@@ -86,7 +86,7 @@ namespace API
     std::string threadOutput = partialWSName;
 #ifdef MPI_BUILD
     Workspace_sptr partialWS = AnalysisDataService::Instance().retrieve(partialWSName);
-    IAlgorithm_sptr gatherAlg = createSubAlgorithm("GatherWorkspaces");
+    IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
     gatherAlg->setLogging(true);
     gatherAlg->setAlwaysStoreInADS(true);
     gatherAlg->setProperty("InputWorkspace", partialWS);
@@ -118,7 +118,7 @@ namespace API
 
     if (saveOutput && outputFile.size() > 0)
     {
-      IAlgorithm_sptr saveAlg = createSubAlgorithm("SaveNexus");
+      IAlgorithm_sptr saveAlg = createChildAlgorithm("SaveNexus");
       saveAlg->setPropertyValue("Filename", outputFile);
       saveAlg->setPropertyValue("InputWorkspace", outputWSName);
       saveAlg->execute();
@@ -175,7 +175,7 @@ namespace API
         Poco::Path p(foundFile);
         const std::string outputWSName = p.getBaseName();
 
-        IAlgorithm_sptr loadAlg = createSubAlgorithm(m_loadAlg);
+        IAlgorithm_sptr loadAlg = createChildAlgorithm(m_loadAlg);
         loadAlg->setProperty(m_loadAlgFileProp, foundFile);
         if (!loadQuiet)
         {

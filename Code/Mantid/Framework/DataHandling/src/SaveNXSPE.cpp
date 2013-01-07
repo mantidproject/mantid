@@ -7,7 +7,7 @@ Saves the data in a workspace into a file in the NeXus based 'NXSPE' format.
 
 The input workspace must have units of Momentum Transfer ('DeltaE') and contain histogram data with common binning on all spectra.
 
-==== Subalgorithm used ====
+==== ChildAlgorithm used ====
 
 [[FindDetectorsPar]] algorithm is used to calculate detectors parameters from the instrument description.
 
@@ -310,8 +310,8 @@ namespace Mantid
             progress.report();
           }
         }
-     // execute the subalgorithm to calculate the detector's parameters;
-      IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 1, true, 1);
+     // execute the ChildAlgorithm to calculate the detector's parameters;
+      IAlgorithm_sptr   spCalcDetPar = this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
 
       spCalcDetPar->initialize();
       spCalcDetPar->setPropertyValue("InputWorkspace", inputWS->getName());

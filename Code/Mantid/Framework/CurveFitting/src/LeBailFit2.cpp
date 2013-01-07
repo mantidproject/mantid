@@ -127,7 +127,7 @@ namespace CurveFitting
     this->declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
 
     // Background function order
-    this->declareProperty("BackgroundFunctionOrder", 12, "Order of background function.");
+    // this->declareProperty("BackgroundFunctionOrder", 12, "Order of background function.");
 
     // Input background parameters (array)
     this->declareProperty(new Kernel::ArrayProperty<double>("BackgroundParameters"),
@@ -244,7 +244,7 @@ namespace CurveFitting
         g_log.notice() << "Function: Do LeBail Fit." << std::endl;
         if (inputparamcorrect)
         {
-          execLeBailFit(m_wsIndex);
+          execLeBailFit();
         }
         else
         {
@@ -446,7 +446,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** LeBail Fitting for one self-consistent iteration
    */
-  void LeBailFit2::execLeBailFit(size_t workspaceindex)
+  void LeBailFit2::execLeBailFit()
   {
     // FIXME: m_maxStep should be an instance variable and evaluate in exec as an input property
     int m_maxSteps = 1;
@@ -458,7 +458,7 @@ namespace CurveFitting
     // 2. Do 1 iteration of LeBail fit
     for (int istep = 0; istep < m_maxSteps; ++istep)
     {
-      this->do1StepLeBailFit(workspaceindex, parammap);
+      this->do1StepLeBailFit(parammap);
     }
 
     // 3. Output
@@ -536,50 +536,44 @@ namespace CurveFitting
   * a) Calculate pattern for peak intensities
   * b) Set peak intensities
   */
-  // TODO Release 2.4: Arguments: size_t workspaceindex, std::map<std::string, Parameter>& paramma, size_t istep
-  bool LeBailFit2::do1StepLeBailFit(size_t workspaceindex, std::map<std::string, Parameter>& parammap)
+  bool LeBailFit2::do1StepLeBailFit(map<string, Parameter>& parammap)
   {
     // 1. Generate domain and value
-    const std::vector<double> vecX = m_dataWS->readX(workspaceindex);
+    const std::vector<double> vecX = m_dataWS->readX(m_wsIndex);
     API::FunctionDomain1DVector domain(vecX);
     API::FunctionValues values(domain);
 
     // 2. Calculate peak intensity and etc.
-    // FIXME Release 2.4 Single out the process to calculate intensity.
-    // FIXME Move calculation of peak out of UnitLeBailFit
-    bool calpeakintensity = true;
-    this->calculateDiffractionPattern(m_dataWS, workspaceindex, domain, values, parammap, calpeakintensity);
+    vector<double> allpeaksvalues(vecX.size(), 0.0);
+    calculatePeaksIntensities(m_dataWS, m_wsIndex, false, allpeaksvalues);
+    // calculateDiffractionPattern(m_dataWS, workspaceindex, domain, values, parammap, calpeakintensity);
 
-    // a) Apply initial calculated result to output workspace
-    mWSIndexToWrite = 5;
-    writeToOutputWorkspace(domain, values);
+    writeToOutputWorkspace(5, domain, values);
 
     // b) Calculate input background
     m_backgroundFunction->function(domain, values);
-    mWSIndexToWrite = 6;
-    writeToOutputWorkspace(domain, values);
+    writeToOutputWorkspace(6, domain, values);
 
     // 3. Construct the tie.  2-level loop. (1) peak parameter (2) peak
     // TODO Release 2.4: setLeBailFitParameters(istep)
     this->setLeBailFitParameters();
 
     // 4. Construct the Fit
-    this->fitLeBailFunction(workspaceindex, parammap);
+    this->fitLeBailFunction(m_wsIndex, parammap);
 
     // TODO (1) Calculate Rwp, Chi^2, .... for the fitted pattern.
 
     // 5. Do calculation again and set the output
     // FIXME Move this part our of UnitLeBailFit
-    calpeakintensity = true;
+    bool calpeakintensity = true;
     API::FunctionValues newvalues(domain);
-    this->calculateDiffractionPattern(m_dataWS, workspaceindex, domain, newvalues, parammap, calpeakintensity);
+    this->calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, newvalues, parammap, calpeakintensity);
 
     // Add final calculated value to output workspace
-    mWSIndexToWrite = 1;
-    writeToOutputWorkspace(domain, newvalues);
+    writeToOutputWorkspace(1, domain, newvalues);
 
     // Add original data and
-    writeInputDataNDiff(workspaceindex, domain);
+    writeInputDataNDiff(m_wsIndex, domain);
 
     return true;
   }
@@ -664,14 +658,13 @@ namespace CurveFitting
     } // FOR-Function Parameters
 
     // 2. Set 'Height' to be fixed
-    string parname("Height");
+    // string parname("Height");
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
     {
       // a. Get peak height
       ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
+      /* Replaced
       double parvalue = thispeak->getParameter(0);
-
-#if 1
       std::stringstream ss1, ss2;
       ss1 << "f" << ipk << "." << parname;
       ss2 << parvalue;
@@ -681,9 +674,8 @@ namespace CurveFitting
       g_log.debug() << "Step 1B: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
 
       m_lebailFunction->tie(tiepart1, tievalue);
-#else
+      */
       thispeak->fix(0);
-#endif
     } // For each peak
 
     // 3. Fix all background paramaters to constants/current values
@@ -738,19 +730,11 @@ namespace CurveFitting
     minimizeFunction(m_dataWS, workspaceindex, boost::shared_ptr<API::IFunction>(m_lebailFunction),
                      tof_min, tof_max, mMinimizer, m_dampingFactor, numiterations, fitstatus, m_lebailFitChi2, true);
 
-
     // 3. Get parameters
-#if 0
-    API::IFunction_sptr fitout = fitalg->getProperty("Function");
-#else
-    g_log.warning("Need to check whether this is valid or not!");
     IFunction_sptr fitout = boost::dynamic_pointer_cast<IFunction>(m_lebailFunction);
-#endif
     std::vector<std::string> parnames = fitout->getParameterNames();
 
     std::stringstream rmsg;
-    rmsg << "Fitting Result: " << std::endl;
-
     for (size_t ip = 0; ip < parnames.size(); ++ip)
     {
       // a) Get all that are needed
@@ -798,8 +782,6 @@ namespace CurveFitting
       }
     }
 
-    g_log.notice(rmsg.str());
-
     // 4. Calculate Chi^2 wih all parmeters fixed
     // a) Fit all parameters
     vector<string> lbparnames = m_lebailFunction->getParameterNames();
@@ -810,12 +792,14 @@ namespace CurveFitting
 
     // b) Fit/calculation
     numiterations = 0; //
+    string numfitstatus;
     minimizeFunction(m_dataWS, workspaceindex, boost::shared_ptr<API::IFunction>(m_lebailFunction),
-                     tof_min, tof_max, "Levenberg-MarquardtMD", 0.0, numiterations, fitstatus, m_lebailFitChi2, false);
+                     tof_min, tof_max, "Levenberg-MarquardtMD", 0.0, numiterations, numfitstatus, m_lebailFitChi2, false);
 
     g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 (Fit) = " << m_lebailFitChi2
                    << ", Chi^2 (Cal) = " << m_lebailCalChi2
-                   << ", Fit Status = " << fitstatus << std::endl;
+                   << ", Fit Status = " << fitstatus << " with max number of steps = " << m_numMinimizeSteps
+                   << endl << rmsg.str();
 
     // TODO: Check the covariant matrix to see whether any NaN or Infty.  If so, return false with reason
     // TODO: (continue).  Code should fit again with Simplex and extends MaxIteration if not enough... ...
@@ -838,10 +822,11 @@ namespace CurveFitting
     std::string fitoutputwsrootname("TempMinimizerOutput");
 
     // 1. Initialize
-    API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
+    API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
     fitalg->initialize();
 
-    g_log.debug() << "[DBx534 | Before Fit] Function To Fit: " << function->asString() << std::endl;
+    g_log.debug() << "[DBx534 | Before Fit] Function To Fit: " << function->asString()
+                  << endl << "Number of iteration = " << numiteration << std::endl;
 
     // 2. Set property
     fitalg->setProperty("Function", function);
@@ -999,7 +984,7 @@ namespace CurveFitting
     }
 
     // 2.Call  CropWorkspace()
-    API::IAlgorithm_sptr cropalg = this->createSubAlgorithm("CropWorkspace", -1, -1, true);
+    API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
     cropalg->initialize();
 
     cropalg->setProperty("InputWorkspace", inpws);
@@ -1019,7 +1004,7 @@ namespace CurveFitting
     API::MatrixWorkspace_sptr cropws = cropalg->getProperty("OutputWorkspace");
     if (!cropws)
     {
-      g_log.error() << "Unable to retrieve a Workspace2D object from subalgorithm Crop." << std::endl;
+      g_log.error() << "Unable to retrieve a Workspace2D object from ChildAlgorithm Crop." << std::endl;
     }
     else
     {
@@ -2074,29 +2059,35 @@ void LeBailFit2::exportBraggPeakParameterToTable()
   return;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Write data (domain, values) to one specified spectrum of output workspace
  */
-void LeBailFit2::writeToOutputWorkspace(API::FunctionDomain1DVector domain,  API::FunctionValues values)
+void LeBailFit2::writeToOutputWorkspace(size_t wsindex, FunctionDomain1DVector domain,  FunctionValues values)
 {
-  if (m_outputWS->getNumberHistograms() <= mWSIndexToWrite)
+  // Check workspace index
+  if (m_outputWS->getNumberHistograms() <= wsindex)
   {
-    g_log.error() << "LeBailFit.writeToOutputWorkspace.  Try to write to spectrum " << mWSIndexToWrite << " out of range = "
-                  << m_outputWS->getNumberHistograms() << std::endl;
-    throw std::invalid_argument("Try to write to a spectrum out of range.");
+    stringstream errss;
+    errss << "LeBailFit.writeToOutputWorkspace.  Try to write to spectrum " << wsindex << " out of range = "
+          << m_outputWS->getNumberHistograms();
+    g_log.error(errss.str());
+    throw runtime_error(errss.str());
   }
 
+  // Write X
   for (size_t i = 0; i < domain.size(); ++i)
   {
-    m_outputWS->dataX(mWSIndexToWrite)[i] = domain[i];
+    m_outputWS->dataX(wsindex)[i] = domain[i];
   }
+
+  // Write Y & E (square root of Y)
   for (size_t i = 0; i < values.size(); ++i)
   {
-    m_outputWS->dataY(mWSIndexToWrite)[i] = values[i];
+    m_outputWS->dataY(wsindex)[i] = values[i];
     if (fabs(values[i]) > 1.0)
-      m_outputWS->dataE(mWSIndexToWrite)[i] = std::sqrt(fabs(values[i]));
+      m_outputWS->dataE(wsindex)[i] = std::sqrt(fabs(values[i]));
     else
-      m_outputWS->dataE(mWSIndexToWrite)[i] = 1.0;
+      m_outputWS->dataE(wsindex)[i] = 1.0;
   }
 
   return;
@@ -2389,14 +2380,13 @@ void LeBailFit2::createOutputDataWorkspace(size_t workspaceindex, FunctionMode f
 }
 
 
-// ============================ Random Walk Suite ==============================
-//-----------------------------------------------------------------------------
+// ====================================== Random Walk Suite ======================================
+//------------------------------------------------------------------------------------------------
 /** Refine instrument parameters by random walk algorithm (MC)
   *
   * @param wsindex  :  workspace index of the diffraction data (observed)
   */
-void LeBailFit2::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
-                                        map<string, Parameter>& parammap)
+void LeBailFit2::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex, map<string, Parameter>& parammap)
 {
   // 1. Initialization
   const MantidVec& vecInY = m_dataWS->readY(wsindex);
@@ -2477,8 +2467,8 @@ void LeBailFit2::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
 
   // 4. Random walk loops
   // generate some MC trace structure
-  vector<double> vecIndex(maxcycles);
-  vector<double> vecRwp(maxcycles);
+  vector<double> vecIndex(maxcycles+1);
+  vector<double> vecRwp(maxcycles+1);
   size_t numinvalidmoves = 0;
   size_t numacceptance = 0;
   bool prevcyclebetterrwp = true;
@@ -2599,7 +2589,7 @@ void LeBailFit2::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
   // 5. Sum up
   // a) Summary output
   g_log.notice() << "[SUMMARY] Random-walk Rwp:  Starting = " << startrwp << ", Best = " << m_bestRwp
-                 << " @ Step = " << m_bestMCStep << ", Final Rwp = " << currwp
+                 << " @ Step = " << m_bestMCStep << "; Last Step Rwp = " << currwp
                  << ", Rp = " << currp
                  << ", Acceptance ratio = " << double(numacceptance)/double(maxcycles*m_numMCGroups) << endl;
 
@@ -2830,6 +2820,8 @@ bool LeBailFit2::calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws, size
                                               const MantidVec& domain, MantidVec& values,
                                               double &rwp, double& rp)
 {
+    UNUSED_ARG(domain);
+
   // 1. Set the parameters
   // a) Set the parameters to all peaks
   setPeaksParameters(m_dspPeaks, funparammap, 1.0, true);
@@ -3182,6 +3174,7 @@ void LeBailFit2::bookKeepBestMCResult(map<string, Parameter> parammap, vector<do
     {
       // If not be initialized, initialize it!
       m_bestParameters = parammap;
+      // copyParameterMap(parammap, m_bestParameters);
     }
     else
     {
@@ -3198,7 +3191,7 @@ void LeBailFit2::bookKeepBestMCResult(map<string, Parameter> parammap, vector<do
   return;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Apply the value of parameters in the source to target
   */
 void LeBailFit2::applyParameterValues(map<string, Parameter>& srcparammap, map<string, Parameter>& tgtparammap)
@@ -3228,7 +3221,7 @@ void LeBailFit2::applyParameterValues(map<string, Parameter>& srcparammap, map<s
 
 //===============  Background Functions ========================================
 
-//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Re-fit background according to the new values
   *
   * @param wsindex   raw data's workspace index
@@ -3338,7 +3331,7 @@ void LeBailFit2::smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVect
   Chebyshev_sptr bkgdfunc(new Chebyshev);
   bkgdfunc->setAttributeValue("n", 6);
 
-  API::IAlgorithm_sptr calalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
+  API::IAlgorithm_sptr calalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
   calalg->initialize();
   calalg->setProperty("Function", boost::shared_ptr<API::IFunction>(bkgdfunc));
   calalg->setProperty("InputWorkspace", m_outputWS);

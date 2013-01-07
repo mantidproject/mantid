@@ -13,7 +13,7 @@ where <math>S_I</math> is the number of counts from the monitor in front of the 
 
 The resulting fraction as a function of wavelength is created as the OutputUnfittedData workspace. However, because of statistical variations it is recommended to use the OutputWorkspace, which is the evaluation of a fit to those transmission fractions. The unfitted data is not affected by the RebinParams or Fitmethod properties but these can be used to refine the fitted data. The RebinParams method is useful when the range of wavelengths passed to CalculateTransmission is different from that of the data to be corrected.
 
-=== Subalgorithms used ===
+=== ChildAlgorithms used ===
 
 Uses the algorithm [[linear]] to fit to the calculated transmission fraction.
 
@@ -175,13 +175,13 @@ void CalculateTransmission::exec()
   const bool outputRaw = getProperty("OutputUnfittedData");
   if ( outputRaw )
   {
-    IAlgorithm_sptr childAlg = createSubAlgorithm("ReplaceSpecialValues");
+    IAlgorithm_sptr childAlg = createChildAlgorithm("ReplaceSpecialValues");
     childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", transmission);
     childAlg->setProperty<double>("NaNValue", 0.0);
     childAlg->setProperty<double>("NaNError", 0.0);
     childAlg->setProperty<double>("InfinityValue", 0.0);
     childAlg->setProperty<double>("InfinityError", 0.0);
-    childAlg->executeAsSubAlg();
+    childAlg->executeAsChildAlg();
     transmission = childAlg->getProperty("OutputWorkspace");
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSName += "_unfitted";
@@ -207,10 +207,10 @@ void CalculateTransmission::exec()
 API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWorkspace_sptr WS, const int64_t index)
 {
   double start = m_done;
-  IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum", start, m_done += 0.1);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("ExtractSingleSpectrum", start, m_done += 0.1);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", static_cast<int>(index));
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
 
   // Only get to here if successful
   return childAlg->getProperty("OutputWorkspace");
@@ -299,7 +299,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
 
   return output;
 }
-/** Uses 'Linear' as a subalgorithm to fit the log of the exponential curve expected for the transmission.
+/** Uses 'Linear' as a ChildAlgorithm to fit the log of the exponential curve expected for the transmission.
  *  @param[in] WS The single-spectrum workspace to fit
  *  @param[out] grad The single-spectrum workspace to fit
  *  @param[out] offset The single-spectrum workspace to fit
@@ -310,9 +310,9 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sp
 {
   g_log.information("Fitting the experimental transmission curve");
   double start = m_done;
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Linear", start, m_done=0.9);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Linear", start, m_done=0.9);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
 
   std::string fitStatus = childAlg->getProperty("FitStatus");
   if ( fitStatus != "success" )
@@ -327,7 +327,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sp
   
   return childAlg->getProperty("OutputWorkspace");
 }
-/** Calls rebin as sub-algorithm
+/** Calls rebin as Child Algorithm
 *  @param binParams this string is passed to rebin as the "Params" property
 *  @param ws the workspace to rebin
 *  @return the resultant rebinned workspace
@@ -336,10 +336,10 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sp
 API::MatrixWorkspace_sptr CalculateTransmission::rebin(std::vector<double> & binParams, API::MatrixWorkspace_sptr ws)
 {
   double start = m_done;
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin", start, m_done += 0.05);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin", start, m_done += 0.05);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
   childAlg->setProperty< std::vector<double> >("Params", binParams);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   
   // Only get to here if successful
   return childAlg->getProperty("OutputWorkspace");

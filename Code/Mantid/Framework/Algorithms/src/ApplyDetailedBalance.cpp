@@ -102,13 +102,13 @@ namespace Algorithms
 
      double oneOverT=PhysicalConstants::meVtoKelvin/Temp;
      // Run the exponential correction algorithm explicitly to enable progress reporting
-     IAlgorithm_sptr expcor = createSubAlgorithm("OneMinusExponentialCor",0.0,1.0);
+     IAlgorithm_sptr expcor = createChildAlgorithm("OneMinusExponentialCor",0.0,1.0);
      expcor->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
      expcor->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
      expcor->setProperty<double>("C1", M_PI);
      expcor->setProperty<double>("C", oneOverT);
      expcor->setPropertyValue("Operation","Multiply");
-     expcor->executeAsSubAlg();
+     expcor->executeAsChildAlg();
      // Get back the result
      outputWS = expcor->getProperty("OutputWorkspace");
 

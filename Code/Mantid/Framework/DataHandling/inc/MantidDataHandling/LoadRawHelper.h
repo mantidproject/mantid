@@ -108,11 +108,11 @@ namespace Mantid
       //Constructs the time channel (X) vector(s)     
       std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes,
           const int64_t& lengthIn);
-      /// loadinstrument sub algorithm
+      /// loadinstrument Child Algorithm
       void runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr, double, double );
       /// loadinstrumentfromraw algorithm
       void runLoadInstrumentFromRaw(const std::string& fileName,DataObjects::Workspace2D_sptr);
-      /// loadinstrumentfromraw sub algorithm
+      /// loadinstrumentfromraw Child Algorithm
       void runLoadMappingTable(const std::string& fileName,DataObjects::Workspace2D_sptr);
       /// load log algorithm
       void runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr, double, double);

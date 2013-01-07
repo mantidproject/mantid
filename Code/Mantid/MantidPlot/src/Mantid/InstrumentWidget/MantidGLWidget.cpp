@@ -231,7 +231,6 @@ void MantidGLWidget::keyReleaseEvent(QKeyEvent *event)
   OpenGLError::check("MantidGLWidget::keyReleaseEvent");
 }
 
-
 /**
  * This method set the background color.
  */
@@ -309,7 +308,7 @@ void MantidGLWidget::componentSelected(Mantid::Geometry::ComponentID id)
   {
     m_surface->componentSelected(id);
     m_surface->updateView();
-    repaint();
+    update();
   }
 }
 
@@ -331,13 +330,25 @@ void MantidGLWidget::updateDetectors()
   }
 }
 
+void MantidGLWidget::enterEvent(QEvent *ev)
+{
+    if (m_surface)
+    {
+      m_surface->enterEvent(ev);
+    }
+    update();
+}
+
 void MantidGLWidget::leaveEvent (QEvent* ev)
 {
-  UNUSED_ARG(ev)
   // Restore possible override cursor
   while(QApplication::overrideCursor())
   {
     QApplication::restoreOverrideCursor();
   }
-  emit mouseOut();
+  if (m_surface)
+  {
+    m_surface->leaveEvent(ev);
+  }
+  update();
 }

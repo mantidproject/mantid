@@ -397,11 +397,11 @@ namespace Mantid
       if (!filename.empty())
       {
         progress(0.9, "Saving .cal file");
-        IAlgorithm_sptr childAlg = createSubAlgorithm("SaveCalFile");
+        IAlgorithm_sptr childAlg = createChildAlgorithm("SaveCalFile");
         childAlg->setProperty("OffsetsWorkspace", outputW);
         childAlg->setProperty("MaskWorkspace", maskWS);
         childAlg->setPropertyValue("Filename", filename);
-        childAlg->executeAsSubAlg();
+        childAlg->executeAsChildAlg();
       }
 
     }
@@ -473,7 +473,7 @@ namespace Mantid
         }
       }
 
-      API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks", -1, -1, false);
+      API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
       findpeaks->setProperty("InputWorkspace", inputW);
       findpeaks->setProperty<int>("FWHM",7);
       findpeaks->setProperty<int>("Tolerance",4);
@@ -489,7 +489,7 @@ namespace Mantid
       findpeaks->setProperty<bool>("HighBackground", this->getProperty("HighBackground"));
       findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
       findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
-      findpeaks->executeAsSubAlg();
+      findpeaks->executeAsChildAlg();
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
       std::vector<size_t> banned;
       std::vector<double> peakWidFitted;

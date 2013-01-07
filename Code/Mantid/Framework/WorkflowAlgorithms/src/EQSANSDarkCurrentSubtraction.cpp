@@ -133,11 +133,11 @@ void EQSANSDarkCurrentSubtraction::exec()
     IAlgorithm_sptr loadAlg;
     if (!reductionManager->existsProperty("LoadAlgorithm"))
     {
-      loadAlg = createSubAlgorithm("EQSANSLoad", 0.1, 0.3);
+      loadAlg = createChildAlgorithm("EQSANSLoad", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
       if (loadAlg->existsProperty("LoadMonitors"))
         loadAlg->setProperty("LoadMonitors", false);
-      loadAlg->executeAsSubAlg();
+      loadAlg->executeAsChildAlg();
       darkWS = loadAlg->getProperty("OutputWorkspace");
     } else {
       // Get load algorithm as a string so that we can create a completely
@@ -184,26 +184,26 @@ void EQSANSDarkCurrentSubtraction::exec()
   progress.report("Scaling dark current");
 
   // Scale the stored dark current by the counting time
-  IAlgorithm_sptr rebinAlg = createSubAlgorithm("RebinToWorkspace", 0.4, 0.5);
+  IAlgorithm_sptr rebinAlg = createChildAlgorithm("RebinToWorkspace", 0.4, 0.5);
   rebinAlg->setProperty("WorkspaceToRebin", darkWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
   rebinAlg->setProperty("OutputWorkspace", darkWS);
-  rebinAlg->executeAsSubAlg();
+  rebinAlg->executeAsChildAlg();
   MatrixWorkspace_sptr scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Perform subtraction
-  IAlgorithm_sptr scaleAlg = createSubAlgorithm("Scale", 0.5, 0.6);
+  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale", 0.5, 0.6);
   scaleAlg->setProperty("InputWorkspace", scaledDarkWS);
   scaleAlg->setProperty("Factor", scaling_factor);
   scaleAlg->setProperty("OutputWorkspace", scaledDarkWS);
   scaleAlg->setProperty("Operation", "Multiply");
-  scaleAlg->executeAsSubAlg();
+  scaleAlg->executeAsChildAlg();
 
-  IAlgorithm_sptr minusAlg = createSubAlgorithm("Minus", 0.6, 0.7);
+  IAlgorithm_sptr minusAlg = createChildAlgorithm("Minus", 0.6, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
   minusAlg->setProperty("OutputWorkspace", outputWS);
-  minusAlg->executeAsSubAlg();
+  minusAlg->executeAsChildAlg();
 
   setProperty("OutputWorkspace", outputWS);
   setProperty("OutputMessage", "Dark current subtracted: "+output_message);

@@ -172,12 +172,12 @@ namespace Mantid
       bool isStandAlone = !reductionManager->existsProperty("IncidentEnergyGuess");
 
       // Process the detector vanadium
-      IAlgorithm_sptr detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
+      IAlgorithm_sptr detVan = this->createChildAlgorithm("DgsProcessDetectorVanadium");
       detVan->setProperty("InputWorkspace", detVanWS);
       detVan->setProperty("OutputWorkspace", dvInternal);
       detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
       detVan->setProperty("ReductionProperties", reductionManagerName);
-      detVan->executeAsSubAlg();
+      detVan->executeAsChildAlg();
       MatrixWorkspace_sptr dvWS = detVan->getProperty("OutputWorkspace");
 
       // Process the comparison detector vanadium workspace if present
@@ -187,7 +187,7 @@ namespace Mantid
         detVan->setProperty("InputWorkspace", detVanCompWS);
         detVan->setProperty("OutputWorkspace", dvCompInternal);
         detVan->setProperty("InputMonitorWorkspace", detVanCompMonWS);
-        detVan->executeAsSubAlg();
+        detVan->executeAsChildAlg();
         dvCompWS = detVan->getProperty("OutputWorkspace");
         detVanCompWS.reset();
       }
@@ -205,20 +205,20 @@ namespace Mantid
         Workspace_sptr tmp;
         if (!isStandAlone)
         {
-          IAlgorithm_sptr cloneWs = this->createSubAlgorithm("CloneWorkspace");
+          IAlgorithm_sptr cloneWs = this->createChildAlgorithm("CloneWorkspace");
           cloneWs->setProperty("InputWorkspace", sampleWS);
           cloneWs->setProperty("OutputWorkspace", sampleInternal);
-          cloneWs->executeAsSubAlg();
+          cloneWs->executeAsChildAlg();
           tmp = cloneWs->getProperty("OutputWorkspace");
           sampleWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
         }
 
-        IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
+        IAlgorithm_sptr norm = this->createChildAlgorithm("DgsPreprocessData");
         norm->setProperty("InputWorkspace", sampleWS);
         norm->setProperty("OutputWorkspace", sampleWS);
         norm->setProperty("InputMonitorWorkspace", sampleMonWS);
         norm->setProperty("ReductionProperties", reductionManagerName);
-        norm->executeAsSubAlg();
+        norm->executeAsChildAlg();
         sampleWS = norm->getProperty("OutputWorkspace");
       }
 
@@ -226,11 +226,11 @@ namespace Mantid
       MatrixWorkspace_sptr totalCountsWS;
       if (rejectZeroBkg)
       {
-        IAlgorithm_sptr integrate = this->createSubAlgorithm("Integration");
+        IAlgorithm_sptr integrate = this->createChildAlgorithm("Integration");
         integrate->setProperty("InputWorkspace", sampleWS);
         integrate->setProperty("OutputWorkspace", countsInternal);
         integrate->setProperty("IncludePartialBins", true);
-        integrate->executeAsSubAlg();
+        integrate->executeAsChildAlg();
         totalCountsWS = integrate->getProperty("OutputWorkspace");
       }
       else
@@ -248,22 +248,22 @@ namespace Mantid
         double rangeEnd = getDblPropOrParam("BackgroundTofEnd",
             reductionManager, "bkgd-range-max", sampleWS);
 
-        IAlgorithm_sptr integrate = this->createSubAlgorithm("Integration");
+        IAlgorithm_sptr integrate = this->createChildAlgorithm("Integration");
         integrate->setProperty("InputWorkspace", sampleWS);
         integrate->setProperty("OutputWorkspace", bkgInternal);
         integrate->setProperty("RangeLower", rangeStart);
         integrate->setProperty("RangeUpper", rangeEnd);
         integrate->setProperty("IncludePartialBins", true);
-        integrate->executeAsSubAlg();
+        integrate->executeAsChildAlg();
         backgroundIntWS = integrate->getProperty("OutputWorkspace");
 
         // Need to match the units between background and detector vanadium
         const std::string detVanIntRangeUnits = reductionManager->getProperty("DetVanIntRangeUnits");
-        IAlgorithm_sptr cvu = this->createSubAlgorithm("ConvertUnits");
+        IAlgorithm_sptr cvu = this->createChildAlgorithm("ConvertUnits");
         cvu->setProperty("InputWorkspace", backgroundIntWS);
         cvu->setProperty("OutputWorkspace", backgroundIntWS);
         cvu->setProperty("Target", detVanIntRangeUnits);
-        cvu->executeAsSubAlg();
+        cvu->executeAsChildAlg();
         backgroundIntWS = cvu->getProperty("OutputWorkspace");
 
         // Normalise the background integral workspace
@@ -290,7 +290,7 @@ namespace Mantid
         sampleWS = boost::shared_ptr<MatrixWorkspace>();
       }
 
-      IAlgorithm_sptr diag = this->createSubAlgorithm("DetectorDiagnostic");
+      IAlgorithm_sptr diag = this->createChildAlgorithm("DetectorDiagnostic");
       diag->setProperty("InputWorkspace", dvWS);
       diag->setProperty("DetVanCompare", dvCompWS);
       diag->setProperty("SampleWorkspace", sampleWS);
@@ -339,7 +339,7 @@ namespace Mantid
           if (maskWS)
           {
             MatrixWorkspace_sptr tmp = diag->getProperty("OutputWorkspace");
-            IAlgorithm_sptr comb = createSubAlgorithm("BinaryOperateMasks");
+            IAlgorithm_sptr comb = createChildAlgorithm("BinaryOperateMasks");
             comb->setProperty("InputWorkspace1", maskWS);
             comb->setProperty("InputWorkspace2", tmp);
             comb->setProperty("OutputWorkspace", maskWS);
@@ -367,7 +367,7 @@ namespace Mantid
         std::string maskFilename = reductionManager->getPropertyValue("OutputMaskFile");
         if (!maskFilename.empty())
         {
-          IAlgorithm_sptr saveNxs = this->createSubAlgorithm("SaveMask");
+          IAlgorithm_sptr saveNxs = this->createChildAlgorithm("SaveMask");
           saveNxs->setProperty("InputWorkspace", maskWS);
           saveNxs->setProperty("OutputFile", maskFilename);
           saveNxs->execute();

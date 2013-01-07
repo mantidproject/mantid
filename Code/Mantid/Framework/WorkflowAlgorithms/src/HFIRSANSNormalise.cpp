@@ -66,12 +66,12 @@ void HFIRSANSNormalise::exec()
     factor = 1.0/norm_count;
   }
 
-  IAlgorithm_sptr scaleAlg = createSubAlgorithm("Scale");
+  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale");
   scaleAlg->setProperty("InputWorkspace", inputWS);
   scaleAlg->setProperty("OutputWorkspace", outputWS);
   scaleAlg->setProperty("Factor", factor);
   scaleAlg->setProperty("Operation", "Multiply");
-  scaleAlg->executeAsSubAlg();
+  scaleAlg->executeAsChildAlg();
   MatrixWorkspace_sptr scaledWS = scaleAlg->getProperty("OutputWorkspace");
 
   setProperty("OutputWorkspace", scaledWS);

@@ -48,7 +48,7 @@ class DLLExport MDTransfNoQ: public MDTransfInterface
 { 
 public:
 
-    /// the name, this subalgorithm is known to users (will appear in selection list)
+    /// the name, this ChildAlgorithm is known to users (will appear in selection list)
     const std::string transfID()const; // {return "NoQ"; }
 // calc target coordinates interface:
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);

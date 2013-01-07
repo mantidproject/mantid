@@ -118,7 +118,7 @@ struct UnitsConverter<ConvertToMD::ConvFromTOF,TYPE>
        if(std::string("TOF").compare(units_from)!=0){
            throw(std::logic_error(" it whould be only TOF here"));
        }
-      // create units for this subalgorith to convert to 
+      // create units for this ChildAlgorith to convert to 
        pWSUnit      = Kernel::UnitFactory::Instance().create(units_to);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve workspace unit from the units factory"));
@@ -181,7 +181,7 @@ struct UnitsConverter<ConvertToMD::ConvByTOF,TYPE>
            throw(std::logic_error(" can not retrieve source workspace units from the input workspacee"));
        }
 
-       // get units class, requested by subalgorithm
+       // get units class, requested by ChildAlgorithm
        pWSUnit                   = Kernel::UnitFactory::Instance().create(units_to);
        if(!pWSUnit){
            throw(std::logic_error(" can not retrieve target workspace unit from the units factory"));

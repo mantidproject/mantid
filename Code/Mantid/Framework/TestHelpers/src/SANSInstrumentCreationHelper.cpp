@@ -41,7 +41,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
   return ws;
 }
 
-  /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
+  /** Run the Child Algorithm LoadInstrument (as for LoadRaw)
    * @param inst_name :: The name written in the Nexus file
    * @param workspace :: The workspace to insert the instrument into
    */
@@ -58,7 +58,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
 
     Mantid::DataHandling::LoadInstrument loadInst;
     loadInst.initialize();
-    // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+    // Now execute the Child Algorithm. Catch and log any error, but don't stop.
     loadInst.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentID + "_Definition.xml");
     loadInst.setProperty<MatrixWorkspace_sptr> ("Workspace", workspace);
     loadInst.execute();

@@ -121,7 +121,7 @@ namespace Mantid
       if (absDetVanWS)
       {
         std::string idetVanName = outputWsName + "_absunits_idetvan";
-        IAlgorithm_sptr detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
+        IAlgorithm_sptr detVan = this->createChildAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", absDetVanWS);
         detVan->setProperty("InputMonitorWorkspace", absDetVanMonWS);
         detVan->setProperty("ReductionProperties", reductionManagerName);
@@ -130,7 +130,7 @@ namespace Mantid
         {
           detVan->setProperty("MaskWorkspace", maskWS);
         }
-        detVan->executeAsSubAlg();
+        detVan->executeAsChildAlg();
         absIdetVanWS = detVan->getProperty("OutputWorkspace");
       }
       else
@@ -139,7 +139,7 @@ namespace Mantid
       }
 
       const std::string absWsName = absSampleWS->getName() + "_absunits";
-      IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
+      IAlgorithm_sptr etConv = this->createChildAlgorithm("DgsConvertToEnergyTransfer");
       etConv->setProperty("InputWorkspace", absSampleWS);
       etConv->setProperty("InputMonitorWorkspace", absSampleMonWS);
       etConv->setProperty("OutputWorkspace", absWsName);
@@ -156,7 +156,7 @@ namespace Mantid
         etConv->setProperty("GroupingWorkspace", absGroupingWS);
       }
       etConv->setProperty("AlternateGroupingTag", "AbsUnits");
-      etConv->executeAsSubAlg();
+      etConv->executeAsChildAlg();
       outputWS = etConv->getProperty("OutputWorkspace");
 
       Property *prop = outputWS.get()->run().getProperty("Ei");
@@ -181,14 +181,14 @@ namespace Mantid
       params.push_back(eMax - eMin);
       params.push_back(eMax);
 
-      IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+      IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
       rebin->setProperty("InputWorkspace", outputWS);
       rebin->setProperty("OutputWorkspace", outputWS);
       rebin->setProperty("Params", params);
-      rebin->executeAsSubAlg();
+      rebin->executeAsChildAlg();
       outputWS = rebin->getProperty("OutputWorkspace");
 
-      IAlgorithm_sptr cToMWs = this->createSubAlgorithm("ConvertToMatrixWorkspace");
+      IAlgorithm_sptr cToMWs = this->createChildAlgorithm("ConvertToMatrixWorkspace");
       cToMWs->setProperty("InputWorkspace", outputWS);
       cToMWs->setProperty("OutputWorkspace", outputWS);
       outputWS = cToMWs->getProperty("OutputWorkspace");
@@ -209,7 +209,7 @@ namespace Mantid
       const double vanSigma = getDblPropOrParam("AbsUnitsErrorBarCriterion",
           reductionManager, "diag_samp_sig", outputWS);
 
-      IAlgorithm_sptr diag = this->createSubAlgorithm("DetectorDiagnostic");
+      IAlgorithm_sptr diag = this->createChildAlgorithm("DetectorDiagnostic");
       diag->setProperty("InputWorkspace", outputWS);
       diag->setProperty("OutputWorkspace", "absUnitsDiagMask");
       diag->setProperty("LowThreshold", tiny);
@@ -219,24 +219,24 @@ namespace Mantid
       diag->setProperty("LowThresholdFraction", vanLo);
       diag->setProperty("HighThresholdFraction", vanHi);
       diag->setProperty("SignificanceTest", vanSigma);
-      diag->executeAsSubAlg();
+      diag->executeAsChildAlg();
       MatrixWorkspace_sptr absMaskWS = diag->getProperty("OutputWorkspace");
 
-      IAlgorithm_sptr mask = this->createSubAlgorithm("MaskDetectors");
+      IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
       mask->setProperty("Workspace", outputWS);
       mask->setProperty("MaskedWorkspace", absMaskWS);
-      mask->executeAsSubAlg();
+      mask->executeAsChildAlg();
       outputWS = mask->getProperty("Workspace");
 
-      IAlgorithm_sptr cFrmDist = this->createSubAlgorithm("ConvertFromDistribution");
+      IAlgorithm_sptr cFrmDist = this->createChildAlgorithm("ConvertFromDistribution");
       cFrmDist->setProperty("Workspace", outputWS);
-      cFrmDist->executeAsSubAlg();
+      cFrmDist->executeAsChildAlg();
       outputWS = cFrmDist->getProperty("Workspace");
 
-      IAlgorithm_sptr wMean = this->createSubAlgorithm("WeightedMeanOfWorkspace");
+      IAlgorithm_sptr wMean = this->createChildAlgorithm("WeightedMeanOfWorkspace");
       wMean->setProperty("InputWorkspace", outputWS);
       wMean->setProperty("OutputWorkspace", outputWS);
-      wMean->executeAsSubAlg();
+      wMean->executeAsChildAlg();
       outputWS = wMean->getProperty("OutputWorkspace");
 
       // If the absolute units detector vanadium is used, do extra correction.

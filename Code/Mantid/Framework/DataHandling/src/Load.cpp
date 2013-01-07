@@ -436,7 +436,7 @@ namespace Mantid
       ///get the list properties for the concrete loader load algorithm
       const std::vector<Kernel::Property*> & loader_props = m_loader->getProperties();
 
-      // Loop through and set the properties on the sub algorithm
+      // Loop through and set the properties on the Child Algorithm
       std::vector<Kernel::Property*>::const_iterator itr;
       for (itr = loader_props.begin(); itr != loader_props.end(); ++itr)
       {
@@ -567,7 +567,7 @@ namespace Mantid
     }
 
     /**
-     * Set the loader option for use as a sub algorithm.
+     * Set the loader option for use as a Child Algorithm.
      * @param loader :: Concrete loader
      * @param startProgress :: The start progress fraction
      * @param endProgress :: The end progress fraction
@@ -629,7 +629,7 @@ namespace Mantid
     * WorkspaceProperty types
     * @param propName :: The name of the property
     * @param loader :: The loader algorithm
-    * @returns A pointer to the OutputWorkspace property of the sub algorithm
+    * @returns A pointer to the OutputWorkspace property of the Child Algorithm
     */
     API::Workspace_sptr Load::getOutputWorkspace(const std::string & propName,
       const API::IDataFileChecker_sptr & loader) const
@@ -712,12 +712,12 @@ namespace Mantid
      */
     API::Workspace_sptr Load::loadFileToWs(const std::string & fileName, const std::string & wsName)
     {
-      Mantid::API::IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 1);
+      Mantid::API::IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 1);
 
       // Get the list properties for the concrete loader load algorithm
       const std::vector<Kernel::Property*> & props = getProperties();
 
-      // Loop through and set the properties on the sub algorithm
+      // Loop through and set the properties on the Child Algorithm
       std::vector<Kernel::Property*>::const_iterator prop = props.begin();
       for (; prop != props.end(); ++prop)
       {
@@ -740,7 +740,7 @@ namespace Mantid
         }
       }
 
-      loadAlg->executeAsSubAlg();
+      loadAlg->executeAsChildAlg();
 
       Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
       ws->setName(wsName);
@@ -780,20 +780,20 @@ namespace Mantid
           Workspace_sptr group1ChildWs = group1->getItem(*group1ChildWsName);
           Workspace_sptr group2ChildWs = group2->getItem(*group2ChildWsName);
 
-          Mantid::API::IAlgorithm_sptr plusAlg = createSubAlgorithm("Plus", 1);
+          Mantid::API::IAlgorithm_sptr plusAlg = createChildAlgorithm("Plus", 1);
           plusAlg->setProperty<Workspace_sptr>("LHSWorkspace", group1ChildWs);
           plusAlg->setProperty<Workspace_sptr>("RHSWorkspace", group2ChildWs);
           plusAlg->setProperty<Workspace_sptr>("OutputWorkspace", group1ChildWs);
-          plusAlg->executeAsSubAlg();
+          plusAlg->executeAsChildAlg();
         }
       }
       else if( ! group1 && ! group2 )
       {
-        Mantid::API::IAlgorithm_sptr plusAlg = createSubAlgorithm("Plus", 1);
+        Mantid::API::IAlgorithm_sptr plusAlg = createChildAlgorithm("Plus", 1);
         plusAlg->setProperty<Workspace_sptr>("LHSWorkspace", ws1);
         plusAlg->setProperty<Workspace_sptr>("RHSWorkspace", ws2);
         plusAlg->setProperty<Workspace_sptr>("OutputWorkspace", ws1);
-        plusAlg->executeAsSubAlg();
+        plusAlg->executeAsChildAlg();
       }
       else
       {

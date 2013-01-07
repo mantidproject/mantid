@@ -22,6 +22,8 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Gaussian.h"
 
+#include "MantidGeometry/Crystal/UnitCell.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -884,7 +886,7 @@ namespace CurveFitting
     }
 
     // 3. Fit
-    API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
+    API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
     fitalg->initialize();
 
     g_log.information() << "Function To Fit: " << background->asString() << ".  Number of points  to fit =  "
@@ -1021,7 +1023,7 @@ namespace CurveFitting
           cout << dataws->readX(1)[i] << "  " << dataws->readY(1)[i] << "  " << dataws->readE(1)[i] << endl;
           */
 
-        API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", -1, -1, true);
+        API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
         fitalg->initialize();
 
         fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(peakfunction));
@@ -1098,7 +1100,7 @@ namespace CurveFitting
     gaussianpeak->addConstraint(centerbound);
 
     // 3. Fit
-    API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", -1, -1, true);
+    API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
     fitalg->initialize();
 
     fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
@@ -1357,10 +1359,15 @@ namespace CurveFitting
     // 2. Calculate d-values for each picked peak
     std::vector<std::pair<double, std::vector<int> > > dhkls;
     std::vector<std::vector<int> >::iterator peakiter;
+
+    double lattice = m_instrumentParmaeters["LatticeConstant"];
+    Geometry::UnitCell unitcell(lattice, lattice, lattice, 90.0, 90.0, 90.0);
+
     for (peakiter = goodfitpeaks.begin(); peakiter != goodfitpeaks.end(); ++peakiter)
     {
       std::vector<int> hkl = *peakiter;
-      double d_h = calculateDspaceValue(hkl);
+      // double d_h = calculateDspaceValue(hkl);
+      double d_h = unitcell.d(hkl[0], hkl[1], hkl[2]);
       dhkls.push_back(std::make_pair(d_h, hkl));
     }
 
@@ -1667,7 +1674,7 @@ namespace CurveFitting
       */
   void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax)
   {
-    API::IAlgorithm_sptr cropalg = this->createSubAlgorithm("CropWorkspace", -1, -1, true);
+    API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
     cropalg->initialize();
 
     cropalg->setProperty("InputWorkspace", dataWS);
@@ -1687,7 +1694,7 @@ namespace CurveFitting
     dataWS = cropalg->getProperty("OutputWorkspace");
     if (!dataWS)
     {
-      g_log.error() << "Unable to retrieve a Workspace2D object from subalgorithm Crop." << std::endl;
+      g_log.error() << "Unable to retrieve a Workspace2D object from ChildAlgorithm Crop." << std::endl;
     }
 
     return;
@@ -1695,7 +1702,6 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Calculate peak's d-spacing
-    */
   double FitPowderDiffPeaks::calculateDspaceValue(std::vector<int> hkl)
   {
     // g_log.information() << "HKL = " << hkl[0] << hkl[1] <<  hkl[2] << std::endl;
@@ -1710,18 +1716,24 @@ namespace CurveFitting
 
     return d;
   }
+  */
 
   /** Calculate a Bragg peak's centre in TOF from its Miller indices
     * and with instrumental parameters
     */
   double FitPowderDiffPeaks::calculatePeakCentreTOF(int h, int k, int l)
   {
+    /*
     vector<int> hkl(3);
     hkl[0] = h;
     hkl[1] = k;
     hkl[2] = l;
-
     double dh = calculateDspaceValue(hkl);
+    */
+
+    double lattice = m_instrumentParmaeters["LatticeConstant"];
+    Geometry::UnitCell unitcell(lattice, lattice, lattice, 90.0, 90.0, 90.0);
+    double dh = unitcell.d(h, k, l);
 
     // 2. Get parameter values from instrument parameter map
     double dtt1 = getParameter("Dtt1");

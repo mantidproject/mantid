@@ -9,7 +9,7 @@ Further corrections are then carried out to account for the 0.125mm Vanadium win
 ==== Restrictions on the input workspace ====
 The input workspace must have units of wavelength. The [[instrument]] associated with the workspace must be fully defined because detector, source & sample position are needed.
 
-===Subalgorithms used===
+===ChildAlgorithms used===
 The [[FlatPlateAbsorption]] algorithm is used to calculate the correction due to the sample itself.
 
 
@@ -179,8 +179,8 @@ void HRPDSlabCanAbsorption::exec()
 
 API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption()
 {
-  // Call FlatPlateAbsorption as a sub-algorithm
-  IAlgorithm_sptr childAlg = createSubAlgorithm("FlatPlateAbsorption",0.0,0.9);
+  // Call FlatPlateAbsorption as a Child Algorithm
+  IAlgorithm_sptr childAlg = createChildAlgorithm("FlatPlateAbsorption",0.0,0.9);
   // Pass through all the properties
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
   childAlg->setProperty<double>("AttenuationXSection", getProperty("SampleAttenuationXSection"));
@@ -196,7 +196,7 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption()
   // Valid values are 0.2,0.5,1.0 & 1.5 - would be nice to have a numeric list validator
   const std::string thickness = getPropertyValue("Thickness");
   childAlg->setPropertyValue("SampleThickness", thickness);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 

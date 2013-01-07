@@ -69,7 +69,7 @@ set ( SRC_FILES
 # Old TMP convertToMD code prepared for deprecation:	
 	src/ConvertToMDEvents.cpp	
 	src/ConvertToMDEventsParams.cpp
-	src/ConvertToMDEventsSubalgFactory.cpp
+	src/ConvertToMDEventsChildAlgFactory.cpp
 	src/ConvertToMDEventsWSBase.cpp
 #end TMP
 	src/SaveMD.cpp	
@@ -153,11 +153,11 @@ set ( INC_FILES
 # Old TMP convertToMD code prepared for deprication:
     inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h 
-	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h 	
+	inc/MantidMDAlgorithms/ConvertToMDEventsChildAlgFactory.h 	
 	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsChildAlgFactory.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h

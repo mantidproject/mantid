@@ -2,6 +2,7 @@
 #define MANTIDPLOT_SHAPE2DCOLLECTION_H_
 
 #include "Shape2D.h"
+#include "RectF.h"
 
 #include <QList>
 #include <QTransform>
@@ -16,16 +17,14 @@ class QKeyEvent;
  * It supports operations on teh shapes such as adding, removing, and aditting either
  * with the mouse via control points (CPs) or via properties.
  *
- * The shapes operate in three coordinate systems:
- * 1. Some 'real' or logical coordinates
- * 2. Current or transformed screen coordinates
- * 3. Untransformed screen coordinates
+ * The shapes operate in two coordinate systems:
+ * 1. 'Real' or logical coordinates
+ * 2. Transformed screen coordinates
  *
  * Shape2DCollection must know the boundaries of the drawing area in logical and transformed screen coords.
  * They are set by calling setWindow(...) method. The first argument is the logical drawing rectangle and 
- * the second one is the corresponding screen viewport in pixels. The first screen viewport set with setWindow
- * defines the Untransformed screen coordinates. The individual shapes draw themselves in the untransformed
- * screen coords and unaware of the logical ones at all. If the size of the screen/widget changes setWindow
+ * the second one is the corresponding screen viewport in pixels. The individual shapes draw themselves in the
+ * logical coords and unaware of the screen ones at all. If the size of the screen/widget changes setWindow
  * must be called again. Changing the logical drawing bounds translates and zooms the picture.
  * The transformation is done by Qt's QTransform object.
  */
@@ -36,32 +35,24 @@ public:
   Shape2DCollection();
   ~Shape2DCollection();
   Shape2D* clone()const{return NULL;}
-  void setWindow(const QRectF& window,const QRect& viewport) const;
+  void setWindow(const RectF& surface,const QRect& viewport) const;
   virtual void draw(QPainter& painter) const;
   virtual void addShape(Shape2D*,bool slct = false);
   virtual void removeShape(Shape2D*);
   virtual void removeShapes(const QList<Shape2D*>&);
   virtual void clear();
   
-  bool mousePressEvent(QMouseEvent*);
-  void mouseMoveEvent(QMouseEvent*);
-  void mouseReleaseEvent(QMouseEvent*);
-  void wheelEvent(QWheelEvent*);
   void keyPressEvent(QKeyEvent*);
 
-  void addShape(const QString& type,int x,int y);
-  void startCreatingShape2D(const QString& type,const QColor& borderColor = Qt::red,const QColor& fillColor = QColor());
-  void deselectAll();
   bool selectAtXY(int x,int y);
   bool selectIn(const QRect& rect);
   void removeCurrentShape();
-  void removeSelectedShapes();
   bool isEmpty()const{return m_shapes.isEmpty();}
   size_t size()const {return static_cast<size_t>(m_shapes.size());}
   void select(int i);
 
-  QRectF getCurrentBoundingRect()const;
-  void setCurrentBoundingRect(const QRectF& rect);
+  RectF getCurrentBoundingRect()const;
+  void setCurrentBoundingRect(const RectF &rect);
   // double properties
   QStringList getCurrentDoubleNames()const;
   double getCurrentDouble(const QString& prop) const;
@@ -77,12 +68,8 @@ public:
   // collect all screen pixels that are masked by the shapes
   void getMaskedPixels(QList<QPoint>& pixels)const;
 
-  // --- coordinate transformations --- //
-
   // set the bounding rect of the current shape such that its real rect is given by the argument
   void setCurrentBoundingRectReal(const QRectF& rect);
-  // convert a real point to the untransformed screen coordinates
-  QPointF realToUntransformed(const QPointF& point)const;
 
 signals:
 
@@ -90,6 +77,16 @@ signals:
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
+
+public slots:
+  void addShape(const QString& type,int x,int y,const QColor& borderColor,const QColor& fillColor);
+  void deselectAll();
+  void moveRightBottomTo(int,int);
+  void selectShapeOrControlPointAt(int x,int y);
+  void moveShapeOrControlPointBy(int dx,int dy);
+  void touchShapeOrControlPointAt(int x,int y);
+  void removeSelectedShapes();
+  void restoreOverrideCursor();
 
 protected:
   virtual void drawShape(QPainter& ) const{} // never called
@@ -99,26 +96,20 @@ protected:
 
   Shape2D* createShape(const QString& type,int x,int y)const;
   bool selectControlPointAt(int x,int y);
+  void deselectControlPoint();
   bool isOverCurrentAt(int x,int y);
   void select(Shape2D* shape);
   QList<Shape2D*> getSelectedShapes() const;
 
   QList<Shape2D*> m_shapes;
-  mutable QRectF m_windowRect; // original surface window in "real" coordinates
+  mutable RectF m_surfaceRect; // original surface window in "real" coordinates
   mutable double m_wx,m_wy;
   mutable int m_h; // original screen viewport height
   mutable QRect m_viewport;  // current screen viewport
   mutable QTransform m_transform; // current transform
 
-  bool m_creating; ///< a shape is being created with a mouse
-  bool m_editing;  ///< current shape is being edited with a mouse. CPs are visible
-  bool m_moving;   ///< current shape is being moved with a mouse. 
-  int m_x,m_y;
-  QString m_shapeType;
-  QColor m_borderColor, m_fillColor;
   Shape2D*  m_currentShape;
   size_t m_currentCP;
-  bool m_leftButtonPressed;
   bool m_overridingCursor;
 };
 

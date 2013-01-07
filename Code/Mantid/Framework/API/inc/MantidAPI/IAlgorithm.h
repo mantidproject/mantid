@@ -94,7 +94,7 @@ public:
   /** Initialization method invoked by the framework. This method is responsible
    *  for any bookkeeping of initialization required by the framework itself.
    *  It will in turn invoke the init() method of the derived algorithm,
-   *  and of any sub-algorithms which it creates.
+   *  and of any Child Algorithms which it creates.
    */
   virtual void initialize() = 0;
 
@@ -107,8 +107,8 @@ public:
   /// Asynchronous execution of the algorithm.
   virtual Poco::ActiveResult<bool> executeAsync() = 0;
 
-  /// Execute as a sub-algorithm, with try/catch
-  virtual void executeAsSubAlg() = 0;
+  /// Execute as a Child Algorithm, with try/catch
+  virtual void executeAsChildAlg() = 0;
 
   /// Check whether the algorithm is initialized properly
   virtual bool isInitialized() const = 0;

@@ -705,7 +705,7 @@ void SmoothNeighbours::exec()
     wsEvent->sortAll(TOF_SORT, m_prog);
 
   if (!wsEvent || !PreserveEvents)
-    this->execWorkspace2D(inWS);
+    this->execWorkspace2D();
   else if (wsEvent)
     this->execEvent(wsEvent);
   else
@@ -714,7 +714,7 @@ void SmoothNeighbours::exec()
 
 //--------------------------------------------------------------------------------------------
 /** Execute the algorithm for a Workspace2D/don't preserve events input */
-void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
+void SmoothNeighbours::execWorkspace2D()
 {
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.5, 1.0);
 
@@ -725,21 +725,25 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 
   MatrixWorkspace_sptr outWS;
   //Make a brand new Workspace2D
-  if (boost::dynamic_pointer_cast<OffsetsWorkspace>(ws))
+  if (boost::dynamic_pointer_cast<OffsetsWorkspace>(inWS))
   {
     g_log.information() << "Creating new OffsetsWorkspace\n";
-    outWS = MatrixWorkspace_sptr(new OffsetsWorkspace(ws->getInstrument()));
+    outWS = MatrixWorkspace_sptr(new OffsetsWorkspace(inWS->getInstrument()));
   }
   else
   {
-  outWS = boost::dynamic_pointer_cast<MatrixWorkspace>( API::WorkspaceFactory::Instance().create("Workspace2D", numberOfSpectra, YLength+1, YLength));
+    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+        ( API::WorkspaceFactory::Instance().create("Workspace2D", numberOfSpectra, YLength+1, YLength));
   }
   this->setProperty("OutputWorkspace", outWS);
+
+  setupNewInstrument(outWS);
+
   //Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(ws, outWS, false);
+  // API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, false);
 
   // Go through all the output workspace
-  PARALLEL_FOR2(ws, outWS)
+  PARALLEL_FOR2(inWS, outWS)
   for (int outWIi=0; outWIi<int(numberOfSpectra); outWIi++)
   {
     PARALLEL_START_INTERUPT_REGION
@@ -762,7 +766,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
       double weight = it->second;
       double weightSquared = weight * weight;
 
-      const ISpectrum * inSpec = ws->getSpectrum(inWI);
+      const ISpectrum * inSpec = inWS->getSpectrum(inWI);
       inSpec->lockData();
       const MantidVec & inY = inSpec->readY();
       const MantidVec & inE = inSpec->readE();
@@ -780,7 +784,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
         // Copy the X values as well
         outX[i] = inX[i];
       }
-      if(ws->isHistogramData())
+      if(inWS->isHistogramData())
       {
         outX[YLength] = inX[YLength];
       }
@@ -793,7 +797,7 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
       outE[i] = sqrt(outE[i]);
 
     //Copy the single detector ID (of the center) and spectrum number from the input workspace
-    outSpec->copyInfoFrom(*ws->getSpectrum(outWIi));
+    // outSpec->copyInfoFrom(*inWS->getSpectrum(outWIi));
 
     m_prog->report("Summing");
     PARALLEL_END_INTERUPT_REGION
@@ -802,8 +806,49 @@ void SmoothNeighbours::execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws)
 
 }
 
+//--------------------------------------------------------------------------------------------
+/** Build the instrument/detector setup in workspace
+  */
+void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws)
+{
+  //Copy geometry over.
+  API::WorkspaceFactory::Instance().initializeFromParent(inWS, outws, false);
 
+  // Go through all the output workspace
+  size_t numberOfSpectra = outws->getNumberHistograms();
 
+  for (int outWIi=0; outWIi<int(numberOfSpectra); outWIi++)
+  {
+    ISpectrum * outSpec = outws->getSpectrum(outWIi);
+    /*
+    g_log.notice() << "[DBx555] Original spectrum number for wsindex " << outWIi
+                   << " = " << outSpec->getSpectrumNo() << std::endl;
+    outSpec->setSpectrumNo(outWIi+1);
+    */
+
+    // Reset detectors
+    outSpec->clearDetectorIDs();;
+
+    // Which are the neighbours?
+    std::vector< weightedNeighbour > & neighbours = m_neighbours[outWIi];
+    std::vector< weightedNeighbour >::iterator it;
+    for (it = neighbours.begin(); it != neighbours.end(); ++it)
+    {
+      size_t inWI = it->first;
+
+      const ISpectrum * inSpec = inWS->getSpectrum(inWI);
+
+      std::set<detid_t> thesedetids = inSpec->getDetectorIDs();
+      outSpec->addDetectorIDs(thesedetids);
+
+    } //(each neighbour)
+  }
+
+  // Final set up to close
+  outws->generateSpectraMap();
+
+  return;
+}
 
 //--------------------------------------------------------------------------------------------
 /** Execute the algorithm for a EventWorkspace input

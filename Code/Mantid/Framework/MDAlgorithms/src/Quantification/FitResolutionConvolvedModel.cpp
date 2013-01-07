@@ -179,14 +179,14 @@ namespace Mantid
     }
 
     /**
-     * Create the fitting sub algorithm
+     * Create the fitting Child Algorithm
      * @return A shared pointer to the new algorithm
      */
     API::IAlgorithm_sptr FitResolutionConvolvedModel::createFittingAlgorithm()
     {
       const double startProgress(0.0), endProgress(1.0);
       const bool enableLogging(true);
-      return createSubAlgorithm("Fit", startProgress, endProgress, enableLogging);
+      return createChildAlgorithm("Fit", startProgress, endProgress, enableLogging);
     }
 
 

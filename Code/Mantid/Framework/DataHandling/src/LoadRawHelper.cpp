@@ -514,7 +514,7 @@ namespace Mantid
       return timeChannelsVec;
     }
 
-    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+    /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
     /// @param fileName :: the raw file filename
     /// @param localWorkspace :: The workspace to load the instrument for
     /// @param progStart :: progress at start
@@ -529,12 +529,12 @@ namespace Mantid
       size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
       if (i != std::string::npos) instrumentID.erase(i);
 
-      IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
-      // Enable progress reporting by sub-algorithm - 
+      IAlgorithm_sptr loadInst= createChildAlgorithm("LoadInstrument");
+      // Enable progress reporting by Child Algorithm - 
       loadInst->addObserver(m_progressObserver);
       setChildStartProgress(progStart);
       setChildEndProgress((progStart+progEnd)/2);
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       bool executionSuccessful(true);
       try
       {
@@ -544,11 +544,11 @@ namespace Mantid
         loadInst->execute();
       } catch (std::invalid_argument&)
       {
-        g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
         executionSuccessful = false;
       } catch (std::runtime_error&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
         executionSuccessful = false;
       }
 
@@ -570,10 +570,10 @@ namespace Mantid
           std::string value = updateDets->value<std::string>();
           if(value.substr(0,8)  == "datafile" )
           {
-            IAlgorithm_sptr updateInst = createSubAlgorithm("UpdateInstrumentFromFile");
+            IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
             updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
             updateInst->setPropertyValue("Filename", fileName);
-            updateInst->addObserver(m_progressObserver); // Enable progress reporting by subalgorithm
+            updateInst->addObserver(m_progressObserver); // Enable progress reporting by ChildAlgorithm
             setChildStartProgress((progStart+progEnd)/2);
             setChildEndProgress(progEnd);
             if(value  == "datafile-ignore-phi" )
@@ -599,23 +599,23 @@ namespace Mantid
       }
     }
 
-    /// Run LoadInstrumentFromRaw as a sub-algorithm (only if loading from instrument definition file fails)
+    /// Run LoadInstrumentFromRaw as a Child Algorithm (only if loading from instrument definition file fails)
     /// @param fileName :: the raw file filename
     /// @param localWorkspace :: The workspace to load the instrument for
     void LoadRawHelper::runLoadInstrumentFromRaw(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace)
     {
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromRaw");
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrumentFromRaw");
       loadInst->setPropertyValue("Filename", fileName);
       // Set the workspace property to be the same one filled above
       loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
         loadInst->execute();
       } catch (std::runtime_error&)
       {
-        g_log.error("Unable to successfully run LoadInstrumentFromRaw sub-algorithm");
+        g_log.error("Unable to successfully run LoadInstrumentFromRaw Child Algorithm");
       }
       m_monitordetectorList = loadInst->getProperty("MonitorList");
       std::vector<specid_t>::const_iterator itr;
@@ -630,16 +630,16 @@ namespace Mantid
       }
     }
 
-    /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
+    /// Run the LoadMappingTable Child Algorithm to fill the SpectraToDetectorMap
     /// @param fileName :: the raw file filename
     /// @param localWorkspace :: The workspace to load the mapping table for
     void LoadRawHelper::runLoadMappingTable(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace)
     {
       g_log.debug("Loading the spectra-detector mapping...");
       progress(m_prog, "Loading the spectra-detector mapping...");
-      // Now determine the spectra to detector map calling sub-algorithm LoadMappingTable
+      // Now determine the spectra to detector map calling Child Algorithm LoadMappingTable
       // There is a small penalty in re-opening the raw file but nothing major.
-      IAlgorithm_sptr loadmap = createSubAlgorithm("LoadMappingTable");
+      IAlgorithm_sptr loadmap = createChildAlgorithm("LoadMappingTable");
       loadmap->setPropertyValue("Filename",fileName);
       loadmap->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
       try
@@ -647,17 +647,17 @@ namespace Mantid
         loadmap->execute();
       } catch (std::runtime_error&)
       {
-        g_log.error("Unable to successfully execute LoadMappingTable sub-algorithm");
+        g_log.error("Unable to successfully execute LoadMappingTable Child Algorithm");
       }
 
       if (!loadmap->isExecuted())
       {
-        g_log.error("LoadMappingTable sub-algorithm is not executed");
+        g_log.error("LoadMappingTable Child Algorithm is not executed");
       }
 
     }
 
-    /// Run the LoadLog sub-algorithm
+    /// Run the LoadLog Child Algorithm
     /// @param fileName :: the raw file filename
     /// @param localWorkspace :: The workspace to load the logs for
     void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd )
@@ -668,13 +668,13 @@ namespace Mantid
         m_prog = progStart;
       }
       progress(m_prog, "Reading log files...");
-      IAlgorithm_sptr loadLog = createSubAlgorithm("LoadLog");
+      IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
       // Pass through the same input filename
       loadLog->setPropertyValue("Filename", fileName);
       // Set the workspace property to be the same one filled above
       loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
 
-      // Enable progress reporting by sub-algorithm - if progress range has duration
+      // Enable progress reporting by Child Algorithm - if progress range has duration
       if( progStart < progEnd ) {
         loadLog->addObserver(m_progressObserver);
         setChildStartProgress(progStart);
@@ -682,18 +682,18 @@ namespace Mantid
       }
 
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
         loadLog->execute();
       } catch (std::exception&)
       {
-        g_log.error("Unable to successfully run LoadLog sub-algorithm");
+        g_log.error("Unable to successfully run LoadLog Child Algorithm");
       }
 
       if (!loadLog->isExecuted())
       {
-        g_log.error("Unable to successfully run LoadLog sub-algorithm");
+        g_log.error("Unable to successfully run LoadLog Child Algorithm");
       }
 
       // Make log creator object and add the run status log if we have the appropriate ICP log

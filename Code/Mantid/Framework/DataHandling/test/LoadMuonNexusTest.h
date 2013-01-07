@@ -87,7 +87,7 @@ public:
 
     /*  - other tests from LoadRawTest - These test data not in current Nexus files
     //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
+    // Tests taken from LoadInstrumentTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
     boost::shared_ptr<Instrument> i = output->getInstrument();
     Mantid::Geometry::Component* source = i->getSource();
@@ -106,7 +106,7 @@ public:
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
     */
     //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check sub-algorithm is running properly
+    // Test code copied from LoadLogTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
     //boost::shared_ptr<Sample> sample = output->getSample();
     Property *l_property = output->run().getLogData( std::string("beamlog_current") );

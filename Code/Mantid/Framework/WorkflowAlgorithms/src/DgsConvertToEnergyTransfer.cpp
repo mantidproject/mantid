@@ -204,74 +204,74 @@ namespace Mantid
             }
 
             // Load the monitors
-            IAlgorithm_sptr loadmon = this->createSubAlgorithm(loadAlgName);
+            IAlgorithm_sptr loadmon = this->createChildAlgorithm(loadAlgName);
             loadmon->setProperty(fileProp, runFileName);
             loadmon->setProperty("OutputWorkspace", monWsName);
-            loadmon->executeAsSubAlg();
+            loadmon->executeAsChildAlg();
             monWS = loadmon->getProperty("OutputWorkspace");
           }
 
           // Calculate Ei
-          IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
+          IAlgorithm_sptr getei = this->createChildAlgorithm("GetEi");
           getei->setProperty("InputWorkspace", monWS);
           getei->setProperty("Monitor1Spec", eiMon1Spec);
           getei->setProperty("Monitor2Spec", eiMon2Spec);
           getei->setProperty("EnergyEstimate", eiGuess);
-          getei->executeAsSubAlg();
+          getei->executeAsChildAlg();
           incidentEnergy = getei->getProperty("IncidentEnergy");
           tZero = getei->getProperty("Tzero");
         }
 
         g_log.notice() << "Adjusting for T0" << std::endl;
-        IAlgorithm_sptr alg = this->createSubAlgorithm("ChangeBinOffset");
+        IAlgorithm_sptr alg = this->createChildAlgorithm("ChangeBinOffset");
         alg->setProperty("InputWorkspace", inputWS);
         alg->setProperty("OutputWorkspace", outputWS);
         alg->setProperty("Offset", -tZero);
-        alg->executeAsSubAlg();
+        alg->executeAsChildAlg();
         outputWS = alg->getProperty("OutputWorkspace");
 
         // Add T0 to sample logs
-        IAlgorithm_sptr addLog = this->createSubAlgorithm("AddSampleLog");
+        IAlgorithm_sptr addLog = this->createChildAlgorithm("AddSampleLog");
         addLog->setProperty("Workspace", outputWS);
         addLog->setProperty("LogName", "CalculatedT0");
         addLog->setProperty("LogType", "Number");
         addLog->setProperty("LogText", boost::lexical_cast<std::string>(tZero));
-        addLog->executeAsSubAlg();
+        addLog->executeAsChildAlg();
       }
       // Do ISIS
       else
       {
-        IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
+        IAlgorithm_sptr getei = this->createChildAlgorithm("GetEi");
         getei->setProperty("InputWorkspace", inputWS);
         getei->setProperty("Monitor1Spec", eiMon1Spec);
         getei->setProperty("Monitor2Spec", eiMon2Spec);
         getei->setProperty("EnergyEstimate", eiGuess);
-        getei->executeAsSubAlg();
+        getei->executeAsChildAlg();
 
         monPeak = getei->getProperty("FirstMonitorPeak");
         const specid_t monIndex = static_cast<const specid_t>(getei->getProperty("FirstMonitorIndex"));
         // Why did the old way get it from the log?
         incidentEnergy = getei->getProperty("IncidentEnergy");
 
-        IAlgorithm_sptr cbo = this->createSubAlgorithm("ChangeBinOffset");
+        IAlgorithm_sptr cbo = this->createChildAlgorithm("ChangeBinOffset");
         cbo->setProperty("InputWorkspace", inputWS);
         cbo->setProperty("OutputWorkspace", outputWS);
         cbo->setProperty("Offset", -monPeak);
-        cbo->executeAsSubAlg();
+        cbo->executeAsChildAlg();
         outputWS = cbo->getProperty("OutputWorkspace");
 
         IDetector_const_sptr monDet = inputWS->getDetector(monIndex);
         V3D monPos = monDet->getPos();
         std::string srcName = inputWS->getInstrument()->getSource()->getName();
 
-        IAlgorithm_sptr moveInstComp = this->createSubAlgorithm("MoveInstrumentComponent");
+        IAlgorithm_sptr moveInstComp = this->createChildAlgorithm("MoveInstrumentComponent");
         moveInstComp->setProperty("Workspace", outputWS);
         moveInstComp->setProperty("ComponentName", srcName);
         moveInstComp->setProperty("X", monPos.X());
         moveInstComp->setProperty("Y", monPos.Y());
         moveInstComp->setProperty("Z", monPos.Z());
         moveInstComp->setProperty("RelativePosition", false);
-        moveInstComp->executeAsSubAlg();
+        moveInstComp->executeAsChildAlg();
         outputWS = moveInstComp->getProperty("Workspace");
       }
 
@@ -292,11 +292,11 @@ namespace Mantid
         if (!detcalFile.empty())
         {
           const bool relocateDets = reductionManager->getProperty("RelocateDetectors");
-          IAlgorithm_sptr loaddetinfo = this->createSubAlgorithm("LoadDetectorInfo");
+          IAlgorithm_sptr loaddetinfo = this->createChildAlgorithm("LoadDetectorInfo");
           loaddetinfo->setProperty("Workspace", outputWS);
           loaddetinfo->setProperty("DataFilename", detcalFile);
           loaddetinfo->setProperty("RelocateDets", relocateDets);
-          loaddetinfo->executeAsSubAlg();
+          loaddetinfo->executeAsChildAlg();
           outputWS = loaddetinfo->getProperty("Workspace");
         }
         else
@@ -310,7 +310,7 @@ namespace Mantid
       if (doTibSub)
       {
         // Setup for later use
-        IAlgorithm_sptr cnvToDist = this->createSubAlgorithm("ConvertToDistribution");
+        IAlgorithm_sptr cnvToDist = this->createChildAlgorithm("ConvertToDistribution");
 
         // Set the binning parameters for the background region
         double tibTofStart = reductionManager->getProperty("TibTofRangeStart");
@@ -349,11 +349,11 @@ namespace Mantid
           {
             g_log.notice("TIB removal using event mode.");
             // Treat background as events
-            IAlgorithm_sptr createBkg = this->createSubAlgorithm("CreateFlatEventWorkspace");
+            IAlgorithm_sptr createBkg = this->createChildAlgorithm("CreateFlatEventWorkspace");
             createBkg->setProperty("InputWorkspace", outputWS);
             createBkg->setProperty("RangeStart", tibTofStart);
             createBkg->setProperty("RangeEnd", tibTofEnd);
-            createBkg->executeAsSubAlg();
+            createBkg->executeAsChildAlg();
             bkgWS = createBkg->getProperty("OutputWorkspace");
           }
           else
@@ -362,22 +362,22 @@ namespace Mantid
             // Create an original background workspace from a portion of the
             // result workspace.
             std::string origBkgWsName = "background_origin_ws";
-            IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+            IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
             rebin->setProperty("InputWorkspace", outputWS);
             rebin->setProperty("OutputWorkspace", origBkgWsName);
             rebin->setProperty("Params", params);
             rebin->setProperty("PreserveEvents", false);
-            rebin->executeAsSubAlg();
+            rebin->executeAsChildAlg();
             MatrixWorkspace_sptr origBkgWS = rebin->getProperty("OutputWorkspace");
 
             // Convert result workspace to DeltaE since we have Et binning
-            IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
+            IAlgorithm_sptr cnvun = this->createChildAlgorithm("ConvertUnits");
             cnvun->setProperty("InputWorkspace", outputWS);
             cnvun->setProperty("OutputWorkspace", outputWS);
             cnvun->setProperty("Target", "DeltaE");
             cnvun->setProperty("EMode", "Direct");
             cnvun->setProperty("EFixed", incidentEnergy);
-            cnvun->executeAsSubAlg();
+            cnvun->executeAsChildAlg();
             outputWS = cnvun->getProperty("OutputWorkspace");
 
             // Rebin to Et
@@ -385,7 +385,7 @@ namespace Mantid
             rebin->setProperty("OutputWorkspace", outputWS);
             rebin->setProperty("Params", etBinning);
             rebin->setProperty("PreserveEvents", false);
-            rebin->executeAsSubAlg();
+            rebin->executeAsChildAlg();
             outputWS = rebin->getProperty("OutputWorkspace");
 
             // Convert result workspace to TOF
@@ -394,12 +394,12 @@ namespace Mantid
             cnvun->setProperty("Target", "TOF");
             cnvun->setProperty("EMode", "Direct");
             cnvun->setProperty("EFixed", incidentEnergy);
-            cnvun->executeAsSubAlg();
+            cnvun->executeAsChildAlg();
             outputWS = cnvun->getProperty("OutputWorkspace");
 
             // Make result workspace a distribution
             cnvToDist->setProperty("Workspace", outputWS);
-            cnvToDist->executeAsSubAlg();
+            cnvToDist->executeAsChildAlg();
             outputWS = cnvToDist->getProperty("Workspace");
 
             std::string bkgWsName = this->getPropertyValue("OutputTibWorkspace");
@@ -408,14 +408,14 @@ namespace Mantid
               bkgWsName = "background_ws";
             }
             // Calculate the background
-            IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
+            IAlgorithm_sptr flatBg = this->createChildAlgorithm("FlatBackground");
             flatBg->setProperty("InputWorkspace", origBkgWS);
             flatBg->setProperty("OutputWorkspace", bkgWsName);
             flatBg->setProperty("StartX", tibTofStart);
             flatBg->setProperty("EndX", tibTofEnd);
             flatBg->setProperty("Mode", "Mean");
             flatBg->setProperty("OutputMode", "Return Background");
-            flatBg->executeAsSubAlg();
+            flatBg->executeAsChildAlg();
             bkgWS = flatBg->getProperty("OutputWorkspace");
 
             // Remove unneeded original background workspace
@@ -423,16 +423,16 @@ namespace Mantid
 
             // Make background workspace a distribution
             cnvToDist->setProperty("Workspace", bkgWS);
-            cnvToDist->executeAsSubAlg();
+            cnvToDist->executeAsChildAlg();
             bkgWS = cnvToDist->getProperty("Workspace");
           }
 
           // Subtract background from result workspace
-          IAlgorithm_sptr minus = this->createSubAlgorithm("Minus");
+          IAlgorithm_sptr minus = this->createChildAlgorithm("Minus");
           minus->setProperty("LHSWorkspace", outputWS);
           minus->setProperty("RHSWorkspace", bkgWS);
           minus->setProperty("OutputWorkspace", outputWS);
-          minus->executeAsSubAlg();
+          minus->executeAsChildAlg();
 
           this->setProperty("OutputTibWorkspace", bkgWS);
         }
@@ -441,56 +441,56 @@ namespace Mantid
         {
           // Make result workspace a distribution
           cnvToDist->setProperty("Workspace", outputWS);
-          cnvToDist->executeAsSubAlg();
+          cnvToDist->executeAsChildAlg();
           outputWS = cnvToDist->getProperty("Workspace");
 
-          IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
+          IAlgorithm_sptr flatBg = this->createChildAlgorithm("FlatBackground");
           flatBg->setProperty("InputWorkspace", outputWS);
           flatBg->setProperty("OutputWorkspace", outputWS);
           flatBg->setProperty("StartX", tibTofStart);
           flatBg->setProperty("EndX", tibTofEnd);
           flatBg->setProperty("Mode", "Mean");
-          flatBg->executeAsSubAlg();
+          flatBg->executeAsChildAlg();
           outputWS = flatBg->getProperty("OutputWorkspace");
         }
 
         if (!treatTibAsEvents)
         {
           // Convert result workspace back to histogram
-          IAlgorithm_sptr cnvFrDist = this->createSubAlgorithm("ConvertFromDistribution");
+          IAlgorithm_sptr cnvFrDist = this->createChildAlgorithm("ConvertFromDistribution");
           cnvFrDist->setProperty("Workspace", outputWS);
-          cnvFrDist->executeAsSubAlg();
+          cnvFrDist->executeAsChildAlg();
           outputWS = cnvFrDist->getProperty("Workspace");
         }
       }
 
       // Normalise result workspace to incident beam parameter
-      IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
+      IAlgorithm_sptr norm = this->createChildAlgorithm("DgsPreprocessData");
       norm->setProperty("InputWorkspace", outputWS);
       norm->setProperty("OutputWorkspace", outputWS);
       norm->setProperty("InputMonitorWorkspace", monWS);
       norm->setProperty("TofRangeOffset", binOffset);
-      norm->executeAsSubAlg();
+      norm->executeAsChildAlg();
       outputWS = norm->getProperty("OutputWorkspace");
 
       // Convert to energy transfer
       g_log.notice() << "Converting to energy transfer." << std::endl;
-      IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
+      IAlgorithm_sptr cnvun = this->createChildAlgorithm("ConvertUnits");
       cnvun->setProperty("InputWorkspace", outputWS);
       cnvun->setProperty("OutputWorkspace", outputWS);
       cnvun->setProperty("Target", "DeltaE");
       cnvun->setProperty("EMode", "Direct");
       cnvun->setProperty("EFixed", incidentEnergy);
-      cnvun->executeAsSubAlg();
+      cnvun->executeAsChildAlg();
       outputWS = cnvun->getProperty("OutputWorkspace");
 
       g_log.notice() << "Rebinning data" << std::endl;
-      IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+      IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
       rebin->setProperty("InputWorkspace", outputWS);
       rebin->setProperty("OutputWorkspace", outputWS);
       rebin->setProperty("Params", etBinning);
       rebin->setProperty("PreserveEvents", preserveEvents);
-      rebin->executeAsSubAlg();
+      rebin->executeAsChildAlg();
       outputWS = rebin->getProperty("OutputWorkspace");
 
       // Correct for detector efficiency
@@ -500,30 +500,30 @@ namespace Mantid
         cnvun->setProperty("InputWorkspace", outputWS);
         cnvun->setProperty("OutputWorkspace", outputWS);
         cnvun->setProperty("Target", "Wavelength");
-        cnvun->executeAsSubAlg();
+        cnvun->executeAsChildAlg();
         outputWS = cnvun->getProperty("OutputWorkspace");
 
         // Do the correction
-        IAlgorithm_sptr alg2 = this->createSubAlgorithm("He3TubeEfficiency");
+        IAlgorithm_sptr alg2 = this->createChildAlgorithm("He3TubeEfficiency");
         alg2->setProperty("InputWorkspace", outputWS);
         alg2->setProperty("OutputWorkspace", outputWS);
-        alg2->executeAsSubAlg();
+        alg2->executeAsChildAlg();
         outputWS = alg2->getProperty("OutputWorkspace");
 
         // Convert back to energy transfer
         cnvun->setProperty("InputWorkspace", outputWS);
         cnvun->setProperty("OutputWorkspace", outputWS);
         cnvun->setProperty("Target", "DeltaE");
-        cnvun->executeAsSubAlg();
+        cnvun->executeAsChildAlg();
         outputWS = cnvun->getProperty("OutputWorkspace");
       }
       // Do ISIS
       else
       {
-        IAlgorithm_sptr alg = this->createSubAlgorithm("DetectorEfficiencyCor");
+        IAlgorithm_sptr alg = this->createChildAlgorithm("DetectorEfficiencyCor");
         alg->setProperty("InputWorkspace", outputWS);
         alg->setProperty("OutputWorkspace", outputWS);
-        alg->executeAsSubAlg();
+        alg->executeAsChildAlg();
         outputWS = alg->getProperty("OutputWorkspace");
       }
 
@@ -531,11 +531,11 @@ namespace Mantid
       if (correctKiKf)
       {
         // Correct for Ki/Kf
-        IAlgorithm_sptr kikf = this->createSubAlgorithm("CorrectKiKf");
+        IAlgorithm_sptr kikf = this->createChildAlgorithm("CorrectKiKf");
         kikf->setProperty("InputWorkspace", outputWS);
         kikf->setProperty("OutputWorkspace", outputWS);
         kikf->setProperty("EMode", "Direct");
-        kikf->executeAsSubAlg();
+        kikf->executeAsChildAlg();
         outputWS = kikf->getProperty("OutputWorkspace");
       }
 
@@ -549,26 +549,26 @@ namespace Mantid
       {
         rebin->setProperty("PreserveEvents", false);
       }
-      rebin->executeAsSubAlg();
+      rebin->executeAsChildAlg();
       outputWS = rebin->getProperty("OutputWorkspace");
 
       if (sofphieIsDistribution)
       {
         g_log.notice() << "Making distribution" << std::endl;
-        IAlgorithm_sptr distrib = this->createSubAlgorithm("ConvertToDistribution");
+        IAlgorithm_sptr distrib = this->createChildAlgorithm("ConvertToDistribution");
         distrib->setProperty("Workspace", outputWS);
-        distrib->executeAsSubAlg();
+        distrib->executeAsChildAlg();
         outputWS = distrib->getProperty("Workspace");
       }
       else
       {
         // Discard events outside nominal bounds
-        IAlgorithm_sptr crop = this->createSubAlgorithm("CropWorkspace");
+        IAlgorithm_sptr crop = this->createChildAlgorithm("CropWorkspace");
         crop->setProperty("InputWorkspace", outputWS);
         crop->setProperty("OutputWorkspace", outputWS);
         crop->setProperty("XMin", etBinning[0]);
         crop->setProperty("XMax", etBinning[2]);
-        crop->executeAsSubAlg();
+        crop->executeAsChildAlg();
         outputWS = crop->getProperty("OutputWorkspace");
       }
 
@@ -576,11 +576,11 @@ namespace Mantid
       MatrixWorkspace_sptr detVanWS = this->getProperty("IntegratedDetectorVanadium");
       if (detVanWS)
       {
-        IAlgorithm_sptr divide = this->createSubAlgorithm("Divide");
+        IAlgorithm_sptr divide = this->createChildAlgorithm("Divide");
         divide->setProperty("LHSWorkspace", outputWS);
         divide->setProperty("RHSWorkspace", detVanWS);
         divide->setProperty("OutputWorkspace", outputWS);
-        divide->executeAsSubAlg();
+        divide->executeAsChildAlg();
         outputWS = divide->getProperty("OutputWorkspace");
       }
 
@@ -594,30 +594,30 @@ namespace Mantid
       {
         oldGroupFile = reductionManager->getPropertyValue(fileProp);
       }
-      IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
+      IAlgorithm_sptr remap = this->createChildAlgorithm("DgsRemap");
       remap->setProperty("InputWorkspace", outputWS);
       remap->setProperty("OutputWorkspace", outputWS);
       remap->setProperty("MaskWorkspace", maskWS);
       remap->setProperty("GroupingWorkspace", groupWS);
       remap->setProperty("OldGroupingFile", oldGroupFile);
-      remap->executeAsSubAlg();
+      remap->executeAsChildAlg();
       outputWS = remap->getProperty("OutputWorkspace");
 
       if ("ISIS" == facility)
       {
         double scaleFactor = inputWS->getInstrument()->getNumberParameter("scale-factor")[0];
         const std::string scaleFactorName = "ScaleFactor";
-        IAlgorithm_sptr csvw = this->createSubAlgorithm("CreateSingleValuedWorkspace");
+        IAlgorithm_sptr csvw = this->createChildAlgorithm("CreateSingleValuedWorkspace");
         csvw->setProperty("OutputWorkspace", scaleFactorName);
         csvw->setProperty("DataValue", scaleFactor);
-        csvw->executeAsSubAlg();
+        csvw->executeAsChildAlg();
         MatrixWorkspace_sptr scaleFactorWS = csvw->getProperty("OutputWorkspace");
 
-        IAlgorithm_sptr mult = this->createSubAlgorithm("Multiply");
+        IAlgorithm_sptr mult = this->createChildAlgorithm("Multiply");
         mult->setProperty("LHSWorkspace", outputWS);
         mult->setProperty("RHSWorkspace", scaleFactorWS);
         mult->setProperty("OutputWorkspace", outputWS);
-        mult->executeAsSubAlg();
+        mult->executeAsChildAlg();
       }
 
       this->setProperty("OutputWorkspace", outputWS);

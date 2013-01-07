@@ -47,7 +47,7 @@ namespace MDEvents
 class DLLExport MDTransfModQ: public MDTransfInterface
 { 
 public:
-    /// the name, this subalgorithm is known to users (will appear in selection list)
+    /// the name, this ChildAlgorithm is known to users (will appear in selection list)
     const std::string transfID()const; // {return "ModQ"; }
     /** energy conversion modes supported by this class; 
       * The class supports three standard energy conversion modes */

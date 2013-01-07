@@ -263,7 +263,7 @@ void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork, const s
   container->addWorkspace(newWork);
   setProperty(propName, newWork);
 }
-/** Run the sub-algorithm LoadInstrument (as for LoadRaw)
+/** Run the Child Algorithm LoadInstrument (as for LoadRaw)
  * @param inst_name :: The name written in the Nexus file
  * @param localWorkspace :: The workspace to insert the instrument into
  */
@@ -271,9 +271,9 @@ void LoadCanSAS1D::runLoadInstrument(const std::string & inst_name,
     API::MatrixWorkspace_sptr localWorkspace)
 {
 
-  API::IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+  API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try
   {
     loadInst->setPropertyValue("InstrumentName", inst_name);
@@ -281,10 +281,10 @@ void LoadCanSAS1D::runLoadInstrument(const std::string & inst_name,
     loadInst->execute();
   } catch (std::invalid_argument&)
   {
-    g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+    g_log.information("Invalid argument to LoadInstrument Child Algorithm");
   } catch (std::runtime_error&)
   {
-    g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+    g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
   }
 
 }

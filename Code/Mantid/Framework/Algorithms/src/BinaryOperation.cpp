@@ -75,19 +75,19 @@ namespace Mantid
           std::cout << "Special DIVIDE of " << this->getPropertyValue(inputPropName2()) << " by " << this->getPropertyValue(inputPropName1()) << "\n";
           // x / workspace = Power(workspace, -1) * x
           // workspace ^ -1
-          IAlgorithm_sptr pow = this->createSubAlgorithm("Power", 0.0, 0.5, true);
+          IAlgorithm_sptr pow = this->createChildAlgorithm("Power", 0.0, 0.5, true);
           pow->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_rhs));
           pow->setProperty("Exponent", -1.0);
           pow->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
-          pow->executeAsSubAlg();
+          pow->executeAsChildAlg();
           out = pow->getProperty("OutputWorkspace");
 
           // Multiply by x
-          IAlgorithm_sptr mult = this->createSubAlgorithm("Multiply", 0.5, 1.0, true);
+          IAlgorithm_sptr mult = this->createChildAlgorithm("Multiply", 0.5, 1.0, true);
           mult->setProperty(inputPropName1(), out); //(workspace^-1)
           mult->setProperty(inputPropName2(), boost::const_pointer_cast<MatrixWorkspace>(m_lhs));  // (1.0) or other number
           mult->setProperty(outputPropName(), out);
-          mult->executeAsSubAlg();
+          mult->executeAsChildAlg();
           out = mult->getProperty("OutputWorkspace");
         }
         else if (this->name() == "Minus")
@@ -99,19 +99,19 @@ namespace Mantid
           minusOne->dataE(0)[0] = 0.0;
 
           // workspace * -1
-          IAlgorithm_sptr mult = this->createSubAlgorithm("Multiply", 0.0, 0.5, true);
+          IAlgorithm_sptr mult = this->createChildAlgorithm("Multiply", 0.0, 0.5, true);
           mult->setProperty(inputPropName1(), boost::const_pointer_cast<MatrixWorkspace>(m_rhs));
           mult->setProperty(inputPropName2(), minusOne);
           mult->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
-          mult->executeAsSubAlg();
+          mult->executeAsChildAlg();
           out = mult->getProperty("OutputWorkspace");
 
           // Multiply by x
-          IAlgorithm_sptr plus = this->createSubAlgorithm("Plus", 0.5, 1.0, true);
+          IAlgorithm_sptr plus = this->createChildAlgorithm("Plus", 0.5, 1.0, true);
           plus->setProperty(inputPropName1(), out); //(workspace^-1)
           plus->setProperty(inputPropName2(), boost::const_pointer_cast<MatrixWorkspace>(m_lhs));  // (1.0) or other number
           plus->setProperty(outputPropName(), out);
-          plus->executeAsSubAlg();
+          plus->executeAsChildAlg();
           out = plus->getProperty("OutputWorkspace");
         }
 

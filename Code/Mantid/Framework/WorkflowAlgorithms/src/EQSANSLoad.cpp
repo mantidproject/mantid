@@ -371,13 +371,13 @@ void EQSANSLoad::moveToBeamCenter()
   double beam_ctr_y = 0.0;
   EQSANSInstrument::getCoordinateFromPixel(m_center_x, m_center_y, dataWS, beam_ctr_x, beam_ctr_y);
 
-  IAlgorithm_sptr mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
+  IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
   mvAlg->setProperty("ComponentName", "detector1");
   mvAlg->setProperty("X", -x_offset-beam_ctr_x);
   mvAlg->setProperty("Y", -y_offset-beam_ctr_y);
   mvAlg->setProperty("RelativePosition", true);
-  mvAlg->executeAsSubAlg();
+  mvAlg->executeAsChildAlg();
   m_output_message += "   Beam center offset: " + Poco::NumberFormatter::format(x_offset)
       + ", " + Poco::NumberFormatter::format(y_offset) + " m\n";
   //m_output_message += "   Beam center in real-space: " + Poco::NumberFormatter::format(-x_offset-beam_ctr_x)
@@ -503,7 +503,7 @@ void EQSANSLoad::exec()
   if (!inputEventWS)
   {
     const bool loadMonitors = getProperty("LoadMonitors");
-    IAlgorithm_sptr loadAlg = createSubAlgorithm("LoadEventNexus", 0, 0.2);
+    IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
     loadAlg->setProperty("LoadMonitors", loadMonitors);
     loadAlg->setProperty("MonitorsAsEvents", false);
     loadAlg->setProperty("Filename", fileName);
@@ -530,9 +530,9 @@ void EQSANSLoad::exec()
     EventWorkspace_sptr outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
     if (inputEventWS != outputEventWS)
     {
-      IAlgorithm_sptr copyAlg = createSubAlgorithm("CloneWorkspace", 0, 0.2);
+      IAlgorithm_sptr copyAlg = createChildAlgorithm("CloneWorkspace", 0, 0.2);
       copyAlg->setProperty("InputWorkspace", inputEventWS);
-      copyAlg->executeAsSubAlg();
+      copyAlg->executeAsChildAlg();
       Workspace_sptr dataWS_asWks = copyAlg->getProperty("OutputWorkspace");
       dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
     } else {
@@ -567,12 +567,12 @@ void EQSANSLoad::exec()
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
 
   // Move the detector to its correct position
-  IAlgorithm_sptr mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
+  IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
   mvAlg->setProperty("ComponentName", "detector1");
   mvAlg->setProperty("Z", sdd/1000.0);
   mvAlg->setProperty("RelativePosition", false);
-  mvAlg->executeAsSubAlg();
+  mvAlg->executeAsChildAlg();
   g_log.information() << "Moving detector to " << sdd/1000.0 << " meters" << std::endl;
   m_output_message += "   Detector position: " + Poco::NumberFormatter::format(sdd/1000.0, 3) + " m\n";
 
@@ -618,12 +618,12 @@ void EQSANSLoad::exec()
         g_log.error() << "Moderator position seems close to the sample, please check" << std::endl;
       g_log.information() << "Moving moderator to " << m_moderator_position << std::endl;
       m_output_message += "   Moderator position: " + Poco::NumberFormatter::format(m_moderator_position, 3) + " m\n";
-      mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.4, 0.45);
+      mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.4, 0.45);
       mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
       mvAlg->setProperty("ComponentName", "moderator");
       mvAlg->setProperty("Z", m_moderator_position);
       mvAlg->setProperty("RelativePosition", false);
-      mvAlg->executeAsSubAlg();
+      mvAlg->executeAsChildAlg();
   }
 
   // Get source aperture radius
@@ -674,12 +674,12 @@ void EQSANSLoad::exec()
     if (!correct_for_flight_path) m_output_message += "NOT ";
     m_output_message += "applied\n";
     DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(dataWS);
-    IAlgorithm_sptr tofAlg = createSubAlgorithm("EQSANSTofStructure", 0.5, 0.7);
+    IAlgorithm_sptr tofAlg = createChildAlgorithm("EQSANSTofStructure", 0.5, 0.7);
     tofAlg->setProperty<EventWorkspace_sptr>("InputWorkspace", dataWS_evt);
     tofAlg->setProperty("LowTOFCut", m_low_TOF_cut);
     tofAlg->setProperty("HighTOFCut", m_high_TOF_cut);
     tofAlg->setProperty("FlightPathCorrection", correct_for_flight_path);
-    tofAlg->executeAsSubAlg();
+    tofAlg->executeAsChildAlg();
     wl_min = tofAlg->getProperty("WavelengthMin");
     wl_max = tofAlg->getProperty("WavelengthMax");
     if (wl_min != wl_min || wl_max != wl_max)
@@ -726,11 +726,11 @@ void EQSANSLoad::exec()
     dataWS->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom", true);
   }
 
-  IAlgorithm_sptr scAlg = createSubAlgorithm("ScaleX", 0.7, 0.71);
+  IAlgorithm_sptr scAlg = createChildAlgorithm("ScaleX", 0.7, 0.71);
   scAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   scAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
   scAlg->setProperty("Factor", conversion_factor);
-  scAlg->executeAsSubAlg();
+  scAlg->executeAsChildAlg();
   dataWS->getAxis(0)->setUnit("Wavelength");
 
   // Rebin so all the wavelength bins are aligned
@@ -739,12 +739,12 @@ void EQSANSLoad::exec()
   std::string params = Poco::NumberFormatter::format(wl_min, 2) + ","
 		  + Poco::NumberFormatter::format(wl_step, 2) + ","
 		  + Poco::NumberFormatter::format(wl_combined_max, 2);
-  IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin", 0.71, 0.72);
+  IAlgorithm_sptr rebinAlg = createChildAlgorithm("Rebin", 0.71, 0.72);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   if (preserveEvents) rebinAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
   rebinAlg->setPropertyValue("Params", params);
   rebinAlg->setProperty("PreserveEvents", preserveEvents);
-  rebinAlg->executeAsSubAlg();
+  rebinAlg->executeAsChildAlg();
 
   if (!preserveEvents) dataWS = rebinAlg->getProperty("OutputWorkspace");
 

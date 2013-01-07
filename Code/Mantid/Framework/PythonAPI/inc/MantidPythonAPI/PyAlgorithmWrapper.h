@@ -67,15 +67,15 @@ public:
   }
 
   /**
-   * Expose createSubAlgorithm to python so that a python algorithm can
-   * create a sub-algorithm that will not log itself.
+   * Expose createChildAlgorithm to python so that a python algorithm can
+   * create a Child Algorithm that will not log itself.
    * @param algo_name :: Name of the algorithm to create
    * @param version :: Version number, -1 is default
    */
   /// Creates and instance of an algorithm
-  boost::shared_ptr<Mantid::API::IAlgorithm> _createSubAlgorithm(const std::string& algo_name, const int version=-1)
+  boost::shared_ptr<Mantid::API::IAlgorithm> _createChildAlgorithm(const std::string& algo_name, const int version=-1)
   {
-    return this->Algorithm::createSubAlgorithm(algo_name, -1, -1, true, version);
+    return this->Algorithm::createChildAlgorithm(algo_name, -1, -1, true, version);
   }
   /**
    * Declare a property, templated on the value along with a validator

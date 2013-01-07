@@ -173,7 +173,7 @@ namespace DataObjects
     // ====================================== ITableWorkspace Methods ==================================
 
     // ===== Methods that are not implemented (read-only table) ==========
-    virtual bool addColumn(const std::string& /*type*/, const std::string& /*name*/)
+    virtual API::Column_sptr addColumn(const std::string& /*type*/, const std::string& /*name*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot add column."); }
 
     virtual bool addColumns(const std::string& /*type*/, const std::string& /*name*/, size_t /*n*/)

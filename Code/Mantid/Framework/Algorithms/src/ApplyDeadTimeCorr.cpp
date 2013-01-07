@@ -67,7 +67,7 @@ void ApplyDeadTimeCorr::exec()
             numGoodFrames = boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
 
             // Duplicate the input workspace. Only need to change Y values based on dead time corrections
-            IAlgorithm_sptr duplicate = createSubAlgorithm("CloneWorkspace");
+            IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
             duplicate->initialize();
             duplicate->setProperty<Workspace_sptr>("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inputWs));
             duplicate->execute();

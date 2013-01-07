@@ -63,8 +63,8 @@ namespace Algorithms
       throw std::invalid_argument("InputWorkspace is not a MaskWorkspace.");
     }
 
-    // 2. Do Invert by calling sub algorithm
-    API::IAlgorithm_sptr invert = createSubAlgorithm("BinaryOperateMasks", 0.0, 1.0, true);
+    // 2. Do Invert by calling Child Algorithm
+    API::IAlgorithm_sptr invert = createChildAlgorithm("BinaryOperateMasks", 0.0, 1.0, true);
     invert->setPropertyValue("InputWorkspace1", inWS->name());
     invert->setProperty("OperationType", "NOT");
     invert->setProperty("OutputWorkspace", "tempws");
@@ -73,8 +73,8 @@ namespace Algorithms
 
     if (!invert->isExecuted())
     {
-      g_log.error() << "Subalgorithm BinaryOperateMask() cannot be executed. " << std::endl;
-      throw std::runtime_error("Subalgorithm BinaryOperateMask() cannot be executed. ");
+      g_log.error() << "ChildAlgorithm BinaryOperateMask() cannot be executed. " << std::endl;
+      throw std::runtime_error("ChildAlgorithm BinaryOperateMask() cannot be executed. ");
     }
 
     DataObjects::MaskWorkspace_sptr outputws = invert->getProperty("OutputWorkspace");

@@ -217,7 +217,7 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
   double retVal = 1.0; 
 
     API::IAlgorithm_sptr fit;
-    fit = createSubAlgorithm("Fit", -1, -1, true);
+    fit = createChildAlgorithm("Fit", -1, -1, true);
 
     std::stringstream ss;
     ss << "name=LinearBackground,A0=" << ws->readY(wsIndex)[0] << ",A1=" << 0.0 << ",ties=(A1=0.0)";

@@ -4,7 +4,7 @@ This algorithm searches the specified spectra in a workspace for peaks, returnin
 
 The output [[TableWorkspace]] contains the following columns, which reflect the fact that the peak has been fitted to a Gaussian atop a linear background: spectrum, centre, width, height, backgroundintercept & backgroundslope.
 
-====Subalgorithms used====
+====ChildAlgorithms used====
 FindPeaks uses the [[SmoothData]] algorithm to, well, smooth the data - a necessary step to identify peaks in statistically fluctuating data. The [[Gaussian]] algorithm is used to fit candidate peaks.
 
 ==== References ====
@@ -576,20 +576,20 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::Matrix
 }
 
 //=================================================================================================
-/** Calls the SmoothData algorithm as a sub-algorithm on a workspace
+/** Calls the SmoothData algorithm as a Child Algorithm on a workspace
  *  @param WS :: The workspace containing the data to be smoothed. The smoothed result will be stored in this pointer.
  *  @param w ::  The number of data points which should contribute to each smoothed point
  */
 void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w)
 {
   g_log.information("Smoothing the input data");
-  IAlgorithm_sptr smooth = createSubAlgorithm("SmoothData");
+  IAlgorithm_sptr smooth = createChildAlgorithm("SmoothData");
   smooth->setProperty("InputWorkspace", WS);
   // The number of points which contribute to each smoothed point
   std::vector<int> wvec;
   wvec.push_back(w);
   smooth->setProperty("NPoints",wvec);
-  smooth->executeAsSubAlg();
+  smooth->executeAsChildAlg();
   // Get back the result
   WS = smooth->getProperty("OutputWorkspace");
 }
@@ -918,12 +918,12 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
   for (unsigned int width = minGuessedPeakWidth; width <= maxGuessedPeakWidth; width +=stepGuessedPeakWidth)
   {
 
-    // a) Set up sub algorithm Fit
+    // a) Set up Child Algorithm Fit
     IAlgorithm_sptr fit;
     try
     {
       // Fitting the candidate peaks to a Gaussian
-      fit = createSubAlgorithm("Fit", -1, -1, true);
+      fit = createChildAlgorithm("Fit", -1, -1, true);
     } catch (Exception::NotFoundError &)
     {
       g_log.error("The StripPeaks algorithm requires the CurveFitting library");
@@ -948,7 +948,7 @@ void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int
     fit->setProperty("CostFunction", "Least squares");
 
     // e) Fit and get result
-    fit->executeAsSubAlg();
+    fit->executeAsChildAlg();
 
     this->updateFitResults(fit, bestparams, bestRawParams, mincost, in_centre, in_height);
 
@@ -1020,7 +1020,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   try
   {
     // Fitting the candidate peaks to a Gaussian
-    fit = createSubAlgorithm("Fit", -1, -1, true);
+    fit = createChildAlgorithm("Fit", -1, -1, true);
   } catch (Exception::NotFoundError &)
   {
     g_log.error("The StripPeaks algorithm requires the CurveFitting library");
@@ -1044,7 +1044,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   fit->setProperty("CostFunction", "Least squares");
 
   // e) Fit and get result of fitting background
-  fit->executeAsSubAlg();
+  fit->executeAsChildAlg();
 
   std::string fitStatus = fit->getProperty("OutputStatus");
   //std::vector<double> params = fit->getProperty("Parameters");
@@ -1133,12 +1133,12 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   {
     double in_sigma = (i4 + iwidth < X.size()) ? X[i4 + iwidth] - X[i4] : 0.;// Guess sigma
 
-    // a) Set up sub algorithm Fit
+    // a) Set up Child Algorithm Fit
     IAlgorithm_sptr gfit;
     try
     {
       // Fitting the candidate peaks to a Gaussian
-      gfit = createSubAlgorithm("Fit", -1, -1, true);
+      gfit = createChildAlgorithm("Fit", -1, -1, true);
     } catch (Exception::NotFoundError &)
     {
       g_log.error("The FindPeaks algorithm requires the CurveFitting library");
@@ -1173,7 +1173,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
         << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
 
     // e) Fit and get result
-    gfit->executeAsSubAlg();
+    gfit->executeAsChildAlg();
 
     //std::vector<double> params = gfit->getProperty("Parameters");
     std::string fitpeakstatus = gfit->getProperty("OutputStatus");
@@ -1196,7 +1196,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   try
   {
     // Fitting the candidate peaks to a Gaussian
-    lastfit = createSubAlgorithm("Fit", -1, -1, true);
+    lastfit = createChildAlgorithm("Fit", -1, -1, true);
   } catch (Exception::NotFoundError &)
   {
     g_log.error("The StripPeaks algorithm requires the CurveFitting library");
@@ -1219,7 +1219,7 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   lastfit->setProperty("CostFunction", "Least squares");
 
   // e) Fit and get result
-  lastfit->executeAsSubAlg();
+  lastfit->executeAsChildAlg();
 
   this->updateFitResults(lastfit, bestparams, bestRawParams, mincost, in_centre, in_height);
 

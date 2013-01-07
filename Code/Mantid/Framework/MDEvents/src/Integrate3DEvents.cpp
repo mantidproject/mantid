@@ -42,7 +42,9 @@ Integrate3DEvents::Integrate3DEvents( std::vector<V3D>  const & peak_q_list,
   for ( size_t i = 0; i < peak_q_list.size(); i++ )
   {
     hkl_key = getHklKey( peak_q_list[i] );
-    peak_qs[hkl_key] = peak_q_list[i];
+
+    if ( hkl_key != 0 )                   // only save if hkl != (0,0,0)
+      peak_qs[hkl_key] = peak_q_list[i];
   }
 }
     
@@ -122,8 +124,21 @@ void Integrate3DEvents::ellipseIntegrateEvents(
                                             double         & inti,
                                             double         & sigi )
 {
+  inti = 0.0;                            // default values, in case something
+  sigi = 0.0;                            // is wrong with the peak.
+
   long hkl_key = getHklKey( peak_q );
-  std::vector<V3D> some_events = event_lists[hkl_key];
+  if ( hkl_key == 0 )
+  {
+    return;
+  }
+  
+  std::vector<V3D> & some_events = event_lists[hkl_key];
+
+  if ( some_events.size() < 3 )          // if there are not enough events to 
+  {                                      // find covariance matrix, return 
+    return;
+  }
 
   DblMatrix cov_matrix(3,3);
   makeCovarianceMatrix( some_events, cov_matrix, radius );
@@ -137,6 +152,24 @@ void Integrate3DEvents::ellipseIntegrateEvents(
     sigmas.push_back( stdDev( some_events, eigen_vectors[i], radius ) );
   }
 
+  bool invalid_peak = false;
+  for ( int i = 0; i < 3; i++ )
+  {
+    if ( (boost::math::isnan)( sigmas[i]) )
+    {
+      invalid_peak = true;
+    }
+    else if ( sigmas[i] <= 0 )
+    {
+      invalid_peak = true;
+    }
+  }
+
+  if ( invalid_peak )                 // if data collapses to a line or
+  {                                   // to a plane, the volume of the 
+    return;                           // ellipsoids will be zero.
+  }
+ 
   ellipseIntegrateEvents(some_events, eigen_vectors, sigmas,
                          specify_size,   peak_radius, 
                          back_inner_radius, back_outer_radius,
@@ -305,7 +338,7 @@ double Integrate3DEvents::stdDev( std::vector<V3D> const & events,
 
 
 /**
- *  Form a map key as 10^12*h + 10^6*k + l from the integers h, k, l 
+ *  Form a map key as 10^12*h + 10^6*k + l from the integers h,k,l.
  *
  *  @param  h        The first Miller index
  *  @param  k        The second Miller index
@@ -313,7 +346,12 @@ double Integrate3DEvents::stdDev( std::vector<V3D> const & events,
  */
 long Integrate3DEvents::getHklKey( int h, int k, int l )
 {
-  return ( 1000000000000l * h + 1000000l * k + l );
+  long key = 0l;
+
+  if ( h != 0 || k != 0 || l != 0 )
+    key = 1000000000000l * (long)h + 1000000l * (long)k + (long)l;
+
+  return key;
 }
   
 
@@ -351,6 +389,10 @@ long Integrate3DEvents::getHklKey( V3D const & q_vector )
 void Integrate3DEvents::addEvent( V3D event_Q )
 {
   long hkl_key = getHklKey( event_Q );
+
+  if ( hkl_key == 0 )      // don't keep events associated with 0,0,0
+    return;
+
   V3D peak_q = peak_qs[hkl_key];
   if ( peak_q != 0 )
   {

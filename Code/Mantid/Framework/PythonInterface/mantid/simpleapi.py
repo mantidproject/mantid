@@ -389,7 +389,7 @@ def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
         prop = algm_obj.getProperty(name)
         # Parent algorithms store their workspaces in the ADS
         # Child algorithms should store their workspaces in the property 
-        # but they don't at the moment while the issues with history recording Python sub algs
+        # but they don't at the moment while the issues with history recording Python Child Algs
         # is resolved: ticket #5157
         if _is_workspace_property(prop):
             value_str = prop.valueAsStr
@@ -455,7 +455,7 @@ def _set_properties(alg_object, *args, **kwargs):
         value = kwargs[key]
         
         # The correct parent/child relationship is not quite set up yet: #5157
-        # Subalgorithms in Python are marked as children but their output is in the
+        # ChildAlgorithms in Python are marked as children but their output is in the
         # ADS meaning we cannot just set DataItem properties by value. At the moment
         # they are just set with strings 
         if isinstance(value, _kernel.DataItem):

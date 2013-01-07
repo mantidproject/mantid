@@ -77,23 +77,23 @@ void NormaliseToUnity::exec()
   MatrixWorkspace_sptr localworkspace = getProperty("InputWorkspace");
 
   // Sum up all the wavelength bins
-  IAlgorithm_sptr integrateAlg = createSubAlgorithm("Integration");
+  IAlgorithm_sptr integrateAlg = createChildAlgorithm("Integration");
   integrateAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", localworkspace);
   integrateAlg->setProperty<double>("RangeLower", m_MinRange);
   integrateAlg->setProperty<double>("RangeUpper", m_MaxRange);
   integrateAlg->setProperty<int>("StartWorkspaceIndex", m_MinSpec);
   integrateAlg->setProperty<int>("EndWorkspaceIndex", m_MaxSpec);
   integrateAlg->setProperty<bool>("IncludePartialBins", incPartBins);
-  integrateAlg->executeAsSubAlg();
+  integrateAlg->executeAsChildAlg();
   progress.report("Normalising to unity");
 
   MatrixWorkspace_sptr integrated = integrateAlg->getProperty("OutputWorkspace");
 
   //Sum all the spectra of the integrated workspace
-  IAlgorithm_sptr sumAlg = createSubAlgorithm("SumSpectra");
+  IAlgorithm_sptr sumAlg = createChildAlgorithm("SumSpectra");
   sumAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integrated);
   sumAlg->setProperty<bool>("IncludeMonitors", keepMonitors);
-  sumAlg->executeAsSubAlg();
+  sumAlg->executeAsChildAlg();
   progress.report("Normalising to unity");
 
   MatrixWorkspace_sptr summed = sumAlg->getProperty("OutputWorkspace");

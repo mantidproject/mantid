@@ -127,7 +127,7 @@ void CheckWorkspacesMatch::processGroups(boost::shared_ptr<API::WorkspaceGroup> 
   for( size_t i = 0; i < totalNum; ++i )
   {
     // We should use an algorithm for each so that the output properties are reset properly
-    Algorithm_sptr checker =  this->createSubAlgorithm(this->name(), progressFraction*(double)i, progressFraction*(double)(i+1), false, this->version());
+    Algorithm_sptr checker =  this->createChildAlgorithm(this->name(), progressFraction*(double)i, progressFraction*(double)(i+1), false, this->version());
     checker->setPropertyValue("Workspace1", namesOne[i]);
     checker->setPropertyValue("Workspace2", namesTwo[i]);
     for( size_t j = 0; j < numNonDefault; ++j )
@@ -782,12 +782,12 @@ void CheckWorkspacesMatch::doMDComparison(Workspace_sptr w1, Workspace_sptr w2)
   mdws1 = boost::dynamic_pointer_cast<IMDWorkspace>(w1);
   mdws2 = boost::dynamic_pointer_cast<IMDWorkspace>(w2);
 
-  IAlgorithm_sptr alg = this->createSubAlgorithm("CompareMDWorkspaces");
+  IAlgorithm_sptr alg = this->createChildAlgorithm("CompareMDWorkspaces");
   alg->setProperty<IMDWorkspace_sptr>("Workspace1", mdws1);
   alg->setProperty<IMDWorkspace_sptr>("Workspace2", mdws2);
   const double tolerance = getProperty("Tolerance");
   alg->setProperty("Tolerance", tolerance);
-  alg->executeAsSubAlg();
+  alg->executeAsChildAlg();
   bool doesMatch = alg->getProperty("Equals");
   std::string algResult = alg->getProperty("Result");
   if (!doesMatch)

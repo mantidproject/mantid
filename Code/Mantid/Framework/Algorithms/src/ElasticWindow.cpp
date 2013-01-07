@@ -64,7 +64,7 @@ void ElasticWindow::exec()
   if ( ! ( ( enR2S == enR2E ) && ( enR2S == EMPTY_DBL() ) ) )
   {
     // ... FlatBackground, Minus, Integration...
-    IAlgorithm_sptr flatBG = createSubAlgorithm("FlatBackground");
+    IAlgorithm_sptr flatBG = createChildAlgorithm("FlatBackground");
     flatBG->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
     flatBG->setProperty<double>("StartX", enR2S);
     flatBG->setProperty<double>("EndX", enR2E);
@@ -74,7 +74,7 @@ void ElasticWindow::exec()
 
     MatrixWorkspace_sptr flatBGws = flatBG->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr integ = createSubAlgorithm("Integration");
+    IAlgorithm_sptr integ = createChildAlgorithm("Integration");
     integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", flatBGws);
     integ->setProperty<double>("RangeLower", enR1S);
     integ->setProperty<double>("RangeUpper", enR1E);
@@ -86,7 +86,7 @@ void ElasticWindow::exec()
   else
   {
     // ... Just Integration ...
-    IAlgorithm_sptr integ = createSubAlgorithm("Integration");
+    IAlgorithm_sptr integ = createChildAlgorithm("Integration");
     integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
     integ->setProperty<double>("RangeLower", enR1S);
     integ->setProperty<double>("RangeUpper", enR1E);
@@ -97,7 +97,7 @@ void ElasticWindow::exec()
   }
 
   // ... ConvertSpectrumAxis (MomentumTransfer) ...
-  IAlgorithm_sptr csaQ = createSubAlgorithm("ConvertSpectrumAxis");
+  IAlgorithm_sptr csaQ = createChildAlgorithm("ConvertSpectrumAxis");
   csaQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
   csaQ->setPropertyValue("Target", "MomentumTransfer");
   csaQ->setPropertyValue("EMode", "Indirect");
@@ -105,7 +105,7 @@ void ElasticWindow::exec()
   csaQ->execute();
   MatrixWorkspace_sptr csaQws = csaQ->getProperty("OutputWorkspace");
   // ... ConvertSpectrumAxis (Q2) ...
-  IAlgorithm_sptr csaQ2 = createSubAlgorithm("ConvertSpectrumAxis");
+  IAlgorithm_sptr csaQ2 = createChildAlgorithm("ConvertSpectrumAxis");
   csaQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
   csaQ2->setPropertyValue("Target", "QSquared");
   csaQ2->setPropertyValue("EMode", "Indirect");
@@ -114,13 +114,13 @@ void ElasticWindow::exec()
   MatrixWorkspace_sptr csaQ2ws = csaQ2->getProperty("OutputWorkspace");
 
   // ... Transpose A ...
-  IAlgorithm_sptr tranQ = createSubAlgorithm("Transpose");
+  IAlgorithm_sptr tranQ = createChildAlgorithm("Transpose");
   tranQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace",csaQws);
   tranQ->setPropertyValue("OutputWorkspace", "outQ");
   tranQ->execute();
   outputQ = tranQ->getProperty("OutputWorkspace");
   // ... Transpose B ...
-  IAlgorithm_sptr tranQ2 = createSubAlgorithm("Transpose");
+  IAlgorithm_sptr tranQ2 = createChildAlgorithm("Transpose");
   tranQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace",csaQ2ws);
   tranQ2->setPropertyValue("OutputWorkspace", "outQSquared");
   tranQ2->execute();

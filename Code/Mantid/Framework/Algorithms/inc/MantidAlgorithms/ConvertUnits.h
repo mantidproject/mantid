@@ -88,7 +88,7 @@ private:
   /// Convert the workspace units using TOF as an intermediate step in the conversion
   void convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS);
 
-  // Calls Rebin as a sub-algorithm to align the bins of the output workspace
+  // Calls Rebin as a Child Algorithm to align the bins of the output workspace
   API::MatrixWorkspace_sptr alignBins(const API::MatrixWorkspace_sptr workspace);
   const std::vector<double> calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const;
 

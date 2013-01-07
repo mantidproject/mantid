@@ -198,14 +198,14 @@ void AlignDetectors::exec()
   if (!calFileName.empty())
   {
     // Load the .cal file
-    IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile");
+    IAlgorithm_sptr alg = createChildAlgorithm("LoadCalFile");
     alg->setPropertyValue("CalFilename", calFileName);
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty<bool>("MakeGroupingWorkspace", false);
     alg->setProperty<bool>("MakeOffsetsWorkspace", true);
     alg->setProperty<bool>("MakeMaskWorkspace", false);
     alg->setPropertyValue("WorkspaceName", "temp");
-    alg->executeAsSubAlg();
+    alg->executeAsChildAlg();
     offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
   }
 

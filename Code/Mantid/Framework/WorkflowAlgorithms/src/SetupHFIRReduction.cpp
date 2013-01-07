@@ -527,7 +527,7 @@ void SetupHFIRReduction::exec()
   const double wavelength = getProperty("Wavelength");
   const double wavelengthSpread = getProperty("WavelengthSpread");
 
-  IAlgorithm_sptr loadAlg = createSubAlgorithm("HFIRLoad");
+  IAlgorithm_sptr loadAlg = createChildAlgorithm("HFIRLoad");
   if (!isEmpty(sdd)) loadAlg->setProperty("SampleDetectorDistance", sdd);
   if (!isEmpty(sddOffset)) loadAlg->setProperty("SampleDetectorDistanceOffset", sddOffset);
   if (!isEmpty(wavelength))
@@ -562,7 +562,7 @@ void SetupHFIRReduction::exec()
     {
       const double beamRadius = getProperty("BeamRadius");
 
-      IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
+      IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
       ctrAlg->setProperty("Filename", beamCenterFile);
       ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeamMethod);
       if (!isEmpty(beamRadius)) ctrAlg->setProperty("BeamRadius", beamRadius);
@@ -581,7 +581,7 @@ void SetupHFIRReduction::exec()
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
   if (darkCurrentFile.size() > 0)
   {
-    IAlgorithm_sptr darkAlg = createSubAlgorithm("HFIRDarkCurrentSubtraction");
+    IAlgorithm_sptr darkAlg = createChildAlgorithm("HFIRDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
     darkAlg->setProperty("OutputDarkCurrentWorkspace", "");
     darkAlg->setPropertyValue("ReductionProperties", reductionManagerName);
@@ -591,7 +591,7 @@ void SetupHFIRReduction::exec()
   }
 
   // Store default dark current algorithm
-  IAlgorithm_sptr darkDefaultAlg = createSubAlgorithm("HFIRDarkCurrentSubtraction");
+  IAlgorithm_sptr darkDefaultAlg = createChildAlgorithm("HFIRDarkCurrentSubtraction");
   darkDefaultAlg->setProperty("OutputDarkCurrentWorkspace", "");
   darkDefaultAlg->setPropertyValue("ReductionProperties", reductionManagerName);
   algProp = new AlgorithmProperty("DefaultDarkCurrentAlgorithm");
@@ -603,7 +603,7 @@ void SetupHFIRReduction::exec()
   const bool isTubeDetector = getProperty("DetectorTubes");
   if (solidAngleCorrection)
   {
-    IAlgorithm_sptr solidAlg = createSubAlgorithm("SANSSolidAngleCorrection");
+    IAlgorithm_sptr solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
     solidAlg->setProperty("DetectorTubes", isTubeDetector);
     algProp = new AlgorithmProperty("SANSSolidAngleCorrection");
     algProp->setValue(solidAlg->toString());
@@ -614,7 +614,7 @@ void SetupHFIRReduction::exec()
   const std::string normalization = getProperty("Normalisation");
   if (!boost::contains(normalization, "None"))
   {
-    IAlgorithm_sptr normAlg = createSubAlgorithm("HFIRSANSNormalise");
+    IAlgorithm_sptr normAlg = createChildAlgorithm("HFIRSANSNormalise");
     normAlg->setProperty("NormalisationType", normalization);
     algProp = new AlgorithmProperty("NormaliseAlgorithm");
     algProp->setValue(normAlg->toString());
@@ -632,7 +632,7 @@ void SetupHFIRReduction::exec()
   const double thickness = getProperty("SampleThickness");
   if (!isEmpty(thickness))
   {
-    IAlgorithm_sptr thickAlg = createSubAlgorithm("NormaliseByThickness");
+    IAlgorithm_sptr thickAlg = createChildAlgorithm("NormaliseByThickness");
     thickAlg->setProperty("SampleThickness", thickness);
 
     algProp = new AlgorithmProperty("GeometryAlgorithm");
@@ -645,7 +645,7 @@ void SetupHFIRReduction::exec()
   const std::string maskEdges = getPropertyValue("MaskedEdges");
   const std::string maskSide = getProperty("MaskedSide");
 
-  IAlgorithm_sptr maskAlg = createSubAlgorithm("HFIRSANSMask");
+  IAlgorithm_sptr maskAlg = createChildAlgorithm("HFIRSANSMask");
   // The following is broken, try PropertyValue
   maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
   maskAlg->setPropertyValue("MaskedEdges", maskEdges);
@@ -660,7 +660,7 @@ void SetupHFIRReduction::exec()
   {
     const double absScaleFactor = getProperty("AbsoluteScalingFactor");
 
-    IAlgorithm_sptr absAlg = createSubAlgorithm("SANSAbsoluteScale");
+    IAlgorithm_sptr absAlg = createChildAlgorithm("SANSAbsoluteScale");
     absAlg->setProperty("Method", absScaleMethod);
     absAlg->setProperty("ScalingFactor", absScaleFactor);
     absAlg->setPropertyValue("ReductionProperties", reductionManagerName);
@@ -675,7 +675,7 @@ void SetupHFIRReduction::exec()
     const double attTrans = getProperty("AbsoluteScalingAttenuatorTrans");
     const bool applySensitivity = getProperty("AbsoluteScalingApplySensitivity");
 
-    IAlgorithm_sptr absAlg = createSubAlgorithm("SANSAbsoluteScale");
+    IAlgorithm_sptr absAlg = createChildAlgorithm("SANSAbsoluteScale");
     absAlg->setProperty("Method", absScaleMethod);
     absAlg->setProperty("ReferenceDataFilename", absRefFile);
     absAlg->setProperty("BeamstopDiameter", beamDiam);
@@ -697,7 +697,7 @@ void SetupHFIRReduction::exec()
     const std::string n_subpix = getPropertyValue("NumberOfSubpixels");
     const bool err_weighting = getProperty("ErrorWeighting");
 
-    IAlgorithm_sptr iqAlg = createSubAlgorithm("SANSAzimuthalAverage1D");
+    IAlgorithm_sptr iqAlg = createChildAlgorithm("SANSAzimuthalAverage1D");
     iqAlg->setPropertyValue("Binning", binning);
     iqAlg->setPropertyValue("NumberOfBins", n_bins);
     iqAlg->setProperty("LogBinning", log_binning);
@@ -715,7 +715,7 @@ void SetupHFIRReduction::exec()
   if (do2DReduction)
   {
     const std::string n_bins = getPropertyValue("IQ2DNumberOfBins");
-    IAlgorithm_sptr iqAlg = createSubAlgorithm("EQSANSQ2D");
+    IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSQ2D");
     iqAlg->setPropertyValue("NumberOfBins", n_bins);
     algProp = new AlgorithmProperty("IQXYAlgorithm");
     algProp->setValue(iqAlg->toString());
@@ -740,7 +740,7 @@ void SetupHFIRReduction::setupSensitivity(boost::shared_ptr<PropertyManager> red
     const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
     const double sensitivityBeamCenterY = getProperty("SensitivityBeamCenterY");
 
-    IAlgorithm_sptr effAlg = createSubAlgorithm("SANSSensitivityCorrection");
+    IAlgorithm_sptr effAlg = createChildAlgorithm("SANSSensitivityCorrection");
     effAlg->setProperty("Filename", sensitivityFile);
     effAlg->setProperty("UseSampleDC", useSampleDC);
     effAlg->setProperty("DarkCurrentFile", sensitivityDarkCurrentFile);
@@ -766,7 +766,7 @@ void SetupHFIRReduction::setupSensitivity(boost::shared_ptr<PropertyManager> red
       bool useDirectBeam = boost::iequals(centerMethod, "DirectBeam");
       if (beamCenterFile.size()>0)
        {
-         IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
+         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
          ctrAlg->setProperty("Filename", beamCenterFile);
          ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
          ctrAlg->setProperty("PersistentCorrection", false);
@@ -811,7 +811,7 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
     const double transError = getProperty("BckTransmissionError");
     if (!isEmpty(transValue) && !isEmpty(transError))
     {
-      IAlgorithm_sptr transAlg = createSubAlgorithm("ApplyTransmissionCorrection");
+      IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
       transAlg->setProperty("TransmissionValue", transValue);
       transAlg->setProperty("TransmissionError", transError);
       transAlg->setProperty("ThetaDependent", bckThetaDependentTrans);
@@ -833,7 +833,7 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
     const double beamY = getProperty("BckTransmissionBeamCenterY");
     const bool thetaDependentTrans = getProperty("BckThetaDependentTransmission");
 
-    IAlgorithm_sptr transAlg = createSubAlgorithm("SANSDirectBeamTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("SANSDirectBeamTransmission");
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
@@ -850,7 +850,7 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
       const std::string beamCenterFile = getProperty("BckTransmissionBeamCenterFile");
       if (beamCenterFile.size()>0)
        {
-         IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
+         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
          ctrAlg->setProperty("Filename", beamCenterFile);
          ctrAlg->setProperty("UseDirectBeamMethod", true);
          ctrAlg->setProperty("PersistentCorrection", false);
@@ -881,7 +881,7 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
     const double spreaderTrError = getProperty("BckSpreaderTransmissionError");
     const bool thetaDependentTrans = getProperty("BckThetaDependentTransmission");
 
-    IAlgorithm_sptr transAlg = createSubAlgorithm("SANSBeamSpreaderTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("SANSBeamSpreaderTransmission");
     transAlg->setProperty("SampleSpreaderFilename", sampleSpread);
     transAlg->setProperty("DirectSpreaderFilename", directSpread);
     transAlg->setProperty("SampleScatteringFilename", sampleScatt);
@@ -912,7 +912,7 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
     const double transError = getProperty("TransmissionError");
     if (!isEmpty(transValue) && !isEmpty(transError))
     {
-      IAlgorithm_sptr transAlg = createSubAlgorithm("ApplyTransmissionCorrection");
+      IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
       transAlg->setProperty("TransmissionValue", transValue);
       transAlg->setProperty("TransmissionError", transError);
       transAlg->setProperty("ThetaDependent", thetaDependentTrans);
@@ -935,7 +935,7 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
     const double beamY = getProperty("TransmissionBeamCenterY");
     const std::string centerMethod = getPropertyValue("TransmissionBeamCenterMethod");
 
-    IAlgorithm_sptr transAlg = createSubAlgorithm("SANSDirectBeamTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("SANSDirectBeamTransmission");
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
@@ -952,7 +952,7 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
       const std::string beamCenterFile = getProperty("TransmissionBeamCenterFile");
       if (beamCenterFile.size()>0)
        {
-         IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
+         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
          ctrAlg->setProperty("Filename", beamCenterFile);
          ctrAlg->setProperty("UseDirectBeamMethod", true);
          ctrAlg->setProperty("PersistentCorrection", false);
@@ -981,7 +981,7 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
     const double spreaderTrValue = getProperty("SpreaderTransmissionValue");
     const double spreaderTrError = getProperty("SpreaderTransmissionError");
 
-    IAlgorithm_sptr transAlg = createSubAlgorithm("SANSBeamSpreaderTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("SANSBeamSpreaderTransmission");
     transAlg->setProperty("SampleSpreaderFilename", sampleSpread);
     transAlg->setProperty("DirectSpreaderFilename", directSpread);
     transAlg->setProperty("SampleScatteringFilename", sampleScatt);

@@ -203,9 +203,9 @@ namespace MDEvents
     m_targWSDescr.setLorentsCorr(false);
 
     // generate the detectors table
-    Mantid::API::Algorithm_sptr childAlg = createSubAlgorithm("PreprocessDetectorsToMD",0.,.5);
+    Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD",0.,.5);
     childAlg->setProperty("InputWorkspace",wksp);
-    childAlg->executeAsSubAlg();
+    childAlg->executeAsChildAlg();
 
     DataObjects::TableWorkspace_sptr table = childAlg->getProperty("OutputWorkspace");
     if(!table)

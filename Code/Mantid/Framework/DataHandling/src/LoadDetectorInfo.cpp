@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -433,15 +434,7 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
     // The sample position may not be at 0,0,0
     newPos += m_samplePos;
 
-    IComponent_const_sptr parent = det->getParent();
-    if (parent)
-    {
-      newPos -= parent->getPos();
-      Quat rot = parent->getRotation();
-      rot.inverse();
-      rot.rotate(newPos);
-    }
-    m_pmap->addV3D(det->getComponentID(),"pos",newPos);
+    ComponentHelper::moveComponent(*det, *m_pmap, newPos, ComponentHelper::Absolute);
   }
 
 

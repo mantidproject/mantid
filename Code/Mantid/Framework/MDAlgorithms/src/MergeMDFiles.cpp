@@ -191,11 +191,11 @@ namespace MDAlgorithms
 //    // Save the empty WS and turn it into a file-backed MDEventWorkspace
 //    if (!outputFile.empty())
 //    {
-//      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.01, 0.05);
+//      IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD" ,0.01, 0.05);
 //      saver->setProperty("InputWorkspace", outIWS);
 //      saver->setPropertyValue("Filename", outputFile);
 //      saver->setProperty("MakeFileBacked", true);
-//      saver->executeAsSubAlg();
+//      saver->executeAsChildAlg();
 //    }
 //
 //    // Complete the file-back-end creation.
@@ -371,11 +371,11 @@ namespace MDAlgorithms
     // Convert the output workspace to file-backed
     if (!outputFile.empty())
     {
-      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.05, 0.10, true);
+      IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD" ,0.05, 0.10, true);
       saver->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws) );
       saver->setPropertyValue("Filename", outputFile);
       saver->setProperty("MakeFileBacked", true);
-      saver->executeAsSubAlg();
+      saver->executeAsChildAlg();
     }
     // For the output
     outIWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
@@ -684,10 +684,10 @@ namespace MDAlgorithms
     if (!outputFile.empty())
     {
       g_log.notice() << "Starting SaveMD to update the file back-end." << std::endl;
-      IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.9, 1.00);
+      IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD" ,0.9, 1.00);
       saver->setProperty("InputWorkspace", outIWS);
       saver->setProperty("UpdateFileBackEnd", true);
-      saver->executeAsSubAlg();
+      saver->executeAsChildAlg();
     }
 
     g_log.information() << overallTime << " to run SaveMD." << std::endl;
@@ -706,13 +706,13 @@ namespace MDAlgorithms
     std::string firstFile = m_filenames[0];
 
     // Start by loading the first file but just the box structure, no events, and not file-backed
-    IAlgorithm_sptr loader = createSubAlgorithm("LoadMD", 0.0, 0.05, false);
+    IAlgorithm_sptr loader = createChildAlgorithm("LoadMD", 0.0, 0.05, false);
     loader->setPropertyValue("Filename", firstFile);
     loader->setProperty("MetadataOnly", false);
     loader->setProperty("BoxStructureOnly", true);
     loader->setProperty("FileBackEnd", false);
     loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace") );
-    loader->executeAsSubAlg();
+    loader->executeAsChildAlg();
     IMDWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
 
     // Call the templated method

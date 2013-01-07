@@ -77,6 +77,7 @@ protected:
   void saveMaskingToFile(bool invertMask = false);
   std::string generateMaskWorkspaceName(bool temp = false) const;
   void enableApply(bool on);
+  void enableClear(bool on);
   void setSelectActivity();
 
   /// Is it used?

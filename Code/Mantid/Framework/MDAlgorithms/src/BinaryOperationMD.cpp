@@ -129,10 +129,10 @@ namespace MDAlgorithms
     else
     {
       // C = A + B. -> So first we clone A (lhs) into C
-      IAlgorithm_sptr clone = this->createSubAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+      IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
       clone->setProperty("InputWorkspace", m_lhs);
       clone->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-      clone->executeAsSubAlg();
+      clone->executeAsChildAlg();
       m_out = clone->getProperty("OutputWorkspace");
     }
 

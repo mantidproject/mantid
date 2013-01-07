@@ -32,9 +32,9 @@ To determine if a file contains data from more than one period the field ''switc
 If this value is greater than one it is taken to be the number of periods, <math>N_p</math> of the data.
 In this case the <math>N_s</math> spectra in the ''histogram_data'' field are split with <math>N_s/N_p</math> assigned to each period.
 
-===Subalgorithms used===
+===ChildAlgorithms used===
 
-The subalgorithms used by LoadMuonNexus are:
+The ChildAlgorithms used by LoadMuonNexus are:
 * LoadMuonLog - this reads log information from the Nexus file and uses it to create TimeSeriesProperty entries in the workspace.
 * LoadInstrument - this algorithm looks for an XML description of the instrument and if found reads it.
 * LoadIntstrumentFromNexus - this is called if the normal LoadInstrument fails. As the Nexus file has limited instrument data, this only populates a few fields.
@@ -316,7 +316,7 @@ namespace Mantid
 
         if (period == 0)
         {
-          // Only run the sub-algorithms once
+          // Only run the Child Algorithms once
           loadRunDetails(localWorkspace);
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
@@ -649,13 +649,13 @@ namespace Mantid
 
     }
 
-    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
+    /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromNexus)
     void LoadMuonNexus::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
 
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
         loadInst->setPropertyValue("InstrumentName", m_instrument_name);
@@ -665,11 +665,11 @@ namespace Mantid
       }
       catch( std::invalid_argument&)
       {
-        g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
       }
       catch (std::runtime_error&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
       }
 
       // If loading instrument definition file fails, run LoadInstrumentFromNexus instead
@@ -682,15 +682,15 @@ namespace Mantid
       }
     }
 
-    /// Run LoadInstrumentFromNexus as a sub-algorithm (only if loading from instrument definition file fails)
+    /// Run LoadInstrumentFromNexus as a Child Algorithm (only if loading from instrument definition file fails)
     void LoadMuonNexus::runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr localWorkspace)
     {
       g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
         << "the instrument from nexus data file.\n";
 
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromNexus");
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrumentFromNexus");
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       bool executionSuccessful(true);
       try
       {
@@ -700,19 +700,19 @@ namespace Mantid
       }
       catch( std::invalid_argument&)
       {
-        g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
         executionSuccessful = false;
       }
       catch (std::runtime_error&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
         executionSuccessful = false;
       }
 
       if ( !executionSuccessful ) g_log.error("No instrument definition loaded");      
     }
 
-    /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
+    /// Run the LoadMappingTable Child Algorithm to fill the SpectraToDetectorMap
     void LoadMuonNexus::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace)
     {
       NXRoot root(m_filename);
@@ -727,30 +727,30 @@ namespace Mantid
       localWorkspace->replaceSpectraMap(new API::SpectraDetectorMap(det.get(),det.get(),ndet));
     }
 
-    /// Run the LoadLog sub-algorithm
+    /// Run the LoadLog Child Algorithm
     void LoadMuonNexus::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      IAlgorithm_sptr loadLog = createSubAlgorithm("LoadMuonLog");
+      IAlgorithm_sptr loadLog = createChildAlgorithm("LoadMuonLog");
       // Pass through the same input filename
       loadLog->setPropertyValue("Filename",m_filename);
       // Set the workspace property to be the same one filled above
       loadLog->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
         loadLog->execute();
       }
       catch (std::runtime_error&)
       {
-        g_log.error("Unable to successfully run LoadLog sub-algorithm");
+        g_log.error("Unable to successfully run LoadLog Child Algorithm");
       }
       catch (std::logic_error&)
       {
-        g_log.error("Unable to successfully run LoadLog sub-algorithm");
+        g_log.error("Unable to successfully run LoadLog Child Algorithm");
       }
 
-      if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
+      if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog Child Algorithm");
 
 
       NXRoot root(m_filename);

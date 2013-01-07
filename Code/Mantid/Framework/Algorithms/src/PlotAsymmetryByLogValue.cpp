@@ -176,7 +176,7 @@ namespace Mantid
         fn << fnBase << fnn.str() << ext;
 
         // Load a muon nexus file with auto_group set to true
-        IAlgorithm_sptr loadNexus = createSubAlgorithm("LoadMuonNexus");
+        IAlgorithm_sptr loadNexus = createChildAlgorithm("LoadMuonNexus");
         loadNexus->setPropertyValue("Filename", fn.str());
         loadNexus->setPropertyValue("OutputWorkspace","tmp"+fnn.str());
         if (m_autogroup)
@@ -315,7 +315,7 @@ namespace Mantid
       }
       if (!m_int)
       {   //  "Differential asymmetry"
-        IAlgorithm_sptr asym = createSubAlgorithm("AsymmetryCalc");
+        IAlgorithm_sptr asym = createChildAlgorithm("AsymmetryCalc");
         asym->initialize();
         asym->setProperty("InputWorkspace",ws);
         asym->setPropertyValue("OutputWorkspace","tmp");
@@ -327,7 +327,7 @@ namespace Mantid
         asym->execute();
         MatrixWorkspace_sptr asymWS = asym->getProperty("OutputWorkspace");
 
-        IAlgorithm_sptr integr = createSubAlgorithm("Integration");
+        IAlgorithm_sptr integr = createChildAlgorithm("Integration");
         integr->setProperty("InputWorkspace",asymWS);
         integr->setPropertyValue("OutputWorkspace","tmp");
         if (setX)
@@ -344,7 +344,7 @@ namespace Mantid
       else
       {   
         //  "Integral asymmetry"
-        IAlgorithm_sptr integr = createSubAlgorithm("Integration");
+        IAlgorithm_sptr integr = createChildAlgorithm("Integration");
         integr->setProperty("InputWorkspace", ws);
         integr->setPropertyValue("OutputWorkspace","tmp");
         if (setX)
@@ -355,7 +355,7 @@ namespace Mantid
         integr->execute();
         API::MatrixWorkspace_sptr intWS = integr->getProperty("OutputWorkspace");
 
-        IAlgorithm_sptr asym = createSubAlgorithm("AsymmetryCalc");
+        IAlgorithm_sptr asym = createChildAlgorithm("AsymmetryCalc");
         asym->initialize();
         asym->setProperty("InputWorkspace",intWS);
         asym->setPropertyValue("OutputWorkspace","tmp");
@@ -420,7 +420,7 @@ namespace Mantid
           tmpWS->dataE(0)[i] = (1.0+ZF*ZF)*FNORM+(1.0+ZB*ZB)*BNORM;
         }
 
-        IAlgorithm_sptr integr = createSubAlgorithm("Integration");
+        IAlgorithm_sptr integr = createChildAlgorithm("Integration");
         integr->setProperty("InputWorkspace",tmpWS);
         integr->setPropertyValue("OutputWorkspace","tmp");
         if (setX)
@@ -437,7 +437,7 @@ namespace Mantid
       else
       {   
         //  "Integral asymmetry"
-        IAlgorithm_sptr integr = createSubAlgorithm("Integration");
+        IAlgorithm_sptr integr = createChildAlgorithm("Integration");
         integr->setProperty("InputWorkspace", ws_red);
         integr->setPropertyValue("OutputWorkspace","tmp");
         if (setX)
@@ -448,7 +448,7 @@ namespace Mantid
         integr->execute();
         API::MatrixWorkspace_sptr intWS_red = integr->getProperty("OutputWorkspace");
 
-        integr = createSubAlgorithm("Integration");
+        integr = createChildAlgorithm("Integration");
         integr->setProperty("InputWorkspace", ws_green);
         integr->setPropertyValue("OutputWorkspace","tmp");
         if (setX)
@@ -478,7 +478,7 @@ namespace Mantid
      */
     void PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr& ws,const std::vector<int>& spectraList)
     {
-      API::IAlgorithm_sptr group = createSubAlgorithm("GroupDetectors");
+      API::IAlgorithm_sptr group = createChildAlgorithm("GroupDetectors");
       group->setProperty("InputWorkspace",ws);
       group->setProperty("SpectraList",spectraList);
       group->setProperty("KeepUngroupedSpectra",true);

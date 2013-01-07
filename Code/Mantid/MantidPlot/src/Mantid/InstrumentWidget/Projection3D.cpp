@@ -4,10 +4,11 @@
 #include "Projection3D.h"
 #include "GLActor.h"
 #include "GLColor.h"
-
 #include "UnwrappedCylinder.h"
 #include "UnwrappedSphere.h"
 #include "OpenGLError.h"
+#include "InputController.h"
+
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -40,7 +41,6 @@ Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int win
   m_viewport(new GLViewport),
   m_drawAxes(true),
   m_wireframe(false),
-  m_isKeyPressed(false),
   m_isLightingOn(false)
 {
 
@@ -60,6 +60,17 @@ Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int win
   m_trackball = new GLTrackball(m_viewport);
   changeColorMap();
   rootActor->invalidateDisplayLists();
+
+  // create and connect the move input controller
+  InputController3DMove* moveController = new InputController3DMove(this);
+  setInputController(MoveMode, moveController);
+  connect(moveController,SIGNAL(initTranslation(int,int)),this,SLOT(initTranslation(int,int)));
+  connect(moveController,SIGNAL(translate(int,int)),this,SLOT(translate(int,int)));
+  connect(moveController,SIGNAL(initRotation(int,int)),this,SLOT(initRotation(int,int)));
+  connect(moveController,SIGNAL(rotate(int,int)),this,SLOT(rotate(int,int)));
+  connect(moveController,SIGNAL(initZoom(int,int)),this,SLOT(initZoom(int,int)));
+  connect(moveController,SIGNAL(zoom(int,int)),this,SLOT(zoom(int,int)));
+  connect(moveController,SIGNAL(wheelZoom(int,int,int)),this,SLOT(wheelZoom(int,int,int)));
 }
 
 Projection3D::~Projection3D()
@@ -78,6 +89,7 @@ void Projection3D::resize(int w, int h)
   {
     m_viewport->resize(w,h);
     m_viewport->issueGL();
+    updateView();
   }
 }
 
@@ -115,10 +127,6 @@ void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
   
   QApplication::setOverrideCursor(Qt::WaitCursor);
 
-  if (m_viewChanged)
-  {
-    m_viewChanged = false;
-  }
   m_instrActor->draw(picking);
   OpenGLError::check("GL3DWidget::draw3D()[scene draw] ");
 
@@ -169,66 +177,6 @@ void Projection3D::drawAxes(double axis_length)const
   glVertex3d(0.0,0.0,0.0);
   glVertex3d(0.0, 0.0, axis_length);
   glEnd();
-}
-
-void Projection3D::mousePressEventMove(QMouseEvent* event)
-{
-  if (event->buttons() & Qt::MidButton)
-  {
-    m_trackball->initZoomFrom(event->x(),event->y());
-    m_isKeyPressed=true;
-    //setSceneLowResolution();
-  }
-  else if (event->buttons() & Qt::LeftButton)
-  {
-    m_trackball->initRotationFrom(event->x(),event->y());
-    m_isKeyPressed=true;
-    //setSceneLowResolution();
-  }
-  else if(event->buttons() & Qt::RightButton)
-  {
-    m_trackball->initTranslateFrom(event->x(),event->y());
-    m_isKeyPressed=true;
-    //setSceneLowResolution();
-  }
-  OpenGLError::check("GL3DWidget::mousePressEvent");
-}
-
-void Projection3D::mouseMoveEventMove(QMouseEvent* event)
-{
-    m_viewChanged = false;
-    if (event->buttons() & Qt::LeftButton)
-    {
-      m_trackball->generateRotationTo(event->x(),event->y());
-      m_trackball->initRotationFrom(event->x(),event->y());
-      m_viewChanged = true;
-    }
-    else if(event->buttons() & Qt::RightButton)
-    { //Translate
-      m_trackball->generateTranslationTo(event->x(),event->y());
-      m_trackball->initTranslateFrom(event->x(),event->y());
-      m_viewChanged = true;
-    }
-    else if(event->buttons() & Qt::MidButton)
-    { //Zoom
-      m_trackball->generateZoomTo(event->x(),event->y());
-      m_trackball->initZoomFrom(event->x(),event->y());
-      m_viewChanged = true;
-    }
-    OpenGLError::check("GL3DWidget::mouseMoveEvent");
-}
-
-void Projection3D::mouseReleaseEventMove(QMouseEvent*)
-{
-  m_isKeyPressed=false;
-  m_viewChanged = true;
-}
-
-void Projection3D::wheelEventMove(QWheelEvent* event)
-{
-  m_trackball->initZoomFrom(event->x(),event->y());
-  m_trackball->generateZoomTo(event->x(),event->y()-event->delta());
-  m_viewChanged = true;
 }
 
 void Projection3D::changeColorMap()
@@ -433,23 +381,101 @@ void Projection3D::componentSelected(Mantid::Geometry::ComponentID id)
 
 QString Projection3D::getInfoText()const
 {
-  if (m_interactionMode == PickMode)
+  if (m_interactionMode == MoveMode)
   {
-    return getPickInfoText();
+      QString text = "Mouse Buttons: Left -- Rotation, Middle -- Zoom, Right -- Translate.";
+      if( m_drawAxes )
+      {
+        text += " Axes: X = Red; Y = Green; Z = Blue";
+      }
+      return text;
   }
-  QString text = "Mouse Buttons: Left -- Rotation, Middle -- Zoom, Right -- Translate";
-  if( m_drawAxes )
-  {
-    text += "\nAxes: X = Red; Y = Green; Z = Blue";
-  }
-  return text;
+  return ProjectionSurface::getInfoText();
 }
 
-QRectF Projection3D::getSurfaceBounds()const
+/**
+  * Initialize translation movement at point on the screen.
+  * @param x :: The x screen coord clicked with the mouse to start translation.
+  * @param y :: The y screen coord clicked with the mouse to start translation.
+  */
+void Projection3D::initTranslation(int x, int y)
+{
+    m_trackball->initTranslateFrom( x, y );
+}
+
+/**
+  * Translate the view in the surface.
+  * @param x :: The x screen coord of the mouse pointer.
+  * @param y :: The y screen coord of the mouse pointer.
+  */
+void Projection3D::translate(int x, int y)
+{
+    m_trackball->generateTranslationTo( x, y );
+    m_trackball->initTranslateFrom( x, y );
+    updateView();
+}
+
+/**
+  * Initialize zooming at point on the screen.
+  * @param x :: The x screen coord of the mouse pointer.
+  * @param y :: The y screen coord of the mouse pointer.
+  */
+void Projection3D::initZoom(int x, int y)
+{
+    m_trackball->initZoomFrom( x, y );
+}
+
+/**
+  * Zoom the view in the surface.
+  * @param x :: The x screen coord of the mouse pointer.
+  * @param y :: The y screen coord of the mouse pointer.
+  */
+void Projection3D::zoom(int x, int y)
+{
+    m_trackball->generateZoomTo( x, y );
+    m_trackball->initZoomFrom( x, y );
+    updateView();
+}
+
+/**
+  * Zoom the view in the surface using the mouse wheel.
+  * @param x :: The x screen coord of the mouse pointer.
+  * @param y :: The y screen coord of the mouse pointer.
+  */
+void Projection3D::wheelZoom(int x, int y, int d)
+{
+    m_trackball->initZoomFrom( x, y );
+    m_trackball->generateZoomTo( x, y - d );
+    updateView();
+}
+
+/**
+  * Initialize rotation movement at point on the screen.
+  * @param x :: The x screen coord of the mouse pointer.
+  * @param y :: The y screen coord of the mouse pointer.
+  */
+void Projection3D::initRotation(int x, int y)
+{
+    m_trackball->initRotationFrom( x, y );
+}
+
+/**
+  * Rotate the view in the surface.
+  * @param x :: The x screen coord of the mouse pointer.
+  * @param y :: The y screen coord of the mouse pointer.
+  */
+void Projection3D::rotate(int x, int y)
+{
+    m_trackball->generateRotationTo( x, y );
+    m_trackball->initRotationFrom( x, y );
+    updateView();
+}
+
+RectF Projection3D::getSurfaceBounds()const
 {
   double xmin,xmax,ymin,ymax,zmin,zmax;
   m_viewport->getInstantProjection(xmin,xmax,ymin,ymax,zmin,zmax);
-  return QRectF(QPointF(xmin,ymin),QPointF(xmax,ymax));
+  return RectF( QPointF(xmin, ymin), QPointF(xmax, ymax) );
 }
 
 /**

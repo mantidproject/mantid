@@ -9,7 +9,7 @@ Optionally, some might want to do median on a tube, or a bank. Fot that, use the
 
 The output workspace contains a MaskWorkspace where those spectra that fail the tests are masked and those that pass them are assigned a single positive value.
 
-===Subalgorithms used===
+===ChildAlgorithms used===
 
 Uses the [[SolidAngle]], [[Integration]] and [[ConvertToDistribution]] algorithms.
 
@@ -208,13 +208,13 @@ namespace Mantid
       g_log.debug("Calculating solid angles");
       // get percentage completed estimates for now, t0 and when we've finished t1
       double t0 = m_fracDone, t1 = advanceProgress(RTGetSolidAngle);
-      IAlgorithm_sptr childAlg = createSubAlgorithm("SolidAngle", t0, t1, true);
+      IAlgorithm_sptr childAlg = createChildAlgorithm("SolidAngle", t0, t1, true);
       childAlg->setProperty( "InputWorkspace", m_inputWS);
       childAlg->setProperty( "StartWorkspaceIndex", firstSpec );
       childAlg->setProperty( "EndWorkspaceIndex", lastSpec );
       try
       {
-        // Execute the sub-algorithm, it could throw a runtime_error at this point which would abort execution
+        // Execute the Child Algorithm, it could throw a runtime_error at this point which would abort execution
         childAlg->execute();
         if ( ! childAlg->isExecuted() )
         {

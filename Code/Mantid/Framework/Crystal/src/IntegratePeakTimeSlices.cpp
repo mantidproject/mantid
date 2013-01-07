@@ -496,7 +496,7 @@ namespace Mantid
           std::vector<std::pair<double, double> > Bounds;
           std::string Constraints = AttributeValues->CalcConstraints(Bounds, CalcVars);
           IAlgorithm_sptr fit_alg;
-          fit_alg = createSubAlgorithm("Fit");
+          fit_alg = createChildAlgorithm("Fit");
           std::string fun_str = CalculateFunctionProperty_Fit();
 
           std::string SSS("   Fit string ");
@@ -524,7 +524,7 @@ namespace Mantid
             fit_alg->setProperty("Constraints", Constraints);
           try
           {
-            fit_alg->executeAsSubAlg();
+            fit_alg->executeAsChildAlg();
 
             chisqOverDOF = fit_alg->getProperty("OutputChi2overDoF");
             std::string outputStatus = fit_alg->getProperty( "OutputStatus" );
@@ -1838,8 +1838,6 @@ namespace Mantid
 
 
         IDetector_const_sptr Det = inpWkSpace->getDetector(workspaceIndex);
-        boost::shared_ptr<const RectangularDetector> Panel = boost::dynamic_pointer_cast<const RectangularDetector>
-                   (Det->getParent()->getParent());
         V3D pixPos = Det->getPos();
 
 

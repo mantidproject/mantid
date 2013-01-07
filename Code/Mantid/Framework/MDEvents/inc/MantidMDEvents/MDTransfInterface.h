@@ -21,7 +21,7 @@ namespace MDEvents
 * 2) Calculation of MD coordinates for single measurement 
 
 1) First task resolved during algorithm initialization and defines the number of dimensions, coordinate system, dimension units and ID-s etc.
-  This information is used when creating the target MD workspace or checking if existing MD workspace can be used as target for the selected subalgorithm
+  This information is used when creating the target MD workspace or checking if existing MD workspace can be used as target for the selected ChildAlgorithm
 
 2) Second task performed during conversion itself. The subclass will works with input workpsace and convert a single point of the input ws into 
    the vector of MD coordinates.  
@@ -73,7 +73,7 @@ public:
      * In addition it calculates the property-dependant coordinates, which do not depend on workspace
      *
      * @param Coord        --  vector of ND-coordinates. 
-     *                         Method calculates subalgorithm specific number of variables, 
+     *                         Method calculates ChildAlgorithm specific number of variables, 
      *                         calculated from properties and placed into specific place of the Coord vector;
      * @param n_ws_variabes -- specific number of additional variables, calculated from the workspace data
      *
@@ -82,7 +82,7 @@ public:
     virtual bool calcGenericVariables(std::vector<coord_t> &Coord, size_t n_ws_variabes)=0;
    
     /** generalizes the code to calculate Y-variables within the detector's loop of the  workspace
-     * @param Coord  -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular subalgorithm.
+     * @param Coord  -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular ChildAlgorithm.
      * @param i    -- index of external loop, identifying current y-coordinate
      * 
      * @return true   -- if all Coord are within the range requested by algorithm. false otherwise   
@@ -94,7 +94,7 @@ public:
      * @param i    -- index of external loop, identifying generic y-coordinate
      * @param j    -- index of internal loop, identifying generic x-coordinate
      * 
-     * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
+     * @param Coord  -- ChildAlgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
      *
      * @param s      -- signal value which can change or remain unchanged depending on MD coordinates or can affect MD coordinates
      * @param err    -- error value which can change or remain unchanged depending on MD coordinates or can affect MD coordinates
@@ -114,7 +114,7 @@ public:
     *  given that the input described by sinble value only
      * @param X    -- X workspace value
      * 
-     * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
+     * @param Coord  -- ChildAlgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
 
      * @param signal -- signal value which can change or remain unchanged depending on MD coordinates or can affect MD coordinates
      * @param errSq  -- squared error value which can change or remain unchanged depending on MD coordinates or can affect MD coordinates

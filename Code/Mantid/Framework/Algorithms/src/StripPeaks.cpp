@@ -3,7 +3,7 @@
 
 This algorithm is intended to automatically find all the peaks in a dataset and subtract them, leaving just the residual 'background'. 
 
-====Subalgorithms used====
+====ChildAlgorithms used====
 The [[FindPeaks]] algorithm is used to identify the peaks in the data.
 
 
@@ -86,7 +86,7 @@ void StripPeaks::exec()
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   m_maxChiSq = getProperty("MaximumChisq");
 
-  // Call FindPeaks as a sub-algorithm
+  // Call FindPeaks as a Child Algorithm
   ITableWorkspace_sptr peakslist = this->findPeaks(inputWS);
 
   MatrixWorkspace_sptr outputWS;
@@ -106,16 +106,16 @@ void StripPeaks::exec()
   setProperty("OutputWorkspace",outputWS);
 }
 
-/** Calls FindPeaks as a sub-algorithm.
+/** Calls FindPeaks as a Child Algorithm.
  *  @param WS :: The workspace to search
  *  @return list of found peaks
  */
 API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 {
-  g_log.debug("Calling FindPeaks as a sub-algorithm");
+  g_log.debug("Calling FindPeaks as a Child Algorithm");
 
   bool showlog = true;
-  API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0, 0.2, showlog);
+  API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks",0.0, 0.2, showlog);
   findpeaks->setProperty("InputWorkspace", WS);
   findpeaks->setProperty<int>("FWHM",getProperty("FWHM"));
   findpeaks->setProperty<int>("Tolerance",getProperty("Tolerance"));
@@ -142,7 +142,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   for (size_t i = 0; i < peakpositions.size(); ++i)
       g_log.debug() << peakpositions[i] << std::endl;
 
-  findpeaks->executeAsSubAlg();
+  findpeaks->executeAsChildAlg();
   return findpeaks->getProperty("PeaksList");
 }
 

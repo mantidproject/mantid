@@ -429,7 +429,7 @@ namespace CurveFitting
     g_log.information() << outss.str();
 
     // 1. Create and setup fit algorithm
-    API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", 0.0, 0.2, true);
+    API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
     fitalg->initialize();
 
     fitalg->setProperty("Function", function);

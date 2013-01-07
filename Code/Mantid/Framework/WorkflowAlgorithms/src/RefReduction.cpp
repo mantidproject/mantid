@@ -212,10 +212,10 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
       throw std::invalid_argument("SignalBackgroundPixelRange parameter should be a vector of two values");
     }
 
-    IAlgorithm_sptr convAlg = createSubAlgorithm("ConvertToMatrixWorkspace", 0.50, 0.55);
+    IAlgorithm_sptr convAlg = createChildAlgorithm("ConvertToMatrixWorkspace", 0.50, 0.55);
     convAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
     convAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
-    convAlg->executeAsSubAlg();
+    convAlg->executeAsChildAlg();
 
     dataWS = subtractBackground(dataWS, dataWS,
         peakRange[0], peakRange[1], bckRange[0], bckRange[1], low_res_min, low_res_max);
@@ -228,32 +228,32 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
   if (getProperty("PerformNormalization"))
   {
     MatrixWorkspace_sptr normWS = processNormalization();
-    IAlgorithm_sptr rebinAlg = createSubAlgorithm("RebinToWorkspace", 0.50, 0.55);
+    IAlgorithm_sptr rebinAlg = createChildAlgorithm("RebinToWorkspace", 0.50, 0.55);
     rebinAlg->setProperty<MatrixWorkspace_sptr>("WorkspaceToRebin", normWS);
     rebinAlg->setProperty<MatrixWorkspace_sptr>("WorkspaceToMatch", dataWS);
     rebinAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", normWS);
-    rebinAlg->executeAsSubAlg();
+    rebinAlg->executeAsChildAlg();
     normWS = rebinAlg->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr divAlg = createSubAlgorithm("Divide", 0.55, 0.65);
+    IAlgorithm_sptr divAlg = createChildAlgorithm("Divide", 0.55, 0.65);
     divAlg->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", dataWS);
     divAlg->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", normWS);
     divAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
-    divAlg->executeAsSubAlg();
+    divAlg->executeAsChildAlg();
 
-    IAlgorithm_sptr repAlg = createSubAlgorithm("ReplaceSpecialValues", 0.55, 0.65);
+    IAlgorithm_sptr repAlg = createChildAlgorithm("ReplaceSpecialValues", 0.55, 0.65);
     repAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
     repAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
     repAlg->setProperty("NaNValue", 0.0);
     repAlg->setProperty("NaNError", 0.0);
     repAlg->setProperty("InfinityValue", 0.0);
     repAlg->setProperty("InfinityError", 0.0);
-    repAlg->executeAsSubAlg();
+    repAlg->executeAsChildAlg();
     m_output_message += "Normalization completed\n";
   }
 
 //    // Integrate over Y
-//    IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.90, 0.95);
+//    IAlgorithm_sptr refAlg = createChildAlgorithm("RefRoi", 0.90, 0.95);
 //    refAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
 //    refAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
 //    refAlg->setProperty("NXPixel", NX_PIXELS);
@@ -264,21 +264,21 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
 //    refAlg->setProperty("XPixelMax", xmax);
 //    refAlg->setProperty("IntegrateY", integrateY);
 //    refAlg->setProperty("ScatteringAngle", theta);
-//    refAlg->executeAsSubAlg();
+//    refAlg->executeAsChildAlg();
 //    
 //    // Convert back to TOF
-//    IAlgorithm_sptr convAlgToTof = createSubAlgorithm("ConvertUnits", 0.85, 0.90);
+//    IAlgorithm_sptr convAlgToTof = createChildAlgorithm("ConvertUnits", 0.85, 0.90);
 //    convAlgToTof->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
 //    convAlgToTof->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWSTof);
 //    convAlgToTof->setProperty("Target", "TOF");
-//    convAlgToTof->executeAsSubAlg();
+//    convAlgToTof->executeAsChildAlg();
 //
 //    MatrixWorkspace_sptr outputWS2 = convAlgToTof->getProperty("OutputWorkspace");
 //    declareProperty(new WorkspaceProperty<>("OutputWorkspace_jc_" + polarization, "TOF_"+polarization, Direction::Output));
 //    setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
 
     //integrated over Y and keep in lambda scale
-    IAlgorithm_sptr refAlg1 = createSubAlgorithm("RefRoi", 0.90, 0.95);
+    IAlgorithm_sptr refAlg1 = createChildAlgorithm("RefRoi", 0.90, 0.95);
     refAlg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
     refAlg1->setProperty("NXPixel", NX_PIXELS);
     refAlg1->setProperty("NYPixel", NY_PIXELS);
@@ -288,13 +288,13 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     refAlg1->setProperty("XPixelMax", xmax);
     refAlg1->setProperty("IntegrateY", integrateY);
     refAlg1->setProperty("ScatteringAngle", theta);
-    refAlg1->executeAsSubAlg();
+    refAlg1->executeAsChildAlg();
     MatrixWorkspace_sptr outputWS2 = refAlg1->getProperty("OutputWorkspace");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace_jc_" + polarization, "Lambda_"+polarization, Direction::Output));
     setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
     
     // Conversion to Q
-  IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.90, 0.95);
+  IAlgorithm_sptr refAlg = createChildAlgorithm("RefRoi", 0.90, 0.95);
   refAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   refAlg->setProperty("NXPixel", NX_PIXELS);
   refAlg->setProperty("NYPixel", NY_PIXELS);
@@ -306,16 +306,16 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
   refAlg->setProperty("XPixelMax", xmax);
   refAlg->setProperty("IntegrateY", integrateY);
   refAlg->setProperty("ScatteringAngle", theta);
-  refAlg->executeAsSubAlg();
+  refAlg->executeAsChildAlg();
 
   MatrixWorkspace_sptr output2DWS = refAlg->getProperty("OutputWorkspace");
   std::vector<int> spectra;
   for(int i=peakRange[0]; i<peakRange[1]+1; i++) spectra.push_back(i);
 
-  IAlgorithm_sptr grpAlg = createSubAlgorithm("GroupDetectors", 0.95, 0.99);
+  IAlgorithm_sptr grpAlg = createChildAlgorithm("GroupDetectors", 0.95, 0.99);
   grpAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", output2DWS);
   grpAlg->setProperty("SpectraList", spectra);
-  grpAlg->executeAsSubAlg();
+  grpAlg->executeAsChildAlg();
 
   MatrixWorkspace_sptr outputWS = grpAlg->getProperty("OutputWorkspace");
 
@@ -396,10 +396,10 @@ MatrixWorkspace_sptr RefReduction::processNormalization()
       throw std::invalid_argument("NormBackgroundPixelRange parameter should be a vector of two values");
     }
 
-    IAlgorithm_sptr convAlg = createSubAlgorithm("ConvertToMatrixWorkspace", 0.50, 0.55);
+    IAlgorithm_sptr convAlg = createChildAlgorithm("ConvertToMatrixWorkspace", 0.50, 0.55);
     convAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", normWS);
     convAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", normWS);
-    convAlg->executeAsSubAlg();
+    convAlg->executeAsChildAlg();
 
     normWS = subtractBackground(normWS, normWS,
         peakRange[0], peakRange[1], bckRange[0], bckRange[1], low_res_min, low_res_max);
@@ -407,7 +407,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization()
         + Poco::NumberFormatter::format(bckRange[0]) + ", "
         + Poco::NumberFormatter::format(bckRange[1]) + "]\n";
   }
-  IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.6, 0.65);
+  IAlgorithm_sptr refAlg = createChildAlgorithm("RefRoi", 0.6, 0.65);
   refAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", normWS);
   refAlg->setProperty("NXPixel", NX_PIXELS);
   refAlg->setProperty("NYPixel", NY_PIXELS);
@@ -420,7 +420,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization()
   refAlg->setProperty("XPixelMin", xmin);
   refAlg->setProperty("XPixelMax", xmax);
   refAlg->setProperty("IntegrateY", integrateY);
-  refAlg->executeAsSubAlg();
+  refAlg->executeAsChildAlg();
 
   MatrixWorkspace_sptr outputNormWS = refAlg->getProperty("OutputWorkspace");
   return outputNormWS;
@@ -475,11 +475,11 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
     if (Poco::File(path).exists()) {
       g_log.notice() << "Found: " << path << std::endl;
       m_output_message += "    |Loading from " + path + "\n";
-      IAlgorithm_sptr loadAlg = createSubAlgorithm("LoadEventNexus", 0, 0.2);
+      IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
       loadAlg->setProperty("Filename", path);
       if (polarization.compare(PolStateNone)!=0)
         loadAlg->setProperty("NXentryName", polarization);
-      loadAlg->executeAsSubAlg();
+      loadAlg->executeAsChildAlg();
       rawWS = loadAlg->getProperty("OutputWorkspace");
       if (rawWS->getNumberEvents()==0)
       {
@@ -495,12 +495,12 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
           Mantid::Kernel::Property* prop = rawWS->run().getProperty("SampleDetDis");
           Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
           double sdd = dp->getStatistics().mean/1000.0;
-          IAlgorithm_sptr mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.2, 0.25);
+          IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.25);
           mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", rawWS);
           mvAlg->setProperty("ComponentName", "detector1");
           mvAlg->setProperty("Z", sdd-det_distance);
           mvAlg->setProperty("RelativePosition", true);
-          mvAlg->executeAsSubAlg();
+          mvAlg->executeAsChildAlg();
           g_log.notice() << "Ensuring correct Z position: Correction = "
               << Poco::NumberFormatter::format(sdd-det_distance)
               << " m" << std::endl;
@@ -534,11 +534,11 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   params.push_back(tofStep);
   params.push_back(tofMax);
 
-  IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin", 0.25, 0.3);
+  IAlgorithm_sptr rebinAlg = createChildAlgorithm("Rebin", 0.25, 0.3);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", rawWS);
   rebinAlg->setProperty("Params", params);
   rebinAlg->setProperty("PreserveEvents", true);
-  rebinAlg->executeAsSubAlg();
+  rebinAlg->executeAsChildAlg();
   MatrixWorkspace_sptr outputWS = rebinAlg->getProperty("OutputWorkspace");
   m_output_message += "    |TOF binning: "
       +  Poco::NumberFormatter::format(tofMin) + " to "
@@ -546,18 +546,18 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       +  Poco::NumberFormatter::format(tofStep) + " microsecs\n";
 
   // Normalise by current
-  IAlgorithm_sptr normAlg = createSubAlgorithm("NormaliseByCurrent", 0.3, 0.35);
+  IAlgorithm_sptr normAlg = createChildAlgorithm("NormaliseByCurrent", 0.3, 0.35);
   normAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
   //normAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
-  normAlg->executeAsSubAlg();
+  normAlg->executeAsChildAlg();
   outputWS = normAlg->getProperty("OutputWorkspace");
 
   // Convert to wavelength
-  IAlgorithm_sptr convAlg = createSubAlgorithm("ConvertUnits", 0.35, 0.4);
+  IAlgorithm_sptr convAlg = createChildAlgorithm("ConvertUnits", 0.35, 0.4);
   convAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
   convAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
   convAlg->setProperty("Target", "Wavelength");
-  convAlg->executeAsSubAlg();
+  convAlg->executeAsChildAlg();
 
   // Rebin in wavelength
   const MantidVec& x = outputWS->readX(0);
@@ -569,12 +569,12 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   wl_params.push_back((wlMax-wlMin)/nBins);
   wl_params.push_back(wlMax);
 
-  IAlgorithm_sptr rebinAlg2 = createSubAlgorithm("Rebin", 0.25, 0.3);
+  IAlgorithm_sptr rebinAlg2 = createChildAlgorithm("Rebin", 0.25, 0.3);
   rebinAlg2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
   rebinAlg2->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
   rebinAlg2->setProperty("Params", wl_params);
   rebinAlg2->setProperty("PreserveEvents", true);
-  rebinAlg2->executeAsSubAlg();
+  rebinAlg2->executeAsChildAlg();
 
   IEventWorkspace_sptr outputEvtWS = boost::dynamic_pointer_cast<IEventWorkspace>(outputWS);
   return outputEvtWS;
@@ -674,7 +674,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(MatrixWorkspace_sptr dataW
        ymin = bckMin;
        ymax = peakMin-1;
     }
-    IAlgorithm_sptr leftAlg = createSubAlgorithm("RefRoi", 0.6, 0.65);
+    IAlgorithm_sptr leftAlg = createChildAlgorithm("RefRoi", 0.6, 0.65);
     leftAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", rawWS);
     leftAlg->setProperty("NXPixel", NX_PIXELS);
     leftAlg->setProperty("NYPixel", NY_PIXELS);
@@ -687,7 +687,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(MatrixWorkspace_sptr dataW
     leftAlg->setProperty("XPixelMin", xmin);
     leftAlg->setProperty("XPixelMax", xmax);
     leftAlg->setProperty("IntegrateY", integrateY);
-    leftAlg->executeAsSubAlg();
+    leftAlg->executeAsChildAlg();
 
     MatrixWorkspace_sptr leftWS = leftAlg->getProperty("OutputWorkspace");
 
@@ -700,7 +700,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(MatrixWorkspace_sptr dataW
        ymin = peakMax+1;
        ymax = bckMax;
     }
-    IAlgorithm_sptr rightAlg = createSubAlgorithm("RefRoi", 0.6, 0.65);
+    IAlgorithm_sptr rightAlg = createChildAlgorithm("RefRoi", 0.6, 0.65);
     rightAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", rawWS);
     rightAlg->setProperty("NXPixel", NX_PIXELS);
     rightAlg->setProperty("NYPixel", NY_PIXELS);
@@ -713,7 +713,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(MatrixWorkspace_sptr dataW
     rightAlg->setProperty("XPixelMin", xmin);
     rightAlg->setProperty("XPixelMax", xmax);
     rightAlg->setProperty("IntegrateY", integrateY);
-    rightAlg->executeAsSubAlg();
+    rightAlg->executeAsChildAlg();
 
     MatrixWorkspace_sptr rightWS = rightAlg->getProperty("OutputWorkspace");
 
@@ -744,7 +744,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(MatrixWorkspace_sptr dataW
        ymax = bckMax;
     }
 
-    IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.6, 0.65);
+    IAlgorithm_sptr refAlg = createChildAlgorithm("RefRoi", 0.6, 0.65);
     refAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", rawWS);
     refAlg->setProperty("NXPixel", NX_PIXELS);
     refAlg->setProperty("NYPixel", NY_PIXELS);
@@ -757,7 +757,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(MatrixWorkspace_sptr dataW
     refAlg->setProperty("XPixelMin", xmin);
     refAlg->setProperty("XPixelMax", xmax);
     refAlg->setProperty("IntegrateY", integrateY);
-    refAlg->executeAsSubAlg();
+    refAlg->executeAsChildAlg();
 
     MatrixWorkspace_sptr cropWS = refAlg->getProperty("OutputWorkspace");
 

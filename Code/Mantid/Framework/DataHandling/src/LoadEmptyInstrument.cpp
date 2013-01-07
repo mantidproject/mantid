@@ -62,7 +62,7 @@ namespace Mantid
     /** Executes the algorithm. Reading in the file and creating and populating
      *  the output workspace
      * 
-     *  @throw std::runtime_error If the instrument cannot be loaded by the LoadInstrument subalgorithm
+     *  @throw std::runtime_error If the instrument cannot be loaded by the LoadInstrument ChildAlgorithm
      *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file not covered by LoadInstrument
      *  @throw std::invalid_argument If the optional properties are set to invalid values
      */
@@ -139,7 +139,7 @@ namespace Mantid
 
     }
     
-    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+    /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
     API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument()
     {
       const std::string filename = getPropertyValue("Filename");
@@ -158,12 +158,12 @@ namespace Mantid
         fullPathIDF = directoryName + "/" + filename;
       }
 
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument",0,1);
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument",0,1);
       loadInst->setPropertyValue("Filename", fullPathIDF);
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",ws);
 
-      // Now execute the sub-algorithm. Catch and log any error and stop,
+      // Now execute the Child Algorithm. Catch and log any error and stop,
       // because there is no point in continuing without a valid instrument.
       try
       {
@@ -171,7 +171,7 @@ namespace Mantid
       }
       catch (std::runtime_error& )
       {
-        g_log.error("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.error("Unable to successfully run LoadInstrument Child Algorithm");
         throw std::runtime_error("Unable to obtain valid instrument.");
       }
       

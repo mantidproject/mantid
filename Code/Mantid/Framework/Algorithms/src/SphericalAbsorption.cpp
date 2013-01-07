@@ -84,7 +84,7 @@ void SphericalAbsorption::exec()
   double m_sphRadius = getProperty("SphericalSampleRadius"); // in cm
 
 
-  IAlgorithm_sptr anvred = createSubAlgorithm("AnvredCorrection");
+  IAlgorithm_sptr anvred = createChildAlgorithm("AnvredCorrection");
   anvred->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_inputWS);
   anvred->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", correctionFactors);
   anvred->setProperty("PreserveEvents", true);
@@ -92,7 +92,7 @@ void SphericalAbsorption::exec()
   anvred->setProperty("LinearScatteringCoef", m_scattering);
   anvred->setProperty("LinearAbsorptionCoef", m_refAtten);
   anvred->setProperty("Radius", m_sphRadius);
-  anvred->executeAsSubAlg();
+  anvred->executeAsChildAlg();
   // Get back the result
   correctionFactors = anvred->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", correctionFactors);

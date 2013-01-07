@@ -1,5 +1,5 @@
 """A test for the simple API dedicated to Python algorithms. Checks
-things like sub-algorithm calls
+things like Child Algorithm calls
 """
 import unittest
 from testhelpers import run_algorithm
@@ -15,7 +15,7 @@ import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 
-class PythonAlgorithmSubAlgCallTestAlg(PythonAlgorithm):
+class PythonAlgorithmChildAlgCallTestAlg(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
@@ -28,11 +28,11 @@ class PythonAlgorithmSubAlgCallTestAlg(PythonAlgorithm):
         outputWS = api.Scale(InputWorkspace=inputWS, Factor=2.0)
         self.setProperty("OutputWorkspace", outputWS)
 
-registerAlgorithm(PythonAlgorithmSubAlgCallTestAlg)
+registerAlgorithm(PythonAlgorithmChildAlgCallTestAlg)
 """
 
 
-class PythonAlgorithmSubAlgCallTest(unittest.TestCase):
+class PythonAlgorithmChildAlgCallTest(unittest.TestCase):
     
     _alg_reg = False
     _ws_name = "test_ws"
@@ -50,23 +50,23 @@ class PythonAlgorithmSubAlgCallTest(unittest.TestCase):
         if self._ws_name2 in mtd:
             mtd.remove(self._ws_name2)
     
-    def test_subalg_call_with_output_and_input_ws_the_same_succeeds(self):
+    def test_ChildAlg_call_with_output_and_input_ws_the_same_succeeds(self):
         data = [1.0]
         api.CreateWorkspace(DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', OutputWorkspace=self._ws_name)
         try:
-            run_algorithm('PythonAlgorithmSubAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name)
+            run_algorithm('PythonAlgorithmChildAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name)
         except Exception,exc:
             self.fail("Algorithm call failed: %s" % str(exc))
 
         self.assertTrue(self._ws_name in mtd)
         self.assertAlmostEqual(mtd[self._ws_name].readY(0)[0],2.0, places=10)
 
-    def test_subalg_call_with_output_and_input_ws_different_succeeds(self):
+    def test_ChildAlg_call_with_output_and_input_ws_different_succeeds(self):
         data = [1.0]
         api.CreateWorkspace(DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', OutputWorkspace=self._ws_name)
         
         try:
-            run_algorithm('PythonAlgorithmSubAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name2)
+            run_algorithm('PythonAlgorithmChildAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name2)
         except Exception,exc:
             self.fail("Algorithm call failed: %s" % str(exc))
 

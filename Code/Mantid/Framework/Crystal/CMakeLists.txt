@@ -88,6 +88,7 @@ set ( TEST_FILES
 	CalculateUMatrixTest.h
 	CentroidPeaksTest.h
 	CombinePeaksWorkspacesTest.h
+	CreateFractionalPeaksTest.h
 	DiffPeaksWorkspacesTest.h
 	FilterPeaksTest.h
 	FindSXPeaksTest.h

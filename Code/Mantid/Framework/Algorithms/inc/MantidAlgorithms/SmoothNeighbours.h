@@ -103,7 +103,7 @@ private:
   void init();
   void exec();
 
-  void execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws);
+  void execWorkspace2D();
   void execEvent(Mantid::DataObjects::EventWorkspace_sptr ws);
   void findNeighboursRectangular();
   void findNeighboursUbiqutious();
@@ -113,6 +113,9 @@ private:
   void setWeightingStrategy(const std::string strategyName, double& cutOff);
   /// Translate the entered radius into meters.
   double translateToMeters(const std::string radiusUnits, const double& enteredRadius);
+
+  /// Build the instrument/detector setup in workspace
+  void setupNewInstrument(API::MatrixWorkspace_sptr outws);
 
   /// Pixels in the detector
   int XPixels;

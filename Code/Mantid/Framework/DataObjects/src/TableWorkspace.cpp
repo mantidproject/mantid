@@ -42,30 +42,31 @@ namespace Mantid
 
     /** @param type :: Data type of the column.
         @param name :: Column name.
-        @return True if the column was successfully created.
+        @return A shared pointer to the created column (will be null on failure).
     */
-    bool TableWorkspace::addColumn(const std::string& type, const std::string& name)
+    API::Column_sptr TableWorkspace::addColumn(const std::string& type, const std::string& name)
     {
+        API::Column_sptr c;
         if (type.empty())
         {
             g_log.error("Empty string passed as type argument of createColumn.");
-            return false;
+            return c;
         }
         if (name.empty())
         {
             g_log.error("Empty string passed as name argument of createColumn.");
-            return false;
+            return c;
         }
         // Check that there is no column with the same name.
         column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));
         if (ci != m_columns.end())
-            {
-                g_log.error()<<"Column with name "<<name<<" already exists.\n";
-                return false;
-            }
+        {
+            g_log.error()<<"Column with name "<<name<<" already exists.\n";
+            return c;
+        }
         try
         {
-            API::Column_sptr c = API::ColumnFactory::Instance().create(type);
+            c = API::ColumnFactory::Instance().create(type);
             m_columns.push_back(c);
             c->setName(name);
             resizeColumn(c.get(),rowCount());
@@ -74,9 +75,9 @@ namespace Mantid
         {
             g_log.error()<<"Column of type "<<type<<" and name "<<name<<" has not been created.\n";
             g_log.error()<<e.what()<<'\n';
-            return false;
+            return c;
         }
-        return true;
+        return c;
     }
 
     /** If count is greater than the current number of rows extra rows are added to the bottom of the table.

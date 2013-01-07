@@ -440,12 +440,12 @@ namespace Algorithms
     outputWS->mutableRun().addProperty("run_start", runstartstr);
 
     // 4. Instrument
-    IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
-    // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+    IAlgorithm_sptr loadInst= createChildAlgorithm("LoadInstrument");
+    // Now execute the Child Algorithm. Catch and log any error, but don't stop.
     loadInst->setPropertyValue("InstrumentName", eventWS->getInstrument()->getName());
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", outputWS);
     loadInst->setProperty("RewriteSpectraMap", true);
-    loadInst->executeAsSubAlg();
+    loadInst->executeAsChildAlg();
     // Populate the instrument parameters in this workspace - this works around a bug
     outputWS->populateInstrumentParameters();
 
@@ -504,7 +504,7 @@ namespace Algorithms
     longest_tof = -1;
 
     // 1. Sort the workspace (event) in the order absolute time
-    API::IAlgorithm_sptr sort1 = createSubAlgorithm("SortEvents");
+    API::IAlgorithm_sptr sort1 = createChildAlgorithm("SortEvents");
     sort1->initialize();
     sort1->setProperty("InputWorkspace", eventWS);
     sort1->setProperty("SortBy", "Pulse Time + TOF");

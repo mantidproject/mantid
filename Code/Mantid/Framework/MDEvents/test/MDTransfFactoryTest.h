@@ -36,7 +36,7 @@ void testInit()
 
 void testWrongAlgThrows()
 {
-    TS_ASSERT_THROWS(MDTransfFactory::Instance().create("Non_existing_subalgorithm"),Kernel::Exception::NotFoundError);
+    TS_ASSERT_THROWS(MDTransfFactory::Instance().create("Non_existing_ChildAlgorithm"),Kernel::Exception::NotFoundError);
 }
 
 void testGetAlg()
@@ -63,5 +63,5 @@ MDTransfFactoryTest()
 };
 
 
-#endif /* MANTID_MD_CONVERT2_MDEV_SUBALGFACTORY_TEST_H_ */
+#endif /* MANTID_MD_CONVERT2_MDEV_ChildAlgFACTORY_TEST_H_ */
 

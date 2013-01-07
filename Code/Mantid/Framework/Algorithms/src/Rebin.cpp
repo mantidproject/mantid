@@ -242,11 +242,11 @@ namespace Mantid
         if ( ! isHist )
         {
           g_log.information() << "Rebin: Converting Data to Histogram." << std::endl;
-          Mantid::API::Algorithm_sptr subAlg = createSubAlgorithm("ConvertToHistogram");
-          subAlg->initialize();
-          subAlg->setProperty("InputWorkspace", inputWS);
-          subAlg->execute();
-          inputWS = subAlg->getProperty("OutputWorkspace");
+          Mantid::API::Algorithm_sptr ChildAlg = createChildAlgorithm("ConvertToHistogram");
+          ChildAlg->initialize();
+          ChildAlg->setProperty("InputWorkspace", inputWS);
+          ChildAlg->execute();
+          inputWS = ChildAlg->getProperty("OutputWorkspace");
         }
 
         // This will be the output workspace (exact type may vary)
@@ -310,11 +310,11 @@ namespace Mantid
         if ( ! isHist )
         {
           g_log.information() << "Rebin: Converting Data back to Data Points." << std::endl;
-          Mantid::API::Algorithm_sptr subAlg = createSubAlgorithm("ConvertToPointData");
-          subAlg->initialize();
-          subAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
-          subAlg->execute();
-          outputWS = subAlg->getProperty("OutputWorkspace");
+          Mantid::API::Algorithm_sptr ChildAlg = createChildAlgorithm("ConvertToPointData");
+          ChildAlg->initialize();
+          ChildAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
+          ChildAlg->execute();
+          outputWS = ChildAlg->getProperty("OutputWorkspace");
         }
 
         // Assign it to the output workspace property

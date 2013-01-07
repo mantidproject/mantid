@@ -69,10 +69,10 @@ namespace Mantid
     /** The actions to be performed by the AlgorithmProxy on a dataset. This method is
     *  invoked for top level AlgorithmProxys by the application manager.
     *  This method invokes exec() method.
-    *  For sub-AlgorithmProxys either the execute() method or exec() method
+    *  For Child AlgorithmProxys either the execute() method or exec() method
     *  must be EXPLICITLY invoked by  the parent AlgorithmProxy.
     *
-    *  @throw runtime_error Thrown if AlgorithmProxy or sub-AlgorithmProxy cannot be executed
+    *  @throw runtime_error Thrown if AlgorithmProxy or Child AlgorithmProxy cannot be executed
     */
     bool AlgorithmProxy::execute()
     {

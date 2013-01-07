@@ -161,8 +161,8 @@ m_freezePlot(false)
   m_peakSelect = new QPushButton();
   m_peakSelect->setCheckable(true);
   m_peakSelect->setAutoExclusive(true);
-  m_peakSelect->setIcon(QIcon(":/PickTools/selection-peaks.png"));
-  m_peakSelect->setToolTip("Select single crystal peak(s)");
+  m_peakSelect->setIcon(QIcon(":/PickTools/eraser.png"));
+  m_peakSelect->setToolTip("Erase single crystal peak(s)");
 
   QHBoxLayout* toolBox = new QHBoxLayout();
   toolBox->addWidget(m_one);
@@ -588,37 +588,40 @@ void InstrumentWindowPickTab::plotTubeIntegrals(int detid)
  */
 void InstrumentWindowPickTab::setSelectionType()
 {
-  ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickMode;
+  ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickSingleMode;
   if (m_one->isChecked())
   {
     m_selectionType = Single;
     m_activeTool->setText("Tool: Pixel selection");
+    surfaceMode = ProjectionSurface::PickSingleMode;
   }
   else if (m_tube->isChecked())
   {
     m_selectionType = Tube;
     m_activeTool->setText("Tool: Tube/bank selection");
+    surfaceMode = ProjectionSurface::PickTubeMode;
   }
   else if (m_peak->isChecked())
   {
     m_selectionType = AddPeak;
     m_activeTool->setText("Tool: Add a single crystal peak");
+    surfaceMode = ProjectionSurface::AddPeakMode;
   }
   else if (m_peakSelect->isChecked())
   {
-    m_selectionType = SelectPeak;
-    m_activeTool->setText("Tool: Select crystal peak(s)");
-    surfaceMode = ProjectionSurface::DrawMode;
+    m_selectionType = ErasePeak;
+    m_activeTool->setText("Tool: Erase crystal peak(s)");
+    surfaceMode = ProjectionSurface::EraseMode;
   }
   auto surface = m_instrWindow->getSurface();
   if ( surface ) 
   {
     surface->setInteractionMode( surfaceMode );
-    m_instrWindow->updateInstrumentView();
   }
   m_plot->clearAll();
   m_plot->replot();
   setPlotCaption();
+  m_instrWindow->updateInfoText();
 }
 
 /**
@@ -630,7 +633,6 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 {
   using namespace Mantid::PhysicalConstants;
 
-  UNUSED_ARG(y)
   if (!m_peak->isChecked() ||  m_currentDetID < 0) return;
   Mantid::API::IPeaksWorkspace_sptr tw;
   std::string peakTableName = "SingleCrystalPeakTable";
@@ -693,11 +695,6 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 void InstrumentWindowPickTab::showEvent (QShowEvent *)
 {
   auto surface = getSurface();
-  if (surface)
-  {
-    surface->setInteractionMode(ProjectionSurface::PickMode);
-  }
-  //mInstrumentDisplay->setMouseTracking(true);
   // Make the state of the display view consistent with the current selection type
   setSelectionType();
 }
@@ -1124,7 +1121,7 @@ void InstrumentWindowPickTab::changedIntegrationRange(double,double)
  */
 void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
 {
-  if (m_selectionType < SelectPeak)
+  if (m_selectionType < ErasePeak)
   {
     updatePick(-1);
   }

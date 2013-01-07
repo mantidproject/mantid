@@ -157,10 +157,10 @@ namespace MDAlgorithms
     if (outWS != inWS)
     {
       // NOT in-place. So first we clone inWS into outWS
-      IAlgorithm_sptr clone = this->createSubAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+      IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
       clone->setProperty("InputWorkspace", inWS);
       clone->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-      clone->executeAsSubAlg();
+      clone->executeAsChildAlg();
       outWS = clone->getProperty("OutputWorkspace");
     }
 

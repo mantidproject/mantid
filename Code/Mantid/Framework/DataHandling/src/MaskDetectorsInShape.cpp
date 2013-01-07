@@ -2,7 +2,7 @@
 
 The algorithm places the user defined geometric shape within the virtual instrument and masks any detector detectors that in contained within it.  A detector is considered to be contained it its central location point is contained within the shape.
 
-===Subalgorithms used===
+===ChildAlgorithms used===
 MaskDetectorsInShape runs the following algorithms as child algorithms:
 * [[FindDetectorsInShape ]] - To determine the detectors that are contained in the user defined shape.
 * [[MaskDetectors]] - To mask the detectors found.
@@ -65,11 +65,11 @@ void MaskDetectorsInShape::exec()
   setProperty("Workspace", WS);
 }
 
-/// Run the FindDetectorsInShape sub-algorithm
+/// Run the FindDetectorsInShape Child Algorithm
 std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(API::MatrixWorkspace_sptr workspace,
     const std::string shapeXML, const bool includeMonitors)
 {
-  IAlgorithm_sptr alg = createSubAlgorithm("FindDetectorsInShape");
+  IAlgorithm_sptr alg = createChildAlgorithm("FindDetectorsInShape");
   alg->setPropertyValue("IncludeMonitors", includeMonitors ? "1" : "0");
   alg->setPropertyValue("ShapeXML", shapeXML);
   alg->setProperty<MatrixWorkspace_sptr> ("Workspace", workspace);
@@ -77,11 +77,11 @@ std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(API::MatrixWorksp
   {
     if (!alg->execute())
     {
-      throw std::runtime_error("FindDetectorsInShape sub-algorithm has not executed successfully\n");
+      throw std::runtime_error("FindDetectorsInShape Child Algorithm has not executed successfully\n");
     }
   } catch (std::runtime_error&)
   {
-    g_log.error("Unable to successfully execute FindDetectorsInShape sub-algorithm");
+    g_log.error("Unable to successfully execute FindDetectorsInShape Child Algorithm");
     throw;
   }
   progress(0.5);
@@ -92,18 +92,18 @@ std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(API::MatrixWorksp
 
 void MaskDetectorsInShape::runMaskDetectors(API::MatrixWorkspace_sptr workspace, const std::vector<int> detectorIds)
 {
-  IAlgorithm_sptr alg = createSubAlgorithm("MaskDetectors", 0.85, 1.0);
+  IAlgorithm_sptr alg = createChildAlgorithm("MaskDetectors", 0.85, 1.0);
   alg->setProperty<std::vector<int> > ("DetectorList", detectorIds);
   alg->setProperty<MatrixWorkspace_sptr> ("Workspace", workspace);
   try
   {
     if (!alg->execute())
     {
-      throw std::runtime_error("MaskDetectors sub-algorithm has not executed successfully\n");
+      throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully\n");
     }
   } catch (std::runtime_error&)
   {
-    g_log.error("Unable to successfully execute MaskDetectors sub-algorithm");
+    g_log.error("Unable to successfully execute MaskDetectors Child Algorithm");
     throw;
   }
   progress(1);

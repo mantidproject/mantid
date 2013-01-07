@@ -52,7 +52,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertEquals(len(table), 0)
         table.setRowCount(5)
         self.assertEquals(len(table), 5)
-        table.addColumn(type="int",name="index")
+        self.assertTrue(table.addColumn(type="int",name="index"))
         self.assertEquals(table.columnCount(), 1)
         
     def test_setcell_sets_the_correct_cell(self):

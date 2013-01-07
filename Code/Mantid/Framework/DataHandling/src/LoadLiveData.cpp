@@ -298,7 +298,7 @@ namespace DataHandling
     MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
     if (mws) algoName = "Plus";
 
-    IAlgorithm_sptr alg = this->createSubAlgorithm(algoName);
+    IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
     alg->setProperty("LHSWorkspace", m_accumWS);
     alg->setProperty("RHSWorkspace", chunkWS);
     alg->setProperty("OutputWorkspace", m_accumWS);
@@ -352,7 +352,7 @@ namespace DataHandling
     ReadLock _lock1(*m_accumWS);
     ReadLock _lock2(*chunkWS);
 
-    alg = this->createSubAlgorithm("AppendSpectra");
+    alg = this->createChildAlgorithm("AppendSpectra");
     alg->setProperty("InputWorkspace1", m_accumWS);
     alg->setProperty("InputWorkspace2", chunkWS);
     alg->setProperty("ValidateInputs", false);
@@ -381,10 +381,10 @@ namespace DataHandling
     if (!eventWS)
       return;
     CPUTimer tim;
-    Algorithm_sptr alg = this->createSubAlgorithm("SortEvents");
+    Algorithm_sptr alg = this->createChildAlgorithm("SortEvents");
     alg->setProperty("InputWorkspace", eventWS);
     alg->setPropertyValue("SortBy", "X Value");
-    alg->executeAsSubAlg();
+    alg->executeAsChildAlg();
     g_log.debug() << tim << " to perform SortEvents on " << ws->name() << std::endl;
   }
 
@@ -432,7 +432,7 @@ namespace DataHandling
     EventWorkspace_sptr processedEvent = boost::dynamic_pointer_cast<EventWorkspace>(processed);
     if (!PreserveEvents && processedEvent)
     {
-      Algorithm_sptr alg = this->createSubAlgorithm("ConvertToMatrixWorkspace");
+      Algorithm_sptr alg = this->createChildAlgorithm("ConvertToMatrixWorkspace");
       alg->setProperty("InputWorkspace", processedEvent);
       std::string outputName = "__anonymous_livedata_convert_" + this->getPropertyValue("OutputWorkspace");
       alg->setPropertyValue("OutputWorkspace", outputName);

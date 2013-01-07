@@ -408,13 +408,13 @@ void LoadEventPreNexus::runLoadInstrument(const std::string &eventfilename, Matr
   instrument = instrument.substr(0, pos);
 
   // do the actual work
-  IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst= createChildAlgorithm("LoadInstrument");
 
-  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   loadInst->setPropertyValue("InstrumentName", instrument);
   loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
   loadInst->setProperty("RewriteSpectraMap", false);
-  loadInst->executeAsSubAlg();
+  loadInst->executeAsChildAlg();
 
   // Populate the instrument parameters in this workspace - this works around a bug
   localWorkspace->populateInstrumentParameters();

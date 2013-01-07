@@ -2,6 +2,7 @@
 #include "InstrumentWindowTreeTab.h"
 #include "InstrumentTreeWidget.h"
 #include "InstrumentActor.h"
+#include "ProjectionSurface.h"
 
 InstrumentWindowTreeTab::InstrumentWindowTreeTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow)
@@ -39,6 +40,14 @@ void InstrumentWindowTreeTab::selectComponentByName(const QString &name)
 }
 
 /**
+  * Update surface when tab becomes visible.
+  */
+void InstrumentWindowTreeTab::showEvent(QShowEvent *)
+{
+    getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
+}
+
+/**
   * Clean up on becoming invisible.
   */
 void InstrumentWindowTreeTab::hideEvent(QHideEvent *)
@@ -47,6 +56,8 @@ void InstrumentWindowTreeTab::hideEvent(QHideEvent *)
   if ( actor )
   {
     actor->accept(SetAllVisibleVisitor());
+    getSurface()->updateView();
+    getSurface()->requestRedraw();
   }
 }
 

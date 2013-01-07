@@ -20,9 +20,9 @@ The log data in the Nexus file (NX_LOG sections) is loaded as TimeSeriesProperty
 Time is stored as seconds from the Unix epoch.
 Only floating point logs are stored and loaded at present.
 
-===Subalgorithms used===
+===ChildAlgorithms used===
 
-The subalgorithms used by LoadMuonNexus are:
+The ChildAlgorithms used by LoadMuonNexus are:
 * LoadInstrument - this algorithm looks for an XML description of the instrument and if found reads it.
 
 

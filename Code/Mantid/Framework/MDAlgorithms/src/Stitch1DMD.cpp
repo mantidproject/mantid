@@ -202,7 +202,7 @@ namespace MDAlgorithms
   };
 
   /**
-  Creates a 1D MDHistoWorkspace from the inputs arrays. Runs the CreateMDHistoWorkspace algorithm as a subalgorithm.
+  Creates a 1D MDHistoWorkspace from the inputs arrays. Runs the CreateMDHistoWorkspace algorithm as a ChildAlgorithm.
   @param signals: signal collection
   @param errors: error collection
   @param extents: extents collection
@@ -212,7 +212,7 @@ namespace MDAlgorithms
   */
   MDHistoWorkspace_sptr Stitch1DMD::create1DHistoWorkspace(const MantidVec& signals,const MantidVec& errors, const MantidVec& extents, const std::vector<int>& vecNBins, const std::vector<std::string> names, const std::vector<std::string>& units)
   {
-    IAlgorithm_sptr createMDHistoWorkspace = this->createSubAlgorithm("CreateMDHistoWorkspace");
+    IAlgorithm_sptr createMDHistoWorkspace = this->createChildAlgorithm("CreateMDHistoWorkspace");
     createMDHistoWorkspace->initialize();
     createMDHistoWorkspace->setProperty("SignalInput", signals);
     createMDHistoWorkspace->setProperty("ErrorInput", errors);
@@ -221,7 +221,7 @@ namespace MDAlgorithms
     createMDHistoWorkspace->setProperty("NumberOfBins", vecNBins);
     createMDHistoWorkspace->setProperty("Names", names);
     createMDHistoWorkspace->setProperty("Units", units);
-    createMDHistoWorkspace->executeAsSubAlg();
+    createMDHistoWorkspace->executeAsChildAlg();
     IMDHistoWorkspace_sptr outWS = createMDHistoWorkspace->getProperty("OutputWorkspace");
     return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
   }
@@ -396,18 +396,18 @@ namespace MDAlgorithms
     auto workspace1Overlap = this->extractOverlapAsWorkspace(scaledWorkspace1, startOverlap, endOverlap);
     auto workspace2Overlap = this->extractOverlapAsWorkspace(scaledWorkspace2, startOverlap, endOverlap);
 
-    IAlgorithm_sptr weightedMeanMD = this->createSubAlgorithm("WeightedMeanMD");
+    IAlgorithm_sptr weightedMeanMD = this->createChildAlgorithm("WeightedMeanMD");
     weightedMeanMD->initialize();
     weightedMeanMD->setProperty("LHSWorkspace", workspace1Overlap);
     weightedMeanMD->setProperty("RHSWorkspace", workspace2Overlap);
-    weightedMeanMD->executeAsSubAlg();
+    weightedMeanMD->executeAsChildAlg();
     IMDWorkspace_sptr weightedMeanOverlap = weightedMeanMD->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr plusMD = this->createSubAlgorithm("PlusMD");
+    IAlgorithm_sptr plusMD = this->createChildAlgorithm("PlusMD");
     plusMD->initialize();
     plusMD->setProperty("LHSWorkspace", scaledWorkspace1);
     plusMD->setProperty("RHSWorkspace", scaledWorkspace2);
-    plusMD->executeAsSubAlg();
+    plusMD->executeAsChildAlg();
     IMDWorkspace_sptr sum = plusMD->getProperty("OutputWorkspace");
 
     overlayOverlap(boost::dynamic_pointer_cast<MDHistoWorkspace>(sum), boost::dynamic_pointer_cast<IMDHistoWorkspace>(weightedMeanOverlap));

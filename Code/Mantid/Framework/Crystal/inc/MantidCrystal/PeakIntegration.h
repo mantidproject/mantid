@@ -60,7 +60,7 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  /// Call Gaussian as a sub-algorithm to fit the peak in a spectrum
+  /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
   void fitSpectra(const int s, double TOFPeakd, double& I, double& sigI);
   /// Read in all the input parameters
   void retrieveProperties();

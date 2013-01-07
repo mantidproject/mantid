@@ -31,7 +31,7 @@ namespace Mantid
     /** @class LoadLogsFromSNSNexus LoadLogsFromSNSNexus.h DataHandling/LoadLogsFromSNSNexus.h
 
     Load sample logs (single values and time series data) from a SNS NeXus format file.
-    This is meant to be used as a sub-algorithm to other algorithms.
+    This is meant to be used as a Child Algorithm to other algorithms.
 
     Required Properties:
     <UL>

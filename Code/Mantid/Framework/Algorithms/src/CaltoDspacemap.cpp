@@ -119,23 +119,23 @@ void CaltoDspacemap::exec()
   const std::string calFileName = getProperty("CalibrationFile");
 
   progress(0.0,"Reading calibration file");
-  IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile", 0.0, 0.5, true);
+  IAlgorithm_sptr alg = createChildAlgorithm("LoadCalFile", 0.0, 0.5, true);
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("CalFilename", calFileName);
   alg->setProperty<bool>("MakeGroupingWorkspace", false);
   alg->setProperty<bool>("MakeOffsetsWorkspace", true);
   alg->setProperty<bool>("MakeMaskWorkspace", false);
   alg->setPropertyValue("WorkspaceName", "temp");
-  alg->executeAsSubAlg();
+  alg->executeAsChildAlg();
   OffsetsWorkspace_sptr offsetsWS;
   offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
 
   progress(0.5,"Saving dspacemap file");
-  alg = createSubAlgorithm("SaveDspacemap", 0.5, 1.0, true);
+  alg = createChildAlgorithm("SaveDspacemap", 0.5, 1.0, true);
   alg->setPropertyValue("DspacemapFile", DFileName);
   alg->setProperty<int>("PadDetID", getProperty("PadDetID"));
   alg->setProperty("InputWorkspace", offsetsWS);
-  alg->executeAsSubAlg();
+  alg->executeAsChildAlg();
 }
 
 } // namespace Algorithms

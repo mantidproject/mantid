@@ -277,11 +277,11 @@ namespace Mantid
         if ((m_nDataPoints * sizeof(MDEvent<4>) * 2 / 1024) < stat.availMem())
           g_log.notice() << "You have enough memory available to load the " << m_nDataPoints << " points into memory; this would be faster than using a file back-end." << std::endl;
 
-        IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.01, 0.05, true);
+        IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD" ,0.01, 0.05, true);
         saver->setProperty("InputWorkspace", ws);
         saver->setPropertyValue("Filename", m_outputFile);
         saver->setProperty("MakeFileBacked", true);
-        saver->executeAsSubAlg();
+        saver->executeAsChildAlg();
         m_prog->resetNumSteps(100, 0.05, 0.75);
       }
       else
@@ -311,10 +311,10 @@ namespace Mantid
       if (!m_outputFile.empty())
       {
         g_log.notice() << "Starting SaveMD to update the file back-end." << std::endl;
-        IAlgorithm_sptr saver = this->createSubAlgorithm("SaveMD" ,0.76, 1.00);
+        IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD" ,0.76, 1.00);
         saver->setProperty("InputWorkspace", ws);
         saver->setProperty("UpdateFileBackEnd", true);
-        saver->executeAsSubAlg();
+        saver->executeAsChildAlg();
       }
     }
 

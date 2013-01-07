@@ -127,10 +127,10 @@ namespace MDAlgorithms
     if (outIWS != inIWS)
     {
       // Not in-place. So clone the input to the output
-      IAlgorithm_sptr clone = this->createSubAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+      IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
       clone->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(inIWS));
       clone->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-      clone->executeAsSubAlg();
+      clone->executeAsChildAlg();
       IMDWorkspace_sptr temp = clone->getProperty("OutputWorkspace");
       outIWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
     }

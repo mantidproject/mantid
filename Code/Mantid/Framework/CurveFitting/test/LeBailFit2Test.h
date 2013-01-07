@@ -37,8 +37,8 @@ public:
   static LeBailFit2Test *createSuite() { return new LeBailFit2Test(); }
   static void destroySuite( LeBailFit2Test *suite ) { delete suite; }
 
-  /*
-   * Fundamental test to calcualte 2 peak w/o background.
+  //----------------------------------------------------------------------------------------------
+  /** Fundamental test to calcualte 2 peak w/o background.
    * It is migrated from LeBailFunctionTest.test_CalculatePeakParameters
    */
   void test_cal2PeaksV2()
@@ -78,11 +78,12 @@ public:
     lbfit.setPropertyValue("InputWorkspace", "Data");
     lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
     lbfit.setPropertyValue("OutputParameterWorkspace", "PeakParameters");
+    lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
     lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
+    lbfit.setProperty("OutputPeaksWorkspace", "PeakParameterWS");
+
     lbfit.setProperty("WorkspaceIndex", 0);
     lbfit.setProperty("Function", "Calculation");
-    lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
-    lbfit.setProperty("OutputPeaksWorkspace", "PeakParameterWS");
     lbfit.setProperty("UseInputPeakHeights", true);
     lbfit.setProperty("PeakRadius", 8);
 
@@ -102,10 +103,10 @@ public:
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 5);
 
-#if 0
+    /*
     for (size_t i = 0; i < outws->dataY(0).size(); ++i)
       std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << "\t\t" << outws->dataY(1)[i] << std::endl;
-#endif
+    */
 
     // 4. Calcualte data
     double y25 = 1360.20;
@@ -116,306 +117,178 @@ public:
     TS_ASSERT_DELTA(outws->readY(1)[59], y59, 0.0001);
     TS_ASSERT_DELTA(outws->readY(1)[86], y86, 0.001);
 
-      // 5. Clean
-      AnalysisDataService::Instance().remove("Data");
-      AnalysisDataService::Instance().remove("PeakParameters");
-      AnalysisDataService::Instance().remove("Reflections");
-      AnalysisDataService::Instance().remove("CalculatedPeaks");
+    // 5. Clean
+    AnalysisDataService::Instance().remove("Data");
+    AnalysisDataService::Instance().remove("PeakParameters");
+    AnalysisDataService::Instance().remove("Reflections");
+    AnalysisDataService::Instance().remove("CalculatedPeaks");
+    AnalysisDataService::Instance().remove("PeakParameterWS");
 
-      return;
+    return;
   }
 
-
-  /*
-   * Test on peak calcualtion with non-trivial background
+  //----------------------------------------------------------------------------------------------
+  /** Test on peak calcualtion with non-trivial background
    */
   void test_cal2PeaksWithBackgroundV2()
   {
-      // 1. Create input workspace
-      API::MatrixWorkspace_sptr dataws;
-      DataObjects::TableWorkspace_sptr parameterws;
-      DataObjects::TableWorkspace_sptr hklws;
+    // 1. Create input workspace
+    API::MatrixWorkspace_sptr dataws;
+    DataObjects::TableWorkspace_sptr parameterws;
+    DataObjects::TableWorkspace_sptr hklws;
 
-      dataws = createInputDataWorkspace(1);
-      parameterws = createPeakParameterWorkspace();
-      // a) Add reflection (111) and (110)
-      double h110 = 660.0/0.0064;
-      double h111 = 1370.0/0.008;
-      std::vector<double> peakheights;
-      peakheights.push_back(h111); peakheights.push_back(h110);
-      std::vector<std::vector<int> > hkls;
-      std::vector<int> p111;
-      p111.push_back(1); p111.push_back(1); p111.push_back(1);
-      hkls.push_back(p111);
-      std::vector<int> p110;
-      p110.push_back(1); p110.push_back(1); p110.push_back(0);
-      hkls.push_back(p110);
-      hklws = createInputHKLWorkspace(hkls, peakheights);
+    dataws = createInputDataWorkspace(1);
+    parameterws = createPeakParameterWorkspace();
+    // a) Add reflection (111) and (110)
+    double h110 = 660.0/0.0064;
+    double h111 = 1370.0/0.008;
+    std::vector<double> peakheights;
+    peakheights.push_back(h111); peakheights.push_back(h110);
+    std::vector<std::vector<int> > hkls;
+    std::vector<int> p111;
+    p111.push_back(1); p111.push_back(1); p111.push_back(1);
+    hkls.push_back(p111);
+    std::vector<int> p110;
+    p110.push_back(1); p110.push_back(1); p110.push_back(0);
+    hkls.push_back(p110);
+    hklws = createInputHKLWorkspace(hkls, peakheights);
 
-      AnalysisDataService::Instance().addOrReplace("Data", dataws);
-      AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
-      AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
+    AnalysisDataService::Instance().addOrReplace("Data", dataws);
+    AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
+    AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
 
-      // 2. Initialize the algorithm
-      LeBailFit2 lbfit;
+    // 2. Initialize the algorithm
+    LeBailFit2 lbfit;
 
-      TS_ASSERT_THROWS_NOTHING(lbfit.initialize());
-      TS_ASSERT(lbfit.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(lbfit.initialize());
+    TS_ASSERT(lbfit.isInitialized());
 
-      // 3. Set properties
-      lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
-      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("OutputParameterWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
-      lbfit.setProperty("OutputPeaksWorkspace", "PeakParameterWS");
-      lbfit.setProperty("WorkspaceIndex", 0);
-      lbfit.setProperty("BackgroundType", "Polynomial");
-      /// a second order polynomial background
-      lbfit.setPropertyValue("BackgroundParameters", "101.0, 0.001");
-      lbfit.setProperty("Function", "Calculation");
-      lbfit.setProperty("UseInputPeakHeights", true);
-      lbfit.setProperty("PeakRadius", 8);
+    // 3. Set properties
+    lbfit.setPropertyValue("InputWorkspace", "Data");
+    lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
+    lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
+    lbfit.setPropertyValue("OutputParameterWorkspace", "PeakParameters");
+    lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
+    lbfit.setProperty("OutputPeaksWorkspace", "PeakParameterWS");
+    lbfit.setProperty("WorkspaceIndex", 0);
+    lbfit.setProperty("BackgroundType", "Polynomial");
+    /// a second order polynomial background
+    lbfit.setPropertyValue("BackgroundParameters", "101.0, 0.001");
+    lbfit.setProperty("Function", "Calculation");
+    lbfit.setProperty("UseInputPeakHeights", true);
+    lbfit.setProperty("PeakRadius", 8);
 
-      // 4. Run
-      TS_ASSERT_THROWS_NOTHING(lbfit.execute());
-      TS_ASSERT(lbfit.isExecuted());
+    // 4. Run
+    TS_ASSERT_THROWS_NOTHING(lbfit.execute());
+    TS_ASSERT(lbfit.isExecuted());
 
-      // 5. Get output & Test
-      DataObjects::Workspace2D_sptr outws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-                  AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
-      TS_ASSERT(outws);
+    // 5. Get output & Test
+    DataObjects::Workspace2D_sptr outws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+          AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
+    TS_ASSERT(outws);
 
-      /*
-      for (size_t i = 0; i < outws->dataY(0).size(); ++i)
-          std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << std::endl;
-          */
+    double bkgdx = outws->readX(1).back()*0.001 + 101.0;
+    TS_ASSERT_DELTA(outws->readY(1).back(), bkgdx, 1.0);
 
-      double bkgdx = outws->readX(1).back()*0.001 + 101.0;
-      TS_ASSERT_DELTA(outws->readY(1).back(), bkgdx, 1.0);
+    // 5. Clean
+    AnalysisDataService::Instance().remove("Data");
+    AnalysisDataService::Instance().remove("PeakParameters");
+    AnalysisDataService::Instance().remove("Reflections");
+    AnalysisDataService::Instance().remove("CalculatedPeaks");
+    AnalysisDataService::Instance().remove("PeakParameterWS");
 
-      // 5. Clean
-      AnalysisDataService::Instance().remove("Data");
-      AnalysisDataService::Instance().remove("PeakParameters");
-      AnalysisDataService::Instance().remove("Reflections");
-      AnalysisDataService::Instance().remove("CalculatedPeaks");
-
-      return;
+    return;
   }
 
-
-  /*
-   * Unit test on figure out peak height
-   * The test data are of reflection (932) and (852) @ TOF = 12721.91 and 12790.13
+  //----------------------------------------------------------------------------------------------
+  /** Unit test on figure out peak height
+   *  The test data are of reflection (932) and (852) @ TOF = 12721.91 and 12790.13
    */
-  void Ptest_calOverlappedPeakHeightsV2()
+  void test_calOverlappedPeakHeightsV2()
   {
-      // 1. Geneate data and Create input workspace
-      API::MatrixWorkspace_sptr dataws;
-      DataObjects::TableWorkspace_sptr parameterws;
-      DataObjects::TableWorkspace_sptr hklws;
+    // 1. Geneate data and Create input workspace
+    API::MatrixWorkspace_sptr dataws;
+    DataObjects::TableWorkspace_sptr parameterws;
+    DataObjects::TableWorkspace_sptr hklws;
 
-      //   Reflections
-      int xp932[] = {9, 3, 2};
-      std::vector<int> p932(xp932, xp932+sizeof(xp932)/sizeof(int));
-      int xp852[] = {8, 5, 2};
-      std::vector<int> p852(xp852, xp852+sizeof(xp852)/sizeof(int));
-      std::vector<std::vector<int> > hkls;
-      hkls.push_back(p932);
-      hkls.push_back(p852);
-      std::vector<double> pkheights(2, 1.0);
+    //   Reflections
+    int xp932[] = {9, 3, 2};
+    std::vector<int> p932(xp932, xp932+sizeof(xp932)/sizeof(int));
+    int xp852[] = {8, 5, 2};
+    std::vector<int> p852(xp852, xp852+sizeof(xp852)/sizeof(int));
+    std::vector<std::vector<int> > hkls;
+    hkls.push_back(p932);
+    hkls.push_back(p852);
+    std::vector<double> pkheights(2, 1.0);
 
-      dataws = createInputDataWorkspace(2);
-      std::map<std::string, double> parammodifymap;
-      parameterws = createPeakParameterWorkspace(parammodifymap, 1);
-      hklws = createInputHKLWorkspace(hkls, pkheights);
+    dataws = createInputDataWorkspace(2);
+    std::map<std::string, double> parammodifymap;
+    parameterws = createPeakParameterWorkspace(parammodifymap, 1);
+    hklws = createInputHKLWorkspace(hkls, pkheights);
 
-      AnalysisDataService::Instance().addOrReplace("Data", dataws);
-      AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
-      AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
+    AnalysisDataService::Instance().addOrReplace("Data", dataws);
+    AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
+    AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
 
-      // 2. Create LeBailFit and do the calculation
-      LeBailFit2 lbfit;
-      lbfit.initialize();
+    // 2. Create LeBailFit and do the calculation
+    LeBailFit2 lbfit;
+    lbfit.initialize();
 
-      // 3. Computation
-      // 3. Set properties
-      lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("OutputParameterWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
-      lbfit.setProperty("WorkspaceIndex", 0);
-      lbfit.setProperty("Function", "Calculation");
-      lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
-      lbfit.setProperty("UseInputPeakHeights", false);
-      lbfit.setProperty("OutputPeaksWorkspace", "PeaksParameters");
+    // 3. Computation
+    // 3. Set properties
+    lbfit.setPropertyValue("InputWorkspace", "Data");
+    lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
+    lbfit.setPropertyValue("OutputParameterWorkspace", "PeakParameters");
+    lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
+    lbfit.setProperty("WorkspaceIndex", 0);
+    lbfit.setProperty("Function", "Calculation");
+    lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
+    lbfit.setProperty("UseInputPeakHeights", false);
+    lbfit.setProperty("OutputPeaksWorkspace", "PeaksParameters");
 
-      TS_ASSERT_THROWS_NOTHING(lbfit.execute());
-      TS_ASSERT(lbfit.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(lbfit.execute());
+    TS_ASSERT(lbfit.isExecuted());
 
-      // 4. Get result
-      DataObjects::Workspace2D_sptr outputws =
-              boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
-      TS_ASSERT(outputws);
-      if (!outputws)
-      {
-          return;
-      }
-
-      TS_ASSERT_EQUALS(outputws->getNumberHistograms(), 5);
-
-      /* Output
-      for (size_t ih = 0; ih < outputws->getNumberHistograms(); ++ih)
-      {
-          std::stringstream namestream;
-          namestream << "calculated_pattern_";
-          if (ih == 0)
-          {
-              namestream << "complete";
-          }
-          else
-          {
-              namestream << "peak_" << (ih-1);
-          }
-          namestream << ".dat";
-          std::string filename = namestream.str();
-
-          std::ofstream ofile;
-          ofile.open(filename.c_str());
-          std::cout << "Write to file " << filename << std::endl;
-          for (size_t i = 0; i < outputws->dataY(ih).size(); ++i)
-              ofile << outputws->dataX(ih)[i] << "\t\t" << outputws->dataY(ih)[i] << std::endl;
-          ofile.close();
-      }
-      */
-
-      // 3. Do the calcualtion ...
-
-      // 4. Check
-      // b) peak height (can be some percent off)
-      size_t ipeak1 = 6;
-      size_t ipeak2 = 12;
-      TS_ASSERT_DELTA(outputws->dataY(0)[ipeak1], dataws->dataY(0)[ipeak1], 5.0);
-      TS_ASSERT_DELTA(outputws->dataY(0)[ipeak2], dataws->dataY(0)[ipeak2], 10.0);
-
-      // c) Table Workspace
-      DataObjects::TableWorkspace_sptr peaksws =
-              boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
-              (AnalysisDataService::Instance().retrieve("PeaksParameters"));
-      TS_ASSERT(peaksws);
-      if (peaksws)
-      {
-          size_t numrows = peaksws->rowCount();
-          for (size_t ir = 0; ir < numrows; ++ir)
-          {
-              int h, k, l;
-              double tof_h, height;
-              API::TableRow row = peaksws->getRow(ir);
-              row >> h >> k >> l >> height >> tof_h;
-              std::cout << "Peak (" << h << ", " << k << ", " << l << ") @ " << tof_h << " w/ Height = " << height << std::endl;
-          }
-      }
-
-      // -1. Clean
-      AnalysisDataService::Instance().remove("Data");
-      AnalysisDataService::Instance().remove("PeakParameters");
-      AnalysisDataService::Instance().remove("Reflections");
-      AnalysisDataService::Instance().remove("CalculatedPeaks");
-
+    // 4. Get result
+    DataObjects::Workspace2D_sptr outputws =
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
+    TS_ASSERT(outputws);
+    if (!outputws)
+    {
       return;
+    }
+
+    TS_ASSERT_EQUALS(outputws->getNumberHistograms(), 5);
+
+    // 5. Check
+    // b) peak height (can be some percent off)
+    size_t ipeak1 = 6;
+    size_t ipeak2 = 12;
+    TS_ASSERT_DELTA(outputws->dataY(1)[ipeak1], dataws->dataY(0)[ipeak1], 5.0);
+    TS_ASSERT_DELTA(outputws->dataY(1)[ipeak2], dataws->dataY(0)[ipeak2], 10.0);
+
+    // c) Table Workspace
+    DataObjects::TableWorkspace_sptr peaksws =
+        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
+        (AnalysisDataService::Instance().retrieve("PeaksParameters"));
+    TS_ASSERT(peaksws);
+
+    // -1. Clean
+    AnalysisDataService::Instance().remove("Data");
+    AnalysisDataService::Instance().remove("PeakParameters");
+    AnalysisDataService::Instance().remove("Reflections");
+    AnalysisDataService::Instance().remove("CalculatedPeaks");
+
+    return;
   }
 
-  /*
-   * This is an advanced test based on test_calOverlappedPeakHeights
-   * It will be REMOVED from unit test before commit
+  //----------------------------------------------------------------------------------------------
+  /** Fit 1 parameter value in a 2 peak pattern
+    * Due to the strongly correlated peak parameters, only 1 parameter
+    * has its value shifted from true value for unit test purpose
    */
-  void Disabled_test_calOverlappedPeakHeights2V2()
-  {
-      // FIXME : Disable this unit test before committing
-
-      // 1. Geneate data and Create input workspace
-      API::MatrixWorkspace_sptr dataws;
-      DataObjects::TableWorkspace_sptr parameterws;
-      DataObjects::TableWorkspace_sptr hklws;
-
-      // a)  Reflections
-      std::vector<std::vector<int> > hkls;
-      importReflectionTxtFile("/home/wzz/Mantid/Code/debug/unittest_multigroups_reflection.txt", hkls);
-      size_t numpeaks = hkls.size();
-      std::cout << "TestXXX Number of peaks = " << hkls.size() << std::endl;
-
-      // b) data
-      dataws = createInputDataWorkspace(3);
-
-      // c) Workspaces
-      std::vector<double> pkheights(numpeaks, 1.0);
-      parameterws = createPeakParameterWorkspace();
-      hklws = createInputHKLWorkspace(hkls, pkheights);
-
-      AnalysisDataService::Instance().addOrReplace("Data", dataws);
-      AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
-      AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
-
-      // 2. Create LeBailFit and do the calculation
-      LeBailFit2 lbfit;
-      lbfit.initialize();
-
-      // 3. Computation
-      // 3. Set properties
-      lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
-      lbfit.setProperty("WorkspaceIndex", 0);
-      lbfit.setProperty("Function", "Calculation");
-      lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
-      lbfit.setProperty("UseInputPeakHeights", false);
-
-      TS_ASSERT_THROWS_NOTHING(lbfit.execute());
-      TS_ASSERT(lbfit.isExecuted());
-
-      // 4. Get result
-      DataObjects::Workspace2D_sptr outputws =
-              boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
-      TS_ASSERT(outputws);
-      if (!outputws)
-      {
-          return;
-      }
-
-      TS_ASSERT_EQUALS(outputws->getNumberHistograms(), 3);
-
-      for (size_t ih = 0; ih < outputws->getNumberHistograms(); ++ih)
-      {
-          std::stringstream namestream;
-          namestream << "calculated_pattern_";
-          if (ih == 0)
-          {
-              namestream << "complete";
-          }
-          else
-          {
-              namestream << "peak_" << (ih-1);
-          }
-          namestream << ".dat";
-          std::string filename = namestream.str();
-
-          std::ofstream ofile;
-          ofile.open(filename.c_str());
-          std::cout << "Write to file " << filename << std::endl;
-          for (size_t i = 0; i < outputws->dataY(ih).size(); ++i)
-              ofile << outputws->dataX(ih)[i] << "\t\t" << outputws->dataY(ih)[i] << std::endl;
-          ofile.close();
-      }
-
-
-  }
-
-  /*
-   * Fit 2 (separate) peaks (Partial data)
-   */
-  void Passed_fit2PeaksV2()
+  void test_fit1Parameter()
   {
     std::string testplan("zero");
 
@@ -494,375 +367,60 @@ public:
       return;
     }
 
-    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 7);
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 9);
     if (outws->getNumberHistograms() != 4)
     {
       return;
     }
 
-    // 5. Write out result
-    // FIXME Disable this section later
-    for (size_t ifl = 0; ifl < 4; ifl ++)
-    {
-      std::stringstream ss;
-      ss << "unittest_result_file_" << ifl << ".dat";
-      std::string filename = ss.str();
-
-      cout << "Write to file " << filename << endl;
-
-      std::ofstream ofile;
-      ofile.open(filename.c_str());
-
-      for (size_t i = 0; i < outws->readY(ifl).size(); ++i)
-      {
-        ofile << outws->readX(ifl)[i] << "\t\t" << outws->readY(ifl)[i] << std::endl;
-      }
-
-      ofile.close();
-    }
-
-      // 6. Check fit result
-      DataObjects::TableWorkspace_sptr paramws =
-              boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
-              (AnalysisDataService::Instance().retrieve("PeakParameters"));
-      TS_ASSERT(paramws);
-      if (!paramws)
-      {
-          return;
-      }
-
-      TS_ASSERT_EQUALS(paramws->columnCount(), 3);
-      std::map<std::string, double> paramvalues;
-      std::map<std::string, char> paramfitstatus;
-      parseParameterTableWorkspace(paramws, paramvalues, paramfitstatus);
-
-      if (testplan.compare("zero") == 0)
-      {
-          double zero = paramvalues["Zero"];
-          TS_ASSERT_DELTA(zero, 0.0, 0.5);
-      }
-      else if (testplan.compare("alpha") == 0)
-      {
-          double alph0 = paramvalues["Alph0"];
-          TS_ASSERT_DELTA(alph0, 4.026, 1.00);
-      }
-      else if (testplan.compare("sigma") == 0)
-      {
-          double sig0 = paramvalues["Sig0"];
-          TS_ASSERT_DELTA(sig0, sqrt(17.37), 0.01);
-          double sig1 = paramvalues["Sig1"];
-          TS_ASSERT_DELTA(sig1, sqrt(9.901), 0.01);
-      }
-
-      return;
-  } 
-
-  /*
-   * Fit 2 (overlapped) peaks (Partial data)
-   */
-  void PassedDiabled_test_fitTwinPeaksV2()
-  {
-      // 0. Test Plan
-      // std::string testplan("zero");
-      std::string testplan("alpha");
-      // std::string testplan("sigma");
-
-      // 1. Geneate data and Create input workspace
-      API::MatrixWorkspace_sptr dataws;
-      DataObjects::TableWorkspace_sptr parameterws;
-      DataObjects::TableWorkspace_sptr hklws;
-
-      //   Reflections
-      int xp932[] = {9, 3, 2};
-      std::vector<int> p932(xp932, xp932+sizeof(xp932)/sizeof(int));
-      int xp852[] = {8, 5, 2};
-      std::vector<int> p852(xp852, xp852+sizeof(xp852)/sizeof(int));
-      std::vector<std::vector<int> > hkls;
-      hkls.push_back(p932);
-      hkls.push_back(p852);
-      std::vector<double> pkheights(2, 1.0);
-
-      // Data (option 2)
-      dataws = createInputDataWorkspace(2);
-
-      // b) Parameter
-      std::map<std::string, double> parammodifymap;
-      if (testplan.compare("zero") == 0)
-      {
-          /// Failed.  As 50.0 means there are no peaks be in the calculation range
-          /// FIXME Why Intensity of 2nd peak is negative!
-          parammodifymap.insert(std::make_pair("Zero", 50.0));
-      }
-      else if (testplan.compare("alpha") == 0)
-      {
-          /// Significant change in peak shape with a different alph0
-          double alph0 = 4.026;
-          double newalph0 = alph0*0.05;
-          parammodifymap.insert(std::make_pair("Alph0", newalph0));
-      }
-      else if (testplan.compare("sigma") == 0)
-      {
-          /// Sig0 and Sig1 has very large range to output good result
-          double sig1 = sqrt(9.901);
-          double newsig1 = sig1*0.1;
-          double sig0 = sqrt(127.37);
-          double newsig0 = sig0*0.1;
-          parammodifymap.insert(std::make_pair("Sig0", newsig0));
-          parammodifymap.insert(std::make_pair("Sig1", newsig1));
-      }
-      parameterws = createPeakParameterWorkspace(parammodifymap, 1);
-      hklws = createInputHKLWorkspace(hkls, pkheights);
-
-      AnalysisDataService::Instance().addOrReplace("Data", dataws);
-      AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
-      AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
-
-      // 2. Create LeBailFit and do the calculation
-      LeBailFit2 lbfit;
-      lbfit.initialize();
-
-      // 3. Set properties
-      lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("OutputParameterWorkspace", "NewPeakParameters");
-      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
-      lbfit.setProperty("WorkspaceIndex", 0);
-      lbfit.setProperty("Function", "LeBailFit");
-      lbfit.setProperty("OutputWorkspace", "FitResultWS");
-      lbfit.setProperty("OutputPeaksWorkspace", "PeakInfoWS");
-      lbfit.setProperty("PeakRadius", 8);
-
-      lbfit.execute();
-
-      // 4. Get output
-      DataObjects::Workspace2D_sptr outws =
-              boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (AnalysisDataService::Instance().retrieve("FitResultWS"));
-      TS_ASSERT(outws);
-      if (!outws)
-      {
-          return;
-      }
-
-      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 7);
-      if (outws->getNumberHistograms() != 7)
-      {
-          return;
-      }
-
-      // 5. Write out result
-      // FIXME Disable this section later
-      for (size_t ifl = 0; ifl < 4; ifl ++)
-      {
-          std::stringstream ss;
-          ss << "unittest_result_file_" << ifl << ".dat";
-          std::string filename = ss.str();
-
-          std::ofstream ofile;
-          ofile.open(filename.c_str());
-
-          for (size_t i = 0; i < outws->readY(ifl).size(); ++i)
-          {
-              ofile << outws->readX(ifl)[i] << "\t\t" << outws->readY(ifl)[i] << std::endl;
-          }
-
-          ofile.close();
-      }
-
-      // 6. Check fit result
-      DataObjects::TableWorkspace_sptr paramws =
-              boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
-              (AnalysisDataService::Instance().retrieve("NewPeakParameters"));
-      TS_ASSERT(paramws);
-      if (!paramws)
-      {
-          return;
-      }
-
-      TS_ASSERT(paramws->columnCount() > 3);
-      std::map<std::string, double> paramvalues;
-      std::map<std::string, char> paramfitstatus;
-      parseParameterTableWorkspace(paramws, paramvalues, paramfitstatus);
-
-      if (testplan.compare("zero") == 0)
-      {
-          double zero = paramvalues["Zero"];
-          TS_ASSERT_DELTA(zero, 0.0, 0.5);
-      }
-      else if (testplan.compare("alpha") == 0)
-      {
-          double alph0 = paramvalues["Alph0"];
-          TS_ASSERT_DELTA(alph0, 4.026, 1.00);
-      }
-      else if (testplan.compare("sigma") == 0)
-      {
-          double sig0 = paramvalues["Sig0"];
-          TS_ASSERT_DELTA(sig0, sqrt(17.37), 0.01);
-          double sig1 = paramvalues["Sig1"];
-          TS_ASSERT_DELTA(sig1, sqrt(9.901), 0.01);
-      }
-
-      return;
-  }
-
-
-
-  // ============================  Complate LeBailFit Test =====================
-
-  //----------------------------------------------------------------------------
-
-  /** Test a complete LeBail Fit process with background
-   * Using Run 4862 Bank 7 as the testing data
-   */
-  void NeedFile_test_fitLeBailFit_PG3Bank7V2()
-  {
-    // 1. Create input workspace
-    API::MatrixWorkspace_sptr dataws;
-    DataObjects::TableWorkspace_sptr parameterws;
-    DataObjects::TableWorkspace_sptr hklws;
-    DataObjects::TableWorkspace_sptr bkgdws;
-
-    // a)  Reflections
-    std::vector<std::vector<int> > hkls;
-    importReflectionTxtFile("/home/wzz/Mantid/Code/debug/MyTestData/pg3_4862bank7_reflection.txt", hkls);
-    size_t numpeaks = hkls.size();
-    std::cout << "[TESTx349] Nmber of (file imported) peaks = " << hkls.size() << std::endl;
-
-    // b) data
-    dataws = createInputDataWorkspace(4);
-    std::cout << "[TESTx349] Data Workspace Range: " << dataws->readX(0)[0] << ", " << dataws->readX(0).back() << std::endl;
-
-    // c) Generate TableWorkspaces
-    std::vector<double> pkheights(numpeaks, 1.0);
-    map<string, double> modmap;
-    modmap.insert(make_pair("Alph0", 5.0));
-    modmap.insert(make_pair("Zero", 40.0));
-    parameterws = createPeakParameterWorkspace(modmap, 2);
-    hklws = createInputHKLWorkspace(hkls, pkheights);
-    bkgdws = createBackgroundParameterWorksapce("/home/wzz/Mantid/Code/debug/MyTestData/pg3_4862bank7_background.dat");
-
-    AnalysisDataService::Instance().addOrReplace("Data", dataws);
-    AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
-    AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
-    AnalysisDataService::Instance().addOrReplace("BackgroundParameters", bkgdws);
-
-    // 2. Other properties
-    std::vector<double> fitregion;
-    fitregion.push_back(56198.0);
-    fitregion.push_back(151239.0);
-
-    // 3. Genearte LeBailFit algorithm and set it up
-    LeBailFit2 lbfit;
-    lbfit.initialize();
-
-    lbfit.setPropertyValue("InputWorkspace", "Data");
-    lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
-    lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
-    lbfit.setProperty("WorkspaceIndex", 0);
-    lbfit.setProperty("FitRegion", fitregion);
-    lbfit.setProperty("Function", "LeBailFit");
-    lbfit.setProperty("BackgroundType", "Polynomial");
-    lbfit.setPropertyValue("BackgroundParametersWorkspace", "BackgroundParameters");
-    lbfit.setProperty("OutputWorkspace", "FittedData");
-    lbfit.setProperty("OutputPeaksWorkspace", "FittedPeaks");
-    lbfit.setProperty("OutputParameterWorkspace", "FittedParameters");
-    lbfit.setProperty("PeakRadius", 8);
-    lbfit.setProperty("Damping", 0.4);
-    lbfit.setProperty("NumberMinimizeSteps", 0);
-
-    // 4. Execute
-    TS_ASSERT_THROWS_NOTHING(lbfit.execute());
-    TS_ASSERT(lbfit.isExecuted());
-    if (!lbfit.isExecuted())
-    {
-      return;
-    }
-
-    // 5. Exam
-    // Take the output data:
-    DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (AnalysisDataService::Instance().retrieve("FittedData"));
-    TS_ASSERT(outws);
-    if (!outws)
-      return;
-    else
-    {
-      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 8);
-    }
-
-    stringstream infoss;
-    for (size_t i = 0; i < outws->getNumberHistograms(); ++i)
-    {
-      cout << "Spectrum " << i << ": Size X = " << outws->readX(i).size() << endl;
-      cout << "Spectrum " << i << ": Size Y = " << outws->readY(i).size() << endl;
-      cout << "Spectrum " << i << ": Size Z = " << outws->readE(i).size() << endl;
-      for (size_t j = 0; j < outws->readX(i).size(); ++j)
-      {
-        infoss << outws->readX(i)[j] << outws->readY(i)[j] << outws->readE(i)[j];
-      }
-    }
-
-    return;
-
-    // Peaks
-    DataObjects::TableWorkspace_sptr peakparamws =
+    // 5. Check fit result
+    DataObjects::TableWorkspace_sptr paramws =
         boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
         (AnalysisDataService::Instance().retrieve("PeakParameters"));
-    TS_ASSERT(peakparamws);
-    if (!peakparamws)
+    TS_ASSERT(paramws);
+    if (!paramws)
     {
       return;
     }
-    else
+
+    TS_ASSERT_EQUALS(paramws->columnCount(), 3);
+    std::map<std::string, double> paramvalues;
+    std::map<std::string, char> paramfitstatus;
+    parseParameterTableWorkspace(paramws, paramvalues, paramfitstatus);
+
+    if (testplan.compare("zero") == 0)
     {
-      TS_ASSERT_EQUALS(peakparamws->rowCount(), 8);
+      double zero = paramvalues["Zero"];
+      TS_ASSERT_DELTA(zero, 0.0, 0.5);
+    }
+    else if (testplan.compare("alpha") == 0)
+    {
+      double alph0 = paramvalues["Alph0"];
+      TS_ASSERT_DELTA(alph0, 4.026, 1.00);
+    }
+    else if (testplan.compare("sigma") == 0)
+    {
+      double sig0 = paramvalues["Sig0"];
+      TS_ASSERT_DELTA(sig0, sqrt(17.37), 0.01);
+      double sig1 = paramvalues["Sig1"];
+      TS_ASSERT_DELTA(sig1, sqrt(9.901), 0.01);
     }
 
-    // Parameters
-    DataObjects::TableWorkspace_sptr instrparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
-        (AnalysisDataService::Instance().retrieve("FittedParameters"));
-    TS_ASSERT(instrparamws);
-    if (instrparamws)
-    {
-      ;
-      /*
-      std::map<std::string, double> paramvalues;
-      std::map<std::string, char> paramfitstatus;
-      parseParameterTableWorkspace(paramws, paramvalues, paramfitstatus);
-
-      std::string testplan("zero");
-      if (testplan.compare("zero") == 0)
-      {
-        double zero = paramvalues["Zero"];
-        TS_ASSERT_DELTA(zero, 0.0, 0.5);
-      }
-      else if (testplan.compare("alpha") == 0)
-      {
-        double alph0 = paramvalues["Alph0"];
-        TS_ASSERT_DELTA(alph0, 4.026, 1.00);
-      }
-      else if (testplan.compare("sigma") == 0)
-      {
-        double sig0 = paramvalues["Sig0"];
-        TS_ASSERT_DELTA(sig0, sqrt(17.37), 0.01);
-        double sig1 = paramvalues["Sig1"];
-        TS_ASSERT_DELTA(sig1, sqrt(9.901), 0.01);
-      }
-      */
-    }
-
-    TS_ASSERT_EQUALS(1, 2102);
+    // 6. Clean
+    AnalysisDataService::Instance().remove("Data");
+    AnalysisDataService::Instance().remove("PeakParameters");
+    AnalysisDataService::Instance().remove("Reflections");
+    AnalysisDataService::Instance().remove("FitResultWS");
+    AnalysisDataService::Instance().remove("PeakInfoWS");
 
     return;
   }
 
-
+  //----------------------------------------------------------------------------------------------
   /** Test a complete LeBail Fit process with background by Monte Carlo algorithm
    *  Using Run 4862 Bank 7 as the testing data
    */
-  void Pending_test_monteCarloLeBailFit_PG3Bank7V2()
+  void OnlyLocalPassed_test_monteCarloLeBailFit_PG3Bank7()
   {
     // 1. Create input workspace
     API::MatrixWorkspace_sptr dataws;
@@ -872,7 +430,23 @@ public:
 
     // a)  Reflections
     std::vector<std::vector<int> > hkls;
-    importReflectionTxtFile("/home/wzz/Mantid/Code/debug/MyTestData/pg3_4862bank7_reflection.txt", hkls);
+    // importReflectionTxtFile("PG3_Bank7_Peaks.hkl", hkls);
+    // (222)
+    vector<int> r222(3, 2);
+    hkls.push_back(r222);
+    // (311)
+    vector<int> r311(3, 1); r311[0] = 3;
+    hkls.push_back(r311);
+    // (220)
+    vector<int> r220(3, 2); r220[2] = 0;
+    hkls.push_back(r220);
+    // (200)
+    vector<int> r200(3, 0); r200[0] = 2;
+    hkls.push_back(r200);
+    // (111)
+    vector<int> r111(3, 1);
+    hkls.push_back(r111);
+
     size_t numpeaks = hkls.size();
     std::cout << "[TESTx349] Nmber of (file imported) peaks = " << hkls.size() << std::endl;
 
@@ -884,10 +458,10 @@ public:
     std::vector<double> pkheights(numpeaks, 1.0);
     map<string, double> modmap;
     modmap.insert(make_pair("Alph0", 5.0));
-    modmap.insert(make_pair("Zero", 40.0));
+    modmap.insert(make_pair("Beta0", 5.0));
     parameterws = createPeakParameterWorkspace(modmap, 2);
     hklws = createInputHKLWorkspace(hkls, pkheights);
-    bkgdws = createBackgroundParameterWorksapce("/home/wzz/Mantid/Code/debug/MyTestData/pg3_4862bank7_background.dat");
+    bkgdws = createBackgroundParameterWorksapce("PG3_4862_Background.dat");
 
     AnalysisDataService::Instance().addOrReplace("Data", dataws);
     AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
@@ -916,7 +490,7 @@ public:
     lbfit.setProperty("OutputParameterWorkspace", "FittedParameters");
     lbfit.setProperty("PeakRadius", 8);
     lbfit.setProperty("Damping", 0.4);
-    lbfit.setProperty("NumberMinimizeSteps", 10);
+    lbfit.setProperty("NumberMinimizeSteps", 100);
 
     // 4. Execute
     TS_ASSERT_THROWS_NOTHING(lbfit.execute());
@@ -936,180 +510,53 @@ public:
       return;
     else
     {
-      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 8);
+      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 9);
     }
 
-    stringstream infoss;
-    for (size_t i = 0; i < outws->getNumberHistograms(); ++i)
-    {
-      cout << "Spectrum " << i << ": Size X = " << outws->readX(i).size() << endl;
-      cout << "Spectrum " << i << ": Size Y = " << outws->readY(i).size() << endl;
-      cout << "Spectrum " << i << ": Size Z = " << outws->readE(i).size() << endl;
-      for (size_t j = 0; j < outws->readX(i).size(); ++j)
-      {
-        infoss << outws->readX(i)[j] << outws->readY(i)[j] << outws->readE(i)[j];
-      }
-    }
-
-    return;
-
-    // Peaks
+    // Peaks table
     DataObjects::TableWorkspace_sptr peakparamws =
         boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
-        (AnalysisDataService::Instance().retrieve("PeakParameters"));
+        (AnalysisDataService::Instance().retrieve("FittedPeaks"));
     TS_ASSERT(peakparamws);
     if (!peakparamws)
     {
       return;
     }
+
     else
     {
-      TS_ASSERT_EQUALS(peakparamws->rowCount(), 8);
+      TS_ASSERT_EQUALS(peakparamws->rowCount(), 5);
     }
 
-    // Parameters
+    // Parameters table
     DataObjects::TableWorkspace_sptr instrparamws =
         boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
         (AnalysisDataService::Instance().retrieve("FittedParameters"));
     TS_ASSERT(instrparamws);
-    if (instrparamws)
-    {
-      ;
-      /*
-      std::map<std::string, double> paramvalues;
-      std::map<std::string, char> paramfitstatus;
-      parseParameterTableWorkspace(paramws, paramvalues, paramfitstatus);
+    if (!instrparamws)
+      return;
 
-      std::string testplan("zero");
-      if (testplan.compare("zero") == 0)
-      {
-        double zero = paramvalues["Zero"];
-        TS_ASSERT_DELTA(zero, 0.0, 0.5);
-      }
-      else if (testplan.compare("alpha") == 0)
-      {
-        double alph0 = paramvalues["Alph0"];
-        TS_ASSERT_DELTA(alph0, 4.026, 1.00);
-      }
-      else if (testplan.compare("sigma") == 0)
-      {
-        double sig0 = paramvalues["Sig0"];
-        TS_ASSERT_DELTA(sig0, sqrt(17.37), 0.01);
-        double sig1 = paramvalues["Sig1"];
-        TS_ASSERT_DELTA(sig1, sqrt(9.901), 0.01);
-      }
-      */
-    }
+    std::map<std::string, double> paramvalues;
+    std::map<std::string, char> paramfitstatus;
+    parseParameterTableWorkspace(instrparamws, paramvalues, paramfitstatus);
 
-    TS_ASSERT_EQUALS(1, 2102);
+    double zero = paramvalues["Zero"];
+    TS_ASSERT_DELTA(zero, 0.0, 0.5);
 
+    double alph0 = paramvalues["Alph0"];
+    TS_ASSERT_DELTA(alph0, 4.026, 1.00);
+
+    double beta0 = paramvalues["Beta0"];
+    TS_ASSERT_DELTA(beta0, 4.026, 1.00);
+
+    // Clean
+    AnalysisDataService::Instance().remove("Data");
+    AnalysisDataService::Instance().remove("PeakParameters");
+    AnalysisDataService::Instance().remove("Reflections");
+    AnalysisDataService::Instance().remove("FittedData");
+    AnalysisDataService::Instance().remove("FittedPeaks");
+    AnalysisDataService::Instance().remove("FittedParameters");
     return;
-  }
-
-
-
-
-
-  /// ============================  Background Calculation ====================== ///
-
-  /*
-   * Item to test
-   * (1) Crop workspace
-   * (2) Split peaks to groups
-   * (3) Fit peak intensity
-   * (4) Whatever
-   *
-   * Test Data:
-   * (1) 4862b7
-   */
-  void LocalPassed_test_BackgroundCalculationV2()
-  {
-    // 1. Create data
-    API::MatrixWorkspace_sptr dataws;
-    DataObjects::TableWorkspace_sptr parameterws;
-    DataObjects::TableWorkspace_sptr hklws;
-
-    // a)  Reflections
-    std::vector<std::vector<int> > hkls;
-    importReflectionTxtFile("/home/wzz/Mantid/Code/debug/MyTestData/pg3_4862bank7_reflection.txt", hkls);
-    size_t numpeaks = hkls.size();
-    std::cout << "TEST1009 Number of peaks = " << hkls.size() << std::endl;
-
-    // b) data
-    dataws = createInputDataWorkspace(4);
-    std::cout << "Data Workspace Range: " << dataws->readX(0)[0] << ", " << dataws->readX(0).back() << std::endl;
-
-    // c) Workspaces
-    std::map<std::string, double> parammodifymap;
-    parameterws = createPeakParameterWorkspace(parammodifymap, 2);
-
-    std::vector<double> pkheights(numpeaks, 1.0);
-    hklws = createInputHKLWorkspace(hkls, pkheights);
-    std::cout << "InputHKLWorkspace is created.  Number of reflections =  " << hklws->rowCount() << std::endl;
-
-    AnalysisDataService::Instance().addOrReplace("Data", dataws);
-    AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
-    AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
-
-    std::vector<double> fitregion;
-    fitregion.push_back(58000.0);
-    fitregion.push_back(180000.0);
-
-    // 3. Genearte LeBailFit algorithm and set it up
-    LeBailFit2 lbfit;
-    lbfit.initialize();
-
-    lbfit.setPropertyValue("InputWorkspace", "Data");
-    lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
-    lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
-    lbfit.setProperty("WorkspaceIndex", 0);
-    lbfit.setProperty("FitRegion", fitregion);
-    lbfit.setProperty("Function", "CalculateBackground");
-    lbfit.setProperty("BackgroundType", "Polynomial");
-    lbfit.setProperty("OutputWorkspace", "CalculatedBackground");
-    lbfit.setProperty("OutputPeaksWorkspace", "CaclulatedPeaks");
-    lbfit.setProperty("PeakRadius", 8);
-
-    TS_ASSERT_THROWS_NOTHING(lbfit.execute());
-    TS_ASSERT(lbfit.isExecuted());
-
-    // 4. Get output
-    DataObjects::Workspace2D_sptr outbkgdws =
-            boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-            (AnalysisDataService::Instance().retrieve("CalculatedBackground"));
-    TS_ASSERT(outbkgdws);
-
-    // a) Range
-    double tofmin = outbkgdws->readX(0)[0];
-    double tofmax = outbkgdws->readX(0).back();
-
-    std::cout << "Background Workspace Range: " << tofmin << ", " << tofmax << std::endl;
-
-    /* --- Write out data file for checking ---
-    std::ofstream purepeakfile, bkgdfile;
-    purepeakfile.open("PeaksOnlyBank7.dat");
-    bkgdfile.open("BackgroundBank7.dat");
-    for (size_t i = 0; i < outbkgdws->readX(0).size(); ++i)
-    {
-        bkgdfile << outbkgdws->readX(1)[i] << "    " << outbkgdws->readY(1)[i] << std::endl;
-        purepeakfile << outbkgdws->readX(2)[i] << "    " << outbkgdws->readY(2)[i] << std::endl;
-    }
-    purepeakfile.close();
-    bkgdfile.close();
-
-    *****************/
-
-    // b) Histograms
-    TS_ASSERT_EQUALS(outbkgdws->getNumberHistograms(), 3);
-
-    // c) Peaks
-    DataObjects::TableWorkspace_sptr peakparamws =
-            boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
-            (AnalysisDataService::Instance().retrieve("CaclulatedPeaks"));
-    TS_ASSERT(peakparamws);
-
-    TS_ASSERT_EQUALS(peakparamws->rowCount(), hklws->rowCount())
-
   }
 
 
@@ -1416,6 +863,8 @@ public:
     importDataFromColumnFile(filename, vecX, vecY,  vecE);
     */
 
+    string datafilename("PG3_4862_Bank7.dat");
+
     switch (option)
     {
       case 1:
@@ -1431,8 +880,8 @@ public:
         break;
 
       case 4:
-        importDataFromColumnFile("/home/wzz/Mantid/Code/debug/MyTestData/4862b7.inp", vecX, vecY, vecE);
-        std::cout << "[TEST] Data File Option 4: ../MyTestData/4862b7.inp; Number data = "
+        importDataFromColumnFile(datafilename, vecX, vecY, vecE);
+        std::cout << "[TEST] Data File Option 4: " << datafilename << "; Number data = "
                   << vecX.size() << std::endl;
         break;
 
@@ -1610,37 +1059,36 @@ public:
     return;
   }
 
-  /*
-   * Generate data (vectors) containg twin peak w/o background
+  /** Generate data (vectors) containg twin peak w/o background
    */
   void generateTwinPeakData(std::vector<double>& vecX, std::vector<double>& vecY, std::vector<double>& vecE)
   {
-      // These data of reflection (932) and (852)
-      vecX.push_back(12646.470);    vecY.push_back(  0.56916749     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12658.333);    vecY.push_back(  0.35570398     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12670.196);    vecY.push_back(  0.85166878     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12682.061);    vecY.push_back(   4.6110063     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12693.924);    vecY.push_back(   24.960907     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12705.787);    vecY.push_back(   135.08231     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12717.650);    vecY.push_back(   613.15887     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12729.514);    vecY.push_back(   587.66174     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12741.378);    vecY.push_back(   213.99724     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12753.241);    vecY.push_back(   85.320320     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12765.104);    vecY.push_back(   86.317253     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12776.968);    vecY.push_back(   334.30905     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12788.831);    vecY.push_back(   1171.0187     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12800.695);    vecY.push_back(   732.47943     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12812.559);    vecY.push_back(   258.37717     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12824.422);    vecY.push_back(   90.549515     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12836.285);    vecY.push_back(   31.733501     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12848.148);    vecY.push_back(   11.121155     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12860.013);    vecY.push_back(   3.9048645     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12871.876);    vecY.push_back(  4.15836312E-02 );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12883.739);    vecY.push_back(  0.22341134     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12895.603);    vecY.push_back(   1.2002950     );  vecE.push_back(  1000.0000 );
-      vecX.push_back(12907.466);    vecY.push_back(   6.4486742     );  vecE.push_back(  1000.0000 );
+    // These data of reflection (932) and (852)
+    vecX.push_back(12646.470);    vecY.push_back(  0.56916749     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12658.333);    vecY.push_back(  0.35570398     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12670.196);    vecY.push_back(  0.85166878     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12682.061);    vecY.push_back(   4.6110063     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12693.924);    vecY.push_back(   24.960907     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12705.787);    vecY.push_back(   135.08231     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12717.650);    vecY.push_back(   613.15887     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12729.514);    vecY.push_back(   587.66174     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12741.378);    vecY.push_back(   213.99724     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12753.241);    vecY.push_back(   85.320320     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12765.104);    vecY.push_back(   86.317253     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12776.968);    vecY.push_back(   334.30905     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12788.831);    vecY.push_back(   1171.0187     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12800.695);    vecY.push_back(   732.47943     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12812.559);    vecY.push_back(   258.37717     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12824.422);    vecY.push_back(   90.549515     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12836.285);    vecY.push_back(   31.733501     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12848.148);    vecY.push_back(   11.121155     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12860.013);    vecY.push_back(   3.9048645     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12871.876);    vecY.push_back(  4.15836312E-02 );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12883.739);    vecY.push_back(  0.22341134     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12895.603);    vecY.push_back(   1.2002950     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12907.466);    vecY.push_back(   6.4486742     );  vecE.push_back(  1000.0000 );
 
-      return;
+    return;
   }
 
   /** Import text file containing reflections (HKL)
@@ -1651,8 +1099,10 @@ public:
     ins.open(filename.c_str());
     if (!ins.is_open())
     {
-      std::cout << "File " << filename << " cannot be opened. " << std::endl;
-      throw std::invalid_argument("Cannot open Reflection-Text-File.");
+      stringstream errss;
+      errss << "File " << filename << " cannot be opened. ";
+      std::cout << errss.str() << std::endl;
+      throw std::invalid_argument(errss.str());
     }
     else
     {

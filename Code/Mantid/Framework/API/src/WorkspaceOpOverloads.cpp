@@ -90,7 +90,7 @@ namespace OperatorOverloads
       throw std::runtime_error(message);
     }
 
-    throw Kernel::Exception::NotFoundError("Required output workspace property not found on sub algorithm" ,"OutputWorkspace");
+    throw Kernel::Exception::NotFoundError("Required output workspace property not found on Child Algorithm" ,"OutputWorkspace");
 
     //Horendous code inclusion to satisfy compilers that all code paths return a value
     // in reality the above code should either throw or return successfully.

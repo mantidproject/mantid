@@ -30,7 +30,7 @@ class DummyAlg3(PythonAlgorithm):
 
 class DummyAlg(PythonAlgorithm):
     """
-        Dummy algorithm that uses executeSubAlg()
+        Dummy algorithm that uses executeChildAlg()
     """
      
     def category(self):
@@ -45,8 +45,8 @@ class DummyAlg(PythonAlgorithm):
     
     def PyExec(self):
         output_ws = self.getPropertyValue("OutputWorkspace")
-        a = self.executeSubAlg(CreateWorkspace, OutputWorkspace=output_ws, DataX=[0,1,2], DataY=[0,1,2], DataE=[0,0,0])
-        #a = self.executeSubAlg(CreateWorkspace, output_ws, [0,1,2], [0,1,2], [0,0,0])
+        a = self.executeChildAlg(CreateWorkspace, OutputWorkspace=output_ws, DataX=[0,1,2], DataY=[0,1,2], DataE=[0,0,0])
+        #a = self.executeChildAlg(CreateWorkspace, output_ws, [0,1,2], [0,1,2], [0,0,0])
         self._setWorkspaceProperty("OutputWorkspace", a._getWorkspaceProperty("OutputWorkspace"))
 
 
@@ -55,7 +55,7 @@ class DummyAlg2(DummyAlg):
         return "DummyAlg2"
     def PyExec(self):
         output_ws = self.getPropertyValue("OutputWorkspace")
-        a = self.executeSubAlg(CreateWorkspace, OutputWorkspace=output_ws, DataX=[0,1,2], DataY=[0,1,2], DataE=[0,0,0])
+        a = self.executeChildAlg(CreateWorkspace, OutputWorkspace=output_ws, DataX=[0,1,2], DataY=[0,1,2], DataE=[0,0,0])
         self._setWorkspaceProperty("OutputWorkspace", a._getWorkspaceProperty("OutputWorkspace"))
         
 class GenericWorkspacePropertyTest(PythonAlgorithm):
@@ -89,28 +89,28 @@ class PythonAlgorithmTest(unittest.TestCase):
         
     def test_sub_alg_wksp_transfer(self):
         """
-            Check that we can execute a sub-algorithm and pass
+            Check that we can execute a Child Algorithm and pass
             ownership of an output workspace to the parent algo. 
         """
         algm = DummyAlg2()
         algm.initialize()
-        algm.setPropertyValue("OutputWorkspace", "subalgtest")
+        algm.setPropertyValue("OutputWorkspace", "ChildAlgtest")
         algm.setRethrows(True)
         algm.execute()
-        self.assertTrue(mtd.workspaceExists("subalgtest"))
-        mtd.deleteWorkspace("subalgtest")
+        self.assertTrue(mtd.workspaceExists("ChildAlgtest"))
+        mtd.deleteWorkspace("ChildAlgtest")
     
     def test_sub_alg_variation(self):
         """
-            Call signature variation for sub-algorithm execution
+            Call signature variation for Child Algorithm execution
         """
         algm = DummyAlg2()
         algm.initialize()
-        algm.setPropertyValue("OutputWorkspace", "subalgtest2")
+        algm.setPropertyValue("OutputWorkspace", "ChildAlgtest2")
         algm.setRethrows(True)
         algm.execute()
-        self.assertTrue(mtd.workspaceExists("subalgtest2"))
-        mtd.deleteWorkspace("subalgtest2")
+        self.assertTrue(mtd.workspaceExists("ChildAlgtest2"))
+        mtd.deleteWorkspace("ChildAlgtest2")
         
         
     def test_cpp_alg_property_using_python_alg(self):
@@ -123,13 +123,13 @@ class PythonAlgorithmTest(unittest.TestCase):
         
         algm = DummyAlg()
         algm.initialize()
-        algm.setPropertyValue("OutputWorkspace", "subalgtest")
+        algm.setPropertyValue("OutputWorkspace", "ChildAlgtest")
         algm._setAlgorithmProperty("Algo", algm_par._getHeldObject())
         algm.execute()
         self.assertEqual(str(algm._getAlgorithmProperty("Algo")), 
                          "CreateWorkspace.1(OutputWorkspace=test,DataX=1,DataY=1,DataE=1)")
-        self.assertTrue(mtd.workspaceExists("subalgtest"))
-        mtd.deleteWorkspace("subalgtest")
+        self.assertTrue(mtd.workspaceExists("ChildAlgtest"))
+        mtd.deleteWorkspace("ChildAlgtest")
         
     def test_python_alg_property_using_python_alg(self):
         """
@@ -140,12 +140,12 @@ class PythonAlgorithmTest(unittest.TestCase):
         
         algm = DummyAlg()
         algm.initialize()
-        algm.setPropertyValue("OutputWorkspace", "subalgtest")
+        algm.setPropertyValue("OutputWorkspace", "ChildAlgtest")
         algm._setAlgorithmProperty("Algo", algm_par)
         algm.execute()
         self.assertEqual(str(algm._getAlgorithmProperty("Algo")), "DummyAlg2.1()")
-        self.assertTrue(mtd.workspaceExists("subalgtest"))
-        mtd.deleteWorkspace("subalgtest")
+        self.assertTrue(mtd.workspaceExists("ChildAlgtest"))
+        mtd.deleteWorkspace("ChildAlgtest")
 
     def test_algp_property_using_public_API(self):
         """
@@ -159,13 +159,13 @@ class PythonAlgorithmTest(unittest.TestCase):
         
         algm = DummyAlg()
         algm.initialize()
-        algm.setPropertyValue("OutputWorkspace", "subalgtest")
+        algm.setPropertyValue("OutputWorkspace", "ChildAlgtest")
         algm.setProperty("Algo", algm_par._getHeldObject())
         algm.execute()
         self.assertEqual(str(algm._getAlgorithmProperty("Algo")), 
                          "CreateWorkspace.1(OutputWorkspace=test,DataX=1,DataY=1,DataE=1)")
-        self.assertTrue(mtd.workspaceExists("subalgtest"))
-        mtd.deleteWorkspace("subalgtest")
+        self.assertTrue(mtd.workspaceExists("ChildAlgtest"))
+        mtd.deleteWorkspace("ChildAlgtest")
                 
         
     def test_cpp_alg_property_using_python_alg_and_execute_the_propertied_algorithm(self):
@@ -180,14 +180,14 @@ class PythonAlgorithmTest(unittest.TestCase):
         
         algm = DummyAlg3()
         algm.initialize()
-        algm.setPropertyValue("OutputWorkspace", "subalgtest")
+        algm.setPropertyValue("OutputWorkspace", "ChildAlgtest")
         algm._setAlgorithmProperty("Algo", algm_par._getHeldObject())
         algm.execute()
         # THe algorithm created the workspace name given in the PROPERTY ...
         self.assertTrue(mtd.workspaceExists("test"))
         mtd.deleteWorkspace("test")
         # ... not the one given as a parameter of DummyAlg3, because that's not the way that algo was written
-        self.assertFalse(mtd.workspaceExists("subalgtest"))
+        self.assertFalse(mtd.workspaceExists("ChildAlgtest"))
         
     def test_generic_workspace_property(self):
         """

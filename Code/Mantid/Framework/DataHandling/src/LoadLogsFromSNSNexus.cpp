@@ -54,7 +54,7 @@ LoadLogsFromSNSNexus::LoadLogsFromSNSNexus()
 /// Initialisation method.
 void LoadLogsFromSNSNexus::init()
 {
-  // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
+  // When used as a Child Algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the workspace in which to import the sample logs." );

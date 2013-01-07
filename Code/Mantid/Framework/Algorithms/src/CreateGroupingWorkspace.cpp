@@ -287,12 +287,12 @@ namespace Algorithms
     }
     else
     {
-      Algorithm_sptr childAlg = createSubAlgorithm("LoadInstrument",0.0,0.2);
+      Algorithm_sptr childAlg = createChildAlgorithm("LoadInstrument",0.0,0.2);
       MatrixWorkspace_sptr tempWS(new Workspace2D());
       childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
       childAlg->setPropertyValue("Filename", InstrumentFilename);
       childAlg->setPropertyValue("InstrumentName", InstrumentName);
-      childAlg->executeAsSubAlg();
+      childAlg->executeAsChildAlg();
       inst = tempWS->getInstrument();
     }
 

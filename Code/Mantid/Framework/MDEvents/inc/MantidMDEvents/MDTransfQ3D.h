@@ -49,7 +49,7 @@ namespace MDEvents
 class DLLExport MDTransfQ3D: public MDTransfModQ
 { 
 public:
-    /// the name, this subalgorithm is known to users (will appear in selection list)
+    /// the name, this ChildAlgorithm is known to users (will appear in selection list)
     const std::string transfID()const; // {return "Q3D"; }
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
     bool calcMatrixCoord(const double& X,std::vector<coord_t> &Coord, double &s, double &err)const;

@@ -100,7 +100,7 @@ private:
   void readGroupingFile(const std::string& filename);
   /// Read an XML Grouping File
   void readXMLGroupingFile(const std::string& filename);
-  /// Sub-algorithm to Load the associated empty instrument
+  /// Child Algorithm to Load the associated empty instrument
   /// @param instrument_xml_name :: The instrument xml name including extension(.xml or .XML) but no path
   /// this is determine by the mantid instrument.directory
   /// @return Shared pointer to the 2D workspace

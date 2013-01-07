@@ -19,7 +19,7 @@ set ( TEST_PY_FILES
   MDHistoWorkspaceTest.py
   MultipleFilePropertyTest.py
   PythonAlgorithmPropertiesTest.py
-  PythonAlgorithmSubAlgCallTest.py
+  PythonAlgorithmChildAlgCallTest.py
   PythonAlgorithmTraitsTest.py
   PythonAlgorithmWorkspacePropertyTest.py
   RunTest.py

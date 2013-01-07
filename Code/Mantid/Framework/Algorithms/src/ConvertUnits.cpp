@@ -545,16 +545,16 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
     eventWS->clearMRU();
 }
 
-/// Calls Rebin as a sub-algorithm to align the bins
+/// Calls Rebin as a Child Algorithm to align the bins
 API::MatrixWorkspace_sptr ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace)
 {
   // Create a Rebin child algorithm
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   // Next line for EventWorkspaces - needed for as long as in/out set same keeps as events.
   childAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", workspace);
   childAlg->setProperty<std::vector<double> >("Params",this->calculateRebinParams(workspace));
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 

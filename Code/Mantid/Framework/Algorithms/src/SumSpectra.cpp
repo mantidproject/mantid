@@ -331,7 +331,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   // First, we need to clean the input workspace for nan's and inf's in order
   // to treat the data correctly later. This will create a new private
   // workspace that will be retrieved as mutable.
-  IAlgorithm_sptr alg = this->createSubAlgorithm("ReplaceSpecialValues");
+  IAlgorithm_sptr alg = this->createChildAlgorithm("ReplaceSpecialValues");
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
   std::string outName = "_"+temp->getName()+"_clean";
   alg->setProperty("OutputWorkspace", outName);
@@ -339,7 +339,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   alg->setProperty("NaNError", 0.0);
   alg->setProperty("InfinityValue", 0.0);
   alg->setProperty("InfinityError", 0.0);
-  alg->executeAsSubAlg();
+  alg->executeAsChildAlg();
   MatrixWorkspace_sptr localworkspace = alg->getProperty("OutputWorkspace");
 
   // Transform to real workspace types

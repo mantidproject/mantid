@@ -200,7 +200,7 @@ namespace Algorithms
 
       g_log.debug() << "Binning parameter = " << binparam << std::endl;
 
-      API::Algorithm_sptr rebin = this->createSubAlgorithm("Rebin", 0.8, 0.9, true);
+      API::Algorithm_sptr rebin = this->createChildAlgorithm("Rebin", 0.8, 0.9, true);
       rebin->initialize();
       rebin->setProperty("InputWorkspace", outputWS);
       rebin->setProperty("OutputWorkspace", outputWS);
@@ -222,7 +222,7 @@ namespace Algorithms
     */
   DataObjects::EventWorkspace_sptr CountEventsInPulses::compressEvents(DataObjects::EventWorkspace_sptr inputws, double tolerance)
   {
-      API::Algorithm_sptr alg = this->createSubAlgorithm("CompressEvents", 0.9, 1.0, true);
+      API::Algorithm_sptr alg = this->createChildAlgorithm("CompressEvents", 0.9, 1.0, true);
       alg->initialize();
 
       alg->setProperty("InputWorkspace", inputws);

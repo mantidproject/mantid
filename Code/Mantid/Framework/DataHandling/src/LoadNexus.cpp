@@ -61,7 +61,7 @@ namespace Mantid
      */
     void LoadNexus::init()
     {
-      // Declare required input parameters for all sub algorithms
+      // Declare required input parameters for all Child Algorithms
       std::vector<std::string> exts;
       exts.push_back(".nxs");
       exts.push_back(".nx5");
@@ -153,7 +153,7 @@ namespace Mantid
 
     void LoadNexus::runLoadMuonNexus()
     {
-      IAlgorithm_sptr loadMuonNexus = createSubAlgorithm("LoadMuonNexus",0.,1.);
+      IAlgorithm_sptr loadMuonNexus = createChildAlgorithm("LoadMuonNexus",0.,1.);
       // Pass through the same input filename
       loadMuonNexus->setPropertyValue("Filename",m_filename);
       // Set the workspace property
@@ -172,16 +172,16 @@ namespace Mantid
       }
       loadMuonNexus->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       // try
       // {
       loadMuonNexus->execute();
       // }
       // catch (std::runtime_error&)
       // {
-      //   g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
+      //   g_log.error("Unable to successfully run LoadMuonNexus Child Algorithm");
       //  }
-      if ( ! loadMuonNexus->isExecuted() ) g_log.error("Unable to successfully run LoadMuonNexus2 sub-algorithm");
+      if ( ! loadMuonNexus->isExecuted() ) g_log.error("Unable to successfully run LoadMuonNexus2 Child Algorithm");
       // Get pointer to the workspace created
       //  m_localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
       //  setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
@@ -219,7 +219,7 @@ namespace Mantid
 
     void LoadNexus::runLoadNexusProcessed()
     {
-      IAlgorithm_sptr loadNexusPro = createSubAlgorithm("LoadNexusProcessed",0.,1.);
+      IAlgorithm_sptr loadNexusPro = createChildAlgorithm("LoadNexusProcessed",0.,1.);
       // Pass through the same input filename
       loadNexusPro->setPropertyValue("Filename",m_filename);
       // Set the workspace property
@@ -250,9 +250,9 @@ namespace Mantid
       //}
 
       loadNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       loadNexusPro->execute();
-      if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadNexusProcessed sub-algorithm");
+      if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadNexusProcessed Child Algorithm");
       // Get pointer to the workspace created
       Workspace_sptr localworkspace=loadNexusPro->getProperty("OutputWorkspace");
       setProperty<Workspace_sptr>("OutputWorkspace",localworkspace); 
@@ -286,7 +286,7 @@ namespace Mantid
 
     void LoadNexus::runLoadIsisNexus()
     {
-      IAlgorithm_sptr loadNexusPro = createSubAlgorithm("LoadISISNexus",0.,1.);
+      IAlgorithm_sptr loadNexusPro = createChildAlgorithm("LoadISISNexus",0.,1.);
       // Pass through the same input filename
       loadNexusPro->setPropertyValue("Filename",m_filename);
       // Set the workspace property
@@ -307,7 +307,7 @@ namespace Mantid
 
       loadNexusPro->execute();
 
-      if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadISISNexus sub-algorithm");
+      if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadISISNexus Child Algorithm");
       // Get pointer to the workspace created
       Workspace_sptr localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
       setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
@@ -340,7 +340,7 @@ namespace Mantid
 
     void LoadNexus::runLoadSNSNexus()
     {
-      IAlgorithm_sptr loadNexusPro = createSubAlgorithm("LoadSNSNexus",0.,1.);
+      IAlgorithm_sptr loadNexusPro = createChildAlgorithm("LoadSNSNexus",0.,1.);
       // Pass through the same input filename
       loadNexusPro->setPropertyValue("Filename",m_filename);
       // Set the workspace property
@@ -358,16 +358,16 @@ namespace Mantid
         loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
       }
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
         loadNexusPro->execute();
       }
       catch (std::runtime_error&)
       {
-        g_log.error("Unable to successfully run LoadSNSNexus sub-algorithm");
+        g_log.error("Unable to successfully run LoadSNSNexus Child Algorithm");
       }
-      if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadSNSNexus sub-algorithm");
+      if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadSNSNexus Child Algorithm");
       // Get pointer to the workspace created
       Workspace_sptr localWorkspace = loadNexusPro->getProperty(outputWorkspace); 
       setProperty(outputWorkspace,localWorkspace);

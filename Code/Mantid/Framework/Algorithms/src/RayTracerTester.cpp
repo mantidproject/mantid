@@ -71,10 +71,10 @@ namespace Algorithms
    */
   void RayTracerTester::exec()
   {
-    IAlgorithm_sptr alg = this->createSubAlgorithm("LoadEmptyInstrument", 0.0, 0.3, true);
+    IAlgorithm_sptr alg = this->createChildAlgorithm("LoadEmptyInstrument", 0.0, 0.3, true);
     alg->setPropertyValue("Filename", getPropertyValue("Filename"));
     alg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-    alg->executeAsSubAlg();
+    alg->executeAsChildAlg();
 
     MatrixWorkspace_sptr mws = alg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspace", mws);

@@ -44,7 +44,7 @@ ScalingOpt - this integer value controls the way in which the scaling is calcula
 The default is to just average the two together.
 Setting this to 1 causes the maximum scaling to be used and setting it to 2 uses the maximum scaling plus 5% to be used.
 
-===Subalgorithms used===
+===ChildAlgorithms used===
 None
 
 

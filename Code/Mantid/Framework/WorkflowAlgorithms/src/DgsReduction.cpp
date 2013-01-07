@@ -503,11 +503,11 @@ namespace Mantid
 
         inputWS = this->load(inputData, true);
 
-        IAlgorithm_sptr smlog = this->createSubAlgorithm("AddSampleLog");
+        IAlgorithm_sptr smlog = this->createChildAlgorithm("AddSampleLog");
         smlog->setProperty("Workspace", inputWS);
         smlog->setProperty("LogName", "Filename");
         smlog->setProperty("LogText", inputData);
-        smlog->executeAsSubAlg();
+        smlog->executeAsChildAlg();
       }
       else
       {
@@ -542,13 +542,13 @@ namespace Mantid
         bool castWorkspace = false;
         if (boost::ends_with(hardMask, ".nxs"))
         {
-          loadMask = this->createSubAlgorithm("Load");
+          loadMask = this->createChildAlgorithm("Load");
           loadMask->setProperty("Filename", hardMask);
         }
         else
         {
           const std::string instName = this->reductionManager->getProperty("InstrumentName");
-          loadMask = this->createSubAlgorithm("LoadMask");
+          loadMask = this->createChildAlgorithm("LoadMask");
           loadMask->setProperty("Instrument", instName);
           loadMask->setProperty("InputFile", hardMask);
           castWorkspace = true;
@@ -578,7 +578,7 @@ namespace Mantid
         try
         {
           groupingWsName = prop + "Grouping";
-          IAlgorithm_sptr loadGrpFile = this->createSubAlgorithm("LoadDetectorsGroupingFile");
+          IAlgorithm_sptr loadGrpFile = this->createChildAlgorithm("LoadDetectorsGroupingFile");
           loadGrpFile->setProperty("InputFile", groupFile);
           loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
           loadGrpFile->execute();
@@ -700,7 +700,7 @@ namespace Mantid
       {
         std::string detVanMaskName = outputWsName + "_diagmask";
 
-        IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
+        IAlgorithm_sptr diag = this->createChildAlgorithm("DgsDiagnose");
         diag->setProperty("DetVanWorkspace", detVanWS);
         diag->setProperty("DetVanMonitorWorkspace", detVanMonWS);
         diag->setProperty("DetVanCompWorkspace", detVan2WS);
@@ -710,7 +710,7 @@ namespace Mantid
         diag->setProperty("HardMaskWorkspace", hardMaskWS);
         diag->setProperty("OutputWorkspace", detVanMaskName);
         diag->setProperty("ReductionProperties", reductionManagerName);
-        diag->executeAsSubAlg();
+        diag->executeAsChildAlg();
         maskWS = diag->getProperty("OutputWorkspace");
 
         if (showIntermedWS)
@@ -720,7 +720,7 @@ namespace Mantid
           this->setProperty("SampleDetVanDiagMask", maskWS);
         }
 
-        detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
+        detVan = this->createChildAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
         detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
         detVan->setProperty("MaskWorkspace", maskWS);
@@ -728,7 +728,7 @@ namespace Mantid
 
         detVan->setProperty("OutputWorkspace", idetVanName);
         detVan->setProperty("ReductionProperties", reductionManagerName);
-        detVan->executeAsSubAlg();
+        detVan->executeAsChildAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
         idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
 
@@ -746,7 +746,7 @@ namespace Mantid
         detVanWS.reset();
       }
 
-      IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
+      IAlgorithm_sptr etConv = this->createChildAlgorithm("DgsConvertToEnergyTransfer");
       etConv->setProperty("InputWorkspace", sampleWS);
       etConv->setProperty("InputMonitorWorkspace", sampleMonWS);
       etConv->setProperty("IntegratedDetectorVanadium", idetVanWS);
@@ -765,7 +765,7 @@ namespace Mantid
       etConv->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
       std::string tibWsName = this->getPropertyValue("OutputWorkspace") + "_tib";
       etConv->setProperty("OutputTibWorkspace", tibWsName);
-      etConv->executeAsSubAlg();
+      etConv->executeAsChildAlg();
       outputWS = etConv->getProperty("OutputWorkspace");
       MatrixWorkspace_sptr tibWS = etConv->getProperty("OutputTibWorkspace");
 
@@ -790,7 +790,7 @@ namespace Mantid
         MatrixWorkspace_sptr absGroupingWS = this->loadGroupingFile("AbsUnits");
 
         // Run the absolute normalisation reduction
-        IAlgorithm_sptr absUnitsRed = this->createSubAlgorithm("DgsAbsoluteUnitsReduction");
+        IAlgorithm_sptr absUnitsRed = this->createChildAlgorithm("DgsAbsoluteUnitsReduction");
         absUnitsRed->setProperty("InputWorkspace", absSampleWS);
         absUnitsRed->setProperty("InputMonitorWorkspace", absSampleMonWS);
         absUnitsRed->setProperty("DetectorVanadiumWorkspace", absDetVanWS);
@@ -800,14 +800,14 @@ namespace Mantid
         absUnitsRed->setProperty("MaskWorkspace", maskWS);
         absUnitsRed->setProperty("ReductionProperties", reductionManagerName);
         absUnitsRed->setProperty("OutputWorkspace", absWsName);
-        absUnitsRed->executeAsSubAlg();
+        absUnitsRed->executeAsChildAlg();
         MatrixWorkspace_sptr absUnitsWS = absUnitsRed->getProperty("OutputWorkspace");
         MatrixWorkspace_sptr absMaskWS = absUnitsRed->getProperty("OutputWorkspace");
 
-        IAlgorithm_sptr mask = this->createSubAlgorithm("MaskDetectors");
+        IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
         mask->setProperty("Workspace", outputWS);
         mask->setProperty("MaskedWorkspace", absMaskWS);
-        mask->executeAsSubAlg();
+        mask->executeAsChildAlg();
         outputWS = mask->getProperty("Workspace");
 
         // Do absolute normalisation
@@ -834,13 +834,13 @@ namespace Mantid
         std::vector<double> qBinning = this->getProperty("PowderMomTransferRange");
         const double initialEnergy = boost::lexical_cast<double>(outputWS->run().getProperty("Ei")->value());
 
-        IAlgorithm_sptr sofqw = this->createSubAlgorithm("SofQW3");
+        IAlgorithm_sptr sofqw = this->createChildAlgorithm("SofQW3");
         sofqw->setProperty("InputWorkspace", outputWS);
         sofqw->setProperty("OutputWorkspace", sqwWsName);
         sofqw->setProperty("QAxisBinning", qBinning);
         sofqw->setProperty("EMode", "Direct");
         sofqw->setProperty("EFixed", initialEnergy);
-        sofqw->executeAsSubAlg();
+        sofqw->executeAsChildAlg();
         MatrixWorkspace_sptr sqwWS = sofqw->getProperty("OutputWorkspace");
         this->declareProperty(new WorkspaceProperty<>("PowderSqwWorkspace",
             sqwWsName, Direction::Output));
@@ -854,10 +854,10 @@ namespace Mantid
           {
             saveProcNexusFilename = sqwWsName + ".nxs";
           }
-          IAlgorithm_sptr saveNxs = this->createSubAlgorithm("SaveNexus");
+          IAlgorithm_sptr saveNxs = this->createChildAlgorithm("SaveNexus");
           saveNxs->setProperty("InputWorkspace", sqwWS);
           saveNxs->setProperty("Filename", saveProcNexusFilename);
-          saveNxs->executeAsSubAlg();
+          saveNxs->executeAsChildAlg();
         }
       }
 

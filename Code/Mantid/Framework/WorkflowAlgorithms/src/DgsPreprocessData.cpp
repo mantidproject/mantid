@@ -122,7 +122,7 @@ namespace Mantid
           incidentBeamNorm = "ByCurrent";
         }
         const std::string normAlg = "Normalise" + incidentBeamNorm;
-        IAlgorithm_sptr norm = this->createSubAlgorithm(normAlg);
+        IAlgorithm_sptr norm = this->createChildAlgorithm(normAlg);
         norm->setProperty("InputWorkspace", inputWS);
         norm->setProperty("OutputWorkspace", outputWS);
         if ("ToMonitor" == incidentBeamNorm)
@@ -158,15 +158,15 @@ namespace Mantid
           norm->setProperty("IntegrationRangeMax", rangeMax);
           norm->setProperty("IncludePartialBins", true);
         }
-        norm->executeAsSubAlg();
+        norm->executeAsChildAlg();
 
         outputWS = norm->getProperty("OutputWorkspace");
 
-        IAlgorithm_sptr addLog = this->createSubAlgorithm("AddSampleLog");
+        IAlgorithm_sptr addLog = this->createChildAlgorithm("AddSampleLog");
         addLog->setProperty("Workspace", outputWS);
         addLog->setProperty("LogName", doneLog);
         addLog->setProperty("LogText", normAlg);
-        addLog->executeAsSubAlg();
+        addLog->executeAsChildAlg();
       }
       else
       {

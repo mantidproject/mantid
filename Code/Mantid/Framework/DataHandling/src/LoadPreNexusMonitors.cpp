@@ -244,9 +244,9 @@ void LoadPreNexusMonitors::runLoadInstrument(const std::string &instrument,
     MatrixWorkspace_sptr localWorkspace)
 {
 
-  IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
   try
   {
@@ -259,12 +259,12 @@ void LoadPreNexusMonitors::runLoadInstrument(const std::string &instrument,
     localWorkspace->populateInstrumentParameters();
   } catch (std::invalid_argument& e)
   {
-    g_log.information() << "Invalid argument to LoadInstrument sub-algorithm : " << e.what()
+    g_log.information() << "Invalid argument to LoadInstrument Child Algorithm : " << e.what()
         << std::endl;
     executionSuccessful = false;
   } catch (std::runtime_error& e)
   {
-    g_log.information() << "Unable to successfully run LoadInstrument sub-algorithm : " << e.what()
+    g_log.information() << "Unable to successfully run LoadInstrument Child Algorithm : " << e.what()
         << std::endl;
     executionSuccessful = false;
   }

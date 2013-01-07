@@ -103,11 +103,11 @@ namespace Mantid
       MatrixWorkspace_sptr monWS = this->getProperty("InputMonitorWorkspace");
 
       // Normalise result workspace to incident beam parameter
-      IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
+      IAlgorithm_sptr norm = this->createChildAlgorithm("DgsPreprocessData");
       norm->setProperty("InputWorkspace", inputWS);
       norm->setProperty("OutputWorkspace", inputWS);
       norm->setProperty("InputMonitorWorkspace", monWS);
-      norm->executeAsSubAlg();
+      norm->executeAsChildAlg();
       inputWS.reset();
       inputWS = norm->getProperty("OutputWorkspace");
 
@@ -122,12 +122,12 @@ namespace Mantid
       if ("TOF" != detVanIntRangeUnits)
       {
         // Convert the data to the appropriate units
-        IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
+        IAlgorithm_sptr cnvun = this->createChildAlgorithm("ConvertUnits");
         cnvun->setProperty("InputWorkspace", inputWS);
         cnvun->setProperty("OutputWorkspace", inputWS);
         cnvun->setProperty("Target", detVanIntRangeUnits);
         cnvun->setProperty("EMode", "Elastic");
-        cnvun->executeAsSubAlg();
+        cnvun->executeAsChildAlg();
         inputWS = cnvun->getProperty("OutputWorkspace");
       }
 
@@ -137,21 +137,21 @@ namespace Mantid
       binning.push_back(detVanIntRangeHigh - detVanIntRangeLow);
       binning.push_back(detVanIntRangeHigh);
 
-      IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+      IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
       rebin->setProperty("InputWorkspace", inputWS);
       rebin->setProperty("OutputWorkspace", outputWS);
       rebin->setProperty("PreserveEvents", false);
       rebin->setProperty("Params", binning);
-      rebin->executeAsSubAlg();
+      rebin->executeAsChildAlg();
       outputWS = rebin->getProperty("OutputWorkspace");
 
       // Mask and group workspace if necessary.
       MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
-      IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
+      IAlgorithm_sptr remap = this->createChildAlgorithm("DgsRemap");
       remap->setProperty("InputWorkspace", outputWS);
       remap->setProperty("OutputWorkspace", outputWS);
       remap->setProperty("MaskWorkspace", maskWS);
-      remap->executeAsSubAlg();
+      remap->executeAsChildAlg();
       outputWS = remap->getProperty("OutputWorkspace");
 
       const std::string facility = ConfigService::Instance().getFacility().name();
@@ -182,7 +182,7 @@ namespace Mantid
           if (!outputFile.empty() && !boost::starts_with(outputFile, "ChildAlgOutput") &&
               !boost::starts_with(outputFile, "__"))
           {
-            IAlgorithm_sptr save = this->createSubAlgorithm("SaveNexus");
+            IAlgorithm_sptr save = this->createChildAlgorithm("SaveNexus");
             save->setProperty("InputWorkspace", outputWS);
             save->setProperty("FileName", outputFile);
             save->execute();

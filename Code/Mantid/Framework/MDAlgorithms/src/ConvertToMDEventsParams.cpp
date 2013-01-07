@@ -116,7 +116,7 @@ std::string ConvertToMDEventsParams::parseDEMode(const std::string &Q_MODE_ID,co
     if((DE_MODE_ID.compare(dE_modes[Direct])==0)||(DE_MODE_ID.compare(dE_modes[Indir])==0)){
         ndE_dims = 1;
         out_dim_units.push_back("DeltaE");
-        // natural units defined in subalgorithm doing the conversion and their ID has to be defined correctly in class constructor
+        // natural units defined in ChildAlgorithm doing the conversion and their ID has to be defined correctly in class constructor
         natural_units = native_inelastic_unitID;
     }
 
@@ -126,7 +126,7 @@ std::string ConvertToMDEventsParams::parseDEMode(const std::string &Q_MODE_ID,co
     return DE_MODE_ID;
 }
 
-/** Identify the Unit conversion mode, deployed by the subalgorith 
+/** Identify the Unit conversion mode, deployed by the ChildAlgorith 
   * 
   *@param Q_MODE_ID       -- the momentum conversion mode. Unit conversion depends on it
   *@param ws_dim_units    -- vector of input workspace dimensions units ID-s
@@ -352,7 +352,7 @@ void  ConvertToMDEventsParams::getAlgoModes(const std::string &AlgoID, QMode &Q,
 
 }
 
-/** function processes the input arguments and tries to establish what subalgorithm should be deployed; 
+/** function processes the input arguments and tries to establish what ChildAlgorithm should be deployed; 
     *
     * @param inWS           -- input workspace (2D or Events)
     * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
@@ -374,7 +374,7 @@ std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_s
    std::string the_algID;
 
  
-   // identify the matrix conversion part of subalgorithm as function of user input and workspace Matrix parameters (axis)
+   // identify the matrix conversion part of ChildAlgorithm as function of user input and workspace Matrix parameters (axis)
    the_algID = identifyMatrixAlg(inWS, Q_mode_req, dE_mode_req,targetWSUnits,TargWSDescription);
    if(the_algID.find("Unknown")!=std::string::npos){
        convert_log.error()<<" Input parameters indentify uncomplete algorithm ID: "<<the_algID<<std::endl;
@@ -420,7 +420,7 @@ std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_s
     if((emode == 1)||(emode == 2))
     {        
         if(!inWS->run().hasProperty("Ei")){
-            convert_log.error()<<" Conversion sub-algorithm with ID: "<<the_algID<<" (inelastic) needs input energy to be present among run properties\n";
+            convert_log.error()<<" Conversion Child Algorithm with ID: "<<the_algID<<" (inelastic) needs input energy to be present among run properties\n";
             throw(std::invalid_argument(" Needs Input energy to be present for inelastic modes"));
         }
         
@@ -464,7 +464,7 @@ void ConvertToMDEventsParams::getAddDimensionNames(API::MatrixWorkspace_const_sp
 
 }
 
-/** function builds list of dimension names, dimension units and dimension ID-s used to describe target MD workspace as the function of MD workspace and selected subalgorithm
+/** function builds list of dimension names, dimension units and dimension ID-s used to describe target MD workspace as the function of MD workspace and selected ChildAlgorithm
 */
 void ConvertToMDEventsParams::buildMDDimDescription(API::MatrixWorkspace_const_sptr inWS,const std::string &AlgoID,const Strings &other_dim_names,
                               MDEvents::MDWSDescriptionDepricated &TargWSDescription)const

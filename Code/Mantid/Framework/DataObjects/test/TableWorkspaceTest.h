@@ -83,12 +83,18 @@ public:
   void testAll()
   {
     TableWorkspace tw(3);
-    tw.addColumn("int","Number");
-    tw.addColumn("str","Name");
-    tw.addColumn("V3D","Position");
+    Column_sptr intCol = tw.addColumn("int","Number");
+    Column_sptr strCol = tw.addColumn("str","Name");
+    Column_sptr v3dCol = tw.addColumn("V3D","Position");
 
     TS_ASSERT_EQUALS(tw.rowCount(),3);
     TS_ASSERT_EQUALS(tw.columnCount(),3);
+
+    TS_ASSERT_EQUALS(tw.getColumn("Number"),intCol);
+    TS_ASSERT_EQUALS(tw.getColumn("Name"),strCol);
+    TS_ASSERT_EQUALS(tw.getColumn("Position"),v3dCol);
+    // Test trying to add existing column returns null pointer
+    TS_ASSERT( ! tw.addColumn("int","Number") )
 
     tw.getRef<int>("Number",1) = 17;
     tw.cell<std::string>(2,1) = "STRiNG";

@@ -1,9 +1,55 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+ * This algorithm will integrate a list of indexed single-crystal diffraction peaks from a 
+ * PeaksWorkspace, using events from an EventWorkspace.  The indexed peaks are first 
+ * used to determine a UB matrix.  The inverse of that UB matrix is then used to collect
+ * lists of events that are close to peaks in reciprocal space.  An event will be added
+ * to the list of events for a peak provided that the fractional h,k,l value of that
+ * event (obtained by applying UB-inverse to the Q-vector) is closer to the h,k,l of that
+ * peak, than to the h,k,l of any other peak AND the Q-vector for that event is within 
+ * the specified radius of the Q-vector for that peak. 
+ *
+ * When the lists of events near the peaks have been built, the three principal axes of  
+ * the "cloud" of events near each peak are found, and the standard deviations of the 
+ * projections of the events on each of the three principal axes are calculated.  The
+ * principal axes and standard deviations for the events around a peak in the directions
+ * of the principal axes are used to determine an ellipsoidal region for the peak and an 
+ * ellipsoidal shell region for the background. The number of events in the peak 
+ * ellipsoid and background ellipsoidal shell are counted and used to determine the net
+ * integrated intensity of the peak. 
+ *
+ * The ellipsoidal regions used for the peak and background can be obtained in two ways.
+ * First, the user may specify the size of the peak ellipsoid and the inner and outer 
+ * size of the background ellipsoid.  If these are specified, the values will be used
+ * for half the length of the major axis of an ellipsoid centered on the peak.  The 
+ * major axis is in the direction of the principal axis for which the standard deviation
+ * in that direction is largest.  The other two axes for the ellipsoid are in the 
+ * direction of the other two principal axes and are scaled relative to the major axes 
+ * in proportion to their standard deviations.  For example of the standard deviations 
+ * in the direction of the other two princial axes are .8 and .7 times the standard 
+ * deviation in the direction of the major axis, then the ellipse will extend only .8 
+ * and .7 times as far in the direction of those axes, as in the direction of the major 
+ * axis.  Overall, the user specified sizes for the PeakSize, BackgroundInnerSize and
+ * BackgroundOuterSize are similar to the PeakRadius, BackgroundInnerRadius and
+ * BackgrounOuterRadius for the IntegratePeaksMD algorithm.  The difference is that
+ * the regions used in this algorithm are not spherical, but are ellipsoidal with axis
+ * directions obtained from the principal axes of the events near a peak and the 
+ * ellipsoid shape (relative axis lengths) determined by the standard deviations in 
+ * the directions of the principal axes.
+ *
+ * Second, if the user does not specifiy the size of the peak and background ellipsoids, 
+ * then the three axes of the peak ellipsoid are again set to the principal axes of the
+ * nearby events and their axis lengths are set to cover a range of plus or minus
+ * three standard deviations in the axis directions.  In this case, the background 
+ * ellipsoidal shell is chosen to have the same volume as the peak ellipsoid and it's
+ * inner surface is the outer surface of the peak ellipsoid.  The outer surface of the 
+ * background ellipsoidal shell is an ellipsoidal surface with the same relative axis 
+ * lengths as the inner surface. 
+ *
 *WIKI*/
 
 #include <iostream>
 #include <fstream>
+#include <boost/math/special_functions/round.hpp>
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -17,6 +63,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidMDEvents/UnitsConversionHelper.h"
 #include "MantidMDEvents/Integrate3DEvents.h"
 #include "MantidMDEvents/IntegrateEllipsoids.h"
+
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -95,13 +142,11 @@ namespace MDEvents
     // the validator which checks if the workspace has axis and any units
     ws_valid->add<WorkspaceUnitValidator>("TOF");
 
-    declareProperty(new WorkspaceProperty<EventWorkspace>(
-           "InputWorkspace", "", Direction::Input,ws_valid),
-           "An input EventWorkspace with units along X-axis and defined instrument with defined sample");
+    declareProperty(new WorkspaceProperty<EventWorkspace>( "InputWorkspace", "", Direction::Input,ws_valid),
+                    "An input EventWorkspace with units along X-axis and defined instrument with defined sample");
 
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>(
-          "PeaksWorkspace","",Direction::InOut), 
-          "Workspace with Peaks to be integrated, AND UB matrix");
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>( "PeaksWorkspace","",Direction::InOut), 
+                    "Workspace with Peaks to be integrated, AND UB matrix");
 
     boost::shared_ptr<BoundedValidator<double> > mustBePositive(new BoundedValidator<double>());
     mustBePositive->setLower(0.0);
@@ -119,6 +164,10 @@ namespace MDEvents
 
     declareProperty("BackgroundOuterSize", .23, mustBePositive,
                     "Half-length of major axis for outer ellipsoidal surface of background region");
+
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),
+                   "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+                   "with the peaks' integrated intensities.");
   }
 
   //---------------------------------------------------------------------
@@ -140,36 +189,54 @@ namespace MDEvents
       throw std::runtime_error("IntegrateEllipsoids does not work for empty event lists");
     }
 
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
+    PeaksWorkspace_sptr in_peak_ws;
+    in_peak_ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+         AnalysisDataService::Instance().retrieve( getProperty("PeaksWorkspace")) );
 
-    if (!ws)
+    if (!in_peak_ws)
     {
       throw std::runtime_error("Could not read the peaks workspace");
     }
+
+    Mantid::DataObjects::PeaksWorkspace_sptr peak_ws = getProperty("OutputWorkspace");
+    if ( peak_ws != in_peak_ws )
+    {
+      peak_ws = in_peak_ws->clone();
+    }
                                                    // get UBinv and the list of
                                                    // peak Q's for the integrator
-    Geometry::OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
-    Matrix<double> UB = o_lattice.getUB();
-
-    if ( ! Geometry::IndexingUtils::CheckUB( UB ) )
+    std::vector<Peak> & peaks = peak_ws->getPeaks();
+    size_t n_peaks            = peak_ws->getNumberPeaks();
+    size_t indexed_count      = 0;
+    std::vector<V3D> peak_q_list;
+    std::vector<V3D> hkl_vectors;
+    for ( size_t i = 0; i < n_peaks; i++ )         // Note: we skip un-indexed peaks
     {
-       throw std::runtime_error(
-             "The stored UB is not a valid orientation matrix");
+      V3D hkl( peaks[i].getH(), peaks[i].getK(), peaks[i].getL() );  
+      if ( Geometry::IndexingUtils::ValidIndex( hkl, 1.0 ) )    // use tolerance == 1 to 
+                                                                // just check for (0,0,0) 
+      {
+        peak_q_list.push_back( V3D( peaks[i].getQLabFrame() ) );
+        V3D miller_ind( (double)boost::math::iround<double>(hkl[0]), 
+                        (double)boost::math::iround<double>(hkl[1]),
+                        (double)boost::math::iround<double>(hkl[2]) );
+        hkl_vectors.push_back( V3D(miller_ind) );
+        indexed_count++;
+      }
     }
 
+    if ( indexed_count < 3 )
+    {
+      throw std::runtime_error(
+            "At least three linearly independent indexed peaks are needed.");
+    }
+                                             // Get UB using indexed peaks and
+                                             // lab-Q vectors
+    Matrix<double> UB(3,3,false);
+    Geometry::IndexingUtils::Optimize_UB( UB, hkl_vectors, peak_q_list );
     Matrix<double> UBinv( UB );
     UBinv.Invert();
-
-    std::vector<Peak> & peaks = ws->getPeaks();
-    size_t n_peaks            = ws->getNumberPeaks();
-    std::vector<V3D> peak_q_list;
-    for ( size_t i = 0; i < n_peaks; i++ )
-    {
-      V3D q_vector( peaks[i].getQLabFrame() );
-      peak_q_list.push_back( q_vector );
-    }
+    UBinv *= (1.0/(2.0 * M_PI));
 
     double radius = getProperty( "RegionRadius" );
                     
@@ -180,10 +247,6 @@ namespace MDEvents
                                                   // them to the inegrator
     // set up a descripter of where we are going
     this->initTargetWSDescr(wksp);
-
-    size_t coord_map[DIMS] = {0,1,2}; // x->x, y->y, z->z
-    double coord_signs[DIMS] = { 1., 1., 1.}; // for left-handed coords
-//  double coord_signs[DIMS] = {-1.,-1.,-1.}; // for right-handed coords
 
     // units conersion helper
     UnitsConversionHelper unitConv;
@@ -229,7 +292,7 @@ namespace MDEvents
         q_converter->calcMatrixCoord( val, locCoord, signal, errorSq );
         for ( size_t dim = 0; dim < DIMS; ++dim )
         {
-          buffer[dim] = coord_signs[dim] * locCoord[coord_map[dim]];
+          buffer[dim] = locCoord[dim];
         }
         V3D q_vec( buffer );
         event_qs.push_back( q_vec );
@@ -240,6 +303,7 @@ namespace MDEvents
       prog.report();
     } // end of loop over spectra
 
+
     bool   specify_size      = getProperty( "SpecifySize" );
     double peak_radius       = getProperty( "PeakSize" );
     double back_inner_radius = getProperty( "BackgroundInnerSize" );
@@ -248,14 +312,27 @@ namespace MDEvents
     double sigi;
     for ( size_t i = 0; i < n_peaks; i++ )
     {
-      V3D peak_q( peaks[i].getQLabFrame() );
-      integrator.ellipseIntegrateEvents( peak_q, 
-        specify_size, peak_radius, back_inner_radius, back_outer_radius,
-        inti, sigi );
-      std::cout << i << ", " << inti << ", " << sigi << std::endl;
-      peaks[i].setIntensity( inti );
-      peaks[i].setSigmaIntensity( sigi );
+      V3D hkl( peaks[i].getH(), peaks[i].getK(), peaks[i].getL() );
+      if ( Geometry::IndexingUtils::ValidIndex( hkl, 1.0 ) ) 
+      {
+        V3D peak_q( peaks[i].getQLabFrame() );
+        integrator.ellipseIntegrateEvents( peak_q, 
+          specify_size, peak_radius, back_inner_radius, back_outer_radius,
+          inti, sigi );
+        peaks[i].setIntensity( inti );
+        peaks[i].setSigmaIntensity( sigi );
+      }
+      else
+      {
+        peaks[i].setIntensity( 0.0 );
+        peaks[i].setSigmaIntensity( 0.0 );
+      }
+  
     }
+
+    peak_ws->mutableRun().addProperty("PeaksIntegrated", 1, true);
+
+    setProperty("OutputWorkspace", peak_ws);
   }
 
 
@@ -273,9 +350,9 @@ namespace MDEvents
     m_targWSDescr.setLorentsCorr(false);
 
     // generate the detectors table
-    Mantid::API::Algorithm_sptr childAlg = createSubAlgorithm("PreprocessDetectorsToMD",0.,.5);
+    Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD",0.,.5);
     childAlg->setProperty("InputWorkspace",wksp);
-    childAlg->executeAsSubAlg();
+    childAlg->executeAsChildAlg();
 
     DataObjects::TableWorkspace_sptr table = childAlg->getProperty("OutputWorkspace");
     if(!table)

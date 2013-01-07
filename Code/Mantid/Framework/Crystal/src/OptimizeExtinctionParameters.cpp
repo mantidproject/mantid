@@ -214,21 +214,21 @@ namespace Mantid
       std::vector<double> tofParam = Kernel::VectorHelper::splitStringIntoVector<double>(tofParams);
       if (mosaic < 0.0 || rcrystallite < 0.0) return 1e300;
 
-      API::IAlgorithm_sptr tofextinction = createSubAlgorithm("TOFExtinction",0.0,0.2);
+      API::IAlgorithm_sptr tofextinction = createChildAlgorithm("TOFExtinction",0.0,0.2);
       tofextinction->setProperty("InputWorkspace", inputW);
       tofextinction->setProperty("OutputWorkspace", "tmp");
       tofextinction->setProperty("ExtinctionCorrectionType", corrOption);
       tofextinction->setProperty<double>("Mosaic", mosaic);
       tofextinction->setProperty<double>("Cell", tofParam[0]);
       tofextinction->setProperty<double>("RCrystallite", rcrystallite);
-      tofextinction->executeAsSubAlg();
+      tofextinction->executeAsChildAlg();
       PeaksWorkspace_sptr peaksW = tofextinction->getProperty("OutputWorkspace");
 
-      API::IAlgorithm_sptr sorthkl = createSubAlgorithm("SortHKL",0.0,0.2);
+      API::IAlgorithm_sptr sorthkl = createChildAlgorithm("SortHKL",0.0,0.2);
       sorthkl->setProperty("InputWorkspace", peaksW);
       sorthkl->setProperty("OutputWorkspace", peaksW);
       sorthkl->setProperty("PointGroup", pointOption);
-      sorthkl->executeAsSubAlg();
+      sorthkl->executeAsChildAlg();
       double Chisq = sorthkl->getProperty("OutputChi2");
       std::cout << mosaic<<"  "<<rcrystallite<<"  "<<Chisq<<"\n";
       return Chisq;

@@ -4,7 +4,7 @@
 
 #include "MantidMDEvents/MDWSDescriptionDepricated.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsChildAlgFactory.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
@@ -15,7 +15,7 @@ namespace MDAlgorithms
 /** ConvertToMDEvents :
    *  Transfrom a workspace into MD workspace with components defined by user. 
    *
-   * Gateway for number of subalgorithms, some are very important, some are questionable 
+   * Gateway for number of ChildAlgorithms, some are very important, some are questionable 
    * Intended to cover wide range of cases; 
 
    * @date 11-10-2011
@@ -75,11 +75,11 @@ namespace MDAlgorithms
     /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
 
-   /// the class which knows about existing subalgorithms and generates alforithm ID as function of input parameters of this algorithm. 
+   /// the class which knows about existing ChildAlgorithms and generates alforithm ID as function of input parameters of this algorithm. 
     ConvertToMD::ConvertToMDEventsParams ParamParser;   
-    /// The class which keeps map of all existing subalgorithms converting to MDEventWorkspace.
-    /// It returns the pointer to the subalgorithm receiving alogID from ParamParser. Shoud be re-implemented through a singleton if used not only here. 
-    ConvertToMDEventsSubalgFactory  subAlgFactory;
+    /// The class which keeps map of all existing ChildAlgorithms converting to MDEventWorkspace.
+    /// It returns the pointer to the ChildAlgorithm receiving alogID from ParamParser. Shoud be re-implemented through a singleton if used not only here. 
+    ConvertToMDEventsChildAlgFactory  ChildAlgFactory;
   //------------------------------------------------------------------------------------------------------------------------------------------
     protected: //for testing
         static Mantid::Kernel::Logger & getLogger();

@@ -98,7 +98,7 @@ namespace DataObjects
     /// Get the footprint in memory in KB.
     virtual size_t getMemorySize() const;
     /// Creates a new column.
-    bool addColumn(const std::string& type, const std::string& name);
+    API::Column_sptr addColumn(const std::string& type, const std::string& name);
     /// Removes a column.
     void removeColumn( const std::string& name);
     /// Number of columns in the workspace.

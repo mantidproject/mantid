@@ -3,6 +3,7 @@
 #include "MantidGLWidget.h"
 #include "OpenGLError.h"
 #include "PeakMarker2D.h"
+#include "InputController.h"
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -79,6 +80,12 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid
     m_flippedView(false),
     m_startPeakShapes(false)
 {
+    // create and set the move input controller
+    InputControllerMoveUnwrapped* moveController = new InputControllerMoveUnwrapped(this);
+    setInputController(MoveMode,moveController);
+    connect(moveController,SIGNAL(setSelectionRect(QRect)),this,SLOT(setSelectionRect(QRect)));
+    connect(moveController,SIGNAL(zoom()),this,SLOT(zoom()));
+    connect(moveController,SIGNAL(unzoom()),this,SLOT(unzoom()));
 }
 
 UnwrappedSurface::~UnwrappedSurface()
@@ -223,8 +230,7 @@ void UnwrappedSurface::init()
   m_u_max += du;
   m_v_min -= dv;
   m_v_max += dv;
-  m_viewRect = QRectF(QPointF(m_u_min,m_v_max),
-                           QPointF(m_u_max,m_v_min));
+  m_viewRect = RectF( QPointF(m_u_min,m_v_min), QPointF(m_u_max,m_v_max) );
 
 }
 
@@ -241,7 +247,15 @@ void UnwrappedSurface::init()
 void UnwrappedSurface::calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos )
 {
   this->project(udet.u, udet.v, udet.uscale, udet.vscale, pos);
-  calcSize(udet,Mantid::Kernel::V3D(-1,0,0),Mantid::Kernel::V3D(0,1,0));
+    calcSize(udet,Mantid::Kernel::V3D(-1,0,0),Mantid::Kernel::V3D(0,1,0));
+}
+
+/**
+  * Get information about the dimensions of the surface.
+  */
+QString UnwrappedSurface::getDimInfo() const
+{
+    return QString("U: [%1, %2] V: [%3, %4]").arg(m_viewRect.x0()).arg(m_viewRect.x1()).arg(m_viewRect.y0()).arg(m_viewRect.y1());
 }
 
 
@@ -307,10 +321,10 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   int widget_height = widget->height();
 
   // view rectangle in the OpenGL coordinates
-  double view_left = m_viewRect.left();
-  double view_top  = m_viewRect.top();
-  double view_right  = m_viewRect.right();
-  double view_bottom = m_viewRect.bottom();
+  double view_left = m_viewRect.x0();
+  double view_top  = m_viewRect.y1();
+  double view_right  = m_viewRect.x1();
+  double view_bottom = m_viewRect.y0();
 
   // make sure the view rectangle has a finite area
   if (view_left == view_right)
@@ -341,9 +355,9 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   if (OpenGLError::hasError("UnwrappedSurface::drawSurface"))
   {
     OpenGLError::log() << "glOrtho arguments:\n";
-    OpenGLError::log() << m_viewRect.left()<<','<<m_viewRect.right()<<','<<
-      m_viewRect.bottom()<<','<<m_viewRect.top()<<','<<
-      -10<<','<<10<<'\n';
+    OpenGLError::log() << view_left << ',' << view_right << ','
+                       << view_bottom << ',' << view_top << ','
+                       << -10 << ',' << 10 << '\n';
   }
   glMatrixMode(GL_MODELVIEW);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -373,9 +387,9 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
     double h = (ih == 0)?  dh : udet.height/2;
 
     // check that the detector is visible in the current view
-    //if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
-    QRectF detectorRect(udet.u-w,udet.v+h,w*2,h*2);
-    if ( !m_viewRect.intersects(detectorRect) ) continue;
+    if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
+    //QRectF detectorRect(udet.u-w,udet.v+h,w*2,h*2);
+    //if ( !m_viewRect.intersects(detectorRect) ) continue;
 
     // apply the detector's colour
     setColor(int(i),picking);
@@ -781,60 +795,19 @@ void UnwrappedSurface::changeColorMap()
   }
 }
 
-void UnwrappedSurface::mousePressEventMove(QMouseEvent* e)
-{
-  if (e->button() == Qt::LeftButton)
-  {
-    m_leftButtonDown = true;
-    startSelection(e->x(),e->y());
-  }
-}
-
-void UnwrappedSurface::mouseMoveEventMove(QMouseEvent* e)
-{
-  if (m_leftButtonDown)
-  {
-    moveSelection(e->x(),e->y());
-  }
-}
-
-void UnwrappedSurface::mouseReleaseEventMove(QMouseEvent* e)
-{
-  if (m_leftButtonDown)
-  {
-    if (!m_pickImage) // we are in normal mode
-    {
-      if (!m_selectRect.isNull())
-      {
-        zoom();
-      }
-    }
-    endSelection(e->x(),e->y());
-    m_leftButtonDown = false;
-  }
-  else if (e->button() == Qt::RightButton)
-  {
-    unzoom();
-  }
-}
-
-void UnwrappedSurface::wheelEventMove(QWheelEvent*)
-{
-}
-
 QString UnwrappedSurface::getInfoText()const
 {
-  if (m_interactionMode == PickMode)
+  if (m_interactionMode == MoveMode)
   {
-    return getPickInfoText();
+    //return getDimInfo() +
+    return "Left mouse click and drag to zoom in. Right mouse click to zoom out.";
   }
-  QString text = "Left mouse click and drag to zoom in.\nRight mouse click to zoom out.";
-  return text;
+  return ProjectionSurface::getInfoText();
 }
 
-QRectF UnwrappedSurface::getSurfaceBounds()const
+RectF UnwrappedSurface::getSurfaceBounds()const
 {
-  return QRectF(m_viewRect.left(),m_viewRect.bottom(),m_viewRect.width(),-m_viewRect.height());
+  return m_viewRect;
 }
 
 /**
@@ -863,14 +836,17 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
  */
 void UnwrappedSurface::createPeakShapes(const QRect& window)const
 {
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  PeakOverlay& peakShapes = *m_peakShapes.last();
-  PeakMarker2D::Style style = peakShapes.getDefaultStyle(m_peakShapesStyle);
-  m_peakShapesStyle++;
-  peakShapes.setWindow(getSurfaceBounds(),window);
-  peakShapes.createMarkers( style );
-  m_startPeakShapes = false;
-  QApplication::restoreOverrideCursor();
+    if ( !m_peakShapes.isEmpty() )
+    {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        PeakOverlay& peakShapes = *m_peakShapes.last();
+        PeakMarker2D::Style style = peakShapes.getDefaultStyle(m_peakShapesStyle);
+        m_peakShapesStyle++;
+        peakShapes.setWindow(getSurfaceBounds(),window);
+        peakShapes.createMarkers( style );
+        QApplication::restoreOverrideCursor();
+    }
+    m_startPeakShapes = false;
 }
 
 /**
@@ -878,11 +854,11 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
  */
 void UnwrappedSurface::setFlippedView(bool on)
 {
-  m_flippedView = on;
-  qreal left = m_viewRect.left();
-  qreal right = m_viewRect.right();
-  m_viewRect.setLeft(right);
-  m_viewRect.setRight(left);
+    if ( m_flippedView != on )
+    {
+        m_flippedView = on;
+        m_viewRect.xFlip();
+    }
 }
 
 /**
@@ -930,14 +906,14 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
     int u = 0;
     if ( !isFlippedView() )
     {
-      u = static_cast<int>( ( udet.u - m_viewRect.left() ) / dw );
+      u = static_cast<int>( ( udet.u - m_viewRect.x0() ) / dw );
     }
     else
     {
-      u =  static_cast<int>( vwidth - ( udet.u - m_viewRect.right() ) / dw );
+      u =  static_cast<int>( vwidth - ( udet.u - m_viewRect.x1() ) / dw );
     }
 
-    int v = vheight - static_cast<int>(( udet.v - m_viewRect.bottom() ) / dh );
+    int v = vheight - static_cast<int>(( udet.v - m_viewRect.y0() ) / dh );
 
     QColor color;
     int index = int( i );
@@ -957,5 +933,59 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
     paint.fillRect(u - iw/2, v - ih/2, iw, ih, color);
 
   }
+}
+
+/**
+  * Zooms to the specified area. The previous zoom stack is cleared.
+  */
+void UnwrappedSurface::zoom(const QRectF& area)
+{
+  if (!m_zoomStack.isEmpty())
+  {
+    m_viewRect = m_zoomStack.first();
+    m_zoomStack.clear();
+  }
+  m_zoomStack.push(m_viewRect);
+
+  double left = area.left();
+  double top  = area.top();
+  double width = area.width();
+  double height = area.height();
+
+  if (width * m_viewRect.width() < 0)
+  {
+    left += width;
+    width = -width;
+  }
+  if (height * m_viewRect.height() < 0)
+  {
+    top += height;
+    height = -height;
+  }
+  m_viewRect = RectF( QPointF(left,top), QPointF(left+width,top+height) );
+  updateView();
+
+}
+
+void UnwrappedSurface::unzoom()
+{
+  if (!m_zoomStack.isEmpty())
+  {
+    m_viewRect = m_zoomStack.pop();
+    updateView();
+    emit updateInfoText();
+  }
+}
+
+void UnwrappedSurface::zoom()
+{
+  if (!m_viewImage) return;
+  RectF newView = selectionRectUV();
+  if ( newView.isEmpty() ) return;
+  m_zoomStack.push(m_viewRect);
+  m_viewRect = newView;
+  updateView();
+  emptySelectionRect();
+  emit updateInfoText();
 }
 

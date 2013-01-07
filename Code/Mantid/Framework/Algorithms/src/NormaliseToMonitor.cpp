@@ -21,7 +21,7 @@ The error on the integrated monitor spectrum is taken into account in the normal
 
 The data must be histogram, non-distribution data.
 
-===Subalgorithms used===
+===ChildAlgorithms used===
 
 The [[ExtractSingleSpectrum]] algorithm is used to pull out the monitor spectrum if it's part of the InputWorkspace.
 For the 'integrated range' option, the [[Integration]] algorithm is used to integrate the monitor spectrum.
@@ -433,15 +433,15 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWor
  */
 API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const std::size_t index)
 {
-  IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("ExtractSingleSpectrum");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", static_cast<int>(index));
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   MatrixWorkspace_sptr outWS = childAlg->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr alg = createSubAlgorithm("ConvertToMatrixWorkspace");
+  IAlgorithm_sptr alg = createChildAlgorithm("ConvertToMatrixWorkspace");
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outWS);
-  alg->executeAsSubAlg();
+  alg->executeAsChildAlg();
   outWS = alg->getProperty("OutputWorkspace");
 
   // Only get to here if successful
@@ -498,24 +498,24 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
                                                     API::MatrixWorkspace_sptr& outputWorkspace)
 {
   // Add up all the bins so it's just effectively a single value with an error
-  IAlgorithm_sptr integrate = createSubAlgorithm("Integration");
+  IAlgorithm_sptr integrate = createChildAlgorithm("Integration");
   integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_monitor);
   integrate->setProperty("RangeLower",m_integrationMin);
   integrate->setProperty("RangeUpper",m_integrationMax);
   integrate->setProperty<bool>("IncludePartialBins",getProperty("IncludePartialBins"));
 
-  integrate->executeAsSubAlg();
+  integrate->executeAsChildAlg();
 
   // Get back the result
   m_monitor = integrate->getProperty("OutputWorkspace");
 
   // Run the divide algorithm explicitly to enable progress reporting
-  IAlgorithm_sptr divide = createSubAlgorithm("Divide",0.0,1.0);
+  IAlgorithm_sptr divide = createChildAlgorithm("Divide",0.0,1.0);
   divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", inputWorkspace);
   divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", m_monitor);
   divide->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWorkspace);
 
-  divide->executeAsSubAlg();
+  divide->executeAsChildAlg();
 
   // Get back the result
   outputWorkspace = divide->getProperty("OutputWorkspace");

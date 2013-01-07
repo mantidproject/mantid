@@ -131,7 +131,7 @@ namespace CurveFitting
                                   const MantidVec &rawY, const MantidVec& rawE);
 
     /// Calculate d-space value from peak's miller index for thermal neutron
-    double calculateDspaceValue(std::vector<int> hkl, double lattice);
+    // double calculateDspaceValue(std::vector<int> hkl, double lattice);
 
     /// Calcualte value n for thermal neutron peak profile
     void calculateThermalNeutronSpecial(IFunction_sptr mFunction, vector<double> vec_d, vector<double>& vec_n);

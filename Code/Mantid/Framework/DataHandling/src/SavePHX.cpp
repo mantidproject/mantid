@@ -80,12 +80,12 @@ void SavePHX::exec() {
         filename);
   }
 
-   // execute the subalgorithm to calculate the detector's parameters;
-       IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 1, true, 1);
+   // execute the ChildAlgorithm to calculate the detector's parameters;
+       IAlgorithm_sptr   spCalcDetPar = this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
        spCalcDetPar->initialize();
        spCalcDetPar->setPropertyValue("InputWorkspace", inputWorkspace->getName());
        spCalcDetPar->setPropertyValue("ReturnLinearRanges", "0");
-       // in test mode, request the subalgortithm to create output workspace and add it to dataservice
+       // in test mode, request the ChildAlgortithm to create output workspace and add it to dataservice
        if(!det_par_ws_name.empty()){
            spCalcDetPar->setPropertyValue("OutputParTable",det_par_ws_name);
        }

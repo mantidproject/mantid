@@ -122,13 +122,13 @@ namespace DataHandling
     }
     else
     {
-      Algorithm_sptr childAlg = alg->createSubAlgorithm("LoadInstrument",0.0,0.2);
+      Algorithm_sptr childAlg = alg->createChildAlgorithm("LoadInstrument",0.0,0.2);
       MatrixWorkspace_sptr tempWS(new Workspace2D());
       childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
       childAlg->setPropertyValue("Filename", InstrumentFilename);
       childAlg->setPropertyValue("InstrumentName", InstrumentName);
       childAlg->setProperty("RewriteSpectraMap", false);
-      childAlg->executeAsSubAlg();
+      childAlg->executeAsChildAlg();
       inst = tempWS->getInstrument();
     }
 

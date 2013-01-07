@@ -590,13 +590,13 @@ namespace Mantid
       }
     }
 
-    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
+    /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromNexus)
     void LoadISISNexus2::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
 
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       bool executionSuccessful(true);
       try
       {
@@ -607,12 +607,12 @@ namespace Mantid
       }
       catch( std::invalid_argument&)
       {
-        g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
         executionSuccessful = false;
       }
       catch (std::runtime_error&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
         executionSuccessful = false;
       }
       if( executionSuccessful )
@@ -625,7 +625,7 @@ namespace Mantid
           std::string value = updateDets->value<std::string>();
           if(value.substr(0,8)  == "datafile" )
           {
-            IAlgorithm_sptr updateInst = createSubAlgorithm("UpdateInstrumentFromFile");
+            IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
             updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
             updateInst->setPropertyValue("Filename", m_filename);
             if(value  == "datafile-ignore-phi" )
@@ -772,12 +772,12 @@ namespace Mantid
     */
     void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws, NXEntry & entry)
     {
-      IAlgorithm_sptr alg = createSubAlgorithm("LoadNexusLogs", 0.0, 0.5);
+      IAlgorithm_sptr alg = createChildAlgorithm("LoadNexusLogs", 0.0, 0.5);
       alg->setPropertyValue("Filename", this->getProperty("Filename"));
       alg->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
       try
       {
-        alg->executeAsSubAlg();
+        alg->executeAsChildAlg();
       }
       catch(std::runtime_error&)
       {

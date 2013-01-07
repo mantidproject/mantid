@@ -185,17 +185,17 @@ namespace MDAlgorithms
     {
       // First save to the NXS file
       g_log.notice() << "Running SaveMD" << std::endl;
-      IAlgorithm_sptr alg = createSubAlgorithm("SaveMD");
+      IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
       alg->setPropertyValue("Filename", filename);
       alg->setProperty("InputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(out));
-      alg->executeAsSubAlg();
+      alg->executeAsChildAlg();
       // And now re-load it with this file as the backing.
       g_log.notice() << "Running LoadMD" << std::endl;
-      alg = createSubAlgorithm("LoadMD");
+      alg = createChildAlgorithm("LoadMD");
       alg->setPropertyValue("Filename", filename);
       alg->setProperty("FileBackEnd", true);
       alg->setPropertyValue("Memory", getPropertyValue("Memory"));
-      alg->executeAsSubAlg();
+      alg->executeAsChildAlg();
       // Replace the workspace with the loaded, file-backed one
       IMDWorkspace_sptr temp;
       temp = alg->getProperty("OutputWorkspace");

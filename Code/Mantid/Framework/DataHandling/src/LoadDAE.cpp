@@ -388,7 +388,7 @@ namespace Mantid
         std::string outputWorkspace = "OutputWorkspace";
         if (period == 0)
         {
-          // Only run the sub-algorithms once
+          // Only run the Child Algorithms once
           runLoadInstrument(localWorkspace, iName);
           //runLoadLog(localWorkspace );
           // Set the total proton charge for this run
@@ -476,7 +476,7 @@ namespace Mantid
     }
 
 
-    /** Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw).
+    /** Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw).
      *  @param localWorkspace :: The workspace
      *  @param iName :: The instrument name
      */
@@ -487,8 +487,8 @@ namespace Mantid
       size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
       if (i != std::string::npos) instrumentID.erase(i);
 
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
         loadInst->setPropertyValue("InstrumentName", instrumentID);
@@ -498,11 +498,11 @@ namespace Mantid
       }
       catch(std::invalid_argument &)
       {
-        g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
       }
       catch (std::runtime_error&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
       }
 
     }

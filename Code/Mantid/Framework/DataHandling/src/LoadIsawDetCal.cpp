@@ -92,14 +92,14 @@ namespace DataHandling
     MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
             (AnalysisDataService::Instance().retrieve(inname));
 
-    IAlgorithm_sptr alg1 = createSubAlgorithm("MoveInstrumentComponent");
+    IAlgorithm_sptr alg1 = createChildAlgorithm("MoveInstrumentComponent");
     alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
     alg1->setPropertyValue("ComponentName", detname);
     alg1->setProperty("X", x);
     alg1->setProperty("Y", y);
     alg1->setProperty("Z", z);
     alg1->setPropertyValue("RelativePosition", "0");
-    alg1->executeAsSubAlg();
+    alg1->executeAsChildAlg();
 } 
 
   /** Initialisation method
@@ -212,10 +212,10 @@ namespace DataHandling
         // Convert from cm to m
         center(0.0, 0.0, -0.01 * mL1,"moderator", inname);
         //mT0 and time of flight are both in microsec
-        IAlgorithm_sptr alg1 = createSubAlgorithm("ChangeBinOffset");
+        IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
         alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
         alg1->setProperty("Offset", mT0);
-        alg1->executeAsSubAlg();
+        alg1->executeAsChildAlg();
       }
 
       if(line[0] != '5') continue;
@@ -244,13 +244,13 @@ namespace DataHandling
       det = detList[idnum];
       if (det)
       {
-        IAlgorithm_sptr alg1 = createSubAlgorithm("ResizeRectangularDetector");
+        IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
         alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
         alg1->setProperty("ComponentName", det->getName());
         // Convert from cm to m
         alg1->setProperty("ScaleX", 0.01*width/det->xsize());
         alg1->setProperty("ScaleY", 0.01*height/det->ysize());
-        alg1->executeAsSubAlg();
+        alg1->executeAsChildAlg();
 
         // Convert from cm to m
         x *= 0.01;

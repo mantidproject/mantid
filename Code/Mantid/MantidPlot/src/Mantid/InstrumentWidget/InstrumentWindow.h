@@ -87,7 +87,6 @@ public:
   void setViewType(const QString& type);
   /// for saving the instrument window  to mantid project
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
-  //MantidGLWidget* getInstrumentDisplay(){return m_InstrumentDisplay;}
   InstrumentActor* getInstrumentActor(){return m_instrumentActor;}
   bool blocked()const{return m_blocked;}
   void selectTab(int tab);
@@ -161,11 +160,11 @@ public slots:
   void setShowPeakRowFlag(bool on);
   /// Enable OpenGL. Slot called from render tab only - doesn't update the checkbox.
   void enableGL( bool on );
+  void updateInfoText();
 
 private slots:
   void block();
   void unblock();
-  void mouseLeftInstrumentDisplay();
 
 private:
   /// Set newly created projection surface

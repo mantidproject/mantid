@@ -178,7 +178,7 @@ void SetupEQSANSReduction::exec()
   const bool normalizeToMonitor = getProperty("NormaliseToMonitor");
   const std::string monitorRefFile = getPropertyValue("MonitorReferenceFile");
   // If we normalize to monitor, force the loading of monitor data
-  IAlgorithm_sptr normAlg = createSubAlgorithm("EQSANSNormalise");
+  IAlgorithm_sptr normAlg = createChildAlgorithm("EQSANSNormalise");
   if (normalizeToMonitor)
   {
     loadMonitors = true;
@@ -197,7 +197,7 @@ void SetupEQSANSReduction::exec()
   reductionManager->setProperty("NormaliseAlgorithm", normAlg);
 
   // Load algorithm
-  IAlgorithm_sptr loadAlg = createSubAlgorithm("EQSANSLoad");
+  IAlgorithm_sptr loadAlg = createChildAlgorithm("EQSANSLoad");
   const bool useConfigBeam = getProperty("UseConfigBeam");
   loadAlg->setProperty("UseConfigBeam", useConfigBeam);
   const bool useConfigTOFCuts = getProperty("UseConfigTOFCuts");
@@ -238,7 +238,7 @@ void SetupEQSANSReduction::exec()
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
   if (darkCurrentFile.size() > 0)
   {
-    IAlgorithm_sptr darkAlg = createSubAlgorithm("EQSANSDarkCurrentSubtraction");
+    IAlgorithm_sptr darkAlg = createChildAlgorithm("EQSANSDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
     darkAlg->setProperty("OutputDarkCurrentWorkspace", "");
     darkAlg->setPropertyValue("ReductionProperties", reductionManagerName);
@@ -247,7 +247,7 @@ void SetupEQSANSReduction::exec()
   }
 
   // Store default dark current algorithm
-  IAlgorithm_sptr darkDefaultAlg = createSubAlgorithm("EQSANSDarkCurrentSubtraction");
+  IAlgorithm_sptr darkDefaultAlg = createChildAlgorithm("EQSANSDarkCurrentSubtraction");
   darkDefaultAlg->setProperty("OutputDarkCurrentWorkspace", "");
   darkDefaultAlg->setPropertyValue("ReductionProperties", reductionManagerName);
   reductionManager->declareProperty(new AlgorithmProperty("DefaultDarkCurrentAlgorithm"));
@@ -257,7 +257,7 @@ void SetupEQSANSReduction::exec()
   const bool solidAngleCorrection = getProperty("SolidAngleCorrection");
   if (solidAngleCorrection)
   {
-    IAlgorithm_sptr solidAlg = createSubAlgorithm("SANSSolidAngleCorrection");
+    IAlgorithm_sptr solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
     reductionManager->declareProperty(new AlgorithmProperty("SANSSolidAngleCorrection"));
     reductionManager->setProperty("SANSSolidAngleCorrection", solidAlg);
   }
@@ -272,7 +272,7 @@ void SetupEQSANSReduction::exec()
     const bool useDirectBeamMethod = getProperty("UseDirectBeamMethod");
     const double beamRadius = getProperty("BeamRadius");
 
-    IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
+    IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
     ctrAlg->setProperty("Filename", beamCenterFile);
     ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeamMethod);
     if (!isEmpty(beamRadius)) ctrAlg->setProperty("BeamRadius", beamRadius);
@@ -298,7 +298,7 @@ void SetupEQSANSReduction::exec()
     const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
     const double sensitivityBeamCenterY = getProperty("SensitivityBeamCenterY");
 
-    IAlgorithm_sptr effAlg = createSubAlgorithm("SANSSensitivityCorrection");
+    IAlgorithm_sptr effAlg = createChildAlgorithm("SANSSensitivityCorrection");
     effAlg->setProperty("Filename", sensitivityFile);
     effAlg->setProperty("UseSampleDC", useSampleDC);
     effAlg->setProperty("DarkCurrentFile", sensitivityDarkCurrentFile);
@@ -457,7 +457,7 @@ void SetupEQSANSReduction::initializeReduction(boost::shared_ptr<PropertyManager
   g_log.information() << "Reducer script:\n" << script << std::endl;
 
   // Run a snippet of python
-  IAlgorithm_sptr alg = this->createSubAlgorithm("RunPythonScript");
+  IAlgorithm_sptr alg = this->createChildAlgorithm("RunPythonScript");
   alg->setLogging(false);
   alg->setPropertyValue("Code", script);
   alg->execute();

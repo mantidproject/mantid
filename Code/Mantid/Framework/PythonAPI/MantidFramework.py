@@ -1275,7 +1275,7 @@ class MantidPyFramework(FrameworkManager):
             if not parentAlg is None:
                 
                 # Algorithm is being called as part of a Python algorithm.
-                ialg = parentAlg._createSubAlgorithm(ialg, version)
+                ialg = parentAlg._createChildAlgorithm(ialg, version)
 
                 # History is always active until the workflow algorithms are in place
                 ialg.enableHistoryRecordingForChild(True)
@@ -1762,20 +1762,20 @@ class PythonAlgorithm(PyAlgorithmBase):
         else:
             raise TypeError('Unrecognized list type')
         
-    def _createSubAlgProxy(self, ialg, version=-1):
+    def _createChildAlgProxy(self, ialg, version=-1):
         """
         Will accept either a IAlgorithm or a string specifying the algorithm name.
         """
         if isinstance(ialg, str):
-            ialg = self._createSubAlgorithm(str(ialg), version)
-        ialg.setRethrows(True) # TODO get rid of this line # We NEED this line for sub-algorithms.
+            ialg = self._createChildAlgorithm(str(ialg), version)
+        ialg.setRethrows(True) # TODO get rid of this line # We NEED this line for Child Algorithms.
         return IAlgorithmProxy(ialg, self)
         
-    def executeSubAlg(self, algorithm, *args, **kwargs):
+    def executeChildAlg(self, algorithm, *args, **kwargs):
         """
-        Execute an algorithm as a sub-algorithm.
+        Execute an algorithm as a Child Algorithm.
         The method will set the input/output workspace objects so that they can be
-        passed to sub-algs without having to save them in the ADS.
+        passed to Child Algs without having to save them in the ADS.
         
         @param algorithm: mantidsimple algorithm function returning an IAlgorithm object
         @param *args: arguments to pass to the instantiated algorithm
@@ -1783,16 +1783,16 @@ class PythonAlgorithm(PyAlgorithmBase):
         @return: algorithm proxy for the executed algorithm
         """
         if isinstance(algorithm, str):
-            proxy = self._createSubAlgProxy(algorithm)
+            proxy = self._createChildAlgProxy(algorithm)
         else:
             #TODO: check if we still need this after mantidsimple is gone
             if isinstance(algorithm, types.FunctionType):
-                proxy = self._createSubAlgProxy(algorithm.func_name)
+                proxy = self._createChildAlgProxy(algorithm.func_name)
             else:
-                raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function."
+                raise RuntimeError, "PythonAlgorithm.executeChildAlg expects a function."
 
         if not isinstance(proxy, IAlgorithmProxy):
-            raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function returning an IAlgorithm object"                
+            raise RuntimeError, "PythonAlgorithm.executeChildAlg expects a function returning an IAlgorithm object"                
         
         proxy.setPropertyValues(*args, **kwargs)
         proxy.execute()

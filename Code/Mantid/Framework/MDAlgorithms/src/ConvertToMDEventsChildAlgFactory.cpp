@@ -1,4 +1,4 @@
-#include "MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsChildAlgFactory.h"
 /**TODO: FOR DEPRICATION */ 
 
 
@@ -12,30 +12,30 @@ namespace MDAlgorithms
 {
 
 
-/** Get access to a subalgorithm defined by its name
+/** Get access to a ChildAlgorithm defined by its name
   * @param   AlgName -- symbolic name, which defines the algorithm
   * @returns    Pointer fo the algorithm, which do the conversion
   *
-  * Thows invalid_agrument if subalgorithm, defined by the name is not exist (not initated);
+  * Thows invalid_agrument if ChildAlgorithm, defined by the name is not exist (not initated);
 */
-ConvertToMDEventsWSBase* ConvertToMDEventsSubalgFactory::getAlg(const std::string &AlgName)
+ConvertToMDEventsWSBase* ConvertToMDEventsChildAlgFactory::getAlg(const std::string &AlgName)
 {
     auto algoIt  = alg_selector.find(AlgName);
     if (algoIt == alg_selector.end())
     {
-        std::string Error = "Undefined subalgoritm: "+AlgName+" requested ";
+        std::string Error = "Undefined ChildAlgoritm: "+AlgName+" requested ";
         throw(std::invalid_argument(Error));
     }
     return algoIt->second;
 
 }
 
-ConvertToMDEventsSubalgFactory::ConvertToMDEventsSubalgFactory()
+ConvertToMDEventsChildAlgFactory::ConvertToMDEventsChildAlgFactory()
 {
 }
-ConvertToMDEventsSubalgFactory::~ConvertToMDEventsSubalgFactory()
+ConvertToMDEventsChildAlgFactory::~ConvertToMDEventsChildAlgFactory()
 {
-    // clear all initated subalgorithms
+    // clear all initated ChildAlgorithms
     auto it = alg_selector.begin();
     for(; it!=alg_selector.end();++it){
         delete it->second;  
@@ -46,7 +46,7 @@ ConvertToMDEventsSubalgFactory::~ConvertToMDEventsSubalgFactory()
 
 //----------------------------------------------------------------------------------------------
 // AUTOINSTANTIATION OF EXISTING CODE:
-/** helper class to orginize metaloop instansiating various subalgorithms dealing with particular 
+/** helper class to orginize metaloop instansiating various ChildAlgorithms dealing with particular 
   * workspaces and implementing particular user requests */
 template<QMode Q, size_t AlgoNum>
 class LOOP_ALGS{
@@ -59,7 +59,7 @@ private:
     
     };
   public:
-    static inline void EXEC(const ConvertToMD::ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsSubalgFactory *pH){
+    static inline void EXEC(const ConvertToMD::ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsChildAlgFactory *pH){
         // cast loop integers to proper enum type
         CnvrtUnits Conv = static_cast<CnvrtUnits>(CONV);
         AnalMode   Mode = static_cast<AnalMode>(MODE);
@@ -88,7 +88,7 @@ private:
         //MODE => noQ -- no mode conversion ANY_Mode,     
     };
   public:
-    static inline void EXEC(const ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsSubalgFactory *pH){
+    static inline void EXEC(const ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsChildAlgFactory *pH){
 
       // cast loop integers to proper enum type
       CnvrtUnits Conv = static_cast<CnvrtUnits>(CONV);
@@ -111,7 +111,7 @@ private:
 template<ConvertToMD::QMode Q >
 class LOOP_ALGS<Q,0>{
   public:
-      static inline void EXEC(const ConvertToMD::ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsSubalgFactory *pH)
+      static inline void EXEC(const ConvertToMD::ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsChildAlgFactory *pH)
       {
           CnvrtUnits Conv = static_cast<CnvrtUnits>(0);
           AnalMode   Mode = static_cast<AnalMode>(0);
@@ -128,7 +128,7 @@ class LOOP_ALGS<Q,0>{
 template<>
 class LOOP_ALGS<ConvertToMD::NoQ,0>{
   public:
-      static inline void EXEC(const ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsSubalgFactory *pH)
+      static inline void EXEC(const ConvertToMDEventsParams &AlgoKey,ConvertToMDEventsChildAlgFactory *pH)
       {     
           CnvrtUnits Conv = static_cast<CnvrtUnits>(0);
           InputWSType Ws  = static_cast<InputWSType>(0);
@@ -140,19 +140,19 @@ class LOOP_ALGS<ConvertToMD::NoQ,0>{
       } 
 };
 
-/** initiate the subalgorithms and made them availible for getAlg function
-  * @param SubAlgDescriptor  -- the class which has infromation about existing subalgorthms and used to generate subalgorithms keys.
+/** initiate the ChildAlgorithms and made them availible for getAlg function
+  * @param ChildAlgDescriptor  -- the class which has infromation about existing ChildAlgorthms and used to generate ChildAlgorithms keys.
 */
-void ConvertToMDEventsSubalgFactory::init(const ConvertToMD::ConvertToMDEventsParams &SubAlgDescriptor)
+void ConvertToMDEventsChildAlgFactory::init(const ConvertToMD::ConvertToMDEventsParams &ChildAlgDescriptor)
 {
-    if (alg_selector.empty()) // Instantiate the subalgorithms for different cases
+    if (alg_selector.empty()) // Instantiate the ChildAlgorithms for different cases
     {    
     // NoQ --> any Analysis mode will do as it does not depend on it; we may want to convert unuts
-        LOOP_ALGS<NoQ,NInWSTypes*NConvUintsStates>::EXEC(SubAlgDescriptor,this); 
+        LOOP_ALGS<NoQ,NInWSTypes*NConvUintsStates>::EXEC(ChildAlgDescriptor,this); 
     // MOD Q
-       LOOP_ALGS<ModQ,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(SubAlgDescriptor,this);
+       LOOP_ALGS<ModQ,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(ChildAlgDescriptor,this);
     // Q3D
-        LOOP_ALGS<Q3D,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(SubAlgDescriptor,this);
+        LOOP_ALGS<Q3D,NInWSTypes*NConvUintsStates*ANY_Mode*NSampleTypes>::EXEC(ChildAlgDescriptor,this);
     }
 
 }

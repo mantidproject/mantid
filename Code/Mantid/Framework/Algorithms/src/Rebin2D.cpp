@@ -167,7 +167,7 @@ namespace Mantid
       bool Transpose = this->getProperty("Transpose");
       if (Transpose)
       {
-        IAlgorithm_sptr alg = this->createSubAlgorithm("Transpose", 0.9, 1.0);
+        IAlgorithm_sptr alg = this->createChildAlgorithm("Transpose", 0.9, 1.0);
         alg->setProperty("InputWorkspace", outputWS);
         alg->setPropertyValue("OutputWorkspace", "__anonymous");
         alg->execute();

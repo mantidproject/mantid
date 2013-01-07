@@ -91,8 +91,8 @@ struct CoordTransformer
      *
      * In addition it caluclates the property-dependant coordinates 
      *
-     * @param Coord        -- subalgorithm specific number of variables, calculated from properties and placed into specific place of the Coord vector;
-     * @param n_ws_variabes -- subalgorithm specific number of variables, calculated from the workspace data
+     * @param Coord        -- ChildAlgorithm specific number of variables, calculated from properties and placed into specific place of the Coord vector;
+     * @param n_ws_variabes -- ChildAlgorithm specific number of variables, calculated from the workspace data
      *
      * @return true         -- if all Coord are within the range requested by algorithm. false otherwise
      *
@@ -106,7 +106,7 @@ struct CoordTransformer
     }
    
     /** template generalizes the code to calculate Y-variables within the detector's loop of processQND workspace
-     * @param Coord  -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular subalgorithm.
+     * @param Coord  -- current Y coordinate, placed in the position of the Coordinate vector, specific for particular ChildAlgorithm.
      * @param i    -- index of external loop, identifying current y-coordinate
      * 
      * @return true   -- if all Coord are within the range requested by algorithm. false otherwise   
@@ -125,7 +125,7 @@ struct CoordTransformer
      * @param i    -- index of external loop, identifying generic y-coordinate
      * @param j    -- index of internal loop, identifying generic x-coordinate
      * 
-     * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
+     * @param Coord  -- ChildAlgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
      * has to be specialized
@@ -142,7 +142,7 @@ struct CoordTransformer
     * given that the input described by sinble value only
      * @param X    -- X workspace value
      * 
-     * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
+     * @param Coord  -- ChildAlgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
      * has to be specialized    */
@@ -154,7 +154,7 @@ struct CoordTransformer
     /** template generalizes the conversion of single x-variable using unit conversion as the first step 
      * @param X    -- X workspace value
      * 
-     * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
+     * @param Coord  -- ChildAlgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
      * has to be specialized     */

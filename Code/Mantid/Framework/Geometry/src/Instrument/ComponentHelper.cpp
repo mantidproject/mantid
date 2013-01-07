@@ -47,17 +47,11 @@ namespace ComponentHelper
       if (parent)
       {
         newPos -= parent->getPos();
-        Quat rot = parent->getRelativeRot();
+        Quat rot = parent->getRotation();
         rot.inverse();
         rot.rotate(newPos);
       }
-      auto grandParent = parent->getParent();
-      if (grandParent)
-      {
-        Quat rot = grandParent->getRelativeRot();
-        rot.inverse();
-        rot.rotate(newPos);
-      }
+
       // Add a parameter for the new position
       pmap.addV3D(comp.getComponentID(), "pos", newPos);
     }

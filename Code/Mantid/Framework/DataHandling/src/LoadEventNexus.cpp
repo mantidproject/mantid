@@ -2,7 +2,7 @@
 
 The LoadEventNeXus algorithm loads data from an EventNexus file into an [[EventWorkspace]]. The default histogram bin boundaries consist of a single bin able to hold all events (in all pixels), and will have their [[units]] set to time-of-flight. Since it is an [[EventWorkspace]], it can be rebinned to finer bins with no loss of data.
 
-Sample logs, such as motor positions or e.g. temperature vs time, are also loaded using the [[LoadLogsFromSNSNexus]] sub-algorithm.
+Sample logs, such as motor positions or e.g. temperature vs time, are also loaded using the [[LoadLogsFromSNSNexus]] Child Algorithm.
 
 === Optional properties ===
 
@@ -138,6 +138,11 @@ bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime)
   return ((this->startTime == otherStartTime) && (this->numPulses == otherNumPulse));
 }
 
+namespace
+{
+  Poco::Mutex g_eventVectorMutex;
+}
+  
 //===============================================================================================
 //===============================================================================================
 /** This task does the disk IO from loading the NXS file,
@@ -258,6 +263,7 @@ public:
 
     // Which detector IDs were touched?
     std::vector<bool> usedDetIds(alg->eventid_max+1, false);
+
     //Go through all events in the list
     for (std::size_t i = 0; i < numEvents; i++)
     {
@@ -296,6 +302,7 @@ public:
         detid_t detId = event_id[i];
         if (detId <= alg->eventid_max)
         {
+          alg->m_eventVectorMutex.lock();
           // Handle simulated data if present
           if (have_weight)
           {
@@ -327,8 +334,10 @@ public:
               eventVector->push_back( TofEvent(tof, pulsetime) );
 #endif
             }
-            }
-            //Local tof limits
+          }
+          alg->m_eventVectorMutex.unlock();
+
+          //Local tof limits
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
           // Skip any events that are the cause of bad DAS data (e.g. a negative number in uint32 -> 2.4 billion * 100 nanosec = 2.4e8 microsec)
           if (tof < 2e8)
@@ -431,6 +440,7 @@ private:
  * and so will be on a disk IO mutex */
 class LoadBankFromDiskTask : public Task
 {
+
 public:
   //---------------------------------------------------------------------------------------------------
   /** Constructor
@@ -1786,9 +1796,9 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   nxfile.close();
 
   // do the actual work
-  IAlgorithm_sptr loadInst= alg->createSubAlgorithm("LoadInstrument");
+  IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadInstrument");
 
-  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
   try
   {
@@ -1801,11 +1811,11 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
     localWorkspace->populateInstrumentParameters();
   } catch (std::invalid_argument& e)
   {
-    alg->getLogger().information() << "Invalid argument to LoadInstrument sub-algorithm : " << e.what() << std::endl;
+    alg->getLogger().information() << "Invalid argument to LoadInstrument Child Algorithm : " << e.what() << std::endl;
     executionSuccessful = false;
   } catch (std::runtime_error& e)
   {
-    alg->getLogger().information("Unable to successfully run LoadInstrument sub-algorithm");
+    alg->getLogger().information("Unable to successfully run LoadInstrument Child Algorithm");
     alg->getLogger().information(e.what());
     executionSuccessful = false;
   }
@@ -1827,7 +1837,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   std::string value = updateDets->value<std::string>();
   if(value.substr(0,8)  == "datafile" )
   {
-    IAlgorithm_sptr updateInst = alg->createSubAlgorithm("UpdateInstrumentFromFile");
+    IAlgorithm_sptr updateInst = alg->createChildAlgorithm("UpdateInstrumentFromFile");
     updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
     updateInst->setPropertyValue("Filename", nexusfilename);
     if(value  == "datafile-ignore-phi" )
@@ -1862,9 +1872,9 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
   // --------------------- Load DAS Logs -----------------
   //The pulse times will be empty if not specified in the DAS logs.
   BankPulseTimes * out = NULL;
-  IAlgorithm_sptr loadLogs = alg->createSubAlgorithm("LoadNexusLogs");
+  IAlgorithm_sptr loadLogs = alg->createChildAlgorithm("LoadNexusLogs");
 
-  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try
   {
     alg->getLogger().information() << "Loading logs from NeXus file..." << endl;
@@ -2018,7 +2028,7 @@ void LoadEventNexus::runLoadMonitors()
   std::string mon_wsname = this->getProperty("OutputWorkspace");
   mon_wsname.append("_monitors");
 
-  IAlgorithm_sptr loadMonitors = this->createSubAlgorithm("LoadNexusMonitors");
+  IAlgorithm_sptr loadMonitors = this->createChildAlgorithm("LoadNexusMonitors");
   try
   {
     this->g_log.information() << "Loading monitors from NeXus file..."

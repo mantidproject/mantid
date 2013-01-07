@@ -48,11 +48,11 @@ class AlgorithmHistory;
  The base class provides utility methods for accessing
  standard services (event data service etc.); for declaring
  properties which may be configured by the job options
- service; and for creating sub algorithms.
+ service; and for creating Child Algorithms.
  The only base class functionality which may be used in the
  constructor of a concrete algorithm is the declaration of
  member variables as properties. All other functionality,
- i.e. the use of services and the creation of sub-algorithms,
+ i.e. the use of services and the creation of Child Algorithms,
  may be used only in initialise() and afterwards (see the
  Gaudi user guide).
 
@@ -186,7 +186,7 @@ public:
   /** @name IAlgorithm methods */
   void initialize();
   bool execute();
-  void executeAsSubAlg();
+  void executeAsChildAlg();
   virtual std::map<std::string, std::string> validateInputs();
   virtual bool isInitialized() const;
   virtual bool isExecuted() const;
@@ -257,7 +257,7 @@ public:
   static IAlgorithm_sptr fromHistory(const AlgorithmHistory & history);
   //@}
 
-  boost::shared_ptr<Algorithm> createSubAlgorithm(const std::string& name, const double startProgress = -1.,
+  boost::shared_ptr<Algorithm> createChildAlgorithm(const std::string& name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
 
 protected:
@@ -352,8 +352,8 @@ private:
   bool m_runningAsync; ///< Algorithm is running asynchronously
   bool m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
-  mutable double m_startChildProgress; ///< Keeps value for algorithm's progress at start of an sub-algorithm
-  mutable double m_endChildProgress; ///< Keeps value for algorithm's progress at sub-algorithm's finish
+  mutable double m_startChildProgress; ///< Keeps value for algorithm's progress at start of an Child Algorithm
+  mutable double m_endChildProgress; ///< Keeps value for algorithm's progress at Child Algorithm's finish
   AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
   std::string m_OptionalMessage; ///< An optional message string to be displayed in the GUI.
   std::string m_WikiSummary; ///< A summary line for the wiki page.

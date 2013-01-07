@@ -81,13 +81,13 @@ MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string& beamC
 
     if (!m_reductionManager->existsProperty("LoadAlgorithm"))
     {
-      IAlgorithm_sptr loadAlg = createSubAlgorithm("EQSANSLoad", 0.1, 0.3);
+      IAlgorithm_sptr loadAlg = createChildAlgorithm("EQSANSLoad", 0.1, 0.3);
       loadAlg->setProperty("Filename", beamCenterFile);
       loadAlg->setProperty("NoBeamCenter", true);
       loadAlg->setProperty("BeamCenterX", EMPTY_DBL());
       loadAlg->setProperty("BeamCenterY", EMPTY_DBL());
       loadAlg->setProperty("ReductionProperties", reductionManagerName);
-      loadAlg->executeAsSubAlg();
+      loadAlg->executeAsChildAlg();
       finderWS = loadAlg->getProperty("OutputWorkspace");
       m_output_message += "   |Loaded " + beamCenterFile + "\n";
       std::string msg = loadAlg->getPropertyValue("OutputMessage");
@@ -185,7 +185,7 @@ void SANSBeamFinder::exec()
     // HFIR reduction masks the first pixels on each edge of the detector
     if (specialMapping) maskEdges(beamCenterWS, 1,1,1,1);
 
-    IAlgorithm_sptr ctrAlg = createSubAlgorithm("FindCenterOfMassPosition");
+    IAlgorithm_sptr ctrAlg = createChildAlgorithm("FindCenterOfMassPosition");
     ctrAlg->setProperty("InputWorkspace", beamCenterWS);
 
     const bool directBeam = getProperty("UseDirectBeamMethod");
@@ -295,7 +295,7 @@ void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high, int 
     }
   }
 
-  IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors");
+  IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
   maskAlg->setProperty("Workspace", beamCenterWS);
   maskAlg->setProperty("DetectorList", IDs);
   maskAlg->execute();

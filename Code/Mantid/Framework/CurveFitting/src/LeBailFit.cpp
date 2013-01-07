@@ -754,7 +754,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
   // a) Initialize
   std::string fitoutputwsrootname("xLeBailOutput");
 
-  API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", 0.0, 0.2, true);
+  API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
 
   g_log.debug() << "[Before Fit] Function To Fit: " << m_lebailFunction->asString() << std::endl;
@@ -868,7 +868,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
 
 
   /*-----------------------------------------------------------------------
-  API::IAlgorithm_sptr calalg = this->createSubAlgorithm("Fit", 0.0, 0.2, true);
+  API::IAlgorithm_sptr calalg = this->createChildAlgorithm("Fit", 0.0, 0.2, true);
   calalg->initialize();
   calalg->setProperty("Function", boost::shared_ptr<API::IFunction>(m_lebailFunction));
   calalg->setProperty("InputWorkspace", dataWS);
@@ -915,7 +915,7 @@ bool LeBailFit::minimizeFunction(MatrixWorkspace_sptr dataws, size_t wsindex, IF
   std::string fitoutputwsrootname("TempMinimizerOutput");
 
   // 1. Initialize
-  API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
+  API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
   fitalg->initialize();
 
   g_log.debug() << "[DBx534 | Before Fit] Function To Fit: " << function->asString() << std::endl;
@@ -1133,7 +1133,7 @@ void LeBailFit::calBackground(size_t workspaceindex)
 
     // b. Fit peaks in the peak group
     double unitprog = double(ipg)*0.9/double(peakgroups.size());
-    API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", double(ipg)*unitprog, double(ipg+1)*unitprog, true);
+    API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", double(ipg)*unitprog, double(ipg+1)*unitprog, true);
     fitalg->initialize();
 
     fitalg->setProperty("Function", boost::shared_ptr<API::IFunction>(groupedpeaks));
@@ -1341,7 +1341,7 @@ API::MatrixWorkspace_sptr LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inp
   }
 
   // 2.Call  CropWorkspace()
-  API::IAlgorithm_sptr cropalg = this->createSubAlgorithm("CropWorkspace", -1, -1, true);
+  API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
   cropalg->initialize();
 
   cropalg->setProperty("InputWorkspace", inpws);
@@ -1361,7 +1361,7 @@ API::MatrixWorkspace_sptr LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inp
   API::MatrixWorkspace_sptr cropws = cropalg->getProperty("OutputWorkspace");
   if (!cropws)
   {
-    g_log.error() << "Unable to retrieve a Workspace2D object from subalgorithm Crop." << std::endl;
+    g_log.error() << "Unable to retrieve a Workspace2D object from ChildAlgorithm Crop." << std::endl;
   }
   else
   {
@@ -3544,7 +3544,7 @@ void LeBailFit::smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVecto
   Chebyshev_sptr bkgdfunc(new Chebyshev);
   bkgdfunc->setAttributeValue("n", 6);
 
-  API::IAlgorithm_sptr calalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
+  API::IAlgorithm_sptr calalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
   calalg->initialize();
   calalg->setProperty("Function", boost::shared_ptr<API::IFunction>(bkgdfunc));
   calalg->setProperty("InputWorkspace", m_outputWS);

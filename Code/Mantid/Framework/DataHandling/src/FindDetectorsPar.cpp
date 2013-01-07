@@ -1,10 +1,10 @@
 /*WIKI* 
 
 Identifies geometrical parameters of detectors and groups of detectors after the workspaces were grouped using ASCII or XML map file. 
-Located in DataHangdling\Instrument\Detectors group and intended to be used as sub-algorithm of saveNXSPE algorithm, though can be deployed independently. Dynamic casting from iAlgorithm and accessors functions return calculated parameters to saveNXSPE when FindDetectorsPar used as the sub-algorithm of saveNXSPE procedure; 
+Located in DataHangdling\Instrument\Detectors group and intended to be used as Child Algorithm of saveNXSPE algorithm, though can be deployed independently. Dynamic casting from iAlgorithm and accessors functions return calculated parameters to saveNXSPE when FindDetectorsPar used as the Child Algorithm of saveNXSPE procedure; 
 
 
-Internal sub-algorithm identifies the group topology, namely if a group of detectors is arranged into a rectangular shape or in a ring. The algorithm calculates the geometrical centre of the detectors group and 6 points, located within +-1/4 width of the first detector of the group. If the centre or any of these points belong to the group of the detectors itself, the group assumed to have a rectangular topology, and if not -- the cylindrical one (ring).
+Internal Child Algorithm identifies the group topology, namely if a group of detectors is arranged into a rectangular shape or in a ring. The algorithm calculates the geometrical centre of the detectors group and 6 points, located within +-1/4 width of the first detector of the group. If the centre or any of these points belong to the group of the detectors itself, the group assumed to have a rectangular topology, and if not -- the cylindrical one (ring).
 
 Single detector defined to have the rectangular shape.
 
@@ -58,7 +58,7 @@ Kernel::Logger& FindDetectorsPar::g_log=Kernel::Logger::get("DataHandling");
 void FindDetectorsPar::initDocs()
 {
   this->setWikiSummary("Calculates angular positions and sizes of detectors and groups of detectors after the workspace was grouped using ASCII or XML map file. "
-                       "The results can be used to identify the positions of detectors in reciprocal space. Primary usage -- sub-algorithm of [[SaveNXSPE]], [[SavePAR]] or [[SavePHX]] algorithm.");
+                       "The results can be used to identify the positions of detectors in reciprocal space. Primary usage -- Child Algorithm of [[SaveNXSPE]], [[SavePAR]] or [[SavePHX]] algorithm.");
   this->setOptionalMessage("The algorithm returns the angular parameters and second flight path for a workspace detectors (data, usually availble in par or phx file)");
 }
 
