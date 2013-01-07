@@ -410,6 +410,26 @@ public:
       }
   }
 
+ /* void xestGetColDataArrayBool()
+  {
+  Does not work and probably should not 
+     TableWorkspace tw(3);
+     tw.addColumn("bool","MyBoolData");
+
+     bool *pbData =tw.getColDataArray<bool>("MyBoolData");
+     TS_ASSERT(pbData);
+
+
+     for(int i=0;i<3;i++)
+       *(pbData+i) = true;
+
+      std::vector<bool> &MyBools = tw.getColVector<bool>("MyBoolData");
+      for(int i=0;i<3;i++)
+      {
+        TS_ASSERT_EQUALS(*(pbData+i),MyBools[i]);
+      }
+  }*/
+
   void testAddProperty()
   {
     TableWorkspace tw(3);

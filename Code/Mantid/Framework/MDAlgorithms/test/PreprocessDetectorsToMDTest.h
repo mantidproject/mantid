@@ -50,7 +50,7 @@ void testCreateTarget()
   TS_ASSERT(tws);
 
   TS_ASSERT_EQUALS(4,tws->rowCount());
-  TS_ASSERT_EQUALS(7,tws->columnCount());
+  TS_ASSERT_EQUALS(8,tws->columnCount());
 }
 
 
@@ -132,6 +132,7 @@ void testTheAlg()
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testMatrWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","PreprocDetectorsWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("UpdateMasksInfo","1"));
 
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
     TSM_ASSERT("Should be successful ",pAlg->isExecuted());
@@ -173,11 +174,124 @@ void testCreateWSWithEfixed()
     DataObjects::TableWorkspace_sptr tws = boost::dynamic_pointer_cast< DataObjects::TableWorkspace>(wsOut);
     TSM_ASSERT("can not interpet the workspace as table workspace",tws);
 
-     auto &Efixed     = tws->getColVector<float>("eFixed"); 
+     auto &Efixed     = tws->getColVector<float>("eFixed");   
      for(size_t i=0;i<Efixed.size();i++)
      {
        TS_ASSERT_DELTA(13.f,Efixed[i],1.e-6);
      }
+
+
+}
+
+void testUpdateMasks()
+{
+    auto pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(new PrepcocessDetectorsToMDTestHelper()); 
+    // do first run which generates first masks
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testMatrWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","PreprocDetectorsWSMasks"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("GetMaskState","1"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("UpdateMasksInfo","1"));
+
+    TS_ASSERT_THROWS_NOTHING(pAlg->execute());
+    TSM_ASSERT("Should be successful ",pAlg->isExecuted());
+
+    API::Workspace_sptr wsOut =  API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWSMasks");
+    TSM_ASSERT("can not retrieve table worksapce from analysis data service ",wsOut);
+    DataObjects::TableWorkspace_sptr tws = boost::dynamic_pointer_cast< DataObjects::TableWorkspace>(wsOut);
+    TSM_ASSERT("can not interpet the workspace as table workspace",tws);
+
+     auto &maskCol     = tws->getColVector<int>("detMask"); 
+     for(size_t i=0;i<maskCol.size();i++)
+     {
+       TS_ASSERT_EQUALS(0,maskCol[i]);
+     }
+     // now mask a detector and check if masks are updated;
+     auto inputWS  =boost::dynamic_pointer_cast<API::MatrixWorkspace >(API::AnalysisDataService::Instance().retrieve("testMatrWS"));
+     const size_t nRows = inputWS->getNumberHistograms();
+
+     // build detectors ID list to mask
+     std::vector<detid_t> detectorList;  detectorList.reserve(nRows);
+     std::vector<size_t> indexLis;    indexLis.reserve(nRows);
+     for (size_t i = 0; i < nRows; i++)
+     {   
+        // get detector or detector group which corresponds to the spectra i
+        Geometry::IDetector_const_sptr spDet;
+        try
+        {
+          spDet= inputWS->getDetector(i);      
+        }
+        catch(Kernel::Exception::NotFoundError &)
+        {
+          continue;
+        }
+
+        // Check that we aren't dealing with monitor...
+        if (spDet->isMonitor())continue;   
+
+        indexLis.push_back(i);
+        //detectorList.push_back(spDet->getID());
+      }
+
+      // Now mask all detectors in the workspace
+      //Geometry::ParameterMap& pmap = inputWS->instrumentParameters();
+      //std::vector<detid_t>::const_iterator it;
+      //Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
+      //for (it = detectorList.begin(); it != detectorList.end(); ++it)
+      //{
+      //    try
+      //    {
+      //      if ( const Geometry::ComponentID det = instrument->getDetector(*it)->getComponentID() ) pmap.addBool(det,"masked",true);
+      //    }
+      //    catch(Kernel::Exception::NotFoundError &)        
+      //    {
+      //    }
+      //}
+   std::vector<size_t>::const_iterator wit;
+   for (wit = indexLis.begin(); wit != indexLis.end(); ++wit)
+   {
+    inputWS->maskWorkspaceIndex(*wit);
+
+   }
+  // let's retrieve masks now
+
+      TS_ASSERT_THROWS_NOTHING(pAlg->execute());
+      TSM_ASSERT("Should be successful ",pAlg->isExecuted());
+
+      // old table ws sp still should be valid amd mask column should still be the same
+      // auto &maskCol     = tws->getColVector<int>("detMask"); 
+      // all detectors should be masked now
+      for(size_t i=0;i<maskCol.size();i++)
+      {
+       TS_ASSERT_EQUALS(1,maskCol[i]);
+      }
+
+
+
+
+     API::AnalysisDataService::Instance().remove("PreprocDetectorsWSMasks");
+}
+void testNoMasksColumnTrhows()
+{
+    auto pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(new PrepcocessDetectorsToMDTestHelper()); 
+    // do first run which generates first masks
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testMatrWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","PreprocDetectorsWSMasks"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("GetMaskState","0"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("UpdateMasksInfo","0"));
+
+    TS_ASSERT_THROWS_NOTHING(pAlg->execute());
+    TSM_ASSERT("Should be successful ",pAlg->isExecuted());
+
+    API::Workspace_sptr wsOut =  API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWSMasks");
+    TSM_ASSERT("can not retrieve table worksapce from analysis data service ",wsOut);
+    DataObjects::TableWorkspace_sptr tws = boost::dynamic_pointer_cast< DataObjects::TableWorkspace>(wsOut);
+    TSM_ASSERT("can not interpet the workspace as table workspace",tws);
+
+    TSM_ASSERT_THROWS("No such column",tws->getColVector<int>("detMask"),std::runtime_error); 
+
+
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("GetMaskState","1"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("UpdateMasksInfo","1"));
 
 }
 
