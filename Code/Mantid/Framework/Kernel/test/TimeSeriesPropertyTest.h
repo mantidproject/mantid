@@ -491,7 +491,7 @@ public:
     TS_ASSERT_DELTA( intLog->averageValueInFilter(filter), 1.75, 0.001 );
 
     // Check the correct behaviour of empty of single value logs.
-    TS_ASSERT( isnan(dProp->averageValueInFilter(filter)) );
+    TS_ASSERT( boost::math::isnan(dProp->averageValueInFilter(filter)) );
     iProp->addValue(DateAndTime("2010-11-30T16:17:25"),99);
     TS_ASSERT_EQUALS( iProp->averageValueInFilter(filter), 99.0 );
 
