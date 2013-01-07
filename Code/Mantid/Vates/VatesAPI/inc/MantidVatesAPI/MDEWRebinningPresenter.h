@@ -72,7 +72,7 @@ namespace Mantid
 
       void persistReductionKnowledge(vtkDataSet* out_ds, const RebinningKnowledgeSerializer& xmlGenerator, const char* id);
       std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_sptr dimension) const;
-      std::string extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, double length, Mantid::Geometry::IMDDimension_sptr dimension) const;
+      std::string extractFormattedPropertyFromDimension(const Mantid::Kernel::V3D& basis, const size_t totalNDims, double length, Mantid::Geometry::IMDDimension_sptr dimension) const;
       void addFunctionKnowledge();
 
       ///Parser used to process input vtk to extract metadata.

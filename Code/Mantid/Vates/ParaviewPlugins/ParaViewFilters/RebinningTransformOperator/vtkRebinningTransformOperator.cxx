@@ -381,15 +381,6 @@ void vtkRebinningTransformOperator::SetThresholdRangeStrategyIndex(std::string s
   }
 }
 
-void vtkRebinningTransformOperator::SetInOriginalCoords(bool inOriginalCoords)
-{
-  if(inOriginalCoords != m_bTransformVis)
-  {
-    m_bTransformVis = inOriginalCoords;
-    this->Modified();
-  }
-}
-
 const char* vtkRebinningTransformOperator::GetInputGeometryXML()
 {
   try
