@@ -30,7 +30,7 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include "MantidKernel/ListValidator.h"
 #include "MantidMDEvents/ConvToMDSelector.h"
 #include "MantidDataObjects/TableWorkspace.h" 
-#include "MantidMDEvents/MDTransfDEHelper.h"
+
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -136,6 +136,11 @@ ConvertToMD::init()
       "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another.  </span>\n"
        "In this case this property has to be set to ""-"" sting (without quotes) or empty (possible from script only) to force\n"
        "the workspace recalculation each time the algorithm is invoked");
+
+    declareProperty(new PropertyWithValue<bool>("UpdateMasks", false, Direction::Input),
+           "if PreprocessDetectorWS used to build a workspace with preprocessed detectors and the workspaces are different by just different masked monitors,\n"
+           " setting this option to true updates the detectors masks only for all subsequent calls to the algorithm.\n"
+           "<span style=""color:#FF0000"">This is temporary solution necessary untill Mantid masks spectra by 0 rather then by NaN</span>");
     // if one needs to use Lorentz corrections
     declareProperty(new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input), 
         "Correct the weights of events or signals and errors transformed into reciprocal space by multiplying them by the Lorentz multiplier: sin(theta)^2/lambda^4.\n"
@@ -212,7 +217,7 @@ void ConvertToMD::exec()
        m_OutWSWrapper->setMDWS(spws);
  
     // preprocess detectors;
-    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D,dEModReq);
+    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D,dEModReq,getProperty("UpdateMasks"));
 
  
     //DO THE JOB:
@@ -375,10 +380,11 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
   *@returns TableWorkspace_const_sptr the pointer to the table workspace which contains positions of the preprocessed detectors
   *         Depenting on the algorithm parameters, this worksapce is also stored in the analysis data service and may have additional properties.
  */
-DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested)
+DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,bool updateMasks)
 {
 
     DataObjects::TableWorkspace_sptr TargTableWS;
+    CnvrtToMD::EModes Emode;
 
     // Do we need to reuse output workspace
     bool storeInDataService(true);
@@ -406,38 +412,22 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
           std::string currentWSInstrumentName = InWS2D->getInstrument()->getName();
           std::string oldInstrName            = TargTableWS->getLogs()->getPropertyValueAsType<std::string>("InstrumentName");
 
-          if(oldInstrName==currentWSInstrumentName) return TargTableWS;
+          if(oldInstrName==currentWSInstrumentName)
+          { 
+            if(!updateMasks) return TargTableWS;
+            //Target workspace with preprocessed detectors exists and seems is correct one. 
+            // We still need to update masked detectors information
+            TargTableWS = this->runPreprocessDetectorsToMDChildUpdatingMasks(InWS2D,OutWSName,dEModeRequested,Emode);
+            return TargTableWS;
+          }
+        }
+        else // there is a workspace in the data service with the same name but this ws is not suitable as target for this algorithm. 
+        {    // Should delete this WS from the dataservice
+          API::AnalysisDataService::Instance().remove(OutWSName);
         }
     }
     // No result found in analysis data service or the result is unsatisfactory. Try to calculate target workspace.  
-
-    // if input workspace does not exist in analysis data service, we have to add it there to work with the Child Algorithm 
-    std::string InWSName = InWS2D->getName();
-    if(!API::AnalysisDataService::Instance().doesExist(InWSName))
-    {
-       if(InWSName.empty())InWSName = "ImputMatrixWS";
-       // wery bad, but what can we do otherwise... -> pool out the class pointer which is not const 
-       // add input matrix ws to the analysis data service in order for ChildAlgorithm to retrieve it. 
-       API::AnalysisDataService::Instance().addOrReplace(InWSName,m_InWS2D);
-    }
-
-    Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD",0.,1.);
-    if(!childAlg)throw(std::runtime_error("Can not create child ChildAlgorithm to preprocess detectors"));
-    childAlg->setProperty("InputWorkspace",InWSName);
-    childAlg->setProperty("OutputWorkspace",OutWSName);
-
- // check and get energy conversion mode to define additional ChildAlgorithm parameters
-    MDTransfDEHelper dEChecker;
-    CnvrtToMD::EModes Emode = dEChecker.getEmode(dEModeRequested);
-    if(Emode == CnvrtToMD::Indir)  // TODO: redefine this through Kernel::Emodes
-      childAlg->setProperty("GetEFixed",true); 
-
-
-    childAlg->execute();
-    if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child ChildAlgorithm to preprocess detectors"));
-
-    TargTableWS = childAlg->getProperty("OutputWorkspace");
-    if(!TargTableWS)throw(std::runtime_error("Can not retrieve results of child ChildAlgorithm to preprocess detectors work"));
+    TargTableWS =this->runPreprocessDetectorsToMDChildUpdatingMasks(InWS2D,OutWSName,dEModeRequested,Emode);
 
     if(storeInDataService)
       API::AnalysisDataService::Instance().addOrReplace(OutWSName,TargTableWS);
@@ -470,6 +460,45 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
     return TargTableWS;
 }
 
+DataObjects::TableWorkspace_sptr  ConvertToMD::runPreprocessDetectorsToMDChildUpdatingMasks(Mantid::API::MatrixWorkspace_const_sptr InWS2D,
+                                                                                                  const std::string &OutWSName,const std::string &dEModeRequested,CnvrtToMD::EModes &Emode)
+{
+   // prospective result
+    DataObjects::TableWorkspace_sptr TargTableWS;
+
+    // if input workspace does not exist in analysis data service, we have to add it there to work with the Child Algorithm 
+    std::string InWSName = InWS2D->getName();
+    if(!API::AnalysisDataService::Instance().doesExist(InWSName))
+    {
+       if(InWSName.empty())InWSName = "ImputMatrixWS";
+       // wery bad, but what can we do otherwise... -> pool out the class pointer which is not const 
+       // add input matrix ws to the analysis data service in order for ChildAlgorithm to retrieve it. 
+       API::AnalysisDataService::Instance().addOrReplace(InWSName,m_InWS2D);
+    }
+
+    Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD",0.,1.);
+    if(!childAlg)throw(std::runtime_error("Can not create child ChildAlgorithm to preprocess detectors"));
+    childAlg->setProperty("InputWorkspace",InWSName);
+    childAlg->setProperty("OutputWorkspace",OutWSName);
+    childAlg->setProperty("GetMaskState",true);
+    childAlg->setProperty("UpdateMasksInfo",true);
+    childAlg->setProperty("OutputWorkspace",OutWSName);
+
+ // check and get energy conversion mode to define additional ChildAlgorithm parameters
+    MDTransfDEHelper dEChecker;
+    Emode = dEChecker.getEmode(dEModeRequested);
+    if(Emode == CnvrtToMD::Indir)  // TODO: redefine this through Kernel::Emodes
+      childAlg->setProperty("GetEFixed",true); 
+
+
+    childAlg->execute();
+    if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child algorithm PreprocessDetectorsToMD"));
+
+    TargTableWS = childAlg->getProperty("OutputWorkspace");
+    if(!TargTableWS)throw(std::runtime_error("Can not retrieve results of child algorithm PreprocessDetectorsToMD"));
+
+    return TargTableWS;
+}
 
 } // namespace Mantid
 } // namespace MDAlgorithms

@@ -105,6 +105,8 @@ protected:
     double m_Ei;
     // pointer to detector specific input energy (eFixed) defined for indirect instruments; This one is relewant to indirect instruments only;
     float *m_pEfixedArray;
+    // pointer to the array which contains detectors masks. TODO: It is here untill Mantid masks spectra by 0 instead of NaNs, when switched to NaN-s -- remove
+    int   *m_pDetMasks;
 private:
      /// how to transform workspace data in elastic case
     inline bool calcMatrixCoordElastic(const double &k0,std::vector<coord_t> &Coored)const;

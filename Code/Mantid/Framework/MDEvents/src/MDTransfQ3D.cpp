@@ -130,6 +130,11 @@ namespace Mantid
         m_Ei = double(*(m_pEfixedArray+i));
         m_Ki = sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
       }
+      // if masks are defined and detector masked -- no further calculations
+      if(m_pDetMasks)
+      {
+        if(*(m_pDetMasks+i)>0)return false;
+      }
 
       return true;
     }
@@ -138,6 +143,7 @@ namespace Mantid
     void MDTransfQ3D::initialize(const MDWSDescription &ConvParams)
     { 
       m_pEfixedArray = NULL;
+      m_pDetMasks    = NULL;
       //********** Generic part of initialization, common for elastic and inelastic modes:
       // get transformation matrix (needed for CrystalAsPoder mode)
       m_RotMat = ConvParams.getTransfMatrix();
@@ -182,6 +188,7 @@ namespace Mantid
         }
       }
 
+      m_pDetMasks =  ConvParams.m_PreprDetTable->getColDataArray<int>("detMask");
     }
     /**method returns default ID-s for ModQ elastic and inelastic modes. The ID-s are related to the units, 
     * this class produces its ouptut in. 

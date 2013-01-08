@@ -7,6 +7,8 @@
 #include "MantidMDEvents/ConvToMDBase.h"
 
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
+//TODO: redefine this through Kernel::Emodes
+#include "MantidMDEvents/MDTransfDEHelper.h"
 
 
 namespace Mantid
@@ -95,7 +97,10 @@ namespace MDAlgorithms
        void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;
 
        // 
-       DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested);
+       DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,bool updateMasks);
+
+       DataObjects::TableWorkspace_sptr runPreprocessDetectorsToMDChildUpdatingMasks(Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &OutWSName,
+                                                                                           const std::string &dEModeRequested,MDEvents::CnvrtToMD::EModes &Emode);
  };
 
 } // namespace Mantid

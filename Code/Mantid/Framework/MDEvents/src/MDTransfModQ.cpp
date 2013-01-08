@@ -96,6 +96,11 @@ namespace Mantid
         m_Ei = double(*(m_pEfixedArray+i));
         m_Ki = sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
       }
+      // if spectra masked, this spectra should be excluded
+      if(m_pDetMasks)
+      {
+        if(*(m_pDetMasks+i)>0)return false;
+      }
       return true;
     }
     /** function calculates workspace-dependent coordinates in inelastic case. 
@@ -194,7 +199,7 @@ namespace Mantid
           " is more or equal then Max Q^2 value: "+boost::lexical_cast<std::string>(m_DimMax[0]);
         throw(std::invalid_argument(ERR));
       }
-      this->m_AddDimCoordinates = ConvParams.getAddCoord();
+      m_AddDimCoordinates = ConvParams.getAddCoord();
 
       //************   specific part of the initialization, dependent on emode:
       m_Emode      = ConvParams.getEMode();
@@ -219,10 +224,11 @@ namespace Mantid
 
         m_pEfixedArray=NULL;
         if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
-      }else{
-        if (m_Emode != CnvrtToMD::Elastic)throw(std::invalid_argument("MDTransfModQ::initialize::Unknown energy conversion mode"));
       }
-
+      else
+        if (m_Emode != CnvrtToMD::Elastic)throw(std::invalid_argument("MDTransfModQ::initialize::Unknown energy conversion mode"));
+      
+      m_pDetMasks =  ConvParams.m_PreprDetTable->getColDataArray<int>("detMask");
     }
     /**method returns default ID-s for ModQ elastic and inelastic modes. The ID-s are related to the units, 
     * this class produces its ouptut in. 

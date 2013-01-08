@@ -94,7 +94,10 @@ namespace Mantid
           {
             int * pMasksArray  = targWS->getColDataArray<int>("detMask");
             if(pMasksArray) updateMasks = true;
-          }     
+            // was this workspace calculated without eFixed and now we need one?
+            if(this->getProperty("GetEFixed") && !targWS->getColDataArray<float>("eFixed"))updateMasks=false;
+          }
+
         }      
       }
 
