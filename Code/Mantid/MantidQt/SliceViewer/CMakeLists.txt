@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/PhysicalCrossPeak.cpp
 	src/PhysicalSphericalPeak.cpp
 	src/ProxyCompositePeaksPresenter.cpp
+	src/QPeaksTableModel.cpp
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
@@ -64,6 +65,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PhysicalCrossPeak.h
 	inc/MantidQtSliceViewer/PhysicalSphericalPeak.h
 	inc/MantidQtSliceViewer/ProxyCompositePeaksPresenter.h
+	inc/MantidQtSliceViewer/QPeaksTableModel.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h

@@ -5,7 +5,6 @@
 #include "DllOption.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "ui_PeaksWorkspaceWidget.h"
-
 namespace MantidQt
 {
 namespace SliceViewer
@@ -37,13 +36,17 @@ namespace SliceViewer
     /// Background colour
     QColor m_backgroundColour;
 
+    int m_originalTableWidth;
+
+    virtual void resizeEvent(QResizeEvent*);
+
   private slots:
-      void onExpandChanged(bool);
       void onBackgroundColourClicked();
       void onForegroundColourClicked();
       void onShowBackgroundChanged(bool);
       void onRemoveWorkspaceClicked();
       void onToggleHideInPlot(bool);
+      void onTableClicked(const QModelIndex&);
   };
 
 } //namespace
