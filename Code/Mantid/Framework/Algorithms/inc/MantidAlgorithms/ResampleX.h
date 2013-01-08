@@ -3,6 +3,7 @@
 
 #include <map>
 #include "MantidKernel/System.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid
@@ -10,7 +11,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** RebinRagged : TODO: DESCRIPTION
+  /** ResampleX : TODO: DESCRIPTION
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -32,11 +33,11 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport RebinRagged  : public API::Algorithm
+  class DLLExport ResampleX  : public Algorithms::Rebin
   {
   public:
-    RebinRagged();
-    virtual ~RebinRagged();
+    ResampleX();
+    virtual ~ResampleX();
     
     virtual const std::string name() const;
     virtual int version() const;

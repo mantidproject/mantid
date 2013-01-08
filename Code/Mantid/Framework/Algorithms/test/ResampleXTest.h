@@ -3,31 +3,31 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/RebinRagged.h"
+#include "MantidAlgorithms/ResampleX.h"
 
 using namespace Mantid::API;
-using Mantid::Algorithms::RebinRagged;
+using Mantid::Algorithms::ResampleX;
 using Mantid::MantidVec;
 
-class RebinRaggedTest : public CxxTest::TestSuite
+class ResampleXTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RebinRaggedTest *createSuite() { return new RebinRaggedTest(); }
-  static void destroySuite( RebinRaggedTest *suite ) { delete suite; }
+  static ResampleXTest *createSuite() { return new ResampleXTest(); }
+  static void destroySuite( ResampleXTest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    RebinRagged alg;
+    ResampleX alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
   }
   
   void test_linear_binning_histogram()
   {
-    RebinRagged alg;
+    ResampleX alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
 
@@ -50,7 +50,7 @@ public:
 
   void test_linear_binning_density()
   {
-    RebinRagged alg;
+    ResampleX alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
 
@@ -73,7 +73,7 @@ public:
 
   void test_log_binning_histogram()
   {
-    RebinRagged alg;
+    ResampleX alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
 
@@ -101,7 +101,7 @@ public:
 
   void test_log_binning_density()
   {
-    RebinRagged alg;
+    ResampleX alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
 
@@ -129,9 +129,9 @@ public:
 
   void xtest_exec()
   {
-    std::string outWSName("RebinRagged_out");
+    std::string outWSName("ResampleX_out");
 
-    RebinRagged alg;
+    ResampleX alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
 

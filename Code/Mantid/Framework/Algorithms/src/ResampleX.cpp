@@ -3,7 +3,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 *WIKI*/
 
 #include <sstream>
-#include "MantidAlgorithms/RebinRagged.h"
+#include "MantidAlgorithms/ResampleX.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -24,46 +24,46 @@ namespace Algorithms
   using std::vector;
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(RebinRagged)
+  DECLARE_ALGORITHM(ResampleX)
   
 
 
   //----------------------------------------------------------------------------------------------
   /// Constructor
-  RebinRagged::RebinRagged(): m_useLogBinning(true), m_preserveEvents(true), m_numBins(0),
+  ResampleX::ResampleX(): m_useLogBinning(true), m_preserveEvents(true), m_numBins(0),
     m_isDistribution(false), m_isHistogram(true)
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /// Destructor
-  RebinRagged::~RebinRagged()
+  ResampleX::~ResampleX()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string RebinRagged::name() const
+  const std::string ResampleX::name() const
   {
-    return "RebinRagged"; // TODO change to ResampleX
+    return "ResampleX"; // TODO change to ResampleX
   }
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int RebinRagged::version() const
+  int ResampleX::version() const
   {
     return 1;
   }
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string RebinRagged::category() const
+  const std::string ResampleX::category() const
   {
     return "Transforms\\Rebin";
   }
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void RebinRagged::initDocs()
+  void ResampleX::initDocs()
   {
     this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
     this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
@@ -72,7 +72,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void RebinRagged::init()
+  void ResampleX::init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
@@ -94,7 +94,7 @@ namespace Algorithms
 
   /** More complicated checks of parameters and their relations. @see Algorithm::validateInputs
    */
-  map<string, string> RebinRagged::validateInputs()
+  map<string, string> ResampleX::validateInputs()
   {
     map<string, string> errors;
     vector<double> xmins = getProperty("XMin");
@@ -171,13 +171,13 @@ namespace Algorithms
   }
 
   /**
-   * Set the instance variables before running a test of @link RebinRagged::determineBinning.
+   * Set the instance variables before running a test of @link ResampleX::determineBinning.
    *
    * @param numBins The number of bins that will be used.
    * @param useLogBins True if you want log binning.
    * @param isDist True if you want binning for a histogram.
    */
-  void RebinRagged::setOptions(const int numBins, const bool useLogBins, const bool isDist)
+  void ResampleX::setOptions(const int numBins, const bool useLogBins, const bool isDist)
   {
     m_numBins = numBins;
     m_useLogBinning = useLogBins;
@@ -193,7 +193,7 @@ namespace Algorithms
    *
    * @return The final delta value (absolute value).
    */
-  double RebinRagged::determineBinning(MantidVec& xValues, const double xmin, const double xmax)
+  double ResampleX::determineBinning(MantidVec& xValues, const double xmin, const double xmax)
   {
     xValues.clear(); // clear out the x-values
 
@@ -278,7 +278,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void RebinRagged::exec()
+  void ResampleX::exec()
   {
     // generically having access to the input workspace is a good idea
     MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -402,6 +402,97 @@ namespace Algorithms
         setProperty("OutputWorkspace", outputWS);
       }
       return;
+    }
+    else // (inputeventWS != NULL)
+    {
+      // workspace2d ----------------------------------------------------------
+      if ( ! m_isHistogram )
+      {
+        g_log.information() << "Rebin: Converting Data to Histogram.\n";
+        Mantid::API::Algorithm_sptr ChildAlg = createChildAlgorithm("ConvertToHistogram");
+        ChildAlg->initialize();
+        ChildAlg->setProperty("InputWorkspace", inputWS);
+        ChildAlg->execute();
+        inputWS = ChildAlg->getProperty("OutputWorkspace");
+      }
+
+      // This will be the output workspace (exact type may vary)
+      API::MatrixWorkspace_sptr outputWS;
+
+      // make output Workspace the same type is the input, but with new length of signal array
+      outputWS = API::WorkspaceFactory::Instance().create(inputWS,numSpectra,m_numBins,m_numBins-1);
+
+
+      // Copy over the 'vertical' axis
+      if (inputWS->axes() > 1) outputWS->replaceAxis( 1, inputWS->getAxis(1)->clone(outputWS.get()) );
+
+      Progress prog(this,0.0,1.0,numSpectra);
+      PARALLEL_FOR2(inputWS,outputWS)
+      for (int wkspIndex=0; wkspIndex <  numSpectra;++wkspIndex)
+      {
+        PARALLEL_START_INTERUPT_REGION
+        // get const references to input Workspace arrays (no copying)
+        const MantidVec& XValues = inputWS->readX(wkspIndex);
+        const MantidVec& YValues = inputWS->readY(wkspIndex);
+        const MantidVec& YErrors = inputWS->readE(wkspIndex);
+
+        //get references to output workspace data (no copying)
+        MantidVec& YValues_new=outputWS->dataY(wkspIndex);
+        MantidVec& YErrors_new=outputWS->dataE(wkspIndex);
+
+        // create new output X axis
+        MantidVec XValues_new;
+        double delta = this->determineBinning(XValues_new, xmins[wkspIndex], xmaxs[wkspIndex]);
+        g_log.information() << "delta[wkspindex=" << wkspIndex << "] = " << delta << "\n";
+//        outputWS->setX(wkspIndex, xValues);
+//        const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());
+
+        // output data arrays are implicitly filled by function
+        try {
+          VectorHelper::rebin(XValues,YValues,YErrors,XValues_new,YValues_new,YErrors_new, m_isDistribution);
+        } catch (std::exception& ex)
+        {
+          g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+          throw;
+        }
+
+        // Populate the output workspace X values
+        outputWS->setX(wkspIndex,XValues_new);
+
+        prog.report(name());
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+      outputWS->isDistribution(m_isDistribution);
+
+      // Now propagate any masking correctly to the output workspace
+      // More efficient to have this in a separate loop because
+      // MatrixWorkspace::maskBins blocks multi-threading
+      for (int wkspIndex=0; wkspIndex <  numSpectra; ++wkspIndex)
+      {
+        if ( inputWS->hasMaskedBins(wkspIndex) )  // Does the current spectrum have any masked bins?
+        {
+          this->propagateMasks(inputWS,outputWS,wkspIndex);
+        }
+      }
+      //Copy the units over too.
+      for (int i=0; i < outputWS->axes(); ++i)
+      {
+        outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
+      }
+
+      if ( ! m_isHistogram )
+      {
+        g_log.information() << "Rebin: Converting Data back to Data Points.\n";
+        Mantid::API::Algorithm_sptr ChildAlg = createChildAlgorithm("ConvertToPointData");
+        ChildAlg->initialize();
+        ChildAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
+        ChildAlg->execute();
+        outputWS = ChildAlg->getProperty("OutputWorkspace");
+      }
+
+      // Assign it to the output workspace property
+      setProperty("OutputWorkspace",outputWS);
     } // end if (inputeventWS != NULL)
 
     throw std::runtime_error("Only event workspace mode is implemented");
