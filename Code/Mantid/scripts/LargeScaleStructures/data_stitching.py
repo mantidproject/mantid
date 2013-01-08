@@ -441,12 +441,12 @@ class Stitcher(object):
             raise RuntimeError, "Stitcher: invalid reference ID"
         self._reference = id
 
-    def save_combined(self, file_path=None, as_canSAS=True):
+    def save_combined(self, file_path=None, as_canSAS=True, workspace=None):
         """
             Save the resulting scaled I(Q) curves in one data file
             @param file_path: file to save data in
         """
-        iq = self.get_scaled_data()        
+        iq = self.get_scaled_data(workspace=workspace)        
         if file_path is not None:
             if as_canSAS:
                 SaveCanSAS1D(Filename=file_path, InputWorkspace=iq)
@@ -539,8 +539,15 @@ class Stitcher(object):
             
         return ws_combined
         
-def stitch(data_list=[], q_min=None, q_max=None, scale=None, save_output=False):
+def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None, 
+           scale=None, save_output=False):
     """
+        @param data_list: list of N data files or workspaces to stitch
+        @param q_min: list of N-1 Qmin values of overlap regions
+        @param q_max: list of N-1 Qmax values of overlap regions
+        @param output_workspace: name of the output workspace for the combined data
+        @param scale: single overall scaling factor, of N scaling factors (one for each data set)
+        @param save_output: If True, the combined output will be saved as XML 
     """
     
     # Sanity check: q_min and q_max can either both be None or both be
@@ -556,6 +563,15 @@ def stitch(data_list=[], q_min=None, q_max=None, scale=None, save_output=False):
     if n_data_sets<2:
         raise RuntimeError, "The data_list parameter should contain at least two data sets"
     
+    # Check whether we just need to scale the data sets using the provided
+    # scaling factors
+    has_scale_factors = False
+    if type(scale)==list:
+        if len(scale)==n_data_sets:
+            has_scale_factors = True
+        else:
+            raise RuntimeError, "If the scale parameter is provided as a list, it should have the same length as data_list"
+        
     is_q_range_limited = False
     if q_min is not None and q_max is not None:
         is_q_range_limited = True
@@ -591,19 +607,21 @@ def stitch(data_list=[], q_min=None, q_max=None, scale=None, save_output=False):
         d.set_range(xmin, xmax)
             
         # Set the scale of the reference data as needed
-        if i==0 and scale is not None:
-            d.set_scale(float(scale))
+        if has_scale_factors:
+            d.set_scale(float(scale[i]))
+        elif i==0 and type(scale) in [int, float]:
+            d.set_scale(scale)
         
         s.append(d)
                                 
     # Set the reference data (index of the data set in the workspace list)
     s.set_reference(0)
-    s.compute()
+    if not has_scale_factors:
+        s.compute()
     
     # Now that we have the scaling factors computed, simply apply them (not very pretty...)
     for i in range(n_data_sets):
         d = s.get_data_set(i)
-        print d
         xmin, xmax = d.get_range()
         if i>0:
             xmin = q_min[i-1]
@@ -612,7 +630,13 @@ def stitch(data_list=[], q_min=None, q_max=None, scale=None, save_output=False):
         
         d.apply_scale(xmin, xmax)
     
+    # Create combined output
+    if output_workspace is not None:
+        s.get_scaled_data(workspace=output_workspace)
+        
     # Save output to a file
     if save_output:
-        s.save_combined("combined_output.xml", as_canSAS=True)
+        if output_workspace is None:
+            output_workspace = "combined_scaled_Iq"
+        s.save_combined(output_workspace+".xml", as_canSAS=True, workspace=output_workspace)
           
