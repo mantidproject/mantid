@@ -114,7 +114,7 @@ private:
   std::map< std::string, boost::shared_ptr<RemoteJobManager> > m_computeResources;
     ///< list of compute resources (clusters, etc...) available at this facility
     ///< sorted by their names
-    // Note that this is a vector of pointers!  RemoteJobManager is an abstract base class.
+    // Note that this is a map of pointers!  RemoteJobManager is an abstract base class.
   static Logger& g_log;                        ///< logger
 };
 
