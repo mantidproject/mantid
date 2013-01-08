@@ -1014,7 +1014,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     XSTEP = ReductionSingleton().inst.cen_find_step
     YSTEP = ReductionSingleton().inst.cen_find_step
 
-    original = ReductionSingleton().get_beam_center()
+    original = ReductionSingleton().get_instrument().cur_detector_position(ReductionSingleton().get_sample().get_wksp_name())
 
     if ReductionSingleton().instrument.lowAngDetSet:
         det_bank = 'rear'

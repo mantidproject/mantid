@@ -3090,6 +3090,11 @@ bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const 
   //assign the workspace name to a Python variable and read back some details
 
   QString run_info;
+  run_info = QString("i.SetCentre('%1','%2','rear') \ni.SetCentre('%3','%4','front')\n")
+    .arg( m_uiForm.rear_beam_x->text())
+    .arg( m_uiForm.rear_beam_y->text())
+    .arg( m_uiForm.front_beam_x->text())
+    .arg( m_uiForm.front_beam_y->text());
   run_info += "SCATTER_SAMPLE, logvalues = " + assignCom+";print '"+PYTHON_SEP+"',SCATTER_SAMPLE,'"+PYTHON_SEP+"',logvalues";
   run_info = runReduceScriptFunction(run_info);
   if (run_info.startsWith("error", Qt::CaseInsensitive))
