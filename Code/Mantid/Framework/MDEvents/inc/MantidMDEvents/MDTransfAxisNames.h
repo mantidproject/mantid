@@ -1,6 +1,7 @@
 #ifndef MANTID_MDEVENTS_MDTRANSF_AXIS_NAMES_H
 #define MANTID_MDEVENTS_MDTRANSF_AXIS_NAMES_H
-#include "MantidMDEvents/MDTransfDEHelper.h"
+//#include "MantidMDEvents/MDTransfDEHelper.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid
@@ -54,11 +55,11 @@ class DLLExport MDTransfAxisNames
 {
 public:
     /// function returns default dimension id-s for different Q and dE modes, defined by this class
-    std::vector<std::string> getDefaultDimIDQ3D(CnvrtToMD::EModes  dEmode)const;
-    std::vector<std::string> getDefaultDimIDModQ(CnvrtToMD::EModes dEmode)const;
+  std::vector<std::string> getDefaultDimIDQ3D(Kernel::DeltaEMode::Type dEmode)const;
+  std::vector<std::string> getDefaultDimIDModQ(Kernel::DeltaEMode::Type dEmode)const;
 
     // constructor
-    MDTransfAxisNames();
+   MDTransfAxisNames();
 private:
    /// the vector describes default dimension names, specified along the axis if no names are explicitly requested;
    std::vector<std::string> m_DefaultDimID;

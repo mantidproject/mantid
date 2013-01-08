@@ -78,7 +78,7 @@ namespace Mantid
 
     /** return the number of dimensions, calculated by the transformation from the workspace.
     Depending on ws axis units, the numebr here is either 1 or 2* and is independent on emode*/
-    unsigned int MDTransfNoQ::getNMatrixDimensions(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+    unsigned int MDTransfNoQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(mode);
 
@@ -111,7 +111,7 @@ namespace Mantid
     * @param  inWS -- input matrix workspace shared pointer
     *
     */
-    std::vector<std::string> MDTransfNoQ::outputUnitID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+    std::vector<std::string> MDTransfNoQ::outputUnitID(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(mode);
 
@@ -131,12 +131,12 @@ namespace Mantid
       return rez;
     }
     /**the default dimID-s in noQ mode equal to input WS dim-id-s */ 
-    std::vector<std::string> MDTransfNoQ::getDefaultDimID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+    std::vector<std::string> MDTransfNoQ::getDefaultDimID(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS)const
     {
       return this->outputUnitID(mode,inWS);
     }
     /**  returns the units, the input ws is actually in as they coinside with input units for this class */
-    const std::string MDTransfNoQ::inputUnitID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const
+    const std::string MDTransfNoQ::inputUnitID(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(mode);
       API::NumericAxis *pXAxis;

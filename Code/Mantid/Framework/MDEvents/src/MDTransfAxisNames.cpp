@@ -5,6 +5,7 @@ namespace Mantid
 {
 namespace MDEvents
 {
+  using namespace Mantid::Kernel;
 
   MDTransfAxisNames::MDTransfAxisNames():
   m_DefaultDimID(CnvrtToMD::nDefaultID)
@@ -20,17 +21,17 @@ namespace MDEvents
   }
 
   //
-  std::vector<std::string> MDTransfAxisNames::getDefaultDimIDQ3D(CnvrtToMD::EModes  dEMode)const
+  std::vector<std::string> MDTransfAxisNames::getDefaultDimIDQ3D(DeltaEMode::Type dEMode)const
   {
     std::vector<std::string> rez;
-    if(dEMode==CnvrtToMD::Elastic)
+    if(dEMode==DeltaEMode::Elastic)
     {
       rez.resize(3);
     }
     else
     {
 
-      if (dEMode==CnvrtToMD::Direct||dEMode==CnvrtToMD::Indir)
+      if (dEMode==DeltaEMode::Direct||dEMode==DeltaEMode::Indirect)
       {
         rez.resize(4);
         rez[3]=m_DefaultDimID[CnvrtToMD::dE_ID];
@@ -47,16 +48,16 @@ namespace MDEvents
 
 
 
-  std::vector<std::string> MDTransfAxisNames::getDefaultDimIDModQ(CnvrtToMD::EModes  dEMode)const
+  std::vector<std::string> MDTransfAxisNames::getDefaultDimIDModQ(DeltaEMode::Type dEMode)const
   {
     std::vector<std::string> rez;
 
-    if(dEMode==CnvrtToMD::Elastic)
+    if(dEMode==DeltaEMode::Elastic)
     {
       rez.resize(1);
     }else
     {
-      if (dEMode==CnvrtToMD::Direct||dEMode==CnvrtToMD::Indir)
+      if (dEMode==DeltaEMode::Direct||dEMode==DeltaEMode::Indirect)
       {
         rez.resize(2);
         rez[1]=m_DefaultDimID[CnvrtToMD::dE_ID];

@@ -10,14 +10,14 @@ namespace Mantid
 
     /** method returns number of matrix dimensions calculated by this class
     * as function of energy analysis mode   */
-    unsigned int MDTransfQ3D::getNMatrixDimensions(CnvrtToMD::EModes mode,API::MatrixWorkspace_const_sptr inWS)const
+    unsigned int MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
       switch(mode)
       {
-      case(CnvrtToMD::Direct):  return 4;
-      case(CnvrtToMD::Indir):   return 4;
-      case(CnvrtToMD::Elastic): return 3;
+      case(Kernel::DeltaEMode::Direct):  return 4;
+      case(Kernel::DeltaEMode::Indirect):   return 4;
+      case(Kernel::DeltaEMode::Elastic): return 3;
       default: throw(std::invalid_argument("Unknow or unsupported energy conversion mode"));
       }
     }
@@ -187,7 +187,7 @@ namespace Mantid
           if(!m_SinThetaSqArray)throw(std::runtime_error("MDTransfQ3D::initialize::Uninitilized Sin(Theta)^2 array for calculating Lorentz corrections"));
         }
       }
-
+      // use detectors masks untill signals are masked by 0 instead of NaN
       m_pDetMasks =  ConvParams.m_PreprDetTable->getColDataArray<int>("detMask");
     }
     /**method returns default ID-s for ModQ elastic and inelastic modes. The ID-s are related to the units, 
@@ -197,7 +197,7 @@ namespace Mantid
     *@returns       -- vector of default dimension ID-s for correspondent energy conversion mode. 
     The position of each dimID in the vector corresponds to the position of each MD coordinate in the Coord vector
     */
-    std::vector<std::string> MDTransfQ3D::getDefaultDimID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
+    std::vector<std::string> MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
       std::vector<std::string> default_dim_ID;
@@ -230,7 +230,7 @@ namespace Mantid
     * @param Emode   -- energy conversion mode
     *
     * It is Momentum and DelteE in inelastic modes   */
-    std::vector<std::string> MDTransfQ3D::outputUnitID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
+    std::vector<std::string> MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
       std::vector<std::string> UnitID = this->getDefaultDimID(dEmode,inWS);

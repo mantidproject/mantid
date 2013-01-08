@@ -242,8 +242,8 @@ void MDWSDescription::getMinMax(std::vector<double> &min,std::vector<double> &ma
 /** Returns symbolic representation of current Emode */
 std::string MDWSDescription::getEModeStr()const
 {
-  MDTransfDEHelper         deHelper;
-  return deHelper.getEmode(m_Emode);
+  Kernel::DeltaEMode    deHelper;
+  return deHelper.asString(m_Emode);
 }
 
 /** function extracts the coordinates from additional workspace porperties and places them to proper position within 

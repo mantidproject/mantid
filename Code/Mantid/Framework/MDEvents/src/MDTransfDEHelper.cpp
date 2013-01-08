@@ -8,7 +8,7 @@ namespace Mantid
   namespace MDEvents
   {
 
-    MDTransfDEHelper::MDTransfDEHelper():
+  MDTransfDEHelper::MDTransfDEHelper():
   EmodesList(CnvrtToMD::No_DE,"")
   {
     EmodesList[CnvrtToMD::Elastic]="Elastic";
