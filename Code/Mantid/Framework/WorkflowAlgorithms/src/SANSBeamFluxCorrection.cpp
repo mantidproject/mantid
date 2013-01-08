@@ -86,6 +86,11 @@ void SANSBeamFluxCorrection::exec()
 
   // Rebin the reference and monitor data to the sample data workspace
   progress.report("Rebinning reference data");
+  IAlgorithm_sptr convAlg = createChildAlgorithm("ConvertToHistogram");
+  convAlg->setProperty("InputWorkspace", fluxRefWS);
+  convAlg->executeAsChildAlg();
+  fluxRefWS = convAlg->getProperty("OutputWorkspace");
+
   IAlgorithm_sptr rebinAlg = createChildAlgorithm("RebinToWorkspace");
   rebinAlg->setProperty("WorkspaceToRebin", fluxRefWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
@@ -106,14 +111,12 @@ void SANSBeamFluxCorrection::exec()
   IAlgorithm_sptr divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", inputWS);
   divideAlg->setProperty("RHSWorkspace", monitorWS);
-  divideAlg->setProperty("OutputWorkspace", outputWS);
   divideAlg->executeAsChildAlg();
   outputWS = divideAlg->getProperty("OutputWorkspace");
 
   divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", outputWS);
   divideAlg->setProperty("RHSWorkspace", scaledfluxRefWS);
-  divideAlg->setProperty("OutputWorkspace", outputWS);
   divideAlg->executeAsChildAlg();
   outputWS = divideAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWS);
