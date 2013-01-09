@@ -15,18 +15,30 @@ class IdealTube:
         """
         Create empty instance
         """
-        self.idealTubeArray = []
+        self.positions = []  # position of the points in metres
+        self.functionalForms = [] # function form of points 1=peak 2=edge. peaks assumed if [].
         
    def setArray ( self, array ):
        """     
-       Construct and ideal tube directly from an array
+       Construct and ideal tube directly from an array of positions 
                    
-       @param array: Array of points where the peaks should be in Metres
+       @param points: Array of points where the peaks should be in Metres
   
        """
-       self.idealTubeArray = array	
+       self.positions = array	
 
         
+   def setPositionsAndForm ( self, pos, form ):
+       """     
+       Construct and ideal tube directly from an array of positions and functional forms 
+                   
+       @param pos: Array of points where the peaks or edges should be in Metres
+       @param form: Array of functional forms of the points 1=peak, 2=edge
+  
+       """
+       self.positions = pos 
+       self.functionalForms = form 
+
 
    def constructTubeFor3PointsMethod( self, idealAP, idealBP, idealCP, activeTubeLen ):
        """     
@@ -42,7 +54,8 @@ class IdealTube:
        pixelLen = activeTubeLen/1024  # Pixel length
 
        # we then convert idealAP, idealCP and idealBP to Y coordinates and put into ideal tube array
-       self.idealTubeArray = [ idealAP*pixelLen - activeTubeLen/2,  idealCP*pixelLen - activeTubeLen/2, idealBP*pixelLen - activeTubeLen/2]
+       self.positions = [ idealAP*pixelLen - activeTubeLen/2,  idealCP*pixelLen - activeTubeLen/2, idealBP*pixelLen - activeTubeLen/2]
+       self.functionalForms = [ 2, 1, 2 ]
      
      
    def constructIdealTubeFromRealTube( self, ws, tube, fitPar ):
@@ -78,7 +91,7 @@ class IdealTube:
    
        # Get ideal tube based on this actual tube
        try:
-           self.idealTubeArray = getIdealTubeFromNSlits ( ws, actualTube )
+           self.positions = getIdealTubeFromNSlits ( ws, actualTube )
        except:
            print "Attempted to create ideal tube based on actual tube",actualTube
            print "Unable to create ideal tube."
@@ -88,7 +101,7 @@ class IdealTube:
        """
        Reurn the array of of points where the peaks should be in Metres
        """
-       return self.idealTubeArray
+       return self.positions
         
 
 
