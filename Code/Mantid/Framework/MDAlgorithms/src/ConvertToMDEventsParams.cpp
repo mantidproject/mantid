@@ -9,6 +9,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidMDEvents/MDTransfAxisNames.h"
+#include "MantidKernel/DeltaEMode.h"
+
+
 
 namespace Mantid
 {
@@ -16,6 +19,8 @@ namespace MDAlgorithms
 {
 namespace ConvertToMD
 {
+using namespace Mantid::Kernel;
+
 Kernel::Logger& ConvertToMDEventsParams::convert_log =Kernel::Logger::get("MD-Algorithms");
 
 
@@ -502,7 +507,7 @@ void ConvertToMDEventsParams::buildMDDimDescription(API::MatrixWorkspace_const_s
      eMode = getEMode(AlgoID);
   }
   MDEvents::MDTransfAxisNames AxisNames;
-  MDEvents::CnvrtToMD::EModes eeMode = (MDEvents::CnvrtToMD::EModes)(eMode);
+  DeltaEMode::Type eeMode = (DeltaEMode::Type)(eMode);
 
   // ModQ : default dimension names
   if (getQMode(AlgoID)==ModQ)

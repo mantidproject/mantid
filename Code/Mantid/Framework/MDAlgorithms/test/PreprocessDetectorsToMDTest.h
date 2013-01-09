@@ -265,9 +265,6 @@ void testUpdateMasks()
        TS_ASSERT_EQUALS(1,maskCol[i]);
       }
 
-
-
-
      API::AnalysisDataService::Instance().remove("PreprocDetectorsWSMasks");
 }
 void testNoMasksColumnTrhows()

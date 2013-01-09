@@ -50,7 +50,7 @@ public:
     const std::string transfID()const; // {return "ModQ"; }
     /** energy conversion modes supported by this class; 
       * The class supports three standard energy conversion modes */
-    std::vector<std::string> getEmodes()const{Kernel::DeltaEMode dEModes;  return dEModes.availableTypes();}
+    std::vector<std::string> getEmodes()const{ return Kernel::DeltaEMode().availableTypes();}
 
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);

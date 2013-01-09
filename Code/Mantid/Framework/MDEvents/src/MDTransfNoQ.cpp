@@ -47,7 +47,7 @@ namespace Mantid
       // get min and max values defined by the algorithm. 
       ConvParams.getMinMax(m_DimMin,m_DimMax);
 
-      m_NMatrixDim = getNMatrixDimensions(CnvrtToMD::Undef,ConvParams.getInWS());
+      m_NMatrixDim = getNMatrixDimensions(Kernel::DeltaEMode::Undefined,ConvParams.getInWS());
       m_AddDimCoordinates = ConvParams.getAddCoord();
 
       API::NumericAxis *pXAx;

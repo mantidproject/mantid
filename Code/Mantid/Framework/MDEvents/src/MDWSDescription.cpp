@@ -56,8 +56,8 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
   this->AlgID = QMode;
 
   // check and get energy conversion mode;
-  MDTransfDEHelper dEChecker;
-  m_Emode = dEChecker.getEmode(dEMode);
+
+  m_Emode = Kernel::DeltaEMode().fromString(dEMode);
 
   // get raw pointer to Q-transformation (do not delete this pointer!)
   MDTransfInterface* pQtransf =  MDTransfFactory::Instance().create(QMode).get();
@@ -188,7 +188,7 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
 MDWSDescription::MDWSDescription(unsigned int nDimensions):
   m_Wtransf(3,3,true),
   m_RotMatrix(9,0),
-  m_Emode(CnvrtToMD::Undef),
+  m_Emode(Kernel::DeltaEMode::Undefined),
   m_LorentzCorr(false)
 {
 
@@ -242,8 +242,7 @@ void MDWSDescription::getMinMax(std::vector<double> &min,std::vector<double> &ma
 /** Returns symbolic representation of current Emode */
 std::string MDWSDescription::getEModeStr()const
 {
-  Kernel::DeltaEMode    deHelper;
-  return deHelper.asString(m_Emode);
+  return  Kernel::DeltaEMode().asString(m_Emode);
 }
 
 /** function extracts the coordinates from additional workspace porperties and places them to proper position within 

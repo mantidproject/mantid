@@ -198,11 +198,6 @@ ConvertToMDComponentsTest()
 
      AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-#ifdef WIN32
-// load Algoritm library to register CloneWorkspace with framoworkManager
-     Mantid::Kernel::LibraryWrapper Lw;
-     Lw.OpenLibrary("MantidAlgorithms");
-#endif
      Mantid::API::FrameworkManager::Instance();
 }
 ~ConvertToMDComponentsTest()
