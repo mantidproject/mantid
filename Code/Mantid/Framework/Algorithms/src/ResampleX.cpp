@@ -46,7 +46,7 @@ namespace Algorithms
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string ResampleX::name() const
   {
-    return "ResampleX"; // TODO change to ResampleX
+    return "ResampleX";
   }
   
   /// Algorithm's version for identification. @see Algorithm::version
@@ -61,12 +61,18 @@ namespace Algorithms
     return "Transforms\\Rebin";
   }
 
+  const std::string ResampleX::alias() const
+  {
+    return "";
+  }
+
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void ResampleX::initDocs()
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    string msg("Resample the x-axis of the data with the requested number of points.");
+    this->setWikiSummary(msg);
+    this->setOptionalMessage(msg);
   }
 
   //----------------------------------------------------------------------------------------------

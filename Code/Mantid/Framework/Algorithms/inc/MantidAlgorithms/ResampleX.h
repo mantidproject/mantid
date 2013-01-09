@@ -42,6 +42,7 @@ namespace Algorithms
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
+    virtual const std::string alias() const;
     /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
     double determineBinning(MantidVec& xValues, const double xmin, const double xmax);
     /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
