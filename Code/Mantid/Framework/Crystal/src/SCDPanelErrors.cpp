@@ -261,7 +261,7 @@ namespace Mantid
 
 
 
-
+//TODO eliminate next 2 lines. not used
         boost::shared_ptr<const IComponent> inst3 = boost::dynamic_pointer_cast<const IComponent>(
             instSave);
       // updateParams(pmapSv, pmap, inst3);
@@ -425,6 +425,7 @@ namespace Mantid
 
         Peak peak = createNewPeak(peak_old, instChange);
 
+
         Kernel::V3D hkl = peak_old.getHKL();
         double hkl1[3] =
         { hkl.X(), hkl.Y(), hkl.Z() };
@@ -447,7 +448,6 @@ namespace Mantid
 
             ok = false;
         }
-
         if (ok && (hkl.X() != 0 || hkl.Y() != 0 || hkl.Z() != 0))
         {
 
@@ -768,8 +768,8 @@ namespace Mantid
           last_Nrows = Nrows;
           last_Ncols = Ncols;
 
-          PanelCenter.push_back(rPanel->getAtXY(0, 0)->getPos());
-
+          PanelCenter.push_back(rPanel->getPos());
+          last_Center= rPanel->getPos();
           xvec.push_back(x_vec);
           yvec.push_back(y_vec);
           last_xvec = x_vec;
@@ -957,11 +957,17 @@ namespace Mantid
 
           V3D dXvec = Rot2dRot * xvec[peak];
           V3D dYvec = Rot2dRot * yvec[peak];
+          //TODO check new stuff dCenter def next 2 lines , used after
+          V3D Center = PanelCenter[peak];
+          V3D dCenter = Rot2dRot*Center;
           V3D dxyz2theta = dXvec * (col[peak] - NPanelcols[peak] / 2.0 + .5) + dYvec * (row[peak]
-              - NPanelrows[peak] / 2.0 + .5);
+              - NPanelrows[peak] / 2.0 + .5)+dCenter;
 
           //dxyz2theta is partials xyz wrt rot x
           V3D unRotDeriv = Bas * dxyz2theta;
+
+        // std::cout<<"dCenter for group #"<<gr<<dCenter<<"wrt"<<param-StartRot<<
+        //     Rot2dRot<<Center<<std::endl;
        if(doMethod ==0)
        {   Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
           GonMatrix.Invert();

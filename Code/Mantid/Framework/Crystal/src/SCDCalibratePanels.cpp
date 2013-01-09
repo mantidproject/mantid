@@ -50,6 +50,7 @@ Some features:
 #include "MantidKernel/Quat.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
+//#include "MantidKernel/ValidatorAnyList.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -237,7 +238,11 @@ namespace Crystal
           string S = GroupA[ Gr ];
 
           boost::trim(S);
+
           if( S.empty()) break;
+          if (S[0]==',')
+            S.erase(0,1);
+          boost::trim(S);
           if( S[0]=='[')
               S.erase(0, 1);
           boost::trim(S);
@@ -332,11 +337,11 @@ namespace Crystal
                                   double &L0,
                                   vector< string >  & AllBankNames)
   {
-    if( preprocessCommand == "No PreProcessing")
+    if( preprocessCommand == "A)No PreProcessing")
       return instrument;
 
     bool xml = false;
-    if( preprocessCommand == "Apply a LoadParameter.xml type file")
+    if( preprocessCommand == "C)Apply a LoadParameter.xml type file")
       xml = true;
 
     vector< int > detIDs = instrument->getDetectorIDs();
@@ -485,10 +490,10 @@ namespace Crystal
     Quat ChgRot = rotPre*rotI;
 
     Quat2RotxRotyRotz(ChgRot,Xrot0,Yrot0,Zrot0);
-   std::cout<<"new Initial Values="<<std::endl;
-    std::cout<<"   "<< detWidthScale0<<","<<detHeightScale0
-        <<","<<Xoffset0<<","<<Yoffset0<<","<<Zoffset0
-        <<","<<Xrot0<<","<<Yrot0<<","<<Zrot0<<std::endl;
+   //std::cout<<"new Initial Values="<<std::endl;
+   // std::cout<<"   "<< detWidthScale0<<","<<detHeightScale0
+   //     <<","<<Xoffset0<<","<<Yoffset0<<","<<Zoffset0
+    //    <<","<<Xrot0<<","<<Yrot0<<","<<Zrot0<<std::endl;
   }
 
 
@@ -552,7 +557,7 @@ namespace Crystal
 
     boost::shared_ptr<const Instrument> instrument = peaksWs->getPeak(0).getInstrument();
     double T0 = 0;
-    if((std::string) getProperty("PreProcessInstrument") == "Apply a LoadParameter.xml type file")
+    if((std::string) getProperty("PreProcessInstrument") == "C)Apply a LoadParameter.xml type file")
       T0=  getProperty("InitialTimeOffset");//!*****
 
     double L0 = peaksWs->getPeak(0).getL1();
@@ -816,15 +821,14 @@ namespace Crystal
         new API::WorkspaceProperty<API::ITableWorkspace>
                ("OutputNormalisedCovarianceMatrix","",Kernel::Direction::Output),
        "The name of the TableWorkspace in which to store the final covariance matrix" );
+   std::string NormMatName=fit_alg->getPropertyValue("OutputNormalisedCovarianceMatrix");
 
-   setPropertyValue("OutputNormalisedCovarianceMatrix",
-                    (string)fit_alg->getPropertyValue("OutputNormalisedCovarianceMatrix"));
 
    ITableWorkspace_sptr NormCov= fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
 
-   setProperty("OutputNormalisedCovarianceMatrix", NormCov);
-
-
+  // setProperty("OutputNormalisedCovarianceMatrix", NormCov);
+    AnalysisDataService::Instance().addOrReplace( string("CovarianceInfo"),NormCov);
+    setPropertyValue("OutputNormalisedCovarianceMatrix",   string("CovarianceInfo"));
    //--------------------- Get and Process Results -----------------------
     double chisq = fit_alg->getProperty( "OutputChi2overDoF");
 
@@ -916,7 +920,11 @@ namespace Crystal
 
     }
 
-    setProperty( "ResultWorkspace", Result);
+//    setProperty( "ResultWorkspace", Result);
+    std::string ResultWorkspaceName= getPropertyValue( "ResultWorkspace");
+    AnalysisDataService::Instance().addOrReplace(ResultWorkspaceName, Result);
+    setPropertyValue( "ResultWorkspace", ResultWorkspaceName);
+    Result->setComment(std::string("t0(microseconds),l0&offsets(meters),rot(degrees"));
 
 
     //---------------- Create new instrument with ------------------------
@@ -927,7 +935,7 @@ namespace Crystal
     boost::shared_ptr<const Instrument> NewInstrument( new Instrument( instrument->baseInstrument(), pmap));
 
     i = -1;
-    std::cout<<"Ere set new values into instrument"<<std::endl;
+   // std::cout<<"Ere set new values into instrument"<<std::endl;
     for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); ++itv )
     {
       i++;
@@ -1051,8 +1059,11 @@ namespace Crystal
       TableRow++;
     }
 
-    setProperty("QErrorWorkspace", QErrTable);
-
+   //setProperty("QErrorWorkspace", QErrTable);
+   std::string QErrorWorkspaceName = getPropertyValue("QErrorWorkspace");
+   QErrTable->setComment(std::string("Errors in Q for each Peak"));
+   AnalysisDataService::Instance().addOrReplace(QErrorWorkspaceName, QErrTable);
+   setPropertyValue("QErrorWorkspace", QErrorWorkspaceName);
 
   }
 
@@ -1102,13 +1113,15 @@ namespace Crystal
           "Path to an Mantid .xml description(for LoadParameterFile) file to save.");
 
 
-      vector< string > preProcessOptions;
-      preProcessOptions.push_back("No PreProcessing");
-      preProcessOptions.push_back("Apply a ISAW.DetCal File");
-      preProcessOptions.push_back("Apply a LoadParameter.xml type file");
+      vector< std::string > preProcessOptions;
+      preProcessOptions.push_back(std::string("A)No PreProcessing"));
+      preProcessOptions.push_back("B)Apply a ISAW.DetCal File");
+      preProcessOptions.push_back("C)Apply a LoadParameter.xml type file");
 
-      declareProperty("PreProcessInstrument", "No PreProcessing", boost::make_shared<
+      declareProperty(string("PreProcessInstrument"), std::string("A)No PreProcessing"), boost::make_shared<
           Kernel::StringListValidator>(preProcessOptions), "Select PreProcessing info");
+     // declareProperty("PreProcessInstrument", std::string("No PreProcessing"), boost::shared_ptr<
+      //        Kernel::ValidatorAnyList<std::string> >(new Kernel::ValidatorAnyList<std::string>(preProcessOptions)), "Select PreProcessing info");
 
       vector< string > exts2;
       exts2.push_back(".DetCal");
@@ -1135,10 +1148,10 @@ namespace Crystal
           "SpecifyGroups"));
 
       setPropertySettings("PreProcFilename", new EnabledWhenProperty( "PreProcessInstrument",
-          Kernel::IS_NOT_EQUAL_TO, "No PreProcessing"));
+          Kernel::IS_NOT_EQUAL_TO, "A)No PreProcessing"));
 
       setPropertySettings("InitialTimeOffset", new EnabledWhenProperty("PreProcessInstrument",
-          Kernel::IS_EQUAL_TO, "Apply a LoadParameter.xml type file"));
+          Kernel::IS_EQUAL_TO, "C)Apply a LoadParameter.xml type file"));
 
     }
 
@@ -1331,13 +1344,29 @@ namespace Crystal
         pmap->addRotationParam(bank.get(), string("roty"), roty);
         pmap->addRotationParam(bank.get(), string("rotz"), rotz);
         pmap->addQuat(bank.get(), "rot", newRelRot);//Should not have had to do this???
-
+        //---------Rotate center of bank ----------------------
+        V3D Center =bank->getPos();
+        V3D Center_orig( Center);
+        rot.rotate(Center);
 
         V3D pos1 = bank->getRelativePos();
 
-        pmap->addPositionCoordinate(bank.get(), string("x"), pos.X() + pos1.X());
-        pmap->addPositionCoordinate(bank.get(), string("y"), pos.Y() + pos1.Y());
-        pmap->addPositionCoordinate(bank.get(), string("z"), pos.Z() + pos1.Z());
+        pmap->addPositionCoordinate(bank.get(), string("x"), pos.X() + pos1.X()+
+             Center.X()-Center_orig.X());
+        pmap->addPositionCoordinate(bank.get(), string("y"), pos.Y() + pos1.Y()+
+            Center.Y()-Center_orig.Y());
+        pmap->addPositionCoordinate(bank.get(), string("z"), pos.Z() + pos1.Z()+
+            Center.Z()-Center_orig.Z());
+
+        Quat2RotxRotyRotz(rot, rotx, roty, rotz);
+        //std::cout<<"A dCenter rot for"<<bankName<<Center-Center_orig<<
+        //    "using rots="<< rotx<<","<<roty<<","<<rotz<<std::endl;
+       // std::cout<<"       before/aft Centers"<<Center_orig<<Center<<std::endl;
+       // std::cout<<"    Thru 1st prt param fix for "<<bankName<<". pos="<<bank->getPos()<<std::endl;
+        //std::cout<<"A"<<posNR<<pos<<pos1<<std::endl;
+       // pmap->addPositionCoordinate(bank.get(), string("x"), pos.X() + pos1.X());
+       // pmap->addPositionCoordinate(bank.get(), string("y"), pos.Y() + pos1.Y());
+       // pmap->addPositionCoordinate(bank.get(), string("z"), pos.Z() + pos1.Z());
 
         vector<double> oldScalex = pmap->getDouble(bank->getName(), string("scalex"));
         vector<double> oldScaley = pmap->getDouble(bank->getName(), string("scaley"));
@@ -1355,7 +1384,7 @@ namespace Crystal
 
         pmap->addDouble(bank.get(), string("scalex"), scalex);
         pmap->addDouble(bank.get(), string("scaley"), scaley);
-
+       //std::cout<<"Thru param fix for "<<bankName<<". pos="<<bank->getPos()<<std::endl;
       }//For @ bank
     }
 

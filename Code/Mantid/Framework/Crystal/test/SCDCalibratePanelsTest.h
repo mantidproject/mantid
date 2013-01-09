@@ -88,22 +88,23 @@ public:
      boost::shared_ptr<TableWorkspace> Results  =  alg->getProperty("ResultWorkspace");
         // (AnalysisDataService::Instance().retrieveWS<TableWorkspace>(string("Result")));
 
-     TS_ASSERT_DELTA(1.00001,Results->cell<double>(3,1),.01);
-     TS_ASSERT_DELTA(0.998187,Results->cell<double>(2,1),.01);
-     TS_ASSERT_DELTA(-0.416479,Results->cell<double>(9,1),.01);
-     TS_ASSERT_DELTA(-0.298888,Results->cell<double>(8,1),.01);
-     TS_ASSERT_DELTA(0.212273,Results->cell<double>(17,1),.01);
-     std::cout<<"G"<<std::endl;
-     /* for( int i=0; i<(int)Results->rowCount(); i++)
+     TS_ASSERT_DELTA(1.00005,Results->cell<double>(3,1),.01);
+     TS_ASSERT_DELTA(0.997963,Results->cell<double>(2,1),.01);
+     TS_ASSERT_DELTA(0.0767157,Results->cell<double>(9,1),.01);
+     TS_ASSERT_DELTA(-0.0653761,Results->cell<double>(8,1),.01);
+     TS_ASSERT_DELTA(0.249612,Results->cell<double>(17,1),.01);
+     /* std::cout<<"G"<<std::endl;
+       for( int i=0; i<(int)Results->rowCount(); i++)
      {
 
        std::cout<<"row "<<i<<"="<<Results->cell<double>(i,1)<<std::endl;
      }
-row 0=18.0095  row 1=-4.99949  row 2=0.998187 row 3=1.00001  row 4=1.07244e-07
-row 5=-0.000569398 row 6=-0.000179413  row 7=-0.103256  row 8=-0.298888
-row 9=-0.416479 row 10=0.129725 row 11=2.56685 row 12=0.287941 row 13=0.288195
-row 14=0.0945599 row 15=0.0352754 row 16=0.0696436 row 17=0.212273 row 18=0.323982
-row 19=1.12121
+row 0=18.0089  row 1=-4.99552  row 2=0.997963   row 3=1.00005  row 4=-1.97417e-05
+row 5=-0.000635655  row 6=-0.000158904  row 7=-0.0632047   row 8=-0.0653761
+row 9=0.0767157  row 10=0.154177   row 11=3.03748   row 12=0.341038  row 13=0.341351
+row 14=0.11184  row 15=0.0406815  row 16=0.082941  row 17=0.249612  row 18=0.381596
+row 19=1.31104
+
 */
    }
 

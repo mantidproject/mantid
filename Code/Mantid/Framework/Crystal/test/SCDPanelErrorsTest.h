@@ -121,15 +121,15 @@ public:
     //calib.setParameter("Yrot",90);
 
     calib.function1D(out.data(), xVals.data(), (size_t) N);
-    std::cout<<out[0]<<","<<out[4]<<","<<out[8]<<","<<out[10]<<std::endl;
+    //std::cout<<out[0]<<","<<out[4]<<","<<out[8]<<","<<out[10]<<std::endl;
     double d = .0001;
-    TS_ASSERT_DELTA(out[0], -0.0038554, d);
+    TS_ASSERT_DELTA(out[0], -0.0038239, d);
 
-    TS_ASSERT_DELTA(out[4], 0.00756805, d);
+    TS_ASSERT_DELTA(out[4], 0.00759182, d);
 
-    TS_ASSERT_DELTA(out[8], 0.0267926, d);
+    TS_ASSERT_DELTA(out[8], 0.026758, d);
 
-    TS_ASSERT_DELTA(out[10], 0.00880572, d);
+    TS_ASSERT_DELTA(out[10], 0.00883232, d);
 
     //-------------------------Test the derivative --------------------------------
   boost::shared_ptr<Jacob> Jac(new Jacob(10, N));
@@ -143,7 +143,7 @@ public:
     std::vector<double> compRes(N);
 
     size_t params[20] =
-    { 0, 0,0,0,0, 2, 2,2,3,3, 6, 6, 8,8, 8, 8,9, 9, 9, 9 };
+    { 0, 0,0,1,1, 2, 2,4,4,5, 5, 6, 6,7, 7, 7,8, 8, 9, 9 };
    // { 2, 2,2,2,2, 2,2,2,2 , 2,2,2,2, 2,3,3,3,3, 3,3 };
     size_t indx[20] =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 1, 2, 3, 4, 5 };
@@ -155,6 +155,7 @@ public:
     for (size_t i = 0; i < 20; i++)
     {
       size_t param = params[i];
+
       if (param !=prevParam)
       {
 
@@ -173,8 +174,9 @@ public:
       size_t k = indx[x];
       x++;
 
-
-      TS_ASSERT_DELTA(Jac->get(k, param), compRes[k], .002);
+   //   std::cout<<"param,peak qxyz="<<param<<","<<k<<
+    //       "resT,resNum="<<Jac->get(k, param)<<","<< compRes[k]<<std::endl;
+    TS_ASSERT_DELTA(Jac->get(k, param), compRes[k], .02);
 
     }
   }
