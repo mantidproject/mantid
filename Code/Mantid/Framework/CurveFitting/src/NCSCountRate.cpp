@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include <iterator>
+
 namespace Mantid
 {
   namespace CurveFitting
@@ -81,7 +83,7 @@ namespace Mantid
      */
     void NCSCountRate::declareParameters()
     {
-      this->declareParameter(KFSE_NAME, 0.0, "FSE coefficient k");
+      this->declareParameter(KFSE_NAME, 1.0, "FSE coefficient k");
     }
 
     /**
@@ -132,7 +134,7 @@ namespace Mantid
       m_sigmaL2 = getComponentParameter(*det, "sigma_l2");
       m_sigmaTheta = getComponentParameter(*det, "sigma_theta");
       m_e1 = getComponentParameter(*det,"efixed");
-      m_t0 = getComponentParameter(*det,"t0")*1e-6;
+      m_t0 = getComponentParameter(*det,"t0")*1e-6; // Convert to seconds
       m_hwhmLorentzE = getComponentParameter(*det, "hwhm_energy_lorentz");
       m_hwhmGaussE = STDDEV_TO_HWHM*getComponentParameter(*det, "sigma_energy_gauss");
     }
@@ -143,8 +145,7 @@ namespace Mantid
     void NCSCountRate::setUpForFit()
     {
       using namespace Mantid::API;
-      m_voigt = boost::dynamic_pointer_cast<API::IFunction1D>(FunctionFactory::Instance().createFunction("Voigt"));
-      assert(m_voigt);
+      m_voigt = boost::dynamic_pointer_cast<API::IPeakFunction>(FunctionFactory::Instance().createFunction("Voigt"));
     }
 
 
@@ -159,6 +160,9 @@ namespace Mantid
     void NCSCountRate::function1D(double* out, const double* xValues, const size_t nData) const
     {
       std::vector<double> tInSecs(xValues, xValues + nData);
+
+      //std::transform(tInSecs.begin(), tInSecs.end(), tInSecs.begin(), std::bind2nd(std::minus<double>(), 0.25)); // Convert to seconds
+
       std::transform(tInSecs.begin(), tInSecs.end(), tInSecs.begin(), std::bind2nd(std::multiplies<double>(), 1e-6)); // Convert to seconds
 
       const double mn = PhysicalConstants::NeutronMassAMU;
@@ -177,7 +181,7 @@ namespace Mantid
         const double ei = massToMeV*v0*v0;
         e0[i] = ei;
         omega[i] = ei - m_e1;
-        const double k0 = std::sqrt(ei/PhysicalConstants::E_mev_toNeutronWavenumberSq);
+        const double k0 = std::sqrt(ei/mevToK);
         modQ[i] = std::sqrt(k0*k0 + k1*k1 - 2.0*k0*k1*std::cos(m_theta));
       }
 
@@ -204,7 +208,7 @@ namespace Mantid
         double qy0(0.0), wl(0.0), wgauss(0.0);
         if(mi > 1.0)
         {
-          qy0 = std::sqrt(mi*std::pow(k1*k0k1,2) - 1);
+          qy0 = std::sqrt(k1*k1*mi*(k0k1*k0k1 - 1));//std::sqrt(mi*std::pow(k1*k0k1,2) - 1);
           double k0k1p3 = std::pow(k0k1,3);
           double r1 = -(1.0 + l2l1*k0k1p3);
           double r2 = 1.0 - l2l1*k0k1p3 + l2l1*std::pow(k0k1,2)*std::cos(m_theta) - k0k1*std::cos(m_theta);
@@ -251,10 +255,12 @@ namespace Mantid
         }
         else
         {
-          const double lorentzPos(0.0), lorentzAmp(1.0), lorentzFWHM(lorentzWidth);
-          const double gaussFWHM = std::sqrt(std::pow(gaussRes,2) + std::pow(2.0*STDDEV_TO_HWHM*gaussWidth,2));
-          voigtApprox(j1i, yi,lorentzPos, lorentzAmp, lorentzFWHM, gaussFWHM); // Answer goes into j1i
-          voigtApproxDiff(voigtDiffResult, yi, lorentzPos, lorentzAmp, lorentzFWHM, gaussFWHM);
+          os.str("");
+          os << INTENSITY_PREFIX << i;
+          double lorentzPos(0.0), amplitude(getParameter(os.str())), lorentzFWHM(lorentzWidth);
+          double gaussFWHM = std::sqrt(std::pow(gaussRes,2) + std::pow(2.0*STDDEV_TO_HWHM*gaussWidth,2));
+          voigtApprox(j1i, yi,lorentzPos, amplitude, lorentzFWHM, gaussFWHM); // Answer goes into j1i
+          voigtApproxDiff(voigtDiffResult, yi, lorentzPos, amplitude, lorentzFWHM, gaussFWHM);
           for(size_t j = 0; j < nData; ++j)
           {
             const double factor = std::pow(gaussWidth,4.0)/(3.0*modQ[j]);
@@ -274,6 +280,9 @@ namespace Mantid
         }
         out[j] *= std::pow(e0[j],0.1)/modQ[j];
       }
+
+//      std::copy(out, out+nData,std::ostream_iterator<double>(std::cerr, "\n"));
+      //throw std::runtime_error("stop");
     }
 
     //-------------------------------------- Attribute setters -------------------------------------------
@@ -425,6 +434,7 @@ namespace Mantid
                                   const double wg, const double wl, const double wgRes) const
     {
       using namespace Mantid::Kernel;
+
       // First compute product of gaussian momentum distribution with Hermite polynomials.
       // This is done over an interpolated range between ymin & ymax and y and hence q must be sorted
       // Sort needs to sort y and put q in the right order based on the new order. Use a struct that will keep the y/q together
@@ -502,6 +512,7 @@ namespace Mantid
           sumJM[j] += jMdi[j];
         }
       }
+
       // Plus the FSE term
       auto & jMdfse = jMd.back();
       for(int j = 0; j < nfineY; ++j)
@@ -509,6 +520,7 @@ namespace Mantid
         const double y = yfine[j]/std::sqrt(2.)/wg;
         const double he3 = Math::hermitePoly(3,y);
         jMdfse[j] = ampNorm*std::exp(-y*y)*he3*(kfse/qfine[j]);
+        sumJM[j] += jMdfse[j];
       }
 
       // Now convolute with the Voigt function
@@ -520,8 +532,8 @@ namespace Mantid
       {
         const double yi = yspace[i];
         std::transform(minusYFine.begin(), minusYFine.end(), ym.begin(), std::bind2nd(std::plus<double>(), yi)); //yfine is actually -yfine
-        voigtApprox(voigt,yfine,0,1,wl,wgRes);
-        // Multipy voigt with polynomial sum and put result in voigt to save using another vector
+        voigtApprox(voigt,ym,0,1.0,wl,wgRes);
+        // Multiply voigt with polynomial sum and put result in voigt to save using another vector
         std::transform(voigt.begin(), voigt.end(), sumJM.begin(), voigt.begin(), std::multiplies<double>());
         j1[i] = trapzf(yfine, voigt);
       }
@@ -578,7 +590,7 @@ namespace Mantid
     }
 
     /**
-     * Transforms the input y coordinates using the Voigt function approximation
+     * Transforms the input y coordinates using the Voigt function approximation. The area is normalized to lorentzAmp
      * @param voigt [Out] Output values (vector is expected to be of the correct size
      * @param yspace Input y coordinates
      * @param lorentzPos LorentzPos parameter
@@ -594,7 +606,11 @@ namespace Mantid
       m_voigt->setParameter("LorentzFWHM",lorentzWidth);
       m_voigt->setParameter("GaussianFWHM",gaussWidth);
       assert(voigt.size() == yspace.size());
-      m_voigt->function1D(voigt.data(), yspace.data(), yspace.size());
+      m_voigt->functionLocal(voigt.data(), yspace.data(), yspace.size());
+
+      // Normalize so that integral of V=lorentzAmp
+      const double norm = 1.0/(0.5*M_PI*lorentzWidth);
+      std::transform(voigt.begin(), voigt.end(), voigt.begin(), std::bind2nd(std::multiplies<double>(), norm));
     }
 
     /**

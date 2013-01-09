@@ -2,7 +2,7 @@
 #define MANTID_CURVEFITTING_NCSCOUNTRATE_H_
 
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
 
@@ -47,6 +47,15 @@ namespace Mantid
       /// Default constructor required for factory
       NCSCountRate();
 
+      /** @name Function evaluation */
+      ///@{
+      void function1D(double* out, const double* xValues, const size_t nData) const;
+      /// Ensure the object is ready to be fitted
+      void setUpForFit();
+      /// Cache a copy of the workspace pointer
+      void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+      ///@}
+
     private:
       /// Name of the function in the factory
       std::string name() const;
@@ -59,16 +68,8 @@ namespace Mantid
       void declareParameters();
       /// Set an attribute value (and possibly cache its value)
       void setAttribute(const std::string& name,const Attribute& value);
-      /// Cache a copy of the workspace pointer
-      void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
-      /// Ensure the object is ready to be fitted
-      void setUpForFit();
       ///@}
 
-      /** @name Function evaluation */
-      ///@{
-      void function1D(double* out, const double* xValues, const size_t nData) const;
-      ///@}
 
       /** @name Attribute setters */
       ///@{
@@ -94,7 +95,7 @@ namespace Mantid
       ///@{
       /// Computes the convolution of the Gaussian momentum distribution with the instrument resolution
       void firstMassJ(std::vector<double> & j1, const std::vector<double> & yspace, const std::vector<double> & modQ,
-                      const double amp, const double kfse, const double wg, const double wl, const double wgRes) const;
+                      const double amp,  const double kfse,  const double wg, const double wl, const double wgRes) const;
       /// Compute Voigt function interpolated around the given values
       void voigtApproxDiff(std::vector<double> & voigtDiff, const std::vector<double> & yspace, const double lorentzPos, const double lorentzAmp,
                            const double lorentzWidth, const double gaussWidth) const;
@@ -131,7 +132,7 @@ namespace Mantid
 
       /// Final energy
       double m_e1;
-      /// T0 value for this spectrum
+      /// T0 value for this spectrum in seconds
       double m_t0;
       /// Lorentzian HWHM of the foil analyser energy
       double m_hwhmGaussE;
@@ -139,7 +140,7 @@ namespace Mantid
       double m_hwhmLorentzE;
 
       /// Voigt function
-      API::IFunction1D_sptr m_voigt;
+      boost::shared_ptr<API::IPeakFunction> m_voigt;
     };
 
 
