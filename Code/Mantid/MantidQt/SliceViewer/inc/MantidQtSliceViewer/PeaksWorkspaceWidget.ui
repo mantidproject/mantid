@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>654</width>
-    <height>140</height>
+    <height>175</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,107 +27,109 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0">
    <item>
-    <layout class="QHBoxLayout" name="infoLayout">
-     <item>
-      <widget class="QLabel" name="lblWSName">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Workspace:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lblWorkspaceName">
-       <property name="text">
-        <string>[Workspace]</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_6">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="lblPeaksIntegrated">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Peaks Integrated:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lblWorkspaceState">
-       <property name="text">
-        <string>[Integrated/UnIntegrated]</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_5">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="lblCoordinates">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Coordinates:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lblWorkspaceCoordinates">
-       <property name="text">
-        <string>[Viewing Coordinate System]</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
+    <widget class="QFrame" name="infoFrame">
+     <layout class="QHBoxLayout" name="infoLayout">
+      <item>
+       <widget class="QLabel" name="lblWSName">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Workspace:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblWorkspaceName">
+        <property name="text">
+         <string>[Workspace]</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblPeaksIntegrated">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Peaks Integrated:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblWorkspaceState">
+        <property name="text">
+         <string>[Integrated/UnIntegrated]</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblCoordinates">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Coordinates:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblWorkspaceCoordinates">
+        <property name="text">
+         <string>[Viewing Coordinate System]</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="tableLayout">
@@ -167,18 +169,21 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>100</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>60</width>
+         <width>100</width>
          <height>16777215</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Remove entire peaks list from display</string>
+       </property>
        <property name="text">
-        <string>Remove</string>
+        <string>Remove Peaks List</string>
        </property>
       </widget>
      </item>
@@ -190,14 +195,23 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
-         <width>70</width>
+         <width>100</width>
          <height>16777215</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Hide/show all peaks from this list in the plot</string>
+       </property>
        <property name="text">
-        <string>Hide in Plot</string>
+        <string>Hide Peaks List</string>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -225,6 +239,9 @@
           <widget class="QLabel" name="label_2">
            <property name="text">
             <string>Peak Color</string>
+           </property>
+           <property name="buddy">
+            <cstring>infoFrame</cstring>
            </property>
           </widget>
          </item>

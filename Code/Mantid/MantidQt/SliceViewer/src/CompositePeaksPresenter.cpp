@@ -299,7 +299,10 @@ namespace MantidQt
 
     void CompositePeaksPresenter::zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const int peakIndex)
     {
-      //TODO
+      auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+      auto subjectPresenter = *iterator;
+      auto boundingBox = subjectPresenter->getBoundingBox(peakIndex);
+      m_zoomablePlottingWidget->zoomToRectangle(boundingBox.get<0>(), boundingBox.get<1>());
     }
   }
 }

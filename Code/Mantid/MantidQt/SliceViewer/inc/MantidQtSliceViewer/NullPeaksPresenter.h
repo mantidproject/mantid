@@ -25,6 +25,7 @@ namespace MantidQt
       std::string getTransformName() const {return "";}
       void showBackgroundRadius(const bool){/*Do nothing*/}
       void setShown(const bool){/*Do nothing*/}
+      virtual RectangleType getBoundingBox(const int) const{return boost::make_tuple(Mantid::Kernel::V2D(), Mantid::Kernel::V2D());}
     };
 
   }

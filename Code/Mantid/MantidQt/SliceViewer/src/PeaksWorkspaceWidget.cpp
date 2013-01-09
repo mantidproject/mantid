@@ -59,6 +59,7 @@ namespace MantidQt
       ui.tblPeaks->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
       ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
       m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();
+
     }
 
     /// Destructor
@@ -73,6 +74,7 @@ namespace MantidQt
     {
       QColorDialog colourDlg;
       QColor selectedColour = colourDlg.getColor();
+
       ui.btnPeakColor->setBackgroundColor(selectedColour);
       emit peakColourChanged(this->m_ws, selectedColour);
     }
@@ -123,8 +125,7 @@ namespace MantidQt
     {
       if(index.isValid())
       {
-        const Mantid::API::IPeak& peak = m_ws->getPeak(index.row());
-        //TODO Zoom to this peak.
+        emit zoomToPeak(this->m_ws, index.row());
       }
     }
 

@@ -94,5 +94,10 @@ namespace MantidQt
     {
       m_compositePresenter->setShown(peaksWS, !hide);
     }
+
+    void ProxyCompositePeaksPresenter::zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const int peakIndex)
+    {
+      m_compositePresenter->zoomToPeak(peaksWS, peakIndex);
+    }
   }
 }

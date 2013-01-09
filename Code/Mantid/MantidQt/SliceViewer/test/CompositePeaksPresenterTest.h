@@ -529,6 +529,32 @@ public:
     TSM_ASSERT_THROWS("Cannot fetch foreground colours until nested presenters have been added.", composite.getForegroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error);
   }
 
+  void test_zoomToPeak()
+  {
+    const int peakIndex = 0;
+    // Prepare subject objects.
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(); 
+    SetPeaksWorkspaces set;
+    set.insert(peaksWS);
+    MockPeaksPresenter* pSubject = new MockPeaksPresenter;
+    PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, getBoundingBox(peakIndex)).Times(1).WillOnce(Return(RectangleType()));
+    EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
+
+    //Prepare zoomable peak view.
+    MockZoomablePeaksView mockZoomableView;
+    EXPECT_CALL(mockZoomableView, zoomToRectangle(_, _)).Times(1);
+
+    // Create the composite and add the test presenter.
+    CompositePeaksPresenter composite(&mockZoomableView);
+    composite.addPeaksPresenter(subject);
+
+    composite.zoomToPeak(peaksWS, peakIndex);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockZoomableView));
+  }
+
 };
 
 #endif

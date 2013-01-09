@@ -32,6 +32,7 @@ public slots:
       void onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
       void onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
       void onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool);
+      void onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, int peakIndex);
 private:
   boost::shared_ptr<ProxyCompositePeaksPresenter> m_presenter;
 };

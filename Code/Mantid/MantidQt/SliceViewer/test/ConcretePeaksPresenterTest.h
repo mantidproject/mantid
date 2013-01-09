@@ -544,7 +544,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
   }
 
-
   void test_setShown()
   {
     const int expectedNumberOfPeaks = 5;
@@ -571,6 +570,51 @@ public:
     presenter->setShown(true);
     presenter->setShown(false);
 
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
+  }
+
+  void test_getBoundingBox_throws_if_index_too_low()
+  {
+    auto concreteBuilder = createStandardBuild();
+    ConcretePeaksPresenter_sptr presenter = concreteBuilder.create();
+
+    const int badIndex = -1;
+    TSM_ASSERT_THROWS("Index is < 0, should throw", presenter->getBoundingBox(badIndex), std::out_of_range);
+  }
+
+  void test_getBoundingBox_throws_if_index_too_high()
+  {
+    auto concreteBuilder = createStandardBuild();
+    ConcretePeaksPresenter_sptr presenter = concreteBuilder.create();
+
+    const size_t numberOfPeaks = (*presenter->presentedWorkspaces().begin())->rowCount();
+    const int badIndex = static_cast<int>(numberOfPeaks) + 1;
+    TSM_ASSERT_THROWS("Index is < 0, should throw", presenter->getBoundingBox(badIndex), std::out_of_range);
+  }
+
+  void test_getBoundingBox()
+  {
+    const int expectedNumberOfPeaks = 1;
+    auto concreteBuilder = createStandardBuild(expectedNumberOfPeaks);
+
+    // Create a mock view object/product that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
+    EXPECT_CALL(*pMockView, getBoundingBox()).Times(1).WillOnce(Return(RectangleType())); // Expect that the bounding box will be requested.
+
+    // Create a widget factory mock
+    auto pMockViewFactory = new MockPeakOverlayFactory;
+    PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+    EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+    EXPECT_CALL(*pMockViewFactory, setPeakRadius(_,_,_)).Times(AtLeast(1));
+    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(1));
+
+    concreteBuilder.withIntegratedViewFactory(mockViewFactory);
+
+    auto presenter = concreteBuilder.create();
+    presenter->getBoundingBox(0);
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
   }
 

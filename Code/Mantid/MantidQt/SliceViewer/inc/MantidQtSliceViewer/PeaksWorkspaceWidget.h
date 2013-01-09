@@ -22,6 +22,7 @@ namespace SliceViewer
     void backgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
     void removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
     void hideInPlot(Mantid::API::IPeaksWorkspace_const_sptr, bool);
+    void zoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr, int);
   private:
     /// Populate the widget with model data.
     void populate();

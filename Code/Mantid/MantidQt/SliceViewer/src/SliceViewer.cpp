@@ -2279,7 +2279,11 @@ Zoom in upon a rectangle
 */
 void SliceViewer::zoomToRectangle(Mantid::Kernel::V2D& lowerLeft, Mantid::Kernel::V2D& upperRight)
 {
-  this->setXYLimits(lowerLeft.X(), upperRight.X(), upperRight.Y(), lowerLeft.Y());
+    // Set the limits in X and Y
+  m_plot->setAxisScale( m_spect->xAxis(), lowerLeft.X(), upperRight.X());
+  m_plot->setAxisScale( m_spect->yAxis(), lowerLeft.Y(), upperRight.Y());
+  // Make sure the view updates
+  m_plot->replot();
 }
 
 } //namespace

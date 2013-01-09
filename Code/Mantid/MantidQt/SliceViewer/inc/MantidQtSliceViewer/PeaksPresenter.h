@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/System.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
+#include "MantidQtSliceViewer/PeakOverlayView.h"
 #include <set>
 
 namespace Mantid
@@ -22,7 +23,6 @@ namespace SliceViewer
 {
   // Forward dec.
   class PeakOverlayViewFactory;
-  class PeakOverlayView;
   class PeakTransform;
 
   // Alias
@@ -48,6 +48,7 @@ namespace SliceViewer
     virtual std::string getTransformName() const = 0;
     virtual void showBackgroundRadius(const bool shown) = 0;
     virtual void setShown(const bool shown) = 0;
+    virtual RectangleType getBoundingBox(const int peakIndex) const = 0;
   };
 
 

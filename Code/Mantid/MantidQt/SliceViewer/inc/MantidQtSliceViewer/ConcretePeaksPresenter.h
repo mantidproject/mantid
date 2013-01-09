@@ -39,6 +39,7 @@ namespace MantidQt
       void setBackgroundColour(const QColor);
       std::string getTransformName() const;
       void setShown(const bool shown);
+      virtual RectangleType getBoundingBox(const int) const;
     private:
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;

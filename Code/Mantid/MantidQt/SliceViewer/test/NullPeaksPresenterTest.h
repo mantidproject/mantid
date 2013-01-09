@@ -75,6 +75,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(presenter.setShown(false));
   }
 
+  /// return a box collapsed to a point at 0, 0.
+  void test_getBoundingBox_returns_point()
+  {
+    NullPeaksPresenter presenter;
+    RectangleType result = presenter.getBoundingBox(0);
+
+    TS_ASSERT_EQUALS(0, result.get<0>().X());
+    TS_ASSERT_EQUALS(0, result.get<0>().Y());
+    TS_ASSERT_EQUALS(0, result.get<1>().X());
+    TS_ASSERT_EQUALS(0, result.get<1>().Y());
+  }
+
 };
 
 #endif

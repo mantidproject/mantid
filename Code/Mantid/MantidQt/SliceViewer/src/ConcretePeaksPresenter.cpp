@@ -293,5 +293,18 @@ namespace SliceViewer
     }
   }
 
+  /**
+  @param peakIndex: index into contained peaks workspace.
+  @return the bounding box corresponding to the peakIndex.
+  */
+  RectangleType ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const
+  {
+    if(peakIndex < 0 || peakIndex > m_viewPeaks.size())
+    {
+      throw std::out_of_range("PeakIndex is out of range");
+    }
+    return this->m_viewPeaks[peakIndex]->getBoundingBox();
+  }
+
 }
 }

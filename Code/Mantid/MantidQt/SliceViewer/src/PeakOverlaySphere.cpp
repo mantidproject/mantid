@@ -142,7 +142,7 @@ namespace SliceViewer
   */
   RectangleType PeakOverlaySphere::getBoundingBox() const
   {
-    throw std::runtime_error("Not implemented");
+    return m_physicalPeak.getBoundingBox();
   }
 
 } // namespace Mantid

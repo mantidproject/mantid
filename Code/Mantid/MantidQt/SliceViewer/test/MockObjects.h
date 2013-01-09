@@ -47,6 +47,7 @@ namespace
     MOCK_CONST_METHOD0(getTransformName, std::string());
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
     MOCK_METHOD1(setShown, void(const bool));
+    MOCK_CONST_METHOD1(getBoundingBox, RectangleType(const int peakIndex));
     virtual ~MockPeaksPresenter(){}
   };
 
