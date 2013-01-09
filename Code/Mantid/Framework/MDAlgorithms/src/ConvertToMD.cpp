@@ -137,9 +137,10 @@ ConvertToMD::init()
        "the workspace recalculation each time the algorithm is invoked");
 
     declareProperty(new PropertyWithValue<bool>("UpdateMasks", false, Direction::Input),
-           "if PreprocessDetectorWS used to build a workspace with preprocessed detectors and the workspaces are different by just different masked monitors,\n"
-           " setting this option to true updates the detectors masks only for all subsequent calls to the algorithm.\n"
-           "<span style=""color:#FF0000"">This is temporary solution necessary untill Mantid masks spectra by 0 rather then by NaN</span>");
+           "if PreprocessDetectorWS is used to build the workspace with preprocessed detectors at first algorithm call\n"
+           "and the input workspaces instruments are different by just different masked monitors, setting this option to true forces [[PreprocessDetectorsToMD]]\n"
+           "update only the detectors masks for all subsequent calls to this algorithm. \n"
+           "<span style=""color:#FF0000"">This is temporary solution necessary until Mantid masks spectra by 0 rather then by NaN</span> ");
     // if one needs to use Lorentz corrections
     declareProperty(new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input), 
         "Correct the weights of events or signals and errors transformed into reciprocal space by multiplying them by the Lorentz multiplier: sin(theta)^2/lambda^4.\n"
