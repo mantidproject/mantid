@@ -166,6 +166,109 @@ public:
     TS_ASSERT(!physicalPeak.isViewableBackground());
   }
 
+  void test_getBoundingBox()
+  {
+    /*
+
+    width = height = outerradius * 2
+    |---------------|
+    |               |
+    |               |
+    |     (0,0)     |
+    |               |
+    |               |
+    |---------------|
+
+    */
+    V3D origin(0, 0, 0);
+    const double radius = 1; // Not important
+    const double innerBackgroundRadius = 2; // Not important
+    const double outerBackgroundRadius = 3; // This should be used to control the bounding box.
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
+    
+    auto boundingBox = physicalPeak.getBoundingBox();
+    auto lowerLeft = boundingBox.get<0>();
+    auto upperRight = boundingBox.get<1>();
+
+    TS_ASSERT_EQUALS(V2D(-3, -3), lowerLeft);
+    TS_ASSERT_EQUALS(V2D(3, 3), upperRight);
+  }
+
+  void test_getBoundingBox_with_offset_origin()
+  {
+    /*
+
+    width = height = outerradius * 2
+    |---------------|
+    |               |
+    |               |
+    |     (-1,1)    |
+    |               |
+    |               |
+    |---------------|
+
+    */
+    V3D origin(-1, 1, 0); // Offset origin from (0, 0, 0)
+    const double radius = 1; // Not important
+    const double innerBackgroundRadius = 2; // Not important
+    const double outerBackgroundRadius = 3; // This should be used to control the bounding box.
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
+    
+    auto boundingBox = physicalPeak.getBoundingBox();
+    auto lowerLeft = boundingBox.get<0>();
+    auto upperRight = boundingBox.get<1>();
+
+    const V2D expectedLowerLeft(origin.X() - outerBackgroundRadius, origin.Y() - outerBackgroundRadius);
+    const V2D expectedUpperRight(origin.X() + outerBackgroundRadius, origin.Y() + outerBackgroundRadius);
+
+    TS_ASSERT_EQUALS(expectedLowerLeft, lowerLeft);
+    TS_ASSERT_EQUALS(expectedUpperRight, upperRight);
+  }
+
+  void test_getBoundingBox_windows_coordinates()
+  {
+    /*
+    calculated in natural coords: width = height = outerradius * 2
+    in windows coords: window height = 100, window width = 50
+    |---------------|
+    |               |
+    |               |
+    |     (0,0)     |
+    |               |
+    |               |
+    |---------------|
+
+    */
+
+    V3D origin(0, 0, 0); // Offset origin from (0, 0, 0)
+    const double radius = 1; // Not important
+    const double innerBackgroundRadius = 2; // Not important
+    const double outerBackgroundRadius = 3; // This should be used to control the bounding box.
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
+
+    const double viewHeight = 1;
+    const double viewWidth = 1;
+    const double windowHeight = 100;
+    const double windowWidth = 50;
+    
+    auto boundingBox = physicalPeak.getBoundingBox(windowHeight, windowWidth, viewWidth, viewHeight);
+    auto lowerLeft = boundingBox.get<0>();
+    auto upperRight = boundingBox.get<1>();
+
+    double scaleXFactor = windowWidth/viewWidth; // To convert the box into windows coordinates
+    double scaleYFactor = windowHeight/viewHeight; // To convert the box into windows coordinates
+
+    const double expectedLowerLeftX = (origin.X() - outerBackgroundRadius) * scaleXFactor;
+    const double expectedLowerLeftY = (origin.Y() - outerBackgroundRadius) * scaleYFactor;
+    const double expectedUpperRightX = (origin.X() + outerBackgroundRadius) * scaleXFactor;
+    const double expectedUpperRightY = (origin.Y() + outerBackgroundRadius) * scaleYFactor;
+
+    TS_ASSERT_EQUALS(expectedLowerLeftX, lowerLeft.X());
+    TS_ASSERT_EQUALS(expectedLowerLeftY, lowerLeft.Y());
+    TS_ASSERT_EQUALS(expectedUpperRightX, upperRight.X());
+    TS_ASSERT_EQUALS(expectedUpperRightY, upperRight.Y());
+  }
+
 };
 
 //=====================================================================================

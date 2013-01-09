@@ -14,6 +14,7 @@
 #include "MantidQtSliceViewer/LineOverlay.h"
 #include "MantidQtSliceViewer/PeakTransformSelector.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <QtCore/QtCore>
@@ -43,7 +44,7 @@ class ProxyCompositePeaksPresenter;
  * along the other dimension(s).
  *
  */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget, public ZoomablePeaksView
 {
   friend class SliceViewerWindow;
 
@@ -98,6 +99,9 @@ public:
 
   /// Methods relating to peaks overlays.
   boost::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
+
+  /// Methods from implementation of ZoomablePeaksView.
+  virtual void zoomToRectangle(Mantid::Kernel::V2D& lowerLeft, Mantid::Kernel::V2D& upperRight);
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed

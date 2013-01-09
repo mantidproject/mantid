@@ -5,6 +5,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidQtSliceViewer/PeakTransform.h"
+#include "MantidQtSliceViewer/PeakOverlayView.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt
@@ -77,6 +78,12 @@ namespace MantidQt
 
       /// Setter to command whether the background radius should also be shown.
       void showBackgroundRadius(const bool show);
+
+      /// Get the bounding box in natural coordinates.
+      RectangleType getBoundingBox() const;
+
+      /// Get the bounding box in windows coordinates.
+      RectangleType getBoundingBox(const double& windowHeight, const double& windowWidth, const double& viewWidth, const double& viewHeight) const;
 
     private:
       /// Original origin x=h, y=k, z=l

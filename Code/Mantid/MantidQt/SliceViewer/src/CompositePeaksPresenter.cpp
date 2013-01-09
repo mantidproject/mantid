@@ -8,8 +8,13 @@ namespace MantidQt
     /**
     Constructor
     */
-    CompositePeaksPresenter::CompositePeaksPresenter(PeaksPresenter_sptr defaultPresenter) : m_default(defaultPresenter)
+    CompositePeaksPresenter::CompositePeaksPresenter(ZoomablePeaksView* const zoomablePlottingWidget, PeaksPresenter_sptr defaultPresenter) : m_zoomablePlottingWidget(zoomablePlottingWidget),  
+      m_default(defaultPresenter)
     {
+      if(m_zoomablePlottingWidget == NULL)
+      {
+        throw std::runtime_error("Zoomable Plotting Widget is NULL");
+      }
     }
 
     /**
@@ -290,6 +295,11 @@ namespace MantidQt
       }
       auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
       (*iterator)->setShown(shown);
+    }
+
+    void CompositePeaksPresenter::zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const int peakIndex)
+    {
+      //TODO
     }
   }
 }

@@ -5,6 +5,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidQtSliceViewer/PeakTransform.h"
+#include "MantidQtSliceViewer/PeakOverlayView.h"
 
 namespace MantidQt
 {
@@ -44,6 +45,11 @@ namespace MantidQt
       {
         return (m_opacityAtDistance != m_opacityMin);
       }
+      /// Get the bounding box.
+      RectangleType getBoundingBox() const;
+      /// Get the bounding box in windows coordinates.
+      RectangleType getBoundingBox(const double& windowHeight, const double& windowWidth, const double& viewWidth, const double& viewHeight) const;
+
     private:
       /// Original origin x=h, y=k, z=l
       const Mantid::Kernel::V3D m_originalOrigin;

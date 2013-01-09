@@ -137,5 +137,13 @@ namespace SliceViewer
     m_physicalPeak.showBackgroundRadius(show);
   }
 
+  /**
+  @return bounding box for peak in windows coordinates.
+  */
+  RectangleType PeakOverlaySphere::getBoundingBox() const
+  {
+    throw std::runtime_error("Not implemented");
+  }
+
 } // namespace Mantid
 } // namespace SliceViewer

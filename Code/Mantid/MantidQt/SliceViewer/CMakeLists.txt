@@ -72,6 +72,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
 	inc/MantidQtSliceViewer/XYLimitsDialog.h
+	inc/MantidQtSliceViewer/ZoomablePeaksView.h
 )
 
 set ( MOC_FILES 

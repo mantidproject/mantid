@@ -8,6 +8,7 @@
 #include "MantidQtSliceViewer/PeakTransformFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidAPI/IPeak.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
@@ -19,6 +20,16 @@ using boost::regex;
 
 namespace
 {
+
+  /*------------------------------------------------------------
+  Zoomable Peaks View
+  ------------------------------------------------------------*/
+  class MockZoomablePeaksView : public ZoomablePeaksView
+  {
+  public:
+    MOCK_METHOD2(zoomToRectangle, void(Mantid::Kernel::V2D&, Mantid::Kernel::V2D&));
+    virtual ~MockZoomablePeaksView(){}
+  };
 
   /*------------------------------------------------------------
   Mock Peaks Presenter
@@ -83,6 +94,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_METHOD1(changeForegroundColour, void(const QColor));
     MOCK_METHOD1(changeBackgroundColour, void(const QColor));
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
+    MOCK_CONST_METHOD0(getBoundingBox, RectangleType());
     ~MockPeakOverlayView(){}
   };
 

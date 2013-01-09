@@ -133,5 +133,13 @@ namespace SliceViewer
     // Do nothing with the background colour for a peak widget of this type.
   }
 
+  /**
+  @return bounding box for peak in windows coordinates.
+  */
+  RectangleType PeakOverlayCross::getBoundingBox() const
+  {
+    throw std::runtime_error("Not implemented");
+  }
+
 } // namespace Mantid
 } // namespace SliceViewer

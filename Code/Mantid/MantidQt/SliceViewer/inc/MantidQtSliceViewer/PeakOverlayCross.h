@@ -66,6 +66,8 @@ namespace SliceViewer
     virtual void changeForegroundColour(const QColor);
     /// Change background colour
     virtual void changeBackgroundColour(const QColor);
+    /// Get a bounding box for this peak.
+    virtual RectangleType getBoundingBox() const;
 
   private:
 

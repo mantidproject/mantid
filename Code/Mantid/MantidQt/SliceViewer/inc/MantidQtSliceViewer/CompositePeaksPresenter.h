@@ -4,6 +4,7 @@
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
+#include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include <vector>
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
@@ -35,7 +36,7 @@ namespace MantidQt
       virtual std::string getTransformName() const;
       
       /// Constructor
-      CompositePeaksPresenter(PeaksPresenter_sptr defaultPresenter = PeaksPresenter_sptr(new NullPeaksPresenter));
+      CompositePeaksPresenter(ZoomablePeaksView* const zoomablePlottingWidget,  PeaksPresenter_sptr defaultPresenter = PeaksPresenter_sptr(new NullPeaksPresenter));
       /// Destructor
       ~CompositePeaksPresenter();
       /// Add a peaks presenter onto the composite.
@@ -59,7 +60,9 @@ namespace MantidQt
       /// Remove the workspace and corresponding presenter.
       void remove(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
       /// Hide these peaks in the plot.
-      void CompositePeaksPresenter::setShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const bool shown);
+      void setShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const bool shown);
+      /// zoom in on a peak.
+      void zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const int peakIndex);
     private:
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
@@ -75,6 +78,8 @@ namespace MantidQt
       SubjectContainer::const_iterator getPresenterIteratorFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
       /// Colour pallette.
       PeakPalette m_palette;
+      /// Zoomable peaks view.
+      ZoomablePeaksView* const m_zoomablePlottingWidget;
     };
   }
 }

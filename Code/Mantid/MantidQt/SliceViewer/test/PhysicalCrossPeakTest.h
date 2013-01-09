@@ -119,6 +119,117 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockTransform));
   }
+
+    void test_getBoundingBox()
+  {
+    /*
+
+    width = height = effectiveradius * 2
+    |---------------|
+    |               |
+    |               |
+    |     (0,0)     |
+    |               |
+    |               |
+    |---------------|
+
+    */
+    V3D origin(0, 0, 0);
+    const double maxZ = 1;
+    const double minZ = 0;
+    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
+    
+    // Pre-calculate the effective radius.
+    const double effectiveRadius = 0.015 * (maxZ - minZ);
+
+    auto boundingBox = physicalPeak.getBoundingBox();
+    auto lowerLeft = boundingBox.get<0>();
+    auto upperRight = boundingBox.get<1>();
+
+    TS_ASSERT_EQUALS(V2D(-effectiveRadius, -effectiveRadius), lowerLeft);
+    TS_ASSERT_EQUALS(V2D(effectiveRadius, effectiveRadius), upperRight);
+  }
+
+  void test_getBoundingBox_with_offset_origin()
+  {
+    /*
+
+    width = height = effectiveradius * 2
+    |---------------|
+    |               |
+    |               |
+    |     (-1,1)    |
+    |               |
+    |               |
+    |---------------|
+
+    */
+
+    V3D origin(0, 0, 0);
+    const double maxZ = 1;
+    const double minZ = 0;
+    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
+    
+    auto boundingBox = physicalPeak.getBoundingBox();
+    auto lowerLeft = boundingBox.get<0>();
+    auto upperRight = boundingBox.get<1>();
+
+    // Pre-calculate the effective radius.
+    const double effectiveRadius = 0.015 * (maxZ - minZ);
+
+    const V2D expectedLowerLeft(origin.X() - effectiveRadius, origin.Y() - effectiveRadius);
+    const V2D expectedUpperRight(origin.X() + effectiveRadius, origin.Y() + effectiveRadius);
+
+    TS_ASSERT_EQUALS(expectedLowerLeft, lowerLeft);
+    TS_ASSERT_EQUALS(expectedUpperRight, upperRight);
+  }
+
+  void test_getBoundingBox_windows_coordinates()
+  {
+    /*
+    calculated in natural coords: width = height = outerradius * 2
+    in windows coords: window height = 100, window width = 50
+    |---------------|
+    |               |
+    |               |
+    |     (0,0)     |
+    |               |
+    |               |
+    |---------------|
+
+    */
+
+    V3D origin(0, 0, 0); // Offset origin from (0, 0, 0)
+    const double maxZ = 1;
+    const double minZ = 0;
+    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
+
+    const double viewHeight = 1;
+    const double viewWidth = 1;
+    const double windowHeight = 100;
+    const double windowWidth = 50;
+    
+    auto boundingBox = physicalPeak.getBoundingBox(windowHeight, windowWidth, viewWidth, viewHeight);
+    auto lowerLeft = boundingBox.get<0>();
+    auto upperRight = boundingBox.get<1>();
+
+    double scaleXFactor = windowWidth/viewWidth; // To convert the box into windows coordinates
+    double scaleYFactor = windowHeight/viewHeight; // To convert the box into windows coordinates
+
+    // Pre-calculate the effective radius.
+    const double effectiveRadius = 0.015 * (maxZ - minZ);
+
+    const double expectedLowerLeftX = (origin.X() - effectiveRadius) * scaleXFactor;
+    const double expectedLowerLeftY = (origin.Y() - effectiveRadius) * scaleYFactor;
+    const double expectedUpperRightX = (origin.X() + effectiveRadius) * scaleXFactor;
+    const double expectedUpperRightY = (origin.Y() + effectiveRadius) * scaleYFactor;
+
+    TS_ASSERT_EQUALS(expectedLowerLeftX, lowerLeft.X());
+    TS_ASSERT_EQUALS(expectedLowerLeftY, lowerLeft.Y());
+    TS_ASSERT_EQUALS(expectedUpperRightX, upperRight.X());
+    TS_ASSERT_EQUALS(expectedUpperRightY, upperRight.Y());
+  }
+
 };
 
 //=====================================================================================

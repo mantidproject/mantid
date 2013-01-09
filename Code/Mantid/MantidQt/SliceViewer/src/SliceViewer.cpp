@@ -102,7 +102,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_fastRender(true),
       m_rebinMode(false), 
       m_rebinLocked(true), 
-      m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>()),
+      m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_peaksSliderWidget(NULL)
 {
 	ui.setupUi(this);
@@ -2270,6 +2270,16 @@ Get the peaks proxy presenter.
 boost::shared_ptr<ProxyCompositePeaksPresenter> SliceViewer::getPeaksPresenter() const
 {
   return boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter);
+}
+
+/**
+Zoom in upon a rectangle
+@parm lower Left: rectangle lower left
+@param upperRight, rectangle upper right
+*/
+void SliceViewer::zoomToRectangle(Mantid::Kernel::V2D& lowerLeft, Mantid::Kernel::V2D& upperRight)
+{
+  this->setXYLimits(lowerLeft.X(), upperRight.X(), upperRight.Y(), lowerLeft.Y());
 }
 
 } //namespace

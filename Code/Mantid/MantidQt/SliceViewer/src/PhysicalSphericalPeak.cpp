@@ -117,9 +117,51 @@ namespace MantidQt
         return drawingObjects;
       }
 
+      /**
+      Setter for showing/hiding the background radius.
+      @param show: Flag indicating what to do.
+      */
       void PhysicalSphericalPeak::showBackgroundRadius(const bool show)
       {
         m_showBackgroundRadius = show;
+      }
+
+      /**
+      @return bounding box for peak in natural coordinates.
+      */
+      RectangleType PhysicalSphericalPeak::getBoundingBox() const
+      {
+        using Mantid::Kernel::V2D;
+        V2D lowerLeft(m_origin.X() - m_backgroundOuterRadius, m_origin.Y() - m_backgroundOuterRadius);
+        V2D upperRight(m_origin.X() + m_backgroundOuterRadius, m_origin.Y() + m_backgroundOuterRadius);
+        return RectangleType(boost::make_tuple(lowerLeft, upperRight));
+      }
+
+      /**
+      @param windowHeight : height of the window in px
+      @param windowWidth : height of the window in px
+      @param viewWidth : width of the view area in natural coodinates
+      @param viewHeight : height of the view area in natural coordinates
+      @return bounding box for peak in windows coordinates.
+      */
+      RectangleType PhysicalSphericalPeak::getBoundingBox(const double& windowHeight, const double& windowWidth, const double& viewWidth, const double& viewHeight) const
+      {
+        using Mantid::Kernel::V2D;
+        // Scale factor for going from viewX to windowX
+        const double scaleYFactor = windowHeight/viewHeight;
+        // Scale factor for going from viewY to windowY
+        const double scaleXFactor = windowWidth/viewWidth;
+
+        // Get the box in natural coordinates.
+        RectangleType boxInNaturalCoords = this->getBoundingBox();
+
+        const double expectedLowerLeftX = boxInNaturalCoords.get<0>().X() * scaleXFactor;
+        const double expectedLowerLeftY = boxInNaturalCoords.get<0>().Y() * scaleYFactor;
+        const double expectedUpperRightX = boxInNaturalCoords.get<1>().X() * scaleXFactor;
+        const double expectedUpperRightY = boxInNaturalCoords.get<1>().Y() * scaleYFactor;
+
+        // Apply scaling.
+        return RectangleType(V2D(expectedLowerLeftX, expectedLowerLeftY), V2D(expectedUpperRightX, expectedUpperRightY));
       }
   }
 }
