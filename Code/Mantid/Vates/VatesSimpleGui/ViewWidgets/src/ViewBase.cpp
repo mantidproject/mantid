@@ -39,17 +39,23 @@ ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
 /**
  * This function creates a single standard ParaView view instance.
  * @param widget the UI widget to associate the view with
+ * @param viewName the requested view type, if empty will default to RenderView
  * @return the created view
  */
-pqRenderView* ViewBase::createRenderView(QWidget* widget)
+pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
 {
   QHBoxLayout *hbox = new QHBoxLayout(widget);
   hbox->setMargin(0);
 
+  if (viewName == "")
+  {
+    viewName = pqRenderView::renderViewType();
+  }
+
   // Create a new render view.
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
   pqRenderView *view = qobject_cast<pqRenderView*>(\
-        builder->createView(pqRenderView::renderViewType(),
+        builder->createView(viewName,
                             pqActiveObjects::instance().activeServer()));
   pqActiveObjects::instance().setActiveView(view);
 
