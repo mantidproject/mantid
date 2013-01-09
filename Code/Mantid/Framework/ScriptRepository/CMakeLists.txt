@@ -94,6 +94,6 @@ set_target_properties ( ScriptRepository PROPERTIES OUTPUT_NAME MantidScriptRepo
 set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
-target_link_libraries(ScriptRepository ${MANTIDLIBS} PocoZip)
+target_link_libraries(ScriptRepository ${MANTIDLIBS})
 
 install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

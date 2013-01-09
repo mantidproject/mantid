@@ -16,7 +16,6 @@
 #include "Poco/Net/FilePartSource.h"
 #include "Poco/Net/HTTPResponse.h"
 #include "Poco/Net/NameValueCollection.h"
-#include "Poco/Zip/Compress.h"
 #include "Poco/NullStream.h"
 #include "Poco/Exception.h"
 
@@ -715,9 +714,7 @@ namespace API
                                    const std::string description)
     throw (ScriptRepoException&)
   {
-    using Poco::Zip::Compress;
-    using Poco::FileOutputStream;
-  
+    using Poco::FileOutputStream; 
     ///  @todo: deal with the description
     UNUSED_ARG(description);    
     /// @todo: create the zip file
@@ -725,18 +722,6 @@ namespace API
     std::string file_path_adjusted = convertPath(file_path, file_is_local); 
     if (!file_is_local)
       throw ScriptRepoException("You can not upload an unexisting file!"); 
-    Poco::Path origin(file_path); 
-    Poco::Path target(file_path_adjusted); 
-    std::string file_zip_path = Poco::Path::home().append(origin.getFileName()).append(".zip"); 
-    FileOutputStream out_file(file_zip_path,
-                              std::ios::out); 
-    Compress zip(out_file, true);
-    if (origin.isDirectory()){
-      zip.addRecursive(origin);
-    }else{
-      zip.addFile(origin, target);
-    }
-    zip.close(); 
 
     try{
       const char * failure_message = "Failed connect to server\n";
@@ -804,8 +789,8 @@ namespace API
 
       /// the form will take ownership of this memory and 
       /// will delete it when necessary
-      FilePartSource * fil = new FilePartSource(file_zip_path,
-                                                "application/x-zip-compressed");       
+      FilePartSource * fil = new FilePartSource(file_path,
+                                                "application/octet-stream");       
       form.addPart("script", fil); 
      
       //send the request     
