@@ -54,12 +54,13 @@ public:
   /// Set new peak radius
   static void setPeakRadius(const int& r = 5);
 
-protected:
   /// Function evaluation method to be implemented in the inherited classes
   virtual void functionLocal(double* out, const double* xValues, const size_t nData)const = 0;
   /// Derivative evaluation method to be implemented in the inherited classes
   virtual void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData) = 0;
-  /// Defines the area around the centre where the peak values are to be calculated (in FWHM).
+
+protected:
+/// Defines the area around the centre where the peak values are to be calculated (in FWHM).
   static int s_peakRadius; 
 };
 

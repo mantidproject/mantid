@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
 	src/Chebyshev.cpp
+	src/ComptonProfile.cpp
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
@@ -33,7 +34,9 @@ set ( SRC_FILES
 	src/GausOsc.cpp
 	src/Gaussian.cpp
 	src/Gaussian1D.cpp
+	src/GaussianComptonProfile.cpp
 	src/GaussianLinearBG1D.cpp
+	src/GramCharlierComptonProfile.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LeBailFit.cpp
 	src/LeBailFit2.cpp
@@ -93,6 +96,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/CompositeValues.h
+	inc/MantidCurveFitting/ComptonProfile.h
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
@@ -120,7 +124,9 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GausOsc.h
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/Gaussian1D.h
+	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
+	inc/MantidCurveFitting/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LeBailFit.h
@@ -177,6 +183,7 @@ set ( TEST_FILES
 	BoundaryConstraintTest.h
 	ChebyshevTest.h
 	CompositeFunctionTest.h
+	ComptonProfileTest.h
 	ConvolutionTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
@@ -193,10 +200,12 @@ set ( TEST_FILES
 	GausDecayTest.h
 	GausOscTest.h
 	Gaussian1DTest.h
+	GaussianComptonProfileTest.h
 	GaussianTest.h
+	GramCharlierComptonProfileTest.h
 	IkedaCarpenterPVTest.h
-	LeBailFitTest.h
 	LeBailFit2Test.h
+	LeBailFitTest.h
 	LeBailFunctionTest.h
 	LeastSquaresTest.h
 	LevenbergMarquardtMDTest.h

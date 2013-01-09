@@ -58,12 +58,15 @@ public:
   ///Destructor
   virtual ~CompositeFunction();
 
-              /* Overriden methods */
+  /* Overriden methods */
 
   /// Returns the function's name
   virtual std::string name()const {return "CompositeFunction";}
   /// Writes itself into a string
   std::string asString()const;
+  /// Sets the workspace for each member function
+  void setWorkspace(boost::shared_ptr<const Workspace> ws);
+
   /// Function you want to fit to. 
   /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   virtual void function(const FunctionDomain& domain, FunctionValues& values)const;

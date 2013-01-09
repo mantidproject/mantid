@@ -1,0 +1,325 @@
+//-----------------------------------------------------------------------------
+// Includes
+//-----------------------------------------------------------------------------
+#include "MantidCurveFitting/ComptonProfile.h"
+#include "MantidAPI/FunctionFactory.h"
+
+#include <gsl/gsl_poly.h>
+
+namespace Mantid
+{
+namespace CurveFitting
+{
+
+  namespace
+  {
+    ///@cond
+    const char * WSINDEX_NAME = "WorkspaceIndex";
+    const char * MASS_NAME = "Mass";
+
+    const double STDDEV_TO_HWHM = std::sqrt(std::log(4));
+    ///@endcond
+  }
+
+  /**
+   */
+  ComptonProfile::ComptonProfile() : API::ParamFunction(), API::IFunction1D(),
+      m_workspace(), m_wsIndex(0), m_mass(0.0),  m_l1(0.0), m_sigmaL1(0.0),
+      m_l2(0.0), m_sigmaL2(0.0), m_theta(0.0), m_sigmaTheta(0.0), m_e1(0.0),
+      m_t0(0.0), m_hwhmGaussE(0.0), m_hwhmLorentzE(0.0), m_voigt()
+  {}
+
+  /**
+   */
+  void ComptonProfile::declareAttributes()
+  {
+    declareAttribute(WSINDEX_NAME, IFunction::Attribute(static_cast<int>(m_wsIndex)));
+    declareAttribute(MASS_NAME, IFunction::Attribute(m_mass));
+  }
+
+  /**
+   * @param name The name of the attribute
+   * @param value The attribute's value
+   */
+  void ComptonProfile::setAttribute(const std::string& name,const Attribute& value)
+  {
+    if(name == WSINDEX_NAME)  m_wsIndex = static_cast<size_t>(value.asInt());
+    else if(name == MASS_NAME) m_mass = value.asDouble();
+  }
+
+  /**
+   * Also caches parameters from the instrument
+   * Throws if it is not a MatrixWorkspace
+   * @param ws The workspace set as input
+   */
+  void ComptonProfile::setWorkspace(boost::shared_ptr<const API::Workspace> ws)
+  {
+    m_workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
+    if(!m_workspace)
+    {
+      throw std::invalid_argument("NCSCountRate expected an object of type MatrixWorkspace, type=" + ws->id());
+    }
+    auto inst = m_workspace->getInstrument();
+    auto sample = inst->getSample();
+    auto source = inst->getSource();
+    if(!sample || !source)
+    {
+      throw std::invalid_argument("NCSCountRate - Workspace has no source/sample.");
+    }
+    Geometry::IDetector_const_sptr det;
+    try
+    {
+     det = m_workspace->getDetector(m_wsIndex);
+    }
+    catch (Kernel::Exception::NotFoundError &)
+    {
+      throw std::invalid_argument("NCSCountRate - Workspace has not detector attached to histogram at index " + boost::lexical_cast<std::string>(m_wsIndex));
+    }
+
+    m_l1 = sample->getDistance(*source);
+    m_l2 = det->getDistance(*sample);
+    m_theta = m_workspace->detectorTwoTheta(det);
+
+    // parameters
+    m_sigmaL1 = getComponentParameter(*det, "sigma_l1");
+    m_sigmaL2 = getComponentParameter(*det, "sigma_l2");
+    m_sigmaTheta = getComponentParameter(*det, "sigma_theta");
+    m_e1 = getComponentParameter(*det,"efixed");
+    m_t0 = getComponentParameter(*det,"t0")*1e-6; // Convert to seconds
+    m_hwhmLorentzE = getComponentParameter(*det, "hwhm_energy_lorentz");
+    m_hwhmGaussE = STDDEV_TO_HWHM*getComponentParameter(*det, "sigma_energy_gauss");
+  }
+
+  /*
+   * Creates the internal caches
+   */
+  void ComptonProfile::setUpForFit()
+  {
+    using namespace Mantid::API;
+    m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Voigt"));
+  }
+
+  //-------------------------------------- Function evaluation -----------------------------------------
+
+  /**
+   * Calculates the value of the function for each x value and stores in the given output array
+   * @param out An array of size nData to store the results
+   * @param xValues The input X data array of size nData. It is assumed to be times in microseconds
+   * @param nData The length of the out & xValues arrays
+   */
+  void ComptonProfile::function1D(double* out, const double* xValues, const size_t nData) const
+  {
+    std::vector<double> tInSecs(xValues, xValues + nData);
+
+    std::transform(tInSecs.begin(), tInSecs.end(), tInSecs.begin(), std::bind2nd(std::multiplies<double>(), 1e-6)); // Convert to seconds
+
+    const double mn = PhysicalConstants::NeutronMassAMU;
+    const double mevToK = PhysicalConstants::E_mev_toNeutronWavenumberSq;
+    const double massToMeV = 0.5*PhysicalConstants::NeutronMass/PhysicalConstants::meV; // Includes factor of 1/2
+
+    const double v1 = std::sqrt(m_e1/massToMeV);
+    const double k1 = std::sqrt(m_e1/mevToK);
+    const double l2l1 = m_l2/m_l1;
+
+    // -------------------------------------- Resolution dependence -------------------------------------
+    double x0(0.0),x1(0.0);
+    gsl_poly_solve_quadratic(m_mass-1.0, 2.0*std::cos(m_theta), -(m_mass+1.0), &x0, &x1);
+    const double k0k1 = std::max(x0,x1); // K0/K1 at y=0
+
+    double qy0(0.0), wgauss(0.0), lorentzFWHM(0.0);
+;
+    if(m_mass > 1.0)
+    {
+      qy0 = std::sqrt(k1*k1*m_mass*(k0k1*k0k1 - 1));
+      double k0k1p3 = std::pow(k0k1,3);
+      double r1 = -(1.0 + l2l1*k0k1p3);
+      double r2 = 1.0 - l2l1*k0k1p3 + l2l1*std::pow(k0k1,2)*std::cos(m_theta) - k0k1*std::cos(m_theta);
+
+      double factor = (0.2413/qy0)*((m_mass/mn)*r1 - r2);
+      lorentzFWHM = std::abs(factor*m_hwhmLorentzE*2);
+      wgauss = std::abs(factor*m_hwhmGaussE*2);
+    }
+    else
+    {
+      qy0 = k1*std::tan(m_theta);
+      double factor = (0.2413*2.0/k1)*std::abs((std::cos(m_theta) + l2l1)/std::sin(m_theta));
+      lorentzFWHM = m_hwhmLorentzE*factor;
+      wgauss = m_hwhmGaussE*factor;
+    }
+    double k0y0 = k1*k0k1;                     // k0_y0 =  k0 value at y=0
+    double wtheta = 2.0*STDDEV_TO_HWHM*std::abs(k0y0*k1*std::sin(m_theta)/qy0)*m_sigmaTheta;
+    double common = (m_mass/mn) - 1 + k1*std::cos(m_theta)/k0y0;
+    double wl1 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,2)/(qy0*m_l1))*common)*m_sigmaL1;
+    double wl2 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,3)/(k1*qy0*m_l1))*common)*m_sigmaL2;
+
+    const double resolutionSigma = std::sqrt(std::pow(wgauss,2) + std::pow(wtheta,2) + std::pow(wl1,2) + std::pow(wl2,2));
+
+    // -------------------------------------- Profile factor --------------------------------------------------------------
+
+    // Calculate energy dependent factors and transform q to Yspace
+    std::vector<double> e0(nData,0.0);
+    m_modQ.resize(nData);
+    m_yspace.resize(nData);
+    for(size_t i = 0; i < nData; ++i)
+    {
+      const double v0 = m_l1/(tInSecs[i] - m_t0 - (m_l2/v1));
+      const double ei = massToMeV*v0*v0;
+      e0[i] = ei;
+      const double w = ei - m_e1;
+      const double k0 = std::sqrt(ei/mevToK);
+      const double q = std::sqrt(k0*k0 + k1*k1 - 2.0*k0*k1*std::cos(m_theta));
+      m_modQ[i] = q;
+      m_yspace[i] = 0.2393*(m_mass/q)*(w - mevToK*q*q/m_mass);
+    }
+
+    std::vector<double> profile(nData);
+    this->massProfile(profile,lorentzFWHM, resolutionSigma);
+
+    // Multiply by the mass & final prefactor e0^0.1/q
+    for(size_t j = 0; j < nData; ++j)
+    {
+      out[j] = std::pow(e0[j],0.1)*m_mass*profile[j]/m_modQ[j];
+    }
+
+//    for(size_t i = 0; i < nmasses; ++i)
+//    {
+//      const auto & yi = yspace[i];
+//      auto & j1i = j1[i];
+//      std::ostringstream os;
+//      os << WIDTH_PREFIX << i;
+//      const double gaussWidth(getParameter(os.str()));
+//      const double lorentzWidth(lorentzW[i]);
+//      const double gaussRes = sigmaRes[i];
+//      if(i == 0)
+//      {
+//        const double amp(1.0);
+//        firstMassJ(j1i, yi, modQ, amp, kfse, gaussWidth, lorentzWidth, gaussRes);
+//      }
+//      else
+//      {
+//        os.str("");
+//        os << INTENSITY_PREFIX << i;
+//        double lorentzPos(0.0), amplitude(getParameter(os.str())), lorentzFWHM(lorentzWidth);
+//        double gaussFWHM = std::sqrt(std::pow(gaussRes,2) + std::pow(2.0*STDDEV_TO_HWHM*gaussWidth,2));
+//        voigtApprox(j1i, yi,lorentzPos, amplitude, lorentzFWHM, gaussFWHM); // Answer goes into j1i
+//        voigtApproxDiff(voigtDiffResult, yi, lorentzPos, amplitude, lorentzFWHM, gaussFWHM);
+//        for(size_t j = 0; j < nData; ++j)
+//        {
+//          const double factor = std::pow(gaussWidth,4.0)/(3.0*modQ[j]);
+//          j1i[j] -= factor*voigtDiffResult[j];
+//        }
+//      }
+//      // Multiply by mass
+//      std::transform(j1i.begin(), j1i.end(), j1i.begin(), std::bind2nd(std::multiplies<double>(), m_masses[i]));
+//    }
+//
+//    // Sum over each mass and scale by prefactor to get answer
+//    for(size_t j = 0; j < nData; ++j)
+//    {
+//      for(size_t i = 0; i < nmasses; ++i)
+//      {
+//        out[j] += j1[i][j];
+//      }
+//      out[j] *= std::pow(e0[j],0.1)/modQ[j];
+//    }
+//
+////      std::copy(out, out+nData,std::ostream_iterator<double>(std::cerr, "\n"));
+//    //throw std::runtime_error("stop");
+  }
+
+  /**
+   * Transforms the input y coordinates using a difference if Voigt functions across the whole range
+   * @param voigtDiff [Out] Output values (vector is expected to be of the correct size)
+   * @param yspace Input y coordinates
+   * @param lorentzPos LorentzPos parameter
+   * @param lorentzAmp LorentzAmp parameter
+   * @param lorentzWidth LorentzFWHM parameter
+   * @param gaussWidth GaussianFWHM parameter
+   */
+  void ComptonProfile::voigtApproxDiff(std::vector<double> & voigtDiff, const std::vector<double> & yspace, const double lorentzPos, const double lorentzAmp,
+                                       const double lorentzWidth, const double gaussWidth) const
+  {
+    double miny(DBL_MAX), maxy(-DBL_MAX);
+    auto iend = yspace.end();
+    for(auto itr = yspace.begin(); itr != iend; ++itr)
+    {
+      const double absy = std::abs(*itr);
+      if(absy < miny) miny = absy;
+      else if(absy > maxy) maxy = absy;
+    }
+    const double epsilon = (maxy - miny)/1000.0;
+
+    // Compute: V = voigt(y+2eps,...) - voigt(y-2eps,...) - 2*voigt(y+eps,...) + 2*(voigt(y-eps,...)/(2eps^3))
+
+    std::vector<double> ypmEps(yspace.size());
+    // y+2eps
+    std::transform(yspace.begin(), yspace.end(), ypmEps.begin(), std::bind2nd(std::plus<double>(), 2.0*epsilon)); // Add 2 epsilon
+    voigtApprox(voigtDiff, ypmEps, lorentzPos, lorentzAmp, lorentzWidth, gaussWidth);
+    // y-2eps
+    std::transform(yspace.begin(), yspace.end(), ypmEps.begin(), std::bind2nd(std::minus<double>(), 2.0*epsilon)); // Subtract 2 epsilon
+    std::vector<double> tmpResult(yspace.size());
+    voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp, lorentzWidth, gaussWidth);
+    // Difference of first two terms - result is put back in voigtDiff
+    std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(), voigtDiff.begin(), std::minus<double>());
+
+    // y+eps
+    std::transform(yspace.begin(), yspace.end(), ypmEps.begin(), std::bind2nd(std::plus<double>(), epsilon)); // Add 2 epsilon
+    voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp, lorentzWidth, gaussWidth);
+    std::transform(tmpResult.begin(), tmpResult.end(), tmpResult.begin(), std::bind2nd(std::multiplies<double>(), 2.0)); // times 2
+    // Difference - result is put back in voigtDiff
+    std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(), voigtDiff.begin(), std::minus<double>());
+
+    //y-eps
+    std::transform(yspace.begin(), yspace.end(), ypmEps.begin(), std::bind2nd(std::minus<double>(), epsilon)); // Add 2 epsilon
+    voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp, lorentzWidth, gaussWidth);
+    std::transform(tmpResult.begin(), tmpResult.end(), tmpResult.begin(), std::bind2nd(std::divides<double>(), std::pow(epsilon,3))); // divided by (eps^3)
+    // Sum for final answer
+    std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(), voigtDiff.begin(), std::plus<double>());
+  }
+
+  /**
+   * Transforms the input y coordinates using the Voigt function approximation. The area is normalized to lorentzAmp
+   * @param voigt [Out] Output values (vector is expected to be of the correct size
+   * @param yspace Input y coordinates
+   * @param lorentzPos LorentzPos parameter
+   * @param lorentzAmp LorentzAmp parameter
+   * @param lorentzWidth LorentzFWHM parameter
+   * @param gaussWidth GaussianFWHM parameter
+   */
+  void ComptonProfile::voigtApprox(std::vector<double> & voigt, const std::vector<double> & yspace, const double lorentzPos,
+                                 const double lorentzAmp, const double lorentzWidth, const double gaussWidth) const
+  {
+    m_voigt->setParameter("LorentzAmp",lorentzAmp);
+    m_voigt->setParameter("LorentzPos",lorentzPos);
+    m_voigt->setParameter("LorentzFWHM",lorentzWidth);
+    m_voigt->setParameter("GaussianFWHM",gaussWidth);
+    assert(voigt.size() == yspace.size());
+    m_voigt->functionLocal(voigt.data(), yspace.data(), yspace.size());
+
+    // Normalize so that integral of V=lorentzAmp
+    const double norm = 1.0/(0.5*M_PI*lorentzWidth);
+    std::transform(voigt.begin(), voigt.end(), voigt.begin(), std::bind2nd(std::multiplies<double>(), norm));
+  }
+
+  /**
+   * @param comp A reference to the component that should contain the parameter
+   * @param name The name of the parameter
+   * @returns The value of the parameter if it exists
+   * @throws A std::invalid_argument error if the parameter does not exist
+   */
+  double ComptonProfile::getComponentParameter(const Geometry::IComponent & comp,const std::string &name) const
+  {
+    std::vector<double> pars = comp.getNumberParameter(name);
+    if(!pars.empty())
+    {
+      return pars[0];
+    }
+    else
+    {
+      throw std::invalid_argument("NCSCountRate - Unable to find component parameter \"" + name + "\".");
+    }
+  }
+
+
+} // namespace CurveFitting
+} // namespace Mantid

@@ -119,6 +119,19 @@ std::string CompositeFunction::asString()const
   return ostr.str();
 }
 
+/**
+ * @param ws A pointer to the workspace being fitted
+ */
+void CompositeFunction::setWorkspace(boost::shared_ptr<const Workspace> ws)
+{
+  // Pass it on to each member
+  auto iend = m_functions.end();
+  for(auto it = m_functions.begin(); it != iend; ++it)
+  {
+    (*it)->setWorkspace(ws);
+  }
+}
+
 /** Function you want to fit to. 
  *  @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
  */
