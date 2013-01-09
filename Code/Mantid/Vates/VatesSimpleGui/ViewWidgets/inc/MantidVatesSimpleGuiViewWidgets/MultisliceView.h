@@ -82,6 +82,9 @@ public:
   void resetDisplay();
 
 protected slots:
+  ///
+  void checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
+                         int button, int modifier);
   /// Launch SliceViewer with the specified cut.
   void showCutInSliceViewer(const QString &name);
 

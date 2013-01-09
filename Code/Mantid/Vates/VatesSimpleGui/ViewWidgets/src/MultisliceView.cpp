@@ -38,7 +38,10 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
   pqRenderView *tmp = this->createRenderView(this->ui.renderFrame,
                                              QString("MultiSlice"));
   this->mainView = qobject_cast<pqMultiSliceView *>(tmp);
-
+  QObject::connect(this->mainView,
+                   SIGNAL(sliceClicked(int, double, int, int)),
+                   this,
+                   SLOT(checkSliceClicked(int,double,int,int)));
 }
 
 MultiSliceView::~MultiSliceView()
@@ -91,6 +94,12 @@ void MultiSliceView::resetCamera()
   this->mainView->resetCamera();
 }
 
+void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
+                                       int button, int modifier)
+{
+
+}
+
 /**
  * This function checks the sources for the WorkspaceName property. If found,
  * the ability to show a given cut in the SliceViewer will be activated.
@@ -98,8 +107,9 @@ void MultiSliceView::resetCamera()
 void MultiSliceView::checkSliceViewCompat()
 {
   QString wsName = this->getWorkspaceName();
-  if (!wsName.isEmpty())
+  if (wsName.isEmpty())
   {
+    QObject::disconnect(this->mainView, 0, this, 0);
   }
 }
 
