@@ -2,9 +2,8 @@
 #define  MANTID_MDEVENTS_Q3D_TRANSF_H
 //
 #include "MantidMDEvents/MDTransfInterface.h"
-//#include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidMDEvents/MDTransfFactory.h"
-#include "MantidMDEvents/MDTransfDEHelper.h"
+//#include "MantidMDEvents/MDTransfDEHelper.h"
 #include "MantidMDEvents/MDTransfModQ.h"
 //
 namespace Mantid

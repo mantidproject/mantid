@@ -41,7 +41,7 @@ namespace Mantid
 
     bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord, double & /*signal*/,double &/*ErrSq*/)const
     {
-      if(m_Emode == CnvrtToMD::Elastic)
+      if(m_Emode == Kernel::DeltaEMode::Elastic)
       {
         return calcMatrixCoordElastic(x,Coord);
       }else{
@@ -120,7 +120,7 @@ namespace Mantid
       Coord[1]    =(coord_t)E_tr;
       double k_tr;
       // get module of the wavevector for scattered neutrons
-      if(this->m_Emode==CnvrtToMD::Direct)
+      if(this->m_Emode==Kernel::DeltaEMode::Direct)
       {
         k_tr=sqrt((m_Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
       }else{
@@ -204,7 +204,7 @@ namespace Mantid
       //************   specific part of the initialization, dependent on emode:
       m_Emode      = ConvParams.getEMode();
       m_NMatrixDim = getNMatrixDimensions(m_Emode);
-      if(m_Emode == CnvrtToMD::Direct||m_Emode == CnvrtToMD::Indir)
+      if(m_Emode == Kernel::DeltaEMode::Direct||m_Emode == Kernel::DeltaEMode::Indirect)
       {
         // energy needed in inelastic case
         volatile double Ei = ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("Ei");
@@ -223,10 +223,10 @@ namespace Mantid
         m_Ki=sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
 
         m_pEfixedArray=NULL;
-        if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
+        if(m_Emode==(int)Kernel::DeltaEMode::Indirect) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
       }
       else
-        if (m_Emode != CnvrtToMD::Elastic)throw(std::invalid_argument("MDTransfModQ::initialize::Unknown energy conversion mode"));
+        if (m_Emode != Kernel::DeltaEMode::Elastic)throw(std::invalid_argument("MDTransfModQ::initialize::Unknown energy conversion mode"));
       
       m_pDetMasks =  ConvParams.m_PreprDetTable->getColDataArray<int>("detMask");
     }
@@ -243,13 +243,13 @@ namespace Mantid
       std::vector<std::string> default_dim_ID;
       switch(dEmode)
       {
-      case(CnvrtToMD::Elastic):
+      case(Kernel::DeltaEMode::Elastic):
         {
           default_dim_ID.resize(1);
           break;
         }
-      case(CnvrtToMD::Direct):
-      case(CnvrtToMD::Indir):
+      case(Kernel::DeltaEMode::Direct):
+      case(Kernel::DeltaEMode::Indirect):
         {
           default_dim_ID.resize(2);
           default_dim_ID[1]= "DeltaE";

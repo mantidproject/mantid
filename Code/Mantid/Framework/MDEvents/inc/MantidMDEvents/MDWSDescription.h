@@ -11,7 +11,7 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
-#include "MantidMDEvents/MDTransfDEHelper.h"
+//#include "MantidMDEvents/MDTransfDEHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 

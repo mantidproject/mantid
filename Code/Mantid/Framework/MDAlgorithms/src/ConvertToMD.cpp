@@ -106,9 +106,8 @@ ConvertToMD::init()
           "String, describing available analysis modes, registered with [[MD Transformation factory]].\n"
           "The modes names are ""CopyToMD"", ""mod|Q|"" and ""Q3D""",Direction::InOut);
      /// temporary, untill dEMode is not properly defined on Workspace
-     MDEvents::MDTransfDEHelper AlldEModes;
-     std::vector<std::string> dE_modes = AlldEModes.getEmodes();
-     declareProperty("dEAnalysisMode",dE_modes[CnvrtToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
+     std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
+     declareProperty("dEAnalysisMode",dE_modes[Kernel::DeltaEMode::Direct],boost::make_shared<StringListValidator>(dE_modes),
        "You can analyse neutron energy transfer in ""Direct"", ""Indirect"" or ""Elastic"" mode. \n"
        " The analysis mode has to correspond to experimental set up. Selecting inelastic mode increases the number of the target workspace dimensions by one.\n"
        " See [[MD Transformation factory]] for further details.",Direction::InOut);
@@ -384,7 +383,7 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
 {
 
     DataObjects::TableWorkspace_sptr TargTableWS;
-    CnvrtToMD::EModes Emode;
+    Kernel::DeltaEMode::Type Emode;
 
     // Do we need to reuse output workspace
     bool storeInDataService(true);
@@ -438,13 +437,13 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
    // check if we got what we wanted:
 
    // in direct or indirect mode input ws has to have input energy
-    if(Emode==CnvrtToMD::Direct||Emode==CnvrtToMD::Indir)
+    if(Emode==Kernel::DeltaEMode::Direct||Emode==Kernel::DeltaEMode::Indirect)
     {
        double   m_Ei  = TargTableWS->getLogs()->getPropertyValueAsType<double>("Ei");
        if(isNaN(m_Ei))
        {
          // Direct mode needs Ei
-         if(Emode==CnvrtToMD::Direct)throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
+         if(Emode==Kernel::DeltaEMode::Direct)throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
 
          // Do we have at least something for Indirect?
          float *eFixed = TargTableWS->getColDataArray<float>("eFixed");
@@ -461,7 +460,7 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
 }
 
 DataObjects::TableWorkspace_sptr  ConvertToMD::runPreprocessDetectorsToMDChildUpdatingMasks(Mantid::API::MatrixWorkspace_const_sptr InWS2D,
-                                                                                                  const std::string &OutWSName,const std::string &dEModeRequested,CnvrtToMD::EModes &Emode)
+                                                                                                  const std::string &OutWSName,const std::string &dEModeRequested,Kernel::DeltaEMode::Type &Emode)
 {
    // prospective result
     DataObjects::TableWorkspace_sptr TargTableWS;
@@ -485,9 +484,8 @@ DataObjects::TableWorkspace_sptr  ConvertToMD::runPreprocessDetectorsToMDChildUp
     childAlg->setProperty("OutputWorkspace",OutWSName);
 
  // check and get energy conversion mode to define additional ChildAlgorithm parameters
-    MDTransfDEHelper dEChecker;
-    Emode = dEChecker.getEmode(dEModeRequested);
-    if(Emode == CnvrtToMD::Indir)  // TODO: redefine this through Kernel::Emodes
+    Emode = Kernel::DeltaEMode().fromString(dEModeRequested);
+    if(Emode == Kernel::DeltaEMode::Indirect) 
       childAlg->setProperty("GetEFixed",true); 
 
 

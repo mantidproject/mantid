@@ -167,19 +167,19 @@ void testUpdateMasksWorked()
 void testCalcDECol()
 {
       
-      MDTransfDEHelper DeH;
-      auto TableWS7= pAlg->preprocessDetectorsPositions(ws2D,DeH.getEmode(MDEvents::CnvrtToMD::Indir));
 
-      TS_ASSERT_EQUALS(4,TableWS7->rowCount());
+    auto TableWS7= pAlg->preprocessDetectorsPositions(ws2D,Kernel::DeltaEMode::asString(Kernel::DeltaEMode::Indirect));
 
-      float *pDataArray=TableWS7->getColDataArray<float>("eFixed");
-      TS_ASSERT(pDataArray);
-      if(!pDataArray)return;
+    TS_ASSERT_EQUALS(4,TableWS7->rowCount());
 
-      for(size_t i=0;i<TableWS7->rowCount();i++)
-      {
-          TS_ASSERT_DELTA(13.f,*(pDataArray+i),1.e-6);
-      }
+    float *pDataArray=TableWS7->getColDataArray<float>("eFixed");
+    TS_ASSERT(pDataArray);
+    if(!pDataArray)return;
+
+    for(size_t i=0;i<TableWS7->rowCount();i++)
+    {
+       TS_ASSERT_DELTA(13.f,*(pDataArray+i),1.e-6);
+    }
 
 
 }

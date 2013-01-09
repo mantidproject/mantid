@@ -91,14 +91,14 @@ void testWSDescrInputUnitID()
 void testISLorents()
 {
   MDTransfQ3DTestHelper Q3DTransf;
-  MDTransfDEHelper DEhepler;
+
 
   TSM_ASSERT("Should not be lorentz corrected by default ",!Q3DTransf.getLorentzCorr());
 
 
   MDWSDescription WSDescr(5);
   std::string QMode = Q3DTransf.transfID();
-  std::string dEMode= DEhepler.getEmode(CnvrtToMD::Elastic);
+  std::string dEMode= Kernel::DeltaEMode::asString(Kernel::DeltaEMode::Elastic);
   std::vector<std::string> dimPropNames(2,"T");
   dimPropNames[1]="Ei";
 

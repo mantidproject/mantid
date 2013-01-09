@@ -178,7 +178,7 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
     throw(std::invalid_argument(ERR)); 
   }
 
-  if(m_Emode==CnvrtToMD::Undef)
+  if(m_Emode==Kernel::DeltaEMode::Undefined)
     throw(std::invalid_argument("Workspace description has not been correctly defined, as emode has not been defined")); 
 
   //TODO: More thorough checks may be nesessary to prevent adding different kind of workspaces e.g 4D |Q|-dE-T-P workspace to Q3d+dE ws

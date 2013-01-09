@@ -99,7 +99,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, con
   // get efix
   m_Efix      =  targetWSDescr.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("Ei");
   m_pEfixedArray=NULL;
-  if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = targetWSDescr.m_PreprDetTable->getColDataArray<float>("eFixed");
+  if(m_Emode==(int)Kernel::DeltaEMode::Indirect) m_pEfixedArray = targetWSDescr.m_PreprDetTable->getColDataArray<float>("eFixed");
 }
 /** Method updates unit conversion given the index of detector parameters in the array of detectors */
 void UnitsConversionHelper::updateConversion(size_t i)

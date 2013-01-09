@@ -25,7 +25,7 @@ namespace Mantid
 
     bool MDTransfQ3D::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord,double &s, double &err)const
     {
-      if(m_Emode == CnvrtToMD::Elastic)
+      if(m_Emode == Kernel::DeltaEMode::Elastic)
       {
         return calcMatrixCoord3DElastic(x,Coord,s,err);
       }else{
@@ -51,7 +51,7 @@ namespace Mantid
 
       // get module of the wavevector for scattered neutrons
       double k_tr;
-      if(m_Emode==CnvrtToMD::Direct)
+      if(m_Emode==Kernel::DeltaEMode::Direct)
       {
         k_tr=sqrt((m_Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
       }else{
@@ -161,7 +161,7 @@ namespace Mantid
       //************   specific part of the initialization, dependent on emode:
       m_Emode      = ConvParams.getEMode();
       m_NMatrixDim = getNMatrixDimensions(m_Emode);
-      if(m_Emode == CnvrtToMD::Direct||m_Emode == CnvrtToMD::Indir)
+      if(m_Emode == Kernel::DeltaEMode::Direct||m_Emode == Kernel::DeltaEMode::Indirect)
       {
         // energy needed in inelastic case
         m_Ei  =  ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("Ei");
@@ -169,9 +169,9 @@ namespace Mantid
         m_Ki=sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
 
         m_pEfixedArray=NULL;
-        if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");  
+        if(m_Emode==(int)Kernel::DeltaEMode::Indirect) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");  
       }else{
-        if (m_Emode != CnvrtToMD::Elastic) throw(std::runtime_error("MDTransfQ3D::initialize::Unknown or unsupported energy conversion mode"));
+        if (m_Emode != Kernel::DeltaEMode::Elastic) throw(std::runtime_error("MDTransfQ3D::initialize::Unknown or unsupported energy conversion mode"));
         // check if we need to calculate Lorentz corrections and if we do, prepare values for their precalculation:
         m_isLorentzCorrected = ConvParams.isLorentsCorrections();
         if(m_isLorentzCorrected)
@@ -203,13 +203,13 @@ namespace Mantid
       std::vector<std::string> default_dim_ID;
       switch(dEmode)
       {
-      case(CnvrtToMD::Elastic):
+      case(Kernel::DeltaEMode::Elastic):
         {
           default_dim_ID.resize(3);
           break;
         }
-      case(CnvrtToMD::Direct):
-      case(CnvrtToMD::Indir):
+      case(Kernel::DeltaEMode::Direct):
+      case(Kernel::DeltaEMode::Indirect):
         {
           default_dim_ID.resize(4);
           default_dim_ID[3]= "DeltaE";
@@ -237,7 +237,7 @@ namespace Mantid
 
       //TODO: is it really momentum transfer, as MomentumTransfer units are seems bound to elastic mode only (at least accorting to Units description on Wiki)?
       std::string kUnits("MomentumTransfer");
-      if(dEmode==CnvrtToMD::Elastic)kUnits= "Momentum";
+      if(dEmode==Kernel::DeltaEMode::Elastic)kUnits= "Momentum";
      
 
       UnitID[0] = kUnits;
