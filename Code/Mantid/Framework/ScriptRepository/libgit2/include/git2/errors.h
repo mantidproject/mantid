@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -63,6 +63,8 @@ typedef enum {
 	GITERR_THREAD,
 	GITERR_STASH,
 	GITERR_CHECKOUT,
+	GITERR_FETCHHEAD,
+	GITERR_MERGE,
 } git_error_t;
 
 /**

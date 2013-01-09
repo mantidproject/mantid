@@ -89,6 +89,7 @@ namespace API{
   */
   class ScriptRepoException : public std::exception
   {
+    char general_info[300];
   public:
     ///default constructor
   ScriptRepoException(const std::string info = std::string("Unknown Exception")):
@@ -111,10 +112,11 @@ namespace API{
     ~ScriptRepoException() throw() {}
     
     /// Returns the message string.
-    const char* what() const throw()
+    const char* what() const throw(); 
+    /*
     {
       return _user_info.c_str();
-    }
+      }*/
     std::string systemError(); 
 
     std::string filePath(); 

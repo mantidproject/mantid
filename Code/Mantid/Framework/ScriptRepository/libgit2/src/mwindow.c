@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -293,28 +293,23 @@ int git_mwindow_file_register(git_mwindow_file *mwf)
 	return ret;
 }
 
-int git_mwindow_file_deregister(git_mwindow_file *mwf)
+void git_mwindow_file_deregister(git_mwindow_file *mwf)
 {
 	git_mwindow_ctl *ctl = &mem_ctl;
 	git_mwindow_file *cur;
 	unsigned int i;
 
-	if (git_mutex_lock(&git__mwindow_mutex)) {
-		giterr_set(GITERR_THREAD, "unable to lock mwindow mutex");
-		return -1;
-	}
+	if (git_mutex_lock(&git__mwindow_mutex))
+		return;
 
 	git_vector_foreach(&ctl->windowfiles, i, cur) {
 		if (cur == mwf) {
 			git_vector_remove(&ctl->windowfiles, i);
 			git_mutex_unlock(&git__mwindow_mutex);
-			return 0;
+			return;
 		}
 	}
 	git_mutex_unlock(&git__mwindow_mutex);
-
-	giterr_set(GITERR_ODB, "Failed to find the memory window file to deregister");
-	return -1;
 }
 
 void git_mwindow_close(git_mwindow **window)

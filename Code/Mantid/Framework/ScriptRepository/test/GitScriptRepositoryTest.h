@@ -85,28 +85,32 @@ void delete_file(std::string path){
 
     vector<string> files = repo->listFiles(); 
     
-
+    
     const string files_inside_repository [] = {
       (const char*)"TofConv/README.txt",
       (const char *)"reflectometry",
+      (const char *)"development/diffraction",
       (const char *)"largescalestructures/offspec/Larmor_Detector_Map_File_2.xml",
       (const char *)"inelastic/user/javier_250mev.py",
       (const char *)"inelastic",
       (const char *)"inelastic/user",
     };
+
+    //print 
+    if (false){
+      for (vector<string>::iterator it = files.begin();
+           it != files.end(); it++)
+        cout << "f: " << *it << endl;     
+    }
     
-    for (int i = 0; i<6; i++)
+    for (int i = 0; i<7; i++)
     {
       TSM_ASSERT(files_inside_repository[i],
                  find(files.begin(),files.end(),files_inside_repository[i]) != files.end()); 
     }
 
     // comment the return in order to print the values
-    return;
-    //print 
-    for (vector<string>::iterator it = files.begin();
-         it != files.end(); it++)
-      cout << "f: " << *it << endl;     
+
    
   }
 
@@ -138,11 +142,11 @@ void delete_file(std::string path){
     std::string file_to_download = "TofConv/TofConverter.py"; 
     std::string repo_file = repo->localRepository(); 
     repo_file.append("/"); 
-
+    std::cout << "Trying to download file " << file_to_download<<endl; 
     TS_ASSERT_THROWS_NOTHING(repo->download(file_to_download)); 
 
     Poco::File f(std::string(repo_file).append(file_to_download)); 
-    TS_ASSERT(f.exists()); 
+    TSM_ASSERT(f.path(), f.exists()); 
 
     delete_file("TofConv"); 
   }
@@ -277,12 +281,6 @@ void delete_file(std::string path){
     } 
   }
   
-
-
-
-
-
-
 };
 
 #endif

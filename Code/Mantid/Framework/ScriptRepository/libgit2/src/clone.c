@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -105,6 +105,7 @@ struct head_info {
 	git_oid remote_head_oid;
 	git_buf branchname;
 	const git_refspec *refspec;
+	bool found;
 };
 
 static int reference_matches_remote_head(
@@ -119,16 +120,16 @@ static int reference_matches_remote_head(
 	 */
 
 	/* Stop looking if we've already found a match */
-	if (git_buf_len(&head_info->branchname) > 0)
+	if (head_info->found)
 		return 0;
 
 	if (git_reference_name_to_id(
 		&oid,
 		head_info->repo,
 		reference_name) < 0) {
-			/* TODO: How to handle not found references?
-			 */
-			return -1;
+			/* If the reference doesn't exists, it obviously cannot match the expected oid. */
+			giterr_clear();
+			return 0;
 	}
 
 	if (git_oid_cmp(&head_info->remote_head_oid, &oid) == 0) {
@@ -139,10 +140,14 @@ static int reference_matches_remote_head(
 			reference_name) < 0)
 				return -1;
 		
-		if (git_buf_sets(
-			&head_info->branchname,
-			git_buf_cstr(&head_info->branchname) + strlen(GIT_REFS_HEADS_DIR)) < 0)
-				return -1;
+		if (git_buf_len(&head_info->branchname) > 0) {
+			if (git_buf_sets(
+				&head_info->branchname,
+				git_buf_cstr(&head_info->branchname) + strlen(GIT_REFS_HEADS_DIR)) < 0)
+					return -1;
+
+			head_info->found = 1;
+		}
 	}
 
 	return 0;
@@ -207,6 +212,7 @@ static int update_head_to_remote(git_repository *repo, git_remote *remote)
 	git_buf_init(&head_info.branchname, 16);
 	head_info.repo = repo;
 	head_info.refspec = git_remote_fetchspec(remote);
+	head_info.found = 0;
 	
 	/* Determine the remote tracking reference name from the local master */
 	if (git_refspec_transform_r(
@@ -219,7 +225,7 @@ static int update_head_to_remote(git_repository *repo, git_remote *remote)
 	if (reference_matches_remote_head(git_buf_cstr(&remote_master_name), &head_info) < 0)
 		goto cleanup;
 
-	if (git_buf_len(&head_info.branchname) > 0) {
+	if (head_info.found) {
 		retcode = update_head_to_new_branch(
 			repo,
 			&head_info.remote_head_oid,
@@ -236,7 +242,7 @@ static int update_head_to_remote(git_repository *repo, git_remote *remote)
 		&head_info) < 0)
 			goto cleanup;
 
-	if (git_buf_len(&head_info.branchname) > 0) {
+	if (head_info.found) {
 		retcode = update_head_to_new_branch(
 			repo,
 			&head_info.remote_head_oid,
@@ -258,28 +264,71 @@ cleanup:
  * submodules?
  */
 
+static int create_and_configure_origin(
+		git_remote **out,
+		git_repository *repo,
+		const char *url,
+		const git_clone_options *options)
+{
+	int error;
+	git_remote *origin = NULL;
+
+	if ((error = git_remote_create(&origin, repo, options->remote_name, url)) < 0)
+		goto on_error;
+
+	git_remote_set_cred_acquire_cb(origin, options->cred_acquire_cb,
+			options->cred_acquire_payload);
+	git_remote_set_autotag(origin, options->remote_autotag);
+	/*
+	 * Don't write FETCH_HEAD, we'll check out the remote tracking
+	 * branch ourselves based on the server's default.
+	 */
+	git_remote_set_update_fetchhead(origin, 0);
+
+	if (options->remote_callbacks &&
+	    (error = git_remote_set_callbacks(origin, options->remote_callbacks)) < 0)
+		goto on_error;
+
+	if (options->fetch_spec &&
+	    (error = git_remote_set_fetchspec(origin, options->fetch_spec)) < 0)
+		goto on_error;
+
+	if (options->push_spec &&
+	    (error = git_remote_set_pushspec(origin, options->push_spec)) < 0)
+		goto on_error;
+
+	if (options->pushurl &&
+	    (error = git_remote_set_pushurl(origin, options->pushurl)) < 0)
+		goto on_error;
+
+	if ((error = git_remote_save(origin)) < 0)
+		goto on_error;
+
+	*out = origin;
+	return 0;
+
+on_error:
+	git_remote_free(origin);
+	return error;
+}
 
 
 static int setup_remotes_and_fetch(
 		git_repository *repo,
-		const char *origin_url,
-		git_transfer_progress_callback progress_cb,
-		void *progress_payload)
+		const char *url,
+		const git_clone_options *options)
 {
 	int retcode = GIT_ERROR;
-	git_remote *origin = NULL;
+	git_remote *origin;
 
-	/* Create the "origin" remote */
-	if (!git_remote_add(&origin, repo, GIT_REMOTE_ORIGIN, origin_url)) {
-		/*
-		 * Don't write FETCH_HEAD, we'll check out the remote tracking
-		 * branch ourselves based on the server's default.
-		 */
+	/* Construct an origin remote */
+	if (!create_and_configure_origin(&origin, repo, url, options)) {
 		git_remote_set_update_fetchhead(origin, 0);
 
 		/* Connect and download everything */
 		if (!git_remote_connect(origin, GIT_DIRECTION_FETCH)) {
-			if (!git_remote_download(origin, progress_cb, progress_payload)) {
+			if (!git_remote_download(origin, options->fetch_progress_cb,
+						options->fetch_progress_payload)) {
 				/* Create "origin/foo" branches for all remote branches */
 				if (!git_remote_update_tips(origin)) {
 					/* Point HEAD to the same ref as the remote's head */
@@ -320,79 +369,55 @@ static bool should_checkout(
 	if (!opts)
 		return false;
 
+	if (opts->checkout_strategy == GIT_CHECKOUT_NONE)
+		return false;
+
 	return !git_repository_head_orphan(repo);
 }
 
-static int clone_internal(
+static void normalize_options(git_clone_options *dst, const git_clone_options *src)
+{
+	git_clone_options default_options = GIT_CLONE_OPTIONS_INIT;
+	if (!src) src = &default_options;
+
+	*dst = *src;
+
+	/* Provide defaults for null pointers */
+	if (!dst->remote_name) dst->remote_name = "origin";
+}
+
+int git_clone(
 	git_repository **out,
-	const char *origin_url,
-	const char *path,
-	git_transfer_progress_callback fetch_progress_cb,
-	void *fetch_progress_payload,
-	git_checkout_opts *checkout_opts,
-	bool is_bare)
+	const char *url,
+	const char *local_path,
+	const git_clone_options *options)
 {
 	int retcode = GIT_ERROR;
 	git_repository *repo = NULL;
+	git_clone_options normOptions;
 
-	if (!path_is_okay(path)) {
+	assert(out && url && local_path);
+
+	normalize_options(&normOptions, options);
+	GITERR_CHECK_VERSION(&normOptions, GIT_CLONE_OPTIONS_VERSION, "git_clone_options");
+
+	if (!path_is_okay(local_path)) {
 		return GIT_ERROR;
 	}
 
-	if (!(retcode = git_repository_init(&repo, path, is_bare))) {
-		if ((retcode = setup_remotes_and_fetch(repo, origin_url,
-						fetch_progress_cb, fetch_progress_payload)) < 0) {
+	if (!(retcode = git_repository_init(&repo, local_path, normOptions.bare))) {
+		if ((retcode = setup_remotes_and_fetch(repo, url, &normOptions)) < 0) {
 			/* Failed to fetch; clean up */
 			git_repository_free(repo);
-			git_futils_rmdir_r(path, NULL, GIT_RMDIR_REMOVE_FILES);
+			git_futils_rmdir_r(local_path, NULL, GIT_RMDIR_REMOVE_FILES);
 		} else {
 			*out = repo;
 			retcode = 0;
 		}
 	}
 
-	if (!retcode && should_checkout(repo, is_bare, checkout_opts))
-		retcode = git_checkout_head(*out, checkout_opts);
+	if (!retcode && should_checkout(repo, normOptions.bare, &normOptions.checkout_opts))
+		retcode = git_checkout_head(*out, &normOptions.checkout_opts);
 
 	return retcode;
-}
-
-int git_clone_bare(
-		git_repository **out,
-		const char *origin_url,
-		const char *dest_path,
-		git_transfer_progress_callback fetch_progress_cb,
-		void *fetch_progress_payload)
-{
-	assert(out && origin_url && dest_path);
-
-	return clone_internal(
-		out,
-		origin_url,
-		dest_path,
-		fetch_progress_cb,
-		fetch_progress_payload,
-		NULL,
-		1);
-}
-
-
-int git_clone(
-		git_repository **out,
-		const char *origin_url,
-		const char *workdir_path,
-		git_checkout_opts *checkout_opts,
-		git_transfer_progress_callback fetch_progress_cb,
-		void *fetch_progress_payload)
-{
-	assert(out && origin_url && workdir_path);
-
-	return clone_internal(
-		out,
-		origin_url,
-		workdir_path,
-		fetch_progress_cb,
-		fetch_progress_payload,
-		checkout_opts,
-		0);
 }

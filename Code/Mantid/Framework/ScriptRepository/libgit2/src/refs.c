@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -166,7 +166,7 @@ static int loose_parse_oid(git_oid *oid, git_buf *file_content)
 	/* str is guranteed to be zero-terminated */
 	str = git_buf_cstr(file_content);
 
-	/* If the file is longer than 40 chars, the 41st must be a space */
+	/* we need to get 40 OID characters from the file */
 	if (git_oid_fromstr(oid, git_buf_cstr(file_content)) < 0)
 		goto corrupted;
 
@@ -373,7 +373,7 @@ static int packed_parse_oid(
 
 	refname_end = memchr(refname_begin, '\n', buffer_end - refname_begin);
 	if (refname_end == NULL)
-		goto corrupt;
+		refname_end = buffer_end;
 
 	if (refname_end[-1] == '\r')
 		refname_end--;
@@ -1728,6 +1728,9 @@ cleanup:
 		giterr_set(
 			GITERR_REFERENCE,
 			"The given reference name '%s' is not valid", name);
+
+	if (error && normalize)
+		git_buf_free(buf);
 
 	return error;
 }

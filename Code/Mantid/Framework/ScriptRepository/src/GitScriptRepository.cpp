@@ -170,54 +170,53 @@ namespace API
     GitScriptRepository::repo_iteration & repo_iteration = *(static_cast< GitScriptRepository::repo_iteration* >(payload));  
 
     std::string curr_directory; 
-  
-    {// get the path of the current directory
-      using boost::algorithm::split;
-      using boost::algorithm::is_any_of;
-      using boost::algorithm::join;           
-      vector<std::string> strs;
-      std::string str = file;
-      //split the full path
-      // /home/user/mantid/myfile
-      // will be splited in : home user mantid myfile
-      split(strs, str, boost::is_any_of("/\\"));
-  
-      if (strs.size()<= 1){
-        curr_directory = "";
-      }else{
-        //remote the current file name
-        strs.pop_back(); 
-        curr_directory = join(strs,"/"); 
-      }
+    
+    // get the path of the current directory
+    using boost::algorithm::split;
+    using boost::algorithm::is_any_of;
+    using boost::algorithm::join;           
+    vector<std::string> strs;
+    std::string str = file;
+    //split the full path
+    // /home/user/mantid/myfile
+    // will be splited in : home user mantid myfile
+    split(strs, str, boost::is_any_of("/\\"));
+    
+    if (strs.size()<= 1){
+      curr_directory = "";
+    }else{
+      //remote the current file name
+      strs.pop_back(); 
+      curr_directory = join(strs,"/"); 
     }
+    
 
     //check if the directory changed 
-    while (repo_iteration.last_directory.find(curr_directory) == string::npos){
- 
-      // if the directory changes, we must create a new entry for
-      // the directory
-      GitScriptRepository::file_entry directory; 
-      directory.path = curr_directory; 
-      //will be processed later    directory.status 
-      directory.directory = true;
+    std::string ancestor_dir; 
+    vector<std::string> ancestor_parts; 
+    if (repo_iteration.last_directory.find(curr_directory) != 0){
 
-      //insert at list
-      repo_iteration.repository_list->push_back(directory); 
-
-
-      //check if the directory is child than the last one:
-      // going depth
-      if (curr_directory.find(repo_iteration.last_directory) != string::npos)
-        break;
-
-      // check if they have a common ancestor
-      size_t found;  
-      found = curr_directory.rfind("/");    
-      if (found == string::npos){
-        break;
-      }else{
-        curr_directory.replace(found,curr_directory.size()-found,""); 
+      // look for the common ancestor: 
+      unsigned int index; 
+      for (index = 0; index<strs.size(); index++){
+        ancestor_parts.push_back(strs[index]);
+        ancestor_dir = join(ancestor_parts,"/");
+        if (repo_iteration.last_directory.find(ancestor_dir) == 0)
+          continue;
+        else
+          break; 
       }
+      //std::cout << "auxiliar: file " << file << " directory : " << curr_directory  << " index = " << index<< std::endl;       
+      // now, add the directories
+      do{
+        GitScriptRepository::file_entry directory; 
+        directory.path = ancestor_dir; 
+        directory.directory = true; 
+        // std::cout << "insert directory " << ancestor_dir << std::endl; 
+        repo_iteration.repository_list->push_back(directory); 
+        ancestor_parts.push_back(strs[++index]); 
+        ancestor_dir = join(ancestor_parts,"/"); 
+      }while(index < strs.size()); 
     }
     // update the directory
     repo_iteration.last_directory = curr_directory;
@@ -296,7 +295,7 @@ namespace API
     if (err){
       throw gitException("",__FILE__,__LINE__); 
     }
-  
+
     // set the status of the directories
     // dealing with directories
     for (unsigned int i = 0; i< repository_list.size();
@@ -521,12 +520,12 @@ namespace API
     int err; 
     memset(&opts,0,sizeof(opts));
     opts.version = GIT_CHECKOUT_OPTS_VERSION;
-    opts.checkout_strategy = GIT_CHECKOUT_ALLOW_CONFLICTS|GIT_CHECKOUT_UPDATE_MISSING;    
+    opts.checkout_strategy = GIT_CHECKOUT_FORCE ; 
     opts.paths.strings = new char*[1];
     // add file name
     opts.paths.strings[0] = strdup(file_path_adjusted.c_str()); 
     opts.paths.count = 1; 
- 
+   
     err = git_checkout_index(repo, NULL, &opts); 
   
     // release memory
@@ -653,25 +652,24 @@ namespace API
   void GitScriptRepository::cloneRepository(void) throw (ScriptRepoException&){
     g_log.debug() << "GitScriptRepository::cloneRepository ... begin\n" ; 
     git_repository *cloned_repo = NULL;
-    git_checkout_opts checkout_opts; 
+    git_clone_options clone_opts; 
     int error;
-    int counter=0;
   
     // Set up options	
-  
-    memset(&checkout_opts,0,sizeof( checkout_opts));   
-    checkout_opts.version = GIT_CHECKOUT_OPTS_VERSION;
+    memset(&clone_opts,0,sizeof(clone_opts)); 
+    clone_opts.version = GIT_CLONE_OPTIONS_VERSION; 
+    clone_opts.checkout_opts.version = GIT_CHECKOUT_OPTS_VERSION;
     // avoid downloading the files, letting the local folder clean (to not fill the local folder
     // with files that the user is not interested with
-    checkout_opts.checkout_strategy = GIT_CHECKOUT_UPDATE_ONLY| GIT_CHECKOUT_ALLOW_CONFLICTS;
+    clone_opts.checkout_opts.checkout_strategy = GIT_CHECKOUT_UPDATE_ONLY| GIT_CHECKOUT_ALLOW_CONFLICTS;
     // Do cloning
     // try not to use the call back function
     g_log.debug() << "GitScriptRepository::cloneRepository ... cloning " << remote_url << "\n"; 
-    error = git_clone(&cloned_repo, remote_url.c_str(), 
+    error = git_clone(&cloned_repo, 
+                      remote_url.c_str(), 
                       local_repository.c_str(), 
-                      &checkout_opts,
-                      NULL, 
-                      &counter);     
+                      &clone_opts
+                      );     
   
     if (error){
       throw gitException("We can not create your local repository.\nHInt: check your internet connection.",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -13,13 +13,13 @@
 #include "blob.h"
 #include "filter.h"
 
-const void *git_blob_rawcontent(git_blob *blob)
+const void *git_blob_rawcontent(const git_blob *blob)
 {
 	assert(blob);
 	return blob->odb_object->raw.data;
 }
 
-git_off_t git_blob_rawsize(git_blob *blob)
+git_off_t git_blob_rawsize(const git_blob *blob)
 {
 	assert(blob);
 	return (git_off_t)blob->odb_object->raw.len;
@@ -295,4 +295,16 @@ cleanup:
 	git_filebuf_cleanup(&file);
 	git__free(content);
 	return error;
+}
+
+int git_blob_is_binary(git_blob *blob)
+{
+	git_buf content;
+
+	assert(blob);
+
+	content.ptr = blob->odb_object->raw.data;
+	content.size = min(blob->odb_object->raw.len, 4000);
+
+	return git_buf_text_is_binary(&content);
 }

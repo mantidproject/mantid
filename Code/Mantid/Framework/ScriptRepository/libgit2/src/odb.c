@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -712,6 +712,10 @@ int git_odb_write(
 	git_odb_stream *stream;
 
 	assert(oid && db);
+
+	git_odb_hash(oid, data, len, type);
+	if (git_odb_exists(db, oid))
+		return 0;
 
 	for (i = 0; i < db->backends.length && error < 0; ++i) {
 		backend_internal *internal = git_vector_get(&db->backends, i);

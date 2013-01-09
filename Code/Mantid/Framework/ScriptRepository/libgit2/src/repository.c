@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -1140,8 +1140,7 @@ static int repo_init_create_origin(git_repository *repo, const char *url)
 	int error;
 	git_remote *remote;
 
-	if (!(error = git_remote_add(&remote, repo, GIT_REMOTE_ORIGIN, url))) {
-		error = git_remote_save(remote);
+	if (!(error = git_remote_create(&remote, repo, GIT_REMOTE_ORIGIN, url))) {
 		git_remote_free(remote);
 	}
 

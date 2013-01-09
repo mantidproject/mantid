@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -66,7 +66,7 @@ __KHASH_IMPL(
 	str, static kh_inline, const char *, void *, 1,
 	str_hash_no_trailing_slash, str_equal_no_trailing_slash);
 
-static int load_submodule_config(git_repository *repo, bool force);
+static int load_submodule_config(git_repository *repo);
 static git_config_backend *open_gitmodules(git_repository *, bool, const git_oid *);
 static int lookup_head_remote(git_buf *url, git_repository *repo);
 static int submodule_get(git_submodule **, git_repository *, const char *, const char *);
@@ -106,7 +106,7 @@ int git_submodule_lookup(
 
 	assert(repo && name);
 
-	if ((error = load_submodule_config(repo, false)) < 0)
+	if ((error = load_submodule_config(repo)) < 0)
 		return error;
 
 	pos = git_strmap_lookup_index(repo->submodules, name);
@@ -148,7 +148,7 @@ int git_submodule_foreach(
 
 	assert(repo && callback);
 
-	if ((error = load_submodule_config(repo, false)) < 0)
+	if ((error = load_submodule_config(repo)) < 0)
 		return error;
 
 	git_strmap_foreach_value(repo->submodules, sm, {
@@ -708,7 +708,8 @@ int git_submodule_open(
 int git_submodule_reload_all(git_repository *repo)
 {
 	assert(repo);
-	return load_submodule_config(repo, true);
+	git_submodule_config_free(repo);
+	return load_submodule_config(repo);
 }
 
 int git_submodule_reload(git_submodule *submodule)
@@ -828,6 +829,20 @@ int git_submodule_status(
 
 	return error;
 }
+
+int git_submodule_location(
+	unsigned int *location_status,
+	git_submodule *submodule)
+{
+	assert(location_status && submodule);
+
+	*location_status = submodule->flags &
+		(GIT_SUBMODULE_STATUS_IN_HEAD | GIT_SUBMODULE_STATUS_IN_INDEX |
+		 GIT_SUBMODULE_STATUS_IN_CONFIG | GIT_SUBMODULE_STATUS_IN_WD);
+
+	return 0;
+}
+
 
 /*
  * INTERNAL FUNCTIONS
@@ -1225,14 +1240,14 @@ static git_config_backend *open_gitmodules(
 	return mods;
 }
 
-static int load_submodule_config(git_repository *repo, bool force)
+static int load_submodule_config(git_repository *repo)
 {
 	int error;
 	git_oid gitmodules_oid;
 	git_buf path = GIT_BUF_INIT;
 	git_config_backend *mods = NULL;
 
-	if (repo->submodules && !force)
+	if (repo->submodules)
 		return 0;
 
 	memset(&gitmodules_oid, 0, sizeof(gitmodules_oid));
@@ -1454,7 +1469,7 @@ static int submodule_wd_status(unsigned int *status, git_submodule *sm)
 		if (sm->ignore == GIT_SUBMODULE_IGNORE_NONE)
 			opt.flags |= GIT_DIFF_INCLUDE_UNTRACKED;
 
-		error = git_diff_index_to_tree(&diff, sm_repo, sm_head, NULL, &opt);
+		error = git_diff_tree_to_index(&diff, sm_repo, sm_head, NULL, &opt);
 
 		if (!error) {
 			if (git_diff_num_deltas(diff) > 0)
@@ -1471,7 +1486,7 @@ static int submodule_wd_status(unsigned int *status, git_submodule *sm)
 
 		/* perform index-to-workdir diff on submodule */
 
-		error = git_diff_workdir_to_index(&diff, sm_repo, NULL, &opt);
+		error = git_diff_index_to_workdir(&diff, sm_repo, NULL, &opt);
 
 		if (!error) {
 			size_t untracked =

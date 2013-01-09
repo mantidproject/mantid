@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -208,9 +208,9 @@ int git_reflog_read(git_reflog **reflog, const git_reference *ref)
 	git_buf log_file = GIT_BUF_INIT;
 	git_reflog *log = NULL;
 
-	*reflog = NULL;
-
 	assert(reflog && ref);
+
+	*reflog = NULL;
 
 	if (reflog_init(&log, ref) < 0)
 		return -1;
@@ -253,7 +253,6 @@ int git_reflog_write(git_reflog *reflog)
 	git_filebuf fbuf = GIT_FILEBUF_INIT;
 
 	assert(reflog);
-
 
 	if (git_buf_join_n(&log_path, '/', 3,
 		git_repository_path(reflog->owner), GIT_REFLOG_DIR, reflog->ref_name) < 0)
@@ -340,7 +339,7 @@ cleanup:
 
 int git_reflog_rename(git_reference *ref, const char *new_name)
 {
-	int error, fd;
+	int error = 0, fd;
 	git_buf old_path = GIT_BUF_INIT;
 	git_buf new_path = GIT_BUF_INIT;
 	git_buf temp_path = GIT_BUF_INIT;
@@ -350,19 +349,16 @@ int git_reflog_rename(git_reference *ref, const char *new_name)
 
 	if ((error = git_reference__normalize_name(
 		&normalized, new_name, GIT_REF_FORMAT_ALLOW_ONELEVEL)) < 0)
-			goto cleanup;
-
-	error = -1;
+			return error;
 
 	if (git_buf_joinpath(&temp_path, git_reference_owner(ref)->path_repository, GIT_REFLOG_DIR) < 0)
 		return -1;
 
 	if (git_buf_joinpath(&old_path, git_buf_cstr(&temp_path), ref->name) < 0)
-		goto cleanup;
+		return -1;
 
-	if (git_buf_joinpath(&new_path,
-		git_buf_cstr(&temp_path), git_buf_cstr(&normalized)) < 0)
-			goto cleanup;
+	if (git_buf_joinpath(&new_path, git_buf_cstr(&temp_path), git_buf_cstr(&normalized)) < 0)
+		return -1;
 
 	/*
 	 * Move the reflog to a temporary place. This two-phase renaming is required
@@ -372,23 +368,36 @@ int git_reflog_rename(git_reference *ref, const char *new_name)
 	 *  - a/b/c/d -> a/b/c
 	 */
 	if (git_buf_joinpath(&temp_path, git_buf_cstr(&temp_path), "temp_reflog") < 0)
-		goto cleanup;
+		return -1;
 
-	if ((fd = git_futils_mktmp(&temp_path, git_buf_cstr(&temp_path))) < 0)
+	if ((fd = git_futils_mktmp(&temp_path, git_buf_cstr(&temp_path))) < 0) {
+		error = -1;
 		goto cleanup;
+	}
+
 	p_close(fd);
 
-	if (p_rename(git_buf_cstr(&old_path), git_buf_cstr(&temp_path)) < 0)
+	if (p_rename(git_buf_cstr(&old_path), git_buf_cstr(&temp_path)) < 0) {
+		giterr_set(GITERR_OS, "Failed to rename reflog for %s", new_name);
+		error = -1;
 		goto cleanup;
+	}
 
 	if (git_path_isdir(git_buf_cstr(&new_path)) && 
-		(git_futils_rmdir_r(git_buf_cstr(&new_path), NULL, GIT_RMDIR_SKIP_NONEMPTY) < 0))
+		(git_futils_rmdir_r(git_buf_cstr(&new_path), NULL, GIT_RMDIR_SKIP_NONEMPTY) < 0)) {
+		error = -1;
 		goto cleanup;
+	}
 
-	if (git_futils_mkpath2file(git_buf_cstr(&new_path), GIT_REFLOG_DIR_MODE) < 0)
+	if (git_futils_mkpath2file(git_buf_cstr(&new_path), GIT_REFLOG_DIR_MODE) < 0) {
+		error = -1;
 		goto cleanup;
+	}
 
-	error = p_rename(git_buf_cstr(&temp_path), git_buf_cstr(&new_path));
+	if (p_rename(git_buf_cstr(&temp_path), git_buf_cstr(&new_path)) < 0) {
+		giterr_set(GITERR_OS, "Failed to rename reflog for %s", new_name);
+		error = -1;
+	}
 
 cleanup:
 	git_buf_free(&temp_path);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -794,6 +794,44 @@ int git_index_remove(git_index *index, const char *path, int stage)
 	return error;
 }
 
+int git_index_remove_directory(git_index *index, const char *dir, int stage)
+{
+	git_buf pfx = GIT_BUF_INIT;
+	int error = 0;
+	size_t pos;
+	git_index_entry *entry;
+
+	if (git_buf_sets(&pfx, dir) < 0 || git_path_to_dir(&pfx) < 0)
+		return -1;
+
+	git_vector_sort(&index->entries);
+
+	pos = git_index__prefix_position(index, pfx.ptr);
+
+	while (1) {
+		entry = git_vector_get(&index->entries, pos);
+		if (!entry || git__prefixcmp(entry->path, pfx.ptr) != 0)
+			break;
+
+		if (index_entry_stage(entry) != stage) {
+			++pos;
+			continue;
+		}
+
+		git_tree_cache_invalidate_path(index->tree, entry->path);
+
+		if ((error = git_vector_remove(&index->entries, pos)) < 0)
+			break;
+		index_entry_free(entry);
+
+		/* removed entry at 'pos' so we don't need to increment it */
+	}
+
+	git_buf_free(&pfx);
+
+	return error;
+}
+
 static int index_find(git_index *index, const char *path, int stage)
 {
 	struct entry_srch_key srch_key;
@@ -814,7 +852,10 @@ int git_index_find(git_index *index, const char *path)
 
 	if ((pos = git_vector_bsearch2(
 			&index->entries, index->entries_search_path, path)) < 0)
+	{
+		giterr_set(GITERR_INDEX, "Index does not contain %s", path);
 		return pos;
+	}
 
 	/* Since our binary search only looked at path, we may be in the
 	 * middle of a list of stages.
@@ -957,13 +998,14 @@ int git_index_conflict_remove(git_index *index, const char *path)
 			continue;
 		}
 
-		error = git_vector_remove(&index->entries, (unsigned int)pos);
+		if ((error = git_vector_remove(&index->entries, (unsigned int)pos)) < 0)
+			return error;
 
-		if (error >= 0)
-			index_entry_free(conflict_entry);
+		index_entry_free(conflict_entry);
+		posmax--;
 	}
 
-	return error;
+	return 0;
 }
 
 static int index_conflicts_match(const git_vector *v, size_t idx)
@@ -1358,9 +1400,10 @@ static int parse_index(git_index *index, const char *buffer, size_t buffer_size)
 
 #undef seek_forward
 
-	/* force sorting in the vector: the entries are
-	 * assured to be sorted on the index */
-	index->entries.sorted = 1;
+	/* Entries are stored case-sensitively on disk. */
+	index->entries.sorted = !index->ignore_case;
+	git_vector_sort(&index->entries);
+
 	return 0;
 }
 

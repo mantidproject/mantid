@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -91,7 +91,7 @@ GIT_INLINE(const git_oid *) git_blob_id(const git_blob *blob)
  * @param blob pointer to the blob
  * @return the pointer; NULL if the blob has no contents
  */
-GIT_EXTERN(const void *) git_blob_rawcontent(git_blob *blob);
+GIT_EXTERN(const void *) git_blob_rawcontent(const git_blob *blob);
 
 /**
  * Get the size in bytes of the contents of a blob
@@ -99,7 +99,7 @@ GIT_EXTERN(const void *) git_blob_rawcontent(git_blob *blob);
  * @param blob pointer to the blob
  * @return size on bytes
  */
-GIT_EXTERN(git_off_t) git_blob_rawsize(git_blob *blob);
+GIT_EXTERN(git_off_t) git_blob_rawsize(const git_blob *blob);
 
 /**
  * Read a file from the working folder of a repository
@@ -182,6 +182,19 @@ GIT_EXTERN(int) git_blob_create_fromchunks(
  * @return 0 or an error code
  */
 GIT_EXTERN(int) git_blob_create_frombuffer(git_oid *oid, git_repository *repo, const void *buffer, size_t len);
+
+/**
+ * Determine if the blob content is most certainly binary or not.
+ *
+ * The heuristic used to guess if a file is binary is taken from core git:
+ * Searching for NUL bytes and looking for a reasonable ratio of printable
+ * to non-printable characters among the first 4000 bytes.
+ *
+ * @param blob The blob which content should be analyzed
+ * @return 1 if the content of the blob is detected
+ * as binary; 0 otherwise.
+ */
+GIT_EXTERN(int) git_blob_is_binary(git_blob *blob);
 
 /** @} */
 GIT_END_DECL

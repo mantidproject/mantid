@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 the libgit2 contributors
+ * Copyright (C) the libgit2 contributors. All rights reserved.
  *
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
@@ -198,10 +198,7 @@ static int gitno_ssl_teardown(gitno_ssl *ssl)
 {
 	int ret;
 
-	do {
-		ret = SSL_shutdown(ssl->ssl);
-	} while (ret == 0);
-
+	ret = SSL_shutdown(ssl->ssl);
 	if (ret < 0)
 		ret = ssl_set_error(ssl, ret);
 	else
@@ -409,10 +406,10 @@ static int ssl_setup(gitno_socket *socket, const char *host, int flags)
 	if ((ret = SSL_connect(socket->ssl.ssl)) <= 0)
 		return ssl_set_error(&socket->ssl, ret);
 
-	if ((GITNO_CONNECT_SSL_NO_CHECK_CERT & flags) || verify_server_cert(&socket->ssl, host) < 0)
-		return -1;
+	if (GITNO_CONNECT_SSL_NO_CHECK_CERT & flags)
+		return 0;
 
-	return 0;
+	return verify_server_cert(&socket->ssl, host);
 }
 #endif
 

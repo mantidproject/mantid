@@ -14,6 +14,8 @@ using Mantid::API::ScriptRepoException;
 
 /**
    These tests requires connection to the internet.
+make -j4 GitScriptRepositoryTest
+ctest -j8 -R GitScriptRepositoryTest_GitConnection  --verbose
  */
 class GitConnectionTest : public CxxTest::TestSuite{
 
@@ -31,7 +33,7 @@ class GitConnectionTest : public CxxTest::TestSuite{
   }
 
   void test_UpdateNewRepositoryMustCloneRepository(){
-    const string newpath = Poco::Path::temp().append("/newrep"); 
+    const string newpath = Poco::Path::temp().append("newrep"); 
     TS_ASSERT_THROWS_NOTHING(repo = new GitScriptRepository(newpath));
     if (repo){
       TS_ASSERT_THROWS_NOTHING(repo->update());
