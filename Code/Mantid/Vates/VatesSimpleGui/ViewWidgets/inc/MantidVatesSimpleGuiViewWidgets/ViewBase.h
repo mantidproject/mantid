@@ -69,7 +69,8 @@ public:
   /// Correct post-accept visibility issues.
   virtual void correctVisibility(pqPipelineBrowserWidget *pbw);
   /// Creates a single view instance.
-  virtual pqRenderView *createRenderView(QWidget *container);
+  virtual pqRenderView *createRenderView(QWidget *container,
+                                         QString viewName=QString(""));
   /// Remove all filters of a given name: i.e. Slice.
   virtual void destroyFilter(pqObjectBuilder *builder, const QString &name);
   /// Destroy sources and view relevant to mode switching.

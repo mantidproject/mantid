@@ -53,85 +53,10 @@ MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
 {
   this->isOrigSrc = false;
   this->ui.setupUi(this);
-  this->ui.xAxisWidget->setScalePosition(AxisInteractor::LeftScale);
-  this->ui.yAxisWidget->setScalePosition(AxisInteractor::TopScale);
-  this->ui.zAxisWidget->setScalePosition(AxisInteractor::RightScale);
 
-  this->mainView = this->createRenderView(this->ui.renderFrame);
+  this->mainView = this->createRenderView(this->ui.renderFrame,
+                                          QString("MultiSlice"));
 
-  QObject::connect(this->ui.xAxisWidget->getScalePicker(),
-                   SIGNAL(clicked(double)), this, SLOT(makeXcut(double)));
-  QObject::connect(this->ui.yAxisWidget->getScalePicker(),
-                   SIGNAL(clicked(double)), this, SLOT(makeYcut(double)));
-  QObject::connect(this->ui.zAxisWidget->getScalePicker(),
-                   SIGNAL(clicked(double)), this, SLOT(makeZcut(double)));
-
-  QObject::connect(this->ui.xAxisWidget->getScalePicker(),
-                   SIGNAL(moved(double)), this,
-                   SLOT(updateCutPosition(double)));
-  QObject::connect(this->ui.yAxisWidget->getScalePicker(),
-                   SIGNAL(moved(double)), this,
-                   SLOT(updateCutPosition(double)));
-  QObject::connect(this->ui.zAxisWidget->getScalePicker(),
-                   SIGNAL(moved(double)), this,
-                   SLOT(updateCutPosition(double)));
-
-  QObject::connect(this->ui.xAxisWidget,
-                   SIGNAL(indicatorSelected(const QString &)), this,
-                   SLOT(indicatorSelected(const QString &)));
-  QObject::connect(this->ui.yAxisWidget,
-                   SIGNAL(indicatorSelected(const QString &)), this,
-                   SLOT(indicatorSelected(const QString &)));
-  QObject::connect(this->ui.zAxisWidget,
-                   SIGNAL(indicatorSelected(const QString &)), this,
-                   SLOT(indicatorSelected(const QString &)));
-
-  QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
-                   this->ui.xAxisWidget,
-                   SLOT(setIndicatorName(const QString &)));
-  QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
-                   this->ui.yAxisWidget,
-                   SLOT(setIndicatorName(const QString &)));
-  QObject::connect(this, SIGNAL(sliceNamed(const QString &)),
-                   this->ui.zAxisWidget,
-                   SLOT(setIndicatorName(const QString &)));
-
-  QObject::connect(this->ui.xAxisWidget,
-                   SIGNAL(deleteIndicator(const QString &)), this,
-                   SLOT(deleteCut(const QString &)));
-  QObject::connect(this->ui.yAxisWidget,
-                   SIGNAL(deleteIndicator(const QString &)), this,
-                   SLOT(deleteCut(const QString &)));
-  QObject::connect(this->ui.zAxisWidget,
-                   SIGNAL(deleteIndicator(const QString &)), this,
-                   SLOT(deleteCut(const QString &)));
-
-  QObject::connect(this->ui.xAxisWidget,
-                   SIGNAL(showOrHideIndicator(bool, const QString &)),
-                   this, SLOT(cutVisibility(bool, const QString &)));
-  QObject::connect(this->ui.yAxisWidget,
-                   SIGNAL(showOrHideIndicator(bool, const QString &)),
-                   this, SLOT(cutVisibility(bool, const QString &)));
-  QObject::connect(this->ui.zAxisWidget,
-                   SIGNAL(showOrHideIndicator(bool, const QString &)),
-                   this, SLOT(cutVisibility(bool, const QString &)));
-
-  QObject::connect(this->ui.xAxisWidget,
-                   SIGNAL(showInSliceView(const QString &)),
-                   this,
-                   SLOT(showCutInSliceViewer(const QString &)));
-  QObject::connect(this->ui.yAxisWidget,
-                   SIGNAL(showInSliceView(const QString &)),
-                   this,
-                   SLOT(showCutInSliceViewer(const QString &)));
-  QObject::connect(this->ui.zAxisWidget,
-                   SIGNAL(showInSliceView(const QString &)),
-                   this,
-                   SLOT(showCutInSliceViewer(const QString &)));
-
-  this->ui.xAxisWidget->installEventFilter(this);
-  this->ui.yAxisWidget->installEventFilter(this);
-  this->ui.zAxisWidget->installEventFilter(this);
 }
 
 MultiSliceView::~MultiSliceView()
@@ -176,7 +101,7 @@ bool MultiSliceView::eventFilter(QObject *ob, QEvent *ev)
 void MultiSliceView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->destroyFilter(builder, QString("Slice"));
+  //this->destroyFilter(builder, QString("Slice"));
   builder->destroy(this->mainView);
 }
 
@@ -187,9 +112,6 @@ pqRenderView* MultiSliceView::getView()
 
 void MultiSliceView::clearIndicatorSelections()
 {
-  this->ui.xAxisWidget->clearSelections();
-  this->ui.yAxisWidget->clearSelections();
-  this->ui.zAxisWidget->clearSelections();
 }
 
 void MultiSliceView::setupData()
@@ -198,11 +120,11 @@ void MultiSliceView::setupData()
 
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSrc->getOutputPort(0), this->mainView);
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Surface");
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
   this->origRep->colorByArray("signal",
-                                       vtkDataObject::FIELD_ASSOCIATION_CELLS);
+                              vtkDataObject::FIELD_ASSOCIATION_CELLS);
 }
 
 void MultiSliceView::setupAxisInfo()
@@ -214,10 +136,6 @@ void MultiSliceView::setupAxisInfo()
   AxisInformation *xinfo = parser.getAxisInfo("XDimension");
   AxisInformation *yinfo = parser.getAxisInfo("YDimension");
   AxisInformation *zinfo = parser.getAxisInfo("ZDimension");
-
-  this->ui.xAxisWidget->setInformation(xinfo);
-  this->ui.yAxisWidget->setInformation(yinfo);
-  this->ui.zAxisWidget->setInformation(zinfo);
 
   delete xinfo;
   delete yinfo;
@@ -309,9 +227,6 @@ void MultiSliceView::selectIndicator()
   vtkSMProxy* smProxy = selection->GetSelectedProxy(0);
   pqPipelineSource *source = pqModel->findItem<pqPipelineSource*>(smProxy);
   QString name = source->getSMName();
-  this->ui.xAxisWidget->selectIndicator(name);
-  this->ui.yAxisWidget->selectIndicator(name);
-  this->ui.zAxisWidget->selectIndicator(name);
 }
 
 void MultiSliceView::updateSelectedIndicator()
@@ -325,18 +240,6 @@ void MultiSliceView::updateSelectedIndicator()
     vtkSMProxy *plane = vtkSMPropertyHelper(smProxy, "CutFunction").GetAsProxy();
     double origin[3];
     vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
-    if (this->ui.xAxisWidget->hasIndicator())
-    {
-      this->ui.xAxisWidget->updateIndicator(origin[0]);
-    }
-    if (this->ui.yAxisWidget->hasIndicator())
-    {
-      this->ui.yAxisWidget->updateIndicator(origin[1]);
-    }
-    if (this->ui.zAxisWidget->hasIndicator())
-    {
-      this->ui.zAxisWidget->updateIndicator(origin[2]);
-    }
   }
 }
 
@@ -360,23 +263,6 @@ void MultiSliceView::updateCutPosition(double position)
     // Something went wrong retrieving the selection
     return;
   }
-
-  vtkSMProxy *plane = vtkSMPropertyHelper(smProxy, "CutFunction").GetAsProxy();
-  double origin[3] = {0.0, 0.0, 0.0};
-  if (this->ui.xAxisWidget->hasIndicator())
-  {
-    origin[0] = position;
-  }
-  if (this->ui.yAxisWidget->hasIndicator())
-  {
-    origin[1] = position;
-  }
-  if (this->ui.zAxisWidget->hasIndicator())
-  {
-    origin[2] = position;
-  }
-  vtkSMPropertyHelper(plane, "Origin").Set(origin, 3);
-  plane->UpdateVTKObjects();
 }
 
 void MultiSliceView::deleteCut(const QString &name)
@@ -401,9 +287,6 @@ void MultiSliceView::cutVisibility(bool isVisible, const QString &name)
 bool MultiSliceView::noIndicatorsLeft()
 {
   int count = 0;
-  count += this->ui.xAxisWidget->numIndicators();
-  count += this->ui.yAxisWidget->numIndicators();
-  count += this->ui.zAxisWidget->numIndicators();
   return count == 0;
 }
 
@@ -423,56 +306,6 @@ void MultiSliceView::setAxisScales()
   AxisInformation *xinfo = parser.getAxisInfo("XDimension");
   AxisInformation *yinfo = parser.getAxisInfo("YDimension");
   AxisInformation *zinfo = parser.getAxisInfo("ZDimension");
-
-  // Check to see if axis mapping has changed and update if necessary.
-  bool isXChanged = this->checkTitles(xinfo, this->ui.xAxisWidget);
-  bool isYChanged = this->checkTitles(yinfo, this->ui.yAxisWidget);
-  bool isZChanged = this->checkTitles(zinfo, this->ui.zAxisWidget);
-  bool haveAxesChanged = isXChanged || isYChanged || isZChanged;
-
-  if (haveAxesChanged)
-  {
-    if (isXChanged)
-    {
-      this->ui.xAxisWidget->deleteAllIndicators();
-      this->ui.xAxisWidget->setInformation(xinfo, true);
-    }
-    if (isYChanged)
-    {
-      this->ui.yAxisWidget->deleteAllIndicators();
-      this->ui.yAxisWidget->setInformation(yinfo, true);
-    }
-    if (isZChanged)
-    {
-      this->ui.zAxisWidget->deleteAllIndicators();
-      this->ui.zAxisWidget->setInformation(zinfo, true);
-    }
-  }
-
-  // Axis mapping not changed, so check if boundaries changed.
-  bool xBoundsChanged = this->checkBounds(xinfo, this->ui.xAxisWidget);
-  bool yBoundsChanged = this->checkBounds(yinfo, this->ui.yAxisWidget);
-  bool zBoundsChanged = this->checkBounds(zinfo, this->ui.zAxisWidget);
-  bool haveBoundsChanged = xBoundsChanged || yBoundsChanged || zBoundsChanged;
-
-  if (haveBoundsChanged)
-  {
-    if (xBoundsChanged)
-    {
-      this->ui.xAxisWidget->setBounds(xinfo, true);
-      this->resetOrDeleteIndicators(this->ui.xAxisWidget, 0);
-    }
-    if (yBoundsChanged)
-    {
-      this->ui.yAxisWidget->setBounds(yinfo, true);
-      this->resetOrDeleteIndicators(this->ui.yAxisWidget, 1);
-    }
-    if (zBoundsChanged)
-    {
-      this->ui.zAxisWidget->setBounds(zinfo, true);
-      this->resetOrDeleteIndicators(this->ui.zAxisWidget, 2);
-    }
-  }
 
   delete xinfo;
   delete yinfo;
@@ -556,9 +389,6 @@ void MultiSliceView::checkSliceViewCompat()
   QString wsName = this->getWorkspaceName();
   if (!wsName.isEmpty())
   {
-    this->ui.xAxisWidget->setShowSliceView(true);
-    this->ui.yAxisWidget->setShowSliceView(true);
-    this->ui.zAxisWidget->setShowSliceView(true);
   }
 }
 
