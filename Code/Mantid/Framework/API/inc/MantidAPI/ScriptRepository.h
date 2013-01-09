@@ -87,7 +87,7 @@ namespace API{
 
 
   */
-  class ScriptRepoException : public std::exception
+  class MANTID_API_DLL ScriptRepoException : public std::exception
   {
     char general_info[300];
   public:

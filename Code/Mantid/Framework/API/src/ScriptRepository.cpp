@@ -1,5 +1,7 @@
 #include "MantidAPI/ScriptRepository.h"
-
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
 namespace Mantid
 {
   namespace API

@@ -27,6 +27,9 @@
 #include "git2.h"
 #include "assert.h"
 #include <locale.h>
+#ifdef _WIN32
+#define snprintf _snprintf
+#endif
 
 using std::vector;
 using std::string;

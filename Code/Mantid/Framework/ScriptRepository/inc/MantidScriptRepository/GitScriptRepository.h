@@ -5,6 +5,17 @@
 #include <vector>
 using Mantid::API::ScriptRepository; 
 class git_repository ; 
+
+#ifdef _WIN32
+#if (IN_MANTID_SCRIPTREPO)
+#define SCRIPT_DLL_EXPORT DLLExport
+#else
+#define SCRIPT_DLL_EXPORT DLLImport
+#endif
+#else
+#define SCRIPT_DLL_EXPORT 
+#endif
+
 namespace Mantid
 {
   namespace Kernel{
@@ -13,7 +24,7 @@ namespace Mantid
 namespace API{
 
 
-  class GitScriptRepository: public ScriptRepository
+  class SCRIPT_DLL_EXPORT GitScriptRepository: public ScriptRepository
   {    
   public:
     /**
