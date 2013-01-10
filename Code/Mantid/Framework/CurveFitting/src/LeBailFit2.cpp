@@ -1103,7 +1103,7 @@ namespace CurveFitting
       {
         // 2 neighboring peaks have almost same d_h
         ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
-        ThermalNeutronBk2BkExpConvPV_sptr nextpeak = m_dspPeaks[ipk].second;
+        ThermalNeutronBk2BkExpConvPV_sptr nextpeak = m_dspPeaks[ipk+1].second;
         int h0, k0, l0, h1, k1, l1;
         thispeak->getMillerIndex(h0, k0, l0);
         nextpeak->getMillerIndex(h1, k1, l1);
