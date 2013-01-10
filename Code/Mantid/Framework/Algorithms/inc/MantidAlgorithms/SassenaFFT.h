@@ -39,7 +39,7 @@ class DLLExport SassenaFFT : public API::Algorithm
 {
 public:
   /// Default constructor
-  SassenaFFT() : API::Algorithm(), m_T2ueV(1000.0/11.604) {}
+  SassenaFFT() : API::Algorithm(), m_T2ueV(1000.0/11.604), m_ps2ueV(4136.0) {}
   /// Destructor
   virtual ~SassenaFFT() {}
   /// Algorithm's name for identification overriding a virtual method
@@ -58,7 +58,8 @@ private:
   void init();
   void exec();
   bool checkGroups();
-  const double m_T2ueV;  //conversion factor from Kelvin to ueV
+  const double m_T2ueV; // conversion factor from Kelvin to ueV
+  const double m_ps2ueV; // conversion factor from picosecond to ueV
 
 }; // class SassenaFFT
 

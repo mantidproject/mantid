@@ -32,7 +32,8 @@ public:
   /// FFT of a real symmetric Gaussian
   void test_ZeroImaginary()
   {
-    const double params[] = {1.0, 1.0, 0.0, 0.1, 0.1, 2.0}; // three pairs of (Heigth,sigma) values
+    // params defines (height,stdev) values for fqt.Re, fqt.Im, and fqt0, respectively
+    const double params[] = {1.0, 1.0, 0.0, 0.1, 0.1, 2.0}; // params[3]=0.0 entails no fqt.Im
     if( !m_alg.isInitialized() ){ m_alg.initialize(); }
     const std::string gwsName("Sassena");
     this->createGroupWorkspace( params, gwsName );
@@ -40,9 +41,9 @@ public:
     // execute the algorithm
     TS_ASSERT_THROWS_NOTHING( m_alg.execute() );
     TS_ASSERT( m_alg.isExecuted() );
-    //this->printWorkspace2D("/tmp/sqwZeroImaginary.dat",gwsName +"_sqw");
+    //this->printWorkspace2D("/tmp/sqwZeroImaginary.dat",gwsName +"_sqw"); // uncomment line for debugging purposes only
     // The input real part was an exponential h*exp(-x^2/(2*s^2) with h=1.0,s=1.0
-    // The Fourier transform is an exponential h'*exp(-x^2/(2*s'^2) with h'=sqrt(2*pi*s)=2.507 and s=2*pi/s=0.159
+    // The Fourier transform is an exponential h'*exp(-x^2/(2*s'^2) with h'=sqrt(2*pi*s)=2.507 and s'=1/(2*pi*s)=0.159
     DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
     const double exponentFactor = 0.0;
     checkHeigth(ws, sqrt(2*M_PI), exponentFactor);
@@ -55,7 +56,8 @@ public:
    */
   void test_DetailedBalanceCondition(){
     const double T(100);
-    const double params[] = {1.0, 1.0, 0.0, 0.1, 0.1, 2.0}; // three pairs of (Heigth,sigma) values
+    // params defines (height,stdev) values for fqt.Re, fqt.Im, and fqt0, respectively
+    const double params[] = {1.0, 1.0, 0.0, 0.1, 0.1, 2.0};
     if( !m_alg.isInitialized() ){ m_alg.initialize(); }
     const std::string gwsName("SassenaII");
     this->createGroupWorkspace( params, gwsName );
@@ -65,9 +67,10 @@ public:
     // execute the algorithm
     TS_ASSERT_THROWS_NOTHING( m_alg.execute() );
     TS_ASSERT( m_alg.isExecuted() );
-    this->printWorkspace2D("/tmp/sqwDetailedBalanceCondition.dat",gwsName +"_sqw");
+    this->printWorkspace2D("/tmp/sqwDetailedBalanceCondition.dat",gwsName +"_sqw"); // uncomment line for debugging purposes only
     DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
-    const double exponentFactor = -11.604/(2.0*T);
+    const double T2ueV=1000.0/11.604; //conversion factor from Kelvin to ueV
+    const double exponentFactor = 1.0/(2.0*T*T2ueV); // quantum-correction to classical S(Q,E): exp(E/(2*kT)
     checkHeigth(ws, sqrt(2*M_PI),exponentFactor);
     checkAverage(ws,0.0, exponentFactor);
     checkSigma(ws, 1.0/(2.0*M_PI), exponentFactor);
@@ -83,6 +86,7 @@ private:
    */
   void checkHeigth(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
   {
+    const double ps2ueV=4136.0; // conversion factor from picosecond to micro-eV
     const double frErr=1E-03; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv;
@@ -92,7 +96,7 @@ private:
       MantidVec::iterator it = std::max_element( yv.begin(), yv.end() );
       size_t index = std::distance( yv.begin(), it);
       double x = ws->readX(i).at(index);
-      double factor = exp(exponentFactor*x);
+      double factor = exp(exponentFactor*ps2ueV*x);
       double h = (*it)*factor;
       double goldStandard = value/(1+ static_cast<double>(i) );
       double error1 = DBL_EPSILON*std::sqrt( static_cast<double>(yv.size()) ); //rounding error if value==0
@@ -109,13 +113,14 @@ private:
    */
   void checkAverage(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
   {
+    const double ps2ueV=4136.0; // conversion factor from picosecond to micro-eV
     const double frErr=1E-03; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv,xv;
     double factor;  //remove the detailed balance condition
     for(size_t i=0; i<nspectra; i++)
     {
-      double goldStandard = (1+ static_cast<double>(i) )*value;
+      double goldStandard = (1+ static_cast<double>(i) )*value; // recall each spectra was created with a different stdev
       xv = ws->readX(i);
       yv = ws->readY(i);
       double sum = 0.0;
@@ -123,13 +128,13 @@ private:
       MantidVec::iterator itx = xv.begin();
       for(MantidVec::iterator it = yv.begin(); it != yv.end(); ++it)
       {
-        factor = exp(exponentFactor*(*itx));
+        factor = exp(exponentFactor*ps2ueV*(*itx));
         sum += (*it)*factor;
         average += (*it)*(*itx)*factor;
         ++itx;
       }
       average /= sum;
-      double error1 = DBL_EPSILON*std::sqrt( static_cast<double>(yv.size()) ); //rounding error if value==0
+      double error1 = std::sqrt(DBL_EPSILON*std::sqrt( static_cast<double>(yv.size()) )); //rounding error if value==0
       double error = std::max(error1, frErr*std::fabs(goldStandard));
       TS_ASSERT_DELTA( average, goldStandard, error );
     }
@@ -146,16 +151,17 @@ private:
     const double frErr=1E-03; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv,xv;
-    double factor;  //remove the detailed balance condition
+    double factor;  // remove the detailed balance condition
+    const double ps2ueV=4136.0; // conversion factor from picosecond to micro-eV
     for(size_t i=0; i<nspectra; i++)
     {
-      double goldStandard = (1+ static_cast<double>(i) )*value;
+      double goldStandard = ps2ueV*(1+ static_cast<double>(i) )*value; // recall each spectra was created with a different stdev
       double dx = (-2.0) * ws->readX(i).at(0); // extent along the X-axis
       yv = ws->readY(i);
       MantidVec::iterator it = std::max_element( yv.begin(), yv.end() );
       size_t index = std::distance( yv.begin(), it);
       double x = ws->readX(i).at(index);
-      factor = exp(exponentFactor*x);
+      factor = exp(exponentFactor*ps2ueV*x);
       double h = (*it)*exp(x);
       xv = ws->readX(i);
       MantidVec::iterator itx = xv.begin();
@@ -207,10 +213,10 @@ private:
   void createWorkspace2D( const std::string& wsName, const double& Heigth, const double& sigma0, const size_t &nbins, const size_t& nspectra)
   {
     DataObjects::Workspace2D_sptr ws(new DataObjects::Workspace2D);
-    ws->initialize(nspectra, nbins, nbins);
+    ws->initialize(nspectra, nbins, nbins); // arguments are NVectors, XLength, and YLength
     ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
 
-    const double dt=0.01;
+    const double dt=0.01; // time unit, in picoseconds
     MantidVec xv;
     for(size_t i=0; i<nbins; i++)
     {
@@ -220,6 +226,7 @@ private:
 
     double sigma;
     MantidVec yv(nbins);
+    // each spectra is a gaussian of same Height but different stdev
     for (size_t i=0; i<nspectra; i++)
     {
       ws->dataX(i) = xv;
@@ -240,20 +247,19 @@ private:
     API::WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
 
     const size_t nbins(2001);
-    const size_t nspectra(4);
-    //double dt=0.01; //this parameter has been moved to createWorkspace2D()
+    const size_t nspectra(4); // assume four Q-values
     std::string wsName = gwsName +"_fqt.Re";
     double Heigth = params[0];
     double sigma = params[1];
     this->createWorkspace2D( wsName, Heigth, sigma, nbins, nspectra);
-    //this->printWorkspace2D("/tmp/fqt.Re.dat",wsName);
+    this->printWorkspace2D("/tmp/fqt.Re.dat",wsName);
     gws->add(wsName);
 
     wsName = gwsName +"_fqt.Im";
     Heigth = params[2];
     sigma = params[3];
     this->createWorkspace2D( wsName, Heigth, sigma, nbins, nspectra);
-    //this->printWorkspace2D("/tmp/fqt.Im.dat",wsName);
+    this->printWorkspace2D("/tmp/fqt.Im.dat",wsName);
     gws->add(wsName);
 
     wsName = gwsName + "_fqt0";

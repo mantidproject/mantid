@@ -91,11 +91,10 @@ void SassenaFFT::exec()
 
   // Transform the X-axis to appropriate dimensions
   // We assume the units of the intermediate scattering function are in picoseconds
-  // The resulting frequency unit is in micro-eV
-  const double df = 4136.0;
+  // The resulting frequency unit is in micro-eV, thus use m_ps2ueV
   API::IAlgorithm_sptr scaleX = this->createChildAlgorithm("ScaleX");
   scaleX->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace",sqw);
-  scaleX->setProperty<double>("Factor", df);
+  scaleX->setProperty<double>("Factor", m_ps2ueV);
   scaleX->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
   scaleX->executeAsChildAlg();
 
@@ -104,12 +103,12 @@ void SassenaFFT::exec()
   {
     double T = this->getProperty("Temp");
     T *= m_T2ueV;  // from Kelvin to units of ueV
-    //The ExponentialCorrection algorithm assume the form C0*exp(-C1*x). Note the minus in the exponent
+    // The ExponentialCorrection algorithm assume the form C0*exp(-C1*x). Note the explicit minus in the exponent
     API::IAlgorithm_sptr ec = this->createChildAlgorithm("ExponentialCorrection");
     ec->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", sqw);
     ec->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
     ec->setProperty<double>("C0",1.0);
-    ec->setProperty<double>("C1",1.0/(2.0*T));
+    ec->setProperty<double>("C1",-1.0/(2.0*T));
     ec->setPropertyValue("Operation","Multiply");
     ec->executeAsChildAlg();
   }
