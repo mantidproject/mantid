@@ -54,7 +54,7 @@ namespace Mantid
     {
       NLatticeParametersSet = 0;
       a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
-          = startX_set = NGroups_set = false;//_WIN32
+          = startX_set = NGroups_set  = false;
 
      // g_log.setLevel(7);
 
@@ -74,6 +74,8 @@ namespace Mantid
       a = b = c = alpha = beta = gamma = 0;
 
       NGroups =1;
+      RotateCenters= false;
+      SampleOffsets=false;
 
     }
 
@@ -99,9 +101,8 @@ namespace Mantid
       tolerance = tolerance1;
       NGroups = 1;
       NLatticeParametersSet = 0;
-      NLatticeParametersSet = 0;
       a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set = BankNames_set = endX_set
-          = startX_set = NGroups_set = false;
+          = startX_set = NGroups_set   = false;
 
       setAttribute("a", Attribute(ax));
       setAttribute("b", Attribute(bx));
@@ -116,6 +117,8 @@ namespace Mantid
 
       setAttribute("startX", Attribute(-1));
       setAttribute("endX", Attribute(-1));
+      setAttribute("RotateCenters",Attribute(0));
+      setAttribute("SampleOffsets", Attribute(0));
       init();
 #if defined(_WIN32) && !defined(_WIN64)
 
@@ -171,7 +174,7 @@ namespace Mantid
 
     void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp, const double *xValues, const size_t nData) const
     {
-      if (NLatticeParametersSet < (int) nAttributes())
+      if (NLatticeParametersSet < (int) nAttributes()-2)
       {
         g_log.error("Not all lattice parameters have been set");
         throw std::invalid_argument("Not all lattice parameters have been set");
@@ -300,7 +303,7 @@ namespace Mantid
                                                 rot,
                                             getParameter( prefix+"detWidthScale"),
                                             getParameter( prefix+"detHeightScale"),
-                                            pmapSv);
+                                            pmapSv,RotateCenters);
 
       }//for each group
 
@@ -663,7 +666,7 @@ namespace Mantid
       CheckSizetMax(StartPos, L0param,T0param,"Start deriv");
       if (nData <= 0)
         return;
-      if (NLatticeParametersSet < (int) nAttributes())
+      if (NLatticeParametersSet < (int) nAttributes()-2)
       {
         g_log.error("Not all lattice parameters have been set");
         throw std::invalid_argument("Not all lattice parameters have been set");
@@ -960,6 +963,8 @@ namespace Mantid
           //TODO check new stuff dCenter def next 2 lines , used after
           V3D Center = PanelCenter[peak];
           V3D dCenter = Rot2dRot*Center;
+          if( !RotateCenters)
+            dCenter=V3D(0,0,0);
           V3D dxyz2theta = dXvec * (col[peak] - NPanelcols[peak] / 2.0 + .5) + dYvec * (row[peak]
               - NPanelrows[peak] / 2.0 + .5)+dCenter;
 
@@ -1257,7 +1262,8 @@ namespace Mantid
 
         double x = 0;
         if(!(attName == "PeakWorkspaceName" || attName=="BankNames" || attName =="startX"
-                            || attName == "endX" || attName == "NGroups"))
+                            || attName == "endX" || attName == "NGroups"||
+                            attName=="RotateCenters"|| attName=="SampleOffsets"))
            x =value.asDouble();
 
         if (attName.compare("beta") < 0)
@@ -1335,6 +1341,24 @@ namespace Mantid
               NLatticeParametersSet++;
             }
           }
+          else if( attName == "RotateCenters")
+          {
+            int v= value.asInt();
+            if( v==0)
+              RotateCenters= false;
+            else
+              RotateCenters = true;
+
+          }
+          else if( attName== "SampleOffsets")
+          { int v= value.asInt();
+            if( v==0)
+              SampleOffsets= false;
+            else
+              SampleOffsets=true;
+
+          }
+
           else
             throw std::invalid_argument("Not a valid attribute namef ");
 
@@ -1385,11 +1409,12 @@ namespace Mantid
             gamma_set = true;
             NLatticeParametersSet++;
           }
+
         }else
-          throw std::invalid_argument("Not a valid attribute namea "+attName);
+          throw std::invalid_argument("Not a valid attribute name "+attName);
 
 
-        if (NLatticeParametersSet >= (int)nAttributes())
+        if (NLatticeParametersSet >= (int)nAttributes()-2)
         {
 
           Geometry::UnitCell lat(a, b, c, alpha, beta, gamma);

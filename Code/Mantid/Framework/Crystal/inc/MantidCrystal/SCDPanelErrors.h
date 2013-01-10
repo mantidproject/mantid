@@ -146,7 +146,7 @@ namespace Crystal
 
    size_t   nAttributes () const
     {
-      return (size_t)11;
+      return (size_t)13;
     }
 
 
@@ -164,6 +164,8 @@ namespace Crystal
       V.push_back("startX");
       V.push_back("endX");
       V.push_back("NGroups");
+      V.push_back("RotateCenters");
+      V.push_back("SampleOffsets");
       return V;
     }
 
@@ -196,7 +198,22 @@ namespace Crystal
              Attribute A(NGroups);
 
             return A;
+          } else if( attName == "RotateCenters")
+          {
+            if(RotateCenters)
+              return Attribute(1);
+            else
+              return Attribute(0);
           }
+          else if( attName== "SampleOffsets")
+          {
+            if( SampleOffsets)
+
+              return Attribute(1);
+            else
+             return Attribute(0);
+          }
+
 
           else
             throw std::invalid_argument("Not a valid attribute namec");
@@ -244,6 +261,12 @@ namespace Crystal
 
           else if( attName == "NGroups")
                    return true;
+
+          else if( attName == "RotateCenters")
+            return true;
+
+          else if( attName== "SampleOffsets")
+            return true;
           return false;
 
         }
@@ -261,6 +284,7 @@ namespace Crystal
 
         else if (attName == "endX")
           return true;
+
 
 
 
@@ -320,6 +344,7 @@ namespace Crystal
 
     double a,b,c,alpha,beta,gamma;
     int NGroups;
+    bool RotateCenters, SampleOffsets;
 
     std::string PeakName;//< SCDPanelErrors{PeakName} is name in the Analysis Data Service where the PeaksWorkspace is stored
 

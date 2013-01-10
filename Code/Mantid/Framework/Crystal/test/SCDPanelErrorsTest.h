@@ -82,6 +82,7 @@ public:
     std::string ComponentName("bank26");
     Crystal::SCDPanelErrors calib(Peakws, ComponentName, 14.0, 19.3, 8.6, 90., 105., 90., .12);
     calib.setAttribute("NGroups", IFunction::Attribute(1));
+    calib.setAttribute("RotateCenters",IFunction::Attribute(1));
     std::vector<std::string> banks;
     banks.push_back(std::string("bank26"));
 

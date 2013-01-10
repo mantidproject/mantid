@@ -109,12 +109,16 @@ namespace Crystal
   *   @param  pmapOld      The Parameter map from the original instrument( not
   *                        NewInstrument). "Clones" relevant information into the
   *                        NewInstrument's parameter map.
+  *
+  *   @param RotateCenters Rotate the centers of the panels(the same amount) with the
+  *                        rotation of panels around their center
   */
   static void FixUpBankParameterMap(  std::vector<std::string>const bankNames,
                                       boost::shared_ptr<const Instrument> NewInstrument,
                                      V3D const pos,Quat const rot,
                                      double const DetWScale, double const DetHtScale,
-                                     boost::shared_ptr<const ParameterMap> const pmapOld);
+                                     boost::shared_ptr<const ParameterMap> const pmapOld,
+                                     bool RotateCenters);
 
   /**
    * *  Updates the ParameterMap for NewInstrument to reflect the position of the

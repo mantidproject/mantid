@@ -212,7 +212,7 @@ namespace Crystal
       bankNames.push_back(bankName);
 
       SCDCalibratePanels::FixUpBankParameterMap(bankNames,instr, dPos,
-          dRot,DetWScale,DetHtScale , parMap1);
+          dRot,DetWScale,DetHtScale , parMap1, false);
 
     }
     return startChar;

@@ -61,7 +61,7 @@ public:
      AnalysisDataService::Instance().remove("TOPAZ_3007");
 
      alg= AlgorithmFactory::Instance().create("SCDCalibratePanels", 1);
-     std::cout<<"A"<<std::endl;
+
      alg->initialize();
      Peakws->setName("PeaksWsp");
      alg->setProperty("PeakWorkspace", Peakws );
@@ -76,6 +76,7 @@ public:
     // alg->setProperty("use_timeOffset", false );
      //alg->setProperty("XmlFilename","abc.xml");
      //alg->setProperty("DetCalFilename","abc.DetCal");
+     alg->setProperty("RotateCenters", true);
      alg->setProperty("PanelGroups","SpecifyGroups");
      alg->setProperty("Grouping","26");
      alg->setPropertyValue("ResultWorkspace","Result");

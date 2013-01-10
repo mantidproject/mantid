@@ -613,11 +613,16 @@ namespace Crystal
              }
            }
        // if( i > 0 ) oss << ";";
-
+        int RotGroups=0;
+        if( getProperty("RotateCenters"))
+          RotGroups=1;
+        int SampOffsets=0;
+        if( getProperty("AllowSampleShift"))
+          SampOffsets=1;
         oss << "name=SCDPanelErrors, PeakWorkspaceName=\""<<PeakWSName<<"\",";
         oss << "a=" << fixed << a << "," << "b=" << fixed << b << "," << "c=" << fixed << c << "," << "alpha=" << fixed << alpha << "," << "beta=" << fixed << beta
              << "," << "gamma=" << fixed << gamma << ","<< "NGroups="<<NGroups<<",BankNames ="<<BankNameString<<","
-             <<"startX=-1,endX=-1,";
+             <<"startX=-1,endX=-1,RotateCenters="<<RotGroups<<",SampleOffsets="<<SampOffsets<<",";
       oss<<   "l0=" << fixed << L0 << "," << "t0=" << fixed << T0 ;
     ostringstream oss1 ( ostringstream::out);
 
@@ -960,7 +965,7 @@ namespace Crystal
                               newRelRot,
                               result[ prefix+"detWidthScale" ],
                               result[ prefix+"detHeightScale" ],
-                              pmapOld);
+                              pmapOld, getProperty("RotateCenters"));
 
     }//For @ group
 
@@ -1098,6 +1103,9 @@ namespace Crystal
       declareProperty("use_PanelHeight", true, "Fit the Panel Height");
       declareProperty("use_PanelPosition", true, "Fit the PanelPosition");
       declareProperty("use_PanelOrientation", true, "Fit the PanelOrientation");
+      declareProperty("RotateCenters", false,"Rotate bank Centers with panel orientations");
+      declareProperty("AllowSampleShift",false,"Allow and fit for a sample that is off center");
+
 
       declareProperty("tolerance", .12, "offset of hkl values from integer for GOOD Peaks");
 
@@ -1322,7 +1330,7 @@ namespace Crystal
 
   void SCDCalibratePanels::FixUpBankParameterMap(std::vector<std::string> const bankNames,
         boost::shared_ptr<const Instrument> NewInstrument, V3D const pos, Quat const rot, double const DetWScale,
-        double const DetHtScale, boost::shared_ptr<const ParameterMap> const pmapOld)
+        double const DetHtScale, boost::shared_ptr<const ParameterMap> const pmapOld, bool RotCenters)
     {
       boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
 
@@ -1347,7 +1355,7 @@ namespace Crystal
         //---------Rotate center of bank ----------------------
         V3D Center =bank->getPos();
         V3D Center_orig( Center);
-        rot.rotate(Center);
+        if(RotCenters) rot.rotate(Center);
 
         V3D pos1 = bank->getRelativePos();
 
