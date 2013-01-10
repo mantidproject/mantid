@@ -180,7 +180,6 @@ typedef boost::shared_ptr<ThermalNeutronBk2BkExpConvPV> ThermalNeutronBk2BkExpCo
 
 //--- Public inline function --------------------------------------------------
 /** Calculate d = a/sqrt(h**2+k**2+l**2)
-  */
 inline double calCubicDSpace(double a, int h, int k, int l)
 {
     // TODO This function will be refactored in future.
@@ -188,6 +187,7 @@ inline double calCubicDSpace(double a, int h, int k, int l)
 
     return d;
 }
+*/
 
 /// Integral for Gamma
 std::complex<double> E1(std::complex<double> z);
