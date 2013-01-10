@@ -56,6 +56,12 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","",Kernel::Direction::Output),
         "Name of the output Table workspace with preprocessed detectors data. If the workspace exists, it will be replaced.");
 
+     declareProperty(new Kernel::PropertyWithValue<bool>("GetMaskState",true,Kernel::Direction::Input),
+        "Returns addiitonal column with information if the detector is masked.");
+
+     declareProperty(new Kernel::PropertyWithValue<bool>("UpdateMasksInfo",false,Kernel::Direction::Input),
+        "Returns addiitonal column with information if the detector is masked.");
+
       declareProperty(new Kernel::PropertyWithValue<bool>("GetEFixed",false,Kernel::Direction::Input),
         "This option makes sense for Indirect instrument, where each detector can have its own energy, defined by correspondent crystal-analyser position.\n"
         "If this option is selected for other instrument types, the value of eFixed is taken from workspace property ""Ei"" or ""eFixed"" if ""Ei""\n"
@@ -74,8 +80,32 @@ namespace Mantid
     {
       // -------- get Input workspace
       MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");  
-      // -------- build target workspace:
-      auto  targWS = createTableWorkspace(inputWS);
+
+      // verify if we want to preprocess real workspace or just update the state of workspace masks
+      DataObjects::TableWorkspace_sptr targWS;
+      bool updateMasks(false);
+      if (this->getProperty("GetMaskState") && this->getProperty("UpdateMasksInfo"))
+      {
+        std::string wsName =this->getPointerToProperty("OutputWorkspace")->value();
+        if(API::AnalysisDataService::Instance().doesExist(wsName))
+        {
+          targWS= boost::dynamic_pointer_cast<DataObjects::TableWorkspace >(API::AnalysisDataService::Instance().retrieve(wsName));
+          if(targWS)
+          {
+            int * pMasksArray  = targWS->getColDataArray<int>("detMask");
+            if(pMasksArray) updateMasks = true;
+            // was this workspace calculated without eFixed and now we need one?
+            if(this->getProperty("GetEFixed") && !targWS->getColDataArray<float>("eFixed"))updateMasks=false;
+          }
+
+        }      
+      }
+
+      if(updateMasks) // just update masks
+        this->updateMasksState(inputWS,targWS);
+      else   // -------- build target workspace:
+        targWS = createTableWorkspace(inputWS);
+
       if(this->isDetInfoLost(inputWS))
         this->buildFakeDetectorsPositions(inputWS,targWS);
       else    // process real detectors positions
@@ -84,7 +114,8 @@ namespace Mantid
       // set up target workspace 
       setProperty("OutputWorkspace",targWS);
     }
-    /** helper method to create resilting table workspace */
+
+    /** helper method to create resulting table workspace */
     boost::shared_ptr<DataObjects::TableWorkspace> PreprocessDetectorsToMD::createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS)
     {
       const size_t nHist = inputWS->getNumberHistograms();
@@ -105,6 +136,10 @@ namespace Mantid
       if(!targWS->addColumn("size_t","detIDMap"))throw(std::runtime_error("Can not add column detIDMap"));
       // stores detector index which corresponds to the workspace index;
       if(!targWS->addColumn("size_t","spec2detMap"))throw(std::runtime_error("Can not add column spec2detMap"));
+
+      m_getIsMasked = this->getProperty("GetMaskState");
+      if(m_getIsMasked)  // as bool is presented in vectors as a class, we are using int instead of bool
+        if(!targWS->addColumn("int","detMask"))throw(std::runtime_error("Can not add column containing for detector masks"));
 
       // check if one wants to obtain detector's efixed"    
       m_getEFixed = this->getProperty("GetEFixed");
@@ -165,12 +200,18 @@ namespace Mantid
       auto &Azimuthal  = targWS->getColVector<double>("Azimuthal");
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
 
+
       // Efixed; do we need one and does one exist?
       double Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
       float *pEfixedArray(NULL);
       const Geometry::ParameterMap& pmap = inputWS->constInstrumentParameters(); 
       if (m_getEFixed)
         pEfixedArray     = targWS->getColDataArray<float>("eFixed"); 
+
+      // check if one needs to generate masked detectors column.
+      int *pMasksArray(NULL);
+      if (m_getIsMasked)
+         pMasksArray    = targWS->getColDataArray<int>("detMask");
 
 
       //// progress messave appearence
@@ -187,6 +228,7 @@ namespace Mantid
         L2[i]       =std::numeric_limits<double>::quiet_NaN(); 
         TwoTheta[i] =std::numeric_limits<double>::quiet_NaN(); 
         Azimuthal[i]=std::numeric_limits<double>::quiet_NaN(); 
+   //     detMask[i]  = true;
 
    
         // get detector or detector group which corresponds to the spectra i
@@ -202,6 +244,13 @@ namespace Mantid
 
         // Check that we aren't dealing with monitor...
         if (spDet->isMonitor())continue;   
+
+        // if masked detectors state is not used, masked detectors just ignored;
+        bool maskDetector = spDet->isMasked();
+        if(m_getIsMasked)
+          *(pMasksArray+liveDetectorsCount) = maskDetector?1:0;
+        else
+          if(maskDetector)continue;
 
         // calculate the requested values;
         sp2detMap[i]                = liveDetectorsCount;
@@ -223,6 +272,7 @@ namespace Mantid
         detDir[liveDetectorsCount].setY(ey);
         detDir[liveDetectorsCount].setZ(ez);
 
+ 
         //double sinTheta=sin(0.5*polar);
         //this->SinThetaSq[liveDetectorsCount]  = sinTheta*sinTheta;
 
@@ -250,6 +300,46 @@ namespace Mantid
       theProgress.report();
       g_log.information()<<"Finished preprocessing detector locations. Found: "<<liveDetectorsCount<<" detectors out of: "<<nHist<<" histograms\n";
     }
+   /** Method updates the column, which describes if current detector/spectra is masked 
+       It is used if one tries to process multiple workspaces obtained from a series of experiments  where the masked detectors can change */
+   void PreprocessDetectorsToMD::updateMasksState(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
+   {
+      int * pMasksArray    = targWS->getColDataArray<int>("detMask");
+      if(!pMasksArray )
+        throw std::invalid_argument("target workspace "+targWS->getName()+" does not have defined masks column to update");
+
+      size_t nHist       = targWS->rowCount();
+      const size_t nRows = inputWS->getNumberHistograms();
+      if (nHist != nRows)
+        throw std::invalid_argument(" source workspace "+ inputWS->getName()+ " and target workspace "+targWS->getName()+" are inconsistent as have different numner of detectors");
+
+      uint32_t liveDetectorsCount(0);
+      for (size_t i = 0; i < nHist; i++)
+      {   
+        // get detector or detector group which corresponds to the spectra i
+        Geometry::IDetector_const_sptr spDet;
+        try
+        {
+          spDet= inputWS->getDetector(i);      
+        }
+        catch(Kernel::Exception::NotFoundError &)
+        {
+          continue;
+        }
+
+        // Check that we aren't dealing with monitor...
+        if (spDet->isMonitor())continue;   
+
+        // if masked detectors state is not used, masked detectors just ignored;
+        bool maskDetector = spDet->isMasked();
+        *(pMasksArray+liveDetectorsCount) = maskDetector?1:0;
+
+        liveDetectorsCount++;
+      }
+
+
+   }
+
 
     /** method calculates fake detectors positions in the situation when real detector information has been lost  */
     void PreprocessDetectorsToMD::buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
@@ -271,7 +361,7 @@ namespace Mantid
       auto &TwoTheta   = targWS->getColVector<double>("TwoTheta");
       auto &Azimuthal  = targWS->getColVector<double>("Azimuthal");
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
-
+  //    auto &detMask    = targWS->getColVector<bool>("detMask");
 
       //// progress messave appearence  
       size_t nHist = targWS->rowCount();

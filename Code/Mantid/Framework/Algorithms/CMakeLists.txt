@@ -164,6 +164,7 @@ set ( SRC_FILES
 	src/RemovePromptPulse.cpp
 	src/RenameWorkspace.cpp
 	src/ReplaceSpecialValues.cpp
+	src/ResampleX.cpp
 	src/ResetNegatives.cpp
 	src/ResizeRectangularDetector.cpp
 	src/SANSDirectBeamScaling.cpp
@@ -370,6 +371,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
+	inc/MantidAlgorithms/ResampleX.h
 	inc/MantidAlgorithms/ResetNegatives.h
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
@@ -567,6 +569,7 @@ set ( TEST_FILES
 	RemovePromptPulseTest.h
 	RenameWorkspaceTest.h
 	ReplaceSpecialValuesTest.h
+	ResampleXTest.h
 	ResetNegativesTest.h
 	ResizeRectangularDetectorTest.h
 	#SassenaFFTTest.h

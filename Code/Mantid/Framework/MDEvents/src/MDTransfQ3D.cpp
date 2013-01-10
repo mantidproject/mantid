@@ -10,14 +10,14 @@ namespace Mantid
 
     /** method returns number of matrix dimensions calculated by this class
     * as function of energy analysis mode   */
-    unsigned int MDTransfQ3D::getNMatrixDimensions(CnvrtToMD::EModes mode,API::MatrixWorkspace_const_sptr inWS)const
+    unsigned int MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
       switch(mode)
       {
-      case(CnvrtToMD::Direct):  return 4;
-      case(CnvrtToMD::Indir):   return 4;
-      case(CnvrtToMD::Elastic): return 3;
+      case(Kernel::DeltaEMode::Direct):  return 4;
+      case(Kernel::DeltaEMode::Indirect):   return 4;
+      case(Kernel::DeltaEMode::Elastic): return 3;
       default: throw(std::invalid_argument("Unknow or unsupported energy conversion mode"));
       }
     }
@@ -25,7 +25,7 @@ namespace Mantid
 
     bool MDTransfQ3D::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord,double &s, double &err)const
     {
-      if(m_Emode == CnvrtToMD::Elastic)
+      if(m_Emode == Kernel::DeltaEMode::Elastic)
       {
         return calcMatrixCoord3DElastic(x,Coord,s,err);
       }else{
@@ -51,7 +51,7 @@ namespace Mantid
 
       // get module of the wavevector for scattered neutrons
       double k_tr;
-      if(m_Emode==CnvrtToMD::Direct)
+      if(m_Emode==Kernel::DeltaEMode::Direct)
       {
         k_tr=sqrt((m_Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
       }else{
@@ -130,6 +130,11 @@ namespace Mantid
         m_Ei = double(*(m_pEfixedArray+i));
         m_Ki = sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
       }
+      // if masks are defined and detector masked -- no further calculations
+      if(m_pDetMasks)
+      {
+        if(*(m_pDetMasks+i)>0)return false;
+      }
 
       return true;
     }
@@ -138,6 +143,7 @@ namespace Mantid
     void MDTransfQ3D::initialize(const MDWSDescription &ConvParams)
     { 
       m_pEfixedArray = NULL;
+      m_pDetMasks    = NULL;
       //********** Generic part of initialization, common for elastic and inelastic modes:
       // get transformation matrix (needed for CrystalAsPoder mode)
       m_RotMat = ConvParams.getTransfMatrix();
@@ -155,7 +161,7 @@ namespace Mantid
       //************   specific part of the initialization, dependent on emode:
       m_Emode      = ConvParams.getEMode();
       m_NMatrixDim = getNMatrixDimensions(m_Emode);
-      if(m_Emode == CnvrtToMD::Direct||m_Emode == CnvrtToMD::Indir)
+      if(m_Emode == Kernel::DeltaEMode::Direct||m_Emode == Kernel::DeltaEMode::Indirect)
       {
         // energy needed in inelastic case
         m_Ei  =  ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("Ei");
@@ -163,9 +169,9 @@ namespace Mantid
         m_Ki=sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
 
         m_pEfixedArray=NULL;
-        if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");  
+        if(m_Emode==(int)Kernel::DeltaEMode::Indirect) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");  
       }else{
-        if (m_Emode != CnvrtToMD::Elastic) throw(std::runtime_error("MDTransfQ3D::initialize::Unknown or unsupported energy conversion mode"));
+        if (m_Emode != Kernel::DeltaEMode::Elastic) throw(std::runtime_error("MDTransfQ3D::initialize::Unknown or unsupported energy conversion mode"));
         // check if we need to calculate Lorentz corrections and if we do, prepare values for their precalculation:
         m_isLorentzCorrected = ConvParams.isLorentsCorrections();
         if(m_isLorentzCorrected)
@@ -181,7 +187,8 @@ namespace Mantid
           if(!m_SinThetaSqArray)throw(std::runtime_error("MDTransfQ3D::initialize::Uninitilized Sin(Theta)^2 array for calculating Lorentz corrections"));
         }
       }
-
+      // use detectors masks untill signals are masked by 0 instead of NaN
+      m_pDetMasks =  ConvParams.m_PreprDetTable->getColDataArray<int>("detMask");
     }
     /**method returns default ID-s for ModQ elastic and inelastic modes. The ID-s are related to the units, 
     * this class produces its ouptut in. 
@@ -190,19 +197,19 @@ namespace Mantid
     *@returns       -- vector of default dimension ID-s for correspondent energy conversion mode. 
     The position of each dimID in the vector corresponds to the position of each MD coordinate in the Coord vector
     */
-    std::vector<std::string> MDTransfQ3D::getDefaultDimID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
+    std::vector<std::string> MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
       std::vector<std::string> default_dim_ID;
       switch(dEmode)
       {
-      case(CnvrtToMD::Elastic):
+      case(Kernel::DeltaEMode::Elastic):
         {
           default_dim_ID.resize(3);
           break;
         }
-      case(CnvrtToMD::Direct):
-      case(CnvrtToMD::Indir):
+      case(Kernel::DeltaEMode::Direct):
+      case(Kernel::DeltaEMode::Indirect):
         {
           default_dim_ID.resize(4);
           default_dim_ID[3]= "DeltaE";
@@ -223,14 +230,14 @@ namespace Mantid
     * @param Emode   -- energy conversion mode
     *
     * It is Momentum and DelteE in inelastic modes   */
-    std::vector<std::string> MDTransfQ3D::outputUnitID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
+    std::vector<std::string> MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
       std::vector<std::string> UnitID = this->getDefaultDimID(dEmode,inWS);
 
       //TODO: is it really momentum transfer, as MomentumTransfer units are seems bound to elastic mode only (at least accorting to Units description on Wiki)?
       std::string kUnits("MomentumTransfer");
-      if(dEmode==CnvrtToMD::Elastic)kUnits= "Momentum";
+      if(dEmode==Kernel::DeltaEMode::Elastic)kUnits= "Momentum";
      
 
       UnitID[0] = kUnits;

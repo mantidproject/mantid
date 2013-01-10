@@ -11,7 +11,7 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
-#include "MantidMDEvents/MDTransfDEHelper.h"
+//#include "MantidMDEvents/MDTransfDEHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 
@@ -80,7 +80,7 @@ public:  // for the time being
     std::vector<size_t>      getNBins()const{return m_NBins;}
     std::vector<coord_t>     getAddCoord()const{return m_AddCoord;}
     std::string              getEModeStr()const;
-    CnvrtToMD::EModes        getEMode()const{return m_Emode;}
+    Kernel::DeltaEMode::Type getEMode()const{return m_Emode;}
     std::string              getQMode()const{return AlgID;}
 
 
@@ -133,7 +133,7 @@ protected: // until MDWSDesctiptionDepricatedExist
     // shared pointer to the source matrix workspace
     API::MatrixWorkspace_const_sptr m_InWS;
     /// energy transfer analysis mode 
-    CnvrtToMD::EModes m_Emode;
+    Kernel::DeltaEMode::Type m_Emode;
     /// if one needs to calculate Lorentz corrections
     bool m_LorentzCorr;
     /// the vector of MD coordinates, which are obtained from workspace properties.

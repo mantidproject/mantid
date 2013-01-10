@@ -1,7 +1,7 @@
 #include "MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidMDEvents/MDTransfFactory.h"
-#include "MantidMDEvents/MDTransfDEHelper.h"
+#include "MantidKernel/DeltaEMode.h"
 #include <QComboBox>
 #include <QLineEdit>
 #include <QCheckBox>
@@ -30,8 +30,7 @@ CreateMDWorkspaceAlgDialog::CreateMDWorkspaceAlgDialog()
       m_uiForm.combo_q_dimensions->addItem(name);
 
   }
-  Mantid::MDEvents::MDTransfDEHelper AlldEModes;
-  std::vector<std::string> dEModes = AlldEModes.getEmodes();
+  std::vector<std::string> dEModes = Mantid::Kernel::DeltaEMode::availableTypes();
   for(size_t i=0;i<dEModes.size();i++)
   {
       QString name(dEModes[i].c_str());

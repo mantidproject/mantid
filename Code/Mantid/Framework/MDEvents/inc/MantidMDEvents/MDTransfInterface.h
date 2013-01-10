@@ -2,7 +2,7 @@
 #define MANTID_MDEVENTS_IMD_TRANSFORMATION_H
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidMDEvents/MDTransfDEHelper.h"
+#include "MantidKernel/DeltaEMode.h"
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -66,7 +66,7 @@ public:
     virtual const std::string transfID()const=0;
  /** MD transformation can often be used together with energy analysis mode; This function should be overloaded 
        if the transformation indeed can do the energy analysis */
-    virtual std::vector<std::string> getEmodes()const{return std::vector<std::string>(1,std::string("No dE"));}
+    virtual std::vector<std::string> getEmodes()const{return std::vector<std::string>(1,std::string("Undefined"));}
  
 //***************> the method below involwed in the calculations of MD coordinates
     /** Method deployed out of the loop and calculates all variables needed within the loop.
@@ -136,17 +136,17 @@ public:
     /** returns the unit ID for the input units, the particular transformation expects. 
      if one wants the transformation to be meaningful, the X-coordinates of input workspace 
      used by the transformation have to be expressed in the uinits  with ID, returned by this method */
-    virtual const std::string inputUnitID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const=0;
+    virtual const std::string inputUnitID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const=0;
     /** The transformation generates output MD events in particular units. This method returns these Units ID-s */ 
-    virtual std::vector<std::string> outputUnitID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const = 0;
+    virtual std::vector<std::string> outputUnitID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const = 0;
 
       /** when one builds MD workspace, he needs a dimension names/ID-s which can be different for different Q-transformatons and in different E-mode 
        The position of each dimID in the output vector should correspond the position of each coordinate in the Coord vector     */
-    virtual std::vector<std::string> getDefaultDimID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const = 0;
+    virtual std::vector<std::string> getDefaultDimID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const = 0;
 
     /** return the number of dimensions, calculated by the transformation from the workspace. This number is usually varies from 1 to 4
       * and depends on emode and possibly on some WS parameters.     */
-    virtual unsigned int getNMatrixDimensions(CnvrtToMD::EModes mode,API::MatrixWorkspace_const_sptr inWS)const=0;
+    virtual unsigned int getNMatrixDimensions(Kernel::DeltaEMode::Type mode,API::MatrixWorkspace_const_sptr inWS)const=0;
     
 }; 
 

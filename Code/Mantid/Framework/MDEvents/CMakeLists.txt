@@ -33,7 +33,7 @@ set ( SRC_FILES
 	src/MDHistoWorkspaceIterator.cpp
 	src/MDLeanEvent.cpp
 	src/MDTransfAxisNames.cpp
-	src/MDTransfDEHelper.cpp
+#	src/MDTransfDEHelper.cpp
 	src/MDTransfFactory.cpp
 	src/MDTransfModQ.cpp
 	src/MDTransfNoQ.cpp
@@ -100,7 +100,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDHistoWorkspaceIterator.h
 	inc/MantidMDEvents/MDLeanEvent.h
 	inc/MantidMDEvents/MDTransfAxisNames.h
-	inc/MantidMDEvents/MDTransfDEHelper.h
+#	inc/MantidMDEvents/MDTransfDEHelper.h
 	inc/MantidMDEvents/MDTransfFactory.h
 	inc/MantidMDEvents/MDTransfInterface.h
 	inc/MantidMDEvents/MDTransfModQ.h

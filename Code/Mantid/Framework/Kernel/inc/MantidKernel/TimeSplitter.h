@@ -28,7 +28,7 @@ public:
 
   SplittingInterval(const SplittingInterval& other);
 
-  SplittingInterval(const DateAndTime& start, const DateAndTime& stop, const int index);
+  SplittingInterval(const DateAndTime& start, const DateAndTime& stop, const int index = 0);
 
   DateAndTime start() const;
   DateAndTime stop() const;

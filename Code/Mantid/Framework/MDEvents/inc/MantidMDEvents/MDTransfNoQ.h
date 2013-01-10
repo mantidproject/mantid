@@ -66,12 +66,12 @@ public:
 //***** output WS definition interface:
     /** return the number of dimensions, calculated by the transformation from the workspace.
         Depending on ws axis units, the numebr here is either 1 or 2* and is independent on emode*/
-    unsigned int getNMatrixDimensions(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
+    unsigned int getNMatrixDimensions(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS)const;
     /**function returns units ID-s which this transformation prodiuces its ouptut.
        here it is usually input ws units, which are independent on emode */
-    std::vector<std::string> outputUnitID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
-    std::vector<std::string> getDefaultDimID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
-    const std::string inputUnitID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
+    std::vector<std::string> outputUnitID(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS)const;
+    std::vector<std::string> getDefaultDimID(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS)const;
+    const std::string inputUnitID(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS)const;
 private:
     unsigned int m_NMatrixDim;
     // the variables used for exchange data between different specific parts of the generic ND algorithm:

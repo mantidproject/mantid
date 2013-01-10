@@ -2,9 +2,8 @@
 #define  MANTID_MDEVENTS_Q3D_TRANSF_H
 //
 #include "MantidMDEvents/MDTransfInterface.h"
-//#include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidMDEvents/MDTransfFactory.h"
-#include "MantidMDEvents/MDTransfDEHelper.h"
+//#include "MantidMDEvents/MDTransfDEHelper.h"
 #include "MantidMDEvents/MDTransfModQ.h"
 //
 namespace Mantid
@@ -63,14 +62,14 @@ public:
 // WARNING!!!! THESE METHODS ARE USED BEFORE INITIALIZE IS EXECUTED SO THEY CAN NOT RELY ON THE CONTENTS OF THE CLASS (THEY ARE VIRTUAL STATIC METHODS)
     /** return the number of dimensions, calculated by the transformation from the workspace.
        Depending on EMode, this numebr here is either 3 or 4 and do not depend on input workspace*/
-    unsigned int getNMatrixDimensions(CnvrtToMD::EModes mode,
+    unsigned int getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
     /**function returns units ID-s which this transformation prodiuces its ouptut.
        It is Momentum and Momentum and DelteE in inelastic modes */
-    std::vector<std::string> outputUnitID(CnvrtToMD::EModes dEmode,
+    std::vector<std::string> outputUnitID(Kernel::DeltaEMode::Type dEmode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
     /**the default dimID-s in Q3D mode are Q1,Q2,Q3 and dE if necessary */ 
-    std::vector<std::string> getDefaultDimID(CnvrtToMD::EModes dEmode,
+    std::vector<std::string> getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
 protected:
     // the variable which verifies if Lorentz corrections have to be calculated in Elastic mode;

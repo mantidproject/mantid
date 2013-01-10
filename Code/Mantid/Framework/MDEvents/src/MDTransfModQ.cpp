@@ -11,28 +11,28 @@ namespace Mantid
     /** method calculates the unigs, the transformation expects input ws to be in. If input ws is in different units, 
     the WS data will be converted into the units requested on-fly. 
     */
-    const std::string MDTransfModQ::inputUnitID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
+    const std::string MDTransfModQ::inputUnitID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
       switch(dEmode)
       {
-      case(CnvrtToMD::Elastic):  return "Momentum";
-      case(CnvrtToMD::Direct):  return "DeltaE";
-      case(CnvrtToMD::Indir):  return "DeltaE";
+      case(Kernel::DeltaEMode::Elastic):  return "Momentum";
+      case(Kernel::DeltaEMode::Direct):  return "DeltaE";
+      case(Kernel::DeltaEMode::Indirect):  return "DeltaE";
       default:
         throw(std::invalid_argument(" MDTransfModQ::inputUnitID: this class supports only conversion in Elastic and Inelastic energy transfer modes"));
       }
     }
     /** method returns number of matrix dimensions calculated by this class
     * as function of energy analysis mode   */
-    unsigned int MDTransfModQ::getNMatrixDimensions(CnvrtToMD::EModes mode,API::MatrixWorkspace_const_sptr inWS)const
+    unsigned int MDTransfModQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
       switch(mode)
       {
-      case(CnvrtToMD::Direct):  return 2;
-      case(CnvrtToMD::Indir):   return 2;
-      case(CnvrtToMD::Elastic): return 1;
+      case(Kernel::DeltaEMode::Direct):  return 2;
+      case(Kernel::DeltaEMode::Indirect):return 2;
+      case(Kernel::DeltaEMode::Elastic): return 1;
       default: throw(std::invalid_argument("Unknow or unsupported energy conversion mode"));
       }
     }
@@ -41,7 +41,7 @@ namespace Mantid
 
     bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord, double & /*signal*/,double &/*ErrSq*/)const
     {
-      if(m_Emode == CnvrtToMD::Elastic)
+      if(m_Emode == Kernel::DeltaEMode::Elastic)
       {
         return calcMatrixCoordElastic(x,Coord);
       }else{
@@ -96,6 +96,11 @@ namespace Mantid
         m_Ei = double(*(m_pEfixedArray+i));
         m_Ki = sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
       }
+      // if spectra masked, this spectra should be excluded
+      if(m_pDetMasks)
+      {
+        if(*(m_pDetMasks+i)>0)return false;
+      }
       return true;
     }
     /** function calculates workspace-dependent coordinates in inelastic case. 
@@ -115,7 +120,7 @@ namespace Mantid
       Coord[1]    =(coord_t)E_tr;
       double k_tr;
       // get module of the wavevector for scattered neutrons
-      if(this->m_Emode==CnvrtToMD::Direct)
+      if(this->m_Emode==Kernel::DeltaEMode::Direct)
       {
         k_tr=sqrt((m_Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
       }else{
@@ -194,12 +199,12 @@ namespace Mantid
           " is more or equal then Max Q^2 value: "+boost::lexical_cast<std::string>(m_DimMax[0]);
         throw(std::invalid_argument(ERR));
       }
-      this->m_AddDimCoordinates = ConvParams.getAddCoord();
+      m_AddDimCoordinates = ConvParams.getAddCoord();
 
       //************   specific part of the initialization, dependent on emode:
       m_Emode      = ConvParams.getEMode();
       m_NMatrixDim = getNMatrixDimensions(m_Emode);
-      if(m_Emode == CnvrtToMD::Direct||m_Emode == CnvrtToMD::Indir)
+      if(m_Emode == Kernel::DeltaEMode::Direct||m_Emode == Kernel::DeltaEMode::Indirect)
       {
         // energy needed in inelastic case
         volatile double Ei = ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("Ei");
@@ -218,11 +223,12 @@ namespace Mantid
         m_Ki=sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
 
         m_pEfixedArray=NULL;
-        if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
-      }else{
-        if (m_Emode != CnvrtToMD::Elastic)throw(std::invalid_argument("MDTransfModQ::initialize::Unknown energy conversion mode"));
+        if(m_Emode==(int)Kernel::DeltaEMode::Indirect) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
       }
-
+      else
+        if (m_Emode != Kernel::DeltaEMode::Elastic)throw(std::invalid_argument("MDTransfModQ::initialize::Unknown energy conversion mode"));
+      
+      m_pDetMasks =  ConvParams.m_PreprDetTable->getColDataArray<int>("detMask");
     }
     /**method returns default ID-s for ModQ elastic and inelastic modes. The ID-s are related to the units, 
     * this class produces its ouptut in. 
@@ -231,19 +237,19 @@ namespace Mantid
     *@returns       -- vector of default dimension ID-s for correspondent energy conversion mode. 
     The position of each dimID in the vector corresponds to the position of each MD coordinate in the Coord vector
     */
-    std::vector<std::string> MDTransfModQ::getDefaultDimID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
+    std::vector<std::string> MDTransfModQ::getDefaultDimID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
       std::vector<std::string> default_dim_ID;
       switch(dEmode)
       {
-      case(CnvrtToMD::Elastic):
+      case(Kernel::DeltaEMode::Elastic):
         {
           default_dim_ID.resize(1);
           break;
         }
-      case(CnvrtToMD::Direct):
-      case(CnvrtToMD::Indir):
+      case(Kernel::DeltaEMode::Direct):
+      case(Kernel::DeltaEMode::Indirect):
         {
           default_dim_ID.resize(2);
           default_dim_ID[1]= "DeltaE";
@@ -262,12 +268,12 @@ namespace Mantid
     * @param Emode   -- energy conversion mode
     *
     * It is Momentum and DelteE in inelastic modes   */
-    std::vector<std::string> MDTransfModQ::outputUnitID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
+    std::vector<std::string> MDTransfModQ::outputUnitID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
       std::vector<std::string> UnitID = this->getDefaultDimID(dEmode,inWS);
       //TODO: is it really momentum transfer, as MomentumTransfer units are seems bound to elastic mode only (at least accorting to Units description on Wiki)?
-      if(dEmode==CnvrtToMD::Elastic)
+      if(dEmode==Kernel::DeltaEMode::Elastic)
       {
         UnitID[0] = "Momentum";
       }else{

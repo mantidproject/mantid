@@ -86,6 +86,14 @@ namespace DataHandling
     // all of the variable value packets that may arrive before we can call
     // initWorkspace().
 
+    // We also know we'll need 2 time series properties on the workspace.  Create them
+    // now (because we may end up adding values to them before we can call
+    // initWorkspace().
+    Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
+    m_eventBuffer->mutableRun().addLogData(prop);
+    prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
+    m_eventBuffer->mutableRun().addLogData(prop);
+
     // Initialize the heartbeat time to the current time so we don't get a bunch of
     // timeout errors when the background thread starts.
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -768,12 +776,6 @@ namespace DataHandling
 
     m_indexMap = m_eventBuffer->getDetectorIDToWorkspaceIndexMap( true /* bool throwIfMultipleDets */ );
 
-    // initialize time series properties for pause/resume and scan_index
-    Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
-    m_eventBuffer->mutableRun().addLogData(prop);
-    prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
-    m_eventBuffer->mutableRun().addLogData(prop);
-
     // We must always have a run_start property or the LogManager throws an
     // exception.  The "real" value will come from a RunStatus packet saying that
     // a new run is starting.  By the time we get here, we may already have
@@ -787,6 +789,15 @@ namespace DataHandling
       Kernel::DateAndTime now = timeFromPacket(pkt);
       // addProperty() wants the time as an ISO 8601 string
       m_eventBuffer->mutableRun().addProperty("run_start", now.toISO8601String());
+    }
+
+    // Much like the run_start property, we always want to have at least one value
+    // for the the scan index time series.  We may have already gotten a scan start
+    // packet by the time we get here and therefor don't need to do anything.  If
+    // not, we need to put a 0 into the time series.
+    if ( m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->size() == 0 )
+    {
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), 0);
     }
 
     m_workspaceInitialized = true;

@@ -150,12 +150,11 @@ namespace Kernel
       using namespace boost::multi_index;
       typename ordered_item_list::iterator it;
       bool found_nothing;
-      it = il.get<1>().find((int)index);
-      found_nothing = (it == il.get<1>().end());
+      it = il.template get<1>().find((int)index);
+      found_nothing = (it == il.template get<1>().end());
       if (!found_nothing)
       {
-        // TODO: ERASE IT HERE
-        il.get<1>().erase(it);
+        il.template get<1>().erase(it);
       }
 
     }
@@ -180,8 +179,8 @@ namespace Kernel
 
       Mutex::ScopedLock _lock(m_mutex);
 
-      it = il.get<1>().find(int(index));
-      found_nothing = (it == il.get<1>().end());
+      it = il.template get<1>().find(int(index));
+      found_nothing = (it == il.template get<1>().end());
 
       if (found_nothing)
       {

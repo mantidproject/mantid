@@ -49,7 +49,7 @@ namespace Mantid
       // initialize the MD coordinates conversion class
       m_QConverter->initialize(WSD);
       // initialize units conversion which can/or can not be necessary depending on input ws/converter requested units;
-      CnvrtToMD::EModes emode = WSD.getEMode();
+      Kernel::DeltaEMode::Type emode = WSD.getEMode();
       m_UnitConversion.initialize(WSD,m_QConverter->inputUnitID(emode,m_InWS2D));
 
 

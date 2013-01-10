@@ -99,7 +99,7 @@ namespace MDEvents
     EventWorkspace_sptr wksp = getProperty("InputWorkspace");
 
     // this only works for unweighted events
-    if (wksp->getEventType() != API::EventType::TOF)
+    if (wksp->getEventType() != API::TOF)
     {
       throw std::runtime_error("SaveIsawQvector only works for raw events");
     }

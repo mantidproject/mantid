@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {
@@ -58,6 +59,14 @@ namespace Algorithms
 
     template <typename T>
     void createBinnedOutput(const Kernel::TimeSeriesProperty<T> * log);
+
+    void filterEventList(const API::IEventList& eventList, const int minVal, const int maxVal,
+        const Kernel::TimeSeriesProperty<int> * log, std::vector<int>& Y);
+    void addMonitorCounts(API::ITableWorkspace_sptr outputWorkspace,
+        const Kernel::TimeSeriesProperty<int> * log, const int minVal, const int maxVal);
+    std::vector<std::pair<std::string,const Kernel::ITimeSeriesProperty * >> getNumberSeriesLogs();
+    double sumProtonCharge(const Kernel::TimeSeriesProperty<double> * protonChargeLog,
+        const Kernel::TimeSplitterType& filter);
 
     DataObjects::EventWorkspace_const_sptr m_inputWorkspace;
     std::string m_logName;

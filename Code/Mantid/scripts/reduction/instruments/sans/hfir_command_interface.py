@@ -336,6 +336,7 @@ def DivideByThickness(thickness=1.0):
 def BckDivideByThickness(thickness=1.0):
     print "Background thickness can no longer be set: only the final sample-minus-data workspace can be divided by the sample thickness."
 
-def Stitch(data_list=[], q_min=None, q_max=None, scale=None, save_output=False):
+def Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
+           scale=None, save_output=False):
     from LargeScaleStructures.data_stitching import stitch
     stitch(data_list, q_min=q_min, q_max=q_max, scale=scale, save_output=save_output)

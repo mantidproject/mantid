@@ -356,7 +356,7 @@ public:
 
 
     // Now test with left-aligned log value boundaries
-    log->makeFilterByValue(splitter, 1.8, 2.2, 1.0, false);
+    log->makeFilterByValue(splitter, 1.8, 2.2, 1.0);
 
     TS_ASSERT_EQUALS( splitter.size(), 2);
 
@@ -448,6 +448,62 @@ public:
     TimeSeriesProperty<std::string> log("StringTSP");
     TimeSplitterType splitter;
     TS_ASSERT_THROWS(log.expandFilterToRange(splitter,0.0,0.0,TimeInterval()), Exception::NotImplementedError);
+  }
+
+  void test_averageValueInFilter()
+  {
+    auto dblLog = createDoubleTSP();
+    auto intLog = createIntegerTSP(5);
+
+    // Test a filter that's fully within the range of both properties
+    TimeSplitterType filter;
+    filter.push_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"),DateAndTime("2007-11-30T16:17:29")));
+    TS_ASSERT_DELTA( dblLog->averageValueInFilter(filter), 7.308, 0.001 );
+    TS_ASSERT_DELTA( intLog->averageValueInFilter(filter), 2.167, 0.001 );
+
+    // Test a filter that starts before the log start time
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:16:30"),DateAndTime("2007-11-30T16:17:13"));
+    TS_ASSERT_DELTA( dblLog->averageValueInFilter(filter), 9.820, 0.001 );
+    TS_ASSERT_DELTA( intLog->averageValueInFilter(filter), 1.070, 0.001 );
+
+    // How about one that's entirely outside the log range (should just take the last value)
+    filter[0] = SplittingInterval(DateAndTime("2013-01-01T00:00:00"),DateAndTime("2013-01-01T01:00:00"));
+    TS_ASSERT_DELTA( dblLog->averageValueInFilter(filter), 10.55, 0.001 );
+    TS_ASSERT_DELTA( intLog->averageValueInFilter(filter), 5.0, 0.001 );
+
+    // Test a filter with two separate ranges, one of which goes past the end of the log
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),DateAndTime("2007-11-30T16:17:15"));
+    filter.push_back(SplittingInterval(DateAndTime("2007-11-30T16:17:25"),DateAndTime("2007-11-30T16:17:45")));
+    TS_ASSERT_DELTA( dblLog->averageValueInFilter(filter), 9.123, 0.001 );
+    TS_ASSERT_DELTA( intLog->averageValueInFilter(filter), 3.167, 0.001 );
+
+    // Test a filter with two out of order ranges (the second one coming before the first)
+    // It should work fine.
+    filter[0] = filter[1];
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),DateAndTime("2007-11-30T16:17:15"));
+    TS_ASSERT_DELTA( dblLog->averageValueInFilter(filter), 9.123, 0.001 );
+    TS_ASSERT_DELTA( intLog->averageValueInFilter(filter), 3.167, 0.001 );
+
+    // What about an overlap between the filters? It's odd, but it's allowed.
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),DateAndTime("2007-11-30T16:17:15"));
+    filter[1] = SplittingInterval(DateAndTime("2007-11-30T16:17:10"),DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_DELTA( dblLog->averageValueInFilter(filter), 8.16, 0.001 );
+    TS_ASSERT_DELTA( intLog->averageValueInFilter(filter), 1.75, 0.001 );
+
+    // Check the correct behaviour of empty of single value logs.
+    TS_ASSERT( boost::math::isnan(dProp->averageValueInFilter(filter)) );
+    iProp->addValue(DateAndTime("2010-11-30T16:17:25"),99);
+    TS_ASSERT_EQUALS( iProp->averageValueInFilter(filter), 99.0 );
+
+    // Clean up
+    delete dblLog;
+    delete intLog;
+  }
+
+  void test_averageValueInFilter_throws_for_string_property()
+  {
+    TimeSplitterType splitter;
+    TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter), Exception::NotImplementedError);
   }
 
   //----------------------------------------------------------------------------

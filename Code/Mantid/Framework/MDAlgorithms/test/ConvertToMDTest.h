@@ -27,9 +27,9 @@ class Convert2AnyTestHelper: public ConvertToMD
 {
 public:
     Convert2AnyTestHelper(){};
-    TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string dEModeRequested="Direct")
+    TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string dEModeRequested="Direct",bool updateMasks=false)
     {
-      return ConvertToMD::preprocessDetectorsPositions(InWS2D,dEModeRequested);
+      return ConvertToMD::preprocessDetectorsPositions(InWS2D,dEModeRequested,updateMasks);
     }
     void setSourceWS(Mantid::API::MatrixWorkspace_sptr InWS2D)
     {
@@ -61,7 +61,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 18 propeties",18,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 19 propeties",19,(size_t)(pAlg->getProperties().size()));
 }
 
 
