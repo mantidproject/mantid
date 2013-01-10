@@ -6,6 +6,7 @@
 #include "MantidKernel/System.h"
 
 #include "MantidCurveFitting/LeBailFit2.h"
+#include "MantidDataHandling/LoadAscii.h"
 
 #include <iostream>
 #include <iomanip>
@@ -420,7 +421,7 @@ public:
   /** Test a complete LeBail Fit process with background by Monte Carlo algorithm
    *  Using Run 4862 Bank 7 as the testing data
    */
-  void OnlyLocalPassed_test_monteCarloLeBailFit_PG3Bank7()
+  void test_monteCarloLeBailFit_PG3Bank7()
   {
     // 1. Create input workspace
     API::MatrixWorkspace_sptr dataws;
@@ -461,7 +462,7 @@ public:
     modmap.insert(make_pair("Beta0", 5.0));
     parameterws = createPeakParameterWorkspace(modmap, 2);
     hklws = createInputHKLWorkspace(hkls, pkheights);
-    bkgdws = createBackgroundParameterWorksapce("PG3_4862_Background.dat");
+    bkgdws = createBackgroundParameterWorksapce(1);
 
     AnalysisDataService::Instance().addOrReplace("Data", dataws);
     AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
@@ -853,64 +854,62 @@ public:
   /** Create data workspace without background
    */
   API::MatrixWorkspace_sptr createInputDataWorkspace(int option)
-  {
-    // 1. Import data
-    std::vector<double> vecX;
-    std::vector<double> vecY;
-    std::vector<double> vecE;
-    /*
-    std::string filename("/home/wzz/Mantid/mantid/Code/release/LB4917b1_unittest.dat");
-    importDataFromColumnFile(filename, vecX, vecY,  vecE);
-    */
+  {    
+    API::MatrixWorkspace_sptr dataws;
 
-    string datafilename("PG3_4862_Bank7.dat");
-
-    switch (option)
+    if (option == 1 || option == 2)
     {
-      case 1:
-        generateSeparateTwoPeaksData2(vecX, vecY, vecE);
-        break;
+      // Generate data
 
-      case 2:
-        generateTwinPeakData(vecX, vecY, vecE);
-        break;
+      std::vector<double> vecX;
+      std::vector<double> vecY;
+      std::vector<double> vecE;
 
-      case 3:
-        importDataFromColumnFile("/home/wzz/Mantid/Code/debug/unittest_multigroups.dat", vecX, vecY, vecE);
-        break;
+      // a) Generate data
+      switch (option)
+      {
+        case 1:
+          generateSeparateTwoPeaksData2(vecX, vecY, vecE);
+          break;
 
-      case 4:
-        importDataFromColumnFile(datafilename, vecX, vecY, vecE);
-        std::cout << "[TEST] Data File Option 4: " << datafilename << "; Number data = "
-                  << vecX.size() << std::endl;
-        break;
+        case 2:
+          generateTwinPeakData(vecX, vecY, vecE);
+          break;
 
-    default:
-        // not supported
-        std::cout << "LeBailFitTest.createInputDataWorkspace() Option " << option << " is not supported. " << std::endl;
-        throw std::invalid_argument("Unsupported option. ");
-    }
+        default:
+          break;
+      }
 
+      // b) Get workspace
+      int64_t nHist = 1;
+      int64_t nBins = vecX.size();
 
-    // 2. Get workspace
-    int64_t nHist = 1;
-    int64_t nBins = vecX.size();
-
-    API::MatrixWorkspace_sptr dataws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+      dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
             API::WorkspaceFactory::Instance().create("Workspace2D", nHist, nBins, nBins));
 
+      // c) Input data
+      for (size_t i = 0; i < vecX.size(); ++i)
+      {
+        dataws->dataX(0)[i] = vecX[i];
+        dataws->dataY(0)[i] = vecY[i];
+        dataws->dataE(0)[i] = vecE[i];
+      }
 
-    // Mantid::DataObjects::Workspace2D_sptr  Create2DWorkspace(int nHist, int nBins);
-    // API::MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(Create2DWorkspaceWithValues(
-    // nHist, nBins, isHist, maskedWSIndices, xvalue, yvalue, evalue));
-
-    // 3. Input data
-    for (size_t i = 0; i < vecX.size(); ++i)
+    }
+    else if (option == 4)
     {
-      dataws->dataX(0)[i] = vecX[i];
-      dataws->dataY(0)[i] = vecY[i];
-      dataws->dataE(0)[i] = vecE[i];
+      // Load from column file
+      string datafilename("PG3_4862_Bank7.dat");
+      string wsname("Data");
+      importDataFromColumnFile(datafilename, wsname);
+      dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(wsname));
+    }
+    else
+    {
+      // not supported
+      std::cout << "LeBailFitTest.createInputDataWorkspace() Option " << option << " is not supported. " << std::endl;
+      throw std::invalid_argument("Unsupported option. ");
     }
 
     return dataws;
@@ -1131,41 +1130,49 @@ public:
     return;
   }
 
-  /*
-   * Import data from a column data file
+  //----------------------------------------------------------------------------------------------
+  /** Import data from a column data file
    */
-  void importDataFromColumnFile(std::string filename, std::vector<double>& vecX, std::vector<double>& vecY, std::vector<double>& vecE)
+  void importDataFromColumnFile(std::string filename, std::string wsname)
   {
-    std::ifstream ins;
-    ins.open(filename.c_str());
+    DataHandling::LoadAscii load;
+    load.initialize();
 
-    if (!ins.is_open())
+    load.setProperty("FileName", filename);
+    load.setProperty("OutputWorkspace", wsname);
+    load.setProperty("Separator", "Automatic");
+    load.setProperty("Unit", "TOF");
+
+    load.execute();
+    if (!load.isExecuted())
     {
-        std::cout << "Data file " << filename << " cannot be opened. " << std::endl;
-        throw std::invalid_argument("Unable to open data fiile. ");
-    }
-    else
-    {
-        std::cout << "Data file " << filename << " is opened for parsing. " << std::endl;
+      stringstream errss;
+      errss << "Data file " << filename << " cannot be opened. ";
+      std::cout << errss.str() << std::endl;
+      throw std::runtime_error(errss.str());
     }
 
-    char line[256];
-    // std::cout << "File " << filename << " isOpen = " << ins.is_open() << std::endl;
-    while(ins.getline(line, 256))
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve(wsname));
+    if (!ws)
     {
-      if (line[0] != '#')
-      {
-        double x, y;
-        std::stringstream ss;
-        ss.str(line);
-        ss >> x >> y;
-        vecX.push_back(x);
-        vecY.push_back(y);
-        double e = 1.0;
-        if (y > 1.0E-5)
-          e = std::sqrt(y);
-        vecE.push_back(e);
-      }
+      stringstream errss;
+      errss << "LoadAscii failed to generate workspace";
+      std::cout << errss.str() << std::endl;
+      throw std::runtime_error(errss.str());
+    }
+
+    // Set error
+    const MantidVec& vecY = ws->readY(0);
+    MantidVec& vecE = ws->dataE(0);
+    size_t numpts = vecY.size();
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      double y = vecY[i];
+      double e = 1.0;
+      if (y > 1.0)
+        e = sqrt(y);
+      vecE[i] = e;
     }
 
     return;
@@ -1207,56 +1214,52 @@ public:
       return;
   }
 
-  /*
-   * Create a table worskpace for background parameters
-   * Format:
-   *    parameter name1, parameter Value1
-   *    parameter name2, parameter value2
+  //----------------------------------------------------------------------------------------------
+  /** Create a table worskpace for background parameters
+    * Note: It is just desired for bank 7 run 4862
    */
-  DataObjects::TableWorkspace_sptr createBackgroundParameterWorksapce(std::string filename)
+  DataObjects::TableWorkspace_sptr createBackgroundParameterWorksapce(int option)
   {
-      // 1. Open file
-      std::ifstream ins;
-      ins.open(filename.c_str());
-      if (!ins.is_open())
-      {
-          std::cout << "File " << filename << " cannot be opened. " << std::endl;
-          throw std::invalid_argument("Unable to open input background parameter file. ");
-      }
+    // 1. Create map
+    if (option != 1)
+    {
+      stringstream errss;
+      errss << "Option " << option << " is not supported.";
+      throw runtime_error(errss.str());
+    }
 
-      // 2. Parse
-      DataObjects::TableWorkspace* tablewsptr = new DataObjects::TableWorkspace();
-      DataObjects::TableWorkspace_sptr tablews(tablewsptr);
+    map<string, double> bkgdparmap;
+    bkgdparmap.insert(make_pair("A0",  -197456));
+    bkgdparmap.insert(make_pair("A1",  15.5819));
+    bkgdparmap.insert(make_pair("A2",  -0.000467362));
+    bkgdparmap.insert(make_pair("A3",  5.59069e-09));
+    bkgdparmap.insert(make_pair("A4",  2.81875e-14));
+    bkgdparmap.insert(make_pair("A5",  -1.88986e-18));
+    bkgdparmap.insert(make_pair("A6",  2.9137e-23));
+    bkgdparmap.insert(make_pair("A7",  -2.50121e-28));
+    bkgdparmap.insert(make_pair("A8",  1.3279e-33));
+    bkgdparmap.insert(make_pair("A9",  -4.33776e-39));
+    bkgdparmap.insert(make_pair("A10", 8.01018e-45));
+    bkgdparmap.insert(make_pair("A11", -6.40846e-51));
 
-      tablews->addColumn("str", "Name");
-      tablews->addColumn("double", "Value");
+    // 2. Build table workspace
+    DataObjects::TableWorkspace* tablewsptr = new DataObjects::TableWorkspace();
+    DataObjects::TableWorkspace_sptr tablews(tablewsptr);
 
-      char line[256];
-      while(ins.getline(line, 256))
-      {
-          std::string theline(line);
-          std::vector<std::string> terms;
-          boost::split(terms, theline, boost::is_any_of(","));
+    tablews->addColumn("str", "Name");
+    tablews->addColumn("double", "Value");
 
-          if (terms.size() < 2)
-          {
-              std::cout << theline << "  --- Not a good line" << std::endl;
-              continue;
-          }
+    map<string, double>::iterator mapiter;
+    for (mapiter = bkgdparmap.begin(); mapiter != bkgdparmap.end(); ++mapiter)
+    {
+      string parname = mapiter->first;
+      double parvalue = mapiter->second;
 
-          std::string parname = terms[0];
-          boost::algorithm::trim(parname);
-          std::string parvaluestr = terms[1];
-          boost::algorithm::trim(parvaluestr);
-          double parvalue = atof( parvaluestr.c_str() );
-          API::TableRow newrow = tablews->appendRow();
-          newrow << parname << parvalue;
-          std::cout << parname << "  :  " << parvalue << std::endl;
-      }
+      API::TableRow newrow = tablews->appendRow();
+      newrow << parname << parvalue;
+    }
 
-      ins.close();
-
-      return tablews;
+    return tablews;
   }
 
 };
