@@ -88,7 +88,8 @@ namespace Mantid
       std::vector<double> tths;
       std::vector<double> phis;
       std::string m_instName;
-      std::vector<double> params;
+      std::vector<double> m_params;
+      int m_resampleX;
       bool dspace;
       double xmin;
       double xmax;

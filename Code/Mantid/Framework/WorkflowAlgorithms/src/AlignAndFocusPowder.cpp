@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -67,7 +67,9 @@ void AlignAndFocusPowder::init()
         "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.");
-  declareProperty("Dspacing", true,"Bin in Dspace. (Default true)");
+  declareProperty("ResampleX", 0,
+                  "Number of bins in x-axis. Non-zero value overrides \"Params\" property. Negative value means logorithmic binning.");
+  declareProperty("Dspacing", true,"Bin in Dspace. (True is Dspace; False is TOF)");
   declareProperty("DMin", 0.0, "Minimum for Dspace axis. (Default 0.) ");
   declareProperty("DMax", 0.0, "Maximum for Dspace axis. (Default 0.) ");
   declareProperty("TMin", 0.0, "Minimum for TOF axis. (Default 0.) ");
@@ -111,7 +113,7 @@ void AlignAndFocusPowder::exec()
   l2s = getProperty("L2");
   tths = getProperty("Polar");
   phis = getProperty("Azimuthal");
-  params=getProperty("Params");
+  m_params=getProperty("Params");
   dspace = getProperty("DSpacing");
   double dmin = getProperty("DMin");
   double dmax = getProperty("DMax");
@@ -121,37 +123,43 @@ void AlignAndFocusPowder::exec()
   tmin = getProperty("TMin");
   tmax = getProperty("TMax");
   m_preserveEvents = getProperty("PreserveEvents");
+  m_resampleX = getProperty("ResampleX");
   // determine some bits about d-space and binning
-  if (params.size() == 1)
+  if (m_resampleX != 0)
+  {
+    m_params.clear(); // ignore the normal rebin parameters
+  }
+  else if (m_params.size() == 1)
   {
     if (dmax > 0) dspace = true;
     else dspace=false;
   }
   if (dspace)
   {
-    if (params.size() == 1 && dmax > 0)
+    if (m_params.size() == 1 && dmax > 0)
     {
-    	double step = params[0];
+        double step = m_params[0];
+        m_params.clear();
         if (step > 0 || dmin > 0)
         {
-          params[0] = dmin;
-          params.push_back(step);
-          params.push_back(dmax);
-          g_log.information() << "d-Spacing Binning: " << params[0] << "  " << params[1] << "  " << params[2] <<"\n";
+          m_params.push_back(dmin);
+          m_params.push_back(step);
+          m_params.push_back(dmax);
+          g_log.information() << "d-Spacing Binning: " << m_params[0] << "  " << m_params[1] << "  " << m_params[2] <<"\n";
         }
     }
   }
   else
   {
-    if (params.size() == 1 && tmax > 0)
+    if (m_params.size() == 1 && tmax > 0)
     {
-    	double step = params[0];
+        double step = m_params[0];
         if (step > 0 || tmin > 0)
         {
-          params[0] = tmin;
-          params.push_back(step);
-          params.push_back(tmax);
-          g_log.information() << "TOF Binning: " << params[0] << "  " << params[1] << "  " << params[2] <<"\n";
+          m_params[0] = tmin;
+          m_params.push_back(step);
+          m_params.push_back(tmax);
+          g_log.information() << "TOF Binning: " << m_params[0] << "  " << m_params[1] << "  " << m_params[2] <<"\n";
         }
     }
   }
@@ -165,10 +173,10 @@ void AlignAndFocusPowder::exec()
   {
     xmax = tmax;
   }
-  if (!dspace && params.size() == 3)
+  if (!dspace && m_params.size() == 3)
   {
-    xmin = params[0];
-    xmax = params[2];
+    xmin = m_params[0];
+    xmax = m_params[2];
   }
 
   loadCalFile(calFileName);
@@ -272,13 +280,28 @@ void AlignAndFocusPowder::exec()
 
   if(!dspace)
   {
+    if (m_resampleX != 0)
+    {
+      g_log.information() << "running ResampleX(NumberBins=" << abs(m_resampleX)
+                          << ", LogBinning=" << (m_resampleX < 0) << ")\n";
+      API::IAlgorithm_sptr alg = createChildAlgorithm("ResampleX");
+      alg->setProperty("InputWorkspace", m_outputW);
+      alg->setProperty("OutputWorkspace", m_outputW);
+      alg->setProperty("NumberBins", abs(m_resampleX));
+      alg->setProperty("LogBinning", (m_resampleX < 0));
+      alg->executeAsChildAlg();
+      m_outputW = alg->getProperty("OutputWorkspace");
+    }
+    else
+    {
       g_log.information() << "running Rebin\n";
 	  API::IAlgorithm_sptr rebin1Alg = createChildAlgorithm("Rebin");
 	  rebin1Alg->setProperty("InputWorkspace", m_outputW);
 	  rebin1Alg->setProperty("OutputWorkspace", m_outputW);
-	  rebin1Alg->setProperty("Params",params);
+      rebin1Alg->setProperty("Params",m_params);
 	  rebin1Alg->executeAsChildAlg();
 	  m_outputW = rebin1Alg->getProperty("OutputWorkspace");
+    }
   }
 
   g_log.information() << "running AlignDetectors\n";
@@ -353,13 +376,28 @@ void AlignAndFocusPowder::exec()
 
   if(dspace)
   {
+    if (m_resampleX != 0)
+    {
+      g_log.information() << "running ResampleX(NumberBins=" << abs(m_resampleX)
+                          << ", LogBinning=" << (m_resampleX < 0) << ")\n";
+      API::IAlgorithm_sptr alg = createChildAlgorithm("ResampleX");
+      alg->setProperty("InputWorkspace", m_outputW);
+      alg->setProperty("OutputWorkspace", m_outputW);
+      alg->setProperty("NumberBins", abs(m_resampleX));
+      alg->setProperty("LogBinning", (m_resampleX < 0));
+      alg->executeAsChildAlg();
+      m_outputW = alg->getProperty("OutputWorkspace");
+    }
+    else
+    {
       g_log.information() << "running Rebin\n";
 	  API::IAlgorithm_sptr rebin2Alg = createChildAlgorithm("Rebin");
 	  rebin2Alg->setProperty("InputWorkspace", m_outputW);
 	  rebin2Alg->setProperty("OutputWorkspace", m_outputW);
-	  rebin2Alg->setProperty("Params",params);
+      rebin2Alg->setProperty("Params",m_params);
 	  rebin2Alg->executeAsChildAlg();
 	  m_outputW = rebin2Alg->getProperty("OutputWorkspace");
+    }
   }
 
   doSortEvents(m_outputW);
@@ -398,18 +436,33 @@ void AlignAndFocusPowder::exec()
   convert3Alg->executeAsChildAlg();
   m_outputW = convert3Alg->getProperty("OutputWorkspace");
 
-  if (params.size() != 1)
+  if ((!m_params.empty()) && (m_params.size() != 1))
   {
-  	params.erase(params.begin());
-  	params.pop_back();
+    m_params.erase(m_params.begin());
+    m_params.pop_back();
   }
-  g_log.information() << "running Rebin\n";
-  API::IAlgorithm_sptr rebin3Alg = createChildAlgorithm("Rebin");
-  rebin3Alg->setProperty("InputWorkspace", m_outputW);
-  rebin3Alg->setProperty("OutputWorkspace", m_outputW);
-  rebin3Alg->setProperty("Params",params);
-  rebin3Alg->executeAsChildAlg();
-  m_outputW = rebin3Alg->getProperty("OutputWorkspace");
+  if (m_resampleX != 0)
+  {
+    g_log.information() << "running ResampleX(NumberBins=" << abs(m_resampleX)
+                        << ", LogBinning=" << (m_resampleX < 0) << ")\n";
+    API::IAlgorithm_sptr alg = createChildAlgorithm("ResampleX");
+    alg->setProperty("InputWorkspace", m_outputW);
+    alg->setProperty("OutputWorkspace", m_outputW);
+    alg->setProperty("NumberBins", abs(m_resampleX));
+    alg->setProperty("LogBinning", (m_resampleX < 0));
+    alg->executeAsChildAlg();
+    m_outputW = alg->getProperty("OutputWorkspace");
+  }
+  else
+  {
+    g_log.information() << "running Rebin\n";
+    API::IAlgorithm_sptr rebin3Alg = createChildAlgorithm("Rebin");
+    rebin3Alg->setProperty("InputWorkspace", m_outputW);
+    rebin3Alg->setProperty("OutputWorkspace", m_outputW);
+    rebin3Alg->setProperty("Params",m_params);
+    rebin3Alg->executeAsChildAlg();
+    m_outputW = rebin3Alg->getProperty("OutputWorkspace");
+  }
 
   // return the output workspace
   setProperty("OutputWorkspace",m_outputW);
