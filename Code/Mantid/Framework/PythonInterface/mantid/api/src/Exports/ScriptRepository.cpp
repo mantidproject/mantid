@@ -117,6 +117,6 @@ promote its usage. In order to enhance the usage, it is necessary:\n\
     .def("download",&ScriptRepository::download,"Download file or folder ")
     .def("fileStatus",&getStatus,"Return the status")
     .def("upload",&ScriptRepository::upload,"Publish your script")
-    .def("upade",&ScriptRepository::update,"Check if there is update remotely");
+    .def("update",&ScriptRepository::update,"Check if there is update remotely");
     
 }
