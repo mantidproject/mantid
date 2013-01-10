@@ -85,6 +85,7 @@ set ( SRC_FILES
 	src/FilterByLogValue.cpp
 	src/FilterByTime.cpp
 	src/FilterByTime2.cpp
+	src/FilterByXValue.cpp
 	src/FilterEvents.cpp
 	src/FilterEventsHighFrequency.cpp
 	src/FindCenterOfMassPosition.cpp
@@ -291,6 +292,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FilterByLogValue.h
 	inc/MantidAlgorithms/FilterByTime.h
 	inc/MantidAlgorithms/FilterByTime2.h
+	inc/MantidAlgorithms/FilterByXValue.h
 	inc/MantidAlgorithms/FilterEvents.h
 	inc/MantidAlgorithms/FilterEventsHighFrequency.h
 	inc/MantidAlgorithms/FindCenterOfMassPosition.h
@@ -427,6 +429,7 @@ set ( TEST_FILES
 	#	CalMuonDeadTimeTest.h
 	# CountEventsInPulsesTest.h
 	# UpdatePeakParameterTableTest.h
+	#SassenaFFTTest.h
 	AddLogDerivativeTest.h
 	AddPeakTest.h
 	AddSampleLogTest.h
@@ -499,6 +502,7 @@ set ( TEST_FILES
 	FilterByLogValueTest.h
 	FilterByTime2Test.h
 	FilterByTimeTest.h
+	FilterByXValueTest.h
 	FilterEventsHighFrequencyTest.h
 	FilterEventsTest.h
 	FindCenterOfMassPosition2Test.h
@@ -572,7 +576,6 @@ set ( TEST_FILES
 	ResampleXTest.h
 	ResetNegativesTest.h
 	ResizeRectangularDetectorTest.h
-	#SassenaFFTTest.h
 	ScaleTest.h
 	ScaleXTest.h
 	ShiftLogTimeTest.h
