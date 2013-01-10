@@ -11,6 +11,7 @@
 
 using Mantid::CurveFitting::ProcessBackground;
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Kernel;
 
 class ProcessBackgroundTest : public CxxTest::TestSuite
@@ -120,7 +121,7 @@ public:
 
   /** Test automatic background selection
    */
-  void test_AutoBackgroundSelection()
+  void Passed_test_AutoBackgroundSelection()
   {
 
     // 1. Prepare for data
@@ -171,20 +172,28 @@ public:
   {
 
     // 1. Prepare for data
+    /*
     std::string datafile("/home/wzz/Mantid/Code/debug/MyTestData/4862b7.inp");
     DataObjects::Workspace2D_sptr dataws = createWorkspace2D(datafile);
+    */
+    // 1. Create Workspace2D
+    DataObjects::Workspace2D_sptr dataws
+        = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1000, 1000));
+    for (size_t i = 0; i < 10; ++i)
+    {
+      dataws->dataX(0)[i] = double(i);
+      dataws->dataY(0)[i] = double(i)*double(i);
+    }
+
     API::AnalysisDataService::Instance().addOrReplace("DiffractionData", dataws);
 
     std::vector<double> bkgdpts;
-    /// Background points for bank 7
-    bkgdpts.push_back(57741.0);
-    bkgdpts.push_back(63534.0);
-    bkgdpts.push_back(69545.0);
-    bkgdpts.push_back(89379.0);
-    bkgdpts.push_back(115669.0);
-    bkgdpts.push_back(134830.0);
-    bkgdpts.push_back(165131.0);
-    bkgdpts.push_back(226847.0);
+
+    bkgdpts.push_back(577.400);
+    bkgdpts.push_back(635.340);
+    bkgdpts.push_back(695.450);
+    bkgdpts.push_back(893.790);
 
     // 2. Prepare algorithm
     ProcessBackground alg;
@@ -213,6 +222,9 @@ public:
     {
       TS_ASSERT_EQUALS(bkgdws->readX(0).size(), bkgdpts.size());
     }
+
+    AnalysisDataService::Instance().remove("DiffractionData");
+    AnalysisDataService::Instance().remove("SelectedBackgroundPoints");
 
     return;
   }
