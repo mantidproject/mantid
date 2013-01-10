@@ -186,6 +186,7 @@ namespace Mantid
       void loadEvents(API::Progress * const prog, const bool monitors);
       void createSpectraMapping(const std::string &nxsfile, API::MatrixWorkspace_sptr workspace,
                                 const bool monitorsOnly, const std::string & bankName = "");
+      bool deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames);
       bool hasEventMonitors();
       void runLoadMonitors();
       /// Set the filters on TOF.
