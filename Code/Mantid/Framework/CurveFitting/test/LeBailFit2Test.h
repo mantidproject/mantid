@@ -877,12 +877,13 @@ public:
           break;
 
         default:
+          throw runtime_error("Unsopported option to generate data workspace.");
           break;
       }
 
       // b) Get workspace
-      int64_t nHist = 1;
-      int64_t nBins = vecX.size();
+      size_t nHist = 1;
+      size_t nBins = vecX.size();
 
       dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
             API::WorkspaceFactory::Instance().create("Workspace2D", nHist, nBins, nBins));
