@@ -575,7 +575,7 @@ set ( TEST_FILES
 	ResampleXTest.h
 	ResetNegativesTest.h
 	ResizeRectangularDetectorTest.h
-	SassenaFFTTest.h
+	#SassenaFFTTest.h
 	ScaleTest.h
 	ScaleXTest.h
 	ShiftLogTimeTest.h
