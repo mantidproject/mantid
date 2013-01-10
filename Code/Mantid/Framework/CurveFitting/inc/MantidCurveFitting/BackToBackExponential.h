@@ -58,7 +58,8 @@ namespace Mantid
 
       /// overwrite IPeakFunction base class methods
       virtual double centre()const {return getParameter("X0");};
-      virtual double height()const {return getParameter("I");};  // note height can likely be defined more accurately, here set equal to intensity 
+      // virtual double height()const {return getParameter("I");};  // note height can likely be defined more accurately, here set equal to intensity
+      virtual double height()const;
       virtual double fwhm()const {return 2*getParameter("S");};  // can likely be defined more accurately
       virtual void setCentre(const double c) {setParameter("X0",c);};
       virtual void setHeight(const double h) {setParameter("I",h);};
