@@ -35,7 +35,7 @@
     </component>
   </type>
 
-  <component type="detector1" idlist="detector1">
+  <component type="detector1">
     <location/>
   </component>
   
@@ -70,10 +70,7 @@
     </cylinder>
     <algebra val="cyl-approx"/>
   </type>
-<!--DETECTOR IDs-->
-  <idlist idname="detector1">
-    <id start="0" end="49151"/>
-  </idlist>
+
 <!--MONITOR IDs-->
   <idlist idname="monitors">
     <id val="-1"/>
