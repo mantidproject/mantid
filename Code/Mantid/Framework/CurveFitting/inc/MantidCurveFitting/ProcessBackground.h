@@ -44,10 +44,6 @@ class DLLExport ProcessBackground : public API::Algorithm
 
     virtual void initDocs();
 
-    virtual void init();
-
-    virtual void exec();
-
     virtual const std::string category() const {return "Diffraction\\Utility";}
 
     virtual const std::string name() const {return "ProcessBackground";}
@@ -55,6 +51,18 @@ class DLLExport ProcessBackground : public API::Algorithm
     virtual int version() const {return 1;}
 
 private:
+    /// Define properties
+    virtual void init();
+
+    /// Execution body
+    virtual void exec();
+
+    /// Select background points (main)
+    void execSelectBkgdPoints();
+
+    /// Select background points automatically
+    DataObjects::Workspace2D_sptr autoBackgroundSelection(size_t wsindex, DataObjects::Workspace2D_sptr bkgdWS);
+
     DataObjects::Workspace2D_const_sptr inpWS;
     DataObjects::Workspace2D_sptr outWS;
 
@@ -71,9 +79,6 @@ private:
 
     /// Add a certain region from a reference workspace
     void addRegion();
-
-    /// Select background points automatically
-    void autoBackgroundSelection();
     
   };
 

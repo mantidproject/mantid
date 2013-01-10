@@ -14,7 +14,11 @@
 #include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid;
-using namespace Kernel;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
+
+using namespace std;
 
 namespace Mantid
 {
@@ -29,114 +33,125 @@ DECLARE_ALGORITHM(ProcessBackground)
   ProcessBackground::ProcessBackground()
   {
   }
-    
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   ProcessBackground::~ProcessBackground()
   {
   }
-  
+
   void ProcessBackground::initDocs()
   {
       return;
   }
 
-  /*
-   * Define parameters
+  //----------------------------------------------------------------------------------------------
+  /** Define parameters
    */
   void ProcessBackground::init()
   {
-      /// Input and output Workspace
-      this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace", "Anonymous", Direction::Input),
+    // Input and output Workspace
+    declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace", "Anonymous", Direction::Input),
                             "Input workspace containg background.");
-      this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace", "", Direction::Output),
+    declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace", "", Direction::Output),
                             "Output workspace containing processed background");
-      this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("ReferenceWorkspace", "", Direction::Input, API::PropertyMode::Optional),
-                            "Optional reference workspace for adding data points. ");
+    declareProperty(new WorkspaceProperty<Workspace2D>("ReferenceWorkspace", "", Direction::Input,
+                                                       PropertyMode::Optional),
+                    "Optional reference workspace for adding data points. ");
 
-      /// Function Options
-      std::vector<std::string> options;
-      options.push_back("SimpleRemovePeaks");
-      options.push_back("DeleteRegion");
-      options.push_back("AddRegion");
-      options.push_back("SelectBackgroundPoints");
+    // Function Options
+    std::vector<std::string> options;
+    options.push_back("SimpleRemovePeaks");
+    options.push_back("DeleteRegion");
+    options.push_back("AddRegion");
+    options.push_back("SelectBackgroundPoints");
 
-      auto validator = boost::make_shared<Kernel::StringListValidator>(options);
-      this->declareProperty("Options", "SimpleRemovePeaks", validator, "Option to process the background.");
+    auto validator = boost::make_shared<Kernel::StringListValidator>(options);
+    declareProperty("Options", "SimpleRemovePeaks", validator, "Option to process the background.");
 
-      /// Boundary
-      this->declareProperty("LowerBound", Mantid::EMPTY_DBL(), "Lower boundary of the region to be deleted/added.");
-      this->declareProperty("UpperBound", Mantid::EMPTY_DBL(), "Upper boundary of the region to be deleted/added.");
+    vector<string> pointsselectmode;
+    pointsselectmode.push_back("All Background Points");
+    pointsselectmode.push_back("Input Background Pionts Only");
 
-      /// Optional Function Type
-      std::vector<std::string> bkgdtype;
-      bkgdtype.push_back("Polynomial");
-      bkgdtype.push_back("Chebyshev");
-      auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
-      declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
+    auto modevalidator = boost::make_shared<StringListValidator>(pointsselectmode);
+    declareProperty("BackgroundPointSelectMode", "All Background Points", modevalidator,
+                    "Mode to select background points. ");
 
-      /// User input background points for "SelectBackground"
-      auto arrayproperty = new Kernel::ArrayProperty<double>("BackgroundPoints");
-      declareProperty(arrayproperty, "User specified background points as starting points");
+    // Boundary
+    declareProperty("LowerBound", Mantid::EMPTY_DBL(), "Lower boundary of the region to be deleted/added.");
+    declareProperty("UpperBound", Mantid::EMPTY_DBL(), "Upper boundary of the region to be deleted/added.");
 
-      /// Workspace index
-      declareProperty("WorkspaceIndex", 0, "Workspace index for the input workspaces.");
+    // Optional Function Type
+    std::vector<std::string> bkgdtype;
+    bkgdtype.push_back("Polynomial");
+    bkgdtype.push_back("Chebyshev");
+    auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
+    declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
 
-      /// Background tolerance
-      declareProperty("NoiseTolerance", 1.0, "Tolerance of noise range. ");
+    // User input background points for "SelectBackground"
+    auto arrayproperty = new Kernel::ArrayProperty<double>("BackgroundPoints");
+    declareProperty(arrayproperty, "User specified background points as starting points");
 
-      return;
+    // Workspace index
+    declareProperty("WorkspaceIndex", 0, "Workspace index for the input workspaces.");
+
+    // Background tolerance
+    declareProperty("NoiseTolerance", 1.0, "Tolerance of noise range. ");
+
+    return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Main execution function
+    */
   void ProcessBackground::exec()
   {
-      // 1. Get workspace
-      inpWS = this->getProperty("InputWorkspace");
-      if (!inpWS)
-      {
-          g_log.error() << "Input Workspace cannot be obtained." << std::endl;
-          throw std::invalid_argument("Input Workspace cannot be obtained.");
-      }
+    // 1. Get workspace
+    inpWS = this->getProperty("InputWorkspace");
+    if (!inpWS)
+    {
+      g_log.error() << "Input Workspace cannot be obtained." << std::endl;
+      throw std::invalid_argument("Input Workspace cannot be obtained.");
+    }
 
-      mLowerBound = getProperty("LowerBound");
-      mUpperBound = getProperty("UpperBound");
+    mLowerBound = getProperty("LowerBound");
+    mUpperBound = getProperty("UpperBound");
 
-      mTolerance = getProperty("NoiseTolerance");
+    mTolerance = getProperty("NoiseTolerance");
 
-      // 2. Do different work
-      std::string option = getProperty("Options");
-      if (option.compare("SimpleRemovePeaks") == 0)
-      {
-          removePeaks();
-      }
-      else if (option.compare("DeleteRegion") == 0)
-      {
-          deleteRegion();
-      }
-      else if (option.compare("AddRegion") == 0)
-      {
-          addRegion();
-      }
-      else if (option.compare("SelectBackgroundPoints") == 0)
-      {
-          autoBackgroundSelection();
-      }
-      else
-      {
-          g_log.error() << "Option " << option << " is not supported. " << std::endl;
-          throw std::invalid_argument("Unsupported option. ");
-      }
+    // 2. Do different work
+    std::string option = getProperty("Options");
+    if (option.compare("SimpleRemovePeaks") == 0)
+    {
+      removePeaks();
+    }
+    else if (option.compare("DeleteRegion") == 0)
+    {
+      deleteRegion();
+    }
+    else if (option.compare("AddRegion") == 0)
+    {
+      addRegion();
+    }
+    else if (option.compare("SelectBackgroundPoints") == 0)
+    {
+      execSelectBkgdPoints();
+    }
+    else
+    {
+      g_log.error() << "Option " << option << " is not supported. " << std::endl;
+      throw std::invalid_argument("Unsupported option. ");
+    }
 
-      // 3. Set output
-      // std::cout << "DBx510 OutWorkspace Range: " << outWS->dataX(0)[0] << ", " << outWS->dataX(0).back() << std::endl;
-      setProperty("OutputWorkspace", outWS);
+    // 3. Set output
+    setProperty("OutputWorkspace", outWS);
 
-      return;
+    return;
   }
 
-  /*
-   * Remove peaks within a specified region
+  //----------------------------------------------------------------------------------------------
+  /** Remove peaks within a specified region
    */
   void ProcessBackground::removePeaks()
   {
@@ -300,180 +315,217 @@ DECLARE_ALGORITHM(ProcessBackground)
       return;
   }
 
-  /*
-   * Select background automatically
-   */
-  void ProcessBackground::autoBackgroundSelection()
+  //----------------------------------------------------------------------------------------------
+  /** Select background points
+    */
+  void ProcessBackground::execSelectBkgdPoints()
   {
-      // 1. Get data
-      std::string backgroundtype = getProperty("BackgroundType");
-      std::vector<double> bkgdpoints = getProperty("BackgroundPoints");
-      int intemp = getProperty("WorkspaceIndex");
-      if (intemp < 0)
-          throw std::invalid_argument("WorkspaceIndex is not allowed to be less than 0. ");
-      size_t wsindex = size_t(intemp);
+    // 1. Get data
+    std::vector<double> bkgdpoints = getProperty("BackgroundPoints");
+    int intemp = getProperty("WorkspaceIndex");
+    if (intemp < 0)
+        throw std::invalid_argument("WorkspaceIndex is not allowed to be less than 0. ");
+    size_t wsindex = size_t(intemp);
 
-      // 2. Construct background workspace for fit
-      std::vector<double> realx, realy, reale;
-      for (size_t i = 0; i < bkgdpoints.size(); ++i)
+    // 2. Construct background workspace for fit
+    std::vector<double> realx, realy, reale;
+    for (size_t i = 0; i < bkgdpoints.size(); ++i)
+    {
+      // a) Data validity test
+      double bkgdpoint = bkgdpoints[i];
+      if (bkgdpoint < inpWS->readX(wsindex)[0])
       {
-          // a) Data validity test
-          double bkgdpoint = bkgdpoints[i];
-          if (bkgdpoint < inpWS->readX(wsindex)[0])
-          {
-              g_log.warning() << "Input background point " << bkgdpoint << " is out of lower boundary.  Use X[0] = "
-                              << inpWS->readX(wsindex)[0] << " instead." << std::endl;
-              bkgdpoint = inpWS->readX(wsindex)[0];
-          }
-          else if (bkgdpoint > inpWS->readX(wsindex).back())
-          {
-              g_log.warning() << "Input background point " << bkgdpoint << " is out of upper boundary.  Use X[-1] = "
-                              << inpWS->readX(wsindex).back() << " instead." << std::endl;
-              bkgdpoint = inpWS->readX(wsindex).back();
-          }
-
-          // b) Find the index in
-          std::vector<double>::const_iterator it;
-          it = std::lower_bound(inpWS->readX(wsindex).begin(), inpWS->readX(wsindex).end(), bkgdpoint);
-          size_t index = size_t(it - inpWS->readX(wsindex).begin());
-
-          g_log.debug() << "DBx502 Background Points " << i << " Index = " << index << " For TOF = "
-                        << bkgdpoints[i] << " in [" << inpWS->readX(wsindex)[0] << ", "
-                        << inpWS->readX(wsindex).back() << "] " << std::endl;
-
-          // b) Add to list
-          realx.push_back(inpWS->readX(wsindex)[index]);
-          realy.push_back(inpWS->readY(wsindex)[index]);
-          reale.push_back(inpWS->readE(wsindex)[index]);
-
-      } // ENDFOR (i)
-
-      DataObjects::Workspace2D_sptr bkgdWS =
-              boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (API::WorkspaceFactory::Instance().create("Workspace2D", 1, realx.size(), realy.size()));
-      for (size_t i = 0; i < realx.size(); ++i)
+        g_log.warning() << "Input background point " << bkgdpoint << " is out of lower boundary.  Use X[0] = "
+                        << inpWS->readX(wsindex)[0] << " instead." << std::endl;
+        bkgdpoint = inpWS->readX(wsindex)[0];
+      }
+      else if (bkgdpoint > inpWS->readX(wsindex).back())
       {
-          bkgdWS->dataX(0)[i] = realx[i];
-          bkgdWS->dataY(0)[i] = realy[i];
-          bkgdWS->dataE(0)[i] = reale[i];
-          // std::cout << "DBx514 Index = " << i << "  Add " << realx[i] << ", " << realy[i] << ", " << reale[i] << std::endl;
+        g_log.warning() << "Input background point " << bkgdpoint << " is out of upper boundary.  Use X[-1] = "
+                        << inpWS->readX(wsindex).back() << " instead." << std::endl;
+        bkgdpoint = inpWS->readX(wsindex).back();
       }
 
-      // 3. Fit input background pionts
-      API::IAlgorithm_sptr fit;
-      try
-      {
-          fit = this->createChildAlgorithm("Fit", 0.0, 0.2, true);
-      }
-      catch (Exception::NotFoundError &)
-      {
-          g_log.error() << "Requires CurveFitting library." << std::endl;
-          throw;
-      }
+      // b) Find the index in
+      std::vector<double>::const_iterator it;
+      it = std::lower_bound(inpWS->readX(wsindex).begin(), inpWS->readX(wsindex).end(), bkgdpoint);
+      size_t index = size_t(it - inpWS->readX(wsindex).begin());
 
-      CurveFitting::BackgroundFunction_sptr bkgdfunction;
+      g_log.debug() << "DBx502 Background Points " << i << " Index = " << index << " For TOF = "
+                    << bkgdpoints[i] << " in [" << inpWS->readX(wsindex)[0] << ", "
+                    << inpWS->readX(wsindex).back() << "] " << std::endl;
 
-      if (backgroundtype.compare("Polynomial") == 0)
-      {
-          CurveFitting::Polynomial poly;
-          bkgdfunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(boost::make_shared<CurveFitting::Polynomial>(poly));
-      }
-      else if (backgroundtype.compare("Chebyshev") == 0)
-      {
-          CurveFitting::Chebyshev cheby;
-          bkgdfunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>
-                  (boost::make_shared<CurveFitting::Chebyshev>(cheby));
-      }
-      else
-      {
-          g_log.error() << "Background of type " << backgroundtype << " is not supported. ";
-          throw std::invalid_argument("Non-supported background function. ");
-      }
+      // b) Add to list
+      realx.push_back(inpWS->readX(wsindex)[index]);
+      realy.push_back(inpWS->readY(wsindex)[index]);
+      reale.push_back(inpWS->readE(wsindex)[index]);
 
-      bkgdfunction->setAttributeValue("n", 6);
-      g_log.debug() << "DBx622 Background Workspace has " << bkgdWS->readX(0).size() << " data points." << std::endl;
+    } // ENDFOR (i)
 
-      fit->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
-      fit->setProperty("InputWorkspace", bkgdWS);
-      fit->setProperty("WorkspaceIndex", 0);
-      fit->setProperty("MaxIterations", 500);
-      fit->setProperty("StartX", realx[0]);
-      fit->setProperty("EndX", realx.back());
-      fit->setProperty("Minimizer", "Levenberg-Marquardt");
-      fit->setProperty("CostFunction", "Least squares");
+    DataObjects::Workspace2D_sptr bkgdWS =
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (API::WorkspaceFactory::Instance().create("Workspace2D", 1, realx.size(), realy.size()));
+    for (size_t i = 0; i < realx.size(); ++i)
+    {
+      bkgdWS->dataX(0)[i] = realx[i];
+      bkgdWS->dataY(0)[i] = realy[i];
+      bkgdWS->dataE(0)[i] = reale[i];
+      // std::cout << "DBx514 Index = " << i << "  Add " << realx[i] << ", " << realy[i] << ", " << reale[i] << std::endl;
+    }
 
-      fit->executeAsChildAlg();
+    // 3. Select background points according to mode
+    string mode = getProperty("BackgroundPointSelectMode");
+    if (mode.compare("All Background Points") == 0)
+    {
+      // Select (possibly) all background points
+      outWS = autoBackgroundSelection(wsindex, bkgdWS);
+    }
+    else if (mode.compare("Input Background Pionts Only") == 0)
+    {
+      // Use the input background points only
+      outWS = bkgdWS;
+    }
+    else
+    {
+      stringstream errss;
+      errss << "Background select mode " << mode << " is not supported by ProcessBackground.";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
 
-      // 4. Get fit result
-      // a) Status
-      std::string fitStatus = fit->getProperty("OutputStatus");
-      bool allowedfailure = (fitStatus.find("cannot") < fitStatus.size()) &&
-              (fitStatus.find("tolerance") < fitStatus.size());
-      if (fitStatus.compare("success") != 0 && !allowedfailure)
-      {
-        g_log.error() << "ProcessBackground: Fit Status = " << fitStatus << ".  Not to update fit result" << std::endl;
-        throw std::runtime_error("Bad Fit");
-      }
+    return;
+  }
 
-      // b) check that chi2 got better
-      const double chi2 = fit->getProperty("OutputChi2overDoF");
-      g_log.notice() << "Fit background: Fit Status = " << fitStatus << ", chi2 = " << chi2 << std::endl;
 
-      // c) get out the parameter names
-      API::IFunction_sptr func = fit->getProperty("Function");
-      std::vector<std::string> parnames = func->getParameterNames();
-      std::map<std::string, double> parvalues;
-      for (size_t iname = 0; iname < parnames.size(); ++iname)
-      {
-          double value = func->getParameter(parnames[iname]);
-          parvalues.insert(std::make_pair(parnames[iname], value));
-      }
+  //----------------------------------------------------------------------------------------------
+  /** Select background automatically
+   */
+  DataObjects::Workspace2D_sptr ProcessBackground::autoBackgroundSelection(size_t wsindex, Workspace2D_sptr bkgdWS)
+  {
+    // 1. Get background type and create bakground function
+    std::string backgroundtype = getProperty("BackgroundType");
 
-      /*
+    CurveFitting::BackgroundFunction_sptr bkgdfunction;
+
+    if (backgroundtype.compare("Polynomial") == 0)
+    {
+      CurveFitting::Polynomial poly;
+      bkgdfunction =
+          boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(boost::make_shared<CurveFitting::Polynomial>(poly));
+    }
+    else if (backgroundtype.compare("Chebyshev") == 0)
+    {
+      CurveFitting::Chebyshev cheby;
+      bkgdfunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>
+          (boost::make_shared<CurveFitting::Chebyshev>(cheby));
+    }
+    else
+    {
+      stringstream errss;
+      errss << "Background of type " << backgroundtype << " is not supported. ";
+      g_log.error(errss.str());
+      throw std::invalid_argument(errss.str());
+    }
+
+    bkgdfunction->initialize();;
+    bkgdfunction->setAttributeValue("n", 6);
+
+    g_log.debug() << "DBx622 Background Workspace has " << bkgdWS->readX(0).size()
+                  << " data points." << std::endl;
+
+    // 2. Fit input background pionts
+    API::IAlgorithm_sptr fit;
+    try
+    {
+      fit = this->createChildAlgorithm("Fit", 0.0, 0.2, true);
+    }
+    catch (Exception::NotFoundError &)
+    {
+      g_log.error() << "Requires CurveFitting library." << std::endl;
+      throw;
+    }
+
+    double startx = bkgdWS->readX(0)[0];
+    double endx = bkgdWS->readX(0).back();
+    fit->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
+    fit->setProperty("InputWorkspace", bkgdWS);
+    fit->setProperty("WorkspaceIndex", 0);
+    fit->setProperty("MaxIterations", 500);
+    fit->setProperty("StartX", startx);
+    fit->setProperty("EndX", endx);
+    fit->setProperty("Minimizer", "Levenberg-Marquardt");
+    fit->setProperty("CostFunction", "Least squares");
+
+    fit->executeAsSubAlg();
+
+    // 4. Get fit result
+    // a) Status
+    std::string fitStatus = fit->getProperty("OutputStatus");
+    bool allowedfailure = (fitStatus.find("cannot") < fitStatus.size()) &&
+        (fitStatus.find("tolerance") < fitStatus.size());
+    if (fitStatus.compare("success") != 0 && !allowedfailure)
+    {
+      g_log.error() << "ProcessBackground: Fit Status = " << fitStatus << ".  Not to update fit result" << std::endl;
+      throw std::runtime_error("Bad Fit");
+    }
+
+    // b) check that chi2 got better
+    const double chi2 = fit->getProperty("OutputChi2overDoF");
+    g_log.notice() << "Fit background: Fit Status = " << fitStatus << ", chi2 = " << chi2 << std::endl;
+
+    // c) get out the parameter names
+    API::IFunction_sptr func = fit->getProperty("Function");
+    std::vector<std::string> parnames = func->getParameterNames();
+    std::map<std::string, double> parvalues;
+    for (size_t iname = 0; iname < parnames.size(); ++iname)
+    {
+      double value = func->getParameter(parnames[iname]);
+      parvalues.insert(std::make_pair(parnames[iname], value));
+    }
+
+    /*
       DataObject::Workspace2D_const_sptr theorybackground = AnalysisDataService::Instance().retrieve(wsname);
       */
 
-      // 5. Filter and construct for the output workspace
-      // a) Calcualte theoretical values
-      const std::vector<double> x = inpWS->readX(wsindex);
-      API::FunctionDomain1DVector domain(x);
-      API::FunctionValues values(domain);
-      func->function(domain, values);
+    // 5. Filter and construct for the output workspace
+    // a) Calcualte theoretical values
+    const std::vector<double> x = inpWS->readX(wsindex);
+    API::FunctionDomain1DVector domain(x);
+    API::FunctionValues values(domain);
+    func->function(domain, values);
 
-      // b) Filter
-      std::vector<double> vecx, vecy, vece;
-      for (size_t i = 0; i < domain.size(); ++i)
+    // b) Filter
+    std::vector<double> vecx, vecy, vece;
+    for (size_t i = 0; i < domain.size(); ++i)
+    {
+      double y = inpWS->readY(wsindex)[i];
+      double theoryy = values[i];
+      if (y >= (theoryy-mTolerance) && y <= (theoryy+mTolerance) )
       {
-          double y = inpWS->readY(wsindex)[i];
-          double theoryy = values[i];
-          if (y >= (theoryy-mTolerance) && y <= (theoryy+mTolerance) )
-          {
-              // Selected
-              double x = domain[i];
-              double e = inpWS->readE(wsindex)[i];
-              vecx.push_back(x);
-              vecy.push_back(y);
-              vece.push_back(e);
-          }
+        // Selected
+        double x = domain[i];
+        double e = inpWS->readE(wsindex)[i];
+        vecx.push_back(x);
+        vecy.push_back(y);
+        vece.push_back(e);
       }
+    }
 
-      // c) Build new
-      outWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (API::WorkspaceFactory::Instance().create("Workspace2D", 1, vecx.size(), vecy.size()));
+    // c) Build new
+    Workspace2D_sptr outws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (API::WorkspaceFactory::Instance().create("Workspace2D", 1, vecx.size(), vecy.size()));
 
-      for (size_t i = 0; i < vecx.size(); ++i)
-      {          
-          outWS->dataX(0)[i] = vecx[i];
-          outWS->dataY(0)[i] = vecy[i];
-          outWS->dataE(0)[i] = vece[i];
-      }
+    for (size_t i = 0; i < vecx.size(); ++i)
+    {
+      outws->dataX(0)[i] = vecx[i];
+      outws->dataY(0)[i] = vecy[i];
+      outws->dataE(0)[i] = vece[i];
+    }
 
-      // d) Set property
-      // this->setProperty("OutputWorkspace", outWS);
-
-      return;
+    return outws;
   } // END OF FUNCTION
 
 
 } // namespace CurveFitting
 } // namespace Mantid
+
