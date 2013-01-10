@@ -429,7 +429,6 @@ set ( TEST_FILES
 	#	CalMuonDeadTimeTest.h
 	# CountEventsInPulsesTest.h
 	# UpdatePeakParameterTableTest.h
-	#SassenaFFTTest.h
 	AddLogDerivativeTest.h
 	AddPeakTest.h
 	AddSampleLogTest.h
@@ -576,6 +575,7 @@ set ( TEST_FILES
 	ResampleXTest.h
 	ResetNegativesTest.h
 	ResizeRectangularDetectorTest.h
+	SassenaFFTTest.h
 	ScaleTest.h
 	ScaleXTest.h
 	ShiftLogTimeTest.h
