@@ -506,8 +506,9 @@ void MdViewerWidget::swapViews()
 
 /**
  * This function allows one to filter the Qt events and look for a hide
- * event. It then executes source cleanup and view mode switch if the viewer
- * is in plugin mode.
+ * event. As long as the event does not come from the system (minimize VSI
+ * window or switch virtual desktops), it then executes source cleanup and
+ * view mode switch if the viewer is in plugin mode.
  * @param obj the subject of the event
  * @param ev the actual event
  * @return true if the event was handled
@@ -516,7 +517,8 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
 {
   if (this->currentView == obj)
   {
-    if (this->pluginMode && QEvent::Hide == ev->type())
+    if (this->pluginMode && QEvent::Hide == ev->type() &&
+        !ev->spontaneous())
     {
       pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
       builder->destroySources();
