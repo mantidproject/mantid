@@ -169,7 +169,7 @@ public:
 
   SumEventsByLogValueTestPerformance()
   {
-    ws = WorkspaceCreationHelper::CreateEventWorkspace(1000,1,1000);
+    ws = WorkspaceCreationHelper::CreateEventWorkspace(1000,1,10000);
     // Add a bunch of logs
     std::vector<DateAndTime> times;
     std::vector<int> index;
