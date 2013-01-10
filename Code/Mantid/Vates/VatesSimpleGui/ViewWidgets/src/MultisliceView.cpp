@@ -15,6 +15,7 @@
 #include <pqPipelineSource.h>
 #include <pqRenderView.h>
 #include <pqServerManagerModel.h>
+#include <vtkContextMouseEvent.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 
@@ -94,15 +95,29 @@ void MultiSliceView::resetCamera()
   this->mainView->resetCamera();
 }
 
+/**
+ * This function checks the signal coming from the MultiSliceView when a slice
+ * indicator is clicked.
+ * @param axisIndex : index for the axis on which the clicked indicator resides
+ * @param sliceOffsetOnAxis :
+ * @param button : which mouse button is being used
+ * @param modifier : which modifier key is being used
+ */
 void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
                                        int button, int modifier)
 {
-
+  UNUSED_ARG(sliceOffsetOnAxis);
+  if (modifier == vtkContextMouseEvent::CONTROL_MODIFIER &&
+      button == vtkContextMouseEvent::LEFT_BUTTON)
+  {
+    std::cout << "Right combination present." << std::endl;
+    this->showCutInSliceViewer(axisIndex);
+  }
 }
 
 /**
- * This function checks the sources for the WorkspaceName property. If found,
- * the ability to show a given cut in the SliceViewer will be activated.
+ * This function checks the sources for the WorkspaceName property. If not found,
+ * the ability to show a given cut in the SliceViewer will be deactivated.
  */
 void MultiSliceView::checkSliceViewCompat()
 {
