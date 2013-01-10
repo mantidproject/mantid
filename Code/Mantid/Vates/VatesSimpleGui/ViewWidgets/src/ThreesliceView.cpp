@@ -34,30 +34,15 @@ namespace SimpleGui
 ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
+
   // Need to load plugin
   pqPluginManager* pm = pqApplicationCore::instance()->getPluginManager();
   QString error;
-  vtkPVPluginsInformation *pvi = pm->loadedExtensions(pqActiveObjects::instance().activeServer(),
-                                                      false);
-  for(unsigned int i = 0; i < pvi->GetNumberOfPlugins(); ++i)
-  {
-    std::cout << "D: " << pvi->GetPluginName(i) << std::endl;
-  }
-
-  QStringList list = pm->pluginPaths(pqActiveObjects::instance().activeServer(),
-                                     false);
-  std::cout << "C: " << list.size() << std::endl;
-  foreach(QString path, list)
-  {
-    std::cout << "B: " << path.toStdString() << std::endl;
-  }
-
   pm->loadExtension(pqActiveObjects::instance().activeServer(),
                     "libQuadView.so", &error, false);
-  std::cout << "A: " << error.toStdString() << std::endl;
 
   this->mainView = this->createRenderView(this->ui.mainRenderFrame,
-                                          QString("QuadView"));
+                                          QString("pqQuadView"));
   pqActiveObjects::instance().setActiveView(this->mainView);
 }
 
@@ -111,11 +96,9 @@ void ThreeSliceView::makeThreeSlice()
 
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSrc->getOutputPort(0), this->mainView);
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Surface");
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
-  this->origRep->getProxy()->UpdateVTKObjects();
 }
 
 void ThreeSliceView::renderAll()
@@ -130,15 +113,6 @@ void ThreeSliceView::resetDisplay()
 
 void ThreeSliceView::correctVisibility(pqPipelineBrowserWidget *pbw)
 {
-  //pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
-  //smsModel->setCurrentItem(this->xCut, pqServerManagerSelectionModel::ClearAndSelect);
-  //smsModel->setCurrentItem(this->yCut, pqServerManagerSelectionModel::Select);
-  //smsModel->setCurrentItem(this->zCut, pqServerManagerSelectionModel::Select);
-  pbw->setSelectionVisibility(true);
-  //smsModel->setCurrentItem(this->xCut, pqServerManagerSelectionModel::Clear);
-  //smsModel->setCurrentItem(this->yCut, pqServerManagerSelectionModel::Clear);
-  //smsModel->setCurrentItem(this->zCut, pqServerManagerSelectionModel::Clear);
-  this->origRep->setVisible(false);
   this->correctColorScaleRange();
 }
 
