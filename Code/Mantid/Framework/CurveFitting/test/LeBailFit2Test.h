@@ -421,7 +421,7 @@ public:
   /** Test a complete LeBail Fit process with background by Monte Carlo algorithm
    *  Using Run 4862 Bank 7 as the testing data
    */
-  void test_monteCarloLeBailFit_PG3Bank7()
+  void Disabled_test_monteCarloLeBailFit_PG3Bank7()
   {
     // 1. Create input workspace
     API::MatrixWorkspace_sptr dataws;
