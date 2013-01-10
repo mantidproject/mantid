@@ -145,11 +145,13 @@ class sfCalculator():
             self.back_pixel_max = self.d_back_pixel_max
         
         nexus_file_numerator = file
+        print '----> loading nexus file: ' + nexus_file_numerator
         LoadEventNexus(Filename=nexus_file_numerator,
                        OutputWorkspace='EventDataWks')
         mt1 = mtd['EventDataWks']
         
         proton_charge = self._getProtonCharge(mt1)
+        print '----> rebinning '
         rebin(InputWorkspace='EventDataWks',
               OutputWorkspace='HistoDataWks',
               Params=self.rebin_parameters)
@@ -163,15 +165,20 @@ class sfCalculator():
                                         proton_charge=proton_charge,
                                         from_pixel=self.x_pixel_min,
                                         to_pixel=self.x_pixel_max)
+        
+        print '----> Convert to histogram'
         ConvertToHistogram(InputWorkspace='IntegratedDataWks',
                            OutputWorkspace='IntegratedDataWks')
 
+        print '----> Transpose'
         Transpose(InputWorkspace='IntegratedDataWks',
                   OutputWorkspace='TransposeIntegratedDataWks')
         
+        print '----> convert to histogram'
         ConvertToHistogram(InputWorkspace='TransposeIntegratedDataWks',
                            OutputWorkspace='TransposeIntegratedDataWks_t')
         
+        print '----> flat background1'
         FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
                        OutputWorkspace='TransposeHistoFlatDataWks_1',
                        StartX=self.back_pixel_min,
@@ -179,6 +186,7 @@ class sfCalculator():
                        Mode='Mean',
                        OutputMode="Return Background")
         
+        print '----> flat background2'
         FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
                        OutputWorkspace='TransposeHistoFlatDataWks_2',
                        StartX=self.peak_pixel_max,
@@ -186,30 +194,38 @@ class sfCalculator():
                        Mode='Mean',
                        OutputMode="Return Background")
         
+        print '----> transpose flat background 1 -> data1'
         Transpose(InputWorkspace='TransposeHistoFlatDataWks_1',
                   OutputWorkspace='DataWks_1')
         
+        print '----> transpose flat background 2 -> data2'
         Transpose(InputWorkspace='TransposeHistoFlatDataWks_2',
                   OutputWorkspace='DataWks_2')
         
+        print '----> convert to histogram data2'
         ConvertToHistogram(InputWorkspace='DataWks_1', 
                            OutputWorkspace='DataWks_1')
         
+        print '----> convert to histogram data1'
         ConvertToHistogram(InputWorkspace='DataWks_2', 
                            OutputWorkspace='DataWks_2')
         
+        print '----> rebin workspace data1'
         RebinToWorkspace(WorkspaceToRebin='DataWks_1',
                          WorkspacetoMatch='IntegratedDataWks',
                          OutputWorkspace='DataWks_1')
         
+        print '----> rebin workspace data2'
         RebinToWorkspace(WorkspaceToRebin='DataWks_2',
                          WorkspacetoMatch='IntegratedDataWks',
                          OutputWorkspace='DataWks_2')
         
+        print '----> weighted mean'
         WeightedMean(InputWorkspace1='DataWks_1',
                      InputWorkspace2='DataWks_2',
                      OutputWorkspace='DataWks')
 
+        print '----> minus'
         Minus(LHSWorkspace='IntegratedDataWks', 
               RHSWorkspace='DataWks',
               OutputWorkspace='DataWks')
@@ -217,6 +233,7 @@ class sfCalculator():
         mt3 = mtd['DataWks']
         self._calculateFinalAxis(Workspace=mt3,
                            bNumerator=bNumerator)
+        print 'done with _calculateFinalAxis and back in calculatefinalaxis in line 236' #REMOVEME
 
         #cleanup workspaces
         mtd.deleteWorkspace('EventDataWks')
@@ -227,11 +244,15 @@ class sfCalculator():
         mtd.deleteWorkspace('TransposeHistoFlatDataWks')
         mtd.deleteWorkspace('DataWks')
         
+        print 'done with cleaning workspaces in line 247'
+        
     def _calculateFinalAxis(self, Workspace=None, bNumerator=None):
         """
         this calculates the final y_axis and y_axis_error of numerator 
         and denominator
         """
+        
+        print '----> calculate final axis'
         mt = Workspace
         x_axis = mt.readX(0)[:]
         self.x_axis = x_axis
@@ -243,8 +264,21 @@ class sfCalculator():
             counts_vs_tof += mt.readY(x)[:]
             counts_vs_tof_error += mt.readE(x)[:] ** 2
         counts_vs_tof_error = sqrt(counts_vs_tof_error)
+        
+#        print 'x_axis'
+#        print x_axis
+#        print 'self.tof_min:'
+#        print self.tof_min
+#        print 'self.tof_max:'
+#        print self.tof_max
+        
         index_tof_min = self._getIndex(self.tof_min, x_axis)
         index_tof_max = self._getIndex(self.tof_max, x_axis)
+
+#        print 'index_tof_min'
+#        print index_tof_min
+#        print 'index_tof_max'
+#        print index_tof_max
 
         if (bNumerator is True):
             self.y_axis_numerator = counts_vs_tof[index_tof_min:index_tof_max]
@@ -254,6 +288,8 @@ class sfCalculator():
             self.y_axis_denominator = counts_vs_tof[index_tof_min:index_tof_max]
             self.y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max]
             self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max]
+        print 'done with _calculateFinalAxis'
+        
         
     def _createIntegratedWorkspace(self,
                                    InputWorkspace=None,
@@ -267,6 +303,7 @@ class sfCalculator():
         returns the new workspace handle
         """
         
+        print '-----> Create Integrated workspace '
         x_axis = InputWorkspace.readX(0)[:]
         x_size = to_pixel - from_pixel + 1 
         y_axis = zeros((self.alpha_pixel_nbr, len(x_axis) - 1))
@@ -340,11 +377,47 @@ class sfCalculator():
                         DataY=self.y_axis_ratio,
                         DataE=self.y_axis_error_ratio,
                         Nspec=1)
+        print 'entering fit in line 380'
 
-        Fit(InputWorkspace='DataToFit',
-            Function="name=UserFunction, Formula=a+b*x, a=1, b=2",
-            Output='Res')
+        
+        print 'replaceSpecialValues'
+        ReplaceSpecialValues(InputWorkspace='DataToFit', 
+                             NaNValue=0, 
+                             NaNError=0, 
+                             InfinityValue=0, 
+                             InfinityError=0, 
+                             OutputWorkspace='DataToFit')
+
+#        ResetNegatives(InputWorkspace='DataToFit',
+#                       OutputWorkspace='DataToFit',
+#                       AddMinimum=0)        
+        
+        print 'before fit'
+        
+        try:
+        
+            Fit(InputWorkspace='DataToFit',
+                Function="name=UserFunction, Formula=a+b*x, a=1, b=2",
+                Output='Res')
+        
+        except:
+            
+            xaxis = self.x_axis_ratio
+            sz = len(xaxis)
+            xmin = xaxis[0]
+            xmax = xaxis[sz/2]
+            
+            CropWorkspace(InputWorkspace='DataToFit',
+                         OutputWorkspace='DataToFit',
+                         XMin=xmin,
+                         XMax=xmax)
+            
+            Fit(InputWorkspace='DataToFit',
+                Function='name=UserFunction, Formula=a+b*x, a=1, b=2',
+                Output='Res')
+        
         res = mtd['Res_Parameters']
+        print 'after fit'
         
         self.a = res.getDouble("Value", 0)
         self.b = res.getDouble("Value", 1)        
@@ -384,6 +457,7 @@ def recordSettings(a, b, error_a, error_b, name, instance):
     This function will record the various fitting parameters and the 
     name of the ratio
     """
+    print '--> recoding settings'
     a.append(instance.a)
     b.append(instance.b)
     error_a.append(instance.error_a)
@@ -433,6 +507,8 @@ def outputFittingParameters(a, b, error_a, error_b,
     8th column: error_a
     9th column: error_b
     """
+
+    print '--> output fitting parameters'
 
     bFileExist = False
     #First we need to check if the file already exist
@@ -767,6 +843,7 @@ def calculateAndFit(numerator='',
                         maxBack=list_peak_back_denominator[3])                
 
     cal1.run()
+    print 'Done with cal1.run() line 806' #REMOVEME
     
     if (list_objects != [] and list_objects[-1] is not None):
         new_cal1 = cal1 * list_objects[-1]
@@ -950,6 +1027,7 @@ def calculate(string_runs=None,
                                       list_peak_back_denominator=list_peak_back[index_denominator],
                                       list_objects=list_objects,
                                       tof_range=tof_range)                                       
+                print '-> Done with Calculate and Fit'
                 
                 recordSettings(a, b, error_a, error_b, name, cal)
                                 
