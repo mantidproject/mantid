@@ -456,7 +456,7 @@ DECLARE_ALGORITHM(ProcessBackground)
     fit->setProperty("Minimizer", "Levenberg-Marquardt");
     fit->setProperty("CostFunction", "Least squares");
 
-    fit->executeAsSubAlg();
+    fit->executeAsChildAlg();
 
     // 4. Get fit result
     // a) Status
