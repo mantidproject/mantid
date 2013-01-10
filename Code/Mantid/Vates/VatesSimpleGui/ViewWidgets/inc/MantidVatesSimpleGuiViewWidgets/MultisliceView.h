@@ -86,7 +86,7 @@ protected slots:
   void checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
                          int button, int modifier);
   /// Launch SliceViewer with the specified cut.
-  void showCutInSliceViewer(const QString &name);
+  void showCutInSliceViewer(int axisIndex, double sliceOffsetOnAxis);
 
 private:
   Q_DISABLE_COPY(MultiSliceView)

@@ -99,19 +99,17 @@ void MultiSliceView::resetCamera()
  * This function checks the signal coming from the MultiSliceView when a slice
  * indicator is clicked.
  * @param axisIndex : index for the axis on which the clicked indicator resides
- * @param sliceOffsetOnAxis :
+ * @param sliceOffsetOnAxis : location of slice along axis
  * @param button : which mouse button is being used
  * @param modifier : which modifier key is being used
  */
 void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
                                        int button, int modifier)
 {
-  UNUSED_ARG(sliceOffsetOnAxis);
   if (modifier == vtkContextMouseEvent::CONTROL_MODIFIER &&
       button == vtkContextMouseEvent::LEFT_BUTTON)
   {
-    std::cout << "Right combination present." << std::endl;
-    this->showCutInSliceViewer(axisIndex);
+    this->showCutInSliceViewer(axisIndex, sliceOffsetOnAxis);
   }
 }
 
@@ -133,9 +131,10 @@ void MultiSliceView::checkSliceViewCompat()
  * It will gather all of the necessary information and create an XML
  * representation of the current dataset and cut parameters. That will then
  * be handed to the SliceViewer.
- * @param name the slice to be opened in SliceViewer
+ * @param axisIndex the index of the slice to be opened in SliceViewer
  */
-void MultiSliceView::showCutInSliceViewer(const QString &name)
+void MultiSliceView::showCutInSliceViewer(int axisIndex,
+                                          double sliceOffsetOnAxis)
 {
   // Get the associated workspace name
   QString wsName = this->getWorkspaceName();
@@ -173,13 +172,21 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
   }
 
   // Get the necessary information from the cut
-  pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
-  vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
-                                          "CutFunction").GetAsProxy();
+  // 10/01/2013 Cannot use the GetSliceOrigin due to bug in ParaView
+  // which only returns (0, 0, 0) from the function call.
+  /*
+  const double *origin = this->mainView->GetSliceOrigin(axisIndex);
+  std::cout << "(" << origin[0] << ", " << origin[1] << ", ";
+  std::cout << origin[2] << ")" << std::endl;
+  */
+
+  const double *orient = this->mainView->GetSliceNormal(axisIndex);
+
+  // Construct origin vector from orientation vector due to ParaView bug
   double origin[3];
-  vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
-  double orient[3];
-  vtkSMPropertyHelper(plane, "Normal").Get(orient, 3);
+  origin[0] = sliceOffsetOnAxis * orient[0];
+  origin[1] = sliceOffsetOnAxis * orient[1];
+  origin[2] = sliceOffsetOnAxis * orient[2];
 
   // Create the XML holder
   VATES::RebinningKnowledgeSerializer rks(VATES::LocationNotRequired);
@@ -188,8 +195,8 @@ void MultiSliceView::showCutInSliceViewer(const QString &name)
 
   MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction(3, orient,
                                                                origin));
-  rks.setImplicitFunction(impplane);;
-  QString titleAddition = name;
+  rks.setImplicitFunction(impplane);
+  QString titleAddition = "";
 
   // Use the WidgetFactory to create the slice viewer window
   SliceViewerWindow *w = MantidQt::Factory::WidgetFactory::Instance()->createSliceViewerWindow(wsName, titleAddition);
