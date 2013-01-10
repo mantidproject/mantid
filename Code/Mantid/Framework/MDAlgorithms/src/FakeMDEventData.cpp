@@ -358,11 +358,14 @@ namespace MDAlgorithms
       startPoint[d]   = min+shift;
       if ((startPoint[d] < min)||(startPoint[d] >= max)) throw std::invalid_argument("RegularData: starting point must be within the box for all dimensions.");
 
-      delta[d]  = step;
       if(step<=0)
         throw(std::invalid_argument("Step of the regular grid is less or equal to 0"));
 
       indexMax[d] = size_t((max-min)/step)+1;
+      // deal with round-off errors
+      while( (startPoint[d]+(indexMax[d]-1)*step) >= max ) step*=(1-FLT_EPSILON);
+
+      delta[d]  = step;
 
       gridSize*=indexMax[d];
 
