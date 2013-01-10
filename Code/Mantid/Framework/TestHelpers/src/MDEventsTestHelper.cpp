@@ -111,22 +111,25 @@ namespace MDEventsTestHelper
 
 
   //=====================================================================================
-  /** Make a (optionally) file backed MDEventWorkspace with 10000 fake random data points
+  /** Make a (optionally) file backed MDEventWorkspace with nEvents fake data points
+   * the points are randomly distributed within the box (nEvents>0) or homoheneously and regularly spread through the box (nEvents<0)
    *
    * @param wsName :: name of the workspace in ADS
    * @param fileBacked :: true for file-backed
+   * @param numEvents :: number of events in the target workspace distributed randomly if numEvents>0 or regularly & homogeneously if numEvents<0
    * @return MDEW sptr
    */
-  MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked)
+  MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked,long numEvents)
   {
     // ---------- Make a file-backed MDEventWorkspace -----------------------
+    std::string snEvents = boost::lexical_cast<std::string>(numEvents);
     MDEventWorkspace3Lean::sptr ws1 = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
     ws1->getBoxController()->setSplitThreshold(100);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName,
         boost::dynamic_pointer_cast< Mantid::API::IMDEventWorkspace>(ws1));
     FrameworkManager::Instance().exec("FakeMDEventData", 6,
         "InputWorkspace", wsName.c_str(),
-        "UniformParams", "10000", "RandomizeSignal", "1");
+        "UniformParams", snEvents.c_str(), "RandomizeSignal", "1");
     if (fileBacked)
     {
       std::string filename = wsName + ".nxs";

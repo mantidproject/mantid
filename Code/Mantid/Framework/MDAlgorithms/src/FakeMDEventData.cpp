@@ -7,8 +7,6 @@ or generate regular events placed in boxes, or fills peaks around given points w
 
 
 
-
-
 *WIKI*/
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
@@ -30,6 +28,7 @@ or generate regular events placed in boxes, or fills peaks around given points w
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Utils.h"
 #include <cfloat>
+#include <limits>
 
 namespace Mantid
 {
@@ -215,14 +214,22 @@ namespace MDAlgorithms
       }
       else   // regular events
       {
-        double delta; // declare outside loop to reduce heap thrash
+        size_t nPoints = size_t(params[0]);
+        double Vol = 1;
+        for(size_t d=0;d<nd;++d)
+          Vol *=(ws->getDimension(d)->getMaximum()-ws->getDimension(d)->getMinimum());
+
+        if(Vol==0 || Vol>std::numeric_limits<float>::max())
+          throw std::invalid_argument(" Domain ranges are not defined properly for workspace: "+ws->getName());
+
+        double dV = Vol/double(nPoints);
+        double delta0= std::pow(dV,1./double(nd)); 
         for (size_t d=0; d<nd; ++d)
         {
-            params.push_back( ws->getDimension(d)->getMinimum() );
-            size_t nStrides = ws->getDimension(d)->getNBins();
-            if(nStrides<1 || nStrides>=size_t(-1))nStrides = 1;
-            delta = ws->getDimension(d)->getMaximum()-ws->getDimension(d)->getMinimum();
-            params.push_back(delta/static_cast<double>(nStrides));
+            params.push_back(0.);
+            double extent = ws->getDimension(d)->getMaximum()-ws->getDimension(d)->getMinimum();
+            size_t nStrides = size_t(extent/delta0)+1;              
+            params.push_back(extent/static_cast<double>(nStrides));
         }
       }
     }
@@ -321,8 +328,8 @@ namespace MDAlgorithms
   void FakeMDEventData::addFakeRegularData(const std::vector<double> &params,typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     // the parameters for regular distribution of events over the box
-    std::vector<double> minPar(nd),delta(nd);
-    std::vector<size_t> nStrides(nd);
+    std::vector<double> startPoint(nd),delta(nd);
+    std::vector<size_t> indexMax(nd);
     size_t gridSize(0);
 
     //bool RandomizeSignal = getProperty("RandomizeSignal");
@@ -343,25 +350,21 @@ namespace MDAlgorithms
     {
       double min  = ws->getDimension(d)->getMinimum(); 
       double max  = ws->getDimension(d)->getMaximum();
-      minPar[d]   = params[d*2+1];
-      double step = params[d*2+2];
-      if ((minPar[d] < min)||(minPar[d] >= max)) throw std::invalid_argument("RegularData: starting point must be within the box for all dimensions.");
-      if ((minPar[d]<0) ||(minPar[d]>step))throw  std::invalid_argument("RegularData: initial point must be within the sep and be positive for all dimensions.");
-      if(minPar[d]==step)minPar[d]=step*(1-FLT_EPSILON);
+      double shift=params[d*2+1];
+      double step =params[d*2+2];
+      if (shift<0)shift=0;
+      if (shift>=step)shift=step*(1-FLT_EPSILON);
+
+      startPoint[d]   = min+shift;
+      if ((startPoint[d] < min)||(startPoint[d] >= max)) throw std::invalid_argument("RegularData: starting point must be within the box for all dimensions.");
 
       delta[d]  = step;
       if(step<=0)
         throw(std::invalid_argument("Step of the regular grid is less or equal to 0"));
 
-      nStrides[d] = size_t((max-min)/step);
-      if(nStrides[d]<1)
-      {
-        minPar[d]=min;
-        delta[d] = (max-min);
-        nStrides[d]=1;
-      }
+      indexMax[d] = size_t((max-min)/step)+1;
 
-      gridSize*=(nStrides[d]+1);
+      gridSize*=indexMax[d];
 
     }
     // Create all the requested events
@@ -371,13 +374,13 @@ namespace MDAlgorithms
     {
       coord_t centers[nd];
 
-      Kernel::Utils::getIndicesFromLinearIndex(cellCount,nStrides,indexes);
+      Kernel::Utils::getIndicesFromLinearIndex(cellCount,indexMax,indexes);
       ++cellCount;
       if(cellCount>=gridSize)cellCount=0;
 
       for (size_t d=0; d<nd; d++)
       {
-         centers[d]= coord_t(minPar[d]+delta[d]*double(indexes[d]));
+         centers[d]= coord_t(startPoint[d]+delta[d]*double(indexes[d]));
       }
 
       // Default or randomized error/signal

@@ -40,7 +40,7 @@ namespace MDEventsTestHelper
    * @param fileBacked :: true for file-backed
    * @return MDEW sptr
    */
-  Mantid::MDEvents::MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked);
+  Mantid::MDEvents::MDEventWorkspace3Lean::sptr makeFileBackedMDEW(std::string wsName, bool fileBacked,long numEvents=10000);
 
   /// Make a fake n-dimensional MDHistoWorkspace
   Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10, coord_t max = 10.0,
