@@ -14,43 +14,43 @@ namespace Mantid
 namespace CurveFitting
 {
 
-//----------------------------------------------------------------------------------------------
-DECLARE_FUNCTION(ThermalNeutronDtoTOFFunction)
+  //----------------------------------------------------------------------------------------------
+  DECLARE_FUNCTION(ThermalNeutronDtoTOFFunction)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
    */
-ThermalNeutronDtoTOFFunction::ThermalNeutronDtoTOFFunction()
-{
-}
+  ThermalNeutronDtoTOFFunction::ThermalNeutronDtoTOFFunction()
+  {
+  }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
+  //----------------------------------------------------------------------------------------------
+  /** Destructor
   */
-ThermalNeutronDtoTOFFunction::~ThermalNeutronDtoTOFFunction()
-{
-}
+  ThermalNeutronDtoTOFFunction::~ThermalNeutronDtoTOFFunction()
+  {
+  }
 
-/**
+  /**
   * Define the fittable parameters
   */
-void ThermalNeutronDtoTOFFunction::init()
-{
+  void ThermalNeutronDtoTOFFunction::init()
+  {
 
     /// Instrument geometry related
-    declareParameter("Dtt1", 1.0);
-    declareParameter("Dtt1t", 1.0);
-    declareParameter("Dtt2t", 1.0);
-    declareParameter("Zero", 0.0);
-    declareParameter("Zerot", 0.0);
+    declareParameter("Dtt1", 1.0);   // 0
+    declareParameter("Dtt1t", 1.0);  // 1
+    declareParameter("Dtt2t", 1.0);  // 2
+    declareParameter("Zero", 0.0);   // 3
+    declareParameter("Zerot", 0.0);  // 4
 
-    declareParameter("Width", 1.0);
-    declareParameter("Tcross", 1.0);
-}
+    declareParameter("Width", 1.0);  // 5
+    declareParameter("Tcross", 1.0); // 6
+  }
 
-/**
-   * Main function
-   */
+/** Main function
+  * xValues containing the d-space value of peaks centres
+  */
 void ThermalNeutronDtoTOFFunction::function1D(double* out, const double* xValues, const size_t nData) const
 {
     double dtt1 = getParameter("Dtt1");
@@ -70,27 +70,29 @@ void ThermalNeutronDtoTOFFunction::function1D(double* out, const double* xValues
     return;
 }
 
-
-/** Core function
-inline double ThermalNeutronDtoTOFFunction::corefunction(double dh, double dtt1, double dtt1t, double dtt2t,
-                                                         double zero, double zerot, double width, double tcross) const
+//------------------------------------------------------------------------------------------------
+/** Main function
+  * xValues containing the d-space value of peaks centres
+  */
+void ThermalNeutronDtoTOFFunction::function1D(vector<double>& out, const vector<double> xValues) const
 {
-  double n = 0.5*gsl_sf_erfc(width*(tcross-1/dh));
-  double Th_e = zero + dtt1*dh;
-  double Th_t = zerot + dtt1t*dh - dtt2t/dh;
-  double tof_h = n*Th_e + (1-n)*Th_t;
+    double dtt1 = getParameter(0);
+    double dtt1t = getParameter(1);
+    double dtt2t = getParameter(2);
+    double zero = getParameter(3);
+    double zerot = getParameter(4);
+    double width = getParameter(5);
+    double tcross = getParameter(6);
 
-  return tof_h;
+    size_t nData = out.size();
+
+    for (size_t i = 0; i < nData; ++i)
+    {
+      out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
+    }
+
+    return;
 }
-*/
-
-/** Calculate derivative of this peak function
-
-void ThermalNeutronDtoTOFFunction::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
-{
-  calNumericalDeriv(domain, jacobian);
-}
- */
 
 void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
 {
