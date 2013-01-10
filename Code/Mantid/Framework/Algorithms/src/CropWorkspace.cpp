@@ -62,9 +62,9 @@ CropWorkspace::~CropWorkspace() {}
 void CropWorkspace::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
-    "The input Workspace2D" );
+    "The input workspace" );
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-    "Name of the output workspace2D" );
+    "Name of the output workspace" );
 
   declareProperty("XMin", EMPTY_DBL(),
     "An X value that is within the first (lowest X value) bin that will be retained\n"

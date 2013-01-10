@@ -24,6 +24,10 @@ using namespace Mantid::Kernel;
 class CropWorkspaceTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CropWorkspaceTest *createSuite() { return new CropWorkspaceTest(); }
+  static void destroySuite( CropWorkspaceTest *suite ) { delete suite; }
 
   std::string createInputWorkspace()
   {
@@ -105,7 +109,7 @@ public:
   {
     //Make an event workspace with 2 events in each bin.
     EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(36, 50, 50, 0.0, 2., 2);
-    //Fake a d-spacing unit in the data.
+    //Fake a unit in the data.
     test_in->getAxis(0)->unit() =UnitFactory::Instance().create("TOF");
     test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(4, false) );
     //Add it to the workspace
@@ -378,6 +382,37 @@ public:
   
 private:
   CropWorkspace crop;
+};
+
+class CropWorkspaceTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CropWorkspaceTestPerformance *createSuite() { return new CropWorkspaceTestPerformance(); }
+  static void destroySuite( CropWorkspaceTestPerformance *suite ) { delete suite; }
+
+  void setUp()
+  {
+    AnalysisDataService::Instance().add("ToCrop",
+        WorkspaceCreationHelper::CreateEventWorkspace(5000,10000,8000, 0.0, 1.0, 3) );
+  }
+
+  void tearDown()
+  {
+    AnalysisDataService::Instance().remove("ToCrop");
+  }
+
+  void test_crop_events_inplace()
+  {
+    CropWorkspace cropper;
+    cropper.initialize();
+    cropper.setPropertyValue("InputWorkspace","ToCrop");
+    cropper.setPropertyValue("OutputWorkspace","ToCrop");
+    cropper.setProperty("XMin",5000.0);
+    cropper.setProperty("XMax",7500.0);
+    TS_ASSERT( cropper.execute() );
+  }
 };
 
 #endif /*CROPWORKSPACETEST_H_*/
