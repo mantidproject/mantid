@@ -56,6 +56,9 @@ namespace CurveFitting
     /// Overwrite IFunction
     virtual const std::string category() const { return "General";}
 
+    /// Calculate function values
+    void function1D(vector<double>& out, const vector<double> xValues) const;
+
   protected:
     /// overwrite IFunction base class method, which declare function parameters
     virtual void init();
