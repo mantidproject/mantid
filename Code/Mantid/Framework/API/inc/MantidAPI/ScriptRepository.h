@@ -89,7 +89,6 @@ namespace API{
   */
   class MANTID_API_DLL ScriptRepoException : public std::exception
   {
-    char general_info[300];
   public:
     ///default constructor
   ScriptRepoException(const std::string info = std::string("Unknown Exception")):

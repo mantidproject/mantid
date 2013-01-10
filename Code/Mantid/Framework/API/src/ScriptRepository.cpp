@@ -33,7 +33,6 @@ namespace Mantid
           _file_path.append(aux); 
         }
       }
-      snprintf(general_info, 300, "%s\n%s\n",_user_info.c_str(),_system_error.c_str()); 
     }
 
     ScriptRepoException::ScriptRepoException( const std::string info,  
@@ -54,14 +53,12 @@ namespace Mantid
           _file_path.append(aux); 
           }
         }
-      snprintf(general_info, 300, "%s\n%s\n",_user_info.c_str(),_system_error.c_str()); 
     }
 
 
 
     const char * ScriptRepoException::what() const throw(){
-
-      return general_info; 
+      return _system_error.c_str(); 
     }
   } // namespace API
 } // namespace Mantid

@@ -82,7 +82,7 @@ void delete_file(std::string path){
   
   void test_List_All_Remote_Files_Inside_Repository(){
     // it must show the files and folders!
-
+    cout << "lista all remote files inside repository testing...\n";
     vector<string> files = repo->listFiles(); 
     
     
@@ -116,7 +116,7 @@ void delete_file(std::string path){
 
   void test_List_All_Local_Files_Inside_Repository(){
     // It must list the local files as well as remote files
-    const char * content = "#!/bin/bash\n# -*- coding: utf-8 -*-\n'''\nusage: ...\n'''\n"; 
+    const char * content = "#!/usr/bin/env python \n# -*- coding: utf-8 -*-\n'''\nusage: ...\n'''\n"; 
     create_file("newfolder/newfile.py",content); 
 
     // it must show the files and folders!
@@ -184,8 +184,9 @@ void delete_file(std::string path){
     using Mantid::API::LOCAL_CHANGED;
     using Mantid::API::REMOTE_CHANGED;
     std::string file_name = "TofConv/README.txt";
-
+    
     TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
+    
     Poco::File f(std::string(repo->localRepository()).append("/").append(file_name));
     TS_ASSERT(f.exists()); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
@@ -193,6 +194,7 @@ void delete_file(std::string path){
     
     // test update    
     TSM_ASSERT("Must show file is updated given relative path",repo->fileStatus(file_name)==BOTH_UNCHANGED);
+    
 
     std::string abs_path = std::string(repo->localRepository()).append("/").append(file_name);
     
@@ -242,29 +244,32 @@ void delete_file(std::string path){
   */
 
   void test_shall_giveback_file_info(){
-    
+ 
     using Mantid::API::ScriptInfo;
     std::string file_name = "TofConv/TofConverter.py"; 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
 
 
     {  
+      std::cout << "Query file info\n";  
       // get info from remote only file
       ScriptInfo info = repo->fileInfo(file_name); 
-      TS_ASSERT(info.description.empty()); 
+      TSM_ASSERT("got info 1", info.description.empty()); 
       // ensure it removes directories that it has created
+      std::cout << "Check file removed\n"; 
       Poco::File f(std::string(repo->localRepository()).append("/").append("TofConv")); 
       TS_ASSERT(!f.exists()); 
     }
-
+    
     {
       // get info from local files
     TS_ASSERT_THROWS_NOTHING(repo->download("reflectometry/Quick.py")); 
     ScriptInfo info = repo->fileInfo("reflectometry/Quick.py"); 
-    TS_ASSERT(info.description == "ISIS reflectometry reduction script."); 
+    std::cout << "Description of the file Quick: " << info.description << "\n";
+    TS_ASSERT(info.description.find("ISIS reflectometry reduction script.") == 0); 
     delete_file("reflectometry"); 
     }
-
+    
 
     {// get info from modules
       TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter")); 
@@ -276,7 +281,7 @@ void delete_file(std::string path){
     {// get info from folders
       TS_ASSERT_THROWS_NOTHING(repo->download("TofConv")); 
       ScriptInfo info = repo->fileInfo("TofConv"); 
-      TS_ASSERT(info.description == "This has been adopted into the main Mantid repository as a Mantid interface. TofConverter from version 2.2.");                 
+      TS_ASSERT(info.description.find("This has been adopted into the main Mantid repository as a Mantid interface. TofConverter from version 2.2.")==0);                 
       delete_file("TofConv"); 
     } 
   }

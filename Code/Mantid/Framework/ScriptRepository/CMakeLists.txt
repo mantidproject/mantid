@@ -79,9 +79,9 @@ set ( INC_FILES inc/MantidScriptRepository/GitScriptRepository.h
 
 set ( TEST_FILES
 	GitScriptRepositoryTest.h
-  GitConnectionTest.h
-  GitNewFeatureTest.h
-  ScriptRepositoryFactoryTest.h
+    GitConnectionTest.h
+    GitNewFeatureTest.h
+    ScriptRepositoryFactoryTest.h
 )
 
 # Add the target for this directory

@@ -5,6 +5,7 @@
 #include "MantidScriptRepository/GitScriptRepository.h"
 #include <Poco/File.h>
 #include <Poco/FileStream.h>
+#include <Poco/TemporaryFile.h>
 #include <Poco/Path.h>
 #include <iostream>
 using namespace std; 
@@ -24,24 +25,35 @@ class GitConnectionTest : public CxxTest::TestSuite{
   static void destroySuite (GitConnectionTest * suite){delete suite; }
   GitScriptRepository * repo; 
   void setUp(){
-
+    cout << "setup\n"; 
   }
   
   void tearDown(){
-    cout << "tear down" << endl; 
+    cout << "tear down\n" ; 
     delete repo; 
   }
 
   void test_UpdateNewRepositoryMustCloneRepository(){
-    const string newpath = Poco::Path::temp().append("newrep"); 
-    TS_ASSERT_THROWS_NOTHING(repo = new GitScriptRepository(newpath));
+    cout << "test Update new repository must clone repository\n";     
+    std::string file_path_name = Poco::TemporaryFile::tempName(); 
+    //const string newpath = Poco::Path::temp().append("newrep"); 
+    // testing with a very small repository to be fast... 
+    TS_ASSERT_THROWS_NOTHING(repo = new GitScriptRepository(file_path_name, "git://github.com/gesnerpassos/GPWorks.git")); 
     if (repo){
       TS_ASSERT_THROWS_NOTHING(repo->update());
       // check that the path was created
-      Poco::File p(newpath);      
-      TS_ASSERT(p.exists()); 
-      p.remove(true); 
-    }                             
+      try{
+        Poco::File p(file_path_name);
+        TSM_ASSERT(file_path_name, p.exists()); 
+        Poco::TemporaryFile::registerForDeletion(file_path_name); 
+      }
+      catch(Poco::Exception & ex){
+        std::cerr << "Poco Exception: " << ex.className() << ": " << ex.message() << "\n"; 
+      }
+    }
+    else{
+      TSM_ASSERT("Repo not created!",false); 
+    }
   }
 
 
@@ -52,7 +64,7 @@ class GitConnectionTest : public CxxTest::TestSuite{
   }
 
 
-  void test_UploadingNewFiles(){
+  void tes_UploadingNewFiles(){
     TS_ASSERT_THROWS_NOTHING(repo = new GitScriptRepository()); 
     std::string file_path = repo->localRepository().append("/mynewfile.py"); 
     Poco::FileStream newfile(file_path, std::ios::out | std::ios::app);

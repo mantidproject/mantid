@@ -3,6 +3,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string.hpp> 
 
 #include "Poco/Path.h"
 #include "Poco/File.h"
@@ -65,8 +66,7 @@ namespace API
                                          const std::string remote)
   throw (ScriptRepoException&):
   g_log(Logger::get("GitScriptRepository"))
-  {
-    
+  {    
     g_log.debug() << "GitScriptRepository constructor: local_rep " 
                   << local_rep << "; remote = " << remote << "\n"; 
     
@@ -76,7 +76,9 @@ namespace API
       loc = config.getString("ScriptLocalRepository"); 
       rem = config.getString("ScriptRepository");     
     }else{
-      assert(false); }
+      local_repository = local_rep; 
+      remote_url = remote; 
+    }
     
     if (local_rep.empty())
       local_repository = loc; 
@@ -216,10 +218,13 @@ namespace API
         directory.path = ancestor_dir; 
         directory.directory = true; 
         // std::cout << "insert directory " << ancestor_dir << std::endl; 
-        repo_iteration.repository_list->push_back(directory); 
-        ancestor_parts.push_back(strs[++index]); 
+        repo_iteration.repository_list->push_back(directory);
+        index++; 
+        if (index >= strs.size())
+          break;
+        ancestor_parts.push_back(strs[index]); 
         ancestor_dir = join(ancestor_parts,"/"); 
-      }while(index < strs.size()); 
+      }while(true); 
     }
     // update the directory
     repo_iteration.last_directory = curr_directory;
@@ -227,13 +232,15 @@ namespace API
     // create the entry for the file: 
     GitScriptRepository::file_entry curfile; 
     curfile.status = BOTH_UNCHANGED; 
-    curfile.path = file; 
+    curfile.path = file;
+    if (std::string(file).find("TofConv/README.txt") != string::npos)
+      std::cout << "file " << file << " git status = " << (int)status << "\n"; ///FIXME
     if ((status & GIT_STATUS_WT_DELETED) ||
         (status & GIT_STATUS_INDEX_NEW))
       curfile.status = REMOTE_ONLY; 
     else if (status &  GIT_STATUS_WT_NEW)
       curfile.status = LOCAL_ONLY;
-    else if (status == (GIT_STATUS_INDEX_MODIFIED|GIT_STATUS_WT_MODIFIED))
+    else if (status == (GIT_STATUS_INDEX_MODIFIED| GIT_STATUS_WT_MODIFIED))
       curfile.status = BOTH_CHANGED;
     else if  (status & GIT_STATUS_INDEX_MODIFIED)
       curfile.status = REMOTE_CHANGED; 
@@ -373,11 +380,13 @@ namespace API
     // change the path to a path related to the repository.
     bool file_is_local; 
     std::string file_path_adjusted = convertPath(file_path, file_is_local); 
+    //g_log.debug() << "Check status of file " << file_path_adjusted << "\n"; 
 
     for( std::vector<struct file_entry>::iterator it = repository_list.begin(); 
          it != repository_list.end();
          it++){
       if( it->path == file_path_adjusted){
+        g_log.debug() << "File " << file_path_adjusted << " status = " << it->status;
         return it->status;       
       }
     }
@@ -386,7 +395,7 @@ namespace API
     snprintf(info, 200, 
              "The File %s was not found inside the repository. Hint: Check spelling, and list the files again",
              file_path_adjusted.c_str()); 
-           
+    g_log.warning() << info << "\n";        
     throw ScriptRepoException(info, "Exception at GitScriptRepository::fileStatus");
   }
 
@@ -403,7 +412,7 @@ namespace API
     assert(git_rep[size-1] == '/');
 
     std::string repo_path = std::string(git_rep, git_rep + size - 5); 
-
+    //g_log.debug() << "Repo_path: " << repo_path <<"\n"; 
 
     // first of all, check if the file is local: 
     // the given path may be absolute, relative to the git local repository or to your home
@@ -421,10 +430,10 @@ namespace API
       absolute_path = pathFound.absolute().toString(); 
     else
       absolute_path = path;
-
-
-
-
+    // this is necessary because in windows, the absolute path is given with \ slash.
+    boost::replace_all(absolute_path,"\\","/");     
+    
+    
     //check it the path is inside the repository: 
     size_t pos = absolute_path.find(repo_path); 
 
@@ -492,7 +501,7 @@ namespace API
     // change the path to a path related to the repository.
     bool file_is_local;
     std::string file_path_adjusted = convertPath(file_path, file_is_local); 
-
+    g_log.debug() << "Request to download file : " << file_path_adjusted << "\n"; 
     // refresh the list of files inside the repository. It should do at least once.
     // but, usually, the information will not change after.
     if (repository_list.size() == 0)
@@ -513,6 +522,7 @@ namespace API
     if (!file_inside_repository){
       char info[200]; 
       snprintf(info,200, "The file %s is not inside the repository. You cannot download it or update it.\nHint: Check mispelling", file_path.c_str());
+      g_log.warning() << "File not inside the repository: " << info << "\n"; 
       throw ScriptRepoException(info); 
     }
 
@@ -528,8 +538,9 @@ namespace API
     // add file name
     opts.paths.strings[0] = strdup(file_path_adjusted.c_str()); 
     opts.paths.count = 1; 
-   
-    err = git_checkout_index(repo, NULL, &opts); 
+    g_log.debug() << "Checking out the file : \n"; 
+    //err = git_checkout_index(repo, NULL, &opts); 
+    err = git_checkout_head(repo, &opts); 
   
     // release memory
     delete [] opts.paths.strings[0]; 
@@ -538,7 +549,7 @@ namespace API
   
     if (err)
       throw gitException("Failure to download."); /// @todo provide a better explanation.
-
+    g_log.debug() << "download ok! \n"; 
   }
 
 
@@ -678,7 +689,7 @@ namespace API
       throw gitException("We can not create your local repository.\nHInt: check your internet connection.",
                          __FILE__, __LINE__); 
     }
-  
+    g_log.debug() << "GitScriptRepository::cloneRepository ... clone done correctly! \n"; 
     char exclude_file_path[200]; 
     snprintf(exclude_file_path,200, "%s/info/exclude",git_repository_path(cloned_repo));
     // open the file in append mode
@@ -686,6 +697,7 @@ namespace API
     file << "*.pyc\n";
     file.close(); 
     repo = cloned_repo; 
+    g_log.debug() << "GitScriptRepository::cloneRepository ... finished!\n";
     return;
 
   }
@@ -1012,17 +1024,25 @@ namespace API
       g_log.information() << "No support for extracting information of file like" << abs_path << "\n"; 
       break;
     }
-  
+    // close the file descriptor, to allow deleting the file.
+    input.close();
     if (!local){
-      // remove the files and folders that were created when downloading
-      if (directory.empty()){     
-        Poco::File f(abs_path); 
-        f.remove(); 
+      try{
+        // remove the files and folders that were created when downloading
+        if (directory.empty()){     
+          Poco::File f(abs_path); 
+          f.remove(); 
+        }
+        else{
+          Poco::File f(directory); 
+          f.remove(true); 
+        }    
+      }catch (Poco::Exception & ex){
+        g_log.error() <<"ProcessInfo exception: " << ex.className() << ": " << ex.message() << "\n";
+
+
+      
       }
-      else{
-        Poco::File f(directory); 
-        f.remove(true); 
-      }    
     }
 
     return description.str(); 
