@@ -76,6 +76,8 @@ class CreateLeBailFitInput(PythonAlgorithm):
     def importFullProfHKLFile(self, hklfilename):
         """ Import Fullprof's .hkl file
         """
+        import math
+
         # 1. Import file
         try:
             hklfile = open(hklfilename, "r")
@@ -102,13 +104,26 @@ class CreateLeBailFitInput(PythonAlgorithm):
             h = int(terms[0])
             k = int(terms[1])
             l = int(terms[2])
-            dsp = float(terms[3])
-            tof = float(terms[4])
-            alpha = float(terms[5])
-            beta = float(terms[6])
-            sigma2 = float(terms[7])
-            gamma2 = float(terms[8])
-            fwhm = float(terms[12])
+            if len(terms) >= 9:
+                dsp = float(terms[3])
+                tof = float(terms[4])
+                alpha = float(terms[5])
+                beta = float(terms[6])
+                sigma2 = float(terms[7])
+                gamma2 = float(terms[8])
+            else:
+                dsp = 0.0
+                tof = 0.0
+                alpha = 0.0
+                beta = 0.0
+                sigma2 = 0.0
+                gamma2 = 0.0
+                fwhm = 1.0
+
+            if len(terms) >= 13:
+                fwhm = float(terms[12])
+            elif len(terms) >= 9:
+                fwhm = math.sqrt(sigma2)*2.0
 
             dkey = (h, k, l)
 
