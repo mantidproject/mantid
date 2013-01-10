@@ -297,7 +297,7 @@ namespace SliceViewer
   @param peakIndex: index into contained peaks workspace.
   @return the bounding box corresponding to the peakIndex.
   */
-  RectangleType ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const
+  PeakBoundingBox ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const
   {
     if(peakIndex < 0 || peakIndex > m_viewPeaks.size())
     {

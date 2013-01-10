@@ -64,7 +64,7 @@ namespace MantidQt
   */
   MantidQt::SliceViewer::CrossPeakPrimitives PhysicalCrossPeak::draw(const double& windowHeight, const double& windowWidth) const
   {
-      CrossPeakPrimitives drawingObjects = {0,0,0,0.0,Mantid::Kernel::V3D()};
+    CrossPeakPrimitives drawingObjects = {0,0,0,0.0,Mantid::Kernel::V3D()};
     if(isViewable())
     {
       const int halfCrossHeight = int(windowHeight * m_crossViewFraction);
@@ -84,39 +84,16 @@ namespace MantidQt
   /**
   @return bounding box for peak in natural coordinates.
   */
-  RectangleType PhysicalCrossPeak::getBoundingBox() const
+  PeakBoundingBox PhysicalCrossPeak::getBoundingBox() const
   {
     using Mantid::Kernel::V2D;
-    V2D lowerLeft(m_origin.X() - m_effectiveRadius, m_origin.Y() - m_effectiveRadius);
-    V2D upperRight(m_origin.X() + m_effectiveRadius, m_origin.Y() + m_effectiveRadius);
-    return RectangleType(boost::make_tuple(lowerLeft, upperRight));
-  }
+    const Left left( m_origin.X() - m_effectiveRadius );
+    const Right right( m_origin.X() + m_effectiveRadius );
+    const Bottom bottom ( m_origin.X() - m_effectiveRadius );
+    const Top top ( m_origin.X() + m_effectiveRadius );
+    const SlicePoint slicePoint( m_origin.Z() );
 
-  /**
-  @param windowHeight : height of the window in px
-  @param windowWidth : height of the window in px
-  @param viewWidth : width of the view area in natural coodinates
-  @param viewHeight : height of the view area in natural coordinates
-  @return bounding box for peak in windows coordinates.
-  */
-  RectangleType PhysicalCrossPeak::getBoundingBox(const double& windowHeight, const double& windowWidth, const double& viewWidth, const double& viewHeight) const
-  {
-    using Mantid::Kernel::V2D;
-    // Scale factor for going from viewX to windowX
-    const double scaleYFactor = windowHeight/viewHeight;
-    // Scale factor for going from viewY to windowY
-    const double scaleXFactor = windowWidth/viewWidth;
-
-    // Get the box in natural coordinates.
-    RectangleType boxInNaturalCoords = this->getBoundingBox();
-
-    const double expectedLowerLeftX = boxInNaturalCoords.get<0>().X() * scaleXFactor;
-    const double expectedLowerLeftY = boxInNaturalCoords.get<0>().Y() * scaleYFactor;
-    const double expectedUpperRightX = boxInNaturalCoords.get<1>().X() * scaleXFactor;
-    const double expectedUpperRightY = boxInNaturalCoords.get<1>().Y() * scaleYFactor;
-
-    // Apply scaling.
-    return RectangleType(V2D(expectedLowerLeftX, expectedLowerLeftY), V2D(expectedUpperRightX, expectedUpperRightY));
+    return PeakBoundingBox(left, right, top, bottom, slicePoint);
   }
 
   }

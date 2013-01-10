@@ -33,7 +33,7 @@ namespace MantidQt
       void setBackgroundColour(const QColor){/*Do nothing*/}
       void showBackgroundRadius(const bool show){/*Do nothing*/}
       void setShown(const bool show){/*Do nothing*/}
-      virtual RectangleType getBoundingBox(const int peakIndex) const {return m_default->getBoundingBox(peakIndex);}
+      virtual PeakBoundingBox getBoundingBox(const int peakIndex) const {return m_default->getBoundingBox(peakIndex);}
 
 
       virtual std::string getTransformName() const;

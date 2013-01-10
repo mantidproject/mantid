@@ -8,6 +8,8 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+    /// Forward dec
+    class PeakBoundingBox;
 
     /** Abstract view in Representing a view that can be zoomed in upon.
     
@@ -37,34 +39,11 @@ namespace MantidQt
     {
     public:
       /// Zoom to a peak position provided by a boundary rectangle in the windows coordinate system.
-      virtual void zoomToRectangle(Mantid::Kernel::V2D& lowerLeft, Mantid::Kernel::V2D& upperRight) = 0;
+      virtual void zoomToRectangle(const PeakBoundingBox&) = 0;
       /// Destructor
       virtual ~ZoomablePeaksView(){ }
-    };
-
-    /**
-    @class ZoomableAdapter
-    Templated adapter to zoom to peak. Alows objects from outside this type hierachy to be made to work seamlessly with it.
-    */
-    template <class Adaptee>
-    class DLLExport ZoomableAdapter : public ZoomablePeaksView
-    {
-    private:
-      Adaptee * const _adaptee;
-      ZoomableAdapter& operator=(const ZoomableAdapter& other);
-      ZoomableAdapter(const ZoomableAdapter& other);
-    public:
-      ZoomableAdapter(Adaptee* const adaptee) : _adaptee(adaptee)
-      {
-      }
-
-      void zoomToRectangle(Mantid::Kernel::V2D& lowerLeft, Mantid::Kernel::V2D& upperRight)
-      {
-        _adaptee.zoomToRectange(lowerLeft, upperRight);
-      }
-      virtual ~ZoomableAdapter(){ }
     };
   }
 }
 
-#endif /* MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_ */
+#endif /* MANTID_SLICEVIEWER_ZOOMABLE_PEAKS_VIEW_H_ */

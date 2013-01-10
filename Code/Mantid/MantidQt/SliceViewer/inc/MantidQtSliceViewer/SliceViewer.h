@@ -101,7 +101,7 @@ public:
   boost::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
 
   /// Methods from implementation of ZoomablePeaksView.
-  virtual void zoomToRectangle(Mantid::Kernel::V2D& lowerLeft, Mantid::Kernel::V2D& upperRight);
+  virtual void zoomToRectangle(const PeakBoundingBox& box);
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed

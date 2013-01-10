@@ -69,7 +69,7 @@ namespace SliceViewer
     /// Show the background radius
     virtual void showBackgroundRadius(const bool show);
     /// Get a bounding box for this peak.
-    virtual RectangleType getBoundingBox() const;
+    virtual PeakBoundingBox getBoundingBox() const;
 
   private:
 

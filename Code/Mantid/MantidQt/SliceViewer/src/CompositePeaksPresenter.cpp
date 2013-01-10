@@ -302,7 +302,7 @@ namespace MantidQt
       auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
       auto subjectPresenter = *iterator;
       auto boundingBox = subjectPresenter->getBoundingBox(peakIndex);
-      m_zoomablePlottingWidget->zoomToRectangle(boundingBox.get<0>(), boundingBox.get<1>());
+      m_zoomablePlottingWidget->zoomToRectangle(boundingBox);
     }
   }
 }

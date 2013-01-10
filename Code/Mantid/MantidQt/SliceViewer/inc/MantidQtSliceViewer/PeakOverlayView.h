@@ -5,17 +5,14 @@
 #include "MantidKernel/V2D.h"
 #include "MantidQtSliceViewer/PeakTransform.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
+#include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include <QPointF>
 #include <boost/shared_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
 
 namespace MantidQt
 {
   namespace SliceViewer
   {
-
-    typedef boost::tuple<Mantid::Kernel::V2D, Mantid::Kernel::V2D> RectangleType;
-
     /** Abstract view in MVP model representing a PeakOverlay.
     
     @date 2012-08-24
@@ -60,7 +57,7 @@ namespace MantidQt
       /// Show the background radius
       virtual void showBackgroundRadius(const bool){}
       /// Get a bounding box around the peak in windows coordinates.
-      virtual RectangleType getBoundingBox() const = 0;
+      virtual PeakBoundingBox getBoundingBox() const = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

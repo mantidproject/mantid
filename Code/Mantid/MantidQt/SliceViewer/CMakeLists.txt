@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/DimensionSliceWidget.cpp
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
+	src/PeakBoundingBox.cpp
 	src/PeakOverlaySphere.cpp
 	src/PeakOverlayCross.cpp
 	src/PeakOverlaySphereFactory.cpp
@@ -45,6 +46,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/NullPeaksPresenter.h
+	inc/MantidQtSliceViewer/PeakBoundingBox.h
 	inc/MantidQtSliceViewer/PeakOverlaySphere.h
 	inc/MantidQtSliceViewer/PeakOverlayCross.h
 	inc/MantidQtSliceViewer/PeakOverlayView.h
@@ -107,6 +109,7 @@ set ( UI_FILES
 set ( TEST_FILES
     test/CompositePeaksPresenterTest.h
     test/ConcretePeaksPresenterTest.h
+    test/PeakBoundingBoxTest.h
     test/PeakPaletteTest.h
     test/PeakTransformHKLTest.h
     test/PeakTransformQSampleTest.h

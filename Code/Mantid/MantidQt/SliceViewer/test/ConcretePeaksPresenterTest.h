@@ -600,7 +600,7 @@ public:
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
-    EXPECT_CALL(*pMockView, getBoundingBox()).Times(1).WillOnce(Return(RectangleType())); // Expect that the bounding box will be requested.
+    EXPECT_CALL(*pMockView, getBoundingBox()).Times(1).WillOnce(Return(PeakBoundingBox())); // Expect that the bounding box will be requested.
 
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;

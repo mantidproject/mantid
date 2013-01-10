@@ -28,6 +28,7 @@
 #include "MantidQtSliceViewer/PeakTransformQSample.h"
 #include "MantidQtSliceViewer/PeakTransformQLab.h"
 #include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
+#include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "qmainwindow.h"
 #include "qmenubar.h"
@@ -2277,11 +2278,15 @@ Zoom in upon a rectangle
 @parm lower Left: rectangle lower left
 @param upperRight, rectangle upper right
 */
-void SliceViewer::zoomToRectangle(Mantid::Kernel::V2D& lowerLeft, Mantid::Kernel::V2D& upperRight)
+void SliceViewer::zoomToRectangle(const PeakBoundingBox& boundingBox)
 {
     // Set the limits in X and Y
-  m_plot->setAxisScale( m_spect->xAxis(), lowerLeft.X(), upperRight.X());
-  m_plot->setAxisScale( m_spect->yAxis(), lowerLeft.Y(), upperRight.Y());
+  m_plot->setAxisScale( m_spect->xAxis(), boundingBox.left(), boundingBox.right());
+  m_plot->setAxisScale( m_spect->yAxis(), boundingBox.bottom(), boundingBox.top());
+
+  const QString dimensionName = QString::fromStdString(m_peaksSliderWidget->getDimName());
+  this->setSlicePoint(dimensionName, boundingBox.slicePoint());
+
   // Make sure the view updates
   m_plot->replot();
 }

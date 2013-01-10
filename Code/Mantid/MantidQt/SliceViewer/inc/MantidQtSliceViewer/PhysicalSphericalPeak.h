@@ -80,10 +80,7 @@ namespace MantidQt
       void showBackgroundRadius(const bool show);
 
       /// Get the bounding box in natural coordinates.
-      RectangleType getBoundingBox() const;
-
-      /// Get the bounding box in windows coordinates.
-      RectangleType getBoundingBox(const double& windowHeight, const double& windowWidth, const double& viewWidth, const double& viewHeight) const;
+      PeakBoundingBox getBoundingBox() const;
 
     private:
       /// Original origin x=h, y=k, z=l

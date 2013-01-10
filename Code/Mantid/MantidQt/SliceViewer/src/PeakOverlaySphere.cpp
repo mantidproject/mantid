@@ -140,7 +140,7 @@ namespace SliceViewer
   /**
   @return bounding box for peak in windows coordinates.
   */
-  RectangleType PeakOverlaySphere::getBoundingBox() const
+  PeakBoundingBox PeakOverlaySphere::getBoundingBox() const
   {
     return m_physicalPeak.getBoundingBox();
   }

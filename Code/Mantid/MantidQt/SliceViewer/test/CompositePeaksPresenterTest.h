@@ -21,7 +21,7 @@ private:
   class FakeZoomablePeaksView : public ZoomablePeaksView
   {
   public:
-    void zoomToRectangle(Mantid::Kernel::V2D&, Mantid::Kernel::V2D&)
+    void zoomToRectangle(const PeakBoundingBox&)
     {
     }
     virtual ~FakeZoomablePeaksView(){}
@@ -538,12 +538,12 @@ public:
     set.insert(peaksWS);
     MockPeaksPresenter* pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
-    EXPECT_CALL(*pSubject, getBoundingBox(peakIndex)).Times(1).WillOnce(Return(RectangleType()));
+    EXPECT_CALL(*pSubject, getBoundingBox(peakIndex)).Times(1).WillOnce(Return(PeakBoundingBox()));
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
 
     //Prepare zoomable peak view.
     MockZoomablePeaksView mockZoomableView;
-    EXPECT_CALL(mockZoomableView, zoomToRectangle(_, _)).Times(1);
+    EXPECT_CALL(mockZoomableView, zoomToRectangle(_)).Times(1);
 
     // Create the composite and add the test presenter.
     CompositePeaksPresenter composite(&mockZoomableView);

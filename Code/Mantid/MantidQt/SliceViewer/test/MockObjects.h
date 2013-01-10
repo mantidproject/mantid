@@ -27,7 +27,7 @@ namespace
   class MockZoomablePeaksView : public ZoomablePeaksView
   {
   public:
-    MOCK_METHOD2(zoomToRectangle, void(Mantid::Kernel::V2D&, Mantid::Kernel::V2D&));
+    MOCK_METHOD1(zoomToRectangle, void(const PeakBoundingBox&));
     virtual ~MockZoomablePeaksView(){}
   };
 
@@ -47,7 +47,7 @@ namespace
     MOCK_CONST_METHOD0(getTransformName, std::string());
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
     MOCK_METHOD1(setShown, void(const bool));
-    MOCK_CONST_METHOD1(getBoundingBox, RectangleType(const int peakIndex));
+    MOCK_CONST_METHOD1(getBoundingBox, PeakBoundingBox(const int peakIndex));
     virtual ~MockPeaksPresenter(){}
   };
 
@@ -95,7 +95,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_METHOD1(changeForegroundColour, void(const QColor));
     MOCK_METHOD1(changeBackgroundColour, void(const QColor));
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
-    MOCK_CONST_METHOD0(getBoundingBox, RectangleType());
+    MOCK_CONST_METHOD0(getBoundingBox, PeakBoundingBox());
     ~MockPeakOverlayView(){}
   };
 
