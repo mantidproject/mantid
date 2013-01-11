@@ -19,34 +19,22 @@ public:
     TSM_ASSERT_EQUALS("\n\nPalette should have a default and fixed size\n", expectedNumberOfEntries, palette.paletteSize());
   }
 
-  void test_default_foregroundIndexToColour()
+  void test_default_foreground_colours_unique()
   {
     PeakPalette palette;
-    TS_ASSERT_EQUALS(QColor(Qt::green), palette.foregroundIndexToColour(0));
-    TS_ASSERT_EQUALS(QColor(Qt::darkMagenta), palette.foregroundIndexToColour(1));
-    TS_ASSERT_EQUALS(QColor(Qt::cyan), palette.foregroundIndexToColour(2));
-    TS_ASSERT_EQUALS(QColor(Qt::darkGreen), palette.foregroundIndexToColour(3));
-    TS_ASSERT_EQUALS(QColor(Qt::darkCyan), palette.foregroundIndexToColour(4));
-    TS_ASSERT_EQUALS(QColor(Qt::darkYellow), palette.foregroundIndexToColour(5));
-    TS_ASSERT_EQUALS(QColor(Qt::darkRed), palette.foregroundIndexToColour(6));
-    TS_ASSERT_EQUALS(QColor(Qt::black), palette.foregroundIndexToColour(7));
-    TS_ASSERT_EQUALS(QColor(Qt::white), palette.foregroundIndexToColour(8));
-    TS_ASSERT_EQUALS(QColor(Qt::darkGray), palette.foregroundIndexToColour(9));
+    for(int i = 0; i < palette.paletteSize()-1; ++i)
+    {
+      TS_ASSERT_DIFFERS(palette.foregroundIndexToColour(i), palette.foregroundIndexToColour(i+1));
+    }
   }  
 
-  void test_default_backgroundIndexToColour()
+  void test_default_background_colours_unique()
   {
     PeakPalette palette;
-    TS_ASSERT_EQUALS(QColor(Qt::green), palette.backgroundIndexToColour(9));
-    TS_ASSERT_EQUALS(QColor(Qt::darkMagenta), palette.backgroundIndexToColour(8));
-    TS_ASSERT_EQUALS(QColor(Qt::cyan), palette.backgroundIndexToColour(7));
-    TS_ASSERT_EQUALS(QColor(Qt::darkGreen), palette.backgroundIndexToColour(6));
-    TS_ASSERT_EQUALS(QColor(Qt::darkCyan), palette.backgroundIndexToColour(5));
-    TS_ASSERT_EQUALS(QColor(Qt::darkYellow), palette.backgroundIndexToColour(4));
-    TS_ASSERT_EQUALS(QColor(Qt::darkRed), palette.backgroundIndexToColour(3));
-    TS_ASSERT_EQUALS(QColor(Qt::black), palette.backgroundIndexToColour(2));
-    TS_ASSERT_EQUALS(QColor(Qt::white), palette.backgroundIndexToColour(1));
-    TS_ASSERT_EQUALS(QColor(Qt::darkGray), palette.backgroundIndexToColour(0));
+    for(int i = 0; i < palette.paletteSize()-1; ++i)
+    {
+      TS_ASSERT_DIFFERS(palette.backgroundIndexToColour(i), palette.backgroundIndexToColour(i+1));
+    }
   }
 
   void test_foregroundIndexToColour_throws_if_out_of_range()

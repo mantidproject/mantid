@@ -21,7 +21,8 @@ namespace SliceViewer
   : QWidget( parent ),
     m_plot(plot),
     m_physicalPeak(origin, peakRadius, backgroundInnerRadius, backgroundOuterRadius),
-    m_peakColour(peakColour)
+    m_peakColour(peakColour),
+    m_backColour(backColour)
   {
     setAttribute(Qt::WA_NoMousePropagation, false);
     this->setVisible(true);
