@@ -191,7 +191,7 @@ public:
     // Default Event Workspace with times from 0-99
     EventWorkspace_sptr ew = WorkspaceCreationHelper::CreateEventWorkspace2();
 
-    DateAndTime run_start("2010-01-01"); //NOTE This run_start is hard-coded in WorkspaceCreationHelper.
+    DateAndTime run_start("2010-01-01T00:00:00"); //NOTE This run_start is hard-coded in WorkspaceCreationHelper.
 
     TimeSeriesProperty<double> * temp;
     temp = new TimeSeriesProperty<double>("temp");

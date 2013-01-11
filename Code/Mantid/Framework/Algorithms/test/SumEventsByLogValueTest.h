@@ -118,7 +118,9 @@ public:
     TS_ASSERT_EQUALS( outWS->rowCount(), 2 );
     TS_ASSERT_EQUALS( outWS->columnCount(), 4 );
     TS_ASSERT_EQUALS( outWS->Int(0,0), 1 );
-    TS_ASSERT_EQUALS( outWS->Int(0,1), 300 );
+    TS_ASSERT_EQUALS( outWS->Int(0,1), 270 );
+    TS_ASSERT_EQUALS( outWS->Int(1,0), 2 );
+    TS_ASSERT_EQUALS( outWS->Int(1,1), 30 );
 
     // Save more complex tests for a system test
   }

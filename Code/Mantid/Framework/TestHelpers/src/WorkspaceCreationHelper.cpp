@@ -477,7 +477,7 @@ namespace WorkspaceCreationHelper
                                            int numBins, int numEvents, double x0, double binDelta,
                                            int eventPattern, int start_at_pixelID)
   {
-    DateAndTime run_start("2010-01-01");
+    DateAndTime run_start("2010-01-01T00:00:00");
 
     //add one to the number of bins as this is histogram
     numBins++;
