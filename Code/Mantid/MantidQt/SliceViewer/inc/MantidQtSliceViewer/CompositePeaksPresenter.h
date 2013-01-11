@@ -69,8 +69,6 @@ namespace MantidQt
     private:
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
-      /// Default behaviour 
-      PeaksPresenter_sptr m_default;
       /// Subject presenters.
       SubjectContainer m_subjects;
       /// Use default
@@ -83,6 +81,8 @@ namespace MantidQt
       PeakPalette m_palette;
       /// Zoomable peaks view.
       ZoomablePeaksView* const m_zoomablePlottingWidget;
+      /// Default behaviour 
+      PeaksPresenter_sptr m_default;
     };
   }
 }

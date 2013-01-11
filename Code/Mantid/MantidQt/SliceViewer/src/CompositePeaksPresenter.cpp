@@ -192,7 +192,7 @@ namespace MantidQt
       SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
       
       // Update the palette the foreground colour
-      const int pos = std::distance(m_subjects.begin(), iterator);
+      const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
       m_palette.setForegroundColour(pos, colour);
 
       // Apply the foreground colour
@@ -209,7 +209,7 @@ namespace MantidQt
       SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
 
       // Update the palette background colour.
-      const int pos = std::distance(m_subjects.begin(), iterator);
+      const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
       m_palette.setBackgroundColour(pos, colour);
 
       // Apply the background colour
@@ -248,7 +248,7 @@ namespace MantidQt
         throw std::runtime_error("Foreground colours from palette cannot be fetched until nested presenters are added.");
       }
       SubjectContainer::const_iterator iterator = getPresenterIteratorFromWorkspace(ws);
-      const int pos = std::distance(m_subjects.begin(), iterator);
+      const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
       return m_palette.foregroundIndexToColour(pos);
     }
 
@@ -263,7 +263,7 @@ namespace MantidQt
         throw std::runtime_error("Background colours from palette cannot be fetched until nested presenters are added.");
       }
       SubjectContainer::const_iterator iterator = getPresenterIteratorFromWorkspace(ws);
-      const int pos = std::distance(m_subjects.begin(), iterator);
+      const int pos = static_cast<int>(std::distance(m_subjects.begin(), iterator));
       return m_palette.backgroundIndexToColour(pos);
     }
 
