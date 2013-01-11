@@ -129,6 +129,27 @@ void SplatterPlotView::resetDisplay()
   this->view->resetDisplay();
 }
 
+void SplatterPlotView::checkPeaksCoordinates()
+{
+  if (!this->peaksSource.isEmpty())
+  {
+    /*
+    // Use this to get the correct parameter. Name and type can change, but
+    // input to set call below is integer.
+    int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
+                                             "DataView").GetAsInt();
+    */
+    // Remove below when above is fixed.
+    int peakViewCoords = 1;
+    foreach(pqPipelineSource *src, this->peaksSource)
+    {
+      vtkSMPropertyHelper(src->getProxy(),
+                          "Peak Dimensions").Set(peakViewCoords);
+      src->getProxy()->UpdateVTKObjects();
+    }
+  }
+}
+
 void SplatterPlotView::onThresholdButtonClicked()
 {
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();

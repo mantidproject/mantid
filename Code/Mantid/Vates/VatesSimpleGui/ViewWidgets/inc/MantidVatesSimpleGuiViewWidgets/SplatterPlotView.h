@@ -86,6 +86,10 @@ public:
    */
   void resetDisplay();
 
+public slots:
+  /// Check the coordinates for the peaks overlay if necessary
+  void checkPeaksCoordinates();
+
 protected slots:
   /**
    * Create and apply a threshold filter to the data.
