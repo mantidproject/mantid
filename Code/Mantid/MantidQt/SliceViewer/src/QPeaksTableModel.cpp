@@ -15,7 +15,7 @@ namespace MantidQt
     const QString QPeaksTableModel::HKL = "HKL";
     const QString QPeaksTableModel::DSPACING = "DSpacing";
     const QString QPeaksTableModel::INT = "Int";
-    const QString QPeaksTableModel::SIGINT = "SigInt";
+    const QString QPeaksTableModel::SIGMINT = "SigInt";
     const QString QPeaksTableModel::QLAB = "QLab";
     const QString QPeaksTableModel::QSAMPLE = "QSample";
 
@@ -30,7 +30,7 @@ namespace MantidQt
       map.insert(std::make_pair(HKL, peak.getHKL().toString().c_str()));
       map.insert(std::make_pair(DSPACING, QString::number(peak.getDSpacing())));
       map.insert(std::make_pair(INT, QString::number(peak.getIntensity())));
-      map.insert(std::make_pair(SIGINT, QString::number(peak.getIntensity())));
+      map.insert(std::make_pair(SIGMINT, QString::number(peak.getIntensity())));
       map.insert(std::make_pair(QLAB, peak.getQLabFrame().toString().c_str()));
       map.insert(std::make_pair(QSAMPLE, peak.getQSampleFrame().toString().c_str()));
       return map;
@@ -48,7 +48,7 @@ namespace MantidQt
       m_columnNameMap.insert(std::make_pair(index++, HKL));
       m_columnNameMap.insert(std::make_pair(index++, DSPACING));
       m_columnNameMap.insert(std::make_pair(index++, INT));
-      m_columnNameMap.insert(std::make_pair(index++, SIGINT));
+      m_columnNameMap.insert(std::make_pair(index++, SIGMINT));
       m_columnNameMap.insert(std::make_pair(index++, QLAB));
       m_columnNameMap.insert(std::make_pair(index++, QSAMPLE));
     }

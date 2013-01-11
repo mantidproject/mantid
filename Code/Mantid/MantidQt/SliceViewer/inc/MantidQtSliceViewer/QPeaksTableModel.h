@@ -67,7 +67,7 @@ namespace MantidQt
       static const QString HKL;
       static const QString DSPACING;
       static const QString INT;
-      static const QString SIGINT;
+      static const QString SIGMINT;
       static const QString QLAB;
       static const QString QSAMPLE;
 
