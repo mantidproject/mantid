@@ -102,13 +102,12 @@ void SassenaFFT::exec()
   if( this->getProperty("DetailedBalance") )
   {
     double T = this->getProperty("Temp");
-    T *= m_T2ueV;  // from Kelvin to units of ueV
-    // The ExponentialCorrection algorithm assume the form C0*exp(-C1*x). Note the explicit minus in the exponent
+    // The ExponentialCorrection algorithm assumes the form C0*exp(-C1*x). Note the explicit minus in the exponent
     API::IAlgorithm_sptr ec = this->createChildAlgorithm("ExponentialCorrection");
     ec->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", sqw);
     ec->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
     ec->setProperty<double>("C0",1.0);
-    ec->setProperty<double>("C1",-1.0/(2.0*T));
+    ec->setProperty<double>("C1",-1.0/(2.0*T*m_T2ueV)); // Temperature in units of ueV
     ec->setPropertyValue("Operation","Multiply");
     ec->executeAsChildAlg();
   }

@@ -21,7 +21,7 @@ public:
   static  SassenaFFTTest* createSuite() { return new SassenaFFTTest(); }
   static void destroySuite( SassenaFFTTest *suite ) { delete suite; }
 
-  SassenaFFTTest() { }
+  SassenaFFTTest() : T2ueV(1000.0/11.604), ps2ueV(4136.0), nbins(2001) { }
 
   void test_init()
   {
@@ -67,10 +67,9 @@ public:
     // execute the algorithm
     TS_ASSERT_THROWS_NOTHING( m_alg.execute() );
     TS_ASSERT( m_alg.isExecuted() );
-    this->printWorkspace2D("/tmp/sqwDetailedBalanceCondition.dat",gwsName +"_sqw"); // uncomment line for debugging purposes only
+    // this->printWorkspace2D("/tmp/sqwDetailedBalanceCondition.dat",gwsName +"_sqw"); // uncomment line for debugging purposes only
     DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
-    const double T2ueV=1000.0/11.604; //conversion factor from Kelvin to ueV
-    const double exponentFactor = 1.0/(2.0*T*T2ueV); // quantum-correction to classical S(Q,E): exp(E/(2*kT)
+    const double exponentFactor = -1.0/(2.0*T*T2ueV); // negative of the quantum-correction to classical S(Q,E): exp(E/(2*kT)
     checkHeigth(ws, sqrt(2*M_PI),exponentFactor);
     checkAverage(ws,0.0, exponentFactor);
     checkSigma(ws, 1.0/(2.0*M_PI), exponentFactor);
@@ -82,22 +81,19 @@ private:
    * Check the maximum value stored in the workspace when the detailed condition is applied
    * @param wsName name of the workspace
    * @param value compare to the maximum value stored in the Y-vector of the workspace
-   * @exponentFactor inverse of the exponent factor in the detailed balance condition.
+   * @exponentFactor negative of the exponent factor in the detailed balance condition.
    */
   void checkHeigth(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
   {
-    const double ps2ueV=4136.0; // conversion factor from picosecond to micro-eV
     const double frErr=1E-03; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv;
     for(size_t i=0; i<nspectra; i++)
     {
       yv = ws->readY(i);
-      MantidVec::iterator it = std::max_element( yv.begin(), yv.end() );
-      size_t index = std::distance( yv.begin(), it);
+      size_t index = nbins/2; // This position should yield ws->readX(i).at(index)==0.0
       double x = ws->readX(i).at(index);
-      double factor = exp(exponentFactor*ps2ueV*x);
-      double h = (*it)*factor;
+      double h = yv.at(index)*exp(exponentFactor*x); // remove the quantum-correction from ws
       double goldStandard = value/(1+ static_cast<double>(i) );
       double error1 = DBL_EPSILON*std::sqrt( static_cast<double>(yv.size()) ); //rounding error if value==0
       double error = std::max(error1, frErr*std::fabs(goldStandard));
@@ -109,11 +105,10 @@ private:
    * Check the average.
    * @param wsName name of the workspace
    * @param value compare to the average
-   * @exponentFactor inverse of the exponent factor in the detailed balance condition.
+   * @exponentFactor negative of the exponent factor in the detailed balance condition.
    */
   void checkAverage(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
   {
-    const double ps2ueV=4136.0; // conversion factor from picosecond to micro-eV
     const double frErr=1E-03; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv,xv;
@@ -128,7 +123,7 @@ private:
       MantidVec::iterator itx = xv.begin();
       for(MantidVec::iterator it = yv.begin(); it != yv.end(); ++it)
       {
-        factor = exp(exponentFactor*ps2ueV*(*itx));
+        factor = exp(exponentFactor*(*itx));
         sum += (*it)*factor;
         average += (*it)*(*itx)*factor;
         ++itx;
@@ -144,7 +139,7 @@ private:
    * Check the standard deviation
    * @param wsName name of the workspace
    * @param value compare to the standard deviation
-   * @exponentFactor inverse of the exponent factor in the detailed balance condition.
+   * @exponentFactor negative of the exponent factor in the detailed balance condition.
    */
   void checkSigma(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
   {
@@ -152,20 +147,17 @@ private:
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv,xv;
     double factor;  // remove the detailed balance condition
-    const double ps2ueV=4136.0; // conversion factor from picosecond to micro-eV
     for(size_t i=0; i<nspectra; i++)
     {
       double goldStandard = ps2ueV*(1+ static_cast<double>(i) )*value; // recall each spectra was created with a different stdev
       double dx = (-2.0) * ws->readX(i).at(0); // extent along the X-axis
       yv = ws->readY(i);
-      MantidVec::iterator it = std::max_element( yv.begin(), yv.end() );
-      size_t index = std::distance( yv.begin(), it);
+      size_t index = nbins/2; // This position should yield ws->readX(i).at(index)==0.0
       double x = ws->readX(i).at(index);
-      factor = exp(exponentFactor*ps2ueV*x);
-      double h = (*it)*exp(x);
+      factor = exp(exponentFactor*x);
+      double h = yv.at(index)*exp(x);
       xv = ws->readX(i);
       MantidVec::iterator itx = xv.begin();
-      size_t nbins = yv.size();
       double sum = 0.0;
       for(MantidVec::iterator it = yv.begin(); it != yv.end(); ++it)
       {
@@ -184,7 +176,6 @@ private:
   /**
    * Gaussian centered at zero and with positive times only
    * @param sigma standard deviation
-   * @param nbins number of time points
    */
   void Gaussian( MantidVec& xv, MantidVec& yv, const double& Heigth, const double& sigma)
   {
@@ -210,7 +201,7 @@ private:
    * Each spectra is a gaussian centered at the origin and with a different standard deviation sigma.
    * sigma increases as sigma0*2^nspectra
    */
-  void createWorkspace2D( const std::string& wsName, const double& Heigth, const double& sigma0, const size_t &nbins, const size_t& nspectra)
+  void createWorkspace2D( const std::string& wsName, const double& Heigth, const double& sigma0, const size_t& nspectra)
   {
     DataObjects::Workspace2D_sptr ws(new DataObjects::Workspace2D);
     ws->initialize(nspectra, nbins, nbins); // arguments are NVectors, XLength, and YLength
@@ -246,32 +237,34 @@ private:
   {
     API::WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
 
-    const size_t nbins(2001);
     const size_t nspectra(4); // assume four Q-values
     std::string wsName = gwsName +"_fqt.Re";
     double Heigth = params[0];
     double sigma = params[1];
-    this->createWorkspace2D( wsName, Heigth, sigma, nbins, nspectra);
-    this->printWorkspace2D("/tmp/fqt.Re.dat",wsName);
+    this->createWorkspace2D( wsName, Heigth, sigma, nspectra);
+    // this->printWorkspace2D("/tmp/fqt.Re.dat",wsName); // uncomment line for debugging purposes only
     gws->add(wsName);
 
     wsName = gwsName +"_fqt.Im";
     Heigth = params[2];
     sigma = params[3];
-    this->createWorkspace2D( wsName, Heigth, sigma, nbins, nspectra);
-    this->printWorkspace2D("/tmp/fqt.Im.dat",wsName);
+    this->createWorkspace2D( wsName, Heigth, sigma, nspectra);
+    // this->printWorkspace2D("/tmp/fqt.Im.dat",wsName); // uncomment line for debugging purposes only
     gws->add(wsName);
 
     wsName = gwsName + "_fqt0";
     Heigth = params[4];
     sigma = params[5];
-    this->createWorkspace2D( wsName, Heigth, sigma, nbins, 1);
+    this->createWorkspace2D( wsName, Heigth, sigma, 1);
     gws->add(wsName);
 
     API::AnalysisDataService::Instance().add( gwsName, gws);
   } // void  createGroupWorkspace
 
   Algorithms::SassenaFFT m_alg;
+  const double T2ueV; //conversion factor from Kelvin to ueV
+  const double ps2ueV; // conversion factor from picosecond to micro-eV
+  const size_t nbins;
 }; // class ApplyDetailedBalanceTest
 
 
