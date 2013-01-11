@@ -18,6 +18,15 @@ class CompositePeaksPresenterTest : public CxxTest::TestSuite
 
 private:
 
+  /// Mock class for testing desruction of PeaksPresenters
+  class DyingMockPeaksPresenter : public MockPeaksPresenter
+  {
+  public:
+    MOCK_METHOD0(die, void());
+    virtual ~DyingMockPeaksPresenter(){die();}
+  };
+
+  /// Fake class to make objects of type
   class FakeZoomablePeaksView : public ZoomablePeaksView
   {
   public:
@@ -27,19 +36,10 @@ private:
     virtual ~FakeZoomablePeaksView(){}
   };
 
-  FakeZoomablePeaksView* _fakeZoomableView;
+  /// Fake zoomable peaks view instance to use as a dummy parameter.
+  FakeZoomablePeaksView _fakeZoomableView;
 
 public:
-
-  CompositePeaksPresenterTest() : _fakeZoomableView(new FakeZoomablePeaksView)
-  {
-  }
-
-  ~CompositePeaksPresenterTest()
-  {
-    delete _fakeZoomableView;
-  }
-
 
   void test_construction_throws_if_zoomablePeakView__NULL()
   {
@@ -49,8 +49,8 @@ public:
 
   void test_construction()
   {
-     CompositePeaksPresenter composite(_fakeZoomableView);
-     TSM_ASSERT_EQUALS("Should default construct with a _fakeZoomableViewPeaksPresenter", 0, composite.size());
+     CompositePeaksPresenter composite(&_fakeZoomableView);
+     TSM_ASSERT_EQUALS("Should default construct with a &_fakeZoomableViewPeaksPresenter", 0, composite.size());
 
      /*After default construction, the composite presenter should behave identically to a NULL peaks presenter.*/
      NullPeaksPresenter expected;
@@ -64,7 +64,7 @@ public:
 
   void test_add_peaks_presenter()
   {
-    CompositePeaksPresenter presenter(_fakeZoomableView);
+    CompositePeaksPresenter presenter(&_fakeZoomableView);
     const size_t initialSize = presenter.size();
     presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>() );
     TSM_ASSERT_EQUALS("Expected one item to be added.", initialSize + 1, presenter.size());
@@ -72,7 +72,7 @@ public:
 
   void test_keep_presenters_unique()
   {
-    CompositePeaksPresenter presenter(_fakeZoomableView);
+    CompositePeaksPresenter presenter(&_fakeZoomableView);
     const size_t initialSize = presenter.size();
     auto presenterToAdd = boost::make_shared<MockPeaksPresenter>();
     presenter.addPeaksPresenter( presenterToAdd );
@@ -82,7 +82,7 @@ public:
 
   void test_clear()
   {
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     const size_t initialSize = composite.size();
     composite.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>() ); // Add one subject
     composite.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>() ); // Add another subject
@@ -91,7 +91,7 @@ public:
 
     TSM_ASSERT_EQUALS("Should be back to initial size after clearing.", initialSize, composite.size());
 
-    /*After clearing, the composite presenter should behave identically to a _fakeZoomableViewPeaks presenter.*/
+    /*After clearing, the composite presenter should behave identically to a &_fakeZoomableViewPeaks presenter.*/
     NullPeaksPresenter expected;
     TS_ASSERT_THROWS_NOTHING(expected.update());
     TS_ASSERT_THROWS_NOTHING(composite.update());
@@ -112,7 +112,7 @@ public:
     EXPECT_CALL(*mockDefault, updateWithSlicePoint(_)).Times(1); // Expect the method on the default to be called.
 
     // Create the composite.
-    CompositePeaksPresenter composite(_fakeZoomableView, defaultPresenter);
+    CompositePeaksPresenter composite(&_fakeZoomableView, defaultPresenter);
     // Call the method on the composite.
     composite.updateWithSlicePoint(0);
 
@@ -126,7 +126,7 @@ public:
     EXPECT_CALL(*mockPresenter, updateWithSlicePoint(_)).Times(1); // Expect the method on the default to be called.
 
     // Create the composite.
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     // add the subject presenter.
     composite.addPeaksPresenter(presenter);
     // Call the method on the composite.
@@ -153,7 +153,7 @@ public:
     EXPECT_CALL(*mockPresenter, getTransformName()).Times(1).WillOnce(Return("")); 
 
     // Create the composite.
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     // add the subject presenter.
     composite.addPeaksPresenter(presenter);
     // Call the method on the composite.
@@ -173,7 +173,7 @@ public:
     EXPECT_CALL(*mockDefault, update()).Times(1); // Expect the method on the default to be called.
 
     // Create the composite.
-    CompositePeaksPresenter composite(_fakeZoomableView, defaultPresenter);
+    CompositePeaksPresenter composite(&_fakeZoomableView, defaultPresenter);
     // Call the method on the composite.
     composite.update();
 
@@ -187,7 +187,7 @@ public:
     EXPECT_CALL(*mockPresenter, update()).Times(1); // Expect the method on the default to be called.
 
     // Create the composite.
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     // add the subject presenter.
     composite.addPeaksPresenter(presenter);
     // Call the method on the composite.
@@ -211,7 +211,7 @@ public:
     EXPECT_CALL(*pB, presentedWorkspaces()).WillOnce(Return(setB)); 
 
     // Create the composite.
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     // add the subject presenter.
     composite.addPeaksPresenter(A);
     composite.addPeaksPresenter(B);
@@ -227,7 +227,7 @@ public:
     const bool PASS = true;
     const bool FAIL = false;
     
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     
     MockPeaksPresenter* A = new MockPeaksPresenter;
     MockPeaksPresenter* B = new MockPeaksPresenter;
@@ -275,7 +275,7 @@ public:
     const bool PASS = true;
     const bool FAIL = false;
     
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     
     MockPeaksPresenter* A = new MockPeaksPresenter;
     MockPeaksPresenter* B = new MockPeaksPresenter;
@@ -320,7 +320,7 @@ public:
 
   void test_maximum_allowed_peaks()
   {
-    CompositePeaksPresenter presenter(_fakeZoomableView);
+    CompositePeaksPresenter presenter(&_fakeZoomableView);
     // Add peaksWS
     const int limit = 10;
     for(int i = 0; i < limit; ++i)
@@ -335,7 +335,7 @@ public:
   {
     PeakPalette actualDefaultPalette;
 
-    CompositePeaksPresenter presenter(_fakeZoomableView);
+    CompositePeaksPresenter presenter(&_fakeZoomableView);
     PeakPalette presenterDefaultPalette = presenter.getPalette();
 
     TSM_ASSERT_EQUALS("CompositePeaksPresenter should be using a default palette until changed.", actualDefaultPalette, presenterDefaultPalette);
@@ -355,7 +355,7 @@ public:
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
 
     // Set a background colour on the composite.
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     composite.addPeaksPresenter(subject);
     composite.setBackgroundColour(peaksWS, newColour);
 
@@ -381,7 +381,7 @@ public:
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
 
     // Set a background colour on the composite.
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     composite.addPeaksPresenter(subject);
     composite.setForegroundColour(peaksWS, newColour);
 
@@ -395,13 +395,6 @@ public:
 
   void test_remove()
   {
-    class DyingMockPeaksPresenter : public MockPeaksPresenter
-    {
-    public:
-      MOCK_METHOD0(die, void());
-      virtual ~DyingMockPeaksPresenter(){die();}
-    };
-
     // Create a subject presenter that will be deleted.
     auto A = new NiceMock<DyingMockPeaksPresenter>();
     // Create a subject presenter that won't be deleted.
@@ -425,7 +418,7 @@ public:
       EXPECT_CALL(*B, presentedWorkspaces()).WillRepeatedly(Return(setB));
 
       // Set a background colour on the composite.
-      CompositePeaksPresenter composite(_fakeZoomableView);
+      CompositePeaksPresenter composite(&_fakeZoomableView);
       composite.addPeaksPresenter(subjectA);
       composite.addPeaksPresenter(subjectB);
 
@@ -445,7 +438,7 @@ public:
 
   void test_remove_default()
   {
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     auto peaksWorkspace = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
 
     //Try to remove a peaks workspace & associated presenter that doesn't exist from a default constructed composite.
@@ -464,7 +457,7 @@ public:
     EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
 
     // Create the composite and add the test presenter.
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     composite.addPeaksPresenter(subject);
 
     // execute setshown(...)
@@ -493,7 +486,7 @@ public:
     EXPECT_CALL(*mockDefault, setShown(expectedFlag)).Times(1); // Expect the method on the default to be called.
 
     // Create the composite.
-    CompositePeaksPresenter composite(_fakeZoomableView, defaultPresenter);
+    CompositePeaksPresenter composite(&_fakeZoomableView, defaultPresenter);
     // Call the method on the composite.
     composite.setShown(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(), expectedFlag);
 
@@ -510,7 +503,7 @@ public:
     EXPECT_CALL(*mockDefault, showBackgroundRadius(expectedFlag)).Times(1); // Expect the method on the default to be called.
 
      // Create the composite.
-    CompositePeaksPresenter composite(_fakeZoomableView, defaultPresenter);
+    CompositePeaksPresenter composite(&_fakeZoomableView, defaultPresenter);
     // Call the method on the composite.
     composite.setBackgroundRadiusShown(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(), expectedFlag);
 
@@ -519,13 +512,13 @@ public:
 
   void test_getBackroundColour_default()
   {
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     TSM_ASSERT_THROWS("Cannot fetch background colours until nested presenters have been added.", composite.getBackgroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error);
   }
 
   void test_getForegroundColour_default()
   {
-    CompositePeaksPresenter composite(_fakeZoomableView);
+    CompositePeaksPresenter composite(&_fakeZoomableView);
     TSM_ASSERT_THROWS("Cannot fetch foreground colours until nested presenters have been added.", composite.getForegroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error);
   }
 
