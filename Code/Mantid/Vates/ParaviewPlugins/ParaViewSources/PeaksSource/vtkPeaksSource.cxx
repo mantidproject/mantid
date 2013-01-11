@@ -22,7 +22,8 @@ using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
 /// Constructor
-vtkPeaksSource::vtkPeaksSource() :  m_wsName(""), m_wsTypeName("")
+vtkPeaksSource::vtkPeaksSource() :  m_wsName(""), m_radius(-1),
+  m_wsTypeName(""), m_dimToShow(vtkPeakMarkerFactory::Peak_in_Q_lab)
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -52,6 +53,12 @@ void vtkPeaksSource::SetRadius(double radius)
   this->Modified();
 }
 
+void vtkPeaksSource::SetPeakDimension(int dim)
+{
+  m_dimToShow = static_cast<vtkPeakMarkerFactory::ePeakDimensions>(dim);
+  this->Modified();
+}
+
 int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
                                 vtkInformationVector *outputVector)
 {
@@ -66,7 +73,8 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
                             outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
     // Instantiate the factory that makes the peak markers
-    vtkPeakMarkerFactory *p_peakFactory = new vtkPeakMarkerFactory("peaks");
+    vtkPeakMarkerFactory *p_peakFactory = new vtkPeakMarkerFactory("peaks",
+                                                                   m_dimToShow);
 
     p_peakFactory->initialize(m_PeakWS);
     vtkDataSet *structuredMesh = p_peakFactory->create(drawingProgressUpdate);

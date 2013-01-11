@@ -2,6 +2,7 @@
 #define _vtkPeaksSource_h
 
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "vtkPolyDataAlgorithm.h"
 #include <string>
 
@@ -9,7 +10,6 @@
     Source for fetching Peaks Workspace out of the Mantid Analysis Data Service
     and converting them into vtkDataSets as part of the pipeline source.
 
-    @author Michael Reuter, NSSD ORNL
     @date 06/10/2011
 
     Copyright &copy; 2007-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -43,6 +43,7 @@ public:
   
   void SetRadius(double radius);
   void SetWsName(std::string wsName);
+  void SetPeakDimension(int dim);
   /// Update the algorithm progress.
   void updateAlgorithmProgress(double progress, const std::string& message);
   /// Getter for the workspace type
@@ -63,6 +64,9 @@ private:
 
   /// Cache for the workspace type name
   std::string m_wsTypeName;
+
+  /// View coodinate to show
+  Mantid::VATES::vtkPeakMarkerFactory::ePeakDimensions m_dimToShow;
 
   /// Cached workspace.
   Mantid::API::IPeaksWorkspace_sptr m_PeakWS;
