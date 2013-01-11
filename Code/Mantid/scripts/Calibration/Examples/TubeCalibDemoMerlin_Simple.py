@@ -62,7 +62,7 @@ def CalibrateMerlin( RunNumber ):
    iTube.constructTubeFor3PointsMethod ( Left, Right, Centre, ActiveLength )
 
    # Get fitting parameters
-   fitPar = TubeCalibFitParams( [], ExpectedHeight, ExpectedWidth, ThreePointMethod=True )
+   fitPar = TubeCalibFitParams( [35.0,512.0,989.0], ExpectedHeight, ExpectedWidth, ThreePointMethod=True )
 
    print "Created objects needed for calibration."
 

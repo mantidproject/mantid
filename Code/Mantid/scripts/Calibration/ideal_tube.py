@@ -84,9 +84,7 @@ class IdealTube:
             return 
          
        # Get actual tube on which ideal tube is based           
-       eP = fitPar.getPeaks()
-       ht, wd = fitPar.getHeightAndWidth()   
-       actualTube = getPeaksForNSlitsMethod ( ws, eP, ht, wd, wht)
+       actualTube = getPoints ( ws, [], fitPar, wht)
        print "Actual tube that ideal tube is to be based upon",actualTube
    
        # Get ideal tube based on this actual tube
@@ -102,8 +100,10 @@ class IdealTube:
        Reurn the array of of points where the peaks should be in Metres
        """
        return self.positions
-        
+   
+   def getFunctionalForms( self ):
+       """
+       Reurn the array of of points where the peaks should be in Metres
+       """
+       return self.functionalForms
 
-
-    
-    

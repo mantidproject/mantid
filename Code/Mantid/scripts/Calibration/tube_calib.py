@@ -78,106 +78,67 @@ def fitEndErfcParams ( B, C ): # Compose string argument for fit
     #print "name=EndErfc, B="+str(B)+", C="+str(C)
     return "name=EndErfc, B="+str(B)+", C="+str(C)
     
-def get3pointsFor3pointMethod ( IntegratedWorkspace, whichTube, fitParams ):
+def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube ):
     """     
-       Get the three points for the three point calibration method
-       from a centre peak, the left rise and right fall of the function.
-       This 3 point method is suited for MERLIN.
-       
-       @param IntegratedWorkspace: Workspace of integrated data
-       @param whichTube:  a list of workspace indices for one tube
-       @param fitParams: a TubeCalibFitParams object contain the fit parameters
-   
-       Return Value: the three points (left, right, centre)
-       
-    """	
-    nDets = len(whichTube)
-    
-    #Values that may need adjusting for instrument and tube type (must not be integer)
-    yVal, sigma = fitParams.getHeightAndWidth()
-
-    # We don't currently use the peaks of fitParams, but use hardcoded values
-    centre = nDets/2 # Centre peak position (pixels)
-    left = (5.0, 35.0, 85.0) # expected left in pixels
-    right =  (nDets-left[2], nDets-left[1], nDets-left[0]) # expected right in pixels
-    endGrad = 6.0 #expected end gradient
-
-    createTubeCalibtationWorkspaceByWorkspaceIndexList( IntegratedWorkspace, "get3pointsFor3pointMethod", whichTube, showPlot=False )
-
-    #Get three points for calibration
-    Fit(InputWorkspace="get3pointsFor3pointMethod",Function='name=LinearBackground, A0=1000',StartX=str(centre-2*sigma),EndX=str(centre+2*sigma),Output="Z1")
-
-    #Fit(InputWorkspace="Z1_Workspace",Function='name=Gaussian, Height=4500.0, PeakCentre=512.0, Sigma=34.0', WorkspaceIndex='2',StartX='444.0',EndX='580.0',Output="CentrePoint")
-    Fit(InputWorkspace="Z1_Workspace",Function=fitGaussianParams(yVal,centre,sigma), WorkspaceIndex='2',StartX=str(centre-5*sigma),EndX=str(centre+5*sigma),Output="CentrePoint")
-
-
-    paramG1 = mtd['CentrePoint_Parameters']
-
-
-    #Fit(InputWorkspace="get3pointsFor3pointMethod",Function='name=EndErfc, B=24.0, C=6.0 ',StartX='6.0',EndX='90.0',Output="LeftPoint")
-    Fit(InputWorkspace="get3pointsFor3pointMethod",Function=fitEndErfcParams(left[1],endGrad),StartX=str(left[0]),EndX=str(left[2]),Output="LeftPoint")  
-  
-
-    paramL1 = mtd['LeftPoint_Parameters']
-
-
-    #Fit(InputWorkspace="get3pointsFor3pointMethod",Function='name=EndErfc, B=980.0, C=-6.0 ',StartX='940.0',EndX='1023.0',Output="RightPoint")
-    Fit(InputWorkspace="get3pointsFor3pointMethod",Function=fitEndErfcParams(right[1],-endGrad),StartX=str(right[0]),EndX=str(right[2]),Output="RightPoint")
-        
-    paramR1 = mtd['RightPoint_Parameters']
-    
-    #Check fits
-    #  we just check that there is a positive peak in centre
-    htRow = paramG1.row(0).items()
-    ht = htRow[1][1]
-    htOK = (ht > 0.0)
-
-    l = paramL1.row(1).items()
-    g = paramG1.row(1).items()
-    r = paramR1.row(1).items()
-    A = l[1][1]
-    B = r[1][1]
-    if( htOK ):
-        C = g[1][1]
-    else:
-        C = (A+B)/2.0  # If we haven't got a centre peak, we put one half way between the end points.
-            
-    return A, B, C 
-    
-def getPeaksForNSlitsMethod ( IntegratedWorkspace, eP, eHeight, eWidth, whichTube ):
-    """     
-       Get the centres of N slits for calibration 
+       Get the centres of N slits or edges for calibration 
        This N slit method is suited for WISH or the five sharp peaks of MERLIN .
        
        @param IntegratedWorkspace: Workspace of integrated data
-       @param eP: array of expected positions of the slits (in pixels)
-       @param eHeight: expected height of slits
-       @param eWidth: expected width of slits
+       @param funcForms: array of function form 1=slit, 2=edge
+       @param fitParams: a TubeCalibFitParams object contain the fit parameters
        @param whichTube:  a list of workspace indices for one tube
    
-       Return Value: array of the slit positions (-1.0 indicates failed to find slit position)
+       Return Value: array of the slit/edge positions (-1.0 indicates failed to find position)
        
     """	
     nDets = len(whichTube)
-    nPeaks = len(eP)
+    eP = fitParams.getPeaks()
+    nPts = len(eP)
+    nFf = len(funcForms)
     results = []
     
-    createTubeCalibtationWorkspaceByWorkspaceIndexList( IntegratedWorkspace, "getPeaksForNSlitsMethod", whichTube, showPlot=False )
+    eHeight, eWidth = fitParams.getHeightAndWidth()
+    outedge, inedge, endGrad = fitParams.getEdgeParameters()
     
-    for i in range(nPeaks):
-        margin = 0.3
-        if( i == 0):
-           start = (1-margin)*eP[i]
+    margin = 0.3
+    
+    # Check functional form
+    if ( nFf != 0 and nFf < nPts):
+       print "tube_calib.getPoints Error: Number of functional forms",nFf,"not compatible with number of points",nPts,"."
+       return []
+     
+    # Create input workspace for fitting  
+    createTubeCalibtationWorkspaceByWorkspaceIndexList( IntegratedWorkspace, "getPoints", whichTube, showPlot=False )
+    
+    # Prepare to loop over points
+    edgeMode = 1  # We assume first edge is approached from outside
+    # Loop over the points
+    for i in range(nPts):
+        if( nFf != 0 and funcForms[i] == 2 ):
+           # We have an edge
+           centre = eP[i]
+           if( edgeMode > 0):
+              start = eP[i] - outedge
+              end = eP[i] + inedge
+           else:
+              start = eP[i] - inedge
+              end = eP[i] + outedge
+           Fit(InputWorkspace="getPoints",Function=fitEndErfcParams(centre,endGrad*edgeMode),StartX=str(start),EndX=str(end),Output="CalibPoint") 
+           edgeMode = -edgeMode # Next edge would be reverse of this edge
         else:
-           start = margin*eP[i-1] + (1-margin)*eP[i]
-        centre = eP[i]
-        if( i == nPeaks-1):
-           end = (1-margin)*eP[i] + (margin)*nDets
-        else:
-           end = (1-margin)*eP[i] + (margin)*eP[i+1]
-	   
-        Fit(InputWorkspace="getPeaksForNSlitsMethod",Function=fitGaussianParams(eHeight,centre,eWidth), StartX=str(start),EndX=str(end),Output="CalibPeak")
-        paramCalibPeak = mtd['CalibPeak_Parameters']
+           # We have a slit
+           centre = eP[i]
+           if( i == 0):
+              start = (1-margin)*eP[i]
+           else:
+              start = margin*eP[i-1] + (1-margin)*eP[i]
+           if( i == nPts-1):
+              end = (1-margin)*eP[i] + (margin)*nDets
+           else:
+              end = (1-margin)*eP[i] + (margin)*eP[i+1]   
+           Fit(InputWorkspace="getPoints",Function=fitGaussianParams(eHeight,centre,eWidth), StartX=str(start),EndX=str(end),Output="CalibPoint")
+           
+        paramCalibPeak = mtd['CalibPoint_Parameters']
         pkRow = paramCalibPeak.row(1).items()
         thisResult = pkRow[1][1]
         if( start < thisResult and thisResult < end):
@@ -185,7 +146,6 @@ def getPeaksForNSlitsMethod ( IntegratedWorkspace, eP, eHeight, eWidth, whichTub
         else:
             results.append(-1.0) #ensure result is ignored
     
-    #print whichTube[0], results    
     return results
     
     
@@ -449,26 +409,20 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
         # Calibribate the tube, if possible
         if( tubeSet.getTubeLength(i) >= ExcludeShortTubes ):  # Only calibrate tubes not excluded by ExcludeShortTubes
             if( overrideFit ):
-                actualTube = OverridePeaks
-            elif( fitPar.isThreePointMethod() ):
-                # Find the three peaks in the tube
-                AP, BP, CP =  get3pointsFor3pointMethod( ws, wht, fitPar)
-                #print i+1, AP, BP, CP
-                actualTube = [AP, CP, BP] 
+               actualTube = OverridePeaks
             else:
-                ht, wd = fitPar.getHeightAndWidth()   
-                actualTube = getPeaksForNSlitsMethod ( ws, eP, ht, wd, wht )
-                # print actualTube
-                
+               ff = iTube.getFunctionalForms()
+               actualTube = getPoints ( ws, ff, fitPar, wht )
+               
+            # print actualTube
             if( len(actualTube) == 0):
-                print "getPeaksForNSlitMethod failed"
+                print "getPoints failed"
                 return
                 
             # Print peak positions fitted into PeaksFile, if it exists
             if( PeakFile != ""):
                 print >> pFile, tubeSet.getTubeName(i), actualTube
                 
-            #detIDList, detPosList = get3pointsMethodResults( ws, AP, BP, CP, wht, 2900 ) 
             detIDList, detPosList = getCalibratedPixelPositions( ws, actualTube, idealTube, wht, PeakTestMode )
         
             #print len(wht)
@@ -485,25 +439,10 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
 
     # Delete temporary workspaces for obtaining slit points
     if( OverridePeaks == []):
-       if( fitPar.isThreePointMethod() ):
-          DeleteWorkspace( 'get3pointsFor3pointMethod')
-          DeleteWorkspace('Z1_NormalisedCovarianceMatrix')
-          DeleteWorkspace('Z1_Parameters')
-          DeleteWorkspace('Z1_Workspace')
-          DeleteWorkspace('CentrePoint_NormalisedCovarianceMatrix')
-          DeleteWorkspace('CentrePoint_Parameters')
-          DeleteWorkspace('CentrePoint_Workspace')
-          DeleteWorkspace('LeftPoint_NormalisedCovarianceMatrix')
-          DeleteWorkspace('LeftPoint_Parameters')
-          DeleteWorkspace('LeftPoint_Workspace')
-          DeleteWorkspace('RightPoint_NormalisedCovarianceMatrix')
-          DeleteWorkspace('RightPoint_Parameters')
-          DeleteWorkspace('RightPoint_Workspace')
-       else:
-          DeleteWorkspace('getPeaksForNSlitsMethod')
-          DeleteWorkspace('CalibPeak_NormalisedCovarianceMatrix')
-          DeleteWorkspace('CalibPeak_Parameters')
-          DeleteWorkspace('CalibPeak_Workspace')
+       DeleteWorkspace('getPoints')
+       DeleteWorkspace('CalibPoint_NormalisedCovarianceMatrix')
+       DeleteWorkspace('CalibPoint_Parameters')
+       DeleteWorkspace('CalibPoint_Workspace')
     
     # Delete temporary workspaces for getting new detector positions
     DeleteWorkspace('QuadraticFittingWorkspace')

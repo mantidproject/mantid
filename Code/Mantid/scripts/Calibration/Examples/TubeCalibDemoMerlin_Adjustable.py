@@ -60,7 +60,7 @@ def CalibrateMerlin( RunNumber, UsePeakFile=False ):
       thisTubeSet = TubeSpec(CalibInstWS)
       thisTubeSet.setTubeSpecByString(CalibratedComponent)
       # Get fitting parameters
-      fitPar = TubeCalibFitParams( [], ExpectedHeight, ExpectedWidth, ThreePointMethod=True )
+      fitPar = TubeCalibFitParams( [35.0,512.0,989.0], ExpectedHeight, ExpectedWidth, ThreePointMethod=True )
 
    # Get ideal tube
    iTube = IdealTube()
