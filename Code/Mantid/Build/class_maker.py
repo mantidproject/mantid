@@ -132,7 +132,7 @@ def write_source(subproject, classname, filename, args):
   int %s::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string %s::category() const { return "General";}
+  const std::string %s::category() const { return TODO: FILL IN A CATEGORY;}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
