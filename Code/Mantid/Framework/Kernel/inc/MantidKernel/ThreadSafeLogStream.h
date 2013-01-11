@@ -52,7 +52,10 @@ public:
   ThreadSafeLogStreamBuf(Poco::Logger& logger, Poco::Message::Priority priority);
   /// Destructor
   ~ThreadSafeLogStreamBuf();
-		
+	
+public:
+    int overflow(char c);
+    
 private:
   ///Overridden fron base to write to the device in a thread-safe manner.
   int writeToDevice(char c);

@@ -27,6 +27,11 @@ ThreadSafeLogStreamBuf::~ThreadSafeLogStreamBuf()
 {
 }
 
+int ThreadSafeLogStreamBuf::overflow(char c)
+{
+    return Poco::UnbufferedStreamBuf::overflow(c);
+}
+
 /**
  * If the character is an EOL character then write the buffered messsage to the chosen device(s). If
  * not, buffer the character
