@@ -36,8 +36,8 @@ namespace Algorithms
   /// Sets documentation strings for this algorithm
   void FilterByXValue::initDocs()
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    this->setWikiSummary("Filters the events in an event workspace according to a minimum and/or maximum value of X.");
+    this->setOptionalMessage("Filters events according to a min and/or max value of X.");
   }
 
   void FilterByXValue::init()
@@ -89,10 +89,8 @@ namespace Algorithms
     const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
     // Check if we're doing thing in-place.
-    bool inPlace = true;
     if ( inputWS != outputWS )
     {
-      inPlace = false;
       // Create a new output workspace if not doing things in place. Preserve event-ness.
       outputWS =
           boost::dynamic_pointer_cast<EventWorkspace>( WorkspaceFactory::Instance().create("EventWorkspace",
