@@ -16,11 +16,12 @@ set ( SRC_FILES
 	src/EQSANSQ2D.cpp
 	src/EQSANSReduce.cpp
 	src/HFIRDarkCurrentSubtraction.cpp
-	src/HFIRSANSNormalise.cpp
 	src/HFIRInstrument.cpp
 	src/HFIRLoad.cpp
+	src/HFIRSANSNormalise.cpp
 	src/RefReduction.cpp
 	src/RefRoi.cpp
+	src/RockingCurve.cpp
 	src/SANSBeamFinder.cpp
 	src/SANSBeamFluxCorrection.cpp
 	src/SANSSensitivityCorrection.cpp
@@ -51,11 +52,12 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
 	inc/MantidWorkflowAlgorithms/EQSANSReduce.h
 	inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
-	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
 	inc/MantidWorkflowAlgorithms/HFIRInstrument.h
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
+	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
 	inc/MantidWorkflowAlgorithms/RefReduction.h
 	inc/MantidWorkflowAlgorithms/RefRoi.h
+	inc/MantidWorkflowAlgorithms/RockingCurve.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
@@ -65,7 +67,10 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h
 )
               
-set ( TEST_FILES SANSSolidAngleCorrectionTest.h )
+set ( TEST_FILES
+	RockingCurveTest.h
+	SANSSolidAngleCorrectionTest.h
+)
 
 set ( TEST_PY_FILES 
   EQSANSQ2DTest.py 
