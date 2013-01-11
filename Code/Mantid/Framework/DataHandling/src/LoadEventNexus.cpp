@@ -1926,8 +1926,10 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
  * Create the required spectra mapping. If the file contains an isis_vms_compat block then
  * the mapping is read from there, otherwise a 1:1 map with the instrument is created (along
  * with the associated spectra axis)
+ * @param nxsfile :: The name of a nexus file to load the mapping from
  * @param workspace :: The workspace to contain the spectra mapping
- * @param bankNames :: Bank names that are in Nexus file
+ * @param monitorsOnly :: Load only the monitors is true
+ * @param bankName :: An optional bank name for loading a single bank
  */
 bool LoadEventNexus::deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames)
 {
