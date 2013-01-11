@@ -41,7 +41,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+
 
 #include <fstream>
 #include <sstream>
@@ -1519,8 +1519,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   //----------------- Pad Empty Pixels -------------------------------
   // Create the required spectra mapping so that the workspace knows what to pad to
-  bool hasMap = deleteBanks(WS, bankNames);
-  if (!hasMap) createSpectraMapping(m_filename, WS, monitors, onebank);
+  createSpectraMapping(m_filename, WS, monitors, onebank);
   WS->padSpectra();
 
   //This map will be used to find the workspace index
@@ -1921,127 +1920,9 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
   }
   return out;
 }
-//-----------------------------------------------------------------------------
-/**
- * Create the required spectra mapping. If the file contains an isis_vms_compat block then
- * the mapping is read from there, otherwise a 1:1 map with the instrument is created (along
- * with the associated spectra axis)
- * @param nxsfile :: The name of a nexus file to load the mapping from
- * @param workspace :: The workspace to contain the spectra mapping
- * @param monitorsOnly :: Load only the monitors is true
- * @param bankName :: An optional bank name for loading a single bank
- */
-bool LoadEventNexus::deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames)
-{
-	Instrument_sptr inst = boost::const_pointer_cast<Instrument>(workspace->getInstrument()->baseInstrument());
-	//Build a list of Rectangular Detectors
-	std::vector<boost::shared_ptr<RectangularDetector> > detList;
-	for (int i=0; i < inst->nelements(); i++)
-	{
-	  boost::shared_ptr<RectangularDetector> det;
-	  boost::shared_ptr<ICompAssembly> assem;
-	  boost::shared_ptr<ICompAssembly> assem2;
 
-	  det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
-	  if (det)
-	  {
-		detList.push_back(det);
-	  }
-	  else
-	  {
-		//Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
-		// We are not doing a full recursive search since that will be very long for lots of pixels.
-		assem = boost::dynamic_pointer_cast<ICompAssembly>( (*inst)[i] );
-		if (assem)
-		{
-		  for (int j=0; j < assem->nelements(); j++)
-		  {
-			det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
-			if (det)
-			{
-			  detList.push_back(det);
 
-			}
-			else
-			{
-			  //Also, look in the second sub-level for RectangularDetectors (e.g. PG3).
-			  // We are not doing a full recursive search since that will be very long for lots of pixels.
-			  assem2 = boost::dynamic_pointer_cast<ICompAssembly>( (*assem)[j] );
-			  if (assem2)
-			  {
-				for (int k=0; k < assem2->nelements(); k++)
-				{
-				  det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
-				  if (det)
-				  {
-					detList.push_back(det);
-				  }
-				}
-			  }
-			}
-		  }
-		}
-	  }
-	}
-    if (detList.size() == 0) return false;
-	for (int i = 0; i<static_cast<int>(detList.size()); i++)
-	{
-		bool keep = false;
-		for (int j = 0; j<static_cast<int>(bankNames.size()); j++)
-		{
-		    boost::shared_ptr<RectangularDetector> det = detList[i];
-		    std::string det_name = det->getName();
-		    size_t pos = bankNames[j].find("_events");
-			if(det_name.compare(bankNames[j].substr(0,pos)) == 0) keep = true;
-			if(keep) break;
-		}
-		if (!keep)
-		{
-			IComponent* comp = dynamic_cast<IComponent*>(detList[i].get());
-			inst->remove(comp);
-		}
-	}
-	Geometry::ISpectraDetectorMap *spectramap(NULL);
-    SpectraDetectorMap *singlebank = new API::SpectraDetectorMap;
-    size_t wiLast = 0;
-    for(size_t i=0; i < bankNames.size(); i++)
-    {
-    // Only build the map for the single bank
-    std::vector<IDetector_const_sptr> dets;
-    size_t pos = bankNames[i].find("_events");
-    if (pos > 0) WS->getInstrument()->getDetectorsInBank(dets, bankNames[i].substr(0,pos));
-    else WS->getInstrument()->getDetectorsInBank(dets, bankNames[i]);
-    if (!dets.empty())
-    {
-      // Make an event list for each.
-      for(size_t wi=0; wi < dets.size(); wi++)
-      {
-        const detid_t detID = dets[wi]->getID();
-        singlebank->addSpectrumEntries(specid_t(wiLast+wi+1), std::vector<detid_t>(1, detID));
-      }
-      wiLast += dets.size();
-      g_log.debug() << "Populated spectra map for single bank " << bankNames[i] << "\n";
-    }
-    else
-      throw std::runtime_error("Could not find the bank named " + bankNames[i] +
-          " as a component assembly in the instrument tree; or it did not contain any detectors."
-          " Try unchecking SingleBankPixelsOnly.");
-    }
-      spectramap = singlebank;
-      if( !spectramap )
-      {
-        g_log.debug() << "No custom spectra mapping found, continuing with default 1:1 mapping of spectrum:detectorID\n";
-        // The default 1:1 will suffice but exclude the monitors as they are always in a separate workspace
-        workspace->rebuildSpectraMapping(false);
-        g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
-      }
-      else
-      {
-        workspace->replaceAxis(1, new API::SpectraAxis(spectramap->nSpectra(), *spectramap));
-        workspace->replaceSpectraMap(spectramap);
-      }
-      return true;
-}
+
 //-----------------------------------------------------------------------------
 /**
  * Create the required spectra mapping. If the file contains an isis_vms_compat block then
