@@ -2,7 +2,7 @@
 #define REF_IMAGE_PLOT_ITEM_H
 
 #include "MantidQtImageViewer/ImagePlotItem.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "DllOption.h"
 #include "MantidQtRefDetectorViewer/RefLimitsHandler.h"
 
 namespace MantidQt
@@ -31,7 +31,7 @@ namespace RefDetectorViewer
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImagePlotItem : public ImageView::ImagePlotItem
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImagePlotItem : public ImageView::ImagePlotItem
 {
 
 public:

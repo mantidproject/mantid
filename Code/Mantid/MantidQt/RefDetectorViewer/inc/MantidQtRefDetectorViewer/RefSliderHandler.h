@@ -6,7 +6,7 @@
 
 #include "ui_RefImageView.h"
 #include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtRefDetectorViewer/DllOption.h"
 
 /**
     @class SliderHandler 
@@ -44,7 +44,7 @@ namespace RefDetectorViewer
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefSliderHandler : public ImageView::ISliderHandler
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public ImageView::ISliderHandler
 {
   public:
 

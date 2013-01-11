@@ -10,7 +10,7 @@
 #include "MantidQtImageViewer/TrackingPicker.h"
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
 #include "MantidQtImageViewer/GraphDisplay.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "DllOption.h"
 
 
 /**
@@ -52,7 +52,7 @@ namespace RefDetectorViewer
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefIVConnections: public QWidget
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefIVConnections: public QWidget
 {
   Q_OBJECT
 

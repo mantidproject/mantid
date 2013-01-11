@@ -53,7 +53,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories ( inc )
 
 # For Windows:
-add_definitions ( -DIN_MANTIDQT_IMAGEVIEWER )
+add_definitions ( -DIN_MANTIDQT_REFDETECTORVIEWER )
 
 # This creates the target library
 add_library ( MantidQtRefDetectorViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )

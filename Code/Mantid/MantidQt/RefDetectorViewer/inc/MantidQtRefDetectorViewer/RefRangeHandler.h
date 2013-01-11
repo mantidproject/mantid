@@ -4,7 +4,7 @@
 #include "MantidQtImageViewer/IRangeHandler.h"
 #include "ui_RefImageView.h"
 #include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "DllOption.h"
 
 /**
     @class RangeHandler 
@@ -42,7 +42,7 @@ namespace RefDetectorViewer
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefRangeHandler : public ImageView::IRangeHandler
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public ImageView::IRangeHandler
 {
   public:
 

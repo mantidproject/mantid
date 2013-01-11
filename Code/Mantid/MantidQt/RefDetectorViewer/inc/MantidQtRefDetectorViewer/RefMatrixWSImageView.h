@@ -1,7 +1,7 @@
 #ifndef REF_MATRIX_WS_IMAGE_VIEW_H
 #define REF_MATRIX_WS_IMAGE_VIEW_H
 
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "DllOption.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtRefDetectorViewer/RefImageView.h"
@@ -42,7 +42,7 @@ namespace RefDetectorViewer
 {
 
   class RefIVConnections;
-   class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSImageView
+   class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefMatrixWSImageView
 {
   public:
 

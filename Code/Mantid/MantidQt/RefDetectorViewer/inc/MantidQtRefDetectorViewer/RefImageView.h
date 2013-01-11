@@ -6,7 +6,7 @@
 
 #include "MantidQtImageViewer/GraphDisplay.h"
 #include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "DllOption.h"
 
 /**
     @class RefImageView 
@@ -45,7 +45,7 @@ namespace RefDetectorViewer
 {
 
   class RefIVConnections;
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageView : public QMainWindow
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
 {
   public:
 

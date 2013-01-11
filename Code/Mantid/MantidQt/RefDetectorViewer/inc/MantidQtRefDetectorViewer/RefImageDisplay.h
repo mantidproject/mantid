@@ -5,6 +5,7 @@
 #include "MantidQtRefDetectorViewer/RefSliderHandler.h"
 #include "MantidQtRefDetectorViewer/RefRangeHandler.h"
 #include "MantidQtRefDetectorViewer/RefLimitsHandler.h"
+#include "DllOption.h"
 
 namespace MantidQt
 {
@@ -33,7 +34,7 @@ namespace RefDetectorViewer
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageDisplay : public ImageView::ImageDisplay
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageDisplay : public ImageView::ImageDisplay
 {
   public:
      /// Make an ImageDisplay to display with the given widgets and controls 
