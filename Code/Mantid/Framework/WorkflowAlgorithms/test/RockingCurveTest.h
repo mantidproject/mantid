@@ -25,6 +25,12 @@ public:
   // Just a simple test on a very small workspace - leave more extensive testing for system tests
   void test_simple_case()
   {
+    // I'm not sure why, but this trick seems to be needed to force linking to the Algorithms
+    // library on Ubuntu (otherwise it says the child algorithms are not registered).
+    Mantid::Algorithms::FilterByXValue dummy;
+    dummy.version();
+    // End of dummy code
+
     EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace2(3,1);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     auto scan_index = new TimeSeriesProperty<int>("scan_index");
