@@ -70,7 +70,7 @@ int LoadSassena::fileCheck(const std::string &filePath)
   }
   else
   {
-    this->g_log.debug("LoadSassena::fileCheck - no version attribute found");
+    this->g_log.error("LoadSassena::fileCheck - no version attribute found");
   }
   // Be sure to close the file before returning
   H5Fclose(h5file);
