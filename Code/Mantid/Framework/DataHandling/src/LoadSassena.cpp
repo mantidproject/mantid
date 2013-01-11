@@ -336,8 +336,7 @@ void LoadSassena::exec()
   char cversion[16];
   if ( H5LTget_attribute_string( h5file, "/", "sassena_version", cversion ) < 0 )
   {
-    this->g_log.error("Unable to read version string:"+m_filename);
-    //throw Kernel::Exception::FileError("Unable to read version string:" , m_filename);
+    throw Kernel::Exception::FileError("Unable to read Sassena version" , m_filename);
   }
   //const std::string version(cversion);
   //determine which loader protocol to use based on the version
