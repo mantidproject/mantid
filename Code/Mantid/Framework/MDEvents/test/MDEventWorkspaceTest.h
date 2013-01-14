@@ -590,6 +590,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws->clearMDMasking());
     TSM_ASSERT_EQUALS("Nothing should be masked.", 0, getNumberMasked(ws));
   }
+
+  void test_getSpecialCoordinateSystem_default()
+  {
+     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 1 /*event per box*/);
+    TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::API::None, ws->getSpecialCoordinateSystem());
+  }
+
+  void test_setSpecialCoordinateSystem_default()
+  {
+     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 1 /*event per box*/);
+    TS_ASSERT_EQUALS(Mantid::API::None, ws->getSpecialCoordinateSystem());
+
+    ws->setCoordinateSystem(Mantid::API::QLab);
+    TS_ASSERT_EQUALS(Mantid::API::QLab, ws->getSpecialCoordinateSystem());
+  }
 };
 
 class MDEventWorkspaceTestPerformance :    public CxxTest::TestSuite

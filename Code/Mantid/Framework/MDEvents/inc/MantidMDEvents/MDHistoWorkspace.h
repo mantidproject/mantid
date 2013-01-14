@@ -161,6 +161,15 @@ namespace MDEvents
       return m_boxLength;
     }
 
+    /// Get the special coordinate system.
+    virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const
+    {
+      return m_coordinateSystem;
+    }
+
+    /// Set the special coordinate system.
+    void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem);
+
     void setTo(signal_t signal, signal_t errorSquared, signal_t numEvents);
 
     void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared);
@@ -430,6 +439,8 @@ namespace MDEvents
     coord_t * m_origin;
     /// the number of events, contributed into the workspace;
     mutable uint64_t m_nEventsContributed;
+    /// The special coordinate system of the workspace.
+    Mantid::API::SpecialCoordinateSystem m_coordinateSystem;
   protected:
   
     /// Linear array of masks for each bin

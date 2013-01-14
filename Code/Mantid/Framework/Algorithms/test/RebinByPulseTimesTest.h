@@ -72,6 +72,7 @@ public:
   MOCK_METHOD1(getSpectrum, Mantid::API::ISpectrum*(const std::size_t));
   MOCK_CONST_METHOD1(getSpectrum, const Mantid::API::ISpectrum*(const std::size_t));
   MOCK_METHOD3(init, void(const size_t&, const size_t&, const size_t&));
+  MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::API::SpecialCoordinateSystem()); 
   virtual ~MockIEventWorkspace(){}
 };
 

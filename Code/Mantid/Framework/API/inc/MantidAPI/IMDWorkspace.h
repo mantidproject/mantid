@@ -36,6 +36,16 @@ namespace Mantid
       NumEventsNormalization  = 2
     };
 
+    
+    /// Special coordinate systems
+    enum SpecialCoordinateSystem
+    {
+      None = 0, 
+      HKL = 1, 
+      QLab = 2, 
+      QSample = 3
+    };
+
 
     /** Basic MD Workspace Abstract Class.
      *
@@ -110,6 +120,8 @@ namespace Mantid
 
       /// Clear existing masks
       virtual void clearMDMasking() = 0;
+
+      virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const = 0;
     };
     
     /// Shared pointer to the IMDWorkspace base class

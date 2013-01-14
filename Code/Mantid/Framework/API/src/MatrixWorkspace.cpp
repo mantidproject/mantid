@@ -1797,6 +1797,14 @@ namespace Mantid
       throw std::runtime_error("MatrixWorkspace::clearMDMasking has no implementation");
     }
 
+     /**
+    @return the special coordinate system used if any.
+    */
+    Mantid::API::SpecialCoordinateSystem MatrixWorkspace::getSpecialCoordinateSystem() const
+    {
+      return Mantid::API::None;
+    }
+
 
   } // namespace API
 } // Namespace Mantid

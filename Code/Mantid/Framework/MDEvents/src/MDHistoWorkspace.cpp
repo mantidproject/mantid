@@ -31,7 +31,8 @@ namespace MDEvents
       Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT)
   : IMDHistoWorkspace(),
     numDimensions(0),
-    m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN())
+    m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
+    m_coordinateSystem(None)
   {
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
     if (dimX) dimensions.push_back(dimX);
@@ -1257,6 +1258,15 @@ namespace MDEvents
           sum+=uint64_t(m_numEvents[i]);
 
     return sum;
+  }
+
+  /**
+  Set the special coordinate system (if any) to use.
+  @param coordinateSystem : Special coordinate system to use.
+  */
+  void MDHistoWorkspace::setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem)
+  {
+    m_coordinateSystem = coordinateSystem;
   }
 
 } // namespace Mantid

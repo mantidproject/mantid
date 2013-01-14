@@ -38,7 +38,8 @@ namespace MDEvents
   TMDE(
   MDEventWorkspace)::MDEventWorkspace()
     //m_BoxController(boost::make_shared<BoxController>(nd))
-  : m_BoxController(boost::make_shared<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > >(nd))
+  : m_BoxController(boost::make_shared<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > >(nd)),
+  m_coordinateSystem(Mantid::API::None)
   {
     // First box is at depth 0, and has this default boxController
     data = new MDBox<MDE, nd>(m_BoxController, 0);
@@ -812,6 +813,16 @@ namespace MDEvents
     {
       allBoxes[i]->unmask();
     }
+  }
+
+  /**
+  Set the special coordinate system (if any) to use.
+  @param coordinateSystem : Special coordinate system to use.
+  */
+    TMDE(
+      void MDEventWorkspace)::setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem)
+  {
+    m_coordinateSystem = coordinateSystem;
   }
 
 }//namespace MDEvents

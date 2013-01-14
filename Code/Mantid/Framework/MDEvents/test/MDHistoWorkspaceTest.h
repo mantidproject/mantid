@@ -949,6 +949,20 @@ public:
     TSM_ASSERT_EQUALS("Nothing should be masked.", 0, getNumberMasked(ws));
   }
 
+  void test_getSpecialCoordinateSystem_default()
+  {
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
+    TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::API::None, ws->getSpecialCoordinateSystem());
+  }
+
+  void test_setSpecialCoordinateSystem_default()
+  {
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
+    TS_ASSERT_EQUALS(Mantid::API::None, ws->getSpecialCoordinateSystem());
+
+    ws->setCoordinateSystem(Mantid::API::QLab);
+    TS_ASSERT_EQUALS(Mantid::API::QLab, ws->getSpecialCoordinateSystem());
+  }
 
 };
 
