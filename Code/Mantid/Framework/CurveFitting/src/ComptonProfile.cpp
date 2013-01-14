@@ -78,7 +78,12 @@ namespace CurveFitting
 
     m_l1 = sample->getDistance(*source);
     m_l2 = det->getDistance(*sample);
-    m_theta = m_workspace->detectorTwoTheta(det);
+    double dummy(0.0);
+    const Kernel::V3D detPos = det->getPos();
+    detPos.getSpherical(dummy, m_theta, dummy);
+    m_theta *= M_PI/180.0;
+    //m_theta = m_workspace->detectorTwoTheta(det);
+
 
     // parameters
     m_sigmaL1 = getComponentParameter(*det, "sigma_l1");
@@ -109,10 +114,6 @@ namespace CurveFitting
    */
   void ComptonProfile::function1D(double* out, const double* xValues, const size_t nData) const
   {
-    std::vector<double> tInSecs(xValues, xValues + nData);
-
-    std::transform(tInSecs.begin(), tInSecs.end(), tInSecs.begin(), std::bind2nd(std::multiplies<double>(), 1e-6)); // Convert to seconds
-
     const double mn = PhysicalConstants::NeutronMassAMU;
     const double mevToK = PhysicalConstants::E_mev_toNeutronWavenumberSq;
     const double massToMeV = 0.5*PhysicalConstants::NeutronMass/PhysicalConstants::meV; // Includes factor of 1/2
@@ -162,14 +163,15 @@ namespace CurveFitting
     m_yspace.resize(nData);
     for(size_t i = 0; i < nData; ++i)
     {
-      const double v0 = m_l1/(tInSecs[i] - m_t0 - (m_l2/v1));
+      const double tseconds = xValues[i]*1e-6;
+      const double v0 = m_l1/(tseconds - m_t0 - (m_l2/v1));
       const double ei = massToMeV*v0*v0;
       e0[i] = ei;
       const double w = ei - m_e1;
       const double k0 = std::sqrt(ei/mevToK);
       const double q = std::sqrt(k0*k0 + k1*k1 - 2.0*k0*k1*std::cos(m_theta));
       m_modQ[i] = q;
-      m_yspace[i] = 0.2393*(m_mass/q)*(w - mevToK*q*q/m_mass);
+      m_yspace[i] = 0.2393*(m_mass/q)*(w - (mevToK*q*q/m_mass));
     }
 
     std::vector<double> profile(nData);
@@ -181,50 +183,6 @@ namespace CurveFitting
       out[j] = std::pow(e0[j],0.1)*m_mass*profile[j]/m_modQ[j];
     }
 
-//    for(size_t i = 0; i < nmasses; ++i)
-//    {
-//      const auto & yi = yspace[i];
-//      auto & j1i = j1[i];
-//      std::ostringstream os;
-//      os << WIDTH_PREFIX << i;
-//      const double gaussWidth(getParameter(os.str()));
-//      const double lorentzWidth(lorentzW[i]);
-//      const double gaussRes = sigmaRes[i];
-//      if(i == 0)
-//      {
-//        const double amp(1.0);
-//        firstMassJ(j1i, yi, modQ, amp, kfse, gaussWidth, lorentzWidth, gaussRes);
-//      }
-//      else
-//      {
-//        os.str("");
-//        os << INTENSITY_PREFIX << i;
-//        double lorentzPos(0.0), amplitude(getParameter(os.str())), lorentzFWHM(lorentzWidth);
-//        double gaussFWHM = std::sqrt(std::pow(gaussRes,2) + std::pow(2.0*STDDEV_TO_HWHM*gaussWidth,2));
-//        voigtApprox(j1i, yi,lorentzPos, amplitude, lorentzFWHM, gaussFWHM); // Answer goes into j1i
-//        voigtApproxDiff(voigtDiffResult, yi, lorentzPos, amplitude, lorentzFWHM, gaussFWHM);
-//        for(size_t j = 0; j < nData; ++j)
-//        {
-//          const double factor = std::pow(gaussWidth,4.0)/(3.0*modQ[j]);
-//          j1i[j] -= factor*voigtDiffResult[j];
-//        }
-//      }
-//      // Multiply by mass
-//      std::transform(j1i.begin(), j1i.end(), j1i.begin(), std::bind2nd(std::multiplies<double>(), m_masses[i]));
-//    }
-//
-//    // Sum over each mass and scale by prefactor to get answer
-//    for(size_t j = 0; j < nData; ++j)
-//    {
-//      for(size_t i = 0; i < nmasses; ++i)
-//      {
-//        out[j] += j1[i][j];
-//      }
-//      out[j] *= std::pow(e0[j],0.1)/modQ[j];
-//    }
-//
-////      std::copy(out, out+nData,std::ostream_iterator<double>(std::cerr, "\n"));
-//    //throw std::runtime_error("stop");
   }
 
   /**
@@ -249,7 +207,7 @@ namespace CurveFitting
     }
     const double epsilon = (maxy - miny)/1000.0;
 
-    // Compute: V = voigt(y+2eps,...) - voigt(y-2eps,...) - 2*voigt(y+eps,...) + 2*(voigt(y-eps,...)/(2eps^3))
+    // Compute: V = (voigt(y+2eps,...) - voigt(y-2eps,...) - 2*voigt(y+eps,...) + 2*(voigt(y-eps,...))/(2eps^3)
 
     std::vector<double> ypmEps(yspace.size());
     // y+2eps
@@ -263,18 +221,21 @@ namespace CurveFitting
     std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(), voigtDiff.begin(), std::minus<double>());
 
     // y+eps
-    std::transform(yspace.begin(), yspace.end(), ypmEps.begin(), std::bind2nd(std::plus<double>(), epsilon)); // Add 2 epsilon
+    std::transform(yspace.begin(), yspace.end(), ypmEps.begin(), std::bind2nd(std::plus<double>(), epsilon)); // Add epsilon
     voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp, lorentzWidth, gaussWidth);
     std::transform(tmpResult.begin(), tmpResult.end(), tmpResult.begin(), std::bind2nd(std::multiplies<double>(), 2.0)); // times 2
-    // Difference - result is put back in voigtDiff
+    // Difference with 3rd term - result is put back in voigtDiff
     std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(), voigtDiff.begin(), std::minus<double>());
 
     //y-eps
-    std::transform(yspace.begin(), yspace.end(), ypmEps.begin(), std::bind2nd(std::minus<double>(), epsilon)); // Add 2 epsilon
+    std::transform(yspace.begin(), yspace.end(), ypmEps.begin(), std::bind2nd(std::minus<double>(), epsilon)); // Subtract epsilon
     voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp, lorentzWidth, gaussWidth);
-    std::transform(tmpResult.begin(), tmpResult.end(), tmpResult.begin(), std::bind2nd(std::divides<double>(), std::pow(epsilon,3))); // divided by (eps^3)
-    // Sum for final answer
+    std::transform(tmpResult.begin(), tmpResult.end(), tmpResult.begin(), std::bind2nd(std::multiplies<double>(), 2.0)); // times 2
+    // Sum final term
     std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(), voigtDiff.begin(), std::plus<double>());
+
+    // Finally multiply by 2*eps^3
+    std::transform(voigtDiff.begin(), voigtDiff.end(), voigtDiff.begin(), std::bind2nd(std::divides<double>(), 2.0*std::pow(epsilon,3))); // divided by (2eps^3)
   }
 
   /**
