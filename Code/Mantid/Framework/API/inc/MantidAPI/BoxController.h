@@ -41,6 +41,7 @@ namespace API
       m_addingEvents_eventsPerTask = 1000;
       m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
       m_splitInto.resize(this->nd, 1);
+      m_DataChunk = 10000;
       resetNumBoxes();
     }
 
@@ -263,7 +264,18 @@ namespace API
       // Return true if the average # of events per box is big enough to split.
       return ((eventsAdded / numMDBoxes) > m_SplitThreshold);
     }
-
+    /**The method returns the data chunk (continious part of the NeXus array) used to write data on HDD */ 
+    size_t getDataChunk()const
+    {
+      return m_DataChunk;
+    }
+    /** The method used to load nexus data chunk size to the box controller. Used when loading MDEvent nexus file 
+        Disabled at the moment as it is unclear how to get acsess to physical size of NexUs data set and optimal chunk size should be physical Nexus chunk size
+    */ 
+    //void setChunkSize(size_t chunkSize)
+    //{
+    //  m_DataChunk = chunkSize;
+    // }
 
     //-----------------------------------------------------------------------------------
     /** Call to track the number of MDBoxes are contained in the MDEventWorkspace
@@ -438,7 +450,7 @@ namespace API
         m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth-1] * double(m_numSplit);
     }
 
-
+  private:
     /// Number of dimensions
     size_t nd;
 
@@ -498,10 +510,10 @@ namespace API
     /// Do we use the DiskBuffer at all?
     bool m_useWriteBuffer;
 
-
-  private:
     /// Number of bytes in a single MDLeanEvent<> of the workspace.
     size_t m_bytesPerEvent;
+    /// The size of the events block which can be written in the neXus array at once (continious part of the data block)
+    size_t m_DataChunk;
    
   };
 

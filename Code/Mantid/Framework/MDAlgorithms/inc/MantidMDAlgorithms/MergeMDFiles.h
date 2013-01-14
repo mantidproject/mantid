@@ -80,16 +80,16 @@ namespace MDAlgorithms
   public:
 
     /// Files to load
-    std::vector<std::string> m_filenames;
+    std::vector<std::string> m_Filenames;
 
     /// Vector of file handles to each input file
-    std::vector< ::NeXus::File *> files;
+    std::vector< ::NeXus::File *> m_pFiles;
 
     /// Vector of the box_index vector for each each input file
-    std::vector< std::vector<uint64_t> > box_indexes;
+    std::vector<boost::shared_ptr<std::vector<uint64_t> > > m_BoxIndexes;
 
     /// Number of events in each box, summed over all input files
-    std::vector<uint64_t> eventsPerBox;
+    std::vector<uint64_t> m_EventsPerBox;
 
     /// # of boxes in the input workspaces.
     size_t numBoxes;

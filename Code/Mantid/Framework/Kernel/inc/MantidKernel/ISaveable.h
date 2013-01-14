@@ -60,7 +60,7 @@ namespace Kernel
     //-----------------------------------------------------------------------------------------------
 
     /// Save the data - to be overriden
-    virtual void save() const = 0;
+    virtual void save()const = 0;
 
     /// Load the data - to be overriden
     virtual void load() = 0;

@@ -299,28 +299,29 @@ namespace MDAlgorithms
 
     // Total number of events in ALL files.
     totalEvents = 0;
-
+    m_BoxIndexes.reserve(m_Filenames.size());
+    m_pFiles.reserve(m_Filenames.size());
     try
     {
-      for (size_t i=0; i<m_filenames.size(); i++)
+      for (size_t i=0; i<m_Filenames.size(); i++)
       {
         // Open the file to read
-        ::NeXus::File * file = new ::NeXus::File(m_filenames[i], NXACC_READ);
-        files.push_back(file);
+        ::NeXus::File * file = new ::NeXus::File(m_Filenames[i], NXACC_READ);
+        m_pFiles.push_back(file);
 
         file->openGroup("MDEventWorkspace", "NXentry");
         file->openGroup("box_structure", "NXdata");
 
         // Start index/length into the list of events
-        std::vector<uint64_t> box_event_index;
-        file->readData("box_event_index", box_event_index);
-        box_indexes.push_back(box_event_index);
+        auto spBoxEventsInd = boost::shared_ptr<std::vector<uint64_t> >(new std::vector<uint64_t>());//box_event_index;
+        file->readData("box_event_index", *spBoxEventsInd);
+        m_BoxIndexes.push_back(spBoxEventsInd);
 
         // Check for consistency
         if (i>0)
         {
-          if (box_event_index.size() != box_indexes[0].size())
-            throw std::runtime_error("Inconsistent number of boxes found in file " + m_filenames[i] + ". Cannot merge these files. Did you generate them all with exactly the same box structure?");
+          if (spBoxEventsInd->size() != m_BoxIndexes[0]->size())
+            throw std::runtime_error("Inconsistent number of boxes found in file " + m_Filenames[i] + ". Cannot merge these files. Did you generate them all with exactly the same box structure?");
         }
         file->closeGroup();
 
@@ -333,25 +334,25 @@ namespace MDAlgorithms
     catch (...)
     {
       // Close all open files in case of error
-      for (size_t i=0; i<files.size(); i++)
-        files[i]->close();
+      for (size_t i=0; i<m_pFiles.size(); i++)
+        m_pFiles[i]->close();
       throw;
     }
 
     // This is how many boxes are in all the files.
-    numBoxes = box_indexes[0].size() / 2;
+    numBoxes = m_BoxIndexes[0]->size() / 2;
 
     // Count the number of events in each box.
-    eventsPerBox.resize(numBoxes, 0);
+    m_EventsPerBox.resize(numBoxes, 0);
     for (size_t ib=0; ib<numBoxes; ib++)
     {
       uint64_t tot = 0;
-      for (size_t j=0; j<files.size(); j++)
-        tot += box_indexes[j][ib*2 + 1];
-      eventsPerBox[ib] = tot;
+      for (size_t j=0; j<m_pFiles.size(); j++)
+        tot += (*m_BoxIndexes[j])[ib*2 + 1];
+      m_EventsPerBox[ib] = tot;
     }
 
-    g_log.notice() << totalEvents << " events in " << files.size() << " files." << std::endl;
+    g_log.notice() << totalEvents << " events in " << m_pFiles.size() << " files." << std::endl;
   }
 
 
@@ -432,14 +433,14 @@ namespace MDAlgorithms
         outWS(outWS),
         m_boxesById(boxesById), m_parallelSplit(parallelSplit)
     {
-      this->m_cost = double(this->m_alg->eventsPerBox[this->m_blockNumStart]);
+      this->m_cost = double(this->m_alg->m_EventsPerBox[this->m_blockNumStart]);
     }
 
     //---------------------------------------------------------------------------------------------
     /** Main method that performs the work for the task. */
     void run()
     {
-      // Vector of each vector of events in each box
+      // Vector of each vector of events in each inBox
       std::vector<std::vector<MDE> > eventsPerEachBox(m_blockNumEnd-m_blockNumStart);
       // Each of the outputted boxes
       std::vector<MDBoxBase<MDE,nd> *> outputBoxes(m_blockNumEnd-m_blockNumStart);
@@ -451,7 +452,7 @@ namespace MDAlgorithms
       // ----------------- Prepare the boxes for each box -----------------------------------------
       for (size_t blockNum = this->m_blockNumStart; blockNum < this->m_blockNumEnd; blockNum++)
       {
-        uint64_t numEvents = this->m_alg->eventsPerBox[blockNum];
+        uint64_t numEvents = this->m_alg->m_EventsPerBox[blockNum];
         if (numEvents == 0) continue;
 
         // Find the box in the output.
@@ -459,23 +460,24 @@ namespace MDAlgorithms
         if (!outBox)
           throw std::runtime_error("Could not find box at ID " + Strings::toString(blockNum) );
 
-        // Should we pre-emptively split the box
-        MDBox<MDE,nd> * outMDBox = dynamic_cast<MDBox<MDE,nd> *>(outBox);
-        if (outMDBox && (numEvents > bc->getSplitThreshold()))
-        {
-          // Yes, let's split it
-          MDGridBox<MDE,nd> * parent = dynamic_cast<MDGridBox<MDE,nd> *>(outMDBox->getParent());
-          if (parent)
-          {
-            size_t index = parent->getChildIndexFromID( outBox->getId() );
-            if (index < parent->getNumChildren())
-            {
-              parent->splitContents(index);
-              // Have to update our pointer - old one was deleted!
-              outBox = parent->getChild(index);
-            }
-          }
-        }
+        ///// its optimization, let's avoid it for the time being. 
+        //// Should we pre-emptively split the box
+        //MDBox<MDE,nd> * outMDBox = dynamic_cast<MDBox<MDE,nd> *>(outBox);
+        //if (outMDBox && (numEvents > bc->getSplitThreshold()))
+        //{
+        //  // Yes, let's split it
+        //  MDGridBox<MDE,nd> * parent = dynamic_cast<MDGridBox<MDE,nd> *>(outMDBox->getParent());
+        //  if (parent)
+        //  {
+        //    size_t index = parent->getChildIndexFromID( outBox->getId() );
+        //    if (index < parent->getNumChildren())
+        //    {
+        //      parent->splitContents(index);
+        //      // Have to update our pointer - old one was deleted!
+        //      outBox = parent->getChild(index);
+        //    }
+        //  }
+        //}
         // Save the output box for later
         outputBoxes[blockNum-this->m_blockNumStart] = outBox;
 
@@ -489,7 +491,7 @@ namespace MDAlgorithms
       // --------------------- Go through each file -------------------------------------------
       this->m_alg->fileMutex.lock();
       //bc->fileMutex.lock();
-      for (size_t iw=0; iw<this->m_alg->files.size(); iw++)
+      for (size_t iw=0; iw<this->m_alg->m_pFiles.size(); iw++)
       {
         for (size_t blockNum = this->m_blockNumStart; blockNum < this->m_blockNumEnd; blockNum++)
         {
@@ -497,11 +499,11 @@ namespace MDAlgorithms
           std::vector<MDE> & events = eventsPerEachBox[blockNum-this->m_blockNumStart];
 
           // The file and the indexes into that file
-          ::NeXus::File * file = this->m_alg->files[iw];
-          std::vector<uint64_t> & box_event_index = this->m_alg->box_indexes[iw];
+          ::NeXus::File * file = this->m_alg->m_pFiles[iw];
+          auto spBoxEventInd = this->m_alg->m_BoxIndexes[iw];
 
-          uint64_t indexStart = box_event_index[blockNum*2+0];
-          uint64_t numEvents = box_event_index[blockNum*2+1];
+          uint64_t indexStart = spBoxEventInd->operator[](blockNum*2+0);
+          uint64_t numEvents  = spBoxEventInd->operator[](blockNum*2+1);
           if (numEvents == 0) continue;
           totalEvents += numEvents;
 
@@ -629,7 +631,7 @@ namespace MDAlgorithms
       size_t accumulatedEvents = 0;
       while (accumulatedEvents < 10000000 && ib < numBoxes)
       {
-        accumulatedEvents += eventsPerBox[ib];
+        accumulatedEvents += m_EventsPerBox[ib];
         ib++;
       }
 
@@ -657,9 +659,9 @@ namespace MDAlgorithms
     g_log.information() << overallTime << " to do all the adding." << std::endl;
 
     // Close any open file handle
-    for (size_t iw=0; iw<this->files.size(); iw++)
+    for (size_t iw=0; iw<this->m_pFiles.size(); iw++)
     {
-      ::NeXus::File * file = this->files[iw];
+      ::NeXus::File * file = this->m_pFiles[iw];
       if (file) file->close();
     }
 
@@ -700,10 +702,10 @@ namespace MDAlgorithms
   void MergeMDFiles::exec()
   {
     MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filenames"));
-    m_filenames = MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
-    if (m_filenames.size() == 0)
+    m_Filenames = MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
+    if (m_Filenames.size() == 0)
       throw std::invalid_argument("Must specify at least one filename.");
-    std::string firstFile = m_filenames[0];
+    std::string firstFile = m_Filenames[0];
 
     // Start by loading the first file but just the box structure, no events, and not file-backed
     IAlgorithm_sptr loader = createChildAlgorithm("LoadMD", 0.0, 0.05, false);

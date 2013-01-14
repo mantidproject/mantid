@@ -44,7 +44,7 @@ public:
     std::vector<std::vector<std::string> > filenames;
     std::vector<MDEventWorkspace3Lean::sptr> inWorkspaces;
     // how many events put into each file.
-    long nFileEvents(1000000);
+    long nFileEvents(1000);
     for (size_t i=0; i<3; i++)
     {
       std::ostringstream mess;

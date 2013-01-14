@@ -221,14 +221,17 @@ namespace MDAlgorithms
 
         if(Vol==0 || Vol>std::numeric_limits<float>::max())
           throw std::invalid_argument(" Domain ranges are not defined properly for workspace: "+ws->getName());
+      
 
         double dV = Vol/double(nPoints);
         double delta0= std::pow(dV,1./double(nd)); 
         for (size_t d=0; d<nd; ++d)
         {
-            params.push_back(0.);
-            double extent = ws->getDimension(d)->getMaximum()-ws->getDimension(d)->getMinimum();
-            size_t nStrides = size_t(extent/delta0)+1;              
+            double min = ws->getDimension(d)->getMinimum();
+            params.push_back(min*(1+FLT_EPSILON)-min+FLT_EPSILON);
+            double extent = ws->getDimension(d)->getMaximum()-min;
+            size_t nStrides = size_t(extent/delta0);              
+            if(nStrides<1)nStrides = 1;
             params.push_back(extent/static_cast<double>(nStrides));
         }
       }
@@ -361,7 +364,8 @@ namespace MDAlgorithms
       if(step<=0)
         throw(std::invalid_argument("Step of the regular grid is less or equal to 0"));
 
-      indexMax[d] = size_t((max-min)/step)+1;
+      indexMax[d] = size_t((max-min)/step);
+      if(indexMax[d]==0)indexMax[d]=1;
       // deal with round-off errors
       while( (startPoint[d]+(indexMax[d]-1)*step) >= max ) step*=(1-FLT_EPSILON);
 
