@@ -279,30 +279,7 @@ void AlignAndFocusPowder::exec()
   m_outputW = maskAlg->getProperty("Workspace");
 
   if(!dspace)
-  {
-    if (m_resampleX != 0)
-    {
-      g_log.information() << "running ResampleX(NumberBins=" << abs(m_resampleX)
-                          << ", LogBinning=" << (m_resampleX < 0) << ")\n";
-      API::IAlgorithm_sptr alg = createChildAlgorithm("ResampleX");
-      alg->setProperty("InputWorkspace", m_outputW);
-      alg->setProperty("OutputWorkspace", m_outputW);
-      alg->setProperty("NumberBins", abs(m_resampleX));
-      alg->setProperty("LogBinning", (m_resampleX < 0));
-      alg->executeAsChildAlg();
-      m_outputW = alg->getProperty("OutputWorkspace");
-    }
-    else
-    {
-      g_log.information() << "running Rebin\n";
-	  API::IAlgorithm_sptr rebin1Alg = createChildAlgorithm("Rebin");
-	  rebin1Alg->setProperty("InputWorkspace", m_outputW);
-	  rebin1Alg->setProperty("OutputWorkspace", m_outputW);
-      rebin1Alg->setProperty("Params",m_params);
-	  rebin1Alg->executeAsChildAlg();
-	  m_outputW = rebin1Alg->getProperty("OutputWorkspace");
-    }
-  }
+    this->rebin();
 
   g_log.information() << "running AlignDetectors\n";
   API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
@@ -375,30 +352,7 @@ void AlignAndFocusPowder::exec()
   }
 
   if(dspace)
-  {
-    if (m_resampleX != 0)
-    {
-      g_log.information() << "running ResampleX(NumberBins=" << abs(m_resampleX)
-                          << ", LogBinning=" << (m_resampleX < 0) << ")\n";
-      API::IAlgorithm_sptr alg = createChildAlgorithm("ResampleX");
-      alg->setProperty("InputWorkspace", m_outputW);
-      alg->setProperty("OutputWorkspace", m_outputW);
-      alg->setProperty("NumberBins", abs(m_resampleX));
-      alg->setProperty("LogBinning", (m_resampleX < 0));
-      alg->executeAsChildAlg();
-      m_outputW = alg->getProperty("OutputWorkspace");
-    }
-    else
-    {
-      g_log.information() << "running Rebin\n";
-	  API::IAlgorithm_sptr rebin2Alg = createChildAlgorithm("Rebin");
-	  rebin2Alg->setProperty("InputWorkspace", m_outputW);
-	  rebin2Alg->setProperty("OutputWorkspace", m_outputW);
-      rebin2Alg->setProperty("Params",m_params);
-	  rebin2Alg->executeAsChildAlg();
-	  m_outputW = rebin2Alg->getProperty("OutputWorkspace");
-    }
-  }
+    this->rebin();
 
   doSortEvents(m_outputW);
 
@@ -441,6 +395,15 @@ void AlignAndFocusPowder::exec()
     m_params.erase(m_params.begin());
     m_params.pop_back();
   }
+  if (!dspace)
+    this->rebin();
+
+  // return the output workspace
+  setProperty("OutputWorkspace",m_outputW);
+}
+
+void AlignAndFocusPowder::rebin()
+{
   if (m_resampleX != 0)
   {
     g_log.information() << "running ResampleX(NumberBins=" << abs(m_resampleX)
@@ -463,9 +426,6 @@ void AlignAndFocusPowder::exec()
     rebin3Alg->executeAsChildAlg();
     m_outputW = rebin3Alg->getProperty("OutputWorkspace");
   }
-
-  // return the output workspace
-  setProperty("OutputWorkspace",m_outputW);
 }
 
 /**

@@ -75,6 +75,7 @@ namespace Mantid
       void init();
       void exec();
       void loadCalFile(const std::string &calFileName);
+      void rebin();
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;
       DataObjects::EventWorkspace_sptr m_inputEW;
