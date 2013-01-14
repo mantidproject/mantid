@@ -282,6 +282,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     refAlg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
     refAlg1->setProperty("NXPixel", NX_PIXELS);
     refAlg1->setProperty("NYPixel", NY_PIXELS);
+    refAlg1->setProperty("ConvertToQ", false);
     refAlg1->setProperty("YPixelMin", ymin);
     refAlg1->setProperty("YPixelMax", ymax);
     refAlg1->setProperty("XPixelMin", xmin);

@@ -392,8 +392,6 @@ class sfCalculator():
 #                       OutputWorkspace='DataToFit',
 #                       AddMinimum=0)        
         
-        print 'before fit'
-        
         try:
         
             Fit(InputWorkspace='DataToFit',
@@ -417,7 +415,6 @@ class sfCalculator():
                 Output='Res')
         
         res = mtd['Res_Parameters']
-        print 'after fit'
         
         self.a = res.getDouble("Value", 0)
         self.b = res.getDouble("Value", 1)        
