@@ -32,19 +32,22 @@ class EQSANSSetup(ReductionStep):
         
         beam_ctr_x = None
         beam_ctr_y = None
-        find_beam = True
+        find_beam = "None"
         use_config_ctr = False
         find_beam_filename = ""
         if reducer._beam_finder is not None and \
             type(reducer._beam_finder)==BaseBeamFinder:
             [beam_ctr_x, beam_ctr_y] = reducer._beam_finder.get_beam_center()
-            find_beam = False
+            find_beam = "Value"
             if beam_ctr_x==0.0 and beam_ctr_y==0.0:
                 beam_ctr_x = None
                 beam_ctr_y = None
                 use_config_ctr = True
         else:
-            find_beam_filename = reducer._beam_finder._datafile
+            if reducer._beam_finder._datafile is not None and \
+                len(reducer._beam_finder._datafile)>0:
+                find_beam = "DirectBeam"
+                find_beam_filename = reducer._beam_finder._datafile
         
         SetupEQSANSReduction(UseConfigTOFCuts = reducer._data_loader._use_config_cutoff,
                              LowTOFCut = reducer._data_loader._low_TOF_cut,
@@ -59,7 +62,7 @@ class EQSANSSetup(ReductionStep):
                              WavelengthStep = reducer._data_loader._wavelength_step,
                              UseConfig = reducer._data_loader._use_config,
                              UseConfigBeam = use_config_ctr,
-                             FindBeamCenter=find_beam,
+                             BeamCenterMethod=find_beam,
                              BeamCenterFile=find_beam_filename,
                              BeamCenterX=beam_ctr_x,
                              BeamCenterY=beam_ctr_y,

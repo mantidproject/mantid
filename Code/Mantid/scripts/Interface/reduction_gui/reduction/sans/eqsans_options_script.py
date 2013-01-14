@@ -99,10 +99,10 @@ class ReductionOptions(BaseOptions):
             
         if self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
             if self.use_beam_monitor:
-                script += "  NormaliseToMonitor=1,\n"
+                script += "  Normalisation='Monitor',\n"
                 script += "  MonitorReferenceFile='%s',\n" % self.beam_monitor_reference
             else:
-                script += "  NormaliseToMonitor=0,\n"
+                script += "  Normalisation='BeamProfileAndCharge',\n"
 
         return script
 

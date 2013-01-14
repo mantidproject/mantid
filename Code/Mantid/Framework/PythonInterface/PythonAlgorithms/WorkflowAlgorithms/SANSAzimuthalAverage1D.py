@@ -54,13 +54,9 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         # Q binning options
         binning = self.getProperty("Binning").value
                 
-        input_ws_name = self.getPropertyValue("InputWorkspace")
         workspace = self.getProperty("InputWorkspace").value
         output_ws_name = self.getPropertyValue("OutputWorkspace")
 
-        if not AnalysisDataService.doesExist(input_ws_name):
-            Logger.get("SANSAzimuthalAverage").error("Could not find input workspace")
-            
         # Q range                        
         pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
         pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
@@ -83,20 +79,23 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             
         # If we kept the events this far, we need to convert the input workspace
         # to a histogram here
+        compute_resolution = True
         if workspace.id()=="EventWorkspace":
-            input_workspace = '__'+input_ws_name
+            compute_resolution = False
             alg = AlgorithmManager.create("ConvertToMatrixWorkspace")
             alg.initialize()
             alg.setChild(True)
-            alg.setPropertyValue("InputWorkspace", input_ws_name)
-            alg.setPropertyValue("OutputWorkspace", input_ws_name) 
+            alg.setProperty("InputWorkspace", workspace)
+            alg.setPropertyValue("OutputWorkspace", "__tmp_matrix_workspace")
             alg.execute()
+            workspace = alg.getProperty("OutputWorkspace").value
             
         alg = AlgorithmManager.create("Q1DWeighted")
         alg.initialize()
         alg.setChild(True)
-        alg.setPropertyValue("InputWorkspace", input_ws_name)
-        alg.setProperty("OutputBinning", binning)
+        alg.setProperty("InputWorkspace", workspace)
+        tmp_binning = "%g, %g, %g" % (binning[0], binning[1], binning[2])
+        alg.setPropertyValue("OutputBinning", tmp_binning)
         alg.setProperty("NPixelDivision", n_subpix) 
         alg.setProperty("PixelSizeX", pixel_size_x) 
         alg.setProperty("PixelSizeY", pixel_size_y) 
@@ -118,11 +117,12 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         output_ws = alg.getProperty("OutputWorkspace").value
 
         # Q resolution 
-        alg = AlgorithmManager.create("ReactorSANSResolution")
-        alg.initialize()
-        alg.setChild(True)
-        alg.setProperty("InputWorkspace", output_ws)
-        alg.execute()
+        if compute_resolution:
+            alg = AlgorithmManager.create("ReactorSANSResolution")
+            alg.initialize()
+            alg.setChild(True)
+            alg.setProperty("InputWorkspace", output_ws)
+            alg.execute()
         
         msg = "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
         self.setProperty("OutputMessage", msg)        
@@ -132,13 +132,25 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
     def _get_binning(self, workspace, wavelength_min, wavelength_max):    
         log_binning = self.getProperty("LogBinning").value
         nbins = self.getProperty("NumberOfBins").value
-        beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value
-        beam_ctr_y = workspace.getRun().getProperty("beam_center_y").value
         sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
         nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
         ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
         pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
         pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
+
+        if workspace.getRun().hasProperty("beam_center_x") and \
+             workspace.getRun().hasProperty("beam_center_y"):
+            beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value
+            beam_ctr_y = workspace.getRun().getProperty("beam_center_y").value
+        else:
+            property_manager_name = self.getProperty("ReductionProperties").value
+            property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+            if property_manager.existsProperty("LatestBeamCenterX") and \
+                property_manager.existsProperty("LatestBeamCenterY"):
+                beam_ctr_x = property_manager.getProperty("LatestBeamCenterX").value
+                beam_ctr_y = property_manager.getProperty("LatestBeamCenterY").value
+            else:
+                raise RuntimeError, "No beam center information can be found on the data set"                
 
         # Q min is one pixel from the center, unless we have the beam trap size
         if workspace.getRun().hasProperty("beam-trap-diameter"):

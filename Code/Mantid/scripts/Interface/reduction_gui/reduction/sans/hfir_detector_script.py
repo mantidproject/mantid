@@ -95,11 +95,16 @@ class Detector(BaseScriptElement):
             Set up the reduction options
         """
         # Beam finder options
-        script = "  FindBeamCenter=%s,\n" % str(self.use_finder)
+        script = ''
         if self.use_finder:
+            if self.use_direct_beam:
+                script += "  BeamCenterMethod='DirectBeam',\n"
+            else:
+                script += "  BeamCenterMethod='Scattering',\n"
             script += "  BeamCenterFile=%s,\n" % self.beam_file
             script += "  BeamRadius=%g,\n" % self.beam_radius
         else:
+            script += "  BeamCenterMethod='Value',\n"
             script += "  BeamCenterX=%g,\n" % self.x_position
             script += "  BeamCenterY=%g,\n" % self.y_position
         
