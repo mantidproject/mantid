@@ -82,7 +82,7 @@ public:
   void resetDisplay();
 
 protected slots:
-  ///
+  /// Determine if slice is to be shown in SliceViewer.
   void checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
                          int button, int modifier);
   /// Launch SliceViewer with the specified cut.

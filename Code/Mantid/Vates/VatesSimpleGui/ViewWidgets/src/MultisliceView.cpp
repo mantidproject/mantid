@@ -97,7 +97,8 @@ void MultiSliceView::resetCamera()
 
 /**
  * This function checks the signal coming from the MultiSliceView when a slice
- * indicator is clicked.
+ * indicator is clicked. It then calls for the slice to be shown in the
+ * SliceViewer.
  * @param axisIndex : index for the axis on which the clicked indicator resides
  * @param sliceOffsetOnAxis : location of slice along axis
  * @param button : which mouse button is being used
@@ -132,6 +133,7 @@ void MultiSliceView::checkSliceViewCompat()
  * representation of the current dataset and cut parameters. That will then
  * be handed to the SliceViewer.
  * @param axisIndex the index of the slice to be opened in SliceViewer
+ * @param sliceOffsetOnAxis position of the slice along given axis
  */
 void MultiSliceView::showCutInSliceViewer(int axisIndex,
                                           double sliceOffsetOnAxis)
@@ -171,18 +173,9 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
     geomXML = std::string(inGeomXML);
   }
 
-  // Get the necessary information from the cut
-  // 10/01/2013 Cannot use the GetSliceOrigin due to bug in ParaView
-  // which only returns (0, 0, 0) from the function call.
-  /*
-  const double *origin = this->mainView->GetSliceOrigin(axisIndex);
-  std::cout << "(" << origin[0] << ", " << origin[1] << ", ";
-  std::cout << origin[2] << ")" << std::endl;
-  */
-
   const double *orient = this->mainView->GetSliceNormal(axisIndex);
 
-  // Construct origin vector from orientation vector due to ParaView bug
+  // Construct origin vector from orientation vector
   double origin[3];
   origin[0] = sliceOffsetOnAxis * orient[0];
   origin[1] = sliceOffsetOnAxis * orient[1];
