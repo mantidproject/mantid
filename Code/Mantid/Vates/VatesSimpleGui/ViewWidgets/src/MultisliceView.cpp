@@ -108,7 +108,8 @@ void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
                                        int button, int modifier)
 {
   if (modifier == vtkContextMouseEvent::CONTROL_MODIFIER &&
-      button == vtkContextMouseEvent::LEFT_BUTTON)
+      (button == vtkContextMouseEvent::LEFT_BUTTON ||
+       button == vtkContextMouseEvent::RIGHT_BUTTON))
   {
     this->showCutInSliceViewer(axisIndex, sliceOffsetOnAxis);
   }
