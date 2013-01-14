@@ -50,7 +50,7 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
   public:
 
      /// Construct an ImageView to display data from the specified data source 
-     RefImageView( ImageView::ImageDataSource* data_source, double peak_min, double peak_max, double back_min, double back_max, double tof_min, double tof_max);
+     RefImageView( ImageView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max);
 
     ~RefImageView();    
     

@@ -27,7 +27,7 @@ namespace RefDetectorViewer
  *
  *  @param data_source  The source of the data that will be displayed. 
  */
-RefImageView::RefImageView( ImageView::ImageDataSource* data_source, double peak_min, double peak_max, double back_min, double back_max, double tof_min, double tof_max)
+RefImageView::RefImageView( ImageView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
 {
   Ui_RefImageViewer* ui = new Ui_RefImageViewer();
   saved_ui          = ui; 

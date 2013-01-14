@@ -106,28 +106,29 @@ void RefLimitsHandler::setTOFmax(const int value)
 }
 
 /** Update the currently active line edit with the coordinate passed in
+ *  Converts the incoming double to integer precision
  *  @param x An x coordinate - pertains to TOF lines
  *  @param y A y coordinate - pertains to peak & background lines
  */
 void RefLimitsHandler::setActiveValue(const double x, const double y)
 {
   if (m_ui->radioButton_peakLeft->isChecked()) { //peak left selected
-    setPeakLeft(y);
+    setPeakLeft( static_cast<int>(y) );
   }
   else if (m_ui->radioButton_peakRight->isChecked()) { //peak right selected
-    setPeakRight(y);
+    setPeakRight( static_cast<int>(y) );
   }
   else if (m_ui->radioButton_backLeft->isChecked()) { //back left selected
-    setBackLeft(y);
+    setBackLeft( static_cast<int>(y) );
   }
   else if (m_ui->radioButton_backRight->isChecked()) { //back right selected
-    setBackRight(y);
+    setBackRight( static_cast<int>(y) );
   }
   else if (m_ui->radioButton_TOFmin->isChecked()) { //tof min selected
-    setTOFmin(x);
+    setTOFmin( static_cast<int>(x) );
   }
   else if (m_ui->radioButton_TOFmax->isChecked()) { // tof max selected
-    setTOFmax(x);
+    setTOFmax( static_cast<int>(x) );
   }
 
 }

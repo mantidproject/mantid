@@ -28,7 +28,7 @@ RefMatrixWSImageView::RefMatrixWSImageView( MatrixWorkspace_sptr /*mat_ws*/ )
 //                                         // is closed
 }
 
-RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name, double peak_min, double peak_max, double back_min, double back_max, double tof_min, double tof_max)
+RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
 {
 
     IEventWorkspace_sptr ws;
