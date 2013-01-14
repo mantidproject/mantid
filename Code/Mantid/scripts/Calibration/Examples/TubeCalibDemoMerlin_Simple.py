@@ -35,6 +35,7 @@ def CalibrateMerlin( RunNumber ):
    # Set initial parameters for peak finding
    ExpectedHeight = 1000.0 # Expected Height of Peaks (initial value of fit parameter)
    ExpectedWidth = 32.0 # Expected width of centre peak (initial value of fit parameter)
+   ExpectedPositions = [35.0, 512.0, 989.0] # Expected positions of the edges and peak (initial values of fit parameters)
 
    # Set what we want to calibrate (e.g whole intrument or one door )
    CalibratedComponent = 'MERLIN'  # Calibrate whole instrument 
@@ -62,7 +63,7 @@ def CalibrateMerlin( RunNumber ):
    iTube.constructTubeFor3PointsMethod ( Left, Right, Centre, ActiveLength )
 
    # Get fitting parameters
-   fitPar = TubeCalibFitParams( [35.0,512.0,989.0], ExpectedHeight, ExpectedWidth, ThreePointMethod=True )
+   fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth, ThreePointMethod=True )
 
    print "Created objects needed for calibration."
 
