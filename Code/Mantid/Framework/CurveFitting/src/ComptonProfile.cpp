@@ -78,12 +78,7 @@ namespace CurveFitting
 
     m_l1 = sample->getDistance(*source);
     m_l2 = det->getDistance(*sample);
-    double dummy(0.0);
-    const Kernel::V3D detPos = det->getPos();
-    detPos.getSpherical(dummy, m_theta, dummy);
-    m_theta *= M_PI/180.0;
-    //m_theta = m_workspace->detectorTwoTheta(det);
-
+    m_theta = m_workspace->detectorTwoTheta(det);
 
     // parameters
     m_sigmaL1 = getComponentParameter(*det, "sigma_l1");
