@@ -468,7 +468,7 @@ namespace Geometry
    *
    *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
    */
-  void InstrumentDefinitionParser::setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem,
+  void InstrumentDefinitionParser::setLocation(Geometry::IComponent* comp, const Poco::XML::Element* pElem,
       const double angleConvertConst, const bool deltaOffsets)
   {
     comp->setPos(getRelativeTranslation(comp, pElem, angleConvertConst, deltaOffsets));
@@ -495,31 +495,41 @@ namespace Geometry
 
     // Check if sub-elements <trans> or <rot> of present - for now ignore these if m_deltaOffset = true
 
-    Element* pRecursive = pElem;
+    Element* pRecursive = NULL; 
+    Element* tElem = pElem->getChildElement("trans");
+    Element* rElem = pElem->getChildElement("rot");
     bool stillTransElement = true;
+    bool firstRound = true;  // during first round below pRecursive has not been set up front
     while ( stillTransElement )
     {
-        // figure out if child element is <trans> or <rot> or none of these
-
-        Element* tElem = pRecursive->getChildElement("trans");
-        Element* rElem = pRecursive->getChildElement("rot");
-
-        if (tElem && rElem)
-        {
+      // figure out if child element is <trans> or <rot> or none of these
+      
+      if (firstRound)
+      {
+        firstRound = false;
+      }
+      else
+      {
+        tElem = pRecursive->getChildElement("trans");
+        rElem = pRecursive->getChildElement("rot");
+      }
+ 
+      if (tElem && rElem)
+      {
         // if both a <trans> and <rot> child element present. Ignore <rot> element
         rElem = NULL;
-        }
+      }
 
-        if (!tElem && !rElem)
-        {
+      if (!tElem && !rElem)
+      {
         stillTransElement = false;
-        }
+      }
 
-        Kernel::V3D posTrans;
+      Kernel::V3D posTrans;
 
-        if (tElem)
-        {
-            posTrans = getRelativeTranslation(comp, tElem, angleConvertConst, deltaOffsets);
+      if (tElem)
+      {
+        posTrans = getRelativeTranslation(comp, tElem, angleConvertConst, deltaOffsets);
 
         // to get the change in translation relative to current rotation of comp
         Geometry::CompAssembly compToGetRot;
@@ -533,10 +543,10 @@ namespace Geometry
 
         // for recursive action
         pRecursive = tElem;
-        }  // end translation
+      }  // end translation
 
-        if (rElem)
-        {
+      if (rElem)
+      {
         double rotAngle = angleConvertConst*atof( (rElem->getAttribute("val")).c_str() ); // assumed to be in degrees
 
         double axis_x = 0.0;
@@ -544,17 +554,17 @@ namespace Geometry
         double axis_z = 1.0;
 
         if ( rElem->hasAttribute("axis-x") )
-            axis_x = atof( (rElem->getAttribute("axis-x")).c_str() );
+          axis_x = atof( (rElem->getAttribute("axis-x")).c_str() );
         if ( rElem->hasAttribute("axis-y") )
-            axis_y = atof( (rElem->getAttribute("axis-y")).c_str() );
+          axis_y = atof( (rElem->getAttribute("axis-y")).c_str() );
         if ( rElem->hasAttribute("axis-z") )
-            axis_z = atof( (rElem->getAttribute("axis-z")).c_str() );
+          axis_z = atof( (rElem->getAttribute("axis-z")).c_str() );
 
         comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x,axis_y,axis_z)));
 
         // for recursive action
         pRecursive = rElem;
-        }
+      }
 
     } // end while
   }
@@ -657,7 +667,7 @@ namespace Geometry
   *
   *  @throw logic_error Thrown if argument is not a child of component element
   */
-  Poco::XML::Element* InstrumentDefinitionParser::getParentComponent(Poco::XML::Element* pLocElem)
+  Poco::XML::Element* InstrumentDefinitionParser::getParentComponent(const Poco::XML::Element* pLocElem)
   {
     if ( (pLocElem->tagName()).compare("location") )
     {
@@ -695,7 +705,7 @@ namespace Geometry
   *  @param pElem ::  Poco::XML element that points to a location element
   *  @return name of location element
   */
-  std::string InstrumentDefinitionParser::getNameOfLocationElement(Poco::XML::Element* pElem)
+  std::string InstrumentDefinitionParser::getNameOfLocationElement(const Poco::XML::Element* pElem)
   {
     Element* pCompElem = InstrumentDefinitionParser::getParentComponent(pElem);
 
@@ -1040,7 +1050,7 @@ namespace Geometry
   *
   *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
   */
-  void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
+  void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly* parent, const Poco::XML::Element* pLocElem, IdList& idList)
   {
     const std::string filename = m_xmlFile->getFileFullPathStr();
     // The location element is required to be a child of a component element. Get this component element
@@ -1506,7 +1516,7 @@ namespace Geometry
   *
   *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
   */
-  void InstrumentDefinitionParser::setFacing(Geometry::IComponent* comp, Poco::XML::Element* pElem)
+  void InstrumentDefinitionParser::setFacing(Geometry::IComponent* comp, const Poco::XML::Element* pElem)
   {
     // Require that pElem points to an element with tag name 'location'
 
@@ -1556,7 +1566,7 @@ namespace Geometry
   *
   *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
   */
-  void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem,
+  void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent* comp, const Poco::XML::Element* pElem,
     std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache)
   {
     const std::string filename = m_xmlFile->getFileFullPathStr();

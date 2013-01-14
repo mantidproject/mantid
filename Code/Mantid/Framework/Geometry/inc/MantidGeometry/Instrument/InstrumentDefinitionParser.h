@@ -67,10 +67,10 @@ namespace Geometry
     std::string getMangledName();
 
     /// Get parent component element of location element
-    static Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
+    static Poco::XML::Element* getParentComponent(const Poco::XML::Element* pLocElem);
 
     /// get name of location element
-    static std::string getNameOfLocationElement(Poco::XML::Element* pElem);
+    static std::string getNameOfLocationElement(const Poco::XML::Element* pElem);
 
     /// Save DOM tree to xml file
     void saveDOM_Tree(std::string& outFilename);
@@ -83,7 +83,7 @@ namespace Geometry
     static Kernel::Logger& g_log;
 
     /// Set location (position) of comp as specified in XML location element
-    void setLocation(Geometry::IComponent* comp, Poco::XML::Element* pElem, const double angleConvertConst,
+    void setLocation(Geometry::IComponent* comp, const Poco::XML::Element* pElem, const double angleConvertConst,
                             const bool deltaOffsets=false);
 
     /// Calculate the position of comp relative to its parent from info provided by \<location\> element
@@ -127,16 +127,16 @@ namespace Geometry
     bool isAssembly(std::string) const;
 
     /// Add XML element to parent assuming the element contains no other component elements
-    void appendLeaf(Geometry::ICompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
+    void appendLeaf(Geometry::ICompAssembly* parent, const Poco::XML::Element* pElem, IdList& idList);
 
     /// Set parameter/logfile info (if any) associated with component
-    void setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem,
+    void setLogfile(const Geometry::IComponent* comp, const Poco::XML::Element* pElem,
                               std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache);
 
     /// Parse position of facing element to V3D
     Kernel::V3D parseFacingElementToV3D(Poco::XML::Element* pElem);
     /// Set facing of comp as specified in XML facing element
-    void setFacing(Geometry::IComponent* comp, Poco::XML::Element* pElem);
+    void setFacing(Geometry::IComponent* comp, const Poco::XML::Element* pElem);
     /// Make the shape defined in 1st argument face the component in the second argument
     void makeXYplaneFaceComponent(Geometry::IComponent* &in, const Geometry::ObjComponent* facing);
     /// Make the shape defined in 1st argument face the position in the second argument
