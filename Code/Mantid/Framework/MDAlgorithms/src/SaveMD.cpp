@@ -179,9 +179,11 @@ namespace MDAlgorithms
     }
 
     // The base entry. Named so as to distinguish from other workspace types.
-    if (!update)
-      file->makeGroup("MDEventWorkspace", "NXentry", 0);
-    file->openGroup("MDEventWorkspace", "NXentry");
+    if (update) // open workspace group
+      file->openGroup("MDEventWorkspace", "NXentry");
+    else // create and open workspace group
+      file->makeGroup("MDEventWorkspace", "NXentry", true);
+    
 
     // General information
     if (!update)
@@ -208,27 +210,27 @@ namespace MDAlgorithms
       file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
     }
 
-
     // Start the event Data group
-    if (!update)
-      file->makeGroup("event_data", "NXdata");
-    file->openGroup("event_data", "NXdata");
+    if (update)
+      file->openGroup("event_data", "NXdata");
+    else
+      file->makeGroup("event_data", "NXdata",true);
     file->putAttr("version", "1.0");
 
     // Prepare the data chunk storage.
-    size_t chunkSize = 10000; // TODO: Determine a smart chunk size!
-    if (!update)
+    size_t chunkSize = bc->getDataChunk();
+    if (update)
+    {
+      uint64_t totalNumEvents = MDE::openNexusData(file);
+      // Set it back to the new file handle
+      bc->setFile(file, filename, totalNumEvents);
+    }
+    else
     {
       MDE::prepareNexusData(file, chunkSize);
       // Initialize the file-backing
       if (MakeFileBacked)
         bc->setFile(file, filename, 0);
-    }
-    else
-    {
-      uint64_t totalNumEvents = MDE::openNexusData(file);
-      // Set it back to the new file handle
-      bc->setFile(file, filename, totalNumEvents);
     }
 
     size_t maxBoxes = bc->getMaxId();
@@ -252,12 +254,10 @@ namespace MDAlgorithms
 
     // The slab start for events, start at 0
     uint64_t start = 0;
-
     // Get a starting iterator
     MDBoxIterator<MDE,nd> it(ws->getBox(), 1000, false);
 
     Progress * prog = new Progress(this, 0.05, 0.9, maxBoxes);
-
     MDBoxBase<MDE,nd> * box;
     while (true)
     {
@@ -294,7 +294,6 @@ namespace MDAlgorithms
             // File-backed: update where on the file it is
             // This will relocate and save the box if it has any events
             mdbox->save();
-            // We've now forced it to go on disk
             mdbox->setOnDisk(true);
             // Save the index
             box_event_index[id*2] = mdbox->getFileIndexStart();
@@ -313,8 +312,8 @@ namespace MDAlgorithms
               if (MakeFileBacked)
               {
                 // Save, set that it is on disk and clear the actual events to free up memory
-                mdbox->setOnDisk(true);
                 mdbox->clearDataOnly();
+                mdbox->setOnDisk(true);
               }
               // Save the index
               box_event_index[id*2] = start;
@@ -361,7 +360,7 @@ namespace MDAlgorithms
     if (freeSpaceBlocks.empty())
       freeSpaceBlocks.resize(2, 0); // Needs a minimum size
     std::vector<int> free_dims(2,2); free_dims[0] = int(freeSpaceBlocks.size()/2);
-    std::vector<int> free_chunk(2,2); free_chunk[0] = 1000;
+    std::vector<int> free_chunk(2,2); free_chunk[0] =int(bc->getDataChunk());
 
     // Now the free space blocks under event_data
     if (!update)
@@ -377,11 +376,11 @@ namespace MDAlgorithms
     prog->resetNumSteps(8, 0.92, 1.00);
 
     // Start the box data group
-    if (!update)
-      file->makeGroup("box_structure", "NXdata");
-    file->openGroup("box_structure", "NXdata");
+    if (update)
+      file->openGroup("box_structure", "NXdata");
+    else
+      file->makeGroup("box_structure", "NXdata",true);
     file->putAttr("version", "1.0");
-
     // Add box controller info to this group
     file->putAttr("box_controller_xml", bc->toXMLString());
 

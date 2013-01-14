@@ -17,8 +17,8 @@ namespace MDEvents
   /** Empty constructor */
   TMDE(MDBox)::MDBox()
    : MDBoxBase<MDE, nd>(),
-     m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
      m_fileIndexStart(0), m_fileNumEvents(0),
+     m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
      m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
   {
   }
@@ -30,8 +30,8 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth,int64_t boxSize,int64_t boxID)
     : MDBoxBase<MDE, nd>(),
-      m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
       m_fileIndexStart(0), m_fileNumEvents(0),
+      m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
       m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
   {
     if (splitter->getNDims() != nd)
@@ -55,8 +55,8 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,int64_t boxSize,int64_t boxID)
       : MDBoxBase<MDE, nd>(extentsVector),
-        m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
         m_fileIndexStart(0), m_fileNumEvents(0),
+        m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
         m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
   {
     if (splitter->getNDims() != nd)
@@ -78,8 +78,8 @@ namespace MDEvents
   TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other)
    : MDBoxBase<MDE, nd>(other),
      data(other.data),
-     m_dataBusy(other.m_dataBusy), m_dataModified(other.m_dataModified), m_dataAdded(other.m_dataAdded),
      m_fileIndexStart(other.m_fileIndexStart), m_fileNumEvents(other.m_fileNumEvents),
+     m_dataBusy(other.m_dataBusy), m_dataModified(other.m_dataModified), m_dataAdded(other.m_dataAdded),
      m_onDisk(other.m_onDisk), m_inMemory(other.m_inMemory), m_bIsMasked(other.m_bIsMasked)
   {
   }
@@ -98,18 +98,26 @@ namespace MDEvents
     this->m_errorSquared = 0.0;
     m_fileNumEvents = 0;
     data.clear();
+    vec_t().swap(data); // Linux trick to really free the memory
+    m_inMemory = false;
     m_dataAdded = false;
+    m_dataModified = false;
+
   }
 
   //-----------------------------------------------------------------------------------------------
   /** Clear the data[] vector ONLY but does not change the file-backed settings.
    * Used to free up the memory in a file-backed workspace without removing the events from disk. */
   TMDE(
-  void MDBox)::clearDataOnly() const
+  void MDBox)::clearDataOnly()const
   {
     data.clear();
     vec_t().swap(data); // Linux trick to really free the memory
+
     m_inMemory = false;
+    m_dataAdded = false;
+    m_dataModified = false;
+
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -180,7 +188,7 @@ namespace MDEvents
    *
    */
   TMDE(
-  inline void MDBox)::loadEvents() const
+  inline void MDBox)::loadEvents()const
   {
     // Is the data in memory right now (cached copy)?
     if (!m_inMemory)
@@ -238,7 +246,7 @@ namespace MDEvents
    * VERY IMPORTANT: call MDBox::releaseEvents() when you are done accessing that data.
    */
   TMDE(
-  const std::vector<MDE> & MDBox)::getConstEvents() const
+  const std::vector<MDE> & MDBox)::getConstEvents()const 
   {
     if (m_onDisk)
     {
@@ -279,7 +287,7 @@ namespace MDEvents
    * Called from the DiskBuffer.
    */
   TMDE(
-  void MDBox)::save() const
+  void MDBox)::save()const
   {
     // Only save to disk when the access was non-const;
     //  or when you added events to a cached data
@@ -287,6 +295,7 @@ namespace MDEvents
     {
 //      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
 
+      ////TODO:::: !!!!!
       // This will load and append events ONLY if needed.
       if (m_dataAdded)
         this->loadEvents();
@@ -303,6 +312,7 @@ namespace MDEvents
         {
           // Save it where the MRU told us to
           this->saveNexus( this->m_BoxController->getFile() );
+          m_onDisk = true;
         }
       }
       else
@@ -312,18 +322,23 @@ namespace MDEvents
         {
           // Save at the same place
           this->saveNexus( this->m_BoxController->getFile() );
+          m_onDisk = true;
         }
       }
     }
-    // Free up memory by clearing the events
-    data.clear();
-    vec_t().swap(data); // Linux trick to really free the memory
-    // Data is no longer in memory
-    m_inMemory = false;
-    // Data was not modified
-    m_dataModified = false;
-    // Data was not added
-    m_dataAdded = false;
+    ////TODO::::!!!!!
+    //if(removeFromMemory)
+    {
+      // Free up memory by clearing the events
+      data.clear();
+      vec_t().swap(data); // Linux trick to really free the memory
+      // Data is no longer in memory
+      m_inMemory = false;
+      // Data was not modified
+      m_dataModified = false;
+      // Data was not added
+      m_dataAdded = false;
+    }
   }
 
 
@@ -591,6 +606,10 @@ namespace MDEvents
 
     // Yes, we added some data
     this->m_dataAdded = true;
+//TODO: will see if this is necessary;
+    //this->m_inMemory  = true;
+    //this->m_dataModified=true;
+    //this->m_onDisk   = false;
 
 #ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
     //Running total of signal/error

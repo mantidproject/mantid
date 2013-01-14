@@ -52,8 +52,8 @@ namespace MDEvents
 
     // ----------------------------- ISaveable Methods ------------------------------------------------------
 
-    /// Save the data
-    virtual void save() const;
+    /// Save the data and free it up from the memory (despite const function it changes the object)
+    virtual void save()const;
 
     /// Load the data - unused
     virtual void load()
@@ -75,7 +75,7 @@ namespace MDEvents
 
     void clear();
 
-    void clearDataOnly() const;
+    void clearDataOnly()const;
 
     uint64_t getNPoints() const;
 
@@ -160,19 +160,18 @@ namespace MDEvents
 
     std::vector< MDE > & getEvents();
 
-    const std::vector<MDE> & getConstEvents() const;
+    const std::vector<MDE> & getConstEvents()const ;
 
     void releaseEvents() const;
 
 
     std::vector< MDE > * getEventsCopy();
 
+
     void addEvent(const MDE & point);
     void addAndTraceEvent(const MDE & point,size_t index);
     void addEventUnsafe(const MDE & point);
-
     size_t addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
-
     size_t addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
@@ -209,7 +208,7 @@ namespace MDEvents
 
   protected:
 
-    inline void loadEvents() const;
+    inline void loadEvents()const ;
 
     /** Vector of MDLeanEvent's, in no particular order.
      * */
@@ -218,24 +217,22 @@ namespace MDEvents
     /// Mutex for modifying the event list
     Mantid::Kernel::Mutex dataMutex;
 
-    /// Is the "data" vector currently in use by some algorithm?
-    mutable bool m_dataBusy;
-
-    /** Marker set to true when the data was possibly modifed, due to NON-const access.  */
-    mutable bool m_dataModified;
-
-    /** Marker set to true when one (or more) events were ADDED to this list WHILE it was cached to disk. */
-    mutable bool m_dataAdded;
-
     /// Start point in the NXS file where the events are located
     mutable uint64_t m_fileIndexStart;
 
     /// Number of events saved in the file, after the start index location
     mutable uint64_t m_fileNumEvents;
-
+    //------> BOOLS   /- 
+    //              oO
+    //                \-
+    /// Is the "data" vector currently in use by some algorithm? TODO: -- there should be mutex for this
+    mutable bool m_dataBusy;
+    /** Marker set to true when the data was possibly modifed, due to NON-const access.  */
+    mutable bool m_dataModified;
+    /** Marker set to true when one (or more) events were ADDED to this list WHILE it was cached to disk. */
+    mutable bool m_dataAdded;
     /// True when the events are cached to disk. If false, then the events are ALWAYS kept in memory
-    bool m_onDisk;
-
+    mutable bool m_onDisk;
     /// True when the events were loaded up from disk. Irrelevant if m_onDisk is false.
     mutable bool m_inMemory;
 
