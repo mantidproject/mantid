@@ -47,7 +47,7 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
   QHBoxLayout *hbox = new QHBoxLayout(widget);
   hbox->setMargin(0);
 
-  if (viewName == "")
+  if (viewName == QString(""))
   {
     viewName = pqRenderView::renderViewType();
   }
