@@ -78,21 +78,10 @@ namespace DataHandling
     // ADARA::Parser() will accept values for buffer size and max packet size, but the
     // defaults will work fine
   {
-    m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
-        (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
-    // The numbers in the create() function don't matter - they'll get overwritten
-    // down in initWorkspace() when we load the instrument definition.
-    // We need m_eventBuffer created now, though, so we can add properties to it from
-    // all of the variable value packets that may arrive before we can call
-    // initWorkspace().
 
-    // We also know we'll need 2 time series properties on the workspace.  Create them
-    // now (because we may end up adding values to them before we can call
-    // initWorkspace().
-    Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
-    m_eventBuffer->mutableRun().addLogData(prop);
-    prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
-    m_eventBuffer->mutableRun().addLogData(prop);
+    // Perform all the workspace initialization steps (including actually creating
+    // the workspace) that need to happen prior to receiving any packets.
+    initWorkspacePart1();
 
     // Initialize the heartbeat time to the current time so we don't get a bunch of
     // timeout errors when the background thread starts.
@@ -388,7 +377,7 @@ namespace DataHandling
       // then we can initialize our workspace.  Otherwise, we'll just wait.
       if (m_instrumentName.size() > 0)
       {
-        initWorkspace( pkt);
+        initWorkspacePart2( pkt);
       }
     }
 
@@ -409,7 +398,7 @@ namespace DataHandling
       // we can create our workspace.  Otherwise, we'll just wait
       if (m_instrumentXML.size() > 0)
       {
-        initWorkspace( pkt);
+        initWorkspacePart2( pkt);
       }
     }
 
@@ -498,7 +487,11 @@ namespace DataHandling
     }
 
     // Note: all other possibilities for pkt.status() can be ignored
-    return false;
+
+    return m_pauseNetRead;
+    // If we've set m_pauseNetRead, it means we want to stop processing packets.
+    // In that case, we need to return true so that we'll break out of the read() loop
+    // in the packet parser.
   }
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableU32Pkt &pkt)
@@ -755,7 +748,24 @@ namespace DataHandling
   }
 
 
-  void SNSLiveEventDataListener::initWorkspace(const ADARA::Packet &pkt)
+  void SNSLiveEventDataListener::initWorkspacePart1()
+  {
+    m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
+        (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
+    // The numbers in the create() function don't matter - they'll get overwritten
+    // down in initWorkspacePart2() when we load the instrument definition.
+
+    // We also know we'll need 2 time series properties on the workspace.  Create them
+    // now (because we may end up adding values to them before we can call
+    // initWorkspacePart2().
+    Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
+    m_eventBuffer->mutableRun().addLogData(prop);
+    prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
+    m_eventBuffer->mutableRun().addLogData(prop);
+
+  }
+
+  void SNSLiveEventDataListener::initWorkspacePart2(const ADARA::Packet &pkt)
   {
     // Use the LoadEmptyInstrument algorithm to create a proper workspace
     // for whatever beamline we're on
@@ -889,8 +899,7 @@ namespace DataHandling
       // background thread is still paused.
       m_workspaceInitialized = false;
       m_nameMap.clear();
-      m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
-          (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
+      initWorkspacePart1();
     }
 
     m_pauseNetRead = false;  // make sure the network reads start back up

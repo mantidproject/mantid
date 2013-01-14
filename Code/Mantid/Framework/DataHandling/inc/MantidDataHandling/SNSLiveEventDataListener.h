@@ -85,12 +85,16 @@ namespace Mantid
 
     private:
      
+      // Workspace initialization needs to happen in 2 steps.  Part 1 must happen
+      // before we receive *any* packets.
+      void initWorkspacePart1();
+
       // We need data from both the geometry packet and the run status packet in
-      // order to initialize the workspace.  Since I don't know what order the
-      // packets will arrive in, I've put the necessary code in this function.
-      // Both rxPacket() functions will check to see if all the data is available
-      // and call this function if it is.
-      void initWorkspace(const ADARA::Packet &pkt);
+      // order to run the second part of the initialization.  Since I don't know what
+      // order the packets will arrive in, I've put the necessary code in this
+      // function.  Both rxPacket() functions will check to see if all the data is
+      // available and call this function if it is.
+      void initWorkspacePart2(const ADARA::Packet &pkt);
 
       void appendEvent( uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime);
       // tof is "Time Of Flight" and is in units of microsecondss relative to the start of the pulse
