@@ -67,56 +67,6 @@ enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT, PULSETIMETOF_SORT};
 
 class DLLExport EventList :  public Mantid::API::IEventList
 {
-private:
-
-
-  //==========================================================================
-  /** Unary function for searching the event list.
-   * Returns true if the event's TOF is >= a value
-   * @param event :: the event being checked.
-   */
-  template <class T>
-  class tofGreaterOrEqual: std::unary_function<T, double>
-  {
-    /// Comparison variable
-    double m_value;
-  public:
-    /// Constructor: save the value
-    tofGreaterOrEqual(double value): m_value(value)
-    {  }
-    /// () operator: return true if event.tof >= value
-    bool operator()(T event)
-    {
-        return event.m_tof >= m_value;
-    }
-  };
-
-
-  //==========================================================================
-  /** Unary function for searching the event list.
-   * Returns true if the event's TOF is > a value
-   * @param event :: the event being checked.
-   */
-  template <class T>
-  class tofGreater: std::unary_function<T, double>
-  {
-    /// Comparison variable
-    double m_value;
-  public:
-    /// Constructor: save the value
-    tofGreater(double value): m_value(value)
-    {  }
-    /// () operator: return true if event.tof > value
-    bool operator()(T event)
-    {
-        return event.m_tof > m_value;
-    }
-  };
-
-
-
-
-
 public:
   EventList();
 
@@ -155,14 +105,6 @@ public:
   bool operator==(const EventList& rhs) const;
   bool operator!=(const EventList& rhs) const;
 
-//  inline void addEventQuickly(const TofEvent &event);
-//
-//  inline void addEventQuickly(const WeightedEvent &event);
-//
-//  inline void addEventQuickly(const WeightedEventNoTime &event);
-
-
-
   // --------------------------------------------------------------------------
   /** Append an event to the histogram, without clearing the cache, to make it faster.
    * NOTE: Only call this on a un-weighted event list!
@@ -199,12 +141,7 @@ public:
 
   void switchTo(Mantid::API::EventType newType);
 
-  //  bool hasWeights() const;
-
   WeightedEvent getEvent(size_t event_number);
-
-  //template<class T>
-  //std::vector<T>& getEventsOfType();
 
   std::vector<TofEvent>& getEvents();
   const std::vector<TofEvent>& getEvents() const;
@@ -431,8 +368,6 @@ private:
 
   void switchToWeightedEvents();
   void switchToWeightedEventsNoTime();
-
-  //std::vector<TofEvent>::iterator findFirstEvent(const double seek_tof) const;
 
 };
 

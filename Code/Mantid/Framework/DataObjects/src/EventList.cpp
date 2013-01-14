@@ -2484,15 +2484,13 @@ namespace DataObjects
     if (tofMax < events.begin()->tof())
       return 0;
 
-    typename EventList::tofGreaterOrEqual<T> comparator(tofMin);
     //Find the index of the first tofMin
-    typename std::vector<T>::iterator it_first = std::find_if(events.begin(), events.end(), comparator);
+    auto it_first = std::lower_bound(events.begin(), events.end(), tofMin, compareEventTof<T>);
     if ((it_first != events.end()) && (it_first->tof() < tofMax))
     {
       //Something was found
       //Look for the first one > tofMax
-      typename EventList::tofGreater<T> comparator2(tofMax);
-      typename std::vector<T>::iterator it_last = std::find_if(it_first, events.end(), comparator2);
+      auto it_last = std::upper_bound(it_first, events.end(), tofMax, compareEventTof<T>);
 
       if (it_first >= it_last)
       {
