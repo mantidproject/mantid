@@ -299,7 +299,7 @@ namespace SliceViewer
   */
   PeakBoundingBox ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const
   {
-    if(peakIndex < 0 || peakIndex > m_viewPeaks.size())
+    if(peakIndex < 0 || peakIndex > static_cast<int>(m_viewPeaks.size()))
     {
       throw std::out_of_range("PeakIndex is out of range");
     }

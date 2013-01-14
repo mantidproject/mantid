@@ -64,7 +64,7 @@ namespace MantidQt
     /**
     @return the row count.
     */
-    int QPeaksTableModel::rowCount(const QModelIndex &parent) const
+    int QPeaksTableModel::rowCount(const QModelIndex &) const
     {
       return static_cast<int>(m_peaksWS->rowCount());
     }

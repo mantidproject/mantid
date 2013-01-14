@@ -18,14 +18,6 @@ class CompositePeaksPresenterTest : public CxxTest::TestSuite
 
 private:
 
-  /// Mock class for testing desruction of PeaksPresenters
-  class DyingMockPeaksPresenter : public MockPeaksPresenter
-  {
-  public:
-    MOCK_METHOD0(die, void());
-    virtual ~DyingMockPeaksPresenter(){die();}
-  };
-
   /// Fake class to make objects of type
   class FakeZoomablePeaksView : public ZoomablePeaksView
   {

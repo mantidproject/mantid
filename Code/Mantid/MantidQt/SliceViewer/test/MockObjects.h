@@ -52,6 +52,16 @@ namespace
   };
 
   /*------------------------------------------------------------
+  Mock Peaks Presenter, with additional hooks for verifying destruction.
+  ------------------------------------------------------------*/
+  class DyingMockPeaksPresenter : public MockPeaksPresenter
+  {
+  public:
+    MOCK_METHOD0(die, void());
+    virtual ~DyingMockPeaksPresenter(){die();}
+  };
+
+  /*------------------------------------------------------------
   Mock Peak Transform
   ------------------------------------------------------------*/
   class MockPeakTransform : public PeakTransform 
