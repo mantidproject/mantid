@@ -12,6 +12,7 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ConfigService.h"
@@ -69,6 +70,7 @@ void AlignAndFocusPowder::init()
         "Negative width values indicate logarithmic binning.");
   declareProperty("ResampleX", 0,
                   "Number of bins in x-axis. Non-zero value overrides \"Params\" property. Negative value means logorithmic binning.");
+  setPropertySettings("Params", new EnabledWhenProperty("ResampleX", IS_DEFAULT));
   declareProperty("Dspacing", true,"Bin in Dspace. (True is Dspace; False is TOF)");
   declareProperty("DMin", 0.0, "Minimum for Dspace axis. (Default 0.) ");
   declareProperty("DMax", 0.0, "Maximum for Dspace axis. (Default 0.) ");
