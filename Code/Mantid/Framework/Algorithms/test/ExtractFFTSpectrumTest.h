@@ -55,10 +55,11 @@ public:
     ExtractFFTSpectrum alg;
     alg.initialize();
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error); // check it does output error
     TS_ASSERT(!alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "alg_irs_r"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputImagWorkspace", "alg_irs_r")); // use same spectra for the imaginary part (Re==Im)
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "alg_irs_t"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
