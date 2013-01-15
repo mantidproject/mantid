@@ -66,7 +66,7 @@ namespace DataHandling
         "MaskingWorkspace to output to XML file (SpecialWorkspace2D)");
     declareProperty(new FileProperty("OutputFile", "", FileProperty::Save, ".xml"),
         "File to save the detectors mask in XML format");
-    declareProperty("GroupedDetectors", false,
+    declareProperty("GroupedDetectors", true,
         "True if there can be more than one detector contained in any spectrum. ");
 
   }
@@ -96,8 +96,11 @@ namespace DataHandling
         const std::set<detid_t> detids = spec->getDetectorIDs();
         if (!groupeddetectors && detids.size() != 1)
         {
-          g_log.error() << "Impossible Situation! Workspace " << i << " corresponds to #(Det) = " << detids.size() << std::endl;
-          throw std::invalid_argument("Impossible number of detectors");
+          std::stringstream errmsg;
+          errmsg << "Workspace " << i << " has " << detids.size() << " detectors. "
+                 << "User does not specify the detectors are grouped. ";
+          g_log.error(errmsg.str());
+          throw std::invalid_argument(errmsg.str());
         }
 
         // b) get detector id & Store
@@ -147,7 +150,8 @@ namespace DataHandling
       idx0sts.push_back(i0st);
       idx0eds.push_back(i0ed);
 
-      for (size_t i = 0; i < idx0sts.size(); i++){
+      for (size_t i = 0; i < idx0sts.size(); i++)
+      {
         g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  " << idx0eds[i] << " to be masked and recorded."<< std::endl;
       }
     } // Only work for detid > 0
