@@ -360,6 +360,53 @@ public:
     FrameworkManager::Instance().deleteWorkspace("FFT_WS_backward");
   }
 
+  void testInputImaginary()
+  {
+    const int N = 100;
+    const double XX = dX * N;
+    double dx = 1/(XX);
+
+    createWS(N,0,"even_points_real");
+    createWS(N,0,"even_points_imag");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_WS_even_points_real");
+    fft->setPropertyValue("InputImagWorkspace","FFT_WS_even_points_imag");
+    fft->setPropertyValue("OutputWorkspace","FFT_out");
+    fft->setPropertyValue("Real","0");
+    fft->setPropertyValue("Imaginary","0");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFT_out"));
+
+    const MantidVec& X = fWS->readX(0);
+    const MantidVec& Yr = fWS->readY(0);
+    const MantidVec& Yi = fWS->readY(1);
+
+
+    const MantidVec::const_iterator it = std::find(X.begin(),X.end(),0.);
+
+    TS_ASSERT( it != X.end() );
+    int i0 = static_cast<int>(it - X.begin());
+
+    for(int i=0;i<N/4;i++)
+    {
+      int j = i0 + i;
+      double x = X[j];
+      //std::cerr<<j<<' '<<x<<' '<<Yr[j]<<' '<<h*exp(-a*x*x)<<'\n';
+      TS_ASSERT_DELTA(x,dx*i,0.00001);
+      TS_ASSERT_DELTA(Yr[i0+i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yi[i0+i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yr[i0-i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yi[i0-i] / (h*exp(-a*x*x)),1.,0.001);
+    }
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_even_points_real");
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_even_points_imag");
+    FrameworkManager::Instance().deleteWorkspace("FFT_out");
+  }
+
 private:
 
   MatrixWorkspace_sptr createWS(int n,int dn,const std::string& name)
