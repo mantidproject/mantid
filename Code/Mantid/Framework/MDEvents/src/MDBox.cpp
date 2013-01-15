@@ -176,7 +176,7 @@ namespace MDEvents
       if (m_inMemory)
         return data.size();
       else // m_fileNumEvents
-        return this->getMRUMemorySize()+ data.size();
+        return Kernel::ISaveable::getMRUMemorySize()+ data.size();
     }
     else
       return data.size();
@@ -318,16 +318,16 @@ namespace MDEvents
       // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
       size_t newNumEvents = data.size();
       DiskBuffer & dbuf = this->m_BoxController->getDiskBuffer();
-      uint64_t m_fileNumEvents = this->getMRUMemorySize();
+      uint64_t m_fileNumEvents = Kernel::ISaveable::getMRUMemorySize();
       if (newNumEvents != m_fileNumEvents)
       {
         // Event list changed size. The MRU can tell us where it best fits now.
         uint64_t m_fileIndexStart = dbuf.relocate(this->getFilePosition(), m_fileNumEvents, newNumEvents);
         // BAD: !!!
         auto pThis = const_cast<MDBox<MDE,nd> *>(this);
-        pThis->setFilePosition(m_fileIndexStart);
+        pThis->setFileIndex(m_fileIndexStart,newNumEvents);
 
-        m_fileNumEvents = newNumEvents;
+        //m_fileNumEvents = newNumEvents;
         if (newNumEvents > 0)
         {
           // Save it where the MRU told us to

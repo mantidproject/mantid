@@ -95,7 +95,10 @@ namespace MDEvents
     /// @return Number of events saved in the file, after the start index location (= not necessarily the number of events it currently has in memory)
     //uint64_t getFileNumEvents() const { return m_fileNumEvents; }
     //void setFileIndex(uint64_t start, uint64_t numEvents);
- 
+    uint64_t getMRUMemorySize() const
+    {
+      return (this->getNPoints());
+    }
 
     /** Set whether the box is cached on disk (true) or in memory (false)
      * @param onDisk :: true if it is on disk  */
