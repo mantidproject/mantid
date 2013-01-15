@@ -64,7 +64,7 @@ void AlignAndFocusPowder::init()
     "Optional: An OffsetsWorkspace workspace giving the detector calibration values.");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace","",Direction::Input, PropertyMode::Optional),
     "Optional: An Workspace workspace giving which detectors are masked.");
-  declareProperty(new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
+  declareProperty(new ArrayProperty<double>("Params"/*, boost::make_shared<RebinParamsValidator>()*/),
         "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.");
@@ -72,8 +72,8 @@ void AlignAndFocusPowder::init()
                   "Number of bins in x-axis. Non-zero value overrides \"Params\" property. Negative value means logorithmic binning.");
   setPropertySettings("Params", new EnabledWhenProperty("ResampleX", IS_DEFAULT));
   declareProperty("Dspacing", true,"Bin in Dspace. (True is Dspace; False is TOF)");
-  declareProperty("DMin", 0.0, "Minimum for Dspace axis. (Default 0.) ");
-  declareProperty("DMax", 0.0, "Maximum for Dspace axis. (Default 0.) ");
+  declareProperty(new ArrayProperty<double>("DMin", 0.0), "Minimum for Dspace axis. (Default 0.) ");
+  declareProperty(new ArrayProperty<double>("DMax", 0.0), "Maximum for Dspace axis. (Default 0.) ");
   declareProperty("TMin", 0.0, "Minimum for TOF axis. (Default 0.) ");
   declareProperty("TMax", 0.0, "Maximum for TOF or dspace axis. (Default 0.) ");
   declareProperty("PreserveEvents", true,
@@ -117,8 +117,14 @@ void AlignAndFocusPowder::exec()
   phis = getProperty("Azimuthal");
   m_params=getProperty("Params");
   dspace = getProperty("DSpacing");
-  double dmin = getProperty("DMin");
-  double dmax = getProperty("DMax");
+  m_dmins = getProperty("DMin");
+  m_dmaxs = getProperty("DMax");
+  double dmin = 0.;
+  if (!m_dmins.empty())
+    dmin = m_dmins[0];
+  double dmax = 0.;
+  if (!m_dmaxs.empty())
+    dmax = m_dmaxs[0];
   LRef = getProperty("UnwrapRef");
   DIFCref = getProperty("LowResRef");
   minwl = getProperty("CropWavelengthMin");
@@ -133,8 +139,10 @@ void AlignAndFocusPowder::exec()
   }
   else if (m_params.size() == 1)
   {
-    if (dmax > 0) dspace = true;
-    else dspace=false;
+    if (dmax > 0.)
+      dspace = true;
+    else
+      dspace=false;
   }
   if (dspace)
   {
@@ -369,6 +377,9 @@ void AlignAndFocusPowder::exec()
 
   doSortEvents(m_outputW);
 
+  if (dspace)
+    this->rebin();
+
   if (l1 > 0)
   {
     g_log.information() << "running EditInstrumentGeometry\n";
@@ -413,6 +424,20 @@ void AlignAndFocusPowder::rebin()
     API::IAlgorithm_sptr alg = createChildAlgorithm("ResampleX");
     alg->setProperty("InputWorkspace", m_outputW);
     alg->setProperty("OutputWorkspace", m_outputW);
+    if ((!m_dmins.empty()) && (!m_dmaxs.empty()))
+    {
+      size_t numHist = m_outputW->getNumberHistograms();
+      if ((numHist == m_dmins.size()) && (numHist == m_dmaxs.size()))
+      {
+        alg->setProperty("XMin", m_dmins);
+        alg->setProperty("XMax", m_dmaxs);
+      }
+      else
+      {
+        g_log.information() << "Number of dmin and dmax values don't match the "
+                            << "number of workspace indices. Ignoring the parameters.\n";
+      }
+    }
     alg->setProperty("NumberBins", abs(m_resampleX));
     alg->setProperty("LogBinning", (m_resampleX < 0));
     alg->executeAsChildAlg();

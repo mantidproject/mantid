@@ -91,6 +91,8 @@ namespace Mantid
       std::string m_instName;
       std::vector<double> m_params;
       int m_resampleX;
+      std::vector<double> m_dmins;
+      std::vector<double> m_dmaxs;
       bool dspace;
       double xmin;
       double xmax;
