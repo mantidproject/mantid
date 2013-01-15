@@ -94,9 +94,6 @@ namespace Mantid
       /// Returns a list of Detectors for the given detectors ids
       std::vector<IDetector_const_sptr> getDetectors(const std::set<detid_t> &det_ids) const;
 
-      /// Returns a pointer to the geometrical object representing the monitor with the given ID
-      IDetector_const_sptr getMonitor(const int &detector_id) const;
-
       /// mark a Component which has already been added to the Instrument (as a child comp.)
       /// to be 'the' samplePos Component. For now it is assumed that we have
       /// at most one of these.

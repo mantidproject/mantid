@@ -624,30 +624,6 @@ namespace Mantid
       return dets_ptr;
     }
 
-
-    /**	Gets a pointer to the monitor from its ID
-    *  @param   detector_id The requested detector ID
-    *  @return A pointer to the detector object
-    *  @throw   NotFoundError If no monitor is found for the detector ID given
-    */
-    IDetector_const_sptr Instrument::getMonitor(const int &detector_id)const
-    {
-      //No parametrized monitors - I guess ....
-
-      std::vector<detid_t>::const_iterator itr;
-      itr=find(m_monitorCache.begin(),m_monitorCache.end(),detector_id);
-      if ( itr == m_monitorCache.end() )
-      {
-        g_log.debug() << "monitor with ID " << detector_id << " not found." << std::endl;
-        std::stringstream readInt;
-        readInt << detector_id;
-        throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.","");
-      }
-      IDetector_const_sptr monitor = getDetector(detector_id);
-
-      return monitor;
-    }
-
     /**
      * Adds a Component which already exists in the instrument to the chopper cache. If
      * the component is not a chopper or it has no name then an invalid_argument expection is thrown

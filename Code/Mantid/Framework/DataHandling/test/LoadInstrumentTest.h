@@ -536,9 +536,9 @@ public:
     TS_ASSERT_EQUALS( physicalInst->getDetector(1000)->shape(), neutronicInst->getDetector(1000)->shape() )
 
     // Check the monitor is in the same place in each instrument
-    TS_ASSERT_EQUALS( physicalInst->getMonitor(1)->getPos(), neutronicInst->getMonitor(1)->getPos() );
+    TS_ASSERT_EQUALS( physicalInst->getDetector(1)->getPos(), neutronicInst->getDetector(1)->getPos() );
     // ...but is not the same object
-    TS_ASSERT_DIFFERS( physicalInst->getMonitor(1).get(), neutronicInst->getMonitor(1).get() );
+    TS_ASSERT_DIFFERS( physicalInst->getDetector(1).get(), neutronicInst->getDetector(1).get() );
 
     // Clean up
     IDS.clear();
