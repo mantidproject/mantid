@@ -5,7 +5,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidMDEvents/MDEventWSWrapper.h"
-#include "MantidMDEvents/MDTransfDEHelper.h"
+//#include "MantidMDEvents/MDTransfDEHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
