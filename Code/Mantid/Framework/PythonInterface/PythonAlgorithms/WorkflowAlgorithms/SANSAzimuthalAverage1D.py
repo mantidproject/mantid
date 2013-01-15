@@ -25,6 +25,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         self.declareProperty("LogBinning", False, "Produce log binning in Q when true and binning wasn't supplied")
         self.declareProperty("NumberOfSubpixels", 1, "Number of sub-pixels per side of a detector pixel: use with care")
         self.declareProperty("ErrorWeighting", False, "Backward compatibility option: use with care")
+        self.declareProperty('ComputeResolution', False, 'If true the Q resolution will be computed')
         
         self.declareProperty("ReductionProperties", "__sans_reduction_properties", 
                              validator=StringMandatoryValidator(),
@@ -79,9 +80,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             
         # If we kept the events this far, we need to convert the input workspace
         # to a histogram here
-        compute_resolution = True
         if workspace.id()=="EventWorkspace":
-            compute_resolution = False
             alg = AlgorithmManager.create("ConvertToMatrixWorkspace")
             alg.initialize()
             alg.setChild(True)
@@ -117,6 +116,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         output_ws = alg.getProperty("OutputWorkspace").value
 
         # Q resolution 
+        compute_resolution = self.getProperty("ComputeResolution").value
         if compute_resolution:
             alg = AlgorithmManager.create("ReactorSANSResolution")
             alg.initialize()

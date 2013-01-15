@@ -469,16 +469,20 @@ void SetupEQSANSReduction::exec()
   const bool doAveraging = getProperty("DoAzimuthalAverage");
   if (doAveraging)
   {
-    const std::string n_bins = getPropertyValue("IQNumberOfBins");
-    const bool log_binning = getProperty("IQLogBinning");
+    const std::string nBins = getPropertyValue("IQNumberOfBins");
+    const bool logBinning = getProperty("IQLogBinning");
+    const double sampleApert = getProperty("SampleApertureDiameter");
+    const bool computeResolution = getProperty("ComputeResolution");
+    const bool indepBinning = getProperty("IQIndependentBinning");
+    const bool scaleResults = getProperty("IQScaleResults");
 
     IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSAzimuthalAverage1D");
-    iqAlg->setPropertyValue("NumberOfBins", n_bins);
-    iqAlg->setProperty("LogBinning", log_binning);
-    iqAlg->setProperty("ScaleResults", true);
-    iqAlg->setProperty("ComputeResolution", false);
-    iqAlg->setProperty("IndependentBinning", true);
-    iqAlg->setProperty("SampleApertureDiameter", 10.0);
+    iqAlg->setPropertyValue("NumberOfBins", nBins);
+    iqAlg->setProperty("LogBinning", logBinning);
+    iqAlg->setProperty("ScaleResults", scaleResults);
+    iqAlg->setProperty("ComputeResolution", computeResolution);
+    iqAlg->setProperty("IndependentBinning", indepBinning);
+    iqAlg->setProperty("SampleApertureDiameter", sampleApert);
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
     algProp = new AlgorithmProperty("IQAlgorithm");
