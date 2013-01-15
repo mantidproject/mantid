@@ -78,9 +78,9 @@ namespace Algorithms
         "Name of the sample log to use to filter.\n"
         "For example, the pulse charge is recorded in 'ProtonCharge'.");
 
-    declareProperty("MinimumLogValue", 0.0, "Minimum log value for which to keep events.");
+    declareProperty("MinimumLogValue", EMPTY_DBL(), "Minimum log value for which to keep events.");
 
-    declareProperty("MaximumLogValue", -1.0, "Maximum log value for which to keep events.");
+    declareProperty("MaximumLogValue", EMPTY_DBL(), "Maximum log value for which to keep events.");
 
     declareProperty("LogValueInterval", -1.0,
         "Delta of log value to be sliced into from min log value and max log value.\n"
@@ -345,9 +345,25 @@ namespace Algorithms
     // a) Clear duplicate value
     mLog->eliminateDuplicates();
 
-    double minValue = this->getProperty("MinimumLogValue");
-    double maxValue = this->getProperty("MaximumLogValue");
+    double minvalue = this->getProperty("MinimumLogValue");
+    double maxvalue = this->getProperty("MaximumLogValue");
     double deltaValue = this->getProperty("LogValueInterval");
+
+    if (minvalue == EMPTY_DBL())
+    {
+      minvalue = mLog->minValue();
+    }
+    if (maxvalue == EMPTY_DBL())
+    {
+      maxvalue = mLog->maxValue();
+    }
+
+    if (minvalue > maxvalue)
+    {
+      g_log.error() << "Error: Input minimum log value " << minvalue <<
+          " is larger than maximum log value " << maxvalue << std::endl;
+      throw std::invalid_argument("Input minimum value is larger than maximum value");
+    }
 
     std::string filterdirection = this->getProperty("FilterLogValueByChangingDirection");
     bool filterIncrease;
@@ -378,12 +394,12 @@ namespace Algorithms
     if (toProcessSingleValueFilter)
     {
       // a) Generate a filter for a single log value
-      processSingleValueFilter(mLog, minValue, maxValue, filterIncrease, filterDecrease);
+      processSingleValueFilter(mLog, minvalue, maxvalue, filterIncrease, filterDecrease);
     }
     else
     {
       // b) Generate filters for a series of log value
-      processMultipleValueFilters(mLog, minValue, maxValue, filterIncrease, filterDecrease);
+      processMultipleValueFilters(mLog, minvalue, maxvalue, filterIncrease, filterDecrease);
     }
 
     return;
@@ -393,13 +409,6 @@ namespace Algorithms
       bool filterincrease, bool filterdecrease)
   {
     // 1. Validity & value
-    if (minvalue > maxvalue)
-    {
-      g_log.error() << "Error: Input minimum log value " << minvalue <<
-          " is larger than maximum log value " << maxvalue << std::endl;
-      throw std::invalid_argument("Input minimum value is larger than maximum value");
-    }
-
     double timetolerance = this->getProperty("TimeTolerance");
     int64_t timetolerance_ns = static_cast<int64_t>(timetolerance*m_convertfactor);
 
@@ -456,7 +465,7 @@ namespace Algorithms
 
     // 2. Build Map
     std::map<size_t, int> indexwsindexmap;
-    std::vector<double> valueranges;
+    std::vector<double> logvalueranges;
     int wsindex = 0;
     size_t index = 0;
 
@@ -467,8 +476,8 @@ namespace Algorithms
 
       double lowbound = curvalue - valuetolerance;
       double upbound = curvalue + valuetolerance;
-      valueranges.push_back(lowbound);
-      valueranges.push_back(upbound);
+      logvalueranges.push_back(lowbound);
+      logvalueranges.push_back(upbound);
 
       std::stringstream ss;
       ss << "Log " << mlog->name() << " From " << lowbound << " To " << upbound << "  Value-change-direction ";
@@ -495,11 +504,11 @@ namespace Algorithms
     // 3. Call
     Kernel::TimeSplitterType splitters;
     std::string logboundary = this->getProperty("LogBoundary");
-    std::transform(logboundary.begin(), logboundary.end(), logboundary.begin(), tolower);
+    transform(logboundary.begin(), logboundary.end(), logboundary.begin(), tolower);
 
-    makeMultipleFiltersByValues(mlog, splitters, indexwsindexmap, valueranges,
-        logboundary.compare("centre") == 0,
-        filterincrease, filterdecrease, mStartTime, mStopTime);
+    makeMultipleFiltersByValues(mlog, splitters, indexwsindexmap, logvalueranges,
+                                logboundary.compare("centre") == 0,
+                                filterincrease, filterdecrease, mStartTime, mStopTime);
 
     // 4. Put to SplittersWorkspace
     for (size_t i = 0; i < splitters.size(); i ++)
@@ -668,11 +677,12 @@ namespace Algorithms
    * @param min :: min value
    * @param max :: max value
    * @param centre :: Whether the log value time is considered centred or at the beginning.
+   * @param log valuerange:  a vector of double. Each 2i and 2i+1 pair is one individual log value range.
    * @filterIncrease: as log value increase, and within (min, max), include this range in the filter
    * @filterDecrease: as log value increase, and within (min, max), include this range in the filter
    */
   void GenerateEventsFilter::makeMultipleFiltersByValues(Kernel::TimeSeriesProperty<double>* mlog,
-      Kernel::TimeSplitterType& split, std::map<size_t, int> indexwsindexmap, std::vector<double> valueranges,
+      Kernel::TimeSplitterType& split, std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges,
       bool centre, bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime)
   {
     // 0. Set up
@@ -690,21 +700,19 @@ namespace Algorithms
       return;
     }
 
-    // 2. Do the rest
+    // 2. Go through the whole log to set up time intervals
     Kernel::DateAndTime ZeroTime(0);
     int lastindex = -1;
     int currindex = -1;
     DateAndTime lastTime, currTime;
     DateAndTime start, stop;
-    //double lastValue = 0.0;  // unused variable
     double currValue = 0.0;
     size_t progslot = 0;
 
     for (int i = 0; i < mlog->size(); i ++)
     {
       // a) Initialize status flags and new entry
-      lastTime = currTime;
-      //lastValue = currValue;
+      lastTime = currTime;  // for loop i, currTime is not defined.
       bool breakloop = false;
       bool completehalf = false;
       bool newsplitter = false;
@@ -716,12 +724,12 @@ namespace Algorithms
       bool intime = false;
       if (currTime < startTime)
       {
-        // b1) Too early, do nothing
+        // case i.  Too early, do nothing
         completehalf = false;
       }
       else if (currTime > stopTime)
       {
-        // b2) Too later.  Put to splitter if half of splitter is done.  But still within range
+        // case ii. Too later.  Put to splitter if half of splitter is done.  But still within range
         breakloop = true;
         stop = currTime;
         if (start.totalNanoseconds() > 0)
@@ -731,13 +739,14 @@ namespace Algorithms
       }
       else
       {
+        // case iii. In the range to generate filters
         intime = true;
       }
 
       // c) Filter in time
       if (intime)
       {
-        // c1) Direction
+        // c1) Determine direction
         bool correctdir = true;
 
         if (filterIncrease && filterDecrease)
@@ -771,10 +780,18 @@ namespace Algorithms
         // c2) See whether this value falls into any range
         if (correctdir)
         {
-          size_t index = searchValue(valueranges, currValue);
-          g_log.debug() << "DBOP Log Index " << i << " Data Range Index = " << index << "  WS Index = " << indexwsindexmap[index/2] << std::endl;
+          size_t index = searchValue(logvalueranges, currValue);
+          g_log.debug() << "DBOP Log Index " << i << " Data Range Index = " << index
+                        << ", WS Index = " << indexwsindexmap[index/2] << std::endl;
 
-          if (index%2 == 0)
+          bool valuewithin2boundaries = true;
+          if (index > logvalueranges.size())
+          {
+            // Out of range
+            valuewithin2boundaries = false;
+          }
+
+          if (index%2 == 0 && valuewithin2boundaries)
           {
             // c1) Falls in the interval
             currindex = indexwsindexmap[index/2];
@@ -799,20 +816,38 @@ namespace Algorithms
             else
             {
               // iv.  It is impossible
-              g_log.error() << "Log Index = " << i << "\t value = " << currValue << "\t, Index = " << index << std::endl;
-              throw std::runtime_error("Impossible to have currindex == lastindex, while start is not init");
+              std::stringstream errmsg;
+              errmsg << "Impossible to have currindex == lastindex == " << currindex
+                     << ", while start is not init.  Log Index = " << i << "\t value = "
+                     << currValue << "\t, Index = " << index
+                     << " in range " << logvalueranges[index] << ", " << logvalueranges[index+1];
+
+              g_log.error(errmsg.str());
+              throw std::runtime_error(errmsg.str());
             }
           }
-          else
+          else if (valuewithin2boundaries)
           {
+            // Out of a range.
             if (start.totalNanoseconds() > 0)
             {
+              // End situation
               stop = currTime;
               completehalf = true;
+            }
+            else
+            {
+              // No operation required
+              ;
             }
 
             // c2) Fall out of interval
             g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c value range... " << std::endl;
+          }
+          else
+          {
+            // log value falls out of min/max: do nothing
+            ;
           }
         } // ENDIF NO breakloop AND Correction Direction
         else
@@ -822,6 +857,7 @@ namespace Algorithms
       }
       else
       {
+        // Wrong direction
         g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
       }
 
@@ -874,36 +910,39 @@ namespace Algorithms
 
   }
 
-  /*
-   * Do a binary search in the following list
+  //----------------------------------------------------------------------------------------------
+  /** Do a binary search in the following list
    * Warning: if the vector is not sorted, the error will happen.
    * This algorithm won't guarantee for it
    *
+   * @param dataranges: a list of data to search for value;
+   * @param value:      value to look up
+   *
    * return:  if value is out of range, then return datarange.size() + 1
    */
-  size_t GenerateEventsFilter::searchValue(std::vector<double> dataranges, double value)
+  size_t GenerateEventsFilter::searchValue(std::vector<double> sorteddata, double value)
   {
-    size_t outrange = dataranges.size()+1;
+    size_t outrange = sorteddata.size()+1;
 
     // std::cout << "DB450  Search Value " << value << std::endl;
 
     // 1. Extreme case
-    if (value < dataranges[0] || value > dataranges.back())
+    if (value < sorteddata[0] || value > sorteddata.back())
       return outrange;
-    if (dataranges.size() == 0)
+    if (sorteddata.size() == 0)
       return outrange;
 
     // 2. Binary search
     bool found = false;
     size_t start = 0;
-    size_t stop = dataranges.size()-1;
+    size_t stop = sorteddata.size()-1;
 
     while (!found)
     {
       if (start == stop || start+1 == stop)
       {
         // a) Found
-        if (value == dataranges[stop])
+        if (value == sorteddata[stop])
         {
           // std::cout << "DB450  Found @ A " << dataranges[stop] << "  Index = " << stop << std::endl;
           return stop;
@@ -916,7 +955,7 @@ namespace Algorithms
       }
 
       size_t mid = (start+stop)/2;
-      if (value < dataranges[mid])
+      if (value < sorteddata[mid])
       {
         stop = mid;
       }
