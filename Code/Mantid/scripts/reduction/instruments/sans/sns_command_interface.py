@@ -45,7 +45,12 @@ def DarkCurrent(datafile):
                                                      ReductionProperties=ReductionSingleton().get_reduction_table_name())
 
 def TotalChargeNormalization(normalize_to_beam=True, beam_file=''):
-    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, None, NormaliseToBeam=normalize_to_beam, BeamSpectrumFile=beam_file)
+    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, InputWorkspace=None, 
+                                        NormaliseToBeam=normalize_to_beam, 
+                                        BeamSpectrumFile=beam_file,
+                                        OutputWorkspace=None,
+                                        ReductionProperties=ReductionSingleton().get_reduction_table_name())
+                                        
 
 def MonitorNormalization(normalize_to_beam=True, beam_file=''):
     print "WARNING: The MonitorNormalization command is being phased out: use TotalChargeNormalization instead"
@@ -54,9 +59,11 @@ def MonitorNormalization(normalize_to_beam=True, beam_file=''):
 def BeamMonitorNormalization(reference_flux_file):
     find_data(reference_flux_file, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_data_loader().load_monitors(True)
-    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, None,
+    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, 
+                                        InputWorkspace=None,
                                         BeamSpectrumFile=reference_flux_file,
                                         NormaliseToMonitor=True,
+                                        OutputWorkspace=None,
                                         ReductionProperties=ReductionSingleton().get_reduction_table_name())
     
 def BeamStopTransmission(normalize_to_unity=True, theta_dependent=False):
