@@ -372,7 +372,7 @@ namespace Algorithms
           //Set the X axis for each output histogram
           MantidVec xValues;
           double delta = this->determineBinning(xValues, xmins[wkspIndex], xmaxs[wkspIndex]);
-          g_log.information() << "delta[wkspindex=" << wkspIndex << "] = " << delta << "\n";
+          g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta << "\n";
           outputWS->setX(wkspIndex, xValues);
 
           //Get a const event list reference. inputEventWS->dataY() doesn't work.
@@ -426,7 +426,7 @@ namespace Algorithms
       API::MatrixWorkspace_sptr outputWS;
 
       // make output Workspace the same type is the input, but with new length of signal array
-      outputWS = API::WorkspaceFactory::Instance().create(inputWS,numSpectra,m_numBins,m_numBins-1);
+      outputWS = API::WorkspaceFactory::Instance().create(inputWS,numSpectra,m_numBins,m_numBins);
 
 
       // Copy over the 'vertical' axis
@@ -449,7 +449,7 @@ namespace Algorithms
         // create new output X axis
         MantidVec XValues_new;
         double delta = this->determineBinning(XValues_new, xmins[wkspIndex], xmaxs[wkspIndex]);
-        g_log.information() << "delta[wkspindex=" << wkspIndex << "] = " << delta << "\n";
+        g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta << "\n";
 //        outputWS->setX(wkspIndex, xValues);
 //        const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());
 
@@ -500,8 +500,6 @@ namespace Algorithms
       // Assign it to the output workspace property
       setProperty("OutputWorkspace",outputWS);
     } // end if (inputeventWS != NULL)
-
-    throw std::runtime_error("Only event workspace mode is implemented");
   }
 
 } // namespace Algorithms
