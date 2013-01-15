@@ -162,10 +162,7 @@ namespace MDEvents
     }
 
     /// Get the special coordinate system.
-    virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const
-    {
-      return m_coordinateSystem;
-    }
+    virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
 
     /// Set the special coordinate system.
     void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem);

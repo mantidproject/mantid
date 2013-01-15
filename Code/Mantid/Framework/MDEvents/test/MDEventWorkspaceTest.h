@@ -593,7 +593,7 @@ public:
 
   void test_getSpecialCoordinateSystem_default()
   {
-     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 1 /*event per box*/);
+    MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 1 /*event per box*/);
     TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::API::None, ws->getSpecialCoordinateSystem());
   }
 

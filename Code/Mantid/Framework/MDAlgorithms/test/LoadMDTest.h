@@ -515,6 +515,46 @@ public:
     doTestHisto(ws);
   }
 
+  /// More of an integration test as it uses both load and save.
+  void test_save_and_load_special_coordinates()
+  {
+    MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
+    // Set the special coordinate system
+    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    ws->setCoordinateSystem(appliedCoordinateSystem);
+
+    const std::string inputWSName = "SaveMDSpecialCoordinatesTest";
+    const std::string fileName = inputWSName + ".nxs";
+    AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
+
+    SaveMD saveAlg;
+    saveAlg.initialize();
+    saveAlg.isInitialized();
+    saveAlg.setPropertyValue("InputWorkspace", inputWSName);
+    saveAlg.setPropertyValue("Filename", fileName);
+    saveAlg.execute();
+    TS_ASSERT( saveAlg.isExecuted() );
+
+    LoadMD loadAlg;
+    loadAlg.initialize();
+    loadAlg.isInitialized();
+    loadAlg.setPropertyValue("Filename", fileName);
+    loadAlg.setProperty("FileBackEnd", false);
+    loadAlg.setPropertyValue("OutputWorkspace", "reloaded_again");
+    loadAlg.execute(); 
+    TS_ASSERT( loadAlg.isExecuted() );
+
+    // Check that the special coordinate system is the same before the save-load cycle.
+    TS_ASSERT_EQUALS(appliedCoordinateSystem, ws->getSpecialCoordinateSystem());
+
+    if (Poco::File(fileName).exists())
+    {
+      Poco::File(fileName).remove();
+    }
+    AnalysisDataService::Instance().remove(inputWSName);
+    AnalysisDataService::Instance().remove("OutputWorkspace");
+  }
+
 };
 
 #endif /* MANTID_MDEVENTS_LOADMDEWTEST_H_ */

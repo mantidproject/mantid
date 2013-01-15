@@ -146,10 +146,7 @@ namespace MDEvents
     void clearMDMasking();
 
      /// Get the special coordinate system.
-    virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const
-    {
-      return m_coordinateSystem;
-    }
+    virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
 
     /// Set the special coordinate system.
     void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem);
@@ -163,9 +160,6 @@ namespace MDEvents
     //Mantid::API::BoxController_sptr m_BoxController;
     boost::shared_ptr<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > > m_BoxController;
   private:
-
-    /// The special coordinate system of the workspace.
-    Mantid::API::SpecialCoordinateSystem m_coordinateSystem;
 
   public:
     /// Typedef for a shared pointer of this kind of event workspace

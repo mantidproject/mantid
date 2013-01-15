@@ -31,8 +31,7 @@ namespace MDEvents
       Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT)
   : IMDHistoWorkspace(),
     numDimensions(0),
-    m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN()),
-    m_coordinateSystem(None)
+    m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN())
   {
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
     if (dimX) dimensions.push_back(dimX);
@@ -1264,9 +1263,38 @@ namespace MDEvents
   Set the special coordinate system (if any) to use.
   @param coordinateSystem : Special coordinate system to use.
   */
-  void MDHistoWorkspace::setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem)
+    void MDHistoWorkspace::setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem)
   {
-    m_coordinateSystem = coordinateSystem;
+    // If there isn't an experiment info, create one.
+    if(this->getNumExperimentInfo() == 0)
+    {
+      ExperimentInfo_sptr expInfo = boost::shared_ptr<ExperimentInfo>(new ExperimentInfo());
+      this->addExperimentInfo(expInfo);
+    }
+    this->getExperimentInfo(0)->mutableRun().addProperty("CoordinateSystem", (int)coordinateSystem, true);
+  }
+
+  /**
+  Get the special coordinate system (if any) to use.
+  */
+  Mantid::API::SpecialCoordinateSystem MDHistoWorkspace::getSpecialCoordinateSystem() const
+  {
+    Mantid::API::SpecialCoordinateSystem result = None;
+    try
+    {
+      auto nInfos = this->getNumExperimentInfo();
+      if(nInfos > 0)
+      {
+        Property* prop = this->getExperimentInfo(0)->run().getProperty("CoordinateSystem");
+        PropertyWithValue<int>* p = dynamic_cast<PropertyWithValue<int>* >(prop);
+        int temp = *p;
+        result = (SpecialCoordinateSystem)temp;
+      }
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError&)
+    {
+    }
+    return result;
   }
 
 } // namespace Mantid

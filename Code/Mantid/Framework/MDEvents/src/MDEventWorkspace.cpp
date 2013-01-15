@@ -20,6 +20,7 @@
 #include <algorithm>
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidKernel/Memory.h"
+#include "MantidKernel/Exception.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -38,8 +39,7 @@ namespace MDEvents
   TMDE(
   MDEventWorkspace)::MDEventWorkspace()
     //m_BoxController(boost::make_shared<BoxController>(nd))
-  : m_BoxController(boost::make_shared<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > >(nd)),
-  m_coordinateSystem(Mantid::API::None)
+  : m_BoxController(boost::make_shared<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > >(nd))
   {
     // First box is at depth 0, and has this default boxController
     data = new MDBox<MDE, nd>(m_BoxController, 0);
@@ -819,10 +819,41 @@ namespace MDEvents
   Set the special coordinate system (if any) to use.
   @param coordinateSystem : Special coordinate system to use.
   */
-    TMDE(
-      void MDEventWorkspace)::setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem)
+  TMDE(
+    void MDEventWorkspace)::setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem)
   {
-    m_coordinateSystem = coordinateSystem;
+    // If there isn't an experiment info, create one.
+    if(this->getNumExperimentInfo() == 0)
+    {
+      ExperimentInfo_sptr expInfo = boost::shared_ptr<ExperimentInfo>(new ExperimentInfo());
+      this->addExperimentInfo(expInfo);
+    }
+    this->getExperimentInfo(0)->mutableRun().addProperty("CoordinateSystem", (int)coordinateSystem, true);
+  }
+
+  /**
+  Get the special coordinate system (if any) to use.
+  @return Special coordinate system if any.
+  */
+  TMDE(
+    Mantid::API::SpecialCoordinateSystem MDEventWorkspace)::getSpecialCoordinateSystem() const
+  {
+    Mantid::API::SpecialCoordinateSystem result = None;
+    try
+    {
+      auto nInfos = this->getNumExperimentInfo();
+      if(nInfos > 0)
+      {
+        Property* prop = this->getExperimentInfo(0)->run().getProperty("CoordinateSystem");
+        PropertyWithValue<int>* p = dynamic_cast<PropertyWithValue<int>* >(prop);
+        int temp = *p;
+        result = (SpecialCoordinateSystem)temp;
+      }
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError&)
+    {
+    }
+    return result;
   }
 
 }//namespace MDEvents
