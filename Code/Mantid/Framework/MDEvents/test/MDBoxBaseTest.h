@@ -86,6 +86,9 @@ public:
   virtual void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *, signal_t & ) const {};
   virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool) {};
   virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
+  virtual void getBoxes(std::vector<Kernel::ISaveable *>&  /*boxes*/, size_t /*maxDepth*/, bool) {};
+  virtual void getBoxes(std::vector<Kernel::ISaveable *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
+
   virtual void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {}
 
   virtual bool getIsMasked() const
@@ -394,11 +397,11 @@ public:
 
   void test_sortBoxesByFilePos()
   {
-    std::vector<MDBoxBase<MDLeanEvent<1>,1>*> boxes;
+    std::vector<Kernel::ISaveable *> boxes;
     // 10 to 1 in reverse order
     for (uint64_t i=0; i<10; i++)
       boxes.push_back(new MDBoxBaseTester<MDLeanEvent<1>,1>(10-i));
-    MDBoxBase<MDLeanEvent<1>,1>::sortBoxesByFilePos(boxes);
+    Kernel::ISaveable::sortObjByFilePos(boxes);
     // After sorting, they are in the right order 1,2,3, etc.
     for (uint64_t i=0; i<10; i++)
       { TS_ASSERT_EQUALS( boxes[i]->getFilePosition(), i+1); }

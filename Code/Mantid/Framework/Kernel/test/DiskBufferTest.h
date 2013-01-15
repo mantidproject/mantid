@@ -26,8 +26,8 @@ using Mantid::Kernel::CPUTimer;
 class ISaveableTester : public ISaveable
 {
 public:
-  ISaveableTester(size_t id) : ISaveable(id),
-  m_doSave(true), m_memory(1), m_dataBusy(false)
+  ISaveableTester(size_t id,uint64_t filePos=0,uint64_t fileSize=1) : ISaveable(id,filePos,fileSize),
+  m_doSave(true),m_dataBusy(false)
   {}
 
   bool m_doSave;
@@ -45,8 +45,6 @@ public:
   virtual void load() {}
   virtual void flushData() const {}
 
-  uint64_t m_memory;
-  virtual uint64_t getMRUMemorySize() const { return m_memory; };
 
   bool m_dataBusy;
   virtual bool dataBusy() const {return m_dataBusy; }
@@ -71,14 +69,15 @@ Kernel::Mutex ISaveableTester::streamMutex;
 class ISaveableTesterWithSeek : public ISaveableTester
 {
 public:
-  ISaveableTesterWithSeek(size_t id) : ISaveableTester(id)
+  ISaveableTesterWithSeek(size_t id,uint64_t startPos=0,uint64_t size=1) : ISaveableTester(id,startPos,size)
   {
-    myFilePos = id;
+    this->setFileIndex(id,size);
   }
 
   using ISaveableTester::load; // Unhide base class method to avoid Intel compiler warning
   virtual void load(DiskBuffer & /*dbuf*/) const
   {
+    uint64_t myFilePos = this->getFilePosition();
     std::cout << "Block " << getId() << " loading at " << myFilePos << std::endl;
     ISaveableTesterWithSeek::fakeSeekAndWrite( this->getFilePosition() );
   }
@@ -87,21 +86,27 @@ public:
   {
     if (!m_doSave) return;
     // Pretend to seek to the point and write
+    uint64_t myFilePos = this->getFilePosition();
     std::cout << "Block " << getId() << " saving at " << myFilePos << std::endl;
     fakeSeekAndWrite(getFilePosition());
   }
 
   void grow(DiskBuffer & dbuf, bool /*tellMRU*/)
   {
+    uint64_t fPos    = this->getFilePosition();
+    uint64_t mMemory = this->getMRUMemorySize();
+
     // OK first you seek to where the OLD data was and load it.
-    std::cout << "Block " << getId() << " loading at " << myFilePos << std::endl;
-    ISaveableTesterWithSeek::fakeSeekAndWrite( this->getFilePosition() );
+    std::cout << "Block " << getId() << " loading at " << fPos << std::endl;
+    ISaveableTesterWithSeek::fakeSeekAndWrite(fPos);
     // Simulate that the data is growing and so needs to be written out
-    size_t newfilePos = dbuf.relocate(myFilePos, m_memory, m_memory+1);
-    std::cout << "Block " << getId() << " has moved from " << myFilePos << " to " << newfilePos << std::endl;
-    myFilePos = newfilePos;
+
+    size_t newfilePos = dbuf.relocate(fPos, mMemory, mMemory+1);
+    std::cout << "Block " << getId() << " has moved from " << fPos << " to " << newfilePos << std::endl;
+    fPos = newfilePos;
     // Grow the size by 1
-    m_memory = m_memory + 1;
+    mMemory = mMemory+ 1;
+    this->setFileIndex(fPos,mMemory);
   }
 
   /// Fake a seek followed by a write
@@ -120,9 +125,6 @@ public:
     streamMutex.unlock();
   }
 
-  // File position = same as its ID
-  uint64_t myFilePos;
-  virtual uint64_t getFilePosition() const { return myFilePos; }
 
   static uint64_t filePos;
 };
@@ -136,8 +138,8 @@ uint64_t ISaveableTesterWithSeek::filePos;
 class ISaveableTesterWithFile : public ISaveable
 {
 public:
-  ISaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch) : ISaveable(id),
-  m_ch(ch), m_memory(size), m_pos(pos), m_dataBusy(false)
+  ISaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch) : ISaveable(id,pos,size),
+  m_ch(ch), m_dataBusy(false)
   {}
 
   char m_ch;
@@ -145,9 +147,12 @@ public:
   {
     // Fake writing to a file
     streamMutex.lock();
-    if (fakeFile.size() < m_pos+m_memory)
-      fakeFile.resize(m_pos+m_memory, ' ');
-    for (size_t i=m_pos; i< m_pos+m_memory; i++)
+    uint64_t mPos = this->getFilePosition();
+    uint64_t mMem = this->getMRUMemorySize();
+    if (fakeFile.size() < mPos+mMem)
+      fakeFile.resize(this->getFilePosition()+mMem, ' ');
+
+    for (size_t i=mPos; i< mPos+mMem; i++)
       fakeFile[i] = m_ch;
     streamMutex.unlock();
   }
@@ -155,11 +160,6 @@ public:
   virtual void load() {}
   virtual void flushData() const {}
 
-  uint64_t m_memory;
-  virtual uint64_t getMRUMemorySize() const {return m_memory;};
-
-  uint64_t m_pos;
-  virtual uint64_t getFilePosition() const { return m_pos; }
 
   bool m_dataBusy;
   virtual bool dataBusy() const {return m_dataBusy; }
@@ -366,7 +366,8 @@ public:
     TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 5);
 
     // First let's get rid of something in to to-write buffer
-    dbuf.objectDeleted(data[1], 1);
+//    dbuf.objectDeleted(data[1],1);
+    dbuf.objectDeleted(data[1]);
     TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 4);
     TSM_ASSERT_EQUALS( "Space on disk was marked as free", dbuf.getFreeSpaceMap().size(), 1);
 
@@ -625,13 +626,14 @@ public:
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 10);
 
     // Asking for a new chunk of space that needs to be at the end
-    newPos = dbuf.relocate(blockB->m_pos, blockB->m_memory, 7);
+    uint64_t mPos = blockB->getFilePosition();
+    uint64_t mMem = blockB->getMRUMemorySize();
+    newPos = dbuf.relocate(mPos, mMem, 7);
     TSM_ASSERT_EQUALS( "One freed block", map.size(), 1);
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 17);
 
     // Simulate saving
-    blockB->m_pos = newPos;
-    blockB->m_memory = 7;
+    blockB->setFileIndex(newPos,7);
     blockB->save();
     TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
 
@@ -646,7 +648,7 @@ public:
     // Grow blockD by 1
     newPos = dbuf.relocate(2, 2, 3);
     TSM_ASSERT_EQUALS( "Block D stayed in the same place since there was room after it", newPos, 2 );
-    blockD->m_memory = 3;
+    blockD->setFileIndex(newPos,3);
     blockD->save();
     TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AADDDCCCCCBBBBBBB");
 

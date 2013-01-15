@@ -2,6 +2,7 @@
 #define MANTID_MDEVENTS_ISAVEABLE_H_
     
 #include "MantidKernel/System.h"
+#include <vector>
 
 namespace Mantid
 {
@@ -40,7 +41,7 @@ namespace Kernel
   public:
     ISaveable();
     ISaveable(const ISaveable & other);
-    ISaveable(const size_t id);
+    ISaveable(const size_t id,const uint64_t fileIndexStart=0,uint64_t fileSize=0);
     ~ISaveable();
 
     //-----------------------------------------------------------------------------------------------
@@ -72,17 +73,37 @@ namespace Kernel
     virtual bool dataBusy() const = 0;
 
     /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
-    virtual uint64_t getFilePosition() const = 0;
+    virtual uint64_t getFilePosition() const
+    {return m_fileIndexStart;}
+
+    virtual void setFilePosition(uint64_t newPos)
+    {   m_fileIndexStart=newPos;   }
+
+    virtual void setFileIndex(uint64_t newPos, uint64_t newSize);
 
     /** @return the amount of memory that the object takes up in MEMORY.
      * This should be in the same units as getFilePosition(), e.g. the object will use a block
      * from getFilePosition() to getFilePosition()+getMRUMemorySize()-1 in the file.
      */
-    virtual uint64_t getMRUMemorySize() const = 0;
+    virtual uint64_t getMRUMemorySize() const
+    { return   m_fileNumEvents; }
+
+
+    // ----------------------------- Helper Methods --------------------------------------------------------
+    static void sortObjByFilePos(std::vector<ISaveable *> & boxes);
+    // -----------------------------------------------------------------------------------------------------
+
 
   protected:
     /// Unique, sequential ID of the object/box within the containing workspace.
     size_t m_id;
+  private:
+    /// Start point in the NXS file where the events are located
+    uint64_t m_fileIndexStart;
+  /// Number of events saved in the file, after the start index location
+    uint64_t m_fileNumEvents;
+
+
   };
 
 

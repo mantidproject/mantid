@@ -93,8 +93,9 @@ namespace Kernel
    * @param item :: ISaveable object that is getting deleted.
    * @param sizeOnFile :: size that the object used on file. This amount of space is marked as "free"
    */
-  void DiskBuffer::objectDeleted(const ISaveable * item, const uint64_t sizeOnFile)
+  void DiskBuffer::objectDeleted(const ISaveable * item)
   {
+    // const uint64_t sizeOnFile 
     size_t id = item->getId();
     uint64_t size = item->getMRUMemorySize();
 
@@ -112,7 +113,8 @@ namespace Kernel
     //std::cout << "DiskBuffer deleting ID " << item->getId() << "; new size " << m_writeBuffer.size() << std::endl;
 
     // Mark the amount of space used on disk as free
-    this->freeBlock(item->getFilePosition(), sizeOnFile);
+    //this->freeBlock(item->getFilePosition(), sizeOnFile);
+    this->freeBlock(item->getFilePosition(), size);
   }
 
 

@@ -447,7 +447,9 @@ namespace MDEvents
       ws->cell<int>(i, col++) = int(box->getNumChildren());
       ws->cell<int>(i, col++) = int(box->getFilePosition());
       MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
-      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getFileNumEvents()) : 0;
+      //getMRUMemorySize
+      //ws->cell<int>(i, col++) = mdbox ? int(mdbox->getFileNumEvents()) : 0;
+      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getMRUMemorySize()) : 0;
       ws->cell<int>(i, col++) = mdbox ? int(mdbox->getEventVectorSize()) : -1;
       if (mdbox)
       {

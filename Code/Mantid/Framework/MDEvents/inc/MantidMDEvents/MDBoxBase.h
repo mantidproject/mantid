@@ -92,23 +92,19 @@ namespace MDEvents
     virtual void load()
     { }
 
-    /// @return the amount of memory that the object takes up in the MRU.
+  /*  /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getMRUMemorySize() const
-    { return 0; }
+    { return 0; }*/
 
     /// @return true if it the data of the object is busy and so cannot be cleared; false if the data was released and can be cleared/written.
     virtual bool dataBusy() const
     { return false; }
 
     /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
-    virtual uint64_t getFilePosition() const
-    { return 0; }
+  //  virtual uint64_t getFilePosition() const
+  //  { return 0; }
     // -----------------------------------------------------------------------------------------------------
 
-
-    // ----------------------------- Helper Methods --------------------------------------------------------
-    static void sortBoxesByFilePos(std::vector<MDBoxBase<MDE,nd> *> & boxes);
-    // -----------------------------------------------------------------------------------------------------
 
 
     // -------------------------------- Parents/Children-Related -------------------------------------------
@@ -139,9 +135,11 @@ namespace MDEvents
 
     /// Fill a vector with all the boxes up to a certain depth
     virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly) = 0;
+    virtual void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly) = 0;
 
     /// Fill a vector with all the boxes up to a certain depth
     virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
+    virtual void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
 
     /** Split sub-boxes, if this is possible and neede for this box */
     virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)

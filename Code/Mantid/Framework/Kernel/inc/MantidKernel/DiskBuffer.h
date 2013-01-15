@@ -93,7 +93,7 @@ namespace Kernel
 
     void toWrite(const ISaveable * item);
     void flushCache();
-    void objectDeleted(const ISaveable * item, const uint64_t sizeOnFile);
+    void objectDeleted(const ISaveable * item);
 
     // Free space map methods
     void freeBlock(uint64_t const pos, uint64_t const size);

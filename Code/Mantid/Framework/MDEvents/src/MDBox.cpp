@@ -17,7 +17,7 @@ namespace MDEvents
   /** Empty constructor */
   TMDE(MDBox)::MDBox()
    : MDBoxBase<MDE, nd>(),
-     m_fileIndexStart(0), m_fileNumEvents(0),
+//     m_fileNumEvents(0),
      m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
      m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
   {
@@ -30,7 +30,7 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth,int64_t boxSize,int64_t boxID)
     : MDBoxBase<MDE, nd>(),
-      m_fileIndexStart(0), m_fileNumEvents(0),
+//      m_fileNumEvents(0),
       m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
       m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
   {
@@ -54,8 +54,8 @@ namespace MDEvents
    * @param extentsVector :: vector defining the extents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,int64_t boxSize,int64_t boxID)
-      : MDBoxBase<MDE, nd>(extentsVector),
-        m_fileIndexStart(0), m_fileNumEvents(0),
+   :   MDBoxBase<MDE, nd>(extentsVector),
+       // m_fileNumEvents(0),
         m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
         m_onDisk(false), m_inMemory(true), m_bIsMasked(false)
   {
@@ -76,9 +76,9 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor */
   TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other)
-   : MDBoxBase<MDE, nd>(other),
+     : MDBoxBase<MDE, nd>(other),
      data(other.data),
-     m_fileIndexStart(other.m_fileIndexStart), m_fileNumEvents(other.m_fileNumEvents),
+     //m_fileNumEvents(other.m_fileNumEvents),
      m_dataBusy(other.m_dataBusy), m_dataModified(other.m_dataModified), m_dataAdded(other.m_dataAdded),
      m_onDisk(other.m_onDisk), m_inMemory(other.m_inMemory), m_bIsMasked(other.m_bIsMasked)
   {
@@ -92,11 +92,12 @@ namespace MDEvents
   {
     // Make sure the object is not in any of the disk MRUs, and mark any space it used as free
     if (this->m_BoxController->useWriteBuffer())
-      this->m_BoxController->getDiskBuffer().objectDeleted(this, m_fileNumEvents);
+            this->m_BoxController->getDiskBuffer().objectDeleted(this);
+//-->     this->m_BoxController->getDiskBuffer().objectDeleted(this, m_fileNumEvents);
     // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
-    m_fileNumEvents = 0;
+    //m_fileNumEvents = 0;
     data.clear();
     vec_t().swap(data); // Linux trick to really free the memory
     m_inMemory = false;
@@ -144,14 +145,26 @@ namespace MDEvents
   {
     boxes.push_back(this);
   }
+  TMDE(
+  void MDBox)::getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/)
+  {
+    boxes.push_back(this);
+  }
+
 
   //-----------------------------------------------------------------------------------------------
-  /// Fill a vector with all the boxes up to a certain depth
+  /// Fill a vector with all the boxes up to a certain depth  
   TMDE(
   void MDBox)::getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/, Mantid::Geometry::MDImplicitFunction * /*function*/)
   {
     boxes.push_back(this);
   }
+  TMDE(
+  void MDBox)::getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/, Mantid::Geometry::MDImplicitFunction * /*function*/)
+  {
+    boxes.push_back(this);
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the total number of points (events) in this box */
@@ -162,24 +175,24 @@ namespace MDEvents
     {
       if (m_inMemory)
         return data.size();
-      else
-        return m_fileNumEvents + data.size();
+      else // m_fileNumEvents
+        return this->getMRUMemorySize()+ data.size();
     }
     else
       return data.size();
   }
 
 
-  //-----------------------------------------------------------------------------------------------
-  /** Set the start/end point in the file where the events are located
-   * @param start :: start point,
-   * @param numEvents :: number of events in the file   */
-  TMDE(
-  void MDBox)::setFileIndex(uint64_t start, uint64_t numEvents)
-  {
-    m_fileIndexStart = start;
-    m_fileNumEvents = numEvents;
-  }
+  ////-----------------------------------------------------------------------------------------------
+  ///** Set the start/end point in the file where the events are located
+  // * @param start :: start point,
+  // * @param numEvents :: number of events in the file   */
+  //TMDE(
+  //void MDBox)::setFileIndex(uint64_t start, uint64_t numEvents)
+  //{
+  // this->setFilePosition(start);
+  //  m_fileNumEvents = numEvents;
+  //}
 
   //-----------------------------------------------------------------------------------------------
   /** Private method to load the events from a disk cache into the "data" member vector.
@@ -204,7 +217,9 @@ namespace MDEvents
         //  (in the event that addEvent() was called for a box that was on disk)
         try
         {
-          MDE::loadVectorFromNexusSlab(data, file, m_fileIndexStart, m_fileNumEvents);
+          uint64_t fileIndexStart = this->getFilePosition();
+          uint64_t fileNumEvents  = this->getMRUMemorySize();
+          MDE::loadVectorFromNexusSlab(data, file,fileIndexStart, fileNumEvents);
           mutex.unlock();
         }
         catch (std::exception &)
@@ -303,10 +318,15 @@ namespace MDEvents
       // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
       size_t newNumEvents = data.size();
       DiskBuffer & dbuf = this->m_BoxController->getDiskBuffer();
+      uint64_t m_fileNumEvents = this->getMRUMemorySize();
       if (newNumEvents != m_fileNumEvents)
       {
         // Event list changed size. The MRU can tell us where it best fits now.
-        m_fileIndexStart = dbuf.relocate(m_fileIndexStart, m_fileNumEvents, newNumEvents);
+        uint64_t m_fileIndexStart = dbuf.relocate(this->getFilePosition(), m_fileNumEvents, newNumEvents);
+        // BAD: !!!
+        auto pThis = const_cast<MDBox<MDE,nd> *>(this);
+        pThis->setFilePosition(m_fileIndexStart);
+
         m_fileNumEvents = newNumEvents;
         if (newNumEvents > 0)
         {
@@ -351,7 +371,7 @@ namespace MDEvents
   inline void MDBox)::saveNexus(::NeXus::File * file) const
   {
     //std::cout << "Box " << this->getId() << " saving to " << m_fileIndexStart << std::endl;
-    MDE::saveVectorToNexusSlab(this->data, file, m_fileIndexStart,
+    MDE::saveVectorToNexusSlab(this->data, file, this->getFilePosition(),
                                this->m_signal, this->m_errorSquared);
   }
 
@@ -366,7 +386,9 @@ namespace MDEvents
   inline void MDBox)::loadNexus(::NeXus::File * file)
   {
     this->data.clear();
-    MDE::loadVectorFromNexusSlab(this->data, file, m_fileIndexStart, m_fileNumEvents);
+    uint64_t fileIndexStart = this->getFilePosition();
+    uint64_t fileNumEvents  = this->getMRUMemorySize();
+    MDE::loadVectorFromNexusSlab(this->data, file, fileIndexStart, fileNumEvents);
   }
 
 

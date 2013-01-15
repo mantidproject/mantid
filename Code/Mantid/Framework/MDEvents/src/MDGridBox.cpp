@@ -531,6 +531,41 @@ namespace MDEvents
 
   }
 
+  TMDE(
+  void MDGridBox)::getBoxes(std::vector<Kernel::ISaveable *> & outBoxes, size_t maxDepth, bool leafOnly)
+  {
+    // Add this box, unless we only want the leaves
+    if (!leafOnly)
+      outBoxes.push_back(this);
+
+    if (this->getDepth() + 1 <= maxDepth)
+    {
+      for (size_t i=0; i<numBoxes; i++)
+      {
+        // Recursively go deeper, if needed
+        boxes[i]->getBoxes(outBoxes, maxDepth, leafOnly);
+      }
+    }
+    else
+    {
+      // Oh, we reached the max depth and want only leaves.
+      // ... so we consider this box to be a leaf too.
+      if (leafOnly)
+        outBoxes.push_back(this);
+    }
+
+  }
+  TMDE(
+  void MDGridBox)::getBoxes(std::vector<Kernel::ISaveable *> & outBoxes, size_t maxDepth, bool leafOnly,Mantid::Geometry::MDImplicitFunction * function)
+  {
+    std::vector<MDBoxBase<MDE,nd> *> buf;
+    this->getBoxes(buf,maxDepth,leafOnly,function);
+    outBoxes.resize(buf.size());
+    for(size_t i=0;i<buf.size();i++)
+    {
+      outBoxes[i]=buf[i];
+    }
+  }
 
 
   //-----------------------------------------------------------------------------------------------

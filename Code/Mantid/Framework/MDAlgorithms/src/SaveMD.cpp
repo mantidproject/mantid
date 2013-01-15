@@ -296,8 +296,13 @@ namespace MDAlgorithms
             mdbox->save();
             mdbox->setOnDisk(true);
             // Save the index
-            box_event_index[id*2] = mdbox->getFileIndexStart();
-            box_event_index[id*2+1] = mdbox->getFileNumEvents();
+            //box_event_index[id*2] = mdbox->getFileIndexStart();
+            //box_event_index[id*2+1] = mdbox->getFileNumEvents();
+            box_event_index[id*2] = mdbox->getFilePosition();
+            box_event_index[id*2+1] = mdbox->getMRUMemorySize();
+
+            
+
           }
           else
           {

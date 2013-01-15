@@ -393,13 +393,13 @@ namespace MDAlgorithms
       MDImplicitFunction * function = this->getImplicitFunctionForChunk(chunkMin, chunkMax);
 
       // Use getBoxes() to get an array with a pointer to each box
-      std::vector<MDBoxBase<MDE,nd>*> boxes;
+      std::vector<Kernel::ISaveable *> boxes;
       // Leaf-only; no depth limit; with the implicit function passed to it.
       ws->getBox()->getBoxes(boxes, 1000, true, function);
 
       // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
       if (bc->isFileBacked())
-        MDBoxBase<MDE, nd>::sortBoxesByFilePos(boxes);
+        Kernel::ISaveable::sortObjByFilePos(boxes);
 
       // For progress reporting, the # of boxes
       if (prog)

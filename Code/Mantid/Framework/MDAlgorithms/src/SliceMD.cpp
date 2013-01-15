@@ -225,13 +225,13 @@ namespace MDAlgorithms
     // Function defining which events (in the input dimensions) to place in the output
     MDImplicitFunction * function = this->getImplicitFunctionForChunk(NULL, NULL);
 
-    std::vector<MDBoxBase<MDE,nd>*> boxes;
+    std::vector<Kernel::ISaveable *> boxes;
     // Leaf-only; no depth limit; with the implicit function passed to it.
     ws->getBox()->getBoxes(boxes, 1000, true, function);
     // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
     bool fileBackedWS = bc->isFileBacked();
     if (fileBackedWS)
-      MDBoxBase<MDE, nd>::sortBoxesByFilePos(boxes);
+      Kernel::ISaveable::sortObjByFilePos(boxes);
 
     Progress * prog = new Progress(this, 0.0, 1.0, boxes.size());
 

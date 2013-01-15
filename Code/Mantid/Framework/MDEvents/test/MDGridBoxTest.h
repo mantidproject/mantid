@@ -1046,9 +1046,9 @@ public:
       box_t * mdbox = dynamic_cast<box_t *>(box);
       TS_ASSERT( mdbox);
       if ( mdbox->getOnDisk() ) numOnDisk++;
-      eventsOnDisk += mdbox->getFileNumEvents();
+      eventsOnDisk += mdbox->getMRUMemorySize();
       // Track the last point used in the file
-      uint64_t fileEnd = mdbox->getFilePosition() + mdbox->getFileNumEvents();
+      uint64_t fileEnd = mdbox->getFilePosition() + mdbox->getMRUMemorySize();
       if (fileEnd > maxFilePos) maxFilePos = fileEnd;
       //std::cout << mdbox->getFilePosition() << " file pos " << i << std::endl;
     }

@@ -36,7 +36,7 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport MDBox : public MDBoxBase<MDE, nd>
+  class DLLExport MDBox :  public MDBoxBase<MDE, nd>
   {
   public:
     MDBox();
@@ -63,13 +63,9 @@ namespace MDEvents
     virtual bool dataBusy() const
     { return m_dataBusy; }
 
-    /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
-    virtual uint64_t getFilePosition() const
-    { return m_fileIndexStart; }
-
-    /// @return the amount of memory that the object takes up in the MRU.
-    virtual uint64_t getMRUMemorySize() const
-    { return uint64_t(getNPoints()); }
+      /// @return the amount of memory that the object takes up in the MRU.
+    //virtual uint64_t getMRUMemorySize() const
+    //{ return uint64_t(getNPoints()); }
 
     //-----------------------------------------------------------------------------------------------
 
@@ -96,14 +92,9 @@ namespace MDEvents
     { throw std::runtime_error("MDBox cannot have children."); }
 
 
-
-    /// @return Start point in the NXS file where the events are located
-    uint64_t getFileIndexStart() const { return m_fileIndexStart; }
-
     /// @return Number of events saved in the file, after the start index location (= not necessarily the number of events it currently has in memory)
-    uint64_t getFileNumEvents() const { return m_fileNumEvents; }
-
-    void setFileIndex(uint64_t start, uint64_t numEvents);
+    //uint64_t getFileNumEvents() const { return m_fileNumEvents; }
+    //void setFileIndex(uint64_t start, uint64_t numEvents);
  
 
     /** Set whether the box is cached on disk (true) or in memory (false)
@@ -195,8 +186,10 @@ namespace MDEvents
     void loadNexus(::NeXus::File * file);
 
     void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
+    void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
 
     void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
+    void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 
@@ -217,11 +210,6 @@ namespace MDEvents
     /// Mutex for modifying the event list
     Mantid::Kernel::Mutex dataMutex;
 
-    /// Start point in the NXS file where the events are located
-    mutable uint64_t m_fileIndexStart;
-
-    /// Number of events saved in the file, after the start index location
-    mutable uint64_t m_fileNumEvents;
     //------> BOOLS   /- 
     //              oO
     //                \-
