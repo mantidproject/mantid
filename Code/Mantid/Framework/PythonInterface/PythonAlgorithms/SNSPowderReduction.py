@@ -131,7 +131,13 @@ class SNSPowderReduction(PythonAlgorithm):
                     self._use_vnoise = True
                 return
             data = line.strip().split()
-            data = [float(i) for i in data]
+            for i in range(len(data)):
+                if ',' in data[i]:
+                    temp = data[i].split(',')
+                    temp = [float(item) for item in temp]
+                    data[i] = temp
+                else:
+                    data[i] = float(data[i])
             if data[0] not in self._data.keys():
                 self._data[data[0]]={}
             info = self.PDInfo(data, self.use_dspace, self._use_vnoise)
@@ -216,6 +222,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              "Filter the characterization runs using above parameters. This only works for event files.")
         self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],
                              direction=Direction.Input), "Positive is linear bins, negative is logorithmic")
+        self.declareProperty("ResampleX", 0,
+                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. Negative value means logorithmic binning.")
         self.declareProperty("BinInDspace", True,
                              "If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
         self.declareProperty("StripVanadiumPeaks", True,
@@ -244,7 +252,7 @@ class SNSPowderReduction(PythonAlgorithm):
         # EMPTY_INT() from C++
         if chunk:
             if "ChunkNumber" in chunk:
-                name += "_%d" % (int(chunk["ChunkNumber"]))        
+                name += "_%d" % (int(chunk["ChunkNumber"]))
             elif "SpectrumMin" in chunk:
                 name += "_%d" % (1 + int(chunk["SpectrumMin"])/(int(chunk["SpectrumMax"])-int(chunk["SpectrumMin"])))        
         else:
@@ -295,7 +303,7 @@ class SNSPowderReduction(PythonAlgorithm):
                                             LogName=filterLogs[0],
                                             MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
             temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
-                Params=self._binning, Dspacing=self._bin_in_dspace,
+                Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                 DMin=self._info.dmin, DMax=self._info.dmax, TMin=self._info.tmin, TMax=self._info.tmax,
                 PreserveEvents=preserveEvents,
                 RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
@@ -383,12 +391,16 @@ class SNSPowderReduction(PythonAlgorithm):
         # get generic information
         SUFFIX = self.getProperty("Extension").value
         self._config = self.PDConfigFile(self.getProperty("CharacterizationRunsFile").value)
-        self._binning = self.getProperty("Binning").value
-        if len(self._binning) != 1 and len(self._binning) != 3:
-            raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
-        if len(self._binning) == 3:
-            if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
-                raise RuntimeError("Failed to specify the binning")
+        self._resampleX = self.getProperty("ResampleX").value
+        if self._resampleX != 0.:
+            self._binning = [0.]
+        else:
+            self._binning = self.getProperty("Binning").value
+            if len(self._binning) != 1 and len(self._binning) != 3:
+                raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
+            if len(self._binning) == 3:
+                if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
+                    raise RuntimeError("Failed to specify the binning")
         self._bin_in_dspace = self.getProperty("BinInDspace").value
         self._instrument = self.getProperty("Instrument").value
         config['default.facility'] = "SNS"
