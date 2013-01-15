@@ -59,7 +59,25 @@ It should be noted that in a case like this, i.e. when the input is a real posit
 
 ==Output==
 
-The output workspace for a direct ("Forward") transform contains six spectra. The actual transfor is written to spectra with indeces 3 and 4 which are the real and imaginary parts correspondingly. The last spectrum (index 5) has the modulus of the transform: <math> \sqrt(Re^2+Im^2) </math>. The spectra from 0 to 2 repeat these results for positive frequencies only. This corresponds to Fourier transform of real data and is only meaningful if the input data are real. 
+The output workspace for a direct ("Forward") transform contains either three or six spectra, depending on whether the input function is complex or purely real. If the input function has an imaginary part, the transform is written to three spectra with indexes 0, 1, and 2. Indexes 0 and 1 are the real and imaginary parts, while index 2 contains the modulus <math> \sqrt{Re^2+Im^2} </math>. If the input function does not contain an spectrum for the imaginary part (purely real function), the actual transform is written to spectra with indexes 3 and 4 which are the real and imaginary parts, respectively. The last spectrum (index 5) has the modulus of the transform. The spectra from 0 to 2 repeat these results for positive frequencies only.
+
+Output for the case of input function containing imaginary part:
+
+{| border="1" cellpadding="5" cellspacing="0"
+!Workspace index
+!Description
+|-
+|0
+|Complete real part
+|-
+|1
+|Complete imaginary part
+|-
+|2
+|Complete transform modulus
+|}
+
+Output for the case of input function containing no imaginary part:
 
 {| border="1" cellpadding="5" cellspacing="0"
 !Workspace index
