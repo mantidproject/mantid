@@ -29,9 +29,15 @@ namespace
     }
     else
     {
-      Mantid::Kernel::Property *p = self.getProperty(name);
-      Registry::PropertyValueHandler *entry = Registry::getHandler(*(p->type_info()));
-      entry->set(&self, name, value);
+      try {
+        Mantid::Kernel::Property *p = self.getProperty(name);
+        Registry::PropertyValueHandler *entry = Registry::getHandler(*(p->type_info()));
+        entry->set(&self, name, value);
+      }
+      catch (std::invalid_argument &e)
+      {
+        throw std::invalid_argument("When converting parameter \"" + name + "\": " + e.what());
+      }
     }
   }
 }
