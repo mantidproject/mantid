@@ -335,7 +335,11 @@ namespace Geometry
       if ( (pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
           ((pNL_comp->item(i))->nodeName()).compare("component") == 0 )
       {
-        Element* pElem = static_cast<Element*>(pNL_comp->item(i));
+        const Element* pElem = static_cast<Element*>(pNL_comp->item(i));
+
+        if( !pElem->hasAttribute("idlist") ) {
+          int a = 1;
+        }
 
         IdList idList; // structure to possibly be populated with detector IDs
 
@@ -377,12 +381,17 @@ namespace Geometry
               // outside the pNL_childs loop since the if/else works on pElem not on the individual childs)
               if ( isAssembly(pElem->getAttribute("type")) )
               {
-                appendAssembly(m_instrument.get(), pLocElem, idList);
+                appendAssembly(m_instrument.get(), pLocElem, pElem, idList);
               }
               else  
               {
-                appendLeaf(m_instrument.get(), pLocElem, idList);
+                appendLeaf(m_instrument.get(), pLocElem, pElem, idList);
               }
+
+              if( !pElem->hasAttribute("idlist") ) {
+                int a = 1;
+              }
+
             }
 
             // if a <locations> element
@@ -399,7 +408,7 @@ namespace Geometry
         {
           std::stringstream ss1, ss2;
           ss1 << idList.vec.size(); ss2 << idList.counted;
-          if( pElem->getAttribute("idList") == "") {
+          if( !pElem->hasAttribute("idlist") ) {
             g_log.error("No detector ID list found for detectors of type "
               + pElem->getAttribute("type"));
           }
@@ -462,7 +471,7 @@ namespace Geometry
   /** Set location (position) of comp as specified in XML location element.
    *
    *  @param comp :: To set position/location off
-   *  @param pElem ::  Poco::XML element that points a location element in the XML doc
+   *  @param pElem ::  Poco::XML element that points a \<location\> element, which optionally may be detached (meaning it is not required to be part of the DOM tree of the IDF)
    *  @param angleConvertConst :: constant for converting deg to rad
    *  @param deltaOffsets :: radial position offsets
    *
@@ -574,7 +583,7 @@ namespace Geometry
   /** Calculate the position of comp relative to its parent from info provided by \<location\> element.
   *
   *  @param comp :: To set position/location off
-  *  @param pElem ::  Poco::XML element that points a location element in the XML doc
+  *  @param pElem ::  Poco::XML element that points a \<location\> element, which optionally may be detached (meaning it is not required to be part of the DOM tree of the IDF)
   *  @param angleConvertConst :: constant for converting deg to rad
   *  @param deltaOffsets :: radial position offsets
   *
@@ -699,16 +708,15 @@ namespace Geometry
   }
 
   //-----------------------------------------------------------------------------------------------------------------------
-  /** get name of location element. Will be the name attribute, or the
-    * parent's name attribute, or the parent's type, if all else fails.
-  *
-  *  @param pElem ::  Poco::XML element that points to a location element
-  *  @return name of location element
-  */
-  std::string InstrumentDefinitionParser::getNameOfLocationElement(const Poco::XML::Element* pElem)
+  /** Get name of a location element. It will return the value of the attribute 'name', or the
+   *  parent's name attribute, or the parent's type, if all else fails.
+   *
+   *  @param pElem ::  Poco::XML element that points to a <location> element, which optionally may be detached (meaning it is not required to be part of the DOM tree of the IDF)
+   *  @param pCompElem :: The Poco::XML <component> element that contain the location element, which may optionally be detached from the DOM tree also 
+   *  @return name of location element
+   */
+  std::string InstrumentDefinitionParser::getNameOfLocationElement(const Poco::XML::Element* pElem, const Poco::XML::Element* pCompElem)
   {
-    Element* pCompElem = InstrumentDefinitionParser::getParentComponent(pElem);
-
     std::string retVal;
 
     if ( pElem->hasAttribute("name") )
@@ -918,14 +926,15 @@ namespace Geometry
   *  itself, i.e. it may act recursively.
   *
   *  @param parent :: CompAssembly to append new component to
-  *  @param pLocElem ::  Poco::XML element that points to a location element in an instrument description XML file
+  *  @param pLocElem ::  Poco::XML element that points to a location element in an instrument description XML file, which optionally may be detached (meaning it is not required to be part of the DOM tree of the IDF)
+  *  @param pCompElem :: The Poco::XML \<component\> element that contains the \<location\> element, which may optionally be detached from the DOM tree also 
   *  @param idList :: The current IDList
   */
-  void InstrumentDefinitionParser::appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
+  void InstrumentDefinitionParser::appendAssembly(Geometry::ICompAssembly* parent, const Poco::XML::Element* pLocElem, const Poco::XML::Element* pCompElem, IdList& idList)
   {
     const std::string filename = m_xmlFile->getFileFullPathStr();
     // The location element is required to be a child of a component element. Get this component element
-    Element* pCompElem = InstrumentDefinitionParser::getParentComponent(pLocElem);
+    //Element* pCompElem = InstrumentDefinitionParser::getParentComponent(pLocElem);
 
     // Read detector IDs into idlist if required
     // Note idlist may be defined for any component
@@ -958,11 +967,11 @@ namespace Geometry
     Element* pType = getTypeElement[pCompElem->getAttribute("type")];
     if (pType->hasAttribute("outline") && pType->getAttribute("outline") != "no")
     {
-      ass = new Geometry::ObjCompAssembly(InstrumentDefinitionParser::getNameOfLocationElement(pLocElem),parent);
+      ass = new Geometry::ObjCompAssembly(InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem),parent);
     }
     else
     {
-      ass = new Geometry::CompAssembly(InstrumentDefinitionParser::getNameOfLocationElement(pLocElem),parent);
+      ass = new Geometry::CompAssembly(InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem),parent);
     }
 
     // set location for this newly added comp and set facing if specified in instrument def. file. Also
@@ -990,10 +999,15 @@ namespace Geometry
     {
       if ( pNode->nodeName().compare("location")==0 )
       {
-        Element* pElem = static_cast<Element*>(pNode);
+        // this is a <location> element of this type (i.e. whatever type pLocElem is) 
+        const Element* pElem = static_cast<Element*>(pNode);
+
+        // get the parent of pElem, i.e. a pointer to the <component> element that contains pElem
+        const Element* pParentElem = InstrumentDefinitionParser::getParentComponent(pElem);
 
         // check if this location is in the exclude list
-        std::vector<std::string>::const_iterator it = find(excludeList.begin(), excludeList.end(), InstrumentDefinitionParser::getNameOfLocationElement(pElem));
+        std::vector<std::string>::const_iterator it = find(excludeList.begin(), excludeList.end(), 
+                                                           InstrumentDefinitionParser::getNameOfLocationElement(pElem, pCompElem));
         if ( it == excludeList.end() )
         {
 
@@ -1001,11 +1015,11 @@ namespace Geometry
 
           if ( isAssembly(typeName) )
           {
-            appendAssembly(ass, pElem, idList);
+            appendAssembly(ass, pElem, pParentElem, idList);
           }
           else
           {
-            appendLeaf(ass, pElem, idList);
+            appendLeaf(ass, pElem, pParentElem, idList);
           }
         }
       }
@@ -1042,19 +1056,18 @@ namespace Geometry
   //-----------------------------------------------------------------------------------------------------------------------
   /** Assumes second argument is pointing to a leaf, which here means the location element (indirectly
   *  representing a component element) that contains no sub-components. This component is appended
-  %  to the parent (1st argument).
+  *  to the parent (1st argument).
   *
   *  @param parent :: CompAssembly to append component to
-  *  @param pLocElem ::  Poco::XML element that points to the element in the XML doc we want to add
+  *  @param pLocElem ::  Poco::XML element that points to the element in the XML doc we want to add, which optionally may be detached (meaning it is not required to be part of the DOM tree of the IDF)
+  *  @param pCompElem :: The Poco::XML \<component\> element that contains the \<location\> element, which may optionally be detached from the DOM tree also 
   *  @param idList :: The current IDList
   *
   *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
   */
-  void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly* parent, const Poco::XML::Element* pLocElem, IdList& idList)
+  void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly* parent, const Poco::XML::Element* pLocElem, const Poco::XML::Element* pCompElem, IdList& idList)
   {
     const std::string filename = m_xmlFile->getFileFullPathStr();
-    // The location element is required to be a child of a component element. Get this component element
-    Element* pCompElem = InstrumentDefinitionParser::getParentComponent(pLocElem);
 
     //--- Get the detector's X/Y pixel sizes (optional) ---
     // Read detector IDs into idlist if required
@@ -1096,7 +1109,7 @@ namespace Geometry
     if ( category.compare("RectangularDetector") == 0 || category.compare("rectangularDetector") == 0  || category.compare("rectangulardetector") == 0 || category.compare("rectangular_detector") == 0 )
     {
       //-------------- Create a RectangularDetector ------------------------------------------------
-      std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem);
+      std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem);
 
       //Create the bank with the given parent.
       Geometry::RectangularDetector * bank = new Geometry::RectangularDetector(name, parent);
@@ -1174,7 +1187,7 @@ namespace Geometry
     else if ( category.compare("Detector") == 0 || category.compare("detector") == 0 || category.compare("Monitor") == 0 || category.compare("monitor") == 0 )
     {
       //-------------- Create a Detector ------------------------------------------------
-      std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem);
+      std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem);
 
       // before setting detector ID check that the IDF satisfies the following
 
@@ -1257,7 +1270,7 @@ namespace Geometry
     else
     {
       //-------------- Not a Detector nor a RectangularDetector ------------------------------
-      std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem);
+      std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem);
 
       auto comp = new Geometry::ObjComponent(name, mapTypeNameToShape[typeName], parent);
       parent->add(comp);
@@ -1512,7 +1525,7 @@ namespace Geometry
   /** Set facing of comp as specified in XML facing element (which must be sub-element of a location element).
   *
   *  @param comp :: To set facing of
-  *  @param pElem ::  Poco::XML element that points a location element in the XML doc
+  *  @param pElem ::  Poco::XML element that points a \<location\> element, which optionally may be detached (meaning it is not required to be part of the DOM tree of the IDF)
   *
   *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
   */
@@ -1561,7 +1574,7 @@ namespace Geometry
   /** Set parameter/logfile info (if any) associated with component
   *
   *  @param comp :: Some component
-  *  @param pElem ::  Associated Poco::XML element to component that may hold a \<parameter\> element
+  *  @param pElem ::  Poco::XML element that may hold \<parameter\> elements
   *  @param logfileCache :: Cache to add information about parameter to
   *
   *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -2499,7 +2512,7 @@ namespace Geometry
 
     Element* pType = getTypeElement[pCompElem->getAttribute("type")];
 
-    ass = new Geometry::CompAssembly(InstrumentDefinitionParser::getNameOfLocationElement(pLocElem),parent);
+    ass = new Geometry::CompAssembly(InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem),parent);
     endAssembly = ass;
 
     // set location for this newly added comp

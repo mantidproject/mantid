@@ -70,7 +70,7 @@ namespace Geometry
     static Poco::XML::Element* getParentComponent(const Poco::XML::Element* pLocElem);
 
     /// get name of location element
-    static std::string getNameOfLocationElement(const Poco::XML::Element* pElem);
+    static std::string getNameOfLocationElement(const Poco::XML::Element* pElem, const Poco::XML::Element* pCompElem);
 
     /// Save DOM tree to xml file
     void saveDOM_Tree(std::string& outFilename);
@@ -122,12 +122,12 @@ namespace Geometry
     std::vector<std::string> buildExcludeList(const Poco::XML::Element* const location);
 
     /// Add XML element to parent assuming the element contains other component elements
-    void appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
+    void appendAssembly(Geometry::ICompAssembly* parent, const Poco::XML::Element* pLocElem, const Poco::XML::Element* pCompElem, IdList& idList);
     /// Return true if assembly, false if not assembly and throws exception if string not in assembly
     bool isAssembly(std::string) const;
 
     /// Add XML element to parent assuming the element contains no other component elements
-    void appendLeaf(Geometry::ICompAssembly* parent, const Poco::XML::Element* pElem, IdList& idList);
+    void appendLeaf(Geometry::ICompAssembly* parent, const Poco::XML::Element* pLocElem, const Poco::XML::Element* pCompElem, IdList& idList);
 
     /// Set parameter/logfile info (if any) associated with component
     void setLogfile(const Geometry::IComponent* comp, const Poco::XML::Element* pElem,
