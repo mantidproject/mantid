@@ -132,9 +132,8 @@ void ViewBase::onLogScale(int state)
  * This function is used to correct post-accept visibility issues. Most
  * views won't need to do anything.
  */
-void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
+void ViewBase::correctVisibility()
 {
-  UNUSED_ARG(pbw);
 }
 
 /**

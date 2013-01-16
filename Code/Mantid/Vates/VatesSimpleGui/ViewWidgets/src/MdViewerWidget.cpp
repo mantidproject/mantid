@@ -499,7 +499,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   delete this->hiddenView;
   this->currentView->render();
   this->currentView->checkViewOnSwitch();
-  this->currentView->correctVisibility(this->ui.pipelineBrowser);
+  this->currentView->correctVisibility();
   this->viewSettings->updateEnableState();
 }
 

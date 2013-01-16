@@ -9,7 +9,6 @@
 #include <QWidget>
 
 class pqColorMapModel;
-class pqPipelineBrowserWidget;
 class pqPipelineRepresentation;
 class pqPipelineSource;
 class pqRenderView;
@@ -67,9 +66,8 @@ public:
   /**
    * Correct an oddity in the creation of the 3D view so that the cuts
    * are visibile.
-   * @param pbw the main program's handle to the pqPipelineBrowserWidget
    */
-  void correctVisibility(pqPipelineBrowserWidget *pbw);
+  void correctVisibility();
   /**
    * ViewBase::destroyView
    */

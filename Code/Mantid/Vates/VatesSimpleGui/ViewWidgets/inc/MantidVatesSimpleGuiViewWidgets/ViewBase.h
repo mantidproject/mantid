@@ -11,7 +11,6 @@
 
 class pqColorMapModel;
 class pqObjectBuilder;
-class pqPipelineBrowserWidget;
 class pqPipelineSource;
 class pqPipelineRepresentation;
 class pqRenderView;
@@ -67,7 +66,7 @@ public:
   /// Close view generated sub-windows.
   virtual void closeSubWindows();
   /// Correct post-accept visibility issues.
-  virtual void correctVisibility(pqPipelineBrowserWidget *pbw);
+  virtual void correctVisibility();
   /// Creates a single view instance.
   virtual pqRenderView *createRenderView(QWidget *container,
                                          QString viewName=QString(""));

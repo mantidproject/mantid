@@ -111,7 +111,7 @@ void ThreeSliceView::resetDisplay()
   this->mainView->resetDisplay();
 }
 
-void ThreeSliceView::correctVisibility(pqPipelineBrowserWidget *pbw)
+void ThreeSliceView::correctVisibility()
 {
   this->correctColorScaleRange();
 }
