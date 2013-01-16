@@ -68,7 +68,7 @@ class ISaveableTesterWithSeek : public ISaveableTester
 public:
   ISaveableTesterWithSeek(size_t id) : ISaveableTester(id)
   {
-    this->setFilePosition(10,this->m_memory);
+    this->setFilePosition(10+id,this->m_memory);
   }
 
   using ISaveableTester::load; // Unhide base class method to avoid Intel compiler warning
@@ -89,6 +89,15 @@ public:
 
   void grow(DiskBuffer & dbuf, bool /*tellMRU*/)
   {
+    // OK first you seek to where the OLD data was and load it.
+    uint64_t myFilePos = this->getFilePosition();
+    std::cout << "Block " << getId() << " loading at " << myFilePos << std::endl;
+    ISaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
+    // Simulate that the data is growing and so needs to be written out
+    size_t newfilePos = dbuf.relocate(myFilePos, m_memory, m_memory+1);
+    std::cout << "Block " << getId() << " has moved from " << myFilePos << " to " << newfilePos << std::endl;
+    myFilePos = newfilePos;
+    // Grow the size by 1
     m_memory++;
     //uint64_t fPos    = this->getFilePosition();
     //uint64_t mMemory = this->getFileSize();
@@ -103,7 +112,7 @@ public:
     //fPos = newfilePos;
     //// Grow the size by 1
     //mMemory = mMemory+ 1;
-    //this->setFileIndex(fPos,mMemory);
+    this->setFilePosition(myFilePos,m_memory);
   }
 
   /// Fake a seek followed by a write
@@ -194,6 +203,9 @@ public:
   size_t num;
   std::vector<ISaveableTester*> bigData;
   size_t bigNum;
+#ifdef _GLUE_PERFORMANCE_TEST
+  std::vector<ISaveableTesterWithSeek*> dataSeek;
+#endif
 
   void setUp()
   {
@@ -207,6 +219,18 @@ public:
     bigData.clear();
     for (size_t i=0; i<bigNum; i++)
       bigData.push_back( new ISaveableTester(i) );
+#ifdef _GLUE_PERFORMANCE_TEST
+    dataSeek.clear();
+    for (size_t i=0; i<200; i++)
+      dataSeek.push_back( new ISaveableTesterWithSeek(i) );
+    ISaveableTester::fakeFile = "";
+    for (size_t i=0; i<data.size(); i++)
+    {
+      data[i]->setBusy(); // Items won't do any real saving
+    }
+#endif
+
+
   }
 
   void teadDown()
@@ -222,6 +246,15 @@ public:
       delete bigData[i];
       bigData[i]=NULL;
     }
+#ifdef _GLUE_PERFORMANCE_TEST
+    for (size_t i=0; i<200; i++)
+    {
+      delete dataSeek[i];
+      dataSeek[i]=NULL;
+    }
+    dataSeek.clear();
+#endif
+
   }
   void testIsaveable()
   {
@@ -781,9 +814,8 @@ public:
     //std::cout <<  ISaveableTesterWithFile::fakeFile << "!" << std::endl;
   }
 
+#ifndef _GLUE_PERFORMANCE_TEST
 };
-
-
 
 
 //====================================================================================
@@ -813,18 +845,19 @@ public:
     for (size_t i=0; i<200; i++)
       dataSeek.push_back( new ISaveableTesterWithSeek(i) );
   }
-
   void setUp()
   {
     ISaveableTester::fakeFile = "";
   }
+
+#endif
 
 
   void test_smallCache_writeBuffer()
   {
     CPUTimer tim;
     DiskBuffer dbuf(3);
-    for (int i=0; i<int(num); i++)
+    for (int i=0; i<data.size(); i++)
       dbuf.toWrite(data[i]);
     std::cout << tim << " to load " << num << " into MRU." << std::endl;
   }
@@ -833,7 +866,12 @@ public:
   {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (int i=0; i<int(num); i++)
+    for (size_t i=0; i<int(data.size()); i++)
+    {
+      data[i]->setBusy(); // Items won't do any real saving
+    }
+
+    for (int i=0; i<int(data.size()); i++)
       dbuf.toWrite(data[i]);
     std::cout << tim << " to load " << num << " into MRU (no write cache)." << std::endl;
   }
@@ -842,7 +880,7 @@ public:
   {
     CPUTimer tim;
     DiskBuffer dbuf(1000);
-    for (int i=0; i<int(num); i++)
+    for (int i=0; i<int(data.size()); i++)
       dbuf.toWrite(data[i]);
     std::cout << tim << " to load " << num << " into MRU." << std::endl;
   }
@@ -851,7 +889,7 @@ public:
   {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (int i=0; i<int(num); i++)
+    for (int i=0; i<int(data.size()); i++)
       dbuf.toWrite(data[i]);
     std::cout << tim << " to load " << num << " into MRU (no write buffer)." << std::endl;
   }
