@@ -2,6 +2,7 @@
 #define MANTID_VATES_MD_LOADING_PRESENTER
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include <vtkDataSet.h>
 #include <string>
 #include <vector>
@@ -52,6 +53,10 @@ namespace Mantid
       virtual std::string getWorkspaceTypeName()
       {
         return "NotSet";
+      }
+      virtual int getSpecialCoordinates()
+      {
+        return API::None;
       }
     };
 
