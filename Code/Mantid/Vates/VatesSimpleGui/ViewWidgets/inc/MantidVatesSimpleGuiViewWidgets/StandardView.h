@@ -8,8 +8,6 @@
 #include <QPointer>
 #include <QWidget>
 
-class pqColorMapModel;
-class pqPipelineRepresentation;
 class pqPipelineSource;
 class pqRenderView;
 

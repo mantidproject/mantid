@@ -2,17 +2,12 @@
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
-#include <pqChartValue.h>
-#include <pqColorMapModel.h>
 #include <pqDataRepresentation.h>
 #include <pqObjectBuilder.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
 #include <pqRenderView.h>
-#include <pqScalarsToColors.h>
-#include <pqSMAdaptor.h>
 #include <vtkDataObject.h>
-#include <vtkProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 
