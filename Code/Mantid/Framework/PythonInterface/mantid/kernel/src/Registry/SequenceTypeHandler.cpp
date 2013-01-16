@@ -32,30 +32,21 @@ namespace Mantid
         using boost::python::len;
         typedef typename ContainerType::value_type DestElementType;
 
-        // Check for a container-like object
-        try
-        {
-         Py_ssize_t length = len(value);
-         UNUSED_ARG(length);
-        }
-        catch(boost::python::error_already_set&)
-        {
-          throw std::invalid_argument(name + " property requires a list/array type but found a " + value.ptr()->ob_type->tp_name);
-        }
-
         // numpy arrays requires special handling to extract their types. Hand-off to a more appropriate handler
         if( PyArray_Check(value.ptr()) )
         {
           alg->setProperty(name, Converters::NDArrayToVector<DestElementType>(value)());
         }
-        else if( PySequence_Check(value.ptr()) )
+	else if( PySequence_Check(value.ptr()) )
         {
           alg->setProperty(name, Converters::PySequenceToVector<DestElementType>(value)());
+	  return;
         }
-        else
-        {
-          throw std::invalid_argument(std::string("Unknown sequence type \"") + value.ptr()->ob_type->tp_name
-                                        + "\" found when setting " + name + " property.");
+	else // assume it is a scalar and try to convert into a vector of length one
+	{
+          std::vector<DestElementType> result(1);
+          result[0] = boost::python::extract<DestElementType>(value.ptr());
+          alg->setProperty(name, result);
         }
       }
 
