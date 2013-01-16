@@ -24,6 +24,7 @@
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
 #include <pqStatusBar.h>
+#include <pqViewSettingsReaction.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
@@ -499,6 +500,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->currentView->render();
   this->currentView->checkViewOnSwitch();
   this->currentView->correctVisibility(this->ui.pipelineBrowser);
+  this->viewSettings->updateEnableState();
 }
 
 /**
@@ -552,8 +554,13 @@ void MdViewerWidget::createMenus()
     menubar = qobject_cast<QMainWindow *>(this->parentWidget())->menuBar();
   }
 
-  QMenu *viewMenu = menubar->addMenu(QApplication::tr("&View"));\
-  UNUSED_ARG(viewMenu)
+  QMenu *viewMenu = menubar->addMenu(QApplication::tr("&View"));
+
+  QAction *settingsAction = new QAction(QApplication::tr("View Settings..."), this);
+  settingsAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+S"));
+  settingsAction->setStatusTip(QApplication::tr("Show the settings for the current view."));
+  this->viewSettings = new pqViewSettingsReaction(settingsAction);
+  viewMenu->addAction(settingsAction);
 
   QMenu *helpMenu = menubar->addMenu(QApplication::tr("&Help"));
 
