@@ -141,6 +141,8 @@ namespace VATES
       case Peak_in_HKL:
         pos = peak.getHKL();
         break;
+      default:
+        pos = peak.getQLabFrame();
       }
 
       double x = pos.X();
