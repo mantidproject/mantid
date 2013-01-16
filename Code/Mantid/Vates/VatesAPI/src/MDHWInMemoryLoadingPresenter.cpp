@@ -20,7 +20,7 @@ namespace Mantid
     @throw invalid_argument if the repository is null
     @throw invalid_arument if view is null
     */
-    MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDHWLoadingPresenter(view), m_repository(repository), m_wsName(wsName), m_wsTypeName("")
+  MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDHWLoadingPresenter(view), m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1)
     {
       if(m_wsName.empty())
       {
@@ -97,6 +97,7 @@ namespace Mantid
       Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
       IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
       m_wsTypeName = histoWs->id();
+      m_specialCoords = histoWs->getSpecialCoordinateSystem();
       //Call base-class extraction method.
       this->extractMetadata(histoWs);
     }
@@ -114,6 +115,15 @@ namespace Mantid
     std::string MDHWInMemoryLoadingPresenter::getWorkspaceTypeName()
     {
       return m_wsTypeName;
+    }
+
+    /**
+     * Getter for the special coordinates.
+     * @return the special coordinates value
+     */
+    int MDHWInMemoryLoadingPresenter::getSpecialCoordinates()
+    {
+      return m_specialCoords;
     }
   }
 }

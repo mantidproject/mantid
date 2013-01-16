@@ -165,7 +165,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(presenter.hasTDimensionAvailable());
     TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
     TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
-    TSM_ASSERT("Special coordinate metadata failed.", -1<presenter.getSpecialCoordinates());
+    TSM_ASSERT("Special coordinate metadata failed.", -1 < presenter.getSpecialCoordinates());
     TS_ASSERT(Mock::VerifyAndClearExpectations(view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
 
