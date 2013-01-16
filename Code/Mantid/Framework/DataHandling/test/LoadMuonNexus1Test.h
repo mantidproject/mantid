@@ -395,21 +395,21 @@ private:
   boost::shared_ptr<SpectraDetectorMap> map;
 };
 
-////------------------------------------------------------------------------------
-//// Performance test
-////------------------------------------------------------------------------------
-//
-//class LoadMuonNexus1TestPerformance : public CxxTest::TestSuite
-//{
-//public:
-//  void testDefaultLoad()
-//  {
-//    LoadMuonNexus1 loader;
-//    loader.initialize();
-//    loader.setPropertyValue("Filename", "deltat_tdc_gpd_0900.nxs");
-//    loader.setPropertyValue("OutputWorkspace", "ws");
-//    TS_ASSERT( loader.execute() );
-//  }
-//};
-//
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadMuonNexus1TestPerformance : public CxxTest::TestSuite
+{
+public:
+  void testDefaultLoad()
+  {
+    LoadMuonNexus1 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "emu00006475.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT( loader.execute() );
+  }
+};
+
 #endif /*LOADMUONNEXUS1TEST_H_*/
