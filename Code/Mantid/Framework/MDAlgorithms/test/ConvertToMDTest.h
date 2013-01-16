@@ -106,8 +106,11 @@ void testExecNoQ()
     pAlg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
     checkHistogramsHaveBeenStored("WS3DNoQ");
-    AnalysisDataService::Instance().remove("WS3DNoQ");
 
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DNoQ");
+    TS_ASSERT_EQUALS(Mantid::API::None, outWS->getSpecialCoordinateSystem());
+
+    AnalysisDataService::Instance().remove("WS3DNoQ");
 }
 
 void testExecModQ()
@@ -131,8 +134,11 @@ void testExecModQ()
     pAlg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
     checkHistogramsHaveBeenStored("WS3DmodQ");
-    AnalysisDataService::Instance().remove("WS3DmodQ");
 
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DmodQ");
+    TS_ASSERT_EQUALS(Mantid::API::None, outWS->getSpecialCoordinateSystem());
+
+    AnalysisDataService::Instance().remove("WS3DmodQ");
 }
 
 void testExecQ3D()
@@ -147,11 +153,14 @@ void testExecQ3D()
     pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
     pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
 
-
     pAlg->setRethrows(false);
     pAlg->execute();
     TSM_ASSERT("Shoud finish succesfully",pAlg->isExecuted());
     checkHistogramsHaveBeenStored("WS5DQ3D");
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
+    TS_ASSERT_EQUALS(Mantid::API::QSample, outWS->getSpecialCoordinateSystem());
+
     AnalysisDataService::Instance().remove("WS5DQ3D");
 }
 

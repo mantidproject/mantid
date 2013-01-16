@@ -96,6 +96,8 @@ namespace MDEvents
    // On multiprocessor machine the algorithm should run and utilizes all cores (see Kernel::Threadpool), 
    // but this can be chenged setting this parameter to 0 (no multithreading) or positive number specifying the requested nymber of threads
    int m_NumThreads;
+   /// Any special coordinate system used.
+   Mantid::API::SpecialCoordinateSystem m_coordinateSystem;
  private:
     /** internal function which do one peace of work, which should be performed by one thread 
       *

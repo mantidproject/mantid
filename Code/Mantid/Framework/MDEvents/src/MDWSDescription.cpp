@@ -189,7 +189,8 @@ MDWSDescription::MDWSDescription(unsigned int nDimensions):
   m_Wtransf(3,3,true),
   m_RotMatrix(9,0),
   m_Emode(Kernel::DeltaEMode::Undefined),
-  m_LorentzCorr(false)
+  m_LorentzCorr(false),
+  m_coordinateSystem(Mantid::API::None)
 {
 
   this->resizeDimDescriptions(nDimensions);
@@ -316,6 +317,21 @@ boost::shared_ptr<Geometry::OrientedLattice> MDWSDescription::getOrientedLattice
   return orl;
 
 }
+
+/** Set the special coordinate system if any.
+@param coordinate system.
+*/
+void MDWSDescription::setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem system)
+{
+  m_coordinateSystem = system;
+}
+
+/// @return the special coordinate system if any.
+Mantid::API::SpecialCoordinateSystem MDWSDescription::getCoordinateSystem() const
+{
+  return m_coordinateSystem;
+}
+
 
 
 } //end namespace MDEvents 

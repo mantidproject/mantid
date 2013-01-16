@@ -75,6 +75,8 @@ namespace API
 
     virtual bool threadSafe() const;
 
+    virtual void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem) = 0;
+
   protected:
     /// Marker set to true when a file-backed workspace needs its back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
     bool m_fileNeedsUpdating;

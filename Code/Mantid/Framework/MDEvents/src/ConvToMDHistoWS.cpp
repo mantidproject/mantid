@@ -212,7 +212,10 @@ namespace Mantid
       }
       m_OutWSWrapper->pWorkspace()->refreshCache();
       m_OutWSWrapper->refreshCentroid();
-      pProgress->report();          
+      pProgress->report();   
+
+      /// Set the special coordinate system flag on the output workspace.
+      m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
     }
     /**function calculates the size of temporary memory used to keep convertTo MD data before these data should be added to MDEvents
     * @param nThreads  -- number of threads used to process data

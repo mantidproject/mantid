@@ -40,10 +40,10 @@ namespace Mantid
     /// Special coordinate systems
     enum SpecialCoordinateSystem
     {
-      None = 0, 
-      HKL = 1, 
-      QLab = 2, 
-      QSample = 3
+      None = 0,
+      QLab = 1, 
+      QSample = 2,
+      HKL = 3
     };
 
 

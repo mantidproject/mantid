@@ -400,6 +400,7 @@ namespace MDEvents
 
     std::string dimensionNames[3] = {"Q_lab_x", "Q_lab_y", "Q_lab_z"};
     std::string dimensionUnits = "Angstroms^-1";
+    Mantid::API::SpecialCoordinateSystem coordinateSystem = Mantid::API::QLab;
     if (OutputDimensions == "Q (sample frame)")
     {
       // Set the matrix based on goniometer angles
@@ -410,6 +411,7 @@ namespace MDEvents
       dimensionNames[0] = "Q_sample_x";
       dimensionNames[1] = "Q_sample_y";
       dimensionNames[2] = "Q_sample_z";
+      coordinateSystem = Mantid::API::QSample;
     }
     else if (OutputDimensions == "HKL")
     {
@@ -426,6 +428,7 @@ namespace MDEvents
       dimensionNames[1] = "K";
       dimensionNames[2] = "L";
       dimensionUnits = "lattice";
+      coordinateSystem = Mantid::API::HKL;
     }
     // Q in the lab frame is the default, so nothing special to do.
 
@@ -616,6 +619,8 @@ namespace MDEvents
       g_log.information() << std::endl;
     }
 
+    // Set the special coordinate system.
+    ws->setCoordinateSystem(coordinateSystem);
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
