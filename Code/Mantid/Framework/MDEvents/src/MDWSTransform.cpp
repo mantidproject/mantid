@@ -244,7 +244,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
     {
       dimNames[0]="Q_sample_x";
       dimNames[1]="Q_sample_y";
-      dimNames[2]="Q_sqmple_z";
+      dimNames[2]="Q_sample_z";
       break;
     }
   case(CnvrtToMD::HKLFrame):
