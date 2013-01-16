@@ -113,7 +113,7 @@ namespace Mantid
           setProperty("TimeZero", dum);
         }
       }
-      catch (::NeXus::Exception&)
+      catch (...)
       {}
 
       try
@@ -128,7 +128,7 @@ namespace Mantid
           setProperty("FirstGoodData", bin*bin_size);
         }
       }
-      catch (::NeXus::Exception&)
+      catch (...)
       {}
 
       try
@@ -144,7 +144,7 @@ namespace Mantid
         }
         setProperty("DeadTimes", defaultDeadTimes);
       }
-      catch (::NeXus::Exception&)
+      catch (...)
       {}
 
       NXEntry nxRun = root.openEntry("run");
@@ -155,14 +155,14 @@ namespace Mantid
         title = nxRun.getString("title");
         notes = nxRun.getString("notes");
       }    
-      catch (::NeXus::Exception&)
+      catch (...)
       {}
       std::string run_num;
       try
       {
         run_num = boost::lexical_cast<std::string>(nxRun.getInt("number"));
       }
-      catch (::NeXus::Exception&)
+      catch (...)
       {}
 
       MuonNexusReader nxload;
