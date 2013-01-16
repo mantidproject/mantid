@@ -22,6 +22,14 @@
          information_only="1">
          <SimpleStringInformationHelper /> 
 	</StringVectorProperty>
+      <IntVectorProperty
+         name="SpecialCoordinates"
+         command="GetSpecialCoordinates"
+         number_of_elements="1"
+         information_only="1"
+         default_values="0">
+         <SimpleIntInformationHelper />
+      </IntVectorProperty>
 	   <StringVectorProperty
          name="InputGeometryXML"
          command="GetInputGeometryXML"

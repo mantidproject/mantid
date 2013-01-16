@@ -68,6 +68,26 @@ const char* vtkMDHWSource::GetInputGeometryXML()
   }
 }
 
+/**
+ * Gets the current value of the special coordinates associated with the
+ * workspace.
+ * @return the special coordinates value
+ */
+int vtkMDHWSource::GetSpecialCoordinates()
+{
+  if (NULL == m_presenter)
+  {
+    return 0;
+  }
+  try
+  {
+    return m_presenter->getSpecialCoordinates();
+  }
+  catch (std::runtime_error &)
+  {
+    return 0;
+  }
+}
 
 int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
