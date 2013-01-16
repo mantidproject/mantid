@@ -1,9 +1,6 @@
 # Pinched the bulk of this file from:
 # http://bugreports.qt.nokia.com/browse/QTSOLBUG-80
 
-# This is mainly here so you don't get a complaint when running cmake
-cmake_minimum_required ( VERSION 2.6 )
-
 project ( QtPropertyBrowser )
 
 # We check for Qt in the directory above this, but having this here
