@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -199,7 +199,7 @@ public:
 
 private:
   ApplyDeadTimeCorr applyDeadTime;
-  Mantid::DataHandling::LoadMuonNexus loader;
+  Mantid::DataHandling::LoadMuonNexus2 loader;
 };
 
 

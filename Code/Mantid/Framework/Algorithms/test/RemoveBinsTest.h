@@ -9,7 +9,7 @@
 #include <stdexcept>
 
 #include "MantidAlgorithms/RemoveBins.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
@@ -177,7 +177,7 @@ public:
 
 	void xtestRealData()
 	{
-		Mantid::DataHandling::LoadMuonNexus loader;
+		Mantid::DataHandling::LoadMuonNexus2 loader;
 		loader.initialize();
 		loader.setPropertyValue("Filename", "emu00006473.nxs");
 		loader.setPropertyValue("OutputWorkspace", "EMU6473");

@@ -2,21 +2,21 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Progress.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidAPI/Progress.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
 
-
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
@@ -40,8 +40,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void LoadMuonNexus2::initDocs()
     {
-      this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
-      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
+      this->setWikiSummary("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 2 and use the results to populate the named workspace. LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a NeXus file of this type. ");
+      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given NeXus Muon data file Version 2 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a NeXus file of this type.");
     }
 
 
@@ -49,13 +49,49 @@ namespace Mantid
     LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus()
     {}
 
-    /** Executes the algorithm. Reading in the file and creating and populating
-    *  the output workspace
+    /** Executes the right version of the muon nexus loader: versions 1 or 2.
     * 
     *  @throw Exception::FileError If the Nexus file cannot be found/opened
     *  @throw std::invalid_argument If the optional properties are set to invalid values
     */
     void LoadMuonNexus2::exec()
+    {
+      std::string filePath = getPropertyValue("Filename");
+      LoadMuonNexus1 load1; load1.initialize();
+
+      int confidence1 = load1.fileCheck( filePath );
+      int confidence2 = this->fileCheck( filePath );
+
+      // if none can load the file throw
+      if ( confidence1 < 80 && confidence2 < 80)
+      {
+        throw Kernel::Exception::FileError("Cannot open the file ", filePath);
+      }
+
+      if ( confidence2 > confidence1 )
+      {
+        // this loader
+        doExec();
+      }
+      else
+      {
+        // version 1 loader
+        IAlgorithm_sptr childAlg = createChildAlgorithm("LoadMuonNexus",0,1,true,1);
+        auto version1Loader = boost::dynamic_pointer_cast<API::Algorithm>( childAlg );
+        version1Loader->copyPropertiesFrom( *this );
+        version1Loader->executeAsChildAlg();
+        this->copyPropertiesFrom( *version1Loader );
+        API::Workspace_sptr outWS = version1Loader->getProperty("OutputWorkspace");
+        setProperty("OutputWorkspace", outWS);
+      }
+    }
+
+    /** Read in a muon nexus file of the version 2.
+    * 
+    *  @throw Exception::FileError If the Nexus file cannot be found/opened
+    *  @throw std::invalid_argument If the optional properties are set to invalid values
+    */
+    void LoadMuonNexus2::doExec()
     {
       // Create the root Nexus class
       NXRoot root(getPropertyValue("Filename"));
@@ -67,45 +103,27 @@ namespace Mantid
       }
 
       // Open the data entry
-      std::string entryName = root.groups()[iEntry].nxname;
-      NXEntry entry = root.openEntry(entryName);
-
-      NXInfo info = entry.getDataSetInfo("definition");
-      if (info.stat == NX_ERROR)
-      {
-        info = entry.getDataSetInfo("analysis");
-        std::string compareString = "muon";
-        if (info.stat == NX_OK && entry.getString("analysis").compare(0,compareString.length(),compareString) == 0)
-        {
-          LoadMuonNexus::exec();
-          return;
-        }
-        else
-        {
-          g_log.debug()<<"analysis=|" << entry.getString("analysis") << "|" << std::endl;
-          throw std::runtime_error("Unknown Muon NeXus file format");
-        }
-      }
-      else
-      {
-        std::string definition = entry.getString("definition");
-        if (info.stat == NX_ERROR || definition != "pulsedTD")
-        {
-          throw std::runtime_error("Unknown Muon Nexus file format");
-        }
-      }
+      m_entry_name = root.groups()[iEntry].nxname;
+      NXEntry entry = root.openEntry(m_entry_name);
 
       // Read in the instrument name from the Nexus file
       m_instrument_name = entry.getString("instrument/name");
 
       // Read the number of periods in this file
-      try
+      if ( entry.containsGroup("run") )
       {
-        m_numberOfPeriods = entry.getInt("run/number_periods");
+        try
+        {
+          m_numberOfPeriods = entry.getInt("run/number_periods");
+        }
+        catch (::NeXus::Exception&)
+        {
+          //assume 1
+          m_numberOfPeriods = 1;
+        }
       }
-      catch (::NeXus::Exception&)
+      else
       {
-        //assume 1
         m_numberOfPeriods = 1;
       }
 
@@ -179,56 +197,44 @@ namespace Mantid
 
       //g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
-      try 
+      if ( entry.containsDataSet( "title" ) )
       {
         wsGrpSptr->setTitle(entry.getString("title"));
       }
-      catch (::NeXus::Exception&)
-      {}
-      try
+
+      if ( entry.containsDataSet( "notes" ) )
       {
         wsGrpSptr->setComment(entry.getString("notes"));
       }
-      catch (::NeXus::Exception&)
-      {}
 
       if(m_numberOfPeriods>1)
       {
         setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
       }
 
-      Mantid::NeXus::NXInt period_index = dataGroup.openNXInt("period_index");
-      period_index.load();
+      // period_index is currently unused
+      //Mantid::NeXus::NXInt period_index = dataGroup.openNXInt("period_index");
+      //period_index.load();
 
       Mantid::NeXus::NXInt counts = dataGroup.openIntData();
       counts.load();
 
+      NXInstrument instr = entry.openNXInstrument("instrument");
 
-      try
+      if ( instr.containsGroup( "detector_fb" ) )
       {
-        NXEntry entryTimeZero = root.openEntry("run/instrument/detector_fb");
-        NXInfo infoTimeZero = entryTimeZero.getDataSetInfo("time_zero");
-        if (infoTimeZero.stat != NX_ERROR)
+        NXDetector detector = instr.openNXDetector("detector_fb");
+        if (detector.containsDataSet("time_zero"))
         {
-          double dum = root.getFloat("run/instrument/detector_fb/time_zero");
+          double dum = detector.getFloat("time_zero");
           setProperty("TimeZero", dum);
         }
-      }
-      catch (::NeXus::Exception&)
-      {}
-
-      try
-      {
-        NXEntry entryFGB = root.openEntry("run/instrument/detector_fb");
-        NXInfo infoFGB = entryFGB.getDataSetInfo("first_good_time");
-        if (infoFGB.stat != NX_ERROR)
+        if (detector.containsDataSet("first_good_time"))
         {
-          double dum = root.getFloat("run/instrument/detector_fb/first_good_time");
+          double dum = detector.getFloat("first_good_time");
           setProperty("FirstGoodData", dum);
         }
       }
-      catch (::NeXus::Exception&)
-      {}
 
       API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
@@ -321,10 +327,27 @@ namespace Mantid
       MantidVec& X = localWorkspace->dataX(wsIndex);
       MantidVec& Y = localWorkspace->dataY(wsIndex);
       MantidVec& E = localWorkspace->dataE(wsIndex);
-      int nBins = counts.dim2();
-      assert( nBins+1 == static_cast<int>(timeBins.size()) );
       X.assign(timeBins.begin(),timeBins.end());
-      int *data = &counts(period,spec,0);
+
+      int nBins = 0;
+      int *data = NULL;
+
+      if ( counts.rank() == 3 )
+      {
+        nBins = counts.dim2();
+        data = &counts(period,spec,0);
+      }
+      else if ( counts.rank() == 2 )
+      {
+        nBins = counts.dim1();
+        data = &counts(spec,0);
+      }
+      else
+      {
+        throw std::runtime_error("Data have unsupported dimansionality");
+      }
+      assert( nBins+1 == static_cast<int>(timeBins.size()) );
+
       Y.assign(data,data+nBins);
       typedef double (*uf)(double);
       uf dblSqrt = std::sqrt;
@@ -357,93 +380,17 @@ namespace Mantid
       }
 
       ws->setTitle(entry.getString("title"));
-      ws->setComment(entry.getString("notes"));
+
+      if ( entry.containsDataSet("notes") )
+      {
+        ws->setComment(entry.getString("notes"));
+      }
 
       std::string run_num = boost::lexical_cast<std::string>(entry.getInt("run_number"));
       //The sample is left to delete the property
       ws->mutableRun().addLogData(new PropertyWithValue<std::string>("run_number", run_num));
 
       ws->populateInstrumentParameters();
-    }
-
-    /**This method does a quick file type check by looking at the first 100 bytes of the file 
-    *  @param filePath- path of the file including name.
-    *  @param nread :: no.of bytes read
-    *  @param header :: The first 100 bytes of the file as a union
-    *  @return true if the given file is of type which can be loaded by this algorithm
-    */
-    bool LoadMuonNexus2::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-    {
-      std::string extn=extension(filePath);
-      bool bnexs(false);
-      (!extn.compare("nxs")||!extn.compare("nx5"))?bnexs=true:bnexs=false;
-      /*
-      * HDF files have magic cookie in the first 4 bytes
-      */
-      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes) == g_hdf_cookie)) || bnexs )
-      {
-        //hdf
-        return true;
-      }
-      else if ( (nread >= sizeof(g_hdf5_signature)) && (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature)))  )
-      { 
-        //hdf5
-        return true;
-      }
-      return false;
-
-    }
-    /**checks the file by opening it and reading few lines 
-    *  @param filePath :: name of the file inluding its path
-    *  @return an integer value how much this algorithm can load the file 
-    */
-    int LoadMuonNexus2::fileCheck(const std::string& filePath)
-    {   
-      int confidence(0);
-      std::string analysisType;
-      try
-      {
-        ::NeXus::File file = ::NeXus::File(filePath);
-        // Will throw if this doesn't exist
-        file.openPath("/run/analysis");
-        analysisType = file.getStrData();
-      }
-      catch(::NeXus::Exception&)
-      {
-        try
-        {
-          ::NeXus::File file = ::NeXus::File(filePath);
-          file.openPath("/run/definition");
-          analysisType = file.getStrData();
-        }
-        catch(::NeXus::Exception&)
-        {
-          //one last try - this is the area for PSI written files
-          try
-          {
-            ::NeXus::File file = ::NeXus::File(filePath);
-            file.openPath("/raw_data_1/definition");
-            analysisType = file.getStrData();
-          }
-          catch(::NeXus::Exception&)
-          {
-            //no give up this doesn't look like a muon v2 file
-            analysisType = "";
-          }
-        }
-      }
-      std::string compareString = "muon";
-      if( analysisType == "pulsedTD" )
-      {
-        confidence = 85;
-      }
-      else if( analysisType.compare(0,compareString.length(),compareString) == 0 )
-      {
-        confidence = 50;
-      }
-      else confidence = 0;
-
-      return confidence;
     }
 
     /**  Log the run details from the file
@@ -460,28 +407,29 @@ namespace Mantid
 
       m_filename = getPropertyValue("Filename");
       NXRoot root(m_filename);
+      NXEntry entry = root.openEntry(m_entry_name);
 
-      std::string start_time = root.getString("run/start_time");
+      std::string start_time = entry.getString("start_time");
       runDetails.addProperty("run_start", start_time);
 
-      std::string stop_time = root.getString("run/end_time");
+      std::string stop_time = entry.getString("end_time");
       runDetails.addProperty("run_end", stop_time);
 
-
-      NXEntry runRun = root.openEntry("run/run");
-
-      NXInfo infoGoodTotalFrames = runRun.getDataSetInfo("good_total_frames");
-      if (infoGoodTotalFrames.stat != NX_ERROR)
+      if ( entry.containsGroup( "run" ) )
       {
-        int dum = root.getInt("run/run/good_total_frames");
-        runDetails.addProperty("goodfrm", dum);
-      }
+        NXClass runRun = entry.openNXGroup("run");
 
-      NXInfo infoNumberPeriods = runRun.getDataSetInfo("number_periods");
-      if (infoNumberPeriods.stat != NX_ERROR)
-      {
-        int dum = root.getInt("run/run/number_periods");
-        runDetails.addProperty("nperiods", dum);
+        if ( runRun.containsDataSet("good_total_frames") )
+        {
+          int dum = runRun.getInt("good_total_frames");
+          runDetails.addProperty("goodfrm", dum);
+        }
+
+        if ( runRun.containsDataSet("number_periods") )
+        {
+          int dum = runRun.getInt("number_periods");
+          runDetails.addProperty("nperiods", dum);
+        }
       }
 
       {  // Duration taken to be stop_time minus stat_time
@@ -490,9 +438,37 @@ namespace Mantid
         double duration_in_secs = DateAndTime::secondsFromDuration( end - start);
         runDetails.addProperty("dur_secs",duration_in_secs);
       }
+    }
 
-
-
+    /**checks the file by opening it and reading few lines 
+    *  @param filePath :: name of the file inluding its path
+    *  @return an integer value how much this algorithm can load the file 
+    */
+    int LoadMuonNexus2::fileCheck(const std::string& filePath)
+    {   
+      try
+      {
+        NXRoot root(filePath);
+        NXEntry entry = root.openFirstEntry();
+        if ( ! entry.containsDataSet( "definition" ) ) return 0;
+        std::string versionField = "IDF_version";
+        if ( ! entry.containsDataSet( versionField ) )
+        {
+          versionField = "idf_version";
+          if ( ! entry.containsDataSet( versionField ) ) return 0;
+        }
+        if ( entry.getInt( versionField ) != 2 ) return 0;
+        std::string definition = entry.getString( "definition" );
+        if ( definition == "muonTD" || definition == "pulsedTD" )
+        {
+          // If all this succeeded then we'll assume this is an ISIS Muon NeXus file version 2
+          return 81;
+        }
+      }
+      catch( ... )
+      {
+      }
+      return 0;
     }
 
   } // namespace DataHandling

@@ -1,21 +1,27 @@
-#ifndef MANTID_DATAHANDLING_LOADMUONNEXUS2_H_
-#define MANTID_DATAHANDLING_LOADMUONNEXUS2_H_
+#ifndef MANTID_DATAHANDLING_LOADMUONNEXUS1_H_
+#define MANTID_DATAHANDLING_LOADMUONNEXUS1_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus.h"
-#include "MantidAPI/IDataFileChecker.h"
-#include "MantidNexus/NexusClasses.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+
+#include <napi.h>
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
+class MuonNexusReader;
 
 namespace Mantid
 {
-
   namespace DataHandling
   {
+    /** @class LoadMuonNexus LoadMuonNexus.h DataHandling/LoadMuonNexus.h
 
-    /**
-    Loads an file in NeXus Muon format version 1 and 2 and stores it in a 2D workspace
+    Loads an file in Nexus Muon format version 1 and stores it in a 2D workspace 
     (Workspace2D class). LoadMuonNexus is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
     the init() & exec() methods.
@@ -24,8 +30,8 @@ namespace Mantid
     <UL>
     <LI> Filename - The name of and path to the input NeXus file </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
-    (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)
-    [ not yet implemented for NeXus ]</LI>
+         (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)
+         [ not yet implemented for Nexus ]</LI>
     </UL>
 
     Optional Properties: (note that these options are not available if reading a multiperiod file)
@@ -35,7 +41,7 @@ namespace Mantid
     <LI> spectrum_list - An ArrayProperty of spectra to load</LI>
     <LI> auto_group - Determines whether the spectra are automatically grouped together based on the groupings in the NeXus file. </LI>
     </UL>
-
+    
     Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -56,37 +62,40 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadMuonNexus2 : public LoadMuonNexus
+    class DLLExport LoadMuonNexus1 : public LoadMuonNexus
     {
     public:
       /// Default constructor
-      LoadMuonNexus2();
+      LoadMuonNexus1();
       /// Destructor
-      ~LoadMuonNexus2() {}
+      virtual ~LoadMuonNexus1() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadMuonNexus"; }
       /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return 2; }
+      virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Nexus;Muon"; }
-
+      
       /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
       virtual int fileCheck(const std::string& filePath);
+    protected:
+      /// Overwrites Algorithm method
+      void exec();
+      /// Implement the base class method
+      void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
+      
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
-      /// Overwrites Algorithm method
-      void exec();
-      /// Execute this version of the algorithm
-      void doExec();
       
-      void loadData(const Mantid::NeXus::NXInt& counts,const std::vector<double>& timeBins,int wsIndex,
-                    int period,int spec,API::MatrixWorkspace_sptr localWorkspace);
-      void loadLogs(API::MatrixWorkspace_sptr ws, Mantid::NeXus::NXEntry & entry,int period);
+      void loadData(const MantidVecPtr::ptr_type& tcbs,size_t hist, specid_t& i,
+          MuonNexusReader& nxload, const int64_t lengthIn, DataObjects::Workspace2D_sptr localWorkspace);
+      void runLoadMappingTable(DataObjects::Workspace2D_sptr);
+      void runLoadLog(DataObjects::Workspace2D_sptr);
       void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
     };
 
   } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_LOADMUONNEXUS2_H_*/
+#endif /*MANTID_DATAHANDLING_LOADMUONNEXUS1_H_*/

@@ -307,6 +307,11 @@ bool NXClass::containsGroup(const std::string & query) const
   return false;
 }
 
+/** 
+  *  Returns NXInfo for a dataset
+  *  @param name :: The name of the dataset
+  *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
+  */
 NXInfo NXClass::getDataSetInfo(const std::string& name)const
 {
     NXInfo info;
@@ -316,6 +321,14 @@ NXInfo NXClass::getDataSetInfo(const std::string& name)const
     }
     info.stat = NX_ERROR;
     return info;
+}
+
+/**
+  * Returns whether an individual dataset is present.
+  */
+bool NXClass::containsDataSet(const std::string & query) const
+{
+  return getDataSetInfo( query ).stat != NX_ERROR;
 }
 
 //---------------------------------------------------------

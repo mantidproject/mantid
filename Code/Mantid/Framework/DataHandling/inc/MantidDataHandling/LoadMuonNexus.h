@@ -22,10 +22,8 @@ namespace Mantid
   {
     /** @class LoadMuonNexus LoadMuonNexus.h DataHandling/LoadMuonNexus.h
 
-    Loads an file in Nexus Muon format and stores it in a 2D workspace 
-    (Workspace2D class). LoadMuonNexus is an algorithm and as such inherits
-    from the Algorithm class, via DataHandlingCommand, and overrides
-    the init() & exec() methods.
+    It is a base class for loadres for versions 1 and 2 of the muon nexus file format. 
+    It implements property initialization and some common for both versions methods.
 
     Required Properties:
     <UL>
@@ -77,19 +75,20 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Nexus;Muon"; }
       
-    /// do a quick check that this file can be loaded 
+      /// do a quick check that this file can be loaded 
       virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
       /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
       virtual int fileCheck(const std::string& filePath);
     protected:
-      /// Overwrites Algorithm method
-      void exec();
       
+      virtual void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr) {}
       void checkOptionalProperties();
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
 
       /// The name and path of the input file
       std::string m_filename;
+      /// The first top-level entry name in the file
+      std::string m_entry_name;
       /// The instrument name from Nexus
       std::string m_instrument_name;
       /// The sample name read from Nexus
@@ -120,13 +119,6 @@ namespace Mantid
       virtual void initDocs();
       /// Overwrites Algorithm method.
       void init();
-      
-      void loadData(const MantidVecPtr::ptr_type& tcbs,size_t hist, specid_t& i,
-          MuonNexusReader& nxload, const int64_t lengthIn, DataObjects::Workspace2D_sptr localWorkspace);
-      void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
-      void runLoadMappingTable(DataObjects::Workspace2D_sptr);
-      void runLoadLog(DataObjects::Workspace2D_sptr);
-      void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
     };
 
   } // namespace DataHandling

@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -38,6 +38,7 @@ public:
 
   void testCalAlphaManySpectra()
   {
+    //system("pause");
     //Load the muon nexus file
     loader.initialize();
     loader.setPropertyValue("Filename", "emu00006473.nxs");
@@ -93,7 +94,7 @@ public:
 
 private:
   AlphaCalc alphaCalc;
-  Mantid::DataHandling::LoadMuonNexus loader;
+  Mantid::DataHandling::LoadMuonNexus2 loader;
 
 };
 

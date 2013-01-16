@@ -399,7 +399,7 @@ namespace Mantid
         alloc(n);
         getSlab(m_data.get(),start,m_size);
       }
-    protected:
+    private:
       /** Allocates memory for the data buffer
       *  @param n :: The number of elements to allocate.
       */
@@ -559,7 +559,10 @@ namespace Mantid
       *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
       */
       NXInfo getDataSetInfo(const std::string& name)const;
-      void close();///< Close this class 
+      /// Returns whether an individual dataset is present
+      bool containsDataSet(const std::string & query) const;
+      /// Close this class 
+      void close();
       /// Opens this NXClass using NXopengrouppath. Can be slow (or is slow)
       void open();
       /// Opens this NXClass using NXopengroup. It is fast, but the parent of this class must be open at

@@ -358,7 +358,7 @@ public:
     
     check_spectra_and_detectors(output);
 
-    AnalysisDataService::Instance().remove(outputSpace);
+    AnalysisDataService::Instance().clear();
   }
 
   void testExec2()
@@ -443,9 +443,69 @@ public:
 	
     check_spectra_and_detectors(output);
 
-    AnalysisDataService::Instance().remove(outputSpace);
+    AnalysisDataService::Instance().clear();
   }
 
+  void test_gpd_file()
+  {
+    LoadMuonNexus2 nxLoad;
+    nxLoad.initialize();
+
+    // Now set required filename and output workspace name
+    std::string inputFile = "deltat_tdc_gpd_0900.nxs";
+    nxLoad.setPropertyValue("FileName", inputFile);
+
+    std::string outputSpace="outer";
+    nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     
+    
+    //
+    // Test execute to read file and populate workspace
+    //
+    TS_ASSERT_THROWS_NOTHING(nxLoad.execute());    
+    TS_ASSERT( nxLoad.isExecuted() );    
+
+    //
+    // Test additional output parameters
+    //
+    std::string field = nxLoad.getProperty("MainFieldDirection");
+    TS_ASSERT( field == "Transverse" );
+    //  TimeZero and FirstGoodData are not read yet so they are 0
+    double timeZero = nxLoad.getProperty("TimeZero");
+    TS_ASSERT_DELTA( timeZero, 0.0,0.001);
+    double firstgood = nxLoad.getProperty("FirstGoodData");
+    TS_ASSERT_DELTA( firstgood, 0.0,0.001); 
+
+    //
+    // Test workspace data
+    //
+    MatrixWorkspace_sptr output;
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    // Should be 192 for file inputFile = "argus0026287.nxs";
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS( output2D->blocksize(), 8192);
+    // Check two X vectors are the same
+    TS_ASSERT( (output2D->dataX(0)) == (output2D->dataX(1)) );
+    // Check two Y arrays have the same number of elements
+    TS_ASSERT_EQUALS( output2D->dataY(0).size(), output2D->dataY(1).size() );
+    // Check one particular value
+    TS_ASSERT_EQUALS( output2D->dataY(0)[686], 516);
+    TS_ASSERT_EQUALS( output2D->dataY(0)[687], 413);
+    TS_ASSERT_EQUALS( output2D->dataY(1)[686], 381);
+
+    // Check that the error on that value is correct
+    TS_ASSERT_DELTA( output2D->dataE(0)[686], 22.7156,0.001);
+    TS_ASSERT_DELTA( output2D->dataE(0)[687], 20.3224,0.001);
+    TS_ASSERT_DELTA( output2D->dataE(1)[686], 19.5192,0.001);
+    // Check that the time is as expected from bin boundary update
+    TS_ASSERT_DELTA( output2D->dataX(1)[687], 0.8050,0.001);
+
+    // Check the unit has been set correctly
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Label" );
+    TS_ASSERT( ! output-> isDistribution() );
+
+    AnalysisDataService::Instance().remove(outputSpace);
+  }
 };
 
 //------------------------------------------------------------------------------
