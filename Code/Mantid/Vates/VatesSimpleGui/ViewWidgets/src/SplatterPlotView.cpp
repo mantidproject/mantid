@@ -1,5 +1,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 
+
 #include "pqActiveObjects.h"
 #include "pqApplicationCore.h"
 #include "pqDataRepresentation.h"
@@ -133,14 +134,11 @@ void SplatterPlotView::checkPeaksCoordinates()
 {
   if (!this->peaksSource.isEmpty())
   {
-    /*
-    // Use this to get the correct parameter. Name and type can change, but
-    // input to set call below is integer.
     int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
-                                             "DataView").GetAsInt();
-    */
-    // Remove below when above is fixed.
-    int peakViewCoords = 1;
+                                             "SpecialCoordinates").GetAsInt();
+    // Make commensurate with vtkPeakMarkerFactory
+    peakViewCoords--;
+
     foreach(pqPipelineSource *src, this->peaksSource)
     {
       vtkSMPropertyHelper(src->getProxy(),
