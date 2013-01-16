@@ -96,7 +96,7 @@ namespace Kernel
     void objectDeleted(const ISaveable * item);
 
     // Free space map methods
-    void freeBlock(uint64_t const pos, uint64_t const size);
+    void freeBlock(uint64_t const pos, uint64_t const fileSize);
     void defragFreeBlocks();
 
     // Allocating

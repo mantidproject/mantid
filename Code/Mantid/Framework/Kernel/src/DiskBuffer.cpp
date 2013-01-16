@@ -114,7 +114,7 @@ namespace Kernel
 
     // Mark the amount of space used on disk as free
     //this->freeBlock(item->getFilePosition(), sizeOnFile);
-    this->freeBlock(item->getFilePosition(), size);
+    this->freeBlock(item->getFilePosition(), item->getFileSize());
   }
 
 
@@ -143,16 +143,42 @@ namespace Kernel
     writeBuffer_t::iterator it = m_writeBuffer.begin();
     writeBuffer_t::iterator it_end = m_writeBuffer.end();
 
-    const ISaveable * obj = NULL;
+    ISaveable * obj = NULL;
     for (; it != it_end; ++it)
     {
-      obj = *it;
-      if (!obj->dataBusy())
+      // the object will be changed so no other way to go! TODO: Rethink the desighn
+      obj = const_cast<ISaveable *>(*it);
+      if (!obj->isBusy())
       {
-        // Write to the disk
-        obj->save();
-      }
-      else
+        uint64_t NumAllEvents = obj->getMRUMemorySize();
+        uint64_t fileIndexStart;
+        if (!obj->wasSaved())
+        {
+            fileIndexStart=this->allocate(NumAllEvents);
+           // Write to the disk; this will call the object specific save function;
+            obj->saveAt(fileIndexStart,NumAllEvents);
+        }
+        else
+        {
+          uint64_t NumFileEvents= obj->getFileSize();
+          if (NumAllEvents != NumFileEvents)
+          {
+          // Event list changed size. The MRU can tell us where it best fits now.
+            fileIndexStart= this->relocate(obj->getFilePosition(), NumFileEvents, NumAllEvents);
+           // Write to the disk; this will call the object specific save function;
+            obj->saveAt(fileIndexStart,NumAllEvents);
+          }       
+          else // despite object size have not been changed, it can be modified other way. In this case, the method which changed the data should set dataChanged ID
+          {
+            if(obj->isDataChanged())
+            {
+              fileIndexStart = obj->getFilePosition();
+              obj->saveAt(fileIndexStart,NumAllEvents);
+            }
+          }
+        }
+      } 
+      else // object busy
       {
         // The object is busy, can't write. Save it for later
         //couldNotWrite.insert( pairObj_t(obj->getFilePosition(), obj) );
@@ -189,7 +215,7 @@ namespace Kernel
   }
 
   //---------------------------------------------------------------------------------------------
-  /** This method is called by an ISaveable object that has shrunk
+  /** This method is called by this->relocate when object that has shrunk
    * and so has left a bit of free space after itself on the file;
    * or when an object gets moved to a new spot.
    *

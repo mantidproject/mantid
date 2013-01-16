@@ -1,5 +1,6 @@
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
+#include <limits>
 
 namespace Mantid
 {
@@ -11,23 +12,23 @@ namespace Kernel
   /** Constructor
    */
   ISaveable::ISaveable()
-  : m_id(0),m_fileIndexStart(0),m_fileNumEvents(0)
+  : m_id(0),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),
+  m_Busy(false),m_dataChanged(false)
   {
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Copy constructor
+  /** Copy constructor --> big qusetions about the validity of such implementation
    */
   ISaveable::ISaveable(const ISaveable & other)
-  : m_id(other.m_id),m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents)
+  : m_id(other.m_id),m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents),
+   m_Busy(other.m_Busy),m_dataChanged(other.m_dataChanged)
   {
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  ISaveable::ISaveable(const size_t id,const uint64_t fileIndexStart,uint64_t fileNumEvents)
-  : m_id(id),m_fileIndexStart(fileIndexStart),m_fileNumEvents(fileNumEvents)
+ ISaveable::ISaveable(const size_t id)
+  : m_id(id),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),
+    m_Busy(false),m_dataChanged(false)
   {
   }
 
@@ -38,10 +39,12 @@ namespace Kernel
   {
   }
 
-  void ISaveable::setFileIndex(uint64_t newPos, uint64_t newSize)
+  void ISaveable::saveAt(uint64_t newPos, uint64_t newSize)
   {
       m_fileIndexStart= newPos;
       m_fileNumEvents = newSize;
+      this->save();
+      m_dataChanged = false;
   }
 
   
