@@ -120,7 +120,7 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
     * @return a shared pointer of WSTYPE
     */
    template <typename WSTYPE>
-   boost::shared_ptr<WSTYPE> retrieveWS(const std::string& name)
+   boost::shared_ptr<WSTYPE> retrieveWS(const std::string& name) const
    {
      // Get as a bare workspace
      boost::shared_ptr<Mantid::API::Workspace> workspace = Kernel::DataService<API::Workspace>::retrieve(name);
