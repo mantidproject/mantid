@@ -54,22 +54,17 @@ namespace Mantid
     public:
       /// Type of domain to create.
       enum DomainType { Simple = 0, Sequential, Parallel };
-      /// Constructor.
-      /// @param manager :: A property manager which has information about the data source (eg workspace)
-      /// and the function.
-      /// @param workspacePropertyNames :: Property names for workspaces to get the data from.
-      /// @ param domainType :: Type of domain to create: Simple, Sequential, or Parallel.
+      /// Constrcutor
       IDomainCreator( Kernel::IPropertyManager* manager,
         const std::vector<std::string>& workspacePropertyNames,
-        DomainType domainType = Simple):
-      m_manager( manager ),
-      m_workspacePropertyNames( workspacePropertyNames ),
-      m_domainType( domainType )
-      {}
+        DomainType domainType = Simple);
       /// Virtual destructor
       virtual ~IDomainCreator() {};
       /// Initialize
       virtual void initialize(Kernel::IPropertyManager* , const std::string&, DomainType) {}
+
+      /// Toggle output of either just composite or composite + members
+      void separateCompositeMembersInOutput(const bool value);
 
       /// declare properties that specify the dataset within the workspace to fit to.
       /// @param suffix :: A suffix to give to all new properties.
@@ -115,6 +110,8 @@ namespace Mantid
       std::vector<std::string> m_workspacePropertyNames;
       /// Domain type
       DomainType m_domainType;
+      /// Output separate composite function values
+      bool m_outputCompositeMembers;
     };
 
     /// Typedef for a shared pointer to IDomainCreator.

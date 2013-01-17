@@ -10,6 +10,29 @@ namespace API
 {
 
   /**
+   * @param manager :: A property manager which has information about the data source (eg workspace)
+   * and the function.
+   * @param workspacePropertyNames :: Property names for workspaces to get the data from.
+   * @ param domainType :: Type of domain to create: Simple, Sequential, or Parallel.
+   */
+  IDomainCreator::IDomainCreator( Kernel::IPropertyManager* manager,
+    const std::vector<std::string>& workspacePropertyNames,
+    DomainType domainType):
+  m_manager( manager ),
+  m_workspacePropertyNames( workspacePropertyNames ),
+  m_domainType( domainType ), m_outputCompositeMembers(false)
+  {}
+
+  /**
+   * @param value If true then each composite is unrolled and its output is appended to
+   * the default output, otherwise just the composite is used
+   */
+  void IDomainCreator::separateCompositeMembersInOutput(const bool value)
+  {
+    m_outputCompositeMembers = value;
+  }
+
+  /**
    * Declare a property to the algorithm.
    * @param prop :: A new property.
    * @param doc :: A doc string.

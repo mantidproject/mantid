@@ -10,6 +10,7 @@
 #include "MantidCurveFitting/ExpDecay.h"
 #include "MantidCurveFitting/SeqDomain.h"
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -37,20 +38,8 @@ public:
 
   void test_exec_point_data()
   {
-    MatrixWorkspace_sptr ws2(new WorkspaceTester);
-    ws2->initialize(2,10,10);
-
-    for(size_t is = 0; is < ws2->getNumberHistograms(); ++is)
-    {
-      Mantid::MantidVec& x = ws2->dataX(is);
-      Mantid::MantidVec& y = ws2->dataY(is);
-      //Mantid::MantidVec& e = ws2->dataE(is);
-      for(size_t i = 0; i < ws2->blocksize(); ++i)
-      {
-        x[i] = 0.1 * double(i);
-        y[i] =  (10.0 + double(is)) * exp( -(x[i])/ (0.5*(1 + double(is))) );
-      }
-    }
+    const bool histogram(false);
+    auto ws2 = createTestWorkspace(histogram);
 
     API::IFunction_sptr fun(new ExpDecay);
     fun->setParameter("Height",1.);
@@ -158,21 +147,8 @@ public:
 
   void test_exec_histogram_data()
   {
-    MatrixWorkspace_sptr ws2(new WorkspaceTester);
-    ws2->initialize(2,11,10);
-
-    for(size_t is = 0; is < ws2->getNumberHistograms(); ++is)
-    {
-      Mantid::MantidVec& x = ws2->dataX(is);
-      Mantid::MantidVec& y = ws2->dataY(is);
-      //Mantid::MantidVec& e = ws2->dataE(is);
-      for(size_t i = 0; i < ws2->blocksize(); ++i)
-      {
-        x[i] = 0.1 * double(i);
-        y[i] =  (10.0 + double(is)) * exp( -(x[i] + 0.05)/ (0.5*(1 + double(is))) );
-      }
-      x.back() = x[x.size()-2] + 0.1;
-    }
+    const bool histogram(true);
+    auto ws2 = createTestWorkspace(histogram);
 
     API::IFunction_sptr fun(new ExpDecay);
     fun->setParameter("Height",1.);
@@ -307,6 +283,81 @@ public:
 
   }
 
+  void test_Composite_Function_With_SeparateMembers_Option_On_FitMW_Outputs_Composite_Values_Plus_Each_Member()
+  {
+    const bool histogram(true);
+    auto ws2 = createTestWorkspace(histogram);
+
+    auto composite = boost::shared_ptr<API::CompositeFunction>(new API::CompositeFunction);
+    API::IFunction_sptr expDecay(new ExpDecay);
+    expDecay->setParameter("Height",1.);
+    expDecay->setParameter("Lifetime",1.0);
+    composite->addFunction(expDecay);
+    expDecay = API::IFunction_sptr(new ExpDecay);
+    expDecay->setParameter("Height",2.);
+    expDecay->setParameter("Lifetime",0.5);
+    composite->addFunction(expDecay);
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function",boost::static_pointer_cast<API::IFunction>(composite));
+    fit.setProperty("InputWorkspace",ws2);
+    fit.setProperty("WorkspaceIndex",0);
+    fit.setProperty("CreateOutput",true);
+    fit.setProperty("OutputCompositeMembers", true);
+    fit.execute();
+
+    TS_ASSERT(fit.isExecuted());
+    MatrixWorkspace_sptr outputWS;
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Output_Workspace"));
+
+    static const size_t nExpectedHist(5);
+    TS_ASSERT_EQUALS(nExpectedHist, outputWS->getNumberHistograms());
+    // Check axis has expected labels
+    API::Axis* axis = outputWS->getAxis(1);
+    TS_ASSERT(axis);
+    TS_ASSERT(axis->isText());
+    TS_ASSERT_EQUALS(axis->length(), nExpectedHist);
+    TS_ASSERT_EQUALS(axis->label(0), "Data");
+    TS_ASSERT_EQUALS(axis->label(1), "Calc");
+    TS_ASSERT_EQUALS(axis->label(2), "Diff");
+    TS_ASSERT_EQUALS(axis->label(3), "ExpDecay");
+    TS_ASSERT_EQUALS(axis->label(4), "ExpDecay");
+
+    const double yValues[nExpectedHist] = {8.1873075308, 8.1873075308, 0, -2.1426494943613e-14, 8.1873075308};
+    const double eValues[nExpectedHist] = {1, 1732.7497028344, 0, 1266.3006968103, 1182.7527543533};
+    const double xValue(0.1);
+
+    for(size_t i = 0; i < nExpectedHist; ++i)
+    {
+      TS_ASSERT_DELTA(outputWS->readY(i)[1], yValues[i], 1e-10);
+      TS_ASSERT_DELTA(outputWS->readE(i)[1], eValues[i], 1e-10);
+      TS_ASSERT_DELTA(outputWS->readX(i)[1], xValue, 1e-10);
+    }
+    AnalysisDataService::Instance().clear();
+  }
+
+
+private:
+
+  API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram)
+  {
+    MatrixWorkspace_sptr ws2(new WorkspaceTester);
+    ws2->initialize(2,10,10);
+
+    for(size_t is = 0; is < ws2->getNumberHistograms(); ++is)
+    {
+      Mantid::MantidVec& x = ws2->dataX(is);
+      Mantid::MantidVec& y = ws2->dataY(is);
+      for(size_t i = 0; i < ws2->blocksize(); ++i)
+      {
+        x[i] = 0.1 * double(i);
+        y[i] =  (10.0 + double(is)) * exp( -(x[i])/ (0.5*(1 + double(is))) );
+      }
+      if(histogram) x.back() = x[x.size()-2] + 0.1;
+    }
+    return ws2;
+  }
 };
 
 #endif /*CURVEFITTING_FITMWTEST_H_*/

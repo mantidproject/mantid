@@ -324,6 +324,8 @@ namespace CurveFitting
     declareProperty("CalcErrors", false,
       "Set to true to calcuate errors when output isn't created "
       "(default is false)." );
+    declareProperty("OutputCompositeMembers",false,
+        "If true and CreateOutput is true then the value of each member of a Composite Function is also output.");
   }
 
   /** Executes the algorithm
@@ -535,6 +537,8 @@ namespace CurveFitting
       row << "Cost function value" << finalCostFuncVal;      
       setProperty("OutputParameters",result);
 
+      const bool unrollComposites = getProperty("OutputCompositeMembers");
+      m_domainCreator->separateCompositeMembersInOutput(unrollComposites);
       m_domainCreator->createOutputWorkspace(baseName,m_function,domain,values);
 
     }

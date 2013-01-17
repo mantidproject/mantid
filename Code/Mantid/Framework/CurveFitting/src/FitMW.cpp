@@ -1,10 +1,10 @@
-//----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/EmptyValues.h"
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -270,77 +270,49 @@ namespace
     auto values = boost::dynamic_pointer_cast<API::FunctionValues>(ivalues);
     if (!values)
     {
-      //throw std::invalid_argument("Unsupported Function Values found in FitMW");
       return;
     }
 
-    // calculate the values
-    function->function(*domain,*values);
-    const MantidVec& inputX = m_matrixWorkspace->readX(m_workspaceIndex);
-    const MantidVec& inputY = m_matrixWorkspace->readY(m_workspaceIndex);
-    const MantidVec& inputE = m_matrixWorkspace->readE(m_workspaceIndex);
-    size_t nData = ivalues->size();
+    // Compile list of functions to output. The top-level one is first
+    std::list<API::IFunction_sptr> functionsToDisplay(1, function);
+    if(m_outputCompositeMembers)
+    {
+      appendCompositeFunctionMembers(functionsToDisplay,function);
+    }
 
-      size_t histN = m_matrixWorkspace->isHistogramData() ? 1 : 0;
-      API::MatrixWorkspace_sptr ws =
-        Mantid::API::WorkspaceFactory::Instance().create(
-            "Workspace2D",
-            3,
-            nData + histN,
-            nData);
-      ws->setTitle("");
-      ws->setYUnitLabel(m_matrixWorkspace->YUnitLabel());
-      ws->setYUnit(m_matrixWorkspace->YUnit());
-      ws->getAxis(0)->unit() = m_matrixWorkspace->getAxis(0)->unit();
-      API::TextAxis* tAxis = new API::TextAxis(3);
-      tAxis->setLabel(0,"Data");
-      tAxis->setLabel(1,"Calc");
-      tAxis->setLabel(2,"Diff");
-      ws->replaceAxis(1,tAxis);
+    // Nhist = Data histogram, Difference Histogram + nfunctions
+    const size_t nhistograms = functionsToDisplay.size() + 2;
+    const size_t nyvalues = ivalues->size();
+    auto ws = createEmptyResultWS(nhistograms, nyvalues);
+    API::TextAxis *textAxis = dynamic_cast<API::TextAxis*>(ws->getAxis(1));
+    textAxis->setLabel(0,"Data");
+    textAxis->setLabel(1,"Calc");
+    textAxis->setLabel(2,"Diff");
 
-      for(size_t i=0;i<3;i++)
-      {
-        ws->dataX(i).assign( inputX.begin() + m_startIndex, inputX.begin() + m_startIndex + nData + histN );
-      }
+    // Add each calculated function
+    auto iend = functionsToDisplay.end();
+    size_t wsIndex(1); // Zero reserved for data
+    for(auto it = functionsToDisplay.begin(); it != iend; ++it)
+    {
+      if(textAxis && wsIndex > 2) textAxis->setLabel(wsIndex, (*it)->name());
+      addFunctionValuesToWS(*it, ws, wsIndex, domain, values);
+      if(it == functionsToDisplay.begin()) wsIndex += 2; //Skip difference histogram for now
+      else ++wsIndex;
+    }
 
-      ws->dataY(0).assign( inputY.begin() + m_startIndex, inputY.begin() + m_startIndex + nData);
-      ws->dataE(0).assign( inputE.begin() + m_startIndex, inputE.begin() + m_startIndex + nData );
+    // Set the difference spectrum
+    const MantidVec& Ycal = ws->readY(1);
+    MantidVec& Diff = ws->dataY(2);
+    const size_t nData = ivalues->size();
+    for(size_t i = 0; i < nData; ++i)
+    {
+      Diff[i] = values->getFitData(i) - Ycal[i];
+    }
 
-      MantidVec& Ycal = ws->dataY(1);
-      MantidVec& Ecal = ws->dataE(1);
-      MantidVec& Diff = ws->dataY(2);
-
-      for(size_t i = 0; i < nData; ++i)
-      {
-        Ycal[i] = values->getCalculated(i);
-        Diff[i] = values->getFitData(i) - Ycal[i];
-      }
-
-      SimpleJacobian J(nData,function->nParams());
-      try
-      {
-        function->functionDeriv(*domain,J);
-      }
-      catch(...)
-      {
-        function->calNumericalDeriv(*domain,J);
-      }
-      for(size_t i=0; i<nData; i++)
-      {
-        double err = 0.0;
-        for(size_t j=0;j< function->nParams();++j)
-        {
-          double d = J.get(i,j) * function->getError(j);
-          err += d*d;
-        }
-        Ecal[i] = sqrt(err);
-      }
-
-      declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output Workspace holding resulting simulated spectrum");
-      m_manager->setPropertyValue("OutputWorkspace",baseName+"Workspace");
-      m_manager->setProperty("OutputWorkspace",ws);
-
+    m_manager->setPropertyValue("OutputWorkspace",baseName+"Workspace");
+    m_manager->setProperty("OutputWorkspace",ws);
   }
 
   /**
@@ -460,6 +432,104 @@ namespace
     }
   }
 
+  //--------------------------------------------------------------------------------------------------------------
+  /**
+   * @param functionList The current list of functions to append to
+   * @param function A function that may or not be composite
+   */
+  void FitMW::appendCompositeFunctionMembers(std::list<API::IFunction_sptr> & functionList,
+                                             const API::IFunction_sptr & function) const
+  {
+    const auto compositeFn = boost::dynamic_pointer_cast<API::CompositeFunction>(function);
+    if(!compositeFn) return;
+
+    const size_t nlocals = compositeFn->nFunctions();
+    for(size_t i = 0; i < nlocals; ++i)
+    {
+      auto localFunction = compositeFn->getFunction(i);
+      auto localComposite = boost::dynamic_pointer_cast<API::CompositeFunction>(localFunction);
+      if(localComposite) appendCompositeFunctionMembers(functionList, localComposite);
+      else functionList.insert(functionList.end(), localFunction);
+    }
+  }
+
+  /**
+   * Creates a workspace to hold the results. If the input workspace contains histogram data then so will this
+   * It assigns the X and input data values but no Y,E data for any functions
+   * @param nhistograms The number of histograms
+   * @param nyvalues The number of y values to hold
+   */
+  API::MatrixWorkspace_sptr FitMW::createEmptyResultWS(const size_t nhistograms, const size_t nyvalues)
+  {
+    size_t nxvalues(nyvalues);
+    if(m_matrixWorkspace->isHistogramData()) nxvalues += 1;
+    API::MatrixWorkspace_sptr ws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", nhistograms, nxvalues, nyvalues);
+    ws->setTitle("");
+    ws->setYUnitLabel(m_matrixWorkspace->YUnitLabel());
+    ws->setYUnit(m_matrixWorkspace->YUnit());
+    ws->getAxis(0)->unit() = m_matrixWorkspace->getAxis(0)->unit();
+    API::TextAxis* tAxis = new API::TextAxis(nhistograms);
+    ws->replaceAxis(1,tAxis);
+
+    const MantidVec& inputX = m_matrixWorkspace->readX(m_workspaceIndex);
+    const MantidVec& inputY = m_matrixWorkspace->readY(m_workspaceIndex);
+    const MantidVec& inputE = m_matrixWorkspace->readE(m_workspaceIndex);
+    // X values for all
+    for(size_t i = 0;i < nhistograms; i++)
+    {
+      ws->dataX(i).assign(inputX.begin() + m_startIndex, inputX.begin() + m_startIndex + nxvalues);
+    }
+    // Data values for the first histogram
+    ws->dataY(0).assign( inputY.begin() + m_startIndex, inputY.begin() + m_startIndex + nyvalues);
+    ws->dataE(0).assign( inputE.begin() + m_startIndex, inputE.begin() + m_startIndex + nyvalues);
+
+    return ws;
+  }
+
+  /**
+   * Add the calculated function values to the workspace
+   * @param function The function to evaluate
+   * @param ws A workspace to fill
+   * @param wsIndex The index to store the values
+   * @param domain The domain to calculate the values over
+   * @param resultValues A presized values holder for the results
+   */
+  void FitMW::addFunctionValuesToWS(const API::IFunction_sptr & function, boost::shared_ptr<API::MatrixWorkspace> & ws,
+      const size_t wsIndex, const boost::shared_ptr<API::FunctionDomain> & domain, boost::shared_ptr<API::FunctionValues> resultValues) const
+  {
+    const size_t nData = resultValues->size();
+    resultValues->zeroCalculated();
+
+    // Function value
+    function->function(*domain,*resultValues);
+    // and errors
+    SimpleJacobian J(nData, function->nParams());
+    try
+    {
+      function->functionDeriv(*domain,J);
+    }
+    catch(...)
+    {
+      function->calNumericalDeriv(*domain,J);
+    }
+
+
+    MantidVec& yValues = ws->dataY(wsIndex);
+    MantidVec& eValues = ws->dataE(wsIndex);
+    for(size_t i=0; i < nData; i++)
+    {
+      yValues[i] = resultValues->getCalculated(i);
+      double err = 0.0;
+      for(size_t j=0; j< function->nParams();++j)
+      {
+        double d = J.get(i,j) * function->getError(j);
+        err += d*d;
+      }
+      eValues[i] = std::sqrt(err);
+    }
+
+  }
 
 } // namespace Algorithm
 } // namespace Mantid

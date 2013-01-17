@@ -7,6 +7,8 @@
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include <list>
+
 namespace Mantid
 {
   namespace API
@@ -90,6 +92,15 @@ namespace Mantid
       void getStartIterator(const Mantid::MantidVec& X, Mantid::MantidVec::const_iterator& from, size_t& n, bool isHisto) const;
       /// Set all parameters
       void setParameters()const;
+
+    private:
+      // Unrolls function into its constituent parts if it is a composite and adds it to the list. Note this is recursive
+      void appendCompositeFunctionMembers(std::list<API::IFunction_sptr> & functionList, const API::IFunction_sptr & function) const;
+      /// Creates the blank output workspace of the correct size
+      boost::shared_ptr<API::MatrixWorkspace> createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
+      /// Add the calculated function values to the workspace
+      void addFunctionValuesToWS(const API::IFunction_sptr & function, boost::shared_ptr<API::MatrixWorkspace> & ws,
+          const size_t wsIndex, const boost::shared_ptr<API::FunctionDomain> & domain, boost::shared_ptr<API::FunctionValues> resultValues) const;
 
       /// Store workspace property name
       std::string m_workspacePropertyName;
