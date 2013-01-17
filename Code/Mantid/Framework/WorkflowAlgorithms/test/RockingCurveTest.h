@@ -77,7 +77,7 @@ public:
     // The XMin/XMax range covers 50s out of the remaining 70s TOF range
     //   (note that there's a correlation between pulse time & TOF) -> so 200 are left at the end
     TS_ASSERT_EQUALS( table->Int(0,1), 200 )
-    TS_ASSERT_EQUALS( table->getColumnNames()[2], "Time" );
+    TS_ASSERT_EQUALS( table->getColumnNames()[2], "time" );
     TS_ASSERT_EQUALS( table->Double(0,2), 70.0);
     TS_ASSERT_EQUALS( table->getColumnNames()[3], "proton_charge" );
     // The cell in the proton_charge column will be empty

@@ -1909,10 +1909,8 @@ void Graph::setTitle(const QString& t)
 
 void Graph::removeTitle()
 {
-  if (d_plot->titleLabel()->hasFocus()){
-    d_plot->setTitle(" ");
-    emit modifiedGraph();
-  }
+  d_plot->setTitle("");
+  emit modifiedGraph();
 }
 
 void Graph::initTitle(bool on, const QFont& fnt)

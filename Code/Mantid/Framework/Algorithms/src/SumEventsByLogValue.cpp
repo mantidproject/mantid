@@ -156,7 +156,7 @@ namespace Algorithms
     // Columns for normalisation: monitors (if available), time & proton charge
     addMonitorCounts(outputWorkspace, log, minVal, maxVal);
     // Add a column to hold the time duration (in seconds) for which the log had a certain value
-    auto timeCol = outputWorkspace->addColumn("double","Time");
+    auto timeCol = outputWorkspace->addColumn("double","time");
     // Add a column to hold the proton charge for which the log had a certain value
     auto protonChgCol = outputWorkspace->addColumn("double","proton_charge");
     // Get hold of the proton charge log for later
@@ -273,7 +273,7 @@ namespace Algorithms
   SumEventsByLogValue::getNumberSeriesLogs()
   {
     std::vector<std::pair<std::string,const Kernel::ITimeSeriesProperty * >> numberSeriesProps;
-    const auto logs = m_inputWorkspace->run().getLogData();
+    const auto & logs = m_inputWorkspace->run().getLogData();
     for ( auto log = logs.begin(); log != logs.end(); ++log )
     {
       const std::string logName = (*log)->name();
