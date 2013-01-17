@@ -52,20 +52,17 @@ namespace MDEvents
 
     // ----------------------------- ISaveable Methods ------------------------------------------------------
 
-    /// Save the data and free it up from the memory (despite const function it changes the object)
-    virtual void save()const;
+    /// Save the data and free it up from the memory ( it changes the object)
+    virtual void save();
 
     /// Load the data - unused
     virtual void load()
     { }
 
-    /// @return true if it the data of the object is busy and so cannot be cleared by the MRU; false if the data was released and can be cleared/written.
-    virtual bool dataBusy() const
-    { return m_dataBusy; }
-
-      /// @return the amount of memory that the object takes up in the MRU.
-    //virtual uint64_t getMRUMemorySize() const
-    //{ return uint64_t(getNPoints()); }
+   
+    /// @return the amount of memory that the object takes up in the MRU.
+    virtual uint64_t getMRUMemorySize() const
+            { return uint64_t(getEventVectorSize()); }
 
     //-----------------------------------------------------------------------------------------------
 
@@ -92,58 +89,20 @@ namespace MDEvents
     { throw std::runtime_error("MDBox cannot have children."); }
 
 
-    /// @return Number of events saved in the file, after the start index location (= not necessarily the number of events it currently has in memory)
-    //uint64_t getFileNumEvents() const { return m_fileNumEvents; }
-    //void setFileIndex(uint64_t start, uint64_t numEvents);
-    uint64_t getMRUMemorySize() const
-    {
-      return (this->getNPoints());
-    }
-
-    /** Set whether the box is cached on disk (true) or in memory (false)
-     * @param onDisk :: true if it is on disk  */
-    void setOnDisk(const bool onDisk)
-    { m_onDisk = onDisk; }
-
-    /// @return whether the box is cached on disk (true) or in memory (false)
-    bool getOnDisk() const
-    { return m_onDisk; }
-
     /// @return whether the box data (from disk) is loaded in memory (for debugging purposes).
     bool getInMemory() const
-    { return m_inMemory; }
+    { return m_isLoaded; }
 
-    /** Set whether the box data (from disk) is loaded in memory (for SaveMD with MakeFileBacked).
-     * @param inMem :: true if it is in memory  */
-    void setInMemory(const bool inMem)
-    { m_inMemory = inMem; }
-
+ 
     /// @return the size of the event vector. FOR DEBUGGING! Note that this is NOT necessarily the same as the number of points (because it might be cached to disk) or the size on disk (because you might have called AddEvents)
     size_t getEventVectorSize() const
     { return data.size(); }
 
     /// @return true if events were added to the box (using addEvent()) while the rest of the event list is cached to disk
     bool getHasAddedEventsOnCached() const
-    { return (!m_inMemory && (data.size() != 0)); }
+    { return (!m_isLoaded && (data.size() != 0)); }
 
-    /// @return true if the data was modified in some way.
-    bool dataModified() const
-    { return m_dataModified; }
-
-    /** Set the dataModified flag.
-     * @param value :: true if the data was modified in some way.   */
-    void setDataModified(const bool value)
-    { m_dataModified = value; }
-
-    /// @return true if any events were added to the data
-    bool dataAdded() const
-    { return m_dataAdded; }
-
-    /** Set the dataBusy flag.
-     * @param value :: true if the data is "busy" (someone has a reference to it).   */
-    void setDataBusy(const bool value)
-    { m_dataBusy = value; }
-
+ 
     /* Getter to determine if masking is applied.
     @return true if masking is applied.
     */
@@ -153,10 +112,12 @@ namespace MDEvents
     }
 
     std::vector< MDE > & getEvents();
-
     const std::vector<MDE> & getConstEvents()const ;
+    // the same as getConstEvents above, 
+    const std::vector< MDE > & getEvents()const;
 
-    void releaseEvents() const;
+
+    void releaseEvents() ;
 
 
     std::vector< MDE > * getEventsCopy();
@@ -213,19 +174,8 @@ namespace MDEvents
     /// Mutex for modifying the event list
     Mantid::Kernel::Mutex dataMutex;
 
-    //------> BOOLS   /- 
-    //              oO
-    //                \-
-    /// Is the "data" vector currently in use by some algorithm? TODO: -- there should be mutex for this
-    mutable bool m_dataBusy;
-    /** Marker set to true when the data was possibly modifed, due to NON-const access.  */
-    mutable bool m_dataModified;
-    /** Marker set to true when one (or more) events were ADDED to this list WHILE it was cached to disk. */
-    mutable bool m_dataAdded;
-    /// True when the events are cached to disk. If false, then the events are ALWAYS kept in memory
-    mutable bool m_onDisk;
-    /// True when the events were loaded up from disk. Irrelevant if m_onDisk is false.
-    mutable bool m_inMemory;
+    /// True when the events, which were saved before have been loaded up from disk. Load sets it true and memory clean-up resets it to false
+    mutable bool m_isLoaded;
 
     /// Flag indicating that masking has been applied.
     bool m_bIsMasked;

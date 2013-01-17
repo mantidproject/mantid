@@ -71,13 +71,14 @@ namespace MDEvents
     // ----------------------------- ISaveable Methods ------------------------------------------------------
 
     /// Save the data - to be overriden
-    virtual void save() const
+    virtual void save() 
     {
       std::cerr << "ID " << getId() << std::endl;
       throw std::runtime_error("MDBoxBase::save() called and should have been overridden.");
     }
 
-    /// Flush the data to disk. Allows NXS api to actually write out the file.
+    /// Flush the data to disk. Allows NXS api to actually write out the file. 
+     //TODO: DO WE WANT IT ?????, I suspect not as muliple writes can be combined in the NXS buffer
     virtual void flushData() const
     {
       ::NeXus::File * file = this->m_BoxController->getFile();
@@ -92,18 +93,10 @@ namespace MDEvents
     virtual void load()
     { }
 
-  /*  /// @return the amount of memory that the object takes up in the MRU.
+    /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getMRUMemorySize() const
-    { return 0; }*/
+    { return 0; }
 
-    /// @return true if it the data of the object is busy and so cannot be cleared; false if the data was released and can be cleared/written.
-    virtual bool dataBusy() const
-    { return false; }
-
-    /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
-  //  virtual uint64_t getFilePosition() const
-  //  { return 0; }
-    // -----------------------------------------------------------------------------------------------------
 
 
 

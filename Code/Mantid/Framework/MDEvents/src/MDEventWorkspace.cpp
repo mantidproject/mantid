@@ -404,20 +404,22 @@ namespace MDEvents
     UNUSED_ARG(start);
     UNUSED_ARG(num);
     // Boxes to show
-    std::vector<MDBoxBase<MDE,nd>*> boxes;
-    std::vector<MDBoxBase<MDE,nd>*> boxes_filtered;
+    std::vector<Kernel::ISaveable *> boxes;
+    std::vector<MDBoxBase<MDE,nd>* > boxes_filtered;
     this->getBox()->getBoxes(boxes, 1000, false);
 
     bool withPointsOnly = true;
-    if (withPointsOnly)
+    boxes_filtered.reserve(boxes.size());
+
+    for (size_t i=0; i<boxes.size(); i++)
     {
-      boxes_filtered.reserve(boxes.size());
-      for (size_t i=0; i<boxes.size(); i++)
-        if (boxes[i]->getNPoints() > 0)
-          boxes_filtered.push_back(boxes[i]);
+        MDBoxBase<MDE,nd>* box = dynamic_cast<MDBoxBase<MDE,nd>* >(boxes[i]);
+        if (box->getNPoints() > 0 && withPointsOnly)
+          boxes_filtered.push_back(box);
+        else
+          boxes_filtered.push_back(box);
     }
-    else
-      boxes_filtered = boxes;
+      
 
     // Now sort by ID
     typedef MDBoxBase<MDE,nd> * ibox_t;
@@ -447,15 +449,15 @@ namespace MDEvents
       ws->cell<int>(i, col++) = int(box->getNumChildren());
       ws->cell<int>(i, col++) = int(box->getFilePosition());
       MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
-      //getMRUMemorySize
-      //ws->cell<int>(i, col++) = mdbox ? int(mdbox->getFileNumEvents()) : 0;
-      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getMRUMemorySize()) : 0;
+      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getFileSize()) : 0;
       ws->cell<int>(i, col++) = mdbox ? int(mdbox->getEventVectorSize()) : -1;
       if (mdbox)
       {
-        ws->cell<std::string>(i, col++) = (mdbox->getOnDisk() ? "yes":"no");
+        ws->cell<std::string>(i, col++) = (mdbox->wasSaved() ? "yes":"no");
         ws->cell<std::string>(i, col++) = (mdbox->getInMemory() ? "yes":"no");
-        ws->cell<std::string>(i, col++) = std::string(mdbox->dataAdded() ? "Added ":"") + std::string(mdbox->dataModified() ? "Modif.":"") ;
+        // there is no exact equivalent of data added, but we assume that data added if data on file are not equal to data in memory
+        bool isDataAdded = (mdbox->getFileSize()!=mdbox->getNPoints());
+        ws->cell<std::string>(i, col++) = std::string(isDataAdded ? "Added ":"") + std::string(mdbox->isBusy() ? "Modif.":"") ;
       }
       else
       {
@@ -503,9 +505,9 @@ namespace MDEvents
    * @param event :: event to add.
    */
   TMDE(
-  void MDEventWorkspace)::addEvent(const MDE & event)
+  void MDEventWorkspace)::addEvent(const MDE & MDEv)
   {
-    data->addEvent(event);
+    data->addEvent(MDEv);
   }
 
    //-----------------------------------------------------------------------------------------------

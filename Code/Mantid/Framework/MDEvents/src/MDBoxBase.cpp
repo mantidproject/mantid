@@ -19,9 +19,11 @@ namespace MDEvents
   MDBoxBase)::MDBoxBase()
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_inverseVolume(std::numeric_limits<coord_t>::quiet_NaN()),
+      m_BoxController(boost::make_shared<API::BoxController>(nd)),
       m_depth(0),
       m_parent(NULL)
   {
+
 #ifdef MDBOX_TRACK_CENTROID
     // Clear the running total of the centroid
     for (size_t d=0; d<nd; d++)
@@ -37,6 +39,7 @@ namespace MDEvents
   MDBoxBase)::MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_inverseVolume(1.0),
+      m_BoxController(boost::make_shared<API::BoxController>(nd)),
       m_depth(0),
       m_parent(NULL)
   {

@@ -240,8 +240,8 @@ namespace MDEvents
       size_t numColumns = nd+4;
       coord_t * data = new coord_t[numEvents*numColumns];
 
-      totalSignal = 0;
-      totalErrorSquared = 0;
+      double SignalSum(0);
+      double ErrorSqSum(0);
 
       size_t index = 0;
       typename std::vector<MDEvent<nd> >::const_iterator it = events.begin();
@@ -259,9 +259,11 @@ namespace MDEvents
         for(size_t d=0; d<nd; d++)
           data[index++] = event.center[d];
         // Track the total signal
-        totalSignal += signal_t(signal);
-        totalErrorSquared += signal_t(errorSquared);
+        SignalSum += double(signal);
+        ErrorSqSum += double(errorSquared);
       }
+      totalSignal = signal_t(SignalSum);
+      totalErrorSquared = signal_t(ErrorSqSum);
 
       MDLeanEvent<nd>::putDataInNexus(file, data, startIndex, numEvents, numColumns);
      }

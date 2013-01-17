@@ -47,7 +47,16 @@ namespace Kernel
       m_dataChanged = false;
   }
 
-  
+  /** Set the start/end point in the file where the events are located
+     * @param start :: start point,
+     * @param numEvents :: number of events in the file   */
+    void ISaveable::setFilePosition(uint64_t newPos,uint64_t newSize)
+    {  
+      m_fileIndexStart=newPos;  
+      m_fileNumEvents =newSize;
+    }
+
+
   //-----------------------------------------------------------------------------------------------
   /** Helper method for sorting MDBoxBasees by file position.
    * MDGridBoxes return 0 for file position and so aren't sorted.

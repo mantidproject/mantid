@@ -30,7 +30,7 @@ public:
   m_memory(1)
   {}
 
-  virtual void save() const
+  virtual void save() 
   {
     // Fake writing to a file
     std::ostringstream out;
@@ -72,14 +72,14 @@ public:
   }
 
   using ISaveableTester::load; // Unhide base class method to avoid Intel compiler warning
-  virtual void load(DiskBuffer & /*dbuf*/) const
+  virtual void load(DiskBuffer & /*dbuf*/) 
   {
     uint64_t myFilePos = this->getFilePosition();
     std::cout << "Block " << getId() << " loading at " << myFilePos << std::endl;
     ISaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
   }
 
-  virtual void save() const
+  virtual void save() 
   {
     // Pretend to seek to the point and write
     uint64_t myFilePos = this->getFilePosition();
@@ -99,19 +99,7 @@ public:
     myFilePos = newfilePos;
     // Grow the size by 1
     m_memory++;
-    //uint64_t fPos    = this->getFilePosition();
-    //uint64_t mMemory = this->getFileSize();
-
-    //// OK first you seek to where the OLD data was and load it.
-    //std::cout << "Block " << getId() << " loading at " << fPos << std::endl;
-    //ISaveableTesterWithSeek::fakeSeekAndWrite(fPos);
-    //// Simulate that the data is growing and so needs to be written out
-
-    //size_t newfilePos = dbuf.relocate(fPos, mMemory, mMemory+1);
-    //std::cout << "Block " << getId() << " has moved from " << fPos << " to " << newfilePos << std::endl;
-    //fPos = newfilePos;
-    //// Grow the size by 1
-    //mMemory = mMemory+ 1;
+  
     this->setFilePosition(myFilePos,m_memory);
   }
 
@@ -162,7 +150,7 @@ public:
 
 
   char m_ch;
-  virtual void save() const
+  virtual void save() 
   {
     // Fake writing to a file
     streamMutex.lock();

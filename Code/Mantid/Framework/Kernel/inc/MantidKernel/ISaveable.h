@@ -47,21 +47,17 @@ namespace Kernel
     //-----------------------------------------------------------------------------------------------
     /** Returns the unique ID for this object/box     */
     size_t getId() const
-    {
-      return m_id;
-    }
+    {  return m_id;   }
 
     /** Sets the unique ID for this object/box
      * @param newId :: new ID value. */
     virtual void setId(size_t newId)
-    {
-      m_id = newId;
-    }
+    {    m_id = newId;   }
 
     //-----------------------------------------------------------------------------------------------
 
     /// Save the data - to be overriden
-    virtual void save()const = 0;
+    virtual void save() = 0;
 
     /// Load the data - to be overriden
     virtual void load() = 0;
@@ -79,14 +75,16 @@ namespace Kernel
     /// @return true if it the data of the object is busy and so cannot be cleared; false if the data was released and can be cleared/written.
     bool isBusy() const{return m_Busy;}
     /// @ set the data busy to prevent from removing them from memory. The process which does that should clean the data when finished with them
-    void setBusy(bool On=true){m_Busy=On;}
+    void setBusy(bool On=true)const
+       {m_Busy=On;}
 
     bool isDataChanged()const{return m_dataChanged;}
+
     /** Call this method to from the method which changes the object but keep the object size the same to tell DiskBuffer to write it back
-        the dataChanged ID is reset after save from the DataBuffer
-    */
+        the dataChanged ID is reset after save from the DataBuffer    */
     void setDataChanged()
-    {  if(this->wasSaved())m_dataChanged=true;
+    { 
+      if(this->wasSaved())m_dataChanged=true;
     }
 
     /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
@@ -96,17 +94,10 @@ namespace Kernel
     uint64_t getFileSize()const
     { return   m_fileNumEvents;}
 
-    /**sets the file position and the specified value*/ 
-    void setFilePosition(uint64_t newPos,uint64_t newSize)
-    {  
-      m_fileIndexStart=newPos;  
-      m_fileNumEvents =newSize;
-    }
-    
+    /** Sets the location of the object on HDD*/ 
+    void setFilePosition(uint64_t newPos,uint64_t newSize);   
 
-  
-
-    /** function returns information if the object have ever been saved on HDD */
+    /** function returns true if the object have ever been saved on HDD and knows it place there*/
     bool wasSaved()const
     { 
       return (std::numeric_limits<uint64_t>::max()!=m_fileIndexStart);
@@ -124,14 +115,19 @@ namespace Kernel
     uint64_t m_fileIndexStart;
   /// Number of events saved in the file, after the start index location
     uint64_t m_fileNumEvents;
+    //-------------- 
     /// a user needs to set this variable to true preventing from deleting data from buffer
-    bool m_Busy;
-    /// a user needs to set this variable to true to force writing on HDD if the size of iSavable object is unchanged
+    mutable bool m_Busy;
+    /** a user needs to set this variable to true to allow DiskBuffer saving the object to HDD 
+        when it decides it suitable,  if the size of iSavable object in cache is unchanged from the previous 
+        save/load operation */
     bool m_dataChanged;
+
     /// the function saveAt has to be availible to DiskBuffer and nobody else. To highlight this we make it private
     friend class DiskBuffer;
    /** save at specific file location the specific amount of data; 
-        used by DiskBuffer which knows what and where to save and calling object specific save operation above 
+        used by DiskBuffer which asks this object where to save it and calling 
+        overloaded object specific save operation above
      */
     void saveAt(uint64_t newPos, uint64_t newSize);
 

@@ -98,7 +98,7 @@ namespace MDEvents
     fillBoxShell(tot,coord_t(1./ChildVol));
 
 
-    // Prepare to distribute the events that were in the box before
+    // Prepare to distribute the events that were in the box before, this will load missing events from HDD in file based ws if there are some.
     const std::vector<MDE> & events = box->getConstEvents();   
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
@@ -117,7 +117,13 @@ namespace MDEvents
 
     // Clear the old box.
     box->clear();
-    box->setDataBusy(false);
+    if (this->m_BoxController->isFileBacked())
+    {        
+         //Delete it from "to-write" DiskBuffer if it is there
+         this->m_BoxController->getDiskBuffer().objectDeleted(box);
+    }
+
+
   }
   /**Internal function to do main job of filling in a GridBox contents  (part of the constructor) */
   template<typename MDE,size_t nd>
@@ -878,22 +884,10 @@ namespace MDEvents
         else
         {
           // This box does NOT have enough events to be worth splitting
-          if (box->dataAdded() && this->m_BoxController->isFileBacked() &&
-              !box->getOnDisk())
-          {
-            // The box is NOT on disk but the workspace is file-backed.
-            // Therefore, it is likely a NEW MDBox that was just created by splitting.
-            // Mark that it is to be on disk from now on
-            box->setOnDisk(true);
-            // Set it "modified" so that it gets written out upon saving
-            box->setDataModified(true);
-
-            //Mark the box as "to-write" in DiskBuffer.
-            this->m_BoxController->getDiskBuffer().toWrite(box);
-
-//            // Make the MRU track it in the buffer. It is using up memory!
-//            this->m_BoxController->getDiskBuffer().loading(box);
-//            // So the MRU will cache it to the WriteBuffer when it falls out of the cache.
+          if (this->m_BoxController->isFileBacked())
+          {        
+              //Mark the box as "to-write" in DiskBuffer. If the buffer is excausted, the box will be cached on disk
+              this->m_BoxController->getDiskBuffer().toWrite(box);
           }
         }
       }
