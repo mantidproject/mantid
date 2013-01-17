@@ -305,15 +305,38 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     if( len(pixels) != nDets):
        print "Tube correction failed."
        return detIDs, detPositions 
-       
+    
+    # Work out distant between first and last detectors in tube 
+    det0 = ws.getDetector( whichTube[0])
+    detN = ws.getDetector (whichTube[nDets-1])
+    d0x = det0.getPos().X()
+    d0y = det0.getPos().Y()
+    d0z = det0.getPos().Z()
+    dNx = detN.getPos().X()
+    dNy = detN.getPos().Y()
+    dNz = detN.getPos().Z()
+    tubeLength = math.sqrt( (dNx - d0x)*(dNx - d0x) + (dNy - d0y)*(dNy - d0y) + (dNz - d0z)*(dNz - d0z) )
+    if( tubeLength <= 0.0):
+        print "Zero length tube cannot be calibrated, calibration failed."
+        return detIDs, detPositions
+    
+    # Move the pixel detectors
     for i in range(nDets):
         deti = ws.getDetector( whichTube[i])
 	detiPositionX = deti.getPos().X()
+	detiPositionY = deti.getPos().Y()
 	detiPositionZ = deti.getPos().Z()
-	yNew = pixels[i]
+	# yNew = pixels[i]
 	detIDs.append( deti.getID() )
-	detPositions.append(  V3D( detiPositionX, yNew, detiPositionZ ) )
-	# print i, detIDs[i], detPositions[i]
+	#detPositions.append(  V3D( detiPositionX, yNew, detiPositionZ ) )
+	uX = ( detiPositionX - d0x)/tubeLength
+	uY = ( detiPositionY - d0y)/tubeLength
+	uZ = ( detiPositionZ - d0z)/tubeLength
+	xNew = (1.0 - uX)*d0x + uX*dNx
+	yNew = (1.0 - uY)*d0y + uY*dNy
+	zNew = (1.0 - uZ)*d0z + uZ*dNz	
+	detPositions.append( V3D( xNew, yNew, zNew ) )
+        # print i, detIDs[i], detPositions[i]
 
     return detIDs, detPositions
     
