@@ -274,7 +274,15 @@ public:
     svc_it it = this->findNameWithCaseSearch(name, foundName);
     if (it==datamap.end())
     {
-      g_log.warning(" remove '" + name + "' cannot be found");
+      if ( ! objectIsToBeHidden(name) )
+      {
+        g_log.warning(" remove '" + name + "' cannot be found");
+      }
+      else
+      {
+        // Log only at a low level for hidden workspaces
+        g_log.debug(" remove '" + name + "' cannot be found");
+      }
       m_mutex.unlock();
       return;
     }
