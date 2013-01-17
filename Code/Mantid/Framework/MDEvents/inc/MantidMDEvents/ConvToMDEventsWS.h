@@ -69,7 +69,6 @@ private:
 
    /**function converts particular type of events into MD space and add these events to the workspace itself    */
    template <class T>   size_t convertEventList(size_t workspaceIndex);
-
 };
 
 } // endNamespace MDEvents

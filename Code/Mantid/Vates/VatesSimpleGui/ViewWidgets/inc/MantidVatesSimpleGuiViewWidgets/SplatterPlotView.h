@@ -86,7 +86,13 @@ public:
    */
   void resetDisplay();
 
+public slots:
+  /// Check the coordinates for the peaks overlay if necessary
+  void checkPeaksCoordinates();
+
 protected slots:
+  /// Check state of toggle button with respect to peak coordinates.
+  void onOverridePeakCoordToggled(bool state);
   /**
    * Create and apply a threshold filter to the data.
    */

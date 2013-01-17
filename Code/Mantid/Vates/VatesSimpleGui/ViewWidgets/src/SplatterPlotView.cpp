@@ -1,5 +1,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 
+
 #include "pqActiveObjects.h"
 #include "pqApplicationCore.h"
 #include "pqDataRepresentation.h"
@@ -28,6 +29,12 @@ SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent)
   // Set the threshold button to create a threshold filter on data
   QObject::connect(this->ui.thresholdButton, SIGNAL(clicked()),
                    this, SLOT(onThresholdButtonClicked()));
+
+  // Set connection to toggle button for peak coordinate checking
+  QObject::connect(this->ui.overridePeakCoordsButton,
+                   SIGNAL(toggled(bool)),
+                   this,
+                   SLOT(onOverridePeakCoordToggled(bool)));
 
   this->view = this->createRenderView(this->ui.renderFrame);
 }
@@ -127,6 +134,40 @@ void SplatterPlotView::renderAll()
 void SplatterPlotView::resetDisplay()
 {
   this->view->resetDisplay();
+}
+
+/**
+ * This function checks to see if the Override PC button has been
+ * toggled. If the state is unchecked (false), we want to make sure
+ * that the coordniates are matched back to the MD workspace.
+ * @param state : true is button is checked, false if not
+ */
+void SplatterPlotView::onOverridePeakCoordToggled(bool state)
+{
+  if (!state)
+  {
+    this->checkPeaksCoordinates();
+    emit this->triggerAccept();
+  }
+}
+
+void SplatterPlotView::checkPeaksCoordinates()
+{
+  if (!this->peaksSource.isEmpty() &&
+      !this->ui.overridePeakCoordsButton->isChecked())
+  {
+    int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
+                                             "SpecialCoordinates").GetAsInt();
+    // Make commensurate with vtkPeakMarkerFactory
+    peakViewCoords--;
+
+    foreach(pqPipelineSource *src, this->peaksSource)
+    {
+      vtkSMPropertyHelper(src->getProxy(),
+                          "Peak Dimensions").Set(peakViewCoords);
+      src->getProxy()->UpdateVTKObjects();
+    }
+  }
 }
 
 void SplatterPlotView::onThresholdButtonClicked()

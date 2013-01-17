@@ -238,6 +238,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
       dimNames[0]="Q_lab_x";
       dimNames[1]="Q_lab_y";
       dimNames[2]="Q_lab_z";
+      TargWSDescription.setCoordinateSystem(Mantid::API::QLab);
       break;
     }
   case(CnvrtToMD::SampleFrame):
@@ -245,6 +246,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
       dimNames[0]="Q_sample_x";
       dimNames[1]="Q_sample_y";
       dimNames[2]="Q_sample_z";
+      TargWSDescription.setCoordinateSystem(Mantid::API::QSample);
       break;
     }
   case(CnvrtToMD::HKLFrame):
@@ -252,6 +254,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
       dimNames[0]="H";
       dimNames[1]="K";
       dimNames[2]="L";
+      TargWSDescription.setCoordinateSystem(Mantid::API::HKL);
       break;
     }
   default:

@@ -105,6 +105,7 @@ public:
   ISpectrum * getSpectrum(const size_t index) { return &vec[index]; }
   const ISpectrum * getSpectrum(const size_t index) const { return &vec[index];; }
   void generateHistogram(const std::size_t , const MantidVec& , MantidVec& , MantidVec& , bool ) const { }
+  virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const { return Mantid::API::None;}
 
 private:
   std::vector<SpectrumTester> vec;

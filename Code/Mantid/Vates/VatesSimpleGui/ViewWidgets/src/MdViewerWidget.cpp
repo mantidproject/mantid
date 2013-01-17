@@ -342,6 +342,7 @@ void MdViewerWidget::setParaViewComponentsForView()
   QObject::connect(this->currentView, SIGNAL(triggerAccept()),
                    this->ui.proxyTabWidget->getObjectInspector(),
                    SLOT(accept()));
+
   if (this->currentView->inherits("MultiSliceView"))
   {
     QObject::connect(this->ui.pipelineBrowser,
@@ -352,6 +353,15 @@ void MdViewerWidget::setParaViewComponentsForView()
                      SIGNAL(accepted()),
                      static_cast<MultiSliceView *>(this->currentView),
                      SLOT(updateSelectedIndicator()));
+  }
+
+  SplatterPlotView *spv = dynamic_cast<SplatterPlotView *>(this->currentView);
+  if (spv)
+  {
+    QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
+                     SIGNAL(postaccept()),
+                     static_cast<SplatterPlotView *>(this->currentView),
+                     SLOT(checkPeaksCoordinates()));
   }
 
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),

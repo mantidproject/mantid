@@ -100,6 +100,8 @@ namespace Mantid
       if(!m_EventWS)
         throw(std::logic_error(" ConvertToMDEventWS should work with defined event workspace"));
 
+      // Record any special coordinate system known to the description.
+      m_coordinateSystem = WSD.getCoordinateSystem();
       return numSpec;
     }
 
@@ -180,8 +182,10 @@ namespace Mantid
       m_OutWSWrapper->pWorkspace()->refreshCache(); 
       m_OutWSWrapper->refreshCentroid();
       pProgress->report();
-    }
 
+      /// Set the special coordinate system flag on the output workspace.
+      m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
+    }
 
 
   } // endNamespace MDEvents

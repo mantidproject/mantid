@@ -60,6 +60,8 @@ public:
   void updateAlgorithmProgress(double, const std::string& message);
   /// Getter for the input geometry xml
   const char* GetInputGeometryXML();
+  /// Getter for the special coodinate value
+  int GetSpecialCoordinates();
   /// Getter for the workspace name
   const char* GetWorkspaceName();
   /// Getter for the workspace type

@@ -20,7 +20,7 @@ namespace Mantid
     @throw invalid_argument if the repository is null
     @throw invalid_arument if view is null
     */
-    MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDEWLoadingPresenter(view), m_repository(repository), m_wsName(wsName), m_wsTypeName("")
+  MDEWInMemoryLoadingPresenter::MDEWInMemoryLoadingPresenter(MDLoadingView* view, WorkspaceProvider* repository, std::string wsName) : MDEWLoadingPresenter(view), m_repository(repository), m_wsName(wsName), m_wsTypeName(""), m_specialCoords(-1)
     {
       if(m_wsName.empty())
       {
@@ -97,6 +97,7 @@ namespace Mantid
       Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
       IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
       m_wsTypeName = eventWs->id();
+      m_specialCoords = eventWs->getSpecialCoordinateSystem();
       //Call base-class extraction method.
       this->extractMetadata(eventWs);
     }
@@ -114,6 +115,15 @@ namespace Mantid
     std::string MDEWInMemoryLoadingPresenter::getWorkspaceTypeName()
     {
       return m_wsTypeName;
+    }
+
+    /**
+     * Getter for the special coordinates.
+     * @return the special coordinates value
+     */
+    int MDEWInMemoryLoadingPresenter::getSpecialCoordinates()
+    {
+      return m_specialCoords;
     }
   }
 }

@@ -311,6 +311,9 @@ namespace Mantid
        /// Clear exsting masking.
        void clearMDMasking();
 
+       /// @return the special coordinate system used if any.
+       virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
+
       //=====================================================================================
       // End IMDWorkspace methods
       //=====================================================================================

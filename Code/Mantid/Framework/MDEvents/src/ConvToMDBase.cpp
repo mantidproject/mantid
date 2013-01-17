@@ -81,12 +81,14 @@ namespace Mantid
       }
       catch(Kernel::Exception::NotFoundError &){}
    
-     
+     // Record any special coordinate system known to the description.
+      m_coordinateSystem = WSD.getCoordinateSystem();
+
       return n_spectra;
     };  
 
     /** empty default constructor */
-    ConvToMDBase::ConvToMDBase():m_NumThreads(-1)
+    ConvToMDBase::ConvToMDBase():m_NumThreads(-1), m_coordinateSystem(Mantid::API::None)
     { }
 
 

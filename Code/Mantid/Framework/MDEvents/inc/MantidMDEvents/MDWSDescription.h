@@ -126,6 +126,11 @@ public:  // for the time being
     static void fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimProperyNames,std::vector<coord_t> &AddCoord);
 
     static boost::shared_ptr<Geometry::OrientedLattice> getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D);
+
+    /// Set the special coordinate system if any.
+    void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem system);
+    /// @return the special coordinate system if any.
+    Mantid::API::SpecialCoordinateSystem getCoordinateSystem() const;
 protected: // until MDWSDesctiptionDepricatedExist
     /// the variable which describes the number of the dimensions, in the target workspace. 
     /// Calculated from number of input properties and the operations, performed on input workspace;
@@ -151,7 +156,9 @@ protected: // until MDWSDesctiptionDepricatedExist
 //********************* internal helpers
      /// helper function to resize all vectors, responsible for MD dimensions in one go
      void resizeDimDescriptions(unsigned int Dims,size_t nBins=10);
-
+private:
+  /// Coordinate system.
+  Mantid::API::SpecialCoordinateSystem m_coordinateSystem;
 }; 
 
 }

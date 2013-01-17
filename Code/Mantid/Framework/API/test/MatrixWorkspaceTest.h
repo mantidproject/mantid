@@ -631,6 +631,12 @@ public:
     TSM_ASSERT_THROWS("Characterisation test. This is not implemented.", ws->clearMDMasking(), std::runtime_error);
   }
 
+  void test_getSpecialCoordinateSystem_default()
+  {
+    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
+    TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::API::None, ws->getSpecialCoordinateSystem());
+  }
+
 private:
   boost::shared_ptr<MatrixWorkspace> ws;
 

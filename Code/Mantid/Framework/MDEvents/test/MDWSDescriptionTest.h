@@ -74,8 +74,23 @@ public:
     //}
 
    }
-  
 
+  void test_defaultCoordinateSystem()
+  {
+    MDWSDescription description;
+    TS_ASSERT_EQUALS(Mantid::API::None, description.getCoordinateSystem());
+  }
+
+  void test_setCoordinateSystem()
+  {
+    using namespace Mantid::API;
+    const SpecialCoordinateSystem expectedResult = QSample;
+
+    MDWSDescription description;
+    description.setCoordinateSystem(expectedResult);
+    TS_ASSERT_EQUALS(expectedResult, description.getCoordinateSystem());
+  }
+  
 MDWSDescriptionTest()
 {
      ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
