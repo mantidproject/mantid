@@ -11,7 +11,7 @@ find_path ( QWT_INCLUDE_DIR qwt.h
             /usr/include/qwt-qt4 /usr/include/qwt /usr/include/qwt5 /usr/include/qwt5-qt4
 	    ${CMAKE_INCLUDE_PATH}/qwt 
 )
-find_library ( QWT_LIBRARY NAMES qwt-qt4 qwt )
+find_library ( QWT_LIBRARY NAMES qwt-qt4 qwt qwt5-qt4 )
 find_library ( QWT_LIBRARY_DEBUG qwtd )
 
 # handle the QUIETLY and REQUIRED arguments and set QWT_FOUND to TRUE if 
