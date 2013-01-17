@@ -161,7 +161,8 @@ void StandardView::updateUI()
 /**
  * This function checks a pipeline source that ParaView says is being
  * deleted. If the source is a Mantid rebinning filter, the restriction
- * on the SplatterPlot view should be lifted.
+ * on the SplatterPlot view should be lifted. Also, the cut button can
+ * be enabled.
  * @param src : The pipeline source being checked
  */
 void StandardView::onDestroyingSource(pqPipelineSource *src)
@@ -169,6 +170,7 @@ void StandardView::onDestroyingSource(pqPipelineSource *src)
   if (src->getSMName().contains("MantidRebinning"))
   {
     emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, true);
+    this->ui.cutButton->setEnabled(true);
   }
 }
 
