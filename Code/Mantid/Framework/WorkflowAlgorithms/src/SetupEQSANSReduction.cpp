@@ -218,7 +218,6 @@ void SetupEQSANSReduction::init()
   std::vector<std::string> transOptions;
   transOptions.push_back("Value");
   transOptions.push_back("DirectBeam");
-  transOptions.push_back("BeamSpreader");
   declareProperty("TransmissionMethod", "Value",
       boost::make_shared<StringListValidator>(transOptions),
       "Transmission determination method");
@@ -233,24 +232,73 @@ void SetupEQSANSReduction::init()
   setPropertySettings("TransmissionError",
             new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "Value"));
 
+  // - Direct beam method transmission calculation
+  declareProperty("TransmissionBeamRadius", 3.0,
+      "Radius of the beam area used to compute the transmission [pixels]");
+  setPropertySettings("TransmissionBeamRadius",
+            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(new API::FileProperty("TransmissionSampleDataFile", "",
+      API::FileProperty::OptionalLoad, ".xml"),
+      "Sample data file for transmission calculation");
+  setPropertySettings("TransmissionSampleDataFile",
+            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(new API::FileProperty("TransmissionEmptyDataFile", "",
+      API::FileProperty::OptionalLoad, ".xml"),
+      "Empty data file for transmission calculation");
+  setPropertySettings("TransmissionEmptyDataFile",
+            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty("FitFramesTogether", false,
+      "If true, the two frames will be fit together");
+
+  // - transmission beam center
+  declareProperty("TransmissionBeamCenterMethod", "None",
+      boost::make_shared<StringListValidator>(centerOptions),
+      "Method for determining the transmission data beam center");
+  setPropertySettings("TransmissionBeamCenterMethod",
+            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+
+  //    Option 1: Set beam center by hand
+  declareProperty("TransmissionBeamCenterX", EMPTY_DBL(),
+      "Transmission beam center location in X [pixels]");
+  setPropertySettings("TransmissionBeamCenterX",
+            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty("TransmissionBeamCenterY", EMPTY_DBL(),
+      "Transmission beam center location in Y [pixels]");
+  setPropertySettings("TransmissionBeamCenterY",
+            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+
+  //    Option 2: Find it (expose properties from FindCenterOfMass)
+  declareProperty(new API::FileProperty("TransmissionBeamCenterFile", "",
+      API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load");
+  setPropertySettings("TransmissionBeamCenterFile",
+            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+
+  declareProperty(new API::FileProperty("TransmissionDarkCurrentFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load as transmission dark current.");
+  setPropertySettings("TransmissionDarkCurrentFile",
+            new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
+
+  declareProperty("ThetaDependentTransmission", true,
+      "If true, a theta-dependent transmission correction will be applied.");
+
   // -- Define group --
   setPropertyGroup("TransmissionMethod", trans_grp);
   setPropertyGroup("TransmissionValue", trans_grp);
   setPropertyGroup("TransmissionError", trans_grp);
-  // TODO: put in other transmission options
+  setPropertyGroup("TransmissionBeamRadius", trans_grp);
+  setPropertyGroup("TransmissionSampleDataFile", trans_grp);
+  setPropertyGroup("TransmissionEmptyDataFile", trans_grp);
+  setPropertyGroup("FitFramesTogether", trans_grp);
+  setPropertyGroup("TransmissionBeamCenterMethod", trans_grp);
+  setPropertyGroup("TransmissionBeamCenterX", trans_grp);
+  setPropertyGroup("TransmissionBeamCenterY", trans_grp);
+  setPropertyGroup("TransmissionBeamCenterFile", trans_grp);
 
+  setPropertyGroup("TransmissionDarkCurrentFile", trans_grp);
+  setPropertyGroup("ThetaDependentTransmission", trans_grp);
 
   declareProperty("SetupReducer",false, "If true, a Reducer object will be created");
-  declareProperty(new API::FileProperty("TransmissionDirectBeam", "",
-      API::FileProperty::OptionalLoad, "_event.nxs"),
-      "Direct beam data file used to compute transmission");
-  declareProperty(new API::FileProperty("TransmissionEmptyBeam", "",
-      API::FileProperty::OptionalLoad, "_event.nxs"),
-      "Empty beam data file used to compute transmission");
-  declareProperty("ThetaDependentTransmission",true, "If true, a theta-dependent transmission correction will be used");
-  setPropertySettings("TransmissionDirectBeam", new EnabledWhenProperty("SetupReducer", IS_EQUAL_TO, "1") );
-  setPropertySettings("TransmissionEmptyBeam", new EnabledWhenProperty("SetupReducer", IS_EQUAL_TO, "1") );
-  setPropertySettings("ThetaDependentTransmission", new EnabledWhenProperty("SetupReducer", IS_EQUAL_TO, "1") );
 
   // I(Q) calculation
   std::string iq1d_grp = "I(q) Calculation";
@@ -438,32 +486,10 @@ void SetupEQSANSReduction::exec()
     }
   }
 
-  // Sensitivity correction
-  const std::string sensitivityFile = getPropertyValue("SensitivityFile");
-  if (sensitivityFile.size() > 0)
-  {
-    const bool useSampleDC = getProperty("UseDefaultDC");
-    const std::string sensitivityDarkCurrentFile = getPropertyValue("SensitivityDarkCurrentFile");
-    const std::string outputSensitivityWS = getPropertyValue("OutputSensitivityWorkspace");
-    const double minEff = getProperty("MinEfficiency");
-    const double maxEff = getProperty("MaxEfficiency");
-    const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
-    const double sensitivityBeamCenterY = getProperty("SensitivityBeamCenterY");
-
-    IAlgorithm_sptr effAlg = createChildAlgorithm("SANSSensitivityCorrection");
-    effAlg->setProperty("Filename", sensitivityFile);
-    effAlg->setProperty("UseSampleDC", useSampleDC);
-    effAlg->setProperty("DarkCurrentFile", sensitivityDarkCurrentFile);
-    effAlg->setProperty("MinEfficiency", minEff);
-    effAlg->setProperty("MaxEfficiency", maxEff);
-    if (!isEmpty(sensitivityBeamCenterX)) effAlg->setProperty("BeamCenterX", sensitivityBeamCenterX);
-    if (!isEmpty(sensitivityBeamCenterY)) effAlg->setProperty("BeamCenterY", sensitivityBeamCenterY);
-    effAlg->setProperty("OutputSensitivityWorkspace", outputSensitivityWS);
-    effAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-    algProp = new AlgorithmProperty("SensitivityAlgorithm");
-    algProp->setValue(effAlg->toString());
-    reductionManager->declareProperty(algProp);
-  }
+  // Sensitivity correction, transmission and background
+  setupSensitivity(reductionManager);
+  setupTransmission(reductionManager);
+  //setupBackground(reductionManager);
 
   // Azimuthal averaging
   const bool doAveraging = getProperty("DoAzimuthalAverage");
@@ -641,6 +667,72 @@ void SetupEQSANSReduction::initializeReduction(boost::shared_ptr<PropertyManager
   alg->execute();
 }
 
+void SetupEQSANSReduction::setupSensitivity(boost::shared_ptr<PropertyManager> reductionManager)
+{
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+
+  const std::string sensitivityFile = getPropertyValue("SensitivityFile");
+  if (sensitivityFile.size() > 0)
+  {
+    const bool useSampleDC = getProperty("UseDefaultDC");
+    const std::string sensitivityDarkCurrentFile = getPropertyValue("SensitivityDarkCurrentFile");
+    const std::string outputSensitivityWS = getPropertyValue("OutputSensitivityWorkspace");
+    const double minEff = getProperty("MinEfficiency");
+    const double maxEff = getProperty("MaxEfficiency");
+    const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
+    const double sensitivityBeamCenterY = getProperty("SensitivityBeamCenterY");
+
+    IAlgorithm_sptr effAlg = createChildAlgorithm("SANSSensitivityCorrection");
+    effAlg->setProperty("Filename", sensitivityFile);
+    effAlg->setProperty("UseSampleDC", useSampleDC);
+    effAlg->setProperty("DarkCurrentFile", sensitivityDarkCurrentFile);
+    effAlg->setProperty("MinEfficiency", minEff);
+    effAlg->setProperty("MaxEfficiency", maxEff);
+
+    // Beam center option for sensitivity data
+    const std::string centerMethod = getPropertyValue("SensitivityBeamCenterMethod");
+    if (boost::iequals(centerMethod, "Value"))
+    {
+      if (!isEmpty(sensitivityBeamCenterX) &&
+          !isEmpty(sensitivityBeamCenterY))
+      {
+        effAlg->setProperty("BeamCenterX", sensitivityBeamCenterX);
+        effAlg->setProperty("BeamCenterY", sensitivityBeamCenterY);
+      }
+    }
+    else if (boost::iequals(centerMethod, "DirectBeam") ||
+        boost::iequals(centerMethod, "Scattering"))
+    {
+      const std::string beamCenterFile = getProperty("SensitivityBeamCenterFile");
+      const double sensitivityBeamRadius = getProperty("SensitivityBeamCenterRadius");
+      bool useDirectBeam = boost::iequals(centerMethod, "DirectBeam");
+      if (beamCenterFile.size()>0)
+       {
+         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
+         ctrAlg->setProperty("Filename", beamCenterFile);
+         ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
+         ctrAlg->setProperty("PersistentCorrection", false);
+         if (useDirectBeam && !isEmpty(sensitivityBeamRadius))
+           ctrAlg->setProperty("BeamRadius", sensitivityBeamRadius);
+         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+
+         AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityBeamCenterAlgorithm");
+         algProp->setValue(ctrAlg->toString());
+         reductionManager->declareProperty(algProp);
+       } else {
+         g_log.error() << "ERROR: Sensitivity beam center determination was required"
+             " but no file was provided" << std::endl;
+       }
+    }
+
+    effAlg->setProperty("OutputSensitivityWorkspace", outputSensitivityWS);
+    effAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+
+    AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityAlgorithm");
+    algProp->setValue(effAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
+}
 void SetupEQSANSReduction::setupTransmission(boost::shared_ptr<PropertyManager> reductionManager)
 {
   const std::string reductionManagerName = getProperty("ReductionProperties");
@@ -675,11 +767,13 @@ void SetupEQSANSReduction::setupTransmission(boost::shared_ptr<PropertyManager> 
     const std::string sampleFilename = getPropertyValue("TransmissionSampleDataFile");
     const std::string emptyFilename = getPropertyValue("TransmissionEmptyDataFile");
     const double beamRadius = getProperty("TransmissionBeamRadius");
+    const bool fitFramesTogether = getProperty("FitFramesTogether");
     const double beamX = getProperty("TransmissionBeamCenterX");
     const double beamY = getProperty("TransmissionBeamCenterY");
     const std::string centerMethod = getPropertyValue("TransmissionBeamCenterMethod");
 
-    IAlgorithm_sptr transAlg = createChildAlgorithm("SANSDirectBeamTransmission");
+    IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
+    transAlg->setProperty("FitFramesTogether", fitFramesTogether);
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
@@ -710,29 +804,6 @@ void SetupEQSANSReduction::setupTransmission(boost::shared_ptr<PropertyManager> 
              " but no file was provided" << std::endl;
        }
     }
-    transAlg->setProperty("ThetaDependent", thetaDependentTrans);
-    AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
-    algProp->setValue(transAlg->toString());
-    reductionManager->declareProperty(algProp);
-  }
-  // Direct beam method for transmission determination
-  else if (boost::iequals(transMethod, "BeamSpreader"))
-  {
-    const std::string sampleSpread = getPropertyValue("TransSampleSpreaderFilename");
-    const std::string directSpread = getPropertyValue("TransDirectSpreaderFilename");
-    const std::string sampleScatt = getPropertyValue("TransSampleScatteringFilename");
-    const std::string directScatt = getPropertyValue("TransDirectScatteringFilename");
-    const double spreaderTrValue = getProperty("SpreaderTransmissionValue");
-    const double spreaderTrError = getProperty("SpreaderTransmissionError");
-
-    IAlgorithm_sptr transAlg = createChildAlgorithm("SANSBeamSpreaderTransmission");
-    transAlg->setProperty("SampleSpreaderFilename", sampleSpread);
-    transAlg->setProperty("DirectSpreaderFilename", directSpread);
-    transAlg->setProperty("SampleScatteringFilename", sampleScatt);
-    transAlg->setProperty("DirectScatteringFilename", directScatt);
-    transAlg->setProperty("SpreaderTransmissionValue", spreaderTrValue);
-    transAlg->setProperty("SpreaderTransmissionError", spreaderTrError);
-    transAlg->setProperty("DarkCurrentFilename", darkCurrent);
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
     AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
     algProp->setValue(transAlg->toString());

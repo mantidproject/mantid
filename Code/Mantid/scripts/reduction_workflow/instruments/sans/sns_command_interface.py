@@ -4,13 +4,29 @@
 # Import the specific commands that we need
 from reduction_workflow.command_interface import *
 
-from hfir_command_interface import DarkCurrent, NoNormalization
+from hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization
 from hfir_command_interface import SolidAngle, NoSolidAngle
 from hfir_command_interface import SetBeamCenter, DirectBeamCenter, ScatteringBeamCenter
-from hfir_command_interface import SetTransmission
-from hfir_command_interface import SensitivityCorrection
-from hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq
 
+from hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter
+from hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter
+from hfir_command_interface import NoSensitivityCorrection
+
+from hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii
+
+from hfir_command_interface import DirectBeamTransmission, TransmissionDarkCurrent
+from hfir_command_interface import ThetaDependentTransmission
+from hfir_command_interface import SetTransmissionBeamCenter, TransmissionDirectBeamCenter
+from hfir_command_interface import SetTransmission, NoTransmission
+
+from hfir_command_interface import Background, NoBackground, NoBckTransmission
+from hfir_command_interface import SetBckTransmission, BckDirectBeamTransmission
+from hfir_command_interface import SetBckTransmissionBeamCenter, BckThetaDependentTransmission
+from hfir_command_interface import BckTransmissionDirectBeamCenter, BckTransmissionDarkCurrent
+
+from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance
+from hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide
+from hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale
 from hfir_command_interface import Stitch
 
 from mantid.api import AlgorithmManager
@@ -22,7 +38,7 @@ def EQSANS(keep_events=False, property_manager=None):
     Clear()
     ReductionSingleton().set_instrument("EQSANS",
                                         "SetupEQSANSReduction",
-                                        "HFIRSANSReduction")
+                                        "SANSReduction")
     ReductionSingleton().reduction_properties["PreserveEvents"]=keep_events
     SolidAngle()
     AzimuthalAverage()
@@ -36,17 +52,10 @@ def TotalChargeNormalization(normalize_to_beam=True, beam_file=''):
     else:
         ReductionSingleton().reduction_properties["Normalisation"]="Charge"
 
-def MonitorNormalization(normalize_to_beam=True, beam_file=''):
-    ReductionSingleton().reduction_properties["Normalisation"]="Monitor"
-    ReductionSingleton().reduction_properties["MonitorReferenceFile"]=beam_file
-      
 def BeamMonitorNormalization(reference_flux_file):
-    find_data(reference_flux_file, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().get_data_loader().load_monitors(True)
-    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, None,
-                                        BeamSpectrumFile=reference_flux_file,
-                                        NormaliseToMonitor=True,
-                                        ReductionProperties=ReductionSingleton().get_reduction_table_name())
+    find_data(reference_flux_file, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["Normalisation"]="Monitor"
+    ReductionSingleton().reduction_properties["MonitorReferenceFile"]=reference_flux_file
     
 def PerformFlightPathCorrection(do_correction=True):
     ReductionSingleton().reduction_properties["CorrectForFlightPath"]=do_correction
@@ -75,40 +84,12 @@ def AzimuthalAverage(suffix="_Iq", n_bins=100, n_subpix=1, log_binning=False,
     ReductionSingleton().reduction_properties["IQNumberOfBins"]=n_bins
     ReductionSingleton().reduction_properties["IQLogBinning"]=log_binning
     ReductionSingleton().reduction_properties["IQScaleResults"]=scale
+    
+def CombineTransmissionFits(combine_frames=True):
+    ReductionSingleton().reduction_properties["FitFramesTogether"]=combine_frames
 
-def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True, combine_frames=True):
-    find_data(sample_file, instrument=ReductionSingleton().instrument.name())
-    find_data(empty_file, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_transmission(sns_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
-                                                                                     empty_file=empty_file,
-                                                                                     beam_radius=beam_radius,
-                                                                                     theta_dependent=theta_dependent,
-                                                                                     combine_frames=combine_frames,
-                                                                                     use_sample_dc=True))
-
-def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True, combine_frames=True):
-    if ReductionSingleton().get_background() is None:
-        raise RuntimeError, "A background hasn't been defined."
-    find_data(sample_file, instrument=ReductionSingleton().instrument.name())
-    find_data(empty_file, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().get_background().set_transmission(sns_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
-                                                                                                      empty_file=empty_file,
-                                                                                                      beam_radius=beam_radius,
-                                                                                                      theta_dependent=theta_dependent,
-                                                                                                      combine_frames=combine_frames,
-                                                                                                      use_sample_dc=True))
-        
-def CombineTransmissionFits(combine_frames):
-    if not isinstance(ReductionSingleton().get_transmission(), sns_reduction_steps.DirectBeamTransmission):
-        raise RuntimeError, "Trying to set transmission fitting option when the transmission calculation method hasn't been set correctly."
-    ReductionSingleton().get_transmission().set_combine_frames(combine_frames)
-
-def BckCombineTransmissionFits(combine_frames):
-    if ReductionSingleton().get_background() is None:
-        raise RuntimeError, "A background hasn't been defined."
-    if not isinstance(ReductionSingleton().get_background().get_transmission_calculator(), sns_reduction_steps.DirectBeamTransmission):
-        raise RuntimeError, "Trying to set transmission fitting option when the transmission calculation method hasn't been set correctly."
-    ReductionSingleton().get_background().get_transmission_calculator().set_combine_frames(combine_frames)
+def BckCombineTransmissionFits(combine_frames=True):
+    ReductionSingleton().reduction_properties["FitFramesTogether"]=combine_frames
     
 def Resolution(sample_aperture_diameter=10.0):
     ReductionSingleton().reduction_properties["ComputeResolution"]=True
