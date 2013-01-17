@@ -1,6 +1,7 @@
 #include "MantidQtSliceViewer/PeaksWorkspaceWidget.h"
 #include "MantidQtSliceViewer/QPeaksTableModel.h"
 #include <QColorDialog>
+#include <QPlastiqueStyle>
 
 namespace MantidQt
 {
@@ -29,6 +30,10 @@ namespace MantidQt
       connect(ui.btnRemove, SIGNAL(clicked()), this, SLOT(onRemoveWorkspaceClicked()));
       connect(ui.btnHide, SIGNAL(toggled(bool)), this, SLOT(onToggleHideInPlot(bool)));
       connect(ui.tblPeaks, SIGNAL(clicked(const QModelIndex&)), this, SLOT(onTableClicked(const QModelIndex&)));
+
+      // Override the styles for the colour buttons, because with some inherited styles, the button background colour will be hidden.
+      ui.btnBackgroundColor->setStyle(new QPlastiqueStyle);
+      ui.btnPeakColor->setStyle(new QPlastiqueStyle);
 
       // Populate controls with data.
       populate();
