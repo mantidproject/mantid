@@ -41,7 +41,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
 #include "MantidAPI/SpectraAxis.h"
-
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include <fstream>
 #include <sstream>
@@ -1519,6 +1519,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   //----------------- Pad Empty Pixels -------------------------------
   // Create the required spectra mapping so that the workspace knows what to pad to
+  deleteBanks(WS, bankNames);
   createSpectraMapping(m_filename, WS, monitors, onebank);
   WS->padSpectra();
 
@@ -1920,9 +1921,102 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
   }
   return out;
 }
+//-----------------------------------------------------------------------------
+/**
+ * Create the required spectra mapping. If the file contains an isis_vms_compat block then
+ * the mapping is read from there, otherwise a 1:1 map with the instrument is created (along
+ * with the associated spectra axis)
+ * @param workspace :: The workspace to contain the spectra mapping
+ * @param bankNames :: Bank names that are in Nexus file
+ */
+void LoadEventNexus::deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames)
+{
+	Instrument_sptr inst = boost::const_pointer_cast<Instrument>(workspace->getInstrument()->baseInstrument());
+	//Build a list of Rectangular Detectors
+	std::vector<boost::shared_ptr<RectangularDetector> > detList;
+	for (int i=0; i < inst->nelements(); i++)
+	{
+	  boost::shared_ptr<RectangularDetector> det;
+	  boost::shared_ptr<ICompAssembly> assem;
+	  boost::shared_ptr<ICompAssembly> assem2;
 
+	  det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
+	  if (det)
+	  {
+		detList.push_back(det);
+	  }
+	  else
+	  {
+		//Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
+		// We are not doing a full recursive search since that will be very long for lots of pixels.
+		assem = boost::dynamic_pointer_cast<ICompAssembly>( (*inst)[i] );
+		if (assem)
+		{
+		  for (int j=0; j < assem->nelements(); j++)
+		  {
+			det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
+			if (det)
+			{
+			  detList.push_back(det);
 
+			}
+			else
+			{
+			  //Also, look in the second sub-level for RectangularDetectors (e.g. PG3).
+			  // We are not doing a full recursive search since that will be very long for lots of pixels.
+			  assem2 = boost::dynamic_pointer_cast<ICompAssembly>( (*assem)[j] );
+			  if (assem2)
+			  {
+				for (int k=0; k < assem2->nelements(); k++)
+				{
+				  det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
+				  if (det)
+				  {
+					detList.push_back(det);
+				  }
+				}
+			  }
+			}
+		  }
+		}
+	  }
+	}
+    if (detList.size() == 0) return;
+	for (int i = 0; i<static_cast<int>(detList.size()); i++)
+	{
+		bool keep = false;
+	    boost::shared_ptr<RectangularDetector> det = detList[i];
+	    std::string det_name = det->getName();
+		for (int j = 0; j<static_cast<int>(bankNames.size()); j++)
+		{
+		    size_t pos = bankNames[j].find("_events");
+			if(det_name.compare(bankNames[j].substr(0,pos)) == 0) keep = true;
+			if(keep) break;
+		}
+		if (!keep)
+		{
+			boost::shared_ptr<const IComponent> parent = inst->getComponentByName(det_name);
+			std::vector<Geometry::IComponent_const_sptr> children;
+			boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+			asmb->getChildren(children, false);
+	        for (int col = 0; col<static_cast<int>(children.size()); col++)
+	        {
+				boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col]);
+				std::vector<Geometry::IComponent_const_sptr> grandchildren;
+				asmb2->getChildren(grandchildren,false);
 
+				for (int row = 0; row<static_cast<int>(grandchildren.size()); row++)
+				{
+					Detector* d = dynamic_cast<Detector*>(const_cast<IComponent*>(grandchildren[row].get()));
+					inst->removeDetector(d);
+				}
+	        }
+			IComponent* comp = dynamic_cast<IComponent*>(detList[i].get());
+			inst->remove(comp);
+		}
+	}
+      return;
+}
 //-----------------------------------------------------------------------------
 /**
  * Create the required spectra mapping. If the file contains an isis_vms_compat block then
