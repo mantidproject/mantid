@@ -74,6 +74,8 @@ public:
 protected slots:
   /// Add a slice to the current dataset.
   void onCutButtonClicked();
+  /// Check for a rebinning source being destroyed.
+  void onDestroyingSource(pqPipelineSource *src);
   /// Invoke the RebinnerCutter on the current dataset.
   void onRebinButtonClicked();
 

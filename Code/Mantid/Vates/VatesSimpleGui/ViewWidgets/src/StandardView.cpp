@@ -44,6 +44,11 @@ StandardView::StandardView(QWidget *parent) : ViewBase(parent)
   QObject::connect(this->ui.rebinButton, SIGNAL(clicked()), this,
                    SLOT(onRebinButtonClicked()));
 
+  // Check for rebinning source being deleted
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  QObject::connect(builder, SIGNAL(destroying(pqPipelineSource*)),
+                   this, SLOT(onDestroyingSource(pqPipelineSource*)));
+
   this->view = this->createRenderView(this->ui.renderFrame);
 }
 
@@ -124,6 +129,9 @@ void StandardView::onRebinButtonClicked()
     this->rebinCut = builder->createFilter("filters", "MDEWRebinningCutter",
                                            this->origSrc);
     this->ui.cutButton->setEnabled(false);
+    // Resulting MDHW can crash VSI when switching to SplatterPlot view,
+    // so disable that mode.
+    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
   }
 }
 
@@ -148,6 +156,20 @@ void StandardView::resetCamera()
 void StandardView::updateUI()
 {
   this->ui.cutButton->setEnabled(true);
+}
+
+/**
+ * This function checks a pipeline source that ParaView says is being
+ * deleted. If the source is a Mantid rebinning filter, the restriction
+ * on the SplatterPlot view should be lifted.
+ * @param src : The pipeline source being checked
+ */
+void StandardView::onDestroyingSource(pqPipelineSource *src)
+{
+  if (src->getSMName().contains("MantidRebinning"))
+  {
+    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, true);
+  }
 }
 
 } // SimpleGui
