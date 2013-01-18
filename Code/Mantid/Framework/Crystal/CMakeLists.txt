@@ -36,6 +36,7 @@ set ( SRC_FILES
 	src/SetUB.cpp
 	src/ShowPossibleCells.cpp
 	src/SortHKL.cpp
+	src/SortPeaksWorkspace.cpp
 	src/TOFExtinction.cpp
 	src/TransformHKL.cpp
 )
@@ -79,6 +80,7 @@ set ( INC_FILES
 	inc/MantidCrystal/SetUB.h
 	inc/MantidCrystal/ShowPossibleCells.h
 	inc/MantidCrystal/SortHKL.h
+	inc/MantidCrystal/SortPeaksWorkspace.h
 	inc/MantidCrystal/TOFExtinction.h
 	inc/MantidCrystal/TransformHKL.h
 )
@@ -119,6 +121,7 @@ set ( TEST_FILES
 	SetUBTest.h
 	ShowPossibleCellsTest.h
 	SortHKLTest.h
+	SortPeaksWorkspaceTest.h
 	TransformHKLTest.h
 )
 
