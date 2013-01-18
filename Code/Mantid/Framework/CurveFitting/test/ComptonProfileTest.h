@@ -46,15 +46,14 @@ public:
   }
 
 private:
+  struct FakeComptonProfile : ComptonProfile
+  {
+    std::string name() const { return "FakeComptonProfile"; }
+    void massProfile(std::vector<double> &, const double, const double) const {}
+  };
 
   Mantid::API::IFunction_sptr createFunction()
   {
-    struct FakeComptonProfile : ComptonProfile
-    {
-      std::string name() const { return "FakeComptonProfile"; }
-      void massProfile(std::vector<double> &, const double, const double) const {}
-    };
-
     auto profile = boost::make_shared<FakeComptonProfile>();
     profile->initialize();
     return profile;
