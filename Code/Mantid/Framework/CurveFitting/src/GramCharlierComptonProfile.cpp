@@ -136,6 +136,28 @@ namespace Mantid
       }
     }
 
+    namespace
+    {
+      ///@cond
+      // Cannot put these inside massProfile definition as you can't use local types as template
+      // arguments on some compilers
+
+      // massProfile needs to sort 1 vector but keep another in order. Use a struct of combined points
+      // and a custom comparator
+      struct Point
+      {
+        Point(double yvalue = 0.0, double qvalue = 0.0) : y(yvalue), q(qvalue) {}
+        double y;
+        double q;
+      };
+      struct InY
+      {
+        /// Sort by the y field
+        bool operator()(Point const &a, Point const &b) { return a.y < b.y; }
+      };
+      ///@endcond
+    }
+
     /**
      * Uses a Gram-Charlier series approximation for the mass and convolutes it with the Voigt
      * instrument resolution function
@@ -151,25 +173,12 @@ namespace Mantid
 
       // First compute product of gaussian momentum distribution with Hermite polynomials.
       // This is done over an interpolated range between ymin & ymax and y and hence q must be sorted
-      // Sort needs to sort y and put q in the right order based on the new order. Use a struct that will keep the y/q together
-      // and sort on y
-      struct Point
-      {
-        Point(double yvalue = 0.0, double qvalue = 0.0) : y(yvalue), q(qvalue) {}
-        double y;
-        double q;
-      };
       const size_t ncoarseY(yspace.size());
       std::vector<Point> points(ncoarseY);
       for(size_t i = 0; i < ncoarseY; ++i)
       {
         points[i] = Point(yspace[i], modq[i]);
       }
-      struct InY
-      {
-        /// Sort by the y field
-        bool operator()(Point const &a, Point const &b) { return a.y < b.y; }
-      };
       std::sort(points.begin(), points.end(), InY());
       // Separate back into vectors as GSL requires them separate
       std::vector<double> sortedy(ncoarseY), sortedq(ncoarseY);
