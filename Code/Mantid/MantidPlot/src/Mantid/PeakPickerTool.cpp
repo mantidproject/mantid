@@ -9,6 +9,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/Exception.h"
 
 #include "qwt_painter.h"
 #include <QPainter>
@@ -560,19 +561,37 @@ void PeakPickerTool::functionRemoved()
  */
 void PeakPickerTool::algorithmFinished(const QString& out)
 {
-  m_curveFitName = workspaceName()+"_"+QString("Workspace-Calc");
-  m_curveDifName = workspaceName()+"_"+QString("Workspace-Diff");
-
-  graph()->removeCurve(m_curveFitName);
-  graph()->removeCurve(m_curveDifName);
+  // Remove old curves first
+  removeFitCurves();
 
   // If style needs to be changed from default, signal pair second will be true and change to line.
-  new MantidMatrixCurve(m_curveFitName,out,graph(),1,false, false, Graph::Line);
+  auto * curve = new MantidMatrixCurve("",out,graph(),1,false, false, Graph::Line);
+  m_curveNames.append(curve->title().text());
   if (m_fitPropertyBrowser->plotDiff())
   {
-    new MantidMatrixCurve(m_curveDifName,out,graph(),2,false);
+    curve = new MantidMatrixCurve("",out,graph(),2,false);
+    m_curveNames.append(curve->title().text());
   }
-
+  if(m_fitPropertyBrowser->plotCompositeMembers())
+  {
+    using namespace Mantid::API;
+    try
+    {
+      auto wkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(out.toStdString());
+      const size_t nhist = wkspace->getNumberHistograms();
+      for(size_t i = 3; i < nhist; ++i) // first 3 are data,sum,diff
+      {
+        curve = new MantidMatrixCurve("",out,graph(),static_cast<int>(i),false);
+        m_curveNames.append(curve->title().text());
+      }
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError&)
+    {
+      const std::string error = "PeakPicker cannot find output workspace '" + out.toStdString() + "'";
+      m_mantidUI->logMessage(Poco::Message("", error, Poco::Message::PRIO_WARNING));
+    }
+  }
+  
   graph()->replot();
 }
 
@@ -1049,6 +1068,10 @@ void PeakPickerTool::modifiedGraph()
 
 void PeakPickerTool::removeFitCurves()
 {
-  graph()->removeCurve(m_curveFitName);
-  graph()->removeCurve(m_curveDifName);
+  QStringListIterator itr(m_curveNames);
+  while(itr.hasNext())
+  {
+    graph()->removeCurve(itr.next());
+  }
+  m_curveNames.clear();
 }

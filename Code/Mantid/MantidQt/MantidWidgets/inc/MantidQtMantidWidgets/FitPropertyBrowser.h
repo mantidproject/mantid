@@ -196,6 +196,8 @@ public:
 
   /// Returns true if the difference plot should be drawn
   bool plotDiff()const;
+  /// Returns true if a composite's member functions should be plotted also
+  bool plotCompositeMembers() const;
 
   /// Returns true if the fit should be done against binned (bunched) data.  	
   bool rawData()const;
@@ -353,6 +355,7 @@ protected:
   QtProperty *m_costFunction;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
+  QtProperty *m_plotCompositeMembers;
   QtProperty *m_rawData;
   QtProperty *m_xColumn;
   QtProperty *m_yColumn;

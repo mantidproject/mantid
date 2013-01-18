@@ -209,8 +209,7 @@ private:
   bool m_changingXMax; // Flag indicating that changing of xMax is in progress
   //std::string m_defaultPeakName; // The default peak function name
 
-  QString m_curveFitName; // Name of the fit result curve
-  QString m_curveDifName; // Name of the obs-calc difference curve
+  QStringList m_curveNames; // Names of all curves added to graph()
 };
 
 

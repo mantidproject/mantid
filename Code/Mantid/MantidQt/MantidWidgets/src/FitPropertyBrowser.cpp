@@ -219,6 +219,11 @@ void FitPropertyBrowser::init()
   m_plotDiff = m_boolManager->addProperty("Plot Difference");
   bool plotDiff = settings.value("Plot Difference",QVariant(true)).toBool();
   m_boolManager->setValue(m_plotDiff,plotDiff);
+  
+  m_plotCompositeMembers = m_boolManager->addProperty("Plot Composite Members");
+  bool plotCompositeItems = settings.value(m_plotCompositeMembers->propertyName(),
+                                           QVariant(false)).toBool();
+  m_boolManager->setValue(m_plotCompositeMembers, plotCompositeItems);
 
   m_xColumn = m_columnManager->addProperty("XColumn");
   m_yColumn = m_columnManager->addProperty("YColumn");
@@ -234,6 +239,7 @@ void FitPropertyBrowser::init()
   settingsGroup->addSubProperty(m_minimizer);
   settingsGroup->addSubProperty(m_costFunction);
   settingsGroup->addSubProperty(m_plotDiff);
+  settingsGroup->addSubProperty(m_plotCompositeMembers);
     
   /* Create editors and assign them to the managers */
   createEditors(w);
@@ -1121,12 +1127,11 @@ void FitPropertyBrowser::boolChanged(QtProperty* prop)
 {
   if ( ! m_changeSlotsEnabled ) return;
 
-  if ( prop == m_plotDiff )
+  if (prop == m_plotDiff || prop == m_plotCompositeMembers)
   {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
-    bool plotDiff = m_boolManager->value(m_plotDiff);
-    settings.setValue("Plot Difference",plotDiff);
+    settings.setValue(prop->propertyName(), m_boolManager->value(prop));
   }
   else
   {// it could be an attribute
@@ -1496,6 +1501,8 @@ void FitPropertyBrowser::doFit(int maxIterations)
     alg->setPropertyValue("Minimizer",minimizer(true));
     alg->setPropertyValue("CostFunction",costFunction());
     alg->setProperty( "MaxIterations", maxIterations );
+    // Always output each composite function but not necessarily plot it
+    alg->setProperty("OutputCompositeMembers", true);
     observeFinish(alg);
     alg->executeAsync();
 
@@ -2585,6 +2592,13 @@ bool FitPropertyBrowser::plotDiff()const
 {
   return m_boolManager->value(m_plotDiff);
 }
+
+/// @returns true if each function with a composite should also be plotted
+bool FitPropertyBrowser::plotCompositeMembers() const
+{
+  return m_boolManager->value(m_plotCompositeMembers);
+}
+
 
 bool FitPropertyBrowser::rawData()const  	
 {	  	
