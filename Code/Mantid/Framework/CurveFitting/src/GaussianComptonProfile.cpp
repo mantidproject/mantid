@@ -13,7 +13,7 @@ namespace Mantid
     const char * WIDTH_PARAM = "Width";
     const char * AMP_PARAM = "Intensity";
 
-    const double STDDEV_TO_HWHM = std::sqrt(std::log(4));
+    const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 
     /**
      */
