@@ -175,13 +175,15 @@ namespace Kernel
               fileIndexStart = obj->getFilePosition();
               obj->saveAt(fileIndexStart,NumAllEvents);
             }
+            else // remove object's data from memory
+              obj->clearDataFromMemory();
+
           }
         }
       } 
       else // object busy
       {
         // The object is busy, can't write. Save it for later
-        //couldNotWrite.insert( pairObj_t(obj->getFilePosition(), obj) );
         couldNotWrite.insert( obj );
         memoryNotWritten += obj->getMRUMemorySize();
       }
@@ -203,8 +205,7 @@ namespace Kernel
 
 
   //---------------------------------------------------------------------------------------------
-  /** Flush out all the data in the memory; and writes out everything in the to-write cache.
-   * Mostly used for debugging and unit tests */
+  /** Flush out all the data in the memory; and writes out everything in the to-write cache. */
   void DiskBuffer::flushCache()
   {
     m_mutex.lock();
@@ -225,6 +226,8 @@ namespace Kernel
   void DiskBuffer::freeBlock(uint64_t const pos, uint64_t const size)
   {
     if (size == 0) return;
+    // the object have never been saved to disk
+    if (pos  == std::numeric_limits<uint64_t>::max())return;
     m_freeMutex.lock();
 
     // Make the block

@@ -44,6 +44,7 @@ namespace Kernel
       m_fileIndexStart= newPos;
       m_fileNumEvents = newSize;
       this->save();
+      this->clearDataFromMemory();
       m_dataChanged = false;
   }
 

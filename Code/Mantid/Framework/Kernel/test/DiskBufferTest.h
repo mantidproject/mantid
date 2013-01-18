@@ -30,7 +30,7 @@ public:
   m_memory(1)
   {}
 
-  virtual void save() 
+  virtual void save()const 
   {
     // Fake writing to a file
     std::ostringstream out;
@@ -40,6 +40,7 @@ public:
     streamMutex.unlock();
   }
 
+  virtual void clearDataFromMemory(){m_memory = 0; }
   virtual void load() {}
   virtual void flushData() const {}
 
@@ -79,13 +80,15 @@ public:
     ISaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
   }
 
-  virtual void save() 
+  virtual void save()const
   {
     // Pretend to seek to the point and write
     uint64_t myFilePos = this->getFilePosition();
     std::cout << "Block " << getId() << " saving at " << myFilePos << std::endl;
     fakeSeekAndWrite(myFilePos);
   }
+  virtual void clearDataFromMemory(){ m_memory = 0; }
+
 
   void grow(DiskBuffer & dbuf, bool /*tellMRU*/)
   {
@@ -137,6 +140,7 @@ public:
   {
     this->setFilePosition(pos,size); 
   }
+  virtual void clearDataFromMemory(){/* m_memory = 0;  -- not yet implemented in this test */}
 
   uint64_t m_memory;
   virtual uint64_t getMRUMemorySize() const 
@@ -150,7 +154,7 @@ public:
 
 
   char m_ch;
-  virtual void save() 
+  virtual void save()const 
   {
     // Fake writing to a file
     streamMutex.lock();
@@ -436,16 +440,34 @@ public:
     TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 5);
 
     // First let's get rid of something in to to-write buffer
-//    dbuf.objectDeleted(data[1],1);
+
     dbuf.objectDeleted(data[1]);
     TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 4);
-    TSM_ASSERT_EQUALS( "Space on disk was marked as free", dbuf.getFreeSpaceMap().size(), 1);
+    TSM_ASSERT_EQUALS( "The data have never been written", dbuf.getFreeSpaceMap().size(), 0);
 
     dbuf.flushCache();
     // This triggers a write. 1 is no longer in the to-write buffer
     //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "4,3,2,0,");
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,2,3,4,");
     TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
+
+    // assume now we have loaded the data back;
+     size_t ic(0);
+     for (size_t i=0; i<5; i++)
+     {
+        if(i==1)continue;
+        data[i]->setFilePosition(ic,1);
+        data[i]->m_memory = 1;
+        data[i]->setDataChanged();
+        dbuf.toWrite(data[i]);
+        ic++;
+     }
+
+    dbuf.objectDeleted(data[2]);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 3);
+    TSM_ASSERT_EQUALS( "It is now free space mapping the data on hdd", dbuf.getFreeSpaceMap().size(), 1);
+    TSM_ASSERT_EQUALS(" and file is still the same size: ",dbuf.getFileLength(),4);
+
   }
 
 

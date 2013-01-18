@@ -232,8 +232,49 @@ namespace MDAlgorithms
       if (MakeFileBacked)
         bc->setFile(file, filename, 0);
     }
+//----------------------------------------------------------------------------------------------------------------
 
-    size_t maxBoxes = bc->getMaxId();
+    // flatten the box structure
+    std::vector<Kernel::ISaveable *> boxes;
+    ws->getBox()->getBoxes(boxes, 1000, false);
+    size_t maxBoxes = boxes.size();
+
+    Progress * prog = new Progress(this, 0.05, 0.9, maxBoxes);
+    if(update)
+    {
+      // use write buffer to update file and allocate/reallocate all data chunk to their rightfull positions
+      Kernel::DiskBuffer &db = bc->getDiskBuffer();
+      // if write buffer size is smaller then chunk size it is usually not very efficietn
+      if(db.getWriteBufferSize()<bc->getDataChunk())db.setWriteBufferSize(bc->getDataChunk());
+      for(size_t i=0;i<maxBoxes;i++)
+      {
+        MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
+        if(!mdBox)continue;
+        if(mdBox->getNPointsInMemory()>0)
+          db.toWrite(mdBox);
+      }
+      // clear all still remaining in the buffer. 
+      db.flushCache();
+
+    }
+    else  // this will preserve file-based workspace and information in it as we are not loading old box data and not?
+         // this would be right for binary axcess but questionable for Nexus --TODO: needs testing
+    {
+      Kernel::ISaveable::sortObjByFilePos(boxes);
+      // calculate the box positions in the resulting file and save it on place
+       uint64_t eventsStart=0;
+       for(size_t i=0;i<boxes.size();i++)
+       {
+          MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);        
+          if(!mdBox)continue;
+          size_t nEvents = mdBox->getNPoints();
+          mdBox->setFilePosition(eventsStart,nEvents);
+          eventsStart+=nEvents;
+       }
+
+    }
+
+//------------ Fill in plain box structure : TODO: Refactoring, extracting,
 
     // Prepare the vectors we will fill with data.
 
@@ -252,23 +293,17 @@ namespace MDAlgorithms
     // Start/end children IDs
     std::vector<int> box_children(maxBoxes*2, 0);
 
-    // The slab start for events, start at 0
-    uint64_t start = 0;
-    // Get a starting iterator
-    MDBoxIterator<MDE,nd> it(ws->getBox(), 1000, false);
 
-    Progress * prog = new Progress(this, 0.05, 0.9, maxBoxes);
-    MDBoxBase<MDE,nd> * box;
-    while (true)
+
+    MDBoxBase<MDE,nd> *Box;
+    for(size_t i=0;i<maxBoxes;i++)
     {
-      box = it.getBox();
-      size_t id = box->getId();
-      if (id < maxBoxes)
-      {
-        // The start/end children IDs
-        size_t numChildren = box->getNumChildren();
-        if (numChildren > 0)
-        {
+       Box = dynamic_cast<MDBoxBase<MDE,nd> *>(boxes[i]);
+      // currently ID is the number of the box, but it may change in a future. TODO: uint64_t
+       size_t id = Box->getId();
+       size_t numChildren = Box->getNumChildren();
+       if (numChildren > 0)
+       {
           //// Make sure that all children are ordered. TODO: This might not be needed if the IDs are rigorously done
           //size_t lastId = box->getChild(0)->getId();
           //for (size_t i = 1; i < numChildren; i++)
@@ -278,81 +313,42 @@ namespace MDAlgorithms
           //  lastId = box->getChild(i)->getId();
           //}
 
-          box_children[id*2] = int(box->getChild(0)->getId());
-          box_children[id*2+1] = int(box->getChild(numChildren-1)->getId());
+          box_children[id*2] = int(Box->getChild(0)->getId());
+          box_children[id*2+1] = int(Box->getChild(numChildren-1)->getId());
           box_type[id] = 2;
         }
         else
           box_type[id] = 1;
 
 
-        MDBox<MDE,nd> * mdbox = dynamic_cast<MDBox<MDE,nd> *>(box);
-        if (mdbox)
-        {
-          if (update)
-          {
-            // File-backed: update where on the file it is
-            // This will relocate and save the box if it has any events
-            mdbox->save();
-            mdbox->setOnDisk(true);
+
+       MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(Box);           
+       if(mdBox)
+       {
             // Save the index
-            //box_event_index[id*2] = mdbox->getFileIndexStart();
-            //box_event_index[id*2+1] = mdbox->getFileNumEvents();
-            box_event_index[id*2] = mdbox->getFilePosition();
-            box_event_index[id*2+1] = mdbox->getMRUMemorySize();
+            box_event_index[id*2]   = mdBox->getFilePosition();
+            box_event_index[id*2+1] = mdBox->getNPoints();
+            // save for the first time
+            if(!update)mdBox->saveNexus(file);
+            // Save, set that it is on disk and clear the actual events to free up memory
+            if (MakeFileBacked) mdBox->clearDataOnly();
 
-            
+       }
 
-          }
-          else
-          {
-            // Save for the first time
-            const std::vector<MDE> & events = mdbox->getConstEvents();
-            uint64_t numEvents = uint64_t(events.size());
-            if (numEvents > 0)
-            {
-              mdbox->setFileIndex(uint64_t(start), numEvents);
-              // Just save but don't clear the events or anything
-              mdbox->saveNexus(file);
-              if (MakeFileBacked)
-              {
-                // Save, set that it is on disk and clear the actual events to free up memory
-                mdbox->clearDataOnly();
-                mdbox->setOnDisk(true);
-              }
-              // Save the index
-              box_event_index[id*2] = start;
-              box_event_index[id*2+1] = numEvents;
-              // Move forward in the file.
-              start += numEvents;
-            }
-            // Like releaseEvents(), but without saving to disk.
-            mdbox->setDataBusy(false);
-          }
-        }
-
-        // Various bits of data about the box
-        depth[id] = int(box->getDepth());
-        box_signal_errorsquared[id*2] = double(box->getSignal());
-        box_signal_errorsquared[id*2+1] = double(box->getErrorSquared());
-        inverse_volume[id] = box->getInverseVolume();
+     // Various bits of data about the box
+        depth[id] = int(Box->getDepth());
+        box_signal_errorsquared[id*2] = double(Box->getSignal());
+        box_signal_errorsquared[id*2+1] = double(Box->getErrorSquared());
+        inverse_volume[id] = Box->getInverseVolume();
         for (size_t d=0; d<nd; d++)
         {
           size_t newIndex = id*(nd*2) + d*2;
-          extents[newIndex]   = box->getExtents(d).getMin();
-          extents[newIndex+1] = box->getExtents(d).getMax();
+          extents[newIndex]   = Box->getExtents(d).getMin();
+          extents[newIndex+1] = Box->getExtents(d).getMax();
+
         }
 
-        // Move on to the next box
         prog->report("Saving Box");
-        if (!it.next()) break;
-      }
-      else
-      {
-        // Some sort of problem
-        g_log.warning() << "Unexpected box ID found (" << id << ") which is > than maxBoxes (" << maxBoxes << ")" << std::endl;
-        break;
-      }
     }
 
     // Done writing the event data.

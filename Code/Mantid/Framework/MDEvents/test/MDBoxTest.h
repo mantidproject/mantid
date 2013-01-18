@@ -612,7 +612,7 @@ public:
     TS_ASSERT_EQUALS( c.getNPoints(), 1000);
     // still on disk
     TS_ASSERT_EQUALS( c.getFileSize(), 1000);
-    TS_ASSERT_EQUALS( c.getEventVectorSize(), 0);
+    TS_ASSERT_EQUALS( c.getNPointsInMemory(), 0);
     const std::vector<MDLeanEvent<3> > & events = c.getEvents();
     TSM_ASSERT("Got events so data should be busy unill events are released ",c.isBusy());
 
@@ -954,7 +954,7 @@ public:
     TSM_ASSERT("Data is not flagged as modified because it was written out to disk.", !c.isDataChanged());
     TSM_ASSERT_EQUALS("Now there is nothing in memory", c.getMRUMemorySize(), 0);
     TSM_ASSERT_EQUALS("Now there is 1001 event in file", c.getFileSize(), 1001);
-    TSM_ASSERT_EQUALS("And noting in memory", c.getEventVectorSize(), 0);
+    TSM_ASSERT_EQUALS("And noting in memory", c.getNPointsInMemory(), 0);
     TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
     TSM_ASSERT("And the data is on disk.", c.wasSaved());
@@ -963,6 +963,7 @@ public:
 
     TSM_ASSERT_EQUALS("The size of the file's field matches the last available point", file->getInfo().dims[0], 3001);
 
+    {
     // Now getEvents in a const way then call addEvent()
     const std::vector<MDLeanEvent<3> > & events2 = c.getConstEvents();
     TSM_ASSERT("Data is not flagged as modified because it was accessed as const", !c.isDataChanged());
@@ -981,7 +982,9 @@ public:
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
     TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1002);
     TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1002.4, 1e-3);
+    }
 
+    {
     // Now getEvents in a non-const way then call addEvent()
     std::vector<MDLeanEvent<3> > & events3 = c.getEvents();
     (void) events3;
@@ -997,8 +1000,9 @@ public:
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
     TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1003);
     TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1003.6, 1e-3);
+    }
 
-
+    {
     // changes have been saved
     std::vector<MDLeanEvent<3> > & events4 = c.getEvents();
     TSM_ASSERT("Data  flagged as modified", c.isDataChanged());
@@ -1011,8 +1015,43 @@ public:
     TSM_ASSERT_EQUALS("1003 events on the file", c.getFileSize(), 1003);
     TSM_ASSERT_EQUALS("The file have not changed ", c.getFilePosition(), 2000);
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
-    std::vector<MDLeanEvent<3> > & events5 = c.getEvents();
-    TSM_ASSERT_DELTA("The changes have been lost ",events5[234].getSignal(),234.,1.e-6);
+    const std::vector<MDLeanEvent<3> > & events5 = c.getConstEvents();
+    TSM_ASSERT_DELTA("The changes have been stored ",events5[234].getSignal(),234.,1.e-6);
+    }
+
+ // changes have been lost
+    {
+    const std::vector<MDLeanEvent<3> > & events6 = c.getConstEvents();
+    TSM_ASSERT("Data  flagged as unmodifiable ", !c.isDataChanged());
+    TSM_ASSERT_DELTA("This was on file",events6[234].getSignal(),234.,1.e-6);
+    // now do nasty thing and modify the signal
+    std::vector<MDLeanEvent<3> > & events6m = const_cast<std::vector<MDLeanEvent<3> > &>(events6);
+    events6m[234].setSignal(0.);
+    c.releaseEvents();
+    dbuf.flushCache();
+    // changes lost; checks that constEvents are not saved back on HDD 
+    const std::vector<MDLeanEvent<3> > & events7 = c.getConstEvents();
+    TSM_ASSERT("Data  flagged as unmodifiable ", !c.isDataChanged());
+    TSM_ASSERT_DELTA("This was on file",events7[234].getSignal(),234.,1.e-6);
+    }
+    // changes forced: save of data to HDD is controlled by isDataChanged parameter
+    {
+    const std::vector<MDLeanEvent<3> > & events6 = c.getConstEvents();
+    TSM_ASSERT("Data  flagged as unmodifiable ", !c.isDataChanged());
+    c.setDataChanged();
+    TSM_ASSERT("Data  flagged as modifiable ", c.isDataChanged());
+    TSM_ASSERT_DELTA("This was on file",events6[234].getSignal(),234.,1.e-6);
+    // now do nasty thing and modify the signal
+    std::vector<MDLeanEvent<3> > & events6m = const_cast<std::vector<MDLeanEvent<3> > &>(events6);
+    events6m[234].setSignal(0.);
+
+    c.releaseEvents();
+    dbuf.flushCache();
+    // changes now saved 
+    const std::vector<MDLeanEvent<3> > & events7 = c.getConstEvents();
+    TSM_ASSERT("Data  flagged as unmodifiable ", !c.isDataChanged());
+    TSM_ASSERT_DELTA("This was on file",events7[234].getSignal(),0.,1.e-6);
+    }
 
 
     file->close();

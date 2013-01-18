@@ -52,8 +52,8 @@ namespace MDEvents
 
     // ----------------------------- ISaveable Methods ------------------------------------------------------
 
-    /// Save the data and free it up from the memory ( it changes the object)
-    virtual void save();
+    /// Save the data to the place, specified by the object
+    virtual void save()const;
 
     /// Load the data - unused
     virtual void load()
@@ -62,13 +62,13 @@ namespace MDEvents
    
     /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getMRUMemorySize() const
-            { return uint64_t(getEventVectorSize()); }
+            { return uint64_t(getNPointsInMemory()); }
 
     //-----------------------------------------------------------------------------------------------
 
     void clear();
-
-    void clearDataOnly()const;
+    /** Remove box data from memory */
+    void clearDataFromMemory();
 
     uint64_t getNPoints() const;
 
@@ -95,7 +95,7 @@ namespace MDEvents
 
  
     /// @return the size of the event vector. FOR DEBUGGING! Note that this is NOT necessarily the same as the number of points (because it might be cached to disk) or the size on disk (because you might have called AddEvents)
-    size_t getEventVectorSize() const
+    size_t getNPointsInMemory() const
     { return data.size(); }
 
     /// @return true if events were added to the box (using addEvent()) while the rest of the event list is cached to disk
@@ -118,6 +118,7 @@ namespace MDEvents
 
 
     void releaseEvents() ;
+
 
 
     std::vector< MDE > * getEventsCopy();

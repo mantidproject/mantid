@@ -37,7 +37,7 @@ namespace MDEvents
     /// Return a pointer to the current box pointed to by the iterator.
     MDBoxBase<MDE,nd> * getBox() const
     {
-      return m_current;
+      return (m_current);
     }
 
     /// ------------ IMDIterator Methods ------------------------------
@@ -102,10 +102,10 @@ namespace MDEvents
     size_t m_max;
 
     /// Vector of all the boxes that will be iterated.
-    std::vector<MDBoxBase<MDE,nd> *> m_boxes;
+    std::vector<Kernel::ISaveable *> m_boxes;
 
     /// Box currently pointed to
-    MDBoxBase<MDE,nd> * m_current;
+    MDBoxBase<MDE,nd>* m_current;
 
     /// MDBox currently pointed to
     mutable MDBox<MDE,nd> * m_currentMDBox;

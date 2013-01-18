@@ -78,7 +78,7 @@ namespace MDEvents
     m_max = m_boxes.size();
     // Get the first box
     if (m_max > 0)
-      m_current = m_boxes[0];
+      m_current = dynamic_cast<MDBoxBase<MDE,nd>*>(m_boxes[0]);
   }
 
 
@@ -120,7 +120,7 @@ namespace MDEvents
     m_max = m_boxes.size();
     // Get the first box
     if (m_max > 0)
-      m_current = m_boxes[0];
+      m_current = dynamic_cast<MDBoxBase<MDE,nd>*>(m_boxes[0]);
   }
 
     
@@ -144,7 +144,7 @@ namespace MDEvents
     m_pos = index;
     if (m_pos < m_max)
     {
-      m_current = m_boxes[m_pos];
+      m_current = dynamic_cast<MDBoxBase<MDE,nd>* >(m_boxes[m_pos]);
     }
   }
 
@@ -186,7 +186,7 @@ namespace MDEvents
     if (m_pos < m_max)
     {
       // Move up.
-      m_current = m_boxes[m_pos];
+      m_current = dynamic_cast<MDBoxBase<MDE,nd>*>(m_boxes[m_pos]);
       return true;
     }
     else

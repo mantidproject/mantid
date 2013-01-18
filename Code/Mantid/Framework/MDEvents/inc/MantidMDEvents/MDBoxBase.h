@@ -71,7 +71,7 @@ namespace MDEvents
     // ----------------------------- ISaveable Methods ------------------------------------------------------
 
     /// Save the data - to be overriden
-    virtual void save() 
+    virtual void save() const
     {
       std::cerr << "ID " << getId() << std::endl;
       throw std::runtime_error("MDBoxBase::save() called and should have been overridden.");
@@ -97,7 +97,9 @@ namespace MDEvents
     virtual uint64_t getMRUMemorySize() const
     { return 0; }
 
-
+    virtual void clearDataFromMemory()
+    {// no data so no operations
+    }
 
 
     // -------------------------------- Parents/Children-Related -------------------------------------------

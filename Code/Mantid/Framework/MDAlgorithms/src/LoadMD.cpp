@@ -517,37 +517,28 @@ namespace Mantid
               if(BoxStructureOnly)
               {
                 box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,-1);
-               // Only the box structure is being loaded
-                box->setOnDisk(false);
-                box->setInMemory(true);
-                box->setFileIndex(0,0);
+               // Only the box structure is being loaded, so ISavable will be undefined (NeverSaved, 0 size data)
               }
               else // !BoxStructureOnly)
               {
                 //----> Load the events now
                 // specify initial and final file location of the events which belong to this box 
                 uint64_t indexStart = box_event_index[i*2];
-                uint64_t numEvents = box_event_index[i*2+1];
+                uint64_t numEvents  = box_event_index[i*2+1];
 
                 if(FileBackEnd)
                 {
                   box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,-1);
                   // Set the index in the file in the box data
-                  box->setFileIndex(indexStart, numEvents);
-                  // Box is on disk and NOT in memory
-                  box->setOnDisk(true);
-                  box->setInMemory(false);
-
+                  box->setFilePosition(indexStart, numEvents);
                 }
                 else
                 {
                   box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,int64_t(numEvents));
                   // Set the index in the file in the box data
-                  box->setFileIndex(indexStart, numEvents);
+                  box->setFilePosition(indexStart, numEvents);
                   // Load if NOT using the file as the back-end,
                   box->loadNexus(file);
-                  box->setOnDisk(false);
-                  box->setInMemory(true);
                 }           
               } // ifBoxStructureOnly
               ibox = box;
@@ -597,7 +588,7 @@ namespace Mantid
           if (boxType[i] == 2)
           {
             size_t indexStart = box_children[i*2];
-            size_t indexEnd = box_children[i*2+1] + 1;
+            size_t indexEnd   = box_children[i*2+1] + 1;
             boxes[i]->setChildren( boxes, indexStart, indexEnd);
           }
         }

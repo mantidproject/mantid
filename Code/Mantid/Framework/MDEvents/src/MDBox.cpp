@@ -104,12 +104,8 @@ namespace MDEvents
     // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
-    //m_fileNumEvents = 0;
-    data.clear();
-    vec_t().swap(data); // Linux trick to really free the memory
- 
-    m_isLoaded=false;
-    this->setBusy(false);
+
+    this->clearDataFromMemory();
 
   }
 
@@ -117,15 +113,13 @@ namespace MDEvents
   /** Clear the data[] vector ONLY but does not change the file-backed settings.
    * Used to free up the memory in a file-backed workspace without removing the events from disk. */
   TMDE(
-  void MDBox)::clearDataOnly()const
+  void MDBox)::clearDataFromMemory()
   {
     data.clear();
     vec_t().swap(data); // Linux trick to really free the memory
-    m_isLoaded=false;
-
-    //m_inMemory = false;
-    //m_dataAdded = false;
-    //m_dataModified = false;
+    m_isLoaded=false; 
+    this->setBusy(false);
+    this->resetDataChanges();
 
   }
 
@@ -258,7 +252,10 @@ namespace MDEvents
     {
       // If no write buffer is used, save it immediately if needed.
       if (!this->m_BoxController->useWriteBuffer())
+      {
         this->save();
+        this->clearDataFromMemory();
+      }
     }
   }
 
@@ -269,7 +266,7 @@ namespace MDEvents
    *  If called directly presumes to know its file location
    */
   TMDE(
-  void MDBox)::save()
+  void MDBox)::save()const
   {
   //      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
 
@@ -288,17 +285,8 @@ namespace MDEvents
                                      this->m_signal, this->m_errorSquared);
    }
     
-    ////TODO::::!!!!!
-    //if(removeFromMemory)
-   {
-      // Free up memory by clearing the events
-      data.clear();
-      vec_t().swap(data); // Linux trick to really free the memory
-      // Data is no longer in memory
-      m_isLoaded = false;
-      this->setBusy(false); // was it busy or not, does not matter now. 
    
-   }
+   
   }
 
 
@@ -327,7 +315,7 @@ namespace MDEvents
   {
     this->data.clear();
     uint64_t fileIndexStart = this->getFilePosition();
-    uint64_t fileNumEvents  = this->getMRUMemorySize();
+    uint64_t fileNumEvents  = this->getFileSize();
     MDE::loadVectorFromNexusSlab(this->data, file, fileIndexStart, fileNumEvents);
   }
 

@@ -57,13 +57,15 @@ namespace Kernel
     //-----------------------------------------------------------------------------------------------
 
     /// Save the data - to be overriden
-    virtual void save() = 0;
+    virtual void save()const = 0;
 
     /// Load the data - to be overriden
     virtual void load() = 0;
 
     /// Method to flush the data to disk and ensure it is written.
     virtual void flushData() const = 0;
+    /// remove objects data from memory
+    virtual void clearDataFromMemory() = 0;
 
   /** @return the amount of memory that the object takes up in MEMORY.
      * This should be in the same units as getFilePosition(), e.g. the object will use a block
@@ -80,11 +82,16 @@ namespace Kernel
 
     bool isDataChanged()const{return m_dataChanged;}
 
-    /** Call this method to from the method which changes the object but keep the object size the same to tell DiskBuffer to write it back
+    /** Call this method from the method which changes the object but keeps the object size the same to tell DiskBuffer to write it back
         the dataChanged ID is reset after save from the DataBuffer    */
     void setDataChanged()
     { 
       if(this->wasSaved())m_dataChanged=true;
+    }
+    /// this method has to be called if the object has been discarded from memory manually but need to remain on HDD. BAD desighn
+    void resetDataChanges()
+    {
+      m_dataChanged=false;
     }
 
     /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
@@ -94,7 +101,9 @@ namespace Kernel
     uint64_t getFileSize()const
     { return   m_fileNumEvents;}
 
-    /** Sets the location of the object on HDD*/ 
+    /** Sets the location of the object on HDD 
+        The method has side effects as wasSaved reports true after this function was used so one better save data immidiately after using this function
+    */ 
     void setFilePosition(uint64_t newPos,uint64_t newSize);   
 
     /** function returns true if the object have ever been saved on HDD and knows it place there*/
