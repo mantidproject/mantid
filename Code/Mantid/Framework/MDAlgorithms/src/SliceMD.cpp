@@ -249,11 +249,12 @@ namespace MDAlgorithms
       // Perform the binning in this separate method.
       if (box)
       {
-        bool clearBox = box->getOnDisk();
         // An array to hold the rotated/transformed coordinates
         coord_t outCenter[ond];
 
         const std::vector<MDE> & events = box->getConstEvents();
+        bool clearBox = box->wasSaved();
+
         typename std::vector<MDE>::const_iterator it = events.begin();
         typename std::vector<MDE>::const_iterator it_end = events.end();
         for (; it != it_end; it++)

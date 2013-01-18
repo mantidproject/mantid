@@ -46,6 +46,8 @@ public:
 
   uint64_t m_memory;
   virtual uint64_t getMRUMemorySize() const { return m_memory; };
+  virtual size_t getDataMemorySize() const  {  return size_t(m_memory);  }
+
 
   // File position = same as its ID
   //virtual uint64_t getFilePosition() const { return uint64_t(10-getId()); }
@@ -66,8 +68,10 @@ Kernel::Mutex ISaveableTester::streamMutex;
 /** An ISaveable that will fake seeking to disk */
 class ISaveableTesterWithSeek : public ISaveableTester
 {
+  bool is_loaded;
 public:
-  ISaveableTesterWithSeek(size_t id) : ISaveableTester(id)
+  ISaveableTesterWithSeek(size_t id) : ISaveableTester(id),
+    is_loaded(false)
   {
     this->setFilePosition(10+id,this->m_memory);
   }
@@ -78,6 +82,7 @@ public:
     uint64_t myFilePos = this->getFilePosition();
     std::cout << "Block " << getId() << " loading at " << myFilePos << std::endl;
     ISaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
+    is_loaded=true;
   }
 
   virtual void save()const
@@ -87,7 +92,11 @@ public:
     std::cout << "Block " << getId() << " saving at " << myFilePos << std::endl;
     fakeSeekAndWrite(myFilePos);
   }
-  virtual void clearDataFromMemory(){ m_memory = 0; }
+  virtual void clearDataFromMemory()
+  { 
+    m_memory = 0; 
+    is_loaded=false;
+  }
 
 
   void grow(DiskBuffer & dbuf, bool /*tellMRU*/)
@@ -134,19 +143,26 @@ uint64_t ISaveableTesterWithSeek::filePos;
 /** An ISaveable that fakes writing to a fixed-size file */
 class ISaveableTesterWithFile : public ISaveable
 {
+  bool is_loaded;
 public:
   ISaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch) : ISaveable(id),
-  m_ch(ch), m_memory(size)
+  is_loaded(false),m_ch(ch), m_memory(size)
   {
     this->setFilePosition(pos,size); 
   }
-  virtual void clearDataFromMemory(){/* m_memory = 0;  -- not yet implemented in this test */}
+  virtual void clearDataFromMemory()
+  {
+    is_loaded=false; 
+    /* m_memory = 0;  -- not yet implemented in this test */
+  }
 
   uint64_t m_memory;
   virtual uint64_t getMRUMemorySize() const 
   {
        return m_memory;
   };
+  virtual size_t getDataMemorySize() const  {  return size_t(m_memory);  }
+
   void changeMemSize(uint64_t newSize)
   {
     m_memory = newSize;
@@ -168,7 +184,7 @@ public:
     streamMutex.unlock();
   }
 
-  virtual void load() {}
+  virtual void load() {is_loaded=true;}
   virtual void flushData() const {}
 
    

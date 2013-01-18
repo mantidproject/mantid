@@ -96,6 +96,8 @@ namespace MDEvents
     /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getMRUMemorySize() const
     { return 0; }
+    virtual size_t getDataMemorySize()const
+    {return 0;}
 
     virtual void clearDataFromMemory()
     {// no data so no operations

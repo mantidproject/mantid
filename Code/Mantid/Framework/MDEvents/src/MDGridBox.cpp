@@ -879,7 +879,7 @@ namespace MDEvents
         else
         {
           // This box does NOT have enough events to be worth splitting, if it do have at least something in memory then,
-          if (this->m_BoxController->isFileBacked()&&(box->getNPointsInMemory()>0))
+          if (this->m_BoxController->isFileBacked()&&(box->getDataMemorySize()>0))
           {        
               //Mark the box as "to-write" in DiskBuffer. If the buffer is full, the box will be dropped on disk
               this->m_BoxController->getDiskBuffer().toWrite(box);

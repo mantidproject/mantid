@@ -245,12 +245,12 @@ namespace MDAlgorithms
       // use write buffer to update file and allocate/reallocate all data chunk to their rightfull positions
       Kernel::DiskBuffer &db = bc->getDiskBuffer();
       // if write buffer size is smaller then chunk size it is usually not very efficietn
-      if(db.getWriteBufferSize()<bc->getDataChunk())db.setWriteBufferSize(bc->getDataChunk());
+      if(db.getWriteBufferSize()<chunkSize)db.setWriteBufferSize(chunkSize);
       for(size_t i=0;i<maxBoxes;i++)
       {
         MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
         if(!mdBox)continue;
-        if(mdBox->getNPointsInMemory()>0)
+        if(mdBox->getDataMemorySize()>0)
           db.toWrite(mdBox);
       }
       // clear all still remaining in the buffer. 
@@ -331,7 +331,7 @@ namespace MDAlgorithms
             // save for the first time
             if(!update)mdBox->saveNexus(file);
             // Save, set that it is on disk and clear the actual events to free up memory
-            if (MakeFileBacked) mdBox->clearDataOnly();
+            if (MakeFileBacked) mdBox->clearDataFromMemory();
 
        }
 

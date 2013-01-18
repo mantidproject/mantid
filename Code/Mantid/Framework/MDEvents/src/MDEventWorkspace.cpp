@@ -450,7 +450,7 @@ namespace MDEvents
       ws->cell<int>(i, col++) = int(box->getFilePosition());
       MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
       ws->cell<int>(i, col++) = mdbox ? int(mdbox->getFileSize()) : 0;
-      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getNPointsInMemory()) : -1;
+      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getDataMemorySize()) : -1;
       if (mdbox)
       {
         ws->cell<std::string>(i, col++) = (mdbox->wasSaved() ? "yes":"no");

@@ -72,6 +72,8 @@ namespace Kernel
      * from getFilePosition() to getFilePosition()+getMRUMemorySize()-1 in the file.
      */
     virtual uint64_t getMRUMemorySize() const=0;
+    /// the data size allocated in memory
+    virtual size_t getDataMemorySize()const=0;
 
 
     /// @return true if it the data of the object is busy and so cannot be cleared; false if the data was released and can be cleared/written.

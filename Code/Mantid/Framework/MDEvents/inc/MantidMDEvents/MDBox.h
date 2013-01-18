@@ -55,15 +55,20 @@ namespace MDEvents
     /// Save the data to the place, specified by the object
     virtual void save()const;
 
-    /// Load the data - unused
+    /// Load the data which are not in memory yet and merge them with the data in memory;
     virtual void load()
-    { }
+    {
+      this->loadEvents();
+    };
+
 
    
     /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getMRUMemorySize() const
-            { return uint64_t(getNPointsInMemory()); }
-
+            { return getNPoints(); }
+  /// @return the size of the event vector. ! Note that this is NOT necessarily the same as the number of points (because it might be cached to disk) or the size on disk (because you might have called AddEvents)
+    virtual size_t getDataMemorySize()const
+            {  return data.size();}
     //-----------------------------------------------------------------------------------------------
 
     void clear();
@@ -89,15 +94,11 @@ namespace MDEvents
     { throw std::runtime_error("MDBox cannot have children."); }
 
 
-    /// @return whether the box data (from disk) is loaded in memory (for debugging purposes).
+    /// @return whether the box data (from disk) is loaded in memory.
     bool getInMemory() const
     { return m_isLoaded; }
 
- 
-    /// @return the size of the event vector. FOR DEBUGGING! Note that this is NOT necessarily the same as the number of points (because it might be cached to disk) or the size on disk (because you might have called AddEvents)
-    size_t getNPointsInMemory() const
-    { return data.size(); }
-
+   
     /// @return true if events were added to the box (using addEvent()) while the rest of the event list is cached to disk
     bool getHasAddedEventsOnCached() const
     { return (!m_isLoaded && (data.size() != 0)); }

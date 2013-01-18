@@ -75,7 +75,7 @@ namespace Kernel
     if (result.second)
     {
       // Track the memory change
-      m_writeBufferUsed += item->getMRUMemorySize();
+      m_writeBufferUsed += item->getDataMemorySize();
 
       // Should we now write out the old data?
       if (m_writeBufferUsed >= m_writeBufferSize)
@@ -97,7 +97,7 @@ namespace Kernel
   {
     // const uint64_t sizeOnFile 
     size_t id = item->getId();
-    uint64_t size = item->getMRUMemorySize();
+    uint64_t size = item->getDataMemorySize();
 
     m_mutex.lock();
 
@@ -175,17 +175,17 @@ namespace Kernel
               fileIndexStart = obj->getFilePosition();
               obj->saveAt(fileIndexStart,NumAllEvents);
             }
-            else // remove object's data from memory
+            else // just clean the object up -- it just occupies memory
               obj->clearDataFromMemory();
-
           }
         }
       } 
       else // object busy
       {
         // The object is busy, can't write. Save it for later
+        //couldNotWrite.insert( pairObj_t(obj->getFilePosition(), obj) );
         couldNotWrite.insert( obj );
-        memoryNotWritten += obj->getMRUMemorySize();
+        memoryNotWritten += obj->getDataMemorySize();
       }
     }
 
@@ -226,8 +226,6 @@ namespace Kernel
   void DiskBuffer::freeBlock(uint64_t const pos, uint64_t const size)
   {
     if (size == 0) return;
-    // the object have never been saved to disk
-    if (pos  == std::numeric_limits<uint64_t>::max())return;
     m_freeMutex.lock();
 
     // Make the block

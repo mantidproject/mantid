@@ -151,7 +151,7 @@ public:
 
     TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
     // Clean up file
-	ws->getBoxController()->closeFile(true);
+  ws->getBoxController()->closeFile(true);
     //std::string fullPath = alg.getPropertyValue("Filename");
     //if (Poco::File(fullPath).exists()) Poco::File(fullPath).remove();
   }
