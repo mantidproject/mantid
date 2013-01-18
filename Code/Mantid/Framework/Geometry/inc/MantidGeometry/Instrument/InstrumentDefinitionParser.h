@@ -129,6 +129,9 @@ namespace Geometry
     /// Add XML element to parent assuming the element contains no other component elements
     void appendLeaf(Geometry::ICompAssembly* parent, const Poco::XML::Element* pLocElem, const Poco::XML::Element* pCompElem, IdList& idList);
 
+    /// Append \<locations\> in a locations element
+    void appendLocations(Geometry::ICompAssembly* parent, const Poco::XML::Element*pLocElems, const Poco::XML::Element* pCompElem, IdList& idList);
+
     /// Set parameter/logfile info (if any) associated with component
     void setLogfile(const Geometry::IComponent* comp, const Poco::XML::Element* pElem,
                               std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache);

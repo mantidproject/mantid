@@ -347,6 +347,17 @@ public:
     TS_ASSERT( !source->isValid(V3D(0.0,0.0,-0.005)+source->getPos()) );
     TS_ASSERT( !source->isValid(V3D(0.0,0.0,0.02)+source->getPos()) );
 
+    // test <locations>
+    boost::shared_ptr<const IDetector> ptrDet100 = i->getDetector(100);
+    TS_ASSERT_DELTA( ptrDet100->getPos().Z(), 0.0, 1e-8 );
+    boost::shared_ptr<const IDetector> ptrDet109 = i->getDetector(109);
+    TS_ASSERT_DELTA( ptrDet109->getPos().Z(), 1.0, 1e-8 );
+
+    boost::shared_ptr<const IDetector> ptrDet200 = i->getDetector(200);
+    TS_ASSERT_DELTA( ptrDet200->getPos().Y(), 0.0, 1e-8 );
+    boost::shared_ptr<const IDetector> ptrDet209 = i->getDetector(209);
+    TS_ASSERT_DELTA( ptrDet209->getPos().Y(), 1.0, 1e-8 );
+
     // Check absence of distinct physical instrument
     TS_ASSERT( !i->getPhysicalInstrument() );
   }

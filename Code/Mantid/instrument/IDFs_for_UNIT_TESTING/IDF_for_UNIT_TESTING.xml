@@ -79,6 +79,21 @@
   <location x="0.0" y="0.0" z="0.0"> <facing val="none"/> </location>
 </component>
 
+<component type="cylinder-right" idlist="tests locations tag">
+  <locations x="0.0" y="0.0" z="0.0" z-end="1.0" n-elements="10" rot="90"/> 
+</component>
+
+<component type="locations nested test" idlist="tests locations tag 2">
+  <location /> 
+</component>
+
+<type name="locations nested test">
+  <component type="cylinder-right">
+    <locations x="0.0" y="0.0" z="0.0" y-end="1.0" n-elements="10"/>
+  </component>
+</type>
+
+
   <!-- source and sample-position components -->
 
   <component type="undulator">
@@ -324,5 +339,11 @@
     <id start="15" end="17" />
   </idlist>   
   
+  <idlist idname="tests locations tag">
+    <id start="100" end="109" />
+  </idlist>  
   
+  <idlist idname="tests locations tag 2">
+    <id start="200" end="209" />
+  </idlist>  
 </instrument>

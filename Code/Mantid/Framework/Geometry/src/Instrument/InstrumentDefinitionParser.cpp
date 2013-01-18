@@ -337,10 +337,6 @@ namespace Geometry
       {
         const Element* pElem = static_cast<Element*>(pNL_comp->item(i));
 
-        if( !pElem->hasAttribute("idlist") ) {
-          int a = 1;
-        }
-
         IdList idList; // structure to possibly be populated with detector IDs
 
         // Get all <location> and <locations> elements contained in component element
@@ -375,10 +371,8 @@ namespace Geometry
             // if a <location> element
             if ( ((pNL_childs->item(iLoc))->nodeName()).compare("location") == 0 )
             {
-              Element* pLocElem = static_cast<Element*>(pNL_childs->item(iLoc));
+              const Element* pLocElem = static_cast<Element*>(pNL_childs->item(iLoc));
               // process differently depending on whether component is and assembly or leaf
-              // (Note this if/else could alternative, if this makes more sense later, be moved 
-              // outside the pNL_childs loop since the if/else works on pElem not on the individual childs)
               if ( isAssembly(pElem->getAttribute("type")) )
               {
                 appendAssembly(m_instrument.get(), pLocElem, pElem, idList);
@@ -387,18 +381,15 @@ namespace Geometry
               {
                 appendLeaf(m_instrument.get(), pLocElem, pElem, idList);
               }
-
-              if( !pElem->hasAttribute("idlist") ) {
-                int a = 1;
-              }
-
             }
 
             // if a <locations> element
             if ( ((pNL_childs->item(iLoc))->nodeName()).compare("locations") == 0 )
             {
-              // create detached <location> elements from <locations> element
+              const Element* pLocElems = static_cast<Element*>(pNL_childs->item(iLoc));
 
+              // append <locations> elements in <locations>
+              appendLocations(m_instrument.get(), pLocElems, pElem, idList);
             }
           }
         } // finished looping over all childs of this component
@@ -447,6 +438,61 @@ namespace Geometry
     // And give back what we created
     return m_instrument;
   }
+
+
+  //-----------------------------------------------------------------------------------------------------------------------
+  /** Assumes second argument is a XML location element and its parent is a component element
+  *  which is assigned to be an assembly. This method appends the parent component element of
+  *  the location element to the CompAssembly passed as the 1st arg. Note this method may call
+  *  itself, i.e. it may act recursively.
+  *
+  *  @param parent :: CompAssembly to append new component to
+  *  @param pLocElems ::  Poco::XML element that points to a locations element in an instrument description XML file, which optionally may be detached (meaning it is not required to be part of the DOM tree of the IDF)
+  *  @param pCompElem :: The Poco::XML \<component\> element that contains the \<locations\> element
+  *  @param idList :: The current IDList
+  */
+  void InstrumentDefinitionParser::appendLocations(Geometry::ICompAssembly* parent, const Poco::XML::Element*pLocElems, const Poco::XML::Element* pCompElem, IdList& idList)
+  {
+      // create detached <location> elements from <locations> element
+      const std::string xmlLocation = convertLocationsElement(pLocElems);
+
+      // parse converted <locations> output
+      DOMParser pLocationsParser;
+      Document* pLocationsDoc;
+      try
+      {
+        pLocationsDoc = pLocationsParser.parseString(xmlLocation);
+      }
+      catch(...)
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("Unable to parse XML string", xmlLocation);
+      }
+  
+      // Get pointer to root element
+      const Element* pRootLocationsElem = pLocationsDoc->documentElement();
+      if ( !pRootLocationsElem->hasChildNodes() )
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("No root element in XML string", xmlLocation);
+      }              
+
+      NodeList* pNL_locInLocs = pRootLocationsElem->getElementsByTagName("location");
+      unsigned long pNL_locInLocs_length = pNL_locInLocs->length();
+      for (unsigned long iInLocs = 0; iInLocs < pNL_locInLocs_length; iInLocs++)
+      {
+        const Element* pLocInLocsElem = static_cast<Element*>(pNL_locInLocs->item(iInLocs));
+        if ( isAssembly(pCompElem->getAttribute("type")) )
+        {
+          appendAssembly(m_instrument.get(), pLocInLocsElem, pCompElem, idList);
+        }
+        else  
+        {
+          appendLeaf(m_instrument.get(), pLocInLocsElem, pCompElem, idList);
+        }
+      }
+      pNL_locInLocs->release();
+      pLocationsDoc->release();
+  }
+
 
   //-----------------------------------------------------------------------------------------------------------------------
   /** Save DOM tree to xml file. This method was initially added for testing purpose
@@ -678,10 +724,12 @@ namespace Geometry
   */
   Poco::XML::Element* InstrumentDefinitionParser::getParentComponent(const Poco::XML::Element* pLocElem)
   {
-    if ( (pLocElem->tagName()).compare("location") )
+    if ( (pLocElem->tagName()).compare("location") && (pLocElem->tagName()).compare("locations") )
     {
-      g_log.error("Argument to function getParentComponent must be a pointer to an XML element with tag name location.");
-      throw std::logic_error( "Argument to function getParentComponent must be a pointer to an XML element with tag name location." );
+      std::string tagname = pLocElem->tagName();
+      g_log.error("Argument to function getParentComponent must be a pointer to an XML element with tag name location or locations.");
+      throw std::logic_error( std::string("Argument to function getParentComponent must be a pointer to an XML element")
+                             + "with tag name location or locations." + " The tag name is " + tagname);
     }
 
     // The location element is required to be a child of a component element. Get this component element
@@ -927,7 +975,7 @@ namespace Geometry
   *
   *  @param parent :: CompAssembly to append new component to
   *  @param pLocElem ::  Poco::XML element that points to a location element in an instrument description XML file, which optionally may be detached (meaning it is not required to be part of the DOM tree of the IDF)
-  *  @param pCompElem :: The Poco::XML \<component\> element that contains the \<location\> element, which may optionally be detached from the DOM tree also 
+  *  @param pCompElem :: The Poco::XML \<component\> element that contains the \<location\> element
   *  @param idList :: The current IDList
   */
   void InstrumentDefinitionParser::appendAssembly(Geometry::ICompAssembly* parent, const Poco::XML::Element* pLocElem, const Poco::XML::Element* pCompElem, IdList& idList)
@@ -999,7 +1047,8 @@ namespace Geometry
     {
       if ( pNode->nodeName().compare("location")==0 )
       {
-        // this is a <location> element of this type (i.e. whatever type pLocElem is) 
+        // pLocElem is the location of a type. This type is here an assembly and
+        // pElem below is a <location> within this type
         const Element* pElem = static_cast<Element*>(pNode);
 
         // get the parent of pElem, i.e. a pointer to the <component> element that contains pElem
@@ -1007,7 +1056,7 @@ namespace Geometry
 
         // check if this location is in the exclude list
         std::vector<std::string>::const_iterator it = find(excludeList.begin(), excludeList.end(), 
-                                                           InstrumentDefinitionParser::getNameOfLocationElement(pElem, pCompElem));
+                                                           InstrumentDefinitionParser::getNameOfLocationElement(pElem, pParentElem));
         if ( it == excludeList.end() )
         {
 
@@ -1022,6 +1071,14 @@ namespace Geometry
             appendLeaf(ass, pElem, pParentElem, idList);
           }
         }
+      }
+      if ( pNode->nodeName().compare("locations")==0 )
+      {
+        const Element* pLocElems = static_cast<Element*>(pNode);
+        const Element* pParentElem = InstrumentDefinitionParser::getParentComponent(pLocElems);
+
+        // append <locations> elements in <locations>
+        appendLocations(m_instrument.get(), pLocElems, pParentElem, idList);
       }
       pNode = it.nextNode();
     }
@@ -2325,7 +2382,22 @@ namespace Geometry
     bool alongTheta = false; 
     bool alongPhi = false; 
 
-    size_t n_elements=0;
+    double x=0.0, y=0.0, z=0.0;
+    double x_end=0.0;
+    double y_end=0.0;
+    double z_end=0.0;
+    bool alongX = false;
+    bool alongY = false;
+    bool alongZ = false;
+
+    size_t nAlong = 0; // for additional checking of syntax. Only one along direction is allowed to be chosen
+
+    // number of <location> this <locations> element is shorthand for
+    size_t n_elements=0;  
+    // the step size that either x,y,x or equivalent spherical coordinated should be incremented by.
+    // say x and x_end are specified then the step size is (x_end-x)/(n_element-1). The minus 1
+    // here is because both x and x_end are treated as values to create <location> elements for also
+    double step = 0.0; 
     if ( pElem->hasAttribute("n-elements") )
       n_elements = atoi((pElem->getAttribute("n-elements")).c_str());
     else
@@ -2344,6 +2416,8 @@ namespace Geometry
           throwTooManyEndAttributeInLocations("R-end", "theta-end or phi-end");
         R_end = atof((pElem->getAttribute("R-end")).c_str());
         alongR = true;
+        step = (R_end - R) / static_cast<double>(n_elements-1);
+        nAlong++;
       }
 
       if ( pElem->hasAttribute("theta-end") ) 
@@ -2352,6 +2426,8 @@ namespace Geometry
           throwTooManyEndAttributeInLocations("theta-end", "R-end or phi-end");
         theta_end = atof((pElem->getAttribute("theta-end")).c_str());
         alongTheta = true;
+        step = (theta_end - theta) / static_cast<double>(n_elements-1);
+        nAlong++;
       }
 
       if ( pElem->hasAttribute("phi-end") ) 
@@ -2360,6 +2436,8 @@ namespace Geometry
           throwTooManyEndAttributeInLocations("phi-end", "R-end or theta-end");
         phi_end = atof((pElem->getAttribute("phi-end")).c_str());
         alongPhi = true;
+        step = (phi_end - phi) / static_cast<double>(n_elements-1);
+        nAlong++;
       }
     }
     else if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || pElem->hasAttribute("p") )
@@ -2374,6 +2452,8 @@ namespace Geometry
           throwTooManyEndAttributeInLocations("r-end", "t-end or p-end");
         R_end = atof((pElem->getAttribute("r-end")).c_str());
         alongR = true;
+        step = (R_end - R) / static_cast<double>(n_elements-1);
+        nAlong++;
       }
 
       if ( pElem->hasAttribute("t-end") ) 
@@ -2382,6 +2462,8 @@ namespace Geometry
           throwTooManyEndAttributeInLocations("t-end", "r-end or p-end");
         theta_end = atof((pElem->getAttribute("t-end")).c_str());
         alongTheta = true;
+        step = (theta_end - theta) / static_cast<double>(n_elements-1);
+        nAlong++;
       }
 
       if ( pElem->hasAttribute("p-end") ) 
@@ -2390,24 +2472,132 @@ namespace Geometry
           throwTooManyEndAttributeInLocations("p-end", "r-end or t-end");
         phi_end = atof((pElem->getAttribute("p-end")).c_str());
         alongPhi = true;
+        step = (phi_end - phi) / static_cast<double>(n_elements-1);
+        nAlong++;
       }
     }
     else
     {
-      double x=0.0, y=0.0, z=0.0;
-
       if ( pElem->hasAttribute("x") ) x = atof((pElem->getAttribute("x")).c_str());
       if ( pElem->hasAttribute("y") ) y = atof((pElem->getAttribute("y")).c_str());
       if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
+
+      if ( pElem->hasAttribute("x-end") ) 
+      {
+        if (  pElem->hasAttribute("y-end") || pElem->hasAttribute("z-end") )
+          throwTooManyEndAttributeInLocations("x-end", "y-end or z-end");
+        x_end = atof((pElem->getAttribute("x-end")).c_str());
+        alongX = true;
+        step = (x_end - x) / static_cast<double>(n_elements-1);
+        nAlong++;
+      }
+
+      if ( pElem->hasAttribute("y-end") ) 
+      {
+        if (  pElem->hasAttribute("x-end") || pElem->hasAttribute("z-end") )
+          throwTooManyEndAttributeInLocations("y-end", "x-end or z-end");
+        y_end = atof((pElem->getAttribute("y-end")).c_str());
+        alongY = true;
+        step = (y_end - y) / static_cast<double>(n_elements-1);
+        nAlong++;
+      }
+
+      if ( pElem->hasAttribute("z-end") ) 
+      {
+        if (  pElem->hasAttribute("x-end") || pElem->hasAttribute("y-end") )
+          throwTooManyEndAttributeInLocations("z-end", "x-end or y-end");
+        z_end = atof((pElem->getAttribute("z-end")).c_str());
+        alongZ = true;
+        step = (z_end - z) / static_cast<double>(n_elements-1);
+        nAlong++;
+      }
     }
 
-    // create output cuboid XML string
+    // also check if 'rot' is the one to step through
+    double rot=0.0;
+    double rot_end = 0.0;
+    bool along_rot = false;    
+    if ( pElem->hasAttribute("rot") ) 
+    {
+      rot = atof((pElem->getAttribute("rot")).c_str());
+
+      if ( pElem->hasAttribute("rot-end") ) 
+      {
+        rot_end = atof((pElem->getAttribute("rot-end")).c_str());
+        along_rot = true;
+        step = (rot_end - rot) / static_cast<double>(n_elements-1);
+        nAlong++;
+      }
+    }
+
+    if (nAlong != 1)
+    {
+      throw Exception::InstrumentDefinitionError( std::string("When using <locations> ")
+            + " can only one 'end' attribute, like 'x-end'. See www.mantidproject.org/IDF." );
+    }
+
+    // create output XML string
     std::ostringstream obj_str;
+    obj_str << "<expansion-of-locations-element>\n";
 
+    // OK, above all the attributes of <locations> has been collected
+    // now it is time to create to <location> elements
+    for (size_t i = 0; i < n_elements; i++)
+    { 
+      obj_str << "<location ";
+      if (alongX)
+      {
+        obj_str << "x=\"" << x+static_cast<double>(i)*step << "\" y=\"" << y << "\" z=\"" << z << "\"";
+      }
+      else if (alongY)
+      {
+        obj_str << "x=\"" << x << "\" y=\"" << y+static_cast<double>(i)*step << "\" z=\"" << z << "\"";
+      }
+      else if (alongZ)
+      {
+        obj_str << "x=\"" << x << "\" y=\"" << y << "\" z=\"" << z+static_cast<double>(i)*step << "\"";
+      }
+      else if (alongR)
+      {
+        obj_str << "r=\"" << R+static_cast<double>(i)*step << "\" t=\""<< theta << "\" p=\"" << phi << "\"";
+      }
+      else if (alongTheta)
+      {
+        obj_str << "r=\"" << R << "\" t=\""<< theta+static_cast<double>(i)*step << "\" p=\"" << phi << "\"";
+      }
+      else if (alongPhi)
+      {
+        obj_str << "r=\"" << R << "\" t=\""<< theta << "\" p=\"" << phi+static_cast<double>(i)*step << "\"";
+      }
 
+      if (along_rot)
+      {
+        obj_str << "r=\"" << R << "\" t=\""<< theta << "\" p=\"" << phi << "\" rot=\"" 
+                << rot+static_cast<double>(i)*step << "\"";
+      }
+      else if ( pElem->hasAttribute("rot") )
+      {
+        obj_str << " rot=\"" << rot << "\"";
+      }
 
+      // add axis if specified in <locations>
+      if ( pElem->hasAttribute("rot") )
+      {
+        if ( pElem->hasAttribute("axis-x") )        
+          obj_str << " axis-x=\"" << pElem->getAttribute("axis-x") << "\"";
+        if ( pElem->hasAttribute("axis-y") )        
+          obj_str << " axis-y=\"" << pElem->getAttribute("axis-y") << "\"";
+        if ( pElem->hasAttribute("axis-z") )        
+          obj_str << " axis-z=\"" << pElem->getAttribute("axis-z") << "\"";
+      }
+      
+      // close <location>
+      obj_str << "/>\n";
+    }
+    obj_str << "</expansion-of-locations-element>";
     return obj_str.str();
   }
+
 
   /** Return a subelement of an XML element, but also checks that there exist exactly one entry
    *  of this subelement.
