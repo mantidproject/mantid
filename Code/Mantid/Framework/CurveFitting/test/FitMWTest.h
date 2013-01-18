@@ -15,6 +15,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/WorkspaceProperty.h"
+
+#include "MantidKernel/PropertyManager.h"
 
 #include <sstream>
 
@@ -287,29 +290,51 @@ public:
   {
     const bool histogram(true);
     auto ws2 = createTestWorkspace(histogram);
+    const std::string inputWSName = "FitMWTest_CompositeTest";
+    //AnalysisDataService::Instance().add(inputWSName, ws2);
 
     auto composite = boost::shared_ptr<API::CompositeFunction>(new API::CompositeFunction);
     API::IFunction_sptr expDecay(new ExpDecay);
-    expDecay->setParameter("Height",1.);
-    expDecay->setParameter("Lifetime",1.0);
+    expDecay->setParameter("Height",1.5);
+    expDecay->setError(0, 0.01);
+    expDecay->setParameter("Lifetime",2.0);
+    expDecay->setError(1, 0.005);
     composite->addFunction(expDecay);
     expDecay = API::IFunction_sptr(new ExpDecay);
-    expDecay->setParameter("Height",2.);
-    expDecay->setParameter("Lifetime",0.5);
+    expDecay->setParameter("Height",2.0);
+    expDecay->setError(0, 0.015);
+    expDecay->setParameter("Lifetime",3.0);
+    expDecay->setError(1, 0.02);
     composite->addFunction(expDecay);
 
-    Fit fit;
-    fit.initialize();
-    fit.setProperty("Function",boost::static_pointer_cast<API::IFunction>(composite));
-    fit.setProperty("InputWorkspace",ws2);
-    fit.setProperty("WorkspaceIndex",0);
-    fit.setProperty("CreateOutput",true);
-    fit.setProperty("OutputCompositeMembers", true);
-    fit.execute();
+    FunctionDomain_sptr domain;
+    IFunctionValues_sptr values;
 
-    TS_ASSERT(fit.isExecuted());
+    // Requires a property manager to make a workspce
+    auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    const std::string wsPropName = "TestWorkspaceInput"; 
+    propManager->declareProperty(new WorkspaceProperty<Workspace>(wsPropName, "", Mantid::Kernel::Direction::Input));
+    propManager->setProperty<Workspace_sptr>(wsPropName, ws2);
+
+    FitMW fitmw(propManager.get(), wsPropName);
+    fitmw.declareDatasetProperties("", true);
+    fitmw.initFunction(composite);
+    fitmw.separateCompositeMembersInOutput(true);
+    fitmw.createDomain(domain, values);
+
+    // Create Output
+    const std::string baseName("TestOutput_");
+    fitmw.createOutputWorkspace(baseName, composite, domain, values);
+    
+    
     MatrixWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Output_Workspace"));
+    // A new property should have appeared
+    TS_ASSERT_THROWS_NOTHING(outputWS = propManager->getProperty("OutputWorkspace"));
+    if(!outputWS)
+    {
+      TS_FAIL("No output workspace was found in the property manager");
+      return;
+    }
 
     static const size_t nExpectedHist(5);
     TS_ASSERT_EQUALS(nExpectedHist, outputWS->getNumberHistograms());
@@ -324,17 +349,16 @@ public:
     TS_ASSERT_EQUALS(axis->label(3), "ExpDecay");
     TS_ASSERT_EQUALS(axis->label(4), "ExpDecay");
 
-    const double yValues[nExpectedHist] = {8.1873075308, 8.1873075308, 0, -2.1426494943613e-14, 8.1873075308};
-    const double eValues[nExpectedHist] = {1, 1732.7497028344, 0, 1266.3006968103, 1182.7527543533};
-    const double xValue(0.1);
+    const double eValues[nExpectedHist] = {1.0, 0.01735481, 0.0, 0.0095139661, 0.014514608};
+    const double yValues[nExpectedHist] = {8.1873075308, 3.36127634, 4.826031193, 1.42684414, 1.93443220};
 
     for(size_t i = 0; i < nExpectedHist; ++i)
     {
-      TS_ASSERT_DELTA(outputWS->readY(i)[1], yValues[i], 1e-10);
-      //TS_ASSERT_DELTA(outputWS->readE(i)[1], eValues[i], 1e-10);
-      TS_ASSERT_DELTA(outputWS->readX(i)[1], xValue, 1e-10);
+      TS_ASSERT_DELTA(outputWS->readY(i)[1], yValues[i], 1e-8);
+      TS_ASSERT_DELTA(outputWS->readE(i)[1], eValues[i], 1e-8);
+      TS_ASSERT_DELTA(outputWS->readX(i)[1], ws2->readX(0)[1], 1e-8);
     }
-    AnalysisDataService::Instance().clear();
+
   }
 
 
