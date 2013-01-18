@@ -15,6 +15,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Events.h"
@@ -30,6 +31,8 @@
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+
+using namespace std;
 
 class GenerateEventsFilterTest : public CxxTest::TestSuite
 {
@@ -64,10 +67,10 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Splitters01"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("SplittersInformationWorkspace", "SplittersInformation"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InformationWorkspace", "SplittersInformation"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartTime", "100"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StopTime", "1000000"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeType", "Nanoseconds"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
 
     // 3. Running and get result
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -76,7 +79,7 @@ public:
     // 4. Check output
     DataObjects::SplittersWorkspace_sptr splittersws =
         boost::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(AnalysisDataService::Instance().retrieve("Splitters01"));
-    DataObjects::TableWorkspace_const_sptr splittersinfo =
+    DataObjects::TableWorkspace_sptr splittersinfo =
         boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("SplittersInformation"));
 
     TS_ASSERT(splittersws);
@@ -88,7 +91,24 @@ public:
     TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstart.totalNanoseconds()+1000000);
     TS_ASSERT_EQUALS(splitter0.index(), 0);
 
+    TS_ASSERT_EQUALS(splittersws->rowCount(), 1);
+    TS_ASSERT_EQUALS(splittersinfo->rowCount(), 1);
+
+    /*
+    API::TableRow row = splittersws->getRow(0);
+    int64_t start, stop;
+    int wsgroup;
+    row >> start >> stop >> wsgroup;
+    cout << "SplittersWorkspace:  group = " << wsgroup << endl;
+
+    API::TableRow row2 = splittersinfo->getRow(0);
+    string title;
+    row2 >> wsgroup >> title;
+    cout << "SplittersWorkspace:  group = " << wsgroup << endl;
+    */
+
     AnalysisDataService::Instance().remove("Splitters01");
+    AnalysisDataService::Instance().remove("SplittersInformation");
 
     return;
   }
@@ -111,7 +131,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "Splitters01"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeInterval", 15000.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeType", "Nanoseconds"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
 
     // 3. Running and get result
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -182,7 +202,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterLogValueByChangingDirection", "Increase"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeTolerance", 1.0E-8));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBoundary",  "Centre"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SplittersInformationWorkspace", "Information"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InformationWorkspace", "Information"));
 
     // 3. Running and get result
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -226,7 +246,7 @@ public:
    */
   void test_genMultipleLogValuesFilter()
   {
-    std::cout << "\nTest Simple Log Value Filter\n" << std::endl;
+    std::cout << "\n==== Test Multiple Log Value Filter ====\n" << std::endl;
 
     // 1. Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
@@ -237,7 +257,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "Splitters04"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SplittersInformationWorkspace", "Information"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InformationWorkspace", "Information"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "FastSineLog"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinimumLogValue", "-1.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaximumLogValue",  "1.0"));
@@ -272,7 +292,7 @@ public:
 
      Kernel::SplittingInterval s14 = splittersws->getSplitter(14);
      TS_ASSERT_EQUALS(s14.start(), 3000924990);
-     TS_ASSERT_EQUALS(s14.stop(),  3000949990);
+     TS_ASSERT_EQUALS(s14.stop(),  3000974990);
      TS_ASSERT_EQUALS(s14.index(), 9);
 
   }
