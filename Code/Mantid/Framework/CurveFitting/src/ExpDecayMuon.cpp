@@ -24,8 +24,8 @@ void ExpDecayMuon::init()
 
 void ExpDecayMuon::function1D(double* out, const double* xValues, const size_t nData)const
 {
-    const double& gA0 = getParameter("A");
-    const double& gs = getParameter("Lambda");
+    const double gA0 = getParameter("A");
+    const double gs = getParameter("Lambda");
 
     for (size_t i = 0; i < nData; i++) 
     {
@@ -35,8 +35,8 @@ void ExpDecayMuon::function1D(double* out, const double* xValues, const size_t n
 
 void ExpDecayMuon::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
-    const double& gA0 = getParameter("A");
-    const double& gs = getParameter("Lambda");
+    const double gA0 = getParameter("A");
+    const double gs = getParameter("Lambda");
 
     for (size_t i = 0; i < nData; i++) {
         double x = xValues[i];

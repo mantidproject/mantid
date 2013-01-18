@@ -25,9 +25,9 @@ void StretchExpMuon::init()
 
 void StretchExpMuon::function1D(double* out, const double* xValues, const size_t nData)const
 {
-  const double& A = getParameter("A");
-  const double& G = getParameter("Lambda");
-  const double& b = getParameter("Beta");
+  const double A = getParameter("A");
+  const double G = getParameter("Lambda");
+  const double b = getParameter("Beta");
 
 
   for (size_t i = 0; i < nData; i++) {

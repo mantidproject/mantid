@@ -28,11 +28,11 @@ void Abragam::init()
 
 void Abragam::function1D(double* out, const double* xValues, const size_t nData)const
 {
-  const double& A = getParameter("A"); 
-  const double& w = getParameter("Omega"); 
-  const double& phi = getParameter("Phi"); 
-  const double& sig = getParameter("Sigma");   
-  const double& t = getParameter("Tau"); 
+  const double A = getParameter("A"); 
+  const double w = getParameter("Omega"); 
+  const double phi = getParameter("Phi"); 
+  const double sig = getParameter("Sigma");   
+  const double t = getParameter("Tau"); 
 
   for (size_t i = 0; i < nData; i++) {
     double A1=A*cos(w*xValues[i]+phi); 

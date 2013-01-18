@@ -25,9 +25,9 @@ void Gaussian::init()
 
 void Gaussian::functionLocal(double* out, const double* xValues, const size_t nData)const
 {
-    const double& height = getParameter("Height");
-    const double& peakCentre = getParameter("PeakCentre");
-    const double& weight = pow(1/getParameter("Sigma"),2);
+    const double height = getParameter("Height");
+    const double peakCentre = getParameter("PeakCentre");
+    const double weight = pow(1/getParameter("Sigma"),2);
 
     for (size_t i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
@@ -37,9 +37,9 @@ void Gaussian::functionLocal(double* out, const double* xValues, const size_t nD
 
 void Gaussian::functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
 {
-    const double& height = getParameter("Height");
-    const double& peakCentre = getParameter("PeakCentre");
-    const double& weight = pow(1/getParameter("Sigma"),2);
+    const double height = getParameter("Height");
+    const double peakCentre = getParameter("PeakCentre");
+    const double weight = pow(1/getParameter("Sigma"),2);
 
     for (size_t i = 0; i < nData; i++) {
         double diff = xValues[i]-peakCentre;
@@ -52,9 +52,9 @@ void Gaussian::functionDerivLocal(Jacobian* out, const double* xValues, const si
 
 void Gaussian::calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t nData)
 {
-    const double& height = getParameter("Height");
-    const double& peakCentre = getParameter("PeakCentre");
-    const double& sigma = getParameter("Sigma");
+    const double height = getParameter("Height");
+    const double peakCentre = getParameter("PeakCentre");
+    const double sigma = getParameter("Sigma");
 
     double weight = 1/(sigma*sigma);
 

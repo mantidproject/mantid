@@ -30,9 +30,9 @@ StretchExp::StretchExp()
 
 void StretchExp::function1D(double* out, const double* xValues, const size_t nData)const
 {
-    const double& h = getParameter("Height");
-    const double& t = getParameter("Lifetime");
-    const double& b = getParameter("Stretching");
+    const double h = getParameter("Height");
+    const double t = getParameter("Lifetime");
+    const double b = getParameter("Stretching");
 
     for (size_t i = 0; i < nData; i++) 
     {
@@ -42,9 +42,9 @@ void StretchExp::function1D(double* out, const double* xValues, const size_t nDa
 
 void StretchExp::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
-    const double& h = getParameter("Height");
-    const double& t = getParameter("Lifetime");
-    const double& b = getParameter("Stretching");
+    const double h = getParameter("Height");
+    const double t = getParameter("Lifetime");
+    const double b = getParameter("Stretching");
 
     for (size_t i = 0; i < nData; i++) {
         double x = xValues[i];

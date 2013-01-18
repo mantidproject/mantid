@@ -43,18 +43,18 @@ namespace CurveFitting
 void BackToBackExponential::function1D(double* out, const double* xValues, const size_t nData)const
 {
   /*
-    const double& I = getParameter("I");
-    const double& a = getParameter("A");
-    const double& b = getParameter("B");
-    const double& x0 = getParameter("X0");
-    const double& s = getParameter("S");
+    const double I = getParameter("I");
+    const double a = getParameter("A");
+    const double b = getParameter("B");
+    const double x0 = getParameter("X0");
+    const double s = getParameter("S");
   */
 
-  const double& I = getParameter(0);
-  const double& a = getParameter(1);
-  const double& b = getParameter(2);
-  const double& x0 = getParameter(3);
-  const double& s = getParameter(4);
+  const double I = getParameter(0);
+  const double a = getParameter(1);
+  const double b = getParameter(2);
+  const double x0 = getParameter(3);
+  const double s = getParameter(4);
 
   double s2 = s*s;
   for (size_t i = 0; i < nData; i++) {
@@ -75,18 +75,18 @@ void BackToBackExponential::function1D(double* out, const double* xValues, const
 void BackToBackExponential::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
   /*
-    const double& I = getParameter("I");
-    const double& a = getParameter("A");
-    const double& b = getParameter("B");
-    const double& x0 = getParameter("X0");
-    const double& s = getParameter("S");
+    const double I = getParameter("I");
+    const double a = getParameter("A");
+    const double b = getParameter("B");
+    const double x0 = getParameter("X0");
+    const double s = getParameter("S");
   */
 
-  const double& I = getParameter(0);
-  const double& a = getParameter(1);
-  const double& b = getParameter(2);
-  const double& x0 = getParameter(3);
-  const double& s = getParameter(4);
+  const double I = getParameter(0);
+  const double a = getParameter(1);
+  const double b = getParameter(2);
+  const double x0 = getParameter(3);
+  const double s = getParameter(4);
 
   double s2 = s*s;
   for (size_t i = 0; i < nData; i++)

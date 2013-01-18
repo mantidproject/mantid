@@ -41,8 +41,8 @@ ElasticDiffSphere::ElasticDiffSphere(){
 }
 
 double ElasticDiffSphere::HeightPrefactor() const{
-  const double& R = getParameter("Radius");
-  const double& Q = getAttribute("Q").asDouble();
+  const double R = getParameter("Radius");
+  const double Q = getAttribute("Q").asDouble();
   return pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2);
 }
 
@@ -227,7 +227,7 @@ void InelasticDiffSphere::calNumericalDeriv2(const API::FunctionDomain& domain, 
   {
     if ( isActive(iP) )
     {
-      const double& val = activeParameter(iP);
+      const double val = activeParameter(iP);
       if (fabs(val) < cutoff)
       {
         step = epsilon;

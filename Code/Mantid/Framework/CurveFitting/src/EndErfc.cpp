@@ -28,10 +28,10 @@ namespace Mantid
 
     void EndErfc::function1D(double* out, const double* xValues, const size_t nData)const
     {
-      const double& gA = getParameter("A"); 
-      const double& gB = getParameter("B"); 
-      const double& gC = getParameter("C"); 
-      const double& gD = getParameter("D"); 
+      const double gA = getParameter("A"); 
+      const double gB = getParameter("B"); 
+      const double gC = getParameter("C"); 
+      const double gD = getParameter("D"); 
 
 
       for (size_t i = 0; i < nData; i++) {

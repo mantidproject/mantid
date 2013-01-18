@@ -663,7 +663,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
   {
     if ( isActive(iP) )
     {
-      const double& val = activeParameter(iP);
+      const double val = activeParameter(iP);
       if (fabs(val) < cutoff)
       {
         step = epsilon;

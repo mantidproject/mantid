@@ -97,13 +97,13 @@ void ThermalNeutronDtoTOFFunction::function1D(vector<double>& out, const vector<
 void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
 {
   // 1. Get hold all parameters
-  const double& dtt1 = getParameter("Dtt1");
-  const double& dtt1t = getParameter("Dtt1t");
-  const double& dtt2t = getParameter("Dtt2t");
-  const double& zero = getParameter("Zero");
-  const double& zerot = getParameter("Zerot");
-  const double& width = getParameter("Width");
-  const double& tcross = getParameter("Tcross");
+  const double dtt1 = getParameter("Dtt1");
+  const double dtt1t = getParameter("Dtt1t");
+  const double dtt2t = getParameter("Dtt2t");
+  const double zero = getParameter("Zero");
+  const double zerot = getParameter("Zerot");
+  const double width = getParameter("Width");
+  const double tcross = getParameter("Tcross");
 
   // 2. Calcualtion
   for (size_t i = 0; i < nData; ++i)

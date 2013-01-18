@@ -26,11 +26,11 @@ void MuonFInteraction::init()
 
 void MuonFInteraction::function1D(double* out, const double* xValues, const size_t nData)const
 {
-  const double& lambda = getParameter("Lambda");
-  const double& omega = getParameter("Omega");
-  const double& beta = getParameter("Beta");
-  const double& A = getParameter("A"); 
-  const double& sqrt3 = sqrt(3.0);
+  const double lambda = getParameter("Lambda");
+  const double omega = getParameter("Omega");
+  const double beta = getParameter("Beta");
+  const double A = getParameter("A"); 
+  const double sqrt3 = sqrt(3.0);
 
   for (size_t i = 0; i < nData; i++) {
     double A1=exp(-pow(lambda*xValues[i],beta))*A/6;

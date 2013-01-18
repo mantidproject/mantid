@@ -43,7 +43,7 @@ namespace CurveFitting
   {
     UNUSED_ARG(xValues);
 
-    const double& a0 = getParameter("A0");
+    const double a0 = getParameter("A0");
 
     for (size_t i = 0; i < nData; i++) {
         out[i] = a0;

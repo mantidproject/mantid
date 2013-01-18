@@ -25,8 +25,8 @@ void GausDecay::init()
 
 void GausDecay::function1D(double* out, const double* xValues, const size_t nData)const
 {
-  const double& A = getParameter("A"); 
-  const double& G = getParameter("Sigma");  
+  const double A = getParameter("A"); 
+  const double G = getParameter("Sigma");  
 
   for (size_t i = 0; i < nData; i++) {
     double x = xValues[i];
@@ -36,8 +36,8 @@ void GausDecay::function1D(double* out, const double* xValues, const size_t nDat
 
 void GausDecay::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
-  const double& A = getParameter("A"); 
-  const double& G = getParameter("Sigma");  
+  const double A = getParameter("A"); 
+  const double G = getParameter("Sigma");  
 
   for (size_t i = 0; i < nData; i++) {
     double x = xValues[i];

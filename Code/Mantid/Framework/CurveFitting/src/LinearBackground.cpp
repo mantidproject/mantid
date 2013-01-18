@@ -23,8 +23,8 @@ void LinearBackground::init()
 
 void LinearBackground::function1D(double* out, const double* xValues, const size_t nData)const
 {
-    const double& a0 = getParameter("A0");
-    const double& a1 = getParameter("A1");
+    const double a0 = getParameter("A0");
+    const double a1 = getParameter("A1");
 
     for (size_t i = 0; i < nData; i++) {
         out[i] = a0+a1*xValues[i];

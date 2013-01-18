@@ -107,7 +107,7 @@ void CompositeFunctionMD::functionDeriv(Jacobian* out)
     {
       if ( isActive(iP) )
       {
-        const double& val = getParameter(iP);
+        const double val = getParameter(iP);
         if (fabs(val) < stepPercentage)
         {
           step = stepPercentage;

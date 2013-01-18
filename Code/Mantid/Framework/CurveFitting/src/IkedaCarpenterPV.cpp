@@ -182,7 +182,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
  *  @param H :: pseudo voigt param
  *  @param eta :: pseudo voigt param
  */
-void IkedaCarpenterPV::convertVoigtToPseudo(const double& voigtSigmaSq, const double& voigtGamma, 
+void IkedaCarpenterPV::convertVoigtToPseudo(const double& voigtSigmaSq, const double& voigtGamma,
   double& H, double& eta) const
 {
   double fwhmGsq = 8.0 * M_LN2 * voigtSigmaSq;
@@ -205,14 +205,14 @@ void IkedaCarpenterPV::convertVoigtToPseudo(const double& voigtSigmaSq, const do
 
 void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const int& nData) const
 {
-    const double& I = getParameter("I");
-    const double& alpha0 =getParameter("Alpha0");
-    const double& alpha1 = getParameter("Alpha1");
-    const double& beta0 = getParameter("Beta0");
-    const double& kappa = getParameter("Kappa");
-    const double& voigtsigmaSquared = getParameter("SigmaSquared");
-    const double& voigtgamma = getParameter("Gamma");
-    const double& X0 = getParameter("X0");
+    const double I = getParameter("I");
+    const double alpha0 =getParameter("Alpha0");
+    const double alpha1 = getParameter("Alpha1");
+    const double beta0 = getParameter("Beta0");
+    const double kappa = getParameter("Kappa");
+    const double voigtsigmaSquared = getParameter("SigmaSquared");
+    const double voigtgamma = getParameter("Gamma");
+    const double X0 = getParameter("X0");
 
     // cal pseudo voigt sigmaSq and gamma and eta
     double gamma = 1.0; // dummy initialization
@@ -292,14 +292,14 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
 
 void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const size_t nData)const
 {
-    const double& I = getParameter("I");
-    const double& alpha0 =getParameter("Alpha0");
-    const double& alpha1 = getParameter("Alpha1");
-    const double& beta0 = getParameter("Beta0");
-    const double& kappa = getParameter("Kappa");
-    const double& voigtsigmaSquared = getParameter("SigmaSquared");
-    const double& voigtgamma = getParameter("Gamma");
-    const double& X0 = getParameter("X0");
+    const double I = getParameter("I");
+    const double alpha0 =getParameter("Alpha0");
+    const double alpha1 = getParameter("Alpha1");
+    const double beta0 = getParameter("Beta0");
+    const double kappa = getParameter("Kappa");
+    const double voigtsigmaSquared = getParameter("SigmaSquared");
+    const double voigtgamma = getParameter("Gamma");
+    const double X0 = getParameter("X0");
 
     // cal pseudo voigt sigmaSq and gamma and eta
     double gamma = 1.0; // dummy initialization

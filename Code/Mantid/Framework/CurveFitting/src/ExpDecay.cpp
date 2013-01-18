@@ -24,8 +24,8 @@ ExpDecay::ExpDecay()
 
 void ExpDecay::function1D(double* out, const double* xValues, const size_t nData)const
 {
-    const double& h = getParameter("Height");
-    const double& t = getParameter("Lifetime");
+    const double h = getParameter("Height");
+    const double t = getParameter("Lifetime");
 
     for (size_t i = 0; i < nData; i++) 
     {
@@ -35,8 +35,8 @@ void ExpDecay::function1D(double* out, const double* xValues, const size_t nData
 
 void ExpDecay::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
-    const double& h = getParameter("Height");
-    const double& t = getParameter("Lifetime");
+    const double h = getParameter("Height");
+    const double t = getParameter("Lifetime");
 
     for (size_t i = 0; i < nData; i++) {
         double x = xValues[i];

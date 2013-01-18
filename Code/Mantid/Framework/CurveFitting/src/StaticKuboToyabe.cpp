@@ -24,8 +24,8 @@ void StaticKuboToyabe::init()
 
 void StaticKuboToyabe::function1D(double* out, const double* xValues, const size_t nData)const
 {
-  const double& A = getParameter("A"); 
-  const double& G = getParameter("Delta"); 
+  const double A = getParameter("A"); 
+  const double G = getParameter("Delta"); 
 
 
   for (size_t i = 0; i < nData; i++) {

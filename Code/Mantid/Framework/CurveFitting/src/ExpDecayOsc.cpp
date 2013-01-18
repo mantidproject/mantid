@@ -27,10 +27,10 @@ void ExpDecayOsc::init()
 
 void ExpDecayOsc::function1D(double* out, const double* xValues, const size_t nData)const
 {
-  const double& gA0 = getParameter("A"); 
-  const double& gs = getParameter("Lambda"); 
-  const double& gf = getParameter("Frequency"); 
-  const double& gphi = getParameter("Phi"); 
+  const double gA0 = getParameter("A"); 
+  const double gs = getParameter("Lambda"); 
+  const double gf = getParameter("Frequency"); 
+  const double gphi = getParameter("Phi"); 
 
   for (size_t i = 0; i < nData; i++) {
     double x = xValues[i];
@@ -40,10 +40,10 @@ void ExpDecayOsc::function1D(double* out, const double* xValues, const size_t nD
 
 void ExpDecayOsc::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
-    const double& gA0 = getParameter("A");
-    const double& gs = getParameter("Lambda");
-    const double& gf = getParameter("Frequency"); 
-    const double& gphi = getParameter("Phi"); 
+    const double gA0 = getParameter("A");
+    const double gs = getParameter("Lambda");
+    const double gf = getParameter("Frequency"); 
+    const double gphi = getParameter("Phi"); 
 
     for (size_t i = 0; i < nData; i++) {
         double x = xValues[i];

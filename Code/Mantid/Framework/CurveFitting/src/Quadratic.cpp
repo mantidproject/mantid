@@ -32,9 +32,9 @@ void Quadratic::init()
  */
 void Quadratic::function1D(double* out, const double* xValues, const size_t nData)const
 {
-    const double& a0 = getParameter("A0");
-    const double& a1 = getParameter("A1");
-    const double& a2 = getParameter("A2");
+    const double a0 = getParameter("A0");
+    const double a1 = getParameter("A1");
+    const double a2 = getParameter("A2");
 
     for (size_t i = 0; i < nData; i++) 
     {

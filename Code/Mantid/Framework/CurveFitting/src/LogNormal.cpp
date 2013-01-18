@@ -25,9 +25,9 @@ LogNormal::LogNormal()
 
 void LogNormal::function1D(double* out, const double* xValues, const size_t nData)const
 {
-    const double& h = getParameter("Height");
-    const double& t = getParameter("Location");
-    const double& b = getParameter("Scale");
+    const double h = getParameter("Height");
+    const double t = getParameter("Location");
+    const double b = getParameter("Scale");
 
     for (size_t i = 0; i < nData; i++) 
     {
@@ -46,9 +46,9 @@ void LogNormal::function1D(double* out, const double* xValues, const size_t nDat
 
 void LogNormal::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
-    const double& h = getParameter("Height");
-    const double& t = getParameter("Location");
-    const double& b = getParameter("Scale");
+    const double h = getParameter("Height");
+    const double t = getParameter("Location");
+    const double b = getParameter("Scale");
 
     for (size_t i = 0; i < nData; i++) {
         double x = xValues[i];
