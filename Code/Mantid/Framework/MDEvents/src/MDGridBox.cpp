@@ -115,14 +115,9 @@ namespace MDEvents
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
 
-    // Clear the old box.
+    // Clear the old box and delete it from disk buffer if one is used.
     box->clear();
-    if (this->m_BoxController->isFileBacked())
-    {        
-         //Delete it from "to-write" DiskBuffer if it is there
-         this->m_BoxController->getDiskBuffer().objectDeleted(box);
-    }
-
+ 
 
   }
   /**Internal function to do main job of filling in a GridBox contents  (part of the constructor) */
@@ -883,10 +878,10 @@ namespace MDEvents
         }
         else
         {
-          // This box does NOT have enough events to be worth splitting
-          if (this->m_BoxController->isFileBacked())
+          // This box does NOT have enough events to be worth splitting, if it do have at least something in memory then,
+          if (this->m_BoxController->isFileBacked()&&(box->getEventVectorSize()>0))
           {        
-              //Mark the box as "to-write" in DiskBuffer. If the buffer is excausted, the box will be cached on disk
+              //Mark the box as "to-write" in DiskBuffer. If the buffer is full, the box will be dropped on disk
               this->m_BoxController->getDiskBuffer().toWrite(box);
           }
         }

@@ -252,7 +252,7 @@ public:
     // Get a child
     MDBox<MDLeanEvent<3>,3> * b = dynamic_cast<MDBox<MDLeanEvent<3>,3> *>(gb->getChild(22));
     TSM_ASSERT_EQUALS( "Child has 8 events", b->getNPoints(), 8);
-    TSM_ASSERT_EQUALS( "Child is NOT on disk", b->getOnDisk(), false);
+    TSM_ASSERT_EQUALS( "Child is NOT on disk", b->wasSaved(), false);
 
     file->close();
     MDBoxTest::do_deleteNexusFile("MDGridBoxTest.nxs");
@@ -1045,10 +1045,10 @@ public:
       TS_ASSERT_EQUALS( box->getNPoints(), num_repeat );
       box_t * mdbox = dynamic_cast<box_t *>(box);
       TS_ASSERT( mdbox);
-      if ( mdbox->getOnDisk() ) numOnDisk++;
-      eventsOnDisk += mdbox->getMRUMemorySize();
+      if ( mdbox->wasSaved() ) numOnDisk++;
+      eventsOnDisk += mdbox->getFileSize();
       // Track the last point used in the file
-      uint64_t fileEnd = mdbox->getFilePosition() + mdbox->getMRUMemorySize();
+      uint64_t fileEnd = mdbox->getFilePosition() + mdbox->getFileSize();
       if (fileEnd > maxFilePos) maxFilePos = fileEnd;
       //std::cout << mdbox->getFilePosition() << " file pos " << i << std::endl;
     }

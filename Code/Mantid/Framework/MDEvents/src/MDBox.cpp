@@ -101,16 +101,13 @@ namespace MDEvents
     // Make sure the object is not in any of the disk MRUs, and mark any space it used as free
     if (this->m_BoxController->useWriteBuffer())
             this->m_BoxController->getDiskBuffer().objectDeleted(this);
-//-->     this->m_BoxController->getDiskBuffer().objectDeleted(this, m_fileNumEvents);
     // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
     //m_fileNumEvents = 0;
     data.clear();
     vec_t().swap(data); // Linux trick to really free the memory
-    //m_inMemory = false;
-    //m_dataAdded = false;
-    //m_dataModified = false;
+ 
     m_isLoaded=false;
     this->setBusy(false);
 
