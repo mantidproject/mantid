@@ -75,7 +75,7 @@ public:
     // 2. Set properties
     filter.setProperty("InputWorkspace", inpWS);
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
-    filter.setProperty("InputSplittersWorkspace", splws);
+    filter.setProperty("SplitterWorkspace", splws);
     filter.setProperty("DetectorCalibrationFile", "");
 
     // 3. Execute

@@ -11,8 +11,10 @@
 
 #include <sstream>
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -40,23 +42,23 @@ namespace Algorithms
 
   }
 
-  /*
-   * Declare Inputs
+  //----------------------------------------------------------------------------------------------
+  /** Declare Inputs
    */
   void FilterEvents::init()
   {
     declareProperty(
-      new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input),
-      "An input event workspace" );
+          new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input),
+          "An input event workspace" );
 
     declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
-      "The base name to use for the output workspace" );
+                    "The base name to use for the output workspace" );
 
-    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("SplittersInformationWorkspace", "", Direction::Input, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("InformationWorkspace", "", Direction::Input, PropertyMode::Optional),
         "Optional output for the information of each splitter workspace index.");
 
     declareProperty(
-        new API::WorkspaceProperty<DataObjects::SplittersWorkspace>("InputSplittersWorkspace", "", Direction::Input),
+        new API::WorkspaceProperty<DataObjects::SplittersWorkspace>("SplitterWorkspace", "", Direction::Input),
         "An input SpilltersWorskpace for filtering");
 
     this->declareProperty(new API::FileProperty("DetectorCalibrationFile", "", API::FileProperty::OptionalLoad, ".dat"),
@@ -71,19 +73,19 @@ namespace Algorithms
     return;
   }
 
-  /*
-   * Execution body
+  //----------------------------------------------------------------------------------------------
+  /** Execution body
    */
   void FilterEvents::exec()
   {
     // 1. Get inputs
     mEventWorkspace = this->getProperty("InputWorkspace");
-    mSplittersWorkspace = this->getProperty("InputSplittersWorkspace");
+    mSplittersWorkspace = this->getProperty("SplitterWorkspace");
     std::string outputwsnamebase = this->getProperty("OutputWorkspaceBaseName");
     std::string detcalfilename = this->getProperty("DetectorCalibrationFile");
     mFilterByPulseTime = this->getProperty("FilterByPulseTime");
 
-    mInformationWS = this->getProperty("SplittersInformationWorkspace");
+    mInformationWS = this->getProperty("InformationWorkspace");
     if (!mInformationWS)
     {
       mWithInfo = false;
@@ -122,7 +124,7 @@ namespace Algorithms
       API::IAlgorithm_sptr groupws = createChildAlgorithm("GroupWorkspaces", 0.99, 1.00, true);
       // groupws->initialize();
       groupws->setAlwaysStoreInADS(true);
-      groupws->setProperty("InputWorkspaces", mWsNames);
+      groupws->setProperty("InputWorkspaces", m_wsNames);
       groupws->setProperty("OutputWorkspace", groupname);
       groupws->execute();
       if (!groupws->isExecuted())
@@ -178,8 +180,8 @@ namespace Algorithms
     return;
   }
 
-  /*
-   * Create a list of EventWorkspace for output
+  //----------------------------------------------------------------------------------------------
+  /** Create a list of EventWorkspace for output
    */
   void FilterEvents::createOutputWorkspaces(std::string outputwsnamebase)
   {
@@ -203,7 +205,10 @@ namespace Algorithms
       // 1. Get workspace name
       int wsgroup = *groupit;
       std::stringstream wsname;
-      wsname << outputwsnamebase << "_" << wsgroup;
+      if (wsgroup >= 0)
+        wsname << outputwsnamebase << "_" << wsgroup;
+      else
+        wsname << outputwsnamebase << "_unfiltered";
       std::stringstream parname;
       parname << "OutputWorkspace_" << wsgroup;
 
@@ -241,9 +246,10 @@ namespace Algorithms
       mOutputWorkspaces.insert(std::make_pair(wsgroup, optws));
 
       // 4. Set to output workspace
-      this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(parname.str(), wsname.str(), Direction::Output), "Output");
+      this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(
+                              parname.str(), wsname.str(), Direction::Output), "Output");
       this->setProperty(parname.str(), optws);
-      mWsNames.push_back(wsname.str());
+      m_wsNames.push_back(wsname.str());
       AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
 
       g_log.debug() << "DB9141  Output Workspace:  Group = " << wsgroup << "  Property Name = " << parname.str() <<
@@ -356,8 +362,8 @@ namespace Algorithms
     return;
   }
 
-  /*
-   * Main filtering method
+  //----------------------------------------------------------------------------------------------
+  /** Main filtering method
    */
   void FilterEvents::filterEventsBySplitters()
   {
