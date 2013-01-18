@@ -222,7 +222,7 @@ namespace Mantid
       {
         if(m_hermite[i] == 0) continue;
 
-        const unsigned int npoly = 2*i; // Only even ones
+        const int npoly = 2*i; // Only even ones
         std::ostringstream os;
         os << HERMITE_PREFIX << npoly;
         const double hermiteCoeff = getParameter(os.str());
