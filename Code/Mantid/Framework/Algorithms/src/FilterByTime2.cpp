@@ -63,7 +63,7 @@ namespace Algorithms
 
   }
 
-  //-----------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Executes the algorithm
    */
   void FilterByTime2::exec()
@@ -114,10 +114,9 @@ namespace Algorithms
     genfilter->initialize();
     genfilter->setPropertyValue("InputWorkspace", inWS->getName());
     genfilter->setPropertyValue("OutputWorkspace", "FilterWS");
-    // genfilter->setPropertyValue("SplittersInformationWorkspace", "InfoWS");
     genfilter->setProperty("StartTime", start);
     genfilter->setProperty("StopTime", stop);
-    genfilter->setProperty("TimeType", "Seconds");
+    genfilter->setProperty("UnitOfTime", "Seconds");
 
     bool sucgen = genfilter->execute();
     if (!sucgen)
@@ -145,8 +144,7 @@ namespace Algorithms
     filter->initialize();
     filter->setPropertyValue("InputWorkspace", inWS->getName());
     filter->setPropertyValue("OutputWorkspaceBaseName", "ResultWS");
-    // filter->setPropertyValue("InputSplittersWorkspace", "FilterWS");
-    filter->setProperty("InputSplittersWorkspace", filterWS);
+    filter->setProperty("SplitterWorkspace", filterWS);
     filter->setProperty("FilterByPulseTime", true);
 
     bool sucfilt = filter->execute();
