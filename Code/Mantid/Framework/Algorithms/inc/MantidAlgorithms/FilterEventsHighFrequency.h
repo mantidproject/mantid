@@ -7,12 +7,15 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
+
 namespace Mantid
 {
 namespace Algorithms
 {
 
-  /** FilterEventsHighFrequency : TODO: DESCRIPTION
+  /** FilterEventsHighFrequency : Filter events by log of sample environment device operated in
+    high frequency.
     
     @date 2011-11-29
 
