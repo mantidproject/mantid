@@ -3,6 +3,7 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidKernel/VMD.h"
 #include <limits>
+#include <boost/make_shared.hpp>
 
 using NeXus::File;
 
