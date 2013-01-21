@@ -59,6 +59,8 @@ private:
       bool b_sortedDescending = this->isSortedDescending(potentiallySorted);
       TSM_ASSERT("The Workspace has not been sorted descending according to the column as expected", b_sortedDescending);
     }
+
+    TSM_ASSERT_DIFFERS("Output and Input Workspaces should be different objects.", outWS, inWS);
   }
 
   /**
@@ -170,6 +172,28 @@ public:
     const bool sortAscending = false;
 
     doExecute(inWS, columnOfInterestName, sortAscending);
+  }
+
+  void test_modify_workspace_in_place()
+  {
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+
+    SortPeaksWorkspace alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize())
+    TS_ASSERT( alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inWS));
+    alg.setPropertyValue("OutputWorkspace", "OutName");
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("OutputWorkspace", inWS));
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ColumnNameToSortBy", "h"));
+    TS_ASSERT_THROWS_NOTHING( alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    IPeaksWorkspace_sptr temp = alg.getProperty("OutputWorkspace");
+    PeaksWorkspace_sptr outWS = boost::dynamic_pointer_cast<PeaksWorkspace>(temp);
+
+    TSM_ASSERT_EQUALS("Sorting should have happened in place. Output and input workspaces should be the same.", outWS, inWS);
   }
 
 };

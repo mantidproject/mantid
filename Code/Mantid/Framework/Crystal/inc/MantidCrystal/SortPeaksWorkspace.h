@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid
 {
@@ -31,23 +32,23 @@ namespace Crystal
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SortPeaksWorkspace  : public API::Algorithm
-  {
-  public:
-    SortPeaksWorkspace();
-    virtual ~SortPeaksWorkspace();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
+    class DLLExport SortPeaksWorkspace: public API::Algorithm
+    {
+    public:
+      SortPeaksWorkspace();
+      virtual ~SortPeaksWorkspace();
 
-  private:
-    virtual void initDocs();
-    void init();
-    void exec();
+      virtual const std::string name() const;
+      virtual int version() const;
+      virtual const std::string category() const;
 
-
-  };
+    private:
+      virtual void initDocs();
+      void init();
+      void exec();
+      Mantid::DataObjects::PeaksWorkspace_sptr tryFetchOutputWorkspace() const;
+      Mantid::DataObjects::PeaksWorkspace_sptr tryFetchInputWorkspace() const;
+    };
 
 
 } // namespace Crystal
