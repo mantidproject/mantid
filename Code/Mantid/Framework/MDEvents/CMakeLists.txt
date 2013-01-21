@@ -24,7 +24,7 @@ set ( SRC_FILES
 	src/MDBox.cpp
 	src/MDBoxBase.cpp
 	src/MDBoxIterator.cpp
-    src/MDBoxFlatTree.cpp    
+    #src/MDBoxFlatTree.cpp    
 	src/MDBoxToChange.cpp
 	src/MDEventFactory.cpp
 	src/MDEventWSWrapper.cpp
@@ -88,7 +88,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDBox.h
 	inc/MantidMDEvents/MDBoxBase.h
 	inc/MantidMDEvents/MDBoxIterator.h
-    inc/MantidMDEvents/MDBoxFlatTree.h
+    #inc/MantidMDEvents/MDBoxFlatTree.h
 	inc/MantidMDEvents/MDBoxToChange.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
