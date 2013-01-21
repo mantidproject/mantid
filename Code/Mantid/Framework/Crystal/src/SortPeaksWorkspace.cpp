@@ -7,10 +7,12 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -74,7 +76,32 @@ namespace Crystal
    */
   void SortPeaksWorkspace::exec()
   {
-    // TODO Auto-generated execute stub
+     std::string columnToSortBy = getProperty("ColumnNameToSortBy");
+
+     IPeaksWorkspace_const_sptr temp = getProperty("InputWorkspace");
+     PeaksWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<const PeaksWorkspace>(temp);
+     if(inputWS == NULL)
+     {
+       throw std::invalid_argument("InputWorkspace is not a PeaksWorkspace.");
+     }
+
+     try
+     {
+       Column_const_sptr column = inputWS->getColumn(columnToSortBy);
+       PeaksWorkspace_sptr outputWorkspace =  boost::shared_ptr<PeaksWorkspace>(inputWS->clone());
+
+       // Perform the sorting.
+       std::vector< std::pair<std::string, bool> > sortCriteria;
+       sortCriteria.push_back( std::pair<std::string, bool>(columnToSortBy, true) );
+       outputWorkspace->sort(sortCriteria);
+
+       setProperty("OutputWorkspace", outputWorkspace);
+     }
+     catch(std::invalid_argument& ex)
+     {
+       this->g_log.error("Specified ColumnToSortBy does not exist");
+       throw ex;
+     }
 
   }
 
