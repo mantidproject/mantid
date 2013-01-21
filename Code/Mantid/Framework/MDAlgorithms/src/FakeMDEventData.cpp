@@ -367,7 +367,7 @@ namespace MDAlgorithms
       indexMax[d] = size_t((max-min)/step);
       if(indexMax[d]==0)indexMax[d]=1;
       // deal with round-off errors
-      while( (startPoint[d]+(indexMax[d]-1)*step) >= max ) step*=(1-FLT_EPSILON);
+      while( (startPoint[d]+double(indexMax[d]-1)*step) >= max ) step*=(1-FLT_EPSILON);
 
       delta[d]  = step;
 
