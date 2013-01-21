@@ -213,7 +213,7 @@ public:
     TS_ASSERT_EQUALS(2, box_controller.getNDims());
     TS_ASSERT_EQUALS(1, box_controller.getNumSplit());
     TS_ASSERT_EQUALS(0, box_controller.getMaxId());
-    TS_ASSERT_EQUALS(true, box_controller.useWriteBuffer());
+    //TS_ASSERT_EQUALS(true, box_controller.useWriteBuffer());
   }
 
 

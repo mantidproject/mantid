@@ -395,8 +395,8 @@ namespace API
     Mantid::Kernel::DiskBuffer & getDiskBuffer()
     { return m_diskBuffer; }
 
-    /** Return true if the DiskBuffer should be used */
-   // bool useWriteBuffer() const
+    /** Return true if the DiskBuffer should be used  -- in current edition it is always used*/
+    bool useWriteBuffer() const{return true;}
    // { return m_useWriteBuffer; }
 
     //-----------------------------------------------------------------------------------
