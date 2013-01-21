@@ -1,6 +1,7 @@
 #include "MantidDataObjects/PeakColumn.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <Poco/Mutex.h>
 
@@ -162,6 +163,24 @@ namespace DataObjects
       s << peak.getQLabFrame();
     else if (m_name == "QSample")
       s << peak.getQSampleFrame();
+    else if (m_name == "h")
+    {
+      int hklPrec = 2;
+      ConfigService::Instance().getValue("PeakColumn.hklPrec",hklPrec);
+      s << std::fixed << std::setprecision(hklPrec) << peak.getH();
+    }
+    else if (m_name == "k")
+    {
+      int hklPrec = 2;
+      ConfigService::Instance().getValue("PeakColumn.hklPrec",hklPrec);
+      s << std::fixed << std::setprecision(hklPrec) << peak.getK();
+    }
+    else if (m_name == "l")
+    {
+      int hklPrec = 2;
+      ConfigService::Instance().getValue("PeakColumn.hklPrec",hklPrec);
+      s << std::fixed << std::setprecision(hklPrec) << peak.getL();
+    }
     else
       s << peak.getValueByColName(m_name);
   }
