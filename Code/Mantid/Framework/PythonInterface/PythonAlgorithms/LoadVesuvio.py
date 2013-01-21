@@ -434,7 +434,7 @@ class LoadVesuvio(PythonAlgorithm):
             mon_values = mon_ws.readY(wsindex)
             mon_values_sum = np.sum(mon_values[mon_range_indices])
             foil_state = foil_ws.dataY(wsindex)
-            foil_state /= (self._mon_scale/mon_values_sum)
+            foil_state *= (self._mon_scale/mon_values_sum)
             err = foil_ws.dataE(wsindex)
             err *= (self._mon_scale/mon_values_sum)
 
