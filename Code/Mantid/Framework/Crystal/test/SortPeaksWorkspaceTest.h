@@ -21,9 +21,8 @@ private:
    * Execute the algorithm on the given input workspace and columnName.
    * @param inWS : Input workspace to sort
    * @param columnName : Column name to sort by
-   * @return Output workspace from algorithm execution
    */
-  PeaksWorkspace_sptr doExecute(IPeaksWorkspace_sptr inWS, const std::string& columnName)
+  void doExecute(IPeaksWorkspace_sptr inWS, const std::string& columnName, const bool sortAscending = true)
   {
     std::string outWSName("SortPeaksWorkspaceTest_OutputWS");
 
@@ -34,10 +33,32 @@ private:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inWS));
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ColumnNameToSortBy", columnName));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("SortAscending", sortAscending));
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    return AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName);
+    PeaksWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(outWSName);
+
+    // Extract the sorted column values out into a containtainer.
+    const size_t columnIndex = outWS->getColumnIndex(columnName);
+    std::vector<double> potentiallySorted;
+    for(size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex)
+    {
+      TableRow row = outWS->getRow(rowIndex);
+      potentiallySorted.push_back( row.Double(columnIndex) );
+    }
+
+    // Compare the contents of the container to determine how the column has been sorted.
+    if (sortAscending)
+    {
+      bool b_sortedAscending = this->isSortedAscending(potentiallySorted);
+      TSM_ASSERT("The Workspace has not been sorted ascending according to the column as expected", b_sortedAscending);
+    }
+    else
+    {
+      bool b_sortedDescending = this->isSortedDescending(potentiallySorted);
+      TSM_ASSERT("The Workspace has not been sorted descending according to the column as expected", b_sortedDescending);
+    }
   }
 
   /**
@@ -50,6 +71,18 @@ private:
   bool isSortedAscending(std::vector<T> potentiallySorted)
   {
     return std::adjacent_find(potentiallySorted.begin(), potentiallySorted.end(), std::greater<T>()) == potentiallySorted.end();
+  }
+
+  /**
+   * Helper method.
+   * Determine whether a vector is sorted Descending
+   * @param potentiallySorted : Vector that might be sorted descending.
+   * @return False if not sortedAscending
+   */
+  template<typename T>
+  bool isSortedDescending(std::vector<T> potentiallySorted)
+  {
+    return std::adjacent_find(potentiallySorted.begin(), potentiallySorted.end(), std::less<T>()) == potentiallySorted.end();
   }
 
 public:
@@ -103,24 +136,40 @@ public:
   void test_sort_by_H()
   {
     const std::string columnOfInterestName = "h";
+
+    // Create a peaks workspace and add some peaks with unordered H values.
     PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
-    PeaksWorkspace_sptr outWS = doExecute(inWS, columnOfInterestName);
+    Peak peak1;
+    peak1.setH(1);
+    Peak peak2;
+    peak2.setH(3);
+    Peak peak3;
+    peak3.setH(2);
+    inWS->addPeak(peak1);
+    inWS->addPeak(peak2);
+    inWS->addPeak(peak3);
 
-    const size_t columnIndex = outWS->getColumnIndex(columnOfInterestName);
-    std::vector<double> potentiallySorted;
-    for(size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex)
-    {
-      TableRow row = outWS->getRow(rowIndex);
-      potentiallySorted.push_back( row.Double(columnIndex) );
-    }
-    bool b_sortedAscending = this->isSortedAscending(potentiallySorted);
-    TSM_ASSERT("The Workspace has not been sorted correctly", b_sortedAscending);
-
+    doExecute(inWS, columnOfInterestName);
   }
 
-  void tryToSortEverthing()
+  void test_sort_by_H_Descending()
   {
+    const std::string columnOfInterestName = "h";
 
+    // Create a peaks workspace and add some peaks with unordered H values.
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    Peak peak1;
+    peak1.setH(0);
+    Peak peak2;
+    peak2.setH(2);
+    Peak peak3;
+    peak3.setH(1);
+    inWS->addPeak(peak1);
+    inWS->addPeak(peak2);
+    inWS->addPeak(peak3);
+    const bool sortAscending = false;
+
+    doExecute(inWS, columnOfInterestName, sortAscending);
   }
 
 };

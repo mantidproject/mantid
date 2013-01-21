@@ -66,9 +66,10 @@ namespace Crystal
     declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
 
     auto mustHave = boost::make_shared<MandatoryValidator<std::string> >();
-
     declareProperty("ColumnNameToSortBy", "", mustHave,
           "Column to sort by");
+
+    declareProperty("SortAscending", true, "Sort the OutputWorkspace by the target column in a Ascending fashion.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -76,8 +77,8 @@ namespace Crystal
    */
   void SortPeaksWorkspace::exec()
   {
-     std::string columnToSortBy = getProperty("ColumnNameToSortBy");
-
+     const std::string columnToSortBy = getProperty("ColumnNameToSortBy");
+     const bool sortAscending = getProperty("SortAscending");
      IPeaksWorkspace_const_sptr temp = getProperty("InputWorkspace");
      PeaksWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<const PeaksWorkspace>(temp);
      if(inputWS == NULL)
@@ -92,7 +93,7 @@ namespace Crystal
 
        // Perform the sorting.
        std::vector< std::pair<std::string, bool> > sortCriteria;
-       sortCriteria.push_back( std::pair<std::string, bool>(columnToSortBy, true) );
+       sortCriteria.push_back( std::pair<std::string, bool>(columnToSortBy, sortAscending) );
        outputWorkspace->sort(sortCriteria);
 
        setProperty("OutputWorkspace", outputWorkspace);
