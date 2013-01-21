@@ -134,6 +134,9 @@ curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
 
+# Defines the precision of h, k, and l when output in peak workspace table
+PeakColumn.hklPrec=2
+
 # Do not show 'invisible' workspaces
 MantidOptions.InvisibleWorkspaces=0
 
