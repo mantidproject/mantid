@@ -720,7 +720,7 @@ public:
     // Handle the disk DiskBuffer values
     bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0);
     // DiskBuffer won't be used
-    TS_ASSERT( !bc->useWriteBuffer());
+//    TS_ASSERT( !bc->useWriteBuffer());
     DiskBuffer & dbuf = bc->getDiskBuffer();
     // It is empty now
     TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
@@ -750,12 +750,15 @@ public:
     TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
     TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
 
-    TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  dbuf.getWriteBufferUsed(), 0);
+  //  TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  dbuf.getWriteBufferUsed(), 0);
+    TSM_ASSERT_EQUALS( "DiskBuffer has this object inside",  dbuf.getWriteBufferUsed(), 1000);
     TSM_ASSERT("Data is busy", c.isBusy() );
     TSM_ASSERT("Data is in memory", c.getInMemory() );
     // Done with the data.
     c.releaseEvents();
     TSM_ASSERT("Data is no longer busy", !c.isBusy() );
+    TSM_ASSERT("Data stillin memory", c.getInMemory() );
+    dbuf.flushCache();
     TSM_ASSERT("Data is not in memory", !c.getInMemory() );
     TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  dbuf.getWriteBufferUsed(), 0);
 

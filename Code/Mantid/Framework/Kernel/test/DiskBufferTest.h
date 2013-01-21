@@ -148,7 +148,7 @@ public:
   ISaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch) : ISaveable(id),
   is_loaded(false),m_ch(ch), m_memory(size)
   {
-    this->setFilePosition(pos,size); 
+    this->setFilePosition(pos,size,false); 
   }
   virtual void clearDataFromMemory()
   {
@@ -331,7 +331,7 @@ public:
 
   //--------------------------------------------------------------------------------
   /** Set a buffer size of 0 */
-  void test_basic_noWriteBuffer()
+  void test_basic_WriteBuffer()
   {
     // No write buffer
     DiskBuffer dbuf(0);
@@ -340,13 +340,17 @@ public:
     TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
 
     dbuf.toWrite(data[0]);
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,");
     dbuf.toWrite(data[1]);
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,");
     TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
     dbuf.toWrite(data[2]);
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,");
     dbuf.toWrite(data[3]);
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,");
     dbuf.toWrite(data[4]);
-    // Nothing gets written out
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "");
+    // Everything get written immidiately;
+    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,");
   }
 
 

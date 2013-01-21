@@ -99,8 +99,8 @@ namespace MDEvents
   void MDBox)::clear()
   {
     // Make sure the object is not in any of the disk MRUs, and mark any space it used as free
-    if (this->m_BoxController->useWriteBuffer())
-            this->m_BoxController->getDiskBuffer().objectDeleted(this);
+    //if (this->m_BoxController->useWriteBuffer())
+     this->m_BoxController->getDiskBuffer().objectDeleted(this);
     // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
@@ -196,7 +196,7 @@ namespace MDEvents
     if (this->wasSaved())
     {
       // Load and concatenate the events if needed
-      this->loadEvents();
+      this->load();
       // The data vector is busy - can't release the memory yet
       this->setBusy();
       // Tell the to-write buffer to write out/discard the object (when no longer busy)
@@ -223,8 +223,9 @@ namespace MDEvents
     if (this->wasSaved())
     {
       // Load and concatenate the events if needed
-      this->loadEvents();
-
+      //TODO: redesighn
+       MDBox<MDE,nd> *loader = const_cast<MDBox<MDE,nd> *>(this);
+       loader->load();  // this will set isLoaded to true if not already loaded;
       // The data vector is busy - can't release the memory yet
       this->setBusy();
 
@@ -248,22 +249,22 @@ namespace MDEvents
     // Data vector is no longer busy.
     this->setBusy(false);
 
-    if (this->wasSaved()) // if it was saved before, it knows its place
-    {
+//    if (this->wasSaved()) // if it was saved before, it knows its place
+//    {
       // If no write buffer is used, save it immediately if needed.
-      if (!this->m_BoxController->useWriteBuffer())
-      {
-        this->save();
-        this->clearDataFromMemory();
-      }
-    }
+//      if (!this->m_BoxController->useWriteBuffer())
+//      {
+//        this->save();
+//        this->clearDataFromMemory();
+//      }
+//    }
   }
 
 
   //-----------------------------------------------------------------------------------------------
   /** Call to save the data (if needed) and release the memory used.
    *  Called from the DiskBuffer.
-   *  If called directly presumes to know its file location
+   *  If called directly presumes to know its file location and [TODO: refactor this] needs the file to be open correctly on correct group 
    */
   TMDE(
   void MDBox)::save()const
@@ -273,7 +274,11 @@ namespace MDEvents
  
     // This will load and append events ONLY if needed.
    if (this->wasSaved())
-          this->loadEvents();  // this will set isLoaded to true if not already loaded;
+   {
+     //TODO: redesighn
+     MDBox<MDE,nd> *loader = const_cast<MDBox<MDE,nd> *>(this);
+     loader->load();  // this will set isLoaded to true if not already loaded;
+   }
 
       // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
    size_t numAllEvents = data.size();
@@ -281,8 +286,9 @@ namespace MDEvents
    {
         // this actually checks if the object knows its place (may be wrong place but no checks there
         if(this->wasSaved())  // Save at the ISaveable specified place
-          MDE::saveVectorToNexusSlab(this->data, this->m_BoxController->getFile(), this->getFilePosition(),
-                                     this->m_signal, this->m_errorSquared);
+          this->saveNexus(this->m_BoxController->getFile());
+        else
+          throw std::runtime_error(" Attempt to save undefined event");
    }
     
    
@@ -301,27 +307,35 @@ namespace MDEvents
     //std::cout << "Box " << this->getId() << " saving to " << m_fileIndexStart << std::endl;
     MDE::saveVectorToNexusSlab(this->data, file, this->getFilePosition(),
                                this->m_signal, this->m_errorSquared);
+
   }
 
 
   //-----------------------------------------------------------------------------------------------
   /** Load the box's Event data from an open nexus file.
    * The FileIndex start and numEvents must be set correctly already.
+   * Clear existing data from memory!
    *
    * @param file :: Nexus File object, must already by opened with MDE::openNexusData()
    */
   TMDE(
-  inline void MDBox)::loadNexus(::NeXus::File * file)
+  inline void MDBox)::loadNexus(::NeXus::File * file, bool setIsLoaded)
   {
     this->data.clear();
     uint64_t fileIndexStart = this->getFilePosition();
     uint64_t fileNumEvents  = this->getFileSize();
+    if(fileIndexStart == std::numeric_limits<uint64_t>::max())
+      throw(std::runtime_error("MDBox::loadNexus -- attempt to load box from undefined location"));
     MDE::loadVectorFromNexusSlab(this->data, file, fileIndexStart, fileNumEvents);
+
+   
+    this->m_isLoaded=setIsLoaded;
+  
   }
 
 
  TMDE(
- inline void MDBox)::loadEvents()const
+ inline void MDBox)::load()
  {
     // Is the data in memory right now (cached copy)?
     if (!m_isLoaded)
@@ -384,6 +398,17 @@ namespace MDEvents
     // Use the cached value if it is on disk
     double signalSum(0);
     double errorSum(0);
+
+    if (this->wasSaved()) // There are possible problems with disk buffered events, as saving calculates averages and these averages has to be added to memory contents
+    {
+      if(!m_isLoaded)  // events were saved,  averages calculated and stored 
+      {
+        // the partial data were not loaded from HDD but their averages should be calculated when loaded. Add them 
+         signalSum +=double(this->m_signal);
+         errorSum  +=double(this->m_errorSquared);
+      }
+    }
+    // calculate all averages from memory
     typename std::vector<MDE>::const_iterator it_end = data.end();
     for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; ++it)
     {
@@ -393,13 +418,6 @@ namespace MDEvents
         errorSum += static_cast<signal_t>(event.getErrorSquared());
     }
 
-
-    if (this->wasSaved()&& !this->m_isLoaded)
-    {
-      // In memory - just sum up everything
-      signalSum +=double(this->m_signal);
-      errorSum  +=double(this->m_errorSquared);
-    }
     this->m_signal = signal_t(signalSum);
     this->m_errorSquared=signal_t(errorSum);
 

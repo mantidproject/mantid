@@ -10,12 +10,12 @@ namespace Mantid
 namespace Kernel
 {
 
-
+#define DISK_BUFFER_SIZE_TO_REPORT_WRITE  10000
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
   DiskBuffer::DiskBuffer() :
-    m_useWriteBuffer(false),
+//    m_useWriteBuffer(false),
     m_writeBufferSize(50),
     m_writeBuffer_byId( m_writeBuffer.get<1>() ),
     m_writeBufferUsed(0),
@@ -33,7 +33,7 @@ namespace Kernel
    * @return
    */
   DiskBuffer::DiskBuffer(uint64_t m_writeBufferSize) :
-    m_useWriteBuffer(m_writeBufferSize > 0),
+//    m_useWriteBuffer(m_writeBufferSize > 0),
     m_writeBufferSize(m_writeBufferSize),
     m_writeBuffer_byId( m_writeBuffer.get<1>() ),
     m_writeBufferUsed(0),
@@ -63,7 +63,7 @@ namespace Kernel
   void DiskBuffer::toWrite(const ISaveable * item)
   {
     if (item == NULL) return;
-    if (!m_useWriteBuffer) return;
+//    if (!m_useWriteBuffer) return;
 
     m_mutex.lock();
 
@@ -124,7 +124,7 @@ namespace Kernel
    */
   void DiskBuffer::writeOldObjects()
   {
-    if (m_writeBufferUsed > 0)
+    if (m_writeBufferUsed > DISK_BUFFER_SIZE_TO_REPORT_WRITE)
       std::cout << "DiskBuffer:: Writing out " << m_writeBufferUsed << " events in " << m_writeBuffer.size() << " blocks." << std::endl;
 //    std::cout << getMemoryStr() << std::endl;
 //    std::cout << getFreeSpaceMap().size() << " entries in the free size map." << std::endl;
@@ -189,10 +189,11 @@ namespace Kernel
       }
     }
 
+    // use last object to clear NeXus buffer and actually write data to HDD
     if (obj)
     {
       // NXS needs to flush the writes to file by closing and re-opening the data block.
-      // For speed, it is best to do this only once per write dump.
+      // For speed, it is best to do this only once per write dump, using last object saved
       obj->flushData();
     }
 

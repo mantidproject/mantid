@@ -34,7 +34,7 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0),m_SplitThreshold(1024), m_numSplit(1), m_file(NULL), m_diskBuffer(), m_useWriteBuffer(true)
+    :nd(nd), m_maxId(0),m_SplitThreshold(1024), m_numSplit(1), m_file(NULL), m_diskBuffer()//, m_useWriteBuffer(true)
       {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -396,8 +396,8 @@ namespace API
     { return m_diskBuffer; }
 
     /** Return true if the DiskBuffer should be used */
-    bool useWriteBuffer() const
-    { return m_useWriteBuffer; }
+   // bool useWriteBuffer() const
+   // { return m_useWriteBuffer; }
 
     //-----------------------------------------------------------------------------------
     /** Set the memory-caching parameters for a file-backed
@@ -413,7 +413,7 @@ namespace API
       // Save the values
       m_diskBuffer.setWriteBufferSize(writeBufferSize);
       // If all caches are 0, don't use the MRU at all
-      m_useWriteBuffer = !(writeBufferSize==0);
+//      m_useWriteBuffer = !(writeBufferSize==0);
       m_bytesPerEvent = bytesPerEvent;
     }
 
@@ -507,8 +507,8 @@ namespace API
     /// Instance of the disk-caching MRU list.
     mutable Mantid::Kernel::DiskBuffer m_diskBuffer;
 
-    /// Do we use the DiskBuffer at all?
-    bool m_useWriteBuffer;
+    /// Do we use the DiskBuffer at all? Always use WB
+    // bool m_useWriteBuffer;
 
     /// Number of bytes in a single MDLeanEvent<> of the workspace.
     size_t m_bytesPerEvent;

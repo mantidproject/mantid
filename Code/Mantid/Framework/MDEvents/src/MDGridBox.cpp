@@ -815,6 +815,10 @@ namespace MDEvents
       // Create a task to split the newly created MDGridBox.
       ts->push(new FunctionTask(boost::bind(&MDGridBox<MDE,nd>::splitAllIfNeeded, &*gridbox, ts) ) );
     }
+    else
+    {
+      gridbox->splitAllIfNeeded(NULL);
+    }
   }
 
   //-----------------------------------------------------------------------------------------------

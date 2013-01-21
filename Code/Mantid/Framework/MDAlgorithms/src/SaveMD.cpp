@@ -221,9 +221,9 @@ namespace MDAlgorithms
     size_t chunkSize = bc->getDataChunk();
     if (update)
     {
-      uint64_t totalNumEvents = MDE::openNexusData(file);
+      uint64_t NumOldEvents = MDE::openNexusData(file);
       // Set it back to the new file handle
-      bc->setFile(file, filename, totalNumEvents);
+      bc->setFile(file, filename, NumOldEvents);
     }
     else
     {
@@ -257,18 +257,19 @@ namespace MDAlgorithms
       db.flushCache();
 
     }
-    else  // this will preserve file-based workspace and information in it as we are not loading old box data and not?
+    else  // this will preserve file-backed workspace and information in it as we are not loading old box data and not?
          // this would be right for binary axcess but questionable for Nexus --TODO: needs testing
     {
       Kernel::ISaveable::sortObjByFilePos(boxes);
       // calculate the box positions in the resulting file and save it on place
        uint64_t eventsStart=0;
+       bool rememberBoxIsSaved = MakeFileBacked;
        for(size_t i=0;i<boxes.size();i++)
        {
           MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);        
           if(!mdBox)continue;
           size_t nEvents = mdBox->getNPoints();
-          mdBox->setFilePosition(eventsStart,nEvents);
+          mdBox->setFilePosition(eventsStart,nEvents,rememberBoxIsSaved);
           eventsStart+=nEvents;
        }
 
@@ -304,34 +305,35 @@ namespace MDAlgorithms
        size_t numChildren = Box->getNumChildren();
        if (numChildren > 0)
        {
-          //// Make sure that all children are ordered. TODO: This might not be needed if the IDs are rigorously done
-          //size_t lastId = box->getChild(0)->getId();
-          //for (size_t i = 1; i < numChildren; i++)
-          //{
-          //  if (box->getChild(i)->getId() != lastId+1)
-          //    throw std::runtime_error("Non-sequential child ID encountered!");
-          //  lastId = box->getChild(i)->getId();
-          //}
+          // DEBUG:
+          // Make sure that all children are ordered. TODO: This might not be needed if the IDs are rigorously done
+          size_t lastId = Box->getChild(0)->getId();
+          for (size_t i = 1; i < numChildren; i++)
+          {
+            if (Box->getChild(i)->getId() != lastId+1)
+              throw std::runtime_error("Non-sequential child ID encountered!");
+            lastId = Box->getChild(i)->getId();
+          }
 
           box_children[id*2] = int(Box->getChild(0)->getId());
           box_children[id*2+1] = int(Box->getChild(numChildren-1)->getId());
           box_type[id] = 2;
-        }
-        else
-          box_type[id] = 1;
-
-
-
-       MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(Box);           
-       if(mdBox)
+          // no events but index defined
+          box_event_index[id*2]   = 0;
+          box_event_index[id*2+1] = 0;
+       }
+       else
        {
-            // Save the index
-            box_event_index[id*2]   = mdBox->getFilePosition();
-            box_event_index[id*2+1] = mdBox->getNPoints();
-            // save for the first time
-            if(!update)mdBox->saveNexus(file);
-            // Save, set that it is on disk and clear the actual events to free up memory
-            if (MakeFileBacked) mdBox->clearDataFromMemory();
+          box_type[id] = 1;
+          MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(Box);
+          if(!mdBox) throw std::runtime_error("found unfamiliar type of box");
+          // Store the index
+          box_event_index[id*2]   = mdBox->getFilePosition();
+          box_event_index[id*2+1] = mdBox->getNPoints();
+          // save for the first time
+          if(!update)mdBox->saveNexus(file);
+          // set that it is on disk and clear the actual events to free up memory, saving occured earlier
+          if (MakeFileBacked) mdBox->clearDataFromMemory();
 
        }
 

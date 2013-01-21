@@ -114,7 +114,7 @@ namespace Kernel
     void setWriteBufferSize(uint64_t buffer)
     {
       m_writeBufferSize = buffer;
-      m_useWriteBuffer = (buffer > 0);
+      //m_useWriteBuffer = (buffer > 0);
     }
 
     /// @return the size of the to-write buffer, in number of events
@@ -153,8 +153,8 @@ namespace Kernel
     Kernel::Mutex m_fileMutex;
 
     // ----------------------- To-write buffer --------------------------------------
-    /// Do we use the write buffer?
-    bool m_useWriteBuffer;
+    /// Do we use the write buffer? Always now
+    //bool m_useWriteBuffer;
 
     /// Amount of memory to accumulate in the write buffer before writing.
     uint64_t m_writeBufferSize;

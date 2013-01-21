@@ -57,8 +57,8 @@ namespace Kernel
     //-----------------------------------------------------------------------------------------------
 
     /// Save the data - to be overriden
-    virtual void save()const = 0;
-
+    virtual void save()const =0;
+  
     /// Load the data - to be overriden
     virtual void load() = 0;
 
@@ -104,15 +104,15 @@ namespace Kernel
     { return   m_fileNumEvents;}
 
     /** Sets the location of the object on HDD 
-        The method has side effects as wasSaved reports true after this function was used so one better save data immidiately after using this function
+        @param setSaved -- set object savedStatus to true. It is better to call save method immidiately after that
     */ 
-    void setFilePosition(uint64_t newPos,uint64_t newSize);   
+    void setFilePosition(uint64_t newPos,uint64_t newSize,bool setSaved=true);   
+  
 
+    virtual void clearFileState(){m_wasSaved=false;}
     /** function returns true if the object have ever been saved on HDD and knows it place there*/
     bool wasSaved()const
-    { 
-      return (std::numeric_limits<uint64_t>::max()!=m_fileIndexStart);
-    }
+    {  return m_wasSaved;  }
     // ----------------------------- Helper Methods --------------------------------------------------------
     static void sortObjByFilePos(std::vector<ISaveable *> & boxes);
     // -----------------------------------------------------------------------------------------------------
@@ -133,6 +133,7 @@ namespace Kernel
         when it decides it suitable,  if the size of iSavable object in cache is unchanged from the previous 
         save/load operation */
     bool m_dataChanged;
+    mutable bool m_wasSaved;
 
     /// the function saveAt has to be availible to DiskBuffer and nobody else. To highlight this we make it private
     friend class DiskBuffer;

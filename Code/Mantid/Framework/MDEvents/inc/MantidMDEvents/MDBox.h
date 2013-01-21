@@ -56,12 +56,7 @@ namespace MDEvents
     virtual void save()const;
 
     /// Load the data which are not in memory yet and merge them with the data in memory;
-    virtual void load()
-    {
-      this->loadEvents();
-    };
-
-
+    virtual void load();
    
     /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getMRUMemorySize() const
@@ -100,8 +95,13 @@ namespace MDEvents
 
    
     /// @return true if events were added to the box (using addEvent()) while the rest of the event list is cached to disk
-    bool getHasAddedEventsOnCached() const
-    { return (!m_isLoaded && (data.size() != 0)); }
+    bool isDataAdded() const
+    {
+      if(m_isLoaded)
+        return data.size()!=this->getFileSize();
+      else
+        return (data.size() != 0);
+    }
 
  
     /* Getter to determine if masking is applied.
@@ -117,10 +117,7 @@ namespace MDEvents
     // the same as getConstEvents above, 
     const std::vector< MDE > & getEvents()const;
 
-
     void releaseEvents() ;
-
-
 
     std::vector< MDE > * getEventsCopy();
 
@@ -149,7 +146,7 @@ namespace MDEvents
 
     void saveNexus(::NeXus::File * file) const;
 
-    void loadNexus(::NeXus::File * file);
+    void loadNexus(::NeXus::File * file, bool setLoaded=true);
 
     void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
     void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
@@ -167,8 +164,7 @@ namespace MDEvents
 
   protected:
 
-    inline void loadEvents()const ;
-
+  
     /** Vector of MDLeanEvent's, in no particular order.
      * */
     mutable std::vector< MDE > data;

@@ -254,7 +254,9 @@ public:
         if (box)
         {
           TSM_ASSERT("Large box should not be in memory", !box->getInMemory());
-          TSM_ASSERT("Large box should be cached to disk", box->getOnDisk());
+          TSM_ASSERT("Large box should be cached to disk", box->wasSaved());
+          TSM_ASSERT_EQUALS("Box should not have points in memory", box->getDataMemorySize(),0);
+
         }
       }
     }

@@ -518,6 +518,7 @@ namespace Mantid
               {
                 box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,-1);
                // Only the box structure is being loaded, so ISavable will be undefined (NeverSaved, 0 size data)
+                box->setFilePosition(std::numeric_limits<uint64_t>::max(), 0,false); // this should be default state of ISavable
               }
               else // !BoxStructureOnly)
               {
@@ -530,15 +531,15 @@ namespace Mantid
                 {
                   box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,-1);
                   // Set the index in the file in the box data
-                  box->setFilePosition(indexStart, numEvents);
+                  box->setFilePosition(indexStart, numEvents,true);
                 }
                 else
                 {
                   box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,int64_t(numEvents));
-                  // Set the index in the file in the box data
-                  box->setFilePosition(indexStart, numEvents);
+                  // Set the index in the file in the box data, and indicate that data were not saved
+                  box->setFilePosition(indexStart, numEvents,false);
                   // Load if NOT using the file as the back-end,
-                  box->loadNexus(file);
+                  box->loadNexus(file,false);
                 }           
               } // ifBoxStructureOnly
               ibox = box;
@@ -591,6 +592,7 @@ namespace Mantid
             size_t indexEnd   = box_children[i*2+1] + 1;
             boxes[i]->setChildren( boxes, indexStart, indexEnd);
           }
+           // Break boxes connection with the file
         }
 
         g_log.debug() << tim << " to give all the children to the boxes." << std::endl;
@@ -602,6 +604,7 @@ namespace Mantid
 
       } //end-of bMetaDataOnly
       // Refresh cache
+      //TODO:if(!FileBackEnd)ws->refreshCache();
       ws->refreshCache();
       g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh." << std::endl;
 

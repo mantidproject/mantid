@@ -13,7 +13,7 @@ namespace Kernel
    */
   ISaveable::ISaveable()
   : m_id(0),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),
-  m_Busy(false),m_dataChanged(false)
+  m_Busy(false),m_dataChanged(false),m_wasSaved(false)
   {
   }
 
@@ -22,13 +22,13 @@ namespace Kernel
    */
   ISaveable::ISaveable(const ISaveable & other)
   : m_id(other.m_id),m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents),
-   m_Busy(other.m_Busy),m_dataChanged(other.m_dataChanged)
+   m_Busy(other.m_Busy),m_dataChanged(other.m_dataChanged),m_wasSaved(other.m_wasSaved)
   {
   }
 
  ISaveable::ISaveable(const size_t id)
   : m_id(id),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),
-    m_Busy(false),m_dataChanged(false)
+    m_Busy(false),m_dataChanged(false),m_wasSaved(false)
   {
   }
 
@@ -45,6 +45,7 @@ namespace Kernel
       this->load(); 
       m_fileIndexStart= newPos;
       m_fileNumEvents = newSize;
+      m_wasSaved   = true;
       this->save();
       this->clearDataFromMemory();
       m_dataChanged = false;
@@ -53,10 +54,11 @@ namespace Kernel
   /** Set the start/end point in the file where the events are located
      * @param start :: start point,
      * @param numEvents :: number of events in the file   */
-    void ISaveable::setFilePosition(uint64_t newPos,uint64_t newSize)
+    void ISaveable::setFilePosition(uint64_t newPos,uint64_t newSize, bool wasSaved)
     {  
       m_fileIndexStart=newPos;  
       m_fileNumEvents =newSize;
+      m_wasSaved = wasSaved;
     }
 
 
@@ -71,7 +73,7 @@ namespace Kernel
   
   inline bool CompareFilePosition (const ISaveable * a, const ISaveable * b)
   {
-    return (a->getFilePosition() < b->getFilePosition());
+    return (a->getId() < b->getId());
   }
 
   //-----------------------------------------------------------------------------------------------
