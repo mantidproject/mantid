@@ -181,7 +181,7 @@ namespace MDAlgorithms
     // store wrute buffer size for the future 
     uint64_t writeBufSize = bc->getDiskBuffer().getWriteBufferSize();
     // and disable write buffer (if any) for input MD Events for this algorithm purposes;
-    bc->setCacheParameters(1,0);
+    //bc->setCacheParameters(1,0);
 
     BoxController_sptr obc = outWS->getBoxController();
     // Use the "number of bins" as the "split into" parameter
@@ -193,6 +193,10 @@ namespace MDAlgorithms
     int tempDepth =  getProperty("MaxRecursionDepth");
     size_t maxDepth = bTakeDepthFromInputWorkspace? bc->getMaxDepth() : size_t(tempDepth);
     obc->setMaxDepth(maxDepth);
+    // the buffer size for resulting workspace; reasonable size is at least 10 data chunk sizes (nice to verify)
+    size_t outputSize = writeBufSize;
+    if(outputSize<10*obc->getDataChunk())outputSize=10*obc->getDataChunk();
+    obc->setCacheParameters(sizeof(OMDE),outputSize);
 
     obc->resetNumBoxes();
     // Perform the first box splitting
