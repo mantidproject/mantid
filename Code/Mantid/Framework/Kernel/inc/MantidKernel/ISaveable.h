@@ -3,6 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include <vector>
+#include <algorithm>
 
 namespace Mantid
 {
