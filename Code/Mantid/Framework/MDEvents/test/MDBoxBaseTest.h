@@ -24,24 +24,31 @@ class MDBoxBaseTester : public MDBoxBase<MDE,nd>
 {
 public:
   MDBoxBaseTester()
-  : MDBoxBase<MDE,nd>(), m_filePos(0)
-  { }
+  : MDBoxBase<MDE,nd>()
+  {     
+    this->setFilePosition(0,1,false);
+  }
   MDBoxBaseTester(uint64_t filePos)
-  : MDBoxBase<MDE,nd>(), m_filePos(filePos)
-  { }
+  : MDBoxBase<MDE,nd>()
+  { 
+    this->setId(filePos);
+    this->setFilePosition(filePos,10,false);
+  }
 
   MDBoxBaseTester(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
   : MDBoxBase<MDE,nd>(extentsVector)
-  { }
+  { 
+    this->setFilePosition(0,10,false);
+  }
 
   /// Clear all contained data
   virtual void clear()
   {}
 
-  /// Get total number of points
-  virtual uint64_t getNPoints() const
-  {return 0;}
-
+  virtual uint64_t getNPoints()const
+  {
+    return this->getFileSize();
+  }
   /// Get number of dimensions
   virtual size_t getNumDims() const
   {return nd;}
@@ -106,9 +113,6 @@ public:
     throw std::runtime_error("MDBoxBaseTester does not implement unmask");
   }
 
-  uint64_t getFilePosition() const
-  { return m_filePos; }
-  uint64_t m_filePos;
 };
 
 
@@ -399,12 +403,18 @@ public:
   {
     std::vector<Kernel::ISaveable *> boxes;
     // 10 to 1 in reverse order
+
     for (uint64_t i=0; i<10; i++)
+    {
       boxes.push_back(new MDBoxBaseTester<MDLeanEvent<1>,1>(10-i));
+    }
     Kernel::ISaveable::sortObjByFilePos(boxes);
     // After sorting, they are in the right order 1,2,3, etc.
     for (uint64_t i=0; i<10; i++)
-      { TS_ASSERT_EQUALS( boxes[i]->getFilePosition(), i+1); }
+    {
+        TS_ASSERT_EQUALS( boxes[i]->getFilePosition(), i+1); 
+        delete boxes[i];
+    }
   }
 
 
