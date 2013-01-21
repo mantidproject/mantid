@@ -47,8 +47,7 @@ namespace Kernel
       m_fileNumEvents = newSize;
       m_wasSaved   = true;
       this->save();
-      this->clearDataFromMemory();
-      m_dataChanged = false;
+      this->clearDataFromMemory();      
   }
 
   /** Set the start/end point in the file where the events are located

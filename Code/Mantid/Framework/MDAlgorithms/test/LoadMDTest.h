@@ -286,7 +286,7 @@ public:
 
     // Modify that by adding some boxes
     MDGridBox<MDLeanEvent<nd>,nd> * box = dynamic_cast<MDGridBox<MDLeanEvent<nd>,nd>*>(ws2->getBox());
-    // Now there are 54 boxes
+    // Now there are 1000+1000 boxes (the box 12 was split into 10x10x10)
     box->splitContents(12);
 
     // And add an ExperimentInfo thingie
@@ -298,6 +298,8 @@ public:
     MDLeanEvent<nd> ev(1.0, 1.0);
     for (size_t d=0; d<nd; d++) ev.setCenter(d, 0.5);
     box->addEvent(ev);
+    // CHANGE from AB: 20/01/2013: you have to split to identify changes!
+    box->splitAllIfNeeded(NULL);
 
     // Modify a different box by accessing the events
     MDBox<MDLeanEvent<nd>,nd> * box8 = dynamic_cast<MDBox<MDLeanEvent<nd>,nd>*>(box->getChild(8));

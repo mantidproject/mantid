@@ -538,8 +538,9 @@ namespace Mantid
                   box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,int64_t(numEvents));
                   // Set the index in the file in the box data, and indicate that data were not saved
                   box->setFilePosition(indexStart, numEvents,false);
-                  // Load if NOT using the file as the back-end,
-                  box->loadNexus(file,false);
+                  if(numEvents>0) // Load if NOT using the file as the back-end,
+                    box->loadNexus(file,false);
+                  // else --> well, it was an empty box TODO: something about it but it is substantial redesighn
                 }           
               } // ifBoxStructureOnly
               ibox = box;

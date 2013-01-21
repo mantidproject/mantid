@@ -77,10 +77,15 @@ namespace Kernel
 
 
     /// @return true if it the data of the object is busy and so cannot be cleared; false if the data was released and can be cleared/written.
-    bool isBusy() const{return m_Busy;}
+    bool isBusy() const
+    {
+      return m_Busy;
+    }
     /// @ set the data busy to prevent from removing them from memory. The process which does that should clean the data when finished with them
     void setBusy(bool On=true)const
-       {m_Busy=On;}
+    {
+     m_Busy=On;
+    }
 
     bool isDataChanged()const{return m_dataChanged;}
 
@@ -90,7 +95,8 @@ namespace Kernel
     { 
       if(this->wasSaved())m_dataChanged=true;
     }
-    /// this method has to be called if the object has been discarded from memory manually but need to remain on HDD. BAD desighn
+    /** this method has to be called if the object has been discarded from memory and is not changed any more. 
+    It expected to be called from clearDataFromMemory. */
     void resetDataChanges()
     {
       m_dataChanged=false;
@@ -98,21 +104,33 @@ namespace Kernel
 
     /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
     virtual uint64_t getFilePosition() const
-    {return m_fileIndexStart;}
+    {
+      return m_fileIndexStart;
+    }
     /**Return the number of units this block occipies on file */
     uint64_t getFileSize()const
-    { return   m_fileNumEvents;}
+    { 
+      return   m_fileNumEvents;
+    }
 
     /** Sets the location of the object on HDD 
-        @param setSaved -- set object savedStatus to true. It is better to call save method immidiately after that
+       @param newPos   -- the position of the object in the object's  array
+       @param newSize  -- the size of the object in the object's arrau
+       @param setSaved -- set object savedStatus to true. It is better to call save method immidiately after that
+                          non-file based worksapce should set it to false to forget about the file, this object was loaded from
     */ 
     void setFilePosition(uint64_t newPos,uint64_t newSize,bool setSaved=true);   
   
 
-    virtual void clearFileState(){m_wasSaved=false;}
+    virtual void clearFileState()
+    {
+      m_wasSaved=false;
+    }
     /** function returns true if the object have ever been saved on HDD and knows it place there*/
     bool wasSaved()const
-    {  return m_wasSaved;  }
+    {  
+      return m_wasSaved;  
+    }
     // ----------------------------- Helper Methods --------------------------------------------------------
     static void sortObjByFilePos(std::vector<ISaveable *> & boxes);
     // -----------------------------------------------------------------------------------------------------

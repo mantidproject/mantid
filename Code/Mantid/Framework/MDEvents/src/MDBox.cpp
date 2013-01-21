@@ -119,6 +119,7 @@ namespace MDEvents
     vec_t().swap(data); // Linux trick to really free the memory
     m_isLoaded=false; 
     this->setBusy(false);
+    // mark data unchanged
     this->resetDataChanges();
 
   }
@@ -271,26 +272,26 @@ namespace MDEvents
   {
   //      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
 
- 
-    // This will load and append events ONLY if needed.
+
+   // this aslo indirectly checks if the object knows its place (may be wrong place but no checks for that here)
    if (this->wasSaved())
    {
-     //TODO: redesighn
-     MDBox<MDE,nd> *loader = const_cast<MDBox<MDE,nd> *>(this);
-     loader->load();  // this will set isLoaded to true if not already loaded;
-   }
+     //TODO: redesighn const_cast
+    // This will load and append events ONLY if needed.
+      MDBox<MDE,nd> *loader = const_cast<MDBox<MDE,nd> *>(this);
+      loader->load();  // this will set isLoaded to true if not already loaded;
+   
 
       // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
-   size_t numAllEvents = data.size();
-   if (numAllEvents > 0)
-   {
-        // this actually checks if the object knows its place (may be wrong place but no checks there
-        if(this->wasSaved())  // Save at the ISaveable specified place
+      if (data.size() > 0)
+      {
+
+         // Save at the ISaveable specified place
           this->saveNexus(this->m_BoxController->getFile());
-        else
-          throw std::runtime_error(" Attempt to save undefined event");
-   }
-    
+      }
+   } 
+   else
+     if(data.size()>0)  throw std::runtime_error(" Attempt to save undefined event");
    
    
   }
