@@ -71,8 +71,8 @@ namespace Algorithms
     DataObjects::EventWorkspace_sptr mEventWorkspace;
     DataObjects::SplittersWorkspace_sptr mSplittersWorkspace;
 
-    std::set<int> mWorkspaceGroups;
-    Kernel::TimeSplitterType mSplitters;
+    std::set<int> m_workGroupIndexes;
+    Kernel::TimeSplitterType m_splitters;
     std::map<int, DataObjects::EventWorkspace_sptr> mOutputWorkspaces;
     std::vector<std::string> m_wsNames;
 

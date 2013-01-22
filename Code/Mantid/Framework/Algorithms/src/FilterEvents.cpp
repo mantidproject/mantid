@@ -16,6 +16,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+using namespace std;
+
 namespace Mantid
 {
 namespace Algorithms
@@ -100,10 +102,26 @@ namespace Algorithms
     progress(mProgress, "Processing SplittersWorkspace.");
     processSplittersWorkspace();
 
-
     mProgress = 0.1;
     progress(mProgress, "Create Output Workspaces.");
     createOutputWorkspaces(outputwsnamebase);
+
+    /*
+    DateAndTime splitter_t0 = m_splitters[0].start();
+    DateAndTime splitter_tf = m_splitters.back().stop();
+    Kernel::TimeSeriesProperty<double>* protonchargelog =
+        dynamic_cast<Kernel::TimeSeriesProperty<double>* >(mEventWorkspace->run().getProperty("proton_charge"));
+    DateAndTime startime = mEventWorkspace->getFirstPulseTime();
+    DateAndTime endtime = protonchargelog->lastTime();
+
+    int64_t diff_start = splitter_t0.totalNanoseconds()-startime.totalNanoseconds();
+    int64_t diff_end = endtime.totalNanoseconds() - splitter_tf.totalNanoseconds();
+
+    stringstream dbinfo;
+    dbinfo << "1st splitter starts " << diff_start << " (ns) from first pulse time. "
+           << "Last splitter ends " << diff_end << " (ns) before last proton charge log time.";
+    g_log.notice(dbinfo.str());
+    */
 
     progress(0.2);
     importDetectorTOFCalibration(detcalfilename);
@@ -136,44 +154,46 @@ namespace Algorithms
     return;
   }
 
-  /*
-   * Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
-   * and create a map for all workspace group number
+  //----------------------------------------------------------------------------------------------
+  /** Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
+   *  and create a map for all workspace group number
    */
   void FilterEvents::processSplittersWorkspace()
   {
     // 1. Init data structure
     size_t numsplitters = mSplittersWorkspace->getNumberSplitters();
-    mSplitters.reserve(numsplitters);
+    m_splitters.reserve(numsplitters);
 
     // 2. Insert all splitters
     bool inorder = true;
     for (size_t i = 0; i < numsplitters; i ++)
     {
-      mSplitters.push_back(mSplittersWorkspace->getSplitter(i));
-      mWorkspaceGroups.insert(mSplitters.back().index());
+      m_splitters.push_back(mSplittersWorkspace->getSplitter(i));
+      m_workGroupIndexes.insert(m_splitters.back().index());
 
-      if (inorder && i > 0 && mSplitters[i] < mSplitters[i-1])
+      if (inorder && i > 0 && m_splitters[i] < m_splitters[i-1])
         inorder = false;
     }
-    mProgress = 0.5;
+    mProgress = 0.05;
     progress(mProgress);
 
     // 3. Order if not ordered and add workspace for events excluded
     if (!inorder)
     {
-      std::sort(mSplitters.begin(), mSplitters.end());
+      std::sort(m_splitters.begin(), m_splitters.end());
     }
-    mWorkspaceGroups.insert(-1);
 
-    // 4. Add information
+    // 4. Add extra workgroup index for unfiltered events
+    m_workGroupIndexes.insert(-1);
+
+    // 5. Add information
     if (mWithInfo)
     {
-      if (mWorkspaceGroups.size() > mInformationWS->rowCount()+1)
+      if (m_workGroupIndexes.size() > mInformationWS->rowCount()+1)
       {
-        g_log.warning() << "Input Splitters Workspace has different entries (" << mWorkspaceGroups.size() -1 <<
-            ") than input information workspaces (" << mInformationWS->rowCount() << "). "
-            << "  Information may not be accurate. " << std::endl;
+        g_log.warning() << "Input Splitters Workspace has different entries (" << m_workGroupIndexes.size() -1
+                        << ") than input information workspaces (" << mInformationWS->rowCount() << "). "
+                        << "  Information may not be accurate. " << std::endl;
       }
     }
 
@@ -200,7 +220,7 @@ namespace Algorithms
 
     // Set up new workspaces
     std::set<int>::iterator groupit;
-    for (groupit = mWorkspaceGroups.begin(); groupit != mWorkspaceGroups.end(); ++groupit)
+    for (groupit = m_workGroupIndexes.begin(); groupit != m_workGroupIndexes.end(); ++groupit)
     {
       // 1. Get workspace name
       int wsgroup = *groupit;
@@ -390,7 +410,7 @@ namespace Algorithms
       const DataObjects::EventList& input_el = mEventWorkspace->getEventList(iws);
 
       // c) Perform the filtering (using the splitting function and just one output)
-      input_el.splitByFullTime(mSplitters, outputs, mCalibOffsets[iws]);
+      input_el.splitByFullTime(m_splitters, outputs, mCalibOffsets[iws]);
 
       mProgress = 0.2+0.8*double(iws)/double(numberOfSpectra);
       progress(mProgress);
@@ -443,9 +463,9 @@ namespace Algorithms
   void FilterEvents::generateSplitters(int wsindex, Kernel::TimeSplitterType& splitters)
   {
     splitters.clear();
-    for (size_t isp = 0; isp < mSplitters.size(); ++ isp)
+    for (size_t isp = 0; isp < m_splitters.size(); ++ isp)
     {
-      Kernel::SplittingInterval splitter = mSplitters[isp];
+      Kernel::SplittingInterval splitter = m_splitters[isp];
       int index = splitter.index();
       if (index == wsindex)
       {
