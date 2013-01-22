@@ -44,7 +44,9 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
                                    , direction),
     m_action(action),
     m_defaultExt(""),
-    m_runFileProp(false)
+    m_runFileProp(false),
+    m_oldLoadPropValue(""),
+    m_oldLoadFoundFile("")
 {
   setUp((exts.size() > 0) ? exts.front() : "");
 }
@@ -69,7 +71,9 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
       , direction),
     m_action(action),
     m_defaultExt(ext),
-    m_runFileProp(false)
+    m_runFileProp(false),
+    m_oldLoadPropValue(""),
+    m_oldLoadFoundFile("")
 {
   setUp(ext);
 }
@@ -248,39 +252,56 @@ void addExtension(const std::string &extension, std::vector<std::string> &extens
  */
 std::string FileProperty::setLoadProperty(const std::string & propValue)
 {
+  // determine the initial version of foundFile
   std::string foundFile("");
-  if( m_runFileProp )
+  if ((propValue == m_oldLoadPropValue) && (!m_oldLoadFoundFile.empty()))
   {
-    std::set<std::string> allowedExts(allowedValues());
-    std::vector<std::string> exts;
-    if (!m_defaultExt.empty())
-    {
-      addExtension(m_defaultExt, exts);
-
-      std::string lower(m_defaultExt);
-      std::transform(m_defaultExt.begin(), m_defaultExt.end(), lower.begin(), tolower);
-      addExtension(lower, exts);
-
-      std::string upper(m_defaultExt);
-      std::transform(m_defaultExt.begin(), m_defaultExt.end(), upper.begin(), toupper);
-      addExtension(upper, exts);
-    }
-    for(std::set<std::string>::iterator it = allowedExts.begin();it!=allowedExts.end();++it)
-    {
-      std::string lower(*it); 
-      std::string upper(*it); 
-      std::transform(it->begin(), it->end(), lower.begin(), tolower);
-      std::transform(it->begin(), it->end(), upper.begin(), toupper);
-      addExtension(*it, exts);
-      addExtension(lower, exts);
-      addExtension(upper, exts);
-    }
-    foundFile = FileFinder::Instance().findRun(propValue, exts);
+    foundFile = m_oldLoadFoundFile;
   }
-  else
+
+  // cache the new version of propValue
+  m_oldLoadPropValue = propValue;
+
+  // if foundFile is not empty then it is the cached file
+  if (foundFile.empty())
   {
-    foundFile = FileFinder::Instance().getFullPath(propValue);
+    if( m_runFileProp ) // runfiles go through FileFinder::findRun
+    {
+      std::set<std::string> allowedExts(allowedValues());
+      std::vector<std::string> exts;
+      if (!m_defaultExt.empty())
+      {
+        addExtension(m_defaultExt, exts);
+
+        std::string lower(m_defaultExt);
+        std::transform(m_defaultExt.begin(), m_defaultExt.end(), lower.begin(), tolower);
+        addExtension(lower, exts);
+
+        std::string upper(m_defaultExt);
+        std::transform(m_defaultExt.begin(), m_defaultExt.end(), upper.begin(), toupper);
+        addExtension(upper, exts);
+      }
+      for(std::set<std::string>::iterator it = allowedExts.begin();it!=allowedExts.end();++it)
+      {
+        std::string lower(*it);
+        std::string upper(*it);
+        std::transform(it->begin(), it->end(), lower.begin(), tolower);
+        std::transform(it->begin(), it->end(), upper.begin(), toupper);
+        addExtension(*it, exts);
+        addExtension(lower, exts);
+        addExtension(upper, exts);
+      }
+      foundFile = FileFinder::Instance().findRun(propValue, exts);
+    }
+    else // non-runfiles go through FileFinder::getFullPath
+    {
+      foundFile = FileFinder::Instance().getFullPath(propValue);
+    }
   }
+
+  // cache the new version of foundFile
+  m_oldLoadFoundFile = foundFile;
+
   if( foundFile.empty() )
   {
     return PropertyWithValue<std::string>::setValue(propValue);

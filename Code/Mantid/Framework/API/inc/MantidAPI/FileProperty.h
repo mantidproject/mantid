@@ -97,6 +97,10 @@ public:
   std::string m_defaultExt;
   /// Is this property for run files?
   bool m_runFileProp;
+  /// Last value of propValue used in @link FileProperty::setLoadProperty.
+  std::string m_oldLoadPropValue;
+  /// Last value of foundFile used in @link FileProperty::setLoadProperty.
+  std::string m_oldLoadFoundFile;
 
   /// Private, unimplemented copy assignment operator
   FileProperty& operator=( const FileProperty& right );
