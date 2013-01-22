@@ -862,6 +862,22 @@ target_link_libraries ( MantidPlot
 # Custom Info.plist file for OS X
 ###########################################################################
 if( APPLE )
+  # Setting the CFBundleIdentifer attribute on OS X 10.6 (SL) and before
+  # causes problems with trying to install the package on the same
+  # machine as it was built. It tries to relocate the package to the build directory
+  # because the bundle identifiers match. Mountain Lion requires the attribute
+  # to avoid crashes when accessing certain system dialogs from Qt.
+  # The ideal would be to pass the --no-relocate
+  # option to packagemaker but we can't control that so only set the
+  # identifier for 10.7 and above
+  #
+  # This can disappear when if/when we move to a drag-n-drop package.
+  if (OSX_VERSION VERSION_GREATER 10.7 OR OSX_VERSION VERSION_EQUAL 10.7)
+    set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidPlot" )
+  else()
+    set ( MAC_BUNDLE_IDENTIFIER "" )
+  endif()
+
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../Installers/MacInstaller/Info.plist.in
                    ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
                    @ONLY )

@@ -16,7 +16,7 @@
 	<key>CFBundleIconFile</key>
 	<string>MantidPlot.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.mantidproject.MantidPlot</string>
+	<string>@MAC_BUNDLE_IDENTIFIER@</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleLongVersionString</key>
