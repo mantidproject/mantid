@@ -52,8 +52,14 @@ namespace API
     if (!this->m_deprecatdDate.empty())
       msg << " (on " << this->m_deprecatdDate << ")";
 
-    if (!this->m_replacementAlgorithm.empty())
-      msg << ". Use " << this->m_replacementAlgorithm << " instead." << std::endl;
+    if (this->m_replacementAlgorithm.empty())
+    {
+      msg << " and has no replacement.";
+    }
+    else
+    {
+      msg << ". Use " << this->m_replacementAlgorithm << " instead.";
+    }
 
     return msg.str();
   }
