@@ -510,7 +510,7 @@
              <number>0</number>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="page_5">
              <layout class="QGridLayout" name="gridLayout_4">
@@ -596,8 +596,8 @@
             </widget>
             <widget class="QWidget" name="page_6">
              <layout class="QGridLayout" name="gridLayout_10">
-              <item row="0" column="6">
-               <spacer name="horizontalSpacer_10">
+              <item row="1" column="1">
+               <spacer name="horizontalSpacer_16">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -609,67 +609,101 @@
                 </property>
                </spacer>
               </item>
-              <item row="0" column="0">
-               <spacer name="horizontalSpacer">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
+              <item row="1" column="0">
+               <layout class="QHBoxLayout" name="horizontalLayout_35">
+                <item>
+                 <widget class="QCheckBox" name="ckDetailedBalance">
+                  <property name="text">
+                   <string>Detailed Balance</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="leDetailedBalance">
+                  <property name="maximumSize">
+                   <size>
+                    <width>112</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>300</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="valDetailedBalance">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text">
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lbDBKelvin">
+                  <property name="text">
+                   <string>Kelvin</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_10">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
               </item>
-              <item row="0" column="2">
-               <widget class="QCheckBox" name="ckDetailedBalance">
-                <property name="text">
-                 <string>Detailed Balance</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="3">
-               <widget class="QLineEdit" name="leDetailedBalance">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>40</width>
-                  <height>300</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>Temperature value to use in Detailed Balance.</string>
-                </property>
-                <property name="text">
-                 <string>300</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="5">
-               <widget class="QLabel" name="lbDBKelvin">
-                <property name="text">
-                 <string>Kelvin</string>
-                </property>
-                <property name="buddy">
-                 <cstring>leDetailedBalance</cstring>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="4">
-               <widget class="QLabel" name="valDetailedBalance">
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text">
-                 <string>*</string>
-                </property>
-               </widget>
+              <item row="1" column="2">
+               <layout class="QHBoxLayout" name="horizontalLayout_38">
+                <item>
+                 <widget class="QCheckBox" name="ckScaleMultiplier">
+                  <property name="text">
+                   <string>Scale: Multiply by</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="leScaleMultiplier">
+                  <property name="text">
+                   <string>1.0</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="valScaleMultiplier">
+                  <property name="text">
+                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#ff0000;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -889,7 +923,7 @@
        <item>
         <widget class="QStackedWidget" name="swRebin">
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="page_9">
           <layout class="QVBoxLayout" name="verticalLayout_15">
@@ -3117,8 +3151,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>ckUseCalib</tabstop>
   <tabstop>ckRunDiag</tabstop>
   <tabstop>ckRunAbsol</tabstop>
-  <tabstop>leDetailedBalance</tabstop>
-  <tabstop>ckDetailedBalance</tabstop>
   <tabstop>cbAnalyser</tabstop>
   <tabstop>leVanEi</tabstop>
   <tabstop>leVanELow</tabstop>

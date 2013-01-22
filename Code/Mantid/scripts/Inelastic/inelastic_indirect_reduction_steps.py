@@ -53,8 +53,8 @@ class LoadData(ReductionStep):
             loader_name = loader_handle.getPropertyValue("LoaderName")
 
             if mtd[file].getInstrument().getName() == 'BASIS':
-		ModeratorTzero(file, file)
-		basis_mask = mtd[file].getInstrument().getStringParameter(
+                ModeratorTzero(file, file)
+                basis_mask = mtd[file].getInstrument().getStringParameter(
                     'Workflow.MaskFile')[0]
                 # Quick hack for older BASIS files that only have one side
                 #if (mtd[file].getRun()['run_number'] < 16693):
@@ -717,6 +717,32 @@ class DetailedBalance(ReductionStep):
         
     def set_temperature(self, temp):
         self._temp = temp
+            
+class Scaling(ReductionStep):
+    """
+    """
+    _scale_factor = None
+    _multiple_frames = False
+    
+    def __init__(self, MultipleFrames=False):
+        super(Scaling, self).__init__()
+        self._scale_factor = None
+        self._multiple_frames = MultipleFrames
+        
+    def execute(self, reducer, file_ws):
+        if self._scale_factor is None: # Scale factor is the default value, 1.0
+            return
+
+        if ( self._multiple_frames ):
+            workspaces = mtd[file_ws].getNames()
+        else:
+            workspaces = [file_ws]
+
+        for ws in workspaces:
+            Scale(ws, ws, self._scale_factor, Operation="Multiply")
+        
+    def set_scale_factor(self, scaleFactor):
+        self._scale_factor = scaleFactor
             
 class Grouping(ReductionStep):
     """This ReductionStep handles the grouping and renaming of the final

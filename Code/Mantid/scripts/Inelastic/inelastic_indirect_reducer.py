@@ -27,6 +27,7 @@ class IndirectReducer(MSGReducer):
     _detailed_balance_temp = None
     _rename_result = True
     _save_to_cm_1 = False
+    _scale_factor = None
     
     def __init__(self):
         """
@@ -38,6 +39,7 @@ class IndirectReducer(MSGReducer):
         self._background_end = None
         self._detailed_balance_temp = None
         self._rename_result = True
+        self._scale_factor = None
         
     def _setup_steps(self):
         """**NB: This function is run automatically by the base reducer class
@@ -80,6 +82,12 @@ class IndirectReducer(MSGReducer):
         if self._detailed_balance_temp is not None:
             step = steps.DetailedBalance(MultipleFrames=self._multiple_frames)
             step.set_temperature(self._detailed_balance_temp)
+            self.append_step(step)
+        
+        # Multiplies the scale by the factor specified.
+        if self._scale_factor is not None:
+            step = steps.Scaling(MultipleFrames=self._multiple_frames)
+            step.set_scale_factor(self._scale_factor)
             self.append_step(step)
             
         step = steps.Grouping(MultipleFrames=self._multiple_frames)
@@ -127,6 +135,9 @@ class IndirectReducer(MSGReducer):
     def set_detailed_balance(self, temp):
         self._detailed_balance_temp = float(temp)
 
+    def set_scale_factor(self, scaleFactor):
+        self._scale_factor = float(scaleFactor)
+        
     def set_rename(self, value):
         if not isinstance(value, bool):
             raise TypeError("value must be either True or False (boolean)")

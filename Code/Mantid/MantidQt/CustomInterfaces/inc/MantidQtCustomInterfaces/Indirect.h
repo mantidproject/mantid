@@ -9,7 +9,7 @@
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
-//-----------------------------------------------------
+//----------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------
 
@@ -106,6 +106,9 @@ namespace MantidQt
       void plotRaw(); ///< plot raw data from instrument
       void rebinCheck(bool state); ///< handle checking/unchecking of "Do Not Rebin"
       void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"
+
+      void scaleMultiplierCheck(bool state); ///< handle checking/unchecking of "Scale: Multiply by"
+
       void resCheck(bool state); ///< handles checking/unchecking of "Create RES File" checkbox
       void useCalib(bool state); ///< whether to use calib file
       void calibCreate(); ///< create calibration file

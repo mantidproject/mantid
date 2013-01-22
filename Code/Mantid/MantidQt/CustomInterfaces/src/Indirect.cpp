@@ -80,6 +80,9 @@ void Indirect::initLayout()
   connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(plotRaw()));
   connect(m_uiForm.rebin_ckDNR, SIGNAL(toggled(bool)), this, SLOT(rebinCheck(bool)));
   connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
+
+  connect(m_uiForm.ckScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(scaleMultiplierCheck(bool)));
+
   connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
   connect(m_uiForm.ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(useCalib(bool)));
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
@@ -120,6 +123,8 @@ void Indirect::initLayout()
   m_uiForm.rebin_leELow->setValidator(m_valDbl);
   m_uiForm.rebin_leEWidth->setValidator(m_valDbl);
   m_uiForm.rebin_leEHigh->setValidator(m_valDbl);
+
+  m_uiForm.leScaleMultiplier->setValidator(m_valPosDbl);
   
   m_uiForm.sqw_leELow->setValidator(m_valDbl);
   m_uiForm.sqw_leEWidth->setValidator(m_valDbl);
@@ -253,6 +258,11 @@ void Indirect::runConvertToEnergy()
     pyInput += "reducer.set_detailed_balance(" + m_uiForm.leDetailedBalance->text() + ")\n";
   }
 
+  if ( m_uiForm.ckScaleMultiplier->isChecked() )
+  {
+    pyInput += "reducer.set_scale_factor(" + m_uiForm.leScaleMultiplier->text() + ")\n";
+  }
+
   if ( m_uiForm.cbMappingOptions->currentText() != "Default" )
   {
     QString grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
@@ -311,8 +321,8 @@ void Indirect::runConvertToEnergy()
   }
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
-
 }
+
 /**
 * This function holds any steps that must be performed on the selection of an instrument,
 * for example loading values from the Instrument Definition File (IDF).
@@ -329,6 +339,8 @@ void Indirect::setIDFValues(const QString & prefix)
   rebinCheck(m_uiForm.rebin_ckDNR->isChecked());
   detailedBalanceCheck(m_uiForm.ckDetailedBalance->isChecked());
   resCheck(m_uiForm.cal_ckRES->isChecked());
+
+  scaleMultiplierCheck(m_uiForm.ckScaleMultiplier->isChecked());
 
   // Get list of analysers and populate cbAnalyser
   QString pyInput = 
@@ -567,6 +579,7 @@ void Indirect::createRESfile(const QString& file)
 bool Indirect::validateInput()
 {
   bool valid = true;
+
   // run files input
   if ( ! m_uiForm.ind_runFiles->isValid() )
   {
@@ -595,6 +608,7 @@ bool Indirect::validateInput()
   }
 
   int dummyPos = 0;
+
   QString text = m_uiForm.leDetailedBalance->text();
   QValidator::State fieldState = m_uiForm.leDetailedBalance->validator()->validate(text, dummyPos);
 
@@ -608,6 +622,23 @@ bool Indirect::validateInput()
   {
     m_uiForm.valDetailedBalance->setText("");
   }
+
+  int dummyPos2 = 0;
+
+  // scale multiplier
+  QString scaleMultiplierText = m_uiForm.leScaleMultiplier->text();
+  QValidator::State fieldState2 = m_uiForm.leScaleMultiplier->validator()->validate(scaleMultiplierText, dummyPos2);
+
+  if ( m_uiForm.ckScaleMultiplier->isChecked() && fieldState2 != QValidator::Acceptable )
+  {
+    valid = false;
+    m_uiForm.valScaleMultiplier->setText("*");
+  }
+  else
+  {
+    m_uiForm.valScaleMultiplier->setText("");
+  }
+
 
   // SpectraMin/SpectraMax
   if (
@@ -1366,6 +1397,20 @@ void Indirect::resCheck(bool state)
   m_calResR1->setVisible(state);
   m_calResR2->setVisible(state);
 }
+
+
+
+/**
+* Disables/enables the relevant parts of the UI when user checks/unchecks the 'Multiplication Factor (Scale):'
+* ckScaleMultiplier checkbox.
+* @param state :: state of the checkbox
+*/
+void Indirect::scaleMultiplierCheck(bool state)
+{
+  m_uiForm.leScaleMultiplier->setEnabled(state);
+}
+
+
 
 void Indirect::useCalib(bool state)
 {
