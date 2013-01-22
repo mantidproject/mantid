@@ -144,6 +144,22 @@ class ConvertInstrumentFile(PythonAlgorithm):
                 self.vrun = [4920]
             # ENDIFELSE
 
+        elif self.instrument == "NOM":
+            hz60_f = chopperhertz==60
+            if (hz60_f):
+                # 60 Hz
+                self.rep='60'
+                self.CWL    = [0.00,  1.11,  2.22,  3.33,  1.5000]
+                self.mndsp  = [0,     1,     2,     3,     0.0450]   #for gsas parameter file extrapolation
+                self.mxdsp  = [0,     1,     2,     3,     2.6000]
+                #self.mndsp  = [0,     1,     2,     3,     0.2335]   #for gsas parameter file extrapolation
+                #self.mxdsp  = [0,     1,     2,     3,     1.3270]
+                self.mxtofs = [46.76, 70.14, 81.83, 93.52, 156.00]
+                self.vrun =   [0,     1,     2,     3,     4   ]
+            else:
+                raise NotImplementedError("For instrument %s running in %d mode is not supported." 
+                        % (self.instrument, chopperhertz))
+
         else:
             # Cases are not supported
             print "Instrument %s Is Not Setup For CWL, Min/Max d-spacing, and etc"
@@ -183,7 +199,11 @@ class ConvertInstrumentFile(PythonAlgorithm):
         mdict = {}
         mdict["title"] = lines[0]
         bank = -1
-        for il in xrange(1, len(lines)):
+        indexfirstline = 1
+        if lines[0][0] == "!":
+            indexfirstline = 0
+
+        for il in xrange(indexfirstline, len(lines)):
             line = lines[il]
             if line[0] == '!':
                 # Comment line
@@ -202,7 +222,14 @@ class ConvertInstrumentFile(PythonAlgorithm):
             elif line.startswith("NPROF"):
                 # Profile Type
                 profiletype = int(line.split("NPROF")[1])
-                mdict[bank]["Profile"] = profiletype
+                try: 
+                    mdict[bank]["Profile"] = profiletype
+                except KeyError:
+                    errmsg = "Irf file importing error: Bank-Line is not defined!\n" 
+                    errmsg += "Imported content: \n"
+                    for key in mdict.keys:
+                        errmsg += "%s:  %s\n" % (key, mdict[key])
+                    raise NotImplementedError(errmsg)
     
             elif line.startswith("TOFRG"):
                 # Tof-min(us)    step      Tof-max(us)
@@ -512,8 +539,8 @@ class ConvertInstrumentFile(PythonAlgorithm):
                 Description="Banks to be written into output file")
         self.declareProperty("Frequency", "60", Validator=ListValidator(frequencies),
                 Description="Frequency of the instrument file corresponds to")
-        self.declareProperty("L1", 60.0)
-        self.declareProperty("L2", 3.0, 
+        self.declareProperty("L1", -1.0)
+        self.declareProperty("L2", -1.0,
                 Description="Distance from sample to detector.  If 2Theta is given, this won't work. ")
         self.declareProperty("2Theta", 1001.0,
                 Description="Angle of the detector bank.  It is to calculate L2 with given Dtt1")
@@ -534,11 +561,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         banks = self.getProperty("Banks")
         self.iL1 = self.getProperty("L1")
         self.i2theta = self.getProperty("2Theta")
-        if self.i2theta >= 1000:
-            self.iL2 = self.getProperty("L2")
-        else:
-            self.iL2 = -1;
-
+        templ2 = self.getProperty("L2")
         self.frequency = int(self.getProperty("Frequency"))
         outputfilename = self.getProperty("OutputFile")
 
@@ -549,6 +572,31 @@ class ConvertInstrumentFile(PythonAlgorithm):
             irffilename = inputfilename
         else:
             pcrfilename = inputfilename
+
+        # 3. Some "default" values for L1 and L2
+        if self.iL1 < 0:
+            if self.instrument == "PG3":
+                self.iL1 = 60.0
+            elif self.instrument == "NOM":
+                self.iL1 = 19.5 
+            else:
+                errmsg = "L1 is not given (unphysical).  There is no default value for instrument %s." % (self.instrument)
+                raise NotImplementedError(errmsg)
+        # ENDIF
+
+        if self.i2theta >= 1000:
+            self.iL2 = templ2            
+            if templ2 < 0:
+                if self.instrument == "PG3":
+                    self.iL2 = 3.0
+                elif self.instrument == "NOM":
+                    self.iL2 = 2.0
+                else:
+                    errmsg = "L2 is not given (unphysical).  There is no default value for instrument %s." % (self.instrument)
+                    raise NotImplementedError(errmsg)
+                # ENDIF
+        else:
+            self.iL2 = -1;
 
         # 3. Run
         self.initConstants(self.frequency)
