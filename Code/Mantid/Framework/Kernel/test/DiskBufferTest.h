@@ -887,7 +887,7 @@ public:
   {
     CPUTimer tim;
     DiskBuffer dbuf(3);
-    for (size_t i=0; i<int(data.size()); i++)
+    for (size_t i=0; i<data.size(); i++)
       dbuf.toWrite(data[i]);
     std::cout << tim << " to load " << num << " into MRU." << std::endl;
   }
