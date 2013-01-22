@@ -40,6 +40,12 @@ public:
   
   void do_test_exec(std::string OutputFilename)
   {
+    if (OutputFilename != "")
+    {
+       if (Poco::File(OutputFilename).exists()) Poco::File(OutputFilename).remove();
+    }
+
+
     // Create a bunch of input files
     std::vector<std::vector<std::string> > filenames;
     std::vector<MDEventWorkspace3Lean::sptr> inWorkspaces;
@@ -96,6 +102,12 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
+
+    if (OutputFilename != "")
+    {
+       if (Poco::File(OutputFilename).exists()) Poco::File(OutputFilename).remove();
+    }
+
   }
 
 

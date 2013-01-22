@@ -130,6 +130,11 @@ public:
       bool willFail = false,
       std::string OutputFilename = "")
   {
+    if (OutputFilename != "")
+    {
+       if (Poco::File(OutputFilename).exists()) Poco::File(OutputFilename).remove();
+    }
+
     SliceMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -171,7 +176,13 @@ public:
     AnalysisDataService::Instance().remove("SliceMDTest_ws");
     AnalysisDataService::Instance().remove("SliceMDTest_outWS");
     // Clean up file
-  out->getBoxController()->closeFile(true);
+    out->getBoxController()->closeFile(true);
+
+    if (OutputFilename != "")
+    {
+       if (Poco::File(OutputFilename).exists()) Poco::File(OutputFilename).remove();
+    }
+
   }
 
 

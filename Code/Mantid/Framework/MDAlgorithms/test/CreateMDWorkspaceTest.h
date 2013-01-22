@@ -79,6 +79,12 @@ public:
 
   void do_test_exec(std::string Filename, bool lean, int MinRecursionDepth=0, int expectedNumMDBoxes=216)
   {
+    if (Filename != "")
+    {
+       if (Poco::File(Filename).exists()) Poco::File(Filename).remove();
+    }
+
+
     std::string wsName = "CreateMDWorkspaceTest_out";
     CreateMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
