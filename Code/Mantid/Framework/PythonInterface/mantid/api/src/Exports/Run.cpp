@@ -3,6 +3,9 @@
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/list.hpp>
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include <boost/python/copy_const_reference.hpp>
+
 
 using Mantid::API::Run;
 using Mantid::Kernel::Property;
@@ -135,6 +138,9 @@ void export_Run()
 
     .def("getLogData", (const std::vector<Property*>& (Run::*)() const)&Run::getLogData, return_internal_reference<>(), 
          "Return the list of logs for this run. The same as getProperties.")
+
+    .def("getGoniometer", (const Mantid::Geometry::Goniometer & (Run::*)() const)&Run::getGoniometer,
+         return_value_policy<reference_existing_object>(), "Get the oriented lattice for this sample")
 
     .def("addProperty", &addProperty, "Adds a property with the given name and value. If replace=True then an existing property is overwritten")
 

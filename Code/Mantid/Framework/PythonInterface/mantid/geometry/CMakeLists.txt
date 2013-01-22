@@ -20,6 +20,7 @@ set ( EXPORT_FILES
   src/Exports/UnitCell.cpp
   src/Exports/OrientedLattice.cpp
   src/Exports/ReferenceFrame.cpp
+  src/Exports/Goniometer.cpp
 )  
 
 set ( SRC_FILES
