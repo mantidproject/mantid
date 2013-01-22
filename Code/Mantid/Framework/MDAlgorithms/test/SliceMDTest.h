@@ -130,10 +130,7 @@ public:
       bool willFail = false,
       std::string OutputFilename = "")
   {
-    if (OutputFilename != "")
-    {
-       if (Poco::File(OutputFilename).exists()) Poco::File(OutputFilename).remove();
-    }
+   
 
     SliceMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -149,6 +146,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("AlignedDim3", name4));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "SliceMDTest_outWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputFilename", OutputFilename));
+
+    std::string fullName = alg.getPropertyValue("OutputFilename");
+    if (fullName!="")
+      if(Poco::File(fullName).exists()) Poco::File(fullName).remove();
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
 
@@ -178,10 +179,7 @@ public:
     // Clean up file
     out->getBoxController()->closeFile(true);
 
-    if (OutputFilename != "")
-    {
-       if (Poco::File(OutputFilename).exists()) Poco::File(OutputFilename).remove();
-    }
+ 
 
   }
 

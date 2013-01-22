@@ -79,10 +79,6 @@ public:
 
   void do_test_exec(std::string Filename, bool lean, int MinRecursionDepth=0, int expectedNumMDBoxes=216)
   {
-    if (Filename != "")
-    {
-       if (Poco::File(Filename).exists()) Poco::File(Filename).remove();
-    }
 
 
     std::string wsName = "CreateMDWorkspaceTest_out";
@@ -101,6 +97,11 @@ public:
     alg.setPropertyValue("OutputWorkspace",wsName);
     alg.setPropertyValue("Filename", Filename);
     alg.setPropertyValue("Memory", "1");
+
+    std::string fullName = alg.getPropertyValue("Filename");
+    if (fullName!="")
+      if(Poco::File(fullName).exists()) Poco::File(fullName).remove();
+
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );

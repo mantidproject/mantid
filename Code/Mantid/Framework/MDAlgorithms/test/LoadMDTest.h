@@ -199,7 +199,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDTest_ws" ) );
     TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename",  "LoadMDTest" + Strings::toString(nd) + ".nxs") );
 
-    // Retrieve the full path; delete any pre-existing file
+      // Retrieve the full path; delete any pre-existing file
     std::string filename = saver.getPropertyValue("Filename");
     if (Poco::File(filename).exists()) Poco::File(filename).remove();
 

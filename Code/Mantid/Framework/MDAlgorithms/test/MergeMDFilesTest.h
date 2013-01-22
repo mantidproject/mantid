@@ -69,6 +69,13 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Filenames", filenames) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputFilename", OutputFilename) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+
+    // clean up possible rubbish from previous runs
+    std::string fullName = alg.getPropertyValue("OutputFilename");
+    if (fullName!="")
+      if(Poco::File(fullName).exists()) Poco::File(fullName).remove();
+
+
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     

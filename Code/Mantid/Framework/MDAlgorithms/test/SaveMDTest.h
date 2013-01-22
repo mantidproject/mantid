@@ -69,7 +69,7 @@ public:
 
   void do_test_exec(size_t numPerBox, std::string filename, bool MakeFileBacked = false, bool UpdateFileBackEnd = false)
   {
-    if (Poco::File(filename).exists()) Poco::File(filename).remove();
+   
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, numPerBox);
     // Make sure it is split
@@ -92,6 +92,12 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeFileBacked", MakeFileBacked) );
+
+    // clean up possible rubbish from the previous runs
+    std::string fullName = alg.getPropertyValue("Filename");
+    if (fullName!="")
+      if(Poco::File(fullName).exists()) Poco::File(fullName).remove();
+
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
