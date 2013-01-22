@@ -178,9 +178,9 @@ public:
     do_test_exec("", true);
   }
 
-  void xest_exec_MDLeanEvent_fileBacked()
+  void test_exec_MDLeanEvent_fileBacked()
   {
-    //do_test_exec("CreateMDWorkspaceTest.nxs", true);
+    do_test_exec("CreateMDWorkspaceTest.nxs", true);
   }
 
 

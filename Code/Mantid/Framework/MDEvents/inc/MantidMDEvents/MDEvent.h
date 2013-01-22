@@ -237,6 +237,7 @@ namespace MDEvents
         signal_t & totalSignal, signal_t & totalErrorSquared)
     {
       size_t numEvents = events.size();
+      if(numEvemts==0)return;
       size_t numColumns = nd+4;
       coord_t * data = new coord_t[numEvents*numColumns];
 

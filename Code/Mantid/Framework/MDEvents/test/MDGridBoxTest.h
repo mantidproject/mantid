@@ -1026,7 +1026,7 @@ public:
 
     // Split those boxes in parallel.
     ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
-    ThreadPool tp(ts);
+    ThreadPool tp(ts,2);
     b->splitAllIfNeeded(ts);
     tp.joinAll();
 
