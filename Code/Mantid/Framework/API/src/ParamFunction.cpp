@@ -41,14 +41,23 @@ void ParamFunction::setParameter(size_t i, const double& value, bool explicitlyS
 {
   // Cppcheck confused by the check for NaN
   // cppcheck-suppress duplicateExpression
-  if (value != value || !(value > -DBL_MAX && value < DBL_MAX))
+  if (value != value)
   {
+    // Check for NaN or -NaN
     std::stringstream errmsg;
-    errmsg << "Trying to set a NaN or infinity value " << value << " to parameter " << this->parameterName(i)
-           << " Out of lower bound = " << -DBL_MAX << " is " << (value > -DBL_MAX)
-           << " Out of upper bound = " << DBL_MAX << " is " << (value < DBL_MAX);
-    g_log.warning() << errmsg.str() << std::endl;
-    throw std::runtime_error(errmsg.str());
+    errmsg << "Trying to set a NaN or infinity value (" << value << ") to parameter "
+           << this->parameterName(i);
+    g_log.warning(errmsg.str());
+    // throw std::runtime_error(errmsg.str());
+  }
+  else if (value <= -DBL_MAX || value >= DBL_MAX)
+  {
+    // Infinity value
+    std::stringstream errmsg;
+    errmsg << "Trying to set an infinity value (" << value << ") to parameter "
+           << this->parameterName(i);
+    g_log.warning(errmsg.str());
+    // throw std::runtime_error(errmsg.str());
   }
 
   if (i >= nParams())
