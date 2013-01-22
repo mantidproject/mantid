@@ -12,7 +12,8 @@ namespace Kernel
 // Typedefs for ThreadPool
 
 /// General mutex (typedef'd to Poco::FastMutex). Not recursive in general; don't assume it is!
-typedef Poco::FastMutex Mutex;
+  typedef Poco::FastMutex NonRecursiveMutex;
+  typedef Poco::Mutex Mutex;
 
 } //namespace
 } //namespace

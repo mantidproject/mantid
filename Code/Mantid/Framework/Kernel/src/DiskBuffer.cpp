@@ -69,6 +69,7 @@ namespace Kernel
 
     // And put it in the queue of stuff to write.
 //    std::cout << "DiskBuffer adding ID " << item->getId() << " to current size " << m_writeBuffer.size() << std::endl;
+    // TODO: check what happens when the same element is inserted with different size 
     std::pair<writeBuffer_t::iterator,bool> result = m_writeBuffer.insert(item);
 
     // Result.second is FALSE if the item was already there
@@ -95,11 +96,11 @@ namespace Kernel
    */
   void DiskBuffer::objectDeleted(const ISaveable * item)
   {
+    m_mutex.lock();
     // const uint64_t sizeOnFile 
     size_t id = item->getId();
     uint64_t size = item->getDataMemorySize();
 
-    m_mutex.lock();
 
     // Take it out of the to-write buffer
     writeBuffer_byId_t::iterator it2 = m_writeBuffer_byId.find(id);
