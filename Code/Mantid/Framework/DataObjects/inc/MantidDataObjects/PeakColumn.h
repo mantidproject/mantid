@@ -77,6 +77,8 @@ namespace DataObjects
   private:
     /// Reference to the peaks object saved in the PeaksWorkspace.
     std::vector<Peak> & m_peaks;
+    /// Precision of hkl in table workspace
+    int m_hklPrec;
 
     /// Type of the row cache value
     typedef boost::variant<double,int,std::string,Kernel::V3D> CacheValueType;

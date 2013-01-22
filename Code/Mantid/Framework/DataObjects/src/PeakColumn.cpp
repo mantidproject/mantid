@@ -79,6 +79,8 @@ namespace DataObjects
   {
     this->m_name = name;
     this->m_type = typeFromName(name); // Throws if the name is unknown
+    this->m_hklPrec = 2;
+    ConfigService::Instance().getValue("PeakColumn.hklPrec",this->m_hklPrec);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -165,21 +167,15 @@ namespace DataObjects
       s << peak.getQSampleFrame();
     else if (m_name == "h")
     {
-      int hklPrec = 2;
-      ConfigService::Instance().getValue("PeakColumn.hklPrec",hklPrec);
-      s << std::fixed << std::setprecision(hklPrec) << peak.getH();
+      s << std::fixed << std::setprecision(m_hklPrec) << peak.getH();
     }
     else if (m_name == "k")
     {
-      int hklPrec = 2;
-      ConfigService::Instance().getValue("PeakColumn.hklPrec",hklPrec);
-      s << std::fixed << std::setprecision(hklPrec) << peak.getK();
+      s << std::fixed << std::setprecision(m_hklPrec) << peak.getK();
     }
     else if (m_name == "l")
     {
-      int hklPrec = 2;
-      ConfigService::Instance().getValue("PeakColumn.hklPrec",hklPrec);
-      s << std::fixed << std::setprecision(hklPrec) << peak.getL();
+      s << std::fixed << std::setprecision(m_hklPrec) << peak.getL();
     }
     else
       s << peak.getValueByColName(m_name);
