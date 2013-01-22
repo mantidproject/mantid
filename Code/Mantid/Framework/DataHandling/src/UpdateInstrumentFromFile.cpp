@@ -94,6 +94,7 @@ namespace Mantid
       // Retrieve the filename from the properties
       const std::string filename = getPropertyValue("Filename");
       m_workspace = getProperty("Workspace");
+
       if(!m_workspace->getInstrument())
       {
         throw std::runtime_error("Input workspace has no defined instrument");
@@ -224,21 +225,27 @@ namespace Mantid
       AsciiFileHeader header;
       const bool isSpectrum = parseAsciiHeader(header);
 
-      Geometry::ParameterMap & pmap = m_workspace->instrumentParameters();
       Geometry::Instrument_const_sptr inst = m_workspace->getInstrument();
       // Throws for multiple detectors
       boost::scoped_ptr<spec2index_map> specToIndex(m_workspace->getSpectrumToWorkspaceIndexMap());
 
       std::ifstream datfile(filename.c_str(), std::ios_base::in);
+
       std::string line;
       std::vector<double> colValues(header.colCount - 1, 0.0);
       while(std::getline(datfile,line))
       {
         std::istringstream is(line);
-
         // Column 0 should be ID/spectrum number
-        int32_t detOrSpec(0);
+        int32_t detOrSpec(-1000);
         is >> detOrSpec;
+        // If first thing read is not a number then skip the line
+        if(is.fail())
+        {
+          g_log.debug() << "Skipping \"" << line << "\". Cannot interpret as list of numbers.\n";
+          continue;
+        }
+
         Geometry::IDetector_const_sptr det;
         try
         {
@@ -247,11 +254,12 @@ namespace Mantid
             auto it = specToIndex->find(detOrSpec);
             if(it != specToIndex->end())
             {
-              det = m_workspace->getDetector((*specToIndex)[detOrSpec]);
+              const size_t wsIndex = it->second;
+              det = m_workspace->getDetector(wsIndex);
             }
             else
             {
-              g_log.debug() << "Skipping \"" << line << "\". Spectrum is not in workspace.";
+              g_log.debug() << "Skipping \"" << line << "\". Spectrum is not in workspace.\n";
               continue;
             }
           }
@@ -262,10 +270,9 @@ namespace Mantid
         }
         catch(Kernel::Exception::NotFoundError&)
         {
-          g_log.debug() << "Skipping \"" << line << "\". Spectrum in workspace but cannot find associated detector.";
+          g_log.debug() << "Skipping \"" << line << "\". Spectrum in workspace but cannot find associated detector.\n";
           continue;
         }
-
 
         // Special cases for detector r,t,p. Everything else is
         // attached as an detector parameter
@@ -287,7 +294,8 @@ namespace Mantid
           else if(i == header.phiColIdx) phi = value;
           else if(header.detParCols.count(i) == 1)
           {
-            pmap.addDouble(det.get(), header.colToName[i],value);
+            Geometry::ParameterMap & pmap = m_workspace->instrumentParameters();
+            pmap.addDouble(det->getComponentID(), header.colToName[i],value);
           }
         }
         // Check stream state. stringstream::EOF should have been reached, if not then there is still more to
