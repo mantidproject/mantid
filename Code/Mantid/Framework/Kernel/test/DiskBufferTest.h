@@ -146,7 +146,7 @@ class ISaveableTesterWithFile : public ISaveable
   bool is_loaded;
 public:
   ISaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch) : ISaveable(id),
-  is_loaded(false),m_ch(ch), m_memory(size)
+  is_loaded(false), m_memory(size),m_ch(ch)
   {
     this->setFilePosition(pos,size,false); 
   }
@@ -887,7 +887,7 @@ public:
   {
     CPUTimer tim;
     DiskBuffer dbuf(3);
-    for (int i=0; i<data.size(); i++)
+    for (size_t i=0; i<int(data.size()); i++)
       dbuf.toWrite(data[i]);
     std::cout << tim << " to load " << num << " into MRU." << std::endl;
   }
@@ -896,7 +896,7 @@ public:
   {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (size_t i=0; i<int(data.size()); i++)
+    for (size_t i=0; i<data.size(); i++)
     {
       data[i]->setBusy(); // Items won't do any real saving
     }
