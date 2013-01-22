@@ -44,8 +44,7 @@ public:
   }
 
 
-  /*
-   * In this test, only a very simple event workspace is used
+  /** In this test, only a very simple event workspace is used
    */
   void NtestTooManyParams()
   {
@@ -84,6 +83,8 @@ public:
     return;
   }
 
+  /** Test Filter by relative time and absolute time
+    */
   void testExecEventWorkspace_relativeTime_and_absolute_time()
   {
     std::string outputWS;
