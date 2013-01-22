@@ -23,6 +23,7 @@ namespace SliceViewer
     void removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
     void hideInPlot(Mantid::API::IPeaksWorkspace_const_sptr, bool);
     void zoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr, int);
+    void peaksSorted(const std::string&, const bool, Mantid::API::IPeaksWorkspace_const_sptr);
   private:
     /// Populate the widget with model data.
     void populate();
@@ -48,6 +49,7 @@ namespace SliceViewer
       void onRemoveWorkspaceClicked();
       void onToggleHideInPlot(bool);
       void onTableClicked(const QModelIndex&);
+      void onPeaksSorted(const std::string&, const bool);
   };
 
 } //namespace

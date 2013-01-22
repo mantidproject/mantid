@@ -28,6 +28,7 @@ namespace
   {
   public:
     MOCK_METHOD1(zoomToRectangle, void(const PeakBoundingBox&));
+    MOCK_METHOD0(resetView, void());
     virtual ~MockZoomablePeaksView(){}
   };
 

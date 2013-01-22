@@ -12,9 +12,11 @@ namespace MantidQt
   {
     const QString QPeaksTableModel::RUNNUMBER = "RunNumber";
     const QString QPeaksTableModel::DETID = "DetID";
-    const QString QPeaksTableModel::HKL = "HKL";
+    const QString QPeaksTableModel::H = "h";
+    const QString QPeaksTableModel::K= "k";
+    const QString QPeaksTableModel::L = "l";
     const QString QPeaksTableModel::DSPACING = "DSpacing";
-    const QString QPeaksTableModel::INT = "Int";
+    const QString QPeaksTableModel::INT = "Intens";
     const QString QPeaksTableModel::SIGMINT = "SigInt";
     const QString QPeaksTableModel::QLAB = "QLab";
     const QString QPeaksTableModel::QSAMPLE = "QSample";
@@ -27,7 +29,9 @@ namespace MantidQt
       ColumnNameRowValueMap map;
       map.insert(std::make_pair(RUNNUMBER, QString::number(peak.getRunNumber())));
       map.insert(std::make_pair(DETID, QString::number(peak.getDetectorID())));
-      map.insert(std::make_pair(HKL, peak.getHKL().toString().c_str()));
+      map.insert(std::make_pair(H, QString::number(peak.getH())));
+      map.insert(std::make_pair(K, QString::number(peak.getK())));
+      map.insert(std::make_pair(L, QString::number(peak.getL())));
       map.insert(std::make_pair(DSPACING, QString::number(peak.getDSpacing())));
       map.insert(std::make_pair(INT, QString::number(peak.getIntensity())));
       map.insert(std::make_pair(SIGMINT, QString::number(peak.getIntensity())));
@@ -45,16 +49,20 @@ namespace MantidQt
       int index = 0;
       m_columnNameMap.insert(std::make_pair(index++, RUNNUMBER));
       m_columnNameMap.insert(std::make_pair(index++, DETID));
-      m_columnNameMap.insert(std::make_pair(index++, HKL));
+      m_columnNameMap.insert(std::make_pair(index++, H));
+      m_columnNameMap.insert(std::make_pair(index++, K));
+      m_columnNameMap.insert(std::make_pair(index++, L));
       m_columnNameMap.insert(std::make_pair(index++, DSPACING));
       m_columnNameMap.insert(std::make_pair(index++, INT));
       m_columnNameMap.insert(std::make_pair(index++, SIGMINT));
       m_columnNameMap.insert(std::make_pair(index++, QLAB));
       m_columnNameMap.insert(std::make_pair(index++, QSAMPLE));
 
-      m_sortableColumns.insert(std::make_pair(RUNNUMBER, false));
-      m_sortableColumns.insert(std::make_pair(DETID, false));
-      m_sortableColumns.insert(std::make_pair(HKL,true));
+      m_sortableColumns.insert(std::make_pair(RUNNUMBER, true));
+      m_sortableColumns.insert(std::make_pair(DETID, true));
+      m_sortableColumns.insert(std::make_pair(H,true));
+      m_sortableColumns.insert(std::make_pair(K,true));
+      m_sortableColumns.insert(std::make_pair(L,true));
       m_sortableColumns.insert(std::make_pair(DSPACING, true));
       m_sortableColumns.insert(std::make_pair(INT, true));
       m_sortableColumns.insert(std::make_pair(SIGMINT, true));
@@ -173,6 +181,7 @@ namespace MantidQt
       {
 
         // TODO raise event and propagate through to Proper presenter.
+        peaksSorted(columnName.toStdString(), order== Qt::AscendingOrder);
 
        this->update();
       }

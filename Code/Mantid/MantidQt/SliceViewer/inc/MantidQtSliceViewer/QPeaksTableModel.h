@@ -48,6 +48,7 @@ namespace MantidQt
 */
     class QPeaksTableModel : public QAbstractTableModel
     {
+      Q_OBJECT
     public:
       QPeaksTableModel(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
       void update();
@@ -58,7 +59,8 @@ namespace MantidQt
       Qt::ItemFlags flags(const QModelIndex &index) const;
       void sort (int column, Qt::SortOrder);
       ~QPeaksTableModel();
-
+     signals:
+      void peaksSorted(const std::string&, const bool);
     private:
 
       typedef QString ColumnNameType;
@@ -69,7 +71,9 @@ namespace MantidQt
 
       static const QString RUNNUMBER;
       static const QString DETID;
-      static const QString HKL;
+      static const QString H;
+      static const QString K;
+      static const QString L;
       static const QString DSPACING;
       static const QString INT;
       static const QString SIGMINT;

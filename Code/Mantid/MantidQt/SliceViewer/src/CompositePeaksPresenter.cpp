@@ -304,5 +304,14 @@ namespace MantidQt
       auto boundingBox = subjectPresenter->getBoundingBox(peakIndex);
       m_zoomablePlottingWidget->zoomToRectangle(boundingBox);
     }
+
+    void CompositePeaksPresenter::sortPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const std::string& columnToSortBy, const bool sortedAscending)
+    {
+      auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+      auto subjectPresenter = *iterator;
+      subjectPresenter->sortPeaksWorkspace(columnToSortBy, sortedAscending);
+      // We want to zoom out now, because any currently selected peak will be wrong.
+      m_zoomablePlottingWidget->resetView();
+    }
   }
 }

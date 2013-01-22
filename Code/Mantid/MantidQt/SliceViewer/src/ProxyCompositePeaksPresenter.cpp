@@ -99,5 +99,10 @@ namespace MantidQt
     {
       m_compositePresenter->zoomToPeak(peaksWS, peakIndex);
     }
+
+    void ProxyCompositePeaksPresenter::sortPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const std::string& columnToSortBy, const bool sortedAscending)
+    {
+      m_compositePresenter->sortPeaksWorkspace(peaksWS, columnToSortBy, sortedAscending);
+    }
   }
 }

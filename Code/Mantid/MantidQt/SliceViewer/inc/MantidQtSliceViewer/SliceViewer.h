@@ -100,8 +100,9 @@ public:
   /// Methods relating to peaks overlays.
   boost::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
 
-  /// Methods from implementation of ZoomablePeaksView.
+  /* -- Methods from implementation of ZoomablePeaksView. --*/
   virtual void zoomToRectangle(const PeakBoundingBox& box);
+  virtual void resetView();
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed

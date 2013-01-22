@@ -8,6 +8,7 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+    /// Constructor
     PeaksViewer::PeaksViewer(QWidget *parent)
       : QWidget(parent)
     {
@@ -18,6 +19,10 @@ namespace MantidQt
     {
     }
 
+    /**
+     * Remove the layout
+     * @param widget
+     */
     void removeLayout (QWidget* widget)
     {
       QLayout* layout = widget->layout ();
@@ -30,6 +35,10 @@ namespace MantidQt
       }
     }
 
+    /**
+     * Set the peaks presenter. This allows the peaks workspace reporting controls to talk to the outside world.
+     * @param presenter : Proxy through which all information can be fetched.
+     */
     void PeaksViewer::setPresenter(boost::shared_ptr<ProxyCompositePeaksPresenter> presenter) 
     {
       m_presenter = presenter;
@@ -59,12 +68,15 @@ namespace MantidQt
         connect(widget, SIGNAL(removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr)), this, SLOT(onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr)));
         connect(widget, SIGNAL(hideInPlot(Mantid::API::IPeaksWorkspace_const_sptr, bool)), this, SLOT(onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr, bool)));
         connect(widget, SIGNAL(zoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr, int)), this, SLOT(onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr, int)));
-
+        connect(widget, SIGNAL(peaksSorted(const std::string&, const bool, Mantid::API::IPeaksWorkspace_const_sptr)), this, SLOT(onPeaksSorted(const std::string&, const bool, Mantid::API::IPeaksWorkspace_const_sptr)));
         layout()->addWidget(widget);
         ++it;
       }
     }
 
+    /**
+     * Hide this view.
+     */
     void PeaksViewer::hide() 
     {
       QLayout* layout = this->layout();
@@ -81,38 +93,79 @@ namespace MantidQt
       QWidget::hide();
     }
 
+    /// Destructor
     PeaksViewer::~PeaksViewer()
     {
     }
 
+    /**
+     * Handler for changing the peak radius colour.
+     * @param peaksWS : Peaks workspace to change the foreground colour on.
+     * @param newColour : New colour to apply.
+     */
     void PeaksViewer::onPeakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, QColor newColour)
     {
       m_presenter->setForegroundColour(peaksWS, newColour);
     }
 
+    /**
+     * Handler for Changing the background colour on a peak.
+     * @param peaksWS : Peaks workspace to change the background colours on.
+     * @param newColour : New colour to apply to the background.
+     */
     void PeaksViewer::onBackgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, QColor newColour)
     {
       m_presenter->setBackgroundColour(peaksWS, newColour);
     }
 
+    /**
+     * Event hander for showing the background radius.
+     * @param peaksWS : Workspace to show the background on.
+     * @param show : Flag to indicate that the background should be shown/hidden.
+     */
     void PeaksViewer::onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool show)
     {
       m_presenter->setBackgroundRadiusShown(peaksWS, show);
     }
 
+    /**
+     * Event hander for removal of a workspace from the plot.
+     * @param peaksWS : Workspace to remove
+     */
     void PeaksViewer::onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr peaksWS)
     {
       m_presenter->remove(peaksWS);
     }
 
+    /**
+     * Event hander for hiding a set of peaks in the plot.
+     * @param peaksWS : Peaks workspace to hide.
+     * @param hide : boolean toggle for hide/unhide
+     */
     void PeaksViewer::onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool hide)
     {
       m_presenter->hideInPlot(peaksWS, hide);
     }
 
+    /**
+     * Handler for dealing with zooming actions onto a peak.
+     * @param peaksWS : Workspace to zoom in on.
+     * @param peakIndex : Index of the peak to zoom in on.
+     */
     void PeaksViewer::onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, int peakIndex)
     {
       m_presenter->zoomToPeak(peaksWS, peakIndex);
+    }
+
+    /**
+     * Handler for sorting of a peaks workspace.
+     * @param columnToSortBy : Column to sort by
+     * @param sortedAscending : Sort direction
+     * @param peaksWS : Workspace to be sorted
+     */
+    void PeaksViewer::onPeaksSorted(const std::string& columnToSortBy, const bool sortedAscending, Mantid::API::IPeaksWorkspace_const_sptr peaksWS)
+    {
+      m_presenter->sortPeaksWorkspace(peaksWS, columnToSortBy, sortedAscending);
     }
 
   } // namespace

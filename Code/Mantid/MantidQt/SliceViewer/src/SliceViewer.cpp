@@ -2291,6 +2291,14 @@ void SliceViewer::zoomToRectangle(const PeakBoundingBox& boundingBox)
   m_plot->replot();
 }
 
+/**
+ * Reset the original view.
+ */
+void SliceViewer::resetView()
+{
+  this->resetZoom();
+}
+
 } //namespace
 }
 

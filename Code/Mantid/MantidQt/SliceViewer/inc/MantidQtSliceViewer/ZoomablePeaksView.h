@@ -40,6 +40,8 @@ namespace MantidQt
     public:
       /// Zoom to a peak position provided by a boundary rectangle in the windows coordinate system.
       virtual void zoomToRectangle(const PeakBoundingBox&) = 0;
+      /// Zoom out
+      virtual void resetView() = 0;
       /// Destructor
       virtual ~ZoomablePeaksView(){ }
     };

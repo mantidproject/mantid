@@ -44,6 +44,8 @@ namespace MantidQt
       void hideInPlot(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const bool hide);
       /// zoom in on a peak.
       void zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const int peakIndex);
+      /// sort the peaks workspace.
+      void sortPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const std::string& columnToSortBy, const bool sortedAscending);
 
     private:
       /// Wrapped composite to delegate to.

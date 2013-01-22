@@ -67,6 +67,8 @@ namespace MantidQt
       void setShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const bool shown);
       /// zoom in on a peak.
       void zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const int peakIndex);
+      /// Sort the peaks workspace.
+      void sortPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const std::string& columnToSortBy, const bool sortedAscending);
     private:
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;

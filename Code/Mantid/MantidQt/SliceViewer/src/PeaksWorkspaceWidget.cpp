@@ -60,7 +60,9 @@ namespace MantidQt
       ui.btnBackgroundColor->setBackgroundColor(m_backgroundColour);
       ui.btnPeakColor->setBackgroundColor(m_foregroundColour);
 
-      ui.tblPeaks->setModel(new QPeaksTableModel(this->m_ws));
+      auto model = new QPeaksTableModel(this->m_ws);
+      connect(model, SIGNAL(peaksSorted(const std::string&, const bool)), this, SLOT(onPeaksSorted(const std::string&, const bool)));
+      ui.tblPeaks->setModel(model);
       ui.tblPeaks->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
       ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
       m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();
@@ -153,6 +155,16 @@ namespace MantidQt
       {
         ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents); // Doesn't work well the widget is expanded, but works well when the width is compressed.
       }
+    }
+
+    /**
+     * Handler for sorting of the peaks workspace.
+     * @param columnToSortBy
+     * @param sortAscending
+     */
+    void PeaksWorkspaceWidget::onPeaksSorted(const std::string& columnToSortBy, const bool sortAscending)
+    {
+      emit peaksSorted(columnToSortBy, sortAscending, this->m_ws);
     }
 
   } // namespace

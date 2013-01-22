@@ -93,6 +93,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/PeaksViewer.h
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.h
 	inc/MantidQtSliceViewer/XYLimitsDialog.h
+	inc/MantidQtSliceViewer/QPeaksTableModel.h
 )
 
 set ( UI_FILES 
