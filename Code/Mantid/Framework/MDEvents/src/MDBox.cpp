@@ -346,7 +346,7 @@ namespace MDEvents
       if (file)
       {
         // Mutex for disk access (prevent read/write at the same time)
-        Kernel::Mutex & mutex = this->m_BoxController->getDiskBuffer().getFileMutex();
+        Kernel::RecursiveMutex & mutex = this->m_BoxController->getDiskBuffer().getFileMutex();
         mutex.lock();
         // Note that this APPENDS any events to the existing event list
         //  (in the event that addEvent() was called for a box that was on disk)

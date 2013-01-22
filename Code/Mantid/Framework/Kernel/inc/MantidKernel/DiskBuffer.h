@@ -142,7 +142,7 @@ namespace Kernel
 
     //-------------------------------------------------------------------------------------------
     /** @return the file-access mutex */
-    Kernel::Mutex & getFileMutex()
+    Kernel::RecursiveMutex & getFileMutex()
     { return m_fileMutex; }
 
 
@@ -150,7 +150,7 @@ namespace Kernel
     inline void writeOldObjects();
 
     /// Mutex for accessing the file being buffered
-    Kernel::Mutex m_fileMutex;
+    Kernel::RecursiveMutex m_fileMutex;
 
     // ----------------------- To-write buffer --------------------------------------
     /// Do we use the write buffer? Always now
@@ -169,7 +169,7 @@ namespace Kernel
     uint64_t m_writeBufferUsed;
 
     /// Mutex for modifying the the toWrite buffer.
-    Kernel::Mutex m_mutex;
+    Kernel::RecursiveMutex m_mutex;
 
     // ----------------------- Free space map --------------------------------------
     /// Map of the free blocks in the file
@@ -179,7 +179,7 @@ namespace Kernel
     freeSpace_bySize_t & m_free_bySize;
 
     /// Mutex for modifying the free space list
-    Kernel::Mutex m_freeMutex;
+    Kernel::RecursiveMutex m_freeMutex;
 
     // ----------------------- File object --------------------------------------
     /// Length of the file. This is where new blocks that don't fit get placed.
