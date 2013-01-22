@@ -48,6 +48,7 @@ namespace
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
     MOCK_METHOD1(setShown, void(const bool));
     MOCK_CONST_METHOD1(getBoundingBox, PeakBoundingBox(const int peakIndex));
+    MOCK_METHOD2(sortPeaksWorkspace, void(const std::string&, const bool));
     virtual ~MockPeaksPresenter(){}
   };
 

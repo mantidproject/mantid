@@ -50,6 +50,7 @@ namespace SliceViewer
     virtual void showBackgroundRadius(const bool shown) = 0;
     virtual void setShown(const bool shown) = 0;
     virtual PeakBoundingBox getBoundingBox(const int peakIndex) const = 0;
+    virtual void sortPeaksWorkspace(const std::string& byColumnName, const bool ascending) = 0;
   };
 
 

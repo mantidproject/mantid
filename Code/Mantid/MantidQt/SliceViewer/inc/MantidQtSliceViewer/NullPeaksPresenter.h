@@ -26,6 +26,7 @@ namespace MantidQt
       void showBackgroundRadius(const bool){/*Do nothing*/}
       void setShown(const bool){/*Do nothing*/}
       virtual PeakBoundingBox getBoundingBox(const int) const{return PeakBoundingBox();}
+      virtual void sortPeaksWorkspace(const std::string& byColumnName, const bool ascending){/*Do Nothing*/}
     };
 
   }

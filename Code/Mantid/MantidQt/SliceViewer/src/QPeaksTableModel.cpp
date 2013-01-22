@@ -51,6 +51,15 @@ namespace MantidQt
       m_columnNameMap.insert(std::make_pair(index++, SIGMINT));
       m_columnNameMap.insert(std::make_pair(index++, QLAB));
       m_columnNameMap.insert(std::make_pair(index++, QSAMPLE));
+
+      m_sortableColumns.insert(std::make_pair(RUNNUMBER, false));
+      m_sortableColumns.insert(std::make_pair(DETID, false));
+      m_sortableColumns.insert(std::make_pair(HKL,true));
+      m_sortableColumns.insert(std::make_pair(DSPACING, true));
+      m_sortableColumns.insert(std::make_pair(INT, true));
+      m_sortableColumns.insert(std::make_pair(SIGMINT, true));
+      m_sortableColumns.insert(std::make_pair(QLAB, false));
+      m_sortableColumns.insert(std::make_pair(QSAMPLE, false));
     }
 
     /**
@@ -58,7 +67,7 @@ namespace MantidQt
     */
     void QPeaksTableModel::update()
     {
-      // Do nothing. Read-only.
+      emit layoutChanged(); //This should tell the view that the data has changed.
     }
 
     /**
@@ -148,6 +157,25 @@ namespace MantidQt
     /// Destructor
     QPeaksTableModel::~QPeaksTableModel()
     {
+    }
+
+    /**
+     * Overriden sort.
+     * @param column
+     * @param order
+     */
+    void QPeaksTableModel::sort ( int column, Qt::SortOrder order )
+    {
+      using namespace Mantid::API;
+      const QString columnName = findColumnName(column);
+      const bool isSortable = m_sortableColumns[columnName];
+      if(isSortable)
+      {
+
+        // TODO raise event and propagate through to Proper presenter.
+
+       this->update();
+      }
     }
   }
 }

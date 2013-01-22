@@ -40,6 +40,7 @@ namespace MantidQt
       std::string getTransformName() const;
       void setShown(const bool shown);
       virtual PeakBoundingBox getBoundingBox(const int) const;
+      virtual void sortPeaksWorkspace(const std::string& byColumnName, const bool ascending);
     private:
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;
@@ -63,6 +64,8 @@ namespace MantidQt
       bool isDimensionNameOfFreeAxis(const std::string& name) const;
       /// Switch between showing background radius or not
       void showBackgroundRadius(const bool show);
+      /// Produce the views from the PeaksWorkspace
+      void produceViews();
     };
 
   }

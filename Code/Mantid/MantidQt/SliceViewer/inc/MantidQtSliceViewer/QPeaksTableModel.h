@@ -56,11 +56,16 @@ namespace MantidQt
       QVariant data(const QModelIndex &index, int role) const;
       QVariant headerData(int section, Qt::Orientation orientation, int role) const;
       Qt::ItemFlags flags(const QModelIndex &index) const;
+      void sort (int column, Qt::SortOrder);
       ~QPeaksTableModel();
-      typedef std::map<int, QString> ColumnIndexNameMap;
-      typedef std::map<QString, QString> ColumnNameRowValueMap;
 
     private:
+
+      typedef QString ColumnNameType;
+      typedef QString ColumnValueType;
+      typedef std::map<ColumnNameType, bool> ColumnNameSortableMap;
+      typedef std::map<int, ColumnNameType> ColumnIndexNameMap;
+      typedef std::map<ColumnNameType, ColumnValueType> ColumnNameRowValueMap;
 
       static const QString RUNNUMBER;
       static const QString DETID;
@@ -77,7 +82,11 @@ namespace MantidQt
       /// Collection of data for viewing.
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
 
+      /// Map of column indexes to names
       ColumnIndexNameMap m_columnNameMap;
+
+      /// Map of column names to sortable flag.
+      ColumnNameSortableMap m_sortableColumns;
 
     };
   }
