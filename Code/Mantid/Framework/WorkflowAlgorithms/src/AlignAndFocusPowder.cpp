@@ -377,8 +377,9 @@ void AlignAndFocusPowder::exec()
 
   doSortEvents(m_outputW);
 
-  if (dspace)
-    this->rebin();
+  // this next call should probably be in, but it changes the system tests
+  //if (dspace)
+  //  this->rebin();
 
   if (l1 > 0)
   {
@@ -408,8 +409,7 @@ void AlignAndFocusPowder::exec()
     m_params.erase(m_params.begin());
     m_params.pop_back();
   }
-  if (!dspace)
-    this->rebin();
+  this->rebin();
 
   // return the output workspace
   setProperty("OutputWorkspace",m_outputW);
@@ -445,7 +445,10 @@ void AlignAndFocusPowder::rebin()
   }
   else
   {
-    g_log.information() << "running Rebin\n";
+    g_log.information() << "running Rebin( ";
+    for (auto param = m_params.begin(); param != m_params.end(); ++param)
+      g_log.information() << (*param) << " ";
+    g_log.information() << ")\n";
     API::IAlgorithm_sptr rebin3Alg = createChildAlgorithm("Rebin");
     rebin3Alg->setProperty("InputWorkspace", m_outputW);
     rebin3Alg->setProperty("OutputWorkspace", m_outputW);
