@@ -28,6 +28,9 @@ public:
   static void destroySuite( FilterEventsTest *suite ) { delete suite; }
 
 
+  //----------------------------------------------------------------------------------------------
+  /** Test initialization
+    */
   void test_Initialization()
   {
     FilterEvents alg;
@@ -36,6 +39,9 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test create event workspace and splitters
+    */
   void test_CreatedEventWorskpaceAndSplitter()
   {
     DataObjects::EventWorkspace_sptr eventws = createEventWorkspace();
@@ -53,8 +59,8 @@ public:
     return;
   }
 
-  /*
-   *  Filter events without any correction
+  //----------------------------------------------------------------------------------------------
+  /**  Filter events without any correction
    *  (1) Leave correction file empty
    *  (2) Count events in each output including "-1", the excluded/unselected events
    */
@@ -120,20 +126,25 @@ public:
     return;
   }
 
-  void test_FilterWithCorrection()
+  void ToImplement_test_FilterWithCorrection()
   {
 
   }
 
 
-  /*
-   * Create an EventWorkspace.  This workspace will have
-   * (1) Events with wall time even in time
+  //----------------------------------------------------------------------------------------------
+  /** Create an EventWorkspace.  This workspace has
+    * (1) 10 detectors
+    * (2) Run starts @ 20000000000 seconds
+    * (3) Pulse length = 100*1000*1000 seconds
+    * (4) Within one pulse, two consecutive events/neutrons is apart for 10*1000*1000 seconds
+    * (5) "Experiment": 5 pulse times.  10 events in each pulse
    */
   DataObjects::EventWorkspace_sptr createEventWorkspace()
   {
     // 1. Create an EventWorkspace with 10 detectors
-    DataObjects::EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
+    DataObjects::EventWorkspace_sptr eventWS =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
 
     int64_t runstart_i64 = 20000000000;
     Kernel::DateAndTime runstart(runstart_i64);
@@ -164,9 +175,9 @@ public:
   }
 
 
-  /*
-   * Create a  Splitter for output
-   * Region:
+  //----------------------------------------------------------------------------------------------
+  /** Create a  Splitter for output
+   *  Region:
    * 0: pulse 0: 0 ~ 3+
    * 1: pulse 0: 3+ ~ pulse 1: 9+
    * 2: from pulse 2: 0 ~ 6+
@@ -174,7 +185,8 @@ public:
    */
   DataObjects::SplittersWorkspace_sptr createSplitter()
   {
-    DataObjects::SplittersWorkspace_sptr splitterws = boost::shared_ptr<DataObjects::SplittersWorkspace>(new DataObjects::SplittersWorkspace);
+    DataObjects::SplittersWorkspace_sptr splitterws =
+        boost::shared_ptr<DataObjects::SplittersWorkspace>(new DataObjects::SplittersWorkspace);
 
     int64_t runstart_i64 = 20000000000;
 
