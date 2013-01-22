@@ -433,6 +433,10 @@ public:
     TS_ASSERT( saver.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", "LoadMDTest_ws" ) );
     TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename", "LoadMDTest2.nxs") );
+    // clean up possible rubbish from the previous runs
+    std::string fullName = saver.getPropertyValue("Filename");
+    if(Poco::File(fullName).exists()) Poco::File(fullName).remove();
+
     TS_ASSERT_THROWS_NOTHING( saver.execute(); );
     TS_ASSERT( saver.isExecuted() );
 
