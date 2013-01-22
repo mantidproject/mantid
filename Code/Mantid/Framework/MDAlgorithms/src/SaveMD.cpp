@@ -328,10 +328,11 @@ namespace MDAlgorithms
           MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(Box);
           if(!mdBox) throw std::runtime_error("found unfamiliar type of box");
           // Store the index
+          uint64_t nEvents        = mdBox->getNPoints();
           box_event_index[id*2]   = mdBox->getFilePosition();
-          box_event_index[id*2+1] = mdBox->getNPoints();
+          box_event_index[id*2+1] = nEvents;
           // save for the first time
-          if(!update)mdBox->saveNexus(file);
+          if(!update && nEvents>0)mdBox->saveNexus(file);
           // set that it is on disk and clear the actual events to free up memory, saving occured earlier
           if (MakeFileBacked) mdBox->clearDataFromMemory();
 
