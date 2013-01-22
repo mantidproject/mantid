@@ -30,9 +30,8 @@ ITHICK = 2
 BACKWARD = 0
 FORWARD = 1
 
-# Instrument parameter header
-IP_HEADER = "spectrum,theta,t0,-,R"
-
+# Instrument parameter headers. Key in the dictionary is the number of columns in the file
+IP_HEADERS = {5:"spectrum,theta,t0,-,R", 6:"spectrum,-,theta,t0,-,R"}
 
 # Child Algorithm logging
 _LOGGING_ = False
@@ -552,6 +551,8 @@ class LoadVesuvio(PythonAlgorithm):
         ip_file = self.getProperty(INST_PAR_PROP).value
         if ip_file == "":
             return
+
+        ip_header = self._get_header_format(ip_file)
         
         # More verbose until the sub algorithm stuff is sorted
         update_inst = self.createChildAlgorithm("UpdateInstrumentFromFile")
@@ -560,10 +561,28 @@ class LoadVesuvio(PythonAlgorithm):
         update_inst.setProperty("Filename", ip_file)
         update_inst.setProperty("MoveMonitors", False)
         update_inst.setProperty("IgnorePhi", True)
-        update_inst.setProperty("AsciiHeader", IP_HEADER)
+        update_inst.setProperty("AsciiHeader", ip_header)
         update_inst.execute()
         
         self.foil_out = update_inst.getProperty("Workspace").value
+
+#----------------------------------------------------------------------------------------
+    def _get_header_format(self, ip_filename):
+        """
+            Returns the header format to be used for the given
+            IP file. Currently supports 5/6 column files.
+            Raises ValueError if anything other than a 5/6 column
+            file is found. 
+            @filename ip_filename :: Full path to the IP file.
+            @returns The header format string for use with UpdateInstrumentFromFile
+        """
+        ipfile = open(ip_filename, "r")
+        first_line = ipfile.readline()
+        columns = first_line.split() # splits on whitespace characters
+        try:
+            return IP_HEADERS[len(columns)]
+        except KeyError:
+            raise ValueError("Unknown format for IP file. Currently support 5/6 column variants. ncols=%d" % (len(columns)))
 
 #----------------------------------------------------------------------------------------
     def _store_results(self):
