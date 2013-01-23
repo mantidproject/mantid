@@ -103,7 +103,7 @@ __operator_names = set(['CALL_FUNCTION', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_KW'
                         'INPLACE_OR', 'COMPARE_OP'])
 #--------------------------------------------------------------------------------------
 
-def process_frame(frame, use_object_names):
+def process_frame(frame):
     """Returns the number of arguments on the left of assignment along 
     with the names of the variables for the given frame.
      
@@ -113,10 +113,6 @@ def process_frame(frame, use_object_names):
     ===========================   ==========
     frame                         The code frame to analyse
 
-    use_object_names               If true and the variable name on the LHS already exists as an object 
-                                  in the frame locals or globals then replace the name with the name of the
-                                  object if it has one
-                                  
     Outputs:
     =========     
     Returns the a tuple with the number of arguments and their names
@@ -192,26 +188,11 @@ def process_frame(frame, use_object_names):
                 output_var_names.append(argvalue_)
             count = count + 1
             
-    if use_object_names:
-        for index, name in enumerate(output_var_names):
-            if name in frame.f_locals:
-                obj = frame.f_locals[name]
-            elif name in frame.f_globals:
-                obj = frame.f_globals[name]
-            else:
-                continue
-            try:
-                if hasattr(obj, 'getName'):
-                    output_var_names[index] = obj.getName()
-            except RuntimeError:
-                # Variable cannot be used, continue as if it is not defined
-                pass
-
     return (max_returns, tuple(output_var_names))
 
 #-------------------------------------------------------------------------------
 
-def lhs_info(output_type='both', use_object_names=False):
+def lhs_info(output_type='both'):
     """Returns the number of arguments on the left of assignment along 
     with the names of the variables.
 
@@ -232,9 +213,6 @@ def lhs_info(output_type='both', use_object_names=False):
                                                       variable names 
                                     output_type = 'both' : A tuple containing both of
                                                       the above
-    use_object_names               If true and the variable name on the LHS already exists as an object 
-                                  in the frame locals or globals then replace the name with the name of the
-                                  object if it has one
 
     Outputs:
     =========     
@@ -251,7 +229,7 @@ def lhs_info(output_type='both', use_object_names=False):
     # Process the frame noting the advice here:
     # http://docs.python.org/library/inspect.html#the-interpreter-stack
     try:
-        ret_vals = process_frame(frame, use_object_names)
+        ret_vals = process_frame(frame)
     finally:
         del frame
         

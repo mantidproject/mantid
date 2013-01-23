@@ -91,7 +91,7 @@ def Load(*args, **kwargs):
         del kwargs['Filename']
     except KeyError:
         pass
-    lhs = _funcreturns.lhs_info(use_object_names=True)
+    lhs = _funcreturns.lhs_info()
     # If the output has not been assigned to anything, i.e. lhs[0] = 0 and kwargs does not have OutputWorkspace
     # then raise a more helpful error than what we would get from an algorithm
     if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
@@ -191,7 +191,7 @@ def Fit(*args, **kwargs):
     except KeyError:
         pass
     
-    lhs = _funcreturns.lhs_info(use_object_names=True)
+    lhs = _funcreturns.lhs_info()
     # Check for any properties that aren't known and warn they will not be used
     for key in kwargs.keys():
         if key not in algm:
@@ -482,7 +482,7 @@ def create_algorithm(algorithm, version, _algm_object):
             del kwargs["Version"]
         algm = _framework.createAlgorithm(algorithm, _version)
         _set_logging_option(algm, kwargs)
-        lhs = _funcreturns.lhs_info(use_object_names=True)
+        lhs = _funcreturns.lhs_info()
         lhs_args = get_args_from_lhs(lhs, algm)
         final_keywords = merge_keywords_with_lhs(kwargs, lhs_args)
         _set_properties(algm, *args, **final_keywords)
