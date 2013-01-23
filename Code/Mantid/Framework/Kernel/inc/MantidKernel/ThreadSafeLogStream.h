@@ -54,7 +54,8 @@ public:
   ~ThreadSafeLogStreamBuf();
 	
 public:
-    int overflow(char c);
+  int overflow(char c);
+  using Poco::LogStreamBuf::overflow;
     
 private:
   ///Overridden fron base to write to the device in a thread-safe manner.
