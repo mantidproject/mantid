@@ -888,7 +888,10 @@ public:
     CPUTimer tim;
     DiskBuffer dbuf(3);
     for (size_t i=0; i<data.size(); i++)
+    {
       dbuf.toWrite(data[i]);
+      data[i]->setBusy(false);
+    }
     std::cout << tim << " to load " << num << " into MRU." << std::endl;
   }
 
@@ -902,7 +905,10 @@ public:
     }
 
     for (int i=0; i<int(data.size()); i++)
+    {
       dbuf.toWrite(data[i]);
+      data[i]->setBusy(false);
+    }
     std::cout << tim << " to load " << num << " into MRU (no write cache)." << std::endl;
   }
 
@@ -911,7 +917,10 @@ public:
     CPUTimer tim;
     DiskBuffer dbuf(1000);
     for (int i=0; i<int(data.size()); i++)
+    {
       dbuf.toWrite(data[i]);
+      data[i]->setBusy(false);
+    }
     std::cout << tim << " to load " << num << " into MRU." << std::endl;
   }
 
@@ -920,7 +929,10 @@ public:
     CPUTimer tim;
     DiskBuffer dbuf(0);
     for (int i=0; i<int(data.size()); i++)
+    {
       dbuf.toWrite(data[i]);
+      data[i]->setBusy(false);
+    }
     std::cout << tim << " to load " << num << " into MRU (no write buffer)." << std::endl;
   }
 
