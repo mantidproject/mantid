@@ -38,5 +38,5 @@ class DgsInterface(InstrumentInterface):
                                         data_type = self.data_type))
         
         # Powder and Single Crystal conversion
-        self.attach(PdAndScConversionWidget(settings = self._settings,
-                                            data_type = self.data_type))
+        #self.attach(PdAndScConversionWidget(settings = self._settings,
+        #                                    data_type = self.data_type))
