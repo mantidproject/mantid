@@ -267,6 +267,11 @@ namespace MantidQt
       return m_palette.backgroundIndexToColour(pos);
     }
 
+    /**
+     * Set to show the background radius.
+     * @param ws : Workspace upon which the backgoround radius should be shown/hidden.
+     * @param shown : True to show.
+     */
     void CompositePeaksPresenter::setBackgroundRadiusShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const bool shown)
     {
       if(useDefault())
@@ -277,6 +282,10 @@ namespace MantidQt
       (*iterator)->showBackgroundRadius(shown);
     }
 
+    /**
+     * Remove a peaks list altogether from the reporting and peaks overlays.
+     * @param peaksWS : Peaks list to remove.
+     */
     void CompositePeaksPresenter::remove(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
     {
       if(useDefault())
@@ -287,6 +296,11 @@ namespace MantidQt
       m_subjects.erase(iterator);
     }
 
+    /**
+     * Allow the peaks list to be hidden or visible.
+     * @param peaksWS : Peaks list to show/hide.
+     * @param shown : True to show.
+     */
     void CompositePeaksPresenter::setShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const bool shown)
     {
       if(useDefault())
@@ -297,6 +311,11 @@ namespace MantidQt
       (*iterator)->setShown(shown);
     }
 
+    /**
+     * Zoom in on a given peak in a given peaks list according to the current viewing dimensions.
+     * @param peaksWS : Peaks list from which a choosen peak will be zoomed into.
+     * @param peakIndex : Index of the peak in the peaks list to zoom into.
+     */
     void CompositePeaksPresenter::zoomToPeak(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const int peakIndex)
     {
       auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
@@ -305,6 +324,12 @@ namespace MantidQt
       m_zoomablePlottingWidget->zoomToRectangle(boundingBox);
     }
 
+    /**
+     * Sort the peaks workspace.
+     * @param peaksWS : Peaks list to sort.
+     * @param columnToSortBy : Column to sort by.
+     * @param sortedAscending : Direction of the sort. True for Ascending.
+     */
     void CompositePeaksPresenter::sortPeaksWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const std::string& columnToSortBy, const bool sortedAscending)
     {
       auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
