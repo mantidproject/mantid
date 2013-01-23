@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/Fit1D.cpp
 	src/FitMW.cpp
 	src/FitPowderDiffPeaks.cpp
+	src/FitPowderDiffPeaks2.cpp
 	src/FlatBackground.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
@@ -60,6 +61,7 @@ set ( SRC_FILES
 	src/ProductQuadraticExp.cpp
 	src/Quadratic.cpp
 	src/RefinePowderInstrumentParameters.cpp
+	src/RefinePowderInstrumentParameters2.cpp
 	src/Resolution.cpp
 	src/SeqDomain.cpp
 	src/SimplexMinimizer.cpp
@@ -114,6 +116,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Fit1D.h
 	inc/MantidCurveFitting/FitMW.h
 	inc/MantidCurveFitting/FitPowderDiffPeaks.h
+	inc/MantidCurveFitting/FitPowderDiffPeaks2.h
 	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
@@ -150,6 +153,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ProductQuadraticExp.h
 	inc/MantidCurveFitting/Quadratic.h
 	inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
+	inc/MantidCurveFitting/RefinePowderInstrumentParameters2.h
 	inc/MantidCurveFitting/Resolution.h
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
@@ -192,6 +196,7 @@ set ( TEST_FILES
 	FRConjugateGradientTest.h
 	FitMWTest.h
 	FitPowderDiffPeaksTest.h
+	FitPowderDiffPeaks2Test.h
 	FlatBackgroundTest.h
 	FunctionFactoryConstraintTest.h
 	GSLMatrixTest.h
@@ -225,6 +230,7 @@ set ( TEST_FILES
 	ProductQuadraticExpTest.h
 	QuadraticTest.h
 	RefinePowderInstrumentParametersTest.h
+	RefinePowderInstrumentParameters2Test.h
 	ResolutionTest.h
 	SimplexTest.h
 	SpecialFunctionSupportTest.h
