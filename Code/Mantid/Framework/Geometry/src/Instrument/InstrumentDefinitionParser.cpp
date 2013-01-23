@@ -2539,6 +2539,7 @@ namespace Geometry
     // create output XML string
     std::ostringstream obj_str;
     obj_str << "<expansion-of-locations-element>\n";
+    obj_str.precision(9); // a conservative output precision
 
     // OK, above all the attributes of <locations> has been collected
     // now it is time to create to <location> elements
@@ -2589,6 +2590,14 @@ namespace Geometry
           obj_str << " axis-y=\"" << pElem->getAttribute("axis-y") << "\"";
         if ( pElem->hasAttribute("axis-z") )        
           obj_str << " axis-z=\"" << pElem->getAttribute("axis-z") << "\"";
+      }
+
+      // look to see if name attribute is defined
+      if ( pElem->hasAttribute("name") )
+      {
+        const std::string name = pElem->getAttribute("name");
+
+        obj_str << " name=\"" << name << i << "\"";
       }
       
       // close <location>

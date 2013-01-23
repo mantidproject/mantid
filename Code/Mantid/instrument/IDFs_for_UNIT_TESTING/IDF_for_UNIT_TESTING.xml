@@ -81,6 +81,7 @@
 
 <component type="cylinder-right" idlist="tests locations tag">
   <locations x="0.0" y="0.0" z="0.0" z-end="1.0" n-elements="10" rot="90"/> 
+  <locations y="-1.0" y-end="1.0" n-elements="10" name="tube"/>   
 </component>
 
 <component type="locations nested test" idlist="tests locations tag 2">
@@ -341,6 +342,7 @@
   
   <idlist idname="tests locations tag">
     <id start="100" end="109" />
+    <id start="110" end="119" />    
   </idlist>  
   
   <idlist idname="tests locations tag 2">

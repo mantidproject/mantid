@@ -352,6 +352,12 @@ public:
     TS_ASSERT_DELTA( ptrDet100->getPos().Z(), 0.0, 1e-8 );
     boost::shared_ptr<const IDetector> ptrDet109 = i->getDetector(109);
     TS_ASSERT_DELTA( ptrDet109->getPos().Z(), 1.0, 1e-8 );
+    boost::shared_ptr<const IDetector> ptrDet110 = i->getDetector(110);
+    TS_ASSERT_DELTA( ptrDet110->getPos().Y(), -1.0, 1e-8 );
+    TS_ASSERT_EQUALS( ptrDet110->getName(), "tube0");
+    boost::shared_ptr<const IDetector> ptrDet119 = i->getDetector(119);
+    TS_ASSERT_DELTA( ptrDet119->getPos().Y(), 1.0, 1e-8 );
+    TS_ASSERT_EQUALS( ptrDet119->getName(), "tube9");
 
     boost::shared_ptr<const IDetector> ptrDet200 = i->getDetector(200);
     TS_ASSERT_DELTA( ptrDet200->getPos().Y(), 0.0, 1e-8 );
