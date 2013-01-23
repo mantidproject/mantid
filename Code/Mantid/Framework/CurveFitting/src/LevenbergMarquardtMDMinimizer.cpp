@@ -10,9 +10,6 @@
 
 #include "MantidKernel/Logger.h"
 
-//#include "MantidAPI/FunctionDomain1D.h"
-//#include "MantidAPI/FunctionValues.h"
-
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_blas.h>
 #include <iostream>
@@ -30,13 +27,13 @@ Kernel::Logger& LevenbergMarquardtMDMinimizer::g_log = Kernel::Logger::get("Lev-
 /// Constructor
 LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer():
 IFuncMinimizer(),
-m_relTol(1e-6),
 m_tau(1e-6),
-m_mu(0),
+m_mu(1e-6),
 m_nu(2.0),
 m_rho(1.0)
 {
-  declareProperty("MuMax",1e6,"Maximum value of mu.");
+  declareProperty("MuMax",1e6,"Maximum value of mu - a stopping parameter in failure.");
+  declareProperty("AbsError",0.0001,"Absolute error allowed for parameters - a stopping parameter in success.");
   declareProperty("Debug",false,"Turn on the debug output.");
 }
 
@@ -58,6 +55,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
 {
   const bool debug = getProperty("Debug");
   const double muMax = getProperty("MuMax");
+  const double absError = getProperty("AbsError");
 
   if ( !m_leastSquares )
   {
@@ -68,12 +66,14 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   if ( n == 0 )
   {
     m_errorString = "No parameters to fit.";
+    g_log.warning() << m_errorString << std::endl;
     return false;
   }
 
   if ( m_mu > muMax )
   {
-    m_errorString = "Failed to converge.";
+    m_errorString = "Failed to converge, maximum mu reached";
+    g_log.warning() << m_errorString << std::endl;
     return false;
   }
 
@@ -89,7 +89,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   // else if m_rho < 0 last iteration was bad: reuse m_der and m_hessian
 
   // Calculate damping to hessian
-  if (m_mu == 0) // first iteration
+  if (m_mu == 0) // first iteration or accidental zero
   {
     m_mu = m_tau;
     m_nu = 2.0;
@@ -97,7 +97,8 @@ bool LevenbergMarquardtMDMinimizer::iterate()
 
   if (debug)
   {
-    g_log.warning() << "mu=" << m_mu << std::endl;
+    g_log.warning() << "===========================================================" << std::endl;
+    g_log.warning() << "mu=" << m_mu << std::endl << std::endl;
   }
 
   if (m_D.empty())
@@ -123,6 +124,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     if ( tmp == 0.0 )
     {
       m_errorString = "Singular matrix.";
+      g_log.warning() << m_errorString << std::endl;
       return false;
     }
   }
@@ -147,10 +149,10 @@ bool LevenbergMarquardtMDMinimizer::iterate()
 
   if (debug && m_rho > 0)
   {
-    g_log.warning() << "H:\n" << H ;
-    g_log.warning() << "-----------------------------\n";
+    g_log.warning() << "Hessian:\n" << H ;
+    g_log.warning() << "Right-hand side:\n";
     for(size_t j = 0; j < n; ++j)  {g_log.warning() << dd.get(j) << ' '; } g_log.warning() << std::endl;
-    g_log.warning() << "det=" << H.det() << std::endl;
+    g_log.warning() << "Determinant=" << H.det() << std::endl;
   }
 
   // Parameter corrections
@@ -161,7 +163,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
 
   if (debug)
   {
-    g_log.warning() << "\nScaling:" << std::endl;
+    g_log.warning() << "\nScaling factors:" << std::endl;
     for(size_t j = 0; j < n; ++j)  {g_log.warning() << sf[j] << ' '; } g_log.warning() << std::endl;
     g_log.warning() << "Corrections:" << std::endl;
     for(size_t j = 0; j < n; ++j)  {g_log.warning() << dx.get(j) << ' '; } g_log.warning() << std::endl << std::endl;
@@ -185,7 +187,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     m_leastSquares->setParameter(i,d);
     if (debug)
     {
-      g_log.warning() << "P" << i << ' ' << d << std::endl;
+      g_log.warning() << "Parameter(" << i << ")=" << d << std::endl;
     }
   }
   m_leastSquares->getFittingFunction()->applyTies();
@@ -202,9 +204,10 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   double F1 = m_leastSquares->val();
   if (debug)
   {
-    static size_t iter = 0;
-    g_log.warning() << "iter " << ++iter << std::endl;
-    g_log.warning() << "F " << m_F << ' ' << F1 << ' ' << dL << std::endl;
+    g_log.warning() << std::endl;
+    g_log.warning() << "Old cost function " << m_F << std::endl;
+    g_log.warning() << "New cost function " << F1 << std::endl;
+    g_log.warning() << "Linear part " << dL << std::endl;
   }
 
   // Try the stop condition
@@ -213,16 +216,24 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     GSLVector p(n);
     m_leastSquares->getParameters(p);
     double dx_norm = gsl_blas_dnrm2(dx.gsl());
-    //double p_norm = gsl_blas_dnrm2(p.gsl());
-    if (dx_norm < 0.0001)
+    if (dx_norm < absError)
     {
+      if (debug)
+      {
+        g_log.warning() << "Successful fit, parameters changed by less than " << absError << std::endl;
+      }
       return false;
     }
     if (m_rho == 0)
     {
       if ( m_F != F1 )
       {
-        this->m_errorString = "rho == 0";
+        this->m_errorString = "Failed to converge, rho == 0";
+        g_log.warning() << m_errorString << std::endl;
+      }
+      if (debug)
+      {
+        g_log.warning() << "Successful fit, cost function didn't change." << std::endl;
       }
       return false;
     }
@@ -256,11 +267,13 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     if (m_rho > I3) m_rho = I3;
     if (m_rho < 0.0001) m_rho = 0.1;
     m_mu *= m_rho;
-    //if (m_mu < m_tau) m_mu = m_tau;
     m_nu = 2.0;
     m_F = F1;
     if (debug)
-    g_log.warning() << "times " << m_rho << std::endl;
+    {
+      g_log.warning() << "Good iteration, accept new parameters." << std::endl;
+      g_log.warning() << "rho=" << m_rho << std::endl;
+    }
     // drop saved state, accept new parameters
     m_leastSquares->drop();
   }
@@ -271,9 +284,12 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     // undo parameter update
     m_leastSquares->pop();
     m_F = m_leastSquares->val();
+    if (debug)
+    {
+      g_log.warning() << "Bad iteration, increase mu and revert changes to parameters." << std::endl;
+    }
   }
 
-  //m_leastSquares->drop();
   return true;
 }
 

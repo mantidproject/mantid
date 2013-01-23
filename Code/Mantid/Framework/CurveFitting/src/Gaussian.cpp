@@ -50,23 +50,6 @@ void Gaussian::functionDerivLocal(Jacobian* out, const double* xValues, const si
     }
 }
 
-void Gaussian::calJacobianForCovariance(Jacobian* out, const double* xValues, const size_t nData)
-{
-    const double height = getParameter("Height");
-    const double peakCentre = getParameter("PeakCentre");
-    const double sigma = getParameter("Sigma");
-
-    double weight = 1/(sigma*sigma);
-
-    for (size_t i = 0; i < nData; i++) {
-        double diff = xValues[i]-peakCentre;
-        double e = exp(-0.5*diff*diff*weight);
-        out->set(i,0, e);
-        out->set(i,1, diff*height*e*weight);
-        out->set(i,2, diff*diff*height*e/(sigma*sigma*sigma));  // note this is derivative with respect to sigma not weight
-    }
-}
-
 void Gaussian::setActiveParameter(size_t i,double value)
 {
   if ( !isActive(i) )

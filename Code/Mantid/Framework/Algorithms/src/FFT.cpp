@@ -178,6 +178,7 @@ void FFT::init()
   fft_dir.push_back("Forward");
   fft_dir.push_back("Backward");
   declareProperty("Transform","Forward",boost::make_shared<StringListValidator>(fft_dir),"Direction of the transform: forward or backward");
+  declareProperty("Shift",0.0,"Shift");
 }
 
 /** Executes the algorithm
@@ -209,10 +210,21 @@ void FFT::exec()
     if( iImag >= nHist ) throw std::invalid_argument("Property Imaginary is out of range");
   }
 
+  // check that the workspace isn't empty
+  if ( X.size() < 2 )
+  {
+    throw std::invalid_argument("Input workspace must have at least two values");
+  }
+
   //Check that the x values are evenly spaced
-  const double dx = (X.back() - X.front()) / (static_cast<int>(X.size()) - 1);
-  for(size_t i=0;i<X.size()-2;i++)
-    if (std::abs(dx - X[i+1] + X[i])/dx > 1e-7) throw std::invalid_argument("X axis must be linear (all bins have same width)");
+  const double dx = X[1] - X[0];
+  for(size_t i=1;i<X.size()-2;i++)
+    if (std::abs(dx - X[i+1] + X[i])/dx > 1e-7)
+    {
+      g_log.error() << "dx=" << X[i+1] - X[i] << ' ' << dx << ' ' << i << std::endl;
+      throw std::invalid_argument("X axis must be linear (all bins have same width)");
+    }
+  
 
   gsl_fft_complex_wavetable * wavetable = gsl_fft_complex_wavetable_alloc(ySize);
   gsl_fft_complex_workspace * workspace = gsl_fft_complex_workspace_alloc(ySize);
@@ -285,6 +297,9 @@ void FFT::exec()
       data[2*i+1] = isComplex? inImagWS->dataY(iImag)[j] : 0.;
     }
 
+    double shift = getProperty("Shift");
+    shift *= 2 * M_PI;
+
     gsl_fft_complex_forward (data.get(), 1, ySize, wavetable, workspace);
     for(int i=0;i<ySize;i++)
     {
@@ -292,6 +307,15 @@ void FFT::exec()
       outWS->dataX(iRe)[i] = df*(-ySize/2 + i);
       double re = data[2*j]*dx;
       double im = data[2*j+1]*dx;
+      // shift
+      {
+        double c = cos(outWS->dataX(iRe)[i]*shift);
+        double s = sin(outWS->dataX(iRe)[i]*shift);
+        double re1 = re * c - im * s;
+        double im1 = re * s + im * c;
+        re = re1;
+        im = im1;
+      }
       outWS->dataY(iRe)[i] = re; // real part
       outWS->dataY(iIm)[i] = im; // imaginary part
       outWS->dataY(iAbs)[i] = sqrt(re*re + im*im); // modulus
