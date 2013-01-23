@@ -20,7 +20,8 @@ using namespace MantidQt::MantidWidgets;
 WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(parent),
   m_addObserver(*this, &WorkspaceSelector::handleAddEvent), 
   m_remObserver(*this, &WorkspaceSelector::handleRemEvent),
-  m_init(init), m_workspaceTypes(), m_showHidden(true), m_suffix(), m_algName(), m_algPropName(), m_algorithm()
+  m_init(init), m_workspaceTypes(), m_showHidden(true), m_optional(false),
+  m_suffix(), m_algName(), m_algPropName(), m_algorithm()
 {
   setEditable(false); 
   if( init )
@@ -66,7 +67,7 @@ bool WorkspaceSelector::showHiddenWorkspaces() const
   return m_showHidden;
 }
 
-void WorkspaceSelector::showHiddenWorkspaces(const bool & show)
+void WorkspaceSelector::showHiddenWorkspaces(bool show)
 {
   if ( show != m_showHidden )
   {
@@ -75,6 +76,20 @@ void WorkspaceSelector::showHiddenWorkspaces(const bool & show)
     {
       refresh();
     }
+  }
+}
+
+bool WorkspaceSelector::isOptional() const
+{
+  return m_optional;
+}
+
+void WorkspaceSelector::setOptional(bool optional)
+{
+  if ( optional != m_optional )
+  {
+    m_optional = optional;
+    if ( m_init ) refresh();
   }
 }
 
@@ -180,6 +195,7 @@ bool WorkspaceSelector::checkEligibility(const QString & name, Mantid::API::Work
 void WorkspaceSelector::refresh()
 {
   clear();
+  if ( m_optional ) addItem("");
   Mantid::API::AnalysisDataServiceImpl& ads = Mantid::API::AnalysisDataService::Instance();
   std::set<std::string> items = ads.getObjectNames();
   if ( ! items.empty() )

@@ -64,6 +64,7 @@ namespace MantidWidgets
     
     Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
     Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
+    Q_PROPERTY(bool Optional READ isOptional WRITE setOptional)
     Q_PROPERTY(QString Suffix READ getSuffix WRITE setSuffix)
     Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE setValidatingAlgorithm)
 
@@ -76,19 +77,21 @@ namespace MantidWidgets
     QStringList getWorkspaceTypes() const;
     void setWorkspaceTypes(const QStringList & types);
     bool showHiddenWorkspaces() const;
-    void showHiddenWorkspaces(const bool & show);
+    void showHiddenWorkspaces(bool show);
+    bool isOptional() const;
+    void setOptional(bool optional);
     QString getSuffix() const;
     void setSuffix(const QString & suffix);
     QString getValidatingAlgorithm() const;
     void setValidatingAlgorithm(const QString & algName);
     bool isValid() const;
+    void refresh();
 
   private:
     void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
     void handleRemEvent(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
 
     bool checkEligibility(const QString & name, Mantid::API::Workspace_sptr object) const;
-    void refresh();
 
   private:
     /// Poco Observers for ADS Notifications
@@ -101,6 +104,7 @@ namespace MantidWidgets
     QStringList m_workspaceTypes;
     /// Whether to show "hidden" workspaces
     bool m_showHidden;
+    bool m_optional; ///< Whether to add an extra empty entry to the combobox
     // suffix
     QString m_suffix;
     QString m_algName;
