@@ -33,9 +33,9 @@ public:
     do_test_exec("");
   }
 
-  void xest_exec_fileBacked()
+  void test_exec_fileBacked()
   {
-    //do_test_exec("MergeMDFilesTest_OutputWS.nxs");
+    do_test_exec("MergeMDFilesTest_OutputWS.nxs");
   }
   
   void do_test_exec(std::string OutputFilename)
