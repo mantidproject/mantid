@@ -20,7 +20,10 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 /// Constructor
-RockingCurve::RockingCurve(QWidget *parent) : UserSubWindow(parent)
+RockingCurve::RockingCurve(QWidget *parent)
+  : UserSubWindow(parent), m_dataReloadNeeded(false),
+    m_addObserver(*this, &RockingCurve::handleAddEvent),
+    m_replObserver(*this, &RockingCurve::handleReplEvent)
 {
 }
 
@@ -28,18 +31,25 @@ RockingCurve::~RockingCurve()
 {
   // Clean up any hidden workspaces created
   cleanupWorkspaces();
+  // Disconnect the observers for the mask workspace combobox
+  AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
+  AnalysisDataService::Instance().notificationCenter.removeObserver(m_replObserver);
 }
 
 /// Set up the dialog layout
 void RockingCurve::initLayout()
 {
   m_uiForm.setupUi(this);
+  // I couldn't see a way to set a validator on a qlineedit in designer
+  m_uiForm.xmin->setValidator(new QDoubleValidator(m_uiForm.xmin));
+  m_uiForm.xmax->setValidator(new QDoubleValidator(m_uiForm.xmax));
+
+  connect( m_uiForm.launchInstView, SIGNAL(clicked()), SLOT(launchInstrumentWindow()) );
 
   connect( m_uiForm.mWRunFiles, SIGNAL(filesFound()), SLOT(loadFile()), Qt::QueuedConnection );
   connect( this, SIGNAL(logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr &)),
            SLOT(fillPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
 
-  //connect( m_uiForm.startButton, SIGNAL(clicked()), SLOT(generatePlot()) );
   connect( m_uiForm.startButton, SIGNAL(clicked()), SLOT(runRockingCurveAlg()) );
   connect( m_uiForm.closeButton, SIGNAL(clicked()), this->parent(), SLOT(close()) );
 }
@@ -56,6 +66,8 @@ void RockingCurve::cleanupWorkspaces()
   }
   // Disable start button
   m_uiForm.startButton->setEnabled(false);
+  // Disable the button for launching the instrument view
+  m_uiForm.launchInstView->setEnabled(false);
   // Disconnect anything listening to the comboboxes
   m_uiForm.plotVariable->disconnect(SIGNAL(currentIndexChanged(const QString &)));
   m_uiForm.normalization->disconnect(SIGNAL(currentIndexChanged(const QString &)));
@@ -75,17 +87,35 @@ void RockingCurve::loadFile()
   alg->setProperty("LoadMonitors", true);
   if ( alg->execute() )  // executeAsync???
   {
+    m_dataReloadNeeded = false;
     const auto& ADS = AnalysisDataService::Instance();
     MatrixWorkspace_const_sptr outWS = ADS.retrieveWS<MatrixWorkspace>(m_inputWSName);
+    // Trigger population of the logs combobox
     emit logsAvailable( outWS );
     // Add the monitors to the normalization combobox
     MatrixWorkspace_const_sptr monWS = ADS.retrieveWS<MatrixWorkspace>(m_inputWSName+"_monitors");
     fillNormalizationCombobox( monWS );
+    // Enable the button to launch the instrument view (for defining a mask)
+    m_uiForm.launchInstView->setEnabled(true);
   }
   else
   {
     QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
   }
+}
+
+void RockingCurve::launchInstrumentWindow()
+{
+  // Gotta do this in python
+  std::string pyCode = "instrument_view = getInstrumentView('" + m_inputWSName + "',2)\n"
+                       "instrument_view.show()";
+
+  runPythonCode( QString::fromStdString(pyCode) );
+
+  // Attach the observers so that if a mask workspace is generated over in the instrument view,
+  // it is automatically selected by the combobox over here
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
 }
 
 void RockingCurve::fillPlotVarCombobox( const MatrixWorkspace_const_sptr & ws )
@@ -156,13 +186,36 @@ void RockingCurve::fillNormalizationCombobox( const Mantid::API::MatrixWorkspace
 
 void RockingCurve::runRockingCurveAlg()
 {
+  if ( m_dataReloadNeeded ) loadFile(); // Reload if workspace isn't fresh
+
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RockingCurve");
   alg->setPropertyValue("InputWorkspace", m_inputWSName);
   // The table should not be hidden, so leave off the prefix
   m_tableWSName = m_inputWSName.substr(2) + "_RockingCurve";
   alg->setPropertyValue("OutputWorkspace", m_tableWSName);
-  // TODO: Get other properties when implemented in the form
+
+  const QString maskWS = m_uiForm.maskWorkspace->currentText();
+  alg->setPropertyValue("MaskWorkspace",maskWS.toStdString());
+
+  const QString xminStr = m_uiForm.xmin->text();
+  const QString xmaxStr = m_uiForm.xmax->text();
+  const double xmin = xminStr.toDouble();
+  const double xmax = xmaxStr.toDouble();
+  // If both set, check that xmax > xmin
+  if ( !xminStr.isEmpty() && !xmaxStr.isEmpty() && xmin >= xmax )
+  {
+    QMessageBox::critical(this,"Invalid filtering range set","For the filtering range, min has to be less than max");
+    return;
+  }
+  if ( ! xminStr.isEmpty() ) alg->setProperty("XMin",xmin);
+  if ( ! xmaxStr.isEmpty() ) alg->setProperty("XMax",xmax);
+  // TODO: Update when entries added to rangeUnit combobox
+
   alg->execute();
+
+  // If any of the filtering options were set, next time round we'll need to reload the data
+  // as they cause the workspace to be changed
+  if ( !maskWS.isEmpty() || !xminStr.isEmpty() || !xmaxStr.isEmpty() ) m_dataReloadNeeded = true;
 
   // Now that the algorithm's been run, connect up the signal to change the plot variable
   connect( m_uiForm.plotVariable, SIGNAL(currentIndexChanged(const QString &)),
@@ -242,6 +295,28 @@ void RockingCurve::plotCurve()
                        "l.setAxisTitle(Layer.Left,'" + yAxisTitle + "')";
 
   runPythonCode( QString::fromStdString(pyCode) );
+}
+
+void RockingCurve::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
+{
+  checkForMaskWorkspace(pNf->object_name());
+}
+
+void RockingCurve::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
+{
+  checkForMaskWorkspace(pNf->object_name());
+}
+
+void RockingCurve::checkForMaskWorkspace(const std::string & wsName)
+{
+  if ( wsName == "MaskWorkspace" )
+  {
+    // Make sure the combobox has picked up the new workspace
+    m_uiForm.maskWorkspace->refresh();
+    // Now set it to point at the mask workspace
+    const int index = m_uiForm.maskWorkspace->findText("MaskWorkspace");
+    if ( index != -1 ) m_uiForm.maskWorkspace->setCurrentIndex(index);
+  }
 }
 
 } // namespace CustomInterfaces
