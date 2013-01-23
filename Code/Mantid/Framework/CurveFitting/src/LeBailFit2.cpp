@@ -174,6 +174,11 @@ namespace CurveFitting
     declareProperty("MinimumPeakHeight", 0.01, "Minimum height of a peak to be counted "
                     "during smoothing background by exponential smooth algorithm. ");
 
+    // Flag to allow input hkl file containing degenerated peaks
+    declareProperty("AllowDegeneratedPeaks", false,
+                    "Flag to allow degenerated peaks in input .hkl file. "
+                    "Otherwise, an exception will be thrown if this situation occurs.");
+
     return;
   }
 
@@ -376,6 +381,9 @@ namespace CurveFitting
     }
 
     m_minimumHeight = getProperty("MinimumPeakHeight");
+
+    // Tolerate duplicated input peak or not?
+    m_tolerateInputDupHKL2Peaks = getProperty("AllowDegeneratedPeaks");
 
     return;
   }
@@ -1094,6 +1102,91 @@ namespace CurveFitting
     sort(m_dspPeaks.begin(), m_dspPeaks.end());
 
     // 3. Check to see whether there is any duplicate peaks
+    bool noduppeaks = true;
+    vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> >::iterator peakiter, leftpeakiter;
+    for (peakiter = m_dspPeaks.begin()+1; peakiter != m_dspPeaks.end(); ++peakiter)
+    {
+      leftpeakiter = peakiter-1;
+      double this_dh = peakiter->first;
+      double prev_dh = leftpeakiter->first;
+      if ( this_dh - prev_dh < 1.0E-10 )
+      {
+        // Possibly 2 exactly same (HKL)^2
+        // a) Signal
+        noduppeaks = false;
+
+        // b) Print out information
+        ThermalNeutronBk2BkExpConvPV_sptr thispeak = peakiter->second;
+        ThermalNeutronBk2BkExpConvPV_sptr leftpeak = leftpeakiter->second;
+        int h0, k0, l0, h1, k1, l1;
+        thispeak->getMillerIndex(h0, k0, l0);
+        leftpeak->getMillerIndex(h1, k1, l1);
+        int hkl2a = h0*h0 + k0*k0 + l0*l0;
+        int hkl2b = h1*h1 + k1*k1 + l1*l1;
+        int ipk = static_cast<int>(peakiter-m_dspPeaks.begin());
+        std::stringstream errmsg;
+        errmsg << "Duplicate (d_h) peaks found! They are peak (" << h0 << ", " << k0 << ", " << l0
+               << ") ^2 = " << hkl2a << " indexed as " << ipk << ", and peak ("
+               << h1 << ", " << k1 << ", " << l1 << ")^2 = " << hkl2b << " indexed as " << ipk-1;
+
+        if (m_tolerateInputDupHKL2Peaks)
+          g_log.warning(errmsg.str());
+        else
+          g_log.error(errmsg.str());
+      }
+    }
+
+    // 4. Remove duplicated peaks or throw exception
+    if (!noduppeaks)
+    {
+      if (m_tolerateInputDupHKL2Peaks)
+      {
+        // Allow duplicate input.  Remove peaks then.
+        for (peakiter = m_dspPeaks.begin()+1; peakiter != m_dspPeaks.end(); ++peakiter)
+        {
+          leftpeakiter = peakiter-1;
+          double this_dh = peakiter->first;
+          double prev_dh = leftpeakiter->first;
+          if ( this_dh - prev_dh < 1.0E-10 )
+          {
+            // Possibly 2 exactly same (HKL)^2
+            // a) Get information
+            ThermalNeutronBk2BkExpConvPV_sptr thispeak = peakiter->second;
+            ThermalNeutronBk2BkExpConvPV_sptr leftpeak = leftpeakiter->second;
+            int h0, k0, l0, h1, k1, l1;
+            thispeak->getMillerIndex(h0, k0, l0);
+            leftpeak->getMillerIndex(h1, k1, l1);
+            int hkl2a = h0*h0 + k0*k0 + l0*l0;
+            int hkl2b = h1*h1 + k1*k1 + l1*l1;
+
+            // b) Some exception
+            if (hkl2a != hkl2b)
+            {
+              stringstream errmsg;
+              errmsg << "Peak (" << h0 << ", " << k0 << ", " << l0 << ") ^2 = " << hkl2a
+                     << ", d = " << this_dh << " "
+                     << "and peak (" << h1 << ", " << k1 << ", " << l1 << ")^2 = " << hkl2b
+                     << ", d = " << prev_dh << " "
+                     << "have too close d-spacing value, but they are different peaks. "
+                     << "This situation is not supported yet.";
+              g_log.error(errmsg.str());
+              throw runtime_error(errmsg.str());
+            }
+
+            // c) Remove this peak
+            peakiter = m_dspPeaks.erase(peakiter);
+          }
+        } // ENDFOR
+      }
+      else
+      {
+        // Disallow duplicated input peak (HKL)^2.
+        throw runtime_error("Input contains peaks with duplicated (HKL)^2. User treats it an exception.");
+      }
+    }
+
+
+    /*
     size_t numpeaks = m_dspPeaks.size();
     for (size_t ipk = 0; ipk < numpeaks-1; ++ipk)
     {
@@ -1116,6 +1209,7 @@ namespace CurveFitting
         throw std::invalid_argument(errmsg.str());
       }
     }
+    */
 
     // 4. Information output
     g_log.information() << "Number of ... Input Peaks = " << m_inputPeakInfoVec.size() << "; Peaks Generated: "

@@ -358,6 +358,9 @@ namespace CurveFitting
     /// Minimum height of a peak to be counted in smoothing background
     double m_minimumHeight;
 
+    /// Flag to allow peaks with duplicated (HKL)^2 in input .hkl file
+    bool m_tolerateInputDupHKL2Peaks;
+
   };
 
   /// Auxiliary.  Split composite function name to function index and parameter name
