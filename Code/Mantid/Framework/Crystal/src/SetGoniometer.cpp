@@ -21,6 +21,7 @@ The run's sample logs will be used in order to determine the actual angles of ro
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include <boost/algorithm/string/detail/classification.hpp>
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/ListValidator.h"
 
 using Mantid::Geometry::Goniometer;
 using namespace Mantid::Geometry;
@@ -69,7 +70,12 @@ namespace Crystal
   {
     declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut), "An workspace that will be modified with the new goniometer created.");
 
-    declareProperty(new PropertyWithValue<std::string>("goniometers","",Direction::Input), "Set the axes and motor names according to goniometers that we define in the code (Universal defined for SNS)");
+    std::vector<std::string> gonOptions;
+    gonOptions.push_back( "None, Specify Individually" );
+    gonOptions.push_back("Universal" );
+    declareProperty("Goniometers", gonOptions[0],boost::make_shared<StringListValidator>(gonOptions),
+      "Set the axes and motor names according to goniometers that we define in the code (Universal defined for SNS)");
+
     std::string axisHelp = ": name, x,y,z, 1/-1 (1 for ccw, -1 for cw rotation). Leave blank for no axis";
     for (size_t i=0; i< NUM_AXES; i++)
     {
@@ -85,7 +91,7 @@ namespace Crystal
   void SetGoniometer::exec()
   {
     MatrixWorkspace_sptr ws = getProperty("Workspace");
-    std::string gonioDefined = getPropertyValue("goniometers");
+    std::string gonioDefined = getPropertyValue("Goniometers");
     // Create the goniometer
     Goniometer gon;
 
@@ -129,7 +135,15 @@ namespace Crystal
       g_log.warning() << "Empty goniometer created; will always return an identity rotation matrix." << std::endl;
 
     // All went well, copy the goniometer into it. It will throw if the log values cannot be found
-    ws->mutableRun().setGoniometer(gon, true);
+    try
+    {
+    	ws->mutableRun().setGoniometer(gon, true);
+    }
+    catch (std::runtime_error &)
+    {
+    	g_log.error("No log values for goniometers");
+    }
+
   }
 
 

@@ -48,7 +48,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis0", "angle1, 1.0,2.0,3.0, 1") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis1", "angle2  , 4.0, 5.0,6.0, -1") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( !alg.isExecuted() ); //no log values
+    TS_ASSERT( alg.isExecuted() ); //catch for no log values
     
   }
   
@@ -108,6 +108,38 @@ public:
 
     AnalysisDataService::Instance().remove("SetGoniometerTest_ws");
   }
+  void test_universal()
+    {
+      Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+      AnalysisDataService::Instance().addOrReplace("SetUnivGoniometerTest_ws", ws);
+      FrameworkManager::Instance().exec("AddSampleLog", 8,
+        "Workspace","SetUnivGoniometerTest_ws","LogName", "phi","LogType","Number Series","LogText","1.234");
+
+      FrameworkManager::Instance().exec("AddSampleLog", 8,
+        "Workspace","SetUnivGoniometerTest_ws","LogName", "chi","LogType","Number Series","LogText","1.234");
+
+      FrameworkManager::Instance().exec("AddSampleLog", 8,
+        "Workspace","SetUnivGoniometerTest_ws","LogName", "omega","LogType","Number Series","LogText","1.234");
+
+
+      SetGoniometer alg;
+      TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+      TS_ASSERT( alg.isInitialized() )
+      TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace", "SetUnivGoniometerTest_ws"));
+      TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Goniometers", "Universal") );
+      TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+      TS_ASSERT( alg.isExecuted() ); //no log values
+
+      // Check the results
+      const Goniometer & G = ws->mutableRun().getGoniometer();
+      TS_ASSERT_EQUALS(G.getNumberAxes(), 3);
+      TS_ASSERT_EQUALS(G.getAxis(2).name, "phi");
+      TS_ASSERT_EQUALS(G.getAxis(1).name, "chi");
+      TS_ASSERT_EQUALS(G.getAxis(0).name, "omega");
+
+
+      AnalysisDataService::Instance().remove("SetUnivGoniometerTest_ws");
+    }
 
   /** Do a test with a single param
    *
