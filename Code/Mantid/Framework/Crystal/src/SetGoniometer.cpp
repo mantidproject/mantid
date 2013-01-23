@@ -69,6 +69,7 @@ namespace Crystal
   {
     declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut), "An workspace that will be modified with the new goniometer created.");
 
+    declareProperty(new PropertyWithValue<std::string>("goniometers","",Direction::Input), "Set the axes and motor names according to goniometers that we define in the code (Universal defined for SNS)");
     std::string axisHelp = ": name, x,y,z, 1/-1 (1 for ccw, -1 for cw rotation). Leave blank for no axis";
     for (size_t i=0; i< NUM_AXES; i++)
     {
@@ -84,10 +85,12 @@ namespace Crystal
   void SetGoniometer::exec()
   {
     MatrixWorkspace_sptr ws = getProperty("Workspace");
+    std::string gonioDefined = getPropertyValue("goniometers");
     // Create the goniometer
     Goniometer gon;
 
-    for (size_t i=0; i< NUM_AXES; i++)
+    if(gonioDefined.compare("Universal") == 0) gon.makeUniversalGoniometer();
+    else for (size_t i=0; i< NUM_AXES; i++)
     {
       std::ostringstream propName;
       propName << "Axis" << i;
