@@ -478,6 +478,13 @@ namespace Crystal
       // Read the header if necessary
       s = readPeakBlockHeader( s ,  in  , run , bankNum , chi , phi ,
           omega , monCount );
+      // Build the Rotation matrix using phi,chi,omega
+      uniGonio.setRotationAngle("phi", phi);
+      uniGonio.setRotationAngle("chi", chi);
+      uniGonio.setRotationAngle("omega", omega);
+      //Put goniometer into peaks workspace
+      outWS->mutableRun().setGoniometer(uniGonio, false);
+
 
       std::ostringstream oss;
       oss << "bank" << bankNum;
@@ -489,11 +496,6 @@ namespace Crystal
       {
         // Read the peak
         Peak peak = readPeak(outWS, s, in, seqNum, bankName);
-
-        // Build the Rotation matrix using phi,chi,omega
-        uniGonio.setRotationAngle("phi", phi);
-        uniGonio.setRotationAngle("chi", chi);
-        uniGonio.setRotationAngle("omega", omega);
 
         // Get the calculated goniometer matrix
         Matrix<double> gonMat = uniGonio.getR();
