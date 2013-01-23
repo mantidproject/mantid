@@ -11,6 +11,7 @@
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidCurveFitting/Polynomial.h"
 #include "MantidCurveFitting/BackToBackExponential.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 
 using namespace std;
 using namespace Mantid;
@@ -65,7 +66,7 @@ namespace CurveFitting
     virtual ~FitPowderDiffPeaks2();
 
     /// Algorithm's name for identification overriding a virtual method
-    virtual const std::string name() const { return "FitPowderDiffPeaks2";}
+    virtual const std::string name() const { return "FitPowderDiffPeaks";}
 
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;}
@@ -115,14 +116,11 @@ namespace CurveFitting
 
     /// Fit single peak in robust mode (no hint)
     bool fitSinglePeakRobust(BackToBackExponential_sptr peak, BackgroundFunction_sptr background,
-                             double leftdev, double rightdev, double& chi2);
+                             double leftdev, double rightdev, map<string, double> rightpeakparammap,
+                             double &finalchi2);
 
-    /// Fit non-right-most single peak in robust mode.  Estimation from right peak
-    bool fitSinglePeakRefRight(BackToBackExponential_sptr peak, BackgroundFunction_sptr backgroundfunction,
-                               BackToBackExponential_sptr rightpeak, double peakleftbound, double peakrightbound,
-                               double& chi2);
-
-
+    /// Fit signle peak by Monte Carlo/simulated annealing
+    bool fitSinglePeakSimulatedAnnealing(BackToBackExponential_sptr peak, vector<string> paramtodomc);
 
     /// Fit peak with confidence of the centre
     bool fitSinglePeakConfidentX(BackToBackExponential_sptr peak);
@@ -160,10 +158,16 @@ namespace CurveFitting
                           size_t maxiteration, double &chi2);
 
     /// Fit 1 peak and background
-    bool doFit1PeakBackgroundSimple(Workspace2D_sptr dataws, size_t workspaceindex,
-                                    BackToBackExponential_sptr peakfunction,
-                                    BackgroundFunction_sptr backgroundfunction,
-                                    string minimzername, size_t maxiteration, double &chi2);
+    // bool doFit1PeakBackgroundSimple(Workspace2D_sptr dataws, size_t workspaceindex,
+    // BackToBackExponential_sptr peakfunction,
+    // BackgroundFunction_sptr backgroundfunction,
+    // string minimzername, size_t maxiteration, double &chi2);
+
+    /// Fit single peak with background to raw data
+    bool doFit1PeakBackground(Workspace2D_sptr dataws, size_t wsindex,
+                             BackToBackExponential_sptr peak,
+                             BackgroundFunction_sptr backgroundfunction,
+                             double &chi2);
 
     /// Fit 1 peak by using a sequential of minimizer
     bool doFit1PeakSequential(Workspace2D_sptr dataws, size_t workspaceindex,
@@ -213,6 +217,11 @@ namespace CurveFitting
     bool estimateSinglePeakRange(BackToBackExponential_sptr peak, BackgroundFunction_sptr background,
                                  BackToBackExponential_sptr rightpeak, double fwhm, bool ismostright,
                                                      size_t m_wsIndex, double& chi2);
+
+    /// Observe peak range with hint from right peak's properties
+    void observePeakRange(BackToBackExponential_sptr thispeak,
+                          BackToBackExponential_sptr rightpeak, double refpeakshift,
+                          double& peakleftbound, double& peakrightbound);
 
     /// Estimate background
     // void estimateBackground(DataObjects::Workspace2D_sptr dataws);
@@ -336,6 +345,12 @@ namespace CurveFitting
     /// Minimum peak height for peak to be refined
     double m_minPeakHeight;
 
+    /// Unit cell of powder crystal
+    Geometry::UnitCell m_unitCell;
+
+    /// Fit peak + background as the last step
+    bool m_fitPeakBackgroundComposite;
+
   };
 
   /** Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
@@ -359,7 +374,7 @@ namespace CurveFitting
                                 size_t wsindexraw, size_t wsindexbkgd, size_t wsindexpeak);
 
   /// Estimate peak parameters;
-  bool estimatePeakParameters(Workspace2D_sptr dataws, size_t wsindex, double& centre, double& height, double& fwhm,
+  bool observePeakParameters(Workspace2D_sptr dataws, size_t wsindex, double& centre, double& height, double& fwhm,
                               string& errmsg);
 
   /// Find maximum value
@@ -367,6 +382,9 @@ namespace CurveFitting
 
   /// Find maximum value
   size_t findMaxValue(MatrixWorkspace_sptr dataws, size_t wsindex, double leftbound, double rightbound);
+
+  /// Get function parameter name, value and etc information in string
+  string getFunctionInfo(IFunction_sptr function);
 
 } // namespace CurveFitting
 } // namespace Mantid

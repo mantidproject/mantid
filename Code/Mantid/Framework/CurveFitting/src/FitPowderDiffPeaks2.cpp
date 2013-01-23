@@ -59,8 +59,7 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  // FIXME: Disabled for further test.
-  // DECLARE_ALGORITHM(FitPowderDiffPeaks2)
+  DECLARE_ALGORITHM(FitPowderDiffPeaks2)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -175,6 +174,10 @@ namespace CurveFitting
     declareProperty("RightMostPeakRightBound", EMPTY_DBL(), "Right bound of the right most peak. "
                     "Used in RobustFit mode.");
 
+    // Fit option
+    declareProperty("FitCompositePeakBackground", true,
+                    "Flag to do fit to both peak and background in a composite function as last fit step.");
+
     return;
   }
 
@@ -192,9 +195,18 @@ namespace CurveFitting
 
     // 3. Parse input table workspace
     importInstrumentParameterFromTable(m_profileTable);
+
+    // 4. Unit cell
+    double latticesize = getParameter("LatticeConstant");
+    if (latticesize == EMPTY_DBL())
+      throw runtime_error("Input instrument table workspace lacks LatticeConstant. "
+                          "Unable to complete processing.");
+    m_unitCell.set(latticesize, latticesize, latticesize, 90.0, 90.0, 90.0);
+
+    // 5. Generate peaks
     genPeaksFromTable(m_peakParamTable);
 
-    // 4. Fit peaks & get peak centers
+    // 6. Fit peaks & get peak centers
     m_indexGoodFitPeaks.clear();
     m_chi2GoodFitPeaks.clear();
     size_t numpts = m_dataWS->readX(m_wsIndex).size();
@@ -327,12 +339,7 @@ namespace CurveFitting
 
     m_minPeakHeight = getProperty("MinimumPeakHeight");
 
-    // Unit cell
-    double latticesize = getParameter("LatticeConstant");
-    if (latticesize == EMPTY_DBL())
-      throw runtime_error("Input instrument table workspace lacks LatticeConstant. "
-                          "Unable to complete processing.");
-    m_unitCell.set(latticesize, latticesize, latticesize, 90.0, 90.0, 90.0);
+    m_fitPeakBackgroundComposite = getProperty("FitCompositePeakBackground");
 
     return;
   }
@@ -361,13 +368,11 @@ namespace CurveFitting
 
     // II. Create local background function.
     Polynomial_sptr backgroundfunction = boost::make_shared<Polynomial>(Polynomial());
-    backgroundfunction->setAttributeValue("n", 2);
+    backgroundfunction->setAttributeValue("n", 1);
     backgroundfunction->initialize();
 
     // III. Fit peaks
-    double firstpeakheight = -1;
     double chi2;
-
     double refpeakshift = 0.0;
 
     for (int peakindex = static_cast<int>(numpeaks)-1; peakindex >= 0; --peakindex)
@@ -395,8 +400,9 @@ namespace CurveFitting
                << ", " << peakrightbound  << "].";
         g_log.information() << infoss.str() << endl;
 
+        map<string, double> rightpeakparameters;
         goodfit = fitSinglePeakRobust(thispeak, boost::dynamic_pointer_cast<BackgroundFunction>(backgroundfunction),
-                                      peakleftbound, peakrightbound, chi2);
+                                      peakleftbound, peakrightbound, rightpeakparameters, chi2);
 
         m_peakFitChi2[peakindex] = chi2;
 
@@ -411,12 +417,14 @@ namespace CurveFitting
         }
         g_log.information() << "[DB1151] Robust Fit Result:   Chi^2 = " << chi2 << endl << robmsgss.str();
 
-        firstpeakheight = thispeak->height();
         rightpeak = thispeak;
         isrightmost = false;
 
         // iii. Reference peak shift
         refpeakshift = thispeak->centre() - predictpeakcentre;
+
+        g_log.notice() << "[DBx332] Peak -" << static_cast<int>(numpeaks)-peakindex-1 << ": shifted = "
+                       << refpeakshift << endl;
       }
       else if (!isrightmost)
       {
@@ -425,52 +433,51 @@ namespace CurveFitting
         if (peakindex == static_cast<int>(numpeaks)-1)
           throw runtime_error("Impossible to have peak index as the right most peak here!");
 
-        // 2. Determine the peak range
         double predictcentre = thispeak->centre();
-        double rightfwhm = rightpeak->fwhm();
-        if (refpeakshift > 0)
-        {
-          // tend to shift to right
-          peakleftbound = predictcentre - rightfwhm;
-          peakrightbound = predictcentre + rightfwhm + refpeakshift;
-        }
-        else
-        {
-          // tendency to shift to left
-          peakleftbound = predictcentre - rightfwhm + refpeakshift;
-          peakrightbound = predictcentre + rightfwhm;
-        }
-        if (peakrightbound > rightpeak->centre() - 3*rightpeak->fwhm())
-        {
-          // the search of peak's right end shouldn't exceed the left tail of its real right peak!
-          // Remember this is robust mode.  Any 2 adjacent peaks should be faw enough.
-          peakrightbound = rightpeak->centre() - 3*rightpeak->fwhm();
-        }
 
-        g_log.information() << "[DB1213] Peak (" << peakhkl[0] << ", " << peakhkl[1] << ", " << peakhkl[2] << ")"
-                            << ": TOF = " << thispeak->centre() << ", Estimated boundary = " << peakleftbound
-                            << ", " << peakrightbound << endl;
+        // 2. Determine the peak range by observation
+        double peakleftbound, peakrightbound;
+        observePeakRange(thispeak, rightpeak, refpeakshift, peakleftbound, peakrightbound);
+
+        stringstream dbxss;
+        dbxss << endl;
+        for (int i = 0; i < 10; ++i)
+          dbxss << "==";
+        dbxss << endl << "[DBx323] Peak (" << peakhkl[0] << ", " << peakhkl[1] << ","
+              << peakhkl[2] << ").  Centre predicted @ TOF = " << predictcentre
+              << ".  Observed range = " << peakleftbound << ", " << peakrightbound;
+        g_log.notice(dbxss.str());
 
         // 3. Fit peak
+        /* Disabled and replaced by fit1PeakRobust
         goodfit = fitSinglePeakRefRight(thispeak, backgroundfunction, rightpeak, peakleftbound,
                                         peakrightbound, chi2);
+                                        */
 
-        if (!goodfit)
+        map<string, double> rightpeakparameters;
+        storeFunctionParameters(rightpeak, rightpeakparameters);
+        goodfit = fitSinglePeakRobust(thispeak, boost::dynamic_pointer_cast<BackgroundFunction>(backgroundfunction),
+                                      peakleftbound, peakrightbound, rightpeakparameters, chi2);
+
+        if (goodfit)
         {
-          m_peakFitChi2[peakindex] = -1.0;
-          g_log.warning() << "Fitting peak @ " << thispeak->centre() << " failed. " << endl;
-        }
-        else
-        {
+          // Fit successful
           m_peakFitChi2[peakindex] = chi2;
-          // FIXME: replace magic number 10 with a more reasonable variable; and another magic number 2.0
-          // Put the latest rightpeak if the fitting is good and peak height is reasonable.
-          if (thispeak->height() >= firstpeakheight/10.0 && thispeak->fwhm() <= rightpeak->fwhm()*2.0)
+          // Update right peak and reference peak shift if peak is not trivial
+          if (thispeak->height() >= m_minPeakHeight)
           {
             rightpeak = thispeak;
             refpeakshift = thispeak->centre() - predictcentre;
           }
+
         }
+        else
+        {
+          // Bad fit
+          m_peakFitChi2[peakindex] = -1.0;
+          g_log.warning() << "Fitting peak @ " << thispeak->centre() << " failed. " << endl;
+        }
+
       }
       else
       {
@@ -487,17 +494,64 @@ namespace CurveFitting
 
     } // ENDFOR Peaks
 
-    stringstream ss;
-    for (size_t i = 0; i < m_peakData.size(); ++i)
-      ss << i << "\t\t" << m_peakData[i] << endl;
-    g_log.debug() << "[DBx227] m_peakData:  Size = " << m_peakData.size() << endl
-                   << ss.str();
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Observe peak range with hint from right peak's properties
+    * Assumption: the background is reasonably flat within peak range
+    */
+  void FitPowderDiffPeaks2::observePeakRange(BackToBackExponential_sptr thispeak,
+                                             BackToBackExponential_sptr rightpeak, double refpeakshift,
+                                             double& peakleftbound, double& peakrightbound)
+  {
+    double predictcentre = thispeak->centre();
+    double rightfwhm = rightpeak->fwhm();
+
+    // 1. Roughly determine the peak range from this peak's starting values and right peak' fitted
+    //    parameters values
+    if (refpeakshift > 0)
+    {
+      // tend to shift to right
+      peakleftbound = predictcentre - rightfwhm;
+      peakrightbound = predictcentre + rightfwhm + refpeakshift;
+    }
+    else
+    {
+      // tendency to shift to left
+      peakleftbound = predictcentre - rightfwhm + refpeakshift;
+      peakrightbound = predictcentre + rightfwhm;
+    }
+    if (peakrightbound > rightpeak->centre() - 3*rightpeak->fwhm())
+    {
+      // the search of peak's right end shouldn't exceed the left tail of its real right peak!
+      // Remember this is robust mode.  Any 2 adjacent peaks should be faw enough.
+      peakrightbound = rightpeak->centre() - 3*rightpeak->fwhm();
+    }
+
+    // 2. Search for maximum
+    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
+
+    size_t icentre = findMaxValue(m_dataWS, m_wsIndex, peakleftbound, peakrightbound);
+    double peakcentre = vecX[icentre];
+
+    // 3. Narrow now the peak range
+    peakleftbound = vecX[icentre] - 4.0*rightfwhm;
+    peakrightbound = vecX[icentre] + 4.0*rightfwhm;
+
+    double rightpeakleftbound = rightpeak->centre() - 3*rightfwhm;
+    if (peakrightbound > rightpeakleftbound)
+    {
+      peakrightbound = rightpeakleftbound;
+      if (peakrightbound < 2.0*rightfwhm+peakcentre)
+        g_log.warning() << "Peak @ " << peakcentre << "'s right boundary is too close to its right peak!" << endl;
+    }
 
     return;
   }
 
 
-  //-----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Fit a single peak including its background by a robust algorithm
     * Algorithm will
     *  1. Locate Maximum
@@ -509,6 +563,18 @@ namespace CurveFitting
     * Prerequisit:
     * ---- NONE!
     *
+    * Algorithms:
+    *  1. Build partial workspace for peak
+    *  2. Estimate background
+    *  3. Estimate peak position and height (by observing)
+    *  4. Fit peak by Gaussian for more accurate peak position, height and sigma
+    *
+    * Peak Fit Algorithms: 4 different approaches are used.  3 of them use normal minimzers such that
+    * 1. Use X0 and I calculated by Gaussian, then use A, B, S from input;
+    * 2. Use X0, I and S calculated by Gaussian, then use A and B from input;
+    * 3. Use X0, I and S calculated by Gaussian, then use A and B from right peak;
+    * 4. Use X0, I and S calculated by Gaussian, then use simulated annealing on A and B;
+    *
     * Arguments
     * @param chi2   :  (output) chi square of the fit result
     *
@@ -516,12 +582,16 @@ namespace CurveFitting
     * 1. leftdev, rightdev:  search range for the peak from the estimatio (theoretical)
     * Return: chi2 ... all the other parameter should be just in peak
     */
-  bool FitPowderDiffPeaks2::fitSinglePeakRobust(BackToBackExponential_sptr peak, BackgroundFunction_sptr backgroundfunction,
-                                                double peakleftbound, double peakrightbound, double& newchi2)
+  bool FitPowderDiffPeaks2::fitSinglePeakRobust(BackToBackExponential_sptr peak,
+                                                BackgroundFunction_sptr backgroundfunction,
+                                                double peakleftbound, double peakrightbound,
+                                                map<string, double> rightpeakparammap,
+                                                double& finalchi2)
   {
     // 1. Build partial workspace
-    g_log.debug() << "[DB1208] Build partial workspace for peak @ " << peak->centre() << " (predicted)." << endl;
     Workspace2D_sptr peakws = buildPartialWorkspace(m_dataWS, m_wsIndex, peakleftbound, peakrightbound);
+    g_log.debug() << "[DB1208] Build partial workspace for peak @ " << peak->centre()
+                  << " (predicted)." << endl;
 
     // 2. Estimate and remove background
     size_t rawdata_wsindex = 0;
@@ -540,37 +610,294 @@ namespace CurveFitting
     // 3. Estimate FWHM, peak centre, and height
     double centre, fwhm, height;
     string errmsg;
-    bool pass = estimatePeakParameters(peakws, 1, centre, height, fwhm, errmsg);
+    bool pass = observePeakParameters(peakws, 1, centre, height, fwhm, errmsg);
     if (!pass)
     {
       // If estiamtion fails, quit b/c first/rightmost peak must be fitted.
       g_log.error(errmsg);
       throw runtime_error(errmsg);
     }
+    else if (height < m_minPeakHeight)
+    {
+      g_log.notice() << "[FLAGx409] Peak proposed @ TOF = " << peak->centre() << " has a trivial "
+                     << "peak height = " << height << " by observation.  Skipped." << endl;
+      return false;
+    }
     else
     {
       g_log.information() << "[DBx201] Peak Predicted @ TOF = " << peak->centre()
-                     << ", Estimated (observation) Centre = " << centre
-                     << " FWHM = " << fwhm << " Height = " << height << endl;
+                          << ", Estimated (observation) Centre = " << centre
+                          << ", FWHM = " << fwhm << " Height = " << height << endl;
     }
 
     // 4. Fit by Gaussian to get some starting value
     double tof_h, sigma;
     doFitGaussianPeak(peakws, peak_wsindex, centre, fwhm, fwhm, tof_h, sigma, height);
 
-    // 5. Set all parameters for fit
+    // 5. Fit by various methods
+    //    Set all parameters for fit
     vector<string> peakparnames = peak->getParameterNames();
     for (size_t i = 0; i < peakparnames.size(); ++i)
       peak->unfix(i);
 
+    //    Set up the universal starting parameter
+    peak->setParameter("I", height);
+    peak->setParameter("X0", tof_h);
+
+    size_t numsteps = 2;
+    vector<string> minimizers(numsteps);
+    minimizers[0] = "Simplex";
+    minimizers[1] = "Levenberg-Marquardt";
+    vector<size_t> maxiterations(numsteps, 10000);
+    vector<double> dampfactors(numsteps, 0.0);
+
+    //    Record the start value
+    map<string, double> origparammap;
+    storeFunctionParameters(peak, origparammap);
+
+    vector<double> chi2s;
+    vector<bool> goodfits;
+    vector<map<string, double> > solutions;
+
+    // a) Fit by using input peak parameters
+    string peakinfoa0 = getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+    g_log.notice() << "[DBx533A] Approach A: Starting Peak Function Information: "
+                   << endl << peakinfoa0 << endl;
+
+    double chi2a;
+    bool fitgooda = doFit1PeakSequential(peakws, peak_wsindex, peak, minimizers, maxiterations,
+                                         dampfactors, chi2a);
+    map<string, double> solutiona;
+    storeFunctionParameters(peak, solutiona);
+
+    chi2s.push_back(chi2a);
+    goodfits.push_back(fitgooda);
+    solutions.push_back(solutiona);
+
+    string peakinfoa1 = getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+    g_log.notice() << "[DBx533A] Approach A:  Fit Successful = " << fitgooda
+                   << ", Chi2 = " << chi2a
+                   << ", Peak Function Information: " << endl << peakinfoa1 << endl;
+
+    // b) Fit by using Gaussian result (Sigma)
+    restoreFunctionParameters(peak, origparammap);
+    peak->setParameter("S", sigma);
+
+    string peakinfob0 = getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+    g_log.notice() << "[DBx533B] Approach B: Starting Peak Function Information: "
+                   << endl << peakinfob0 << endl;
+
+    double chi2b;
+    bool fitgoodb = doFit1PeakSequential(peakws, peak_wsindex, peak, minimizers, maxiterations, dampfactors, chi2b);
+
+    map<string, double> solutionb;
+    storeFunctionParameters(peak, solutionb);
+
+    chi2s.push_back(chi2b);
+    goodfits.push_back(fitgoodb);
+    solutions.push_back(solutionb);
+
+    string peakinfob1 = getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+    g_log.notice() << "[DBx533B] Approach 2: Fit Successful = " << fitgoodb
+                   << ", Chi2 = " << chi2b
+                   << ", Peak Function Information: " << endl << peakinfob1 << endl;
+
+    // c) Fit peak parameters by the value from right peak
+    if (rightpeakparammap.size() > 0)
+    {
+      restoreFunctionParameters(peak, rightpeakparammap);
+      peak->setParameter("X0", tof_h);
+      peak->setParameter("I", height);
+
+      string peakinfoc0 = getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+      g_log.notice() << "[DBx533C] Approach C: Starting Peak Function Information: "
+                     << endl << peakinfoc0 << endl;
+
+      double chi2c;
+      bool fitgoodc = doFit1PeakSequential(peakws, peak_wsindex, peak, minimizers, maxiterations,
+                                           dampfactors, chi2c);
+      map<string, double> solutionc;
+      storeFunctionParameters(peak, solutionc);
+
+      chi2s.push_back(chi2c);
+      goodfits.push_back(fitgoodc);
+      solutions.push_back(solutionc);
+
+      string peakinfoc1 = getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
+      g_log.notice() << "[DBx533C] Approach C:  Fit Successful = " << fitgoodc
+                     << ", Chi2 = " << chi2c
+                     << ", Peak Function Information: " << endl << peakinfoc1 << endl;
+    }
+    else
+    {
+      // No right peak information: set a error entry
+      chi2s.push_back(DBL_MAX);
+      goodfits.push_back(false);
+      solutions.push_back(rightpeakparammap);
+    }
+
+    // 6. Summarize the above 3 approach
+    size_t bestapproach = goodfits.size() + 1;
+    double bestchi2 = DBL_MAX;
+    for (size_t i = 0; i < goodfits.size(); ++i)
+    {
+      if (goodfits[i] && chi2s[i] < bestchi2)
+      {
+        bestapproach = i;
+        bestchi2 = chi2s[i];
+      }
+    }
+
+    stringstream fitsumss;
+    fitsumss << "Best fit result is obtained by approach " << bestapproach << " of total "
+             << goodfits.size() << " approaches.  Best Chi^2 = " << bestchi2
+             << ", Peak Height = " << peak->height();
+    g_log.notice() << "[DB1127] " << fitsumss.str() << endl;
+
+    bool fitgood = true;
+    if (bestapproach < goodfits.size())
+    {
+      restoreFunctionParameters(peak, solutions[bestapproach]);
+    }
+    else
+    {
+      fitgood = false;
+    }
+
+    // 7. Fit by Monte Carlo if previous failed
+    if (!fitgood)
+    {
+      peak->setParameter("S", sigma);
+      peak->setParameter("I", height);
+      peak->setParameter("X0", tof_h);
+
+      vector<string> paramsinmc;
+      paramsinmc.push_back("A");
+      paramsinmc.push_back("B");
+
+      fitSinglePeakSimulatedAnnealing(peak, paramsinmc);
+    }
+
+    // 8. Fit with background
+    if (m_fitPeakBackgroundComposite)
+    {
+      // Fit peak + background
+      double chi2compf;
+      bool fitcompfunsuccess = doFit1PeakBackground(peakws, rawdata_wsindex, peak, backgroundfunction,
+                                                 chi2compf);
+      if (fitcompfunsuccess)
+      {
+        finalchi2 = chi2compf;
+      }
+      else
+      {
+        finalchi2 = bestchi2;
+        throw runtime_error("Need to find out how this case peak value is changed from best fit.");
+      }
+    }
+    else
+    {
+      // Flag is turned off
+      finalchi2 = bestchi2;
+    }
+
+    // 9. Plot function
+    FunctionDomain1DVector domain(peakws->readX(0));
+    plotFunction(peak, backgroundfunction, domain);
+
+    return fitgood;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Fit single peak with background to raw data
+    * Note 1: in a limited range (4*FWHM)
+    */
+  bool  FitPowderDiffPeaks2::doFit1PeakBackground(Workspace2D_sptr dataws, size_t wsindex,
+                                                 BackToBackExponential_sptr peak,
+                                                 BackgroundFunction_sptr backgroundfunction,
+                                                 double &chi2)
+  {
+    // 0. Set fit parameters
+    string minimzername("Levenberg-MarquardtMD");
+    double startx = peak->centre() - 3.0*peak->fwhm();
+    double endx = peak->centre() + 3.0*peak->fwhm();
+
+    // 1. Create composite function
+    CompositeFunction_sptr compfunc(new CompositeFunction);
+    compfunc->addFunction(peak);
+    compfunc->addFunction(backgroundfunction);
+
+    // 2. Unfix all parameters
+    vector<string> comparnames = compfunc->getParameterNames();
+    for (size_t ipar = 0; ipar < comparnames.size(); ++ipar)
+      compfunc->unfix(ipar);
+
+    // 3. Fit
+    string cominfoa = getFunctionInfo(compfunc);
+    g_log.notice() << "[DBx533X-0] Fit All: Starting Peak Function Information: "
+                   << endl << cominfoa
+                   << "Fit range = " << startx << ", " << endx << endl;
+
+    // 3. Set
+    IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
+    fitalg->initialize();
+
+    fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(compfunc));
+    fitalg->setProperty("InputWorkspace", dataws);
+    fitalg->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+    fitalg->setProperty("Minimizer", minimzername);
+    fitalg->setProperty("CostFunction", "Least squares");
+    fitalg->setProperty("MaxIterations", 1000);
+    fitalg->setProperty("Output", "FitPeakBackground");
+    fitalg->setProperty("StartX", startx);
+    fitalg->setProperty("EndX", endx);
+
+    // 3. Execute and parse the result
+    bool isexecute = fitalg->execute();
+    bool fitsuccess;
+    chi2 = DBL_MAX;
+
+    if (isexecute)
+    {
+      std::string fitresult = parseFitResult(fitalg, chi2, fitsuccess);
+
+      // Figure out result
+      stringstream cominfob;
+      cominfob << "[DBx533X] Fit All: Fit Successful = " << fitsuccess
+               << ", Chi^2 = " << chi2 << endl;
+      cominfob << "Detailed info = " << fitresult << endl;
+      string fitinfo = getFunctionInfo(compfunc);
+      cominfob << fitinfo;
+
+      g_log.notice(cominfob.str());
+    }
+    else
+    {
+      g_log.notice() << "[DB1203B] Failed To Fit Peak+Background @ " << peak->centre() << endl;
+      fitsuccess = false;
+    }
+
+    return fitsuccess;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Fit signle peak by Monte Carlo/simulated annealing
+    */
+  bool FitPowderDiffPeaks2::fitSinglePeakSimulatedAnnealing(BackToBackExponential_sptr peak,
+                                                            vector<string> paramtodomc)
+  {
+    UNUSED_ARG(peak);
+    UNUSED_ARG(paramtodomc);
+    throw runtime_error("To Be Implemented Soon!");
+
+    /*
     // 6. Fit peak by the result from Gaussian
     pair<bool, double> fitresult;
 
     double varA = 1.0;
     double varB = 1.0;
-    peak->setParameter("S", sigma);
-    peak->setParameter("I", height);
-    peak->setParameter("X0", tof_h);
+
 
     // a) Get initial chi2
     double startchi2 = DBL_MAX;
@@ -739,90 +1066,10 @@ namespace CurveFitting
     }
 
     return goodfit;
-  }
-
-  /** Fit the non-right most peak in robust fit mode.  The peak parameters are from right peak
-    * Algorithm:
-    *  1. Find max height in range of (peakleftbound, peakrightbound)
-    *  2. Estimate background
-    *  3. Re-find max height in data w/ background removed;
-    *  4. Build partial workspace based on the new centre
-    *  5. Fit!
     */
-  bool FitPowderDiffPeaks2::fitSinglePeakRefRight(BackToBackExponential_sptr peak, BackgroundFunction_sptr backgroundfunction,
-                                                  BackToBackExponential_sptr rightpeak, double searchpeakleftbound,
-                                                  double searchpeakrightbound, double& chi2)
-  {
-    // 1. Search
-    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
-    const MantidVec& vecY = m_dataWS->readY(m_wsIndex);
 
-    // 2. Build partial data workspace for fit
-    size_t icentre = findMaxValue(m_dataWS, m_wsIndex, searchpeakleftbound, searchpeakrightbound);
-    double peakcentre = vecX[icentre];
-
-    double rightfwhm = rightpeak->fwhm();
-    double peakleftbound = vecX[icentre] - 4.0*rightfwhm;
-    double peakrightbound = vecX[icentre] + 4.0*rightfwhm;
-
-    double rightpeakleftbound = rightpeak->centre() - 3*rightfwhm;
-    if (peakrightbound > rightpeakleftbound)
-    {
-      peakrightbound = rightpeakleftbound;
-      if (peakrightbound < 2.0*rightfwhm+peakcentre)
-        g_log.warning() << "Peak @ " << peakcentre << "'s right boundary is too close to its right peak!" << endl;
-    }
-
-    Workspace2D_sptr peakws = buildPartialWorkspace(m_dataWS, m_wsIndex, peakleftbound, peakrightbound);
-
-    // 4. Estimate and remove background
-    estimateBackgroundCoarse(peakws, backgroundfunction, 0, 2, 1);
-
-    const MantidVec& vecPeakX = peakws->readX(1);
-    const MantidVec& vecPeakY = peakws->readY(1);
-
-    stringstream debugss;
-    for (size_t i = 0; i < peakws->readX(0).size(); ++i)
-      debugss << vecPeakX[i] << "\t\t" << vecPeakY[i] << "\t\t" << peakws->readE(1)[i] << endl;
-    g_log.debug() << "[DB1252] Partial Peak Workspace for peak @ " << peak->centre()
-                  << endl << debugss.str();
-
-    // 5. Set up peak parameters
-    peak->setCentre(vecX[icentre]);
-    peak->setHeight(vecY[icentre]);
-    peak->setParameter("A", rightpeak->getParameter("A"));
-    peak->setParameter("B", rightpeak->getParameter("B"));
-    peak->setParameter("S", rightpeak->getParameter("S"));
-
-    map<string, double> storevalues;
-    storeFunctionParameters(peak, storevalues);
-
-    // 6. Fit
-    pair<bool, double> fitresult = doFitPeak(peakws, peak, rightfwhm);
-    bool goodfit = fitresult.first;
-
-    chi2 = fitresult.second;
-    stringstream dbgss;
-    dbgss <<  "DBx105 Fit Single Peak Success: " << goodfit << ", Chi^2 = " << chi2
-           << ", Starting value is from right peak @ " << rightpeak->centre()
-           << ", Predicted peak centre @ " << peakcentre << endl;
-    vector<string> parnames = peak->getParameterNames();
-    for (size_t i = 0; i < parnames.size(); ++i)
-    {
-      string parname = parnames[i];
-      dbgss << parname << "  =  " << peak->getParameter(parname) << "\t\t<=\t"
-            << storevalues[parname] << endl;
-    }
-    g_log.notice(dbgss.str());
-
-    // 7. Plot
-    // Plot the peak
-    FunctionDomain1DVector domain(peakws->readX(1));
-    plotFunction(peak, backgroundfunction, domain);
-
-    return goodfit;
+    return false;
   }
-
 
   //==============================  Fit Peaks With Good Starting Values ==========================
 
@@ -1406,11 +1653,14 @@ namespace CurveFitting
     vector<string> names = peakfunction->getParameterNames();
     for (size_t i = 0; i < names.size(); ++i)
       dbss << names[i] << "= " << peakfunction->getParameter(names[i]) << ", \t";
+    for (size_t i = 0; i < dataws->readX(workspaceindex).size(); ++i)
+      dbss << dataws->readX(workspaceindex)[i] << "\t\t" << dataws->readY(workspaceindex)[i]
+           << "\t\t"  << dataws->readE(workspaceindex)[i] << endl;
     g_log.debug() << "DBx430 " << dbss.str() << endl;
 
     // 1. Peak height
-    if (peakfunction->height() < 1.0E-5)
-      peakfunction->setHeight(4.0);
+    if (peakfunction->getParameter("I") < 1.0E-5)
+      peakfunction->setParameter("I", 4.0);
 
     // 2. Create fit
     Algorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
@@ -1436,8 +1686,8 @@ namespace CurveFitting
 
       // Figure out result
       g_log.information() << "[DBx138A] Fit Peak @ " << peakfunction->centre() << " Result:"
-                    << fitsuccess << "\n"
-                    << "Detailed info = " << fitresult << ", Chi^2 = " << chi2 << endl;
+                          << fitsuccess << "\n"
+                          << "Detailed info = " << fitresult << ", Chi^2 = " << chi2 << endl;
 
       // Debug information output
       API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
@@ -1462,7 +1712,6 @@ namespace CurveFitting
     * Return
     * 1. fit success?
     * 2. chi2
-    */
   bool FitPowderDiffPeaks2::doFit1PeakBackgroundSimple(Workspace2D_sptr dataws, size_t workspaceindex,
                                                        BackToBackExponential_sptr peakfunction,
                                                        BackgroundFunction_sptr backgroundfunction,
@@ -1521,6 +1770,7 @@ namespace CurveFitting
 
     return fitsuccess;
   }
+  */
 
 
   //----------------------------------------------------------------------------------------------
@@ -1555,9 +1805,10 @@ namespace CurveFitting
     {
       string minimizer = minimzernames[i];
       size_t maxiteration = maxiterations[i];
-      g_log.debug() << "DBx315 Minimizer = " << minimizer << ", Max Iterations = " << maxiteration
-                    << ", Workspace Index = " << workspaceindex << ", Data Range = "
-                    << dataws->readX(workspaceindex)[0] << ", " << dataws->readX(workspaceindex).back() << endl;
+      g_log.notice() << "DBx315 Start Chi2 = " << startchi2 << ", Minimizer = " << minimizer
+                     << ", Max Iterations = " << maxiteration
+                     << ", Workspace Index = " << workspaceindex << ", Data Range = "
+                     << dataws->readX(workspaceindex)[0] << ", " << dataws->readX(workspaceindex).back() << endl;
 
       storeFunctionParameters(peakfunction, parambeforefit);
 
@@ -1574,6 +1825,7 @@ namespace CurveFitting
       {
         // A same of worse one
         restoreFunctionParameters(peakfunction, parambeforefit);
+        g_log.information() << "DBx315C  Fit Failed.  Fit Good = " << localgoodfit << endl;
       }
 
     }
@@ -2078,8 +2330,8 @@ namespace CurveFitting
     return msgss.str();
   }
 
-  //===========================  Process Input/Output  =========================
-  //----------------------------------------------------------------------------
+  //================================  Process Input/Output  ======================================
+  //----------------------------------------------------------------------------------------------
   /** Import TableWorkspace containing the parameters for fitting
    * the diffrotometer geometry parameters
    */
@@ -2105,10 +2357,14 @@ namespace CurveFitting
       throw std::runtime_error(errss.str());
     }
 
+    size_t numrows = parameterWS->rowCount();
+
+    g_log.notice() << "[DBx409] Import TableWorkspace " << parameterWS->name() << " containing "
+                   << numrows << " instrument profile parameters" << endl;
+
     // 2. Import data to maps
     std::string parname;
     double value;
-    size_t numrows = parameterWS->rowCount();
     m_instrumentParmaeters.clear();
 
     for (size_t ir = 0; ir < numrows; ++ir)
@@ -2116,7 +2372,7 @@ namespace CurveFitting
       API::TableRow trow = parameterWS->getRow(ir);
       trow >> parname >> value;
       m_instrumentParmaeters.insert(std::make_pair(parname, value));
-      cout << "[DBx211] Import parameter " << parname << ": " << value << endl;
+      g_log.notice() << "[DBx211] Import parameter " << parname << ": " << value << endl;
     }
 
     return;
@@ -2584,6 +2840,10 @@ namespace CurveFitting
 
   //-----------------------------------------------------------------------------------------
   /** Generate a peak
+    *
+    * @param hklmap: a map containing one (HKL) entry
+    * @param hkl   : (output) (HKL) of the peak generated.
+    * @return      : BackToBackExponential peak
     */
   BackToBackExponential_sptr FitPowderDiffPeaks2::genPeak(map<string, int> hklmap, map<string, double> parammap,
                                                           map<string, string> bk2bk2braggmap, bool &good,
@@ -2601,13 +2861,9 @@ namespace CurveFitting
       // Ignore and return
       return newpeakptr;
     }
-    else
-    {
-      cout << "[DBx426] Generate Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] << ")... ..."
-           << endl;
-    }
 
     // 3. Set the peak parameters from 2 methods
+    string peakcalmode;
     if (m_genPeakStartingValue == HKLCALCULATION)
     {
       // a) Use Bragg peak table's (HKL) and calculate the peak parameters
@@ -2648,8 +2904,14 @@ namespace CurveFitting
           beta0 == EMPTY_DBL() || beta1 == EMPTY_DBL() || beta0t == EMPTY_DBL() || beta1t == EMPTY_DBL() ||
           sig0 == EMPTY_DBL() || sig1 == EMPTY_DBL() || sig2 == EMPTY_DBL())
       {
-        g_log.warning() << "[DBx343] Incomplete in instrument-peak profile parameters. Use (HKL) only!" << endl;
         caltofonly = true;
+        g_log.warning() << "[DBx343] At least one of the input instrument-peak profile parameters is not given. "
+                        << "Use (HKL) only!" << endl;
+        g_log.warning() << "Alph0 = " << alph0 << ", Alph1 = " << alph1 << ", Alph0t = " << alph0t
+                        << ", Alph1t = " << alph1t << endl;
+        g_log.warning() << "Beta0 = " << beta0 << ", Beta1 = " << beta1 << ", Beta0t = " << beta0t
+                        << ", Beta1t = " << beta1t << endl;
+        g_log.warning() << "Sig0 = " << sig0 << ", Sig1 = " << sig1 << ", Sig2 = " << sig2 << endl;
       }
 
       if (caltofonly)
@@ -2671,6 +2933,9 @@ namespace CurveFitting
         //   Calcualte TOF_h
         double tof_h = calThermalNeutronTOF(d_h, dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
         newpeakptr->setCentre(tof_h);
+
+        peakcalmode = "Calculate TOF Only";
+
       }
       else
       {
@@ -2716,6 +2981,9 @@ namespace CurveFitting
         newpeakptr->setParameter("S", sqrt(sigma2));
         newpeakptr->setParameter("X0", tof_h);
       }
+
+      peakcalmode = "Calculate all parameters by thermal neutron peak function.";
+
     }
     else if (m_genPeakStartingValue == FROMBRAGGTABLE)
     {
@@ -2750,15 +3018,28 @@ namespace CurveFitting
           }
         }
       } // FOR PEAK TABLE CELL
+
+      peakcalmode = "Import from Bragg peaks table";
     }
+
+    // Debug output
+    stringstream infoss;
+    string peakinfo = getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(newpeakptr));
+
+    infoss << "Generate Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] << ") Of Mode "
+           << peakcalmode << endl;
+    infoss << peakinfo;
+    g_log.notice() << "[DBx426] " << infoss.str();
 
     good = true;
 
     return newpeakptr;
   }
 
-  //----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Plot a single peak to output vector
+    *
+    * @param domain:  domain/region of the peak to plot.  It is very localized.
     */
   void FitPowderDiffPeaks2::plotFunction(IFunction_sptr peakfunction, BackgroundFunction_sptr background,
                                          FunctionDomain1DVector domain)
@@ -2786,12 +3067,6 @@ namespace CurveFitting
 
     for (int i = 0; i < static_cast<int>(domain.size()); ++i)
       m_peakData[i+ix0] += values2[i];
-
-    /*
-    double xf = domain[domain.size()-1];
-    viter = lower_bound(vecX.begin(), vecX.end(), xf);
-    int ixf = static_cast<int>(viter - vecX.begin());
-    */
 
     return;
   }
@@ -2951,7 +3226,22 @@ namespace CurveFitting
     return partws;
   }
 
-  //-----------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
+  /** Get function parameter values information and returned as a string
+    */
+  string getFunctionInfo(IFunction_sptr function)
+  {
+    stringstream outss;
+    vector<string> parnames = function->getParameterNames();
+    size_t numpars = parnames.size();
+    outss << "Number of Parameters = " << numpars << endl;
+    for (size_t i = 0; i < numpars; ++i)
+      outss << parnames[i] << " = " << function->getParameter(i) << ", \t\tFitted = " << !function->isFixed(i) << endl;
+
+    return outss.str();
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Estimate background for a pattern in a coarse mode
     * Assumption: the peak must be in the data range completely
     * Algorithm: use two end data points for a linear background
@@ -3034,7 +3324,7 @@ namespace CurveFitting
     * (2) Peak is inside
     * Algorithm: From the top.  Get the maximum value. Calculate the half maximum value.  Find the range of X
     */
-  bool estimatePeakParameters(Workspace2D_sptr dataws, size_t wsindex, double& centre, double& height, double& fwhm,
+  bool observePeakParameters(Workspace2D_sptr dataws, size_t wsindex, double& centre, double& height, double& fwhm,
                               string& errmsg)
   {
     // 1. Get the value of the Max Height
@@ -3160,7 +3450,7 @@ namespace CurveFitting
     return imax;
   }
 
-  //-----------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Find maximum value
     */
   size_t findMaxValue(MatrixWorkspace_sptr dataws, size_t wsindex, double leftbound, double rightbound)
