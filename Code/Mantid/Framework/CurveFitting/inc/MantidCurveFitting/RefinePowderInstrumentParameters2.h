@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_FITPOWDERPEAKPARAMETERS_H_
-#define MANTID_CURVEFITTING_FITPOWDERPEAKPARAMETERS_H_
+#ifndef MANTID_CURVEFITTING_RefinePowderInstrumentParameters2_H_
+#define MANTID_CURVEFITTING_RefinePowderInstrumentParameters2_H_
 
 #include "MantidKernel/System.h"
 
@@ -24,7 +24,7 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** FitPowderPeakParameters : TODO: DESCRIPTION
+  /** RefinePowderInstrumentParameters2 : TODO: DESCRIPTION
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -46,17 +46,17 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport FitPowderPeakParameters : public Algorithm
+  class DLLExport RefinePowderInstrumentParameters2 : public Algorithm
   {
   public:
-    FitPowderPeakParameters();
-    virtual ~FitPowderPeakParameters();
+    RefinePowderInstrumentParameters2();
+    virtual ~RefinePowderInstrumentParameters2();
 
     /// Algorithm's name for identification overriding a virtual method
-    virtual const std::string name() const { return "FitPowderPeakParameters";}
+    virtual const std::string name() const { return "RefinePowderInstrumentParameters";}
 
     /// Algorithm's version for identification overriding a virtual method
-    virtual int version() const { return 1;}
+    virtual int version() const { return 2;}
 
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Diffraction";}
@@ -73,6 +73,34 @@ namespace CurveFitting
 
     /// Fit instrument parameters by non Monte Carlo algorithm
     double execFitParametersNonMC();
+
+    /// Refine instrument parameters by Monte Carlo/simulated annealing method
+    double execFitParametersMC();
+
+    /// Do MC/simulated annealing to refine parameters
+    double doSimulatedAnnealing(map<string, Parameter> inparammap);
+
+    /// Set up Monte Carlo random walk strategy
+    void setupRandomWalkStrategy(map<string, Parameter>& parammap,
+                                 vector<vector<string> >& mcgroups);
+
+    /// Add parameter (to a vector of string/name) for MC random walk
+    void addParameterToMCMinimize(vector<string>& parnamesforMC, string parname,
+                                  map<string, Parameter> parammap);
+
+    /// Propose new parameters
+    void proposeNewValues(vector<string> mcgroup, map<string, Parameter>& curparammap,
+                          map<string, Parameter>& newparammap, double currchisq);
+
+    /// Determine whether the proposed value should be accepted or denied
+    bool acceptOrDenyChange(double curchisq, double newchisq, double temperature);
+
+    /// Book keep the best fitting result
+    void bookKeepMCResult(map<string, Parameter> parammap, double chisq, int istep, int igroup, map<string, Parameter> &bestparammap);
+    // vector<pair<double, map<string, Parameter> > > &bestresults, size_t maxnumresults);
+
+    /// Implement parameter values, calculate function and its chi square.
+    double calculateFunction(map<string, Parameter> parammap, vector<double>& vecY);
 
     /// Calculate Chi^2 of the a function with all parameters are fixed
     double calculateFunctionError(IFunction_sptr function, Workspace2D_sptr dataws,
@@ -138,6 +166,14 @@ namespace CurveFitting
     /// My function for peak positions
     ThermalNeutronDtoTOFFunction_sptr m_positionFunc;
 
+    /// Damping factor
+    double m_dampingFactor;
+
+    /// Book keep for MC
+    double m_bestChiSq;
+    int m_bestChiSqStep;
+    int m_bestChiSqGroup;
+
   };
 
   //================================= External Functions =========================================
@@ -154,7 +190,17 @@ namespace CurveFitting
   void restoreFunctionParameterValue(map<string, pair<double, double> > parvaluemap, IFunction_sptr function,
                                      map<string, Parameter> &parammap);
 
+  /// Copy parameters from source to target
+  void duplicateParameters(map<string, Parameter> source, map<string, Parameter> &target);
+
+  /// Copy parameters values from source to target
+  void copyParametersValues(map<string, Parameter> source, map<string, Parameter>& target);
+
+  /// Calculate Chi^2
+  double calculateFunctionChiSquare(const vector<double> modelY, const vector<double> dataY,
+                                    const vector<double> dataE);
+
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_FITPOWDERPEAKPARAMETERS_H_ */
+#endif  /* MANTID_CURVEFITTING_RefinePowderInstrumentParameters2_H_ */

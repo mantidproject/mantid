@@ -1,4 +1,4 @@
-#include "MantidCurveFitting/FitPowderPeakParameters.h"
+#include "MantidCurveFitting/RefinePowderInstrumentParameters2.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/TextAxis.h"
@@ -10,26 +10,26 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  DECLARE_ALGORITHM(FitPowderPeakParameters)
+  DECLARE_ALGORITHM(RefinePowderInstrumentParameters2)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  FitPowderPeakParameters::FitPowderPeakParameters()
+  RefinePowderInstrumentParameters2::RefinePowderInstrumentParameters2()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  FitPowderPeakParameters::~FitPowderPeakParameters()
+  RefinePowderInstrumentParameters2::~RefinePowderInstrumentParameters2()
   {
   }
 
   //----------------------------------------------------------------------------------------------
   /** Set up documention
     */
-  void FitPowderPeakParameters::initDocs()
+  void RefinePowderInstrumentParameters2::initDocs()
   {
     setWikiSummary("Refine the instrument geometry related parameters for powder diffractomer. ");
     setOptionalMessage("Parameters include Dtt1, Dtt1t, Dtt2t, Zero, Zerot. ");
@@ -38,7 +38,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Declare properties
     */
-  void FitPowderPeakParameters::init()
+  void RefinePowderInstrumentParameters2::init()
   {
     // Peak position workspace
     declareProperty(new WorkspaceProperty<Workspace2D>("InputPeakPositionWorkspace", "Anonymous",
@@ -86,13 +86,22 @@ namespace CurveFitting
     declareProperty("StandardError", "ConstantValue", listvalidator,
                     "Algorithm to calculate the standard error of peak positions.");
 
+    /// Damping factor
+    declareProperty("Damping", 1.0, "Damping factor for (1) minimizer 'damping'. (2) Monte Calro. ");
+
+    /// Anealing temperature
+    declareProperty("AnnealingTemperature", 1.0, "Starting aneealing temperature.");
+
+    /// Monte Carlo iterations
+    declareProperty("MonteCarloIterations", 100, "Number of iterations in Monte Carlo random walk.");
+
     return;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Main execution body
     */
-  void FitPowderPeakParameters::exec()
+  void RefinePowderInstrumentParameters2::exec()
   {
     // 1. Process input
     processInputProperties();
@@ -119,20 +128,25 @@ namespace CurveFitting
 
     // b) Fit by type
     double finalchi2 = DBL_MAX;
-    if (m_fitMode == FIT)
+    switch (m_fitMode)
     {
-      // Fit by non-Monte Carlo method
-      g_log.notice("Fit by non Monte Carlo algorithm. ");
-      finalchi2 = execFitParametersNonMC();
-    }
-    else
-    {
-      // Fit by Monte Carlo method
-      g_log.notice("Fit by Monte Carlo algorithm. ");
-      throw runtime_error("Haven't been implemented yet!");
-    }
+      case FIT:
+        // Fit by non-Monte Carlo method
+        g_log.notice("Fit by non Monte Carlo algorithm. ");
+        finalchi2 = execFitParametersNonMC();
+        break;
 
-    // updateFunctionParameterValues(m_positionFunc, m_profileParameters);
+      case MONTECARLO:
+        // Fit by Monte Carlo method
+        g_log.notice("Fit by Monte Carlo algorithm.");
+        finalchi2 = execFitParametersMC();
+        break;
+
+      default:
+        // Unsupported
+        throw runtime_error("Unsupported fit mode.");
+        break;
+    }
 
     // 4. Process the output
     TableWorkspace_sptr fitparamtable = genOutputProfileTable(m_profileParameters,
@@ -148,7 +162,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Process input properties
     */
-  void FitPowderPeakParameters::processInputProperties()
+  void RefinePowderInstrumentParameters2::processInputProperties()
   {
     // Data Workspace
     m_dataWS = getProperty("InputPeakPositionWorkspace");
@@ -193,13 +207,15 @@ namespace CurveFitting
 
     m_randomSeed = getProperty("MonteCarloRandomSeed");
 
+    m_dampingFactor = getProperty("Damping");
+
     return;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Parse TableWorkspaces
     */
-  void FitPowderPeakParameters::parseTableWorkspaces()
+  void RefinePowderInstrumentParameters2::parseTableWorkspaces()
   {
     m_profileParameters.clear();
 
@@ -210,8 +226,8 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Parse table workspace to a map of Parameters
     */
-  void FitPowderPeakParameters::parseTableWorkspace(TableWorkspace_sptr tablews,
-                                                    map<string, Parameter>& parammap)
+  void RefinePowderInstrumentParameters2::parseTableWorkspace(TableWorkspace_sptr tablews,
+                                                              map<string, Parameter>& parammap)
   {
     // 1. Process Table column names
     std::vector<std::string> colnames = tablews->getColumnNames();
@@ -280,7 +296,7 @@ namespace CurveFitting
   /** Fit instrument parameters by non Monte Carlo algorithm
     * Requirement:  m_positionFunc should have the best fit result;
    */
-  double FitPowderPeakParameters::execFitParametersNonMC()
+  double RefinePowderInstrumentParameters2::execFitParametersNonMC()
   {
     // 1. Set up constraints
     setFunctionParameterFitSetups(m_positionFunc, m_profileParameters);
@@ -289,14 +305,574 @@ namespace CurveFitting
     double chi2;
     fitFunction(m_positionFunc, m_dataWS, m_wsIndex, chi2);
 
+    // 2. Summary
+    stringstream sumss;
+    sumss << "Monte Carlo Results:  Best Chi^2 = " << chi2;
+    g_log.notice(sumss.str());
+
     return chi2;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Refine instrument parameters by Monte Carlo/simulated annealing method
+    */
+  double RefinePowderInstrumentParameters2::execFitParametersMC()
+  {
+    // 1. Monte Carlo simulation
+    double chisq = doSimulatedAnnealing(m_profileParameters);
+
+    // 2. Summary
+    stringstream sumss;
+    sumss << "Monte Carlo Results:  Best Chi^2 = " << chisq << " @ Step "
+          << m_bestChiSqStep << ", Group " << m_bestChiSqGroup;
+    g_log.notice(sumss.str());
+
+    return chisq;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Do MC/simulated annealing to refine parameters
+    *
+    * Helpful:     double curchi2 = calculateD2TOFFunction(mFunction, domain, values, rawY, rawE);
+    */
+  double RefinePowderInstrumentParameters2::doSimulatedAnnealing(map<string, Parameter> inparammap)
+  {
+    // 1. Prepare/initialization
+    //    Data structure
+    // const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
+    const MantidVec& dataY = m_dataWS->readY(m_wsIndex);
+    // const MantidVec& dataE = m_dataWS->readE(m_wsIndex);
+
+    size_t numpts = dataY.size();
+
+    vector<double> vecY(numpts, 0.0);
+
+    //    Monte Carlo strategy and etc.
+    vector<vector<string> > mcgroups;
+    setupRandomWalkStrategy(inparammap, mcgroups);
+
+    int randomseed = getProperty("MonteCarloRandomSeed");
+    srand(randomseed);
+
+    double temperature = getProperty("AnnealingTemperature");
+    if (temperature < 1.0E-10)
+      throw runtime_error("Annealing temperature is too low.");
+
+    int maxiterations = getProperty("MonteCarloIterations");
+    if (maxiterations <= 0)
+      throw runtime_error("Max iteration cannot be 0 or less.");
+
+    //    Book keeping
+    map<string, Parameter> parammap;
+    duplicateParameters(inparammap, parammap);
+    // vector<pair<double, map<string, Parameter> > > bestresults;
+    map<string, Parameter> bestresult;
+    // size_t maxnumresults = 10;
+
+    // 2. Set up parameters and get initial values
+    m_bestChiSq = DBL_MAX;
+    m_bestChiSqStep = -1;
+    m_bestChiSqGroup = -1;
+
+    /*
+    stringstream dbss;
+    map<string, Parameter>::iterator dbiter;
+    for (dbiter = parammap.begin(); dbiter != parammap.end(); ++dbiter)
+      dbss << dbiter->first << " = " << dbiter->second.value << endl;
+    g_log.notice() << "DBx514  Starting Parameter Values: " << endl << dbss.str() << endl;
+    */
+
+    double chisq0 = calculateFunction(parammap, vecY);
+    double chisq0x = calculateFunctionError(m_positionFunc, m_dataWS, m_wsIndex);
+    g_log.notice() << "[DBx510] Starting Chi^2 = " << chisq0 << " (homemade) "
+                   << chisq0x << " (Levenber-marquadt)" << endl;
+
+    bookKeepMCResult(parammap, chisq0, -1, -1, bestresult); // bestresults, maxnumresults);
+
+    // 3. Monte Carlo starts
+    double chisqx = chisq0;
+    int numtotalacceptance = 0;
+    int numrecentacceptance = 0;
+    int numrecentsteps = 0;
+
+    map<string, Parameter> propparammap; // parameters with proposed value
+    duplicateParameters(parammap, propparammap);
+
+    for (int istep = 0; istep < maxiterations; ++istep)
+    {
+      for (int igroup = 0; igroup < static_cast<int>(mcgroups.size()); ++igroup)
+      {
+        // a) Propose value
+        proposeNewValues(mcgroups[igroup], parammap, propparammap, chisqx); // , prevbetterchi2);
+
+        // b) Calcualte function and chi^2
+        double propchisq = calculateFunction(propparammap, vecY);
+
+        /*
+        stringstream dbss;
+        dbss << "[DBx541] New Chi^2 = " << propchisq << endl;
+        vector<string> paramnames = m_positionFunc->getParameterNames();
+        for (size_t i = 0; i < paramnames.size(); ++i)
+        {
+          string parname = paramnames[i];
+          double curvalue = parammap[parname].value;
+          double propvalue = propparammap[parname].value;
+          dbss << parname << ":\t\t" << setw(20) << propvalue << "\t\t<-----\t\t" << curvalue << "\t Delta = "
+               << curvalue-propvalue << endl;
+        }
+        g_log.notice(dbss.str());
+        */
+
+        // c) Determine to accept change
+        bool acceptpropvalues = acceptOrDenyChange(propchisq, chisqx, temperature);
+
+        // d) Change current chi^2, apply change, and book keep
+        if (acceptpropvalues)
+        {
+          setFunctionParameterValues(m_positionFunc, propparammap);
+          chisqx = propchisq;
+          bookKeepMCResult(parammap, chisqx, istep, igroup, bestresult); // s, maxnumresults);
+        }
+
+        // e) MC strategy control
+        ++ numtotalacceptance;
+        ++ numrecentacceptance;
+        ++ numrecentsteps;
+      }
+
+      // f) Annealing
+      if (numrecentsteps >= 10)
+      {
+        double acceptratio = static_cast<double>(numrecentacceptance)/static_cast<double>(numrecentsteps);
+        if (acceptratio < 0.2)
+        {
+          // i) Low acceptance, need to raise temperature
+          temperature *= 2.0;
+        }
+        else if (acceptratio >= 0.8)
+        {
+          // ii) Temperature too high to accept too much new change
+          temperature /= 2.0;
+        }
+
+        // iii) Reset counters
+        numrecentacceptance = 0;
+        numrecentsteps = 0;
+      }
+    }
+
+    // 4. Apply the best result
+    // sort(bestresults.begin(), bestresults.end());
+    setFunctionParameterValues(m_positionFunc, bestresult);
+    double chisqf = m_bestChiSq;
+
+    g_log.warning() << "[DBx544] Best Chi^2 From MC = " << m_bestChiSq << endl;
+
+    // 5. Use regular minimzer to try to get a better result
+    string fitstatus;
+    double fitchisq;
+    bool goodfit = doFitFunction(m_positionFunc, m_dataWS, m_wsIndex, "Levenberg-MarquardtMD",
+                                 1000, fitchisq, fitstatus);
+
+    bool restoremcresult = false;
+    if (goodfit)
+    {
+      map<string, Parameter> nullmap;
+      fitchisq = calculateFunction(nullmap, vecY);
+      if (fitchisq > chisqf)
+      {
+        // Fit is unable to achieve a better solution
+        restoremcresult = true;
+      }
+      else
+      {
+        m_bestChiSq = fitchisq;
+      }
+    }
+    else
+    {
+      // Fit is bad
+      restoremcresult = true;
+    }
+
+    g_log.warning() << "[DBx545] Restore MC Result = " << restoremcresult << endl;
+
+    if (restoremcresult)
+    {
+      setFunctionParameterValues(m_positionFunc, bestresult);
+    }
+    chisqf = m_bestChiSq;
+
+    // 6. Final result
+    double chisqfx = calculateFunctionError(m_positionFunc, m_dataWS, m_wsIndex);
+    map<string, Parameter> emptymap;
+    double chisqf0 = calculateFunction(emptymap, vecY);
+    g_log.notice() << "Best Chi^2 (L-V) = " << chisqfx << ", (homemade) = " << chisqf0 << endl;
+    g_log.warning() << "Data Size = " << m_dataWS->readX(m_wsIndex).size() << ", Number of parameters = "
+                    << m_positionFunc->getParameterNames().size() << endl;
+
+    return chisqf;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Propose new parameters
+    *
+    * @param mcgroup:     list of parameters to have new values proposed
+    * @param churrchisq:  present chi^2 (as a factor in step size)
+    * @param curparammap: current parameter maps
+    * @param newparammap: parameters map containing new/proposed value
+    * @param prevBetterRwp: (removed.  only use random walk)
+    */
+  void RefinePowderInstrumentParameters2::proposeNewValues(vector<string> mcgroup,
+                                                           map<string, Parameter>& curparammap,
+                                                           map<string, Parameter>& newparammap,
+                                                           double currchisq)
+  {
+    for (size_t i = 0; i < mcgroup.size(); ++i)
+    {
+      // random number between -1 and 1
+      double randomnumber = 2*static_cast<double>(rand())/static_cast<double>(RAND_MAX) - 1.0;
+
+      // parameter information
+      string paramname = mcgroup[i];
+      Parameter param = curparammap[paramname];
+      double stepsize = m_dampingFactor * currchisq * (param.value * param.mcA1 + param.mcA0) * randomnumber/m_bestChiSq;
+
+      g_log.debug() << "Parameter " << paramname << " Step Size = " << stepsize
+                    << " From " << param.mcA0 << ", " << param.mcA1 << ", " << param.value
+                    << ", " << m_dampingFactor << endl;
+
+      // drunk walk or random walk
+      double newvalue;
+      // Random walk.  No preference on direction
+      newvalue = param.value + stepsize;
+
+      /*
+      if (m_walkStyle == RANDOMWALK)
+      {
+
+      }
+      else if (m_walkStyle == DRUNKENWALK)
+      {
+        // Drunken walk.  Prefer to previous successful move direction
+        int prevRightDirection;
+        if (prevBetterRwp)
+          prevRightDirection = 1;
+        else
+          prevRightDirection = -1;
+
+        double randirint = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+
+        // FIXME Here are some MAGIC numbers
+        if (randirint < 0.1)
+        {
+          // Negative direction to previous direction
+          stepsize = -1.0*fabs(stepsize)*static_cast<double>(param.movedirection*prevRightDirection);
+        }
+        else if (randirint < 0.4)
+        {
+          // No preferance
+          stepsize = stepsize;
+        }
+        else
+        {
+          // Positive direction to previous direction
+          stepsize = fabs(stepsize)*static_cast<double>(param.movedirection*prevRightDirection);
+        }
+
+        newvalue = param.value + stepsize;
+      }
+      else
+      {
+        newvalue = DBL_MAX;
+        throw runtime_error("Unrecoganized walk style. ");
+      }
+      */
+
+      // restriction
+      if (param.nonnegative && newvalue < 0)
+      {
+        // If not allowed to be negative
+        newvalue = fabs(newvalue);
+      }
+
+      // apply to new parameter map
+      newparammap[paramname].value = newvalue;
+
+      // record some trace
+      Parameter& p = curparammap[paramname];
+      if (stepsize > 0)
+      {
+        p.movedirection = 1;
+        ++ p.numpositivemove;
+      }
+      else if (stepsize < 0)
+      {
+        p.movedirection = -1;
+        ++ p.numnegativemove;
+      }
+      else
+      {
+        p.movedirection = -1;
+        ++p.numnomove;
+      }
+      p.sumstepsize += fabs(stepsize);
+      if (fabs(stepsize) > p.maxabsstepsize)
+        p.maxabsstepsize = fabs(stepsize);
+
+      g_log.debug() << "[DBx257] " << paramname << "\t" << "Proposed value = " << setw(15)
+                    << newvalue << " (orig = " << param.value << ",  step = "
+                    << stepsize << "), totRwp = " << currchisq << endl;
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Determine whether the proposed value should be accepted or denied
+    *
+    * @param temperature:  annealing temperature
+    */
+  bool RefinePowderInstrumentParameters2::acceptOrDenyChange(double curchisq, double newchisq,
+                                                             double temperature)
+  {
+    bool accept;
+
+    if (newchisq < curchisq)
+    {
+      // Lower Rwp.  Take the change
+      accept = true;
+    }
+    else
+    {
+      // Higher Rwp. Take a chance to accept
+      double dice = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+      double bar = exp(-(newchisq-curchisq)/(curchisq*temperature));
+      // double bar = exp(-(newrwp-currwp)/m_bestRwp);
+      // g_log.notice() << "[DBx329] Bar = " << bar << ", Dice = " << dice << endl;
+      if (dice < bar)
+      {
+        // random number (dice, 0 and 1) is smaller than bar (between -infty and 0)
+        accept = true;
+      }
+      else
+      {
+        // Reject
+        accept = false;
+      }
+    }
+
+    return accept;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Book keep the best fitting result
+    */
+  void RefinePowderInstrumentParameters2::bookKeepMCResult(map<string, Parameter> parammap,
+                                                           double chisq, int istep, int igroup,
+                                                           map<string, Parameter>& bestparammap)
+                                                           // vector<pair<double, map<string, Parameter> > >& bestresults,
+                                                           // size_t maxnumresults)
+  {
+    // 1. Check whether input Chi^2 is the best Chi^2
+    bool recordparameter = false;
+
+    if (chisq < m_bestChiSq)
+    {
+      m_bestChiSq = chisq;
+      m_bestChiSqStep = istep;
+      m_bestChiSqGroup = igroup;
+
+      recordparameter = true;
+    }
+
+    // 2. Record for the best parameters
+    if (bestparammap.size() == 0)
+    {
+      // No record yet
+      duplicateParameters(parammap, bestparammap);
+    }
+    else if (recordparameter)
+    {
+      // Replace the record
+
+    }
+
+    // 2. Determine whether to add this entry to records
+    /*
+    bool addentry = true;
+    if (bestresults.size() >= maxnumresults && chisq > bestresults.back().first)
+      addentry = false;
+
+    // 3. Add entry
+    if (addentry)
+    {
+      map<string, Parameter> storemap;
+      duplicateParameters(parammap, storemap);
+      bestresults.push_back(make_pair(chisq, storemap));
+      sort(bestresults.begin(), bestresults.end());
+    }
+    */
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up Monte Carlo random walk strategy
+    */
+  void RefinePowderInstrumentParameters2::setupRandomWalkStrategy(map<string, Parameter>& parammap,
+                                                                  vector<vector<string> >& mcgroups)
+  {
+    stringstream dboutss;
+    dboutss << "Monte Carlo minimizer refines: ";
+
+    // 1. Monte Carlo groups
+    // a. Instrument gemetry
+    vector<string> geomparams;
+    addParameterToMCMinimize(geomparams, "Dtt1", parammap);
+    addParameterToMCMinimize(geomparams, "Dtt1t", parammap);
+    addParameterToMCMinimize(geomparams, "Dtt2t", parammap);
+    addParameterToMCMinimize(geomparams, "Zero", parammap);
+    addParameterToMCMinimize(geomparams, "Zerot", parammap);
+    addParameterToMCMinimize(geomparams, "Width", parammap);
+    addParameterToMCMinimize(geomparams, "Tcross", parammap);
+    mcgroups.push_back(geomparams);
+
+    dboutss << "Geometry parameters: ";
+    for (size_t i = 0; i < geomparams.size(); ++i)
+      dboutss << geomparams[i] << "\t\t";
+    dboutss << endl;
+
+    g_log.notice(dboutss.str());
+
+    // 2. Dictionary for each parameter for non-negative, mcX0, mcX1
+    parammap["Width"].mcA0 = 0.0;
+    parammap["Width"].mcA1 = 1.0;
+    parammap["Width"].nonnegative = true;
+
+    parammap["Tcross"].mcA0 = 0.0;
+    parammap["Tcross"].mcA1 = 1.0;
+    parammap["Tcross"].nonnegative = true;
+
+    parammap["Zero"].mcA0 = 5.0;
+    parammap["Zero"].mcA1 = 0.0;
+    parammap["Zero"].nonnegative = false;
+
+    parammap["Zerot"].mcA0 = 5.0;
+    parammap["Zerot"].mcA1 = 0.0;
+    parammap["Zerot"].nonnegative = false;
+
+    parammap["Dtt1"].mcA0 = 5.0;
+    parammap["Dtt1"].mcA1 = 0.0;
+    parammap["Dtt1"].nonnegative = true;
+
+    parammap["Dtt1t"].mcA0 = 5.0;
+    parammap["Dtt1t"].mcA1 = 0.0;
+    parammap["Dtt1t"].nonnegative = true;
+
+    parammap["Dtt2t"].mcA0 = 0.1;
+    parammap["Dtt2t"].mcA1 = 1.0;
+    parammap["Dtt2t"].nonnegative = false;
+
+    // 3. Reset
+    map<string, Parameter>::iterator mapiter;
+    for (mapiter = parammap.begin(); mapiter != parammap.end(); ++mapiter)
+    {
+      mapiter->second.movedirection = 1;
+      mapiter->second.sumstepsize = 0.0;
+      mapiter->second.numpositivemove = 0;
+      mapiter->second.numnegativemove = 0;
+      mapiter->second.numnomove = 0;
+      mapiter->second.maxabsstepsize = -0.0;
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Add parameter (to a vector of string/name) for MC random walk
+    * according to Fit in Parameter
+    *
+    * @param parnamesforMC: vector of parameter for MC minimizer
+    * @param parname: name of parameter to check whether to put into refinement list
+    */
+  void RefinePowderInstrumentParameters2::addParameterToMCMinimize(vector<string>& parnamesforMC,
+                                                                   string parname,
+                                                                   map<string, Parameter> parammap)
+  {
+    map<string, Parameter>::iterator pariter;
+    pariter = parammap.find(parname);
+    if (pariter == parammap.end())
+    {
+      stringstream errss;
+      errss << "Parameter " << parname << " does not exisit Le Bail function parameters. ";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    if (pariter->second.fit)
+      parnamesforMC.push_back(parname);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Implement parameter values, calculate function and its chi square.
+    *
+    * @param parammap:  if size = 0, there is no action to set function parameter.
+    * Return: chi^2
+    */
+  double RefinePowderInstrumentParameters2::calculateFunction(map<string, Parameter> parammap,
+                                                              vector<double>& vecY)
+  {
+    // 1. Implement parameter values to m_positionFunc
+    if (parammap.size() > 0)
+      setFunctionParameterValues(m_positionFunc, parammap);
+
+    // 2. Calculate
+    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
+    //    Check
+    if (vecY.size() != vecX.size())
+      throw runtime_error("vecY must be initialized with proper size!");
+
+    m_positionFunc->function1D(vecY, vecX);
+
+    // 3. Calcualte error
+    double chisq = calculateFunctionChiSquare(vecY, m_dataWS->readY(m_wsIndex), m_dataWS->readE(m_wsIndex));
+
+    return chisq;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Calculate Chi^2
+    */
+  double calculateFunctionChiSquare(const vector<double> modelY, const vector<double> dataY,
+                                    const vector<double> dataE)
+  {
+    // 1. Check
+    if (modelY.size() != dataY.size() || dataY.size() != dataE.size())
+      throw runtime_error("Input model, data and error have different size.");
+
+    // 2. Calculation
+    double chisq = 0.0;
+    size_t numpts = modelY.size();
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      if (dataE[i] > 1.0E-5)
+      {
+        double temp = (modelY[i] - dataY[i])/dataE[i];
+        chisq += temp*temp;
+      }
+    }
+
+    return chisq;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Calculate Chi^2 of the a function with all parameters are fixed
     */
-  double FitPowderPeakParameters::calculateFunctionError(IFunction_sptr function,
-                                                         Workspace2D_sptr dataws, int wsindex)
+  double RefinePowderInstrumentParameters2::calculateFunctionError(IFunction_sptr function,
+                                                                   Workspace2D_sptr dataws, int wsindex)
   {
     // 1. Record the fitting information
     vector<string> parnames = function->getParameterNames();
@@ -330,15 +906,20 @@ namespace CurveFitting
     *
     * @param chi2:  chi2 of the final (best) solution
     */
-  double FitPowderPeakParameters::fitFunction(IFunction_sptr function, Workspace2D_sptr dataws,
-                                              int wsindex, double& chi2)
+  double RefinePowderInstrumentParameters2::fitFunction(IFunction_sptr function, Workspace2D_sptr dataws,
+                                                        int wsindex, double& chi2)
   {
     // 1. Store original
     map<string, pair<double, double> > start_paramvaluemap, paramvaluemap1, paramvaluemap2,
         paramvaluemap3;
     storeFunctionParameterValue(function, start_paramvaluemap);
 
-    // 1. Simplex
+    // 2. Calculate starting chi^2
+    double startchisq = calculateFunctionError(function, dataws, wsindex);
+    g_log.notice() << "[DBx436] Starting Chi^2 = " << startchisq << endl;
+
+    // 3. Fitting
+    // a) Simplex
     string minimizer = "Simplex";
     double chi2simplex;
     string fitstatussimplex;
@@ -351,7 +932,7 @@ namespace CurveFitting
     else
       chi2simplex = DBL_MAX;
 
-    // 2. Continue Levenberg-Marquardt following Simplex
+    // b) Continue Levenberg-Marquardt following Simplex
     minimizer = "Levenberg-MarquardtMD";
     double chi2lv2;
     string fitstatuslv2;
@@ -363,7 +944,7 @@ namespace CurveFitting
     else
       chi2lv2 = DBL_MAX;
 
-    // 3. Fit by L.V. solely
+    // c) Fit by L.V. solely
     map<string, Parameter> tempparmap;
     restoreFunctionParameterValue(start_paramvaluemap, function, tempparmap);
     double chi2lv1;
@@ -377,7 +958,8 @@ namespace CurveFitting
 
     // 4. Compare best
     bool retvalue;
-    g_log.error() << "Find Bug:  Chi2s = " << chi2simplex << ", " << chi2lv2 << ", " << chi2lv1 << endl;
+    g_log.notice() << "Fit Result:  Chi2s: Simplex = " << chi2simplex << ", "
+                   << "Levenberg 1 = " << chi2lv2 << ", Levenberg 2 = " << chi2lv1 << endl;
     if (fitgood1 || fitgood2 || fitgood3)
     {
       // At least one good fit
@@ -417,8 +999,8 @@ namespace CurveFitting
   /** Fit function
     * Minimizer: "Levenberg-MarquardtMD"/"Simplex"
    */
-  bool FitPowderPeakParameters::doFitFunction(IFunction_sptr function, Workspace2D_sptr dataws, int wsindex,
-                                              string minimizer, int numiters, double& chi2, string& fitstatus)
+  bool RefinePowderInstrumentParameters2::doFitFunction(IFunction_sptr function, Workspace2D_sptr dataws, int wsindex,
+                                                        string minimizer, int numiters, double& chi2, string& fitstatus)
   {
     // 0. Debug output
     stringstream outss;
@@ -473,7 +1055,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Construct an output TableWorkspace for fitting result (profile parameters)
     */
-  TableWorkspace_sptr FitPowderPeakParameters::genOutputProfileTable(map<string, Parameter> parameters,
+  TableWorkspace_sptr RefinePowderInstrumentParameters2::genOutputProfileTable(map<string, Parameter> parameters,
                                                                      double startchi2, double finalchi2)
   {
     // 1. Create TableWorkspace
@@ -518,7 +1100,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Construct output
    */
-  Workspace2D_sptr FitPowderPeakParameters::genOutputWorkspace(FunctionDomain1DVector domain,
+  Workspace2D_sptr RefinePowderInstrumentParameters2::genOutputWorkspace(FunctionDomain1DVector domain,
                                                                FunctionValues rawvalues)
   {
     // 1. Create and set up output workspace
@@ -575,8 +1157,8 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Set parameter values to function from Parameter map
    */
-  void FitPowderPeakParameters::setFunctionParameterValues(IFunction_sptr function,
-                                                           map<string, Parameter> params)
+  void RefinePowderInstrumentParameters2::setFunctionParameterValues(IFunction_sptr function,
+                                                                     map<string, Parameter> params)
   {
     // 1. Prepare
     vector<string> funparamnames = function->getParameterNames();
@@ -614,9 +1196,8 @@ namespace CurveFitting
     return;
   }
 
-  //----------------------------------------------------------------------------------------------
   /** Update parameter values to Parameter map from fuction map
-  void FitPowderPeakParameters::updateFunctionParameterValues(IFunction_sptr function,
+  void RefinePowderInstrumentParameters2::updateFunctionParameterValues(IFunction_sptr function,
                                                               map<string, Parameter>& params)
   {
     // 1. Prepare
@@ -652,7 +1233,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Set parameter fitting setup (boundary, fix or unfix) to function from Parameter map
    */
-  void FitPowderPeakParameters::setFunctionParameterFitSetups(IFunction_sptr function,
+  void RefinePowderInstrumentParameters2::setFunctionParameterFitSetups(IFunction_sptr function,
                                                               map<string, Parameter> params)
   {
     // 1. Prepare
@@ -705,6 +1286,57 @@ namespace CurveFitting
 
 
   //================================= External Functions =========================================
+
+  //----------------------------------------------------------------------------------------------
+  /** Copy parameters from source to target, i.e., clear the target and make it exacly same as
+    * source;
+    */
+  void duplicateParameters(map<string, Parameter> source, map<string, Parameter>& target)
+  {
+    target.clear();
+
+    map<string, Parameter>::iterator miter;
+    for (miter = source.begin(); miter != source.end(); ++miter)
+    {
+      string parname = miter->first;
+      Parameter param = miter->second;
+      Parameter newparam;
+      newparam = param;
+      target.insert(make_pair(parname, newparam));
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Copy parameters from source to target, i.e., clear the target and make it exacly same as
+    * source;
+    */
+  void copyParametersValues(map<string, Parameter> source, map<string, Parameter>& target)
+  {
+    // 1. Check
+    if (source.size() != target.size())
+      throw runtime_error("Source and Target should have the same size.");
+
+    // 2. Copy the value
+    map<string, Parameter>::iterator miter;
+    map<string, Parameter>::iterator titer;
+    for (miter = source.begin(); miter != source.end(); ++miter)
+    {
+      string parname = miter->first;
+      Parameter param = miter->second;
+      double paramvalue = param.value;
+
+      titer = target.find(parname);
+      if (titer == target.end())
+        throw runtime_error("Source and target should have exactly the same keys.");
+
+      titer->second.value = paramvalue;
+    }
+
+    return;
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Convert a vector to a lookup map (dictionary)
@@ -800,37 +1432,3 @@ namespace CurveFitting
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
