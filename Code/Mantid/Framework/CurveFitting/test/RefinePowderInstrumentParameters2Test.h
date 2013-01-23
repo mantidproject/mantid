@@ -1,9 +1,9 @@
-#ifndef MANTID_CURVEFITTING_FITPOWDERPEAKPARAMETERSTEST_H_
-#define MANTID_CURVEFITTING_FITPOWDERPEAKPARAMETERSTEST_H_
+#ifndef MANTID_CURVEFITTING_RefinePowderInstrumentParameters2TEST_H_
+#define MANTID_CURVEFITTING_RefinePowderInstrumentParameters2TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/FitPowderPeakParameters.h"
+#include "MantidCurveFitting/RefinePowderInstrumentParameters2.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -12,7 +12,7 @@
 
 #include <fstream>
 
-using Mantid::CurveFitting::FitPowderPeakParameters;
+using Mantid::CurveFitting::RefinePowderInstrumentParameters2;
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -21,13 +21,13 @@ using namespace Mantid::API;
 
 using namespace std;
 
-class FitPowderPeakParametersTest : public CxxTest::TestSuite
+class RefinePowderInstrumentParameters2Test : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FitPowderPeakParametersTest *createSuite() { return new FitPowderPeakParametersTest(); }
-  static void destroySuite( FitPowderPeakParametersTest *suite ) { delete suite; }
+  static RefinePowderInstrumentParameters2Test *createSuite() { return new RefinePowderInstrumentParameters2Test(); }
+  static void destroySuite( RefinePowderInstrumentParameters2Test *suite ) { delete suite; }
 
   //----------------------------------------------------------------------------------------------
   /** Fit with non Monte Carlo method.
@@ -40,14 +40,15 @@ public:
 
     // a) Generate workspaces
     Workspace2D_sptr posWS = generatePeakPositionWorkspace(bankid);
-    TableWorkspace_sptr profWS = generateInstrumentProfileTable(bankid);
+    // TableWorkspace_sptr profWS = generateInstrumentProfileTable(bankid);
+    TableWorkspace_sptr profWS = generateInstrumentProfileTableBank1();
 
     // z) Set to data service
     AnalysisDataService::Instance().addOrReplace("Bank1PeakPositions", posWS);
     AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters", profWS);
 
     // 2. Initialization
-    FitPowderPeakParameters alg;
+    RefinePowderInstrumentParameters2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -61,6 +62,93 @@ public:
 
     alg.setProperty("RefinementAlgorithm", "OneStepFit");
     alg.setProperty("StandardError", "UseInputValue");
+
+    // 4. Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // 5. Check result
+    // a) Profile parameter table
+    TableWorkspace_sptr newgeomparamws = boost::dynamic_pointer_cast<TableWorkspace>
+        (AnalysisDataService::Instance().retrieve("Bank1FittedProfileParameters"));
+    TS_ASSERT(newgeomparamws);
+    if (newgeomparamws)
+    {
+      std::map<std::string, double> fitparamvalues;
+      parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
+      map<string, double>::iterator mapiter;
+
+      stringstream msgss;
+      msgss << "[Unit Test]  Parameters: " << endl;
+      for (mapiter = fitparamvalues.begin(); mapiter != fitparamvalues.end(); ++ mapiter)
+      {
+        msgss << "  |  " << mapiter->first << "\t = \t" << mapiter->second << "\t" << endl;
+      }
+      cout << msgss.str();
+    }
+
+    // b) Data
+    Workspace2D_sptr outdataws = boost::dynamic_pointer_cast<Workspace2D>
+        (AnalysisDataService::Instance().retrieve("Bank1FittedPositions"));
+    TS_ASSERT(outdataws);
+    if (outdataws)
+    {
+      /*
+      stringstream outss;
+      outss << "Difference: " << endl;
+      for (size_t i = 0; i < outdataws->readX(0).size(); ++i)
+        outss << outdataws->readX(0)[i] << "\t\t" << outdataws->readY(2)[i] << endl;
+      cout << outss.str();
+      */
+    }
+
+    // 4. Clean
+    AnalysisDataService::Instance().remove("Bank1PeakPositions");
+    AnalysisDataService::Instance().remove("Bank1FittedPositions");
+    AnalysisDataService::Instance().remove("Bank1ProfileParameters");
+    AnalysisDataService::Instance().remove("Bank1FittedProfileParameters");
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Fit with Monte Carlo method.
+    * The parameters to fit include Dtt1, Zero, and Width/Tcross
+   */
+  void test_FitMonteCarlo()
+  {
+    // 1. Create workspaces for testing
+    int bankid = 1;
+
+    // a) Generate workspaces
+    Workspace2D_sptr posWS = generatePeakPositionWorkspace(bankid);
+    // TableWorkspace_sptr profWS = generateInstrumentProfileTable(bankid);
+    TableWorkspace_sptr profWS = generateInstrumentProfileTableBank1();
+
+    // z) Set to data service
+    AnalysisDataService::Instance().addOrReplace("Bank1PeakPositions", posWS);
+    AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters", profWS);
+
+    // 2. Initialization
+    RefinePowderInstrumentParameters2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    // 3. Set parameters
+    alg.setPropertyValue("InputPeakPositionWorkspace", "Bank1PeakPositions");
+    alg.setProperty("WorkspaceIndex", 0);
+    alg.setProperty("OutputPeakPositionWorkspace", "Bank1FittedPositions");
+
+    alg.setProperty("InputInstrumentParameterWorkspace", "Bank1ProfileParameters");
+    alg.setProperty("OutputInstrumentParameterWorkspace", "Bank1FittedProfileParameters");
+
+    alg.setProperty("RefinementAlgorithm", "MonteCarlo");
+    alg.setProperty("StandardError", "UseInputValue");
+
+    alg.setProperty("AnnealingTemperature", 100.0);
+
+    alg.setProperty("MonteCarloIterations", 100);
 
     // 4. Execute
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -106,6 +194,50 @@ public:
 
     return;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate a table workspace for holding instrument parameters for POWGEN's bank 1
+    */
+  TableWorkspace_sptr generateInstrumentProfileTableBank1()
+  {
+    DataObjects::TableWorkspace* tablews = new DataObjects::TableWorkspace();
+    DataObjects::TableWorkspace_sptr geomws = DataObjects::TableWorkspace_sptr(tablews);
+
+    tablews->addColumn("str", "Name");
+    tablews->addColumn("double", "Value");
+    tablews->addColumn("str", "FitOrTie");
+    tablews->addColumn("double", "Min");
+    tablews->addColumn("double", "Max");
+    tablews->addColumn("double", "StepSize");
+
+    API::TableRow newrow = geomws->appendRow();
+    newrow << "Dtt1" << 22778.3 << "f" << 0.0 << 1.0E20 << 1.0;
+
+    newrow = geomws->appendRow();
+    newrow << "Dtt1t" << 22747.4 << "t" << 0.0 << 1.0E20 << 1.0;
+
+    newrow = geomws->appendRow();
+    newrow << "Dtt2" << 0.0 << "t" << 0.0 << 1.0E20 << 1.0;
+
+    newrow = geomws->appendRow();
+    newrow << "Dtt2t" << 0.3 << "t" << -10000.0 << 100000.0 << 1.0;
+
+    newrow = geomws->appendRow();
+    newrow << "Tcross" << 0.356 << "t" << 0.0 << 1000.0 << 1.0;
+
+    newrow = geomws->appendRow();
+    newrow << "Width" << 1.1072 << "f" << 0.0 << 1000.0 << 1.0;
+
+    newrow = geomws->appendRow();
+    newrow << "Zero" << 0.0 << "f" << -10000.0 << 10000.0 << 1.0;
+
+    newrow = geomws->appendRow();
+    newrow << "Zerot" << 90.7 << "t" << -10000.0 << 10000.0 << 1.0;
+
+    return geomws;
+
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Generate a table workspace for holding instrument parameters
@@ -166,6 +298,12 @@ public:
         stepsize = atof(strvalues[istep].c_str());
 
       newrow << parname << parvalue << fitstr << minvalue << maxvalue << stepsize;
+
+      /*
+      cout << "newrow = geomws->appendRow();" << endl;
+      cout << "newrow << \"" <<  parname << "\" << " << parvalue << " << \"" << fitstr << "\" << " << minvalue << " << "
+           << maxvalue << " << " << stepsize << "; " << endl;
+      */
     }
 
     return geomws;
@@ -281,8 +419,9 @@ public:
 
     if (bankid == 1)
     {
-      string filename("/home/wzz/Mantid/Code/debug/MyTestData/bank1peakpositions.dat");
-      importDataFromColumnFile(filename, vecDsp, vecTof, vecError);
+      generateBank1PeakPositions(vecDsp, vecTof, vecError);
+      // string filename("/home/wzz/Mantid/Code/debug/MyTestData/bank1peakpositions.dat");
+      // importDataFromColumnFile(filename, vecDsp, vecTof, vecError);
     }
     else
     {
@@ -306,6 +445,49 @@ public:
 
     return dataws;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate bank 1's peak positions
+    */
+  void generateBank1PeakPositions(vector<double>& vecX, vector<double>& vecY, vector<double>& vecE)
+  {
+    vecX.push_back(0.907108); vecY.push_back(20487.6);
+    vecX.push_back(0.929509); vecY.push_back(20994.7);
+    vecX.push_back(0.953656); vecY.push_back(21537.4);
+    vecX.push_back(0.979788); vecY.push_back(22128.8);
+    vecX.push_back(1.00819 ); vecY.push_back(22769.2);
+    vecX.push_back(1.03922 ); vecY.push_back(23469.4);
+    vecX.push_back(1.11098 ); vecY.push_back(25083.6);
+    vecX.push_back(1.15291 ); vecY.push_back(26048.1);
+    vecX.push_back(1.19999 ); vecY.push_back(27097.6);
+    vecX.push_back(1.25335 ); vecY.push_back(28272.2);
+    vecX.push_back(1.31452 ); vecY.push_back(29684.7);
+    vecX.push_back(1.38563 ); vecY.push_back(31291.5);
+    vecX.push_back(1.46968 ); vecY.push_back(33394.0);
+    vecX.push_back(1.69704 ); vecY.push_back(38326.3);
+    vecX.push_back(1.85902 ); vecY.push_back(41989.8);
+    vecX.push_back(2.07844 ); vecY.push_back(46921.7);
+
+    vecE.push_back(0.350582);
+    vecE.push_back(0.597347);
+    vecE.push_back(0.644844);
+    vecE.push_back(0.879349);
+    vecE.push_back(0.41783 );
+    vecE.push_back(0.481466);
+    vecE.push_back(0.527287);
+    vecE.push_back(0.554732);
+    vecE.push_back(0.363456);
+    vecE.push_back(0.614706);
+    vecE.push_back(0.468477);
+    vecE.push_back(0.785721);
+    vecE.push_back(0.555938);
+    vecE.push_back(0.728131);
+    vecE.push_back(0.390796);
+    vecE.push_back(0.997644);
+
+    return;
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Import data from a column data file
@@ -354,4 +536,4 @@ public:
 };
 
 
-#endif /* MANTID_CURVEFITTING_FITPOWDERPEAKPARAMETERSTEST_H_ */
+#endif /* MANTID_CURVEFITTING_RefinePowderInstrumentParameters2TEST_H_ */
