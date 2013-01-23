@@ -47,11 +47,14 @@ class Logger;
     class DLLExport ISISDataArchive: public API::IArchiveSearch
     {
     public:
+      /// Returns the path to a filename given the list of extensions to try
       std::string getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts)const;
     private:
+      /// Queries the archive & returns the path to a single file.
+      std::string getPath(const std::string& fName) const;
+
       // static reference to the logger class
       static Mantid::Kernel::Logger & g_log;
-      std::string getPath(const std::string& fName)const;
     };
   }
 }
