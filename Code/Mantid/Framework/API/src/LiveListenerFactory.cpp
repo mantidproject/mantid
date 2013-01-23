@@ -38,9 +38,10 @@ namespace API
       if ( ! listener->connect(Poco::Net::SocketAddress(inst.liveDataAddress())) )
       {
         // If we can't connect, log and throw an exception
-        m_log.error() << "Unable to connect listener " << listener->name() << " to "
-                      << inst.liveDataAddress() << "\n";
-        throw std::runtime_error("Live listener cannot connect");
+        std::stringstream ss;
+        ss << "Unable to connect listener " << listener->name() << " to " << inst.liveDataAddress();
+        m_log.debug(ss.str());
+        throw std::runtime_error(ss.str());
       }
     } catch ( Kernel::Exception::NotFoundError& )
     {
@@ -56,8 +57,10 @@ namespace API
     // Just catch the base class exception
     catch ( Poco::Exception& pocoEx )
     {
-      m_log.error() << "Unable to connect listener " << listener->name() << " : " << pocoEx.what() << "\n";
-      throw std::runtime_error(pocoEx.what());
+      std::stringstream ss;
+      ss << "Unable to connect listener " << listener->name() << " to " << instrumentName << ": " << pocoEx.what();
+      m_log.debug(ss.str());
+      throw std::runtime_error(ss.str());
     }
 
     // If we get to here, it's all good!
