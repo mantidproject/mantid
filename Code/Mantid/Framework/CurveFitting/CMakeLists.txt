@@ -195,7 +195,7 @@ set ( TEST_FILES
 	ExpDecayTest.h
 	FRConjugateGradientTest.h
 	FitMWTest.h
-	FitPowderDiffPeaksTest.h
+	# FitPowderDiffPeaksTest.h
 	FitPowderDiffPeaks2Test.h
 	FlatBackgroundTest.h
 	FunctionFactoryConstraintTest.h

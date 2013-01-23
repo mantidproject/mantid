@@ -7,6 +7,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataHandling/LoadAscii.h"
 #include "MantidAPI/TableRow.h"
 #include <fstream>
 
@@ -40,7 +41,7 @@ public:
 
   /** Fit with one shifted parmeter 'Zero'
    */
-  void Passed_test_FitZero()
+  void Passed_test_FitZeroShift()
   {
     // 1. Generate testing workspace
     std::map<std::string, double> newparamvalues;
@@ -86,7 +87,7 @@ public:
 
     if (outws)
     {
-      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 3);
+      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 5);
       ofstream ofile("bank7fittedpeaks.dat");
       for (size_t i = 0; i < outws->readX(0).size(); ++i)
       {
@@ -116,7 +117,7 @@ public:
 
   /** Fit the parameters for PG3's bank 1 with quite-off starting peak parameters.
     */
-  void OutDated_test_FitPG3Bank1()
+  void Next_test_FitPG3Bank1()
   {
     // 1. Generate testing workspace
     std::map<std::string, double> newparamvalues;
@@ -179,20 +180,19 @@ public:
   API::MatrixWorkspace_sptr createInputDataWorkspace(int option)
   {
     // 1. Import data
-    std::vector<double> vecX;
-    std::vector<double> vecY;
-    std::vector<double> vecE;
+    string datawsname("Data");
 
     switch (option)
     {
       case 1:
-        importDataFromColumnFile("/home/wzz/Mantid/Code/debug/MyTestData/4862b7.inp", vecX, vecY, vecE);
-        std::cout << "Option 1:  4862b7.inp.  Vector Size = " << vecX.size() << std::endl;
+        // /home/wzz/Mantid/Code/debug/MyTestData/..
+        importDataFromColumnFile("4862b7.inp", datawsname);
+        std::cout << "Option 1:  4862b7.inp. " << std::endl;
         break;
 
       case 2:
-        importDataFromColumnFile("/home/wzz/Mantid/Code/debug/MyTestData/PG3_10808-1.dat", vecX, vecY, vecE);
-        std::cout << "Option 2:  PG3_10808-1.dat.  Vector Size = " << vecX.size() << std::endl;
+        importDataFromColumnFile("PG3_10808-1.dat", datawsname);
+        std::cout << "Option 2:  PG3_10808-1.dat. " << std::endl;
         break;
 
       default:
@@ -202,57 +202,37 @@ public:
     }
 
     // 2. Get workspace
-    int64_t nHist = 1;
-    int64_t nBins = vecX.size();
-
-    API::MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", nHist, nBins, nBins));
-
-    // 3. Input data
-    for (size_t i = 0; i < vecX.size(); ++i)
+    MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>
+        (AnalysisDataService::Instance().retrieve(datawsname));
+    if (!dataws)
     {
-      dataws->dataX(0)[i] = vecX[i];
-      dataws->dataY(0)[i] = vecY[i];
-      dataws->dataE(0)[i] = vecE[i];
+      throw runtime_error("Failed to retrieve data workspace from LoadAsii.");
     }
 
     return dataws;
   }
 
-  /** Import data from a column data file
+  //----------------------------------------------------------------------------------------------
+  /** Import data from a column data file by calling LoadAscii
    */
-  void importDataFromColumnFile(std::string filename, std::vector<double>& vecX, std::vector<double>& vecY, std::vector<double>& vecE)
+  void importDataFromColumnFile(string filename, string datawsname)
   {
-    std::ifstream ins;
-    ins.open(filename.c_str());
+    // 1. Call LoadAscii
+    DataHandling::LoadAscii loader;
+    loader.initialize();
 
-    if (!ins.is_open())
-    {
-        std::cout << "Data file " << filename << " cannot be opened. " << std::endl;
-        throw std::invalid_argument("Unable to open data fiile. ");
-    }
-    else
-    {
-        std::cout << "Data file " << filename << " is opened for parsing. " << std::endl;
-    }
+    loader.setProperty("FileName", filename);
+    loader.setProperty("OutputWorkspace", datawsname);
+    loader.setProperty("Separator", "Space");
+    loader.setProperty("Unit", "TOF");
 
-    char line[256];
-    // std::cout << "File " << filename << " isOpen = " << ins.is_open() << std::endl;
-    while(ins.getline(line, 256))
+    loader.execute();
+
+    if (!loader.isExecuted())
     {
-      if (line[0] != '#')
-      {
-        double x, y;
-        std::stringstream ss;
-        ss.str(line);
-        ss >> x >> y;
-        vecX.push_back(x);
-        vecY.push_back(y);
-        double e = 1.0;
-        if (y > 1.0E-5)
-          e = std::sqrt(y);
-        vecE.push_back(e);
-      }
+      stringstream errss;
+      errss << "Failed to load file " << filename << " by calling LoadAsci()";
+      throw runtime_error(errss.str());
     }
 
     return;
