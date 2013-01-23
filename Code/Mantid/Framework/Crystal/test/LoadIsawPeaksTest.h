@@ -122,6 +122,12 @@ public:
     r2[1][1] = 1;
     r2[2][0] = -1;
     TS_ASSERT( ws->getPeaks()[2].getGoniometerMatrix().equals(r2, 1e-5) );
+    const Goniometer & G = ws->mutableRun().getGoniometer();
+    TS_ASSERT_EQUALS(G.getNumberAxes(), 3);
+    TS_ASSERT_EQUALS(G.getAxis(2).name, "phi");
+    TS_ASSERT_EQUALS(G.getAxis(1).name, "chi");
+    TS_ASSERT_EQUALS(G.getAxis(0).name, "omega");
+
   }
 
 
