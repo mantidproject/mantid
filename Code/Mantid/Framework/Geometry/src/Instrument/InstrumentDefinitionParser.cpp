@@ -482,11 +482,11 @@ namespace Geometry
         const Element* pLocInLocsElem = static_cast<Element*>(pNL_locInLocs->item(iInLocs));
         if ( isAssembly(pCompElem->getAttribute("type")) )
         {
-          appendAssembly(m_instrument.get(), pLocInLocsElem, pCompElem, idList);
+          appendAssembly(parent, pLocInLocsElem, pCompElem, idList);
         }
         else  
         {
-          appendLeaf(m_instrument.get(), pLocInLocsElem, pCompElem, idList);
+          appendLeaf(parent, pLocInLocsElem, pCompElem, idList);
         }
       }
       pNL_locInLocs->release();
@@ -1074,11 +1074,11 @@ namespace Geometry
       }
       if ( pNode->nodeName().compare("locations")==0 )
       {
-        const Element* pLocElems = static_cast<Element*>(pNode);
-        const Element* pParentElem = InstrumentDefinitionParser::getParentComponent(pLocElems);
+        const Element* pLocationsElems = static_cast<Element*>(pNode); 
+        const Element* pParentLocationsElem = InstrumentDefinitionParser::getParentComponent(pLocationsElems);
 
         // append <locations> elements in <locations>
-        appendLocations(m_instrument.get(), pLocElems, pParentElem, idList);
+        appendLocations(ass, pLocationsElems, pParentLocationsElem, idList);
       }
       pNode = it.nextNode();
     }
@@ -2595,7 +2595,26 @@ namespace Geometry
       // look to see if name attribute is defined
       if ( pElem->hasAttribute("name") )
       {
-        const std::string name = pElem->getAttribute("name");
+        std::string name = pElem->getAttribute("name");
+
+        int startCount = 0; // default start count to zero
+
+/*        std::string nameToUpper = name;
+        std::transform(nameToUpper.begin(), nameToUpper.end(), nameToUpper.begin(), toupper);
+
+        size_t found = nameToUpper.find("__STARTCOUNT");
+        if (found!=std::string::npos)
+        {
+           // Find where keyword ends
+           size_t foundLast__ = nameToUpper.find("__", found+3);
+
+           std::string intPart = nameToUpper.substr(found+12,2);
+
+           startCount = boost::lexical_cast<int>(intPart);
+
+           name = name.erase(found, foundLast__+2-found);
+        }
+*/
 
         obj_str << " name=\"" << name << i << "\"";
       }
