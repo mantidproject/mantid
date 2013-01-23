@@ -334,7 +334,8 @@ namespace MDAlgorithms
           box_event_index[id*2+1] = nPoints;
           // save for the first time
           //if(!update && (box_event_index[id*2] != std::numeric_limits<uint64_t>::max()))mdBox->saveNexus(file);
-          if(!update && (nPoints != 0))mdBox->saveNexus(file);
+          if(!update && (nPoints != 0))
+            mdBox->saveNexus(file);
           // set that it is on disk and clear the actual events to free up memory, saving occured earlier
           if (MakeFileBacked) mdBox->clearDataFromMemory();
 
