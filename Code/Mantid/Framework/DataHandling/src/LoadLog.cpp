@@ -271,24 +271,6 @@ void LoadLog::exec()
       catch(std::exception &)
       {
       }
-
-      if( potentialLogFiles.empty() )
-      {
-        boost::regex regex(l_rawID + "_.*\\.txt", boost::regex_constants::icase);
-        Poco::DirectoryIterator end_iter;
-        for ( Poco::DirectoryIterator dir_itr(Poco::Path(m_filename).parent()); dir_itr != end_iter; ++dir_itr )
-        {
-          if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
-
-          l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
-
-          if ( boost::regex_match(l_filenamePart, regex) )
-          {
-            potentialLogFiles.insert( dir_itr->path() );
-          }
-        }
-
-      }
     }
 
     //.if a .log file exists in the raw file directory
