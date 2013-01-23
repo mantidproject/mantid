@@ -498,12 +498,14 @@ void MWRunFiles::setEntryNum(const int num)
 }
 
 /**
- * Retrieve user input from this widget. NOTE: This knows nothing of periods yet
+ * Retrieve user input from this widget. This expands the current
+ * file list to a comma separated list of file paths
+ * NOTE: This knows nothing of periods yet
  * @returns A qvariant
  */
 QVariant MWRunFiles::getUserInput() const
 {
-  return QVariant(getText());
+  return QVariant(m_foundFiles.join(","));
 }
 
 /**
