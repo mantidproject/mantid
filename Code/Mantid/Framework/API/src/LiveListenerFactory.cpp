@@ -67,6 +67,26 @@ namespace API
     return listener;
   }
 
+  /** Tries to connect to the named instrument and returns an indicator of success or failure.
+   *  Useful for clients that want to just check whether it's possible to connect to a live stream
+   *  but not maintain and use the connection (e.g. for enabling or disabling some GUI button).
+   *  @param instrumentName The name of the instrument to connect to
+   *  @return True if able to connect, false otherwise
+   */
+  bool LiveListenerFactoryImpl::checkConnection(const std::string& instrumentName) const
+  {
+    try {
+      // Create the live listener (which will try to connect).
+      // Don't capture the returned listener - just let it die.
+      create(instrumentName);
+      // If we get to here we have connected successfully.
+      return true;
+    } catch (std::runtime_error&) {
+      // We couldn't connect. Return false.
+      return false;
+    }
+  }
+
   /** Override the DynamicFactory::createUnwrapped() method. We don't want it used here.
    *  Making it private will prevent most accidental usage, though of course this could
    *  be called through a DynamicFactory pointer or reference.

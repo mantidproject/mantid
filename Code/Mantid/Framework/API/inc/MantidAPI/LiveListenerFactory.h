@@ -51,6 +51,7 @@ namespace Mantid
     {
     public:
       boost::shared_ptr<ILiveListener> create(const std::string& instrumentName) const;
+      bool checkConnection(const std::string& instrumentName) const;
 
     private:
       friend struct Kernel::CreateUsingNew<LiveListenerFactoryImpl>;

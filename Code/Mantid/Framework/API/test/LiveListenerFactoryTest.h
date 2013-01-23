@@ -41,6 +41,12 @@ public:
     TS_ASSERT_THROWS( factory.create("MINITOPAZ"), std::runtime_error );
   }
 
+  void test_checkConnection()
+  {
+    TS_ASSERT( factory.checkConnection("MockILiveListener") );
+    TS_ASSERT( ! factory.checkConnection("MINITOPAZ") )
+  }
+
   void test_createUnwrapped_throws()
   {
     // Make sure this method just throws.
