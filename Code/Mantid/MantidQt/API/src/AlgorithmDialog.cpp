@@ -42,8 +42,8 @@ using Mantid::Kernel::DateAndTime;
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :  
   QDialog(parent), m_algorithm(NULL), m_algName(""), m_algProperties(), 
   m_propertyValueMap(), m_tied_properties(), m_forScript(false), m_python_arguments(), 
-  m_enabled(), m_disabled(), m_strMessage(""), m_msgAvailable(false), m_isInitialized(false), m_showHidden(true),
-  m_validators(), m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker()
+  m_enabled(), m_disabled(), m_strMessage(""), m_msgAvailable(false), m_isInitialized(false), m_autoParseOnInit(true), 
+  m_showHidden(true), m_validators(), m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker()
 {
 }
 
@@ -83,11 +83,14 @@ void AlgorithmDialog::initializeLayout()
   // This derived class function creates the layout of the widget. It can also add default input if the
   // dialog has been written this way
   this->initLayout();
-  // Check if there is any default input 
-  this->parse();
 
-  // Try to set these values. This will validate the defaults and mark those that are invalid, if any.
-  setPropertyValues();
+  if(m_autoParseOnInit)
+  {
+    // Check if there is any default input 
+    this->parse();
+    // Unless told not to, try to set these values. This will validate the defaults and mark those that are invalid, if any.
+    this->setPropertyValues();
+  }
 
   m_isInitialized = true;
 }

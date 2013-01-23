@@ -34,6 +34,8 @@ namespace MantidQt
     LoadDialog:: LoadDialog(QWidget *parent) 
       : API::AlgorithmDialog(parent), m_form(), m_currentFiles(), m_initialHeight(0)
     {
+      // We will handle parsing the input ourselves on startup
+      m_autoParseOnInit = false;
     }
 
     //--------------------------------------------------------------------------

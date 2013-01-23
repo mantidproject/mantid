@@ -270,7 +270,8 @@ protected:
 
   /// Whether the layout has been initialized
   bool m_isInitialized;
-
+  /// Flag if the input should be parsed automatically on initialization
+  bool m_autoParseOnInit;
   /// Whether we show hidden workspaces
   bool m_showHidden;
 
