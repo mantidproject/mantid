@@ -94,7 +94,19 @@ namespace Mantid
       // order the packets will arrive in, I've put the necessary code in this
       // function.  Both rxPacket() functions will check to see if all the data is
       // available and call this function if it is.
-      void initWorkspacePart2(const ADARA::Packet &pkt);
+      void initWorkspacePart2();
+
+      // Check to see if all the conditions we need for initWorkspacePart2() have been
+      // met.  Making this a function because it's starting to get a little complicated
+      // and I didn't want to be repeating the same tests in several places...
+      bool readyForInitPart2()
+      {
+        if (m_instrumentXML.size() == 0)  return false;
+        if (m_instrumentName.size() == 0) return false;
+        if (m_dataStartTime == Kernel::DateAndTime())  return false;
+
+        return true;
+      }
 
       void appendEvent( uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime);
       // tof is "Time Of Flight" and is in units of microsecondss relative to the start of the pulse
@@ -132,6 +144,12 @@ namespace Mantid
                                         // packet.  SMS is supposed to send these out
                                         // periodicaly.  If we don't get them, there's a
                                         // problem somewhere.
+
+      // Used to initialize the a few properties (run_start and scan_index) if we haven't received
+      // the packets with the 'real' values by the time we call initWorkspacePart2.  (We can't
+      // delay the call to initWorkspacePart2 because we might never receive 'real' values for
+      // those properties.
+      Kernel::DateAndTime m_dataStartTime;
 
       // These 2 determine whether or not we filter out events that arrive when
       // the run is paused.

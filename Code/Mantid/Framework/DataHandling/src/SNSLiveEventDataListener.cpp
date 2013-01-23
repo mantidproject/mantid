@@ -373,11 +373,11 @@ namespace DataHandling
     {
       m_instrumentXML = pkt.info();
 
-      // if we also have the instrument name (from the beamline info packet),
-      // then we can initialize our workspace.  Otherwise, we'll just wait.
-      if (m_instrumentName.size() > 0)
+      // If we've now got all the data we need to initialize the workspace,
+      // then do so.
+      if (readyForInitPart2())
       {
-        initWorkspacePart2( pkt);
+        initWorkspacePart2();
       }
     }
 
@@ -394,11 +394,11 @@ namespace DataHandling
       // We need the instrument name
       m_instrumentName = pkt.longName();
 
-      // If we've also got the XML definition (from the Geometry packet), then
-      // we can create our workspace.  Otherwise, we'll just wait
-      if (m_instrumentXML.size() > 0)
+      // If we've now got all the data we need to initialize the workspace,
+      // then do so.
+      if (readyForInitPart2())
       {
-        initWorkspacePart2( pkt);
+        initWorkspacePart2();
       }
     }
 
@@ -410,7 +410,12 @@ namespace DataHandling
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
 
-    // Exactly what we have to do depends on the status field
+    if (m_workspaceInitialized == false)
+    {
+      // grab the time from the packet - we'll use it down in initializeWorkspacePart2()
+      m_dataStartTime = timeFromPacket( pkt);
+    }
+
     if (pkt.status() == ADARA::RunStatus::NEW_RUN)
     {
       // Starting a new run:  update m_status and add the run_start & run_number properties
@@ -765,7 +770,7 @@ namespace DataHandling
 
   }
 
-  void SNSLiveEventDataListener::initWorkspacePart2(const ADARA::Packet &pkt)
+  void SNSLiveEventDataListener::initWorkspacePart2()
   {
     // Use the LoadEmptyInstrument algorithm to create a proper workspace
     // for whatever beamline we're on
@@ -796,9 +801,8 @@ namespace DataHandling
     // time values in the sample log.
     if ( ! m_eventBuffer->mutableRun().hasProperty("run_start") )
     {
-      Kernel::DateAndTime now = timeFromPacket(pkt);
       // addProperty() wants the time as an ISO 8601 string
-      m_eventBuffer->mutableRun().addProperty("run_start", now.toISO8601String());
+      m_eventBuffer->mutableRun().addProperty("run_start", m_dataStartTime.toISO8601String());
     }
 
     // Much like the run_start property, we always want to have at least one value
@@ -807,7 +811,7 @@ namespace DataHandling
     // not, we need to put a 0 into the time series.
     if ( m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->size() == 0 )
     {
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), 0);
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( m_dataStartTime, 0);
     }
 
     m_workspaceInitialized = true;
