@@ -14,6 +14,7 @@
 #include <Poco/StringTokenizer.h>
 #include <Poco/Exception.h>
 
+#include <sstream>
 #include <iostream>
 
 using Poco::Net::HTTPClientSession;
