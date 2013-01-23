@@ -229,7 +229,7 @@ set ( TEST_FILES
 	ProductLinearExpTest.h
 	ProductQuadraticExpTest.h
 	QuadraticTest.h
-	RefinePowderInstrumentParametersTest.h
+	# RefinePowderInstrumentParametersTest.h
 	RefinePowderInstrumentParameters2Test.h
 	ResolutionTest.h
 	SimplexTest.h
