@@ -73,7 +73,6 @@ namespace Algorithms
       return errors;
     }
 
-    // TODO: Check for binning parameters if required & perhaps for string TSP
     return errors;
   }
 
@@ -129,12 +128,18 @@ namespace Algorithms
 
     // Accumulate things in a local vector before transferring to the table
     std::vector<int> Y(xLength);
-    // TODO: Parallelize & add progress reporting
-    for ( std::size_t spec = 0; spec < m_inputWorkspace->getNumberHistograms(); ++spec )
+    const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+    Progress prog(this,0.0,1.0,numSpec);
+    PARALLEL_FOR1(m_inputWorkspace)
+    for ( int spec = 0; spec < numSpec; ++spec )
     {
+      PARALLEL_START_INTERUPT_REGION
       const IEventList & eventList = m_inputWorkspace->getEventList(spec);
       filterEventList(eventList, minVal, maxVal, log, Y);
+      prog.report();
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
     // For now, no errors. Do we need them?
 
     // Create a table workspace to hold the sum.
@@ -218,12 +223,13 @@ namespace Algorithms
       // Find the value of the log at the time of this event
       // This algorithm is really concerned with 'slow' logs so we don't care about
       // the time of the event within the pulse.
-      // TODO: If the pulse time is before the first log entry, we get the first value. Check that's what we want.
+      // NB: If the pulse time is before the first log entry, we get the first value.
       const int logValue = log->getSingleValue( pulseTimes[eventIndex] );
 
       if ( logValue >= minVal && logValue <= maxVal )
       {
         // In this scenario it's easy to know what bin to increment
+        PARALLEL_ATOMIC
         ++Y[logValue-minVal];
       }
     }
@@ -332,9 +338,12 @@ namespace Algorithms
     outputWorkspace->getAxis(0)->title() = m_logName;
 
     MantidVec & Y = outputWorkspace->dataY(0);
-    // TODO: Parallelize & add progress reporting
-    for ( std::size_t spec = 0; spec < m_inputWorkspace->getNumberHistograms(); ++spec )
+    const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+    Progress prog(this,0.0,1.0,numSpec);
+    PARALLEL_FOR1(m_inputWorkspace)
+    for ( int spec = 0; spec < numSpec; ++spec )
     {
+      PARALLEL_START_INTERUPT_REGION
       const IEventList & eventList = m_inputWorkspace->getEventList(spec);
       // TODO: Handle weighted events and avoid the vector copy below
       const auto pulseTimes = eventList.getPulseTimes();
@@ -345,11 +354,15 @@ namespace Algorithms
         // TODO: Refactor getBinIndex to use a binary search and allow out-of-range values
         if ( logValue >= XValues.front() && logValue < XValues.back() )
         {
+          PARALLEL_ATOMIC
           ++Y[VectorHelper::getBinIndex(XValues, logValue)];
         }
       }
 
+      prog.report();
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
 
     // For now, the errors are the sqrt of the counts. TODO: change as part of weighted event handling
     std::transform( Y.begin(),Y.end(),outputWorkspace->dataE(0).begin(), (double(*)(double)) std::sqrt );
