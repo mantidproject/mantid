@@ -141,6 +141,8 @@ void DiffractionFocussing2::exec()
   udet2group.clear();
   // std::cout << "(1) nGroups " << nGroups << "\n";
   groupWS->makeDetectorIDToGroupVector(udet2group, nGroups);
+  if (nGroups <= 0)
+    throw std::runtime_error("No groups were specified.");
   // std::cout << "(2) nGroups " << nGroups << "\n";
 
   //This finds the rebin parameters (used in both versions)
