@@ -117,8 +117,8 @@ namespace Crystal
        std::istringstream iss( L1s+" "+T0s, std::istringstream::in);
        iss>>L1;
        iss>>T0;
-
-       SCDCalibratePanels::FixUpSourceParameterMap(instr, L1/100, parMap1);
+       V3D sampPos=instr->getSample()->getPos();
+       SCDCalibratePanels::FixUpSourceParameterMap(instr, L1/100, sampPos,parMap1);
 
      }catch(...)
      {

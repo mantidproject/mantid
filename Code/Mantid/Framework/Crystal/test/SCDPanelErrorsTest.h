@@ -82,7 +82,8 @@ public:
     std::string ComponentName("bank26");
     Crystal::SCDPanelErrors calib(Peakws, ComponentName, 14.0, 19.3, 8.6, 90., 105., 90., .12);
     calib.setAttribute("NGroups", IFunction::Attribute(1));
-    calib.setAttribute("RotateCenters",IFunction::Attribute(1));
+    calib.setAttribute("RotateCenters",IFunction::Attribute(0));
+    calib.setAttribute("SampleOffsets",IFunction::Attribute(1));
     std::vector<std::string> banks;
     banks.push_back(std::string("bank26"));
 
@@ -133,8 +134,10 @@ public:
     TS_ASSERT_DELTA(out[10], 0.00883232, d);
 
     //-------------------------Test the derivative --------------------------------
-  boost::shared_ptr<Jacob> Jac(new Jacob(10, N));
+  int nn=3;//sample offsets used
 
+  boost::shared_ptr<Jacob> Jac(new Jacob(10+nn, N));
+    calib.functionDeriv1D(Jac.get(), xVals.data(), (size_t) N);
     calib.functionDeriv1D(Jac.get(), xVals.data(), (size_t) N);
 
 
@@ -144,10 +147,10 @@ public:
     std::vector<double> compRes(N);
 
     size_t params[20] =
-    { 0, 0,0,1,1, 2, 2,4,4,5, 5, 6, 6,7, 7, 7,8, 8, 9, 9 };
+    { 12,12,11,11,10,10,0,1,1, 2, 2,4,4,5, 5, 6, 6,7, 7, 7 };
    // { 2, 2,2,2,2, 2,2,2,2 , 2,2,2,2, 2,3,3,3,3, 3,3 };
     size_t indx[20] =
-    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 1, 2, 3, 4, 5 };
+    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 1, 2, 3, 4, 5 };
 
 
     int x = 0;
@@ -175,8 +178,8 @@ public:
       size_t k = indx[x];
       x++;
 
-   //   std::cout<<"param,peak qxyz="<<param<<","<<k<<
-    //       "resT,resNum="<<Jac->get(k, param)<<","<< compRes[k]<<std::endl;
+     // std::cout<<"param,peak qxyz="<<param<<","<<k<<
+      //    "resT,resNum="<<Jac->get(k, param)<<","<< compRes[k]<<std::endl;
     TS_ASSERT_DELTA(Jac->get(k, param), compRes[k], .02);
 
     }

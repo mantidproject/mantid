@@ -350,6 +350,8 @@ namespace Crystal
 
     bool a_set,b_set,c_set,alpha_set,beta_set,gamma_set,PeakName_set, BankNames_set,
         startX_set,endX_set, NGroups_set;
+    int SampOffsetDeclareStatus;//0 no action, 1- init called no declare
+                                //2- init Called and samp offset parameters are declared
 
     int NLatticeParametersSet;
 

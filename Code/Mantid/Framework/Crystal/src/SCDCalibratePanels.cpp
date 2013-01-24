@@ -845,12 +845,31 @@ namespace Crystal
 
     if( chisq < 0 ||  chisq != chisq)
       sigma = -1;
-
+    string fieldBaseNames = ";l0;t0;detWidthScale;detHeightScale;Xoffset;Yoffset;Zoffset;Xrot;Yrot;Zrot;";
+    if( getProperty("AllowSampleShift"))
+      fieldBaseNames +="Sample_x;Sample_y;Sample_z;";
     for( int prm = 0; prm < (int)RRes->rowCount(); ++prm )
     {
-      names.push_back( RRes->getRef< string >( "Name", prm ) );
+      string namee =RRes->getRef< string >( "Name", prm );
+      size_t dotPos = namee.find('_');
+      if (dotPos >= namee.size())
+         dotPos = 0;
+      else
+         dotPos++;
+       string Field = namee.substr(dotPos);
+       size_t FieldNum= fieldBaseNames.find(";"+Field+";");
+       if( FieldNum > fieldBaseNames.size())
+         continue;
+       if( dotPos !=0)
+             {
+               int col = atoi( namee.substr( 1,dotPos).c_str());
+               if( col < 0 || col >=NGroups)
+                 continue;
+             }
+      names.push_back( namee );
       params.push_back( RRes->getRef< double >( "Value", prm ));
       errs.push_back( sigma* RRes->getRef< double >( "Error",prm));
+
     }
 
     //------------------- Report chi^2 value --------------------
@@ -878,11 +897,14 @@ namespace Crystal
 
       }
 
-    string fieldBaseNames = ";              ;l0;           ;t0;           ;detWidthScale;;detHeightScale;Xoffset;      ;Yoffset;      ;Zoffset;      ;Xrot;         ;Yrot;         ;Zrot;";
+
 
 
     //--------------------- Create Result Table Workspace-------------------
-    TableWorkspace_sptr Result( new TableWorkspace( 20));
+    int nn(0);
+    if( getProperty("AllowSampleShift"))
+      nn=3;
+    TableWorkspace_sptr Result( new TableWorkspace( 1+2*(10 + nn)));
 
     Result->addColumn( "str","Field");
 
@@ -893,7 +915,32 @@ namespace Crystal
       Result->addColumn( "double",GroupName);
     }
 
-    double sqrtChiSqoverDof = sqrt( chisq);
+   //double sqrtChiSqoverDof = sqrt( chisq);
+   std::vector<string>TableFieldNames;
+   for( int p=0; p <(int) names.size(); ++p)
+   {
+        string fieldName = names[p];
+        size_t dotPos = fieldName.find('_');
+        if (dotPos >= fieldName.size())
+          dotPos = 0;
+        else
+          dotPos++;
+        string Field = fieldName.substr(dotPos);
+        int it;
+        for(  it=0;  it< (int)TableFieldNames.size(); it++)
+        {
+          if( TableFieldNames[it]==Field)
+            break;
+        }
+        if( it >= (int)TableFieldNames.size())
+          TableFieldNames.push_back(Field);
+    }
+   for( int p=0; p< (int)TableFieldNames.size(); p++)
+     Result->cell< string >( p,0) =  TableFieldNames[p];
+   Result->cell<string>(TableFieldNames.size(),0)="Errors";
+   for( int p=0; p< (int)TableFieldNames.size(); p++)
+     Result->cell<string>(TableFieldNames.size()+p+1,0)=TableFieldNames[p];
+
 
    for( int p = 0; p < (int)names.size(); ++p )
     {
@@ -904,7 +951,24 @@ namespace Crystal
      else
        dotPos++;
      string Field = fieldName.substr( dotPos);
-     int FieldNum = (int)fieldBaseNames.find( ";" + Field + ";" ) / 15;
+     int FieldNum=0;
+     int it=0;
+         for( it=0;it <= (int)TableFieldNames.size() ; it++)
+         {
+           if( TableFieldNames[it] == Field) break;
+           FieldNum++;
+         }
+      if(it == (int)TableFieldNames.size())
+        continue;
+      int col=1;
+      if( dotPos !=0)
+      {
+        col = atoi( fieldName.substr( 1,dotPos).c_str())+1;
+      }
+      Result->cell<double>(FieldNum,col)=params[p];
+      Result->cell<double>(FieldNum+10+nn+1,col)=errs[p];
+
+     /*int FieldNum = (int)fieldBaseNames.find( ";" + Field + ";" ) / 15;
      int col = 0;
      if( FieldNum <= 0)
        col = -1;
@@ -922,14 +986,14 @@ namespace Crystal
        Result->cell< double >( FieldNum, col + 1) = params[ p ];
        Result->cell< double >( FieldNum+10,col + 1) = errs[ p ] * sqrtChiSqoverDof;
      }
-
+*/
     }
 
 //    setProperty( "ResultWorkspace", Result);
     std::string ResultWorkspaceName= getPropertyValue( "ResultWorkspace");
     AnalysisDataService::Instance().addOrReplace(ResultWorkspaceName, Result);
     setPropertyValue( "ResultWorkspace", ResultWorkspaceName);
-    Result->setComment(std::string("t0(microseconds),l0&offsets(meters),rot(degrees"));
+    Result->setComment(std::string("t0(microseconds),l0 & offsets(meters),rot(degrees"));
 
 
     //---------------- Create new instrument with ------------------------
@@ -969,7 +1033,11 @@ namespace Crystal
 
     }//For @ group
 
-  FixUpSourceParameterMap( NewInstrument, result["l0"], pmapOld);
+  V3D sampPos(NewInstrument->getSample()->getPos());//should be (0,0,0)???
+  if( getProperty("AllowSampleShift"))
+    sampPos= V3D( result["Sample_x"],result["Sample_y"],result["Sample_z"]);
+
+  FixUpSourceParameterMap( NewInstrument, result["l0"],sampPos, pmapOld);
 
     //---------------------- Save new instrument to DetCal-------------
     //-----------------------or xml(for LoadParameterFile) files-----------
@@ -1304,7 +1372,7 @@ namespace Crystal
 
 
   void SCDCalibratePanels::FixUpSourceParameterMap( boost::shared_ptr<const Instrument> NewInstrument,
-                                                   double const L0,
+                                                   double const L0,V3D const newSampPos,
                                                    boost::shared_ptr<const ParameterMap> const pmapOld)
     {
       boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
@@ -1312,10 +1380,19 @@ namespace Crystal
       updateSourceParams(source, pmap, pmapOld);
 
       IObjComponent_const_sptr sample = NewInstrument->getSample();
+      V3D SamplePos = sample->getPos();
+      if( SamplePos != newSampPos)
+      {
+        V3D newSampRelPos = newSampPos-SamplePos;
+        pmap->addPositionCoordinate(sample.get(), string( "x" ), newSampRelPos.X());
+        pmap->addPositionCoordinate(sample.get(), string( "y" ), newSampRelPos.Y());
+        pmap->addPositionCoordinate(sample.get(), string( "z" ), newSampRelPos.Z());
+
+      }
       V3D sourceRelPos = source->getRelativePos();
       V3D sourcePos = source->getPos();
       V3D parentSourcePos = sourcePos - sourceRelPos;
-      V3D source2sampleDir = sample->getPos() - source->getPos();
+      V3D source2sampleDir = SamplePos - source->getPos();
 
       double scalee = L0 / source2sampleDir.norm();
       V3D newsourcePos = sample->getPos() - source2sampleDir * scalee;

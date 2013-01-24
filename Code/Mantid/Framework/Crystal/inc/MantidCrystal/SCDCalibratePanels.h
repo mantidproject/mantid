@@ -134,7 +134,7 @@ namespace Crystal
   *                        NewInstrument's parameter map.
    */
   static void FixUpSourceParameterMap( boost::shared_ptr<const Instrument> NewInstrument,
-        double const L0, boost::shared_ptr<const ParameterMap>const  pmapOld) ;
+        double const L0,V3D const newSampPos, boost::shared_ptr<const ParameterMap>const  pmapOld) ;
 
   /**
    * Given a string representation of a set of groups( [] separated list of
