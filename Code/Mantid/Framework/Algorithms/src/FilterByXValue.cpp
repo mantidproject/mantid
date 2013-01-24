@@ -1,5 +1,5 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+This algorithm filters events outside of the given values (in whatever units the workspace possesses). This can be a one or two-sided filter depending on which of xmin & xmax are given. This algorithm pays no attention whatsoever to any binning that has been set on the input workspace (though it will be carried over to the output). If you need to affect the bin boundaries as well, or want to remove some spectra/pixels, consider using [[CropWorkspace]] instead.
 *WIKI*/
 
 #include "MantidAlgorithms/FilterByXValue.h"
@@ -48,7 +48,7 @@ namespace Algorithms
       "The minimum X value (in the units of the input workspace) for which events will be retained\n"
       "(default: event list min)");
     declareProperty("XMax", EMPTY_DBL(),
-      "The maximum X value (in the units of the input workspace) for which events will be retained\n"
+      "The maximum X value (in the units of the input workspace) for which events will be retained. Must be greater than XMin.\n"
       "(default: event list max)");
   }
 
