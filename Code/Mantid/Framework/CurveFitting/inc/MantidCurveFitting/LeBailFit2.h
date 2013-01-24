@@ -112,7 +112,7 @@ namespace CurveFitting
 
     //--------------  Pattern Calculation & Minimizing  -------------------
     /// Calculate LeBail pattern from from input peak parameters
-    void execPatternCalculation(size_t workspaceindex);
+    void execPatternCalculation();
 
     /// Calculate diffraction pattern
     bool calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
@@ -129,7 +129,7 @@ namespace CurveFitting
     void setLeBailFitParameters();
 
     /// Do 1 fit on LeBailFunction
-    bool fitLeBailFunction(size_t workspaceindex, std::map<std::string, Parameter> &parammap);
+    bool fitLeBailFunction(std::map<std::string, Parameter> &parammap);
 
     /// Minimize a give function
     bool minimizeFunction(MatrixWorkspace_sptr dataws, size_t wsindex, IFunction_sptr function,
@@ -149,7 +149,7 @@ namespace CurveFitting
 
     //-------------- Operation with Bragg Peaks -------------------------------
     /// Create a list of peaks
-    bool generatePeaksFromInput(size_t workspaceindex);
+    bool generatePeaksFromInput();
 
     /// Examine whether the insturment parameter set to a peak can cause a valid set of peak profile of that peak
     bool examinInstrumentParameterValid(ThermalNeutronBk2BkExpConvPV_sptr peak,
@@ -194,7 +194,7 @@ namespace CurveFitting
     void exportInstrumentParameterToTable(map<string, Parameter> parammap);
 
     /// Create output data workspace
-    void createOutputDataWorkspace(size_t workspaceindex, FunctionMode functionmode);
+    void createOutputDataWorkspace();
 
     /// Fake calculated pattern
     void writeFakedDataToOutputWS(size_t workspaceindex, int functionmode);
@@ -208,7 +208,7 @@ namespace CurveFitting
 
     //--------------  Random Walk Suite ----------------------------------------
     /// Main for random walk process
-    void execRandomWalkMinimizer(size_t maxcycles, size_t wsindex, map<string, Parameter> &parammap);
+    void execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter> &parammap);
 
     /// Set up Monte Carlo random walk strategy
     void setupRandomWalkStrategy();
@@ -220,9 +220,8 @@ namespace CurveFitting
     bool calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws,
                                        size_t wsindex,
                                        map<string, Parameter> funparammap,
-                                       MantidVec &background,
-                                       const MantidVec &domain,
-                                       MantidVec &values, double &rwp, double &rp);
+                                       MantidVec &background, MantidVec &values,
+                                       double &rwp, double &rp);
 
     /// Calculate powder diffraction statistic Rwp
     void calculatePowderPatternStatistic(MantidVec &values, vector<double> &background,
