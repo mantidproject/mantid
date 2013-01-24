@@ -45,17 +45,17 @@ namespace WorkflowAlgorithms
   {
     // TODO: Validator to ensure that this is 'fresh' data???
     declareProperty(new WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input,
-        boost::make_shared<WorkspaceUnitValidator>("TOF")), "An input workspace.");
+        boost::make_shared<WorkspaceUnitValidator>("TOF")), "The input workspace. Must hold 'raw' events.");
     // Note that this algorithm may modify the input workspace (by masking and/or cropping)
-    declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
+    declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output), "The output table workspace.");
 
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace","",Direction::Input, PropertyMode::Optional), "");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace","",Direction::Input, PropertyMode::Optional), "A workspace holding pixels to be masked.");
 
-    declareProperty("XMin", EMPTY_DBL());
-    declareProperty("XMax", EMPTY_DBL());
+    declareProperty("XMin", EMPTY_DBL(), "The minimum value of X for which an event will be counted.");
+    declareProperty("XMax", EMPTY_DBL(), "The maximum value of X for which an event will be counted.");
     // TODO: Restrict the choice of units?
     declareProperty("RangeUnit", "TOF", boost::make_shared<StringListValidator>(UnitFactory::Instance().getKeys()),
-      "The units of XMin and XMax" );
+      "The units in which XMin and XMax is being given." );
 
     // TODO: Maybe need to add a pre/post-processing flag for live
   }
