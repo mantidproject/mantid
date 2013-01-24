@@ -33,7 +33,7 @@ and used by other algorithms, they should not be needed in daily use.
 #include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDBoxFlatTree.h"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vector>
 #include "MantidMDEvents/MDHistoWorkspace.h"

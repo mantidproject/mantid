@@ -259,18 +259,18 @@ namespace Mantid
     // Add box controller info to this group
     hFile->putAttr("box_controller_xml", m_bcXMLDescr);
 
-    std::vector<int> exents_dims(2,0);
-    exents_dims[0] = (int(maxBoxes));
+    std::vector<int64_t> exents_dims(2,0);
+    exents_dims[0] = (int64_t(maxBoxes));
     exents_dims[1] = (m_nDim*2);
-    std::vector<int> exents_chunk(2,0);
-    exents_chunk[0] = int(16384);
+    std::vector<int64_t> exents_chunk(2,0);
+    exents_chunk[0] = int64_t(16384);
     exents_chunk[1] = (m_nDim*2);
 
-    std::vector<int> box_2_dims(2,0);
-    box_2_dims[0] = int(maxBoxes);
+    std::vector<int64_t> box_2_dims(2,0);
+    box_2_dims[0] = int64_t(maxBoxes);
     box_2_dims[1] = (2);
-    std::vector<int> box_2_chunk(2,0);
-    box_2_chunk[0] = int(16384);
+    std::vector<int64_t> box_2_chunk(2,0);
+    box_2_chunk[0] = int64_t(16384);
     box_2_chunk[1] = (2);
 
     if (update)

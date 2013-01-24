@@ -9,7 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include <nexus/NeXusFile.hpp>
 
 #include <boost/scoped_ptr.hpp>
 

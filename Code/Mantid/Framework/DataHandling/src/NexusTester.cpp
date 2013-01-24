@@ -19,7 +19,7 @@ saving and loading rates, in MB per second.
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include <nexus/NeXusFile.hpp>
 #include <stdlib.h>
 #include "MantidKernel/CPUTimer.h"
 #include "MantidAPI/Progress.h"

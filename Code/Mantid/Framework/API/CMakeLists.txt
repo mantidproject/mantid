@@ -353,7 +353,7 @@ set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} )
+target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} ${NEXUS_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

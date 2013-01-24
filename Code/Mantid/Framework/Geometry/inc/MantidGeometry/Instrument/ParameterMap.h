@@ -19,7 +19,6 @@
 
 #include <vector>
 #include <typeinfo>
-#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {

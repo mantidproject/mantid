@@ -5,7 +5,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidAPI/IDataFileChecker.h"
 
 namespace Mantid

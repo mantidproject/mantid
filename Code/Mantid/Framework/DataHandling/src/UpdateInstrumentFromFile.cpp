@@ -46,8 +46,8 @@ would tell the algorithm to interpret the columns as:
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 #include "LoadRaw/isisraw2.h"
 
 #include <boost/scoped_ptr.hpp>

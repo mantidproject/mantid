@@ -6,7 +6,6 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include <cmath>
 #include <numeric>
 

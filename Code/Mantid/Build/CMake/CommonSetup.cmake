@@ -187,7 +187,6 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/Algorithms/inc
         Framework/GPUAlgorithms/inc
         Framework/PythonInterface/inc
-        Framework/NexusCPP/inc
         Framework/Nexus/inc
         Framework/MPIAlgorithms/inc
         Framework/MDAlgorithms/inc

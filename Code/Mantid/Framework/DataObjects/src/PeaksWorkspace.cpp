@@ -2,8 +2,8 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

@@ -2,13 +2,11 @@
 #define MANTID_MDEVENTS_MDLEANEVENT_H_
     
 #include "MantidKernel/System.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidAPI/BoxController.h"
 #include <numeric>
 #include <cmath>
-#include <napi.h>
 
 namespace Mantid
 {
@@ -318,12 +316,13 @@ namespace MDEvents
       dims.push_back(int(numColumns));
 
       // C-style call is much faster than the C++ call.
-      int dims_ignored[NX_MAXRANK];
-      int type = ::NeXus::FLOAT32;
-      int rank = 0;
-      NXgetinfo(file->getHandle(), &rank, dims_ignored, &type);
+//      int dims_ignored[NX_MAXRANK];
+//      int type = ::NeXus::FLOAT32;
+//      int rank = 0;
+//      NXgetinfo(file->getHandle(), &rank, dims_ignored, &type);
+      NeXus::Info info = file->getInfo();
 
-      if (type == ::NeXus::FLOAT64)
+      if (info.type == ::NeXus::FLOAT64)
       {
         // Handle file-backed OLD files that are in doubles.
 
@@ -439,14 +438,15 @@ namespace MDEvents
       coord_t * data = new coord_t[dataSize];
 
       // C-style call is much faster than the C++ call.
-      int dims[NX_MAXRANK];
-      int type = ::NeXus::FLOAT32;
-      int rank = 0;
-      NXgetinfo(file->getHandle(), &rank, dims, &type);
+//      int dims[NX_MAXRANK];
+//      int type = ::NeXus::FLOAT32;
+//      int rank = 0;
+//      NXgetinfo(file->getHandle(), &rank, dims, &type);
+      NeXus::Info info = file->getInfo();
 
 #ifdef COORDT_IS_FLOAT
       /* coord_t is a single-precision float */
-      if (type == ::NeXus::FLOAT64)
+      if (info.type == ::NeXus::FLOAT64)
       {
         // Handle old files that are recorded in DOUBLEs to load as FLOATS
         double * dblData = new double[dataSize];

@@ -16,8 +16,8 @@ If the DetectorTableFilename property is blank then it is assumed that a 1:1 spe
 #include "MantidKernel/VectorHelper.h"
 
 #include "LoadRaw/isisraw2.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <Poco/File.h>
 

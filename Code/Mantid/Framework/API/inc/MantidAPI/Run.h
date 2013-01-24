@@ -6,7 +6,7 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include <nexus/NeXusFile.hpp>
 #include <vector>
 
 namespace Mantid

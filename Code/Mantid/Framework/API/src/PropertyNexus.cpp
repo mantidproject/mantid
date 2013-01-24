@@ -1,7 +1,7 @@
 #include "MantidAPI/PropertyNexus.h"
 
-#include "MantidNexusCPP/NeXusException.hpp"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"

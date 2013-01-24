@@ -22,7 +22,6 @@
 #include <set>
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/scoped_ptr.hpp>
 #include "MantidAPI/IMDIterator.h"
 

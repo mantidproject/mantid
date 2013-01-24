@@ -22,7 +22,6 @@
 #include <numeric>
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"

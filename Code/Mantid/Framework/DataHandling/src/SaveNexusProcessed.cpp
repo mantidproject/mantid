@@ -45,7 +45,7 @@ off by default.
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include <nexus/NeXusFile.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <Poco/File.h>
