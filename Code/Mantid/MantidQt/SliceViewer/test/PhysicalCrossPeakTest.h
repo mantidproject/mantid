@@ -170,7 +170,7 @@ public:
 
     */
 
-    V3D origin(0, 0, 0);
+    V3D origin(-1, 1, 0);
     const double maxZ = 1;
     const double minZ = 0;
     PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);

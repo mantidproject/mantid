@@ -89,8 +89,8 @@ namespace MantidQt
     using Mantid::Kernel::V2D;
     const Left left( m_origin.X() - m_effectiveRadius );
     const Right right( m_origin.X() + m_effectiveRadius );
-    const Bottom bottom ( m_origin.X() - m_effectiveRadius );
-    const Top top ( m_origin.X() + m_effectiveRadius );
+    const Bottom bottom ( m_origin.Y() - m_effectiveRadius );
+    const Top top ( m_origin.Y() + m_effectiveRadius );
     const SlicePoint slicePoint( m_origin.Z() );
 
     return PeakBoundingBox(left, right, top, bottom, slicePoint);
