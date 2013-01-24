@@ -53,8 +53,16 @@ namespace Algorithms
   {
     std::map<std::string, std::string> errors;
 
-    // Check that the log exists for the given input workspace
     m_inputWorkspace = getProperty("InputWorkspace");
+
+    // This only works for unweighted events
+    // TODO: Either turn this check into a proper validator or amend the algorithm to work for weighted events
+    if (m_inputWorkspace->getEventType() != API::TOF)
+    {
+      errors["InputWorkspace"] = "This algorithm only works for unweighted ('raw') events";
+    }
+
+    // Check that the log exists for the given input workspace
     m_logName = getPropertyValue("LogName");
     try {
       ITimeSeriesProperty * log =
@@ -334,8 +342,8 @@ namespace Algorithms
     MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",1,XLength,XLength-1);
     // Copy the bin boundaries into the output workspace
     outputWorkspace->dataX(0) = XValues;
-    // TODO: Add a label unit to the x axis, copy over y axis unit
     outputWorkspace->getAxis(0)->title() = m_logName;
+    outputWorkspace->setYUnit("Counts");
 
     MantidVec & Y = outputWorkspace->dataY(0);
     const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
