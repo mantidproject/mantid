@@ -380,6 +380,7 @@ namespace Crystal
 	  else
 	  {
 		  std::string bankName0 = bankName;
+                  //Only works for WISH
 		  bankName0.erase(0,4);
 		  std::ostringstream pixelString;
 		  pixelString << Iptr->getName() << "/" << bankName0 << "/" <<bankName
@@ -399,12 +400,11 @@ namespace Crystal
 		  boost::shared_ptr<const RectangularDetector> RDet = boost::shared_dynamic_cast<
 					const RectangularDetector>(parent);
 
-	      if (col < Edge || col > (RDet->xpixels()-Edge) || row < Edge || row > (RDet->ypixels()-Edge)) return true;
+	      if (col < Edge || col >= (RDet->xpixels()-Edge) || row < Edge || row >= (RDet->ypixels()-Edge)) return true;
 	      else return false;
 	  }
 	  else
 	  {
-          int nPixels = std::max<int>(0, Edge);
           std::vector<Geometry::IComponent_const_sptr> children;
           boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
           asmb->getChildren(children, false);
@@ -413,7 +413,8 @@ namespace Crystal
           asmb2->getChildren(grandchildren,false);
           int NROWS = static_cast<int>(grandchildren.size());
           int NCOLS = static_cast<int>(children.size());
-    	  if (row < nPixels || col < nPixels || NROWS-row < nPixels || NCOLS-col < nPixels) return true;
+          // Wish pixels and tubes start at 1 not 0
+          if (col-1 < Edge || col-1 >= (NCOLS-Edge) || row-1 < Edge || row-1 >= (NROWS-Edge)) return true;
     	  else return false;
 	  }
 	  return false;
