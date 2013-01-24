@@ -2597,9 +2597,9 @@ namespace Geometry
       {
         std::string name = pElem->getAttribute("name");
 
-        int startCount = 0; // default start count to zero
+/*        int startCount = 0; // default start count to zero
 
-/*        std::string nameToUpper = name;
+        std::string nameToUpper = name;
         std::transform(nameToUpper.begin(), nameToUpper.end(), nameToUpper.begin(), toupper);
 
         size_t found = nameToUpper.find("__STARTCOUNT");
