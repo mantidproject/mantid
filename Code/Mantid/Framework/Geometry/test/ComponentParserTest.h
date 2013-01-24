@@ -15,7 +15,6 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Strings.h"
 #include <Poco/SAX/AttributesImpl.h>
-#include "MantidNexusCPP/NeXusFile.hpp"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

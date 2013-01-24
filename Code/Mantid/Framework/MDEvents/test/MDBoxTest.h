@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <Poco/File.h>
+#include <nexus/NeXusFile.hpp>
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
@@ -15,7 +16,6 @@
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid;
