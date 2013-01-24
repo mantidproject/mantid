@@ -2421,9 +2421,17 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
   //Get the starting time of the log.
   Mantid::Kernel::DateAndTime startTime;
+  //Toggle to switch between using the real date or the change in seconds.
+  bool useAbsoluteDate = false;
+
   if (!time_value_map.empty())
   {
-    startTime = ws->run().startTime();
+    try {
+      startTime = ws->run().startTime();
+    } catch (std::runtime_error&) {
+      // This means the start time is missing, use absolute times instead
+      useAbsoluteDate = true;
+    }
   }
 
   //Make a unique title, and put in the start time of the log
@@ -2433,9 +2441,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   // Make both columns read-only
   t->setReadOnlyColumn(0, true);
   t->setReadOnlyColumn(1, true);
-
-  //Toggle to switch between using the real date or the change in seconds.
-  bool useAbsoluteDate = false;
 
   if (useAbsoluteDate)
   {
