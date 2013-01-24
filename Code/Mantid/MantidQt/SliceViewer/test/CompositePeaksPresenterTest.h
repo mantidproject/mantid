@@ -34,7 +34,7 @@ public:
 
   void test_construction_throws_if_zoomablePeakView__NULL()
   {
-    TS_ASSERT_THROWS(CompositePeaksPresenter composite(NULL), std::runtime_error);
+    TS_ASSERT_THROWS(CompositePeaksPresenter composite(NULL), std::runtime_error&);
   }
 
 
@@ -319,7 +319,7 @@ public:
      TS_ASSERT_THROWS_NOTHING(presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>()));
     }
     // Add a peaksWS beyond the limit of allowed number of peaksWS.
-    TS_ASSERT_THROWS(presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>()), std::invalid_argument);
+    TS_ASSERT_THROWS(presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>()), std::invalid_argument&);
   }
 
   void test_default_palette()
@@ -504,13 +504,13 @@ public:
   void test_getBackroundColour_default()
   {
     CompositePeaksPresenter composite(&_fakeZoomableView);
-    TSM_ASSERT_THROWS("Cannot fetch background colours until nested presenters have been added.", composite.getBackgroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error);
+    TSM_ASSERT_THROWS("Cannot fetch background colours until nested presenters have been added.", composite.getBackgroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error&);
   }
 
   void test_getForegroundColour_default()
   {
     CompositePeaksPresenter composite(&_fakeZoomableView);
-    TSM_ASSERT_THROWS("Cannot fetch foreground colours until nested presenters have been added.", composite.getForegroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error);
+    TSM_ASSERT_THROWS("Cannot fetch foreground colours until nested presenters have been added.", composite.getForegroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error&);
   }
 
   void test_zoomToPeak()

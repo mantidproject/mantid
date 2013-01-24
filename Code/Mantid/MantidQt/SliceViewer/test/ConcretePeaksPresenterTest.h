@@ -228,11 +228,11 @@ public:
 
     builder.withNonIntegratedViewFactory(nullViewFactory);
     builder.withIntegratedViewFactory(normalViewFactory);
-    TSM_ASSERT_THROWS("Non integrated view factory is null, should throw.", builder.create(), std::invalid_argument);
+    TSM_ASSERT_THROWS("Non integrated view factory is null, should throw.", builder.create(), std::invalid_argument&);
 
     builder.withNonIntegratedViewFactory(normalViewFactory);
     builder.withIntegratedViewFactory(nullViewFactory);
-    TSM_ASSERT_THROWS("Integrated view factory is null, should throw.",builder.create(), std::invalid_argument);
+    TSM_ASSERT_THROWS("Integrated view factory is null, should throw.",builder.create(), std::invalid_argument&);
   }
 
   void test_construction()

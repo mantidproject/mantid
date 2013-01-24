@@ -15,7 +15,7 @@ namespace SliceViewer
     Q_OBJECT
   public:
     PeaksWorkspaceWidget(Mantid::API::IPeaksWorkspace_const_sptr ws, const std::string& coordinateSystem, const QColor& defaultForegroundColour, const QColor& defaultBackgroundColour, QWidget *parent = 0);
-    ~PeaksWorkspaceWidget();
+    virtual ~PeaksWorkspaceWidget();
   signals:
     void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
     void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);

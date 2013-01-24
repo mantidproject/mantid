@@ -89,7 +89,7 @@ namespace MantidQt
     /**
     @return the number of columns in the model.
     */
-    int QPeaksTableModel::columnCount(const QModelIndex &parent) const
+    int QPeaksTableModel::columnCount(const QModelIndex &) const
     {
       return static_cast<int>(m_columnNameMap.size());
     }
@@ -179,9 +179,8 @@ namespace MantidQt
       const bool isSortable = m_sortableColumns[columnName];
       if(isSortable)
       {
-
-        // TODO raise event and propagate through to Proper presenter.
-        peaksSorted(columnName.toStdString(), order== Qt::AscendingOrder);
+       // TODO raise event and propagate through to Proper presenter.
+       peaksSorted(columnName.toStdString(), order== Qt::AscendingOrder);
 
        this->update();
       }

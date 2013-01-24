@@ -42,7 +42,7 @@ namespace MantidQt
       /// Constructor
       CompositePeaksPresenter(ZoomablePeaksView* const zoomablePlottingWidget,  PeaksPresenter_sptr defaultPresenter = PeaksPresenter_sptr(new NullPeaksPresenter));
       /// Destructor
-      ~CompositePeaksPresenter();
+      virtual ~CompositePeaksPresenter();
       /// Add a peaks presenter onto the composite.
       void addPeaksPresenter(PeaksPresenter_sptr presenter);
       /// Get the number of subjects.
