@@ -138,10 +138,10 @@ namespace DataHandling
         fakeData[i] = rand();
     }
 
-    std::vector<int> dims;
-    dims.push_back(int(chunkSize)*NumChunks);
-    std::vector<int> chunkDims;
-    chunkDims.push_back(int(chunkSize));
+    std::vector<int64_t> dims;
+    dims.push_back(int64_t(chunkSize)*NumChunks);
+    std::vector<int64_t> chunkDims;
+    chunkDims.push_back(int64_t(chunkSize));
 
     // Total size in BYTES
     double dataSizeMB = double(chunkSize*NumChunks*sizeof(uint32_t)) / (1024.*1024.);
@@ -157,8 +157,8 @@ namespace DataHandling
       CPUTimer tim;
       for (int i=0; i<NumChunks; i++)
       {
-        std::vector<int> startDims;
-        startDims.push_back(i * int(chunkSize));
+        std::vector<int64_t> startDims;
+        startDims.push_back(i * int64_t(chunkSize));
         file.putSlab(fakeData, startDims, chunkDims);
         prog.report();
       }
@@ -199,8 +199,8 @@ namespace DataHandling
       for (int i=0; i<NumChunks; i++)
       {
         file.openData("FakeData");
-        std::vector<int> startDims;
-        startDims.push_back(i * int(chunkSize));
+        std::vector<int64_t> startDims;
+        startDims.push_back(i * int64_t(chunkSize));
         file.getSlab(fakeData, startDims, chunkDims);
         prog.report();
         file.closeData();

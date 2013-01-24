@@ -229,12 +229,12 @@ namespace Mantid
       nxFile.makeData("data", ::NeXus::FLOAT64, array_dims, false);
       nxFile.makeData("error", ::NeXus::FLOAT64, array_dims, false);
 
-      std::vector<int> slab_start;
-      std::vector<int> slab_size;
+      std::vector<int64_t> slab_start;
+      std::vector<int64_t> slab_size;
 
       // What size slabs are we going to write...
       slab_size.push_back(1);
-      slab_size.push_back((int)nBins);
+      slab_size.push_back((int64_t)nBins);
 
       // And let's start at the beginning
       slab_start.push_back(0);
