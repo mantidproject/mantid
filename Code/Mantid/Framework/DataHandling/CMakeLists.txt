@@ -422,7 +422,7 @@ ENDIF()
 include_directories ( inc ../Nexus/inc ${HDF5_INCLUDE_DIRS})
 #include_directories ( inc ../Nexus/inc)
 
-target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${HDF5_LIBRARIES})
+target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES})
 #target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus)
 
 # Add the unit tests directory
