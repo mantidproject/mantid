@@ -204,6 +204,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+#include "MantidQtAPI/ScriptRepositoryView.h"
+
 using namespace Qwt3D;
 using namespace MantidQt::API;
 
@@ -2813,6 +2815,14 @@ void ApplicationWindow::loadImage(const QString& fn)
   g->removeLegend();
   g->addImage(fn);
   QApplication::restoreOverrideCursor();
+}
+
+void ApplicationWindow::loadScriptRepo(){
+   MantidQt::API::ScriptRepositoryView *ad = new MantidQt::API::ScriptRepositoryView(this);
+   connect(ad, SIGNAL(loadScript(const QString)),this,SLOT(loadScript(const QString& )));
+  ad->setAttribute(Qt::WA_DeleteOnClose);
+  ad->show();
+  ad->setFocus();
 }
 
 void ApplicationWindow::polishGraph(Graph *g, int style)
@@ -9278,6 +9288,7 @@ void ApplicationWindow::fileMenuAboutToShow()
   fileMenu->addAction(actionManageDirs);
   fileMenu->insertSeparator();
   fileMenu->addAction(actionLoadImage);
+  fileMenu->addAction(actionScriptRepo); 
 
   MdiSubWindow *w = activeWindow();
   if (w && w->isA("Matrix"))
@@ -12746,6 +12757,10 @@ void ApplicationWindow::createActions()
   actionLoadImage = new QAction(tr("Open Image &File"), this);
   actionLoadImage->setShortcut( tr("Ctrl+I") );
   connect(actionLoadImage, SIGNAL(activated()), this, SLOT(loadImage()));
+
+  actionScriptRepo = new QAction(tr("Script Repositor&y"),this); 
+  actionScriptRepo->setShortcut(tr("Ctrl+Y")); 
+  connect(actionScriptRepo, SIGNAL(activated()), this, SLOT(loadScriptRepo()));
 
   actionImportImage = new QAction(tr("Import I&mage..."), this);
   connect(actionImportImage, SIGNAL(activated()), this, SLOT(importImage()));

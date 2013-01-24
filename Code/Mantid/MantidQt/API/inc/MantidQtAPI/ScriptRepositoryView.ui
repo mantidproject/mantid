@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ScriptRepositoryView</class>
+ <widget class="QWidget" name="ScriptRepositoryView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>616</width>
+    <height>505</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Script Repository</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,2,0,1">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Mantid Scripts Repository</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTreeView" name="repo_treeView"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="desc_label">
+     <property name="text">
+      <string>Description</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTextBrowser" name="desc_textBrowser"/>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

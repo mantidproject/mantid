@@ -217,6 +217,7 @@ namespace API
         GitScriptRepository::file_entry directory; 
         directory.path = ancestor_dir; 
         directory.directory = true; 
+        directory.status = REMOTE_ONLY;
         // std::cout << "insert directory " << ancestor_dir << std::endl; 
         repo_iteration.repository_list->push_back(directory);
         index++; 
@@ -233,10 +234,9 @@ namespace API
     GitScriptRepository::file_entry curfile; 
     curfile.status = BOTH_UNCHANGED; 
     curfile.path = file;
-    if (std::string(file).find("TofConv/README.txt") != string::npos)
-      std::cout << "file " << file << " git status = " << (int)status << "\n"; ///FIXME
     if ((status & GIT_STATUS_WT_DELETED) ||
-        (status & GIT_STATUS_INDEX_NEW))
+        (status & GIT_STATUS_INDEX_NEW) || 
+        (status & GIT_STATUS_INDEX_DELETED))
       curfile.status = REMOTE_ONLY; 
     else if (status &  GIT_STATUS_WT_NEW)
       curfile.status = LOCAL_ONLY;
@@ -308,16 +308,48 @@ namespace API
 
     // set the status of the directories
     // dealing with directories
-    for (unsigned int i = 0; i< repository_list.size();
-         i++){
-      ///@todo recurseDirectory
-      /// THE PERFORMANCE OF THE SYSTEM GOT REALLY TERRIBLE! 
-      /// NOT A GOOD SOLUTION!!!  
-      break;
-    
-      GitScriptRepository::file_entry * curr = &repository_list[i];
-      if (curr->directory)
-        curr->status = (Mantid::API::SCRIPTSTATUS)recurseDirectory(repository_list, i);
+    Mantid::API::SCRIPTSTATUS acc_state = Mantid::API::BOTH_UNCHANGED;
+    std::string last_directory = "";
+    for (size_t i = repository_list.size() - 1 ; i> 0;
+         i--){
+      struct file_entry & curr_entry = repository_list[i]; 
+      std::string & curr_path  = curr_entry.path; 
+      size_t pos = curr_path.rfind("/"); 
+      std::string parent_dir ="";       
+      if (pos != string::npos){
+        parent_dir  = std::string(curr_path.begin(), curr_path.begin() + pos);         
+      }
+      
+
+      if (curr_entry.directory){        
+        curr_entry.status = acc_state; 
+        last_directory = curr_path; 
+      }
+
+      // this file is child of the last directory?
+      if (!last_directory.empty()){
+        if (curr_path.find(last_directory) == string::npos){
+          // no, it is not child
+          // restart the status 
+          acc_state = Mantid::API::BOTH_UNCHANGED;          
+        }          
+      }
+      //FIXME: when you download just one file, it says that you still can download the folder.
+      // update status
+      switch ( acc_state | curr_entry.status){
+        case BOTH_UNCHANGED: 
+          acc_state = BOTH_UNCHANGED;
+          break;
+        case REMOTE_ONLY:
+        case LOCAL_ONLY:
+        case LOCAL_CHANGED:
+        case REMOTE_CHANGED:
+          acc_state =  curr_entry.status; 
+          break;
+        default: 
+          acc_state = BOTH_CHANGED; 
+          break;
+      }
     }
   
     vector<std::string> file_names(repository_list.size());
@@ -508,16 +540,16 @@ namespace API
       listFiles(); 
 
     bool file_inside_repository = false; 
-  
+    struct file_entry * curr_entry = NULL; 
     for( std::vector<struct file_entry>::iterator it = repository_list.begin(); 
          it != repository_list.end();
          it++){
       if( it->path == file_path_adjusted){
         file_inside_repository = true;
+        curr_entry = &(*it); 
         break; 
       }
     }
-
     // it is impossible to download/update files that are not inside the repository
     if (!file_inside_repository){
       char info[200]; 
@@ -525,26 +557,66 @@ namespace API
       g_log.warning() << "File not inside the repository: " << info << "\n"; 
       throw ScriptRepoException(info); 
     }
+    {
+    // file found
+    const char * git_rep =  git_repository_path (repo);
+    // git path always returns '.git/',
+    //confirm: 
+    size_t size = strlen(git_rep); 
+    std::string repo_path = std::string(git_rep, git_rep + size - 5); 
+    
+    std::string abs_path = std::string(repo_path).append(file_path_adjusted); 
+    
+    Poco::File file2down (abs_path); 
+    
+    if (file2down.exists()){
+      //make backup if necessary
+      SCRIPTSTATUS st = curr_entry->status; 
+      if (st == LOCAL_CHANGED || st == BOTH_CHANGED){
+        g_log.warning() << "perform a backup of this file\n";
+        Poco::File f (std::string(repo_path).append(file_path_adjusted)); 
+        // copy file
+        std::string bck = std::string(f.path()).append("_bck"); 
+        g_log.warning() << "This script has local changes that would be override from the remote one"
+                        << " so, a back up copy will be created on your behalf, at: " 
+                        << bck << "\n";
+        f.copyTo(bck);
+      }                          
+    }else{
+      if (curr_entry->directory){
+        //  file2down.createDirectories();
+      }else{      
+      // touch file
+      size_t pos = file_path_adjusted.rfind("/"); 
+      if (pos != string::npos){
+        std::string dir_parent = std::string(repo_path).append(std::string(file_path_adjusted.begin(), 
+                                                                           file_path_adjusted.begin() + pos));
+        Poco::File dir_ (dir_parent); 
+        dir_.createDirectories();             
+      }
+      file2down.createFile();       
+      }
+    }
 
-
+  }
     // if the file can be downloaded
     // the download used the gti_checkout_index method.  
     git_checkout_opts opts; 
-    int err; 
+    int err = 0; 
     memset(&opts,0,sizeof(opts));
     opts.version = GIT_CHECKOUT_OPTS_VERSION;
-    opts.checkout_strategy = GIT_CHECKOUT_FORCE ; 
+    opts.checkout_strategy = GIT_CHECKOUT_FORCE; 
     opts.paths.strings = new char*[1];
     // add file name
     opts.paths.strings[0] = strdup(file_path_adjusted.c_str()); 
     opts.paths.count = 1; 
-    g_log.debug() << "Checking out the file : \n"; 
+    g_log.warning() << "entering git checkout index " << opts.paths.strings[0]<< "\n" ;
     //err = git_checkout_index(repo, NULL, &opts); 
     err = git_checkout_head(repo, &opts); 
-  
-    // release memory
+      g_log.warning() << " git checkout index\n" ;
+    // release memory FIXME
     delete [] opts.paths.strings[0]; 
-    delete [] opts.paths.strings; 
+    free(opts.paths.strings); 
     opts.paths.strings = NULL;
   
     if (err)
@@ -858,49 +930,76 @@ namespace API
     return false; 
   }
 
-
-
   static std::string extractPythonDocString( std::istream & input, 
                                              long int &doc_start, 
                                              long int &doc_end){
-    int docstring_found = 0; 
+
+    int line_number = 0;
+    const char * startmarks[] = {"\"\"\"",
+                                 "'''",
+                                 "##",
+                                 "# ",
+                                 "#\n"};
+    const char * endmarks[] = {"\"\"\"",
+                                 "'''",
+                                 "",
+                                 "",
+                               ""};
+
+    // int docstring_found = 0; 
     std::string buf;
     size_t pos; 
     long int start_mark = -1; 
-    long int end_mark; 
-
+    long int end_mark = -1; 
+    int end_mark_index = 0;
     while(getline(input,buf)){
-      if (((pos = buf.find("\"\"\"")) != std::string::npos)
-          ||
-          ((pos = buf.find("'''")) != std::string::npos)){
-        docstring_found += 1;
-        if (docstring_found == 1){    
-          start_mark = input.tellg();
-          if (hasAlpha(buf))
-            start_mark -= (buf.size()-2);
-        }else{
-          end_mark = input.tellg();
-          if (hasAlpha(buf))          
-            end_mark -= (buf.size() - pos+1);
-          else
-            end_mark -= (buf.size()+2);
+      if (start_mark < 0){
+        // looking for the start mark
+      for (int i = 0; i< 5; i++){
+        pos = buf.find(startmarks[i]); 
+        if (pos == 0){
+          std::cout << "start_mark found\n";
+          end_mark_index = i;
+           start_mark = input.tellg();
+           if (hasAlpha(buf)){
+             start_mark -= (buf.size()-strlen(startmarks[i]) + 1);
+           }
         }
       }
+      continue;
+      }
+      
+      // looking for end mark
+      if (end_mark_index < 2){
+        pos = buf.find(endmarks[end_mark_index]); 
+        if (pos != std::string::npos){
+          end_mark = input.tellg(); 
+          if (hasAlpha(buf))
+            end_mark -= (buf.size() - pos + 1);
+          else
+            end_mark -= (buf.size() + 2);
+          break;
+        }
 
-      if (docstring_found ==0)
-        continue; // skip before
-    
-      if (docstring_found == 2)
-        break; // no need to loop any more
+      }else{
+        if (buf.size() == 0){
+          end_mark = input.tellg(); 
+          end_mark -= 2;
+          break;
+        }
+      }
+      
     }
 
-    if (start_mark < 0){
+    if (start_mark < 0 || end_mark < 0){
       // no documentation
       doc_start = 0; 
       doc_end = 0; 
-      return "";     
+      input.clear(); 
+      input.seekg(0,std::ios::beg); 
+      return "";
     }
-  
+    
     doc_start = start_mark; 
     doc_end = end_mark; 
     long int size = end_mark - start_mark;

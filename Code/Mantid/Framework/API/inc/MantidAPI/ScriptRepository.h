@@ -8,6 +8,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/DllConfig.h"
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace Mantid
 {
@@ -263,10 +264,18 @@ They will work as was expected for folders @ref folders-sec.
    
     /// Virtual destructor (always needed for abstract classes)
     virtual ~ScriptRepository() throw(){};
-    
-    
-    
 
+    /// Define a file inside the repository
+    struct file_entry{
+      /// path related to git
+      std::string path; 
+      /// file status
+      SCRIPTSTATUS status; 
+      /// show if it is a directory or not
+      bool directory;
+    };
+
+         
     /** The constructor of ScriptSharing. 
         
         Ideally, it requires the definition of the remote repository
@@ -338,8 +347,8 @@ They will work as was expected for folders @ref folders-sec.
        @exception May throw Invalid Repository if the local repository was not generated. In this case, it is necessary to execute the ScriptRepository::update (at least once). 
      */
     virtual std::vector<std::string> listFiles() throw (ScriptRepoException&) = 0;
-
-
+    const std::vector<struct file_entry> & listEntries() {return repository_list;     
+    }
     /**
        Create a copy of the remote file/folder inside the local repository.
        For folder, it will copy all the files inside the folder as well. 
@@ -432,7 +441,10 @@ They will work as was expected for folders @ref folders-sec.
        @exception ScriptRepoException notifies mainly connection failure, but, 
                   may eventually, notify that the local repository may not be created. 
     */
-    virtual void update(void) throw (ScriptRepoException&) = 0;    
+    virtual void update(void) throw (ScriptRepoException&) = 0; 
+  protected:
+    /// get all the files from a repository
+    std::vector<struct file_entry> repository_list; 
   };
 
 ///shared pointer to the function base class

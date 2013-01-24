@@ -7,6 +7,7 @@
 #include <Poco/Path.h>
 #include <Poco/FileStream.h>
 #include <algorithm>
+#include <Poco/StreamCopier.h>
 using Poco::File; 
 using Poco::FileOutputStream;
 using Mantid::API::GitScriptRepository; 
@@ -147,9 +148,47 @@ void delete_file(std::string path){
 
     Poco::File f(std::string(repo_file).append(file_to_download)); 
     TSM_ASSERT(f.path(), f.exists()); 
+    Poco::FileStream sin (f.path()); 
+    std::stringstream sout;
+    Poco::StreamCopier::copyStream(sin,sout);
+    TSM_ASSERT(sout.str(), sout.str().find("from TofConverter import converterGUI") == 0);
 
     delete_file("TofConv"); 
   }
+
+  void test_nupdate_file(){
+    std::string file_to_download = "TofConv/TofConverter.py"; 
+    std::string repo_file = repo->localRepository(); 
+    repo_file.append("/"); 
+    std::cout << "Trying to download file " << file_to_download<<endl; 
+    TS_ASSERT_THROWS_NOTHING(repo->download(file_to_download)); 
+
+    Poco::File f(std::string(repo_file).append(file_to_download)); 
+    
+    // Change the file
+    {      
+      FileOutputStream out(f.path(),std::ios::out|std::ios::app); 
+      out << "something new\n";
+      out.close(); 
+    }
+
+    // re-list files
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    
+    TS_ASSERT_THROWS_NOTHING(repo->fileStatus(file_to_download) == Mantid::API::LOCAL_CHANGED); 
+
+    // try to download again
+    
+    TS_ASSERT_THROWS_NOTHING(repo->download(file_to_download));
+    
+    // check that back up file was created
+    
+    Poco::File f2(std::string(repo_file).append(file_to_download).append("_bck")); 
+    TSM_ASSERT(f2.path(), f2.exists()); 
+
+    delete_file("TofConv"); 
+  }
+
 
 
   void test_download_directory(){
@@ -234,15 +273,6 @@ void delete_file(std::string path){
     delete_file("TofConv"); 
   }
 
-  /*
-  void tes_shall_display_the_file_commits(){
-    std::string file_name = "TofConv/TofConverter.py"; 
-    TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
-
-    //   repo->history(); 
-  }
-  */
-
   void test_shall_giveback_file_info(){
  
     using Mantid::API::ScriptInfo;
@@ -253,14 +283,15 @@ void delete_file(std::string path){
     {  
       std::cout << "Query file info\n";  
       // get info from remote only file
-      ScriptInfo info = repo->fileInfo(file_name); 
+      ScriptInfo info; 
+      TS_ASSERT_THROWS_NOTHING(info = repo->fileInfo(file_name)); 
       TSM_ASSERT("got info 1", info.description.empty()); 
       // ensure it removes directories that it has created
       std::cout << "Check file removed\n"; 
       Poco::File f(std::string(repo->localRepository()).append("/").append("TofConv")); 
       TS_ASSERT(!f.exists()); 
     }
-    
+
     {
       // get info from local files
     TS_ASSERT_THROWS_NOTHING(repo->download("reflectometry/Quick.py")); 
@@ -283,8 +314,67 @@ void delete_file(std::string path){
       ScriptInfo info = repo->fileInfo("TofConv"); 
       TS_ASSERT(info.description.find("This has been adopted into the main Mantid repository as a Mantid interface. TofConverter from version 2.2.")==0);                 
       delete_file("TofConv"); 
-    } 
+    }
+    
   }
+
+  void test_multiple_downloads(void){
+  using Mantid::API::ScriptInfo;
+  std::string file1 = "TofConv/README.txt";
+  std::string file1_firstline = "This has been adopted into the main Mantid";
+  std::string file2 = "TofConv/TofConverter.py"; 
+  std::string file2_firstline = "from TofConverter import converterGUI"; 
+  std::string local_rep = std::string(repo->localRepository()).append("/");
+  std::string file3 = "TofConv/TofConverter/__init__.py";
+  TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+
+  TS_ASSERT_THROWS_NOTHING(repo->download(file2)); 
+
+  TS_ASSERT_THROWS_NOTHING(repo->download(file1));
+  
+  TS_ASSERT_THROWS_NOTHING(repo->download(file3));
+  
+
+  
+  
+  {
+    try{
+      Poco::FileStream sin (std::string(local_rep).append(file2)); 
+      std::stringstream sout;
+      Poco::StreamCopier::copyStream(sin,sout);
+      TSM_ASSERT(sout.str(), sout.str().find(file2_firstline) == 0);
+    }catch(std::exception & ex){
+      TSM_ASSERT(ex.what() , false); 
+    }
+  }  
+  
+  {
+    try{
+  Poco::FileStream sin (std::string(local_rep).append(file1)); 
+  std::stringstream sout;
+  Poco::StreamCopier::copyStream(sin,sout);
+  TSM_ASSERT(sout.str(), sout.str().find(file1_firstline) == 0);
+    }catch(std::exception & ex){
+      TSM_ASSERT(ex.what() , false); 
+  }   
+  }
+
+  delete_file("TofConv"); 
+  };
+
+  void test_download_directories(void){
+    std::string dir1 = "inelastic/direct_geometry/instrument_control"; 
+    std::string dir2 = "inelastic/indirect_geometry";
+
+    repo->listFiles(); 
+
+    repo->download(dir1); 
+
+    repo->download(dir2); 
+    delete_file("inelastic"); 
+
+  }
+
   
 };
 

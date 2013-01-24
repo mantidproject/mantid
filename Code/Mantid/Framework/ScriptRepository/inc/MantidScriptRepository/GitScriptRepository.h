@@ -2,7 +2,7 @@
 #define _MANTIDSCRIPTREPOSITORY_GITSCRIPTREPOSITORY_H_
 
 #include "MantidAPI/ScriptRepository.h"
-#include <vector>
+
 using Mantid::API::ScriptRepository; 
 class git_repository ; 
 
@@ -79,16 +79,6 @@ namespace API{
 
     std::string localRepository() const {return local_repository;  }
 
-    /// Define a file inside the repository
-    struct file_entry{
-      /// path related to git
-      std::string path; 
-      /// file status
-      SCRIPTSTATUS status; 
-      /// show if it is a directory or not
-      bool directory;
-    };
-
     /** Auxiliar struct that will be used as payload, to allo 
         auxiliar_list_files_cb to list all files and folders inside
         a repository.
@@ -100,8 +90,7 @@ namespace API{
   protected:
 
 
-    /// get all the files from a repository
-    std::vector<struct file_entry> repository_list; 
+
     
     int recurseDirectory( std::vector<struct file_entry> & repository_list,
                          unsigned int & index);

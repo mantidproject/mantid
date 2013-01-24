@@ -18,6 +18,8 @@ set ( SRC_FILES
 	src/PropertyWidget.cpp
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
+	src/ScriptRepositoryView.cpp
+  src/RepoModel.cpp
 	src/SyncedCheckboxes.cpp
 	src/TextPropertyWidget.cpp
 	src/UserSubWindow.cpp
@@ -38,6 +40,8 @@ set ( MOC_FILES
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
+  inc/MantidQtAPI/ScriptRepositoryView.h
+  inc/MantidQtAPI/RepoModel.h
   inc/MantidQtAPI/SyncedCheckboxes.h
   inc/MantidQtAPI/TextPropertyWidget.h
   inc/MantidQtAPI/UserSubWindow.h
@@ -60,10 +64,12 @@ set ( INC_FILES
     inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h
 	inc/MantidQtAPI/PropertyWidgetFactory.h
+	inc/MantidQtAPI/ScriptRepositoryView.h
 )
 
 set ( UI_FILES 
-	inc/MantidQtAPI/ManageUserDirectories.ui 
+	inc/MantidQtAPI/ManageUserDirectories.ui
+  inc/MantidQtAPI/ScriptRepositoryView.ui 
 )
 
 set( TEST_FILES
@@ -100,3 +106,7 @@ add_subdirectory ( test )
 
 install ( TARGETS MantidQtAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
+
+set ( TEST_FILES
+	ScriptRepositoryViewTest.h
+)
