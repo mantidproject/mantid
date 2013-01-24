@@ -380,7 +380,6 @@ namespace CurveFitting
       vector<int> peakhkl = m_peaks[peakindex].second.first;
       BackToBackExponential_sptr thispeak = m_peaks[peakindex].second.second;
 
-      double peakleftbound, peakrightbound;
       stringstream infoss;
 
       bool goodfit = false;
@@ -389,6 +388,7 @@ namespace CurveFitting
       {
         // It is the specified right most peak.  Estimate background, peak height, fwhm, ...
         // 1. Determine the starting value of the peak
+        double peakleftbound, peakrightbound;
         peakleftbound = m_rightmostPeakLeftBound;
         peakrightbound = m_rightmostPeakRightBound;
 
@@ -482,6 +482,10 @@ namespace CurveFitting
       else
       {
         // It is right to the specified right most peak.  Skip to next peak
+        double peakleftbound, peakrightbound;
+        peakleftbound = m_rightmostPeakLeftBound;
+        peakrightbound = m_rightmostPeakRightBound;
+
         infoss << "[DBx102] The " << numpeaks-1-peakindex << "-th rightmost peak's miller index = "
                << peakhkl[0] << ", " << peakhkl[1] << ", " << peakhkl[2] << ", predicted at TOF = "
                << thispeak->centre() << "; "
@@ -3051,7 +3055,7 @@ namespace CurveFitting
     int ix0 = static_cast<int>(viter - vecX.begin());
 
     // Check boundary
-    if ((int(domain.size()) + ix0) > m_peakData.size())
+    if ( (static_cast<int>(domain.size()) + ix0) > static_cast<int>(m_peakData.size()) )
       throw runtime_error("Plot single peak out of boundary error!");
 
     // 2. Calculation of peaks
