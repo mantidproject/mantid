@@ -862,6 +862,13 @@ public:
   {
     do_test_dirtyFlag(true);
   }
+
+  void test_getEventXMinMax()
+  {
+    EventWorkspace_sptr wksp = createEventWorkspace(1, 1, true);
+    TS_ASSERT_DELTA(wksp->getEventXMin(), 500, .01);
+    TS_ASSERT_DELTA(wksp->getEventXMax(), 1023500, .01);
+  }
 };
 
 #endif /* EVENTWORKSPACETEST_H_ */
