@@ -79,61 +79,77 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
     this->addProperty<std::string>("end_time", end.toISO8601String(), true);
   }
 
-  /// Return the run start time
+  /** Return the run start time as given by the 'start_time' or 'run_start' property.
+   *  'start_time' is tried first, falling back to 'run_start' if the former isn't found.
+   *  @returns The start time of the run
+   *  @throws std::runtime_error if neither property is defined
+   */
   const Kernel::DateAndTime LogManager::startTime() const
   {
-  // Use start_time if found, else use run_start
     const std::string start_prop("start_time");
-  const std::string run_start_prop("run_start");
-    if( this->hasProperty(start_prop)  ) 
+    const std::string run_start_prop("run_start");
+    if (this->hasProperty(start_prop))
     {
       std::string start = this->getProperty(start_prop)->value();
-      if (DateAndTime(start) != DateAndTimeHelpers::GPS_EPOCH) return DateAndTime(start);
-      else if (  this->hasProperty(run_start_prop) )
+      if (DateAndTime(start) != DateAndTimeHelpers::GPS_EPOCH)
       {
-       std::string start = this->getProperty(run_start_prop)->value();
-       if (DateAndTime(start) != DateAndTimeHelpers::GPS_EPOCH) return DateAndTime(start);
-       else
-       {
-         throw std::runtime_error("Run::startTime() - No start time has been set for this run.");
-       }
+        return DateAndTime(start);
+      }
+      else if (this->hasProperty(run_start_prop))
+      {
+        std::string start = this->getProperty(run_start_prop)->value();
+        if (DateAndTime(start) != DateAndTimeHelpers::GPS_EPOCH)
+        {
+          return DateAndTime(start);
+        }
+        else
+        {
+          throw std::runtime_error("Run::startTime() - No start time has been set for this run.");
+        }
       }
       else
       {
         throw std::runtime_error("Run::startTime() - No start time has been set for this run.");
       }
-    }  
-  else if (  this->hasProperty(run_start_prop) ) 
-  {
-   std::string start = this->getProperty(run_start_prop)->value();
-   if (DateAndTime(start) != DateAndTimeHelpers::GPS_EPOCH) return DateAndTime(start);
-    else
-    {
-      throw std::runtime_error("Run::startTime() - No start time has been set for this run.");
     }
-  }
+    else if (this->hasProperty(run_start_prop))
+    {
+      std::string start = this->getProperty(run_start_prop)->value();
+      if (DateAndTime(start) != DateAndTimeHelpers::GPS_EPOCH)
+      {
+        return DateAndTime(start);
+      }
+      else
+      {
+        throw std::runtime_error("Run::startTime() - No start time has been set for this run.");
+      }
+    }
     else
     {
       throw std::runtime_error("Run::startTime() - No start time has been set for this run.");
     }
   }
 
-  /// Return the run end time
+  /** Return the run end time as given by the 'end_time' or 'run_end' property.
+   *  'end_time' is tried first, falling back to 'run_end' if the former isn't found.
+   *  @returns The end time of the run
+   *  @throws std::runtime_error if neither property is defined
+   */
   const Kernel::DateAndTime LogManager::endTime() const
   {
-  // Use end_time if found, else use run_end
     const std::string end_prop("end_time");
-  const std::string run_end_prop("run_end");
-    if( this->hasProperty(end_prop) )
+    const std::string run_end_prop("run_end");
+    if (this->hasProperty(end_prop))
     {
       std::string end = this->getProperty(end_prop)->value();
       return DateAndTime(end);
     }
-    else if( this->hasProperty(run_end_prop) )
+    else if (this->hasProperty(run_end_prop))
     {
       std::string end = this->getProperty(run_end_prop)->value();
       return DateAndTime(end);
     }
+    else
     {
       throw std::runtime_error("Run::endTime() - No end time has been set for this run.");
     }
