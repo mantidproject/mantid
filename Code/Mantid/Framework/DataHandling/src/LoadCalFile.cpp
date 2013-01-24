@@ -232,6 +232,9 @@ namespace DataHandling
     bool doOffsets = bool(offsetsWS);
     bool doMask = bool(maskWS);
 
+    bool hasUnmasked(false);
+    bool hasGrouped(false);
+
     if (!doOffsets && !doGroup && !doMask)
       throw std::invalid_argument("You must give at least one of the grouping, offsets or masking workspaces.");
 
@@ -291,6 +294,8 @@ namespace DataHandling
         try
         {
           groupWS->setValue(udet, double(group) );
+          if ((!hasGrouped) && (group > 0))
+            hasGrouped = true;
         }
         catch (std::invalid_argument &)
         {
@@ -315,6 +320,8 @@ namespace DataHandling
           {
             // Selected, set the value to be 0
             maskWS->dataY(wi)[0] = 0.0;
+            if (!hasUnmasked)
+              hasUnmasked = true;
           }
 
         }
@@ -329,6 +336,10 @@ namespace DataHandling
     // Warn about any errors
     if (numErrors > 0)
       g_log.warning() << numErrors << " errors (invalid Detector ID's) found when reading .cal file '" << calFileName << "'.\n";
+    if (doGroup && (!hasGrouped))
+      g_log.warning() << "'" << calFileName << "' has no spectra grouped\n";
+    if (doMask && (!hasUnmasked))
+      g_log.warning() << "'" << calFileName << "' masks all spectra\n";
 
     if (doMask)
       delete detID_to_wi;
