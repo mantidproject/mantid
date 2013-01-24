@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/SpecialCoordinateSystem.h"
 
 namespace Mantid
 {
@@ -121,7 +122,21 @@ namespace API
      * @returns A shared pointer to a TableWorkspace containing the information
      */
     virtual API::ITableWorkspace_sptr createDetectorTable() const = 0;
-  };
+
+    //---------------------------------------------------------------------------------------------
+    /**
+     * Set the special coordinate system.
+     * @param coordinateSystem : Special Q3D coordinate system to use.
+     */
+    virtual void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem) = 0;
+
+      //---------------------------------------------------------------------------------------------
+      /**
+       * Get the special coordinate system.
+       * @returns special Q3D coordinate system to use being used by this PeaksWorkspace object. Probably the one the workspace was generated with.
+       */
+      virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const = 0;
+    };
 
 
   /// Typedef for a shared pointer to a peaks workspace.

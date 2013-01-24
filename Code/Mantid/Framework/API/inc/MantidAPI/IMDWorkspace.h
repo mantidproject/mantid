@@ -13,6 +13,7 @@
 #include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/SpecialCoordinateSystem.h"
 
 namespace Mantid
 {
@@ -34,16 +35,6 @@ namespace Mantid
       VolumeNormalization = 1,
       /// Divide the signal by the number of events that contributed to it.
       NumEventsNormalization  = 2
-    };
-
-    
-    /// Special coordinate systems
-    enum SpecialCoordinateSystem
-    {
-      None = 0,
-      QLab = 1, 
-      QSample = 2,
-      HKL = 3
     };
 
 

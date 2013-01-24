@@ -317,6 +317,20 @@ public:
      TS_ASSERT_EQUALS(1402, column1->cell<int>(6)); // Id 1402
    }
 
+   void test_default_getSpecialCoordinates()
+   {
+     auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
+     TS_ASSERT_EQUALS(None, pw->getSpecialCoordinateSystem());
+   }
+
+   void test_setSpecialCoordinates()
+   {
+     auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
+     SpecialCoordinateSystem coordSystem = HKL;
+     pw->setCoordinateSystem(coordSystem);
+     TS_ASSERT_EQUALS(coordSystem, pw->getSpecialCoordinateSystem());
+   }
+
 private:
 
    PeaksWorkspace_sptr createSaveTestPeaksWorkspace()

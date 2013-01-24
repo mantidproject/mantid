@@ -238,6 +238,7 @@ set ( INC_FILES
 	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
+        inc/MantidAPI/SpecialCoordinateSystem.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraDetectorMap.h
 	inc/MantidAPI/TableRow.h

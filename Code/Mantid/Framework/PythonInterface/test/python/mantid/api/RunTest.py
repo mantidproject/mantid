@@ -1,5 +1,6 @@
 import unittest
 from testhelpers import run_algorithm
+from mantid.geometry import Goniometer
 
 class RunTest(unittest.TestCase):
 
@@ -9,6 +10,11 @@ class RunTest(unittest.TestCase):
         if self.__class__._expt_ws is None:
             alg = run_algorithm('Load', Filename='LOQ48127.raw', SpectrumMax=1, child=True)
             self.__class__._expt_ws = alg.getProperty("OutputWorkspace").value
+
+    def test_get_goniometer(self):
+        run = self._expt_ws.run()
+        gm = run.getGoniometer()
+        self.assertTrue(isinstance(gm, Goniometer))
 
     def test_proton_charge_returns_a_double(self):
         run = self._expt_ws.run()

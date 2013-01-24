@@ -33,6 +33,7 @@ set ( SRC_FILES
 	src/SelectCellOfType.cpp
 	src/SelectCellWithForm.cpp
 	src/SetGoniometer.cpp
+	src/SetSpecialCoordinates.cpp
 	src/SetUB.cpp
 	src/ShowPossibleCells.cpp
 	src/SortHKL.cpp
@@ -77,6 +78,7 @@ set ( INC_FILES
 	inc/MantidCrystal/SelectCellOfType.h
 	inc/MantidCrystal/SelectCellWithForm.h
 	inc/MantidCrystal/SetGoniometer.h
+	inc/MantidCrystal/SetSpecialCoordinates.h
 	inc/MantidCrystal/SetUB.h
 	inc/MantidCrystal/ShowPossibleCells.h
 	inc/MantidCrystal/SortHKL.h
@@ -118,6 +120,7 @@ set ( TEST_FILES
 	SelectCellOfTypeTest.h
 	SelectCellWithFormTest.h
 	SetGoniometerTest.h
+	SetSpecialCoordinatesTest.h
 	SetUBTest.h
 	ShowPossibleCellsTest.h
 	SortHKLTest.h

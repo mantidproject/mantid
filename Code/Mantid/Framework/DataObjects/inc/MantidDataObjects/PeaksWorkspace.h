@@ -114,6 +114,12 @@ namespace DataObjects
     /// peaks within the workspace
     API::ITableWorkspace_sptr createDetectorTable() const;
 
+    /// Set the special coordinate system.
+    virtual void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem);
+
+    /// Get the special coordinate system.
+    virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
+
     // ====================================== ITableWorkspace Methods ==================================
     /// Number of columns in the workspace.
     virtual size_t columnCount() const

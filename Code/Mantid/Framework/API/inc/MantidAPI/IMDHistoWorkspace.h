@@ -76,6 +76,8 @@ namespace API
     virtual size_t getLinearIndex(size_t index1, size_t index2, size_t index3, size_t index4) const = 0;
 
     virtual double & operator [](const size_t & index) = 0;
+
+    virtual void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem) = 0;
   };
 
   /// Shared pointer to the IMDWorkspace base class
