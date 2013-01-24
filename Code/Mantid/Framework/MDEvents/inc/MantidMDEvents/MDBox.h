@@ -61,8 +61,9 @@ namespace MDEvents
     /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getMRUMemorySize() const
             { return getNPoints(); }
-  /// @return the size of the event vector. ! Note that this is NOT necessarily the same as the number of points (because it might be cached to disk) or the size on disk (because you might have called AddEvents)
-    virtual size_t getDataMemorySize()const
+  /** @return the size of the event vector. ! Note that this is NOT necessarily the same as the number of points 
+    (because it might be cached to disk) or the size on disk (because you might have called AddEvents) */
+    virtual size_t getDataMemorySize()const 
             {  return data.size();}
     //-----------------------------------------------------------------------------------------------
 
@@ -111,8 +112,13 @@ namespace MDEvents
     {
       return m_bIsMasked;
     }
-
+    /**Get vector of events to change. Beware, that calling this funtion for file-based workspace sets both dataChanged and dataBusy flags
+       first forces disk buffer to write the object contents to HDD when disk buffer is full and the second one prevents DB 
+       from clearing object from memory untill the events are released. One HAS TO call releaseEvents when finished using data on file-based WS    */ 
     std::vector< MDE > & getEvents();
+    /**Get vector of constant events to use. Beware, that calling this funtion for file-based workspace sets dataBusy flag
+       This flag prevents DB from clearing object from memory untill the events are released.
+       One HAS TO call releaseEvents when finished using data on file-based WS to allow DB clearing them  */ 
     const std::vector<MDE> & getConstEvents()const ;
     // the same as getConstEvents above, 
     const std::vector< MDE > & getEvents()const;

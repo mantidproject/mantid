@@ -17,9 +17,6 @@ namespace MDEvents
   /** Empty constructor */
   TMDE(MDBox)::MDBox()
    : MDBoxBase<MDE, nd>(),
-//     m_fileNumEvents(0),
-    // m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
-     //m_onDisk(false), m_inMemory(true), 
      m_isLoaded(false),
      m_bIsMasked(false)
   {
@@ -32,9 +29,6 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth,int64_t boxSize,int64_t boxID)
     : MDBoxBase<MDE, nd>(),
-//      m_fileNumEvents(0),
-   //   m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
-   //   m_onDisk(false), m_inMemory(true), 
       m_isLoaded(false),
       m_bIsMasked(false)
   {
@@ -59,11 +53,8 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,int64_t boxSize,int64_t boxID)
    :   MDBoxBase<MDE, nd>(extentsVector),
-       // m_fileNumEvents(0),
-        //m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
-        //m_onDisk(false), m_inMemory(true), 
-        m_isLoaded(false),
-        m_bIsMasked(false)
+       m_isLoaded(false),
+       m_bIsMasked(false)
   {
     if (splitter->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
@@ -84,9 +75,6 @@ namespace MDEvents
   TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other)
      : MDBoxBase<MDE, nd>(other),
      data(other.data),
-     //m_fileNumEvents(other.m_fileNumEvents),
-     //m_dataBusy(other.m_dataBusy), m_dataModified(other.m_dataModified), m_dataAdded(other.m_dataAdded),
-     //m_onDisk(other.m_onDisk), m_inMemory(other.m_inMemory), 
      m_isLoaded(other.m_isLoaded),
      m_bIsMasked(other.m_bIsMasked)
   {
@@ -100,7 +88,8 @@ namespace MDEvents
   {
     // Make sure the object is not in any of the disk MRUs, and mark any space it used as free
     //if (this->m_BoxController->useWriteBuffer())
-     this->m_BoxController->getDiskBuffer().objectDeleted(this);
+    if(this->m_BoxController->isFileBacked())
+       this->m_BoxController->getDiskBuffer().objectDeleted(this);
     // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
@@ -249,16 +238,6 @@ namespace MDEvents
   {
     // Data vector is no longer busy.
     this->setBusy(false);
-
-//    if (this->wasSaved()) // if it was saved before, it knows its place
-//    {
-      // If no write buffer is used, save it immediately if needed.
-//      if (!this->m_BoxController->useWriteBuffer())
-//      {
-//        this->save();
-//        this->clearDataFromMemory();
-//      }
-//    }
   }
 
 
@@ -488,8 +467,6 @@ namespace MDEvents
       }
     }
   }
-
-
 
   //-----------------------------------------------------------------------------------------------
   /** Add a MDLeanEvent to the box.
@@ -790,7 +767,6 @@ namespace MDEvents
     }
     // it is constant access, so no saving or fiddling with the buffer is needed. Events just can be dropped if necessary
     this->setBusy(false);
-   //this->releaseEvents();
   }
 
 
@@ -814,7 +790,7 @@ namespace MDEvents
       for (size_t d=0; d<nd; d++)
         center[d] = (center[d] * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
     }
-    this->releaseEvents();
+    this->setBusy(false);
   }
 
     ///Setter for masking the box

@@ -73,7 +73,7 @@ namespace Kernel
      * from getFilePosition() to getFilePosition()+getMRUMemorySize()-1 in the file.
      */
     virtual uint64_t getMRUMemorySize() const=0;
-    /// the data size allocated in memory
+    /// the data size kept in memory
     virtual size_t getDataMemorySize()const=0;
 
 
@@ -87,11 +87,12 @@ namespace Kernel
     {
      m_Busy=On;
     }
-
+    /** Returns the state of the parameter, which tells disk buffer to force writing data 
+     * to disk despite the size of the object have not changed (so one have probably done something with object contents. */
     bool isDataChanged()const{return m_dataChanged;}
 
     /** Call this method from the method which changes the object but keeps the object size the same to tell DiskBuffer to write it back
-        the dataChanged ID is reset after save from the DataBuffer    */
+        the dataChanged ID is reset after save from the DataBuffer is emptied   */
     void setDataChanged()
     { 
       if(this->wasSaved())m_dataChanged=true;
@@ -117,33 +118,37 @@ namespace Kernel
     /** Sets the location of the object on HDD 
        @param newPos   -- the position of the object in the object's  array
        @param newSize  -- the size of the object in the object's arrau
-       @param setSaved -- set object savedStatus to true. It is better to call save method immidiately after that
-                          non-file based worksapce should set it to false to forget about the file, this object was loaded from
-    */ 
-    void setFilePosition(uint64_t newPos,uint64_t newSize,bool setSaved=true);   
-  
+       @param setSaved -- set object savedStatus to true. It indicates that the object or part of it (if it was changed in memory)
+                          has its place on HDD
+                          It is better to call save method immidiately after calling setFilePosition with setSaved=true
+                          when saving a workspace or load method when loading one in a particular place.
 
-    virtual void clearFileState()
-    {
-      m_wasSaved=false;
-    }
+                          Non-file based worksapce should set it to false to forget about the file, 
+                          which was the source of the object  */ 
+    void setFilePosition(uint64_t newPos,uint64_t newSize,bool setSaved=true);   
+
     /** function returns true if the object have ever been saved on HDD and knows it place there*/
     bool wasSaved()const
-    {  
+    { // for speed it returns this boolean, but for relaibility this should be m_wasSaved&&(m_fileIndexStart!=max())
       return m_wasSaved;  
     }
+
+  
+  
     // ----------------------------- Helper Methods --------------------------------------------------------
     static void sortObjByFilePos(std::vector<ISaveable *> & boxes);
     // -----------------------------------------------------------------------------------------------------
 
 
   protected:
-    /// Unique, sequential ID of the object/box within the containing workspace.
+    /** Unique, sequential ID of the object/box within the containing workspace.
+        This ID also relates to boxes order as the boxes with adjacent 
+        ID should usually occupy adjacent places on HDD         */
     size_t m_id;
   private:
     /// Start point in the NXS file where the events are located
     uint64_t m_fileIndexStart;
-  /// Number of events saved in the file, after the start index location
+    /// Number of events saved in the file, after the start index location
     uint64_t m_fileNumEvents;
     //-------------- 
     /// a user needs to set this variable to true preventing from deleting data from buffer
@@ -152,6 +157,7 @@ namespace Kernel
         when it decides it suitable,  if the size of iSavable object in cache is unchanged from the previous 
         save/load operation */
     bool m_dataChanged;
+    /// this 
     mutable bool m_wasSaved;
 
     /// the function saveAt has to be availible to DiskBuffer and nobody else. To highlight this we make it private
