@@ -3043,7 +3043,9 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Plot a single peak to output vector
     *
-    * @param domain:  domain/region of the peak to plot.  It is very localized.
+    * @param domain:       domain/region of the peak to plot.  It is very localized.
+    * @param peakfunction: function to plot
+    * @param background:   background of the peak
     */
   void FitPowderDiffPeaks2::plotFunction(IFunction_sptr peakfunction, BackgroundFunction_sptr background,
                                          FunctionDomain1DVector domain)
@@ -3076,10 +3078,12 @@ namespace CurveFitting
   }
 
 
-  //===========================  Auxiliary Functions ===========================
-  //----------------------------------------------------------------------------
+  //=====================================  Auxiliary Functions ===================================
+  //----------------------------------------------------------------------------------------------
   /** Get (HKL) from a map
     * Return false if the information is incomplete
+    * @param intmap:  map as a pair of string and integer
+    * @param hkl:     output integer vector for miller index
     */
   bool FitPowderDiffPeaks2::getHKLFromMap(map<string, int> intmap, vector<int>& hkl)
   {
@@ -3102,9 +3106,11 @@ namespace CurveFitting
     return true;
   }
 
-  //----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Crop data workspace: the original workspace will not be affected
-      */
+    * @param tofmin:  minimum value for cropping
+    * @param tofmax:  maximum value for cropping
+    */
   void FitPowderDiffPeaks2::cropWorkspace(double tofmin, double tofmax)
   {
     API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
@@ -3144,6 +3150,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Get parameter value from m_instrumentParameters
     * Exception: throw runtime error if there is no such parameter
+    * @param parname:  parameter name to get from m_instrumentParameters
     */
   double FitPowderDiffPeaks2::getParameter(string parname)
   {
@@ -3162,9 +3169,12 @@ namespace CurveFitting
     return mapiter->second;
   }
 
-
-  //-------- External Functions -------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Build a partial workspace from original data workspace
+    * @param sourcews:  data workspace which the new workspace is built from
+    * @param workspaceindex:  workspace index of the source spectrum in sourcews
+    * @param leftbound:  lower boundary of the source data
+    * @param rightbound: upper boundary of the source data
     */
   Workspace2D_sptr FitPowderDiffPeaks2::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews, size_t workspaceindex,
                                                               double leftbound, double rightbound)
@@ -3219,19 +3229,12 @@ namespace CurveFitting
       nE[i] = E[i+ileft];
     }
 
-    // 5. Debug output
-    /*
-    stringstream wss;
-    for (size_t i = 0; i < partws->readX(0).size(); ++i)
-      wss << setw(10) << setprecision(6) << partws->readX(0)[i] << setw(10) << setprecision(6) << partws->readY(0)[i] << endl;
-    g_log.information() << "[DBx109] Partial Workspace: " << endl << wss.str() << "..................................." << endl;
-    */
-
     return partws;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Get function parameter values information and returned as a string
+    * @param function:  function to have information written out
     */
   string getFunctionInfo(IFunction_sptr function)
   {
@@ -3250,6 +3253,11 @@ namespace CurveFitting
     * Assumption: the peak must be in the data range completely
     * Algorithm: use two end data points for a linear background
     * Output: dataws spectrum 3 (workspace index 2)
+    * @param dataws:  data workspace to estimate background for
+    * @param background:  background function
+    * @param wsindexraw:  workspace index of spectrum holding raw data
+    * @param wsindexbkgd: workspace index of spectrum holding background data
+    * @param wsindexpeak: workspace index of spectrum holding pure peak data (with background removed)
     */
   void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws, BackgroundFunction_sptr background,
                                 size_t wsindexraw, size_t wsindexbkgd, size_t wsindexpeak)
@@ -3327,6 +3335,7 @@ namespace CurveFitting
     * (1) Background removed
     * (2) Peak is inside
     * Algorithm: From the top.  Get the maximum value. Calculate the half maximum value.  Find the range of X
+    * @param dataws:  data workspace containing peak data
     */
   bool observePeakParameters(Workspace2D_sptr dataws, size_t wsindex, double& centre, double& height, double& fwhm,
                               string& errmsg)
