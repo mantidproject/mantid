@@ -2634,8 +2634,8 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
 
-  // Do not create graph if there is only one value in the table
-  if (t->numRows() < 2) return;
+  // Do not create graph if there is only one value in the table or using absolute dates
+  if (t->numRows() < 2 || useAbsoluteDate ) return;
 
   QStringList colNames;
   if (filter && flt.filter())
