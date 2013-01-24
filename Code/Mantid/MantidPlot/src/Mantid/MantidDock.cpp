@@ -1091,7 +1091,6 @@ void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPea
     m_showVatesGui->setEnabled(false);
   }
   menu->addSeparator();
-  menu->addAction(m_showLogs); // Sample logs
   menu->addAction(m_showDetectors);
   menu->addAction(m_showHist);
 }
