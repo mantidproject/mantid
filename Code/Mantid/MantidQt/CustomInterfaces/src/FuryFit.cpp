@@ -508,8 +508,13 @@ namespace IDA
       "endx = " + m_ffProp["EndX"]->valueText() + "\n"
       "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n"
       "save = ";
+
+    if ( uiForm().furyfit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+    else pyInput += "verbose = False\n";
+
     pyInput += uiForm().furyfit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
-    pyInput += "furyfitSeq(input, func, ftype, startx, endx, save, plot)\n";
+
+    pyInput += "furyfitSeq(input, func, ftype, startx, endx, save, plot, verbose)\n";
   
     QString pyOutput = runPythonCode(pyInput);
   }

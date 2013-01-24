@@ -159,7 +159,7 @@ namespace IDA
     alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
     alg->setPropertyValue("Output", output);
     alg->execute();
-
+   
     if ( ! alg->isExecuted() )
     {
       showInformationBox("Fit algorithm failed.");
@@ -779,11 +779,14 @@ namespace IDA
       "save = ";
   
     pyInput += uiForm().confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
+
+    if ( uiForm().confit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+    else pyInput += "verbose = False\n";
   
     pyInput +=    
       "bg = '" + bg + "'\n"
       "ftype = '" + ftype + "'\n"
-      "confitSeq(input, func, startx, endx, save, plot, ftype, bg, specMin, specMax)\n";
+      "confitSeq(input, func, startx, endx, save, plot, ftype, bg, specMin, specMax, Verbose=verbose)\n";
 
     QString pyOutput = runPythonCode(pyInput);
   }

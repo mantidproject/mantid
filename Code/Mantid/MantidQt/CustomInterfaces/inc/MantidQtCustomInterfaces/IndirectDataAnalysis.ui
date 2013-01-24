@@ -87,10 +87,13 @@
          <item>
           <widget class="QCheckBox" name="elwin_ckVerbose">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Verbose</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -167,10 +170,13 @@
          <item>
           <widget class="QCheckBox" name="msd_ckVerbose">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Verbose</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -359,10 +365,13 @@
          <item>
           <widget class="QCheckBox" name="fury_ckVerbose">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Verbose</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -580,11 +589,35 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_26">
          <item>
-          <widget class="QCheckBox" name="furyfit_ckPlotOutput">
-           <property name="text">
-            <string>Plot Output (Single Run)</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_28">
+             <item>
+              <widget class="QCheckBox" name="furyfit_ckPlotOutput">
+               <property name="text">
+                <string>Plot Output (Single Run)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_10">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_32"/>
+           </item>
+          </layout>
          </item>
          <item>
           <spacer name="horizontalSpacer_8">
@@ -635,6 +668,19 @@
               </widget>
              </item>
              <item>
+              <spacer name="horizontalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
               <widget class="QCheckBox" name="furyfit_ckSaveSeq">
                <property name="text">
                 <string>Save Result</string>
@@ -645,6 +691,13 @@
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_14">
+             <item>
+              <widget class="QPushButton" name="furyfit_pbSeqFit">
+               <property name="text">
+                <string>Run Sequential Fit</string>
+               </property>
+              </widget>
+             </item>
              <item>
               <spacer name="horizontalSpacer_2">
                <property name="orientation">
@@ -659,24 +712,14 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="furyfit_pbSeqFit">
+              <widget class="QCheckBox" name="furyfit_ckVerbose">
                <property name="text">
-                <string>Run Sequential Fit</string>
+                <string>Verbose</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </item>
@@ -940,11 +983,19 @@
        <item>
         <layout class="QHBoxLayout" name="confit_layoutOuputOptions">
          <item>
-          <widget class="QCheckBox" name="confit_ckPlotOutput">
-           <property name="text">
-            <string>Plot Output</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="confit_layoutSeq_2">
+           <item>
+            <layout class="QHBoxLayout" name="confit_layoutSeqPlot_2">
+             <item>
+              <widget class="QCheckBox" name="confit_ckPlotOutput">
+               <property name="text">
+                <string>Plot Output</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </item>
          <item>
           <spacer name="horizontalSpacer">
@@ -990,6 +1041,19 @@
               </widget>
              </item>
              <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
               <widget class="QCheckBox" name="confit_ckSaveSeq">
                <property name="text">
                 <string>Save Result</string>
@@ -1000,6 +1064,13 @@
            </item>
            <item>
             <layout class="QHBoxLayout" name="confit_layoutSeqRun">
+             <item>
+              <widget class="QPushButton" name="confit_pbSequential">
+               <property name="text">
+                <string>Run Sequential Fit</string>
+               </property>
+              </widget>
+             </item>
              <item>
               <spacer name="horizontalSpacer_4">
                <property name="orientation">
@@ -1014,24 +1085,18 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="confit_pbSequential">
-               <property name="text">
-                <string>Run Sequential Fit</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_5">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
+              <layout class="QHBoxLayout" name="confit_layoutSeqRun_2">
+               <item>
+                <widget class="QCheckBox" name="confit_ckVerbose">
+                 <property name="text">
+                  <string>Verbose</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </item>
@@ -1583,6 +1648,35 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
+          <widget class="QCheckBox" name="absp_ckVerbose">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Verbose</string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <widget class="QLabel" name="absp_lbPlotOutput">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -1618,6 +1712,58 @@
             </property>
            </item>
           </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_12">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_17">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_16">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_15">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -1869,6 +2015,39 @@
          </property>
         </spacer>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_33">
+         <item>
+          <widget class="QCheckBox" name="abscor_ckVerbose">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Verbose</string>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_9">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
     </widget>
@@ -1978,10 +2157,8 @@
   <tabstop>furyfit_ckConstrainIntensities</tabstop>
   <tabstop>furyfit_ckPlotGuess</tabstop>
   <tabstop>furyfit_leSpecNo</tabstop>
-  <tabstop>furyfit_ckPlotOutput</tabstop>
   <tabstop>furyfit_cbPlotOutput</tabstop>
   <tabstop>furyfit_ckSaveSeq</tabstop>
-  <tabstop>furyfit_pbSeqFit</tabstop>
   <tabstop>confit_cbInputType</tabstop>
   <tabstop>confit_wsSample</tabstop>
   <tabstop>confit_pbPlotInput</tabstop>
@@ -1990,7 +2167,6 @@
   <tabstop>confit_ckPlotGuess</tabstop>
   <tabstop>confit_leSpecNo</tabstop>
   <tabstop>confit_leSpecMax</tabstop>
-  <tabstop>confit_ckPlotOutput</tabstop>
   <tabstop>confit_cbPlotOutput</tabstop>
   <tabstop>confit_ckSaveSeq</tabstop>
   <tabstop>confit_pbSequential</tabstop>

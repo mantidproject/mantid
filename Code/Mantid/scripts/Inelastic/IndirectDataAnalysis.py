@@ -101,7 +101,7 @@ def confitPlotSeq(inputWS, plot):
             plotSpecs.append(i)
     mp.plotSpectrum(inputWS, plotSpecs, True)
 
-def confitSeq(inputWS, func, startX, endX, save, plot, ftype, bg, specMin, specMax, Verbose=True):
+def confitSeq(inputWS, func, startX, endX, save, plot, ftype, bg, specMin, specMax, Verbose):
     StartTime('ConvFit')
     workdir = config['defaultsave.directory']
     input = inputWS+',i' + str(specMin)
@@ -129,9 +129,8 @@ def confitSeq(inputWS, func, startX, endX, save, plot, ftype, bg, specMin, specM
 # Elwin
 ##############################################################################
 
-def elwin(inputFiles, eRange, Save=False, Verbose=True, Plot=False):
+def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False): 
     StartTime('ElWin')
-    Verbose = True
     workdir = config['defaultsave.directory']
     CheckXrange(eRange,'Energy')
     tempWS = '__temp'
@@ -249,9 +248,8 @@ def furyPlot(inWS, spec):
     layer.setScale(mp.Layer.Left, 0, 1.0)
 
 def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
-        Plot=False):
+        Plot=False): 
     StartTime('Fury')
-    Verbose = True
     workdir = config['defaultsave.directory']
     LoadNexus(Filename=sam_files[0], OutputWorkspace='__sam_tmp') # SAMPLE
     nsam,npt = CheckHistZero('__sam_tmp')
@@ -414,7 +412,7 @@ def furyfitPlotSeq(inputWS, Plot):
             plotSpecs.append(i)
     mp.plotSpectrum(inputWS, plotSpecs, True)
 
-def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose = True):
+def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False): 
     StartTime('FuryFit')
     workdir = config['defaultsave.directory']
     input = inputWS+',i0'
@@ -572,8 +570,7 @@ def msdfitPlotFits(lniWS, fitWS, n):
     mfit_layer.setAxisTitle(mp.Layer.Left,'log(Elastic Intensity)')
     mp.mergePlots(mfit_plot,mp.plotSpectrum(fitWS+'_line',n,False))
 
-def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
-    Verbose = True
+def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True): 
     StartTime('msdFit')
     workdir = config['defaultsave.directory']
     log_type = 'sample'
@@ -778,11 +775,10 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     DeleteWorkspace('corrections')
     return CorrectedWS
                 
-def abscorFeeder(sample, container, geom, useCor):
+def abscorFeeder(sample, container, geom, useCor, Verbose=False):
     '''Load up the necessary files and then passes them into the main
     applyCorrections routine.'''
     StartTime('ApplyCorrections')
-    Verbose = True
     Save = True
     PlotResult = 'Both'
     PlotContrib = 'Spectrum'
