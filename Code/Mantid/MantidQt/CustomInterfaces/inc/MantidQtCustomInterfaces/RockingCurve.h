@@ -28,6 +28,7 @@ signals:
   void logsAvailable( const Mantid::API::MatrixWorkspace_const_sptr & );
 
 private slots:
+  void startLiveListener();
   void loadFile();
   void launchInstrumentWindow();
   void fillPlotVarCombobox( const Mantid::API::MatrixWorkspace_const_sptr & ws );

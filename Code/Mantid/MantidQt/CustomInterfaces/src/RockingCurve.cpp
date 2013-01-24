@@ -5,6 +5,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <QFileInfo>
 
@@ -40,9 +42,17 @@ RockingCurve::~RockingCurve()
 void RockingCurve::initLayout()
 {
   m_uiForm.setupUi(this);
+
   // I couldn't see a way to set a validator on a qlineedit in designer
   m_uiForm.xmin->setValidator(new QDoubleValidator(m_uiForm.xmin));
   m_uiForm.xmax->setValidator(new QDoubleValidator(m_uiForm.xmax));
+
+  // Try to connect to live listener for default instrument to see if live button should be enabled
+  const std::string instrument = ConfigService::Instance().getInstrument().name();
+  //const std::string instrument = "FileEventDataListener";
+  // Enable the button if the connection is successful. Will be disabled otherwise.
+  m_uiForm.liveButton->setEnabled(LiveListenerFactory::Instance().checkConnection(instrument));
+  //connect( m_uiForm.liveButton, SIGNAL(clicked()), SLOT(startLiveListener()), Qt::QueuedConnection );
 
   connect( m_uiForm.launchInstView, SIGNAL(clicked()), SLOT(launchInstrumentWindow()) );
 
@@ -71,6 +81,21 @@ void RockingCurve::cleanupWorkspaces()
   // Disconnect anything listening to the comboboxes
   m_uiForm.plotVariable->disconnect(SIGNAL(currentIndexChanged(const QString &)));
   m_uiForm.normalization->disconnect(SIGNAL(currentIndexChanged(const QString &)));
+}
+
+void RockingCurve::startLiveListener()
+{
+  // Remove any previously-loaded workspaces
+  cleanupWorkspaces();
+
+  // TODO: Run entirely asynchronously (see AlgorithmRunner)
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("StartLiveData");
+  alg->setProperty("UpdateEvery",5.0);
+  const std::string instrument = "FileEventDataListener";//ConfigService::Instance().getInstrument().name();
+  alg->setProperty("Instrument",instrument);
+  m_inputWSName = "__live";
+  alg->setProperty("OutputWorkspace",m_inputWSName);
+  alg->execute();
 }
 
 void RockingCurve::loadFile()
