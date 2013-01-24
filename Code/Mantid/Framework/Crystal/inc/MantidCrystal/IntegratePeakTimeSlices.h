@@ -179,6 +179,7 @@ namespace Crystal
      {
        return Vxy_calc;
      }
+
      std::string CalcConstraints(std::vector< std::pair<double,double> > & Bounds,
                                                           bool CalcVariances );
      std::string getTies()
@@ -201,8 +202,15 @@ namespace Crystal
 
      double CalcISAWIntensityVariance(  const double* params, const double* errs, double chiSqOvDOF) ;
 
+     /**
+      * For Edge Peaks
+      */
      double CalcSampleIntensityMultiplier( const double* params) const;
 
+     /**
+      * Returns init values with background and variances replaced by arguments.  Varxy=0
+      *
+      */
      std::vector<double> InitValues( double Varx,double Vary,double b);
      double baseRCRadius;
      double lastRCRadius;
