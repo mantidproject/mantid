@@ -3,10 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/BackToBackExponential.h"
 #include "MantidAPI/FunctionFactory.h"
+
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_multifit_nlin.h>
-
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <cmath>
+#include <limits>
 
 namespace Mantid
 {
@@ -55,12 +57,17 @@ namespace CurveFitting
        h0 = 1e-6;
      }
      double area = getParameter( 0 ); // == I
-     if ( area == 0.0 )
-      {
+     area *= h / h0;
+     if ( area <= 0.0 )
+     {
        area = 1e-6;
-      }
-     setParameter( 0, area / h0 * h );
-    }
+     }
+     if ( boost::math::isnan( area ) || boost::math::isinf( area ) )
+     {
+       area = std::numeric_limits<double>::max() / 2;
+     }
+     setParameter( 0, area );
+   }
   
    /**
     * Get approximate peak width.
