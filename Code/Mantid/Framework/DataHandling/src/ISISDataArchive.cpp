@@ -36,7 +36,7 @@ namespace Mantid
 #ifdef _WIN32
       const char * URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/windir?name=";
 #else
-      const char * URL_PREFIX = ("http://data.isis.rl.ac.uk/where.py/unixdir?name=");
+      const char * URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
 #endif
     }
 
@@ -81,19 +81,21 @@ namespace Mantid
     */
     std::string ISISDataArchive::getPath(const std::string& fName) const
     {
+      g_log.debug() << "ISISDataArchive::getPath() - fName=" << fName << "\n";
       if(fName.empty()) return ""; // Avoid pointless call to service
 
       URI uri(URL_PREFIX + fName);
       std::string path(uri.getPathAndQuery());
 
       HTTPClientSession session(uri.getHost(), uri.getPort());
-      session.setTimeout(Poco::Timespan(0,100));
       HTTPRequest req(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
       session.sendRequest(req);
 
       HTTPResponse res;
       std::istream& rs = session.receiveResponse(res);
-      if(res.getStatus() == HTTPResponse::HTTP_OK)
+      const HTTPResponse::HTTPStatus status = res.getStatus();
+      g_log.debug() << "HTTP response=" << res.getStatus() << "\n";
+      if(status == HTTPResponse::HTTP_OK)
       {
         std::ostringstream os;
         Poco::StreamCopier::copyStream(rs, os);

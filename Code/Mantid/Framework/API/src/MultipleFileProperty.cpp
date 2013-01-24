@@ -385,30 +385,14 @@ namespace API
           // If a default ext has been specified/found, then use it.
           if( ! defaultExt.empty() )
           {
-            FileProperty slaveFileProp("Slave", "", FileProperty::Load, std::vector<std::string>(1, defaultExt), Direction::Input);
-            std::string error = slaveFileProp.setValue(*unresolvedFileName + defaultExt);
-            if(!error.empty())
-              throw std::runtime_error("Unable to find file matching the string \"" + *unresolvedFileName + defaultExt + "\".");
-            fullyResolvedFile = slaveFileProp();
+            fullyResolvedFile = FileFinder::Instance().findRun(*unresolvedFileName, std::vector<std::string>(1, defaultExt));
           }
-          // Else try each of the suggested extensions in turn, and whichever one works becomes the defaultExt.
           else
           {
-            for( auto ext = m_exts.begin(); ext != m_exts.end(); ++ext )
-            {
-              FileProperty slaveFileProp("Slave", "", FileProperty::Load, std::vector<std::string>(1, *ext), Direction::Input);
-              std::string error = slaveFileProp.setValue(*unresolvedFileName + *ext);
-              if(!error.empty())
-                continue;
-              fullyResolvedFile = slaveFileProp();
-              defaultExt = *ext;
-
-              break;
-            }
-
-            if( fullyResolvedFile.empty() )
-              throw std::runtime_error("Unable to find file matching the string \"" + *unresolvedFileName + "\", even after appending suggested file extensions.");
+            fullyResolvedFile = FileFinder::Instance().findRun(*unresolvedFileName, m_exts);
           }
+          if(fullyResolvedFile.empty()) throw std::runtime_error("Unable to find file matching the string \"" + *unresolvedFileName + "\", even after appending suggested file extensions.");
+
         }
 
         // Append the file name to result.

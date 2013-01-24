@@ -87,15 +87,8 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element* elem)
   */
 void FacilityInfo::addExtension(const std::string& ext)
 {
-  std::string casedExt(ext);
-  std::transform(ext.begin(), ext.end(), casedExt.begin(), tolower);
-  std::vector<std::string>::iterator it = std::find(m_extensions.begin(),m_extensions.end(),casedExt);
-  if (it == m_extensions.end())
-  {
-    m_extensions.push_back(casedExt);
-    std::transform(ext.begin(), ext.end(), casedExt.begin(), toupper);
-    m_extensions.push_back(casedExt);
-  }
+  auto it = std::find(m_extensions.begin(),m_extensions.end(),ext);
+  if (it == m_extensions.end()) m_extensions.push_back(ext);
 }
 
 /// Called from constructor to fill ICAT soap end point

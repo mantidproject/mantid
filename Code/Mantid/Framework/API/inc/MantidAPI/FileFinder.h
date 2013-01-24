@@ -52,7 +52,7 @@ namespace Mantid
       /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
       std::string makeFileName(const std::string& hint, const Kernel::InstrumentInfo& instrument)const;
       void setCaseSensitive(const bool cs);
-      int getCaseSensitive();
+      int getCaseSensitive() const;
       std::string findRun(const std::string& hint,const std::set<std::string> *exts)const;
       std::string findRun(const std::string& hint,const std::vector<std::string> &exts  = std::vector<std::string>())const;
       std::vector<std::string> findRuns(const std::string& hint)const;

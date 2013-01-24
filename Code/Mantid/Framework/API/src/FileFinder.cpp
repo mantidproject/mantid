@@ -65,11 +65,15 @@ namespace Mantid
       }
 
       // determine from Mantid property how sensitive Mantid should be
+#ifdef _WIN32
+      globOption = Poco::Glob::GLOB_DEFAULT;
+#else
       std::string casesensitive = Mantid::Kernel::ConfigService::Instance().getString("filefinder.casesensitive");
       if ( boost::iequals("Off",casesensitive) )
         globOption = Poco::Glob::GLOB_CASELESS;
       else
         globOption = Poco::Glob::GLOB_DEFAULT;
+#endif
     }
 
 
@@ -89,7 +93,7 @@ namespace Mantid
      * Option to get if file finder should be case sensitive
      * @return cs :: If case sensitive return true, if not case sensitive return false
      */
-    int FileFinderImpl::getCaseSensitive()
+    int FileFinderImpl::getCaseSensitive() const
     {
       return globOption;
     }
@@ -134,7 +138,7 @@ namespace Mantid
           Poco::Path path(*it, fName);
           Poco::Path pathPattern(path);
           std::set < std::string > files;
-          Kernel::Glob::glob(pathPattern, files, globOption);
+          Kernel::Glob::glob(pathPattern, files, getCaseSensitive());
           if (!files.empty())
           {
             return *files.begin();
@@ -472,59 +476,81 @@ namespace Mantid
         {
           if (filename.length() >= hint.length())
           {
-            g_log.error() << "Could not find file '" << filename << "'\n";
+            g_log.information() << "Could not form filename from standard rules '" << filename << "'\n";
           }
         }
       }
 
       // Look first at the original filename then for case variations. This is important
       // on platforms where file names ARE case sensitive.
+      // Sorry for the duplication, a last minute fix was required. Ticket #6419 is tasked with a redesign of
+      // the whole file finding concept.
+
       std::set<std::string> filenames;
       filenames.insert(filename);
-      if (globOption == Poco::Glob::GLOB_CASELESS)
-        std::transform(filename.begin(),filename.end(),filename.begin(),toupper);
-      filenames.insert(filename);
-      if (globOption == Poco::Glob::GLOB_CASELESS)
-        std::transform(filename.begin(),filename.end(),filename.begin(),tolower);
-      filenames.insert(filename);
-
-      // work through the extensions
-      // try the extension that comes with the filename
-      if (!extension.empty())
+      if (getCaseSensitive() == Poco::Glob::GLOB_CASELESS)
       {
-        g_log.debug() << "Attempt to find files with the extension that comes with the filename " <<  extension << "\n";
-        std::string path = getPath(archs, filenames, std::vector<std::string>(1, extension));
-        if (!path.empty())
+        std::string transformed(filename);
+        std::transform(filename.begin(),filename.end(),transformed.begin(),toupper);
+        filenames.insert(transformed);
+        std::transform(filename.begin(),filename.end(),transformed.begin(),tolower);
+        filenames.insert(transformed);
+      }
+
+      // Merge the extensions & throw out duplicates
+      // On Windows throw out ones that only vary in case
+      std::vector<std::string> uniqueExts;
+      uniqueExts.reserve(1 + exts.size() + extensions.size());
+      if(!extension.empty()) uniqueExts.push_back(extension);
+
+      auto cend = exts.end();
+      for(auto cit = exts.begin(); cit != cend; ++cit)
+      {
+        if (getCaseSensitive() == Poco::Glob::GLOB_DEFAULT) //prune case variations - this is a hack, see above
         {
-          g_log.information() << "found path = " << path << '\n';
-          return path;
-        } else {
-          g_log.information() << "Unable to find files with extensions that comes with the filename" << "\n";
+          std::string transformed(*cit);
+          std::transform(cit->begin(), cit->end(), transformed.begin(), tolower);
+          auto searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
+          if(searchItr != uniqueExts.end()) continue;
+          std::transform(cit->begin(), cit->end(), transformed.begin(), toupper);
+          searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
+          if(searchItr == uniqueExts.end()) uniqueExts.push_back(*cit);
+        }
+        else
+        {
+          auto searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), *cit);
+          if(searchItr == uniqueExts.end()) uniqueExts.push_back(*cit);
+        }
+      }
+      cend = extensions.end();
+      for(auto cit = extensions.begin(); cit != cend; ++cit)
+      {
+        if (getCaseSensitive() == Poco::Glob::GLOB_DEFAULT)  //prune case variations - this is a hack, see above
+        {
+          std::string transformed(*cit);
+          std::transform(cit->begin(), cit->end(), transformed.begin(), tolower);
+          auto searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
+          if(searchItr != uniqueExts.end()) continue;
+          std::transform(cit->begin(), cit->end(), transformed.begin(), toupper);
+          searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
+          if(searchItr == uniqueExts.end()) uniqueExts.push_back(*cit);
+        }
+        else
+        {
+          auto searchItr = std::find(uniqueExts.begin(), uniqueExts.end(), *cit);
+          if(searchItr == uniqueExts.end()) uniqueExts.push_back(*cit);
         }
       }
 
-      // try the extension that are supplied by user
-      if (!exts.empty())
-      {
-        g_log.debug() << "Attempt to find files with extensions that are supplied by users or algorithms, first extension = " <<  *(exts.begin()) << "\n";
-        std::string path = getPath(archs, filenames, exts);
-        if (!path.empty())
-        {
-          g_log.information() << "found path = " << path << '\n';
-          return path;
-        } else {
-          g_log.information() << "Unable to find files with extensions that are supplied by users or algorithms" << "\n";
-        }
-      }
-
-
-      std::string path = getPath(archs, filenames, extensions);
+      std::string path = getPath(archs, filenames, uniqueExts);
       if (!path.empty())
       {
         g_log.information() << "found path = " << path << '\n';
         return path;
-      } else {
-        g_log.information() << "Unable to find files with extensions that are defined in the Facilities.xml file" << "\n";
+      } 
+      else 
+      {
+        g_log.information() << "Unable to find run with hint " << hint << "\n";
       }
 
       g_log.information() << "Unable to find file path for " << hint << "\n";
@@ -725,7 +751,7 @@ namespace Mantid
       // Search the archive
       if (archs.size() != 0 )
       {
-        g_log.debug() << "Search the archive of the default facility" << "\n";
+        g_log.debug() << "Search the archives\n";
         std::string path = getArchivePath(archs, filenames, exts);
         try
         {

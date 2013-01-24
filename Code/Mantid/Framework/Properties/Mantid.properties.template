@@ -184,8 +184,8 @@ workspace.sendto.SansView.target=%SANSVIEWPATH%/SansView.exe
 workspace.sendto.SansView.visible=Yes
 workspace.sendto.name.SansView=0
 
-# Change this property to On to make Mantid case sensitive
-filefinder.casesensitive=Off
+# Change this property to On to make Mantid case sensitive (ignored on Windows as file searching is always case insensitve)
+filefinder.casesensitive=On
 
 # Control which geometry the Instrument View window displays, valid values 
 # are "Default", "Neutronic" or "Physical".

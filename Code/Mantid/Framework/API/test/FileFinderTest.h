@@ -300,8 +300,13 @@ public:
   // test to see if case sensitive on/off works
   void testFindFileCaseSensitive()
   {
-    // By default case insensitive is on
-    std::string path = FileFinder::Instance().findRun("CSp78173.Raw");
+    auto & fileFinder = FileFinder::Instance();
+    const bool startingCaseOption = fileFinder.getCaseSensitive();
+
+    // By default case sensitive is on
+    fileFinder.setCaseSensitive(false);
+
+    std::string path = fileFinder.findRun("CSp78173.Raw");
 #ifdef _WIN32
     TS_ASSERT(path.find("CSp78173.Raw") != std::string::npos);
 #else
@@ -309,13 +314,13 @@ public:
 #endif
     Poco::File file(path);
     TS_ASSERT(file.exists());
-    std::string path2 = FileFinder::Instance().getFullPath("IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
+    std::string path2 = fileFinder.getFullPath("IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File file2(path2);
     TS_ASSERT(file2.exists());
 
     // turn on case sensitive - this one should fail on none windows
     FileFinder::Instance().setCaseSensitive(true);
-    std::string pathOn = FileFinder::Instance().findRun("CSp78173.Raw");
+    std::string pathOn = fileFinder.findRun("CSp78173.Raw");
     Poco::File fileOn(pathOn);
 
     std::string pathOn2 = FileFinder::Instance().getFullPath("IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
@@ -341,6 +346,9 @@ public:
     TS_ASSERT_THROWS_ANYTHING(fileOn3.exists());
     TS_ASSERT_THROWS_ANYTHING(fileOn4.exists());
 #endif
+
+    fileFinder.setCaseSensitive(startingCaseOption);
+
   }
 
 private:
@@ -411,15 +419,27 @@ public:
 
   void test_largeDirectoryOfFiles()
   {
+    auto & fileFinder = FileFinder::Instance();
+    const bool startingCaseOption = fileFinder.getCaseSensitive();
+
+    // By default case sensitive is on
+    fileFinder.setCaseSensitive(false);
+
     std::vector<std::string> files;
     std::stringstream range;
     range << (m_filesInDir - m_filesToFind) << "-" << (m_filesInDir - 1);
-    TS_ASSERT_THROWS_NOTHING( files = FileFinder::Instance().findRuns(range.str().c_str()) );
+    TS_ASSERT_THROWS_NOTHING( files = fileFinder.findRuns(range.str().c_str()) );
     TS_ASSERT( files.size() == m_filesToFind );
+
+    fileFinder.setCaseSensitive(startingCaseOption);
   }
 
   void test_manyMissingFilesWithLargeDirectory()
   {
+    auto & fileFinder = FileFinder::Instance();
+    const bool startingCaseOption = fileFinder.getCaseSensitive();
+
+
     // This test essentially covers the case where a user types an erroneous range of runs into an MWRunFiles widget.
     // If they have accidentally typed in an extremely large range (most of which dont exist) then it is important
     // that this fact is realised as early as possible, and the user is not punished by either having to wait or just
@@ -429,7 +449,10 @@ public:
     std::string startOfRange = boost::lexical_cast<std::string>(m_filesInDir - 10);
     std::string accidentalEndOfRange = "99999";
     range << startOfRange << "-" << accidentalEndOfRange;
-    TS_ASSERT_THROWS( files = FileFinder::Instance().findRuns(range.str().c_str()), Mantid::Kernel::Exception::NotFoundError );
+    TS_ASSERT_THROWS( files = fileFinder.findRuns(range.str().c_str()), Mantid::Kernel::Exception::NotFoundError );
+
+
+    fileFinder.setCaseSensitive(startingCaseOption);
   }
   
 private:

@@ -72,9 +72,8 @@ public:
     TS_ASSERT_EQUALS( fac->zeroPadding(), 0 );
     TS_ASSERT( fac->delimiter().empty() )
     const std::vector<std::string> exts = fac->extensions();
-    TS_ASSERT_EQUALS( fac->extensions().size(), 2 ); // Automatically get the upper case versions as well
+    TS_ASSERT_EQUALS( fac->extensions().size(), 1 );
     TS_ASSERT_EQUALS( fac->extensions()[0],".xyz" );
-    TS_ASSERT_EQUALS( fac->extensions()[1],".XYZ" );
     TS_ASSERT_EQUALS( fac->preferredExtension(), ".xyz" );
     TS_ASSERT( fac->getSoapEndPoint().empty() );
     TS_ASSERT( fac->catalogName().empty() );
@@ -119,12 +118,12 @@ public:
     TS_ASSERT_EQUALS(fac->zeroPadding(),5);
     TS_ASSERT_EQUALS(fac->delimiter(), "%");
     const std::vector<std::string> exts = fac->extensions();
-    TS_ASSERT_EQUALS(exts.size(), 10); // Automatically get the upper case versions as well
+    TS_ASSERT_EQUALS(exts.size(), 5);
     TS_ASSERT_EQUALS(exts[0],".nxs");
-    TS_ASSERT_EQUALS(exts[2],".raw");
-    TS_ASSERT_EQUALS(exts[4],".sav");
-    TS_ASSERT_EQUALS(exts[6],".n*");
-    TS_ASSERT_EQUALS(exts[8],".s*");
+    TS_ASSERT_EQUALS(exts[1],".raw");
+    TS_ASSERT_EQUALS(exts[2],".sav");
+    TS_ASSERT_EQUALS(exts[3],".n*");
+    TS_ASSERT_EQUALS(exts[4],".s*");
     TS_ASSERT_EQUALS(fac->preferredExtension(),".nxs");
 
     TS_ASSERT_EQUALS(fac->archiveSearch().size(),2);
