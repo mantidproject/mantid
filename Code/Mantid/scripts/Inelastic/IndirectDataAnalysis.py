@@ -280,8 +280,9 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         CheckHistSame('__sam_tmp','Sample','res_data','Resolution')
     DeleteWorkspace('__sam_tmp')
     Rebin(InputWorkspace='res_data', OutputWorkspace='res_data', Params=rebinParam)
-    ExtractFFTSpectrum(InputWorkspace='res_data', OutputWorkspace='res_fft', FFTPart=2)
     Integration(InputWorkspace='res_data', OutputWorkspace='res_int')
+    ConvertToPointData(InputWorkspace='res_data', OutputWorkspace='res_data')
+    ExtractFFTSpectrum(InputWorkspace='res_data', OutputWorkspace='res_fft', FFTPart=2)
     Divide(LHSWorkspace='res_fft', RHSWorkspace='res_int', OutputWorkspace='res')
     for sam_file in sam_files:
         (direct, filename) = os.path.split(sam_file)
@@ -293,8 +294,9 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
             Rebin(InputWorkspace='sam_data', OutputWorkspace='sam_data', Params=rebinParam)
         else: #input is workspace
             Rebin(InputWorkspace=sam_file, OutputWorkspace='sam_data', Params=rebinParam)
-        ExtractFFTSpectrum(InputWorkspace='sam_data', OutputWorkspace='sam_fft', FFTPart=2)
         Integration(InputWorkspace='sam_data', OutputWorkspace='sam_int')
+        ConvertToPointData(InputWorkspace='sam_data', OutputWorkspace='sam_data')
+        ExtractFFTSpectrum(InputWorkspace='sam_data', OutputWorkspace='sam_fft', FFTPart=2)
         Divide(LHSWorkspace='sam_fft', RHSWorkspace='sam_int', OutputWorkspace='sam')
         # Create save file name
         savefile = getWSprefix('sam_data', root) + 'iqt'
