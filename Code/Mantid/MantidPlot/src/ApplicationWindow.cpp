@@ -658,7 +658,6 @@ void ApplicationWindow::initGlobalConstants()
   d_column_tool_bar = true;
   d_edit_tool_bar = true;
   d_plot_tool_bar = true;
-  d_plot3D_tool_bar = true;
   d_display_tool_bar = false;
   d_format_tool_bar = true;
 
@@ -1091,7 +1090,6 @@ void ApplicationWindow::insertTranslatedStrings()
   displayBar->setWindowTitle(tr("Data Display"));
   plotTools->setWindowTitle(tr("Plot"));
   standardTools->setWindowTitle(tr("Standard Tools"));
-  plot3DTools->setWindowTitle(tr("3D Surface"));
   formatToolBar->setWindowTitle(tr("Format"));
 
   fileMenu->changeItem(recentMenuID, tr("&Recent Projects"));
@@ -1437,7 +1435,6 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
         analysisMenuAboutToShow();
       }
       myMenuBar()->insertItem(tr("For&mat"), format);
-
       format->clear();
       format->addAction(actionShowPlotDialog);
       format->insertSeparator();
@@ -1447,6 +1444,8 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       format->insertSeparator();
       format->addAction(actionShowGridDialog);
       format->addAction(actionShowTitleDialog);
+
+
   
     } else if (w->isA("Graph3D")) {
       disableActions();
@@ -1461,8 +1460,46 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
       format->addAction(actionShowScaleDialog);
       format->addAction(actionShowAxisDialog);
       format->addAction(actionShowTitleDialog);
+
       if (dynamic_cast<Graph3D*>(w)->coordStyle() == Qwt3D::NOCOORD)
         actionShowAxisDialog->setEnabled(false);
+
+      format->addSeparator();
+      QMenu *gridLines = format->addMenu("Grid Lines");
+      gridLines->addAction(front);
+      gridLines->addAction(back);
+      gridLines->addAction(left);
+      gridLines->addAction(right);
+      gridLines->addAction(ceil);
+      gridLines->addAction(floor);
+
+      QMenu *frameMenu = format->addMenu("Frame");
+      frameMenu->addAction(Frame);
+      frameMenu->addAction(Box);
+      frameMenu->addAction(None);
+
+      QMenu *internalView = format->addMenu("View");
+      internalView->addAction(actionPerspective);
+      internalView->addAction(actionResetRotation);
+      internalView->addAction(actionFitFrame);
+
+      QMenu *style = format->addMenu("Style");
+      style->addAction(barstyle);
+      style->addAction(pointstyle);
+      style->addAction(conestyle);
+      style->addAction(crossHairStyle);
+      style->addSeparator();
+      style->addAction(wireframe);
+      style->addAction(hiddenline);
+      style->addAction(polygon);
+      style->addAction(filledmesh);
+      style->addSeparator();
+      style->addAction(floordata);
+      style->addAction(flooriso);
+      style->addAction(floornone);
+
+      format->addAction(actionAnimate);
+
     } else if (w->inherits("Table")) {
       myMenuBar()->insertItem(tr("&Plot"), plot2DMenu);
       myMenuBar()->insertItem(tr("&Analysis"), analysisMenu);
@@ -1663,14 +1700,9 @@ void ApplicationWindow::customToolBars(MdiSubWindow* w)
       formatToolBar->setEnabled (true);
       formatToolBar->show();
     }
-  } else if (w->isA("Graph3D") && d_plot3D_tool_bar){
-    if(!plot3DTools->isVisible())
-      plot3DTools->show();
-
-    if (dynamic_cast<Graph3D*>(w)->plotStyle() == Qwt3D::NOPLOT)
-      plot3DTools->setEnabled(false);
-    else
-      plot3DTools->setEnabled(true);
+  }
+  else if (w->isA("Graph3D"))
+  {
     custom3DActions(w);
   }
 }
@@ -1678,7 +1710,6 @@ void ApplicationWindow::customToolBars(MdiSubWindow* w)
 void ApplicationWindow::disableToolbars()
 {
   plotTools->setEnabled(false);
-  plot3DTools->setEnabled(false);
 }
 
 void ApplicationWindow::hideToolbars()
@@ -1686,7 +1717,6 @@ void ApplicationWindow::hideToolbars()
   standardTools->setVisible(false);
   displayBar->setVisible(false);
   plotTools->setVisible(false);
-  plot3DTools->setVisible(false);
   formatToolBar->setVisible(false);
 }
 
@@ -1695,7 +1725,6 @@ void ApplicationWindow::showToolbars()
   standardTools->setVisible(true);
   displayBar->setVisible(true);
   plotTools->setVisible(true);
-  //plot3DTools->setVisible(true);
   formatToolBar->setVisible(true);
 }
 
@@ -2541,12 +2570,6 @@ void ApplicationWindow::initPlot3D(Graph3D *plot)
   plot->setIcon(getQPixmap("trajectory_xpm"));
   plot->show();
   plot->setFocus();
-
-  if (!plot3DTools->isVisible())
-    plot3DTools->show();
-
-  if (!plot3DTools->isEnabled())
-    plot3DTools->setEnabled(true);
 
   customMenu(plot);
   customToolBars(plot);
@@ -5280,7 +5303,6 @@ void ApplicationWindow::readSettings()
   d_column_tool_bar = settings.value("/ColumnToolBar", true).toBool();
   d_matrix_tool_bar = settings.value("/MatrixToolBar", true).toBool();
   d_plot_tool_bar = settings.value("/PlotToolBar", true).toBool();
-  d_plot3D_tool_bar = settings.value("/Plot3DToolBar", true).toBool();
   d_display_tool_bar = settings.value("/DisplayToolBar", false).toBool();
   d_format_tool_bar = settings.value("/FormatToolBar", true).toBool();
   settings.endGroup();
@@ -5656,7 +5678,6 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/ColumnToolBar", d_column_tool_bar);
   settings.setValue("/MatrixToolBar", d_matrix_tool_bar);
   settings.setValue("/PlotToolBar", d_plot_tool_bar);
-  settings.setValue("/Plot3DToolBar", d_plot3D_tool_bar);
   settings.setValue("/DisplayToolBar", d_display_tool_bar);
   settings.setValue("/FormatToolBar", d_format_tool_bar);
   settings.endGroup();
@@ -10723,16 +10744,16 @@ void ApplicationWindow::custom3DGrids(int grids)
 
 void ApplicationWindow::initPlot3DToolBar()
 {
-  plot3DTools = new QToolBar( tr( "3D Surface" ), this );
-  plot3DTools->setObjectName("plot3DTools"); // this is needed for QMainWindow::restoreState()
-  plot3DTools->setIconSize( QSize(20,20) );
-  addToolBarBreak( Qt::TopToolBarArea );
-  addToolBar( Qt::TopToolBarArea, plot3DTools );
+  /**
+   * Only inits the actions that are later placed in the
+   * Format menu in this->customMenu(MdiSubWindow* w)
+   */
 
   coord = new QActionGroup( this );
   Box = new QAction( coord );
   Box->setIcon(QIcon(getQPixmap("box_xpm")));
   Box->setCheckable(true);
+  Box->setChecked( true );
 
   Frame = new QAction( coord );
   Frame->setIcon(QIcon(getQPixmap("free_axes_xpm")) );
@@ -10742,83 +10763,75 @@ void ApplicationWindow::initPlot3DToolBar()
   None->setIcon(QIcon(getQPixmap("no_axes_xpm")) );
   None->setCheckable(true);
 
-  plot3DTools->addAction(Frame);
-  plot3DTools->addAction(Box);
-  plot3DTools->addAction(None);
-  Box->setChecked( true );
-
-  plot3DTools->addSeparator();
-
-  // grid actions
+  // grid actions - Used when the format menu is active for the 3D plot
   grids = new QActionGroup( this );
   grids->setEnabled( true );
   grids->setExclusive( false );
-  front = new QAction( grids );
+  front = new QAction(grids);
+  front->setMenuText(tr("Front"));
   front->setCheckable( true );
   front->setIcon(QIcon(getQPixmap("frontGrid_xpm")) );
-  back = new QAction( grids );
+  back = new QAction( grids);
+  back->setMenuText(tr("Back"));
   back->setCheckable( true );
   back->setIcon(QIcon(getQPixmap("backGrid_xpm")));
-  right = new QAction( grids );
+  right = new QAction( grids);
+  right->setMenuText(tr("Right"));
   right->setCheckable( true );
   right->setIcon(QIcon(getQPixmap("leftGrid_xpm")) );
-  left = new QAction( grids );
+  left = new QAction( grids);
+  left->setMenuText(tr("Left"));
   left->setCheckable( true );
   left->setIcon(QIcon(getQPixmap("rightGrid_xpm")));
-  ceil = new QAction( grids );
+  ceil = new QAction( grids);
+  ceil->setMenuText(tr("Ceiling"));
   ceil->setCheckable( true );
   ceil->setIcon(QIcon(getQPixmap("ceilGrid_xpm")) );
-  floor = new QAction( grids );
+  floor = new QAction( grids);
+  floor->setMenuText(tr("Floor"));
   floor->setCheckable( true );
   floor->setIcon(QIcon(getQPixmap("floorGrid_xpm")) );
 
-  plot3DTools->addAction(front);
-  plot3DTools->addAction(back);
-  plot3DTools->addAction(right);
-  plot3DTools->addAction(left);
-  plot3DTools->addAction(ceil);
-  plot3DTools->addAction(floor);
-
-  plot3DTools->addSeparator();
 
   actionPerspective = new QAction( this );
   actionPerspective->setToggleAction( TRUE );
   actionPerspective->setIconSet(getQPixmap("perspective_xpm") );
-  actionPerspective->addTo( plot3DTools );
   actionPerspective->setOn(!orthogonal3DPlots);
   connect(actionPerspective, SIGNAL(toggled(bool)), this, SLOT(togglePerspective(bool)));
 
   actionResetRotation = new QAction( this );
   actionResetRotation->setToggleAction( false );
   actionResetRotation->setIconSet(getQPixmap("reset_rotation_xpm"));
-  actionResetRotation->addTo( plot3DTools );
   connect(actionResetRotation, SIGNAL(activated()), this, SLOT(resetRotation()));
 
   actionFitFrame = new QAction( this );
   actionFitFrame->setToggleAction( false );
   actionFitFrame->setIconSet(getQPixmap("fit_frame_xpm"));
-  actionFitFrame->addTo( plot3DTools );
   connect(actionFitFrame, SIGNAL(activated()), this, SLOT(fitFrameToLayer()));
-
-  plot3DTools->addSeparator();
 
   //plot style actions
   plotstyle = new QActionGroup( this );
+
   wireframe = new QAction( plotstyle );
   wireframe->setCheckable( true );
   wireframe->setEnabled( true );
   wireframe->setIcon(QIcon(getQPixmap("lineMesh_xpm")) );
+
   hiddenline = new QAction( plotstyle );
   hiddenline->setCheckable( true );
   hiddenline->setEnabled( true );
   hiddenline->setIcon(QIcon(getQPixmap("grid_only_xpm")) );
+
   polygon = new QAction( plotstyle );
   polygon->setCheckable( true );
   polygon->setEnabled( true );
   polygon->setIcon(QIcon(getQPixmap("no_grid_xpm")));
+
   filledmesh = new QAction( plotstyle );
   filledmesh->setCheckable( true );
   filledmesh->setIcon(QIcon(getQPixmap("grid_poly_xpm")) );
+  filledmesh->setChecked( true );
+
   pointstyle = new QAction( plotstyle );
   pointstyle->setCheckable( true );
   pointstyle->setIcon(QIcon(getQPixmap("pointsMesh_xpm")) );
@@ -10835,21 +10848,6 @@ void ApplicationWindow::initPlot3DToolBar()
   barstyle->setCheckable( true );
   barstyle->setIcon(QIcon(getQPixmap("plot_bars_xpm")) );
 
-  plot3DTools->addAction(barstyle);
-  plot3DTools->addAction(pointstyle);
-
-  plot3DTools->addAction(conestyle);
-  plot3DTools->addAction(crossHairStyle);
-  plot3DTools->addSeparator();
-
-  plot3DTools->addAction(wireframe);
-  plot3DTools->addAction(hiddenline);
-  plot3DTools->addAction(polygon);
-  plot3DTools->addAction(filledmesh);
-  filledmesh->setChecked( true );
-
-  plot3DTools->addSeparator();
-
   //floor actions
   floorstyle = new QActionGroup( this );
   floordata = new QAction( floorstyle );
@@ -10861,20 +10859,11 @@ void ApplicationWindow::initPlot3DToolBar()
   floornone = new QAction( floorstyle );
   floornone->setCheckable( true );
   floornone->setIcon(QIcon(getQPixmap("no_floor_xpm")));
-
-  plot3DTools->addAction(floordata);
-  plot3DTools->addAction(flooriso);
-  plot3DTools->addAction(floornone);
   floornone->setChecked( true );
-
-  plot3DTools->addSeparator();
 
   actionAnimate = new QAction( this );
   actionAnimate->setToggleAction( true );
   actionAnimate->setIconSet(getQPixmap("movie_xpm"));
-  plot3DTools->addAction(actionAnimate);
-
-  plot3DTools->hide();
 
   connect(actionAnimate, SIGNAL(toggled(bool)), this, SLOT(toggle3DAnimation(bool)));
   connect( coord, SIGNAL( triggered( QAction* ) ), this, SLOT( pickCoordSystem( QAction* ) ) );
@@ -16715,12 +16704,6 @@ void ApplicationWindow::showToolBarsMenu()
   connect(actionPlotTools, SIGNAL(toggled(bool)), plotTools, SLOT(setVisible(bool)));
   toolBarsMenu.addAction(actionPlotTools);
 
-  QAction *actionPlot3DTools = new QAction(plot3DTools->windowTitle(), this);
-  actionPlot3DTools->setCheckable(true);
-  actionPlot3DTools->setChecked(plot3DTools->isVisible());
-  connect(actionPlot3DTools, SIGNAL(toggled(bool)), plot3DTools, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionPlot3DTools);
-
   QAction *actionDisplayBar = new QAction(displayBar->windowTitle(), this);
   actionDisplayBar->setCheckable(true);
   actionDisplayBar->setChecked(displayBar->isVisible());
@@ -16742,10 +16725,8 @@ void ApplicationWindow::showToolBarsMenu()
   if (action->text() == plotTools->windowTitle()){
     d_plot_tool_bar = action->isChecked();
     plotTools->setEnabled(w && w->isA("MultiLayer"));
-  } else if (action->text() == plot3DTools->windowTitle()){
-    d_plot3D_tool_bar = action->isChecked();
-    plot3DTools->setEnabled(w && w->isA("Graph3D"));
-  } else if (action->text() == standardTools->windowTitle()){
+  }
+  else if (action->text() == standardTools->windowTitle()){
     d_standard_tool_bar = action->isChecked();
   } else if (action->text() == displayBar->windowTitle()){
     d_display_tool_bar = action->isChecked();
