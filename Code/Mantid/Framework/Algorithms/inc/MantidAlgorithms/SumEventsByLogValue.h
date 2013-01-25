@@ -13,9 +13,11 @@ namespace Mantid
 {
 namespace Algorithms
 {
-  /** SumEventsByLogValue : TODO: DESCRIPTION
+  /** 
+    Produces a table or single spectrum workspace containing the total summed events in the workspace
+    as a function of a specified log.
     
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2012-3 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -68,9 +70,9 @@ namespace Algorithms
     double sumProtonCharge(const Kernel::TimeSeriesProperty<double> * protonChargeLog,
         const Kernel::TimeSplitterType& filter);
 
-    DataObjects::EventWorkspace_const_sptr m_inputWorkspace;
-    std::string m_logName;
-    std::vector<double> m_binningParams;
+    DataObjects::EventWorkspace_const_sptr m_inputWorkspace; ///< The input workspace
+    std::string m_logName;                                   ///< The name of the log to sum against
+    std::vector<double> m_binningParams;                     ///< The optional binning parameters
   };
 
 

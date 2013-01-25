@@ -32,8 +32,8 @@ namespace Algorithms
   /// Sets documentation strings for this algorithm
   void SumEventsByLogValue::initDocs()
   {
-    this->setWikiSummary("Produces a single spectrum containing the total summed events in the workspace as a function of a specified log.");
-    this->setOptionalMessage("Produces a single spectrum containing the total summed events in the workspace as a function of a specified log.");
+    this->setWikiSummary("Produces a workspace containing the total summed events in the workspace as a function of a specified log.");
+    this->setOptionalMessage("Produces a workspace containing the total summed events in the workspace as a function of a specified log.");
   }
 
   void SumEventsByLogValue::init()
@@ -127,6 +127,9 @@ namespace Algorithms
     }
   }
 
+  /** Produces the table workspace output for an integer TimeSeriesProperty.
+   *  @param log The log to tabulate against
+   */
   void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int> * log)
   {
     // This is the version for integer logs when no binning parameters have been given and has a data point per log value
@@ -221,6 +224,15 @@ namespace Algorithms
     setProperty("OutputWorkspace",outputWorkspace);
   }
 
+  /** Goes through an event list assigning events to the output vector according to the log value
+   *  at the time the event was measured. Used for integer logs, where each possible value between
+   *  the min & max log value has an entry in the output vector.
+   *  @param eventList The event list to parse
+   *  @param minVal    The minimum value of the log
+   *  @param maxVal    The maximum value of the log
+   *  @param log       The TimeSeriesProperty log
+   *  @param Y         The output vector to be filled
+   */
   void SumEventsByLogValue::filterEventList(const API::IEventList& eventList, const int minVal,
       const int maxVal, const Kernel::TimeSeriesProperty<int> * log, std::vector<int>& Y)
   {
@@ -243,6 +255,13 @@ namespace Algorithms
     }
   }
 
+  /** Looks for monitor event data and, if found, adds columns to the output table corresponding
+   *  to the monitor counts for each (integer) log value.
+   *  @param outputWorkspace The output table
+   *  @param log             The log being summed against
+   *  @param minVal          The minimum value of the log
+   *  @param maxVal          The maximum value of the log
+   */
   void SumEventsByLogValue::addMonitorCounts(ITableWorkspace_sptr outputWorkspace,
       const TimeSeriesProperty<int> * log, const int minVal, const int maxVal)
   {
@@ -283,6 +302,10 @@ namespace Algorithms
     }
   }
 
+  /** Searches the input workspace for int or double TimeSeriesProperty's other than
+   *  the one being summed against.
+   *  @return A list holding the names of the found logs and pointers to the corresponding properties
+   */
   std::vector<std::pair<std::string,const Kernel::ITimeSeriesProperty * >>
   SumEventsByLogValue::getNumberSeriesLogs()
   {
@@ -311,6 +334,11 @@ namespace Algorithms
     return numberSeriesProps;
   }
 
+  /** Integrates the proton charge between specified times.
+   *  @param protonChargeLog The proton charge log
+   *  @param filter          The times between which to integrate
+   *  @returns The summed proton charge
+   */
   double SumEventsByLogValue::sumProtonCharge(const Kernel::TimeSeriesProperty<double> * protonChargeLog,
       const Kernel::TimeSplitterType& filter)
   {
@@ -325,6 +353,10 @@ namespace Algorithms
     return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);
   }
 
+  /** Create a single-spectrum Workspace2D containing the integrated counts versus
+   *  log value, binned according to the parameters input to the algorithm.
+   *  @param log The log against which to count the events.
+   */
   template <typename T>
   void SumEventsByLogValue::createBinnedOutput(const Kernel::TimeSeriesProperty<T> * log)
   {
