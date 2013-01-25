@@ -916,7 +916,6 @@ void ApplicationWindow::initToolBars()
   plotTools->addAction(actionAddFunctionCurve);
   plotTools->addAction(actionNewLegend);
   plotTools->addSeparator ();
-  plotTools->addAction(actionUnzoom);
 
   dataTools = new QActionGroup( this );
   dataTools->setExclusive( true );
@@ -945,6 +944,7 @@ void ApplicationWindow::initToolBars()
   btnZoomOut->setCheckable( true );
   btnZoomOut->setIcon(QIcon(getQPixmap("zoomOut_xpm")) );
   plotTools->addAction(btnZoomOut);
+  plotTools->addAction(actionUnzoom);
 
 
   btnCursor = new QAction(tr("&Data Reader"), this);
@@ -13635,7 +13635,7 @@ void ApplicationWindow::translateActionsStrings()
 
   actionUnzoom->setMenuText(tr("&Rescale to Show All"));
   actionUnzoom->setShortcut(tr("Ctrl+Shift+R"));
-  actionUnzoom->setToolTip(tr("Best fit"));
+  actionUnzoom->setToolTip(tr("Zoom to show all"));
 
   actionNewLegend->setMenuText( tr("New &Legend"));
   actionNewLegend->setShortcut(tr("Ctrl+L"));
