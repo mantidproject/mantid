@@ -12548,11 +12548,11 @@ void ApplicationWindow::createActions()
   actionSetupParaview = new QAction(tr("Setup 3D Visualisation"), this);
   connect(actionSetupParaview, SIGNAL(activated()), this, SLOT(showSetupParaview()));
 
-  actionNewProject = new QAction(QIcon(getQPixmap("new_xpm")), tr("New &Project"), this);
+  actionNewProject = new QAction(QIcon(":/NewProject16x16.png"), tr("New &Project"), this);
   actionNewProject->setShortcut( tr("Ctrl+N") );
   connect(actionNewProject, SIGNAL(activated()), this, SLOT(newProject()));
 
-  actionSaveProject=new QAction(QIcon(getQPixmap("filesave_xpm")), tr("Save &Project"), this);
+  actionSaveProject=new QAction(QIcon(":/SaveProject16x16.png"), tr("Save &Project"), this);
   actionSaveProject->setShortcut( tr("Ctrl+Shift+S") );
   connect(actionSaveProject, SIGNAL(activated()), this, SLOT(saveProject()));
 
@@ -12586,11 +12586,11 @@ void ApplicationWindow::createActions()
   actionNewSurfacePlot->setShortcut( tr("Ctrl+ALT+Z") );
   connect(actionNewSurfacePlot, SIGNAL(activated()), this, SLOT(newSurfacePlot()));
 
-  actionOpenProj=new QAction(QIcon(getQPixmap("folder_open_xpm")), tr("&Project"), this);
+  actionOpenProj=new QAction(QIcon(":/LoadProject16x16.png"), tr("&Project"), this);
   actionOpenProj->setShortcut( tr("Ctrl+Shift+O") );
   connect(actionOpenProj, SIGNAL(activated()), this, SLOT(open()));
 
-  actionLoadFile=new QAction(QIcon(getQPixmap("fileopen_raw_xpm")), tr("Data File"), this);
+  actionLoadFile=new QAction(QIcon(":/Open-icon16x16.png"), tr("Data File"), this);
   actionLoadFile->setShortcut( tr("Ctrl+Shift+F") );
   connect(actionLoadFile, SIGNAL(activated()), this, SLOT(loadDataFile()));
 

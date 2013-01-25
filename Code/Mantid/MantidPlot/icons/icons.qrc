@@ -227,5 +227,13 @@
         <file>align_bottom.png</file>
         <file>align_left.png</file>
         <file>align_right.png</file>
+        <file>NewProject16x16.png</file>
+        <file>NewProject32x32.png</file>
+        <file>LoadProject16x16.png</file>
+        <file>LoadProject32x32.png</file>
+        <file>SaveProject16x16.png</file>
+        <file>SaveProject32x32.png</file>
+        <file>Open-icon16x16.png</file>
+        <file>Open-icon32x32.png</file>
     </qresource>
 </RCC>
