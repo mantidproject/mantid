@@ -1120,6 +1120,7 @@ void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
   menu->addAction(m_showData);
   menu->addAction(m_showTransposed);
   menu->addAction(m_showHist);
+  menu->addAction(m_saveNexus);
   menu->addAction(m_convertToMatrixWorkspace);
 }
 
