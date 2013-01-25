@@ -496,6 +496,10 @@ public slots:
   Matrix* importImage(const QString& = QString());
   //@}
 
+  //! \name Script Repository Interaction
+  //@{
+  void loadScriptRepo();
+  //@}
   //! \name Export and Print
   //@{
   void exportLayer();
@@ -1410,7 +1414,7 @@ private:
   QAction *actionEditFunction, *actionRemoveCurve, *actionShowCurveWorksheet, *actionShowCurvePlotDialog;
   QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
   QAction *actionNewSurfacePlot, *actionNewMatrix, *actionNewGraph, *actionNewFolder;
-  QAction *actionOpen, *actionLoadImage, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj;
+  QAction *actionOpen, *actionLoadImage, *actionScriptRepo, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj;
   QAction *actionLoad, *actionUndo, *actionRedo;
   QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;

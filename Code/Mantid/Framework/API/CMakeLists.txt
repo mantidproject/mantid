@@ -96,6 +96,8 @@ set ( SRC_FILES
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
+	src/ScriptRepository.cpp
+	src/ScriptRepositoryFactory.cpp
 	src/SpectraAxis.cpp
 	src/SpectraDetectorMap.cpp
 	src/TableRow.cpp
@@ -236,6 +238,8 @@ set ( INC_FILES
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
+	inc/MantidAPI/ScriptRepository.h
+	inc/MantidAPI/ScriptRepositoryFactory.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
         inc/MantidAPI/SpecialCoordinateSystem.h
