@@ -3026,6 +3026,12 @@ void FitPropertyBrowser::minimizerChanged()
       prop = m_stringManager->addProperty( propName );
       QString val = QString::fromStdString( prp->value() );
     }
+    // set the tooltip from property doc string
+    QString toolTip = QString::fromStdString( (**it).documentation() );
+    if ( !toolTip.isEmpty() )
+    {
+      prop->setToolTip( toolTip );
+    }
     m_settingsGroup->property()->addSubProperty( prop );
     m_minimizerProperties.append( prop );
   }

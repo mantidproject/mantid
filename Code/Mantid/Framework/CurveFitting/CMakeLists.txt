@@ -179,6 +179,7 @@ set ( TEST_FILES
 	#DiffSphereTest.h
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
+	BackToBackExponentialTest.h
 	BFGSTest.h
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h

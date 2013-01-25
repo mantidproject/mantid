@@ -436,7 +436,11 @@ void FitDialog::tieStaticWidgets(const bool readHistory)
   m_form.cbCostFunction->addItems(getAllowedPropertyValues("CostFunction"));
   tie(m_form.cbCostFunction, "CostFunction", m_form.staticLayout, readHistory);
 
-  m_form.cbDomainType->addItems(getAllowedPropertyValues("DomainType"));
+  QStringList allowedDomainTypes = getAllowedPropertyValues("DomainType");
+  // Disable some domain types in the GUI until their imlpementations have been finished
+  allowedDomainTypes.remove("Sequential");
+  allowedDomainTypes.remove("Parallel");
+  m_form.cbDomainType->addItems(allowedDomainTypes);
   //tie(m_form.cbDomainType, "DomainType", m_form.staticLayout, readHistory);
   connect(m_form.cbDomainType,SIGNAL(currentIndexChanged(int)),this,SLOT(domainTypeChanged()));
   QString domainTypeValue = getStoredPropertyValue("DomainType");

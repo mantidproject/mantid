@@ -4,282 +4,72 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/BackToBackExponential.h"
-#include "MantidCurveFitting/LinearBackground.h"
-#include "MantidCurveFitting/Fit.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadRaw.h"
-#include "MantidKernel/System.h"
-
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::CurveFitting;
-using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
+#include <cmath>
 
-// Algorithm to force Simplex to run
-class SimplexBackToBackExponential : public BackToBackExponential
+using Mantid::CurveFitting::BackToBackExponential;
+
+namespace 
 {
-public:
-  virtual ~SimplexBackToBackExponential() {}
-
-protected:
-  void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
+  /**
+   * A simple test function: two exponentials back-to-back.
+   */
+  class B2B : public Mantid::API::IFunction1D, public Mantid::API::ParamFunction
   {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-    throw Exception::NotImplementedError("No derivative function provided");
-  }
-};
-
-
+  public:
+    /// Default constructor.
+    B2B():Mantid::API::IFunction1D(), Mantid::API::ParamFunction()
+    {
+      declareParameter("A",1.0);
+      declareParameter("B",2.0);
+    }
+    /// overwrite IFunction base class methods
+    std::string name()const{return "B2B";}
+    virtual const std::string category() const { return "Peak";}
+    virtual void function1D(double* out, const double* xValues, const size_t nData)const
+    {
+      const double a = getParameter(0);
+      const double b = getParameter(1);
+      for(size_t i = 0; i < nData; ++i)
+      {
+        double x = xValues[i];
+        out[i] = x <= 0.0 ? exp( a * x ) : exp( - b * x );
+      }
+    }
+    // return the integral of this function in (-oo, oo)
+    double integral() const
+    {
+      const double a = getParameter(0);
+      const double b = getParameter(1);
+      return (a + b) / (a * b);
+    }
+  };
+}
 
 class BackToBackExponentialTest : public CxxTest::TestSuite
 {
 public:
 
-  void getHRP38692_WI2(Mantid::MantidVec& x, Mantid::MantidVec& y, Mantid::MantidVec& e)
+  void test_test_function_B2B()
   {
-
-    x[0] = 79280.000;
-    x[1] = 79284.562;
-    x[2] = 79292.437;
-    x[3] = 79300.312;
-    x[4] = 79308.187;
-    x[5] = 79316.062;
-    x[6] = 79323.937;
-    x[7] = 79331.812;
-    x[8] = 79339.687;
-    x[9] = 79347.625;
-    x[10] = 79355.625;
-    x[11] = 79363.625;
-    x[12] = 79371.625;
-    x[13] = 79379.625;
-    x[14] = 79387.625;
-    x[15] = 79395.625;
-    x[16] = 79403.625;
-    x[17] = 79411.625;
-    x[18] = 79419.625;
-    x[19] = 79427.625;
-    x[20] = 79435.625;
-    x[21] = 79443.625;
-    x[22] = 79451.625;
-    x[23] = 79459.625;
-    x[24] = 79467.625;
-    x[25] = 79475.625;
-    x[26] = 79483.625;
-    x[27] = 79491.625;
-    x[28] = 79499.625;
-    x[29] = 79507.625;
-    x[30] = 79515.625;
-    x[31] = 79523.625;
-    x[32] = 79531.625;
-    x[33] = 79539.625;
-    x[34] = 79547.625;
-    x[35] = 79555.625;
-    x[36] = 79563.625;
-    x[37] = 79571.625;
-    x[38] = 79579.625;
-    x[39] = 79587.625;
-    x[40] = 79595.625;
-    x[41] = 79603.625;
-    x[42] = 79611.625;
-    x[43] = 79619.625;
-    x[44] = 79627.625;
-    x[45] = 79635.625;
-    x[46] = 79643.625;
-    x[47] = 79651.625;
-    x[48] = 79659.625;
-    x[49] = 79667.625;
-    x[50] = 79675.625;
-    x[51] = 79683.625;
-    x[52] = 79691.625;
-    x[53] = 79699.625;
-    x[54] = 79707.625;
-    x[55] = 79715.625;
-    x[56] = 79723.625;
-    x[57] = 79731.625;
-    x[58] = 79739.625;
-    x[59] = 79747.625;
-    x[60] = 79755.625;
-
-    y[0] =  7  ;
-    y[1] =  7  ;
-    y[2] =  8  ;
-    y[3] =  4  ;
-    y[4] =  9  ;
-    y[5] =  4  ;
-    y[6] =  10 ;
-    y[7] =  10 ;
-    y[8] =  5  ;
-    y[9] =  8  ;
-    y[10] = 7  ;
-    y[11] = 10 ;
-    y[12] = 18 ;
-    y[13] = 30 ;
-    y[14] = 71 ;
-    y[15] = 105;
-    y[16] = 167;
-    y[17] = 266;
-    y[18] = 271;
-    y[19] = 239;
-    y[20] = 221;
-    y[21] = 179;
-    y[22] = 133;
-    y[23] = 126;
-    y[24] = 88 ;
-    y[25] = 85 ;
-    y[26] = 52 ;
-    y[27] = 37 ;
-    y[28] = 51 ;
-    y[29] = 32 ;
-    y[30] = 31 ;
-    y[31] = 17 ;
-    y[32] = 21 ;
-    y[33] = 15 ;
-    y[34] = 13 ;
-    y[35] = 12 ;
-    y[36] = 12 ;
-    y[37] = 10 ;
-    y[38] = 7  ;
-    y[39] = 5  ;
-    y[40] = 9  ;
-    y[41] = 6  ;
-    y[42] = 8  ;
-    y[43] = 8  ;
-    y[44] = 3  ;
-    y[45] = 10 ;
-    y[46] = 4  ;
-    y[47] = 4  ;
-    y[48] = 5  ;
-    y[49] = 5  ;
-    y[50] = 7  ;
-    y[51] = 2  ;
-    y[52] = 0  ;
-    y[53] = 4  ;
-    y[54] = 2  ;
-    y[55] = 1  ;
-    y[56] = 4  ;
-    y[57] = 5  ;
-    y[58] = 4  ;
-    y[59] = 6  ;
-    y[60] = 2  ;    
-
-    for (int i = 0; i<= 60; i++)
-      e[i] = sqrt(y[i]); 
-  }
-
-
-  void testAgainstMockData()
-  {
-    Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
-    // create mock data to test against
-    std::string wsName = "IkedaCarpenterPV1D_GaussMockData";
-    int histogramNumber = 1;
-    int timechannels = 61;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    Mantid::MantidVec& x = ws2D->dataX(0);
-    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
-    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
-    getHRP38692_WI2(x, y, e);
-
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-
-
-    // create function you want to fit against
-    CompositeFunction_sptr fnWithBk( new CompositeFunction );
-
-    IFunction_sptr bk( new LinearBackground );
-    bk->initialize();
-
-    bk->setParameter("A0",6.0);
-    bk->setParameter("A1",0.0);
-    bk->fix(1);    
-
-    IFunction_sptr fn( new BackToBackExponential );
-    fn->initialize();
-
-    // Test categories
-    const std::vector<std::string> categories = fn->categories();
-    TS_ASSERT( categories.size() == 1 );
-    TS_ASSERT( categories[0] == "Peak" );
-
-    fn->setParameter("I",237.0);
-    fn->setParameter("A",0.4);
-    fn->setParameter("B",0.03);
-    fn->setParameter("X0",79400.0);
-    fn->setParameter("S",8.0);
-
-    fnWithBk.addFunction(fn);
-    fnWithBk.addFunction(bk);
-
-    alg2.setProperty("Function",boost::dynamic_pointer_cast<IFunction>(fnWithBk));
-    alg2.setPropertyValue("InputWorkspace",wsName);
-    alg2.setPropertyValue("WorkspaceIndex","0");
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(
-      TS_ASSERT( alg2.execute() )
-    )    
-    TS_ASSERT( alg2.isExecuted() );
-
-    // test the output from fit is what you expect
-
-
-    std::string minimizer = alg2.getProperty("Minimizer");
-    TS_ASSERT( minimizer.compare("Levenberg-Marquardt") == 0 );
-
-    double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA( dummy, 1.686,0.01);
-
-    IFunction_sptr out = alg2.getProperty("Function"); 
-
-    TS_ASSERT_DELTA( out->getParameter("f0.I"), 231.3 ,0.2);
-    TS_ASSERT_DELTA( out->getParameter("f0.A"), 0.2522 ,0.01);
-    TS_ASSERT_DELTA( out->getParameter("f0.B"), 0.0293 ,0.001);
-    TS_ASSERT_DELTA( out->getParameter("f0.X0"), 79408.00 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.S"), 15.561 ,0.2);
-
-    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 4.0 ,0.2);
-
-    FunctionDomain1D domain(ws2D->readX(0));
-    FunctionValues yy(domain);
-
-    out->function(domain,yy);
-
-    // note that fitting a none-totally optimized IC to a Gaussian peak so 
-    // not a perfect fit - but pretty ok result
-    TS_ASSERT_DELTA( yy.getCalculated(9), 4.1138 ,0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(10), 4.6679 ,0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(11), 6.8471 ,0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(12), 13.7936, 0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(13), 31.4458 ,0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(14), 66.6687 ,0.4);
-    TS_ASSERT_DELTA( yy.getCalculated(15), 120.9065 ,0.4);
-    TS_ASSERT_DELTA( yy.getCalculated(16), 183.5634 ,0.4);
-    TS_ASSERT_DELTA( yy.getCalculated(17), 234.3267 ,0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(18), 256.1503, 0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(19), 246.6795 ,0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(20), 216.7392 ,0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(21), 180.0203 ,0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(22), 145.4474, 0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(23), 116.3506 ,0.3);
-    TS_ASSERT_DELTA( yy.getCalculated(24), 92.9199 ,0.3);
-
-    AnalysisDataService::Instance().remove(wsName);
+    // define 1d domain of 30 points in interval [-6,3]
+    Mantid::API::FunctionDomain1DVector x(-6,3,30);
+    Mantid::API::FunctionValues y(x);
+    B2B b2b;
+    b2b.function(x,y);
+    for(size_t i = 0; i < x.size(); ++i)
+    {
+      if ( x[i] <= 0 )
+      {
+        TS_ASSERT_DELTA(y[i], exp( x[i] ), 1e-15);
+      }
+      else
+      {
+        TS_ASSERT_DELTA(y[i], exp(-2*x[i] ), 1e-15);
+      }
+    }
   }
 
   void testForCategories()
@@ -289,6 +79,111 @@ public:
     TS_ASSERT( categories.size() == 1 );
     TS_ASSERT( categories[0] == "Peak" );
   }
+
+  // test that parameters exist and can be set and read
+  void test_parameters()
+  {
+    BackToBackExponential b2bExp; 
+    TS_ASSERT_EQUALS( b2bExp.nParams(), 0 );
+    b2bExp.initialize();
+    TS_ASSERT_EQUALS( b2bExp.nParams(), 5 );
+    b2bExp.setParameter("I", 123.45);
+    TS_ASSERT_EQUALS( b2bExp.getParameter("I"), 123.45 );
+    b2bExp.setParameter("A", 23.45);
+    TS_ASSERT_EQUALS( b2bExp.getParameter("A"), 23.45 );
+    b2bExp.setParameter("B", 3.45);
+    TS_ASSERT_EQUALS( b2bExp.getParameter("B"), 3.45 );
+    b2bExp.setParameter("X0", .45);
+    TS_ASSERT_EQUALS( b2bExp.getParameter("X0"), .45 );
+    b2bExp.setParameter("S", 4.5);
+    TS_ASSERT_EQUALS( b2bExp.getParameter("S"), 4.5 );
+  }
+
+  // test that parameter I equals integrated intensity of the peak
+  void test_integrated_intensity()
+  {
+    BackToBackExponential b2bExp; 
+    b2bExp.initialize();
+    b2bExp.setParameter("I", 1.0);
+    b2bExp.setParameter("A", 1.1);
+    b2bExp.setParameter("B", 2.2);
+    b2bExp.setParameter("X0",0.0);
+    b2bExp.setParameter("S", 4.0);
+
+    Mantid::API::FunctionDomain1DVector x(-20,20,100);
+    Mantid::API::FunctionValues y(x);
+    b2bExp.function(x,y);
+    double sum = 0.0;
+    for(size_t i = 0; i < x.size(); ++i) sum += y[i];
+    sum *= x[1] - x[0];
+    TS_ASSERT_DELTA(sum, 1.0, 0.00001);
+    b2bExp.setParameter("I", 2.3);
+    b2bExp.function(x,y);
+    sum = 0.0;
+    for(size_t i = 0; i < x.size(); ++i) sum += y[i];
+    sum *= x[1] - x[0];
+    TS_ASSERT_DELTA(sum, 2.3, 0.00001);
+  }
+
+  // test that when gaussian is narrow BackToBackExponential tends to B2B
+  void test_narrow_gaussian()
+  {
+    const double a = 1.0;
+    const double b = 2.0;
+    const double I = 2.1;
+    BackToBackExponential b2bExp; 
+    b2bExp.initialize();
+    b2bExp.setParameter("I", I);
+    b2bExp.setParameter("A", a);
+    b2bExp.setParameter("B", b);
+    b2bExp.setParameter("X0",0.0);
+    b2bExp.setParameter("S", 0.000001);// this makes gaussian narrow
+
+    B2B b2b;
+    b2b.setParameter("A", a);
+    b2b.setParameter("B", b);
+    const double b2bNorm = b2b.integral();
+
+    // define 1d domain of 30 points in interval [-6,3]
+    Mantid::API::FunctionDomain1DVector x(-6,3,30);
+    Mantid::API::FunctionValues y1(x), y2(x);
+
+    b2bExp.function(x,y1);
+    b2b.function(x,y2);
+
+    for(size_t i = 0; i < x.size(); ++i)
+    {
+      TS_ASSERT_DELTA( y1[i], I*y2[i]/b2bNorm, 1e-10 );
+    }
+  }
+
+  // test that when gaussian is wide BackToBackExponential tends to Gaussian
+  void test_wide_gaussian()
+  {
+    const double s = 4.0;
+    const double I = 2.1;
+    BackToBackExponential b2bExp; 
+    b2bExp.initialize();
+    b2bExp.setParameter("I", I);
+    b2bExp.setParameter("A", 6.0);// large A and B make
+    b2bExp.setParameter("B", 6.0);// the exponentials narrow
+    b2bExp.setParameter("X0",0.0);
+    b2bExp.setParameter("S", s);
+
+    // define 1d domain of 30 points in interval [-6,3]
+    Mantid::API::FunctionDomain1DVector x(-10,10,30);
+    Mantid::API::FunctionValues y(x);
+
+    b2bExp.function(x,y);
+
+    for(size_t i = 0; i < x.size(); ++i)
+    {
+      double arg = x[i]/s;
+      arg *= arg;
+      double ex = I*exp(-arg/2)/sqrt(2*M_PI)/s;
+      TS_ASSERT_DELTA( y[i] / ex, 1.0, 0.01 );
+    }
+}
 
 
 };

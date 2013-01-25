@@ -14,13 +14,13 @@ namespace Mantid
     Provide BackToBackExponential peak shape function interface to IPeakFunction.
     That is the function:
 
-      I*(exp(A/2*(A*S^2+2*(x-X0)))*erfc((A*S^2+(x-X0))/sqrt(2*S^2))+exp(B/2*(B*S^2-2*(x-X0)))*erfc((B*S^2-(x-X0))/sqrt(2*S^2))).
+      I*(A*B/(A+B)/2)*(exp(A/2*(A*S^2+2*(x-X0)))*erfc((A*S^2+(x-X0))/sqrt(2*S^2))+exp(B/2*(B*S^2-2*(x-X0)))*erfc((B*S^2-(x-X0))/sqrt(2*S^2))).
 
     Function parameters:
     <UL>
-    <LI> I - height of peak (default 0.0)</LI>
-    <LI> A - exponential constant of rising part of neutron pulse (default 0.0)</LI>
-    <LI> B - exponential constant of decaying part of neutron pulse (default 0.0)</LI>
+    <LI> I - Integrated intensity of peak (default 0.0)</LI>
+    <LI> A - exponential constant of rising part of neutron pulse (default 1.0)</LI>
+    <LI> B - exponential constant of decaying part of neutron pulse (default 0.05)</LI>
     <LI> X0 - peak position (default 0.0)</LI>
     <LI> S - standard deviation of gaussian part of peakshape function (default 1.0)</LI>
     </UL>
@@ -51,20 +51,16 @@ namespace Mantid
     class DLLExport BackToBackExponential : public API::IPeakFunction
     {
     public:
-      BackToBackExponential() : m_cutOff(100.0) {};
-      /// Destructor
-      virtual ~BackToBackExponential() {};
-
+      /// Default constructor.
+      BackToBackExponential():API::IPeakFunction(){}
 
       /// overwrite IPeakFunction base class methods
-      virtual double centre()const {return getParameter("X0");};
-      // virtual double height()const {return getParameter("I");};  // note height can likely be defined more accurately, here set equal to intensity
+      virtual double centre()const {return getParameter("X0");}
+      virtual void setCentre(const double c) {setParameter("X0",c);}
       virtual double height()const;
-      virtual double fwhm()const {return 2*getParameter("S");};  // can likely be defined more accurately
-      virtual void setCentre(const double c) {setParameter("X0",c);};
-      virtual void setHeight(const double h) {setParameter("I",h);};
-      virtual void setFwhm(const double w) {setParameter("S",w/2.0);};
-
+      virtual void setHeight(const double h) ;
+      virtual double fwhm()const;
+      virtual void setFwhm(const double w);
 
       /// overwrite IFunction base class methods
       std::string name()const{return "BackToBackExponential";}
@@ -76,19 +72,10 @@ namespace Mantid
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
       /// Function evaluation method to be implemented in the inherited classes
-      virtual void functionLocal(double* out, const double* xValues, const size_t nData)const
-      {
-        UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
-      }
-
+      virtual void functionLocal(double*, const double*, const size_t )const{}
       /// Derivative evaluation method to be implemented in the inherited classes
-      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData)
-      {
-        UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
-      }
-
-    private:
-      const double m_cutOff; //prevent overflow
+      virtual void functionDerivLocal(API::Jacobian*, const double*, const size_t){}
+      double expWidth() const;
     };
 
     typedef boost::shared_ptr<BackToBackExponential> BackToBackExponential_sptr;

@@ -645,7 +645,7 @@ namespace CurveFitting
       peak->unfix(i);
 
     //    Set up the universal starting parameter
-    peak->setParameter("I", height);
+    peak->setParameter("I", height*fwhm);
     peak->setParameter("X0", tof_h);
 
     size_t numsteps = 2;
@@ -711,7 +711,7 @@ namespace CurveFitting
     {
       restoreFunctionParameters(peak, rightpeakparammap);
       peak->setParameter("X0", tof_h);
-      peak->setParameter("I", height);
+      peak->setParameter("I", height*fwhm);
 
       string peakinfoc0 = getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
       g_log.notice() << "[DBx533C] Approach C: Starting Peak Function Information: "
@@ -772,7 +772,7 @@ namespace CurveFitting
     if (!fitgood)
     {
       peak->setParameter("S", sigma);
-      peak->setParameter("I", height);
+      peak->setParameter("I", height*fwhm);
       peak->setParameter("X0", tof_h);
 
       vector<string> paramsinmc;
@@ -1663,8 +1663,8 @@ namespace CurveFitting
     g_log.debug() << "DBx430 " << dbss.str() << endl;
 
     // 1. Peak height
-    if (peakfunction->getParameter("I") < 1.0E-5)
-      peakfunction->setParameter("I", 4.0);
+    if (peakfunction->height() < 1.0E-5)
+      peakfunction->setHeight( 4.0 );
 
     // 2. Create fit
     Algorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
@@ -2588,7 +2588,7 @@ namespace CurveFitting
     }
 
     size_t numpeaks = m_peaks.size();
-    vector<double> vectofh, vecalpha, vecbeta, vecsigma;
+    vector<double> vectofh(numpeaks), vecalpha(numpeaks), vecbeta(numpeaks), vecsigma(numpeaks);
 
     // 2. Generate the TableWorkspace for peak parameters
     TableWorkspace* tablewsptr = new TableWorkspace();
@@ -2640,10 +2640,14 @@ namespace CurveFitting
         newrow << chi2;
 
         // iv.  Prepare for Z-score
-        vectofh.push_back(p_x);
-        vecalpha.push_back(p_a);
-        vecbeta.push_back(p_b);
-        vecsigma.push_back(p_s);
+        //vectofh.push_back(p_x);
+        //vecalpha.push_back(p_a);
+        //vecbeta.push_back(p_b);
+        //vecsigma.push_back(p_s);
+        vectofh[i] = p_x;
+        vecalpha[i] = p_a;
+        vecbeta[i] = p_b;
+        vecsigma[i] = p_s;
 
         /*
         outbuf << setw(10) << setprecision(5) << chi2 << endl;
