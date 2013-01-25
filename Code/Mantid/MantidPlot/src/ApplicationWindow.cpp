@@ -655,7 +655,6 @@ void ApplicationWindow::initGlobalConstants()
 
   d_matrix_tool_bar = true;
   d_file_tool_bar = true;
-  d_table_tool_bar = true;
   d_column_tool_bar = true;
   d_edit_tool_bar = true;
   d_plot_tool_bar = true;
@@ -1055,34 +1054,6 @@ void ApplicationWindow::initToolBars()
   plotTools->addAction(actionAddImage);
   plotTools->hide();
 
-  tableTools = new QToolBar(tr("Table"), this);
-  tableTools->setObjectName("tableTools"); // this is needed for QMainWindow::restoreState()
-  tableTools->setIconSize( QSize(16, 20));
-  addToolBar(Qt::TopToolBarArea, tableTools);
-
-  tableTools->addAction(actionPlotL);
-  tableTools->addAction(actionPlotP);
-  tableTools->addAction(actionPlotLP);
-  tableTools->addAction(actionPlotVerticalBars);
-  tableTools->addAction(actionPlotHorizontalBars);
-  tableTools->addAction(actionPlotArea);
-  tableTools->addAction(actionPlotPie);
-  tableTools->addAction(actionPlotHistogram);
-  tableTools->addAction(actionBoxPlot);
-  tableTools->addAction(actionPlotVectXYXY);
-  tableTools->addAction(actionPlotVectXYAM);
-  tableTools->addSeparator ();
-  tableTools->addAction(actionPlot3DRibbon);
-  tableTools->addAction(actionPlot3DBars);
-  tableTools->addAction(actionPlot3DScatter);
-  tableTools->addAction(actionPlot3DTrajectory);
-  tableTools->addSeparator();
-  tableTools->addAction(actionAddColToTable);
-  tableTools->addAction(actionShowColStatistics);
-  tableTools->addAction(actionShowRowStatistics);
-  tableTools->setEnabled(false);
-  tableTools->hide();
-
   columnTools = new QToolBar(tr( "Column"), this);
   columnTools->setObjectName("columnTools"); // this is needed for QMainWindow::restoreState()
   columnTools->setIconSize(QSize(16, 20));
@@ -1199,7 +1170,6 @@ void ApplicationWindow::insertTranslatedStrings()
   undoStackWindow->setWindowTitle(tr("Undo Stack"));
   consoleWindow->setWindowTitle(tr("Scripting Console"));
   displayBar->setWindowTitle(tr("Data Display"));
-  tableTools->setWindowTitle(tr("Table"));
   columnTools->setWindowTitle(tr("Column"));
   plotTools->setWindowTitle(tr("Plot"));
   fileTools->setWindowTitle(tr("File"));
@@ -1778,11 +1748,6 @@ void ApplicationWindow::customToolBars(MdiSubWindow* w)
       formatToolBar->show();
     }
   } else if (w->inherits("Table")){
-    if(d_table_tool_bar){
-      if(!tableTools->isVisible())
-        tableTools->show();
-      tableTools->setEnabled (true);
-    }
     if (d_column_tool_bar){
       if(!columnTools->isVisible())
         columnTools->show();
@@ -1808,7 +1773,6 @@ void ApplicationWindow::customToolBars(MdiSubWindow* w)
 void ApplicationWindow::disableToolbars()
 {
   plotTools->setEnabled(false);
-  tableTools->setEnabled(false);
   columnTools->setEnabled(false);
   plot3DTools->setEnabled(false);
   plotMatrixBar->setEnabled(false);
@@ -1820,7 +1784,6 @@ void ApplicationWindow::hideToolbars()
   displayBar->setVisible(false);
   editTools->setVisible(false);
   plotTools->setVisible(false);
-  tableTools->setVisible(false);
   columnTools->setVisible(false);
   plot3DTools->setVisible(false);
   plotMatrixBar->setVisible(false);
@@ -1833,7 +1796,6 @@ void ApplicationWindow::showToolbars()
   displayBar->setVisible(true);
   editTools->setVisible(true);
   plotTools->setVisible(true);
-  tableTools->setVisible(true);
   columnTools->setVisible(true);
   //plot3DTools->setVisible(true);
   plotMatrixBar->setVisible(true);
@@ -5418,7 +5380,6 @@ void ApplicationWindow::readSettings()
   settings.beginGroup("/ToolBars");
   d_file_tool_bar = settings.value("/FileToolBar", true).toBool();
   d_edit_tool_bar = settings.value("/EditToolBar", true).toBool();
-  d_table_tool_bar = settings.value("/TableToolBar", true).toBool();
   d_column_tool_bar = settings.value("/ColumnToolBar", true).toBool();
   d_matrix_tool_bar = settings.value("/MatrixToolBar", true).toBool();
   d_plot_tool_bar = settings.value("/PlotToolBar", true).toBool();
@@ -5795,7 +5756,6 @@ void ApplicationWindow::saveSettings()
   settings.beginGroup("/ToolBars");
   settings.setValue("/FileToolBar", d_file_tool_bar);
   settings.setValue("/EditToolBar", d_edit_tool_bar);
-  settings.setValue("/TableToolBar", d_table_tool_bar);
   settings.setValue("/ColumnToolBar", d_column_tool_bar);
   settings.setValue("/MatrixToolBar", d_matrix_tool_bar);
   settings.setValue("/PlotToolBar", d_plot_tool_bar);
@@ -16858,12 +16818,6 @@ void ApplicationWindow::showToolBarsMenu()
   connect(actionEditTools, SIGNAL(toggled(bool)), editTools, SLOT(setVisible(bool)));
   toolBarsMenu.addAction(actionEditTools);
 
-  QAction *actionTableTools = new QAction(tableTools->windowTitle(), this);
-  actionTableTools->setCheckable(true);
-  actionTableTools->setChecked(tableTools->isVisible());
-  connect(actionTableTools, SIGNAL(toggled(bool)), tableTools, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionTableTools);
-
   QAction *actionColumnTools = new QAction(columnTools->windowTitle(), this);
   actionColumnTools->setCheckable(true);
   actionColumnTools->setChecked(columnTools->isVisible());
@@ -16909,10 +16863,8 @@ void ApplicationWindow::showToolBarsMenu()
   if (action->text() == plotMatrixBar->windowTitle()){
     d_matrix_tool_bar = action->isChecked();
     plotMatrixBar->setEnabled(w && w->isA("Matrix"));
-  } else if (action->text() == tableTools->windowTitle()){
-    d_table_tool_bar = action->isChecked();
-    tableTools->setEnabled(w && w->inherits("Table"));
-  } else if (action->text() == columnTools->windowTitle()){
+  }
+  else if (action->text() == columnTools->windowTitle()){
     d_column_tool_bar = action->isChecked();
     columnTools->setEnabled(w && w->inherits("Table"));
   } else if (action->text() == plotTools->windowTitle()){
