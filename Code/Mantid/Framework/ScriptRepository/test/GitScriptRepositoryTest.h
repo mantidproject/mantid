@@ -145,18 +145,22 @@ void delete_file(std::string path){
     repo_file.append("/"); 
     std::cout << "Trying to download file " << file_to_download<<endl; 
     TS_ASSERT_THROWS_NOTHING(repo->download(file_to_download)); 
+    
 
     Poco::File f(std::string(repo_file).append(file_to_download)); 
+
     TSM_ASSERT(f.path(), f.exists()); 
+    
     Poco::FileStream sin (f.path()); 
     std::stringstream sout;
     Poco::StreamCopier::copyStream(sin,sout);
     TSM_ASSERT(sout.str(), sout.str().find("from TofConverter import converterGUI") == 0);
-
+    sin.close();
     delete_file("TofConv"); 
+    return;
   }
 
-  void test_nupdate_file(){
+  void test_update_file(){
     std::string file_to_download = "TofConv/TofConverter.py"; 
     std::string repo_file = repo->localRepository(); 
     repo_file.append("/"); 
@@ -174,8 +178,9 @@ void delete_file(std::string path){
 
     // re-list files
     TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
-    
-    TS_ASSERT_THROWS_NOTHING(repo->fileStatus(file_to_download) == Mantid::API::LOCAL_CHANGED); 
+    Mantid::API::SCRIPTSTATUS status;
+    TS_ASSERT_THROWS_NOTHING(status = repo->fileStatus(file_to_download)); 
+     TS_ASSERT(status == Mantid::API::LOCAL_CHANGED); 
 
     // try to download again
     
@@ -333,9 +338,6 @@ void delete_file(std::string path){
   TS_ASSERT_THROWS_NOTHING(repo->download(file1));
   
   TS_ASSERT_THROWS_NOTHING(repo->download(file3));
-  
-
-  
   
   {
     try{

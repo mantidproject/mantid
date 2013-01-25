@@ -4,6 +4,7 @@
 #include <QDialog>
 #include "MantidKernel/System.h"
 #include "ui_ScriptRepositoryView.h"
+#include "DllOption.h"
 namespace MantidQt
 {
 namespace API
@@ -31,7 +32,7 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class  ScriptRepositoryView : public QDialog
+  class  EXPORT_OPT_MANTIDQT_API ScriptRepositoryView : public QDialog
   {
     Q_OBJECT
   public:

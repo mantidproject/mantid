@@ -7,6 +7,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include <QIcon>
+#include <QPixmap>
 using namespace MantidQt::API;
 using Mantid::Kernel::ConfigServiceImpl; 
 using Mantid::Kernel::ConfigService;
@@ -136,31 +137,31 @@ QVariant RepoItem::data(int column,  int role  ) const
 
       if (directory){
         if (status == Mantid::API::REMOTE_ONLY)
-          return QIcon::fromTheme("folder-remote"); 
+          return QIcon::fromTheme("folder-remote", QIcon(QPixmap(":/win/folder-remote"))); 
         else
-          return QIcon::fromTheme("folder");           
+          return QIcon::fromTheme("folder", QIcon(QPixmap(":/win/folder")));           
       }
       else{
         int pos = QString(path).lastIndexOf('.');
         if (pos < 0)
-          return QIcon::fromTheme("unknown"); 
+          return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown"))); 
         if (path.contains("readme",Qt::CaseInsensitive))
-          return QIcon::fromTheme("text-x-readme"); 
+          return QIcon::fromTheme("text-x-readme", QIcon(QPixmap(":/win/txt_file.png"))); 
 
 
         QString extension = QString(path).remove(0,pos);
         if (extension == ".cpp" || extension == ".CPP" || extension == ".c" || extension == ".C")
-          return QIcon::fromTheme("text-x-c++");
+          return QIcon::fromTheme("text-x-c++", QIcon(QPixmap(":/win/unknown")));
         else if (extension == ".py" || extension == ".PY")
-          return QIcon::fromTheme("text-x-python"); 
+          return QIcon::fromTheme("text-x-python", QIcon(QPixmap(":/win/text-x-python"))); 
         else if (extension == ".ui")
-          return QIcon::fromTheme("document");
+          return QIcon::fromTheme("document", QIcon(QPixmap(":/win/document")));
         else if (extension == ".docx" || extension == ".doc" || extension == ".odf")
-          return QIcon::fromTheme("x-office-document"); 
+          return QIcon::fromTheme("x-office-document", QIcon(QPixmap(":/win/office-document"))); 
         else if (extension == ".pdf")
-          return QIcon::fromTheme("application-pdf"); 
+          return QIcon::fromTheme("application-pdf", QIcon(QPixmap(":/win/file_pdf"))); 
         else
-          return QIcon::fromTheme("unknown"); 
+          return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown"))); 
 
       }
       
@@ -271,20 +272,20 @@ void RepoDelegate::paint(
     // download    
     if (checked == "true" || checked.isEmpty())
       return;
-    icon = QIcon::fromTheme("system-software-install"); 
+    icon = QIcon::fromTheme("system-software-install", QIcon(QPixmap(":/win/download"))); 
   }else if (index.column() == 2){
     // update
     if (checked.isEmpty())
       return; 
     if (checked == "true")
-      icon = QIcon::fromTheme("dialog-ok"); 
+      icon = QIcon::fromTheme("dialog-ok", QIcon(QPixmap(":/win/dialog-ok"))); 
     else
-      icon = QIcon::fromTheme("bottom"); 
+      icon = QIcon::fromTheme("bottom", QIcon(QPixmap(":win/system-software-update"))); 
   }else if (index.column() == 3){
     if (checked.isEmpty() || checked == "true")
       return;
     else
-      icon = QIcon::fromTheme("add-files-to-archive"); 
+      icon = QIcon::fromTheme("add-files-to-archive", QIcon(QPixmap(":win/upload"))); 
   }
 
   QRect buttonRect( option.rect);

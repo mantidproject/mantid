@@ -448,7 +448,7 @@ static int checkout_action(
 	/* move workdir iterator to follow along with deltas */
 
 	while (1) {
-		if (!wd)
+		if (!wd || true) // GESNER ADDED FOR A SEGMENTATION FAULT THAT OCCURRED UNDER LINUX
 			return checkout_action_no_wd(data, delta);
 
 		cmp = strcomp(wd->path, delta->old_file.path);
