@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/Path.h>
 #include <Poco/File.h>
@@ -174,11 +175,17 @@ public:
     TS_ASSERT_DIFFERS(fp->value().find("LOQ48127"),std::string::npos);
     
     // Now test one with an upper case extension
+    auto & fileFinder = Mantid::API::FileFinder::Instance();
+    const bool startingCaseOption = fileFinder.getCaseSensitive();
+    // By default case sensitive is on
+    fileFinder.setCaseSensitive(false);
 
     ConfigService::Instance().setString("default.instrument","LOQ");
     error = fp->setValue("25654");
     TS_ASSERT_EQUALS(error, "");
     TS_ASSERT(fp->value().find("LOQ25654") != std::string::npos);
+
+    fileFinder.setCaseSensitive(startingCaseOption);
   }
 
   void testOptionalDirectory()
