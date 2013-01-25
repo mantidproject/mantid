@@ -918,13 +918,6 @@ void ApplicationWindow::initToolBars()
   plotTools->setIconSize( QSize(16,20) );
   addToolBar( plotTools );
 
-  plotTools->addAction(actionAddLayer);
-  plotTools->addAction(actionShowLayerDialog);
-  plotTools->addAction(actionAutomaticLayout);
-  plotTools->addSeparator();
-  plotTools->addAction(actionAddErrorBars);
-  plotTools->addAction(actionRemoveErrorBars);
-  plotTools->addAction(actionShowCurvesDialog);
   plotTools->addAction(actionAddFunctionCurve);
   plotTools->addAction(actionNewLegend);
   plotTools->addSeparator ();
@@ -1037,8 +1030,6 @@ void ApplicationWindow::initToolBars()
   btnLine->setIcon(QIcon(getQPixmap("lPlot_xpm")) );
   plotTools->addAction(btnLine);
 
-  plotTools->addAction(actionTimeStamp);
-  plotTools->addAction(actionAddImage);
   plotTools->hide();
 
   displayBar = new QToolBar( tr( "Data Display" ), this );
