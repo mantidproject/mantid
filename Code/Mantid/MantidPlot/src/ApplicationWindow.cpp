@@ -889,29 +889,15 @@ void ApplicationWindow::initToolBars()
   addToolBar( Qt::TopToolBarArea, fileTools );
 
   fileTools->addAction(actionNewProject);
-  fileTools->addAction(actionNewFolder);
-  fileTools->addAction(actionNewTable);
-  fileTools->addAction(actionNewMatrix);
-  fileTools->addAction(actionNewNote);
-  fileTools->addAction(actionNewGraph);
-  fileTools->addAction(actionNewFunctionPlot);
-  fileTools->addAction(actionNewSurfacePlot);
   fileTools->addSeparator ();
+
   fileTools->addAction(actionManageDirs);
   fileTools->addSeparator ();
   
   fileTools->addAction(actionOpenProj);
   fileTools->addAction(actionLoadFile);
+  fileTools->addSeparator ();
 
-  fileTools->addAction(actionSaveProject);
-  fileTools->addSeparator ();
-  fileTools->addAction(actionLoad);
-  fileTools->addSeparator ();
-  fileTools->addAction(actionCopyWindow);
-  fileTools->addAction(actionPrint);
-  fileTools->addAction(actionExportPDF);
-  fileTools->addSeparator();
-  fileTools->addAction(actionShowExplorer);
   fileTools->addAction(actionShowLog);
 #ifdef SCRIPTING_PYTHON
   fileTools->addAction(actionShowScriptWindow);
