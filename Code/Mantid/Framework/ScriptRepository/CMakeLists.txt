@@ -76,11 +76,11 @@ set ( INC_FILES inc/MantidScriptRepository/GitScriptRepository.h
   ${INC_HTTP}
 
 )
-
-set ( TEST_FILES
-	GitScriptRepositoryTest.h
-        ScriptRepositoryFactoryTest.h)
-
+#
+#set ( TEST_FILES
+#	GitScriptRepositoryTest.h
+#        ScriptRepositoryFactoryTest.h)
+#
 # uncomment these lines if you want to be able to test the
 # features that depend on internet connection
 #
