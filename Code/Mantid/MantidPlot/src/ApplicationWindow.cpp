@@ -896,6 +896,7 @@ void ApplicationWindow::initToolBars()
   
   fileTools->addAction(actionOpenProj);
   fileTools->addAction(actionLoadFile);
+  fileTools->addAction(actionSaveProject);
   fileTools->addSeparator ();
 
   fileTools->addAction(actionShowLog);
