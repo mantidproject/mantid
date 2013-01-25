@@ -32,6 +32,7 @@ and used by other algorithms, they should not be needed in daily use.
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidNexusCPP/NeXusException.hpp"
 #include <boost/algorithm/string.hpp>
 #include <vector>
@@ -108,11 +109,11 @@ namespace Mantid
 
     //-------------------------------------------------------------------------------------------------
     /** Do a quick file type check by looking at the first 100 bytes of the file
-     *  @param filePath :: path of the file including name.
-     *  @param nread :: no.of bytes read
-     *  @param header :: The first 100 bytes of the file as a union
-     *  @return true if the given file is of type which can be loaded by this algorithm
-     */
+    *  @param filePath :: path of the file including name.
+    *  @param nread :: no.of bytes read
+    *  @param header :: The first 100 bytes of the file as a union
+    *  @return true if the given file is of type which can be loaded by this algorithm
+    */
     bool LoadMD::quickFileCheck(const std::string& filePath,size_t nread, const file_header& header)
     {
       std::string ext = this->extension(filePath);
@@ -126,9 +127,9 @@ namespace Mantid
 
     //-------------------------------------------------------------------------------------------------
     /** Checks the file by opening it and reading few lines
-     *  @param filePath :: name of the file inluding its path
-     *  @return an integer value how much this algorithm can load the file
-     */
+    *  @param filePath :: name of the file inluding its path
+    *  @return an integer value how much this algorithm can load the file
+    */
     int LoadMD::fileCheck(const std::string& filePath)
     {
       int confidence(0);
@@ -140,7 +141,7 @@ namespace Mantid
         for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
         {
           if ( (it->second == "NXentry") &&
-              ((it->first == "MDEventWorkspace") || (it->first == "MDHistoWorkspace")) )
+            ((it->first == "MDEventWorkspace") || (it->first == "MDHistoWorkspace")) )
             confidence = 95;
         }
         file.close();
@@ -157,9 +158,9 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /** Load the ExperimentInfo blocks, if any, in the NXS file
-     *
-     * @param ws :: MDEventWorkspace/MDHisto to load
-     */
+    *
+    * @param ws :: MDEventWorkspace/MDHisto to load
+    */
     void LoadMD::loadExperimentInfos(boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws)
     {
       // First, find how many experimentX blocks there are
@@ -292,12 +293,12 @@ namespace Mantid
 
 
     /** Load a slab of double data into a bare array.
-     * Checks that the size is correct.
-     *
-     * @param data :: bare pointer to double array
-     * @param numPoints ::
-     * @param name
-     */
+    * Checks that the size is correct.
+    *
+    * @param data :: bare pointer to double array
+    * @param numPoints ::
+    * @param name
+    */
     void LoadMD::loadSlab(std::string name, void * data, MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType)
     {
       file->openData(name);
@@ -313,8 +314,8 @@ namespace Mantid
 
     //----------------------------------------------------------------------------------------------
     /** Perform loading for a MDHistoWorkspace.
-     * The entry should be open already.
-     */
+    * The entry should be open already.
+    */
     void LoadMD::loadHisto()
     {
       // Create the initial MDHisto.
@@ -394,78 +395,32 @@ namespace Mantid
         ws->addDimension(m_dims[d]);
 
       bool bMetadataOnly = getProperty("MetadataOnly");
-      if(!bMetadataOnly)
+
+      // ----------------------------------------- Box Structure ------------------------------
+      MDBoxFlatTree FlatBoxTree;
+      FlatBoxTree.loadBoxStructure(file);
+
+      BoxController_sptr bc = ws->getBoxController();
+      bc->fromXMLString(FlatBoxTree.getBCXMLdescr());
+
+      std::vector<MDBoxBase<MDE,nd> *> boxTree;
+      uint64_t totalNumEvents = FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,FileBackEnd,bMetadataOnly);
+      size_t numBoxes = boxTree.size();
+
+      // open data group for usage
+      file->openGroup("event_data", "NXdata");
+      totalNumEvents = MDE::openNexusData(file);
+      // ---------------------------------------- MEMORY FOR CACHE ------------------------------------
+
+      if (FileBackEnd)
       {
-        g_log.debug() << tim << " to load the dimensions, etc." << std::endl;
-
-        // ----------------------------------------- Box Structure ------------------------------
-        file->openGroup("box_structure", "NXdata");
-
-        // Load the box controller
-        std::string bcXML;
-        file->getAttr("box_controller_xml", bcXML);
-        ws->getBoxController()->fromXMLString(bcXML);
-
-        prog->report("Creating Vectors");
-
-        // Box type (0=None, 1=MDBox, 2=MDGridBox
-        std::vector<int> boxType;
-        // Recursion depth
-        std::vector<int> depth;
-        // Start index/length into the list of events
-        std::vector<uint64_t> box_event_index;
-        // Min/Max extents in each dimension
-        std::vector<double> extents;
-        // Inverse of the volume of the cell
-        std::vector<double> inverse_volume;
-        // Box cached signal/error squared
-        std::vector<double> box_signal_errorsquared;
-        // Start/end children IDs
-        std::vector<int> box_children;
-
-        g_log.debug() << tim << " to initialize the box data vectors." << std::endl;
-        prog->report("Reading Box Data");
-
-        // Read all the data blocks
-        file->readData("box_type", boxType);
-        file->readData("depth", depth);
-        file->readData("inverse_volume", inverse_volume);
-        file->readData("extents", extents);
-        file->readData("box_children", box_children);
-        file->readData("box_signal_errorsquared", box_signal_errorsquared);
-        file->readData("box_event_index", box_event_index);
-
-        size_t numBoxes = boxType.size();
-        if (numBoxes == 0) throw std::runtime_error("Zero boxes found. There must have been an error reading or writing the file.");
-
-        g_log.debug() << tim << " to read all the box data vectors. There are " << numBoxes << " boxes." << std::endl;
-
-        // Check all vector lengths match
-        if (depth.size() != numBoxes) throw std::runtime_error("Incompatible size for data: depth.");
-        if (inverse_volume.size() != numBoxes) throw std::runtime_error("Incompatible size for data: inverse_volume.");
-        if (boxType.size() != numBoxes) throw std::runtime_error("Incompatible size for data: boxType.");
-        if (extents.size() != numBoxes*nd*2) throw std::runtime_error("Incompatible size for data: extents.");
-        if (box_children.size() != numBoxes*2) throw std::runtime_error("Incompatible size for data: box_children.");
-        if (box_event_index.size() != numBoxes*2) throw std::runtime_error("Incompatible size for data: box_event_index.");
-        if (box_signal_errorsquared.size() != numBoxes*2) throw std::runtime_error("Incompatible size for data: box_signal_errorsquared.");
-
-        std::vector<MDBoxBase<MDE,nd> *> boxes(numBoxes, NULL);
-        BoxController_sptr bc = ws->getBoxController();
-
-        // ---------------------------------------- MEMORY FOR CACHE ------------------------------------
-        // How much memory for the cache?
-        if (FileBackEnd)
+      // How much memory for the cache?
         {
-          // TODO: Clean up, only a write buffer now
+        // TODO: Clean up, only a write buffer now
           double mb = getProperty("Memory");
-          if (mb < 0)
-          {
-            // Use 40% of available memory.
-            Kernel::MemoryStats stats;
-            stats.update();
-            mb = double(stats.availMem()) * 0.4 / 1024.0;
-          }
-          if (mb <= 0) mb = 0;
+       
+          // Defaults have changed, defauld disk buffer size should be 10 data chunks TODO: find optimal, 100 may be better. 
+          if (mb <= 0) mb = double(10*bc->getDataChunk()* sizeof(MDE)*1024*1024);
 
           // Express the cache memory in units of number of events.
           uint64_t cacheMemory = (uint64_t(mb) * 1024 * 1024) / sizeof(MDE);
@@ -479,131 +434,40 @@ namespace Mantid
           g_log.information() << "Setting a DiskBuffer cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
         }
 
+        // Leave the file open in the box controller
+        bc->setFile(file, m_filename, totalNumEvents);
 
+      } // Not file back end
+      else
+      {
         // ---------------------------------------- READ IN THE BOXES ------------------------------------
         prog->setNumSteps(numBoxes);
-
-        // Get ready to read the slabs
-        file->closeGroup();
-        file->openGroup("event_data", "NXdata");
-        uint64_t totalNumEvents = MDE::openNexusData(file);
-
-#ifdef COORDT_IS_FLOAT
-        if (FileBackEnd && file->getInfo().type == ::NeXus::FLOAT64)
-        {
-          g_log.warning() << "You have loaded, in file-backed mode, an older NXS file where event_data is in doubles." << std::endl;
-          g_log.warning() << "It is recommended that you save to a new file under the new format, where event_data is in floats." << std::endl;
-        }
-#endif
-
         for (size_t i=0; i<numBoxes; i++)
         {
           prog->report();
-          size_t box_type = boxType[i];
-          if (box_type > 0)
-          {
-            MDBoxBase<MDE,nd> * ibox = NULL;
-            MDBox<MDE,nd> * box;
+          MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxTree[i]);
+          if(!box)continue;
 
-            // Extents of the box, as a vector
-            std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(nd);
-            for (size_t d=0; d<nd; d++)
-              extentsVector[d].setExtents(static_cast<double>(extents[i*nd*2 + d*2]),static_cast<double>(extents[i*nd*2 + d*2 + 1]));
-
-
-            if (box_type == 1)
-            {
-              // --- Make a MDBox -----
-              if(BoxStructureOnly)
-              {
-                box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,-1);
-               // Only the box structure is being loaded, so ISavable will be undefined (NeverSaved, 0 size data)
-                box->setFilePosition(std::numeric_limits<uint64_t>::max(), 0,false); // this should be default state of ISavable
-              }
-              else // !BoxStructureOnly)
-              {
-                //----> Load the events now
-                // specify initial and final file location of the events which belong to this box 
-                uint64_t indexStart = box_event_index[i*2];
-                uint64_t numEvents  = box_event_index[i*2+1];
-
-                if(FileBackEnd)
-                {
-                  box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,-1);
-                  // Set the index in the file in the box data
-                  box->setFilePosition(indexStart, numEvents,true);
-                }
-                else
-                {
-                  box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,int64_t(numEvents));
-                  // Set the index in the file in the box data, and indicate that data were not saved
-                  box->setFilePosition(indexStart, numEvents,false);
-                  if(numEvents>0) // Load if NOT using the file as the back-end,
-                    box->loadNexus(file,false);
-                  // else --> well, it was an empty box TODO: something about it but it is substantial redesighn
-                }           
-              } // ifBoxStructureOnly
-              ibox = box;
-            }
-            else if (box_type == 2)
-            {
-              // --- Make a MDGridBox -----
-              ibox = new MDGridBox<MDE,nd>(bc, depth[i], extentsVector);
-            }
-            else
-              continue;
-
-            // Force correct ID
-            ibox->setId(i);
-            ibox->calcVolume();
-
-            // Set the cached values
-            ibox->setSignal(box_signal_errorsquared[i*2]);
-            ibox->setErrorSquared(box_signal_errorsquared[i*2+1]);
-
-            // Save the box at its index in the vector.
-            boxes[i] = ibox;
-          }
+          if(box->getFileSize()>0) // Load in memory NOT using the file as the back-end,
+            box->loadNexus(file,false);
         }
+        // Done reading in all the events.
+        MDE::closeNexusData(file);
+        file->closeGroup();
+        file->close();
+        // Make sure no back-end is used
+        bc->setFile(NULL, "", 0);
+      }
+
+      g_log.debug() << tim << " to create all the boxes and fill them with events." << std::endl;
 
 
-        if (FileBackEnd)
-        {
-          // Leave the file open in the box controller
-          bc->setFile(file, m_filename, totalNumEvents);
-        }
-        else
-        {
-          // Done reading in all the events.
-          MDE::closeNexusData(file);
-          file->closeGroup();
-          file->close();
-          // Make sure no back-end is used
-          bc->setFile(NULL, "", 0);
-        }
+      // Box of ID 0 is the head box.
+      ws->setBox(boxTree[0] );
+      // Make sure the max ID is ok for later ID generation
+      bc->setMaxId(numBoxes);
 
-        g_log.debug() << tim << " to create all the boxes and fill them with events." << std::endl;
-
-        // Go again, giving the children to the parents
-        for (size_t i=0; i<numBoxes; i++)
-        {
-          if (boxType[i] == 2)
-          {
-            size_t indexStart = box_children[i*2];
-            size_t indexEnd   = box_children[i*2+1] + 1;
-            boxes[i]->setChildren( boxes, indexStart, indexEnd);
-          }
-           // Break boxes connection with the file
-        }
-
-        g_log.debug() << tim << " to give all the children to the boxes." << std::endl;
-
-        // Box of ID 0 is the head box.
-        ws->setBox( boxes[0] );
-        // Make sure the max ID is ok for later ID generation
-        bc->setMaxId(numBoxes);
-
-      } //end-of bMetaDataOnly
+      //end-of bMetaDataOnly
       // Refresh cache
       //TODO:if(!FileBackEnd)ws->refreshCache();
       ws->refreshCache();

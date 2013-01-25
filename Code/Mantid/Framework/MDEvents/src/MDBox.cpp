@@ -337,10 +337,10 @@ namespace MDEvents
           m_isLoaded = true;
           mutex.unlock();
         }
-        catch (std::exception &)
+        catch (std::exception &e)
         {
           mutex.unlock();
-          throw;
+          throw e;
         }
       }
     }

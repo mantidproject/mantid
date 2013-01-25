@@ -102,7 +102,7 @@ namespace MDEvents
     virtual void clearDataFromMemory()
     {// no data so no operations
     }
-
+    // TODO: Kill it
     virtual bool isBox()const{throw std::runtime_error("Non-overloaded boxBase is invoked "); return false;}
     // -------------------------------- Parents/Children-Related -------------------------------------------
     /// Get the total # of unsplit MDBoxes contained.

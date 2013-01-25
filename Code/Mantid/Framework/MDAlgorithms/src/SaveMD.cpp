@@ -263,6 +263,7 @@ namespace MDAlgorithms
     else 
     {
       BoxFlatStruct.setBoxesFilePositions(MakeFileBacked);
+      boxes = BoxFlatStruct.getBoxes();
       for(size_t i=0;i<maxBoxes;i++)
       {
         MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
