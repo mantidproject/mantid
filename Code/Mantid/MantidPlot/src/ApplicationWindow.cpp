@@ -654,7 +654,7 @@ void ApplicationWindow::initGlobalConstants()
   d_in_place_editing = true;
 
   d_matrix_tool_bar = true;
-  d_file_tool_bar = true;
+  d_standard_tool_bar = true;
   d_column_tool_bar = true;
   d_edit_tool_bar = true;
   d_plot_tool_bar = true;
@@ -883,35 +883,30 @@ void ApplicationWindow::initToolBars()
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   QPixmap openIcon, saveIcon;
 
-  fileTools = new QToolBar(tr( "File" ), this);
-  fileTools->setObjectName("fileTools"); // this is needed for QMainWindow::restoreState()
-  fileTools->setIconSize( QSize(18,20) );
-  addToolBar( Qt::TopToolBarArea, fileTools );
+  standardTools = new QToolBar(tr( "Standard Tools" ), this);
+  standardTools->setObjectName("standardTools"); // this is needed for QMainWindow::restoreState()
+  standardTools->setIconSize( QSize(18,20) );
+  addToolBar( Qt::TopToolBarArea, standardTools );
 
-  fileTools->addAction(actionNewProject);
-  fileTools->addSeparator ();
+  standardTools->addAction(actionNewProject);
+  standardTools->addSeparator ();
 
-  fileTools->addAction(actionManageDirs);
-  fileTools->addSeparator ();
+  standardTools->addAction(actionManageDirs);
+  standardTools->addSeparator ();
   
-  fileTools->addAction(actionOpenProj);
-  fileTools->addAction(actionLoadFile);
-  fileTools->addAction(actionSaveProject);
-  fileTools->addSeparator ();
+  standardTools->addAction(actionOpenProj);
+  standardTools->addAction(actionLoadFile);
+  standardTools->addAction(actionSaveProject);
+  standardTools->addSeparator ();
 
-  fileTools->addAction(actionShowLog);
+  standardTools->addAction(actionShowLog);
 #ifdef SCRIPTING_PYTHON
-  fileTools->addAction(actionShowScriptWindow);
+  standardTools->addAction(actionShowScriptWindow);
 #endif
 
-  editTools = new QToolBar(tr("Edit"), this);
-  editTools->setObjectName("editTools"); // this is needed for QMainWindow::restoreState()
-  editTools->setIconSize( QSize(18,20) );
-  addToolBar( editTools );
-
-  editTools->addAction(actionCutSelection);
-  editTools->addAction(actionCopySelection);
-  editTools->addAction(actionPasteSelection);
+  standardTools->addAction(actionCutSelection);
+  standardTools->addAction(actionCopySelection);
+  standardTools->addAction(actionPasteSelection);
 
   plotTools = new QToolBar(tr("Plot"), this);
   plotTools->setObjectName("plotTools"); // this is needed for QMainWindow::restoreState()
@@ -1096,8 +1091,7 @@ void ApplicationWindow::insertTranslatedStrings()
   consoleWindow->setWindowTitle(tr("Scripting Console"));
   displayBar->setWindowTitle(tr("Data Display"));
   plotTools->setWindowTitle(tr("Plot"));
-  fileTools->setWindowTitle(tr("File"));
-  editTools->setWindowTitle(tr("Edit"));
+  standardTools->setWindowTitle(tr("Standard Tools"));
   plot3DTools->setWindowTitle(tr("3D Surface"));
   formatToolBar->setWindowTitle(tr("Format"));
 
@@ -1690,9 +1684,8 @@ void ApplicationWindow::disableToolbars()
 
 void ApplicationWindow::hideToolbars()
 {
-  fileTools->setVisible(false);
+  standardTools->setVisible(false);
   displayBar->setVisible(false);
-  editTools->setVisible(false);
   plotTools->setVisible(false);
   plot3DTools->setVisible(false);
   formatToolBar->setVisible(false);
@@ -1700,9 +1693,8 @@ void ApplicationWindow::hideToolbars()
 
 void ApplicationWindow::showToolbars()
 {
-  fileTools->setVisible(true);
+  standardTools->setVisible(true);
   displayBar->setVisible(true);
-  editTools->setVisible(true);
   plotTools->setVisible(true);
   //plot3DTools->setVisible(true);
   formatToolBar->setVisible(true);
@@ -5284,7 +5276,7 @@ void ApplicationWindow::readSettings()
   settings.endGroup();
 
   settings.beginGroup("/ToolBars");
-  d_file_tool_bar = settings.value("/FileToolBar", true).toBool();
+  d_standard_tool_bar = settings.value("/FileToolBar", true).toBool();
   d_edit_tool_bar = settings.value("/EditToolBar", true).toBool();
   d_column_tool_bar = settings.value("/ColumnToolBar", true).toBool();
   d_matrix_tool_bar = settings.value("/MatrixToolBar", true).toBool();
@@ -5660,7 +5652,7 @@ void ApplicationWindow::saveSettings()
   settings.endGroup();
 
   settings.beginGroup("/ToolBars");
-  settings.setValue("/FileToolBar", d_file_tool_bar);
+  settings.setValue("/FileToolBar", d_standard_tool_bar);
   settings.setValue("/EditToolBar", d_edit_tool_bar);
   settings.setValue("/ColumnToolBar", d_column_tool_bar);
   settings.setValue("/MatrixToolBar", d_matrix_tool_bar);
@@ -16712,17 +16704,11 @@ void ApplicationWindow::showToolBarsMenu()
 {
   QMenu toolBarsMenu;
 
-  QAction *actionFileTools = new QAction(fileTools->windowTitle(), this);
+  QAction *actionFileTools = new QAction(standardTools->windowTitle(), this);
   actionFileTools->setCheckable(true);
-  actionFileTools->setChecked(fileTools->isVisible());
-  connect(actionFileTools, SIGNAL(toggled(bool)), fileTools, SLOT(setVisible(bool)));
+  actionFileTools->setChecked(standardTools->isVisible());
+  connect(actionFileTools, SIGNAL(toggled(bool)), standardTools, SLOT(setVisible(bool)));
   toolBarsMenu.addAction(actionFileTools);
-
-  QAction *actionEditTools = new QAction(editTools->windowTitle(), this);
-  actionEditTools->setCheckable(true);
-  actionEditTools->setChecked(editTools->isVisible());
-  connect(actionEditTools, SIGNAL(toggled(bool)), editTools, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionEditTools);
 
   QAction *actionPlotTools = new QAction(plotTools->windowTitle(), this);
   actionPlotTools->setCheckable(true);
@@ -16760,10 +16746,8 @@ void ApplicationWindow::showToolBarsMenu()
   } else if (action->text() == plot3DTools->windowTitle()){
     d_plot3D_tool_bar = action->isChecked();
     plot3DTools->setEnabled(w && w->isA("Graph3D"));
-  } else if (action->text() == fileTools->windowTitle()){
-    d_file_tool_bar = action->isChecked();
-  } else if (action->text() == editTools->windowTitle()){
-    d_edit_tool_bar = action->isChecked();
+  } else if (action->text() == standardTools->windowTitle()){
+    d_standard_tool_bar = action->isChecked();
   } else if (action->text() == displayBar->windowTitle()){
     d_display_tool_bar = action->isChecked();
   } else if (action->text() == formatToolBar->windowTitle()){

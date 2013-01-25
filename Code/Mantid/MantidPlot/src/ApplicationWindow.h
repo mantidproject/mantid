@@ -1215,7 +1215,7 @@ public:
   //! Flag telling if the application is opening a project file or not
   bool d_opening_file;
   QString customActionsDirPath;
-  bool d_matrix_tool_bar, d_file_tool_bar, d_column_tool_bar, d_edit_tool_bar;
+  bool d_matrix_tool_bar, d_standard_tool_bar, d_column_tool_bar, d_edit_tool_bar;
   bool d_plot_tool_bar, d_plot3D_tool_bar, d_display_tool_bar, d_format_tool_bar;
   bool d_backup_files;
   WindowType d_init_window_type;
@@ -1399,7 +1399,7 @@ private:
   CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;
 
-  QToolBar *fileTools, *plotTools, *plot3DTools, *displayBar, *editTools;
+  QToolBar *standardTools, *plotTools, *plot3DTools, *displayBar;
   QToolBar *formatToolBar;
   QToolButton *btnResults;
   QWidgetList *hiddenWindows;
