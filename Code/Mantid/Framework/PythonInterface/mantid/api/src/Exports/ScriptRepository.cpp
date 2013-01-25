@@ -49,7 +49,7 @@ namespace
 
   tuple getInfo(ScriptRepository & self, const std::string path){
     ScriptInfo info = self.fileInfo(path);
-    return  make_tuple<std::string>(info.author, info.description);
+    return   boost::python::make_tuple<std::string>(info.author, info.description);
   }
 
   PyObject * getStatus(ScriptRepository & self, const std::string path){
