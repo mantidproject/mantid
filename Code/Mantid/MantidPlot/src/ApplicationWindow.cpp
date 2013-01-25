@@ -887,14 +887,10 @@ void ApplicationWindow::initToolBars()
   standardTools->setIconSize( QSize(18,20) );
   addToolBar( Qt::TopToolBarArea, standardTools );
 
-  standardTools->addAction(actionNewProject);
-  standardTools->addSeparator ();
-
-  standardTools->addAction(actionManageDirs);
-  standardTools->addSeparator ();
-  
-  standardTools->addAction(actionOpenProj);
   standardTools->addAction(actionLoadFile);
+   standardTools->addSeparator ();
+  standardTools->addAction(actionNewProject);
+  standardTools->addAction(actionOpenProj);
   standardTools->addAction(actionSaveProject);
   standardTools->addSeparator ();
 
@@ -903,7 +899,10 @@ void ApplicationWindow::initToolBars()
   standardTools->addAction(actionShowScriptWindow);
 #endif
 
-  standardTools->addAction(actionCutSelection);
+  standardTools->addSeparator ();
+  standardTools->addAction(actionManageDirs);
+  standardTools->addSeparator ();
+
   standardTools->addAction(actionCopySelection);
   standardTools->addAction(actionPasteSelection);
 
@@ -911,10 +910,6 @@ void ApplicationWindow::initToolBars()
   plotTools->setObjectName("plotTools"); // this is needed for QMainWindow::restoreState()
   plotTools->setIconSize( QSize(16,20) );
   addToolBar( plotTools );
-
-  plotTools->addAction(actionAddFunctionCurve);
-  plotTools->addAction(actionNewLegend);
-  plotTools->addSeparator ();
 
   dataTools = new QActionGroup( this );
   dataTools->setExclusive( true );
@@ -966,13 +961,6 @@ void ApplicationWindow::initToolBars()
   btnPicker->setIcon(QIcon(getQPixmap("cursor_16_xpm")) );
   plotTools->addAction(btnPicker); //disabled until fixed (#2783)
 
-  btnLabel = new QAction(tr("Label &Tool"), this);
-  btnLabel->setShortcut( tr("ALT+T") );
-  btnLabel->setActionGroup(dataTools);
-  btnLabel->setIcon(QIcon(getQPixmap("text_xpm")));
-  btnLabel->setCheckable(true);
-  plotTools->addAction(btnLabel); //disabled until fixed (#2783)
-  
   actionDrawPoints = new QAction(tr("&Draw Data Points"), this);
   actionDrawPoints->setActionGroup(dataTools);
   actionDrawPoints->setCheckable( true );
@@ -1009,6 +997,13 @@ void ApplicationWindow::initToolBars()
   connect( dataTools, SIGNAL( triggered( QAction* ) ), this, SLOT( pickDataTool( QAction* ) ) );
   plotTools->addSeparator ();
 
+  btnLabel = new QAction(tr("Label &Tool"), this);
+  btnLabel->setShortcut(tr("ALT+T"));
+  btnLabel->setActionGroup(dataTools);
+  btnLabel->setIcon(QIcon(getQPixmap("text_xpm")));
+  btnLabel->setCheckable(true);
+  plotTools->addAction(btnLabel); //disabled until fixed (#2783)
+
   btnArrow = new QAction(tr("Draw &Arrow"), this);
   btnArrow->setShortcut( tr("CTRL+ALT+A") );
   btnArrow->setActionGroup(dataTools);
@@ -1022,6 +1017,11 @@ void ApplicationWindow::initToolBars()
   btnLine->setCheckable( true );
   btnLine->setIcon(QIcon(getQPixmap("lPlot_xpm")) );
   plotTools->addAction(btnLine);
+
+  plotTools->addSeparator();
+  plotTools->addAction(actionAddFunctionCurve);
+  plotTools->addAction(actionNewLegend);
+  plotTools->addSeparator();
 
   plotTools->hide();
 
