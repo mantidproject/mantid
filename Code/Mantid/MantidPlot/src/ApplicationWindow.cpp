@@ -923,12 +923,9 @@ void ApplicationWindow::initToolBars()
   editTools->setIconSize( QSize(18,20) );
   addToolBar( editTools );
 
-  editTools->addAction(actionUndo);
-  editTools->addAction(actionRedo);
   editTools->addAction(actionCutSelection);
   editTools->addAction(actionCopySelection);
   editTools->addAction(actionPasteSelection);
-  editTools->addAction(actionClearSelection);
 
   plotTools = new QToolBar(tr("Plot"), this);
   plotTools->setObjectName("plotTools"); // this is needed for QMainWindow::restoreState()
@@ -1232,12 +1229,9 @@ void ApplicationWindow::initMainMenu()
   edit = new QMenu(this);
   edit->setObjectName("editMenu");
 
-  edit->addAction(actionUndo);
-  edit->addAction(actionRedo);
   edit->insertSeparator();
   edit->addAction(actionCopySelection);
   edit->addAction(actionPasteSelection);
-  edit->addAction(actionClearSelection);
   edit->insertSeparator();
   edit->addAction(actionDeleteFitTables);
 
