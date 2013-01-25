@@ -1054,30 +1054,6 @@ void ApplicationWindow::initToolBars()
   plotTools->addAction(actionAddImage);
   plotTools->hide();
 
-  columnTools = new QToolBar(tr( "Column"), this);
-  columnTools->setObjectName("columnTools"); // this is needed for QMainWindow::restoreState()
-  columnTools->setIconSize(QSize(16, 20));
-  addToolBar(Qt::TopToolBarArea, columnTools);
-
-  columnTools->addAction(actionShowColumnValuesDialog);
-  columnTools->addAction(actionSetAscValues);
-  columnTools->addAction(actionSetRandomValues);
-  columnTools->addSeparator();
-  columnTools->addAction(actionSetXCol);
-  columnTools->addAction(actionSetYCol);
-  columnTools->addAction(actionSetZCol);
-  columnTools->addAction(actionSetYErrCol);
-  columnTools->addAction(actionSetLabelCol);
-  columnTools->addAction(actionDisregardCol);
-  columnTools->addSeparator();
-  columnTools->addAction(actionMoveColFirst);
-  columnTools->addAction(actionMoveColLeft);
-  columnTools->addAction(actionMoveColRight);
-  columnTools->addAction(actionMoveColLast);
-  columnTools->addAction(actionSwapColumns);
-  columnTools->setEnabled(false);
-  columnTools->hide();
-
   displayBar = new QToolBar( tr( "Data Display" ), this );
   displayBar->setAllowedAreas( Qt::TopToolBarArea | Qt::BottomToolBarArea );
   displayBar->setObjectName("displayBar"); // this is needed for QMainWindow::restoreState()
@@ -1170,7 +1146,6 @@ void ApplicationWindow::insertTranslatedStrings()
   undoStackWindow->setWindowTitle(tr("Undo Stack"));
   consoleWindow->setWindowTitle(tr("Scripting Console"));
   displayBar->setWindowTitle(tr("Data Display"));
-  columnTools->setWindowTitle(tr("Column"));
   plotTools->setWindowTitle(tr("Plot"));
   fileTools->setWindowTitle(tr("File"));
   editTools->setWindowTitle(tr("Edit"));
@@ -1747,13 +1722,6 @@ void ApplicationWindow::customToolBars(MdiSubWindow* w)
       formatToolBar->setEnabled (true);
       formatToolBar->show();
     }
-  } else if (w->inherits("Table")){
-    if (d_column_tool_bar){
-      if(!columnTools->isVisible())
-        columnTools->show();
-      columnTools->setEnabled (true);
-      customColumnActions();
-    }
   } else if ((w->isA("Matrix") || w->isA("MantidMatrix")) && d_matrix_tool_bar){
     if(!plotMatrixBar->isVisible())
       plotMatrixBar->show();
@@ -1773,7 +1741,6 @@ void ApplicationWindow::customToolBars(MdiSubWindow* w)
 void ApplicationWindow::disableToolbars()
 {
   plotTools->setEnabled(false);
-  columnTools->setEnabled(false);
   plot3DTools->setEnabled(false);
   plotMatrixBar->setEnabled(false);
 }
@@ -1784,7 +1751,6 @@ void ApplicationWindow::hideToolbars()
   displayBar->setVisible(false);
   editTools->setVisible(false);
   plotTools->setVisible(false);
-  columnTools->setVisible(false);
   plot3DTools->setVisible(false);
   plotMatrixBar->setVisible(false);
   formatToolBar->setVisible(false);
@@ -1796,7 +1762,6 @@ void ApplicationWindow::showToolbars()
   displayBar->setVisible(true);
   editTools->setVisible(true);
   plotTools->setVisible(true);
-  columnTools->setVisible(true);
   //plot3DTools->setVisible(true);
   plotMatrixBar->setVisible(true);
   formatToolBar->setVisible(true);
@@ -16818,12 +16783,6 @@ void ApplicationWindow::showToolBarsMenu()
   connect(actionEditTools, SIGNAL(toggled(bool)), editTools, SLOT(setVisible(bool)));
   toolBarsMenu.addAction(actionEditTools);
 
-  QAction *actionColumnTools = new QAction(columnTools->windowTitle(), this);
-  actionColumnTools->setCheckable(true);
-  actionColumnTools->setChecked(columnTools->isVisible());
-  connect(actionColumnTools, SIGNAL(toggled(bool)), columnTools, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionColumnTools);
-
   QAction *actionPlotTools = new QAction(plotTools->windowTitle(), this);
   actionPlotTools->setCheckable(true);
   actionPlotTools->setChecked(plotTools->isVisible());
@@ -16863,10 +16822,6 @@ void ApplicationWindow::showToolBarsMenu()
   if (action->text() == plotMatrixBar->windowTitle()){
     d_matrix_tool_bar = action->isChecked();
     plotMatrixBar->setEnabled(w && w->isA("Matrix"));
-  }
-  else if (action->text() == columnTools->windowTitle()){
-    d_column_tool_bar = action->isChecked();
-    columnTools->setEnabled(w && w->inherits("Table"));
   } else if (action->text() == plotTools->windowTitle()){
     d_plot_tool_bar = action->isChecked();
     plotTools->setEnabled(w && w->isA("MultiLayer"));
