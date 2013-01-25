@@ -1167,7 +1167,7 @@ private:
   void showmantidplotHelp();
 
   /// for zooming the selected graph using mouse drag tool
-  void magnify();
+  void panOnPlot();
 
   /// Handler for ICat login menu 
   void ICatLogin();
@@ -1482,7 +1482,7 @@ private:
   QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
   QAction *actionShowUndoStack;
   QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
-  QAction *actionMagnify;
+  QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
 
   //mantid log level control

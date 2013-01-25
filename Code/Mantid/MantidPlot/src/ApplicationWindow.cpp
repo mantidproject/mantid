@@ -928,10 +928,9 @@ void ApplicationWindow::initToolBars()
   btnPointer->setChecked(true);
   plotTools->addAction(btnPointer);
 
-
-  actionMagnify->setActionGroup(dataTools);
-  actionMagnify->setCheckable( true );
-  plotTools->addAction(actionMagnify);
+  actionPanPlot->setActionGroup(dataTools);
+  actionPanPlot->setCheckable( true );
+  plotTools->addAction(actionPanPlot);
 
   btnZoomIn = new QAction(tr("&Zoom In"), this);
   btnZoomIn->setShortcut( tr("Ctrl++") );
@@ -1337,7 +1336,7 @@ void ApplicationWindow::plotDataMenuAboutToShow()
   plotDataMenu->addAction(btnPointer);
   plotDataMenu->addAction(btnZoomIn);
   plotDataMenu->addAction(btnZoomOut);
-  plotDataMenu->addAction(actionMagnify);
+  plotDataMenu->addAction(actionPanPlot);
   plotDataMenu->addAction(actionUnzoom);
   plotDataMenu->insertSeparator();
   plotDataMenu->addAction(btnCursor);
@@ -12453,8 +12452,8 @@ void ApplicationWindow::pickDataTool( QAction* action )
     drawLine();
   else if (action == btnMultiPeakPick)
     selectMultiPeak();
-  else if (action == actionMagnify)
-    magnify();
+  else if (action == actionPanPlot)
+    panOnPlot();
 }
 
 void ApplicationWindow::connectSurfacePlot(Graph3D *plot)
@@ -13414,8 +13413,8 @@ void ApplicationWindow::createActions()
   connect(actionreleaseFreeMemory,SIGNAL(triggered()), mantidUI, SLOT(releaseFreeMemory() ));
 #endif
 
-  actionMagnify = new QAction(QIcon(getQPixmap("magnifier_xpm")), tr("Zoom &In/Out and Drag Canvas"), this);
-  connect(actionMagnify, SIGNAL(activated()), this, SLOT(magnify()));
+  actionPanPlot = new QAction(QIcon(":/panning.png"), tr("Panning tool"), this);
+  connect(actionPanPlot, SIGNAL(activated()), this, SLOT(panOnPlot()));
 
   actionICatLogin  = new QAction("Login",this);
   actionICatLogin->setToolTip(tr("Catalog Login"));
@@ -13915,8 +13914,8 @@ void ApplicationWindow::translateActionsStrings()
   btnZoomOut->setShortcut(tr("Ctrl+-"));
   btnZoomOut->setToolTip(tr("Zoom Out"));
 
-  actionMagnify->setMenuText(tr("Zoom &In/Out and Drag Canvas"));
-  actionMagnify->setToolTip(tr("Zoom In (Shift++) or Out (-) and Drag Canvas"));
+  actionPanPlot->setMenuText(tr("Zoom &In/Out and Drag Canvas"));
+  actionPanPlot->setToolTip(tr("Panning tool (zoom with mouse wheel)"));
 
   btnCursor->setMenuText(tr("&Data Reader"));
   btnCursor->setShortcut(tr("CTRL+D"));
@@ -17625,7 +17624,7 @@ void ApplicationWindow::enablesaveNexus(const QString &wsName)
 }
 /* For zooming the selected graph using the drag canvas tool and mouse drag.
  */
-void ApplicationWindow::magnify()
+void ApplicationWindow::panOnPlot()
 {
   MultiLayer *plot = dynamic_cast<MultiLayer*>(activeWindow(MultiLayerWindow));
   if (!plot)
