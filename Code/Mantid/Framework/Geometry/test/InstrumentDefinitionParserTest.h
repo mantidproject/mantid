@@ -358,6 +358,12 @@ public:
     boost::shared_ptr<const IDetector> ptrDet119 = i->getDetector(119);
     TS_ASSERT_DELTA( ptrDet119->getPos().Y(), 1.0, 1e-8 );
     TS_ASSERT_EQUALS( ptrDet119->getName(), "tube9");
+    boost::shared_ptr<const IDetector> ptrDet120 = i->getDetector(120);
+    TS_ASSERT_DELTA( ptrDet120->getPos().Y(), -1.0, 1e-8 );
+    TS_ASSERT_EQUALS( ptrDet120->getName(), "tube1");
+    boost::shared_ptr<const IDetector> ptrDet129 = i->getDetector(129);
+    TS_ASSERT_DELTA( ptrDet129->getPos().Y(), 1.0, 1e-8 );
+    TS_ASSERT_EQUALS( ptrDet129->getName(), "tube10");
 
     boost::shared_ptr<const IDetector> ptrDet200 = i->getDetector(200);
     TS_ASSERT_DELTA( ptrDet200->getPos().Y(), 0.0, 1e-8 );

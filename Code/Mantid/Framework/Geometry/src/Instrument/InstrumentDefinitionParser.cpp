@@ -2402,7 +2402,15 @@ namespace Geometry
       n_elements = atoi((pElem->getAttribute("n-elements")).c_str());
     else
       throw Exception::InstrumentDefinitionError( std::string("When using <locations> ")
-            + " this element requires a n-elements attribute. See www.mantidproject.org/IDF." );    
+            + " this element requires a n-elements attribute. See www.mantidproject.org/IDF." ); 
+
+    std::string name;
+    if ( pElem->hasAttribute("name") )
+      name = pElem->getAttribute("name");
+
+    int nameCountStart = 0; 
+    if ( pElem->hasAttribute("name-count-start") )
+      nameCountStart = atoi((pElem->getAttribute("name-count-start")).c_str());   
 
     if ( pElem->hasAttribute("R") || pElem->hasAttribute("theta") || pElem->hasAttribute("phi") )
     {
@@ -2595,28 +2603,7 @@ namespace Geometry
       // look to see if name attribute is defined
       if ( pElem->hasAttribute("name") )
       {
-        std::string name = pElem->getAttribute("name");
-
-/*        int startCount = 0; // default start count to zero
-
-        std::string nameToUpper = name;
-        std::transform(nameToUpper.begin(), nameToUpper.end(), nameToUpper.begin(), toupper);
-
-        size_t found = nameToUpper.find("__STARTCOUNT");
-        if (found!=std::string::npos)
-        {
-           // Find where keyword ends
-           size_t foundLast__ = nameToUpper.find("__", found+3);
-
-           std::string intPart = nameToUpper.substr(found+12,2);
-
-           startCount = boost::lexical_cast<int>(intPart);
-
-           name = name.erase(found, foundLast__+2-found);
-        }
-*/
-
-        obj_str << " name=\"" << name << i << "\"";
+        obj_str << " name=\"" << name << i+nameCountStart << "\"";
       }
       
       // close <location>
