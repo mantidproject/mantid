@@ -94,7 +94,7 @@ namespace MDEvents
     { }
 
     /// @return the amount of memory that the object takes up in the MRU.
-    virtual uint64_t getMRUMemorySize() const
+    virtual uint64_t getTotalDataSize() const
     { return 0; }
     virtual size_t getDataMemorySize()const
     {return 0;}
@@ -103,7 +103,7 @@ namespace MDEvents
     {// no data so no operations
     }
 
-
+    virtual bool isBox()const{throw std::runtime_error("Non-overloaded boxBase is invoked "); return false;}
     // -------------------------------- Parents/Children-Related -------------------------------------------
     /// Get the total # of unsplit MDBoxes contained.
     virtual size_t getNumMDBoxes() const = 0;

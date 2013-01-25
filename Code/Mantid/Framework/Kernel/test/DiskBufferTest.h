@@ -30,6 +30,7 @@ public:
   m_memory(1)
   {}
 
+  virtual bool isBox()const{return true;}
   virtual void save()const 
   {
     // Fake writing to a file
@@ -45,7 +46,7 @@ public:
   virtual void flushData() const {}
 
   uint64_t m_memory;
-  virtual uint64_t getMRUMemorySize() const { return m_memory; };
+  virtual uint64_t getTotalDataSize() const { return m_memory; };
   virtual size_t getDataMemorySize() const  {  return size_t(m_memory);  }
 
 
@@ -70,6 +71,7 @@ class ISaveableTesterWithSeek : public ISaveableTester
 {
   bool is_loaded;
 public:
+  virtual bool isBox()const{return true;}
   ISaveableTesterWithSeek(size_t id) : ISaveableTester(id),
     is_loaded(false)
   {
@@ -145,6 +147,7 @@ class ISaveableTesterWithFile : public ISaveable
 {
   bool is_loaded;
 public:
+  virtual bool isBox()const{return true;}
   ISaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch) : ISaveable(id),
   is_loaded(false), m_memory(size),m_ch(ch)
   {
@@ -157,7 +160,7 @@ public:
   }
 
   uint64_t m_memory;
-  virtual uint64_t getMRUMemorySize() const 
+  virtual uint64_t getTotalDataSize() const 
   {
        return m_memory;
   };
@@ -175,7 +178,7 @@ public:
     // Fake writing to a file
     streamMutex.lock();
     uint64_t mPos = this->getFilePosition();
-    uint64_t mMem = this->getMRUMemorySize();
+    uint64_t mMem = this->getTotalDataSize();
     if (fakeFile.size() < mPos+mMem)
       fakeFile.resize(mPos+mMem, ' ');
 
@@ -740,10 +743,10 @@ public:
 
     // Asking for a new chunk of space that needs to be at the end
     // This all now happens inside the writeBuffer
-    uint64_t oldMem = blockB->getMRUMemorySize();
+    uint64_t oldMem = blockB->getTotalDataSize();
     blockB->changeMemSize(7);
     uint64_t mPos   = blockB->getFilePosition();
-    uint64_t newMem = blockB->getMRUMemorySize();
+    uint64_t newMem = blockB->getTotalDataSize();
     newPos = dbuf.relocate(mPos, oldMem, newMem);
     TSM_ASSERT_EQUALS( "One freed block", map.size(), 1);
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 17);

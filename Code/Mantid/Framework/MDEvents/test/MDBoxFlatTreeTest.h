@@ -15,7 +15,7 @@ class MDEventFlatTreeTest :public CxxTest::TestSuite
 {
 private:
   
-    Mantid::MDEvents::MDEventWorkspace3Lean::sptr spEw3;
+    Mantid::API::IMDEventWorkspace_sptr spEw3;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -29,7 +29,7 @@ public:
 
     TS_ASSERT_EQUALS(0,BoxTree.getNBoxes());
 
-    TS_ASSERT_THROWS_NOTHING(BoxTree.initTree(spEw3));
+   TS_ASSERT_THROWS_NOTHING((BoxTree.initFlatStructure<MDLeanEvent<3>, 3>(spEw3)));
 
     TSM_ASSERT_EQUALS("Workspace creatrion helper should generate ws split into 1001 boxes",1001,BoxTree.getNBoxes());
 

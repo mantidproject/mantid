@@ -68,11 +68,15 @@ namespace Kernel
     /// remove objects data from memory
     virtual void clearDataFromMemory() = 0;
 
-  /** @return the amount of memory that the object takes up in MEMORY.
-     * This should be in the same units as getFilePosition(), e.g. the object will use a block
-     * from getFilePosition() to getFilePosition()+getMRUMemorySize()-1 in the file.
+    /**This method is for refactoring from here*/
+    virtual bool isBox()const=0;
+
+  /** @return the amount of memory that the object takes as a whole.
+      For filebased objects it should be the amount the object occupies in memory plus the size it occupies in file if the object has not been fully loaded
+      or modified.
+     * If the object has never been loaded, this should be equal to number of data points in the file
      */
-    virtual uint64_t getMRUMemorySize() const=0;
+    virtual uint64_t getTotalDataSize() const=0;
     /// the data size kept in memory
     virtual size_t getDataMemorySize()const=0;
 

@@ -21,6 +21,7 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <Poco/File.h>
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDEvents/MDBoxFlatTree.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -233,10 +234,12 @@ namespace MDAlgorithms
         bc->setFile(file, filename, 0);
     }
 //----------------------------------------------------------------------------------------------------------------
-
     // flatten the box structure
-    std::vector<Kernel::ISaveable *> boxes;
-    ws->getBox()->getBoxes(boxes, 1000, false);
+    MDBoxFlatTree BoxFlatStruct;
+    BoxFlatStruct.initFlatStructure<MDE,nd>(ws);
+    // get boxes vector
+    std::vector<Kernel::ISaveable *> &boxes = BoxFlatStruct.getBoxes();
+
     size_t maxBoxes = boxes.size();
 
     Progress * prog = new Progress(this, 0.05, 0.9, maxBoxes);
@@ -257,104 +260,20 @@ namespace MDAlgorithms
       db.flushCache();
 
     }
-    else  // this will preserve file-backed workspace and information in it as we are not loading old box data and not?
-         // this would be right for binary axcess but questionable for Nexus --TODO: needs testing
+    else 
     {
-      Kernel::ISaveable::sortObjByFilePos(boxes);
-      // calculate the box positions in the resulting file and save it on place
-       uint64_t eventsStart=0;
-       bool rememberBoxIsSaved = MakeFileBacked;
-       for(size_t i=0;i<boxes.size();i++)
-       {
-          MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);        
-          if(!mdBox)continue;
-          size_t nEvents = mdBox->getNPoints();
-          mdBox->setFilePosition(eventsStart,nEvents,rememberBoxIsSaved);
-          eventsStart+=nEvents;
-       }
-
-    }
-
-//------------ Fill in plain box structure : TODO: Refactoring, extracting,
-
-    // Prepare the vectors we will fill with data.
-
-    // Box type (0=None, 1=MDBox, 2=MDGridBox
-    std::vector<int> box_type(maxBoxes, 0);
-    // Recursion depth
-    std::vector<int> depth(maxBoxes, -1);
-    // Start/end indices into the list of events
-    std::vector<uint64_t> box_event_index(maxBoxes*2, 0);
-    // Min/Max extents in each dimension
-    std::vector<double> extents(maxBoxes*nd*2, 0);
-    // Inverse of the volume of the cell
-    std::vector<double> inverse_volume(maxBoxes, 0);
-    // Box cached signal/error squared
-    std::vector<double> box_signal_errorsquared(maxBoxes*2, 0);
-    // Start/end children IDs
-    std::vector<int> box_children(maxBoxes*2, 0);
-
-
-
-    MDBoxBase<MDE,nd> *Box;
-    for(size_t i=0;i<maxBoxes;i++)
-    {
-       Box = dynamic_cast<MDBoxBase<MDE,nd> *>(boxes[i]);
-      // currently ID is the number of the box, but it may change in a future. TODO: uint64_t
-       size_t id = Box->getId();
-       size_t numChildren = Box->getNumChildren();
-       if (numChildren > 0)
-       {
-          // DEBUG:
-          // Make sure that all children are ordered. TODO: This might not be needed if the IDs are rigorously done
-          size_t lastId = Box->getChild(0)->getId();
-          for (size_t i = 1; i < numChildren; i++)
-          {
-            if (Box->getChild(i)->getId() != lastId+1)
-              throw std::runtime_error("Non-sequential child ID encountered!");
-            lastId = Box->getChild(i)->getId();
-          }
-
-          box_children[id*2] = int(Box->getChild(0)->getId());
-          box_children[id*2+1] = int(Box->getChild(numChildren-1)->getId());
-          box_type[id] = 2;
-          // no events but index defined
-          box_event_index[id*2]   = 0;
-          box_event_index[id*2+1] = 0;
-       }
-       else
-       {
-          box_type[id] = 1;
-          MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(Box);
-          if(!mdBox) throw std::runtime_error("found unfamiliar type of box");
-          // Store the index
-
-          uint64_t nPoints = mdBox->getNPoints();
-          box_event_index[id*2]   = mdBox->getFilePosition();
-          box_event_index[id*2+1] = nPoints;
-          // save for the first time
-          //if(!update && (box_event_index[id*2] != std::numeric_limits<uint64_t>::max()))mdBox->saveNexus(file);
-          if(!update && (nPoints != 0))
+      BoxFlatStruct.setBoxesFilePositions(MakeFileBacked);
+      for(size_t i=0;i<maxBoxes;i++)
+      {
+        MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
+        if(!mdBox)continue;
+        // avoid HDF/Nexus error on empty writes
+        if(mdBox->getNPoints() != 0)
             mdBox->saveNexus(file);
           // set that it is on disk and clear the actual events to free up memory, saving occured earlier
-          if (MakeFileBacked) mdBox->clearDataFromMemory();
-
-       }
-
-     // Various bits of data about the box
-        depth[id] = int(Box->getDepth());
-        box_signal_errorsquared[id*2] = double(Box->getSignal());
-        box_signal_errorsquared[id*2+1] = double(Box->getErrorSquared());
-        inverse_volume[id] = Box->getInverseVolume();
-        for (size_t d=0; d<nd; d++)
-        {
-          size_t newIndex = id*(nd*2) + d*2;
-          extents[newIndex]   = Box->getExtents(d).getMin();
-          extents[newIndex+1] = Box->getExtents(d).getMax();
-
-        }
-
+        if (MakeFileBacked) mdBox->clearDataFromMemory();
         prog->report("Saving Box");
+      }
     }
 
     // Done writing the event data.
@@ -382,54 +301,8 @@ namespace MDAlgorithms
     progress(0.91, "Writing Box Data");
     prog->resetNumSteps(8, 0.92, 1.00);
 
-    // Start the box data group
-    if (update)
-      file->openGroup("box_structure", "NXdata");
-    else
-      file->makeGroup("box_structure", "NXdata",true);
-    file->putAttr("version", "1.0");
-    // Add box controller info to this group
-    file->putAttr("box_controller_xml", bc->toXMLString());
-
-    std::vector<int> exents_dims(2,0);
-    exents_dims[0] = (int(maxBoxes));
-    exents_dims[1] = (nd*2);
-    std::vector<int> exents_chunk(2,0);
-    exents_chunk[0] = int(16384);
-    exents_chunk[1] = (nd*2);
-
-    std::vector<int> box_2_dims(2,0);
-    box_2_dims[0] = int(maxBoxes);
-    box_2_dims[1] = (2);
-    std::vector<int> box_2_chunk(2,0);
-    box_2_chunk[0] = int(16384);
-    box_2_chunk[1] = (2);
-
-    if (!update)
-    {
-      // Write it for the first time
-      file->writeExtendibleData("box_type", box_type);
-      file->writeExtendibleData("depth", depth);
-      file->writeExtendibleData("inverse_volume", inverse_volume);
-      file->writeExtendibleData("extents", extents, exents_dims, exents_chunk);
-      file->writeExtendibleData("box_children", box_children, box_2_dims, box_2_chunk);
-      file->writeExtendibleData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims, box_2_chunk);
-      file->writeExtendibleData("box_event_index", box_event_index, box_2_dims, box_2_chunk);
-    }
-    else
-    {
-      // Update the extendible data sets
-      file->writeUpdatedData("box_type", box_type);
-      file->writeUpdatedData("depth", depth);
-      file->writeUpdatedData("inverse_volume", inverse_volume);
-      file->writeUpdatedData("extents", extents, exents_dims);
-      file->writeUpdatedData("box_children", box_children, box_2_dims);
-      file->writeUpdatedData("box_signal_errorsquared", box_signal_errorsquared, box_2_dims);
-      file->writeUpdatedData("box_event_index", box_event_index, box_2_dims);
-    }
-
-    // Finished - close the file. This ensures everything gets written out even when updating.
-    file->close();
+    //Save box structure;
+    BoxFlatStruct.saveBoxStructure(file);
 
     if (update || MakeFileBacked)
     {

@@ -59,12 +59,13 @@ namespace MDEvents
     virtual void load();
    
     /// @return the amount of memory that the object takes up in the MRU.
-    virtual uint64_t getMRUMemorySize() const
+    virtual uint64_t getTotalDataSize() const
             { return getNPoints(); }
   /** @return the size of the event vector. ! Note that this is NOT necessarily the same as the number of points 
     (because it might be cached to disk) or the size on disk (because you might have called AddEvents) */
     virtual size_t getDataMemorySize()const 
             {  return data.size();}
+    virtual bool isBox()const{return true;}
     //-----------------------------------------------------------------------------------------------
 
     void clear();

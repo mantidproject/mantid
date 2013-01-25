@@ -57,6 +57,7 @@ namespace MDEvents
     size_t getNumMDBoxes() const;
 
     size_t getNumChildren() const;
+   virtual bool isBox()const{return false;}
 
     size_t getChildIndexFromID(size_t childId) const;
 

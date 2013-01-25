@@ -867,7 +867,7 @@ public:
 
     // The size on disk should have been changed (but not the position since that was the only free spot)
     TS_ASSERT_EQUALS( c.getFilePosition(), 500);
-    TS_ASSERT_EQUALS( c.getMRUMemorySize(), 600);
+    TS_ASSERT_EQUALS( c.getTotalDataSize(), 600);
     TS_ASSERT_EQUALS( c.getDataMemorySize(), 0);
     TS_ASSERT_EQUALS( c.getNPoints(), 600);
 
@@ -889,7 +889,7 @@ public:
     // The new event list should have ended up at the end of the file
     TS_ASSERT_EQUALS( c2.getFilePosition(), 2000);
     TS_ASSERT_EQUALS( c2.getDataMemorySize(), 0);
-    TS_ASSERT_EQUALS( c2.getMRUMemorySize(), 1500);
+    TS_ASSERT_EQUALS( c2.getTotalDataSize(), 1500);
     // The file has now grown.
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 3500);
 
@@ -927,7 +927,7 @@ public:
     MDBox<MDLeanEvent<3>,3> c(bc, 0);
     ::NeXus::File * file = do_saveAndOpenNexus(c, "MDBoxTest.nxs", false);
     TSM_ASSERT_EQUALS("Nothing in memory", c.getDataMemorySize(), 0);
-    TSM_ASSERT_EQUALS("Nothing in memory", c.getMRUMemorySize(), 1000);
+    TSM_ASSERT_EQUALS("Nothing in memory", c.getTotalDataSize(), 1000);
     TSM_ASSERT_EQUALS("1000 events on file", c.getFileSize(), 1000);
     TSM_ASSERT("The data was NOT loaded from disk.", !c.getInMemory());
     TSM_ASSERT_DELTA("Correct cached signal", c.getSignal(), 1000.0, 1e-3);
@@ -944,7 +944,7 @@ public:
     TSM_ASSERT_EQUALS("Still 1000 events on file", c.getFileSize(), 1000);
     TSM_ASSERT_EQUALS("But now 1001 events total because they are in two places.", c.getNPoints(), 1001);
     TSM_ASSERT_EQUALS("But only one in memory", c.getDataMemorySize(), 1);
-    TSM_ASSERT_EQUALS("The object size -- number of points in it", c.getMRUMemorySize(), 1001);
+    TSM_ASSERT_EQUALS("The object size -- number of points in it", c.getTotalDataSize(), 1001);
     TSM_ASSERT("The data is STILL NOT loaded from disk.", !c.getInMemory());
     TSM_ASSERT_DELTA("At this point the cached signal is still incorrect - this is normal", c.getSignal(), 1000.0, 1e-3);
 
@@ -960,7 +960,7 @@ public:
     dbuf.flushCache();
     TSM_ASSERT("Data is not flagged as modified because it was written out to disk.", !c.isDataChanged());
     TSM_ASSERT_EQUALS("Now there is nothing in memory", c.getDataMemorySize(), 0);
-    TSM_ASSERT_EQUALS("There is 1001 ppoint in total", c.getMRUMemorySize(), 1001);
+    TSM_ASSERT_EQUALS("There is 1001 ppoint in total", c.getTotalDataSize(), 1001);
     TSM_ASSERT_EQUALS("Now there is 1001 event in file", c.getFileSize(), 1001);
     TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
@@ -979,7 +979,7 @@ public:
 
     TSM_ASSERT("Data is still not flagged as modified because it was accessed as const", !c.isDataChanged());
     TSM_ASSERT_EQUALS("Still 1001 events on file", c.getFileSize(), 1001);
-    TSM_ASSERT_EQUALS("And  1002 events in memory ", c.getMRUMemorySize(), 1002);
+    TSM_ASSERT_EQUALS("And  1002 events in memory ", c.getTotalDataSize(), 1002);
     TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1002);
     c.releaseEvents();
     dbuf.flushCache();
@@ -997,12 +997,12 @@ public:
     (void) events3;
     c.addEvent(ev);
     TSM_ASSERT_EQUALS("Still 1002 events on file", c.getFileSize(), 1002);
-    TSM_ASSERT_EQUALS("And 1003 events in memory", c.getMRUMemorySize(), 1003);
+    TSM_ASSERT_EQUALS("And 1003 events in memory", c.getTotalDataSize(), 1003);
     TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1003);
     c.releaseEvents();
     dbuf.flushCache();
     TSM_ASSERT_EQUALS("Nothing in memory", c.getDataMemorySize(), 0);
-    TSM_ASSERT_EQUALS("1003 events in total", c.getMRUMemorySize(), 1003);
+    TSM_ASSERT_EQUALS("1003 events in total", c.getTotalDataSize(), 1003);
     TSM_ASSERT_EQUALS("1003 events on file", c.getFileSize(), 1003);
     TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
     TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());

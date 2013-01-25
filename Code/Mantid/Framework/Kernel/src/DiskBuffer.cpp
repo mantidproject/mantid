@@ -151,7 +151,7 @@ namespace Kernel
       obj = const_cast<ISaveable *>(*it);
       if (!obj->isBusy())
       {
-        uint64_t NumAllEvents = obj->getMRUMemorySize();
+        uint64_t NumAllEvents = obj->getTotalDataSize();
         uint64_t fileIndexStart;
         if (!obj->wasSaved())
         {
