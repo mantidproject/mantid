@@ -489,7 +489,7 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
   {
     clearShapes();
     QString saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-    QString fileName = QFileDialog::getSaveFileName(m_instrWindow,"Select location for the mas file",saveDir);
+    QString fileName = QFileDialog::getSaveFileName(m_instrWindow,"Select location and name for the mask file",saveDir,"XML files (*.xml)");
 
     if (!fileName.isEmpty())
     {
