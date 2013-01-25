@@ -7,18 +7,18 @@ include_directories (libgit2/include)
 ####
 # Find required dependencies
 #maybe INCLUDE_DIRECTORIES (libgit2/src as well
-INCLUDE_DIRECTORIES(libgit2/include libgit2/deps/http-parser libgit2/src/ libgit2/deps/regex)
+INCLUDE_DIRECTORIES(SYSTEM libgit2/include libgit2/deps/http-parser libgit2/src/ libgit2/deps/regex)
 
 IF (NOT WIN32)
   FIND_PACKAGE(ZLIB)
 ENDIF()
 
 IF (ZLIB_FOUND)
- INCLUDE_DIRECTORIES (${ZLIB_INCLUDE_DIRS})
+ INCLUDE_DIRECTORIES (SYSTEM ${ZLIB_INCLUDE_DIRS})
  LINK_LIBRARIES(${ZLIB_LIBRARIES})
  SET (SRC_ZLIB "")
 ELSE()
-  INCLUDE_DIRECTORIES(libgit2/deps/zlib)
+  INCLUDE_DIRECTORIES(SYSTEM libgit2/deps/zlib)
   ADD_DEFINITIONS(-DNO_VIZ -DSTDC -DNO_GZIP)
   SET (SRC_ZLIB
     libgit2/deps/zlib/adler32.c
@@ -47,7 +47,7 @@ ENDIF()
 
 # On Windows use specific platform sources
 IF (WIN32 AND NOT CYGWIN)
-	ADD_DEFINITIONS(-DWIN32 -D_DEBUG -D_WIN32_WINNT=0x0501)
+	##ADD_DEFINITIONS(-DWIN32 -D_WIN32_WINNT=0x0501)
 	FILE(GLOB GIT2_SRC libgit2/src/*.c libgit2/src/transports/*.c libgit2/src/xdiff/*.c libgit2/src/win32/*.c libgit2/src/compat/*.c)
 ELSEIF (CMAKE_SYSTEM_NAME MATCHES "(Solaris|SunOS)")
 	FILE(GLOB GIT2_SRC libgit2/src/*.c libgit2/src/transports/*.c libgit2/src/xdiff/*.c libgit2/src/unix/*.c libgit2/src/compat/*.c)
