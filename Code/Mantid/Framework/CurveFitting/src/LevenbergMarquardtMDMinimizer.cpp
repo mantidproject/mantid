@@ -72,8 +72,8 @@ bool LevenbergMarquardtMDMinimizer::iterate()
 
   if ( m_mu > muMax )
   {
-    m_errorString = "Failed to converge, maximum mu reached";
-    g_log.warning() << m_errorString << std::endl;
+    //m_errorString = "Failed to converge, maximum mu reached";
+    //g_log.warning() << m_errorString << std::endl;
     return false;
   }
 
