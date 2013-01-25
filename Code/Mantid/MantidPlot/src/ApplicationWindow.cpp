@@ -1071,35 +1071,6 @@ void ApplicationWindow::initToolBars()
 
   insertToolBarBreak (displayBar);
 
-  plotMatrixBar = new QToolBar( tr( "Matrix Plot" ), this);
-  plotMatrixBar->setObjectName("plotMatrixBar");
-  addToolBar(Qt::BottomToolBarArea, plotMatrixBar);
-
-  actionPlot3DWireFrame->addTo(plotMatrixBar);
-  actionPlot3DHiddenLine->addTo(plotMatrixBar);
-
-  actionPlot3DPolygons->addTo(plotMatrixBar);
-  actionPlot3DWireSurface->addTo(plotMatrixBar);
-
-  plotMatrixBar->addSeparator();
-
-  actionPlot3DBars->addTo(plotMatrixBar);
-  actionPlot3DScatter->addTo(plotMatrixBar);
-
-  plotMatrixBar->addSeparator();
-  actionColorMap->addTo(plotMatrixBar);
-  actionContourMap->addTo(plotMatrixBar);
-  actionGrayMap->addTo(plotMatrixBar);
-  actionImagePlot->addTo(plotMatrixBar);
-  //actionPlotHistogram->addTo(plotMatrixBar);
-  plotMatrixBar->addSeparator();
-  actionSetMatrixValues->addTo(plotMatrixBar);
-  actionFlipMatrixHorizontally->addTo(plotMatrixBar);
-  actionFlipMatrixVertically->addTo(plotMatrixBar);
-  actionRotateMatrix->addTo(plotMatrixBar);
-  actionRotateMatrixMinus->addTo(plotMatrixBar);
-  plotMatrixBar->hide();
-
   formatToolBar = new QToolBar(tr( "Format" ), this);
   formatToolBar->setObjectName("formatToolBar");
   addToolBar(Qt::TopToolBarArea, formatToolBar);
@@ -1149,7 +1120,6 @@ void ApplicationWindow::insertTranslatedStrings()
   plotTools->setWindowTitle(tr("Plot"));
   fileTools->setWindowTitle(tr("File"));
   editTools->setWindowTitle(tr("Edit"));
-  plotMatrixBar->setWindowTitle(tr("Matrix Plot"));
   plot3DTools->setWindowTitle(tr("3D Surface"));
   formatToolBar->setWindowTitle(tr("Format"));
 
@@ -1722,10 +1692,6 @@ void ApplicationWindow::customToolBars(MdiSubWindow* w)
       formatToolBar->setEnabled (true);
       formatToolBar->show();
     }
-  } else if ((w->isA("Matrix") || w->isA("MantidMatrix")) && d_matrix_tool_bar){
-    if(!plotMatrixBar->isVisible())
-      plotMatrixBar->show();
-    plotMatrixBar->setEnabled (true);
   } else if (w->isA("Graph3D") && d_plot3D_tool_bar){
     if(!plot3DTools->isVisible())
       plot3DTools->show();
@@ -1742,7 +1708,6 @@ void ApplicationWindow::disableToolbars()
 {
   plotTools->setEnabled(false);
   plot3DTools->setEnabled(false);
-  plotMatrixBar->setEnabled(false);
 }
 
 void ApplicationWindow::hideToolbars()
@@ -1752,7 +1717,6 @@ void ApplicationWindow::hideToolbars()
   editTools->setVisible(false);
   plotTools->setVisible(false);
   plot3DTools->setVisible(false);
-  plotMatrixBar->setVisible(false);
   formatToolBar->setVisible(false);
 }
 
@@ -1763,7 +1727,6 @@ void ApplicationWindow::showToolbars()
   editTools->setVisible(true);
   plotTools->setVisible(true);
   //plot3DTools->setVisible(true);
-  plotMatrixBar->setVisible(true);
   formatToolBar->setVisible(true);
 }
 
@@ -16789,12 +16752,6 @@ void ApplicationWindow::showToolBarsMenu()
   connect(actionPlotTools, SIGNAL(toggled(bool)), plotTools, SLOT(setVisible(bool)));
   toolBarsMenu.addAction(actionPlotTools);
 
-  QAction *actionMatrixTools = new QAction(plotMatrixBar->windowTitle(), this);
-  actionMatrixTools->setCheckable(true);
-  actionMatrixTools->setChecked(plotMatrixBar->isVisible());
-  connect(actionMatrixTools, SIGNAL(toggled(bool)), plotMatrixBar, SLOT(setVisible(bool)));
-  toolBarsMenu.addAction(actionMatrixTools);
-
   QAction *actionPlot3DTools = new QAction(plot3DTools->windowTitle(), this);
   actionPlot3DTools->setCheckable(true);
   actionPlot3DTools->setChecked(plot3DTools->isVisible());
@@ -16819,10 +16776,7 @@ void ApplicationWindow::showToolBarsMenu()
 
   MdiSubWindow *w = activeWindow();
 
-  if (action->text() == plotMatrixBar->windowTitle()){
-    d_matrix_tool_bar = action->isChecked();
-    plotMatrixBar->setEnabled(w && w->isA("Matrix"));
-  } else if (action->text() == plotTools->windowTitle()){
+  if (action->text() == plotTools->windowTitle()){
     d_plot_tool_bar = action->isChecked();
     plotTools->setEnabled(w && w->isA("MultiLayer"));
   } else if (action->text() == plot3DTools->windowTitle()){

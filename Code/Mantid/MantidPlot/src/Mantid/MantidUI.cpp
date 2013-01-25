@@ -391,7 +391,6 @@ bool MantidUI::menuAboutToShow(MdiSubWindow *w)
     appWindow()->actionCopySelection->setEnabled(true);
     appWindow()->actionPasteSelection->setEnabled(false);
     appWindow()->actionClearSelection->setEnabled(false);
-    appWindow()->plotMatrixBar->setEnabled (true);
 
     appWindow()->myMenuBar()->insertItem(tr("&Workspace"),menuMantidMatrix);
     return true;

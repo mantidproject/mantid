@@ -1399,7 +1399,7 @@ private:
   CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;
 
-  QToolBar *fileTools, *plotTools, *plot3DTools, *displayBar, *editTools, *plotMatrixBar;
+  QToolBar *fileTools, *plotTools, *plot3DTools, *displayBar, *editTools;
   QToolBar *formatToolBar;
   QToolButton *btnResults;
   QWidgetList *hiddenWindows;
