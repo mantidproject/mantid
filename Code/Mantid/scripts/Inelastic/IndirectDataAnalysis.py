@@ -206,6 +206,9 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         ename = first+'to_'+last
     e1WS = ename+'_eq1'
     e2WS = ename+'_eq2'
+    elwWS = ename+'_elw'    # temporary fix to do plotting
+    CreateWorkspace(OutputWorkspace=elwWS, DataX=datX1, DataY=datY1, DataE=datE1,
+        Nspec=nr, UnitX='MomentumTransfer')
     CreateWorkspace(OutputWorkspace=e1WS, DataX=datX1, DataY=datY1, DataE=datE1,
         Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis)
     CreateWorkspace(OutputWorkspace=e2WS, DataX=datX2, DataY=datY2, DataE=datE2,
