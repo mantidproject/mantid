@@ -215,7 +215,7 @@ namespace MDAlgorithms
     BoxFlatStruct.initFlatStructure<MDE,nd>(ws);
 
     // Start the event Data group and prepare the data chunk storage.
-    BoxFlatStruct.initEventFileStorage(file,bc,MakeFileBacked,MDE::getTypeName());
+    BoxFlatStruct.initEventFileStorage(file,bc,MakeFileBacked||update,MDE::getTypeName());
 //----------------------------------------------------------------------------------------------------------------
  
     // get boxes vector
