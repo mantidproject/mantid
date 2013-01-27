@@ -393,6 +393,8 @@ namespace Mantid
     Boxes.assign(numBoxes, NULL);
 
     uint64_t totalNumEvents(0);
+    m_nDim = bc->getNDims();
+    if(m_nDim<=0)throw std::runtime_error("Workspace dimesnions are not defined properly");
 
     for (size_t i=0; i<numBoxes; i++)
     {
@@ -405,7 +407,7 @@ namespace Mantid
 
       // Extents of the box, as a vector
       std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(m_nDim);
-      for (size_t d=0; d<m_nDim; d++)
+      for (size_t d=0; d<size_t(m_nDim); d++)
         extentsVector[d].setExtents(static_cast<double>(m_Extents[i*m_nDim*2 + d*2]),static_cast<double>(m_Extents[i*m_nDim*2 + d*2 + 1]));
 
       // retrieve initial and file location and the numner of the events which belong to this box stored on the HDD
