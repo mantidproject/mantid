@@ -1,6 +1,3 @@
-include_directories (libgit2/include)
-#add_subdirectory (libgit2)
-
 
 ####
 ## SET THE LIB GIT 2 FILES
@@ -66,9 +63,15 @@ SET (INC_REGEX libgit2/deps/regex/regex.h)
 SET (SRC_HTTP libgit2/deps/http-parser/http_parser.c)
 SET (INC_HTTP libgit2/deps/http-parser/http_parser.h)
 
-set ( SRC_FILES src/GitScriptRepository.cpp
+# Libgit2 source
+set ( LIBGIT2_SRC 
   ${SRC_ZLIB} ${SRC_REGEX} ${SRC_HTTP}
   ${SRC_SHA1}  ${GIT2_SRC} 
+)
+
+# Mantid source
+set ( SRC_FILES 
+  src/GitScriptRepository.cpp
 )
 
 set ( INC_FILES inc/MantidScriptRepository/GitScriptRepository.h
@@ -89,8 +92,17 @@ set ( INC_FILES inc/MantidScriptRepository/GitScriptRepository.h
 #    GitNewFeatureTest.h
 #)
 
+## Ignore all warnings from libgit2 source
+if (MSVC)
+  set_source_files_properties ( ${LIBGIT2_SRC} 
+                                PROPERTIES COMPILE_FLAGS "/w" )
+else()
+  set_source_files_properties ( ${LIBGIT2_SRC} 
+                                PROPERTIES COMPILE_FLAGS "-w" )
+endif()
+
 # Add the target for this directory
-add_library ( ScriptRepository ${SRC_FILES} ${INC_FILES})
+add_library ( ScriptRepository ${SRC_FILES} ${LIBGIT2_SRC} ${INC_FILES} )
 # Add the unit tests directory
 add_subdirectory ( test )
 # Set the name of the generated library

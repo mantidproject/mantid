@@ -934,7 +934,6 @@ namespace API
                                              long int &doc_start, 
                                              long int &doc_end){
 
-    int line_number = 0;
     const char * startmarks[] = {"\"\"\"",
                                  "'''",
                                  "##",
