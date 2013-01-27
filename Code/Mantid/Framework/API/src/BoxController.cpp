@@ -176,7 +176,7 @@ namespace API
   }
 
 
-  void BoxController::prepareEventNexusData(::NeXus::File * file, const uint64_t chunkSize,const size_t nColumns,const std::string &descr)
+  void BoxController::prepareEventNexusData(::NeXus::File * file, const size_t chunkSize,const size_t nColumns,const std::string &descr)
   {
       std::vector<int> dims(2,0);
       dims[0] = NX_UNLIMITED;
