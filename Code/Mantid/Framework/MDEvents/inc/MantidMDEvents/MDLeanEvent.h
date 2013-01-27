@@ -5,6 +5,7 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "ManditAPI/BoxController.h"
 #include <numeric>
 #include <cmath>
 #include <napi.h>

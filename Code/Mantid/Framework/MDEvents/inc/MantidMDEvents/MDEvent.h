@@ -4,6 +4,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
+#include "ManditAPI/BoxController.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <cmath>
