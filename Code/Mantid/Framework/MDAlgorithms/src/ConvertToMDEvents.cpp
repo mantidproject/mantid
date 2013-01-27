@@ -351,7 +351,9 @@ void ConvertToMDEvents::exec()
 
 /** Constructor */
 ConvertToMDEvents::ConvertToMDEvents()
-{}
+{ 
+  this->useAlgorithm("ConvertToMD");
+}
 /** Constructor
 ConvertToMDEvents::ConvertToMDEvents()
 {
