@@ -393,8 +393,8 @@ namespace Mantid
     Boxes.assign(numBoxes, NULL);
 
     uint64_t totalNumEvents(0);
-    m_nDim = bc->getNDims();
-    if(m_nDim<=0)throw std::runtime_error("Workspace dimesnions are not defined properly");
+    m_nDim = int(bc->getNDims());
+    if(m_nDim<=0||m_nDim>11 )throw std::runtime_error("Workspace dimesnions are not defined properly");
 
     for (size_t i=0; i<numBoxes; i++)
     {
