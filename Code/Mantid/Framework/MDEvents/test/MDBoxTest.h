@@ -563,7 +563,7 @@ public:
     ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
     file->openGroup("my_test_group", "NXdata");
     // Must get ready to load in the data
-    MDLeanEvent<3>::openNexusData(file);
+    API::BoxController::openEventNexusData(file);
 
     // Set it in the BoxController
     if (box.getBoxController())

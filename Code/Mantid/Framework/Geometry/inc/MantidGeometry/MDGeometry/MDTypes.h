@@ -74,7 +74,6 @@ namespace Mantid
    */
   #define TMDE_CLASS template <typename MDE, size_t nd>
 
-
 }
 
 #endif //MANTID_GEOMETRY_MDTYPES_H_

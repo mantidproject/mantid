@@ -409,7 +409,7 @@ namespace Mantid
 
       // open data group for usage
       file->openGroup("event_data", "NXdata");
-      totalNumEvents = MDE::openNexusData(file);
+      totalNumEvents = API::BoxController::openEventNexusData(file);
       // ---------------------------------------- MEMORY FOR CACHE ------------------------------------
 
       if (FileBackEnd)
@@ -452,7 +452,7 @@ namespace Mantid
             box->loadNexus(file,false);
         }
         // Done reading in all the events.
-        MDE::closeNexusData(file);
+        file->closeData();
         file->closeGroup();
         file->close();
         // Make sure no back-end is used

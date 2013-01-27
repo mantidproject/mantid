@@ -514,8 +514,22 @@ namespace API
     size_t m_bytesPerEvent;
     /// The size of the events block which can be written in the neXus array at once (continious part of the data block)
     size_t m_DataChunk;
-   
+  public:
+
+  static void prepareEventNexusData(::NeXus::File * file,const size_t DataChunk,const size_t nColumns,const std::string &descr);
+
+  //---------------------------------------------------------------------------------------------
+    /** Open the NXS event data blocks for loading.
+     *
+     * @param file :: open NXS file.
+     * @return the number of events currently in the data field.
+     */
+  static uint64_t openEventNexusData(::NeXus::File * file);
+
+  static void closeNexusData(::NeXus::File * file);
   };
+
+
 
   /// Shared ptr to BoxController
   typedef boost::shared_ptr<BoxController> BoxController_sptr;

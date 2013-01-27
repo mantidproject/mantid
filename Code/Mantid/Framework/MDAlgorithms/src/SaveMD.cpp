@@ -163,7 +163,7 @@ namespace MDAlgorithms
 
       // Normally the file is left open with the event data open, but in READ only mode.
       // Needs to be closed and reopened for things to work
-      MDE::closeNexusData(file);
+      file->closeData();
       file->close();
       // Reopen the file
       filename = bc->getFilename();
@@ -191,12 +191,11 @@ namespace MDAlgorithms
     {
       // Write out some general information like # of dimensions
       file->writeData("dimensions", int32_t(nd));
-      file->putAttr("event_type", MDE::getTypeName());
-
       // Save the algorithm history under "process"
       ws->getHistory().saveNexus(file);
     }
 
+    file->putAttr("event_type", MDE::getTypeName());
     // Save each NEW ExperimentInfo to a spot in the file
     this->saveExperimentInfos(file,ws);
 
@@ -210,37 +209,20 @@ namespace MDAlgorithms
       mess << "dimension" << d;
       file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
     }
-
-    // Start the event Data group
-    if (update)
-      file->openGroup("event_data", "NXdata");
-    else
-      file->makeGroup("event_data", "NXdata",true);
-    file->putAttr("version", "1.0");
-
-    // Prepare the data chunk storage.
-    size_t chunkSize = bc->getDataChunk();
-    if (update)
-    {
-      uint64_t NumOldEvents = MDE::openNexusData(file);
-      // Set it back to the new file handle
-      bc->setFile(file, filename, NumOldEvents);
-    }
-    else
-    {
-      MDE::prepareNexusData(file, chunkSize);
-      // Initialize the file-backing
-      if (MakeFileBacked)
-        bc->setFile(file, filename, 0);
-    }
-//----------------------------------------------------------------------------------------------------------------
-    // flatten the box structure
     MDBoxFlatTree BoxFlatStruct;
+
+  // flatten the box structure
     BoxFlatStruct.initFlatStructure<MDE,nd>(ws);
+
+    // Start the event Data group and prepare the data chunk storage.
+    BoxFlatStruct.initEventFileStorage(file,bc,MakeFileBacked,MDE::getTypeName());
+//----------------------------------------------------------------------------------------------------------------
+ 
     // get boxes vector
     std::vector<Kernel::ISaveable *> &boxes = BoxFlatStruct.getBoxes();
 
     size_t maxBoxes = boxes.size();
+    size_t chunkSize = bc->getDataChunk();
 
     Progress * prog = new Progress(this, 0.05, 0.9, maxBoxes);
     if(update)
@@ -253,7 +235,7 @@ namespace MDAlgorithms
       {
         MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
         if(!mdBox)continue;
-        if(mdBox->getDataMemorySize()>0)
+        if(mdBox->getDataMemorySize()>0) // if part of the object is on HDD, this will load it into memory before saving
           db.toWrite(mdBox);
       }
       // clear all still remaining in the buffer. 
@@ -278,7 +260,8 @@ namespace MDAlgorithms
     }
 
     // Done writing the event data.
-    MDE::closeNexusData(file);
+    file->closeData();
+
 
     // ------------------------- Save Free Blocks --------------------------------------------------
     // Get a vector of the free space blocks to save to the file
@@ -289,11 +272,19 @@ namespace MDAlgorithms
     std::vector<int> free_dims(2,2); free_dims[0] = int(freeSpaceBlocks.size()/2);
     std::vector<int> free_chunk(2,2); free_chunk[0] =int(bc->getDataChunk());
 
-    // Now the free space blocks under event_data
-    if (!update)
+    // Now the free space blocks under event_data -- should be done better
+    try
+    {
+       file->writeUpdatedData("free_space_blocks", freeSpaceBlocks, free_dims);
+    }catch(...)
+    {
+       file->writeExtendibleData("free_space_blocks", freeSpaceBlocks, free_dims, free_chunk);
+    }
+/*    if (!update)
       file->writeExtendibleData("free_space_blocks", freeSpaceBlocks, free_dims, free_chunk);
     else
       file->writeUpdatedData("free_space_blocks", freeSpaceBlocks, free_dims);
+  */  // close event group
     file->closeGroup();
 
 
@@ -314,7 +305,7 @@ namespace MDAlgorithms
       // Re-open the data for events.
       file->openGroup("MDEventWorkspace", "NXentry");
       file->openGroup("event_data", "NXdata");
-      uint64_t totalNumEvents = MDE::openNexusData(file);
+      uint64_t totalNumEvents = API::BoxController::openEventNexusData(file);
       bc->setFile(file, filename, totalNumEvents);
       // Mark file is up-to-date
       ws->setFileNeedsUpdating(false);

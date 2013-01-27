@@ -30,7 +30,7 @@ public:
 
   void test_exec()
   {
-    do_test_exec("");
+   do_test_exec("");
   }
 
   void test_exec_fileBacked()
@@ -110,11 +110,7 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
 
-    if (OutputFilename != "")
-    {
-       if (Poco::File(OutputFilename).exists()) Poco::File(OutputFilename).remove();
-    }
-
+  
   }
 
 

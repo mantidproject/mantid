@@ -84,8 +84,8 @@ namespace MDEvents
       ::NeXus::File * file = this->m_BoxController->getFile();
       if (file)
       {
-        MDE::closeNexusData(file);
-        MDE::openNexusData(file);
+        API::BoxController::closeNexusData(file);
+        API::BoxController::openEventNexusData(file);
       }
     }
 

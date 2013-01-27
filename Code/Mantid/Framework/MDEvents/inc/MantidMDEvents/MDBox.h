@@ -57,6 +57,17 @@ namespace MDEvents
 
     /// Load the data which are not in memory yet and merge them with the data in memory;
     virtual void load();
+    /** Method sets the attribite which tells that data were loaded in memory. 
+
+        Usually one should not use this method  as load operation sets this attribute by itself 
+        but in some specific situations where the data were loaded from extermal source and exchanged with the box and the
+        data file position in new place is known this attribute should be set to true manually, to not allowing attempt to download 
+        data again (see mergeMD files where target box data were loaded from the external source and been added to the box
+    */
+    void setLoaded()
+    {
+    m_isLoaded=true;
+    }
    
     /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getTotalDataSize() const

@@ -1005,7 +1005,7 @@ public:
     file->close();
     file = new ::NeXus::File(filename, NXACC_RDWR);
     file->openGroup("MDEventWorkspaceTest", "NXentry");
-    MDE::openNexusData(file);
+    API::BoxController::openEventNexusData(file);
 
     // Create the grid box and make it file-backed.
     gbox_t * b = MDEventsTestHelper::makeMDGridBox<2>();

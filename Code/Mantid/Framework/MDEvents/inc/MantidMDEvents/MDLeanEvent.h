@@ -278,49 +278,15 @@ namespace MDEvents
      */
     static void prepareNexusData(::NeXus::File * file, const uint64_t chunkSize)
     {
-      std::vector<int> dims(2,0);
-      dims[0] = NX_UNLIMITED;
-      dims[1] = (nd)+2; // One point per dimension, plus signal, plus error = nd+2
-
-      // Now the chunk size.
-      std::vector<int> chunk(dims);
-      chunk[0] = int(chunkSize);
-
-      // Make and open the data
-#ifdef COORDT_IS_FLOAT
-      file->makeCompData("event_data", ::NeXus::FLOAT32, dims, ::NeXus::NONE, chunk, true);
-#else
-      file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
-#endif
-
-      // A little bit of description for humans to read later
-      file->putAttr("description", "signal, errorsquared, center (each dim.)");
+      API::BoxController::prepareEventNexusData(file,chunkSize,nd+2,"signal, errorsquared, center (each dim.)");
     }
 
-    //---------------------------------------------------------------------------------------------
-    /** Open the NXS data blocks for loading.
-     * The data should have been created before.
-     *
-     * @param file :: open NXS file.
-     * @return the number of events currently in the data field.
-     */
-    static uint64_t openNexusData(::NeXus::File * file)
-    {
-      // Open the data
-      file->openData("event_data");
-      // Return the size of dimension 0 = the number of events in the field
-      return uint64_t(file->getInfo().dims[0]);
-    }
-
+  
     //---------------------------------------------------------------------------------------------
     /** Do any final clean up of NXS event data blocks
      *
      * @param file :: open NXS file.
-     */
-    static void closeNexusData(::NeXus::File * file)
-    {
-      file->closeData();
-    }
+     */  
 
 
     //---------------------------------------------------------------------------------------------
@@ -545,7 +511,7 @@ namespace MDEvents
     }
 
   };
-
+ 
 
 } // namespace MDEvents
 } // namespace Mantid

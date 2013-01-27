@@ -186,9 +186,6 @@ namespace MDEvents
 
 
 
-
-
-
     //---------------------------------------------------------------------------------------------
     /** When first creating a NXS file containing the data, the proper
      * data block(s) need to be created.
@@ -198,24 +195,7 @@ namespace MDEvents
      */
     static void prepareNexusData(::NeXus::File * file, const uint64_t chunkSize)
     {
-      std::vector<int> dims(2,0);
-      dims[0] = NX_UNLIMITED;
-      // One point per dimension, plus signal, plus error, plus runIndex, plus detectorID = nd+4
-      dims[1] = (nd)+4;
-
-      // Now the chunk size.
-      std::vector<int> chunk(dims);
-      chunk[0] = int(chunkSize);
-
-      // Make and open the data
-#ifdef COORDT_IS_FLOAT
-      file->makeCompData("event_data", ::NeXus::FLOAT32, dims, ::NeXus::NONE, chunk, true);
-#else
-      file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
-#endif
-
-      // A little bit of description for humans to read later
-      file->putAttr("description", "signal, errorSquared, runIndex, detectorId, center (each dim.)");
+       API::BoxController::prepareEventNexusData(file,chunkSize,nd+4,"signal, errorSquared, runIndex, detectorId, center (each dim.)");
     }
 
 

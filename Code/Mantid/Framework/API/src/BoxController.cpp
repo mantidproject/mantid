@@ -175,6 +175,50 @@ namespace API
     }
   }
 
+
+  void BoxController::prepareEventNexusData(::NeXus::File * file, const uint64_t chunkSize,const size_t nColumns,const std::string &descr)
+  {
+      std::vector<int> dims(2,0);
+      dims[0] = NX_UNLIMITED;
+      // One point per dimension, plus signal, plus error, plus runIndex, plus detectorID = nd+4
+      dims[1] = int(nColumns);
+
+      // Now the chunk size.
+      std::vector<int> chunk(dims);
+      chunk[0] = int(chunkSize);
+
+      // Make and open the data
+#ifdef COORDT_IS_FLOAT
+      file->makeCompData("event_data", ::NeXus::FLOAT32, dims, ::NeXus::NONE, chunk, true);
+#else
+      file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
+#endif
+
+      // A little bit of description for humans to read later
+      file->putAttr("description", descr);
+
+  }
+
+  //---------------------------------------------------------------------------------------------
+    /** Open the NXS data blocks for loading.
+     * The data should have been created before.
+     *
+     * @param file :: open NXS file.
+     * @return the number of events currently in the data field.
+     */
+    uint64_t BoxController::openEventNexusData(::NeXus::File * file)
+    {
+      // Open the data
+      file->openData("event_data");
+      // Return the size of dimension 0 = the number of events in the field
+      return uint64_t(file->getInfo().dims[0]);
+    }
+    void BoxController::closeNexusData(::NeXus::File * file)
+    {
+      file->closeData();
+    }
+
+
 } // namespace Mantid
 
 } // namespace API

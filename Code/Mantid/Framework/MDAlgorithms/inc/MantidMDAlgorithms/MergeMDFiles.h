@@ -5,6 +5,7 @@
 #include "MantidAPI/Algorithm.h" 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
@@ -63,20 +64,18 @@ namespace MDAlgorithms
     void loadBoxData();
 
     template<typename MDE, size_t nd>
-    typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr createOutputWSbyCloning(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
-
-    template<typename MDE, size_t nd>
     void doExecByCloning(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     template<typename MDE, size_t nd>
     void finalizeOutput(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr outWS);
 
-//    template<typename MDE, size_t nd>
-//    typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr createOutputWS(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
-//
-//    template<typename MDE, size_t nd>
-//    void doExec(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+    template<typename MDE, size_t nd>
+    uint64_t loadEventsFromSubBoxes(MDEvents::MDBox<MDE, nd> *TargetBox);
 
+    // the class which flatten the box structure and deal with it
+    MDEvents::MDBoxFlatTree m_BoxStruct;
+
+    Kernel::DiskBuffer *pDiskBuffer;
   public:
 
     /// Files to load
@@ -86,16 +85,11 @@ namespace MDAlgorithms
     std::vector< ::NeXus::File *> m_pFiles;
 
     /// Vector of the box_index vector for each each input file
-    std::vector<boost::shared_ptr<std::vector<uint64_t> > > m_BoxIndexes;
+    std::vector<boost::shared_ptr<std::vector<uint64_t> > > m_EachBoxIndexes;
 
-    /// Number of events in each box, summed over all input files
-    std::vector<uint64_t> m_EventsPerBox;
-
-    /// # of boxes in the input workspaces.
-    size_t numBoxes;
-
+ 
     /// Output IMDEventWorkspace
-    Mantid::API::IMDEventWorkspace_sptr outIWS;
+    Mantid::API::IMDEventWorkspace_sptr m_OutIWS;
 
     /// # of events from ALL input files
     uint64_t totalEvents;
@@ -113,7 +107,7 @@ namespace MDAlgorithms
     Mantid::API::Progress * prog;
 
     /// Set to true if the output is cloned of the first one
-    bool clonedFirst;
+    //bool clonedFirst;
 
   };
 
