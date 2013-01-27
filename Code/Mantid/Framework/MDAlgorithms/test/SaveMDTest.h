@@ -46,22 +46,22 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_exec()
+  void xest_exec()
   {
     do_test_exec(23, "SaveMDTest.nxs");
   }
 
-  void test_exec_noEvents()
+  void xest_exec_noEvents()
   {
     do_test_exec(0, "SaveMDTest_noEvents.nxs");
   }
 
-  void test_MakeFileBacked()
+  void xest_MakeFileBacked()
   {
     do_test_exec(23, "SaveMDTest.nxs", true);
   }
 
-  void test_MakeFileBacked_then_UpdateFileBackEnd()
+  void xest_MakeFileBacked_then_UpdateFileBackEnd()
   {
     do_test_exec(23, "SaveMDTest_updating.nxs", true, true);
   }
