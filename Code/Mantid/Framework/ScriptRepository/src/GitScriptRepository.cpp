@@ -418,7 +418,7 @@ namespace API
          it != repository_list.end();
          it++){
       if( it->path == file_path_adjusted){
-        g_log.debug() << "File " << file_path_adjusted << " status = " << it->status;
+        //g_log.debug() << "File " << file_path_adjusted << " status = " << it->status;
         return it->status;       
       }
     }
@@ -573,7 +573,7 @@ namespace API
       //make backup if necessary
       SCRIPTSTATUS st = curr_entry->status; 
       if (st == LOCAL_CHANGED || st == BOTH_CHANGED){
-        g_log.warning() << "perform a backup of this file\n";
+        g_log.debug() << "perform a backup of this file\n";
         Poco::File f (std::string(repo_path).append(file_path_adjusted)); 
         // copy file
         std::string bck = std::string(f.path()).append("_bck"); 
@@ -610,10 +610,10 @@ namespace API
     // add file name
     opts.paths.strings[0] = strdup(file_path_adjusted.c_str()); 
     opts.paths.count = 1; 
-    g_log.warning() << "entering git checkout index " << opts.paths.strings[0]<< "\n" ;
+    g_log.debug() << "entering git checkout index " << opts.paths.strings[0]<< "\n" ;
     //err = git_checkout_index(repo, NULL, &opts); 
     err = git_checkout_head(repo, &opts); 
-      g_log.warning() << " git checkout index\n" ;
+      g_log.debug() << " git checkout index\n" ;
     // release memory FIXME
     delete [] opts.paths.strings[0]; 
     free(opts.paths.strings); 
@@ -769,7 +769,7 @@ namespace API
     file << "*.pyc\n";
     file.close(); 
     repo = cloned_repo; 
-    g_log.debug() << "GitScriptRepository::cloneRepository ... finished!\n";
+    g_log.notice() << "ScriptRepository Installation Success!\n";
     return;
 
   }

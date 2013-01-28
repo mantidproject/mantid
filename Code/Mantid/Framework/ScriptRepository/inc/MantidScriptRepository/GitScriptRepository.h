@@ -76,6 +76,10 @@ namespace API{
                 const std::string description = std::string()) throw (ScriptRepoException&);
     void update(void) throw (ScriptRepoException&);
 
+    /* Return true if there is a local cloned repository*/
+    bool isValid(void){
+      return (repo != NULL);
+    };
 
     std::string localRepository() const {return local_repository;  }
 

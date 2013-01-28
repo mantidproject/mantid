@@ -422,7 +422,11 @@ They will work as was expected for folders @ref folders-sec.
                 const std::string author, 
                 const std::string description = std::string()) throw (ScriptRepoException&) = 0;
 
-
+    /** Check if the local repository exists. If there is no local repository, 
+      the repository was never cloned, the isValid will return false, and the
+      only method valid is update. 
+    */
+    virtual bool isValid(void) = 0;
 
     /**
        Connects to the remote repository, and checking for updates. 
