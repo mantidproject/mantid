@@ -388,6 +388,10 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(helpLineViewer()));
   m_menuHelp->addAction(action);
 
+  action = new QAction(QPixmap(), "&Peaks Viewer Help (browser)", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(helpPeaksViewer()));
+  m_menuHelp->addAction(action);
+
   // --------------- Line Menu ----------------------------------------
   m_menuLine = new QMenu("&Line", this);
 
@@ -983,6 +987,12 @@ void SliceViewer::helpSliceViewer()
 void SliceViewer::helpLineViewer()
 {
   QString helpPage = "MantidPlot:_LineViewer";
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
+}
+
+void SliceViewer::helpPeaksViewer()
+{
+  QString helpPage = "PeaksViewer";
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
