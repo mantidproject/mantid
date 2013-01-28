@@ -397,7 +397,7 @@ namespace Mantid
       bool bMetadataOnly = getProperty("MetadataOnly");
 
       // ----------------------------------------- Box Structure ------------------------------
-      MDBoxFlatTree FlatBoxTree;
+      MDBoxFlatTree FlatBoxTree(m_filename);
       FlatBoxTree.loadBoxStructure(file);
 
       BoxController_sptr bc = ws->getBoxController();

@@ -14,7 +14,7 @@ namespace MDEvents
   class DLLExport MDBoxFlatTree
   {
   public:
-    MDBoxFlatTree();
+    MDBoxFlatTree(const std::string &fileName);
 
     size_t getNBoxes()const{return m_BoxType.size();}
 
@@ -24,7 +24,7 @@ namespace MDEvents
 
     // TODO: this does not have to be a template-> refactoring needed.
     template<typename MDE,size_t nd>
-    void initFlatStructure(API::IMDEventWorkspace_sptr pws);
+    void initFlatStructure(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
     /**Method resotores the interconnected box structure in memory, namely the internal nodes and their connectivity */
     template<typename MDE,size_t nd>
     uint64_t restoreBoxTree(std::vector<MDBoxBase<MDE,nd> *>&Boxes ,API::BoxController_sptr bc, bool FileBackEnd,bool NoFileInfo=false);
@@ -47,6 +47,8 @@ namespace MDEvents
     std::vector<uint64_t> &getEventIndex(){return m_BoxEventIndex;}
   private:
     int m_nDim;
+    // The name of the file the class will be working with 
+    std::string m_FileName;
     /// Box type (0=None, 1=MDBox, 2=MDGridBox
     std::vector<int> m_BoxType;
     /// Recursion depth
