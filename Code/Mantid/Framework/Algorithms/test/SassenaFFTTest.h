@@ -47,7 +47,7 @@ public:
     // The Fourier transform is an exponential h'*exp(-x^2/(2*s'^2) with h'=sqrt(2*pi*s)=2.507 and s'=1/(2*pi*s)=0.159
     DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
     const double exponentFactor = 0.0;
-    checkHeigth(ws, sqrt(2*M_PI), exponentFactor);
+    checkHeight(ws, sqrt(2*M_PI), exponentFactor);
     checkAverage(ws,0.0, exponentFactor);
     checkSigma(ws, 1.0/(2.0*M_PI), exponentFactor);
   }
@@ -71,7 +71,7 @@ public:
     // this->printWorkspace2D("/tmp/sqwDetailedBalanceCondition.dat",gwsName +"_sqw"); // uncomment line for debugging purposes only
     DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
     const double exponentFactor = -1.0/(2.0*T*T2ueV); // negative of the quantum-correction to classical S(Q,E): exp(E/(2*kT)
-    checkHeigth(ws, sqrt(2*M_PI),exponentFactor);
+    checkHeight(ws, sqrt(2*M_PI),exponentFactor);
     checkAverage(ws,0.0, exponentFactor);
     checkSigma(ws, 1.0/(2.0*M_PI), exponentFactor);
   }
@@ -84,7 +84,7 @@ private:
    * @param value compare to the maximum value stored in the Y-vector of the workspace
    * @exponentFactor negative of the exponent factor in the detailed balance condition.
    */
-  void checkHeigth(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
+  void checkHeight(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
   {
     const double frErr=1E-03; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
