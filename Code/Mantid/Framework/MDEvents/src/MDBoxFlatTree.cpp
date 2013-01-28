@@ -10,15 +10,16 @@ namespace Mantid
   namespace MDEvents
   {
 
-    MDBoxFlatTree::MDBoxFlatTree():
-  m_nDim(-1)
+    MDBoxFlatTree::MDBoxFlatTree(const std::string &fileName):
+  m_nDim(-1),m_FileName(fileName)
   {     
   }
 
   template<typename MDE,size_t nd>
-  void MDBoxFlatTree::initFlatStructure(API::IMDEventWorkspace_sptr pws)
+  void MDBoxFlatTree::initFlatStructure(API::IMDEventWorkspace_sptr pws,const std::string &fileName)
   {
     m_bcXMLDescr = pws->getBoxController()->toXMLString();
+    m_FileName = fileName;
 
     m_nDim = int(pws->getNumDims());
     // flatten the box structure
@@ -102,18 +103,19 @@ namespace Mantid
   /**TODO: this should not be here, refactor out*/ 
   void MDBoxFlatTree::initEventFileStorage(const std::string &fileName,API::BoxController_sptr bc,bool FileBacked,const std::string &EventType)
   {
+    m_FileName = fileName;
     ::NeXus::File * hFile;
       // Erase the file if it exists
-    Poco::File oldFile(fileName);
+    Poco::File oldFile(m_FileName);
     if (oldFile.exists())
     {
-      hFile = new ::NeXus::File(fileName, NXACC_RDWR);
+      hFile = new ::NeXus::File(m_FileName, NXACC_RDWR);
       hFile->openGroup("MDEventWorkspace", "NXentry");
     }
     else
     {
       // Create a new file in HDF5 mode.
-      hFile = new ::NeXus::File(fileName, NXACC_CREATE5);
+      hFile = new ::NeXus::File(m_FileName, NXACC_CREATE5);
       hFile->makeGroup("MDEventWorkspace", "NXentry", true);
 
       auto nDim = int32_t(bc->getNDims());
@@ -147,7 +149,7 @@ namespace Mantid
     }
     hFile->putAttr("version", "1.0");
 
-    std::string fileName = hFile->inquireFile();
+
     // Prepare the data chunk storage.
     size_t chunkSize = bc->getDataChunk();
     size_t nDim = bc->getNDims();
@@ -175,7 +177,7 @@ namespace Mantid
    }
       // Initialize the file-backing
     if (MakeFileBacked)         // Set it back to the new file handle
-       bc->setFile(hFile, fileName, NumOldEvents);
+       bc->setFile(hFile, m_FileName, NumOldEvents);
 
 
   }
@@ -211,18 +213,19 @@ namespace Mantid
   }
   void MDBoxFlatTree::saveBoxStructure(const std::string &fileName)
   {
+    m_FileName = fileName;
     ::NeXus::File * hFile;
       // Erase the file if it exists
     Poco::File oldFile(fileName);
     if (oldFile.exists())
     {
-      hFile = new ::NeXus::File(fileName, NXACC_RDWR);
+      hFile = new ::NeXus::File(m_FileName, NXACC_RDWR);
       hFile->openGroup("MDEventWorkspace", "NXentry");
     }
     else
     {
       // Create a new file in HDF5 mode.
-      hFile = new ::NeXus::File(fileName, NXACC_CREATE5);
+      hFile = new ::NeXus::File(m_FileName, NXACC_CREATE5);
       hFile->makeGroup("MDEventWorkspace", "NXentry", true);
       // Write out some general information like # of dimensions
       hFile->writeData("dimensions", int32_t(m_nDim));
@@ -303,9 +306,9 @@ namespace Mantid
   void MDBoxFlatTree::loadBoxStructure(const std::string &fileName)
   {
 
-
+    m_FileName = fileName;
      // open file
-    ::NeXus::File *hFile = new ::NeXus::File(fileName, NXACC_READ);
+    ::NeXus::File *hFile = new ::NeXus::File(m_FileName, NXACC_READ);
 
     // The main entry
     std::map<std::string, std::string> entries;
@@ -481,25 +484,25 @@ namespace Mantid
 
 
   // TODO: Get rid of this!
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<1>, 1>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<2>, 2>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<3>, 3>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<4>, 4>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<5>, 5>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<6>, 6>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<7>, 7>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<8>, 8>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<9>, 9>(API::IMDEventWorkspace_sptr pws);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<1>, 1>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<2>, 2>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<3>, 3>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<4>, 4>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<5>, 5>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<6>, 6>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<7>, 7>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<8>, 8>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<9>, 9>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
 
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<1>, 1>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<2>, 2>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<3>, 3>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<4>, 4>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<5>, 5>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<6>, 6>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<7>, 7>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<8>, 8>(API::IMDEventWorkspace_sptr pws);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<9>, 9>(API::IMDEventWorkspace_sptr pws);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<1>, 1>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<2>, 2>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<3>, 3>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<4>, 4>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<5>, 5>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<6>, 6>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<7>, 7>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<8>, 8>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
+  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<9>, 9>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
 
 
   template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<1>, 1>(std::vector<MDBoxBase<MDLeanEvent<1>, 1>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);

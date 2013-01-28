@@ -209,10 +209,10 @@ namespace MDAlgorithms
       mess << "dimension" << d;
       file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
     }
-    MDBoxFlatTree BoxFlatStruct;
+    MDBoxFlatTree BoxFlatStruct(filename);
 
   // flatten the box structure
-    BoxFlatStruct.initFlatStructure<MDE,nd>(ws);
+    BoxFlatStruct.initFlatStructure<MDE,nd>(ws,filename);
 
     // Start the event Data group and prepare the data chunk storage.
     BoxFlatStruct.initEventFileStorage(file,bc,MakeFileBacked||update,MDE::getTypeName());

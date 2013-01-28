@@ -43,7 +43,8 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  MergeMDFiles::MergeMDFiles() 
+  MergeMDFiles::MergeMDFiles() :
+  m_BoxStruct("")
   {
   }
     
@@ -641,8 +642,8 @@ namespace MDAlgorithms
     if (!outputFile.empty())
         fileBasedWS = true;
 
-   // Run the tasks in parallel?
-    bool Parallel = this->getProperty("Parallel");
+   // Run the tasks in parallel? TODO: enable
+    //bool Parallel = this->getProperty("Parallel");
 
     // Fix the box controller settings in the output workspace so that it splits normally
     BoxController_sptr bc = ws->getBoxController();
@@ -656,8 +657,8 @@ namespace MDAlgorithms
       g_log.notice() << "Setting cache to 400 MB write." << std::endl;
       bc->setCacheParameters(sizeof(MDE), 400000000/sizeof(MDE));
     }
-
-    m_BoxStruct.initFlatStructure<MDE,nd>(ws);
+    // Init box structure used for memory/file space calculations
+    m_BoxStruct.initFlatStructure<MDE,nd>(ws,outputFile);
     // First, load all the box data and calculate file positions of the target workspace
     this->loadBoxData<MDE,nd>();
 
