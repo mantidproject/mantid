@@ -6,6 +6,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/SaveAscii.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -21,7 +22,7 @@ public:
   static  SassenaFFTTest* createSuite() { return new SassenaFFTTest(); }
   static void destroySuite( SassenaFFTTest *suite ) { delete suite; }
 
-  SassenaFFTTest() : T2ueV(1000.0/11.604), ps2ueV(4136.0), nbins(2001) { }
+  SassenaFFTTest() : T2ueV(1000.0/Mantid::PhysicalConstants::meVtoKelvin), ps2ueV(4136.0), nbins(2001) { }
 
   void test_init()
   {
