@@ -366,31 +366,31 @@ public:
   //=================================================================================================================
 
   /// Load directly to memory
-  void xest_exec_1D()
+  void test_exec_1D()
   {
     do_test_exec<1>(false);
   }
 
   /// Run the loading but keep the events on file and load on demand
-  void xest_exec_1D_with_file_backEnd()
+  void test_exec_1D_with_file_backEnd()
   {
     do_test_exec<1>(true);
   }
 
   /// Load directly to memory
-  void xest_exec_3D()
+  void test_exec_3D()
   {
     do_test_exec<3>(false);
   }
 
   /// Run the loading but keep the events on file and load on demand
-  void xest_exec_3D_with_FileBackEnd()
+  void test_exec_3D_with_FileBackEnd()
   {
     do_test_exec<3>(true);
   }
 
   /// Run the loading but keep the events on file and load on demand
-  void xest_exec_3D_with_FileBackEnd_andSmallBuffer()
+  void test_exec_3D_with_FileBackEnd_andSmallBuffer()
   {
     do_test_exec<3>(true, true, 1.0);
   }
@@ -399,7 +399,7 @@ public:
   /** Use the file back end,
    * then change it and save to update the file at the back end.
    */
-  void xest_exec_3D_with_FileBackEnd_then_update_SaveMDEW()
+  void test_exec_3D_with_FileBackEnd_then_update_SaveMDEW()
   {
     std::cout << "Starting the first step\n";
     do_test_exec<3>(true, false);
@@ -409,7 +409,7 @@ public:
 
 
   /// Only load the box structure, no events
-  void xest_exec_3D_BoxStructureOnly()
+  void test_exec_3D_BoxStructureOnly()
   {
     do_test_exec<3>(false, true, 0.0, true);
   }
@@ -419,7 +419,7 @@ public:
 
   //=================================================================================================================
 
-  void xestMetaDataOnly()
+  void testMetaDataOnly()
   {
     //------ Start by creating the file ----------------------------------------------
     // Make a 1D MDEventWorkspace
@@ -524,7 +524,7 @@ public:
   }
 
   /// More of an integration test as it uses both load and save.
-  void xest_save_and_load_special_coordinates()
+  void test_save_and_load_special_coordinates()
   {
     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
     // Set the special coordinate system
