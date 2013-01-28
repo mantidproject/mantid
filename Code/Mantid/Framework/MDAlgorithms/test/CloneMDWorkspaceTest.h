@@ -40,9 +40,9 @@ public:
     do_test(true);
   }
 
-  void xest_exec_FileBacked_withNeedsUpdating()
+  void test_exec_FileBacked_withNeedsUpdating()
   {
-   // do_test(true, "", true);
+    do_test(true, "", true);
   }
 
   void test_exec_FileBacked_withFilename()
@@ -50,9 +50,9 @@ public:
     do_test(true, "CloneMDWorkspaceTest_ws_custom_cloned_name.nxs");
   }
 
-  void xest_exec_FileBacked_withFilename_withNeedsUpdating()
+  void test_exec_FileBacked_withFilename_withNeedsUpdating()
   {
-    //do_test(true, "CloneMDWorkspaceTest_ws_custom_cloned_name2.nxs", true);
+    do_test(true, "CloneMDWorkspaceTest_ws_custom_cloned_name2.nxs", true);
   }
 
 

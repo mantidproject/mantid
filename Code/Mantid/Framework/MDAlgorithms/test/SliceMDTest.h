@@ -214,9 +214,9 @@ public:
   }
 
 
-  void xest_exec_3D_fileBackedOutput()
+  void test_exec_3D_fileBackedOutput()
   { 
-   // do_test_exec<MDEvent<3>,3>("Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "Axis2,2.0,8.0, 3", "",  6*6*6 /*# of events*/, 3 /*dims*/, false /*WillFail*/, "SliceMDTest_output.nxs");
+    do_test_exec<MDEvent<3>,3>("Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 3", "Axis2,2.0,8.0, 3", "",  6*6*6 /*# of events*/, 3 /*dims*/, false /*WillFail*/, "SliceMDTest_output.nxs");
   }
 
   void test_dont_use_max_recursion_depth()
