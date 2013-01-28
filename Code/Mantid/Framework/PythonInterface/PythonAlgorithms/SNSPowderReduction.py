@@ -296,12 +296,13 @@ class SNSPowderReduction(PythonAlgorithm):
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
             if self._info is None:
                 self._info = self._getinfo(temp)
-            if (self._filterBadPulses and filterBadPulsesOverride):
-                temp = api.FilterBadPulses(InputWorkspace=temp, OutputWorkspace=temp)
-            if len(filterLogs[0]) > 0:
-                temp = api.FilterByLogValue(InputWorkspace=temp, OutputWorkspace=temp,
-                                            LogName=filterLogs[0],
-                                            MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
+            if not "histo" in extension:
+                if (self._filterBadPulses and filterBadPulsesOverride):
+                    temp = api.FilterBadPulses(InputWorkspace=temp, OutputWorkspace=temp)
+                if len(filterLogs[0]) > 0:
+                    temp = api.FilterByLogValue(InputWorkspace=temp, OutputWorkspace=temp,
+                                                LogName=filterLogs[0],
+                                                MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
             temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                 Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                 DMin=self._info.dmin, DMax=self._info.dmax, TMin=self._info.tmin, TMax=self._info.tmax,
