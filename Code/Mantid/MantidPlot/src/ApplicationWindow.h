@@ -548,7 +548,6 @@ public slots:
   void hideActiveWindow();
   void activateWindow();
   void activateWindow(MdiSubWindow *, bool activateOuterWindow = true);
-  void repaintWindows();
   bool existsWindow(MdiSubWindow* w) const;
   //@}
 
@@ -1155,6 +1154,8 @@ private:
   void showAllColumns();
   void closedLastCopiedLayer(){lastCopiedLayer = NULL;};
   void cleanTextEditor();
+  void tileMdiWindows();
+  void shakeViewport();
 
   /// context menu for log window
   void showLogWindowContextMenu(const QPoint &p);

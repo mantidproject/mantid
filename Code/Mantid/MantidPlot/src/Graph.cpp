@@ -113,7 +113,7 @@
 Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
 
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
-: QWidget(parent, f) //QwtPlot(parent)
+: QWidget(parent, f)
 {	
   setWindowFlags(f);
   n_curves=0;
@@ -194,6 +194,8 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   connect (scalePicker,SIGNAL(axisRightClicked(int)),this,SLOT(showAxisContextMenu(int)));
 
   connect (d_zoomer[0],SIGNAL(zoomed (const QwtDoubleRect &)),this,SLOT(zoomed (const QwtDoubleRect &)));
+
+  connect(this,SIGNAL(needReresize(QSize,QSize)),this,SLOT(reresize(QSize,QSize)),Qt::QueuedConnection);
 }
 
 void Graph::notifyChanges()
@@ -4217,14 +4219,23 @@ void Graph::resizeEvent ( QResizeEvent *e )
     return;
 
   if (autoScaleFonts){
-    QSize oldSize = e->oldSize();
-    QSize size = e->size();
-    d_plot->resize(e->size());
-    scaleFonts((double)size.height()/(double)oldSize.height());
+    // delayed resize of d_plot 
+    emit needReresize(e->size(),e->oldSize());
   } else {
     d_plot->resize(e->size());
     d_plot->updateCurveLabels();
   }
+}
+
+/**
+ * A slot which resizes d_plot. It is connected via queued connection to needReresize() signal
+ * emitted from resizeEvent(). It is done to avoid calling resize() inside resizeEvent()
+ * which can lead to infinite loops and other negative effects.
+ */
+void Graph::reresize(QSize newSize, QSize oldSize)
+{
+  d_plot->resize(newSize);
+  scaleFonts((double)newSize.height()/(double)oldSize.height());
 }
 
 void Graph::scaleFonts(double factor)

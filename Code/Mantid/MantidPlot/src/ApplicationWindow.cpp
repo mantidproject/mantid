@@ -9261,7 +9261,7 @@ void ApplicationWindow::windowsMenuAboutToShow()
   }
 
   windowsMenu->insertItem(tr("&Cascade"), this, SLOT(cascade()));
-  windowsMenu->insertItem(tr("&Tile"), d_workspace, SLOT(tileSubWindows()));
+  windowsMenu->insertItem(tr("&Tile"), this, SLOT(tileMdiWindows()));
   windowsMenu->insertSeparator();
   windowsMenu->addAction(actionNextWindow);
   windowsMenu->addAction(actionPrevWindow);
@@ -12469,7 +12469,6 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g)
       this,SLOT(newTable(const QString&,int,int,const QString&)));
   connect (g,SIGNAL(viewTitleDialog()),this,SLOT(showTitleDialog()));
   //connect (g,SIGNAL(modifiedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
-  connect (g,SIGNAL(resizedWindow(MdiSubWindow*)), this, SLOT(repaintWindows()));
   connect (g,SIGNAL(modifiedPlot()), this, SLOT(modifiedProject()));
   connect (g,SIGNAL(showLineDialog()),this, SLOT(showLineDialog()));
   connect (g,SIGNAL(pasteMarker()),this,SLOT(pasteSelection()));
@@ -17498,14 +17497,32 @@ void ApplicationWindow::setMatrixUndoStackSize(int size)
   }
 }
 
-//! This is a dirty hack: sometimes the workspace area and the windows are not redrawn properly
-// after a MultiLayer plot window is resized by the user: Qt bug?
-void ApplicationWindow::repaintWindows()
+/**
+ * Arange the mdi sub-windows in a tile pattern
+ */
+void ApplicationWindow::tileMdiWindows()
 {
-  MdiSubWindow* w = getActiveWindow();
-  if (d_opening_file || (w && w->status() == MdiSubWindow::Maximized))
-    return;
+  d_workspace->tileSubWindows();
+  // hack to redraw the graphs
+  shakeViewport();
+  // QMdiArea::tileSubWindows() aranges the windows and enables automatic tiling
+  // after subsequent resizing of the mdi area until a window is moved or resized 
+  // separatly. Unfortunately Graph behaves badly during this.
+  // The following code disables automatic tiling.
+  auto winList = d_workspace->subWindowList();
+  if ( !winList.isEmpty() )
+  {
+    auto p = winList[0]->pos();
+    winList[0]->move(p.x()+1,p.y());
+    winList[0]->move(p);
+  }
+}
 
+/**
+ * A hack to make the mdi area and the Graphs to redraw themselves in certain cases.
+ */
+void ApplicationWindow::shakeViewport()
+{
   QWidget *viewPort = d_workspace->viewport();
   QSize size = viewPort->size();
   viewPort->resize(QSize(size.width() + 1, size.height() + 1));

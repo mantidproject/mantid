@@ -799,11 +799,15 @@ signals:
   void currentFontChanged(const QFont&);
   void enableTextEditor(Graph *);
   void curveRemoved();
+  void needReresize(QSize,QSize);
 
   /// sent to indicate that scale type changed to log (bool arg is true) or to linear (boolarg is false)
   /// int argument gives the axis as defined in QwtPlot::Axis
   void axisScaleChanged(int,bool);
   
+private slots:
+
+  void reresize(QSize,QSize);
 
 private:
   //! Finds bounding interval of the plot data.
