@@ -43,7 +43,7 @@ class DLLExport LoadILL: public API::IDataFileChecker {
 public:
 	/// Constructor
 	LoadILL() :
-			API::IDataFileChecker(),m_instrumentName("") {
+			API::IDataFileChecker(), m_instrumentName("") {
 	}
 	/// Virtual destructor
 	virtual ~LoadILL() {
@@ -72,28 +72,46 @@ private:
 	void init();
 	// Execution code
 	void exec();
-	/// Load the counts
-	void loadData(NeXus::NXData& dataGroup,
-			API::MatrixWorkspace_sptr& workspace);
-	/// Load Nexus Files Parameters
-	/// Load the instrument form the IDF
-	void runLoadInstrument(API::MatrixWorkspace_sptr workspace);
 
+	/// L
+	//NeXus::NXEntry initNexusFile();
+	void setInstrumentName(NeXus::NXEntry& entry);
+	void initWorkSpace(NeXus::NXEntry& entry);
+	std::vector<int> getMonitorData(NeXus::NXEntry& entry);
+	template<class T> std::vector<int> peakSearchPosition(
+			const std::vector<T> &v, int);
+	template<typename T> std::vector<T> mode(std::vector<T> &data);
+	void loadRunDetails(NeXus::NXEntry & entry);
+	void loadExperimentDetails(NeXus::NXEntry & entry);
+	int getMonitorElasticPeakPosition(const std::vector<int> &monitorData);
+	int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
+	void loadTimeDetails(NeXus::NXEntry& entry);
+	NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
+	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry);
+
+	void runLoadInstrument();
+
+	std::string getDateTimeInIsoFormat(std::string dateToParse);
 	// Load all the nexus file information
-	NeXus::NXData loadNexusFile(NeXus::NXEntry&);
 
-	void correctData(API::MatrixWorkspace_sptr&);
+	API::MatrixWorkspace_sptr m_localWorkspace;
 
 	std::string m_filename; ///< The file to load
-	std::string m_instrumentName; ///< Name of the instrumen
+	std::string m_instrumentName; ///< Name of the instrument
+
+	// Variables describing the data in the detector
+	size_t m_numberOfTubes; // number of tubes - X
+	size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
+	size_t m_numberOfChannels; // time channels - Z
+	size_t m_numberOfHistograms;
 
 	/* Values parsed from the nexus file */
-	int elasticPeakPosition;
-	double wavelength;
-	double channelWidth;
-	double timeOfFlightDelay;
-	double timePickupToOpening;
-	std::string title;
+	int m_monitorElasticPeakPosition;
+	double m_wavelength;
+	double m_channelWidth;
+	double m_timeOfFlightDelay;
+	double m_timePickupToOpening;
+	//std::string m_title;
 
 };
 
