@@ -281,6 +281,7 @@ void InstrumentWindowMaskTab::showEvent (QShowEvent *)
   bool hasMasks = m_instrWindow->getSurface()->hasMasks();
   enableApply( hasMasks );
   enableClear( hasMasks || m_instrWindow->getInstrumentActor()->hasMaskWorkspace() );
+  m_instrWindow->updateInstrumentView(true);
 }
 
 void InstrumentWindowMaskTab::clearProperties()

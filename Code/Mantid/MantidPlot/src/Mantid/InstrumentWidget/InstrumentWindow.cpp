@@ -1333,15 +1333,17 @@ int InstrumentWindow::getInstrumentDisplayHeight() const
 }
 
 /// Redraw the instrument view
-void InstrumentWindow::updateInstrumentView()
+/// @param picking :: Set to true to update the picking image regardless the interaction
+///   mode of the surface.
+void InstrumentWindow::updateInstrumentView(bool picking)
 {
   if ( m_InstrumentDisplay && m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget*>(m_InstrumentDisplay) )
   {
-    m_InstrumentDisplay->updateView();
+    m_InstrumentDisplay->updateView(picking);
   }
   else
   {
-    m_simpleDisplay->updateView();
+    m_simpleDisplay->updateView(picking);
   }
 }
 

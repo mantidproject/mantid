@@ -694,9 +694,10 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
  */
 void InstrumentWindowPickTab::showEvent (QShowEvent *)
 {
-  auto surface = getSurface();
   // Make the state of the display view consistent with the current selection type
   setSelectionType();
+  // make sure picking updated
+  m_instrWindow->updateInstrumentView(true);
 }
 
 /**

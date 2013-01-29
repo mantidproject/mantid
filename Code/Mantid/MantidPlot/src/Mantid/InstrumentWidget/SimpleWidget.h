@@ -21,7 +21,7 @@ public:
   /// Return the surface
   boost::shared_ptr<ProjectionSurface> getSurface(){return m_surface;}
   /// Redraw the view
-  void updateView();
+  void updateView(bool picking = false);
   /// Update the detector information (count values) and redraw
   void updateDetectors();
 protected:
