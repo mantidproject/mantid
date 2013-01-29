@@ -252,6 +252,9 @@ namespace MantidQt
       // resize the scroll area so we don't get a scroll bar
       if ( dialogHeight < 0.8*screenHeight ) this->resize(this->width(),dialogHeight + 20);
 
+      // Make sure the OutputWorkspace value has been stored so that the validator is cleared appropriately
+      QString wsName(m_form.workspaceEdit->text());
+      if(!wsName.isEmpty()) storePropertyValue("OutputWorkspace",wsName);
       setPropertyValues(QStringList("Filename"));
     }
 
