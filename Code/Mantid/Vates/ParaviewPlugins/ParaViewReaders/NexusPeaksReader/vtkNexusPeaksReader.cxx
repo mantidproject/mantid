@@ -3,6 +3,7 @@
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkMath.h"
+#include "vtkAxes.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkPointData.h"
@@ -44,12 +45,6 @@ vtkNexusPeaksReader::~vtkNexusPeaksReader()
 }
 
 
-void vtkNexusPeaksReader::SetRadius(double radius)
-{
-  m_radius = radius;
-  this->Modified();
-}
-
 void vtkNexusPeaksReader::SetDimensions(int dimensions)
 {
   m_dimensions = dimensions;
@@ -81,19 +76,28 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   FilterUpdateProgressAction<vtkNexusPeaksReader> drawingProgressUpdate(this, "Drawing...");
   vtkDataSet * structuredMesh = p_peakFactory->create(drawingProgressUpdate);
 
-  // Pick the radius up from the factory if possible, otherwise use the user-provided value.
-  double peakRadius = m_radius;
+  vtkPolyDataAlgorithm* shapeMarker = NULL;
   if(p_peakFactory->isPeaksWorkspaceIntegrated())
   {
-    peakRadius = p_peakFactory->getIntegrationRadius();
+    double peakRadius = p_peakFactory->getIntegrationRadius(); 
+    const int resolution = 6;
+    vtkSphereSource *sphere = vtkSphereSource::New();
+    sphere->SetRadius(peakRadius);
+    sphere->SetPhiResolution(resolution);
+    sphere->SetThetaResolution(resolution);
+    shapeMarker = sphere;
   }
-
-  vtkSphereSource *sphere = vtkSphereSource::New();
-  sphere->SetRadius(peakRadius);
+  else
+  {
+    vtkAxes* axis = vtkAxes::New();
+    axis->SymmetricOn();
+    axis->SetScaleFactor(0.5);
+    shapeMarker = axis;
+  }
 
   vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
   glyphFilter->SetInput(structuredMesh);
-  glyphFilter->SetSource(sphere->GetOutput());
+  glyphFilter->SetSource(shapeMarker->GetOutput());
   glyphFilter->Update();
   vtkPolyData *glyphed = glyphFilter->GetOutput();
 

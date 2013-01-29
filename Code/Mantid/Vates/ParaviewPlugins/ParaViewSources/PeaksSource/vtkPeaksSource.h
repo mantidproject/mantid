@@ -41,7 +41,6 @@ public:
   vtkTypeRevisionMacro(vtkPeaksSource,vtkPolyDataAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   
-  void SetRadius(double radius);
   void SetWsName(std::string wsName);
   void SetPeakDimension(int dim);
   /// Update the algorithm progress.
@@ -58,9 +57,6 @@ protected:
 private:
   /// Name of the workspace.
   std::string m_wsName;
-
-  /// Width of the glyphs
-  double m_radius;
 
   /// Cache for the workspace type name
   std::string m_wsTypeName;

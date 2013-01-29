@@ -15,16 +15,6 @@
         number_of_elements="1"
         information_only="0">
       </StringVectorProperty>
-      <DoubleVectorProperty
-        name="Peak Radius"
-        command="SetRadius"
-        number_of_elements="1"
-        default_values="0.05"
-        information_only="0">
-      <Documentation>
-          Set the Radius of the Peak Marker. This is automatically determined if peaks in the PeaksWorkspace has been integrated.
-      </Documentation>
-      </DoubleVectorProperty>
       <IntVectorProperty
         name="Peak Dimensions"
         command="SetPeakDimension"
