@@ -59,7 +59,7 @@
   </component>
 
   <type name="monitors">
-    <component type="monitor" mark-as="monitor" is="detector">
+    <component type="monitor" >
       <location r="7.641" t="180.0" p="0.0" />
       <location r="7.641" t="180.0" p="0.0" />
       <location r="7.356" t="180.0" p="0.0" />
@@ -77,7 +77,7 @@
     </component>
   </type>
 
-  <type name="monitor" is="detector" >
+  <type name="monitor" is="monitor" >
     <percent-transparency val="90" />
     <!-- The shape is 80.5mm tall along y; 88.4m wide along x and 25mm deep in z -->
     <cuboid id="shape">
