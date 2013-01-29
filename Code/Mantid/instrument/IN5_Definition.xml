@@ -41,11 +41,11 @@ valid-to="2100-01-31 23:59:59" last-modified="2012-05-17 00:00:00">
 	<location />
 	</component>
 	<type name="monitors">
-	<component type="monitor" mark-as="monitor">
+	<component type="monitor" >
 	<location r="0.8656" t="180.0" p="0.0" />
 	</component>
 	</type>
-	<type name="monitor" is="detector">
+	<type name="monitor" is="monitor">
 	<cylinder id="some-shape">
 	<centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
 	<axis x="0.0" y="0.0" z="1.0" />
