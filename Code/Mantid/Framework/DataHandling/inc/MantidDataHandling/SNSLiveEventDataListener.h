@@ -145,10 +145,9 @@ namespace Mantid
                                         // periodicaly.  If we don't get them, there's a
                                         // problem somewhere.
 
-      // Used to initialize the a few properties (run_start and scan_index) if we haven't received
-      // the packets with the 'real' values by the time we call initWorkspacePart2.  (We can't
-      // delay the call to initWorkspacePart2 because we might never receive 'real' values for
-      // those properties.
+      // Used to initialize the scan_index property if we haven't received a packet with the
+      // 'real' value by the time we call initWorkspacePart2.  (We can't delay the call to
+      // initWorkspacePart2 because we might never receive a 'real' value for that property.
       Kernel::DateAndTime m_dataStartTime;
 
       // These 2 determine whether or not we filter out events that arrive when

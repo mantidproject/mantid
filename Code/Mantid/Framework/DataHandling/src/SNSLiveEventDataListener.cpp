@@ -432,29 +432,42 @@ namespace DataHandling
       // Add the run_start property
       if ( m_eventBuffer->mutableRun().hasProperty("run_start") )
       {
-        m_eventBuffer->mutableRun().removeProperty( "run_start"); // remove to old run_start value
+        // We should never hit this code.  And if we do, all we can really do is log
+        // the error - removing the property prior to adding the new value doesn't
+        // always work.  Depending on the value of the "Accumulation Method" in
+        // StartLiveData, the new run_start property may not actually be picked up.
+        g_log.error() << "run_start property already exists.  Current value will be ignored."  << std::endl
+                      << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
       }
+      else
+      {
 
-      // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
-      time_t runStartTime = pkt.runStart() + ADARA::EPICS_EPOCH_OFFSET;
+        // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
+        time_t runStartTime = pkt.runStart() + ADARA::EPICS_EPOCH_OFFSET;
 
-      // Add the run_start property
-      char timeString[64];  // largest the string should end up is 20 (plus a null terminator)
-      strftime( timeString, 64, "%FT%H:%M:%SZ", gmtime( &runStartTime));
-      // addProperty() wants the time as an ISO 8601 string
+        // Add the run_start property
+        char timeString[64];  // largest the string should end up is 20 (plus a null terminator)
+        strftime( timeString, 64, "%FT%H:%M:%SZ", gmtime( &runStartTime));
+        // addProperty() wants the time as an ISO 8601 string
 
-      m_eventBuffer->mutableRun().addProperty("run_start", std::string( timeString) );
+        m_eventBuffer->mutableRun().addProperty("run_start", std::string( timeString) );
+      }
 
       // Add the run_number property
       if ( m_eventBuffer->mutableRun().hasProperty("run_number") )
       {
-        m_eventBuffer->mutableRun().removeProperty( "run_number"); // remove to old run_start value
+        // Same problem as the run_start property above:  run_number should not exist
+        // at this point, and if it does, we can't do much about it.
+        g_log.error() << "run_snumber property already exists.  Current value will be ignored."  << std::endl
+                      << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
       }
-
-      // Oddly, the run number property needs to be a string....
-      std::ostringstream runNum;
-      runNum << pkt.runNumber();
-      m_eventBuffer->mutableRun().addProperty( "run_number", runNum.str());
+      else
+      {
+        // Oddly, the run number property needs to be a string....
+        std::ostringstream runNum;
+        runNum << pkt.runNumber();
+        m_eventBuffer->mutableRun().addProperty( "run_number", runNum.str());
+      }
 
     }
     else if (pkt.status() == ADARA::RunStatus::END_RUN)
@@ -791,24 +804,9 @@ namespace DataHandling
 
     m_indexMap = m_eventBuffer->getDetectorIDToWorkspaceIndexMap( true /* bool throwIfMultipleDets */ );
 
-    // We must always have a run_start property or the LogManager throws an
-    // exception.  The "real" value will come from a RunStatus packet saying that
-    // a new run is starting.  By the time we get here, we may already have
-    // received one of these packets.  If not, we'll just use the time from the
-    // packet passed in to this function..  (In a truely "live" stream, current
-    // time would also work, but if we're replaying old data, then current time
-    // would be newer than the timestamps in the data, and that would cause strange
-    // time values in the sample log.
-    if ( ! m_eventBuffer->mutableRun().hasProperty("run_start") )
-    {
-      // addProperty() wants the time as an ISO 8601 string
-      m_eventBuffer->mutableRun().addProperty("run_start", m_dataStartTime.toISO8601String());
-    }
-
-    // Much like the run_start property, we always want to have at least one value
-    // for the the scan index time series.  We may have already gotten a scan start
-    // packet by the time we get here and therefor don't need to do anything.  If
-    // not, we need to put a 0 into the time series.
+    // We always want to have at least one value for the the scan index time series.  We may have
+    // already gotten a scan start packet by the time we get here and therefor don't need to do
+    // anything.  If not, we need to put a 0 into the time series.
     if ( m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->size() == 0 )
     {
       m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( m_dataStartTime, 0);
