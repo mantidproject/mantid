@@ -13451,7 +13451,7 @@ void ApplicationWindow::translateActionsStrings()
   actionShowAllCurves->setMenuText(tr("&Show All Curves"));
 
   actionNewProject->setMenuText(tr("New &Project"));
-  actionNewProject->setToolTip(tr("Open a new project"));
+  actionNewProject->setToolTip(tr("Open a New Project"));
   actionNewProject->setShortcut(tr("Ctrl+N"));
 
   actionNewFolder->setMenuText(tr("New Fol&der"));
@@ -13482,7 +13482,7 @@ void ApplicationWindow::translateActionsStrings()
 
   actionOpenProj->setMenuText(tr("&Project"));
   actionOpenProj->setShortcut(tr("Ctrl+Shift+O"));
-  actionOpenProj->setToolTip(tr("Load Mantid project"));
+  actionOpenProj->setToolTip(tr("Load Mantid Project"));
 
   actionLoadFile->setMenuText(tr("&File"));
   actionLoadFile->setShortcut(tr("Ctrl+Shift+F"));
@@ -13531,12 +13531,12 @@ void ApplicationWindow::translateActionsStrings()
   actionCutSelection->setShortcut(tr("Ctrl+X"));
   
   actionCopySelection->setMenuText(tr("&Copy Selection"));
-  actionCopySelection->setToolTip(tr("Copy selection"));
+  actionCopySelection->setToolTip(tr("Copy Selection"));
   actionCopySelection->setShortcut(tr("Ctrl+C"));
   
 
   actionPasteSelection->setMenuText(tr("&Paste Selection"));
-  actionPasteSelection->setToolTip(tr("Paste selection"));
+  actionPasteSelection->setToolTip(tr("Paste Selection"));
   actionPasteSelection->setShortcut(tr("Ctrl+V"));
   
 
@@ -13549,7 +13549,7 @@ void ApplicationWindow::translateActionsStrings()
   actionShowExplorer->setToolTip(tr("Show project explorer"));
 
   actionShowLog->setMenuText(tr("Results &Log"));
-  actionShowLog->setToolTip(tr("Show analysis results"));
+  actionShowLog->setToolTip(tr("Show Analysis Results"));
 
   actionShowUndoStack->setMenuText(tr("&Undo/Redo Stack"));
   actionShowUndoStack->setToolTip(tr("Show available undo/redo commands"));
@@ -13623,11 +13623,11 @@ void ApplicationWindow::translateActionsStrings()
 
   actionUnzoom->setMenuText(tr("&Rescale to Show All"));
   actionUnzoom->setShortcut(tr("Ctrl+Shift+R"));
-  actionUnzoom->setToolTip(tr("Zoom to show all"));
+  actionUnzoom->setToolTip(tr("Rescale to Show All"));
 
-  actionNewLegend->setMenuText( tr("New &Legend"));
+  actionNewLegend->setMenuText( tr("Add New &Legend"));
   actionNewLegend->setShortcut(tr("Ctrl+L"));
-  actionNewLegend->setToolTip(tr("Add new legend"));
+  actionNewLegend->setToolTip(tr("Add New Legend"));
 
   actionTimeStamp->setMenuText(tr("Add Time Stamp"));
   actionTimeStamp->setShortcut(tr("Ctrl+ALT+T"));
@@ -13891,8 +13891,8 @@ void ApplicationWindow::translateActionsStrings()
   //actionDonate->setMenuText(tr("Make a &Donation"));
   //actionTechnicalSupport->setMenuText(tr("Technical &Support"));
 
-  btnPointer->setMenuText(tr("Disable &tools"));
-  btnPointer->setToolTip( tr( "Pointer" ) );
+  btnPointer->setMenuText(tr("Selection &Tools"));
+  btnPointer->setToolTip( tr( "Selection Tools" ) );
 
   btnZoomIn->setMenuText(tr("&Zoom In"));
   btnZoomIn->setShortcut(tr("Ctrl++"));
@@ -13902,12 +13902,12 @@ void ApplicationWindow::translateActionsStrings()
   btnZoomOut->setShortcut(tr("Ctrl+-"));
   btnZoomOut->setToolTip(tr("Zoom Out"));
 
-  actionPanPlot->setMenuText(tr("Zoom &In/Out and Drag Canvas"));
-  actionPanPlot->setToolTip(tr("Panning tool (zoom with mouse wheel)"));
+  actionPanPlot->setMenuText(tr("Panning Tool (zoom with mouse wheel)"));
+  actionPanPlot->setToolTip(tr("Panning Tool (zoom with mouse wheel)"));
 
   btnCursor->setMenuText(tr("&Data Reader"));
   btnCursor->setShortcut(tr("CTRL+D"));
-  btnCursor->setToolTip(tr("Data reader"));
+  btnCursor->setToolTip(tr("Data Reader"));
 
   btnSelect->setMenuText(tr("&Select Data Range"));
   btnSelect->setShortcut(tr("ALT+S"));
@@ -13932,11 +13932,11 @@ void ApplicationWindow::translateActionsStrings()
 
   btnArrow->setMenuText(tr("Draw &Arrow"));
   btnArrow->setShortcut(tr("CTRL+ALT+A"));
-  btnArrow->setToolTip(tr("Draw arrow"));
+  btnArrow->setToolTip(tr("Draw Arrow"));
 
   btnLine->setMenuText(tr("Draw &Line"));
   btnLine->setShortcut(tr("CTRL+ALT+L"));
-  btnLine->setToolTip(tr("Draw line"));
+  btnLine->setToolTip(tr("Draw Line"));
 
   // FIXME: is setText necessary for action groups?
   //	coord->setText( tr( "Coordinates" ) );
