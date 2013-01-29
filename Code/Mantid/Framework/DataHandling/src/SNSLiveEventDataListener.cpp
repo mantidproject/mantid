@@ -312,42 +312,42 @@ namespace DataHandling
 
     // Append the events
     g_log.information() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
-    m_mutex.lock();
-
-    // Iterate through each event
-    const ADARA::Event *event = pkt.firstEvent();
-    unsigned lastBankID = pkt.curBankId();
-    while (event != NULL)
     {
-      eventsPerBank++;
-      totalEvents++;
-      if (lastBankID < 0xFFFFFFFE)  // Bank ID -1 & -2 are special cases and are not valid pixels
+      Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex)  ;
+
+      // Iterate through each event
+      const ADARA::Event *event = pkt.firstEvent();
+      unsigned lastBankID = pkt.curBankId();
+      while (event != NULL)
       {
-        // appendEvent needs tof to be in units of microseconds, but it comes
-        // from the ADARA stream in units of 100ns.
-        if (pkt.getSourceCORFlag())
+        eventsPerBank++;
+        totalEvents++;
+        if (lastBankID < 0xFFFFFFFE)  // Bank ID -1 & -2 are special cases and are not valid pixels
         {
-          appendEvent(event->pixel, event->tof / 10.0, pkt.pulseId());
+          // appendEvent needs tof to be in units of microseconds, but it comes
+          // from the ADARA stream in units of 100ns.
+          if (pkt.getSourceCORFlag())
+          {
+            appendEvent(event->pixel, event->tof / 10.0, pkt.pulseId());
+          }
+          else
+          {
+            appendEvent(event->pixel, (event->tof + pkt.getSourceTOFOffset()) / 10.0, pkt.pulseId());
+          }
         }
-        else
+
+        event = pkt.nextEvent();
+        if (pkt.curBankId() != lastBankID)
         {
-          appendEvent(event->pixel, (event->tof + pkt.getSourceTOFOffset()) / 10.0, pkt.pulseId());
+          g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank
+                        << " events" << std::endl;
+
+          lastBankID = pkt.curBankId();
+          eventsPerBank = 0;
         }
       }
+    }  // mutex automatically unlocks here
 
-      event = pkt.nextEvent();
-      if (pkt.curBankId() != lastBankID)
-      {
-        g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank
-                      << " events" << std::endl;
-
-        lastBankID = pkt.curBankId();
-        eventsPerBank = 0;
-      }
-    }
-
-
-    m_mutex.unlock();
     g_log.information() << "Total Events: " << totalEvents << std::endl;
     g_log.information() << "-------------------------------" << std::endl;
 
@@ -862,10 +862,11 @@ namespace DataHandling
     // Clear out the old logs
     temp->mutableRun().clearTimeSeriesLogs();
 
-    // Get an exclusive lock
-    m_mutex.lock();
-    std::swap(m_eventBuffer, temp);
-    m_mutex.unlock();
+    // Lock the mutex and swap the workspaces
+    {
+      Poco::ScopedLock<Poco::FastMutex> scopedLock( m_mutex);
+      std::swap(m_eventBuffer, temp);
+    }  // mutex automatically unlocks here
 
     return temp;
   }
