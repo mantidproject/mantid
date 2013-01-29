@@ -205,11 +205,6 @@ void AlignAndFocusPowder::exec()
   {
     if (m_inputEW)
     {
-      m_outputW = WorkspaceFactory::Instance().create(m_inputW);
-      m_outputW->setName(getProperty("OutputWorkspace"));
-    }
-    else
-    {
       //Make a brand new EventWorkspace
       m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace", m_inputEW->getNumberHistograms(), 2, 1));
@@ -220,6 +215,12 @@ void AlignAndFocusPowder::exec()
 
       //Cast to the matrixOutputWS and save it
       m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+      m_outputW->setName(getProperty("OutputWorkspace"));
+    }
+    else
+    {
+      // Not-an-event workspace
+      m_outputW = WorkspaceFactory::Instance().create(m_inputW);
       m_outputW->setName(getProperty("OutputWorkspace"));
     }
   }
