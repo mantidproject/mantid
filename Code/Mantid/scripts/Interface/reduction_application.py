@@ -127,7 +127,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             if IS_IN_MANTIDPLOT:
                 from mantid.kernel import ConfigService
                 c = ConfigService.Instance()
-                facility = str(c.getFacility().name())
+                facility = str(c.getFacility())
                 if facility in INSTRUMENT_DICT.keys():
                     instr = str(c.getFacility().instrument(""))
                     instr = instr.replace("-","")
