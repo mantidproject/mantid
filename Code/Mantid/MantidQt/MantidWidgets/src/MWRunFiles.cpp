@@ -726,13 +726,9 @@ QString MWRunFiles::createFileFilter()
     }
   }
 
+  QString allFiles("All Files (*.*)");
   if( !fileExts.isEmpty() )
   {
-    // The file filter consists of three parts, which we will combine to create the
-    // complete file filter:
-    QString dataFiles("Data Files (");
-    QString individualFiles("");
-    QString allFiles("All Files (*.*)");
     
     // The list may contain upper and lower cased versions, ensure these are on the same line
     // I want this ordered
@@ -761,6 +757,11 @@ QString MWRunFiles::createFileFilter()
       }
     }
 
+    // The file filter consists of three parts, which we will combine to create the
+    // complete file filter:
+    QString dataFiles("Data Files (");
+    QString individualFiles("");
+
     if( extsAsSingleOption() )
     {
       QListIterator<QPair<QString, QStringList> > itr(finalIndex);
@@ -768,20 +769,11 @@ QString MWRunFiles::createFileFilter()
       {
         const QStringList values = itr.next().second;
         
-        if ( *(individualFiles.end()-1) != '(' )
-        {
-          individualFiles += " ";
-        }
-
-        if ( *(dataFiles.end()-1) != '(' )
-        {
-          dataFiles += " ";
-        }
-        
         individualFiles += "*" + values.join(" *") + ";;";
-        dataFiles += "*" + values.join(" *") + ";";
+        dataFiles += "*" + values.join(" *") + " ";
       }
-      dataFiles.chop(1);
+      //Don't remove final ;; from individualFiles as we are going to tack on allFiles anyway
+      dataFiles.chop(1); // Remove last space
       dataFiles += ");;";
     }
     else
@@ -793,12 +785,11 @@ QString MWRunFiles::createFileFilter()
         dataFiles += "*" + values.join(" *") + ";;";
       }
     }
-
     return dataFiles + individualFiles + allFiles;
   }
-  else//if( fileExts.isEmpty() )
+  else
   {
-    return QString("All Files (*.*)");
+    return allFiles;
   }
   
 }
