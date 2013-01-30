@@ -30,20 +30,25 @@ namespace MantidQt
 
       /// Returns the error string.  Empty if no error was caught.
       std::string error() const { return m_error; }
-      /// Returns the vector of filenames.  Empty if no files were found, or if there was an error.
+      /// Returns the vector of "unpacked" filenames.  Empty if no files were found, or if there was an error.
       std::vector<std::string> filenames() const { return m_filenames; }
-      /// Use the specified algorithm and property to find files instead of using the FileFinder.
-      void getFilesFromAlgorithm();
+      /// Returns a string value that can be used to put in to another instance of the algorithm to avoid searching again
+      QString valueForProperty() const { return m_valueForProperty; }
 
     protected:
       /// Override parent class run().
       virtual void run();
 
     private:
+      /// Use the specified algorithm and property to find files instead of using the FileFinder.
+      void getFilesFromAlgorithm();
+
       /// Storage for any error thrown while trying to find files.
       std::string m_error;
       /// Filenames found during execution of the thread.
       std::vector<std::string> m_filenames;
+      /// Stores the string value to be used as input for an algorithm property
+      QString m_valueForProperty;
 
       /// File name text typed in by the user.
       std::string m_text;

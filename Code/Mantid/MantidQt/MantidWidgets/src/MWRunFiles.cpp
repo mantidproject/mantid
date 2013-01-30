@@ -29,7 +29,7 @@ using namespace MantidQt::MantidWidgets;
  * @param parent :: pointer to the parent QObject.
  */
 FindFilesThread::FindFilesThread(QObject *parent) :
-  QThread(parent), m_error(), m_filenames(), m_text(), 
+  QThread(parent), m_error(), m_filenames(), m_valueForProperty(), m_text(),
   m_algorithm(), m_property(), m_isForRunFiles(), m_isOptional()
 {
 }
@@ -86,6 +86,7 @@ void FindFilesThread::run()
 
   try
   {
+    m_valueForProperty = "";
     // Use the property of the algorithm to find files, if one has been specified.
     if( m_algorithm.length() != 0 && m_property.length() != 0 )
     {
@@ -95,6 +96,12 @@ void FindFilesThread::run()
     else if( m_isForRunFiles )
     {
       m_filenames = fileSearcher.findRuns(m_text);
+      m_valueForProperty = "";
+      for(auto cit = m_filenames.begin(); cit != m_filenames.end(); ++cit)
+      {
+        m_valueForProperty += QString::fromStdString(*cit) + ",";
+      }
+      m_valueForProperty.chop(1);
     }
     // Else try to run a simple parsing on the string, and find the full paths individually.
     else
@@ -113,12 +120,14 @@ void FindFilesThread::run()
         if ( ( ! result.empty() ) && test.exists() )
         {
           m_filenames.push_back(*it);
+          m_valueForProperty += QString::fromStdString(*it) + ",";
         }
         else
         {
           throw std::invalid_argument("File \"" + (*it) + "\" not found");
         }
       }
+      m_valueForProperty.chop(1);
     }
   }
   catch(std::exception& exc)
@@ -147,6 +156,7 @@ void FindFilesThread::getFilesFromAlgorithm()
   algorithm->setProperty(propName, m_text);
 
   Property *prop = algorithm->getProperty(propName);
+  m_valueForProperty = QString::fromStdString(prop->value());
   
   FileProperty *fileProp = dynamic_cast<FileProperty*>(prop);
   MultipleFileProperty *multiFileProp = dynamic_cast<MultipleFileProperty*>(prop);
@@ -157,14 +167,17 @@ void FindFilesThread::getFilesFromAlgorithm()
   }
   else if( multiFileProp )
   {
+    // This flattens any summed files to a set of single files so that you lose the information about
+    // what was summed
     std::vector<std::vector<std::string> > filenames = algorithm->getProperty(propName);
     std::vector<std::string> flattenedNames = MultipleFileProperty::flattenFileNames(filenames);
-    
+
     for( auto filename = flattenedNames.begin(); filename != flattenedNames.end(); ++filename )
     {
       m_filenames.push_back( *filename );
     }
   }
+
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -499,13 +512,14 @@ void MWRunFiles::setEntryNum(const int num)
 
 /**
  * Retrieve user input from this widget. This expands the current
- * file list to a comma separated list of file paths
+ * file text to include the found absolute paths so that no more
+ * searching is required
  * NOTE: This knows nothing of periods yet
- * @returns A qvariant
+ * @returns A QVariant containing the text string for the algorithm property
  */
 QVariant MWRunFiles::getUserInput() const
 {
-  return QVariant(m_foundFiles.join(","));
+  return QVariant(m_thread->valueForProperty());
 }
 
 /**
