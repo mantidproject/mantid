@@ -206,6 +206,6 @@ loading.multifilelimit=100
 # Url for the WebServer that support the upload of the files that the users want to share
 UploaderWebServer = http://127.0.0.1:8000/upload/
 # Local system path for the script repository.
-ScriptLocalRepository = 
+ScriptLocalRepository =  @MANTID_ROOT@/scriptsRepository
 # Url for the remote script repository.
-ScriptRepository = https://github.com/mantidproject/scripts.git
+ScriptRepository = git://github.com/mantidproject/scripts.git
