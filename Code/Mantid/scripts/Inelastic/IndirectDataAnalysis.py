@@ -816,7 +816,7 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False):
         if ( container != '' ):
             plot_list.append(container)
         if (PlotResult != 'None'):
-            plotCorrResult(cor_result+'_sqw',PlotResult)
+            plotCorrResult(cor_result+'_rqw',PlotResult)
         if (PlotContrib != 'None'):
             plotCorrContrib(plot_list,0)
     else:
