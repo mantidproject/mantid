@@ -64,6 +64,9 @@
 
 #include <qwt_plot_curve.h>
 
+#include "MantidQtAPI/FileDialogHandler.h"
+
+
 FitDialog::FitDialog(Graph *g, QWidget* parent, Qt::WFlags fl )
 : QDialog( parent, fl )
 {
@@ -621,7 +624,7 @@ void FitDialog::saveUserFunction()
 			ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 		QString filter = tr("MantidPlot fit model")+" (*.fit);;";
 		filter += tr("All files")+" (*.*)";
-		QString fn = QFileDialog::getSaveFileName(app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
+		QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
                                 app->fitModelsPath + "/" + name, filter);
 		if (!fn.isEmpty()){
             QFileInfo fi(fn);
@@ -1359,7 +1362,7 @@ void FitDialog::saveInitialGuesses()
       ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 		QString filter = tr("MantidPlot fit model") + " (*.fit);;";
 		filter += tr("All files") + " (*.*)";
-		QString fn = QFileDialog::getSaveFileName(app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
+		QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
                                 app->fitModelsPath + "/" + d_current_fit->objectName(), filter);
 		if (!fn.isEmpty()){
             QFileInfo fi(fn);

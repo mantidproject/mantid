@@ -358,7 +358,7 @@ void MuonAnalysis::runSaveGroupButton()
   QString filter;
   filter.append("Files (*.xml *.XML)");
   filter += ";;AllFiles (*.*)";
-  QString groupingFile = QFileDialog::getSaveFileName(this,
+  QString groupingFile = MantidQt::API::FileDialogHandler::getSaveFileName(this,
                                    "Save Grouping file as", prevPath, filter);
 
   // Add extension if the groupingFile specified doesn't have one. (Solving Linux problem).

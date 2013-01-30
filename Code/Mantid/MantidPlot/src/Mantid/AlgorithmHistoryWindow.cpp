@@ -2,6 +2,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 
 #include <QLineEdit>
 #include <QLabel>
@@ -300,7 +301,7 @@ void AlgorithmHistoryWindow::writeToScriptFile()
   {
     scriptDir = prevDir;
   }
-  QString filePath = QFileDialog::getSaveFileName(this,tr("Save Script As "),scriptDir,tr("Script files (*.py)"));
+  QString filePath = MantidQt::API::FileDialogHandler::getSaveFileName(this,tr("Save Script As "),scriptDir,tr("Script files (*.py)"));
   // An empty string indicates they clicked cancel
   if( filePath.isEmpty() ) return;
   

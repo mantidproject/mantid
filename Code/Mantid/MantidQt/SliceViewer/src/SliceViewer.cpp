@@ -70,6 +70,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 
 
 using namespace Mantid;
@@ -1105,7 +1106,7 @@ void SliceViewer::saveImage(const QString & filename)
   QString fileselection;
   if (filename.isEmpty())
   {
-    fileselection = QFileDialog::getSaveFileName(this, tr("Pick a file to which to save the image"),
+    fileselection = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Pick a file to which to save the image"),
         QFileInfo(m_lastSavedFile).absoluteFilePath(),
         tr("PNG files(*.png *.png)"));
     // User cancelled if filename is still empty

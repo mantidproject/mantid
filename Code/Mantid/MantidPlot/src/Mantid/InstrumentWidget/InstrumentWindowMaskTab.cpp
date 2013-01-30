@@ -43,6 +43,8 @@
 #include <QApplication>
 #include <QFileDialog>
 
+#include "MantidQtAPI/FileDialogHandler.h"
+
 #include <numeric>
 #include <cfloat>
 #include <algorithm>
@@ -490,7 +492,7 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
   {
     clearShapes();
     QString saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-    QString fileName = QFileDialog::getSaveFileName(m_instrWindow,"Select location and name for the mask file",saveDir,"XML files (*.xml)");
+    QString fileName = MantidQt::API::FileDialogHandler::getSaveFileName(m_instrWindow,"Select location and name for the mask file",saveDir,"XML files (*.xml)");
 
     if (!fileName.isEmpty())
     {

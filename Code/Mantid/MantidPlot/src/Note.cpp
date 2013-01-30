@@ -36,6 +36,7 @@
 #include <Qsci/qsciprinter.h>
 #include <QPrintDialog>
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 
 Note::Note(const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
   : MdiSubWindow(parent, label, name, f)
@@ -124,7 +125,7 @@ QString Note::exportASCII(const QString &filename)
   if (filename.isEmpty())
   {
     QString dir(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory").c_str());
-    fn = QFileDialog::getSaveFileName(this, tr("Save Text to File"),dir,filter, &selectedFilter);
+    fn = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save Text to File"),dir,filter, &selectedFilter);
   }
   else
     fn = filename;

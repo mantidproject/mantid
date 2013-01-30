@@ -7,6 +7,7 @@
 #undef QT_NO_KEYWORDS
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 
 #include <QIcon>
 #include <QMessageBox>
@@ -200,7 +201,7 @@ QString UserSubWindow::openFileDialog(const bool save, const QStringList &exts)
   QString filename;
   if( save )
   {
-    filename = QFileDialog::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+    filename = MantidQt::API::FileDialogHandler::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
   }
   else
   {
