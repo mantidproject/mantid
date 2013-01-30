@@ -1,4 +1,3 @@
-
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -817,8 +816,8 @@ static int cred_acquire(git_cred **out,
     using Mantid::Kernel::FacilityInfo;
     g_log.debug() << "GitScriptRepository::cloneRepository ... begin\n" ; 
     git_repository *cloned_repo = NULL;
-    git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
-    git_checkout_opts checkout_opts = GIT_CHECKOUT_OPTS_INIT;
+    git_clone_options clone_opts;  
+    git_checkout_opts checkout_opts;
     int error;
     git_config * cfg;
     
@@ -840,9 +839,14 @@ static int cred_acquire(git_cred **out,
     // Set up options
     // avoid downloading the files, letting the local folder clean (to not fill the local folder
     // with files that the user is not interested with   
-    progress_data pd = {{0}};
+    progress_data pd; 
+    memset(&pd,0,sizeof(pd)); 
     pd.log = &g_log; 
-    pd.up_to = 0; 
+    pd.up_to = 0;
+    memset(&clone_opts, 0, sizeof(clone_opts)); 
+    memset(&checkout_opts,0,sizeof(checkout_opts));
+    clone_opts.version = GIT_CLONE_OPTIONS_VERSION; 
+    checkout_opts.version = GIT_CHECKOUT_OPTS_VERSION;
 	  checkout_opts.checkout_strategy =  GIT_CHECKOUT_UPDATE_ONLY| GIT_CHECKOUT_ALLOW_CONFLICTS;
 	  checkout_opts.progress_cb = checkout_progress;
 	  checkout_opts.progress_payload = &pd;
