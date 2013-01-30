@@ -13549,7 +13549,7 @@ void ApplicationWindow::translateActionsStrings()
   actionShowExplorer->setToolTip(tr("Show project explorer"));
 
   actionShowLog->setMenuText(tr("Results &Log"));
-  actionShowLog->setToolTip(tr("Show Analysis Results"));
+  actionShowLog->setToolTip(tr("Results Log"));
 
   actionShowUndoStack->setMenuText(tr("&Undo/Redo Stack"));
   actionShowUndoStack->setToolTip(tr("Show available undo/redo commands"));
