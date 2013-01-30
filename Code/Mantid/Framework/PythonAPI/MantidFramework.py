@@ -91,8 +91,6 @@ else:
     ldpath = os.environ.get(library_var, "")
     ldpath += ":" + _bin
     os.environ[library_var] = ldpath
-    if "NXSESSIONID" in os.environ:
-        os.environ['LD_PRELOAD'] = ''
     if platform.system() == 'Linux':
         # stdc++ has to be loaded first or exceptions don't get translated 
         # properly across bounadries
