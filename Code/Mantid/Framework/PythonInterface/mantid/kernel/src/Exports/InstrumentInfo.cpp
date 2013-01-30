@@ -19,8 +19,11 @@ void export_InstrumentInfo()
     .def("shortName", &InstrumentInfo::shortName,
          "Returns the abbreviated name of the instrument as definined in the Facilites.xml file")
 
+    .def("__str__", &InstrumentInfo::shortName,
+         "Returns the abbreviated name of the instrument as definined in the Facilites.xml file")
+
     .def("zeroPadding", &InstrumentInfo::zeroPadding,
-          "Returns zero padding for this instrument")
+         "Returns zero padding for this instrument")
 
     .def("filePrefix", &InstrumentInfo::filePrefix,
           "Returns file prefix for this instrument")

@@ -14,6 +14,9 @@ void export_FacilityInfo()
     .def("name", &FacilityInfo::name, return_value_policy<copy_const_reference>(),
          "Returns name of the facility as definined in the Facilities.xml file")
 
+    .def("__str__", &FacilityInfo::name, return_value_policy<copy_const_reference>(),
+         "Returns name of the facility as definined in the Facilities.xml file")
+
     .def("zeroPadding", &FacilityInfo::zeroPadding,
          "Returns default zero padding for this facility")
 
