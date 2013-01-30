@@ -1,4 +1,3 @@
-
 #include <QtGui>
 #include "MantidQtAPI/RepoModel.h"
 
@@ -229,27 +228,27 @@ RepoDelegate::RepoDelegate(QObject *parent)
     :QStyledItemDelegate(parent)
 {}
 
-QWidget * RepoDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                                    const QModelIndex &index) const
+QWidget * RepoDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/,
+                                     const QModelIndex &/*index*/) const
 {
   QPushButton *pb = new QPushButton(parent);
   return pb;
 }
 
 
-void RepoDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+void RepoDelegate::setEditorData(QWidget */*editor*/, const QModelIndex &/*index*/) const
 {
   /*    QString value = index.model()->data(index, Qt::DisplayRole).toString();  // Qt::EditRole
     QPushButton * pb = static_cast<QPushButton*>(editor);
     pb->setHidden(value == "true");*/
 }
 
-void RepoDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
+void RepoDelegate::setModelData(QWidget */*editor*/, QAbstractItemModel *model,
                                 const QModelIndex &index) const{  
    model->setData(index, QString("true"), Qt::EditRole);
 }
 
-void RepoDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void RepoDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/*index*/) const
 {
     editor->setGeometry(option.rect);
 }
@@ -299,7 +298,7 @@ void RepoDelegate::paint(
   QStyleOptionButton button;
   button.rect = buttonRect;
   button.icon = icon;
-  int icon_size = min_val*.8; 
+  int icon_size =(int) (min_val*.8); 
   button.iconSize = QSize(icon_size,icon_size);
   button.state =  QStyle::State_Enabled;
   
