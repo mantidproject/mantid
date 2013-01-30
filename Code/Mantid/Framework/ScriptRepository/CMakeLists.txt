@@ -114,4 +114,4 @@ set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 include_directories(inc)
 target_link_libraries(ScriptRepository ${MANTIDLIBS})
 
-install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGIN_DIR} )
