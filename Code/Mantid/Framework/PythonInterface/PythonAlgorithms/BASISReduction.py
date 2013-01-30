@@ -100,7 +100,7 @@ class BASISReduction(PythonAlgorithm):
             api.ModeratorTzero(InputWorkspace=self._samWs, 
                                OutputWorkspace=self._samWs)
             api.LoadParameterFile(Workspace=self._samWs, 
-                                  Filename='BASIS_silicon_111_Parameters.xml')
+                                  Filename=config.getInstrumentDirectory() + 'BASIS_silicon_111_Parameters.xml')
             api.ConvertUnits(InputWorkspace=self._samWs, 
                                  OutputWorkspace=self._samWs,
                                  Target='Wavelength', EMode='Indirect')
@@ -194,3 +194,4 @@ class BASISReduction(PythonAlgorithm):
     
 # Register algorithm with Mantid.
 registerAlgorithm(BASISReduction)
+
