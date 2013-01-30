@@ -119,6 +119,12 @@ set_target_properties ( ScriptRepository PROPERTIES OUTPUT_NAME MantidScriptRepo
 set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
-target_link_libraries(ScriptRepository ${MANTIDLIBS})
+if ( APPLE )
+  set ( LIBS ${MANTIDLIBS} ${OPENSSL_CRYPTO_LIBRARY} )
+else ()
+  set ( LIBS ${MANTIDLIBS} )
+endif()
+target_link_libraries(ScriptRepository ${LIBS})
+
 
 install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
