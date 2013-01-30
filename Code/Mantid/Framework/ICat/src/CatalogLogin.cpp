@@ -45,7 +45,8 @@ namespace Mantid
       ICatalog_sptr catalog_sptr;
       try
       {
-
+        g_log.information() << "Attempting to login to " << ConfigService::Instance().getFacility().catalogName()
+                            << " for " << ConfigService::Instance().getFacility().name() << "\n";
         catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
 
       }
