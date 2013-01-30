@@ -10,6 +10,13 @@ IF (NOT WIN32)
   FIND_PACKAGE(ZLIB)
 ENDIF()
 
+IF (WIN32 AND NOT MINGW)
+	ADD_DEFINITIONS(-DGIT_WINHTTP)
+ELSE ()
+	FIND_PACKAGE(OpenSSL)
+	FILE(GLOB SRC_HTTP deps/http-parser/*.c)
+ENDIF()
+
 IF (ZLIB_FOUND)
  INCLUDE_DIRECTORIES (SYSTEM ${ZLIB_INCLUDE_DIRS})
  LINK_LIBRARIES(${ZLIB_LIBRARIES})
@@ -55,13 +62,17 @@ ELSE()
 	FILE(GLOB GIT2_SRC libgit2/src/*.c libgit2/src/transports/*.c libgit2/src/xdiff/*.c libgit2/src/unix/*.c)
 ENDIF ()
 
+IF (MSVC)
+	# Default to stdcall, as that's what the CLR expects and how the Windows API is built
+	OPTION (STDCALL "Buildl libgit2 with the __stdcall convention" ON)
 
+ENDIF()
 
 SET (SRC_REGEX libgit2/deps/regex/regex.c)
 SET (INC_REGEX libgit2/deps/regex/regex.h)
 
-SET (SRC_HTTP libgit2/deps/http-parser/http_parser.c)
-SET (INC_HTTP libgit2/deps/http-parser/http_parser.h)
+#SET (SRC_HTTP libgit2/deps/http-parser/http_parser.c)
+#SET (INC_HTTP libgit2/deps/http-parser/http_parser.h)
 
 # Libgit2 source
 set ( LIBGIT2_SRC 
@@ -77,7 +88,6 @@ set ( SRC_FILES
 set ( INC_FILES inc/MantidScriptRepository/GitScriptRepository.h
   ${INC_ZLIB}
   ${INC_HTTP}
-
 )
 #
 #set ( TEST_FILES
@@ -114,4 +124,4 @@ set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 include_directories(inc)
 target_link_libraries(ScriptRepository ${MANTIDLIBS})
 
-install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
