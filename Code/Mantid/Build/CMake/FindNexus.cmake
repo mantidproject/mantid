@@ -37,4 +37,10 @@ endif()
 # Handle the QUIETLY and REQUIRED arguments and set NEXUS_FOUND to TRUE if 
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
-find_package_handle_standard_args( Nexus DEFAULT_MSG NEXUS_LIBRARIES NEXUS_INCLUDE_DIR )
+if (NEXUS_VERSION)
+  find_package_handle_standard_args( Nexus REQUIRED_VARS NEXUS_LIBRARIES NEXUS_INCLUDE_DIR
+				     VERSION_VAR NEXUS_VERSION )
+else (NEXUS_VERSION)
+  message (status "Failed to determine version: Ignoring version requirement")
+  find_package_handle_standard_args( Nexus DEFAULT_MSG NEXUS_LIBRARIES NEXUS_INCLUDE_DIR )
+endif (NEXUS_VERSION)
