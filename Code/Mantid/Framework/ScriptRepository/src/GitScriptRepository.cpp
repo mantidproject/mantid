@@ -63,8 +63,7 @@ namespace API
   DECLARE_SCRIPTREPOSITORY(GitScriptRepository)
   
   GitScriptRepository::GitScriptRepository(const std::string local_rep, 
-                                         const std::string remote)
-  throw (ScriptRepoException&):
+                                         const std::string remote) :
   g_log(Logger::get("GitScriptRepository"))
   {    
     g_log.debug() << "GitScriptRepository constructor: local_rep " 
@@ -132,7 +131,7 @@ namespace API
   }
 
 
-  GitScriptRepository::~GitScriptRepository() throw(){
+  GitScriptRepository::~GitScriptRepository() throw() {
 
     if (repo)
       git_repository_free(repo);
@@ -300,7 +299,7 @@ namespace API
       @attention Empty folders will not be listed!
 
   */
-  vector<std::string> GitScriptRepository::listFiles() throw (ScriptRepoException&){
+  vector<std::string> GitScriptRepository::listFiles() {
     // this method requires a valid local repository.
     if (!repo)
       throw invalidRepository();
@@ -431,7 +430,7 @@ namespace API
 
    
   */
-  SCRIPTSTATUS GitScriptRepository::fileStatus(const std::string file_path) throw (ScriptRepoException&){
+  SCRIPTSTATUS GitScriptRepository::fileStatus(const std::string file_path) {
     if (!repo)
       throw invalidRepository();
     // change the path to a path related to the repository.
@@ -545,7 +544,7 @@ namespace API
      http://libgit2.github.com/libgit2/#HEAD/group/checkout/git_checkout_index
 
   */
-  void GitScriptRepository::download(const std::string file_path) throw (ScriptRepoException&){
+  void GitScriptRepository::download(const std::string file_path) {
     if (! repo)
       throw invalidRepository();
 
@@ -659,7 +658,7 @@ namespace API
     
     
   */
-  void GitScriptRepository::update(void) throw (ScriptRepoException&)
+  void GitScriptRepository::update(void) 
   {
     g_log.debug() << "GitScriptRepository::update ... begin\n" ; 
     // if the repository was not initialized, check if we can initialize (meaning that it was created)
@@ -707,7 +706,7 @@ namespace API
      http://libgit2.github.com/libgit2/ex/HEAD/fetch.html#git_remote_update_tips-8
 
   */
-  void GitScriptRepository::fetchOrigin(void) throw (ScriptRepoException&){
+  void GitScriptRepository::fetchOrigin(void) {
     g_log.debug() << "GitScriptRepository::fetchOrigin begin\n" ; 
     // ensures this means that repo exists
     git_remote * remote = NULL;
@@ -814,7 +813,7 @@ static int cred_acquire(git_cred **out,
      shown at the repository. Specially, .pyc files.
 
   */
-  void GitScriptRepository::cloneRepository(void) throw (ScriptRepoException&){
+  void GitScriptRepository::cloneRepository(void) {
     using Mantid::Kernel::FacilityInfo;
     g_log.debug() << "GitScriptRepository::cloneRepository ... begin\n" ; 
     git_repository *cloned_repo = NULL;
@@ -902,7 +901,7 @@ static int cred_acquire(git_cred **out,
                                    const std::string comment,
                                    const std::string author, 
                                    const std::string description)
-   throw (ScriptRepoException&) 
+    
   {
     using Poco::FileOutputStream; 
     ///  @todo: deal with the description
@@ -1256,7 +1255,7 @@ static int cred_acquire(git_cred **out,
    
      The main issue, is how to get the file description. As defined, is defined differently, depending on the kind of file. 
   */
-  ScriptInfo GitScriptRepository::fileInfo(const std::string path) throw (ScriptRepoException&){
+  ScriptInfo GitScriptRepository::fileInfo(const std::string path) {
     using boost::algorithm::ends_with;
     if ( !repo)
       throw invalidRepository();

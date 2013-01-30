@@ -308,7 +308,7 @@ They will work as was expected for folders @ref folders-sec.
          // info.description : returns the file description.
        @endcode       
      */
-    virtual ScriptInfo fileInfo(const std::string path) throw (ScriptRepoException&)  = 0;
+    virtual ScriptInfo fileInfo(const std::string path)   = 0;
     
 
     /**
@@ -346,7 +346,7 @@ They will work as was expected for folders @ref folders-sec.
        
        @exception May throw Invalid Repository if the local repository was not generated. In this case, it is necessary to execute the ScriptRepository::update (at least once). 
      */
-    virtual std::vector<std::string> listFiles() throw (ScriptRepoException&) = 0;
+    virtual std::vector<std::string> listFiles()  = 0;
     const std::vector<struct file_entry> & listEntries() {return repository_list;     
     }
     /**
@@ -364,7 +364,7 @@ They will work as was expected for folders @ref folders-sec.
                   remotely or to indicate that a confict was found.
        
      */
-    virtual void download(const std::string file_path) throw (ScriptRepoException&) = 0 ;
+    virtual void download(const std::string file_path)  = 0 ;
 
 
     
@@ -376,7 +376,7 @@ They will work as was expected for folders @ref folders-sec.
        @return SCRIPTSTATUS of the given file/folder
        @exception ScriptRepoException to indicate that file is not available.
      */
-    virtual SCRIPTSTATUS fileStatus(const std::string file_path) throw (ScriptRepoException&) = 0; 
+    virtual SCRIPTSTATUS fileStatus(const std::string file_path)  = 0; 
 
     
     /**
@@ -420,7 +420,7 @@ They will work as was expected for folders @ref folders-sec.
      */
     virtual void upload(const std::string file_path, const std::string comment,
                 const std::string author, 
-                const std::string description = std::string()) throw (ScriptRepoException&) = 0;
+                const std::string description = std::string())  = 0;
 
     /** Check if the local repository exists. If there is no local repository, 
       the repository was never cloned, the isValid will return false, and the
@@ -445,7 +445,7 @@ They will work as was expected for folders @ref folders-sec.
        @exception ScriptRepoException notifies mainly connection failure, but, 
                   may eventually, notify that the local repository may not be created. 
     */
-    virtual void update(void) throw (ScriptRepoException&) = 0; 
+    virtual void update(void)  = 0; 
   protected:
     /// get all the files from a repository
     std::vector<struct file_entry> repository_list; 
