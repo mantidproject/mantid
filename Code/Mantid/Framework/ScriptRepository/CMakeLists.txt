@@ -1,4 +1,3 @@
-
 ####
 ## SET THE LIB GIT 2 FILES
 ####
@@ -14,8 +13,8 @@ IF (WIN32 AND NOT MINGW)
 	ADD_DEFINITIONS(-DGIT_WINHTTP)
 ELSE ()
 	FIND_PACKAGE(OpenSSL)
-	SET (SRC_HTTP libgit2/deps/http-parser/http_parser.c)
-	SET (INC_HTTP libgit2/deps/http-parser/http_parser.h)
+    SET (SRC_HTTP libgit2/deps/http-parser/http_parser.c)
+    SET (INC_HTTP libgit2/deps/http-parser/http_parser.h)
 ENDIF()
 
 IF (ZLIB_FOUND)
@@ -72,7 +71,6 @@ ENDIF()
 SET (SRC_REGEX libgit2/deps/regex/regex.c)
 SET (INC_REGEX libgit2/deps/regex/regex.h)
 
-
 # Libgit2 source
 set ( LIBGIT2_SRC 
   ${SRC_ZLIB} ${SRC_REGEX} ${SRC_HTTP}
@@ -87,7 +85,6 @@ set ( SRC_FILES
 set ( INC_FILES inc/MantidScriptRepository/GitScriptRepository.h
   ${INC_ZLIB}
   ${INC_HTTP}
-
 )
 #
 #set ( TEST_FILES

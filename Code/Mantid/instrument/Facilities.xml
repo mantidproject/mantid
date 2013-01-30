@@ -9,6 +9,9 @@
   <catalog name="ICat3Catalog">
   </catalog>
 
+  <httpproxy url="http://wwwcache.rl.ac.uk:8080">
+  </httpproxy>
+  
   <soapEndPoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT">
   </soapEndPoint>
 

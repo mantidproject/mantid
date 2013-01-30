@@ -24,7 +24,7 @@
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
-
+#include "MantidKernel/FacilityInfo.h"
 #include "git2.h"
 #include "assert.h"
 #include <locale.h>
@@ -61,7 +61,7 @@ namespace Mantid
 namespace API
 {
   DECLARE_SCRIPTREPOSITORY(GitScriptRepository)
-
+  
   GitScriptRepository::GitScriptRepository(const std::string local_rep, 
                                          const std::string remote)
   throw (ScriptRepoException&):
@@ -69,7 +69,7 @@ namespace API
   {    
     g_log.debug() << "GitScriptRepository constructor: local_rep " 
                   << local_rep << "; remote = " << remote << "\n"; 
-    
+    update_called = false;  
     std::string loc, rem; 
     if (local_rep.empty() || remote.empty()){
       ConfigServiceImpl & config = ConfigService::Instance();
@@ -90,7 +90,7 @@ namespace API
     else
       remote_url = remote;
     
-    if (local_repository.empty() || remote_url.empty()){
+    if (remote_url.empty()){
       g_log.error() << "Failed to find the specification for the remote url and local repository\n"; 
       
       throw ScriptRepoException(
@@ -98,29 +98,41 @@ namespace API
                                 "Attempt to construct GitScriptRepository with invalid inputs");                              
     }
     
-    g_log.debug() << "GitScriptRepository::Constructor Configuring repository for local " << local_repository  
-                  << "\n"; 
+    repo = NULL; 
     
+    if (local_repository.empty())
+      return;
+    
+    //parsing the local_repository
+    Poco::Path local(local_repository); 
+    std::string aux_local_rep;
+    if (local.isRelative()){
+      aux_local_rep = std::string(Poco::Path::home()).append(local_repository);
+      local_repository = aux_local_rep;
+    }
+     g_log.debug() << "GitScriptRepository::Constructor Configuring repository for local " << local_repository  
+                  << "\n"; 
     // it will try to initialize the git_repository
     // It is possible to have a non valid git_repository
     // when there is no local repository. But, this means, 
     // that it will accept only the update method.
-    repo = NULL; 
+    
     int err = git_repository_open(&repo, local_repository.c_str());
     if (err){
       const git_error *git_err = giterr_last();
-      g_log.warning() << "Invalid path detected in the GitScriptRepository constructor '" << local_repository 
+      g_log.warning() << "ScriptRepository not installed in this machine.\n";
+      g_log.debug() << "Invalid path detected in the GitScriptRepository constructor '" << local_repository 
                       << "'.\n Git Error: "
                       <<git_err->message                  
                       << "\n";
       // repo should be NULL in this case
       assert(!repo);
     } 
-    update_called = false;
+
   }
 
 
-  GitScriptRepository::~GitScriptRepository() throw (){
+  GitScriptRepository::~GitScriptRepository() throw(){
 
     if (repo)
       git_repository_free(repo);
@@ -142,8 +154,21 @@ namespace API
 
   ScriptRepoException GitScriptRepository::gitException(const std::string info, const std::string file, int line){
     const git_error *err = giterr_last();
-    g_log.error() << "Failure: "<< err->message  << "\n"<< "Info " << info << "\n" ; 
-    return ScriptRepoException(info, err->message, 
+    std::string desc; 
+    switch(err->klass){
+    case GITERR_OS:
+      desc = "Internet failure. It may be the internet connection or proxy setting problem\n";      
+    break;
+    case GITERR_REPOSITORY:
+      desc = "The definition of the working directory path is invalid. Check the value of ScriptLocalRepository at the properties file.\n";
+      break;
+    default:
+      break;
+    }
+    desc.append(err->message);
+
+    g_log.error() << "Failure: "<< desc  << "\n"<< "Info " << info << " -> Error Code ("<< err->klass << ")\n)" ; 
+    return ScriptRepoException(info, desc, 
                                file, line);
   }
 
@@ -729,6 +754,60 @@ namespace API
     git_remote_free(remote);
   }
 
+  
+typedef struct progress_data {
+	git_transfer_progress fetch_progress;
+	size_t completed_steps;
+	size_t total_steps;
+	const char *path;
+  int up_to;
+  Mantid::Kernel::Logger * log; 
+} progress_data;
+
+static void print_progress(progress_data *pd)
+{
+	int network_percent = (100*pd->fetch_progress.received_objects) / pd->fetch_progress.total_objects;
+	int index_percent = (100*pd->fetch_progress.indexed_objects) / pd->fetch_progress.total_objects;
+  int percent = (network_percent + index_percent )/ 2; 
+  if (percent > pd->up_to){
+    pd->up_to = (percent + 5); 
+    pd->log->notice() << "Progress: " << index_percent << "%\n"; 
+  }
+}
+
+static void fetch_progress(const git_transfer_progress *stats, void *payload)
+{
+	progress_data *pd = (progress_data*)payload;
+	pd->fetch_progress = *stats;
+	print_progress(pd);
+}
+static void checkout_progress(const char *path, size_t cur, size_t tot, void *payload)
+{
+	progress_data *pd = (progress_data*)payload;
+	pd->completed_steps = cur;
+	pd->total_steps = tot;
+	pd->path = path;
+	print_progress(pd);
+}
+
+static int cred_acquire(git_cred **out,
+		const char * /*url*/,
+		unsigned int /*allowed_types*/,
+		void * /*payload*/)
+{
+	char username[128] = {0};
+	char password[128] = {0};
+
+	printf("Username: ");
+	scanf("%s", username);
+
+	/* Yup. Right there on your terminal. Careful where you copy/paste output. */
+	printf("Password: ");
+	scanf("%s", password);
+
+	return git_cred_userpass_plaintext_new(out, username, password);
+}
+
 
   /**
      Does the cloning, but do also ensure that automatic generated files, will not be 
@@ -736,21 +815,47 @@ namespace API
 
   */
   void GitScriptRepository::cloneRepository(void) throw (ScriptRepoException&){
+    using Mantid::Kernel::FacilityInfo;
     g_log.debug() << "GitScriptRepository::cloneRepository ... begin\n" ; 
     git_repository *cloned_repo = NULL;
-    git_clone_options clone_opts; 
+    git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
+    git_checkout_opts checkout_opts = GIT_CHECKOUT_OPTS_INIT;
     int error;
-  
-    // Set up options	
-    memset(&clone_opts,0,sizeof(clone_opts)); 
-    clone_opts.version = GIT_CLONE_OPTIONS_VERSION; 
-    clone_opts.checkout_opts.version = GIT_CHECKOUT_OPTS_VERSION;
+    git_config * cfg;
+    
+  error = git_config_open_default(&cfg);
+  if (error){
+    throw gitException("Script Repository Proxy Configuration Failed");
+    }
+    const FacilityInfo defaultFacility = ConfigService::Instance().getFacility();
+    std::string proxy = defaultFacility.getHTTPProxy();
+    if (!proxy.empty()){
+      const char * git_proxy; 
+      git_config_get_string(&git_proxy, cfg, "http.proxy"); 
+      if (proxy != git_proxy){
+        g_log.debug() << "Script Repository Proxy configured to " << proxy << "\n"; 
+        git_config_set_string(cfg,"http.proxy",proxy.c_str()); 
+      }    
+    }
+
+    // Set up options
     // avoid downloading the files, letting the local folder clean (to not fill the local folder
-    // with files that the user is not interested with
-    clone_opts.checkout_opts.checkout_strategy = GIT_CHECKOUT_UPDATE_ONLY| GIT_CHECKOUT_ALLOW_CONFLICTS;
+    // with files that the user is not interested with   
+    progress_data pd = {{0}};
+    pd.log = &g_log; 
+    pd.up_to = 0; 
+	  checkout_opts.checkout_strategy =  GIT_CHECKOUT_UPDATE_ONLY| GIT_CHECKOUT_ALLOW_CONFLICTS;
+	  checkout_opts.progress_cb = checkout_progress;
+	  checkout_opts.progress_payload = &pd;
+	  clone_opts.checkout_opts = checkout_opts;
+	  clone_opts.fetch_progress_cb = &fetch_progress;
+	  clone_opts.fetch_progress_payload = &pd;
+	  clone_opts.cred_acquire_cb = cred_acquire;
+
+    
     // Do cloning
     // try not to use the call back function
-    g_log.debug() << "GitScriptRepository::cloneRepository ... cloning " << remote_url << "\n"; 
+    g_log.notice() << "ScriptRepository installation started! (Remember it will take a couple of minutes)\n"; 
     error = git_clone(&cloned_repo, 
                       remote_url.c_str(), 
                       local_repository.c_str(), 
@@ -758,7 +863,7 @@ namespace API
                       );     
   
     if (error){
-      throw gitException("We can not create your local repository.\nHInt: check your internet connection.",
+      throw gitException("Script Repository installatio failed!",
                          __FILE__, __LINE__); 
     }
     g_log.debug() << "GitScriptRepository::cloneRepository ... clone done correctly! \n"; 
@@ -797,7 +902,7 @@ namespace API
                                    const std::string comment,
                                    const std::string author, 
                                    const std::string description)
-    throw (ScriptRepoException&)
+   throw (ScriptRepoException&) 
   {
     using Poco::FileOutputStream; 
     ///  @todo: deal with the description
@@ -931,8 +1036,8 @@ namespace API
   }
 
   static std::string extractPythonDocString( std::istream & input, 
-                                             long int &doc_start, 
-                                             long int &doc_end){
+                                             size_t &doc_start, 
+                                             size_t &doc_end){
 
     const char * startmarks[] = {"\"\"\"",
                                  "'''",
@@ -948,11 +1053,11 @@ namespace API
     // int docstring_found = 0; 
     std::string buf;
     size_t pos; 
-    long int start_mark = -1; 
-    long int end_mark = -1; 
+    size_t start_mark = SIZE_MAX; 
+    size_t end_mark = SIZE_MAX; 
     int end_mark_index = 0;
     while(getline(input,buf)){
-      if (start_mark < 0){
+      if (start_mark == SIZE_MAX){
         // looking for the start mark
       for (int i = 0; i< 5; i++){
         pos = buf.find(startmarks[i]); 
@@ -990,7 +1095,7 @@ namespace API
       
     }
 
-    if (start_mark < 0 || end_mark < 0){
+    if (start_mark == SIZE_MAX || end_mark == SIZE_MAX){
       // no documentation
       doc_start = 0; 
       doc_end = 0; 
@@ -1001,7 +1106,7 @@ namespace API
     
     doc_start = start_mark; 
     doc_end = end_mark; 
-    long int size = end_mark - start_mark;
+    size_t size = end_mark - start_mark;
     char * buffer = new char [size + 1]; 
     input.clear(); 
     input.seekg(start_mark,std::ios::beg); 
@@ -1111,7 +1216,7 @@ namespace API
     switch(filetype){
     case PYTHONFILE:
       {
-        long int start, end; 
+        size_t start, end; 
         description << extractPythonDocString(input, start, end); 
       }
       break;
