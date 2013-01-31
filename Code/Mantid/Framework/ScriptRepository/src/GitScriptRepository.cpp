@@ -660,7 +660,7 @@ namespace API
   
     if (err)
       throw gitException("Failure to download."); /// @todo provide a better explanation.
-    g_log.notice() << file_path  << " downloaded!" << std::endl; 
+    g_log.debug() << file_path  << " downloaded!" << std::endl; 
   }
 
 

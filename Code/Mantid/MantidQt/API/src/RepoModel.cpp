@@ -69,7 +69,7 @@ QVariant RepoItem::data(int column,  int role  ) const
     case 1:
       return "Download";
     case 2:
-      return "Update"; 
+      return "Status"; 
     case 3: 
       return "Publish"; 
     default: 
@@ -95,7 +95,7 @@ QVariant RepoItem::data(int column,  int role  ) const
         }
         return "true";
         break;
-      case 2:/* Update -> The file is up to date?*/ 
+      case 2:/* Status -> The file is up to date?*/ 
         if (status ==  Mantid::API::BOTH_UNCHANGED)
           return "true";
         else{
@@ -133,7 +133,7 @@ QVariant RepoItem::data(int column,  int role  ) const
     {
       if (column > 0)
         return QVariant(); 
-
+      
       if (directory){
         if (status == Mantid::API::REMOTE_ONLY)
           return QIcon::fromTheme("folder-remote", QIcon(QPixmap(":/win/folder-remote"))); 
@@ -147,7 +147,7 @@ QVariant RepoItem::data(int column,  int role  ) const
         if (path.contains("readme",Qt::CaseInsensitive))
           return QIcon::fromTheme("text-x-readme", QIcon(QPixmap(":/win/txt_file.png"))); 
 
-
+        
         QString extension = QString(path).remove(0,pos);
         if (extension == ".cpp" || extension == ".CPP" || extension == ".c" || extension == ".C")
           return QIcon::fromTheme("text-x-c++", QIcon(QPixmap(":/win/unknown")));
@@ -161,9 +161,58 @@ QVariant RepoItem::data(int column,  int role  ) const
           return QIcon::fromTheme("application-pdf", QIcon(QPixmap(":/win/file_pdf"))); 
         else
           return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown"))); 
-
+        
       }
       
+    }
+    break;
+  case  Qt::ToolTipRole:
+    {
+      switch(column){
+      case 0:
+        return QVariant();
+        break;
+      case 1: /*Donwload -> is this file already donwloaded?*/           
+        if (status == Mantid::API::REMOTE_ONLY){
+          if (directory)
+            return "Click here to download this folder and all its files";
+          else
+            return "Click here to download this file"; 
+        }
+        break;
+      case 2:/* Status -> The file is up to date?*/ 
+        if (status ==  Mantid::API::BOTH_UNCHANGED){
+          if (directory)
+            return "This folder is up-to-date";
+          else
+            return "This file is up-to-date"; 
+        }
+        else{
+          if (status == Mantid::API::LOCAL_CHANGED)
+            return "This file has been changed locally."; // FIXME: you may consider publish
+          if (status == Mantid::API::REMOTE_CHANGED || 
+              status == Mantid::API::BOTH_CHANGED){
+            if (directory)
+              return "There is a new version of the files inside this folder. Click here to install them.";
+            else
+              return "There is a new version of this file available. Click here to install it.";
+          }
+          
+        }
+        break;
+      case 3: /* Publish -> is this file already published?*/
+        if (status == Mantid::API::LOCAL_ONLY
+            ||
+            status == Mantid::API::LOCAL_CHANGED)
+          return "You have changed this file. Click here to publish it.";
+        
+        break;
+      case 4:
+        return path;
+      default:
+        break;
+      }
+      return QVariant();     
     }
     break;
   }
