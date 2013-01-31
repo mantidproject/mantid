@@ -125,6 +125,21 @@ namespace API
                       << "\n";
       // repo should be NULL in this case
       assert(!repo);
+      return;
+    }
+    // test the repository, checking if it was a valid and not corrupted (usually if the user canceled the 
+    // installation of the repository, it becomes invalid)
+    err =  git_repository_is_empty(repo); 
+    if (err){
+      if (err == 1){
+        g_log.warning() << "The repository in " << local_repository << " is corrupted or invalid." << std::endl;
+      }
+      if (err < 0){
+      const git_error *git_err = giterr_last(); 
+      g_log.debug() << "Corrupted: " << git_err->message << ". Code (" << git_err->klass << ")." << std::endl; 
+      }
+      git_repository_free(repo); 
+      repo = NULL;        
     } 
 
   }
