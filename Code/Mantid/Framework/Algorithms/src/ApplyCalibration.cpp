@@ -111,6 +111,12 @@ namespace Mantid
          Quat rot = grandparent->getRelativeRot();
          rot.inverse();
          rot.rotate(pos);
+         boost::shared_ptr<const Geometry::IComponent>greatgrandparent = grandparent->getParent();
+         if (greatgrandparent) {
+           Quat rot2 = greatgrandparent->getRelativeRot();
+            rot2.inverse();
+            rot2.rotate(pos);
+         }
        }
 
        // Add a parameter for the new position
