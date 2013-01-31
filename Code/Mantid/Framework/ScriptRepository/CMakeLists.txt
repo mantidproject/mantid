@@ -107,6 +107,12 @@ else()
   set_source_files_properties ( ${LIBGIT2_SRC} 
                                 PROPERTIES COMPILE_FLAGS "-w" )
 endif()
+# add support for ssl for the transport https
+IF (OPENSSL_FOUND)
+  ADD_DEFINITIONS(-DGIT_SSL)
+  INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
+  SET(SSL_LIBRARIES ${OPENSSL_LIBRARIES})
+ENDIF()
 
 # Add the target for this directory
 add_library ( ScriptRepository ${SRC_FILES} ${LIBGIT2_SRC} ${INC_FILES} )
