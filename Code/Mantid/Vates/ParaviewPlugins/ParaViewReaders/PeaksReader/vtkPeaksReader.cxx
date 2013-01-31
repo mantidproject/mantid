@@ -10,6 +10,8 @@
 #include "vtkAxes.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include <vtkSphereSource.h>
+#include <vtkTransform.h>
+#include <vtkTransformPolyDataFilter.h>
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
@@ -89,8 +91,19 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
   {
     vtkAxes* axis = vtkAxes::New();
     axis->SymmetricOn();
-    axis->SetScaleFactor(0.5);
-    shapeMarker = axis;
+    axis->SetScaleFactor(0.3);
+
+    vtkTransform* transform = vtkTransform::New();
+    const double rotationDegrees = 45;
+    transform->RotateX(rotationDegrees);
+    transform->RotateY(rotationDegrees);
+    transform->RotateZ(rotationDegrees);
+
+    vtkTransformPolyDataFilter* transformFilter = vtkTransformPolyDataFilter::New();
+    transformFilter->SetTransform(transform);
+    transformFilter->SetInputConnection(axis->GetOutputPort());
+    transformFilter->Update();
+    shapeMarker = transformFilter;
   }
 
   vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
