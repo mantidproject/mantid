@@ -124,7 +124,7 @@ namespace API
         deleteLater(); 
         return;      
       }
-      QString local_path = dir + "/scriptRepository"; 
+      QString local_path = dir + "/mantidscripts"; 
       qDebug() << "setting scriptlocalrepository to " << local_path << "\n"; 
       config.setString("ScriptLocalRepository", local_path.toStdString()); 
       config.saveConfig(config.getUserFilename()); 

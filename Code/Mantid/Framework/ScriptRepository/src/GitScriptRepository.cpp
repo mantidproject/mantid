@@ -928,7 +928,7 @@ static int cred_acquire(git_cred **out,
       throw gitException("Script Repository installation failed!",
                          __FILE__, __LINE__); 
     }
-    g_log.debug() << "ScriptRepository cloneRepository ... installed!" << std::endl;
+    g_log.notice() << "ScriptRepository installed at "<< local_repository.c_str() << std::endl;
     char exclude_file_path[200]; 
     snprintf(exclude_file_path,200, "%s/info/exclude",git_repository_path(cloned_repo));
     // open the file in append mode
