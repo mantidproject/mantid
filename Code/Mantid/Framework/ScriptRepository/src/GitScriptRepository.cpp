@@ -118,7 +118,7 @@ namespace API
     int err = git_repository_open(&repo, local_repository.c_str());
     if (err){
       const git_error *git_err = giterr_last();
-      g_log.warning() << "ScriptRepository not installed in this machine.\n";
+      g_log.warning() << "ScriptRepository not installed in this machine."<< std::endl;
       g_log.debug() << "Invalid path detected in the GitScriptRepository constructor '" << local_repository 
                       << "'.\n Git Error: "
                       <<git_err->message                  
@@ -670,15 +670,12 @@ namespace API
       int err = git_repository_open(&repo, local_repository.c_str());
       if (err){
         const git_error *git_err = giterr_last();
-        g_log.warning() << "Invalid path detected in the GitScriptRepository constructor '" << local_repository 
-                        << "'.\n Git Error: "
-                        <<git_err->message                  
-                        << "\n";
+        g_log.debug() << "Script Repository Update open error: " << git_err->message << ". Code(" << git_err->klass << ")." << std::endl; 
         // repo should be NULL in this case
         assert(!repo);
 
         // if it does not exists... we have to create
-        g_log.debug() << "GitScriptRepository::update call clone\n";  
+        g_log.debug() << "GitScriptRepository::update call clone" << std::endl;   
         cloneRepository(); 
         update_called = true; // the clone, do also update the origin information
         return;
@@ -814,6 +811,10 @@ static int cred_acquire(git_cred **out,
   */
   void GitScriptRepository::cloneRepository(void) {
     using Mantid::Kernel::FacilityInfo;
+    using boost::algorithm::split;
+    using boost::algorithm::is_any_of;
+    using boost::algorithm::join;           
+
     g_log.debug() << "GitScriptRepository::cloneRepository ... begin\n" ; 
     git_repository *cloned_repo = NULL;
     git_clone_options clone_opts;  
@@ -858,18 +859,47 @@ static int cred_acquire(git_cred **out,
     
     // Do cloning
     // try not to use the call back function
-    g_log.notice() << "ScriptRepository installation started! (Remember it will take a couple of minutes)\n"; 
-    error = git_clone(&cloned_repo, 
-                      remote_url.c_str(), 
+    g_log.notice() << "ScriptRepository installation started! (Remember it will take a couple of minutes)" << std::endl; 
+
+    // get the path of the current directory
+    vector<std::string> url_paths;
+    std::string str = remote_url;
+    //split the csv of url path in url paths
+    // git://github.com/scripts;http://github.com/scripts
+    // will be splited in : git://github.com/scripts http://github.com/scripts
+    split(url_paths, str, boost::is_any_of(";"));
+    error = 0; 
+    for (vector<std::string>::iterator url = url_paths.begin();
+         url != url_paths.end(); 
+         url ++){
+
+      // this test is done here, in order not to repeat twice the 
+      // error message. So, it will print this message only if there is more 
+      // than one attempt to install the repository.
+      if (error)
+         g_log.warning() << "Attempt to install the repository failed with the following message: "
+                         << giterr_last()->message << ".\t New attempt will be done..." << std::endl;  
+
+      g_log.debug() << "Installing Script Repository for the url: " << (*url) << std::endl;  
+      // clone the repository
+      error = git_clone(&cloned_repo, 
+                        (*url).c_str(), 
                       local_repository.c_str(), 
                       &clone_opts
                       );     
-  
+
+      if (error) // if error, try the following approach
+        {
+          continue;
+        }
+      else
+        break; // no error, means success
+    }
     if (error){
-      throw gitException("Script Repository installatio failed!",
+      throw gitException("Script Repository installation failed!",
                          __FILE__, __LINE__); 
     }
-    g_log.debug() << "GitScriptRepository::cloneRepository ... clone done correctly! \n"; 
+    g_log.debug() << "ScriptRepository cloneRepository ... installed!" << std::endl;
     char exclude_file_path[200]; 
     snprintf(exclude_file_path,200, "%s/info/exclude",git_repository_path(cloned_repo));
     // open the file in append mode

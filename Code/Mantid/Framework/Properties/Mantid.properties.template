@@ -207,5 +207,5 @@ loading.multifilelimit=100
 UploaderWebServer = http://127.0.0.1:8000/upload/
 # Local system path for the script repository.
 ScriptLocalRepository = 
-# Url for the remote script repository.
-ScriptRepository = https://github.com/mantidproject/scripts.git
+# Url for the remote script repository. Write a list of urls separating them with ";", the system will try them in the order passed.
+ScriptRepository = git://github.com/mantidproject/scripts.git;https://github.com/mantidproject/scripts.git
