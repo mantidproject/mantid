@@ -12598,8 +12598,7 @@ void ApplicationWindow::createActions()
   actionLoadImage->setShortcut( tr("Ctrl+I") );
   connect(actionLoadImage, SIGNAL(activated()), this, SLOT(loadImage()));
 
-  actionScriptRepo = new QAction(tr("Script Repositor&y"),this); 
-  actionScriptRepo->setShortcut(tr("Ctrl+Y")); 
+  actionScriptRepo = new QAction(tr("Script Repositor&y"),this);
   connect(actionScriptRepo, SIGNAL(activated()), this, SLOT(loadScriptRepo()));
 
   actionImportImage = new QAction(tr("Import I&mage..."), this);
