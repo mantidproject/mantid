@@ -19,9 +19,26 @@ namespace API
 {
 
 
+  const QString install_mantid_label = "<html><head/><body><p>New in this release, the <span style=\" font-weight:600;\">"
+    "Script Repository</span> allows you to:</p>"
+    "<p>  * Share your scripts and reduction algorithms;</p>"
+    "<p>  * Get <span style=\" font-weight:600;\">Mantid</span> Scripts from the mantid developers and the comunity. </p>"
+    "<p><span style=\" font-style:italic;\">"
+    "Obs: The installation usually requires a couple of minutes, depending on your broadband available. </span></p>"
+    "<p>More Information available at "
+    "<a href=\"http://www.mantidproject.org/ScriptRepository\"><span style=\" text-decoration: underline; color:#0000ff;\">"
+    "http://www.mantidproject.org/ScriptRepository</span></a></p></br><p><span style=\" font-weight:600;\">"
+    "Would you like to install it now?</span></p></body></html>";
 
+  const QString installation_in_progress = "<html><head/><body><p><span style=\" font-weight:600;\">"
+    "Installing Script Repository Installation in background!</span></p>"
+    "<p>You may continue to use mantid.</p>"
+    "<p>The Result Log willl give you information of the installation progress.</p>"
+    "<p>When finished, please, reopen the <span style=\" font-weight:600;\">Script Repository</span>. </p></body></html>";
 
-
+  const QString installation_failed = "<html><head/><body><p>The installation of Script Repository "
+    "<span style=\" font-weight:600;\">Failed</span>!</p>"
+    "<p>Please, check the Result Log to see why the installation failed. </p></body></html>";
 
   /** Allow the application to be alive while giving some time to this Widget to ensure that
   the installation process is going on well.*/
@@ -84,9 +101,7 @@ namespace API
     if (!repo_ptr->isValid()){
       // no repository cloned
       if (QMessageBox::Ok != QMessageBox::question(this,"Install Script Repository?",
-          "The Script Repository allow you to share your scripts and to get mantid scripts from the developers and the community.\n"
-          "The installation may require a couple of minutes.\nWould you like to install it now?"
-          "\n\nMore Information: http://www.mantidproject.org/ScriptRepository",
+                                                   install_mantid_label,
           QMessageBox::Ok|QMessageBox::Cancel)){
             // user does not whant to install
             close();
@@ -119,20 +134,14 @@ namespace API
       delay();
       if (install.isResultReadyAt(0)){
         if (install.resultAt(0) < 0){
-          QMessageBox::warning(this, "Installatin Failed",
-              "The installation of Script Repository Failed\n"
-              "It may be internet connection or firewall, or the proxy definition.\n"
-              "Look at the result log to get some hints\n");
+          QMessageBox::warning(this, "Failure", installation_failed);
           close(); 
           deleteLater(); 
           return;
         }
       }else{
         // give some time to the thread to start
-        QLabel * inf = new QLabel("Running Script Repository Installation in background!\n"
-                                "Please, check the Result Log to see the progress of the installation\n\n"
-                                "After completing installation, please, reopen the Script Repository Interface\n",
-                                this); 
+        QLabel * inf = new QLabel(installation_in_progress,this); 
         QPushButton * close = new QPushButton("Close"); 
         connect(close, SIGNAL(clicked()), this, SLOT(close())); 
         QVBoxLayout *layout = new QVBoxLayout;
