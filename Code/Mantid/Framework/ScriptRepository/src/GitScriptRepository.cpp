@@ -838,22 +838,34 @@ static int cred_acquire(git_cred **out,
     git_checkout_opts checkout_opts;
     int error;
     git_config * cfg;
-    
-  error = git_config_open_default(&cfg);
-  if (error){
-    throw gitException("Script Repository Proxy Configuration Failed");
+    // check if config file exists:
+    {
+      char path[100];
+      if (git_config_find_global(path, 100)){
+        g_log.debug() << "Git configuration file does not exists" << std::endl; 
+        std::string config_path = std::string(Poco::Path::home()).append("/.gitconfig");
+        Poco::File f(config_path); 
+        f.createFile(); 
+        if (git_config_find_global(path, 100))
+          throw gitException("Instalation failed when creating the configuration file"); 
+      }
+    }
+    error = git_config_open_default(&cfg);
+    if (error){
+      throw gitException("Script Repository Proxy Configuration Failed");
     }
     const FacilityInfo defaultFacility = ConfigService::Instance().getFacility();
     std::string proxy = defaultFacility.getHTTPProxy();
     if (!proxy.empty()){
       const char * git_proxy; 
-      git_config_get_string(&git_proxy, cfg, "http.proxy"); 
+      if (git_config_get_string(&git_proxy, cfg, "http.proxy"))
+        throw gitException("Script Repository installation failed"); 
       if (proxy != git_proxy){
         g_log.debug() << "Script Repository Proxy configured to " << proxy << "\n"; 
         git_config_set_string(cfg,"http.proxy",proxy.c_str()); 
       }    
     }
-
+    git_config_free(cfg);
     // Set up options
     // avoid downloading the files, letting the local folder clean (to not fill the local folder
     // with files that the user is not interested with   
