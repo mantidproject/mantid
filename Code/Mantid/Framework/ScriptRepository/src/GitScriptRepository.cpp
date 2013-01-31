@@ -132,7 +132,8 @@ namespace API
     err =  git_repository_is_empty(repo); 
     if (err){
       if (err == 1){
-        g_log.warning() << "The repository in " << local_repository << " is corrupted or invalid." << std::endl;
+        g_log.warning() << "The repository in " << local_repository << " is corrupted or invalid.\n"
+                        << "We strongly suggest you should remove this folder from your machine!" <<  std::endl;
       }
       if (err < 0){
       const git_error *git_err = giterr_last(); 
@@ -779,9 +780,10 @@ static void print_progress(progress_data *pd)
 	int network_percent = (100*pd->fetch_progress.received_objects) / pd->fetch_progress.total_objects;
 	int index_percent = (100*pd->fetch_progress.indexed_objects) / pd->fetch_progress.total_objects;
   int percent = (network_percent + index_percent )/ 2; 
+  int next_step = ((percent > 10) && (percent < 20))? 1 : 5;  // attempt to make the progress information better to the user
   if (percent > pd->up_to){
-    pd->up_to = (percent + 5); 
-    pd->log->notice() << "Progress: " << index_percent << "%\n"; 
+    pd->up_to = (percent + next_step); 
+    pd->log->notice() << "Script Repository Installation Progress: " << index_percent << "%\n"; 
   }
 }
 
