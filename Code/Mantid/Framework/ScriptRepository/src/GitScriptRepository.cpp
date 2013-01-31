@@ -564,7 +564,7 @@ namespace API
       throw invalidRepository();
 
     if (!update_called){
-      g_log.warning() << "The information about the remote repository may be out-to-date.\n"
+      g_log.debug() << "The information about the remote repository may be out-to-date.\n"
                       << "Maybe you should update that information through ::update() method\n";
     }
 
@@ -660,7 +660,7 @@ namespace API
   
     if (err)
       throw gitException("Failure to download."); /// @todo provide a better explanation.
-    g_log.debug() << "download ok! \n"; 
+    g_log.notice() << file_path  << " downloaded!" << std::endl; 
   }
 
 
