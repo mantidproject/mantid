@@ -506,11 +506,6 @@ void RepoModel::setupModelData(RepoItem *parent)
   repo_ptr = ScriptRepositoryFactory::Instance().create("GitScriptRepository");
   QStringList lines;
   repo_ptr->listFiles();
-  try{
-  repo_ptr->update();
-  }catch (Mantid::API::ScriptRepoException & ex){
-    qWarning() << "Updating Failed: " << ex.what() << endl; 
-  }
   const std::vector<ScriptRepository::file_entry> & entries = repo_ptr->listEntries(); 
   QList<RepoItem*> parents;
 
