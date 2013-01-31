@@ -219,9 +219,6 @@
 
 <facility name="HFIR" FileExtensions=".nxs,.dat,.xml">
    
-   <catalog name="ICat3Catalog">
-   </catalog>
-   
    <instrument name="HB1"> 
       <technique>Triple Axis Spectroscopy</technique>
    </instrument> 
@@ -265,17 +262,6 @@
 </facility> 
 
 <facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs.h5,.nxs,.dat,_runinfo.xml,_histo.nxs">
-
-  <archive>
-    <archiveSearch plugin="SNSDataSearch" />
-    <archiveSearch plugin="SNSDataSearchICAT2" />
-  </archive>
-  
-   <catalog name="ICat3Catalog">
-   </catalog>
-  
-   <soapEndPoint url="https://icat.sns.gov:8181/ICATService/ICAT">
-   </soapEndPoint>
 
    <instrument name="DAS"> 
       <technique>technique</technique>
