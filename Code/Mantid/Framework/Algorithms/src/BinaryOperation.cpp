@@ -460,7 +460,7 @@ namespace Mantid
       {
         // ---- The output is an EventWorkspace ------
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-        for (int64_t i = 0; i < int64_t(numHists); ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i, m_lhs->refX(i));
@@ -473,14 +473,16 @@ namespace Mantid
       else
       {
         // ---- Histogram Output -----
-#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-#endif
-        for (int64_t i = 0; i < int64_t(numHists); ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i,m_lhs->refX(i));
-          performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),rhsY,rhsE,m_out->dataY(i),m_out->dataE(i));
+          // Get reference to output vectors here to break any sharing outside the function call below
+          // where the order of argument evaluation is not guaranteed (if it's L->R there would be a data race)
+          MantidVec & outY = m_out->dataY(i);
+          MantidVec & outE = m_out->dataE(i);
+          performBinaryOperation( m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i), rhsY, rhsE, outY, outE);
           m_progress->report(this->name());
           PARALLEL_END_INTERUPT_REGION
         }
@@ -505,7 +507,7 @@ namespace Mantid
       {
         // ---- The output is an EventWorkspace ------
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-        for (int64_t i = 0; i < int64_t(numHists); ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           const double rhsY = m_rhs->readY(i)[0];
@@ -524,10 +526,8 @@ namespace Mantid
       else
       {
         // ---- Histogram Output -----
-#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-#endif
-        for (int64_t i = 0; i < int64_t(numHists); ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           const double rhsY = m_rhs->readY(i)[0];
@@ -536,7 +536,11 @@ namespace Mantid
           m_out->setX(i,m_lhs->refX(i));
           if( propagateSpectraMask(m_lhs, m_rhs, i, m_out) )
           {
-            performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),rhsY,rhsE,m_out->dataY(i),m_out->dataE(i));
+            // Get reference to output vectors here to break any sharing outside the function call below
+            // where the order of argument evaluation is not guaranteed (if it's L->R there would be a data race)
+            MantidVec & outY = m_out->dataY(i);
+            MantidVec & outE = m_out->dataE(i);
+            performBinaryOperation( m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i), rhsY, rhsE, outY, outE );
           }
           m_progress->report(this->name());
           PARALLEL_END_INTERUPT_REGION
@@ -575,7 +579,7 @@ namespace Mantid
           // Now loop over the spectra of the left hand side calling the virtual function
           const int64_t numHists = m_lhs->getNumberHistograms();
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-          for (int64_t i = 0; i < int64_t(numHists); ++i)
+          for (int64_t i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             //m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied before.
@@ -597,10 +601,9 @@ namespace Mantid
 
           // Now loop over the spectra of the left hand side calling the virtual function
           const int64_t numHists = m_lhs->getNumberHistograms();
-#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
+
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-#endif
-          for (int64_t i = 0; i < int64_t(numHists); ++i)
+          for (int64_t i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             //m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied before.
@@ -625,14 +628,17 @@ namespace Mantid
 
         // Now loop over the spectra of the left hand side calling the virtual function
         const int64_t numHists = m_lhs->getNumberHistograms();
-#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
+
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-#endif
-        for (int64_t i = 0; i < int64_t(numHists); ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i,m_lhs->refX(i));
-          performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),rhsY,rhsE,m_out->dataY(i),m_out->dataE(i));
+          // Get reference to output vectors here to break any sharing outside the function call below
+          // where the order of argument evaluation is not guaranteed (if it's L->R there would be a data race)
+          MantidVec & outY = m_out->dataY(i);
+          MantidVec & outE = m_out->dataE(i);
+          performBinaryOperation( m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i), rhsY, rhsE, outY, outE );
           m_progress->report(this->name());
           PARALLEL_END_INTERUPT_REGION
         }
@@ -670,7 +676,7 @@ namespace Mantid
           // Now loop over the spectra of each one calling the virtual function
           const int64_t numHists = m_lhs->getNumberHistograms();
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-          for (int64_t i = 0; i < int64_t(numHists); ++i)
+          for (int64_t i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             m_progress->report(this->name());
@@ -705,10 +711,9 @@ namespace Mantid
 
           // Now loop over the spectra of each one calling the virtual function
           const int64_t numHists = m_lhs->getNumberHistograms();
-#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
+
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-#endif
-          for (int64_t i = 0; i < int64_t(numHists); ++i)
+          for (int64_t i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             m_progress->report(this->name());
@@ -747,10 +752,9 @@ namespace Mantid
 
         // Now loop over the spectra of each one calling the virtual function
         const int64_t numHists = m_lhs->getNumberHistograms();
-#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
+
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-#endif
-        for (int64_t i = 0; i < int64_t(numHists); ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_progress->report(this->name());
@@ -769,7 +773,11 @@ namespace Mantid
               continue;
           }
           //Reach here? Do the division
-          performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),m_rhs->readY(rhs_wi),m_rhs->readE(rhs_wi),m_out->dataY(i),m_out->dataE(i));
+          // Get reference to output vectors here to break any sharing outside the function call below
+          // where the order of argument evaluation is not guaranteed (if it's L->R there would be a data race)
+          MantidVec & outY = m_out->dataY(i);
+          MantidVec & outE = m_out->dataE(i);
+          performBinaryOperation( m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i), m_rhs->readY(rhs_wi), m_rhs->readE(rhs_wi), outY ,outE );
 
           //Free up memory on the RHS if that is possible
           if (m_ClearRHSWorkspace)
