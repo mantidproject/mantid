@@ -378,9 +378,10 @@ void AlignAndFocusPowder::exec()
 
   doSortEvents(m_outputW);
 
-  // this next call should probably be in, but it changes the system tests
-  //if (dspace)
-  //  this->rebin();
+  // this next call should probably be in for rebin as well
+  // but it changes the system tests
+  if (dspace && m_resampleX != 0)
+    this->rebin();
 
   if (l1 > 0)
   {
