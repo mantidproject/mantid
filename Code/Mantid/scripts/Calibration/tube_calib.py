@@ -426,34 +426,33 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
         wht = tubeSet.getTube(i)
         print "Calibrating tube", i+1,"of",nTubes, tubeSet.getTubeName(i) #, " length", tubeSet.getTubeLength(i) 
         if ( len(wht) < 1 ):
-            print "Unable to get any workspace indices for this tube. Calibration abandoned."
-            return
-            
-        # Calibribate the tube, if possible
-        if( tubeSet.getTubeLength(i) >= ExcludeShortTubes ):  # Only calibrate tubes not excluded by ExcludeShortTubes
-            if( overrideFit ):
-               actualTube = OverridePeaks
-            else:
-               ff = iTube.getFunctionalForms()
-               actualTube = getPoints ( ws, ff, fitPar, wht )
+           print "Unable to get any workspace indices (spectra) for this tube. Tube",tubeSet.getTubeName(i),"not calibrated."
+        else:
+           # Calibribate the tube, if possible
+           if( tubeSet.getTubeLength(i) >= ExcludeShortTubes ):  # Only calibrate tubes not excluded by ExcludeShortTubes
+               if( overrideFit ):
+                  actualTube = OverridePeaks
+               else:
+                  ff = iTube.getFunctionalForms()
+                  actualTube = getPoints ( ws, ff, fitPar, wht )
                
-            # print actualTube
-            if( len(actualTube) == 0):
-                print "getPoints failed"
-                return
+               # print actualTube
+               if( len(actualTube) == 0):
+                   print "getPoints failed"
+                   return
                 
-            # Print peak positions fitted into PeaksFile, if it exists
-            if( PeakFile != ""):
-                print >> pFile, tubeSet.getTubeName(i), actualTube
+               # Print peak positions fitted into PeaksFile, if it exists
+               if( PeakFile != ""):
+                   print >> pFile, tubeSet.getTubeName(i), actualTube
                 
-            detIDList, detPosList = getCalibratedPixelPositions( ws, actualTube, idealTube, wht, PeakTestMode )
+               detIDList, detPosList = getCalibratedPixelPositions( ws, actualTube, idealTube, wht, PeakTestMode )
         
-            #print len(wht)
-            if( len(detIDList) == len(wht)): # We have corrected positions
-                for j in range(len(wht)):
-	            nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
-	            calibTable.addRow ( nextRow )
-                        
+               #print len(wht)
+               if( len(detIDList) == len(wht)): # We have corrected positions
+                   for j in range(len(wht)):
+	               nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
+	               calibTable.addRow ( nextRow )
+
     if(PeakFile != ""):
        pFile.close()
        
