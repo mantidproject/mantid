@@ -3,7 +3,7 @@
      see http://www.mantidproject.org/IDF -->
 <instrument name="MANDI" valid-from   ="1900-01-31 23:59:59"
                          valid-to     ="2100-01-31 23:59:59"
-		         last-modified="2012-12-07 16:30:00">
+		         last-modified="2013-02-01 16:30:00">
   <!--Created by Vickie Lynch-->
   <!--Modified by Vickie Lynch using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->
 
@@ -42,7 +42,7 @@
       <location z="-0.898" name="monitor2"/>
     </component>
     <component type="monitor">
-      <location z="1.00" name="monitor3"/>
+      <location z="1.042" name="monitor3"/>
     </component>
   </type>
 
