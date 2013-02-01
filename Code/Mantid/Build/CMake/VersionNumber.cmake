@@ -3,7 +3,7 @@
 set ( VERSION_MAJOR 2 )
 
 # The minor version number is the iteration number
-set ( VERSION_MINOR 3 )
+set ( VERSION_MINOR 4 )
 
 # UNCOMMENT the next 'set' line to 'force' the patch version number to
 # a value (instead of using the count coming out of 'git describe')
