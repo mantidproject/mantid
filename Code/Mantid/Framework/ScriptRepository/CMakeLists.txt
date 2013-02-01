@@ -126,7 +126,7 @@ set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
 if ( APPLE )
-  set ( LIBS ${MANTIDLIBS} ${OPENSSL_CRYPTO_LIBRARY} )
+  set ( LIBS ${MANTIDLIBS} ${SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} )
 else ()
   set ( LIBS ${MANTIDLIBS} )
 endif()
