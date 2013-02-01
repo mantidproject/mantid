@@ -122,31 +122,37 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Clean up the widgets that have already been created
         self.tabWidget.clear()
         self.progress_bar.hide()
-        
+
         if self._instrument == '' or self._instrument is None:
-            if IS_IN_MANTIDPLOT:
-                from mantid.kernel import ConfigService
-                c = ConfigService.Instance()
-                facility = str(c.getFacility())
-                if facility in INSTRUMENT_DICT.keys():
-                    instr = str(c.getFacility().instrument(""))
-                    instr = instr.replace("-","")
-                    if instr in INSTRUMENT_DICT[facility].keys():
-                        self._instrument = instr
-                        
-                # If we still can't find an instrument, show the
-                # instrument selection dialog
-                if self._instrument == '' or self._instrument is None:
-                    self._change_instrument()
-                    return
-            else:
-                self._change_instrument()
-                return
-                
-        if self._instrument == '' or self._instrument is None:
-            self.close()
-            self._quit_asap = True
+            self._change_instrument()
             return
+
+        # Commented out to solve a bug where setting ARCS as your default
+        # instrument means you get the DGS interface when clicking ORNL_SANS..
+#        if self._instrument == '' or self._instrument is None:
+#            if IS_IN_MANTIDPLOT:
+#                from mantid.kernel import ConfigService
+#                c = ConfigService.Instance()
+#                facility = str(c.getFacility())
+#                if facility in INSTRUMENT_DICT.keys():
+#                    instr = str(c.getFacility().instrument(""))
+#                    instr = instr.replace("-","")
+#                    if instr in INSTRUMENT_DICT[facility].keys():
+#                        self._instrument = instr
+#                        
+#                # If we still can't find an instrument, show the
+#                # instrument selection dialog
+#                if self._instrument == '' or self._instrument is None:
+#                    self._change_instrument()
+#                    return
+#            else:
+#                self._change_instrument()
+#                return
+#                
+#        if self._instrument == '' or self._instrument is None:
+#            self.close()
+#            self._quit_asap = True
+#            return
         
         self._update_file_menu()
 
