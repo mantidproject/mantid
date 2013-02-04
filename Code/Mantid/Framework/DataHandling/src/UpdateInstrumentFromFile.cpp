@@ -92,6 +92,7 @@ namespace Mantid
 
       std::vector<std::string> exts;
       exts.push_back(".raw");
+      exts.push_back(".nxs");
       exts.push_back(".s*");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The filename of the input file.\n"
@@ -150,7 +151,7 @@ namespace Mantid
       }
       else
       {
-        throw std::invalid_argument("Unknown filetype for \"" + filename + "\"");
+        throw std::invalid_argument("File \"" + filename + "\" is not a valid input file.");
       }
 
     }
