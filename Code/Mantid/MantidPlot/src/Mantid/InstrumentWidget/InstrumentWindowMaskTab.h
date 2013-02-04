@@ -65,6 +65,9 @@ protected slots:
   void saveInvertedMaskToFile();
   void saveMaskToWorkspace();
   void saveMaskToFile();
+  void saveMaskToCalFile();
+  void saveInvertedMaskToCalFile();
+  void showSaveMenuTooltip(QAction*);
 
   void doubleChanged(QtProperty*);
 protected:
@@ -75,6 +78,7 @@ protected:
   boost::shared_ptr<Mantid::API::MatrixWorkspace> createMaskWorkspace(bool invertMask, bool temp = false);
   void saveMaskingToWorkspace(bool invertMask = false);
   void saveMaskingToFile(bool invertMask = false);
+  void saveMaskingToCalFile(bool invertMask = false);
   std::string generateMaskWorkspaceName(bool temp = false) const;
   void enableApply(bool on);
   void enableClear(bool on);
@@ -101,6 +105,8 @@ protected:
   QAction* m_save_as_workspace_exclude;
   QAction* m_save_as_file_include;
   QAction* m_save_as_file_exclude;
+  QAction* m_save_as_cal_file_include;
+  QAction* m_save_as_cal_file_exclude;
 
   // properties
   bool m_userEditing;

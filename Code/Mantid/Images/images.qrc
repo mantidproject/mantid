@@ -11,20 +11,21 @@
         <file>Mantid_Logo_Transparent.png</file>
         <file>data_replace.png</file>
         <file>panning.png</file>
-	</qresource>
+    </qresource>
     <qresource prefix="/win">
-		<file>folder-remote.png</file>
-		<file>folder.png</file>
-		<file>document.png</file>
-		<file>office-document.png</file>
-		<file>txt_file.png</file>
-		<file>text-x-python.png</file>
-		<file>unknown.png</file>
-		<file>download.png</file>
-		<file>upload.png</file>
-		<file>system-software-update.png</file>
-		<file>dialog-ok.png</file>
-		<file>file_pdf.png</file>
+        <file>folder-remote.png</file>
+        <file>folder.png</file>
+        <file>document.png</file>
+        <file>office-document.png</file>
+        <file>txt_file.png</file>
+        <file>text-x-python.png</file>
+        <file>unknown.png</file>
+        <file>download.png</file>
+        <file>upload.png</file>
+        <file>system-software-update.png</file>
+        <file>dialog-ok.png</file>
+        <file>file_pdf.png</file>
+        <file>selection-circle-ring.png</file>
     </qresource>
     <qresource prefix="/Icons">
         <file>LoadFile.png</file>
@@ -43,5 +44,7 @@
         <file>selection-pointer.png</file>
         <file>selection-circle.png</file>
         <file>selection-box.png</file>
+        <file>selection-box-ring.png</file>
+        <file>selection-circle-ring.png</file>
     </qresource>
 </RCC>

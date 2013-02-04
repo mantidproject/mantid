@@ -42,6 +42,7 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QFileDialog>
+#include <QToolTip>
 
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -88,13 +89,13 @@ m_userEditing(true)
   m_ring_ellipse = new QPushButton();
   m_ring_ellipse->setCheckable(true);
   m_ring_ellipse->setAutoExclusive(true);
-  m_ring_ellipse->setIcon(QIcon(":/MaskTools/selection-circle.png"));
+  m_ring_ellipse->setIcon(QIcon(":/MaskTools/selection-circle-ring.png"));
   m_ring_ellipse->setToolTip("Draw an elliptical ring");
 
   m_ring_rectangle = new QPushButton();
   m_ring_rectangle->setCheckable(true);
   m_ring_rectangle->setAutoExclusive(true);
-  m_ring_rectangle->setIcon(QIcon(":/MaskTools/selection-box.png"));
+  m_ring_rectangle->setIcon(QIcon(":/MaskTools/selection-box-ring.png"));
   m_ring_rectangle->setToolTip("Draw a rectangular ring ");
 
   QHBoxLayout* toolBox = new QHBoxLayout();
@@ -136,7 +137,7 @@ m_userEditing(true)
 
   // Algorithm buttons
 
-  m_apply = new QPushButton("Apply");
+  m_apply = new QPushButton("Apply Mask(s) to Workspace(data)");
   m_apply->setToolTip("Apply current mask to the data workspace. Cannot be reverted.");
   connect(m_apply,SIGNAL(clicked()),this,SLOT(applyMask()));
 
@@ -145,30 +146,47 @@ m_userEditing(true)
   connect(m_clear_all,SIGNAL(clicked()),this,SLOT(clearMask()));
 
   m_save_as_workspace_exclude = new QAction("As Mask to workspace",this);
+  m_save_as_workspace_exclude->setToolTip("Save current mask to mask workspace.");
   connect(m_save_as_workspace_exclude,SIGNAL(activated()),this,SLOT(saveMaskToWorkspace()));
 
   m_save_as_workspace_include = new QAction("As ROI to workspace",this);
+  m_save_as_workspace_include->setToolTip("Save current mask as ROI to mask workspace.");
   connect(m_save_as_workspace_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToWorkspace()));
 
   m_save_as_file_exclude = new QAction("As Mask to file",this);
+  m_save_as_file_exclude->setToolTip("Save current mask to mask file.");
   connect(m_save_as_file_exclude,SIGNAL(activated()),this,SLOT(saveMaskToFile()));
 
   m_save_as_file_include = new QAction("As ROI to file",this);
+  m_save_as_file_include->setToolTip("Save current mask as ROI to mask file.");
   connect(m_save_as_file_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToFile()));
+
+  m_save_as_cal_file_exclude = new QAction("As Mask to cal file",this);
+  m_save_as_cal_file_exclude->setToolTip("Save current mask to cal file.");
+  connect(m_save_as_cal_file_exclude,SIGNAL(activated()),this,SLOT(saveMaskToCalFile()));
+
+  m_save_as_cal_file_include = new QAction("As ROI to cal file",this);
+  m_save_as_cal_file_include->setToolTip("Save current mask as ROI to cal file.");
+  connect(m_save_as_cal_file_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToCalFile()));
 
   m_saveButton = new QPushButton("Save");
   m_saveButton->setToolTip("Save current masking to a file or a workspace.");
   QMenu* saveMenu = new QMenu(this);
   saveMenu->addAction(m_save_as_workspace_include);
   saveMenu->addAction(m_save_as_workspace_exclude);
+  saveMenu->addSeparator();
   saveMenu->addAction(m_save_as_file_include);
   saveMenu->addAction(m_save_as_file_exclude);
+  saveMenu->addSeparator();
+  saveMenu->addAction(m_save_as_cal_file_include);
+  saveMenu->addAction(m_save_as_cal_file_exclude);
+  connect(saveMenu,SIGNAL(hovered(QAction*)),this,SLOT(showSaveMenuTooltip(QAction*)));
   m_saveButton->setMenu(saveMenu);
 
   QGridLayout* buttons = new QGridLayout();
-  buttons->addWidget(m_apply,0,0);
-  buttons->addWidget(m_clear_all,0,1);
-  buttons->addWidget(m_saveButton,1,0,1,2);
+  buttons->addWidget(m_apply,0,0,1,2);
+  buttons->addWidget(m_saveButton,1,0);
+  buttons->addWidget(m_clear_all,1,1);
   
   layout->addLayout(buttons);
 
@@ -453,7 +471,22 @@ void InstrumentWindowMaskTab::saveInvertedMaskToFile()
 
 void InstrumentWindowMaskTab::saveMaskToFile()
 {
-  saveMaskingToFile(false);
+    saveMaskingToFile(false);
+}
+
+void InstrumentWindowMaskTab::saveMaskToCalFile()
+{
+    saveMaskingToCalFile(false);
+}
+
+void InstrumentWindowMaskTab::saveInvertedMaskToCalFile()
+{
+    saveMaskingToCalFile(true);
+}
+
+void InstrumentWindowMaskTab::showSaveMenuTooltip(QAction *action)
+{
+    QToolTip::showText(QCursor::pos(),action->toolTip(),this);
 }
 
 /**
@@ -505,6 +538,41 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
     Mantid::API::AnalysisDataService::Instance().remove( outputWS->name() );
   }
   QApplication::restoreOverrideCursor();
+}
+
+/**
+  * Save the constructed mask to a cal file.
+  * The mask is not applied to the data workspace being displayed.
+  * @param invertMask ::  if true, the selected mask will be inverted; if false, the mask will be used as is
+  */
+void InstrumentWindowMaskTab::saveMaskingToCalFile(bool invertMask)
+{
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    // Make sure we have stored the Mask in the helper MaskWorkspace
+    storeMask();
+
+    setSelectActivity();
+    Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(false,true);
+    if (outputWS)
+    {
+      clearShapes();
+      QString saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+      QString fileName = QFileDialog::getSaveFileName(m_instrWindow,"Select location and name for the mask file",saveDir,"cal files (*.cal)");
+
+      std::cerr << "File " << fileName.toStdString() << std::endl;
+
+      if (!fileName.isEmpty())
+      {
+        Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("MaskWorkspaceToCalFile",-1);
+        alg->setPropertyValue("InputWorkspace",outputWS->name());
+        alg->setPropertyValue("OutputFile",fileName.toStdString());
+        alg->setProperty("Invert",invertMask);
+        alg->execute();
+      }
+      Mantid::API::AnalysisDataService::Instance().remove( outputWS->name() );
+    }
+    QApplication::restoreOverrideCursor();
 }
 
 /**
