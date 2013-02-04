@@ -44,8 +44,9 @@ def createTubeCalibtationWorkspaceByWorkspaceIndexList ( integratedWorkspace, ou
 	 integratedPixelCounts.append( integratedWorkspace.dataY(i)[0] )
 	 
     CreateWorkspace(dataX=pixelNumbers,dataY=integratedPixelCounts, OutputWorkspace=outputWorkspace)
-    if (showPlot):
-          plotSpectrum(outputWorkspace,0)
+    #if (showPlot):
+          #plotSpectrum(outputWorkspace,0)
+          # For some reason plotSpectrum is not recognised, but instead we can plot this worspace afterwards.
           
           
 # Return the udet number and [x,y,z] position of the detector (or virtual detector) corresponding to spectra spectra_number
@@ -78,7 +79,7 @@ def fitEndErfcParams ( B, C ): # Compose string argument for fit
     #print "name=EndErfc, B="+str(B)+", C="+str(C)
     return "name=EndErfc, B="+str(B)+", C="+str(C)
     
-def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube ):
+def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=False ):
     """     
        Get the centres of N slits or edges for calibration 
        This N slit method is suited for WISH or the five sharp peaks of MERLIN .
@@ -87,6 +88,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube ):
        @param funcForms: array of function form 1=slit, 2=edge
        @param fitParams: a TubeCalibFitParams object contain the fit parameters
        @param whichTube:  a list of workspace indices for one tube
+       @param showPlot: show plot for this tube
    
        Return Value: array of the slit/edge positions (-1.0 indicates failed to find position)
        
@@ -100,7 +102,14 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube ):
     eHeight, eWidth = fitParams.getHeightAndWidth()
     outedge, inedge, endGrad = fitParams.getEdgeParameters()
     
-    margin = 0.3
+    #margin = 0.3
+    margin = 0.2
+    
+    # Use a different workspace if plotting, so plot survives.
+    if(showPlot):
+       getPointsWs = "TubePlot"
+    else:
+       getPointsWs = "getPoints"
     
     # Check functional form
     if ( nFf != 0 and nFf < nPts):
@@ -108,7 +117,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube ):
        return []
      
     # Create input workspace for fitting  
-    createTubeCalibtationWorkspaceByWorkspaceIndexList( IntegratedWorkspace, "getPoints", whichTube, showPlot=False )
+    createTubeCalibtationWorkspaceByWorkspaceIndexList( IntegratedWorkspace, getPointsWs, whichTube, showPlot=showPlot )
     
     # Prepare to loop over points
     edgeMode = 1  # We assume first edge is approached from outside
@@ -123,7 +132,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube ):
            else:
               start = eP[i] - inedge
               end = eP[i] + outedge
-           Fit(InputWorkspace="getPoints",Function=fitEndErfcParams(centre,endGrad*edgeMode),StartX=str(start),EndX=str(end),Output="CalibPoint") 
+           Fit(InputWorkspace=getPointsWs,Function=fitEndErfcParams(centre,endGrad*edgeMode),StartX=str(start),EndX=str(end),Output="CalibPoint") 
            edgeMode = -edgeMode # Next edge would be reverse of this edge
         else:
            # We have a slit
@@ -136,7 +145,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube ):
               end = (1-margin)*eP[i] + (margin)*nDets
            else:
               end = (1-margin)*eP[i] + (margin)*eP[i+1]   
-           Fit(InputWorkspace="getPoints",Function=fitGaussianParams(eHeight,centre,eWidth), StartX=str(start),EndX=str(end),Output="CalibPoint")
+           Fit(InputWorkspace=getPointsWs,Function=fitGaussianParams(eHeight,centre,eWidth), StartX=str(start),EndX=str(end),Output="CalibPoint")
            
         paramCalibPeak = mtd['CalibPoint_Parameters']
         pkRow = paramCalibPeak.row(1).items()
@@ -386,7 +395,7 @@ def readPeakFile(file_name):
 """
     
     
-def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False, OverridePeaks=[], PeakFile="", ExcludeShortTubes=0.0):
+def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False, OverridePeaks=[], PeakFile="", ExcludeShortTubes=0.0, PlotTube=-1):
     """     
        Get the results the calibration and put them in the calibration table provided.
              
@@ -399,6 +408,7 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
        @param OverridePeaks: if non-zero length an array of peaks in pixels to override those that would be fitted for one tube
        @param PeakFile: Optional output file for peaks 
        @param ExludeShortTubes: Exlude tubes shorter than specified length from calibration
+       @param PlotTube: If in range plot graph of tube with this index 
        
     """	
     
@@ -434,7 +444,7 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
                   actualTube = OverridePeaks
                else:
                   ff = iTube.getFunctionalForms()
-                  actualTube = getPoints ( ws, ff, fitPar, wht )
+                  actualTube = getPoints ( ws, ff, fitPar, wht, showPlot=(i==PlotTube) )
                
                # print actualTube
                if( len(actualTube) == 0):
