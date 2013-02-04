@@ -338,5 +338,30 @@ namespace MantidQt
       // We want to zoom out now, because any currently selected peak will be wrong.
       m_zoomablePlottingWidget->resetView();
     }
+
+    /**
+     * Set the peaks size on the current projection using the supplied fraction.
+     * @param fraction of the view width to use as the peak radius.
+     */
+    void CompositePeaksPresenter::setPeakSizeOnProjection(const double fraction)
+    {
+      for(auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end(); ++presenterIterator)
+      {
+        (*presenterIterator)->setPeakSizeOnProjection(fraction);
+      }
+    }
+
+    /**
+     * Fraction of the z-range to use as the peak radius.
+     * @param fraction to use as the peak radius
+     */
+    void CompositePeaksPresenter::setPeakSizeIntoProjection(const double fraction)
+    {
+      for (auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end();
+          ++presenterIterator)
+      {
+        (*presenterIterator)->setPeakSizeIntoProjection(fraction);
+      }
+    }
   }
 }

@@ -327,9 +327,11 @@ namespace MantidQt
       return this->m_viewPeaks[peakIndex]->getBoundingBox();
     }
 
-    void ConcretePeaksPresenter::sortPeaksWorkspace(const std::string& byColumnName, const bool ascending)
+    void ConcretePeaksPresenter::sortPeaksWorkspace(const std::string& byColumnName,
+        const bool ascending)
     {
-      Mantid::API::IPeaksWorkspace_sptr peaksWS = boost::const_pointer_cast < Mantid::API::IPeaksWorkspace> (this->m_peaksWS);
+      Mantid::API::IPeaksWorkspace_sptr peaksWS =
+          boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
 
       // Sort the Peaks in-place.
       Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SortPeaksWorkspace");
@@ -350,6 +352,30 @@ namespace MantidQt
       for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
       {
         (*it)->setSlicePoint(this->m_slicePoint);
+      }
+    }
+
+    void ConcretePeaksPresenter::setPeakSizeOnProjection(const double fraction)
+    {
+      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      {
+        if ((*it) != NULL)
+        {
+          (*it)->changeOccupancyInView(fraction);
+          (*it)->updateView();
+        }
+      }
+    }
+
+    void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction)
+    {
+      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      {
+        if ((*it) != NULL)
+        {
+          (*it)->changeOccupancyIntoView(fraction);
+          (*it)->updateView();
+        }
       }
     }
   }

@@ -50,6 +50,8 @@ namespace
     MOCK_METHOD1(setShown, void(const bool));
     MOCK_CONST_METHOD1(getBoundingBox, PeakBoundingBox(const int peakIndex));
     MOCK_METHOD2(sortPeaksWorkspace, void(const std::string&, const bool));
+    MOCK_METHOD1(setPeakSizeOnProjection, void(const double));
+    MOCK_METHOD1(setPeakSizeIntoProjection, void(const double));
     virtual ~MockPeaksPresenter(){}
   };
 

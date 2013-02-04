@@ -36,7 +36,6 @@ namespace MantidQt
       virtual PeakBoundingBox getBoundingBox(const int peakIndex) const {return m_default->getBoundingBox(peakIndex);}
       virtual void sortPeaksWorkspace(const std::string&, const bool){ /*Do Nothing*/}
 
-
       virtual std::string getTransformName() const;
       
       /// Constructor
@@ -49,6 +48,10 @@ namespace MantidQt
       size_t size() const;
       /// Clear the owned presenters.
       void clear();
+      /// Set the peaks size within the current projection
+      virtual void setPeakSizeOnProjection(const double fraction);
+      /// Set the peaks size into the current projection
+      virtual void setPeakSizeIntoProjection(const double fraction);
       /// Change the foreground representation for the peaks of this workspace
       void setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const QColor);
       /// Change the background representation for the peaks of this workspace

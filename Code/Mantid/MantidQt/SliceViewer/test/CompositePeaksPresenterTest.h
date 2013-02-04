@@ -539,6 +539,37 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockZoomableView));
   }
 
+  void test_setPeakSizeOnProjection()
+  {
+    const double fraction = 0.5;
+
+    MockPeaksPresenter* pSubject = new MockPeaksPresenter;
+    PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, setPeakSizeOnProjection(fraction)).Times(1);
+
+    CompositePeaksPresenter composite(&_fakeZoomableView);
+    composite.addPeaksPresenter(subject);
+    composite.setPeakSizeOnProjection(fraction);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
+  }
+
+  void test_setPeakSizeIntoProjection()
+  {
+    const double fraction = 0.5;
+
+    MockPeaksPresenter* pSubject = new MockPeaksPresenter;
+    PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, setPeakSizeIntoProjection(fraction)).Times(1);
+
+    CompositePeaksPresenter composite(&_fakeZoomableView);
+    composite.addPeaksPresenter(subject);
+    composite.setPeakSizeIntoProjection(fraction);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
+  }
+
+
 };
 
 #endif

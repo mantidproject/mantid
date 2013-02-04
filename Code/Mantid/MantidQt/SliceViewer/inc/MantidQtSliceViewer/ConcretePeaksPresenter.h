@@ -41,6 +41,8 @@ namespace MantidQt
       void setShown(const bool shown);
       virtual PeakBoundingBox getBoundingBox(const int) const;
       virtual void sortPeaksWorkspace(const std::string& byColumnName, const bool ascending);
+      virtual void setPeakSizeOnProjection(const double fraction);
+      virtual void setPeakSizeIntoProjection(const double fraction);
     private:
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;
