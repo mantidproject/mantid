@@ -1966,11 +1966,8 @@ void AlgorithmDockWidget::algorithmStarted(void* alg)
 void AlgorithmDockWidget::algorithmFinished(void* alg)
 {
   if (m_algID.empty()) return;
-  if (alg == m_algID.first())
-  {
-    m_algID.pop_front();
-    hideProgressBar();
-  }
+  m_algID.removeAll(alg);
+  hideProgressBar();
 }
 
 void AlgorithmDockWidget::showProgressBar()
@@ -1988,7 +1985,6 @@ void AlgorithmDockWidget::showProgressBar()
 
 void AlgorithmDockWidget::hideProgressBar()
 {
-
   if (m_progressBar && m_algID.empty())
   {
     m_runningLayout->insertStretch(0);

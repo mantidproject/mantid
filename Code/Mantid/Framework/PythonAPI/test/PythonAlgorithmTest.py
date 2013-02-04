@@ -23,9 +23,9 @@ class DummyAlg3(PythonAlgorithm):
     
     def PyExec(self):
         # Get the algorithm property
-        sub_alg = self._getAlgorithmProperty("Algo")
-        sub_alg.execute()
-        self.setPropertyValue("OutputWorkspace", sub_alg.getPropertyValue("OutputWorkspace"))
+        child_alg = self._getAlgorithmProperty("Algo")
+        child_alg.execute()
+        self.setPropertyValue("OutputWorkspace", child_alg.getPropertyValue("OutputWorkspace"))
 
 
 class DummyAlg(PythonAlgorithm):
@@ -87,7 +87,7 @@ class PythonAlgorithmTest(unittest.TestCase):
         """
         from mantidsimple import EQSANSTransmission
         
-    def test_sub_alg_wksp_transfer(self):
+    def test_child_alg_wksp_transfer(self):
         """
             Check that we can execute a Child Algorithm and pass
             ownership of an output workspace to the parent algo. 
@@ -100,7 +100,7 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertTrue(mtd.workspaceExists("ChildAlgtest"))
         mtd.deleteWorkspace("ChildAlgtest")
     
-    def test_sub_alg_variation(self):
+    def test_child_alg_variation(self):
         """
             Call signature variation for Child Algorithm execution
         """

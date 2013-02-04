@@ -7,6 +7,8 @@
 #include <QTextStream>
 #include <QApplication>
 
+#include "MantidQtAPI/FileDialogHandler.h"
+
 /**
  * Construct an object with a list of file filters
  */
@@ -50,7 +52,7 @@ QString TextFileIO::askWhereToSave() const
 {
   QString selectedFilter;
   QString filter = m_filters.join(";;");
-  QString filename = QFileDialog::getSaveFileName(NULL, "MantidPlot - Save", "",filter, &selectedFilter);
+  QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(NULL, "MantidPlot - Save", "",filter, &selectedFilter);
   if( filename.isEmpty() ) return QString();
   if( QFileInfo(filename).suffix().isEmpty() )
   {

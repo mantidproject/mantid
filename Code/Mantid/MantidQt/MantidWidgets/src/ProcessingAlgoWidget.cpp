@@ -2,7 +2,7 @@
 #include <Qsci/qscilexerpython.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include <qfiledialog.h>
+#include "MantidQtAPI/FileDialogHandler.h"
 #include <iosfwd>
 #include <fstream>
 #include <QFileInfo>
@@ -87,7 +87,7 @@ void ProcessingAlgoWidget::saveSettings()
 void ProcessingAlgoWidget::btnSaveClicked()
 {
   // Save to a .py file
-  QString fileselection = QFileDialog::getSaveFileName(this, "Save a Python Script",
+  QString fileselection = MantidQt::API::FileDialogHandler::getSaveFileName(this, "Save a Python Script",
       QFileInfo(m_lastFile).absoluteFilePath(), "Python scripts (*.py);;All files (*)");
   if (!fileselection.isEmpty())
   {

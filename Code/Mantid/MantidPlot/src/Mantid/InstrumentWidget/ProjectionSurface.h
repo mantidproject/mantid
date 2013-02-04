@@ -68,7 +68,7 @@ public:
   /// called when the gl widget gets resized
   virtual void resize(int, int);
   /// redraw surface without recalulationg of colours, etc
-  virtual void updateView();
+  virtual void updateView(bool picking = false);
   /// full update and redraw of the surface
   virtual void updateDetectors();
   /// returns the bounding rectangle in the real coordinates
@@ -263,6 +263,8 @@ private:
   QMap<int,InputController*> m_inputControllers; ///< controllers for mouse and keyboard input
   /// Set when the image must be redrawn
   mutable bool m_viewChanged;
+  /// Set when the picking image must be redrawn regardless of the interaction mode
+  mutable bool m_redrawPicking;
 };
 
 typedef boost::shared_ptr<ProjectionSurface> ProjectionSurface_sptr;

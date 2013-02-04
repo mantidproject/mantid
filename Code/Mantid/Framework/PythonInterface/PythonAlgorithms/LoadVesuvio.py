@@ -554,7 +554,7 @@ class LoadVesuvio(PythonAlgorithm):
 
         ip_header = self._get_header_format(ip_file)
         
-        # More verbose until the sub algorithm stuff is sorted
+        # More verbose until the child algorithm stuff is sorted
         update_inst = self.createChildAlgorithm("UpdateInstrumentFromFile")
         update_inst.setLogging(_LOGGING_)
         update_inst.setProperty("Workspace", self.foil_out)

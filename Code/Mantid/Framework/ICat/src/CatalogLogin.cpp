@@ -45,20 +45,32 @@ namespace Mantid
       ICatalog_sptr catalog_sptr;
       try
       {
-
+        g_log.information() << "Attempting to login to " << ConfigService::Instance().getFacility().catalogName()
+                            << " for " << ConfigService::Instance().getFacility().name() << "\n";
         catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
 
       }
       catch(Kernel::Exception::NotFoundError&)
       {
-        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
+        throwCatalogError();
       }
       if(!catalog_sptr)
       {
-        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
+        throwCatalogError();
       }
       catalog_sptr->login(username,password,"");
 
+    }
+
+    /// Raise an error concerning catalog searching
+    void CatalogLogin::throwCatalogError() const
+    {
+      const std::string facilityName = ConfigService::Instance().getFacility().name();
+      std::stringstream ss;
+      ss << "Your current Facility, " << facilityName << ", does not have ICAT catalog information. "
+          << std::endl;
+      ss << "The facilities.xml file may need updating. Contact the Mantid Team for help." << std::endl;
+      throw std::runtime_error(ss.str());
     }
 
 

@@ -1,4 +1,3 @@
-
 ####
 ## SET THE LIB GIT 2 FILES
 ####
@@ -8,6 +7,14 @@ INCLUDE_DIRECTORIES(SYSTEM libgit2/include libgit2/deps/http-parser libgit2/src/
 
 IF (NOT WIN32)
   FIND_PACKAGE(ZLIB)
+ENDIF()
+
+IF (WIN32 AND NOT MINGW)
+	ADD_DEFINITIONS(-DGIT_WINHTTP)
+ELSE ()
+	FIND_PACKAGE(OpenSSL)
+    SET (SRC_HTTP libgit2/deps/http-parser/http_parser.c)
+    SET (INC_HTTP libgit2/deps/http-parser/http_parser.h)
 ENDIF()
 
 IF (ZLIB_FOUND)
@@ -55,13 +62,14 @@ ELSE()
 	FILE(GLOB GIT2_SRC libgit2/src/*.c libgit2/src/transports/*.c libgit2/src/xdiff/*.c libgit2/src/unix/*.c)
 ENDIF ()
 
+IF (MSVC)
+	# Default to stdcall, as that's what the CLR expects and how the Windows API is built
+	OPTION (STDCALL "Buildl libgit2 with the __stdcall convention" ON)
 
+ENDIF()
 
 SET (SRC_REGEX libgit2/deps/regex/regex.c)
 SET (INC_REGEX libgit2/deps/regex/regex.h)
-
-SET (SRC_HTTP libgit2/deps/http-parser/http_parser.c)
-SET (INC_HTTP libgit2/deps/http-parser/http_parser.h)
 
 # Libgit2 source
 set ( LIBGIT2_SRC 
@@ -77,7 +85,6 @@ set ( SRC_FILES
 set ( INC_FILES inc/MantidScriptRepository/GitScriptRepository.h
   ${INC_ZLIB}
   ${INC_HTTP}
-
 )
 #
 #set ( TEST_FILES
@@ -100,6 +107,12 @@ else()
   set_source_files_properties ( ${LIBGIT2_SRC} 
                                 PROPERTIES COMPILE_FLAGS "-w" )
 endif()
+# add support for ssl for the transport https
+IF (OPENSSL_FOUND)
+  ADD_DEFINITIONS(-DGIT_SSL)
+  INCLUDE_DIRECTORIES(${OPENSSL_INCLUDE_DIR})
+  SET(SSL_LIBRARIES ${OPENSSL_LIBRARIES})
+ENDIF()
 
 # Add the target for this directory
 add_library ( ScriptRepository ${SRC_FILES} ${LIBGIT2_SRC} ${INC_FILES} )
@@ -112,6 +125,12 @@ set_target_properties ( ScriptRepository PROPERTIES OUTPUT_NAME MantidScriptRepo
 set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
-target_link_libraries(ScriptRepository ${MANTIDLIBS})
+if ( APPLE )
+  set ( LIBS ${MANTIDLIBS} ${SSL_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} )
+else ()
+  set ( LIBS ${MANTIDLIBS} )
+endif()
+target_link_libraries(ScriptRepository ${LIBS})
 
-install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+
+install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

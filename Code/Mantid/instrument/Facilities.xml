@@ -9,6 +9,9 @@
   <catalog name="ICat3Catalog">
   </catalog>
 
+  <httpproxy url="http://wwwcache.rl.ac.uk:8080">
+  </httpproxy>
+  
   <soapEndPoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT">
   </soapEndPoint>
 
@@ -216,9 +219,6 @@
 
 <facility name="HFIR" FileExtensions=".nxs,.dat,.xml">
    
-   <catalog name="ICat3Catalog">
-   </catalog>
-   
    <instrument name="HB1"> 
       <technique>Triple Axis Spectroscopy</technique>
    </instrument> 
@@ -263,16 +263,10 @@
 
 <facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs.h5,.nxs,.dat,_runinfo.xml,_histo.nxs">
 
-  <archive>
-    <archiveSearch plugin="SNSDataSearch" />
-    <archiveSearch plugin="SNSDataSearchICAT2" />
-  </archive>
-  
-   <catalog name="ICat3Catalog">
-   </catalog>
-  
-   <soapEndPoint url="https://icat.sns.gov:8181/ICATService/ICAT">
-   </soapEndPoint>
+   <archive>
+      <archiveSearch plugin="SNSDataSearch" />
+      <archiveSearch plugin="SNSDataSearchICAT2" />
+   </archive>
 
    <instrument name="DAS"> 
       <technique>technique</technique>

@@ -13,7 +13,6 @@ public:
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);
   int CanReadFile(const char* fname);
-  void SetRadius(double width);
   void SetDimensions(int dimensions);
   /// Called by presenter to force progress information updating.
   void updateAlgorithmProgress(double progress, const std::string& message);
@@ -33,9 +32,6 @@ private:
   vtkNexusPeaksReader(const vtkNexusPeaksReader&);
   
   void operator = (const vtkNexusPeaksReader&);
-
-  //Peak width;
-  double m_radius;
 
   /// File name from which to read.
   char *FileName;

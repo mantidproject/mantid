@@ -2175,7 +2175,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     QString csv_file(m_uiForm.csv_filename->text());
     if( m_dirty_batch_grid )
     {
-      QString selected_file = QFileDialog::getSaveFileName(this, "Save as CSV", m_last_dir);
+      QString selected_file = MantidQt::API::FileDialogHandler::getSaveFileName(this, "Save as CSV", m_last_dir);
       csv_file = saveBatchGrid(selected_file);
     }
     py_code.prepend("import SANSBatchMode as batch\n");

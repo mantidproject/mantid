@@ -39,7 +39,8 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
     m_interactionMode(MoveMode),
     m_peakLabelPrecision(6),
     m_peakShapesStyle(0),
-    m_viewChanged(true)
+    m_viewChanged(true),
+    m_redrawPicking(true)
 {
   connect(rootActor,SIGNAL(colorMapChanged()),this,SLOT(colorMapChanged()));
   connect(&m_maskShapes,SIGNAL(shapeCreated()),this,SLOT(catchShapeCreated()));
@@ -128,9 +129,10 @@ void ProjectionSurface::clear()
  */
 void ProjectionSurface::draw(MantidGLWidget *widget)const
 {
-  if ( m_viewChanged )
+  if ( m_viewChanged && ( m_redrawPicking || m_interactionMode == PickSingleMode || m_interactionMode == PickTubeMode ) )
   {
     draw(widget,true);
+    m_redrawPicking = false;
   }
   draw(widget,false);
   if ( m_viewChanged )
@@ -224,7 +226,11 @@ void ProjectionSurface::drawSimple(QWidget* widget)const
       m_pickImage = new QImage(widget->width(), widget->height(),QImage::Format_RGB32);
     }
 
-    drawSimpleToImage(m_pickImage,true);
+    if ( m_redrawPicking || m_interactionMode == PickSingleMode || m_interactionMode == PickTubeMode )
+    {
+      drawSimpleToImage(m_pickImage,true);
+      m_redrawPicking = false;
+    }
     drawSimpleToImage(m_viewImage,false);
     m_viewChanged = false;
   }
@@ -302,9 +308,15 @@ void ProjectionSurface::leaveEvent(QEvent *e)
     getController()->leaveEvent( e );
 }
 
-void ProjectionSurface::updateView()
+/**
+  * Update the view of the surface at the next redraw.
+  * @param picking :: Set to true to update the picking image regardless the interaction
+  *   mode of the surface.
+  */
+void ProjectionSurface::updateView(bool picking)
 {
   m_viewChanged = true;
+  m_redrawPicking = picking;
 }
 
 void ProjectionSurface::updateDetectors()

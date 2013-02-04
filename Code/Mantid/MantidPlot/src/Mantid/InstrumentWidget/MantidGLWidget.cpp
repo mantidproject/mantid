@@ -312,11 +312,14 @@ void MantidGLWidget::componentSelected(Mantid::Geometry::ComponentID id)
   }
 }
 
-void MantidGLWidget::updateView()
+/// Redraw the view
+/// @param picking :: Set to true to update the picking image regardless the interaction
+///   mode of the surface.
+void MantidGLWidget::updateView(bool picking)
 {
   if ( m_surface )
   {
-    m_surface->updateView();
+    m_surface->updateView(picking);
     update();
   }
 }

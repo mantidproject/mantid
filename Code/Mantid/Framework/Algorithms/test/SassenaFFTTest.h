@@ -6,6 +6,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/SaveAscii.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -21,7 +22,7 @@ public:
   static  SassenaFFTTest* createSuite() { return new SassenaFFTTest(); }
   static void destroySuite( SassenaFFTTest *suite ) { delete suite; }
 
-  SassenaFFTTest() : T2ueV(1000.0/11.604), ps2ueV(4136.0), nbins(2001) { }
+  SassenaFFTTest() : T2ueV(1000.0/Mantid::PhysicalConstants::meVtoKelvin), ps2ueV(4136.0), nbins(2001) { }
 
   void test_init()
   {
@@ -46,7 +47,7 @@ public:
     // The Fourier transform is an exponential h'*exp(-x^2/(2*s'^2) with h'=sqrt(2*pi*s)=2.507 and s'=1/(2*pi*s)=0.159
     DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
     const double exponentFactor = 0.0;
-    checkHeigth(ws, sqrt(2*M_PI), exponentFactor);
+    checkHeight(ws, sqrt(2*M_PI), exponentFactor);
     checkAverage(ws,0.0, exponentFactor);
     checkSigma(ws, 1.0/(2.0*M_PI), exponentFactor);
   }
@@ -70,7 +71,7 @@ public:
     // this->printWorkspace2D("/tmp/sqwDetailedBalanceCondition.dat",gwsName +"_sqw"); // uncomment line for debugging purposes only
     DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
     const double exponentFactor = -1.0/(2.0*T*T2ueV); // negative of the quantum-correction to classical S(Q,E): exp(E/(2*kT)
-    checkHeigth(ws, sqrt(2*M_PI),exponentFactor);
+    checkHeight(ws, sqrt(2*M_PI),exponentFactor);
     checkAverage(ws,0.0, exponentFactor);
     checkSigma(ws, 1.0/(2.0*M_PI), exponentFactor);
   }
@@ -83,7 +84,7 @@ private:
    * @param value compare to the maximum value stored in the Y-vector of the workspace
    * @exponentFactor negative of the exponent factor in the detailed balance condition.
    */
-  void checkHeigth(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
+  void checkHeight(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
   {
     const double frErr=1E-03; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();

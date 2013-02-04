@@ -2,7 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include <qfiledialog.h>
+#include "MantidQtAPI/FileDialogHandler.h"
 
 using namespace Mantid::Kernel;
 //using namespace Mantid::API;
@@ -162,7 +162,7 @@ namespace API
       filter.chop(2);
       // Prepend the default filter
       QString selectedFilter;
-      filename = QFileDialog::getSaveFileName(NULL, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter, &selectedFilter);
+      filename = MantidQt::API::FileDialogHandler::getSaveFileName(NULL, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter, &selectedFilter);
 
       //Check the filename and append the selected filter if necessary
       if( QFileInfo(filename).completeSuffix().isEmpty() )

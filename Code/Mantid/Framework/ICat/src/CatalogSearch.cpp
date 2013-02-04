@@ -72,7 +72,11 @@ namespace Mantid
       }
       catch(Kernel::Exception::NotFoundError&)
       {
-        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
+        std::string facilityName = ConfigService::Instance().getFacility().name();
+        std::stringstream ss;
+        ss << "Your current Facility: " << facilityName << " does not have ICAT catalog information. " << std::endl;
+        ss << "The facilities.xml file may need updating. Contact the Mantid Team for help." << std::endl;
+        throw std::runtime_error(ss.str());
       }
       if(!catalog_sptr)
       {

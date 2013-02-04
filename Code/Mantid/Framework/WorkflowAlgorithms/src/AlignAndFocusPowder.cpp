@@ -205,11 +205,6 @@ void AlignAndFocusPowder::exec()
   {
     if (m_inputEW)
     {
-      m_outputW = WorkspaceFactory::Instance().create(m_inputW);
-      m_outputW->setName(getProperty("OutputWorkspace"));
-    }
-    else
-    {
       //Make a brand new EventWorkspace
       m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace", m_inputEW->getNumberHistograms(), 2, 1));
@@ -220,6 +215,12 @@ void AlignAndFocusPowder::exec()
 
       //Cast to the matrixOutputWS and save it
       m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+      m_outputW->setName(getProperty("OutputWorkspace"));
+    }
+    else
+    {
+      // Not-an-event workspace
+      m_outputW = WorkspaceFactory::Instance().create(m_inputW);
       m_outputW->setName(getProperty("OutputWorkspace"));
     }
   }
@@ -377,9 +378,10 @@ void AlignAndFocusPowder::exec()
 
   doSortEvents(m_outputW);
 
-  // this next call should probably be in, but it changes the system tests
-  //if (dspace)
-  //  this->rebin();
+  // this next call should probably be in for rebin as well
+  // but it changes the system tests
+  if (dspace && m_resampleX != 0)
+    this->rebin();
 
   if (l1 > 0)
   {
@@ -409,6 +411,11 @@ void AlignAndFocusPowder::exec()
     m_params.erase(m_params.begin());
     m_params.pop_back();
   }
+  if (!m_dmins.empty())
+    m_dmins.clear();
+  if (!m_dmaxs.empty())
+    m_dmaxs.clear();
+
   this->rebin();
 
   // return the output workspace
@@ -420,7 +427,8 @@ void AlignAndFocusPowder::rebin()
   if (m_resampleX != 0)
   {
     g_log.information() << "running ResampleX(NumberBins=" << abs(m_resampleX)
-                        << ", LogBinning=" << (m_resampleX < 0) << ")\n";
+                        << ", LogBinning=" << (m_resampleX < 0)
+                        << ", dMin(" << m_dmins.size() << "), dmax(" << m_dmaxs.size() << "))\n";
     API::IAlgorithm_sptr alg = createChildAlgorithm("ResampleX");
     alg->setProperty("InputWorkspace", m_outputW);
     alg->setProperty("OutputWorkspace", m_outputW);

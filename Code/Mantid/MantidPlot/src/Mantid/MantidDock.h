@@ -13,7 +13,7 @@
 #include <QPoint>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QVector>
+#include <QList>
 #include <QActionGroup>
 #include <QSortFilterProxyModel>
 #include <QStringList>
@@ -205,7 +205,7 @@ protected:
     QPushButton *m_runningButton;
     QProgressBar* m_progressBar;
     QHBoxLayout * m_runningLayout;
-    QVector<void*> m_algID;
+    QList<void*> m_algID;
     friend class MantidUI;
 private:
     MantidUI *m_mantidUI;

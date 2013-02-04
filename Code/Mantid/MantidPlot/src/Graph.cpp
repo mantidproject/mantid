@@ -113,7 +113,7 @@
 Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
 
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
-: QWidget(parent, f) //QwtPlot(parent)
+: QWidget(parent, f)
 {	
   setWindowFlags(f);
   n_curves=0;
@@ -194,6 +194,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   connect (scalePicker,SIGNAL(axisRightClicked(int)),this,SLOT(showAxisContextMenu(int)));
 
   connect (d_zoomer[0],SIGNAL(zoomed (const QwtDoubleRect &)),this,SLOT(zoomed (const QwtDoubleRect &)));
+
 }
 
 void Graph::notifyChanges()
@@ -4216,12 +4217,7 @@ void Graph::resizeEvent ( QResizeEvent *e )
   if (ignoreResize || !this->isVisible())
     return;
 
-  if (autoScaleFonts){
-    QSize oldSize = e->oldSize();
-    QSize size = e->size();
-    d_plot->resize(e->size());
-    scaleFonts((double)size.height()/(double)oldSize.height());
-  } else {
+  if (!autoScaleFonts){
     d_plot->resize(e->size());
     d_plot->updateCurveLabels();
   }

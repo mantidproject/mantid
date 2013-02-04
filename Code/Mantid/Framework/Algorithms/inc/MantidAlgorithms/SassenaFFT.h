@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid
 {
@@ -39,7 +40,7 @@ class DLLExport SassenaFFT : public API::Algorithm
 {
 public:
   /// Default constructor
-  SassenaFFT() : API::Algorithm(), m_T2ueV(1000.0/11.604), m_ps2ueV(4136.0) {}
+  SassenaFFT() : API::Algorithm(), m_T2ueV(1000.0/Mantid::PhysicalConstants::meVtoKelvin), m_ps2ueV(4136.0) {}
   /// Destructor
   virtual ~SassenaFFT() {}
   /// Algorithm's name for identification overriding a virtual method

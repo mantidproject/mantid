@@ -4,7 +4,7 @@
 #include "MantidAPI/ScriptRepository.h"
 
 using Mantid::API::ScriptRepository; 
-class git_repository ; 
+struct git_repository ; 
 
 #ifdef _WIN32
 #if (IN_MANTID_SCRIPTREPO)
@@ -59,23 +59,26 @@ namespace API{
      */
    
     GitScriptRepository(const std::string local_repository = std::string(), 
-                        const std::string remote_url = std::string())
-      throw (ScriptRepoException&); 
+                        const std::string remote_url = std::string()) ; 
     
     virtual ~GitScriptRepository() throw();
 
-    ScriptInfo fileInfo(const std::string path) throw (ScriptRepoException&);
+    ScriptInfo fileInfo(const std::string path) ;
     
-    std::vector<std::string> listFiles() throw (ScriptRepoException&); 
+    std::vector<std::string> listFiles() ; 
     
-    void download(const std::string file_path) throw (ScriptRepoException&);
-    SCRIPTSTATUS fileStatus(const std::string file_path) throw (ScriptRepoException&);
+    void download(const std::string file_path) ;
+    SCRIPTSTATUS fileStatus(const std::string file_path) ;
     
     void upload(const std::string file_path, const std::string comment,
                 const std::string author, 
-                const std::string description = std::string()) throw (ScriptRepoException&);
-    void update(void) throw (ScriptRepoException&);
+                const std::string description = std::string()) ;
+    void update(void) ;
 
+    /* Return true if there is a local cloned repository*/
+    bool isValid(void){
+      return (repo != NULL);
+    };
 
     std::string localRepository() const {return local_repository;  }
 
@@ -121,8 +124,8 @@ namespace API{
      */
     std::string convertPath(const std::string path, bool & file_is_local); 
     
-    void cloneRepository(void) throw (ScriptRepoException&); 
-    void fetchOrigin(void) throw (ScriptRepoException&); 
+    void cloneRepository(void) ; 
+    void fetchOrigin(void) ; 
     enum FILEINFOSUPPORT{READMEFILE, PYTHONFILE};
     std::string processInfo(const std::string path, FILEINFOSUPPORT filetype); 
     

@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="Polaris_upgrade"
-              valid-from="2011-01-01 01:01:01"
+  <instrument name="Polaris_upgrade"
+              valid-from="2012-05-01 01:01:01"
               valid-to="2099-12-31 23:59:59"
-              last-modified="2012-03-08T11:43:38">
+              last-modified="2012-05-01T11:43:38">
 
   <defaults>
     <length unit="meter" />
@@ -59,7 +59,7 @@
   </component>
 
   <type name="monitors">
-    <component type="monitor">
+    <component type="monitor" >
       <location r="7.641" t="180.0" p="0.0" />
       <location r="7.641" t="180.0" p="0.0" />
       <location r="7.356" t="180.0" p="0.0" />
@@ -22699,212 +22699,6 @@
     </bounding-box>
   </type>
 
-
-  <type name="bank5module">
-    <component type="cone353">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.540" t="134.66" />
-    </component>
-    <component type="cone354">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.540" t="134.85" />
-    </component>
-    <component type="cone355">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.540" t="135.03" />
-    </component>
-    <component type="cone356">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.540" t="135.22" />
-    </component>
-    <component type="cone357">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.540" t="135.41" />
-    </component>
-    <component type="cone358">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.540" t="135.59" />
-    </component>
-    <component type="cone359">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.540" t="135.78" />
-    </component>
-    <component type="cone360">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.540" t="135.97" />
-    </component>
-    <component type="cone361">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.540" t="136.15" />
-    </component>
-    <component type="cone362">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.540" t="136.34" />
-    </component>
-    <component type="cone363">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.480" t="136.73" />
-    </component>
-    <component type="cone364">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.480" t="136.92" />
-    </component>
-    <component type="cone365">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.480" t="137.12" />
-    </component>
-    <component type="cone366">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.480" t="137.31" />
-    </component>
-    <component type="cone367">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.480" t="137.50" />
-    </component>
-    <component type="cone368">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.480" t="137.70" />
-    </component>
-    <component type="cone369">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.480" t="137.89" />
-    </component>
-    <component type="cone370">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.480" t="138.08" />
-    </component>
-    <component type="cone371">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.480" t="138.28" />
-    </component>
-    <component type="cone372">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.480" t="138.47" />
-    </component>
-    <component type="cone373">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.422" t="138.89" />
-    </component>
-    <component type="cone374">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.422" t="139.09" />
-    </component>
-    <component type="cone375">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.422" t="139.30" />
-    </component>
-    <component type="cone376">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.422" t="139.50" />
-    </component>
-    <component type="cone377">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.422" t="139.70" />
-    </component>
-    <component type="cone378">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.422" t="139.90" />
-    </component>
-    <component type="cone379">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.422" t="140.10" />
-    </component>
-    <component type="cone380">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.422" t="140.30" />
-    </component>
-    <component type="cone381">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.422" t="140.51" />
-    </component>
-    <component type="cone382">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.422" t="140.71" />
-    </component>
-    <component type="cone383">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.362" t="141.15" />
-    </component>
-    <component type="cone384">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.362" t="141.36" />
-    </component>
-    <component type="cone385">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.362" t="141.57" />
-    </component>
-    <component type="cone386">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.362" t="141.78" />
-    </component>
-    <component type="cone387">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.362" t="141.99" />
-    </component>
-    <component type="cone388">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.362" t="142.21" />
-    </component>
-    <component type="cone389">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.362" t="142.42" />
-    </component>
-    <component type="cone390">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.362" t="142.63" />
-    </component>
-    <component type="cone391">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.362" t="142.84" />
-    </component>
-    <component type="cone392">
-  <!--  Mantid uses this location to define detector L2 and 2theta -->
-      <location r="1.362" t="143.05" />
-    </component>
-  </type>
-
-  <type name="bank5">
-    <component type="bank5module">
-      <location rot=" 90.0" axis-x="0" axis-y="0" axis-z="1" />
-    </component>
-    <component type="bank5module">
-      <location rot="135.0" axis-x="0" axis-y="0" axis-z="1" />
-    </component>
-    <component type="bank5module">
-      <location rot="180.0" axis-x="0" axis-y="0" axis-z="1" />
-    </component>
-    <component type="bank5module">
-      <location rot="225.0" axis-x="0" axis-y="0" axis-z="1" />
-    </component>
-    <component type="bank5module">
-      <location rot="270.0" axis-x="0" axis-y="0" axis-z="1" />
-    </component>
-    <component type="bank5module">
-      <location rot="315.0" axis-x="0" axis-y="0" axis-z="1" />
-    </component>
-    <component type="bank5module">
-      <location rot="  0.0" axis-x="0" axis-y="0" axis-z="1" />
-    </component>
-    <component type="bank5module">
-      <location rot=" 45.0" axis-x="0" axis-y="0" axis-z="1" />
-    </component>
-  </type>
-
-  <component type="bank5" idlist="bank5list">
-    <location />
-  </component>
-
-  <idlist idname="bank5list">
-    <id start="501001" end="501040" />
-    <id start="502001" end="502040" />
-    <id start="503001" end="503040" />
-    <id start="504001" end="504040" />
-    <id start="505001" end="505040" />
-    <id start="506001" end="506040" />
-    <id start="507001" end="507040" />
-    <id start="508001" end="508040" />
-  </idlist>
-
   <!--  Bank 6 ( 4 modules):  7 groups (10 elements/group)  -->
 
   <type name="cone393" is="detector">
@@ -27358,7 +27152,172 @@
   </type>
 
 
-  <type name="bank6module">
+
+  <type name="bank5outermodule">
+    <component type="cone353">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.540" t="134.66" />
+    </component>
+    <component type="cone354">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.540" t="134.85" />
+    </component>
+    <component type="cone355">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.540" t="135.03" />
+    </component>
+    <component type="cone356">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.540" t="135.22" />
+    </component>
+    <component type="cone357">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.540" t="135.41" />
+    </component>
+    <component type="cone358">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.540" t="135.59" />
+    </component>
+    <component type="cone359">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.540" t="135.78" />
+    </component>
+    <component type="cone360">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.540" t="135.97" />
+    </component>
+    <component type="cone361">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.540" t="136.15" />
+    </component>
+    <component type="cone362">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.540" t="136.34" />
+    </component>
+    <component type="cone363">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.480" t="136.73" />
+    </component>
+    <component type="cone364">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.480" t="136.92" />
+    </component>
+    <component type="cone365">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.480" t="137.12" />
+    </component>
+    <component type="cone366">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.480" t="137.31" />
+    </component>
+    <component type="cone367">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.480" t="137.50" />
+    </component>
+    <component type="cone368">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.480" t="137.70" />
+    </component>
+    <component type="cone369">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.480" t="137.89" />
+    </component>
+    <component type="cone370">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.480" t="138.08" />
+    </component>
+    <component type="cone371">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.480" t="138.28" />
+    </component>
+    <component type="cone372">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.480" t="138.47" />
+    </component>
+    <component type="cone373">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.422" t="138.89" />
+    </component>
+    <component type="cone374">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.422" t="139.09" />
+    </component>
+    <component type="cone375">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.422" t="139.30" />
+    </component>
+    <component type="cone376">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.422" t="139.50" />
+    </component>
+    <component type="cone377">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.422" t="139.70" />
+    </component>
+    <component type="cone378">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.422" t="139.90" />
+    </component>
+    <component type="cone379">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.422" t="140.10" />
+    </component>
+    <component type="cone380">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.422" t="140.30" />
+    </component>
+    <component type="cone381">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.422" t="140.51" />
+    </component>
+    <component type="cone382">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.422" t="140.71" />
+    </component>
+    <component type="cone383">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.362" t="141.15" />
+    </component>
+    <component type="cone384">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.362" t="141.36" />
+    </component>
+    <component type="cone385">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.362" t="141.57" />
+    </component>
+    <component type="cone386">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.362" t="141.78" />
+    </component>
+    <component type="cone387">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.362" t="141.99" />
+    </component>
+    <component type="cone388">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.362" t="142.21" />
+    </component>
+    <component type="cone389">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.362" t="142.42" />
+    </component>
+    <component type="cone390">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.362" t="142.63" />
+    </component>
+    <component type="cone391">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.362" t="142.84" />
+    </component>
+    <component type="cone392">
+  <!--  Mantid uses this location to define detector L2 and 2theta -->
+      <location r="1.362" t="143.05" />
+    </component>
+  </type>
+
+
+  <type name="bank5innermodule">
     <component type="cone393">
   <!--  Mantid uses this location to define detector L2 and 2theta -->
       <location r="1.233" t="145.95" />
@@ -27641,30 +27600,63 @@
     </component>
   </type>
 
-  <type name="bank6">
-    <component type="bank6module">
+  <type name="bank5">
+    <component type="bank5outermodule">
       <location rot=" 90.0" axis-x="0" axis-y="0" axis-z="1" />
     </component>
-    <component type="bank6module">
+    <component type="bank5outermodule">
+      <location rot="135.0" axis-x="0" axis-y="0" axis-z="1" />
+    </component>
+    <component type="bank5outermodule">
       <location rot="180.0" axis-x="0" axis-y="0" axis-z="1" />
     </component>
-    <component type="bank6module">
+    <component type="bank5outermodule">
+      <location rot="225.0" axis-x="0" axis-y="0" axis-z="1" />
+    </component>
+    <component type="bank5outermodule">
       <location rot="270.0" axis-x="0" axis-y="0" axis-z="1" />
     </component>
-    <component type="bank6module">
+    <component type="bank5outermodule">
+      <location rot="315.0" axis-x="0" axis-y="0" axis-z="1" />
+    </component>
+    <component type="bank5outermodule">
+      <location rot="  0.0" axis-x="0" axis-y="0" axis-z="1" />
+    </component>
+    <component type="bank5outermodule">
+      <location rot=" 45.0" axis-x="0" axis-y="0" axis-z="1" />
+    </component>
+    <component type="bank5innermodule">
+      <location rot=" 90.0" axis-x="0" axis-y="0" axis-z="1" />
+    </component>
+    <component type="bank5innermodule">
+      <location rot="180.0" axis-x="0" axis-y="0" axis-z="1" />
+    </component>
+    <component type="bank5innermodule">
+      <location rot="270.0" axis-x="0" axis-y="0" axis-z="1" />
+    </component>
+    <component type="bank5innermodule">
       <location rot="  0.0" axis-x="0" axis-y="0" axis-z="1" />
     </component>
   </type>
 
-  <component type="bank6" idlist="bank6list">
+  <component type="bank5" idlist="bank5list">
     <location />
   </component>
 
-  <idlist idname="bank6list">
+  <idlist idname="bank5list">
+    <id start="501001" end="501040" />
+    <id start="502001" end="502040" />
+    <id start="503001" end="503040" />
+    <id start="504001" end="504040" />
+    <id start="505001" end="505040" />
+    <id start="506001" end="506040" />
+    <id start="507001" end="507040" />
+    <id start="508001" end="508040" />
     <id start="601001" end="601070" />
     <id start="602001" end="602070" />
     <id start="603001" end="603070" />
     <id start="604001" end="604070" />
   </idlist>
+
 
   </instrument>

@@ -1,4 +1,3 @@
-
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/join.hpp>
@@ -24,7 +23,7 @@
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
-
+#include "MantidKernel/FacilityInfo.h"
 #include "git2.h"
 #include "assert.h"
 #include <locale.h>
@@ -61,15 +60,14 @@ namespace Mantid
 namespace API
 {
   DECLARE_SCRIPTREPOSITORY(GitScriptRepository)
-
+  
   GitScriptRepository::GitScriptRepository(const std::string local_rep, 
-                                         const std::string remote)
-  throw (ScriptRepoException&):
+                                         const std::string remote) :
   g_log(Logger::get("GitScriptRepository"))
   {    
     g_log.debug() << "GitScriptRepository constructor: local_rep " 
                   << local_rep << "; remote = " << remote << "\n"; 
-    
+    update_called = false;  
     std::string loc, rem; 
     if (local_rep.empty() || remote.empty()){
       ConfigServiceImpl & config = ConfigService::Instance();
@@ -90,7 +88,7 @@ namespace API
     else
       remote_url = remote;
     
-    if (local_repository.empty() || remote_url.empty()){
+    if (remote_url.empty()){
       g_log.error() << "Failed to find the specification for the remote url and local repository\n"; 
       
       throw ScriptRepoException(
@@ -98,29 +96,57 @@ namespace API
                                 "Attempt to construct GitScriptRepository with invalid inputs");                              
     }
     
-    g_log.debug() << "GitScriptRepository::Constructor Configuring repository for local " << local_repository  
-                  << "\n"; 
+    repo = NULL; 
     
+    if (local_repository.empty())
+      return;
+    
+    //parsing the local_repository
+    Poco::Path local(local_repository); 
+    std::string aux_local_rep;
+    if (local.isRelative()){
+      aux_local_rep = std::string(Poco::Path::home()).append(local_repository);
+      local_repository = aux_local_rep;
+    }
+     g_log.debug() << "GitScriptRepository::Constructor Configuring repository for local " << local_repository  
+                  << "\n"; 
     // it will try to initialize the git_repository
     // It is possible to have a non valid git_repository
     // when there is no local repository. But, this means, 
     // that it will accept only the update method.
-    repo = NULL; 
+    
     int err = git_repository_open(&repo, local_repository.c_str());
     if (err){
       const git_error *git_err = giterr_last();
-      g_log.warning() << "Invalid path detected in the GitScriptRepository constructor '" << local_repository 
+      g_log.warning() << "ScriptRepository not installed in this machine."<< std::endl;
+      g_log.debug() << "Invalid path detected in the GitScriptRepository constructor '" << local_repository 
                       << "'.\n Git Error: "
                       <<git_err->message                  
                       << "\n";
       // repo should be NULL in this case
       assert(!repo);
+      return;
+    }
+    // test the repository, checking if it was a valid and not corrupted (usually if the user canceled the 
+    // installation of the repository, it becomes invalid)
+    err =  git_repository_is_empty(repo); 
+    if (err){
+      if (err == 1){
+        g_log.warning() << "The repository in " << local_repository << " is corrupted or invalid.\n"
+                        << "We strongly suggest you should remove this folder from your machine!" <<  std::endl;
+      }
+      if (err < 0){
+      const git_error *git_err = giterr_last(); 
+      g_log.debug() << "Corrupted: " << git_err->message << ". Code (" << git_err->klass << ")." << std::endl; 
+      }
+      git_repository_free(repo); 
+      repo = NULL;        
     } 
-    update_called = false;
+
   }
 
 
-  GitScriptRepository::~GitScriptRepository() throw (){
+  GitScriptRepository::~GitScriptRepository() throw() {
 
     if (repo)
       git_repository_free(repo);
@@ -142,8 +168,21 @@ namespace API
 
   ScriptRepoException GitScriptRepository::gitException(const std::string info, const std::string file, int line){
     const git_error *err = giterr_last();
-    g_log.error() << "Failure: "<< err->message  << "\n"<< "Info " << info << "\n" ; 
-    return ScriptRepoException(info, err->message, 
+    std::string desc; 
+    switch(err->klass){
+    case GITERR_OS:
+      desc = "Internet failure. It may be the internet connection or proxy setting problem\n";      
+    break;
+    case GITERR_REPOSITORY:
+      desc = "The definition of the working directory path is invalid. Check the value of ScriptLocalRepository at the properties file.\n";
+      break;
+    default:
+      break;
+    }
+    desc.append(err->message);
+
+    g_log.error() << "Failure: "<< desc  << "\n"<< "Info " << info << " -> Error Code ("<< err->klass << ")\n)" ; 
+    return ScriptRepoException(info, desc, 
                                file, line);
   }
 
@@ -275,7 +314,7 @@ namespace API
       @attention Empty folders will not be listed!
 
   */
-  vector<std::string> GitScriptRepository::listFiles() throw (ScriptRepoException&){
+  vector<std::string> GitScriptRepository::listFiles() {
     // this method requires a valid local repository.
     if (!repo)
       throw invalidRepository();
@@ -406,7 +445,7 @@ namespace API
 
    
   */
-  SCRIPTSTATUS GitScriptRepository::fileStatus(const std::string file_path) throw (ScriptRepoException&){
+  SCRIPTSTATUS GitScriptRepository::fileStatus(const std::string file_path) {
     if (!repo)
       throw invalidRepository();
     // change the path to a path related to the repository.
@@ -418,7 +457,7 @@ namespace API
          it != repository_list.end();
          it++){
       if( it->path == file_path_adjusted){
-        g_log.debug() << "File " << file_path_adjusted << " status = " << it->status;
+        //g_log.debug() << "File " << file_path_adjusted << " status = " << it->status;
         return it->status;       
       }
     }
@@ -520,12 +559,12 @@ namespace API
      http://libgit2.github.com/libgit2/#HEAD/group/checkout/git_checkout_index
 
   */
-  void GitScriptRepository::download(const std::string file_path) throw (ScriptRepoException&){
+  void GitScriptRepository::download(const std::string file_path) {
     if (! repo)
       throw invalidRepository();
 
     if (!update_called){
-      g_log.warning() << "The information about the remote repository may be out-to-date.\n"
+      g_log.debug() << "The information about the remote repository may be out-to-date.\n"
                       << "Maybe you should update that information through ::update() method\n";
     }
 
@@ -573,7 +612,7 @@ namespace API
       //make backup if necessary
       SCRIPTSTATUS st = curr_entry->status; 
       if (st == LOCAL_CHANGED || st == BOTH_CHANGED){
-        g_log.warning() << "perform a backup of this file\n";
+        g_log.debug() << "perform a backup of this file\n";
         Poco::File f (std::string(repo_path).append(file_path_adjusted)); 
         // copy file
         std::string bck = std::string(f.path()).append("_bck"); 
@@ -610,10 +649,10 @@ namespace API
     // add file name
     opts.paths.strings[0] = strdup(file_path_adjusted.c_str()); 
     opts.paths.count = 1; 
-    g_log.warning() << "entering git checkout index " << opts.paths.strings[0]<< "\n" ;
+    g_log.debug() << "entering git checkout index " << opts.paths.strings[0]<< "\n" ;
     //err = git_checkout_index(repo, NULL, &opts); 
     err = git_checkout_head(repo, &opts); 
-      g_log.warning() << " git checkout index\n" ;
+      g_log.debug() << " git checkout index\n" ;
     // release memory FIXME
     delete [] opts.paths.strings[0]; 
     free(opts.paths.strings); 
@@ -621,7 +660,7 @@ namespace API
   
     if (err)
       throw gitException("Failure to download."); /// @todo provide a better explanation.
-    g_log.debug() << "download ok! \n"; 
+    g_log.debug() << file_path  << " downloaded!" << std::endl; 
   }
 
 
@@ -634,7 +673,7 @@ namespace API
     
     
   */
-  void GitScriptRepository::update(void) throw (ScriptRepoException&)
+  void GitScriptRepository::update(void) 
   {
     g_log.debug() << "GitScriptRepository::update ... begin\n" ; 
     // if the repository was not initialized, check if we can initialize (meaning that it was created)
@@ -647,15 +686,12 @@ namespace API
       int err = git_repository_open(&repo, local_repository.c_str());
       if (err){
         const git_error *git_err = giterr_last();
-        g_log.warning() << "Invalid path detected in the GitScriptRepository constructor '" << local_repository 
-                        << "'.\n Git Error: "
-                        <<git_err->message                  
-                        << "\n";
+        g_log.debug() << "Script Repository Update open error: " << git_err->message << ". Code(" << git_err->klass << ")." << std::endl; 
         // repo should be NULL in this case
         assert(!repo);
 
         // if it does not exists... we have to create
-        g_log.debug() << "GitScriptRepository::update call clone\n";  
+        g_log.debug() << "GitScriptRepository::update call clone" << std::endl;   
         cloneRepository(); 
         update_called = true; // the clone, do also update the origin information
         return;
@@ -682,7 +718,7 @@ namespace API
      http://libgit2.github.com/libgit2/ex/HEAD/fetch.html#git_remote_update_tips-8
 
   */
-  void GitScriptRepository::fetchOrigin(void) throw (ScriptRepoException&){
+  void GitScriptRepository::fetchOrigin(void) {
     g_log.debug() << "GitScriptRepository::fetchOrigin begin\n" ; 
     // ensures this means that repo exists
     git_remote * remote = NULL;
@@ -729,39 +765,170 @@ namespace API
     git_remote_free(remote);
   }
 
+  
+typedef struct progress_data {
+	git_transfer_progress fetch_progress;
+	size_t completed_steps;
+	size_t total_steps;
+	const char *path;
+  int up_to;
+  Mantid::Kernel::Logger * log; 
+} progress_data;
+
+static void print_progress(progress_data *pd)
+{
+	int network_percent = (100*pd->fetch_progress.received_objects) / pd->fetch_progress.total_objects;
+	int index_percent = (100*pd->fetch_progress.indexed_objects) / pd->fetch_progress.total_objects;
+  int percent = (network_percent + index_percent )/ 2; 
+  int next_step = ((percent > 10) && (percent < 20))? 1 : 5;  // attempt to make the progress information better to the user
+  if (percent > pd->up_to){
+    pd->up_to = (percent + next_step); 
+    pd->log->notice() << "Script Repository Installation Progress: " << index_percent << "%\n"; 
+  }
+}
+
+static void fetch_progress(const git_transfer_progress *stats, void *payload)
+{
+	progress_data *pd = (progress_data*)payload;
+	pd->fetch_progress = *stats;
+	print_progress(pd);
+}
+static void checkout_progress(const char *path, size_t cur, size_t tot, void *payload)
+{
+	progress_data *pd = (progress_data*)payload;
+	pd->completed_steps = cur;
+	pd->total_steps = tot;
+	pd->path = path;
+	print_progress(pd);
+}
+
+static int cred_acquire(git_cred **out,
+		const char * /*url*/,
+		unsigned int /*allowed_types*/,
+		void * /*payload*/)
+{
+	char username[128] = {0};
+	char password[128] = {0};
+
+	printf("Username: ");
+	scanf("%s", username);
+
+	/* Yup. Right there on your terminal. Careful where you copy/paste output. */
+	printf("Password: ");
+	scanf("%s", password);
+
+	return git_cred_userpass_plaintext_new(out, username, password);
+}
+
 
   /**
      Does the cloning, but do also ensure that automatic generated files, will not be 
      shown at the repository. Specially, .pyc files.
 
   */
-  void GitScriptRepository::cloneRepository(void) throw (ScriptRepoException&){
+  void GitScriptRepository::cloneRepository(void) {
+    using Mantid::Kernel::FacilityInfo;
+    using boost::algorithm::split;
+    using boost::algorithm::is_any_of;
+    using boost::algorithm::join;           
+
     g_log.debug() << "GitScriptRepository::cloneRepository ... begin\n" ; 
     git_repository *cloned_repo = NULL;
-    git_clone_options clone_opts; 
+    git_clone_options clone_opts;  
+    git_checkout_opts checkout_opts;
     int error;
-  
-    // Set up options	
-    memset(&clone_opts,0,sizeof(clone_opts)); 
-    clone_opts.version = GIT_CLONE_OPTIONS_VERSION; 
-    clone_opts.checkout_opts.version = GIT_CHECKOUT_OPTS_VERSION;
+    git_config * cfg;
+    // check if config file exists:
+    {
+      char path[100];
+      if (git_config_find_global(path, 100)){
+        g_log.debug() << "Git configuration file does not exists" << std::endl; 
+        std::string config_path = std::string(Poco::Path::home()).append("/.gitconfig");
+        Poco::File f(config_path); 
+        f.createFile(); 
+        if (git_config_find_global(path, 100))
+          throw gitException("Instalation failed when creating the configuration file"); 
+      }
+    }
+    error = git_config_open_default(&cfg);
+    if (error){
+      throw gitException("Script Repository Proxy Configuration Failed");
+    }
+    const FacilityInfo defaultFacility = ConfigService::Instance().getFacility();
+    std::string proxy = defaultFacility.getHTTPProxy();
+    if (!proxy.empty()){
+      const char * git_proxy; 
+      if (git_config_get_string(&git_proxy, cfg, "http.proxy"))
+        throw gitException("Script Repository installation failed"); 
+      if (proxy != git_proxy){
+        g_log.debug() << "Script Repository Proxy configured to " << proxy << "\n"; 
+        git_config_set_string(cfg,"http.proxy",proxy.c_str()); 
+      }    
+    }
+    git_config_free(cfg);
+    // Set up options
     // avoid downloading the files, letting the local folder clean (to not fill the local folder
-    // with files that the user is not interested with
-    clone_opts.checkout_opts.checkout_strategy = GIT_CHECKOUT_UPDATE_ONLY| GIT_CHECKOUT_ALLOW_CONFLICTS;
+    // with files that the user is not interested with   
+    progress_data pd; 
+    memset(&pd,0,sizeof(pd)); 
+    pd.log = &g_log; 
+    pd.up_to = 0;
+    memset(&clone_opts, 0, sizeof(clone_opts)); 
+    memset(&checkout_opts,0,sizeof(checkout_opts));
+    clone_opts.version = GIT_CLONE_OPTIONS_VERSION; 
+    checkout_opts.version = GIT_CHECKOUT_OPTS_VERSION;
+	  checkout_opts.checkout_strategy =  GIT_CHECKOUT_UPDATE_ONLY| GIT_CHECKOUT_ALLOW_CONFLICTS;
+	  checkout_opts.progress_cb = checkout_progress;
+	  checkout_opts.progress_payload = &pd;
+	  clone_opts.checkout_opts = checkout_opts;
+	  clone_opts.fetch_progress_cb = &fetch_progress;
+	  clone_opts.fetch_progress_payload = &pd;
+	  clone_opts.cred_acquire_cb = cred_acquire;
+
+    
     // Do cloning
     // try not to use the call back function
-    g_log.debug() << "GitScriptRepository::cloneRepository ... cloning " << remote_url << "\n"; 
-    error = git_clone(&cloned_repo, 
-                      remote_url.c_str(), 
+    g_log.notice() << "ScriptRepository installation started! (Remember it will take a couple of minutes)" << std::endl; 
+
+    // get the path of the current directory
+    vector<std::string> url_paths;
+    std::string str = remote_url;
+    //split the csv of url path in url paths
+    // git://github.com/scripts;http://github.com/scripts
+    // will be splited in : git://github.com/scripts http://github.com/scripts
+    split(url_paths, str, boost::is_any_of(";"));
+    error = 0; 
+    for (vector<std::string>::iterator url = url_paths.begin();
+         url != url_paths.end(); 
+         url ++){
+
+      // this test is done here, in order not to repeat twice the 
+      // error message. So, it will print this message only if there is more 
+      // than one attempt to install the repository.
+      if (error)
+         g_log.warning() << "Attempt to install the repository failed with the following message: "
+                         << giterr_last()->message << ".\t New attempt will be done..." << std::endl;  
+
+      g_log.debug() << "Installing Script Repository for the url: " << (*url) << std::endl;  
+      // clone the repository
+      error = git_clone(&cloned_repo, 
+                        (*url).c_str(), 
                       local_repository.c_str(), 
                       &clone_opts
                       );     
-  
+
+      if (error) // if error, try the following approach
+        {
+          continue;
+        }
+      else
+        break; // no error, means success
+    }
     if (error){
-      throw gitException("We can not create your local repository.\nHInt: check your internet connection.",
+      throw gitException("Script Repository installation failed!",
                          __FILE__, __LINE__); 
     }
-    g_log.debug() << "GitScriptRepository::cloneRepository ... clone done correctly! \n"; 
+    g_log.notice() << "ScriptRepository installed at "<< local_repository.c_str() << std::endl;
     char exclude_file_path[200]; 
     snprintf(exclude_file_path,200, "%s/info/exclude",git_repository_path(cloned_repo));
     // open the file in append mode
@@ -769,7 +936,7 @@ namespace API
     file << "*.pyc\n";
     file.close(); 
     repo = cloned_repo; 
-    g_log.debug() << "GitScriptRepository::cloneRepository ... finished!\n";
+    g_log.notice() << "ScriptRepository Installation Success!\n";
     return;
 
   }
@@ -797,7 +964,7 @@ namespace API
                                    const std::string comment,
                                    const std::string author, 
                                    const std::string description)
-    throw (ScriptRepoException&)
+    
   {
     using Poco::FileOutputStream; 
     ///  @todo: deal with the description
@@ -931,8 +1098,8 @@ namespace API
   }
 
   static std::string extractPythonDocString( std::istream & input, 
-                                             long int &doc_start, 
-                                             long int &doc_end){
+                                             size_t &doc_start, 
+                                             size_t &doc_end){
 
     const char * startmarks[] = {"\"\"\"",
                                  "'''",
@@ -948,11 +1115,11 @@ namespace API
     // int docstring_found = 0; 
     std::string buf;
     size_t pos; 
-    long int start_mark = -1; 
-    long int end_mark = -1; 
+    size_t start_mark = SIZE_MAX; 
+    size_t end_mark = SIZE_MAX; 
     int end_mark_index = 0;
     while(getline(input,buf)){
-      if (start_mark < 0){
+      if (start_mark == SIZE_MAX){
         // looking for the start mark
       for (int i = 0; i< 5; i++){
         pos = buf.find(startmarks[i]); 
@@ -990,7 +1157,7 @@ namespace API
       
     }
 
-    if (start_mark < 0 || end_mark < 0){
+    if (start_mark == SIZE_MAX || end_mark == SIZE_MAX){
       // no documentation
       doc_start = 0; 
       doc_end = 0; 
@@ -1001,7 +1168,7 @@ namespace API
     
     doc_start = start_mark; 
     doc_end = end_mark; 
-    long int size = end_mark - start_mark;
+    size_t size = end_mark - start_mark;
     char * buffer = new char [size + 1]; 
     input.clear(); 
     input.seekg(start_mark,std::ios::beg); 
@@ -1111,7 +1278,7 @@ namespace API
     switch(filetype){
     case PYTHONFILE:
       {
-        long int start, end; 
+        size_t start, end; 
         description << extractPythonDocString(input, start, end); 
       }
       break;
@@ -1151,7 +1318,7 @@ namespace API
    
      The main issue, is how to get the file description. As defined, is defined differently, depending on the kind of file. 
   */
-  ScriptInfo GitScriptRepository::fileInfo(const std::string path) throw (ScriptRepoException&){
+  ScriptInfo GitScriptRepository::fileInfo(const std::string path) {
     using boost::algorithm::ends_with;
     if ( !repo)
       throw invalidRepository();

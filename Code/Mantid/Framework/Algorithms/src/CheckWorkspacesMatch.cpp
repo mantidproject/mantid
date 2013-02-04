@@ -185,6 +185,13 @@ void CheckWorkspacesMatch::doComparison()
 {
   Workspace_sptr w1 = getProperty("Workspace1");
   Workspace_sptr w2 = getProperty("Workspace2");
+
+  // Not implemented yet for table workspaces
+  if ( w1->id() == "TableWorkspace" || w2->id() == "TableWorkspace" )
+  {
+    throw Kernel::Exception::NotImplementedError("This algorithm does not (yet) work for table workspaces");
+  }
+
   // Check that both workspaces are the same type
   bool checkType = getProperty("CheckType");
   PeaksWorkspace_sptr tws1, tws2;

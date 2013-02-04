@@ -1,6 +1,7 @@
 #include "vtkPeaksSource.h"
 
 #include "vtkSphereSource.h"
+#include "vtkAxes.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -22,7 +23,7 @@ using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
 /// Constructor
-vtkPeaksSource::vtkPeaksSource() :  m_wsName(""), m_radius(-1),
+vtkPeaksSource::vtkPeaksSource() :  m_wsName(""), 
   m_wsTypeName(""), m_dimToShow(vtkPeakMarkerFactory::Peak_in_Q_lab)
 {
   this->SetNumberOfInputPorts(0);
@@ -46,13 +47,6 @@ void vtkPeaksSource::SetWsName(std::string name)
     this->Modified();
   }
 }
-
-void vtkPeaksSource::SetRadius(double radius)
-{
-  m_radius = radius;
-  this->Modified();
-}
-
 void vtkPeaksSource::SetPeakDimension(int dim)
 {
   m_dimToShow = static_cast<vtkPeakMarkerFactory::ePeakDimensions>(dim);
@@ -80,21 +74,28 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
     vtkDataSet *structuredMesh = p_peakFactory->create(drawingProgressUpdate);
 
     // Pick the radius up from the factory if possible, otherwise use the user-provided value.
-    double peakRadius = m_radius;
+    vtkPolyDataAlgorithm* shapeMarker = NULL;
     if(p_peakFactory->isPeaksWorkspaceIntegrated())
     {
-      peakRadius = p_peakFactory->getIntegrationRadius();
+      double peakRadius = p_peakFactory->getIntegrationRadius(); 
+      const int resolution = 6;
+      vtkSphereSource *sphere = vtkSphereSource::New();
+      sphere->SetRadius(peakRadius);
+      sphere->SetPhiResolution(resolution);
+      sphere->SetThetaResolution(resolution);
+      shapeMarker = sphere;
     }
-
-    const int resolution = 6;
-    vtkSphereSource *sphere = vtkSphereSource::New();
-    sphere->SetRadius(peakRadius);
-    sphere->SetPhiResolution(resolution);
-    sphere->SetThetaResolution(resolution);
+    else
+    {
+      vtkAxes* axis = vtkAxes::New();
+      axis->SymmetricOn();
+      axis->SetScaleFactor(0.5);
+      shapeMarker = axis;
+    }
 
     vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
     glyphFilter->SetInput(structuredMesh);
-    glyphFilter->SetSource(sphere->GetOutput());
+    glyphFilter->SetSource(shapeMarker->GetOutput());
     glyphFilter->Update();
     vtkPolyData *glyphed = glyphFilter->GetOutput();
 

@@ -70,6 +70,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtAPI/FileDialogHandler.h"
 
 
 using namespace Mantid;
@@ -386,6 +387,10 @@ void SliceViewer::initMenus()
 
   action = new QAction(QPixmap(), "&Line Viewer Help (browser)", this);
   connect(action, SIGNAL(triggered()), this, SLOT(helpLineViewer()));
+  m_menuHelp->addAction(action);
+
+  action = new QAction(QPixmap(), "&Peaks Viewer Help (browser)", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(helpPeaksViewer()));
   m_menuHelp->addAction(action);
 
   // --------------- Line Menu ----------------------------------------
@@ -986,6 +991,12 @@ void SliceViewer::helpLineViewer()
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
+void SliceViewer::helpPeaksViewer()
+{
+  QString helpPage = "PeaksViewer";
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
+}
+
 //------------------------------------------------------------------------------------
 /** Automatically resets the zoom view to full axes.
  * This will reset the XY limits to the full range of the workspace.
@@ -1095,7 +1106,7 @@ void SliceViewer::saveImage(const QString & filename)
   QString fileselection;
   if (filename.isEmpty())
   {
-    fileselection = QFileDialog::getSaveFileName(this, tr("Pick a file to which to save the image"),
+    fileselection = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Pick a file to which to save the image"),
         QFileInfo(m_lastSavedFile).absoluteFilePath(),
         tr("PNG files(*.png *.png)"));
     // User cancelled if filename is still empty

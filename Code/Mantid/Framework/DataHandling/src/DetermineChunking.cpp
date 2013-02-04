@@ -1,5 +1,6 @@
 /*WIKI*
-Workflow algorithm to determine chunking strategy.
+Workflow algorithm to determine chunking strategy 
+for event nexus, runinfo.xml, raw, or histo nexus files
 *WIKI*/
 
 #include <exception>
@@ -87,8 +88,8 @@ namespace DataHandling
   /// @copydoc Mantid::API::Algorithm::initDocs()
   void DetermineChunking::initDocs()
   {
-    this->setWikiSummary("Determine chunking strategy for event nexus or runinfo.xml files.");
-    this->setOptionalMessage("Determine chunking strategy for event nexus or runinfo.xml files.");
+    this->setWikiSummary("Determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
+    this->setOptionalMessage("Determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
   }
 
 
@@ -251,7 +252,7 @@ namespace DataHandling
     }
     else
     {
-    	return;
+    	throw(std::invalid_argument("unsupported file type"));
     }
 
     int numChunks = static_cast<int>(filesize/maxChunk);

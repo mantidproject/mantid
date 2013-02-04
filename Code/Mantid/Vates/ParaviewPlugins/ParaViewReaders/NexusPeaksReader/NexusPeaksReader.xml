@@ -9,15 +9,6 @@
          information_only="1">
         <SimpleStringInformationHelper /> 
        </StringVectorProperty>
-		<DoubleVectorProperty
-         name="Peak Radius"
-         command="SetRadius"
-         number_of_elements="1"
-	     default_values="0.05">
-        <Documentation>
-          Set the Radius of the Peak Marker. This is automatically determined if peaks in the PeaksWorkspace has been integrated.
-        </Documentation>
-	    </DoubleVectorProperty>
        <StringVectorProperty
         name="FileName"
         command="SetFileName"

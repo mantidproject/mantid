@@ -2,6 +2,11 @@
 #define MANTIDQT_API_FILEDIALOGHANDLER_H_
 
 #include <QFileDialog>
+#ifdef Q_OS_DARWIN
+  #include <errno.h>
+  #include <sys/sysctl.h>
+#endif
+
 
 namespace MantidQt
 {
@@ -34,8 +39,9 @@ namespace API
 */
 struct FileDialogHandler
 {
-  /** The MacOS's native save file browse button hangs so this function, which takes
-  *  the same arguments as the Qt function, ensures a nonnative object is used on the Mac
+  /** The MacOS's native save dialog crashes when running a 10.6 package on 10.8 so this function, which takes
+  *  the same arguments as the Qt function, ensures a nonnative object is used on the Mac when necessary.
+  *  If compiled on 10.8 the native will be used
   *  @param parent :: the dialog will be shown centered over this parent widget
   *  @param caption :: The dialog's caption 
   *  @param dir :: The file dialog's working directory will be set to dir. If dir includes a file name, the file will be selected
@@ -45,11 +51,26 @@ struct FileDialogHandler
   */
   static QString getSaveFileName(QWidget * parent = 0, const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString(), QString * selectedFilter = 0, QFileDialog::Options options = 0)
   {
-#ifdef Q_OS_DARWIN
-    options = options | QFileDialog::DontUseNativeDialog;
+#if defined(Q_OS_DARWIN) && defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
+  // If we are compiling on Snow Leopard
+  #if __MAC_OS_X_VERSION_MAX_ALLOWED == 1060
+    static int runningMountainLion(-1);
+    if(runningMountainLion < 0)
+    {
+      // Check if we are running Mountain Lion
+      // osrelease 12.x.x is OS X 10.8: http://stackoverflow.com/questions/11072804/mac-os-x-10-8-replacement-for-gestalt-for-testing-os-version-at-runtime
+      char str[256];
+      size_t size = sizeof(str);
+      sysctlbyname("kern.osrelease", str, &size, NULL, 0);
+      if(str[0] == '1' && str[1] == '2' ) runningMountainLion = 1;
+      else runningMountainLion = 0;
+    }
+    if(runningMountainLion) options = options | QFileDialog::DontUseNativeDialog;
+  #endif
 #endif
     return QFileDialog::getSaveFileName(parent, caption, dir, filter, selectedFilter, options);
   }
+
 };
 
 }

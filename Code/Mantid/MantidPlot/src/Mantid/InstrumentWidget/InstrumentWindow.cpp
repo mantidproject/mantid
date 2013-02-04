@@ -42,6 +42,8 @@
 #include <QStackedLayout>
 #include <QKeyEvent>
 
+#include "MantidQtAPI/FileDialogHandler.h"
+
 #include <numeric>
 #include <fstream>
 #include <stdexcept>
@@ -679,7 +681,7 @@ void InstrumentWindow::saveImage()
     }
   }
   QString selectedFilter = "*.png";
-  QString filename = QFileDialog::getSaveFileName(this, "Save image ...", m_savedialog_dir, filter, &selectedFilter);
+  QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(this, "Save image ...", m_savedialog_dir, filter, &selectedFilter);
 
   // If its empty, they cancelled the dialog
   if( filename.isEmpty() ) return;
@@ -1073,7 +1075,7 @@ void InstrumentWindow::sumDetsToWorkspace()
 
 void InstrumentWindow::createIncludeGroupingFile()
 {
-  QString fname = QFileDialog::getSaveFileName(this,"Save grouping file");
+  QString fname = MantidQt::API::FileDialogHandler::getSaveFileName(this,"Save grouping file");
   if (!fname.isEmpty())
   {
     DetXMLFile mapFile(m_selectedDetectors,DetXMLFile::Sum,fname);
@@ -1083,7 +1085,7 @@ void InstrumentWindow::createIncludeGroupingFile()
 
 void InstrumentWindow::createExcludeGroupingFile()
 {
-  QString fname = QFileDialog::getSaveFileName(this,"Save grouping file");
+  QString fname = MantidQt::API::FileDialogHandler::getSaveFileName(this,"Save grouping file");
   if (!fname.isEmpty())
   {
     DetXMLFile mapFile(m_instrumentActor->getAllDetIDs(),m_selectedDetectors,fname);
@@ -1333,15 +1335,17 @@ int InstrumentWindow::getInstrumentDisplayHeight() const
 }
 
 /// Redraw the instrument view
-void InstrumentWindow::updateInstrumentView()
+/// @param picking :: Set to true to update the picking image regardless the interaction
+///   mode of the surface.
+void InstrumentWindow::updateInstrumentView(bool picking)
 {
   if ( m_InstrumentDisplay && m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget*>(m_InstrumentDisplay) )
   {
-    m_InstrumentDisplay->updateView();
+    m_InstrumentDisplay->updateView(picking);
   }
   else
   {
-    m_simpleDisplay->updateView();
+    m_simpleDisplay->updateView(picking);
   }
 }
 

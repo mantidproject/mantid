@@ -119,6 +119,7 @@ signals:
 public slots:
   void helpSliceViewer();
   void helpLineViewer();
+  void helpPeaksViewer();
   void setFastRender(bool fast);
   void showInfoAt(double, double);
 

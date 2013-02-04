@@ -309,7 +309,7 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>Overlay a peaks workspace</string>
+             <string>Auto rebin</string>
             </property>
             <property name="text">
              <string>...</string>

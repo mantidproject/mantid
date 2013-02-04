@@ -24,11 +24,13 @@ void SimpleWidget::setSurface(boost::shared_ptr<ProjectionSurface> surface)
 }
 
 /// Redraw the view
-void SimpleWidget::updateView()
+/// @param picking :: Set to true to update the picking image regardless the interaction
+///   mode of the surface.
+void SimpleWidget::updateView(bool picking)
 {
     if(m_surface)
     {
-      m_surface->updateView();
+      m_surface->updateView(picking);
       update();
     }
 }

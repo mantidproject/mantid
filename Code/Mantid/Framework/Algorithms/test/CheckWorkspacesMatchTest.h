@@ -749,6 +749,15 @@ public:
     cleanupGroup(groupTwo);
   }
 
+  void test_tableworkspaces()
+  {
+    Workspace_sptr table = WorkspaceFactory::Instance().createTable();
+    Mantid::Algorithms::CheckWorkspacesMatch alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", table) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", table) );
+    TS_ASSERT( ! alg.execute() );
+  }
 
 private:
 

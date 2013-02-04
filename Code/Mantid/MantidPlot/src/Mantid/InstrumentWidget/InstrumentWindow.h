@@ -74,7 +74,7 @@ public:
   /// Toggle between the GL and simple instrument display widgets
   void enableOpenGL( bool on );
   /// Redraw the instrument view
-  void updateInstrumentView();
+  void updateInstrumentView(bool picking = false);
   /// Recalculate the detector data and redraw the instrument view
   void updateInstrumentDetectors();
 

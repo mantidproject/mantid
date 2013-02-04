@@ -268,7 +268,7 @@ namespace Mantid
     m_workspace = imdws;
     
     //Setup range values according to whatever strategy object has been injected.
-    m_thresholdRange->setWorkspace(m_workspace);
+    m_thresholdRange->setWorkspace(ws);
     m_thresholdRange->calculate();
   }
 

@@ -184,6 +184,7 @@
 #include "Mantid/FirstTimeSetup.h"
 #include "Mantid/SetUpParaview.h"
 
+#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
@@ -6060,7 +6061,7 @@ void ApplicationWindow::savetoNexusFile()
   if(fileDir.isEmpty())
   {fileDir="C\\Mantid\\Test\\Nexus";
   }
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File As"), fileDir, filter, &selectedFilter);
+  QString fileName = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save File As"), fileDir, filter, &selectedFilter);
   if ( !fileName.isEmpty() ){
     std::string wsName;
     MdiSubWindow *w = activeWindow();
@@ -6119,7 +6120,7 @@ void ApplicationWindow::saveProjectAs(const QString& fileName, bool compress)
     filter += tr("Compressed MantidPlot project")+" (*.mantid.gz)";
 
     QString selectedFilter;
-    fn = QFileDialog::getSaveFileName(this, tr("Save Project As"), workingDir, filter, &selectedFilter);
+    fn = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save Project As"), workingDir, filter, &selectedFilter);
     if (selectedFilter.contains(".gz"))
       compress = true;
   }
@@ -6199,7 +6200,7 @@ void ApplicationWindow::saveAsTemplate(MdiSubWindow* w, const QString& fileName)
       filter = tr("MantidPlot 3D Surface Template")+" (*.qst)";
 
     QString selectedFilter;
-    fn = QFileDialog::getSaveFileName(this, tr("Save Window As Template"), templatesDir + "/" + w->objectName(), filter, &selectedFilter);
+    fn = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save Window As Template"), templatesDir + "/" + w->objectName(), filter, &selectedFilter);
 
     if (!fn.isEmpty()){
       QFileInfo fi(fn);
@@ -6528,7 +6529,7 @@ void ApplicationWindow::exportASCII(const QString& tableName, const QString& sep
     return;
 
   QString selectedFilter;
-  QString fname = QFileDialog::getSaveFileName(this, tr("Choose a filename to save under"),
+  QString fname = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Choose a filename to save under"),
       asciiDirPath + "/" + w->objectName(), "*.txt;;*.dat;;*.DAT", &selectedFilter);
   if (!fname.isEmpty() ){
     QFileInfo fi(fname);
@@ -7567,7 +7568,7 @@ void ApplicationWindow::exportPDF()
     return;
   }
 
-  QString fname = QFileDialog::getSaveFileName(this, tr("Choose a filename to save under"), workingDir, "*.pdf");
+  QString fname = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Choose a filename to save under"), workingDir, "*.pdf");
   if (!fname.isEmpty() ){
     QFileInfo fi(fname);
     QString baseName = fi.fileName();
@@ -9160,7 +9161,8 @@ void ApplicationWindow::fileMenuAboutToShow()
   fileMenu->addAction(actionManageDirs);
   fileMenu->insertSeparator();
   fileMenu->addAction(actionLoadImage);
-  fileMenu->addAction(actionScriptRepo); 
+  // pulled from Release 2.4.
+  //fileMenu->addAction(actionScriptRepo); 
 
   MdiSubWindow *w = activeWindow();
   if (w && w->isA("Matrix"))
@@ -9261,7 +9263,7 @@ void ApplicationWindow::windowsMenuAboutToShow()
   }
 
   windowsMenu->insertItem(tr("&Cascade"), this, SLOT(cascade()));
-  windowsMenu->insertItem(tr("&Tile"), d_workspace, SLOT(tileSubWindows()));
+  windowsMenu->insertItem(tr("&Tile"), this, SLOT(tileMdiWindows()));
   windowsMenu->insertSeparator();
   windowsMenu->addAction(actionNextWindow);
   windowsMenu->addAction(actionPrevWindow);
@@ -12469,7 +12471,6 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g)
       this,SLOT(newTable(const QString&,int,int,const QString&)));
   connect (g,SIGNAL(viewTitleDialog()),this,SLOT(showTitleDialog()));
   //connect (g,SIGNAL(modifiedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
-  connect (g,SIGNAL(resizedWindow(MdiSubWindow*)), this, SLOT(repaintWindows()));
   connect (g,SIGNAL(modifiedPlot()), this, SLOT(modifiedProject()));
   connect (g,SIGNAL(showLineDialog()),this, SLOT(showLineDialog()));
   connect (g,SIGNAL(pasteMarker()),this,SLOT(pasteSelection()));
@@ -12598,8 +12599,7 @@ void ApplicationWindow::createActions()
   actionLoadImage->setShortcut( tr("Ctrl+I") );
   connect(actionLoadImage, SIGNAL(activated()), this, SLOT(loadImage()));
 
-  actionScriptRepo = new QAction(tr("Script Repositor&y"),this); 
-  actionScriptRepo->setShortcut(tr("Ctrl+Y")); 
+  actionScriptRepo = new QAction(tr("Script Repositor&y"),this);
   connect(actionScriptRepo, SIGNAL(activated()), this, SLOT(loadScriptRepo()));
 
   actionImportImage = new QAction(tr("Import I&mage..."), this);
@@ -13452,7 +13452,7 @@ void ApplicationWindow::translateActionsStrings()
   actionShowAllCurves->setMenuText(tr("&Show All Curves"));
 
   actionNewProject->setMenuText(tr("New &Project"));
-  actionNewProject->setToolTip(tr("Open a new project"));
+  actionNewProject->setToolTip(tr("Open a New Project"));
   actionNewProject->setShortcut(tr("Ctrl+N"));
 
   actionNewFolder->setMenuText(tr("New Fol&der"));
@@ -13483,7 +13483,7 @@ void ApplicationWindow::translateActionsStrings()
 
   actionOpenProj->setMenuText(tr("&Project"));
   actionOpenProj->setShortcut(tr("Ctrl+Shift+O"));
-  actionOpenProj->setToolTip(tr("Load Mantid project"));
+  actionOpenProj->setToolTip(tr("Load Mantid Project"));
 
   actionLoadFile->setMenuText(tr("&File"));
   actionLoadFile->setShortcut(tr("Ctrl+Shift+F"));
@@ -13532,12 +13532,12 @@ void ApplicationWindow::translateActionsStrings()
   actionCutSelection->setShortcut(tr("Ctrl+X"));
   
   actionCopySelection->setMenuText(tr("&Copy Selection"));
-  actionCopySelection->setToolTip(tr("Copy selection"));
+  actionCopySelection->setToolTip(tr("Copy Selection"));
   actionCopySelection->setShortcut(tr("Ctrl+C"));
   
 
   actionPasteSelection->setMenuText(tr("&Paste Selection"));
-  actionPasteSelection->setToolTip(tr("Paste selection"));
+  actionPasteSelection->setToolTip(tr("Paste Selection"));
   actionPasteSelection->setShortcut(tr("Ctrl+V"));
   
 
@@ -13550,7 +13550,7 @@ void ApplicationWindow::translateActionsStrings()
   actionShowExplorer->setToolTip(tr("Show project explorer"));
 
   actionShowLog->setMenuText(tr("Results &Log"));
-  actionShowLog->setToolTip(tr("Show analysis results"));
+  actionShowLog->setToolTip(tr("Results Log"));
 
   actionShowUndoStack->setMenuText(tr("&Undo/Redo Stack"));
   actionShowUndoStack->setToolTip(tr("Show available undo/redo commands"));
@@ -13624,11 +13624,11 @@ void ApplicationWindow::translateActionsStrings()
 
   actionUnzoom->setMenuText(tr("&Rescale to Show All"));
   actionUnzoom->setShortcut(tr("Ctrl+Shift+R"));
-  actionUnzoom->setToolTip(tr("Zoom to show all"));
+  actionUnzoom->setToolTip(tr("Rescale to Show All"));
 
-  actionNewLegend->setMenuText( tr("New &Legend"));
+  actionNewLegend->setMenuText( tr("Add New &Legend"));
   actionNewLegend->setShortcut(tr("Ctrl+L"));
-  actionNewLegend->setToolTip(tr("Add new legend"));
+  actionNewLegend->setToolTip(tr("Add New Legend"));
 
   actionTimeStamp->setMenuText(tr("Add Time Stamp"));
   actionTimeStamp->setShortcut(tr("Ctrl+ALT+T"));
@@ -13892,8 +13892,8 @@ void ApplicationWindow::translateActionsStrings()
   //actionDonate->setMenuText(tr("Make a &Donation"));
   //actionTechnicalSupport->setMenuText(tr("Technical &Support"));
 
-  btnPointer->setMenuText(tr("Disable &tools"));
-  btnPointer->setToolTip( tr( "Pointer" ) );
+  btnPointer->setMenuText(tr("Selection &Tools"));
+  btnPointer->setToolTip( tr( "Selection Tools" ) );
 
   btnZoomIn->setMenuText(tr("&Zoom In"));
   btnZoomIn->setShortcut(tr("Ctrl++"));
@@ -13903,12 +13903,12 @@ void ApplicationWindow::translateActionsStrings()
   btnZoomOut->setShortcut(tr("Ctrl+-"));
   btnZoomOut->setToolTip(tr("Zoom Out"));
 
-  actionPanPlot->setMenuText(tr("Zoom &In/Out and Drag Canvas"));
-  actionPanPlot->setToolTip(tr("Panning tool (zoom with mouse wheel)"));
+  actionPanPlot->setMenuText(tr("Panning Tool (zoom with mouse wheel)"));
+  actionPanPlot->setToolTip(tr("Panning Tool (zoom with mouse wheel)"));
 
   btnCursor->setMenuText(tr("&Data Reader"));
   btnCursor->setShortcut(tr("CTRL+D"));
-  btnCursor->setToolTip(tr("Data reader"));
+  btnCursor->setToolTip(tr("Data Reader"));
 
   btnSelect->setMenuText(tr("&Select Data Range"));
   btnSelect->setShortcut(tr("ALT+S"));
@@ -13933,11 +13933,11 @@ void ApplicationWindow::translateActionsStrings()
 
   btnArrow->setMenuText(tr("Draw &Arrow"));
   btnArrow->setShortcut(tr("CTRL+ALT+A"));
-  btnArrow->setToolTip(tr("Draw arrow"));
+  btnArrow->setToolTip(tr("Draw Arrow"));
 
   btnLine->setMenuText(tr("Draw &Line"));
   btnLine->setShortcut(tr("CTRL+ALT+L"));
-  btnLine->setToolTip(tr("Draw line"));
+  btnLine->setToolTip(tr("Draw Line"));
 
   // FIXME: is setText necessary for action groups?
   //	coord->setText( tr( "Coordinates" ) );
@@ -15221,7 +15221,7 @@ void ApplicationWindow::saveFolderAsProject(Folder *f)
   filter += tr("Compressed MantidPlot project")+" (*.qti.gz)";
 
   QString selectedFilter;
-  QString fn = QFileDialog::getSaveFileName(this, tr("Save project as"), workingDir, filter, &selectedFilter);
+  QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(this, tr("Save project as"), workingDir, filter, &selectedFilter);
   if ( !fn.isEmpty() ){
     QFileInfo fi(fn);
     workingDir = fi.dirPath(true);
@@ -17498,14 +17498,32 @@ void ApplicationWindow::setMatrixUndoStackSize(int size)
   }
 }
 
-//! This is a dirty hack: sometimes the workspace area and the windows are not redrawn properly
-// after a MultiLayer plot window is resized by the user: Qt bug?
-void ApplicationWindow::repaintWindows()
+/**
+ * Arange the mdi sub-windows in a tile pattern
+ */
+void ApplicationWindow::tileMdiWindows()
 {
-  MdiSubWindow* w = getActiveWindow();
-  if (d_opening_file || (w && w->status() == MdiSubWindow::Maximized))
-    return;
+  d_workspace->tileSubWindows();
+  // hack to redraw the graphs
+  shakeViewport();
+  // QMdiArea::tileSubWindows() aranges the windows and enables automatic tiling
+  // after subsequent resizing of the mdi area until a window is moved or resized 
+  // separatly. Unfortunately Graph behaves badly during this.
+  // The following code disables automatic tiling.
+  auto winList = d_workspace->subWindowList();
+  if ( !winList.isEmpty() )
+  {
+    auto p = winList[0]->pos();
+    winList[0]->move(p.x()+1,p.y());
+    winList[0]->move(p);
+  }
+}
 
+/**
+ * A hack to make the mdi area and the Graphs to redraw themselves in certain cases.
+ */
+void ApplicationWindow::shakeViewport()
+{
   QWidget *viewPort = d_workspace->viewport();
   QSize size = viewPort->size();
   viewPort->resize(QSize(size.width() + 1, size.height() + 1));

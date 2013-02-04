@@ -804,6 +804,7 @@ signals:
   /// int argument gives the axis as defined in QwtPlot::Axis
   void axisScaleChanged(int,bool);
   
+private slots:
 
 private:
   //! Finds bounding interval of the plot data.

@@ -64,6 +64,18 @@ namespace Mantid
                                                      Direction::Output),
                       "A list of containing  locations of files downloaded from data server");
     }
+
+    /// Raise an error concerning catalog searching
+    void CatalogDownloadDataFiles::throwCatalogError() const
+    {
+      const std::string facilityName = ConfigService::Instance().getFacility().name();
+      std::stringstream ss;
+      ss << "Your current Facility, " << facilityName << ", does not have ICAT catalog information. "
+          << std::endl;
+      ss << "The facilities.xml file may need updating. Contact the Mantid Team for help." << std::endl;
+      throw std::runtime_error(ss.str());
+    }
+
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()
     {
@@ -76,11 +88,11 @@ namespace Mantid
       }
       catch(Kernel::Exception::NotFoundError&)
       {
-        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
+        throwCatalogError();
       }
       if(!catalog_sptr)
       {
-        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
+        throwCatalogError();
       }
       //get file ids
       std::vector<int64_t> fileids = getProperty("FileIds");

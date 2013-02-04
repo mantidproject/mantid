@@ -31,7 +31,7 @@ public:
 
 public slots:
   void enableLighting(bool);
-  void updateView();
+  void updateView(bool picking = false);
   void updateDetectors();
   void componentSelected(Mantid::Geometry::ComponentID id);
 

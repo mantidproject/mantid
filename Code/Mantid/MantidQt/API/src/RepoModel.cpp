@@ -1,4 +1,3 @@
-
 #include <QtGui>
 #include "MantidQtAPI/RepoModel.h"
 
@@ -70,7 +69,7 @@ QVariant RepoItem::data(int column,  int role  ) const
     case 1:
       return "Download";
     case 2:
-      return "Update"; 
+      return "Status"; 
     case 3: 
       return "Publish"; 
     default: 
@@ -96,7 +95,7 @@ QVariant RepoItem::data(int column,  int role  ) const
         }
         return "true";
         break;
-      case 2:/* Update -> The file is up to date?*/ 
+      case 2:/* Status -> The file is up to date?*/ 
         if (status ==  Mantid::API::BOTH_UNCHANGED)
           return "true";
         else{
@@ -134,7 +133,7 @@ QVariant RepoItem::data(int column,  int role  ) const
     {
       if (column > 0)
         return QVariant(); 
-
+      
       if (directory){
         if (status == Mantid::API::REMOTE_ONLY)
           return QIcon::fromTheme("folder-remote", QIcon(QPixmap(":/win/folder-remote"))); 
@@ -148,7 +147,7 @@ QVariant RepoItem::data(int column,  int role  ) const
         if (path.contains("readme",Qt::CaseInsensitive))
           return QIcon::fromTheme("text-x-readme", QIcon(QPixmap(":/win/txt_file.png"))); 
 
-
+        
         QString extension = QString(path).remove(0,pos);
         if (extension == ".cpp" || extension == ".CPP" || extension == ".c" || extension == ".C")
           return QIcon::fromTheme("text-x-c++", QIcon(QPixmap(":/win/unknown")));
@@ -162,9 +161,58 @@ QVariant RepoItem::data(int column,  int role  ) const
           return QIcon::fromTheme("application-pdf", QIcon(QPixmap(":/win/file_pdf"))); 
         else
           return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown"))); 
-
+        
       }
       
+    }
+    break;
+  case  Qt::ToolTipRole:
+    {
+      switch(column){
+      case 0:
+        return QVariant();
+        break;
+      case 1: /*Donwload -> is this file already donwloaded?*/           
+        if (status == Mantid::API::REMOTE_ONLY){
+          if (directory)
+            return "Click here to download this folder and all its files";
+          else
+            return "Click here to download this file"; 
+        }
+        break;
+      case 2:/* Status -> The file is up to date?*/ 
+        if (status ==  Mantid::API::BOTH_UNCHANGED){
+          if (directory)
+            return "This folder is up-to-date";
+          else
+            return "This file is up-to-date"; 
+        }
+        else{
+          if (status == Mantid::API::LOCAL_CHANGED)
+            return "This file has been changed locally."; // FIXME: you may consider publish
+          if (status == Mantid::API::REMOTE_CHANGED || 
+              status == Mantid::API::BOTH_CHANGED){
+            if (directory)
+              return "There is a new version of the files inside this folder. Click here to install them.";
+            else
+              return "There is a new version of this file available. Click here to install it.";
+          }
+          
+        }
+        break;
+      case 3: /* Publish -> is this file already published?*/
+        if (status == Mantid::API::LOCAL_ONLY
+            ||
+            status == Mantid::API::LOCAL_CHANGED)
+          return "You have changed this file. Click here to publish it.";
+        
+        break;
+      case 4:
+        return path;
+      default:
+        break;
+      }
+      return QVariant();     
     }
     break;
   }
@@ -229,27 +277,27 @@ RepoDelegate::RepoDelegate(QObject *parent)
     :QStyledItemDelegate(parent)
 {}
 
-QWidget * RepoDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                                    const QModelIndex &index) const
+QWidget * RepoDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/,
+                                     const QModelIndex &/*index*/) const
 {
   QPushButton *pb = new QPushButton(parent);
   return pb;
 }
 
 
-void RepoDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
+void RepoDelegate::setEditorData(QWidget */*editor*/, const QModelIndex &/*index*/) const
 {
   /*    QString value = index.model()->data(index, Qt::DisplayRole).toString();  // Qt::EditRole
     QPushButton * pb = static_cast<QPushButton*>(editor);
     pb->setHidden(value == "true");*/
 }
 
-void RepoDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
+void RepoDelegate::setModelData(QWidget */*editor*/, QAbstractItemModel *model,
                                 const QModelIndex &index) const{  
    model->setData(index, QString("true"), Qt::EditRole);
 }
 
-void RepoDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void RepoDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/*index*/) const
 {
     editor->setGeometry(option.rect);
 }
@@ -299,7 +347,7 @@ void RepoDelegate::paint(
   QStyleOptionButton button;
   button.rect = buttonRect;
   button.icon = icon;
-  int icon_size = min_val*.8; 
+  int icon_size =(int) (min_val*.8); 
   button.iconSize = QSize(icon_size,icon_size);
   button.state =  QStyle::State_Enabled;
   
@@ -507,11 +555,6 @@ void RepoModel::setupModelData(RepoItem *parent)
   repo_ptr = ScriptRepositoryFactory::Instance().create("GitScriptRepository");
   QStringList lines;
   repo_ptr->listFiles();
-  try{
-  repo_ptr->update();
-  }catch (Mantid::API::ScriptRepoException & ex){
-    qWarning() << "Updating Failed: " << ex.what() << endl; 
-  }
   const std::vector<ScriptRepository::file_entry> & entries = repo_ptr->listEntries(); 
   QList<RepoItem*> parents;
 

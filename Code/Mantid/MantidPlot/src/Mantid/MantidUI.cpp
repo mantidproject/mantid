@@ -1055,9 +1055,13 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       {
         detIds = QString("%1,%2...(%3 more)...%4,%5");
         //post-fix increments and returns last value
-        detIds = detIds.arg(*iter++).arg(*iter++).arg(ndets-4); // First two + n extra
+        // NOTE: Doing this detIds.arg(*iter++).arg(*iter++).arg(ndets-4) seems to result
+        // in an undefined order in which the iterator is dereference and incremented leading
+        // to the first two items being backward on some systems
+        const Mantid::detid_t first(*iter++), second(*iter++);
+        detIds = detIds.arg(first).arg(second).arg(ndets-4); // First two + n extra
         auto revIter = ids.rbegin(); // Set iterators are unidirectional ... so no operator-()
-        Mantid::specid_t last(*revIter++), lastm1(*revIter++);
+        const Mantid::detid_t last(*revIter++), lastm1(*revIter++);
         detIds = detIds.arg(lastm1).arg(last);
       }
       else

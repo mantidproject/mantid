@@ -979,43 +979,32 @@ def nrWriteXYE(wksp,fname):
 #===========================================================
 #
 def nrPNRCorrection(UpWksp,DownWksp):
-#	crho=[0.941893,0.0234006,-0.00210536,0.0]
-#	calpha=[0.945088,0.0242861,-0.00213624,0.0]
-#	cAp=[1.00079,-0.0186778,0.00131546,0.0]
-#	cPp=[1.01649,-0.0228172,0.00214626,0.0]
-	# Constants Based on Runs 18350+18355 and 18351+18356 analyser theta at -0.1deg 
-	# 2 RF Flippers as the polarising system
-	crho=[1.006831,-0.011467,0.002244,-0.000095]
-	calpha=[1.017526,-0.017183,0.003136,-0.000140]
-	cAp=[0.917940,0.038265,-0.006645,0.000282]
-	cPp=[0.972762,0.001828,-0.000261,0.0]
+	crho=[0.941893,0.0234006,-0.00210536,0.0]
+	calpha=[0.945088,0.0242861,-0.00213624,0.0]
+	cAp=[1.00079,-0.0186778,0.00131546,0.0]
+	cPp=[1.01649,-0.0228172,0.00214626,0.0]
 	Ip = mtd[UpWksp]
 	Ia = mtd[DownWksp]
 	CloneWorkspace(Ip,"PCalpha")
 	CropWorkspace(InputWorkspace="PCalpha",OutputWorkspace="PCalpha",StartWorkspaceIndex="0",EndWorkspaceIndex="0")
-	PCalpha=(mtd['PCalpha']*0.0)+1.0
 	alpha=mtd['PCalpha']
-	# a1=alpha.readY(0)
-	# for i in range(0,len(a1)):
-		# alpha.dataY(0)[i]=0.0
-		# alpha.dataE(0)[i]=0.0
+	a1=alpha.readY(0)
+	for i in range(0,len(a1)):
+		alpha.dataY(0)[i]=0.0
+		alpha.dataE(0)[i]=0.0
 	CloneWorkspace("PCalpha","PCrho")
 	CloneWorkspace("PCalpha","PCAp")
 	CloneWorkspace("PCalpha","PCPp")
 	rho=mtd['PCrho']
 	Ap=mtd['PCAp']
 	Pp=mtd['PCPp']
-	# for i in range(0,len(a1)):
-		# x=(alpha.dataX(0)[i]+alpha.dataX(0)[i])/2.0
-		# for j in range(0,4):
-			# alpha.dataY(0)[i]=alpha.dataY(0)[i]+calpha[j]*x**j
-			# rho.dataY(0)[i]=rho.dataY(0)[i]+crho[j]*x**j
-			# Ap.dataY(0)[i]=Ap.dataY(0)[i]+cAp[j]*x**j
-			# Pp.dataY(0)[i]=Pp.dataY(0)[i]+cPp[j]*x**j
-	PolynomialCorrection(InputWorkspace="PCalpha",OutputWorkspace="PCalpha",Coefficients=calpha,Operation="Multiply")
-	PolynomialCorrection(InputWorkspace="PCrho",OutputWorkspace="PCrho",Coefficients=crho,Operation="Multiply")
-	PolynomialCorrection(InputWorkspace="PCAp",OutputWorkspace="PCAp",Coefficients=cAp,Operation="Multiply")
-	PolynomialCorrection(InputWorkspace="PCPp",OutputWorkspace="PCPp",Coefficients=cPp,Operation="Multiply")
+	for i in range(0,len(a1)):
+		x=(alpha.dataX(0)[i]+alpha.dataX(0)[i])/2.0
+		for j in range(0,4):
+			alpha.dataY(0)[i]=alpha.dataY(0)[i]+calpha[j]*x**j
+			rho.dataY(0)[i]=rho.dataY(0)[i]+crho[j]*x**j
+			Ap.dataY(0)[i]=Ap.dataY(0)[i]+cAp[j]*x**j
+			Pp.dataY(0)[i]=Pp.dataY(0)[i]+cPp[j]*x**j
 	D=Pp*(1.0+rho)
 	nIp=(Ip*(rho*Pp+1.0)+Ia*(Pp-1.0))/D
 	nIa=(Ip*(rho*Pp-1.0)+Ia*(Pp+1.0))/D
@@ -1053,31 +1042,24 @@ def nrPACorrection(UpUpWksp,UpDownWksp,DownUpWksp,DownDownWksp):
 	Iaa = mtd[DownDownWksp]
 	CloneWorkspace(Ipp,"PCalpha")
 	CropWorkspace(InputWorkspace="PCalpha",OutputWorkspace="PCalpha",StartWorkspaceIndex="0",EndWorkspaceIndex="0")
-	PCalpha=(mtd['PCalpha']*0.0)+1.0
 	alpha=mtd['PCalpha']
-	# a1=alpha.readY(0)
-	# for i in range(0,len(a1)):
-		# alpha.dataY(0)[i]=0.0
-		# alpha.dataE(0)[i]=0.0
+	a1=alpha.readY(0)
+	for i in range(0,len(a1)):
+		alpha.dataY(0)[i]=0.0
+		alpha.dataE(0)[i]=0.0
 	CloneWorkspace("PCalpha","PCrho")
 	CloneWorkspace("PCalpha","PCAp")
 	CloneWorkspace("PCalpha","PCPp")
 	rho=mtd['PCrho']
 	Ap=mtd['PCAp']
 	Pp=mtd['PCPp']
-	# for i in range(0,len(a1)):
-		# x=(alpha.dataX(0)[i]+alpha.dataX(0)[i])/2.0
-		# for j in range(0,4):
-			# alpha.dataY(0)[i]=alpha.dataY(0)[i]+calpha[j]*x**j
-			# rho.dataY(0)[i]=rho.dataY(0)[i]+crho[j]*x**j
-			# Ap.dataY(0)[i]=Ap.dataY(0)[i]+cAp[j]*x**j
-			# Pp.dataY(0)[i]=Pp.dataY(0)[i]+cPp[j]*x**j
-	# Use the polynomial corretion fn instead
-	PolynomialCorrection(InputWorkspace="PCalpha",OutputWorkspace="PCalpha",Coefficients=calpha,Operation="Multiply")
-	PolynomialCorrection(InputWorkspace="PCrho",OutputWorkspace="PCrho",Coefficients=crho,Operation="Multiply")
-	PolynomialCorrection(InputWorkspace="PCAp",OutputWorkspace="PCAp",Coefficients=cAp,Operation="Multiply")
-	PolynomialCorrection(InputWorkspace="PCPp",OutputWorkspace="PCPp",Coefficients=cPp,Operation="Multiply")
-	
+	for i in range(0,len(a1)):
+		x=(alpha.dataX(0)[i]+alpha.dataX(0)[i])/2.0
+		for j in range(0,4):
+			alpha.dataY(0)[i]=alpha.dataY(0)[i]+calpha[j]*x**j
+			rho.dataY(0)[i]=rho.dataY(0)[i]+crho[j]*x**j
+			Ap.dataY(0)[i]=Ap.dataY(0)[i]+cAp[j]*x**j
+			Pp.dataY(0)[i]=Pp.dataY(0)[i]+cPp[j]*x**j
 	A0 = (Iaa * Pp * Ap) + (Ap * Ipa * rho * Pp) + (Ap * Iap * Pp * alpha) + (Ipp * Ap * alpha * rho * Pp)
 	A1 = Pp * Iaa
 	A2 = Pp * Iap
@@ -1124,7 +1106,7 @@ def nrPACorrection(UpUpWksp,UpDownWksp,DownUpWksp,DownDownWksp):
 #
 #===========================================================
 #
-def nrPNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gparams,floodfile,PNRwithPA,pnums,doCorrs,doLDCorrs="0",subbgd=0,diagnostics=0):
+def nrPNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gparams,floodfile,PNRwithPA,pnums,doCorrs,subbgd=0):
 	nlist=parseNameList(nameList)
 	mtd.sendLogMessage("This is the sample nameslist:"+str(nlist))
 	rlist=parseRunList(runList)
@@ -1151,6 +1133,9 @@ def nrPNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gpar
 	
 	k=0
 	for i in nlist:
+		glist1=""
+		glist2=""
+		glist3=""
 		a1=mantid.getMatrixWorkspace(i+"_1")
 		nspec=a1.getNumberHistograms()
 		if (subbgd==1 and nspec!=4):
@@ -1174,76 +1159,112 @@ def nrPNRFn(runList,nameList,incidentAngles,DBList,specChan,minSpec,maxSpec,gpar
 			Mantid.deleteWorkspace("bgd2")
 			Mantid.deleteWorkspace("bgd")
 			
-		wksp=i
-		ConvertUnits(InputWorkspace=wksp,OutputWorkspace=wksp,Target="Wavelength",AlignBins="1")
-		Rebin(InputWorkspace=wksp,OutputWorkspace=wksp,Params=reb)
-		CropWorkspace(InputWorkspace=wksp,OutputWorkspace=wksp+"mon",StartWorkspaceIndex=mon_spec,EndWorkspaceIndex=mon_spec)
-		if nspec == 4:
-			CropWorkspace(InputWorkspace=wksp,OutputWorkspace=wksp+"det",StartWorkspaceIndex=3,EndWorkspaceIndex=3)
-			RotateInstrumentComponent(wksp+"det","DetectorBench",X="-1.0",Angle=str(2.0*float(incAngles[k])))
-			Divide(LHSWorkspace=wksp+"det",RHSWorkspace=wksp+"mon",OutputWorkspace=wksp+"norm")
-			if dlist[k] != "none":
-				Divide(LHSWorkspace=wksp+"norm",RHSWorkspace=dlist[k],OutputWorkspace=wksp+"norm")
-				ReplaceSpecialValues(wksp+"norm",wksp+"norm","0.0","0.0","0.0","0.0")
-				ConvertUnits(wksp+"norm",wksp+"RvQ",Target="MomentumTransfer")
-		else:
-			CropWorkspace(InputWorkspace=wksp,OutputWorkspace=wksp+"det",StartWorkspaceIndex=4,EndWorkspaceIndex=243)
-			# move the first spectrum in the list onto the beam centre so that when the bench is rotated it's in the right place
-			MoveInstrumentComponent(wksp+"det","DetectorBench",Y=str((125.0-float(minSpec))*1.2e-3))
-			# add a bit to the angle to put the first spectrum of the group in the right place
-			a1=2.0*float(incAngles[k])+atan((float(minSpec)-float(specChan))*1.2e-3/3.53)*180.0/pi
-			#print str(2.0*float(incAngles[k]))+" "+str(atan((float(minSpec)-float(specChan))*1.2e-3/3.63)*180.0/pi)+" "+str(a1)
-			RotateInstrumentComponent(wksp+"det","DetectorBench",X="-1.0",Angle=str(a1))
-			floodnorm(wksp+"det",floodfile)
-			if (subbgd==1):
-				# Subract a per spectrum background
-				Minus(wksp+"det",wbgdtemp,OutputWorkspace=wksp+"det")
-				ResetNegatives(InputWorkspace=wksp+"det",OutputWorkspace=wksp+"det",AddMinimum='0',ResetValue="0.0")
-				GroupDetectors(wksp+"det",wksp+"sum",WorkspaceIndexList=range(int(minSpec)-5,int(maxSpec)-5+1),KeepUngroupedSpectra="0")
+		for j in range(nper):
+			wksp=i+"_"+pnums[j]
+			ConvertUnits(InputWorkspace=wksp,OutputWorkspace=wksp,Target="Wavelength",AlignBins="1")
+			Rebin(InputWorkspace=wksp,OutputWorkspace=wksp,Params=reb)
+			#removeoutlayer(i+"_"+pnums[j])
+			CropWorkspace(InputWorkspace=wksp,OutputWorkspace=wksp+"mon",StartWorkspaceIndex=mon_spec,EndWorkspaceIndex=mon_spec)
+			#a1=mantid.getMatrixWorkspace(wksp)
+			#nspec=a1.getNumberHistograms()
+			if nspec == 4:
+				CropWorkspace(InputWorkspace=wksp,OutputWorkspace=wksp+"det",StartWorkspaceIndex=3,EndWorkspaceIndex=3)
+				RotateInstrumentComponent(wksp+"det","DetectorBench",X="-1.0",Angle=str(2.0*float(incAngles[k])))
+				Divide(LHSWorkspace=wksp+"det",RHSWorkspace=wksp+"mon",OutputWorkspace=wksp+"norm")
+				if dlist[k] != "none":
+					Divide(LHSWorkspace=wksp+"norm",RHSWorkspace=dlist[k],OutputWorkspace=wksp+"norm")
+					ReplaceSpecialValues(wksp+"norm",wksp+"norm","0.0","0.0","0.0","0.0")
+					ConvertUnits(wksp+"norm",wksp+"RvQ",Target="MomentumTransfer")
 			else:
-				GroupDetectors(wksp+"det",wksp+"sum",WorkspaceIndexList=range(int(minSpec)-5,int(maxSpec)-5+1),KeepUngroupedSpectra="0")
-			RebinToWorkspace(WorkspaceToRebin=wksp+"sum",WorkspaceToMatch=wksp+"mon",OutputWorkspace=wksp+"sum")
-			Divide(LHSWorkspace=wksp+"sum",RHSWorkspace=wksp+"mon",OutputWorkspace=wksp+"norm")
-			RebinToWorkspace(WorkspaceToRebin=wksp+"det",WorkspaceToMatch=wksp+"mon",OutputWorkspace=wksp+"det")
-			Divide(LHSWorkspace=wksp+"det",RHSWorkspace=wksp+"mon",OutputWorkspace=wksp+"detnorm")
-			if dlist[k]  != "none":
-				Divide(LHSWorkspace=wksp+"norm",RHSWorkspace=dlist[k],OutputWorkspace=wksp+"norm")
-				ReplaceSpecialValues(wksp+"norm",wksp+"norm","0.0","0.0","0.0","0.0")
-				Divide(LHSWorkspace=wksp+"detnorm",RHSWorkspace=dlist[k],OutputWorkspace=wksp+"detnorm")
-				ReplaceSpecialValues(wksp+"detnorm",wksp+"detnorm","0.0","0.0","0.0","0.0")
-			ConvertUnits(wksp+"norm",wksp+"RvQ",Target="MomentumTransfer")
-			DeleteWorkspace(wksp+"sum")
-	
+				CropWorkspace(InputWorkspace=wksp,OutputWorkspace=wksp+"det",StartWorkspaceIndex=4,EndWorkspaceIndex=243)
+				# move the first spectrum in the list onto the beam centre so that when the bench is rotated it's in the right place
+				MoveInstrumentComponent(wksp+"det","DetectorBench",Y=str((125.0-float(minSpec))*1.2e-3))
+				# add a bit to the angle to put the first spectrum of the group in the right place
+				a1=2.0*float(incAngles[k])+atan((float(minSpec)-float(specChan))*1.2e-3/3.53)*180.0/pi
+				#print str(2.0*float(incAngles[k]))+" "+str(atan((float(minSpec)-float(specChan))*1.2e-3/3.63)*180.0/pi)+" "+str(a1)
+				RotateInstrumentComponent(wksp+"det","DetectorBench",X="-1.0",Angle=str(a1))
+				floodnorm(wksp+"det",floodfile)
+				if (subbgd==1):
+					# Subract a per spectrum background
+					Minus(wksp+"det",wbgdtemp,OutputWorkspace=wksp+"det")
+					ResetNegatives(InputWorkspace=wksp+"det",OutputWorkspace=wksp+"det",AddMinimum='0',ResetValue="0.0")
+					GroupDetectors(wksp+"det",wksp+"sum",WorkspaceIndexList=range(int(minSpec)-5,int(maxSpec)-5+1),KeepUngroupedSpectra="0")
+				else:
+					GroupDetectors(wksp+"det",wksp+"sum",WorkspaceIndexList=range(int(minSpec)-5,int(maxSpec)-5+1),KeepUngroupedSpectra="0")
+				RebinToWorkspace(WorkspaceToRebin=wksp+"sum",WorkspaceToMatch=wksp+"mon",OutputWorkspace=wksp+"sum")
+				Divide(LHSWorkspace=wksp+"sum",RHSWorkspace=wksp+"mon",OutputWorkspace=wksp+"norm")
+				RebinToWorkspace(WorkspaceToRebin=wksp+"det",WorkspaceToMatch=wksp+"mon",OutputWorkspace=wksp+"det")
+				Divide(LHSWorkspace=wksp+"det",RHSWorkspace=wksp+"mon",OutputWorkspace=wksp+"detnorm")
+				if dlist[k]  != "none":
+					Divide(LHSWorkspace=wksp+"norm",RHSWorkspace=dlist[k],OutputWorkspace=wksp+"norm")
+					ReplaceSpecialValues(wksp+"norm",wksp+"norm","0.0","0.0","0.0","0.0")
+					Divide(LHSWorkspace=wksp+"detnorm",RHSWorkspace=dlist[k],OutputWorkspace=wksp+"detnorm")
+					ReplaceSpecialValues(wksp+"detnorm",wksp+"detnorm","0.0","0.0","0.0","0.0")
+				else:
+					atemp=1
+					# polynomial + power law corrections based on Run numbers 8291 and 8292
+					# Divide(wksp+'norm',wksp+'norm',wksp+'normt1')
+					# PolynomialCorrection(wksp+'normt1',wksp+'normPC','-0.0177398,0.00101695,0.0',Operation='Multiply')
+					# PowerLawCorrection(wksp+'normt1',wksp+'normPLC','2.01332','-1.8188')
+					# Plus(wksp+'normPC',wksp+'normPLC',wksp+'normt1')
+					# Divide(wksp+'norm',wksp+'normt1',wksp+'norm')
+					# ReplaceSpecialValues(wksp+'norm',wksp+'norm',0.0,0.0,0.0,0.0)
+					# DeleteWorkspace(wksp+'normPC')
+					# DeleteWorkspace(wksp+'normPLC')
+					# DeleteWorkspace(wksp+'normt1')
+				ConvertUnits(wksp+"norm",wksp+"RvQ",Target="MomentumTransfer")
+				#floodnorm(wksp+"detnorm",floodfile)
+				DeleteWorkspace(wksp+"sum")
 			DeleteWorkspace(wksp+"mon")
 			DeleteWorkspace(wksp+"det")
-		if doCorrs != "0":
-			if nper == 2:
-				nrPNRCorrection(i+"norm_"+pnums[0],i+"norm_"+pnums[1])
-				for j in range(2):
-					RenameWorkspace(InputWorkspace=i+"norm"+"_"+pnums[j]+"corr",OutputWorkspace=i+"normcorr"+"_"+pnums[j])
-				GroupWorkspaces(InputWorkspaces=i+"normcorr_"+pnums[0]+","+i+"normcorr_"+pnums[1],OutputWorkspace=i+"normcorr")
-				ConvertUnits(InputWorkspace=i+"normcorr",OutputWorkspace=i+"normcorrRvQ",Target="MomentumTransfer")
-				if (nspec > 4 and doLDCorrs != "0"):
-					nrPNRCorrection(i+"detnorm_"+pnums[0],i+"detnorm_"+pnums[1])
-					for j in range(4):
-						RenameWorkspace(InputWorkspace=i+"detnorm"+"_"+pnums[j]+"corr",OutputWorkspace=i+"detnormcorr"+"_"+pnums[j])
-					GroupWorkspaces(InputWorkspaces=i+"detnormcorr_"+pnums[0]+","+i+"detnormcorr_"+pnums[1],OutputWorkspace=i+"detnormcorr")
+			if j < nper-1:
+				glist1=glist1+wksp+"norm,"
+				glist2=glist2+wksp+"detnorm,"
+				glist3=glist3+wksp+"RvQ,"
 			else:
-				nrPACorrection(i+"norm"+"_"+pnums[0],i+"norm"+"_"+pnums[1],i+"norm"+"_"+pnums[2],i+"norm"+"_"+pnums[3])
-				for j in range(4):
-					RenameWorkspace(InputWorkspace=i+"norm"+"_"+pnums[j]+"corr",OutputWorkspace=i+"normcorr"+"_"+pnums[j])
-				GroupWorkspaces(InputWorkspaces=i+"normcorr_"+pnums[0]+","+i+"normcorr_"+pnums[1]+","+i+"normcorr_"+pnums[2]+","+i+"normcorr_"+pnums[3]+"",OutputWorkspace=i+"normcorr")
-				ConvertUnits(InputWorkspace=i+"normcorr",OutputWorkspace=i+"normcorrRvQ",Target="MomentumTransfer")
-				if (nspec > 4 and doLDCorrs != "0"):
-					nrPACorrection(i+"detnorm_"+pnums[0],i+"detnorm_"+pnums[1],i+"detnorm_"+pnums[2],i+"detnorm_"+pnums[3])
-					for j in range(4):
-						RenameWorkspace(InputWorkspace=i+"detnorm"+"_"+pnums[j]+"corr",OutputWorkspace=i+"detnormcorr"+"_"+pnums[j])
-					GroupWorkspaces(InputWorkspaces=i+"detnormcorr_"+pnums[0]+","+i+"detnormcorr_"+pnums[1]+","+i+"detnormcorr_"+pnums[2]+","+i+"detnormcorr_"+pnums[3]+"",OutputWorkspace=i+"detnormcorr")
-			if (diagnostics == 0 and doCorrs != "0"):
-				DeleteWorkspace(i+"norm")
-				DeleteWorkspace(i+"RvQ")
-			if (diagnostics == 0 and doLDCorrs != "0"):
-				DeleteWorkspace(i+"detnorm")
+				glist1=glist1+wksp+"norm"
+				glist2=glist2+wksp+"detnorm"
+				glist3=glist3+wksp+"RvQ"
+		if doCorrs == "2":
+			if nper == 2:
+				nrPNRCorrection(i+"_"+pnums[0]+"norm",i+"_"+pnums[1]+"norm")
+				GroupWorkspaces(InputWorkspaces=i+"_"+pnums[0]+"normcorr,"+i+"_"+pnums[1]+"normcorr",OutputWorkspace=i+"normcorr")
+				ConvertUnits(i+"_"+pnums[0]+"normcorr",i+"_"+pnums[0]+"corrRvQ",Target="MomentumTransfer")
+				ConvertUnits(i+"_"+pnums[1]+"normcorr",i+"_"+pnums[1]+"corrRvQ",Target="MomentumTransfer")
+				GroupWorkspaces(InputWorkspaces=i+"_"+pnums[0]+"corrRvQ,"+i+"_"+pnums[1]+"corrRvQ",OutputWorkspace=i+"corrRvQ")
+				if nspec > 4:
+					nrPNRCorrection(i+"_"+pnums[0]+"detnorm",i+"_"+pnums[1]+"detnorm")
+					GroupWorkspaces(InputWorkspaces=i+"_"+pnums[0]+"detnormcorr,"+i+"_"+pnums[1]+"detnormcorr",OutputWorkspace=i+"detnormcorr")
+			else:
+				nrPACorrection(i+"_"+pnums[0]+"norm",i+"_"+pnums[1]+"norm",i+"_"+pnums[2]+"norm",i+"_"+pnums[3]+"norm")
+				GroupWorkspaces(InputWorkspaces=i+"_"+pnums[0]+"normcorr,"+i+"_"+pnums[1]+"normcorr,"+i+"_"+pnums[2]+"normcorr,"+i+"_"+pnums[3]+"normcorr",OutputWorkspace=i+"normcorr")
+				ConvertUnits(i+"_"+pnums[0]+"normcorr",i+"_"+pnums[0]+"corrRvQ",Target="MomentumTransfer")
+				ConvertUnits(i+"_"+pnums[1]+"normcorr",i+"_"+pnums[1]+"corrRvQ",Target="MomentumTransfer")
+				ConvertUnits(i+"_"+pnums[2]+"normcorr",i+"_"+pnums[2]+"corrRvQ",Target="MomentumTransfer")
+				ConvertUnits(i+"_"+pnums[3]+"normcorr",i+"_"+pnums[3]+"corrRvQ",Target="MomentumTransfer")
+				GroupWorkspaces(InputWorkspaces=i+"_"+pnums[0]+"corrRvQ,"+i+"_"+pnums[1]+"corrRvQ,"+i+"_"+pnums[2]+"corrRvQ,"+i+"_"+pnums[3]+"corrRvQ",OutputWorkspace=i+"corrRvQ")
+				if nspec > 4:
+					nrPACorrection(i+"_"+pnums[0]+"detnorm",i+"_"+pnums[1]+"detnorm",i+"_"+pnums[2]+"detnorm",i+"_"+pnums[3]+"detnorm")
+					GroupWorkspaces(InputWorkspaces=i+"_"+pnums[0]+"detnormcorr,"+i+"_"+pnums[1]+"detnormcorr,"+i+"_"+pnums[2]+"detnormcorr,"+i+"_"+pnums[3]+"detnormcorr",OutputWorkspace=i+"detnormcorr")
+		if nper == 2:
+			Minus(i+"_"+pnums[0]+"norm",i+"_"+pnums[1]+"norm","num")
+			Plus(i+"_"+pnums[0]+"norm",i+"_"+pnums[1]+"norm","den")
+			Divide("num","den",i+"lampol")
+			ReplaceSpecialValues(i+"lampol",i+"lampol","0.0","0.0","0.0","0.0")
+			Minus(i+"_"+pnums[0]+"RvQ",i+"_"+pnums[1]+"RvQ","num")
+			Plus(i+"_"+pnums[0]+"RvQ",i+"_"+pnums[1]+"RvQ","den")
+			Divide("num","den",i+"Qpol")
+			ReplaceSpecialValues(i+"Qpol",i+"Qpol","0.0","0.0","0.0","0.0")
+			Minus(i+"_"+pnums[0]+"detnorm",i+"_"+pnums[1]+"detnorm","num")
+			Plus(i+"_"+pnums[0]+"detnorm",i+"_"+pnums[1]+"detnorm","den")
+			Divide("num","den",i+"2Dpol")
+			ReplaceSpecialValues(i+"2Dpol",i+"2Dpol","0.0","0.0","0.0","0.0")
+			DeleteWorkspace("num")
+			DeleteWorkspace("den")
+		GroupWorkspaces(InputWorkspaces=glist1,OutputWorkspace=i+"norm")
+		GroupWorkspaces(InputWorkspaces=glist3,OutputWorkspace=i+"RvQ")
+		if nspec != 4:
+			GroupWorkspaces(InputWorkspaces=glist2,OutputWorkspace=i+"detnorm")
 		k=k+1
 		DeleteWorkspace(i)
 		if (subbgd==1):
