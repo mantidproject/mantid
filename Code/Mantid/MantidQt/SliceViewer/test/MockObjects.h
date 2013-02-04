@@ -108,6 +108,8 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_METHOD1(changeBackgroundColour, void(const QColor));
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
     MOCK_CONST_METHOD0(getBoundingBox, PeakBoundingBox());
+    MOCK_METHOD1(changeOccupancyInView, void(const double));
+    MOCK_METHOD1(changeOccupancyIntoView, void(const double));
     ~MockPeakOverlayView(){}
   };
 

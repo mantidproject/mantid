@@ -191,6 +191,31 @@ public:
     TS_ASSERT_EQUALS(expectedBottom, boundingBox.bottom());
   }
 
+  void test_expand_peak_intoplane()
+  {
+    V3D origin(0, 0, 0);
+    const double maxZ = 1;
+    const double minZ = 0;
+    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
+
+    const double newEffecitveRadiusFactor = 0.2;
+    const double effectiveRadius = newEffecitveRadiusFactor * (maxZ - minZ);
+    physicalPeak.setOccupancyIntoView(newEffecitveRadiusFactor);
+    TS_ASSERT_EQUALS(effectiveRadius, physicalPeak.getEffectiveRadius());
+  }
+
+  void test_expand_peak_inplane()
+  {
+    V3D origin(0, 0, 0);
+    const double maxZ = 1;
+    const double minZ = 0;
+    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
+
+    physicalPeak.setOccupancyInView(0.01);// 1 %
+    auto drawingObject = physicalPeak.draw(1000, 1000);
+    TS_ASSERT_EQUALS(10, drawingObject.peakHalfCrossHeight);
+  }
+
 
 };
 

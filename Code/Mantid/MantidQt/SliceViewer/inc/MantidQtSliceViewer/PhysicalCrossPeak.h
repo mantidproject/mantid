@@ -47,14 +47,22 @@ namespace MantidQt
       }
       /// Get the bounding box.
       PeakBoundingBox getBoundingBox() const;
+      /// Set the size of the cross peak in the viewing plane
+      void setOccupancyInView(const double fraction);
+      /// Set the size of the cross peak into the viewing plane
+      void setOccupancyIntoView(const double fraction);
+      /// Get the effective peak radius.
+      double getEffectiveRadius() const;
 
     private:
       /// Original origin x=h, y=k, z=l
       const Mantid::Kernel::V3D m_originalOrigin;
       /// Origin md-x, md-y, and md-z
       Mantid::Kernel::V3D m_origin;
+      /// Fraction of the view considered for the effectiveRadius.
+      double m_intoViewFraction;
       /// effective peak radius
-      const double m_effectiveRadius;
+      double m_effectiveRadius;
       /// Max opacity
       const double m_opacityMax;
       /// Min opacity
@@ -62,9 +70,11 @@ namespace MantidQt
       /// Cached opacity gradient
       const double m_opacityGradient;
       /// Cross size percentage in y a fraction of the current screen height.
-      const double m_crossViewFraction;
+      double m_crossViewFraction;
       /// Cached opacity at the distance z from origin
       double m_opacityAtDistance;
+      /// Current slice point.
+      double m_slicePoint;
 
       DISABLE_COPY_AND_ASSIGN(PhysicalCrossPeak)
     };

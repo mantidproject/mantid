@@ -141,5 +141,24 @@ namespace SliceViewer
     return m_physicalPeak.getBoundingBox();
   }
 
+  /**
+   * Set the occupancy into the view as a fraction of the current view width.
+   * @param fraction to use.
+   */
+  void PeakOverlayCross::changeOccupancyInView(const double fraction)
+  {
+    m_physicalPeak.setOccupancyInView(fraction);
+  }
+
+  /**
+   * Set the occupancy into the view as a fraction of the current view depth.
+   * @param fraction to use.
+   */
+  void PeakOverlayCross::changeOccupancyIntoView(const double fraction)
+  {
+    m_physicalPeak.setOccupancyIntoView(fraction);
+  }
+
+
 } // namespace Mantid
 } // namespace SliceViewer

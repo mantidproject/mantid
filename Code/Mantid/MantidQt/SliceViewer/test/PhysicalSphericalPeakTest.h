@@ -105,8 +105,11 @@ public:
 
     // Quick white-box calculations of the outputs to expect.
     const double expectedOpacityAtDistance = (0.8 - 0)/2;
-    const double expectedRadius = std::sqrt( std::pow(radius, 2) - std::pow((slicePoint- origin.Z()), 2));
 
+    auto peakRadSQ = std::pow(radius, 2);
+    auto planeDistanceSQ = std::pow((slicePoint- origin.Z()), 2);
+
+    const double expectedRadius = std::sqrt(peakRadSQ - planeDistanceSQ);
     TS_ASSERT_EQUALS( expectedOpacityAtDistance, drawObject.peakOpacityAtDistance);
     TS_ASSERT_EQUALS( expectedRadius, drawObject.peakInnerRadiusX);
     TS_ASSERT_EQUALS( expectedRadius, drawObject.peakInnerRadiusY);

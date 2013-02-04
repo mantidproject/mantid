@@ -13,7 +13,8 @@ namespace MantidQt
     PhysicalCrossPeak::PhysicalCrossPeak(const Mantid::Kernel::V3D& origin, const double& maxZ, const double& minZ):
     m_originalOrigin(origin),
     m_origin(origin),
-    m_effectiveRadius((maxZ - minZ)*0.015),
+    m_intoViewFraction(0.015),
+    m_effectiveRadius((maxZ - minZ)*m_intoViewFraction),
     m_opacityMax(0.8),
     m_opacityMin(0.0),
     m_opacityGradient((m_opacityMin - m_opacityMax)/m_effectiveRadius),
@@ -34,6 +35,7 @@ namespace MantidQt
   */
   void PhysicalCrossPeak::setSlicePoint(const double& z)
   {
+    m_slicePoint = z;
     const double distanceAbs = std::abs(z - m_origin.Z());
     
     if(distanceAbs < m_effectiveRadius)
@@ -94,6 +96,27 @@ namespace MantidQt
     const SlicePoint slicePoint( m_origin.Z() );
 
     return PeakBoundingBox(left, right, top, bottom, slicePoint);
+  }
+
+
+  void PhysicalCrossPeak::setOccupancyInView(const double fraction)
+  {
+    m_crossViewFraction = fraction;
+    setSlicePoint(m_slicePoint);
+  }
+
+  void PhysicalCrossPeak::setOccupancyIntoView(const double fraction)
+  {
+    m_effectiveRadius *= (fraction/m_intoViewFraction);
+    m_intoViewFraction = fraction;
+  }
+
+  /**
+   * @return The effective peak radius.
+   */
+  double PhysicalCrossPeak::getEffectiveRadius() const
+  {
+    return m_effectiveRadius;
   }
 
   }
