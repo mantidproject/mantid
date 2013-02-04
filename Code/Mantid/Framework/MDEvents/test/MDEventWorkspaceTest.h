@@ -623,6 +623,9 @@ public:
 
   MDEventWorkspaceTestPerformance()
   {    
+  }
+  void startUp()
+  {
     size_t dim_size = 100;
     size_t sq_dim_size = dim_size*dim_size;
     m_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, (Mantid::coord_t)dim_size, 10 /*event per box*/);
@@ -643,18 +646,26 @@ public:
     m_ws->addEvents(vecEvents);
   }
 
+  void tearDown()
+  {
+    m_ws.reset();
+  }
   void test_splitting_performance_single_threaded()
   {
+    Kernel::Timer clock;
     m_ws->splitAllIfNeeded(NULL);
+    std::cout << clock.elapsed()<<std::endl;
   }
 
-  //void test_splitting_performance_parallel()
-  //{
-  //  auto ts_splitter = new ThreadSchedulerFIFO();
-  //  ThreadPool tp_splitter(ts_splitter);
-  //  m_ws->splitAllIfNeeded(ts_splitter);
-  //  tp_splitter.joinAll();
-  //}
+  void test_splitting_performance_parallel()
+  {
+    auto ts_splitter = new ThreadSchedulerFIFO();
+    ThreadPool tp_splitter(ts_splitter,8);
+    Kernel::Timer clock;
+    m_ws->splitAllIfNeeded(ts_splitter);
+    tp_splitter.joinAll();
+    std::cout << clock.elapsed()<<std::endl;
+  }
 };
 
 #endif
