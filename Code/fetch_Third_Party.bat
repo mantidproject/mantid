@@ -6,19 +6,20 @@
 
 :: Check for git. Older versions used %GitCmd%, newer just git
 echo Checking for git.cmd
-where /Q git.cmd
-if ERRORLEVEL 1 (
+for %%X in (git.cmd) do (set FOUND=%%~$PATH:X)
+if defined FOUND (
+  set GitCmd=git.cmd
+) else (
     echo Not Found. Checking for git.exe
-    where /Q git.exe
-    if ERRORLEVEL 1 (
+    for %%X in (git.exe) do (set FOUND=%%~$PATH:X)
+    if defined FOUND (
+        set GitCmd=git.exe
+    ) else (
         echo Cannot find git. Make sure the cmd folder is in your path.
         exit /b 1
-    ) else (
-        set GitCmd=git.exe
     )
-) else (
-    set GitCmd=git.cmd
 )
+echo Using %GitCmd%
 
 :: Check whether we're 64 or 32 bit. Store it in the 'arch' variable
 Set RegQry=HKLM\Hardware\Description\System\CentralProcessor\0
