@@ -278,8 +278,8 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False )
     if( TestMode ):
         print "TestMode code"
         for i in range( len(usedTubePoints) ):
-           #print "used point",i,"shoving pixel",int(usedTubePoints[i]+0.5)
-           xResult[ int(usedTubePoints[i]+0.5) ] = xResult[0]
+           #print "used point",i,"shoving pixel",int(usedTubePoints[i])
+           xResult[ int(usedTubePoints[i]) ] = xResult[0]
          
     # print xResult	 
     return xResult
