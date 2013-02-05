@@ -140,7 +140,8 @@ def SetTransmission(trans, error, theta_dependent=True):
     ReductionSingleton().reduction_properties["TransmissionError"] = error
     ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
 
-def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
+def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True,
+                           use_sample_dc=True):
     find_data(sample_file, instrument=ReductionSingleton().get_instrument())
     find_data(empty_file, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["TransmissionMethod"] = "DirectBeam"
@@ -148,6 +149,7 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_depen
     ReductionSingleton().reduction_properties["TransmissionSampleDataFile"] = sample_file
     ReductionSingleton().reduction_properties["TransmissionEmptyDataFile"] = empty_file
     ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
+    ReductionSingleton().reduction_properties["TransmissionUseSampleDC"] = use_sample_dc
 
 def TransmissionDarkCurrent(dark_current=None):
     if dark_current is not None:

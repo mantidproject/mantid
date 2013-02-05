@@ -42,7 +42,9 @@ void ApplyTransmissionCorrection::init()
   wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
       "Workspace to apply the transmission correction to");
-  declareProperty("TransmissionWorkspace", "", "Workspace containing the transmission values");
+  declareProperty(new WorkspaceProperty<>("TransmissionWorkspace","",
+                                          Direction::Output, PropertyMode::Optional),
+      "Workspace containing the transmission values [optional]");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Workspace to store the corrected data in");
 
@@ -82,8 +84,7 @@ void ApplyTransmissionCorrection::exec()
 
   if ( isEmpty(trans_value) ) {
     // Get the transmission workspace
-    MatrixWorkspace_const_sptr transWS = boost::dynamic_pointer_cast<MatrixWorkspace>
-          (AnalysisDataService::Instance().retrieve(getPropertyValue("TransmissionWorkspace")));
+    MatrixWorkspace_const_sptr transWS = getProperty("TransmissionWorkspace");
 
     // Check that the two input workspaces are consistent (same number of X bins)
     if ( transWS->readY(0).size() != inputWS->readY(0).size() )

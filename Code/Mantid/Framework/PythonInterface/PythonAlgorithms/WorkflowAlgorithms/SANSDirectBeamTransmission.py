@@ -5,8 +5,6 @@ import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 import os
-import sys
-from reduction_workflow.find_data import find_data
 
 class SANSDirectBeamTransmission(PythonAlgorithm):
 
@@ -54,7 +52,6 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         
         property_manager_name = self.getProperty("ReductionProperties").value
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)
-        property_list = [p.name for p in property_manager.getProperties()]
         
         # Build the name we are going to give the transmission workspace
         sample_basename = os.path.basename(sample_file)
@@ -63,7 +60,7 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         trans_ws_name = "__transmission_fit_%s" % sample_basename
         trans_ws = None
         
-        if entry_name in property_list:
+        if property_manager.existsProperty(entry_name):
             trans_ws_name = property_manager.getProperty(entry_name)
             if AnalysisDataService.doesExist(trans_ws_name):
                 trans_ws = AnalysisDataService.retrieve(trans_ws_name)
@@ -71,27 +68,27 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         if trans_ws is None:
             # Load data files
             sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID = TransmissionUtils.load_monitors(self, property_manager)
-            TransmissionUtils.calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, trans_ws_name, monitor_det_ID)
-            trans_ws = AnalysisDataService.retrieve(trans_ws_name)
+            trans_ws = TransmissionUtils.calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, trans_ws_name, monitor_det_ID)
             
         # 2- Apply correction (Note: Apply2DTransCorr)
-        input_ws = self.getProperty("InputWorkspace").value
-        workspace = self.getPropertyValue("InputWorkspace")
-        api.CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace='__'+workspace)
-        
-        TransmissionUtils.apply_transmission(self, '__'+workspace, trans_ws_name)
-
-        trans = trans_ws.dataY(0)[0]
-        error = trans_ws.dataE(0)[0]
-        
-        if len(trans_ws.dataY(0))==1:
-            self.setProperty("MeasuredTransmission", trans)
-            self.setProperty("MeasuredError", error)
-            output_str = "%s   T = %6.2g += %6.2g\n" % (output_str, trans, error)
-        output_msg = "Transmission correction applied [%s]\n%s\n" % (trans_ws_name, output_str)
-        
-        output_ws = AnalysisDataService.retrieve('__'+workspace)
-        self.setProperty("OutputWorkspace", output_ws)
+        if trans_ws is not None:
+            input_ws = self.getProperty("InputWorkspace").value
+            
+            output_ws = TransmissionUtils.apply_transmission(self, input_ws, trans_ws)
+    
+            trans = trans_ws.dataY(0)[0]
+            error = trans_ws.dataE(0)[0]
+            
+            if len(trans_ws.dataY(0))==1:
+                self.setProperty("MeasuredTransmission", trans)
+                self.setProperty("MeasuredError", error)
+                output_str = "%s   T = %6.2g += %6.2g\n" % (output_str, trans, error)
+            
+            self.setProperty("OutputWorkspace", output_ws)
+            output_msg = "Transmission correction applied [%s]\n%s\n" % (trans_ws_name, output_str)
+        else:
+            output_msg = "Transmission correction had errors\n%s\n" % output_str
+            
         self.setPropertyValue("OutputMessage", output_msg)
                 
 #############################################################################################

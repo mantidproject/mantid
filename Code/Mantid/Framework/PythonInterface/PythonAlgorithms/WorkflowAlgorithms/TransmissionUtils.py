@@ -3,8 +3,29 @@ from mantid.api import *
 from mantid.kernel import *
 import os
 import sys
-from reduction_workflow.find_data import find_data
 
+def _execute(algorithm_str, parameters, is_name=True):
+    if is_name:
+        alg = AlgorithmManager.create(algorithm_str)
+    else:
+        alg = Algorithm.fromString(algorithm_str)
+    alg.initialize()
+    alg.setChild(True)
+    for key, value in parameters.iteritems():
+        if value is None:
+            Logger.get("TransmissionUtils").error("Trying to set %s=None" % key)
+        if alg.existsProperty(key):
+            if type(value)==str:
+                alg.setPropertyValue(key, value)
+            else:
+                alg.setProperty(key, value)
+    try:
+        alg.execute()
+    except:
+        Logger.get("TransmissionUtils").error("Error executing [%s]" % str(alg))
+        Logger.get("TransmissionUtils").error(str(sys.exc_value))
+    return alg
+    
 def load_monitors(self, property_manager):
     """
         Load files necessary to compute transmission.
@@ -32,52 +53,49 @@ def load_monitors(self, property_manager):
             Logger.get("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
             raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
         p=property_manager.getProperty("LoadAlgorithm")
-        alg=Algorithm.fromString(p.valueAsStr)
-        alg.setProperty("Filename", filename)
-        alg.setProperty("OutputWorkspace", output_ws)
+        
+        alg_props = {"Filename": filename,
+                     "OutputWorkspace": output_ws,
+                     "ReductionProperties": property_manager_name,                     
+                     }
         if beam_center_x is not None and beam_center_y is not None:
-            if alg.existsProperty("BeamCenterX"):
-                alg.setProperty("BeamCenterX", beam_center_x)
-            if alg.existsProperty("BeamCenterY"):
-                alg.setProperty("BeamCenterY", beam_center_y)
-        if alg.existsProperty("ReductionProperties"):
-            alg.setProperty("ReductionProperties", property_manager_name)
-        alg.execute()
-        msg = ''
+            alg_props["BeamCenterX"] = beam_center_x
+            alg_props["BeamCenterY"] = beam_center_y
+        
+        alg = _execute(p.valueAsStr, alg_props, is_name=False)
+        
+        msg = 'Loaded %s\n' % filename
         if alg.existsProperty("OutputMessage"):
-            msg = alg.getProperty("OutputMessage").value
-        return msg
+            msg += alg.getProperty("OutputMessage").value
+        ws = alg.getProperty("OutputWorkspace").value
+        
+        return ws, msg.replace('\n', '\n|')
 
     # Load the data files
     sample_file = self.getPropertyValue("SampleDataFilename")
     empty_file = self.getPropertyValue("EmptyDataFilename")
 
     sample_ws_name = "__transmission_sample"
-    filepath = find_data(sample_file, instrument=instrument)
-    l_text = _load_data(sample_file, sample_ws_name)
-    output_str += "   Sample: %s\n" % os.path.basename(sample_file)
-    output_str += "   %s\n" % l_text
+    sample_ws, l_text = _load_data(sample_file, sample_ws_name)
+    tmp_str = "   Sample: %s\n%s\n" % (os.path.basename(sample_file), l_text)
+    output_str += tmp_str.replace('\n', '\n      ')    
+    
+    sample_ws, l_text = subtract_dark_current(self, sample_ws, property_manager)
+    if len(l_text)>0:
+        output_str += l_text.replace('\n', '\n      ')+'\n'
     
     empty_ws_name = "__transmission_empty"
-    filepath = find_data(empty_file, instrument=instrument)
-    l_text = _load_data(empty_file, empty_ws_name)
-    output_str += "   Empty: %s\n" % os.path.basename(empty_file)
-    output_str += "   %s\n" % l_text
+    empty_ws, l_text = _load_data(empty_file, empty_ws_name)
+    tmp_str = "   Empty: %s\n%s\n" % (os.path.basename(empty_file), l_text)
+    output_str += tmp_str.replace('\n', '\n      ')
     
-    # Subtract dark current
-    use_sample_dc = self.getProperty("UseSampleDarkCurrent").value
-    dark_current_data = self.getPropertyValue("DarkCurrentFilename")
-    
-    partial_out1 = subtract_dark_current(self, sample_ws_name, property_manager)
-    partial_out2 = subtract_dark_current(self, empty_ws_name, property_manager)
-    partial_out = "\n   Sample: %s\n   Empty: %s" % (partial_out1, partial_out2)
-    partial_out.replace('\n', '   \n')
-    output_str += partial_out
+    empty_ws, l_text = subtract_dark_current(self, empty_ws, property_manager)
+    if len(l_text)>0:
+        output_str += l_text.replace('\n', '\n      ')+'\n'
         
     # Find which pixels to sum up as our "monitor". At this point we have moved the detector
     # so that the beam is at (0,0), so all we need is to sum the area around that point.
     #TODO: in IGOR, the error-weighted average is computed instead of simply summing up the pixels
-    sample_ws = AnalysisDataService.retrieve(sample_ws_name)
     beam_radius = self.getProperty("BeamRadius").value
     pixel_size_x = sample_ws.getInstrument().getNumberParameter("x-pixel-size")[0]
     cylXML = '<infinite-cylinder id="transmission_monitor">' + \
@@ -88,12 +106,10 @@ def load_monitors(self, property_manager):
              
     # Use the transmission workspaces to find the list of monitor pixels
     # since the beam center may be at a different location
-    alg = AlgorithmManager.create("FindDetectorsInShape")
-    alg.initialize()
-    alg.setChild(True)
-    alg.setProperty("Workspace", sample_ws)
-    alg.setPropertyValue("ShapeXML", cylXML)
-    alg.execute()
+    alg = _execute("FindDetectorsInShape",
+                   {"Workspace": sample_ws,
+                    "ShapeXML": cylXML
+                    })
     det_list = alg.getProperty("DetectorList").value
     first_det = det_list[0]
 
@@ -109,67 +125,91 @@ def load_monitors(self, property_manager):
     elif property_manager.existsProperty("NormaliseAlgorithm"):
         def _normalise(workspace):
             p=property_manager.getProperty("NormaliseAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
-            alg.setProperty("InputWorkspace", workspace)
-            alg.setProperty("OutputWorkspace", workspace)
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
-            alg.execute()
+            alg = _execute(p.valueAsStr,
+                           {"InputWorkspace": workspace,
+                            "OutputWorkspace": workspace,
+                            "ReductionProperties": property_manager_name
+                            },
+                           is_name=False)
             msg = ''
             if alg.existsProperty("OutputMessage"):
                 msg += alg.getProperty("OutputMessage").value+'\n'
-            return msg
-        norm_msg = _normalise(empty_ws_name)
+            ws = alg.getProperty("OutputWorkspace").value
+            return ws, msg
+        empty_ws, norm_msg = _normalise(empty_ws)
         output_str += "   %s\n" % norm_msg.replace('\n', '   \n')
-        norm_msg = _normalise(sample_ws_name)
+        sample_ws, norm_msg = _normalise(sample_ws)
         output_str += "   %s\n" % norm_msg.replace('\n', '   \n')
         
-    empty_mon_ws = "__empty_mon"
-    sample_mon_ws = "__sample_mon"
+    empty_mon_ws_name = "__empty_mon"
+    sample_mon_ws_name = "__sample_mon"
     
     det_list = [str(i) for i in det_list]
     det_list = ','.join(det_list)
-    api.GroupDetectors(InputWorkspace=empty_ws_name,  OutputWorkspace=empty_mon_ws,  DetectorList=det_list, KeepUngroupedSpectra="1")
-    api.GroupDetectors(InputWorkspace=sample_ws_name, OutputWorkspace=sample_mon_ws, DetectorList=det_list, KeepUngroupedSpectra="1")
-    api.ConvertToMatrixWorkspace(InputWorkspace=empty_mon_ws, OutputWorkspace=empty_mon_ws)
-    api.ConvertToMatrixWorkspace(InputWorkspace=sample_mon_ws, OutputWorkspace=sample_mon_ws)
+    alg = _execute("GroupDetectors",
+                   {"InputWorkspace": empty_ws,
+                    "OutputWorkspace": empty_mon_ws_name,
+                    "DetectorList": det_list,
+                    "KeepUngroupedSpectra": True
+                    })
+    empty_mon_ws = alg.getProperty("OutputWorkspace").value
     
-    # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
-    # as the monitor channel.
-    api.RebinToWorkspace(WorkspaceToRebin=empty_mon_ws,
-                         WorkspaceToMatch=sample_mon_ws,
-                         OutputWorkspace=empty_mon_ws)
-
-    # Clean up
-    for ws in [empty_ws_name, sample_ws_name]:
-        if AnalysisDataService.doesExist(ws):
-            AnalysisDataService.remove(ws)       
+    alg = _execute("GroupDetectors",
+                   {"InputWorkspace": sample_ws,
+                    "OutputWorkspace": sample_mon_ws_name,
+                    "DetectorList": det_list,
+                    "KeepUngroupedSpectra": True
+                    })
+    sample_mon_ws = alg.getProperty("OutputWorkspace").value
+    
+    alg = _execute("ConvertToMatrixWorkspace",
+                   {"InputWorkspace": empty_mon_ws,
+                    "OutputWorkspace": empty_mon_ws_name
+                    })
+    empty_mon_ws = alg.getProperty("OutputWorkspace").value
+    
+    alg = _execute("ConvertToMatrixWorkspace",
+                   {"InputWorkspace": sample_mon_ws,
+                    "OutputWorkspace": sample_mon_ws_name
+                    })
+    sample_mon_ws = alg.getProperty("OutputWorkspace").value
+    
+    alg = _execute("RebinToWorkspace",
+                   {"WorkspaceToRebin": empty_mon_ws,
+                    "WorkspaceToMatch": sample_mon_ws,
+                    "OutputWorkspace": empty_mon_ws_name
+                    })
+    empty_mon_ws = alg.getProperty("OutputWorkspace").value     
 
     return sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID
     
-def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, trans_output_workspace, monitor_det_ID):
+def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, 
+                           trans_output_workspace, monitor_det_ID):
     """
         Compute zero-angle transmission
     """
     try:
         if monitor_det_ID is not None:
-            api.CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
-                                  OutputWorkspace=trans_output_workspace,
-                                  IncidentBeamMonitor=str(monitor_det_ID), 
-                                  TransmissionMonitor=str(first_det),
-                                  OutputUnfittedData=True)
+            alg = _execute("CalculateTransmission",
+                           {"DirectRunWorkspace": empty_mon_ws,
+                            "SampleRunWorkspace": sample_mon_ws,
+                            "OutputWorkspace": trans_output_workspace,
+                            "IncidentBeamMonitor": str(monitor_det_ID),
+                            "TransmissionMonitor": str(first_det),
+                            "OutputUnfittedData": True})
+            output_ws = alg.getProperty("OutputWorkspace").value
+            return output_ws
         else:
-            api.CalculateTransmission(DirectRunWorkspace=empty_mon_ws, SampleRunWorkspace=sample_mon_ws, 
-                                  OutputWorkspace=trans_output_workspace,
-                                  TransmissionMonitor=str(first_det),
-                                  OutputUnfittedData=True)
+            alg = _execute("CalculateTransmission",
+                           {"DirectRunWorkspace": empty_mon_ws,
+                            "SampleRunWorkspace": sample_mon_ws,
+                            "OutputWorkspace": trans_output_workspace,
+                            "TransmissionMonitor": str(first_det),
+                            "OutputUnfittedData": True})
+            output_ws = alg.getProperty("OutputWorkspace").value
+            return output_ws
     except:
-        raise RuntimeError, "Couldn't compute transmission. Is the beam center in the right place?\n\n%s" % sys.exc_value
-    
-    
-    for ws in [empty_mon_ws, sample_mon_ws]:
-        if AnalysisDataService.doesExist(ws):
-            AnalysisDataService.remove(ws)       
+        Logger.get("TransmissionUtils").error("Couldn't compute transmission. Is the beam center in the right place?\n%s" % sys.exc_value)
             
 def apply_transmission(self, workspace, trans_workspace):
     """
@@ -177,26 +217,35 @@ def apply_transmission(self, workspace, trans_workspace):
         @param workspace: workspace to apply correction to
         @param trans_workspace: workspace name for of the transmission
     """
+    # Sanity check
+    if workspace is None:
+        return None
+    
     # Make sure the binning is compatible
-    api.RebinToWorkspace(WorkspaceToRebin=trans_workspace,
-                         WorkspaceToMatch=workspace,
-                         OutputWorkspace=trans_workspace+'_rebin',
-                         PreserveEvents=False)
+    alg = _execute("RebinToWorkspace",
+                   {"WorkspaceToRebin": trans_workspace,
+                    "WorkspaceToMatch": workspace,
+                    "OutputWorkspace": '__trans_rebin',
+                    "PreserveEvents": False
+                    })
+    rebinned_ws = alg.getProperty("OutputWorkspace").value;
+
     # Apply angle-dependent transmission correction using the zero-angle transmission
     theta_dependent = self.getProperty("ThetaDependent").value
     
-    api.ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                    TransmissionWorkspace=trans_workspace+'_rebin', 
-                                    OutputWorkspace=workspace,
-                                    ThetaDependent=theta_dependent)          
-
-    if AnalysisDataService.doesExist(trans_workspace+'_rebin'):
-        AnalysisDataService.remove(trans_workspace+'_rebin')          
+    alg = _execute("ApplyTransmissionCorrection",
+                   {"InputWorkspace": workspace,
+                    "TransmissionWorkspace": rebinned_ws,
+                    "OutputWorkspace": '__corrected_output',
+                    "ThetaDependent": theta_dependent
+                    })
+    output_ws = alg.getProperty("OutputWorkspace").value
+    return output_ws
    
-def subtract_dark_current(self, workspace_name, property_manager):
+def subtract_dark_current(self, workspace, property_manager):
     """
         Subtract the dark current
-        @param workspace_name: name of the workspace to subtract from
+        @param workspace: workspace object to subtract from
         @param property_manager: property manager object 
     """
     # Subtract dark current
@@ -209,26 +258,28 @@ def subtract_dark_current(self, workspace_name, property_manager):
         instrument = property_manager.getProperty("InstrumentName").value
     
     dark_current_property = "DefaultDarkCurrentAlgorithm"
-    def _dark(workspace, dark_current_property):
+    def _dark(ws, dark_current_property, dark_current_file=None):
         if property_manager.existsProperty(dark_current_property):
             p=property_manager.getProperty(dark_current_property)
-            # Dark current subtraction for sample data
-            alg=Algorithm.fromString(p.valueAsStr)
-            alg.setProperty("InputWorkspace", workspace)
-            alg.setProperty("OutputWorkspace", workspace)
-            alg.setProperty("Filename", dark_current_data)
-            if alg.existsProperty("PersistentCorrection"):
-                alg.setProperty("PersistentCorrection", False)
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
-            alg.execute()
+            
+            alg_props = {"InputWorkspace": ws,
+                         "PersistentCorrection": False,
+                         "ReductionProperties": property_manager_name
+                         }
+            if dark_current_file is not None:
+                alg_props["Filename"] = dark_current_file
+                
+            alg = _execute(p.valueAsStr, alg_props, is_name=False)
             msg = "Dark current subtracted"
             if alg.existsProperty("OutputMessage"):
-                msg += alg.getProperty("OutputMessage").value
-            return msg
+                msg = alg.getProperty("OutputMessage").value
+            ws = alg.getProperty("OutputWorkspace").value
+            return ws, msg.replace('\n', '\n|')+'\n'
+        return ws, ""
 
-    if use_sample_dc is True:
-        _dark(workspace_name, "DarkCurrentAlgorithm")
-    elif len(dark_current_data.strip())>0:
-        _dark(workspace_name, "DefaultDarkCurrentAlgorithm")   
-            
+    if len(dark_current_data.strip())>0:
+        return _dark(workspace, "DefaultDarkCurrentAlgorithm",
+                     dark_current_file=dark_current_data)   
+    elif use_sample_dc is True:
+        return _dark(workspace, "DarkCurrentAlgorithm")
+    return workspace, ""

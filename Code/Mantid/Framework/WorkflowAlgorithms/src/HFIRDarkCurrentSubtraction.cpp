@@ -89,13 +89,6 @@ void HFIRDarkCurrentSubtraction::exec()
   Progress progress(this,0.0,1.0,10);
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if ( outputWS != inputWS )
-  {
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
-    outputWS->isDistribution(inputWS->isDistribution());
-  }
-
   const std::string fileName = getPropertyValue("Filename");
   MatrixWorkspace_sptr darkWS;
   std::string darkWSName = getPropertyValue("OutputDarkCurrentWorkspace");
@@ -172,8 +165,10 @@ void HFIRDarkCurrentSubtraction::exec()
   IAlgorithm_sptr minusAlg = createChildAlgorithm("Minus", 0.5, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
-  minusAlg->setProperty("OutputWorkspace", outputWS);
+  const std::string outputWSname = getPropertyValue("OutputWorkspace");
+  minusAlg->setProperty("OutputWorkspace", outputWSname);
   minusAlg->executeAsChildAlg();
+  MatrixWorkspace_sptr outputWS = minusAlg->getProperty("OutputWorkspace");
 
   setProperty("OutputWorkspace", outputWS);
   setProperty("OutputMessage", "Dark current subtracted: "+output_message);

@@ -4,7 +4,7 @@
 from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi as api
-import math
+import os
 
 class EQSANSDirectBeamTransmission(PythonAlgorithm):
     
@@ -29,7 +29,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
         self.declareProperty(FileProperty("DarkCurrentFilename", "",
                                           action=FileAction.OptionalLoad,                                          
                                           extensions=['xml', 'nxs', 'nxs.h5']))
-        self.declareProperty("UseSampleDarkCurrent", False, 
+        self.declareProperty("UseSampleDarkCurrent", True, 
                              "If true, the sample dark current will be used")
         self.declareProperty("BeamCenterX", 0.0, "Beam center position in X")
         self.declareProperty("BeamCenterY", 0.0, "Beam center position in Y")
@@ -50,6 +50,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
         # Perform transmission correction according to whether or not
         # we are in frame-skipping mode
         if self.getProperty('FitFramesTogether').value or \
+            not workspace.getRun().hasProperty('is_frame_skipping') or \
             (workspace.getRun().hasProperty('is_frame_skipping') \
             and workspace.getRun().getProperty('is_frame_skipping').value == 0):
             output_ws_name = self.getPropertyValue('OutputWorkspace')
@@ -57,7 +58,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
             self.setPropertyValue("OutputMessage", msg)
             self.setProperty("OutputWorkspace", ws)
         else:
-            self._with_frame_skipping(source_aperture_radius)            
+            self._with_frame_skipping(input_ws_name)            
     
     def _call_sans_transmission(self, workspace, output_workspace_name):
         """
@@ -96,17 +97,17 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
         output_ws = alg.getProperty('OutputWorkspace').value
         return (output_msg, output_ws)
     
-    def _with_frame_skipping(self):
+    def _with_frame_skipping(self, workspace):
         """
             Perform transmission correction assuming frame-skipping
         """
         import TransmissionUtils
+        
         sample_file = self.getPropertyValue("SampleDataFilename")
         empty_file = self.getPropertyValue("EmptyDataFilename")
         
         property_manager_name = self.getProperty("ReductionProperties").value
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)
-        property_list = [p.name for p in property_manager.getProperties()]
         
         # Build the name we are going to give the transmission workspace
         sample_basename = os.path.basename(sample_file)
@@ -115,7 +116,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
         trans_ws_name = "__transmission_fit_%s" % sample_basename
         trans_ws = None
         
-        if entry_name in property_list:
+        if property_manager.existsProperty(entry_name):
             trans_ws_name = property_manager.getProperty(entry_name)
             if AnalysisDataService.doesExist(trans_ws_name):
                 trans_ws = AnalysisDataService.retrieve(trans_ws_name)
@@ -167,9 +168,6 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                        sample_mon_ws, empty_mon_ws]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws) 
-            
-        # Add output workspace to the list of important output workspaces
-        #reducer.output_workspaces.append([self._transmission_ws, self._transmission_ws+'_unfitted'])
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission

@@ -279,6 +279,12 @@ void SetupEQSANSReduction::init()
   setPropertySettings("TransmissionDarkCurrentFile",
             new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
 
+  declareProperty("TransmissionUseSampleDC", true,
+      "If true, the sample dark current will be used IF a dark current file is"
+      "not set.");
+  setPropertySettings("TransmissionUseSampleDC",
+            new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
+
   declareProperty("ThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
 
@@ -296,6 +302,7 @@ void SetupEQSANSReduction::init()
   setPropertyGroup("TransmissionBeamCenterFile", trans_grp);
 
   setPropertyGroup("TransmissionDarkCurrentFile", trans_grp);
+  setPropertyGroup("TransmissionUseSampleDC", trans_grp);
   setPropertyGroup("ThetaDependentTransmission", trans_grp);
 
   declareProperty("SetupReducer",false, "If true, a Reducer object will be created");
@@ -740,6 +747,7 @@ void SetupEQSANSReduction::setupTransmission(boost::shared_ptr<PropertyManager> 
   const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");
   const std::string transMethod = getProperty("TransmissionMethod");
   const std::string darkCurrent = getPropertyValue("TransmissionDarkCurrentFile");
+  const bool useSampleDC = getProperty("TransmissionUseSampleDC");
 
   // Transmission is entered by hand
   if (boost::iequals(transMethod, "Value"))
@@ -778,6 +786,7 @@ void SetupEQSANSReduction::setupTransmission(boost::shared_ptr<PropertyManager> 
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
+    transAlg->setProperty("UseSampleDarkCurrent", useSampleDC);
 
     // Beam center option for transmission data
     if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) && !isEmpty(beamY))

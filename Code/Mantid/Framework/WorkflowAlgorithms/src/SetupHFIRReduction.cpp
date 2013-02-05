@@ -269,6 +269,12 @@ void SetupHFIRReduction::init()
   setPropertySettings("TransmissionDarkCurrentFile",
             new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
 
+  declareProperty("TransmissionUseSampleDC", true,
+      "If true, the sample dark current will be used IF a dark current file is"
+      "not set.");
+  setPropertySettings("TransmissionUseSampleDC",
+            new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
+
   declareProperty("ThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
 
@@ -290,6 +296,7 @@ void SetupHFIRReduction::init()
   setPropertyGroup("SpreaderTransmissionValue", trans_grp);
   setPropertyGroup("SpreaderTransmissionError", trans_grp);
   setPropertyGroup("TransmissionDarkCurrentFile", trans_grp);
+  setPropertyGroup("TransmissionUseSampleDC", trans_grp);
   setPropertyGroup("ThetaDependentTransmission", trans_grp);
 
   // Background options
@@ -904,6 +911,7 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
   const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");
   const std::string transMethod = getProperty("TransmissionMethod");
   const std::string darkCurrent = getPropertyValue("TransmissionDarkCurrentFile");
+  const bool useSampleDC = getProperty("TransmissionUseSampleDC");
 
   // Transmission is entered by hand
   if (boost::iequals(transMethod, "Value"))
@@ -940,6 +948,7 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
+    transAlg->setProperty("UseSampleDarkCurrent", useSampleDC);
 
     // Beam center option for transmission data
     if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) && !isEmpty(beamY))
