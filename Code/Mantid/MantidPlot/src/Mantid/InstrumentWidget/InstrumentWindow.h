@@ -165,6 +165,7 @@ public slots:
 private slots:
   void block();
   void unblock();
+  void helpClicked();
 
 private:
   /// Set newly created projection surface

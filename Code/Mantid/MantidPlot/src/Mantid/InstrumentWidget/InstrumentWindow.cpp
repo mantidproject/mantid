@@ -99,9 +99,17 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   mainLayout->addWidget(m_xIntegration);
   connect(m_xIntegration,SIGNAL(changed(double,double)),this,SLOT(setIntegrationRange(double,double)));
 
-  //Set the mouse/keyboard operation info
+  //Set the mouse/keyboard operation info and help button
+  QHBoxLayout* infoLayout = new QHBoxLayout();
   mInteractionInfo = new QLabel();
-  mainLayout->addWidget(mInteractionInfo);
+  infoLayout->addWidget(mInteractionInfo);
+  QPushButton* helpButton = new QPushButton("?");
+  helpButton->setMaximumWidth(25);
+  connect(helpButton,SIGNAL(clicked()),this,SLOT(helpClicked()));
+  infoLayout->addWidget(helpButton);
+  infoLayout->setStretchFactor(mInteractionInfo,1);
+  infoLayout->setStretchFactor(helpButton,0);
+  mainLayout->addLayout(infoLayout);
 
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWindow");
@@ -828,7 +836,12 @@ void InstrumentWindow::block()
 
 void InstrumentWindow::unblock()
 {
-  m_blocked = false;
+    m_blocked = false;
+}
+
+void InstrumentWindow::helpClicked()
+{
+    QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_Instrument_View"));
 }
 
 void InstrumentWindow::set3DAxesState(bool on)
