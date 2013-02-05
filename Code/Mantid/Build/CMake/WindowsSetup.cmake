@@ -30,6 +30,12 @@ endif()
 # /w34389 - Treat warning C4389, about equality comparison on unsigned 
 #           and signed, as a level 3 warning
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389" ) 
+# As discussed here: http://code.google.com/p/googletest/issues/detail?id=412
+# gtest requires changing the _VARAIDIC_MAX value for VS2012 as it defaults to 5
+if ( MSVC_VERSION EQUAL 1700 )
+  message ( STATUS "Found VS2012 - Increasing maximum number of variadic template arguments to 10" )
+  add_definitions ( /D _VARIADIC_MAX=10 ) 
+endif ()
 
 ###########################################################################
 # On Windows we want to bundle Python. The necessary libraries are in

@@ -10,6 +10,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+#include <functional>
 
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/Math/BnId.h"

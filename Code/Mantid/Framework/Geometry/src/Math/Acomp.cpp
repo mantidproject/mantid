@@ -6,6 +6,7 @@
 #include "MantidGeometry/Math/RotCounter.h"
 #include <algorithm>
 #include <iterator>
+#include <functional>
 
 namespace Mantid
 {
