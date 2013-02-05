@@ -410,6 +410,11 @@ namespace DataHandling
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
 
+    // Note: We don't really need to lock the mutex for the entire length of
+    // this function call, but it's far simpler to put the lock here than to
+    // have individual lock/unlocks every time we fiddle with a run property
+    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+
     if (m_workspaceInitialized == false)
     {
       // grab the time from the packet - we'll use it down in initializeWorkspacePart2()
@@ -529,7 +534,10 @@ namespace DataHandling
     }
     else
     {
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      {
+        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      }
     }
 
     return false;
@@ -552,7 +560,10 @@ namespace DataHandling
     }
     else
     {
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      {
+        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      }
     }
 
     return false;
@@ -575,7 +586,10 @@ namespace DataHandling
     }
     else
     {
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      {
+        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      }
     }
 
     return false;
@@ -701,8 +715,13 @@ namespace DataHandling
               {
                   prop->setUnits( pvUnits);
               }
-
-              m_eventBuffer->mutableRun().addLogData(prop);
+              {
+                // Note: it's possible for us receive device descriptor packets in the middle
+                // of a run (after the call to initWorkspacePart2), so we really do need to
+                // the lock the mutex here.
+                Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+                m_eventBuffer->mutableRun().addLogData(prop);
+              }
 
               // Add the pv id, device id and pv name to the name map so we can find the
               // name when we process the variable value packets
@@ -722,38 +741,42 @@ namespace DataHandling
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
 
-    switch (pkt.type())
     {
-    case ADARA::MarkerType::GENERIC:
-      // Do nothing.  We log the comment field below for all types
-      break;
+      Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+      // We have to lock the mutex prior to calling mutableRun()
+      switch (pkt.type())
+      {
+      case ADARA::MarkerType::GENERIC:
+        // Do nothing.  We log the comment field below for all types
+        break;
 
-    case ADARA::MarkerType::SCAN_START:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), pkt.scanIndex());
-      g_log.information() << "Scan Start: " << pkt.scanIndex() << std::endl;
-      break;
+      case ADARA::MarkerType::SCAN_START:
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), pkt.scanIndex());
+        g_log.information() << "Scan Start: " << pkt.scanIndex() << std::endl;
+        break;
 
-    case ADARA::MarkerType::SCAN_STOP:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), 0);
-      g_log.information() << "Scan Stop:  " << pkt.scanIndex() << std::endl;
-      break;
+      case ADARA::MarkerType::SCAN_STOP:
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), 0);
+        g_log.information() << "Scan Stop:  " << pkt.scanIndex() << std::endl;
+        break;
 
-    case ADARA::MarkerType::PAUSE:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 1);
-      g_log.information() << "Run paused" << std::endl;
-      m_runPaused = true;
-      break;
+      case ADARA::MarkerType::PAUSE:
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 1);
+        g_log.information() << "Run paused" << std::endl;
+        m_runPaused = true;
+        break;
 
-    case ADARA::MarkerType::RESUME:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 0);
-      g_log.information() << "Run resumed" << std::endl;
-      m_runPaused = false;
-      break;
+      case ADARA::MarkerType::RESUME:
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 0);
+        g_log.information() << "Run resumed" << std::endl;
+        m_runPaused = false;
+        break;
 
-    case ADARA::MarkerType::OVERALL_RUN_COMMENT:
-      // Do nothing.  We log the comment field below for all types
-      break;
-    }
+      case ADARA::MarkerType::OVERALL_RUN_COMMENT:
+        // Do nothing.  We log the comment field below for all types
+        break;
+      }
+    } // mutex auto unlocks here
 
     // if there's a comment in the packet, log it at the info level
     std::string comment = pkt.comment();
@@ -838,7 +861,6 @@ namespace DataHandling
 
   boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData()
   {
-
     // Block until the background thread has actually initialized the workspace
     // (Which won't happen until the SMS sends it the packet with the geometry
     // information in it.)
