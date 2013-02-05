@@ -98,7 +98,7 @@ else:
         # the thread-local storage not being initialized properly unles
         # it is loaded before other libraries.
         dlloader(get_libpath(pythonlib, 'stdc++')) 
-        dlloader(get_libpath(pythonlib, 'libNeXus'))
+        dlloader(get_libpath(pythonlib, 'libNeXus.so'))
     dlloader(get_libpath(pythonlib, 'libMantidKernel'))
     dlloader(get_libpath(pythonlib, 'libMantidGeometry'))
     dlloader(get_libpath(pythonlib, 'libMantidAPI'))
