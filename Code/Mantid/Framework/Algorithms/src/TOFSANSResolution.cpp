@@ -39,8 +39,8 @@ using namespace DataObjects;
 
 void TOFSANSResolution::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::InOut,
-                                                     boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::InOut,
+                                          boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
       "Name the workspace to calculate the resolution for");
 
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -77,7 +77,7 @@ double TOFSANSResolution::getTOFResolution(double wl)
 
 void TOFSANSResolution::exec()
 {
-  Workspace2D_sptr iqWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr iqWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr reducedWS = getProperty("ReducedWorkspace");
   EventWorkspace_sptr reducedEventWS = boost::dynamic_pointer_cast<EventWorkspace>(reducedWS);
   const double min_wl = getProperty("MinWavelength");

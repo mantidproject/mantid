@@ -165,12 +165,11 @@ void HFIRDarkCurrentSubtraction::exec()
   IAlgorithm_sptr minusAlg = createChildAlgorithm("Minus", 0.5, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
-  const std::string outputWSname = getPropertyValue("OutputWorkspace");
-  minusAlg->setProperty("OutputWorkspace", outputWSname);
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  minusAlg->setProperty("OutputWorkspace", outputWS);
   minusAlg->executeAsChildAlg();
-  MatrixWorkspace_sptr outputWS = minusAlg->getProperty("OutputWorkspace");
-
-  setProperty("OutputWorkspace", outputWS);
+  MatrixWorkspace_sptr correctedWS = minusAlg->getProperty("OutputWorkspace");
+  setProperty("OutputWorkspace", correctedWS);
   setProperty("OutputMessage", "Dark current subtracted: "+output_message);
 
   progress.report("Subtracted dark current");

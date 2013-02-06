@@ -18,7 +18,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                                                      direction=Direction.Input))
 
         self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],
-                             direction=Direction.Input), "Positive is linear bins, negative is logorithmic")
+                             direction=Direction.InOut), "Positive is linear bins, negative is logorithmic")
         
         self.declareProperty("NumberOfBins", 100, validator=IntBoundedValidator(lower=1),
                              doc="Number of Q bins to use if binning is not supplied")
@@ -74,6 +74,8 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                 raise RuntimeError, "Azimuthal averaging needs positive wavelengths"
             qmin, qstep, qmax = self._get_binning(workspace, wavelength_min, wavelength_max)
             binning = [qmin, qstep, qmax]
+            tmp_binning = "%g, %g, %g" % (qmin, qstep, qmax)
+            self.setPropertyValue("Binning", tmp_binning)
         else:
             qmin = binning[0]
             qmax = binning[2]
