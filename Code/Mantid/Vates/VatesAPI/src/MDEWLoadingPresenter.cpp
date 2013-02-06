@@ -203,5 +203,19 @@ namespace Mantid
       }
       return result;
     }
+
+    /**
+     * Create a label for the "time" coordinate
+     * @return the "time" coordinate label
+     * @throw runtime_error if execute has not been run first.
+     */
+    std::string MDEWLoadingPresenter::getTimeStepLabel() const
+    {
+      if (!m_isSetup)
+      {
+        throw std::runtime_error("Have not yet run ::extractMetaData!");
+      }
+      return tDimension->getName() + " (" + tDimension->getUnits() + ")";
+    }
   }
 }

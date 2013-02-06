@@ -207,6 +207,8 @@ void vtkEventNexusReader::setTimeRange(vtkInformationVector* outputVector)
     timeRange[1] = timeStepValues.back();
 
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
+    std::cout << "B: " << m_presenter->getTimeStepLabel() << std::endl;
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(), m_presenter->getTimeStepLabel().c_str());
   }
 }
 

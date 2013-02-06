@@ -20,6 +20,8 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
+#include <QtDebug>
+
 vtkStandardNewMacro(vtkMDEWNexusReader);
 
 using namespace Mantid::VATES;
@@ -200,6 +202,8 @@ void vtkMDEWNexusReader::setTimeRange(vtkInformationVector* outputVector)
   if(m_presenter->hasTDimensionAvailable())
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
+    qDebug() << "A: " << m_presenter->getTimeStepLabel().c_str();
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(), m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
       static_cast<int> (timeStepValues.size()));
