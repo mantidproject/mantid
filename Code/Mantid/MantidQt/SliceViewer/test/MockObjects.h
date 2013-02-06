@@ -52,6 +52,8 @@ namespace
     MOCK_METHOD2(sortPeaksWorkspace, void(const std::string&, const bool));
     MOCK_METHOD1(setPeakSizeOnProjection, void(const double));
     MOCK_METHOD1(setPeakSizeIntoProjection, void(const double));
+    MOCK_CONST_METHOD0(getPeakSizeOnProjection, double());
+    MOCK_CONST_METHOD0(getPeakSizeIntoProjection, double());
     virtual ~MockPeaksPresenter(){}
   };
 
@@ -112,6 +114,9 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_CONST_METHOD0(getBoundingBox, PeakBoundingBox());
     MOCK_METHOD1(changeOccupancyInView, void(const double));
     MOCK_METHOD1(changeOccupancyIntoView, void(const double));
+    MOCK_CONST_METHOD0(getOccupancyInView, double());
+    MOCK_CONST_METHOD0(getOccupancyIntoView, double());
+    MOCK_CONST_METHOD0(positionOnly, bool());
     ~MockPeakOverlayView(){}
   };
 

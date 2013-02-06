@@ -53,6 +53,8 @@ namespace SliceViewer
     virtual void sortPeaksWorkspace(const std::string& byColumnName, const bool ascending) = 0;
     virtual void setPeakSizeOnProjection(const double fraction) = 0;
     virtual void setPeakSizeIntoProjection(const double fraction) = 0;
+    virtual double getPeakSizeOnProjection() const = 0;
+    virtual double getPeakSizeIntoProjection() const = 0;
     virtual ~PeaksPresenter(){};
   };
 

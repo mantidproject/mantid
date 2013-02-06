@@ -29,6 +29,7 @@
 #include "MantidQtSliceViewer/PeakTransformQLab.h"
 #include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
+#include "MantidQtSliceViewer/PeaksViewerOptionsDialog.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "qmainwindow.h"
 #include "qmenubar.h"
@@ -409,12 +410,19 @@ void SliceViewer::initMenus()
   connect(m_syncSnapToGrid, SIGNAL(toggled(bool)), this, SLOT(SnapToGrid_toggled(bool)));
   m_menuLine->addAction(action);
 
+  // --------------- Peaks Menu ----------------------------------------
+  m_menuPeaks = new QMenu("&Peak", this);
+  action = new QAction(QPixmap(), "&PeaksViewer Options", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(onPeaksViewerOptions()));
+  m_menuPeaks->addAction(action);
+  m_menuPeaks->setEnabled(false);// Until a PeaksWorkspace is selected.
 
   // Add all the needed menus
   bar->addMenu( m_menuFile );
   bar->addMenu( m_menuView );
   bar->addMenu( m_menuColorOptions );
   bar->addMenu( m_menuLine );
+  bar->addMenu( m_menuPeaks );
   bar->addMenu( m_menuHelp );
 }
 
@@ -2165,6 +2173,18 @@ void SliceViewer::autoRebinIfRequired()
   }
 }
 
+  /**
+   * Helper function to rest the SliceViewer into a no-peak overlay mode.
+   */
+  void SliceViewer::disablePeakOverlays()
+  {
+    // Un-check the button for consistency.
+    ui.btnPeakOverlay->setChecked(false);
+    m_peaksPresenter->clear();
+    emit showPeaksViewer(false);
+    m_menuPeaks->setEnabled(false);
+  }
+
 /**
 Event handler for selection/de-selection of peak overlays.
 
@@ -2203,33 +2223,31 @@ void SliceViewer::peakOverlay_toggled(bool checked)
           }
           catch(std::invalid_argument& e)
           {
-            // Uncheck the button for consistency.
-            ui.btnPeakOverlay->setChecked(false);
-            emit showPeaksViewer(false);
+            // Incompatible PeaksWorkspace.
+            disablePeakOverlays();
             throw e;
           }
         }
         updatePeakOverlaySliderWidget();
         emit showPeaksViewer(true);
+        m_menuPeaks->setEnabled(true);
       }
       else
       {
-        // Uncheck the button for consistency.
-        ui.btnPeakOverlay->setChecked(false);
-        emit showPeaksViewer(false);
+        // No PeaksWorkspace to choose.
+        disablePeakOverlays();
       }
     }
     else
     {
-      // Uncheck the button for consistency.
-      ui.btnPeakOverlay->setChecked(false);
-      emit showPeaksViewer(false);
+      // PeaksWorkspace selection dialog canceled.
+      disablePeakOverlays();
     }
   }
   else
   {
-    m_peaksPresenter->clear();
-    emit showPeaksViewer(false);
+    // Toggle peaks overlays to disabled.
+    disablePeakOverlays();
   }
 }
 
@@ -2308,6 +2326,12 @@ void SliceViewer::zoomToRectangle(const PeakBoundingBox& boundingBox)
 void SliceViewer::resetView()
 {
   this->resetZoom();
+}
+
+void SliceViewer::onPeaksViewerOptions()
+{
+  PeaksViewerOptionsDialog dlg(this->m_peaksPresenter);
+  dlg.exec();
 }
 
 } //namespace

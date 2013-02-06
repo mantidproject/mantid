@@ -105,19 +105,33 @@ namespace MantidQt
     setSlicePoint(m_slicePoint);
   }
 
-  void PhysicalCrossPeak::setOccupancyIntoView(const double fraction)
-  {
-    m_effectiveRadius *= (fraction/m_intoViewFraction);
-    m_intoViewFraction = fraction;
-  }
+    void PhysicalCrossPeak::setOccupancyIntoView(const double fraction)
+    {
+      if (fraction != 0)
+      {
+        m_effectiveRadius *= (fraction / m_intoViewFraction);
+        m_intoViewFraction = fraction;
+        setSlicePoint(m_slicePoint);
+      }
+    }
 
-  /**
-   * @return The effective peak radius.
-   */
-  double PhysicalCrossPeak::getEffectiveRadius() const
-  {
-    return m_effectiveRadius;
-  }
+    /**
+     * @return The effective peak radius.
+     */
+    double PhysicalCrossPeak::getEffectiveRadius() const
+    {
+      return m_effectiveRadius;
+    }
+
+    double PhysicalCrossPeak::getOccupancyInView() const
+    {
+      return m_crossViewFraction;
+    }
+
+    double PhysicalCrossPeak::getOccupancyIntoView() const
+    {
+      return m_intoViewFraction;
+    }
 
   }
 }

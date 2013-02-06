@@ -149,6 +149,7 @@ public slots:
   QPixmap getImage();
   void saveImage(const QString & filename = QString());
   void copyImageToClipboard();
+  void onPeaksViewerOptions();
 
   // Synced checkboxes
   void LineMode_toggled(bool);
@@ -182,6 +183,7 @@ private:
   // Peak overlay methods.
   void updatePeakOverlaySliderWidget();
   void enablePeakOverlaysIfAppropriate();
+  void disablePeakOverlays();
 
   // Autorebin methods.
   bool isAutoRebinSet() const;
@@ -262,7 +264,7 @@ private:
   bool m_logColor;
 
   /// Menus
-  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine, *m_menuFile;
+  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine, *m_menuFile, *m_menuPeaks;
   QAction *m_actionFileClose;
   QAction *m_actionTransparentZeros;
   QAction *m_actionNormalizeNone;

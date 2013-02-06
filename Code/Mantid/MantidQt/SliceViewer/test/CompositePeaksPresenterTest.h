@@ -569,6 +569,55 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
   }
 
+  void test_getPeakSizeOnProjection_default()
+  {
+    MockPeaksPresenter* pDefault = new MockPeaksPresenter;
+    PeaksPresenter_sptr defaultPresenter(pDefault);
+    EXPECT_CALL(*pDefault, getPeakSizeOnProjection()).WillOnce(Return(0));
+
+    CompositePeaksPresenter composite(&_fakeZoomableView, defaultPresenter);
+    TS_ASSERT_EQUALS(0, composite.getPeakSizeOnProjection())
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pDefault));
+  }
+
+  void test_getPeakSizeIntoProjection_default()
+  {
+    MockPeaksPresenter* pDefault = new MockPeaksPresenter;
+    PeaksPresenter_sptr defaultPresenter(pDefault);
+    EXPECT_CALL(*pDefault, getPeakSizeIntoProjection()).WillOnce(Return(0));
+
+    CompositePeaksPresenter composite(&_fakeZoomableView, defaultPresenter);
+    TS_ASSERT_EQUALS(0, composite.getPeakSizeIntoProjection())
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pDefault));
+  }
+
+  void test_getPeakSizeOnProjection()
+  {
+    MockPeaksPresenter* pSubject = new MockPeaksPresenter;
+    PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, getPeakSizeOnProjection()).WillOnce(Return(1));
+
+    CompositePeaksPresenter composite(&_fakeZoomableView);
+    composite.addPeaksPresenter(subject);
+    TS_ASSERT_EQUALS(1, composite.getPeakSizeOnProjection())
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
+  }
+
+  void test_getPeakSizeIntoProjection()
+  {
+    MockPeaksPresenter* pSubject = new MockPeaksPresenter;
+    PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, getPeakSizeIntoProjection()).WillOnce(Return(1));
+
+    CompositePeaksPresenter composite(&_fakeZoomableView);
+    composite.addPeaksPresenter(subject);
+    TS_ASSERT_EQUALS(1, composite.getPeakSizeIntoProjection())
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
+  }
 
 };
 

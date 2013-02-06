@@ -43,6 +43,8 @@ namespace MantidQt
       virtual void sortPeaksWorkspace(const std::string& byColumnName, const bool ascending);
       virtual void setPeakSizeOnProjection(const double fraction);
       virtual void setPeakSizeIntoProjection(const double fraction);
+      virtual double getPeakSizeOnProjection() const;
+      virtual double getPeakSizeIntoProjection() const;
     private:
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;

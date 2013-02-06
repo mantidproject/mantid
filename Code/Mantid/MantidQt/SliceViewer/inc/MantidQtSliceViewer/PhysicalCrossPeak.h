@@ -53,6 +53,10 @@ namespace MantidQt
       void setOccupancyIntoView(const double fraction);
       /// Get the effective peak radius.
       double getEffectiveRadius() const;
+      /// Get the width occupancy (fractional in the projection plane).
+      double getOccupancyInView() const;
+      /// Get the depth occupancy (fractional into the projection plane)
+      double getOccupancyIntoView() const;
 
     private:
       /// Original origin x=h, y=k, z=l

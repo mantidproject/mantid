@@ -163,5 +163,20 @@ namespace MantidQt
       // DO NOTHING
     }
 
+    double PeakOverlaySphere::getOccupancyInView() const
+    {
+      throw std::runtime_error("PeakOverlaySphere::getOccupancyInView() not implemented");
+    }
+
+    double PeakOverlaySphere::getOccupancyIntoView() const
+    {
+      throw std::runtime_error("PeakOverlaySphere::getOccupancyIntoView() not implemented");
+    }
+
+    bool PeakOverlaySphere::positionOnly() const
+    {
+      false;
+    }
+
   } // namespace Mantid
 } // namespace SliceViewer

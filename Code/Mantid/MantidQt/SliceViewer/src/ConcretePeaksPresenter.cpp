@@ -378,6 +378,37 @@ namespace MantidQt
         }
       }
     }
+
+    double ConcretePeaksPresenter::getPeakSizeOnProjection() const
+    {
+      double result = 0;
+      for (VecPeakOverlayView::const_iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      {
+        PeakOverlayView_sptr view = (*it);
+        if (view != NULL && view->positionOnly())
+        {
+          result = m_viewPeaks.front()->getOccupancyInView();
+          break;
+        }
+      }
+      return result;
+    }
+
+    double ConcretePeaksPresenter::getPeakSizeIntoProjection() const
+    {
+      double result = 0;
+      for (VecPeakOverlayView::const_iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      {
+        PeakOverlayView_sptr view = (*it);
+        if (view != NULL && view->positionOnly())
+        {
+          result = m_viewPeaks.front()->getOccupancyIntoView();
+          break;
+        }
+      }
+      return result;
+    }
+
   }
 }
 

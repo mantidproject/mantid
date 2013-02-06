@@ -52,6 +52,10 @@ namespace MantidQt
       virtual void setPeakSizeOnProjection(const double fraction);
       /// Set the peaks size into the current projection
       virtual void setPeakSizeIntoProjection(const double fraction);
+      /// Get the peaks size onto the current projection
+      virtual double getPeakSizeOnProjection() const;
+      /// Get the peaks size into the current projection
+      virtual double getPeakSizeIntoProjection() const;
       /// Change the foreground representation for the peaks of this workspace
       void setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const QColor);
       /// Change the background representation for the peaks of this workspace
