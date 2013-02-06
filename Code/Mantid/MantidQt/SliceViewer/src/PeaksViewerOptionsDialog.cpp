@@ -1,5 +1,5 @@
 #include <QDialogButtonBox>
-#include <Qurl>
+#include <QUrl>
 #include <QDesktopServices>
 #include "MantidQtSliceViewer/PeaksViewerOptionsDialog.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
