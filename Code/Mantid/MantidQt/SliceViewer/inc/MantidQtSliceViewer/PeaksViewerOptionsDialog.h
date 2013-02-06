@@ -34,6 +34,7 @@ namespace MantidQt
       void onSliderOnProjectionMoved(int value);
       void onReset();
       void onCompleteClicked(QAbstractButton* button);
+      void onHelp();
 
     private:
       Ui::PeaksViewerOptionsDialog *ui;

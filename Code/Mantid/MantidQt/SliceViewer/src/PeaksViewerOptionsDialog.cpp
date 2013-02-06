@@ -1,4 +1,6 @@
 #include <QDialogButtonBox>
+#include <Qurl>
+#include <QDesktopServices>
 #include "MantidQtSliceViewer/PeaksViewerOptionsDialog.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "ui_PeaksViewerOptionsDialog.h"
@@ -57,6 +59,7 @@ namespace MantidQt
     connect(ui->sliderOnProjection, SIGNAL(sliderMoved(int)), this, SLOT(onSliderOnProjectionMoved(int)));
     connect(ui->btnReset, SIGNAL(clicked()), this, SLOT(onReset()));
     connect(ui->btnGroupControls, SIGNAL(clicked(QAbstractButton*)), this, SLOT(onCompleteClicked(QAbstractButton*)));
+    connect(ui->btnHelp, SIGNAL(clicked()), this, SLOT(onHelp()));
   }
 
   PeaksViewerOptionsDialog::~PeaksViewerOptionsDialog()
@@ -109,6 +112,11 @@ namespace MantidQt
     QDialog::reject();
   }
 
+  void PeaksViewerOptionsDialog::onHelp()
+  {
+    QString helpPage = "PeaksViewer#Preference_Options";
+    QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
+  }
 }
 }
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>384</width>
-    <height>222</height>
+    <width>466</width>
+    <height>209</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -61,6 +61,16 @@
          </spacer>
         </item>
         <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="../../icons/SliceViewerIcons.qrc">:/SliceViewer/icons/peak-cross-small.png</pixmap>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QSlider" name="sliderOnProjection">
           <property name="maximum">
            <number>100</number>
@@ -86,6 +96,16 @@
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="../../icons/SliceViewerIcons.qrc">:/SliceViewer/icons/peak-cross.png</pixmap>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="lblPercentageOnProjection">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -103,6 +123,19 @@
            <string>TextLabel</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -147,6 +180,16 @@
          </spacer>
         </item>
         <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="../../icons/SliceViewerIcons.qrc">:/SliceViewer/icons/peak-cross-faded.png</pixmap>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QSlider" name="sliderIntoProjection">
           <property name="maximum">
            <number>100</number>
@@ -172,6 +215,16 @@
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="../../icons/SliceViewerIcons.qrc">:/SliceViewer/icons/peak-cross.png</pixmap>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="lblPercentageIntoProjection">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -190,6 +243,19 @@
           </property>
          </widget>
         </item>
+        <item>
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
       </item>
      </layout>
@@ -197,6 +263,13 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="btnHelp">
+       <property name="text">
+        <string>Help</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QPushButton" name="btnReset">
        <property name="text">
@@ -218,7 +291,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../icons/SliceViewerIcons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>btnGroupControls</sender>
