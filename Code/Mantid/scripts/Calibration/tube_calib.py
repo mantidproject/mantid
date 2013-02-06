@@ -119,6 +119,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
     createTubeCalibtationWorkspaceByWorkspaceIndexList( IntegratedWorkspace, getPointsWs, whichTube, showPlot=showPlot )
     
     # Prepare to loop over points
+    tallPeak = False
     edgeMode = 1  # We assume first edge is approached from outside
     # Loop over the points
     for i in range(nPts):
@@ -137,6 +138,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
               end = eP[i] + outedge
            Fit(InputWorkspace=getPointsWs,Function=fitEndErfcParams(centre,endGrad*edgeMode),StartX=str(start),EndX=str(end),Output=calibPointWs) 
            edgeMode = -edgeMode # Next edge would be reverse of this edge
+           tallPeak = True
         else:
            # We have a slit or bar
            centre = eP[i]
@@ -150,11 +152,16 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
               end = (1-margin)*eP[i] + (margin)*eP[i+1]   
            Fit(InputWorkspace=getPointsWs,Function='name=LinearBackground, A0=1000',StartX=str(start),EndX=str(end),Output="Z1")
            Fit(InputWorkspace="Z1_Workspace",Function=fitGaussianParams(eHeight,centre,eWidth), WorkspaceIndex='2',StartX=str(start),EndX=str(end),Output=calibPointWs)
+           tallPeak = False # Force peak height to be checked
            
         paramCalibPeak = mtd[calibPointWs+'_Parameters']
+        if( not tallPeak ):
+            pkHeightRow = paramCalibPeak.row(0).items()
+            thisHeight = pkHeightRow[1][1]
+            tallPeak = ( thisHeight/eHeight > 0.2)
         pkRow = paramCalibPeak.row(1).items()
         thisResult = pkRow[1][1]
-        if( start < thisResult and thisResult < end):
+        if( tallPeak and start < thisResult and thisResult < end ):
             results.append( thisResult )
         else:
             results.append(-1.0) #ensure result is ignored
