@@ -13,7 +13,6 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <cstdarg>
-#include <napi.h>
 
 #ifdef _WIN32
 #include <winsock2.h>

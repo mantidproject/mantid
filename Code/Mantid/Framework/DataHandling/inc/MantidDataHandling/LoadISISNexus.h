@@ -8,7 +8,6 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
-#include <napi.h>
 #include <climits>
 
 #include <boost/shared_array.hpp>

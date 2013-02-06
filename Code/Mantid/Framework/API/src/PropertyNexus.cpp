@@ -12,8 +12,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-#include <napi.h>
-
 using namespace Mantid::Kernel;
 using namespace ::NeXus;
 using boost::algorithm::is_any_of;
@@ -100,8 +98,8 @@ namespace PropertyNexus
     {
       if (file->getInfo().dims.size() != 2)
         throw std::runtime_error("NXlog loading failed on field " + name + ". Expected rank 2.");
-      int numStrings = file->getInfo().dims[0];
-      int span = file->getInfo().dims[1];
+      int64_t numStrings = file->getInfo().dims[0];
+      int64_t span = file->getInfo().dims[1];
       char * data = new char[numStrings*span];
       file->getData(data);
       values.reserve(size_t(numStrings));
