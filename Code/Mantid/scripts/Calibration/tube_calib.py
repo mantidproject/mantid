@@ -85,7 +85,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
        This N slit method is suited for WISH or the five sharp peaks of MERLIN .
        
        @param IntegratedWorkspace: Workspace of integrated data
-       @param funcForms: array of function form 1=slit, 2=edge
+       @param funcForms: array of function form 1=slit/bar, 2=edge
        @param fitParams: a TubeCalibFitParams object contain the fit parameters
        @param whichTube:  a list of workspace indices for one tube
        @param showPlot: show plot for this tube
@@ -102,8 +102,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
     eHeight, eWidth = fitParams.getHeightAndWidth()
     outedge, inedge, endGrad = fitParams.getEdgeParameters()
     
-    #margin = 0.3
-    margin = 0.2
+    margin = 0.3
     
     # Set workspace names, a different workspace if plotting, so plot survives.
     calibPointWs = "CalibPoint"
@@ -474,12 +473,17 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
     if(nTubes == 0):
        return
 
-    # Delete temporary workspaces for obtaining slit points
+    # Delete temporary workspaces for obtaining points
     if( OverridePeaks == []):
        DeleteWorkspace('getPoints')
        DeleteWorkspace('CalibPoint_NormalisedCovarianceMatrix')
        DeleteWorkspace('CalibPoint_Parameters')
        DeleteWorkspace('CalibPoint_Workspace')
+       # Assume at least one slit or peak (else we'd need to check here)
+       DeleteWorkspace('Z1_NormalisedCovarianceMatrix')
+       DeleteWorkspace('Z1_Parameters')
+       DeleteWorkspace('Z1_Workspace')
+       
     
     # Delete temporary workspaces for getting new detector positions
     DeleteWorkspace('QuadraticFittingWorkspace')
