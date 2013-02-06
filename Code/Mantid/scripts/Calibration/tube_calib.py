@@ -105,11 +105,11 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
     #margin = 0.3
     margin = 0.2
     
-    # Use a different workspace if plotting, so plot survives.
+    # Set workspace names, a different workspace if plotting, so plot survives.
+    calibPointWs = "CalibPoint"
+    getPointsWs = "getPoints"
     if(showPlot):
        getPointsWs = "TubePlot"
-    else:
-       getPointsWs = "getPoints"
     
     # Check functional form
     if ( nFf != 0 and nFf < nPts):
@@ -123,6 +123,10 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
     edgeMode = 1  # We assume first edge is approached from outside
     # Loop over the points
     for i in range(nPts):
+        # Use different workpace if plotting fit, so plot survives
+        if(showPlot):
+           calibPointWs = "TubeCalibPlot"+str(i)
+           
         if( nFf != 0 and funcForms[i] == 2 ):
            # We have an edge
            centre = eP[i]
@@ -132,10 +136,10 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
            else:
               start = eP[i] - inedge
               end = eP[i] + outedge
-           Fit(InputWorkspace=getPointsWs,Function=fitEndErfcParams(centre,endGrad*edgeMode),StartX=str(start),EndX=str(end),Output="CalibPoint") 
+           Fit(InputWorkspace=getPointsWs,Function=fitEndErfcParams(centre,endGrad*edgeMode),StartX=str(start),EndX=str(end),Output=calibPointWs) 
            edgeMode = -edgeMode # Next edge would be reverse of this edge
         else:
-           # We have a slit
+           # We have a slit or bar
            centre = eP[i]
            if( i == 0):
               start = (1-margin)*eP[i]
@@ -145,9 +149,10 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
               end = (1-margin)*eP[i] + (margin)*nDets
            else:
               end = (1-margin)*eP[i] + (margin)*eP[i+1]   
-           Fit(InputWorkspace=getPointsWs,Function=fitGaussianParams(eHeight,centre,eWidth), StartX=str(start),EndX=str(end),Output="CalibPoint")
+           Fit(InputWorkspace=getPointsWs,Function='name=LinearBackground, A0=1000',StartX=str(start),EndX=str(end),Output="Z1")
+           Fit(InputWorkspace="Z1_Workspace",Function=fitGaussianParams(eHeight,centre,eWidth), WorkspaceIndex='2',StartX=str(start),EndX=str(end),Output=calibPointWs)
            
-        paramCalibPeak = mtd['CalibPoint_Parameters']
+        paramCalibPeak = mtd[calibPointWs+'_Parameters']
         pkRow = paramCalibPeak.row(1).items()
         thisResult = pkRow[1][1]
         if( start < thisResult and thisResult < end):
