@@ -71,6 +71,9 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT( !alg.hasPostProcessing() );
 
+    TSM_ASSERT("Can't connect", !alg.validateInputs()["Instrument"].empty() );
+    alg.setPropertyValue("Instrument","FakeEventDataListener");
+
     TSM_ASSERT("No OutputWorkspace",  !alg.validateInputs()["OutputWorkspace"].empty() );
     alg.setPropertyValue("OutputWorkspace", "out_ws");
     TSM_ASSERT("Is OK now",  alg.validateInputs().empty() );
@@ -84,6 +87,10 @@ public:
 
     alg.setPropertyValue("AccumulationWorkspace", "out_ws");
     TSM_ASSERT("AccumulationWorkspace == OutputWorkspace",  !alg.validateInputs()["AccumulationWorkspace"].empty() );
+
+    alg.setPropertyValue("Instrument", "ISISHistoDataListener");
+    alg.setPropertyValue("AccumulationMethod","Add");
+    TSM_ASSERT("Shouldn't add histograms", !alg.validateInputs()["AccumulationMethod"].empty() );
   }
 
   /** Test creating the processing algorithm.
