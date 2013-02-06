@@ -44,7 +44,7 @@ using namespace DataObjects;
 
   /// Empty default constructor
   NexusFileIO::NexusFileIO() :
-          m_nexusformat(NXACC_CREATE5),
+          m_filehandle(0),
           m_nexuscompression(NX_COMP_LZW),
           m_progress(0)
   {
@@ -52,7 +52,7 @@ using namespace DataObjects;
 
   /// Constructor that supplies a progress object
   NexusFileIO::NexusFileIO( Progress *prog ) :
-          m_nexusformat(NXACC_CREATE5),
+          m_filehandle(0),
           m_nexuscompression(NX_COMP_LZW),
           m_progress(prog)
   {
@@ -83,13 +83,12 @@ using namespace DataObjects;
   //   </NXprocess>
   // </NXentry>
 
-  int NexusFileIO::openNexusWrite(const std::string& fileName )
+  void NexusFileIO::openNexusWrite(const std::string& fileName )
   {
     // open named file and entry - file may exist
     // @throw Exception::FileError if cannot open Nexus file for writing
     //
-    NXaccess mode;
-    NXstatus status;
+    NXaccess mode(NXACC_CREATE5);
     std::string className="NXentry";
     std::string mantidEntryName;
     m_filename=fileName;
@@ -107,16 +106,17 @@ using namespace DataObjects;
         mode = NXACC_CREATEXML;
         m_nexuscompression = NX_COMP_NONE;
       }
-      else
-        mode = m_nexusformat;
       mantidEntryName="mantid_workspace_1";
     }
-    status=NXopen(fileName.c_str(), mode, &fileID);
+
+    // open the file and copy the handle into the NeXus::File object
+    NXstatus status=NXopen(fileName.c_str(), mode, &fileID);
     if(status==NX_ERROR)
     {
       g_log.error("Unable to open file " + fileName);
       throw Exception::FileError("Unable to open File:" , fileName);
     }
+    m_filehandle = new ::NeXus::File(fileID, true);
 
     //
     // for existing files, search for any current mantid_workspace_<n> entries and set the
@@ -133,21 +133,16 @@ using namespace DataObjects;
     // make and open the new mantid_workspace_<n> group
     // file remains open until explict close
     //
-    status=NXmakegroup(fileID,mantidEntryName.c_str(),className.c_str());
-    if(status==NX_ERROR)
-      return(2);
-
-    status=NXopengroup(fileID,mantidEntryName.c_str(),className.c_str());
-    return(0);
+    m_filehandle->makeGroup(mantidEntryName,className);
+    m_filehandle->openGroup(mantidEntryName,className);
   }
 
 
   //-----------------------------------------------------------------------------------------------
-  int NexusFileIO::closeNexusFile()
+  void NexusFileIO::closeNexusFile()
   {
-    NXclosegroup(fileID);
-    NXclose(&fileID);
-    return(0);
+    m_filehandle->closeGroup();
+    delete m_filehandle;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -184,20 +179,14 @@ using namespace DataObjects;
   //
   // write an NXdata entry with Float array values
   //
-  bool NexusFileIO::writeNxFloatArray(const std::string& name, const std::vector<double>& values, const std::vector<std::string>& attributes,
+  void NexusFileIO::writeNxFloatArray(const std::string& name, const std::vector<double>& values, const std::vector<std::string>& attributes,
       const std::vector<std::string>& avalues) const
   {
-    NXstatus status;
-    int dimensions[1];
-    dimensions[0]=static_cast<int>(values.size());
-    status=NXmakedata(fileID, name.c_str(), NX_FLOAT64, 1, dimensions);
-    if(status==NX_ERROR) return(false);
-    status=NXopendata(fileID, name.c_str());
+    m_filehandle->writeData(name, values);
+    m_filehandle->openData(name);
     for(size_t it=0; it<attributes.size(); ++it)
-      status=NXputattr(fileID, attributes[it].c_str(), reinterpret_cast<void*>(const_cast<char*>(avalues[it].c_str())), static_cast<int>(avalues[it].size()+1), NX_CHAR);
-    status=NXputdata(fileID, reinterpret_cast<void*>(const_cast<double *>(&(values[0]))));
-    status=NXclosedata(fileID);
-    return(true);
+      m_filehandle->putAttr(attributes[it], avalues[it]);
+    m_filehandle->closeData();
   }
 
 
@@ -237,12 +226,8 @@ using namespace DataObjects;
   bool NexusFileIO::writeNxNote(const std::string& noteName, const std::string& author, const std::string& date,
       const std::string& description, const std::string& pairValues) const
   {
-    NXstatus status;
-    status=NXmakegroup(fileID,noteName.c_str(),"NXnote");
-    if(status==NX_ERROR)
-      return(false);
-    status=NXopengroup(fileID,noteName.c_str(),"NXnote");
-    //
+    m_filehandle->makeGroup(noteName, "NXnote", true);
+
     std::vector<std::string> attributes,avalues;
     if(date!="")
     {
@@ -251,14 +236,13 @@ using namespace DataObjects;
     }
     if( ! writeNxValue<std::string>( "author", author, NX_CHAR, attributes, avalues) )
       return(false);
-    attributes.clear();
-    avalues.clear();
-    if( ! writeNxValue<std::string>( "description", description, NX_CHAR, attributes, avalues) )
+
+    if( ! writeNxValue<std::string>( "description", description, NX_CHAR) )
       return(false);
-    if( ! writeNxValue<std::string>( "data", pairValues, NX_CHAR, attributes, avalues) )
+    if( ! writeNxValue<std::string>( "data", pairValues, NX_CHAR) )
       return(false);
 
-    status=NXclosegroup(fileID);
+    m_filehandle->closeGroup();
     return(true);
   }
 
@@ -873,17 +857,13 @@ using namespace DataObjects;
   {
     // see if the given attribute name is in the current level
     // return true if it is.
-    int length=NX_MAXNAMELEN,type;
-    NXinitattrdir(fileID);
-    char aname[NX_MAXNAMELEN];
-    //    char avalue[NX_MAXNAMELEN]; // value is not restricted to this, but it is a reasonably large value
-    while(NXgetnextattr(fileID,aname,&length,&type)==NX_OK)
+    const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
+    for (auto it = infos.begin(); it != infos.end(); ++it)
     {
-      if(target.compare(aname)==0)
-      {
+      if (target.compare(it->name)==0)
         return true;
-      }
     }
+
     return false;
   }
 
@@ -1021,51 +1001,29 @@ using namespace DataObjects;
   {
     // search exiting file for entries of form mantid_workspace_<n> and return count
     int count=0;
-    NXstatus status;
-    char *nxname,*nxclass;
-    int nxdatatype;
-    nxname= new char[NX_MAXNAMELEN];
-    nxclass = new char[NX_MAXNAMELEN];
-    //
-    // read nexus fields at this level
-    while( (status=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
+    std::map<std::string, std::string> entries = m_filehandle->getEntries();
+    for (auto it = entries.begin(); it != entries.end(); ++it)
     {
-      std::string nxClass=nxclass;
-      if(nxClass=="NXentry")
+      if (it->second == "NXentry")
       {
-        std::string nxName=nxname;
-        if(nxName.find("mantid_workspace_")==0)
+        if (it->first.find("mantid_workspace_")==0)
           count++;
       }
     }
-    delete[] nxname;
-    delete[] nxclass;
+
     return count;
   }
 
   bool NexusFileIO::checkEntryAtLevel(const std::string& item) const
   {
     // Search the currently open level for name "item"
-    NXstatus status;
-    char *nxname,*nxclass;
-    int nxdatatype;
-    nxname= new char[NX_MAXNAMELEN];
-    nxclass = new char[NX_MAXNAMELEN];
-    //
-    // read nexus fields at this level
-    status=NXinitgroupdir(fileID); // just in case
-    while( (status=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
+    std::map<std::string, std::string> entries = m_filehandle->getEntries();
+    for (auto it = entries.begin(); it != entries.end(); ++it)
     {
-      std::string nxName=nxname;
-      if(nxName==item)
-      {
-        delete[] nxname;
-        delete[] nxclass;
-        return(true);
-      }
+        if (it->first== item)
+          return true;
     }
-    delete[] nxname;
-    delete[] nxclass;
+
     return(false);
   }
 
@@ -1073,31 +1031,22 @@ using namespace DataObjects;
   bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string& attribute, std::string& entry) const
   {
     // Search the currently open level for a section with "attribute" and return entry name
-    NXstatus status;
-    char *nxname,*nxclass;
-    int nxdatatype;
-    nxname= new char[NX_MAXNAMELEN];
-    nxclass = new char[NX_MAXNAMELEN];
-    //
-    // read nexus fields at this level
-    status=NXinitgroupdir(fileID); // just in case
-    while( (status=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
+    std::map<std::string, std::string> entries = m_filehandle->getEntries();
+    for (auto it = entries.begin(); it != entries.end(); ++it)
     {
-      status=NXopendata(fileID,nxname);
-      // FIXME: Is the correct ?
-      //if(checkAttributeName("signal"))
-      if(checkAttributeName(attribute))
+      if (it->second == "SDS")
       {
-        entry=nxname;
-        delete[] nxname;
-        delete[] nxclass;
-        status=NXclosedata(fileID);
-        return(true);
+        m_filehandle->openData(it->first);
+        bool result = checkAttributeName(attribute);
+        m_filehandle->closeData();
+        if (result)
+        {
+          entry = it->first;
+          return true;
+        }
       }
-      status=NXclosedata(fileID);
     }
-    delete[] nxname;
-    delete[] nxclass;
+
     return(false);
 
   }

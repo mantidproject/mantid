@@ -253,8 +253,7 @@ namespace DataHandling
 	// Then immediately open the file
     Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO( &prog_init );
 
-    if( nexusFile->openNexusWrite( m_filename ) != 0 )
-      throw Exception::FileError("Failed to open file", m_filename);
+    nexusFile->openNexusWrite( m_filename );
 
     // Equivalent C++ API handle
     ::NeXus::File * cppFile = new ::NeXus::File(nexusFile->fileID);
