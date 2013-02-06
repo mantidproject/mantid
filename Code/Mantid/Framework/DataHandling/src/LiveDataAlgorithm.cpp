@@ -39,8 +39,7 @@ namespace DataHandling
    */
   void LiveDataAlgorithm::initProps()
   {
-    // Options for the Instrument = all the listeners that are registered.
-    std::vector<std::string> listeners = Mantid::API::LiveListenerFactory::Instance().getKeys();
+    // Add all the instruments (in the default facility) that have a listener specified
     std::vector<std::string> instruments;
     auto& instrInfo = Kernel::ConfigService::Instance().getFacility().instruments();
     for(auto it = instrInfo.begin(); it != instrInfo.end(); ++it)
@@ -50,6 +49,8 @@ namespace DataHandling
         instruments.push_back( it->name() );
       }
     }
+    // TEMPORARY: Add all the listeners by hand while this is all under development
+    std::vector<std::string> listeners = Mantid::API::LiveListenerFactory::Instance().getKeys();
     instruments.insert( instruments.end(), listeners.begin(), listeners.end() );
     declareProperty(new PropertyWithValue<std::string>("Instrument","", boost::make_shared<StringListValidator>(instruments)),
         "Name of the instrument to monitor.");
@@ -67,7 +68,7 @@ namespace DataHandling
         "The format is propName=value;propName=value");
 
     declareProperty(new PropertyWithValue<std::string>("ProcessingScript","",Direction::Input),
-        "Not currently supported, but reserved for future use.");
+        "A Python script that will be run to process each chunk of data.");
 
     std::vector<std::string> propOptions;
     propOptions.push_back("Add");
@@ -94,7 +95,7 @@ namespace DataHandling
         "The format is propName=value;propName=value");
 
     declareProperty(new PropertyWithValue<std::string>("PostProcessingScript","",Direction::Input),
-        "Not currently supported, but reserved for future use.");
+        "A Python script that will be run to process the accumulated data.");
 
     std::vector<std::string> runOptions;
     runOptions.push_back("Restart");
@@ -106,20 +107,14 @@ namespace DataHandling
         " - Stop: live data monitoring ends.\n"
         " - Rename: the previous workspaces are renamed, and monitoring continues with cleared ones.");
 
-    // MonitorLiveData and StartLiveData need to NOT lock workspaces
-    LockMode::Type lockWorkspaces = LockMode::NoLock;
-    // But LoadLiveData SHOULD lock when it gets called
-//    if (this->name() == "LoadLiveData")
-//      lockWorkspaces = LockMode::Lock;
-
     declareProperty(new WorkspaceProperty<Workspace>("AccumulationWorkspace","",Direction::Output,
-                                                     PropertyMode::Optional, lockWorkspaces),
+                                                     PropertyMode::Optional, LockMode::NoLock),
         "Optional, unless performing PostProcessing:\n"
         " Give the name of the intermediate, accumulation workspace.\n"
         " This is the workspace after accumulation but before post-processing steps.");
 
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output,
-                                                     PropertyMode::Mandatory, lockWorkspaces),
+                                                     PropertyMode::Mandatory, LockMode::NoLock),
                     "Name of the processed output workspace.");
 
     declareProperty(new PropertyWithValue<std::string>("LastTimeStamp","",Direction::Output),
