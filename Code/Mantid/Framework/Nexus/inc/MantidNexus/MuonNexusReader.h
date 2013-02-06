@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include <nexus/NeXusFile.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <limits.h>
 
@@ -50,8 +51,9 @@ class DLLExport MuonNexusReader
         int nexusLogCount;  ///< number of NXlog sections read from file
 		std::vector<bool> logType;  ///< true if i'th log is numeric
 		std::vector<std::string> logNames;  ///< stores name read from file
-		int readMuonLogData(NXhandle fileID);  ///< method to read the fields of open NXlog section
-		std::vector< std::vector<float> > logValues, ///< array of values for i'th NXlog section
+        void openFirstNXentry(NeXus::File & handle);
+        void readMuonLogData(NeXus::File &handle);  ///< method to read the fields of open NXlog section
+        std::vector< std::vector<float> > logValues, ///< array of values for i'th NXlog section
 			                                logTimes;  ///< arrys of times for i'th NXlog section
 		std::vector< std::vector<std::string> > logStringValues; ///< array of string values for i'th NXlog section
 		std::string startTime; ///< string startTime which must be read from Nexus file to base all NXlog times on
