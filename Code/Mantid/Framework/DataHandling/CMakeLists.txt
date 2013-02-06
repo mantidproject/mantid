@@ -56,6 +56,7 @@ set ( SRC_FILES
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
 	src/LoadMaskingFile.cpp
+	src/LoadMcStasNexus.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
 	src/LoadMuonNexus1.cpp
@@ -105,7 +106,7 @@ set ( SRC_FILES
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
-    src/SNSDataArchiveICAT2.cpp
+	src/SNSDataArchiveICAT2.cpp
 	src/SNSLiveEventDataListener.cpp
 	src/SaveAscii.cpp
 	src/SaveCSV.cpp
@@ -195,6 +196,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMaskingFile.h
+	inc/MantidDataHandling/LoadMcStasNexus.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
 	inc/MantidDataHandling/LoadMuonNexus1.h
@@ -221,7 +223,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
-    inc/MantidDataHandling/LoadSassena.h
+	inc/MantidDataHandling/LoadSassena.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
@@ -239,7 +241,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/SNSDataArchive.h
-    inc/MantidDataHandling/SNSDataArchiveICAT2.h
+	inc/MantidDataHandling/SNSDataArchiveICAT2.h
 	inc/MantidDataHandling/SNSLiveEventDataListener.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveCSV.h
@@ -362,7 +364,7 @@ set ( TEST_FILES
 	RawFileInfoTest.h
 	RemoveLogsTest.h
 	RenameLogTest.h
-    RotateInstrumentComponentTest.h
+	RotateInstrumentComponentTest.h
 	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
 	SaveAsciiTest.h
