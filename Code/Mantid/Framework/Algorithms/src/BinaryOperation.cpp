@@ -432,15 +432,6 @@ namespace Mantid
       return continueOp;
     }
 
-    //--------------------------------------------------------------------------------------------
-    // Disable optimization under the Visual Studio compiler
-    // Optimizing, in combination with openmp parallelization causes occasional miscalculations
-    // Re-enabled below, after the doSingleValue, doSingleSpectrum, doSingleColumn & do2D methods
-    #ifdef _MSC_VER
-      #pragma optimize( "", off )
-      #pragma warning(disable:4748)  // This is about /Gs being irrelevant when not optimizing
-    #endif
-
     /**
      * Called when the rhs operand is a single value.
      *  Loops over the lhs workspace calling the abstract binary operation function with a single number as the rhs operand.
@@ -791,14 +782,6 @@ namespace Mantid
       if (m_ClearRHSWorkspace)
         m_erhs->clearMRU();
     }
-
-    // End of optimization disabling under Visual Studio
-    #ifdef _MSC_VER
-      #pragma optimize( "", on )
-      #pragma warning(default:4748)
-    #endif
-
-    //---------------------------------------------------------------------------------------------
 
     /** Copies any bin masking from the smaller/rhs input workspace to the output.
      *  Masks on the other input workspace are copied automatically by the workspace factory.
