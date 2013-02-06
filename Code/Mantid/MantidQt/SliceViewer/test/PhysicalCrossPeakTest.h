@@ -216,7 +216,6 @@ public:
     physicalPeak.setOccupancyInView(occupancyFraction);// 1 %
     auto drawingObject = physicalPeak.draw(1000, 1000);
     TS_ASSERT_EQUALS(occupancyFraction, physicalPeak.getOccupancyInView());
-    TS_ASSERT_EQUALS(10, drawingObject.peakHalfCrossHeight); // 10 = 0.01 * 1000
   }
 
   void test_setOccupanyIntoView_ignores_zeros()

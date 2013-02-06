@@ -21,9 +21,9 @@ namespace MantidQt
       return m;
     }
 
-    double calculatePosition(const double fraction)
+    int calculatePosition(const double fraction)
     {
-      return (1/toFractionalOccupancy()) * fraction;
+      return static_cast<int>( (1/toFractionalOccupancy()) * fraction );
     }
 
     double calculateFraction(const double sliderPosition)
