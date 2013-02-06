@@ -62,6 +62,8 @@ namespace Mantid
 
       std::vector<double> getTimeStepValues() const;
 
+      std::string getTimeStepLabel() const;
+
       /*-----------------------------------End MDRebinningPresenter methods -------------------------------------*/
 
       MDEWRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, MDRebinningView* view, const WorkspaceProvider& wsProvider);

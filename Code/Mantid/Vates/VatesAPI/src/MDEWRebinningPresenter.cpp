@@ -416,6 +416,17 @@ namespace Mantid
       return timeStepValues;
     }
 
+    std::string MDEWRebinningPresenter::getTimeStepLabel() const
+    {
+      Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
+      sourceGeometry.execute();
+      std::string label = sourceGeometry.getTDimension()->getName();
+      label += " (";
+      label += sourceGeometry.getTDimension()->getUnits();
+      label += ")";
+      return label;
+    }
+
     void MDEWRebinningPresenter::persistReductionKnowledge(vtkDataSet* out_ds, const
       RebinningKnowledgeSerializer& xmlGenerator, const char* id)
     {
