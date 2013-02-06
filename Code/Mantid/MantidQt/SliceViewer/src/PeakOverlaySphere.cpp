@@ -175,7 +175,7 @@ namespace MantidQt
 
     bool PeakOverlaySphere::positionOnly() const
     {
-      false;
+      return false;
     }
 
   } // namespace Mantid

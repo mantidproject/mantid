@@ -171,7 +171,7 @@ namespace SliceViewer
 
     bool PeakOverlayCross::positionOnly() const
     {
-      true;
+      return true;
     }
 
   } // namespace Mantid
