@@ -65,7 +65,7 @@ void MuonNexusReader::openFirstNXentry(NeXus::File & handle)
 //         Data: "corrected time" (1D float array)
 //
 // @param filename ::  name of existing NeXus Muon file to read
-int MuonNexusReader::readFromFile(const string& filename)
+void MuonNexusReader::readFromFile(const string& filename)
 { 
   NeXus::File handle(filename, NXACC_READ);
   openFirstNXentry(handle);
@@ -135,8 +135,6 @@ int MuonNexusReader::readFromFile(const string& filename)
   }
 
   // file will close on leaving the function
-  handle.close();
-  return(0);
 }
 
 // Get time boundary data as in ISISRAW. Simpler here as NeXus stores real times
@@ -144,18 +142,16 @@ int MuonNexusReader::readFromFile(const string& filename)
 // times and that bin boundary values are wanted, as ISISRAW.
 // @param  timebnds  float pointer for time values to be stored
 // @param  ndnbs     int count of expected points
-int MuonNexusReader::getTimeChannels(float* timebnds, const int& nbnds) const
+void MuonNexusReader::getTimeChannels(float* timebnds, const int& nbnds) const
 {
-  int i;
   // assume constant time bin width given by difference of first two values
   float binHalfWidth=(corrected_times[1]-corrected_times[0])/float(2.0);
-  for(i=0;i<nbnds-1;i++)
+  for(int i=0;i<nbnds-1;i++)
     timebnds[i]=corrected_times[i]-binHalfWidth;
   timebnds[nbnds-1]=timebnds[nbnds-2]+float(2.0)*binHalfWidth;
-  return(0);
 }
 
-string MuonNexusReader::getInstrumentName()
+string MuonNexusReader::getInstrumentName() const
 {
   return(nexus_instrument_name);
 }
@@ -170,7 +166,7 @@ string MuonNexusReader::getInstrumentName()
 //            or sting.
 //
 // @param filename ::  name of existing NeXus Muon file to read
-int MuonNexusReader::readLogData(const string& filename)
+void MuonNexusReader::readLogData(const string& filename)
 {
   // reset the count of logs
   nexusLogCount=0;
@@ -212,8 +208,7 @@ int MuonNexusReader::readLogData(const string& filename)
     }
   }
 
-  handle.close();
-  return(0);
+  // file will close on leaving the function
 }
 
 

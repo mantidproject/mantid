@@ -69,11 +69,7 @@ void LoadInstrumentFromNexus::exec()
 
   // open Nexus file
   MuonNexusReader nxload;
-  if (nxload.readFromFile(m_filename.c_str()) != 0)
-  {
-    g_log.error("Unable to open file " + m_filename);
-    throw Exception::FileError("Unable to open File:" , m_filename);
-  }
+  nxload.readFromFile(m_filename);
   progress(0.5);
   // Create a new Instrument with the right name and add it to the workspace
   Geometry::Instrument_sptr instrument(new Geometry::Instrument(nxload.getInstrumentName()));

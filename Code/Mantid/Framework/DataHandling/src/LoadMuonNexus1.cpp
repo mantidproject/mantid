@@ -166,11 +166,7 @@ namespace Mantid
       {}
 
       MuonNexusReader nxload;
-      if (nxload.readFromFile(m_filename) != 0)
-      {
-        g_log.error("Unable to open file " + m_filename);
-        throw Exception::FileError("Unable to open File:" , m_filename);  
-      }
+      nxload.readFromFile(m_filename);
 
       // Read in the instrument name from the Nexus file
       m_instrument_name = nxload.getInstrumentName();

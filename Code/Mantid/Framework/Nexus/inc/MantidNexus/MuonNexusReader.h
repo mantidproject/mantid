@@ -80,9 +80,9 @@ class DLLExport MuonNexusReader
 		/// Destructor
 		~MuonNexusReader();
 
-		int readFromFile(const std::string& filename); ///< read histogram data
-		int readLogData(const std::string& filename);  ///< read log data
-		int getTimeChannels(float* timechannels, const int& len) const; ///< get time bin boundaries
+        void readFromFile(const std::string& filename); ///< read histogram data
+        void readLogData(const std::string& filename);  ///< read log data
+        void getTimeChannels(float* timechannels, const int& len) const; ///< get time bin boundaries
         /// return sample name
 		std::string getSampleName() const {return nexus_samplename; };
 		int numberOfLogs() const;  ///< Number of NXlog sections read from file
@@ -102,7 +102,7 @@ class DLLExport MuonNexusReader
 		int* counts;         ///< temp store of histogram data
 		int* detectorGroupings; ///< detector grouping info
 		int numDetectors; ///< detector count
-		std::string getInstrumentName(); ///< return instrument name
+        std::string getInstrumentName() const; ///< return instrument name
 };
 
 

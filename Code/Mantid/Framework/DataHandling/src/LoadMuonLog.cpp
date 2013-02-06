@@ -72,11 +72,7 @@ void LoadMuonLog::exec()
   m_filename = getPropertyValue("Filename");
 
   MuonNexusReader nxload;
-  if ( nxload.readLogData(m_filename) != 0 )
-  {
-    g_log.error("In LoadMuonLog: " + m_filename + " can not be opened.");
-    throw Exception::FileError("File does not exist:" , m_filename);
-  }
+  nxload.readLogData(m_filename);
 
   // Get the input workspace and retrieve sample from workspace.
   // the log data will be loaded into the Sample container of the workspace
