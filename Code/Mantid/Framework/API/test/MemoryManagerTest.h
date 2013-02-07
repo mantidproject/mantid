@@ -18,7 +18,8 @@ public:
   {
     MemoryInfo minfo = MemoryManager::Instance().getMemoryInfo();
     TS_ASSERT_LESS_THAN( 1000, minfo.totalMemory )
-    TS_ASSERT_LESS_THAN( minfo.totalMemory, 10000000000 )// totalMemory is in KB
+    TSM_ASSERT_LESS_THAN( "You machine appears to have more than a petabyte of RAM!",
+        minfo.totalMemory, 1.1e12 ) // totalMemory is in KB
     TS_ASSERT_LESS_THAN( minfo.availMemory, minfo.totalMemory )
     TS_ASSERT_LESS_THAN( minfo.freeRatio, 100 )
   }
