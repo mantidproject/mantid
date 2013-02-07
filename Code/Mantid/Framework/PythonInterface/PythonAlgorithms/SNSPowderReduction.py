@@ -343,8 +343,19 @@ class SNSPowderReduction(PythonAlgorithm):
         frequency = None
         if "SpeedRequest1" in logs.keys():
             frequency = logs['SpeedRequest1']
+            if frequency.getStatistics().mean == 0.:
+                self.log().information("'SpeedRequest1' mean value is zero")
+                frequency = None
         else:
             self.log().information("'SpeedRequest1' is not specified in logs")
+        if frequency is None and "Speed1" in logs.keys():
+            frequency = logs['Speed1']
+            if frequency.getStatistics().mean == 0.:
+                self.log().information("'Speed1' mean value is zero")
+                frequency = None
+        else:
+            self.log().information("'Speed1' is not specified in logs")
+        if frequency is None:
             if "frequency" in logs.keys():
                 frequency = logs['frequency']
             else:
