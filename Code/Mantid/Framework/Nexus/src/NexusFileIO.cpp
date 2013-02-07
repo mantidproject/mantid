@@ -236,10 +236,12 @@ using namespace DataObjects;
     }
     if( ! writeNxValue<std::string>( "author", author, NX_CHAR, attributes, avalues) )
       return(false);
+    attributes.clear();
+    avalues.clear();
 
-    if( ! writeNxValue<std::string>( "description", description, NX_CHAR) )
+    if( ! writeNxValue<std::string>( "description", description, NX_CHAR, attributes, avalues) )
       return(false);
-    if( ! writeNxValue<std::string>( "data", pairValues, NX_CHAR) )
+    if( ! writeNxValue<std::string>( "data", pairValues, NX_CHAR, attributes, avalues) )
       return(false);
 
     m_filehandle->closeGroup();

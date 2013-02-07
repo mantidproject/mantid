@@ -111,8 +111,8 @@ namespace Mantid
       /// Write a simple value plus possible attributes
       template<class TYPE>
       bool writeNxValue(const std::string& name, const TYPE& value, const int nxType, 
-                        const std::vector<std::string>& attributes=std::vector<std::string>(),
-                        const std::vector<std::string>& avalues=std::vector<std::string>()) const;
+                        const std::vector<std::string>& attributes,
+                        const std::vector<std::string>& avalues) const;
       /// Returns true if the given property is a time series property
       bool isTimeSeries(Kernel::Property* prop) const;
       /// Write a time series log entry
