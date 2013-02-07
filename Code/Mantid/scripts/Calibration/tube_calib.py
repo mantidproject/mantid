@@ -308,7 +308,7 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
        @param whichtube:  a list of workspace indices for the tube
        @param PeakTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
        
-       Return  Array of pixel detector IDs and array of their calibrated positions (in Y coords)
+       Return  Array of pixel detector IDs and array of their calibrated positions 
     """	
     
     # Arrays to be returned
@@ -343,6 +343,11 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     uY = (dNy - d0y)/tubeLength
     uZ = (dNz - d0z)/tubeLength
     
+    # Get Centre (really want to get if from IDF to allow calibration a multiple number of times)
+    cX = (d0x + dNx)/2
+    cY = (d0y + dNy)/2
+    cZ = (d0z + dNz)/2
+    
     # Move the pixel detectors (might not work for sloping tubes)
     for i in range(nDets):
         deti = ws.getDetector( whichTube[i])
@@ -351,9 +356,9 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
 	detiPositionZ = deti.getPos().Z()
 	pNew = pixels[i]
 	detIDs.append( deti.getID() )
-	xNew = (1.0 - uX*uX)*detiPositionX + uX*uX*pNew
-	yNew = (1.0 - uY*uY)*detiPositionY + uY*uY*pNew
-	zNew = (1.0 - uZ*uZ)*detiPositionZ + uZ*uZ*pNew
+	xNew = (1.0 - uX*uX)*detiPositionX + uX*uX*(pNew + cX)
+	yNew = (1.0 - uY*uY)*detiPositionY + uY*uY*(pNew + cY)
+	zNew = (1.0 - uZ*uZ)*detiPositionZ + uZ*uZ*(pNew + cZ)
 
 	detPositions.append( V3D( xNew, yNew, zNew ) )
         # print i, detIDs[i], detPositions[i]
@@ -445,7 +450,7 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
 
         # Deal with (i+1)st tube specified
         wht = tubeSet.getTube(i)
-        print "Calibrating tube", i+1,"of",nTubes, tubeSet.getTubeName(i) #, " length", tubeSet.getTubeLength(i) 
+        print "Calibrating tube", i+1,"of",nTubes, tubeSet.getTubeName(i)  #, " length", tubeSet.getTubeLength(i) 
         if ( len(wht) < 1 ):
            print "Unable to get any workspace indices (spectra) for this tube. Tube",tubeSet.getTubeName(i),"not calibrated."
         else:
