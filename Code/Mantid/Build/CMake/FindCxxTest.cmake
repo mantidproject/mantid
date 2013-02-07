@@ -105,7 +105,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
         DEPENDS ${PATH_FILES}
-        COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE} --root
+        COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --root
         --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname}
     )
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
@@ -122,7 +122,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
       add_custom_command(
         OUTPUT  ${_cxxtest_cpp}
         DEPENDS ${_cxxtest_h}
-        COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE} --part
+        COMMAND ${PYTHON_EXECUTABLE} ${CXXTEST_TESTGEN_EXECUTABLE} --part
         --world ${_cxxtest_testname} -o ${_cxxtest_cpp} ${_cxxtest_h}
 	)
     

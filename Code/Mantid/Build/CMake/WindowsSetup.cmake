@@ -24,7 +24,7 @@ endif()
 ##########################################################################
 # Additional compiler flags
 ##########################################################################
-# /MP - Multiprocessor compilation within a project
+# /MP     - Compile .cpp files in parallel
 # /w34296 - Treat warning C4396, about comparison on unsigned and zero, 
 #           as a level 3 warning
 # /w34389 - Treat warning C4389, about equality comparison on unsigned 
@@ -43,8 +43,15 @@ endif ()
 ###########################################################################
 ## Set the variables that FindPythonLibs would set
 set ( PYTHON_INCLUDE_PATH "${CMAKE_INCLUDE_PATH}/Python27" "${CMAKE_INCLUDE_PATH}/Python27/Include" )
-set ( PYTHON_LIBRARIES "${CMAKE_LIBRARY_PATH}/Python27/python27.lib" )
-set ( PYTHON_DEBUG_LIBRARY "${CMAKE_LIBRARY_PATH}/Python27/python27_d.lib" )
+# Libraries can be in one of two places. This allows it still to build with the old locations
+if ( EXISTS "${CMAKE_LIBRARY_PATH}/Python27/libs" )
+  set ( PYTHON_LIBRARIES "${CMAKE_LIBRARY_PATH}/Python27/libs/python27.lib" )
+  set ( PYTHON_DEBUG_LIBRARY "${CMAKE_LIBRARY_PATH}/Python27/libs/python27_d.lib" )
+else()
+  set ( PYTHON_LIBRARIES "${CMAKE_LIBRARY_PATH}/Python27/python27.lib" )
+  set ( PYTHON_DEBUG_LIBRARY "${CMAKE_LIBRARY_PATH}/Python27/python27_d.lib" )
+endif()
+
 set ( PYTHON_DEBUG_LIBRARIES ${PYTHON_DEBUG_LIBRARY} )
 ## Add debug library into libraries variable
 set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )

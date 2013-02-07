@@ -150,7 +150,7 @@ public:
     EventWorkspace_sptr work_in = WorkspaceCreationHelper::CreateEventWorkspace(50, 100, 100, 0.0, 1.0, 2, 1);
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(10);
     work_in->setInstrument(inst);
-    DateAndTime run_start("2010-01-01");
+    DateAndTime run_start("2010-01-01T00:00:00");
     // Add ten more at #10 so that it fails
     for (int i=0; i<10; i++)
       work_in->getEventList(10).addEventQuickly( TofEvent((i+0.5), run_start+double(i)) );

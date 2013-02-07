@@ -1893,7 +1893,7 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
     // Use the first pulse as the run_start time.
     if (!temp.empty())
     {
-      if (temp[0] < Kernel::DateAndTime("1991-01-01"))
+      if (temp[0] < Kernel::DateAndTime("1991-01-01T00:00:00"))
         alg->getLogger().warning() << "Found entries in the proton_charge sample log with invalid pulse time!\n";
 
       Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();

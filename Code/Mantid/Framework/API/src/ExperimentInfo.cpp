@@ -811,7 +811,7 @@ namespace API
         if (validTo.length() > 0)
           to.setFromISO8601(validTo);
         else
-          to.setFromISO8601("2100-01-01");
+          to.setFromISO8601("2100-01-01T00:00:00");
 
         if ( from <= d && d <= to )
         {

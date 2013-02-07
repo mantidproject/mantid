@@ -306,7 +306,7 @@ public:
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead_2()
   {
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
-    TS_ASSERT_THROWS_NOTHING( log->addValue("1990-01-01",1) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("1990-01-01T00:00:00",1) );
     TS_ASSERT_EQUALS( log->realSize(), 1);
 
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");

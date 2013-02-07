@@ -10,7 +10,6 @@
 #include <iomanip>
 #include <iostream>
 #include <Poco/SAX/SAXParser.h>
-#include <Poco/XML/XMLWriter.h>
 #include <sstream>
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Strings.h"

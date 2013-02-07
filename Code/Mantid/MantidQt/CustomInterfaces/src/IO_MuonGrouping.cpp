@@ -10,7 +10,14 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/XML/XMLWriter.h>
+#ifdef _MSC_VER
+// Disable a flood of warnings from Poco about inheriting from std::basic_istream
+  // See http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
+  #pragma warning( push )
+  #pragma warning( disable : 4250 )
+  #include <Poco/XML/XMLWriter.h>
+  #pragma warning( pop ) 
+#endif
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

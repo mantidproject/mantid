@@ -9,7 +9,6 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMWriter.h>
-#include <Poco/XML/XMLWriter.h>
 #include <sstream>
 namespace Mantid
 {

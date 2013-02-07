@@ -1278,7 +1278,7 @@ namespace Mantid
       if (!log)
         throw std::runtime_error("EventWorkspace::getFirstPulseTime: No TimeSeriesProperty called 'proton_charge' found in the workspace.");
       DateAndTime startDate;
-      DateAndTime reference("1991-01-01");
+      DateAndTime reference("1991-01-01T00:00:00");
 
       int i=0;
       startDate = log->nthTime(i);

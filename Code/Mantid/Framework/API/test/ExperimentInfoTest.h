@@ -512,7 +512,7 @@ public:
             if (validTo.length() > 0)
               ft.to.setFromISO8601(validTo);
             else
-              ft.to.setFromISO8601("2100-01-01");
+              ft.to.setFromISO8601("2100-01-01T00:00:00");
 
             idfFiles.insert( std::pair<std::string,fromToEntry>(l_filenamePart.substr(0,found),
               ft) );

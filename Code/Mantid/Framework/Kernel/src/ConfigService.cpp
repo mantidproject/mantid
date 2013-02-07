@@ -26,6 +26,9 @@
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
 #include <Poco/String.h>
+#ifdef _WIN32
+  #pragma warning( disable: 4250 )
+#endif
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
 
