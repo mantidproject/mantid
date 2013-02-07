@@ -57,5 +57,13 @@ namespace MantidQt
     return PeakTransform::transform(peak.getHKL());
   }
 
+  /**
+   * @return Special coordinate system associated with this type of transform.
+   */
+  Mantid::API::SpecialCoordinateSystem PeakTransformHKL::getCoordinateSystem() const
+  {
+    return Mantid::API::HKL;
+  }
+
 }
 }

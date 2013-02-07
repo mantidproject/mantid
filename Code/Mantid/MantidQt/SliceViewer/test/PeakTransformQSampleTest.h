@@ -203,6 +203,12 @@ void test_getFriendlyName()
   TS_ASSERT_EQUALS(PeakTransformQSample::name(), transform.getFriendlyName());
 }
 
+void test_getCoordinateSystem()
+{
+  PeakTransformQSample transform;
+  TS_ASSERT_EQUALS(Mantid::API::QSample, transform.getCoordinateSystem())
+}
+
 
 };
 #endif

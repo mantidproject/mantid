@@ -5,6 +5,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpecialCoordinateSystem.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/PeakTransformFactory.h"
@@ -703,6 +704,13 @@ public:
   {
     bool sortAscending = false;
     doTestSorting(sortAscending);
+  }
+
+  void test_coordinateToString()
+  {
+    TS_ASSERT_EQUALS("HKL", coordinateToString(Mantid::API::HKL));
+    TS_ASSERT_EQUALS("QLab", coordinateToString(Mantid::API::QLab));
+    TS_ASSERT_EQUALS("QSample", coordinateToString(Mantid::API::QSample));
   }
 
 };

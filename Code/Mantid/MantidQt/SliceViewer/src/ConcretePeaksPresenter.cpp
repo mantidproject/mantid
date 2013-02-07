@@ -20,6 +20,27 @@ namespace MantidQt
   {
 
     /**
+     * Convert from a SpecialCoordinateSystem enum to a correpsonding enum name.
+     * @param coordSystem : enum option
+     * @return coordinate system as a string
+     */
+    std::string coordinateToString(Mantid::API::SpecialCoordinateSystem coordSystem)
+    {
+      switch(coordSystem)
+      {
+      case QLab:
+        return "QLab";
+      case QSample:
+        return "QSample";
+      case HKL:
+        return "HKL";
+      default:
+        return "Unknown";
+      }
+    }
+
+
+    /**
      * Produce the views for the internally held peaks workspace.
      * Indexes to peaks in the peaks workspace are used to reference the corresponding PeaksOverlayView, so when the PeaksWorkspace is reordered,
      * All the views must be recreated.
@@ -42,8 +63,7 @@ namespace MantidQt
      * @param nonIntegratedViewFactory
      * @param peaksWS
      */
-    void ConcretePeaksPresenter::validateInputs(PeakOverlayViewFactory_sptr integratedViewFactory,
-         PeakOverlayViewFactory_sptr nonIntegratedViewFactory, IPeaksWorkspace_const_sptr peaksWS)
+    void ConcretePeaksPresenter::validateInputs(PeakOverlayViewFactory_sptr integratedViewFactory, PeakOverlayViewFactory_sptr nonIntegratedViewFactory)
     {
       if (integratedViewFactory == NULL)
       {
@@ -53,7 +73,7 @@ namespace MantidQt
       {
         throw std::invalid_argument("NonIntegrated PeakOverlayViewFactory is null");
       }
-      if (peaksWS == NULL)
+      if (m_peaksWS == NULL)
       {
         throw std::invalid_argument("PeaksWorkspace is null");
       }
@@ -103,6 +123,43 @@ namespace MantidQt
     }
 
     /**
+     * Check the work-space compatibilities.
+     *
+     * @param mdWS : MDWorkspace currently plotted.
+     */
+    void ConcretePeaksPresenter::checkWorkspaceCompatibilities(boost::shared_ptr<Mantid::API::MDGeometry>  mdWS)
+    {
+      if (auto imdWS = boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(mdWS))
+      {
+        const SpecialCoordinateSystem coordSystMD = imdWS->getSpecialCoordinateSystem();
+        const SpecialCoordinateSystem coordSystDim = m_transform->getCoordinateSystem();
+        const SpecialCoordinateSystem coordSystPK = m_peaksWS->getSpecialCoordinateSystem();
+        // Check that the MDWorkspace is self-consistent.
+        if (coordSystMD != coordSystDim)
+        {
+          std::stringstream ss;
+          ss << std::endl;
+          ss << "According to the dimension names in your MDWorkspace, this work-space is determined to be in: ";
+          ss << m_transform->getFriendlyName() << " in the PeaksViewer. ";
+          ss << "However, the MDWorkspace has properties indicating that it's coordinates are in: " << coordinateToString(coordSystMD);
+          ss << " To resolve the conflict, the MDWorkspace will be treated as though it has coordinates in: " << m_transform->getFriendlyName();
+          g_log.information(ss.str());
+        }
+        // If the peaks work-space has been integrated. check cross-work-space compatibility.
+        if (coordSystDim != coordSystPK && m_peaksWS->hasIntegratedPeaks())
+        {
+          std::stringstream ss;
+          ss << std::endl;
+          ss << "You appear to be plotting your PeaksWorkspace in a different coordinate system from the one in which integration was performed. ";
+          ss << "This will distort the integrated peak shape on the PeaksViewer. ";
+          ss << "PeaksWorkspace was integrated against a MDWorkspace in the coordinate system: " << coordinateToString(m_peaksWS->getSpecialCoordinateSystem());
+          ss << "MDWorkspace is displayed in coordinate system: " << m_transform->getFriendlyName();
+          g_log.information(ss.str());
+        }
+      }
+    }
+
+    /**
      Constructor.
 
      1) First check that the arguments provided are valid.
@@ -123,11 +180,10 @@ namespace MantidQt
             g_log(Mantid::Kernel::Logger::get("PeaksPresenter"))
     {
       // Check the inputs.
-      validateInputs(integratedViewFactory, nonIntegratedViewFactory, peaksWS);
+      validateInputs(integratedViewFactory, nonIntegratedViewFactory);
 
-      std::stringstream ss;
-      ss << "According the the dimension names in your MDWorkspace, this work-space is determined to be in " << m_transform->getFriendlyName() << " in the PeaksViewer." << std::endl;
-      g_log.debug(ss.str());
+      // Check that the workspaces appear to be compatible. Log if otherwise.
+      checkWorkspaceCompatibilities(mdWS);
 
       // Choose the view factory
       constructViewFactory(nonIntegratedViewFactory, mdWS);

@@ -5,6 +5,7 @@
 #include "MantidAPI/IPeak.h"
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
+#include "MantidAPI/SpecialCoordinateSystem.h"
 
 namespace MantidQt
 {
@@ -29,6 +30,8 @@ namespace MantidQt
       virtual boost::shared_ptr<PeakTransform> clone() const = 0;
       /// Getter for a friendly name to describe the transform type.
       virtual std::string getFriendlyName() const = 0;
+      /// Getter for the special coordinate representation of this transform type.
+      virtual Mantid::API::SpecialCoordinateSystem getCoordinateSystem() const = 0;
     protected:
       PeakTransform(const PeakTransform& other);
       std::string m_xPlotLabel;

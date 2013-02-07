@@ -202,6 +202,12 @@ void test_getFriendlyName()
   TS_ASSERT_EQUALS(PeakTransformHKL::name(), transform.getFriendlyName());
 }
 
+void test_getCoordinateSystem()
+{
+  PeakTransformHKL transform;
+  TS_ASSERT_EQUALS(Mantid::API::HKL, transform.getCoordinateSystem())
+}
+
 };
 #endif
 

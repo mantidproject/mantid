@@ -5,6 +5,7 @@
 #include "MantidQtSliceViewer/PeakTransform.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Logger.h"
 #include <vector>
@@ -20,6 +21,9 @@ namespace MantidQt
 
     /// Alias for Vector of Peak Overlay Views
     typedef std::vector< boost::shared_ptr<PeakOverlayView> > VecPeakOverlayView;
+
+    /// Coordinate System Enum to String.
+    std::string DLLExport coordinateToString(Mantid::API::SpecialCoordinateSystem coordSystem);
 
     /*---------------------------------------------------------
     ConcretePeaksPresenter
@@ -73,12 +77,14 @@ namespace MantidQt
       void showBackgroundRadius(const bool show);
       /// Produce the views from the PeaksWorkspace
       void produceViews();
+      /// Validate inputs.
       void validateInputs( boost::shared_ptr<PeakOverlayViewFactory> integratedViewFactory,
-           boost::shared_ptr<PeakOverlayViewFactory> nonIntegratedViewFactory,
-           boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
-
+           boost::shared_ptr<PeakOverlayViewFactory> nonIntegratedViewFactory);
+      /// Construct a the correct view factory.
       void constructViewFactory(boost::shared_ptr<PeakOverlayViewFactory> nonIntegratedViewFactory,
           const boost::shared_ptr<const Mantid::API::MDGeometry> mdWS);
+      /// Check workspace compatibilities.
+      void checkWorkspaceCompatibilities(boost::shared_ptr<Mantid::API::MDGeometry> mdWS);
     };
 
   }

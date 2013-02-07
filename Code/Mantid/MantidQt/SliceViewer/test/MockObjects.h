@@ -84,6 +84,7 @@ namespace
     MOCK_CONST_METHOD1(transform, Mantid::Kernel::V3D(const Mantid::Kernel::V3D&));
     MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&)); 
     MOCK_CONST_METHOD0(getFriendlyName, std::string());
+    MOCK_CONST_METHOD0(getCoordinateSystem, Mantid::API::SpecialCoordinateSystem());
   };
 
   /*------------------------------------------------------------
