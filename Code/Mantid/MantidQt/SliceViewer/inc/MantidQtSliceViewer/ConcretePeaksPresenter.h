@@ -6,6 +6,7 @@
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/Logger.h"
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
@@ -58,6 +59,8 @@ namespace MantidQt
       PeakTransform_sptr m_transform;
       /// current slicing point.
       double m_slicePoint;
+      /// Logger object
+      Mantid::Kernel::Logger & g_log;
       /// Configurre peak transformations
       bool configureMappingTransform();
       /// Hide all views
@@ -70,6 +73,12 @@ namespace MantidQt
       void showBackgroundRadius(const bool show);
       /// Produce the views from the PeaksWorkspace
       void produceViews();
+      void validateInputs( boost::shared_ptr<PeakOverlayViewFactory> integratedViewFactory,
+           boost::shared_ptr<PeakOverlayViewFactory> nonIntegratedViewFactory,
+           boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
+
+      void constructViewFactory(boost::shared_ptr<PeakOverlayViewFactory> nonIntegratedViewFactory,
+          const boost::shared_ptr<const Mantid::API::MDGeometry> mdWS);
     };
 
   }

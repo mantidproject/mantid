@@ -7,6 +7,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/PeakTransformFactory.h"
+#include "MantidKernel/Logger.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/regex.hpp>
 
@@ -36,23 +37,13 @@ namespace MantidQt
     }
 
     /**
-     Constructor.
-
-     1) First check that the arguments provided are valid.
-     2) Then iterate over the MODEL and use it to construct VIEWs via the factory.
-     3) A collection of views is stored internally
-
-     @param nonIntegratedViewFactory : View Factory (THE VIEW via factory)
-     @param integratedViewFactory : View Factory (THE VIEW via factory)
-     @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
-     @param mdWS : IMDWorkspace also being visualised (THE MODEL)
-     @param peaksTransform : Peak Transformation Factory. This is about interpreting the MODEL.
+     * Check that the inputs provided are valid.
+     * @param integratedViewFactory
+     * @param nonIntegratedViewFactory
+     * @param peaksWS
      */
-    ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory,
-        PeakOverlayViewFactory_sptr integratedViewFactory, IPeaksWorkspace_sptr peaksWS,
-        boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) :
-        m_viewPeaks(peaksWS->getNumberPeaks()), m_viewFactory(integratedViewFactory), m_peaksWS(peaksWS), m_transformFactory(
-            transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0)
+    void ConcretePeaksPresenter::validateInputs(PeakOverlayViewFactory_sptr integratedViewFactory,
+         PeakOverlayViewFactory_sptr nonIntegratedViewFactory, IPeaksWorkspace_const_sptr peaksWS)
     {
       if (integratedViewFactory == NULL)
       {
@@ -66,7 +57,18 @@ namespace MantidQt
       {
         throw std::invalid_argument("PeaksWorkspace is null");
       }
+    }
 
+    /**
+     * The view factory needs to be selected. This is done by looking at log value carried on the inputpeaks workspace.
+     * If the work-space is integrated, then the integratedViewFactory is used.
+     *
+     * @param nonIntegratedViewFactory
+     * @param mdWS
+     */
+    void ConcretePeaksPresenter::constructViewFactory(
+        PeakOverlayViewFactory_sptr nonIntegratedViewFactory,  boost::shared_ptr<const MDGeometry> mdWS)
+    {
       double peakIntegrationRadius = 0;
       double backgroundInnerRadius = 0;
       double backgroundOuterRadius = 0;
@@ -98,6 +100,37 @@ namespace MantidQt
       }
       m_viewFactory->setPeakRadius(peakIntegrationRadius, backgroundInnerRadius, backgroundOuterRadius);
       m_viewFactory->setZRange(maxZ, minZ);
+    }
+
+    /**
+     Constructor.
+
+     1) First check that the arguments provided are valid.
+     2) Then iterate over the MODEL and use it to construct VIEWs via the factory.
+     3) A collection of views is stored internally
+
+     @param nonIntegratedViewFactory : View Factory (THE VIEW via factory)
+     @param integratedViewFactory : View Factory (THE VIEW via factory)
+     @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
+     @param mdWS : IMDWorkspace also being visualised (THE MODEL)
+     @param peaksTransform : Peak Transformation Factory. This is about interpreting the MODEL.
+     */
+    ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory,
+        PeakOverlayViewFactory_sptr integratedViewFactory, IPeaksWorkspace_sptr peaksWS,
+        boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) :
+        m_viewPeaks(peaksWS->getNumberPeaks()), m_viewFactory(integratedViewFactory), m_peaksWS(peaksWS), m_transformFactory(
+            transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0),
+            g_log(Mantid::Kernel::Logger::get("PeaksPresenter"))
+    {
+      // Check the inputs.
+      validateInputs(integratedViewFactory, nonIntegratedViewFactory, peaksWS);
+
+      std::stringstream ss;
+      ss << "According the the dimension names in your MDWorkspace, this work-space is determined to be in " << m_transform->getFriendlyName() << " in the PeaksViewer." << std::endl;
+      g_log.debug(ss.str());
+
+      // Choose the view factory
+      constructViewFactory(nonIntegratedViewFactory, mdWS);
 
       const bool transformSucceeded = this->configureMappingTransform();
 
