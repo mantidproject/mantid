@@ -144,6 +144,8 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
   output->ShallowCopy(clipperOutput);
 
+  m_presenter->setAxisLabels(output);
+
   clipper->Delete();
   
   return 1;
