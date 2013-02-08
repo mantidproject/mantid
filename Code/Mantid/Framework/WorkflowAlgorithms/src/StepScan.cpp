@@ -2,7 +2,7 @@
 TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
 *WIKI*/
 
-#include "MantidWorkflowAlgorithms/RockingCurve.h"
+#include "MantidWorkflowAlgorithms/StepScan.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ListValidator.h"
@@ -13,35 +13,35 @@ namespace Mantid
 namespace WorkflowAlgorithms
 {
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(RockingCurve)
+  DECLARE_ALGORITHM(StepScan)
   
   using namespace Kernel;
   using namespace API;
 
   /// Constructor
-  RockingCurve::RockingCurve()
+  StepScan::StepScan()
   {}
 
   /// Destructor
-  RockingCurve::~RockingCurve()
+  StepScan::~StepScan()
   {}
 
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string RockingCurve::name() const { return "RockingCurve";};
+  const std::string StepScan::name() const { return "StepScan";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int RockingCurve::version() const { return 1;};
+  int StepScan::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string RockingCurve::category() const { return "Workflow\\Alignment";}
+  const std::string StepScan::category() const { return "Workflow\\Alignment";}
 
-  void RockingCurve::initDocs()
+  void StepScan::initDocs()
   {
     this->setWikiSummary("Workflow algorithm for analysis of an alignment scan.");
     this->setOptionalMessage("Workflow algorithm for analysis of an alignment scan.");
   }
 
-  void RockingCurve::init()
+  void StepScan::init()
   {
     // TODO: Validator to ensure that this is 'fresh' data???
     declareProperty(new WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input,
@@ -60,7 +60,7 @@ namespace WorkflowAlgorithms
     // TODO: Maybe need to add a pre/post-processing flag for live
   }
 
-  void RockingCurve::exec()
+  void StepScan::exec()
   {
     // Get hold of the input workspace
     DataObjects::EventWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
@@ -104,7 +104,7 @@ namespace WorkflowAlgorithms
    *  @param inputWS The input workspace to the algorithm.
    *  @return A pointer to the monitor workspace if found, otherwise a null pointer.
    */
-  DataObjects::EventWorkspace_sptr RockingCurve::getMonitorWorkspace(API::MatrixWorkspace_sptr inputWS)
+  DataObjects::EventWorkspace_sptr StepScan::getMonitorWorkspace(API::MatrixWorkspace_sptr inputWS)
   {
     // See if there's a monitor workspace alongside the input one
     const std::string monitorWorkspaceName = inputWS->name() + "_monitors";
@@ -129,7 +129,7 @@ namespace WorkflowAlgorithms
    *  @param inputWS The input workspace
    *  @param maskWS  A masking workspace
    */
-  void RockingCurve::runMaskDetectors(MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr maskWS)
+  void StepScan::runMaskDetectors(MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr maskWS)
   {
     IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
     maskingAlg->setProperty<MatrixWorkspace_sptr>("Workspace", inputWS);
@@ -142,7 +142,7 @@ namespace WorkflowAlgorithms
    *  @param xmin    The minimum value of the filter
    *  @param xmax    The maximum value of the filter
    */
-  void RockingCurve::runFilterByXValue(MatrixWorkspace_sptr inputWS, const double xmin, const double xmax)
+  void StepScan::runFilterByXValue(MatrixWorkspace_sptr inputWS, const double xmin, const double xmax)
   {
     std::string rangeUnit = getProperty("RangeUnit");
     // Run ConvertUnits on the input workspace if xmin/max were given in a different unit

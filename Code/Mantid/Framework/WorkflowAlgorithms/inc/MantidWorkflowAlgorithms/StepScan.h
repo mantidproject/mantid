@@ -33,11 +33,11 @@ namespace WorkflowAlgorithms
       File change history is stored at: <https://github.com/mantidproject/mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport RockingCurve  : public API::Algorithm
+  class DLLExport StepScan  : public API::Algorithm
   {
   public:
-    RockingCurve();
-    virtual ~RockingCurve();
+    StepScan();
+    virtual ~StepScan();
 
     virtual const std::string name() const;
     virtual int version() const;

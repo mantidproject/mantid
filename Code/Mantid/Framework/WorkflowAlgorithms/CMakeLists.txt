@@ -21,13 +21,13 @@ set ( SRC_FILES
 	src/HFIRSANSNormalise.cpp
 	src/RefReduction.cpp
 	src/RefRoi.cpp
-	src/RockingCurve.cpp
 	src/SANSBeamFinder.cpp
 	src/SANSBeamFluxCorrection.cpp
 	src/SANSSensitivityCorrection.cpp
 	src/SANSSolidAngleCorrection.cpp
 	src/SetupEQSANSReduction.cpp
 	src/SetupHFIRReduction.cpp
+	src/StepScan.cpp
 	src/WorkflowAlgorithmHelpers.cpp
 )
                 
@@ -57,19 +57,19 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
 	inc/MantidWorkflowAlgorithms/RefReduction.h
 	inc/MantidWorkflowAlgorithms/RefRoi.h
-	inc/MantidWorkflowAlgorithms/RockingCurve.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
 	inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
+	inc/MantidWorkflowAlgorithms/StepScan.h
 	inc/MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h
 )
               
 set ( TEST_FILES
-	RockingCurveTest.h
 	SANSSolidAngleCorrectionTest.h
+	StepScanTest.h
 )
 
 set ( TEST_PY_FILES 

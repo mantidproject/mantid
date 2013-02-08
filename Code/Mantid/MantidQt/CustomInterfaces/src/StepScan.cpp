@@ -1,7 +1,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/RockingCurve.h"
+#include "MantidQtCustomInterfaces/StepScan.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -16,20 +16,20 @@ namespace CustomInterfaces
 {
 
 //Register the class with the factory
-//DECLARE_SUBWINDOW(RockingCurve);
+DECLARE_SUBWINDOW(StepScan);
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 /// Constructor
-RockingCurve::RockingCurve(QWidget *parent)
+StepScan::StepScan(QWidget *parent)
   : UserSubWindow(parent), m_dataReloadNeeded(false),
-    m_addObserver(*this, &RockingCurve::handleAddEvent),
-    m_replObserver(*this, &RockingCurve::handleReplEvent)
+    m_addObserver(*this, &StepScan::handleAddEvent),
+    m_replObserver(*this, &StepScan::handleReplEvent)
 {
 }
 
-RockingCurve::~RockingCurve()
+StepScan::~StepScan()
 {
   // Clean up any hidden workspaces created
   cleanupWorkspaces();
@@ -39,7 +39,7 @@ RockingCurve::~RockingCurve()
 }
 
 /// Set up the dialog layout
-void RockingCurve::initLayout()
+void StepScan::initLayout()
 {
   m_uiForm.setupUi(this);
 
@@ -60,11 +60,11 @@ void RockingCurve::initLayout()
   connect( this, SIGNAL(logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr &)),
            SLOT(fillPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
 
-  connect( m_uiForm.startButton, SIGNAL(clicked()), SLOT(runRockingCurveAlg()) );
+  connect( m_uiForm.startButton, SIGNAL(clicked()), SLOT(runStepScanAlg()) );
   connect( m_uiForm.closeButton, SIGNAL(clicked()), this->parent(), SLOT(close()) );
 }
 
-void RockingCurve::cleanupWorkspaces()
+void StepScan::cleanupWorkspaces()
 {
   if ( ! m_inputWSName.empty() )
   {
@@ -83,7 +83,7 @@ void RockingCurve::cleanupWorkspaces()
   m_uiForm.normalization->disconnect(SIGNAL(currentIndexChanged(const QString &)));
 }
 
-void RockingCurve::startLiveListener()
+void StepScan::startLiveListener()
 {
   // Remove any previously-loaded workspaces
   cleanupWorkspaces();
@@ -98,7 +98,7 @@ void RockingCurve::startLiveListener()
   alg->execute();
 }
 
-void RockingCurve::loadFile()
+void StepScan::loadFile()
 {
   // Remove any previously-loaded workspaces
   cleanupWorkspaces();
@@ -129,7 +129,7 @@ void RockingCurve::loadFile()
   }
 }
 
-void RockingCurve::launchInstrumentWindow()
+void StepScan::launchInstrumentWindow()
 {
   // Gotta do this in python
   std::string pyCode = "instrument_view = getInstrumentView('" + m_inputWSName + "',2)\n"
@@ -143,7 +143,7 @@ void RockingCurve::launchInstrumentWindow()
   AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
 }
 
-void RockingCurve::fillPlotVarCombobox( const MatrixWorkspace_const_sptr & ws )
+void StepScan::fillPlotVarCombobox( const MatrixWorkspace_const_sptr & ws )
 {
   // Hold the name of the scan index log in a common place
   const std::string scan_index("scan_index");
@@ -193,7 +193,7 @@ void RockingCurve::fillPlotVarCombobox( const MatrixWorkspace_const_sptr & ws )
   m_uiForm.startButton->setEnabled(true);
 }
 
-void RockingCurve::fillNormalizationCombobox( const Mantid::API::MatrixWorkspace_const_sptr & ws )
+void StepScan::fillNormalizationCombobox( const Mantid::API::MatrixWorkspace_const_sptr & ws )
 {
   // If there are more than 3 entries in the combobox (nothing, time, proton_charge) then
   // remove any stale ones
@@ -209,14 +209,14 @@ void RockingCurve::fillNormalizationCombobox( const Mantid::API::MatrixWorkspace
   }
 }
 
-void RockingCurve::runRockingCurveAlg()
+void StepScan::runStepScanAlg()
 {
   if ( m_dataReloadNeeded ) loadFile(); // Reload if workspace isn't fresh
 
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("RockingCurve");
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("StepScan");
   alg->setPropertyValue("InputWorkspace", m_inputWSName);
   // The table should not be hidden, so leave off the prefix
-  m_tableWSName = m_inputWSName.substr(2) + "_RockingCurve";
+  m_tableWSName = m_inputWSName.substr(2) + "_StepScan";
   alg->setPropertyValue("OutputWorkspace", m_tableWSName);
 
   const QString maskWS = m_uiForm.maskWorkspace->currentText();
@@ -252,12 +252,12 @@ void RockingCurve::runRockingCurveAlg()
   generateCurve( m_uiForm.plotVariable->currentText() );
 }
 
-void RockingCurve::updateForNormalizationChange()
+void StepScan::updateForNormalizationChange()
 {
   generateCurve( m_uiForm.plotVariable->currentText() );
 }
 
-void RockingCurve::generateCurve( const QString & var )
+void StepScan::generateCurve( const QString & var )
 {
   // Create a matrix workspace out of the variable that's asked for
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertTableToMatrixWorkspace");
@@ -290,7 +290,7 @@ void RockingCurve::generateCurve( const QString & var )
   plotCurve();
 }
 
-void RockingCurve::plotCurve()
+void StepScan::plotCurve()
 {
   // Get the name of the dataset to produce the plot title
   std::string title = m_inputWSName.substr(2);
@@ -314,7 +314,7 @@ void RockingCurve::plotCurve()
                        "    l.legend().hide()\n"
                        "    l.removeTitle()\n"
                        "    setWindowName(g,'" + title + "')\n"
-                       "    g.setWindowLabel('Rocking Curve')\n"
+                       "    g.setWindowLabel('Step Scan')\n"
                        "l = g.activeLayer()\n"
                        "l.setAxisTitle(Layer.Bottom,'" + xAxisTitle + "')\n"
                        "l.setAxisTitle(Layer.Left,'" + yAxisTitle + "')";
@@ -322,17 +322,17 @@ void RockingCurve::plotCurve()
   runPythonCode( QString::fromStdString(pyCode) );
 }
 
-void RockingCurve::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
+void StepScan::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
 {
   checkForMaskWorkspace(pNf->object_name());
 }
 
-void RockingCurve::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
+void StepScan::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
 {
   checkForMaskWorkspace(pNf->object_name());
 }
 
-void RockingCurve::checkForMaskWorkspace(const std::string & wsName)
+void StepScan::checkForMaskWorkspace(const std::string & wsName)
 {
   if ( wsName == "MaskWorkspace" )
   {
