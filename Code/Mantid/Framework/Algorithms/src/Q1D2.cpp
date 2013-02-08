@@ -339,7 +339,7 @@ void Q1D2::addWaveAdj(const double * c, const double * Dc, MantidVec::iterator b
   for( ; bInOut != end; ++e2InOut, ++c, ++Dc, ++bInOut)
   {
     //first the error
-    *e2InOut += ( (*e2InOut)*(*c)*(*c) )+( (*Dc)*(*Dc)*(*bInOut)*(*bInOut) );
+    *e2InOut = ( (*e2InOut)*(*c)*(*c) )+( (*Dc)*(*Dc)*(*bInOut)*(*bInOut) );
     // now the actual calculation a = b*c
     *bInOut = (*bInOut)*(*c);
   }
