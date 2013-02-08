@@ -3,24 +3,24 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidWorkflowAlgorithms/RockingCurve.h"
+#include "MantidWorkflowAlgorithms/StepScan.h"
 #include "MantidAlgorithms/FilterByXValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::WorkflowAlgorithms::RockingCurve;
+using Mantid::WorkflowAlgorithms::StepScan;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class RockingCurveTest : public CxxTest::TestSuite
+class StepScanTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RockingCurveTest *createSuite() { return new RockingCurveTest(); }
-  static void destroySuite( RockingCurveTest *suite ) { delete suite; }
+  static StepScanTest *createSuite() { return new StepScanTest(); }
+  static void destroySuite( StepScanTest *suite ) { delete suite; }
 
   // Just a simple test on a very small workspace - leave more extensive testing for system tests
   void test_simple_case()
@@ -49,7 +49,7 @@ public:
     MatrixWorkspace_sptr mask = WorkspaceFactory::Instance().create("MaskWorkspace",3,1,1);
     mask->dataY(1)[0] = 1;
 
-    RockingCurve alg;
+    StepScan alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", ws) );
