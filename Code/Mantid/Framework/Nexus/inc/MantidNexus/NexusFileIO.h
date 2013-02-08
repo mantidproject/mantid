@@ -17,6 +17,8 @@ namespace Mantid
   {
     DLLExport int getNexusEntryTypes(const std::string& fileName, std::vector<std::string>& entryName,
                            std::vector<std::string>& definition );
+    DLLExport int getNexusEntryTypes(::NeXus::File * handle, std::vector<std::string>& entryName,
+                           std::vector<std::string>& definition );
 
     /** @class NexusFileIO NexusFileIO.h NeXus/NexusFileIO.h
 
@@ -97,7 +99,6 @@ namespace Mantid
 
       /// write bin masking information
       bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const;
-
       /// Nexus file handle
       NXhandle fileID;
 

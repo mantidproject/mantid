@@ -1093,69 +1093,72 @@ using namespace DataObjects;
   int getNexusEntryTypes(const std::string& fileName, std::vector<std::string>& entryName,
       std::vector<std::string>& definition )
   {
-    //
-    //
-    NXhandle fileH;
-    NXaccess mode= NXACC_READ;
-    NXstatus stat=NXopen(fileName.c_str(), mode, &fileH);
-    if(stat==NX_ERROR) return(-1);
-    //
+    ::NeXus::File *handle = new ::NeXus::File(fileName);
+    int result = getNexusEntryTypes(handle, entryName, definition);
+    delete handle;
+    return result;
+  }
+
+  /** Get all the Nexus entry types for a file
+   *
+   * Try to open named Nexus file and return all entries plus the definition found for each.
+   * If definition not found, try and return "analysis" field (Muon V1 files)
+   * Closes file on exit.
+   *
+   * @param handle :: file handle to use
+   * @param entryName :: vector that gets filled with strings with entry names
+   * @param definition :: vector that gets filled with the "definition" or "analysis" string.
+   * @return count of entries if OK, -1 failed to open file.
+   */
+  int getNexusEntryTypes(::NeXus::File * handle, std::vector<std::string>& entryName,
+                         std::vector<std::string>& definition )
+  {
     entryName.clear();
     definition.clear();
-    char *nxname,*nxclass;
-    int nxdatatype;
-    nxname= new char[NX_MAXNAMELEN];
-    nxclass = new char[NX_MAXNAMELEN];
-    int rank,dims[2],type;
-    //
+
     // Loop through all entries looking for the definition section in each (or analysis for MuonV1)
-    //
+    std::map<std::string, std::string> entries = handle->getEntries();
     std::vector<std::string> entryList;
-    while( ( stat=NXgetnextentry(fileH,nxname,nxclass,&nxdatatype) ) == NX_OK )
+    const std::string NXENTRY("NXentry");
+    for (auto entry = entries.begin(); entry != entries.end(); ++entry)
     {
-      std::string nxc(nxclass);
-      if(nxc.compare("NXentry")==0)
-        entryList.push_back(nxname);
+      if (entry->second == NXENTRY)
+        entryList.push_back(entry->first);
     }
+
     // for each entry found, look for "analysis" or "definition" text data fields and return value plus entry name
+    const std::string SDS("SDS");
+    const std::string DFN("definition");
+    const std::string ANALYSIS("analysis");
     for(size_t i=0;i<entryList.size();i++)
     {
-      //
-      stat=NXopengroup(fileH,entryList[i].c_str(),"NXentry");
-      // loop through field names in this entry
-      while( ( stat=NXgetnextentry(fileH,nxname,nxclass,&nxdatatype) ) == NX_OK )
+      handle->openGroup(entryList[i], NXENTRY);
+
+      std::map<std::string, std::string> possibilities = handle->getEntries();
+      for (auto it = possibilities.begin(); it != possibilities.end(); ++it)
       {
-        std::string nxc(nxclass),nxn(nxname);
-        // if a data field
-        if(nxc.compare("SDS")==0)
-          // if one of the two names we are looking for
-          if(nxn.compare("definition")==0 || nxn.compare("analysis")==0)
+        if (it->second == SDS)
+        {
+          if (it->first == ANALYSIS || it->first == DFN)
           {
-            stat=NXopendata(fileH,nxname);
-            stat=NXgetinfo(fileH,&rank,dims,&type);
-            if(stat==NX_ERROR)
-              continue;
-            char* value=new char[dims[0]+1];
-            stat=NXgetdata(fileH,value);
-            if(stat==NX_ERROR)
-              continue;
-            value[dims[0]]='\0';
+            handle->openData(it->first);
+            std::string value = handle->getStrData();
+            handle->closeData();
+
             // return e.g entryName "analysis"/definition "muonTD"
             definition.push_back(value);
             entryName.push_back(entryList[i]);
-            delete[] value;
-            stat=NXclosegroup(fileH); // close data group, then entry
-            stat=NXclosegroup(fileH);
+
             break;
           }
+        }
       }
+
+      handle->closeGroup();
     }
-    stat=NXclose(&fileH);
-    delete[] nxname;
-    delete[] nxclass;
+
     return(static_cast<int>(entryName.size()));
   }
-
 
 } // namespace NeXus
 } // namespace Mantid
