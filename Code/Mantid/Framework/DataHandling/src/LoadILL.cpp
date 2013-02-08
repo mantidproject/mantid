@@ -102,15 +102,20 @@ void LoadILL::exec() {
  *
  */
 void LoadILL::setInstrumentName(NeXus::NXEntry& entry) {
+
+	// Old format: /entry0/IN5/name
+	// New format: /entry0/instrument/name
+
 	// Ugly way of getting Instrument Name
 	// Instrument name is in: entry0/<NXinstrument>/name
 	std::vector<NXClassInfo> v = entry.groups();
 	for (auto it = v.begin(); it < v.end(); it++) {
 		if (it->nxclass == "NXinstrument") {
-			std::string insNamePath = it->nxname + "/name";
+			m_nexusInstrumentEntryName = it->nxname;
+			std::string insNamePath = m_nexusInstrumentEntryName + "/name";
 			m_instrumentName = entry.getString(insNamePath);
 			g_log.debug() << "Instrument Name: " << m_instrumentName
-					<< std::endl;
+					<< " in NxPath: " << insNamePath << std::endl;
 			break;
 		}
 	}
@@ -119,6 +124,7 @@ void LoadILL::setInstrumentName(NeXus::NXEntry& entry) {
 		throw std::runtime_error(
 				"Cannot read the instrument name from the Nexus file!");
 	}
+
 }
 
 /**
@@ -205,7 +211,9 @@ void LoadILL::loadTimeDetails(NeXus::NXEntry& entry) {
 	m_monitorElasticPeakPosition = entry.getInt("monitor/elasticpeak");
 
 	NXDiskChopper chopper =
-			entry.openNXInstrument(m_instrumentName).openNXDiskChopper("FO");
+			entry.openNXInstrument(m_nexusInstrumentEntryName).openNXDiskChopper(
+					"FO");
+
 	NXFloat f0ChopperSpeedRPM = chopper.openRotationSpeed();
 	f0ChopperSpeedRPM.load();
 
@@ -224,12 +232,12 @@ void LoadILL::loadTimeDetails(NeXus::NXEntry& entry) {
 	m_timeOfFlightDelay = time_of_flight_data[2];
 
 	g_log.debug("Nexus Data:");
-	g_log.debug() << "NchannelWidth: " << m_channelWidth << std::endl;
-	g_log.debug() << "wavelength: " << m_wavelength << std::endl;
-	g_log.debug() << "elasticPeakPosition: " << m_monitorElasticPeakPosition
+	g_log.debug() << " ChannelWidth: " << m_channelWidth << std::endl;
+	g_log.debug() << " Wavelength: " << m_wavelength << std::endl;
+	g_log.debug() << " ElasticPeakPosition: " << m_monitorElasticPeakPosition
 			<< std::endl;
-	g_log.debug() << "timeOfFlightDelay: " << m_timeOfFlightDelay << std::endl;
-	g_log.debug() << "timePickupToOpening: " << m_timePickupToOpening
+	g_log.debug() << " timeOfFlightDelay: " << m_timeOfFlightDelay << std::endl;
+	g_log.debug() << " timePickupToOpening: " << m_timePickupToOpening
 			<< std::endl;
 
 }
@@ -277,7 +285,7 @@ std::string LoadILL::getDateTimeInIsoFormat(std::string dateToParse) {
  */
 template<class T>
 std::vector<int> LoadILL::peakSearchPosition(const std::vector<T> &v,
-		int delta = 10) {
+		int delta = 5) {
 
 	std::vector<int> maxPositions;
 	std::vector<int> minPositions;
@@ -509,9 +517,12 @@ int LoadILL::getMonitorElasticPeakPosition(
 int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
 
 	std::vector<int> listOfFoundEPP;
+	// j = index in the equatorial line (256/2=128)
+	// both index 127 and 128 are in the equatorial line
 	size_t j = m_numberOfPixelsPerTube / 2;
 	// ignore the first tubes and the last ones to avoid the beamstop
-	for (size_t i = 20; i < m_numberOfTubes - 50; i = i + 10) {
+	//for (size_t i = 20; i < m_numberOfTubes - 50; i = i + 4) {
+	for (size_t i = 1; i < m_numberOfTubes-30; i++) {
 		int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
 		std::vector<int> thisSpectrum(data_p, data_p + m_numberOfChannels);
 		std::vector<int> peakPositions = peakSearchPosition<int>(thisSpectrum);
@@ -520,13 +531,26 @@ int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
 					peakPositions.end());
 			listOfFoundEPP.push_back(it);
 		}
+//		g_log.debug() << "Tube (" << i << ") : Spectra (" << 256 * i - 128 << ") : ";
+//		for (auto v : peakPositions)
+//			g_log.debug() << v << " ";
+//		g_log.debug() << "\n";
+
 	}
 
-	int calculatedDetectorElasticPeakPosition = mode(listOfFoundEPP)[0]; // in case of various, pick the first [0]
-	g_log.debug() << "Calculated Detector EPP: "
-			<< calculatedDetectorElasticPeakPosition;
-	g_log.debug() << " :: Read EPP from the nexus file: "
-			<< m_monitorElasticPeakPosition << std::endl;
+	int calculatedDetectorElasticPeakPosition;
+	if (listOfFoundEPP.size() <= 0 || mode(listOfFoundEPP).size() <= 0) {
+		g_log.warning()
+				<< "No Elastic peak position found! Assuming the EPP in the Nexus file: "
+				<< m_monitorElasticPeakPosition << std::endl;
+		calculatedDetectorElasticPeakPosition = m_monitorElasticPeakPosition;
+	} else {
+		calculatedDetectorElasticPeakPosition = mode(listOfFoundEPP)[0]; // in case of various, pick the first [0]
+		g_log.debug() << "Calculated Detector EPP: "
+				<< calculatedDetectorElasticPeakPosition;
+		g_log.debug() << " :: Read EPP from the nexus file: "
+				<< m_monitorElasticPeakPosition << std::endl;
+	}
 
 	return calculatedDetectorElasticPeakPosition;
 
@@ -554,11 +578,11 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	 *
 	 * Neutron velocity: v = (6.626e-34 m² kg / s) / (1.675e-27 kg) (\lambda m)
 	 * t = distance / v
+	 * TODO: delete this when in production
 	 */
-
 	double distanceSourceSample = 2.10855; //meters
 	double distanceSourceMonitor = 0.85560; //meters
-	double distanceSampleDetector = 4;
+	double distanceSampleDetector = 4; //meters - equatorial line of the detector
 
 	double tElastSampleDetector = (distanceSampleDetector)
 			/ (6.626e-34 / (1.675e-27 * m_wavelength * 1e-10));
@@ -588,10 +612,11 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	 * I hate this but the EPP in  the monitor has to be the theoretical value
 	 * Let's make time start at zero and find a ficticious channel witdh
 	 * TODO: This tElastSourceMonitor must be calculated from a parameter and not an hardcoded value
+	 * TODO: Monitor info doesn't look useful for ILL... delete it.
 	 */
 	std::vector<double> monitorTofBins(monitorData.size() + 1);
 	double monitorFakeChannelWidth = tElastSourceMonitor / monitorPeakPosition;
-	for (size_t i = 0; i <= monitorData.size(); ++i) {
+	for (size_t i = 1; i <= monitorData.size() + 1; ++i) {
 		monitorTofBins[i] = static_cast<double>(i) * monitorFakeChannelWidth;
 	}
 	// assign the calculated tof bins to the 0 spectra X axis
@@ -600,9 +625,8 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	m_localWorkspace->dataY(0).assign(monitorData.begin(), monitorData.end());
 
 	/*
-	 * Detector:
-	 * Find real elastic peak in the detector
-	 * found a few pixels elastic peaks on the equatorial line of the detector
+	 * Detector: Find real elastic peak in the detector.
+	 * Looks for a few elastic peaks on the equatorial line of the detector.
 	 */
 	int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(
 			data);
@@ -613,20 +637,34 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 
 	// Calculate the real tof from the source and put it in tof array
 	std::vector<double> detectorTofBins(m_numberOfChannels + 1);
-	for (size_t j = 0; j <= m_numberOfChannels; ++j) {
-		detectorTofBins[j] = tPickupToDetectorElastic - m_timePickupToOpening
+	for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+		detectorTofBins[i] = tPickupToDetectorElastic
+				- m_timePickupToOpening
 				+ m_channelWidth
-						* static_cast<double>(static_cast<int>(j)
+						* static_cast<double>(static_cast<int>(i)
 								- calculatedDetectorElasticPeakPosition);
 
 	}
+	g_log.debug() << "Detector TOF bins: ";
+	for (auto i : detectorTofBins) g_log.debug() << i << " ";
+	g_log.debug() << "\n";
+
+	g_log.information() << "T1+T2 : Theoretical = "
+			<< tElastSourceSample + tElastSampleDetector;
+	g_log.information() << " ::  Calculated bin = ["
+			<< detectorTofBins[calculatedDetectorElasticPeakPosition]
+			<< "," << detectorTofBins[calculatedDetectorElasticPeakPosition +1]
+			<< "]" << std::endl;
+
+
 	// assign the calculated tof bins to the 0 spectra X axis
 	m_localWorkspace->dataX(1).assign(detectorTofBins.begin(),
 			detectorTofBins.end());
 
+	//TODO: start in 1 as 0 is the monitor. Change this!
 	Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 	size_t spec = 1;
-	for (size_t i = 0; i < m_numberOfTubes; ++i)
+	for (size_t i = 0; i < m_numberOfTubes; ++i){
 		for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
 			if (spec > 1) {
 				// just copy the time binning axis to every spectra
@@ -638,6 +676,7 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 			++spec;
 			progress.report();
 		}
+	}
 }
 
 /**

@@ -43,7 +43,8 @@ class DLLExport LoadILL: public API::IDataFileChecker {
 public:
 	/// Constructor
 	LoadILL() :
-			API::IDataFileChecker(), m_instrumentName("") {
+			API::IDataFileChecker(), m_instrumentName(""), m_nexusInstrumentEntryName(
+					"") {
 	}
 	/// Virtual destructor
 	virtual ~LoadILL() {
@@ -112,6 +113,10 @@ private:
 	double m_timeOfFlightDelay;
 	double m_timePickupToOpening;
 	//std::string m_title;
+
+	// Nexus instrument entry is of the format /entry0/<XXX>/
+	// XXX changes from version to version
+	std::string m_nexusInstrumentEntryName;
 
 };
 
