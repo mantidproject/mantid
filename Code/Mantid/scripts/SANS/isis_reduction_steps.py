@@ -1440,6 +1440,57 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
         
         return wave_adj, pixel_adj
 
+class ConvertToQISIS(sans_reduction_steps.ConvertToQ):
+    """
+    Extend the sans_recution_steps.ConvertToQ to use the property WavePixelAdj.
+    Currently, this allows the wide angle transmission correction.
+    """
+    def execute(self, reducer, workspace):
+        """
+        Calculate the normalization workspaces and then call the chosen Q conversion algorithm.
+        Almost a copy of sans_reduction_steps.ConvertToQ, except by the calculation of
+        the transmission correction wide angle.
+        """
+        wavepixeladj = ""
+        if (reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp):
+            #calculate the transmission wide angle correction
+            _issueWarning("sans solid angle correction execution")
+            SANSSolidAngleCorrection(SampleData=workspace,
+                                     TransmissionData = reducer.transmission_calculator.output_wksp,
+                                     OutputWorkspace='transmissionWorkspace')
+            wavepixeladj = 'transmissionWorkspace'
+        #create normalization workspaces
+        if self._norms:
+            # the empty list at the end appears to be needed (the system test SANS2DWaveloops) is this a bug in Python?
+            wave_adj, pixel_adj = self._norms.calculate(reducer, [])
+        else:
+            raise RuntimeError('Normalization workspaces must be created by CalculateNorm() and passed to this step')
+
+        # If some prenormalization flag is set - normalize data with wave_adj and pixel_adj
+        if self.prenorm:
+            data = mtd[workspace]
+            if wave_adj:
+                data /= mtd[wave_adj]
+            if pixel_adj:
+                data /= mtd[pixel_adj]
+            self._deleteWorkspaces([wave_adj, pixel_adj])
+            wave_adj, pixel_adj = '', ''
+
+        try:
+            if self._Q_alg == 'Q1D':
+                Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, WavePixelAdj = wavepixeladj)
+            elif self._Q_alg == 'Qxy':
+                Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
+                ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
+            else:
+                raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
+        except:
+            #when we are all up to Python 2.5 replace the duplicated code below with one finally:
+            self._deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
+            raise
+
+        self._deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
+
 class UnitsConvert(ReductionStep):
     """
         Executes ConvertUnits and then Rebin on the same workspace. If no re-bin limits are
@@ -1718,6 +1769,13 @@ class UserFile(ReductionStep):
 
         elif upper_line.startswith('PRINT '):
             _issueInfo(upper_line[6:])
+
+        elif upper_line.startswith('SAMPLE/PATH'):
+            flag = upper_line[12:].strip()
+            if flag == 'ON' or flag == 'TRUE':
+                reducer.wide_angle_correction = True
+            else:
+                reducer.wide_angle_correction = False
         
         elif line.startswith('!') or not line:
             # this is a comment or empty line, these are allowed
