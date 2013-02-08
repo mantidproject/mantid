@@ -247,7 +247,7 @@ namespace Mantid
         }
         catch(std::runtime_error& ex)
         {
-          g_log.error() << "Error initializing " << this->name() << " algorithm. " << ex.what();
+          g_log.error() << "Error initializing " << this->name() << " algorithm: " << ex.what() << std::endl;
           throw;
         }
 
