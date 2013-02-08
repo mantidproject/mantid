@@ -144,6 +144,8 @@ class SNSPowderReduction(PythonAlgorithm):
             self._data[info.freq][info.wl]=info
         def __getFrequency(self, request):
             for freq in self._data.keys():
+                if abs(float(freq)-request) == 0.:
+                    return freq
                 if 100. * abs(float(freq)-request)/request < 5.:
                     return freq
             raise RuntimeError("Failed to find frequency: %fHz" % request)
