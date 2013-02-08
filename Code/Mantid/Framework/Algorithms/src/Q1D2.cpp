@@ -58,6 +58,9 @@ void Q1D2::init()
   declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, PropertyMode::Optional, wavVal),
     "The scaling to apply to each bin to account for monitor counts, transmission\n"
     "fraction, etc");
+  declareProperty(new WorkspaceProperty<>("WavePixelAdj", "", Direction::Input, PropertyMode::Optional, dataVal), 
+    "The scaling to apply to the normalization factor. It gathers the corrections that depend on pixel and wavelength together.\n"
+     "Currently, it takes in account the angle transmission correction.");
   declareProperty("AccountForGravity",false,
     "Whether to correct for the effects of gravity");
   declareProperty("SolidAngleWeighting",true,
@@ -84,12 +87,14 @@ void Q1D2::exec()
   m_dataWS = getProperty("DetBankWorkspace");
   MatrixWorkspace_const_sptr waveAdj = getProperty("WavelengthAdj");
   MatrixWorkspace_const_sptr pixelAdj = getProperty("PixelAdj");
+  MatrixWorkspace_const_sptr wavePixelAdj = getProperty("WavePixelAdj");
   const bool doGravity = getProperty("AccountForGravity");
   m_doSolidAngle = getProperty("SolidAngleWeighting");
 
   //throws if we don't have common binning or another incompatibility
   Qhelper helper;
   helper.examineInput(m_dataWS, waveAdj, pixelAdj);
+  // FIXME: how to examine the wavePixelAdj? 
   g_log.debug() << "All input workspaces were found to be valid\n";
   // normalization as a function of wavelength (i.e. centers of x-value bins)
   double const * const binNorms = waveAdj ? &(waveAdj->readY(0)[0]) : NULL;
@@ -153,7 +158,7 @@ void Q1D2::exec()
     MantidVec::iterator QIn = normETo2s + numWavbins;
 
     // the weighting for this input spectrum that is added to the normalization
-    calculateNormalization(wavStart, i, pixelAdj, binNorms, binNormEs, norms, normETo2s);
+    calculateNormalization(wavStart, i, pixelAdj, wavePixelAdj, binNorms, binNormEs, norms, normETo2s);
 
     // now read the data from the input workspace, calculate Q for each bin
     convertWavetoQ(i, doGravity, wavStart, QIn);
@@ -264,27 +269,33 @@ API::MatrixWorkspace_sptr Q1D2::setUpOutputWorkspace(const std::vector<double> &
 *  @param wavStart [in] the index number of the first bin in the input wavelengths that is actually being used
 *  @param specInd [in] the spectrum to calculate
 *  @param pixelAdj [in] if not NULL this is workspace contains single bins with the adjustments, e.g. detector efficencies, for the given spectrum index
+*  @param wavePixelAdj [in] if not NULL this is workspace that contains the adjustments for the pixels and wavelenght dependend values. 
 *  @param binNorms [in] pointer to a contigious array of doubles that are the wavelength correction from waveAdj workspace, can be NULL
 *  @param binNormEs [in] pointer to a contigious array of doubles which corrospond to the corrections and are their errors, can be NULL
 *  @param norm [out] normalization for each bin, including soild angle, pixel correction, the proportion that is not masked and the normalization workspace
 *  @param normETo2 [out] this pointer must point to the end of the norm array, it will be filled with the total of the error on the normalization
 */
-void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd, API::MatrixWorkspace_const_sptr pixelAdj, double const * const binNorms, double const * const binNormEs, const MantidVec::iterator norm, const MantidVec::iterator normETo2) const
+  void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd, API::MatrixWorkspace_const_sptr pixelAdj, API::MatrixWorkspace_const_sptr wavePixelAdj, double const * const binNorms, double const * const binNormEs, const MantidVec::iterator norm, const MantidVec::iterator normETo2) const
 {
   double detectorAdj, detAdjErr;
   pixelWeight(pixelAdj, specInd, detectorAdj, detAdjErr);
-
   //use that the normalization array ends at the start of the error array
   for(MantidVec::iterator n = norm, e = normETo2; n != normETo2; ++n, ++e)
-  {
-    *n = detectorAdj;
-    *e = detAdjErr*detAdjErr;
-  }
-
+    {
+      *n = detectorAdj;
+      *e = detAdjErr*detAdjErr;
+    }
+  
   if (binNorms && binNormEs)
-  {
-    addWaveAdj(binNorms+wavStart, binNormEs+wavStart, norm, normETo2);
-  }
+    {
+      if (wavePixelAdj)
+        // pass the iterator for the wave pixel Adj dependent 
+        addWaveAdj(binNorms+wavStart, binNormEs+wavStart, norm, normETo2,
+                   wavePixelAdj->readY(specInd).begin() + wavStart, 
+                   wavePixelAdj->readE(specInd).begin() + wavStart);
+      else
+        addWaveAdj(binNorms+wavStart, binNormEs+wavStart, norm, normETo2);
+    }
   normToMask(wavStart, specInd, norm, normETo2);
 }
 
@@ -327,13 +338,13 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,  const size_t s
 *  @param[in,out] bInOut normalization for each bin, this method multiplise this by the proportion that is not masked and the normalization workspace
 *  @param[in, out] e2InOut this array must follow straight after the normalization array and will contain the error on the normalisation term before the WavelengthAdj term
 */
-void Q1D2::addWaveAdj(const double * c, const double * Dc, MantidVec::iterator bInOut, MantidVec::iterator e2InOut) const
+  void Q1D2::addWaveAdj(const double * c, const double * Dc, MantidVec::iterator bInOut, MantidVec::iterator e2InOut) const
 {
   // normalize by the wavelength dependent correction, keeping the percentage errors the same
   // the error when a = b*c, the formula for Da, the error on a, in terms of Db, etc. is (Da/a)^2 = (Db/b)^2 + (Dc/c)^2
   //(Da)^2 = ((Db*a/b)^2 + (Dc*a/c)^2) = (Db*c)^2 + (Dc*b)^2
   // the variable names relate to those above as: existing values (b=bInOut) multiplied by the additional errors (Dc=binNormEs), existing errors (Db=sqrt(e2InOut)) times new factor (c=binNorms)
-
+ 
   //use the fact that error array follows straight after the normalization array
   const MantidVec::const_iterator end = e2InOut;
   for( ; bInOut != end; ++e2InOut, ++c, ++Dc, ++bInOut)
@@ -342,6 +353,46 @@ void Q1D2::addWaveAdj(const double * c, const double * Dc, MantidVec::iterator b
     *e2InOut = ( (*e2InOut)*(*c)*(*c) )+( (*Dc)*(*Dc)*(*bInOut)*(*bInOut) );
     // now the actual calculation a = b*c
     *bInOut = (*bInOut)*(*c);
+  }
+}
+/** Calculates the contribution to the normalization terms from each bin in a spectrum
+*  @param[in] c pointer to the start of a contigious array of wavelength dependent normalization terms
+*  @param[in] Dc pointer to the start of a contigious array that corrosponds to wavelength dependent term, having its error
+*  @param[in,out] bInOut normalization for each bin, this method multiplise this by the proportion that is not masked and the normalization workspace
+*  @param[in, out] e2InOut this array must follow straight after the normalization array and will contain the error on the normalisation term before the WavelengthAdj term
+* @param[in] wavePixelAdjData normalization correction for each bin for each detector pixel. 
+* @param[in] wavePixelAdjError normalization correction incertainty for each bin for each detector pixel.
+*/
+void Q1D2::addWaveAdj(const double * c, const double * Dc, MantidVec::iterator bInOut, MantidVec::iterator e2InOut, 
+                      MantidVec::const_iterator wavePixelAdjData, MantidVec::const_iterator wavePixelAdjError) const
+{
+  // normalize by the wavelength dependent correction, keeping the percentage errors the same
+  // the error when a = b*c*e, the formula for Da, the error on a, in terms of Db, etc. is 
+  // (Da/a)^2 = (Db/b)^2 + (Dc/c)^2 + (De/e)^2  
+  //(Da)^2 = ((Db*a/b)^2 + (Dc*a/c)^2) + (De * a/e)^2
+  // But: a/b = c*e; a/c = b*e; a/e = b*c; 
+  // So: 
+  // (Da)^2 = (c*e*Db)^2 + (b*e*Dc)^2 + (b*c*De)^2
+  // 
+  // Consider: 
+  // Da = Error (e2InOut)
+  // Db^2 = PixelDependentError (e2InOut)
+  // b  = PixelDependentValue (bInOut) 
+  // c  = WaveDependentValue (c)
+  // Dc = WaveDependentError (Dc)
+  // e  = PixelWaveDependentValue (wavePixelAdjData)
+  // De = PiexlWaveDependentError (wavePixelAdjError)
+
+  //use the fact that error array follows straight after the normalization array
+  const MantidVec::const_iterator end = e2InOut;
+ for( ; bInOut != end; ++e2InOut, ++c, ++Dc, ++bInOut, ++wavePixelAdjData, ++wavePixelAdjError)
+  {
+    //first the error
+    *e2InOut = ( (*e2InOut)*(*c)*(*c)*(*wavePixelAdjData)*(*wavePixelAdjData) ) + 
+      ( (*Dc)*(*Dc)*(*bInOut)*(*bInOut)*(*wavePixelAdjData)*(*wavePixelAdjData) ) +
+      ((*wavePixelAdjError)*(*wavePixelAdjError)*(*c)*(*c)*(*bInOut)*(*bInOut));
+    // now the actual calculation a = b*c*e : Pixel * Wave * PixelWave
+    *bInOut = (*bInOut)*(*c) * (*wavePixelAdjData);
   }
 }
 
