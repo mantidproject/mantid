@@ -28,7 +28,9 @@ namespace DataObjects
      */
     const std::string typeFromName(const std::string & name)
     {
-      if(TYPE_INDEX.empty())
+      // We should enter the critical section if the map has not been fully filled.
+      // Be sure to keep the value tested against in sync with the number of inserts below
+      if( TYPE_INDEX.size() != 17 )
       {
         PARALLEL_CRITICAL(fill_column_index_map)
         {
@@ -52,6 +54,7 @@ namespace DataObjects
             TYPE_INDEX.insert(std::make_pair("Col", "double"));
             TYPE_INDEX.insert(std::make_pair("QLab", "V3D"));
             TYPE_INDEX.insert(std::make_pair("QSample", "V3D"));
+            // If adding an entry, be sure to increment the size comparizon in the first line
           }
         }
       }
