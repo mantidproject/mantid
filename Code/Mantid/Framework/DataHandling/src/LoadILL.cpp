@@ -645,9 +645,9 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 								- calculatedDetectorElasticPeakPosition);
 
 	}
-	g_log.debug() << "Detector TOF bins: ";
-	for (auto i : detectorTofBins) g_log.debug() << i << " ";
-	g_log.debug() << "\n";
+	//g_log.debug() << "Detector TOF bins: ";
+	//for (auto i : detectorTofBins) g_log.debug() << i << " ";
+	//g_log.debug() << "\n";
 
 	g_log.information() << "T1+T2 : Theoretical = "
 			<< tElastSourceSample + tElastSampleDetector;
