@@ -877,7 +877,7 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
     algProp->setValue(transAlg->toString());
     reductionManager->declareProperty(algProp);
   }
-  // Direct beam method for transmission determination
+  // Beam spreader method for transmission determination
   else if (boost::iequals(bckTransMethod, "BeamSpreader"))
   {
     const std::string sampleSpread = getPropertyValue("BckTransSampleSpreaderFilename");

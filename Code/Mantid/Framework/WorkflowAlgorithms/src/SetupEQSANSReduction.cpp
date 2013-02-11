@@ -305,6 +305,84 @@ void SetupEQSANSReduction::init()
   setPropertyGroup("TransmissionUseSampleDC", trans_grp);
   setPropertyGroup("ThetaDependentTransmission", trans_grp);
 
+  // Background options
+  std::string bck_grp = "Background";
+  declareProperty("BackgroundFiles", "", "Background data files");
+  declareProperty("BckTransmissionMethod", "Value",
+      boost::make_shared<StringListValidator>(transOptions),
+      "Transmission determination method");
+
+  // - Transmission value entered by hand
+  declareProperty("BckTransmissionValue", EMPTY_DBL(), positiveDouble,
+      "Transmission value.");
+  setPropertySettings("BckTransmissionValue",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "Value"));
+
+  declareProperty("BckTransmissionError", EMPTY_DBL(), positiveDouble,
+      "Transmission error.");
+  setPropertySettings("BckTransmissionError",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "Value"));
+
+  // - Direct beam method transmission calculation
+  declareProperty("BckTransmissionBeamRadius", 3.0,
+      "Radius of the beam area used to compute the transmission [pixels]");
+  setPropertySettings("BckTransmissionBeamRadius",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(new API::FileProperty("BckTransmissionSampleDataFile", "",
+      API::FileProperty::OptionalLoad, ".xml"),
+      "Sample data file for transmission calculation");
+  setPropertySettings("BckTransmissionSampleDataFile",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(new API::FileProperty("BckTransmissionEmptyDataFile", "",
+      API::FileProperty::OptionalLoad, ".xml"),
+      "Empty data file for transmission calculation");
+  setPropertySettings("BckTransmissionEmptyDataFile",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+
+  // - transmission beam center
+  declareProperty("BckTransmissionBeamCenterMethod", "None",
+      boost::make_shared<StringListValidator>(centerOptions),
+      "Method for determining the transmission data beam center");
+  setPropertySettings("BckTransmissionBeamCenterMethod",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  //    Option 1: Set beam center by hand
+  declareProperty("BckTransmissionBeamCenterX", EMPTY_DBL(),
+      "Transmission beam center location in X [pixels]");
+  setPropertySettings("BckTransmissionBeamCenterX",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty("BckTransmissionBeamCenterY", EMPTY_DBL(),
+      "Transmission beam center location in Y [pixels]");
+  //    Option 2: Find it (expose properties from FindCenterOfMass)
+  setPropertySettings("BckTransmissionBeamCenterY",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty(new API::FileProperty("BckTransmissionBeamCenterFile", "",
+      API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load");
+  setPropertySettings("BckTransmissionBeamCenterFile",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+
+  declareProperty(new API::FileProperty("BckTransmissionDarkCurrentFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load as background transmission dark current.");
+  setPropertySettings("BckTransmissionDarkCurrentFile",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
+
+  declareProperty("BckThetaDependentTransmission", true,
+      "If true, a theta-dependent transmission correction will be applied.");
+
+  setPropertyGroup("BackgroundFiles", bck_grp);
+  setPropertyGroup("BckTransmissionMethod", bck_grp);
+  setPropertyGroup("BckTransmissionValue", bck_grp);
+  setPropertyGroup("BckTransmissionError", bck_grp);
+  setPropertyGroup("BckTransmissionBeamRadius", bck_grp);
+  setPropertyGroup("BckTransmissionSampleDataFile", bck_grp);
+  setPropertyGroup("BckTransmissionEmptyDataFile", bck_grp);
+  setPropertyGroup("BckTransmissionBeamCenterMethod", bck_grp);
+  setPropertyGroup("BckTransmissionBeamCenterX", bck_grp);
+  setPropertyGroup("BckTransmissionBeamCenterY", bck_grp);
+  setPropertyGroup("BckTransmissionBeamCenterFile", bck_grp);
+  setPropertyGroup("BckTransmissionDarkCurrentFile", bck_grp);
+  setPropertyGroup("BckThetaDependentTransmission", bck_grp);
+
   declareProperty("SetupReducer",false, "If true, a Reducer object will be created");
 
   // I(Q) calculation
@@ -496,7 +574,7 @@ void SetupEQSANSReduction::exec()
   // Sensitivity correction, transmission and background
   setupSensitivity(reductionManager);
   setupTransmission(reductionManager);
-  //setupBackground(reductionManager);
+  setupBackground(reductionManager);
 
   // Azimuthal averaging
   const bool doAveraging = getProperty("DoAzimuthalAverage");
@@ -820,6 +898,91 @@ void SetupEQSANSReduction::setupTransmission(boost::shared_ptr<PropertyManager> 
   }
 }
 
+void SetupEQSANSReduction::setupBackground(boost::shared_ptr<PropertyManager> reductionManager)
+{
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  // Background
+  const std::string backgroundFile = getPropertyValue("BackgroundFiles");
+  if (backgroundFile.size() > 0)
+    reductionManager->declareProperty(new PropertyWithValue<std::string>("BackgroundFiles", backgroundFile) );
+  else
+    return;
+
+  const std::string darkCurrent = getPropertyValue("BckTransmissionDarkCurrentFile");
+  const bool bckThetaDependentTrans = getProperty("BckThetaDependentTransmission");
+  const std::string bckTransMethod = getProperty("BckTransmissionMethod");
+  if (boost::iequals(bckTransMethod, "Value"))
+  {
+    const double transValue = getProperty("BckTransmissionValue");
+    const double transError = getProperty("BckTransmissionError");
+    if (!isEmpty(transValue) && !isEmpty(transError))
+    {
+      IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
+      transAlg->setProperty("TransmissionValue", transValue);
+      transAlg->setProperty("TransmissionError", transError);
+      transAlg->setProperty("ThetaDependent", bckThetaDependentTrans);
+
+      AlgorithmProperty *algProp = new AlgorithmProperty("BckTransmissionAlgorithm");
+      algProp->setValue(transAlg->toString());
+      reductionManager->declareProperty(algProp);
+    } else {
+      g_log.information("SetupEQSANSReduction [BckTransmissionAlgorithm]: "
+          "expected transmission/error values and got empty values");
+    }
+  }
+  else if (boost::iequals(bckTransMethod, "DirectBeam"))
+  {
+    const std::string sampleFilename = getPropertyValue("BckTransmissionSampleDataFile");
+    const std::string emptyFilename = getPropertyValue("BckTransmissionEmptyDataFile");
+    const double beamRadius = getProperty("BckTransmissionBeamRadius");
+    const double beamX = getProperty("BckTransmissionBeamCenterX");
+    const double beamY = getProperty("BckTransmissionBeamCenterY");
+    const bool thetaDependentTrans = getProperty("BckThetaDependentTransmission");
+    const bool useSampleDC = getProperty("TransmissionUseSampleDC");
+    const bool fitFramesTogether = getProperty("FitFramesTogether");
+
+    IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
+    transAlg->setProperty("FitFramesTogether", fitFramesTogether);
+    transAlg->setProperty("SampleDataFilename", sampleFilename);
+    transAlg->setProperty("EmptyDataFilename", emptyFilename);
+    transAlg->setProperty("BeamRadius", beamRadius);
+    transAlg->setProperty("DarkCurrentFilename", darkCurrent);
+    transAlg->setProperty("UseSampleDarkCurrent", useSampleDC);
+
+    // Beam center option for transmission data
+    const std::string centerMethod = getPropertyValue("BckTransmissionBeamCenterMethod");
+    if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) && !isEmpty(beamY))
+    {
+      transAlg->setProperty("BeamCenterX", beamX);
+      transAlg->setProperty("BeamCenterY", beamY);
+    }
+    else if (boost::iequals(centerMethod, "DirectBeam"))
+    {
+      const std::string beamCenterFile = getProperty("BckTransmissionBeamCenterFile");
+      if (beamCenterFile.size()>0)
+       {
+         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
+         ctrAlg->setProperty("Filename", beamCenterFile);
+         ctrAlg->setProperty("UseDirectBeamMethod", true);
+         ctrAlg->setProperty("PersistentCorrection", false);
+         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+
+         AlgorithmProperty *algProp = new AlgorithmProperty("BckTransmissionBeamCenterAlgorithm");
+         algProp->setValue(ctrAlg->toString());
+         reductionManager->declareProperty(algProp);
+       } else {
+         g_log.error() << "ERROR: Beam center determination was required"
+             " but no file was provided" << std::endl;
+       }
+    }
+    transAlg->setProperty("DarkCurrentFilename", darkCurrent);
+    transAlg->setProperty("ThetaDependent", thetaDependentTrans);
+    AlgorithmProperty *algProp = new AlgorithmProperty("BckTransmissionAlgorithm");
+    algProp->setValue(transAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
+
+}
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
 

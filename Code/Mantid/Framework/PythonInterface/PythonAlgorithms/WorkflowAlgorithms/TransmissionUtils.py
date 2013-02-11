@@ -4,6 +4,9 @@ from mantid.kernel import *
 import os
 import sys
 
+def simple_algorithm(algorithm_str, parameters):
+    return _execute(algorithm_str, parameters)
+
 def _execute(algorithm_str, parameters, is_name=True):
     if is_name:
         alg = AlgorithmManager.create(algorithm_str)
@@ -184,7 +187,7 @@ def load_monitors(self, property_manager):
     return sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID
     
 def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det, 
-                           trans_output_workspace, monitor_det_ID):
+                           trans_output_workspace, monitor_det_ID=None):
     """
         Compute zero-angle transmission
     """
