@@ -44,6 +44,17 @@ namespace SmallTestDatFile
   const int NDETECTS = 6;
 }
 
+
+class LoadDetectorIndoTestHelper : public LoadDetectorInfo
+{
+public:
+  void readNXS(const std::string &fName,bool moveDetectors = true)
+  {
+    this->m_moveDets  = moveDetectors;
+    LoadDetectorInfo::readNXS(fName);
+  }
+};
+
 namespace
 {
   std::string delta[] = {"4", "4.500", "4.500", "4.500", "-6.00", "0.000"};
@@ -202,13 +213,13 @@ public:
       V3D expected;
       if( j == 1 ) // Monitors are fixed and unaffected
       {
-	expected = V3D(0,0,0);
+  expected = V3D(0,0,0);
       }
       else
       {
-	expected.spherical(boost::lexical_cast<double>(det_l2[j]), 
-			   boost::lexical_cast<double>(det_theta[j]), 
-			   boost::lexical_cast<double>(det_phi[j]));
+  expected.spherical(boost::lexical_cast<double>(det_l2[j]), 
+         boost::lexical_cast<double>(det_theta[j]), 
+         boost::lexical_cast<double>(det_phi[j]));
       }
       TS_ASSERT_EQUALS(expected, pos);
 
@@ -358,6 +369,12 @@ public:
     AnalysisDataService::Instance().remove(m_MariWS);
   }
 
+  void testLoadNXS()
+  {
+    LoadDetectorIndoTestHelper loader;
+    TS_ASSERT_THROWS(loader.readNXS("NonExistingFile"),std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(loader.readNXS("detector_121.nxs"));
+  }
   void loadRawFile()
   {
     LoadRaw3 loader;

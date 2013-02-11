@@ -15,6 +15,9 @@
 #include <sstream>
 #include "LoadRaw/isisraw2.h"
 
+#include <Poco/File.h>
+#include <MantidNexusCPP/NeXusFile.hpp>
+
 namespace Mantid
 {
 namespace DataHandling
@@ -61,6 +64,7 @@ void LoadDetectorInfo::init()
   exts.push_back(".dat");
   exts.push_back(".raw");
   exts.push_back(".sca");
+  exts.push_back(".nxs");
   declareProperty(new FileProperty("DataFilename","", FileProperty::Load, exts),
     "A .DAT or .raw file that contains information about the detectors in the\n"
     "workspace. Partial pressures of 3He will be loaded assuming units of\n"
@@ -68,8 +72,8 @@ void LoadDetectorInfo::init()
     "and wall thicknesses in metres.");
   
   declareProperty("RelocateDets", false,
-		  "If true then update the detector positions with those from the input file, default=false.",
-		  Direction::Input);
+      "If true then update the detector positions with those from the input file, default=false.",
+      Direction::Input);
 }
 
 /** Executes the algorithm
@@ -119,6 +123,12 @@ void LoadDetectorInfo::exec()
     filename.find(".RAW") == filename.size()-4)
   {
     readRAW(filename);
+  }
+
+  if ( filename.find(".nxs") == filename.size()-4 ||
+    filename.find(".NXS") == filename.size()-4)
+  {
+    readNXS(filename);
   }
 
   if (m_error)
@@ -796,6 +806,173 @@ void LoadDetectorInfo::sometimesLogSuccess(const detectorInfo &params, bool &nee
   }
   needToLog = false;
 }
+
+/**The methor reads selected part of detector.nxs file and apply correspondent changes to the detectors */ 
+void LoadDetectorInfo::readNXS(const std::string& fName)
+{
+  Poco::File nxsFile(fName);
+  if(!nxsFile.exists() || !nxsFile.isFile())
+    throw std::invalid_argument(" file "+fName+" does not exist");
+
+  auto hFile = new ::NeXus::File(fName,NXACC_READ);
+  if(!hFile)
+    throw std::runtime_error(" Can not open file "+fName+" as nexus file");
+
+  hFile->openGroup("full_reference_detector","NXIXTdetector");
+    std::vector<detectorInfo> detStruct;
+    std::vector<int32_t> detType;
+    std::vector<float> detOffset;
+    this->readLibisisNXS(hFile,detStruct,detType,detOffset);
+  hFile->closeGroup();
+  delete hFile;
+
+  size_t nDetectors = detStruct.size();
+  float detectorOffset = UNSETOFFSET;
+  bool differentOffsets = false;
+  std::vector<detid_t> detectorList;
+  detectorList.reserve(nDetectors);
+  std::vector<detid_t> missingDetectors;
+  detectorInfo log;
+
+  bool noneSet = true;
+  size_t detectorProblemCount(0);
+  for(size_t i=0;i<nDetectors;i++)
+  {
+    
+    // check we have a supported code
+    switch (detType[i])
+    {
+      // these first two codes are detectors that we'll process, the code for this is below
+      case PSD_GAS_TUBE : break;
+      case NON_PSD_GAS_TUBE : break;
+
+      // the following detectors codes specify little or no analysis
+      case MONITOR_DEVICE :
+        // throws invalid_argument if the detection delay time is different for different monitors
+        noteMonitorOffset(detOffset[i], detStruct[i].detID);
+        // skip the rest of this loop and move on to the next detector
+        continue;
+
+      // the detector is set to dummy, we won't report any error for this we'll just do nothing
+      case DUMMY_DECT : continue;
+      
+      //we can't use data for detectors with other codes because we don't know the format, ignore the data and write to g_log.warning() once at the end
+      default :
+        detectorProblemCount ++;
+        g_log.debug() << "Ignoring data for a detector with code " << detType[i] << std::endl;
+        continue;
+    }
+
+    // gas filled detector specific code now until the end of this method
+    
+    // normally all the offsets are the same and things work faster, check for this
+    if ( detOffset[i] != detectorOffset )
+    {// could mean different detectors have different offsets and we need to do things thoroughly
+      if ( detectorOffset !=  UNSETOFFSET )
+      {
+        differentOffsets = true;
+      }
+      detectorOffset = detOffset[i];
+    }
+
+
+    try
+    {
+      setDetectorParams(detStruct[i], log);
+      sometimesLogSuccess(log, noneSet);
+      detectorList.push_back(detStruct[i].detID);
+    }
+    catch (Exception::NotFoundError &)
+    {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
+      missingDetectors.push_back(detStruct[i].detID);
+      continue;
+    }
+
+    // report progress and check for a user cancel message at regualar intervals
+
+    if ( i % 1000 == 0 )
+    {
+      progress(static_cast<double>(i));
+      interruption_point();
+    }
+  }
+
+  sometimesLogSuccess(log, noneSet = true);
+  g_log.debug() << "Adjusting time of flight X-values by detector delay times" << std::endl;
+  adjDelayTOFs(detectorOffset, differentOffsets, detectorList, detOffset);
+  
+    if ( detectorProblemCount > 0 )
+    {
+      g_log.warning() << "Data for " << detectorProblemCount << " detectors that are neither monitors or psd gas tubes, the data have been ignored" << std::endl;
+    }
+    logErrorsFromRead(missingDetectors);
+    g_log.debug() << "Successfully read DAT file " << fName << std::endl;
+}
+
+void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct, std::vector<int32_t>&detType,std::vector<float> &detOffset)
+{
+
+    std::vector<double> delayTime;
+    std::vector<int32_t> detID;
+    // read detector ID
+    hFile->openData("det_no");
+    hFile->getData<int32_t>(detID);
+    hFile->closeData();
+    // read detector type 
+    hFile->openData("det_type");
+    hFile->getData<int32_t>(detType);
+    hFile->closeData();
+
+    // read the detector's type
+    hFile->openData("delay_time");
+    hFile->getData<double>(delayTime);
+    hFile->closeData();
+
+    size_t nDetectors = delayTime.size();
+    std::vector<double> L2,Phi,Theta;
+    if(m_moveDets)
+    {
+      // the secondary flight path -- sample to detector
+        hFile->readData<double>("L2",L2);
+      // detector's polar angle Theta (2Theta in Brag's terminology)
+        hFile->readData<double>("theta",Theta);
+      // detector's polar angle, phi
+        hFile->readData<double>("phi",Phi);
+    }
+    else
+    {
+      L2.assign(nDetectors,DBL_MAX);
+      Phi.assign(nDetectors,DBL_MAX);
+      Theta.assign(nDetectors,DBL_MAX);
+    }
+    //We need He3 pressue and wall thikness
+    double pressure(0.0008),wallThickness(111.);
+    hFile->openGroup("det_he3","NXIXTdet_he3");
+        hFile->readData<double>("gas_pressure",pressure);
+        hFile->readData<double>("wall_thickness",wallThickness);
+    hFile->closeGroup();
+
+
+   if(nDetectors!=L2.size()||nDetectors!=Phi.size()||nDetectors!=Theta.size()||nDetectors!=detID.size())
+     throw std::runtime_error("The size of nexus data columns is not equal to each other");
+
+   detStruct.resize(nDetectors);
+   detOffset.resize(nDetectors);
+   for(size_t i=0;i<nDetectors;i++)
+   {
+      detStruct[i].detID = detID[i];
+      detStruct[i].l2    = L2[i];
+      detStruct[i].theta = Theta[i];
+      detStruct[i].phi   = Phi[i];
+      detStruct[i].pressure = pressure;
+      detStruct[i].wallThick = wallThickness;
+
+      detOffset[i]  = float(delayTime[i]);
+    }
+    
+}
+
+
 
 } // namespace DataHandling
 } // namespace Mantid
