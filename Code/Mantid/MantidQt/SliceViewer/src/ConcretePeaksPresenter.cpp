@@ -28,11 +28,11 @@ namespace MantidQt
     {
       switch(coordSystem)
       {
-      case QLab:
+      case Mantid::API::QLab:
         return "QLab";
-      case QSample:
+      case Mantid::API::QSample:
         return "QSample";
-      case HKL:
+      case Mantid::API::HKL:
         return "HKL";
       default:
         return "Unknown";
