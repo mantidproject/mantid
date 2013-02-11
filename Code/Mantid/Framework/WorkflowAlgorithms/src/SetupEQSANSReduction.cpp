@@ -249,6 +249,8 @@ void SetupEQSANSReduction::init()
             new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
   declareProperty("FitFramesTogether", false,
       "If true, the two frames will be fit together");
+  setPropertySettings("FitFramesTogether",
+            new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
   declareProperty("TransmissionBeamCenterMethod", "None",
@@ -337,6 +339,10 @@ void SetupEQSANSReduction::init()
       API::FileProperty::OptionalLoad, ".xml"),
       "Empty data file for transmission calculation");
   setPropertySettings("BckTransmissionEmptyDataFile",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
+  declareProperty("BckFitFramesTogether", false,
+      "If true, the two frames will be fit together");
+  setPropertySettings("BckFitFramesTogether",
             new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "DirectBeam"));
 
   // - transmission beam center
@@ -939,7 +945,7 @@ void SetupEQSANSReduction::setupBackground(boost::shared_ptr<PropertyManager> re
     const double beamY = getProperty("BckTransmissionBeamCenterY");
     const bool thetaDependentTrans = getProperty("BckThetaDependentTransmission");
     const bool useSampleDC = getProperty("TransmissionUseSampleDC");
-    const bool fitFramesTogether = getProperty("FitFramesTogether");
+    const bool fitFramesTogether = getProperty("BckFitFramesTogether");
 
     IAlgorithm_sptr transAlg = createChildAlgorithm("EQSANSDirectBeamTransmission");
     transAlg->setProperty("FitFramesTogether", fitFramesTogether);

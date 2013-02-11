@@ -89,7 +89,7 @@ def CombineTransmissionFits(combine_frames=True):
     ReductionSingleton().reduction_properties["FitFramesTogether"]=combine_frames
 
 def BckCombineTransmissionFits(combine_frames=True):
-    ReductionSingleton().reduction_properties["FitFramesTogether"]=combine_frames
+    ReductionSingleton().reduction_properties["BckFitFramesTogether"]=combine_frames
     
 def Resolution(sample_aperture_diameter=10.0):
     ReductionSingleton().reduction_properties["ComputeResolution"]=True
