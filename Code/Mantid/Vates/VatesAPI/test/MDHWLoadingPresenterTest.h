@@ -144,6 +144,34 @@ void testHasTDimensionWhenNotIntegrated()
   TSM_ASSERT("This is a 4D workspace with an integrated T dimension", presenter.hasTDimensionAvailable());
 }
 
+void testCanSetAxisLabelsFrom3DData()
+{
+  //Setup view
+  MockMDLoadingView* view = new MockMDLoadingView;
+
+  ConcreteMDHWLoadingPresenter presenter(view);
+
+  //Test that it does work when setup.
+  Mantid::API::Workspace_sptr ws = get3DWorkspace(true, true);
+  presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+  vtkDataSet *ds = vtkUnstructuredGrid::New();
+  TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
+}
+
+void testCanSetAxisLabelsFrom4DData()
+{
+  //Setup view
+  MockMDLoadingView* view = new MockMDLoadingView;
+
+  ConcreteMDHWLoadingPresenter presenter(view);
+
+  //Test that it does work when setup.
+  Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true);
+  presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+  vtkDataSet *ds = vtkUnstructuredGrid::New();
+  TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
+}
+
 };
 
 #endif

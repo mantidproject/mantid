@@ -7,6 +7,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <vtkDataSet.h>
 #include <vtkFloatArray.h>
+#include <vtkUnstructuredGrid.h>
 #include "MantidAPI/Workspace.h"
 
 using namespace Mantid::VATES;
@@ -69,6 +70,13 @@ public:
     TS_ASSERT_THROWS(nullObject.getTimeStepValues(), std::runtime_error);
   }
 
+  void setAxisLabelsThrows()
+  {
+    NullRebinningPresenter nullObject;
+    vtkDataSet *ds = vtkUnstructuredGrid::New();
+    TS_ASSERT_THROWS(nullObject.setAxisLabels(ds), std::runtime_error);
+    ds->Delete();
+  }
 };
 
 #endif
