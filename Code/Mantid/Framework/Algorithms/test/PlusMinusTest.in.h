@@ -437,7 +437,7 @@ public:
           plus.initialize();
           plus.setProperty("LHSWorkspace",work_in1);
           plus.setProperty("RHSWorkspace",work_in2);
-          AnalysisDataService::Instance().add("outWS",work_in1);
+          AnalysisDataService::Instance().addOrReplace("outWS",work_in1);
           plus.setPropertyValue("OutputWorkspace","outWS");
           TS_ASSERT( plus.execute() );
 

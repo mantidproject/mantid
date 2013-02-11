@@ -69,16 +69,15 @@ namespace Mantid
 
       if (lhs_singleVal)
       {
-        MatrixWorkspace_sptr out;
+        MatrixWorkspace_sptr out = getProperty("OutputWorkspace");
         if (this->name() == "Divide" && !bool(rhs_singleVal))
         {
-          std::cout << "Special DIVIDE of " << this->getPropertyValue(inputPropName2()) << " by " << this->getPropertyValue(inputPropName1()) << "\n";
           // x / workspace = Power(workspace, -1) * x
           // workspace ^ -1
           IAlgorithm_sptr pow = this->createChildAlgorithm("Power", 0.0, 0.5, true);
           pow->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_rhs));
           pow->setProperty("Exponent", -1.0);
-          pow->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+          pow->setProperty("OutputWorkspace", out);
           pow->executeAsChildAlg();
           out = pow->getProperty("OutputWorkspace");
 
@@ -89,10 +88,11 @@ namespace Mantid
           mult->setProperty(outputPropName(), out);
           mult->executeAsChildAlg();
           out = mult->getProperty("OutputWorkspace");
+          setProperty("OutputWorkspace", out);
+          return true;
         }
         else if (this->name() == "Minus")
         {
-          std::cout << "Special MINUS\n";
           // x - workspace = x + (workspace * -1)
           MatrixWorkspace_sptr minusOne = WorkspaceFactory::Instance().create("WorkspaceSingleValue",1,1,1);
           minusOne->dataY(0)[0] = -1.0;
@@ -102,7 +102,7 @@ namespace Mantid
           IAlgorithm_sptr mult = this->createChildAlgorithm("Multiply", 0.0, 0.5, true);
           mult->setProperty(inputPropName1(), boost::const_pointer_cast<MatrixWorkspace>(m_rhs));
           mult->setProperty(inputPropName2(), minusOne);
-          mult->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+          mult->setProperty("OutputWorkspace", out);
           mult->executeAsChildAlg();
           out = mult->getProperty("OutputWorkspace");
 
@@ -113,15 +113,12 @@ namespace Mantid
           plus->setProperty(outputPropName(), out);
           plus->executeAsChildAlg();
           out = plus->getProperty("OutputWorkspace");
-        }
-
-        // If something was done, return the output and finish now
-        if (out)
-        {
           setProperty("OutputWorkspace", out);
           return true;
         }
-      }
+
+      } // lhs_singleVal
+
       // Process normally
       return false;
     }
