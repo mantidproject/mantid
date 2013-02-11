@@ -21,6 +21,8 @@ namespace Mantid
 
       virtual bool hasTDimensionAvailable() const;
 
+      virtual void setAxisLabels(vtkDataSet* visualDataSet);
+
       virtual ~NullRebinningPresenter();
 
     private:

@@ -62,6 +62,8 @@ namespace Mantid
 
       std::vector<double> getTimeStepValues() const;
 
+      virtual void setAxisLabels(vtkDataSet* visualDataSet);
+
       /*-----------------------------------End MDRebinningPresenter methods -------------------------------------*/
 
       MDEWRebinningPresenter(vtkDataSet* input, RebinningActionManager* request, MDRebinningView* view, const WorkspaceProvider& wsProvider);
