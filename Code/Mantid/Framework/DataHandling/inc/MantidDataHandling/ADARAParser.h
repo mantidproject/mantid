@@ -3,46 +3,75 @@
 
 #include <string>
 #include <stdint.h>
+#include <stdexcept>
 
 #include "MantidDataHandling/ADARA.h"
 #include "MantidDataHandling/ADARAPackets.h"
-
-namespace Poco {
-  namespace Net {
-    class StreamSocket;
-  }
-}
 
 namespace ADARA {
 
 class Parser {
 public:
-	Parser(unsigned int buffer_size = 1024 * 1024,
+	Parser(unsigned int inital_buffer_size = 1024 * 1024,
 	       unsigned int max_pkt_size = 8 * 1024 * 1024);
 
 	virtual ~Parser();
 
-	/* Returns false if we hit EOF or a callback asked to stop. We return
-	 * true if we got we got EAGAIN/EINTR from reading the fd. We throw
-	 * exceptions on error, but may hold those until we complete all
-	 * packets in the buffer. The max_read parameter, if non-zero,
-	 * limits the amount of maximum amount of data read and parsed
-	 * from the file descriptor.
+protected:
+	/* The ADARA::Parser class maintains an internal buffer that
+	 * subclasses and direct users must fill with stream data for
+	 * parsing.
+	 *
+	 * bufferFillAddress() returns the address at which to begin
+	 * placing additional data. bufferFillLength() returns the
+	 * maximum amount of data that can be appended at that address.
+	 * The address is guaranteed to be non-NULL if the length is
+	 * non-zero, but will be NULL if length is zero.
+	 * Users must not cache the return values from these functions
+	 * over calls to bufferBytesAppended() or parse().
+	 *
+	 * Once data has been placed in the specified buffer, the user
+	 * must call bufferBytesAppended() to inform the class how much
+	 * new data has been placed in the buffer.
 	 */
-        // Commented out in favor of the Poco version below for Mantid use
-        // bool read(int fd, unsigned int max_read = 0);
+	uint8_t *bufferFillAddress(void) const {
+		if (bufferFillLength())
+			return m_buffer + m_len;
+		return NULL;
+	}
 
-        // Similar semantics as above: returns true if a timeout is set on the
-        // socket and we hit the timeout before reading max_read bytes.
-        // Returns false if the socket has been shut down and throws an assert
-        // on errors
-        bool read(Poco::Net::StreamSocket &stream, unsigned int max_read = 0);
+	unsigned int bufferFillLength(void) const {
+		return m_size - m_len;
+	}
+
+	void bufferBytesAppended(unsigned int count) {
+		if (bufferFillLength() < count) {
+			const char *msg = "attempting to append too much data";
+			throw std::logic_error(msg);
+		}
+
+		m_len += count;
+	}
+
+	/* ADARA::Parser::bufferParse() parses the packets in the internal
+	 * buffer, and calls the appropriate virtual functions for each one.
+	 * The caller may specify the maximum number of packets to parse in
+	 * a batch, with zero indicating parse until the buffer is exhausted.
+	 *
+	 * bufferParse() returns a positive integer indicating the number of
+	 * packets parsed if none of the callbacks returned true (requesting
+	 * stop), a negative number indicating packets parsed before a
+	 * callback requested a stop, or zero if no packets were completed.
+	 *
+	 * Partial packet chunks will be counted as completed when the last
+	 * fragment is processed.
+	 */
+	int bufferParse(unsigned int max_packets = 0);
 
 	/* Flush the internal buffers and get ready to restart parsing.
 	 */
-	void reset(void);
+	virtual void reset(void);
 
-protected:
 	/* This function gets called for every packet that fits in the
 	 * internal buffer; oversize packets will be sent to rxOversizePkt().
 	 * The default implementation will create an appropriate object
@@ -92,13 +121,12 @@ protected:
 	virtual bool rxPacket(const VariableStringPkt &pkt);
 
 private:
-	bool parseBuffer(void);
-
 	uint8_t *	m_buffer;
 	unsigned int	m_size;
 	unsigned int	m_max_size;
 	unsigned int	m_len;
 
+	unsigned int	m_restart_offset;
 	unsigned int	m_oversize_len;
 	unsigned int	m_oversize_offset;
 };

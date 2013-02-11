@@ -136,11 +136,21 @@ namespace DataHandling
     if (address.host().toString().compare( "0.0.0.0") == 0)
     {
       Poco::Net::SocketAddress tempAddress("localhost:31415");
-      m_socket.connect( tempAddress);  // BLOCKING connect
+      try {
+        m_socket.connect( tempAddress);  // BLOCKING connect
+      } catch (...) {
+        g_log.error() << "Connection to " << tempAddress.toString() << " failed." << std::endl;
+        return false;
+      }
     }
     else
     {
-      m_socket.connect( address);  // BLOCKING connect
+      try {
+        m_socket.connect( address);  // BLOCKING connect
+      } catch (...) {
+        g_log.error() << "Connection to " << address.toString() << " failed." << std::endl;
+        return false;
+      }
     }
 
     m_socket.setReceiveTimeout( Poco::Timespan( 0, RECV_TIMEOUT_MS * 1000)); // POCO timespan is seconds, microseconds
@@ -201,10 +211,30 @@ namespace DataHandling
         Poco::Thread::sleep( 100);  // 100 milliseconds
       }
 
-      // Read the packets, accumulate events in m_eventBuffer...
-      Kernel::DateAndTime lastHeartbeat = m_heartbeat;
-      read( m_socket);
-      if (lastHeartbeat == m_heartbeat)
+      // Get some more data from our socket and put it in the parser's buffer
+      unsigned int bufFillLen = bufferFillLength();
+      if (bufFillLen)
+      {
+        uint8_t *bufFillAddr = bufferFillAddress();
+        int bytesRead = 0;
+        try {
+          bytesRead = m_socket.receiveBytes( bufFillAddr, bufFillLen);
+        } catch (Poco::TimeoutException &) {
+          // Don't need to stop processing or anything - just log a warning
+          g_log.warning() << "Timeout reading from the network.  Is SMS still sending?" << std::endl;
+        } catch (Poco::Net::NetException &e) {
+          std::string msg("Parser::read(): ");
+          msg += e.name();
+          throw std::runtime_error(msg);
+        }
+
+        if (bytesRead > 0)
+        {
+          bufferBytesAppended( bytesRead);
+        }
+      }
+      int packetsParsed = bufferParse();
+      if (packetsParsed == 0)
       {
         // No packets were parsed.  Sleep a little to let some data accumulate
         // before calling read again.  (Keeps us from spinlocking the cpu...)

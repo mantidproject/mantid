@@ -1,20 +1,18 @@
 #include <string.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "MantidDataHandling/ADARAParser.h"
-
-#include "Poco/Net/StreamSocket.h"
-#include "Poco/Net/NetException.h"
-#include "Poco/Exception.h"
 
 using namespace ADARA;
 
 /* ------------------------------------------------------------------------ */
 
-Parser::Parser(unsigned int buffer_size, unsigned int max_pkt_size) :
-		m_size(buffer_size), m_max_size(max_pkt_size), m_len(0),
-		m_oversize_len(0)
+Parser::Parser(unsigned int initial_buffer_size, unsigned int max_pkt_size) :
+		m_size(initial_buffer_size), m_max_size(max_pkt_size), m_len(0),
+		m_restart_offset(0), m_oversize_len(0)
 {
-	m_buffer = new uint8_t[buffer_size];
+	m_buffer = new uint8_t[initial_buffer_size];
 }
 
 Parser::~Parser()
@@ -26,124 +24,26 @@ void Parser::reset(void)
 {
 	m_len = 0;
 	m_oversize_len = 0;
+	m_restart_offset = 0;
 }
 
-#if 0
-//  Mantid doesn't use this, and trying to make it build on
-//  Windows would be a nightmare...
-#include <unistd.h>
-#include <errno.h>
-bool Parser::read(int fd, unsigned int max_read)
+int Parser::bufferParse(unsigned int max_packets)
 {
-	unsigned long bytes_read = 0;
-	ssize_t rc;
-
-	while (!max_read || bytes_read < max_read) {
-		rc = ::read(fd, m_buffer + m_len, m_size - m_len);
-		if (rc < 0) {
-			switch (errno) {
-			case EINTR:
-			case EAGAIN:
-				/* We didn't get any data, but we're OK */
-				return true;
-			case EPIPE:
-			case ECONNRESET:
-			case ETIMEDOUT:
-			case EHOSTUNREACH:
-			case ENETUNREACH:
-				/* The host went away, but this shouldn't
-				 * be fatal.
-				 */
-				return false;
-			default:
-				/* TODO consider if we should throw an
-				 * exception at all.
-				 */
-				int err = errno;
-				std::string msg("Parser::read(): ");
-				msg += strerror(err);
-				throw std::runtime_error(msg);
-			}
-		}
-
-		if (rc == 0)
-			return false;
-
-		/* m_len cannot overflow when adding in rc, as we'll never
-		 * ask for more data in the read() call than will fit.
-		 */
-		m_len += (unsigned int) rc;
-		bytes_read += rc;
-
-		if (parseBuffer())
-			return false;
-	}
-
-	return true;
-}
-#endif
-
-/* Added by RGM, 17 May 2012 */
-bool Parser::read(Poco::Net::StreamSocket &stream, unsigned int max_read)
-{
-        unsigned long bytes_read = 0;
-        int rc;
-
-        // If the caller set a timeout on the stream, then presumably they
-        // wanted to ensure that control would return back to them within
-        // a maximum amount of time.  However, the stream won't actually
-        // throw a timeout exception if it's actually reading data.  In
-        // that case, we'll keep looping until we've read max_read bytes
-        // - or forever if max_read is 0.  Since that's probably not what
-        // the caller intended, we'll check the elapsed time and break
-        // out of the while loop below if necessary.
-        Poco::Timespan timeout = stream.getReceiveTimeout();
-        if (timeout == Poco::Timespan())
-        {
-          // if the receive timeout wasn't set, then set it to some enormous
-          // value that we're not likely to ever hit.
-          timeout.assign(365000, 0, 0, 0, 0);  // 365K days - ie, nearly 1000 years
-        }
-
-
-        Poco::Timespan elapsed;
-        Poco::Timestamp startTime;
-        while ( (!max_read || bytes_read < max_read ) &&
-                 (elapsed < timeout) ) {
-                try {
-                  rc = stream.receiveBytes(m_buffer + m_len, m_size - m_len);
-                } catch (Poco::TimeoutException &) {
-                  return true;
-                } catch (Poco::Net::NetException &e) {
-                  std::string msg("Parser::read(): ");
-                  msg += e.name();
-                  throw std::runtime_error(msg);
-                }
-
-                if (rc == 0)
-                        return false;
-
-                /* m_len cannot overflow when adding in rc, as we'll never
-                 * ask for more data in the read() call than will fit.
-                 */
-                m_len += (unsigned int) rc;
-                bytes_read += rc;
-
-                if (parseBuffer())
-                        return false;
-
-                // update the time values
-                elapsed += startTime.elapsed();
-                startTime = Poco::Timestamp();
-        }
-
-        return true;
-}
-
-bool Parser::parseBuffer(void)
-{
-	uint8_t *p = m_buffer;
+	unsigned int valid_len = m_len - m_restart_offset;
+	uint8_t *p = m_buffer + m_restart_offset;
+	unsigned int processed = 0;
 	bool stopped = false;
+
+	/* Is there anything to do? */
+	if (!valid_len)
+		return 0;
+
+	/* If we don't care how many packets we process, then set the limit
+	 * above the range of possibility to avoid needing to check for zero
+	 * multiple times.
+	 */
+	if (!max_packets)
+		max_packets = m_size;
 
 	/* If we're processing an oversize packet, then we will find its
 	 * data at the front of the buffer. We'll either consume our
@@ -153,15 +53,22 @@ bool Parser::parseBuffer(void)
 	if (m_oversize_len) {
 		unsigned int chunk_len;
 
-		chunk_len = m_len < m_oversize_len ? m_len : m_oversize_len;
+		chunk_len = m_oversize_len;
+		if (valid_len < chunk_len)
+			chunk_len = valid_len;
 		stopped = rxOversizePkt(NULL, p, m_oversize_offset, chunk_len);
 		m_oversize_offset += chunk_len;
 		m_oversize_len -= chunk_len;
-		m_len -= chunk_len;
+		valid_len -= chunk_len;
 		p += chunk_len;
+
+		/* Did we finish this packet? */
+		if (!m_oversize_len)
+			processed++;
 	}
 
-	while (!stopped && m_len >= PacketHeader::header_length()) {
+	while (valid_len >= PacketHeader::header_length() &&
+					processed < max_packets && !stopped) {
 		PacketHeader hdr(p);
 
 		if (hdr.payload_length() % 4)
@@ -173,12 +80,11 @@ bool Parser::parseBuffer(void)
 			 * call the oversize handler with this first
 			 * chunk, consuming our entire buffer.
 			 */
-			stopped = rxOversizePkt(&hdr, p, 0, m_len);
-			m_oversize_len = hdr.payload_length() - m_len;
-			m_oversize_offset = m_len;
-			m_len = 0;
-
-			return stopped;
+			stopped = rxOversizePkt(&hdr, p, 0, valid_len);
+			m_oversize_len = hdr.payload_length() - valid_len;
+			m_oversize_offset = valid_len;
+			valid_len = 0;
+			break;
 		}
 
 		if (m_size < hdr.packet_length()) {
@@ -198,35 +104,66 @@ bool Parser::parseBuffer(void)
 				new_size = m_max_size;
 
 			new_buffer = new uint8_t[new_size];
-			memcpy(new_buffer, p, m_len);
+			memcpy(new_buffer, p, valid_len);
 
 			delete m_buffer;
 			m_buffer = new_buffer;
 			m_size = new_size;
 
-			return false;
+			/* We moved the data to the front of the buffer as
+			 * part of the resize; account for that.
+			 */
+			m_restart_offset = 0;
+			m_len = valid_len;
+			return processed;
 		}
 
-		if (m_len < hdr.packet_length())
+		if (valid_len < hdr.packet_length())
 			break;
 
 		Packet pkt(p, hdr.packet_length());
 
 		p += hdr.packet_length();
-		m_len -= hdr.packet_length();
+		valid_len -= hdr.packet_length();
 
-		if (rxPacket(pkt)) {
-			stopped = true;
-			break;
-		}
+		stopped = rxPacket(pkt);
+		processed++;
 	}
 
-	/* If we have anything left over, shove it to the front.
+	/* We're done processing for this round. Update our position and/or
+	 * amount of buffered data so that we restart in the correct spot
+	 * on our next call.
+	 *
+	 * We only need to move data if we ran out of data to process --
+	 * ie, we processed fewer packets than requested without being
+	 * stopped by a callback. This moves any possible fragment of a
+	 * packet to the front, maximizing the room for more data. If this
+	 * occurs coincidentally with a stop request, the next call to
+	 * to bufferParse() will only see the fragment and stop, but that
+	 * should be rare.
 	 */
-	if (m_len && p != m_buffer)
-		memmove(m_buffer, p, m_len);
+	if (valid_len) {
+		if (!stopped && processed < max_packets) {
+			if (p != m_buffer)
+				memmove(m_buffer, p, valid_len);
+			m_len = valid_len;
+			m_restart_offset = 0;
+		} else {
+			/* We know that the offset will fit into an unsigned
+			 * int, as that is the type we use for the buffer size.
+			 */
+			m_restart_offset = (unsigned int) (p - m_buffer);
+		}
+	} else {
+		/* We used up the buffer. */
+		m_len = 0;
+		m_restart_offset = 0;
+	}
 
-	return stopped;
+	/* We need an 32 GB buffer before we can fit 2^31 packets, so
+	 * casting to int is safe here.
+	 */
+	return stopped ? - (int) processed : (int) processed;
 }
 
 bool Parser::rxPacket(const Packet &pkt)
