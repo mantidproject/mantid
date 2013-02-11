@@ -612,18 +612,20 @@ namespace Crystal
                BankNameString +=(*it1);
              }
            }
-       // if( i > 0 ) oss << ";";
+
         int RotGroups=0;
         if( getProperty("RotateCenters"))
           RotGroups=1;
         int SampOffsets=0;
         if( getProperty("AllowSampleShift"))
           SampOffsets=1;
+
         oss << "name=SCDPanelErrors, PeakWorkspaceName=\""<<PeakWSName<<"\",";
         oss << "a=" << fixed << a << "," << "b=" << fixed << b << "," << "c=" << fixed << c << "," << "alpha=" << fixed << alpha << "," << "beta=" << fixed << beta
              << "," << "gamma=" << fixed << gamma << ","<< "NGroups="<<NGroups<<",BankNames ="<<BankNameString<<","
              <<"startX=-1,endX=-1,RotateCenters="<<RotGroups<<",SampleOffsets="<<SampOffsets<<",";
       oss<<   "l0=" << fixed << L0 << "," << "t0=" << fixed << T0 ;
+
     ostringstream oss1 ( ostringstream::out);
 
 
@@ -847,7 +849,7 @@ namespace Crystal
       sigma = -1;
     string fieldBaseNames = ";l0;t0;detWidthScale;detHeightScale;Xoffset;Yoffset;Zoffset;Xrot;Yrot;Zrot;";
     if( getProperty("AllowSampleShift"))
-      fieldBaseNames +="Sample_x;Sample_y;Sample_z;";
+      fieldBaseNames +="SampleX;SampleY;SampleZ;";
     for( int prm = 0; prm < (int)RRes->rowCount(); ++prm )
     {
       string namee =RRes->getRef< string >( "Name", prm );
@@ -868,7 +870,8 @@ namespace Crystal
              }
       names.push_back( namee );
       params.push_back( RRes->getRef< double >( "Value", prm ));
-      errs.push_back( sigma* RRes->getRef< double >( "Error",prm));
+      double err =  RRes->getRef< double >( "Error", prm );
+      errs.push_back( sigma * err );
 
     }
 
@@ -1035,7 +1038,7 @@ namespace Crystal
 
   V3D sampPos(NewInstrument->getSample()->getPos());//should be (0,0,0)???
   if( getProperty("AllowSampleShift"))
-    sampPos= V3D( result["Sample_x"],result["Sample_y"],result["Sample_z"]);
+    sampPos= V3D( result["SampleX"],result["SampleY"],result["SampleZ"]);
 
   FixUpSourceParameterMap( NewInstrument, result["l0"],sampPos, pmapOld);
 

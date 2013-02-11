@@ -31,7 +31,7 @@ namespace Mantid
   namespace Crystal
   {
 
-    DECLARE_FUNCTION(SCDPanelErrors)
+    DECLARE_FUNCTION( SCDPanelErrors )
 
     // Assumes UB from optimize UB maps hkl to qxyz/2PI. So conversion factors to an from
     // UB ified q's are below.
@@ -150,9 +150,9 @@ namespace Mantid
       SampOffsetDeclareStatus=1;
       if( SampleOffsets)
       {
-        declareParameter("Sample_x", 0.0, "Sample x offset");
-        declareParameter("Sample_y", 0.0, "Sample y offset");
-        declareParameter("Sample_z", 0.0, "Sample z offset");
+        declareParameter("SampleX", 0.0, "Sample x offset");
+        declareParameter("SampleY", 0.0, "Sample y offset");
+        declareParameter("SampleZ", 0.0, "Sample z offset");
         SampOffsetDeclareStatus = 2;
       }
 
@@ -319,9 +319,9 @@ namespace Mantid
       V3D SampPos= instChange->getSample()->getPos();
       if( SampleOffsets)
        {
-          SampPos[0]+=getParameter("Sample_x");
-          SampPos[1]+=getParameter("Sample_y");
-          SampPos[2]+=getParameter("Sample_z");
+          SampPos[0]+=getParameter("SampleX");
+          SampPos[1]+=getParameter("SampleY");
+          SampPos[2]+=getParameter("SampleZ");
        }
       SCDCalibratePanels::FixUpSourceParameterMap( instChange, getParameter("l0"),SampPos, pmapSv) ;
 
@@ -331,7 +331,7 @@ namespace Mantid
 
 
 
-    Peak SCDPanelErrors::createNewPeak(const API::IPeak & peak_old, Geometry::Instrument_sptr  instrNew) const
+    Peak SCDPanelErrors::createNewPeak(const API::IPeak & peak_old, Geometry::Instrument_sptr  instrNew, double T0, double L0)
     {
       Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
       if (inst->getComponentID() != instrNew->getComponentID())
@@ -340,7 +340,7 @@ namespace Mantid
         throw invalid_argument("All peaks must have the same instrument");
       }
 
-      double T0 = peak_old.getTOF() + getParameter("t0");
+      double T = peak_old.getTOF() + T0;
 
       int ID = peak_old.getDetectorID();
 
@@ -350,10 +350,10 @@ namespace Mantid
 
       Wavelength wl;
 
-      wl.initialize(getParameter("l0"), peak.getL2(), peak.getScattering(), 0,
+      wl.initialize(L0, peak.getL2(), peak.getScattering(), 0,
           peak_old.getInitialEnergy(), 0.0);
 
-      peak.setWavelength(wl.singleFromTOF(T0));
+      peak.setWavelength(wl.singleFromTOF( T ));
       peak.setIntensity(peak_old.getIntensity());
       peak.setSigmaIntensity(peak_old.getSigmaIntensity());
       peak.setRunNumber(peak_old.getRunNumber());
@@ -444,7 +444,7 @@ namespace Mantid
         IPeak & peak_old = pwks->getPeak((int) pkIndex);
         V3D detOld;
 
-        Peak peak = createNewPeak(peak_old, instChange);
+        Peak peak = createNewPeak(peak_old, instChange,getParameter("t0"),getParameter("l0"));
 
         if( xIndx==4 || xIndx==5)
         {
@@ -749,7 +749,7 @@ namespace Mantid
         Quat Rot;
         IPeak& peak_old = peaks->getPeak((int) x);
 
-        peak = createNewPeak(peak_old, instrNew);
+        peak = createNewPeak(peak_old, instrNew,getParameter("t0"),getParameter("l0"));
 
         peakIndx.push_back((int) x);
         qlab.push_back(peak.getQLabFrame());
@@ -1259,7 +1259,7 @@ namespace Mantid
          }
 
          Result.zeroMatrix();
-         size_t startParam= parameterIndex("Sample_x");
+         size_t startParam= parameterIndex("SampleX");
          for( size_t param = startParam; param < startParam+3; param++)
          {
            size_t k= param-startParam;
@@ -1982,11 +1982,11 @@ namespace Mantid
               SampleOffsets= false;
             else
               SampleOffsets=true;
-            if(SampOffsetDeclareStatus== 1)
+            if(SampOffsetDeclareStatus== 1 && SampleOffsets)
             {
-              declareParameter("Sample_x", 0.0, "Sample x offset");
-              declareParameter("Sample_y", 0.0, "Sample y offset");
-              declareParameter("Sample_z", 0.0, "Sample z offset");
+              declareParameter("SampleX", 0.0, "Sample x offset");
+              declareParameter("SampleY", 0.0, "Sample y offset");
+              declareParameter("SampleZ", 0.0, "Sample z offset");
               SampOffsetDeclareStatus =2;
             }
 

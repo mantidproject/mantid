@@ -306,6 +306,17 @@ namespace Crystal
   static  DataObjects::Workspace2D_sptr calcWorkspace( DataObjects::PeaksWorkspace_sptr & pwks,
                                     std::vector<std::string> &bankNames , double tolerance);
 
+  /**
+     * Creates a new peak, matching the old peak except for a different instrument. The Time of flight
+     * is the same except offset by T0. L0 should be the L0 for the new instrument. It is added as a parameter
+     * in case the instrument will have the initial flight path adjusted later. NOTE:wavelength is changed.
+     *
+     * @param peak_old - The old peak
+     * @param instrNew -The new instrument
+     * @return The new peak with the new instrument( adjusted with the parameters) and time adjusted.
+     */
+    static DataObjects::Peak  createNewPeak( const API::IPeak & peak_old, Geometry::Instrument_sptr  instrNew,
+        double T0, double L0);
 
   protected:
 
@@ -326,14 +337,6 @@ namespace Crystal
      */
     Geometry::Instrument_sptr getNewInstrument( const API::IPeak & peak)const;
 
-    /**
-     * Creates a new peak, matching the old peak except for a different instrument. The Time offset
-     * parameter is also applied( not part of the instrument)
-     * @param peak_old - The old peak
-     * @param instrNew -The new instrument
-     * @return The new peak with the new instrument( adjusted with the parameters) and time adjusted.
-     */
-    DataObjects::Peak  createNewPeak( const API::IPeak & peak_old, Geometry::Instrument_sptr  instrNew)const;
 
     /**
      * Even though constrains are used. Often very illogical parameters have to be processed.
