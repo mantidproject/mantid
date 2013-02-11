@@ -59,13 +59,13 @@ void SphericalAbsorption::init()
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
-  declareProperty("AttenuationXSection", 0.0, mustBePositive,
+  declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
     "The ABSORPTION cross-section for the sample material in barns");
-  declareProperty("ScatteringXSection", 0.0, mustBePositive,
+  declareProperty("ScatteringXSection", EMPTY_DBL(), mustBePositive,
     "The scattering cross-section (coherent + incoherent) for the sample material in barns");
-  declareProperty("SampleNumberDensity", 0.0, mustBePositive,
+  declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
     "The number density of the sample in number per cubic angstrom");
-  declareProperty("SphericalSampleRadius", -1.0, mustBePositive,
+  declareProperty("SphericalSampleRadius", EMPTY_DBL(), mustBePositive,
     "The radius of the spherical sample in centimetres");
 
 }
@@ -108,11 +108,11 @@ void SphericalAbsorption::retrieveBaseProperties()
   double sigma_s = getProperty("ScatteringXSection"); // in barns
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
   const Geometry::Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
-  if( m_sampleMaterial->totalScatterXSection(1.0) != 0.0)
+  if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
   {
-	if(rho == 0.0) rho =  m_sampleMaterial->numberDensity();
-	if(sigma_s == 0.0) sigma_s =  m_sampleMaterial->totalScatterXSection(1.7982);
-	if(sigma_atten == 0.0) sigma_atten = m_sampleMaterial->absorbXSection(1.7982);
+	if(rho == EMPTY_DBL()) rho =  m_sampleMaterial->numberDensity();
+	if(sigma_s == EMPTY_DBL()) sigma_s =  m_sampleMaterial->totalScatterXSection(1.7982);
+	if(sigma_atten == EMPTY_DBL()) sigma_atten = m_sampleMaterial->absorbXSection(1.7982);
   }
 
   m_refAtten = sigma_atten * rho;
