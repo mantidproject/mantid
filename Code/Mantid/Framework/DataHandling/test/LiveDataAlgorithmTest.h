@@ -71,7 +71,6 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT( !alg.hasPostProcessing() );
 
-    TSM_ASSERT("Can't connect", !alg.validateInputs()["Instrument"].empty() );
     alg.setPropertyValue("Instrument","FakeEventDataListener");
 
     TSM_ASSERT("No OutputWorkspace",  !alg.validateInputs()["OutputWorkspace"].empty() );

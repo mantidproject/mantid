@@ -99,7 +99,6 @@ void StartLiveDataDialog::initLayout()
 
   // ========== Set previous values from history =============
   fillAndSetComboBox("Instrument", ui.cmbInstrument);
-  tie(ui.cmbInstrument, "Instrument", ui.horizontalLayout_5);
   tie(ui.edtUpdateEvery, "UpdateEvery", ui.layoutUpdateEvery);
   fillAndSetComboBox("AccumulationMethod", ui.cmbAccumulationMethod);
 

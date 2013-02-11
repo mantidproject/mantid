@@ -287,16 +287,10 @@ namespace DataHandling
     std::map<std::string, std::string> out;
 
     const std::string instrument = getPropertyValue("Instrument");
-    try {
-      const bool eventListener = LiveListenerFactory::Instance().create(instrument,false)->buffersEvents();
-      if ( !eventListener && getPropertyValue("AccumulationMethod") == "Add" )
-      {
-        out["AccumulationMethod"] = "The " + instrument + " live stream produces histograms. Add is not a sensible accumulation method.";
-      }
-    }
-    catch ( std::runtime_error& )
+    const bool eventListener = LiveListenerFactory::Instance().create(instrument,false)->buffersEvents();
+    if ( !eventListener && getPropertyValue("AccumulationMethod") == "Add" )
     {
-      out["Instrument"] = "Unable to connect to live stream for " + instrument;
+      out["AccumulationMethod"] = "The " + instrument + " live stream produces histograms. Add is not a sensible accumulation method.";
     }
 
     if (this->getPropertyValue("OutputWorkspace").empty())
