@@ -163,7 +163,7 @@ namespace DataHandling
 
     // Not stored? Need to create it
     std::string inst = this->getPropertyValue("Instrument");
-    m_listener = LiveListenerFactory::Instance().create(inst);
+    m_listener = LiveListenerFactory::Instance().create(inst, true);
 
     // Start at the given date/time
     m_listener->start( this->getStartTime() );
@@ -288,7 +288,7 @@ namespace DataHandling
 
     const std::string instrument = getPropertyValue("Instrument");
     try {
-      const bool eventListener = LiveListenerFactory::Instance().create(instrument)->buffersEvents();
+      const bool eventListener = LiveListenerFactory::Instance().create(instrument,false)->buffersEvents();
       if ( !eventListener && getPropertyValue("AccumulationMethod") == "Add" )
       {
         out["AccumulationMethod"] = "The " + instrument + " live stream produces histograms. Add is not a sensible accumulation method.";

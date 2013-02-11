@@ -155,7 +155,7 @@ public:
     EventWorkspace_sptr ws1, ws2, ws3;
 
     // Manually make the listener so I can pass the same one to the algo
-    ILiveListener_sptr listener = LiveListenerFactory::Instance().create("TestDataListener");
+    ILiveListener_sptr listener = LiveListenerFactory::Instance().create("TestDataListener",true);
     listener->start();
 
     // First go creates the fake ws

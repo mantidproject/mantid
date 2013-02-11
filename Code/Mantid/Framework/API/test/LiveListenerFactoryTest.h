@@ -27,18 +27,20 @@ public:
   {
     // Check that we can successfully create a registered class
     boost::shared_ptr<ILiveListener> l;
-    TS_ASSERT_THROWS_NOTHING( l = factory.create("MockILiveListener") )
+    TS_ASSERT_THROWS_NOTHING( l = factory.create("MockILiveListener",false) )
     // Check it's really the right class
     TS_ASSERT( boost::dynamic_pointer_cast<MockILiveListener>(l) )
 
     // Check that unregistered class request throws
-    TS_ASSERT_THROWS( factory.create("fdsfds"), Mantid::Kernel::Exception::NotFoundError )
+    TS_ASSERT_THROWS( factory.create("fdsfds",false), Mantid::Kernel::Exception::NotFoundError )
   }
 
   void test_create_throws_when_unable_to_connect()
   {
     Kernel::ConfigService::Instance().setFacility("TEST");
-    TS_ASSERT_THROWS( factory.create("MINITOPAZ"), std::runtime_error );
+    TS_ASSERT_THROWS( factory.create("MINITOPAZ",true), std::runtime_error );
+    // Now test that it doesn't throw if we ask not to connect
+    TS_ASSERT_THROWS_NOTHING( factory.create("MINITOPAZ",false) );
   }
 
   void test_checkConnection()

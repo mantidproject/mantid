@@ -21,7 +21,7 @@ public:
   FakeEventDataListenerTest()
   {
     // Create the listener. Remember: this will call connect()
-    fakel = LiveListenerFactory::Instance().create("FakeEventDataListener");
+    fakel = LiveListenerFactory::Instance().create("FakeEventDataListener",true);
   }
 
   void testProperties()

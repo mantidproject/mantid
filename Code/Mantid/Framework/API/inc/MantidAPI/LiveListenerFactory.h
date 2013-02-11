@@ -50,7 +50,7 @@ namespace Mantid
     class MANTID_API_DLL LiveListenerFactoryImpl : public Kernel::DynamicFactory<ILiveListener>
     {
     public:
-      boost::shared_ptr<ILiveListener> create(const std::string& instrumentName) const;
+      boost::shared_ptr<ILiveListener> create(const std::string& instrumentName, bool connect) const;
       bool checkConnection(const std::string& instrumentName) const;
 
     private:
@@ -65,6 +65,8 @@ namespace Mantid
       /// Private destructor
       virtual ~LiveListenerFactoryImpl();
 
+      // Unhide the base class method to avoid a warning, but make private.
+      using Kernel::DynamicFactory<ILiveListener>::create;
       /// Override the DynamicFactory::createUnwrapped() method. We don't want it used here.
       ILiveListener* createUnwrapped(const std::string& className) const;
 

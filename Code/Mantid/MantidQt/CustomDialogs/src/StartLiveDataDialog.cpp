@@ -317,7 +317,7 @@ void StartLiveDataDialog::setDefaultAccumulationMethod(const QString& inst)
     // principle more robust, but will throw if the listener can't connect (not that you'll
     // get very far in that case anyway).
     if ( listenerName.find("Histo") != std::string::npos
-        || !Mantid::API::LiveListenerFactory::Instance().create(instrument.name())->buffersEvents() )
+        || !Mantid::API::LiveListenerFactory::Instance().create(instrument.name(),false)->buffersEvents() )
     {
       // If 'Add' is currently selected, select 'Replace' instead
       if ( ui.cmbAccumulationMethod->currentIndex() == addIndex )
