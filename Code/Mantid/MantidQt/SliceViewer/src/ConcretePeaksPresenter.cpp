@@ -143,7 +143,7 @@ namespace MantidQt
           ss << m_transform->getFriendlyName() << " in the PeaksViewer. ";
           ss << "However, the MDWorkspace has properties indicating that it's coordinates are in: " << coordinateToString(coordSystMD);
           ss << " To resolve the conflict, the MDWorkspace will be treated as though it has coordinates in: " << m_transform->getFriendlyName();
-          g_log.information(ss.str());
+          g_log.notice(ss.str());
         }
         // If the peaks work-space has been integrated. check cross-work-space compatibility.
         if (coordSystDim != coordSystPK && m_peaksWS->hasIntegratedPeaks())
@@ -154,7 +154,7 @@ namespace MantidQt
           ss << "This will distort the integrated peak shape on the PeaksViewer. ";
           ss << "PeaksWorkspace was integrated against a MDWorkspace in the coordinate system: " << coordinateToString(m_peaksWS->getSpecialCoordinateSystem());
           ss << "MDWorkspace is displayed in coordinate system: " << m_transform->getFriendlyName();
-          g_log.information(ss.str());
+          g_log.notice(ss.str());
         }
       }
     }
