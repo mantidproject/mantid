@@ -100,11 +100,11 @@ public:
         const int NPeaks(peaks->getNumberPeaks());
         std::vector<double>out(NPeaks);
         std::vector<double>out1(NPeaks);
-        double xValues[NPeaks];
+        std::vector<double> xValues(NPeaks);
         for( int i=0; i<peaks->getNumberPeaks();i++)
           xValues[i]=i;
 
-        peakErrs.function1D( out.data(),xValues,(size_t) peaks->getNumberPeaks());
+        peakErrs.function1D( out.data(),xValues.data(),(size_t) peaks->getNumberPeaks());
 
         //std::cout<<out[0]<<","<<out[1]<<","<<out[2]<<","<<out[3]<<","<<out[4]<<std::endl;
         TS_ASSERT_DELTA( -0.021081,   out[0], .01 );
@@ -114,7 +114,7 @@ public:
         TS_ASSERT_DELTA( -0.0277816, out[4], .01 );
 
         boost::shared_ptr<Jacob>Jac(new Jacob ((int)peakErrs.nParams(), (int)peaks->getNumberPeaks()));
-        peakErrs.functionDeriv1D(Jac.get(),xValues,(size_t)peaks->getNumberPeaks());
+        peakErrs.functionDeriv1D(Jac.get(),xValues.data(),(size_t)peaks->getNumberPeaks());
 
         double offset =.0001;
         for( size_t param=1; param < peakErrs.nParams(); param+=2)
@@ -122,10 +122,10 @@ public:
          //std::cout<<"Result for param="<<param<<std::endl;
           double paramValSav= peakErrs.getParameter(param);
           peakErrs.setParameter(param, paramValSav+offset);
-          peakErrs.function1D( out.data(),xValues,(size_t) peaks->getNumberPeaks());
+          peakErrs.function1D( out.data(),xValues.data(),(size_t) peaks->getNumberPeaks());
 
           peakErrs.setParameter(param, paramValSav-offset);
-          peakErrs.function1D( out1.data(),xValues,(size_t) peaks->getNumberPeaks());
+          peakErrs.function1D( out1.data(),xValues.data(),(size_t) peaks->getNumberPeaks());
 
           peakErrs.setParameter(param, paramValSav);
           for( int p = 0; p <= peaks->getNumberPeaks(); p += 40 )
