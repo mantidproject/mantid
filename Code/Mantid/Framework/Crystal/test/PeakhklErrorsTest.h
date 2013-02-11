@@ -97,9 +97,10 @@ public:
         peakErrs.setParameter("SampleYOffset",0.0);
         peakErrs.setParameter("SampleZOffset",0.0);
 
-        std::vector<double>out(peaks->getNumberPeaks());
-        std::vector<double>out1(peaks->getNumberPeaks());
-        double xValues[peaks->getNumberPeaks()];
+        const int NPeaks(peaks->getNumberPeaks());
+        std::vector<double>out(NPeaks);
+        std::vector<double>out1(NPeaks);
+        double xValues[NPeaks];
         for( int i=0; i<peaks->getNumberPeaks();i++)
           xValues[i]=i;
 
