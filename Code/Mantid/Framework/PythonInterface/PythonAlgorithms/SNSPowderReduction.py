@@ -241,6 +241,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("FilterMinimumValue", 0.0, "Minimum log value for which to keep events.")
         self.declareProperty("FilterMaximumValue", 0.0, "Maximum log value for which to keep events.")
         self.declareProperty("SaveAs", "gsas", StringListValidator(outfiletypes))
+        self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
         self.declareProperty("NormalizeByCurrent", True, "Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
@@ -379,7 +380,10 @@ class SNSPowderReduction(PythonAlgorithm):
         return self._config.getInfo(frequency, wavelength)
 
     def _save(self, wksp, info, normalized, pdfgetn):
-        filename = os.path.join(self._outDir, str(wksp))
+        prefix = str(wksp)
+        if len(self._outPrefix) > 0: # non-empty string
+            prefix = self._outPrefix
+        filename = os.path.join(self._outDir, prefix)
         if pdfgetn:
             if "pdfgetn" in self._outTypes:
                 pdfwksp = str(wksp)+"_norm"
@@ -434,6 +438,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams").value
         calib = self.getProperty("CalibrationFile").value
         self._outDir = self.getProperty("OutputDirectory").value
+        self._outPrefix = self.getProperty("OutputFilePrefix").value
         self._outTypes = self.getProperty("SaveAs").value
         samRuns = self.getProperty("RunNumber").value
         filterWall = (self.getProperty("FilterByTimeMin").value, self.getProperty("FilterByTimeMax").value)
