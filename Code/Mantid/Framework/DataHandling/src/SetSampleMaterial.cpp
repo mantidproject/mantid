@@ -11,8 +11,11 @@ Sets the neutrons information in the sample.
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidGeometry/Objects/Material.h"
+
+using namespace Mantid::PhysicalConstants;
 
 namespace Mantid
 {
@@ -42,10 +45,9 @@ namespace DataHandling
     declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "The workspace with which to associate the sample ");
-    declareProperty("materialName", "", "Name of Material");
-    declareProperty("numberDensity", EMPTY_DBL(), "Density in A^-3");
-    declareProperty("zNumber", EMPTY_INT(), "Atomic number of the atom to get");
-    declareProperty("aNumber", 0, "Mass number of the atom to get");
+    declareProperty("ChemicalSymbol", "", "ChemicalSymbol or AtomicNumber must be given");
+    declareProperty("AtomicNumber", EMPTY_INT(), "ChemicalSymbol or AtomicNumber must be given");
+    declareProperty("MassNumber", 0, "Mass number of the atom to get (default is 0)");
   }
 
   /**
@@ -55,13 +57,30 @@ namespace DataHandling
   {
     // Get the input workspace
     MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
-    double numberDensity = getProperty("numberDensity");
-    std::string materialName = getProperty("materialName");
-    int z_number = getProperty("zNumber");
-    int a_number = getProperty("aNumber");
+    const std::string chemicalSymbol = getProperty("ChemicalSymbol");
+    const int z_number = getProperty("AtomicNumber");
+    const int a_number = getProperty("MassNumber");
 
-    Material *mat = new Material(materialName, PhysicalConstants::getNeutronAtom(z_number,a_number), numberDensity);
-    workspace->mutableSample().setMaterial(*mat);
+    try
+    {
+      Atom myAtom = getAtom(chemicalSymbol, static_cast<uint16_t>(a_number));
+      Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
+      workspace->mutableSample().setMaterial(*mat);
+    }
+    catch (...)
+    {
+    	try
+    	{
+			Atom myAtom = getAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number));
+			Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
+			workspace->mutableSample().setMaterial(*mat);
+    	}
+    	catch(std::invalid_argument&)
+    	{
+    		g_log.information("ChemicalSymbol or AtomicNumber must be given.");
+    		throw std::invalid_argument("ChemicalSymbol or AtomicNumber must be given");
+    	}
+    }
     // Done!
     progress(1);
   }

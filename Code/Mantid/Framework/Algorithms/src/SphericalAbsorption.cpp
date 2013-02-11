@@ -18,6 +18,8 @@ Calculates bin-by-bin correction factors for attenuation due to absorption and s
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
 
+using namespace Mantid::PhysicalConstants;
+
 namespace Mantid
 {
 namespace Algorithms
@@ -57,11 +59,11 @@ void SphericalAbsorption::init()
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
-  declareProperty("AttenuationXSection", -1.0, mustBePositive,
+  declareProperty("AttenuationXSection", 0.0, mustBePositive,
     "The ABSORPTION cross-section for the sample material in barns");
-  declareProperty("ScatteringXSection", -1.0, mustBePositive,
+  declareProperty("ScatteringXSection", 0.0, mustBePositive,
     "The scattering cross-section (coherent + incoherent) for the sample material in barns");
-  declareProperty("SampleNumberDensity", -1.0, mustBePositive,
+  declareProperty("SampleNumberDensity", 0.0, mustBePositive,
     "The number density of the sample in number per cubic angstrom");
   declareProperty("SphericalSampleRadius", -1.0, mustBePositive,
     "The radius of the spherical sample in centimetres");
@@ -102,9 +104,17 @@ void SphericalAbsorption::exec()
 /// Fetch the properties and set the appropriate member variables
 void SphericalAbsorption::retrieveBaseProperties()
 {
-  const double sigma_atten = getProperty("AttenuationXSection"); // in barns
-  const double sigma_s = getProperty("ScatteringXSection"); // in barns
+  double sigma_atten = getProperty("AttenuationXSection"); // in barns
+  double sigma_s = getProperty("ScatteringXSection"); // in barns
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+  const Geometry::Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
+  if( m_sampleMaterial->totalScatterXSection(1.0) != 0.0)
+  {
+	if(rho == 0.0) rho =  m_sampleMaterial->numberDensity();
+	if(sigma_s == 0.0) sigma_s =  m_sampleMaterial->totalScatterXSection(1.7982);
+	if(sigma_atten == 0.0) sigma_atten = m_sampleMaterial->absorbXSection(1.7982);
+  }
+
   m_refAtten = sigma_atten * rho;
   m_scattering = sigma_s * rho;
   
