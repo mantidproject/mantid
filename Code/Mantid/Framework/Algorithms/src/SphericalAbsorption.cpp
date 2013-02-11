@@ -114,6 +114,13 @@ void SphericalAbsorption::retrieveBaseProperties()
 	if(sigma_s == EMPTY_DBL()) sigma_s =  m_sampleMaterial->totalScatterXSection(1.7982);
 	if(sigma_atten == EMPTY_DBL()) sigma_atten = m_sampleMaterial->absorbXSection(1.7982);
   }
+  else  //Save input in Sample with wrong atomic number and name
+  {
+	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+  			0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
+    Material *mat = new Material("SetInSphericalAbsorption", *neutron, rho);
+    m_inputWS->mutableSample().setMaterial(*mat);
+  }
 
   m_refAtten = sigma_atten * rho;
   m_scattering = sigma_s * rho;
