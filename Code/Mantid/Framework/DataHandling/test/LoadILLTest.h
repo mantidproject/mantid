@@ -6,21 +6,31 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::API;
+using Mantid::DataHandling::LoadILL;
 
-class LoadILLTest: public CxxTest::TestSuite {
+class LoadILLTest: public CxxTest::TestSuite 
+{
 public:
-	LoadILLTest() :
-			testFile("ILLIN5_094460.nxs") {
+
+	LoadILLTest() : testFile("ILLIN5_094460.nxs") 
+  {
 	}
-	void testName() {
+
+	void testName() 
+  {
+    LoadILL loader;
 		TS_ASSERT_EQUALS( loader.name(), "LoadILL");
 	}
 
-	void testVersion() {
+	void testVersion() 
+  {
+    LoadILL loader;
 		TS_ASSERT_EQUALS( loader.version(), 1);
 	}
 
-	void testInit() {
+	void testInit() 
+  {
+    LoadILL loader;
 		TS_ASSERT_THROWS_NOTHING( loader.initialize());
 		TS_ASSERT( loader.isInitialized());
 	}
@@ -29,7 +39,10 @@ public:
 //		std::cerr << loader.fileCheck(testFile);
 //	}
 
-	void testExec() {
+	void testExec() 
+  {
+    LoadILL loader;
+    loader.initialize();
 		loader.setPropertyValue("Filename", testFile);
 
 		std::string outputSpace = "LoadILLTest_out";
@@ -50,7 +63,7 @@ public:
 	}
 
 private:
-	Mantid::DataHandling::LoadILL loader;
+
 	std::string testFile;
 };
 
@@ -58,9 +71,11 @@ private:
 // Performance test
 //------------------------------------------------------------------------------
 
-class LoadILLTestPerformance: public CxxTest::TestSuite {
+class LoadILLTestPerformance: public CxxTest::TestSuite 
+{
 public:
-	void testDefaultLoad() {
+	void testDefaultLoad() 
+  {
 		Mantid::DataHandling::LoadILL loader;
 		loader.initialize();
 		loader.setPropertyValue("Filename", "ILLIN5_094460.nxs");

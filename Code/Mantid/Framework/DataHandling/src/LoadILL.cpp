@@ -616,7 +616,7 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	 */
 	std::vector<double> monitorTofBins(monitorData.size() + 1);
 	double monitorFakeChannelWidth = tElastSourceMonitor / monitorPeakPosition;
-	for (size_t i = 1; i <= monitorData.size() + 1; ++i) {
+	for (size_t i = 1; i < monitorData.size() + 1; ++i) {
 		monitorTofBins[i] = static_cast<double>(i) * monitorFakeChannelWidth;
 	}
 	// assign the calculated tof bins to the 0 spectra X axis
