@@ -53,15 +53,15 @@ class SANSSolidAngleCorrection(PythonAlgorithm):
         inst_pos = sample_pos - wd.getInstrument().getSource().getPos()
         for i in range(wd.getNumberHistograms()):
             try:
-                solidAngle = wd.getDetector(i).getTwoTheta(sample_pos, inst_pos)
-                A = 1/np.cos(solidAngle) - 1
+                twoTheta = wd.getDetector(i).getTwoTheta(sample_pos, inst_pos)
+                A = 1/np.cos(twoTheta) - 1
                 to_l = (np.power(to,A)-1)/(np.log(to)*A)
                 to_err_l = (np.power(to_e, A) - 1)/ (np.log(to_e) * A)
                 for l in range(len(trans_wc.dataY(i))):
                     trans_wc.dataY(i)[l] = to_l[l]
                     trans_wc.dataE(i)[l] = to_err_l[l]
             except:
-                mantid.sendErrorMessage("SolidAngleCorrection error: " + str(sys.exc_info()))
+                mantid.sendWarningMessage("SolidAngleCorrection error: " + str(sys.exc_info()))
 
         self.setProperty("OutputWorkspace",trans_wc)
 
