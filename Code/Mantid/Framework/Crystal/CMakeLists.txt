@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/IndexPeaks.cpp
+	src/IndexOptimizePeaks.cpp
 	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadHKL.cpp
@@ -21,6 +22,7 @@ set ( SRC_FILES
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
 	src/OptimizeExtinctionParameters.cpp
+	src/PeakhklErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
 	src/PredictPeaks.cpp
@@ -58,6 +60,7 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/IndexPeaks.h
+	inc/MantidCrystal/IndexOptimizePeaks.h
 	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadHKL.h
@@ -66,6 +69,7 @@ set ( INC_FILES
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/OptimizeExtinctionParameters.h
+	inc/MantidCrystal/PeakhklErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
 	inc/MantidCrystal/PredictPeaks.h
@@ -108,6 +112,7 @@ set ( TEST_FILES
 	LoadIsawUBTest.h
 	MaskPeaksWorkspaceTest.h
 	NormaliseVanadiumTest.h
+	PeakhklErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
 	PredictPeaksTest.h
