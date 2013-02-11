@@ -135,6 +135,7 @@ public:
             //if( (p+1) %350 ==0)
             //  std::cout<<std::endl;
             double delta =.8;
+
             if( param >= 3) delta =.003;
             if( fabs( calc-Jac->get(p,param)) >  delta)
               std::cout<<"param and peak="<<param<<","<<p<<","<< fabs( calc-Jac->get(p,param))<<std::endl;
