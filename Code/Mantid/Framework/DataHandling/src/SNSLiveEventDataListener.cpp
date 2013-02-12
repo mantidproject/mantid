@@ -17,10 +17,7 @@
 // Includes for parsing the XML device descriptions
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
-//#include "Poco/DOM/NodeIterator.h"
-#include "Poco/DOM/NodeFilter.h"
 #include "Poco/DOM/AutoPtr.h"
-#include "Poco/SAX/InputSource.h"
 
 #include <Poco/Thread.h>
 #include <Poco/Runnable.h>
@@ -628,10 +625,8 @@ namespace DataHandling
   bool SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &pkt)
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-    std::istringstream input( pkt.description());
-    Poco::XML::InputSource src(input);
     Poco::XML::DOMParser parser;
-    Poco::AutoPtr<Poco::XML::Document> doc = parser.parse(&src);
+    Poco::AutoPtr<Poco::XML::Document> doc = parser.parseMemory( pkt.description().c_str(), pkt.description().length());
     const Poco::XML::Node* deviceNode = doc->firstChild();
 
     // The 'device' should be the root element of the document.  I'm just being paranoid here.
