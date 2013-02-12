@@ -282,6 +282,7 @@ set ( TEST_FILES
 	#LoadDAETest.h
 	#LoadSNSNexusTest.h # TODO has no active tests in it
 	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
+	ADARAPacketTest.h
 	AppendGeometryToSNSNexusTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
