@@ -250,26 +250,3 @@ def CheckXrange(xrange,type):
             error = type + '2 - input max ('+str(xrange[3])+') < min ('+xrange[2]+')'			
             logger.notice('ERROR *** ' + error)
             sys.exit(error)
-
-def CheckElimits(erange,Xin):
-    nx = len(Xin)-1
-    if math.fabs(erange[0]) < 1e-5:
-        error = 'Elimits - input emin ( '+str(erange[0])+' ) is Zero'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
-    if erange[0] < Xin[0]:
-        error = 'Elimits - input emin ( '+str(erange[0])+' ) < data emin ( '+str(Xin[0])+' )'		
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
-    if math.fabs(erange[1]) < 1e-5:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) is Zero'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
-    if erange[1] > Xin[nx]:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)
-    if erange[1] < erange[0]:
-        error = 'Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )'			
-        logger.notice('ERROR *** ' + error)
-        sys.exit(error)

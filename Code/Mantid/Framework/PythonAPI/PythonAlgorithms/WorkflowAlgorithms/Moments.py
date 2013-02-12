@@ -1,6 +1,6 @@
 # Algorithm to start Bayes programs
 from MantidFramework import *
-from mantidsimple import *
+import IndirectMoment as Main
 
 class Moments(PythonAlgorithm):
  
@@ -36,14 +36,6 @@ class Moments(PythonAlgorithm):
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getProperty('Plot')
 		saveOp = self.getProperty('Save')
-		workdir = config['defaultsave.directory']
-		if inType == 'File':
-			spath = os.path.join(workdir, sam+'.nxs')		# path name for sample nxs file
-			self.log().notice('Input from File : '+spath)
-			LoadNexus(Filename=spath, OutputWorkspace=sam)
-		else:
-			self.log().notice('Input from Workspace : '+sam)
-		from IndirectEnergyConversion import SqwMoments
-		SqwMoments(sam,erange,factor,verbOp,plotOp,saveOp)
+		Main.MomentStart(inType,sam,erange,factor,verbOp,plotOp,saveOp)
 
 mantid.registerPyAlgorithm(Moments())         # Register algorithm with Mantid
