@@ -291,7 +291,7 @@ namespace Mantid
           "OutputNormalisedCovarianceMatrix" , "" ,  Direction::Output ) ,
           "The name of the TableWorkspace in which to store the final covariance matrix" );
 
-      std::string NormMatName = fit_alg->getPropertyValue( "OutputNormalisedCovarianceMatrix" );
+      //std::string NormMatName = fit_alg->getPropertyValue( "OutputNormalisedCovarianceMatrix" );
 
       ITableWorkspace_sptr NormCov = fit_alg->getProperty( "OutputNormalisedCovarianceMatrix" );
 

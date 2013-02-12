@@ -671,8 +671,8 @@ namespace Mantid
             delete [] NeighborIDs;
             NeighborIDs = new int[NN+2];
             NeighborIDs[0]=NN+2;
-          }else
-            NN= NeighborIDs[0]-2;
+          }//else
+           // NN= NeighborIDs[0]-2;
           NeighborIDs[1]=2;
           neighborRadius = 1.5*NewRadius;
           //CentNghbr = CentPos;
@@ -1847,8 +1847,8 @@ namespace Mantid
                delete [] NeighborIDs;
                NeighborIDs = new int[NN+2];
                NeighborIDs[0]=NN+2;
-             }else
-               NN= NeighborIDs[0]-2;
+             }//else
+              // NN= NeighborIDs[0]-2;
              NeighborIDs[1]=2;
              neighborRadius = 1.5*NewRadius;
              CentNghbr = CentPos;
@@ -2377,7 +2377,7 @@ namespace Mantid
       double intensity=0;
 
      // if( !EdgePeak  )
-      {
+     // {
         err = AttributeValues->CalcISAWIntensityVariance(params.data(),errs.data(), chisqdivDOF);
             //CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceVariance, ncells);
         intensity =AttributeValues->CalcISAWIntensity( params.data());
@@ -2386,7 +2386,7 @@ namespace Mantid
 
         TotVariance += err ;
         g_log.debug()<<"TotIntensity/TotVariance="<<TotIntensity<<"/"<<TotVariance<<std::endl;
-      }
+     // }
 
       /*else
       {

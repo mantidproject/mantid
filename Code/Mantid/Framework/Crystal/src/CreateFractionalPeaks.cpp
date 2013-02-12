@@ -7,7 +7,7 @@
  * l values are desired
  *
  * The input PeaksWorkspace must contain an orientation matrix and have been INDEXED by THIS MATRIX
- * if the new peaks are not created from a range of h ,k, and l values
+ * when the new peaks are not created from a range of h ,k, and l values
  *
  *WIKI*/
 /*
@@ -179,8 +179,8 @@ namespace Mantid
 
        Kernel::DblMatrix UB= ol.getUB();
        vector< vector<int> > AlreadyDonePeaks;
-       int ErrPos=-1;
        bool done = false;
+       int ErrPos = -1;
        while( !done)
        {
          for( size_t hoffset=0;hoffset<hOffsets.size();hoffset++)
@@ -188,8 +188,9 @@ namespace Mantid
              for( size_t loffset=0;loffset<lOffsets.size();loffset++)
                 try
                 {
-                  ErrPos=0;
-                  V3D hkl1(hkl);
+                  int ErrPos = 0;
+
+                  V3D hkl1( hkl );
 
 
                   hkl1[0] += hOffsets[hoffset] ;
@@ -200,11 +201,11 @@ namespace Mantid
                   Qs*= 2.0;
                   Qs*=M_PI;
                   Qs=Gon*Qs;
-                  if( Qs[2] <=0)
+                  if( Qs[2] <= 0 )
                     continue;
 
                   ErrPos=1;
-                  boost::shared_ptr<IPeak> peak(Peaks->createPeak(Qs, 1));
+                  boost::shared_ptr<IPeak> peak( Peaks->createPeak( Qs, 1 ));
 
                   peak->setGoniometerMatrix(Gon);
 
@@ -217,7 +218,7 @@ namespace Mantid
                     SavPk.push_back((int)floor(1000*hkl1[1]+.5));
                     SavPk.push_back((int)floor(1000*hkl1[2]+.5));
 
-                  //TODO keep list sorted so searching is good
+                  //TODO keep list sorted so searching is faster?
                     vector<vector<int> >::iterator it = find(AlreadyDonePeaks.begin(),AlreadyDonePeaks.end(),SavPk);
 
                     ErrPos=3;
@@ -235,7 +236,8 @@ namespace Mantid
                 }catch(...)
                 {
 
-                  //setQLabFrame throws an exception if wl <0
+                  if( ErrPos != 1)// setQLabFrame in createPeak throws exception
+                    throw new std::invalid_argument( "Invalid data at this point");
                 }
          if( includePeaksInRange)
          {

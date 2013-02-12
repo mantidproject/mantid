@@ -1,25 +1,35 @@
 /*WIKI*
-
-
-This algorithm calibrates sets of Rectangular Detectors in one instrument. The initial path, time offset,
-panel width's, panel height's, panel locations and orientation are all adjusted so the error
-in q positions from the theoretical q positions is minimized.
-
-Some features:
-
-1) Panels can be grouped. All panels in a group will move the same way and rotate the same way.  Their height and
-   widths will all change by the same factor
-
-2) The user can select which quantities to adjust
-
-3) The results can be saved to an ISAW-like DetCal file or in an xml file that can be used with the
-    LoadParameter algorithm.
-
-4) Results from a previous optimization can be applied before another optimization is done.
-
-5) There are several output tables indicating the results of the fit and and peak errors. A new table whose property is
-   "OutputNormalisedCovarianceMatrix" is also  returned directly from a result of the general Fit function.
-
+*
+*
+*This algorithm calibrates sets of Rectangular Detectors in one instrument. The initial path, time offset,
+*panel width's, panel height's, panel locations and orientation are all adjusted so the error
+*in q positions from the theoretical q positions is minimized.  Also, there are options to optimize taking
+*into account sample position and to have rotations be rigid rotations.
+*
+*Some features:
+*
+*1) Panels can be grouped. All panels in a group will move the same way and rotate the same way.  If rigid rotations are used, each panel is rotated about the center of the instrument, not about the panel's center. The height and  widths of the panels in a group will all change by the same factor
+*
+*2) The user can select which quantities to adjust
+*
+*3) The results can be saved to an ISAW-like DetCal file or in an xml file that can be used with the LoadParameter algorithm.
+*
+*4) Results from a previous optimization can be applied before another optimization is done.
+*   The Levenberg-Marquardt optimization algorithm is used. Later iterations may have too small of changes for the parameters to
+*   get to another optimum value.  Restarting allows for the consideration of parameter values further away and also can change8
+*   constraints on the parameter values. This is also useful when fine tuning parameters that do not influence the errors as much as other parameters.
+*
+*5) There are several output tables indicating the results of the fit
+*   A) ResultWorkspace contains the results from fitting.
+*     -t0 is in microseconds
+*     -L0 is in meters
+*     -*Xoffset,*Yoffset,and *Zoffset are in meters
+*     -*Xrot,*Yrot, and *Zrot are in degrees. Not Zrot is done first, then Yrot , the Xrot.
+*
+*   B)QErrorWorkspace contains the Error in Q values for each peak along with other associated information about the peak
+*
+*   C)CovarianceInfo contains the "correlations"(*100) between each of the parameters
+*
 *WIKI*/
 
 
@@ -783,7 +793,7 @@ namespace Crystal
          if( !first)
                   oss1 << ",";
 
-         first = false;
+        //!! first = false;
          oss1 <<"t0="<<fixed<<T0;
 
        }
