@@ -199,6 +199,8 @@ void vtkEventNexusReader::setTimeRange(vtkInformationVector* outputVector)
   if(m_presenter->hasTDimensionAvailable())
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(),
+                 m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
       static_cast<int> (timeStepValues.size()));
@@ -207,8 +209,6 @@ void vtkEventNexusReader::setTimeRange(vtkInformationVector* outputVector)
     timeRange[1] = timeStepValues.back();
 
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
-    std::cout << "B: " << m_presenter->getTimeStepLabel() << std::endl;
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(), m_presenter->getTimeStepLabel().c_str());
   }
 }
 
