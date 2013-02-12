@@ -66,7 +66,7 @@ public:
         alg.execute();
         alg.setProperty("OutputWorkspace","abcd");
         DataObjects::PeaksWorkspace_sptr peaks =alg.getProperty("OutputWorkspace");
-        std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<std::endl;
+        //std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<std::endl;
 
         LoadIsawUB loadUB;
         loadUB.initialize();
@@ -116,7 +116,33 @@ public:
         boost::shared_ptr<Jacob>Jac(new Jacob ((int)peakErrs.nParams(), (int)peaks->getNumberPeaks()));
         peakErrs.functionDeriv1D(Jac.get(),xValues.data(),(size_t)peaks->getNumberPeaks());
 
-        double offset =.0001;
+        TS_ASSERT_DELTA( Jac->get(1,0), -1.75829, .4);
+        TS_ASSERT_DELTA( Jac->get(3,1), 6.862,.4);
+        TS_ASSERT_DELTA( Jac->get(10,2),-16.30, .4);
+        TS_ASSERT_DELTA( Jac->get(55,3), 0,.1);
+        TS_ASSERT_DELTA( Jac->get(435,4),-.193,.1 );
+        TS_ASSERT_DELTA( Jac->get(510,5), .114,.1);
+        TS_ASSERT_DELTA( Jac->get(100,0), .613, .4);
+        TS_ASSERT_DELTA( Jac->get(450,1), 3.04, .4);
+        TS_ASSERT_DELTA( Jac->get(500,2), 10.633, .4);
+        TS_ASSERT_DELTA( Jac->get(20,3), 0,.1);
+        TS_ASSERT_DELTA( Jac->get(450,4),-.162 ,.1);
+        TS_ASSERT_DELTA( Jac->get(500,5),.196 ,.1);
+       /* std::cout<<"Derivatives"<<std::endl;
+        std::cout<< Jac->get(1,0)<<std::endl;
+        std::cout<< Jac->get(3,1)<<std::endl;
+        std::cout<< Jac->get(10,2)<<std::endl;
+        std::cout<< Jac->get(55,3)<<std::endl;
+        std::cout<< Jac->get(435,4)<<std::endl;
+        std::cout<< Jac->get(510,5)<<std::endl;
+        std::cout<< Jac->get(100,0)<<std::endl;
+        std::cout<< Jac->get(450,1)<<std::endl;
+        std::cout<< Jac->get(500,2)<<std::endl;
+        std::cout<< Jac->get(20,3)<<std::endl;
+        std::cout<< Jac->get(450,4)<<std::endl;
+        std::cout<< Jac->get(500,5)<<std::endl;
+        */
+       /* double offset =.0001;
         for( size_t param=1; param < peakErrs.nParams(); param+=2)
         {
          //std::cout<<"Result for param="<<param<<std::endl;
@@ -146,6 +172,7 @@ public:
             offset =.005;
 
         }
+      */
       }
     };
 
