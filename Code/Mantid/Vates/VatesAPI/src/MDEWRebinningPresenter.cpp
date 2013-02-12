@@ -416,6 +416,10 @@ namespace Mantid
       return timeStepValues;
     }
 
+    /**
+     * Create a label for the "time" coordinate
+     * @return the "time" coordinate label
+     */
     std::string MDEWRebinningPresenter::getTimeStepLabel() const
     {
       Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
