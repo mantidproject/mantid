@@ -129,6 +129,8 @@ namespace Crystal
   *
    * @param L0             The distance from source to sample( should be positive)
    *
+   * @param newSampPos     The  new sample position
+   *
    * @param  pmapOld     The Parameter map from the original instrument( not
   *                        NewInstrument). "Clones" relevant information into the
   *                        NewInstrument's parameter map.

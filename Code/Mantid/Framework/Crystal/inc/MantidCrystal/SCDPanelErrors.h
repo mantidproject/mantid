@@ -27,16 +27,27 @@ namespace Crystal
    *The Parameters
    * <UL>
    *   <LI>l0- the initial Flight path in units from Peak.getL1</LI>
+   *
    *   <LI>t0-Time offset in the same units returned with Peak.getTOF);</LI>
+   *
    *   <LI>f*_detWidthScale-panel Width in the same units returned with Peak.getDetPos().norm().</LI>
+   *
    *   <LI>f*_detHeightScale-panel Height in the same units returned with Peak.getDetPos().norm()</LI>
+   *
    *   <LI>f*_Xoffset-Panel Center x offset in the same units returned with Peak.getDetPos().norm()</LI>
+   *
    *   <LI>f*_Yoffset-Panel Center y offset in the same units returned with Peak.getDetPos().norm()</LI>
+   *
    *   <LI>f*_Zoffset-Panel Center z offset in the same units returned with Peak.getDetPos().norm()</LI>
-   *   <LI>f*_Xrot-Rotation(degrees) Panel Center in x axis direction</LI>
-   *   <LI>f*_Yrot-Rotation(degrees) Panel Center in y axis direction</LI>
-   *   <LI>f*_Zrot-Rotation(degrees) Panel Center in z axis direction</LI>
+   *
+   *   <LI>f*_Xrot-Rotation(degrees)around "Center" in x axis direction</LI>
+   *
+   *   <LI>f*_Yrot-Rotation(degrees) around "Center" in y axis direction</LI>
+   *
+   *   <LI>f*_Zrot-Rotation(degrees) around "Center" in z axis direction</LI>
+   *
    * </UL>
+   * "Center" is panel center unless attribute "RotateCenters" is true. Then the "Center" is (0,0,0).
    */
 
    /**
@@ -47,17 +58,27 @@ namespace Crystal
    *Attributes
    *<UL>
    *   <LI>a,b,c,alpha,beta,gamma- The lattice parameters. The angles are in degrees</LI>
+   *
    *   <LI>PeakWorkspaceName- The name of where the PeaksWorkspace is stored in the AnalysisDataService</LI>
+   *
    *   <LI>BankNames- The ! separated "list" of / separated panel names that this IFitFunction uses. The parameters
    *                   apply uniformly to every bank in a Group(separated by !). That is all panels will be
    *                   in a given group will be moved, rotated the same</LI>.
+   *
    *   <LI>startX - -1 is default. If a composite function is used, startX is the index in the xValues( from functionMW)
    *                of the starting xvalues that this function changes.</LI>
+   *
    *  <LI>endX     -1 is default. If a composite function is used, endX is the index in xValues( from functionMW)
    *                of the last xvalues that this function changes. This function only changes xValue between startX and
    *                endX inclusive. See workspace information below</LI>.
-   *   <LI> nGroups  The number of groups( determines and creates parameters
+   *
+   *   <LI>nGroups  The number of groups( determines and creates parameters
    *                   f*_xxxx. where * is 1,2,3, etc.)</LI>
+   *
+   *   <LI> RotateCenters - If true Rotation will also rotate the center of the panels along with rotating elements of
+   *                       the panel around the panels center</LI>
+   *
+   *   <LI> SampleOffsets - Optimize also on sample offsets( if not zero) .</LI>
    *  </UL>
    *
    *  <UL>
@@ -307,12 +328,16 @@ namespace Crystal
                                     std::vector<std::string> &bankNames , double tolerance);
 
   /**
-     * Creates a new peak, matching the old peak except for a different instrument. The Time of flight
-     * is the same except offset by T0. L0 should be the L0 for the new instrument. It is added as a parameter
-     * in case the instrument will have the initial flight path adjusted later. NOTE:wavelength is changed.
+     * Creates a new peak, matching the old peak except for a different instrument.
+     *
+     * The Time of flightis the same except offset by T0. L0 should be the L0 for the new instrument.
+     * It is added as a parameter in case the instrument will have the initial flight path adjusted later.
+     *  NOTE: the wavelength is changed.
      *
      * @param peak_old - The old peak
+     *
      * @param instrNew -The new instrument
+     *
      * @return The new peak with the new instrument( adjusted with the parameters) and time adjusted.
      */
     static DataObjects::Peak  createNewPeak( const API::IPeak & peak_old, Geometry::Instrument_sptr  instrNew,
@@ -343,6 +368,7 @@ namespace Crystal
      * This checks for these conditions.
      */
     double checkForNonsenseParameters() const;
+
     boost::shared_ptr< DataObjects::PeaksWorkspace> peaks;
 
     double a,b,c,alpha,beta,gamma;
