@@ -8111,7 +8111,6 @@ void ApplicationWindow::addLabel()
   {
     g->setActiveTool(new LabelTool(g));
   }
-  displayBar->show();
 }
 
 void ApplicationWindow::addImage()
