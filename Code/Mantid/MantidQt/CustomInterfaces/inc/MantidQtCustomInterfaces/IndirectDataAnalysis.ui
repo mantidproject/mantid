@@ -76,13 +76,6 @@
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="elwin_ckConcat">
-         <property name="text">
-          <string>Concatanate Multiple Results</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <widget class="QCheckBox" name="elwin_ckVerbose">
@@ -2209,7 +2202,6 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>elwin_pbPlotInput</tabstop>
-  <tabstop>elwin_ckConcat</tabstop>
   <tabstop>elwin_ckVerbose</tabstop>
   <tabstop>elwin_ckPlot</tabstop>
   <tabstop>elwin_ckSave</tabstop>

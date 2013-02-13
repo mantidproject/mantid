@@ -9,22 +9,6 @@ import math, re, os.path, numpy as np
 # Misc. Helper Functions
 ##############################################################################
 
-def concatWSs(workspaces, unit, name):
-    dataX = []
-    dataY = []
-    dataE = []
-    for ws in workspaces:
-        readX = mtd[ws].readX(0)
-        readY = mtd[ws].readY(0)
-        readE = mtd[ws].readE(0)
-        for i in range(0, len(readX)):
-            dataX.append(readX[i])
-        for i in range(0, len(readY)):
-            dataY.append(readY[i])
-            dataE.append(readE[i])
-    CreateWorkspace(OutputWorkspace=name, DataX=dataX, DataY=dataY, DataE=dataE, 
-        NSpec=len(workspaces), UnitX=unit)
-
 def split(l, n):
     #Yield successive n-sized chunks from l.
     for i in xrange(0, len(l), n):
