@@ -4,10 +4,11 @@
 #include <stdint.h>
 
 #include "ADARA.h"
+#include "MantidKernel/System.h"
 
 namespace ADARA {
 
-class PacketHeader {
+class DLLExport PacketHeader {
 public:        
 	PacketHeader(const uint8_t *data) {
 		const uint32_t *field = (const uint32_t *) data;
@@ -52,7 +53,7 @@ protected:
 	PacketHeader();
 };
 
-class Packet : public PacketHeader {
+class DLLExport Packet : public PacketHeader {
 public:
 	Packet(const uint8_t *data, uint32_t len);
 	Packet(const Packet &pkt);
@@ -75,7 +76,7 @@ private:
 	Packet &operator=(const Packet &pkt);
 };
 
-class RawDataPkt : public Packet {
+class DLLExport RawDataPkt : public Packet {
 public:
 	RawDataPkt(const RawDataPkt &pkt);
 
@@ -113,7 +114,7 @@ private:
 	friend class Parser;
 };
 
-class RTDLPkt : public Packet {
+class DLLExport RTDLPkt : public Packet {
 public:
 	RTDLPkt(const RTDLPkt &pkt);
 
@@ -144,7 +145,7 @@ private:
 	friend class Parser;
 };
 
-class SourceListPkt : public Packet {
+class DLLExport SourceListPkt : public Packet {
 public:
 	SourceListPkt(const SourceListPkt &pkt);
 
@@ -159,7 +160,7 @@ private:
 	friend class Parser;
 };
 
-class BankedEventPkt : public Packet {
+class DLLExport BankedEventPkt : public Packet {
 public:
 	BankedEventPkt(const BankedEventPkt &pkt);
 
@@ -219,7 +220,7 @@ private:
 	friend class Parser;
 };
 
-class BeamMonitorPkt : public Packet {
+class DLLExport BeamMonitorPkt : public Packet {
 public:
 	BeamMonitorPkt(const BeamMonitorPkt &pkt);
 
@@ -238,7 +239,7 @@ private:
 	friend class Parser;
 };
 
-class PixelMappingPkt : public Packet {
+class DLLExport PixelMappingPkt : public Packet {
 public:
 	PixelMappingPkt(const PixelMappingPkt &pkt);
 	// TODO implement accessors for fields
@@ -249,7 +250,7 @@ private:
 	friend class Parser;
 };
 
-class RunStatusPkt : public Packet {
+class DLLExport RunStatusPkt : public Packet {
 public:
 	RunStatusPkt(const RunStatusPkt &pkt);
 
@@ -268,7 +269,7 @@ private:
 	friend class Parser;
 };
 
-class RunInfoPkt : public Packet {
+class DLLExport RunInfoPkt : public Packet {
 public:
 	RunInfoPkt(const RunInfoPkt &pkt);
 
@@ -282,7 +283,7 @@ private:
 	friend class Parser;
 };
 
-class TransCompletePkt : public Packet {
+class DLLExport TransCompletePkt : public Packet {
 public:
 	TransCompletePkt(const TransCompletePkt &pkt);
 
@@ -298,7 +299,7 @@ private:
 	friend class Parser;
 };
 
-class ClientHelloPkt : public Packet {
+class DLLExport ClientHelloPkt : public Packet {
 public:
 	ClientHelloPkt(const ClientHelloPkt &pkt);
 
@@ -312,7 +313,7 @@ private:
 	friend class Parser;
 };
 
-class AnnotationPkt : public Packet {
+class DLLExport AnnotationPkt : public Packet {
 public:
 	AnnotationPkt(const AnnotationPkt &pkt);
 
@@ -340,7 +341,7 @@ private:
 	friend class Parser;
 };
 
-class SyncPkt : public Packet {
+class DLLExport SyncPkt : public Packet {
 public:
 	SyncPkt(const SyncPkt &pkt);
 	// TODO implement accessors for fields
@@ -351,7 +352,7 @@ private:
 	friend class Parser;
 };
 
-class HeartbeatPkt : public Packet {
+class DLLExport HeartbeatPkt : public Packet {
 public:
 	HeartbeatPkt(const HeartbeatPkt &pkt);
 
@@ -361,7 +362,7 @@ private:
 	friend class Parser;
 };
 
-class GeometryPkt : public Packet {
+class DLLExport GeometryPkt : public Packet {
 public:
 	GeometryPkt(const GeometryPkt &pkt);
 
@@ -375,7 +376,7 @@ private:
 	friend class Parser;
 };
 
-class BeamlineInfoPkt : public Packet {
+class DLLExport BeamlineInfoPkt : public Packet {
 public:
 	BeamlineInfoPkt(const BeamlineInfoPkt &pkt);
 
@@ -393,7 +394,7 @@ private:
 	friend class Parser;
 };
 
-class DeviceDescriptorPkt : public Packet {
+class DLLExport DeviceDescriptorPkt : public Packet {
 public:
 	DeviceDescriptorPkt(const DeviceDescriptorPkt &pkt);
 
@@ -409,7 +410,7 @@ private:
 	friend class Parser;
 };
 
-class VariableU32Pkt : public Packet {
+class DLLExport VariableU32Pkt : public Packet {
 public:
 	VariableU32Pkt(const VariableU32Pkt &pkt);
 
@@ -432,7 +433,7 @@ private:
 	friend class Parser;
 };
 
-class VariableDoublePkt : public Packet {
+class DLLExport VariableDoublePkt : public Packet {
 public:
 	VariableDoublePkt(const VariableDoublePkt &pkt);
 
@@ -455,7 +456,7 @@ private:
 	friend class Parser;
 };
 
-class VariableStringPkt : public Packet {
+class DLLExport VariableStringPkt : public Packet {
 public:
 	VariableStringPkt(const VariableStringPkt &pkt);
 

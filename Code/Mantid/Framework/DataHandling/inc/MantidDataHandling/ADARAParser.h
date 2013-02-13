@@ -10,7 +10,7 @@
 
 namespace ADARA {
 
-class Parser {
+class DLLExport Parser {
 public:
 	Parser(unsigned int inital_buffer_size = 1024 * 1024,
 	       unsigned int max_pkt_size = 8 * 1024 * 1024);
