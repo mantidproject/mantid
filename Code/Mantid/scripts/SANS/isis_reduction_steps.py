@@ -1455,7 +1455,7 @@ class ConvertToQISIS(sans_reduction_steps.ConvertToQ):
         if (reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp):
             #calculate the transmission wide angle correction
             _issueWarning("sans solid angle correction execution")
-            SANSSolidAngleCorrection(SampleData=workspace,
+            SANSWideAngleCorrection(SampleData=workspace,
                                      TransmissionData = reducer.transmission_calculator.output_wksp,
                                      OutputWorkspace='transmissionWorkspace')
             wavepixeladj = 'transmissionWorkspace'
