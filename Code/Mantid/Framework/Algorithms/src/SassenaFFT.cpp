@@ -51,7 +51,8 @@ void SassenaFFT::init()
 {
   this->declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("InputWorkspace","",Kernel::Direction::InOut), "The name of the input group workspace");
   // properties for the detailed balance condition
-  this->declareProperty(new Kernel::PropertyWithValue<bool>("DetailedBalance", false, Kernel::Direction::Input),"Do we apply detailed balance condition (optional, default False)?");
+  this->declareProperty(new Kernel::PropertyWithValue<bool>("FFTonlyRealPart", false, Kernel::Direction::Input),"Do we FFT only the real part of I(Q,t)? (optional, default is False)");
+  this->declareProperty(new Kernel::PropertyWithValue<bool>("DetailedBalance", false, Kernel::Direction::Input),"Do we apply detailed balance condition? (optional, default is False)");
   this->declareProperty("Temp",300.0,"Multiply structure factor by exp(E/(2*kT)");
   this->setPropertySettings("Temp", new Kernel::VisibleWhenProperty("Detailed Balance", Kernel::IS_EQUAL_TO, "1"));
 }
@@ -78,12 +79,17 @@ void SassenaFFT::exec()
   DataObjects::Workspace2D_sptr fqtIm = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem( ftqImName ) );
 
   // Calculate the FFT for all spectra, retaining only the real part since F(q,-t) = F*(q,t)
+  int part=5; // extract the real part of the transform, assuming I(Q,t) is real
   const std::string sqwName = gwsName + "_sqw";
   API::IAlgorithm_sptr fft = this->createChildAlgorithm("ExtractFFTSpectrum");
   fft->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", fqtRe);
-  fft->setProperty<DataObjects::Workspace2D_sptr>("InputImagWorkspace", fqtIm);
+  if( !this->getProperty("FFTonlyRealPart") )
+  {
+    part=2; // extract the real part of the transform, assuming I(Q,t) is complex
+    fft->setProperty<DataObjects::Workspace2D_sptr>("InputImagWorkspace", fqtIm);
+  }
   fft->setPropertyValue("OutputWorkspace", sqwName );
-  fft->setProperty<int>("FFTPart",2); // extract the real part
+  fft->setProperty<int>("FFTPart",part); // extract the real part
   fft->executeAsChildAlg();
   API::MatrixWorkspace_sptr sqw0 = fft->getProperty("OutputWorkspace");
   DataObjects::Workspace2D_sptr sqw = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( sqw0 );
