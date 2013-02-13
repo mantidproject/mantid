@@ -282,10 +282,7 @@ set ( TEST_FILES
 	#LoadDAETest.h
 	#LoadSNSNexusTest.h # TODO has no active tests in it
 	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
-	#ADARAPacketTest.h
-	#Commenting out ADARAPacketTest because the RHEL6 compiler doesn't
-	#like the the way I was initializing data.  Will fix and re-enable
-	#shortly.
+	ADARAPacketTest.h
 	AppendGeometryToSNSNexusTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h

@@ -8,6 +8,11 @@
 #include "Poco/DOM/DOMParser.h"  // for parsing the XML device descriptions
 
 
+// All of the sample packets that we need to run the tests are defined in the following
+// header.  The packets can get pretty long, which is why I didn't want them cluttering
+// up this file.
+#include "ADARAPackets.h"
+
 class ADARAPacketTest : public CxxTest::TestSuite,
                                ADARA::Parser
 {
@@ -31,7 +36,7 @@ public:
   void testDeviceDescriptorPacket()
   {
     boost::shared_ptr<ADARA::DeviceDescriptorPkt> pkt =
-        basicPacketTests<ADARA::DeviceDescriptorPkt>( m_devDesPkt, sizeof(m_devDesPkt), 726785379, 0);
+        basicPacketTests<ADARA::DeviceDescriptorPkt>( devDesPkt, sizeof(devDesPkt), 726785379, 0);
     if (pkt != NULL)
     {
       // Basic XML validation
@@ -43,7 +48,7 @@ public:
   void testRunStatusPacketParser()
   {
     boost::shared_ptr<ADARA::RunStatusPkt> pkt =
-        basicPacketTests<ADARA::RunStatusPkt>( m_runStatusPkt, sizeof(m_runStatusPkt), 728504568, 5625794);
+        basicPacketTests<ADARA::RunStatusPkt>( runStatusPkt, sizeof(runStatusPkt), 728504568, 5625794);
 
     if( pkt != NULL)
     {
@@ -60,13 +65,13 @@ public:
   void testSyncPacketParser()
   {
     // the basic tests cover everything in the sync packet
-    basicPacketTests<ADARA::SyncPkt>(m_syncPkt, sizeof(m_syncPkt), 728504568, 5617153);
+    basicPacketTests<ADARA::SyncPkt>(syncPkt, sizeof(syncPkt), 728504568, 5617153);
   }
 
   void testVariableDoublePacketParser()
   {
     boost::shared_ptr<ADARA::VariableDoublePkt> pkt =
-        basicPacketTests<ADARA::VariableDoublePkt>( m_variableDoublePkt, sizeof(m_variableDoublePkt), 728281149, 0);
+        basicPacketTests<ADARA::VariableDoublePkt>( variableDoublePkt, sizeof(variableDoublePkt), 728281149, 0);
 
     if( pkt != NULL)
     {
@@ -180,11 +185,6 @@ private:
   // value that displayed in various parser utils
   bool pulseIdCompare( uint64_t pulseId, uint32_t high, uint32_t low)
   { return ( ((pulseId>>32) == high) && ((pulseId & 0xFFFFFFFF) == low) ); }
-
-  // All of the sample packets that we need to run the test are defined in the following
-  // header.  The packets can get pretty long, which is why I didn't want them cluttering
-  // up this file.
-  #include "ADARAPackets.h"
 
 };
 
