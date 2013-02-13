@@ -290,12 +290,14 @@ namespace CurveFitting
     }
 
     // 8. Calcualte Chi^2 of Output Data (calcualted or fitted)
-    if (m_fitMode == 0 || m_fitMode == 1)
+    if (m_fitMode != BACKGROUNDPROCESS)
+//    if (m_fitMode == 0 || m_fitMode == 1)
     {
       doResultStatistics();
+      g_log.notice() << "Final Rwp = " << m_bestRwp << "\n";
     }
 
-    // 7. Output peak (table) and parameter workspace
+// 7. Output peak (table) and parameter workspace
     exportBraggPeakParameterToTable();
     exportInstrumentParameterToTable(m_funcParameters);
     this->setProperty("OutputWorkspace", m_outputWS);
