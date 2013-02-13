@@ -11,7 +11,7 @@ from mantidsimple import *
 import os
 import numpy as np
 
-class SANSSolidAngleCorrection(PythonAlgorithm):
+class SANSWideAngleCorrection(PythonAlgorithm):
     """ Calculate the Solid Angle correction for SANS transmissions.
     """
    
@@ -19,7 +19,7 @@ class SANSSolidAngleCorrection(PythonAlgorithm):
         return "CorrectionFunctions\\TransmissionCorrections"
 
     def name(self):
-        return "SANSSolidAngleCorrection"
+        return "SANSWideAngleCorrection"
 
     def PyInit(self):
         self.declareWorkspaceProperty("SampleData","", Direction=Direction.Input, Type=Workspace,
@@ -68,4 +68,4 @@ class SANSSolidAngleCorrection(PythonAlgorithm):
         return
         
         
-mtd.registerPyAlgorithm(SANSSolidAngleCorrection())
+mtd.registerPyAlgorithm(SANSWideAngleCorrection())
