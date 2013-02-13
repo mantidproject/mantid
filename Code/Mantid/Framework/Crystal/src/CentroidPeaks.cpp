@@ -393,6 +393,7 @@ namespace Crystal
   }
   bool CentroidPeaks::edgePixel(std::string bankName, int col, int row, int Edge)
   {
+	  if (bankName.compare("None") == 0) return false;
 	  Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
 	  boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
 	  if (parent->type().compare("RectangularDetector") == 0)
