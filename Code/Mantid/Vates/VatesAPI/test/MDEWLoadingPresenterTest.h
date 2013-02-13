@@ -170,6 +170,20 @@ void testDepthChanged()
     TSM_ASSERT("This is a 4D workspace with an integrated T dimension", presenter.hasTDimensionAvailable());
   }
 
+  void testHasTimeLabelWithTDimension()
+  {
+    //Setup view
+    MockMDLoadingView* view = new MockMDLoadingView;
+
+    ConcreteMDEWLoadingPresenter presenter(view);
+
+    //Test that it does work when setup.
+    Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true); //Non-integrated T Dimension
+    presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
+
+    TSM_ASSERT_EQUALS("This is a 4D workspace with a T dimension", "D (A)", presenter.getTimeStepLabel());
+  }
+
   void testCanLoadFileBasedOnExtension()
   {
     MockMDLoadingView* view = new MockMDLoadingView;

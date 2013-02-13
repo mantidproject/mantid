@@ -69,6 +69,12 @@ public:
     TS_ASSERT_THROWS(nullObject.getTimeStepValues(), std::runtime_error);
   }
 
+  void getTimeStepLabelThows()
+  {
+    NullRebinningPresenter nullObject;
+    TS_ASSERT_THROWS(nullObject.getTimeStepLabel(), std::runtime_error);
+  }
+
 };
 
 #endif
