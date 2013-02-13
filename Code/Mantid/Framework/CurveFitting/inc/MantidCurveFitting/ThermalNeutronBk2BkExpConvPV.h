@@ -74,10 +74,7 @@ namespace CurveFitting
     // double &gamma, double &N,
 
     /// Core function to calcualte peak values for whole region
-    void functionLocal(vector<double>& out, const vector<double> xValues) const;
-
-    /// Calclate the function
-    void functionLocal(vector<double>& out, const vector<double> xValues, int &istart, int &iend) const;
+    void functionLocal(vector<double>& out, const vector<double> &xValues) const;
 
     /// Set up the flag to show whether (from client) cell parameter value changed
     void setUnitCellParameterValueChangeFlag(bool changed)
@@ -115,8 +112,9 @@ namespace CurveFitting
     double calPeakCenter() const;
 
     /// Calculate peak profile I(TOF) = Omega(TOF)
-    double calOmega(double x, double eta, double N, double alpha, double beta, double H,
-                    double sigma2, double invert_sqrt2sigma, bool explicitoutput=true) const;
+    double calOmega(const double x, const double eta, const double N, const double alpha, const double beta,
+                    const double H, const double sigma2, const double invert_sqrt2sigma,
+                    const bool explicitoutput=false) const;
 
     /// Set 2 functions to be hidden from client
     virtual void setCentre(const double c);

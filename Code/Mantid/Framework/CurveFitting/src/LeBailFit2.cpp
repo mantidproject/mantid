@@ -25,6 +25,7 @@
 #define FITTEDBACKGROUNDINDEX 4   // Output workspace background at ws index 4
 #define INPUTBACKGROUNDINDEX  6   // Input background
 #define SMOOTHEDBACKGROUND    8   // Smoothed background
+const double NEG_DBL_MAX(-1.*DBL_MAX);
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
@@ -206,7 +207,7 @@ namespace CurveFitting
     // c. Create CompositeFunction
     createLeBailFunction(backgroundtype, bkgdorderparams, bkgdparamws);
 
-    g_log.debug() << "LeBail Composite Function: " << m_lebailFunction->asString() << std::endl;
+    g_log.debug() << "LeBail Composite Function: " << m_lebailFunction->asString() << "\n";
 
     // d. Function mode
     if (inputparamcorrect)
@@ -219,10 +220,10 @@ namespace CurveFitting
       // Some peaks within range have unphysical parameters.  Just calcualtion for reference
       m_inputParameterPhysical = false;
       g_log.warning() << "Input instrument parameters generate some peaks with unphysical profile "
-                         "parameters." << endl;
+                         "parameters.\n";
       if (m_fitMode == FIT)
       {
-        g_log.warning() << "Function mode FIT is disabled.  Convert to Calculation mode. " << endl;
+        g_log.warning() << "Function mode FIT is disabled.  Convert to Calculation mode.\n";
         m_fitMode = CALCULATION;
       }
     }
@@ -247,7 +248,7 @@ namespace CurveFitting
     {
       case FIT:
         // LeBail Fit
-        g_log.notice() << "Function: Do LeBail Fit." << std::endl;
+        g_log.notice() << "Function: Do LeBail Fit.\n";
         if (inputparamcorrect)
         {
           execLeBailFit();
@@ -260,14 +261,14 @@ namespace CurveFitting
 
       case CALCULATION:
         // Calculation
-        g_log.notice() << "Function: Pattern Calculation." << std::endl;
+        g_log.notice() << "Function: Pattern Calculation.\n";
         execPatternCalculation();
         break;
 
       case BACKGROUNDPROCESS:
         // Calculating background
         // FIXME : Determine later whether this functionality is kept or removed!
-        g_log.notice() << "Function: Calculate Background (Precisely). " << std::endl;
+        g_log.notice() << "Function: Calculate Background (Precisely).\n";
         calBackground(m_wsIndex);
         break;
 
@@ -282,7 +283,7 @@ namespace CurveFitting
         // Impossible
         std::stringstream errmsg;
         errmsg << "FunctionMode = " << m_fitMode <<" is not supported in exec().";
-        g_log.error() << errmsg.str() << std::endl;
+        g_log.error() << errmsg.str() << "\n";
         throw std::runtime_error(errmsg.str());
 
         break;
@@ -520,7 +521,7 @@ namespace CurveFitting
 
       // b) Debug output
       std::stringstream msg;
-      msg << "[DB1209 Pattern Calcuation]  Number of Peaks = " << m_dspPeaks.size() << std::endl;
+      msg << "[DB1209 Pattern Calcuation]  Number of Peaks = " << m_dspPeaks.size() << "\n";
       for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
       {
         CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak = m_dspPeaks[ipk].second;
@@ -529,11 +530,11 @@ namespace CurveFitting
         msg << "(" << h << ", " << k << ", " << l << "), H = " << std::setw(7)
             << std::setprecision(5) << peak->height();
         if ((ipk+1) % 4 == 0)
-          msg << std::endl;
+          msg << "\n";
         else
           msg << ";  ";
       } // ENDFOR: Peak
-      g_log.information() << msg.str() << std::endl;
+      g_log.information() << msg.str() << "\n";
     }
 
     // 3. Calcualte model pattern
@@ -610,7 +611,7 @@ namespace CurveFitting
     {
       Parameter funcparam = pariter->second;
 
-      g_log.debug() << "Step 1:  Set peak parameter value " << funcparam.name << std::endl;
+      g_log.debug() << "Step 1:  Set peak parameter value " << funcparam.name << "\n";
 
       std::string parname = pariter->first;
       // double parvalue = funcparam.value;
@@ -621,7 +622,7 @@ namespace CurveFitting
       if (sit == peakparamnames.end())
       {
         // Not a peak profile parameter
-        g_log.debug() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak. " << std::endl;
+        g_log.debug() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak.\n";
         continue;
       }
 
@@ -638,7 +639,7 @@ namespace CurveFitting
           std::string tiepart1 = ss1.str();
           std::string tievalue = ss2.str();
           m_lebailFunction->tie(tiepart1, tievalue);
-          g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue << " | " << std::endl;
+          g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue << " | \n";
 
           /*--  Code prepared to replace the existing block
           ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
@@ -658,7 +659,7 @@ namespace CurveFitting
           std::string tiepart1 = ss1.str();
           std::string tiepart2 = ss2.str();
           m_lebailFunction->tie(tiepart1, tiepart2);
-          g_log.debug() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /" << std::endl;
+          g_log.debug() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /\n";
         }
 
         // c) Set the constraint
@@ -692,7 +693,7 @@ namespace CurveFitting
       std::string tiepart1 = ss1.str();
       std::string tievalue = ss2.str();
 
-      g_log.debug() << "Step 2: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
+      g_log.debug() << "Step 2: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /\n";
 
       m_lebailFunction->tie(tiepart1, tievalue);
 
@@ -775,12 +776,12 @@ namespace CurveFitting
           parammap[parnamex].fit = true;
 
           rmsg << std::setw(10) << parnamex << " = " << setw(7) << setprecision(5) << curvalue
-               << ",    Error = " << setw(7) << setprecision(5) << error << std::endl;
+               << ",    Error = " << setw(7) << setprecision(5) << error << "\n";
         }
         else
         {
           g_log.warning() << "[Fitting Result] Parameter " << parnamex << " is not set to refine.  "
-                          << "But its chi^2 =" << error << std::endl;
+                          << "But its chi^2 =" << error << "\n";
         }
       }
     }
@@ -802,7 +803,7 @@ namespace CurveFitting
     g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 (Fit) = " << m_lebailFitChi2
                    << ", Chi^2 (Cal) = " << m_lebailCalChi2
                    << ", Fit Status = " << fitstatus << " with max number of steps = " << m_numMinimizeSteps
-                   << endl << rmsg.str();
+                   << "\n" << rmsg.str();
 
     // TODO: Check the covariant matrix to see whether any NaN or Infty.  If so, return false with reason
     // TODO: (continue).  Code should fit again with Simplex and extends MaxIteration if not enough... ...
@@ -839,7 +840,7 @@ namespace CurveFitting
     fitalg->initialize();
 
     g_log.debug() << "[DBx534 | Before Fit] Function To Fit: " << function->asString()
-                  << endl << "Number of iteration = " << numiteration << std::endl;
+                  << "\n" << "Number of iteration = " << numiteration << "\n";
 
     // 2. Set property
     fitalg->setProperty("Function", function);
@@ -863,12 +864,12 @@ namespace CurveFitting
     if (!fitalg->isExecuted() || ! successfulfit)
     {
       // Early return due to bad fit
-      g_log.notice() << "[Error] Fitting to LeBail function failed. " << std::endl;
+      g_log.notice() << "[Error] Fitting to LeBail function failed.\n";
       return false;
     }
     else
     {
-      g_log.debug() << "[DBx523] Fitting successful. " << std::endl;
+      g_log.debug() << "[DBx523] Fitting successful.\n";
     }
 
     // d) Process output of fit
@@ -891,7 +892,7 @@ namespace CurveFitting
       }
       else
       {
-        g_log.warning() << "Expected covariance matrix cannot be found with algorithm Fit." << endl;
+        g_log.warning() << "Expected covariance matrix cannot be found with algorithm Fit.\n";
       }
     }
 
@@ -927,11 +928,11 @@ namespace CurveFitting
     if (!bkgdparamws)
     {
       g_log.information() << "[Input] Use background specified with vector with input vector sized "
-                          << bkgdorderparams.size() << "." << std::endl;
+                          << bkgdorderparams.size() << ".\n";
     }
     else
     {
-      g_log.information() << "[Input] Use background specified by table workspace. " << std::endl;
+      g_log.information() << "[Input] Use background specified by table workspace.\n";
       parseBackgroundTableWorkspace(bkgdparamws, bkgdorderparams);
     }
 
@@ -953,8 +954,8 @@ namespace CurveFitting
     }
 
     g_log.information() << "Generate background function.  Type = " << backgroundtype
-                        << " Order = " << order << std::endl;
-    g_log.debug() << "DBx423: Create background function: " << m_backgroundFunction->asString() << std::endl;
+                        << " Order = " << order << "\n";
+    g_log.debug() << "DBx423: Create background function: " << m_backgroundFunction->asString() << "\n";
 
     // 3. Generate the composite function
     API::CompositeFunction compfunction;
@@ -995,7 +996,7 @@ namespace CurveFitting
     }
     else
     {
-      g_log.warning() << "Input FitRegion has more than 2 entries.  Using default in stread." << std::endl;
+      g_log.warning() << "Input FitRegion has more than 2 entries.  Using default in stread.\n";
 
       tof_min = inpws->readX(wsindex)[0];
       tof_max = inpws->readX(wsindex).back();
@@ -1015,19 +1016,19 @@ namespace CurveFitting
     {
       std::stringstream errmsg;
       errmsg << "DBx309 Cropping workspace unsuccessful.  Fatal Error. Quit!";
-      g_log.error() << errmsg.str() << std::endl;
+      g_log.error() << errmsg.str() << "\n";
       throw std::runtime_error(errmsg.str());
     }
 
     API::MatrixWorkspace_sptr cropws = cropalg->getProperty("OutputWorkspace");
     if (!cropws)
     {
-      g_log.error() << "Unable to retrieve a Workspace2D object from ChildAlgorithm Crop." << std::endl;
+      g_log.error() << "Unable to retrieve a Workspace2D object from ChildAlgorithm Crop.\n";
     }
     else
     {
       g_log.debug() << "DBx307: Cropped Workspace... Range From " << cropws->readX(wsindex)[0] << " To "
-                    << cropws->readX(wsindex).back() << std::endl;
+                    << cropws->readX(wsindex).back() << "\n";
     }
 
     return cropws;
@@ -1091,7 +1092,7 @@ namespace CurveFitting
       {
         //  Exclude peak out of range
         g_log.debug() << "Input peak (" << h << ", " << k << ", " << l << ") is out of range. "
-                      << "TOF_h = " << tof_h << std::endl;
+                      << "TOF_h = " << tof_h << "\n";
         ++ numpeaksoutofrange;
       }
       else if (validparam)
@@ -1105,7 +1106,7 @@ namespace CurveFitting
         ++ numpeaksparamerror;
         errss << "[Warning] Peak (" << h << ", " << k << ", " << l << "), d_h = " << d_h
               << ", TOF_h = " << tof_h << ": "
-              << errmsg << endl;
+              << errmsg << "\n";
       }
     } // ENDFOR All Input (HKL)
 
@@ -1225,7 +1226,7 @@ namespace CurveFitting
     g_log.information() << "Number of ... Input Peaks = " << m_inputPeakInfoVec.size() << "; Peaks Generated: "
                         << m_dspPeaks.size() << "; Peaks With Error Parameters = " << numpeaksparamerror
                         << "; Peaks Outside Range = " <<  numpeaksoutofrange
-                        << "; Range: " << setprecision(5) << tofmin << ", " << setprecision(5) << tofmax <<  std::endl;
+                        << "; Range: " << setprecision(5) << tofmin << ", " << setprecision(5) << tofmax <<  "\n";
 
     if (numpeaksparamerror > 0)
     {
@@ -1307,14 +1308,14 @@ namespace CurveFitting
       {
         // If not a peak profile parameter, skip
         g_log.debug() << "Parameter " << parname
-                      << " in input parameter table workspace is not for peak function. " << std::endl;
+                      << " in input parameter table workspace is not for peak function.\n";
       }
       else
       {
         // Set value
         double value = pit->second.value;
         peak->setParameter(parname, value);
-        g_log.debug() << "LeBailFit Set " << parname << "= " << value << std::endl;
+        g_log.debug() << "LeBailFit Set " << parname << "= " << value << "\n";
       }
     } // ENDFOR: parameter iterator
 
@@ -1366,7 +1367,7 @@ namespace CurveFitting
         {
           // Not found
           g_log.debug() << "Peak parameter " << parname
-                        << "cannot be found in parameter map. " << std::endl;
+                        << "cannot be found in parameter map.\n";
           continue;
         }
 
@@ -1415,8 +1416,8 @@ namespace CurveFitting
     bool peakheightsphysical = true;
     for (size_t ig = 0; ig < peakgroupvec.size(); ++ig)
     {
-      g_log.information() << "[DBx351] Peak group " << ig << " : number of peaks = "
-                          << peakgroupvec[ig].size() << endl;
+      g_log.debug() << "[DBx351] Peak group " << ig << " : number of peaks = "
+                          << peakgroupvec[ig].size() << "\n";
       bool localphysical = calculateGroupPeakIntensities(peakgroupvec[ig], dataws,
                                                          workspaceindex, zerobackground, allpeaksvalues);
       if (!localphysical)
@@ -1444,7 +1445,7 @@ namespace CurveFitting
     {
       std::stringstream errmsg;
       errmsg << "Group peaks:  No peak is found in the peak vector. ";
-      g_log.error() << errmsg.str() << std::endl;
+      g_log.error() << errmsg.str() << "\n";
       throw std::runtime_error(errmsg.str());
     }
     size_t numpeaks = m_dspPeaks.size();
@@ -1490,8 +1491,8 @@ namespace CurveFitting
       ++ ipk;
     } // ENDWHILE
 
-    g_log.information() << "[Calculate Peak Intensity]:  Number of Peak Groups = " << peakgroupvec.size()
-                        << std::endl;
+    g_log.debug() << "[Calculate Peak Intensity]:  Number of Peak Groups = " << peakgroupvec.size()
+                  << "\n";
 
     return;
   }
@@ -1511,13 +1512,13 @@ namespace CurveFitting
                                                  vector<double>& allpeaksvalues)
   {    
     // 1. Sort by d-spacing
-    if (peakgroup.size() == 0)
+    if (peakgroup.empty())
     {
       throw runtime_error("Programming error such that input peak group cannot be empty!");
     }
     else
     {
-      g_log.information() << "[DBx155] Peaks group size = " << peakgroup.size() << endl;
+      g_log.debug() << "[DBx155] Peaks group size = " << peakgroup.size() << "\n";
     }
     if (peakgroup.size() > 1)
       sort(peakgroup.begin(), peakgroup.end());
@@ -1542,7 +1543,7 @@ namespace CurveFitting
     {
       g_log.information() << "Peak group's left boundary " << leftbound << " is out side of "
                           << "input data workspace's left bound (" << vecX[0]
-                          << ")! Accuracy of its peak intensity might be affected. " << endl;
+                          << ")! Accuracy of its peak intensity might be affected.\n";
       leftbound = vecX[0] + 0.1;
     }
     ThermalNeutronBk2BkExpConvPV_sptr rightpeak = peakgroup.back().second;
@@ -1551,7 +1552,7 @@ namespace CurveFitting
     {
       g_log.information() << "Peak group's right boundary " << rightbound << " is out side of "
                           << "input data workspace's right bound (" << vecX.back()
-                          << ")! Accuracy of its peak intensity might be affected. " << endl;
+                          << ")! Accuracy of its peak intensity might be affected.\n";
       rightbound = vecX.back() - 0.1;
     }
 
@@ -1580,11 +1581,11 @@ namespace CurveFitting
       {
         ThermalNeutronBk2BkExpConvPV_sptr thispeak = peakgroup[ipk].second;
         errss << "Peak " << ipk << ":  d_h = " << peakgroup[ipk].first << ", TOF_h = " << thispeak->centre()
-              << ", FWHM = " << thispeak->fwhm() << endl;
+              << ", FWHM = " << thispeak->fwhm() << "\n";
         vector<string> peakparamnames = thispeak->getParameterNames();
         for (size_t ipar = 0; ipar < peakparamnames.size(); ++ipar)
         {
-          errss << "\t" << peakparamnames[ipar] << " = " << thispeak->getParameter(peakparamnames[ipar]) << endl;
+          errss << "\t" << peakparamnames[ipar] << " = " << thispeak->getParameter(peakparamnames[ipar]) << "\n";
         }
       }
 
@@ -1597,20 +1598,21 @@ namespace CurveFitting
     vector<double> datay(vecY.begin()+ileft, vecY.begin()+iright);
     if (datax.size() != ndata)
     {
-      g_log.error() << "Partial peak size = " << datax.size() << " != ndata = " << ndata << endl;
+      g_log.error() << "Partial peak size = " << datax.size() << " != ndata = " << ndata << "\n";
       throw runtime_error("ndata error!");
     }
 
     // FunctionDomain1DVector xvalues(datax);
 
-    g_log.information() << "[DBx356] Number of data points = " << ndata << " index from " << ileft
-                        << " to " << iright << ";  Size(datax, datay) = " << datax.size() << endl;
+    g_log.debug() << "[DBx356] Number of data points = " << ndata << " index from " << ileft
+                  << " to " << iright << ";  Size(datax, datay) = " << datax.size() << "\n";
 
     vector<double> sumYs(ndata, 0.0);
-    vector<vector<double> > peakvalues;
+    size_t numPeaks(peakgroup.size());
+    vector<vector<double> > peakvalues(numPeaks);
 
     // b) Integrage peak by peak
-    for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
+    for (size_t ipk = 0; ipk < numPeaks; ++ipk)
     {
       // calculate peak function value
       ThermalNeutronBk2BkExpConvPV_sptr peak = peakgroup[ipk].second;
@@ -1621,20 +1623,18 @@ namespace CurveFitting
       peak->functionLocal(localpeakvalue, datax);
 
       // check data
-      bool dataisphysical = true;
-      size_t numbadpts = 0;
-
-      for (size_t i = 0; i < ndata; ++i)
+      size_t numbadpts(0);
+      vector<double>::const_iterator localpeakvalue_end = localpeakvalue.end();
+      for (auto it = localpeakvalue.begin(); it != localpeakvalue_end; ++it)
       {
-        if (localpeakvalue[i] < -DBL_MAX || localpeakvalue[i] > DBL_MAX)
+        if ( (*it != 0.) && (*it < NEG_DBL_MAX || *it > DBL_MAX))
         {
-          dataisphysical = false;
-          ++ numbadpts;
+          numbadpts++;
         }
       }
 
       // report the problem and/or integrate data
-      if (dataisphysical)
+      if (numbadpts == 0)
       {
         // Data is fine.  Integrate them all
         for (size_t i = 0; i < ndata; ++i)
@@ -1642,20 +1642,19 @@ namespace CurveFitting
           // If value is physical
           sumYs[i] += localpeakvalue[i];
         }
-        peakvalues.push_back(localpeakvalue);
       }
       else
       {
         // Report the problem
-        peakvalues.push_back(localpeakvalue);
 
         int h, k, l;
         peak->getMillerIndex(h, k, l);
         stringstream warnss;
         warnss << "Peak (" << h << ", " << k << ", " << l <<") has " << numbadpts << " data points whose "
-               << "values exceed limit (i.e., not physical). " << endl;
+               << "values exceed limit (i.e., not physical).\n";
         g_log.warning(warnss.str());
       }
+      peakvalues[ipk].assign(localpeakvalue.begin(), localpeakvalue.end());
     } // For All peaks
 
     // 5. Calculate intensity of all peaks
@@ -1664,9 +1663,7 @@ namespace CurveFitting
     // a) Remove background
     if (zerobackground)
     {
-      // Zero background
-      for (size_t i = 0; i < ndata; ++i)
-        pureobspeaksintensity[i] = datay[i];
+      pureobspeaksintensity.assign(datay.begin(), datay.end());
     }
     else
     {
@@ -1680,10 +1677,10 @@ namespace CurveFitting
 
       /*
       stringstream dbss;
-      dbss << "DBx254 I wonder that all background's parameters are zero!" << endl;
+      dbss << "DBx254 I wonder that all background's parameters are zero!\n";
       vector<string> bkgdparnames = m_backgroundFunction->getParameterNames();
       for (size_t i = 0; i < bkgdparnames.size(); ++i)
-        dbss << bkgdparnames[i] << " = " << m_backgroundFunction->getParameter(i) << endl;
+        dbss << bkgdparnames[i] << " = " << m_backgroundFunction->getParameter(i) << "\n";
       g_log.error(dbss.str());
       */
     }
@@ -1724,7 +1721,7 @@ namespace CurveFitting
 
         int h, k, l;
         peak->getMillerIndex(h, k, l);
-        g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = NaN!" <<endl;
+        g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = NaN!\n";
 
       }
       else if (intensity <= -DBL_MAX || intensity >= DBL_MAX)
@@ -1735,7 +1732,7 @@ namespace CurveFitting
 
         int h, k, l;
         peak->getMillerIndex(h, k, l);
-        g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = Infty!" <<endl;
+        g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = Infty!\n";
       }
       else if (intensity < 0.0)
       {
@@ -1743,14 +1740,13 @@ namespace CurveFitting
         intensity = 0.0;
       }
 
-      g_log.debug() << "[DBx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << endl;
+      g_log.debug() << "[DBx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";
       peak->setHeight(intensity);
 
       // Add peak's value to peaksvalues
       for (size_t i = ileft; i < iright; ++i)
       {
-        size_t index = i-ileft;
-        allpeaksvalues[i] += peakvalues[ipk][index] * intensity;
+        allpeaksvalues[i] += (intensity * peakvalues[ipk][i-ileft]);
       }
 
     } // ENDFOR each peak
@@ -1769,7 +1765,7 @@ namespace CurveFitting
     if (parameterWS->columnCount() < 3)
     {
       g_log.error() << "Input parameter table workspace does not have enough number of columns. "
-                    << " Number of columns (Input =" << parameterWS->columnCount() << ") >= 3 as required. " << std::endl;
+                    << " Number of columns (Input =" << parameterWS->columnCount() << ") >= 3 as required.\n";
       throw std::invalid_argument("Input parameter workspace is wrong. ");
     }
 
@@ -1827,7 +1823,7 @@ namespace CurveFitting
         std::stringstream errmsg;
         errmsg << "Parameter (table) workspace " << parameterWS->name()
                << " does not contain column 'Name'.  It is not a valid input.  Quit ";
-        g_log.error() << errmsg.str() << std::endl;
+        g_log.error() << errmsg.str() << "\n";
         throw std::invalid_argument(errmsg.str());
       }
 
@@ -1852,7 +1848,7 @@ namespace CurveFitting
         std::stringstream errmsg;
         errmsg << "Parameter (table) workspace " << parameterWS->name()
                << " does not contain column 'FitOrTie'.  It is not a valid input.  Quit ";
-        g_log.error() << errmsg.str() << std::endl;
+        g_log.error() << errmsg.str() << "\n";
         throw std::invalid_argument(errmsg.str());
       }
 
@@ -1867,7 +1863,7 @@ namespace CurveFitting
         std::stringstream errmsg;
         errmsg << "Parameter (table) workspace " << parameterWS->name()
                << " does not contain column 'Value'.  It is not a valid input.  Quit ";
-        g_log.error() << errmsg.str() << std::endl;
+        g_log.error() << errmsg.str() << "\n";
         throw std::invalid_argument(errmsg.str());
       }
 
@@ -1915,12 +1911,12 @@ namespace CurveFitting
         g_log.information() << "[Input]: " << newparameter.name << ": value = " << newparameter.value
                             << " Range: [" << newparameter.minvalue << ", " << newparameter.maxvalue
                             << "], MC Step = " << newparameter.stepsize << ", Fit? = "
-                            << newparameter.fit << std::endl;
+                            << newparameter.fit << "\n";
       }
     }
 
     g_log.information() << "DB1118: Successfully Imported Peak Parameters TableWorkspace "
-                        << parameterWS->name() << std::endl;
+                        << parameterWS->name() << "\n";
 
     return;
   }
@@ -1932,14 +1928,14 @@ namespace CurveFitting
   */
   void LeBailFit2::parseBraggPeaksParametersTable()
   {
-    g_log.debug() << "DB1119:  Importing HKL TableWorkspace" << std::endl;
+    g_log.debug() << "DB1119:  Importing HKL TableWorkspace\n";
 
     // 1. Check column orders
     std::vector<std::string> colnames = reflectionWS->getColumnNames();
     if (colnames.size() < 3)
     {
       g_log.error() << "Input parameter table workspace does not have enough number of columns. "
-                    << " Number of columns = " << colnames.size() << " < 3 as required. " << std::endl;
+                    << " Number of columns = " << colnames.size() << " < 3 as required.\n";
       throw std::runtime_error("Input parameter workspace is wrong. ");
     }
     if (colnames[0].compare("H") != 0 ||
@@ -1996,7 +1992,7 @@ namespace CurveFitting
     } // ENDFOR row
 
     g_log.debug() << "DB1119:  Finished importing HKL TableWorkspace.   Size of Rows = "
-                  << numrows << std::endl;
+                  << numrows << "\n";
 
     return;
   }
@@ -2006,7 +2002,7 @@ namespace CurveFitting
    */
   void LeBailFit2::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws, vector<double>& bkgdorderparams)
   {
-    g_log.debug() << "DB1105A Parsing background TableWorkspace." << std::endl;
+    g_log.debug() << "DB1105A Parsing background TableWorkspace.\n";
 
     // 1. Clear (output) map
     bkgdorderparams.clear();
@@ -2016,7 +2012,7 @@ namespace CurveFitting
     std::vector<std::string> colnames = bkgdparamws->getColumnNames();
     if (colnames.size() < 2)
     {
-      g_log.error() << "Input parameter table workspace must have more than 1 columns" << std::endl;
+      g_log.error() << "Input parameter table workspace must have more than 1 columns\n";
       throw std::invalid_argument("Invalid input background table workspace. ");
     }
     else
@@ -2024,14 +2020,14 @@ namespace CurveFitting
       if (!(boost::starts_with(colnames[0], "Name") && boost::starts_with(colnames[1], "Value")))
       {
         // Column 0 and 1 must be Name and Value (at least started with)
-        g_log.error() << "Input parameter table workspace have wrong column definition." << std::endl;
+        g_log.error() << "Input parameter table workspace have wrong column definition.\n";
         for (size_t i = 0; i < 2; ++i)
-          g_log.error() << "Column " << i << " Should Be Name.  But Input is " << colnames[0] << std::endl;
+          g_log.error() << "Column " << i << " Should Be Name.  But Input is " << colnames[0] << "\n";
         throw std::invalid_argument("Invalid input background table workspace. ");
       }
     }
 
-    g_log.debug() << "DB1105B Background TableWorkspace is valid. " << std::endl;
+    g_log.debug() << "DB1105B Background TableWorkspace is valid.\n";
 
     // 3. Input
     for (size_t ir = 0; ir < bkgdparamws->rowCount(); ++ir)
@@ -2073,7 +2069,7 @@ namespace CurveFitting
     {
       msg << "A" << iod << " = " << bkgdorderparams[iod] << "; ";
     }
-    g_log.information() << "DB1105 Importing background TableWorkspace is finished. " << msg.str() << std::endl;
+    g_log.information() << "DB1105 Importing background TableWorkspace is finished. " << msg.str() << "\n";
 
     return;
   }
@@ -2087,13 +2083,13 @@ namespace CurveFitting
   {
     // 1. Initialization
     g_log.notice() << "Input peak parameters are incorrect.  Fake output data for function mode "
-                   << functionmode << std::endl;
+                   << functionmode << "\n";
 
     if (functionmode == 2)
     {
       std::stringstream errmsg;
       errmsg << "Function mode " << functionmode << " is not supported for fake output data.";
-      g_log.error() << errmsg.str() << std::endl;
+      g_log.error() << errmsg.str() << "\n";
       throw std::invalid_argument(errmsg.str());
     }
 
@@ -2371,7 +2367,7 @@ namespace CurveFitting
 
     m_funcParameters.insert(std::make_pair("LocalChi2", localchi2));
 
-    g_log.information() << "[VZ] LeBailFit Result:  chi^2 = " << chi2 << std::endl;
+    g_log.information() << "[VZ] LeBailFit Result:  chi^2 = " << chi2 << "\n";
 
     return;
   }
@@ -2430,7 +2426,7 @@ namespace CurveFitting
         // Error default
         std::stringstream errmsg;
         errmsg << "Function mode " << m_fitMode << " is not supported in createOutputWorkspace.";
-        g_log.error() << errmsg.str() << std::endl;
+        g_log.error() << errmsg.str() << "\n";
         throw std::runtime_error(errmsg.str());
 
         break;
@@ -2503,7 +2499,7 @@ namespace CurveFitting
         // Error default
         std::stringstream errmsg;
         errmsg << "Function mode " << m_fitMode << " is not supported in createOutputWorkspace.";
-        g_log.error() << errmsg.str() << std::endl;
+        g_log.error() << errmsg.str() << "\n";
         throw std::runtime_error(errmsg.str());
 
         break;
@@ -2595,7 +2591,7 @@ namespace CurveFitting
     m_bestRwp = currwp + 1.0;
     bookKeepBestMCResult(parammap, background, currwp, 0);
 
-    g_log.notice() << "[DBx255] Random-walk Starting Rwp = " << currwp << endl;
+    g_log.notice() << "[DBx255] Random-walk Starting Rwp = " << currwp << "\n";
 
     // 4. Random walk loops
     // generate some MC trace structure
@@ -2649,7 +2645,7 @@ namespace CurveFitting
         g_log.debug() << "[DBx317] Step " << icycle << ": New Rwp = " << setprecision(10)
                       << newrwp << ", Rp = " << setprecision(5) << newrp
                       << "; Accepted = " << acceptchange << "; Proposed parameters valid ="
-                      << validparams << endl;
+                      << validparams << "\n";
 
         // iv. Apply change and book keeping
         if (acceptchange)
@@ -2723,7 +2719,7 @@ namespace CurveFitting
     g_log.notice() << "[SUMMARY] Random-walk Rwp:  Starting = " << startrwp << ", Best = " << m_bestRwp
                    << " @ Step = " << m_bestMCStep << "; Last Step Rwp = " << currwp
                    << ", Rp = " << currp
-                   << ", Acceptance ratio = " << double(numacceptance)/double(maxcycles*m_numMCGroups) << endl;
+                   << ", Acceptance ratio = " << double(numacceptance)/double(maxcycles*m_numMCGroups) << "\n";
 
     map<string,Parameter>::iterator mapiter;
     for (mapiter = parammap.begin(); mapiter != parammap.end(); ++mapiter)
@@ -2734,10 +2730,10 @@ namespace CurveFitting
                      << ", Max Step Size = " << setw(10) << setprecision(5) << param.maxabsstepsize
                      << ", Number of Positive Move = " << setw(4) << param.numpositivemove
                      << ", Number of Negative Move = " << setw(4) << param.numnegativemove
-                     << ", Number of No Move = " << setw(4) << param.numnomove << endl;
+                     << ", Number of No Move = " << setw(4) << param.numnomove << "\n";
 
     }
-    g_log.notice() << "Number of invalid proposed moves = " << numinvalidmoves << endl;
+    g_log.notice() << "Number of invalid proposed moves = " << numinvalidmoves << "\n";
     exportXYDataToFile(vecIndex, vecRwp, "rwp_trace.dat");
 
     // b) Calculate again
@@ -2792,7 +2788,7 @@ namespace CurveFitting
     dboutss << "Geometry parameters: ";
     for (size_t i = 0; i < geomparams.size(); ++i)
       dboutss << geomparams[i] << "\t\t";
-    dboutss << endl;
+    dboutss << "\n";
 
     // b. Alphas
     vector<string> alphs;
@@ -2805,7 +2801,7 @@ namespace CurveFitting
     dboutss << "Alpha parameters";
     for (size_t i = 0; i < alphs.size(); ++i)
       dboutss << alphs[i] << "\t\t";
-    dboutss << endl;
+    dboutss << "\n";
 
     // c. Beta
     vector<string> betas;
@@ -2818,7 +2814,7 @@ namespace CurveFitting
     dboutss << "Beta parameters";
     for (size_t i = 0; i < betas.size(); ++i)
       dboutss << betas[i] << "\t\t";
-    dboutss << endl;
+    dboutss << "\n";
 
     // d. Sig
     vector<string> sigs;
@@ -2830,7 +2826,7 @@ namespace CurveFitting
     dboutss << "Sig parameters";
     for (size_t i = 0; i < sigs.size(); ++i)
       dboutss << sigs[i] << "\t\t";
-    dboutss << endl;
+    dboutss << "\n";
 
     g_log.notice(dboutss.str());
 
@@ -2984,11 +2980,11 @@ namespace CurveFitting
     {
       // a) Check (Before)
       stringstream dbss;
-      dbss << "[T1205] Peak Heights Before Calculating Intensities: " << endl;
+      dbss << "[T1205] Peak Heights Before Calculating Intensities:\n";
       for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
       {
         ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
-        dbss << "Peak @ d = " << m_dspPeaks[ipk].first << ",  I = " << thispeak->height() << endl;
+        dbss << "Peak @ d = " << m_dspPeaks[ipk].first << ",  I = " << thispeak->height() << "\n";
       }
       g_log.debug(dbss.str());
 
@@ -3002,11 +2998,11 @@ namespace CurveFitting
 
       // c) Check After
       stringstream dbss2;
-      dbss2 << "[T1205] Peak Heights After Calculating Intensities: " << endl;
+      dbss2 << "[T1205] Peak Heights After Calculating Intensities:\n";
       for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
       {
         ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
-        dbss2 << "Peak @ d = " << m_dspPeaks[ipk].first << ",  I = " << thispeak->height() << endl;
+        dbss2 << "Peak @ d = " << m_dspPeaks[ipk].first << ",  I = " << thispeak->height() << "\n";
       }
       g_log.debug(dbss2.str());
 
@@ -3017,8 +3013,6 @@ namespace CurveFitting
     {
       // Replaced: m_lebailFunction->function(domain, values);
 
-      size_t numpts = values.size();
-
       // a) Background
       // FIXME : Need to clean up m_backgroundFunction->function(....)
       /* as m_background is set to zero.  shouldn't make any difference...
@@ -3027,8 +3021,7 @@ namespace CurveFitting
       m_backgroundFunction->function(domainB, valuesB);
       */
 
-      for (size_t i = 0; i < numpts; ++i)
-        values[i] = peaksvalues[i];
+      values.assign(peaksvalues.begin(), peaksvalues.end());
 
       // b) Peaks
       // FIXME:  There is still tiny difference between using result from calculate-peak-intensity
@@ -3043,7 +3036,7 @@ namespace CurveFitting
     {
       // If the propose instrument parameters have some unphysical parameter
       g_log.information() << "Proposed new instrument profile values cause peak(s) to have "
-                          << "unphysical parameter values." << endl;
+                          << "unphysical parameter values.\n";
       rwp = DBL_MAX;
       rp = DBL_MAX;
     }
@@ -3058,7 +3051,7 @@ namespace CurveFitting
    * @param rwp        : output as Rwp of the model function
    * @param rp         : output as Rp of the model function
    */
-  void LeBailFit2::calculatePowderPatternStatistic(MantidVec& values, vector<double>& background, double& rwp,
+  void LeBailFit2::calculatePowderPatternStatistic(const MantidVec& values, const vector<double>& background, double& rwp,
                                                  double& rp)
   {
     // 1. Init the statistics
@@ -3067,8 +3060,7 @@ namespace CurveFitting
     size_t numdata = obsdata.size();
 
     vector<double> caldata(values.size(), 0.0);
-    for (size_t i = 0; i < numdata; ++i)
-      caldata[i] = values[i] + background[i];
+    std::transform(values.begin(), values.end(), background.begin(), caldata.begin(), std::plus<double>());
 
     // 2. Calculate
     rwp = 0.0;
@@ -3134,7 +3126,7 @@ namespace CurveFitting
   double peakrwp = sqrt(diff2sum/obs2sum);
 
   g_log.information() << "Complete Rwp = " << rwp << "; Peak only Rwp = " << peakrwp
-                      << " Number of points included = " << numcovered << " out of " << numdata << endl;
+                      << " Number of points included = " << numcovered << " out of " << numdata << "\n";
   */
 
     return;
@@ -3239,7 +3231,7 @@ namespace CurveFitting
 
       g_log.debug() << "[DBx257] " << paramname << "\t" << "Proposed value = " << setw(15)
                     << newvalue << " (orig = " << param.value << ",  step = "
-                    << stepsize << "), totRwp = " << m_totRwp << endl;
+                    << stepsize << "), totRwp = " << m_totRwp << "\n";
     }
 
     return;
@@ -3265,7 +3257,7 @@ namespace CurveFitting
       double dice = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
       double bar = exp(-(newrwp-currwp)/(currwp*m_Temperature));
       // double bar = exp(-(newrwp-currwp)/m_bestRwp);
-      // g_log.notice() << "[DBx329] Bar = " << bar << ", Dice = " << dice << endl;
+      // g_log.notice() << "[DBx329] Bar = " << bar << ", Dice = " << dice << "\n";
       if (dice < bar)
       {
         // random number (dice, 0 and 1) is smaller than bar (between -infty and 0)
@@ -3490,7 +3482,7 @@ namespace CurveFitting
     }
 
     double chi2 = calalg->getProperty("OutputChi2overDoF");
-    g_log.information() << "Fit to chebysheve background successful with chi^2 = " << chi2 << endl;
+    g_log.information() << "Fit to chebysheve background successful with chi^2 = " << chi2 << "\n";
 
     // 4. Output
     FunctionValues values(domain);
@@ -3513,7 +3505,7 @@ namespace CurveFitting
 
     for (size_t i = 0; i < vecX.size(); ++i)
       ofile << setw(15) << setprecision(5) << vecX[i] << setw(15) << setprecision(5)
-            << vecY[i] << endl;
+            << vecY[i] << "\n";
 
     ofile.close();
 

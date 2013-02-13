@@ -7,8 +7,10 @@
 
 #include <gsl/gsl_sf_erf.h>
 
-#define PI 3.14159265358979323846264338327950288419716939937510582
-#define PEAKRANGE 5.0
+const double PI = 3.14159265358979323846264338327950288419716939937510582;
+const double PEAKRANGE = 5.0;
+const double TWO_OVER_PI = 2./PI;
+const double NEG_DBL_MAX = -1.*DBL_MAX;
 
 using namespace std;
 using namespace Mantid;
@@ -271,12 +273,12 @@ namespace CurveFitting
     {
       stringstream errss;
       errss << "alpha = " << alpha << ", beta = " << beta
-            << ", N = " << N << std::endl;
-      errss << "  n = " << n << ", alpha_e = " << alpha_e << ", alpha_t = " << alpha_t << std::endl;
+            << ", N = " << N << "\n";
+      errss << "  n = " << n << ", alpha_e = " << alpha_e << ", alpha_t = " << alpha_t << "\n";
       errss << " dh = " << dh << ", alph0t = " << alph0t << ", alph1t = " << alph1t
-            << ", alph0 = " << alph0 << ", alph1 = " << alph1 << std::endl;
-      errss << "  n = " << n << ", beta_e = " << beta_e << ", beta_t = " << beta_t << std::endl;
-      errss << " dh = " << dh << ", beta0t = " << beta0t << ", beta1t = " << beta1t << std::endl;
+            << ", alph0 = " << alph0 << ", alph1 = " << alph1 << "\n";
+      errss << "  n = " << n << ", beta_e = " << beta_e << ", beta_t = " << beta_t << "\n";
+      errss << " dh = " << dh << ", beta0t = " << beta0t << ", beta1t = " << beta1t << "\n";
       g_log.error(errss.str());
     }
 
@@ -335,7 +337,7 @@ namespace CurveFitting
       if (!(omega > -DBL_MAX && omega < DBL_MAX))
       {
        // Output with error
-       g_log.error() << "Calcuate Peak " << mH << ", " << mK << ", " << mL << " wrong!" << std::endl;
+       g_log.error() << "Calcuate Peak " << mH << ", " << mK << ", " << mL << " wrong!\n";
        bool explicitoutput = true;
        calculateParameters(d_h, tof_h, eta, alpha, beta, H, sigma2, gamma, N, explicitoutput);
        calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma, explicitoutput);
@@ -358,85 +360,42 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Function (local) of the vector version
-    * @param istart: index of the start of non-zero peak value
-    * @param iend:   index of the end of non-zero peak value
+    * @param out: The calculated peak intensities. This is assume to been initialized to the correct length
+    * with a value of zero everywhere.
+    * @param xValues: The x-values to evaluate the peak at.
    */
-  void ThermalNeutronBk2BkExpConvPV::functionLocal(vector<double>& out, const vector<double> xValues) const
+  void ThermalNeutronBk2BkExpConvPV::functionLocal(vector<double>& out, const vector<double> &xValues) const
   {
-    // 1. Calculate peak parameters
-    double height = getParameter(0);
+    // calculate peak parameters
+    const double HEIGHT = getParameter(0);
+    const double INVERT_SQRT2SIGMA = 1.0/sqrt(2.0*m_Sigma2);
 
     if (m_newValueSet)
       calculateParameters(false);
 
-    double peakrange = m_fwhm*PEAKRANGE;
-    double invert_sqrt2sigma = 1.0/sqrt(2.0*m_Sigma2);
+    const double RANGE = m_fwhm*PEAKRANGE;
+
+    // calculate where to start calculating
+    const double LEFT_VALUE = m_centre - RANGE;
+    vector<double>::const_iterator iter = std::lower_bound(xValues.begin(), xValues.end(), LEFT_VALUE);
+
+    const double RIGHT_VALUE = m_centre + RANGE;
+    vector<double>::const_iterator iter_end = std::lower_bound(iter, xValues.end(), RIGHT_VALUE);
+
 
     // 2. Calcualte
-    vector<double>::const_iterator xiter;
-    for (xiter = xValues.begin(); xiter != xValues.end(); ++xiter)
+    std::size_t pos(std::distance(xValues.begin(), iter)); //second loop variable
+    for ( ; iter != iter_end; ++iter)
     {
-      // a) Caclualte peak intensity
-      double dT = *xiter - m_centre;
-      double omega = 0.0;
-      if (dT > -peakrange && dT < peakrange)
-      {
-        omega = calOmega(dT, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2, invert_sqrt2sigma);
-        omega *= height;
-      }
-
-      size_t id = static_cast<size_t>(xiter-xValues.begin());
-      out[id] = omega;
+      out[pos] = HEIGHT
+          * calOmega(*iter - m_centre, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2, INVERT_SQRT2SIGMA);
+      pos++;
     } // ENDFOR data points
 
     return;
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Function (local) of the vector version
-    * @param istart: index of the start of non-zero peak value
-    * @param iend:   index of the end of non-zero peak value
-   */
-  void ThermalNeutronBk2BkExpConvPV::functionLocal(vector<double>& out, const vector<double> xValues,
-                                                   int& istart, int& iend) const
-  {
-    // 1. Calculate peak parameters
-    double height = getParameter(0);
-
-    if (m_newValueSet)
-      calculateParameters(false);
-
-    double peakrange = m_fwhm*PEAKRANGE;
-    double invert_sqrt2sigma = 1.0/sqrt(2.0*m_Sigma2);
-
-    // 2. Decide boundary
-    double tofmin = m_centre - peakrange;
-    istart = static_cast<int>(lower_bound(xValues.begin(), xValues.end(), tofmin)-xValues.begin());
-    if (istart < 0)
-      istart = 0;
-    double tofmax = m_centre + peakrange;
-    iend = static_cast<int>(lower_bound(xValues.begin(), xValues.end(), tofmax)-xValues.begin());
-    if (iend >= static_cast<int>(xValues.size()))
-    {
-      iend = static_cast<int>(xValues.size())-1;
-    }
-
-    // 3. Calcualte
-    for (int id = istart; id <= iend; ++id)
-    {
-      // a) Caclualte peak intensity
-      double dT = xValues[id] - m_centre;
-      double omega = calOmega(dT, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2, invert_sqrt2sigma);
-      omega *= height;
-      out[id] = omega;
-    } // ENDFOR data points
-
-    g_log.debug() << "DB1052  Peak @ " << m_centre << ": Range indexed as : " << istart << ", "
-                  << iend << endl;
-
-    return;
-  }
-
   /** Disabled derivative
   */
   void ThermalNeutronBk2BkExpConvPV::functionDerivLocal(API::Jacobian* , const double* , const size_t )
@@ -523,7 +482,7 @@ namespace CurveFitting
 
     if (eta > 1 || eta < 0)
     {
-      g_log.warning() << "Calculated eta = " << eta << " is out of range [0, 1]." << std::endl;
+      g_log.warning() << "Calculated eta = " << eta << " is out of range [0, 1].\n";
     }
 
     return;
@@ -534,60 +493,55 @@ namespace CurveFitting
   /** Calculate Omega(x) = ... ...
  *  This is the core component to calcualte peak profile
  */
-  double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, double beta, double H,
-                                                double sigma2, double invert_sqrt2sigma, bool explicitoutput) const
+  double ThermalNeutronBk2BkExpConvPV::calOmega(const double x, const double eta, const double N,
+                                                const double alpha, const double beta, const double H,
+                                                const double sigma2, const double invert_sqrt2sigma,
+                                                const bool explicitoutput) const
   {
-    // 1. Prepare
-    std::complex<double> p(alpha*x, alpha*sqrt(H)*0.5);
-    std::complex<double> q(-beta*x, beta*sqrt(H)*0.5);
+    const double u = 0.5*alpha*(alpha*sigma2+2.*x);
+    const double y = (alpha*sigma2 + x)*invert_sqrt2sigma;
 
-    double u = 0.5*alpha*(alpha*sigma2+2*x);
-    double y = (alpha*sigma2 + x)*invert_sqrt2sigma;
-
-    double v = 0.5*beta*(beta*sigma2 - 2*x);
-    double z = (beta*sigma2 - x)*invert_sqrt2sigma;
+    const double v = 0.5*beta*(beta*sigma2 - 2.*x);
+    const double z = (beta*sigma2 - x)*invert_sqrt2sigma;
 
     // 2. Calculate
-    double part1, part2;
 
-    double erfcy = gsl_sf_erfc(y);
+    const double erfcy = gsl_sf_erfc(y);
+    double part1(0.);
     if (fabs(erfcy) > DBL_MIN)
       part1 = exp(u)*erfcy;
-    else
-      part1 = 0.0;
 
-    double erfcz = gsl_sf_erfc(z);
+    const double erfcz = gsl_sf_erfc(z);
+    double part2(0.);
     if (fabs(erfcz) > DBL_MIN)
       part2 = exp(v)*erfcz;
-    else
-      part2 = 0.0;
 
-    double omega1 = (1-eta)*N*(part1 + part2);
-    double omega2, omega2a, omega2b;
-    if (eta < 1.0E-8)
+    const double omega1 = (1.-eta)*N*(part1 + part2);
+    double omega2(0.);
+    if (eta >= 1.0E-8)
     {
-      omega2a = 0.0;
-      omega2b = 0.0;
-      omega2 = 0.0;
-    }
-    else
-    {
-      omega2a = imag(exp(p)*E1(p));
-      omega2b = imag(exp(q)*E1(q));
-      omega2 = 2*N*eta/PI*(omega2a + omega2b);
+      const double SQRT_H_5 = sqrt(H)*.5;
+      std::complex<double> p(alpha*x, alpha*SQRT_H_5);
+      std::complex<double> q(-beta*x, beta*SQRT_H_5);
+      double omega2a = imag(exp(p)*E1(p));
+      double omega2b = imag(exp(q)*E1(q));
+      omega2 = N*eta*(omega2a + omega2b)*TWO_OVER_PI;
       // omega2 = 2*N*eta/PI*(imag(exp(p)*E1(p)) + imag(exp(q)*E1(q)));
     }
-    double omega = omega1+omega2;
+    const double omega = omega1+omega2;
 
-    if (explicitoutput && !(omega > -DBL_MAX && omega < DBL_MAX))
+    if (explicitoutput)
     {
-      stringstream errss;
-      errss << "Find omega = " << omega << " is infinity! omega1 = " << omega1 << ", omega2 = " << omega2 << std::endl;
-      errss << "  u = " << u << ", v = " << v << ", erfc(y) = " << gsl_sf_erfc(y)
-            << ", erfc(z) = " << gsl_sf_erfc(z) << std::endl;
-      errss << "  alpha = " << alpha << ", x = " << x << " sigma2 = " << sigma2
-            << ", N = " << N << std::endl;
-      g_log.warning(errss.str());
+      if (omega <= NEG_DBL_MAX || omega >= DBL_MAX)
+      {
+        stringstream errss;
+        errss << "Find omega = " << omega << " is infinity! omega1 = " << omega1 << ", omega2 = " << omega2 << "\n";
+        errss << "  u = " << u << ", v = " << v << ", erfc(y) = " << gsl_sf_erfc(y)
+              << ", erfc(z) = " << gsl_sf_erfc(z) << "\n";
+        errss << "  alpha = " << alpha << ", x = " << x << " sigma2 = " << sigma2
+              << ", N = " << N << "\n";
+        g_log.warning(errss.str());
+      }
     }
 
     return omega;
