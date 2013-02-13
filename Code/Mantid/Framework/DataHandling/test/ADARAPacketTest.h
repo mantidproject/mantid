@@ -33,10 +33,60 @@ public:
     m_initialBufferAddr = bufferFillAddress();
   }
 
-  void testDeviceDescriptorPacket()
+  void testBankedEventPacketParser()
+  {
+    boost::shared_ptr<ADARA::BankedEventPkt> pkt =
+        basicPacketTests<ADARA::BankedEventPkt>( bankedEventPacket, sizeof(bankedEventPacket), 728504567, 761741666);
+    if (pkt != NULL)
+    {
+      TS_ASSERT_EQUALS( pkt->cycle(), 0x3C);
+      TS_ASSERT_EQUALS( pkt->pulseCharge(), 1549703);
+      TS_ASSERT_EQUALS( pkt->pulseEnergy(), 937987556);
+      TS_ASSERT_EQUALS( pkt->flags(), 0);
+
+      const ADARA::Event *event = pkt->firstEvent();
+      TS_ASSERT( event);
+      if (event)
+      {
+        TS_ASSERT_EQUALS( pkt->curBankId(), 0x02);
+        TS_ASSERT_EQUALS( event->tof, 0x00023BD9);
+        TS_ASSERT_EQUALS( event->pixel, 0x043C);
+      }
+
+      // This packet only has one event in its first bank, so fetch the
+      // next event and verify the bank id
+      event = pkt->nextEvent();
+      TS_ASSERT( event);
+      if (event)
+      {
+        TS_ASSERT_EQUALS( pkt->curBankId(), 0x13)
+      }
+
+      // There's also only one event in it's second (and last) bank.
+      // Get the next event and verify it's null
+      event = pkt->nextEvent();
+      TS_ASSERT( ! event);
+    }
+  }
+
+  void testBeamMonitorPacketParser()
+  {
+    boost::shared_ptr<ADARA::BeamMonitorPkt> pkt =
+        basicPacketTests<ADARA::BeamMonitorPkt>( beamMonitorPacket, sizeof(beamMonitorPacket), 728504567, 761741666);
+    if (pkt != NULL)
+    {
+      TS_ASSERT_EQUALS( pkt->cycle(), 0x3c);
+      TS_ASSERT_EQUALS( pkt->flags(), 0);
+      TS_ASSERT_EQUALS( pkt->pulseCharge(), 1549703);
+      TS_ASSERT_EQUALS( pkt->pulseEnergy(), 937987556);
+      // TODO: Find a different Beam Monitor Packet with actual monitor sections in it
+    }
+  }
+
+  void testDeviceDescriptorPacketParser()
   {
     boost::shared_ptr<ADARA::DeviceDescriptorPkt> pkt =
-        basicPacketTests<ADARA::DeviceDescriptorPkt>( devDesPkt, sizeof(devDesPkt), 726785379, 0);
+        basicPacketTests<ADARA::DeviceDescriptorPkt>( devDesPacket, sizeof(devDesPacket), 726785379, 0);
     if (pkt != NULL)
     {
       // Basic XML validation
@@ -48,7 +98,7 @@ public:
   void testRunStatusPacketParser()
   {
     boost::shared_ptr<ADARA::RunStatusPkt> pkt =
-        basicPacketTests<ADARA::RunStatusPkt>( runStatusPkt, sizeof(runStatusPkt), 728504568, 5625794);
+        basicPacketTests<ADARA::RunStatusPkt>( runStatusPacket, sizeof(runStatusPacket), 728504568, 5625794);
 
     if( pkt != NULL)
     {
@@ -62,16 +112,35 @@ public:
     }
   }
 
+  void testRTDLPacketParser()
+  {
+    boost::shared_ptr<ADARA::RTDLPkt> pkt =
+        basicPacketTests<ADARA::RTDLPkt>( rtdlPacket, sizeof(rtdlPacket), 728504567, 761741666);
+
+    if( pkt != NULL)
+    {
+      TS_ASSERT_EQUALS( pkt->cycle(), 60);
+      TS_ASSERT_EQUALS( pkt->veto(), 0x4);
+      TS_ASSERT_EQUALS( pkt->badVeto(), false);
+      TS_ASSERT_EQUALS( pkt->timingStatus(), 0x1e);
+      TS_ASSERT_EQUALS( pkt->flavor(), 1);
+      TS_ASSERT_EQUALS( pkt->intraPulseTime(), 166662);
+      TS_ASSERT_EQUALS( pkt->tofOffset(), 63112);
+      TS_ASSERT_EQUALS( pkt->pulseCharge(), 1549703);
+      TS_ASSERT_EQUALS( pkt->ringPeriod(), 955259);
+    }
+  }
+
   void testSyncPacketParser()
   {
     // the basic tests cover everything in the sync packet
-    basicPacketTests<ADARA::SyncPkt>(syncPkt, sizeof(syncPkt), 728504568, 5617153);
+    basicPacketTests<ADARA::SyncPkt>(syncPacket, sizeof(syncPacket), 728504568, 5617153);
   }
 
   void testVariableDoublePacketParser()
   {
     boost::shared_ptr<ADARA::VariableDoublePkt> pkt =
-        basicPacketTests<ADARA::VariableDoublePkt>( variableDoublePkt, sizeof(variableDoublePkt), 728281149, 0);
+        basicPacketTests<ADARA::VariableDoublePkt>( variableDoublePacket, sizeof(variableDoublePacket), 728281149, 0);
 
     if( pkt != NULL)
     {
@@ -83,6 +152,23 @@ public:
       // Note: we're not allowing for any rounding errors here. Might have to for some values...
     }
   }
+
+  void testVariableU32PacketParser()
+  {
+    boost::shared_ptr<ADARA::VariableU32Pkt> pkt =
+        basicPacketTests<ADARA::VariableU32Pkt>( variableU32Packet, sizeof(variableU32Packet), 728281149, 0);
+
+    if( pkt != NULL)
+    {
+      TS_ASSERT_EQUALS( pkt->devId(),    2);
+      TS_ASSERT_EQUALS( pkt->varId(),    3);
+      TS_ASSERT_EQUALS( pkt->status(),   0);
+      TS_ASSERT_EQUALS( pkt->severity(), 0);
+      TS_ASSERT_EQUALS( pkt->value(),    3);
+      // Note: we're not allowing for any rounding errors here. Might have to for some values...
+    }
+  }
+
 
 
 protected:
