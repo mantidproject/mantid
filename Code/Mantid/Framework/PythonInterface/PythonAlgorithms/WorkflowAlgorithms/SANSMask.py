@@ -8,8 +8,10 @@ import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 from reduction_workflow.instruments.sans import hfir_instrument
+from reduction_workflow.instruments.sans import sns_instrument
+import sys
 
-class HFIRSANSMask(PythonAlgorithm):
+class SANSMask(PythonAlgorithm):
     """
         Normalise detector counts by the sample thickness
     """
@@ -18,9 +20,13 @@ class HFIRSANSMask(PythonAlgorithm):
         return "Workflow\\SANS;PythonAlgorithms"
 
     def name(self):
-        return "HFIRSANSMask"
+        return "SANSMask"
 
     def PyInit(self):
+        facilities = [ "SNS", "HFIR"]
+        self.declareProperty("Facility", "SNS",
+                             StringListValidator(facilities))
+
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", 
                                                      direction=Direction.InOut))
 
@@ -41,22 +47,28 @@ class HFIRSANSMask(PythonAlgorithm):
 
     def PyExec(self):
         workspace = self.getProperty("Workspace").value
+        facility = self.getProperty("Facility").value
 
         # Apply saved mask as needed
-        self._apply_saved_mask(workspace)
+        self._apply_saved_mask(workspace, facility)
 
         # Mask a detector side
-        self._mask_detector_side(workspace)
+        self._mask_detector_side(workspace, facility)
 
         # Mask edges
         edge_str = self.getPropertyValue("MaskedEdges")
         
         edges = self.getProperty("MaskedEdges").value
         if len(edges)==4:
-            masked_pixels = hfir_instrument.get_masked_pixels(edges[0], edges[1],
-                                                              edges[2], edges[3],
-                                                              workspace)
-            self._mask_pixels(masked_pixels, workspace)
+            if facility.upper() == "HFIR":
+                masked_pixels = hfir_instrument.get_masked_pixels(edges[0], edges[1],
+                                                                  edges[2], edges[3],
+                                                                  workspace)
+            else:
+                masked_pixels = sns_instrument.get_masked_pixels(edges[0], edges[1],
+                                                                 edges[2], edges[3],
+                                                                 workspace)
+            self._mask_pixels(masked_pixels, workspace, facility)
 
         # Mask a list of detectors
         masked_dets = self.getProperty("MaskedDetectorList").value
@@ -65,14 +77,17 @@ class HFIRSANSMask(PythonAlgorithm):
         
         self.setProperty("OutputMessage", "Mask applied")
 
-    def _mask_pixels(self, pixel_list, workspace):
+    def _mask_pixels(self, pixel_list, workspace, facility):
         if len(pixel_list)>0:
             # Transform the list of pixels into a list of Mantid detector IDs
-            masked_detectors = hfir_instrument.get_detector_from_pixel(pixel_list)
+            if facility.upper() == "HFIR":
+                masked_detectors = hfir_instrument.get_detector_from_pixel(pixel_list)
+            else:
+                masked_detectors = sns_instrument.get_detector_from_pixel(pixel_list, workspace)
             # Mask the pixels by passing the list of IDs
             api.MaskDetectors(Workspace=workspace, DetectorList = masked_detectors)
                 
-    def _apply_saved_mask(self, workspace):
+    def _apply_saved_mask(self, workspace, facility):
         # Check whether the workspace has mask information
         if workspace.getRun().hasProperty("rectangular_masks"):
             mask_str = workspace.getRun().getProperty("rectangular_masks").value
@@ -89,14 +104,15 @@ class HFIRSANSMask(PythonAlgorithm):
             masked_pixels = []
             for rec in rectangular_masks:
                 try:
-                    for ix in range(x_min, x_max+1):
-                        for iy in range(y_min, y_max+1):
+                    for ix in range(rec[0], rec[1]+1):
+                        for iy in range(rec[2], rec[3]+1):
                             masked_pixels.append([ix, iy])
                 except:
-                    Logger.get("HFIRSANSMask").error("Badly defined mask from configuration file: %s" % str(rec))
-            self._mask_pixels(masked_pixels, workspace)
+                    Logger.get("SANSMask").error("Badly defined mask from configuration file: %s" % str(rec))
+                    Logger.get("SANSMask").error(str(sys.exc_value))
+            self._mask_pixels(masked_pixels, workspace, facility)
                 
-    def _mask_detector_side(self, workspace):
+    def _mask_detector_side(self, workspace, facility):
         """
             Mask the back side or front side as needed
         """
@@ -108,6 +124,11 @@ class HFIRSANSMask(PythonAlgorithm):
         else:
             return
         
+        if not workspace.getRun().hasProperty("number-of-x-pixels") \
+            and not workspace.getRun().hasProperty("number-of-y-pixels"):
+            Logger.get("SANSMask").error("Could not find number of pixels: skipping side masking")
+            return
+            
         nx = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
         ny = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
         id_side = []
@@ -116,6 +137,6 @@ class HFIRSANSMask(PythonAlgorithm):
             for ix in range(side_to_mask, nx+side_to_mask, 2):
                 id_side.append([iy,ix])
 
-        self._mask_pixels(id_side, workspace)
+        self._mask_pixels(id_side, workspace, facility)
        
-registerAlgorithm(HFIRSANSMask())
+registerAlgorithm(SANSMask())

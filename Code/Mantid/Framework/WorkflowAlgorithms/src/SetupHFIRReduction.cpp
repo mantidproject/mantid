@@ -652,8 +652,9 @@ void SetupHFIRReduction::exec()
   const std::string maskEdges = getPropertyValue("MaskedEdges");
   const std::string maskSide = getProperty("MaskedSide");
 
-  IAlgorithm_sptr maskAlg = createChildAlgorithm("HFIRSANSMask");
+  IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
   // The following is broken, try PropertyValue
+  maskAlg->setPropertyValue("Facility", "HFIR");
   maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
   maskAlg->setPropertyValue("MaskedEdges", maskEdges);
   maskAlg->setProperty("MaskedSide", maskSide);

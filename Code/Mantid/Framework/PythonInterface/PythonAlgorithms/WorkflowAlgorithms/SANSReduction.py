@@ -208,7 +208,7 @@ class SANSReduction(PythonAlgorithm):
             api.RebinToWorkspace(WorkspaceToRebin=background_ws,
                                  WorkspaceToMatch=output_ws,
                                  OutputWorkspace=background_ws+'_rebin',
-                                 PreserveEvents=False)
+                                 PreserveEvents=True)
             api.Minus(LHSWorkspace=output_ws,
                          RHSWorkspace=background_ws+'_rebin',
                          OutputWorkspace=output_ws)

@@ -389,6 +389,69 @@ void SetupEQSANSReduction::init()
   setPropertyGroup("BckTransmissionDarkCurrentFile", bck_grp);
   setPropertyGroup("BckThetaDependentTransmission", bck_grp);
 
+  // Geometry correction
+  std::string geo_grp = "Geometry";
+  declareProperty("SampleThickness", EMPTY_DBL(), "Sample thickness [cm]");
+
+  // Masking
+  std::string mask_grp = "Mask";
+  declareProperty(new ArrayProperty<int>("MaskedDetectorList"),
+      "List of detector IDs to be masked");
+  declareProperty(new ArrayProperty<int>("MaskedEdges"),
+      "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  std::vector<std::string> maskOptions;
+  maskOptions.push_back("None");
+  maskOptions.push_back("Front");
+  maskOptions.push_back("Back");
+  declareProperty("MaskedSide", "None",
+      boost::make_shared<StringListValidator>(maskOptions),
+      "Mask one side of the detector");
+
+  setPropertyGroup("MaskedDetectorList", mask_grp);
+  setPropertyGroup("MaskedEdges", mask_grp);
+  setPropertyGroup("MaskedSide", mask_grp);
+
+  // Absolute scale
+  std::string abs_scale_grp = "Absolute Scale";
+  std::vector<std::string> scaleOptions;
+  scaleOptions.push_back("None");
+  scaleOptions.push_back("Value");
+  scaleOptions.push_back("ReferenceData");
+  declareProperty("AbsoluteScaleMethod", "None",
+      boost::make_shared<StringListValidator>(scaleOptions),
+      "Absolute scale correction method");
+  declareProperty("AbsoluteScalingFactor", 1.0, "Absolute scaling factor");
+  setPropertySettings("AbsoluteScalingFactor",
+      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "Value"));
+
+  declareProperty(new API::FileProperty("AbsoluteScalingReferenceFilename", "",
+      API::FileProperty::OptionalLoad, ".xml"));
+  setPropertySettings("AbsoluteScalingReferenceFilename",
+            new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+  declareProperty("AbsoluteScalingBeamDiameter", 0.0,
+      "Beamstop diameter for computing the absolute scale factor [mm]. "
+      "Read from file if not supplied.");
+  setPropertySettings("AbsoluteScalingBeamDiameter",
+      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+  declareProperty("AbsoluteScalingAttenuatorTrans", 1.0,
+      "Attenuator transmission value for computing the absolute scale factor");
+  setPropertySettings("AbsoluteScalingAttenuatorTrans",
+      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+  declareProperty("AbsoluteScalingApplySensitivity", false,
+      "Apply sensitivity correction to the reference data "
+      "when computing the absolute scale factor");
+  setPropertySettings("AbsoluteScalingApplySensitivity",
+      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+
+  setPropertyGroup("AbsoluteScaleMethod", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingFactor", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingReferenceFilename", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingBeamDiameter", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingAttenuatorTrans", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingApplySensitivity", abs_scale_grp);
+
+
+  // Setup the version 1 reducer
   declareProperty("SetupReducer",false, "If true, a Reducer object will be created");
 
   // I(Q) calculation
@@ -409,6 +472,10 @@ void SetupEQSANSReduction::init()
   declareProperty("SampleApertureDiameter", 10.0,
                   "Sample aperture diameter [mm]");
 
+  declareProperty("Do2DReduction", true);
+  declareProperty("IQ2DNumberOfBins", 100, positiveInt,
+                  "Number of I(qx,qy) bins.");
+
   // -- Define group --
   setPropertyGroup("DoAzimuthalAverage", iq1d_grp);
   setPropertyGroup("IQNumberOfBins", iq1d_grp);
@@ -417,8 +484,12 @@ void SetupEQSANSReduction::init()
   setPropertyGroup("IQScaleResults", iq1d_grp);
   setPropertyGroup("ComputeResolution", iq1d_grp);
   setPropertyGroup("SampleApertureDiameter", iq1d_grp);
+  setPropertyGroup("Do2DReduction", iq1d_grp);
+  setPropertyGroup("IQ2DNumberOfBins", iq1d_grp);
 
   // Outputs
+  declareProperty("ProcessInfo","", "Additional process information");
+  declareProperty("OutputDirectory", "", "Directory to put the output files in");
   declareProperty("OutputMessage","",Direction::Output);
   declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 }
@@ -582,6 +653,66 @@ void SetupEQSANSReduction::exec()
   setupTransmission(reductionManager);
   setupBackground(reductionManager);
 
+  // Geometry correction
+  const double thickness = getProperty("SampleThickness");
+  if (!isEmpty(thickness))
+  {
+    IAlgorithm_sptr thickAlg = createChildAlgorithm("NormaliseByThickness");
+    thickAlg->setProperty("SampleThickness", thickness);
+
+    algProp = new AlgorithmProperty("GeometryAlgorithm");
+    algProp->setValue(thickAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
+
+  // Mask
+  const std::string maskDetList = getPropertyValue("MaskedDetectorList");
+  const std::string maskEdges = getPropertyValue("MaskedEdges");
+  const std::string maskSide = getProperty("MaskedSide");
+
+  IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
+  // The following is broken, try PropertyValue
+  maskAlg->setPropertyValue("Facility", "SNS");
+  maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
+  maskAlg->setPropertyValue("MaskedEdges", maskEdges);
+  maskAlg->setProperty("MaskedSide", maskSide);
+  algProp = new AlgorithmProperty("MaskAlgorithm");
+  algProp->setValue(maskAlg->toString());
+  reductionManager->declareProperty(algProp);
+
+  // Absolute scaling
+  const std::string absScaleMethod = getProperty("AbsoluteScaleMethod");
+  if (boost::iequals(absScaleMethod, "Value"))
+  {
+    const double absScaleFactor = getProperty("AbsoluteScalingFactor");
+
+    IAlgorithm_sptr absAlg = createChildAlgorithm("SANSAbsoluteScale");
+    absAlg->setProperty("Method", absScaleMethod);
+    absAlg->setProperty("ScalingFactor", absScaleFactor);
+    absAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    algProp = new AlgorithmProperty("AbsoluteScaleAlgorithm");
+    algProp->setValue(absAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
+  else if (boost::iequals(absScaleMethod, "ReferenceData"))
+  {
+    const std::string absRefFile = getPropertyValue("AbsoluteScalingReferenceFilename");
+    const double beamDiam = getProperty("AbsoluteScalingBeamDiameter");
+    const double attTrans = getProperty("AbsoluteScalingAttenuatorTrans");
+    const bool applySensitivity = getProperty("AbsoluteScalingApplySensitivity");
+
+    IAlgorithm_sptr absAlg = createChildAlgorithm("SANSAbsoluteScale");
+    absAlg->setProperty("Method", absScaleMethod);
+    absAlg->setProperty("ReferenceDataFilename", absRefFile);
+    absAlg->setProperty("BeamstopDiameter", beamDiam);
+    absAlg->setProperty("AttenuatorTransmission", attTrans);
+    absAlg->setProperty("ApplySensitivity", applySensitivity);
+    absAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    algProp = new AlgorithmProperty("AbsoluteScaleAlgorithm");
+    algProp->setValue(absAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
+
   // Azimuthal averaging
   const bool doAveraging = getProperty("DoAzimuthalAverage");
   if (doAveraging)
@@ -607,6 +738,17 @@ void SetupEQSANSReduction::exec()
     reductionManager->declareProperty(algProp);
   }
 
+  // 2D reduction
+  const bool do2DReduction = getProperty("Do2DReduction");
+  if (do2DReduction)
+  {
+    const std::string n_bins = getPropertyValue("IQ2DNumberOfBins");
+    IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSQ2D");
+    iqAlg->setPropertyValue("NumberOfBins", n_bins);
+    algProp = new AlgorithmProperty("IQXYAlgorithm");
+    algProp->setValue(iqAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
   setPropertyValue("OutputMessage", "EQSANS reduction options set");
 
   // Create a python reduction singleton as needed
