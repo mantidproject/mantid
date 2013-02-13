@@ -965,9 +965,9 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
 )
 
 # Ship required files. Explicit so some can be disabled easily if necessary
-install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
-install ( FILES ${MTDPLOT_INSTALL_FILES} DESTINATION ${BIN_DIR}/mantidplotpy )
-install ( FILES ${IPYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR}/ipython_plugin )
+install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
+install ( FILES ${MTDPLOTPY_FILES} DESTINATION ${BIN_DIR}/mantidplotpy )
+install ( FILES ${IPY_FILES} DESTINATION ${BIN_DIR}/ipython_plugin )
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
