@@ -804,8 +804,6 @@ endif ()
 # Required Python config files
 ###########################################################################
 
-add_compile_py_target( CompileMantidPlotScripts ${CMAKE_CURRENT_SOURCE_DIR} )
-
 # Top-level python scripts
 set( PY_FILES mantidplotrc.py mantidplot.py )
 copy_python_files_to_dir ( "${PY_FILES}" 
@@ -842,9 +840,6 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${RES_FILES} ${MANTID_RC_FILE}
 							${PYTHON_INSTALL_FILES} ${IPYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES}
 )
-
-# Target dependencies
-add_dependencies( MantidPlot CompileMantidPlotScripts )
 
 # Library dependencies
 target_link_libraries ( MantidPlot 
@@ -969,9 +964,10 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
                              BUNDLE DESTINATION .
 )
 
-INSTALL_PYTHON_FILES ( ${CMAKE_CURRENT_SOURCE_DIR} "${PY_FILES}" ${BIN_DIR} )
-INSTALL_PYTHON_FILES ( ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy "${MTDPLOTPY_FILES}" ${BIN_DIR}/mantidplotpy )
-INSTALL_PYTHON_FILES ( ${CMAKE_CURRENT_SOURCE_DIR}/ipython_plugin "${IPY_FILES}" ${BIN_DIR}/ipython_plugin )
+# Ship required files. Explicit so some can be disabled easily if necessary
+install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
+install ( FILES ${MTDPLOT_INSTALL_FILES} DESTINATION ${BIN_DIR}/mantidplotpy )
+install ( FILES ${IPYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR}/ipython_plugin )
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in

@@ -56,8 +56,6 @@ add_subdirectory ( mantid )
 # Python algorithms
 ###########################################################################
 clean_orphaned_pyc_files ( ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
-add_compile_py_target( PythonAlgorithms ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
-add_dependencies( PythonAPIModule PythonAlgorithms )
 
 ###########################################################################
 # tests 
@@ -68,12 +66,7 @@ add_subdirectory( test )
 # Installation settings
 ###########################################################################
 
-# Regex matches any .py or .pyc file. The $ ensures that this is the last 
-# part of the string
-install ( DIRECTORY mantid DESTINATION ${BIN_DIR} 
-          FILES_MATCHING REGEX ".*.pyc?$"
-          PATTERN "src" EXCLUDE )
-
 # Python algorithms
 install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
-                                      PATTERN ".svn" EXCLUDE )
+          PATTERN "*.pyc" EXCLUDE
+          PATTERN ".svn" EXCLUDE )

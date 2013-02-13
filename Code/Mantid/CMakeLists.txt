@@ -97,6 +97,9 @@ add_subdirectory ( QtPropertyBrowser )
 ###########################################################################
 # Now add in all the components
 ###########################################################################
+# Flag that this is a full build, i.e not framework only
+set( FULL_PACKAGE_BUILD 1 )
+
 add_subdirectory ( Framework )
 
 include_directories ( Framework/Kernel/inc )
@@ -113,13 +116,6 @@ add_dependencies ( AllTests FrameworkTests GUITests )
 
 add_subdirectory ( MantidQt )
 
-#include_directories ( QtPropertyBrowser/src )
-#include_directories ( MantidQt/API/inc )
-#include_directories ( MantidQt/MantidWidgets/inc )
-#include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/API )
-#include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/MantidWidgets )
-#include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/SliceViewer )
-
 if ( UNIX )
   #Experimental feature. Unix only at this point.
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
@@ -135,10 +131,7 @@ endif ( MAKE_VATES )
 
 add_subdirectory ( MantidPlot )
 
-# python unit tests
-if (PYUNITTEST_FOUND)
-  add_subdirectory ( scripts )
-endif ()
+add_subdirectory ( scripts )
 
 ###########################################################################
 # Installation settings
@@ -156,6 +149,10 @@ if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/o
             RENAME mantidplot.png )
 endif()
 
+# THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Framework/PostInstall/CMakeLists
+# for an explanation
+add_subdirectory( Framework/PostInstall )
+
 ###########################################################################
 # CPack settings
 ###########################################################################
@@ -163,11 +160,8 @@ endif()
 # Keep this in a defaulted-to-off option
 set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
-  #if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-  
     include ( CPackCommon )
     
-    #set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
     # Mac Packagemaker settings
     set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX-README.rtf )
     set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.rtf )
@@ -208,8 +202,6 @@ if ( ENABLE_CPACK )
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgoogle-perftools0 (>= 1.7)" )
       ENDIF ( )
     ENDIF ()
-
     # run cpack configuration
     include ( CPack )
-  #ENDIF(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif ()

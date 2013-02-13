@@ -90,11 +90,6 @@ set ( MANTIDLIBS ${MANTIDLIBS} API )
 
 add_subdirectory (PythonAPI)
 add_subdirectory (PythonInterface)
-# Compile python user scripts
-add_compile_py_target( scripts ${CMAKE_CURRENT_SOURCE_DIR}/../scripts ".*_template" )
-# Compile instrument python scripts
-add_compile_py_target( instrument_scripts ${CMAKE_CURRENT_SOURCE_DIR}/../instrument ) 
-add_dependencies (PythonInterface scripts instrument_scripts)
 
 find_package ( Matlab )
 if( MATLAB_FOUND )
@@ -163,19 +158,28 @@ install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument
           PATTERN "*UNIT_TESTING*" EXCLUDE
 )
 
-# Ships both py & pyc files but only ship compiled pyd files for supported platforms.
+# Ships .py files but only ship compiled pyd files for supported platforms.
 if ( WIN32 ) # General windows environment
   if ( CMAKE_SIZEOF_VOID_P EQUAL 8 ) # Recommended way of detecting 64- vs 32-bit build
     # Excludes .so files & _win32 binaries
-    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE )
+    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
+              PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE )
   else ()
     # Excludes so files & _win64 binaries
-    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE )
+    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
+              PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE )
   endif ()
     # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
     file ( GLOB MINGW_DLLS "${CMAKE_LIBRARY_PATH}/mingw/*.dll" )
     install ( FILES ${MINGW_DLLS} DESTINATION ${INBUNDLE}scripts/Inelastic )
   else ()
   # These don't work correctly and the linux ones are in no way general. They really need to be part of the build
-  install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE )
+  install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
+            PATTERN ".svn" EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE )
 endif ()
+
+# THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Properties/CMakeLists.txt.
+# This is included by the top-level CMakeLists if it is a full build but do it here for a Framework only
+if( NOT FULL_PACKAGE_BUILD )
+  add_subdirectory( PostInstall )
+endif()
