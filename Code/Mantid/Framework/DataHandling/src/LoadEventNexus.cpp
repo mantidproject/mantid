@@ -1516,10 +1516,10 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   }
 
   prog->report("Initializing all pixels");
-
+  // Remove used banks if parameter is set
+  if (WS->getInstrument()->hasParameter("remove-unused-banks")) deleteBanks(WS, bankNames);
   //----------------- Pad Empty Pixels -------------------------------
   // Create the required spectra mapping so that the workspace knows what to pad to
-  deleteBanks(WS, bankNames);
   createSpectraMapping(m_filename, WS, monitors, onebank);
   WS->padSpectra();
 
