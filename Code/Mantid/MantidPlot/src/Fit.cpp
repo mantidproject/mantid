@@ -47,13 +47,13 @@
 #include <QTextStream>
 
 Fit::Fit( ApplicationWindow *parent, Graph *g, const QString& name)
-: Filter( parent, g, name)
+: Filter( parent, g, name), d_f(NULL), d_df(NULL), d_fdf(NULL), d_fsimplex(NULL), d_w(NULL)
 {
 	init();
 }
 
 Fit::Fit( ApplicationWindow *parent, Table *t, const QString& name)
-: Filter( parent, t, name)
+: Filter( parent, t, name), d_f(NULL), d_df(NULL), d_fdf(NULL), d_fsimplex(NULL), d_w(NULL)
 {
 	init();
 }
