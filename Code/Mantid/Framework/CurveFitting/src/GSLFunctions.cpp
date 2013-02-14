@@ -173,7 +173,6 @@ namespace CurveFitting
 
   /**
    * Constructor. Creates declared -> active index map
-   * @param fun :: Pointer to the Fit algorithm
    * @param cf :: ICostFunction
    */
   GSL_FitData::GSL_FitData(boost::shared_ptr<CostFuncLeastSquares>  cf):

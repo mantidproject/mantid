@@ -293,7 +293,7 @@ void TabulatedFunction::loadWorkspace(const std::string& wsName)
  * Load the points from a MatrixWorkspace
  * @param ws :: The workspace to load from
  */
-void TabulatedFunction::loadWorkspace(boost::shared_ptr<MatrixWorkspace> ws)
+void TabulatedFunction::loadWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws)
 {
   const bool hist = ws->isHistogramData();
   const size_t nbins = ws->blocksize();
