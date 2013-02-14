@@ -49,7 +49,9 @@
 LineDialog::LineDialog( ArrowMarker *line, QWidget* parent,  Qt::WFlags fl )
     : QDialog( parent, fl )
 {
-    setWindowTitle( tr( "MantidPlot - Line options" ) );
+  unitBox=NULL;
+
+  setWindowTitle( tr( "MantidPlot - Line options" ) );
 	setAttribute(Qt::WA_DeleteOnClose);
 	
 	lm = line;
@@ -161,7 +163,8 @@ LineDialog::LineDialog( ArrowMarker *line, QWidget* parent,  Qt::WFlags fl )
 
 void LineDialog::initGeometryTab()
 {
-	unitBox = new QComboBox();
+	if (unitBox == NULL)
+    unitBox = new QComboBox();
 	unitBox->insertItem(tr("Scale Coordinates"));
 	unitBox->insertItem(tr("Pixels"));
 
