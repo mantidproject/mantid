@@ -488,7 +488,7 @@ namespace Mantid
 
       std::set<std::string> filenames;
       filenames.insert(filename);
-      if (getCaseSensitive())
+      if (!getCaseSensitive())
       {
         std::string transformed(filename);
         std::transform(filename.begin(),filename.end(),transformed.begin(),toupper);
