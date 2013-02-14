@@ -1,35 +1,38 @@
 # GLOBs should be replaced with explicit listings
 set ( SRC_FILES
+	# Old TMP convertToMD code prepared for deprecation:
 	# src/CreateMDFitWorkspace.cpp
+	#end TMP
 	src/AndMD.cpp
+	src/BinMD.cpp
+	src/BinToMDHistoWorkspace.cpp
 	src/BinaryOperationMD.cpp
-	src/BinMD.cpp		
-	src/BinToMDHistoWorkspace.cpp	
 	src/BooleanBinaryOperationMD.cpp
-	src/CentroidPeaksMD.cpp    
-	src/CloneMDWorkspace.cpp	
-	src/CobaltSpinWaveDSHO.cpp
+	src/CentroidPeaksMD.cpp
+	src/CloneMDWorkspace.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMD.cpp
+	src/ConvertToMDEvents.cpp
+	src/ConvertToMDEventsChildAlgFactory.cpp
+	src/ConvertToMDEventsParams.cpp
+	src/ConvertToMDEventsWSBase.cpp
 	src/CreateMDHistoWorkspace.cpp
-	src/CreateMDWorkspace.cpp	
-	src/DampedHisenbergFMSW.cpp
+	src/CreateMDWorkspace.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
-	src/FakeMDEventData.cpp    
-	src/FindPeaksMD.cpp    
+	src/FakeMDEventData.cpp
+	src/FindPeaksMD.cpp
 	src/GreaterThanMD.cpp
 	src/IDynamicRebinning.cpp
-	src/IntegratePeaksMD.cpp        
+	src/IntegratePeaksMD.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
 	src/LogarithmMD.cpp
-	src/MagneticFormFactor.cpp
 	src/MaskMD.cpp
 	src/MergeMD.cpp
 	src/MergeMDFiles.cpp
@@ -39,8 +42,7 @@ set ( SRC_FILES
 	src/OrMD.cpp
 	src/PlusMD.cpp
 	src/PowerMD.cpp
-    src/PreprocessDetectorsToMD.cpp
-	src/QuadEnBackground.cpp
+	src/PreprocessDetectorsToMD.cpp
 	src/Quantification/CachedExperimentInfo.cpp
 	src/Quantification/FitResolutionConvolvedModel.cpp
 	src/Quantification/ForegroundModel.cpp
@@ -54,64 +56,65 @@ set ( SRC_FILES
 	src/Quantification/Resolution/TobyFitYVector.cpp
 	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
-	src/RunParam.cpp
+	src/SaveMD.cpp
 	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
-	src/SimulateMDD.cpp
-	src/SimulateResolution.cpp
-	src/SliceMD.cpp	
-	src/TobyFitSimulate.cpp
+	src/SliceMD.cpp
+	src/SlicingAlgorithm.cpp
+	src/Stitch1DMD.cpp
 	src/TransformMD.cpp
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
-# Old TMP convertToMD code prepared for deprecation:	
-	src/ConvertToMDEvents.cpp	
-	src/ConvertToMDEventsParams.cpp
-	src/ConvertToMDEventsChildAlgFactory.cpp
-	src/ConvertToMDEventsWSBase.cpp
-#end TMP
-	src/SaveMD.cpp	
-	src/SlicingAlgorithm.cpp
-	src/Stitch1DMD.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
 #)
 
 set ( INC_FILES
+	# END TMP
+	# Old TMP convertToMD code prepared for deprication:
 	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
 	inc/MantidMDAlgorithms/AndMD.h
+	inc/MantidMDAlgorithms/BinMD.h
+	inc/MantidMDAlgorithms/BinToMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
-	inc/MantidMDAlgorithms/BinMD.h	
-	inc/MantidMDAlgorithms/BinToMDHistoWorkspace.h	
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
-	inc/MantidMDAlgorithms/CentroidPeaksMD.h    
-	inc/MantidMDAlgorithms/CloneMDWorkspace.h	
-	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
+	inc/MantidMDAlgorithms/CentroidPeaksMD.h
+	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
+	inc/MantidMDAlgorithms/ConvertToMDEvents.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsChildAlgFactory.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsWSBase.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
-	inc/MantidMDAlgorithms/CreateMDWorkspace.h	
-	inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
+	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
-	inc/MantidMDAlgorithms/FakeMDEventData.h    
-	inc/MantidMDAlgorithms/FindPeaksMD.h    
+	inc/MantidMDAlgorithms/FakeMDEventData.h
+	inc/MantidMDAlgorithms/FindPeaksMD.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
-	inc/MantidMDAlgorithms/IntegratePeaksMD.h    
+	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
 	inc/MantidMDAlgorithms/LoadMD.h
 	inc/MantidMDAlgorithms/LoadSQW.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
-	inc/MantidMDAlgorithms/MagneticFormFactor.h
 	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
 	inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -121,8 +124,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/OrMD.h
 	inc/MantidMDAlgorithms/PlusMD.h
 	inc/MantidMDAlgorithms/PowerMD.h
-    inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h	
-	inc/MantidMDAlgorithms/QuadEnBackground.h
+	inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h
 	inc/MantidMDAlgorithms/Quantification/CachedExperimentInfo.h
 	inc/MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/Quantification/ForegroundModel.h
@@ -136,71 +138,51 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
-	inc/MantidMDAlgorithms/RunParam.h
-	inc/MantidMDAlgorithms/SaveMD.h	
+	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
-	inc/MantidMDAlgorithms/SimulateMDD.h
-	inc/MantidMDAlgorithms/SimulateResolution.h
-	inc/MantidMDAlgorithms/SliceMD.h	
-	inc/MantidMDAlgorithms/TobyFitSimulate.h
+	inc/MantidMDAlgorithms/SliceMD.h
+	inc/MantidMDAlgorithms/SlicingAlgorithm.h
+	inc/MantidMDAlgorithms/Stitch1DMD.h
 	inc/MantidMDAlgorithms/TransformMD.h
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/WeightedMeanMD.h
 	inc/MantidMDAlgorithms/XorMD.h
-# Old TMP convertToMD code prepared for deprication:
-    inc/MantidMDAlgorithms/ConvertToMDEvents.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h 
-	inc/MantidMDAlgorithms/ConvertToMDEventsChildAlgFactory.h 	
-	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsChildAlgFactory.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h	
-	inc/MantidMDAlgorithms/ConvertToMDEventsWSBase.h	
-# END TMP	
-	inc/MantidMDAlgorithms/SlicingAlgorithm.h
-        inc/MantidMDAlgorithms/Stitch1DMD.h
 )
 
 # Test files. Other source files required.
 set ( TEST_FILES
 	#
 	#	ConvertToMDEventsCoordTransfTest.h
+	#    ConvertToMDEventsUnitsConvTest.h
+	# Old TMD convertToMD code prepared for deprication:
 	# these tests are as they test verify different parts of the CPR algorithms
 	#CreateMDFitWorkspaceTest.h
 	AndMDTest.h
-	BinToMDHistoWorkspaceTest.h	
+	BinToMDHistoWorkspaceTest.h
 	BooleanBinaryOperationMDTest.h
 	CachedExperimentInfoTest.h
-	CentroidPeaksMDTest.h    
-	CloneMDWorkspaceTest.h	
-	CobaltSWDTest.h
+	CentroidPeaksMDTest.h
+	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
 	ConvertEventsToMDTest.h
 	ConvertToDetectorFaceMDTest.h
-	ConvertToMDComponentsTest.h	
+	ConvertToMDComponentsTest.h
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
 	CreateMDHistoWorkspaceTest.h
 	CreateMDWorkspaceTest.h
-	DampedHisenbergFMSWTest.h
 	DivideMDTest.h
 	EqualToMDTest.h
 	ExponentialMDTest.h
 	FakeMDEventDataTest.h
-	FindPeaksMDTest.h    
+	FindPeaksMDTest.h
 	FitResolutionConvolvedModelTest.h
 	ForegroundModelTest.h
 	GreaterThanMDTest.h
-	IntegratePeaksMDTest.h    
+	IntegratePeaksMDTest.h
 	InvalidParameterParserTest.h
 	InvalidParameterTest.h
 	LessThanMDTest.h
@@ -208,7 +190,6 @@ set ( TEST_FILES
 	LoadSQWTest.h
 	LogarithmMDTest.h
 	MDResolutionConvolutionFactoryTest.h
-	MagneticFormFactorTest.h
 	MaskMDTest.h
 	MergeMDFilesTest.h
 	MergeMDTest.h
@@ -219,30 +200,23 @@ set ( TEST_FILES
 	OrMDTest.h
 	PlusMDTest.h
 	PowerMDTest.h
-	PreprocessDetectorsToMDTest.h	
-	QuadEnBackgroundTest.h
+	PreprocessDetectorsToMDTest.h
 	ResolutionConvolvedCrossSectionTest.h
-	RunParamTest.h
-	SaveMDTest.h	
+	SaveMDTest.h
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h
-	SimulateMDDTest.h
 	SimulateResolutionConvolvedModelTest.h
-	SimulateResolutionTest.h
-	SliceMDTest.h	
+	SliceMDTest.h
+	SlicingAlgorithmTest.h
+	Stitch1DMDTest.h
 	Strontium122Test.h
 	TobyFitBMatrixTest.h
 	TobyFitResolutionModelTest.h
-	TobyFitSimulateTest.h
 	TobyFitYVectorTest.h
 	TransformMDTest.h
 	UnaryOperationMDTest.h
 	WeightedMeanMDTest.h
 	XorMDTest.h
-        SlicingAlgorithmTest.h	
-        Stitch1DMDTest.h
-# Old TMD convertToMD code prepared for deprication:
-#    ConvertToMDEventsUnitsConvTest.h 
 )
 
 set ( GMOCK_TEST_FILES
