@@ -4,17 +4,11 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
-      /**
-      Constructor
-      @param origin : peak origin (natural coordinates)
-      @param radius : peak radius (natural coordinates)
-      @param backgroundRadius : peak background radius (natural coordinates)
-      */
 
     /**
      * Constructor
      * @param origin : peak origin (natural coordinates)
-     * @param radius : peak radius (natural coordinates)
+     * @param peakRadius : peak radius (natural coordinates)
      * @param backgroundInnerRadius : peak background inner radius (natural coordinates)
      * @param backgroundOuterRadius : peak background outer radius (natural coordinates)
      */
@@ -91,7 +85,7 @@ namespace MantidQt
       }
 
       /**
-      Peform calculations allowing the peak to be drawn.
+      Perform calculations allowing the peak to be drawn.
       @param windowHeight : height of the window in px
       @param windowWidth : height of the window in px
       @param viewWidth : width of the view area in natural coodinates

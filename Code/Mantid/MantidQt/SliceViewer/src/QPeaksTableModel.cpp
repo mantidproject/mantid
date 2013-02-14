@@ -139,6 +139,7 @@ namespace MantidQt
     @param section : Column index
     @param orientation : Heading orientation
     @param role : Role mode of table.
+    @return HeaderData.
     */
     QVariant QPeaksTableModel::headerData(int section, Qt::Orientation orientation, int role) const
     {

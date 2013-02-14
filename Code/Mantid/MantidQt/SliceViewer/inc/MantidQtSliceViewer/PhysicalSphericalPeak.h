@@ -16,7 +16,7 @@ namespace MantidQt
     typedef boost::optional<double> optional_double;
 
     /**
-    @class SphericalPeakPrimitives: Drawing information type.
+    SphericalPeakPrimitives. Drawing information type.
     */
     struct SphericalPeakPrimitives 
     {
