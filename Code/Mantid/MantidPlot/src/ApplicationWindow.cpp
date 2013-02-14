@@ -3764,8 +3764,8 @@ void ApplicationWindow::defineErrorBars(const QString& name, int type, const QSt
   if (!direction)
     ycol=t->colIndex(xColName);
 
-  QVarLengthArray<double> Y(r);
-  Y=t->col(ycol);
+  QVarLengthArray<double> Y(t->col(ycol));
+ // Y=t->col(ycol);
   QString errColName=t->colName(c);
 
   double prc=percent.toDouble();

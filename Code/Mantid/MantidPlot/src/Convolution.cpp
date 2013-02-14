@@ -37,7 +37,7 @@
 #include <gsl/gsl_fft_halfcomplex.h>
 
 Convolution::Convolution(ApplicationWindow *parent, Table *t, const QString& signalColName, const QString& responseColName)
-: Filter(parent, t)
+: Filter(parent, t), d_n_signal(0.0), d_n_response(0.0)
 {
 	setObjectName(tr("Convolution"));
     setDataFromTable(t, signalColName, responseColName);
