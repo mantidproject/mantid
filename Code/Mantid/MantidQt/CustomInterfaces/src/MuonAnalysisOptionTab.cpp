@@ -320,7 +320,7 @@ void MuonAnalysisOptionTab::runyAxisMaximumInput()
 /**
 * Save the settings of plot creation.
 *
-* @params index :: The new index of plot creation combo box.
+* @param index :: The new index of plot creation combo box.
 */
 void MuonAnalysisOptionTab::plotCreationChanged(int index)
 {
@@ -334,7 +334,7 @@ void MuonAnalysisOptionTab::plotCreationChanged(int index)
 /**
 * Save the settings of plot type.
 *
-* @params index :: The new index of plot type combo box.
+* @param index :: The new index of plot type combo box.
 */
 void MuonAnalysisOptionTab::plotTypeChanged(int index)
 {
@@ -347,7 +347,7 @@ void MuonAnalysisOptionTab::plotTypeChanged(int index)
 /**
 * Save the settings of whether to show error bars.
 *
-* @params state :: The new state for the error bar check box.
+* @param state :: The new state for the error bar check box.
 */
 void MuonAnalysisOptionTab::errorBarsChanged(bool state)
 {
@@ -360,7 +360,7 @@ void MuonAnalysisOptionTab::errorBarsChanged(bool state)
 /**
 * Save the settings of whether to show the toolbars.
 *
-* @params state :: The new state for the toolbar check box.
+* @param state :: The new state for the toolbar check box.
 */
 void MuonAnalysisOptionTab::toolbarsChanged(bool state)
 {
@@ -373,7 +373,7 @@ void MuonAnalysisOptionTab::toolbarsChanged(bool state)
 /**
 * Save the settings of whether to show the previous graphs.
 *
-* @params state :: The new state for the hide graphs check box.
+* @param state :: The new state for the hide graphs check box.
 */
 void MuonAnalysisOptionTab::hideGraphsChanged(bool state)
 {
