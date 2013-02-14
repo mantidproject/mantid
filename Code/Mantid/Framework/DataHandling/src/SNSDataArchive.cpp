@@ -36,6 +36,11 @@ Mantid::Kernel::Logger & SNSDataArchive::g_log = Mantid::Kernel::Logger::get("SN
 
 DECLARE_ARCHIVESEARCH(SNSDataArchive,SNSDataSearch);
 
+/**
+ * @param filenames : List of files to search
+ * @param exts : List of extensions to check against
+ * @return list of archive locations
+ */
 std::string SNSDataArchive::getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts) const
 {
   std::set<std::string>::const_iterator iter = filenames.begin();

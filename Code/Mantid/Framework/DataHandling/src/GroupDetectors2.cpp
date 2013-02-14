@@ -657,8 +657,8 @@ void GroupDetectors2::readSpectraIndexes(std::string line, spec2index_map &specs
 *  @param numInHists :: the total number of histograms in the input workspace
 *  @return estimate of the amount of algorithm progress obtained by reading from the file
 */
-double GroupDetectors2::fileReadProg(Mantid::DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead,
-    Mantid::DataHandling::GroupDetectors2::storage_map::size_type numInHists)
+double GroupDetectors2::fileReadProg(DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead,
+    DataHandling::GroupDetectors2::storage_map::size_type numInHists)
 {
   // I'm going to guess that there are half as many groups as spectra
   double progEstim = 2.*static_cast<double>(numGroupsRead)/static_cast<double>(numInHists);

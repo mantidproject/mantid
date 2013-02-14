@@ -40,10 +40,10 @@ Mantid::Kernel::Logger & SNSDataArchiveICAT2::g_log = Mantid::Kernel::Logger::ge
 DECLARE_ARCHIVESEARCH(SNSDataArchiveICAT2,SNSDataSearchICAT2);
 
 /**
-     * Calls a web service to get a full path to a file
-     * @param fName :: The file name.
-     * @return The path to the file or empty string in case of error.
-     */
+ * Calls a web service to get a full path to a file
+ * @param fName :: The file name.
+ * @return The path to the file or empty string in case of error.
+ */
 std::string SNSDataArchiveICAT2::getPath(const std::string& fName) const
 {
   std::string baseURL(
@@ -96,6 +96,11 @@ std::string SNSDataArchiveICAT2::getPath(const std::string& fName) const
   return wsResult;
 }
 
+/**
+ * @param filenames : List of files to search
+ * @param exts : List of extensions to check against
+ * @return list of archive locations
+ */
 std::string SNSDataArchiveICAT2::getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts) const
 {
   std::vector<std::string>::const_iterator ext = exts.begin();

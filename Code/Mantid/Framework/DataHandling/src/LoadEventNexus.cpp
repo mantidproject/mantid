@@ -449,6 +449,7 @@ public:
    * @param entry_name :: The pathname of the bank to load
    * @param entry_type :: The classtype of the entry to load
    * @param numEvents :: The number of events in the bank.
+   * @param oldNeXusFileNames :: Identify if file is of old variety.
    * @param prog :: an optional Progress object
    * @param ioMutex :: a mutex shared for all Disk I-O tasks
    * @param scheduler :: the ThreadScheduler that runs this task.
@@ -513,6 +514,7 @@ public:
   /** Load the event_index field
    (a list of size of # of pulses giving the index in the event list for that pulse)
 
+   * @param file :: File handle for the NeXus file
    * @param event_index :: ref to the vector
    */
   void loadEventIndex(::NeXus::File & file, std::vector<uint64_t> & event_index)
@@ -545,6 +547,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Open the event_id field and validate the contents
    *
+   * @param file :: File handle for the NeXus file
    * @param start_event :: set to the index of the first event
    * @param stop_event :: set to the index of the last event + 1
    * @param event_index ::  (a list of size of # of pulses giving the index in the event list for that pulse)
@@ -1863,7 +1866,6 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
  *
  *  @param nexusfilename :: Used to pick the instrument.
  *  @param localWorkspace :: MatrixWorkspace in which to put the logs
- *  @param pulseTimes [out] :: vector of pulse times to fill
  *  @param alg :: Handle of an algorithm for logging access
  *  @return the BankPulseTimes object created, NULL if it failed.
  */

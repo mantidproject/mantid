@@ -339,9 +339,11 @@ namespace DataHandling
 
   /**
    * Read spectra from the DAE
+   * @param period :: Current period index
    * @param index :: First spectrum index
    * @param count :: Number of spectra to read
    * @param workspace :: Workspace to store the data
+   * @param workspaceIndex :: index in workspace to store data
    */
   void ISISHistoDataListener::getData(int period, int index, int count, API::MatrixWorkspace_sptr workspace, size_t workspaceIndex)
   {
@@ -373,7 +375,6 @@ namespace DataHandling
   }
 
     /** Populate spectra-detector map
-        @param dae_handle :: The internal DAE identifier
         @param localWorkspace :: The workspace
      */
     void ISISHistoDataListener::loadSpectraMap(MatrixWorkspace_sptr localWorkspace)

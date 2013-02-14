@@ -348,7 +348,7 @@ namespace DataHandling
   /** Get the instrument name from the input NeXus file.
    *
    * @param nxfilename :: Input NeXus file.
-   * @param the instrument name, empty string if failed.
+   * @return the instrument name, empty string if failed.
    */
  std::string AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename)
  {

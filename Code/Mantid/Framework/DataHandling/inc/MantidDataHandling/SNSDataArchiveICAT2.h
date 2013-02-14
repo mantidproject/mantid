@@ -19,12 +19,11 @@ namespace Kernel
 class Logger;
 }
 
-  namespace DataHandling
-  {
-  /**
+namespace DataHandling
+{
+/**
    This class is for searching the SNS data archive
 
-   @author Shelly Ren, ORNL
    @date 02/22/2012
 
    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -48,17 +47,19 @@ class Logger;
    Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
 
-    class  DLLExport SNSDataArchiveICAT2: public API::IArchiveSearch
-    {
-    public:
-        std::string getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts) const;
-    private:
-        // static reference to the logger class
-        std::string getPath(const std::string& fName) const;
-        static Mantid::Kernel::Logger & g_log;
-    };
+class  DLLExport SNSDataArchiveICAT2: public API::IArchiveSearch
+{
+public:
+  /// Find the archive location of a set of files.
+  std::string getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts) const;
+private:
+  /// Call web service to get full path.
+  std::string getPath(const std::string& fName) const;
+  /// static reference to the logger class
+  static Mantid::Kernel::Logger & g_log;
+};
 
-  }
+}
 }
 
 #endif /* MANTID_DATAHANDLING_SNSDATAARCHIVEICAT2_H_ */
