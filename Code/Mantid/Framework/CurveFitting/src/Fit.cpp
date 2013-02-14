@@ -144,6 +144,8 @@ namespace CurveFitting
    * Add a new workspace to the fit. The workspace is in the property named workspacePropertyName
    * @param workspacePropertyName :: A workspace property name (eg InputWorkspace or InputWorkspace_2).
    *  The property must already exist in the algorithm.
+   * @param addProperties :: allow for declaration of properties that specify the dataset
+   *  within the workspace to fit to.
    */
   void Fit::addWorkspace(const std::string& workspacePropertyName, bool addProperties)
   {
