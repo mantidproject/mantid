@@ -72,7 +72,7 @@ namespace Mantid
      * @param xValues :: The X values
      * @param nData :: The number of X values to evaluate
      * @param functionValues :: Calculated y values
-     * @param out :: The Jacobian matrix containing the partial derivatives for each x value (allowed null)
+     * @param derivatives :: The Jacobian matrix containing the partial derivatives for each x value (allowed null)
      */
     void Voigt::calculateFunctionAndDerivative(const double *xValues, const size_t nData,
                                                double *functionValues, API::Jacobian * derivatives) const
