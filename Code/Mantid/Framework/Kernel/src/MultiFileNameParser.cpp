@@ -403,7 +403,7 @@ namespace Kernel
     /**
      * Overloaded function operator that takes in a runs, and returns a file name.
      *
-     * @param runs :: the vector of runs with which to make file names.
+     * @param run :: the vector of runs with which to make file names.
      *
      * @returns the generated vector of file names.
      */
