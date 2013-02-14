@@ -62,5 +62,3 @@ namespace Mantid
     }
   } // namespace API
 } // namespace Mantid
-
-///\endcond TEMPLATE
