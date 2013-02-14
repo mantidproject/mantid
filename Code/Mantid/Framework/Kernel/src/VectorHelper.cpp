@@ -343,7 +343,7 @@ void convertToBinCentre(const std::vector<double> & bin_edges, std::vector<doubl
  * bin centers, this may not be correct, but it is the best that
  * can be done, lacking any other information.
  *
- * @param bin_centres :: A vector of values specifying bin centers.
+ * @param bin_centers :: A vector of values specifying bin centers.
  * @param bin_edges   :: An output vector of values specifying bin 
  *                       boundaries
  *
@@ -444,7 +444,7 @@ std::vector<NumT> splitStringIntoVector(std::string listString)
  * If beyond the range of the vector, it will return either 0 or bins.size()-2.
  * @param bins :: A reference to the set of bin boundaries to search. It is assumed that they are
  * monotonically increasing values and this is NOT checked
- * @paran value :: The value whose boundaries should be found
+ * @param value :: The value whose boundaries should be found
  */
 int getBinIndex(const std::vector<double>& bins, const double value )
 {
