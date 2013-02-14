@@ -71,12 +71,14 @@ bool ConvertToMDEventsWSBase::fillAddProperties(std::vector<coord_t> &Coord,size
      return true;
 }
 
-/** method which initates all main class variables
-   * @param WSD        -- class describing the target workspace. 
-  *                      the algorithm uses target workspace limints, transformation matix from source to the target workspace and the parameters, needed for  
-  *                      unit conversion (if any) 
-  * @param pWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
-*/
+/**
+ * method which initates all main class variables
+ * @param WSD : class describing the target workspace.
+ *              the algorithm uses target workspace limints, transformation matix from source to the target workspace and the parameters, needed for
+ *              unit conversion (if any)
+ * @param inWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
+ * @return
+ */
 size_t  ConvertToMDEventsWSBase::setUPConversion(const MDEvents::MDWSDescriptionDepricated &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
         TWS   = WSD;
