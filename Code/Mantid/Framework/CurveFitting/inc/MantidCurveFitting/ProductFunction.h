@@ -50,7 +50,8 @@ namespace Mantid
       /// overwrite IFunction base class methods
       std::string name()const{return "ProductFunction";}
       /// Function you want to fit to. 
-      /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+      /// @param domain :: The space on which the function acts
+      /// @param values :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
       virtual void function(const API::FunctionDomain& domain, API::FunctionValues& values)const;
       /// Calculate the derivatives
       void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
