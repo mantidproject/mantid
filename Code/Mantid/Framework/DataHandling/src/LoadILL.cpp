@@ -576,7 +576,7 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	/**
 	 * Theoretical calculations for cross checking
 	 *
-	 * Neutron velocity: v = (6.626e-34 m² kg / s) / (1.675e-27 kg) (\lambda m)
+	 * Neutron velocity: v = (6.626e-34 m² kg / s) / (1.675e-27 kg) (\\lambda m)
 	 * t = distance / v
 	 * TODO: delete this when in production
 	 */

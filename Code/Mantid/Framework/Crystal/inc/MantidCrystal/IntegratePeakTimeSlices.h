@@ -366,7 +366,7 @@ private:
 
   void InitializeColumnNamesInTableWorkspace( DataObjects::TableWorkspace_sptr &TabWS) ;
 
-
+  ///Prepares the data for futher analysis adding meta data and marking data on the edges of detectors
   void SetUpData1( API::MatrixWorkspace_sptr      &Data,
                    API::MatrixWorkspace_const_sptr     const &inpWkSpace,
                    const int                       chanMin,

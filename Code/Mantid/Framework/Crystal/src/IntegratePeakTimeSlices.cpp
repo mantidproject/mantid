@@ -1872,7 +1872,14 @@ namespace Mantid
     }
 
 
-
+    /// Prepares the data for futher analysis adding meta data and marking data on the edges of detectors
+    /// @param Data
+    /// @param inpWkSpace Input workspace
+    /// @param chanMin Minimum channel
+    /// @param chanMax Maximum Channel
+    /// @param Radius the radius of detectors
+    /// @param CentPos Center on Plane
+    /// @param spec_idList List of spectra id's
     void  IntegratePeakTimeSlices:: SetUpData1(API::MatrixWorkspace_sptr              &Data,
                                                API::MatrixWorkspace_const_sptr        const &inpWkSpace,
                                                const int                               chanMin,
