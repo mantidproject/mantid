@@ -390,7 +390,6 @@ void SetupEQSANSReduction::init()
   setPropertyGroup("BckThetaDependentTransmission", bck_grp);
 
   // Geometry correction
-  std::string geo_grp = "Geometry";
   declareProperty("SampleThickness", EMPTY_DBL(), "Sample thickness [cm]");
 
   // Masking
