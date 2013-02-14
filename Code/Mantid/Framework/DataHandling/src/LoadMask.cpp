@@ -185,6 +185,9 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /**  Mask detectors or Unmask detectors
    *   @param tomask:  true to mask, false to unmask
+   *   @param singledetids: list of individual det ids to mask
+   *   @param pairdetids_low: list of lower bound of det ids to mask
+   *   @param pairdetids_up: list of upper bound of det ids to mask
    */
   void LoadMask::processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids,
                                         std::vector<int32_t> pairdetids_low,
@@ -578,8 +581,8 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Parse bank IDs (string name)
    * Sample:  bank2
-   * params:
-   * @valutext:  must be bank name
+   * @param valuetext:  must be bank name
+   * @param tomask: if true, mask, if not unmask
    */
   void LoadMask::parseComponent(std::string valuetext, bool tomask)
   {

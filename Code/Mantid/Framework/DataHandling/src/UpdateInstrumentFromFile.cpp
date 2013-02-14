@@ -349,7 +349,7 @@ namespace Mantid
     /**
      * Parse the header and fill the headerInfo struct and returns a boolean
      * indicating if the table is spectrum or detector ID based
-     * @param headerInfo[Out] :: Fills the given struct with details about the header
+     * @param headerInfo :: [Out] Fills the given struct with details about the header
      * @returns True if the header is spectrum based, false otherwise
      */
     bool UpdateInstrumentFromFile::parseAsciiHeader(UpdateInstrumentFromFile::AsciiFileHeader & headerInfo)

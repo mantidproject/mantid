@@ -660,6 +660,8 @@ namespace Mantid
     /// Run the LoadLog Child Algorithm
     /// @param fileName :: the raw file filename
     /// @param localWorkspace :: The workspace to load the logs for
+    /// @param progStart :: starting progress fraction
+    /// @param progEnd :: ending progress fraction
     void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd )
     {
 

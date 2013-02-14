@@ -264,7 +264,7 @@ namespace DataHandling
     return answer;
   }
 
-  /** Parse column name line staring with #L
+  /** Parse column name line staring with \#L
     */
   void LoadPDFgetNFile::parseColumnNameLine(std::string line)
   {

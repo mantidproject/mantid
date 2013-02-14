@@ -87,8 +87,6 @@ static const string PID_PARAM("SpectrumList");
 static const string PARALLEL_PARAM("UseParallelProcessing");
 static const string BLOCK_SIZE_PARAM("LoadingBlockSize");
 static const string OUT_PARAM("OutputWorkspace");
-/// Default number of items to read in from any of the files.
-static const size_t DEFAULT_BLOCK_SIZE = 1000000;
 /// All pixel ids with matching this mask are errors.
 static const PixelType ERROR_PID = 0x80000000;
 /// The maximum possible tof as native type

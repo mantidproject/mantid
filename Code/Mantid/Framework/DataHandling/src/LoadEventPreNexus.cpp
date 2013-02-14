@@ -93,8 +93,6 @@ static const string OUT_PARAM("OutputWorkspace");
 static const string PULSE_EXT("pulseid.dat");
 static const string EVENT_EXT("event.dat");
 
-/// Default number of items to read in from any of the files.
-static const size_t DEFAULT_BLOCK_SIZE = 1000000; // 100,000
 /// All pixel ids with matching this mask are errors.
 static const PixelType ERROR_PID = 0x80000000;
 /// The maximum possible tof as native type

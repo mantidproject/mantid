@@ -511,7 +511,7 @@ int LoadILL::getMonitorElasticPeakPosition(
  * In case there are several peaks in a spectrum, it considers
  * the highest one.
  *
- * @param :: spectra data
+ * @param data :: spectra data
  * @return detector Elastic Peak Position
  */
 int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
@@ -725,7 +725,6 @@ int LoadILL::fileCheck(const std::string& filePath) {
 
 /**
  * Run the Child Algorithm LoadInstrument.
- * @param workspace :: The workspace to assign the loaded instrument to.
  */
 void LoadILL::runLoadInstrument() {
 
