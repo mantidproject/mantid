@@ -152,7 +152,7 @@ namespace DataObjects
    * events.
    * Any existing events are cleared.
    *
-   * @param spec :: ISpectrum ptr to histogram data.
+   * @param inSpec :: ISpectrum ptr to histogram data.
    * @param GenerateZeros :: if true, generate event(s) for empty bins
    * @param GenerateMultipleEvents :: if true, create several evenly-spaced fake events inside the bin
    * @param MaxEventsPerBin :: max number of events to generate in one bin, if GenerateMultipleEvents
@@ -3603,6 +3603,7 @@ namespace DataObjects
    * @param outputs :: a vector of where the split events will end up. The # of entries in there should
    *        be big enough to accommodate the indices.
    * @param events :: either this->events or this->weightedEvents.
+   * @param tofcorrection :: a correction for each TOF to multiply with.
    */
   template< class T >
   void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType & splitter, std::map<int, EventList * > outputs,

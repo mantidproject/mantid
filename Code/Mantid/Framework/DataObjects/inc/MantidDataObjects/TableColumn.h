@@ -166,6 +166,7 @@ public:
      * is throw. In case of an overflow boost::numeric::positive_overflow or boost::numeric::negative_overflow
      * is throw.
      * @param i :: The index to an element.
+     * @param value: cast this value
      */
     virtual void fromDouble(size_t i, double value)
     {

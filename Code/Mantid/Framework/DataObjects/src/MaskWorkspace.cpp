@@ -49,7 +49,8 @@ namespace DataObjects
 
     /**
      * Constructor - using an instrument.
-     * @param[in] instrument Instrument that is the base for this workspace.
+     * @param[in] instrument : Instrument that is the base for this workspace.
+     * @param[in] includeMonitors: option for including the monitors at the workspace. 
      * @return MaskWorkspace
      */
     MaskWorkspace::MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument, const bool includeMonitors)
@@ -60,7 +61,7 @@ namespace DataObjects
 
     /**
      * Constructor - using a MatrixWorkspace.
-     * @param[in] A matrix workspace that is the base for this workspace. It must have an instrument.
+     * @param[in] parent:  A matrix workspace that is the base for this workspace. It must have an instrument.
      * @return MaskWorkspace
      */
     MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr parent)
@@ -231,7 +232,7 @@ namespace DataObjects
 
     /**
      * Mask a set of pixels. This is a convenience function to
-     * call @link MaskWorkspace::setMasked(const detid_t, const bool).
+     * call MaskWorkspace::setMasked(const detid_t, const bool).
      */
     void MaskWorkspace::setMasked(const std::set<detid_t> &detectorIDs, const bool mask)
     {

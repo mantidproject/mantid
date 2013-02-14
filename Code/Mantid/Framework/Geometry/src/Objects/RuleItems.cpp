@@ -1262,7 +1262,8 @@ BoolValue::setLeaf(Rule* aR,const int)
     Replaces a leaf with a rule.
     This REQUIRES that aR is of type SurfPoint
     @param aR :: new rule
-    @param int :: Null side point
+    
+    secont argument ignored ( Null side point)
   */
 {
   //std::cerr<<"Calling BoolValue setLeaf"<<std::endl;

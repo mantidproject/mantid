@@ -107,7 +107,7 @@ namespace DataObjects
    * corresponding fractional area array. This creates a representation that
    * is easily visualized. The Rebin and Integration algorithms will have to
    * undo this in order to properly treat the data.
-   * @param hasSqrdErrors :: does the workspace have squared errors?
+   * @param hasSqrdErrs :: does the workspace have squared errors?
    */
   void RebinnedOutput::finalize(bool hasSqrdErrs)
   {
