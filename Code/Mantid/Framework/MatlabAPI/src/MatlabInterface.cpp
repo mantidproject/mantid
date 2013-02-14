@@ -12,7 +12,7 @@
   #define CHAR16_T _CHAR16T
 #endif
 #include "engine.h"
-/// A debugging define
+// A debugging define
 #define ARGCHECK   // Also need mwdebug.c for this
 
 #include "mex.h"
@@ -103,9 +103,9 @@ static mexfunc_s_t mex_functions[] = {
  * From this a FORTRAN function name is created (ixtestclass_plus) which is then called with
  * the rest of the parameters
  */
-/// Maximum bueffer length
+// Maximum bueffer length
 #define BUFFER_LEN	64
-/// Maximum number of arguments
+// Maximum number of arguments
 #define MAX_ARGS	100
 
 #ifdef _WIN32
@@ -121,7 +121,7 @@ static mexfunc_s_t mex_functions[] = {
   /// A 64-bit integer
   #define uint64_t UINT64
 #else
-  /// The function to use to compare case
+  // The function to use to compare case
   #define compare_nocase strcasecmp
 #endif
 
