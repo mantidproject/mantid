@@ -26,6 +26,12 @@ namespace RefDetectorViewer
  *  ImageView destructor is called.
  *
  *  @param data_source  The source of the data that will be displayed. 
+ *  @param peak_min The min peak value
+ *  @param peak_max The max peak value
+ *  @param back_min The min background value
+ *  @param back_max The max background value
+ *  @param tof_min The min time of flight value
+ *  @param tof_max  The max time of flight value
  */
 RefImageView::RefImageView( ImageView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
 {

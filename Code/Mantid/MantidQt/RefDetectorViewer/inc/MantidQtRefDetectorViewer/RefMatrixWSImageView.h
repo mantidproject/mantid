@@ -47,7 +47,7 @@ namespace RefDetectorViewer
   public:
 
     /// Construct an image viewer for the specifed MatrixWorkspace
-    RefMatrixWSImageView ( Mantid::API::MatrixWorkspace_sptr mat_ws );
+    RefMatrixWSImageView ( Mantid::API::MatrixWorkspace_sptr /*mat_ws*/ );
 
     RefMatrixWSImageView( QString wps_name, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max);
     RefIVConnections* getConnections();
