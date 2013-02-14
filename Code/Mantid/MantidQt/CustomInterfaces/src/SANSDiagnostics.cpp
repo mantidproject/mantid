@@ -924,8 +924,8 @@ namespace MantidQt
    /**This method gets called from the handler of TimeIntegral Clicked button click.
     * executes SumSpectra algorithm.
     * @param range string entered by user   
-    * @param specMin- minimum spectrum index used to separate the Front/Rear Detectors data.
-    * @param specMax - maximum spectrum index used to separate the Front/Read Detectors data.
+    * @param minSpec- minimum spectrum index used to separate the Front/Rear Detectors data.
+    * @param maxSpec - maximum spectrum index used to separate the Front/Read Detectors data.
     * @param opws - output workspace.
     * @param pixel_mask boolean used for masking 
     */

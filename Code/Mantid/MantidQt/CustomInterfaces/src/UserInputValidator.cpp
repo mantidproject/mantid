@@ -142,8 +142,8 @@ namespace MantidQt
     /**
      * Check that the given "outer" range completely encloses the given "inner" range.
      *
-     * @param inner :: the start of the range
-     * @param outer :: the end of the range
+     * @param innerName :: the start of the range
+     * @param outerName :: the end of the range
      */
     void UserInputValidator::checkRangeIsEnclosed(const QString & outerName, std::pair<double, double> outer, 
                                                   const QString & innerName, std::pair<double, double> inner)
