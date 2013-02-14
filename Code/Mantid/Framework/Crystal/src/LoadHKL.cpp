@@ -110,10 +110,9 @@ namespace Crystal
       if (h == 0.0 && k == 0 && l == 0) break;
       double Inti = atof(line.substr(12,8).c_str());
       double SigI = atof(line.substr(20,8).c_str());
-      int run = atoi(line.substr(28,4).c_str());
       double wl = atof(line.substr(32,8).c_str());
       double tbar = atof(line.substr(40,7).c_str()); //tbar
-      run = atoi(line.substr(47,7).c_str());
+      int run = atoi(line.substr(47,7).c_str());
       atoi(line.substr(54,7).c_str()); //seqNum
       double trans = atof(line.substr(61,7).c_str()); //transmission
       int bank = atoi(line.substr(68,4).c_str());
