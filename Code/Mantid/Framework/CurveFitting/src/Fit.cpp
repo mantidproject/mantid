@@ -312,7 +312,7 @@ namespace CurveFitting
         *it = "";
       }
     }
-    std::remove_if(costFuncOptions.begin(),costFuncOptions.end(),isStringEmpty);
+    auto last = std::remove_if(costFuncOptions.begin(),costFuncOptions.end(),isStringEmpty);
     declareProperty("CostFunction","Least squares",
       Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(costFuncOptions)),
       "The cost function to be used for the fit, default is Least squares", Kernel::Direction::InOut);
