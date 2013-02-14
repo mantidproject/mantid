@@ -2352,7 +2352,7 @@ namespace Geometry
   }
 
 
-  /// Just to avoid replication of code here throw text string to throw when too many 'end' attribute of <locations> tag
+  /// Just to avoid replication of code here throw text string to throw when too many 'end' attribute of /<locations/> tag
   /// @param tx1 Text for one of the 'end' tag (e.g. theta-end)
   /// @param tx2 Text for the other 'end' tags (e.g. R-end or phi-end)
   /// @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file 
