@@ -113,18 +113,16 @@ namespace MDAlgorithms
         "Name of the output MDEventWorkspace.");
   }
 
-
   //----------------------------------------------------------------------------------------------
   /** Convert an event list to 3/4D detector face space add it to the MDEventWorkspace
    *
-   * @tparam T :: the type of event in the input EventList (TofEvent, WeightedEvent, etc.)
-   * @tparam nd :: number of dimensions of the output
-   * @param workspaceIndex :: index into the workspace
-   * @param x :: x-coordinate for all output events
-   * @param y :: y-coordinate for all output events
-   * @param bankNum :: coordinate for the 4th dimension (optional)
-   * @param detectorID :: detectorID for this event list
-   * @param runIndex :: index of the run, starting at 0
+   * @param outWS
+   * @param workspaceIndex : index into the workspace
+   * @param x : x-coordinate for all output events
+   * @param y : y-coordinate for all output events
+   * @param bankNum : coordinate for the 4th dimension (optional)
+   * @param runIndex : index of the run, starting at 0
+   * @param detectorID : detectorID for this event list
    */
   template <class T, class MDE, size_t nd>
   void ConvertToDetectorFaceMD::convertEventList(boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd>> outWS,

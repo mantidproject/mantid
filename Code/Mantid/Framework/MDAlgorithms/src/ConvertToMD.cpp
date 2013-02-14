@@ -319,10 +319,11 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
     return createNewTargetWs;
 }
 
-
-/**Create new MD workspace and set up its box controller using algorithm's box controllers properties 
-* @param NewMDWSDescription -- the constructed MD workspace description;
-*/
+/**
+ * Create new MD workspace and set up its box controller using algorithm's box controllers properties
+ * @param targWSDescr
+ * @return
+ */
 API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(const MDEvents::MDWSDescription &targWSDescr)
 {
    // create new md workspace and set internal shared pointer of m_OutWSWrapper to this workspace
@@ -350,7 +351,6 @@ API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(const MDEvents::MD
 
 /**Check if the target workspace new or exists and we need to create new workspace
  *@param spws -- shared pointer to target MD workspace, which can be undefined if the workspace does not exist
- *@param      -- Algorithnm property "OverwriteExisting" which specifies if one needs to owerwrite existing workspace
  *
  *@returns true if one needs to create new workspace and false otherwise
 */
@@ -374,11 +374,13 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
   }
   return createNewWs;
 }
-/**The method responsible for analyzing input workspace parameters and preprocessing detectors positions into reciprocal space  
-  *@param InWS2D -- input Matrix workspace with defined instrument 
-  *
-  *@returns TableWorkspace_const_sptr the pointer to the table workspace which contains positions of the preprocessed detectors
-  *         Depenting on the algorithm parameters, this worksapce is also stored in the analysis data service and may have additional properties.
+
+/**
+ * The method responsible for analyzing input workspace parameters and preprocessing detectors positions into reciprocal space
+ * @param InWS2D -- input Matrix workspace with defined instrument
+ * @param dEModeRequested
+ * @param updateMasks
+ * @return
  */
 DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,bool updateMasks)
 {

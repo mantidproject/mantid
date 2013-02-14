@@ -78,7 +78,7 @@ namespace Mantid
 
       void function1D(double *out, const double *xValues, const size_t nData) const;
 
-      void functionDeriv1D(API::Jacobian* out, const double *xValues, const size_t nData);
+      void functionDeriv1D(Mantid::API::Jacobian* out, const double *xValues, const size_t nData);
 
       void init();
 

@@ -46,6 +46,16 @@ int is_member(const std::vector<std::string> &group,const std::string &candidate
   *@param out_dim_units [out] -- vector of units for target workspace
   *@param nQ_dims [out]       -- number of Q or other dimensions. When converting into Q, it is 1 or 3 dimensions, if NoQ -- workspace dimensions are copied.
 */
+
+/**
+ *  Identify the Momentum conversion mode requested by user
+ * @param Q_mode_req -- What conversion algorithm user wants to deploy (Q3d, ModQ, no Q)
+ * @param ws_dim_units -- vector of input workspace dimensions names
+ * @param out_dim_units -- vector of input workspace dimensions units ID-s
+ * @param nQ_dims -- number of Q or other dimensions. When converting into Q, it is 1 or 3 dimensions, if NoQ -- workspace dimensions are copied.
+ * @param isPowder -- Boolean indicating that it is powder mode.
+ * @return
+ */
 std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_units,Strings &out_dim_units, 
                                     int &nQ_dims, bool isPowder)const
 {
@@ -91,7 +101,6 @@ std::string ConvertToMDEventsParams::parseQMode(const std::string &Q_mode_req,co
   *@param Q_MODE_ID     -- the momentum conversion mode. Energy conversion depends on it
   *@param dE_mode_req   -- What conversion algorithm user wants to deploy (direct/indirect elastic)
   *@param ws_dim_units  -- vector of input workspace dimensions units ID-s
-  *@param out_dim_names [out] -- vector of names for target workspace, if inelastic, one of the dimension units have to be DeltaE
   *@param out_dim_units [out] -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
   *@param ndE_dims [out]      -- number of additional dimensions, if inelastic, it would be one dimension more.
   *@param natural_units [out] -- name of the units, the algorithm expects to work with.
@@ -131,14 +140,13 @@ std::string ConvertToMDEventsParams::parseDEMode(const std::string &Q_MODE_ID,co
     return DE_MODE_ID;
 }
 
-/** Identify the Unit conversion mode, deployed by the ChildAlgorith 
-  * 
-  *@param Q_MODE_ID       -- the momentum conversion mode. Unit conversion depends on it
-  *@param ws_dim_units    -- vector of input workspace dimensions units ID-s
-  *@param UnitsToConvert2 -- the units one needs to convert ws to before deploying Q-dE transformation. 
-  *
-  *@returns CONV_MODE_ID -- the string identifier, which says what energy mode is deployed. 
-*/
+/**
+ * Identify the Unit conversion mode, deployed by the ChildAlgorith
+ * @param Q_MODE_ID -- the momentum conversion mode. Unit conversion depends on it
+ * @param ws_dim_units -- vector of input workspace dimensions units ID-s
+ * @param UnitsToConvert2 -- the units one needs to convert ws to before deploying Q-dE transformation.
+ * @return CONV_MODE_ID -- the string identifier, which says what energy mode is deployed.
+ */
 std::string ConvertToMDEventsParams::parseConvMode(const std::string &Q_MODE_ID,const std::vector<std::string> &ws_dim_units,const std::string &UnitsToConvert2)const
 {
     std::string CONV_MODE_ID("Unknown");
@@ -176,13 +184,12 @@ std::string ConvertToMDEventsParams::parseConvMode(const std::string &Q_MODE_ID,
     return CONV_MODE_ID;
 }
 
-/** identify what kind of input workspace is provided as input argument and if the oriented lattice is provided with this workspace
- *
- *@param inMatrixWS  a pointer to the workspace, obtained from the analysis data service
- *
- *@returns   -- the ID of the workspace of one of the supported types. Throws if can not dynamiucally cast the pointer to the workspace:
- *@returns modified TargWSDescription -- sets the oriented lattice and goniometer transformation if the input workspace has one
-*/
+/**
+ * Identify what kind of input workspace is provided as input argument and if the oriented lattice is provided with this workspace
+ * @param inMatrixWS  a pointer to the workspace, obtained from the analysis data service
+ * @param TargWSDescription
+ * @return -- the ID of the workspace of one of the supported types. Throws if can not dynamiucally cast the pointer to the workspace
+ */
 std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS,MDEvents::MDWSDescriptionDepricated &TargWSDescription)const
 {
    UNUSED_ARG(TargWSDescription);
@@ -215,20 +222,19 @@ std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr
     return "";
 }
 
-/**  
+
+/**
   *  The dimensions, which can be obtained from workspace are determined by the availible algorithms.
   *  E.g. an inelastic algorithm can transform matrix workspace into 2D-4D workpsace depending on what requested.
   *  If additional algorithms can be generated through algorithm template, this function shluld be modified accordingly
   *  This function identifies the algoritnm, which should be deploued over particular matrix workspace;
-  *
   * @param inMatrixWS -- const pointer to const matrix workspace, which provides information about availible axis
   * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
   * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
-  *
   * @return out_dim_units      -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
-  * @return algo_id            -- the string, which describes the algorithm, which should be deployed on ws.
-
-*/
+ * @param TargWSDescription
+ * @return
+ */
 std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS, const std::string &Q_mode_req, const std::string &dE_mode_req,
                                                        Strings &out_dim_units, MDEvents::MDWSDescriptionDepricated &TargWSDescription)
 {
@@ -299,14 +305,14 @@ std::string ConvertToMDEventsParams::getAlgoID(QMode Q,AnalMode Mode,CnvrtUnits 
     
 }
 
-/** auxiliary function working opposite to getAlgoID and returns conversion modes given the algorithm ID 
- *@param  AlgoID  -- string wich specifies the algorithm ID
- * 
- *@return Q      -- momentum conversion mode
- *@return Mode   -- energy analysis mode
- *@return Conv   -- unit conversion mode
- *@return  WS    -- processed workspace type
-*/
+/**
+ * Auxiliary function working opposite to getAlgoID and returns conversion modes given the algorithm ID
+ * @param AlgoID -- string which specifies the algorithm ID
+ * @param Q -- momentum conversion mode
+ * @param Mode -- energy analysis mode
+ * @param Conv -- unit conversion mode
+ * @param WS -- processed workspace type
+ */
 void  ConvertToMDEventsParams::getAlgoModes(const std::string &AlgoID, QMode &Q,AnalMode &Mode,CnvrtUnits &Conv,InputWSType &WS)
 {
     int i;
@@ -357,18 +363,16 @@ void  ConvertToMDEventsParams::getAlgoModes(const std::string &AlgoID, QMode &Q,
 
 }
 
-/** function processes the input arguments and tries to establish what ChildAlgorithm should be deployed; 
-    *
-    * @param inWS           -- input workspace (2D or Events)
-    * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
-    * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
-    * @param other_dim_names  -- vector of other (orthogonal, non-Q) dimension names requested by the algorithm
-    * @param maxNdim         -- max number of dimensions a workspace allowed to have
-    *
-    * @returns    aldID           -- string, which identifies the algorithm requested
-    * @returns    TargWSDescription -- partially filled in description for target workspace, which in particular contains n-target dimensions, 
-                                      targ dim names, targ dim ID etc.
-*/
+/**
+ * Function processes the input arguments and tries to establish what ChildAlgorithm should be deployed;
+ * @param inWS
+ * @param Q_mode_req
+ * @param dE_mode_req
+ * @param otherDimNames
+ * @param maxNdim
+ * @param TargWSDescription
+ * @return
+ */
 std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std::string &Q_mode_req, 
                                                    const std::string &dE_mode_req,const std::vector<std::string> &otherDimNames,
                                                    size_t maxNdim,MDEvents::MDWSDescriptionDepricated &TargWSDescription)
@@ -441,13 +445,15 @@ std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_s
     return the_algID;
 
 }
+
+
 /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace 
- * TODO: Currenly logically wrong (at least for inelastic)  Specific processed properties have to be introudced
+ * TODO: Currently logically wrong (at least for in-elastic)  Specific processed properties have to be introduced
  * 
  * @param inMatrixWS -- shared pointer to input workspace for analysis
- * @returns add_dim_names [out] -- the ID-s for the dimension names, which can be obtained from the workspace
- * @returns add_dim_units [out] -- the Units ID-s (if any) existing dimensions
-*/
+ * @param add_dim_names [out] -- the ID-s for the dimension names, which can be obtained from the workspace
+ * @param add_dim_units [out] -- the Units ID-s (if any) existing dimensions
+ */
 void ConvertToMDEventsParams::getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,std::vector<std::string> &add_dim_names,std::vector<std::string> &add_dim_units)const
 {   
     // get dimension names from properties
@@ -571,14 +577,11 @@ void ConvertToMDEventsParams::buildMDDimDescription(API::MatrixWorkspace_const_s
 
 }
 
-
-/** Helper Static function to obtain current analysis mode 
-  *
-  *@param pHost the pointer to the algorithm to work with
-  *
-  *@returns the mode 0-elastic, 1--direct, 2 indirect. Throws if the mode is not defined or should not be defined 
-  (NoQ mode -- no analysis expected)
-*/
+/**
+ * Helper Static function to obtain current analysis mode
+ * @param AlgID : Identifier for the algorithm
+ * @return
+ */
 int ConvertToMDEventsParams::getEMode(const std::string &AlgID)const
 {
     if(AlgID.empty()){
@@ -639,6 +642,13 @@ SampleType ConvertToMDEventsParams::getSampleType(const std::string &AlgID)const
   *@returns the incident energy of the neutrons. 
   *         Throws if the energy property is not defined or can not be retrieved from the workspace
 */
+
+/**
+ * Helper function to obtain the energy of incident neutrons from the input workspaec
+ * @param inWS2D
+ * @return the incident energy of the neutrons.
+ *         Throws if the energy property is not defined or can not be retrieved from the workspace
+ */
 double ConvertToMDEventsParams::getEi(API::MatrixWorkspace_const_sptr inWS2D)const
 {
     if(!inWS2D)
