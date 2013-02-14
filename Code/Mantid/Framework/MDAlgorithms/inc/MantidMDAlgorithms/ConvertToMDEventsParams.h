@@ -122,7 +122,7 @@ class DLLExport ConvertToMDEventsParams
 
   /** The main purpose of this class: identifies the ID of the conversion ChildAlgorithm to run on a workspace and fills in ws description */
   std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                               const Strings &other_dim_names,size_t maxNdim,MDEvents::MDWSDescriptionDepricated &TargWSDescription);
+                               const Strings &otherDimNames,size_t maxNdim,MDEvents::MDWSDescriptionDepricated &TargWSDescription);
   /** get the identifier of the correspondent algorithm as function of integer ws ID-s. This function is used during ChildAlgorithm instanciation
     * to generate algorithmID, which will be used later (through funcion identifyTheAlg) to retrive suitable ChildAlgorithm.  */
   std::string getAlgoID(QMode Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS,SampleType Sample)const;
@@ -155,7 +155,7 @@ class DLLExport ConvertToMDEventsParams
 //TODO :: make these methods protected for testing. User should not usually deal with them.
   //>---> Parts of the identifyMatrixAlg, separated for unit testing:
   /// indentify input units conversion mode
-  std::string parseConvMode(const std::string &Q_MODE_ID,const Strings &ws_dim_unit,const std::string &UnitsToConvert2)const;
+  std::string parseConvMode(const std::string &Q_MODE_ID,const Strings &ws_dim_units,const std::string &UnitsToConvert2)const;
   /// identify momentum transfer mode
   std::string parseQMode(const std::string &Q_mode_req,const Strings &ws_dim_units,
                          Strings &out_dim_units, int &nQdims,bool isPowder=false)const;
@@ -174,7 +174,7 @@ class DLLExport ConvertToMDEventsParams
   void buildMDDimDescription(API::MatrixWorkspace_const_sptr inWS,const std::string &AlgoID,const Strings &other_dim_names,MDEvents::MDWSDescriptionDepricated &TargWSDescription)const;
 
   /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
-   void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &addDimNames,Strings &addDimUnits)const;
+   void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &add_dim_names,Strings &add_dim_units)const;
 private:
    static Mantid::Kernel::Logger& convert_log;
 

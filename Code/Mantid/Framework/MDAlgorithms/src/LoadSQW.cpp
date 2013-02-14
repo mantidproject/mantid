@@ -799,7 +799,7 @@ namespace LoadSQWHelper
 
     // auxiliary functions
    /**Block 1:  Main_header: Parse SQW main data header
-    *@param:        dataStream -- the open file hanlder responsible for IO operations
+    *@param dataStream -- the open file hanlder responsible for IO operations
      **/
    void dataPositions::parse_sqw_main_header(std::ifstream &dataStream)
     { // we do not need this header  at the moment -> just need to calculated its length;
@@ -840,8 +840,8 @@ namespace LoadSQWHelper
       }
     }
    /**Block 2: Header: Parse header of single SPE file
-    *@param:        dataStream -- the open file hanlder responsible for IO operations 
-    *@param:       start_location -- initial file position of the header within the binary file
+    *@param dataStream -- the open file hanlder responsible for IO operations
+    *@param start_location -- initial file position of the header within the binary file
     *
     *@returns: the file location of the first byte behind this header
    */
@@ -899,8 +899,8 @@ namespace LoadSQWHelper
 
     }
    /**Block 3: Detpar: parse positions of the contributed detectors. These detectors have to be the same for all contributing spe files
-    *@param:    dataStream -- the open file hanlder responsible for IO operations
-    *@param:   start_location -- initial file position of the detectors data within the binary file
+    *@param dataStream -- the open file hanlder responsible for IO operations
+    *@param start_location -- initial file position of the detectors data within the binary file
     *
     *@returns: the file location of the first byte behind this header   */
    std::streamoff dataPositions::parse_sqw_detpar(std::ifstream &dataStream,std::streamoff start_location)
@@ -933,12 +933,10 @@ namespace LoadSQWHelper
 
     }
    /**Block 4: Data: parse positions of the data fields 
-    *@param:        dataStream -- the open file hanlder responsible for IO operations
-    *@data_start:   Initial position of the data block4 within the data file
-     
-     @returns:   nBins     -- the vector of bin sizes for MD image
-     @returns:   nDims     -- numner of non-integrated dimensions in the MD image
-     @returns:  nDataPoints-- number of pixels (MD events) contributing to the image
+    *@param dataStream -- the open file hanlder responsible for IO operations
+    *@param data_start -- Initial position of the data block4 within the data file
+     @param nBins -- the vector of bin sizes for MD image
+     @param nDataPoints -- number of pixels (MD events) contributing to the image
    */
     void dataPositions::parse_data_locations(std::ifstream &dataStream,std::streamoff data_start,
                                                       std::vector<size_t> &nBins,uint64_t &nDataPoints)

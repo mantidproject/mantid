@@ -37,16 +37,6 @@ int is_member(const std::vector<std::string> &group,const std::string &candidate
     return num;
 }
 
-/** Identify the Momentum conversion mode requested by user
-  * 
-  *@param Q_mode_req    -- What conversion algorithm user wants to deploy (Q3d, ModQ, no Q)
-  *@param ws_dim_names  -- vector of input workspace dimensions names 
-  *@param ws_dim_units  -- vector of input workspace dimensions units ID-s
-  *@param out_dim_names [out] -- vector of dimension names for momentuns in target workspace
-  *@param out_dim_units [out] -- vector of units for target workspace
-  *@param nQ_dims [out]       -- number of Q or other dimensions. When converting into Q, it is 1 or 3 dimensions, if NoQ -- workspace dimensions are copied.
-*/
-
 /**
  *  Identify the Momentum conversion mode requested by user
  * @param Q_mode_req -- What conversion algorithm user wants to deploy (Q3d, ModQ, no Q)
@@ -141,7 +131,7 @@ std::string ConvertToMDEventsParams::parseDEMode(const std::string &Q_MODE_ID,co
 }
 
 /**
- * Identify the Unit conversion mode, deployed by the ChildAlgorith
+ * Identify the Unit conversion mode, deployed by the ChildAlgorithm
  * @param Q_MODE_ID -- the momentum conversion mode. Unit conversion depends on it
  * @param ws_dim_units -- vector of input workspace dimensions units ID-s
  * @param UnitsToConvert2 -- the units one needs to convert ws to before deploying Q-dE transformation.
@@ -231,7 +221,7 @@ std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr
   * @param inMatrixWS -- const pointer to const matrix workspace, which provides information about availible axis
   * @param Q_mode_req     -- what to do with Q-dimensions e.g. calculate either mod|Q| or Q3D;
   * @param dE_mode_req    -- desirable dE analysis mode (elastic, direct/indirect)
-  * @return out_dim_units      -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
+  * @param out_dim_units      -- vector of units for target workspace, if inelastic, one of the dimension units have to be DeltaE
  * @param TargWSDescription
  * @return
  */
@@ -633,15 +623,6 @@ SampleType ConvertToMDEventsParams::getSampleType(const std::string &AlgID)const
     }
     return Sample;
 }
-
-
-/** Helper function to obtain the energy of incident neutrons from the input workspaec
-  *
-  *@param pHost the pointer to the algorithm to work with
-  *
-  *@returns the incident energy of the neutrons. 
-  *         Throws if the energy property is not defined or can not be retrieved from the workspace
-*/
 
 /**
  * Helper function to obtain the energy of incident neutrons from the input workspaec

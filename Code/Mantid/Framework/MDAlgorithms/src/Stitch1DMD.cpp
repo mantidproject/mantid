@@ -135,8 +135,8 @@ namespace MDAlgorithms
 
   /**
   Validate that two input workspaces are suitable. 
-  @param lhsworkspace : workspace 1 input.
-  @param rhsworkspace : workspace 2 input.
+  @param lhsWorkspace : workspace 1 input.
+  @param rhsWorkspace : workspace 2 input.
   @throws if there are any inconsistencies between the two input workspaces.
   */
   void Stitch1DMD::checkBothWorkspaces(IMDHistoWorkspace_const_sptr lhsWorkspace, IMDHistoWorkspace_const_sptr rhsWorkspace) const
@@ -174,7 +174,7 @@ namespace MDAlgorithms
   Reconstruct a workspace as a truely 1D workspace. This is required if one of the dimensions has been integrated-out.
   A new workspace is fabricated to be identical to the original, but missing the input integrated dimension.
   @param ws : input workspace to flatten.
-  @retrun flattened 1D Histo workspace.
+  @return flattened 1D Histo workspace.
   */
   MDHistoWorkspace_sptr Stitch1DMD::trimOutIntegratedDimension(IMDHistoWorkspace_sptr ws)
   {
@@ -282,6 +282,7 @@ namespace MDAlgorithms
 
   /**
   Extract the overlap region as a distinct workspace.
+  @param ws: Workspace to extract region
   @param fractionLow : Low fraction to start slicing from
   @param fractionHigh : High fraction to stop slicing from
   @return MDHistoWorkspace encompasing the overlap region only.

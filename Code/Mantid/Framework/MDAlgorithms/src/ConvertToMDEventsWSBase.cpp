@@ -10,9 +10,6 @@ namespace MDAlgorithms
    Kernel::Logger& ConvertToMDEventsWSBase::convert_log =Kernel::Logger::get("MD-Algorithms");
 
 /** Helper function to obtain the units set along X-axis of the input workspace. 
-  *
-  *@param pHost the pointer to the algorithm to work with
-  *
   *@returns the name(ID) of the unit, specified along X-axis of current workspace
 */
 Kernel::Unit_sptr    
