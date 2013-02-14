@@ -99,7 +99,7 @@ namespace MDEvents
       signal(signal), errorSquared(errorSquared)
     {
       for (size_t i=0; i<nd; i++)
-        center[i] = (*(centers+i));
+        center[i] = centers[i];
     }
 
 #ifdef COORDT_IS_FLOAT
