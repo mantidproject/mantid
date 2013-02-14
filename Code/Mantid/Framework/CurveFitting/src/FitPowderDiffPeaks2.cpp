@@ -801,7 +801,10 @@ namespace CurveFitting
       else
       {
         finalchi2 = bestchi2;
-        throw runtime_error("Need to find out how this case peak value is changed from best fit.");
+        stringstream dbss;
+        dbss << "Fit peak-background composite function failed! "
+             << "Need to find out how this case peak value is changed from best fit.";
+        g_log.warning(dbss.str());
       }
     }
     else

@@ -175,10 +175,13 @@ namespace CurveFitting
       paramvalue = m_Gamma;
     else if (paramname.compare("d_h") == 0)
       paramvalue = m_dcentre;
+    else if (paramname.compare("Eta") == 0)
+      paramvalue = m_eta;
     else
     {
       stringstream errss;
-      errss << "Parameter " << paramname << " does not exist in peak profile. ";
+      errss << "Parameter " << paramname << " does not exist in peak profile. "
+            << "Candidates are Alpha, Beta, Sigma2, Gamma2 and d_h.";
       g_log.warning(errss.str());
       throw runtime_error(errss.str());
     }
@@ -382,7 +385,6 @@ namespace CurveFitting
     const double RIGHT_VALUE = m_centre + RANGE;
     vector<double>::const_iterator iter_end = std::lower_bound(iter, xValues.end(), RIGHT_VALUE);
 
-
     // 2. Calcualte
     std::size_t pos(std::distance(xValues.begin(), iter)); //second loop variable
     for ( ; iter != iter_end; ++iter)
@@ -525,8 +527,7 @@ namespace CurveFitting
       std::complex<double> q(-beta*x, beta*SQRT_H_5);
       double omega2a = imag(exp(p)*E1(p));
       double omega2b = imag(exp(q)*E1(q));
-      omega2 = N*eta*(omega2a + omega2b)*TWO_OVER_PI;
-      // omega2 = 2*N*eta/PI*(imag(exp(p)*E1(p)) + imag(exp(q)*E1(q)));
+      omega2 = -1.0*N*eta*(omega2a + omega2b)*TWO_OVER_PI;
     }
     const double omega = omega1+omega2;
 
@@ -544,6 +545,7 @@ namespace CurveFitting
       }
     }
 
+    // cout << "[DB] Final Value = " << omega << endl;
     return omega;
   }
 
@@ -625,7 +627,9 @@ namespace CurveFitting
    */
   std::complex<double> E1(std::complex<double> z)
   {
-    std::complex<double> e1;
+    const double el = 0.5772156649015328;
+
+    std::complex<double> exp_e1;
 
     double rz = real(z);
     double az = abs(z);
@@ -633,29 +637,33 @@ namespace CurveFitting
     if (fabs(az) < 1.0E-8)
     {
       // If z = 0, then the result is infinity... diverge!
-     complex<double> r(1.0E300, 0.0);
-     e1 = r;
+      complex<double> r(1.0E300, 0.0);
+      exp_e1 = r;
     }
     else if (az <= 10.0 || (rz < 0.0 && az < 20.0))
     {
       // Some interesting region, equal to integrate to infinity, converged
+      // cout << "[DB] Type 1" << endl;
+
       complex<double> r(1.0, 0.0);
-      e1 = r;
+      exp_e1 = r;
       complex<double> cr = r;
 
-     for (size_t k = 1; k <= 150; ++k)
-     {
+      for (size_t k = 1; k <= 150; ++k)
+      {
         double dk = double(k);
         cr = -cr * dk * z / ( (dk+1.0)*(dk+1.0) );
-       e1 += cr;
-       if (abs(cr) < abs(e1)*1.0E-15)
-       {
+        exp_e1 += cr;
+        if (abs(cr) < abs(exp_e1)*1.0E-15)
+        {
           // cr is converged to zero
           break;
         }
       } // ENDFOR k
 
-      e1 = -e1 - log(z) + (z*e1);
+      // cout << "[DB] el = " << el << ", exp_e1 = " << exp_e1 << endl;
+
+      exp_e1 = -el - log(z) + (z*exp_e1);
     }
     else
     {
@@ -667,16 +675,18 @@ namespace CurveFitting
         ct0 = dk / (10.0 + dk / (z + ct0));
       } // ENDFOR k
 
-      e1 = 1.0 / (z + ct0);
-      e1 = e1 * exp(-z);
+      exp_e1 = 1.0 / (z + ct0);
+      exp_e1 = exp_e1 * exp(-z);
       if (rz < 0.0 && fabs(imag(z)) < 1.0E-10 )
       {
         complex<double> u(0.0, 1.0);
-        e1 = e1 - (PI * u);
+        exp_e1 = exp_e1 - (PI * u);
       }
     }
 
-    return e1;
+    // cout << "[DB] Final exp_e1 = " << exp_e1 << "\n";
+
+    return exp_e1;
   }
 
 } // namespace CurveFitting

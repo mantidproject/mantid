@@ -22,7 +22,7 @@ public:
 
   /** Test overriden set parameter value functions
     */
-  void test_setParameter()
+  void Passed_test_setParameter()
   {
     ThermalNeutronBk2BkExpConvPV peak;
     peak.initialize();
@@ -46,10 +46,9 @@ public:
 
   }
 
-
   /** Test on calcualte peak parameters
    */
-  void test_CalculatePeakParameters()
+  void Passed_test_CalculatePeakParameters()
   {
     // 0. Mock data
     std::vector<double> vecX;
@@ -231,6 +230,105 @@ public:
 
   }
 
+  /** Test on calcualte peak parameters including Gamma (i.e., E1())
+    * Parameter and data is from PG3_11485, Bank 1, (200) @ TOF = 46963
+   */
+  void test_CalculatePeakParameters2()
+  {
+    // 1. Mock data
+    std::vector<double> vecX;
+    std::vector<double> dataY;
+    std::vector<double> modelY;
+    generateData2(vecX, dataY, modelY);
+
+    // 3. Create peak
+    ThermalNeutronBk2BkExpConvPV peak;
+    peak.initialize();
+
+    peak.setMillerIndex(2, 0, 0);
+
+    // 3. Set up parameters
+    peak.setParameter("Dtt1", 22584.51172);
+    peak.setParameter("Dtt2", 0.0);
+    peak.setParameter("Dtt1t", 22604.85156);
+    peak.setParameter("Dtt2t", 0.30);
+
+    peak.setParameter("Zero", 0.0);
+    peak.setParameter("Zerot", 11.31754);
+
+    peak.setParameter("Alph0", 1.881868);
+    peak.setParameter("Alph1", 0.000);
+    peak.setParameter("Beta0", 6.251096);
+    peak.setParameter("Beta1", 0.000);
+
+    peak.setParameter("Alph0t", 64.410156);
+    peak.setParameter("Alph1t", 0.000);
+    peak.setParameter("Beta0t", 85.918922 );
+    peak.setParameter("Beta1t", 0.000);
+
+    peak.setParameter("Sig2",  sqrt(279.996));
+    peak.setParameter("Sig1",  sqrt(10.0));
+    peak.setParameter("Sig0",  0.0);
+
+    peak.setParameter("Width", 1.0521);
+    peak.setParameter("Tcross", 0.3560);
+
+    peak.setParameter("Gam0", 0.0);
+    peak.setParameter("Gam1", 5.744);
+    // peak.setParameter("Gam1", 0.0);
+    peak.setParameter("Gam2", 0.0);
+
+    peak.setParameter("LatticeConstant", 4.156890);
+
+    double bkgd = 0.1;
+    double h1 = (3.666-0.1)/0.005;
+    // h1 = 1.0;
+    peak.setParameter("Height", h1);
+
+    // 3. Parameter check
+    peak.calculateParameters(true);
+    /*
+    double d_h = peak.getPeakParameter("d_h");
+    double alpha = peak.getPeakParameter("Alpha");
+    double beta = peak.getPeakParameter("Beta");
+    double sigma2 = peak.getPeakParameter("Sigma2");
+    double gamma = peak.getPeakParameter("Gamma");
+    double eta = peak.getPeakParameter("Eta");
+    double tof_h = peak.centre();
+    double fwhm = peak.fwhm();
+    cout << "Peak (200) Parameters: \n";
+    cout << "Centre (TOF) = " << tof_h << ", Centre (d) = " << d_h << "\n";
+    cout << "Alpha  = " << alpha << ", Beta  = " << beta << "\n";
+    cout << "Sigma2 = " << sigma2 << ", Gamma = " << gamma << "\n";
+    cout << "Peak height = " << h1 << ", FWHM = " << fwhm << ", Eta = " << eta << endl;
+    */
+
+    // 4. Calculate
+    size_t nData = vecX.size();
+    vector<double> out(nData, 0.0);
+    peak.functionLocal(out, vecX);
+
+    /*
+    std::stringstream outstring;
+    for (size_t id = 0; id < nData; ++id)
+    {
+      outstring << vecX[id] << "\t\t" << out[id] << std::endl;
+    }
+    std::ofstream ofile;
+    ofile.open("peaks_200.dat");
+    ofile << outstring.str();
+    ofile.close();
+    */
+
+    // 4. Compare calculated data
+    TS_ASSERT_DELTA(out[0]+bkgd, modelY[0], 0.1);
+    TS_ASSERT_DELTA(out[25]+bkgd, modelY[25], 0.1);
+    TS_ASSERT_DELTA(out[45]+bkgd, modelY[45], 0.2);
+    TS_ASSERT_DELTA(out[65]+bkgd, modelY[65], 0.1);
+
+
+    return;
+  }
 
 
   /** Generate a set of powder diffraction data with 2 peaks (110 and 111)
@@ -376,89 +474,119 @@ public:
     return;
   }
 
-  /** Experiment data for HKL = (2, 1, 0)
-   */
-  void getMockData(std::vector<double>& xvalues, std::vector<double>& yvalues)
-  {
-    xvalues.clear();
-    yvalues.clear();
 
-    xvalues.push_back(54999.094);       yvalues.push_back(2.6283364);
-    xvalues.push_back(55010.957);       yvalues.push_back(4.0346470);
-    xvalues.push_back(55022.820);       yvalues.push_back(6.1934152);
-    xvalues.push_back(55034.684);       yvalues.push_back(9.5072470);
-    xvalues.push_back(55046.547);       yvalues.push_back(14.594171);
-    xvalues.push_back(55058.410);       yvalues.push_back(22.402889);
-    xvalues.push_back(55070.273);       yvalues.push_back(34.389721);
-    xvalues.push_back(55082.137);       yvalues.push_back(52.790192);
-    xvalues.push_back(55094.000);       yvalues.push_back(81.035973);
-    xvalues.push_back(55105.863);       yvalues.push_back(124.39484);
-    xvalues.push_back(55117.727);       yvalues.push_back(190.95044);
-    xvalues.push_back(55129.590);       yvalues.push_back(293.01022);
-    xvalues.push_back(55141.453);       yvalues.push_back(447.60229);
-    xvalues.push_back(55153.320);       yvalues.push_back(664.84778);
-    xvalues.push_back(55165.184);       yvalues.push_back(900.43817);
-    xvalues.push_back(55177.047);       yvalues.push_back(1028.0037);
-    xvalues.push_back(55188.910);       yvalues.push_back(965.38873);
-    xvalues.push_back(55200.773);       yvalues.push_back(787.02441);
-    xvalues.push_back(55212.637);       yvalues.push_back(603.50177);
-    xvalues.push_back(55224.500);       yvalues.push_back(456.12289);
-    xvalues.push_back(55236.363);       yvalues.push_back(344.13235);
-    xvalues.push_back(55248.227);       yvalues.push_back(259.61121);
-    xvalues.push_back(55260.090);       yvalues.push_back(195.84842);
-    xvalues.push_back(55271.953);       yvalues.push_back(147.74631);
-    xvalues.push_back(55283.816);       yvalues.push_back(111.45851);
-    xvalues.push_back(55295.680);       yvalues.push_back(84.083313);
-    xvalues.push_back(55307.543);       yvalues.push_back(63.431709);
-    xvalues.push_back(55319.406);       yvalues.push_back(47.852318);
-    xvalues.push_back(55331.270);       yvalues.push_back(36.099365);
-    xvalues.push_back(55343.133);       yvalues.push_back(27.233042);
-    xvalues.push_back(55354.996);       yvalues.push_back(20.544367);
-    xvalues.push_back(55366.859);       yvalues.push_back(15.498488);
-    xvalues.push_back(55378.727);       yvalues.push_back(11.690837);
-    xvalues.push_back(55390.590);       yvalues.push_back(8.8194647);
-    xvalues.push_back(55402.453);       yvalues.push_back(6.6533256);
-
-    return;
-  }
-
-  /** Test simple function calculator: It is migrated from Bk2BkExpConvPV's unit test
- */
-  void Ntest_functionCalculator()
-  {
-    // 1. Create peak
-    Mantid::CurveFitting::ThermalNeutronBk2BkExpConvPV peak;
-
-    peak.initialize();
-
-    // 2. Set peak's parameters
-    peak.setMillerIndex(2, 1, 0);
-
-    peak.setParameter("Height", 1000.0);
-
-    /*
-    peak.tie("TOF_h", "55175.79");
-    peak.tie("Alpha", "0.03613");
-    peak.tie("Beta", "0.02376");
-    peak.tie("Sigma2", "187.50514");
-    peak.tie("Gamma", "0.0");
+  /** Generate data from PG3_11485 Jason refined .prf file
+    * @param vecX:   x-values
+    * @param dataY:  experimental y-values
+    * @param modelY: calculated y-values
     */
+  void generateData2(std::vector<double>& vecX, std::vector<double>& dataY, std::vector<double>& modelY)
+  {
+    vecX.clear();
+    dataY.clear();
+    modelY.clear();
 
-    // 2. Set workspace
-    std::vector<double> Xs;
-    std::vector<double> Ys;
-    getMockData(Xs, Ys);
+    vecX.push_back(46129.1562);	  dataY.push_back(0.1069);	  modelY.push_back(0.1185);
+    vecX.push_back(46147.6094);	  dataY.push_back(0.1143);	  modelY.push_back(0.1185);
+    vecX.push_back(46166.0664);	  dataY.push_back(0.1562);	  modelY.push_back(0.1186);
+    vecX.push_back(46184.5352);	  dataY.push_back(0.0627);	  modelY.push_back(0.1186);
+    vecX.push_back(46203.0078);	  dataY.push_back(0.1230);	  modelY.push_back(0.1187);
+    vecX.push_back(46221.4883);	  dataY.push_back(0.1411);	  modelY.push_back(0.1188);
+    vecX.push_back(46239.9766);	  dataY.push_back(0.1920);	  modelY.push_back(0.1189);
+    vecX.push_back(46258.4727);	  dataY.push_back(0.0745);	  modelY.push_back(0.1190);
+    vecX.push_back(46276.9766);	  dataY.push_back(0.0897);	  modelY.push_back(0.1191);
+    vecX.push_back(46295.4883);	  dataY.push_back(0.1671);	  modelY.push_back(0.1193);
+    vecX.push_back(46314.0039);	  dataY.push_back(0.2592);	  modelY.push_back(0.1194);
+    vecX.push_back(46332.5312);	  dataY.push_back(0.0952);	  modelY.push_back(0.1196);
+    vecX.push_back(46351.0625);	  dataY.push_back(0.1850);	  modelY.push_back(0.1198);
+    vecX.push_back(46369.6055);	  dataY.push_back(0.1046);	  modelY.push_back(0.1201);
+    vecX.push_back(46388.1523);	  dataY.push_back(0.2446);	  modelY.push_back(0.1203);
+    vecX.push_back(46406.7070);	  dataY.push_back(0.1852);	  modelY.push_back(0.1206);
+    vecX.push_back(46425.2695);	  dataY.push_back(0.0756);	  modelY.push_back(0.1210);
+    vecX.push_back(46443.8398);	  dataY.push_back(0.1530);	  modelY.push_back(0.1214);
+    vecX.push_back(46462.4180);	  dataY.push_back(0.1813);	  modelY.push_back(0.1218);
+    vecX.push_back(46481.0039);	  dataY.push_back(0.1589);	  modelY.push_back(0.1223);
+    vecX.push_back(46499.5938);	  dataY.push_back(0.1438);	  modelY.push_back(0.1229);
+    vecX.push_back(46518.1953);	  dataY.push_back(0.0546);	  modelY.push_back(0.1236);
+    vecX.push_back(46536.8008);	  dataY.push_back(0.1724);	  modelY.push_back(0.1244);
+    vecX.push_back(46555.4180);	  dataY.push_back(0.1375);	  modelY.push_back(0.1253);
+    vecX.push_back(46574.0391);	  dataY.push_back(0.1136);	  modelY.push_back(0.1265);
+    vecX.push_back(46592.6680);	  dataY.push_back(0.1106);	  modelY.push_back(0.1280);
+    vecX.push_back(46611.3047);	  dataY.push_back(0.2025);	  modelY.push_back(0.1301);
+    vecX.push_back(46629.9492);	  dataY.push_back(0.2148);	  modelY.push_back(0.1330);
+    vecX.push_back(46648.6016);	  dataY.push_back(0.2909);	  modelY.push_back(0.1374);
+    vecX.push_back(46667.2617);	  dataY.push_back(0.1954);	  modelY.push_back(0.1443);
+    vecX.push_back(46685.9297);	  dataY.push_back(0.1355);	  modelY.push_back(0.1555);
+    vecX.push_back(46704.6016);	  dataY.push_back(0.1439);	  modelY.push_back(0.1738);
+    vecX.push_back(46723.2852);	  dataY.push_back(0.3487);	  modelY.push_back(0.2038);
+    vecX.push_back(46741.9727);	  dataY.push_back(0.3768);	  modelY.push_back(0.2520);
+    vecX.push_back(46760.6719);	  dataY.push_back(0.3047);	  modelY.push_back(0.3278);
+    vecX.push_back(46779.3750);	  dataY.push_back(0.4374);	  modelY.push_back(0.4427);
+    vecX.push_back(46798.0859);	  dataY.push_back(0.5702);	  modelY.push_back(0.6098);
+    vecX.push_back(46816.8047);	  dataY.push_back(0.7676);	  modelY.push_back(0.8414);
+    vecX.push_back(46835.5312);	  dataY.push_back(0.9643);	  modelY.push_back(1.1458);
+    vecX.push_back(46854.2656);	  dataY.push_back(1.2149);	  modelY.push_back(1.5224);
+    vecX.push_back(46873.0078);	  dataY.push_back(1.6902);	  modelY.push_back(1.9583);
+    vecX.push_back(46891.7578);	  dataY.push_back(2.3170);	  modelY.push_back(2.4254);
+    vecX.push_back(46910.5156);	  dataY.push_back(2.5934);	  modelY.push_back(2.8814);
+    vecX.push_back(46929.2773);	  dataY.push_back(2.5473);	  modelY.push_back(3.2753);
+    vecX.push_back(46948.0508);	  dataY.push_back(2.6097);	  modelY.push_back(3.5563);
+    vecX.push_back(46966.8281);	  dataY.push_back(2.7768);	  modelY.push_back(3.6847);
+    vecX.push_back(46985.6172);	  dataY.push_back(2.7972);	  modelY.push_back(3.6430);
+    vecX.push_back(47004.4102);	  dataY.push_back(2.5713);	  modelY.push_back(3.4396);
+    vecX.push_back(47023.2109);	  dataY.push_back(2.2840);	  modelY.push_back(3.1064);
+    vecX.push_back(47042.0234);	  dataY.push_back(1.9929);	  modelY.push_back(2.6894);
+    vecX.push_back(47060.8398);	  dataY.push_back(1.6574);	  modelY.push_back(2.2389);
+    vecX.push_back(47079.6641);	  dataY.push_back(1.4395);	  modelY.push_back(1.7989);
+    vecX.push_back(47098.4961);	  dataY.push_back(1.1935);	  modelY.push_back(1.4020);
+    vecX.push_back(47117.3359);	  dataY.push_back(0.7205);	  modelY.push_back(1.0667);
+    vecX.push_back(47136.1797);	  dataY.push_back(0.7175);	  modelY.push_back(0.7990);
+    vecX.push_back(47155.0352);	  dataY.push_back(0.4870);	  modelY.push_back(0.5951);
+    vecX.push_back(47173.8984);	  dataY.push_back(0.5124);	  modelY.push_back(0.4461);
+    vecX.push_back(47192.7656);	  dataY.push_back(0.3997);	  modelY.push_back(0.3407);
+    vecX.push_back(47211.6445);	  dataY.push_back(0.1794);	  modelY.push_back(0.2681);
+    vecX.push_back(47230.5273);	  dataY.push_back(0.2254);	  modelY.push_back(0.2191);
+    vecX.push_back(47249.4219);	  dataY.push_back(0.1645);	  modelY.push_back(0.1863);
+    vecX.push_back(47268.3203);	  dataY.push_back(0.1823);	  modelY.push_back(0.1645);
+    vecX.push_back(47287.2266);	  dataY.push_back(0.1327);	  modelY.push_back(0.1500);
+    vecX.push_back(47306.1445);	  dataY.push_back(0.1759);	  modelY.push_back(0.1402);
+    vecX.push_back(47325.0664);	  dataY.push_back(0.1218);	  modelY.push_back(0.1335);
+    vecX.push_back(47343.9961);	  dataY.push_back(0.0547);	  modelY.push_back(0.1287);
+    vecX.push_back(47362.9336);	  dataY.push_back(0.0376);	  modelY.push_back(0.1254);
+    vecX.push_back(47381.8789);	  dataY.push_back(0.0775);	  modelY.push_back(0.1228);
+    vecX.push_back(47400.8320);	  dataY.push_back(0.0823);	  modelY.push_back(0.1209);
+    vecX.push_back(47419.7930);	  dataY.push_back(0.2909);	  modelY.push_back(0.1194);
+    vecX.push_back(47438.7578);	  dataY.push_back(0.2262);	  modelY.push_back(0.1181);
+    vecX.push_back(47457.7344);	  dataY.push_back(0.0936);	  modelY.push_back(0.1171);
+    vecX.push_back(47476.7188);	  dataY.push_back(0.1618);	  modelY.push_back(0.1162);
+    vecX.push_back(47495.7070);	  dataY.push_back(0.0723);	  modelY.push_back(0.1154);
+    vecX.push_back(47514.7070);	  dataY.push_back(0.1148);	  modelY.push_back(0.1147);
+    vecX.push_back(47533.7148);	  dataY.push_back(0.1758);	  modelY.push_back(0.1141);
+    vecX.push_back(47552.7266);	  dataY.push_back(0.0785);	  modelY.push_back(0.1135);
+    vecX.push_back(47571.7461);	  dataY.push_back(0.1451);	  modelY.push_back(0.1129);
+    vecX.push_back(47590.7773);	  dataY.push_back(0.0517);	  modelY.push_back(0.1124);
+    vecX.push_back(47609.8125);	  dataY.push_back(0.2045);	  modelY.push_back(0.1120);
+    vecX.push_back(47628.8555);	  dataY.push_back(0.0000);	  modelY.push_back(0.1115);
+    vecX.push_back(47647.9062);	  dataY.push_back(0.0473);	  modelY.push_back(0.1111);
+    vecX.push_back(47666.9688);	  dataY.push_back(0.1876);	  modelY.push_back(0.1107);
+    vecX.push_back(47686.0352);	  dataY.push_back(0.1830);	  modelY.push_back(0.1104);
+    vecX.push_back(47705.1094);	  dataY.push_back(0.1113);	  modelY.push_back(0.1100);
+    vecX.push_back(47724.1914);	  dataY.push_back(0.1162);	  modelY.push_back(0.1097);
+    vecX.push_back(47743.2812);	  dataY.push_back(0.1065);	  modelY.push_back(0.1093);
+    vecX.push_back(47762.3789);	  dataY.push_back(0.1699);	  modelY.push_back(0.1090);
+    vecX.push_back(47781.4844);	  dataY.push_back(0.1461);	  modelY.push_back(0.1087);
+    vecX.push_back(47800.5938);	  dataY.push_back(0.0922);	  modelY.push_back(0.1084);
+    vecX.push_back(47819.7148);	  dataY.push_back(0.0729);	  modelY.push_back(0.1081);
+    vecX.push_back(47838.8438);	  dataY.push_back(0.1270);	  modelY.push_back(0.1079);
+    vecX.push_back(47857.9805);	  dataY.push_back(0.0582);	  modelY.push_back(0.1076);
+    vecX.push_back(47877.1211);	  dataY.push_back(0.1710);	  modelY.push_back(0.1073);
+    vecX.push_back(47896.2734);	  dataY.push_back(0.1609);	  modelY.push_back(0.1071);
+    vecX.push_back(47915.4297);	  dataY.push_back(0.1067);	  modelY.push_back(0.1068);
+    vecX.push_back(47934.5977);	  dataY.push_back(0.0627);	  modelY.push_back(0.1066);
+    vecX.push_back(47953.7695);	  dataY.push_back(0.0678);	  modelY.push_back(0.1063);
+    vecX.push_back(47972.9531);	  dataY.push_back(0.0723);	  modelY.push_back(0.1061);
+    vecX.push_back(47992.1406);	  dataY.push_back(0.0769);	  modelY.push_back(0.1058);
 
-    size_t ndata = Xs.size();
-
-    double* out = new double[ndata];
-    double* xvalues = new double[ndata];
-    out = new double[ndata];
-    xvalues = new double[ndata];
-
-    peak.function1D(out, xvalues, ndata);
-
-   return;
   }
 
 };
