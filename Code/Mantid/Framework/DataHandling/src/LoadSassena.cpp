@@ -98,7 +98,7 @@ void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::st
  * Read dataset dimensionality
  * @param h5file file identifier
  * @param setName string name of dataset
- * @param buffer storing dimensionality
+ * @param dims storing dimensionality
  */
 void LoadSassena::dataSetInfo( const hid_t& h5file, const std::string setName, hsize_t* dims)
 {
@@ -115,7 +115,7 @@ void LoadSassena::dataSetInfo( const hid_t& h5file, const std::string setName, h
  * Read the dataset
  * @param h5file file identifier
  * @param setName string name of dataset
- * @param buffer storing dataset
+ * @param buf storing dataset
  */
 void LoadSassena::dataSetDouble( const hid_t& h5file, const std::string setName, double *buf )
 {
