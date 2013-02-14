@@ -2,7 +2,7 @@
 #define MANTIDSLICEVIEWER_PEAKSVIEWEROPTIONS_H
 
 #include <QDialog>
-#include <boost/shared_ptr.hpp>
+#include "MantidQtSliceViewer/PeaksPresenter.h"
 
 class QAbstractButton;
 namespace Ui
@@ -14,15 +14,12 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
-
-    class PeaksPresenter;
-
     class PeaksViewerOptionsDialog: public QDialog
     {
       Q_OBJECT
 
     public:
-      explicit PeaksViewerOptionsDialog(boost::shared_ptr<PeaksPresenter> peaksPresenter, QWidget *parent = 0);
+      explicit PeaksViewerOptionsDialog(PeaksPresenter_sptr peaksPresenter, QWidget *parent = 0);
       ~PeaksViewerOptionsDialog();
 
       virtual void closeEvent(QCloseEvent *);
@@ -38,7 +35,7 @@ namespace MantidQt
 
     private:
       Ui::PeaksViewerOptionsDialog *ui;
-      boost::shared_ptr<PeaksPresenter> m_peaksPresenter;
+      PeaksPresenter_sptr m_peaksPresenter;
 
       double m_originalOnProjectionFraction;
       double m_originalIntoProjectionFraction;

@@ -3,6 +3,8 @@
 
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakTransform.h"
+#include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtSliceViewer/PeakTransformFactory.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
@@ -15,10 +17,6 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
-    // Forward declarations.
-    class PeakOverlayViewFactory;
-    class PeakTransformFactory;
-
     /// Alias for Vector of Peak Overlay Views
     typedef std::vector< boost::shared_ptr<PeakOverlayView> > VecPeakOverlayView;
 
@@ -33,7 +31,7 @@ namespace MantidQt
     class DLLExport ConcretePeaksPresenter : public PeaksPresenter
     {
     public:
-      ConcretePeaksPresenter(boost::shared_ptr<PeakOverlayViewFactory> nonIntegratedViewFactory, boost::shared_ptr<PeakOverlayViewFactory> integratedViewFactory, boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS, boost::shared_ptr<Mantid::API::MDGeometry> mdWS, boost::shared_ptr<PeakTransformFactory> transformFactory);
+      ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory, PeakOverlayViewFactory_sptr integratedViewFactory, Mantid::API::IPeaksWorkspace_sptr peaksWS, boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory);
       virtual ~ConcretePeaksPresenter();
       virtual void update();
       virtual void updateWithSlicePoint(const double& slicePoint);
@@ -78,10 +76,10 @@ namespace MantidQt
       /// Produce the views from the PeaksWorkspace
       void produceViews();
       /// Validate inputs.
-      void validateInputs( boost::shared_ptr<PeakOverlayViewFactory> integratedViewFactory,
-           boost::shared_ptr<PeakOverlayViewFactory> nonIntegratedViewFactory);
+      void validateInputs( PeakOverlayViewFactory_sptr integratedViewFactory,
+           PeakOverlayViewFactory_sptr nonIntegratedViewFactory);
       /// Construct a the correct view factory.
-      void constructViewFactory(boost::shared_ptr<PeakOverlayViewFactory> nonIntegratedViewFactory,
+      void constructViewFactory(PeakOverlayViewFactory_sptr nonIntegratedViewFactory,
           const boost::shared_ptr<const Mantid::API::MDGeometry> mdWS);
       /// Check workspace compatibilities.
       void checkWorkspaceCompatibilities(boost::shared_ptr<Mantid::API::MDGeometry> mdWS);

@@ -2,7 +2,6 @@
 #include <QUrl>
 #include <QDesktopServices>
 #include "MantidQtSliceViewer/PeaksViewerOptionsDialog.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "ui_PeaksViewerOptionsDialog.h"
 
 namespace MantidQt

@@ -5,8 +5,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
-#include "MantidQtSliceViewer/PeakTransformFactory.h"
 #include "MantidKernel/Logger.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/regex.hpp>
