@@ -42,22 +42,34 @@ using namespace DataObjects;
 
   Logger& NexusFileIO::g_log = Logger::get("NexusFileIO");
 
-  /// Empty default constructor
-  NexusFileIO::NexusFileIO() :
-          m_filehandle(0),
-          m_nexuscompression(::NeXus::LZW),
-          m_progress(0)
+  /// Constructor that supplies a progress object
+  NexusFileIO::NexusFileIO(::NeXus::File *handle,  Progress *prog , const bool compression) :
+          m_filehandle(handle),
+          m_progress(prog),
+          m_openedfile(false)
   {
+    if (compression)
+      m_nexuscompression = ::NeXus::LZW;
+    else
+      m_nexuscompression = ::NeXus::NONE;
+
+    int count=findMantidWSEntries();
+    std::string mantidEntryName="mantid_workspace_"+boost::lexical_cast<std::string>(count+1);
+
+    // make and open the new mantid_workspace_<n> group
+    // file remains open until explict close
+    m_filehandle->makeGroup(mantidEntryName,"NXentry", true);
   }
 
   /// Constructor that supplies a progress object
-  NexusFileIO::NexusFileIO( Progress *prog ) :
+  NexusFileIO::NexusFileIO(const std::string & filename,  Progress *prog ) :
           m_filehandle(0),
           m_nexuscompression(::NeXus::LZW),
-          m_progress(prog)
+          m_progress(prog),
+          m_openedfile(true)
   {
+    this->openNexusWrite(filename);
   }
-
 
   //
   // Write out the data in a worksvn space in Nexus "Processed" format.
@@ -83,40 +95,49 @@ using namespace DataObjects;
   //   </NXprocess>
   // </NXentry>
 
+  NXaccess getNXaccessMode(const std::string& filename)
+  {
+    NXaccess mode(NXACC_CREATE5);
+
+    //
+    // If file to write exists, then open as is else see if the extension is xml, if so open as xml
+    // format otherwise as compressed hdf5
+    //
+    if(Poco::File(filename).exists())
+      mode = NXACC_RDWR;
+
+    else
+    {
+      if( filename.find(".xml") < filename.size() || filename.find(".XML") < filename.size() )
+      {
+        mode = NXACC_CREATEXML;
+      }
+    }
+    return mode;
+  }
+
   void NexusFileIO::openNexusWrite(const std::string& fileName )
   {
     // open named file and entry - file may exist
     // @throw Exception::FileError if cannot open Nexus file for writing
     //
-    NXaccess mode(NXACC_CREATE5);
-    std::string className="NXentry";
+    NXaccess mode = getNXaccessMode(fileName);
     std::string mantidEntryName;
-    m_filename=fileName;
     //
     // If file to write exists, then open as is else see if the extension is xml, if so open as xml
     // format otherwise as compressed hdf5
     //
-    if(Poco::File(m_filename).exists())
-      mode = NXACC_RDWR;
-
-    else
+    if(!Poco::File(fileName).exists())
     {
       if( fileName.find(".xml") < fileName.size() || fileName.find(".XML") < fileName.size() )
       {
-        mode = NXACC_CREATEXML;
         m_nexuscompression = ::NeXus::NONE;
       }
       mantidEntryName="mantid_workspace_1";
     }
 
     // open the file and copy the handle into the NeXus::File object
-    NXstatus status=NXopen(fileName.c_str(), mode, &fileID);
-    if(status==NX_ERROR)
-    {
-      g_log.error("Unable to open file " + fileName);
-      throw Exception::FileError("Unable to open File:" , fileName);
-    }
-    m_filehandle = new ::NeXus::File(fileID, true);
+    m_filehandle = new ::NeXus::File(fileName, mode);
 
     //
     // for existing files, search for any current mantid_workspace_<n> entries and set the
@@ -133,8 +154,7 @@ using namespace DataObjects;
     // make and open the new mantid_workspace_<n> group
     // file remains open until explict close
     //
-    m_filehandle->makeGroup(mantidEntryName,className);
-    m_filehandle->openGroup(mantidEntryName,className);
+    m_filehandle->makeGroup(mantidEntryName,"NXentry", true);
   }
 
 
@@ -142,7 +162,9 @@ using namespace DataObjects;
   void NexusFileIO::closeNexusFile()
   {
     m_filehandle->closeGroup();
-    delete m_filehandle;
+    if (m_openedfile)
+      delete m_filehandle;
+    m_filehandle = NULL;
   }
 
   //-----------------------------------------------------------------------------------------------

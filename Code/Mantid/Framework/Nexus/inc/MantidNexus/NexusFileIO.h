@@ -51,17 +51,14 @@ namespace Mantid
     class DLLExport NexusFileIO
     {
     public:
-      /// Default constructor
-      NexusFileIO();
-
-      /// Contructor with Progress suplied
-      NexusFileIO( API::Progress* prog );
+      /// Contructor
+      NexusFileIO(::NeXus::File* handle, API::Progress* prog=NULL, const bool compression=true);
+      NexusFileIO(const std::string & filename, API::Progress* prog=NULL);
 
       /// Destructor
       ~NexusFileIO() {}
 
-      /// open the nexus file for writing
-      void openNexusWrite(const std::string& fileName);
+
       /// write the header ifon for the Mantid workspace format
       int writeNexusProcessedHeader( const std::string& title) const;
       /// close the nexus file
@@ -87,19 +84,19 @@ namespace Mantid
 
       /// write bin masking information
       bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const;
-      /// Nexus file handle
-      NXhandle fileID;
 
     private:
       /// C++ API file handle
       ::NeXus::File *m_filehandle;
       /// Nexus compression method
-      int m_nexuscompression;
-      /// Nexus cpp compression method
-      ::NeXus::NXcompression m_cppcompression;
+      ::NeXus::NXcompression m_nexuscompression;
       /// Allow an externally supplied progress object to be used
       API::Progress *m_progress;
+      /// Whether this class owns the file handle pointer
+      bool m_openedfile;
 
+      /// open the nexus file for writing
+      void openNexusWrite(const std::string& fileName);
       template<class T>
       void writeEventListData( std::vector<T> events, bool writeTOF, bool writePulsetime, bool writeWeight, bool writeError) const;
       /// Write a simple value plus possible attributes
@@ -149,8 +146,6 @@ namespace Mantid
       /// search for exisiting MantidWorkpace_n entries in opened file
       int findMantidWSEntries() const;
 
-      /// nexus file name
-      std::string m_filename;
       ///static reference to the logger class
       static Kernel::Logger& g_log;
 
@@ -167,7 +162,7 @@ namespace Mantid
 
     };
 
-
+    DLLExport NXaccess getNXaccessMode(const std::string& filename);
 
   } // namespace NeXus
 } // namespace Mantid

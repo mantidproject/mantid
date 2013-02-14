@@ -250,13 +250,11 @@ namespace DataHandling
       if( file.exists() )
         file.remove();
     }
-	// Then immediately open the file
-    Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO( &prog_init );
 
-    nexusFile->openNexusWrite( m_filename );
-
-    // Equivalent C++ API handle
-    ::NeXus::File * cppFile = new ::NeXus::File(nexusFile->fileID);
+    // Then immediately open the file
+    ::NeXus::File * cppFile = new ::NeXus::File(m_filename, Mantid::NeXus::getNXaccessMode(m_filename));
+    bool compress = !( m_filename.find(".xml") < m_filename.size() || m_filename.find(".XML") < m_filename.size() );
+    Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO(cppFile, &prog_init, compress);
 
     prog_init.reportIncrement(1, "Opening file");
     if( nexusFile->writeNexusProcessedHeader( m_title ) != 0 )
@@ -267,6 +265,7 @@ namespace DataHandling
     // write instrument data, if present and writer enabled
     if (matrixWorkspace) 
     { 
+
       // Save the instrument names, ParameterMap, sample, run
       matrixWorkspace->saveExperimentInfoNexus(cppFile);
       prog_init.reportIncrement(1, "Writing sample and instrument");
@@ -304,8 +303,6 @@ namespace DataHandling
 
     }  // finish matrix workspace specifics 
 
-
-
     if (peaksWorkspace) 
     {
       // Save the instrument names, ParameterMap, sample, run
@@ -313,16 +310,12 @@ namespace DataHandling
       prog_init.reportIncrement(1, "Writing sample and instrument");
     }
 
-
     // peaks workspace specifics
     if (peaksWorkspace)
     {
       //	g_log.information("Peaks Workspace saving to Nexus would be done");
       //	int pNum = peaksWorkspace->getNumberPeaks();
       peaksWorkspace->saveNexus( cppFile );
-
-
-
     } // finish peaks workspace specifics
     else if (tableWorkspace) // Table workspace specifics 
     {
@@ -335,6 +328,7 @@ namespace DataHandling
     nexusFile->closeNexusFile();
 
     delete nexusFile;
+    delete cppFile;
 
     return;
   }
