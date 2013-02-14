@@ -67,7 +67,7 @@ typedef std::pair< CartesianCoor3D,CartesianCoor3D> cartrect;
 inline float sign(float a,float b) { return (b<0.0) ? -a : a; }
 
 /**
- Models a XML node and provides convenience functions to access its properties.
+* Models a XML node and provides convenience functions to access its properties.
 */
 class XMLElement
 {
@@ -1130,7 +1130,7 @@ public:
  * Basically this class maps the structure of the configuration file, more or less
  *
  * these constructs are to be used w/ in the code the following way:
- * \verbatim
+ * \\verbatim
  * string fs = Params::Inst()->sample.structure.file
 */
 
