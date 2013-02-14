@@ -188,8 +188,6 @@ namespace Mantid
              for( size_t loffset=0;loffset<lOffsets.size();loffset++)
                 try
                 {
-                  int ErrPos = 0;
-
                   V3D hkl1( hkl );
 
 
