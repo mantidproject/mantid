@@ -129,7 +129,7 @@ std::istream& operator>>(std::istream& is, Kernel::Matrix<T>& in)
   is >> ncols;
   if( !is ) throw std::invalid_argument("Expected number of columns when reading Matrix from stream, found something else.");
   is >> dump;
-  if( dump != ')' ) throw std::invalid_argument("Expected closing parenthesis after ncols when reading Matrix from stream, found something else: " + dump);
+  if( dump != ')' ) throw std::invalid_argument("Expected closing parenthesis after ncols when reading Matrix from stream, found something else.");
 
   // Resize the matrix
   in.setMem(nrows,ncols);
