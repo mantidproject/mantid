@@ -200,13 +200,17 @@ namespace Mantid
     }
 
 
-    //-----------------------------------------------------------------------------------------
-   /** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
-    *
-    *  @param s :: The Workspace Index to fit
-    *  @return The calculated offset value
-    */
-
+   //-----------------------------------------------------------------------------------------
+    /**
+     * Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
+     * @param mosaic
+     * @param rcrystallite
+     * @param inname
+     * @param corrOption
+     * @param pointOption
+     * @param tofParams
+     * @return
+     */
     double OptimizeExtinctionParameters::fitMosaic(double mosaic, double rcrystallite, std::string inname, std::string corrOption, std::string pointOption, std::string tofParams)
     {
       PeaksWorkspace_sptr inputW = boost::dynamic_pointer_cast<PeaksWorkspace>
