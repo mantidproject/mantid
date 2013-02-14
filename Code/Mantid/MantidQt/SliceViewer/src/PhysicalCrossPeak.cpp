@@ -6,9 +6,9 @@ namespace MantidQt
   {
     /**
     Constructor
-    @param peak origin (natural coordinates)
-    @param z-axis max (natural coordinates)
-    @param z-axis min (natural coordinates)
+    @param origin: peak origin (natural coordinates)
+    @param maxZ: z-axis max (natural coordinates)
+    @param minZ: z-axis min (natural coordinates)
     */
     PhysicalCrossPeak::PhysicalCrossPeak(const Mantid::Kernel::V3D& origin, const double& maxZ, const double& minZ):
     m_originalOrigin(origin),

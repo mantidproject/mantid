@@ -10,6 +10,14 @@ namespace MantidQt
       @param radius : peak radius (natural coordinates)
       @param backgroundRadius : peak background radius (natural coordinates)
       */
+
+    /**
+     * Constructor
+     * @param origin : peak origin (natural coordinates)
+     * @param radius : peak radius (natural coordinates)
+     * @param backgroundInnerRadius : peak background inner radius (natural coordinates)
+     * @param backgroundOuterRadius : peak background outer radius (natural coordinates)
+     */
       PhysicalSphericalPeak::PhysicalSphericalPeak(const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius, const double& backgroundOuterRadius):
       m_originalOrigin(origin),
       m_origin(origin),

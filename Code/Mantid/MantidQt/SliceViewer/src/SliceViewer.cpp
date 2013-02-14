@@ -2304,8 +2304,7 @@ boost::shared_ptr<ProxyCompositePeaksPresenter> SliceViewer::getPeaksPresenter()
 
 /**
 Zoom in upon a rectangle
-@parm lower Left: rectangle lower left
-@param upperRight, rectangle upper right
+@param boundingBox. The bounding rectangular box to zoom to.
 */
 void SliceViewer::zoomToRectangle(const PeakBoundingBox& boundingBox)
 {

@@ -204,7 +204,7 @@ void SliceViewerWindow::slicerWorkspaceChanged()
 /** Slot called when the LineViewer is setting a fixed bin width mode
  *
  * @param fixed :: True for fixed bin width
- * @param binwidth :: desired width
+ * @param binWidth :: desired width
  */
 void SliceViewerWindow::lineViewer_changedFixedBinWidth(bool fixed, double binWidth)
 {
