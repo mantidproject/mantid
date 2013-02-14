@@ -659,8 +659,9 @@ namespace Mantid
 
     /**
      * Return the path to the file found in archive
-     * @param archs :: A full file name (without path) including extension
-     * @param fName :: A full file name (without path) including extension
+     * @param archs :: A list of archives to search
+     * @param filenames :: A list of filenames (without extensions) to pass to the archive
+     * @param exts :: A list of extensions to check for in turn against each file
      * @return The full path if the file exists and can be found in one of the search locations
      *  or an empty string otherwise.
      */
@@ -684,8 +685,10 @@ namespace Mantid
     }
 
     /**
-     * Return the full path to the file given its name
-     * @param fName :: A vector of full file name (without path) and a vector of extensions
+     * Return the full path to the file given its name, checking local directories first.
+     * @param archs :: A list of archives to search
+     * @param filenames :: A list of filenames (without extensions) to pass to the archive
+     * @param exts :: A list of extensions to check for in turn against each file
      * @return The full path if the file exists and can be found in one of the search locations
      *  or an empty string otherwise.
      */

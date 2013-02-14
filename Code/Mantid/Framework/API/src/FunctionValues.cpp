@@ -11,8 +11,8 @@ namespace API
 {
 
   /**
-   * Constructs a domain base of size n.
-   * @param n :: Size of the domain, i.e. number of values a function should calculate.
+   * Constructs a set of output values based on the given domain.
+   * @param domain :: A reference to the domain over which the function is calculated
    */
   FunctionValues::FunctionValues(const FunctionDomain& domain)
   {

@@ -148,6 +148,7 @@ namespace API
   /**
    * Determine what kind of input data we have and load it
    * @param inputData :: File path or workspace name
+   * @param loadQuiet :: If true then the output is not stored in the ADS
    */
   Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData,
       const bool loadQuiet)
