@@ -186,7 +186,7 @@ protected:
   Common creation implementation whereby delegation to successor is attempted if appropriate. 
   @param workspace : workspace to cast and create from.
   @param progressUpdate : object used to pass progress information back up the stack.
-  @param output : product vtkDataSet, set to NULL if FALSE is returned. Otherwise contains visualisation data if TRUE is returned.
+  @param bExactMatch : Check for an exact match if true.
   @return TRUE if delegation to successors has occured. Otherwise returns false.
   */
   template<typename IMDWorkspaceType, size_t ExpectedNDimensions>
