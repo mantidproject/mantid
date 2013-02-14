@@ -77,21 +77,20 @@ ScaleDraw::ScaleDraw(Plot *plot, const QStringList& labels, const QString& forma
 {}
 
 ScaleDraw::ScaleDraw(Plot *plot, ScaleDraw* sd):
-	d_plot(plot)
+	d_plot(plot),
+	d_type(sd->d_type),
+	d_numeric_format(sd->d_numeric_format),
+	d_fmt(sd->d_fmt),
+  d_prec(sd->d_prec),
+	d_formula(sd->d_formula),
+	d_majTicks(sd->d_majTicks),
+	d_minTicks(sd->d_minTicks),
+	d_selected(sd->d_selected),
+	d_name_format(sd->d_name_format),
+	d_date_time_origin(sd->d_date_time_origin),
+	d_format_info(sd->d_format_info),
+	d_text_labels(sd->d_text_labels)
 {
-	d_type = sd->d_type;
-	d_numeric_format = sd->d_numeric_format;
-	d_fmt = sd->d_fmt;
-    d_prec = sd->d_prec;
-	d_formula = sd->d_formula;
-	d_majTicks = sd->d_majTicks;
-	d_minTicks = sd->d_minTicks;
-	d_selected = sd->d_selected;
-	d_name_format = sd->d_name_format;
-	d_date_time_origin = sd->d_date_time_origin;
-	d_format_info = sd->d_format_info;
-	d_text_labels = sd->d_text_labels;
-
 	setLabelAlignment(sd->labelAlignment());
 	setLabelRotation(sd->labelRotation());
 }
@@ -337,6 +336,7 @@ void ScaleDraw::setNumericFormat(NumericFormat format)
 		break;
 		case Decimal:
 			d_fmt = 'f';
+    break;
 		case Superscripts:
 			d_fmt = 's';
 		break;
