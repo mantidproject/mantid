@@ -1681,7 +1681,7 @@ namespace CurveFitting
 
     // 3. Execute and parse the result
     bool isexecute = fitalg->execute();
-    bool fitsuccess;
+    bool fitsuccess = false;
     chi2 = DBL_MAX;
 
     if (isexecute)
@@ -2250,7 +2250,7 @@ namespace CurveFitting
 
     // 3. Execute and parse the result
     bool isexecute = fitalg->execute();
-    bool fitsuccess;
+    bool fitsuccess = false;
     chi2 = DBL_MAX;
 
     // 4. Output
