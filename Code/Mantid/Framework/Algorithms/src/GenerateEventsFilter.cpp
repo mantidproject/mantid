@@ -204,7 +204,7 @@ namespace Algorithms
 
     // 2. Check if input are in double or string
     bool instringformat = true;
-    if (s_inpt0.find(':') >= s_inpt0.size())
+    if (s_inpt0.find(':') == std::string::npos)
     {
       instringformat = false;
     }
