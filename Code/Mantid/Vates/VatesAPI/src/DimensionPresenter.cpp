@@ -213,7 +213,7 @@ namespace Mantid
 
     /**
     Setter for the bin display mode.
-    @mode : Bin display mode.
+    @param mode : Bin display mode.
     */
     void DimensionPresenter::setViewMode(BinDisplay mode)
     {

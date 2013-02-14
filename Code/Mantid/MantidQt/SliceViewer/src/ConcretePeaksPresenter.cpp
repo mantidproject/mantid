@@ -61,7 +61,6 @@ namespace MantidQt
      * Check that the inputs provided are valid.
      * @param integratedViewFactory
      * @param nonIntegratedViewFactory
-     * @param peaksWS
      */
     void ConcretePeaksPresenter::validateInputs(PeakOverlayViewFactory_sptr integratedViewFactory, PeakOverlayViewFactory_sptr nonIntegratedViewFactory)
     {
@@ -83,8 +82,8 @@ namespace MantidQt
      * The view factory needs to be selected. This is done by looking at log value carried on the inputpeaks workspace.
      * If the work-space is integrated, then the integratedViewFactory is used.
      *
-     * @param nonIntegratedViewFactory
-     * @param mdWS
+     * @param nonIntegratedViewFactory: Non integrated view factory
+     * @param mdWS : Multi-dimensional workspace
      */
     void ConcretePeaksPresenter::constructViewFactory(
         PeakOverlayViewFactory_sptr nonIntegratedViewFactory,  boost::shared_ptr<const MDGeometry> mdWS)
@@ -162,15 +161,15 @@ namespace MantidQt
     /**
      Constructor.
 
-     1) First check that the arguments provided are valid.
-     2) Then iterate over the MODEL and use it to construct VIEWs via the factory.
-     3) A collection of views is stored internally
+     1 First check that the arguments provided are valid.
+     2 Then iterate over the MODEL and use it to construct VIEWs via the factory.
+     3 A collection of views is stored internally
 
      @param nonIntegratedViewFactory : View Factory (THE VIEW via factory)
      @param integratedViewFactory : View Factory (THE VIEW via factory)
      @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
      @param mdWS : IMDWorkspace also being visualised (THE MODEL)
-     @param peaksTransform : Peak Transformation Factory. This is about interpreting the MODEL.
+     @param transformFactory : Peak Transformation Factory. This is about interpreting the MODEL.
      */
     ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory,
         PeakOverlayViewFactory_sptr integratedViewFactory, IPeaksWorkspace_sptr peaksWS,

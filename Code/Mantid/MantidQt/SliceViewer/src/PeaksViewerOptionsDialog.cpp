@@ -23,16 +23,31 @@ namespace MantidQt
       return m;
     }
 
+    /**
+     * Calculate the position of the slider.
+     * @param fraction: fractional occupancy
+     * @return position
+     */
     int calculatePosition(const double fraction)
     {
       return static_cast<int>( (1/toFractionalOccupancy()) * fraction );
     }
 
+    /**
+     * Calculate the fractional occupancy from the slider position.
+     * @param sliderPosition : position of the slider
+     * @return fractional occupancy
+     */
     double calculateFraction(const double sliderPosition)
     {
       return toFractionalOccupancy() * sliderPosition;
     }
 
+    /**
+     * Take a double and produce a formatted string with single decimal precision.
+     * @param fraction : Fractional occupancy.
+     * @return Formatted string.
+     */
     QString formattedPercentageValue(double fraction)
     {
       QString number;
@@ -41,6 +56,11 @@ namespace MantidQt
     }
 
 
+    /**
+     * Constructor
+     * @param peaksPresenter : Peaks presenter to use
+     * @param parent : Parent widget
+     */
     PeaksViewerOptionsDialog::PeaksViewerOptionsDialog(PeaksPresenter_sptr peaksPresenter, QWidget *parent) :
         QDialog(parent), ui(new Ui::PeaksViewerOptionsDialog), m_peaksPresenter(peaksPresenter)
     {
@@ -62,11 +82,16 @@ namespace MantidQt
     connect(ui->btnHelp, SIGNAL(clicked()), this, SLOT(onHelp()));
   }
 
+    /// Destructor
   PeaksViewerOptionsDialog::~PeaksViewerOptionsDialog()
   {
     delete ui;
   }
 
+  /**
+   * Handler for moving the slider associated with ON the current projection.
+   * @param value: New slider position
+   */
   void PeaksViewerOptionsDialog::onSliderOnProjectionMoved(int value)
   {
     auto newFractionOccupancy = calculateFraction(value);
@@ -74,6 +99,10 @@ namespace MantidQt
     ui->lblPercentageOnProjection->setText( formattedPercentageValue(newFractionOccupancy) );
   }
 
+  /**
+   * Handler for moving the slider associated with INTO the current projection.
+   * @param value: New slider position
+   */
   void PeaksViewerOptionsDialog::onSliderIntoProjectionMoved(int value)
   {
     auto newFractionOccupancy = calculateFraction(value);
@@ -81,6 +110,9 @@ namespace MantidQt
     ui->lblPercentageIntoProjection->setText( formattedPercentageValue(newFractionOccupancy) );
   }
 
+  /**
+   * Handler for the reset event.
+   */
   void PeaksViewerOptionsDialog::onReset()
   {
     m_peaksPresenter->setPeakSizeOnProjection( m_originalOnProjectionFraction );
@@ -91,6 +123,10 @@ namespace MantidQt
     ui->lblPercentageIntoProjection->setText( formattedPercentageValue(m_originalIntoProjectionFraction) );
   }
 
+  /**
+   * Handler for the on-complete click event of the button group.
+   * @param button : Button clicked.
+   */
   void PeaksViewerOptionsDialog::onCompleteClicked(QAbstractButton* button)
   {
     QDialogButtonBox::ButtonRole role = ui->btnGroupControls->buttonRole(button);
@@ -100,18 +136,28 @@ namespace MantidQt
     }
   }
 
+  /**
+   * Handler for the on-close event.
+   * @param event : Close event
+   */
   void PeaksViewerOptionsDialog::closeEvent(QCloseEvent *event)
   {
     onReset();
     QDialog::closeEvent(event);
   }
 
+  /**
+   * Handler for the reject event.
+   */
   void PeaksViewerOptionsDialog::reject()
   {
     onReset();
     QDialog::reject();
   }
 
+  /**
+   * Handler for the help-clicked event.
+   */
   void PeaksViewerOptionsDialog::onHelp()
   {
     QString helpPage = "PeaksViewer#Preference_Options";

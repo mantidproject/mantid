@@ -27,7 +27,7 @@ namespace MantidQt
       /**
       Overriden Factory Method.
       @param xPlotLabel : X-axis plot label
-      @param yPlotLable : Y-axis plot label
+      @param yPlotLabel : Y-axis plot label
       */
       virtual PeakTransform_sptr createTransform(const std::string& xPlotLabel, const std::string& yPlotLabel) const
       {
