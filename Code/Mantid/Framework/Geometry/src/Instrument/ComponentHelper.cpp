@@ -62,7 +62,7 @@ namespace ComponentHelper
      * as the move doesn't actually change the object
      * @param comp A reference to the component to move
      * @param pmap A reference to the ParameterMap that will hold the new position
-     * @param pos The new position
+     * @param rot The rotation quaternion
      * @param rotType Defines how the given rotation should be interpreted @see TransformType enumeration
      */
     void rotateComponent(const IComponent & comp, ParameterMap & pmap,

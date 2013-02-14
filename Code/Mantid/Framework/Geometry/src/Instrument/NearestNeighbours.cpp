@@ -48,10 +48,7 @@ namespace Mantid
     /**
      * Returns a map of the spectrum numbers to the distances for the nearest neighbours.
      * @param spectrum :: Spectrum ID of the central pixel
-     * @param force :: flag to indicate that the nearest neighbours map should be rebult by force. Otherwise will only call build when different.
-     * @param noNeighbours :: Number of neighbours to search for
      * @return map of Detector ID's to distance
-     * @throw NotFoundError if component is not recognised as a detector
      */
     std::map<specid_t, V3D> NearestNeighbours::neighbours(const specid_t spectrum) const
     {

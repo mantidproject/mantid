@@ -109,8 +109,9 @@ namespace Geometry
    //----------------------------------------------------------------------------------------------
   /** Initialize the XML parser based on an IDF xml and cached vtp file objects.
    *
-   * @param filename :: IDF .xml path (full). This is needed mostly to find the instrument geometry cache.
-   * @param instName :: name of the instrument
+   * @param xmlFile :: The xml file, here wrapped in a IDFObject
+   * @param expectedCacheFile :: Expected vtp cache file
+   * @param instName :: Instrument name
    * @param xmlText :: XML contents of IDF
    */
   void InstrumentDefinitionParser::initialize(const IDFObject_const_sptr xmlFile, const IDFObject_const_sptr expectedCacheFile, const std::string & instName, const std::string & xmlText)
@@ -759,8 +760,8 @@ namespace Geometry
   /** Get name of a location element. It will return the value of the attribute 'name', or the
    *  parent's name attribute, or the parent's type, if all else fails.
    *
-   *  @param pElem ::  Poco::XML element that points to a <location> element, which optionally may be detached (meaning it is not required to be part of the DOM tree of the IDF)
-   *  @param pCompElem :: The Poco::XML <component> element that contain the location element, which may optionally be detached from the DOM tree also 
+   *  @param pElem ::  Poco::XML element that points to a \<location\> element, which optionally may be detached (meaning it is not required to be part of the DOM tree of the IDF)
+   *  @param pCompElem :: The Poco::XML \<component\> element that contain the location element, which may optionally be detached from the DOM tree also 
    *  @return name of location element
    */
   std::string InstrumentDefinitionParser::getNameOfLocationElement(const Poco::XML::Element* pElem, const Poco::XML::Element* pCompElem)
