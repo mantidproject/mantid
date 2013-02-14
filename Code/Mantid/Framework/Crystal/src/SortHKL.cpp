@@ -222,6 +222,11 @@ namespace Crystal
           sig2.erase(sig2.begin() + (*it));
       }
   }
+
+  /** Rounds the V3D to integer values
+  * @param hkl the input vector
+  * @returns The output V3D
+  */
   V3D SortHKL::round(V3D hkl)
   {
           V3D hkl1;
@@ -230,6 +235,11 @@ namespace Crystal
 	  hkl1.setZ(round(hkl.Z()));
 	  return hkl1;
   }
+
+  /** Rounds a double using 0.5 as the cut off for rounding down
+  * @param d the input value
+  * @returns The output value
+  */
   double SortHKL::round(double d)
   {
 	  return floor(d + 0.5);
