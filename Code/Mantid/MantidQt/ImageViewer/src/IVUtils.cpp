@@ -62,7 +62,7 @@ void IVUtils::Format( int            width,
  *  @param name      String name that is first pushed on the list
  *  @param width     The total number of characters to be used when formatting 
  *                   the value
- *  @param precison  The number of significant figures to use 
+ *  @param precision The number of significant figures to use
  *  @param value     The double precsion number to be formatted and pushed on
  *                   the list
  *  @param list      The list of strings to which the name,value pair is added.

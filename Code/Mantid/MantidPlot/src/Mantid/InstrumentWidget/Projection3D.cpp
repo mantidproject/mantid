@@ -441,6 +441,7 @@ void Projection3D::zoom(int x, int y)
   * Zoom the view in the surface using the mouse wheel.
   * @param x :: The x screen coord of the mouse pointer.
   * @param y :: The y screen coord of the mouse pointer.
+  * @param d :: zoom factor to shift y screen coord.
   */
 void Projection3D::wheelZoom(int x, int y, int d)
 {

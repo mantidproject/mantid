@@ -2839,7 +2839,7 @@ y-values of the second spectrum (errs == false). Consecutive columns have
 y-values and errors (if errs is true) of the following spectra. If visible == true
 the table is made visible in Qtiplot.
 
-The name of a Y column is "Y"+QString::number(i), where i is the row in the MantidMatrix,
+The name of a Y column is "Y"+QString\:\:number(i), where i is the row in the MantidMatrix,
 not the spectrum index in the workspace.
 
 */

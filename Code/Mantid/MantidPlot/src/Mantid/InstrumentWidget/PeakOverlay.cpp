@@ -167,7 +167,6 @@ void PeakOverlay::addMarker(PeakMarker2D* m)
  * Create the markers which graphically represent the peaks on the surface.
  * The coordinates of the Shape2DCollection must be set (calling setWindow())
  * prior calling this method.
- * @param surface :: The surface where the markers will be drawn.
  * @param style :: A style of drawing the markers.
  */
 void PeakOverlay::createMarkers(const PeakMarker2D::Style& style)

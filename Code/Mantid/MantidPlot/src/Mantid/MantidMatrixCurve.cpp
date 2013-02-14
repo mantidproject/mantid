@@ -222,6 +222,7 @@ void MantidMatrixCurve::itemChanged()
 
 
 /** Create the name for a curve from the following input:
+ * @param ws :: Pointer to workspace
  *  @param wsName :: The workspace name
  *  @param index ::  The spectra (bin) index
  */

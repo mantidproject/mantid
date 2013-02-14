@@ -13,6 +13,8 @@ UnwrappedSphere::UnwrappedSphere(const InstrumentActor* rootActor, const Mantid:
  *
  * @param u :: set to U
  * @param v :: set to V
+ * @param uscale :: scaling for u direction
+ * @param vscale :: scaling for v direction
  * @param pos :: position in 3D
  */
 void UnwrappedSphere::project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const
