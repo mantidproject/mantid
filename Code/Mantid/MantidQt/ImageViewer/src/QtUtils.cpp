@@ -34,7 +34,7 @@ void QtUtils::SetTableEntry(       int           row,
  * @param row       The row number where the string should appear.
  * @param col       The column number where the string should appear.
  * @param width     The number of spaces to use when formatting the value.
- * @param precison  The number of significant figures to use when formatting
+ * @param precision  The number of significant figures to use when formatting
  *                  the value.
  * @param value     The number to be formatted and placed in the table.
  * @param table     Pointer to the table
@@ -71,7 +71,7 @@ void  QtUtils::SetText( const std::string & string,
  * QLineEdit widget. 
  *
  * @param width       The number of spaces to use when formatting the value.
- * @param precison    The number of significant figures to use when formatting
+ * @param precision    The number of significant figures to use when formatting
  *                    the value.
  * @param value       The number to be formatted and placed in the table.
  * @param q_line_edit Pointer to the QLineEdit widget.

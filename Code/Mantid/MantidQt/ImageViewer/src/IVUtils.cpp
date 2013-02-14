@@ -35,7 +35,7 @@ bool IVUtils::StringToDouble( std::string  text,
  *
  *  @param width     The total number of characters to be used in the 
  *                   formatted string
- *  @param precison  The number of significant figures to use 
+ *  @param precision  The number of significant figures to use 
  *  @param value     The double precsion number to be formatted
  *  @param str       String that will be set to the formatted number
  */
