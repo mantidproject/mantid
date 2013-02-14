@@ -417,7 +417,6 @@ size_t CompositeFunction::addFunction(IFunction_sptr f)
 
 /** Remove a function
  * @param i :: The index of the function to remove
- * @param del :: The deletion flag. If true the function will be deleted otherwise - simply detached
  */
 void CompositeFunction::removeFunction(size_t i)
 {

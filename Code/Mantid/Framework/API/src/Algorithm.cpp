@@ -328,7 +328,6 @@ namespace Mantid
     /** Go through the workspace properties of this algorithm
      * and lock the workspaces for reading or writing.
      *
-     * @param props :: vector of Property * of this algorithm
      */
     void Algorithm::lockWorkspaces()
     {
