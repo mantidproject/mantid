@@ -257,7 +257,7 @@ namespace Mantid
     /**
      * Calculates the point in Q-E space where the foreground model will be evaluated.
      * @param observation :: The current observation defining the point experimental setup
-     * @param eventPoint :: The point in QE space that this refers to
+     * @param qOmega :: The point in QE space that this refers to
      */
     void TobyFitResolutionModel::calculatePerturbedQE(const CachedExperimentInfo & observation,const QOmegaPoint & qOmega) const
     {

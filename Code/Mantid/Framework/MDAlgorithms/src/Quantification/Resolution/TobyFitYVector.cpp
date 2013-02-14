@@ -31,9 +31,7 @@ namespace Mantid
     }
 
     /**
-     *  Construct a Y vector for the current set up
-     * @param tfResModel :: A reference to the current TobyFit model object to check
-     * which parameters are active in this run
+     *  Construct a Y vector for the current set up.
      */
     TobyFitYVector::TobyFitYVector() 
       : m_yvector(length(), 0.0),
