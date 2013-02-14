@@ -138,7 +138,7 @@ namespace Mantid
           Poco::Path path(*it, fName);
           Poco::Path pathPattern(path);
           std::set < std::string > files;
-          Kernel::Glob::glob(pathPattern, files, getCaseSensitive());
+          Kernel::Glob::glob(pathPattern, files, m_globOption);
           if (!files.empty())
           {
             return *files.begin();
