@@ -5,25 +5,85 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include <fstream>
-/**
+
+namespace Mantid
+{
+  namespace DataHandling
+  {
+    /**  file types currently supported by ASCII loader are:
+     *1) an ASCII Tobyfit par file
+     *     Syntax:
+     *     >> par = get_ascii_file(filename,['par'])
+     *
+     *     filename            name of par file
+     *
+     *     par(5,ndet)         contents of array
+     *
+     *         1st column      sample-detector distance
+     *         2nd  &quot;          scattering angle (deg)
+     *         3rd  &quot;          azimuthal angle (deg)
+     *                     (west bank = 0 deg, north bank = -90 deg etc.)
+     *                     (Note the reversed sign convention cf .phx files)
+     *         4th  &quot;          width (m)
+     *         5th  &quot;          height (m)
+     *-----------------------------------------------------------------------
+     *2) load an ASCII phx file
+     *
+     *
+     *     phx(7,ndet)         contents of array
+     *
+     *     Recall that only the 3,4,5,6 columns in the file (rows in the
+     *     output of this routine) contain useful information
+     *         3rd column      scattering angle (deg)
+     *         4th  &quot;          azimuthal angle (deg)
+     *                     (west bank = 0 deg, north bank = 90 deg etc.)
+     *         5th  &quot;          angular width (deg)
+     *         6th  &quot;          angular height (deg)
+     *-----------------------------------------------------------------------
+     */
+    enum fileTypes
+    {
+      PAR_type, //< ASCII PAR file
+      PHX_type, //< ASCII phx file
+      SPE_type, //< spe file, this loader would not work with spe file, left for compartibility with old algorithms.
+      BIN_file, //< binary file is not an ASCII file, so ascii loader would not work on it
+      NumFileTypes
+    };
+
+    /**
+     *   Description of the ASCII data header, common for all ASCII PAR and PHX files
+     */
+    struct FileTypeDescriptor{
+      fileTypes Type;
+      std::streampos data_start_position; //< the position in the file where the data structure starts
+      size_t 	  nData_records,            //< number of data records -- actually nDetectors
+      nData_blocks;             //< nEnergy bins for SPE file, 5 or 6 for PAR file and 7 for PHX file
+      char      line_end ;                //< the character which ends line in current ASCII file 0x0A (LF)
+      //Unix, 0x0D (CR) Mac and 0x0D 0x0A (CR LF) Win, but the last is interpreted as 0x0A here 
+      FileTypeDescriptor():Type(BIN_file),data_start_position(0),nData_records(0),nData_blocks(0),line_end(0x0A){}
+    };
+
+    /**
     An algorithm to calculate the angular coordinates of the workspace's detectors, as they can be viewed from a sample (par or phx data)
 
     Properties:
     <UL>
-    <LI> Workspace - The name of the input Workspace2D on which to perform the algorithm. 
+    <LI> Workspace - The name of the input Workspace2D on which to perform the algorithm.
          Detectors or detectors groups have to be loaded into this workspace </LI>
     <LI> OutputTable workspace name - if present, identify the name of the output table workspace with provided detectors parameters </LI>
-    <LI> Par or phx file name - if present, used to define the detectors parameters from the file instead of the parameters 
+    <LI> Par or phx file name - if present, used to define the detectors parameters from the file instead of the parameters
          calculated from the instrument description</LI>
     </UL>
 
     Output Properties:
-    <UL>Optional: OutputTableWorkspace - the workspace which contains five columns with the following values:</UL>
-    <UL><LI> azimuthal             - A columnt  containing the detectors azimutal angles</LI> </UL>
-    <UL><LI> polar                 - A column  containing the detectors polar angles</LI>    </UL>
-    <UL><LI> secondary_flightpath  - A column containing the distance from detectors to the sample center</LI></UL>
-    <UL><LI> azimuthal_width       - A column  containing the detectors azimuthal angular width</LI></UL>
-    <UL><LI> polar_width           - A column  containing the detectors polar angular width</LI></UL>
+    Optional: OutputTableWorkspace - the workspace which contains five columns with the following values:
+    <UL>
+    <LI> azimuthal             - A columnt  containing the detectors azimutal angles</LI>
+    <LI> polar                 - A column  containing the detectors polar angles</LI>
+    <LI> secondary_flightpath  - A column containing the distance from detectors to the sample center</LI>
+    <LI> azimuthal_width       - A column  containing the detectors azimuthal angular width</LI>
+    <LI> polar_width           - A column  containing the detectors polar angular width</LI>
+    </UL>
 
     When OutputTable workspace name is empty, the tabled workspace is not defined. To get access to the resulting arrays,
     the algorithm user has to deploy accessors (getAzimuthal(), getPolar() etc.), defined below, which allows avoiding the
@@ -51,142 +111,84 @@
 
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+     */
+    class DLLExport FindDetectorsPar : public API::Algorithm
+    {
+    public:
+      FindDetectorsPar();
+      virtual ~FindDetectorsPar();
 
-namespace Mantid
-{
-namespace DataHandling
-{
-//
-/*!  file types currently supported by ASCII loader are:
-*1) an ASCII Tobyfit par file
-*     Syntax:
-*     >> par = get_ascii_file(filename,['par'])
-*
-*     filename            name of par file
-*
-*     par(5,ndet)         contents of array
-*
-*         1st column      sample-detector distance
-*         2nd  &quot;          scattering angle (deg)
-*         3rd  &quot;          azimuthal angle (deg)
-*                     (west bank = 0 deg, north bank = -90 deg etc.)
-*                     (Note the reversed sign convention cf .phx files)
-*         4th  &quot;          width (m)
-*         5th  &quot;          height (m)
-*-----------------------------------------------------------------------
-*2) load an ASCII phx file
-*
-*
-*     phx(7,ndet)         contents of array
-*
-*     Recall that only the 3,4,5,6 columns in the file (rows in the
-*     output of this routine) contain useful information
-*         3rd column      scattering angle (deg)
-*         4th  &quot;          azimuthal angle (deg)
-*                     (west bank = 0 deg, north bank = 90 deg etc.)
-*         5th  &quot;          angular width (deg)
-*         6th  &quot;          angular height (deg)
-*-----------------------------------------------------------------------
-*/
-enum fileTypes{
-  PAR_type, //< ASCII PAR file
-  PHX_type, //< ASCII phx file
-  SPE_type, //< spe file, this loader would not work with spe file, left for compartibility with old algorithms. 
-    BIN_file, //< binary file is not an ASCII file, so ascii loader would not work on it
-  NumFileTypes
-};
-/*!
-*   Description of the ASCII data header, common for all ASCII PAR and PHX files
-*/
-struct FileTypeDescriptor{
-  fileTypes Type;
-  std::streampos data_start_position; //< the position in the file where the data structure starts
-  size_t 	  nData_records,            //< number of data records -- actually nDetectors
-            nData_blocks;             //< nEnergy bins for SPE file, 5 or 6 for PAR file and 7 for PHX file
-  char      line_end ;                //< the character which ends line in current ASCII file 0x0A (LF)
-      //Unix, 0x0D (CR) Mac and 0x0D 0x0A (CR LF) Win, but the last is interpreted as 0x0A here 
-    FileTypeDescriptor():Type(BIN_file),data_start_position(0),nData_records(0),nData_blocks(0),line_end(0x0A){}
-};
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "FindDetectorsPar";};
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1;};
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "DataHandling\\Instrument";}
+      /// the accessors, used to return algorithm results when called as Child Algorithm, without setting the properties;
+      std::vector<double>const & getAzimuthal()const{return azimuthal;}
+      std::vector<double>const & getPolar()const{return polar;}
+      std::vector<double>const & getAzimWidth()const{return azimuthal_width;}
+      std::vector<double>const & getPolarWidth()const{return polar_width;}
+      std::vector<double>const & getFlightPath()const{return secondary_flightpath;}
+      std::vector<size_t>const & getDetID()const{return det_ID;}
+      /// number of real detectors, calculated by algorithm
+      size_t getNDetectors()const{return nDetectors;}
+    private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
+      // Implement abstract Algorithm methods
+      void init();
+      void exec();
+      /**  the variable defines if algorithm needs to calculate linear ranges for the detectors (dX,dY)
+       *    instead of azimuthal_width and polar_width */
+      bool return_linear_ranges;
+      // number of real (not monitors)detectors, processed by algorithm;
+      size_t nDetectors;
+      std::vector<double> azimuthal;
+      std::vector<double> polar;
+      std::vector<double> azimuthal_width;
+      std::vector<double> polar_width;
+      std::vector<double> secondary_flightpath;
+      std::vector<double> width;
+      std::vector<double> height;
+      std::vector<size_t> det_ID;
+      /// logger -> to provide logging, for MD workspaces
+      static Kernel::Logger& g_log;
 
-// Algorighm body itself
-class DLLExport FindDetectorsPar : public API::Algorithm
-{
-public:
-  FindDetectorsPar();
-  virtual ~FindDetectorsPar();
+      /// calculates par values for a detectors ring;
+      void calc_cylDetPar(const Geometry::IDetector_const_sptr spDet,
+          const Geometry::IObjComponent_const_sptr sample,
+          const Kernel::V3D &groupCentre,
+          double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
+      /// calculates par values for a detectors block or a detector;
+      void calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
+          const Geometry::IDetector_const_sptr spDet,
+          const Geometry::IObjComponent_const_sptr sample,
+          const Kernel::V3D &groupCentre,
+          double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
 
-  /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FindDetectorsPar";};
-  /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;};
-  /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Instrument";}
-  /// the accessors, used to return algorithm results when called as Child Algorithm, without setting the properties;
-  std::vector<double>const & getAzimuthal()const{return azimuthal;}
-  std::vector<double>const & getPolar()const{return polar;}
-  std::vector<double>const & getAzimWidth()const{return azimuthal_width;}
-  std::vector<double>const & getPolarWidth()const{return polar_width;}
-  std::vector<double>const & getFlightPath()const{return secondary_flightpath;}
-  std::vector<size_t>const & getDetID()const{return det_ID;}
-  /// number of real detectors, calculated by algorithm
-  size_t getNDetectors()const{return nDetectors;}
-private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
-  // Implement abstract Algorithm methods
-  void init();
-  void exec();
-  /**  the variable defines if algorithm needs to calculate linear ranges for the detectors (dX,dY)  
-  *    instead of azimuthal_width and polar_width */
-  bool return_linear_ranges;
-  // number of real (not monitors)detectors, processed by algorithm;
-  size_t nDetectors;
-  std::vector<double> azimuthal;
-  std::vector<double> polar;
-  std::vector<double> azimuthal_width;
-  std::vector<double> polar_width;
-  std::vector<double> secondary_flightpath;
-  std::vector<double> width;
-  std::vector<double> height;
-  std::vector<size_t> det_ID;
-  /// logger -> to provide logging, for MD workspaces
-  static Kernel::Logger& g_log;
-
-   /// calculates par values for a detectors ring;
-  void calc_cylDetPar(const Geometry::IDetector_const_sptr spDet,
-                      const Geometry::IObjComponent_const_sptr sample,
-                      const Kernel::V3D &groupCentre,
-                      double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
-  /// calculates par values for a detectors block or a detector;
-  void calc_rectDetPar(const API::MatrixWorkspace_sptr inputWS,
-                       const Geometry::IDetector_const_sptr spDet,
-                       const Geometry::IObjComponent_const_sptr sample,
-                       const Kernel::V3D &groupCentre,
-                       double &azim, double &polar, double &azim_width, double &polar_width,double &dist);
-
-  /// if ASCII file is selected as the datasource, this structure describes the type of this file. 
-  FileTypeDescriptor current_ASCII_file;
-  /// internal function which sets the output table according to the algorithms properties
-  void set_output_table();
-  /// functions used to populate data from the phx or par file
-  void   populate_values_from_file(const API::MatrixWorkspace_sptr & inputWS);
-  /// load data from par or phx file;
-  size_t loadParFile(const std::string &fileName);
-protected: // for testing purposes
-/**!  function calculates number of colums in an ASCII file, assuming that colums are separated by spaces */
-int count_changes(const char *const Buf,size_t buf_size);
-/**! The function reads line from input stream and puts it into buffer. 
-*   It behaves like std::ifstream getline but the getline reads additional symbol from a row in a Unix-formatted file under windows;*/
-size_t get_my_line(std::ifstream &in, char *buf, size_t buf_size, const char DELIM);
-/// load file header and identify which file (PHX,PAR or SPE) it belongs to. It also identifies the position of the begining of the data
-FileTypeDescriptor get_ASCII_header(std::string const &fileName, std::ifstream &data_stream);
-/// load PAR or PHX file
-void load_plain(std::ifstream &stream,std::vector<double> &Data,FileTypeDescriptor const &FILE_TYPE);
-};
+      /// if ASCII file is selected as the datasource, this structure describes the type of this file.
+      FileTypeDescriptor current_ASCII_file;
+      /// internal function which sets the output table according to the algorithms properties
+      void set_output_table();
+      /// functions used to populate data from the phx or par file
+      void   populate_values_from_file(const API::MatrixWorkspace_sptr & inputWS);
+      /// load data from par or phx file;
+      size_t loadParFile(const std::string &fileName);
+    protected: // for testing purposes
+      /**!  function calculates number of colums in an ASCII file, assuming that colums are separated by spaces */
+      int count_changes(const char *const Buf,size_t buf_size);
+      /**! The function reads line from input stream and puts it into buffer.
+       *   It behaves like std::ifstream getline but the getline reads additional symbol from a row in a Unix-formatted file under windows;*/
+      size_t get_my_line(std::ifstream &in, char *buf, size_t buf_size, const char DELIM);
+      /// load file header and identify which file (PHX,PAR or SPE) it belongs to. It also identifies the position of the begining of the data
+      FileTypeDescriptor get_ASCII_header(std::string const &fileName, std::ifstream &data_stream);
+      /// load PAR or PHX file
+      void load_plain(std::ifstream &stream,std::vector<double> &Data,FileTypeDescriptor const &FILE_TYPE);
+    };
 
 
-} //end namespace DataHandling
+  } //end namespace DataHandling
 } //end namespace Mandid
 
 
