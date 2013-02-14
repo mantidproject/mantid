@@ -44,7 +44,7 @@ namespace Crystal
     /// Rounds a double using 0.5 as the cut off for rounding down
     double round(double d);
     ///Rounds the V3D to integer values
-    Kernel::V3D round(Kernel::V3D d);
+    Kernel::V3D round(Kernel::V3D hkl);
   };
 
 } // namespace Crystal
