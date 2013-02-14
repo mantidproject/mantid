@@ -577,13 +577,17 @@ namespace Algorithms
    * SINGLE log values >= min and < max. Creates SplittingInterval's where
    * times match the log values, and going to index==0.
    *
+   * @param mlog :: Log.
+   * @param filterIncrease :: As log value increase, and within (min, max), include this range in the filter.
+   * @param filterDecrease :: As log value increase, and within (min, max), include this range in the filter.
+   * @param startTime :: Start time.
+   * @param stopTime :: Stop time.
+   * @param wsindex :: Workspace index.
    * @param split :: Splitter that will be filled.
-   * @param min :: min value
-   * @param max :: max value
-   * @param TimeTolerance :: offset added to times in seconds.
+   * @param min :: Min value.
+   * @param max :: Max value.
+   * @param TimeTolerance :: Offset added to times in seconds.
    * @param centre :: Whether the log value time is considered centred or at the beginning.
-   * @filterIncrease: as log value increase, and within (min, max), include this range in the filter
-   * @filterDecrease: as log value increase, and within (min, max), include this range in the filter
    */
   void GenerateEventsFilter::makeFilterByValue(Kernel::TimeSeriesProperty<double>* mlog,
       Kernel::TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre,
@@ -725,13 +729,15 @@ namespace Algorithms
    * SINGLE log values >= min and < max. Creates SplittingInterval's where
    * times match the log values, and going to index==0.
    *
+   * @param mlog :: Log.
    * @param split :: Splitter that will be filled.
-   * @param min :: min value
-   * @param max :: max value
+   * @param indexwsindexmap :: Index.
+   * @param logvalueranges ::  A vector of double. Each 2i and 2i+1 pair is one individual log value range.
    * @param centre :: Whether the log value time is considered centred or at the beginning.
-   * @param log valuerange:  a vector of double. Each 2i and 2i+1 pair is one individual log value range.
-   * @filterIncrease: as log value increase, and within (min, max), include this range in the filter
-   * @filterDecrease: as log value increase, and within (min, max), include this range in the filter
+   * @param filterIncrease :: As log value increase, and within (min, max), include this range in the filter.
+   * @param filterDecrease :: As log value increase, and within (min, max), include this range in the filter.
+   * @param startTime :: Start time.
+   * @param stopTime :: Stop time.
    */
   void GenerateEventsFilter::makeMultipleFiltersByValues(Kernel::TimeSeriesProperty<double>* mlog,
       Kernel::TimeSplitterType& split, std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges,
@@ -983,8 +989,8 @@ namespace Algorithms
    * Warning: if the vector is not sorted, the error will happen.
    * This algorithm won't guarantee for it
    *
-   * @param dataranges: a list of data to search for value;
-   * @param value:      value to look up
+   * @param sorteddata :: Sorted data.
+   * @param value :: Value to look up.
    *
    * return:  if value is out of range, then return datarange.size() + 1
    */

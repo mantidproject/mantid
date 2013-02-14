@@ -169,6 +169,7 @@ namespace Algorithms
    * @param minWS A workspace of minimum values for each spectra. This is calculated in
    * the @see exec portion of the algorithm.
    * @param wksp The workspace to modify.
+   * @param prog The progress.
    */
   void ResetNegatives::pushMinimum(MatrixWorkspace_const_sptr minWS, MatrixWorkspace_sptr wksp, Progress &prog)
   {
@@ -200,6 +201,7 @@ namespace Algorithms
    * @param minWS A workspace of minimum values for each spectra.
    * @param value Reset negative values in the spectra to this number.
    * @param wksp The workspace to modify.
+   * @param prog The progress.
    */
   void ResetNegatives::changeNegatives(MatrixWorkspace_const_sptr minWS, const double value, MatrixWorkspace_sptr wksp,
                                        Progress &prog)

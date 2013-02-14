@@ -446,8 +446,17 @@ namespace Mantid
     //-----------------------------------------------------------------------------------------
    /** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
     *
-    *  @param s :: The Workspace Index to fit
-    *  @return The calculated offset value
+    * @param s :: The Workspace Index to fit.
+    * @param inputW :: Input workspace.
+    * @param peakPositions :: Peak positions.
+    * @param fitWindows :: Fit windows.
+    * @param nparams :: Number of parameters.
+    * @param minD :: Min distance.
+    * @param maxD :: Max distance.
+    * @param peakPosToFit :: Peak positions to fit.
+    * @param peakPosFitted :: Peak positions fitted.
+    * @param chisq :: chisq.
+    * @return The calculated offset value
     */
 
     void GetDetOffsetsMultiPeaks::fitSpectra(const int64_t s, MatrixWorkspace_sptr inputW, const std::vector<double> &peakPositions,

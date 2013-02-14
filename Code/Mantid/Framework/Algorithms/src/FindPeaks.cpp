@@ -311,7 +311,7 @@ void FindPeaks::exec()
 
 //=================================================================================================
 /** Use the Mariscotti method to find the start positions to fit gaussian peaks
- * @param peakCenters Vector of the center x-positions specified to perform fits.
+ * @param peakCentres Vector of the center x-positions specified to perform fits.
  * @param fitWindows List of windows around each peak. If not specified windows will
  * be determined automatically.
  */
@@ -763,7 +763,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
  *
  *  @param input    The input workspace
  *  @param spectrum The spectrum index of the peak (is actually the WorkspaceIndex)
- *  @param center   Channel number of peak candidate i0 - the higher side of the peak (right side)
+ *  @param centre   Channel number of peak candidate i0 - the higher side of the peak (right side)
  *  @param left     Channel number of peak candidate i2 - the lower side of the peak (left side)
  *  @param right    Channel number of peak candidate i4 - the center of the peak
  */
@@ -1405,6 +1405,10 @@ void FindPeaks::updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double
 
 /**
  * Create a function for fitting.
+ * @param height Height
+ * @param centre Centre
+ * @param sigma Sigma
+ * @param a0, a1, a2  Variables dependent on background order.
  * @param withPeak If this is set to false then return only a background function.
  * @return The requested function to fit.
  */

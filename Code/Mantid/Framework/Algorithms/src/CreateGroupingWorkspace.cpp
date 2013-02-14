@@ -164,6 +164,7 @@ namespace Algorithms
    * @param inst :: instrument
    * @param detIDtoGroup :: output: map of detID: to group number
    * @param prog :: progress report
+   * @param sortnames :: sort names - a boolean
    */
   void makeGroupingByNames(std::string GroupNames, Instrument_const_sptr inst, std::map<detid_t, int> & detIDtoGroup, Progress & prog, bool sortnames)
   {
