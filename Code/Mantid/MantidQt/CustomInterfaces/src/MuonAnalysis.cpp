@@ -1390,7 +1390,7 @@ void MuonAnalysis::deleteRangedWorkspaces()
 /**
 * Create a table of dead times and apply them to the data.
 *
-* @params deadTimes :: a vector of all the dead times starting at spectrum 1.
+* @param deadTimes :: a vector of all the dead times starting at spectrum 1.
 */
 void MuonAnalysis::getDeadTimeFromData(const std::vector<double> & deadTimes)
 {
@@ -1464,7 +1464,7 @@ void MuonAnalysis::getDeadTimeFromData(const std::vector<double> & deadTimes)
 /**
 * Load up a dead time table or a group of dead time tables and apply them to the workspace.
 *
-* @params fileName :: The file where the dead times are kept.
+* @param fileName :: The file where the dead times are kept.
 */
 void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
 {
@@ -1601,7 +1601,7 @@ QString MuonAnalysis::getGroupName()
 /**
 * Get ranged name.
 *
-* @Return rangedName :: The name to be used to identify the workspace.
+* @return rangedName :: The name to be used to identify the workspace.
 */
 std::string MuonAnalysis::getRangedName()
 {
@@ -2513,7 +2513,7 @@ std::vector<int> MuonAnalysis::spectrumIDs(const std::string& str) const
 /**
 * Change the workspace group name to the instrument and run number if load current run was pressed.
 *
-* @params workspaceGroupName :: The name of the group that needs to be changed or is already in correct format.
+* @param workspaceGroupName :: The name of the group that needs to be changed or is already in correct format.
 */
 void MuonAnalysis::changeCurrentRun(std::string & workspaceGroupName)
 {
@@ -3588,7 +3588,7 @@ void MuonAnalysis::showHideToolbars(bool state)
 /**
 * Change what type of deadtime to use and the options available for the user's choice.
 *
-* @params choice :: The current index of dead time type combo box.
+* @param choice :: The current index of dead time type combo box.
 */
 void MuonAnalysis::changeDeadTimeType(int choice)
 {
