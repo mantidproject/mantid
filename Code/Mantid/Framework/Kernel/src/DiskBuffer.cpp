@@ -92,7 +92,6 @@ namespace Kernel
    * The space it uses on disk is marked as free.
    *
    * @param item :: ISaveable object that is getting deleted.
-   * @param sizeOnFile :: size that the object used on file. This amount of space is marked as "free"
    */
   void DiskBuffer::objectDeleted(const ISaveable * item)
   {

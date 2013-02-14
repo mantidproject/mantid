@@ -372,7 +372,7 @@ private:
                    const int                       chanMin,
                    const int                       chanMax,
                    double                         Radius,
-                   Kernel::V3D                    CentPos , ///< Center on Plane,
+                   Kernel::V3D                    CentPos ,
                    std::string                    &spec_idList
 
                    ) ;

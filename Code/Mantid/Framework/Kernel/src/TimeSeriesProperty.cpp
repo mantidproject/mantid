@@ -554,7 +554,7 @@ namespace Mantid
      *  @param split The splitter to modify if necessary
      *  @param min   The minimum 'good' value
      *  @param max   The maximum 'good' value
-     *  @param TimeInterval The full time range that we want this splitter to cover
+     *  @param range The full time range that we want this splitter to cover
      */
     template<typename TYPE>
     void TimeSeriesProperty<TYPE>::expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const
@@ -1148,6 +1148,7 @@ namespace Mantid
 
     /** Returns the value at a particular time
      *  @param t :: time
+     *  @param index :: index of time
      *  @return Value at time \a t
      */
     template<typename TYPE>

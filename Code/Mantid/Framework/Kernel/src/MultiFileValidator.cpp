@@ -28,7 +28,6 @@ namespace Kernel
 
   /** Constructor
    *  @param extensions :: The permitted file extensions (e.g. .RAW)
-   *  @param testFileExists :: Flag indicating whether to test for existence of file (default: yes)
    */
   MultiFileValidator::MultiFileValidator(const std::vector<std::string>& extensions) :
     TypedValidator<std::vector<std::vector<std::string> > >(),

@@ -1873,7 +1873,7 @@ namespace Mantid
 
     /**
      * Prepares the data for futher analysis adding meta data and marking data on the edges of detectors
-     * @param Data
+     * @param Data: Output workspace
      * @param inpWkSpace: Input workspace
      * @param chanMin: Minimum channel
      * @param chanMax: Maximum channel

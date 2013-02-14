@@ -17,10 +17,11 @@ namespace WorkflowAlgorithmHelpers
    * @param pm : The property manager pointer to retrieve a property value from
    * @param instParam : The name of the instrument parameter to fetch from the workspace
    * @param ws : A workspace that should house the alternate parameter
+   * @param overrideValue : A provided override value to hand back if nothing is found
    * @return : Either the algorithm property or an instrument parameter.
    */
-  double getDblPropOrParam(const std::string &pmProp, PropertyManager_sptr &pm,
-      const std::string &instParam, MatrixWorkspace_sptr &ws,
+  double getDblPropOrParam(const std::string &pmProp, Kernel::PropertyManager_sptr &pm,
+      const std::string &instParam, API::MatrixWorkspace_sptr &ws,
       const double overrideValue)
   {
     double defaultValue = EMPTY_DBL();
@@ -64,10 +65,11 @@ namespace WorkflowAlgorithmHelpers
    * @param pm : The property manager pointer to retrieve a property value from
    * @param instParam : The name of the instrument parameter to fetch from the workspace
    * @param ws : A workspace that should house the alternate parameter
+   * @param overrideValue : A provided override value to hand back if nothing is found
    * @return : Either the algorithm property or an instrument parameter.
    */
-  bool getBoolPropOrParam(const std::string &pmProp, PropertyManager_sptr &pm,
-      const std::string &instParam, MatrixWorkspace_sptr &ws,
+  bool getBoolPropOrParam(const std::string &pmProp, Kernel::PropertyManager_sptr &pm,
+      const std::string &instParam, API::MatrixWorkspace_sptr &ws,
       const bool overrideValue)
   {
     bool defaultValue = false;
