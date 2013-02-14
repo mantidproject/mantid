@@ -7,7 +7,6 @@ Calculates the weighted mean values in the overlap region and then combines the 
 *WIKI*/
 
 #include "MantidMDAlgorithms/Stitch1DMD.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/FrameworkManager.h"

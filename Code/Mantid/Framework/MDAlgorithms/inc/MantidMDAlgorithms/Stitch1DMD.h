@@ -3,18 +3,11 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
-  namespace API
-  {
-    class IMDHistoWorkspace;
-  }
-  namespace MDEvents
-  {
-    class MDHistoWorkspace;
-  }
 namespace MDAlgorithms
 {
 
@@ -53,13 +46,13 @@ namespace MDAlgorithms
   private:
 
     std::string fetchInputPropertyName() const;
-    void checkIndividualWorkspace(boost::shared_ptr<const API::IMDHistoWorkspace> workspace) const;
-    void checkBothWorkspaces(boost::shared_ptr<const API::IMDHistoWorkspace> rhsWorkspace, boost::shared_ptr<const API::IMDHistoWorkspace> lhsWorkspace) const;
-    boost::shared_ptr<MDEvents::MDHistoWorkspace> trimOutIntegratedDimension(boost::shared_ptr<API::IMDHistoWorkspace> ws);
-    double integrateOver(boost::shared_ptr<API::IMDHistoWorkspace> ws, const double& startOverlap, const double& endOverlap);
-    boost::shared_ptr<MDEvents::MDHistoWorkspace> create1DHistoWorkspace(const MantidVec& signals,const MantidVec& errors, const MantidVec& extents, const std::vector<int>& vecNBins, const std::vector<std::string> names, const std::vector<std::string>& units);
-    void overlayOverlap(boost::shared_ptr<MDEvents::MDHistoWorkspace> sum, boost::shared_ptr<API::IMDHistoWorkspace> overlap);
-    boost::shared_ptr<MDEvents::MDHistoWorkspace> extractOverlapAsWorkspace(boost::shared_ptr<API::IMDHistoWorkspace> scaledWorkspace1, const double& startOverlap, const double& endOverlap);
+    void checkIndividualWorkspace(Mantid::API::IMDHistoWorkspace_const_sptr workspace) const;
+    void checkBothWorkspaces(Mantid::API::IMDHistoWorkspace_const_sptr rhsWorkspace, Mantid::API::IMDHistoWorkspace_const_sptr lhsWorkspace) const;
+    Mantid::MDEvents::MDHistoWorkspace_sptr trimOutIntegratedDimension(Mantid::API::IMDHistoWorkspace_sptr ws);
+    double integrateOver(Mantid::API::IMDHistoWorkspace_sptr ws, const double& startOverlap, const double& endOverlap);
+    Mantid::MDEvents::MDHistoWorkspace_sptr create1DHistoWorkspace(const MantidVec& signals,const MantidVec& errors, const MantidVec& extents, const std::vector<int>& vecNBins, const std::vector<std::string> names, const std::vector<std::string>& units);
+    void overlayOverlap(Mantid::MDEvents::MDHistoWorkspace_sptr sum, Mantid::API::IMDHistoWorkspace_sptr overlap);
+    Mantid::MDEvents::MDHistoWorkspace_sptr extractOverlapAsWorkspace(Mantid::API::IMDHistoWorkspace_sptr scaledWorkspace1, const double& startOverlap, const double& endOverlap);
 
     virtual void initDocs();
     void init();
