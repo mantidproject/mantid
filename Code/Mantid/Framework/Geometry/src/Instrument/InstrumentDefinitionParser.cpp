@@ -1616,7 +1616,8 @@ namespace Geometry
         return;
 
 
-      // Face the component to the x,y,z or r,t,p coordinates of the facing component
+      // Face the component, i.e. rotate the z-axis of the component such that it points in the direction from
+      // the point x,y,z (or r,t,p) specified by the <facing> xml element towards the component  
 
       makeXYplaneFaceComponent(comp, parseFacingElementToV3D(facingElem));
 

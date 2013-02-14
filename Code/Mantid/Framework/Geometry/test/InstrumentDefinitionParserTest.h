@@ -284,6 +284,25 @@ public:
     TS_ASSERT( !ptrDet11->isValid(V3D(0.0,-0.05,0.0)+ptrDet11->getPos()) );
     TS_ASSERT( !ptrDet11->isValid(V3D(0.0,-0.01,0.05)+ptrDet11->getPos()) );
     TS_ASSERT( !ptrDet11->isValid(V3D(0.0,-0.01,-0.05)+ptrDet11->getPos()) );
+    boost::shared_ptr<const IDetector> ptrDet1000 = i->getDetector(1000);
+    TS_ASSERT( ptrDet1000->isValid(V3D(0.0,0.0,0.1)+ptrDet1000->getPos()) );
+    TS_ASSERT( ptrDet1000->isValid(V3D(0.0,0.0,-0.1)+ptrDet1000->getPos()) );
+    TS_ASSERT( ptrDet1000->isValid(V3D(0.0,0.02,0.1)+ptrDet1000->getPos()) );
+    TS_ASSERT( ptrDet1000->isValid(V3D(0.0,0.02,-0.1)+ptrDet1000->getPos()) );
+    TS_ASSERT( !ptrDet1000->isValid(V3D(0.0,0.05,0.0)+ptrDet1000->getPos()) );
+    TS_ASSERT( !ptrDet1000->isValid(V3D(0.0,-0.05,0.0)+ptrDet1000->getPos()) );
+    TS_ASSERT( !ptrDet1000->isValid(V3D(0.0,-0.01,0.05)+ptrDet1000->getPos()) );
+    TS_ASSERT( !ptrDet1000->isValid(V3D(0.0,-0.01,-0.05)+ptrDet1000->getPos()) );
+    boost::shared_ptr<const IDetector> ptrDet1001 = i->getDetector(1001);
+    TS_ASSERT( ptrDet1001->isValid(V3D(-0.07,0.0,-0.07)+ptrDet1001->getPos()) );
+    TS_ASSERT( ptrDet1001->isValid(V3D(0.07,0.0,0.07)+ptrDet1001->getPos()) );
+    TS_ASSERT( ptrDet1001->isValid(V3D(0.07,0.01,0.07)+ptrDet1001->getPos()) );
+    TS_ASSERT( ptrDet1001->isValid(V3D(-0.07,0.01,-0.07)+ptrDet1001->getPos()) );
+    TS_ASSERT( !ptrDet1001->isValid(V3D(0.0,0.05,0.0)+ptrDet1001->getPos()) );
+    TS_ASSERT( !ptrDet1001->isValid(V3D(0.0,-0.05,0.0)+ptrDet1001->getPos()) );
+    TS_ASSERT( !ptrDet1001->isValid(V3D(0.0,-0.01,0.05)+ptrDet1001->getPos()) );
+    TS_ASSERT( !ptrDet1001->isValid(V3D(0.0,-0.01,-0.05)+ptrDet1001->getPos()) );
+
 
     // test for "infinite-cylinder-test".
     boost::shared_ptr<const IDetector> ptrDet12 = i->getDetector(12);

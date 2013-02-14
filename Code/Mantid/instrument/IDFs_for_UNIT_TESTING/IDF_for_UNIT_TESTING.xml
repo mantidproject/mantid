@@ -58,7 +58,12 @@
 
 <component type="cuboid-rotating-test" idlist="cuboid-rotating-test">
   <location x="0.0" y="100.0" z="0.0"> </location>
-  <location x="0.0" y="200.0" z="0.0">  <facing rot="45"/> </location>
+  <location x="0.0" y="200.0" z="0.0">  <facing rot="45"/> </location> 
+</component>
+
+<component type="cuboid-rotating-test" idlist="cuboid-rotating-test2">
+  <location x="0.0" y="200.0" z="0.0">  </location>
+  <location x="0.0" y="200.0" z="0.0" rot="45"> </location>  
 </component>
 
 <component type="infinite-cylinder-test" idlist="infinite-cylinder-test">
@@ -325,6 +330,10 @@
     <id start="10" end="11" />
   </idlist>    
 
+  <idlist idname="cuboid-rotating-test2">
+    <id start="1000" end="1001" />
+  </idlist>  
+  
   <idlist idname="infinite-cylinder-test">
     <id val="12" />
   </idlist> 
