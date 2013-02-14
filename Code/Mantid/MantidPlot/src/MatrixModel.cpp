@@ -388,7 +388,17 @@ bool MatrixModel::removeColumns(int column, int count, const QModelIndex & paren
     d_data[i] = d_data[i + aux*count];
   }
 
-  d_data = (double *)realloc (d_data, size*sizeof(double));
+  double *new_data = (double *)realloc (d_data, size*sizeof(double));
+  if (new_data == NULL)
+  {
+    // could not realloc, but orig still valid
+    QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+    tr("Not enough memory, operation aborted!"));
+  }
+  else
+  {
+      d_data = new_data;
+  }
 
   endRemoveColumns();
   return true;
@@ -453,7 +463,17 @@ bool MatrixModel::removeRows(int row, int count, const QModelIndex & parent)
 	for (int i = row*d_cols; i < size; i++)
         d_data[i] = d_data[i + removedCells];
 
-    d_data = (double *)realloc(d_data, size * sizeof(double));
+  double* new_data = (double *)realloc(d_data, size * sizeof(double));
+  if (new_data == NULL)
+  {
+    // could not realloc, but orig still valid
+    QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+    tr("Not enough memory, operation aborted!"));
+  }
+  else
+  {
+      d_data = new_data;
+  }
 
 	endRemoveRows();
 	return true;
