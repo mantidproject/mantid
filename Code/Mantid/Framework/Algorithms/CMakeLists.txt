@@ -202,6 +202,7 @@ set ( SRC_FILES
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
+	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
 )
 
@@ -410,6 +411,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
+	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
 
