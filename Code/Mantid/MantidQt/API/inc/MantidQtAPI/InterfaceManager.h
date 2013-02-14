@@ -134,7 +134,7 @@ typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<InterfaceManager
 }
 }
 
-/**
+/*
  * Used to register Vates GUI
  */
 #define REGISTER_VATESGUI(TYPE) \
