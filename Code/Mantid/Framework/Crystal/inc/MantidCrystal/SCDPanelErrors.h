@@ -335,9 +335,9 @@ namespace Crystal
      *  NOTE: the wavelength is changed.
      *
      * @param peak_old - The old peak
-     *
      * @param instrNew -The new instrument
-     *
+     * @param T0 :
+     * @param L0 :
      * @return The new peak with the new instrument( adjusted with the parameters) and time adjusted.
      */
     static DataObjects::Peak  createNewPeak( const API::IPeak & peak_old, Geometry::Instrument_sptr  instrNew,
