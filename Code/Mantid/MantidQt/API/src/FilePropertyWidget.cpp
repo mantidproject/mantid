@@ -203,7 +203,7 @@ namespace API
   //-------------------------------------------------------------------------------------------------
   /** Open a file selection box to select Multiple files to load.
    *
-   * @param propName :: property name that this is associated with.
+   * @param baseProp:: pointer to an instance of MultipleFileProperty used to set up the valid extensions for opening multiple file dialog. 
    * @return list of full paths to files
    */
   QStringList FilePropertyWidget::openMultipleFileDialog(Mantid::Kernel::Property * baseProp)

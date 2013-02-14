@@ -76,7 +76,7 @@ namespace API
    *
    * This only has an effect for Output WorkspaceProperty's.
    *
-   * @param show :: true to show it */
+   */
   void PropertyWidget::addReplaceWSButton()
   {
     // Don't re-create it if it already exists

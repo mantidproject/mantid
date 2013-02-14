@@ -117,7 +117,7 @@ namespace API
 
   /** Set the algorithm to view using its name
    *
-   * @param algo :: IAlgorithm bare ptr */
+   * @param name :: The algorithm name*/
   void AlgorithmPropertiesWidget::setAlgorithmName(QString name)
   {
     FrameworkManager::Instance();
@@ -339,6 +339,7 @@ namespace API
 
   //-------------------------------------------------------------------------------------------------
   /** Check if the control should be enabled for this property
+   * @param property :: the property that allows to check for the settings.
    * @param propName :: The name of the property
    */
   bool AlgorithmPropertiesWidget::isWidgetEnabled(Property * property, const QString & propName) const
