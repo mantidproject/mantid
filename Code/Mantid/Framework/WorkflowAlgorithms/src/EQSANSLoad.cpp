@@ -296,20 +296,17 @@ void EQSANSLoad::getSourceSlitSize()
     return;
   }
 
-  int slit1 = -1;
   Mantid::Kernel::Property* prop = dataWS->run().getProperty("vBeamSlit");
   Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
-  slit1 = (int)dp->getStatistics().mean;
+  int slit1 = (int)dp->getStatistics().mean;
 
-  int slit2 = -1;
   prop = dataWS->run().getProperty("vBeamSlit2");
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
-  slit2 = (int)dp->getStatistics().mean;
+  int slit2 = (int)dp->getStatistics().mean;
 
-  int slit3 = -1;
   prop = dataWS->run().getProperty("vBeamSlit3");
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
-  slit3 = (int)dp->getStatistics().mean;
+  int slit3 = (int)dp->getStatistics().mean;
 
   if (slit1<0 && slit2<0 && slit3<0)
   {

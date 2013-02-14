@@ -213,15 +213,13 @@ void HFIRLoad::exec()
     m_output_message += "   Could not compute SSD from number of guides, taking: " + Poco::NumberFormatter::format(src_to_sample/1000.0, 3) + " \n";
   };
 
-  double sample_apert = 0.0;
   Mantid::Kernel::Property* prop = dataWS->run().getProperty("sample-aperture-diameter");
   Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
-  sample_apert = *dp;
+  double sample_apert = *dp;
 
-  double source_apert = 0.0;
   prop = dataWS->run().getProperty("source-aperture-diameter");
   dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
-  source_apert = *dp;
+  double source_apert = *dp;
 
   const double beam_diameter = sdd/src_to_sample*(source_apert+sample_apert)+sample_apert;
   dataWS->mutableRun().addProperty("beam-diameter", beam_diameter, "mm", true);
