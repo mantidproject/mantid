@@ -575,11 +575,11 @@ namespace Mantid
       else if( info.type == ::NeXus::CHAR )
       {
         std::string values;
-        const size_t item_length = info.dims[1];
+        const int64_t item_length = info.dims[1];
         try
         {
-          const size_t nitems = info.dims[0];
-          const size_t total_length = nitems*item_length;
+          const int64_t nitems = info.dims[0];
+          const int64_t total_length = nitems*item_length;
           boost::scoped_array<char> val_array(new char[total_length]);
           file.getData(val_array.get());
           file.closeData();
