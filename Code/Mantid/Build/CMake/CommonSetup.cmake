@@ -235,6 +235,7 @@ if ( CPPCHECK_EXECUTABLE )
   set ( CPPCHECK_HEADER_EXCLUDES
         Framework/ScriptRepository/libgit2/include/git2.h
         MantidPlot/src/origin/OPJFile.h
+        Framework/PythonAPI/inc/boost/
       )
 
   # setup the standard arguments
