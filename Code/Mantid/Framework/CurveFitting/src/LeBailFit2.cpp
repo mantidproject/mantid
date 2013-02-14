@@ -3165,40 +3165,39 @@ namespace CurveFitting
         newvalue = param.value + stepsize;
       }
       else if (m_walkStyle == DRUNKENWALK)
-    {
-      // Drunken walk.  Prefer to previous successful move direction
-      int prevRightDirection;
-      if (prevBetterRwp)
-        prevRightDirection = 1;
-      else
-        prevRightDirection = -1;
-
-      double randirint = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
-
-      // FIXME Here are some MAGIC numbers
-      if (randirint < 0.1)
       {
-        // Negative direction to previous direction
-        stepsize = -1.0*fabs(stepsize)*static_cast<double>(param.movedirection*prevRightDirection);
-      }
-      else if (randirint < 0.4)
-      {
-        // No preferance
-        stepsize = stepsize;
-      }
-      else
-      {
-        // Positive direction to previous direction
-        stepsize = fabs(stepsize)*static_cast<double>(param.movedirection*prevRightDirection);
-      }
+        // Drunken walk.  Prefer to previous successful move direction
+        int prevRightDirection;
+        if (prevBetterRwp)
+          prevRightDirection = 1;
+        else
+          prevRightDirection = -1;
 
-      newvalue = param.value + stepsize;
-    }
+        double randirint = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+
+        // FIXME Here are some MAGIC numbers
+        if (randirint < 0.1)
+        {
+          // Negative direction to previous direction
+          stepsize = -1.0*fabs(stepsize)*static_cast<double>(param.movedirection*prevRightDirection);
+        }
+        else if (randirint < 0.4)
+        {
+          // No preferance and thus do nothing
+        }
+        else
+        {
+          // Positive direction to previous direction
+          stepsize = fabs(stepsize)*static_cast<double>(param.movedirection*prevRightDirection);
+        }
+
+        newvalue = param.value + stepsize;
+      }
       else
-    {
-      newvalue = DBL_MAX;
-      throw runtime_error("Unrecoganized walk style. ");
-    }
+      {
+        newvalue = DBL_MAX;
+        throw runtime_error("Unrecoganized walk style. ");
+      }
 
       // restriction
       if (param.nonnegative && newvalue < 0)
