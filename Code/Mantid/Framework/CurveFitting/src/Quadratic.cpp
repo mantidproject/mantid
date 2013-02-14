@@ -26,9 +26,9 @@ void Quadratic::init()
 
 /** \relates Quadratic 
  * Implements the quadratic function
- * @param out :: The result
- * @param xValues :: Array of double x values
- * @param nData :: Array of integer data
+ * @param out :: The result of evaluating the function
+ * @param xValues :: function domain values
+ * @param nData :: size of the function domain
  */
 void Quadratic::function1D(double* out, const double* xValues, const size_t nData)const
 {
@@ -36,7 +36,7 @@ void Quadratic::function1D(double* out, const double* xValues, const size_t nDat
     const double a1 = getParameter("A1");
     const double a2 = getParameter("A2");
 
-    for (size_t i = 0; i < nData; i++) 
+    for (size_t i = 0; i < nData; i++)
     {
         out[i] = a0+a1*xValues[i]+a2*xValues[i]*xValues[i];
     }
@@ -45,10 +45,10 @@ void Quadratic::function1D(double* out, const double* xValues, const size_t nDat
 /** \relates Quadratic 
  * Calculates the derivatives of the quadratic
  * @param out :: The resulting jacobian
- * @param xValues :: Array of double x values
- * @param nData :: Array of integer data
+ * @param xValues :: function domain values
+ * @param nData :: size of the function domain
  */
-void Quadratic::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
+void Quadratic::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
 {
     for (size_t i = 0; i < nData; i++) {
         out->set(i,0, 1);
