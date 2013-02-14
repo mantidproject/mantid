@@ -108,12 +108,7 @@ namespace ComponentCreationHelper
    */
   Mantid::Geometry::Instrument_sptr
   createTestInstrumentCylindrical(int num_banks, bool verbose = false);
-  /**
-   * Create a test instrument with n panels of rectangular detectors, pixels*pixels in size, a source and spherical sample shape.
-   *
-   * @param num_banks: number of 9-cylinder banks to create
-   * @param verbose: prints out the instrument after creation.
-   */
+  /// Create a test instrument with n panels of rectangular detectors, pixels*pixels in size, a source and spherical sample shape.
   Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing = 0.008);
 
   Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing = 0.008);
