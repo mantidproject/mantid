@@ -38,7 +38,7 @@ Integrate3DEvents::Integrate3DEvents( std::vector<V3D>  const & peak_q_list,
   this->UBinv  = UBinv;
   this->radius = radius;
 
-  long hkl_key;
+  int64_t hkl_key;
   for ( size_t i = 0; i < peak_q_list.size(); i++ )
   {
     hkl_key = getHklKey( peak_q_list[i] );
@@ -127,7 +127,7 @@ void Integrate3DEvents::ellipseIntegrateEvents(
   inti = 0.0;                            // default values, in case something
   sigi = 0.0;                            // is wrong with the peak.
 
-  long hkl_key = getHklKey( peak_q );
+  int64_t hkl_key = getHklKey( peak_q );
   if ( hkl_key == 0 )
   {
     return;
@@ -344,12 +344,12 @@ double Integrate3DEvents::stdDev( std::vector<V3D> const & events,
  *  @param  k        The second Miller index
  *  @param  l        The third  Miller index
  */
-long Integrate3DEvents::getHklKey( int h, int k, int l )
+int64_t Integrate3DEvents::getHklKey( int h, int k, int l )
 {
-  long key = 0l;
+  int64_t key(0);
 
   if ( h != 0 || k != 0 || l != 0 )
-    key = 1000000000000l * (long)h + 1000000l * (long)k + (long)l;
+    key = 1000000000000 * h + 1000000 * k + l;
 
   return key;
 }
@@ -363,7 +363,7 @@ long Integrate3DEvents::getHklKey( int h, int k, int l )
  *  @param q_vector  The q_vector to be mapped to h,k,l
  *  @param UBinv     The inverse of the UB matrix
  */
-long Integrate3DEvents::getHklKey( V3D const & q_vector )
+int64_t Integrate3DEvents::getHklKey( V3D const & q_vector )
 {
   V3D hkl = UBinv * q_vector;
   int h = boost::math::iround<double>(hkl[0]);
@@ -388,7 +388,7 @@ long Integrate3DEvents::getHklKey( V3D const & q_vector )
  */
 void Integrate3DEvents::addEvent( V3D event_Q )
 {
-  long hkl_key = getHklKey( event_Q );
+  int64_t hkl_key = getHklKey( event_Q );
 
   if ( hkl_key == 0 )      // don't keep events associated with 0,0,0
     return;

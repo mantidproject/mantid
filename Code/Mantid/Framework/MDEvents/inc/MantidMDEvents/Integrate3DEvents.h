@@ -52,8 +52,8 @@ namespace MDEvents
 
 typedef Mantid::Kernel::V3D                             V3D;
 typedef Mantid::Kernel::Matrix<double>                  DblMatrix;
-typedef boost::unordered_map< long, std::vector<V3D> >  EventListMap;
-typedef boost::unordered_map< long, V3D >               PeakQMap;
+typedef boost::unordered_map< int64_t, std::vector<V3D> >  EventListMap;
+typedef boost::unordered_map< int64_t, V3D >               PeakQMap;
 
 class DLLExport Integrate3DEvents
 {
@@ -105,11 +105,11 @@ class DLLExport Integrate3DEvents
 
     
     /// Form a map key as 10^12*h + 10^6*k + l from the integers h, k, l
-    static long getHklKey( int h, int k, int l );
+    static int64_t getHklKey( int h, int k, int l );
   
 
     /// Form a map key for the specified q_vector.
-    long getHklKey( V3D const & q_vector );
+    int64_t getHklKey( V3D const & q_vector );
 
 
     /// Add an event to the vector of events for the closest h,k,l
