@@ -37,7 +37,7 @@ public:
 	QwtHistogram(Table *t, const QString& xColName, const QString& name, int startRow, int endRow);
     QwtHistogram(Matrix *m);
 
-	void copy(QwtHistogram *h);
+	void copy(const QwtHistogram *h);
 
 	QwtDoubleRect boundingRect() const;
 
