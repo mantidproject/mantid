@@ -3499,7 +3499,8 @@ namespace CurveFitting
   // ============================ External Auxiliary Functions   =================================
 
   /** Write a set of (XY) data to a column file
-  void exportXYDataToFile2(vector<double> vecX, vector<double> vecY, string filename)
+    */
+  void exportXYDataToFile(vector<double> vecX, vector<double> vecY, string filename)
   {
     ofstream ofile;
     ofile.open(filename.c_str());
@@ -3512,7 +3513,6 @@ namespace CurveFitting
 
     return;
   }
-  */
 
   //-----------------------------------------------------------------------------
   /** Convert a Table to space to some vectors of maps
