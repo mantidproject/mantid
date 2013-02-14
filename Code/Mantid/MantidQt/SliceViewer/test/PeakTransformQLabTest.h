@@ -18,12 +18,12 @@ public:
 
   void test_throws_with_unknown_xLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformQLab("?", "Q_lab_y"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformQLab("?", "Q_lab_y"), PeakTransformException&);
   }
 
   void test_throws_with_unknown_yLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformQLab("Q_lab_x", "?"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformQLab("Q_lab_x", "?"), PeakTransformException&);
   }
 
   void test_default_transform()

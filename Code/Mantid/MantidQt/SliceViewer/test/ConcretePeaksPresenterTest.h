@@ -606,7 +606,7 @@ public:
     ConcretePeaksPresenter_sptr presenter = concreteBuilder.create();
 
     const int badIndex = -1;
-    TSM_ASSERT_THROWS("Index is < 0, should throw", presenter->getBoundingBox(badIndex), std::out_of_range);
+    TSM_ASSERT_THROWS("Index is < 0, should throw", presenter->getBoundingBox(badIndex), std::out_of_range&);
   }
 
   void test_getBoundingBox_throws_if_index_too_high()
@@ -616,7 +616,7 @@ public:
 
     const size_t numberOfPeaks = (*presenter->presentedWorkspaces().begin())->rowCount();
     const int badIndex = static_cast<int>(numberOfPeaks) + 1;
-    TSM_ASSERT_THROWS("Index is < 0, should throw", presenter->getBoundingBox(badIndex), std::out_of_range);
+    TSM_ASSERT_THROWS("Index is < 0, should throw", presenter->getBoundingBox(badIndex), std::out_of_range&);
   }
 
   void test_getBoundingBox()

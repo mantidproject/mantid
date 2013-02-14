@@ -17,12 +17,12 @@ public:
 
   void test_throws_with_unknown_xLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformHKL("?", "K (Lattice)"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformHKL("?", "K (Lattice)"), PeakTransformException&);
   }
 
   void test_throws_with_unknown_yLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformHKL("H (Lattice)", "?"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformHKL("H (Lattice)", "?"), PeakTransformException&);
   }
 
   void test_maps_to_hkl_on_ipeak()

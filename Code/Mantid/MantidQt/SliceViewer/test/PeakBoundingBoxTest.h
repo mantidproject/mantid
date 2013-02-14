@@ -48,7 +48,7 @@ public:
     const Bottom expectedBottom(2); // oops top < bottom
     const SlicePoint expectedSlicePoint(1);
 
-    TSM_ASSERT_THROWS( "Top < Bottom", PeakBoundingBox box(expectedLeft, expectedRight, expectedTop, expectedBottom, expectedSlicePoint), std::invalid_argument);
+    TSM_ASSERT_THROWS( "Top < Bottom", PeakBoundingBox box(expectedLeft, expectedRight, expectedTop, expectedBottom, expectedSlicePoint), std::invalid_argument&);
   }
 
   void test_right_greater_than_left()
@@ -59,7 +59,7 @@ public:
     const Bottom expectedBottom(0); // oops top < bottom
     const SlicePoint expectedSlicePoint(1);
 
-    TSM_ASSERT_THROWS( "Right < Left", PeakBoundingBox box(expectedLeft, expectedRight, expectedTop, expectedBottom, expectedSlicePoint), std::invalid_argument);
+    TSM_ASSERT_THROWS( "Right < Left", PeakBoundingBox box(expectedLeft, expectedRight, expectedTop, expectedBottom, expectedSlicePoint), std::invalid_argument&);
   }
 
   void test_copy()
