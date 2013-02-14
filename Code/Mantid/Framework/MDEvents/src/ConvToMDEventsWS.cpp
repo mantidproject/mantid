@@ -88,8 +88,8 @@ namespace Mantid
 
 
     /** method sets up all internal variables necessary to convert from Event Workspace to MDEvent workspace 
-    @parameter WSD         -- the class describing the target MD workspace, sorurce Event workspace and the transformations, necessary to perform on these workspaces
-    @parameter inWSWrapper -- the class wrapping the target MD workspace
+    @param WSD         -- the class describing the target MD workspace, sorurce Event workspace and the transformations, necessary to perform on these workspaces
+    @param inWSWrapper -- the class wrapping the target MD workspace
     */
     size_t  ConvToMDEventsWS::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
