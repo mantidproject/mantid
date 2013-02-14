@@ -10,9 +10,9 @@ namespace Mantid
 {
   namespace Kernel
   {
-    /// Enmuerate the ignored memory fields
 
-    enum MANTID_KERNEL_DLL MemoryStatsIgnore{MEMORY_STATS_IGNORE_NONE, MEMORY_STATS_IGNORE_SYSTEM, MEMORY_STATS_IGNORE_PROCESS};
+    /// Enmuerate the ignored memory fields
+    enum MemoryStatsIgnore{MEMORY_STATS_IGNORE_NONE, MEMORY_STATS_IGNORE_SYSTEM, MEMORY_STATS_IGNORE_PROCESS};
     namespace MemoryOptions
     {
       /// Initialize platform-dependent options for memory management

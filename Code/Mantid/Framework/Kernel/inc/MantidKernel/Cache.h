@@ -63,7 +63,7 @@ namespace Mantid
 
       /**
        * Copy-assignment operator as we have a non-default copy constructor
-       * @param src The object that is on the RHS of the assignment
+       * @param rhs The object that is on the RHS of the assignment
        */
       Cache<KEYTYPE,VALUETYPE> & operator=(const Cache<KEYTYPE,VALUETYPE> & rhs)
       {

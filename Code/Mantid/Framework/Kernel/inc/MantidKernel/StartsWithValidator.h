@@ -41,7 +41,7 @@ class DLLExport StartsWithValidator : public Kernel::StringListValidator
 public:
   /**
    * Default constructor.
-   * @param values :: A vector with the allowed values.
+   * 
    */
   StartsWithValidator():Kernel::StringListValidator(){}
   /**

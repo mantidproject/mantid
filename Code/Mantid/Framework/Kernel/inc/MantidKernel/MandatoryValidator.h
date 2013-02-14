@@ -30,7 +30,7 @@ namespace Kernel
     {
       /**
        * Returns true if the value is considered empty
-       * @param The value to check
+       * @param value: to be checked
        * @return
        */
       static bool check(const T & value)
