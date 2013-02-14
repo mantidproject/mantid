@@ -177,7 +177,7 @@ namespace MantidWidgets
 
   /**
    * The algorithm factory has been updated, refresh the widget
-   * @param
+   * 
    */
   void AlgorithmSelectorWidget::
   handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)

@@ -50,7 +50,7 @@ UserFunctionDialog::~UserFunctionDialog()
 
 /**
  * Load saved functions form Mantid(.user).properties file.
- * Property: userfunctions.CategoryName.FunctionName = Expression-in-Mu::Parser-format
+ * Property: userfunctions.CategoryName.FunctionName = Expression-in-Mu Parser-format
  */
 void UserFunctionDialog::loadFunctions()
 {

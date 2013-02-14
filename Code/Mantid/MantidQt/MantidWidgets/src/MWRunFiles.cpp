@@ -39,7 +39,7 @@ FindFilesThread::FindFilesThread(QObject *parent) :
  *
  * @param text              :: the text containing the file names, typed in by the user
  * @param isForRunFiles     :: whether or not we are finding run files.
- * @param isOption          :: whether or not the files are optional.
+ * @param isOptional        :: whether or not the files are optional.
  * @param algorithmProperty :: the algorithm and property to use as an alternative to FileFinder.  Optional.
  */
 void FindFilesThread::set(QString text, bool isForRunFiles, bool isOptional, const QString & algorithmProperty)

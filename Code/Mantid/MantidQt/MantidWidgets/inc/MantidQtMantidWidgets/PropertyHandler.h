@@ -89,7 +89,7 @@ public:
 
   PropertyHandler* findHandler(QtProperty* prop);
 
-  PropertyHandler* findHandler(boost::shared_ptr<const Mantid::API::IFunction> fun);
+  PropertyHandler* findHandler(Mantid::API::IFunction_const_sptr fun);
   PropertyHandler* findHandler(const Mantid::API::IFunction* fun);
 
   /**
