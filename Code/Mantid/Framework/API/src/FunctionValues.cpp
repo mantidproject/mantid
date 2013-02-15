@@ -119,9 +119,55 @@ namespace API
   }
 
   /**
+   * Add other calculated values to this. 
+   * @param values :: An instance of FunctionValues to be added to this. Must have the same size to this.
+   * @return A reference to this values.
+   */
+  FunctionValues& FunctionValues::operator+=(const FunctionValues& values)
+  {
+    if (size() != values.size())
+    {
+      throw std::runtime_error("Cannot add values: sizes do not match");
+    }
+    values.add(getPointerToCalculated(0));
+    return *this;
+  }
+  
+  /**
+   * Multiply by other calculated values.
+   * @param values :: An instance of FunctionValues to multiply to this. Must have the same size to this.
+   * @return A reference to this values.
+   */
+  FunctionValues& FunctionValues::operator*=(const FunctionValues& values)
+  {
+    if (size() != values.size())
+    {
+      throw std::runtime_error("Cannot multiply values: sizes do not match");
+    }
+    values.multiply(getPointerToCalculated(0));
+    return *this;
+  }
+  
+  /**
+   * Add other calculated values to these values starting from some index.
+   * @param start :: A starting index for addition
+   * @param values :: An instance of FunctionValues to be added to this. The size mustn't exceed the number of
+   *   values in this from start to the end.
+   * @return A reference to this values.
+   */
+  void FunctionValues::addToCalculated(size_t start, const FunctionValues& values)
+  {
+    if (start + size() < values.size())
+    {
+      throw std::runtime_error("Cannot add values: sizes do not match");
+    }
+    values.add(getPointerToCalculated(start));
+  }
+
+  /**
    * Set a fitting data value.
-   * @param i :: Index
-   * @param value :: Value
+   * @param i :: A value index
+   * @param value :: A new value to set.
    */
   void FunctionValues::setFitData(size_t i,double value)
   {
@@ -133,8 +179,8 @@ namespace API
   }
 
   /**
-   * Set fitting data values.
-   * @param values :: Values for fitting
+   * Set all fitting data values.
+   * @param values :: A vector of values for fitting. Must have the same size as this.
    */
   void FunctionValues::setFitData(const std::vector<double>& values)
   {
@@ -147,7 +193,7 @@ namespace API
 
   /**
    * Get a fitting data value
-   * @param i :: Index
+   * @param i :: A value index
    */
   double FunctionValues::getFitData(size_t i) const
   {
@@ -160,8 +206,8 @@ namespace API
 
   /**
    * Set a fitting weight
-   * @param i :: Index
-   * @param value :: Value
+   * @param i :: A value index
+   * @param value :: A new value for the weight.
    */
   void FunctionValues::setFitWeight(size_t i,double value)
   {
@@ -173,8 +219,8 @@ namespace API
   }
 
   /**
-   * Set fitting data values.
-   * @param values :: Values for fitting
+   * Set all fitting weights.
+   * @param values :: A vector of fitting weights. Must have the same size as this.
    */
   void FunctionValues::setFitWeights(const std::vector<double>& values)
   {
@@ -197,7 +243,7 @@ namespace API
 
   /**
    * Get a fitting weight.
-   * @param i :: Index
+   * @param i :: A value index.
    */
   double FunctionValues::getFitWeight(size_t i) const
   {
@@ -210,6 +256,7 @@ namespace API
 
   /**
    * Set fitting data copied from other FunctionValues' calculated values.
+   * @param values :: An instance of FunctionValues to copy the data from.
    */
   void FunctionValues::setFitDataFromCalculated(const FunctionValues& values)
   {

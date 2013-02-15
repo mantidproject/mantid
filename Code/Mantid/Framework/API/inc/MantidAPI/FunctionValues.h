@@ -77,51 +77,32 @@ public:
   /// @param i :: An index of a value 0 <= i < size()
   double operator[](size_t i) const {return m_calculated[i];}
   /// Add a number to a calculated value.
-  /// @param i :: An index of a value 0 <= i < size()
-  /// @param value :: The value to add at the index given
+  /// @param i :: An index of a value 0 <= i < size() to update.
+  /// @param value :: A value to add 
   void addToCalculated(size_t i, double value) {m_calculated[i] += value;}
 
   /// Add other calculated values
-  FunctionValues& operator+=(const FunctionValues& values)
-  {
-    if (size() != values.size())
-    {
-      throw std::runtime_error("Cannot add values: sizes do not match");
-    }
-    values.add(getPointerToCalculated(0));
-    return *this;
-  }
+  FunctionValues& operator+=(const FunctionValues& values);
   /// Multiply by other calculated values
-  FunctionValues& operator*=(const FunctionValues& values)
-  {
-    if (size() != values.size())
-    {
-      throw std::runtime_error("Cannot multiply values: sizes do not match");
-    }
-    values.multiply(getPointerToCalculated(0));
-    return *this;
-  }
-  /// Add other calculated values to these values starting with i.
-  void addToCalculated(size_t i, const FunctionValues& values)
-  {
-    if (i + size() < values.size())
-    {
-      throw std::runtime_error("Cannot add values: sizes do not match");
-    }
-    values.add(getPointerToCalculated(i));
-  }
+  FunctionValues& operator*=(const FunctionValues& values);
+  /// Add other calculated values with offset
+  void addToCalculated(size_t start, const FunctionValues& values);
 
-  /// set a fitting data value
+  /// Set a fitting data value
   void setFitData(size_t i,double value);
+  /// Set all fitting data values
   void setFitData(const std::vector<double>& values);
-  /// get a fitting data value
+  /// Get a fitting data value
   double getFitData(size_t i) const;
-  /// set a fitting weight
+  /// Set a fitting weight
   void setFitWeight(size_t i,double value);
+  /// Set all fitting weights.
   void setFitWeights(const std::vector<double>& values);
+  /// Set all fitting weights to a number.
   void setFitWeights(const double& value);
- /// get a fitting weight
+  /// Get a fitting weight
   double getFitWeight(size_t i) const;
+  /// Set all calculated values by copying them from another FunctionValues instance.
   void setFitDataFromCalculated(const FunctionValues& values);
 protected:
   /// Copy calculated values to a buffer

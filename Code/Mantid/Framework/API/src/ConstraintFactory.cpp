@@ -23,6 +23,13 @@ namespace Mantid
     {
     }
 
+    /**Creates an instance of a Constraint initialized using an expression
+     * @param fun :: The function
+     * @param input :: The creation expression, format depends on the constraint implementation. For BoundaryConstraint
+     *   it is an inequality defining the boundaries for a parameter, eg: 0 < paramName < 1, paramName > 0, etc.
+     * @param isDefault :: Is this initialization a default one?
+     * @return A pointer to the created Constraint
+     */
     IConstraint* ConstraintFactoryImpl::createInitialized(IFunction* fun, const std::string& input, bool isDefault) const
     {
       Expression expr;
@@ -30,6 +37,12 @@ namespace Mantid
       return createInitialized(fun,expr,isDefault);
     }
 
+    /** An overloaded method using Expression.
+     * @param fun :: The function
+     * @param expr :: A parsed initialization Expression.
+     * @param isDefault :: Is this initialization a default one?
+     * @return A pointer to the created Constraint
+     */
     IConstraint* ConstraintFactoryImpl::createInitialized(IFunction* fun, const Expression& expr, bool isDefault) const
     {
       IConstraint* c = 0;

@@ -66,7 +66,7 @@ namespace Mantid
       /// Toggle output of either just composite or composite + members
       void separateCompositeMembersInOutput(const bool value);
 
-      /// declare properties that specify the dataset within the workspace to fit to.
+      /// Declare properties that specify the dataset within the workspace to fit to.
       /// @param suffix :: A suffix to give to all new properties.
       /// @param addProp :: If false don't actually declare new properties but do other stuff if needed
       virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true) 
@@ -84,13 +84,11 @@ namespace Mantid
         boost::shared_ptr<API::IFunctionValues>& values,
         size_t i0 = 0) = 0;
 
-      /**
-       * Create an output workspace filled with data simulated with the fitting function.
-       * @param baseName :: A prefix for the name of the output workspace
-       * @param function :: The function that will provide the calculated values
-       * @param domain :: The input domain over which the function is calculated
-       * @param values :: A result holder for results on the domain
-       */
+       /// Create an output workspace filled with data simulated with the fitting function.
+       /// @param baseName :: Specifies the name of the output workspace
+       /// @param function :: A pointer to the fitting function
+       /// @param domain :: The domain containing x-values for the function
+       /// @param values :: A FunctionValues instance containing the fitting data
       virtual void createOutputWorkspace(
         const std::string& baseName,
         API::IFunction_sptr function,
@@ -99,6 +97,7 @@ namespace Mantid
       {UNUSED_ARG(baseName);UNUSED_ARG(function);UNUSED_ARG(domain);UNUSED_ARG(values);}
 
       /// Initialize the function
+      /// @param function :: A function to initialize.
       virtual void initFunction(API::IFunction_sptr function);
 
       /// Return the size of the domain to be created.

@@ -117,7 +117,7 @@ namespace Mantid
 
     /** 
     * @param domain :: the space on which the function acts
-    * @param Jacobian :: the set of partial derivatives of the function with respect to the
+    * @param jacobian :: the set of partial derivatives of the function with respect to the
     * fitting parameters
     */
     void UserFunction::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)

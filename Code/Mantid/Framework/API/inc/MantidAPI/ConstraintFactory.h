@@ -63,19 +63,9 @@ namespace API
   class MANTID_API_DLL ConstraintFactoryImpl : public Kernel::DynamicFactory<IConstraint>
   {
   public:
-    /**Creates an instance of a Constraint
-     * @param fun :: The function
-     * @param input :: The creation expression
-     * @param isDefault :: Flag to mark as default the value of an object associated with this reference: a tie or a constraint. (default=false)
-     * @return A pointer to the created Constraint
-     */
+    /// Creates an instance of a Constraint
     IConstraint* createInitialized(IFunction* fun, const std::string& input, bool isDefault = false) const;
-    /**Creates an instance of a Constraint
-     * @param fun :: The function
-     * @param expr :: The creation expression
-     * @param isDefault :: Flag to mark as default the value of an object associated with this reference: a tie or a constraint. (default=false)
-     * @return A pointer to the created Constraint
-     */
+    /// Creates an instance of a Constraint
     IConstraint* createInitialized(IFunction* fun, const Expression& expr, bool isDefault = false) const;
 
   private:

@@ -258,10 +258,10 @@ namespace
 
   /**
    * Create an output workspace with the calculated values.
-   * @param basename :: specifies the name of the output workspace
-   * @function :: pointer to the fitting function
-   * @param domain :: The domain
-   * @param ivalues :: The values
+   * @param baseName :: Specifies the name of the output workspace
+   * @param function :: A Pointer to the fitting function
+   * @param domain :: The domain containing x-values for the function
+   * @param ivalues :: A API::FunctionValues instance containing the fitting data
    */
   void FitMW::createOutputWorkspace(
         const std::string& baseName,

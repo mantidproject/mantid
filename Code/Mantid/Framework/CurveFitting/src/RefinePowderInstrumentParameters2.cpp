@@ -518,10 +518,9 @@ namespace CurveFitting
   /** Propose new parameters
     *
     * @param mcgroup:     list of parameters to have new values proposed
-    * @param churrchisq:  present chi^2 (as a factor in step size)
+    * @param currchisq:  present chi^2 (as a factor in step size)
     * @param curparammap: current parameter maps
     * @param newparammap: parameters map containing new/proposed value
-    * @param prevBetterRwp: (removed.  only use random walk)
     */
   void RefinePowderInstrumentParameters2::proposeNewValues(vector<string> mcgroup,
                                                            map<string, Parameter>& curparammap,
@@ -631,6 +630,8 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Determine whether the proposed value should be accepted or denied
     *
+    * @param curchisq:  present chi^2 (as a factor in step size)
+    * @param newchisq:  new chi^2 (as a factor in step size)
     * @param temperature:  annealing temperature
     */
   bool RefinePowderInstrumentParameters2::acceptOrDenyChange(double curchisq, double newchisq,
@@ -795,6 +796,7 @@ namespace CurveFitting
     *
     * @param parnamesforMC: vector of parameter for MC minimizer
     * @param parname: name of parameter to check whether to put into refinement list
+    * @param parammap :: parammap
     */
   void RefinePowderInstrumentParameters2::addParameterToMCMinimize(vector<string>& parnamesforMC,
                                                                    string parname,
@@ -820,6 +822,7 @@ namespace CurveFitting
   /** Implement parameter values, calculate function and its chi square.
     *
     * @param parammap:  if size = 0, there is no action to set function parameter.
+    * @param vecY :: vecY
     * Return: chi^2
     */
   double RefinePowderInstrumentParameters2::calculateFunction(map<string, Parameter> parammap,
@@ -904,6 +907,9 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Fit a function by trying various minimizer or minimizer combination
     *
+    * @param function :: an instance of a function to fit
+    * @param dataws :: a workspace with the data
+    * @param wsindex :: a histogram index
     * @param chi2:  chi2 of the final (best) solution
     */
   double RefinePowderInstrumentParameters2::fitFunction(IFunction_sptr function, Workspace2D_sptr dataws,

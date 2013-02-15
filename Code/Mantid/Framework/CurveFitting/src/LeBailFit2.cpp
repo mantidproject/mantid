@@ -491,7 +491,7 @@ namespace CurveFitting
    */
   bool LeBailFit2::calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
                                                FunctionDomain1DVector domain, FunctionValues& values,
-                                               map<string, Parameter > parammap, bool recalpeakintesity)
+                                               map<string, Parameter > parammap, bool recalpeakintensity)
   {
     // 1. Set parameters to each peak
     bool allpeaksvalid = true;
@@ -514,7 +514,7 @@ namespace CurveFitting
     }
 
     // 2. Calculate peak intensities
-    if (recalpeakintesity)
+    if (recalpeakintensity)
     {
       // a) Calcualte peak intensity
       bool zerobackground = false;
@@ -920,7 +920,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Create LeBailFunction
     * @param backgroundtype:  string, type of background function
-    * @param backgroundparams:  vector of background polynomials from order 0
+    * @param bkgdorderparams:  vector of background polynomials from order 0
     * @param bkgdparamws:     TableWorkspace containing background polynomials
    */
   void LeBailFit2::createLeBailFunction(string backgroundtype, vector<double>& bkgdorderparams,
@@ -2226,7 +2226,7 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Write orignal data and difference b/w data and model to output's workspace
-    * @param wsindex  :  workspace index of the spectrum of m_outputWS to write data in
+    * @param workspaceindex  :  workspace index of the spectrum of m_outputWS to write data in
     * @param domain   :  FunctionDomain of the data to write
     * index 0 and 2
    */
@@ -2944,7 +2944,7 @@ namespace CurveFitting
    *
    * @param dataws  :  workspace of the data
    * @param wsindex :  workspace index of the data with background removed.
-   * @param funcparammap:  map of Parameters of the function to optimize
+   * @param funparammap:  map of Parameters of the function to optimize
    * @param background:  background values
    * @param values:  function values
    * @param rwp:  output, Rwp of the model to data
@@ -3278,6 +3278,7 @@ namespace CurveFitting
   /** Book keep the (sopposed) best MC result
     * @param parammap:  map of Parameters to book keep with
     * @param bkgddata:  background data to book keep with
+    * @param rwp :: rwp
     * @param istep:     current MC step to be recorded
    */
   void LeBailFit2::bookKeepBestMCResult(map<string, Parameter> parammap, vector<double>& bkgddata, double rwp, size_t istep)
@@ -3311,7 +3312,7 @@ namespace CurveFitting
 
   //------------------------------------------------------------------------------------------------
   /** Apply the value of parameters in the source to target
-    * @param scrparammap:  map of Parameters whose values to be copied to others;
+    * @param srcparammap:  map of Parameters whose values to be copied to others;
     * @param tgtparammap:  map of Parameters whose values to be copied from others;
     */
   void LeBailFit2::applyParameterValues(map<string, Parameter>& srcparammap, map<string, Parameter>& tgtparammap)
@@ -3346,6 +3347,8 @@ namespace CurveFitting
    *
    * @param wsindex   raw data's workspace index
    * @param domian    domain of X's
+   * @param values    values
+   * @param background  background
    */
   void LeBailFit2::fitBackground(size_t wsindex, FunctionDomain1DVector domain,
                                  FunctionValues values, vector<double>& background)
@@ -3364,7 +3367,7 @@ namespace CurveFitting
   /** Smooth background by exponential smoothing algorithm
    *
    * @param wsindex  :  raw data's workspace index
-   * @param domian      domain of X's
+   * @param domain      domain of X's
    * @param peakdata:   pattern of pure peaks
    * @param background: output of smoothed background
    */
@@ -3434,7 +3437,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Smooth background by fitting the background to specified background function
    * @param wsindex  :  raw data's workspace index
-   * @param domian      domain of X's
+   * @param domain      domain of X's
    * @param peakdata:   pattern of pure peaks
    * @param background: output of smoothed background
     */

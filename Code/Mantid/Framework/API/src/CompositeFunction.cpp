@@ -133,7 +133,8 @@ void CompositeFunction::setWorkspace(boost::shared_ptr<const Workspace> ws)
 }
 
 /** Function you want to fit to. 
- *  @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+ *  @param domain :: An instance of FunctionDomain with the function arguments.
+ *  @param values :: A FunctionValues instance for storing the calculated values.
  */
 void CompositeFunction::function(const FunctionDomain& domain, FunctionValues& values)const
 {
