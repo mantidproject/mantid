@@ -90,6 +90,7 @@ namespace Mantid { namespace PythonInterface
         template DLLExport PyObject * wrapWithNDArray<std::vector<ElementType> >(const std::vector<ElementType> &, const NumpyWrapMode);\
         template DLLExport PyObject * cloneToNDArray<std::vector<ElementType> >(const std::vector<ElementType> &);
 
+      ///@cond Doxygen doesn't seem to like this...
       INSTANTIATE_TONDARRAY(int);
       INSTANTIATE_TONDARRAY(long);
       INSTANTIATE_TONDARRAY(long long);
@@ -97,6 +98,7 @@ namespace Mantid { namespace PythonInterface
       INSTANTIATE_TONDARRAY(unsigned long);
       INSTANTIATE_TONDARRAY(unsigned long long);
       INSTANTIATE_TONDARRAY(double);
+      ///@endcond
       // std::string already has clone instantiated as it is specialized
       template DLLExport PyObject * wrapWithNDArray<std::vector<std::string> >(const std::vector<std::string> &, const NumpyWrapMode);
     }

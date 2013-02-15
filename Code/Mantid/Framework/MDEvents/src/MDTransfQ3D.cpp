@@ -77,6 +77,8 @@ namespace Mantid
     *
     *@param   k0   module of input momentum
     *@param   &Coord  vector of MD coordinates with filled in momentum and energy transfer
+    *@param   signal signal
+    *@param   errSq error squared
 
     *@return   true if momentum is within the limits requested by the algorithm and false otherwise.
     *

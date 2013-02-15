@@ -929,10 +929,10 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 }
 /**Read detector.dat information from the old libisis NeXus format 
  * @param hFile -- pointer to the opened NeXus file handle, opened at the group, which contains Libisis Detector information
- *
- * @returns  detStruct -- the vector of the DetectorInfo structures, describing the detectors to modify
- * @returns  detType   -- the vector of the detector types, described in the algorithm description
- * @returns detOffset  -- the time delay for each detector's electronics, which should be corrected for.
+ * @param  detStruct -- the vector of the DetectorInfo structures, describing the detectors to modify
+ * @param  detType   -- the vector of the detector types, described in the algorithm description
+ * @param detOffset  -- the time delay for each detector's electronics, which should be corrected for.
+ * @param detList  -- list of detectors
 */
 void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct, std::vector<int32_t>&detType,std::vector<float> &detOffset,
                                       std::vector<detid_t>&detList)
@@ -1006,10 +1006,10 @@ void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detector
 
 /**Read detector.dat information (see ) written in NeXus format 
  * @param hFile -- pointer to the opened NeXus file handle, opened at the group, which contains Libisis Detector information
- *
- * @returns  detStruct -- the vector of the DetectorInfo structures, describing the detectors to modify
- * @returns  detType   -- the vector of the detector types, described in the algorithm description
- * @returns  detOffset  -- the time delay for each detector's electronics, which should be corrected for.
+ * @param  detStruct -- the vector of the DetectorInfo structures, describing the detectors to modify
+ * @param  detType   -- the vector of the detector types, described in the algorithm description
+ * @param  detOffset  -- the time delay for each detector's electronics, which should be corrected for.
+ * @param detList  -- list of detectors
 */
 void LoadDetectorInfo::readDetDotDatNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct, std::vector<int32_t>&detType,std::vector<float> &detOffset,
                                         std::vector<detid_t>&detList)

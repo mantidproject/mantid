@@ -249,6 +249,7 @@ std::string MDWSDescription::getEModeStr()const
 /** function extracts the coordinates from additional workspace porperties and places them to proper position within 
 *  the vector of MD coodinates for the particular workspace.
 *
+*  @param inWS2D -- input workspace
 *  @param dimPropertyNames  -- names of properties which should be treated as dimensions
 *  @param AddCoord --
 *

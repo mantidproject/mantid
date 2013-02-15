@@ -69,6 +69,8 @@ namespace MDEvents
    * @param workspace :: MDHistoWorkspace_sptr being iterated
    * @param function :: The implicit function to use. Becomes owned by this object.
    * @param skippingPolicy :: The skipping policy to use
+   * @param beginPos :: Start position
+   * @param endPos :: End position
    * @return
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function,

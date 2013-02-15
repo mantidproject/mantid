@@ -82,6 +82,7 @@ namespace Mantid { namespace PythonInterface
       #define INSTANTIATE_CLONE(ElementType) \
         template DLLExport PyObject *cloneToNDArray<ElementType>(const ElementType *, const int ndims, Py_intptr_t *dims);
 
+      ///@cond Doxygen doesn't seem to like this...
       INSTANTIATE_CLONE(int);
       INSTANTIATE_CLONE(long);
       INSTANTIATE_CLONE(long long);
@@ -90,6 +91,7 @@ namespace Mantid { namespace PythonInterface
       INSTANTIATE_CLONE(unsigned long long);
       INSTANTIATE_CLONE(double);
       INSTANTIATE_CLONE(float);
+      ///@endcond
     }
   }
 }}

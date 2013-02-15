@@ -219,7 +219,6 @@ namespace MDEvents
    *
    * @param suggestedNumCores :: split iterator over this many cores.
    * @param function :: Optional MDImplicitFunction limiting the iterator
-   * @param normalization :: how signal will be normalized
    */
   TMDE(
   std::vector<Mantid::API::IMDIterator*>  MDEventWorkspace)::createIterators(size_t suggestedNumCores,
@@ -505,9 +504,9 @@ namespace MDEvents
    * @param event :: event to add.
    */
   TMDE(
-  void MDEventWorkspace)::addEvent(const MDE & MDEv)
+  void MDEventWorkspace)::addEvent(const MDE & event)
   {
-    data->addEvent(MDEv);
+    data->addEvent(event);
   }
 
    //-----------------------------------------------------------------------------------------------
@@ -515,6 +514,7 @@ namespace MDEvents
    *  BC cache
    *
    * @param point :: MD Event to add.
+   * @param index :: current event index
    * 
    */
   TMDE(

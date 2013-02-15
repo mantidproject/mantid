@@ -38,11 +38,12 @@ namespace Mantid
     * </UL>
     * There is one attribute, This must be specified.
     * <UL>
-    *   <LI> CalcVariances - <UL>
+    *   <LI> CalcVariances -
     *                           If true,calculates SScol, SSrow, and SSrc from the experimental data
     *                           given Background, Mcol, and Mrow,if the parameter has not been tied,
     *                           If false, the parameters SScol, SSrow, and SSrc will be fit, unless
-    *                            tied. </UL>  </LI>
+    *                            tied.
+    *  </LI>
     * </UL>
     *
     * This is a bivariate function.  The workspace must have three histograms of equal length.

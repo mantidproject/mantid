@@ -1724,77 +1724,6 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Fit 1 peak and background by 1 minimizer of 1 call of minimzer (simple version)
-    * @param dataws
-    * @param workspaceindex
-    * @param minimzer
-    * @param iteration
-    *
-    * Return
-    * 1. fit success?
-    * 2. chi2
-  bool FitPowderDiffPeaks2::doFit1PeakBackgroundSimple(Workspace2D_sptr dataws, size_t workspaceindex,
-                                                       BackToBackExponential_sptr peakfunction,
-                                                       BackgroundFunction_sptr backgroundfunction,
-                                                       string minimzername, size_t maxiteration, double& chi2)
-  {
-    // 1. Debug output
-    stringstream dbss;
-    dbss << peakfunction->asString() << endl;
-    dbss << "Starting Value: ";
-    vector<string> names = peakfunction->getParameterNames();
-    for (size_t i = 0; i < names.size(); ++i)
-      dbss << names[i] << "= " << peakfunction->getParameter(names[i]) << ", \t";
-    g_log.information() << "DBx921 " << dbss.str() << endl;
-
-    // 2. Create Composite function
-    CompositeFunction_sptr peakbkgdfunction(new CompositeFunction);
-    peakbkgdfunction->addFunction(peakfunction);
-    peakbkgdfunction->addFunction(backgroundfunction);
-
-    // 3. Create fit
-    Algorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
-    fitalg->initialize();
-
-    // 4. Set
-    fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(peakbkgdfunction));
-    fitalg->setProperty("InputWorkspace", dataws);
-    fitalg->setProperty("WorkspaceIndex", static_cast<int>(workspaceindex));
-    fitalg->setProperty("Minimizer", minimzername);
-    fitalg->setProperty("CostFunction", "Least squares");
-    fitalg->setProperty("MaxIterations", static_cast<int>(maxiteration));
-    fitalg->setProperty("Output", "FitPeak");
-
-    // 5. Execute and parse the result
-    bool isexecute = fitalg->execute();
-    bool fitsuccess;
-    chi2 = DBL_MAX;
-
-    if (isexecute)
-    {
-      std::string fitresult = parseFitResult(fitalg, chi2, fitsuccess);
-
-      // Figure out result
-      g_log.information() << "[DBx138A] Fit Peak @ " << peakfunction->centre() << " Result:"
-                    << fitsuccess << "\n"
-                    << "Detailed info = " << fitresult << ", Chi^2 = " << chi2 << endl;
-
-      // Debug information output
-      API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
-      std::string infofit = parseFitParameterWorkspace(paramws);
-      g_log.information() << "Fitted Parameters: " << endl << infofit << endl;
-    }
-    else
-    {
-      g_log.error() << "[DBx128B] Failed to execute fitting peak @ " << peakfunction->centre() << endl;
-    }
-
-    return fitsuccess;
-  }
-  */
-
-
-  //----------------------------------------------------------------------------------------------
   /** Fit 1 peak by using a sequential of minimizer
     * @param dataws :: A data aworkspace
     * @param workspaceindex :: A histogram index
@@ -3472,7 +3401,7 @@ namespace CurveFitting
     y0 = Y[index-1];
     yf = Y[index];
 
-    // Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
+    // Formula for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
     double xr = linearInterpolateX(x0, xf, y0, yf, halfMax);
 
     double righthalffwhm = xr-centre;
@@ -3485,7 +3414,9 @@ namespace CurveFitting
 
   //-----------------------------------------------------------------------------------------------------------
   /** Find maximum value
-    */
+   * @param Y :: vector to get maximum value from
+   * @return index of the maximum value
+   */
   size_t findMaxValue(const MantidVec Y)
   {
     size_t imax = 0;
@@ -3505,7 +3436,12 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Find maximum value
-    */
+   * @param dataws :: a workspace to check
+   * @param wsindex :: the spectrum to check
+   * @param leftbound :: lower constraint for check
+   * @param rightbound :: upper constraint for check
+   * @return the index of the maximum value
+   */
   size_t findMaxValue(MatrixWorkspace_sptr dataws, size_t wsindex, double leftbound, double rightbound)
   {
     const MantidVec& X = dataws->readX(wsindex);

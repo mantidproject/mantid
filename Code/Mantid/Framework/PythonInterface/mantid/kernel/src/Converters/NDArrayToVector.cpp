@@ -162,6 +162,7 @@ namespace Mantid
       #define INSTANTIATE_TOVECTOR(ElementType)\
         template DLLExport struct NDArrayToVector<ElementType>;
 
+      ///@cond Doxygen doesn't seem to like this...
       INSTANTIATE_TOVECTOR(int);
       INSTANTIATE_TOVECTOR(long);
       INSTANTIATE_TOVECTOR(long long);
@@ -170,7 +171,6 @@ namespace Mantid
       INSTANTIATE_TOVECTOR(unsigned long long);
       INSTANTIATE_TOVECTOR(double);
       INSTANTIATE_TOVECTOR(bool);
-      ///@cond Doxygen doesn't seem to like this...
       INSTANTIATE_TOVECTOR(std::string); 
       ///@endcond
     }

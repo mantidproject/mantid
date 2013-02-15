@@ -3346,7 +3346,7 @@ namespace CurveFitting
     * FIXME: Still in development
    *
    * @param wsindex   raw data's workspace index
-   * @param domian    domain of X's
+   * @param domain    domain of X's
    * @param values    values
    * @param background  background
    */

@@ -323,6 +323,9 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
  * This function handles the logic for summing RebinnedOutput workspaces.
  * @param outputWorkspace the workspace to hold the summed input
  * @param progress the progress indicator
+ * @param numSpectra
+ * @param numMasked
+ * @param numZeros
  */
 void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
                                   Progress &progress,
