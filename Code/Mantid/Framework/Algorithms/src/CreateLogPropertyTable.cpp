@@ -169,7 +169,7 @@ namespace Algorithms
           const std::vector<std::string> childNames = wsGroup->getNames();
           
           // If there are no child workspaces in the group (is this possible?), just ignore it.
-          if( childNames.size() < 1 )
+          if( childNames.empty() )
             break;
 
           // Retrieve pointers to all the child workspaces.

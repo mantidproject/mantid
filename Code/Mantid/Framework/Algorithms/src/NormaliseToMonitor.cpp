@@ -317,7 +317,6 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
   // separate ws takes over detectorID (this logic is dublicated within  getInWSMonitorSpectrum)
   if ( sepWS && monIDs ){
       g_log.information("Both input MonitorWorkspace and detector ID are specified. Ignoring Detector ID");
-      monIDs= false;
   }
 
 

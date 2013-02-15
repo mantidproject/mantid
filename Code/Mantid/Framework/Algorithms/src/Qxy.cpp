@@ -15,6 +15,7 @@ This algorithm rebins a 2D workspace in units of wavelength into 2D Q, and the r
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/BoundedValidator.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid
 {
@@ -210,9 +211,8 @@ void Qxy::exec()
         // the data will be copied to this bin in the output array
         double & outputBinY = outputWorkspace->dataY(yIndex)[xIndex];
         double & outputBinE = outputWorkspace->dataE(yIndex)[xIndex];
-        // all bins start out at Nan and hence pass the odd conditional below
-        // cppcheck-suppress duplicateExpression
-        if ( outputBinY != outputBinY )
+
+        if ( boost::math::isnan(outputBinY))
         {
           outputBinY = outputBinE = 0;
         }

@@ -189,7 +189,7 @@ namespace Algorithms
     std::vector<double> storL2s;
     std::vector<double> stor2Thetas;
     std::vector<double> storPhis;
-    std::vector<detid_t> storDetids;
+    //std::vector<detid_t> storDetids;
     for (size_t i = 0; i < workspace->getNumberHistograms(); i ++)
     {
       wsindexsetflag.push_back(false);
@@ -197,7 +197,7 @@ namespace Algorithms
       storL2s.push_back(0.0);
       stor2Thetas.push_back(0.0);
       storPhis.push_back(0.0);
-      storDetids.push_back(0);
+      //storDetids.push_back(0);
     }
 
     // 4.1 Sort out workspace (index) will be stored
@@ -250,7 +250,7 @@ namespace Algorithms
           stodet->getPos().getSpherical(rt, thetat, phit);
 
           // c) Store
-          storDetids[i] = detid;
+          //storDetids[i] = detid;
           storL2s[i] = rt;
           stor2Thetas[i] = thetat;
           storPhis[i] = phit;
