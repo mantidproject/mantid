@@ -11,11 +11,7 @@
 # Search for the include files. Newer versions of Nexus have a nexus sub directory 
 # containing the headers but older versions just have napi.h in the root include path
 # Try for nexus/napi.h first
-find_path ( NEXUS_INCLUDE_DIR nexus/napi.h )
-if( NOT NEXUS_INCLUDE_DIR )
-  # The old path
-  find_path ( NEXUS_INCLUDE_DIR napi.h )
-endif()
+find_path ( NEXUS_INCLUDE_DIR napi.h ${CMAKE_INCLUDE_PATH}/nexus )
 	  
 # Find the C libraries
 find_library ( NEXUS_C_LIBRARIES NAMES NeXus libNeXus-0 )
@@ -23,10 +19,12 @@ find_library ( NEXUS_C_LIBRARIES NAMES NeXus libNeXus-0 )
 find_library ( NEXUS_CPP_LIBRARIES NAMES NeXusCPP libNeXusCPP-0)
 set ( NEXUS_LIBRARIES ${NEXUS_C_LIBRARIES} ${NEXUS_CPP_LIBRARIES} )
 
+message (status "NEXUS_INCLUDE_DIR=${NEXUS_INCLUDE_DIR}")
+
 # Set a version string by examining the napi.h header
 if( NEXUS_INCLUDE_DIR ) 
   # Extract the line containing the version string which will look like this "#define NEXUS_VERSION   "X.X.X"                /* major.minor.patch */"
-  file ( STRINGS ${NEXUS_INCLUDE_DIR}/nexus/napi.h NEXUS_VERSION_TMP REGEX "^#define[ \t]+NEXUS_VERSION[ \t]+\"[0-9]+.[0-9]+.[0-9]+\"[ \t]+/\\* major\\.minor\\.patch \\*/$" )
+  file ( STRINGS ${NEXUS_INCLUDE_DIR}/napi.h NEXUS_VERSION_TMP REGEX "^#define[ \t]+NEXUS_VERSION[ \t]+\"[0-9]+.[0-9]+.[0-9]+\"[ \t]+/\\* major\\.minor\\.patch \\*/$" )
   # Hack off the portion up to and including the first double quote 
   string( REGEX REPLACE "^#define[ \t]+NEXUS_VERSION[ \t]+\"" "" NEXUS_VERSION_TMP ${NEXUS_VERSION_TMP} )
   # Hack off the portion from the second double quote to the end of the line
