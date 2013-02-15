@@ -239,12 +239,6 @@ namespace Mantid
       setDetectorPositions(detID, l2, theta, phi);
     }
 
-    namespace
-    {
-      ///@cond
-      ///@endcond
-    }
-
     /**
      * Updates from a more generic ascii file
      * @param filename :: The input filename

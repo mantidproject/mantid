@@ -79,7 +79,7 @@ namespace Mantid
 
     /**
      * Returns the value of the cross-section convoluted with the resolution an event. This assumes that
-     * the box forms a 4D point with axes: Qx, Qy, Qz, \f$\DeltaE\f$
+     * the box forms a 4D point with axes: Qx, Qy, Qz, \f$\Delta E\f$
      * @param box :: An iterator pointing at the current box under examination
      * @param eventIndex :: An index of the current event in the box
      * @param innerRunIndex :: An index of the current run within the workspace. This is NOT the run number. The experiment
