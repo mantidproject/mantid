@@ -7,6 +7,7 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <sstream>
 #include <iostream>
