@@ -144,6 +144,8 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
   output->ShallowCopy(clipperOutput);
 
+  m_presenter->setAxisLabels(output);
+
   clipper->Delete();
   
   return 1;
