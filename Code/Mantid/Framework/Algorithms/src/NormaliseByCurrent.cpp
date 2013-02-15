@@ -55,9 +55,9 @@ void NormaliseByCurrent::init()
 
 /**
 Extract a value for the charge from the input workspace. Handles either single period or multi-period data.
-@param inputWS : The input workspace to extract the log details from.
+@param inputWS :: The input workspace to extract the log details from.
 */
-double NormaliseByCurrent::extractCharge(MatrixWorkspace_sptr inputWS) const
+double NormaliseByCurrent::extractCharge(boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS) const
 {
   // Get the good proton charge and check it's valid
   double charge(-1.0);

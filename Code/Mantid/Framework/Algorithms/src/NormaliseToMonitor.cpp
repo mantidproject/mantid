@@ -346,9 +346,10 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
 }
 
 /** Checks and retrieves the requested spectrum out of the input workspace
- *  @param inputWorkspace The input workspace
- *  @returns A workspace containing the monitor spectrum only
- *  @returns spectra number (WS ID) which is used to normalize by
+ *  @param inputWorkspace The input workspace.
+ *  @param spectra_num The spectra number.
+ *  @returns A workspace containing the monitor spectrum only.
+ *  @returns spectra number (WS ID) which is used to normalize by.
  *  @throw std::runtime_error If the properties are invalid
  */
 API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace,int &spectra_num)
@@ -393,7 +394,8 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::Matrix
 }
 
 /** Checks and retrieves the monitor spectrum out of the input workspace
- *  @param inputWorkspace The input workspace
+ *  @param inputWorkspace The input workspace.
+ *  @param wsID The workspace ID.
  *  @returns A workspace containing the monitor spectrum only
  *  @throw std::runtime_error If the properties are invalid
  */

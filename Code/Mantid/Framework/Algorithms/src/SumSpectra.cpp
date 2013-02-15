@@ -210,9 +210,12 @@ specid_t SumSpectra::getOutputSpecId(MatrixWorkspace_const_sptr localworkspace)
 
 /**
  * This function deals with the logic necessary for summing a Workspace2D.
- * @param localworkspace the input workspace for summing
- * @param outSpec the spectrum for the summed output
- * @param progress the progress indicator
+ * @param localworkspace The input workspace for summing.
+ * @param outSpec The spectrum for the summed output.
+ * @param progress The progress indicator.
+ * @param numSpectra The number of spectra contributed to the sum.
+ * @param numMasked The spectra dropped from the summations because they are masked.
+ * @param numZeros The number of zero bins in histogram workspace or empty spectra for event workspace.
  */
 void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
                                ISpectrum *outSpec, Progress &progress,
