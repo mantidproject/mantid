@@ -103,16 +103,17 @@ private:
   /// Store a pointer to a single parameterized instrument instance
   Geometry::Instrument_const_sptr m_instrument;
 
+  /// If set to true then update the detector positions base on the information in the given file
+  bool m_moveDets;
   // Implement abstract Algorithm methods
   void init();
   void exec();
 protected: // for testing
+  void readNXS(const std::string& fName);
+private:
   void readDAT(const std::string& fName);
   void readRAW(const std::string& fName);
-  void readNXS(const std::string& fName);
-  /// If set to true then update the detector positions base on the information in the given file
-  bool m_moveDets;
-private:
+
   void readLibisisNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct,std::vector<int32_t>&detType,std::vector<float> &detOffset,std::vector<detid_t> &detList);
   void readDetDotDatNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct,std::vector<int32_t>&detType,std::vector<float> &detOffset,std::vector<detid_t> &detList);
 

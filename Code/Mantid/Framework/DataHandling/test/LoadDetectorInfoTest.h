@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/FileFinder.h"
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
@@ -50,9 +51,8 @@ namespace SmallTestDatFile
 class LoadDetectorIndoTestHelper : public LoadDetectorInfo
 {
 public:
-  void readNXS(const std::string &fName,bool moveDetectors = true)
+  void readNXS(const std::string &fName)
   {
-    this->m_moveDets  = moveDetectors;
     LoadDetectorInfo::readNXS(fName);
   }
 };
@@ -262,7 +262,8 @@ public:
   {
     // create a .dat file in the current directory that we'll load later
     writeSmallDatFile(m_DatFile);
-    writeDetNXSfile(m_NXSFile,6);
+    // create correspondent nxs file
+    writeDetNXSfile(m_NXSFile,SmallTestDatFile::NDETECTS);
     m_rawFile = RAWFILE;
   }
 
@@ -279,9 +280,13 @@ public:
 
   void testLoadNXSmisc()
   {
-    //LoadDetectorIndoTestHelper loader;
-    //TS_ASSERT_THROWS(loader.readNXS("NonExistingFile"),std::invalid_argument);
-    //TS_ASSERT_THROWS_NOTHING(loader.readNXS("det_nxs_libisis.nxs"));
+    LoadDetectorIndoTestHelper loader;
+
+    TS_ASSERT_THROWS(loader.readNXS("NonExistingFile"),std::invalid_argument);
+
+    std::string nexusWithoutDet = FileFinder::Instance().getFullPath("argus0026287.nxs");
+    if(nexusWithoutDet.empty())return;
+    TSM_ASSERT_THROWS("this nexus does not have detector information ",loader.readNXS(nexusWithoutDet),std::invalid_argument);
 
   }
 
