@@ -16,7 +16,7 @@
 #include "LoadRaw/isisraw2.h"
 
 #include <Poco/File.h>
-#include <MantidNexusCPP/NeXusFile.hpp>
+#include <NeXusFile.hpp>
 
 namespace Mantid
 {
