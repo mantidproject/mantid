@@ -703,6 +703,7 @@ namespace MDEvents
    * @param normalize :: how to normalize the signal
    * @param x :: is set to the boundaries of the bins, relative to start of the line.
    * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+   * @param e :: vector of errors for each bin.
    */
   TMDE(
   void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
