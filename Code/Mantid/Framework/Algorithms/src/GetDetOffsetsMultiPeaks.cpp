@@ -40,8 +40,52 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    /// Factor to convert full width half max to sigma for calculations of I/sigma.
-    const double FWHM_TO_SIGMA = 2.0*sqrt(2.0*std::log(2.0));
+    namespace 
+    {
+      /// Factor to convert full width half max to sigma for calculations of I/sigma.
+      const double FWHM_TO_SIGMA = 2.0*sqrt(2.0*std::log(2.0));
+
+      /**
+       * Helper function for calculating costs in gsl.
+       * @param v Vector of offsets.
+       * @param params Array of input parameters.
+       * @returns Sum of the errors.
+       */
+      double gsl_costFunction(const gsl_vector *v, void *params)
+      {
+        double *p = (double *)params;
+        size_t n = static_cast<size_t>(p[0]);
+        std::vector<double> peakPosToFit(n);
+        std::vector<double> peakPosFitted(n);
+        std::vector<double> chisq(n);
+        double minD = p[1];
+        double maxD = p[2];
+        for (size_t i = 0; i < n; i++)
+        {
+          peakPosToFit[i] = p[i+3];
+        }
+        for (size_t i = 0; i < n; i++)
+        {
+          peakPosFitted[i] = p[i+n+3];
+        }
+        for (size_t i = 0; i < n; i++)
+        {
+          chisq[i] = p[i+2*n+3];
+        }
+
+        double offset = gsl_vector_get(v, 0);
+        double errsum = 0.0;
+        for (size_t i = 0; i < n; ++i)
+        {
+          // Get references to the data
+          //See formula in AlignDetectors
+          double peakPosMeas = (1.+offset)*peakPosFitted[i];
+          if(peakPosFitted[i] > minD && peakPosFitted[i] < maxD)
+            errsum += std::fabs(peakPosToFit[i]-peakPosMeas)/chisq[i];
+        }
+        return errsum;
+      }
+    }
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(GetDetOffsetsMultiPeaks)
@@ -67,41 +111,7 @@ namespace Mantid
     GetDetOffsetsMultiPeaks::~GetDetOffsetsMultiPeaks()
     {}
   
-    static double Mantid::Algorithms::gsl_costFunction(const gsl_vector *v, void *params)
-    {
-      double *p = (double *)params;
-      size_t n = static_cast<size_t>(p[0]);
-      std::vector<double> peakPosToFit(n);
-      std::vector<double> peakPosFitted(n);
-      std::vector<double> chisq(n);
-      double minD = p[1];
-      double maxD = p[2];
-      for (size_t i = 0; i < n; i++)
-      {
-        peakPosToFit[i] = p[i+3];
-      }
-      for (size_t i = 0; i < n; i++)
-      {
-        peakPosFitted[i] = p[i+n+3];
-      }
-      for (size_t i = 0; i < n; i++)
-      {
-        chisq[i] = p[i+2*n+3];
-      }
-    
-      double offset = gsl_vector_get(v, 0);
-      double errsum = 0.0;
-      for (size_t i = 0; i < n; ++i)
-      {
-        // Get references to the data
-        //See formula in AlignDetectors
-        double peakPosMeas = (1.+offset)*peakPosFitted[i];
-        if(peakPosFitted[i] > minD && peakPosFitted[i] < maxD)
-          errsum += std::fabs(peakPosToFit[i]-peakPosMeas)/chisq[i];
-      }
-      return errsum;
-    }
-  
+ 
     //-----------------------------------------------------------------------------------------
     /** Initialisation method. Declares properties to be used in algorithm.
      */
@@ -313,7 +323,7 @@ namespace Mantid
     
           /* Initialize method and iterate */
           minex_func.n = nopt;
-          minex_func.f = &Mantid::Algorithms::gsl_costFunction;
+          minex_func.f = &gsl_costFunction;
           minex_func.params = &params;
     
           s = gsl_multimin_fminimizer_alloc (T, nopt);
