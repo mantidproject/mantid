@@ -120,6 +120,13 @@ namespace DataHandling
     }
   }
 
+  /// Connect to the SMS daemon.
+
+  /// Attempts to connect to the SMS daemon at the specified address.  Note:
+  /// if the address is '0.0.0.0', it looks on localhost:31415 (useful for
+  /// debugging and testing).
+  /// @param address The address to attempt to connect to
+  /// @return Returns true if the connection succeeds.  False otherwise.
   bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress& address)
   // The SocketAddress class will throw various exceptions if it encounters an error
   // We're assuming the calling function will catch any exceptions that are important
@@ -157,11 +164,21 @@ namespace DataHandling
     return rv;
   }
 
+  /// Test to see if the object has connected to the SMS daemon
+
+  /// Test to see if the object has connected to the SMS daemon
+  /// @return Returns true if connected.  False otherwise.
   bool SNSLiveEventDataListener::isConnected()
   {
     return m_isConnected;
   }
 
+  /// Start the background thread
+
+  /// Starts the background thread which reads data from the network, parses it and
+  /// stores the resulting events in a temporary workspace.
+  /// @param startTime Specifies how much historical data the SMS should send before continuing
+  /// the current 'live' data.  Use 0 to indicate no historical data.
   void SNSLiveEventDataListener::start(Kernel::DateAndTime startTime)
   {
     // Save the startTime and kick off the background thread
@@ -171,6 +188,11 @@ namespace DataHandling
     m_thread.start( *this);
   }
 
+  /// The main function for the background thread
+
+  /// Loops until the forground thread requests it to stop.  Reads data from the network,
+  /// parses it and stores the resulting events (and other metadata) in a temporary
+  /// workspace.
   void SNSLiveEventDataListener::run()
   {
     try {
@@ -292,6 +314,13 @@ namespace DataHandling
   }
 
 
+  /// Parse an RTDL packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::RTDLPkt packets.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RTDLPkt &pkt)
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -302,6 +331,16 @@ namespace DataHandling
     return false;
   }
 
+  /// Parse a banked event packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::BankedEventPkt packets.  Parsed events are stored
+  /// in the temporary workspace until the forground thread retrieves
+  /// them.
+  /// @see extractData()
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   // Note:  Before we can process a particular BankedEventPkt, we must have
   // received the RTDLPkt for pulse ID specified in the BankedEventPkt.
   // Normally this won't be an issue since the SMS will send out RTDLPkts
@@ -381,6 +420,13 @@ namespace DataHandling
     return false;
   }
 
+  /// Parse a heartbeat packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::HeartbeatPkt packets.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::HeartbeatPkt &)
   {
     // We don't actually need anything out of the heartbeat packet - we just
@@ -390,6 +436,14 @@ namespace DataHandling
   }
 
 
+  /// Parse a geometry packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::GeometryPkt packets.  The data is used to initialize
+  /// the temporary workspace.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::GeometryPkt &pkt)
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -411,6 +465,14 @@ namespace DataHandling
     return false;
   }
 
+  /// Parse a beamline info packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::BeamlineInfoPkt packets.  The data is used to initialize
+  /// the temporary workspace.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BeamlineInfoPkt &pkt)
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -433,6 +495,13 @@ namespace DataHandling
   }
 
 
+  /// Parse a run status packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::RunStatusPkt packets.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -544,6 +613,17 @@ namespace DataHandling
     // in the packet parser.
   }
 
+  /// Parse a variable value packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::VariableU32Pkt packets.  The extracted value is stored
+  /// in the sample log of the temporary workspace.
+  /// @warning The specified variable must have already been described in a
+  /// ADARA::DeviceDescriptorPkt packet.
+  /// @see SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &)
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableU32Pkt &pkt)
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -570,6 +650,17 @@ namespace DataHandling
     return false;
   }
 
+  /// Parse a variable value packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::VariableDoublePkt packets.  The extracted value is stored
+  /// in the sample log of the temporary workspace.
+  /// @warning The specified variable must have already been described in a
+  /// ADARA::DeviceDescriptorPkt packet.
+  /// @see SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &)
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableDoublePkt &pkt)
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -596,6 +687,20 @@ namespace DataHandling
     return false;
   }
 
+  /// Parse a variable value packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::VariableStringPkt packets.  The extracted value is stored
+  /// in the sample log of the temporary workspace.
+  /// @warning The specified variable must have already been described in a
+  /// ADARA::DeviceDescriptorPkt packet.
+  /// @see SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &)
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
+  /// @remarks As of Februrary 2013, the SMS does not actually send out packets
+  /// of this type.  As such, this particular function has received very little
+  /// testing.
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableStringPkt &pkt)
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -622,6 +727,19 @@ namespace DataHandling
     return false;
   }
 
+  /// Parse a device decriptor packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::DeviceDecriptorPkt packets.  These packets contain
+  /// XML text decribing variables that will be received in subsequent
+  /// ADARA::VariableU32Pkt, ADARA::VariableDoublePkt and
+  /// ADARA::VariableStringPkt packets.
+  /// @see rxPacket( const ADARA::VariableU32Pkt &)
+  /// @see rxPacket( const ADARA::VariableDoublePkt &)
+  /// @see rxPacket( const ADARA::VariableStringPkt &)
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &pkt)
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -762,6 +880,15 @@ namespace DataHandling
     return false;
   }
 
+  /// Parse a stream annotation packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::AnnotationPkt packets.  Scan start, Scan stop, Pause
+  /// & Resume annotations are stored as time series properties in the
+  /// workspace.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::AnnotationPkt &pkt)
   {
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -814,6 +941,10 @@ namespace DataHandling
   }
 
 
+  /// First part of the workspace initialization
+
+  /// Performs various initialization steps that can (and, in some
+  /// cases, must) be done prior to receiving any packets from the SMS daemon.
   void SNSLiveEventDataListener::initWorkspacePart1()
   {
     m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
@@ -831,6 +962,10 @@ namespace DataHandling
 
   }
 
+  /// Second part of the workspace initialization
+
+  /// Finishes the workspace initialization using data from
+  /// various packets received from the SMS daemon
   void SNSLiveEventDataListener::initWorkspacePart2()
   {
     // Use the LoadEmptyInstrument algorithm to create a proper workspace
@@ -863,6 +998,7 @@ namespace DataHandling
     m_workspaceInitialized = true;
   }
 
+  /// Adds an event to the workspace
   void SNSLiveEventDataListener::appendEvent(uint32_t pixelId, double tof,
                                              const Mantid::Kernel::DateAndTime pulseTime)
   // NOTE: This function does NOT lock the mutex!  Make sure you do that
@@ -884,6 +1020,12 @@ namespace DataHandling
     }
   }
 
+  /// Retrieve buffered data
+
+  /// Called by the foreground thread to fetch data that's accumulated in
+  /// the temporary workspace.  The temporary workspace is left empty and
+  /// ready to receive more data.
+  /// @return shared pointer to a workspace containing the accumulated data
   boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData()
   {
     // Block until the background thread has actually initialized the workspace
@@ -919,6 +1061,11 @@ namespace DataHandling
   }
 
 
+  /// Check the status of the current run
+
+  /// Called by the foreground thread check the status of the current run
+  /// @returns Returns an enum indicating beginning of a run, in the middle
+  /// of a run, ending a run or not in a run.
   ILiveListener::RunStatus SNSLiveEventDataListener::runStatus()
   {
     // The MonitorLiveData algorithm calls this function *after* the call to
