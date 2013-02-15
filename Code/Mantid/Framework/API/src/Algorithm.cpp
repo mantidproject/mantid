@@ -36,6 +36,9 @@ namespace Mantid
 {
   namespace API
   {
+    // Doxygen can't handle member specialization at the moment: https://bugzilla.gnome.org/show_bug.cgi?id=406027
+    // so we have to ignore them
+    ///@cond
     template <typename NumT>
     bool Algorithm::isEmpty(const NumT toCheck)
     {
@@ -53,6 +56,7 @@ namespace Mantid
     template MANTID_API_DLL bool Algorithm::isEmpty<int> (const int);
     template MANTID_API_DLL bool Algorithm::isEmpty<int64_t> (const int64_t);
     template MANTID_API_DLL bool Algorithm::isEmpty<std::size_t> (const std::size_t);
+    ///@endcond
 
     //=============================================================================================
     //================================== Constructors/Destructors =================================

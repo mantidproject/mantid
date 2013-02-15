@@ -55,7 +55,7 @@ namespace API
     ExperimentInfo * cloneExperimentInfo()const;
 
     /// Instrument accessors
-    void setInstrument(const Geometry::Instrument_const_sptr&);
+    void setInstrument(const Geometry::Instrument_const_sptr& instr);
     /// Returns the parameterized instrument
     Geometry::Instrument_const_sptr getInstrument() const;
 

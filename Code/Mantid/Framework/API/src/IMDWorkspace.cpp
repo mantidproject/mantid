@@ -70,6 +70,7 @@ namespace Mantid
        * @param normalize :: how to normalize the signal
        * @param x :: is set to the boundaries of the bins, relative to start of the line.
        * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+       * @param e :: is set to the normalized errors for each bin. Length = length(x) - 1
        */
       void IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
           Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const

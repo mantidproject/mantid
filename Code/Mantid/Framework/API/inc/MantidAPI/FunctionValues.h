@@ -78,6 +78,7 @@ public:
   double operator[](size_t i) const {return m_calculated[i];}
   /// Add a number to a calculated value.
   /// @param i :: An index of a value 0 <= i < size()
+  /// @param value :: The value to add at the index given
   void addToCalculated(size_t i, double value) {m_calculated[i] += value;}
 
   /// Add other calculated values

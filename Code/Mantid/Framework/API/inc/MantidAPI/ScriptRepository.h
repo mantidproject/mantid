@@ -263,10 +263,11 @@ They will work as was expected for folders @ref folders-sec.
   public:
    
     /// Virtual destructor (always needed for abstract classes)
-    virtual ~ScriptRepository() throw(){};
+    virtual ~ScriptRepository() {};
 
     /// Define a file inside the repository
-    struct file_entry{
+    struct file_entry
+    {
       /// path related to git
       std::string path; 
       /// file status
@@ -275,15 +276,6 @@ They will work as was expected for folders @ref folders-sec.
       bool directory;
     };
 
-         
-    /** The constructor of ScriptSharing. 
-        
-        Ideally, it requires the definition of the remote repository
-        and the local repository. But these values will be available inside
-        the mantid properties service (MantidKernel::ConfigService). 
-     */
-    // ScriptSharing();
-    
     /**
        Return the information about the script through the ScriptRepoException 
        struct. 
@@ -353,26 +345,26 @@ They will work as was expected for folders @ref folders-sec.
        Create a copy of the remote file/folder inside the local repository.
        For folder, it will copy all the files inside the folder as well. 
 
-       @attention If one file is different locally and remotelly, the download
-                  will make a copy of the remote file, but will preserv a backup
-                  of the local file. This will be reported through throwing an
-                  exception.
+       If one file is different locally and remotely, the download
+       will make a copy of the remote file, but will preserve a backup
+       of the local file. This will be reported through throwing an
+       exception.
        
-       @param path of a file or folder to be downloaded. 
+       @param file_path of a file or folder to be downloaded.
 
-       @exception ScriptRepoException to indicate file is not available at 
-                  remotely or to indicate that a confict was found.
+       @throws ScriptRepoException to indicate file is not available at
+                  remotely or to indicate that a conflict was found.
        
      */
-    virtual void download(const std::string file_path)  = 0 ;
+    virtual void download(const std::string file_path) = 0 ;
 
 
     
     /**
        Return the status of the file, according to the status defined in 
-       ::SCRIPTSTATUS. 
+       SCRIPTSTATUS.
 
-       @param path for file/folder
+       @param file_path for file/folder
        @return SCRIPTSTATUS of the given file/folder
        @exception ScriptRepoException to indicate that file is not available.
      */

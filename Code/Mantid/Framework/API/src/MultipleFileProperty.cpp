@@ -40,14 +40,11 @@ namespace API
   /**
    * Constructor
    *
-   * @param name ::          The name of the property
-   * @param exts ::          The allowed/suggested extensions
-   * @param optional ::      If true, the property is optional
+   * @param name :: The name of the property
+   * @param exts ::  The allowed/suggested extensions
    */
-  MultipleFileProperty::MultipleFileProperty(
-    const std::string & name,
-    const std::vector<std::string> & exts
-  ) : PropertyWithValue<std::vector<std::vector<std::string> > >( name,
+  MultipleFileProperty::MultipleFileProperty(const std::string & name, const std::vector<std::string> & exts)
+    : PropertyWithValue<std::vector<std::vector<std::string> > >( name,
         std::vector<std::vector<std::string> >(), boost::make_shared<MultiFileValidator>(exts), Direction::Input),
       m_multiFileLoadingEnabled(),
       m_exts(),
@@ -149,11 +146,11 @@ namespace API
    *
    * ((1), (2), (30, 31, 32), (100), (102)) becomes (1, 2, 30, 31, 32, 100, 102)
    *
-   * @param - a vector of vectors, containing all the file names.
+   * @param fileNames :: a vector of vectors, containing all the file names.
    * @return a single vector containing all the file names.
    */
-  std::vector<std::string> MultipleFileProperty::flattenFileNames(
-    const std::vector<std::vector<std::string> > & fileNames)
+  std::vector<std::string>
+  MultipleFileProperty::flattenFileNames(const std::vector<std::vector<std::string> > & fileNames)
   {
     std::vector<std::string> flattenedFileNames;
 

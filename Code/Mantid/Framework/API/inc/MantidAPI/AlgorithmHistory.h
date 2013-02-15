@@ -48,14 +48,14 @@ class MANTID_API_DLL AlgorithmHistory
 public:
   /// The date-and-time will be stored as the Mantid::Kernel::DateAndTime type
   explicit AlgorithmHistory(const Algorithm* const alg, 
-                            const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
+                            const Kernel::DateAndTime& start = Kernel::DateAndTime::defaultTime(),
                             const double& duration = -1.0,std::size_t uexeccount = 0);
   virtual ~AlgorithmHistory();
   AlgorithmHistory& operator=(const AlgorithmHistory&);
   AlgorithmHistory(const AlgorithmHistory&);
-  AlgorithmHistory(const std::string& name, int vers, const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
+  AlgorithmHistory(const std::string& name, int vers, const Kernel::DateAndTime& start = Kernel::DateAndTime::defaultTime(),
                    const double& duration = -1.0, std::size_t uexeccount = 0);
-  void addExecutionInfo(const Mantid::Kernel::DateAndTime& start, const double& duration);
+  void addExecutionInfo(const Kernel::DateAndTime& start, const double& duration);
   void addProperty(const std::string& name,const std::string& value,bool isdefault, 
                    const unsigned int& direction = 99);
   // get functions

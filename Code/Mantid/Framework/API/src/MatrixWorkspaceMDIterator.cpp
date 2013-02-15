@@ -286,8 +286,8 @@ namespace API
   }
 
   /**
-  Getter for the masked state of the workspace.
-  @Return TRUE if the detector/detector-group at the workspace index is masked, or if there is no detector at that index.
+   * Getter for the masked state of the workspace.
+   * @returns True if the detector/detector-group at the workspace index is masked, or if there is no detector at that index.
   */
   bool MatrixWorkspaceMDIterator::getIsMasked() const
   {

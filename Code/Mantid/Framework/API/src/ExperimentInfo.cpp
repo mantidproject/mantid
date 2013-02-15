@@ -95,7 +95,6 @@ namespace API
 
   //---------------------------------------------------------------------------------------
   /** Set the instrument
-  *
   * @param instr :: Shared pointer to an instrument.
   */
   void ExperimentInfo::setInstrument(const Instrument_const_sptr& instr)

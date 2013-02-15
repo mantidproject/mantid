@@ -13,7 +13,7 @@ namespace API
    * @param manager :: A property manager which has information about the data source (eg workspace)
    * and the function.
    * @param workspacePropertyNames :: Property names for workspaces to get the data from.
-   * @ param domainType :: Type of domain to create: Simple, Sequential, or Parallel.
+   * @param domainType :: Type of domain to create: Simple, Sequential, or Parallel.
    */
   IDomainCreator::IDomainCreator( Kernel::IPropertyManager* manager,
     const std::vector<std::string>& workspacePropertyNames,

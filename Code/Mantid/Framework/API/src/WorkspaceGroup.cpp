@@ -156,7 +156,7 @@ void WorkspaceGroup::removeAll()
 }
 
 /** Remove the named workspace from the group. Does not delete the workspace from the AnalysisDataService.
- *  @param name :: The name of the workspace to be removed from the group.
+ *  @param wsName :: The name of the workspace to be removed from the group.
  */
 void WorkspaceGroup::remove(const std::string& wsName)
 {

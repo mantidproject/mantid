@@ -13,6 +13,8 @@ namespace API
   /** Constructor
    * @param funct :: A pointer to the function which parameter will be tied
    * @param parName :: The name of the parameter to be tied
+   * @param expr :: A mathematical expression for the tie
+   * @param isDefault :: Flag to mark as default the value of an object associated with this reference: a tie or a constraint.
    */
   ParameterTie::ParameterTie(IFunction* funct,const std::string& parName,const std::string& expr, bool isDefault)
     :ParameterReference(funct,funct->parameterIndex(parName),isDefault),m_parser(new mu::Parser()),m_function1(funct)

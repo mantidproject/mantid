@@ -13,7 +13,7 @@
 
 namespace Mantid
 {
-        
+
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -33,7 +33,7 @@ namespace API
 /** @class ScriptRepositoryFactoryImpl
 
     The ScriptRepositoryFactoryImpl class is in charge of the creation of concrete
-    instance of ::ScriptRepository interface. It inherits most of its implementation from
+    instance of ScriptRepository interface. It inherits most of its implementation from
     the Dynamic Factory base class.
     It is implemented as a singleton class.
     

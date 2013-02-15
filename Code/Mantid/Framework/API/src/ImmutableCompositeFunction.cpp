@@ -140,7 +140,7 @@ using std::size_t;
   /**
    * Add a list of constraints from a string. Constraints added with this method are created with 
    * isDefault flag set to true and do not appear in the string returned by asString() method.
-   * @param str :: A comma-separated list of constraint expressions.
+   * @param constraints :: A comma-separated list of constraint expressions.
    */
   void ImmutableCompositeFunction::addDefaultConstraints(const std::string& constraints)
   {

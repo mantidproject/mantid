@@ -360,7 +360,7 @@ namespace Mantid
      * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored. True to ignore detectors.
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<specid_t, V3D> MatrixWorkspace::getNeighbours(const IDetector *comp, const double radius, const bool ignoreMaskedDetectors) const
+    std::map<specid_t, V3D> MatrixWorkspace::getNeighbours(const Geometry::IDetector *comp, const double radius, const bool ignoreMaskedDetectors) const
     {
       if ( !m_nearestNeighbours )
       {
@@ -1567,6 +1567,7 @@ namespace Mantid
      * @param normalize :: how to normalize the signal
      * @param x :: is set to the boundaries of the bins, relative to start of the line.
      * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+     * @param e :: is set to the normalized errors for each bin. Length = length(x) - 1
      */
     void MatrixWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
         Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const

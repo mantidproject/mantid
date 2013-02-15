@@ -340,6 +340,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   /** Save the object to an open NeXus file.
    * @param file :: open NeXus file
    * @param group :: name of the group to create
+   * @param keepOpen :: If true, leave the file open after saving
    */
   void Run::saveNexus(::NeXus::File * file, const std::string & group,bool keepOpen) const
   {
@@ -364,6 +365,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * @param file :: open NeXus file
    * @param group :: name of the group to open. Empty string to NOT open a group, but
    * load any NXlog in the current open group.
+   * @param keepOpen :: If true, then the file is left open after doing to load
    */
   void Run::loadNexus(::NeXus::File * file, const std::string & group, bool keepOpen)
   {

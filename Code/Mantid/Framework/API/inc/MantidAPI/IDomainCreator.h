@@ -73,7 +73,6 @@ namespace Mantid
       {UNUSED_ARG(suffix);UNUSED_ARG(addProp);}
 
       /// Create a domain and values from the input workspace. FunctionValues must be filled with data to fit to.
-      /// @param workspacePropetyName :: A name of a workspace property. Domain will be created for this workspace.
       /// @param domain :: Shared pointer to hold the created domain
       /// @param values :: Shared pointer to hold the created values with set fitting data and weights.
       ///  Implementations must check whether it's empty or not. If values pointer is empty create new values instance
@@ -87,6 +86,10 @@ namespace Mantid
 
       /**
        * Create an output workspace filled with data simulated with the fitting function.
+       * @param baseName :: A prefix for the name of the output workspace
+       * @param function :: The function that will provide the calculated values
+       * @param domain :: The input domain over which the function is calculated
+       * @param values :: A result holder for results on the domain
        */
       virtual void createOutputWorkspace(
         const std::string& baseName,
