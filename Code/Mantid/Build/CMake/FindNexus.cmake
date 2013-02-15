@@ -11,15 +11,17 @@
 # Search for the include files. Newer versions of Nexus have a nexus sub directory 
 # containing the headers but older versions just have napi.h in the root include path
 # Try for nexus/napi.h first
-find_path ( NEXUS_INCLUDE_DIR napi.h ${CMAKE_INCLUDE_PATH}/nexus )
+find_path ( NEXUS_INCLUDE_DIR nexus/napi.h )
+if( NOT NEXUS_INCLUDE_DIR )
+  # The old path
+  find_path ( NEXUS_INCLUDE_DIR napi.h )
+endif()
 	  
 # Find the C libraries
 find_library ( NEXUS_C_LIBRARIES NAMES NeXus libNeXus-0 )
 # Find the C++ libraries
 find_library ( NEXUS_CPP_LIBRARIES NAMES NeXusCPP libNeXusCPP-0)
 set ( NEXUS_LIBRARIES ${NEXUS_C_LIBRARIES} ${NEXUS_CPP_LIBRARIES} )
-
-message (status "NEXUS_INCLUDE_DIR=${NEXUS_INCLUDE_DIR}")
 
 # Set a version string by examining the napi.h header
 if( NEXUS_INCLUDE_DIR ) 
