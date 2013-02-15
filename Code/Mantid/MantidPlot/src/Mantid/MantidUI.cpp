@@ -3382,8 +3382,7 @@ MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QStr
 
   if (!ws.get())return 0 ;
 
-  MantidMatrix* w = 0;
-  w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
+  MantidMatrix* w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
   if ( !w ) return 0;
 
   appWindow()->addMdiSubWindow(w);
