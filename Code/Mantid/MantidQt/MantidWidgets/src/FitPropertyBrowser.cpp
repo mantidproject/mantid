@@ -64,6 +64,8 @@
 #include <QSignalMapper>
 #include <QMetaMethod>
 #include <QTreeWidget>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include <algorithm>
 
@@ -733,6 +735,10 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
     menu->addAction(action);
 
     menu->addSeparator();
+
+    action = new QAction("Help",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(browserHelp()));
+    menu->addAction(action);
   }
   else if (isFunctionsGroup || isSettingsGroup || isASetting)
   {
@@ -752,6 +758,10 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
 
     action = new QAction("Clear all",this);
     connect(action,SIGNAL(triggered()),this,SLOT(clear()));
+    menu->addAction(action);
+
+    action = new QAction("Help",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(browserHelp()));
     menu->addAction(action);
 
   }
@@ -783,6 +793,10 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
         menu->addAction(action);
       }
     }
+
+    action = new QAction("Help",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(functionHelp()));
+    menu->addAction(action);
 
     menu->addSeparator();
   }
@@ -3067,6 +3081,28 @@ QStringList FitPropertyBrowser::getParameterNames() const
     out.append(QString::fromStdString( parName ));
   }
   return out;
+}
+
+/**=================================================================================================
+ * Show online function help
+ */
+void FitPropertyBrowser::functionHelp()
+{
+  PropertyHandler* handler = currentHandler();
+  if ( handler )
+  {
+    // Create and open the URL of the help page
+    QString url = QString::fromStdString( "http://www.mantidproject.org/" + handler->ifun()->name() );
+    QDesktopServices::openUrl(QUrl(url));
+  }
+}
+
+/**=================================================================================================
+ * Show online browser help
+ */
+void FitPropertyBrowser::browserHelp()
+{
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_Simple_Peak_Fitting_with_the_Fit_Wizard#Fit_Properties_Browser"));
 }
 
 } // MantidQt

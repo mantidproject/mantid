@@ -285,10 +285,11 @@ private slots:
   void loadFunctionFromString();
   void acceptFit();
   void closeFit();
-
   void copy();///< Copy the function string to the clipboard
   void paste();///< Paste a function string from the clipboard
   void reset();///< reset the function part, renew function, all handlers are new
+  void functionHelp(); ///< Open a web page with description of the current function
+  void browserHelp();  ///< Open a web page with description of FitPropertyBrowser
 
   void popupMenu(const QPoint &);
   /* Context menu slots */
