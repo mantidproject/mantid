@@ -22,7 +22,7 @@
 #include <vector>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
-#include <NeXusFile.hpp>
+#include  <nexus/NeXusFile.hpp>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
