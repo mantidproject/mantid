@@ -275,7 +275,8 @@ EXPAND_ONLY_PREDEF     = YES
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           = 
 INCLUDE_FILE_PATTERNS  = 
-PREDEFINED             = "TMDE(decl)=decl"
+PREDEFINED             = "TMDE(decl)=decl" \
+                         "INSTANTIATE(TYPE)=template MANTID_KERNEL_DLL Statistics getStatistics<TYPE> (const vector<TYPE> &, const bool);\template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE> (const vector<TYPE> &, const bool);\template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE> (const vector<TYPE> &, const bool);"
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
