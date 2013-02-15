@@ -818,19 +818,39 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
   if(!hFile)
     throw std::runtime_error(" Can not open file "+fName+" as nexus file");
 
-  hFile->openGroup("full_reference_detector","NXIXTdetector");
-    std::vector<detectorInfo> detStruct;
-    std::vector<int32_t> detType;
-    std::vector<float> detOffset;
-    this->readLibisisNXS(hFile,detStruct,detType,detOffset);
-  hFile->closeGroup();
+  std::map<std::string, std::string> entries;
+  hFile->getEntries(entries);
+  // define data requested
+  bool detDataFound(false);
+  std::vector<detectorInfo> detStruct;
+  std::vector<int32_t> detType;
+  std::vector<float> detOffset;
+  std::vector<detid_t> detectorList;
+  // identify what file we would read
+  if(entries.find("full_reference_detector")!=entries.end())
+  {
+    g_log.warning()<<" reading data from old Libisis format, which does not support multiple helium pressures and wall thickness\n";
+    hFile->openGroup("full_reference_detector","NXIXTdetector");
+      this->readLibisisNXS(hFile,detStruct,detType,detOffset,detectorList);
+    hFile->closeGroup();
+    detDataFound = true;
+  }
+  if(entries.find("detectors.dat")!=entries.end())
+  {  
+    hFile->openGroup("detectors.dat","NXEntry");
+      this->readDetDotDatNXS(hFile,detStruct,detType,detOffset,detectorList);
+    hFile->closeGroup();
+    detDataFound = true;
+  }
   delete hFile;
 
+  if(!detDataFound)
+    throw std::invalid_argument("the NeXus file "+fName+" does not contain necessary detector's information");
+
+  // process detectors and modify instrument
   size_t nDetectors = detStruct.size();
   float detectorOffset = UNSETOFFSET;
-  bool differentOffsets = false;
-  std::vector<detid_t> detectorList;
-  detectorList.reserve(nDetectors);
+  bool differentOffsets = false; 
   std::vector<detid_t> missingDetectors;
   detectorInfo log;
 
@@ -880,7 +900,6 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
     {
       setDetectorParams(detStruct[i], log);
       sometimesLogSuccess(log, noneSet);
-      detectorList.push_back(detStruct[i].detID);
     }
     catch (Exception::NotFoundError &)
     {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
@@ -908,25 +927,25 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
     logErrorsFromRead(missingDetectors);
     g_log.debug() << "Successfully read DAT file " << fName << std::endl;
 }
-
-void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct, std::vector<int32_t>&detType,std::vector<float> &detOffset)
+/**Read detector.dat information from the old libisis NeXus format 
+ * @param hFile -- pointer to the opened NeXus file handle, opened at the group, which contains Libisis Detector information
+ *
+ * @returns  detStruct -- the vector of the DetectorInfo structures, describing the detectors to modify
+ * @returns  detType   -- the vector of the detector types, described in the algorithm description
+ * @returns detOffset  -- the time delay for each detector's electronics, which should be corrected for.
+*/
+void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct, std::vector<int32_t>&detType,std::vector<float> &detOffset,
+                                      std::vector<detid_t>&detList)
 {
 
     std::vector<double> delayTime;
     std::vector<int32_t> detID;
     // read detector ID
-    hFile->openData("det_no");
-    hFile->getData<int32_t>(detID);
-    hFile->closeData();
+    hFile->readData<int32_t>("det_no",detID);
     // read detector type 
-    hFile->openData("det_type");
-    hFile->getData<int32_t>(detType);
-    hFile->closeData();
-
+    hFile->readData<int32_t>("det_type",detType);
     // read the detector's type
-    hFile->openData("delay_time");
-    hFile->getData<double>(delayTime);
-    hFile->closeData();
+    hFile->readData<double>("delay_time",delayTime);
 
     size_t nDetectors = delayTime.size();
     std::vector<double> L2,Phi,Theta;
@@ -946,11 +965,21 @@ void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detector
       Theta.assign(nDetectors,DBL_MAX);
     }
     //We need He3 pressue and wall thikness
-    double pressure(0.0008),wallThickness(111.);
+    double pressure(0.0008),wallThickness(10.);
     hFile->openGroup("det_he3","NXIXTdet_he3");
         hFile->readData<double>("gas_pressure",pressure);
         hFile->readData<double>("wall_thickness",wallThickness);
     hFile->closeGroup();
+    if(pressure<=0)
+    {
+      g_log.warning("The data file dooes not contain correct He3 pressure value, default value of 10Bar is used instead");
+      pressure = 10.;
+    }
+    if(wallThickness<=0)
+    {
+      g_log.warning("The data file does not contain correct detector's wall thickness value, default value of 0.8mm is used instead");
+      wallThickness = 0.0008;
+    }
 
 
    if(nDetectors!=L2.size()||nDetectors!=Phi.size()||nDetectors!=Theta.size()||nDetectors!=detID.size())
@@ -958,6 +987,7 @@ void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detector
 
    detStruct.resize(nDetectors);
    detOffset.resize(nDetectors);
+   detList.resize(nDetectors);
    for(size_t i=0;i<nDetectors;i++)
    {
       detStruct[i].detID = detID[i];
@@ -968,11 +998,72 @@ void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detector
       detStruct[i].wallThick = wallThickness;
 
       detOffset[i]  = float(delayTime[i]);
+      detList[i] = detid_t(detID[i]);
     }
     
 }
 
 
+/**Read detector.dat information (see ) written in NeXus format 
+ * @param hFile -- pointer to the opened NeXus file handle, opened at the group, which contains Libisis Detector information
+ *
+ * @returns  detStruct -- the vector of the DetectorInfo structures, describing the detectors to modify
+ * @returns  detType   -- the vector of the detector types, described in the algorithm description
+ * @returns  detOffset  -- the time delay for each detector's electronics, which should be corrected for.
+*/
+void LoadDetectorInfo::readDetDotDatNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct, std::vector<int32_t>&detType,std::vector<float> &detOffset,
+                                        std::vector<detid_t>&detList)
+{
+
+    std::vector<float> timeOffsets;
+    std::vector<int32_t> detID;
+    // read detector num and ID 
+    hFile->readData<int32_t>("detID",detID);
+
+    // read the detector's time offsets 
+    hFile->readData<float>("timeOffsets",timeOffsets);
+
+    size_t nDetectors = timeOffsets.size()/2;
+    std::vector<float> detSphericalCoord;
+    if(m_moveDets)
+    {
+        hFile->readData<float>("detSphericalCoord",detSphericalCoord);
+    }
+    else
+    {
+      detSphericalCoord.assign(3*nDetectors,FLT_MAX);
+    }
+    //We need He3 pressue and wall thikness
+    std::vector<float> detPrWall;
+    hFile->readData<float>("detPressureAndWall",detPrWall);
+
+
+
+
+   if(nDetectors!=detSphericalCoord.size()/3||nDetectors!=detPrWall.size()/2||nDetectors!=detID.size()/2)
+     throw std::runtime_error("The size of nexus data columns is not equal to each other");
+
+   detStruct.resize(nDetectors);
+   detOffset.resize(nDetectors);
+   detType.resize(nDetectors);
+   detList.resize(nDetectors);
+   PARALLEL_FOR_NO_WSP_CHECK()
+   for(int i=0;i<nDetectors;i++)
+   {
+      detStruct[i].detID = detID[2*i];
+      detStruct[i].l2    = detSphericalCoord[3*i+0]; //L2,
+      detStruct[i].theta = detSphericalCoord[3*i+1]; // Theta
+      detStruct[i].phi   = detSphericalCoord[3*i+2]; // Phi
+
+      detStruct[i].pressure = detPrWall[2*i+0]; //pressure;
+      detStruct[i].wallThick =detPrWall[2*i+1]; // wallThickness;
+
+      detOffset[i]  = timeOffsets[2*i];
+      detType[i]    = detID[2*i+1];
+      detList[i]   = detid_t(detID[2*i]);
+    }
+    
+}
 
 } // namespace DataHandling
 } // namespace Mantid
