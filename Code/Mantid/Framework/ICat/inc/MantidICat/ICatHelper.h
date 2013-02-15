@@ -52,9 +52,6 @@ namespace Mantid
       /// search method
       int doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response);
 
-      /// method to search isis basic search
-      void doISISSearch(const CatalogSearchParam& input,API::ITableWorkspace_sptr &outputws);
-
       /// calls getInvestigationIncludes api's
       int getDataFiles(long long invId,ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
 
@@ -74,7 +71,7 @@ namespace Mantid
       void doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr);
 
       /// do advanced search 
-      void doAdvancedSearch(CatalogSearchParam& inputs,API::ITableWorkspace_sptr &outputws);
+      void doAdvancedSearch(const CatalogSearchParam& inputs,API::ITableWorkspace_sptr &outputws);
 
       // do login
       void doLogin(const std::string& name,const std::string& password,const std::string& url);
