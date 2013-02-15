@@ -921,77 +921,7 @@ namespace Mantid
 
     }
 
-    /**This method saves the date components to C library struct tm
-     *@param sDate :: string containing the date
-     *@return time_t value of date
-     */
-    time_t CICatHelper::getTimevalue(const std::string& sDate)
-    {
 
-      if(!sDate.compare(""))
-      {
-        return 0;
-      }
-      struct tm  timeinfo;
-      std::basic_string <char>::size_type index,off=0;
-      int day,month,year;
-
-      //look for the first '/' to extract day part from the date string
-      index=sDate.find('/',off);
-      if(index == std::string::npos)
-      {
-        throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
-      }
-      //get day part of the date
-      try
-      {
-        day=boost::lexical_cast<int>(sDate.substr(off,index-off).c_str());
-      }
-      catch(boost::bad_lexical_cast&)
-      {
-        throw std::runtime_error("Invalid Date");
-      }
-      timeinfo.tm_mday=day;
-
-      //change the offset to the next position after "/"
-      off=index+1;
-      //look for 2nd '/' to get month part from  the date string
-      index=sDate.find('/',off);
-      if(index == std::string::npos)
-      {
-        throw std::runtime_error("Invalid Date:date format must be DD/MM/YYYY");
-      }
-      //now get the month part
-      try
-      {
-        month=boost::lexical_cast<int>(sDate.substr(off,index-off).c_str());
-      }
-      catch(boost::bad_lexical_cast&)
-      {
-        throw std::runtime_error("Invalid Date");
-      }
-      timeinfo.tm_mon=month-1;
-
-      //change the offset to the position after "/"
-      off=index+1;
-      //now get the year part from the date string
-      try
-      {
-        year=boost::lexical_cast<int>(sDate.substr(off,4).c_str());
-
-      }
-      catch(boost::bad_lexical_cast&)
-      {
-        throw std::runtime_error("Invalid Date");
-      }
-
-      timeinfo.tm_year=year-1900;
-      timeinfo.tm_min=0;
-      timeinfo.tm_sec=0;
-      timeinfo.tm_hour=0;
-      //timeinfo->tm_isdst=-1;
-      return std::mktime (&timeinfo );
-    }
     /**This method checks the given session is valid
      *@return returns true if the session id is valid,otherwise false;
      */

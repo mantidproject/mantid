@@ -76,10 +76,6 @@ namespace Mantid
       // do login
       void doLogin(const std::string& name,const std::string& password,const std::string& url);
 
-
-      /// Thsi method returns the time_t value for a Date which is in "DD/MM/YYYY" format
-      time_t getTimevalue(const std::string& sDate);
-
       /// thsi method returns true if the  session id is valid
       bool isvalidSession();
 
