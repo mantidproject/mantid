@@ -1048,7 +1048,7 @@ void LoadDetectorInfo::readDetDotDatNXS(::NeXus::File *hFile, std::vector<detect
    detType.resize(nDetectors);
    detList.resize(nDetectors);
    PARALLEL_FOR_NO_WSP_CHECK()
-   for(std::size_t i=0;i<nDetectors;i++)
+   for(int i=0;i<static_cast<int>(nDetectors);i++)
    {
       detStruct[i].detID = detID[2*i];
       detStruct[i].l2    = detSphericalCoord[3*i+0]; //L2,
