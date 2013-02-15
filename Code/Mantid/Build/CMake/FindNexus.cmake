@@ -26,7 +26,7 @@ set ( NEXUS_LIBRARIES ${NEXUS_C_LIBRARIES} ${NEXUS_CPP_LIBRARIES} )
 # Set a version string by examining the napi.h header
 if( NEXUS_INCLUDE_DIR ) 
   # Extract the line containing the version string which will look like this "#define NEXUS_VERSION   "X.X.X"                /* major.minor.patch */"
-  file ( STRINGS ${NEXUS_INCLUDE_DIR}/napi.h NEXUS_VERSION_TMP REGEX "^#define[ \t]+NEXUS_VERSION[ \t]+\"[0-9]+.[0-9]+.[0-9]+\"[ \t]+/\\* major\\.minor\\.patch \\*/$" )
+  file ( STRINGS ${NEXUS_INCLUDE_DIR}/nexus/napi.h NEXUS_VERSION_TMP REGEX "^#define[ \t]+NEXUS_VERSION[ \t]+\"[0-9]+.[0-9]+.[0-9]+\"[ \t]+/\\* major\\.minor\\.patch \\*/$" )
   # Hack off the portion up to and including the first double quote 
   string( REGEX REPLACE "^#define[ \t]+NEXUS_VERSION[ \t]+\"" "" NEXUS_VERSION_TMP ${NEXUS_VERSION_TMP} )
   # Hack off the portion from the second double quote to the end of the line
