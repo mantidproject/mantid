@@ -342,7 +342,6 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
 void MdViewerWidget::setParaViewComponentsForView()
 {
   // Extra setup stuff to hook up view to other items
-  this->ui.propertiesPanel->setAutoApply(true);
   this->ui.propertiesPanel->setView(this->currentView->getView());
   this->ui.pipelineBrowser->setActiveView(this->currentView->getView());
 
@@ -354,6 +353,10 @@ void MdViewerWidget::setParaViewComponentsForView()
   QObject::connect(activeObjects, SIGNAL(viewChanged(pqView*)),
                    this->ui.propertiesPanel, SLOT(setView(pqView*)));
 
+  QObject::connect(this->currentView,
+                   SIGNAL(triggerAccept()),
+                   this->ui.propertiesPanel,
+                   SLOT(apply()));
   QObject::connect(this->ui.propertiesPanel,
                    SIGNAL(applied()),
                    this, SLOT(checkForUpdates()));
