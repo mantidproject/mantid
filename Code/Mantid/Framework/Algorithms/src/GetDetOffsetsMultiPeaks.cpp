@@ -67,7 +67,7 @@ namespace Mantid
     GetDetOffsetsMultiPeaks::~GetDetOffsetsMultiPeaks()
     {}
   
-    static double gsl_costFunction(const gsl_vector *v, void *params)
+    static double Mantid::Algorithms::gsl_costFunction(const gsl_vector *v, void *params)
     {
       double *p = (double *)params;
       size_t n = static_cast<size_t>(p[0]);
