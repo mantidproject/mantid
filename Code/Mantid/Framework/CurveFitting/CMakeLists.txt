@@ -174,11 +174,13 @@ set ( INC_FILES
               
 set ( TEST_FILES
 	# ChebyshevPolynomialBackgroundTest.h
+	# FitPowderDiffPeaksTest.h
+	# RefinePowderInstrumentParametersTest.h
 	#DiffSphereTest.h
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
-	BackToBackExponentialTest.h
 	BFGSTest.h
+	BackToBackExponentialTest.h
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h
 	BoundaryConstraintTest.h
@@ -194,7 +196,6 @@ set ( TEST_FILES
 	ExpDecayTest.h
 	FRConjugateGradientTest.h
 	FitMWTest.h
-	# FitPowderDiffPeaksTest.h
 	FitPowderDiffPeaks2Test.h
 	FlatBackgroundTest.h
 	FunctionFactoryConstraintTest.h
@@ -227,7 +228,6 @@ set ( TEST_FILES
 	ProductLinearExpTest.h
 	ProductQuadraticExpTest.h
 	QuadraticTest.h
-	# RefinePowderInstrumentParametersTest.h
 	RefinePowderInstrumentParameters2Test.h
 	ResolutionTest.h
 	SimplexTest.h
