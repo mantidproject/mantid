@@ -47,11 +47,11 @@ void MDWSDescription::setDimUnit(unsigned int nDim,const std::string &Unit)
 
 */
 void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
-  const std::vector<std::string> &dimProperyNames)
+  const std::vector<std::string> &dimPropertyNames)
 {
   m_InWS = pWS;
   // fill additional dimensions values, defined by workspace properties;
-  this->fillAddProperties(m_InWS,dimProperyNames,m_AddCoord);
+  this->fillAddProperties(m_InWS,dimPropertyNames,m_AddCoord);
 
   this->AlgID = QMode;
 
@@ -87,9 +87,9 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
     }
     else
     {
-      m_DimIDs[i]  = dimProperyNames[i-nMatrixDim];
-      m_DimNames[i]= dimProperyNames[i-nMatrixDim];
-      m_DimUnits[i]= dimProperyNames[i-nMatrixDim];
+      m_DimIDs[i]  = dimPropertyNames[i-nMatrixDim];
+      m_DimNames[i]= dimPropertyNames[i-nMatrixDim];
+      m_DimUnits[i]= dimPropertyNames[i-nMatrixDim];
     }
   }
 
@@ -144,7 +144,7 @@ void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS
 * 
 * This method used to define such parameters from MDWS description, build from workspace and the transformation algorithm parameters
 *
-*@param SourceMartWS -- the MDWS description obtained from input matrix workspace and the algorithm parameters
+*@param SourceMatrWS -- the MDWS description obtained from input matrix workspace and the algorithm parameters
 */
 void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &SourceMatrWS)
 {
@@ -249,19 +249,20 @@ std::string MDWSDescription::getEModeStr()const
 /** function extracts the coordinates from additional workspace porperties and places them to proper position within 
 *  the vector of MD coodinates for the particular workspace.
 *
-*  @param dimProperyNames  -- names of properties which should be treated as dimensions
+*  @param dimPropertyNames  -- names of properties which should be treated as dimensions
+*  @param AddCoord --
 *
-*  @returns AddCoord       -- vector of additional coordinates (derived from WS properties) for current multidimensional event
+*  @return AddCoord       -- vector of additional coordinates (derived from WS properties) for current multidimensional event
 */
-void MDWSDescription::fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimProperyNames,std::vector<coord_t> &AddCoord)
+void MDWSDescription::fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimPropertyNames,std::vector<coord_t> &AddCoord)
 {
-  size_t nDimPropNames = dimProperyNames.size();
+  size_t nDimPropNames = dimPropertyNames.size();
   if(AddCoord.size()!=nDimPropNames)AddCoord.resize(nDimPropNames);
 
   for(size_t i=0;i<nDimPropNames;i++)
   {
     //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
-    Kernel::Property *pProperty = (inWS2D->run().getProperty(dimProperyNames[i]));
+    Kernel::Property *pProperty = (inWS2D->run().getProperty(dimPropertyNames[i]));
     Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
     if(run_property)
     {
@@ -273,7 +274,7 @@ void MDWSDescription::fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr 
       Kernel::PropertyWithValue<double> *proc_property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
       if(!proc_property)
       {
-        std::string ERR = " Can not interpret property, used as dimension.\n Property: "+dimProperyNames[i]+
+        std::string ERR = " Can not interpret property, used as dimension.\n Property: "+dimPropertyNames[i]+
           " is neither a time series (run) property nor a property with value<double>";
         throw(std::invalid_argument(ERR));
       }
@@ -319,7 +320,7 @@ boost::shared_ptr<Geometry::OrientedLattice> MDWSDescription::getOrientedLattice
 }
 
 /** Set the special coordinate system if any.
-@param coordinate system.
+@param system : coordinate system.
 */
 void MDWSDescription::setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem system)
 {

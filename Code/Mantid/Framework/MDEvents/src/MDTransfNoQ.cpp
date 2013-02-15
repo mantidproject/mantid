@@ -55,6 +55,7 @@ namespace Mantid
 
     }
     /** Method updates the value of preprocessed detector coordinates in Q-space, used by other functions 
+    *@param Coord : input-output vector of MD Coordinates
     *@param i -- index of the detector, which corresponds to the spectra to process. 
     * 
     */
