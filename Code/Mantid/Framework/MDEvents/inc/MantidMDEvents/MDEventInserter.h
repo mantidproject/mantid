@@ -84,11 +84,8 @@ namespace MDEvents
     Creates a LEAN MDEvent and adds it to the MDEW. 
     @param signal : intensity
     @param errorSQ : squared value of the error
-    @param runno : run number (not used)
-    @param detectno : detector number (not used)
     @param coords : pointer to coordinates array
-    @param IntToType<false> : no object specified, only used to provide an overload for this LEAN MDEvent type generation.
-    */
+   */
     void insertMDEvent(float signal, float errorSQ, uint16_t, int32_t, Mantid::coord_t* coords, IntToType<false>)
     {
       m_ws->addEvent(MDEventType(signal, errorSQ, coords));
@@ -102,7 +99,6 @@ namespace MDEvents
     @param runno : run number 
     @param detectno : detector number 
     @param coords : pointer to coordinates array
-    @param IntToType<true> : no object specified, only used to provide an overload for this FULL MDEvent type generation.
     */
     void insertMDEvent(float signal, float errorSQ, uint16_t runno, int32_t detectno, Mantid::coord_t* coords, IntToType<true>)
     {

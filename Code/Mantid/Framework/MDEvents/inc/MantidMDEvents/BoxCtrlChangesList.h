@@ -46,7 +46,7 @@ namespace MDEvents
      * Thread-safe for adding.
      * No duplicate checking is done!
      *
-     * @param ptr :: void ptr that casts to a particular MDBox<> * type.
+     * @param theBox -- Box to split
      */
  public:
    void addBoxToSplit(const T &theBox)

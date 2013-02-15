@@ -69,7 +69,7 @@ namespace MDEvents
   public:
     /**
     Always returns false to cancel skipping.
-    @Return false to cancel continuation 
+    @return false to cancel continuation
     */
     bool keepGoing() const
     {
