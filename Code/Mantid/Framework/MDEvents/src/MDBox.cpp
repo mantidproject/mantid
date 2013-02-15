@@ -70,7 +70,9 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Copy constructor */
+  /** Copy constructor
+   * @param other: MDBox object to copy from.
+   * */
   TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other)
      : MDBoxBase<MDE, nd>(other),
      data(other.data),

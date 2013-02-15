@@ -361,7 +361,6 @@ int64_t Integrate3DEvents::getHklKey( int h, int k, int l )
  *  values. 
  *
  *  @param q_vector  The q_vector to be mapped to h,k,l
- *  @param UBinv     The inverse of the UB matrix
  */
 int64_t Integrate3DEvents::getHklKey( V3D const & q_vector )
 {

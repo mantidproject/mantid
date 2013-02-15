@@ -230,6 +230,7 @@ namespace MDEvents
   /** Convert an event list to 3D q-space and add it to the MDEventWorkspace
    *
    * @tparam T :: the type of event in the input EventList (TofEvent, WeightedEvent, etc.)
+   * @param workspaceIndex :: the workspace index
    * @param el :: reference to the event list
    */
   template <class T>
