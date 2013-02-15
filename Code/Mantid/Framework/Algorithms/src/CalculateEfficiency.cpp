@@ -70,12 +70,12 @@ void CalculateEfficiency::exec()
 
   // Get the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr rebinnedWS = inputWS;
+  MatrixWorkspace_sptr rebinnedWS;// = inputWS;
 
   // Now create the output workspace
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS;// = getProperty("OutputWorkspace");
 
-  DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+ // DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
   // Sum up all the wavelength bins
   IAlgorithm_sptr childAlg = createChildAlgorithm("Integration", 0.0, 0.2);

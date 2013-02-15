@@ -31,6 +31,7 @@ The units currently available to this algorithm are listed [[Unit Factory|here]]
 #include "MantidDataObjects/EventWorkspace.h"
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <cfloat>
 #include <iostream>
 #include <limits>
@@ -558,15 +559,7 @@ API::MatrixWorkspace_sptr ConvertUnits::alignBins(API::MatrixWorkspace_sptr work
   return childAlg->getProperty("OutputWorkspace");
 }
 
-namespace // anonymous
-{
-  /// Checks if a double is not infinity or a NaN
-  bool isANumber(const double& d)
-  {
-    // cppcheck-suppress duplicateExpression
-    return d == d && fabs(d) != std::numeric_limits<double>::infinity();
-  }
-}
+
 
 /// The Rebin parameters should cover the full range of the converted unit, with the same number of bins
 const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const
@@ -583,7 +576,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWo
         const MantidVec & XData = workspace->readX(i);
         double xfront = XData.front();
         double xback = XData.back();
-        if (isANumber(xfront) && isANumber(xback))
+        if (boost::math::isfinite(xfront) && boost::math::isfinite(xback))
         {
           if ( xfront < XMin ) XMin = xfront;
           if ( xback > XMax )  XMax = xback;

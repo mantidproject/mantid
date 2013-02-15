@@ -1062,7 +1062,7 @@ namespace Mantid
         // We're ok with empty groups if the workspace property is optional
         if (thisGroup.empty() && !m_inputWorkspaceProps[i]->isOptional())
           throw std::invalid_argument("Empty group passed as input");
-        if (thisGroup.size() >= 1)
+        if (!thisGroup.empty())
         {
           // Record the index of the single group.
           WorkspaceGroup_sptr wsGroup = m_groupWorkspaces[i];

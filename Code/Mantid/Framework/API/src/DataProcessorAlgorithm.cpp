@@ -128,9 +128,11 @@ namespace API
   /// Return true if we are running on the main thread
   bool DataProcessorAlgorithm::isMainThread()
   {
-    bool mainThread = true;
+    bool mainThread;
 #ifdef MPI_BUILD
     mainThread = (boost::mpi::communicator().rank()==0);
+#else
+    mainThread = true;
 #endif
     return mainThread;
   }
