@@ -46,7 +46,7 @@ const LoadDetectorInfo::detectDatForm
 LoadDetectorInfo::LoadDetectorInfo() 
   : Algorithm(), m_workspace(), m_numHists(-1), m_monitors(),
     m_monitorXs(), m_commonXs(false), m_monitOffset(UNSETOFFSET), m_error(false),
-    m_FracCompl(0.0), m_moveDets(false), m_samplePos(), m_pmap(NULL), m_instrument()
+    m_FracCompl(0.0), m_samplePos(), m_pmap(NULL), m_instrument(), m_moveDets(false)
 {
 }
 
@@ -1048,7 +1048,7 @@ void LoadDetectorInfo::readDetDotDatNXS(::NeXus::File *hFile, std::vector<detect
    detType.resize(nDetectors);
    detList.resize(nDetectors);
    PARALLEL_FOR_NO_WSP_CHECK()
-   for(int i=0;i<nDetectors;i++)
+   for(std::size_t i=0;i<nDetectors;i++)
    {
       detStruct[i].detID = detID[2*i];
       detStruct[i].l2    = detSphericalCoord[3*i+0]; //L2,
