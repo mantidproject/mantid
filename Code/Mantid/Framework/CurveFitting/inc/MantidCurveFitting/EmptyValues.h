@@ -58,16 +58,13 @@ public:
 
 protected:
   /// Copy calculated values to a buffer
-  /// @param to :: Pointer to the buffer, it must be large enough
-  virtual void copyTo(double* to) const
+  virtual void copyTo(double*) const
   {throw std::runtime_error("EmptyValues don't contain actual values");}
   /// Add calculated values to values in a buffer and save result to the buffer
-  /// @param to :: Pointer to the buffer, it must be large enough
-  virtual void add(double* to) const
+  virtual void add(double*) const
   {throw std::runtime_error("EmptyValues don't contain actual values");}
   /// Multiply calculated values by values in a buffer and save result to the buffer
-  /// @param to :: Pointer to the buffer, it must be large enough
-  virtual void multiply(double* to) const
+  virtual void multiply(double*) const
   {throw std::runtime_error("EmptyValues don't contain actual values");}
   /// Number of values
   size_t m_size;

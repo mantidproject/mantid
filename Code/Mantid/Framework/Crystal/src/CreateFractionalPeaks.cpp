@@ -180,7 +180,6 @@ namespace Mantid
        Kernel::DblMatrix UB= ol.getUB();
        vector< vector<int> > AlreadyDonePeaks;
        bool done = false;
-       int ErrPos;
        while( !done)
        {
          for( size_t hoffset=0;hoffset<hOffsets.size();hoffset++)
