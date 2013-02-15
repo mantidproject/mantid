@@ -1121,7 +1121,7 @@ public:
     do_test_fileBackEnd_binningOperations(false);
   }
 
-  void test_fileBackEnd_binningOperations_inParallel()
+  void xest_fileBackEnd_binningOperations_inParallel()
   {
     do_test_fileBackEnd_binningOperations(true);
   }
