@@ -23,7 +23,7 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidCurveFitting/BackToBackExponential.h"
-#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
+#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidCurveFitting/DampingMinimizer.h"
 #include "MantidCurveFitting/CostFuncFitting.h"
 
@@ -2909,7 +2909,7 @@ namespace CurveFitting
       {
         // d) Calculate a lot of peak parameters
         // Initialize the function
-        ThermalNeutronBk2BkExpConvPV tnb2bfunc;
+        ThermalNeutronBk2BkExpConvPVoigt tnb2bfunc;
         tnb2bfunc.initialize();
         tnb2bfunc.setMillerIndex(hkl[0], hkl[1], hkl[2]);
 

@@ -6,25 +6,25 @@
 #include <fstream>
 #include <cmath>
 
-#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
+#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
 
 using namespace Mantid;
 using namespace Kernel;
-using Mantid::CurveFitting::ThermalNeutronBk2BkExpConvPV;
+using Mantid::CurveFitting::ThermalNeutronBk2BkExpConvPVoigt;
 
-class ThermalNeutronBk2BkExpConvPVTest : public CxxTest::TestSuite
+class ThermalNeutronBk2BkExpConvPVoigtTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ThermalNeutronBk2BkExpConvPVTest *createSuite() { return new ThermalNeutronBk2BkExpConvPVTest(); }
-  static void destroySuite( ThermalNeutronBk2BkExpConvPVTest *suite ) { delete suite; }
+  static ThermalNeutronBk2BkExpConvPVoigtTest *createSuite() { return new ThermalNeutronBk2BkExpConvPVoigtTest(); }
+  static void destroySuite( ThermalNeutronBk2BkExpConvPVoigtTest *suite ) { delete suite; }
 
   /** Test overriden set parameter value functions
     */
   void Passed_test_setParameter()
   {
-    ThermalNeutronBk2BkExpConvPV peak;
+    ThermalNeutronBk2BkExpConvPVoigt peak;
     peak.initialize();
 
     vector<string> paramnames = peak.getParameterNames();
@@ -57,7 +57,7 @@ public:
     generateData(vecX, vecY, vecE);
 
     // 1. Create peak
-    ThermalNeutronBk2BkExpConvPV peak;
+    ThermalNeutronBk2BkExpConvPVoigt peak;
     peak.initialize();
 
     peak.setMillerIndex(1, 1, 1);
@@ -149,7 +149,7 @@ public:
     generateData(vecX, vecY, vecE);
 
     // 1. Create peak
-    CurveFitting::ThermalNeutronBk2BkExpConvPV peak;
+    CurveFitting::ThermalNeutronBk2BkExpConvPVoigt peak;
     peak.initialize();
 
     peak.setMillerIndex(1, 1, 1);
@@ -242,7 +242,7 @@ public:
     generateData2(vecX, dataY, modelY);
 
     // 3. Create peak
-    ThermalNeutronBk2BkExpConvPV peak;
+    ThermalNeutronBk2BkExpConvPVoigt peak;
     peak.initialize();
 
     peak.setMillerIndex(2, 0, 0);

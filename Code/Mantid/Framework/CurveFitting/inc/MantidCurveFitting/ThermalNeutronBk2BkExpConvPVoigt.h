@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPV_H_
-#define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPV_H_
+#ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVOIGT_H_
+#define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVOIGT_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -15,7 +15,7 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** ThermalNeutronBk2BkExpConvPV :
+  /** ThermalNeutronBk2BkExpConvPVoigt :
       Back-to-back exponential convoluted with pseudo Voigt for thermal neutron and epithermal neutron TOF
 
       It will involve the calculation from peak's miller indices
@@ -41,15 +41,15 @@ namespace CurveFitting
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-  class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction,
+  class DLLExport ThermalNeutronBk2BkExpConvPVoigt : virtual public API::IPeakFunction,
       virtual public API::IFunctionMW
   {
   public:
-    ThermalNeutronBk2BkExpConvPV();
-    virtual ~ThermalNeutronBk2BkExpConvPV();
+    ThermalNeutronBk2BkExpConvPVoigt();
+    virtual ~ThermalNeutronBk2BkExpConvPVoigt();
 
     /// Overwrite IFunction base class methods
-    std::string name()const{return "ThermalNeutronBk2BkExpConvPV";}
+    std::string name()const{return "ThermalNeutronBk2BkExpConvPVoigt";}
     virtual const std::string category() const { return "Peak";}
 
     /// Overwrite IPeakFunction base class methods
@@ -173,8 +173,8 @@ namespace CurveFitting
     
 };
 
-/// Shared pointer to ThermalNeutronBk2BkExpConvPV peak/function
-typedef boost::shared_ptr<ThermalNeutronBk2BkExpConvPV> ThermalNeutronBk2BkExpConvPV_sptr;
+/// Shared pointer to ThermalNeutronBk2BkExpConvPVoigt peak/function
+typedef boost::shared_ptr<ThermalNeutronBk2BkExpConvPVoigt> ThermalNeutronBk2BkExpConvPVoigt_sptr;
 
 //--- Public inline function --------------------------------------------------
 /** Calculate d = a/sqrt(h**2+k**2+l**2)
@@ -193,4 +193,4 @@ std::complex<double> E1(std::complex<double> z);
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPV_H_ */
+#endif  /* MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVOIGT_H_ */

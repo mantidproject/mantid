@@ -438,7 +438,7 @@ namespace CurveFitting
       size_t numpeaks = m_dspPeaks.size();
       for (size_t ipk = 0; ipk < numpeaks; ++ipk)
       {
-        CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak = m_dspPeaks[ipk].second;
+        CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr peak = m_dspPeaks[ipk].second;
 
         peak->function(domain, values);
         for (size_t i = 0; i < domain.size(); ++i)
@@ -495,12 +495,12 @@ namespace CurveFitting
   {
     // 1. Set parameters to each peak
     bool allpeaksvalid = true;
-    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator pit;
+    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr>::iterator pit;
     //  for (pit = m_peaks.begin(); pit != m_peaks.end(); ++pit)
     size_t numpeaks = m_dspPeaks.size();
     for (size_t ipk = 0; ipk < numpeaks; ++ipk)
     {
-      ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
+      ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
 
       setPeakParameters(thispeak, parammap, 1.0, false);
       double d_h, tof_h;
@@ -526,7 +526,7 @@ namespace CurveFitting
       msg << "[DB1209 Pattern Calcuation]  Number of Peaks = " << m_dspPeaks.size() << "\n";
       for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
       {
-        CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak = m_dspPeaks[ipk].second;
+        CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr peak = m_dspPeaks[ipk].second;
         int h, k, l;
         peak->getMillerIndex(h, k, l);
         msg << "(" << h << ", " << k << ", " << l << "), H = " << std::setw(7)
@@ -644,7 +644,7 @@ namespace CurveFitting
           g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue << " | \n";
 
           /*--  Code prepared to replace the existing block
-          ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
+          ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
           size_t iparam = findIndex(thispeak, funcparam.name);
           thispeak->fix(iparam);
           --*/
@@ -678,7 +678,7 @@ namespace CurveFitting
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
     {
       // a. Get peak height
-      ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
+      ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
       thispeak->fix(0);
     } // For each peak
 
@@ -967,7 +967,7 @@ namespace CurveFitting
     // 4. Add peaks to LeBail Function
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
     {
-      ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
+      ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
       m_lebailFunction->addFunction(thispeak);
     }
     m_lebailFunction->addFunction(m_backgroundFunction);
@@ -1074,11 +1074,11 @@ namespace CurveFitting
       int l = hkl[2];
 
       // b) Generate peak
-      CurveFitting::ThermalNeutronBk2BkExpConvPV tmppeak;
+      CurveFitting::ThermalNeutronBk2BkExpConvPVoigt tmppeak;
       tmppeak.setMillerIndex(h, k, l);
       tmppeak.initialize();
-      CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr speak = boost::make_shared
-          <CurveFitting::ThermalNeutronBk2BkExpConvPV>(tmppeak);
+      CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr speak = boost::make_shared
+          <CurveFitting::ThermalNeutronBk2BkExpConvPVoigt>(tmppeak);
 
       // c) Set peak function
       setPeakParameters(speak, this->m_funcParameters, peakheight, true);
@@ -1116,7 +1116,7 @@ namespace CurveFitting
 
     // 3. Check to see whether there is any duplicate peaks
     bool noduppeaks = true;
-    vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> >::iterator peakiter, leftpeakiter;
+    vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> >::iterator peakiter, leftpeakiter;
     for (peakiter = m_dspPeaks.begin()+1; peakiter != m_dspPeaks.end(); ++peakiter)
     {
       leftpeakiter = peakiter-1;
@@ -1129,8 +1129,8 @@ namespace CurveFitting
         noduppeaks = false;
 
         // b) Print out information
-        ThermalNeutronBk2BkExpConvPV_sptr thispeak = peakiter->second;
-        ThermalNeutronBk2BkExpConvPV_sptr leftpeak = leftpeakiter->second;
+        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = peakiter->second;
+        ThermalNeutronBk2BkExpConvPVoigt_sptr leftpeak = leftpeakiter->second;
         int h0, k0, l0, h1, k1, l1;
         thispeak->getMillerIndex(h0, k0, l0);
         leftpeak->getMillerIndex(h1, k1, l1);
@@ -1164,8 +1164,8 @@ namespace CurveFitting
           {
             // Possibly 2 exactly same (HKL)^2
             // a) Get information
-            ThermalNeutronBk2BkExpConvPV_sptr thispeak = peakiter->second;
-            ThermalNeutronBk2BkExpConvPV_sptr leftpeak = leftpeakiter->second;
+            ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = peakiter->second;
+            ThermalNeutronBk2BkExpConvPVoigt_sptr leftpeak = leftpeakiter->second;
             int h0, k0, l0, h1, k1, l1;
             thispeak->getMillerIndex(h0, k0, l0);
             leftpeak->getMillerIndex(h1, k1, l1);
@@ -1208,8 +1208,8 @@ namespace CurveFitting
       if (next_dh - this_dh < 1.0E-10)
       {
         // 2 neighboring peaks have almost same d_h
-        ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
-        ThermalNeutronBk2BkExpConvPV_sptr nextpeak = m_dspPeaks[ipk+1].second;
+        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
+        ThermalNeutronBk2BkExpConvPVoigt_sptr nextpeak = m_dspPeaks[ipk+1].second;
         int h0, k0, l0, h1, k1, l1;
         thispeak->getMillerIndex(h0, k0, l0);
         nextpeak->getMillerIndex(h1, k1, l1);
@@ -1242,12 +1242,12 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Examine whether the insturment parameter set to a peak can cause a valid set of
   * peak profile of that peak
-  * @param peak :  ThermalNuetronBk2BkExpConvPV peak function
+  * @param peak :  ThermalNuetronBk2BkExpConvPVoigt peak function
   * @param d_h  :  output, the d-spacing value of the peak centre
   * @param tof_h:  output, the TOF value of peak centre
   * @param errmsg: output, the error message if the peak parameters are not valid
   */
-  bool LeBailFit2::examinInstrumentParameterValid(ThermalNeutronBk2BkExpConvPV_sptr peak, double& d_h, double& tof_h,
+  bool LeBailFit2::examinInstrumentParameterValid(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, double& d_h, double& tof_h,
                                                   string& errmsg)
   {
     // 1. Calculate peak parameters
@@ -1285,12 +1285,12 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** From table/map to set parameters to an individual peak.
    * It mostly is called by function in calculation.
-   * @param peak :  ThermalNeutronBk2BkExpConvPV function to have parameters' value set
+   * @param peak :  ThermalNeutronBk2BkExpConvPVoigt function to have parameters' value set
    * @param parammap:  map of Parameters to set to peak
    * @param peakheight: height of the peak
    * @param setpeakheight:  boolean as the option to set peak height or not.
    */
-  void LeBailFit2::setPeakParameters(ThermalNeutronBk2BkExpConvPV_sptr peak, map<std::string, Parameter> parammap,
+  void LeBailFit2::setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, map<std::string, Parameter> parammap,
                                      double peakheight, bool setpeakheight)
   {
     // 1. Prepare, sort parameters by name
@@ -1335,7 +1335,7 @@ namespace CurveFitting
     * @param peakheight: a universal peak height to set to all peaks
     * @param setpeakheight: flag to set peak height to each peak or not.
    */
-  void LeBailFit2::setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peaks,
+  void LeBailFit2::setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
                                       map<std::string, Parameter> parammap,
                                       double peakheight, bool setpeakheight)
   {
@@ -1411,7 +1411,7 @@ namespace CurveFitting
                                              vector<double>& allpeaksvalues)
   {
     // 1. Group the peak
-    vector<vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > > peakgroupvec;
+    vector<vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > > peakgroupvec;
     groupPeaks(peakgroupvec);
 
     // 2. Calculate each peak's intensity and set
@@ -1436,7 +1436,7 @@ namespace CurveFitting
     * @param peakgroupvec:  output vector containing peaks grouped together.
     * Disabled argument: MatrixWorkspace_sptr dataws, size_t workspaceindex,
    */
-  void LeBailFit2::groupPeaks(vector<vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > >& peakgroupvec)
+  void LeBailFit2::groupPeaks(vector<vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > >& peakgroupvec)
   {
     // 1. Sort peaks
     if (m_dspPeaks.size() > 0)
@@ -1456,7 +1456,7 @@ namespace CurveFitting
     peakgroupvec.clear();
 
     // a) Starting value
-    vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peakgroup;
+    vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroup;
     size_t ipk = 0;
 
     while (ipk < numpeaks)
@@ -1465,8 +1465,8 @@ namespace CurveFitting
       if (ipk < numpeaks-1)
       {
         // Test whether next peak will be the different group
-        ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
-        ThermalNeutronBk2BkExpConvPV_sptr rightpeak = m_dspPeaks[ipk+1].second;
+        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
+        ThermalNeutronBk2BkExpConvPVoigt_sptr rightpeak = m_dspPeaks[ipk+1].second;
 
         double thisrightbound = thispeak->centre() + PEAKRANGECONSTANT * thispeak->fwhm();
         double rightleftbound = rightpeak->centre() - PEAKRANGECONSTANT * rightpeak->fwhm();
@@ -1474,7 +1474,7 @@ namespace CurveFitting
         if (thisrightbound < rightleftbound)
         {
           // This peak and right peak are away
-          vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peakgroupcopy = peakgroup;
+          vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroupcopy = peakgroup;
           peakgroupvec.push_back(peakgroupcopy);
           peakgroup.clear();
         }
@@ -1487,7 +1487,7 @@ namespace CurveFitting
       else
       {
         // Last peak.  Push the current
-        vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peakgroupcopy = peakgroup;
+        vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroupcopy = peakgroup;
         peakgroupvec.push_back(peakgroupcopy);
       }
       ++ ipk;
@@ -1509,7 +1509,7 @@ namespace CurveFitting
    * @param wsindex: workspace index of the peaks data in dataws
    * @param zerobackground: true if background is zero
    */
-  bool LeBailFit2::calculateGroupPeakIntensities(vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peakgroup,
+  bool LeBailFit2::calculateGroupPeakIntensities(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroup,
                                                  MatrixWorkspace_sptr dataws, size_t wsindex, bool zerobackground,
                                                  vector<double>& allpeaksvalues)
   {    
@@ -1539,7 +1539,7 @@ namespace CurveFitting
     }
 
     // 2. Check boundary
-    ThermalNeutronBk2BkExpConvPV_sptr leftpeak = peakgroup[0].second;
+    ThermalNeutronBk2BkExpConvPVoigt_sptr leftpeak = peakgroup[0].second;
     double leftbound = leftpeak->centre() - PEAKRANGECONSTANT * leftpeak->fwhm();
     if (leftbound < vecX[0])
     {
@@ -1548,7 +1548,7 @@ namespace CurveFitting
                           << ")! Accuracy of its peak intensity might be affected.\n";
       leftbound = vecX[0] + 0.1;
     }
-    ThermalNeutronBk2BkExpConvPV_sptr rightpeak = peakgroup.back().second;
+    ThermalNeutronBk2BkExpConvPVoigt_sptr rightpeak = peakgroup.back().second;
     double rightbound = rightpeak->centre() + PEAKRANGECONSTANT * rightpeak->fwhm();
     if (rightbound > vecX.back())
     {
@@ -1581,7 +1581,7 @@ namespace CurveFitting
             << iright << "; Number of peaks = " << peakgroup.size();
       for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
       {
-        ThermalNeutronBk2BkExpConvPV_sptr thispeak = peakgroup[ipk].second;
+        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = peakgroup[ipk].second;
         errss << "Peak " << ipk << ":  d_h = " << peakgroup[ipk].first << ", TOF_h = " << thispeak->centre()
               << ", FWHM = " << thispeak->fwhm() << "\n";
         vector<string> peakparamnames = thispeak->getParameterNames();
@@ -1617,7 +1617,7 @@ namespace CurveFitting
     for (size_t ipk = 0; ipk < numPeaks; ++ipk)
     {
       // calculate peak function value
-      ThermalNeutronBk2BkExpConvPV_sptr peak = peakgroup[ipk].second;
+      ThermalNeutronBk2BkExpConvPVoigt_sptr peak = peakgroup[ipk].second;
       // FunctionValues localpeakvalue(xvalues);
       vector<double> localpeakvalue(ndata, 0.0);
 
@@ -1690,7 +1690,7 @@ namespace CurveFitting
     bool peakheightsphysical = true;
     for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
     {
-      ThermalNeutronBk2BkExpConvPV_sptr peak = peakgroup[ipk].second;
+      ThermalNeutronBk2BkExpConvPVoigt_sptr peak = peakgroup[ipk].second;
       double intensity = 0.0;
 
       for (size_t i = 0; i < ndata; ++i)
@@ -2152,7 +2152,7 @@ namespace CurveFitting
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
     {
       // a. Access peak function
-      CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr tpeak = m_dspPeaks[ipk].second;
+      CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr tpeak = m_dspPeaks[ipk].second;
 
       // b. Get peak's nature parameters
       int h, k, l;
@@ -2963,7 +2963,7 @@ namespace CurveFitting
     bool paramsvalid = true;
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
     {
-      ThermalNeutronBk2BkExpConvPV_sptr peak = m_dspPeaks[ipk].second;
+      ThermalNeutronBk2BkExpConvPVoigt_sptr peak = m_dspPeaks[ipk].second;
       double d_h, tof_h;
       string errmsg;
       bool localvalid = examinInstrumentParameterValid(peak, d_h, tof_h, errmsg);
@@ -2985,7 +2985,7 @@ namespace CurveFitting
       dbss << "[T1205] Peak Heights Before Calculating Intensities:\n";
       for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
       {
-        ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
+        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
         dbss << "Peak @ d = " << m_dspPeaks[ipk].first << ",  I = " << thispeak->height() << "\n";
       }
       g_log.debug(dbss.str());
@@ -3003,7 +3003,7 @@ namespace CurveFitting
       dbss2 << "[T1205] Peak Heights After Calculating Intensities:\n";
       for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
       {
-        ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
+        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
         dbss2 << "Peak @ d = " << m_dspPeaks[ipk].first << ",  I = " << thispeak->height() << "\n";
       }
       g_log.debug(dbss2.str());
@@ -3104,7 +3104,7 @@ namespace CurveFitting
   double maxheight = 0.0;
   for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
   {
-    ThermalNeutronBk2BkExpConvPV_sptr peak = m_dspPeaks[ipk].second;
+    ThermalNeutronBk2BkExpConvPVoigt_sptr peak = m_dspPeaks[ipk].second;
     if (peak->height() > maxheight)
       maxheight = peak->height();
   }
@@ -3386,7 +3386,7 @@ namespace CurveFitting
     vector<double> peakdensity(vecRawX.size(), 1.0);
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
     {
-      ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
+      ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
       double height = thispeak->height();
       if (height > m_minimumHeight)
       {

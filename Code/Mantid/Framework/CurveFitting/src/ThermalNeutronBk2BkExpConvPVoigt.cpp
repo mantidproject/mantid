@@ -1,4 +1,4 @@
-#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
+#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParamFunction.h"
@@ -21,16 +21,16 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-  DECLARE_FUNCTION(ThermalNeutronBk2BkExpConvPV)
+  DECLARE_FUNCTION(ThermalNeutronBk2BkExpConvPVoigt)
 
   // Get a reference to the logger
-  Mantid::Kernel::Logger& ThermalNeutronBk2BkExpConvPV::g_log =
+  Mantid::Kernel::Logger& ThermalNeutronBk2BkExpConvPVoigt::g_log =
       Kernel::Logger::get("ThermalNeutronBk2BkExpConvPV");
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
  */
-  ThermalNeutronBk2BkExpConvPV::ThermalNeutronBk2BkExpConvPV():mHKLSet(false),
+  ThermalNeutronBk2BkExpConvPVoigt::ThermalNeutronBk2BkExpConvPVoigt():mHKLSet(false),
     m_cancel(false),m_parallelException(false)
   {
 
@@ -39,7 +39,7 @@ namespace CurveFitting
   //------------------------------------------------------------------------------------------------
   /** Destructor
   */
-  ThermalNeutronBk2BkExpConvPV::~ThermalNeutronBk2BkExpConvPV()
+  ThermalNeutronBk2BkExpConvPVoigt::~ThermalNeutronBk2BkExpConvPVoigt()
   {
   }
   
@@ -47,7 +47,7 @@ namespace CurveFitting
   /** Define the fittable parameters
    * Notice that Sig0, Sig1 and Sig2 are NOT the squared value recorded in Fullprof
    */
-  void ThermalNeutronBk2BkExpConvPV::init()
+  void ThermalNeutronBk2BkExpConvPVoigt::init()
   {
     // Peak height (0)
     declareParameter("Height", 1.0);
@@ -103,14 +103,14 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Set Miller Indices for this peak
    */
-  void ThermalNeutronBk2BkExpConvPV::setMillerIndex(int h, int k, int l)
+  void ThermalNeutronBk2BkExpConvPVoigt::setMillerIndex(int h, int k, int l)
   {
     // Check validity and set flag
     if (mHKLSet)
     {
       // Throw exception if tried to reset the miller index
       stringstream errss;
-      errss << "ThermalNeutronBk2BkExpConvPV Peak cannot have (HKL) reset.";
+      errss << "ThermalNeutronBk2BkExpConvPVoigt Peak cannot have (HKL) reset.";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
@@ -140,7 +140,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Get Miller Index from this peak
    */
-  void ThermalNeutronBk2BkExpConvPV::getMillerIndex(int& h, int &k, int &l)
+  void ThermalNeutronBk2BkExpConvPVoigt::getMillerIndex(int& h, int &k, int &l)
   {
     h = static_cast<int>(mH);
     k = static_cast<int>(mK);
@@ -156,7 +156,7 @@ namespace CurveFitting
    * Exception: if the peak profile parameter is not in this peak, then
    *            return an Empty_DBL
    */
-  double ThermalNeutronBk2BkExpConvPV::getPeakParameter(std::string paramname)
+  double ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname)
   {
     // 1. Calculate peak parameters if required
     if (m_newValueSet)
@@ -193,7 +193,7 @@ namespace CurveFitting
   /** Calculate peak parameters (fundamential Back-to-back PV),including
   * alpha, beta, sigma^2, eta, H
   */
-  void ThermalNeutronBk2BkExpConvPV::calculateParameters(bool explicitoutput) const
+  void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) const
   {
     // 1. Get parameters (class)
     double dtt1   = getParameter(1);
@@ -295,7 +295,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Override function1D
    */
-  void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xValues, size_t nData) const
+  void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double* out, const double* xValues, size_t nData) const
   {
     // 1. Calculate peak parameters
     double height = getParameter(0);
@@ -367,7 +367,7 @@ namespace CurveFitting
     * with a value of zero everywhere.
     * @param xValues: The x-values to evaluate the peak at.
    */
-  void ThermalNeutronBk2BkExpConvPV::functionLocal(vector<double>& out, const vector<double> &xValues) const
+  void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(vector<double>& out, const vector<double> &xValues) const
   {
     // calculate peak parameters
     const double HEIGHT = getParameter(0);
@@ -400,21 +400,21 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Disabled derivative
   */
-  void ThermalNeutronBk2BkExpConvPV::functionDerivLocal(API::Jacobian* , const double* , const size_t )
+  void ThermalNeutronBk2BkExpConvPVoigt::functionDerivLocal(API::Jacobian* , const double* , const size_t )
   {
     throw Mantid::Kernel::Exception::NotImplementedError("functionDerivLocal is not implemented for IkedaCarpenterPV.");
   }
 
   /** Calculate derivative of this peak function
  */
-  void ThermalNeutronBk2BkExpConvPV::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
+  void ThermalNeutronBk2BkExpConvPVoigt::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
   {
     calNumericalDeriv(domain, jacobian);
   }
 
   /** Get the center of the peak
  */
-  double ThermalNeutronBk2BkExpConvPV::centre()const
+  double ThermalNeutronBk2BkExpConvPVoigt::centre()const
   {
     if (m_newValueSet)
       calculateParameters(false);
@@ -424,7 +424,7 @@ namespace CurveFitting
 
   /** Set peak center.  Not allowed
  */
-  void ThermalNeutronBk2BkExpConvPV::setCentre(const double c)
+  void ThermalNeutronBk2BkExpConvPVoigt::setCentre(const double c)
   {
     UNUSED_ARG(c);
     throw std::invalid_argument("ThermalNuetronBk2BkExpConvPV: do not allow to set peak's centre");
@@ -432,7 +432,7 @@ namespace CurveFitting
 
   /** Set peak height
  */
-  void ThermalNeutronBk2BkExpConvPV::setHeight(const double h)
+  void ThermalNeutronBk2BkExpConvPVoigt::setHeight(const double h)
   {
     setParameter(0, h);
     return;
@@ -440,7 +440,7 @@ namespace CurveFitting
 
   /** Get peak's height
    */
-  double ThermalNeutronBk2BkExpConvPV::height() const
+  double ThermalNeutronBk2BkExpConvPVoigt::height() const
   {
     double height = this->getParameter(0);
     return height;
@@ -448,7 +448,7 @@ namespace CurveFitting
 
   /** Get peak's FWHM
    */
-  double ThermalNeutronBk2BkExpConvPV::fwhm() const
+  double ThermalNeutronBk2BkExpConvPVoigt::fwhm() const
   {
     if (m_newValueSet)
       calculateParameters(false);
@@ -458,7 +458,7 @@ namespace CurveFitting
 
   /** Set peak's FWHM
  */
-  void ThermalNeutronBk2BkExpConvPV::setFwhm(const double w)
+  void ThermalNeutronBk2BkExpConvPVoigt::setFwhm(const double w)
   {
     UNUSED_ARG(w);
     throw std::invalid_argument("Unable to set FWHM");
@@ -467,7 +467,7 @@ namespace CurveFitting
   //-------------  Private Function To Calculate Peak Profile --------------------------------------------
   /** Calcualte H and eta for the peak
  */
-  void ThermalNeutronBk2BkExpConvPV::calHandEta(double sigma2, double gamma, double& H, double& eta) const
+  void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma, double& H, double& eta) const
   {
     // 1. Calculate H
     double H_G = sqrt(8.0 * sigma2 * log(2.0));
@@ -495,7 +495,7 @@ namespace CurveFitting
   /** Calculate Omega(x) = ... ...
  *  This is the core component to calcualte peak profile
  */
-  double ThermalNeutronBk2BkExpConvPV::calOmega(const double x, const double eta, const double N,
+  double ThermalNeutronBk2BkExpConvPVoigt::calOmega(const double x, const double eta, const double N,
                                                 const double alpha, const double beta, const double H,
                                                 const double sigma2, const double invert_sqrt2sigma,
                                                 const bool explicitoutput) const
@@ -560,7 +560,7 @@ namespace CurveFitting
 
   /** Override setting parameter by parameter index
     */
-  void ThermalNeutronBk2BkExpConvPV::setParameter(size_t i, const double& value, bool explicitlySet)
+  void ThermalNeutronBk2BkExpConvPVoigt::setParameter(size_t i, const double& value, bool explicitlySet)
   {
     if (i == 23)
     {
@@ -586,7 +586,7 @@ namespace CurveFitting
 
   /** Overriding setting parameter by parameter name
     */
-  void ThermalNeutronBk2BkExpConvPV::setParameter(const std::string& name, const double& value, bool explicitlySet)
+  void ThermalNeutronBk2BkExpConvPVoigt::setParameter(const std::string& name, const double& value, bool explicitlySet)
   {
     if (name.compare("LatticeConstant") == 0)
     {
@@ -613,7 +613,7 @@ namespace CurveFitting
   /** This is called during long-running operations,
    * and check if the algorithm has requested that it be cancelled.
    */
-  void ThermalNeutronBk2BkExpConvPV::interruption_point() const
+  void ThermalNeutronBk2BkExpConvPVoigt::interruption_point() const
   {
     // only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
     // that defines that all loops must complete, and no exception can leave an OpenMP section
