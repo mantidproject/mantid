@@ -73,7 +73,7 @@ set ( SRC_FILES
 	src/TabulatedFunction.cpp
 	src/ThermalNeutronBk2BkExpAlpha.cpp
 	src/ThermalNeutronBk2BkExpBeta.cpp
-	src/ThermalNeutronBk2BkExpConvPV.cpp
+	src/ThermalNeutronBk2BkExpConvPVoigt.cpp
 	src/ThermalNeutronBk2BkExpSigma.cpp
 	src/ThermalNeutronDtoTOFFunction.cpp
 	src/UserFunction.cpp
@@ -164,7 +164,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/TabulatedFunction.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpAlpha.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpBeta.h
-	inc/MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h
+	inc/MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpSigma.h
 	inc/MantidCurveFitting/ThermalNeutronDtoTOFFunction.h
 	inc/MantidCurveFitting/UserFunction.h
@@ -239,7 +239,7 @@ set ( TEST_FILES
 	TabulatedFunctionTest.h
 	ThermalNeutronBk2BkExpAlphaTest.h
 	ThermalNeutronBk2BkExpBetaTest.h
-	ThermalNeutronBk2BkExpConvPVTest.h
+	ThermalNeutronBk2BkExpConvPVoigtTest.h
 	ThermalNeutronBk2BkExpSigmaTest.h
 	ThermalNeutronDtoTOFFunctionTest.h
 	UserFunction1DTest.h
