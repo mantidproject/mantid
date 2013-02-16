@@ -213,9 +213,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
                 elif line.startswith("TOFRG"):
                     # Tof-min(us)    step      Tof-max(us)
                     terms = line.split()
-                    mdict[bank]["tof-min"] = float(terms[1])*1.0E-3
-                    mdict[bank]["tof-max"] = float(terms[3])*1.0E-3
-                    mdict[bank]["step"]    = float(terms[2])*1.0E-3
+                    mdict[bank]["tof-min"] = float(terms[1])
+                    mdict[bank]["tof-max"] = float(terms[3])
+                    mdict[bank]["step"]    = float(terms[2])
     
                 elif line.startswith("D2TOF"):
                     # Dtt1      Dtt2         Zero 
