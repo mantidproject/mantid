@@ -256,7 +256,7 @@ namespace Mantid
   * Return the categories of the algorithms. This includes those within the Factory itself and 
   * any cleanly constructed algorithms stored here.
   * @param includeHidden true includes the hidden algorithm names and is faster, the default is false
-  * @returns The caetgory strings
+  * @returns The category strings
   */
   const std::set<std::string> AlgorithmFactoryImpl::getCategories(bool includeHidden) const
   {
