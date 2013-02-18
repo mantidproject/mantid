@@ -162,7 +162,7 @@ namespace Mantid
     /** Intialize the DataItem_sptr typeinfo
      */
     template<typename T>    
-    const std::type_info & TypedValidator<boost::shared_ptr<T>>::m_dataitemTypeID = typeid(boost::shared_ptr<DataItem>);
+    const std::type_info & TypedValidator<boost::shared_ptr<T> >::m_dataitemTypeID = typeid(boost::shared_ptr<DataItem>);
   }
   /// @endcond
 }
