@@ -53,7 +53,7 @@ namespace API{
                     LOCAL_CHANGED = (1u << 3), 
                     BOTH_CHANGED = (REMOTE_CHANGED | LOCAL_CHANGED),
                     }; 
-
+ 	
   /**
   The ScriptRepository class is intended to be used mainly by the users, who
   will be willing to share and download scripts for their analysis. As so, 
@@ -92,6 +92,7 @@ namespace API{
   */
   class MANTID_API_DLL ScriptRepoException : public std::exception
   {
+
   public:
     ///default constructor
   ScriptRepoException(const std::string info = std::string("Unknown Exception")):
@@ -291,6 +292,17 @@ They will work as was expected for folders @ref folders-sec.
   class MANTID_API_DLL ScriptRepository
   {
   public:
+  /// @deprecated Define a file inside the repository
+  struct file_entry
+  {
+    /// path related to git
+    std::string path; 
+    /// file status
+    SCRIPTSTATUS status; 
+    /// show if it is a directory or not
+    bool directory;
+  };
+
    
     /// Virtual destructor (always needed for abstract classes)
     virtual ~ScriptRepository() {};
@@ -353,7 +365,7 @@ They will work as was expected for folders @ref folders-sec.
        @exception May throw Invalid Repository if the local repository was not generated. In this case, it is necessary to execute the ScriptRepository::install (at least once). 
      */
     virtual std::vector<std::string> listFiles()  = 0;
-    
+    const std::vector<struct file_entry> & listEntries() {return repository_list;}
     
     /**
        Create a copy of the remote file/folder inside the local repository.
@@ -432,7 +444,9 @@ They will work as was expected for folders @ref folders-sec.
        @exception ScriptRepoException notifies mainly connection failure, but, 
                   may eventually, notify that the local repository may not be created. 
     */
-    virtual void check4Update(void)  = 0; 
+    virtual void check4Update(void)  = 0;
+    /// @deprecated
+    virtual void update(void) = 0; 
 
 
     
@@ -479,6 +493,9 @@ They will work as was expected for folders @ref folders-sec.
                 const std::string author, 
                 const std::string description = std::string())  = 0;
 
+protected:
+    /// @deprecated get all the files from a repository
+    std::vector<struct file_entry> repository_list; 
   };
 
 ///shared pointer to the function base class
