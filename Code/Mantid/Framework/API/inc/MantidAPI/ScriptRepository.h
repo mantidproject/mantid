@@ -254,7 +254,7 @@ The Mantid project pro (...)
   ## 'Hello world' greeting.
 
   print 'Hello world'
-  @code
+  @endcode
 
   Will show the description as follow:
 
