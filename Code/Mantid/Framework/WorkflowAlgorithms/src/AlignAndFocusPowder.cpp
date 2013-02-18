@@ -72,8 +72,8 @@ void AlignAndFocusPowder::init()
                   "Number of bins in x-axis. Non-zero value overrides \"Params\" property. Negative value means logorithmic binning.");
   setPropertySettings("Params", new EnabledWhenProperty("ResampleX", IS_DEFAULT));
   declareProperty("Dspacing", true,"Bin in Dspace. (True is Dspace; False is TOF)");
-  declareProperty(new ArrayProperty<double>("DMin", 0.0), "Minimum for Dspace axis. (Default 0.) ");
-  declareProperty(new ArrayProperty<double>("DMax", 0.0), "Maximum for Dspace axis. (Default 0.) ");
+  declareProperty(new ArrayProperty<double>("DMin"), "Minimum for Dspace axis. (Default 0.) ");
+  declareProperty(new ArrayProperty<double>("DMax"), "Maximum for Dspace axis. (Default 0.) ");
   declareProperty("TMin", 0.0, "Minimum for TOF axis. (Default 0.) ");
   declareProperty("TMax", 0.0, "Maximum for TOF or dspace axis. (Default 0.) ");
   declareProperty("PreserveEvents", true,
