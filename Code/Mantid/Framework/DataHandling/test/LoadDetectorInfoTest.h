@@ -116,10 +116,9 @@ namespace
       detFalseSize[3*i+1] = 0.22f;
       detFalseSize[3*i+2] = 0.33f;
 
-      detOrient[3*i+0] = static_cast<float>(i*0.1);
-      detOrient[3*i+1] = static_cast<float>(i*0.2);
-      detOrient[3*i+2] = static_cast<float>(i*0.3);
-
+      detOrient[3*i+0] = static_cast<float>(i)*0.1f;
+      detOrient[3*i+1] = static_cast<float>(i)*0.2f;
+      detOrient[3*i+2] = static_cast<float>(i)*0.3f;
       detStruct[2*i+0] = boost::lexical_cast<float>(pressure[ic]);
       detStruct[2*i+1] =boost::lexical_cast<float>(wallThick[ic]);
 

@@ -96,6 +96,7 @@ class DirectEnergyConversion(object):
               bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
                              bleed test diagnostic
               print_results - If True then the results are printed to the screen
+              NEEDED: norm_monitor  - if present, defines the number of monitor to normalize by
         """
         lhs_names = lhs_info('names')
         if len(lhs_names) > 0:
@@ -108,7 +109,7 @@ class DirectEnergyConversion(object):
             arg = par.lstrip('diag_')
             if arg not in kwargs:
                 kwargs[arg] = getattr(self, par)
-        
+                
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None) # No grouping yet
         if 'second_white' in kwargs:
@@ -186,7 +187,7 @@ class DirectEnergyConversion(object):
         self.spectra_masks = result
         return result
     
-    def do_white(self, white_run, spectra_masks, map_file): 
+    def do_white(self, white_run, spectra_masks, map_file,monitor): 
         """
         Normalise to a specified white-beam run
         """
