@@ -15,8 +15,8 @@ namespace Mantid
     Implements Chebyshev polynomial expansion.
 
     Attributes: int n - the highest polynomial order.
-    Parameters: n+1 expansion coefficients a_i as in expression:
-    Sum_i=0^n a_i * T_i(x)
+    Parameters: n+1 expansion coefficients \f$a_i\f$ as in expression:
+    \f$\sum_{i=0}^{n} a_i T_i(x)\f$
 
     Uses the Clenshaw algorithm to evaluate the expansion.
 
