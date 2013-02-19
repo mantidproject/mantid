@@ -1,10 +1,10 @@
 /*
- * PeakhklErrors.cpp
+ * PeakHKLErrors.cpp
  *
  *  Created on: Jan 26, 2013
  *      Author: ruth
  */
-#include "MantidCrystal/PeakhklErrors.h"
+#include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
@@ -35,11 +35,11 @@ namespace Mantid
   namespace Crystal
   {
 
-    Kernel::Logger& PeakhklErrors::g_log = Kernel::Logger::get("PeakhklErrors");
+    Kernel::Logger& PeakHKLErrors::g_log = Kernel::Logger::get("PeakHKLErrors");
 
-    DECLARE_FUNCTION( PeakhklErrors )
+    DECLARE_FUNCTION( PeakHKLErrors )
 
-    PeakhklErrors::PeakhklErrors():ParamFunction(), IFunction1D()
+    PeakHKLErrors::PeakHKLErrors():ParamFunction(), IFunction1D()
     {
       OptRuns = "";
       PeakWorkspaceName = "";
@@ -47,12 +47,12 @@ namespace Mantid
     }
 
 
-    PeakhklErrors:: ~PeakhklErrors()
+    PeakHKLErrors:: ~PeakHKLErrors()
     {
 
     }
 
-    void PeakhklErrors::init()
+    void PeakHKLErrors::init()
     {
       declareParameter( "SampleXOffset", 0.0, "Sample x offset" );
       declareParameter( "SampleYOffset", 0.0, "Sample y offset" );
@@ -83,7 +83,7 @@ namespace Mantid
 
     }
 
-    void PeakhklErrors::setUpOptRuns()
+    void PeakHKLErrors::setUpOptRuns()
     {
 
       std::vector<std::string> OptRunNums;
@@ -103,7 +103,7 @@ namespace Mantid
         declareParameter( "omega" + OptRunNums[i], 0.0, "Omega sample orientation value" );
       }
     }
-    void  PeakhklErrors::cLone( boost::shared_ptr< Geometry::ParameterMap> &pmap,
+    void  PeakHKLErrors::cLone( boost::shared_ptr< Geometry::ParameterMap> &pmap,
               boost::shared_ptr< const Geometry::IComponent> component , boost::shared_ptr<const Geometry::ParameterMap> &pmapSv )
     {
       if( !component )
@@ -165,7 +165,7 @@ namespace Mantid
           }
       }
     }
-    boost::shared_ptr<Geometry::Instrument> PeakhklErrors::getNewInstrument( PeaksWorkspace_sptr Peaks )const
+    boost::shared_ptr<Geometry::Instrument> PeakHKLErrors::getNewInstrument( PeaksWorkspace_sptr Peaks )const
     {
       Geometry::Instrument_const_sptr instSave = Peaks->getPeak( 0 ).getInstrument();
            boost::shared_ptr<Geometry::ParameterMap> pmap( new Geometry::ParameterMap() );
@@ -216,7 +216,7 @@ namespace Mantid
            return instChange;
 
     }
-     void PeakhklErrors::function1D  ( double *out, const double *xValues, const size_t nData )const
+     void PeakHKLErrors::function1D  ( double *out, const double *xValues, const size_t nData )const
      {
       PeaksWorkspace_sptr Peaks =
           AnalysisDataService::Instance().retrieveWS<PeaksWorkspace> ( PeakWorkspaceName );
@@ -294,7 +294,7 @@ namespace Mantid
       g_log.debug() << "    Chi**2 = " << ChiSqTot << "     nData = "<< nData <<std::endl;
     }
 
-     void PeakhklErrors::functionDeriv1D ( Jacobian* out, const double *xValues, const size_t nData )
+     void PeakHKLErrors::functionDeriv1D ( Jacobian* out, const double *xValues, const size_t nData )
      {
       PeaksWorkspace_sptr Peaks =
           AnalysisDataService::Instance().retrieveWS<PeaksWorkspace> ( PeakWorkspaceName );

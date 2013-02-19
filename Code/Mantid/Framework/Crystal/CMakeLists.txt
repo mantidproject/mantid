@@ -22,7 +22,7 @@ set ( SRC_FILES
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
 	src/OptimizeExtinctionParameters.cpp
-	src/PeakhklErrors.cpp
+	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
 	src/PredictPeaks.cpp
@@ -69,7 +69,7 @@ set ( INC_FILES
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/OptimizeExtinctionParameters.h
-	inc/MantidCrystal/PeakhklErrors.h
+	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
 	inc/MantidCrystal/PredictPeaks.h
@@ -112,7 +112,7 @@ set ( TEST_FILES
 	LoadIsawUBTest.h
 	MaskPeaksWorkspaceTest.h
 	NormaliseVanadiumTest.h
-	PeakhklErrorsTest.h
+	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
 	PredictPeaksTest.h

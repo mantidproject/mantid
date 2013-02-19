@@ -35,7 +35,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidCrystal/PeakhklErrors.h"
+#include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 
 using namespace Mantid::API;
@@ -178,7 +178,7 @@ namespace Mantid
       mwkspc->setX( 0 , pX );
       mwkspc->setData( 0 , yvals , errs );
 
-      std::string FuncArg = "name=PeakhklErrors,PeakWorkspaceName=" + getPropertyValue( "Peaks" )
+      std::string FuncArg = "name=PeakHKLErrors,PeakWorkspaceName=" + getPropertyValue( "Peaks" )
           + "";
 
       std::string OptRunNums;
@@ -331,7 +331,7 @@ namespace Mantid
       boost::shared_ptr<const ParameterMap>pmap_old = OldInstrument->getParameterMap();
       boost::shared_ptr<ParameterMap>pmap_new( new ParameterMap());
 
-     PeakhklErrors::cLone( pmap_new, OldInstrument , pmap_old );
+     PeakHKLErrors::cLone( pmap_new, OldInstrument , pmap_old );
 
       double L0 = peak.getL1();
       V3D oldSampPos = OldInstrument->getSample()->getPos();

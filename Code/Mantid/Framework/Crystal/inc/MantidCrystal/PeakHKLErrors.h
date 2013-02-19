@@ -1,5 +1,5 @@
 /*
- * PeakhklErrors.h
+ * PeakHKLErrors.h
  *
  *  Created on: Jan 26, 2013
  *      Author: ruth
@@ -52,15 +52,15 @@ namespace Mantid
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport PeakhklErrors: public API::ParamFunction, public API::IFunction1D
+    class DLLExport PeakHKLErrors: public API::ParamFunction, public API::IFunction1D
     {
     public:
-      PeakhklErrors();
-      virtual ~PeakhklErrors();
+      PeakHKLErrors();
+      virtual ~PeakHKLErrors();
 
       std::string name() const
       {
-        return std::string("PeakhklErrors");
+        return std::string("PeakHKLErrors");
       }
       ;
 

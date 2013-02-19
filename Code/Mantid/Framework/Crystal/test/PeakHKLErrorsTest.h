@@ -1,5 +1,5 @@
 /*
- * PeakhklErrorsTest.h
+ * PeakHKLErrorsTest.h
  *
  *  Created on: Jan 27, 2013
  *      Author: ruth
@@ -9,7 +9,7 @@
 #define PANELHKLERRORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidCrystal/PeakhklErrors.h"
+#include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/IFunction.h"
@@ -50,12 +50,12 @@ public:
 };
 
 
-    class PeakhklErrorsTest: public CxxTest::TestSuite
+    class PeakHKLErrorsTest: public CxxTest::TestSuite
     {
 
      public:
 
-      PeakhklErrorsTest(){}
+      PeakHKLErrorsTest(){}
 
       void test_data()
       {
@@ -75,7 +75,7 @@ public:
         loadUB.execute();
 
 
-        PeakhklErrors peakErrs;
+        PeakHKLErrors peakErrs;
         peakErrs.setAttribute( std::string("PeakWorkspaceName"),IFunction::Attribute("abcd"));
         peakErrs.setAttribute("OptRuns",IFunction::Attribute("/5638/"));
         peakErrs.initialize();
