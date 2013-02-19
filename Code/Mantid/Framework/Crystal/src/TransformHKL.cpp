@@ -67,7 +67,7 @@ namespace Crystal
           new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::InOut),
           "Input Peaks Workspace");
 
-    boost::shared_ptr<BoundedValidator<double>> mustBePositive(new BoundedValidator<double>());
+    boost::shared_ptr<BoundedValidator<double> > mustBePositive(new BoundedValidator<double>());
     mustBePositive->setLower(0.0);
 
     this->declareProperty(

@@ -83,7 +83,7 @@ namespace Crystal
     filters.push_back("Signal/Noise");
     declareProperty("FilterVariable","",boost::make_shared<StringListValidator>(filters),"The variable on which to filter the peaks");
 
-    declareProperty("FilterValue", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
+    declareProperty("FilterValue", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >(),
                     "The value of the FilterVariable to compare each peak to");
 
     std::vector<std::string> operation;

@@ -1504,7 +1504,7 @@ namespace Mantid
         << instrument->getValidFromDate().toISO8601String() << "\">" << std::endl;
       ParameterMap_sptr pmap = instrument->getParameterMap();
 
-      for (std::vector<vector<string>>::const_iterator it = Groups.begin(); it != Groups.end(); ++it)
+      for (std::vector<vector<string> >::const_iterator it = Groups.begin(); it != Groups.end(); ++it)
         for( std::vector<string>::const_iterator it1=(*it).begin(); it1 !=(*it).end(); ++it1)
         {
           string bankName = (*it1);
