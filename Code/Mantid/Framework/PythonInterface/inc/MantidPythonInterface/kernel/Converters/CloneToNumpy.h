@@ -23,6 +23,7 @@
  */
 #include "MantidKernel/System.h"
 #include <boost/python/detail/prefix.hpp>
+#include <vector>
 
 namespace Mantid
 {
