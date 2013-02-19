@@ -185,7 +185,7 @@ namespace API
     // Store.
     try
     {
-      std::vector<std::vector<std::string>> result;
+      std::vector<std::vector<std::string> > result;
       toValue(slaveFileProp(), result, "", "");
       PropertyWithValue<std::vector<std::vector<std::string> > >::operator=(result);
       return "";
@@ -244,7 +244,7 @@ namespace API
         commaTokenString.begin(), commaTokenString.end(), 
         boost::regex(PLUS_OPERATORS, boost::regex_constants::perl), -1);
 
-      std::vector<std::vector<std::string>> temp;
+      std::vector<std::vector<std::string> > temp;
 
       // Put the tokens into a vector before iterating over it this time,
       // so we can see how many we have.
@@ -268,7 +268,7 @@ namespace API
           errorMsg << "Unable to parse run(s): \"" << re.what() << "\", so will treat as a single file.  ";
         }
 
-        std::vector<std::vector<std::string>> f = m_parser.fileNames();
+        std::vector<std::vector<std::string> > f = m_parser.fileNames();
 
         // If there are no files, then we should keep this token as it was passed to the property,
         // in its untampered form. This will enable us to deal with the case where a user is trying to 
@@ -302,8 +302,8 @@ namespace API
       fileNames.insert(fileNames.end(), temp.begin(), temp.end());
     }
     
-    std::vector<std::vector<std::string>> allUnresolvedFileNames = fileNames;
-    std::vector<std::vector<std::string>> allFullFileNames;
+    std::vector<std::vector<std::string> > allUnresolvedFileNames = fileNames;
+    std::vector<std::vector<std::string> > allFullFileNames;
 
     // First, find the default extension.  Flatten all the unresolved filenames first, to make this easier.
     std::vector<std::string> flattenedAllUnresolvedFileNames = flattenFileNames(allUnresolvedFileNames);

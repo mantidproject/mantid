@@ -137,7 +137,7 @@ namespace API
     /// Description of the source object
     boost::shared_ptr<ModeratorModel> m_moderatorModel;
     /// Description of the choppers for this experiment.
-    std::list<boost::shared_ptr<ChopperModel>> m_choppers;
+    std::list<boost::shared_ptr<ChopperModel> > m_choppers;
     /// The information on the sample environment
     Kernel::cow_ptr<Sample> m_sample;
     /// The run information
