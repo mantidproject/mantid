@@ -4,29 +4,29 @@
 *This algorithm calibrates sets of Rectangular Detectors in one instrument. The initial path, time offset,
 *panel width's, panel height's, panel locations and orientation are all adjusted so the error
 *in q positions from the theoretical q positions is minimized.  Also, there are options to optimize taking
-*into account sample position and to have rotations be rigid rotations.
+*into account sample position and to have the rotations be rigid rotations.
 *
 *Some features:
 *
-*1) Panels can be grouped. All panels in a group will move the same way and rotate the same way.  If rigid rotations are used, each panel is rotated about the center of the instrument, not about the panel's center. The height and  widths of the panels in a group will all change by the same factor
+*1) Panels can be grouped. All panels in a group will move the same way and rotate the same way.  If rigid rotations are used, each panel is rotated about the center of the instrument, along with panel pixels rotating around the panel's center. The height and  widths of the panels in a group will all change by the same factor
 *
-*2) The user can select which quantities to adjust
+*2) The user can select which quantities to have optimized
 *
 *3) The results can be saved to an ISAW-like DetCal file or in an xml file that can be used with the LoadParameter algorithm.
 *
 *4) Results from a previous optimization can be applied before another optimization is done.
 *   The Levenberg-Marquardt optimization algorithm is used. Later iterations may have too small of changes for the parameters to
-*   get to another optimum value.  Restarting allows for the consideration of parameter values further away and also can change8
-*   constraints on the parameter values. This is also useful when fine tuning parameters that do not influence the errors as much as other parameters.
+*   get to another optimum value.  Restarting allows for the consideration of parameter values further away and also can change
+*   constraints for the parameter values. This is also useful when fine tuning parameters that do not influence the errors as much as other parameters.
 *
 *5) There are several output tables indicating the results of the fit
 *   A) ResultWorkspace contains the results from fitting.
 *     -t0 is in microseconds
 *     -L0 is in meters
 *     -*Xoffset,*Yoffset,and *Zoffset are in meters
-*     -*Xrot,*Yrot, and *Zrot are in degrees. Not Zrot is done first, then Yrot , the Xrot.
+*     -*Xrot,*Yrot, and *Zrot are in degrees. Note that Zrot is done first, then Yrot , the Xrot.
 *
-*   B)QErrorWorkspace contains the Error in Q values for each peak along with other associated information about the peak
+*   B)QErrorWorkspace contains the Error in Q values for each peak, along with other associated information about the peak
 *
 *   C)CovarianceInfo contains the "correlations"(*100) between each of the parameters
 *
@@ -286,7 +286,7 @@ namespace Mantid
               if( step <=0 ) step = 0;
             }
             start = -1;
-            if( StrtStopStep.size() >= 1)
+            if( !StrtStopStep.empty())
             {
               boost::trim(StrtStopStep[0]);
               start = boost::lexical_cast<int>(StrtStopStep[ 0 ].c_str());
@@ -838,7 +838,7 @@ namespace Mantid
         new API::WorkspaceProperty<API::ITableWorkspace>
         ("OutputNormalisedCovarianceMatrix","",Kernel::Direction::Output),
         "The name of the TableWorkspace in which to store the final covariance matrix" );
-      std::string NormMatName=fit_alg->getPropertyValue("OutputNormalisedCovarianceMatrix");
+      //std::string NormMatName=fit_alg->getPropertyValue("OutputNormalisedCovarianceMatrix");
 
 
       ITableWorkspace_sptr NormCov= fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
@@ -848,7 +848,7 @@ namespace Mantid
       setPropertyValue("OutputNormalisedCovarianceMatrix",   string("CovarianceInfo"));
       //--------------------- Get and Process Results -----------------------
       double chisq = fit_alg->getProperty( "OutputChi2overDoF");
-
+      setProperty("ChiSqOverDOF", chisq);
       ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
       std::vector< double >params;
       std::vector< double >errs ;
@@ -900,6 +900,7 @@ namespace Mantid
 
       // g_log.notice() << "      nVars=" <<nVars<< endl;
       int NDof = ( (int)ws->dataX( 0).size()- nVars);
+      setProperty("DOF",NDof);
       g_log.notice() << "ChiSqoverDoF =" << chisq << " NDof =" << NDof << endl;
 
       map<string,double> result;
@@ -1234,7 +1235,8 @@ namespace Mantid
 
       declareProperty( "NumIterations",60,"Number of iterations");
 
-
+      declareProperty("ChiSqOverDOF",-1.0,"ChiSqOverDOF",Kernel::Direction::Output);
+      declareProperty("DOF",-1,"Degrees of Freedom",Kernel::Direction::Output);
       setPropertySettings("PanelNamePrefix", new EnabledWhenProperty( "PanelGroups",
         Kernel::IS_EQUAL_TO, "SpecifyGroups"));
 

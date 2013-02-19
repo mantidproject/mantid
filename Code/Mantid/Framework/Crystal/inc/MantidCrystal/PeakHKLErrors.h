@@ -86,6 +86,8 @@ namespace Mantid
                          boost::shared_ptr< const Geometry::IComponent> component ,
                          boost::shared_ptr<const Geometry::ParameterMap> &pmapSv );
 
+      void getRun2MatMap( PeaksWorkspace_sptr & Peaks,
+                   const  std::string &OptRuns,std::map<int, Mantid::Kernel::Matrix<double> >&Res) const;
       size_t nAttributes() const
       {
         return (size_t) 2;

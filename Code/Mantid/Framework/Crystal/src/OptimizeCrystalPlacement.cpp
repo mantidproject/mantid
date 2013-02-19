@@ -1,22 +1,20 @@
 /*WIKI*
 
- This algorithm basically indexes peaks with the crystal orientation matrix stored in the peaks workspace.
-
- -The optimization is on the goniometer settings for the runs in the peaks workspace and also the sample
- orientation for the experiment.
+ This algorithm basically optimizes sample positions and sample orientations( chi,phi, and omega) for an experiment.
 
  -If the crystal orientation matrix, UB, was created from one run, that run may not need to have its goniometer
- settings optimized.  There is a property to list the run numbers to not have their goniometer settings optimized.
+ settings optimized.  There is a property to list the run numbers to NOT have their goniometer settings optimized.
+
+ -The crystal orientation matrix, UB, from the PeaksWorkspace should index all the runs "very well". Otherwise iterations that build a UB with corrected sample orientations slowly may be necessary.
 
  *WIKI*/
 /*
- * IndexOptimizePeaks.cpp
+ * OptimizeCrystalPlacement.cpp
  *
  *  Created on: Jan 26, 2013
  *      Author: ruth
  */
-
-#include "MantidCrystal/IndexOptimizePeaks.h"
+#include "MantidCrystal/OptimizeCrystalPlacement.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -50,81 +48,80 @@ namespace Mantid
   namespace Crystal
   {
 
-    Kernel::Logger& IndexOptimizePeaks::g_log = Kernel::Logger::get("IndexOptimizePeaks");
+    Kernel::Logger& OptimizeCrystalPlacement::g_log = Kernel::Logger::get("OptimizeCrystalPlacement");
 
-    DECLARE_ALGORITHM( IndexOptimizePeaks )
+    DECLARE_ALGORITHM( OptimizeCrystalPlacement )
 
-    IndexOptimizePeaks::IndexOptimizePeaks() :
+    OptimizeCrystalPlacement::OptimizeCrystalPlacement() :
       Algorithm()
     {
 
     }
-    IndexOptimizePeaks::~IndexOptimizePeaks()
+    OptimizeCrystalPlacement::~OptimizeCrystalPlacement()
     {
 
     }
 
-    void IndexOptimizePeaks::initDocs()
+    void OptimizeCrystalPlacement::initDocs()
     {
       this->setWikiSummary(
           "This algorithms indexes peaks after optimizing goniometer setting  and sample orientation." );
     }
 
-    void IndexOptimizePeaks::init()
+    void OptimizeCrystalPlacement::init()
     {
       declareProperty(
-          new WorkspaceProperty< PeaksWorkspace> ( "Peaks", "", Direction::Input ),
+          new WorkspaceProperty< PeaksWorkspace> ( "PeaksWorkspace", "", Direction::Input ),
           "Workspace of Peaks with UB loaded" );
-      declareProperty( new  ArrayProperty<int>( std::string( "NOoptimizeRuns" ), Direction::Input ),
-          "List of run Numbers NOT to optimize goniometer settings" );
+      declareProperty( new  ArrayProperty<int>( std::string( "KeepGoniometerFixedfor" ), Direction::Input ),
+          "List of run Numbers for which the goniometer settings will NOT be changed" );
 
-      declareProperty( new WorkspaceProperty< PeaksWorkspace> ( "OutputWorkspace", "",
+      declareProperty( new WorkspaceProperty< PeaksWorkspace> ( "ModifiedPeaksWorkspace", "",
           Direction::Output ), "Output Workspace of Peaks with optimized sample Orientations" );
 
-      declareProperty( new WorkspaceProperty<TableWorkspace> ( "ResultWorkspace", "",
+      declareProperty( new WorkspaceProperty<TableWorkspace> ( "FitInfoTable", "",
            Direction::Output ), "Workspace of Results" );
+
+      declareProperty("ToleranceChiPhiOmega",5.0,"Max offset in degrees from current settings");
+
+      declareProperty("MaxIntHKLOffsetPeaks2Use",.25,
+          "Use only peaks whose h,k,and l offsets from and integer are below this level");
+
+      declareProperty("MaxHKLPeaks2Use",-1.0,
+          "If less than 0 all peaks are used, otherwise only peaks whose h,k, and l values are below the level are used");
+
+      declareProperty("IncludeVaryingSampleOffsets", true,
+          "If true sample offsets will be adjusted to give better fits, otherwise they will be fixed as zero");
+
 
       declareProperty( "Chi2overDoF", -1.0,"chi squared over dof", Direction::Output);
       declareProperty( "nPeaks", -1,"Number of Peaks Used", Direction::Output);
       declareProperty( "nParams", -1,"Number of Parameters fit", Direction::Output);
 
-      declareProperty( "IndexPeaks" , false ,"Index the resultant peaks");
-
-      declareProperty( "Tolerance" , .12, "Tolerance for indexing peaks" );
 
 
-      declareProperty( "RoundHKLs" ,true, "Round H, K and L values to integers " );
 
-      declareProperty( "NumIndexed" , 0  , "Number of indexed peaks" , Direction::Output );
 
-      declareProperty( "AverageError" , 0.0  , "Gets set with the average HKL indexing error" , Direction::Output );
 
-      setPropertySettings ( "Tolerance" , new Kernel::EnabledWhenProperty( "IndexPeaks",
-          Kernel::IS_EQUAL_TO , "1" ) );
-
-      setPropertySettings ( "NumIndexed" , new Kernel::EnabledWhenProperty( "IndexPeaks",
-          Kernel::IS_EQUAL_TO , "1" ) );
-
-      setPropertySettings ( "AverageError" , new Kernel::EnabledWhenProperty( "IndexPeaks",
-          Kernel::IS_EQUAL_TO , "1" ) );
 
     }
 
-    void IndexOptimizePeaks::exec()
+    void OptimizeCrystalPlacement::exec()
     {
-      PeaksWorkspace_sptr Peaks = getProperty( "Peaks" );
+      PeaksWorkspace_sptr Peaks = getProperty( "PeaksWorkspace" );
 
-      PeaksWorkspace_sptr OutPeaks = getProperty( "OutputWorkspace" );
+      PeaksWorkspace_sptr OutPeaks = getProperty( "ModifiedPeaksWorkspace" );
       if( Peaks != OutPeaks)
       {
         boost::shared_ptr<PeaksWorkspace>X(Peaks->clone());
         OutPeaks= X;
       }
 
-      std::vector<int> NOoptimizeRuns = getProperty( "NOoptimizeRuns" );
+      std::vector<int> NOoptimizeRuns = getProperty( "KeepGoniometerFixedfor" );
       const DblMatrix X = Peaks->sample().getOrientedLattice().getUB();
       Matrix<double> UBinv( X );
       UBinv.Invert();
+
       std::vector<int> RunNumList;
       std::vector< V3D> ChiPhiOmega;
       Mantid::MantidVecPtr pX;
@@ -135,6 +132,8 @@ namespace Mantid
       Mantid::MantidVec &errB = errs.access();
 
       int nPeaksUsed =0;
+      double HKLintOffsetMax= getProperty("MaxIntHKLOffsetPeaks2Use");
+      double HKLMax=getProperty("MaxHKLPeaks2Use");
       for ( int i = 0; i < Peaks->getNumberPeaks(); i++ )
       {
          IPeak& peak = Peaks->getPeak( i );
@@ -152,8 +151,13 @@ namespace Mantid
           {
             double x = hkl[k]-floor(hkl[k]);
             if( x > .5 ) x -= 1;
-            if( fabs(x) >= .25)
+
+            if( fabs(x) >=  HKLintOffsetMax)
               use = false;
+
+            else if( HKLMax>0 && fabs(hkl[k])>HKLMax)
+              use = false;
+
           }
 
           if( !use) continue;
@@ -178,7 +182,7 @@ namespace Mantid
       mwkspc->setX( 0 , pX );
       mwkspc->setData( 0 , yvals , errs );
 
-      std::string FuncArg = "name=PeakHKLErrors,PeakWorkspaceName=" + getPropertyValue( "Peaks" )
+      std::string FuncArg = "name=PeakHKLErrors,PeakWorkspaceName=" + getPropertyValue( "PeaksWorkspace" )
           + "";
 
       std::string OptRunNums;
@@ -221,6 +225,7 @@ namespace Mantid
 
       std::string startConstraint = "";
       int nParams=3;
+      double DegreeTol=getProperty("ToleranceChiPhiOmega");
       for ( size_t i = 0; i < RunNumList.size(); i++ )
       {
         int runNum = RunNumList[i];
@@ -237,10 +242,10 @@ namespace Mantid
           oss << ",chi" << runNum << "=" << chiphiomega[0] << ",phi" << runNum << "=" << chiphiomega[1]
               << ",omega" << runNum << "=" << chiphiomega[2];
 
-          oss1 << startConstraint << chiphiomega[0] - 5 << "<chi" << runNum << "<" << chiphiomega[0] + 5;
-          oss1 << "," << chiphiomega[1] - 5 << "<phi" << runNum << "<" << chiphiomega[1] + 5;
+          oss1 << startConstraint << chiphiomega[0] - DegreeTol << "<chi" << runNum << "<" << chiphiomega[0] + DegreeTol;
+          oss1 << "," << chiphiomega[1] - DegreeTol << "<phi" << runNum << "<" << chiphiomega[1] + DegreeTol;
 
-          oss1 << "," << chiphiomega[2] - 5 << "<omega" << runNum << "<" << chiphiomega[2] + 5;
+          oss1 << "," << chiphiomega[2] - DegreeTol << "<omega" << runNum << "<" << chiphiomega[2] + DegreeTol;
           startConstraint = ",";
           nParams +=3 ;
         }
@@ -267,11 +272,16 @@ namespace Mantid
 
       fit_alg->setProperty( "CreateOutput" , true );
 
+      if( (bool)getProperty("IncludeVaryingSampleOffsets"))
+        fit_alg->setProperty("Ties","SampleXOffset=0,SampleYOffset=0,SampleXOffset=0");
+
       fit_alg->setProperty( "Output" , "out" );
 
       fit_alg->executeAsChildAlg();
 
       double chisq = fit_alg->getProperty( "OutputChi2overDoF" );
+      std::cout<<"Fit finished. Status="<<(std::string)fit_alg->getProperty("OutputStatus")
+                                        <<std::endl;
 
       setProperty("Chi2overDoF", chisq );
 
@@ -321,9 +331,9 @@ namespace Mantid
       }
 
     //-----------Fix up Resultant workspace return info -------------------
-      std::string ResultWorkspaceName = getPropertyValue( "ResultWorkspace" );
+      std::string ResultWorkspaceName = getPropertyValue( "FitInfoTable" );
       AnalysisDataService::Instance().addOrReplace( ResultWorkspaceName , RRes );
-      setPropertyValue( "ResultWorkspace" , ResultWorkspaceName );
+      setPropertyValue( "FitInfoTable" , ResultWorkspaceName );
 
       //----------- update instrument -------------------------
       IPeak& peak =Peaks->getPeak(0);
@@ -376,10 +386,10 @@ namespace Mantid
       }
 
 
-      std::string OutputPeaksName= getPropertyValue("OutputWorkspace");
+      std::string OutputPeaksName= getPropertyValue("ModifiedPeaksWorkspace");
 
-       setPropertyValue( "OutputWorkspace", OutputPeaksName);
-       setProperty( "OutputWorkspace", OutPeaks);
+       setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
+       setProperty( "ModifiedPeaksWorkspace", OutPeaks);
 
       //Note: this just runs IndexPeaks at the end. Could/Should be eliminated except the name
        // of this algorithm is index..Peaks, so maybe it should index the peaks.
@@ -400,9 +410,9 @@ namespace Mantid
           OutPeaks = index_alg->getProperty( "PeaksWorkspace" );
           AnalysisDataService::Instance().addOrReplace( OutputPeaksName, OutPeaks);;
 
-          setPropertyValue( "OutputWorkspace", OutputPeaksName);
-          setProperty( "OutputWorkspace", OutPeaks);
-          setPropertyValue( "OutputWorkspace", OutputPeaksName);
+          setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
+          setProperty( "ModifiedPeaksWorkspace", OutPeaks);
+          setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
 
         }catch(...)
         { g_log.debug() << "Could NOT index peaks" << std::endl;

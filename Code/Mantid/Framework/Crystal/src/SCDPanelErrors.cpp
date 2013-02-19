@@ -331,7 +331,10 @@ namespace Mantid
 
 
 
-    Peak SCDPanelErrors::createNewPeak(const API::IPeak & peak_old, Geometry::Instrument_sptr  instrNew, double T0, double L0)
+    Peak SCDPanelErrors::createNewPeak(const API::IPeak & peak_old,
+                                       Geometry::Instrument_sptr  instrNew,
+                                       double T0,
+                                       double L0)
     {
       Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
       if (inst->getComponentID() != instrNew->getComponentID())
@@ -359,7 +362,7 @@ namespace Mantid
       peak.setRunNumber(peak_old.getRunNumber());
       peak.setBinCount(peak_old.getBinCount());
 
-      peak.setDetectorID(ID);
+      //!!!peak.setDetectorID(ID);
       return peak;
     }
 

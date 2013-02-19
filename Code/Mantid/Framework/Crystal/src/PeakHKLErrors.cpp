@@ -216,6 +216,33 @@ namespace Mantid
            return instChange;
 
     }
+
+   void PeakHKLErrors::getRun2MatMap( PeaksWorkspace_sptr & Peaks, const std::string &OptRuns,
+       std::map<int, Mantid::Kernel::Matrix<double> > &Res)const
+    {
+
+      for (int i = 0; i < Peaks->getNumberPeaks(); ++i)
+      {
+        IPeak & peak_old = Peaks->getPeak((int)i);
+
+        int runNum = peak_old.getRunNumber();
+        std::string runNumStr = boost::lexical_cast<std::string>(runNum);
+        size_t N = OptRuns.find("/" + runNumStr + "/");
+        if (N < OptRuns.size())
+        {
+          double chi = getParameter("chi" + boost::lexical_cast<std::string>(runNumStr));
+          double phi = getParameter("phi" + boost::lexical_cast<std::string>(runNumStr));
+          double omega = getParameter("omega" + boost::lexical_cast<std::string>(runNumStr));
+          Mantid::Geometry::Goniometer uniGonio;
+          uniGonio.makeUniversalGoniometer();
+          uniGonio.setRotationAngle("phi", phi);
+          uniGonio.setRotationAngle("chi", chi);
+          uniGonio.setRotationAngle("omega", omega);
+          Res[runNum] = uniGonio.getR();
+        }
+      }
+
+    }
      void PeakHKLErrors::function1D  ( double *out, const double *xValues, const size_t nData )const
      {
       PeaksWorkspace_sptr Peaks =
@@ -226,7 +253,8 @@ namespace Mantid
       if ( !Peaks )
         throw std::invalid_argument( "Peaks not stored under the name " + PeakWorkspaceName );
 
-
+      std::map<int, Mantid::Kernel::Matrix<double> > RunNum2GonMatrixMap;
+      getRun2MatMap( Peaks, OptRuns,  RunNum2GonMatrixMap);
       const DblMatrix & UBx = Peaks->sample().getOrientedLattice().getUB();
 
       DblMatrix UBinv( UBx );
@@ -246,15 +274,8 @@ namespace Mantid
         size_t N = OptRuns.find( "/" + runNumStr + "/" );
         if( N < OptRuns.size() )
         {
-          double chi = getParameter( "chi" + boost::lexical_cast<std::string>( runNumStr ) );
-          double phi = getParameter( "phi" + boost::lexical_cast<std::string>( runNumStr ) );
-          double omega = getParameter( "omega" + boost::lexical_cast<std::string>( runNumStr ) );
-          Mantid::Geometry::Goniometer uniGonio;
-          uniGonio.makeUniversalGoniometer();
-          uniGonio.setRotationAngle( "phi", phi );
-          uniGonio.setRotationAngle( "chi", chi );
-          uniGonio.setRotationAngle( "omega", omega );
-          peak.setGoniometerMatrix( uniGonio.getR( ) );
+
+          peak.setGoniometerMatrix( RunNum2GonMatrixMap[runNum] );
         }
        // Kernel::Matrix<double> Gon  = peak.getGoniometerMatrix(  );
        // std::cout<<"Gon = "<< Gon<<std::endl;
@@ -301,6 +322,8 @@ namespace Mantid
       boost::shared_ptr<Geometry::Instrument> instNew = getNewInstrument( Peaks );
 
       const DblMatrix & UB = Peaks->sample().getOrientedLattice().getUB();
+      std::map<int, Kernel::Matrix<double> > RunNums2GonMatrix;
+      getRun2MatMap(  Peaks, OptRuns,RunNums2GonMatrix);
       DblMatrix UBinv( UB );
       UBinv.Invert();
       UBinv /= 2 * M_PI;
@@ -334,12 +357,8 @@ namespace Mantid
           chi = getParameter( "chi" + ( runNumStr ) );
           phi = getParameter( "phi" + ( runNumStr ) );
           omega = getParameter( "omega" + ( runNumStr ) );
-          Mantid::Geometry::Goniometer uniGonio;
-          uniGonio.makeUniversalGoniometer();
-          uniGonio.setRotationAngle( "phi", phi );
-          uniGonio.setRotationAngle( "chi", chi );
-          uniGonio.setRotationAngle( "omega", omega );
-          peak.setGoniometerMatrix( uniGonio.getR() );
+
+          peak.setGoniometerMatrix( RunNums2GonMatrix[runNum] );
           chiParamNum = parameterIndex( "chi" + ( runNumStr ) );
           phiParamNum = parameterIndex( "phi" + ( runNumStr ) );
           omegaParamNum = parameterIndex( "omega" + ( runNumStr ) );

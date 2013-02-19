@@ -1,12 +1,12 @@
 /*
- * IndexOptimizePeaks.h
+ * OptimizeCrystalPlacement.h
  *
  *  Created on: Jan 26, 2013
  *      Author: ruth
  */
 
-#ifndef INDEXOPTIMIZEPEAKS_H_
-#define INDEXOPTIMIZEPEAKS_H_
+#ifndef OPTIMIZECRYSTALPLACEMENT_H_
+#define OPTIMIZECRYSTALPLACEMENT_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -16,7 +16,7 @@ namespace Mantid
 namespace Crystal
 {
 
-  /** IndexOptimizePeaks
+  /** OptimizeCrystalPlacement
 
     Description:
         This algorithm basically indexes peaks with the crystal orientation matrix stored in the peaks workspace.
@@ -43,15 +43,15 @@ namespace Crystal
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IndexOptimizePeaks  : public API::Algorithm
+  class DLLExport OptimizeCrystalPlacement  : public API::Algorithm
    {
    public:
-    IndexOptimizePeaks();
-     virtual ~IndexOptimizePeaks();
+    OptimizeCrystalPlacement();
+     virtual ~OptimizeCrystalPlacement();
 
      virtual const std::string name() const
        {
-        return "IndexOptimizePeaks";
+        return "OptimizeCrystalPlacement";
        };
 
      virtual  int version() const
@@ -76,4 +76,4 @@ namespace Crystal
 }
 }
 
-#endif /* INDEXOPTIMIZEPEAKS_H_ */
+#endif /* OPTIMIZECRYSTALPLACEMENT_H_ */
