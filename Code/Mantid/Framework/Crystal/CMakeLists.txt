@@ -4,7 +4,7 @@ set ( SRC_FILES
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
 	src/CombinePeaksWorkspaces.cpp
-	src/CreateFractionalPeaks.cpp
+	src/PredictFractionalPeaks.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/FilterPeaks.cpp
 	src/FindSXPeaks.cpp
@@ -50,7 +50,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
-	inc/MantidCrystal/CreateFractionalPeaks.h
+	inc/MantidCrystal/PredictFractionalPeaks.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindSXPeaks.h
@@ -96,7 +96,7 @@ set ( TEST_FILES
 	CalculateUMatrixTest.h
 	CentroidPeaksTest.h
 	CombinePeaksWorkspacesTest.h
-	CreateFractionalPeaksTest.h
+	PredictFractionalPeaksTest.h
 	DiffPeaksWorkspacesTest.h
 	FilterPeaksTest.h
 	FindSXPeaksTest.h

@@ -1,12 +1,12 @@
 /*
- * CreateFractionalPeaksTest.h
+ * PredictFractionalPeaksTest.h
  *
  *  Created on: Dec 28, 2012
  *      Author: ruth
  */
 
-#ifndef CREATEFRACTIONALPEAKSTEST_H_
-#define CREATEFRACTIONALPEAKSTEST_H_
+#ifndef PREDICTFRACTIONALPEAKSTEST_H_
+#define PREDICTFRACTIONALPEAKSTEST_H_
 
 
 #include <cxxtest/TestSuite.h>
@@ -18,7 +18,7 @@
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/IndexPeaks.h"
-#include "MantidCrystal/CreateFractionalPeaks.h"
+#include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidAPI/FrameworkManager.h"
 
 
@@ -28,16 +28,16 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-class CreateFractionalPeaksTest: public CxxTest::TestSuite
+class PredictFractionalPeaksTest: public CxxTest::TestSuite
 {
 
 public:
- CreateFractionalPeaksTest()
+ PredictFractionalPeaksTest()
  {
  }
  void test_Init()
     {
-      CreateFractionalPeaks alg;
+      PredictFractionalPeaks alg;
       TS_ASSERT_THROWS_NOTHING( alg.initialize() );
       TS_ASSERT( alg.isInitialized() );
     }
@@ -74,7 +74,7 @@ public:
     TS_ASSERT( indexer.execute());
     TS_ASSERT(indexer.isExecuted());
 
-    CreateFractionalPeaks alg;
+    PredictFractionalPeaks alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -122,4 +122,4 @@ public:
   }
 };
 
-#endif /* CREATEFRACTIONALPEAKSTEST_H_ */
+#endif /* PredictFRACTIONALPEAKSTEST_H_ */

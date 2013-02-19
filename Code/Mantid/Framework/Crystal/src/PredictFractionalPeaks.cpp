@@ -11,12 +11,12 @@
  *
  *WIKI*/
 /*
- * CreateFractionalPeaks.cpp
+ * PredictFractionalPeaks.cpp
  *
  *  Created on: Dec 5, 2012
  *      Author: ruth
  */
-#include "MantidCrystal/CreateFractionalPeaks.h"
+#include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
@@ -38,31 +38,31 @@ namespace Mantid
   namespace Crystal
   {
 
-    Kernel::Logger& CreateFractionalPeaks::g_log = Kernel::Logger::get("CreateFractionalPeaks");
+    Kernel::Logger& PredictFractionalPeaks::g_log = Kernel::Logger::get("PredictFractionalPeaks");
 
-    DECLARE_ALGORITHM(CreateFractionalPeaks)
+    DECLARE_ALGORITHM( PredictFractionalPeaks )
 
-    CreateFractionalPeaks::~CreateFractionalPeaks()
+    PredictFractionalPeaks::~PredictFractionalPeaks()
     {
 
     }
 
 
 
-    CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
+    PredictFractionalPeaks::PredictFractionalPeaks():Algorithm()
     {
 
 
     }
         /// Sets documentation strings for this algorithm
-    void CreateFractionalPeaks::initDocs()
+    void PredictFractionalPeaks::initDocs()
     {
       this->setWikiSummary("Creates a PeaksWorkspace with peaks occurring at specific fractional h,k,or l values");
       this->setOptionalMessage("The offsets can be from hkl values in a range of hkl values or from peaks in the input PeaksWorkspace");
     }
 
     /// Initialise the properties
-    void CreateFractionalPeaks::init()
+    void PredictFractionalPeaks::init()
     {
       declareProperty(new WorkspaceProperty<PeaksWorkspace> ("Peaks", "", Direction::Input),
                 "Workspace of Peaks with orientation matrix that indexed the peaks and instrument loaded");
@@ -108,7 +108,7 @@ namespace Mantid
     }
 
     /// Run the algorithm
-    void CreateFractionalPeaks::exec()
+    void PredictFractionalPeaks::exec()
     {
        PeaksWorkspace_sptr Peaks=getProperty("Peaks");
 

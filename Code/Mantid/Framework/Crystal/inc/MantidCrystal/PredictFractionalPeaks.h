@@ -1,5 +1,5 @@
-#ifndef MANTID_CRYSTAL_CREATEFRACTIONALPEAKS_H_
-#define MANTID_CRYSTAL_CREATEFRACTIONALPEAKS_H_
+#ifndef MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS_H_
+#define MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS_H_
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
@@ -37,15 +37,15 @@ namespace Crystal
     <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport CreateFractionalPeaks : public API::Algorithm
+  class DLLExport PredictFractionalPeaks : public API::Algorithm
   {
   public:
-    CreateFractionalPeaks();
-    virtual ~CreateFractionalPeaks();
+    PredictFractionalPeaks();
+    virtual ~PredictFractionalPeaks();
     
     /// Algorithm's name for identification 
     virtual const std::string name() const 
-            { return "CreateFractionalPeaks";};
+            { return "PredictFractionalPeaks";};
 
     /// Algorithm's version for identification 
     virtual int version() const 
@@ -74,4 +74,4 @@ namespace Crystal
 } // namespace Crystal
 } // namespace Mantid
 
-#endif  /* MANTID_CRYSTAL_CREATEFRACTIONALPEAKS */
+#endif  /* MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS */
