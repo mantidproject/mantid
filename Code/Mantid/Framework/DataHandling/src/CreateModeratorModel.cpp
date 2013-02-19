@@ -54,10 +54,10 @@ namespace DataHandling
     declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut), "An input workspace.");
 
     std::vector<std::string> keys(1, "IkedaCarpenterModerator");
-    declareProperty("ModelType", "", boost::make_shared<ListValidator<std::string>>(keys),
+    declareProperty("ModelType", "", boost::make_shared<ListValidator<std::string> >(keys),
                     "The string identifier for the model", Direction::Input);
 
-    declareProperty("Parameters", "", boost::make_shared<MandatoryValidator<std::string>>(),
+    declareProperty("Parameters", "", boost::make_shared<MandatoryValidator<std::string> >(),
                     "The parameters for the model as comma-separated list of name=value pairs");
   }
 

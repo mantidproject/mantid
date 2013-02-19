@@ -60,13 +60,13 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut), "An workspace to attach the model");
       
       std::vector<std::string> keys(1, "FermiChopperModel");
-      declareProperty("ModelType", "", boost::make_shared<ListValidator<std::string>>(keys),
+      declareProperty("ModelType", "", boost::make_shared<ListValidator<std::string> >(keys),
                       "The string identifier for the model", Direction::Input);
       
-      declareProperty("Parameters", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      declareProperty("Parameters", "", boost::make_shared<MandatoryValidator<std::string> >(),
                       "The parameters for the model as comma-separated list of name=value pairs");
       
-      auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+      auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
       declareProperty("ChopperPoint", 0, mustBePositive, "The index of the chopper point. (Default=0)");
     }
