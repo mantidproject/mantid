@@ -32,7 +32,7 @@ namespace Mantid
     /// Init method to declare algorithm properties
     void CatalogLogin::init()
     {
-      auto requireValue = boost::make_shared<Kernel::MandatoryValidator<std::string>>();
+      auto requireValue = boost::make_shared<Kernel::MandatoryValidator<std::string> >();
       declareProperty("Username","", requireValue,"The name/federal ID of the logged in user");
       declareProperty(new MaskedProperty<std::string>("Password","", requireValue),
                       "The password of the logged in user ");
