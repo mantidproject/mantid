@@ -72,7 +72,7 @@ namespace Mantid
     */
     void PlotPeakByLogValue::init()
     {
-      declareProperty("Input","",boost::make_shared<MandatoryValidator<std::string>>(),
+      declareProperty("Input","",boost::make_shared<MandatoryValidator<std::string> >(),
         "List of input strings separated by ';'. Each string has a format: "
         "file | workspace[,sp<spectrum>|i<ws index>|v<from>:<to>[,<period>]]. "
         "'|' means 'or', [] means optional, <...> means a number");
@@ -82,7 +82,7 @@ namespace Mantid
       declareProperty("WorkspaceIndex", 0, "The index of a spectrum to be fitted in"
         " each workspace of the input list");
       declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output));
-      declareProperty("Function","",boost::make_shared<MandatoryValidator<std::string>>(),
+      declareProperty("Function","",boost::make_shared<MandatoryValidator<std::string> >(),
         "The fitting function, common for all workspaces");
       declareProperty("LogValue","","Name of the log value to plot the parameters against. "
         "If empty the axis1 values are used. If \"SourceName\" the name of the workspace or file is used.");
