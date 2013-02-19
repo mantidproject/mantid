@@ -472,7 +472,7 @@ namespace Mantid
       m_yvector = std::vector<TobyFitYVector>(nthreads, TobyFitYVector());
       m_etaInPlane = std::vector<double>(nthreads, 0.0);
       m_etaOutPlane = std::vector<double>(nthreads, 0.0);
-      m_deltaQE = std::vector<std::vector<double>>(nthreads, std::vector<double>(4, 0.0));
+      m_deltaQE = std::vector<std::vector<double> >(nthreads, std::vector<double>(4, 0.0));
     }
 
     /**

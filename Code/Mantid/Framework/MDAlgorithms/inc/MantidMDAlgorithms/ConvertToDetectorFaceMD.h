@@ -58,7 +58,7 @@ namespace MDAlgorithms
     std::map<int, Geometry::RectangularDetector_const_sptr> getBanks();
 
     template <class T, class MDE, size_t nd>
-    void convertEventList(boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd>> outWS,
+    void convertEventList(boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd> > outWS,
         size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
         uint16_t runIndex, int32_t detectorID);
 
