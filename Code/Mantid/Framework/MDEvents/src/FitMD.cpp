@@ -161,7 +161,7 @@ namespace Mantid
       auto outputWS = MDEventFactory::CreateMDWorkspace(inputWS->getNumDims(), "MDEvent");
       // Add events
       // TODO: Generalize to ND (the current framework is a bit limiting)
-      auto mdWS = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4>>(outputWS);
+      auto mdWS = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4> >(outputWS);
       if(!mdWS)
       {
         return;
