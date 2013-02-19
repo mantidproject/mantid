@@ -107,7 +107,7 @@ namespace CurveFitting
                                   int wsindex);
 
     /// Fit function by non MC minimzer(s)
-    double fitFunction(IFunction_sptr function, Workspace2D_sptr dataws, int wsindex, double &chi2);
+    double fitFunction(IFunction_sptr function, Workspace2D_sptr dataws, int wsindex, bool powerfit);
 
     /// Fit function (single step)
     bool doFitFunction(IFunction_sptr function, Workspace2D_sptr dataws, int wsindex,
@@ -137,6 +137,9 @@ namespace CurveFitting
     /// Construct an output TableWorkspace for refined peak profile parameters
     TableWorkspace_sptr genOutputProfileTable(map<string, Parameter> parameters,
                                               double startchi2, double finalchi2);
+
+    /// Add a parameter to parameter map.  If this parametere does exist, then replace the value of it
+    void addOrReplace(map<string, Parameter>& parameters, string parname, double parvalue);
 
     //--------  Variables ------------------------------------------------------
     /// Data workspace containg peak positions
