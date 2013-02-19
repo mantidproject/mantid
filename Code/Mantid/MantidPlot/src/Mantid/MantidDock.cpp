@@ -1041,7 +1041,7 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
 
   //menu->addAction(m_showBoxData); // Show MD Box data (for debugging only)
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
-  if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
+  if (!MantidQt::API::InterfaceManager::hasVatesLibraries())
   {
     m_showVatesGui->setEnabled(false);
   }
@@ -1061,7 +1061,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   (void) WS;
   menu->addAction(m_showHist); // Algorithm history
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
-  if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
+  if (!MantidQt::API::InterfaceManager::hasVatesLibraries())
   {
     m_showVatesGui->setEnabled(false);
   }
@@ -1086,7 +1086,7 @@ void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPea
 {
   (void) WS;
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
-  if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
+  if (!MantidQt::API::InterfaceManager::hasVatesLibraries())
   {
     m_showVatesGui->setEnabled(false);
   }

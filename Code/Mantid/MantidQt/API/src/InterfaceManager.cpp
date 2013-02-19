@@ -20,9 +20,9 @@
 using namespace MantidQt::API;
 
 //Initialize the logger
-Mantid::Kernel::Logger & InterfaceManagerImpl::g_log = Mantid::Kernel::Logger::get("InterfaceManager");
+Mantid::Kernel::Logger & InterfaceManager::g_log = Mantid::Kernel::Logger::get("InterfaceManager");
 
-Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManagerImpl::m_vatesGuiFactory = NULL;
+Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManager::m_vatesGuiFactory = NULL;
 
 //----------------------------------
 // Public member functions
@@ -38,7 +38,7 @@ Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManagerImpl
  * @param disabled :: TODO: Write description of this variable. 
  * @returns An AlgorithmDialog object
  */
-AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
+AlgorithmDialog* InterfaceManager::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
   bool forScript, const QHash<QString,QString> & preset_values, 
   const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled)
 {
@@ -90,7 +90,7 @@ AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg
  * @param interface_name :: The registered name of the interface
  * @param parent :: The parent widget
  */
-UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_name, QWidget* parent)
+UserSubWindow* InterfaceManager::createSubWindow(const QString & interface_name, QWidget* parent)
 {
   UserSubWindow *user_win = NULL;
   std::string iname = interface_name.toStdString();
@@ -120,7 +120,7 @@ UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_n
  * The keys associated with UserSubWindow classes
  * @returns A QStringList containing the keys from the InterfaceFactory that refer to UserSubWindow classes
  */
-QStringList InterfaceManagerImpl::getUserSubWindowKeys() const
+QStringList InterfaceManager::getUserSubWindowKeys() const
 {
   QStringList key_list;
   std::vector<std::string> keys = UserSubWindowFactory::Instance().getKeys();
@@ -136,7 +136,7 @@ QStringList InterfaceManagerImpl::getUserSubWindowKeys() const
 // Private member functions
 //----------------------------------
 /// Default Constructor
-InterfaceManagerImpl::InterfaceManagerImpl()
+InterfaceManager::InterfaceManager()
 {
   // Attempt to load libraries that may contain custom interface classes
   const std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("mantidqt.plugins.directory");
@@ -154,32 +154,32 @@ InterfaceManagerImpl::InterfaceManagerImpl()
 }
 
 /// Destructor
-InterfaceManagerImpl::~InterfaceManagerImpl()
+InterfaceManager::~InterfaceManager()
 {
 }
 
-void InterfaceManagerImpl::registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory)
+void InterfaceManager::registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory)
 {
-  this->m_vatesGuiFactory = factory;
+  m_vatesGuiFactory = factory;
 }
 
 /*
 Getter to determine if vates components have been installed.
 @return true if they are available.
 */
-bool InterfaceManagerImpl::hasVatesLibraries() const
+bool InterfaceManager::hasVatesLibraries()
 {
-  return NULL != this->m_vatesGuiFactory;
+  return NULL != m_vatesGuiFactory;
 }
 
 
 
-VatesViewerInterface *InterfaceManagerImpl::createVatesSimpleGui() const
+VatesViewerInterface *InterfaceManager::createVatesSimpleGui() const
 {
   if(m_vatesGuiFactory == NULL)
   {
-    g_log.error() << "InterfaceManagerImpl::createVatesSimpleGui is null. Mantid Vates package is probably not installed." << std::endl;
-    throw Mantid::Kernel::Exception::NullPointerException("InterfaceManagerImpl::createVatesSimpleGui", "m_vatesGuiFactory");
+    g_log.error() << "InterfaceManager::createVatesSimpleGui is null. Mantid Vates package is probably not installed." << std::endl;
+    throw Mantid::Kernel::Exception::NullPointerException("InterfaceManager::createVatesSimpleGui", "m_vatesGuiFactory");
   }
   else 
   {

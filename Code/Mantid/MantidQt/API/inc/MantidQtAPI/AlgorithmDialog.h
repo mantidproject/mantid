@@ -62,7 +62,7 @@ namespace API
 //----------------------------------
 // Forward declarations
 //----------------------------------
-class InterfaceManagerImpl;
+class InterfaceManager;
 
 /** 
     This class should be the basis for all customised algorithm dialogs.
@@ -127,7 +127,7 @@ protected:
   /** @name Algorithm information */
   // InterfaceManager needs to be able to reset the algorithm as I can't pass it in use a 
   // constructor
-  friend class InterfaceManagerImpl;
+  friend class InterfaceManager;
   
   /// Get the algorithm pointer
   Mantid::API::IAlgorithm* getAlgorithm() const;

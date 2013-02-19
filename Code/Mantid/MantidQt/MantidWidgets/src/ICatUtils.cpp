@@ -269,7 +269,8 @@ namespace MantidQt
       if(!m_applicationWindow)
       {return false;}
 
-      MantidQt::API::AlgorithmDialog *dlg =MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_applicationWindow);
+      MantidQt::API::InterfaceManager interfaceManager;
+      MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg.get(), m_applicationWindow);
       if(!dlg) return false;
       if(dlg->exec()==QDialog::Accepted)
       {

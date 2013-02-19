@@ -76,7 +76,8 @@ void ManageCustomMenus::populateMenuTree()
 */
 void ManageCustomMenus::getCustomInterfaceList()
 {
-    QStringList user_windows = MantidQt::API::InterfaceManager::Instance().getUserSubWindowKeys();
+    MantidQt::API::InterfaceManager interfaceManager;
+    QStringList user_windows = interfaceManager.getUserSubWindowKeys();
     QStringListIterator itr(user_windows);
     while( itr.hasNext() )
     {

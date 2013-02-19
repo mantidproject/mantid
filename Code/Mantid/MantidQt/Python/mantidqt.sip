@@ -83,6 +83,19 @@ enum MDNormalization
 
 namespace MantidQt
 {
+namespace API
+{
+
+class InterfaceManager
+{
+%TypeHeaderCode
+#include "MantidQtAPI/InterfaceManager.h"
+%End
+
+};
+
+};
+
 namespace SliceViewer
 {
 

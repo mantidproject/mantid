@@ -44,6 +44,7 @@
 
 #include <Qsci/qscilexerpython.h> 
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtAPI/InterfaceManager.h"
 
 #include <cassert>
 
