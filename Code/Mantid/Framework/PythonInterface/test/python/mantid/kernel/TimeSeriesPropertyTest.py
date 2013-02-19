@@ -18,11 +18,11 @@ class TimeSeriesPropertyTest(unittest.TestCase):
         self.assertEquals(log_series.size(), 63)
         self.assertAlmostEqual(log_series.nthValue(0), -0.00161)
 
-    def test_time_series_int_can_be_extracted(self):
-        log_series = self._test_ws.getRun()["raw_frames"]
-        self._check_has_time_series_attributes(log_series, np.int32)
-        self.assertEquals(log_series.size(), 172)
-        self.assertEquals(log_series.nthValue(0), 17)
+    #def test_time_series_int_can_be_extracted(self):
+    #    log_series = self._test_ws.getRun()["raw_frames"]
+    #    self._check_has_time_series_attributes(log_series, np.int32)
+    #    self.assertEquals(log_series.size(), 172)
+    #    self.assertEquals(log_series.nthValue(0), 17)
 
     def test_time_series_string_can_be_extracted(self):
         log_series = self._test_ws.getRun()["icp_event"]
