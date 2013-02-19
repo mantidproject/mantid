@@ -1,6 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
+#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 
 #include <boost/python/list.hpp>
