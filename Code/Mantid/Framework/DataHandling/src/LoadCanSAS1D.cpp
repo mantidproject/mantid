@@ -336,8 +336,9 @@ bool LoadCanSAS1D::quickFileCheck(const std::string& filePath,size_t nread,const
   (!extn.compare("xml"))?bspice2d=true:bspice2d=false;
 
   const char* xml_header="<?xml version=";
+  const char* full_hdr = reinterpret_cast<const char*>(header.full_hdr);
   if ( ((unsigned)nread >= strlen(xml_header)) && 
-    !strncmp((char*)header.full_hdr, xml_header, strlen(xml_header)) )
+    !strncmp(full_hdr, xml_header, strlen(xml_header)) )
   {
   }
   return(bspice2d?true:false);

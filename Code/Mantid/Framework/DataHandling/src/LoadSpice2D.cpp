@@ -503,9 +503,10 @@ namespace Mantid
       bool bspice2d(false);
       (!extn.compare("xml"))?bspice2d=true:bspice2d=false;
 
+      const char* full_hdr = reinterpret_cast<const char*>(header.full_hdr);
       const char* xml_header="<?xml version=";
       if ( ((unsigned)nread >= strlen(xml_header)) && 
-        !strncmp((char*)header.full_hdr, xml_header, strlen(xml_header)) )
+        !strncmp(full_hdr, xml_header, strlen(xml_header)) )
       {
       }
       return(bspice2d?true:false);
