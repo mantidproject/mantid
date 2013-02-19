@@ -23,15 +23,15 @@ the equation can be rewritten:
 
 :<math>F_k=e^{-2\pi iA\xi_k}\Delta x\sum_{n=0}^{N-1}f_ne^{-\tfrac{2\pi i}{N}nk}</math>
 
-Here <math>f_n=f(x_n)</math> and <math>F_k=F(\xi_k)</math>. The fromula 
+Here <math>f_n=f(x_n)</math> and <math>F_k=F(\xi_k)</math>. The formula
 
 :<math>\tilde{F}_k=\Delta x\sum_{n=0}^{N-1}f_ne^{-\tfrac{2\pi i}{N}nk}</math>
 
-is the Discrete Fourier Transform (DFT) and can be efficiently evaluated using the Fast Fourier Transform algorithm. The DFT formula calculates the Fourier transform of data on the interval <math>[0,L]</math>. It should be noted that it is periodic in <math>k</math> with period <math>N</math>. If we also assume that <math>f_n</math> is aslo periodic with period <math>N</math> the DFT can be used to transform data on the interval <math>[-L/2,L/2]</math>. To do this we swap the two halves of the data array <math>f_n</math>. If we denote the modified array as <math>\bar{f}_n</math>, its transform will be
+is the Discrete Fourier Transform (DFT) and can be efficiently evaluated using the Fast Fourier Transform algorithm. The DFT formula calculates the Fourier transform of data on the interval <math>[0,L]</math>. It should be noted that it is periodic in <math>k</math> with period <math>N</math>. If we also assume that <math>f_n</math> is also periodic with period <math>N</math> the DFT can be used to transform data on the interval <math>[-L/2,L/2]</math>. To do this we swap the two halves of the data array <math>f_n</math>. If we denote the modified array as <math>\bar{f}_n</math>, its transform will be
 
 :<math>\bar{F}_k=\Delta x\sum_{n=0}^{N-1}\bar{f}_ne^{-\tfrac{2\pi i}{N}nk}</math>
 
-The Mantid FFT algorithm returns the complex array <math>\bar{F}_K</math> as Y values of two spectra in the output workspace, one for the real and the other for the imaginary part of the transform. The X values are set to the transform frequencies and have the range approximately equal to <math>[-N/L,N/L]</math>. The actual limits depend sllightly on whether <math>N</math> is even or odd and whether the input spectra are histograms or point data. The variations are of the order of <math>\Delta\xi</math>. The zero frequency is always in the bin with index <math>k=N/2</math>.
+The Mantid FFT algorithm returns the complex array <math>\bar{F}_K</math> as Y values of two spectra in the output workspace, one for the real and the other for the imaginary part of the transform. The X values are set to the transform frequencies and have the range approximately equal to <math>[-N/L,N/L]</math>. The actual limits depend sllightly on whether <math>N</math> is even or odd and whether the input spectra are histograms or point data. The variations are of the order of <math>\Delta\xi</math>. The zero frequency is always in the bin with index <math>k=int(N/2)</math>.
 
 ===Example 1===
 
@@ -178,7 +178,7 @@ void FFT::init()
   fft_dir.push_back("Forward");
   fft_dir.push_back("Backward");
   declareProperty("Transform","Forward",boost::make_shared<StringListValidator>(fft_dir),"Direction of the transform: forward or backward");
-  declareProperty("Shift",0.0,"Shift");
+  declareProperty("Shift",0.0,"Apply an extra phase equal to this quantity times 2*pi to the transform");
 }
 
 /** Executes the algorithm
@@ -265,9 +265,9 @@ void FFT::exec()
   double df = 1.0 / (dx * ySize);
   if (isEnergyMeV) df /= 2.418e2;
 
-  // shift == true means that the zero on the x axis is assumed to be in the data centre 
+  // centerShift == true means that the zero on the x axis is assumed to be in the data centre
   // at point with index i = ySize/2. If shift == false the zero is at i = 0
-  bool shift = true;
+  bool centerShift = true;
 
   API::TextAxis* tAxis = new API::TextAxis(nOut);
   int iRe = 0;
@@ -290,22 +290,36 @@ void FFT::exec()
   const int dys = ySize % 2;
   if (transform == "Forward")
   {
+    /* If we translate the X-axis by -dx*ySize/2 and assume that our function is periodic
+     * along the X-axis with period equal to ySize, then dataY values must be rearranged such that
+     * dataY[i] = dataY[(ySize/2 + i + dys) % ySize]. However, we do not overwrite dataY but
+     * store the rearranged values in array 'data'.
+     * When index 'i' runs from 0 to ySize/2, data[2*i] will store dataY[j] with j running from
+     * ySize/2 to ySize.  When index 'i' runs from ySize/2+1 to ySize, data[2*i] will store
+     * dataY[j] with j running from 0 to ySize.
+     */
     for(int i=0;i<ySize;i++)
     {
-      int j = shift? (ySize/2 + i) % ySize : i; 
-      data[2*i] = inWS->dataY(iReal)[j];
-      data[2*i+1] = isComplex? inImagWS->dataY(iImag)[j] : 0.;
+      int j = centerShift? (ySize/2 + i + dys) % ySize : i;
+      data[2*i] = inWS->dataY(iReal)[j]; // even indexes filled with the real part
+      data[2*i+1] = isComplex? inImagWS->dataY(iImag)[j] : 0.; // odd indexes filled with the imaginary part
     }
 
-    double shift = getProperty("Shift");
+    double shift = getProperty("Shift"); // extra phase to be applied to the transform
     shift *= 2 * M_PI;
 
     gsl_fft_complex_forward (data.get(), 1, ySize, wavetable, workspace);
+    /* The Fourier transform overwrites array 'data'. Recall that the Fourier transform is
+     * periodic along the frequency axis. Thus, 'data' takes the same values when index j runs
+     * from ySize/2 to ySize than if index j would run from -ySize/2 to 0. Thus, for negative
+     * frequencies running from -ySize/2 to 0, we use the values stored in array 'data'
+     * for index j running from ySize/2 to ySize.
+     */
     for(int i=0;i<ySize;i++)
     {
-      int j = (ySize/2 + i + dys) % ySize;
-      outWS->dataX(iRe)[i] = df*(-ySize/2 + i);
-      double re = data[2*j]*dx;
+      int j = (ySize/2 + i) % ySize;
+      outWS->dataX(iRe)[i] = df*(-ySize/2+ i ); // zero frequency at i = ySize/2
+      double re = data[2*j]*dx; // use j from ySize/2 to ySize for negative frequencies
       double im = data[2*j+1]*dx;
       // shift
       {
@@ -355,9 +369,9 @@ void FFT::exec()
     for(int i=0;i<ySize;i++)
     {
       double x = df*i;
-      if (shift) x -= df*(ySize/2);
+      if (centerShift) x -= df*(ySize/2);
       outWS->dataX(0)[i] = x;
-      int j = shift? (ySize/2 + i + dys) % ySize : i; 
+      int j = centerShift? (ySize/2 + i + dys) % ySize : i;
       double re = data[2*j]/df;
       double im = data[2*j+1]/df;
       outWS->dataY(0)[i] = re;                  // real part
