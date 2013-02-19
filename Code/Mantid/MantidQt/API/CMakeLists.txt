@@ -73,6 +73,7 @@ set ( UI_FILES
 )
 
 set( TEST_FILES
+   InterfaceManagerTest.h
    MantidColorMapTest.h
    MantidQwtMatrixWorkspaceDataTest.h
 )
