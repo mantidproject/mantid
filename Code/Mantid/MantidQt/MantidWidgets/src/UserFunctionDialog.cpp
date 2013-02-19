@@ -10,6 +10,8 @@
 #include <QKeyEvent>
 #include <QFile>
 #include <QTextStream>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include <algorithm>
 
@@ -26,6 +28,7 @@ UserFunctionDialog::UserFunctionDialog(QWidget *parent,const QString& formula)
   connect(m_uiForm.btnAdd,SIGNAL(clicked()),this,SLOT(addExpression()));
   connect(m_uiForm.btnUse,SIGNAL(clicked()),this,SLOT(accept()));
   connect(m_uiForm.btnCancel,SIGNAL(clicked()),this,SLOT(reject()));
+  connect(m_uiForm.btnHelp,SIGNAL(clicked()),this,SLOT(helpClicked()));
   connect(m_uiForm.teUserFunction,SIGNAL(textChanged()),this,SLOT(updateFunction()));
   m_uiForm.teUserFunction->installEventFilter(this);
 
@@ -493,6 +496,14 @@ void UserFunctionDialog::setFunction(const QString& cat,const QString& fun,const
 bool UserFunctionDialog::isBuiltin(const QString& cat)const
 {
   return cat == "Base" || cat == "Built-in";
+}
+
+/**
+ * Open the help wiki page in the web browser.
+ */
+void UserFunctionDialog::helpClicked()
+{
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_User_Function_Dialog"));
 }
 
 /**

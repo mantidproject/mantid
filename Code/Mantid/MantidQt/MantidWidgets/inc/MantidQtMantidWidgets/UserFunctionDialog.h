@@ -35,6 +35,7 @@ namespace MantidQt
       void removeCurrentFunction();
       void updateCategories();
       void updateFunction();
+      void helpClicked();
     protected:
       /// User interface elements
       Ui::UserFunctionDialog m_uiForm;
