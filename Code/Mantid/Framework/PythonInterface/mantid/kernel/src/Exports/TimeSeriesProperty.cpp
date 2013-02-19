@@ -1,7 +1,12 @@
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/implicit.hpp>
+#include <boost/python/make_function.hpp>
+#include <boost/python/return_value_policy.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
+
 
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
@@ -9,21 +14,17 @@ using namespace boost::python;
 
 namespace
 {
-  /// Defines the getStatistics member for various types
-  #define DEF_GET_STATS(TYPE) DEF_GET_STATS_##TYPE
-  /// Doubles have a get stats member
-  #define DEF_GET_STATS_double
-  /// booleans do not have a get stats member
-  #define DEF_GET_STATS_bool
 
-  /// Macro to reduce copy-and-paste
+  using Mantid::PythonInterface::Policies::VectorToNumpy;
+
+  // Macro to reduce copy-and-paste
   #define EXPORT_TIMESERIES_PROP(TYPE, Prefix)\
     register_ptr_to_python<TimeSeriesProperty<TYPE>*>();\
     register_ptr_to_python<const TimeSeriesProperty<TYPE>*>();\
     implicitly_convertible<TimeSeriesProperty<TYPE>*,const TimeSeriesProperty<TYPE>*>();\
     \
     class_<TimeSeriesProperty<TYPE>, bases<Property>, boost::noncopyable>(#Prefix"TimeSeriesProperty", no_init)\
-      .add_property("value", &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector) \
+      .add_property("value", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector, return_value_policy<VectorToNumpy>())) \
       .add_property("times", &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector) \
       .def("valueAsString", &TimeSeriesProperty<TYPE>::value) \
       .def("size", &TimeSeriesProperty<TYPE>::size)\
@@ -33,7 +34,7 @@ namespace
       .def("lastValue", &TimeSeriesProperty<TYPE>::lastValue) \
       .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue) \
       .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime) \
-      .def("getStatistics", &TimeSeriesProperty<double>::getStatistics) \
+      .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics) \
       ;
   ;
 }

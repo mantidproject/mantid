@@ -17,6 +17,45 @@ namespace Mantid { namespace PythonInterface
     namespace Impl
     {
       /**
+       * Returns a new numpy array with the a copy of the data from 1D vector with the
+       * exception of string elements where a Python list is produced
+       * @param cvector :: A reference to the cvector to clone
+       * @return The new cloned array
+       */
+      template<typename ElementType>
+      PyObject *clone1D(const std::vector<ElementType> & cvector)
+      {
+        Py_intptr_t dims[1] = { static_cast<int>(cvector.size()) };
+        return cloneND(cvector.data(), 1, dims);
+      }
+
+      /**
+       * Specialisation for vector<bool> that stores the underlying data differently
+       * Returns a new numpy array with the a copy of the data vector of booleans
+       * @param cvector :: A reference to the cvector to clone
+       * @return The new cloned array
+       */
+      template<>
+      PyObject *clone1D(const std::vector<bool> & cvector)
+      {
+        Py_intptr_t dims[1] = { static_cast<int>(cvector.size()) };
+        int datatype = NDArrayTypeIndex<bool>::typenum;
+        PyObject *nparray =
+          PyArray_NewFromDescr(&PyArray_Type,
+                               PyArray_DescrFromType(datatype),
+                               1, // rank
+                               dims, // Length in each dimension
+                               NULL, NULL,
+                               0, NULL);
+        for(Py_intptr_t i = 0; i < dims[0]; ++i)
+        {
+          void *itemPtr = PyArray_GETPTR1(nparray, i);
+          PyArray_SETITEM(nparray,itemPtr, PyBool_FromLong(static_cast<long int>(cvector[i])));
+        }
+        return nparray;
+      }
+
+      /**
        * Returns a new numpy array with the a copy of the data from array. A specialization
        * exists for strings so that they simply create a standard python list.
        * @param carray :: A reference to a carray
@@ -25,13 +64,13 @@ namespace Mantid { namespace PythonInterface
        * @return
        */
       template<typename ElementType>
-      PyObject *cloneToNDArray(const ElementType * carray, const int ndims, Py_intptr_t *dims)
+      PyObject *cloneND(const ElementType * carray, const int ndims, Py_intptr_t *dims)
       {
         int datatype = NDArrayTypeIndex<ElementType>::typenum;
         PyObject *nparray =
           PyArray_NewFromDescr(&PyArray_Type,
                                PyArray_DescrFromType(datatype),
-                               ndims, // rank 1
+                               ndims, // rank
                                dims, // Length in each dimension
                                NULL, NULL,
                                0, NULL);
@@ -58,7 +97,7 @@ namespace Mantid { namespace PythonInterface
        * @return
        */
       template<>
-      PyObject *cloneToNDArray(const std::string * carray, const int ndims, Py_intptr_t *dims)
+      PyObject *cloneND(const std::string * carray, const int ndims, Py_intptr_t *dims)
       {
         boost::python::list pystrs;
         const std::string *iter = carray;
@@ -79,8 +118,15 @@ namespace Mantid { namespace PythonInterface
       //-----------------------------------------------------------------------
       // Explicit instantiations
       //-----------------------------------------------------------------------
+      #define INSTANTIATE_CLONE1D(ElementType) \
+        template DLLExport PyObject *clone1D<ElementType>(const std::vector<ElementType> & cvector); \
+
+      #define INSTANTIATE_CLONEND(ElementType) \
+        template DLLExport PyObject *cloneND<ElementType>(const ElementType *, const int ndims, Py_intptr_t *dims);
+
       #define INSTANTIATE_CLONE(ElementType) \
-        template DLLExport PyObject *cloneToNDArray<ElementType>(const ElementType *, const int ndims, Py_intptr_t *dims);
+        INSTANTIATE_CLONE1D(ElementType) \
+        INSTANTIATE_CLONEND(ElementType)
 
       ///@cond Doxygen doesn't seem to like this...
       INSTANTIATE_CLONE(int);
@@ -91,6 +137,10 @@ namespace Mantid { namespace PythonInterface
       INSTANTIATE_CLONE(unsigned long long);
       INSTANTIATE_CLONE(double);
       INSTANTIATE_CLONE(float);
+      // Need further 1D specialisation for string
+      INSTANTIATE_CLONE1D(std::string)
+      // Need further ND specialisation for bool
+      INSTANTIATE_CLONEND(bool);
       ///@endcond
     }
   }

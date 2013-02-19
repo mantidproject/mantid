@@ -32,9 +32,11 @@ namespace Mantid
     {
       namespace Impl
       {
-        /// Forward declaration of implementation. Helps keep numpy header out of this header
+        // Forward declaration of implementations. Keeps numpy header out of this header
         template<typename ElementType>
-        PyObject *cloneToNDArray(const ElementType * carray, const int ndims, Py_intptr_t *dims);
+        PyObject *clone1D(const std::vector<ElementType> & cvector);
+        template<typename ElementType>
+        PyObject *cloneND(const ElementType * carray, const int ndims, Py_intptr_t *dims);
       }
 
       /**
@@ -53,8 +55,7 @@ namespace Mantid
            */
           static PyObject * create1D(const std::vector<ElementType> & cvector)
           {
-            Py_intptr_t dims[1] = { static_cast<int>(cvector.size()) };
-            return createFromArray(cvector.data(), 1, dims);
+            return Impl::clone1D<ElementType>(cvector);
           }
           /**
            * Returns a Numpy array that has a copy of the array data
@@ -65,11 +66,10 @@ namespace Mantid
            */
           static PyObject * createFromArray(const ElementType * carray, const int ndims, Py_intptr_t *dims)
           {
-            return Impl::cloneToNDArray<ElementType>(carray, ndims, dims);
+            return Impl::cloneND<ElementType>(carray, ndims, dims);
           }
         };
       };
-
     }
   }
 }
