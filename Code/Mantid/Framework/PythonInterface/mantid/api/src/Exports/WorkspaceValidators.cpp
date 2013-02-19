@@ -12,7 +12,7 @@ void export_MatrixWorkspaceValidator()
   using Mantid::API::MatrixWorkspaceValidator;
   EXPORT_TYPEDVALIDATOR(MatrixWorkspace_sptr);
   class_<MatrixWorkspaceValidator, 
-         bases<TypedValidator<MatrixWorkspace_sptr>>, 
+         bases<TypedValidator<MatrixWorkspace_sptr> >,
          boost::noncopyable>("MatrixWorkspaceValidator", no_init)
     ;
 }
