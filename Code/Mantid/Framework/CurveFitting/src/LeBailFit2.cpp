@@ -276,6 +276,8 @@ namespace CurveFitting
         // Monte carlo Le Bail refinement
         g_log.notice("Function: Do LeBail Fit By Monte Carlo Random Walk.");
         execRandomWalkMinimizer(m_numMinimizeSteps, m_funcParameters);
+        doResultStatistics();
+        g_log.notice() << "Final Rwp = " << m_bestRwp << "\n";
 
         break;
 
@@ -289,15 +291,7 @@ namespace CurveFitting
         break;
     }
 
-    // 8. Calcualte Chi^2 of Output Data (calcualted or fitted)
-    if (m_fitMode != BACKGROUNDPROCESS)
-//    if (m_fitMode == 0 || m_fitMode == 1)
-    {
-      doResultStatistics();
-      g_log.notice() << "Final Rwp = " << m_bestRwp << "\n";
-    }
-
-// 7. Output peak (table) and parameter workspace
+    // 7. Output peak (table) and parameter workspace
     exportBraggPeakParameterToTable();
     exportInstrumentParameterToTable(m_funcParameters);
     this->setProperty("OutputWorkspace", m_outputWS);
@@ -451,6 +445,17 @@ namespace CurveFitting
         }
       } // FOR PEAKS
     } // ENDIF: plot.each.peak
+
+    // 5. Calculate Rwp
+    double rwp, rp;
+    calculatePowderPatternStatistic(m_outputWS->dataY(FITTEDPUREPEAKINDEX), m_outputWS->dataY(FITTEDBACKGROUNDINDEX), rwp, rp);
+    g_log.notice() << "Rwp = " << rwp << ", Rp = " << rp << "\n";
+
+    Parameter par_rwp;
+    par_rwp.name = "Rwp";
+    par_rwp.value = rwp;
+
+    m_funcParameters["Rwp"] = par_rwp;
 
     return;
   }
@@ -2619,8 +2624,13 @@ namespace CurveFitting
       for (size_t igroup = 0; igroup < m_numMCGroups; ++igroup)
       {
         // i.   Propose the value
-        // proposeNewValues(m_MCGroups[igroup], currwp, parammap, newparammap);
-        proposeNewValues(m_MCGroups[igroup], currp, parammap, newparammap, prevcyclebetterrwp);
+        bool hasnewvalues = proposeNewValues(m_MCGroups[igroup], currp, parammap, newparammap, prevcyclebetterrwp);
+
+        if (!hasnewvalues)
+        {
+          // g_log.notice() << "[DB1035.  Group " << igroup << " has no new value propsed. \n";
+          continue;
+        }
 
         // ii.  Evaluate
         double newrwp, newrp;
@@ -2727,13 +2737,15 @@ namespace CurveFitting
     for (mapiter = parammap.begin(); mapiter != parammap.end(); ++mapiter)
     {
       Parameter& param = mapiter->second;
-      g_log.notice() << setw(10) << param.name << "\t: Average Stepsize = " << setw(10) << setprecision(5)
-                     << param.sumstepsize/double(maxcycles)
-                     << ", Max Step Size = " << setw(10) << setprecision(5) << param.maxabsstepsize
-                     << ", Number of Positive Move = " << setw(4) << param.numpositivemove
-                     << ", Number of Negative Move = " << setw(4) << param.numnegativemove
-                     << ", Number of No Move = " << setw(4) << param.numnomove << "\n";
-
+      if (param.fit)
+      {
+        g_log.notice() << setw(10) << param.name << "\t: Average Stepsize = " << setw(10) << setprecision(5)
+                       << param.sumstepsize/double(maxcycles)
+                       << ", Max Step Size = " << setw(10) << setprecision(5) << param.maxabsstepsize
+                       << ", Number of Positive Move = " << setw(4) << param.numpositivemove
+                       << ", Number of Negative Move = " << setw(4) << param.numnegativemove
+                       << ", Number of No Move = " << setw(4) << param.numnomove << "\n";
+      }
     }
     g_log.notice() << "Number of invalid proposed moves = " << numinvalidmoves << "\n";
     exportXYDataToFile(vecIndex, vecRwp, "rwp_trace.dat");
@@ -2760,6 +2772,10 @@ namespace CurveFitting
 
     // c) Apply the best parameters to param
     applyParameterValues(m_bestParameters, parammap);
+    Parameter par_rwp;
+    par_rwp.name = "Rwp";
+    par_rwp.value = m_bestRwp;
+    parammap["Rwp"] = par_rwp;
 
     return;
   }
@@ -2851,10 +2867,10 @@ namespace CurveFitting
       m_funcParameters[parname].mcA1 = 1.0;
       m_funcParameters[parname].nonnegative = false;
     }
-    m_funcParameters["Alpha0"].mcA0 = 0.05;
-    m_funcParameters["Alpha1"].mcA0 = 0.02;
-    m_funcParameters["Alpha0t"].mcA0 = 0.1;
-    m_funcParameters["Alpha1t"].mcA0 = 0.05;
+    m_funcParameters["Alph0"].mcA0 = 0.05;
+    m_funcParameters["Alph1"].mcA0 = 0.02;
+    m_funcParameters["Alph0t"].mcA0 = 0.1;
+    m_funcParameters["Alph1t"].mcA0 = 0.05;
 
     // c) Beta
     for (size_t i = 0; i < betas.size(); ++i)
@@ -2877,19 +2893,19 @@ namespace CurveFitting
     m_funcParameters["Tcross"].mcA1 = 1.0;
     m_funcParameters["Tcross"].nonnegative = true;
 
-    m_funcParameters["Zero"].mcA0 = 5.0;
+    m_funcParameters["Zero"].mcA0 = 5.0;  // 5.0
     m_funcParameters["Zero"].mcA1 = 0.0;
     m_funcParameters["Zero"].nonnegative = false;
 
-    m_funcParameters["Zerot"].mcA0 = 5.0;
+    m_funcParameters["Zerot"].mcA0 = 5.0; // 5.0
     m_funcParameters["Zerot"].mcA1 = 0.0;
     m_funcParameters["Zerot"].nonnegative = false;
 
-    m_funcParameters["Dtt1"].mcA0 = 5.0;
+    m_funcParameters["Dtt1"].mcA0 = 5.0;  // 20.0
     m_funcParameters["Dtt1"].mcA1 = 0.0;
     m_funcParameters["Dtt1"].nonnegative = true;
 
-    m_funcParameters["Dtt1t"].mcA0 = 5.0;
+    m_funcParameters["Dtt1t"].mcA0 = 5.0; // 20.0
     m_funcParameters["Dtt1t"].mcA1 = 0.0;
     m_funcParameters["Dtt1t"].nonnegative = true;
 
@@ -3054,7 +3070,7 @@ namespace CurveFitting
    * @param rp         : output as Rp of the model function
    */
   void LeBailFit2::calculatePowderPatternStatistic(const MantidVec& values, const vector<double>& background, double& rwp,
-                                                 double& rp)
+                                                   double& rp)
   {
     // 1. Init the statistics
     const MantidVec& obsdata = m_dataWS->readY(m_wsIndex);
@@ -3142,19 +3158,28 @@ namespace CurveFitting
     * @param newparammap:  map of Parameters hold new values
     * @param prevBetterRwp: boolean.  true if previously proposed value resulted in a better Rwp
     *
-    * TODO: Study the possibility to merge curparammap and newparammap
+    * Return: Boolean to indicate whether there is any parameter that have proposed new values in
+    *         this group
     */
-  void LeBailFit2::proposeNewValues(vector<string> mcgroup, double m_totRwp, map<string, Parameter>& curparammap,
+  bool LeBailFit2::proposeNewValues(vector<string> mcgroup, double m_totRwp, map<string, Parameter>& curparammap,
                                     map<string, Parameter>& newparammap, bool prevBetterRwp)
   {
+    // TODO: Study the possibility to merge curparammap and newparammap
+
+    bool anyparameterrefined = false;
+
     for (size_t i = 0; i < mcgroup.size(); ++i)
     {
-      // random number between -1 and 1
-      double randomnumber = 2*static_cast<double>(rand())/static_cast<double>(RAND_MAX) - 1.0;
-
       // parameter information
       string paramname = mcgroup[i];
       Parameter param = curparammap[paramname];
+      if (param.fit)
+        anyparameterrefined = true;
+      else
+        continue;
+
+      // random number between -1 and 1
+      double randomnumber = 2*static_cast<double>(rand())/static_cast<double>(RAND_MAX) - 1.0;
       double stepsize = m_dampingFactor * m_totRwp * (param.value * param.mcA1 + param.mcA0) * randomnumber;
 
       // drunk walk or random walk
@@ -3212,20 +3237,20 @@ namespace CurveFitting
       // record some trace
       Parameter& p = curparammap[paramname];
       if (stepsize > 0)
-    {
-      p.movedirection = 1;
-      ++ p.numpositivemove;
-    }
+      {
+        p.movedirection = 1;
+        ++ p.numpositivemove;
+      }
       else if (stepsize < 0)
-    {
-      p.movedirection = -1;
-      ++ p.numnegativemove;
-    }
+      {
+        p.movedirection = -1;
+        ++ p.numnegativemove;
+      }
       else
-    {
-      p.movedirection = -1;
-      ++p.numnomove;
-    }
+      {
+        p.movedirection = -1;
+        ++p.numnomove;
+      }
       p.sumstepsize += fabs(stepsize);
       if (fabs(stepsize) > p.maxabsstepsize)
         p.maxabsstepsize = fabs(stepsize);
@@ -3235,7 +3260,7 @@ namespace CurveFitting
                     << stepsize << "), totRwp = " << m_totRwp << "\n";
     }
 
-    return;
+    return anyparameterrefined;
   }
 
   //-----------------------------------------------------------------------------------------------

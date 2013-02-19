@@ -231,7 +231,7 @@ namespace CurveFitting
     bool acceptOrDeny(double currwp, double newrwp);
 
     /// Propose new parameters
-    void proposeNewValues(vector<string> mcgroup, double m_totRwp,
+    bool proposeNewValues(vector<string> mcgroup, double m_totRwp,
                           map<string, Parameter> &curparammap, map<string, Parameter> &newparammap, bool prevBetterRwp);
 
     /// Book keep the (sopposed) best MC result
