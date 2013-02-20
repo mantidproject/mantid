@@ -158,6 +158,10 @@ namespace Mantid
                               // appearantly, we can't read bools from the config file?!?)
 
 
+      // Holds on to any exceptions that were thrown in the background thread so that we
+      // can re-throw them in the forground thread
+      boost::shared_ptr<std::runtime_error> m_backgroundException;
+
       // --- Data structures necessary for handling all the process variable info ---
 
       // maps <device id, variable id> to variable name

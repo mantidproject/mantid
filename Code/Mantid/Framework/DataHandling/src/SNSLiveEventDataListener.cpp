@@ -273,9 +273,11 @@ namespace DataHandling
 
     // If we've gotten here, it's because the thread has thrown an otherwise
     // uncaught exception.  In such a case, the thread will exit and there's
-    // nothing we can do about that.  The only thing we can do is log an error
-    // so hopefully the user will notice (instead of wondering why all the
-    // incoming data has just stopped...)
+    // nothing we can do about that.  We'll log an error and save a copy of the
+    // exception object so that we can re-throw it from the foreground thread (which
+    // will cause the algorithm to exit).
+    // NOTE: For the default exception handler, we actually create a new runtime_error
+    // object and throw that, since there's no exception object passed in to the handler.
     } catch ( ADARA::invalid_packet e) {  // exception handler for invalid packets
       // For now, log it and let the thread exit.  In the future, we might
       // try to recover from this.  (A bad event packet could probably just
@@ -289,6 +291,8 @@ namespace DataHandling
       m_workspaceInitialized = true;  // see the comments in the default exception
                                       // handler for why we set this value.
 
+      m_backgroundException = boost::shared_ptr<std::runtime_error>( new ADARA::invalid_packet(e));
+
     } catch (std::runtime_error e) {  // exception handler for generic runtime exceptions
       g_log.fatal() << "Caught a runtime exception." << std::endl
                     << "Exception message: " << e.what() << std::endl
@@ -296,6 +300,8 @@ namespace DataHandling
       m_isConnected = false;
       m_workspaceInitialized = true;  // see the comments in the default exception
                                       // handler for why we set this value.
+
+      m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
     } catch (...) {  // Default exception handler
       g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
@@ -308,6 +314,9 @@ namespace DataHandling
       // going to be completely bogus, but since the entire we're not going to be able to read
       // any data, that's not really an issue.
       m_workspaceInitialized = true;
+
+      m_backgroundException =
+          boost::shared_ptr<std::runtime_error>( new std::runtime_error( "Unknown error in backgound thread"));
     }
 
     return;
@@ -1068,6 +1077,13 @@ namespace DataHandling
   /// of a run, ending a run or not in a run.
   ILiveListener::RunStatus SNSLiveEventDataListener::runStatus()
   {
+    // First up, check to see if the background thread has thrown an
+    // exception.  If so, re-throw it here.
+    if (m_backgroundException)
+    {
+      throw( *m_backgroundException);
+    }
+
     // The MonitorLiveData algorithm calls this function *after* the call to
     // extract data, which means the value we return should reflect the
     // value that's appropriate for the events that were returned when
