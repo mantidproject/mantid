@@ -3,7 +3,6 @@
 #include <MantidAPI/IMDWorkspace.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include <boost/optional.hpp>
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
@@ -62,9 +61,9 @@ std::string RebinningKnowledgeSerializer::createXMLString() const
     throw std::runtime_error("No workspace name provided on workspace.");
   }
   //Check to see if a function has been provided.
-  if(m_spFunction.is_initialized())
+  if(m_spFunction != NULL)
   {
-    return std::string(MDGeometryXMLDefinitions::workspaceInstructionXMLTagStart()  + m_wsNameXML + m_wsLocationXML + m_geomXML + m_spFunction.get()->toXMLString() + MDGeometryXMLDefinitions::workspaceInstructionXMLTagEnd());
+    return std::string(MDGeometryXMLDefinitions::workspaceInstructionXMLTagStart()  + m_wsNameXML + m_wsLocationXML + m_geomXML + m_spFunction->toXMLString() + MDGeometryXMLDefinitions::workspaceInstructionXMLTagEnd());
   }
   else
   {
