@@ -2,6 +2,7 @@
 #define VATES_REBINNING_KNOWLEDGE_SERIALIZER_H
 
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 #include <string>
 
 namespace Mantid
@@ -58,7 +59,7 @@ class DLLExport RebinningKnowledgeSerializer
 
 private:
 
-  boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction>  m_spFunction;
+  boost::optional<boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> >  m_spFunction;
   std::string m_wsLocationXML;
   std::string m_wsNameXML;
   std::string m_wsName;

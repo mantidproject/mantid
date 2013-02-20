@@ -223,6 +223,11 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
   }
 };
 
+/**
+Create a field data entry containing (as contents) the argument text.
+@param testData : Text to enter
+@return new vtkFieldData object containing text.
+*/
   vtkFieldData* createFieldDataWithCharArray(std::string testData)
   {
     vtkFieldData* fieldData = vtkFieldData::New();
@@ -243,6 +248,21 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
     return fieldData;
   }
 
+  /**
+  Construct an example Geometry section of the XML passed via field-data.
+
+  Note that this function doesn't give complete control over the geometry. For example, the Upper and Lower bounds are hard-coded.
+
+  @param xDimensionIdMapping : Dimension name for dimension to be used as the x-dimension in the view.
+  @param yDimensionIdMapping : Dimension name for dimension y-dimension in the view.
+  @param zDimensionIdMapping : Dimension name for dimension z-dimension in the view.
+  @param tDimensionIdMapping : Dimension name for dimension t-dimension in the view.
+  @param xBins : number of bins in the x dimension
+  @param yBins : number of bins in the x dimension
+  @param zBins : number of bins in the x dimension
+  @param tBins : number of bins in the x dimension
+  @return xml snippet as string.
+  */
   std::string constrctGeometryOnlyXML(const std::string& xDimensionIdMapping, const std::string& yDimensionIdMapping, const std::string& zDimensionIdMapping, const std::string& tDimensionIdMapping
     ,std::string xBins = "10",
     std::string yBins = "10",
@@ -303,6 +323,15 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
     return body;
   }
 
+
+  /**
+  Construct test xml describing the transformations and the inputs.
+  @param xDimensionIdMapping : Dimension name for dimension to be used as the x-dimension in the view.
+  @param yDimensionIdMapping : Dimension name for dimension y-dimension in the view.
+  @param zDimensionIdMapping : Dimension name for dimension z-dimension in the view.
+  @param tDimensionIdMapping : Dimension name for dimension t-dimension in the view.
+  @return full xml as string.
+  */
   std::string constructXML(const std::string& xDimensionIdMapping, const std::string& yDimensionIdMapping, const std::string& zDimensionIdMapping, const std::string& tDimensionIdMapping)
   {
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +

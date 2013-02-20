@@ -3,6 +3,7 @@
 #include <MantidAPI/IMDWorkspace.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include <boost/optional.hpp>
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
@@ -14,7 +15,6 @@ namespace VATES
 {
 
 RebinningKnowledgeSerializer::RebinningKnowledgeSerializer(LocationPolicy locationPolicy) : 
-  m_spFunction(), 
   m_wsLocationXML(""), 
   m_wsNameXML(""), 
   m_wsName(""), 
@@ -56,22 +56,15 @@ std::string RebinningKnowledgeSerializer::createXMLString() const
   {
     throw std::runtime_error("No geometry provided on workspace.");
   }
-//  if(LocationMandatory == this->m_locationPolicy) //Only if it is stated that a location must be provided, do we apply the checking.
-//  {
-//    if(this->m_wsLocationXML == (MDGeometryXMLDefinitions::workspaceLocationXMLTagStart() + MDGeometryXMLDefinitions::workspaceLocationXMLTagEnd()))
-//    {
-//      throw std::runtime_error("No workspace location provided on workspace.");
-//    }
-//  }
+
   if(this->m_wsNameXML == (MDGeometryXMLDefinitions::workspaceNameXMLTagStart() + MDGeometryXMLDefinitions::workspaceNameXMLTagEnd()))
   {
     throw std::runtime_error("No workspace name provided on workspace.");
   }
-
   //Check to see if a function has been provided.
-  if(NULL != m_spFunction.get())
+  if(m_spFunction.is_initialized())
   {
-    return std::string(MDGeometryXMLDefinitions::workspaceInstructionXMLTagStart()  + m_wsNameXML + m_wsLocationXML + m_geomXML + m_spFunction->toXMLString() + MDGeometryXMLDefinitions::workspaceInstructionXMLTagEnd());
+    return std::string(MDGeometryXMLDefinitions::workspaceInstructionXMLTagStart()  + m_wsNameXML + m_wsLocationXML + m_geomXML + m_spFunction.get()->toXMLString() + MDGeometryXMLDefinitions::workspaceInstructionXMLTagEnd());
   }
   else
   {
