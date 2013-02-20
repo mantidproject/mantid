@@ -152,10 +152,11 @@ void LoadNexusProcessed::exec()
   }
   catch (::NeXus::Exception &e)
   {
+    g_log.notice() << "First load threw exception \"" << e.what() << "\"\n";
     NXhandle handle;
     int status = NXopen(filename.c_str(), NXACC_READ, &handle);
     m_cppFile = boost::make_shared< ::NeXus::File >(handle, true);
-    g_log.notice() << "First load did not work, napi.h load returned " << status << "\n";
+    g_log.notice() << "napi.h load returned " << status << "\n";
   }
 
   //Throws an approriate exception if there is a problem with file access
