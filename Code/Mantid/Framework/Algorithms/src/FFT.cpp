@@ -300,7 +300,7 @@ void FFT::exec()
      */
     for(int i=0;i<ySize;i++)
     {
-      int j = centerShift? (ySize/2 + i + dys) % ySize : i;
+      int j = centerShift? (ySize/2 + i) % ySize : i;
       data[2*i] = inWS->dataY(iReal)[j]; // even indexes filled with the real part
       data[2*i+1] = isComplex? inImagWS->dataY(iImag)[j] : 0.; // odd indexes filled with the imaginary part
     }
@@ -317,7 +317,7 @@ void FFT::exec()
      */
     for(int i=0;i<ySize;i++)
     {
-      int j = (ySize/2 + i) % ySize;
+      int j = (ySize/2 + i +dys) % ySize;
       outWS->dataX(iRe)[i] = df*(-ySize/2+ i ); // zero frequency at i = ySize/2
       double re = data[2*j]*dx; // use j from ySize/2 to ySize for negative frequencies
       double im = data[2*j+1]*dx;
