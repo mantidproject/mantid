@@ -96,7 +96,7 @@ namespace DataHandling
   {
     // can't figure out a nice way to replace the c-style malloc/free
     int rank = static_cast<int>(info.dims.size());
-    int dims[info.dims.size()];
+    int dims[rank];
     for (int i = 0; i < rank; ++i)
       dims[i] = static_cast<int>(info.dims[i]);
     if (NXmalloc (dataBuffer, rank, dims, info.type) != NX_OK)
