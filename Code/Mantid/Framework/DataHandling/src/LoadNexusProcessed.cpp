@@ -143,7 +143,8 @@ void LoadNexusProcessed::exec()
   progress(0,"Opening file...");
 
   // "Open" the same file but with the C++ interface
-  m_cppFile = boost::make_shared< ::NeXus::File >(getPropertyValue("Filename"), NXACC_READ);
+  std::string filename = getPropertyValue("Filename");
+  m_cppFile = boost::make_shared< ::NeXus::File >(filename.c_str(), NXACC_READ);
 
   //Throws an approriate exception if there is a problem with file access
   NXRoot root(m_cppFile);
