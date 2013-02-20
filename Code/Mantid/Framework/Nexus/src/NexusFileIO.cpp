@@ -43,11 +43,10 @@ using namespace DataObjects;
   Logger& NexusFileIO::g_log = Logger::get("NexusFileIO");
 
   /// Constructor that supplies a progress object
-  NexusFileIO::NexusFileIO(::NeXus::File *handle,  Progress *prog , const bool compression) :
-          m_filehandle(handle),
-          m_progress(prog),
-          m_openedfile(false)
+  NexusFileIO::NexusFileIO(boost::shared_ptr< ::NeXus::File> handle,  Progress *prog , const bool compression) :
+          m_progress(prog)
   {
+    m_filehandle = handle;
     if (compression)
       m_nexuscompression = ::NeXus::LZW;
     else
@@ -63,10 +62,8 @@ using namespace DataObjects;
 
   /// Constructor that supplies a progress object
   NexusFileIO::NexusFileIO(const std::string & filename,  Progress *prog ) :
-          m_filehandle(0),
           m_nexuscompression(::NeXus::LZW),
-          m_progress(prog),
-          m_openedfile(true)
+          m_progress(prog)
   {
     this->openNexusWrite(filename);
   }
@@ -137,7 +134,7 @@ using namespace DataObjects;
     }
 
     // open the file and copy the handle into the NeXus::File object
-    m_filehandle = new ::NeXus::File(fileName, mode);
+    m_filehandle = boost::make_shared< ::NeXus::File>(fileName, mode);
 
     //
     // for existing files, search for any current mantid_workspace_<n> entries and set the
@@ -162,9 +159,6 @@ using namespace DataObjects;
   void NexusFileIO::closeNexusFile()
   {
     m_filehandle->closeGroup();
-    if (m_openedfile)
-      delete m_filehandle;
-    m_filehandle = NULL;
   }
 
   //-----------------------------------------------------------------------------------------------

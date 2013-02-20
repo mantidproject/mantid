@@ -52,7 +52,7 @@ namespace Mantid
     {
     public:
       /// Contructor
-      NexusFileIO(::NeXus::File* handle, API::Progress* prog=NULL, const bool compression=true);
+      NexusFileIO(boost::shared_ptr< ::NeXus::File> handle, API::Progress* prog=NULL, const bool compression=true);
       NexusFileIO(const std::string & filename, API::Progress* prog=NULL);
 
       /// Destructor
@@ -87,13 +87,11 @@ namespace Mantid
 
     private:
       /// C++ API file handle
-      ::NeXus::File *m_filehandle;
+      boost::shared_ptr< ::NeXus::File> m_filehandle;
       /// Nexus compression method
       ::NeXus::NXcompression m_nexuscompression;
       /// Allow an externally supplied progress object to be used
       API::Progress *m_progress;
-      /// Whether this class owns the file handle pointer
-      bool m_openedfile;
 
       /// open the nexus file for writing
       void openNexusWrite(const std::string& fileName);

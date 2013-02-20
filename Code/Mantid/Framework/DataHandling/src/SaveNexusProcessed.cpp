@@ -252,7 +252,8 @@ namespace DataHandling
     }
 
     // Then immediately open the file
-    ::NeXus::File * cppFile = new ::NeXus::File(m_filename, Mantid::NeXus::getNXaccessMode(m_filename));
+    boost::shared_ptr< ::NeXus::File> cppFile
+        = boost::make_shared< ::NeXus::File>(m_filename, Mantid::NeXus::getNXaccessMode(m_filename));
     bool compress = !( m_filename.find(".xml") < m_filename.size() || m_filename.find(".XML") < m_filename.size() );
     Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO(cppFile, &prog_init, compress);
 
@@ -267,7 +268,7 @@ namespace DataHandling
     { 
 
       // Save the instrument names, ParameterMap, sample, run
-      matrixWorkspace->saveExperimentInfoNexus(cppFile);
+      matrixWorkspace->saveExperimentInfoNexus(cppFile.get());
       prog_init.reportIncrement(1, "Writing sample and instrument");
 
       // check if all X() are in fact the same array
@@ -297,7 +298,7 @@ namespace DataHandling
       if ( matrixWorkspace->getAxis(1)->isSpectra() )
       {
         cppFile->openGroup("instrument", "NXinstrument");
-        matrixWorkspace->saveSpectraMapNexus(cppFile, spec, ::NeXus::LZW);
+        matrixWorkspace->saveSpectraMapNexus(cppFile.get(), spec, ::NeXus::LZW);
         cppFile->closeGroup();
       }
 
@@ -306,7 +307,7 @@ namespace DataHandling
     if (peaksWorkspace) 
     {
       // Save the instrument names, ParameterMap, sample, run
-      peaksWorkspace->saveExperimentInfoNexus(cppFile);
+      peaksWorkspace->saveExperimentInfoNexus(cppFile.get());
       prog_init.reportIncrement(1, "Writing sample and instrument");
     }
 
@@ -315,7 +316,7 @@ namespace DataHandling
     {
       //	g_log.information("Peaks Workspace saving to Nexus would be done");
       //	int pNum = peaksWorkspace->getNumberPeaks();
-      peaksWorkspace->saveNexus( cppFile );
+      peaksWorkspace->saveNexus( cppFile.get() );
     } // finish peaks workspace specifics
     else if (tableWorkspace) // Table workspace specifics 
     {
@@ -323,12 +324,11 @@ namespace DataHandling
     }  // finish table workspace specifics
 
     // Switch to the Cpp API for the algorithm history
-	  inputWorkspace->getHistory().saveNexus(cppFile);
+      inputWorkspace->getHistory().saveNexus(cppFile.get());
 
     nexusFile->closeNexusFile();
 
     delete nexusFile;
-    delete cppFile;
 
     return;
   }
