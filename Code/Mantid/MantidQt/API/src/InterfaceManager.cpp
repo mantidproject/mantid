@@ -13,6 +13,7 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Exception.h"
 
 #include <QStringList>
@@ -83,6 +84,22 @@ AlgorithmDialog* InterfaceManager::createDialog(Mantid::API::IAlgorithm* alg, QW
   dlg->initializeLayout();
 
   return dlg;  
+}
+
+/**
+ *  Create an algorithm dialog for a given algorithm name.
+ * @param algorithmName : Name of the algorithm
+ * @param forScript : True if this is being run from a script.
+ * @param parent : Parent widget
+ * @return new AlgorithmDialog
+ */
+AlgorithmDialog* InterfaceManager::createDialogFromName(const QString& algorithmName,  bool forScript, QWidget* parent)
+{
+    // Create the algorithm. This should throw if the algorithm can't be found.
+    auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(algorithmName.toStdString());
+
+    // Forward call.
+    return createDialog(alg, parent, forScript);
 }
 
 /**

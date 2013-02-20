@@ -85,6 +85,9 @@ public:
         bool forScript = false, const QHash<QString,QString> & preset_values = (QHash<QString,QString>()),
         const QString & optional_msg = QString(), const QStringList & enabled=QStringList(), const QStringList & disabled=QStringList());
 
+  /// Create an algorithm dialog for a given algorithm name.
+  AlgorithmDialog* createDialogFromName(const QString& algorithmName, bool forScript, QWidget* parent = 0);
+
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow* createSubWindow(const QString & interface_name, QWidget* parent = 0);
 
