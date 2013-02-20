@@ -1,7 +1,15 @@
 /*WIKI*
 
-The SassenaFFT algorithm performs the discrete Fourier transform on the intermediate scattering factor, F(q,t), resulting from loading a Sassena input file.
- */
+The Sassena application [http://sassena.org] generates intermediate scattering factors from molecular dynamics trajectories. This algorithm reads Sassena output and stores all data in workspaces of type [[Workspace2D]], grouped under a single [[WorkspaceGroup]]. It is implied that the time unit is one '''picosecond'''.
+
+Sassena ouput files are in HDF5 format [http://www.hdfgroup.org/HDF5], and can be made up of the following datasets: ''qvectors'', ''fq'', ''fq0'', ''fq2'', and ''fqt''
+
+The group workspace should contain workspaces '''_fqt.Re''' and '''_fqt.Im''' containing the real and imaginary parts of the intermediate structure factor, respectively. This algorithm will take both and perform [[FFT]], storing the real part of the transform in workspace '''_fqw''' and placing this workspace under the input group workspace. Assuming the time unit to be one picosecond, the resulting energies will be in units of one '''micro-eV'''.
+
+The Schofield correction (P. Schofield, ''Phys. Rev. Letters'' '''4'''(5), 239 (1960)) is optionally applied to the resulting dynamic structure factor to reinstate the detailed balance condition
+<math>S(Q,\omega)=e^{\beta \hbar \omega}S(-Q,-\omega)</math>.
+
+ *WIKI*/
 
 //----------------------------------------------------------------------
 // Includes
@@ -27,7 +35,6 @@ void SassenaFFT::initDocs()
 {
   this->setWikiSummary("Performs complex Fast Fourier Transform of intermediate scattering function");
   this->setOptionalMessage("Performs complex Fast Fourier Transform of intermediate scattering function");
-  this->setWikiDescription("Performs complex Fast Fourier Transform of intermediate scattering function");
 }
 
 /// Override Algorithm::checkGroups
@@ -79,13 +86,13 @@ void SassenaFFT::exec()
   DataObjects::Workspace2D_sptr fqtIm = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( gws->getItem( ftqImName ) );
 
   // Calculate the FFT for all spectra, retaining only the real part since F(q,-t) = F*(q,t)
-  int part=5; // extract the real part of the transform, assuming I(Q,t) is real
+  int part=3; // extract the real part of the transform, assuming I(Q,t) is real
   const std::string sqwName = gwsName + "_sqw";
   API::IAlgorithm_sptr fft = this->createChildAlgorithm("ExtractFFTSpectrum");
   fft->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", fqtRe);
   if( !this->getProperty("FFTonlyRealPart") )
   {
-    part=2; // extract the real part of the transform, assuming I(Q,t) is complex
+    part=0; // extract the real part of the transform, assuming I(Q,t) is complex
     fft->setProperty<DataObjects::Workspace2D_sptr>("InputImagWorkspace", fqtIm);
   }
   fft->setPropertyValue("OutputWorkspace", sqwName );
