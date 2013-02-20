@@ -9,6 +9,16 @@ The group workspace should contain workspaces '''_fqt.Re''' and '''_fqt.Im''' co
 The Schofield correction (P. Schofield, ''Phys. Rev. Letters'' '''4'''(5), 239 (1960)) is optionally applied to the resulting dynamic structure factor to reinstate the detailed balance condition
 <math>S(Q,\omega)=e^{\beta \hbar \omega}S(-Q,-\omega)</math>.
 
+== Details ==
+
+=== Parameter FFTonlyRealPart ===
+
+Setting parameter FFTonlyRealPart to true will produce a transform on only the real part of I(Q,t). This is convenient if we know that I(Q,t) should be real but a residual imaginary part was left in a Sassena calculation due to finite orientational average in Q-space.
+
+Below are plots after application of SassenaFFT to <math>I(Q,t) = e^{-t^2/(2\sigma^2)} + i\cdot t \cdot e^{-t^2/(2\sigma^2)}</math> with <math>\sigma=1ps</math>. Real an imaginary parts are shown in panels (a) and (b). Note that <math>I(Q,t)*=I(Q,-t)</math>. If only <math>Re[I(Q,t)]</math> is transformed, the result is another Gaussian: <math>\sqrt{2\pi}\cdot e^{-E^2/(2\sigma'^2)}</math> with <math>\sigma'=</math> (panel (c)). If I(Q,t) is transformed, the result is a modulated Gaussian: <math>(1+\sigma' E)\sqrt{2\pi}\cdot e^{-E^2/(2\sigma'^2)}</math>(panel (d)).
+
+[[Image:sassenaFFTexample.jpg|center|x800px|alt=Application of SassenaFFT to a I(Q,t)]]
+
  *WIKI*/
 
 //----------------------------------------------------------------------
