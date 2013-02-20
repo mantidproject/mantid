@@ -26,6 +26,7 @@
 #include <gmock/gmock.h>
 #include <vtkFieldData.h>
 #include <vtkCharArray.h>
+#include <vtkStringArray.h>
 
 using Mantid::VATES::MDRebinningView;
 using Mantid::Geometry::MDHistoDimension;
@@ -394,6 +395,19 @@ Create a field data entry containing (as contents) the argument text.
     binningAlg->execute();
 
     return AnalysisDataService::Instance().retrieve("binned");
+  }
+
+  /**
+   * Get a string array from a particular field data entry in a vtkDataSet.
+   * @param ds : The dataset to retrieve the field data from
+   * @param fieldName : The requested field data entry
+   * @return The value of the requested field data entry
+   */
+  std::string getStringFieldDataValue(vtkDataSet *ds, std::string fieldName)
+  {
+    vtkAbstractArray *value = ds->GetFieldData()->GetAbstractArray(fieldName.c_str());
+    vtkStringArray *array = vtkStringArray::SafeDownCast(value);
+    return static_cast<std::string>(array->GetValue(0));
   }
 
 } // namespace

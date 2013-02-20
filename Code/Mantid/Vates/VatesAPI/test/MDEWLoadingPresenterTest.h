@@ -182,6 +182,12 @@ void testDepthChanged()
     presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
     vtkDataSet *ds = vtkUnstructuredGrid::New();
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
+    TSM_ASSERT_EQUALS("X Label should match exactly",
+                      getStringFieldDataValue(ds, "AxisTitleForX"), "A (A)");
+    TSM_ASSERT_EQUALS("Y Label should match exactly",
+                      getStringFieldDataValue(ds, "AxisTitleForY"), "B (A)");
+    TSM_ASSERT_EQUALS("Z Label should match exactly",
+                      getStringFieldDataValue(ds, "AxisTitleForZ"), "C (A)");
   }
 
   void testCanSetAxisLabelsFrom4DData()
@@ -196,6 +202,12 @@ void testDepthChanged()
     presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
     vtkDataSet *ds = vtkUnstructuredGrid::New();
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
+    TSM_ASSERT_EQUALS("X Label should match exactly",
+                      getStringFieldDataValue(ds, "AxisTitleForX"), "A (A)");
+    TSM_ASSERT_EQUALS("Y Label should match exactly",
+                      getStringFieldDataValue(ds, "AxisTitleForY"), "B (A)");
+    TSM_ASSERT_EQUALS("Z Label should match exactly",
+                      getStringFieldDataValue(ds, "AxisTitleForZ"), "C (A)");
   }
 
   void testCanLoadFileBasedOnExtension()
