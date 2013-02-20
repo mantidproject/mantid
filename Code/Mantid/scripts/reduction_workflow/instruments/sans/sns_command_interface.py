@@ -6,11 +6,12 @@ from reduction_workflow.command_interface import *
 
 from hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization
 from hfir_command_interface import SolidAngle, NoSolidAngle
-from hfir_command_interface import SetBeamCenter, DirectBeamCenter, ScatteringBeamCenter
+from hfir_command_interface import DirectBeamCenter, ScatteringBeamCenter
+from hfir_command_interface import SetBeamCenter as BaseSetBeamCenter
 
 from hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter
 from hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter
-from hfir_command_interface import NoSensitivityCorrection
+from hfir_command_interface import NoSensitivityCorrection, DivideByThickness
 
 from hfir_command_interface import IQxQy, NoIQxQy, SaveIq, NoSaveIq, SaveIqAscii
 
@@ -45,6 +46,12 @@ def EQSANS(keep_events=False, property_manager=None):
     if property_manager is not None:
         ReductionSingleton().set_reduction_table_name(property_manager)
     
+def SetBeamCenter(x,y):
+    if x==0 and y==0:
+        ReductionSingleton().reduction_properties["UseConfigBeam"]=True
+    else:
+        BaseSetBeamCenter(x,y)
+
 def TotalChargeNormalization(normalize_to_beam=True, beam_file=''):
     if normalize_to_beam:
         ReductionSingleton().reduction_properties["Normalisation"]="BeamProfileAndCharge"

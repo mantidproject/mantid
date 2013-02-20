@@ -37,7 +37,7 @@ class EQSANSInterface(InstrumentInterface):
         self.LAST_REDUCTION_NAME = ".mantid_last_reduction.xml"    
         
         # Scripter object to interface with Mantid 
-        self.scripter = EQSANSReductionScripter(name=name)        
+        self.scripter = EQSANSReductionScripter(name=name, settings = self._settings)        
 
         # Instrument description
         self.attach(SANSInstrumentWidget(settings = self._settings, data_proxy=DataProxy, data_type = self.data_type))

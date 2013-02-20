@@ -257,6 +257,8 @@ class Detector(BaseScriptElement):
             Update data members according to reduction results
         """
         if IS_IN_MANTIDPLOT:
+            # Allow the use of the old reducer code, which uses
+            # the Python API v1
             if self.PYTHON_API==1:
                 from reduction.command_interface import ReductionSingleton
                 if ReductionSingleton()._beam_finder is not None:

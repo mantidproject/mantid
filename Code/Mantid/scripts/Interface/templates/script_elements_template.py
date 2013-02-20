@@ -10,8 +10,7 @@ from scripter import BaseScriptElement
 # Check whether Mantid is available, in case we ask
 # the interface to execute the output script
 try:
-    from MantidFramework import *
-    mtd.initialise(False)
+    import mantidplot
     HAS_MANTID = True
 except:
     HAS_MANTID = False  

@@ -603,7 +603,9 @@ void SetupEQSANSReduction::exec()
   const bool solidAngleCorrection = getProperty("SolidAngleCorrection");
   if (solidAngleCorrection)
   {
+    const bool detectorTubes = getProperty("DetectorTubes");
     IAlgorithm_sptr solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
+    solidAlg->setProperty("DetectorTubes", detectorTubes);
     algProp = new AlgorithmProperty("SANSSolidAngleCorrection");
     algProp->setValue(solidAlg->toString());
     reductionManager->declareProperty(algProp);

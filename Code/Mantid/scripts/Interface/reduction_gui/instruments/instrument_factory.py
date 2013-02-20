@@ -3,8 +3,6 @@
     This module is responsible for the association between an instrument name
     and its corresponding interface class. 
 """
-#from hfir_interface import HFIRInterface as HFIRInterfaceOld
-#from eqsans_interface import EQSANSInterface
 from hfir_interface_dev import HFIRInterface
 from eqsans_interface_dev import EQSANSInterface
 from example_interface import ExampleInterface
