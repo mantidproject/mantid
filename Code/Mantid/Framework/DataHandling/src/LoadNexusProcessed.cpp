@@ -51,6 +51,7 @@ The ChildAlgorithms used by LoadMuonNexus are:
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <Poco/DateTimeParser.h>
@@ -144,7 +145,18 @@ void LoadNexusProcessed::exec()
 
   // "Open" the same file but with the C++ interface
   std::string filename = getPropertyValue("Filename");
-  m_cppFile = boost::make_shared< ::NeXus::File >(filename.c_str(), NXACC_READ);
+
+  try
+  {
+    m_cppFile = boost::make_shared< ::NeXus::File >(filename.c_str(), NXACC_READ);
+  }
+  catch (::NeXus::Exception &e)
+  {
+    NXhandle handle;
+    int status = NXopen(filename.c_str(), NXACC_READ, &handle);
+    m_cppFile = boost::make_shared< ::NeXus::File >(handle, true);
+    g_log.information() << "First load did not work, napi.h load returned " << status << "\n";
+  }
 
   //Throws an approriate exception if there is a problem with file access
   NXRoot root(m_cppFile);
