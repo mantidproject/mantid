@@ -84,11 +84,10 @@ namespace Mantid
     void LoadISISNexus2::exec()
     {
       m_filename = getPropertyValue("Filename");
-      // Create the root Nexus class
-      NXRoot root(m_filename);
+      m_cppFile = boost::make_shared< ::NeXus::File >(m_filename, NXACC_READ);
 
-      // "Open" the same file but with the C++ interface
-      m_cppFile = new ::NeXus::File(root.m_fileID);
+      // Create the root Nexus class
+      NXRoot root(m_cppFile);
 
       // Open the raw data group 'raw_data_1'
       NXEntry entry = root.openEntry("raw_data_1");
@@ -220,7 +219,7 @@ namespace Mantid
       m_cppFile->openPath(entry.path());
       std::string parameterString;
       try {  // Try to get instrument info from instrument and sample sections of Nexus file
-        local_workspace->loadExperimentInfoNexus( m_cppFile, parameterString );
+        local_workspace->loadExperimentInfoNexus( m_cppFile.get(), parameterString );
       } catch(std::exception & ) {  // No valid instrument and sample section found
         parameterString="not found";
       }

@@ -83,14 +83,13 @@ using Geometry::Instrument_const_sptr;
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed() : m_shared_bins(false), m_xbins(),
     m_axis1vals(), m_list(false), m_interval(false),
-    m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),m_cppFile(NULL)
+    m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT())
 {
 }
 
 /// Delete NexusFileIO in destructor
 LoadNexusProcessed::~LoadNexusProcessed()
 {
-  delete m_cppFile;
 }
 
 /** Initialisation method.
@@ -143,11 +142,11 @@ void LoadNexusProcessed::exec()
 {
   progress(0,"Opening file...");
 
-  //Throws an approriate exception if there is a problem with file access
-  NXRoot root(getPropertyValue("Filename"));
-
   // "Open" the same file but with the C++ interface
-  m_cppFile = new ::NeXus::File(root.m_fileID);
+  m_cppFile = boost::make_shared< ::NeXus::File >(getPropertyValue("Filename"), NXACC_READ);
+
+  //Throws an approriate exception if there is a problem with file access
+  NXRoot root(m_cppFile);
 
   //Find out how many first level entries there are
   int64_t nperiods = static_cast<int64_t>(root.groups().size());
@@ -485,7 +484,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
   try
   {
     // This loads logs, sample, and instrument.
-    peakWS->loadExperimentInfoNexus(m_cppFile, parameterStr);
+    peakWS->loadExperimentInfoNexus(m_cppFile.get(), parameterStr);
   }
   catch (std::exception & e)
   {
@@ -928,7 +927,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   try
   {
     // This loads logs, sample, and instrument.
-    local_workspace->loadExperimentInfoNexus(m_cppFile, parameterStr);
+    local_workspace->loadExperimentInfoNexus(m_cppFile.get(), parameterStr);
   }
   catch (std::exception & e)
   {
@@ -953,7 +952,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   m_cppFile->openPath(mtd_entry.path());
   try
   {
-    local_workspace->history().loadNexus(m_cppFile);
+    local_workspace->history().loadNexus(m_cppFile.get());
   }
   catch (std::out_of_range&)
   {

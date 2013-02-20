@@ -8,7 +8,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/DateAndTime.h"
-#include <nexus/napi.h>
+#include <nexus/NeXusFile.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -109,7 +109,7 @@ namespace Mantid
       friend class NXRoot;     ///< a friend class declaration
     public:
       // Constructor
-      NXObject(const NXhandle fileID,const NXClass* parent,const std::string& name);
+      NXObject(boost::shared_ptr< ::NeXus::File> handle,const NXClass* parent,const std::string& name);
       virtual ~NXObject(){};
       /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
       virtual std::string NX_class()const = 0;
@@ -121,13 +121,12 @@ namespace Mantid
       std::string name()const;
       /// Attributes
       NXAttributes attributes;
-      /// Nexus file id
-      NXhandle m_fileID;
     protected:
+      boost::shared_ptr< ::NeXus::File> m_handle;      ///< Nexus file id
       std::string m_path;     ///< Keeps the absolute path to the object
       bool m_open;            ///< Set to true if the object has been open
     private:
-      NXObject():m_fileID(){} ///< Private default constructor
+      NXObject():m_handle(){} ///< Private default constructor
       void getAttributes();
     };
 
@@ -459,16 +458,11 @@ namespace Mantid
       *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
       *   @param name :: The name of the NXClass relative to its parent
       */
-      NXClass(const NXClass& parent,const std::string& name);
+      NXClass(const NXClass& parent, const std::string& name);
       /// The NX class identifier
       std::string NX_class()const{return "NXClass";}
-      /**  Returns the class information about the next entry (class or dataset) in this class.
-      */
-      NXClassInfo getNextEntry();
       /// Creates a new object in the NeXus file at path path.
       //virtual void make(const std::string& path) = 0;
-      /// Resets the current position for getNextEntry() to the beginning
-      void reset();
       /**
       * Check if a path exists relative to the current class path
       * @param path :: A string representing the path to test
@@ -502,6 +496,8 @@ namespace Mantid
       template<class T>
       NXDataSetTyped<T> openNXDataSet(const std::string& name)const
       {
+        if (boost::algorithm::ends_with(name,"time_zero"))
+          std::cout << "**********time_zero" << std::endl;
         NXDataSetTyped<T> data(*this,name);
         data.open();
         return data;
@@ -571,7 +567,7 @@ namespace Mantid
       ///     class.openLocal();
       ///     // work with class
       ///     class.close();
-      bool openLocal(const std::string& nxclass = "");
+      void openLocal(const std::string& nxclass = "");
 
     protected:
       boost::shared_ptr<std::vector<NXClassInfo> > m_groups; ///< Holds info about the child NXClasses
@@ -896,6 +892,8 @@ namespace Mantid
     class DLLExport NXRoot: public NXClass
     {
     public:
+      // Constructor
+      NXRoot(boost::shared_ptr< ::NeXus::File> handle);
       // Constructor
       NXRoot(const std::string& fname);
       // Constructor
