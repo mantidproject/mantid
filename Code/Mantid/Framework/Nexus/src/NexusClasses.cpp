@@ -137,6 +137,7 @@ NXClass::NXClass(const NXClass& parent, const std::string& name):
   NXObject(parent.m_handle,&parent,name)
 {
     clear();
+    m_groups = boost::make_shared<std::vector<NXClassInfo> >();
 }
 
 void NXClass::readAllInfo()
