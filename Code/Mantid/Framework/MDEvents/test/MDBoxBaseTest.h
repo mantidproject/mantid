@@ -28,6 +28,7 @@ public:
   {     
     this->setFilePosition(0,1,false);
   }
+  virtual ~MDBoxBaseTester(){}
   MDBoxBaseTester(uint64_t filePos)
   : MDBoxBase<MDE,nd>()
   { 
