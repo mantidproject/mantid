@@ -189,7 +189,7 @@ namespace Mantid
         {
 
           // Find the log value: it is either a log-file value or simply the workspace number
-          double logValue;
+          double logValue = 0;
           if (logName.empty())
           {
             API::Axis* axis = data.ws->getAxis(1);
