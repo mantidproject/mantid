@@ -3,7 +3,7 @@
  This algorithm basically optimizes sample positions and sample orientations( chi,phi, and omega) for an experiment.
 
  -If the crystal orientation matrix, UB, was created from one run, that run may not need to have its goniometer
- settings optimized.  There is a property to list the run numbers to NOT have their goniometer settings optimized.
+ settings optimized.  There is a property to list the run numbers to NOT have their goniometer settings changed.
 
  -The crystal orientation matrix, UB, from the PeaksWorkspace should index all the runs "very well". Otherwise iterations that build a UB with corrected sample orientations slowly may be necessary.
 
@@ -98,12 +98,6 @@ namespace Mantid
       declareProperty( "nPeaks", -1,"Number of Peaks Used", Direction::Output);
       declareProperty( "nParams", -1,"Number of Parameters fit", Direction::Output);
 
-
-
-
-
-
-
     }
 
     void OptimizeCrystalPlacement::exec()
@@ -136,7 +130,7 @@ namespace Mantid
       double HKLMax=getProperty("MaxHKLPeaks2Use");
       for ( int i = 0; i < Peaks->getNumberPeaks(); i++ )
       {
-         IPeak& peak = Peaks->getPeak( i );
+        IPeak& peak = Peaks->getPeak( i );
         int runNum = peak.getRunNumber();
         std::vector<int>::iterator it = RunNumList.begin();
         for ( ; it != RunNumList.end() && *it != runNum; ++it )
@@ -207,9 +201,6 @@ namespace Mantid
         }
       }
 
-      //if ( OptRunNums.size() > 0 )
-      //  OptRunNums += "/";
-
 
       if ( OptRunNums.size() > 0 )
         FuncArg += ",OptRuns=" + OptRunNums;
@@ -272,12 +263,14 @@ namespace Mantid
 
       fit_alg->setProperty( "CreateOutput" , true );
 
-      if( (bool)getProperty("IncludeVaryingSampleOffsets"))
-        fit_alg->setProperty("Ties","SampleXOffset=0,SampleYOffset=0,SampleXOffset=0");
+      if( !(bool)getProperty("IncludeVaryingSampleOffsets"))
+        fit_alg->setProperty("Ties","SampleXOffset=0,SampleYOffset=0,SampleZOffset=0");
 
       fit_alg->setProperty( "Output" , "out" );
 
       fit_alg->executeAsChildAlg();
+
+      //------------------------- Get/Report  Results ------------------
 
       double chisq = fit_alg->getProperty( "OutputChi2overDoF" );
       std::cout<<"Fit finished. Status="<<(std::string)fit_alg->getProperty("OutputStatus")
@@ -301,13 +294,11 @@ namespace Mantid
           "OutputNormalisedCovarianceMatrix" , "" ,  Direction::Output ) ,
           "The name of the TableWorkspace in which to store the final covariance matrix" );
 
-      //std::string NormMatName = fit_alg->getPropertyValue( "OutputNormalisedCovarianceMatrix" );
 
       ITableWorkspace_sptr NormCov = fit_alg->getProperty( "OutputNormalisedCovarianceMatrix" );
 
-      // setProperty("OutputNormalisedCovarianceMatrix" , NormCov );
       AnalysisDataService::Instance().addOrReplace( std::string( "CovarianceInfo" ) , NormCov );
-      setPropertyValue( "OutputNormalisedCovarianceMatrix" , std::string( "CovarianceInfo" ) );
+      setPropertyValue( "OutputNormalisedCovarianceMatrix" , std::string( "CovarianceInfo" ) );//What if 2 instances are run
 
       if ( chisq < 0 || chisq != chisq )
         sigma = -1;
@@ -324,9 +315,11 @@ namespace Mantid
 
         double value = RRes->getRef<double>("Value",prm);
         Results[ namee] = value;
+
+        //Set sigma==1 in optimization. A better estimate is sqrt(Chi2overDoF)
         double v = sigma * RRes->getRef<double> ( "Error" , prm );
         RRes->getRef<double> ( "Error" , prm ) = v;
-        //change error , mult by sqrt
+
 
       }
 
@@ -341,13 +334,13 @@ namespace Mantid
       boost::shared_ptr<const ParameterMap>pmap_old = OldInstrument->getParameterMap();
       boost::shared_ptr<ParameterMap>pmap_new( new ParameterMap());
 
-     PeakHKLErrors::cLone( pmap_new, OldInstrument , pmap_old );
+      PeakHKLErrors::cLone( pmap_new, OldInstrument , pmap_old );
 
       double L0 = peak.getL1();
       V3D oldSampPos = OldInstrument->getSample()->getPos();
       V3D newSampPos( oldSampPos.X()+Results["SampleXOffset"],
                       oldSampPos.Y()+Results["SampleYOffset"],
-                        oldSampPos.Z()+Results["SampleZOffset"]);
+                      oldSampPos.Z()+Results["SampleZOffset"]);
 
       boost::shared_ptr<const Instrument>Inst =OldInstrument;
 
@@ -370,11 +363,14 @@ namespace Mantid
         double chi = Results[ "chi"+runNumStr ];
         double phi = Results[ "phi"+runNumStr ];
         double omega = Results[ "omega"+runNumStr ];
+
         Mantid::Geometry::Goniometer uniGonio;
         uniGonio.makeUniversalGoniometer();
+
         uniGonio.setRotationAngle( "phi", phi );
         uniGonio.setRotationAngle( "chi", chi );
         uniGonio.setRotationAngle( "omega", omega) ;
+
         Matrix<double> GonMatrix = uniGonio.getR();
 
         for( int i = 0 ; i < OutPeaks->getNumberPeaks() ; ++i)
@@ -388,43 +384,12 @@ namespace Mantid
 
       std::string OutputPeaksName= getPropertyValue("ModifiedPeaksWorkspace");
 
-       setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
-       setProperty( "ModifiedPeaksWorkspace", OutPeaks);
+      setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
+      setProperty( "ModifiedPeaksWorkspace", OutPeaks);
 
-      //Note: this just runs IndexPeaks at the end. Could/Should be eliminated except the name
-       // of this algorithm is index..Peaks, so maybe it should index the peaks.
-      //--------------------------- index Output workspace -----------------------
-       if ((bool) getProperty("IndexPeaks"))
-      {
-        boost::shared_ptr<Algorithm> index_alg = createChildAlgorithm("IndexPeaks", .1, .93, true);
-        AnalysisDataService::Instance().addOrReplace(  OutputPeaksName, OutPeaks);
-        //index_alg->setProperty("PeaksWorkspace", OutPeaks);
-        index_alg->setPropertyValue("PeaksWorkspace", OutputPeaksName);
-        index_alg->setProperty("Tolerance", (double) getProperty("Tolerance"));
-        index_alg->setProperty("RoundHKLs", (bool) getProperty("RoundHKLs"));
 
-        try
-        {
-          index_alg->executeAsChildAlg();
-          index_alg->setPropertyValue( "PeaksWorkspace", OutputPeaksName );
-          OutPeaks = index_alg->getProperty( "PeaksWorkspace" );
-          AnalysisDataService::Instance().addOrReplace( OutputPeaksName, OutPeaks);;
 
-          setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
-          setProperty( "ModifiedPeaksWorkspace", OutPeaks);
-          setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
 
-        }catch(...)
-        { g_log.debug() << "Could NOT index peaks" << std::endl;
-          setProperty("NumIndexed", -1);
-          setProperty("AverageError", -1.0);
-          return;
-        }
-
-        setProperty("NumIndexed", (int) index_alg->getProperty("NumIndexed"));
-        setProperty("AverageError", (double) index_alg->getProperty("AverageError"));
-
-      }
     }//exec
 
 
