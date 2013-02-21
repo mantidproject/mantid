@@ -313,6 +313,132 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
       "</MDInstruction>";
   }
 
+  /**
+  Construct an example Geometry section of the XML passed via field-data.
+
+  Note that this function doesn't give complete control over the geometry. For example, the Upper and Lower bounds are hard-coded.
+
+  @param xDimensionIdMapping : Dimension name for dimension to be used as the x-dimension in the view.
+  @param yDimensionIdMapping : Dimension name for dimension y-dimension in the view.
+  @param zDimensionIdMapping : Dimension name for dimension z-dimension in the view.
+  @param tDimensionIdMapping : Dimension name for dimension t-dimension in the view.
+  @param xBins : number of bins in the x dimension
+  @param yBins : number of bins in the x dimension
+  @param zBins : number of bins in the x dimension
+  @param tBins : number of bins in the x dimension
+  @return xml snippet as string.
+  */
+  std::string constructGeometryOnlyXMLForMDEvHelperData(\
+      const std::string& xDimensionIdMapping,
+      const std::string& yDimensionIdMapping,
+      const std::string& zDimensionIdMapping,
+      const std::string& tDimensionIdMapping,
+      std::string xBins = "10",
+      std::string yBins = "10",
+      std::string zBins = "10",
+      std::string tBins = "10"
+      )
+  {
+    std::string cardDirSpec = std::string("<DimensionSet>") +
+        "<Dimension ID=\"Axis0\">" +
+        "<Name>Axis0</Name>" +
+        "<Units>m</Units>" +
+        "<UpperBounds>10.0000</UpperBounds>" +
+        "<LowerBounds>0.0000</LowerBounds>" +
+        "<NumberOfBins>" + xBins + "</NumberOfBins>" +
+        "</Dimension>" +
+        "<Dimension ID=\"Axis1\">" +
+        "<Name>Axis1</Name>" +
+        "<Units>m</Units>" +
+        "<UpperBounds>10.0000</UpperBounds>" +
+        "<LowerBounds>0.0000</LowerBounds>" +
+        "<NumberOfBins>" + yBins + "</NumberOfBins>" +
+        "</Dimension>" +
+        "<Dimension ID=\"Axis2\">" +
+        "<Name>Axis2</Name>" +
+        "<Units>m</Units>" +
+        "<UpperBounds>10.0000</UpperBounds>" +
+        "<LowerBounds>0.0000</LowerBounds>" +
+        "<NumberOfBins>" + zBins  + "</NumberOfBins>" +
+        "</Dimension>";
+    std::string timeSpec;
+    if (!tDimensionIdMapping.empty())
+    {
+      timeSpec = std::string("<Dimension ID=\"Axis3\">") +
+          "<Name>Axis3</Name>" +
+          "<Units>s</Units>" +
+          "<UpperBounds>10.0000</UpperBounds>" +
+          "<LowerBounds>0.0000</LowerBounds>" +
+          "<NumberOfBins>" + tBins + "</NumberOfBins>" +
+          "</Dimension>";
+    }
+    std::string cardDirRef = std::string("<XDimension>") +
+        "<RefDimensionId>" +
+        xDimensionIdMapping +
+        "</RefDimensionId>" +
+        "</XDimension>" +
+        "<YDimension>" +
+        "<RefDimensionId>" +
+        yDimensionIdMapping +
+        "</RefDimensionId>" +
+        "</YDimension>" +
+        "<ZDimension>" +
+        "<RefDimensionId>" +
+        zDimensionIdMapping +
+        "</RefDimensionId>" +
+        "</ZDimension>";
+    std::string timeRef;
+    if (!tDimensionIdMapping.empty())
+    {
+      timeRef = std::string("<TDimension>") +
+          "<RefDimensionId>" +
+          tDimensionIdMapping +
+          "</RefDimensionId>" +
+          "</TDimension>";
+    }
+    else
+    {
+      timeRef = std::string("<TDimension>") +
+          "<RefDimensionId>" +
+          "</RefDimensionId>" +
+          "</TDimension>";
+    }
+    std::string endTag = "</DimensionSet>";
+    std::string body = cardDirSpec;
+    if (!timeSpec.empty())
+    {
+      body += timeSpec;
+    }
+    body += cardDirRef;
+    body += timeRef;
+    body += endTag;
+    return body;
+  }
+
+  /**
+  Construct test xml describing the transformations and the inputs.
+  @param xDimensionIdMapping : Dimension name for dimension to be used as the x-dimension in the view.
+  @param yDimensionIdMapping : Dimension name for dimension y-dimension in the view.
+  @param zDimensionIdMapping : Dimension name for dimension z-dimension in the view.
+  @param tDimensionIdMapping : Dimension name for dimension t-dimension in the view.
+  @return full xml as string.
+  */
+  std::string constructXMLForMDEvHelperData(const std::string& xDimensionIdMapping,
+                                            const std::string& yDimensionIdMapping,
+                                            const std::string& zDimensionIdMapping,
+                                            const std::string& tDimensionIdMapping)
+  {
+    return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
+      "<MDInstruction>" +
+      "<MDWorkspaceName>Input</MDWorkspaceName>" +
+      "<MDWorkspaceLocation>test_horace_reader.sqw</MDWorkspaceLocation>" +
+      constructGeometryOnlyXMLForMDEvHelperData(xDimensionIdMapping,
+                                                yDimensionIdMapping,
+                                                zDimensionIdMapping,
+                                                tDimensionIdMapping) +
+      "</MDInstruction>";
+  }
+
   Mantid::API::Workspace_sptr createSimple3DWorkspace()
   {
     using namespace Mantid::API;
