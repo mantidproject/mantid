@@ -393,7 +393,7 @@ void Integrate3DEvents::addEvent( V3D event_Q )
     return;
 
   V3D peak_q = peak_qs[hkl_key];
-  if ( peak_q != 0 )
+  if ( ! peak_q.nullVector() )
   {
     event_Q = event_Q - peak_q;
     if ( event_Q.norm() < radius )

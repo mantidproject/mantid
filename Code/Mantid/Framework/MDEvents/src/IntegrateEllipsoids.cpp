@@ -313,7 +313,7 @@ namespace MDEvents
     Progress prog(this, 0.5, 1.0, numSpectra);
 
     // loop through the eventlists
-    double buffer[DIMS];
+    std::vector<double> buffer(DIMS);
 
     std::vector<V3D>  event_qs;
     for (std::size_t i = 0; i < numSpectra; ++i)
@@ -346,7 +346,7 @@ namespace MDEvents
         {
           buffer[dim] = locCoord[dim];
         }
-        V3D q_vec( buffer );
+        V3D q_vec( buffer[0], buffer[1], buffer[2] );
         event_qs.push_back( q_vec );
       } // end of loop over events in list
 

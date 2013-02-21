@@ -48,7 +48,6 @@ namespace Mantid
       V3D(const V3D&);
       V3D& operator=(const V3D&);
       V3D(const double,const double,const double);
-      V3D(const double*);
       ~V3D();
 
       // Arithemetic operators overloaded

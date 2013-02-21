@@ -115,10 +115,8 @@ namespace Mantid
       const int ptype = static_cast<int>(tolower(item[itemPt]) - 'x');
       if (ptype < 0 || ptype >= 3)
         return -2;
-      double norm[3] =
-      { 0.0, 0.0, 0.0 };
-      double cent[3] =
-      { 0.0, 0.0, 0.0 };
+      std::vector<double> norm(3,0.0);
+      std::vector<double> cent(3,0.0);
       norm[ptype] = 1.0;
 
       if (itemPt == 1)        // kx type cone
@@ -139,8 +137,8 @@ namespace Mantid
       if (!Mantid::Kernel::Strings::section(Line, tanAng))
         return -5;
 
-      Centre = Kernel::V3D(cent);
-      Normal = Kernel::V3D(norm);
+      Centre = Kernel::V3D(cent[0],cent[1],cent[2]);
+      Normal = Kernel::V3D(norm[0],norm[1],norm[2]);
       setTanAngle(sqrt(tanAng));
       setBaseEqn();
       return 0;
