@@ -11,7 +11,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 
-#include "RemoteJob.h"
+#include "MantidRemote/RemoteJob.h"
 #include <QDockWidget>
 #include <QList>
 #include <QHash>

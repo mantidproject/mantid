@@ -2,7 +2,7 @@
 #ifndef QTMWSREMOTEJOBMANAGER_H
 #define QTMWSREMOTEJOBMANAGER_H
 
-#include "RemoteJobManager.h"
+#include "MantidRemote/RemoteJobManager.h"
 
 class QtMwsRemoteJobManager : public MwsRemoteJobManager
 {

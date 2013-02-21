@@ -2,7 +2,7 @@
 // since everything else is handled by the MwsRemoteJobManager class).
 // This is a separate class just to keep the Qt stuff isolated.
 
-#include "RemoteJobManager.h"
+#include "MantidRemote/RemoteJobManager.h"
 #include "QtMwsRemoteJobManager.h"
 
 #include <MantidKernel/RemoteJobManagerFactory.h>

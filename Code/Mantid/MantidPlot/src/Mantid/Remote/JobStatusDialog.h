@@ -1,7 +1,7 @@
 #ifndef JOBSTATUSDIALOG_H
 #define JOBSTATUSDIALOG_H
 
-#include "RemoteJobManager.h"
+#include "MantidRemote/RemoteJobManager.h"
 
 #include <QDialog>
 #include <QSignalMapper>

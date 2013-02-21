@@ -1,7 +1,7 @@
 #include "JobStatusDialog.h"
 #include "ui_JobStatusDialog.h"
-#include "RemoteJob.h"
-#include "RemoteJobManager.h"
+#include "MantidRemote/RemoteJob.h"
+#include "MantidRemote/RemoteJobManager.h"
 #include "Mantid/MantidUI.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 

@@ -4,9 +4,9 @@
 #include "../MantidDock.h"
 #include "NewClusterDialog.h"
 #include "../MantidUI.h"
-#include "RemoteJobManager.h"
-#include "RemoteTask.h"
-#include "RemoteJob.h"
+#include "MantidRemote/RemoteJobManager.h"
+#include "MantidRemote/RemoteTask.h"
+#include "MantidRemote/RemoteJob.h"
 #include <QtGui>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>

@@ -1,7 +1,7 @@
-#include "RemoteJobManager.h"
-#include "RemoteTask.h"
+#include "MantidRemote/RemoteJobManager.h"
+#include "MantidRemote/RemoteTask.h"
 #include "MantidKernel/ConfigService.h"
-#include "SimpleJSON.h"
+#include "MantidRemote/SimpleJSON.h"
 
 #include <Poco/Base64Encoder.h>
 #include <Poco/Net/HTTPSClientSession.h>

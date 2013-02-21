@@ -105,7 +105,9 @@ add_subdirectory ( Framework )
 include_directories ( Framework/Kernel/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
-set ( CORE_MANTIDLIBS Kernel Geometry API )
+include_directories ( Framework/Remote/inc )
+
+set ( CORE_MANTIDLIBS Kernel Geometry API Remote )
 
 # Add a target for all GUI tests
 add_custom_target ( GUITests ) 

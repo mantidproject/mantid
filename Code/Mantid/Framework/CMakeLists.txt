@@ -100,6 +100,10 @@ include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
+include_directories (Remote/inc)
+add_subdirectory (Remote)
+set ( MANTIDLIBS ${MANTIDLIBS} Remote )
+
 add_subdirectory (Nexus)
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)

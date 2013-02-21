@@ -230,9 +230,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/Remote/MantidRemoteCluster.cpp
                    src/Mantid/Remote/NewClusterDialog.cpp
                    src/Mantid/Remote/QtMwsRemoteJobManager.cpp
-                   src/Mantid/Remote/RemoteJobManager.cpp
-                   src/Mantid/Remote/RemoteTask.cpp
-                   src/Mantid/Remote/SimpleJSON.cpp
 )
 
 ###########################################################################
@@ -464,9 +461,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/Remote/MantidRemoteCluster.h
                    src/Mantid/Remote/NewClusterDialog.h
                    src/Mantid/Remote/QtMwsRemoteJobManager.h
-                   src/Mantid/Remote/RemoteJobManager.h
-                   src/Mantid/Remote/RemoteTask.h
-                   src/Mantid/Remote/SimpleJSON.h
 )
 
 ###########################################################################

@@ -1,4 +1,4 @@
-#include "RemoteTask.h"
+#include "MantidRemote/RemoteTask.h"
 
 #include <sstream>
 #include <string>
