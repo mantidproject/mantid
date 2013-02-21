@@ -152,7 +152,7 @@ void testCanSetAxisLabelsFrom3DData()
   ConcreteMDHWLoadingPresenter presenter(view);
 
   //Test that it does work when setup.
-  Mantid::API::Workspace_sptr ws = get3DWorkspace(true, true);
+  Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false);
   presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
   vtkDataSet *ds = vtkUnstructuredGrid::New();
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
@@ -172,7 +172,7 @@ void testCanSetAxisLabelsFrom4DData()
   ConcreteMDHWLoadingPresenter presenter(view);
 
   //Test that it does work when setup.
-  Mantid::API::Workspace_sptr ws = get3DWorkspace(false, true);
+  Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false);
   presenter.extractMetadata(boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
   vtkDataSet *ds = vtkUnstructuredGrid::New();
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
