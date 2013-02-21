@@ -43,8 +43,12 @@ class DLLExport LoadILL: public API::IDataFileChecker {
 public:
 	/// Constructor
 	LoadILL() :
-			API::IDataFileChecker(), m_instrumentName(""), m_nexusInstrumentEntryName(
-					"") {
+			API::IDataFileChecker(),
+			m_instrumentName(""),
+			//m_nexusInstrumentEntryName(""),
+			m_wavelength(0),
+			m_channelWidth(0),
+			supportedInstruments({"IN5"}){
 	}
 	/// Virtual destructor
 	virtual ~LoadILL() {
@@ -59,7 +63,7 @@ public:
 	}
 	/// Algorithm's category for identification
 	virtual const std::string category() const {
-		return "DataHandling;Inelastic";
+		return "DataHandling";
 	}
 	///checks the file can be loaded by reading 1st 100 bytes and looking at the file extension.
 	bool quickFileCheck(const std::string& filePath, size_t nread,
@@ -74,22 +78,18 @@ private:
 	// Execution code
 	void exec();
 
-	/// L
-	//NeXus::NXEntry initNexusFile();
 	void setInstrumentName(NeXus::NXEntry& entry);
+	std::string getInstrumentName(NeXus::NXEntry& entry);
 	void initWorkSpace(NeXus::NXEntry& entry);
-	std::vector<int> getMonitorData(NeXus::NXEntry& entry);
-	template<class T> std::vector<int> peakSearchPosition(
-			const std::vector<T> &v, int);
-	template<typename T> std::vector<T> mode(std::vector<T> &data);
+	void initInstrumentSpecific();
 	void loadRunDetails(NeXus::NXEntry & entry);
 	void loadExperimentDetails(NeXus::NXEntry & entry);
-	int getMonitorElasticPeakPosition(const std::vector<int> &monitorData);
 	int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
 	void loadTimeDetails(NeXus::NXEntry& entry);
 	NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry);
 
+	double calculateTOF(double);
 	void runLoadInstrument();
 
 	std::string getDateTimeInIsoFormat(std::string dateToParse);
@@ -110,9 +110,11 @@ private:
 	int m_monitorElasticPeakPosition;
 	double m_wavelength;
 	double m_channelWidth;
-	double m_timeOfFlightDelay;
-	double m_timePickupToOpening;
-	//std::string m_title;
+
+	double m_l1; //=2.0;
+	double m_l2; //=4.0;
+
+	std::vector<std::string>  supportedInstruments;
 
 	// Nexus instrument entry is of the format /entry0/<XXX>/
 	// XXX changes from version to version

@@ -8,29 +8,26 @@
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILL;
 
-class LoadILLTest: public CxxTest::TestSuite 
-{
+class LoadILLTest: public CxxTest::TestSuite {
 public:
 
-	LoadILLTest() : testFile("ILLIN5_094460.nxs") 
-  {
+	LoadILLTest() :
+			m_testFile("ILLIN5_094460.nxs")
+	{
 	}
 
-	void testName() 
-  {
-    LoadILL loader;
+	void testName() {
+		LoadILL loader;
 		TS_ASSERT_EQUALS( loader.name(), "LoadILL");
 	}
 
-	void testVersion() 
-  {
-    LoadILL loader;
+	void testVersion() {
+		LoadILL loader;
 		TS_ASSERT_EQUALS( loader.version(), 1);
 	}
 
-	void testInit() 
-  {
-    LoadILL loader;
+	void testInit() {
+		LoadILL loader;
 		TS_ASSERT_THROWS_NOTHING( loader.initialize());
 		TS_ASSERT( loader.isInitialized());
 	}
@@ -39,11 +36,10 @@ public:
 //		std::cerr << loader.fileCheck(testFile);
 //	}
 
-	void testExec() 
-  {
-    LoadILL loader;
-    loader.initialize();
-		loader.setPropertyValue("Filename", testFile);
+	void testExec() {
+		LoadILL loader;
+		loader.initialize();
+		loader.setPropertyValue("Filename", m_testFile);
 
 		std::string outputSpace = "LoadILLTest_out";
 		loader.setPropertyValue("OutputWorkspace", outputSpace);
@@ -57,25 +53,23 @@ public:
 		MatrixWorkspace_sptr output2D = boost::dynamic_pointer_cast<
 				MatrixWorkspace>(output);
 
-		TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 98304+1);
+		TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 98304);
 
 		AnalysisDataService::Instance().clear();
 	}
 
 private:
 
-	std::string testFile;
+	std::string m_testFile;
 };
 
 //------------------------------------------------------------------------------
 // Performance test
 //------------------------------------------------------------------------------
 
-class LoadILLTestPerformance: public CxxTest::TestSuite 
-{
+class LoadILLTestPerformance: public CxxTest::TestSuite {
 public:
-	void testDefaultLoad() 
-  {
+	void testDefaultLoad() {
 		Mantid::DataHandling::LoadILL loader;
 		loader.initialize();
 		loader.setPropertyValue("Filename", "ILLIN5_094460.nxs");
