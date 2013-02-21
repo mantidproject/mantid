@@ -902,7 +902,7 @@ add_subdirectory( docs )
 
 # List of .py files than must be run WITHIN MantidPlot.
 set ( MANTIDPLOT_TEST_PY_FILES
-    AlgorithmDialogTest.py
+    MantidPlotAlgorithmDialogTest.py
 	MantidPlotSliceViewerTest.py 
 	MantidPlot1DPlotTest.py
 	MantidPlotProxiesTest.py

@@ -6,7 +6,7 @@ from mantidplottests import *
 import mantidqtpython
 import sys
 
-class AlgorithmDialogTest(unittest.TestCase):
+class MantidPlotAlgorithmDialogTest(unittest.TestCase):
     
     def test_OpenDialog(self):
         if not sys.platform == 'darwin':
@@ -18,7 +18,7 @@ class AlgorithmDialogTest(unittest.TestCase):
             pass
     
 # Run the unit tests
-mantidplottests.runTests(AlgorithmDialogTest) 
+mantidplottests.runTests(MantidPlotAlgorithmDialogTest) 
     
     
     
