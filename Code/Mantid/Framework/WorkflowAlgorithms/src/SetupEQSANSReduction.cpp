@@ -508,6 +508,14 @@ void SetupEQSANSReduction::exec()
   // Store name of the instrument
   reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "EQSANS") );
 
+  // Store additional (and optional) process information
+  const std::string processInfo = getProperty("ProcessInfo");
+  reductionManager->declareProperty(new PropertyWithValue<std::string>("ProcessInfo", processInfo));
+
+  // Store the output directory
+  const std::string outputDirectory = getProperty("OutputDirectory");
+  reductionManager->declareProperty(new PropertyWithValue<std::string>("OutputDirectory", outputDirectory));
+
   // Store normalization algorithm
   const std::string normalization = getProperty("Normalisation");
   bool loadMonitors = getProperty("LoadMonitors");
