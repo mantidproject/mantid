@@ -47,8 +47,13 @@ public:
 			m_instrumentName(""),
 			//m_nexusInstrumentEntryName(""),
 			m_wavelength(0),
-			m_channelWidth(0),
-			supportedInstruments({"IN5"}){
+			m_channelWidth(0)
+			{
+		
+			supportedInstruments.push_back("IN5");
+		
+
+
 	}
 	/// Virtual destructor
 	virtual ~LoadILL() {
