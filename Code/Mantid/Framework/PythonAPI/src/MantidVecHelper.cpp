@@ -63,10 +63,9 @@ namespace Mantid
     */
     PyObject * MantidVecHelper::createNumPyArray(const MantidVec & values, bool readonly)
     {
-      typedef typename MantidVec::value_type MantidVecElement;
       npy_intp dims[1] = { static_cast<int>(values.size()) };
       PyArrayObject * ndarray = 
-                   (PyArrayObject*)(PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)const_cast<MantidVecElement*>(&(values[0]))));
+                   (PyArrayObject*)(PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)const_cast<MantidVec::value_type*>(&(values[0]))));
       if( readonly )
       {
         ndarray->flags &= ~NPY_WRITEABLE;
