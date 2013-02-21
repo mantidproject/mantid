@@ -88,8 +88,6 @@ int LoadSassena::fileCheck(const std::string &filePath)
  */
 void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::string wsName, DataObjects::Workspace2D_sptr ws, const std::string &description )
 {
-  //this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>(wsName,wsName,Kernel::Direction::Output), description);
-  //this->setProperty(wsName,ws);
   API::AnalysisDataService::Instance().add( wsName, ws );
   gws->add(wsName);
 }
