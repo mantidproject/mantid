@@ -2,6 +2,7 @@ set ( SRC_FILES
 	#	src/Q1DTOF.cpp
 	# src/CountEventsInPulses.cpp
 	# src/UpdatePeakParameterTable.cpp
+	src/CorrectFlightPaths.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
 	src/AddPeak.cpp
@@ -210,6 +211,7 @@ set ( INC_FILES
 	#	inc/MantidAlgorithms/Q1DTOF.h
 	# inc/MantidAlgorithms/CountEventsInPulses.h
 	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
+	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddPeak.h
@@ -468,6 +470,7 @@ set ( TEST_FILES
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
 	CopySampleTest.h
+	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h
 	CorrectToFileTest.h
 	CreateCalFileByNamesTest.h
