@@ -26,18 +26,16 @@ class SortByQVectors(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty("InputWorkspace", "", "Group workspace that automatically includes all members.")
-
-      
+   
     def PyExec(self):
         # get parameter values
-        wsOutput = "__OutputWorkspace"
         wsString = self.getPropertyValue("InputWorkspace").strip()
         #internal values
+        wsOutput = "__OutputWorkspace"
         wsTemp = "__ConjoinSpectra_temp"       
         #get the workspace list
         wsNames = []
         for wsName in wsString.split(","):
-            print wsName
             ws = mtd[wsName.strip()]
             if type(ws) == WorkspaceGroup:
                 wsNames.extend(ws.getNames())
