@@ -130,86 +130,89 @@ void SaveISISNexus::exec()
 
   std::string outputFilename = getPropertyValue("OutputFileName");
 
-  m_handle = new ::NeXus::File(outputFilename, NXACC_CREATE5);
-  m_handle->makeGroup("raw_data_1","NXentry", true);
-  write_isis_vms_compat();
-  m_handle->writeData("beamline", " ");
+  NXstatus status;
+  float flt;
 
-  m_handle->writeData("collection_time", static_cast<float>(m_isisRaw->rpb.r_dur)); // could be wrong
-  m_handle->openData("collection_time");
-  m_handle->putAttr("units","second");
-  m_handle->closeData();
+  status = NXopen(outputFilename.c_str(),NXACC_CREATE5,&handle);
+  if (status != NX_OK)
+  {
+    throw std::runtime_error("Cannot open file " + outputFilename + " for writing.");
+  }
+  status = NXmakegroup(handle,"raw_data_1","NXentry");
+  NXopengroup(handle,"raw_data_1","NXentry");
+    write_isis_vms_compat();
+    saveString("beamline"," ");
+    
+    flt = (float)m_isisRaw->rpb.r_dur;// could be wrong
+    saveFloatOpen("collection_time",&flt,1);
+    putAttr("units","second");
+    close();
+    
+    saveStringOpen("definition","TOFRAW");
+    putAttr("version","1.0");
+    putAttr("url","http://definition.nexusformat.org/instruments/TOFRAW/?version=1.0");
+    close();
 
-  m_handle->writeData("definition","TOFRAW");
-  m_handle->openData("definition");
-  m_handle->putAttr("version","1.0");
-  m_handle->putAttr("url","http://definition.nexusformat.org/instruments/TOFRAW/?version=1.0");
-  m_handle->closeData();
+    saveStringOpen("definition_local","ISISTOFRAW");
+    putAttr("version","1.0");
+    putAttr("url","http://svn.isis.rl.ac.uk/instruments/ISISTOFRAW/?version=1.0");
+    close();
 
-  m_handle->writeData("definition_local","ISISTOFRAW");
-  m_handle->openData("definition_local");
-  m_handle->putAttr("version","1.0");
-  m_handle->putAttr("url","http://svn.isis.rl.ac.uk/instruments/ISISTOFRAW/?version=1.0");
-  m_handle->closeData();
-
-  m_handle->writeData("duration", static_cast<float>(m_isisRaw->rpb.r_dur));
-  m_handle->openData("duration");
-  m_handle->putAttr("units","second");
-  m_handle->closeData();
-
+    flt = (float)m_isisRaw->rpb.r_dur;
+    saveFloatOpen("duration",&flt,1);
+    putAttr("units","second");
+    close();
+    
     start_time_str.assign(m_isisRaw->hdr.hd_date,m_isisRaw->hdr.hd_date+12);
     toISO8601(start_time_str);
     start_time_str += 'T';
     start_time_str += std::string(m_isisRaw->hdr.hd_time,m_isisRaw->hdr.hd_time+8);
-    m_handle->writeData("start_time",start_time_str);
-    m_handle->openData("start_time");
-    m_handle->putAttr("units","ISO8601");
-    m_handle->closeData();
+    saveCharOpen("start_time",&start_time_str[0],19);
+    putAttr("units","ISO8601");
+    close();
 
     std::string str;
     str.assign(m_isisRaw->rpb.r_enddate,m_isisRaw->rpb.r_enddate+12);
     toISO8601(str);
     str += 'T';
     str += std::string(m_isisRaw->rpb.r_endtime,m_isisRaw->rpb.r_endtime+8);
-    m_handle->writeData("end_time",str);
-    m_handle->openData("end_time");
-    m_handle->putAttr("units","ISO8601");
-    m_handle->closeData();
+    saveCharOpen("end_time",&str[0],19);
+    putAttr("units","ISO8601");
+    close();
 
-    m_handle->writeData("title",std::string(m_isisRaw->r_title));
-    m_handle->writeData("good_frames",m_isisRaw->rpb.r_goodfrm);
+    saveChar("title",m_isisRaw->r_title,80);
+    saveInt("good_frames",&m_isisRaw->rpb.r_goodfrm);
     
-    m_handle->writeData("experiment_identifier",boost::lexical_cast<std::string>(m_isisRaw->rpb.r_prop));
-    m_handle->writeData("measurement_first_run",static_cast<int>(0));
-    m_handle->writeData("measurement_id"," ");
-    m_handle->writeData("measurement_label"," ");
-    m_handle->writeData("measurement_subid"," ");
-    m_handle->writeData("measurement_type"," ");
+    std::string experiment_identifier = boost::lexical_cast<std::string>(m_isisRaw->rpb.r_prop);
+    saveChar("experiment_identifier",&experiment_identifier[0],static_cast<int>(experiment_identifier.size()));
+    int tmp_int(0);
+    saveInt("measurement_first_run",&tmp_int);
+    saveString("measurement_id"," ");
+    saveString("measurement_label"," ");
+    saveString("measurement_subid"," ");
+    saveString("measurement_type"," ");
 
-    m_handle->writeData("name",std::string(m_isisRaw->i_inst));
-    m_handle->openData("name");
-    m_handle->putAttr("short_name",std::string(m_isisRaw->hdr.inst_abrv));
-    m_handle->closeData();
+    saveCharOpen("name",&m_isisRaw->i_inst,8);
+    putAttr("short_name",m_isisRaw->hdr.inst_abrv,3);
+    close();
 
     logNotes();
 
-    m_handle->writeData("program_name","isisicp");
+    saveString("program_name","isisicp");
 
-    m_handle->writeData("proton_charge",m_isisRaw->rpb.r_gd_prtn_chrg);
-    m_handle->openData("proton_charge");
-    m_handle->putAttr("units","uamp.hour");
-    m_handle->closeData();
+    saveFloatOpen("proton_charge",&m_isisRaw->rpb.r_gd_prtn_chrg,1);
+    putAttr("units","uamp.hour");
+    close();
 
-    m_handle->writeData("proton_charge_raw",m_isisRaw->rpb.r_tot_prtn_chrg);
-    m_handle->openData("proton_charge_raw");
-    m_handle->putAttr("units","uamp.hour");
-    m_handle->closeData();
+    saveFloatOpen("proton_charge_raw",&m_isisRaw->rpb.r_tot_prtn_chrg,1);
+    putAttr("units","uamp.hour");
+    close();
 
-    m_handle->writeData("raw_frames",m_isisRaw->rpb.r_rawfrm);
+    saveInt("raw_frames",&m_isisRaw->rpb.r_rawfrm);
 
     run_cycle();
 
-    m_handle->writeData("run_number",m_isisRaw->r_number);
+    saveInt("run_number",&m_isisRaw->r_number);
 
     //script_name
     //seci_config
@@ -228,10 +231,97 @@ void SaveISISNexus::exec()
 
     selog();
 
-  m_handle->closeGroup(); // raw_data_1
+  NXclosegroup(handle); // raw_data_1
+  status = NXclose(&handle);
 
-  delete m_handle;
   delete m_isisRaw;
+}
+
+/**
+  * Save int data.
+  * @param name Name of the data set
+  * @param data Pointer to the data source
+  * @param size size of the data in sizeof(int)
+  */
+void SaveISISNexus::saveInt(const char* name,void* data, int size)
+{
+  saveIntOpen(name,data,size);
+  close();
+}
+
+/**
+  * Save char data.
+  * @param name Name of the data set
+  * @param data Pointer to the data source
+  * @param size size of the data in sizeof(char)
+  */
+void SaveISISNexus::saveChar(const char* name,void* data, int size)
+{
+  saveCharOpen(name,data,size);
+  close();
+}
+
+/**
+  * Save float data.
+  * @param name Name of the data set
+  * @param data Pointer to the data source
+  * @param size size of the data in sizeof(float)
+  */
+void SaveISISNexus::saveFloat(const char* name,void* data, int size)
+{
+  saveFloatOpen(name,data,size);
+  close();
+}
+
+/**
+  * Save int data and leave the dataset open.
+  * @param name Name of the data set
+  * @param data Pointer to the data source
+  * @param size size of the data in sizeof(int)
+  */
+void SaveISISNexus::saveIntOpen(const char* name,void* data, int size)
+{
+  int dim[1];
+  dim[0] = size;
+  // If we aren't going to anything with the status, then don't bother asking
+  // for it!  (NXstatus status = NXblah())
+  NXmakedata(handle,name,NX_INT32,1,dim); 
+  NXopendata(handle,name);
+  NXputdata(handle,data);
+}
+
+/**
+  * Save char data and leave the dataset open.
+  * @param name Name of the data set
+  * @param data Pointer to the data source
+  * @param size size of the data in sizeof(char)
+  */
+void SaveISISNexus::saveCharOpen(const char* name,void* data, int size)
+{
+  int dim[1];
+  dim[0] = size;
+  // If we aren't going to anything with the status, then don't bother asking
+  // for it!  (NXstatus status = NXblah())
+  NXmakedata(handle,name,NX_CHAR,1,dim);
+  NXopendata(handle,name);
+  NXputdata(handle,data);
+}
+
+/**
+  * Save float data ald leave the dataset open.
+  * @param name Name of the data set
+  * @param data Pointer to the data source
+  * @param size size of the data in sizeof(float)
+  */
+void SaveISISNexus::saveFloatOpen(const char* name,void* data, int size)
+{
+  int dim[1];
+  dim[0] = size;
+  // If we aren't going to anything with the status, then don't bother asking
+  // for it!  (NXstatus status = NXblah())
+  NXmakedata(handle,name,NX_FLOAT32,1,dim);
+  NXopendata(handle,name);
+  NXputdata(handle,data);
 }
 
 /**
@@ -245,7 +335,7 @@ int SaveISISNexus::saveStringVectorOpen(const char* name,const std::vector<std::
 {
   if (str_vec.empty())
   {
-    m_handle->writeData(name," ");
+    saveStringOpen(name," ");
     return 0;
   }
   int buff_size = max_str_size;
@@ -256,24 +346,64 @@ int SaveISISNexus::saveStringVectorOpen(const char* name,const std::vector<std::
   }
   if (buff_size <= 0) buff_size = 1;
   char *buff = new char[buff_size];
-  std::vector<int64_t> dims(2);
-  dims[0] = static_cast<int64_t>(str_vec.size());
-  dims[1] = static_cast<int64_t>(buff_size);
-  m_handle->makeData(name, ::NeXus::CHAR, dims, true);
+  int dim[2];
+  dim[0] = static_cast<int>(str_vec.size());
+  dim[1] = buff_size;
+  NXmakedata(handle,name,NX_CHAR,2,dim);
+  NXopendata(handle,name);
   for(std::size_t i = 0; i < str_vec.size(); ++i)
   {
-    std::vector<int64_t> start(2,0);
-    start[0] = static_cast<int64_t>(i);
-    std::vector<int64_t> sizes(2,1);
-    sizes[1] = static_cast<int64_t>(buff_size);
+    int start[] = {static_cast<int>(i),0};
+    int sizes[] = {1,buff_size};
     const char* str = str_vec[i].c_str();
     std::fill_n(buff,buff_size,' ');
     int n = std::min(buff_size,int(str_vec[i].size()));
     std::copy(str,str + n,buff);
-    m_handle->putSlab(buff,start,sizes);
+    NXputslab(handle,buff,start,sizes);
   }
   delete [] buff;
   return buff_size;
+}
+
+/**
+  * Save a string in a dataset.
+  * @param name :: Name of the data set
+  * @param str :: The vector to save
+  */
+void SaveISISNexus::saveString(const char* name,const std::string& str)
+{
+  if (str.empty()) return;
+  std::string buff(str);
+  saveChar(name,&buff[0],static_cast<int>(buff.size()));
+}
+
+/**
+  * Save a string in a dataset.
+  * @param name :: Name of the data set
+  * @param str :: The vector to save
+  */
+void SaveISISNexus::saveStringOpen(const char* name,const std::string& str)
+{
+  if (str.empty()) return;
+  std::string buff(str);
+  saveCharOpen(name,&buff[0],static_cast<int>(buff.size()));
+}
+
+void SaveISISNexus::putAttr(const char* name,const std::string& value)
+{
+  boost::scoped_array<char> buff(new char[value.size()]);
+  std::copy(value.begin(),value.end(),buff.get());
+  NXputattr(handle,name,buff.get(),static_cast<int>(value.size()),NX_CHAR);
+}
+
+void SaveISISNexus::putAttr(const char* name,char* value,int size)
+{
+  NXputattr(handle,name,value,size,NX_CHAR);
+}
+
+void SaveISISNexus::putAttr(const char* name,int value,int size)
+{
+  NXputattr(handle,name,&value,size,NX_INT32);
 }
 
 void SaveISISNexus::toISO8601(std::string& str)
@@ -289,79 +419,64 @@ void SaveISISNexus::toISO8601(std::string& str)
 /// Write isis_vms_compat
 void SaveISISNexus::write_isis_vms_compat()
 {
-  m_handle->makeGroup("isis_vms_compat","IXvms", true);
+  NXmakegroup(handle,"isis_vms_compat","IXvms");
+  NXopengroup(handle,"isis_vms_compat","IXvms");
   int ndet = m_isisRaw->i_det;
   int nmon = m_isisRaw->i_mon;
 
-  // some nasty reinterpret of a struct as an integer array
-  std::vector<int64_t> dims(1,9);
-  m_handle->makeData("ADD", ::NeXus::INT32, dims, true);
-  m_handle->putData(&m_isisRaw->add);
-  m_handle->closeData();
-
-  m_handle->writeData("CODE", std::vector<int>(m_isisRaw->code, m_isisRaw->code+ndet));
-  m_handle->writeData("CRAT", std::vector<int>(m_isisRaw->crat, m_isisRaw->crat+ndet));
+  saveInt("ADD",&m_isisRaw->add,9);
+  saveInt("CODE",m_isisRaw->code,ndet);
+  saveInt("CRAT",m_isisRaw->crat,ndet);
 
   write_rpb();
   write_spb();
   write_vpb();
-
-  // some nasty reinterpret of a struct as an integer array
-  dims[0] = 64;
-  m_handle->makeData("DAEP", ::NeXus::INT32, dims, true);
-  m_handle->putData((void*)&m_isisRaw->daep);
-  m_handle->closeData();
-
-  m_handle->writeData("DELT",std::vector<float>(m_isisRaw->delt,m_isisRaw->delt+ndet)); // was being done as int array
-  m_handle->writeData("FORM",m_isisRaw->data_format);
-
-  // some nasty reinterpret of a struct as a character array
-  dims[0] = 80;
-  m_handle->makeData("HDR", ::NeXus::CHAR, dims);
-  m_handle->putData((void*)&m_isisRaw->hdr);
-  m_handle->closeData();
-
-  m_handle->writeData("LEN2",std::vector<float>(m_isisRaw->len2, m_isisRaw->len2+ndet));
-  m_handle->writeData("MDET",std::vector<int>(m_isisRaw->mdet,m_isisRaw->mdet+nmon));
-  m_handle->writeData("MODN",std::vector<int>(m_isisRaw->modn,m_isisRaw->modn+ndet));
-  m_handle->writeData("MONP",std::vector<int>(m_isisRaw->monp,m_isisRaw->monp+nmon));
-  m_handle->writeData("MPOS",std::vector<int>(m_isisRaw->mpos,m_isisRaw->mpos+ndet));
-  m_handle->writeData("NAME", std::string(m_isisRaw->i_inst));
-  m_handle->writeData("NDET",ndet);
-  m_handle->writeData("NFPP",m_isisRaw->t_nfpp);
-  m_handle->writeData("NMON",nmon);
-  m_handle->writeData("NPER",m_isisRaw->t_nper);
-  m_handle->writeData("NSER",m_isisRaw->e_nse);
-  m_handle->writeData("NSP1",m_isisRaw->t_nsp1);
-  m_handle->writeData("NTC1",m_isisRaw->t_ntc1);
-  m_handle->writeData("NTRG",m_isisRaw->t_ntrg);
-  m_handle->writeData("NUSE",m_isisRaw->i_use);
-  m_handle->writeData("PMAP",std::vector<int>(m_isisRaw->t_pmap,m_isisRaw->t_pmap+256));
-  m_handle->writeData("PRE1",m_isisRaw->t_pre1);
-  m_handle->writeData("RUN",m_isisRaw->r_number);
-  m_handle->writeData("SPEC",std::vector<int>(m_isisRaw->spec,m_isisRaw->spec+ndet));
-  m_handle->writeData("TCM1",m_isisRaw->t_tcm1[0]);
-  m_handle->writeData("TCP1",std::vector<float>(&m_isisRaw->t_tcp1[0][0],&m_isisRaw->t_tcp1[0][0]+20));
-  m_handle->writeData("TIMR",std::vector<int>(m_isisRaw->timr,m_isisRaw->timr+ndet));
-  m_handle->writeData("TITL",std::string(m_isisRaw->r_title));
-  m_handle->writeData("TTHE",std::vector<float>(m_isisRaw->tthe,m_isisRaw->tthe+ndet));
-  m_handle->writeData("UDET",std::vector<int>(m_isisRaw->udet,m_isisRaw->udet+ndet));
-  m_handle->writeData("ULEN",m_isisRaw->u_len);
+  saveInt("DAEP",&m_isisRaw->daep,64);
+  saveInt("DELT",m_isisRaw->delt,ndet);
+  saveInt("FORM",&m_isisRaw->data_format);
+  saveChar("HDR",&m_isisRaw->hdr,80);
+  saveFloat("LEN2",m_isisRaw->len2, ndet);
+  saveInt("MDET",m_isisRaw->mdet,nmon);
+  saveInt("MODN",m_isisRaw->modn,ndet);
+  saveInt("MONP",m_isisRaw->monp,nmon);
+  saveInt("MPOS",m_isisRaw->mpos,ndet);
+  saveChar("NAME",m_isisRaw->i_inst,8);
+  saveInt("NDET",&ndet);
+  saveInt("NFPP",&m_isisRaw->t_nfpp);
+  saveInt("NMON",&nmon);
+  saveInt("NPER",&m_isisRaw->t_nper);
+  saveInt("NSER",&m_isisRaw->e_nse);
+  saveInt("NSP1",&m_isisRaw->t_nsp1);
+  saveInt("NTC1",&m_isisRaw->t_ntc1);
+  saveInt("NTRG",&m_isisRaw->t_ntrg);
+  saveInt("NUSE",&m_isisRaw->i_use);
+  saveInt("PMAP",&m_isisRaw->t_pmap,256);
+  saveInt("PRE1",&m_isisRaw->t_pre1);
+  saveInt("RUN",&m_isisRaw->r_number);
+  saveInt("SPEC",m_isisRaw->spec,ndet); 
+  saveInt("TCM1",&m_isisRaw->t_tcm1);
+  saveFloat("TCP1",m_isisRaw->t_tcp1,20);
+  saveInt("TIMR",m_isisRaw->timr,ndet);
+  saveChar("TITL",m_isisRaw->r_title,80);
+  saveFloat("TTHE",m_isisRaw->tthe,ndet);
+  saveInt("UDET",m_isisRaw->udet,ndet);
+  saveInt("ULEN",&m_isisRaw->u_len);
   std::string user_info(160,' ');
   if (m_isisRaw->u_len > 0)
   {
     std::copy((char*)&m_isisRaw->user,(char*)&m_isisRaw->user+m_isisRaw->u_len,user_info.begin());
   }
-  m_handle->writeData("USER",user_info);
-  m_handle->writeData("VER1",m_isisRaw->frmt_ver_no);
-  m_handle->writeData("VER2",m_isisRaw->ver2);
-  m_handle->writeData("VER3",m_isisRaw->ver3);
-  m_handle->writeData("VER4",m_isisRaw->ver4);
-  m_handle->writeData("VER5",m_isisRaw->ver5);
-  m_handle->writeData("VER6",m_isisRaw->ver6);
-  m_handle->writeData("VER7",m_isisRaw->ver7);
-  m_handle->writeData("VER8",m_isisRaw->ver8);
-  m_handle->writeData("VER9",int(0));
+  saveString("USER",user_info);
+  saveInt("VER1",&m_isisRaw->frmt_ver_no);
+  saveInt("VER2",&m_isisRaw->ver2);
+  saveInt("VER3",&m_isisRaw->ver3);
+  saveInt("VER4",&m_isisRaw->ver4);
+  saveInt("VER5",&m_isisRaw->ver5);
+  saveInt("VER6",&m_isisRaw->ver6);
+  saveInt("VER7",&m_isisRaw->ver7);
+  saveInt("VER8",&m_isisRaw->ver8);
+  int tmp_int(0);
+  saveInt("VER9",&tmp_int);
 
   int n = m_isisRaw->logsect.nlines;
   log_notes.resize(n);
@@ -370,29 +485,30 @@ void SaveISISNexus::write_isis_vms_compat()
     log_notes[i].assign(m_isisRaw->logsect.lines[i].data,m_isisRaw->logsect.lines[i].len);
   }
   int ll = saveStringVectorOpen("NOTE",log_notes);
-  m_handle->writeData("NTNL",n);
-  m_handle->writeData("NTLL",ll);
+  saveInt("NTNL",&n);
+  saveInt("NTLL",&ll);
 
-  m_handle->closeGroup(); // isis_vms_compat
+  NXclosegroup(handle); // isis_vms_compat
 }
 
 void SaveISISNexus::instrument()
 {
-  m_handle->makeGroup("instrument","NXinstrument", true);
-  m_handle->writeData("name",std::string(m_isisRaw->i_inst));
-  m_handle->openData("name");
-  m_handle->putAttr("short_name",std::string(m_isisRaw->hdr.inst_abrv));
-  m_handle->closeData();
+  NXmakegroup(handle,"instrument","NXinstrument");
+  NXopengroup(handle,"instrument","NXinstrument");
+    saveCharOpen("name",&m_isisRaw->i_inst,8);
+    putAttr("short_name",m_isisRaw->hdr.inst_abrv,3);
+    close();
   dae();
   detector_1();
   moderator();
   source();
-  m_handle->closeGroup();
+  NXclosegroup(handle);
 }
 
 void SaveISISNexus::detector_1()
 {
-  m_handle->makeGroup("detector_1","NXdata", true);
+  NXmakegroup(handle,"detector_1","NXdata");
+  NXopengroup(handle,"detector_1","NXdata");
 
   for(int i = 0; i < nmon; ++i)
   {
@@ -401,17 +517,17 @@ void SaveISISNexus::detector_1()
   }
 
   // write counts
-  std::vector<int64_t> dim(3);
+  int dim[3];
   dim[0] = nper;
   dim[1] = nsp - nmon;
   dim[2] = ntc;
-  m_handle->makeData("counts", ::NeXus::INT32, dim, true);
-  m_handle->putAttr("units","counts");
-  m_handle->putAttr("signal",1);
-  m_handle->putAttr("axes","period_index,spectrum_index,time_of_flight");
+  NXmakedata(handle,"counts",NX_INT32,3,dim);
+  NXopendata(handle,"counts");
+  putAttr("units","counts");
+  putAttr("signal",1);
+  putAttr("axes","period_index,spectrum_index,time_of_flight");
 
-  std::vector<int64_t> size(3,1);
-  size[2] = ntc;
+  int size[] = {1,1,ntc};
   int index = 0;
   for(int p = 0; p < nper; ++p)
   {
@@ -427,51 +543,46 @@ void SaveISISNexus::detector_1()
       else
       {
         m_isisRaw->readData(rawFile,index);
-        std::vector<int64_t> start(3,0);
-        start[0] = p;
-        start[1] = ispec;
-        m_handle->putSlab(m_isisRaw->dat1+1,start,size);
+        int start[] = {p,ispec,0};
+        NXputslab(handle,m_isisRaw->dat1+1,start,size);
         ++ispec;
       }
       ++index;
     }
   }
-  counts_link = m_handle->getDataID();
-  m_handle->closeData();
+  NXgetdataID(handle,&counts_link);
+  NXclosedata(handle);
 
-  m_handle->makeLink(period_index_link);
+  NXmakelink(handle,&period_index_link);
 
   std::vector<int> spec_minus_monitors(nsp-nmon);
   std::generate(spec_minus_monitors.begin(),spec_minus_monitors.end(),getWithoutMonitors<int>(this,m_isisRaw->spec));
-  m_handle->writeData("spectrum_index",spec_minus_monitors);
-  m_handle->openData("spectrum_index");
-  spectrum_index_link = m_handle->getDataID();
-  m_handle->closeData();
+  saveIntOpen("spectrum_index",&spec_minus_monitors[0],nsp-nmon);
+  NXgetdataID(handle,&spectrum_index_link);
+  close();
 
-  m_handle->makeLink(time_of_flight_link);
-  m_handle->makeLink(time_of_flight_raw_link);
+  NXmakelink(handle,&time_of_flight_link);
+  NXmakelink(handle,&time_of_flight_raw_link);
 
   std::vector<float> float_vec(ndet-nmon);
   std::generate(float_vec.begin(),float_vec.end(),getWithoutMonitors<float>(this,m_isisRaw->delt));
-  m_handle->writeData("delt",float_vec);
+  saveFloat("delt",&float_vec[0],ndet-nmon);
 
-  m_handle->writeData("source_detector_distance",m_isisRaw->ivpb.i_sddist);
+  saveFloat("source_detector_distance",&m_isisRaw->ivpb.i_sddist,1);
 
   // using the same float_vec, size unchanged ndet-nmon
   std::generate(float_vec.begin(),float_vec.end(),getWithoutMonitors<float>(this,m_isisRaw->len2));
-  m_handle->writeData("distance",float_vec);
-  m_handle->openData("distance");
-  m_handle->putAttr("units","metre");
-  m_handle->closeData();
+  saveFloatOpen("distance",&float_vec[0],ndet-nmon);
+  putAttr("units","metre");
+  close();
 
   // using the same float_vec, size unchanged ndet-nmon
   std::generate(float_vec.begin(),float_vec.end(),getWithoutMonitors<float>(this,m_isisRaw->tthe));
-  m_handle->writeData("polar_angle",float_vec);
-  m_handle->openData("polar_angle");
-  m_handle->putAttr("units","degree");
-  m_handle->closeData();
+  saveFloatOpen("polar_angle",&float_vec[0],ndet-nmon);
+  putAttr("units","degree");
+  close();
 
-  m_handle->closeGroup();
+  NXclosegroup(handle);
 }
 
 /**
@@ -479,14 +590,14 @@ void SaveISISNexus::detector_1()
   */
 void SaveISISNexus::moderator()
 {
-  m_handle->makeGroup("moderator","NXmoderator", true);
+  NXmakegroup(handle,"moderator","NXmoderator");
+  NXopengroup(handle,"moderator","NXmoderator");
 
   float l1 = - m_isisRaw->ivpb.i_l1;
-  m_handle->writeData("distance",l1);
-  m_handle->openData("distance");
-  m_handle->putAttr("units","metre");
+  saveFloatOpen("distance",&l1,1);
+  putAttr("units","metre");
 
-  m_handle->closeGroup();
+  NXclosegroup(handle);
 }
 
 /**
@@ -494,13 +605,14 @@ void SaveISISNexus::moderator()
   */
 void SaveISISNexus::source()
 {
-  m_handle->makeGroup("source","NXsource",true);
+  NXmakegroup(handle,"source","NXsource");
+  NXopengroup(handle,"source","NXsource");
 
-  m_handle->writeData("name","ISIS");
-  m_handle->writeData("probe","neutrons");
-  m_handle->writeData("type","Pulsed Neutron Source");
+  saveString("name","ISIS");
+  saveString("probe","neutrons");
+  saveString("type","Pulsed Neutron Source");
 
-  m_handle->closeGroup();
+  NXclosegroup(handle);
 }
 
 /**
@@ -508,14 +620,15 @@ void SaveISISNexus::source()
   */
 void SaveISISNexus::make_detector_1_link()
 {
-  m_handle->makeGroup("detector_1","NXdata", true);
+  NXmakegroup(handle,"detector_1","NXdata");
+  NXopengroup(handle,"detector_1","NXdata");
 
-  m_handle->makeLink(counts_link);
-  m_handle->makeLink(period_index_link);
-  m_handle->makeLink(spectrum_index_link);
-  m_handle->makeLink(time_of_flight_link);
+  NXmakelink(handle,&counts_link);
+  NXmakelink(handle,&period_index_link);
+  NXmakelink(handle,&spectrum_index_link);
+  NXmakelink(handle,&time_of_flight_link);
 
-  m_handle->closeGroup();
+  NXclosegroup(handle);
 }
 
 /**
@@ -545,104 +658,104 @@ void SaveISISNexus::monitor_i(int i)
 {
   int nper = m_isisRaw->t_nper; // number of periods
   int ntc = m_isisRaw->t_ntc1;  // number of time channels
-  std::vector<int64_t> dim(3,1);
-  dim[0] = nper;
-  dim[2] = ntc;
-  std::vector<int64_t> size(3,1);
-  size[2] = ntc;
+  int dim[] = {nper,1,ntc};
+  int size[] = {1,1,ntc};
   std::ostringstream ostr;
   int mon_num = i + 1;
   ostr << "monitor_" << mon_num;
-  m_handle->makeGroup(ostr.str(),"NXmonitor", true);
+  NXmakegroup(handle,ostr.str().c_str(),"NXmonitor");
+  NXopengroup(handle,ostr.str().c_str(),"NXmonitor");
   
 //  int imon = m_isisRaw->mdet[i]; // spectrum index
-  m_handle->makeData("data", ::NeXus::INT32, dim, true);
+  NXmakedata(handle,"data",NX_INT32,3,dim);
+  NXopendata(handle,"data");
   for(int p = 0; p < nper; ++p)
   {
-    std::vector<int64_t> start(3,0);
-    start[0] = p;
-    m_handle->putSlab(getMonitorData(p,i),start,size);
+    int start[] = {p,0,0};
+    NXputslab(handle,getMonitorData(p,i),start,size);
   }
-  m_handle->putAttr("units","counts");
-  m_handle->putAttr("signal",1);
-  m_handle->putAttr("axes","period_index,spectrum_index,time_of_flight");
-  m_handle->closeData();
+  putAttr("units","counts");
+  putAttr("signal",1);
+  putAttr("axes","period_index,spectrum_index,time_of_flight");
+  NXclosedata(handle);
 
-  m_handle->writeData("monitor_number",mon_num);
-  m_handle->makeLink(period_index_link);
-  m_handle->writeData("spectrum_index",m_isisRaw->mdet[i]);
-  m_handle->makeLink(time_of_flight_link);
+  saveInt("monitor_number",&mon_num);
+  NXmakelink(handle,&period_index_link);
+  saveInt("spectrum_index",&m_isisRaw->mdet[i]);
+  NXmakelink(handle,&time_of_flight_link);
 
-  m_handle->closeGroup();
+  NXclosegroup(handle);
 }
 
 void SaveISISNexus::dae()
 {
-  m_handle->makeGroup("dae","IXdae", true);
+  NXmakegroup(handle,"dae","IXdae");
+  NXopengroup(handle,"dae","IXdae");
   
-  m_handle->writeData("detector_table_file"," ");
-  m_handle->writeData("spectra_table_file"," ");
-  m_handle->writeData("wiring_table_file"," ");
+  saveString("detector_table_file"," ");
+  saveString("spectra_table_file"," ");
+  saveString("wiring_table_file"," ");
 
-  m_handle->writeData("period_index",std::vector<int>(m_isisRaw->t_pmap,m_isisRaw->t_pmap+nper));
-  m_handle->openData("period_index");
-  period_index_link =  m_handle->getDataID();
-  m_handle->closeData();
+  saveIntOpen("period_index",m_isisRaw->t_pmap,nper);
+  NXgetdataID(handle,&period_index_link);
+  close();
 
-  m_handle->makeGroup("time_channels_1","IXtime_channels",true);
+  NXmakegroup(handle,"time_channels_1","IXtime_channels");
+  NXopengroup(handle,"time_channels_1","IXtime_channels");
 
   boost::scoped_array<float> timeChannels(new float[ntc+1]);
   m_isisRaw->getTimeChannels(timeChannels.get(),ntc+1);
-  m_handle->writeData("time_of_flight",std::vector<float>(timeChannels.get(),timeChannels.get()+ntc+1));
-  m_handle->openData("time_of_flight");
-  m_handle->putAttr("axis",1);
-  m_handle->putAttr("primary",1);
-  m_handle->putAttr("units","microseconds");
-  time_of_flight_link = m_handle->getDataID();
-  m_handle->closeData();
+  saveFloatOpen("time_of_flight",timeChannels.get(),ntc+1);
+  putAttr("axis",1);
+  putAttr("primary",1);
+  putAttr("units","microseconds");
+  NXgetdataID(handle,&time_of_flight_link);
+  close();
 
-  m_handle->writeData("time_of_flight_raw",std::vector<int>(m_isisRaw->t_tcb1,m_isisRaw->t_tcb1+ntc+1));
-  m_handle->openData("time_of_flight_raw");
-  m_handle->putAttr("units","pulses");
-  m_handle->putAttr("frequency","32 MHz");
-  time_of_flight_raw_link = m_handle->getDataID();
-  m_handle->closeData();
+  saveIntOpen("time_of_flight_raw",m_isisRaw->t_tcb1,ntc+1);
+  putAttr("units","pulses");
+  putAttr("frequency","32 MHz");
+  NXgetdataID(handle,&time_of_flight_raw_link);
+  close();
 
-  m_handle->closeGroup();   // time_channels_1
+  NXclosegroup(handle); // time_channels_1
 
-  m_handle->closeGroup();   // dae
+  NXclosegroup(handle); // dae
 }
 
 void SaveISISNexus::user()
 {
-  m_handle->makeGroup("user_1","NXuser",true);
+  NXmakegroup(handle,"user_1","NXuser");
+  NXopengroup(handle,"user_1","NXuser");
 
-  m_handle->writeData("name",std::string(m_isisRaw->user.r_user));
-  m_handle->writeData("affiliation",std::string(m_isisRaw->user.r_instit));
+  saveChar("name",m_isisRaw->user.r_user,20);
+  saveChar("affiliation",m_isisRaw->user.r_instit,20);
   
-  m_handle->closeGroup();   // user_1
+  NXclosegroup(handle); // user_1
 }
 
 void SaveISISNexus::sample()
 {
-  m_handle->makeGroup("sample","NXsample",true);
+  NXmakegroup(handle,"sample","NXsample");
+  NXopengroup(handle,"sample","NXsample");
 
-  m_handle->writeData("name",std::string(m_isisRaw->spb.e_name));
-  m_handle->writeData("height",m_isisRaw->spb.e_height);
-  m_handle->writeData("width",m_isisRaw->spb.e_width);
-  m_handle->writeData("thickness",m_isisRaw->spb.e_thick);
-  m_handle->writeData("id"," ");
-  m_handle->writeData("distance",float(0.0));
+  saveChar("name",m_isisRaw->spb.e_name,40);
+  saveFloat("height",&m_isisRaw->spb.e_height,1);
+  saveFloat("width",&m_isisRaw->spb.e_width,1);
+  saveFloat("thickness",&m_isisRaw->spb.e_thick,1);
+  saveString("id"," ");
+  float tmp(0.0);
+  saveFloat("distance",&tmp,1);
   std::string shape[] = {"cylinder","flat plate","HRPD slab","unknown"};
   int i = m_isisRaw->spb.e_geom - 1;
   if (i < 0 || i > 3) i = 3;
-  m_handle->writeData("shape",shape[i]);
+  saveString("shape",shape[i]);
   std::string type[] = {"sample+can","empty can","vanadium","absorber","nothing","sample, no can","unknown"};
   i = m_isisRaw->spb.e_type - 1;
   if (i < 0 || i > 6) i = 6;
-  m_handle->writeData("type",type[i]);
+  saveString("type",type[i]);
   
-  m_handle->closeGroup();   // sample
+  NXclosegroup(handle); // sample
 }
 
 /**
@@ -729,7 +842,8 @@ void SaveISISNexus::runlog()
   run_status_vec.resize(time_vec.size());
   std::transform(is_running_vec.begin(),is_running_vec.end(),run_status_vec.begin(),std::bind2nd(std::plus<int>(),1));
 
-  m_handle->makeGroup("runlog","IXrunlog",true);
+  NXmakegroup(handle,"runlog","IXrunlog");
+  NXopengroup(handle,"runlog","IXrunlog");
 
   int time_vec_size = static_cast<int>(time_vec.size());
 
@@ -771,20 +885,20 @@ void SaveISISNexus::runlog()
   }
   icpevent_fil.close();
 
-  m_handle->makeGroup("icp_event","NXlog", true);
+  NXmakegroup(handle,"icp_event","NXlog");
+  NXopengroup(handle,"icp_event","NXlog");
 
-  m_handle->writeData("time",time_vec);
-  m_handle->openData("time");
-  m_handle->putAttr("start",start_time_str);
-  m_handle->putAttr("units","seconds");
-  m_handle->closeData();
+  saveFloatOpen("time",&time_vec[0],static_cast<int>(time_vec.size()));
+  putAttr("start",start_time_str);
+  putAttr("units","seconds");
+  close();
 
   saveStringVectorOpen("value",event_vec,72);
-  m_handle->putAttr("units"," ");
-  m_handle->closeData();
-  m_handle->closeGroup();   // icp_event
+  putAttr("units"," ");
+  close();
+  NXclosegroup(handle); // icp_event
 
-  m_handle->closeGroup(); // runlog
+  NXclosegroup(handle); // runlog
   progress(0.5);
 }
 
@@ -800,7 +914,7 @@ void SaveISISNexus::runlog()
 void SaveISISNexus::write_runlog(const char* name, void* times, void* data,int type,int size,const std::string& units)
 {
   write_logOpen(name,times,data,type,size,units);
-  m_handle->closeGroup();
+  closegroup();
 }
 
 /**
@@ -814,26 +928,24 @@ void SaveISISNexus::write_runlog(const char* name, void* times, void* data,int t
   */
 void SaveISISNexus::write_logOpen(const char* name, void* times, void* data,int type,int size,const std::string& units)
 {
-  m_handle->makeGroup(name,"NXlog",true);
-  std::vector<int64_t> dims(1,size);
+  NXmakegroup(handle,name,"NXlog");
+  NXopengroup(handle,name,"NXlog");
 
-  m_handle->makeData("time", ::NeXus::FLOAT32, dims, true);
-  m_handle->putData(times);
-  m_handle->putAttr("start",start_time_str);
-  m_handle->putAttr("units","seconds");
-  m_handle->closeData();
+  saveFloatOpen("time",times,size);
+  putAttr("start",start_time_str);
+  putAttr("units","seconds");
+  close();
 
   if (type == NX_INT32)
   {
-    m_handle->makeData("value", ::NeXus::INT32, dims, true);
+    saveIntOpen("value",data,size);
   }
   else if (type == NX_FLOAT32)
   {
-    m_handle->makeData("value", ::NeXus::FLOAT32, dims, true);
+    saveFloatOpen("value",data,size);
   }
-  m_handle->putData(data);
-  m_handle->putAttr("units",units);
-  m_handle->closeData();
+  putAttr("units",units);
+  close();
 }
 
 void SaveISISNexus::selog()
@@ -864,7 +976,8 @@ void SaveISISNexus::selog()
 
   Progress prog(this,0.5,1,potentialLogFiles.size());
 
-  m_handle->makeGroup("selog","IXselog",true);
+  NXmakegroup(handle,"selog","IXselog");
+  NXopengroup(handle,"selog","IXselog");
 
   // create a log for each of the found log files
   std::size_t nBase = base_name.size() + 1;
@@ -921,48 +1034,48 @@ void SaveISISNexus::selog()
       str_vec.push_back(istr.str());
     }
     fil.close();
-    m_handle->makeGroup(&logName[0],"IXseblock", true);
+    NXmakegroup(handle,&logName[0],"IXseblock");
+    NXopengroup(handle,&logName[0],"IXseblock");
 
     {
-    m_handle->writeData("vi_name"," ");
-    m_handle->writeData("set_control"," ");
-    m_handle->writeData("read_control"," ");
-    m_handle->writeData("setpoint", float(0.));
-    m_handle->openData("setpoint");
-    m_handle->putAttr("units","mV");
-    m_handle->closeData();
+    saveString("vi_name"," ");
+    saveString("set_control"," ");
+    saveString("read_control"," ");
+    float tmp = 0.0;
+    saveFloatOpen("setpoint",&tmp,1);
+    putAttr("units","mV");
+    close();
     }
 
-    m_handle->makeGroup("value_log","NXlog",true);
+    NXmakegroup(handle,"value_log","NXlog");
+    NXopengroup(handle,"value_log","NXlog");
 
-    m_handle->writeData("time",time_vec);
-    m_handle->openData("time");
-    m_handle->putAttr("start",start_time_str);
-    m_handle->putAttr("units","seconds");
-    m_handle->closeData();
+    saveFloatOpen("time",&time_vec[0],static_cast<int>(time_vec.size()));
+    putAttr("start",start_time_str);
+    putAttr("units","seconds");
+    close();
 
     if (flt_vec.size() == str_vec.size())
     {
-      m_handle->writeData("value",flt_vec);
-      m_handle->openData("value");
+      saveFloatOpen("value",&flt_vec[0],static_cast<int>(flt_vec.size()));
     }
     else
     {
       saveStringVectorOpen("value",str_vec);
     }
-    m_handle->putAttr("units"," ");
-    m_handle->closeData();
+    putAttr("units"," ");
+    close();
 
-    m_handle->writeData("name"," ");
+    saveString("name"," ");
 
-    m_handle->closeGroup(); // value_log
+    NXclosegroup(handle); // value_log
 
-    m_handle->closeGroup(); // logName
+    NXclosegroup(handle); // logName
 
     prog.report();
   }
 
-  m_handle->closeGroup(); // selog
+  NXclosegroup(handle); // selog
 
   progress(1);
 }
@@ -970,76 +1083,46 @@ void SaveISISNexus::selog()
 void SaveISISNexus::logNotes()
 {
   saveStringVectorOpen("notes",log_notes);
-  m_handle->closeData();
+  close();
 }
 
 void SaveISISNexus::run_cycle()
 {
-  m_handle->writeData("run_cycle"," ");
+  saveString("run_cycle"," ");
 }
 
 void SaveISISNexus::write_rpb()
 {
-  std::vector<int64_t> dim(2);
-  dim[0] = 32;
-  dim[1] = 4;
-  m_handle->makeData("CRPB", ::NeXus::CHAR,dim, true);
-  m_handle->putData(&m_isisRaw->rpb);
-  m_handle->closeData();
+  int dim[] = {32,4};
+  NXmakedata(handle,"CRPB",NX_CHAR,2,dim);
+  NXopendata(handle,"CRPB");
+  NXputdata(handle,&m_isisRaw->rpb);
+  NXclosedata(handle);
 
-  // some nasty reinterpret of a struct as an integer array
-  dim.pop_back();
-  m_handle->makeData("IRPB", ::NeXus::INT32, dim, true);
-  m_handle->putData((void*)&m_isisRaw->rpb);
-  m_handle->closeData();
-
-  // some nasty reinterpret of a struct as a float array
-  m_handle->makeData("RRPB", ::NeXus::FLOAT32, dim, true);
-  m_handle->putData((void*)&m_isisRaw->rpb);
-  m_handle->closeData();
+  saveInt("IRPB",&m_isisRaw->rpb,32);
+  saveFloat("RRPB",&m_isisRaw->rpb,32);
 
 }
 
 void SaveISISNexus::write_spb()
 {
-  std::vector<int64_t> dim(2);
-  dim[0] = 64;
-  dim[1] = 4;
-  m_handle->makeData("CSPB",::NeXus::CHAR,dim, true);
-  m_handle->putData(&m_isisRaw->spb);
-  m_handle->closeData();
+  int dim[] = {64,4};
+  NXmakedata(handle,"CSPB",NX_CHAR,2,dim);
+  NXopendata(handle,"CSPB");
+  NXputdata(handle,&m_isisRaw->spb);
+  NXclosedata(handle);
 
-  // some nasty reinterpret of a struct as a float array
-  dim.pop_back();
-  m_handle->makeData("SPB",::NeXus::INT32, dim);
-  m_handle->putData((void*)&m_isisRaw->spb);
-  m_handle->closeData();
-
-  // some nasty reinterpret of a struct as a float array
-  m_handle->makeData("ISPB",::NeXus::INT32, dim);
-  m_handle->putData((void*)&m_isisRaw->spb);
-  m_handle->closeData();
-
-  // some nasty reinterpret of a struct as a float array
-  m_handle->makeData("RSPB",::NeXus::FLOAT32, dim);
-  m_handle->putData((void*)&m_isisRaw->spb);
-  m_handle->closeData();
+  saveInt("SPB",&m_isisRaw->spb,64);
+  saveInt("ISPB",&m_isisRaw->spb,64);
+  saveFloat("RSPB",&m_isisRaw->spb,64);
 
 }
 
 void SaveISISNexus::write_vpb()
 {
-  std::vector<int64_t> dim(1,64);
+  saveInt("IVPB",&m_isisRaw->ivpb,64);
+  saveFloat("RVPB",&m_isisRaw->ivpb,64);
 
-  // some nasty reinterpret of a struct as a float array
-  m_handle->makeData("IVPB", ::NeXus::INT32, dim, true);
-  m_handle->putData((void*)&m_isisRaw->ivpb);
-  m_handle->closeData();
-
-  // some nasty reinterpret of a struct as a float array
-  m_handle->makeData("RVPB", ::NeXus::FLOAT32, dim, true);
-  m_handle->putData((void*)&m_isisRaw->ivpb);
-  m_handle->closeData();
 }
 
 } // namespace NeXus

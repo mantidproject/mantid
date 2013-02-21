@@ -51,7 +51,6 @@ The ChildAlgorithms used by LoadMuonNexus are:
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <Poco/DateTimeParser.h>
@@ -84,13 +83,14 @@ using Geometry::Instrument_const_sptr;
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed() : m_shared_bins(false), m_xbins(),
     m_axis1vals(), m_list(false), m_interval(false),
-    m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT())
+    m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),m_cppFile(NULL)
 {
 }
 
 /// Delete NexusFileIO in destructor
 LoadNexusProcessed::~LoadNexusProcessed()
 {
+  delete m_cppFile;
 }
 
 /** Initialisation method.
@@ -143,24 +143,11 @@ void LoadNexusProcessed::exec()
 {
   progress(0,"Opening file...");
 
-  // "Open" the same file but with the C++ interface
-  std::string filename = getPropertyValue("Filename");
-
-  try
-  {
-    m_cppFile = boost::make_shared< ::NeXus::File >(filename.c_str(), NXACC_READ);
-  }
-  catch (::NeXus::Exception &e)
-  {
-    g_log.notice() << "First load threw exception \"" << e.what() << "\"\n";
-    NXhandle handle;
-    int status = NXopen(filename.c_str(), NXACC_READ, &handle);
-    m_cppFile = boost::make_shared< ::NeXus::File >(handle, true);
-    g_log.notice() << "napi.h load returned " << status << "\n";
-  }
-
   //Throws an approriate exception if there is a problem with file access
-  NXRoot root(m_cppFile);
+  NXRoot root(getPropertyValue("Filename"));
+
+  // "Open" the same file but with the C++ interface
+  m_cppFile = new ::NeXus::File(root.m_fileID);
 
   //Find out how many first level entries there are
   int64_t nperiods = static_cast<int64_t>(root.groups().size());
@@ -498,7 +485,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry & entry)
   try
   {
     // This loads logs, sample, and instrument.
-    peakWS->loadExperimentInfoNexus(m_cppFile.get(), parameterStr);
+    peakWS->loadExperimentInfoNexus(m_cppFile, parameterStr);
   }
   catch (std::exception & e)
   {
@@ -941,7 +928,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   try
   {
     // This loads logs, sample, and instrument.
-    local_workspace->loadExperimentInfoNexus(m_cppFile.get(), parameterStr);
+    local_workspace->loadExperimentInfoNexus(m_cppFile, parameterStr);
   }
   catch (std::exception & e)
   {
@@ -966,7 +953,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   m_cppFile->openPath(mtd_entry.path());
   try
   {
-    local_workspace->history().loadNexus(m_cppFile.get());
+    local_workspace->history().loadNexus(m_cppFile);
   }
   catch (std::out_of_range&)
   {

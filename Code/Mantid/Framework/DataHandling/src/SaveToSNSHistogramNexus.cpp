@@ -92,16 +92,6 @@ namespace DataHandling
 
   }
 
-  void myMalloc(::NeXus::Info& info, void **dataBuffer)
-  {
-    // can't figure out a nice way to replace the c-style malloc/free
-    int rank = static_cast<int>(info.dims.size());
-    int dims[NX_MAXRANK];
-    for (int i = 0; i < rank; ++i)
-      dims[i] = static_cast<int>(info.dims[i]);
-    if (NXmalloc (dataBuffer, rank, dims, info.type) != NX_OK)
-      std::runtime_error("Failed to malloc data buffer");
-  }
 
 //  /** Execute the algorithm.
 //   *
@@ -114,31 +104,33 @@ namespace DataHandling
 
 
   //------------------------------------------------------------------------
-  /** Append to m_current_path */
-  void SaveToSNSHistogramNexus::add_path(std::string& path)
+  /** Append to current_path */
+  int SaveToSNSHistogramNexus::add_path(const char* path)
   {
-    m_current_path = m_current_path + "/" + path;
+    size_t i;
+    i = strlen(current_path);
+    sprintf(current_path + i, "/%s", path);
+    return 0;
   }
 
 
   //------------------------------------------------------------------------
   /** Remove the last part of the path */
-  void SaveToSNSHistogramNexus::remove_path(std::string& path)
+  int SaveToSNSHistogramNexus::remove_path(const char* path)
   {
-    size_t pos = path.rfind("/");
-    m_current_path = m_current_path.substr(0, pos);
-
-//    char *tstr;
-//    tstr = strrchr(m_current_path, '/');
-//    if (tstr != NULL && !strcmp(path, tstr+1))
-//    {
-//      *tstr = '\0';
-//    }
-//    else
-//    {
-//      printf("path error\n");
-//    }
+    char *tstr;
+    tstr = strrchr(current_path, '/');
+    if (tstr != NULL && !strcmp(path, tstr+1))
+    {
+      *tstr = '\0';
+    }
+    else
+    {
+      printf("path error\n");
+    }
+    return 0;
   }
+
 
 
 
@@ -147,55 +139,83 @@ namespace DataHandling
   /** Performs the copying from the input to the output file,
    *  while modifying the data and time_of_flight fields.
    */
-  void SaveToSNSHistogramNexus::copy_file(const std::string &inFile, int nx_read_access, const std::string &outFile, int nx_write_access)
+  int SaveToSNSHistogramNexus::copy_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access)
   {
+    int nx_is_definition = 0;
     links_count = 0;
-    m_current_path = "";
+    current_path[0] = '\0';
     NXlink link;
 
-    // Open NeXus input and output files
-    m_inHandle = new ::NeXus::File(inFile, nx_read_access);
-    m_outHandle = new ::NeXus::File(outFile, nx_write_access);
+    /* Open NeXus input file and NeXus output file */
+    if (NXopen (inFile, nx_read_access, &inId) != NX_OK) {
+      printf ("NX_ERROR: Can't open %s\n", inFile);
+      return NX_ERROR;
+    }
+
+    if (NXopen (outFile, nx_write_access, &outId) != NX_OK) {
+      printf ("NX_ERROR: Can't open %s\n", outFile);
+      return NX_ERROR;
+    }
 
     /* Output global attributes */
-    WriteAttributes();
-
+    if (WriteAttributes (nx_is_definition) != NX_OK)
+    {
+      return NX_ERROR;
+    }
     /* Recursively cycle through the groups printing the contents */
-    WriteGroup();
-
+    if (WriteGroup (nx_is_definition) != NX_OK)
+    {
+      return NX_ERROR;
+    }
     /* close input */
-    delete m_inHandle;
-    m_inHandle = NULL;
+    if (NXclose (&inId) != NX_OK)
+    {
+      return NX_ERROR;
+    }
 
     //HDF5 only
-    if (nx_write_access == NXACC_CREATE5)
     {
       /* now create any required links */
       for(int i=0; i<links_count; i++)
       {
-        m_outHandle->openPath(links_to_make[i].to);
-        link = m_outHandle->getDataID();
-        if (strlen(link.targetPath) == 0)
+        if (NXopenpath(outId, links_to_make[i].to) != NX_OK) return NX_ERROR;
+        if (NXgetdataID(outId, &link) == NX_OK  || NXgetgroupID(outId, &link) == NX_OK)
         {
-          link = m_outHandle->getGroupID();
-          if (strlen(link.targetPath) == 0)
-            throw std::runtime_error("Failed to determine link information");
-        }
-        m_outHandle->openPath(links_to_make[i].from);
-        if (boost::algorithm::ends_with(links_to_make[i].to, links_to_make[i].name))
-        {
-          m_outHandle->makeLink(link);
+          if (NXopenpath(outId, links_to_make[i].from) != NX_OK) return NX_ERROR;
+          char* tstr = strrchr(links_to_make[i].to, '/');
+          if (!strcmp(links_to_make[i].name, tstr+1))
+          {
+            if (NXmakelink(outId, &link) != NX_OK) return NX_ERROR;
+          }
+          else
+          {
+            if (NXmakenamedlink(outId, links_to_make[i].name, &link) != NX_OK) return NX_ERROR;
+          }
         }
         else
         {
-          m_outHandle->makeNamedLink(links_to_make[i].name, link);
+          return NX_ERROR;
         }
       }
     }
     /* Close the input and output files */
-    delete m_outHandle;
-    m_outHandle = NULL;
+    if (NXclose (&outId) != NX_OK)
+    {
+      return NX_ERROR;
+    }
+    return NX_OK;
   }
+
+
+
+
+
+
+
+
+
+
+
 
   //------------------------------------------------------------------------
   /** Utility function to write out the
@@ -211,69 +231,72 @@ namespace DataHandling
    * @param bank :: name of the bank being written.
    * @return error code
    */
-  void SaveToSNSHistogramNexus::WriteOutDataOrErrors(Geometry::RectangularDetector_const_sptr det,
+  int SaveToSNSHistogramNexus::WriteOutDataOrErrors(Geometry::RectangularDetector_const_sptr det,
       int x_pixel_slab,
       const char * field_name, const char * errors_field_name,
-      bool doErrors, bool doBoth,
+      bool doErrors, bool doBoth, int is_definition,
       std::string bank)
   {
-    const int dataRank(3);
-    std::vector<int64_t> dims(dataRank);
-    std::vector<int64_t> slabDims(dataRank);
-    std::vector<int64_t> slabStartIndices(dataRank);
+    int dataRank, dataDimensions[NX_MAXRANK];
+    int slabDimensions[NX_MAXRANK], slabStartIndices[NX_MAXRANK];
+
+    dataRank = 3;
 
     // Dimension 0 = the X pixels
-    dims[0] = det->xpixels();
+    dataDimensions[0] = det->xpixels();
     // Dimension 1 = the Y pixels
-    dims[1] = det->ypixels();
+    dataDimensions[1] = det->ypixels();
     // Dimension 2 = time of flight bins
-    dims[2] = static_cast<int>(inputWorkspace->blocksize());
+    dataDimensions[2] = static_cast<int>(inputWorkspace->blocksize());
 
     // ---- Determine slab size -----
     // Number of pixels to collect in X before slabbing
-    slabDims[0] = x_pixel_slab;
-    slabDims[1] = dims[1];
-    slabDims[2] = dims[2];
+    slabDimensions[0] = x_pixel_slab;
+    slabDimensions[1] = dataDimensions[1];
+    slabDimensions[2] = dataDimensions[2];
 
     if (doBoth)
-      slabDims[0] = dims[0];
+      slabDimensions[0] = dataDimensions[0];
 
-    g_log.information() << "RectangularDetector " << det->getName()
-                        << " being copied. Dimensions : " << dims[0] << ", " << dims[1] << ", " << dims[2] << ".\n";
+    std::cout << "RectangularDetector " << det->getName() << " being copied. Dimensions : " << dataDimensions[0] << ", " << dataDimensions[1] << ", " << dataDimensions[2] << ".\n";
 
 
     // ----- Open the data field -----------------------
     if (m_compress)
-    {
-      m_outHandle->makeCompData(field_name, ::NeXus::FLOAT32, dims, ::NeXus::LZW, slabDims, true);
-    }
+    { if (NXcompmakedata (outId, field_name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, slabDimensions) != NX_OK) return NX_ERROR; }
     else
-    {
-      m_outHandle->makeData(field_name, ::NeXus::FLOAT32, dims, true);
-    }
-    WriteAttributes();
-
+    { if (NXmakedata (outId, field_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK) return NX_ERROR; }
+    if (NXopendata (outId, field_name) != NX_OK) return NX_ERROR;
+    if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
     if (!doErrors)
     {
       // Add an attribute called "errors" with value = the name of the data_errors field.
-      m_outHandle->putAttr("errors", errors_field_name);
+      NXname attrName = "errors";
+      std::string attrBuffer = errors_field_name;
+      if (NXputattr (outId, attrName, static_cast<void *>( const_cast<char*>( attrBuffer.c_str() ) ), static_cast<int>(attrBuffer.size()), NX_CHAR) != NX_OK) return NX_ERROR;
     }
 
     // ---- Errors field -----
     if (doBoth)
     {
-      m_outHandle->closeData();
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
 
       if (m_compress)
-      {
-        m_outHandle->makeCompData(errors_field_name, ::NeXus::FLOAT32, dims, ::NeXus::LZW, slabDims, true);
-      }
+      { if (NXcompmakedata (outId, errors_field_name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, slabDimensions) != NX_OK) return NX_ERROR; }
       else
-      {
-        m_outHandle->makeData(errors_field_name, ::NeXus::FLOAT32, dims, true);
-      }
-      WriteAttributes();
-      m_outHandle->closeData();
+      { if (NXmakedata (outId, errors_field_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK) return NX_ERROR; }
+      if (NXopendata (outId, errors_field_name) != NX_OK) return NX_ERROR;
+
+//      NXlink * link = new NXlink;
+//      link->linkType = 1; /* SDS data link */
+//      NXgetdataID(outId, link);
+//      std::string targetPath = "/entry/" + bank + "/" + errors_field_name;
+//      strcpy(link->targetPath, targetPath.c_str());
+//      if (NXmakelink(outId,link) != NX_OK)
+//        g_log.debug() << "Error while making link to " << targetPath << std::endl;
+
+      if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
     }
 
 
@@ -283,9 +306,9 @@ namespace DataHandling
     // Make a buffer of floats will all the counts in that bank.
     float * data;
     float * errors;
-    data = new float[slabDims[0]*slabDims[1]*slabDims[2]];
+    data = new float[slabDimensions[0]*slabDimensions[1]*slabDimensions[2]];
     if (doBoth)
-      errors = new float[slabDims[0]*slabDims[1]*slabDims[2]];
+      errors = new float[slabDimensions[0]*slabDimensions[1]*slabDimensions[2]];
 
 //    for (size_t i=0; i < slabDimensions[0]*slabDimensions[1]*slabDimensions[2]; i++)
 //      data[i]=i;
@@ -314,11 +337,11 @@ namespace DataHandling
         }
         catch (...)
         {
-          g_log.error() << "Error finding " << bank << " x " << x << " y " << y << "\n";
+          std::cout << "Error finding " << bank << " x " << x << " y " << y << "\n";
         }
 
         // Offset into array.
-        size_t index = size_t(slabx)*size_t(dims[1])*size_t(dims[2]) + size_t(y)*size_t(dims[2]);
+        size_t index = size_t(slabx)*size_t(dataDimensions[1])*size_t(dataDimensions[2]) + size_t(y)*size_t(dataDimensions[2]);
 
         const MantidVec & Y = inputWorkspace->readY(wi);
         const MantidVec & E = inputWorkspace->readE(wi);
@@ -349,12 +372,12 @@ namespace DataHandling
       if (!doBoth && (x % x_pixel_slab == x_pixel_slab-1))
       {
         Timer tim2;
-        //g_log.information() << "starting slab " << x << "\n";
+        //std::cout << "starting slab " << x << "\n";
         // This is where the slab is in the greater data array.
         slabStartIndices[0]=slabnum*x_pixel_slab;
         slabStartIndices[1]=0;
         slabStartIndices[2]=0;
-        m_outHandle->putSlab(data, slabStartIndices, slabDims);
+        if (NXputslab(outId, data, slabStartIndices, slabDimensions) != NX_OK) return NX_ERROR;
         saveTime += tim2.elapsed();
 
         std::ostringstream mess;
@@ -367,29 +390,33 @@ namespace DataHandling
     if (doBoth)
     {
       Timer tim2;
-      m_outHandle->openData(field_name);
-      m_outHandle->putData(data);
-      m_outHandle->closeData();
+      if (NXopendata (outId, field_name) != NX_OK) return NX_ERROR;
+      if (NXputdata (outId, data) != NX_OK) return NX_ERROR;
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
       this->prog->reportIncrement(det->xpixels()*det->ypixels()*1, det->getName() + " data");
 
-      m_outHandle->openData(errors_field_name);
-      m_outHandle->putData(errors);
-      m_outHandle->closeData();
+      if (NXopendata (outId, errors_field_name) != NX_OK) return NX_ERROR;
+      if (NXputdata (outId, errors) != NX_OK) return NX_ERROR;
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
       this->prog->reportIncrement(det->xpixels()*det->ypixels()*1, det->getName() + " errors");
       saveTime += tim2.elapsed();
     }
     else
     {
-      m_outHandle->closeData();
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
     }
 
-    g_log.information() << "Filling out " << det->getName() << " took " << fillTime << " sec.\n";
-    g_log.information() << "Saving      " << det->getName() << " took " << saveTime << " sec.\n";
+    std::cout << "Filling out " << det->getName() << " took " << fillTime << " sec.\n";
+    std::cout << "Saving      " << det->getName() << " took " << saveTime << " sec.\n";
 
 
     delete [] data;
     if (doBoth)
       delete [] errors;
+
+
+    return NX_OK;
+
   }
 
 
@@ -398,14 +425,16 @@ namespace DataHandling
   /** Write the group labeled "data"
    *
    * @param bank :: name of the bank
+   * @param is_definition
    * @return error code
    */
-  void SaveToSNSHistogramNexus::WriteDataGroup(std::string bank)
+  int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank, int is_definition)
   {
-    std::string name;
+    int dataType, dataRank, dataDimensions[NX_MAXRANK];
+    NXname name;
     void *dataBuffer;
 
-    ::NeXus::Info info = m_inHandle->getInfo();
+    if (NXgetinfo (inId, &dataRank, dataDimensions, &dataType) != NX_OK) return NX_ERROR;
 
     // Get the rectangular detector
     IComponent_const_sptr det_comp = inputWorkspace->getInstrument()->getComponentByName( std::string(bank) );
@@ -414,14 +443,14 @@ namespace DataHandling
     {
       g_log.information() << "Detector '" + bank + "' not found, or it is not a rectangular detector!\n";
       //Just copy that then.
-      myMalloc(info, &dataBuffer);
-      m_inHandle->getData(dataBuffer);
-      m_outHandle->makeCompData(name, info.type, info.dims, ::NeXus::LZW, info.dims, true);
-      WriteAttributes();
-      m_outHandle->putData(dataBuffer);
-      if (NXfree((void**)&dataBuffer) != NX_OK)
-        throw std::runtime_error("Failed to free memory");
-      m_outHandle->closeData();
+      if (NXmalloc (&dataBuffer, dataRank, dataDimensions, dataType) != NX_OK) return NX_ERROR;
+      if (NXgetdata (inId, dataBuffer)  != NX_OK) return NX_ERROR;
+      if (NXcompmakedata (outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
+      if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
+      if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
+      if (NXputdata (outId, dataBuffer) != NX_OK) return NX_ERROR;
+      if (NXfree((void**)&dataBuffer) != NX_OK) return NX_ERROR;
+      if (NXclosedata (outId) != NX_OK) return NX_ERROR;
     }
     else
     {
@@ -437,8 +466,8 @@ namespace DataHandling
       mem.update();
       size_t memory_available = mem.availMem()*1024;
 
-      g_log.information() << "Memory available: " << memory_available/1024 << " kb. ";
-      g_log.information() << "Memory required: " << memory_required/1024 << " kb. ";
+      std::cout << "Memory available: " << memory_available/1024 << " kb. ";
+      std::cout << "Memory required: " << memory_required/1024 << " kb. ";
 
       // Give a 50% margin of error in allocating the memory
       memory_available = memory_available/2;
@@ -457,166 +486,187 @@ namespace DataHandling
           x_slab--;
         }
 
-        g_log.information() << "Saving in slabs of " << x_slab << " X pixels.\n";
-        this->WriteOutDataOrErrors(det, x_slab, "data", "data_errors", false, false, bank);
-        this->WriteOutDataOrErrors(det, x_slab, "errors", "", true, false, bank);
+        std::cout << "Saving in slabs of " << x_slab << " X pixels.\n";
+        if (this->WriteOutDataOrErrors(det, x_slab, "data", "data_errors", false, false, is_definition, bank) != NX_OK) return NX_ERROR;
+        if (this->WriteOutDataOrErrors(det, x_slab, "errors", "", true, false, is_definition, bank) != NX_OK) return NX_ERROR;
       }
       else
       {
-        g_log.information() << "Saving in one block.\n";
-        this->WriteOutDataOrErrors(det, det->xpixels(), "data", "data_errors", false, true, bank);
+        std::cout << "Saving in one block.\n";
+        if (this->WriteOutDataOrErrors(det, det->xpixels(), "data", "data_errors", false, true, is_definition, bank) != NX_OK) return NX_ERROR;
       }
 
     }
+
+    return NX_OK;
   }
+
 
   //------------------------------------------------------------------------
   /** Prints the contents of each group as XML tags and values */
-  void SaveToSNSHistogramNexus::WriteGroup()
+  int SaveToSNSHistogramNexus::WriteGroup (int is_definition)
   {
-    std::string name, theClass;
+    int status, dataType, dataRank, dataDimensions[NX_MAXRANK];
+    NXname name, theClass;
     void *dataBuffer;
     NXlink link;
 
-    std::map<std::string, std::string> entries = m_inHandle->getEntries();
-    for (auto entry = entries.begin(); entry != entries.end(); ++entry)
+    do
     {
-      name = entry->first;
-      theClass = entry->second;
+      status = NXgetnextentry (inId, name, theClass, &dataType);
+//      std::cout << name << "(" << theClass << ")\n";
 
-      if (boost::algorithm::starts_with(theClass, "NX"))
+      if (status == NX_ERROR) return NX_ERROR;
+      if (status == NX_OK)
       {
-        m_inHandle->openGroup(name, theClass);
-        add_path(name);
-
-        link = m_inHandle->getGroupID();
-        if (m_current_path == link.targetPath)
+        if (!strncmp(theClass,"NX",2))
         {
-          // Create a copy of the group
-          m_outHandle->makeGroup(name, theClass, true);
-          WriteAttributes();
-          WriteGroup();
-          remove_path(name);
-        }
-        else
-        {
-          remove_path(name);
-          links_to_make[links_count].from = m_current_path;
-          links_to_make[links_count].to = link.targetPath;
-          links_to_make[links_count].name = name;
-          links_count++;
-          m_inHandle->closeGroup();
-        }
-      }
-      else if (theClass == "SDS")
-        //        else if (!strncmp(theClass,"SDS",3))
-      {
-        add_path(name);
-        m_inHandle->openData(name);
-        link = m_inHandle->getDataID();
+          if (NXopengroup (inId, name, theClass) != NX_OK) return NX_ERROR;
+          add_path(name);
 
-        std::string data_label(name);
-
-        if (m_current_path == link.targetPath)
-        {
-          // Look for the bank name
-          std::string path(m_current_path);
-          std::string bank("");
-
-          size_t a = path.rfind('/');
-          if (a != std::string::npos && a > 0)
+          if (NXgetgroupID(inId, &link) != NX_OK) return NX_ERROR;
+          if (!strcmp(current_path, link.targetPath))
           {
-            size_t b = path.rfind('/',a-1);
-            if (b != std::string::npos && (b < a) && (a-b-1) > 0)
-            {
-              bank = path.substr(b+1,a-b-1);
-              //g_log.information() << m_current_path << ":bank " << bank << "\n";
-            }
+            // Create a copy of the group
+            if (NXmakegroup (outId, name, theClass) != NX_OK) return NX_ERROR;
+            if (NXopengroup (outId, name, theClass) != NX_OK) return NX_ERROR;
+            if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
+            if (WriteGroup (is_definition) != NX_OK) return NX_ERROR;
+            remove_path(name);
           }
-
-          //---------------------------------------------------------------------------------------
-          if (data_label=="data" && (bank != ""))
-          {
-            this->WriteDataGroup(bank);
-          }
-          //---------------------------------------------------------------------------------------
-          else if (data_label=="time_of_flight" && (bank != ""))
-          {
-            // Get the original info
-            ::NeXus::Info info = m_inHandle->getInfo();
-
-            // Get the X bins
-            const MantidVec & X = inputWorkspace->readX(0);
-            std::vector<float> tof_data(X.begin(), X.end());
-
-            // And fill it with the X data
-            for (size_t i=0; i < X.size(); i++)
-              tof_data[i] = float(X[i]);
-
-            std::vector<int64_t> dims(1, tof_data.size());
-            m_outHandle->writeCompData(name, tof_data, dims, ::NeXus::LZW, dims);
-            m_outHandle->openData(name);
-            WriteAttributes();
-            m_outHandle->closeData();
-
-          }
-
-          //---------------------------------------------------------------------------------------
           else
           {
-            //Everything else gets copies
-            ::NeXus::Info info = m_inHandle->getInfo();
-            myMalloc(info, &dataBuffer);
-
-            m_inHandle->getData(dataBuffer);
-            m_outHandle->makeCompData(name, info.type, info.dims, ::NeXus::LZW, info.dims, true);
-            m_outHandle->putData(dataBuffer);
-            if (NXfree((void**)&dataBuffer) != NX_OK)
-              std::runtime_error("Failed to malloc data buffer");
-            WriteAttributes();
-            m_outHandle->closeData();
+            remove_path(name);
+            strcpy(links_to_make[links_count].from, current_path);
+            strcpy(links_to_make[links_count].to, link.targetPath);
+            strcpy(links_to_make[links_count].name, name);
+            links_count++;
+            if (NXclosegroup (inId) != NX_OK) return NX_ERROR;
           }
-
-          remove_path(name);
         }
-        else
+        else if (!strncmp(theClass,"SDS",3))
         {
-          //Make a link
-          remove_path(name);
-          links_to_make[links_count].from = m_current_path;
-          links_to_make[links_count].to = link.targetPath;
-          links_to_make[links_count].name = name;
-          links_count++;
+          add_path(name);
+          if (NXopendata (inId, name) != NX_OK) return NX_ERROR;
+          if (NXgetdataID(inId, &link) != NX_OK) return NX_ERROR;
+
+          std::string data_label(name);
+
+          if (!strcmp(current_path, link.targetPath))
+          {
+            // Look for the bank name
+            std::string path(current_path);
+            std::string bank("");
+
+            size_t a = path.rfind('/');
+            if (a != std::string::npos && a > 0)
+            {
+              size_t b = path.rfind('/',a-1);
+              if (b != std::string::npos && (b < a) && (a-b-1) > 0)
+              {
+                bank = path.substr(b+1,a-b-1);
+                //std::cout << current_path << ":bank " << bank << "\n";
+              }
+            }
+
+            //---------------------------------------------------------------------------------------
+            if (data_label=="data" && (bank != ""))
+            {
+              if (this->WriteDataGroup(bank, is_definition) != NX_OK) return NX_ERROR;;
+            }
+            //---------------------------------------------------------------------------------------
+            else if (data_label=="time_of_flight" && (bank != ""))
+            {
+              // Get the original info
+              if (NXgetinfo (inId, &dataRank, dataDimensions, &dataType) != NX_OK) return NX_ERROR;
+
+              // Get the X bins
+              const MantidVec & X = inputWorkspace->readX(0);
+              // 1 dimension, with that number of bin boundaries
+              dataDimensions[0] = static_cast<int>(X.size());
+              // The output TOF axis will be whatever size in the workspace.
+              boost::scoped_array<float> tof_data(new float[dataDimensions[0]]);
+
+              // And fill it with the X data
+              for (size_t i=0; i < X.size(); i++)
+                tof_data[i] = float(X[i]);
+
+              if (NXcompmakedata (outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
+              if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
+              if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
+              if (NXputdata (outId, tof_data.get()) != NX_OK) return NX_ERROR;
+              if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+
+            }
+
+            //---------------------------------------------------------------------------------------
+            else
+            {
+              //Everything else gets copies
+              if (NXgetinfo (inId, &dataRank, dataDimensions, &dataType) != NX_OK) return NX_ERROR;
+              if (NXmalloc (&dataBuffer, dataRank, dataDimensions, dataType) != NX_OK) return NX_ERROR;
+              if (NXgetdata (inId, dataBuffer)  != NX_OK) return NX_ERROR;
+              if (NXcompmakedata (outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK) return NX_ERROR;
+              if (NXopendata (outId, name) != NX_OK) return NX_ERROR;
+              if (WriteAttributes (is_definition) != NX_OK) return NX_ERROR;
+              if (NXputdata (outId, dataBuffer) != NX_OK) return NX_ERROR;
+              if (NXfree((void**)&dataBuffer) != NX_OK) return NX_ERROR;
+              if (NXclosedata (outId) != NX_OK) return NX_ERROR;
+            }
+
+            remove_path(name);
+          }
+          else
+          {
+            //Make a link
+            remove_path(name);
+            strcpy(links_to_make[links_count].from, current_path);
+            strcpy(links_to_make[links_count].to, link.targetPath);
+            strcpy(links_to_make[links_count].name, name);
+            links_count++;
+          }
+          if (NXclosedata (inId) != NX_OK) return NX_ERROR;
         }
-        m_inHandle->closeData();
       }
-    }
+      else if (status == NX_EOD) {
+        if (NXclosegroup (inId) != NX_OK) return NX_ERROR;
+        if (NXclosegroup (outId) != NX_OK) return NX_ERROR;
+        return NX_OK;
+      }
+    } while (status == NX_OK);
+    return NX_OK;
   }
 
 
 
   //------------------------------------------------------------------------
   /** Copy the attributes from input to output */
-  void SaveToSNSHistogramNexus::WriteAttributes()
+  int SaveToSNSHistogramNexus::WriteAttributes (int is_definition)
   {
-    std::vector<AttrInfo> attrs = m_inHandle->getAttrInfos();
-    for (auto attr = attrs.begin(); attr!= attrs.end(); ++attr)
-    {
-      if (attr->name == "NeXus_version")
-        continue;
-      if (attr->name == "XML_version")
-        continue;
-      if (attr->name == "HDF_version")
-        continue;
-      if (attr->name == "HDF5_Version")
-        continue;
-      if (attr->name == "file_name")
-        continue;
-      if (attr->name == "file_time")
-        continue;
-      std::string temp = m_inHandle->getStrAttr(*attr);
-      m_outHandle->putAttr(attr->name, temp);
-    }
+    (void) is_definition;
+
+    int status, i, attrLen, attrType;
+    NXname attrName;
+    void *attrBuffer;
+
+    i = 0;
+    do {
+      status = NXgetnextattr (inId, attrName, &attrLen, &attrType);
+      if (status == NX_ERROR) return NX_ERROR;
+      if (status == NX_OK) {
+        if (strcmp(attrName, "NeXus_version") && strcmp(attrName, "XML_version") &&
+            strcmp(attrName, "HDF_version") && strcmp(attrName, "HDF5_Version") &&
+            strcmp(attrName, "file_name") && strcmp(attrName, "file_time")) {
+          attrLen++; /* Add space for string termination */
+          if (NXmalloc((void**)&attrBuffer, 1, &attrLen, attrType) != NX_OK) return NX_ERROR;
+          if (NXgetattr (inId, attrName, attrBuffer, &attrLen , &attrType) != NX_OK) return NX_ERROR;
+          if (NXputattr (outId, attrName, attrBuffer, attrLen , attrType) != NX_OK) return NX_ERROR;
+          if (NXfree((void**)&attrBuffer) != NX_OK) return NX_ERROR;
+        }
+        i++;
+      }
+    } while (status != NX_EOD);
+    return NX_OK;
   }
 
 
@@ -657,7 +707,11 @@ namespace DataHandling
       eventWorkspace->sortAll(TOF_SORT, prog);
     }
 
-    this->copy_file(m_inputFilename.c_str(),  NXACC_READ, m_outputFilename.c_str(),  NXACC_CREATE5);
+    int ret;
+    ret = this->copy_file(m_inputFilename.c_str(),  NXACC_READ, m_outputFilename.c_str(),  NXACC_CREATE5);
+
+    if (ret == NX_ERROR)
+      throw std::runtime_error("Nexus error while copying the file.");
 
     // Free map memory
     delete map;

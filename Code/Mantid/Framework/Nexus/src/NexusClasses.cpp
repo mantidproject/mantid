@@ -4,7 +4,6 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/Exception.h"
 #include <cstdio>
-#include <nexus/NeXusException.hpp>
 
 namespace Mantid
 {
@@ -72,8 +71,7 @@ void NXAttributes::set(const std::string &name, double value)
  *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the object.
  *   @param name :: The name of the object relative to its parent
  */
-NXObject::NXObject(boost::shared_ptr< ::NeXus::File> handle,const NXClass* parent,const std::string& name):
-  m_handle(handle),m_open(false)
+NXObject::NXObject(const NXhandle fileID,const NXClass* parent,const std::string& name):m_fileID(fileID),m_open(false)
 {
     if (parent && !name.empty())
     {
@@ -94,101 +92,119 @@ std::string NXObject::name()const
  */
 void NXObject::getAttributes()
 {
-  std::vector< ::NeXus::AttrInfo> attrInfos =  m_handle->getAttrInfos();
-  for (auto info = attrInfos.begin(); info != attrInfos.end(); ++info)
-  {
-    std::string avalue("");
-    switch(info->type)
+    NXname pName;
+    int iLength, iType;
+    int nbuff = 127;
+    boost::shared_array<char> buff(new char[nbuff+1]);
+    while(NXgetnextattr(m_fileID, pName, &iLength, &iType) != NX_EOD)
     {
-    case (::NeXus::CHAR):
-    {
-      avalue = m_handle->getStrAttr(*info);
-      break;
-    }
-    case(::NeXus::INT16):
-    {
-      avalue = boost::lexical_cast<std::string>(m_handle->getAttr<int16_t>(*info));
-      break;
-    }
-    case(::NeXus::INT32):
-    {
-      avalue = boost::lexical_cast<std::string>(m_handle->getAttr<int32_t>(*info));
-      break;
-    }
-    case(::NeXus::UINT16):
-    {
-      avalue = boost::lexical_cast<std::string>(m_handle->getAttr<uint16_t>(*info));
-      break;
-    }
-    default:
-    {
-      // intentionally ignore
-    }
-    }
-    if (! avalue.empty())
-      attributes.set(info->name, avalue);
-  }
+        //std::cerr<<"--------------------------\n";
+        //std::cerr<<"name="<<path()<<'\n';
+        //std::cerr<<pName<<' ' <<iLength<<' '<<iType<<'\n';
+        switch(iType)
+        {
+        case NX_CHAR:
+            {
+                if (iLength > nbuff + 1) 
+                {
+                    nbuff = iLength;
+                    buff.reset(new char[nbuff+1]);
+                }
+                int nz = iLength + 1;
+                NXgetattr(m_fileID,pName,buff.get(),&nz,&iType);
+                attributes.set(pName,buff.get());
+                //std::cerr<<"value="<<buff.get()<<'\n';
+                break;
+            }
+        case NX_INT16:
+            {
+                short int value;
+                NXgetattr(m_fileID,pName,&value,&iLength,&iType);
+                sprintf(buff.get(),"%i",value);
+                attributes.set(pName,buff.get());
+                break;
+            }
+        case NX_INT32:
+            {
+                int value;
+                NXgetattr(m_fileID,pName,&value,&iLength,&iType);
+                sprintf(buff.get(),"%i",value);
+                attributes.set(pName,buff.get());
+                break;
+            }
+        case NX_UINT16:
+            {
+                short unsigned int value;
+                NXgetattr(m_fileID,pName,&value,&iLength,&iType);
+                sprintf(buff.get(),"%u",value);
+                attributes.set(pName,buff.get());
+                break;
+            }
+        }
+    };
 }
 //---------------------------------------------------------
 //          NXClass methods
 //---------------------------------------------------------
 
-NXClass::NXClass(const NXClass& parent, const std::string& name):
-  NXObject(parent.m_handle,&parent,name)
+NXClass::NXClass(const NXClass& parent,const std::string& name):NXObject(parent.m_fileID,&parent,name)
 {
     clear();
-    m_groups = boost::make_shared<std::vector<NXClassInfo> >();
+}
+
+NXClassInfo NXClass::getNextEntry()
+{
+    NXClassInfo res;
+    char nxname[NX_MAXNAMELEN],nxclass[NX_MAXNAMELEN];
+    res.stat = NXgetnextentry(m_fileID,nxname,nxclass,&res.datatype);
+    res.nxname = nxname;
+    res.nxclass = nxclass;
+    return res;
 }
 
 void NXClass::readAllInfo()
 {
     clear();
-    std::map<std::string, std::string> entries = m_handle->getEntries();
-    for (auto entry = entries.begin(); entry != entries.end(); ++entry)
+    NXClassInfo info;
+    while(info = getNextEntry())
     {
-      if (entry->second == "SDS")
-      {
-        m_handle->openData(entry->first);
-        ::NeXus::Info nxinfo = m_handle->getInfo();
-        m_handle->closeData();
-
-        NXInfo data_info;
-        data_info.nxname = entry->first;
-        data_info.rank = static_cast<int>(nxinfo.dims.size());
-        for (int i = 0; i < data_info.rank; i++)
-          data_info.dims[i] = static_cast<int>(nxinfo.dims[i]);
-        data_info.type = nxinfo.type;
-        data_info.stat = NX_OK;
-
-        m_datasets->push_back(data_info);
-      }
-      else if (boost::algorithm::starts_with(entry->second, "NX")
-               || boost::algorithm::starts_with(entry->second, "IX"))
-      {
-        NXClassInfo info;
-        info.nxname = entry->first;
-        info.nxclass = entry->second;
-        m_groups->push_back(info);
-      }
+        if (info.nxclass == "SDS")
+        {
+            NXInfo data_info;
+            NXopendata(m_fileID,info.nxname.c_str());
+            data_info.stat = NXgetinfo(m_fileID, &data_info.rank, data_info.dims, &data_info.type);
+            NXclosedata(m_fileID);
+            data_info.nxname = info.nxname;
+            m_datasets->push_back(data_info);
+        }
+        else if(info.nxclass.substr(0,2) == "NX" || info.nxclass.substr(0,2) == "IX")
+        {
+            m_groups->push_back(info);
+        }
+        //std::cerr<<'!'<<info.nxname<<'\n';
     }
+    reset();
 }
 
 bool NXClass::isValid(const std::string & path) const
 {
-  try{
-    m_handle->openGroupPath(path);
-    m_handle->closeGroup();
+  if( NXopengrouppath(m_fileID, path.c_str()) == NX_OK)
+  {
+    NXclosegroup(m_fileID);
     return true;
   }
-  catch (::NeXus::Exception &e)
-  {
-    return false;
-  }
+  else return false;
 }
 
 void NXClass::open()
 {
-  m_handle->openGroupPath(m_path);
+  //if (NX_ERROR == NXopengroup(m_fileID,name().c_str(),NX_class().c_str())) 
+  //{
+    if (NX_ERROR == NXopengrouppath(m_fileID,m_path.c_str())) 
+    {
+      throw std::runtime_error("Cannot open group "+m_path+" of class "+NX_class());
+    }
+  //}
   m_open = true;
   readAllInfo();
 }
@@ -202,18 +218,35 @@ void NXClass::open()
  * @param nxclass :: The NX class name. If empty NX_class() will be used
  * @return true if OK
  */
-void NXClass::openLocal(const std::string& nxclass)
+bool NXClass::openLocal(const std::string& nxclass)
 {
   std::string className = nxclass.empty()? NX_class() : nxclass;
-  m_handle->openGroup(name(), className);
+  if (NX_ERROR == NXopengroup(m_fileID,name().c_str(),className.c_str())) 
+  {
+    // It would be nice if this worked
+    //if (NX_ERROR == NXopengrouppath(m_fileID,m_path.c_str())) 
+    //{
+    //  throw std::runtime_error("Cannot open group "+m_path+" of class "+NX_class());
+    //}
+    return false;
+  }
   m_open = true;
   readAllInfo();
+  return true;
 }
 
 void NXClass::close()
 {
-    m_handle->closeGroup();
+    if (NX_ERROR == NXclosegroup(m_fileID)) 
+    {
+        throw std::runtime_error("Cannot close group "+m_path+" of class "+NX_class());
+    }
     m_open = false;
+}
+
+void NXClass::reset()
+{
+    NXinitgroupdir(m_fileID);
 }
 
 void NXClass::clear()
@@ -318,22 +351,21 @@ std::vector< std::string >& NXNote::data()
 {
     if (!m_data_ok)
     {
-      m_handle->openData("data");
-      ::NeXus::Info info = m_handle->getInfo();
-      int n = static_cast<int>(info.dims[0]);
+      int rank;
+      int dims[4];
+      int type;
+      NXopendata (m_fileID, "data");
+      NXgetinfo(m_fileID, &rank, dims, &type);
+      int n = dims[0];
       char* buffer = new char[n];
+      NXstatus stat = NXgetdata(m_fileID,buffer);
+      NXclosedata(m_fileID);
       m_data.clear();
-      try
-      {
-        m_handle->getData(buffer);
-      }
-      catch (::NeXus::Exception &e)
+      if (stat == NX_ERROR)
       {
         delete[] buffer;
         return m_data;
       }
-      m_handle->closeData();
-
       std::istringstream istr(std::string(buffer,n));
       delete[] buffer;
 
@@ -364,11 +396,16 @@ std::vector<char>& NXBinary::binary()
 {
     if (!m_data_ok)
     {
-      m_handle->openData("data");
-      ::NeXus::Info info = m_handle->getInfo();
-      m_binary.resize(info.dims[0]);
-      m_handle->getData(&m_binary[0]);
-      m_handle->closeData();
+      int rank;
+      int dims[4];
+      int type;
+      NXopendata (m_fileID, "data");
+      NXgetinfo(m_fileID, &rank, dims, &type);
+      int n = dims[0];
+      m_binary.resize(n);
+      NXstatus stat = NXgetdata(m_fileID,&m_binary[0]);
+      (void) stat; //Avoid unused variable compiler warning
+      NXclosedata(m_fileID);
     }
     return m_binary;
 }
@@ -377,19 +414,19 @@ std::vector<char>& NXBinary::binary()
 //          NXRoot methods
 //---------------------------------------------------------
 
-NXRoot::NXRoot(boost::shared_ptr< ::NeXus::File> handle)
-{
-  m_handle = handle;
-  readAllInfo();
-}
-
 /**  Constructor. On creation opens the Nexus file for reading only.
  *   @param fname :: The file name to open
  */
 NXRoot::NXRoot(const std::string& fname)
     :m_filename(fname)
 {
-    m_handle = boost::make_shared< ::NeXus::File >(m_filename, NXACC_READ);
+    // Open NeXus file
+    NXstatus stat=NXopen(m_filename.c_str(), NXACC_READ, &m_fileID);
+    if(stat==NX_ERROR)
+    {
+        std::cout << "NXRoot: Error loading " << m_filename;
+        throw Kernel::Exception::FileError("Unable to open File:" , m_filename);  
+    }
     readAllInfo();
 }
 
@@ -403,12 +440,16 @@ NXRoot::NXRoot(const std::string& fname,const std::string& entry)
 {
     (void)entry;
     // Open NeXus file
-    m_handle = boost::make_shared< ::NeXus::File >(m_filename, NXACC_CREATE5);
+    NXstatus stat=NXopen(m_filename.c_str(), NXACC_CREATE5, &m_fileID);
+    if(stat==NX_ERROR)
+    {
+        throw Kernel::Exception::FileError("Unable to open File:" , m_filename);  
+    }
 }
 
 NXRoot::~NXRoot()
 {
-  // file will close when shared pointer goes out of scope
+    NXclose(&m_fileID);
 }
 
 bool NXRoot::isStandard()const
@@ -444,7 +485,7 @@ NXEntry NXRoot::openFirstEntry()
  *   @param name :: The name of the dataset relative to its parent
  */
 NXDataSet::NXDataSet(const NXClass& parent,const std::string& name)
-    :NXObject(parent.m_handle,&parent,name)
+    :NXObject(parent.m_fileID,&parent,name)
 {
   size_t i = name.find_last_of('/');
   if (i == std::string::npos)
@@ -461,28 +502,36 @@ void NXDataSet::open()
   size_t i = m_path.find_last_of('/');
   if (i == std::string::npos || i == 0) return; // we are in the root group, assume it is open
   std::string group_path = m_path.substr(0,i);
-  m_handle->openPath(group_path);
-  m_handle->openData(name());
-  ::NeXus::Info nxinfo = m_handle->getInfo();
-  m_info.rank = static_cast<int>(nxinfo.dims.size());
-  for (int i = 0; i < m_info.rank; ++i)
-    m_info.dims[i] = static_cast<int>(nxinfo.dims[i]);
-  m_info.type = nxinfo.type;
+  if (NX_ERROR == NXopenpath(m_fileID,group_path.c_str())) 
+  {
+    throw std::runtime_error("Cannot open dataset "+m_path);
+  }
+  if( NXopendata(m_fileID,name().c_str()) != NX_OK )
+  {
+    throw std::runtime_error("Error opening data in group \"" + name() + "\"");
+  }
+
+  if( NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type) != NX_OK )
+  {
+    throw std::runtime_error("Error retrieving information for " + name() + " group");
+  }
 
   getAttributes();
-  m_handle->closeData();
+  NXclosedata(m_fileID);
 }
 
 void NXDataSet::openLocal()
 {
-  m_handle->openData(name());
-  ::NeXus::Info nxinfo = m_handle->getInfo();
-  m_info.rank = static_cast<int>(nxinfo.dims.size());
-  for (int i = 0; i < m_info.rank; ++i)
-    m_info.dims[i] = static_cast<int>(nxinfo.dims[i]);
-  m_info.type = nxinfo.type;
+  if( NXopendata(m_fileID,name().c_str()) != NX_OK )
+  {
+    throw std::runtime_error("Error opening data in group \"" + name() + "\"");
+  }
+  if( NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type) != NX_OK )
+  {
+    throw std::runtime_error("Error retrieving information for " + name() + " group");
+  }
   getAttributes();
-  m_handle->closeData();
+  NXclosedata(m_fileID);
 }
 
 /**
@@ -547,9 +596,10 @@ int NXDataSet::dim3() const
  */
 void NXDataSet::getData(void* data)
 {
-  m_handle->openData(name());
-  m_handle->getData(data);
-  m_handle->closeData();
+    NXopendata(m_fileID,name().c_str());
+    if (NXgetdata(m_fileID,data) != NX_OK)
+        throw std::runtime_error("Cannot read data from NeXus file");
+    NXclosedata(m_fileID);
 }
 
 /**  Wrapper to the NXgetslab.
@@ -562,11 +612,10 @@ void NXDataSet::getData(void* data)
  */
 void NXDataSet::getSlab(void* data, int start[], int size[])
 {
-  m_handle->openData(name());
-  std::vector<int64_t> startVec(start, start+m_info.rank);
-  std::vector<int64_t> sizeVec(size, size+m_info.rank);
-  m_handle->getSlab(data, startVec, sizeVec);
-  m_handle->closeData();
+    NXopendata(m_fileID,name().c_str());
+    if (NXgetslab(m_fileID,data,start,size) != NX_OK)
+        throw std::runtime_error("Cannot read data slab from NeXus file");
+    NXclosedata(m_fileID);
 }
 
 

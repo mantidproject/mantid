@@ -168,7 +168,7 @@ namespace Mantid
       static double dblSqrt(double in);
 
       // C++ interface to the NXS file
-      boost::shared_ptr< ::NeXus::File> m_cppFile;
+      ::NeXus::File * m_cppFile;
 
     };
 

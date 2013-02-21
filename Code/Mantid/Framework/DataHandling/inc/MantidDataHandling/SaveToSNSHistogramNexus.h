@@ -95,32 +95,31 @@ namespace Mantid
       // Stuff needed by the copy_file() functions
       struct link_to_make
       {
-        std::string from;   /* path of directory with link */
-        std::string name;    /* name of link */
-        std::string to;     /* path of real item */
+          char from[1024];   /* path of directory with link */
+          char name[256];    /* name of link */
+          char to[1024];     /* path of real item */
       };
 
       struct link_to_make links_to_make[1024];
       int links_count;
-      std::string m_current_path;
+      char current_path[1024];
 
-      ::NeXus::File *m_inHandle;
-      ::NeXus::File *m_outHandle;
+      NXhandle inId, outId;
 
-      void add_path(std::string &path);
-      void remove_path(std::string &path);
+      int add_path(const char* path);
+      int remove_path(const char* path);
 
-      void WriteGroup();
-      void WriteAttributes ();
-      void copy_file(const std::string& inFile, int nx_read_access, const std::string& outFile, int nx_write_access);
+      int WriteGroup (int is_definition);
+      int WriteAttributes (int is_definition);
+      int copy_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access);
 
-      void WriteOutDataOrErrors(Geometry::RectangularDetector_const_sptr det,
-                                int x_pixel_slab,
-                                const char * field_name, const char * errors_field_name,
-                                bool doErrors, bool doBoth,
-                                std::string bank);
+      int WriteOutDataOrErrors(Geometry::RectangularDetector_const_sptr det,
+          int x_pixel_slab,
+          const char * field_name, const char * errors_field_name,
+          bool doErrors, bool doBoth, int is_definition,
+          std::string bank);
 
-      void WriteDataGroup(std::string bank);
+      int WriteDataGroup(std::string bank, int is_definition);
 
 
 //
