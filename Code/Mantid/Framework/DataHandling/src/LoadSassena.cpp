@@ -88,8 +88,8 @@ int LoadSassena::fileCheck(const std::string &filePath)
  */
 void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::string wsName, DataObjects::Workspace2D_sptr ws, const std::string &description )
 {
-  this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>(wsName,wsName,Kernel::Direction::Output), description);
-  this->setProperty(wsName,ws);
+  //this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>(wsName,wsName,Kernel::Direction::Output), description);
+  //this->setProperty(wsName,ws);
   API::AnalysisDataService::Instance().add( wsName, ws );
   gws->add(wsName);
 }
@@ -319,6 +319,8 @@ void LoadSassena::init()
 void LoadSassena::exec()
 {
   API::WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
+  gws->observeADSNotifications( false ); // Prevent sending unnecessary notifications
+  setProperty("OutputWorkspace", gws); // Register the groupWorkspace in the analysis data service
 
   //populate m_validSets
   int nvalidSets = 4;
@@ -360,7 +362,7 @@ void LoadSassena::exec()
       this->g_log.information("Dataset "+setName+" not present in file");
   }// end of iterate over the valid sets
 
-  this->setProperty( "OutputWorkspace", gws ); //register the groupWorkspace in the analysis data service
+  gws->observeADSNotifications( true ); // Restore notification sending
   H5Fclose(h5file);
 } // end of LoadSassena::exec()
 
