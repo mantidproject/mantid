@@ -43,7 +43,7 @@ namespace Kernel
     ISaveable();
     ISaveable(const size_t id);
     ISaveable(const ISaveable & other);
-    ~ISaveable();
+    virtual ~ISaveable();
 
     //-----------------------------------------------------------------------------------------------
     /** Returns the unique ID for this object/box     */
