@@ -92,7 +92,7 @@ namespace
   {
     Poco::ScopedLock<Poco::Mutex> lock(PYALG_REGISTER_MUTEX);
 
-    static PyObject * const pyAlgClass = const_cast<PyTypeObject*>(converter::registered<AlgorithmWrapper>::converters.to_python_target_type())->tp_dict;
+    static PyObject * const pyAlgClass = (PyObject*)converter::registered<AlgorithmWrapper>::converters.to_python_target_type();
     // obj could be or instance/class, check instance first
     PyObject *classObject(NULL);
     if( PyObject_IsInstance(obj.ptr(), pyAlgClass) )
