@@ -333,7 +333,7 @@ class ISISInstrument(instrument.Instrument):
             'centre-finder-step-size')[0])
 
         firstDetect = DetectorBank(self.definition, 'low-angle')
-        firstDetect.disable_y_and_rot_corrs()
+        #firstDetect.disable_y_and_rot_corrs()
         secondDetect = DetectorBank(self.definition, 'high-angle')
         secondDetect.place_after(firstDetect)
         #add det_selection variable that will receive the DET/ REAR/FRONT/BOTH/MERGED
@@ -592,7 +592,15 @@ class LOQ(ISISInstrument):
         xshift = (317.5/1000.) - xbeam
         yshift = (317.5/1000.) - ybeam
         MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, RelativePosition="1")
-        # LOQ instrument description has detector at 0.0, 0.0
+
+        # Have a separate move for x_corr, y_coor and z_coor just to make it more obvious in the
+        # history, and to expert users what is going on
+        det = self.cur_detector()
+        if det.x_corr != 0.0 or det.y_corr != 0.0 or det.z_corr != 0.0: 
+            MoveInstrumentComponent(ws, det.name(), X = det.x_corr, Y = det.y_corr, Z = det.z_corr, RelativePosition="1")
+            xshift = xshift + det.x_corr
+            yshift = yshift + det.y_corr
+
         return [xshift, yshift], [xshift, yshift]
 
     def get_marked_dets(self):
