@@ -215,7 +215,14 @@ namespace Crystal
        boost::shared_ptr<Geometry::ParameterMap> pmap,
        boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
+  void SaveIsawDetCal(  boost::shared_ptr<const Instrument> &NewInstrument,
+                        std::set<std::string> &AllBankName,
+                        double T0,std::string FileName);
 
+  void LoadISawDetCal(
+           boost::shared_ptr<const Instrument> &instrument,
+           std::set<std::string> &AllBankName,double &T0,std::string filename,
+           std::string bankPrefixName);
   private:
     void exec ();
 

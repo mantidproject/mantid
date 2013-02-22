@@ -5,7 +5,8 @@
  -If the crystal orientation matrix, UB, was created from one run, that run may not need to have its goniometer
  settings optimized.  There is a property to list the run numbers to NOT have their goniometer settings changed.
 
- -The crystal orientation matrix, UB, from the PeaksWorkspace should index all the runs "very well". Otherwise iterations that build a UB with corrected sample orientations slowly may be necessary.
+ -The crystal orientation matrix, UB, from the PeaksWorkspace should index all the runs "very well". Otherwise iterations
+  that build a UB with corrected sample orientations slowly may be necessary.
 
  *WIKI*/
 /*

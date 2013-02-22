@@ -1,35 +1,40 @@
 /*WIKI*
-*
-*
-*This algorithm calibrates sets of Rectangular Detectors in one instrument. The initial path, time offset,
-*panel width's, panel height's, panel locations and orientation are all adjusted so the error
-*in q positions from the theoretical q positions is minimized.  Also, there are options to optimize taking
-*into account sample position and to have the rotations be rigid rotations.
-*
-*Some features:
-*
-*1) Panels can be grouped. All panels in a group will move the same way and rotate the same way.  If rigid rotations are used, each panel is rotated about the center of the instrument, along with panel pixels rotating around the panel's center. The height and  widths of the panels in a group will all change by the same factor
-*
-*2) The user can select which quantities to have optimized
-*
-*3) The results can be saved to an ISAW-like DetCal file or in an xml file that can be used with the LoadParameter algorithm.
-*
-*4) Results from a previous optimization can be applied before another optimization is done.
-*   The Levenberg-Marquardt optimization algorithm is used. Later iterations may have too small of changes for the parameters to
-*   get to another optimum value.  Restarting allows for the consideration of parameter values further away and also can change
-*   constraints for the parameter values. This is also useful when fine tuning parameters that do not influence the errors as much as other parameters.
-*
-*5) There are several output tables indicating the results of the fit
-*   A) ResultWorkspace contains the results from fitting.
-*     -t0 is in microseconds
-*     -L0 is in meters
-*     -*Xoffset,*Yoffset,and *Zoffset are in meters
-*     -*Xrot,*Yrot, and *Zrot are in degrees. Note that Zrot is done first, then Yrot , the Xrot.
-*
-*   B)QErrorWorkspace contains the Error in Q values for each peak, along with other associated information about the peak
-*
-*   C)CovarianceInfo contains the "correlations"(*100) between each of the parameters
-*
+
+
+This algorithm calibrates sets of Rectangular Detectors in one instrument.
+The initial path, time offset,panel width's, panel height's, panel locations and orientation are all
+adjusted so the error in q positions from the theoretical q positions is minimized.  Also, there
+are options to optimize taking into account sample position and to have the rotations be rigid rotations.
+
+Some features:
+
+1) Panels can be grouped.
+   All panels in a group will move the same way and rotate the same way.  If rigid rotations are
+    used, each panel is rotated about the center of the instrument, along with panel pixels rotating
+    around the panel's center. The height and  widths of the panels in a group will
+     all change by the same factor
+
+2) The user can select which quantities to have optimized
+
+3) The results can be saved to an ISAW-like DetCal file or in an xml file that can be used with the LoadParameter algorithm.
+
+4) Results from a previous optimization can be applied before another optimization is done.
+   The Levenberg-Marquardt optimization algorithm is used. Later iterations may have too small of changes for the parameters to
+   get to another optimum value.  Restarting allows for the consideration of parameter values further away and also can change
+   constraints for the parameter values. This is also useful when fine tuning parameters that do not influence the errors as
+   much as other parameters.
+
+5) There are several output tables indicating the results of the fit
+   A) ResultWorkspace contains the results from fitting.
+     -t0 is in microseconds
+     -L0 is in meters
+     -*Xoffset,*Yoffset,and *Zoffset are in meters
+     -*Xrot,*Yrot, and *Zrot are in degrees. Note that Zrot is done first, then Yrot , the Xrot.
+
+   B)QErrorWorkspace contains the Error in Q values for each peak, along with other associated information about the peak
+
+   C)CovarianceInfo contains the "correlations"(*100) between each of the parameters
+
 *WIKI*/
 
 
@@ -60,7 +65,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
-//#include "MantidKernel/ValidatorAnyList.h"
+
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -74,6 +79,7 @@
 #include <boost/lexical_cast.hpp>
 #include "MantidKernel/Property.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 using namespace Mantid::DataObjects;
 using namespace  Mantid::API;
@@ -142,7 +148,7 @@ namespace Mantid
 
 
     DataObjects::Workspace2D_sptr SCDCalibratePanels::calcWorkspace( DataObjects::PeaksWorkspace_sptr & pwks,
-      std::vector< std::string>& bankNames,
+      vector< string>& bankNames,
       double tolerance, vector< int >&bounds)
     {
       int N=0;
@@ -332,7 +338,7 @@ namespace Mantid
       }else
       {
         g_log.error("No mode " + Grouping + " defined yet");
-        throw std::invalid_argument("No mode " + Grouping + " defined yet");
+        throw invalid_argument("No mode " + Grouping + " defined yet");
       }
 
     }
@@ -354,12 +360,7 @@ namespace Mantid
       if( preprocessCommand == "C)Apply a LoadParameter.xml type file")
         xml = true;
 
-      vector< int > detIDs = instrument->getDetectorIDs();
-      MatrixWorkspace_sptr wsM =
-        WorkspaceFactory::Instance().create("Workspace2D",detIDs.size(),(size_t)100,(size_t)100) ;
 
-      Workspace2D_sptr ws = boost::dynamic_pointer_cast< DataObjects::Workspace2D >(wsM);
-      ws->setName("rrrr");
 
       boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
       boost::shared_ptr<ParameterMap> pmap1( new ParameterMap());
@@ -372,29 +373,45 @@ namespace Mantid
       }
 
       //---------------------update params for moderator.------------------------------
-      updateSourceParams( instrument->getSource(), pmap1, pmap0);
+      updateSourceParams(instrument->getSource(), pmap1, pmap0);
 
-      boost::shared_ptr<const Instrument> newInstr( new Instrument( instrument->baseInstrument(), pmap1));
-      ws->setInstrument(newInstr);
-      ws->populateInstrumentParameters();
+
+      boost::shared_ptr<const Instrument> newInstr(new Instrument(instrument->baseInstrument(), pmap1));
+
+
 
       V3D beamline,samplePos;
       double norm = 1.0;
 
       if( xml)
       {
+        vector<int> detIDs = instrument->getDetectorIDs();
+        MatrixWorkspace_sptr wsM = WorkspaceFactory::Instance().create("Workspace2D", detIDs.size(),
+            (size_t) 100, (size_t) 100);
+
+        Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(wsM);
+        ws->setInstrument(newInstr);
+        ws->populateInstrumentParameters();
+        ws->setName("rrrr");
+
         boost::shared_ptr<Algorithm> loadParFile = createChildAlgorithm("LoadParameterFile");
         loadParFile->initialize();
-        loadParFile->setProperty("Workspace",ws);
-        loadParFile->setProperty("Filename",preprocessFilename);
+        loadParFile->setProperty("Workspace", ws);
+        loadParFile->setProperty("Filename", preprocessFilename);
         loadParFile->executeAsChildAlg();
 
         boost::shared_ptr<const Instrument> newInstrument = ws->getInstrument();
-        newInstrument->getInstrumentParameters(L0,beamline,norm,samplePos);
+        newInstrument->getInstrumentParameters(L0, beamline, norm, samplePos);
         return newInstrument;
 
       }else
-      {
+      { set<string>bankNames;
+        LoadISawDetCal(newInstr,bankNames,timeOffset,preprocessFilename,
+                  "bank");
+        return newInstr;
+
+       /* SaveIsawDetCal( newInstr,bankNames,timeOffset,preprocessFilename+"X");
+
         boost::shared_ptr<Algorithm> LoadDetCal = createChildAlgorithm("LoadIsawDetCal" );
 
         LoadDetCal->initialize();
@@ -410,7 +427,7 @@ namespace Mantid
         timeOffset = LoadDetCal->getProperty("TimeOffset");
         AnalysisDataService::Instance().remove("fff");
         return newInstrument;
-
+        */
       }
     }
 
@@ -500,10 +517,7 @@ namespace Mantid
       Quat ChgRot = rotPre*rotI;
 
       Quat2RotxRotyRotz(ChgRot,Xrot0,Yrot0,Zrot0);
-      //std::cout<<"new Initial Values="<<std::endl;
-      // std::cout<<"   "<< detWidthScale0<<","<<detHeightScale0
-      //     <<","<<Xoffset0<<","<<Yoffset0<<","<<Zoffset0
-      //    <<","<<Xrot0<<","<<Yrot0<<","<<Zrot0<<std::endl;
+
     }
 
 
@@ -559,7 +573,7 @@ namespace Mantid
       if( ws->getNumberHistograms() < 2)
       {
         g_log.error(" Not enough data to fit parameters ");
-        throw std::length_error( " Not enough data to fit parameters " );
+        throw length_error( " Not enough data to fit parameters " );
       }
 
 
@@ -567,7 +581,7 @@ namespace Mantid
 
       boost::shared_ptr<const Instrument> instrument = peaksWs->getPeak(0).getInstrument();
       double T0 = 0;
-      if((std::string) getProperty("PreProcessInstrument") == "C)Apply a LoadParameter.xml type file")
+      if((string) getProperty("PreProcessInstrument") == "C)Apply a LoadParameter.xml type file")
         T0=  getProperty("InitialTimeOffset");//!*****
 
       double L0 = peaksWs->getPeak(0).getL1();
@@ -576,7 +590,7 @@ namespace Mantid
         (string) getProperty("PreProcessInstrument"),
         (string) getProperty("PreProcFilename"),
         T0, L0, banksVec);
-      g_log.debug()<<"Initial L0,T0="<<L0<<","<<T0<<std::endl;
+      g_log.debug()<<"Initial L0,T0="<<L0<<","<<T0<<endl;
 
       string PeakWSName = getPropertyValue( "PeakWorkspace");
       if(PeakWSName.length()<1)
@@ -656,7 +670,7 @@ namespace Mantid
         if( !bank_rect)
         {
           g_log.error("No Rectangular detector bank " + banksVec[ 0 ] + " in instrument");
-          throw std::invalid_argument("No Rectangular detector bank " + banksVec[ 0 ] + " in instrument");
+          throw invalid_argument("No Rectangular detector bank " + banksVec[ 0 ] + " in instrument");
         }
 
 
@@ -683,7 +697,7 @@ namespace Mantid
         {
           g_log.error() << "Bank Group " <<  BankNameString  << " does not have enough peaks for fitting" << endl;
 
-          throw  std::runtime_error("Group " + BankNameString +" does not have enough peaks");
+          throw  runtime_error("Group " + BankNameString +" does not have enough peaks");
         }
         //   oss << "BankNames=" << "\"" << BankNameString << "\"" << ",startX=" << startX << ",endX=" << endXp1-1;
         nbanksSoFar = nbanksSoFar + (int)(*itv).size();
@@ -807,9 +821,9 @@ namespace Mantid
         g_log.error( "Cannot find Fit algorithm");
         throw invalid_argument( "Cannot find Fit algorithm" );
       }
-      g_log.debug()<<"Function="<<FunctionArgument<<std::endl;
+      g_log.debug()<<"Function="<<FunctionArgument<<endl;
 
-      g_log.debug()<<"Constraints="<<Constraints<<std::endl;
+      g_log.debug()<<"Constraints="<<Constraints<<endl;
       fit_alg->initialize();
 
       int Niterations =  getProperty( "NumIterations");
@@ -829,16 +843,16 @@ namespace Mantid
 
       fit_alg->executeAsChildAlg();
 
-      g_log.debug()<<"Finished executing Fit algorithm"<<std::endl;
+      g_log.debug()<<"Finished executing Fit algorithm"<<endl;
 
       string OutputStatus =fit_alg->getProperty("OutputStatus");
-      g_log.notice() <<"Output Status="<<OutputStatus<<std::endl;
+      g_log.notice() <<"Output Status="<<OutputStatus<<endl;
 
       declareProperty(
         new API::WorkspaceProperty<API::ITableWorkspace>
         ("OutputNormalisedCovarianceMatrix","",Kernel::Direction::Output),
         "The name of the TableWorkspace in which to store the final covariance matrix" );
-      //std::string NormMatName=fit_alg->getPropertyValue("OutputNormalisedCovarianceMatrix");
+      //string NormMatName=fit_alg->getPropertyValue("OutputNormalisedCovarianceMatrix");
 
 
       ITableWorkspace_sptr NormCov= fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
@@ -850,9 +864,9 @@ namespace Mantid
       double chisq = fit_alg->getProperty( "OutputChi2overDoF");
       setProperty("ChiSqOverDOF", chisq);
       ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
-      std::vector< double >params;
-      std::vector< double >errs ;
-      std::vector< string >names;
+      vector< double >params;
+      vector< double >errs ;
+      vector< string >names;
       double sigma= sqrt(chisq);
 
       if( chisq < 0 ||  chisq != chisq)
@@ -925,12 +939,12 @@ namespace Mantid
       for( int g = 0; g < NGroups; ++g )
       {
 
-        std::string GroupName = std::string("Group") + boost::lexical_cast<std::string>(g);
+        string GroupName = string("Group") + boost::lexical_cast<string>(g);
         Result->addColumn( "double",GroupName);
       }
 
       //double sqrtChiSqoverDof = sqrt( chisq);
-      std::vector<string>TableFieldNames;
+      vector<string>TableFieldNames;
       for( int p=0; p <(int) names.size(); ++p)
       {
         string fieldName = names[p];
@@ -1009,10 +1023,10 @@ namespace Mantid
       }
 
       //    setProperty( "ResultWorkspace", Result);
-      std::string ResultWorkspaceName= getPropertyValue( "ResultWorkspace");
+      string ResultWorkspaceName= getPropertyValue( "ResultWorkspace");
       AnalysisDataService::Instance().addOrReplace(ResultWorkspaceName, Result);
       setPropertyValue( "ResultWorkspace", ResultWorkspaceName);
-      Result->setComment(std::string("t0(microseconds),l0 & offsets(meters),rot(degrees"));
+      Result->setComment(string("t0(microseconds),l0 & offsets(meters),rot(degrees"));
 
 
       //---------------- Create new instrument with ------------------------
@@ -1023,7 +1037,7 @@ namespace Mantid
       boost::shared_ptr<const Instrument> NewInstrument( new Instrument( instrument->baseInstrument(), pmap));
 
       i = -1;
-      // std::cout<<"Ere set new values into instrument"<<std::endl;
+      // cout<<"Ere set new values into instrument"<<endl;
       for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); ++itv )
       {
         i++;
@@ -1065,19 +1079,9 @@ namespace Mantid
       if( !DetCalFileName.empty() )
       {
 
-        boost::shared_ptr<Algorithm>SaveDetCal = createChildAlgorithm( "SaveIsawDetCal");
-        //clone this
-        peaksWs->setInstrument( NewInstrument);
-        SaveDetCal->initialize();
-        SaveDetCal->setProperty( "InputWorkspace",peaksWs);
+        SaveIsawDetCal( NewInstrument,AllBankNames, result[ "t0" ], DetCalFileName);
+        g_log.notice()<<"Saved DetCal file in "<<DetCalFileName<< endl;
 
-        SaveDetCal->setProperty( "Filename", DetCalFileName);
-        string TT0 = "t0";
-        SaveDetCal->setProperty( "TimeOffset",result[ TT0 ]);
-
-        SaveDetCal->executeAsChildAlg();
-
-        g_log.notice()<<"Saved DetCal file in "<<DetCalFileName<< std::endl;
       }
 
       SaveXmlFile(  XmlFileName, Groups,NewInstrument);
@@ -1152,13 +1156,234 @@ namespace Mantid
       }
 
       //setProperty("QErrorWorkspace", QErrTable);
-      std::string QErrorWorkspaceName = getPropertyValue("QErrorWorkspace");
-      QErrTable->setComment(std::string("Errors in Q for each Peak"));
+      string QErrorWorkspaceName = getPropertyValue("QErrorWorkspace");
+      QErrTable->setComment(string("Errors in Q for each Peak"));
       AnalysisDataService::Instance().addOrReplace(QErrorWorkspaceName, QErrTable);
       setPropertyValue("QErrorWorkspace", QErrorWorkspaceName);
 
     }
+// New instrumemt is OldInstrument.base with a cloned parameter map on the
+// panels, sample etc.
+    void  SCDCalibratePanels::LoadISawDetCal(
+           boost::shared_ptr<const Instrument> &instrument,
+           set<string> &AllBankName,double &T0,string filename,
+           string bankPrefixName)
+    {
+      /* if( AllBankName.empty())
+         {
+            g_log.debug()<<"There are NO banks(panels) to load" << endl;
+            throw invalid_argument("There are NO banks(panels) to load");
+         }
+         */
+       V3D beamline, samplePos;
+       double beamlineLen,L0;
+       instrument->getInstrumentParameters(L0,beamline, beamlineLen,samplePos);
+       int  count, id, nrows, ncols;
+       double width, height, depth, detd, x, y,
+              z, base_x, base_y, base_z, up_x, up_y, up_z;
 
+       ifstream input(filename.c_str(), ios_base::in);
+       string line;
+       string detname;
+       boost::shared_ptr<Mantid::Geometry::ParameterMap> pmap= instrument->getParameterMap();
+       while(getline(input, line))
+          {
+            if(line[0] == '7')
+            {
+              double mL1;
+              stringstream(line) >> count >> mL1 >> T0;
+              double scaleL0= .01*mL1/beamlineLen;
+              const IObjComponent_const_sptr source=instrument->getSource();
+              V3D NewSourcePos= samplePos-beamline*scaleL0*2.0;
+
+              V3D RelSourcePos = source->getRelativePos()+NewSourcePos-source->getPos();
+              pmap->addPositionCoordinate(source.get(),"x",RelSourcePos.X());
+              pmap->addPositionCoordinate(source.get(),"y",RelSourcePos.Y());
+              pmap->addPositionCoordinate(source.get(),"z",RelSourcePos.Z());
+            }
+
+            if(line[0] != '5') continue;
+            stringstream(line) >> count >> id >> nrows >> ncols >> width >> height >> depth >> detd
+                                         >> x >> y >> z >> base_x >> base_y >> base_z >> up_x >> up_y >> up_z;
+
+            string bankName= bankPrefixName+boost::lexical_cast<string>(id);
+
+            if( !AllBankName.empty() && AllBankName.find(bankName) == AllBankName.end())
+              continue;
+            boost::shared_ptr<const RectangularDetector> det =
+                boost::dynamic_pointer_cast<const RectangularDetector>(instrument->getComponentByName(bankName,3));
+            if( !det)
+              continue;
+
+            //Adjust pmap to the new scaling
+            double scalex=1.0;//previous scale factor on this detector
+            double scaley=1.0;
+            if( pmap->contains(det.get(),"scalex"))
+              scalex=pmap->getDouble( det->getName(),"scalex")[0];
+            if( pmap->contains(det.get(),"scaley"))
+              scaley=pmap->getDouble( det->getName(),"scaley")[0];
+            double ScaleX= scalex*0.01*width/det->xsize();
+            double ScaleY = scaley*0.01*height/det->ysize();
+            pmap->addDouble( det.get(),"scalex",ScaleX);
+            pmap->addDouble( det.get(),"scaley",ScaleY);
+
+
+            //Adjust pmap to the new center position. Note:in pmap the pos values
+            //                                          are rel positions to parent
+            x *= 0.01;
+            y *= 0.01;
+            z *= 0.01;
+            V3D pos= det->getPos();
+            V3D RelPos= V3D(x,y,z)-pos;
+            if( pmap->contains(det.get(),"pos"))
+              RelPos += pmap->getV3D( det->getName(),"pos")[0];
+            pmap->addPositionCoordinate(det.get(),"x",RelPos.X());
+            pmap->addPositionCoordinate(det.get(),"y",RelPos.Y());
+            pmap->addPositionCoordinate(det.get(),"z",RelPos.Z());
+
+            //Adjust pmap to the orientation of the panel
+            V3D rX = V3D(base_x, base_y, base_z);
+                    rX.normalize();
+                    V3D rY = V3D(up_x, up_y, up_z);
+                    rY.normalize();
+                    //V3D rZ=rX.cross_prod(rY);
+
+                    //These are the original axes
+                    V3D oX = V3D(1.,0.,0.);
+                    V3D oY = V3D(0.,1.,0.);
+                    V3D oZ = V3D(0.,0.,1.);
+
+                    //Axis that rotates X
+                    V3D ax1 = oX.cross_prod(rX);
+                    //Rotation angle from oX to rX
+                    double angle1 = oX.angle(rX);
+                    angle1 *=180.0/M_PI;
+                    //Create the first quaternion
+                    Quat Q1(angle1, ax1);
+
+                    //Now we rotate the original Y using Q1
+                    V3D roY = oY;
+                    Q1.rotate(roY);
+                    //Find the axis that rotates oYr onto rY
+                    V3D ax2 = roY.cross_prod(rY);
+                    double angle2 = roY.angle(rY);
+                    angle2 *=180.0/M_PI;
+                    Quat Q2(angle2, ax2);
+
+                    //Final = those two rotations in succession; Q1 is done first.
+                    Quat Rot = Q2 * Q1;
+
+                    // Then find the corresponding relative position
+                   //boost::shared_ptr<const IComponent> comp = instrument->getComponentByName(detname);
+                    boost::shared_ptr<const IComponent> parent = det->getParent();
+                    if (parent)
+                    {
+                        Quat rot0 = parent->getRelativeRot();
+                        rot0.inverse();
+                        Rot = Rot * rot0;
+                    }
+                    boost::shared_ptr<const IComponent>grandparent = parent->getParent();
+                    if (grandparent)//Why this is not correct but most Rectangular detectors have no grandparent.
+                    {
+                        Quat rot0 = grandparent->getRelativeRot();
+                        rot0.inverse();
+                        Rot = Rot * rot0;
+                    }
+
+
+                    // Set or overwrite "rot" instrument parameter.
+                    pmap->addQuat(det.get(),"rot",Rot);
+
+
+
+       }//While reading thru file
+    }
+    /**
+     * Really this is the operator SaveIsawDetCal but only the results of the given
+     * banks are saved.  L0 and T0 are also saved.
+     *
+     * @param  NewInstrument  -The instrument with the correct panel geometries
+     *                         and initial path length
+     *
+     * @param AllBankName  -the set of the NewInstrument names of the banks(panels)
+     * @param T0           -The time offset
+     * @param FileName     -The name of the DetCal file to save the results to
+     */
+    void SCDCalibratePanels::SaveIsawDetCal( boost::shared_ptr<const Instrument> &NewInstrument,
+         set<string> &AllBankName,double T0,string FileName)
+    {
+      double beamline_norm,L0=0.0;
+      V3D beamline,  samplePos;
+      filebuf fb;
+      fb.open(FileName, ios::out);
+      ostream os(&fb);
+      os << "# NEW CALIBRATION FILE FORMAT (in NeXus/SNS coordinates):" << endl;
+      os << "# Lengths are in centimeters." << endl;
+      os << "# Base and up give directions of unit vectors for a local " << endl;
+      os << "# x,y coordinate system on the face of the detector." << endl;
+      os << "#" << endl;
+      os << "#" << endl;
+      os << "#" << DateAndTime::getCurrentTime().toISO8601String() << endl;
+      os << "6         L1    T0_SHIFT" << endl;
+
+
+      NewInstrument->getInstrumentParameters(L0, beamline, beamline_norm, samplePos);
+      os << "7 " << setw(10);
+      os << setprecision(4) << fixed << (L0 * 100);
+      os << setw(12) << setprecision(3) << fixed;
+      // Time offset of 0.00 for now
+      os << setw(12) << setprecision(4) << T0 << endl;
+
+      os
+          << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ"
+          << endl;
+      for (set<string>::iterator it = AllBankName.begin(); it != AllBankName.end(); it++)
+      {
+        string bankName = *it;
+        string::reverse_iterator rit = bankName.rbegin();
+        string S;
+        while (isdigit(*rit))
+        {
+          S = *rit +S;
+          ++rit;
+        }
+        int bankNum = boost::lexical_cast<int>(S);
+
+        boost::shared_ptr<const RectangularDetector> det = boost::dynamic_pointer_cast<
+            const RectangularDetector>(NewInstrument->getComponentByName(bankName));
+        if (!det)
+          continue;
+        V3D center = det->getPos();
+        double detd = (center - NewInstrument->getSample()->getPos()).norm();
+        // Base unit vector (along the horizontal, X axis)
+        V3D base = det->getAtXY(det->xpixels() - 1, 0)->getPos() - det->getAtXY(0, 0)->getPos();
+        base.normalize();
+        // Up unit vector (along the vertical, Y axis)
+        V3D up = det->getAtXY(0, det->ypixels() - 1)->getPos() - det->getAtXY(0, 0)->getPos();
+        up.normalize();
+
+        // Write the line
+        os << "5 " << setw(6) << right << bankNum << " " << setw(6) << right
+            << det->xpixels() << " " << setw(6) << right << det->ypixels() << " "
+            << setw(7) << right << fixed << setprecision(4) << 100.0 * det->xsize()
+            << " " << setw(7) << right << fixed << setprecision(4) << 100.0
+            * det->ysize() << " " << "  0.2000 " << setw(6) << right << fixed
+            << setprecision(2) << 100.0 * detd << " " << setw(9) << right << fixed
+            << setprecision(4) << 100.0 * center.X() << " " << setw(9) << right
+            << fixed << setprecision(4) << 100.0 * center.Y() << " " << setw(9)
+            << right << fixed << setprecision(4) << 100.0 * center.Z() << " "
+            << setw(8) << right << fixed << setprecision(5) << base.X() << " "
+            << setw(8) << right << fixed << setprecision(5) << base.Y() << " "
+            << setw(8) << right << fixed << setprecision(5) << base.Z() << " "
+            << setw(8) << right << fixed << setprecision(5) << up.X() << " "
+            << setw(8) << right << fixed << setprecision(5) << up.Y() << " "
+            << setw(8) << right << fixed << setprecision(5) << up.Z() << " "
+            << endl;
+
+      }
+
+      fb.close();
+    }
 
 
     void SCDCalibratePanels::init()
@@ -1208,15 +1433,15 @@ namespace Mantid
         "Path to an Mantid .xml description(for LoadParameterFile) file to save.");
 
 
-      vector< std::string > preProcessOptions;
-      preProcessOptions.push_back(std::string("A)No PreProcessing"));
+      vector< string > preProcessOptions;
+      preProcessOptions.push_back(string("A)No PreProcessing"));
       preProcessOptions.push_back("B)Apply a ISAW.DetCal File");
       preProcessOptions.push_back("C)Apply a LoadParameter.xml type file");
 
-      declareProperty(string("PreProcessInstrument"), std::string("A)No PreProcessing"), boost::make_shared<
+      declareProperty(string("PreProcessInstrument"), string("A)No PreProcessing"), boost::make_shared<
         Kernel::StringListValidator>(preProcessOptions), "Select PreProcessing info");
-      // declareProperty("PreProcessInstrument", std::string("No PreProcessing"), boost::shared_ptr<
-      //        Kernel::ValidatorAnyList<std::string> >(new Kernel::ValidatorAnyList<std::string>(preProcessOptions)), "Select PreProcessing info");
+      // declareProperty("PreProcessInstrument", string("No PreProcessing"), boost::shared_ptr<
+      //        Kernel::ValidatorAnyList<string> >(new Kernel::ValidatorAnyList<string>(preProcessOptions)), "Select PreProcessing info");
 
       vector< string > exts2;
       exts2.push_back(".DetCal");
@@ -1261,9 +1486,9 @@ namespace Mantid
 
     void  SCDCalibratePanels::CreateFxnGetValues(Workspace2D_sptr const ws,
       int const NGroups,
-      std::vector<std::string>const names,
-      std::vector<double>const params,
-      std::string const BankNameString,
+      vector<string>const names,
+      vector<double>const params,
+      string const BankNameString,
       double *out,
       const double *xVals,
       const size_t nData)        const
@@ -1271,7 +1496,7 @@ namespace Mantid
       boost::shared_ptr<IFunction1D> fit = boost::dynamic_pointer_cast<IFunction1D>(
         FunctionFactory::Instance().createFunction("SCDPanelErrors"));
       if( !fit)
-        std::cout<<"Could not create fit function"<<std::endl;
+        cout<<"Could not create fit function"<<endl;
 
       fit->setAttribute("a",IFunction::Attribute((double)getProperty("a")));
       fit->setAttribute("b",IFunction::Attribute((double)getProperty("b")));
@@ -1289,7 +1514,7 @@ namespace Mantid
       fit->setAttribute("BankNames", IFunction::Attribute(BankNameString));
 
 
-      std::string fieldBase[8]={"detWidth","detHeight","Xoffset","Yoffset","Zoffset",
+      string fieldBase[8]={"detWidth","detHeight","Xoffset","Yoffset","Zoffset",
         "Xrot","Yrot","Zrot"};
       set<string>FieldB(fieldBase, fieldBase+8);
 
@@ -1425,7 +1650,7 @@ namespace Mantid
 
 
 
-    void SCDCalibratePanels::FixUpBankParameterMap(std::vector<std::string> const bankNames,
+    void SCDCalibratePanels::FixUpBankParameterMap(vector<string> const bankNames,
       boost::shared_ptr<const Instrument> NewInstrument, V3D const pos, Quat const rot, double const DetWScale,
       double const DetHtScale, boost::shared_ptr<const ParameterMap> const pmapOld, bool RotCenters)
     {
@@ -1464,11 +1689,11 @@ namespace Mantid
           Center.Z()-Center_orig.Z());
 
         Quat2RotxRotyRotz(rot, rotx, roty, rotz);
-        //std::cout<<"A dCenter rot for"<<bankName<<Center-Center_orig<<
-        //    "using rots="<< rotx<<","<<roty<<","<<rotz<<std::endl;
-        // std::cout<<"       before/aft Centers"<<Center_orig<<Center<<std::endl;
-        // std::cout<<"    Thru 1st prt param fix for "<<bankName<<". pos="<<bank->getPos()<<std::endl;
-        //std::cout<<"A"<<posNR<<pos<<pos1<<std::endl;
+        //cout<<"A dCenter rot for"<<bankName<<Center-Center_orig<<
+        //    "using rots="<< rotx<<","<<roty<<","<<rotz<<endl;
+        // cout<<"       before/aft Centers"<<Center_orig<<Center<<endl;
+        // cout<<"    Thru 1st prt param fix for "<<bankName<<". pos="<<bank->getPos()<<endl;
+        //cout<<"A"<<posNR<<pos<<pos1<<endl;
         // pmap->addPositionCoordinate(bank.get(), string("x"), pos.X() + pos1.X());
         // pmap->addPositionCoordinate(bank.get(), string("y"), pos.Y() + pos1.Y());
         // pmap->addPositionCoordinate(bank.get(), string("z"), pos.Z() + pos1.Z());
@@ -1489,29 +1714,29 @@ namespace Mantid
 
         pmap->addDouble(bank.get(), string("scalex"), scalex);
         pmap->addDouble(bank.get(), string("scaley"), scaley);
-        //std::cout<<"Thru param fix for "<<bankName<<". pos="<<bank->getPos()<<std::endl;
+        //cout<<"Thru param fix for "<<bankName<<". pos="<<bank->getPos()<<endl;
       }//For @ bank
     }
 
 
-    void SCDCalibratePanels::SaveXmlFile(std::string const FileName, vector<vector<string> > const Groups,
+    void SCDCalibratePanels::SaveXmlFile(string const FileName, vector<vector<string> > const Groups,
       Instrument_const_sptr const instrument)const
     {
       if (FileName.empty())
         return;
 
       ofstream oss3(FileName.c_str());
-      oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
+      oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
       oss3 << " <parameter-file instrument=\"" << instrument->getName() << "\" date=\""
-        << instrument->getValidFromDate().toISO8601String() << "\">" << std::endl;
+        << instrument->getValidFromDate().toISO8601String() << "\">" << endl;
       ParameterMap_sptr pmap = instrument->getParameterMap();
 
-      for (std::vector<vector<string> >::const_iterator it = Groups.begin(); it != Groups.end(); ++it)
-        for( std::vector<string>::const_iterator it1=(*it).begin(); it1 !=(*it).end(); ++it1)
+      for (vector<vector<string> >::const_iterator it = Groups.begin(); it != Groups.end(); ++it)
+        for( vector<string>::const_iterator it1=(*it).begin(); it1 !=(*it).end(); ++it1)
         {
           string bankName = (*it1);
 
-          oss3 << "<component-link name=\"" << bankName << "\">" << std::endl;
+          oss3 << "<component-link name=\"" << bankName << "\">" << endl;
 
           boost::shared_ptr<const IComponent> bank = instrument->getComponentByName(bankName);
 
@@ -1521,20 +1746,20 @@ namespace Mantid
 
           SCDCalibratePanels::Quat2RotxRotyRotz(RelRot, rotx, roty, rotz);
 
-          oss3 << "  <parameter name =\"rotx\"><value val=\"" << rotx << "\" /> </parameter>" << std::endl;
-          oss3 << "  <parameter name =\"roty\"><value val=\"" << roty << "\" /> </parameter>" << std::endl;
-          oss3 << "  <parameter name =\"rotz\"><value val=\"" << rotz << "\" /> </parameter>" << std::endl;
+          oss3 << "  <parameter name =\"rotx\"><value val=\"" << rotx << "\" /> </parameter>" << endl;
+          oss3 << "  <parameter name =\"roty\"><value val=\"" << roty << "\" /> </parameter>" << endl;
+          oss3 << "  <parameter name =\"rotz\"><value val=\"" << rotz << "\" /> </parameter>" << endl;
 
           V3D pos1 = bank->getRelativePos();
 
           oss3 << "  <parameter name =\"x\"><value val=\"" << pos1.X() << "\" /> </parameter>"
-            << std::endl;
+            << endl;
 
           oss3 << "  <parameter name =\"y\"><value val=\"" << pos1.Y() << "\" /> </parameter>"
-            << std::endl;
+            << endl;
 
           oss3 << "  <parameter name =\"z\"><value val=\"" << pos1.Z() << "\" /> </parameter>"
-            << std::endl;
+            << endl;
 
           vector<double> oldScalex = pmap->getDouble(bank->getName(), string("scalex"));
           vector<double> oldScaley = pmap->getDouble(bank->getName(), string("scaley"));
@@ -1551,27 +1776,27 @@ namespace Mantid
             scaley = 1;
 
           oss3 << "  <parameter name =\"scalex\"><value val=\"" << scalex << "\" /> </parameter>"
-            << std::endl;
+            << endl;
           oss3 << "  <parameter name =\"scaley\"><value val=\"" << scaley << "\" /> </parameter>"
-            << std::endl;
-          oss3 << "</component-link>" << std::endl;
+            << endl;
+          oss3 << "</component-link>" << endl;
         }//For @ bank
 
         IObjComponent_const_sptr source = instrument->getSource();
 
-        oss3 << "<component-link name=\"" << source->getName() << "\">" << std::endl;
+        oss3 << "<component-link name=\"" << source->getName() << "\">" << endl;
         IObjComponent_const_sptr sample = instrument->getSample();
         V3D sourceRelPos = source->getRelativePos();
 
-        oss3 << "  <parameter name =\"x\"><value val=\"" << sourceRelPos.X() << "\" /> </parameter>" << std::endl;
+        oss3 << "  <parameter name =\"x\"><value val=\"" << sourceRelPos.X() << "\" /> </parameter>" << endl;
 
-        oss3 << "  <parameter name =\"y\"><value val=\"" << sourceRelPos.Y() << "\" /> </parameter>" << std::endl;
+        oss3 << "  <parameter name =\"y\"><value val=\"" << sourceRelPos.Y() << "\" /> </parameter>" << endl;
 
-        oss3 << "  <parameter name =\"z\"><value val=\"" << sourceRelPos.Z() << "\" /> </parameter>" << std::endl;
+        oss3 << "  <parameter name =\"z\"><value val=\"" << sourceRelPos.Z() << "\" /> </parameter>" << endl;
 
-        oss3 << "</component-link>" << std::endl;
+        oss3 << "</component-link>" << endl;
 
-        oss3 << "</parameter-file>" << std::endl;
+        oss3 << "</parameter-file>" << endl;
 
         oss3.flush();
         oss3.close();
