@@ -32,7 +32,7 @@ class SortByQVectors(PythonAlgorithm):
         wsString = self.getPropertyValue("InputWorkspace").strip()
         #internal values
         wsOutput = "__OutputWorkspace"
-        wsTemp = "__ConjoinSpectra_temp"       
+        wsTemp = "__Sort_temp"       
         #get the workspace list
         wsNames = []
         for wsName in wsString.split(","):
@@ -56,11 +56,15 @@ class SortByQVectors(PythonAlgorithm):
                 sortStat.sort()
         if len(sortStat) == 0:
             raise RuntimeError("Cannot find file with qvectors, aborting")
-            
+        
         for wsName in wsNames:
             ws = mtd[wsName.strip()]
+            yUnit = ws.getAxis(1).getUnit().unitID()
+            transposed = False
             if ws.getNumberHistograms() < len(sortStat):
             	Transpose(InputWorkspace=wsName,OutputWorkspace=wsName)
+                transposed = True
+            loopIndex = 0
             for norm, spec in sortStat:
                 ExtractSingleSpectrum(InputWorkspace=wsName,OutputWorkspace=wsTemp,WorkspaceIndex=spec)
                 if wsOutput in mtd:
@@ -69,8 +73,15 @@ class SortByQVectors(PythonAlgorithm):
                         DeleteWorkspace(Workspace=wsTemp)
                 else:
                     RenameWorkspace(InputWorkspace=wsTemp,OutputWorkspace=wsOutput)
-            wsOut = mtd[wsOutput]
-            RenameWorkspace(InputWorkspace=wsOut,OutputWorkspace=wsName)
+                mtd[wsOutput].getAxis(1).setValue(loopIndex,norm*20)
+                loopIndex = loopIndex + 1
+            if transposed:
+                Transpose(InputWorkspace=wsOutput,OutputWorkspace=wsOutput)
+
+            if len(yUnit) > 0:
+                mtd[wsOutput].getAxis(1).setUnit(yUnit)
+            RenameWorkspace(InputWorkspace=wsOutput,OutputWorkspace=wsName)
+
         
     def GetXValue(self,xs):
         return np.linalg.norm(xs)
