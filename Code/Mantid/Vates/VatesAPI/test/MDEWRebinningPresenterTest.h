@@ -9,8 +9,14 @@
 
 #include "MantidVatesAPI/MDEWRebinningPresenter.h"
 
+#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/EscalatingRebinningActionManager.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+
 using namespace testing;
 using namespace Mantid::VATES;
+using namespace Mantid::MDEvents;
 
 //=====================================================================================
 // Functional tests
@@ -392,6 +398,43 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pRequest));
   }
 
+  void testTimeLabelAfterRebinFor4DData()
+  {
+    const std::string wsName = "TestMDEW";
+    auto someMDEW = Mantid::MDEvents::MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<4>,4>(10,0,10);
+    someMDEW->setName(wsName);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, someMDEW);
+
+    RebinningKnowledgeSerializer serializer(LocationNotRequired);
+    serializer.setWorkspace(someMDEW);
+    std::string creationalXML = serializer.createXMLString();
+
+    vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
+    dataSet->SetFieldData(createFieldDataWithCharArray(creationalXML));
+
+    MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillRepeatedly(Return(false));
+
+    std::string viewXML = constructGeometryOnlyXMLForMDEvHelperData("Axis3",
+                                                                    "Axis2",
+                                                                    "Axis1",
+                                                                    "Axis0");
+    EXPECT_CALL(*view, getAppliedGeometryXML()).WillRepeatedly(Return(viewXML.c_str()));
+
+    ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> workspaceProvider;
+
+    RebinningActionManager* pRequest = new EscalatingRebinningActionManager;
+
+    MDEWRebinningPresenter presenter(dataSet, pRequest, view, workspaceProvider);
+    pRequest->ask(Mantid::VATES::RecalculateAll);
+
+    TSM_ASSERT_EQUALS("Time label should be exact.",
+                      presenter.getTimeStepLabel(), "Axis0 (m)")
+  }
 
 };
 
