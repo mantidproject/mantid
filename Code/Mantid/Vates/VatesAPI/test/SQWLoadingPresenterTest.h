@@ -201,6 +201,12 @@ void testAxisLabels()
   TSM_ASSERT_EQUALS("Z Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForZ"),
                     "qz (A^-1)");
+
+  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+  TSM_ASSERT("Bad usage of loading algorithm progress updates", Mock::VerifyAndClearExpectations(&mockLoadingProgressAction));
+
+  product->Delete();
 }
 
 };
