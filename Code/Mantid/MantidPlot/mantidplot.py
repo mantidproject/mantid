@@ -844,8 +844,8 @@ def screenshot(widget, filename, description, png_exists=False):
         
         _replace_report_text(report, filename, section_text)
         
-def screenshot(widget, filename, screenshot_dir):
-    """Take a screenshot of a widget
+def screenshot_to_dir(widget, filename, screenshot_dir):
+    """Take a screenshot_to_dir of a widget
     
     @param widget :: QWidget to take an image of
     @param filename :: Destination filename for that image

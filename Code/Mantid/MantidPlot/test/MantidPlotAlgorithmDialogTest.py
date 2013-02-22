@@ -24,7 +24,7 @@ class MantidPlotAlgorithmDialogTest(unittest.TestCase):
         dialog = threadsafe_call( interface_manager.createDialogFromName, self.__target_algorithm__, self.__clean_properties__)
         screenshotdir = tempfile.gettempdir();
         file = "CreateMDWorkspace_screenshot"
-        screenshot(widget=dialog, filename=file, screenshot_dir=screenshotdir)
+        screenshot_to_dir(widget=dialog, filename=file, screenshot_dir=screenshotdir)
         threadsafe_call(dialog.close)
         file_abs = os.path.join(screenshotdir, file + ".png")
         file_exists = os.path.isfile(file_abs)
