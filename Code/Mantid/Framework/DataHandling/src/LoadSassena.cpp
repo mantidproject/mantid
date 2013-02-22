@@ -84,9 +84,8 @@ int LoadSassena::fileCheck(const std::string &filePath)
  * @param gws pointer to WorkspaceGroup being filled
  * @param wsName name of workspace to be added and registered
  * @param ws pointer to workspace to be added and registered
- * @param description string summarizing workspace contents
  */
-void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::string wsName, DataObjects::Workspace2D_sptr ws, const std::string &description )
+void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::string wsName, DataObjects::Workspace2D_sptr ws, const std::string &)
 {
   API::AnalysisDataService::Instance().add( wsName, ws );
   gws->add(wsName);
