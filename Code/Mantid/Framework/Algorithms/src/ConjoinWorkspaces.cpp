@@ -183,7 +183,7 @@ void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, 
   bool needsFix(false);
   try
   {
-    if( !m_overlapChecked ) checkForOverlap(ws1, ws2, true);
+    if( !m_overlapChecked && this->getProperty("CheckOverlapping")) checkForOverlap(ws1, ws2, true);
   }
   catch(std::invalid_argument&)
   {

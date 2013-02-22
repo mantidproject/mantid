@@ -49,41 +49,44 @@ class SortByQVectors(PythonAlgorithm):
             if "qvectors" in wsName:     
                 #extract the spectrum
                 ws = mtd[wsName.strip()]
-                for s in range(0,ws.getNumberHistograms()):
+                for s in range(0, ws.getNumberHistograms()):
                     y_s = ws.readY(s)
                     tuple = (self.GetXValue(y_s), s)
                     sortStat.append(tuple)
                 sortStat.sort()
         if len(sortStat) == 0:
             raise RuntimeError("Cannot find file with qvectors, aborting")
-        
+        #sort spectra using norm of q
         for wsName in wsNames:
             ws = mtd[wsName.strip()]
             yUnit = ws.getAxis(1).getUnit().unitID()
             transposed = False
             if ws.getNumberHistograms() < len(sortStat):
-            	Transpose(InputWorkspace=wsName,OutputWorkspace=wsName)
-                transposed = True
-            loopIndex = 0
+            	Transpose(InputWorkspace=wsName, OutputWorkspace=wsName)
+                transposed = True             
             for norm, spec in sortStat:
-                ExtractSingleSpectrum(InputWorkspace=wsName,OutputWorkspace=wsTemp,WorkspaceIndex=spec)
+                ExtractSingleSpectrum(InputWorkspace=wsName, OutputWorkspace=wsTemp, WorkspaceIndex=spec)
                 if wsOutput in mtd:
                     ConjoinWorkspaces(InputWorkspace1=wsOutput,InputWorkspace2=wsTemp,CheckOverlapping=False)
                     if wsTemp in mtd:
                         DeleteWorkspace(Workspace=wsTemp)
                 else:
-                    RenameWorkspace(InputWorkspace=wsTemp,OutputWorkspace=wsOutput)
-                mtd[wsOutput].getAxis(1).setValue(loopIndex,norm*20)
-                loopIndex = loopIndex + 1
-            if transposed:
-                Transpose(InputWorkspace=wsOutput,OutputWorkspace=wsOutput)
+                    RenameWorkspace(InputWorkspace=wsTemp, OutputWorkspace=wsOutput)
 
+            #put norm as y value and copy units from input
+            loopIndex = 0
+            wsOut = mtd[wsOutput]
+            for norm, spec in sortStat:
+                wsOut.getAxis(1).setValue(loopIndex, norm)
+                loopIndex = loopIndex + 1
             if len(yUnit) > 0:
-                mtd[wsOutput].getAxis(1).setUnit(yUnit)
-            RenameWorkspace(InputWorkspace=wsOutput,OutputWorkspace=wsName)
+                wsOut.getAxis(1).setUnit(yUnit)
+            if transposed:
+                Transpose(InputWorkspace=wsOutput, OutputWorkspace=wsOutput)
+            RenameWorkspace(InputWorkspace=wsOutput, OutputWorkspace=wsName)
 
         
-    def GetXValue(self,xs):
+    def GetXValue(self, xs):
         return np.linalg.norm(xs)
         
 registerAlgorithm(SortByQVectors)
