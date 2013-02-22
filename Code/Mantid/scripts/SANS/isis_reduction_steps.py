@@ -1415,6 +1415,7 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
         self._load_params='FirstColumnValue="SpectrumNumber"'
         self._high_angle_pixel_file = ""
         self._low_angle_pixel_file = ""
+        self._pixel_file = ""
 
 
     def setPixelCorrFile(self, filename, detector = ""):
@@ -1427,14 +1428,13 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
           
         """
         detector = detector.upper()
-        self._pixel_file = filename
 
-        if detector in ("FRONT","HAB"):
+        if detector in ("FRONT","HAB","FRONT-DETECTOR-BANK"):
             self._high_angle_pixel_file = filename
-        if detector in ("REAR","MAIN",""):
+        if detector in ("REAR","MAIN","","MAIN-DETECTOR-BANK"):
             self._low_angle_pixel_file = filename
 
-    def getPixelCorrFile(self, detector = ""):
+    def getPixelCorrFile(self, detector ):
         """
           For compatibility reason, it still uses the self._pixel_file, 
           but, now, we need pixel_file (flood file) for both detectors.
@@ -1443,11 +1443,12 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
           override CalculateNorm.
         """
         detector = detector.upper()
-        if detector in ("FRONT","HAB"):
+        if detector in ("FRONT","HAB","FRONT-DETECTOR-BANK"):
             return self._high_angle_pixel_file
-        elif detector in ("REAR","MAIN",""):
+        elif detector in ("REAR","MAIN","MAIN-DETECTOR-BANK",""):
             return self._low_angle_pixel_file
         else :
+            mantid.sendWarningMessage("ASK GETPIXELCORRFILE WITHOUT ARGUMENT: + "+ str(detector))
             return self._pixel_file        
 
     def calculate(self, reducer, wave_wks=[]):
@@ -1466,7 +1467,7 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
             if self._is_point_data(self.TMP_ISIS_NAME):
                 ConvertToHistogram(self.TMP_ISIS_NAME, self.TMP_ISIS_NAME)
         ## try to redefine self._pixel_file to pass to CalculateNORM method calculate.
-        detect_pixel_file = self.getPixelCorrFile(reducer.instrument.det_selection)
+        detect_pixel_file = self.getPixelCorrFile(reducer.instrument.cur_detector().name())
         if (detect_pixel_file != ""):
             self._pixel_file = detect_pixel_file
         wave_adj, pixel_adj = super(CalculateNormISIS, self).calculate(reducer, wave_wks)
@@ -1980,20 +1981,24 @@ class UserFile(ReductionStep):
                                 = filepath
                         except AttributeError:
                             raise AttributeError('Detector HAB does not exist for the current instrument, set the instrument to LOQ first')
-                    elif parts[0].upper() == 'FLAT' or parts[0].upper() == 'FLAT/REAR':
+                    elif parts[0].upper() == 'FLAT':
                         reducer.prep_normalize.setPixelCorrFile(filepath,'REAR')
-                    elif parts[0].upper() == 'FLAT/FRONT':
-                        reducer.prep_normalize.setPixelCorrFile(filepath,'FRONT')
                     else:
                         pass
                 elif len(parts) == 2:
                     detname = parts[1]
                     if detname.upper() == 'REAR':
-                        reducer.instrument.getDetector('REAR').correction_file \
-                            = filepath
+                        if parts[0].upper() == "FLAT":
+                            reducer.prep_normalize.setPixelCorrFile(filepath,'REAR')
+                        else:
+                            reducer.instrument.getDetector('REAR').correction_file \
+                                = filepath
                     elif detname.upper() == 'FRONT' or detname.upper() == 'HAB':
-                        reducer.instrument.getDetector('FRONT').correction_file \
-                            = filepath
+                        if parts[0].upper() == "FLAT":
+                            reducer.prep_normalize.setPixelCorrFile(filepath,'FRONT')
+                        else:
+                            reducer.instrument.getDetector('FRONT').correction_file \
+                                = filepath
                     else:
                         return 'Incorrect detector specified for efficiency file: '
                 else:
