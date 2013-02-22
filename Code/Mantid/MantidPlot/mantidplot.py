@@ -723,11 +723,16 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
 def get_screenshot_dir():
     """ Returns the directory for screenshots,
     or NONE if not set """
-    dest = os.getenv('MANTID_SCREENSHOT_REPORT')
+    expected_env_var = 'MANTID_SCREENSHOT_REPORT'
+    dest = os.getenv(expected_env_var)
     if not dest is None:
         # Create the report directory if needed
         if not os.path.exists(dest):
             os.mkdir(dest)
+    else:
+        errormsg = "The expected environmental does not exist: " + expected_env_var
+        print errormsg
+        raise RuntimeError(errormsg)
     return dest
 
     

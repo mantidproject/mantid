@@ -4,7 +4,7 @@ import tempfile
 from mantidplotpy.proxies import threadsafe_call
 
 # Where to save the screenshots.
-screenshotdir = tempfile.gettempdir();
+screenshotdir = get_screenshot_dir()
 print "Writing screenshots to " + screenshotdir
 
 """
