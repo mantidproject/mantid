@@ -1449,7 +1449,7 @@ intermediate ranges are there for comparison</string>
          </item>
         </layout>
        </item>
-       <item row="2" column="1" rowspan="2">
+       <item row="2" column="1" rowspan="3">
         <layout class="QVBoxLayout" name="verticalLayout_11">
          <item>
           <widget class="QGroupBox" name="groupBox_15">
@@ -1694,7 +1694,7 @@ intermediate ranges are there for comparison</string>
          </item>
         </layout>
        </item>
-       <item row="3" column="0" rowspan="2">
+       <item row="3" column="0">
         <widget class="QGroupBox" name="groupBox_6">
          <property name="title">
           <string>Efficiency correction</string>
@@ -1752,36 +1752,79 @@ intermediate ranges are there for comparison</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="1" colspan="2">
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFile" native="true">
-            <property name="findRunFiles" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="label" stdset="0">
-             <string>Flood File</string>
-            </property>
-            <property name="multipleFiles" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="optional" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="multiEntry" stdset="0">
-             <bool>false</bool>
-            </property>
-           </widget>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="0" rowspan="2">
+        <widget class="QGroupBox" name="groupBox_17">
+         <property name="title">
+          <string>Apply flood correction file</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_13">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_21">
+            <item>
+             <widget class="QCheckBox" name="enableRearFlood_ck">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodRearFile" native="true">
+              <property name="findRunFiles" stdset="0">
+               <bool>false</bool>
+              </property>
+              <property name="label" stdset="0">
+               <string>Rear Flood File</string>
+              </property>
+              <property name="multipleFiles" stdset="0">
+               <bool>false</bool>
+              </property>
+              <property name="optional" stdset="0">
+               <bool>false</bool>
+              </property>
+              <property name="multiEntry" stdset="0">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-          <item row="2" column="1" colspan="2">
-           <widget class="QCheckBox" name="enableFlood_ck">
-            <property name="text">
-             <string>Apply flood correction file</string>
-            </property>
-           </widget>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_22">
+            <item>
+             <widget class="QCheckBox" name="enableFrontFlood_ck">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFrontFile" native="true">
+              <property name="findRunFiles" stdset="0">
+               <bool>false</bool>
+              </property>
+              <property name="label" stdset="0">
+               <string>Front Flood File</string>
+              </property>
+              <property name="multipleFiles" stdset="0">
+               <bool>false</bool>
+              </property>
+              <property name="optional" stdset="0">
+               <bool>false</bool>
+              </property>
+              <property name="multiEntry" stdset="0">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="5" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
           <widget class="QGroupBox" name="groupBox_3">
@@ -1901,19 +1944,6 @@ intermediate ranges are there for comparison</string>
           </widget>
          </item>
         </layout>
-       </item>
-       <item row="5" column="0">
-        <spacer name="verticalSpacer_5">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>
@@ -3957,8 +3987,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>monitor_interp</tabstop>
   <tabstop>trans_monitor</tabstop>
   <tabstop>trans_interp</tabstop>
-  <tabstop>floodFile</tabstop>
-  <tabstop>enableFlood_ck</tabstop>
   <tabstop>tof_min</tabstop>
   <tabstop>tof_max</tabstop>
   <tabstop>scale_factor</tabstop>

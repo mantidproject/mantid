@@ -1413,6 +1413,42 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
         self._load='LoadRKH'
         #a parameters string to add as the last argument to the above algorithm
         self._load_params='FirstColumnValue="SpectrumNumber"'
+        self._high_angle_pixel_file = ""
+        self._low_angle_pixel_file = ""
+
+
+    def setPixelCorrFile(self, filename, detector = ""):
+        """
+          For compatibility reason, it still uses the self._pixel_file, 
+          but, now, we need pixel_file (flood file) for both detectors.
+          so, an extra parameter is allowed. 
+          
+          override CalculateNorm.
+          
+        """
+        detector = detector.upper()
+        self._pixel_file = filename
+
+        if detector in ("FRONT","HAB"):
+            self._high_angle_pixel_file = filename
+        if detector in ("REAR","MAIN",""):
+            self._low_angle_pixel_file = filename
+
+    def getPixelCorrFile(self, detector = ""):
+        """
+          For compatibility reason, it still uses the self._pixel_file, 
+          but, now, we need pixel_file (flood file) for both detectors.
+          so, an extra parameter is allowed. 
+          
+          override CalculateNorm.
+        """
+        detector = detector.upper()
+        if detector in ("FRONT","HAB"):
+            return self._high_angle_pixel_file
+        elif detector in ("REAR","MAIN",""):
+            return self._low_angle_pixel_file
+        else :
+            return self._pixel_file        
 
     def calculate(self, reducer, wave_wks=[]):
         """
@@ -1429,7 +1465,10 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
             
             if self._is_point_data(self.TMP_ISIS_NAME):
                 ConvertToHistogram(self.TMP_ISIS_NAME, self.TMP_ISIS_NAME)
-
+        ## try to redefine self._pixel_file to pass to CalculateNORM method calculate.
+        detect_pixel_file = self.getPixelCorrFile(reducer.instrument.det_selection)
+        if (detect_pixel_file != ""):
+            self._pixel_file = detect_pixel_file
         wave_adj, pixel_adj = super(CalculateNormISIS, self).calculate(reducer, wave_wks)
 
         if pixel_adj:
@@ -1634,7 +1673,8 @@ class UserFile(ReductionStep):
         reducer.user_file_path = os.path.dirname(user_file)
         # Re-initializes default values
         self._initialize_mask(reducer)
-        reducer.prep_normalize.setPixelCorrFile('')
+        reducer.prep_normalize.setPixelCorrFile('','REAR')
+        reducer.prep_normalize.setPixelCorrFile('','FRONT')
     
         file_handle = open(user_file, 'r')
         for line in file_handle:
@@ -1920,49 +1960,36 @@ class UserFile(ReductionStep):
             if len(parts) < 2 or parts[0].upper() != 'TRANS/SPECTRUM' :
                 return 'Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=... not: '
             reducer.set_trans_spectrum(int(parts[1]), interpolate, override=False)
-    
-        elif 'DIRECT' in details.upper() or details.upper().startswith('FLAT'):
-            parts = details.split("=")
-            if len(parts) == 2:
-                filepath = parts[1].rstrip()
-                #for VMS compatibility ignore anything in "[]", those are normally VMS drive specifications
-                if '[' in filepath:
-                    idx = filepath.rfind(']')
-                    filepath = filepath[idx + 1:]
-                if not os.path.isabs(filepath):
-                    filepath = reducer.user_file_path+'/'+filepath
-                type = parts[0]
-                parts = type.split("/")
-                if len(parts) == 1:
-                    if parts[0].upper() == 'DIRECT':
-                        reducer.instrument.cur_detector().correction_file \
-                            = filepath
-                        reducer.instrument.other_detector().correction_file \
-                           = filepath
-                    elif parts[0].upper() == 'HAB':
-                        try:
-                            reducer.instrument.getDetector('HAB').correction_file \
-                                = filepath
-                        except AttributeError:
-                            raise AttributeError('Detector HAB does not exist for the current instrument, set the instrument to LOQ first')
-                    elif parts[0].upper() == 'FLAT':
-                        reducer.prep_normalize.setPixelCorrFile(filepath)
-                    else:
-                        pass
-                elif len(parts) == 2:
-                    detname = parts[1]
-                    if detname.upper() == 'REAR':
-                        reducer.instrument.getDetector('REAR').correction_file \
-                            = filepath
-                    elif detname.upper() == 'FRONT' or detname.upper() == 'HAB':
-                        reducer.instrument.getDetector('FRONT').correction_file \
-                            = filepath
-                    else:
-                        return 'Incorrect detector specified for efficiency file: '
-                else:
-                    return 'Unable to parse monitor line: '
+
+        elif details.upper().startswith('FLAT'):
+            command,filepath = details.strip().upper().split('=')
+            if command == 'FLAT':
+                reducer.prep_normalize.setPixelCorrFile(filepath,'REAR')
+            elif command == "FLAT/REAR":
+                reducer.prep_normalize.setPixelCorrFile(filepath,'REAR')
+            elif command == "FLAT/FRONT":
+                reducer.prep_normalize.setPixelCorrFile(filepath,'FRONT')
             else:
+                raise AttributeError('MON OPTION FAILED: [FLAT]'+ str(details))
                 return 'Unable to parse monitor line: '
+    
+        elif details.upper().startswith('HAB'):
+            command, filepath = details.strip().upper().split("=")
+            if command == "HAB":
+                reducer.instrument.get_high_angle_detector().correction_file = filepath
+            else:
+                raise AttributeError('MON OPTION FAILED [HAB]: ' + str(details))
+
+        elif 'DIRECT' in details.upper():
+            command,filepath = details.strip().upper().split("=")
+            if command == "DIRECT" or command == "DIRECT/REAR":
+                reducer.instrument.get_low_angle_detector().correction_file = filepath
+            elif command == "DIRECT/HAB" or command == "HAB/DIRECT" or command == "DIRECT/FRONT":
+                reducer.instrument.get_high_angle_detector().correction_file = filepath
+            else:
+                raise AttributeError('MON OPTION FAILED: [DIRECT]' + str(details))
+                return 'Incorrect detector specified for efficiency file: '
+
         else:
             return 'Unable to parse monitor line: '
 

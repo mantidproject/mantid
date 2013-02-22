@@ -428,7 +428,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                     ReductionSingleton().can_trans_load.execute(ReductionSingleton(),None)
                         
         ReductionSingleton().instrument.setDetector('front')
-        SetDetectorFloodFile('') #FIXME: now the FloodFile does not refer to FRONT/HAB detectors. But, in the future, this line must be erased.
+
         retWSname_front = _WavRangeReduction(name_suffix)
         retWSname = retWSname_front
 
@@ -746,8 +746,8 @@ def SetFrontEfficiencyFile(filename):
     front_det = ReductionSingleton().instrument.getDetector('front')
     front_det.correction_file = filename
 
-def SetDetectorFloodFile(filename):
-    ReductionSingleton().prep_normalize.setPixelCorrFile(filename)
+def SetDetectorFloodFile(filename, detector_name="REAR"):
+    ReductionSingleton().prep_normalize.setPixelCorrFile(filename, detector_name)
 
 def displayUserFile():
     print '-- Mask file defaults --'
