@@ -779,9 +779,7 @@ Then, the contents of that section are replaced
     f = open(filename, 'w')
     f.write(contents)
     f.close()
-            
-
-
+   
 
 class Screenshot(QtCore.QObject):
     """
@@ -840,6 +838,22 @@ def screenshot(widget, filename, description, png_exists=False):
         section_text += '<img src="%s.png" alt="%s"></img>' % (filename, description)
         
         _replace_report_text(report, filename, section_text)
+        
+def screenshot(widget, filename, screenshot_dir):
+    """Take a screenshot of a widget
+    
+    @param widget :: QWidget to take an image of
+    @param filename :: Destination filename for that image
+    @param screenshot_dir :: Directory to put the screenshots into.
+    """
+        # Find the widget if handled with a proxy
+    if hasattr(widget, "_getHeldObject"):
+        widget = widget._getHeldObject()
+                
+    if widget is not None:
+        camera = Screenshot()
+        threadsafe_call(camera.take_picture, widget, os.path.join(screenshot_dir, filename+".png"))
+    
 
 #=============================================================================
 # Helper methods
