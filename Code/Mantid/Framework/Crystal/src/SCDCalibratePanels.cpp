@@ -1315,7 +1315,7 @@ namespace Mantid
       double beamline_norm,L0=0.0;
       V3D beamline,  samplePos;
       filebuf fb;
-      fb.open(FileName, ios::out);
+      fb.open(FileName.c_str(), ios::out);
       ostream os(&fb);
       os << "# NEW CALIBRATION FILE FORMAT (in NeXus/SNS coordinates):" << endl;
       os << "# Lengths are in centimeters." << endl;
