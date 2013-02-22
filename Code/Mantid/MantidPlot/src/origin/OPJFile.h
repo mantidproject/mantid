@@ -556,7 +556,7 @@ public:
 		if(SPREADSHEET[s].column[c].odata[r].type==0)
 			return (void*)const_cast<double*>(&SPREADSHEET[s].column[c].odata[r].d);
 		else
-			return (void*)const_cast<double*>(SPREADSHEET[s].column[c].odata[r].s.c_str());
+			return (void*)const_cast<char*>(SPREADSHEET[s].column[c].odata[r].s.c_str());
 	}	//!< get data of column c/row r of spreadsheet s
 
 	//matrix properties
