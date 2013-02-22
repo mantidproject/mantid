@@ -552,11 +552,11 @@ public:
 	int colWidth(int s, int c) const { return SPREADSHEET[s].column[c].width; }	//!< get width of column c of spreadsheet s
 	void* oData(int s, int c, int r, bool alwaysDouble=false) const {
 		if(alwaysDouble)
-			return (void*)&SPREADSHEET[s].column[c].odata[r].d;
+			return (void*)const_cast<double*>(&SPREADSHEET[s].column[c].odata[r].d);
 		if(SPREADSHEET[s].column[c].odata[r].type==0)
-			return (void*)&SPREADSHEET[s].column[c].odata[r].d;
+			return (void*)const_cast<double*>(&SPREADSHEET[s].column[c].odata[r].d);
 		else
-			return (void*)SPREADSHEET[s].column[c].odata[r].s.c_str();
+			return (void*)const_cast<double*>(SPREADSHEET[s].column[c].odata[r].s.c_str());
 	}	//!< get data of column c/row r of spreadsheet s
 
 	//matrix properties
