@@ -1955,36 +1955,51 @@ class UserFile(ReductionStep):
             if len(parts) < 2 or parts[0].upper() != 'TRANS/SPECTRUM' :
                 return 'Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=... not: '
             reducer.set_trans_spectrum(int(parts[1]), interpolate, override=False)
-
-        elif details.upper().startswith('FLAT'):
-            command,filepath = details.strip().upper().split('=')
-            if command == 'FLAT':
-                reducer.prep_normalize.setPixelCorrFile(filepath,'REAR')
-            elif command == "FLAT/REAR":
-                reducer.prep_normalize.setPixelCorrFile(filepath,'REAR')
-            elif command == "FLAT/FRONT":
-                reducer.prep_normalize.setPixelCorrFile(filepath,'FRONT')
-            else:
-                raise AttributeError('MON OPTION FAILED: [FLAT]'+ str(details))
-                return 'Unable to parse monitor line: '
     
-        elif details.upper().startswith('HAB'):
-            command, filepath = details.strip().upper().split("=")
-            if command == "HAB":
-                reducer.instrument.get_high_angle_detector().correction_file = filepath
+        elif 'DIRECT' in details.upper() or details.upper().startswith('FLAT'):
+            parts = details.split("=")
+            if len(parts) == 2:
+                filepath = parts[1].rstrip()
+                #for VMS compatibility ignore anything in "[]", those are normally VMS drive specifications
+                if '[' in filepath:
+                    idx = filepath.rfind(']')
+                    filepath = filepath[idx + 1:]
+                if not os.path.isabs(filepath):
+                    filepath = reducer.user_file_path+'/'+filepath
+                type = parts[0]
+                parts = type.split("/")
+                if len(parts) == 1:
+                    if parts[0].upper() == 'DIRECT':
+                        reducer.instrument.cur_detector().correction_file \
+                            = filepath
+                        reducer.instrument.other_detector().correction_file \
+                           = filepath
+                    elif parts[0].upper() == 'HAB':
+                        try:
+                            reducer.instrument.getDetector('HAB').correction_file \
+                                = filepath
+                        except AttributeError:
+                            raise AttributeError('Detector HAB does not exist for the current instrument, set the instrument to LOQ first')
+                    elif parts[0].upper() == 'FLAT' or parts[0].upper() == 'FLAT/REAR':
+                        reducer.prep_normalize.setPixelCorrFile(filepath,'REAR')
+                    elif parts[0].upper() == 'FLAT/FRONT':
+                        reducer.prep_normalize.setPixelCorrFile(filepath,'FRONT')
+                    else:
+                        pass
+                elif len(parts) == 2:
+                    detname = parts[1]
+                    if detname.upper() == 'REAR':
+                        reducer.instrument.getDetector('REAR').correction_file \
+                            = filepath
+                    elif detname.upper() == 'FRONT' or detname.upper() == 'HAB':
+                        reducer.instrument.getDetector('FRONT').correction_file \
+                            = filepath
+                    else:
+                        return 'Incorrect detector specified for efficiency file: '
+                else:
+                    return 'Unable to parse monitor line: '
             else:
-                raise AttributeError('MON OPTION FAILED [HAB]: ' + str(details))
-
-        elif 'DIRECT' in details.upper():
-            command,filepath = details.strip().upper().split("=")
-            if command == "DIRECT" or command == "DIRECT/REAR":
-                reducer.instrument.get_low_angle_detector().correction_file = filepath
-            elif command == "DIRECT/HAB" or command == "HAB/DIRECT" or command == "DIRECT/FRONT":
-                reducer.instrument.get_high_angle_detector().correction_file = filepath
-            else:
-                raise AttributeError('MON OPTION FAILED: [DIRECT]' + str(details))
-                return 'Incorrect detector specified for efficiency file: '
-
+                return 'Unable to parse monitor line: '
         else:
             return 'Unable to parse monitor line: '
 
