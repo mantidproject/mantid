@@ -15,9 +15,9 @@
 # When building the package CPack installs into ${DESTDIR}${CMAKE_INSTALL_PREFIX}
 # but this should be evaluated at CPack time so escape the $ to its written literally.
 set ( PACKAGE_ROOT \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX} )
+set ( EXCLUDE_REGEX ".*_template|.*port_v3" )
 
 set ( COMPILE_SCRIPT "message ( \"Byte-compiling Python in ${PACKAGE_ROOT}\")" )
-set ( COMPILE_SCRIPT "${COMPILE_SCRIPT}\n  execute_process ( COMMAND ${PYTHON_EXECUTABLE} -m compileall -q -x \".*_template.py\" \"${PACKAGE_ROOT}\" ERROR_VARIABLE STDERR)" )
-set ( COMPILE_SCRIPT "${COMPILE_SCRIPT}\n  if(STDERR)\n   message( FATAL_ERROR \"Error compiling Python: \${STDERR}\")\n endif()" )
+set ( COMPILE_SCRIPT "${COMPILE_SCRIPT}\n  execute_process ( COMMAND ${PYTHON_EXECUTABLE} -m compileall -q -x \"${EXCLUDE_REGEX}\" \"${PACKAGE_ROOT}\")" )
 
 install ( CODE ${COMPILE_SCRIPT} )
