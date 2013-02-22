@@ -1,6 +1,7 @@
 from reduction import instrument
 import math
 from mantidsimple import *
+import sys
 
 class DetectorBank:
     class _DectShape:
@@ -311,11 +312,16 @@ class DetectorBank:
             output_name = input_name
 
         try:
-            CropWorkspace(input_name, output_name,
-                StartWorkspaceIndex = self.get_first_spec_num() - 1,
-                EndWorkspaceIndex = self.last_spec_num - 1)
-        except SystemExit:
-            raise ValueError('Can not find spectra for %s in the workspace %s'%(self.name(), output_name))
+            wki = mtd[input_name]
+            #Is it really necessary to crop?
+            if (wki.getNumberHistograms() != self.last_spec_num - self.get_first_spec_num() + 1):
+                CropWorkspace(input_name, output_name,
+                              StartWorkspaceIndex = self.get_first_spec_num() - 1,
+                              EndWorkspaceIndex = self.last_spec_num - 1)
+        except :            
+            raise ValueError('Can not find spectra for %s in the workspace %s [%d,%d]\nException:'
+                             %(self.name(), input_name,self.get_first_spec_num(),self.last_spec_num) 
+                             + str(sys.exc_info()))
 
 class ISISInstrument(instrument.Instrument):
     def __init__(self, filename=None):
@@ -432,6 +438,18 @@ class ISISInstrument(instrument.Instrument):
         if self.lowAngDetSet : return self.DETECTORS['low-angle']
         else : return self.DETECTORS['high-angle']
     
+    def get_low_angle_detector(self):
+        """ Provide a direct way to get the low bank detector.
+        This method does not require to pass the name of the detector bank.
+        """
+        return self.DETECTORS['low-angle']
+   
+    def get_high_angle_detector(self):
+        """ Provide a direct way to get the high bank detector
+        This method does not require to pass the name of the detector bank.
+        """
+        return self.DETECTORS['high-angle']
+
     def other_detector(self) :
         if not self.lowAngDetSet : return self.DETECTORS['low-angle']
         else : return self.DETECTORS['high-angle']
