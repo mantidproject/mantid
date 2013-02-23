@@ -57,7 +57,8 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh  "#!/bin/sh\n"
 #                                                    "PV_PLUGIN_PATH=$scriptpath/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\n"
                                                     "PATH=$PATH:$MANTIDPATH\n"
 						    "PYTHONPATH=$MANTIDPATH:$PYTHONPATH\n"
-                                                    "export MANTIDPATH PV_PLUGIN_PATH PATH PYTHONPATH\n"
+						    "LD_PRELOAD=\n"
+                                                    "export MANTIDPATH PV_PLUGIN_PATH PATH PYTHONPATH LD_PRELOAD\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
