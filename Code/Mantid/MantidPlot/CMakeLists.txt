@@ -523,7 +523,7 @@ add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
 add_custom_command ( OUTPUT ${SIP_SRC}
                      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${SIP_SRC_IN} ${SIP_SRC}
                      DEPENDS ${SIP_SRC_AUTO}
-                     COMMENT "Generating sip wrapper"
+                     COMMENT ""
 )                     
 
 # Needed for sip.h header that can end up in a different place to to the main Python include directory

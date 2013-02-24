@@ -7,7 +7,7 @@ include_directories ( ${PYTHON_INCLUDE_PATH} )
 set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt.sip )
 set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/sip_mantidqt.cpp.in )
 set ( SIP_SRC ${CMAKE_CURRENT_BINARY_DIR}/sip_mantidqt.cpp )
-set ( SIP_SRC_AUTO siplibmantidpythonqtpart0.cpp )
+set ( SIP_SRC_AUTO sipmantidqtpythonpart0.cpp )
 
 # We need to manually add all the headers that are in the sip file
 # so that the dependencies are known to CMake
@@ -45,7 +45,7 @@ add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
 add_custom_command ( OUTPUT ${SIP_SRC}
                      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${SIP_SRC_IN} ${SIP_SRC}
                      DEPENDS ${SIP_SRC_AUTO}
-                     COMMENT "Generating mantidqt sip wrapper"
+                     COMMENT ""
 )                     
 
 # Needed for sip.h header that can end up in a different place to to the main Python include directory
