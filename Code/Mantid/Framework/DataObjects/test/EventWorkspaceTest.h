@@ -14,7 +14,6 @@
 
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/Timer.h"

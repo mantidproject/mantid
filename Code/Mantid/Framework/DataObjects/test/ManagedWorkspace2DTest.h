@@ -5,7 +5,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Memory.h"
 #include <cxxtest/TestSuite.h>
@@ -44,8 +43,6 @@ public:
     size_t nVec = 1250;
     size_t vecLength = 25;
     bigWorkspace.initialize(nVec, vecLength, vecLength);
-    // As of 20/7/2011, revision [13332], this call is required for the testSpectrumAndDetectorNumbers test to pass
-    bigWorkspace.replaceSpectraMap(new Mantid::Geometry::OneToOneSpectraDetectorMap(1,(int)nVec));
     for (size_t i=0; i< nVec; i++)
     {
       boost::shared_ptr<MantidVec > x1(new MantidVec(vecLength,1+i) );
