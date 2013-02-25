@@ -10,6 +10,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
