@@ -158,12 +158,10 @@ private:
     inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
 
     // the following is largely about associating detectors with the workspace
-    int forSpecDetMap[NHIST];
     for (int j = 0; j < NHIST; ++j)
     {
       // Just set the spectrum number to match the index
       inputWS->getAxis(1)->spectraNo(j) = j+1;
-      forSpecDetMap[j] = j+1;
     }
 
     AnalysisDataService::Instance().add(input,inputWS);
@@ -176,8 +174,6 @@ private:
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", input);
     loader.execute();
-
-    inputWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, NHIST));
 
     // mask the detector
     ParameterMap* m_Pmap = &(inputWS->instrumentParameters());
