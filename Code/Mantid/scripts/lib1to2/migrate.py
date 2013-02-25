@@ -6,6 +6,7 @@ from grammar import Grammar
 
 import os
 import shutil
+import traceback
 
 def run(files, backup=True):
     """
@@ -27,10 +28,9 @@ def run(files, backup=True):
         try:
             msg = script.migrate()
         except Exception, exc:
-            raise
-            msg = str(exc)
+            traceback.print_exc()
             script.restore_backup()
-            msg += "\nBackup restored."
+            msg = "%s: Backup restored." % (filename)
         reports.append(msg)
 
     messages.notify("\n" + "="*10 + " Report " + "="*10 + "\n")

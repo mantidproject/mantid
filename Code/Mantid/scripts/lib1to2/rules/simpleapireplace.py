@@ -82,9 +82,6 @@ class SimpleAPIFunctionCallReplace(rules.Rules):
         alg_object.initialize()
         self.transform_arglist_to_keywords(arglist_node, alg_object)
 
-        # Pull out the output args from the argument list
-        self.put_output_args_on_lhs(fn_call_node, arglist_node, alg_object)
-
     def transform_arglist_to_keywords(self, arglist_node, alg_object):
         """Takes a node that points to argument list and transforms
         it to all keyword=values

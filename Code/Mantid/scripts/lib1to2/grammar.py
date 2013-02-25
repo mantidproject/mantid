@@ -4,7 +4,7 @@ Defines the grammar translation from version 1 to version 2 of Mantid's Python A
 import messages 
 import rules
 import astbuilder
-        
+
 class Grammar(object):
     """
     Translation from v1->v2 of the Python API
