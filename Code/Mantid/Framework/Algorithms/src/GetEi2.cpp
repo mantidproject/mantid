@@ -111,7 +111,6 @@ void GetEi2::init()
 *  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
 *  @throw invalid_argument if a good peak fit wasn't made or the input workspace does not have common binning
-*  @throw runtime_error if there is a problem with the SpectraDetectorMap or a Child Algorithm falls over
 */
 void GetEi2::exec()
 {

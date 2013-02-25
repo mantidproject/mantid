@@ -32,7 +32,6 @@ This is the inverse of the DspacemaptoCal algorithm.  The detector offset file c
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/CaltoDspacemap.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"

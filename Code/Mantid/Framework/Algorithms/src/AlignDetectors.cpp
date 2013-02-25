@@ -19,7 +19,6 @@ The input workspace must contain histogram or event data where the X unit is tim
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -209,7 +208,6 @@ void AlignDetectors::exec()
     offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
   }
 
-  // Ref. to the SpectraDetectorMap
   const int64_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // generate map of the tof->d conversion factors
@@ -317,7 +315,6 @@ void AlignDetectors::execEvent()
   // Set the final unit that our output workspace will have
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
-  // Ref. to the SpectraDetectorMap
   const int64_t numberOfSpectra = static_cast<int64_t>(inputWS->getNumberHistograms());
 
   // Initialise the progress reporting object

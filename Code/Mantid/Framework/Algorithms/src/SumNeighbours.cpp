@@ -22,7 +22,6 @@ The algorithm looks through the [[Instrument]] to find all the [[RectangularDete
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include <boost/algorithm/string.hpp>
 #include "MantidKernel/BoundedValidator.h"
 

@@ -23,7 +23,6 @@ Based on information retrieved from the [[Nearest Neighbours]] class in Mantid G
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FileProperty.h"

@@ -13,7 +13,6 @@ To be written
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid

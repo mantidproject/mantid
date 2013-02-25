@@ -16,7 +16,6 @@ The instrumentView is the best way to visualize the grouping using the "show Ins
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"

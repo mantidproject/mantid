@@ -12,7 +12,6 @@ The spectra containing 0 are also marked as masked and the instrument link is pr
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/ExtractMask.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ArrayProperty.h"

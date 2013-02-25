@@ -24,7 +24,6 @@ The distances between the monitors are read from the instrument definition file.
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include <boost/lexical_cast.hpp>
 #include "MantidKernel/Exception.h" 
 #include <cmath>
@@ -103,7 +102,6 @@ void GetEi::init()
 *  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
 *  @throw invalid_argument if a good peak fit wasn't made or the input workspace does not have common binning
-*  @throw runtime_error if there is a problem with the SpectraDetectorMap or a Child Algorithm falls over
 */
 void GetEi::exec()
 {
@@ -150,7 +148,6 @@ void GetEi::exec()
 *  @param monitor0Dist :: the calculated distance to the detector whose ID was passed to this function first
 *  @param monitor1Dist :: calculated distance to the detector whose ID was passed to this function second
 *  @throw NotFoundError if no detector is found for the detector ID given
-*  @throw runtime_error if there is a problem with the SpectraDetectorMap
 */
 void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec, specid_t mon1Spec, double &monitor0Dist, double &monitor1Dist) const
 {

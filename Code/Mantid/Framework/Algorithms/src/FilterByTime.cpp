@@ -21,7 +21,6 @@ You must specify:
 #include "MantidAlgorithms/FilterByTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/DateAndTime.h"

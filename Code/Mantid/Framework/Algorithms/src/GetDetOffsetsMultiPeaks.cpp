@@ -17,7 +17,6 @@ GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 #include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"

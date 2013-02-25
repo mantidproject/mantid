@@ -10,7 +10,6 @@ The result is stored as a new workspace containing a single spectra.
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/RebinnedOutput.h"

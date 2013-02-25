@@ -10,7 +10,6 @@ The algorithm looks at sample logs ("proton_charge"), finds the mean, and reject
 #include "MantidAlgorithms/FilterBadPulses.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"

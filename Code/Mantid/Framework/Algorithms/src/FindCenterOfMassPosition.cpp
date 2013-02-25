@@ -17,7 +17,6 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <iostream>

@@ -24,7 +24,6 @@ Uses the algorithm [[linear]] to fit to the calculated transmission fraction.
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateTransmission.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"

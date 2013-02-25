@@ -17,8 +17,6 @@ The input workspaces must come from the same instrument, have common units and b
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 
 namespace Mantid
 {
@@ -26,7 +24,6 @@ namespace Algorithms
 {
 
 using std::size_t;
-using Geometry::ISpectraDetectorMap;
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;

@@ -16,7 +16,6 @@ Uses the [[Integration]] algorithm to sum the spectra.
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/System.h"
 #include <fstream>
 #include "MantidKernel/BoundedValidator.h"

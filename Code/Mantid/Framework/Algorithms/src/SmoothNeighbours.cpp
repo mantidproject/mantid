@@ -89,7 +89,6 @@ The algorithm will ignore masked detectors if this flag is set.
 
 
 #include "MantidAlgorithms/SmoothNeighbours.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"

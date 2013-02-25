@@ -5,7 +5,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"

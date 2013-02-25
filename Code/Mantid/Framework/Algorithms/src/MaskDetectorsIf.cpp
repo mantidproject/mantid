@@ -8,7 +8,6 @@ Iterates over the input workspace evaluating the test for each single value spec
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskDetectorsIf.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <fstream>

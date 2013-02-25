@@ -36,7 +36,6 @@ In both cases, the [[Divide]] algorithm is used to perform the normalisation.
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/EnabledWhenProperty.h"

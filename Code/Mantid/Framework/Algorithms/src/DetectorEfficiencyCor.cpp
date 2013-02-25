@@ -117,7 +117,6 @@ void DetectorEfficiencyCor::init()
 /** Executes the algorithm
 *  @throw NullPointerException if a getDetector() returns NULL or pressure or wall thickness is not set
 *  @throw invalid_argument if the shape of a detector is isn't a cylinder aligned on axis or there is no baseInstrument
-*  @throw runtime_error if the SpectraDetectorMap had not been filled
 */
 void DetectorEfficiencyCor::exec()
 {
@@ -207,7 +206,6 @@ void DetectorEfficiencyCor::retrieveProperties()
 Gets the detector information and uses this to calculate its efficiency
 *  @param spectraIn :: index of the spectrum to get the efficiency for
 *  @throw invalid_argument if the shape of a detector is isn't a cylinder aligned along one axis
-*  @throw runtime_error if the SpectraDetectorMap has not been filled
 *  @throw NotFoundError if the detector or its gas pressure or wall thickness were not found
 */
 void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn)
