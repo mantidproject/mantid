@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/He3TubeEfficiency.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -184,20 +183,12 @@ private:
     }
     x.access()[nbins] = static_cast<double>((1. + nbins) / 10.);
 
-    int *specNums = new int[nspecs];
-    int *detIDs = new int[nspecs];
     for (int i = 0; i < nspecs; i++)
     {
       space2D->setX(i, x);
       space2D->setData(i, y, e);
       space2D->getAxis(1)->spectraNo(i) = i;
-
-      specNums[i] = i;
-      detIDs[i] = i;
     }
-    space2D->replaceSpectraMap(new SpectraDetectorMap(specNums, detIDs, nspecs));
-    delete[] specNums;
-    delete[] detIDs;
 
     AnalysisDataService::Instance().add(inputWS, space2D);
 

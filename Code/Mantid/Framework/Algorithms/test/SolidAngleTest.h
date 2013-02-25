@@ -9,7 +9,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
 
@@ -52,8 +51,6 @@ public:
       space2D->getAxis(1)->spectraNo(j) = j+1;
       forSpecDetMap[j] = j+1;
     }
-    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space2D->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, Nhist ));
 
     // Register the workspace in the data service
     inputSpace = "SATestWorkspace";

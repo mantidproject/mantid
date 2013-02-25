@@ -8,7 +8,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include <boost/shared_ptr.hpp>
@@ -162,9 +161,6 @@ public:
     //both workspaces should use the same instrument information
     loader.setPropertyValue("Workspace", m_WB2Name);
     loader.execute(); 
-
-    inputA->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap,forSpecDetMap,Nhist));
-    inputB->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap,forSpecDetMap,Nhist));
 
     inputA->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     inputB->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");

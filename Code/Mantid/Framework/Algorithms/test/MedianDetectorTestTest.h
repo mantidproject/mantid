@@ -8,7 +8,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
@@ -231,8 +230,6 @@ public:
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", m_IWSName);
     loader.execute(); 
-
-    m_2DWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, Nhist));
 
     m_2DWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
