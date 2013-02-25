@@ -10,7 +10,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 
 #include <Poco/Path.h>
 #include <Poco/File.h>

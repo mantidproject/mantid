@@ -7,7 +7,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
 

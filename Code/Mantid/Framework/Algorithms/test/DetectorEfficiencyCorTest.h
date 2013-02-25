@@ -13,7 +13,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/DOM/DOMParser.h>

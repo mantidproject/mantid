@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"

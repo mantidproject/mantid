@@ -6,7 +6,6 @@
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::Algorithms;

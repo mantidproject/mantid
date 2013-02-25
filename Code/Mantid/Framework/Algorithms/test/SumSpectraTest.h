@@ -3,7 +3,6 @@
 
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
