@@ -415,7 +415,7 @@ namespace Mantid
       {
         int64_t hist = m_spec_list[0];
         SpectraBlock block(hist,hist,false);
-        for(auto spec = m_spec_list.cbegin() + 1; spec != m_spec_list.cend(); ++spec)
+        for(auto spec = m_spec_list.begin() + 1; spec != m_spec_list.end(); ++spec)
         {
           // try to put all consequtive numbers in same block
           bool isMonitor = m_monitors.find( hist ) != m_monitors.end();
@@ -497,7 +497,7 @@ namespace Mantid
       }
       // count the number of spectra
       size_t nSpec = 0;
-      for( auto it = m_spectraBlocks.cbegin(); it != m_spectraBlocks.cend(); ++it )
+      for( auto it = m_spectraBlocks.begin(); it != m_spectraBlocks.end(); ++it )
       {
         nSpec += it->last - it->first + 1;
       }
@@ -516,7 +516,7 @@ namespace Mantid
       int64_t period_index(period - 1);
       //int64_t first_monitor_spectrum = 0;
 
-      for(auto block = m_spectraBlocks.cbegin(); block != m_spectraBlocks.cend(); ++block)
+      for(auto block = m_spectraBlocks.begin(); block != m_spectraBlocks.end(); ++block)
       {
         if ( block->isMonitor )
         {
