@@ -1,11 +1,9 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 
 using Mantid::API::SpectraAxis;
-using Mantid::API::SpectraDetectorMap;
 
 namespace Mantid
 {

@@ -1,11 +1,9 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 
 using Mantid::API::SpectraAxis;
-using Mantid::API::SpectraDetectorMap;
 
 using std::size_t;
 using namespace Mantid::API;

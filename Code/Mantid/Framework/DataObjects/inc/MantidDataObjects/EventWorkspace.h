@@ -7,7 +7,6 @@
 
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"

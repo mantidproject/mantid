@@ -1,13 +1,11 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 
 #include <fstream>
 
 using Mantid::API::SpectraAxis;
-using Mantid::API::SpectraDetectorMap;
 using std::set;
 using std::size_t;
 

@@ -2,7 +2,6 @@
 #define MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
     
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
