@@ -16,7 +16,6 @@ protected:
   ~vtkScaleWorkspace();
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  void UpdateMetaData(vtkDataSet *ds);
 
 private:
   vtkScaleWorkspace(const vtkScaleWorkspace&);
@@ -24,6 +23,5 @@ private:
   double m_xScaling;
   double m_yScaling;
   double m_zScaling;
-  double m_bb[6];
 };
 #endif
