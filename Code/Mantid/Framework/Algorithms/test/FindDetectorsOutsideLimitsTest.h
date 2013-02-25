@@ -6,7 +6,6 @@
 #include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -68,9 +67,8 @@ public:
       Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("",i,NULL);
       instr->add(det);
       instr->markAsDetector(det);
+      work_in->getSpectrum(i)->setDetectorID(i);
     }
-    int forSpecDetMap[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
-    work_in->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap,forSpecDetMap,20));
 
     FindDetectorsOutsideLimits alg;
 

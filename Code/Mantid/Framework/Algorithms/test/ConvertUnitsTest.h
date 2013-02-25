@@ -9,7 +9,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -43,16 +42,13 @@ public:
       (*a)[i]=i;
       (*e)[i]=sqrt(double(i));
     }
-    int forSpecDetMap[256];
     for (int j = 0; j < 256; ++j) {
       space2D->setX(j, x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
       space2D->getAxis(1)->spectraNo(j) = j;
-      forSpecDetMap[j] = j;
+      space2D->getSpectrum(j)->setDetectorID(j);
     }
-    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space2D->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 256 ));
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     // Register the workspace in the data service
