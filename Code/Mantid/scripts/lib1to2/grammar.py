@@ -34,4 +34,4 @@ class Grammar(object):
         tree = astbuilder.parse(translated)
         tree = api_call_replace.apply_to_ast(tree)
 
-        return astbuilder.regenerate(tree)
+        return astbuilder.regenerate(tree), api_call_replace.errors

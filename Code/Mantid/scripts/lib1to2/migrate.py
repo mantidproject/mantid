@@ -80,11 +80,19 @@ class ScriptFile(object):
         input_as_str = input_file.read()
         input_file.close()
 
-        converted_str = self.grammar.translate(input_as_str)
+        converted_str, errors = self.grammar.translate(input_as_str)
         
-        output_file = open(self.filename, 'w')
+        filename = self.filename
+        if len(errors) > 0:
+            filename = self.filename + ".partial"
+            errors.append("Partial translation stored in '%s'" % filename)
+
+        output_file = open(filename, 'w')
         output_file.write(converted_str)
         output_file.close()
+
+        if len(errors) > 0:
+            raise RuntimeError("\n".join(errors))
 
         outcome = MigrationStatus(MigrationStatus.Migrated)
         return Report(self.filename, outcome)

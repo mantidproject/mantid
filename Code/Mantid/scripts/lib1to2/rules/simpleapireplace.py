@@ -33,7 +33,7 @@ class SimpleAPIFunctionCallReplace(rules.Rules):
     
     func_regex = __FUNCTION_CALL_REGEX__
     current_line = None
-    
+     
     def __init__(self):
         rules.Rules.__init__(self)
         
@@ -64,7 +64,6 @@ class SimpleAPIFunctionCallReplace(rules.Rules):
         """
         # Two steps: 
         #   First - transform to all keywords
-        #   Second - remove output properties from list and put on lhs
         nchildren = len(parent.children)
         no_lhs = True
         if nchildren == 2:
@@ -72,7 +71,7 @@ class SimpleAPIFunctionCallReplace(rules.Rules):
             fn_call_node = parent.children[0]
             no_lhs = True
         elif nchildren == 3:
-            raise RuntimeError("Unable to handle assignment from algorithm call")
+            self.errors.append("Unable to handle assignment for '%s' algorithm call" % (name))
         
         # Get the argument list node: child 1 = arglist parent node then child 1 = arg list
         arglist_node = fn_call_node.children[1].children[1]
@@ -324,7 +323,7 @@ class SimpleAPIVisitor(ASTVisitor):
         return self._nodes
 
     def visit_node(self, node):
-        if node.type == syms.power:
+        if node.type == syms.power and hasattr(node, "value"):
             fn_name = node.children[0].value
             if _is_mantid_algorithm(fn_name):
                 # Make sure we get the whole expression including any assignment

@@ -17,6 +17,7 @@ __STRINGREPLACEMENTS__ = [
     (re.compile("\.getSampleDetails"), ".getRun"),
     (re.compile("mtd\.settings"), "config"),
     (re.compile("mtd\.getConfigProperty"), "config.getString"),
+    (re.compile("mtd\.workspaceExists"), "mtd.doesExist"),
     (re.compile("(mtd|mantid).sendLogMessage"), "logger.notice")
 ]
 

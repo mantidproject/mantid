@@ -3,6 +3,8 @@
 
 class Rules(object):
 
+    errors = []
+
     def apply_to_ast(self, tree):
         """
             Apply the transformation to the AST
