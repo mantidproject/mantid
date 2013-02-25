@@ -6,7 +6,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 
 namespace Mantid
 {

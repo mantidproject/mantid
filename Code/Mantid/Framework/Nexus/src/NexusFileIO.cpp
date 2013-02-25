@@ -17,7 +17,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"

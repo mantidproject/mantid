@@ -12,7 +12,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

@@ -4,7 +4,6 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 
 // Forward declarations
 namespace Mantid
