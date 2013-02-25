@@ -43,7 +43,6 @@ would tell the algorithm to interpret the columns as:
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include <nexus/NeXusFile.hpp>

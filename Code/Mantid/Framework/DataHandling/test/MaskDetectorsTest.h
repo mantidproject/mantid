@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 

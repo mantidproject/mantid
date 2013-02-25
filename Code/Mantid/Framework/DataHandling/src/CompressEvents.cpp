@@ -21,7 +21,6 @@ If you are working from the raw events with TOF resolution of 0.100 microseconds
 #include "MantidDataHandling/CompressEvents.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"

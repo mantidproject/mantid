@@ -18,7 +18,6 @@
 //---------------------------------------------------
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ListValidator.h"
 #include <Poco/File.h>
 #include <fstream>

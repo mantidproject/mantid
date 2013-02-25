@@ -18,7 +18,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -34,7 +33,7 @@ public:
   {
 
     //----------------------------------------------------------------------
-    // Tests to check that Loading SpectraDetectorMap is done correctly
+    // Tests to check that spectra-detector mapping is done correctly
     //----------------------------------------------------------------------
     // Check the total number of elements in the map for HET
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 192);

@@ -8,7 +8,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/IDataFileChecker.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 
 //----------------------------------------------------------------------
 // Forward declaration

@@ -14,7 +14,6 @@ The set of detectors to be masked can be given as a list of either spectrum numb
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/BoundedValidator.h"

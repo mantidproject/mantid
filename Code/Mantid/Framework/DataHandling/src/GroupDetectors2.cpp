@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"

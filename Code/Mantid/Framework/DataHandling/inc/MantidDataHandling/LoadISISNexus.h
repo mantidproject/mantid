@@ -13,10 +13,6 @@
 
 #include <boost/shared_array.hpp>
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
 
 namespace Mantid
 {

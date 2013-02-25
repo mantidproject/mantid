@@ -6,7 +6,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/UnitFactory.h"
@@ -23,9 +22,6 @@
 #include <Poco/Path.h>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
-#include "MantidGeometry/ISpectraDetectorMap.h"
-
-using Mantid::Geometry::ISpectraDetectorMap;
 
 namespace Mantid
 {

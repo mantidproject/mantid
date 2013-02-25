@@ -6,7 +6,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GetMaskedDetectors.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 #include <map>

@@ -11,7 +11,6 @@ The LoadRawBin0 algorithm stores bin 0 data from the selected [[RAW_File | RAW]]
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"

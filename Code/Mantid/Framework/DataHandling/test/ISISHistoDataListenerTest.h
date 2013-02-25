@@ -9,7 +9,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/Thread.h>

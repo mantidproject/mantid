@@ -7,7 +7,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"

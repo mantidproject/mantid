@@ -3,7 +3,6 @@
 
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -76,13 +75,8 @@ namespace Mantid
       MatrixWorkspace_sptr ws = this->runLoadInstrument();
       Instrument_const_sptr instrument = ws->getInstrument();
 
-      // Get detectors stored in instrument and create dummy c-arrays for the purpose
-      // of calling method of SpectraDetectorMap 
-      std::map<detid_t, IDetector_const_sptr> detCache;
-
-      // Use GetDetectorID's here since it'll be way faster.
-      instrument->getDetectors(detCache);
-      const int64_t number_spectra = static_cast<int64_t>(detCache.size());
+      // Get number of detectors stored in instrument
+      const size_t number_spectra = instrument->getNumberDetectors();
 
       // Check that we have some spectra for the workspace
       if( number_spectra == 0){

@@ -8,7 +8,6 @@ This algorithm loads all monitors found in a NeXus file into a single [[Workspac
 #include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"

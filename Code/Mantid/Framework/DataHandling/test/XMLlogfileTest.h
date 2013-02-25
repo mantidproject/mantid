@@ -10,7 +10,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 
 #include <iostream>
 

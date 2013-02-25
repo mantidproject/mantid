@@ -71,7 +71,6 @@ The set of spectra to be grouped can be given as a list of either spectrum numbe
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <set>

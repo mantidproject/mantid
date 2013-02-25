@@ -7,7 +7,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include <algorithm>
@@ -81,7 +80,6 @@ void LoadDetectorInfo::init()
 *  @throw FileError if there was a problem opening the file or its format
 *  @throw MisMatch<int> if not very spectra is associated with exaltly one detector
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
-*  @throw runtime_error if the SpectraDetectorMap had not been filled
 */
 void LoadDetectorInfo::exec()
 {
@@ -147,7 +145,6 @@ void LoadDetectorInfo::exec()
 *  @throw FileError if there was a problem opening the file or its format
 *  @throw MisMatch<int> if not very spectra is associated with exaltly one detector
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
-*  @throw runtime_error if the SpectraDetectorMap had not been filled
 */
 void LoadDetectorInfo::readDAT(const std::string& fName)
 {
@@ -294,7 +291,6 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
 * @throw invalid_argument if the detection delay time is different for different monitors
 * @throw MisMatch<int> if not very spectra is associated with exaltly one detector
 * @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
-* @throw runtime_error if the SpectraDetectorMap had not been filled
 */
 void LoadDetectorInfo::readRAW(const std::string& fName)
 {
@@ -508,7 +504,6 @@ void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, co
 *  @param offsets :: an array of values to change the bin boundaries by, these must be listed in the same order as detIDs
 *  @throw MisMatch<int> if not every spectra is associated with exaltly one detector
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
-*  @throw runtime_error if the SpectraDetectorMap had not been filled
 */
 void LoadDetectorInfo::adjustXs(const std::vector<detid_t> &detIDs, const std::vector<float> &offsets)
 {

@@ -9,7 +9,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/BoundedValidator.h"

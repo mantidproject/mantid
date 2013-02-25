@@ -10,7 +10,6 @@ The resulting workspace can then be used with, e.g. [[AlignDetectors]] to perfor
 
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataHandling/LoadDspacemap.h"

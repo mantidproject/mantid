@@ -24,7 +24,6 @@ LoadRaw runs the following algorithms as child algorithms to populate aspects of
 //----------------------------------------------------------------------
 #include "LoadRaw/isisraw.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadRawHelper.h"

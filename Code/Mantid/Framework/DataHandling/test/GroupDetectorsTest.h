@@ -11,7 +11,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include <iostream>
 
 using Mantid::DataHandling::GroupDetectors;

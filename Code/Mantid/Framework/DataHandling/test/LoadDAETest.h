@@ -10,7 +10,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
