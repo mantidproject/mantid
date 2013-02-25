@@ -1,1 +1,0 @@
-#include "MantidGeometry/PrecompiledHeader.h"

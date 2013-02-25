@@ -254,7 +254,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Add a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidCurveFitting/PrecompiledHeader.h MantidCurveFitting src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+enable_precompiled_headers( inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

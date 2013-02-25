@@ -316,7 +316,7 @@ include_directories ( ${GSL_INCLUDE_DIR} )
 
 
 # Add a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidGeometry/PrecompiledHeader.h MantidGeometry src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+enable_precompiled_headers( inc/MantidGeometry/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( Geometry ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library

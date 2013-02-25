@@ -1,1 +1,0 @@
-#include "MantidDataObjects/PrecompiledHeader.h"

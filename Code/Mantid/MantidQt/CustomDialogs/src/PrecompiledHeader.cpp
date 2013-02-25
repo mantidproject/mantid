@@ -1,1 +1,0 @@
-#include "MantidQtCustomDialogs/PrecompiledHeader.h"

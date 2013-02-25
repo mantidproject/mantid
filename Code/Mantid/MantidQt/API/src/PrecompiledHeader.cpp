@@ -1,1 +1,0 @@
-#include "MantidQtAPI/PrecompiledHeader.h"

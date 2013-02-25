@@ -1,1 +1,0 @@
-#include "MantidKernel/PrecompiledHeader.h"
