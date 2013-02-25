@@ -6,7 +6,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/IDetector.h"
 
 namespace MantidQt

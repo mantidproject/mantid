@@ -4,7 +4,6 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/IDetector.h"
 
 using Mantid::specid_t;

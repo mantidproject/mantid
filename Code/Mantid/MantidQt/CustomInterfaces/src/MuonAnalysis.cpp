@@ -19,7 +19,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
