@@ -159,13 +159,19 @@ InterfaceManager::InterfaceManager()
   const std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("mantidqt.plugins.directory");
   if( !libpath.empty() )
   {
-    int nloaded = Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
-    if( nloaded == 0 )
+    // Lazy loading. Avoid loading libraries every time a new instance is created.
+    static bool isLoaded;
+    if(!isLoaded)
     {
-      g_log.warning() << "Unable to load Qt plugin libraries.\n"
-        << "Please check that the 'mantidqt.plugins.directory' variable in the .properties file points to "
-        << "the correct location."
-        << std::endl;
+      int nloaded = Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
+      if( nloaded == 0 )
+      {
+        g_log.warning() << "Unable to load Qt plugin libraries.\n"
+          << "Please check that the 'mantidqt.plugins.directory' variable in the .properties file points to "
+          << "the correct location."
+          << std::endl;
+      }
+      isLoaded = true;
     }
   }
 }
