@@ -6,6 +6,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "MockObjects.h"
+
 #include "MantidVatesAPI/MDEWRebinningPresenter.h"
 
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
@@ -17,8 +18,6 @@
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-
-
 
 using namespace testing;
 using namespace Mantid::VATES;
@@ -387,6 +386,7 @@ public:
     EXPECT_CALL(*view, getAppliedGeometryXML()).Times(AtLeast(1)).WillRepeatedly(Return(viewXML.c_str()));
 
     MockRebinningActionManager* pRequest = new MockRebinningActionManager;
+    
     EXPECT_CALL(*pRequest, ask(RecalculateAll)).Times(AtLeast(1)); //Should ask on first pass, but not for secondClipping as is identical to first.
 
     MockWorkspaceProvider wsProvider;
@@ -462,6 +462,44 @@ public:
     TS_ASSERT_EQUALS(3, parser.getAllDimensions().size()); // Simple test here. but there are loads of other properties on the parser to test.
   
     // NOTE. if you wanted to Extract the field data. You could do that here by fetching it off output product vtkDataSet.
+  }
+
+  void testTimeLabelAfterRebinFor4DData()
+  {
+    const std::string wsName = "TestMDEW";
+    auto someMDEW = Mantid::MDEvents::MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<4>,4>(10,0,10);
+    someMDEW->setName(wsName);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, someMDEW);
+
+    RebinningKnowledgeSerializer serializer(LocationNotRequired);
+    serializer.setWorkspace(someMDEW);
+    std::string creationalXML = serializer.createXMLString();
+
+    vtkUnstructuredGrid* dataSet = vtkUnstructuredGrid::New();
+    dataSet->SetFieldData(createFieldDataWithCharArray(creationalXML));
+
+    MockMDRebinningView* view = new MockMDRebinningView;
+    EXPECT_CALL(*view, getOutputHistogramWS()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*view, getTimeStep()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMaxThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getMinThreshold()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*view, getApplyClip()).WillRepeatedly(Return(false));
+
+    std::string viewXML = constructGeometryOnlyXMLForMDEvHelperData("Axis3",
+                                                                    "Axis2",
+                                                                    "Axis1",
+                                                                    "Axis0");
+    EXPECT_CALL(*view, getAppliedGeometryXML()).WillRepeatedly(Return(viewXML.c_str()));
+
+    ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> workspaceProvider;
+
+    RebinningActionManager* pRequest = new EscalatingRebinningActionManager;
+
+    MDEWRebinningPresenter presenter(dataSet, pRequest, view, workspaceProvider);
+    pRequest->ask(Mantid::VATES::RecalculateAll);
+
+    TSM_ASSERT_EQUALS("Time label should be exact.",
+                      presenter.getTimeStepLabel(), "Axis0 (m)")
   }
 
   void testAxisLabelsAfterRebinFor3DData()
@@ -565,6 +603,7 @@ public:
                       getStringFieldDataValue(product, "AxisTitleForZ"),
                       "Axis1 (m)");
   }
+
 };
 
 #endif

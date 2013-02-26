@@ -62,6 +62,8 @@ namespace Mantid
 
       std::vector<double> getTimeStepValues() const;
 
+      std::string getTimeStepLabel() const;
+
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
 
       /*-----------------------------------End MDRebinningPresenter methods -------------------------------------*/

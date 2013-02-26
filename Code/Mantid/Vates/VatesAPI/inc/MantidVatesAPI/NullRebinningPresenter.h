@@ -19,6 +19,8 @@ namespace Mantid
 
       virtual std::vector<double> getTimeStepValues() const;
 
+      virtual std::string getTimeStepLabel() const;
+
       virtual bool hasTDimensionAvailable() const;
 
       virtual void setAxisLabels(vtkDataSet* visualDataSet);

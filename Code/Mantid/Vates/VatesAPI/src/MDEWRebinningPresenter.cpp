@@ -417,6 +417,21 @@ namespace Mantid
       return timeStepValues;
     }
 
+    /**
+     * Create a label for the "time" coordinate
+     * @return the "time" coordinate label
+     */
+    std::string MDEWRebinningPresenter::getTimeStepLabel() const
+    {
+      Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
+      sourceGeometry.execute();
+      std::string label = sourceGeometry.getTDimension()->getName();
+      label += " (";
+      label += sourceGeometry.getTDimension()->getUnits();
+      label += ")";
+      return label;
+    }
+
     void MDEWRebinningPresenter::setAxisLabels(vtkDataSet *visualDataSet)
     {
       Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());

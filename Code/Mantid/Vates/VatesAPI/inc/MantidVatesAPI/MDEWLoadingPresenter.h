@@ -45,6 +45,7 @@ namespace Mantid
       const std::string& getGeometryXML() const;
       virtual bool hasTDimensionAvailable() const;
       virtual std::vector<double> getTimeStepValues() const;
+      virtual std::string getTimeStepLabel() const;
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
       virtual ~MDEWLoadingPresenter();
     protected:
