@@ -16,8 +16,12 @@ import codecs
 import fnmatch
 import wiki_tools
 from wiki_tools import *
+from wiki_report import WikiReporter
 import difflib
 import platform
+
+# Junit report generator.
+reporter = WikiReporter()
 
 #======================================================================
 def get_wiki_description(algo, version):
@@ -320,6 +324,8 @@ def do_algorithm(args, algo, version=-1):
     
     if old_contents == new_contents:
         print "Generated wiki page is identical to that on the website."
+        # Report a success test case.
+        reporter.addSuccessTestCase(algo)
     else:
         print "Generated wiki page is DIFFERENT than that on the website."
         print
@@ -337,10 +343,9 @@ def do_algorithm(args, algo, version=-1):
             print "The last editor was NOT the WIKIMAKER"
             last_modifier = last_page_editor(page);
             print "The last page editor was ", last_modifier
-            if args.badeditors and not last_modifier == None:
-                bad_editors = open("BadEditors.txt", "a")
-                bad_editors.write(last_modifier + ", " + wiki_page_name + "\n")
-                bad_editors.close()
+            if not last_modifier == None:
+                # Report a failure test case
+                reporter.addFailureTestCase(algo, version, last_modifier, False)
             
         if wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
             if not args.dryrun:
@@ -352,13 +357,6 @@ def do_algorithm(args, algo, version=-1):
     saved_text = open(wiki_page_name+'.txt', 'w')
     saved_text.write(new_contents)
     saved_text.close()
-    
-#======================================================================
-def purge_exising_bad_editors():
-    file_name = "BadEditors"
-    bad_editors = open(file_name + '.txt', 'w')
-    bad_editors.write("Names of the last editors and corresponding Algorithms that are out of sync.\n\n");
-    bad_editors.close();
     
 #======================================================================
 if __name__ == "__main__":
@@ -400,7 +398,7 @@ if __name__ == "__main__":
     parser.add_argument('--no-version-check', dest='no_version_check', action='store_true',
                         help='Do not perform version check on algorithm name.')
     
-    parser.add_argument('--bad-editors', dest='badeditors', default=False, action='store_const', const=True,
+    parser.add_argument('--report', dest='wikimakerreport', default=False, action='store_const', const=True,
                         help="Record authors and corresponding algorithm wiki-pages that have not been generated with the wiki-maker")
     
     parser.add_argument('--cache-config', dest='cacheconfig', default=False, action='store_const', const=True,
@@ -411,9 +409,6 @@ if __name__ == "__main__":
     
 
     args = parser.parse_args()
-    
-    if args.badeditors:
-        purge_exising_bad_editors()
     
     if args.cacheconfig:
         # Write out config for next time
@@ -447,4 +442,10 @@ if __name__ == "__main__":
     else:
         for algo in args.algos:
             do_algorithm(args, algo, -1)
+            
+    if args.wikimakerreport:
+        junit_file = open('WikiMakerReport.xml', 'w')
+        junit_file.write(reporter.getResults())
+        junit_file.close()
+        print reporter.getResults();
     
