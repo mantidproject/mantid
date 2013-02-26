@@ -145,9 +145,15 @@ def initialize_Mantid(mantidpath):
     mantid_initialized = True
 
 #======================================================================
+def get_all_algorithms_tuples():
+    """Returns a list of all algorithm names and versions as a tuple"""
+    return mtd._getRegisteredAlgorithms(True)
+
+
+#======================================================================
 def get_all_algorithms():
-    """REturns a list of all algorithm names"""
-    temp = mtd._getRegisteredAlgorithms(True)
+    """Returns a list of all algorithm names"""
+    temp = get_all_algorithms_tuples()
     print temp
     algos = [x for (x, version) in temp]
     return algos

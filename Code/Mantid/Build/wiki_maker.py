@@ -37,6 +37,7 @@ def get_wiki_description(algo, version):
         print lines
         f.close()
         n = 0
+        print algo
         while not lines[n].lstrip().startswith("/*WIKI*") and not lines[n].lstrip().startswith('"""*WIKI*'):
             n += 1
         desc = ""
@@ -132,6 +133,7 @@ def make_wiki(algo_name, version, latest_version):
     """ 
     
     # Deprecated algorithms: Simply returnd the deprecation message
+    print "Creating... ", algo_name, version
     deprec = mtd.algorithmDeprecationMessage(algo_name,version)
     if len(deprec) != 0:
         out = deprec
@@ -183,7 +185,11 @@ def make_wiki(algo_name, version, latest_version):
 
     out += "== Description ==\n"
     out += "\n"
-    desc = get_wiki_description(algo_name,version)
+    desc = ""
+    try:
+        desc = get_wiki_description(algo_name,version)
+    except IndexError:
+        pass
     if (desc == ""):
       out += "INSERT FULL DESCRIPTION HERE\n"
       print "Warning: missing wiki description for %s! Placeholder inserted instead." % algo_name
@@ -266,28 +272,32 @@ def make_redirect(from_page, to_page):
     page = site.Pages[from_page]
     contents = "#REDIRECT [[%s]]" % to_page
     page.save(contents, summary = 'Bot: created redirect to the latest version.' )
+ 
+#======================================================================   
+def last_page_editor(page):
+    #Get the last editor of the page.
+    revisions = page.revisions()
+    for rev in revisions:
+        return rev['user']
+     
+#======================================================================   
+def wiki_maker_page(page):
+    """
+    returns True if the wikimaker was the last editor.
+    """
+    return ("WikiMaker" == last_page_editor(page))
     
 #======================================================================
-def do_algorithm(args, algo):
+def do_algorithm(args, algo, version=-1):
     """ Do the wiki page
-    @param algo :: the name of the algorithm, possibly with suffix #"""
+    @param algo_tuple :: the name of the algorithm, and it's version as a tuple"""
     global mtd
-    
     is_latest_version = True
-    version = -1;
     latest_version = -1
-    if not args.no_version_check:
-        if algo.endswith('1'): version = 1
-        if algo.endswith('2'): version = 2
-        if algo.endswith('3'): version = 3
-        if algo.endswith('4'): version = 4
-        if algo.endswith('5'): version = 5
-        if version > 0:
-            algo = algo[:-1]
-
     # Find the latest version        
     latest_version = mtd.createAlgorithm(algo, -1).version()
     if (version == -1): version = latest_version
+
     print "Latest version of %s is %d. You are making version %d." % (algo, latest_version, version)
     
     # What should the name on the wiki page be?
@@ -295,7 +305,8 @@ def do_algorithm(args, algo):
     if latest_version > 1:
         wiki_page_name = algo + " v." + str(version)
         # Make sure there is a redirect to latest version
-        make_redirect(algo, algo + " v." + str(latest_version))
+        if not args.dryrun:
+            make_redirect(algo, algo + " v." + str(latest_version))
         
     
     print "Generating wiki page for %s at http://www.mantidproject.org/%s" % (algo, wiki_page_name)
@@ -320,13 +331,34 @@ def do_algorithm(args, algo):
             sys.stdout.write(line) 
         print
         
-        if args.force or confirm("Do you want to replace the website wiki page?", True):
-            print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
-            page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
+        wiki_maker_edited_last = wiki_maker_page(page)
+        
+        if not wiki_maker_edited_last:
+            print "The last editor was NOT the WIKIMAKER"
+            last_modifier = last_page_editor(page);
+            print "The last page editor was ", last_modifier
+            if args.badeditors and not last_modifier == None:
+                bad_editors = open("BadEditors.txt", "a")
+                bad_editors.write(last_modifier + ", " + wiki_page_name + "\n")
+                bad_editors.close()
+            
+        if wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
+            if not args.dryrun:
+                print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
+                page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
+            else:
+                print "Dry run of saving page to http://www.mantidproject.org/%s" % wiki_page_name
 
     saved_text = open(wiki_page_name+'.txt', 'w')
     saved_text.write(new_contents)
     saved_text.close()
+    
+#======================================================================
+def purge_exising_bad_editors():
+    file_name = "BadEditors"
+    bad_editors = open(file_name + '.txt', 'w')
+    bad_editors.write("Names of the last editors and corresponding Algorithms that are out of sync.\n\n");
+    bad_editors.close();
     
 #======================================================================
 if __name__ == "__main__":
@@ -350,7 +382,7 @@ if __name__ == "__main__":
                                       'or more algorithms, and updates the mantidproject.org website')
     
     parser.add_argument('algos', metavar='ALGORITHM', type=str, nargs='*',
-                        help='Name of the algorithm(s) to generate wiki docs. Add a number after the name (no space) to specify the algorithm version.')
+                        help='Name of the algorithm(s) to generate wiki docs. Add a number after the name (no space) to specify the algorithm version. Passing [ALL] will loop over all registered algorithms.')
     
     parser.add_argument('--user', dest='username', default=defaultuser,
                         help="User name, to log into the www.mantidproject.org wiki. Default: '%s'. This value is saved to a .ini file so that you don't need to specify it after." % defaultuser)
@@ -367,19 +399,33 @@ if __name__ == "__main__":
 
     parser.add_argument('--no-version-check', dest='no_version_check', action='store_true',
                         help='Do not perform version check on algorithm name.')
+    
+    parser.add_argument('--bad-editors', dest='badeditors', default=False, action='store_const', const=True,
+                        help="Record authors and corresponding algorithm wiki-pages that have not been generated with the wiki-maker")
+    
+    parser.add_argument('--cache-config', dest='cacheconfig', default=False, action='store_const', const=True,
+                        help="If true, the creditials of the executor will be cached for the next run.")
+    
+    parser.add_argument('--dry-run', dest='dryrun', default=False, action='store_const', const=True,
+                        help="If false, then the utility will work exactly the same, but no changes will actually be pushed to the wiki.")
+    
 
     args = parser.parse_args()
     
-    # Write out config for next time
-    config = ConfigParser.ConfigParser()
-    config.add_section("login")
-    config.set("login", "username", args.username)
-    config.set("login", "password", args.password)
-    config.add_section("mantid")
-    config.set("mantid", "path", args.mantidpath)
-    f = open(config_filename, 'w')
-    config.write(f)
-    f.close()
+    if args.badeditors:
+        purge_exising_bad_editors()
+    
+    if args.cacheconfig:
+        # Write out config for next time
+        config = ConfigParser.ConfigParser()
+        config.add_section("login")
+        config.set("login", "username", args.username)
+        config.set("login", "password", args.password)
+        config.add_section("mantid")
+        config.set("mantid", "path", args.mantidpath)
+        f = open(config_filename, 'w')
+        config.write(f)
+        f.close()
 
     if len(args.algos)==0:
         parser.error("You must specify at least one algorithm.")
@@ -393,6 +439,12 @@ if __name__ == "__main__":
     intialize_files()
     initialize_wiki(args)
   
-    for algo in args.algos:
-        do_algorithm(args, algo)
+    if len(args.algos) == 1 and args.algos[0] == "ALL":
+        print "Documenting All Algorithms"
+        allAlgorithms = get_all_algorithms_tuples()
+        for algo_tuple in allAlgorithms:
+            do_algorithm(args, algo_tuple[0], algo_tuple[1][0])
+    else:
+        for algo in args.algos:
+            do_algorithm(args, algo, -1)
     
