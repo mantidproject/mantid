@@ -43,13 +43,12 @@ public:
       (*a)[i]=i;
       (*e)[i]=sqrt(double(i));
     }
-    int forSpecDetMap[Nhist];
+
     for (int j = 0; j < Nhist; ++j) {
       space2D->setX(j, x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
       space2D->getAxis(1)->spectraNo(j) = j+1;
-      forSpecDetMap[j] = j+1;
     }
 
     // Register the workspace in the data service

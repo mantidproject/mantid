@@ -199,7 +199,6 @@ public:
     boost::shared_ptr<MantidVec> bigEnough( new MantidVec( specLength-1, 0 ) );
     (*bigEnough)[0] = 1.2*m_YSum*(0.5*Nhist);
 
-    int forSpecDetMap[Nhist];
     for (int j = 0; j < Nhist; ++j)
     {
       m_2DWS->setX(j, x);
@@ -216,7 +215,6 @@ public:
       m_2DWS->setData( j, spectrum, errors );
       // Just set the spectrum number to match the index
       m_2DWS->getAxis(1)->spectraNo(j) = j+1;
-      forSpecDetMap[j] = j+1;
     }
 
     // Register the workspace in the data service

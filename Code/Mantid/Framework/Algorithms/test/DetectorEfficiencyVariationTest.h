@@ -117,7 +117,6 @@ public:
     boost::shared_ptr<MantidVec> errors( new MantidVec( ySize, 1) );
     boost::shared_ptr<MantidVec> forInputA, forInputB;
 
-    int forSpecDetMap[Nhist];
     for (int j = 0; j < Nhist; ++j)
     {
       inputA->setX(j, x);
@@ -143,7 +142,6 @@ public:
       // Just set the spectrum number to match the index, spectra numbers and detector maps must be indentical for both 
       inputA->getAxis(1)->spectraNo(j) = j+1;
       inputB->getAxis(1)->spectraNo(j) = j+1;
-      forSpecDetMap[j] = j+1;
     }
 
     // Register the input workspaces to the ADS where they can be accessed by the algorithm
