@@ -45,9 +45,9 @@ public:
     bigWorkspace.initialize(nVec, vecLength, vecLength);
     for (size_t i=0; i< nVec; i++)
     {
-      boost::shared_ptr<MantidVec > x1(new MantidVec(vecLength,1+i) );
-      boost::shared_ptr<MantidVec > y1(new MantidVec(vecLength,5+i) );
-      boost::shared_ptr<MantidVec > e1(new MantidVec(vecLength,4+i) );
+      boost::shared_ptr<MantidVec > x1(new MantidVec(vecLength, static_cast<MantidVec::value_type>(1+i) ) );
+      boost::shared_ptr<MantidVec > y1(new MantidVec(vecLength, static_cast<MantidVec::value_type>(5+i) ) );
+      boost::shared_ptr<MantidVec > e1(new MantidVec(vecLength, static_cast<MantidVec::value_type>(4+i) ) );
       bigWorkspace.setX(i,x1);     
       bigWorkspace.setData(i,y1,e1);
       // As of 20/7/2011, revision [13332], these calls have no (lasting) effect.
