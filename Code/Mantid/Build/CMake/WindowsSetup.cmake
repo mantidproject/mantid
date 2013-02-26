@@ -29,13 +29,23 @@ endif()
 #           as a level 3 warning
 # /w34389 - Treat warning C4389, about equality comparison on unsigned 
 #           and signed, as a level 3 warning
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389" ) 
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389" )
 # As discussed here: http://code.google.com/p/googletest/issues/detail?id=412
 # gtest requires changing the _VARAIDIC_MAX value for VS2012 as it defaults to 5
 if ( MSVC_VERSION EQUAL 1700 )
   message ( STATUS "Found VS2012 - Increasing maximum number of variadic template arguments to 10" )
   add_definitions ( /D _VARIADIC_MAX=10 ) 
 endif ()
+
+# Replace PCH heap limit, the default does not work when running msbuild from the commandline for some reason
+# Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
+# in the GUI though...
+SET( VISUALSTUDIO_COMPILERHEAPLIMIT 100 )
+STRING( REGEX REPLACE "(/Zm)([0-9]+)" "\\1${VISUALSTUDIO_COMPILERHEAPLIMIT}" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
+STRING( REGEX REPLACE "(/Zm)([0-9]+)" "\\1${VISUALSTUDIO_COMPILERHEAPLIMIT}" CMAKE_C_FLAGS ${CMAKE_C_FLAGS} )
+SET( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} CACHE STRING "CMAKE_CXX_FLAGS" FORCE)
+SET( CMAKE_C_FLAGS ${CMAKE_C_FLAGS} CACHE STRING "CMAKE_C_FLAGS" FORCE)
+
 
 ###########################################################################
 # On Windows we want to bundle Python. The necessary libraries are in
