@@ -10,7 +10,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -381,16 +380,17 @@ private:
     //
     MatrixWorkspace_sptr  buildUngroupedWS(const std::string &WS_Name)
     {
-        const size_t NHIST=3;
+        const int NHIST=3;
 
         inputWS  = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
 
-        specid_t forSpecDetMap[NHIST];
-        for (size_t j = 0; j < NHIST; ++j)
+        for (int j = 0; j < NHIST; ++j)
         {
             // Just set the spectrum number to match the index
-            inputWS->getAxis(1)->spectraNo(j) = specid_t(j+1);
-            forSpecDetMap[j] = specid_t(j+1);
+            inputWS->getAxis(1)->spectraNo(j) = j+1;
+            ISpectrum * spec = inputWS->getSpectrum(j);
+            spec->setSpectrumNo(j+1);
+            spec->setDetectorID(j+1);
         }
 
         AnalysisDataService::Instance().add(WS_Name,inputWS);
@@ -404,8 +404,6 @@ private:
          loader.setPropertyValue("Workspace", WS_Name);
          loader.execute();
 
-         inputWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, NHIST));
-       
          return inputWS;
 
     }
@@ -432,23 +430,15 @@ private:
        // get pointers to the detectors, contributed into group;
        partDetectors = pDet->getDetectors();
 
-       std::vector<specid_t>forSpecDetMap(NDET);
        inputWS->getAxis(1)->spectraNo(0) = 1;
+       inputWS->getSpectrum(0)->setSpectrumNo(1);
+       inputWS->getSpectrum(0)->clearDetectorIDs();
+       inputWS->getSpectrum(0)->addDetectorIDs(pDet->getDetectorIDs());
 
        for(size_t i=0;i<NDET;i++){
             spInst->markAsDetector(partDetectors[i].get());
-        // Just set the spectrum number to match the index
-            forSpecDetMap[i] = 1;
-
        }
       inputWS->setInstrument(spInst);
-             
-  
-      // underlying detectors have different id-s but the group has the ID of the first one'
-      std::vector<detid_t> detIDDetails = pDet->getDetectorIDs();
-
-      inputWS->replaceSpectraMap(new SpectraDetectorMap(&forSpecDetMap[0], &detIDDetails[0], NDET));
-   
 
       AnalysisDataService::Instance().add(WS_Name,inputWS);
       return inputWS;

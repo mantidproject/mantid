@@ -9,8 +9,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include <vector>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
@@ -34,13 +32,14 @@ public:
     MantidVecPtr x,vec;
     x.access().resize(6,10.0);
     vec.access().resize(5,1.0);
-    int forSpecDetMap[5];
     for (int j = 0; j < 5; ++j)
     {
       space2D->setX(j,x);
       space2D->setData(j,vec,vec);
       space2D->getAxis(1)->spectraNo(j) = j;
-      forSpecDetMap[j] = j;
+      ISpectrum * spec = space2D->getSpectrum(j);
+      spec->setSpectrumNo(j);
+      spec->setDetectorID(j);
     }
 
     Instrument_sptr instr(new Instrument);
@@ -56,9 +55,6 @@ public:
     instr->markAsDetector(d3);
     Detector *d4 = new Detector("det",4,0);
     instr->markAsDetector(d4);
-
-    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 5));
 
     // Register the workspace in the data service
     inputWS = "test_masked_ws";

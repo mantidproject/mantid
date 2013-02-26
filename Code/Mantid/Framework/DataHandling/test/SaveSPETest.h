@@ -7,7 +7,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include <Poco/File.h>
@@ -180,12 +179,10 @@ private:
     inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
         
     // the following is largely about associating detectors with the workspace
-    int forSpecDetMap[NHIST];
     for (int j = 0; j < NHIST; ++j)
     {
       // Just set the spectrum number to match the index
       inputWS->getAxis(1)->spectraNo(j) = j+1;
-      forSpecDetMap[j] = j+1;
     }
     
     AnalysisDataService::Instance().add(input,inputWS);
@@ -199,7 +196,6 @@ private:
     loader.setPropertyValue("Workspace", input);
     loader.execute(); 
 
-    inputWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, NHIST));
 
     // mask the detector
     Geometry::ParameterMap* m_Pmap = &(inputWS->instrumentParameters());    

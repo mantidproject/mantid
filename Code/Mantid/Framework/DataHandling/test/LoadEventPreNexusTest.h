@@ -12,7 +12,6 @@
 
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -201,7 +200,6 @@ public:
 
     //Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    outputWS->replaceSpectraMap(new SpectraDetectorMap);
 
     //You need to copy over the data as well.
     outputWS->copyDataFrom(*inputWS);

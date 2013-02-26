@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/FileFinder.h"
 #include <Poco/Path.h>
 #include <Poco/File.h>
@@ -213,16 +212,15 @@ namespace
     std::vector<Mantid::MantidVecPtr> data(ndets);
     xs.access().resize(nbins+1, 0.0);
     errors.access().resize(nbins, 1.0);
-    std::vector<int> detIDs(ndets);
-    std::vector<int> specNums(ndets);
     for (int j = 0; j < ndets; ++j)
     {
       space2D->setX(j,xs);
       data[j].access().resize(nbins, j + 1);  // the y values will be different for each spectra (1+index_number) but the same for each bin
       space2D->setData(j, data[j], errors);
       space2D->getAxis(1)->spectraNo(j) = j+1;  // spectra numbers are also 1 + index_numbers because this is the tradition
-      detIDs[j] = j;
-      specNums[j] = j+1;
+      ISpectrum * spec = space2D->getSpectrum(j);
+      spec->setSpectrumNo(j+1);
+      spec->setDetectorID(j);
     }
 
     Instrument_sptr instr(new Instrument);
@@ -237,10 +235,6 @@ namespace
       Detector *d = new Detector(os.str(),i,0);
       instr->markAsDetector(d);
     }
-
-
-    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->replaceSpectraMap(new SpectraDetectorMap(&specNums[0], &detIDs[0], ndets));
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(ads_name, space);
