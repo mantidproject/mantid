@@ -438,6 +438,7 @@ set ( TEST_FILES
 	AlphaCalcTest.h
 	AnyShapeAbsorptionTest.h
 	AppendSpectraTest.h
+	ApplyCalibrationTest.h
 	ApplyDeadTimeCorrTest.h
 	ApplyDetailedBalanceTest.h
 	ApplyTransmissionCorrectionTest.h
