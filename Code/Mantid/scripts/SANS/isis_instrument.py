@@ -615,9 +615,9 @@ class LOQ(ISISInstrument):
         # history, and to expert users what is going on
         det = self.cur_detector()
         if det.x_corr != 0.0 or det.y_corr != 0.0 or det.z_corr != 0.0: 
-            MoveInstrumentComponent(ws, det.name(), X = det.x_corr, Y = det.y_corr, Z = det.z_corr, RelativePosition="1")
-            xshift = xshift + det.x_corr
-            yshift = yshift + det.y_corr
+            MoveInstrumentComponent(ws, det.name(), X = det.x_corr/1000.0, Y = det.y_corr/1000.0, Z = det.z_corr/1000.0, RelativePosition="1")
+            xshift = xshift + det.x_corr/1000.0
+            yshift = yshift + det.y_corr/1000.0
 
         return [xshift, yshift], [xshift, yshift]
 
