@@ -117,25 +117,18 @@ namespace Crystal
     if (peaksW != inPeaksW)
     peaksW = inPeaksW->clone();
 
+    const Geometry::Material *m_sampleMaterial = &(inPeaksW->sample().getMaterial());
+    if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
+    {
+  	  double rho =  m_sampleMaterial->numberDensity();
+  	  smu =  m_sampleMaterial->totalScatterXSection(1.7982) * rho;
+  	  amu = m_sampleMaterial->absorbXSection(1.7982) * rho;
+    }
+    else
+    {
+      throw std::invalid_argument("Could not retrieve LinearScatteringCoef from material");
+    }
     const API::Run & run = inPeaksW->run();
-    if ( run.hasProperty("LinearScatteringCoef") )
-    {
-      Kernel::Property* prop = run.getProperty("LinearScatteringCoef");
-      smu = boost::lexical_cast<double,std::string>(prop->value());
-    }
-    else
-    {
-      throw std::invalid_argument("Could not retrieve LinearScatteringCoef from run object");
-    }
-    if ( run.hasProperty("LinearAbsorptionCoef") )
-    {
-      Kernel::Property* prop = run.getProperty("LinearAbsorptionCoef");
-      amu = boost::lexical_cast<double,std::string>(prop->value());
-    }
-    else
-    {
-      throw std::invalid_argument("Could not retrieve LinearAbsorptionCoef from run object");
-    }
     if ( run.hasProperty("Radius") )
     {
       Kernel::Property* prop = run.getProperty("Radius");

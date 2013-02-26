@@ -20,6 +20,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::PhysicalConstants;
 
 namespace Mantid
 {
@@ -169,9 +170,11 @@ namespace Crystal
     radius /= mu1;
     g_log.notice() << "LinearScatteringCoef = " << smu << " LinearAbsorptionCoef = " << amu << " Radius = " << radius << " calculated from tbar and transmission of 2 peaks\n";
     API::Run & mrun = ws->mutableRun();
-    mrun.addProperty<double>("LinearScatteringCoef", smu, true);
-    mrun.addProperty<double>("LinearAbsorptionCoef", amu, true);
     mrun.addProperty<double>("Radius", radius, true);
+	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+  			0.0, 0.0, smu, 0.0, smu, amu);
+    Material *mat = new Material("SetInLoadHKL", *neutron, 1.0);
+    ws->mutableSample().setMaterial(*mat);
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
 
 

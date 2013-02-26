@@ -87,25 +87,20 @@ namespace Crystal
 
     std::string filename = getPropertyValue("Filename");
     PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
+
+    const Geometry::Material *m_sampleMaterial = &(ws->sample().getMaterial());
+    if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
+    {
+  	  double rho =  m_sampleMaterial->numberDensity();
+  	  smu =  m_sampleMaterial->totalScatterXSection(1.7982) * rho;
+  	  amu = m_sampleMaterial->absorbXSection(1.7982) * rho;
+    }
+    else
+    {
+    	smu = 0.;
+    	amu = 0.;
+    }
     const API::Run & run = ws->run();
-    if ( run.hasProperty("LinearScatteringCoef") )
-    {
-      Kernel::Property* prop = run.getProperty("LinearScatteringCoef");
-      smu = boost::lexical_cast<double,std::string>(prop->value());
-    }
-    else
-    {
-      smu = 0.0;
-    }
-    if ( run.hasProperty("LinearAbsorptionCoef") )
-    {
-      Kernel::Property* prop = run.getProperty("LinearAbsorptionCoef");
-      amu = boost::lexical_cast<double,std::string>(prop->value());
-    }
-    else
-    {
-      amu = 0.0;
-    }
     if ( run.hasProperty("Radius") )
     {
       Kernel::Property* prop = run.getProperty("Radius");

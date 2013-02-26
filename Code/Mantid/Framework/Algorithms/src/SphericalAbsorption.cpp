@@ -97,6 +97,8 @@ void SphericalAbsorption::exec()
   anvred->executeAsChildAlg();
   // Get back the result
   correctionFactors = anvred->getProperty("OutputWorkspace");
+  const Geometry::Material *m_sampleMaterial = &(correctionFactors->sample().getMaterial());
+  std::cout <<  m_sampleMaterial->numberDensity()<<"  "<<  m_sampleMaterial->totalScatterXSection(1.7982)<<"  "<< m_sampleMaterial->absorbXSection(1.7982)<<"\n";
   setProperty("OutputWorkspace", correctionFactors);
 
 }

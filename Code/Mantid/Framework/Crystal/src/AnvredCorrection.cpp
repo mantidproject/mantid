@@ -101,6 +101,7 @@ using namespace Kernel;
 using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
+using namespace Mantid::PhysicalConstants;
 
 AnvredCorrection::AnvredCorrection() : API::Algorithm()
 {}
@@ -124,11 +125,11 @@ void AnvredCorrection::init()
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
-  declareProperty("LinearScatteringCoef", -1.0, mustBePositive,
+  declareProperty("LinearScatteringCoef", EMPTY_DBL(), mustBePositive,
     "Linear scattering coefficient in 1/cm");
-  declareProperty("LinearAbsorptionCoef", -1.0, mustBePositive,
+  declareProperty("LinearAbsorptionCoef", EMPTY_DBL(), mustBePositive,
     "Linear absorption coefficient at 1.8 Angstroms in 1/cm");
-  declareProperty("Radius", -1.0, mustBePositive, "Radius of the sample in centimeters");
+  declareProperty("Radius", EMPTY_DBL(), mustBePositive, "Radius of the sample in centimeters");
   declareProperty("PowerLambda", 4.0,
     "Power of lamda ");
 
@@ -262,8 +263,6 @@ void AnvredCorrection::exec()
 
   // set the absorption correction values in the run parameters
   API::Run & run = correctionFactors->mutableRun();
-  run.addProperty<double>("LinearScatteringCoef", smu, true);
-  run.addProperty<double>("LinearAbsorptionCoef", amu, true);
   run.addProperty<double>("Radius", radius, true);
   if (!OnlySphericalAbsorption && !ReturnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
@@ -374,11 +373,11 @@ void AnvredCorrection::execEvent()
   correctionFactors->doneAddingEventLists();
   // set the absorption correction values in the run parameters
   API::Run & run = correctionFactors->mutableRun();
-  run.addProperty<double>("LinearScatteringCoef", smu, true);
-  run.addProperty<double>("LinearAbsorptionCoef", amu, true);
   run.addProperty<double>("Radius", radius, true);
   if (!OnlySphericalAbsorption && !ReturnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
+  const Geometry::Material *m_sampleMaterial = &(correctionFactors->sample().getMaterial());
+  std::cout <<  m_sampleMaterial->numberDensity()<<"  "<<  m_sampleMaterial->totalScatterXSection(1.7982)<<"  "<< m_sampleMaterial->absorbXSection(1.7982)<<"\n";
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(correctionFactors));
 
   // Now do some cleaning-up since destructor may not be called immediately
@@ -392,7 +391,20 @@ void AnvredCorrection::retrieveBaseProperties()
   amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
   radius = getProperty("Radius"); // in cm
   power_th = getProperty("PowerLambda"); // in cm
-
+  const Geometry::Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
+  if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
+  {
+	double rho =  m_sampleMaterial->numberDensity();
+	if(smu == EMPTY_DBL()) smu =  m_sampleMaterial->totalScatterXSection(1.7982) * rho;
+	if(amu == EMPTY_DBL()) amu = m_sampleMaterial->absorbXSection(1.7982) * rho;
+  }
+  else  //Save input in Sample with wrong atomic number and name
+  {
+	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+  			0.0, 0.0, smu, 0.0, smu, amu);
+    Material *mat = new Material("SetInAnvredCorrection", *neutron, 1.0);
+    m_inputWS->mutableSample().setMaterial(*mat);
+  }
   // Call the virtual function for any further properties
   retrieveProperties();
 }
