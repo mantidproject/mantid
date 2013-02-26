@@ -334,7 +334,7 @@ def do_algorithm(args, algo, version=-1):
         # Perform a diff of the new vs old contents
         diff = difflib.context_diff(old_contents.splitlines(True), new_contents.splitlines(True), fromfile='website', tofile='new')
         for line in diff:
-            sys.stdout.write(line.encode("UTF-8")) 
+            sys.stdout.write(line) 
         print
         
         wiki_maker_edited_last = wiki_maker_page(page)
@@ -360,6 +360,8 @@ def do_algorithm(args, algo, version=-1):
     
 #======================================================================
 if __name__ == "__main__":
+    
+    reload(sys).setdefaultencoding('utf8')
     # First, get the config for the last settings
     config = ConfigParser.ConfigParser()
     localpath = os.path.split(__file__)[0]
