@@ -51,18 +51,12 @@ public:
      for(int i=0; i < 3; ++i)
      {
        TableRow row = posTableWs->appendRow();
-       row << i << V3D(1.0,0.01*i,1.0); 
+       row << i+1 << V3D(1.0,0.01*i,1.0); 
      }
      TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<Workspace2D_sptr>("Workspace", ws ));
      TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<ITableWorkspace_sptr>("PositionTable", posTableWs ));
-     try 
-     {
-        TS_ASSERT_EQUALS(appCalib.execute(),true);
-     }
-     catch(std::runtime_error & e)
-     {
-        TS_FAIL(e.what());
-     }
+     TS_ASSERT_THROWS_NOTHING(appCalib.execute());
+
      TS_ASSERT( appCalib.isExecuted() );
 
   }
