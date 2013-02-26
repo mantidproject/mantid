@@ -1658,21 +1658,20 @@ void MuonAnalysis::guessAlphaClicked()
     if ( m_uiForm.homePeriodBox2->isEnabled() )
       inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
 
-    QString pyString = "alg=AlphaCalc(\"" + inputWS + "\",\""
-        + idsF->text() + "\",\""
-        + idsB->text() + "\",\""
-        + firstGoodBin() + "\")\n"
-        + "print alg.getPropertyValue('Alpha')";
+    Mantid::API::IAlgorithm_sptr alphaAlg = Mantid::API::AlgorithmManager::Instance().create("AlphaCalc");
+    alphaAlg->setPropertyValue("InputWorkspace", inputWS.toStdString());
+    alphaAlg->setPropertyValue("ForwardSpectra", idsF->text().toStdString());
+    alphaAlg->setPropertyValue("BackwardSpectra", idsB->text().toStdString());
+    alphaAlg->setPropertyValue("FirstGoodValue", firstGoodBin().toStdString());
+    alphaAlg->execute();  
 
-    // run python script
-    QString pyOutput = runPythonCode( pyString ).trimmed();
-    pyOutput.truncate(5);
+    const QString alpha(alphaAlg->getPropertyValue("Alpha").c_str());
 
     QComboBox* qwAlpha = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,3));
     if (qwAlpha)
-      m_uiForm.pairTable->item(m_pairTableRowInFocus,3)->setText(pyOutput);
+      m_uiForm.pairTable->item(m_pairTableRowInFocus,3)->setText(alpha);
     else
-      m_uiForm.pairTable->setItem(m_pairTableRowInFocus,3, new QTableWidgetItem(pyOutput));
+      m_uiForm.pairTable->setItem(m_pairTableRowInFocus,3, new QTableWidgetItem(alpha));
   }
 
   m_updating = false;
@@ -1848,16 +1847,13 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
 {
   m_loaded = true;
 
-
-  QString cropStr = "CropWorkspace(\"";
-  cropStr += inputWS.c_str();
-  cropStr += "\",\"";
-  cropStr += outWS.c_str();
-  cropStr += QString("\",") + boost::lexical_cast<std::string>(plotFromTime()).c_str();
+  Mantid::API::IAlgorithm_sptr cropAlg = Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
+  cropAlg->setPropertyValue("InputWorkspace", inputWS);
+  cropAlg->setPropertyValue("OutputWorkspace", outWS);
+  cropAlg->setProperty("Xmin", plotFromTime());
   if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )
-    cropStr += QString(",") + boost::lexical_cast<std::string>(plotToTime()).c_str();
-  cropStr += ");";
-  runPythonCode( cropStr ).trimmed();
+    cropAlg->setProperty("Xmax", plotToTime());
+  cropAlg->execute();
 
   // adjust for time zero if necessary
   if ( m_nexusTimeZero != boost::lexical_cast<double>(timeZero().toStdString()) )
@@ -1934,16 +1930,17 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
   if ( !AnalysisDataService::Instance().doesExist(groupName) )
   {
     QString rubbish = "boevsMoreBoevs";
-    QString groupStr = QString("CloneWorkspace('") + outWS.c_str() + "','"+rubbish+"')\n";
-    groupStr += QString("GroupWorkspaces(InputWorkspaces='") + outWS.c_str() + "," + rubbish
-      + "',OutputWorkspace='"+groupName.c_str()+"')\n";
+    QString groupStr = "from mantid.simpleapi import *\n";
+    groupStr += rubbish + QString("=CloneWorkspace(InputWorkspace='") + outWS.c_str() + "')\n";
+    groupStr += groupName.c_str() + QString("=GroupWorkspaces(InputWorkspaces='") + outWS.c_str() + "," + rubbish
+      + "')\n";
     runPythonCode( groupStr ).trimmed();
     AnalysisDataService::Instance().remove(rubbish.toStdString());
   }
   else
   {
-    QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + outWS.c_str() + "," + groupName.c_str()
-      + "',OutputWorkspace='" + groupName.c_str() + "')\n";
+    QString groupStr = QString(groupName.c_str()) + QString("=GroupWorkspaces(InputWorkspaces='") + outWS.c_str() + "," + groupName.c_str()
+      + "')\n";
     runPythonCode( groupStr ).trimmed();
   }
 
