@@ -26,6 +26,8 @@ set ( SRC_FILES
 	src/SANSDiagnostics.cpp
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
+	src/MantidEV.cpp
+	src/MantidEVWorker.cpp
 	src/StepScan.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
@@ -65,6 +67,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
+	inc/MantidQtCustomInterfaces/MantidEV.h
+	inc/MantidQtCustomInterfaces/MantidEVWorker.h
 	inc/MantidQtCustomInterfaces/StepScan.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/WorkspaceMemento.h
@@ -100,6 +104,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
+		inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/StepScan.h
 )
 
@@ -111,6 +116,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
+               inc/MantidQtCustomInterfaces/MantidEV.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
 )
 
