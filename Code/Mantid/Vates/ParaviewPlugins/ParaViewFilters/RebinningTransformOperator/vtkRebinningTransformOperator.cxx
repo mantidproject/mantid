@@ -285,7 +285,7 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     delete p_1dMDFactory;
 
     output->ShallowCopy(outData);
-
+    m_presenter->setAxisLabels(output);
   }
   return 1;
 }

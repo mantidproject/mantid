@@ -15,6 +15,7 @@
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidKernel/VMD.h"
@@ -414,6 +415,19 @@ namespace Mantid
         timeStepValues[i] = min + (i * increment);
       }
       return timeStepValues;
+    }
+
+    void MDEWRebinningPresenter::setAxisLabels(vtkDataSet *visualDataSet)
+    {
+      Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
+      sourceGeometry.execute();
+      vtkFieldData* fieldData = visualDataSet->GetFieldData();
+      setAxisLabel("AxisTitleForX",
+                   makeAxisTitle(sourceGeometry.getXDimension()), fieldData);
+      setAxisLabel("AxisTitleForY",
+                   makeAxisTitle(sourceGeometry.getYDimension()), fieldData);
+      setAxisLabel("AxisTitleForZ",
+                   makeAxisTitle(sourceGeometry.getZDimension()), fieldData);
     }
 
     void MDEWRebinningPresenter::persistReductionKnowledge(vtkDataSet* out_ds, const

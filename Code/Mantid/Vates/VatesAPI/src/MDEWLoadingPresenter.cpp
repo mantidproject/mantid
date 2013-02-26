@@ -6,6 +6,7 @@
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/Common.h"
 
 #include <boost/algorithm/string.hpp>
 #include <vtkFieldData.h>
@@ -55,6 +56,7 @@ namespace Mantid
           max = 1.0;
         }
         //std::cout << "dim " << d << min << " to " <<  max << std::endl;
+        axisLabels.push_back(makeAxisTitle(inDim));
         MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), min, max, inDim->getNBins()));
         dimensions.push_back(dim);
       }
@@ -157,6 +159,18 @@ namespace Mantid
       convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
       visualDataSet->SetFieldData(outputFD);
       outputFD->Delete();
+    }
+
+    /**
+     * Set the axis labels from the current dimensions
+     * @param visualDataSet: The VTK dataset to update
+     */
+    void MDEWLoadingPresenter::setAxisLabels(vtkDataSet *visualDataSet)
+    {
+      vtkFieldData* fieldData = visualDataSet->GetFieldData();
+      setAxisLabel("AxisTitleForX", axisLabels[0], fieldData);
+      setAxisLabel("AxisTitleForY", axisLabels[1], fieldData);
+      setAxisLabel("AxisTitleForZ", axisLabels[2], fieldData);
     }
 
     /**
