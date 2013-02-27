@@ -116,22 +116,23 @@ void AnvredCorrection::init()
     "The X values for the input workspace must be in units of wavelength or TOF");
   declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
     "Output workspace name");
-   declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
-      "If false, then the workspace gets converted to a Workspace2D histogram.");
-   declareProperty("OnlySphericalAbsorption", false, "All corrections done if false (default).\n"
-      "If true, only the spherical absorption correction.");
-   declareProperty("ReturnTransmissionOnly", false, "Corrections applied to data if false (default).\n"
-      "If true, only return the transmission coefficient.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("LinearScatteringCoef", EMPTY_DBL(), mustBePositive,
-    "Linear scattering coefficient in 1/cm");
+    "Linear scattering coefficient in 1/cm if not set with SetSampleMaterial");
   declareProperty("LinearAbsorptionCoef", EMPTY_DBL(), mustBePositive,
-    "Linear absorption coefficient at 1.8 Angstroms in 1/cm");
+    "Linear absorption coefficient at 1.8 Angstroms in 1/cm if not set with SetSampleMaterial");
   declareProperty("Radius", EMPTY_DBL(), mustBePositive, "Radius of the sample in centimeters");
+  declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
+     "If false, then the workspace gets converted to a Workspace2D histogram.");
+  declareProperty("OnlySphericalAbsorption", false, "All corrections done if false (default).\n"
+     "If true, only the spherical absorption correction.");
+  declareProperty("ReturnTransmissionOnly", false, "Corrections applied to data if false (default).\n"
+     "If true, only return the transmission coefficient.");
   declareProperty("PowerLambda", 4.0,
     "Power of lamda ");
+
 
   defineProperties();
 }
@@ -166,8 +167,7 @@ void AnvredCorrection::exec()
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputWS );
   if(eventW)eventW->sortAll(TOF_SORT, NULL);
-  bool transOnly = getProperty("ReturnTransmissionOnly");
-  if ((getProperty("PreserveEvents")) && (eventW != NULL) && !transOnly)
+  if ((getProperty("PreserveEvents")) && (eventW != NULL) )
   {
     //Input workspace is an event workspace. Use the other exec method
     this->execEvent();
@@ -240,7 +240,7 @@ void AnvredCorrection::exec()
       const double lambda = timeflight[0];
       timeflight.clear();
 
-      if (transOnly)
+      if (ReturnTransmissionOnly)
       {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
       }
@@ -347,8 +347,16 @@ void AnvredCorrection::execEvent()
         wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
       double value = this->getEventWeight(timeflight[0], scattering);
       timeflight.clear();
-      itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
-      itev->m_weight *= static_cast<float>(value);
+      if (ReturnTransmissionOnly)
+      {
+        itev->m_errorSquared = static_cast<float>( 1.0 / (value*value));
+        itev->m_weight = static_cast<float>(1.0 / value);
+      }
+      else
+      {
+        itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
+        itev->m_weight *= static_cast<float>(value);
+      }
     }
     correctionFactors->getOrAddEventList(i) +=events;
     
@@ -376,8 +384,6 @@ void AnvredCorrection::execEvent()
   run.addProperty<double>("Radius", radius, true);
   if (!OnlySphericalAbsorption && !ReturnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
-  const Geometry::Material *m_sampleMaterial = &(correctionFactors->sample().getMaterial());
-  std::cout <<  m_sampleMaterial->numberDensity()<<"  "<<  m_sampleMaterial->totalScatterXSection(1.7982)<<"  "<< m_sampleMaterial->absorbXSection(1.7982)<<"\n";
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(correctionFactors));
 
   // Now do some cleaning-up since destructor may not be called immediately
@@ -391,7 +397,7 @@ void AnvredCorrection::retrieveBaseProperties()
   amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
   radius = getProperty("Radius"); // in cm
   power_th = getProperty("PowerLambda"); // in cm
-  const Geometry::Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
+  const Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
   if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
   {
 	double rho =  m_sampleMaterial->numberDensity();

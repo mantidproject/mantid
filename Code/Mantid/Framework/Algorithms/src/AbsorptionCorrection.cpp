@@ -34,6 +34,7 @@ namespace Algorithms
 using namespace Kernel;
 using namespace Geometry;
 using namespace API;
+using namespace Mantid::PhysicalConstants;
 
 AbsorptionCorrection::AbsorptionCorrection() : API::Algorithm(), m_inputWS(),
   m_sampleObject(NULL), m_L1s(), m_elementVolumes(), m_elementPositions(),
@@ -56,12 +57,12 @@ void AbsorptionCorrection::init()
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
-  declareProperty("AttenuationXSection", -1.0, mustBePositive,
-    "The ABSORPTION cross-section for the sample material in barns");
-  declareProperty("ScatteringXSection", -1.0, mustBePositive,
-    "The scattering cross-section (coherent + incoherent) for the sample material in barns");
-  declareProperty("SampleNumberDensity", -1.0, mustBePositive,
-    "The number density of the sample in number per cubic angstrom");
+  declareProperty("AttenuationXSection",  EMPTY_DBL(), mustBePositive,
+    "The ABSORPTION cross-section for the sample material in barns if not set with SetSampleMaterial");
+  declareProperty("ScatteringXSection",  EMPTY_DBL(), mustBePositive,
+    "The scattering cross-section (coherent + incoherent) for the sample material in barns if not set with SetSampleMaterial");
+  declareProperty("SampleNumberDensity",  EMPTY_DBL(), mustBePositive,
+    "The number density of the sample in number per cubic angstrom if not set with SetSampleMaterial");
 
   auto positiveInt = boost::make_shared<BoundedValidator<int64_t> >();
   positiveInt->setLower(1);
@@ -236,9 +237,23 @@ void AbsorptionCorrection::exec()
 /// Fetch the properties and set the appropriate member variables
 void AbsorptionCorrection::retrieveBaseProperties()
 {
-  const double sigma_atten = getProperty("AttenuationXSection"); // in barns
-  const double sigma_s = getProperty("ScatteringXSection"); // in barns
+  double sigma_atten = getProperty("AttenuationXSection"); // in barns
+  double sigma_s = getProperty("ScatteringXSection"); // in barns
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+  const Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
+  if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
+  {
+        if(rho == EMPTY_DBL()) rho =  m_sampleMaterial->numberDensity();
+        if(sigma_s == EMPTY_DBL()) sigma_s =  m_sampleMaterial->totalScatterXSection(1.7982);
+        if(sigma_atten == EMPTY_DBL()) sigma_atten = m_sampleMaterial->absorbXSection(1.7982);
+  }
+  else  //Save input in Sample with wrong atomic number and name
+  {
+        NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+                        0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
+    Material *mat = new Material("SetInAbsorptionCorrection", *neutron, rho);
+    m_inputWS->mutableSample().setMaterial(*mat);
+  }
   rho *= 100;  // Needed to get the units right
   m_refAtten = -sigma_atten * rho / 1.798;
   m_scattering = -sigma_s * rho;
@@ -300,7 +315,7 @@ void AbsorptionCorrection::constructSample(API::Sample& sample)
 /// Calculate the distances traversed by the neutrons within the sample
 /// @param detector :: The detector we are working on
 /// @param L2s :: A vector of the sample-detector distance for  each segment of the sample
-void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& L2s) const
+void AbsorptionCorrection::calculateDistances(const IDetector_const_sptr& detector, std::vector<double>& L2s) const
 {
   V3D detectorPos(detector->getPos());
   if ( detector->nDets() > 1 )

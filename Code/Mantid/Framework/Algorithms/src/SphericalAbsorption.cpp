@@ -60,11 +60,11 @@ void SphericalAbsorption::init()
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
-    "The ABSORPTION cross-section for the sample material in barns");
+    "The ABSORPTION cross-section for the sample material in barns if not set with SetSampleMaterial");
   declareProperty("ScatteringXSection", EMPTY_DBL(), mustBePositive,
-    "The scattering cross-section (coherent + incoherent) for the sample material in barns");
+    "The scattering cross-section (coherent + incoherent) for the sample material in barns if not set with SetSampleMaterial");
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-    "The number density of the sample in number per cubic angstrom");
+    "The number density of the sample in number per cubic angstrom if not set with SetSampleMaterial");
   declareProperty("SphericalSampleRadius", EMPTY_DBL(), mustBePositive,
     "The radius of the spherical sample in centimetres");
 
@@ -97,8 +97,6 @@ void SphericalAbsorption::exec()
   anvred->executeAsChildAlg();
   // Get back the result
   correctionFactors = anvred->getProperty("OutputWorkspace");
-  const Geometry::Material *m_sampleMaterial = &(correctionFactors->sample().getMaterial());
-  std::cout <<  m_sampleMaterial->numberDensity()<<"  "<<  m_sampleMaterial->totalScatterXSection(1.7982)<<"  "<< m_sampleMaterial->absorbXSection(1.7982)<<"\n";
   setProperty("OutputWorkspace", correctionFactors);
 
 }
@@ -109,7 +107,7 @@ void SphericalAbsorption::retrieveBaseProperties()
   double sigma_atten = getProperty("AttenuationXSection"); // in barns
   double sigma_s = getProperty("ScatteringXSection"); // in barns
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
-  const Geometry::Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
+  const Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
   if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
   {
 	if(rho == EMPTY_DBL()) rho =  m_sampleMaterial->numberDensity();
