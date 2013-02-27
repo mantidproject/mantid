@@ -37,7 +37,7 @@ class WikiReporter:
         return self._doc.toxml()
     
     def __failureMessage__(self, algorithm, version, last_editor, diff):
-        return "Algorithm %s Version %i last edited by %s is out of sync.\n\nDifferences are:\n\n" % (algorithm, version, last_editor, diff)
+        return "Algorithm %s Version %i last edited by %s is out of sync.\n\nDifferences are:\n\n%s" % (algorithm, version, last_editor, diff)
     
     def addSuccessTestCase(self, algorithm):
         elem = self._doc.createElement('testcase')
