@@ -912,6 +912,7 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 
     if(m_moveDets)
     {
+      bool exception(false);
       try
       {
         setDetectorParams(detStruct[i], log);
@@ -922,8 +923,10 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
         {
           missingDetectors.push_back(detStruct[i].detID);
         }
-        continue;
+        // Set the flag to signal that we should call continue outside of the catch block. Works around a defect with the Intel compiler.
+        exception = true;
       }
+      if ( exception ) continue;
     }
 
     // report progress and check for a user cancel message at regualar intervals
