@@ -849,10 +849,10 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 
   bool noneSet = true;
   size_t detectorProblemCount(0);
-  PARALLEL_FOR_NO_WSP_CHECK()
+  //PARALLEL_FOR_NO_WSP_CHECK()
   for(int i=0;i<int(nDetectors);i++)
   {
-    PARALLEL_START_INTERUPT_REGION
+  //  PARALLEL_START_INTERUPT_REGION
 
     // check we have a supported code
     switch (detType[i])
@@ -863,7 +863,7 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 
     // the following detectors codes specify little or no analysis
     case MONITOR_DEVICE :
-      PARALLEL_CRITICAL(different_mon_offset)
+    //  PARALLEL_CRITICAL(different_mon_offset)
       {
         // throws invalid_argument if the detection delay time is different for different monitors
         noteMonitorOffset(detOffset[i], detStruct[i].detID);
@@ -876,7 +876,7 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 
     //we can't use data for detectors with other codes because we don't know the format, ignore the data and write to g_log.warning() once at the end
     default :
-      PARALLEL_CRITICAL(problem_detector)
+      //PARALLEL_CRITICAL(problem_detector)
       {
         detectorProblemCount ++;
         g_log.debug() << "Ignoring data for a detector with code " << detType[i] << std::endl;
@@ -891,7 +891,7 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
     {// could mean different detectors have different offsets and we need to do things thoroughly
       if ( detectorOffset ==  UNSETOFFSET ) 
       {
-        PARALLEL_CRITICAL(det_offset)
+        //PARALLEL_CRITICAL(det_offset)
         {
           if(detectorOffset ==  UNSETOFFSET) detectorOffset = detOffset[i];
           if(detOffset[i] != detectorOffset) differentOffsets =true;
@@ -913,7 +913,7 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
       }
       catch (Exception::NotFoundError &)
       {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
-        PARALLEL_CRITICAL(non_existing_detector)
+        //PARALLEL_CRITICAL(non_existing_detector)
         {
           missingDetectors.push_back(detStruct[i].detID);
         }
@@ -927,7 +927,7 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 
     if ( i % 100 == 0 )
     {	
-		PARALLEL_CRITICAL(logging)
+		//PARALLEL_CRITICAL(logging)
 		{
 			sometimesLogSuccess(log, noneSet);
 			progress(static_cast<double>(i));
@@ -936,9 +936,9 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 	}
 	
     }
-    PARALLEL_END_INTERUPT_REGION
+    //PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  //PARALLEL_CHECK_INTERUPT_REGION
 
   sometimesLogSuccess(log, noneSet = true);
   g_log.notice() << "Adjusting time of flight X-values by detector delay times, detector have the different offsets:  "<< differentOffsets << std::endl;
