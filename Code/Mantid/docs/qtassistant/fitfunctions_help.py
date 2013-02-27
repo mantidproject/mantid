@@ -21,18 +21,28 @@ def process_function(name, qhp, outputdir, **kwargs): # was (args, algo):
 
     body.append(lhbuilder.H3("Summary"))
     
-    body.append(lhbuilder.H3("Properties"))
-    table = le.SubElement(body, "table",
-                          **{"border":"1", "cellpadding":"5", "cellspacing":"0"})
-    header_row = le.SubElement(table, "tr")
-    header_row.append(lhbuilder.TH("Order"))
-    header_row.append(lhbuilder.TH("Name"))
-    header_row.append(lhbuilder.TH("Default"))
-    header_row.append(lhbuilder.TH("Description"))
-    # TODO expose getting function properties to python so the table can be generated
-    #properties = func.getProperties()
-    #for (i, property) in zip(range(len(properties)), properties):
-    #    propToHtml(table, property, i)
+    if func.numParams() <= 0:
+        body.append(lhbuilder.H3("No Parameters"))
+    else:
+        body.append(lhbuilder.H3("Parameters"))
+        table = le.SubElement(body, "table",
+                              **{"border":"1", "cellpadding":"5", "cellspacing":"0"})
+        header_row = le.SubElement(table, "tr")
+        header_row.append(lhbuilder.TH("Order"))
+        header_row.append(lhbuilder.TH("Name"))
+        header_row.append(lhbuilder.TH("Default"))
+        header_row.append(lhbuilder.TH("Explicit"))
+        header_row.append(lhbuilder.TH("Description"))
+        for number in range(func.numParams()):
+            row = le.SubElement(table, "tr")
+            row.append(lhbuilder.TD(str(number+1)))
+            row.append(lhbuilder.TD(func.getParamName(number)))
+            row.append(lhbuilder.TD(str(func.getParamValue(number))))
+            row.append(lhbuilder.TD(str(func.getParamExplicit(number))))
+            descr = func.getParamDescr(number)
+            if len(descr) <= 0:
+                descr = u'\u00a0' # hack to create r'&nbsp;'
+            row.append(lhbuilder.TD(descr))
 
     cats = []
     for category in func.categories():
