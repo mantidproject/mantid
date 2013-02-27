@@ -453,8 +453,22 @@ else ()
 endif ()
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
-set ( PYTHONALGS ${PLUGINS}/PythonAlgs )
+set ( PYTHONALG_DIRS ${PLUGINS}/PythonAlgs )
 set ( DATADIRS "" )
+
+# Construct script paths.
+set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
+# First the required scripts variable...
+# Omitting the following (as of now) empty directories as CMake doesn't copy them on install and you then end up with a warning message....
+# @MANTID_ROOT@/scripts/Crystallography;@MANTID_ROOT@/scripts/DisorderedMaterials;@MANTID_ROOT@/scripts/Engineering;@MANTID_ROOT@/scripts/Muons;@MANTID_ROOT@/scripts/Neutrinos
+set ( REQUIREDSCRIPT_SUBDIRS Inelastic Reflectometry SANS)
+
+set ( REQUIREDSCRIPT_DIRS ${MANTID_ROOT}/scripts )
+foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
+  set ( REQUIREDSCRIPT_DIRS "${REQUIREDSCRIPT_DIRS};${MANTID_SCRIPTS}/${SUBDIR}" )
+endforeach()
+
+set ( PYTHONSCRIPT_DIRS ${MANTID_ROOT}/scripts )
 
 # For a framework-only (e.g. MPI) build some of these are not relevant and should
 # be left empty to avoid warnings on starting Mantid
