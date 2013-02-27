@@ -22,7 +22,10 @@ __STRINGREPLACEMENTS__ = [
     (re.compile("mtd\.settings"), "config"),
     (re.compile("mtd\.getConfigProperty"), "config.getString"),
     (re.compile("mtd\.workspaceExists"), "mtd.doesExist"),
+    (re.compile("(mtd|mantid).sendErrorMessage"), "logger.error"),
+    (re.compile("(mtd|mantid).sendWarningMessage"), "logger.warning"),
     (re.compile("(mtd|mantid).sendLogMessage"), "logger.notice"),
+    (re.compile("(mtd|mantid).sendInformationMessage"), "logger.information"),
     (re.compile("(mtd|mantid).sendDebugMessage"), "logger.debug"),
     (re.compile("(mtd|mantid).deleteWorkspace"), "mtd.remove"),
     (re.compile("\.workspace\(\)"), "")
