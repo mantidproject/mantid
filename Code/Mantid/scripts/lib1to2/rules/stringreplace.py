@@ -6,6 +6,9 @@ import re
 
 __STRINGREPLACEMENTS__ = [
     (re.compile("from MantidFramework import \*"), "from mantid import *"),
+    (re.compile("mtd\.initiali(s|z)e\(\)"), ""),
+    (re.compile("mtd\.initiali(s|z)e\(False\)"), ""),
+    (re.compile("mtd\.initiali(s|z)e\(True\)"), ""),
     (re.compile("import MantidFramework"), "import mantid"),
     (re.compile("from mantidsimple import \*"), "from mantid.simpleapi import *"),
     (re.compile("from mantidsimple import"), "from mantid.simpleapi import"),
@@ -18,7 +21,9 @@ __STRINGREPLACEMENTS__ = [
     (re.compile("mtd\.settings"), "config"),
     (re.compile("mtd\.getConfigProperty"), "config.getString"),
     (re.compile("mtd\.workspaceExists"), "mtd.doesExist"),
-    (re.compile("(mtd|mantid).sendLogMessage"), "logger.notice")
+    (re.compile("(mtd|mantid).sendLogMessage"), "logger.notice"),
+    (re.compile("(mtd|mantid).sendDebugMessage"), "logger.debug"),
+    (re.compile("(mtd|mantid).deleteWorkspace"), "mtd.remove")
 ]
 
 class SimpleStringReplace(rules.Rules):

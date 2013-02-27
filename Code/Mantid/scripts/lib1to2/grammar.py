@@ -21,9 +21,7 @@ class Grammar(object):
         @param orig_code The original code string
         @returns The translated string
         """
-        if "PythonAlgorithm" in orig_code:
-            raise ValueError("Cannot handle Python algorithms")
-        
+        errors = []
         # Simple string replacements
         string_replace = rules.SimpleStringReplace()
         translated = string_replace.apply(orig_code)
@@ -34,4 +32,9 @@ class Grammar(object):
         tree = astbuilder.parse(translated)
         tree = api_call_replace.apply_to_ast(tree)
 
-        return astbuilder.regenerate(tree), api_call_replace.errors
+        errors.extend(api_call_replace.errors)
+        # No python algorithm support yet
+        if "PythonAlgorithm" in orig_code:
+            errors.append("Cannot fully migrate PythonAlgorithm.")
+
+        return astbuilder.regenerate(tree), errors

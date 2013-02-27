@@ -32,6 +32,7 @@ def run(files, backup=True):
             script.restore_backup()
             msg = "%s: Backup restored." % (filename)
         reports.append(msg)
+        del script
 
     messages.notify("\n" + "="*10 + " Report " + "="*10 + "\n")
     for report in reports:
@@ -113,7 +114,7 @@ class ScriptFile(object):
         location
         """
         if not self.dobackup:
-            raise RuntimeError("Cannot restore from backup, no backup was requested")
+            messages.notify("Cannot restore from backup, no backup was requested")
         if os.path.exists(self.backup_filename):
             shutil.copy(self.backup_filename, self.filename)
 
