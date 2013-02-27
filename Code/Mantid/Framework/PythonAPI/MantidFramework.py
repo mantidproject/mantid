@@ -1333,7 +1333,7 @@ class MantidPyFramework(FrameworkManager):
         for path in dirs:
             if path.endswith('/') or path.endswith("\\"):
                 path = os.path.dirname(path)
-            if not path in sys.path and not os.path.exists(os.path.join(path, '__init__.py')):
+            if not path in sys.path:
                 sys.path.append(path)
 
     def _refreshPyAlgorithms(self):
@@ -1976,19 +1976,3 @@ Mtd = mtd
 MantidPyFramework._addToPySearchPath(mtd.settings['requiredpythonscript.directories'])
 # Now additional user specified directories
 MantidPyFramework._addToPySearchPath(mtd.settings['pythonscripts.directories'])
-# Finally old scripts key; For backwards compatability add all directories that are one-level below this
-_script_dirs = mtd.settings['pythonscripts.directory']
-MantidPyFramework._addToPySearchPath(_script_dirs)
-if _script_dirs == '':
-    _files = []
-else:
-    try:
-        _files = os.listdir(_script_dirs)
-    except:
-        _files = []
-
-for _file in _files:
-    _fullpath = os.path.join(_script_dirs,_file)
-    if not 'svn' in _file and os.path.isdir(_fullpath):
-        MantidPyFramework._addToPySearchPath(_fullpath)
-

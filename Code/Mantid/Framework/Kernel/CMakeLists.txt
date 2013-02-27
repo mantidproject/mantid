@@ -381,9 +381,40 @@ set ( PLUGINS "." )
 set ( PV_PLUGINS "./pvplugins" )
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
-set ( PYTHONALGS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/PythonAlgorithms" )
+set ( PYTHONALG_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/PythonAlgorithms" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
+
+# Construct script paths.
+set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
+# First the required scripts variable...
+# Omitting the following (as of now) empty directories as CMake doesn't copy them on install and you then end up with a warning message....
+# @MANTID_ROOT@/scripts/Crystallography;@MANTID_ROOT@/scripts/DisorderedMaterials;@MANTID_ROOT@/scripts/Engineering;@MANTID_ROOT@/scripts/Muons;@MANTID_ROOT@/scripts/Neutrinos
+set ( REQUIREDSCRIPT_SUBDIRS Inelastic Reflectometry SANS)
+
+set ( REQUIREDSCRIPT_DIRS ${MANTID_ROOT}/scripts )
+foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
+  set ( REQUIREDSCRIPT_DIRS "${REQUIREDSCRIPT_DIRS};${MANTID_SCRIPTS}/${SUBDIR}" )
+endforeach()
+
+# Second the standard scripts variable. The variable in the file is NOT recursive so add the top level directories from here
+set ( EXCLUDED_DIRS test )
+set ( PYTHONSCRIPT_DIRS "" )
+file ( GLOB SCRIPT_SUBDIRS RELATIVE ${MANTID_SCRIPTS} ${MANTID_SCRIPTS}/* )
+foreach ( SUBDIR ${SCRIPT_SUBDIRS} )
+  set ( DIR ${MANTID_SCRIPTS}/${SUBDIR} )
+  if ( IS_DIRECTORY ${DIR} AND NOT EXISTS ${DIR}/__init__.py )
+    list ( FIND REQUIREDSCRIPT_SUBDIRS ${SUBDIR} HAVE_DIR )
+    list ( FIND EXCLUDED_DIRS ${SUBDIR} EXCLUDE_DIR )
+    if ( HAVE_DIR EQUAL -1 AND EXCLUDE_DIR EQUAL -1 ) # If it is not in REQUIRED and not EXCLUDED
+      if ( PYTHONSCRIPT_DIRS )
+        set ( PYTHONSCRIPT_DIRS "${PYTHONSCRIPT_DIRS};${DIR}" )
+      else()
+        set ( PYTHONSCRIPT_DIRS "${DIR}" ) # Avoid first ;
+      endif()
+    endif()
+  endif()
+endforeach()
 
 # For an mpi-enabled build, don't log to file and format console output (which winds up in a file) differently
 # These settings carry down to the installation configuration below
