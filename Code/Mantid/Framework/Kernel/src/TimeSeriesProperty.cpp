@@ -1687,7 +1687,7 @@ namespace Mantid
     {
       if (!m_propSortedFlag)
       {
-        std::sort(m_values.begin(), m_values.end());
+        std::stable_sort(m_values.begin(), m_values.end());
         m_propSortedFlag = true;
       }
     }
