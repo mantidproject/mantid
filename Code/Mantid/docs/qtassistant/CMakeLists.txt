@@ -44,4 +44,6 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
 #             DESTINATION ${GUI_HELP_DEST} <- TODO define this variable
 #             COMPONENT help )             <- TODO define this component
 
+else (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
+   message (status " Did not find QCOLLECTIONGENERATOR - cannot create qtassistant files")
 endif()
