@@ -453,7 +453,9 @@ def _set_properties(alg_object, *args, **kwargs):
     # Set the properties of the algorithm.
     for key in kwargs.keys():
         value = kwargs[key]
-        
+        if value is None:
+            continue
+
         # The correct parent/child relationship is not quite set up yet: #5157
         # ChildAlgorithms in Python are marked as children but their output is in the
         # ADS meaning we cannot just set DataItem properties by value. At the moment

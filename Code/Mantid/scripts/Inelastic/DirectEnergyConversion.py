@@ -33,7 +33,8 @@ deltaE_wkspace = reducer.convert_to_energy(11015, 85, 11060, 11001)
 """
 import CommonFunctions as common
 import diagnostics
-from mantidsimple import *
+from mantid.simpleapi import *
+from mantid.kernel import funcreturns
 import glob
 import os.path
 import math
@@ -96,13 +97,12 @@ class DirectEnergyConversion(object):
               bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
                              bleed test diagnostic
               print_results - If True then the results are printed to the screen
-              NEEDED: norm_monitor  - if present, defines the number of monitor to normalize by
         """
-        lhs_names = lhs_info('names')
+        lhs_names = funcreturns.lhs_info('names')
         if len(lhs_names) > 0:
             var_name = lhs_names[0]
         else:
-            var_name = None
+            var_name = "diag_mask"
 
         # Check for any keywords that have not been supplied and put in the defaults
         for par in self.diag_params:
@@ -130,17 +130,17 @@ class DirectEnergyConversion(object):
             
             # Set up the background integrals
             result_ws = common.load_runs(sample)
-            self.normalise(result_ws, result_ws, self.normalise_method)
+            result_ws = self.normalise(result_ws, result_ws.name(), self.normalise_method)
             if 'bkgd_range' in kwargs:
                 bkgd_range = kwargs['bkgd_range']
                 del kwargs['bkgd_range']
             else:
                 bkgd_range = self.background_range
-            background_int = Integration(result_ws, OutputWorkspace='background_int',\
-                                         RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1], \
-                                         IncludePartialBins=True).workspace()
-            total_counts = Integration(result_ws, OutputWorkspace='total_counts', IncludePartialBins=True).workspace()
-            background_int = ConvertUnits(background_int, background_int, "Energy", AlignBins=0).workspace()
+            background_int = Integration(result_ws,
+                                         RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
+                                         IncludePartialBins=True)
+            total_counts = Integration(result_ws, IncludePartialBins=True)
+            background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
             background_int *= 1.7016e8
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
@@ -172,41 +172,36 @@ class DirectEnergyConversion(object):
                 diagnostics.diagnose(whiteintegrals, **kwargs)
                 
         if 'sample_counts' in kwargs:
-            DeleteWorkspace('background_int')
-            DeleteWorkspace('total_counts')
+            DeleteWorkspace(Workspace='background_int')
+            DeleteWorkspace(Workspace='total_counts')
         if 'second_white' in kwargs:
-            DeleteWorkspace(kwargs['second_white'])
+            DeleteWorkspace(Workspace=kwargs['second_white'])
         # Return a mask workspace
-        diag_mask = ExtractMask(whiteintegrals, OutputWorkspace='diag_mask').workspace()
-        DeleteWorkspace(whiteintegrals)
-
-        if var_name is not None and var_name != str(diag_mask):
-            result = RenameWorkspace(str(diag_mask), var_name).workspace()
-        else:
-            result = diag_mask
-        self.spectra_masks = result
-        return result
+        diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=var_name)
+        DeleteWorkspace(Workspace=whiteintegrals)
+        self.spectra_masks = diag_mask
+        return diag_mask
     
-    def do_white(self, white_run, spectra_masks, map_file,monitor): 
+    def do_white(self, white_run, spectra_masks, map_file): 
         """
         Normalise to a specified white-beam run
         """
         whitews_name = common.create_resultname(white_run, suffix='-white')
         if whitews_name in mtd:
-            DeleteWorkspace(whitews_name)
+            DeleteWorkspace(Workspace=whitews_name)
         # Load
         white_data = self.load_data(white_run)
         # Normalise
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method)
         # Units conversion
-        ConvertUnits(white_ws, white_ws, "Energy", AlignBins=0)
+        white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
         low = self.wb_integr_range[0]
         upp = self.wb_integr_range[1]
         if low > upp:
             raise ValueError("White beam integration range is inconsistent. low=%d, upp=%d" % (low,upp))
         delta = 2.0*(upp - low)
-        Rebin(white_ws, white_ws, [low, delta, upp])
+        white_ws = Rebin(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Params=[low, delta, upp])
         # Why aren't we doing this...
         #Integration(white_ws, white_ws, RangeLower=low, RangeUpper=upp)
 
@@ -273,31 +268,29 @@ class DirectEnergyConversion(object):
             else:
                 tzero = Tzero
             # apply T0 shift
-            ChangeBinOffset(data_ws, result_name, -tzero)
+            ChangeBinOffset(InputWorkspace=data_ws,OutputWorkspace=result_name,Offset= -tzero)
             mon1_peak = 0.0
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
             if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
             else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
                  
-	    mtd.sendDebugMessage("mono_run = %s (%s)" % (mono_run,type(mono_run)))
+	    logger.debug("mono_run = %s (%s)" % (mono_run,type(mono_run)))
           
             if mono_run.endswith("_event.nxs"):
-                loader=LoadNexusMonitors(Filename=mono_run, OutputWorkspace="monitor_ws")    
+                monitor_ws=LoadNexusMonitors(Filename=mono_run)
             elif mono_run.endswith("_event.dat"):
                 InfoFilename = mono_run.replace("_neutron_event.dat", "_runinfo.xml")
-                loader=LoadPreNexusMonitors(RunInfoFilename=InfoFilename,OutputWorkspace="monitor_ws")
-            
-            monitor_ws = loader.workspace()
+                monitor_ws=LoadPreNexusMonitors(RunInfoFilename=InfoFilename)
             
             try:
-                alg = GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), EnergyEstimate=ei_guess,FixEi=self.fix_ei)
-                TzeroCalculated = float(alg.getPropertyValue("Tzero"))
-                ei_calc = monitor_ws.getRun().getLogData("Ei").value
+                ei_calc,firstmon_peak,firstmon_index,TzeroCalculated = \
+                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), 
+                          EnergyEstimate=ei_guess,FixEi=self.fix_ei)
             except:
                 self.log("Error in GetEi. Using entered values.")
                 #monitor_ws.getRun()['Ei'] = ei_value
                 ei_value = ei_guess
-                AddSampleLog(monitor_ws, 'Ei', ei_value, "Number")
+                AddSampleLog(Workspace=monitor_ws,LogName= 'Ei',LogText= ei_value,LogType= "Number")
                 ei_calc = None
                 TzeroCalculated = Tzero
                 
@@ -321,7 +314,7 @@ class DirectEnergyConversion(object):
             
             mon1_peak = 0.0
             # apply T0 shift
-            ChangeBinOffset(data_ws, result_name, -tzero)
+            ChangeBinOffset(InputWorkspace=data_ws,OutputWorkspace= result_name,Offset=-tzero)
         else:
             # Do ISIS stuff for Ei
             # Both are these should be run properties really
@@ -329,98 +322,101 @@ class DirectEnergyConversion(object):
 
         # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in FlatBackground and normalisation
         bin_offset = -mon1_peak
-
-        # Get the workspace the converted data will end up in
-        result_ws = mtd[result_name]
         
         # For event mode, we are going to histogram in energy first, then go back to TOF
         if (self.facility == "SNS"):
             if self.background == True:
                 # Extract the time range for the background determination before we throw it away
                 background_bins = "%s,%s,%s" % (self.background_range[0] + bin_offset, (self.background_range[1]-self.background_range[0]), self.background_range[1] + bin_offset)
-                Rebin(result_ws, "background_origin_ws", background_bins)
+                Rebin(InputWorkspace=result_name,OutputWorkspace= "background_origin_ws",Params=background_bins)
             # Convert to Et
-            ConvertUnits(result_ws, "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
-            RenameWorkspace("_tmp_energy_ws", result_ws)
+            ConvertUnits(InputWorkspace=result_name,OutputWorkspace= "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
+            RenameWorkspace(InputWorkspace="_tmp_energy_ws",OutputWorkspace= result_name)
             # Histogram
-            Rebin(result_ws, "_tmp_rebin_ws", self.energy_bins, PreserveEvents=False)
-            RenameWorkspace("_tmp_rebin_ws", result_ws)
+            Rebin(InputWorkspace=result_name,OutputWorkspace= "_tmp_rebin_ws",Params= self.energy_bins, PreserveEvents=False)
+            RenameWorkspace(InputWorkspace="_tmp_rebin_ws",OutputWorkspace= result_name)
             # Convert back to TOF
-            ConvertUnits(result_ws, result_ws, Target="TOF",EMode="Direct", EFixed=ei_value)
+            ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="TOF",EMode="Direct", EFixed=ei_value)
         else:
             # TODO: This algorithm needs to be separated so that it doesn't actually
             # do the correction as well so that it can be moved next to LoadRaw where
             # it belongs
             if self.det_cal_file == None:
-                if 'Filename' in result_ws.getRun(): 
-                    filename = result_ws.getRun()['Filename'].value
+                run = data_ws.getRun()
+                if 'Filename' in run:
+                    filename = run['Filename'].value
                 else:
                     raise RuntimeError('Cannot run LoadDetectorInfo: "Filename" property not found on input mono workspace')
-                if self.relocate_dets: self.log('Moving detectors to positions specified in RAW file.')
-            	LoadDetectorInfo(result_ws, result_ws.getRun()['Filename'].value, self.relocate_dets)
+                if self.relocate_dets: 
+                    self.log('Moving detectors to positions specified in RAW file.')
+            	LoadDetectorInfo(Workspace=result_name,DataFilename=filename,RelocateDets=self.relocate_dets)
             else:
-
                 self.log('Raw file detector header is superceeded') 
                 if self.relocate_dets: 
                     self.log('Moving detectors to positions specified in cal file.')
                     if self.det_cal_file_ws == None :
                         self.log('Loading detector info from file ' + self.det_cal_file)                    
-                        LoadDetectorInfo(result_ws, self.det_cal_file, self.relocate_dets)
+                        LoadDetectorInfo(Workspace=result_name,DataFilename=self.det_cal_file,RelocateDets= self.relocate_dets)
                     else:
-                        self.log('Copying detectors positions from det_cal_file workspace: '+self.det_cal_file_ws.getName())                    
-                        CopyInstrumentParameters (self.det_cal_file_ws,result_ws)
+                        self.log('Copying detectors positions from det_cal_file workspace: '+self.det_cal_file_ws.name())                    
+                        CopyInstrumentParameters(InputWorkspace=self.det_cal_file_ws,OutputWorkspace=result_name)
 
         if self.background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
-            ConvertToDistribution(result_ws)    
+            ConvertToDistribution(Workspace=result_name)    
             if (self.facility == "SNS"):
-                FlatBackground("background_origin_ws", "background_ws", self.background_range[0] + bin_offset, self.background_range[1] + bin_offset, '', 'Mean', 'Return Background')
+                FlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
+                               StartX= self.background_range[0] + bin_offset,EndX= self.background_range[1] + bin_offset,
+                               WorkspaceIndexList= '',Mode= 'Mean',OutputMode= 'Return Background')
                 # Delete the raw data background region workspace
-                mtd.deleteWorkspace("background_origin_ws")
-                # Convert to distribution to make it compatible with the data workspace (result_ws).
-                ConvertToDistribution("background_ws") 
+                DeleteWorkspace("background_origin_ws")
+                # Convert to distribution to make it compatible with the data workspace (result_name).
+                ConvertToDistribution(Workspace="background_ws") 
                 # Subtract the background
-                Minus(result_ws, "background_ws", result_ws)
+                Minus(LHSWorkspace=result_name,RHSWorkspace= "background_ws",OutputWorkspace=result_name)
                 # Delete the determined background 
-                mtd.deleteWorkspace("background_ws")
+                DeleteWorkspace("background_ws")
             else:
-                FlatBackground(result_ws, result_ws, self.background_range[0] + bin_offset, self.background_range[1] + bin_offset, '', 'Mean')
-            ConvertFromDistribution(result_ws)  
+                FlatBackground(InputWorkspace=result_name,OutputWorkspace=result_name,
+                               StartX= self.background_range[0] + bin_offset,EndX= self.background_range[1] + bin_offset,
+                               WorkspaceIndexList= '',Mode= 'Mean')
+            ConvertFromDistribution(Workspace=result_name)  
 
         # Normalise using the chosen method
         # TODO: This really should be done as soon as possible after loading
-        self.normalise(result_ws, result_ws, self.normalise_method, range_offset=bin_offset)
+        self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
         # This next line will fail the SystemTests
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
-        ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct')
+        ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
         
         if not self.energy_bins is None:
-            Rebin(result_ws, result_ws, self.energy_bins,PreserveEvents=False)
+            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
         
         if self.apply_detector_eff:
             if (self.facility == "SNS"):
                 # Need to be in lambda for detector efficiency correction
-                ConvertUnits(result_ws, result_ws, Target="Wavelength", EMode="Direct", EFixed=ei_value)
-                He3TubeEfficiency(result_ws, result_ws)
-                ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
+                ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
+                He3TubeEfficiency(InputWorkspace=result_name,OutputWorkspace=result_name)
+                ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
             else:
-                DetectorEfficiencyCor(result_ws, result_ws)
+                DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
 
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
             # TODO: Write log message
-            CorrectKiKf(result_ws, result_ws, EMode='Direct')
+            CorrectKiKf(InputWorkspace=result_name,OutputWorkspace= result_name, EMode='Direct')
 
         # Make sure that our binning is consistent
         if not self.energy_bins is None:
-            Rebin(result_ws, result_ws, self.energy_bins)
+            Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params= self.energy_bins)
         
         # Masking and grouping
+        result_ws = mtd[result_name]
         result_ws = self.remap(result_ws, spectra_masks, map_file)
 
-        ConvertToDistribution(result_ws)
+        ConvertToDistribution(Workspace=result_ws)
         # White beam correction
         if white_run is not None:
             white_ws = self.do_white(white_run, spectra_masks, map_file)
@@ -454,7 +450,7 @@ class DirectEnergyConversion(object):
                 self.log("Performing Absolute Units Normalisation.")
                 # Perform Abs Units...
                 norm_factor = self.monovan_abs(monovan_wkspace)
-            mtd.deleteWorkspace(monovan_wkspace.getName())
+            DeleteWorkspace(monovan_wkspace.name())
         else:
             norm_factor = None
 
@@ -511,16 +507,16 @@ class DirectEnergyConversion(object):
             raise TypeError('Unknown option passed to get_ei "%s"' % fix_ei)
 
         # Calculate the incident energy
-        alg = GetEi(InputWorkspace=input_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), EnergyEstimate=ei_guess,FixEi=fix_ei)
-        mon1_peak = float(alg.getPropertyValue("FirstMonitorPeak"))
-        mon1_index = int(alg.getPropertyValue("FirstMonitorIndex"))
-        ei = input_ws.getSampleDetails().getLogData("Ei").value
+        ei,mon1_peak,mon1_index,tzero = \
+            GetEi(InputWorkspace=input_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), 
+                  EnergyEstimate=ei_guess,FixEi=self.fix_ei)
+
         # Adjust the TOF such that the first monitor peak is at t=0
-        ChangeBinOffset(input_ws, resultws_name, -mon1_peak)
+        ChangeBinOffset(InputWorkspace=input_ws,OutputWorkspace= resultws_name,Offset= -float(str(mon1_peak)))
         mon1_det = input_ws.getDetector(mon1_index)
         mon1_pos = mon1_det.getPos()
         src_name = input_ws.getInstrument().getSource().getName()
-        MoveInstrumentComponent(resultws_name, src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
+        MoveInstrumentComponent(Workspace=resultws_name,ComponentName= src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
         return ei, mon1_peak
 
     def remap(self, result_ws, spec_masks, map_file):
@@ -528,13 +524,14 @@ class DirectEnergyConversion(object):
         Mask and group detectors based on input parameters
         """
         if not spec_masks is None:
-            MaskDetectors(result_ws, MaskedWorkspace=spec_masks)
+            MaskDetectors(Workspace=result_ws, MaskedWorkspace=spec_masks)
         if not map_file is None:
-            GroupDetectors(result_ws, result_ws, map_file, KeepUngroupedSpectra=0, Behaviour='Average')
+            result_ws = GroupDetectors(InputWorkspace=result_ws,OutputWorkspace=result_ws,
+                                       MapFile= map_file, KeepUngroupedSpectra=0, Behaviour='Average')
 
-        return mtd[str(result_ws)]
+        return result_ws
 
-    def normalise(self, data_ws, result_ws, method, range_offset=0.0):
+    def normalise(self, data_ws, result_name, method, range_offset=0.0):
         """
         Apply normalisation using specified source
         """
@@ -542,18 +539,18 @@ class DirectEnergyConversion(object):
         method = method.lower()
         done_log = "DirectInelasticReductionNormalisedBy"
         if done_log in data_ws.getRun() or method == 'none':
-            if str(data_ws) != str(result_ws):
-                CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_ws)
-            output = mtd[str(result_ws)]
+            if data_ws.name() != result_name:
+                CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
+            output = mtd[result_name]
         elif method == 'monitor-1':
             range_min = self.mon1_norm_range[0] + range_offset
             range_max = self.mon1_norm_range[1] + range_offset
-            NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_ws, MonitorSpectrum=int(self.mon1_norm_spec), 
-                               IntegrationRangeMin=range_min, IntegrationRangeMax=range_max,IncludePartialBins=True)
-            output = mtd[str(result_ws)]
+            NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorSpectrum=int(self.mon1_norm_spec), 
+                               IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
+            output = mtd[result_name]
         elif method == 'current':
-            NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_ws)
-            output = mtd[str(result_ws)]
+            NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_name)
+            output = mtd[result_name]
         else:
             raise RuntimeError('Normalisation scheme ' + reference + ' not found. It must be one of monitor-1, current, peak or none')
 
@@ -577,8 +574,8 @@ class DirectEnergyConversion(object):
         e_upp = self.monovan_integr_range[1]
         if e_low > e_upp:
             raise ValueError("Inconsistent mono-vanadium integration range defined!")
-        Rebin(data_ws, data_ws, [e_low, 2.*(e_upp-e_low), e_upp])
-        ConvertToMatrixWorkspace(data_ws, data_ws)
+        data_ws=Rebin(InputWorkspace=data_ws,OutputWorkspace=data_ws,Params= [e_low, 2.*(e_upp-e_low), e_upp])
+        data_ws=ConvertToMatrixWorkspace(InputWorkspace=data_ws,OutputWorkspace= data_ws)
 
         args = {}
         args['tiny'] = self.diag_tiny
@@ -590,11 +587,11 @@ class DirectEnergyConversion(object):
         args['van_sig'] = self.diag_samp_sig
 
         diagnostics.diagnose(data_ws, **args)
-        monovan_masks = ExtractMask(data_ws, OutputWorkspace='monovan_masks').workspace()
-        MaskDetectors(data_ws, MaskedWorkspace=monovan_masks)
+        monovan_masks,det_ids = ExtractMask(InputWorkspace=data_ws,OutputWorkspace='monovan_masks')
+        MaskDetectors(Workspace=data_ws, MaskedWorkspace=monovan_masks)
         DeleteWorkspace(Workspace=monovan_masks)
 
-        ConvertFromDistribution(data_ws)
+        ConvertFromDistribution(Workspace=data_ws)
         nhist = data_ws.getNumberHistograms()
         average_value = 0.0
         weight_sum = 0.0
@@ -657,11 +654,11 @@ class DirectEnergyConversion(object):
         for ext in formats:
             filename = save_path + ext
             if ext == '.spe':
-                SaveSPE(workspace, filename)
+                SaveSPE(InputWorkspace=workspace,Filename= filename)
             elif ext == '.nxs':
-                SaveNexus(workspace, filename)
+                SaveNexus(InputWorkspace=workspace,Filename= filename)
             elif ext == '.nxspe':
-                SaveNXSPE(workspace, filename, KiOverKfScaling=self.apply_kikf_correction,Psi=self.psi)
+                SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=self.apply_kikf_correction,Psi=self.psi)
             else:
                 self.log('Unknown file format "%s" encountered while saving results.')
     
@@ -695,8 +692,8 @@ class DirectEnergyConversion(object):
         Initialise the attributes of the class
         """
         # Instrument name might be a prefix, query Mantid for the full name
-        self.instr_name = mtd.settings.facility().instrument(instr_name).name()
-        mtd.settings['default.instrument'] = self.instr_name
+        self.instr_name = config.getFacility().instrument(instr_name).name()
+        config['default.instrument'] = self.instr_name
         self.setup_mtd_instrument()
         # Initialize the default parameters from the instrument as attributes of the
         # class
@@ -707,13 +704,13 @@ class DirectEnergyConversion(object):
             self.instrument = workspace.getInstrument()
         else:
             # Load an empty instrument if one isn't already there
-            idf_dir = mtd.getConfigProperty('instrumentDefinition.directory')
+            idf_dir = config.getString('instrumentDefinition.directory')
             instr_pattern = os.path.join(idf_dir,self.instr_name + '*_Definition.xml')
             idf_files = glob.glob(instr_pattern)
             if len(idf_files) > 0:
                 tmp_ws_name = '__empty_' + self.instr_name
-                if not mtd.workspaceExists(tmp_ws_name):
-                    LoadEmptyInstrument(idf_files[0],tmp_ws_name)
+                if not mtd.doesExist(tmp_ws_name):
+                    LoadEmptyInstrument(Filename=idf_files[0],OutputWorkspace=tmp_ws_name)
                 self.instrument = mtd[tmp_ws_name].getInstrument()
             else:
                 self.instrument = None
@@ -737,7 +734,7 @@ class DirectEnergyConversion(object):
             self.facility = "SNS"
             self.normalise_method  = 'current'
         else:
-            self.facility = str(mtd.settings.facility())
+            self.facility = str(config.getFacility())
         
         # The Ei requested
         self.ei_requested = None
@@ -837,6 +834,6 @@ class DirectEnergyConversion(object):
         if self._to_stdout:
             print msg
         if self._log_to_mantid:
-            mtd.sendLogMessage(msg)
+            logger.notice(msg)
 
 #-----------------------------------------------------------------
