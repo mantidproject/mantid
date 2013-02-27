@@ -18,12 +18,14 @@ __STRINGREPLACEMENTS__ = [
     (re.compile("(MantidFramework\.|)(mtd|mantid)\.initiali[z,s]e\(\)"), ""),
     (re.compile("MantidFramework\."), "mantid."),
     (re.compile("\.getSampleDetails"), ".getRun"),
+    (re.compile("mtd\.settings\.facility\("), "config.getFacility("),
     (re.compile("mtd\.settings"), "config"),
     (re.compile("mtd\.getConfigProperty"), "config.getString"),
     (re.compile("mtd\.workspaceExists"), "mtd.doesExist"),
     (re.compile("(mtd|mantid).sendLogMessage"), "logger.notice"),
     (re.compile("(mtd|mantid).sendDebugMessage"), "logger.debug"),
-    (re.compile("(mtd|mantid).deleteWorkspace"), "mtd.remove")
+    (re.compile("(mtd|mantid).deleteWorkspace"), "mtd.remove"),
+    (re.compile("\.workspace\(\)"), "")
 ]
 
 class SimpleStringReplace(rules.Rules):
