@@ -145,12 +145,14 @@ def initialize_Mantid(mantidpath):
     mantid_initialized = True
 
 #======================================================================
-def get_all_algorithms():
-    """REturns a list of all algorithm names"""
+def get_all_algorithms(withversion=False):
+    """Returns a list of all algorithm names"""
     temp = mtd._getRegisteredAlgorithms(True)
-    print temp
-    algos = [x for (x, version) in temp]
-    return algos
+    if withversion:
+        return temp
+    else:
+        algos = [x for (x, version) in temp]
+        return algos
 
 #======================================================================
 def find_misnamed_algos():

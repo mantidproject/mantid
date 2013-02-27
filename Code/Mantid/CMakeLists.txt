@@ -133,6 +133,8 @@ add_subdirectory ( MantidPlot )
 
 add_subdirectory ( scripts )
 
+add_subdirectory ( docs )
+
 ###########################################################################
 # Installation settings
 ###########################################################################
