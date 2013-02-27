@@ -20,7 +20,7 @@ def addWikiDir(helpsrcdir):
     sys.path.append(wikitoolsloc)
 
 def genFuncElement(name):
-    text = '<a href="%s">%s</a>' % (WEB_BASE+name, name)
+    text = '<a href="FitFunc_%s.html">%s</a>' % (name, name)
     return lxml.html.fragment_fromstring(text)
 
 def processCategories(categories, qhp, outputdir):
@@ -62,10 +62,10 @@ def processCategories(categories, qhp, outputdir):
         handle = open(filename, 'w')
         handle.write(le.tostring(root, pretty_print=True, xml_declaration=False))
 
-def process(functionsalgos, qhp, outputdir):
+def process(functions, qhp, outputdir):
     import mantid.api
 
-    # sort algorithms into categories
+    # sort fit functions into categories
     categories = {}
     for name in functions:
         func = mantid.api.FunctionFactory.createFunction(name)
@@ -87,7 +87,9 @@ def process(functionsalgos, qhp, outputdir):
     ##### section for categories 
     div_cat = le.SubElement(body, "div", **{"id":"function_cats"})
     for category in categories_list:
-        div_cat.append(lh.H2(category + " Category"))
+        temp = le.SubElement(div_cat, "h2")
+        le.SubElement(temp, 'a', **{"name":category})
+        temp.text = category + " Category"
         ul = le.SubElement(div_cat, "ul")
         funcs = categories[category]
         for func in funcs:
@@ -100,6 +102,11 @@ def process(functionsalgos, qhp, outputdir):
 
     shortname = os.path.split(filename)[1]
     qhp.addFile(shortname, "Fit Functions Index")
+
+    # create individual html pages
+    from fitfunctions_help import process_function
+    for func in functions:
+        process_function(func, qhp, helpoutdir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate qtassistant docs " \
