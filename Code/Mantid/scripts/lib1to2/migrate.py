@@ -104,8 +104,8 @@ class ScriptFile(object):
         a different filename with the
         extension defined by self.backup_ext
         """
-        messages.notify("Backing up %s to %s" % (self.filename, self.backup_filename))
         if self.dobackup and self.filename is not None:
+            messages.notify("Backing up %s to %s" % (self.filename, self.backup_filename))
             shutil.copy(self.filename, self.backup_filename)
    
     def restore_backup(self):
