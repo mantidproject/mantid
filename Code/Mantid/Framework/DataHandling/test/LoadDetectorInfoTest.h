@@ -275,8 +275,6 @@ public:
   {
     LoadDetectorIndoTestHelper loader;
 
-    TS_ASSERT_THROWS(loader.readNXS("NonExistingFile"),std::invalid_argument);
-
     std::string nexusWithoutDet = FileFinder::Instance().getFullPath("argus0026287.nxs");
     if(nexusWithoutDet.empty())return;
     TSM_ASSERT_THROWS("this nexus does not have detector information ",loader.readNXS(nexusWithoutDet),std::invalid_argument);

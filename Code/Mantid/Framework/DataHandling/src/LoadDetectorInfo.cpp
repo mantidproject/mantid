@@ -805,10 +805,6 @@ void LoadDetectorInfo::sometimesLogSuccess(const detectorInfo &params, bool &nee
 /**The methor reads selected part of detector.nxs file and apply correspondent changes to the detectors */ 
 void LoadDetectorInfo::readNXS(const std::string& fName)
 {
-  Poco::File nxsFile(fName);
-  if(!nxsFile.exists() || !nxsFile.isFile())
-    throw std::invalid_argument(" file "+fName+" does not exist");
-
   auto hFile = new ::NeXus::File(fName,NXACC_READ);
   if(!hFile)
     throw std::runtime_error(" Can not open file "+fName+" as nexus file");
