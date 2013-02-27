@@ -6,7 +6,7 @@
  settings optimized.  There is a property to list the run numbers to NOT have their goniometer settings changed.
 
  -The crystal orientation matrix, UB, from the PeaksWorkspace should index all the runs "very well". Otherwise iterations
-  that build a UB with corrected sample orientations slowly may be necessary.
+  that slowly build a UB with corrected sample orientations may be needed.
 
  *WIKI*/
 /*
@@ -71,33 +71,46 @@ namespace Mantid
 
     void OptimizeCrystalPlacement::init()
     {
-      declareProperty(
-          new WorkspaceProperty< PeaksWorkspace> ( "PeaksWorkspace", "", Direction::Input ),
-          "Workspace of Peaks with UB loaded" );
-      declareProperty( new  ArrayProperty<int>( std::string( "KeepGoniometerFixedfor" ), Direction::Input ),
-          "List of run Numbers for which the goniometer settings will NOT be changed" );
+      declareProperty(new WorkspaceProperty<PeaksWorkspace> ("PeaksWorkspace", "", Direction::Input),
+          "Workspace of Peaks with UB loaded");
+      declareProperty(new ArrayProperty<int> (std::string("KeepGoniometerFixedfor"), Direction::Input),
+          "List of run Numbers for which the goniometer settings will NOT be changed");
 
-      declareProperty( new WorkspaceProperty< PeaksWorkspace> ( "ModifiedPeaksWorkspace", "",
-          Direction::Output ), "Output Workspace of Peaks with optimized sample Orientations" );
+      declareProperty(new WorkspaceProperty<PeaksWorkspace> ("ModifiedPeaksWorkspace", "",
+          Direction::Output), "Output Workspace of Peaks with optimized sample Orientations");
 
-      declareProperty( new WorkspaceProperty<TableWorkspace> ( "FitInfoTable", "",
-           Direction::Output ), "Workspace of Results" );
+      declareProperty(new WorkspaceProperty<TableWorkspace> ("FitInfoTable", "FitInfoTable", Direction::Output),
+          "Workspace of Results");
 
-      declareProperty("ToleranceChiPhiOmega",5.0,"Max offset in degrees from current settings");
-
-      declareProperty("MaxIntHKLOffsetPeaks2Use",.25,
-          "Use only peaks whose h,k,and l offsets from and integer are below this level");
-
-      declareProperty("MaxHKLPeaks2Use",-1.0,
-          "If less than 0 all peaks are used, otherwise only peaks whose h,k, and l values are below the level are used");
 
       declareProperty("IncludeVaryingSampleOffsets", true,
-          "If true sample offsets will be adjusted to give better fits, otherwise they will be fixed as zero");
+          "If true sample offsets will be adjusted to give better fits, otherwise they will be fixed as zero(def=true)");
+
+      declareProperty("Chi2overDoF", -1.0, "chi squared over dof", Direction::Output);
+      declareProperty("nPeaks", -1, "Number of Peaks Used", Direction::Output);
+      declareProperty("nParams", -1, "Number of Parameters fit", Direction::Output);
 
 
-      declareProperty( "Chi2overDoF", -1.0,"chi squared over dof", Direction::Output);
-      declareProperty( "nPeaks", -1,"Number of Peaks Used", Direction::Output);
-      declareProperty( "nParams", -1,"Number of Parameters fit", Direction::Output);
+      declareProperty("ToleranceChiPhiOmega", 5.0, "Max offset in degrees from current settings(def=5)");
+
+      declareProperty("MaxIntHKLOffsetPeaks2Use", .25,
+          "Use only peaks whose h,k,and l offsets from and integer are below this level(def=.25)");
+
+      declareProperty(
+          "MaxHKLPeaks2Use", -1.0,
+          "If less than 0 all peaks are used, otherwise only peaks whose h,k, and l values are below the level are used(def=-1)");
+      declareProperty("MaxSamplePositionChange_meters", .005,
+          "Maximum Change in Sample position in meters(def=.005)");
+
+
+      setPropertyGroup("ToleranceChiPhiOmega", "Tolerance settings");
+
+      setPropertyGroup("MaxSamplePositionChange_meters", "Tolerance settings");
+      setPropertyGroup("MaxHKLPeaks2Use", "Tolerance settings");
+      setPropertyGroup("MaxIntHKLOffsetPeaks2Use", "Tolerance settings");
+
+      setPropertySettings("MaxSamplePositionChange_meters",new EnabledWhenProperty("IncludeVaryingSampleOffsets",
+            Kernel::IS_EQUAL_TO, "1" ));
 
     }
 
@@ -206,8 +219,6 @@ namespace Mantid
       if ( OptRunNums.size() > 0 )
         FuncArg += ",OptRuns=" + OptRunNums;
 
-      FuncArg += ",SampleXOffset=0,SampleYOffset=0,SampleZOffset=0";
-
       //------------- Add initial parameter values to FuncArg -----------
 
       std::ostringstream oss( std::ostringstream::out );
@@ -215,9 +226,10 @@ namespace Mantid
       std::ostringstream oss1( std::ostringstream::out );//constraints
       oss1.precision( 3 );
 
-      std::string startConstraint = "";
+
       int nParams=3;
       double DegreeTol=getProperty("ToleranceChiPhiOmega");
+      std::string startConstraint ="";
       for ( size_t i = 0; i < RunNumList.size(); i++ )
       {
         int runNum = RunNumList[i];
@@ -238,11 +250,21 @@ namespace Mantid
           oss1 << "," << chiphiomega[1] - DegreeTol << "<phi" << runNum << "<" << chiphiomega[1] + DegreeTol;
 
           oss1 << "," << chiphiomega[2] - DegreeTol << "<omega" << runNum << "<" << chiphiomega[2] + DegreeTol;
-          startConstraint = ",";
+          startConstraint=",";
           nParams +=3 ;
         }
 
       }
+
+
+      Instrument_const_sptr instr =Peaks->getPeak(0).getInstrument();
+      V3D sampPos = instr->getSample()->getPos();
+
+      oss<< ",SampleXOffset="<<sampPos.X()<<",SampleYOffset="<<sampPos.Y()<<",SampleZOffset="<<sampPos.Z();
+
+      double maxSampshift = getProperty("MaxSamplePositionChange_meters");
+      oss1 << startConstraint << sampPos.X()-maxSampshift<<"<SampleXOffset<"<<sampPos.X()+maxSampshift<<","<<sampPos.Y()-maxSampshift<<
+          "<SampleYOffset<"<<sampPos.Y()+maxSampshift <<","<<sampPos.Z()-maxSampshift<<"<SampleZOffset<" <<sampPos.Z()+maxSampshift;
 
       FuncArg += oss.str();
       std::string Constr = oss1.str();
@@ -265,7 +287,13 @@ namespace Mantid
       fit_alg->setProperty( "CreateOutput" , true );
 
       if( !(bool)getProperty("IncludeVaryingSampleOffsets"))
-        fit_alg->setProperty("Ties","SampleXOffset=0,SampleYOffset=0,SampleZOffset=0");
+      {
+        std::ostringstream oss( std::ostringstream::out );
+        oss.precision( 3 );
+        oss<<"SampleXOffset="<<sampPos.X()<<",SampleYOffset="<<sampPos.Y()<<",SampleZOffset="<<sampPos.Z();
+
+        fit_alg->setProperty("Ties",oss.str());
+      }
 
       fit_alg->setProperty( "Output" , "out" );
 
@@ -339,9 +367,9 @@ namespace Mantid
 
       double L0 = peak.getL1();
       V3D oldSampPos = OldInstrument->getSample()->getPos();
-      V3D newSampPos( oldSampPos.X()+Results["SampleXOffset"],
-                      oldSampPos.Y()+Results["SampleYOffset"],
-                      oldSampPos.Z()+Results["SampleZOffset"]);
+      V3D newSampPos( Results["SampleXOffset"],
+                      Results["SampleYOffset"],
+                      Results["SampleZOffset"]);
 
       boost::shared_ptr<const Instrument>Inst =OldInstrument;
 
@@ -353,7 +381,7 @@ namespace Mantid
       SCDCalibratePanels::FixUpSourceParameterMap( NewInstrument,L0, newSampPos,pmap_old);
 
       for( int i=0;i<  OutPeaks->getNumberPeaks();i++)
-        OutPeaks->setInstrument( NewInstrument);
+        OutPeaks->getPeak(i).setInstrument( NewInstrument);
 
       OutPeaks->setInstrument( NewInstrument );
 
@@ -387,7 +415,6 @@ namespace Mantid
 
       setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
       setProperty( "ModifiedPeaksWorkspace", OutPeaks);
-
 
 
 

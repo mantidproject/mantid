@@ -2,9 +2,9 @@
 
 
 This algorithm calibrates sets of Rectangular Detectors in one instrument.
-The initial path, time offset,panel width's, panel height's, panel locations and orientation are all
+The initial path, time offset, sample offset, panel width, panel height, panel locations and orientation are all
 adjusted so the error in q positions from the theoretical q positions is minimized.  Also, there
-are options to optimize taking into account sample position and to have the rotations be rigid rotations.
+is an option to have the rotations represent rigid rotations.
 
 Some features:
 
@@ -14,7 +14,7 @@ Some features:
     around the panel's center. The height and  widths of the panels in a group will
      all change by the same factor
 
-2) The user can select which quantities to have optimized
+2) The user can select which quantities to keep fixed during the optimization.
 
 3) The results can be saved to an ISAW-like DetCal file or in an xml file that can be used with the LoadParameter algorithm.
 
@@ -34,6 +34,8 @@ Some features:
    B)QErrorWorkspace contains the Error in Q values for each peak, along with other associated information about the peak
 
    C)CovarianceInfo contains the "correlations"(*100) between each of the parameters
+
+ 6) Maximum changes in the quantities that are altered during optimization are now settable.
 
 *WIKI*/
 
@@ -198,7 +200,7 @@ namespace Mantid
 
       MatrixWorkspace_sptr mwkspc;
 
-      if( N < 4)
+      if( N < 4)//If not well indexed
         return boost::shared_ptr<DataObjects::Workspace2D>(new DataObjects::Workspace2D);
 
 
@@ -365,6 +367,8 @@ namespace Mantid
       boost::shared_ptr<const ParameterMap> pmap0 = instrument->getParameterMap();
       boost::shared_ptr<ParameterMap> pmap1( new ParameterMap());
 
+
+
       for( vector< string >::iterator vit = AllBankNames.begin();
         vit != AllBankNames.end(); ++vit )
       {
@@ -373,15 +377,17 @@ namespace Mantid
       }
 
       //---------------------update params for moderator.------------------------------
-      updateSourceParams(instrument->getSource(), pmap1, pmap0);
-
+     // updateSourceParams(instrument->getSource(), pmap1, pmap0);
 
       boost::shared_ptr<const Instrument> newInstr(new Instrument(instrument->baseInstrument(), pmap1));
 
+      double L1, norm = 1.0;
+      V3D beamline, sampPos;
+      instrument->getInstrumentParameters(L1, beamline, norm, sampPos);
+      FixUpSourceParameterMap(newInstr, L0, sampPos, pmap0);
 
 
-      V3D beamline,samplePos;
-      double norm = 1.0;
+
 
       if( xml)
       {
@@ -401,7 +407,7 @@ namespace Mantid
         loadParFile->executeAsChildAlg();
 
         boost::shared_ptr<const Instrument> newInstrument = ws->getInstrument();
-        newInstrument->getInstrumentParameters(L0, beamline, norm, samplePos);
+        newInstrument->getInstrumentParameters(L0, beamline, norm, sampPos);
         return newInstrument;
 
       }else
@@ -409,25 +415,6 @@ namespace Mantid
         LoadISawDetCal(newInstr,bankNames,timeOffset,preprocessFilename,
                   "bank");
         return newInstr;
-
-       /* SaveIsawDetCal( newInstr,bankNames,timeOffset,preprocessFilename+"X");
-
-        boost::shared_ptr<Algorithm> LoadDetCal = createChildAlgorithm("LoadIsawDetCal" );
-
-        LoadDetCal->initialize();
-        // LoadDetCal->setProperty("InputWorkspace",ws);//Doesn't work
-        AnalysisDataService::Instance().addOrReplace("fff", ws);
-        LoadDetCal->setProperty("Filename",preprocessFilename);
-        LoadDetCal->setProperty(string("TimeOffset"),0.0);
-        LoadDetCal->setPropertyValue("InputWorkspace","fff");
-        LoadDetCal->executeAsChildAlg();
-
-        boost::shared_ptr<const Instrument> newInstrument = ws->getInstrument();
-        newInstrument->getInstrumentParameters(L0,beamline,norm,samplePos);
-        timeOffset = LoadDetCal->getProperty("TimeOffset");
-        AnalysisDataService::Instance().remove("fff");
-        return newInstrument;
-        */
       }
     }
 
@@ -591,6 +578,7 @@ namespace Mantid
         (string) getProperty("PreProcFilename"),
         T0, L0, banksVec);
       g_log.debug()<<"Initial L0,T0="<<L0<<","<<T0<<endl;
+      V3D samplePos = peaksWs->getPeak( 0 ).getInstrument()->getSample()->getPos();
 
       string PeakWSName = getPropertyValue( "PeakWorkspace");
       if(PeakWSName.length()<1)
@@ -653,6 +641,8 @@ namespace Mantid
       ostringstream oss1 ( ostringstream::out);
 
 
+      double maxXYOffset = getProperty("MaxPositionChange_meters");
+
       oss1.precision( 4);
       for( vector<vector< string > >::iterator itv = Groups.begin(); itv !=Groups.end(); ++itv)
       {
@@ -679,8 +669,6 @@ namespace Mantid
         // if( it1 == (*itv).begin())
         CalcInitParams( bank_rect, instrument,  PreCalibinstrument, detWidthScale0
           ,detHeightScale0, Xoffset0, Yoffset0, Zoffset0, Xrot0, Yrot0, Zrot0);
-
-
 
 
         // --- set Function property ----------------------
@@ -771,26 +759,45 @@ namespace Mantid
 
         ostringstream oss2 ( ostringstream::out);
 
-
-        double maxXYOffset = 10*max< double >( bank_rect->xstep(), bank_rect->ystep());
-
-
         if( i == 0)
           oss2 <<  (.85*L0) << "<" <<  "l0<"  <<  (1.15*L0 ) << ",-5<" <<  "t0<5" ;
 
+        double MaxRotOffset = getProperty("MaxRotationChange_degrees");
         oss2 <<  "," << (.85)*detWidthScale0 << "<" << Gprefix << "detWidthScale<" << (1.15)*detWidthScale0
           << "," << (.85)*detHeightScale0 << "<" << Gprefix << "detHeightScale<" << (1.15)*detHeightScale0
           <<","<< -maxXYOffset+Xoffset0 << "<" << Gprefix << "Xoffset<" << maxXYOffset+Xoffset0
-          << "," << -maxXYOffset+Yoffset0 << "<" << Gprefix << "Yoffset<" << maxXYOffset+Yoffset0
-          << "," << -maxXYOffset+Zoffset0 << "<" << Gprefix << "Zoffset<" << maxXYOffset+Zoffset0
-          << ",-10<" << Gprefix << "Xrot<10,-10<"
-          << Gprefix << "Yrot<10,-10<" << Gprefix << "Zrot<10";
+          << "," << -maxXYOffset+Yoffset0 << "<" << Gprefix << "Yoffset<" << maxXYOffset+Yoffset0<<
+          "," << -maxXYOffset+Zoffset0 << "<" << Gprefix << "Zoffset<" << maxXYOffset+Zoffset0<<","
+          << -MaxRotOffset<<"<" << Gprefix << "Xrot<"<<MaxRotOffset<<",-"<<MaxRotOffset<<"<"
+          << Gprefix << "Yrot<"<<MaxRotOffset<<",-"<<MaxRotOffset<< "<" << Gprefix << "Zrot<"<<MaxRotOffset
+          ;
 
 
         Constraints += oss2.str();
 
 
       }//for vector< string > in Groups
+
+
+//Constraints for sample offsets
+     maxXYOffset = getProperty("MaxSamplePositionChange_meters");
+
+     if( getProperty("AllowSampleShift"))
+     {
+
+        oss << ",SampleX=" << samplePos.X() << ",SampleY=" << samplePos.Y() << ",SampleZ="
+            << samplePos.Z();
+
+        ostringstream oss2(ostringstream::out);
+        if (!Constraints.empty())
+          oss2 << ",";
+
+        oss2 << samplePos.X()-maxXYOffset << "<SampleX<" <<samplePos.X()+ maxXYOffset << "," <<
+            samplePos.Y()-maxXYOffset << "<SampleY<"
+            << samplePos.Y()+maxXYOffset << "," << samplePos.Z()-maxXYOffset << "<SampleZ<" << samplePos.Z()+maxXYOffset;
+
+        Constraints += oss2.str();
+      }
 
       if(!use_L0)
       {
@@ -1389,7 +1396,7 @@ namespace Mantid
     void SCDCalibratePanels::init()
     {
       declareProperty(new WorkspaceProperty<PeaksWorkspace> ("PeakWorkspace", "",
-        Kernel::Direction::Input), "Workspace of Peaks");
+        Kernel::Direction::Input), "Workspace of Indexed Peaks");
 
       vector< string > choices;
       choices.push_back("OnePanelPerGroup");
@@ -1452,13 +1459,23 @@ namespace Mantid
       declareProperty("InitialTimeOffset", 0.0, "Initial time offset when using xml files");
 
 
-      declareProperty(new WorkspaceProperty<TableWorkspace> ("ResultWorkspace", "",
+      declareProperty(new WorkspaceProperty<TableWorkspace> ("ResultWorkspace", "ResultWorkspace",
         Kernel::Direction::Output), "Workspace of Results");
 
-      declareProperty(new WorkspaceProperty<TableWorkspace> ("QErrorWorkspace", "",
+      declareProperty(new WorkspaceProperty<TableWorkspace> ("QErrorWorkspace", "QErrorWorkspace",
         Kernel::Direction::Output), "Workspace of Errors in Q");
+      //------------------------------------ Tolerance settings-------------------------
 
       declareProperty( "NumIterations",60,"Number of iterations");
+      declareProperty("MaxRotationChange_degrees",5.0,"Maximum Change in Rotations about x,y,or z in degrees(def=5)");
+      declareProperty("MaxPositionChange_meters",.010,"Maximum Change in Panel positions in meters(def=.01)");
+      declareProperty("MaxSamplePositionChange_meters",.005,"Maximum Change in Sample position in meters(def=.005)");
+
+      setPropertyGroup("NumIterations", "Tolerance settings");
+      setPropertyGroup("MaxRotationChange_degrees", "Tolerance settings");
+      setPropertyGroup("MaxPositionChange_meters", "Tolerance settings");
+      setPropertyGroup("MaxSamplePositionChange_meters", "Tolerance settings");
+
 
       declareProperty("ChiSqOverDOF",-1.0,"ChiSqOverDOF",Kernel::Direction::Output);
       declareProperty("DOF",-1,"Degrees of Freedom",Kernel::Direction::Output);
@@ -1473,6 +1490,12 @@ namespace Mantid
 
       setPropertySettings("InitialTimeOffset", new EnabledWhenProperty("PreProcessInstrument",
         Kernel::IS_EQUAL_TO, "C)Apply a LoadParameter.xml type file"));
+
+      setPropertySettings("MaxSamplePositionChange_meters",new EnabledWhenProperty("AllowSampleShift",
+          Kernel::IS_EQUAL_TO, "1" ));
+
+      setPropertySettings("MaxRotationChange_degrees",new EnabledWhenProperty("use_PanelOrientation",
+          Kernel::IS_EQUAL_TO, "1" ));
 
     }
 
