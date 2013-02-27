@@ -826,14 +826,14 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
   {
     g_log.warning()<<" reading data from old Libisis format, which does not support multiple helium pressures and wall thickness\n";
     hFile->openGroup("full_reference_detector","NXIXTdetector");
-      this->readLibisisNXS(hFile,detStruct,detType,detOffset,detectorList);
+    this->readLibisisNXS(hFile,detStruct,detType,detOffset,detectorList);
     hFile->closeGroup();
     detDataFound = true;
   }
   if(entries.find("detectors.dat")!=entries.end())
   {  
     hFile->openGroup("detectors.dat","NXEntry");
-      this->readDetDotDatNXS(hFile,detStruct,detType,detOffset,detectorList);
+    this->readDetDotDatNXS(hFile,detStruct,detType,detOffset,detectorList);
     hFile->closeGroup();
     detDataFound = true;
   }
@@ -856,86 +856,86 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
   PARALLEL_FOR_NO_WSP_CHECK()
   for(int i=0;i<int(nDetectors);i++)
   {
-	PARALLEL_START_INTERUPT_REGION
-    
+    PARALLEL_START_INTERUPT_REGION
+
     // check we have a supported code
     switch (detType[i])
     {
-      // these first two codes are detectors that we'll process, the code for this is below
-      case PSD_GAS_TUBE : break;
-      case NON_PSD_GAS_TUBE : break;
+    // these first two codes are detectors that we'll process, the code for this is below
+    case PSD_GAS_TUBE : break;
+    case NON_PSD_GAS_TUBE : break;
 
-      // the following detectors codes specify little or no analysis
-      case MONITOR_DEVICE :
-		PARALLEL_CRITICAL(different_mon_offset)
-		{
+    // the following detectors codes specify little or no analysis
+    case MONITOR_DEVICE :
+      PARALLEL_CRITICAL(different_mon_offset)
+      {
         // throws invalid_argument if the detection delay time is different for different monitors
-			noteMonitorOffset(detOffset[i], detStruct[i].detID);
-		}
-        // skip the rest of this loop and move on to the next detector
-        continue;
+        noteMonitorOffset(detOffset[i], detStruct[i].detID);
+      }
+      // skip the rest of this loop and move on to the next detector
+      continue;
 
       // the detector is set to dummy, we won't report any error for this we'll just do nothing
-      case DUMMY_DECT : continue;
-      
-      //we can't use data for detectors with other codes because we don't know the format, ignore the data and write to g_log.warning() once at the end
-      default :
-	    PARALLEL_CRITICAL(problem_detector)
-		{
-			detectorProblemCount ++;
-			g_log.debug() << "Ignoring data for a detector with code " << detType[i] << std::endl;
-		}
-        continue;
+    case DUMMY_DECT : continue;
+
+    //we can't use data for detectors with other codes because we don't know the format, ignore the data and write to g_log.warning() once at the end
+    default :
+      PARALLEL_CRITICAL(problem_detector)
+      {
+        detectorProblemCount ++;
+        g_log.debug() << "Ignoring data for a detector with code " << detType[i] << std::endl;
+      }
+      continue;
     }
 
     // gas filled detector specific code now until the end of this method
-    
+
     // normally all the offsets are the same and things work faster, check for this
     if ( detOffset[i] != detectorOffset )
     {// could mean different detectors have different offsets and we need to do things thoroughly
       if ( detectorOffset ==  UNSETOFFSET ) 
-	  {
-		  PARALLEL_CRITICAL(det_offset)
-		  {
-			if(detectorOffset ==  UNSETOFFSET) detectorOffset = detOffset[i];
-			if(detOffset[i] != detectorOffset) differentOffsets =true;
-		  }
-	  }
-	  else
-	  {
+      {
+        PARALLEL_CRITICAL(det_offset)
+        {
+          if(detectorOffset ==  UNSETOFFSET) detectorOffset = detOffset[i];
+          if(detOffset[i] != detectorOffset) differentOffsets =true;
+        }
+      }
+      else
+      {
         differentOffsets = true;
-		g_log.debug()<< " different detector offsets for det N"<<i<<" detOffset "<< detOffset[i]<< " base offset: "<<detectorOffset<<std::endl;
-	  }
+        g_log.debug()<< " different detector offsets for det N"<<i<<" detOffset "<< detOffset[i]<< " base offset: "<<detectorOffset<<std::endl;
+      }
 
     }
 
 
-	if(m_moveDets)
-	{
-		try
-		{
-			setDetectorParams(detStruct[i], log);
-		}
-		catch (Exception::NotFoundError &)
-		{// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
-			PARALLEL_CRITICAL(non_existing_detector)
-			{
-				missingDetectors.push_back(detStruct[i].detID);
-			}
-			continue;
-		}
-	}
+    if(m_moveDets)
+    {
+      try
+      {
+        setDetectorParams(detStruct[i], log);
+      }
+      catch (Exception::NotFoundError &)
+      {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
+        PARALLEL_CRITICAL(non_existing_detector)
+        {
+          missingDetectors.push_back(detStruct[i].detID);
+        }
+        continue;
+      }
+    }
 
     // report progress and check for a user cancel message at regualar intervals
 
     if ( i % 100 == 0 )
     {	
-		sometimesLogSuccess(log, noneSet);
-		progress(static_cast<double>(i));
-		interruption_point();
-	
+      sometimesLogSuccess(log, noneSet);
+      progress(static_cast<double>(i));
+      interruption_point();
+
     }
-	PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
