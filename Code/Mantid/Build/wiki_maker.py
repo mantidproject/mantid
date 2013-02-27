@@ -345,7 +345,7 @@ def do_algorithm(args, algo, version=-1):
             print "The last page editor was ", last_modifier
             if not last_modifier == None:
                 # Report a failure test case
-                reporter.addFailureTestCase(algo, version, last_modifier, False)
+                reporter.addFailureTestCase(algo, version, last_modifier, diff)
             
         if wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
             if not args.dryrun:

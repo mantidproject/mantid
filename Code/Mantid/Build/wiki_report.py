@@ -36,8 +36,8 @@ class WikiReporter:
         docEl.setAttribute('time',str(self._time_taken))
         return self._doc.toxml()
     
-    def __failureMessage__(self, algorithm, version, last_editor):
-        return "Algorithm %s Version %i last edited by %s is out of sync." % (algorithm, version, last_editor)
+    def __failureMessage__(self, algorithm, version, last_editor, diff):
+        return "Algorithm %s Version %i last edited by %s is out of sync.\n\nDifferences are:\n\n" % (algorithm, version, last_editor, diff)
     
     def addSuccessTestCase(self, algorithm):
         elem = self._doc.createElement('testcase')
@@ -49,15 +49,14 @@ class WikiReporter:
         self._doc.documentElement.appendChild(elem)
     
     
-    def addFailureTestCase(self, algorithm, version, last_editor, success):
+    def addFailureTestCase(self, algorithm, version, last_editor, diff):
         elem = self._doc.createElement('testcase')
         elem.setAttribute('classname', 'WikiMaker')
         elem.setAttribute('name', algorithm)
-        if not success:
-            self._failures.append(algorithm)
-            failEl = self._doc.createElement('failure')
-            failEl.appendChild(self._doc.createTextNode(self.__failureMessage__(algorithm, version, last_editor)))
-            elem.appendChild(failEl)
+        self._failures.append(algorithm)
+        failEl = self._doc.createElement('failure')
+        failEl.appendChild(self._doc.createTextNode(self.__failureMessage__(algorithm, version, last_editor, diff)))
+        elem.appendChild(failEl)
         time_taken = 0
         elem.setAttribute('time',str(time_taken))
         elem.setAttribute('totalTime',str(time_taken))
