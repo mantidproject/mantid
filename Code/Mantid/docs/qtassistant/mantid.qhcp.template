@@ -3,7 +3,7 @@
      <assistant>
          <title>Mantid Help</title>
          <startPage>qthelp://org.mantidproject/doc/index.html</startPage>
-         <applicationIcon>img/MantidPlot_Icon_32offset.png</applicationIcon>
+         <applicationIcon>@CMAKE_CURRENT_SOURCE_DIR@/img/MantidPlot_Icon_32offset.png</applicationIcon>
          <enableFilterFunctionality>false</enableFilterFunctionality>
          <enableDocumentationManager>true</enableDocumentationManager>
          <enableAddressBar visible="true">false</enableAddressBar>
@@ -12,14 +12,14 @@
              <text>About Mantid</text>
          </aboutMenuText>
          <aboutDialog>
-             <file>src/about.txt</file>
-             <icon>img/Mantid_Logo_Transparent.png</icon>
+             <file>@CMAKE_CURRENT_SOURCE_DIR@/src/about.txt</file>
+             <icon>@CMAKE_CURRENT_SOURCE_DIR@/img/Mantid_Logo_Transparent.png</icon>
          </aboutDialog>
      </assistant>
      <docFiles>
          <generate>
              <file>
-                 <input>src/mantidgeneral.qhp</input>
+                 <input>@CMAKE_CURRENT_SOURCE_DIR@/src/mantidgeneral.qhp</input>
                  <output>mantidgeneral.qch</output>
              </file>
              <file>

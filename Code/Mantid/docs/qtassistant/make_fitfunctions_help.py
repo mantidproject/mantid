@@ -108,13 +108,20 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--mantidpath', dest='mantidpath',
                         default=defaultmantidpath,
                         help="Full path to the Mantid compiled binary folder. Default: '%s'. This will be saved to an .ini file" % defaultmantidpath)
+    parser.add_argument('-o', '--output', dest='helpoutdir',
+                        help="Full path to where the output files should go.")
 
     args = parser.parse_args()
 
     # where to put the generated files
     helpsrcdir = os.path.dirname(os.path.abspath(__file__))
-    helpoutdir = os.path.join(helpsrcdir, OUTPUTDIR)
-    print helpoutdir
+    if args.helpoutdir is not None:
+        helpoutdir = os.path.abspath(args.helpoutdir)
+    else:
+        helpoutdir = os.path.join(helpsrcdir, OUTPUTDIR)
+    print "Writing fit function web pages to '%s'" % helpoutdir
+    if not os.path.exists(helpoutdir):
+        os.makedirs(helpoutdir)
     addWikiDir(helpsrcdir)
 
     # initialize mantid
