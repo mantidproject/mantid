@@ -177,7 +177,9 @@ if __name__ == "__main__":
     # where to put the generated files
     helpsrcdir = os.path.dirname(os.path.abspath(__file__))
     helpoutdir = os.path.join(helpsrcdir, OUTPUTDIR)
-    print helpoutdir
+    print "Writing results to '%s'" % helpsrcdir
+    if not os.path.exists(helpoutdir):
+        os.makedirs(helpoutdir)
     addWikiDir(helpsrcdir)
 
     # initialize mantid
