@@ -273,7 +273,7 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
   }
 
   sometimesLogSuccess(log, noneSet = true);
-  g_log.debug() << "Adjusting time of flight X-values by detector delay times" << std::endl;
+  g_log.debug() << "Adjusting time of flight X-values by detector delay times, detectors have different offsets: "<< differentOffsets << std::endl;
   adjDelayTOFs(detectorOffset, differentOffsets, detectorList, offsets);
   
   if ( detectorProblemCount > 0 )
@@ -842,6 +842,8 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
   if(!detDataFound)
     throw std::invalid_argument("the NeXus file "+fName+" does not contain necessary detector's information");
 
+  g_log.notice() << "Detectors indo loaded from nexus file, starting applying corrections\n";
+
   // process detectors and modify instrument
   size_t nDetectors = detStruct.size();
   float detectorOffset = UNSETOFFSET;
@@ -851,8 +853,10 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 
   bool noneSet = true;
   size_t detectorProblemCount(0);
-  for(size_t i=0;i<nDetectors;i++)
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for(int i=0;i<int(nDetectors);i++)
   {
+	PARALLEL_START_INTERUPT_REGION
     
     // check we have a supported code
     switch (detType[i])
@@ -863,8 +867,11 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 
       // the following detectors codes specify little or no analysis
       case MONITOR_DEVICE :
+		PARALLEL_CRITICAL(different_mon_offset)
+		{
         // throws invalid_argument if the detection delay time is different for different monitors
-        noteMonitorOffset(detOffset[i], detStruct[i].detID);
+			noteMonitorOffset(detOffset[i], detStruct[i].detID);
+		}
         // skip the rest of this loop and move on to the next detector
         continue;
 
@@ -873,8 +880,11 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
       
       //we can't use data for detectors with other codes because we don't know the format, ignore the data and write to g_log.warning() once at the end
       default :
-        detectorProblemCount ++;
-        g_log.debug() << "Ignoring data for a detector with code " << detType[i] << std::endl;
+	    PARALLEL_CRITICAL(problem_detector)
+		{
+			detectorProblemCount ++;
+			g_log.debug() << "Ignoring data for a detector with code " << detType[i] << std::endl;
+		}
         continue;
     }
 
@@ -883,36 +893,54 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
     // normally all the offsets are the same and things work faster, check for this
     if ( detOffset[i] != detectorOffset )
     {// could mean different detectors have different offsets and we need to do things thoroughly
-      if ( detectorOffset !=  UNSETOFFSET )
-      {
+      if ( detectorOffset ==  UNSETOFFSET ) 
+	  {
+		  PARALLEL_CRITICAL(det_offset)
+		  {
+			if(detectorOffset ==  UNSETOFFSET) detectorOffset = detOffset[i];
+			if(detOffset[i] != detectorOffset) differentOffsets =true;
+		  }
+	  }
+	  else
+	  {
         differentOffsets = true;
-      }
-      detectorOffset = detOffset[i];
+		g_log.debug()<< " different detector offsets for det N"<<i<<" detOffset "<< detOffset[i]<< " base offset: "<<detectorOffset<<std::endl;
+	  }
+
     }
 
 
-    try
-    {
-      setDetectorParams(detStruct[i], log);
-      sometimesLogSuccess(log, noneSet);
-    }
-    catch (Exception::NotFoundError &)
-    {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
-      missingDetectors.push_back(detStruct[i].detID);
-      continue;
-    }
+	if(m_moveDets)
+	{
+		try
+		{
+			setDetectorParams(detStruct[i], log);
+		}
+		catch (Exception::NotFoundError &)
+		{// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
+			PARALLEL_CRITICAL(non_existing_detector)
+			{
+				missingDetectors.push_back(detStruct[i].detID);
+			}
+			continue;
+		}
+	}
 
     // report progress and check for a user cancel message at regualar intervals
 
-    if ( i % 1000 == 0 )
-    {
-      progress(static_cast<double>(i));
-      interruption_point();
+    if ( i % 100 == 0 )
+    {	
+		sometimesLogSuccess(log, noneSet);
+		progress(static_cast<double>(i));
+		interruption_point();
+	
     }
+	PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   sometimesLogSuccess(log, noneSet = true);
-  g_log.debug() << "Adjusting time of flight X-values by detector delay times" << std::endl;
+  g_log.notice() << "Adjusting time of flight X-values by detector delay times, detector have the different offsets:  "<< differentOffsets << std::endl;
   adjDelayTOFs(detectorOffset, differentOffsets, detectorList, detOffset);
   
     if ( detectorProblemCount > 0 )
@@ -967,12 +995,12 @@ void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detector
     hFile->closeGroup();
     if(pressure<=0)
     {
-      g_log.warning("The data file dooes not contain correct He3 pressure value, default value of 10Bar is used instead");
+      g_log.warning("The data file does not contain correct He3 pressure, default value of 10Bar is used instead");
       pressure = 10.;
     }
     if(wallThickness<=0)
     {
-      g_log.warning("The data file does not contain correct detector's wall thickness value, default value of 0.8mm is used instead");
+      g_log.warning("The data file does not contain correct detector's wall thickness, default value of 0.8mm is used instead");
       wallThickness = 0.0008;
     }
 
