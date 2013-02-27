@@ -40,8 +40,11 @@ public:
 
   void testExec()
   {
-     // Create workspace with paremeterised instrument
+     // Create workspace with paremeterised instrument and put into data store
      Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
+     const std::string wsName("ApplyCabrationWs");
+     AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
+     dataStore.add(wsName, ws);
 
      // Create Calibration Table
      ITableWorkspace_sptr posTableWs = WorkspaceFactory::Instance().createTable();
@@ -53,7 +56,7 @@ public:
        TableRow row = posTableWs->appendRow();
        row << i+1 << V3D(1.0,0.01*i,1.0); 
      }
-     TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<Workspace2D_sptr>("Workspace", ws ));
+     TS_ASSERT_THROWS_NOTHING(appCalib.setPropertyValue("Workspace", wsName ));
      TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<ITableWorkspace_sptr>("PositionTable", posTableWs ));
      TS_ASSERT_THROWS_NOTHING(appCalib.execute());
 
