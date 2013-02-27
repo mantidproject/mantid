@@ -927,10 +927,13 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 
     if ( i % 100 == 0 )
     {	
+		PARALLEL_CRITICAL(logging)
+		{
 			sometimesLogSuccess(log, noneSet);
 			progress(static_cast<double>(i));
 			interruption_point();
 		}
+	}
 	
     }
     PARALLEL_END_INTERUPT_REGION
