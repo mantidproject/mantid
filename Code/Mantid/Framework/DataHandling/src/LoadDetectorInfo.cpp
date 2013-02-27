@@ -900,8 +900,6 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
       else
       {
         differentOffsets = true;
-        g_log.debug()<< " different detector offsets for det N"<<i<<" detOffset "<< detOffset[i]<< " base offset: "<<detectorOffset<<std::endl;
-      }
 
     }
 
@@ -929,10 +927,11 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
 
     if ( i % 100 == 0 )
     {	
-      sometimesLogSuccess(log, noneSet);
-      progress(static_cast<double>(i));
-      interruption_point();
-
+			sometimesLogSuccess(log, noneSet);
+			progress(static_cast<double>(i));
+			interruption_point();
+		}
+	
     }
     PARALLEL_END_INTERUPT_REGION
   }
