@@ -806,8 +806,6 @@ void LoadDetectorInfo::sometimesLogSuccess(const detectorInfo &params, bool &nee
 void LoadDetectorInfo::readNXS(const std::string& fName)
 {
   auto hFile = new ::NeXus::File(fName,NXACC_READ);
-  if(!hFile)
-    throw std::runtime_error(" Can not open file "+fName+" as nexus file");
 
   std::map<std::string, std::string> entries;
   hFile->getEntries(entries);
