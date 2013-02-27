@@ -17,6 +17,7 @@ set ( TEST_PY_FILES
   ITableWorkspaceTest.py
   MatrixWorkspaceTest.py
   MDHistoWorkspaceTest.py
+  MultipleExperimentInfos.py
   MultipleFilePropertyTest.py
   PythonAlgorithmPropertiesTest.py
   PythonAlgorithmChildAlgCallTest.py
