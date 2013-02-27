@@ -571,10 +571,9 @@ class ISISInstrument(instrument.Instrument):
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
-        ws = mantid[ws_name]
-        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
-        cent_pos = 317.5/1000.0
-        return [cent_pos - pos.getX(), cent_pos - pos.getY()]
+        raise RuntimeError("Not Implemented")
+
+
 
 class LOQ(ISISInstrument):
     """
@@ -650,6 +649,13 @@ class LOQ(ISISInstrument):
             This function does nothing for LOQ
         """
         pass
+
+    def cur_detector_position(self, ws_name):
+        """Return the position of the center of the detector bank"""
+        ws = mantid[ws_name]
+        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        cent_pos = 317.5/1000.0
+        return [cent_pos - pos.getX(), cent_pos - pos.getY()]
 
 class SANS2D(ISISInstrument): 
     """
@@ -925,6 +931,14 @@ class SANS2D(ISISInstrument):
             Not required for SANS2D
         """
         pass
+
+    def cur_detector_position(self, ws_name):
+        """Return the position of the center of the detector bank"""
+        ws = mantid[ws_name]
+        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        
+        return [-pos.getX(), -pos.getY()]
+
 
 
 if __name__ == '__main__':
