@@ -333,8 +333,10 @@ def do_algorithm(args, algo, version=-1):
         print
         # Perform a diff of the new vs old contents
         diff = difflib.context_diff(old_contents.splitlines(True), new_contents.splitlines(True), fromfile='website', tofile='new')
+        diff_list = []
         for line in diff:
             sys.stdout.write(line) 
+            diff_list.append(line)
         print
         
         wiki_maker_edited_last = wiki_maker_page(page)
@@ -345,7 +347,7 @@ def do_algorithm(args, algo, version=-1):
             print "The last page editor was ", last_modifier
             if not last_modifier == None:
                 # Report a failure test case
-                reporter.addFailureTestCase(algo, version, last_modifier, diff)
+                reporter.addFailureTestCase(algo, version, last_modifier, ''.join(diff_list))
             
         if wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
             if not args.dryrun:
