@@ -40,15 +40,15 @@ void StripPeaks::init()
 {
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
-    "Name of the input workspace" );
+    "The name of the input workspace." );
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-    "The name of the workspace to be created as the output of the algorithm" );
+    "The name to use for the output workspace." );
 
   auto min = boost::make_shared<BoundedValidator<int> >();
   min->setLower(1);
   // The estimated width of a peak in terms of number of channels
   declareProperty("FWHM", 7, min,
-    "Estimated number of points covered by the fwhm of a peak (default 7)" );
+    "The number of points covered, on average, by the fwhm of a peak (default 7).\nPassed through to [[FindPeaks]]." );
   // The tolerance allowed in meeting the conditions
   declareProperty("Tolerance",4,min,
     "A measure of the strictness desired in meeting the condition on peak candidates,\n"
@@ -64,15 +64,15 @@ void StripPeaks::init()
   bkgdtypes.push_back("Linear");
   bkgdtypes.push_back("Quadratic");
   declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
-      "Type of Background. The choice can be either Linear or Quadratic");
+      "Type of Background. Present choices include 'Linear' and 'Quadratic'");
 
   declareProperty("HighBackground", true,
-      "Peaks are relatively weak comparing to the background");
+      "Flag to indicate that the peaks are relatively weak comparing to background.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
-    "If set, peaks will only be removed from this spectrum (otherwise from all)");
+    "If set, will remove peaks only in the given spectrum of the workspace. Otherwise, all spectra will be searched.");
 
   auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double> >();
   mustBePositiveDbl->setLower(0.);

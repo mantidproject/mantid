@@ -68,7 +68,7 @@ namespace DataHandling
         "The format is propName=value;propName=value");
 
     declareProperty(new PropertyWithValue<std::string>("ProcessingScript","",Direction::Input),
-        "A Python script that will be run to process each chunk of data.");
+        "A Python script that will be run to process each chunk of data. Only for command line usage, does not appear on the user interface.");
 
     std::vector<std::string> propOptions;
     propOptions.push_back("Add");

@@ -1,8 +1,7 @@
 /*WIKI* 
 
-
-Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a '''spherical''' sample. Sample data must be divided by these corrections.  Algorithm calls AnvredCorrection.
-
+Calculates bin-by-bin correction factors for attenuation due to absorption and scattering in a '''spherical''' sample. Sample data must be divided by these corrections.  
+Algorithm calls [[AnvredCorrection]].
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -60,11 +59,11 @@ void SphericalAbsorption::init()
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
-    "The ABSORPTION cross-section for the sample material in barns if not set with SetSampleMaterial");
+    "The '''absorption''' cross-section, at 1.8 Angstroms, for the sample material in barns.");
   declareProperty("ScatteringXSection", EMPTY_DBL(), mustBePositive,
-    "The scattering cross-section (coherent + incoherent) for the sample material in barns if not set with SetSampleMaterial");
+    "The (coherent + incoherent) scattering cross-section for the sample material in barns.");
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-    "The number density of the sample in number per cubic angstrom if not set with SetSampleMaterial");
+    "TThe number density of the sample in number per cubic angstrom, if not set with SetSampleMaterial");
   declareProperty("SphericalSampleRadius", EMPTY_DBL(), mustBePositive,
     "The radius of the spherical sample in centimetres");
 

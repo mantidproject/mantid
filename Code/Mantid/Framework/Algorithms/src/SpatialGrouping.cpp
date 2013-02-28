@@ -65,7 +65,7 @@ DECLARE_ALGORITHM(SpatialGrouping)
 /// Sets documentation strings for this algorithm
 void SpatialGrouping::initDocs()
 {
-  this->setWikiSummary(" This algorithm creates an XML grouping file, which can be used in [[GroupDetectors]] or [[ReadGroupsFromFile]], which groups the detectors of an instrument based on the distance between the detectors. It does this by querying the [http://doxygen.mantidproject.org/classMantid_1_1Geometry_1_1Detector.html#a3abb2dd5dca89d759b848489360ff9df getNeighbours] method on the Detector object. ");
+  this->setWikiSummary("This algorithm creates an XML grouping file, which can be used in [[GroupDetectors]] or [[ReadGroupsFromFile]], which groups the detectors of an instrument based on the distance between the detectors. It does this by querying the [http://doxygen.mantidproject.org/classMantid_1_1Geometry_1_1Detector.html#a3abb2dd5dca89d759b848489360ff9df getNeighbours] method on the Detector object. ");
   this->setOptionalMessage("This algorithm creates an XML grouping file, which can be used in GroupDetectors or ReadGroupsFromFile, which groups the detectors of an instrument based on the distance between the detectors. It does this by querying the getNeighbours method on the Detector object.");
 }
 
@@ -76,11 +76,11 @@ void SpatialGrouping::initDocs()
 void SpatialGrouping::init()
 {
   declareProperty(new Mantid::API::WorkspaceProperty<>("InputWorkspace","",Mantid::Kernel::Direction::Input),
-      "The input workspace.");
+      "Name of the input workspace, which is used only as a means of retrieving the instrument geometry.");
   declareProperty(new Mantid::API::FileProperty("Filename", "", Mantid::API::FileProperty::Save, ".xml"),
-      "Path to the output .XML file");
-  declareProperty("SearchDistance", 2.5, Mantid::Kernel::Direction::Input);
-  declareProperty("GridSize", 3, Mantid::Kernel::Direction::Input);
+      "Name (and location) in which to save the file. Having a suffix of ''.xml'' is recommended.");
+  declareProperty("SearchDistance", 2.5,"The number of pixel widths in which to search for neighbours of the detector.");
+  declareProperty("GridSize", 3, "The size of the grid that should be grouped. i.e, 3 (the default) will select a group of nine detectors centred in a 3 by 3 grid.");
 }
 
 /**

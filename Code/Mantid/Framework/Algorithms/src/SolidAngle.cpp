@@ -63,7 +63,7 @@ namespace Mantid
         "workspace" );
       declareProperty(
         new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "The name of the workspace to be created as the output of the algorithm" );
+        "The name of the workspace to be created as the output of the algorithm.  A workspace of this name will be created and stored in the Analysis Data Service." );
 
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);

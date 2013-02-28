@@ -44,7 +44,7 @@ double SofQW::energyToK()
 /// Sets documentation strings for this algorithm
 void SofQW::initDocs()
 {
-  this->setWikiSummary(" Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>. ");
+  this->setWikiSummary("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>. ");
   this->setOptionalMessage("Converts a 2D workspace that has axes of <math>\\Delta E</math> against spectrum number to one that gives intensity as a function of momentum transfer against energy: <math>\\rm{S}\\left( q, \\omega \\right)</math>.");
 }
 
@@ -73,21 +73,21 @@ void SofQW::createInputProperties(API::Algorithm & alg)
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
   alg.declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
-                      "A Workspace2D with units of energy transfer.");
+                      "Reduced data in units of energy transfer (DeltaE / <math>\Delta E</math>).\nThe workspace must contain histogram data and have common bins across all spectra.");
   alg.declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-                      "A workspace in units of momentum transfer and energy transfer.");
+                      "The name to use for the q-<math>\rm{\omega}</math> workspace.");
   alg.declareProperty(new ArrayProperty<double>("QAxisBinning", boost::make_shared<RebinParamsValidator>()),
-                      "The binning parameters for the momentum transfer axis.");
+                      "The bin parameters to use for the q axis (in the format used by the [[Rebin]] algorithm).");
   
   std::vector<std::string> propOptions;
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
   alg.declareProperty("EMode","",boost::make_shared<StringListValidator>(propOptions),
-    "The energy mode");
+    "The energy mode (Direct/Indirect)");
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   alg.declareProperty("EFixed",0.0,mustBePositive,
-      "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect).");
+      "The value of fixed energy: <math>E_i</math> (EMode=Direct) or <math>E_f</math> (EMode=Indirect) (meV).\nMust be set here if not available in the instrument definition.");
 
 }
 

@@ -4,6 +4,7 @@ Loads an instrument definition file ([[InstrumentDefinitionFile|IDF]]) into a wo
 
 By default the algorithm will write a 1:1 map between the spectrum number and detector ID. Any custom loading algorithm that calls this as a Child Algorithm will therefore get this 1:1 map be default. If the custom loader is to write its own map then it is advised to set <code>RewriteSpectraMap</code> to false to avoid extra work. 
 
+The instrument to load can be specified by either the InstrumentXML, Filename and InstrumentName properties (given here in order of precedence if more than one is set). At present, if the InstrumentXML is used the InstrumentName property should also be set.
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -62,7 +63,7 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void LoadInstrument::initDocs()
     {
-      this->setWikiSummary(" Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]]. After the IDF has been read this algorithm will attempt to run the Child Algorithm [[LoadParameterFile]]; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory [[Properties_File|Mantid property]]). ");
+      this->setWikiSummary("Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]]. This algorithm is typically run as a child algorithm to the data loading algorithm, rather than as a top-level algorithm. After the IDF has been read this algorithm will attempt to run the child algorithm [[LoadParameterFile]]; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the ParameterDefinition.directory [[Properties_File|Mantid property]]).");
       this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace. After the IDF has been read this algorithm will attempt to run the Child Algorithm LoadParameterFile; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory Mantid property).");
     }
     
@@ -83,20 +84,15 @@ namespace Mantid
       // When used as a Child Algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
       declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
-        "The name of the workspace to load the instrument definition into" );
+        "The name of the workspace to load the instrument definition into. Any existing instrument will be replaced." );
       declareProperty(new FileProperty("Filename","", FileProperty::OptionalLoad, ".xml"),
-        "The filename (including its full or relative path) of an instrument\n"
-        "definition file");
+        "The filename (including its full or relative path) of an instrument definition file. The file extension must either be .xml or .XML when specifying an instrument definition file. Note Filename or InstrumentName must be specified but not both.");
       declareProperty(new ArrayProperty<detid_t>("MonitorList",Direction::Output),
-        "List of detector ids of monitors loaded in to the workspace");
+        "Will be filled with a list of the detector ids of any monitors loaded in to the workspace.");
       declareProperty("InstrumentName", "",
         "Name of instrument. Can be used instead of Filename to specify an IDF" );
-      declareProperty("InstrumentXML","","The full XML description of the instrument."
-                      "If given, the instrument is constructed from this instead of from an IDF."
-                      "The InstrumentName property must also be set.");
-      declareProperty("RewriteSpectraMap", true, "If true then the spectra-detector mapping "
-                      "for the input workspace will be overwritten with a 1:1 map of spectrum "
-                      "number to detector ID");
+      declareProperty("InstrumentXML","","The full XML instrument definition as a string.");
+      declareProperty("RewriteSpectraMap", true, "If true then a 1:1 map between the spectrum numbers and detector/monitor IDs is set up as follows: the detector/monitor IDs in the IDF are ordered from smallest to largest number and then assigned in that order to the spectra in the workspace. For example if the IDF has defined detectors/monitors with ID = 1, 5 and 10 and the workspace contains 3 spectra with numbers 1,2,3 (and workspace indices 0,1, and 2) then spectrum number 1 is associated with det ID=1, spectrum number 2 with det ID=5 and spectrum number 3 with det ID=10");
     }
 
 

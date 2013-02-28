@@ -30,7 +30,7 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void SortEvents::initDocs()
     {
-      this->setWikiSummary(" Sort the events in an [[EventWorkspace]], for faster rebinning. ");
+      this->setWikiSummary("Sort the events in an [[EventWorkspace]], for faster rebinning. ");
       this->setOptionalMessage("Sort the events in an EventWorkspace, for faster rebinning.");
     }
 

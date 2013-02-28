@@ -1,5 +1,5 @@
 /*WIKI* 
-
+Peaks are sorted first by H, then K, and then L.  For equivalent HKL in the point group, the intensity is averaged and all the equivalent HKLs have the same average intensity.  Outliers with zscore > 3 from each group of equivalent HKLs are not included in the average.
 
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
@@ -69,8 +69,8 @@ namespace Crystal
     declareProperty("PointGroup", propOptions[0], boost::make_shared<StringListValidator>(propOptions),
       "Which point group applies to this crystal?");
 
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output));
-    declareProperty("OutputChi2",0.0, Direction::Output);
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),"Output PeaksWorkspace");
+    declareProperty("OutputChi2",0.0,"Chi-square is available as output", Direction::Output);
 
   }
 
