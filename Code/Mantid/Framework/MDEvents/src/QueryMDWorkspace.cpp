@@ -112,7 +112,7 @@ namespace MDEvents
     declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace","",Direction::Input), "An input MDWorkspace.");
 
     declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output),
-        "The output Tableworkspace"
+        "The output Tableworkspace "
         "with columns containing key summary information about the MDWorkspace.");
 
     declareProperty("LimitRows", true, "Limit the report output to a maximum number of rows");
