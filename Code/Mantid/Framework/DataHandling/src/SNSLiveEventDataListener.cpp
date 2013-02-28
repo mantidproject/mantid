@@ -30,9 +30,9 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-// Time we'll wait on a receive call (in milliseconds)
+// Time we'll wait on a receive call (in seconds)
 // Also used when shutting down the thread so we know how long to wait there
-#define RECV_TIMEOUT_MS 100
+#define RECV_TIMEOUT 30
 
 
 // Names for a couple of time series properties
@@ -80,10 +80,6 @@ namespace DataHandling
     // the workspace) that need to happen prior to receiving any packets.
     initWorkspacePart1();
 
-    // Initialize the heartbeat time to the current time so we don't get a bunch of
-    // timeout errors when the background thread starts.
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
     // Initialize m_keepPausedEvents from the config file.
     // NOTE: To the best of my knowledge, the existence of this property is not documented
     // anywhere and this lack of documentation is deliberate.
@@ -104,7 +100,7 @@ namespace DataHandling
       // seem to have an equivalent to pthread_cancel
       m_stopThread = true;
       try {
-      m_thread.join(RECV_TIMEOUT_MS * 2);
+      m_thread.join(RECV_TIMEOUT * 2 * 1000);  // *1000 because join() wants time in milliseconds
       } catch (Poco::TimeoutException &) {
         // And just what do we do here?!?
         // Log a message, sure, but other than that we can either hang the
@@ -157,7 +153,7 @@ namespace DataHandling
       }
     }
 
-    m_socket.setReceiveTimeout( Poco::Timespan( 0, RECV_TIMEOUT_MS * 1000)); // POCO timespan is seconds, microseconds
+    m_socket.setReceiveTimeout( Poco::Timespan( RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
     g_log.information() << "Connected to " << m_socket.address().toString() << std::endl;
 
     rv = m_isConnected = true;
@@ -259,16 +255,6 @@ namespace DataHandling
         // before calling read again.  (Keeps us from spinlocking the cpu...)
         Poco::Thread::sleep( 10);  // 10 milliseconds
       }
-
-      // Check the heartbeat
-#define HEARTBEAT_TIMEOUT (60 * 5)  // 5 minutes
-      time_duration elapsed = Kernel::DateAndTime().getCurrentTime() - m_heartbeat;
-      if ( elapsed.total_seconds() > HEARTBEAT_TIMEOUT)
-      {
-        // SMS seems to have gone away.  Log an error
-        g_log.error() << "SMS server has sent no data for " << HEARTBEAT_TIMEOUT
-                      << " seconds.  Is it still running?" << std::endl;
-      }
     }
 
     // If we've gotten here, it's because the thread has thrown an otherwise
@@ -332,8 +318,6 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RTDLPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
     // At the moment, all we need from the RTDL packets is the pulse
     // time (and its questionable whether we even need that).
     m_rtdlPulseId = pkt.pulseId();
@@ -360,8 +344,6 @@ namespace DataHandling
     // A few counters that we use for logging purposes
     unsigned eventsPerBank = 0;
     unsigned totalEvents = 0;
-
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
 
     // First step - make sure the RTDL packet we've saved matches the
     // banked event packet we've just received and  make sure its RAW flag
@@ -429,22 +411,6 @@ namespace DataHandling
     return false;
   }
 
-  /// Parse a heartbeat packet
-
-  /// Overrides the default function defined in ADARA::Parser and processes
-  /// data from ADARA::HeartbeatPkt packets.
-  /// @param pkt The packet to be parsed
-  /// @return Returns false if there were no problems.  Returns true if there
-  /// was an error and packet parsing should be interrupted
-  bool SNSLiveEventDataListener::rxPacket( const ADARA::HeartbeatPkt &)
-  {
-    // We don't actually need anything out of the heartbeat packet - we just
-    // need to know that it arrived (and thus the SMS is still online)
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-    return false;
-  }
-
-
   /// Parse a geometry packet
 
   /// Overrides the default function defined in ADARA::Parser and processes
@@ -455,8 +421,6 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::GeometryPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
     // TODO: For now, I'm assuming that we only need to process one of these
     // packets the first time it comes in and we can ignore any others.
     if (m_workspaceInitialized == false)
@@ -484,8 +448,6 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BeamlineInfoPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
     // We only need to process a beamlineinfo packet once
     if (m_workspaceInitialized == false)
     {
@@ -513,8 +475,6 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
     // Note: We don't really need to lock the mutex for the entire length of
     // this function call, but it's far simpler to put the lock here than to
     // have individual lock/unlocks every time we fiddle with a run property
@@ -635,7 +595,6 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableU32Pkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
@@ -672,7 +631,6 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableDoublePkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
@@ -712,7 +670,6 @@ namespace DataHandling
   /// testing.
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableStringPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
@@ -751,7 +708,6 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> doc = parser.parseMemory( pkt.description().c_str(), pkt.description().length());
     const Poco::XML::Node* deviceNode = doc->firstChild();
@@ -900,8 +856,6 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::AnnotationPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
     {
       Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
       // We have to lock the mutex prior to calling mutableRun()

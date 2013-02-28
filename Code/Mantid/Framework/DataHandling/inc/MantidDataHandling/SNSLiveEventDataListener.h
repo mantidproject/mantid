@@ -72,7 +72,6 @@ namespace Mantid
       //virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
       virtual bool rxPacket( const ADARA::RTDLPkt &pkt);
       virtual bool rxPacket( const ADARA::BankedEventPkt &pkt);
-      virtual bool rxPacket( const ADARA::HeartbeatPkt &pkt);
       virtual bool rxPacket( const ADARA::GeometryPkt &pkt);
       virtual bool rxPacket( const ADARA::BeamlineInfoPkt &pkt);
       virtual bool rxPacket( const ADARA::RunStatusPkt &pkt);
@@ -140,10 +139,6 @@ namespace Mantid
 
       Kernel::DateAndTime m_startTime;  // The requested start time for the data stream
                                         // (needed by the run() function)
-      Kernel::DateAndTime m_heartbeat;  // The time when we received the last ClientHello
-                                        // packet.  SMS is supposed to send these out
-                                        // periodicaly.  If we don't get them, there's a
-                                        // problem somewhere.
 
       // Used to initialize the scan_index property if we haven't received a packet with the
       // 'real' value by the time we call initWorkspacePart2.  (We can't delay the call to
