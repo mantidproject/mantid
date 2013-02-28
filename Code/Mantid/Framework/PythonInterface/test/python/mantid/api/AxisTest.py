@@ -1,6 +1,6 @@
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import SpectraAxis
+from mantid.api import NumericAxis, SpectraAxis, TextAxis
 import numpy as np
 
 class AxisTest(unittest.TestCase):
@@ -11,6 +11,11 @@ class AxisTest(unittest.TestCase):
         if self.__class__._test_ws is None:
             alg = run_algorithm("Load", Filename="LOQ48127.raw", SpectrumMax=3, child=True)
             self.__class__._test_ws = alg.getProperty("OutputWorkspace").value
+
+    def test_constructor_methods_return_the_correct_type(self):
+        self.assertTrue(isinstance(NumericAxis.create(2),NumericAxis))
+        self.assertTrue(isinstance(SpectraAxis.create(2),SpectraAxis))
+        self.assertTrue(isinstance(TextAxis.create(2),TextAxis))
   
     def test_axis_meta_data(self):
         yAxis = self._test_ws.getAxis(1)
