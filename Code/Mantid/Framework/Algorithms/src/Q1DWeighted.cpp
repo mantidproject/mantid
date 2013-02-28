@@ -50,15 +50,13 @@ void Q1DWeighted::init()
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-  declareProperty(new ArrayProperty<double>("OutputBinning", boost::make_shared<RebinParamsValidator>()));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),"Input workspace containing the SANS 2D data");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"Workspace that will contain the I(Q) data");
+  declareProperty(new ArrayProperty<double>("OutputBinning", boost::make_shared<RebinParamsValidator>()), "The new bin boundaries in the form: <math>x_1,\\Delta x_1,x_2,\\Delta x_2,\\dots,x_n</math>");
 
   auto positiveInt = boost::make_shared<BoundedValidator<int> >();
   positiveInt->setLower(0);
-  declareProperty("NPixelDivision", 1, positiveInt,
-      "Number of sub-pixels used for each detector pixel in each direction."
-      "The total number of sub-pixels will be NPixelDivision*NPixelDivision.");
+  declareProperty("NPixelDivision", 1, positiveInt,"Number of sub-pixels used for each detector pixel in each direction.The total number of sub-pixelswill be NPixelDivision*NPixelDivision.");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0);
