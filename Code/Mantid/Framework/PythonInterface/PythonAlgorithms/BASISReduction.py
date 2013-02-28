@@ -20,6 +20,7 @@ import os
 
 MICROEV_TO_MILLIEV = 1000.0
 DEFAULT_BINS = [0., 0., 0.]
+DEFAULT_RANGE = [6.24, 6.30]
 
 class BASISReduction(PythonAlgorithm):
     def category(self):
@@ -37,6 +38,11 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("DoIndividual", False, "Do each run individually")
         self.declareProperty("NoMonitorNorm", False, 
                              "Stop monitor normalization")
+	self.declareProperty("NormRunNumbers", "", "Normalization run numbers")
+	arrVal = FloatArrayLengthValidator(2)
+	self.declareProperty(FloatArrayProperty("NormWavelengthRange", DEFAULT_RANGE, 
+						arrVal, direction=Direction.Input),
+			     "Wavelength range for normalization. default:(6.24A, 6.30A)")
         self.declareProperty(FloatArrayProperty("EnergyBins", DEFAULT_BINS, 
                                                 direction=Direction.Input), 
                              "Energy transfer binning scheme (in ueV)")
@@ -69,64 +75,47 @@ class BASISReduction(PythonAlgorithm):
 
         api.LoadMask(Instrument='BASIS', OutputWorkspace='BASIS_MASK', 
                      InputFile='BASIS_Mask.xml')
+	
+	# Do normalization if run numbers are present
+	norm_runs = self.getProperty("NormRunNumbers").value
+	self._doNorm = bool(norm_runs)
+	self.log().information("Do Norm: " + str(self._doNorm))
+	if self._doNorm:
+	    if ";" in norm_runs:
+	        raise SyntaxError("Normalization does not support run groups")
+	    # Setup the integration (rebin) parameters
+	    normRange = self.getProperty("NormWavelengthRange").value
+	    self._normRange = [normRange[0], normRange[1]-normRange[0], normRange[1]]
+
+	    # Process normalization runs
+	    self._norm_run_list = self._getRuns(norm_runs)
+	    for norm_set in self._norm_run_list:
+                self._normWs = self._makeRunName(norm_set[0])
+	        self._normMonWs = self._normWs + "_monitors"
+                self._sumRuns(norm_set, self._normWs, self._normMonWs)
+	        self._calibData(self._normWs, self._normMonWs)
+	    
+	    api.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
+		      Params=self._normRange)
+	    api.FindDetectorsOutsideLimits(InputWorkspace=self._normWs, 
+					   OutputWorkspace="BASIS_NORM_MASK")
 
         self._run_list = self._getRuns(self.getProperty("RunNumbers").value)
         for run_set in self._run_list:
             self._samWs = self._makeRunName(run_set[0])
             self._samMonWs = self._samWs + "_monitors"
             self._samWsRun = str(run_set[0])
-            for run in run_set:
-                ws_name = self._makeRunName(run)
-                mon_ws_name = ws_name  + "_monitors"
-                run_file = self._makeRunFile(run)
-                
-                api.Load(Filename=run_file, OutputWorkspace=ws_name)
-                if not self._noMonNorm:
-                    api.LoadNexusMonitors(Filename=run_file, 
-                                          OutputWorkspace=mon_ws_name)
-                if self._samWs != ws_name:
-                    api.Plus(LHSWorkspace=self._samWs, RHSWorkspace=ws_name,
-                             OutputWorkspace=self._samWs)
-                    api.DeleteWorkspace(ws_name)
-                if self._samMonWs != mon_ws_name and not self._noMonNorm:
-                    api.Plus(LHSWorkspace=self._samMonWs, 
-                             RHSWorkspace=mon_ws_name,
-                             OutputWorkspace=self._samMonWs)
-                    api.DeleteWorkspace(mon_ws_name)
-            
+	    
+	    self._sumRuns(run_set, self._samWs, self._samMonWs)
             # After files are all added, run the reduction
-            api.MaskDetectors(Workspace=self._samWs, 
-                              MaskedWorkspace='BASIS_MASK')
-            api.ModeratorTzero(InputWorkspace=self._samWs, 
-                               OutputWorkspace=self._samWs)
-            api.LoadParameterFile(Workspace=self._samWs, 
-                                  Filename=config.getInstrumentDirectory() + 'BASIS_silicon_111_Parameters.xml')
-            api.ConvertUnits(InputWorkspace=self._samWs, 
-                                 OutputWorkspace=self._samWs,
-                                 Target='Wavelength', EMode='Indirect')
-                
-            if not self._noMonNorm:
-                api.ModeratorTzero(InputWorkspace=self._samMonWs, 
-                                   OutputWorkspace=self._samMonWs)
-                api.Rebin(InputWorkspace=self._samMonWs, 
-                          OutputWorkspace=self._samMonWs, Params='10')
-                api.ConvertUnits(InputWorkspace=self._samMonWs, 
-                                 OutputWorkspace=self._samMonWs, 
-                                 Target='Wavelength')
-                api.OneMinusExponentialCor(InputWorkspace=self._samMonWs,
-                                           OutputWorkspace=self._samMonWs,
-                                           C='0.20749999999999999', 
-                                           C1='0.001276')
-                api.Scale(InputWorkspace=self._samMonWs, 
-                          OutputWorkspace=self._samMonWs,
-                          Factor='9.9999999999999995e-07')
-                api.RebinToWorkspace(WorkspaceToRebin=self._samWs, 
-                                     WorkspaceToMatch=self._samMonWs,
-                                     OutputWorkspace=self._samWs)
-                api.Divide(LHSWorkspace=self._samWs, 
-                           RHSWorkspace=self._samMonWs, 
-                           OutputWorkspace=self._samWs)
+	    self._calibData(self._samWs, self._samMonWs)
                     
+	    if self._doNorm:
+		api.MaskDetectors(Workspace=self._samWs, 
+	                          MaskedWorkspace='BASIS_NORM_MASK')
+		api.Divide(LHSWorkspace=self._samWs, RHSWorkspace=self._normWs,
+			   OutputWorkspace=self._samWs)
+
             api.ConvertUnits(InputWorkspace=self._samWs, 
                              OutputWorkspace=self._samWs, 
                              Target='DeltaE', EMode='Indirect')
@@ -191,6 +180,59 @@ class BASISReduction(PythonAlgorithm):
         Make name like BSS24234
         """
         return self._short_inst + str(run) 
+
+    def _sumRuns(self, run_set, sam_ws, mon_ws):
+        for run in run_set:
+            ws_name = self._makeRunName(run)
+            mon_ws_name = ws_name  + "_monitors"
+            run_file = self._makeRunFile(run)
+                
+            api.Load(Filename=run_file, OutputWorkspace=ws_name)
+            if not self._noMonNorm:
+                api.LoadNexusMonitors(Filename=run_file, 
+                                      OutputWorkspace=mon_ws_name)
+            if sam_ws != ws_name:
+                api.Plus(LHSWorkspace=sam_ws, RHSWorkspace=ws_name,
+                         OutputWorkspace=sam_ws)
+                api.DeleteWorkspace(ws_name)
+            if mon_ws != mon_ws_name and not self._noMonNorm:
+                api.Plus(LHSWorkspace=mon_ws, 
+                         RHSWorkspace=mon_ws_name,
+                         OutputWorkspace=mon_ws)
+                api.DeleteWorkspace(mon_ws_name)
+
+    def _calibData(self, sam_ws, mon_ws):
+        api.MaskDetectors(Workspace=sam_ws, 
+                          MaskedWorkspace='BASIS_MASK')
+        api.ModeratorTzero(InputWorkspace=sam_ws, 
+                           OutputWorkspace=sam_ws)
+        api.LoadParameterFile(Workspace=sam_ws, 
+                              Filename=config.getInstrumentDirectory() + 'BASIS_silicon_111_Parameters.xml')
+        api.ConvertUnits(InputWorkspace=sam_ws, 
+                         OutputWorkspace=sam_ws,
+                         Target='Wavelength', EMode='Indirect')
+                
+        if not self._noMonNorm:
+            api.ModeratorTzero(InputWorkspace=mon_ws, 
+                               OutputWorkspace=mon_ws)
+            api.Rebin(InputWorkspace=mon_ws, 
+                      OutputWorkspace=mon_ws, Params='10')
+            api.ConvertUnits(InputWorkspace=mon_ws, 
+                             OutputWorkspace=mon_ws, 
+                             Target='Wavelength')
+            api.OneMinusExponentialCor(InputWorkspace=mon_ws,
+                                       OutputWorkspace=mon_ws,
+                                       C='0.20749999999999999', 
+                                       C1='0.001276')
+            api.Scale(InputWorkspace=mon_ws, 
+                      OutputWorkspace=mon_ws,
+                      Factor='9.9999999999999995e-07')
+            api.RebinToWorkspace(WorkspaceToRebin=sam_ws, 
+                                 WorkspaceToMatch=mon_ws,
+                                 OutputWorkspace=sam_ws)
+            api.Divide(LHSWorkspace=sam_ws, 
+                       RHSWorkspace=mon_ws, 
+                       OutputWorkspace=sam_ws)
     
 # Register algorithm with Mantid.
 registerAlgorithm(BASISReduction)
