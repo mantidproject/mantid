@@ -111,7 +111,7 @@ void SassenaFFT::exec()
   fft->executeAsChildAlg();
   API::MatrixWorkspace_sptr sqw0 = fft->getProperty("OutputWorkspace");
   DataObjects::Workspace2D_sptr sqw = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( sqw0 );
-  API::AnalysisDataService::Instance().add( sqwName, sqw );
+  API::AnalysisDataService::Instance().addOrReplace( sqwName, sqw );
 
   // Transform the X-axis to appropriate dimensions
   // We assume the units of the intermediate scattering function are in picoseconds
