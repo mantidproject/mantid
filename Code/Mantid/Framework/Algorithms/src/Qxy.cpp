@@ -1,7 +1,7 @@
 /*WIKI* 
 
 
-This algorithm rebins a 2D workspace in units of wavelength into 2D Q, and the reduction performed is the same as that for [[Q1D]], hence please see the description of that algorithm for more details about how this algorithm works.
+This algorithm rebins a 2D workspace in units of wavelength into 2D Q. The reduction it performs is the same as that executed by the [[Q1D]] algorithm, expect performed in 2D instead of 1D. Hence, for further documentation on how this algorithm works please see [[Q1D]].
 
 
 *WIKI*/
@@ -45,39 +45,29 @@ void Qxy::init()
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),"The corrected data in units of wavelength.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"The name to use for the corrected workspace.");
   
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(1.0e-12);
   
-  declareProperty("MaxQxy",-1.0,mustBePositive);
-  declareProperty("DeltaQ",-1.0,mustBePositive);
+  declareProperty("MaxQxy",-1.0,mustBePositive,"The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy).");
+  declareProperty("DeltaQ",-1.0,mustBePositive,"The dimension of a Qx-Qy cell.");
   declareProperty(new WorkspaceProperty<>("PixelAdj","", Direction::Input, PropertyMode::Optional),
-    "The scaling to apply to each spectrum e.g. for detector efficiency, must have\n"
-    "the same number of spectra as the DetBankWorkspace");
+                  "The scaling to apply to each spectrum e.g. for detector efficiency, must have just one bin per spectrum and the same number of spectra as DetBankWorkspace.");
   auto wavVal = boost::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input, PropertyMode::Optional, wavVal),
-    "The scaling to apply to each bin to account for monitor counts, transmission\n"
-    "fraction, etc");
-  declareProperty("AccountForGravity",false,Direction::Input);
+                  "The scaling to apply to each bin to account for monitor counts, transmission fraction, etc. Must be one spectrum with the same binning as the InputWorkspace, the same units (counts) and the same [[ConvertToDistribution|distribution status]]."); 
+  declareProperty("AccountForGravity",false,"Whether to correct for the effects of gravity.", Direction::Input);
   declareProperty("SolidAngleWeighting",true,
       "If true, pixels will be weighted by their solid angle.", Direction::Input);
   auto mustBePositive2 = boost::make_shared<BoundedValidator<double> >();
   mustBePositive2->setLower(0.0);
-  declareProperty("RadiusCut", 0.0, mustBePositive2,
-    "To increase resolution some wavelengths are excluded within this distance from\n"
-    "the beam center (mm)");
-  declareProperty("WaveCut", 0.0, mustBePositive2,
-    "To increase resolution by starting to remove some wavelengths below this"
-    "freshold (angstrom)");
-  declareProperty("OutputParts", false,
-    "Set to true to output two additional workspaces which will have the names OutputWorkspace_sumOfCounts "
-    "OutputWorkspace_sumOfNormFactors. The division of _sumOfCounts and _sumOfNormFactors equals the workspace"
-    " returned by the property OutputWorkspace "
-    "(default is false)." );
+  declareProperty("RadiusCut", 0.0, mustBePositive2,"The minimum distance in mm from the beam center at which all wavelengths are used in the calculation (see section [[Q1D#Resolution and Cutoffs|Resolution and Cutoffs]])");
+  declareProperty("WaveCut", 0.0, mustBePositive2,"The shortest wavelength in angstrom at which counts should be summed from all detector pixels (see section [[Q1D#Resolution and Cutoffs|Resolution and Cutoffs]])");
+  declareProperty("OutputParts", false,"Set to true to output two additional workspaces which will have the names OutputWorkspace_sumOfCounts OutputWorkspace_sumOfNormFactors. The division of _sumOfCounts and _sumOfNormFactors equals the workspace returned by the property OutputWorkspace");
 }
 
 void Qxy::exec()
