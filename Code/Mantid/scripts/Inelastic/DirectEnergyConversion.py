@@ -182,7 +182,7 @@ class DirectEnergyConversion(object):
         self.spectra_masks = diag_mask
         return diag_mask
     
-    def do_white(self, white_run, spectra_masks, map_file): 
+    def do_white(self, white_run, spectra_masks, map_file,mon_number=None): 
         """
         Normalise to a specified white-beam run
         """
@@ -192,7 +192,7 @@ class DirectEnergyConversion(object):
         # Load
         white_data = self.load_data(white_run)
         # Normalise
-        white_ws = self.normalise(white_data, whitews_name, self.normalise_method)
+        white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
@@ -532,7 +532,7 @@ class DirectEnergyConversion(object):
 
         return result_ws
 
-    def normalise(self, data_ws, result_name, method, range_offset=0.0):
+    def normalise(self, data_ws, result_name, method, range_offset=0.0,mon_number=None):
         """
         Apply normalisation using specified source
         """
@@ -546,7 +546,11 @@ class DirectEnergyConversion(object):
         elif method == 'monitor-1':
             range_min = self.mon1_norm_range[0] + range_offset
             range_max = self.mon1_norm_range[1] + range_offset
-            NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorSpectrum=int(self.mon1_norm_spec), 
+            if mon_number is None:
+                mon_spectr_num=int(self.mon1_norm_spec)
+            else:
+                mon_spectr_num=mon_number
+            NormaliseToMonitor(InputWorkspace=data_ws, OutputWorkspace=result_name, MonitorSpectrum=mon_spectr_num, 
                                IntegrationRangeMin=float(str(range_min)), IntegrationRangeMax=float(str(range_max)),IncludePartialBins=True)
             output = mtd[result_name]
         elif method == 'current':
