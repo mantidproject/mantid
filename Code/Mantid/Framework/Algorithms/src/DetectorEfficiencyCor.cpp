@@ -107,11 +107,11 @@ void DetectorEfficiencyCor::init()
     "The workspace to correct for detector efficiency");
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-    "The name of the workspace in which to store the result. Each histogram from the input workspace maps to a histogram in this workspace that has just one value which indicates if there was a bad detector." );
+    "The name of the workspace in which to store the result" );
   auto checkEi = boost::make_shared<BoundedValidator<double> >();
   checkEi->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
-    "The energy of neutrons leaving the source. This algorithm assumes that this number is accurate and does not correct it using the output from [[GetEi]]." );
+    "The energy kinetic the neutrons have before they hit the sample (meV)" );
 }
 
 /** Executes the algorithm

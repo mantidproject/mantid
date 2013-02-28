@@ -1,22 +1,6 @@
 /*WIKI* 
 
-{{BinaryOperation|verb=divided|prep=by|symbol=<math>\div</math>}}
-{{BinaryOperationFooterMultiply|verb=divided|prep=by|symbol=<math>\div</math>}}
 
-== Usage ==
-'''Python'''
- Divide("w1","w2","output")
- w3 = w1 / w2
- w1 /= w2  # Perform "in-place"
- # Using a scalar
- w3 = w1 / 2.5
- w1 /= 2.5  # Perform "in-place"
-
-'''C++ Within an Algorithm''' <br/>
-The usage of basic workspace mathematical operations has been specially simplified for use within algorithms
-
- //w1 and w2 are workspaces
- workspace_sptr output = w1 / w2;
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -38,11 +22,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void Divide::initDocs()
     {
-      this->setWikiSummary("The Divide algorithm will divide the data values and calculate the corresponding [[Error Values|error values]] of two compatible workspaces. ");
+      this->setWikiSummary("The Divide algorithm will divide the data values and calculate the corresponding [[Error Values|error values]] of two compatible workspaces.  {{BinaryOperation|verb=divided|prep=by|symbol=<math>\\div</math>}} ");
       this->setOptionalMessage("The Divide algorithm will divide the data values and calculate the corresponding error values of two compatible workspaces.");
-      this->getPointerToProperty("LHSWorkspace")->setDocumentation("The workspace to be divided by, this can be considered to be the workspace on the left hand side of the division symbol.");
-      this->getPointerToProperty("RHSWorkspace")->setDocumentation("The workspace to be divided, this can be considered to be the workspace on the right hand side of the division symbol.");
-      this->getPointerToProperty("OutputWorkspace")->setDocumentation("The name of the workspace to be created as the output of the algorithm.  A workspace of this name will be created and stored in the Analysis Data Service.");
     }
     
 

@@ -239,6 +239,9 @@ namespace Mantid
       // Bypass the initialization if the algorithm has already been initialized.
       if (m_isInitialized) return;
 
+      // Set the documentation. This virtual method is overridden by (nearly) all algorithms and gives documentation summary.
+      initDocs();
+
       g_log.setName(this->name());
       try
       {
@@ -268,9 +271,6 @@ namespace Mantid
         g_log.fatal("UNKNOWN Exception is caught in initialize()");
         throw;
       }
-
-      // Set the documentation. This virtual method is overridden by (nearly) all algorithms and gives documentation summary.
-      initDocs();
     }
 
     //---------------------------------------------------------------------------------------------

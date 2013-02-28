@@ -26,8 +26,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void DeleteTableRows::initDocs()
     {
-      this->setWikiSummary("Deletes rows from a TableWorkspace.");
-      this->setOptionalMessage("Deletes rows from a TableWorkspace.");
+      this->setWikiSummary("Deletes a row from a TableWorkspace.");
+      this->setOptionalMessage("Deletes a row from a TableWorkspace.");
     }
     
 
@@ -39,7 +39,7 @@ namespace Mantid
     {
       declareProperty(new WorkspaceProperty<API::ITableWorkspace>("TableWorkspace", "",Direction::InOut), 
         "The name of the workspace that will be modified.");
-      declareProperty(new ArrayProperty<size_t> ("Rows"),"A comma-separated list of row numbers. Row numbering starts with 0.");
+      declareProperty(new ArrayProperty<size_t> ("Rows"),"The rows to delete. Numbering starts with 0.");
     }
 
     /** 

@@ -10,7 +10,7 @@ where sum1 is the sum of the counts in a histogram in the workspace WhiteBeamBas
 
 The output workspace contains a MaskWorkspace where those spectra that fail the tests are masked and those that pass them are assigned a single positive value. 
 
-====Child algorithms used====
+====ChildAlgorithms used====
 
 Uses the [[Integration]] algorithm to sum the spectra.
 
@@ -65,31 +65,35 @@ namespace Mantid
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("WhiteBeamCompare","",Direction::Input,
               val),
-              "Name of a matching second white beam vanadium run from the same "
+              "Name of a matching second white beam vanadium run from the same\n"
               "instrument" );
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-          "A MaskWorkpace where each spectra that failed the test is masked. Each histogram from the input workspace maps to a histogram in this workspace with one value that indicates if there was a dead detector." );
+          "A MaskWorkpace where each spectra that failed the test is masked" );
+
       auto moreThanZero = boost::make_shared<BoundedValidator<double> >();
       moreThanZero->setLower(0.0);
       declareProperty("Variation", 1.1, moreThanZero,
-                      "Identify histograms whose total number of counts has changed by more than this factor of the median change between the two input workspaces." );
+                      "Identify spectra whose total number of counts has changed by more\n"
+                      "than this factor of the median change between the two input workspaces" );
       auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
       declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
-                      "The index number of the first spectrum to include in the calculation (default: 0)" );
+                      "The index number of the first entry in the Workspace to include in\n"
+                      "the calculation (default: 0)" );
 
       //Mantid::EMPTY_INT() and EMPTY_DBL() are tags that indicate that no 
       // value has been set and we want to use the default
       declareProperty("EndWorkspaceIndex", Mantid::EMPTY_INT(), mustBePosInt,
-                      "The index number of the last spectrum to include in the calculation (default: the last spectrum in the workspace)" );
+                      "The index number of the last entry in the Workspace to include in\n"
+                      "the calculation (default: the last spectrum in the workspace)" );
       declareProperty("RangeLower", Mantid::EMPTY_DBL(),
-                      "No bin with a boundary at an x value less than this will be included "
-                      "in the summation used to decide if a detector is 'bad' (default: the "
+                      "No bin with a boundary at an x value less than this will be included\n"
+                      "in the summation used to decide if a detector is 'bad' (default: the\n"
                       "start of each histogram)" );
       declareProperty("RangeUpper", Mantid::EMPTY_DBL(),
-                      "No bin with a boundary at an x value higher than this value will "
-                      "be included in the summation used to decide if a detector is 'bad' "
+                      "No bin with a boundary at an x value higher than this value will\n"
+                      "be included in the summation used to decide if a detector is 'bad'\n"
                       "(default: the end of each histogram)" );
       declareProperty("NumberOfFailures", 0, Direction::Output);
     }
