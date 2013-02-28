@@ -124,7 +124,7 @@ class IndirectReducer(MSGReducer):
         self._save_to_cm_1 = save_to_cm_1
 
     def set_calibration_workspace(self, workspace):
-        if mtd[workspace] is None:
+        if not mtd.doesExist(workspace):
             raise ValueError("Selected calibration workspace not found.")
         self._calibration_workspace = workspace
 
