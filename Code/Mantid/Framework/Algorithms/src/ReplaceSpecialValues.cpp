@@ -4,7 +4,7 @@ The algorithm searches over all of the values in a workspace and if it finds a v
 
 If no value is provided for either NaNValue, InfinityValue or BigValueThreshold then the algorithm will exit with an error, as in this case it would not be checking anything.
 
-
+Algorithm is now event aware.
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -30,29 +30,25 @@ DECLARE_ALGORITHM(ReplaceSpecialValues)
 /// Sets documentation strings for this algorithm
 void ReplaceSpecialValues::initDocs()
 {
-  this->setWikiSummary("Replaces instances of NaN and infinity in the workspace with user defined numbers. If a replacement value is not provided the check will not occur. This algorithm can also be used to replace numbers whose absolute value is larger than a user-defined threshold. ");
+  this->setWikiSummary("Replaces instances of NaN and infinity in the workspace with user defined numbers.<p>If a replacement value is not provided the check will not occur. This algorithm can also be used to replace numbers whose absolute value is larger than a user-defined threshold. ");
   this->setOptionalMessage("Replaces instances of NaN and infinity in the workspace with user defined numbers. If a replacement value is not provided the check will not occur. This algorithm can also be used to replace numbers whose absolute value is larger than a user-defined threshold.");
 }
 
 
 void ReplaceSpecialValues::defineProperties()
 {
-  declareProperty("NaNValue", Mantid::EMPTY_DBL(), "The value used to replace occurances of NaN\n"
-    "(default: do not check)");
-  declareProperty("NaNError", 0.0, "The error value used when replacing a value of NaN\n"
-    "(default: 0)");
+  declareProperty("NaNValue", Mantid::EMPTY_DBL(), "The value used to replace occurrances of NaN "
+    "(default: do not check).");
+  declareProperty("NaNError", 0.0, "The error value used when replacing a value of NaN ");
   declareProperty("InfinityValue", Mantid::EMPTY_DBL(),
-    "The value used to replace occurances of positive or negative infinity\n"
-    "(default: do not check)");
-  declareProperty("InfinityError", 0.0, "The error value used when replacing a value of infinity\n"
-    "(default: 0)");
+    "The value used to replace occurrances of positive or negative infinity "
+    "(default: do not check).");
+  declareProperty("InfinityError", 0.0, "The error value used when replacing a value of infinity ");
   declareProperty("BigNumberThreshold", Mantid::EMPTY_DBL(),
-    "A threshold value above which a data point should be replaced\n"
+    "The threshold above which a number (positive or negative) should be replaced. "
     "(default: do not check)");
-  declareProperty("BigNumberValue", 0.0, "The value used to replace (positive or negative) big numbers\n"
-    "(default: 0)");
-  declareProperty("BigNumberError", 0.0, "The error value used when replacing a big number\n"
-    "(default: 0)");
+  declareProperty("BigNumberValue", 0.0, "The value with which to replace occurrances of 'big' numbers.");
+  declareProperty("BigNumberError", 0.0, "The error value used when replacing a 'big' number");
 }
 
 void ReplaceSpecialValues::retrieveProperties()
