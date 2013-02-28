@@ -45,19 +45,21 @@ MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
 
 void MaskBins::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()),
+    "The name of the input workspace. Must contain histogram data.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    "The name of the Workspace containing the masked bins.");
   
   // This validator effectively makes these properties mandatory
   // Would be nice to have an explicit validator for this, but MandatoryValidator is already taken!
   auto required = boost::make_shared<BoundedValidator<double> >();
   required->setUpper(std::numeric_limits<double>::max()*0.99);
-  declareProperty("XMin",std::numeric_limits<double>::max(),required);
-  declareProperty("XMax",std::numeric_limits<double>::max(),required);
+  declareProperty("XMin",std::numeric_limits<double>::max(),required,"The value to start masking from.");
+  declareProperty("XMax",std::numeric_limits<double>::max(),required,"The value to end masking at.");
 
   // which pixels to load
   this->declareProperty(new ArrayProperty<int>("SpectraList"),
-                        "Optional: A list of individual which spectra to mask (specified using the workspace index). If not set, all spectra are masked.");
+     "Optional: A list of individual which spectra to mask (specified using the workspace index). If not set, all spectra are masked. Can be entered as a comma-seperated list of values, or a range (such as 'a-b' which will include spectra with workspace index of a to b inclusively).");
 
 }
 
