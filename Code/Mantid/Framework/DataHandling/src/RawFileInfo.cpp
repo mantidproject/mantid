@@ -39,14 +39,13 @@ void RawFileInfo::init()
   exts.push_back(".raw");
   exts.push_back(".s*");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts), 
-		  "The RAW file from which to extract the information");
-  declareProperty("RunTitle", std::string(""), "The title of the run", Direction::Output);
+		  "The name of the [[RAW_File | RAW]] file from which to extract the parameters");
+  declareProperty("GetRunParameters", false, "If this is true, the parameters from the RPB struct are placed into a TableWorkspace called Raw_RPB", Direction::Input);
+  declareProperty("RunTitle", std::string(""), "The run title from the HDR struct", Direction::Output);
   declareProperty("RunHeader", std::string(""), "The run header", Direction::Output);
   declareProperty("SpectraCount", -1, "The number of spectra", Direction::Output);
-  declareProperty("TimeChannelCount", -1, "The number of time channels in regime 1 ", Direction::Output);
+  declareProperty("TimeChannelCount", -1, "The number of time channels", Direction::Output);
   declareProperty("PeriodCount", -1, "The number of periods", Direction::Output);
-  declareProperty("GetRunParameters", false, "Create a table workspace with each column having the title\n"
-		  "of a paramter in the RPB struct of the RAW file", Direction::Input);
 }
 
 void RawFileInfo::exec()
