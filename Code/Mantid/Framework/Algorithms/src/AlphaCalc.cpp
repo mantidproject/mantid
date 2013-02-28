@@ -32,6 +32,7 @@ DECLARE_ALGORITHM( AlphaCalc)
  */
 void AlphaCalc::init()
 {
+  this->setWikiSummary("Muon algorithm for calculating the detector efficiency between two groups of detectors.");
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "",
       Direction::Input), "Name of the input workspace");
 
