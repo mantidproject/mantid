@@ -851,6 +851,8 @@ namespace Mantid
           std::string::const_iterator start, end;
           start = propStr.begin();
           end = propStr.end();
+          // Accumulate them first so that we can set some out of order
+          std::map<std::string, std::string> propNameValues;
           while(boost::regex_search(start, end, what, nameValExp, flags))
           {
             std::string nameValue = what.str(1);
@@ -860,16 +862,28 @@ namespace Mantid
                  what, propNameExp, boost::match_not_null) )
             {
               const std::string name = what.str(1);
-              alg->setPropertyValue(name, value);
+              propNameValues[name] = value;
               end = what[1].first-1;
             } else {
               // The last property-value pair
-              alg->setPropertyValue(nameValue, value);
+              propNameValues[nameValue] = value;
               break;
             }
             // update flags:
             flags |= boost::match_prev_avail;
             flags |= boost::match_not_bob;
+          }
+
+          // Some algorithms require Filename to be set first do that here
+          auto it = propNameValues.find("Filename");
+          if(it != propNameValues.end())
+          {
+            alg->setPropertyValue(it->first, it->second);
+            propNameValues.erase(it);
+          }
+          for(auto cit = propNameValues.begin(); cit != propNameValues.end(); ++cit)
+          {
+            alg->setPropertyValue(cit->first, cit->second);
           }
         }
         return alg;
