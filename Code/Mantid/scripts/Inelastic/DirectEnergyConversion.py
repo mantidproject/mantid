@@ -111,13 +111,13 @@ class DirectEnergyConversion(object):
                 kwargs[arg] = getattr(self, par)
                 
         # Get the white beam vanadium integrals
-        whiteintegrals = self.do_white(white, None, None) # No grouping yet
+        whiteintegrals = self.do_white(white, None, None,None) # No grouping yet
         if 'second_white' in kwargs:
             second_white = kwargs['second_white']
             if second_white is None:
                 del kwargs['second_white']
             else:
-                other_whiteintegrals = self.do_white(second_white, None, None) # No grouping yet
+                other_whiteintegrals = self.do_white(second_white, None, None,None) # No grouping yet
                 kwargs['second_white'] = other_whiteintegrals
 
         # Get the background/total counts from the sample if present
@@ -357,6 +357,7 @@ class DirectEnergyConversion(object):
                     if self.det_cal_file_ws == None :
                         self.log('Loading detector info from file ' + self.det_cal_file)                    
                         LoadDetectorInfo(Workspace=result_name,DataFilename=self.det_cal_file,RelocateDets= self.relocate_dets)
+                        self.log('Loading detector info completed ')                                            
                     else:
                         self.log('Copying detectors positions from det_cal_file workspace: '+self.det_cal_file_ws.name())                    
                         CopyInstrumentParameters(InputWorkspace=self.det_cal_file_ws,OutputWorkspace=result_name)
@@ -419,7 +420,7 @@ class DirectEnergyConversion(object):
         ConvertToDistribution(Workspace=result_ws)
         # White beam correction
         if white_run is not None:
-            white_ws = self.do_white(white_run, spectra_masks, map_file)
+            white_ws = self.do_white(white_run, spectra_masks, map_file,None)
             result_ws /= white_ws
         
         # Overall scale factor
