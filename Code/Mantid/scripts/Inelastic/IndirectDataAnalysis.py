@@ -3,6 +3,7 @@ from IndirectImport import import_mantidplot
 mp = import_mantidplot()
 from IndirectCommon import *
 from mantid import config, logger
+from mantid.api import NumericAxis
 import math, re, os.path, numpy as np
 
 ##############################################################################
@@ -847,8 +848,7 @@ def plotCorrContrib(plot_list,n):
         con_plot=mp.plotSpectrum(plot_list,n)
 
 def replace_workspace_axis(wsName, new_values):
-    from mantidsimple import createNumericAxis, mtd        #temporary use of old API
-    ax1 = createNumericAxis(len(new_values))
+    ax1 = NumericAxis.create(len(new_values))
     for i in range(len(new_values)):
         ax1.setValue(i, new_values[i])
     ax1.setUnit('MomentumTransfer')

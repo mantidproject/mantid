@@ -1,5 +1,5 @@
 ## IndirectEnergyConversionReducer class
-from mantidsimple import *
+from mantid.simpleapi import *
 
 from msg_reducer import MSGReducer
 import inelastic_indirect_reduction_steps as steps
