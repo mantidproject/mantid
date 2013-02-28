@@ -335,11 +335,9 @@ namespace Mantid
       /// Has this workspace been initialised?
       bool m_isInitialized;
 
-    protected:
       /// A shared pointer to the spectra-detector map
       boost::shared_ptr<const Geometry::ISpectraDetectorMap> m_spectraMap;
 
-    private:
       /// The unit for the data values (e.g. Counts)
       std::string m_YUnit;
       /// A text label for use when plotting spectra
