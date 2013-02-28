@@ -446,6 +446,7 @@ add_custom_command ( TARGET Kernel POST_BUILD
 install ( TARGETS Kernel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 # Create the properties file for the installer
+set ( MANTID_ROOT_BUILD ${MANTID_ROOT} )
 if ( APPLE )
   set ( MANTID_ROOT ../.. )
 else ()
@@ -456,19 +457,32 @@ set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONALG_DIRS ${PLUGINS}/PythonAlgs )
 set ( DATADIRS "" )
 
-# Construct script paths.
-set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
-# First the required scripts variable...
-# Omitting the following (as of now) empty directories as CMake doesn't copy them on install and you then end up with a warning message....
-# @MANTID_ROOT@/scripts/Crystallography;@MANTID_ROOT@/scripts/DisorderedMaterials;@MANTID_ROOT@/scripts/Engineering;@MANTID_ROOT@/scripts/Muons;@MANTID_ROOT@/scripts/Neutrinos
-set ( REQUIREDSCRIPT_SUBDIRS Inelastic Reflectometry SANS)
+# Construct script paths by replacing the old MANTID_ROOT with the new one.
+# Unfortunately string (REGEX REPLACE ... )removes the semi-colons so we have to do this in a loop.
 
-set ( REQUIREDSCRIPT_DIRS ${MANTID_ROOT}/scripts )
-foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
-  set ( REQUIREDSCRIPT_DIRS "${REQUIREDSCRIPT_DIRS};${MANTID_SCRIPTS}/${SUBDIR}" )
+# First REQUIREDSCRIPT_DIRS
+set ( WITH_SEMICOLONS "" )
+foreach ( DIR ${REQUIREDSCRIPT_DIRS} )
+  string ( REGEX REPLACE "${MANTID_ROOT_BUILD}" "${MANTID_ROOT}" DIR ${DIR} )
+  if ( WITH_SEMICOLONS )
+    set ( WITH_SEMICOLONS "${WITH_SEMICOLONS};${DIR}" )
+  else()
+    set ( WITH_SEMICOLONS "${DIR}" ) # Avoid first ;
+  endif()
 endforeach()
+set ( REQUIREDSCRIPT_DIRS "${WITH_SEMICOLONS}" )
 
-set ( PYTHONSCRIPT_DIRS ${MANTID_ROOT}/scripts )
+# Second PYTHONSCRIPT_DIRS
+set ( WITH_SEMICOLONS "" )
+foreach ( DIR ${PYTHONSCRIPT_DIRS} )
+  string ( REGEX REPLACE "${MANTID_ROOT_BUILD}" "${MANTID_ROOT}" DIR ${DIR} )
+  if ( WITH_SEMICOLONS )
+    set ( WITH_SEMICOLONS "${WITH_SEMICOLONS};${DIR}" )
+  else()
+    set ( WITH_SEMICOLONS "${DIR}" ) # Avoid first ;
+  endif()
+endforeach()
+set ( PYTHONSCRIPT_DIRS "${WITH_SEMICOLONS}" )
 
 # For a framework-only (e.g. MPI) build some of these are not relevant and should
 # be left empty to avoid warnings on starting Mantid
