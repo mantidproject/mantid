@@ -1,3 +1,29 @@
+/*WIKI* 
+
+
+Generate a workspace by summing over the peak functions.  
+The peaks' parameters are given in a [[TableWorkspace]].  
+
+==== Peak Parameters ====
+Peak parameters must have the following parameters, which are case sensitive in input [[TableWorkspace]]
+ 1. spectrum
+ 2. centre
+ 3. height
+ 4. width (FWHM)
+ 5. backgroundintercept (a0)
+ 6. backgroundslope (a1)
+ 7. A2
+ 8. chi2
+
+[[Category:Algorithms]]
+{{AlgorithmLinks|GeneratePeaks}}
+
+
+*WIKI*/
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+
 #include "MantidAlgorithms/GeneratePeaks.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -38,7 +64,7 @@ namespace Algorithms
   
   void GeneratePeaks::initDocs()
   {
-
+    this->setWikiSummary("Generate peaks in an output workspace according to a [[TableWorkspace]] containing a list of peak's parameters.");
   }
 
   /*
