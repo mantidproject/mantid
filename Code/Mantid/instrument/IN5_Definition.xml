@@ -2,7 +2,7 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
 	see http://www.mantidproject.org/IDF -->
 <instrument name="IN5" valid-from="1900-01-31 23:59:59"
-	valid-to="2100-01-31 23:59:59" last-modified="2012-05-17 00:00:00">
+	valid-to="2100-01-31 23:59:59" last-modified="2013-02-28 00:00:01">
 
 	<!-- Author: ricardo.leal@ill.fr -->
 
@@ -34,32 +34,6 @@
 	</component>
 	<type name="chopper-position" is="ChopperPos"></type>
 
-	<!-- Monitors: just one monitor present for IN5; Distance M1-Sample = 855.60mm -->
-	<!-- <component type="monitors" idlist="monitors">
-		<location />
-	</component>
-	<type name="monitors">
-		<component type="monitor">
-			<location z="-0.85560" name="monitor1" />
-		</component>
-	</type> -->
-	<!--MONITOR IDs -->
-	<!-- <idlist idname="monitors">
-		<id val="1" />
-	</idlist> -->
-
-	<!--MONITOR SHAPE: Copied from CNCS -->
-	<!--FIXME: Do something real here. -->
-	<!-- <type is="monitor" name="monitor">
-		<cylinder id="cyl-approx">
-			<centre-of-bottom-base y="0.0" x="0.0" z="0.0" />
-			<axis y="0.0" x="0.0" z="1.0" />
-			<radius radius="0.01" />
-			<height height="0.03" />
-		</cylinder>
-		<algebra val="cyl-approx" />
-	</type> -->
-
 	<!-- Sample position -->
 	<component type="sample-position">
 		<location y="0.0" x="0.0" z="0.0" />
@@ -69,11 +43,13 @@
 	<!-- **** DETECTORS **** -->
 	<!-- Detector IDs -->
 	<idlist idname="detectors">
-		<id start="0" end="98303" />
+		<id start="1" end="98304" />
 	</idlist>
+
 	<component type="detectors" idlist="detectors">
 		<location />
 	</component>
+
 	<!-- Detector Doors/Banks/Panels -->
 	<type name="detectors">
 		<component type="door1" idlist="door1">
@@ -112,7 +88,6 @@
 		<component type="door12" idlist="door12">
 			<location />
 		</component>
-
 	</type>
 	<!-- Position of tubes around 2 theta, 4m from the sample -->
 	<type name="door1">
@@ -1585,8 +1560,7 @@
 	<!-- Definition of standard-pixel -->
 	<type name="standard-pixel" is="detector">
 		<cylinder id="shape">
-			<centre-of-bottom-base x="0.0" y="-0.0014307"
-				z="0.0" />
+			<centre-of-bottom-base x="0.0" y="-0.006144" z="0.0" />
 			<axis x="0.0" y="1.0" z="0.0" />
 			<radius val="0.0127" />
 			<height val=".0114341328125" />
@@ -2006,17 +1980,5 @@
 		<id start="98049" end="98304" />
 	</idlist>
 
-	<!--DETECTOR PARAMETERS -->
-	<component-link name="detectors">
-		<parameter name="tube_pressure">
-			<value units="atm" val="6.0" />
-		</parameter>
-		<parameter name="tube_thickness">
-			<value units="metre" val="0.0005" />
-		</parameter>
-		<parameter name="tube_temperature">
-			<value units="K" val="290.0" />
-		</parameter>
-	</component-link>
 </instrument>
 
