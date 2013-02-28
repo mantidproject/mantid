@@ -9,6 +9,8 @@ This algorithms is useful both in data reduction, but also in remapping [[Ragged
 The bin immediately before the specified boundaries <math>x_2</math>, <math>x_3</math>, ... <math>x_i</math> is likely to have a different width from its neighbours because there can be no gaps between bins. Rebin ensures that any of these space filling bins cannot be less than 25% or more than 125% of the width that was specified.
 
 === Example Rebin param strings ===
+;-0.0001
+:From min(TOF) to max(TOF) among all events in Logarithmic bins of 0.0001
 ;0,100,20000
 :From 0 rebin in constant size bins of 100 up to 20,000
 ;2,-0.035,10
@@ -84,13 +86,18 @@ namespace Mantid
 
       declareProperty(
         new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
-        "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
-        "this can be followed by a comma and more widths and last boundary pairs.\n"
-        "Negative width values indicate logarithmic binning.");
+        "A comma separated list of first bin boundary, width, last bin boundary. Optionally "
+        "this can be followed by a comma and more widths and last boundary pairs. "
+        "Optionally this can also be a single number, which is the bin width. "
+        "In this case, the boundary of binning will be determined by minimum and maximum TOF "
+        "values among all events, or previous binning boundary, in case of event Workspace, or "
+        "non-event Workspace, respectively. Negative width values indicate logarithmic binning. ");
 
-      declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
-          "If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick.\n"
-          "If false, then the workspace gets converted to a Workspace2D histogram.");
+      declareProperty("PreserveEvents", true,"Keep the output workspace as an EventWorkspace, "
+                      "if the input has events (default). If the input and output EventWorkspace "
+                      "names are the same, only the X bins are set, which is very quick. If false, "
+                      "then the workspace gets converted to a Workspace2D histogram.");
+
     }
 
 
