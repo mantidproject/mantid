@@ -30,7 +30,7 @@ DECLARE_ALGORITHM(DefineGaugeVolume)
 /// Sets documentation strings for this algorithm
 void DefineGaugeVolume::initDocs()
 {
-  this->setWikiSummary(" Defines a geometrical shape object to be used as the gauge volume in the [[AbsorptionCorrection]] algorithm. ");
+  this->setWikiSummary("Defines a geometrical shape object to be used as the gauge volume in the [[AbsorptionCorrection]] algorithm. ");
   this->setOptionalMessage("Defines a geometrical shape object to be used as the gauge volume in the AbsorptionCorrection algorithm.");
 }
 

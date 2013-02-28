@@ -88,8 +88,8 @@ namespace DataHandling
   /// @copydoc Mantid::API::Algorithm::initDocs()
   void DetermineChunking::initDocs()
   {
-    this->setWikiSummary("Determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
-    this->setOptionalMessage("Determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
+    this->setWikiSummary("Workflow algorithm to determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
+    this->setOptionalMessage("Workflow algorithm to determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
   }
 
 
@@ -105,9 +105,7 @@ namespace DataHandling
     exts.push_back(".nxs");
     exts.push_back(".raw");
     this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-        "The name of the runinfo file to read, including its full or relative path. \n"
-        "Or the name of the Event NeXus file to read, including its full or relative path. \n"
-        "The Event NeXus file name is typically of the form INST_####_event.nxs (N.B. case sensitive if running on Linux)." );
+        "The name of the event nexus, runinfo.xml, raw, or histo nexus file to read, including its full or relative path. The Event NeXus file name is typically of the form INST_####_event.nxs (N.B. case sensitive if running on Linux)." );
 
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
