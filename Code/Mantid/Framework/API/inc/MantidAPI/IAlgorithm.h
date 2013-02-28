@@ -159,6 +159,8 @@ public:
   virtual void setChildEndProgress(const double endProgress)const = 0;
   /// Serialize an algorithm
   virtual std::string toString() const = 0;
+  /// Set the wiki summary.
+  virtual void setWikiSummary(const std::string WikiSummary) = 0;
 };
 
 typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;

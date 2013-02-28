@@ -238,6 +238,7 @@ void export_ialgorithm()
         "are NOT stored in the Analysis Data Service but must be retrieved from the property.")
     .def("setLogging", &IAlgorithm::setLogging, "Toggle logging on/off.")
     .def("setRethrows", &IAlgorithm::setRethrows)
+    .def("setWikiSummary", &IAlgorithm::setWikiSummary)
     .def("initialize", &IAlgorithm::initialize, "Initializes the algorithm")
     .def("execute", &executeWhileReleasingGIL, "Runs the algorithm and returns whether it has been successful")
     // Special methods

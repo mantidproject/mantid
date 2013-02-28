@@ -133,6 +133,9 @@ namespace Mantid
       virtual std::string toString() const;
       //@}
       
+      /// Set the wiki summary.
+      virtual void setWikiSummary(const std::string wikiSummary){m_WikiSummary = wikiSummary;}
+
     private:
       /// Private Copy constructor: NO COPY ALLOWED
       AlgorithmProxy(const AlgorithmProxy&);

@@ -206,6 +206,7 @@ using namespace boost::python;
       .def("setLogging", &API::IAlgorithm::setLogging)
       .def("setAlwaysStoreInADS", &API::IAlgorithm::setAlwaysStoreInADS)
       .def("setRethrows", &API::IAlgorithm::setRethrows)
+      .def("setWikiSummary", &API::IAlgorithm::setWikiSummary)
       .def("existsProperty", &API::IAlgorithm::existsProperty)
       .def("setPropertyValue", &API::IAlgorithm::setPropertyValue)
       .def("getPropertyValue", &API::IAlgorithm::getPropertyValue)
