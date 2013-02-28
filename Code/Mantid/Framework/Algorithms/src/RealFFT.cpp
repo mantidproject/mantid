@@ -62,7 +62,7 @@ void RealFFT::init()
 
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
-      declareProperty("WorkspaceIndex",-1,mustBePositive,"The index of the spectrum in the input workspace to transform.");
+      declareProperty("WorkspaceIndex",0,mustBePositive,"The index of the spectrum in the input workspace to transform.");
 
       std::vector<std::string> fft_dir;
       fft_dir.push_back("Forward");
