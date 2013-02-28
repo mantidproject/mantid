@@ -1,7 +1,9 @@
 /*WIKI* 
 
 The algorithm rebins data by adding together ''n_bunch'' successive bins.
+
 ==Usage==
+
 '''Python'''
  Rebunch("InWS, "OutWS", "3")
 
@@ -29,7 +31,7 @@ namespace Mantid
 /// Sets documentation strings for this algorithm
 void Rebunch::initDocs()
 {
-  this->setWikiSummary("Rebins data by adding together ''n_bunch'' successive bins. ");
+  this->setWikiSummary("Rebins data by adding together ''n_bunch'' successive bins.");
   this->setOptionalMessage("Rebins data by adding together 'n_bunch' successive bins.");
 }
 
@@ -46,15 +48,15 @@ void Rebunch::initDocs()
 		{
 							declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
-        "Name of the input workspace" );
+        "The input workspace" );
 			declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "The name of the workspace to be created as the output of the algorithm");
+        "The result of rebinning");
 
    auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
 			mustBePositive->setLower(1);
 			declareProperty("NBunch",1, mustBePositive,
-        "The number of bins to that will be summed in each bunch");
+        "The number of bins that will be summed in each bunch");
 		}
 
 		/** Executes the rebin algorithm
