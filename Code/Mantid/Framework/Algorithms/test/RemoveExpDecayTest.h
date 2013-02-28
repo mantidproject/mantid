@@ -14,7 +14,7 @@
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class MuonRemoveExpDecayTest : public CxxTest::TestSuite
+class RemoveExpDecayTest : public CxxTest::TestSuite
 {
 public:
 
