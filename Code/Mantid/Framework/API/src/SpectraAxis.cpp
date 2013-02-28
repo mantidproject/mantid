@@ -37,7 +37,7 @@ SpectraAxis::SpectraAxis(const std::size_t& length, const bool initWithDefaults 
 }
 
 /**
- * Constructor taking a reference to an ISpectraDetectorMap implementation. The 
+ * Constructor taking a reference to an ISpectraDetectorMap implementation. The
  * axis is initialized to first length unique spectra values provided by the map
  * @param length :: The length of the axis
  * @param spectramap :: A reference to an ISpectraDetectorMap implementation.
@@ -49,7 +49,7 @@ SpectraAxis::SpectraAxis(const std::size_t length, const Geometry::ISpectraDetec
   if( length == 0 ) return;
   Geometry::ISpectraDetectorMap::const_iterator itr = spectramap.cbegin();
   Geometry::ISpectraDetectorMap::const_iterator iend = spectramap.cend();
-  if( itr == iend ) 
+  if( itr == iend )
   {
       m_values.resize(0);
       return;
@@ -192,24 +192,6 @@ void SpectraAxis::getSpectraIndexMap(spec2index_map& map)const
     map.insert(std::make_pair(m_values[i],i));
   }
 }
-
-/** 
- * Populate the SpectraAxis with a 1:1 map from start to end (inclusive).
- */
-void SpectraAxis::populateOneToOne(int64_t start, int64_t end)
-{
-  if( start > end )
-  {
-    throw std::invalid_argument("SpectraAxis::populateOneToOne - start > end");
-  }
-  const size_t nvalues(end-start+1);
-  m_values.resize(nvalues, 0);
-  for (size_t i=0; i < nvalues; i++)
-  {
-    m_values[i] = static_cast<specid_t>(start+i);
-  }
-}
-
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 :: Reference to the axis to compare to

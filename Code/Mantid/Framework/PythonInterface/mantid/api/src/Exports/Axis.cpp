@@ -142,7 +142,6 @@ void export_SpectraAxis()
   class_< SpectraAxis, bases<Axis>, boost::noncopyable >("SpectraAxis", no_init)
     .def("spectraNo", (const specid_t &(SpectraAxis::*)(const size_t &) const)&SpectraAxis::spectraNo,
           return_value_policy<copy_const_reference>(), "Returns the spectrum no at the given index")
-    .def("populateOneToOne", & SpectraAxis::populateOneToOne, "Populate the list with 1:1 values")
     .def("create", &createSpectraAxis, return_internal_reference<>(), "Creates a new SpectraAxis of a specified length")
     .staticmethod("create")
     ;
