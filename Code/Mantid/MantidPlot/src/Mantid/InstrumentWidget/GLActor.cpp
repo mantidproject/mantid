@@ -1,11 +1,11 @@
 #include "GLActor.h"
-#include "GLActorVisitor.h"
+
 
 GLActor::~GLActor()
 {
 }
 
-bool GLActor::accept(GLActorVisitor& visitor)
+bool GLActor::accept(const GLActorVisitor& visitor)
 {
   return visitor.visit(this);
 }
@@ -34,10 +34,11 @@ size_t GLActor::decodePickColor(unsigned char r,unsigned char g,unsigned char b)
   index += g;
   index *= 256;
   index += b - 1;
+  //std::cerr << "decode " << int(r)<<' '<<int(g)<<' '<<int(b)<<' '<<index<<std::endl;
   return index;
 }
 
 GLColor GLActor::defaultDetectorColor()
 {
-  return GLColor(200,200,200);
+  return GLColor(255,100,0);
 }

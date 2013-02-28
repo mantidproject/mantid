@@ -3,7 +3,6 @@
 #include "InstrumentTreeWidget.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
-#include "GLActorVisitor.h"
 
 InstrumentWindowTreeTab::InstrumentWindowTreeTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow)

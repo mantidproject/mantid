@@ -17,12 +17,11 @@ class QAction;
 class QMenu;
 
 /**
-  * Implements the Render tab in InstrumentWindow.
+  * Implements the Render tab in InstrumentWindow
   */
 class InstrumentWindowRenderTab: public InstrumentWindowTab
 {
   Q_OBJECT
-
 public:
   InstrumentWindowRenderTab(InstrumentWindow* instrWindow);
   ~InstrumentWindowRenderTab();
@@ -35,19 +34,15 @@ public:
   void setAxis(const QString& axisName);
   bool areAxesOn()const;
   void setupColorBar(const MantidColorMap&,double,double,double,bool);
-
 signals:
   void rescaleColorMap();
   void setAutoscaling(bool);
-
 public slots:
   void setMinValue(double value, bool apply = true);
   void setMaxValue(double value, bool apply = true);
   void setRange(double minValue, double maxValue, bool apply = true);
   void showAxes(bool on);
-  void displayDetectorsOnly(bool yes);
   void setColorMapAutoscaling(bool);
-
 private slots:
   void changeColormap(const QString & filename = "");
   void showResetView(int);
@@ -61,12 +56,12 @@ private slots:
   void colorMapChanged();
   void scaleTypeChanged(int);
   void glOptionChanged(bool);
-
 private:
   void showEvent (QShowEvent *);
-
   QMenu* createPeaksMenu();
+
   QFrame * setupAxisFrame();
+
   QComboBox* m_renderMode;
   QPushButton *mSaveImage;
   ColorMapWidget* m_colorMapWidget;
@@ -79,7 +74,6 @@ private:
   QAction *m_colorMap;
   QAction *m_backgroundColor;
   QAction *m_displayAxes;
-  QAction *m_displayDetectorsOnly;
   QAction *m_wireframe;
   QAction *m_lighting;
   QAction *m_GLView; ///< toggle between OpenGL and simple view

@@ -192,7 +192,6 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/SampleActor.cpp
                    src/Mantid/InstrumentWidget/GLActorCollection.cpp
                    src/Mantid/InstrumentWidget/GLActor.cpp
-                   src/Mantid/InstrumentWidget/GLActorVisitor.cpp
                    src/Mantid/InstrumentWidget/GLColor.cpp
                    src/Mantid/InstrumentWidget/GLObject.cpp
                    src/Mantid/InstrumentWidget/GLTrackball.cpp
@@ -421,7 +420,6 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/SampleActor.h
                    src/Mantid/InstrumentWidget/GLActorCollection.h
                    src/Mantid/InstrumentWidget/GLActor.h
-                   src/Mantid/InstrumentWidget/GLActorVisitor.h
                    src/Mantid/InstrumentWidget/GLColor.h
                    src/Mantid/InstrumentWidget/GLObject.h
                    src/Mantid/InstrumentWidget/GLTrackball.h

@@ -69,10 +69,6 @@ InstrumentWindowTab(instrWindow)
   m_displayAxes->setCheckable(true);
   m_displayAxes->setChecked(true);
   connect(m_displayAxes, SIGNAL(toggled(bool)), this, SLOT(showAxes(bool)));
-  m_displayDetectorsOnly = new QAction("Display Detectors Only",this);
-  m_displayDetectorsOnly->setCheckable(true);
-  m_displayDetectorsOnly->setChecked(true);
-  connect(m_displayDetectorsOnly, SIGNAL(toggled(bool)), this, SLOT(displayDetectorsOnly(bool)));
   m_wireframe = new QAction("Wireframe",this);
   m_wireframe->setCheckable(true);
   m_wireframe->setChecked(false);
@@ -92,7 +88,6 @@ InstrumentWindowTab(instrWindow)
   displaySettingsMenu->addAction(m_backgroundColor);
   displaySettingsMenu->addSeparator();
   displaySettingsMenu->addAction(m_displayAxes);
-  displaySettingsMenu->addAction(m_displayDetectorsOnly);
   displaySettingsMenu->addAction(m_wireframe);
   displaySettingsMenu->addAction(m_lighting);
   displaySettingsMenu->addAction(m_GLView);
@@ -173,10 +168,6 @@ void InstrumentWindowRenderTab::initSurface()
   {
       p3d->set3DAxesState(areAxesOn());
   }
-  bool detectorsOnly = !m_instrWindow->getInstrumentActor()->areGuidesShown();
-  m_displayDetectorsOnly->blockSignals(true);
-  m_displayDetectorsOnly->setChecked(detectorsOnly);
-  m_displayDetectorsOnly->blockSignals(false);
 }
 
 /**
@@ -288,31 +279,12 @@ void InstrumentWindowRenderTab::showFlipControl(int iv)
   m_peakOverlaysButton->setVisible(vis);
 }
 
-/**
- * Toggle display of 3D axes.
- * 
- * @param on :: True of false for on and off.
- */
 void InstrumentWindowRenderTab::showAxes(bool on)
 {
   m_instrWindow->set3DAxesState(on);
   m_displayAxes->blockSignals(true);
   m_displayAxes->setChecked(on);
   m_displayAxes->blockSignals(false);
-}
-
-/**
- * Toggle display of guide and other non-detector components.
- *
- * @param on :: True of false for on and off.
- */
-void InstrumentWindowRenderTab::displayDetectorsOnly(bool yes)
-{
-  m_instrWindow->getInstrumentActor()->showGuides( !yes );
-  m_instrWindow->updateInstrumentView();
-  m_displayDetectorsOnly->blockSignals(true);
-  m_displayDetectorsOnly->setChecked(yes);
-  m_displayDetectorsOnly->blockSignals(false);
 }
 
 void InstrumentWindowRenderTab::showEvent (QShowEvent *)

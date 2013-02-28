@@ -2,7 +2,6 @@
 #include "ObjComponentActor.h"
 #include "RectangularDetectorActor.h"
 #include "InstrumentActor.h"
-#include "GLActorVisitor.h"
 
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -133,14 +132,14 @@ void RectangularDetectorActor::draw(bool picking)const
  * @param visitor :: A visitor.
  *
  */
-bool RectangularDetectorActor::accept(GLActorVisitor& visitor)
+bool RectangularDetectorActor::accept(const GLActorVisitor& visitor)
 {
   if (visitor.visit(this)) return true;
 
   // ID of the parent RectangularDetector
   Mantid::Geometry::ComponentID thisID = this->m_id;
 
-  SetVisibleComponentVisitor* svv = dynamic_cast<SetVisibleComponentVisitor*>(&visitor);
+  const SetVisibleComponentVisitor* svv = dynamic_cast<const SetVisibleComponentVisitor*>(&visitor);
   if (svv)
   {
     Mantid::Geometry::ComponentID id = svv->getID();
