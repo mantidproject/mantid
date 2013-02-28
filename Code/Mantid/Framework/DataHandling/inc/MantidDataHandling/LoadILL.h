@@ -43,16 +43,13 @@ class DLLExport LoadILL: public API::IDataFileChecker {
 public:
 	/// Constructor
 	LoadILL() :
-			API::IDataFileChecker(),
-			m_instrumentName(""),
+			API::IDataFileChecker(), m_instrumentName(""),
 			//m_nexusInstrumentEntryName(""),
-			m_wavelength(0),
-			m_channelWidth(0)
-			{
-		
-			supportedInstruments.push_back("IN5");
-		
+			m_wavelength(0), m_channelWidth(0) {
 
+		//supportedInstruments.push_back("IN4");
+		supportedInstruments.push_back("IN5");
+		supportedInstruments.push_back("IN6");
 
 	}
 	/// Virtual destructor
@@ -119,7 +116,7 @@ private:
 	double m_l1; //=2.0;
 	double m_l2; //=4.0;
 
-	std::vector<std::string>  supportedInstruments;
+	std::vector<std::string> supportedInstruments;
 
 	// Nexus instrument entry is of the format /entry0/<XXX>/
 	// XXX changes from version to version

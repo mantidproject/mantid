@@ -87,13 +87,11 @@ void LoadILL::exec() {
 	initInstrumentSpecific();
 
 	loadTimeDetails(entry);
-
 	initWorkSpace(entry);
 
 	loadDataIntoTheWorkSpace(entry);
 
 	loadRunDetails(entry);
-
 	loadExperimentDetails(entry);
 
 	// load the instrument from the IDF if it exists
@@ -145,9 +143,9 @@ void LoadILL::setInstrumentName(NeXus::NXEntry& entry) {
 
 	m_instrumentName = getInstrumentName(entry);
 	if (m_instrumentName == "") {
-		g_log.error();
-		throw std::runtime_error(
-				"Cannot read the instrument name from the Nexus file!");
+		std::string message("Cannot read the instrument name from the Nexus file!");
+		g_log.error(message);
+		throw std::runtime_error(message);
 	}
 
 }
@@ -173,8 +171,7 @@ void LoadILL::initWorkSpace(NeXus::NXEntry& entry) {
 	m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
 
 	g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-	g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
-			<< std::endl;
+	g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << std::endl;
 	g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
 
 	// Now create the output workspace
@@ -203,18 +200,40 @@ void LoadILL::initInstrumentSpecific() {
 		m_l1 = 2.0;
 		m_l2 = 4.0;
 	}
+	else if (std::string::npos != m_instrumentName.find("IN6")) {
+		m_l1 = 2.0;
+		m_l2 = 2.48;
+	}
 	else{
 		g_log.warning("initInstrumentSpecific : Couldn't find instrument: " +  m_instrumentName);
 	}
 
 }
 
+/**
+ * Load the time details from the nexus file.
+ * @param entry :: The Nexus entry
+ */
 void LoadILL::loadTimeDetails(NeXus::NXEntry& entry) {
 
-	m_wavelength = entry.getFloat("wavelength");
-	m_monitorElasticPeakPosition = entry.getInt("monitor/elasticpeak");
 
-	NXFloat time_of_flight_data = entry.openNXFloat("monitor/time_of_flight");
+	m_wavelength = entry.getFloat("wavelength");
+
+	// Monitor can be monitor (IN5) or monitor1 (IN6)
+	std::string monitorName;
+	if (entry.containsGroup("monitor"))
+		monitorName = "monitor";
+	else if (entry.containsGroup("monitor1"))
+		monitorName = "monitor1";
+	else {
+		std::string message("Cannot find monitor[1] in the Nexus file!");
+		g_log.error(message);
+		throw std::runtime_error(message);
+	}
+
+	m_monitorElasticPeakPosition = entry.getInt(monitorName + "/elasticpeak");
+
+	NXFloat time_of_flight_data = entry.openNXFloat(monitorName + "/time_of_flight");
 	time_of_flight_data.load();
 
 	// The entry "monitor/time_of_flight", has 3 fields:
