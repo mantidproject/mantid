@@ -55,14 +55,14 @@ void Regroup::init()
   wsVal->add<API::CommonBinsValidator>();
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, wsVal),
-    "Name of the input workspace" );
+    "The input workspace." );
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-    "The name of the workspace to be created as the output of the regrouping");
+    "The result of regrouping.");
 
   declareProperty(
     new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
-    "The new bin widths in the form x1, deltax1, x2, deltax2, x3, ..." );
+    "The new approximate bin boundaries in the form: <math>x_1,\\Delta x_1,x_2,\\Delta x_2,\\dots,x_n</math>");
 }
 
 /** Executes the regroup algorithm
