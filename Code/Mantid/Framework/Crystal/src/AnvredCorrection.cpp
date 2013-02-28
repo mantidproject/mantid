@@ -167,7 +167,7 @@ void AnvredCorrection::exec()
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputWS );
   if(eventW)eventW->sortAll(TOF_SORT, NULL);
-  if ((getProperty("PreserveEvents")) && (eventW != NULL) )
+  if ((getProperty("PreserveEvents")) && (eventW != NULL) && !ReturnTransmissionOnly)
   {
     //Input workspace is an event workspace. Use the other exec method
     this->execEvent();
@@ -179,6 +179,7 @@ void AnvredCorrection::exec()
 
   const int64_t numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
+  if (specSize < 3) throw std::runtime_error("Problem in AnvredCorrection::events not binned");
 
   const bool isHist = m_inputWS->isHistogramData();
 
@@ -347,16 +348,8 @@ void AnvredCorrection::execEvent()
         wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
       double value = this->getEventWeight(timeflight[0], scattering);
       timeflight.clear();
-      if (ReturnTransmissionOnly)
-      {
-        itev->m_errorSquared = static_cast<float>( 1.0 / (value*value));
-        itev->m_weight = static_cast<float>(1.0 / value);
-      }
-      else
-      {
-        itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
-        itev->m_weight *= static_cast<float>(value);
-      }
+      itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * value*value);
+      itev->m_weight *= static_cast<float>(value);
     }
     correctionFactors->getOrAddEventList(i) +=events;
     
