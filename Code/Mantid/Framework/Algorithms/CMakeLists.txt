@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/ApplyDeadTimeCorr.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
+	src/AsymmetryCalc.cpp
 	src/AverageLogData.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
@@ -130,7 +131,6 @@ set ( SRC_FILES
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
-	src/MuonAsymmetryCalc.cpp
 	src/MuonRemoveExpDecay.cpp
 	src/NormaliseByCurrent.cpp
 	src/NormaliseByDetector.cpp
@@ -224,6 +224,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
+	inc/MantidAlgorithms/AsymmetryCalc.h
 	inc/MantidAlgorithms/AverageLogData.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
@@ -340,7 +341,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
-	inc/MantidAlgorithms/MuonAsymmetryCalc.h
 	inc/MantidAlgorithms/MuonRemoveExpDecay.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
 	inc/MantidAlgorithms/NormaliseByDetector.h
@@ -443,6 +443,7 @@ set ( TEST_FILES
 	ApplyDeadTimeCorrTest.h
 	ApplyDetailedBalanceTest.h
 	ApplyTransmissionCorrectionTest.h
+	AsymmetryCalcTest.h
 	AverageLogDataTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
@@ -544,7 +545,6 @@ set ( TEST_FILES
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
-	MuonAsymmetryCalcTest.h
 	MuonRemoveExpDecayTest.h
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h

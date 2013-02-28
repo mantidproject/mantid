@@ -1,6 +1,5 @@
 /*WIKI* 
 
-
 Calculates the probability of a neutron being transmitted through the sample using detected counts from two monitors, one in front and one behind the sample. A data workspace can be corrected for transmission by [[Divide|dividing]] by the output of this algorithm.
 
 Because the detection efficiency of the monitors can be different the transmission calculation is done using two runs, one run with the sample (represented by <math>S</math> below) and a direct run without it(<math>D</math>). The fraction transmitted through the sample <math>f</math> is calculated from this formula:
@@ -62,9 +61,9 @@ void CalculateTransmission::init()
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
   
-  declareProperty(new WorkspaceProperty<>("SampleRunWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<>("DirectRunWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("SampleRunWorkspace","", Direction::Input, wsValidator), "The workspace containing the sample transmission run. Must have common binning and be in units of wavelength.");
+  declareProperty(new WorkspaceProperty<>("DirectRunWorkspace","", Direction::Input, wsValidator), "The workspace containing the direct beam (no sample) transmission run. The units and binning must match those of the SampleRunWorkspace.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The name of the workspace in which to store the fitted transmission fractions.");
 
   auto zeroOrMore = boost::make_shared<BoundedValidator<int> >();
   zeroOrMore->setLower(0);
@@ -83,7 +82,7 @@ void CalculateTransmission::init()
   declareProperty("FitMethod","Log",boost::make_shared<StringListValidator>(options),
     "Whether to fit directly to the transmission curve (Linear) or to the log of it (Log)");
 
-  declareProperty("OutputUnfittedData",false);
+  declareProperty("OutputUnfittedData",false, "If True, will output an additional workspace called [OutputWorkspace]_unfitted containing the unfitted transmission correction.");
 }
 
 void CalculateTransmission::exec()

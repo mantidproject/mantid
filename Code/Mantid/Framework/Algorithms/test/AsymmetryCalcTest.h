@@ -1,5 +1,5 @@
-#ifndef MUONASYMMETRYCALCTEST_H_
-#define MUONASYMMETRYCALCTEST_H_
+#ifndef ASYMMETRYCALCTEST_H_
+#define ASYMMETRYCALCTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -7,7 +7,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAlgorithms/MuonAsymmetryCalc.h"
+#include "MantidAlgorithms/AsymmetryCalc.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -16,7 +16,7 @@
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class MuonAsymmetryCalcTest : public CxxTest::TestSuite
+class AsymmetryCalcTest : public CxxTest::TestSuite
 {
 public:
 
@@ -90,11 +90,11 @@ public:
   }
 
 private:
-  MuonAsymmetryCalc asymCalc;
+  AsymmetryCalc asymCalc;
   Mantid::DataHandling::LoadMuonNexus2 loader;
   Mantid::DataHandling::GroupDetectors group1;
   Mantid::DataHandling::GroupDetectors group2;
 
 };
 
-#endif /*MUONASYMMETRYCALCTEST_H_*/
+#endif /*ASYMMETRYCALCTEST_H_*/

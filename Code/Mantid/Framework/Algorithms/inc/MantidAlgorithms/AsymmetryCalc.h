@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_MUONASYMMETRYCALC_H_
-#define MANTID_ALGORITHM_MUONASYMMETRYCALC_H_
+#ifndef MANTID_ALGORITHM_ASYMMETRYCALC_H_
+#define MANTID_ALGORITHM_ASYMMETRYCALC_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -47,13 +47,13 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MuonAsymmetryCalc : public API::Algorithm
+    class DLLExport AsymmetryCalc : public API::Algorithm
     {
     public:
       /// Default constructor
-      MuonAsymmetryCalc() : API::Algorithm() {};
+      AsymmetryCalc() : API::Algorithm() {};
       /// Destructor
-      virtual ~MuonAsymmetryCalc() {};
+      virtual ~AsymmetryCalc() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "AsymmetryCalc";}
       /// Algorithm's version for identification overriding a virtual method
@@ -71,4 +71,4 @@ namespace Mantid
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_MUONASYMMETRYCALC_H_*/
+#endif /*MANTID_ALGORITHM_ASYMMETRYCALC_H_*/

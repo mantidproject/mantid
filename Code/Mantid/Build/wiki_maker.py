@@ -34,6 +34,7 @@ def get_wiki_description(algo, version):
     source = find_algo_file(algo, version)
     if source == '':
         alg = mtd.createAlgorithm(algo, version)
+        print "Getting algorithm description from binaries."
         return alg.getWikiDescription()
     else:
         f = open(source,'r')
@@ -49,6 +50,7 @@ def get_wiki_description(algo, version):
         while not lines[n].lstrip().startswith("*WIKI*"):
             desc += lines[n] + "\n"
             n += 1
+        print "Getting algorithm description from source."
         return desc
     
     
