@@ -696,7 +696,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
       result->dataX(i).assign(X.begin()+first,X.end());
       result->dataY(i).assign(Y.begin()+first,Y.end());
       result->dataE(i).assign(E.begin()+first,E.end());
-      if (specAxis) outAxis->spectraNo(i) = specAxis->spectraNo(i);
+      if (specAxis) outAxis->setValue(i, specAxis->spectraNo(i));
     }
   }
   else if (emode=="Indirect") 
@@ -745,7 +745,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
           Xnew[l] = X[k]+1+l-k;
         }
       }
-      if (specAxis) outAxis->spectraNo(j) = specAxis->spectraNo(j);
+      if (specAxis) outAxis->setValue(j, specAxis->spectraNo(j));
     }
   }
 

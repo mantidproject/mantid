@@ -133,7 +133,7 @@ namespace Mantid
         int i = j + m_MinSpec;
         try {
           // Get the spectrum number for this histogram
-          outputWS->getAxis(1)->spectraNo(j) = inputWS->getAxis(1)->spectraNo(i);
+          outputWS->getAxis(1)->setValue(j, inputWS->getAxis(1)->spectraNo(i));
           // Now get the detector to which this relates
           Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
           // Solid angle should be zero if detector is masked ('dead')

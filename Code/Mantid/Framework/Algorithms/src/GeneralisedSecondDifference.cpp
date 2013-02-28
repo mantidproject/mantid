@@ -121,7 +121,7 @@ void GeneralisedSecondDifference::exec()
   	for (int i=spec_min;i<=spec_max;i++)
   	{
   		int out_index=i-spec_min;
-  		out->getAxis(1)->spectraNo(out_index)=inputWS->getAxis(1)->spectraNo(i);
+  		out->getAxis(1)->setValue(out_index, inputWS->getAxis(1)->spectraNo(i));
   		const MantidVec& refX=inputWS->readX(i);
   		const MantidVec& refY=inputWS->readY(i);
   		const MantidVec& refE=inputWS->readE(i);

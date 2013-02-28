@@ -109,7 +109,7 @@ void Rebunch::initDocs()
 				// Ensure that axis information are copied to the output workspace if the axis exists
 			        try
 				{
-				  outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
+				  outputW->getAxis(1)->setValue(hist, inputW->getAxis(1)->spectraNo(hist));
 				}
 				catch( Exception::IndexError& )
 				{ 

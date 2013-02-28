@@ -89,16 +89,5 @@ const specid_t& Axis::spectraNo(const std::size_t& index) const
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
 }
 
-/** Returns a non-const reference to the spectrum number at the position given (Spectra axis only)
- *  @param  index The position for which the value is required
- *  @return The spectrum number as an int
- *  @throw  domain_error If this method is called on a numeric axis
- */
-specid_t& Axis::spectraNo(const std::size_t& index)
-{
-  UNUSED_ARG(index)
-  throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
-}
-
 } // namespace API
 } // namespace Mantid

@@ -105,7 +105,7 @@ void MaxMin::exec()
     int newindex=i-m_MinSpec;
     if (localworkspace->axes() > 1)
     {
-      outputWorkspace->getAxis(1)->spectraNo(newindex) = localworkspace->getAxis(1)->spectraNo(i);
+      outputWorkspace->getAxis(1)->setValue(newindex, localworkspace->getAxis(1)->spectraNo(i));
     }
 
     // Retrieve the spectrum into a vector

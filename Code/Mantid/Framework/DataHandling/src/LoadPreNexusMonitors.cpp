@@ -214,7 +214,7 @@ void LoadPreNexusMonitors::exec()
     // Just have spectrum number be the same as the monitor number but -ve.
     detector_numbers[i] = -monitorIDs[i];
     spectra_numbers[i] = monitorIDs[i];
-    localWorkspace->getAxis(1)->spectraNo(i) = monitorIDs[i];
+    localWorkspace->getAxis(1)->setValue(i, monitorIDs[i]);
   }
 
   g_log.debug() << "Setting axis zero to TOF" << std::endl;

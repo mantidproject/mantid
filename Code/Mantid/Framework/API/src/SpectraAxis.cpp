@@ -142,22 +142,6 @@ const specid_t& SpectraAxis::spectraNo(const std::size_t& index) const
   return m_values[index];
 }
 
-/** Returns a non-const reference to the spectrum number at the position given (Spectra axis only)
- *  @param  index The position for which the value is required
- *  @return The spectrum number as an int
- *  @throw  domain_error If this method is called on a numeric axis
- *  @throw  IndexError If the index requested is not in the range of this axis
- */
-specid_t& SpectraAxis::spectraNo(const std::size_t& index)
-{
-  if (index >= length())
-  {
-    throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
-  }
-
-  return m_values[index];
-}
-
 /** Returns a map where index is the key and spectra is the value
  *  This is used for efficient search of spectra number within a workspace
  *  @param  map Reference to the map

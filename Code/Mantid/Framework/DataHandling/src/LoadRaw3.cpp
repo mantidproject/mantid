@@ -595,7 +595,7 @@ namespace Mantid
       progress(m_prog);
       for (int i = 0; i < m_numberOfSpectra; ++i)
       {
-        localWorkspace->getAxis(1)->spectraNo(i) = i + 1;
+        localWorkspace->getAxis(1)->setValue(i, i + 1);
       }
       setProg( 0.9 );
       localWorkspace->populateInstrumentParameters();
@@ -676,8 +676,7 @@ namespace Mantid
               monitorwsList.push_back(static_cast<specid_t>(wsItr->second));
             if (bseparate)
             {
-              monitorWorkspace->getAxis(1)->spectraNo(monitorwsIndex) =
-                  static_cast<specid_t>(i + 1);
+              monitorWorkspace->getAxis(1)->setValue(monitorwsIndex, static_cast<specid_t>(i + 1));
               setWorkspaceData(monitorWorkspace, m_timeChannelsVec, monitorwsIndex, i + 1, m_noTimeRegimes,m_lengthIn,1);
               ++monitorwsIndex;
             }

@@ -63,7 +63,7 @@ public:
       {
         work_in->setData(i, yStrange, yTooDead);
       }
-      work_in->getAxis(1)->spectraNo(i) = i;
+      work_in->getAxis(1)->setValue(i, i);
       Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("",i,NULL);
       instr->add(det);
       instr->markAsDetector(det);

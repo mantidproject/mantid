@@ -36,7 +36,7 @@ public:
     {
       space2D->setX(j,x);
       space2D->setData(j,vec,vec);
-      space2D->getAxis(1)->spectraNo(j) = j;
+      space2D->getAxis(1)->setValue(j, j);
       ISpectrum * spec = space2D->getSpectrum(j);
       spec->setSpectrumNo(j);
       spec->setDetectorID(j);

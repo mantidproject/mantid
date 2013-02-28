@@ -90,7 +90,7 @@ namespace Mantid
       X[1] = wavelength+dwavelength/2.0;
       Y[0] = value;
       E[0] = error;
-      ws->getAxis(1)->spectraNo(specID) = specID;
+      ws->getAxis(1)->setValue(specID, specID);
     }
 
 
@@ -342,7 +342,7 @@ namespace Mantid
         store_value(ws, ipixel, count, error, wavelength, dwavelength);
 
         // Set the spectrum number
-        ws->getAxis(1)->spectraNo(ipixel) = ipixel;
+        ws->getAxis(1)->setValue(ipixel, ipixel);
 
         ++pixel;
         ipixel++;

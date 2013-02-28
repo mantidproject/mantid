@@ -175,7 +175,7 @@ namespace Mantid
         }
               localWorkspace->mutableRun().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
         for (int i = 0; i < m_numberOfSpectra; ++i)
-          localWorkspace->getAxis(1)->spectraNo(i)= i+1;
+          localWorkspace->getAxis(1)->setValue(i, i+1);
         localWorkspace->populateInstrumentParameters();
         setProperty("OutputWorkspace",localWorkspace);
         return;
@@ -230,7 +230,7 @@ namespace Mantid
                 std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
                 // Set the X vector pointer and spectrum number
                 localWorkspace->setX(counter, timeChannelsVec);
-                localWorkspace->getAxis(1)->spectraNo(counter)= i;
+                localWorkspace->getAxis(1)->setValue(counter, i);
                 // NOTE: Raw numbers go straight into the workspace
                 //     - no account taken of bin widths/units etc.
                 ++counter;

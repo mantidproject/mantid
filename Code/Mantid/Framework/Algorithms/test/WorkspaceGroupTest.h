@@ -180,7 +180,7 @@ public:
       {
         work_in1->setData(i, yDead, yDead);
       }
-      work_in1->getAxis(1)->spectraNo(i) = i;
+      work_in1->getAxis(1)->setValue(i, i);
       Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("", i, NULL);
       instr->add(det);
       instr->markAsDetector(det);
@@ -192,7 +192,7 @@ public:
       {
         work_in2->setData(i, yDead, yDead);
       }
-      work_in2->getAxis(1)->spectraNo(i) = i;
+      work_in2->getAxis(1)->setValue(i, i);
     }
 
     WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);

@@ -332,7 +332,7 @@ namespace Mantid
         if ( haveErrors ) localWorkspace->dataE(i) = spectra[i].dataE();
         if ( haveXErrors ) localWorkspace->dataDx(i) = spectra[i].dataDx();
         // Just have spectrum number start at 1 and count up
-        localWorkspace->getAxis(1)->spectraNo(i) = static_cast<specid_t>(i+1);
+        localWorkspace->getAxis(1)->setValue(i, static_cast<specid_t>(i+1));
       }
       return localWorkspace;
     }

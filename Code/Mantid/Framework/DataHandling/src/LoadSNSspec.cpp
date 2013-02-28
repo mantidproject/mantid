@@ -226,7 +226,7 @@ namespace Mantid
               localWorkspace->dataY(i) = spectra[i].dataY();
               localWorkspace->dataE(i) = spectra[i].dataE();
               // Just have spectrum number start at 1 and count up
-              localWorkspace->getAxis(1)->spectraNo(i) = i+1;
+              localWorkspace->getAxis(1)->setValue(i, i+1);
             }
 
           setProperty("OutputWorkspace",localWorkspace);

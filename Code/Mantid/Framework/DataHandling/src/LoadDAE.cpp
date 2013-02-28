@@ -364,7 +364,7 @@ namespace Mantid
           // Shift the histogram to read if we're not in the first period
           int histToRead = i + period*(total_specs+1);
           loadData(timeChannelsVec,counter,histToRead,dae_handle,lengthIn,spectrum.get(),localWorkspace,allData.get() );
-          localWorkspace->getAxis(1)->spectraNo(counter)= i;
+          localWorkspace->getAxis(1)->setValue(counter, i);
           counter++;
           if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
           interruption_point();
@@ -375,7 +375,7 @@ namespace Mantid
           for(unsigned int i=0; i < m_spec_list.size(); ++i)
           {
             loadData(timeChannelsVec,counter,m_spec_list[i],dae_handle,lengthIn,spectrum.get(), localWorkspace,allData.get() );
-            localWorkspace->getAxis(1)->spectraNo(counter)= i;
+            localWorkspace->getAxis(1)->setValue(counter, i);
             counter++;
             if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
             interruption_point();

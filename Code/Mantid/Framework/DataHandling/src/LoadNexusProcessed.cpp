@@ -1044,7 +1044,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
       {
         if( m_axis1vals.empty() )
         {
-          axis1->spectraNo(index) = spectrum;
+          axis1->setValue(index, spectrum);
         }
         else
         {

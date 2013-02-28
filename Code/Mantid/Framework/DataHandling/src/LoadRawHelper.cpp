@@ -384,7 +384,7 @@ namespace Mantid
       MantidVec& E = newWorkspace->dataE(wsIndex);
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt); 
 
-      newWorkspace->getAxis(1)->spectraNo(wsIndex) = nspecNum;
+      newWorkspace->getAxis(1)->setValue(wsIndex, nspecNum);
       //for loadrawbin0
       if(binStart==0)
       {

@@ -176,7 +176,7 @@ public:
     
     for (int i=0; i<5; ++i)
     {
-      TS_ASSERT_THROWS_NOTHING( spectraAxis->spectraNo(i) = 2*i );
+      TS_ASSERT_THROWS_NOTHING( spectraAxis->setValue(i, 2*i) );
       TS_ASSERT_EQUALS( spectraAxis->spectraNo(i), 2*i );
       TS_ASSERT_EQUALS( (*spectraAxis)(i), 2*i );
     }    
