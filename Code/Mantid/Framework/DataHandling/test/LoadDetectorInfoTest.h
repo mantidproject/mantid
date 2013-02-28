@@ -450,6 +450,7 @@ public:
       if ( code[j] == "3" )
       {
         TS_ASSERT(par);
+        if(!par)return;
         if (singleWallPressure)
         {
           TS_ASSERT_DELTA(par->value<double>(),boost::lexical_cast<double>(pressure[j]),1.e-3);       
@@ -462,6 +463,7 @@ public:
 
         par = pmap.get(baseComp,"wallT(m)");
         TS_ASSERT(par);
+        if(!par)return;
         if(singleWallPressure)
         {
           if(j<3)TS_ASSERT_DELTA(par->value<double>(), boost::lexical_cast<double>(wallThick[j]),1.e-3);

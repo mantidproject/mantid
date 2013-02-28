@@ -117,7 +117,7 @@ private:
   void readLibisisNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct,std::vector<int32_t>&detType,std::vector<float> &detOffset,std::vector<detid_t> &detList);
   void readDetDotDatNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct,std::vector<int32_t>&detType,std::vector<float> &detOffset,std::vector<detid_t> &detList);
 
-  void setDetectorParams(const detectorInfo &params, detectorInfo &changed);
+  void setDetectorParams(const detectorInfo &params, detectorInfo &changed,bool doLogging=true);
   void adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<detid_t> &detectIDs=std::vector<detid_t>(), const std::vector<float> &delays=std::vector<float>());
   void adjDelayTOFs(double lastOffset, bool &differentDelays, const detid_t * const detectIDs, const float * const delays, int numDetectors);
   void adjustXs(const std::vector<detid_t> &detIDs, const std::vector<float> &offsets);
