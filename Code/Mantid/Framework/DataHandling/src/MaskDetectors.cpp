@@ -1,7 +1,7 @@
 /*WIKI* 
 This algorithm will flag the detectors listed as masked([[IDetector]] isMasked() method) and will zero the data in the spectra related to those detectors.
 
-All but the first property are option and at least one of the must be set. If several are set, the first will be used.
+All but the first property are optional and at least one of the must be set. If several are set, the first will be used.
 
 The set of detectors to be masked can be given as a list of either spectrum numbers, detector IDs or workspace indices. The list should be set against the appropriate property.
 
