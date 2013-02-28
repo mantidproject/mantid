@@ -5,7 +5,7 @@
 
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidAlgorithms/MuonRemoveExpDecay.h"
+#include "MantidAlgorithms/RemoveExpDecay.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"

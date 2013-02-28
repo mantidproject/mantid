@@ -1,3 +1,20 @@
+/*WIKI* 
+
+
+
+This algorithm removes the exponential time decay from a specified muon spectra. By default, all the spectra in a workspace will be corrected.
+
+The formula for removing the exponential decay is given by:
+
+:<math> NewData = (OldData\times{e^\frac{t}{\tau}})/N_0 - 1.0 </math>
+
+where τ is the muon lifetime (2.197019e-6 seconds). <math>N_0</math> is a fitted normalisation constant.
+
+
+
+
+
+*WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -8,7 +25,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAlgorithms/MuonRemoveExpDecay.h"
+#include "MantidAlgorithms/RemoveExpDecay.h"
 
 namespace Mantid
 {
@@ -36,11 +53,11 @@ void MuonRemoveExpDecay::initDocs()
 void MuonRemoveExpDecay::init()
 {
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "",
-      Direction::Input), "Name of the input 2D workspace");
+      Direction::Input), "The name of the input 2D workspace.");
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
-      Direction::Output), "The name of the workspace to be created as the output of the algorithm");
+      Direction::Output), "The name of the output 2D workspace.");
   std::vector<int> empty;
-  declareProperty(new Kernel::ArrayProperty<int>("Spectra", empty), "Spectra to remove the exponential decay from");
+  declareProperty(new Kernel::ArrayProperty<int>("Spectra", empty), "The workspace indeces to remove the exponential decay from.");
 }
 
 /** Executes the algorithm

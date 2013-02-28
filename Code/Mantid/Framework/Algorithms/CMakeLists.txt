@@ -2,7 +2,6 @@ set ( SRC_FILES
 	#	src/Q1DTOF.cpp
 	# src/CountEventsInPulses.cpp
 	# src/UpdatePeakParameterTable.cpp
-	src/CorrectFlightPaths.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
 	src/AddPeak.cpp
@@ -45,6 +44,7 @@ set ( SRC_FILES
 	src/ConvertUnits.cpp
 	src/CopyInstrumentParameters.cpp
 	src/CopySample.cpp
+	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
 	src/CreateCalFileByNames.cpp
@@ -131,7 +131,6 @@ set ( SRC_FILES
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
-	src/MuonRemoveExpDecay.cpp
 	src/NormaliseByCurrent.cpp
 	src/NormaliseByDetector.cpp
 	src/NormaliseToMonitor.cpp
@@ -162,6 +161,7 @@ set ( SRC_FILES
 	src/RecordPythonScript.cpp
 	src/Regroup.cpp
 	src/RemoveBins.cpp
+	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
 	src/RemovePromptPulse.cpp
 	src/RenameWorkspace.cpp
@@ -211,7 +211,6 @@ set ( INC_FILES
 	#	inc/MantidAlgorithms/Q1DTOF.h
 	# inc/MantidAlgorithms/CountEventsInPulses.h
 	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
-	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddPeak.h
@@ -254,6 +253,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertUnits.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopySample.h
+	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
 	inc/MantidAlgorithms/CorrectToFile.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
@@ -341,7 +341,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
-	inc/MantidAlgorithms/MuonRemoveExpDecay.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
 	inc/MantidAlgorithms/NormaliseByDetector.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
@@ -372,6 +371,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RecordPythonScript.h
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBins.h
+	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RenameWorkspace.h
@@ -545,7 +545,6 @@ set ( TEST_FILES
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
-	MuonRemoveExpDecayTest.h
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
@@ -573,6 +572,7 @@ set ( TEST_FILES
 	RebunchTest.h
 	RegroupTest.h
 	RemoveBinsTest.h
+	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemovePromptPulseTest.h
 	RenameWorkspaceTest.h
