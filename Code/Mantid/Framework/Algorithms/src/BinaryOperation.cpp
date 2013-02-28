@@ -46,16 +46,21 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName2(),"",Direction::Input));
       declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(),"",Direction::Output));
       declareProperty(new PropertyWithValue<bool>("AllowDifferentNumberSpectra", false, Direction::Input),
-          "Allow workspaces to have different number of spectra and perform\n"
-          "operation on LHS spectra using matching detector IDs in RHS.\n");
+          "Are workspaces with different number of spectra allowed? "
+          "For example, the LHSWorkspace might have one spectrum per detector, "
+          "but the RHSWorkspace could have its spectra averaged per bank. If true, "
+          "then matching between the LHS and RHS spectra is performed (all detectors "
+          "in a LHS spectrum have to be in the corresponding RHS) in order to apply the RHS spectrum to the LHS.");
 
       declareProperty(new PropertyWithValue<bool>("ClearRHSWorkspace", false, Direction::Input),
-          "Clear the RHS workspace as the operation is performed.\n"
-          "This can help prevent maxing out available memory for large workspaces.\n"
-          "This is ignored unless the RHS workspace is an EventWorkpsace.\n");
+          "For EventWorkspaces only. This will clear out event lists "
+          "from the RHS workspace as the binary operation is applied. "
+          "This can prevent excessive memory use, e.g. when subtracting "
+          "an EventWorkspace from another: memory use will be approximately "
+          "constant instead of increasing by 50%. At completion, the RHS workspace will be empty.");
     }
 
-
+    
     //--------------------------------------------------------------------------------------------
     /** Special handling for 1-WS and 1/WS.
      *

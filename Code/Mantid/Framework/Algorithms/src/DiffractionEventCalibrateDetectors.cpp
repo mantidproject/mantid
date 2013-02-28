@@ -280,9 +280,9 @@ namespace Algorithms
                             "The workspace containing the geometry to be calibrated." );
 
     declareProperty("Params", "",
-        "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
-        "this can be followed by a comma and more widths and last boundary pairs.\n"
-        "Use bin boundaries close to peak you wish to maximize.\n"
+        "A comma separated list of first bin boundary, width, last bin boundary. Optionally "
+        "this can be followed by a comma and more widths and last boundary pairs. "
+        "Use bin boundaries close to peak you wish to maximize. "
         "Negative width values indicate logarithmic binning.");
 
     auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
