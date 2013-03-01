@@ -29,6 +29,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         return "CalibrateRectangularDetectors"
 
     def PyInit(self):
+        self.setWikiSummary("Calibrate the detector pixels and write a calibration file")
         sns = mtd.getSettings().facility("SNS")
         instruments = []
         for instr in sns.instruments():

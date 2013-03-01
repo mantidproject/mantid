@@ -73,9 +73,9 @@ void SofQW::createInputProperties(API::Algorithm & alg)
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
   alg.declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
-                      "Reduced data in units of energy transfer (DeltaE / <math>\Delta E</math>).\nThe workspace must contain histogram data and have common bins across all spectra.");
+                      "Reduced data in units of energy transfer DeltaE.\nThe workspace must contain histogram data and have common bins across all spectra.");
   alg.declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-                      "The name to use for the q-<math>\rm{\omega}</math> workspace.");
+                      "The name to use for the q-omega workspace.");
   alg.declareProperty(new ArrayProperty<double>("QAxisBinning", boost::make_shared<RebinParamsValidator>()),
                       "The bin parameters to use for the q axis (in the format used by the [[Rebin]] algorithm).");
   

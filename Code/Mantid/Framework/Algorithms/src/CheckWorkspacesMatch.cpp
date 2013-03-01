@@ -146,8 +146,8 @@ void CheckWorkspacesMatch::processGroups(boost::shared_ptr<API::WorkspaceGroup> 
 
 void CheckWorkspacesMatch::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace1","",Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace2","",Direction::Input));
+  declareProperty(new WorkspaceProperty<Workspace>("Workspace1","",Direction::Input), "The name of the first input workspace.");
+  declareProperty(new WorkspaceProperty<Workspace>("Workspace2","",Direction::Input), "The name of the second input workspace.");
 
   declareProperty("Tolerance",0.0, "The maximum amount by which values may differ between the workspaces.");
   
