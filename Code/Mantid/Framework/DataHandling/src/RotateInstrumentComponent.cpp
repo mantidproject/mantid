@@ -24,7 +24,7 @@ DECLARE_ALGORITHM(RotateInstrumentComponent)
 /// Sets documentation strings for this algorithm
 void RotateInstrumentComponent::initDocs()
 {
-  this->setWikiSummary(" Rotates an instrument component. ");
+  this->setWikiSummary("Rotates an instrument component. ");
   this->setOptionalMessage("Rotates an instrument component.");
 }
 
@@ -41,14 +41,15 @@ RotateInstrumentComponent::RotateInstrumentComponent()
 void RotateInstrumentComponent::init()
 {
   // When used as a Child Algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
-  declareProperty("ComponentName","");
-  declareProperty("DetectorID",-1);
-  declareProperty("X",0.0);
-  declareProperty("Y",0.0);
-  declareProperty("Z",0.0);
-  declareProperty("Angle",0.0);
-  declareProperty("RelativeRotation",true);
+ declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
+                 "The name of the workspace for which the new instrument configuration will have an effect. Any other workspaces stored in the analysis data service will be unaffected.");
+ declareProperty("ComponentName","","The name of the component to rotate. Component names are defined in the instrument definition files.");
+ declareProperty("DetectorID",-1,"The ID of the detector to rotate. If both the component name and the detector ID are set the latter will be used.");
+ declareProperty("X",0.0,"The x-part of the rotation axis.");
+ declareProperty("Y",0.0,"The y-part of the rotation axis.");
+ declareProperty("Z",0.0,"The z-part of the rotation axis.");
+ declareProperty("Angle",0.0,"The angle of rotation in degrees.");
+ declareProperty("RelativeRotation",true,"The property defining how the rotation should be interpreted. If true it is a relative rotation. Otherwise it is an absolute rotation.");
 }
 
 /** Executes the algorithm. 
