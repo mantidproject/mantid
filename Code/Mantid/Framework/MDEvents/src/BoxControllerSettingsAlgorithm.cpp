@@ -54,7 +54,7 @@ namespace MDEvents
 
     declareProperty(
       new ArrayProperty<int>("SplitInto", value),
-      "A comma separated list of into how many sub-grid elements each dimension should split; \n"
+      "A comma separated list of into how many sub-grid elements each dimension should split; "
       "or just one to split into the same number for all dimensions. Default " + SplitInto +".");
 
     declareProperty(
@@ -63,7 +63,7 @@ namespace MDEvents
 
     declareProperty(
       new PropertyWithValue<int>("MaxRecursionDepth", MaxRecursionDepth, mustBeMoreThen1),
-      "How many levels of box splitting recursion are allowed. \n"
+      "How many levels of box splitting recursion are allowed. "
       "The smallest box will have each side length l = (extents) / (SplitInto ^ MaxRecursionDepth). "
       "Default " + Strings::toString(MaxRecursionDepth) + ".");
 
