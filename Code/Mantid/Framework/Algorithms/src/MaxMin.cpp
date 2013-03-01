@@ -1,7 +1,9 @@
 /*WIKI* 
 
+The algorithm creates a new 2D workspace containing the first maxima (minima) for each spectrum, as well as their X boundaries and error.
+This is used in particular for single crystal as a quick way to find strong peaks. By default, the algorithm returns the maxima.
 
-
+The [[Max]] and [[Min]] algorithms are just calls to the [[MaxMin]] algorithm, with the ShowMin flag set to true/false respectively.
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -27,8 +29,8 @@ using namespace API;
 /// Set the documentation strings
 void MaxMin::initDocs()
 {
-  this->setWikiSummary("Takes a 2D workspace as input and find the maximum (minimum) in each 1D spectrum. The algorithm creates a new 1D workspace containing all maxima (minima) as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
-  this->setOptionalMessage("Takes a 2D workspace as input and find the maximum (minimum) in each 1D spectrum. The algorithm creates a new 1D workspace containing all maxima (minima) as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
+  this->setWikiSummary("Takes a 2D workspace as input and find the maximum (minimum) in each 1D spectrum.");
+  this->setOptionalMessage("Takes a 2D workspace as input and find the maximum (minimum) in each 1D spectrum.");
 }
 
 /** Initialisation method.
@@ -41,7 +43,7 @@ void MaxMin::init()
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "The name of the workspace in which to store the result");
 
-  declareProperty("ShowMin",false,"Flag to show minimum instead (default=false)");
+  declareProperty("ShowMin",false,"Flag to show minimum instead of maximum (default=false)");
   declareProperty("RangeLower",EMPTY_DBL(),
       "The X value to search from (default min)");
   declareProperty("RangeUpper",EMPTY_DBL(),
