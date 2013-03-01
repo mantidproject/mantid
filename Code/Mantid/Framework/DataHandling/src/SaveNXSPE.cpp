@@ -229,6 +229,12 @@ namespace Mantid
       nxFile.makeData("data", ::NeXus::FLOAT64, array_dims, false);
       nxFile.makeData("error", ::NeXus::FLOAT64, array_dims, false);
 
+      // Add the axes attributes to the data
+      nxFile.openData("data");
+      nxFile.putAttr("signal", 1);
+      nxFile.putAttr("axes", "polar:energy");
+      nxFile.closeData();
+
       std::vector<int64_t> slab_start;
       std::vector<int64_t> slab_size;
 
