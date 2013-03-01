@@ -23,6 +23,7 @@ class ConjoinSpectra(PythonAlgorithm):
         return "ConjoinSpectra"
 
     def PyInit(self):
+        self.setWikiSummary("Joins individual spectra from a range of workspaces into a single workspace for plotting or further analysis.")
         self.declareProperty("InputWorkspaces","", Validator=MandatoryValidator(), Description="Comma seperated list of workspaces to use, group workspaces will automatically include all members.")
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output, Description="Name the workspace that will contain the result")
         self.declareProperty("WorkspaceIndex", 0, Description="The workspace index of the spectra in each workspace to extract. Default: 0")
