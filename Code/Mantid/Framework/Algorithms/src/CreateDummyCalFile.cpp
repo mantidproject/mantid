@@ -90,7 +90,7 @@ namespace Mantid
         new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
                             "The workspace containing the geometry to be calibrated." );
       declareProperty(new FileProperty("CalFilename","",FileProperty::Save, ".cal"),
-        "The name of the output CalFile");
+        "The name of the output [[CalFile]]");
     }
 
     /** Executes the algorithm
