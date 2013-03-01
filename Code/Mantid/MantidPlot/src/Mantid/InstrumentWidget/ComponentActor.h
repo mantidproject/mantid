@@ -55,6 +55,8 @@ public:
   boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector() const;
   boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> getObjCompAssembly() const;
   virtual void setColors(){}
+  /// Check if the component is a non-detector.
+  bool isNonDetector() const;
 protected:
   const InstrumentActor& m_instrActor;
   Mantid::Geometry::ComponentID m_id; ///< Component ID

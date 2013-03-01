@@ -2,6 +2,7 @@
 #include "CompAssemblyActor.h"
 #include "ObjComponentActor.h"
 #include "SampleActor.h"
+#include "GLActorVisitor.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
@@ -124,6 +125,11 @@ m_sampleActor(NULL)
 
   m_sampleActor = new SampleActor(*this,shared_workspace->sample(),samplePosActor);
   m_scene.addActor(m_sampleActor);
+  if ( !m_showGuides )
+  {
+    // hide guide and other components
+    showGuides( m_showGuides );
+  }
 }
 
 /**
@@ -141,10 +147,10 @@ InstrumentActor::~InstrumentActor()
  * @param visitor
  * @return
  */
-bool InstrumentActor::accept(const GLActorVisitor& visitor)
+bool InstrumentActor::accept(GLActorVisitor& visitor)
 {
   bool ok = m_scene.accept(visitor);
-  const SetVisibilityVisitor* vv = dynamic_cast<const SetVisibilityVisitor*>(&visitor);
+  SetVisibilityVisitor* vv = dynamic_cast<SetVisibilityVisitor*>(&visitor);
   if (vv && m_sampleActor)
   {
     m_sampleActor->setVisibility(m_sampleActor->getSamplePosActor()->isVisible());
@@ -213,6 +219,8 @@ void InstrumentActor::applyMaskWorkspace()
     alg->setPropertyValue( "Workspace", getWorkspace()->name() );
     alg->setProperty( "MaskedWorkspace", m_maskWorkspace );
     alg->execute();
+    // After the algorithm finishes the InstrumentWindow catches the after-replace notification 
+    // and updates this instrument actor.
 }
 
 /**
@@ -292,6 +300,13 @@ size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const
     return (*m_detid2index_map)[id];
 }
 
+/**
+ * Set an interval in the data workspace x-vector's units in which the data are to be
+ * integrated to calculate the detector colours.
+ *
+ * @param xmin :: The lower bound.
+ * @param xmax :: The upper bound.
+ */
 void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)
 {
   if (!getWorkspace()) return;
@@ -424,6 +439,16 @@ void InstrumentActor::update()
   resetColors();
 }
 
+/**
+ * @param on :: True or false for on or off.
+ */
+void InstrumentActor::showGuides(bool on)
+{
+  auto visitor = SetVisibleNonDetectorVisitor( on );
+  this->accept( visitor );
+  m_showGuides = on;
+}
+
 GLColor InstrumentActor::getColor(Mantid::detid_t id)const
 {
   try {
@@ -440,6 +465,10 @@ void InstrumentActor::draw(bool picking)const
   m_scene.draw(picking);
 }
 
+/**
+ * @param fname :: A color map file name.
+ * @param reset_colors :: An option to reset the detector colors.
+ */
 void InstrumentActor::loadColorMap(const QString& fname,bool reset_colors)
 {
   m_colorMap.loadMap(fname);
@@ -494,7 +523,9 @@ const Mantid::Kernel::V3D & InstrumentActor::getDetPos(size_t pickID)const
   return m_detPos.at(pickID);
 }
 
-
+/**
+ * @param type :: 0 - linear, 1 - log10.
+ */
 void InstrumentActor::changeScaleType(int type)
 {
   m_colorMap.changeScaleType(static_cast<GraphOptions::ScaleType>(type));
@@ -513,8 +544,8 @@ void InstrumentActor::loadSettings()
   {
     loadColorMap(m_currentColorMap,false);
   }
-  
   m_colorMap.changeScaleType(static_cast<GraphOptions::ScaleType>(scaleType));
+  m_showGuides = settings.value("ShowGuides", false).toBool();
   settings.endGroup();
 }
 
@@ -524,6 +555,7 @@ void InstrumentActor::saveSettings()
   settings.beginGroup("Mantid/InstrumentWindow");
   settings.setValue("ColormapFile", m_currentColorMap);
   settings.setValue("ScaleType", (int)m_colorMap.getScaleType() );
+  settings.setValue("ShowGuides", m_showGuides);
   settings.endGroup();
 }
 
@@ -742,7 +774,7 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D& Xfrom,
   }
 }
 
-bool SetVisibleComponentVisitor::visit(GLActor* actor)const
+bool SetVisibleComponentVisitor::visit(GLActor* actor)
 {
   ComponentActor* comp = dynamic_cast<ComponentActor*>(actor);
   if (comp)
@@ -754,7 +786,23 @@ bool SetVisibleComponentVisitor::visit(GLActor* actor)const
   return false;
 }
 
-bool FindComponentVisitor::visit(GLActor* actor)const
+/**
+ * Visits an actor and if it is a "non-detector" sets its visibility.
+ *
+ * @param actor :: A visited actor.
+ * @return always false to traverse all the instrument tree.
+ */
+bool SetVisibleNonDetectorVisitor::visit(GLActor* actor)
+{
+  ComponentActor* comp = dynamic_cast<ComponentActor*>(actor);
+  if ( comp && comp->isNonDetector() )
+  {
+    actor->setVisibility(m_on);
+  }
+  return false;
+}
+
+bool FindComponentVisitor::visit(GLActor* actor)
 {
   ComponentActor* comp = dynamic_cast<ComponentActor*>(actor);
   if (comp)

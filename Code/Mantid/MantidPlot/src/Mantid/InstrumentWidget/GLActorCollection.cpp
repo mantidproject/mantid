@@ -1,4 +1,5 @@
 #include "GLActorCollection.h"
+#include "GLActorVisitor.h"
 #include "OpenGLError.h"
 
 #include "MantidKernel/Exception.h"
@@ -78,7 +79,7 @@ void GLActorCollection::drawGL(bool picking )const
   }
 }
 
-bool GLActorCollection::accept(const GLActorVisitor& visitor)
+bool GLActorCollection::accept(GLActorVisitor& visitor)
 {
   const SetVisibilityVisitor* svv = dynamic_cast<const SetVisibilityVisitor*>(&visitor);
   // accepting a set visibility visitor. 
