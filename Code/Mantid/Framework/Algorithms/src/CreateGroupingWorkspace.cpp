@@ -81,8 +81,8 @@ namespace Algorithms
         "Optional: Path to the old-style .cal grouping/calibration file (multi-column ASCII). You must also specify the instrument.");
 
     declareProperty("GroupNames","",
-      "Optional: A string of the instrument component names to use as separate groups.\n"
-      "Use / or , to separate multiple groups.\n"
+      "Optional: A string of the instrument component names to use as separate groups. "
+      "Use / or , to separate multiple groups. "
       "If empty, then an empty GroupingWorkspace will be created.");
 
     std::vector<std::string> grouping;
