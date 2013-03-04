@@ -1,35 +1,28 @@
 /*WIKI*
- This algorithm Corrects the time of flight (TOF) of an indirect geometry instrument by a time offset that is dependent on the velocity of the neutron after passing through the moderator.
- The TOF measured by the BASIS data acquisition system (DAS) should be reduced by this moderator emission time. The DAS "erroneously"
- thinks that it takes longer for neutrons to reach the sample and detectors, because it does not "know" that the neutrons
- spend some time in the moderator before being emitted and starting flying
 
- A heuristic formula for the correction, stored in the instrument definition file, is taken as linear on the initial neutron wavelength lambda_i:
-     t_0 = gradient * lambda_i + intercept,  [gradient]=microsec/Angstrom and [intercept]=microsec
+This algorithm Corrects the time of flight (TOF) of an indirect geometry instrument by substracting a time offset <math>t_0</math> dependent
+on the initial neutron energy being emitted through the moderator.
+A heuristic formula for the correction, stored in the instrument definition file, is taken as linear on the initial
+neutron wavelength <math>\lambda_i</math>:
+<math>t_0 = a * \lambda_i + b</math>, [a]=microsec/Angstrom and [b]=microsec
 
-Required Properties:
-  InputWorkspace  - EventWorkSpace in TOF units. </LI>
-  OutputWorkspace - EventWorkSpace in TOF units. </LI>
-  Instrument Geometry - Indirect (obtained from the instrument parameter file)
-  Moderator.Tzero.gradient - Variation of the time offset with initial neutron wavelength (obtained from the instrument parameter file)
-  Moderator.Tzero.intercept - time offset common to all neutrons (obtained from the instrument parameter file)
+The recorded TOF: <math>TOF = t_0 + t_i + t_f</math>, with
+#<math>t_0</math>: moderator emission time
+#<math>t_i</math>: time from moderator to sample
+#<math>t_f</math>: time from sample to detector
 
-  The recorded TOF = t_0 + t_i + t_f with
-   t_0: moderator emission time
-     t_i: time from moderator to sample
-     t_f: time from sample to detector
+This algorithm will replace TOF with <math>TOF' = TOF-t_0 = t_i + t_f</math>
 
-This algorithm will replace TOF with TOF' = TOF-t_0 = t_i+t_f
+For an indirect geometry instrument, <math>\lambda_i</math> is not known but the final energy, <math>E_f</math>,
+selected by the analyzers is known. For this geometry:
+#<math>t_f = L_f/v_f</math>, with <math>L_f</math>: distance from sample to detector, <math>v_f</math>: final velocity derived from <math>E_f</math>
+#<math>t_i = L_i/v_i</math>, with <math>L_i</math>: distance from moderator to sample, <math>v_i</math>: initial velocity unknown
+#<math>t_0 = a'/v_i+b^'</math>, with a' and b'  constants derived from the aforementioned heuristic formula <math>a' = a \cdot 3.956 \cdot 10^{-3}</math> with [a']=meter, and <math>b' = b</math> with [b']=microsec
 
-   For a direct geometry instrument, lambda_i is (approximately) the same for all neutrons. Hence the moderator emission time is the same for all neutrons.
-       There is already an algorithm, getEi, that calculates t_0 for the direct geometry instrument. Thus we skip this step.
-   For an indirect geometry instrument, lambda_i is not known but the final energy, E_f, selected by the analyzers is known. For this geometry:
-     t_f = L_f/v_f   L_f: distance from sample to detector, v_f: final velocity derived from E_f
-     t_i = L_i/v_i   L_i: distance from moderator to sample, v_i: initial velocity unknown
-     t_0 = a/v_i+b   a and b are constants derived from the aforementioned heuristic formula.
-                     a=gradient*3.956E-03, [a]=meter,    b=intercept, [b]=microsec
-     Putting all together:  TOF' = (L_i/(L_i+a))*(TOF-t_f-b) + t_f,   [TOF']=microsec
-     If the detector is a monitor, then we set t_f=0 since there is no sample, and L_i the distance from moderator to monitor
+Putting all together:  <math>TOF' = \frac{L_i}{L_i+a'} \cdot (TOF-t_f-b') + t_f</math>, with [TOF']=microsec
+
+If the detector is a monitor, then we can treat it as both sample and detector. Thus, we use the previous formula inserting the time from sample to detector <math>t_f = 0</math> and with the initial fligh path <math>L_i</math> as the distance from source to monitor.
+
 *WIKI*/
 
 //----------------------------------------------------------------------
@@ -54,7 +47,7 @@ DECLARE_ALGORITHM(ModeratorTzero)
 /// Sets documentation strings for this algorithm
 void ModeratorTzero::initDocs()
 {
-  setWikiSummary(" Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the velocity of the neutron after passing through the moderator. ");
+  setWikiSummary("For an indirect geometry instrument, subtracts to the time of flight a quantity dependent on the initial neutron energy.");
   setOptionalMessage(" Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the velocity of the neutron after passing through the moderator.");
 }
 
