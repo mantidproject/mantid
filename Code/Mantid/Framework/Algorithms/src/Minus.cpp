@@ -1,4 +1,6 @@
-/*WIKI* 
+/*WIKI*
+{{BinaryOperation|verb=subtracted|prep=from|symbol=<math>-</math>}} 
+
 The Minus algorithm will subtract the data values and calculate the corresponding [[Error Values|error values]] for two compatible workspaces.
 
 === Usage ===
@@ -33,7 +35,7 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void Minus::initDocs()
     {
-      this->setWikiSummary("The Minus algorithm will subtract the data values and calculate the corresponding [[Error Values|error values]] for two compatible workspaces.  {{BinaryOperation|verb=subtracted|prep=from|symbol=<math>-</math>}} ");
+      this->setWikiSummary("The Minus algorithm will subtract the data values and calculate the corresponding [[Error Values|error values]] for two compatible workspaces.");
       this->setOptionalMessage("The Minus algorithm will subtract the data values and calculate the corresponding error values for two compatible workspaces.");
     }
     
