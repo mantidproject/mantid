@@ -73,6 +73,10 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
 void ColorUpdater::colorScaleChange(pqPipelineRepresentation *repr,
                                     double min, double max)
 {
+  if (NULL == repr)
+  {
+    return;
+  }
   repr->getLookupTable()->setScalarRange(min, max);
   repr->getProxy()->UpdateVTKObjects();
 }

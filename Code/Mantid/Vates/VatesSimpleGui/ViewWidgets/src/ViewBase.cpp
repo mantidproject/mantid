@@ -18,6 +18,7 @@
 #include <vtkSMProxy.h>
 #include <vtkSMSourceProxy.h>
 
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QPointer>
 
@@ -92,7 +93,14 @@ void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
  */
 void ViewBase::onAutoScale()
 {
-  QPair <double, double> range = this->colorUpdater.autoScale(this->getRep());
+  pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    // Can't get a good rep, just return
+    //qDebug() << "Bad rep for auto scale";
+    return;
+  }
+  QPair <double, double> range = this->colorUpdater.autoScale(rep);
   this->renderAll();
   emit this->dataRange(range.first, range.second);
 }
@@ -307,10 +315,14 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
   if (NULL == dvp)
   {
     // This is a normal filter and therefore has no timesteps.
+    //qDebug() << "No timestep vector, returning.";
     return;
   }
+
   const int numTimesteps = static_cast<int>(dvp->GetNumberOfElements());
-  if (0 != numTimesteps)
+  //qDebug() << "# timesteps: " << numTimesteps;
+
+  if (1 < numTimesteps)
   {
     if (doUpdate)
     {
