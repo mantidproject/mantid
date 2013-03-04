@@ -42,17 +42,17 @@ void NormaliseToUnity::init()
   wsValidator->add<HistogramValidator>();
   wsValidator->add<CommonBinsValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsValidator));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsValidator), "The name of the input workspace.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"The name with which to store the output workspace in the [[Analysis Data Service]]");
 
-  declareProperty("RangeLower",EMPTY_DBL());
-  declareProperty("RangeUpper",EMPTY_DBL());
+  declareProperty("RangeLower",EMPTY_DBL(),"The X (frame) value to integrate from");
+  declareProperty("RangeUpper",EMPTY_DBL(),"The X (frame) value to integrate to");
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex", 0, mustBePositive);
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive, "The lowest workspace index of the specta that will be integrated");
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive);
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(),mustBePositive,"The highest workspace index of the spectra that will be integrated");
   declareProperty("IncludePartialBins", false, "If true then partial bins from the beginning and end of the input range are also included in the integration.");
   declareProperty("IncludeMonitors",true,"Whether to include monitor spectra in the sum (default: yes)");
 }
