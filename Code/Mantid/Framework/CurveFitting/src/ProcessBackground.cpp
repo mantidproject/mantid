@@ -307,7 +307,7 @@ DECLARE_ALGORITHM(ProcessBackground)
       {
           if (vx[i] <= vx[i-1])
           {
-              g_log.error() << "The vector X with value inserted is not ordered incremently" << std::endl;
+              g_log.error() << "The vector X with value inserted is not ordered incrementally" << std::endl;
               throw std::runtime_error("Build new vector error!");
           }
       }
@@ -392,7 +392,7 @@ DECLARE_ALGORITHM(ProcessBackground)
       // Select (possibly) all background points
       outWS = autoBackgroundSelection(wsindex, bkgdWS);
     }
-    else if (mode.compare("Input Background Pionts Only") == 0)
+    else if (mode.compare("Input Background Points Only") == 0)
     {
       // Use the input background points only
       outWS = bkgdWS;
