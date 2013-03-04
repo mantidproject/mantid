@@ -1095,6 +1095,11 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
     throw std::invalid_argument("the NeXus file "+fName+" does not contain necessary detector's information");
 
   g_log.notice() << "Detectors indo loaded from nexus file, starting applying corrections\n";
+  // adjust progress and allow user to cancel
+  progress(0.1);  
+  interruption_point();
+
+
 
   // process detectors and modify instrument
   size_t nDetectors = detStruct.size();
@@ -1156,43 +1161,39 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
       else
       {
         differentOffsets=true;
-
+      }
     }
 
 
-    if(m_moveDets)
+    bool exception(false);
+    try
     {
-      bool exception(false);
-      try
-      {
-        setDetectorParams(detStruct[i], log,false);
-      }
-      catch (Exception::NotFoundError &)
-      {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
-        //PARALLEL_CRITICAL(non_existing_detector)
-        {
-          missingDetectors.push_back(detStruct[i].detID);
-        }
-        // Set the flag to signal that we should call continue outside of the catch block. Works around a defect with the Intel compiler.
-        exception = true;
-      }
-      if ( exception ) continue;
+        setDetectorParams(detStruct[i], log);
+        sometimesLogSuccess(log, noneSet);
     }
+    catch (Exception::NotFoundError &)
+    {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
+        //PARALLEL_CRITICAL(non_existing_detector)
+      {
+          missingDetectors.push_back(detStruct[i].detID);
+      }
+        // Set the flag to signal that we should call continue outside of the catch block. Works around a defect with the Intel compiler.
+       exception = true;
+    }
+    if ( exception ) continue;   
 
     // report progress and check for a user cancel message at regualar intervals
-
     if ( i % 100 == 0 )
     {	
         //PARALLEL_CRITICAL(logging)
         {
-            log = detStruct[i];
-            sometimesLogSuccess(log, noneSet);
+            //log = detStruct[i];
+            //sometimesLogSuccess(log, noneSet);
             progress(static_cast<double>(i));
             interruption_point();
         }
     }
-    
-    }
+        
     //PARALLEL_END_INTERUPT_REGION
   }
   //PARALLEL_CHECK_INTERUPT_REGION

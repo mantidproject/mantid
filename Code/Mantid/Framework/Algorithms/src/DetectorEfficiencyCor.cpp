@@ -446,8 +446,8 @@ void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const
   if( nspecs > 0 )
   {
     g_log.warning() << "There were " <<  nspecs << " spectra that could not be corrected out of total: "<<totalNDetectors<<std::endl;
-    g_log.warning() << "Thir spectra were nullified\n";
-    g_log.debug() << "Unaffected spectra numbers: ";
+    g_log.warning() << "Their spectra were nullified\n";
+    g_log.debug() << " Nullified spectra numbers: ";
     for( size_t i = 0; i < nspecs; ++i )
     {
       g_log.debug() << m_spectraSkipped[i] << " ";
