@@ -42,9 +42,9 @@ namespace Mantid
      */
     void BinaryOperation::init()
     {
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName1(),"",Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName2(),"",Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(),"",Direction::Output));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName1(),"",Direction::Input), "The name of the input workspace on the left hand side of the operation");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName2(),"",Direction::Input), "The name of the input workspace on the right hand side of the operation");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(),"",Direction::Output), "The name to call the output workspace");
       declareProperty(new PropertyWithValue<bool>("AllowDifferentNumberSpectra", false, Direction::Input),
           "Are workspaces with different number of spectra allowed? "
           "For example, the LHSWorkspace might have one spectrum per detector, "
