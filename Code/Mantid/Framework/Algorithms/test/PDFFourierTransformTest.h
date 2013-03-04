@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST.HTEST_H_
-#define MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST.HTEST_H_
+#ifndef MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
+#define MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -14,20 +14,20 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidAlgorithms/PDFFourierTransformTest.h.h"
+#include "MantidAlgorithms/PDFFourierTransform.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid;
 
-class PDFFourierTransformTest.hTest : public CxxTest::TestSuite
+class PDFFourierTransformTest : public CxxTest::TestSuite
 {
 public:
 
     
   void test_Init()
   {
-    PDFFourierTransformTest.h alg;
+    PDFFourierTransform alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -37,7 +37,7 @@ public:
 
     API::Workspace_sptr ws = createWS(20, 0.1, "TestInput1", "MomentumTransfer");
 
-    PDFFourierTransformTest.h pdfft;
+    PDFFourierTransform pdfft;
     pdfft.initialize();
     pdfft.setProperty("InputWorkspace", ws);
     pdfft.setProperty("OutputWorkspace", "PDFGofR");
@@ -86,7 +86,7 @@ public:
 
 private:
   /**
-   * Create Workspacespace from 0 to N*dx
+   * Create Workspace from 0 to N*dx
    */
   Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx, const std::string& name, const std::string unitlabel)
   {
@@ -116,5 +116,5 @@ private:
 };
 
 
-#endif /* MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST.HTEST_H_ */
+#endif /* MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_ */
 
