@@ -59,7 +59,7 @@ DECLARE_ALGORITHM(LoadParameterFile)
 /// Sets documentation strings for this algorithm
 void LoadParameterFile::initDocs()
 {
-  this->setWikiSummary(" Loads instrument parameters into a [[workspace]]. where these parameters are associated component names as defined in Instrument Definition File ([[InstrumentDefinitionFile|IDF]]). ");
+  this->setWikiSummary("Loads instrument parameters into a [[workspace]]. where these parameters are associated component names as defined in Instrument Definition File ([[InstrumentDefinitionFile|IDF]])."); 
   this->setOptionalMessage("Loads instrument parameters into a workspace. where these parameters are associated component names as defined in Instrument Definition File (IDF).");
 }
 
@@ -79,10 +79,9 @@ void LoadParameterFile::init()
   // When used as a Child Algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
-    "The name of the workspace to load the instrument parameters into" );
+    "The name of the workspace to load the instrument parameters into." );
   declareProperty(new FileProperty("Filename","", FileProperty::Load, ".xml"),
-      "The filename (including its full or relative path) of an parameter\n"
-      "definition file");
+                  "The filename (including its full or relative path) of a parameter defintion file. The file extension must either be .xml or .XML.");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

@@ -33,7 +33,7 @@ DECLARE_ALGORITHM(LoadNexusMonitors)
 /// Sets documentation strings for this algorithm
 void LoadNexusMonitors::initDocs()
 {
-  this->setWikiSummary(" Load all monitors from a NeXus file into a workspace. ");
+  this->setWikiSummary("Load all monitors from a NeXus file into a workspace.");
   this->setOptionalMessage("Load all monitors from a NeXus file into a workspace.");
 }
 
@@ -52,7 +52,7 @@ void LoadNexusMonitors::init()
 {
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
       ".nxs"),
-      "The name (including its full or relative path) of the NeXus file to\n"
+      "The name (including its full or relative path) of the NeXus file to "
       "attempt to load. The file extension must either be .nxs or .NXS" );
 
   declareProperty(

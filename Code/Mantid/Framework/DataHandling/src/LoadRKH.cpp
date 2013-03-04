@@ -40,7 +40,7 @@ DECLARE_LOADALGORITHM(LoadRKH)
 /// Sets documentation strings for this algorithm
 void LoadRKH::initDocs()
 {
-  this->setWikiSummary("Load a file written in the RKH format ");
+  this->setWikiSummary("Load a file written in the RKH format");
   this->setOptionalMessage("Load a file written in the RKH format");
 }
 
@@ -70,7 +70,7 @@ void LoadRKH::init()
 
   declareProperty("FirstColumnValue", "Wavelength",
                   boost::make_shared<Kernel::StringListValidator>(propOptions),
-    "Only used for 1D files, the units of the first column in the RKH\n"
+    "Only used for 1D files, the units of the first column in the RKH "
     "file (default Wavelength)" );
 }
 
