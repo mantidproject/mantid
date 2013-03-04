@@ -24,7 +24,7 @@ DECLARE_ALGORITHM(LoadMappingTable)
 /// Sets documentation strings for this algorithm
 void LoadMappingTable::initDocs()
 {
-  this->setWikiSummary("Builds up the mapping between spectrum number and the detector objects in the [[instrument]] [[Geometry]]. ");
+  this->setWikiSummary("Builds up the mapping between spectrum number and the detector objects in the [[instrument]] [[Geometry]].");
   this->setOptionalMessage("Builds up the mapping between spectrum number and the detector objects in the instrument Geometry.");
 }
 
@@ -36,10 +36,9 @@ LoadMappingTable::LoadMappingTable() : Algorithm()
 void LoadMappingTable::init()
 {
   declareProperty(new FileProperty("Filename","", FileProperty::Load),
-    "The name of the file from which to obtain the mapping information,\n"
-    "including its full or relative path" );
+    "The name of the RAW file from which to obtain the mapping information, including its full or relative path." );
   declareProperty(new WorkspaceProperty<>("Workspace","Anonymous",Direction::InOut),
-    "The name of the workspace to which the mapping information will be added");
+   "The name of the input and output workspace on which to perform the algorithm.");
 }
 
 void LoadMappingTable::exec()
