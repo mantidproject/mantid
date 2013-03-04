@@ -274,7 +274,7 @@ class DirectEnergyConversion(object):
             if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
             else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
                  
-	    logger.debug("mono_run = %s (%s)" % (mono_run,type(mono_run)))
+            logger.debug("mono_run = %s (%s)" % (mono_run,type(mono_run)))
           
             if mono_run.endswith("_event.nxs"):
                 monitor_ws=LoadNexusMonitors(Filename=mono_run)
@@ -349,7 +349,7 @@ class DirectEnergyConversion(object):
                     raise RuntimeError('Cannot run LoadDetectorInfo: "Filename" property not found on input mono workspace')
                 if self.relocate_dets: 
                     self.log('Moving detectors to positions specified in RAW file.')
-            	LoadDetectorInfo(Workspace=result_name,DataFilename=filename,RelocateDets=self.relocate_dets)
+                    LoadDetectorInfo(Workspace=result_name,DataFilename=filename,RelocateDets=self.relocate_dets)
             else:
                 self.log('Raw file detector header is superceeded') 
                 if self.relocate_dets: 

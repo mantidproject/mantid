@@ -165,7 +165,7 @@ void DetectorEfficiencyCor::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  logErrors();
+  logErrors(numHists);
   setProperty("OutputWorkspace", m_outputWS);
 }
 /** Loads and checks the values passed to the algorithm
@@ -437,13 +437,16 @@ double DetectorEfficiencyCor::chebevApprox(double a, double b, const double exsp
 
 /** 
  * Logs if there were any problems locating spectra.
+ * @param totalNDetectors -- number of all detectors in the workspace
+ *
 */
-void DetectorEfficiencyCor::logErrors() const
+void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const
 {
   std::vector<int>::size_type nspecs = m_spectraSkipped.size();
   if( nspecs > 0 )
   {
-    g_log.warning() << "There were " <<  nspecs << " spectra that could not be corrected. ";
+    g_log.warning() << "There were " <<  nspecs << " spectra that could not be corrected out of total: "<<totalNDetectors<<std::endl;
+    g_log.warning() << "Thir spectra were nullified\n";
     g_log.debug() << "Unaffected spectra numbers: ";
     for( size_t i = 0; i < nspecs; ++i )
     {
