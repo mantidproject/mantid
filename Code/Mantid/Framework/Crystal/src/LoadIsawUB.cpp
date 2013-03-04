@@ -78,7 +78,7 @@ namespace Crystal
         "Path to an ISAW-style UB matrix text file.");
 
     declareProperty("CheckUMatrix", true,
-          "If true then the U Matrix validity is checked before creating the oriented lattice");
+          "If True (default) then a check is performed to ensure the U matrix is a proper rotation matrix");
   }
 
   //----------------------------------------------------------------------------------------------
