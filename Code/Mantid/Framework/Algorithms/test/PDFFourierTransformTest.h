@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_PDFFTTEST_H_
-#define MANTID_ALGORITHMS_PDFFTTEST_H_
+#ifndef MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST.HTEST_H_
+#define MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST.HTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -14,20 +14,20 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidAlgorithms/PDFFT.h"
+#include "MantidAlgorithms/PDFFourierTransformTest.h.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid;
 
-class PDFFTTest : public CxxTest::TestSuite
+class PDFFourierTransformTest.hTest : public CxxTest::TestSuite
 {
 public:
 
     
   void test_Init()
   {
-    PDFFT alg;
+    PDFFourierTransformTest.h alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -37,7 +37,7 @@ public:
 
     API::Workspace_sptr ws = createWS(20, 0.1, "TestInput1", "MomentumTransfer");
 
-    PDFFT pdfft;
+    PDFFourierTransformTest.h pdfft;
     pdfft.initialize();
     pdfft.setProperty("InputWorkspace", ws);
     pdfft.setProperty("OutputWorkspace", "PDFGofR");
@@ -116,5 +116,5 @@ private:
 };
 
 
-#endif /* MANTID_ALGORITHMS_PDFFTTEST_H_ */
+#endif /* MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST.HTEST_H_ */
 

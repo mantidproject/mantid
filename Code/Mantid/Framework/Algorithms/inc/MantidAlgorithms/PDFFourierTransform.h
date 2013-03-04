@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_PDFFT_H_
-#define MANTID_ALGORITHMS_PDFFT_H_
+#ifndef MANTID_ALGORITHMS_PDFFourierTransform_H_
+#define MANTID_ALGORITHMS_PDFFourierTransform_H_
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
@@ -9,16 +9,16 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** PDFFT : TODO: DESCRIPTION
+  /** PDFFourierTransform : TODO: DESCRIPTION
    * 
    * @author
    * @date 2011-03-22 13:55:27.513553
    */
-  class DLLExport PDFFT  : public API::Algorithm
+  class DLLExport PDFFourierTransform  : public API::Algorithm
   {
   public:
-    PDFFT();
-    ~PDFFT();
+    PDFFourierTransform();
+    ~PDFFourierTransform();
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "PDFFourierTransform";};
@@ -50,4 +50,4 @@ namespace Algorithms
 } // namespace Mantid
 } // namespace Algorithms
 
-#endif  /* MANTID_ALGORITHMS_PDFFT_H_ */
+#endif  /* MANTID_ALGORITHMS_PDFFourierTransform_H_ */
