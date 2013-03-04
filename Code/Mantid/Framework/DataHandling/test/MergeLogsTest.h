@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_MERGE2WORKSPACELOGSTEST_H_
-#define MANTID_DATAHANDLING_MERGE2WORKSPACELOGSTEST_H_
+#ifndef MANTID_DATAHANDLING_MERGELOGSTEST_H_
+#define MANTID_DATAHANDLING_MERGELOGSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -17,13 +17,13 @@ using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
-class Merge2WorkspaceLogsTest : public CxxTest::TestSuite
+class MergeLeLogsTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static Merge2WorkspaceLogsTest *createSuite() { return new Merge2WorkspaceLogsTest(); }
-  static void destroySuite( Merge2WorkspaceLogsTest *suite ) { delete suite; }
+  static MergeLogsTest *createSuite() { return new MergeLogsTest(); }
+  static void destroySuite( MergeLogsTest *suite ) { delete suite; }
 
 
   void test_Init()
@@ -113,4 +113,4 @@ public:
 };
 
 
-#endif /* MANTID_DATAHANDLING_MERGE2WORKSPACELOGSTEST_H_ */
+#endif /* MANTID_DATAHANDLING_MERGELOGSTEST_H_ */
