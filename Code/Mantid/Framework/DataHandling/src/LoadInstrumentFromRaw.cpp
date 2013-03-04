@@ -28,7 +28,7 @@ DECLARE_ALGORITHM(LoadInstrumentFromRaw)
 /// Sets documentation strings for this algorithm
 void LoadInstrumentFromRaw::initDocs()
 {
-  this->setWikiSummary(" Attempts to load information about the instrument from a ISIS raw file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source and samplepos components to instrument.  If the L1 source - sample distance is not available in the file then it may be read from the [[Properties File|mantid properties]] file using the key instrument.L1, as a final fallback a default distance of 10m will be used. ");
+  this->setWikiSummary("<p>Attempts to load information about the instrument from a ISIS raw file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source and samplepos components to instrument.</p><p>If the L1 source - sample distance is not available in the file then it may be read from the [[Properties File|mantid properties]] file using the key instrument.L1, as a final fallback a default distance of 10m will be used.</p>");
   this->setOptionalMessage("Attempts to load information about the instrument from a ISIS raw file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source and samplepos components to instrument.  If the L1 source - sample distance is not available in the file then it may be read from the mantid properties file using the key instrument.L1, as a final fallback a default distance of 10m will be used.");
 }
 
@@ -47,13 +47,13 @@ void LoadInstrumentFromRaw::init()
   // When used as a Child Algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
-    "The name of the workspace in which to store the imported instrument" );
+    "The name of the workspace in which to store the imported instrument." );
   
   std::vector<std::string> exts;
   exts.push_back(".raw");
   exts.push_back(".s*");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-		  "The filename (including its full or relative path) of an ISIS RAW file.\n"
+		  "The filename (including its full or relative path) of an ISIS RAW file. "
 		  "The file extension must either be .raw or .s??" );
   declareProperty(new ArrayProperty<int>("MonitorList",Direction::Output),
       "List of detector ids of monitors loaded into the workspace");
