@@ -33,12 +33,12 @@ using namespace API;
 
 void ExtractSingleSpectrum::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),"The name of the input workspace.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"The name under which to store the output workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);  
-  declareProperty("WorkspaceIndex",-1,mustBePositive);
+  declareProperty("WorkspaceIndex",-1,mustBePositive,"The workspace index number of the spectrum to extract.");
 }
 
 void ExtractSingleSpectrum::exec()

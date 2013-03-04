@@ -81,7 +81,7 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void LoadSNSspec::initDocs()
     {
-      this->setWikiSummary("Loads data from a text file and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
+      this->setWikiSummary("Loads data from a text file and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
       this->setOptionalMessage("Loads data from a text file and stores it in a 2D workspace (Workspace2D class).");
     }
     
@@ -100,13 +100,13 @@ namespace Mantid
 	  exts.push_back(".txt");
 
 	  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-			"A SNS Spec Ascii file");
+			"The name of the text file to read, including its full or relative path. The file extension must be .txt or .dat.");
 	  declareProperty(new WorkspaceProperty<>("OutputWorkspace",
-			"",Direction::Output), "The name of the workspace that will be created.");
+			"",Direction::Output), "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]].");
 
 	  std::vector<std::string> units = UnitFactory::Instance().getKeys();
 	  declareProperty("Unit","Energy", boost::make_shared<Kernel::StringListValidator>(units),
-			"The unit to assign to the X axis (default: Energy)");
+			"The unit to assign to the X axis (anything known to the [[Unit Factory]] or \"Dimensionless\") (default: Energy)");
     }
 
     /**

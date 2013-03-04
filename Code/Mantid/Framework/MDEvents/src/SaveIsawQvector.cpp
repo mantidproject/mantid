@@ -1,5 +1,5 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+This takes an unprocessed event workspace and writes out a file where each event has the <math>(Q_x, Q_y, Q_z)</math> as a set of 32-bit floats.
 *WIKI*/
 
 #include <iostream>

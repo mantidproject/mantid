@@ -104,7 +104,7 @@ namespace MDAlgorithms
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "An input MatrixWorkspace.");
     declareProperty(new ArrayProperty<int>("BankNumbers", Direction::Input),
-        "A list of the bank numbers to convert. If empty, will use all banks.");
+        "A list of the bank numbers to convert. If empty, will use all banksMust have at least one entry.");
 
     // Now the box controller settings
     this->initBoxControllerProps("2", 200, 20);

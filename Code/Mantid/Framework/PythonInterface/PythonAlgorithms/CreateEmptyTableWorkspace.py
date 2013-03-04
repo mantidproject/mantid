@@ -1,3 +1,9 @@
+"""*WIKI* 
+
+This algorithm creates an empty table workspace and puts it in the data service to make it available to python.
+
+*WIKI*"""
+
 from mantid.api import PythonAlgorithm, registerAlgorithm, ITableWorkspaceProperty, WorkspaceFactory
 from mantid.kernel import Direction
 
@@ -6,7 +12,8 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
  
     def PyInit(self):
         # Declare properties
-        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Name of Calibration Table Workspace")
+        self.setWikiSummary("""Creates an empty table workspace that can be populated by python code.""")
+        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output), "The name of the table workspace that will be created.")
  
     def PyExec(self):
         tableWS = WorkspaceFactory.createTable()

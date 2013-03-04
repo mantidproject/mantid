@@ -216,6 +216,9 @@ namespace DataObjects
   class MaskWorkspace;
   class SpecialWorkspace2D;
   class Workspace2D;
+  class TableWorkspace;
+  class SpecialWorkspace2D;
+  class SplittersWorkspace;
 }
 
 namespace Kernel
@@ -279,8 +282,12 @@ std::string getUnmangledTypeName(const std::type_info& type)
                                       string("SpecialWorkspace2D")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<IMDHistoWorkspace>).name(),
                                       string("IMDHistoWorkspace")));
-
-
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<SplittersWorkspace>).name(),
+                                       string("SplittersWorkspace")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<SpecialWorkspace2D>).name(),
+                                       string("SpecialWorkspace2D")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<TableWorkspace>).name(),
+                                        string("TableWorkspace")));
   }
   std::map<std::string, std::string>::const_iterator mitr = typestrings.find(type.name());
   if( mitr != typestrings.end() )

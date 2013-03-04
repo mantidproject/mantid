@@ -70,9 +70,9 @@ LoadCanSAS1D::~LoadCanSAS1D()
 void LoadCanSAS1D::init()
 {
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
-      "The name of the input  xml file to load");
+      "The name of the CanSAS1D file to load");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-      Kernel::Direction::Output), "The name of the Output workspace");
+      Kernel::Direction::Output), "The name to use for the output workspace");
 }
 
 /** Overwrites Algorithm exec method

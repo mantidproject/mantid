@@ -1,7 +1,4 @@
 /*WIKI*
-
-
-
 Creates an MDEventWorkspace from a plain ASCII file. Uses a simple format for the file described below. This algorithm is suitable for importing small volumes of data only. This algorithm does not scale well for large input workspaces. The purpose of this algorithm is to allow users to quickly import data from existing applications for purposes of comparison.
 
 == Format ==

@@ -59,6 +59,8 @@ class EQSANSTransmission(PythonAlgorithm):
         self.declareProperty("YCenter", 128.0, Description="Position of the beam center in Y [pixel]. Default: 128")
         # Transmission will be normalized to 1 if True
         self.declareProperty("NormalizeToUnity", False, Description="If True, the transmission will be normalized to unity. Default: False")
+        # Set the wiki summary
+        self.setWikiSummary("Computes the transmission for EQSANS data. The algorithm looks for a peak within a 10x10 pixel area around the provided beam center.")
 
 
     def PyExec(self):

@@ -22,7 +22,7 @@ DECLARE_ALGORITHM(ConvertToMatrixWorkspace)
 /// Sets documentation strings for this algorithm
 void ConvertToMatrixWorkspace::initDocs()
 {
-  this->setWikiSummary(" Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values. ");
+  this->setWikiSummary("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values. ");
   this->setOptionalMessage("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.");
 }
 

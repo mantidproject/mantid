@@ -1,12 +1,26 @@
 /*WIKI*
+This algorithm can 
+ 1. add an Instrument to a Workspace without any real instrument associated with, or
+ 2. replace a Workspace's Instrument with a new Instrument, or
+ 3. edit whole and partial detectors' parameters of the Instrument associated with a Workspace.
 
+==Limitations==
+There are some limitations of this algorithm.  
 
+1. The key to locate the detector is via spectrum ID;
 
-This algorithm edits the diffractomer detectors' parameters
+2. For each spectrum, there is only one and only one new detector.  Thus, if one spectrum is associated with a group of detectors previously, the replacement (new) detector is the one which is (diffraction) focused on after this algorithm is called.
 
+3. If only part of the spectra to have detector edited, for rest of the spectra, if any of them is associated with a group of detectors, then after the algorithm is called, this spectra won't have any detector associated.
 
-
-
+==Instruction==
+1. For powder diffractomer, user can input
+   SpectrumIDs = "1, 2, 3"
+   L2 = "3.1, 3.2, 3.3"
+   Polar = "90.01, 90.02, 90.03"
+   Azimuthal = "0.1,0.2,0.3"
+   NewInstrument = False
+   to set up the focused detectors' parameters for spectrum 1, 2 and 3.  
 *WIKI*/
 
 #include "MantidAlgorithms/EditInstrumentGeometry.h"
@@ -51,7 +65,7 @@ namespace Algorithms
   /// Sets documentation strings for this algorithm
   void EditInstrumentGeometry::initDocs()
   {
-    this->setWikiSummary("Add and/or edit T.O.F. powder diffractomer instrument geometry information");
+    this->setWikiSummary("Add, substitute and edit an Instrument associated with a Workspace");
     this->setOptionalMessage("The edit or added information will be attached to a Workspace.  Currently it is in an overwrite mode only.");
   }
 

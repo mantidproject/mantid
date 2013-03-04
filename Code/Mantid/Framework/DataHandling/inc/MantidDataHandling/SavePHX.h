@@ -67,6 +67,8 @@ public:
       det_par_ws_name=ws_name;
   }
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   /// Initialisation code
   void init();
   ///Execution code

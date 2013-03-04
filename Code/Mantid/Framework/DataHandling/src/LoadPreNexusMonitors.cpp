@@ -49,21 +49,33 @@ using namespace Mantid::Geometry;
 static const std::string RUNINFO_FILENAME("RunInfoFilename");
 static const std::string WORKSPACE_OUT("OutputWorkspace");
 
+//----------------------------------------------------------------------------------------------
+/** Init documentation
+*/
+void LoadPreNexusMonitors::initDocs()
+{
+  this->setWikiSummary("This is a routine to load in the beam monitors from SNS preNeXus files into a workspace.");
+  this->setOptionalMessage("This is a routine to load in the beam monitors from SNS preNeXus files into a workspace.");
+}
+
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
 void LoadPreNexusMonitors::init()
 {
   // Filename for the runinfo file.
-  declareProperty(new FileProperty(RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"));
+  declareProperty(new FileProperty(RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"),
+                  "The filename of the runinfo file for a particular run. Allowed Values are: *_runinfo.xml");
 
   // The output workspace
-  declareProperty(new WorkspaceProperty<MatrixWorkspace> (WORKSPACE_OUT, "", Direction::Output));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace> (WORKSPACE_OUT, "", Direction::Output),
+                  "The workspace to load the monitors into.");
 
   // Make sure things are initialised.
   nMonitors = 0;
 
 }
+
 
 void LoadPreNexusMonitors::exec()
 {

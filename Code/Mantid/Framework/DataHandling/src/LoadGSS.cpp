@@ -48,7 +48,7 @@ namespace Mantid
     void LoadGSS::initDocs()
     {
       this->setWikiSummary(
-          "Loads a GSS file such as that saved by [[SaveGSS]]. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.  '''Please Note''': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect. ");
+          "<p>Loads a GSS file such as that saved by [[SaveGSS]]. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.</p><p>'''Please Note''': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.</p>");
       this->setOptionalMessage(
           "Loads a GSS file such as that saved by SaveGSS. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.  'Please Note': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.");
     }
@@ -63,7 +63,8 @@ namespace Mantid
       exts.push_back(".txt");
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
           "The input filename of the stored data");
-      declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output));
+      declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
+                      "Workspace name to load into.");
     }
 
     /**

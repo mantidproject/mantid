@@ -2,7 +2,7 @@
 
 This algorithm requires a workspace that is both in d-spacing, but has also been preprocessed by the [[CrossCorrelate]] algorithm.  In this first step you select one spectrum to be the reference spectrum and all of the other spectrum are cross correlated against it.  Each output spectrum then contains a peak whose location defines the offset from the reference spectrum.
 
-The algorithm iterates over each spectrum in the workspace and fits a [[Gaussian]] function to the reference peak.  The fit is used to calculate the centre of the fitted peak, and the offset is then calculated as:
+The algorithm iterates over each spectrum in the workspace and fits a [[Gaussian]] function to the reference peaks.  The fit is used to calculate the centre of the fitted peak, and the offset is then calculated as:
 
 <math>-peakCentre*step/(dreference+PeakCentre*step)</math>
 
@@ -11,7 +11,7 @@ This is then written into a [[CalFile|.cal file]] for every detector that contri
 == Usage ==
 '''Python'''
 
-GetDetectorOffsets("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
+GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal","offsets","mask")
 
 
 *WIKI*/

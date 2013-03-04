@@ -79,13 +79,13 @@ namespace Mantid
     void CreateCalFileByNames::init()
     {
       declareProperty(new WorkspaceProperty<> ("InstrumentWorkspace", "", Direction::Input, boost::make_shared<InstrumentValidator>()),
-        "A workspace that contains a reference to the instrument of interest.\n"
-        "You can use LoadEmptyInstrument if you do not have any data files to load.");
+        "A workspace that contains a reference to the instrument of interest. "
+        "You can use [[LoadEmptyInstrument]] to create such a workspace.");
       declareProperty(new FileProperty("GroupingFileName","",FileProperty::Save, ".cal"),
-        "The name of the output CalFile");
+        "The name of the output [[CalFile]]");
       declareProperty("GroupNames","",
-        "A string of the instrument component names to use as separate groups.\n"
-        "Use / or , to separate multiple groups");
+        "A string of the instrument component names to use as separate groups. "
+        "/ or , can be used to separate multiple groups.");
     }
 
 

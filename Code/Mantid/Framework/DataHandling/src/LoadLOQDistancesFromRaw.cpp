@@ -33,7 +33,7 @@ namespace DataHandling
   /// Sets documentation strings for this algorithm
   void LoadLOQDistancesFromRaw::initDocs()
   {
-    this->setWikiSummary("Loads distance information that is specific to the ISIS TS1 LOQ instrument. ");
+    this->setWikiSummary("Loads distance information that is specific to the ISIS TS1 LOQ instrument.");
     this->setOptionalMessage("Loads distance information that is specific to the ISIS TS1 LOQ instrument.");
   }
 
@@ -43,13 +43,13 @@ namespace DataHandling
   void LoadLOQDistancesFromRaw::init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
-        "The workspace to which the information should be added");
+        "The sample details are attached to this workspace");
 
     std::vector<std::string> exts;
     exts.push_back(".raw");
     exts.push_back(".s*");
     declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-        "The file from which to extract the information");
+        "The raw file containing the sample geometry information");
   }
 
   /**

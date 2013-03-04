@@ -18,6 +18,7 @@ namespace DataHandling
   {
     this->useAlgorithm("LoadMask");
     this->deprecatedDate("2012-02-14");
+    
   }
     
   //----------------------------------------------------------------------------------------------

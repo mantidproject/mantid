@@ -34,11 +34,11 @@ void Scale::init()
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   
-  declareProperty("Factor",1.0,"The factor by which to scale the input workspace");
+  declareProperty("Factor",1.0,"The value by which to scale the input workspace");
   std::vector<std::string> op(2);
   op[0] = "Multiply";
   op[1] = "Add";
-  declareProperty("Operation","Multiply",boost::make_shared<StringListValidator>(op),"The scaling operation: multiply (default) or add");
+  declareProperty("Operation","Multiply",boost::make_shared<StringListValidator>(op),"Whether to multiply by, or add factor");
 }
 
 void Scale::exec()

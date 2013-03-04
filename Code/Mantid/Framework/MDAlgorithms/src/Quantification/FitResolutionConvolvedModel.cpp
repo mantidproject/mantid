@@ -1,6 +1,6 @@
 /*WIKI*
-  Fits a dataset using a resolution function convolved with a foreground model
- *WIKI*/
+Fits a dataset using a resolution function convolved with a foreground model
+*WIKI*/
 
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
 

@@ -1,9 +1,23 @@
 """*WIKI* 
-Generate grouping files for ARCS, CNCS, HYSPEC, and SEQUOIA, by grouping py pixels along a tube and px tubes. 
-py is 1, 2, 4, 8, 16, 32, 64, or 128. 
-px is 1, 2, 4, or 8.
 
-Author:  A. Savici
+In algorithms related to Le Bail fit and powder diffractomer instrument profile calibration, 
+TableWorkspace containing the peak profile parameters' information are used as input and output. 
+''UpdatePeakParameterTableValue'' gives user the method to change the value of parameters' information,
+including its status to fit, value, minimum/maximum value (for boundary contrains) and step size (for Monte Carlo optimizer). 
+
+== Format of TableWorkspace ==
+TableWorkspace containing peak profile parameters must have 2 columns, "Name" and "Value".  It can have but not be limited to the following columns, "Min", "Max", "Stepsize" and "FitOrTie".
+
+== Specify A Cell or Cells ==
+The cell to have value updated can be specified by its row and column index.  
+* Column index is determined by property "Column".  
+* Row index can be specified by property "Row", which requires a list of row indexes, or property "ParameterNames", which requires a list of strings.  If "ParameterNames" is used as the input of row indexes, the algorithm will go through each row to match the string value of cell "Name" (i.e., parameter name) to each input parameter name.  
+* If neither "Row" nor "ParameterNames" is given by user, then all cells in the column will have the value updated to a same value from either "NewFloatValue" or "NewStringValue" according to the type of the cell. 
+* If multiple row indexes are specified, then all the cells of the specified column and rows are updated to same value from either "NewFloatValue" or "NewStringValue". 
+
+== How to use algorithm with other algorithms ==
+This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in the wiki page of [[LeBailFit]].
+
 
 *WIKI*"""
 
@@ -28,23 +42,24 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         return "UpdatePeakParameterTableValue"
 
     def PyInit(self):
+        self.setWikiSummary("Update cell value(s) in a TableWorkspace containing instrument peak profile parameters.")
         """ Property definition
         """
         tableprop = mantid.api.ITableWorkspaceProperty("InputWorkspace", "", mantid.kernel.Direction.InOut)
-        self.declareProperty(tableprop, "Name of Calibration Table Workspace")
+        self.declareProperty(tableprop, "TableWorkspace containing peak profile parameters")
 
         colchoices = ["Value", "FitOrTie", "Min", "Max", "StepSize"]
-        self.declareProperty("Column", "Value", mantid.kernel.StringListValidator(colchoices), "Column to have value changed")
+        self.declareProperty("Column", "Value", mantid.kernel.StringListValidator(colchoices), "Column name of the cell to have value updated.  Choices include "FitOrTie", "Max", "Min", "StepSize" and "Value"")
 
         rowprop = mantid.kernel.IntArrayProperty("Rows", [])
-        self.declareProperty(rowprop, "Row number(s) to update value")
+        self.declareProperty(rowprop, "List of row numbers of the cell to have value updated")
 
         parnameprop = mantid.kernel.StringArrayProperty("ParameterNames", [])
-        self.declareProperty(parnameprop, "Parameter name(s) to update value")
+        self.declareProperty(parnameprop, "List of names of parameters that will have their values updated")
 
-        self.declareProperty("NewFloatValue", 0.0, "New double value to set to the selected cell(s).")
+        self.declareProperty("NewFloatValue", 0.0, "New value for the specified cell of type 'float'.")
 
-        self.declareProperty("NewStringValue", "", "New string value to set to the selected cell(s).")
+        self.declareProperty("NewStringValue", "", "New value for the specified cell of type 'string'.")
 
         return
 

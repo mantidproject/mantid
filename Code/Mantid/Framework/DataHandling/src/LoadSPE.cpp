@@ -36,7 +36,7 @@ DECLARE_LOADALGORITHM(LoadSPE)
 /// Sets documentation strings for this algorithm
 void LoadSPE::initDocs()
 {
-  this->setWikiSummary("Loads a file written in the spe format. ");
+  this->setWikiSummary("Loads a file written in the spe format.");
   this->setOptionalMessage("Loads a file written in the spe format.");
 }
 
@@ -51,7 +51,7 @@ void LoadSPE::initDocs()
 void LoadSPE::init()
 {
   declareProperty(new FileProperty("Filename","", FileProperty::Load, ".spe"),
-                  "Name of the SPE file to load" );
+                  "The name of the SPE file to load." );
   declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
     "The name to use for the output workspace" );
 }

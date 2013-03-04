@@ -1,5 +1,6 @@
 /*WIKI* 
 
+'''Parameters Note:''' Note that it is possible to use both of the optional 'spectrum' properties (i.e. a range and a list) together if so desired.
 
 ===Load ISIS log file(s)===
 Assumes that a log file originates from a PC (not VMS) environment, i.e. the log files to be loaded are assumed to have the extension .txt. Its filename is assumed to starts with the raw data file identifier followed by the character '_', and a log file is assumed to have a format of two columns, where the first column consists of data-time strings of the ISO 8601 form and the second column consists of either numbers or strings that may contain spaces.
@@ -62,7 +63,7 @@ DECLARE_ALGORITHM(LoadLog)
 /// Sets documentation strings for this algorithm
 void LoadLog::initDocs()
 {
-  this->setWikiSummary("Load ISIS log file(s) into a [[workspace]]. ");
+  this->setWikiSummary("Load ISIS log file(s) or a SNS text log file into a [[workspace]].");
   this->setOptionalMessage("Load ISIS log file(s) into a workspace.");
 }
 
@@ -85,7 +86,7 @@ void LoadLog::init()
   // When used as a Child Algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
-                      "The name of the workspace to which the log data will be added");
+                      "The name of the workspace to which the log data will be added.");
 
   std::vector<std::string> exts(4, "");
   exts[0] = ".txt";
@@ -93,19 +94,19 @@ void LoadLog::init()
   exts[2] = ".s*";
   exts[3] = ".add";
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-    "The filename (including its full or relative path) of either \n"
-    "an ISIS log file, a multi-column SNS-style text file, or an ISIS raw file. \n"
-    "If a raw file is specified all log files associated with\n"
-    "that raw file are loaded into the specified workspace. The file extension must\n"
+    "The filename (including its full or relative path) of a SNS text log file (not cvinfo), "
+    "an ISIS log file, or an ISIS raw file. "
+    "If a raw file is specified all log files associated with "
+    "that raw file are loaded into the specified workspace. The file extension must "
     "either be .raw or .s when specifying a raw file");
 
   declareProperty(new ArrayProperty<std::string>("Names"),
-    "For SNS-style log files only: the names of each column's log, separated by commas.\n"
+    "For SNS-style log files only: the names of each column's log, separated by commas. "
     "This must be one fewer than the number of columns in the file.");
 
   declareProperty(new ArrayProperty<std::string>("Units"),
-    "For SNS-style log files only: the units of each column's log, separated by commas.\n"
-    "This must be one fewer than the number of columns in the file.\n"
+    "For SNS-style log files only: the units of each column's log, separated by commas. "
+    "This must be one fewer than the number of columns in the file. "
     "Optional: leave blank for no units in any log.");
 
 }

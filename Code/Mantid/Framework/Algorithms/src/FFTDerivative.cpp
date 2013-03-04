@@ -20,6 +20,13 @@ DECLARE_ALGORITHM(FFTDerivative)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+/// Sets documentation strings for this algorithm
+void FFTDerivative::initDocs()
+{
+  this->setWikiSummary("Calculated derivatives of a spectra in the MatrixWorkspace using Fast Fourier Transform (FFT).");
+  this->setOptionalMessage("Calculated derivatives of a spectra in the MatrixWorkspace using Fast Fourier Transform (FFT).");
+}
+
 void FFTDerivative::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),"Input workspace for differentiation");

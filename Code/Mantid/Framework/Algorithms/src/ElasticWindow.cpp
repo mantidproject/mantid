@@ -36,13 +36,18 @@ using namespace API;
 
 void ElasticWindow::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<WorkspaceUnitValidator>("DeltaE")));
-  declareProperty(new WorkspaceProperty<>("OutputInQ","",Direction::Output));
-  declareProperty(new WorkspaceProperty<>("OutputInQSquared","",Direction::Output));
-  declareProperty("Range1Start", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >());
-  declareProperty("Range1End", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >());
-  declareProperty("Range2Start", EMPTY_DBL(), Direction::Input);
-  declareProperty("Range2End", EMPTY_DBL(), Direction::Input);
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<WorkspaceUnitValidator>("DeltaE")),
+    "The input workspace.");
+  declareProperty(new WorkspaceProperty<>("OutputInQ","",Direction::Output),
+    "The name for output workspace with the X axis in units of Q");
+  declareProperty(new WorkspaceProperty<>("OutputInQSquared","",Direction::Output),
+    "The name for output workspace with the X axis in units of Q^2.");
+  declareProperty("Range1Start", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >(),
+    "Start Point of Range 1");
+  declareProperty("Range1End", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double> >(),
+    "End Point of Range 1");
+  declareProperty("Range2Start", EMPTY_DBL(),"Start Point of Range 2", Direction::Input);
+  declareProperty("Range2End", EMPTY_DBL(), "End Point of Range 2.", Direction::Input);
 }
 
 void ElasticWindow::exec()

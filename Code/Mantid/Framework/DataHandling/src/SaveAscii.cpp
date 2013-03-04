@@ -1,10 +1,9 @@
 /*WIKI* 
 
-The workspace data are stored in the file in columns: the first column contains the X-values, followed by pairs of Y and E values. Columns are separated by commas.
+The workspace data are stored in the file in columns: the first column contains the X-values, followed by pairs of Y and E values. Columns are separated by commas. The resulting file can normally be loaded into a workspace by the [[LoadAscii]] algorithm.
 
 ==== Limitations ====
-The algorithm assumes that the workspace has common X values for all spectra (i.e. is not a [[Ragged Workspace|ragged workspace]]). Only the X values from the first spectrum in the workspace are saved out.
-
+The algorithm assumes that the workspace has common X values for all spectra (i.e. is not a [[Ragged Workspace|ragged workspace]]). Only the X values from the first spectrum in the workspace are saved out. 
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -32,8 +31,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void SaveAscii::initDocs()
     {
-      this->setWikiSummary("Saves a 2D [[workspace]] to a Ascii file. ");
-      this->setOptionalMessage("Saves a 2D workspace to a Ascii file.");
+      this->setWikiSummary("Saves a 2D [[workspace]] to a comma separated ascii file. ");
+      this->setOptionalMessage("Saves a 2D workspace to a ascii file.");
     }
     
 
@@ -52,24 +51,24 @@ namespace Mantid
     void SaveAscii::init()
     {
       declareProperty(new WorkspaceProperty<>("InputWorkspace",
-        "",Direction::Input), "The name of the workspace that will be saved.");
+        "",Direction::Input), "The name of the workspace containing the data you want to save to a Ascii file.");
 
       std::vector<std::string> exts;
       exts.push_back(".dat");
       exts.push_back(".txt");
       exts.push_back(".csv");
       declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
-		      "A comma separated Ascii file that will be created");
+		      "The filename of the output Ascii file.");
 
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(1);
-      declareProperty("WorkspaceIndexMin", 1, mustBePositive);
-      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBePositive);
-      declareProperty(new ArrayProperty<int>("SpectrumList"));
-      declareProperty("Precision", EMPTY_INT(), mustBePositive);
-      declareProperty("WriteXError", false, "If true, the error on X with be written as the fourth column.");
+      declareProperty("WorkspaceIndexMin", 1, mustBePositive,"The starting workspace index.");
+      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBePositive,"The ending workspace index.");
+      declareProperty(new ArrayProperty<int>("SpectrumList"),"List of workspace indices to save.");
+      declareProperty("Precision", EMPTY_INT(), mustBePositive,"Precision of output double values.");
+      declareProperty("WriteXError", false, "If true, the error on X will be written as the fourth column.");
 
-      declareProperty("CommentIndicator", "", "Characters to put in front of comment lines.");
+      declareProperty("CommentIndicator", "", "Character(s) to put in front of comment lines.");
       
       // For the ListValidator
       std::string spacers[6][2] = { {"CSV", ","}, {"Tab", "\t"}, {"Space", " "}, 
@@ -83,14 +82,14 @@ namespace Mantid
       }
       
       declareProperty("Separator", "CSV", boost::make_shared<StringListValidator>(sepOptions),
-        "Characters to put as separator between X, Y, E values. (Default: CSV)");
+        "Character(s) to put as separator between X, Y, E values.");
 
       declareProperty(new PropertyWithValue<std::string>("CustomSeparator", "", Direction::Input),
-        "If present, will overide any specified choice given to Separator.");
+        "If present, will override any specified choice given to Separator.");
 
       setPropertySettings("CustomSeparator", new VisibleWhenProperty("Separator", IS_EQUAL_TO, "UserDefined") );
 
-      declareProperty("ColumnHeader", true, "If true, write the column headers.");
+      declareProperty("ColumnHeader", true, "If true, put column headers into file. ");
 
     }
 

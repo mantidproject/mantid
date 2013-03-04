@@ -27,7 +27,9 @@ DECLARE_ALGORITHM(LoadInstrumentFromNexus)
 /// Sets documentation strings for this algorithm
 void LoadInstrumentFromNexus::initDocs()
 {
-  this->setWikiSummary(" Attempts to load information about the instrument from a Nexus file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,phi). Also adds dummy source and samplepos components to instrument.  Later this will be extended to use any further available details about the instrument in the Nexus file.  If the L1 source - sample distance is not available in the file then it may be read from the [[Properties File|mantid properties]] file using the key instrument.L1, as a final fallback a default distance of 10m will be used. ");
+  this->setWikiSummary("<p>Attempts to load information about the instrument from a Nexus file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,phi). Also adds dummy source and samplepos components to instrument.</p>"
+"<p>Later this will be extended to use any further available details about the instrument in the Nexus file.</p>"
+"<p>If the L1 source - sample distance is not available in the file then it may be read from the [[Properties File|mantid properties]] file using the key instrument.L1, as a final fallback a default distance of 10m will be used.</p>");
   this->setOptionalMessage("Attempts to load information about the instrument from a Nexus file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,phi). Also adds dummy source and samplepos components to instrument.  Later this will be extended to use any further available details about the instrument in the Nexus file.  If the L1 source - sample distance is not available in the file then it may be read from the mantid properties file using the key instrument.L1, as a final fallback a default distance of 10m will be used.");
 }
 
@@ -49,8 +51,8 @@ void LoadInstrumentFromNexus::init()
     "The name of the workspace in which to attach the imported instrument" );
 
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-		  "The name (including its full or relative path) of the Nexus file to\n"
-		  "attempt to load the instrument from. The file extension must either be\n"
+		  "The name (including its full or relative path) of the Nexus file to "
+		  "attempt to load the instrument from. The file extension must either be "
 		  ".nxs or .NXS" );
 }
 
