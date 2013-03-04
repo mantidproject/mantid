@@ -20,7 +20,7 @@ In the future it may be possible to write other Nexus file types than the one su
 TimeSeriesProperty data within the workspace will be saved as NXlog sections in the Nexus file.
 Only floating point logs are stored and loaded at present.
 
-===ChildAlgorithms used===
+===Child Algorithms used===
 
 [[SaveNexusProcessed]]
 

@@ -48,11 +48,18 @@ using namespace Mantid::Geometry;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+/// Sets documentation strings for this algorithm
+void SavePAR::initDocs()
+{
+  this->setWikiSummary("Writes the detector geometry information of a workspace into a Tobyfit PAR format file. Uses [[FindDetectorsPar]] child algorithm to calculate actual detector's parameters. ");
+  this->setOptionalMessage("Writes the detector geometry information of a workspace into a Tobyfit PAR format file.");
+}
+
 void SavePAR::init() {
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "",
-                                           Direction::Input, boost::make_shared<InstrumentValidator>()), "The input workspace");
+                                           Direction::Input, boost::make_shared<InstrumentValidator>()), "The name of the workspace to save.");
   declareProperty(new FileProperty("Filename", "", FileProperty::Save),
-      "The filename to use for the saved data");
+      "The name to give to the saved file.");
 
 }
 
