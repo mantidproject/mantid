@@ -475,6 +475,10 @@ void MdViewerWidget::checkForUpdates()
     this->ui.colorSelectionWidget->setColorScaleRange(range->GetElement(0),
                                                       range->GetElement(1));
   }
+  if (QString(proxy->GetXMLName()).contains("ScaleWorkspace"))
+  {
+    this->currentView->resetDisplay();
+  }
 }
 
 /**
