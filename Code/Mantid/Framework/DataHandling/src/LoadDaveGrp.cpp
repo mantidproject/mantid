@@ -115,12 +115,12 @@ void LoadDaveGrp::init()
   // of the X-Axis property
   auto allowedUnits = boost::make_shared<Kernel::StringListValidator>(Kernel::UnitFactory::Instance().getKeys());
   this->declareProperty("XAxisUnits", "DeltaE", allowedUnits,
-    "The name of the units for the X-Axis (must be one of those registered in\n"
+    "The name of the units for the X-Axis (must be one of those registered in "
     "the Unit Factory)");
   // Extract the current contents of the UnitFactory to be the allowed values
   // of the Y-Axis property
   this->declareProperty("YAxisUnits", "MomentumTransfer", allowedUnits,
-    "The name of the units for the Y-Axis (must be one of those registered in\n"
+    "The name of the units for the Y-Axis (must be one of those registered in "
     "the Unit Factory)");
   this->declareProperty(new Kernel::PropertyWithValue<bool>("IsMicroEV", false,
       Kernel::Direction::Input),
