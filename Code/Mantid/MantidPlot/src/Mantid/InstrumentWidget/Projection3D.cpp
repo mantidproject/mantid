@@ -40,8 +40,7 @@ Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int win
   :ProjectionSurface(rootActor,Mantid::Kernel::V3D(),Mantid::Kernel::V3D(0,0,1)),
   m_viewport(new GLViewport),
   m_drawAxes(true),
-  m_wireframe(false),
-  m_isLightingOn(false)
+  m_wireframe(false)
 {
 
   Instrument_const_sptr instr = rootActor->getInstrument();
@@ -158,6 +157,7 @@ void Projection3D::drawAxes(double axis_length)const
   //To make sure the lines are colored
   glEnable(GL_COLOR_MATERIAL);
   glDisable(GL_TEXTURE_2D);
+  glDisable(GL_LIGHTING);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
   glColor3f(1.0, 0., 0.);
@@ -480,15 +480,6 @@ RectF Projection3D::getSurfaceBounds()const
 }
 
 /**
- * Enable or disable lighting in non-picking mode
- * @param on :: True for enabling, false for disabling.
- */
-void Projection3D::enableLighting(bool on)
-{
-  m_isLightingOn = on;
-}
-
-/**
  * Define lighting of the scene
  */
 void Projection3D::setLightingModel(bool picking) const
@@ -497,26 +488,35 @@ void Projection3D::setLightingModel(bool picking) const
   if ( m_isLightingOn && !picking )
   {
     glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)
-    glEnable(GL_LIGHT0);               // Enable opengl first light
     glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
-    // Set Light0 Attributes, Ambient, diffuse,specular and position
+
+    const float lamp0_intensity = 0.3f;
+    const float lamp1_intensity = 0.7f;
+    
+    // First light source - spot light at the origin
+    glEnable(GL_LIGHT0);               // Enable opengl first light
+    float lamp0_diffuse[4]={lamp0_intensity, lamp0_intensity, lamp0_intensity, 1.0f};
+    float lamp0_ambient[4]={0.1f, 0.1f, 0.1f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp0_diffuse);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lamp0_ambient);
+    float lamp0_pos[4]={0.0f, 0.0f, 0.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_POSITION, lamp0_pos);
+
+    // First light source
     // Its a directional light which follows camera position
-    float lamp_ambient[4]={0.30f, 0.30f, 0.30f, 1.0f};
-    float lamp_diffuse[4]={1.0f, 1.0f, 1.0f, 1.0f};
-    float lamp_specular[4]={1.0f,1.0f,1.0f,1.0f};
-    glLightfv(GL_LIGHT0, GL_AMBIENT,lamp_ambient );
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, lamp_specular);
-    float lamp_pos[4]={0.0f, 0.0f, 0.0f, 1.0f}; // spot light at the origin
-    glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
-    glEnable (GL_LIGHTING);            // Enable light
+    glEnable(GL_LIGHT1);               // Enable opengl second light
+    float lamp1_diffuse[4]={lamp1_intensity, lamp1_intensity, lamp1_intensity, 1.0f};
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, lamp1_diffuse);
+
+    glEnable (GL_LIGHTING);            // Enable overall lighting
   }
   else
   {
     glShadeModel(GL_FLAT);
     glDisable(GL_LIGHTING);
     glDisable(GL_LIGHT0);
+    glDisable(GL_LIGHT1);
     glDisable(GL_LINE_SMOOTH);
   }
 }

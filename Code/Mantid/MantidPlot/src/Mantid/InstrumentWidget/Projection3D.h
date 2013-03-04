@@ -48,7 +48,6 @@ public:
   void setViewDirection(const QString& vd);
   void set3DAxesState(bool on);
   void setWireframe(bool on);
-  void enableLighting(bool on);
 
   virtual void componentSelected(Mantid::Geometry::ComponentID = NULL);
   virtual void getSelectedDetectors(QList<int>& dets);
@@ -78,7 +77,6 @@ protected:
   GLViewport* m_viewport;         ///< Opengl View port [World -> Window]
   bool m_drawAxes;
   bool m_wireframe;
-  bool m_isLightingOn;            ///< Lighting on/off flag
 
 };
 

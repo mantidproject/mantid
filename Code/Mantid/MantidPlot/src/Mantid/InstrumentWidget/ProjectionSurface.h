@@ -112,6 +112,8 @@ public:
   QColor getBackgroundColor() const {return m_backgroundColor;}
   /// Send a redraw request to the surface owner
   void requestRedraw();
+  /// Enable lighting if the implementation allows it
+  void enableLighting(bool on);
 
   //-----------------------------------
   //    Mask methods
@@ -246,9 +248,10 @@ protected:
   mutable QImage* m_viewImage;       ///< storage for view image
   mutable QImage* m_pickImage;       ///< storage for picking image
   QColor m_backgroundColor;          ///< The background colour
-  RectF m_viewRect;                 ///< Keeps the physical dimensions of the surface
+  RectF m_viewRect;                  ///< Keeps the physical dimensions of the surface
   QRect m_selectRect;
   int m_interactionMode;             ///< mode of interaction - index in m_inputControllers
+  bool m_isLightingOn;               ///< Lighting on/off flag
 
   Shape2DCollection m_maskShapes;    ///< to draw mask shapes
   mutable QList<PeakOverlay*> m_peakShapes; ///< to draw peak labels
