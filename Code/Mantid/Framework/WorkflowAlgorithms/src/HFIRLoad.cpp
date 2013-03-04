@@ -11,6 +11,12 @@ to the workspace. Those include:
 
 See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
 
+
+[[Category:Algorithms]]
+[[Category:Workflow]]
+[[Category:SANS]]
+{{AlgorithmLinks|HFIRLoad}}
+
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
