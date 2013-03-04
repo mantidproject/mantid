@@ -21,8 +21,8 @@ DECLARE_ALGORITHM(GetMaskedDetectors)
 /// Sets documentation strings for this algorithm
 void GetMaskedDetectors::initDocs()
 {
-  this->setWikiSummary("This algorithm returns a std::vector<int> containing the detector ID's of detectors that have been masked with [[MaskDetectors]] or it's like. ");
-  this->setOptionalMessage("This algorithm returns a std::vector<int> containing the detector ID's of detectors that have been masked with MaskDetectors or it's like.");
+  this->setWikiSummary("This algorithm returns a std::vector<int> containing the detector IDs of detectors that have been masked with [[MaskDetectors]] or its like.");
+  this->setOptionalMessage("This algorithm returns a std::vector<int> containing the detector IDs of detectors that have been masked with [[MaskDetectors]] or its like.");
 }
 
 
