@@ -44,6 +44,8 @@ namespace MDAlgorithms
     virtual int version() const;
 
   private:
+    /// Sets documentation strings for this algorithm
+    virtual void initDocs();
     bool acceptScalar() const { return true; }
     bool commutative() const { return false; }
 
