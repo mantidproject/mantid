@@ -17,7 +17,7 @@ using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
-class MergeLeLogsTest : public CxxTest::TestSuite
+class MergeLogsTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
