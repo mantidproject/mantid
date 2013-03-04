@@ -8,7 +8,7 @@ being the mid-point of the bin in the case of histogram data.
 The data and error values are either divided or multiplied by the value of this function, according to the
 setting of the Operation property.
 
-This algorithm is noe event aware.
+This algorithm is now event aware.
 
 This correction is applied to a copy of the input workpace and put into output workspace.
 If the input and output workspaces have the same name, the operation is applied to the workspace of that name.

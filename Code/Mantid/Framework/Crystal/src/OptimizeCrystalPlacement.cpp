@@ -1,12 +1,12 @@
 /*WIKI*
 
- This algorithm basically optimizes sample positions and sample orientations( chi,phi, and omega) for an experiment.
+This algorithm basically optimizes sample positions and sample orientations( chi,phi, and omega) for an experiment.
 
- -If the crystal orientation matrix, UB, was created from one run, that run may not need to have its goniometer
- settings optimized.  There is a property to list the run numbers to NOT have their goniometer settings changed.
+-If the crystal orientation matrix, UB, was created from one run, that run may not need to have its goniometer
+settings optimized.  There is a property to list the run numbers to NOT have their goniometer settings changed.
 
- -The crystal orientation matrix, UB, from the PeaksWorkspace should index all the runs "very well". Otherwise iterations
-  that slowly build a UB with corrected sample orientations may be needed.
+-The crystal orientation matrix, UB, from the PeaksWorkspace should index all the runs "very well". Otherwise iterations
+that slowly build a UB with corrected sample orientations may be needed.
 
  *WIKI*/
 /*
