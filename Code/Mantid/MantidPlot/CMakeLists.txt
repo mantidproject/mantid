@@ -47,6 +47,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Graph3D.cpp
                    src/Graph.cpp
                    src/Grid.cpp
+		   src/HelpWindow.cpp
                    src/ImageDialog.cpp
                    src/ImageExportDialog.cpp
                    src/ImageMarker.cpp
@@ -277,6 +278,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Graph3D.h
                    src/Graph.h
                    src/Grid.h
+		   src/HelpWindow.h
                    src/ImageDialog.h
                    src/ImageExportDialog.h
                    src/ImageMarker.h
