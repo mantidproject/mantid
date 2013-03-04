@@ -52,7 +52,7 @@ DECLARE_ALGORITHM(LoadSampleDetailsFromRaw)
 /// Sets documentation strings for this algorithm
 void LoadSampleDetailsFromRaw::initDocs()
 {
-  this->setWikiSummary(" Loads the simple sample geometry that is defined within an ISIS raw file. ");
+  this->setWikiSummary("Loads the simple sample geometry that is defined within an ISIS raw file. ");
   this->setOptionalMessage("Loads the simple sample geometry that is defined within an ISIS raw file.");
 }
 
@@ -62,13 +62,13 @@ void LoadSampleDetailsFromRaw::initDocs()
 void LoadSampleDetailsFromRaw::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
-		  "The workspace to which the information should be added");
+		  "The sample details are attached to this workspace.");
   
   std::vector<std::string> exts;
   exts.push_back("raw");
   exts.push_back(".s*");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts), 
-		  "The file from which to extract the information");
+		  "The raw file containing the sample geometry information.");
 }
 
 /**

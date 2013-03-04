@@ -1,12 +1,8 @@
 /*WIKI* 
-== Summary ==
 
-Create an IMDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from a [http://horace.isis.rl.ac.uk/Main_Page Horace ] SQW file.
+The algorithm takes every pixel defined in the SQW horace file and converts it into an event.
 
-== Description ==
-
-The algorithm takes every pixel defined in the SQW horace file and converts it into an event. 
-Only top level binning information is currently taken from DND/Image data. All DND image information is currently ignored and the resulting MDEvent workspace is in the units of <math>Q^{-1}</math> (SQW dimensions, recalculated to the Lab frame, without HKL transformation).
+Only top level binning information is currently taken from DND/Image data. All DND image information is currently ignored and the resulting MDEvent workspace is in the units of <math>Q^{-1}</math> (SQW dimensions, recalculated to the Crystal? frame, without HKL transformation).
 
 U matrix is set to unity but the B-matrix is read from the SQW and attached to the workspace which may confuse the algorithms which work with [[MDEventWorkspace]] produced by Mantid algorithms.
 
@@ -207,7 +203,7 @@ namespace Mantid
     /// Provide wiki documentation.
     void LoadSQW::initDocs()
     {
-      this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz, Energy) from a SQW file.");
+      this->setWikiSummary("Create an IMDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from a [http://horace.isis.rl.ac.uk/Main_Page Horace ] SQW file.");
       this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz, Energy) from a SQW file.");
     }
 
@@ -218,7 +214,7 @@ namespace Mantid
       fileExtensions[0]=".sqw";
       declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load,fileExtensions), "File of type SQW format");
       declareProperty(new API::WorkspaceProperty<API::IMDEventWorkspace>("OutputWorkspace","", Kernel::Direction::Output),
-        "Name of the output MDEventWorkspace that will contain the SQW data read in.");
+        "Output IMDEventWorkspace reflecting SQW data read-in.");
       declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
         "Load Metadata without events.");
       std::vector<std::string> fileExtensions2(1);
