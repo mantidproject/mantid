@@ -11,7 +11,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidDataHandling/Merge2WorkspaceLogs.h"
+#include "MantidDataHandling/MergeLogs.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
