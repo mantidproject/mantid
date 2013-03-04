@@ -39,6 +39,10 @@ StandardView::StandardView(QWidget *parent) : ViewBase(parent)
   QObject::connect(this->ui.rebinButton, SIGNAL(clicked()), this,
                    SLOT(onRebinButtonClicked()));
 
+  // Set the scale button to create the ScaleWorkspace operator
+  QObject::connect(this->ui.scaleButton, SIGNAL(clicked()),
+                   this, SLOT(onScaleButtonClicked()));
+
   this->view = this->createRenderView(this->ui.renderFrame);
 }
 
@@ -120,6 +124,14 @@ void StandardView::onRebinButtonClicked()
                                            this->origSrc);
     this->ui.cutButton->setEnabled(false);
   }
+}
+
+void StandardView::onScaleButtonClicked()
+{
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  this->scaler = builder->createFilter("filters",
+                                       "MantidParaViewScaleWorkspace",
+                                       this->getPvActiveSrc());
 }
 
 void StandardView::renderAll()
