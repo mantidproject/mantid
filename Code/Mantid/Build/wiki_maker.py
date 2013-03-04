@@ -78,6 +78,7 @@ def make_property_table_line(propnum, p):
     Returns:
         string to add to the wiki
     """
+    
     out = ""
     # The property number
     out += "|" + str(propnum) + "\n"
@@ -86,8 +87,11 @@ def make_property_table_line(propnum, p):
     # Direction
     direction_string = ["Input", "Output", "InOut", "None"]
     out += "|" + direction_string[p.direction] + "\n"
-    # Type (as string)
-    out += "|" + str(p.type) + "\n"
+    # Type (as string) wrap an IWorkspaceProperty in a link.
+    if isinstance(p, IWorkspaceProperty): 
+        out += "|[[" + str(p.type) + "]]\n"
+    else:
+        out += "|" + str(p.type) + "\n"
     # Default?
     default = p.getDefault
     # Convert to int, then float, then any string
@@ -433,6 +437,7 @@ if __name__ == "__main__":
     
     initialize_Mantid(args.mantidpath)
     global mtd
+    from MantidFramework import IWorkspaceProperty
     mtd = wiki_tools.mtd
     intialize_files()
     initialize_wiki(args)
