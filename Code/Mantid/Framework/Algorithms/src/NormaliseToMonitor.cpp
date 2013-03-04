@@ -1,6 +1,5 @@
 /*WIKI* 
 
-
 ===Bin-by-bin mode===
 In this, the default scenario, each spectrum in the workspace is normalised on a bin-by-bin basis by the monitor spectrum given. The error on the monitor spectrum is taken into account.
 The normalisation scheme used is:
@@ -21,9 +20,9 @@ The error on the integrated monitor spectrum is taken into account in the normal
 
 The data must be histogram, non-distribution data.
 
-===ChildAlgorithms used===
+===Child Algorithms used===
 
-The [[ExtractSingleSpectrum]] algorithm is used to pull out the monitor spectrum if it's part of the InputWorkspace.
+The [[ExtractSingleSpectrum]] algorithm is used to pull out the monitor spectrum if it's part of the InputWorkspace or MonitorWorkspace.
 For the 'integrated range' option, the [[Integration]] algorithm is used to integrate the monitor spectrum.
 
 In both cases, the [[Divide]] algorithm is used to perform the normalisation.
