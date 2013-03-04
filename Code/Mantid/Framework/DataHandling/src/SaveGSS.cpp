@@ -62,12 +62,12 @@ namespace Mantid
       Split[0] = "True";
       Split[1] = "False";
       declareProperty("SplitFiles", "True", boost::make_shared<Kernel::StringListValidator>(Split),
-          "Save each spectrum in a different file (default true)");
+          "Whether to save each spectrum into a separate file ('true') or not ('false'). Note that this is a string, not a boolean property.");
       declareProperty("Append", true, "If true and Filename already exists, append, else overwrite");
       declareProperty(
           "Bank",
           1,
-          "Start bank (spectrum) numbers at this number in the file. The bank number in the file will be the workspace index + StartAtBankNumber. Default = 1.");
+          "The bank number to include in the file header for the first spectrum. This will increment for each spectrum or group member.");
       std::vector<std::string> formats;
       formats.push_back(RALF);
       formats.push_back(SLOG);
