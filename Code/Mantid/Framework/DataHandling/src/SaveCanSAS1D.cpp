@@ -69,10 +69,10 @@ void SaveCanSAS1D::init()
   radiation_source.push_back("muon");
   radiation_source.push_back("electron");
   declareProperty("RadiationSource", "Spallation Neutron Source", 
-                  boost::make_shared<Kernel::StringListValidator>(radiation_source));
-  declareProperty("Append", false, "If true the output file is not overwritten but appended to"); 
+                  boost::make_shared<Kernel::StringListValidator>(radiation_source), "The type of radiation used.");
+  declareProperty("Append", false, "Selecting append allows the workspace to be added to an existing canSAS 1-D file as a new SASentry"); 
   declareProperty("Process", "", "Text to append to Process section");
-  declareProperty("DetectorNames","", "Which detectors to store information about, where the name must match the name given for a detector in the instrument definition file");
+  declareProperty("DetectorNames","", "Specify in a comma separated list, which detectors to store information about; \nwhere each name must match a name given for a detector in the [[IDF|instrument definition file (IDF)]]. \nIDFs are located in the instrument sub-directory of the MantidPlot install directory.");
 }
 /** Is called when the input workspace was actually a group, it sets the
  *  for all group members after the first so that the whole group is saved
