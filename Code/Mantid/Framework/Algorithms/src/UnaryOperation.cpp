@@ -25,8 +25,8 @@ namespace Mantid
      */
     void UnaryOperation::init()
     {
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName(),"",Direction::Input),"The input workspace");
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(),"",Direction::Output),"The output workspace");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName(),"",Direction::Input),"The name of the input workspace");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(),"",Direction::Output),"The name to use for the output workspace (can be the same as the input one).");
       
       // Call the virtual defineProperties functions to declare any properties defined in concrete algorithm
       defineProperties();

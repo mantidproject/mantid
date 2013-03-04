@@ -1,3 +1,8 @@
+/*WIKI*
+
+Some sample logs from DAS are written in the format such that the time stamps are the pulse times and the values are time-of-flight. They are usually used to record some mono-value sample log such as turning on or off of a sample environment device.  This algorithm will convert sample logs of this time such that the new log will have the time stamp as the absolute time, i.e., sum of pulse time and time-of-flight. 
+  
+*WIKI*/
 #include "MantidDataHandling/ProcessDasNexusLog.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -44,16 +49,16 @@ namespace DataHandling
   void ProcessDasNexusLog::init()
   {
     this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::InOut),
-        "Input Workspace containing the log to process.");
+        "The name of the [[EventWorkspace]] to filter events from.");
     this->declareProperty("LogToProcess", "", boost::make_shared<MandatoryValidator<std::string> >(),
-        "Name of the log to process.");
+        "The name of sample log to process.");
     this->declareProperty("ProcessedLog", "", boost::make_shared<MandatoryValidator<std::string> >(),
-        "Name of the new log containing processed log.");
+        "The name of the new sample log processed from DAS log.");
     this->declareProperty(new API::FileProperty("OutputDirectory", "", API::FileProperty::Directory),
-        "Directory for output files.");
-    this->declareProperty("NumberOfOutputs", 4000, "Number of log entries written to file.  A negative input disables this option. ");
+        "The directory for some other examination files to be written to.");
+    this->declareProperty("NumberOfOutputs", 4000, "Number of log entries to be written to a file for examination.");
     this->declareProperty(new API::FileProperty("OutputLogFile", "", API::FileProperty::OptionalSave),
-        "Directory for output files.");
+        "The file name for the output data file. ");
 
     return;
   }
