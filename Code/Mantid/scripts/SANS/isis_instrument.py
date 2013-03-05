@@ -1,6 +1,8 @@
 from reduction import instrument
 import math
 from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup
+
 import sys
 
 class DetectorBank:
@@ -807,7 +809,7 @@ class SANS2D(ISISInstrument):
         """
         self._marked_dets = []
         #assume complete log information is stored in the first entry, it isn't stored in the group workspace itself
-        if wksp.isGroup():
+        if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]
 
         samp = wksp.getRun()

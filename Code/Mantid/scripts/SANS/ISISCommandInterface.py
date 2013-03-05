@@ -9,7 +9,8 @@ import isis_reduction_steps
 import isis_reducer
 from centre_finder import CentreFinder as CentreFinder
 #import SANSReduction
-import mantid
+from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup
 import copy
 from SANSadd2 import *
 
@@ -884,7 +885,7 @@ def PlotResult(workspace, canvas=None):
     """ 
     #ensure that we are dealing with a workspace handle rather than its name
     workspace = mtd[str(workspace)]
-    if workspace.isGroup():
+    if isinstance(workspace, WorkspaceGroup):
         numSpecs = workspace[0].getNumberHistograms()
     else:
         numSpecs = workspace.getNumberHistograms()
@@ -1106,5 +1107,11 @@ NewTrans = 'False'
 
 _refresh_singleton()
 
-#if __name__ != '__main__':
-#    AssignSample('c:\\mantid\\test\\data\\SANS2D\\SANS2D000992.raw')
+if __name__ == '__main__':
+    SetVerboseMode(True)
+    SANS2D()
+    MaskFile('/apps/mantid/systemtests/Data/SANS2D/MASKSANS2D_123T_4m_Xpress_8mm.txt')
+    Set1D()
+    AssignSample('/apps/mantid/systemtests/Data/SANS2D/SANS2D00002500.nxs')
+    Gravity(True)
+    

@@ -10,6 +10,7 @@ from reduction import ReductionStep
 import isis_reducer
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup
 import SANSUtility
 import isis_instrument
 import os
@@ -203,8 +204,8 @@ class LoadRun(object):
         return logs
 
     def _leaveSinglePeriod(self, workspace, period):
-        groupW = mantid[workspace]
-        if groupW.isGroup():
+        groupW = mtd[workspace]
+        if isinstance(groupW, WorkspaceGroup):
             num_periods = groupW.getNames()
         else:
             num_periods = 1
@@ -293,8 +294,8 @@ class LoadRun(object):
             @param workspace: the name of the workspace
         """
         numPeriods = -1
-        pWorksp = mantid[workspace]
-        if pWorksp.isGroup() :
+        pWorksp = mtd[workspace]
+        if isinstance(pWorksp, WorkspaceGroup) :
             #get the number of periods in a group using the fact that each period has a different name
             numPeriods = len(pWorksp.getNames())
         else :
@@ -995,9 +996,9 @@ class LoadSample(LoadRun, ReductionStep):
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
-        p_run_ws = mantid[self.wksp_name]
+        p_run_ws = mtd[self.wksp_name]
         
-        if p_run_ws.isGroup():
+        if isinstance(p_run_ws, WorkspaceGroup):
             p_run_ws = p_run_ws[0]
     
         try:
@@ -1404,7 +1405,7 @@ class AbsoluteUnitsISIS(ReductionStep):
             rescaleToColette = math.pi
             scalefactor /= rescaleToColette
 
-        ws = mantid[workspace]
+        ws = mtd[workspace]
         ws *= scalefactor
         
 class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
