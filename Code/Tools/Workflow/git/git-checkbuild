@@ -1,0 +1,99 @@
+#!/bin/sh
+#
+# Copyright 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+#
+# This file is part of Mantid.
+#
+# Mantid is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Mantid is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# File change history is stored at: <https://github.com/mantidproject/mantid>
+
+# Set top-level command name
+CMD_NAME="checkbuild"
+
+# Get directory of this file
+# The sed expression here replaces all backslashes by forward slashes.
+# This helps our Windows users, while not bothering our Unix users.
+export CMDFILE_DIR=$(dirname "$(echo "$0" | sed -e 's@\\@/@g')")
+
+usage() {
+    echo "Usage: git ${CMD_NAME} [SWITCHES]"
+    echo "Check the current branch against the build servers by merging to develop"
+    echo "and pushing to the remote. Any uncommitted changes are stashed temprorarily"
+    echo "and will NOT be checked by the build servers."
+    echo
+    echo "The current branch must not be master or develop, if it is then the script"
+    echo "aborts. "
+    echo
+    echo "Equivalent to:"
+    echo "  git stash"
+    echo "  git checkout develop"
+    echo "  git pull"
+    echo "  git merge <branchname>"
+    echo "  git push origin develop"
+    echo "  git checkout <branchname>"
+    echo "  git stash pop"
+    echo
+    echo "Switches:"
+    echo "  -h  Prints this help"
+
+}
+
+checkargs() {
+    if [ $# -eq 1 ]; then
+	if [ "$1" = "-h" ]; then
+	    usage
+	    exit 0
+	else
+	    usage
+	    exit 1
+	fi
+    elif [ $# -gt 1 ]; then
+	usage
+	exit 1
+    fi
+}
+
+# Returns the name of the current branch
+current_branch() {
+    git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
+}
+
+# Returns 1 if there are modifications to the current index/working copy
+local_modifications() {
+    changes=$(git status --porcelain | grep -v "?")
+    if [ -z "${changes}" ]; then
+	retval=0
+    else
+	retval=1
+    fi
+    return ${retval}
+}
+
+# Stash any changes if necessary
+stash_local() {
+    # Mark that a stash has taken place, this is scoped to the file not to the function
+    stashed=1
+}
+
+# Unstash any changes if necessary
+resurrect_changes() {
+    echo $stashed
+}
+
+main() {
+    checkargs "$@"
+}
+
+main "$@"

@@ -21,8 +21,10 @@
 
 # Set top-level command name
 CMD_NAME="new"
-# 
+# Prefix for branch names
 DEFAULT_PREFIX="feature/"
+# Base branch for new branches
+BASE_BRANCH="origin/master"
 
 # Get directory of this file
 # The sed expression here replaces all backslashes by forward slashes.
@@ -44,19 +46,55 @@ usage() {
     echo "  git checkout --no-track -b [PREFIX]<ticketno>_short_descr"
     echo
     echo "Positional arguments:"
-    echo "  ticketno    The TRAC ticket reference number"
-    echo "  short_descr  A short description of the branch (without spaces)"
+    echo "  ticketno      The TRAC ticket reference number"
+    echo "  short_descr   A short description of the branch (without spaces)"
     echo 
     echo "Switches:"
-    echo "  -p,--prefix  When creating a branch use this prefix in the 
-                         name (default=feature/)"
+    echo "  -p            When creating a branch use this prefix in the"
+    echo "                name (default=feature/)"
 }
- 
-main() {
-    if [ $# -lt 1 ]; then
+
+get_opts() {
+    # Can't use getopt cross-platform
+    # Allow either 2 or 4 arguments
+    if [ ! $# -eq 2 -a ! $# -eq 4 ]; then
 	usage
 	exit 1
     fi
+    
+    branchprefix=${DEFAULT_PREFIX}
+    prefix_next=0
+    pos_arg=0
+    for i in "$@"; do
+	if [ "$i" = "-p" ]; then
+	    prefix_next=1
+	    continue
+	fi
+	if [ ${prefix_next} -eq 1 ]; then
+	    prefix_next=0
+	    branchprefix=${i}
+	else
+	    case $pos_arg in
+		0) ticketno=$i;;
+		1) descr=$i;;
+	    esac
+	    pos_arg=$((pos_arg+1))
+	fi
+    done
+
+    # Make sure the prefix ends with a / by removing it
+    # if it exists and adding it back
+    branchprefix=${branchprefix%%"/"}
+    branchprefix=${branchprefix}"/"
+}
+
+main() {
+  get_opts "$@"
+ 
+  echo "Creating new branch ${branchprefix}${ticketno}_${descr} based on ${BASE_BRANCH}"
+  # Check if there are changes and warn as user may have forgotten
+
+
 }
 
 main "$@"
