@@ -97,10 +97,10 @@
   </component>
   <type name="moderator" is="chopper">
     <cuboid id="cuboid">
-       <left-front-bottom-point x="0.1" y="-0.05" z="-0.3"  />
-       <left-front-top-point  x="0.1" y="-0.05" z="0.3"  />
-       <left-back-bottom-point  x="-0.1" y="-0.05" z="-0.3"  />
-       <right-front-bottom-point  x="0.1" y="0.05" z="-0.3"  />
+       <left-front-bottom-point x="0.06" y="-0.06" z="-0.03"  />
+       <left-front-top-point  x="0.06" y="-0.06" z="0.03"  />
+       <left-back-bottom-point  x="-0.06" y="-0.06" z="-0.03"  />
+       <right-front-bottom-point  x="0.06" y="0.06" z="-0.03"  />
     </cuboid>
   </type>  
   
