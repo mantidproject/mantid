@@ -24,13 +24,13 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
          ${CMAKE_BINARY_DIR}/qtassistant/generated/fitfunctions_index.html )
 
    add_custom_command(OUTPUT ${HELP_ALGO_OUT}
-                      DEPENDS make_algorithms_help.py qhpfile.py
+                      DEPENDS make_algorithms_help.py qhpfile.py algorithm_help.py
                       COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_algorithms_help.py
                               -m ${CMAKE_BINARY_DIR} -o ${CMAKE_BINARY_DIR}/qtassistant/generated
 		      )
 
    add_custom_command(OUTPUT ${HELP_FIT_OUT}
-                      DEPENDS make_fitfunctions_help.py qhpfile.py
+                      DEPENDS make_fitfunctions_help.py qhpfile.py fitfunctions_help.py
                       COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_fitfunctions_help.py
                               -m ${CMAKE_BINARY_DIR} -o ${CMAKE_BINARY_DIR}/qtassistant/generated
 		      )
@@ -40,7 +40,7 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
 		      COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} ${CMAKE_BINARY_DIR}/qtassistant/mantid.qhcp
 		      )
 
-   add_custom_target ( qtassistant
+   add_custom_target ( qtassistant ALL
                        DEPENDS MantidPlot
 		               ${CMAKE_BINARY_DIR}/qtassistant/generated/algorithms.qhp
 			       ${CMAKE_BINARY_DIR}/qtassistant/generated/fitfunctions.qhp
