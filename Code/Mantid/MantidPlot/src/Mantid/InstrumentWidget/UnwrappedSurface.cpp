@@ -375,6 +375,8 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
     glEnable(GL_LIGHT0);               // Enable opengl second light
     float diffuse[4]={1.0f, 1.0f, 1.0f, 1.0f};
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+    float direction[3]={0.0f, 0.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, direction);
 
     glEnable (GL_LIGHTING);            // Enable overall lighting
   }
