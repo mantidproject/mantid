@@ -1114,4 +1114,6 @@ if __name__ == '__main__':
     Set1D()
     AssignSample('/apps/mantid/systemtests/Data/SANS2D/SANS2D00002500.nxs')
     Gravity(True)
-    
+    wav1 = 2.0
+    wav2 = wav1 + 2.0
+    reduced = WavRangeReduction(wav1, wav2, DefaultTrans)
