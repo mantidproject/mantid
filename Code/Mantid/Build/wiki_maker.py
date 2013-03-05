@@ -302,7 +302,15 @@ def make_redirect(from_page, to_page):
     page = site.Pages[from_page]
     contents = "#REDIRECT [[%s]]" % to_page
     page.save(contents, summary = 'Bot: created redirect to the latest version.' )
- 
+    
+#======================================================================
+def page_exists(page):
+    # Determine if the wikipage exists or not.
+    revisions = page.revisions()
+    for rev in revisions:
+        return True
+    return False
+
 #======================================================================   
 def last_page_editor(page):
     #Get the last editor of the page.
@@ -320,7 +328,7 @@ def wiki_maker_page(page):
 #======================================================================
 def do_algorithm(args, algo, version=-1):
     """ Do the wiki page
-    @param algo_tuple :: the name of the algorithm, and it's version as a tuple"""
+    @param algo :: the name of the algorithm, and it's version as a tuple"""
     global mtd
     is_latest_version = True
     latest_version = -1
@@ -329,7 +337,6 @@ def do_algorithm(args, algo, version=-1):
     if (version == -1): version = latest_version
 
     print "Latest version of %s is %d. You are making version %d." % (algo, latest_version, version)
-    
     # What should the name on the wiki page be?
     wiki_page_name = algo
     if latest_version > 1:
@@ -345,6 +352,10 @@ def do_algorithm(args, algo, version=-1):
     
     #Open the page with the name of the algo
     page = site.Pages[wiki_page_name]
+    if not page_exists(page):
+        print "Error: Wiki Page wiki_page_name %s does not exist on the wiki." % wiki_page_name
+        reporter.addFailureNoPage(algo, wiki_page_name)
+        return
     
     old_contents = page.edit() + "\n"
     
@@ -374,14 +385,13 @@ def do_algorithm(args, algo, version=-1):
             if not last_modifier == None:
                 # Report a failure test case
                 reporter.addFailureTestCase(algo, version, last_modifier, ''.join(diff_list))
+        
+        if args.dryrun:
+            print "Dry run of saving page to http://www.mantidproject.org/%s" % wiki_page_name
+        elif wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
+            print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
+            page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
             
-        if wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
-            if not args.dryrun:
-                print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
-                page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
-            else:
-                print "Dry run of saving page to http://www.mantidproject.org/%s" % wiki_page_name
-
     saved_text = open(wiki_page_name+'.txt', 'w')
     saved_text.write(new_contents)
     saved_text.close()
