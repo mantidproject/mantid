@@ -22,6 +22,8 @@ import platform
 
 # Junit report generator.
 reporter = WikiReporter()
+# no version identier
+noversion = -1
 
 #======================================================================
 def get_wiki_description(algo, version):
@@ -326,15 +328,15 @@ def wiki_maker_page(page):
     return ("WikiMaker" == last_page_editor(page))
     
 #======================================================================
-def do_algorithm(args, algo, version=-1):
+def do_algorithm(args, algo, version):
     """ Do the wiki page
     @param algo :: the name of the algorithm, and it's version as a tuple"""
     global mtd
     is_latest_version = True
-    latest_version = -1
     # Find the latest version        
-    latest_version = mtd.createAlgorithm(algo, -1).version()
-    if (version == -1): version = latest_version
+    latest_version = mtd.createAlgorithm(algo, noversion).version()
+    if (version == noversion): 
+        version = latest_version
 
     print "Latest version of %s is %d. You are making version %d." % (algo, latest_version, version)
     # What should the name on the wiki page be?
@@ -432,8 +434,8 @@ if __name__ == "__main__":
                         const=True, default=False,
                         help="Force overwriting the wiki page on the website if different (don't ask the user)")
 
-    parser.add_option('--no-version-check', dest='no_version_check', action='store_true',
-                        help='Do not perform version check on algorithm name.')
+    parser.add_option('--alg-version', dest='algversion', default=noversion, 
+                        help='Algorithm version to create the wiki for.')
     
     parser.add_option('--report', dest='wikimakerreport', default=False, action='store_const', const=True,
                         help="Record authors and corresponding algorithm wiki-pages that have not been generated with the wiki-maker")
@@ -479,7 +481,7 @@ if __name__ == "__main__":
             do_algorithm(args, algo_tuple[0], algo_tuple[1][0])
     else:
         for algo in algos:
-            do_algorithm(args, algo, -1)
+            do_algorithm(args, algo, int(args.algversion))
             
     if args.wikimakerreport:
         junit_file = open('WikiMakerReport.xml', 'w')
