@@ -22,6 +22,8 @@ private:
     /** The full path of the cache file. If it is not
         determined this is an empty string. */
     std::string m_cacheFile;
+    /// QT assistant executable.
+    std::string m_assistantExe;
     /// The logger for the class.
     Mantid::Kernel::Logger& m_log;
 

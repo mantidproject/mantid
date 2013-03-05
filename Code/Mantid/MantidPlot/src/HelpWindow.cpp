@@ -20,7 +20,8 @@ const string BASEURL("qthelp://org.mantidproject/doc/");
 HelpWindow::HelpWindow() :
     m_collectionFile(""),
     m_cacheFile(""),
-  m_log(Mantid::Kernel::Logger::get("HelpWindow"))
+    m_assistantExe(""),
+    m_log(Mantid::Kernel::Logger::get("HelpWindow"))
 {
     this->determineFileLocs();
     this->start();
@@ -107,12 +108,12 @@ void HelpWindow::start()
     args << QLatin1String("-collectionFile")
          << QLatin1String(m_collectionFile.c_str())
          << QLatin1String("-enableRemoteControl");
-    m_process->start(QLatin1String("/usr/bin/assistant"), args);
+    m_process->start(QLatin1String(m_assistantExe.c_str()), args);
     if (!m_process->waitForStarted())
         return;
-    m_log.debug() << QString("/usr/bin/assistant").toStdString()
-                        << " " << args.join(QString(" ")).toStdString()
-                        << " (state = " << m_process->state() << ")\n";
+    m_log.debug() << m_assistantExe
+                  << " " << args.join(QString(" ")).toStdString()
+                  << " (state = " << m_process->state() << ")\n";
 }
 
 /**
@@ -143,6 +144,7 @@ void HelpWindow::findCollectionFile(std::string &binDir)
 
     // try next to the executable
     Poco::Path path(binDir, COLLECTION);
+    m_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
         m_collectionFile =path.absolute().toString();
@@ -151,6 +153,7 @@ void HelpWindow::findCollectionFile(std::string &binDir)
 
     // try one level up
     path = Poco::Path(binDir, "../"+COLLECTION);
+    m_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
         m_collectionFile = path.absolute().toString();
@@ -159,6 +162,7 @@ void HelpWindow::findCollectionFile(std::string &binDir)
 
     // try where the builds will put it
     path = Poco::Path(binDir, "../qtassistant/"+COLLECTION);
+    m_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
         m_collectionFile = path.absolute().toString();
@@ -167,6 +171,7 @@ void HelpWindow::findCollectionFile(std::string &binDir)
 
     // try in a good linux install location
     path = Poco::Path(binDir, "../share/doc/" + COLLECTION);
+    m_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
         m_collectionFile = path.absolute().toString();
@@ -188,6 +193,15 @@ void HelpWindow::determineFileLocs()
     string binDir = Mantid::Kernel::ConfigService::Instance().getDirectoryOfExecutable();
     this->findCollectionFile(binDir);
     m_log.debug() << "using collection file \"" << m_collectionFile << "\"\n";
+
+    // location for qtassistant
+#ifdef __linux__
+    // linux it is in system location
+    m_assistantExe = "/usr/bin/assistant";
+#else
+    // windows it is next to MantidPlot
+    m_assistantExe = Poco::Path(binDir, "assistant").absolute().toString();
+#endif
 
     // determine cache file location
     m_cacheFile = "mantid.qhc";
