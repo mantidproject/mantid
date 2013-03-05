@@ -163,17 +163,18 @@ def make_wiki(algo_name, version, latest_version):
     @param version :: version requested
     @param latest_version :: the latest algorithm 
     """ 
-    
+    out = ""
     # Deprecated algorithms: Simply returnd the deprecation message
     print "Creating... ", algo_name, version
     deprec = mtd.algorithmDeprecationMessage(algo_name,version)
     if len(deprec) != 0:
-        out = deprec
-        out = out.replace(". Use ", ". Use [[")
-        out = out.replace(" instead.", "]] instead.")
-        return out
+        out = "== Deprecated ==\n\n"
+        deprecstr = deprec
+        deprecstr = deprecstr.replace(". Use ", ". Use [[")
+        deprecstr = deprecstr.replace(" instead.", "]] instead.")
+        out += deprecstr 
+        out += "\n\n"
     
-    out = ""
     alg = mtd.createAlgorithm(algo_name, version)
     
     if (latest_version > 1):
