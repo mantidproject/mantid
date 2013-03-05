@@ -67,34 +67,20 @@ def make_group_header_line(group):
         return "|colspan=6 align=center|   \n|-\n"
     else:
         return "|colspan=6 align=center|'''%s'''\n|-\n" % group
+
+#======================================================================  
+def create_property_default_string(prop):
+    """ Create a default string 
     
-#======================================================================
-def make_property_table_line(propnum, p):
-    """ Make one line of the property table
-    
-    Args:
-        propnum :: number of the prop
-        p :: Property object
+     Args:
+        default. The property default value.
     Returns:
-        string to add to the wiki
+        string to add to the wiki property table default section.
     """
-    
-    out = ""
-    # The property number
-    out += "|" + str(propnum) + "\n"
-    # Name of the property
-    out += "|" + p.name + "\n"
-    # Direction
-    direction_string = ["Input", "Output", "InOut", "None"]
-    out += "|" + direction_string[p.direction] + "\n"
-    # Type (as string) wrap an IWorkspaceProperty in a link.
-    if isinstance(p, IWorkspaceProperty): 
-        out += "|[[" + str(p.type) + "]]\n"
-    else:
-        out += "|" + str(p.type) + "\n"
-    # Default?
-    default = p.getDefault
     # Convert to int, then float, then any string
+    
+    default = prop.getDefault
+    defaultstr = ""
     try:
         val = int(default)
         if (val >= 2147483647):
@@ -118,14 +104,48 @@ def make_property_table_line(propnum, p):
        (defaultstr == "2147483647"):
         defaultstr = "Optional"
         
-    if str(p.type) == "boolean":
+    if str(prop.type) == "boolean":
         if defaultstr == "1": defaultstr = "True" 
         else: defaultstr = "False"
+    return defaultstr
+
+#======================================================================
+def make_property_table_line(propnum, p):
+    """ Make one line of the property table
     
-    if (p.isValid == ""): #Nothing was set, but it's still valid = NOT mandatory
+    Args:
+        propnum :: number of the prop
+        p :: Property object
+    Returns:
+        string to add to the wiki
+    """
+    
+    out = ""
+    # The property number
+    out += "|" + str(propnum) + "\n"
+    # Name of the property
+    out += "|" + p.name + "\n"
+    # Direction
+    InputDirection = "Intput"
+    OutputDirection = "Output"
+    InOutDirection = "InOut"
+    NoDirection = "None"
+    direction_string = [InputDirection, OutputDirection, InOutDirection, NoDirection]
+    out += "|" + direction_string[p.direction] + "\n"
+    # Type (as string) wrap an IWorkspaceProperty in a link.
+    if isinstance(p, IWorkspaceProperty): 
+        out += "|[[" + str(p.type) + "]]\n"
+    else:
+        out += "|" + str(p.type) + "\n"
+       
+    if (direction_string[p.direction] == OutputDirection) and (not isinstance(p, IWorkspaceProperty)):
+      out += "|\n" # Nothing to show under the default section for an output properties that are not workspace properties.
+    elif (p.isValid == ""): #Nothing was set, but it's still valid = NOT  mandatory
+      defaultstr = create_property_default_string(p)
       out += "| " + defaultstr + "\n"
     else:
       out += "|Mandatory\n"
+      
     # Documentation
     out += "|" + p.documentation.replace("\n", "<br />") + "\n"
     # End of table line
