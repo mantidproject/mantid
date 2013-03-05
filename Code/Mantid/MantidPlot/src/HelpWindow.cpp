@@ -196,12 +196,30 @@ void HelpWindow::determineFileLocs()
 
     // location for qtassistant
 #ifdef __linux__
-    // linux it is in system location
+    // linux it is in system locations
+    m_assistantExe = "/usr/bin/assistant";
+    if (!Poco::File(m_assistantExe).exists())
+    {
+        m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+        m_assistantExe = "/usr/bin/assistant";
+        if (!Poco::File(m_assistantExe).exists())
+        {
+            m_log.debug() << "File \"" << m_assistantExe
+                          << "\" does not exist. Assuming it is elsewhere in the path.\n";
+            m_assistantExe = "assistant";
+        }
+    }
     m_assistantExe = "/usr/bin/assistant";
 #else
     // windows it is next to MantidPlot
     m_assistantExe = Poco::Path(binDir, "assistant").absolute().toString();
+    if (!Poco::File(m_assistantExe).exists())
+    {
+        m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+    }
 #endif
+    if (Poco::File(m_assistantExe).exists())
+        m_log.debug() << "Using \"" << m_assistantExe << "\" for viewing help\n";
 
     // determine cache file location
     m_cacheFile = "mantid.qhc";
