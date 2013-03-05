@@ -9,7 +9,7 @@
 from reduction import ReductionStep
 import isis_reducer
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
-from mantidsimple import *
+from mantid.simpleapi import *
 import SANSUtility
 import isis_instrument
 import os
@@ -22,7 +22,7 @@ def _issueWarning(msg):
         @param msg: message to be issued
     """
     print msg
-    mantid.sendWarningMessage('::SANS::Warning: ' + msg)
+    logger.warning('::SANS::Warning: ' + msg)
 
 def _issueInfo(msg):
     """
@@ -30,7 +30,7 @@ def _issueInfo(msg):
         @param msg: message to be issued
     """
     print msg
-    mantid.sendLogMessage(msg)
+    logger.notice(msg)
 
 
 class LoadRun(object):
@@ -78,20 +78,30 @@ class LoadRun(object):
 
         if os.path.splitext(self._data_file)[1].lower().startswith('.r') or os.path.splitext(self._data_file)[1].lower().startswith('.s'):
             try:
-                alg = LoadRaw(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
+                outWs = LoadRaw(Filename=self._data_file, 
+                                OutputWorkspace=workspace, 
+                                SpectrumMin=self._spec_min, 
+                                SpectrumMax=self._spec_max)
             except ValueError:
                 # MG - 2011-02-24: Temporary fix to load .sav or .s* files. Lets the file property
                 # work it out
                 file_hint = os.path.splitext(self._data_file)[0]
-                alg = LoadRaw(file_hint, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
-                self._data_file = alg.getPropertyValue("Filename")
-    
-            LoadSampleDetailsFromRaw(workspace, self._data_file)
+                outWs = LoadRaw(Filename=file_hint, 
+                                OutputWorkspace=workspace, 
+                                SpectrumMin=self._spec_min, 
+                                SpectrumMax=self._spec_max)
+                
+            alg = outWs.getHistory().lastAlgorithm()
+            self._data_file = alg.getPropertyValue("Filename")
+            LoadSampleDetailsFromRaw(InputWorkspace=workspace, Filename=self._data_file)
 
             workspace = self._leaveSinglePeriod(workspace, period)
         else:
-            alg = LoadNexus(self._data_file, workspace,
-                SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, EntryNumber=period)
+            outWs = LoadNexus(Filename=self._data_file, 
+                              OutputWorkspace=workspace,
+                SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, 
+                EntryNumber=period)
+            alg = outWs.getHistory().lastAlgorithm()            
             self._data_file = alg.getPropertyValue("Filename")
 
         SANS2D_log_file = mtd[workspace]
@@ -102,7 +112,7 @@ class LoadRun(object):
             #get the workspace name, a period number of 1 is only included if the file has more than 1 period
             period_definitely_inc = self._get_workspace_name(self._period)
             if period_definitely_inc != workspace:
-                RenameWorkspace(workspace, period_definitely_inc)
+                RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= period_definitely_inc)
                 workspace = period_definitely_inc 
         
         log = None
@@ -180,13 +190,13 @@ class LoadRun(object):
                     self._spec_max = 8
                 self.periods_in_file, logs = self._load(reducer.instrument)
             except RuntimeError, err:
-                mantid.sendLogMessage("::SANS::Warning: "+str(err))
+                logger.notice("::SANS::Warning: "+str(err))
                 return '', -1
         else:
             try:
                 self.periods_in_file, logs = self._load(reducer.instrument)
             except RuntimeError, details:
-                mantid.sendLogMessage("::SANS::Warning: "+str(details))
+                logger.notice("::SANS::Warning: "+str(details))
                 self.wksp_name = ''
                 return '', -1
         
@@ -217,16 +227,16 @@ class LoadRun(object):
                 newName += '_'+discriptors[i]
     
         if oldName != newName:
-            RenameWorkspace(oldName, newName)
+            RenameWorkspace(InputWorkspace=oldName,OutputWorkspace= newName)
     
         #remove the rest of the group
-        mantid.deleteWorkspace(groupW.getName())
+        DeleteWorkspace(groupW.getName())
         return newName
     
     def _clearPrevious(self, inWS, others = []):
         if inWS != None:
-            if mantid.workspaceExists(inWS) and (not inWS in others):
-                mantid.deleteWorkspace(inWS)
+            if inWs in mtd and (not inWS in others):
+                DeleteWorkspace(inWs)
                 
 
     def _extract_run_details(self, run_string, is_trans=False, prefix='', run_number_width=-1):
@@ -292,7 +302,7 @@ class LoadRun(object):
 
         #the logs have the definitive information on the number of periods, if it is in the logs
         try:
-            samp = pWorksp.getSampleDetails()
+            samp = pWorksp.getRun()
             numPeriods = samp.getLogData('nperiods').value
         except:
             #it's OK for there not to be any logs
@@ -405,7 +415,7 @@ class CanSubtraction(ReductionStep):
         logs = self.workspace._assignHelper(reducer)
 
         if self.workspace.wksp_name == '':
-            mantid.sendLogMessage('::SANS::Warning: Unable to load SANS can run, cannot continue.')
+            logger.notice('::SANS::Warning: Unable to load SANS can run, cannot continue.')
             return '()'
           
         if logs:
@@ -429,14 +439,14 @@ class CanSubtraction(ReductionStep):
         """        
         #remain the sample workspace, its name will be restored to the original once the subtraction has been done 
         tmp_smp = workspace+"_sam_tmp"
-        RenameWorkspace(workspace, tmp_smp)
+        RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= tmp_smp)
 
         tmp_can = workspace+"_can_tmp"
         #do same corrections as were done to the sample
         reducer.reduce_can(tmp_can)
 
         #we now have the can workspace, use it
-        Minus(tmp_smp, tmp_can, workspace)
+        Minus(LHSWorkspace=tmp_smp,RHSWorkspace= tmp_can,OutputWorkspace= workspace)
     
         #clean up the workspaces ready users to see them if required
         if reducer.to_Q.output_type == '1D':
@@ -834,10 +844,10 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         sans_reduction_steps.Mask.execute(self, reducer, workspace)
 
         if len(self.spec_list)>0:
-            MaskDetectors(workspace, SpectraList = self.spec_list)
+            MaskDetectors(Workspace=workspace, SpectraList = self.spec_list)
             
         if self._lim_phi_xml != '' and self.mask_phi:
-            MaskDetectorsInShape(workspace, self._lim_phi_xml)
+            MaskDetectorsInShape(Workspace=workspace,ShapeXML= self._lim_phi_xml)
 
         if self.arm_width and self.arm_angle:
             if instrument.name() == "SANS2D":
@@ -845,7 +855,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 det = ws.getInstrument().getComponentByName('rear-detector')
                 det_Z = det.getPos().getZ()
                 start_point = [0, 0, det_Z]
-                MaskDetectorsInShape(workspace,
+                MaskDetectorsInShape(Workspace=workspace,ShapeXML=
                                  self._mask_line(start_point, 1e6, self.arm_width, self.arm_angle))
 
     def view(self, instrum):
@@ -869,7 +879,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         instrum.setDetector(original)
 
         # Mark up "dead" detectors with error value 
-        FindDeadDetectors(wksp_name, wksp_name, DeadValue=500)
+        FindDeadDetectors(InputWorkspace=wksp_name,OutputWorkspace= wksp_name, DeadValue=500)
 
         #opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors) 
         instrum.view(wksp_name)
@@ -894,11 +904,11 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         instrum.setDetector(original)
 
         if counts:    
-            Power(counts, 'ones', 0)
-            Plus(wksp, 'ones', wksp)
+            Power(InputWorkspace=counts,OutputWorkspace= 'ones',Exponent= 0)
+            Plus(LHSWorkspace=wksp,RHSWorkspace= 'ones',OutputWorkspace= wksp)
 
         # Mark up "dead" detectors with error value 
-        FindDeadDetectors(wksp, wksp, LiveValue = 0, DeadValue=1)
+        FindDeadDetectors(InputWorkspace=wksp,OutputWorkspace= wksp, LiveValue = 0, DeadValue=1)
 
         #check if we have a workspace to superimpose the mask on to
         if counts:
@@ -929,13 +939,13 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 if Ys[i] != 0:
                     Ys[i] = maxval*Ys[i] + vals.readY(i)[0]
 
-            CreateWorkspace(wksp, Xs, Ys, Es, len(Ys), UnitX='TOF', VerticalAxisValues=Ys)
+            CreateWorkspace(OutputWorkspace=wksp,DataX= Xs,DataY= Ys,DataE= Es,NSpec= len(Ys), UnitX='TOF', VerticalAxisValues=Ys)
             #change the units on the workspace so it is compatible with the workspace containing counts data
-            Multiply('ones', wksp, 'units')
+            Multiply(LHSWorkspace='ones',RHSWorkspace= wksp,OutputWorkspace= 'units')
             #do the super-position and clean up
-            Minus(counts, 'units', wksp)
-            mantid.deleteWorkspace('ones')
-            mantid.deleteWorkspace('units')
+            Minus(LHSWorkspace=counts,RHSWorkspace= 'units',OutputWorkspace= wksp)
+            DeleteWorkspace('ones')
+            DeleteWorkspace('units')
 
         #opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors) 
         instrum.view(wksp)
@@ -991,20 +1001,20 @@ class LoadSample(LoadRun, ReductionStep):
             p_run_ws = p_run_ws[0]
     
         try:
-            run_num = p_run_ws.getSampleDetails().getLogData('run_number').value
+            run_num = p_run_ws.getRun().getLogData('run_number').value
         except RuntimeError:
             # if the run number is not stored in the workspace, try to take it from the filename
             run_num = os.path.basename(self._data_file).split('.')[0].split('-')[0].split('0')[-1]
             try:
                 dummy = int(run_num)
             except ValueError:
-                mantid.sendLogMessage('Could not extract run number from file name ' + self._data_file)
+                logger.notice('Could not extract run number from file name ' + self._data_file)
         
         reducer.instrument.set_up_for_run(run_num)
 
         if reducer.instrument.name() == 'SANS2D':
             if logs == None:
-                mantid.deleteWorkspace(self.wksp_name)
+                DeleteWorkspace(self.wksp_name)
                 raise RuntimeError('Sample logs cannot be loaded, cannot continue')
             reducer.instrument.apply_detector_logs(logs)           
 
@@ -1070,22 +1080,22 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
         if raw_ws is None:
             raw_ws = reducer.get_sample().wksp_name
 
-        mantid.sendLogMessage('::SANS::Normalizing to monitor ' + str(normalization_spectrum))
+        logger.notice('::SANS::Normalizing to monitor ' + str(normalization_spectrum))
 
         self.output_wksp = 'Monitor'       
-        CropWorkspace(raw_ws, self.output_wksp,
+        CropWorkspace(InputWorkspace=raw_ws,OutputWorkspace= self.output_wksp,
                       StartWorkspaceIndex = normalization_spectrum-1, 
                       EndWorkspaceIndex   = normalization_spectrum-1)
     
         if reducer.instrument.name() == 'LOQ':
-            RemoveBins(self.output_wksp, self.output_wksp, reducer.transmission_calculator.loq_removePromptPeakMin, 
+            RemoveBins(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp,XMin= reducer.transmission_calculator.loq_removePromptPeakMin,XMax= 
                        reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
         
         # Remove flat background
         TOF_start, TOF_end = reducer.inst.get_TOFs(
                                     self.NORMALISATION_SPEC_NUMBER)
         if TOF_start and TOF_end:
-            FlatBackground(self.output_wksp, self.output_wksp, StartX=TOF_start, EndX=TOF_end,
+            FlatBackground(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp, StartX=TOF_start, EndX=TOF_end,
                 WorkspaceIndexList=self.NORMALISATION_SPEC_INDEX, Mode='Mean')
 
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
@@ -1221,27 +1231,27 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         #exclude unused spectra because the sometimes empty/sometimes not spectra can cause errors with interpolate
         spectrum1 = min(pre_monitor, post_monitor)
         spectrum2 = max(pre_monitor, post_monitor)
-        CropWorkspace(inputWS, tmpWS,
+        CropWorkspace(InputWorkspace=inputWS,OutputWorkspace= tmpWS,
             StartWorkspaceIndex=self._get_index(spectrum1),
             EndWorkspaceIndex=self._get_index(spectrum2))
 
         if inst.name() == 'LOQ':
-            RemoveBins(tmpWS, tmpWS, self.loq_removePromptPeakMin, self.loq_removePromptPeakMax, 
+            RemoveBins(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,XMin= self.loq_removePromptPeakMin,XMax= self.loq_removePromptPeakMax, 
                        Interpolation='Linear')            
 
         for spectra_number in [pre_monitor, post_monitor]:
             back_start, back_end = inst.get_TOFs(spectra_number)
             if back_start and back_end:
                 index = spectra_number - spectrum1
-                FlatBackground(tmpWS, tmpWS, StartX=back_start, EndX=back_end,
+                FlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX=back_start, EndX=back_end,
                                WorkspaceIndexList=index, Mode='Mean')
 
-        ConvertUnits(tmpWS, tmpWS,"Wavelength")
+        ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Target="Wavelength")
         
         if self.interpolate:
-            InterpolatingRebin(tmpWS, tmpWS, wavbining)
+            InterpolatingRebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
         else :
-            Rebin(tmpWS, tmpWS, wavbining)
+            Rebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
     
         return tmpWS
     
@@ -1343,17 +1353,17 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         
         # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
         fit_type = self.CALC_TRANS_FIT_PARAMS[fit_meth]
-        CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
-            pre_sample, post_sample, reducer.to_wavelen.get_rebin(), FitMethod=fit_type, OutputUnfittedData=True)
+        CalculateTransmission(SampleRunWorkspace=trans_tmp_out,DirectRunWorkspace=direct_tmp_out,OutputWorkspace= fittedtransws,IncidentBeamMonitor=
+            pre_sample,TransmissionMonitor= post_sample,RebinParams= reducer.to_wavelen.get_rebin(), FitMethod=fit_type, OutputUnfittedData=True)
 
         # Remove temporaries
-        DeleteWorkspace(trans_tmp_out)
+        DeleteWorkspace(Workspace=trans_tmp_out)
         if direct_tmp_out != trans_tmp_out:
-            DeleteWorkspace(direct_tmp_out)
+            DeleteWorkspace(Workspace=direct_tmp_out)
             
         if fit_meth == 'Off':
             result = unfittedtransws
-            mantid.deleteWorkspace(fittedtransws)
+            DeleteWorkspace(fittedtransws)
         else:
             result = fittedtransws
     
@@ -1448,7 +1458,7 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
         elif detector in ("REAR","MAIN","MAIN-DETECTOR-BANK",""):
             return self._low_angle_pixel_file
         else :
-            mantid.sendWarningMessage("ASK GETPIXELCORRFILE WITHOUT ARGUMENT: + "+ str(detector))
+            logger.warning("ASK GETPIXELCORRFILE WITHOUT ARGUMENT: + "+ str(detector))
             return self._pixel_file        
 
     def calculate(self, reducer, wave_wks=[]):
@@ -1461,11 +1471,11 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
         #use the instrument's correction file
         corr_file = reducer.instrument.cur_detector().correction_file
         if corr_file:
-            LoadRKH(corr_file, self.TMP_ISIS_NAME, "Wavelength")
+            LoadRKH(Filename=corr_file,OutputWorkspace= self.TMP_ISIS_NAME,FirstColumnValue= "Wavelength")
             wave_wks.append(self.TMP_ISIS_NAME)
             
             if self._is_point_data(self.TMP_ISIS_NAME):
-                ConvertToHistogram(self.TMP_ISIS_NAME, self.TMP_ISIS_NAME)
+                ConvertToHistogram(InputWorkspace=self.TMP_ISIS_NAME,OutputWorkspace= self.TMP_ISIS_NAME)
         ## try to redefine self._pixel_file to pass to CalculateNORM method calculate.
         detect_pixel_file = self.getPixelCorrFile(reducer.instrument.cur_detector().name())
         if (detect_pixel_file != ""):
@@ -1518,10 +1528,10 @@ class ConvertToQISIS(sans_reduction_steps.ConvertToQ):
 
         try:
             if self._Q_alg == 'Q1D':
-                Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, WavePixelAdj = wavepixeladj)
+                Q1D(DetBankWorkspace=workspace,OutputWorkspace= workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, WavePixelAdj = wavepixeladj)
             elif self._Q_alg == 'Qxy':
-                Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
-                ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
+                Qxy(InputWorkspace=workspace,OutputWorkspace= workspace,MaxQxy= reducer.QXY2,DeltaQ= reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
+                ReplaceSpecialValues(InputWorkspace=workspace,OutputWorkspace= workspace, NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
         except:
@@ -1558,7 +1568,7 @@ class UnitsConvert(ReductionStep):
             @param workspace: the name of the workspace to convert
             @param workspace: the name of the workspace to convert
         """ 
-        ConvertUnits(workspace, workspace, self._units)
+        ConvertUnits(InputWorkspace=workspace,OutputWorkspace= workspace,Target= self._units)
         
         low_wav = self.wav_low
         high_wav = self.wav_high
