@@ -349,7 +349,8 @@ class DirectEnergyConversion(object):
                     raise RuntimeError('Cannot run LoadDetectorInfo: "Filename" property not found on input mono workspace')
                 if self.relocate_dets: 
                     self.log('Moving detectors to positions specified in RAW file.')
-                    LoadDetectorInfo(Workspace=result_name,DataFilename=filename,RelocateDets=self.relocate_dets)
+                    
+                LoadDetectorInfo(Workspace=result_name,DataFilename=filename,RelocateDets=self.relocate_dets)
             else:
                 self.log('Raw file detector header is superceeded') 
                 if self.relocate_dets: 
@@ -406,8 +407,9 @@ class DirectEnergyConversion(object):
 
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
-            # TODO: Write log message
+            self.log('Start Applying ki/kf corrections to the workpsace : '+result_name)                                
             CorrectKiKf(InputWorkspace=result_name,OutputWorkspace= result_name, EMode='Direct')
+            self.log('finished applying ki/kf corrections')                                            
 
         # Make sure that our binning is consistent
         if not self.energy_bins is None:
@@ -575,6 +577,8 @@ class DirectEnergyConversion(object):
             
         where only those detectors that are unmasked are used and the weight[i] = 1/errorValue[i].
         """
+        print "Input WB workspace: ", data_ws
+        
         e_low = self.monovan_integr_range[0]
         e_upp = self.monovan_integr_range[1]
         if e_low > e_upp:
