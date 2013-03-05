@@ -1110,9 +1110,9 @@ _refresh_singleton()
 if __name__ == '__main__':
     SetVerboseMode(True)
     SANS2D()
-    MaskFile('/apps/mantid/systemtests/Data/SANS2D/MASKSANS2D_123T_4m_Xpress_8mm.txt')
+    MaskFile('MASKSANS2D_123T_4m_Xpress_8mm.txt')
     Set1D()
-    AssignSample('/apps/mantid/systemtests/Data/SANS2D/SANS2D00002500.nxs')
+    AssignSample('SANS2D00002500.nxs')
     Gravity(True)
     wav1 = 2.0
     wav2 = wav1 + 2.0
