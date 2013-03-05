@@ -1,0 +1,62 @@
+#!/bin/sh
+#
+# Copyright 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+#
+# This file is part of Mantid.
+#
+# Mantid is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Mantid is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# File change history is stored at: <https://github.com/mantidproject/mantid>
+
+# Set top-level command name
+CMD_NAME="new"
+# 
+DEFAULT_PREFIX="feature/"
+
+# Get directory of this file
+# The sed expression here replaces all backslashes by forward slashes.
+# This helps our Windows users, while not bothering our Unix users.
+export CMDFILE_DIR=$(dirname "$(echo "$0" | sed -e 's@\\@/@g')")
+
+usage() {
+    echo "Usage: git ${CMD_NAME} [SWITCHES] <ticketno> <short_descr>"
+    echo "Start working on a new ticket by creating a branch from the information"
+    echo "supplied. The branch is created using origin/master as a start point and"
+    echo "a 'git fetch' is performed beforehand. The branch prefix can be specified"
+    echo "using the -p flag."
+    echo
+    echo "If the branch name exists in the list given by 'git branch -r' an error"
+    echo "is raised."
+    echo
+    echo "Equivalent to:"
+    echo "  git fetch -p"
+    echo "  git checkout --no-track -b [PREFIX]<ticketno>_short_descr"
+    echo
+    echo "Positional arguments:"
+    echo "  ticketno    The TRAC ticket reference number"
+    echo "  short_descr  A short description of the branch (without spaces)"
+    echo 
+    echo "Switches:"
+    echo "  -p,--prefix  When creating a branch use this prefix in the 
+                         name (default=feature/)"
+}
+ 
+main() {
+    if [ $# -lt 1 ]; then
+	usage
+	exit 1
+    fi
+}
+
+main "$@"
