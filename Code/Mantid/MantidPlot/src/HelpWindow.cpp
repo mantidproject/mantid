@@ -64,7 +64,7 @@ void HelpWindow::showAlgorithm(const string &name, const int version)
     // TODO jump to the version within the page
     (void)version;
 
-    string url(BASEURL + "Algo_" + name + ".html");
+    string url(BASEURL + "html/Algo_" + name + ".html");
     this->showURL(url);
 }
 
@@ -76,7 +76,7 @@ void HelpWindow::showAlgorithm(const string &name, const int version)
  */
 void HelpWindow::showFitFunction(const std::string &name)
 {
-    string url(BASEURL + "FitFunc_" + name + ".html");
+    string url(BASEURL + "html/FitFunc_" + name + ".html");
 }
 
 /**
