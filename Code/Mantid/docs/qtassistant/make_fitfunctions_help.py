@@ -59,7 +59,7 @@ def process(functions, qhp, outputdir):
     handle.write(le.tostring(root, pretty_print=True, xml_declaration=False))
 
     shortname = os.path.split(filename)[1]
-    qhp.addFile(shortname, "Fit Functions Index")
+    qhp.addFile(os.path.join(HTML_DIR, shortname), "Fit Functions Index")
 
     # create individual html pages
     from fitfunctions_help import process_function

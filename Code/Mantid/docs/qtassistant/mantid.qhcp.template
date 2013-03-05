@@ -2,11 +2,11 @@
 <QHelpCollectionProject version="1.0">
      <assistant>
          <title>Mantid Help</title>
-         <startPage>qthelp://org.mantidproject/doc/index.html</startPage>
+         <startPage>qthelp://org.mantidproject/doc/html/index.html</startPage>
          <applicationIcon>src/images/MantidPlot_Icon_32offset.png</applicationIcon>
          <enableFilterFunctionality>false</enableFilterFunctionality>
          <enableDocumentationManager>true</enableDocumentationManager>
-         <enableAddressBar visible="true">false</enableAddressBar>
+         <enableAddressBar visible="false">true</enableAddressBar>
          <cacheDirectory>mantidproject</cacheDirectory>
          <aboutMenuText>
              <text>About Mantid</text>

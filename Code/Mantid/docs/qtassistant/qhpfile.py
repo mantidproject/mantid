@@ -38,7 +38,7 @@ class QHPFile:
                 self.__keywordsEle = le.SubElement(self.__filterSect, "keywords")
             if not keyword in self.__keywords:
                 le.SubElement(self.__keywordsEle, "keyword",
-                              **{"name":keyword, "ref":os.path.split(filename)[1]})
+                              **{"name":keyword, "ref":filename})
                 self.__keywords.append(keyword)
         if self.__filesEle is None:
             self.__filesEle = le.SubElement(self.__filterSect, "files")

@@ -8,7 +8,7 @@ DIRECTION = {
     1:"output",
     2:"input/output"
 }
-from assistant_common import WEB_BASE
+from assistant_common import WEB_BASE, HTML_DIR
 
 def make_wiki(algo_name, version, latest_version):
     """ Return wiki text for a given algorithm
@@ -179,7 +179,7 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
 
     # write out the fiel
     outfile = "Algo_%s.html" % (name)
-    qhp.addFile(outfile, name)
+    qhp.addFile(os.path.join(HTML_DIR, outfile), name)
     outfile = os.path.join(outputdir, outfile)
     handle = open(outfile, 'w')
     handle.write(le.tostring(root, pretty_print=True,

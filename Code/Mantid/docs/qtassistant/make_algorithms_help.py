@@ -70,7 +70,7 @@ def processCategories(categories, qhp, outputdir):
                 ul.append(genAlgoElement(name, versions))
 
         filename = "AlgoCat_%s.html" % page_name
-        qhp.addFile(filename, page_name+" Algorithm Category")
+        qhp.addFile(os.path.join(HTML_DIR, filename), page_name)
         filename = os.path.join(outputdir, filename)
         handle = open(filename, 'w')
         handle.write(le.tostring(root, pretty_print=True, xml_declaration=False))
@@ -151,7 +151,7 @@ def process(algos, qhp, outputdir):
     handle.write(le.tostring(root, pretty_print=True, xml_declaration=False))
 
     shortname = os.path.split(filename)[1]
-    qhp.addFile(shortname, "Algorithms Index")
+    qhp.addFile(os.path.join(HTML_DIR, shortname), "Algorithms Index")
 
     # create all of the category pages
     processCategories(categories, qhp, outputdir)

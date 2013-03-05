@@ -3,7 +3,7 @@ import lxml.html
 from lxml.html import builder as lhbuilder
 import os
 
-from assistant_common import WEB_BASE
+from assistant_common import WEB_BASE, HTML_DIR
 
 def process_function(name, qhp, outputdir, **kwargs): # was (args, algo):
     import mantid.api
@@ -53,7 +53,7 @@ def process_function(name, qhp, outputdir, **kwargs): # was (args, algo):
 
     # write out the file
     outfile = "FitFunc_%s.html" % name
-    qhp.addFile(outfile, name)
+    qhp.addFile(os.path.join(HTML_DIR, outfile), name)
     outfile = os.path.join(outputdir, outfile)
     handle = open(outfile, 'w')
     handle.write(le.tostring(root, pretty_print=True,
