@@ -52,5 +52,5 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
 #             COMPONENT help )             <- TODO define this component
 
 else (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
-   message (status " Did not find QCOLLECTIONGENERATOR - cannot create qtassistant files")
+   message (FATAL_ERROR " Did not find qcollectiongenerator - cannot create qtassistant files")
 endif()
