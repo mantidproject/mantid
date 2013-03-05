@@ -15,7 +15,7 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
          ${HELP_IMG_DIR}/Mantid_Logo_Transparent.png
          ${HELP_IMG_DIR}/MantidPlot_Icon_32offset.png
          src/about.txt
-         src/mantidgeneral.qhp
+         ${HELP_OUT_DIR}/mantidgeneral.qhp
         )
 
    add_custom_command( OUTPUT ${HELP_IMG_DIR}/Mantid_Logo_Transparent.png
@@ -26,6 +26,9 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/img/MantidPlot_Icon_32offset.png
                                ${HELP_IMG_DIR}/MantidPlot_Icon_32offset.png
                        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/img/MantidPlot_Icon_32offset.png )
+   add_custom_command( OUTPUT ${HELP_OUT_DIR}/mantidgeneral.qhp
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/mantidgeneral.qhp
+                               ${HELP_OUT_DIR}/mantidgeneral.qhp )
 
    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/mantid.qhcp.template
                    ${HELP_OUT_DIR}/mantid.qhcp )
@@ -50,16 +53,13 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
                               -m ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
 		      )
 
-   add_custom_command(OUTPUT  mantid.qhc algorithms.qch mantidgeneral.qch
+   add_custom_command(OUTPUT  ${HELP_QCH_DIR}/mantid.qhc ${HELP_QCH_DIR}/algorithms.qch ${HELP_QCH_DIR}/fitfunctions.qch ${HELP_QCH_DIR}/mantidgeneral.qch
                       DEPENDS ${HELP_ALGO_OUT} ${HELP_FIT_OUT} ${HELP_QHCP_SOURCE}
 		      COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} ${HELP_OUT_DIR}/mantid.qhcp
 		      )
 
    add_custom_target ( qtassistant ALL
-                       DEPENDS MantidPlot
-		               ${HELP_OUT_DIR}/algorithms.qhp
-			       ${HELP_OUT_DIR}/fitfunctions.qhp
-			       mantid.qhc
+                       DEPENDS MantidPlot ${HELP_QCH_DIR}/mantid.qhc
                        )
 
 #   install ( FILES mantid.qhc algorithms.qch mantidgeneral.qch
