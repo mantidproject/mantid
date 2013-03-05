@@ -151,17 +151,8 @@ void HelpWindow::findCollectionFile(std::string &binDir)
         return;
     }
 
-    // try one level up
-    path = Poco::Path(binDir, "../"+COLLECTION);
-    m_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
-    if (Poco::File(path).exists())
-    {
-        m_collectionFile = path.absolute().toString();
-        return;
-    }
-
     // try where the builds will put it
-    path = Poco::Path(binDir, "../qtassistant/"+COLLECTION);
+    path = Poco::Path(binDir, "qtassistant/"+COLLECTION);
     m_log.debug() << "Trying \"" << path.absolute().toString() << "\"\n";
     if (Poco::File(path).exists())
     {
