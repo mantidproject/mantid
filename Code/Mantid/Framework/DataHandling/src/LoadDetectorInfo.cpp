@@ -1284,7 +1284,7 @@ void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detector
     }
     
 }
-
+#pragma GCC diagnostic ignored "-Wsign-compare"
 
 /**Read detector.dat information (see ) written in NeXus format 
  * @param hFile -- pointer to the opened NeXus file handle, opened at the group, which contains Libisis Detector information
