@@ -654,7 +654,7 @@ class LOQ(ISISInstrument):
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
-        ws = mantid[ws_name]
+        ws = mtd[ws_name]
         pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
         cent_pos = 317.5/1000.0
         return [cent_pos - pos.getX(), cent_pos - pos.getY()]
@@ -936,7 +936,7 @@ class SANS2D(ISISInstrument):
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
-        ws = mantid[ws_name]
+        ws = mtd[ws_name]
         pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
         
         return [-pos.getX(), -pos.getY()]

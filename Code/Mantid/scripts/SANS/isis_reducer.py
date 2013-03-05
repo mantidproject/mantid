@@ -461,7 +461,7 @@ def deleteWorkspaces(workspaces):
     """
     for wk in workspaces:
         try:
-            if wk and mantid.workspaceExists(wk):
+            if wk and wk in mtd:
                 DeleteWorkspace(Workspace=wk)
         except:
             #if the workspace can't be deleted this function does nothing

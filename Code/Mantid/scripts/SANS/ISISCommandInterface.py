@@ -38,7 +38,7 @@ def SetVerboseMode(state):
 # Print a message and log it if the 
 def _printMessage(msg, log = True, no_console=False):
     if log == True and _VERBOSE_ == True:
-        mantid.logger.notice('::SANS::' + msg)
+        logger.notice('::SANS::' + msg)
     if not no_console:
         print msg
     

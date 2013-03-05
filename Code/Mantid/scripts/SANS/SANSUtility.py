@@ -294,7 +294,7 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
 	return xmlstring
 ##START REMOVED STEVE 13 September 2010 (SANSReductionSteps.py)
 def StripEndZeroes(workspace, flag_value = 0.0):
-        result_ws = mantid.getMatrixWorkspace(workspace)
+        result_ws = mtd[workspace]
         y_vals = result_ws.readY(0)
         length = len(y_vals)
         # Find the first non-zero value
