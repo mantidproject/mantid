@@ -7,9 +7,7 @@ import os
 from qhpfile import QHPFile
 from string import split,join
 import sys
-
-OUTPUTDIR = "generated"
-WEB_BASE  = "http://www.mantidproject.org/"
+from assistant_common import *
 
 def addWikiDir(helpsrcdir):
     """
@@ -162,18 +160,10 @@ def process(algos, qhp, outputdir):
     from algorithm_help import process_algorithm
     for name in algos.keys():
         versions = algos[name]
-        process_algorithm(name, versions, qhp, helpoutdir)
+        process_algorithm(name, versions, qhp, outputdir)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate qtassistant docs " \
-                  + "for the algorithms")
-    defaultmantidpath = ""
-    parser.add_argument('-m', '--mantidpath', dest='mantidpath',
-                        default=defaultmantidpath,
-                        help="Full path to the Mantid compiled binary folder. Default: '%s'. This will be saved to an .ini file" % defaultmantidpath)
-    parser.add_argument('-o', '--output', dest='helpoutdir',
-                        help="Full path to where the output files should go.")
-
+    parser = getParser("Generate qtassistant docs for the algorithms")
     args = parser.parse_args()
 
     # where to put the generated files
@@ -181,21 +171,19 @@ if __name__ == "__main__":
     if args.helpoutdir is not None:
         helpoutdir = os.path.abspath(args.helpoutdir)
     else:
-        helpoutdir = os.path.join(helpsrcdir, OUTPUTDIR)
+        raise RuntimeError("need to specify output directory")
     print "Writing algorithm web pages to '%s'" % helpoutdir
-    if not os.path.exists(helpoutdir):
-        os.makedirs(helpoutdir)
+    assertDirs(helpoutdir)
     addWikiDir(helpsrcdir)
 
     # initialize mantid
-    if not args.mantidpath.endswith("bin"):
-        args.mantidpath = os.path.join(args.mantidpath, "bin")
-    sys.path.append(args.mantidpath)
+    import wiki_tools
+    wiki_tools.initialize_Mantid(args.mantidpath)
     import mantid.api
     algos = mantid.api.AlgorithmFactory.getRegisteredAlgorithms(True)
 
     # setup the qhp file
     qhp = QHPFile("org.mantidproject.algorithms")
 
-    process(algos, qhp, helpoutdir)
+    process(algos, qhp, os.path.join(helpoutdir, HTML_DIR))
     qhp.write(os.path.join(helpoutdir, "algorithms.qhp"))

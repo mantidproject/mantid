@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import argparse
 from lxml import etree as le # python-lxml on rpm based systems
 import lxml.html
 from lxml.html import builder as lh
@@ -7,9 +6,7 @@ import os
 from qhpfile import QHPFile
 from string import split,join
 import sys
-
-OUTPUTDIR = "generated"
-WEB_BASE  = "http://www.mantidproject.org/"
+from assistant_common import *
 
 def addWikiDir(helpsrcdir):
     """
@@ -22,45 +19,6 @@ def addWikiDir(helpsrcdir):
 def genFuncElement(name):
     text = '<a href="FitFunc_%s.html">%s</a>' % (name, name)
     return lxml.html.fragment_fromstring(text)
-
-def processCategories(categories, qhp, outputdir):
-    # determine the list of html pages
-    grouped_categories = {}
-    for key in categories.keys():
-        shortkey = key.split('/')[0]
-        if not shortkey in grouped_categories:
-            grouped_categories[shortkey] = []
-        grouped_categories[shortkey].append(key)
-    pages = grouped_categories.keys()
-    pages.sort()
-
-    for page_name in pages:
-
-        root = le.Element("html")
-        head = le.SubElement(root, "head")
-        head.append(lh.META(lh.TITLE(page_name + " Algorithm Category")))
-        body = le.SubElement(root, "body")
-        body.append(lh.CENTER(lh.H1(page_name)))
-
-        subcategories = grouped_categories[page_name]
-        subcategories.sort()
-        for subcategory in subcategories:
-            anchor = subcategory.split('/')
-            anchor = '_'.join(anchor[1:])
-            temp = le.SubElement(body, "h2")
-            le.SubElement(temp, 'a', **{"name":anchor})
-            temp.text=subcategory
-            #body.append(lh.H2(subcategory))
-            ul = le.SubElement(body, "ul")
-            for (name, versions) in categories[subcategory]:
-                li = le.SubElement(ul, "li")
-                li.append(genAlgoElement(name, versions))
-
-        filename = "AlgoCat_%s.html" % page_name
-        qhp.addFile(filename, page_name+" Algorithm Category")
-        filename = os.path.join(outputdir, filename)
-        handle = open(filename, 'w')
-        handle.write(le.tostring(root, pretty_print=True, xml_declaration=False))
 
 def process(functions, qhp, outputdir):
     import mantid.api
@@ -106,18 +64,10 @@ def process(functions, qhp, outputdir):
     # create individual html pages
     from fitfunctions_help import process_function
     for func in functions:
-        process_function(func, qhp, helpoutdir)
+        process_function(func, qhp, outputdir)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate qtassistant docs " \
-                  + "for the fit functions")
-    defaultmantidpath = ""
-    parser.add_argument('-m', '--mantidpath', dest='mantidpath',
-                        default=defaultmantidpath,
-                        help="Full path to the Mantid compiled binary folder. Default: '%s'. This will be saved to an .ini file" % defaultmantidpath)
-    parser.add_argument('-o', '--output', dest='helpoutdir',
-                        help="Full path to where the output files should go.")
-
+    parser = getParser("Generate qtassistant docs for the fit functions")
     args = parser.parse_args()
 
     # where to put the generated files
@@ -125,10 +75,9 @@ if __name__ == "__main__":
     if args.helpoutdir is not None:
         helpoutdir = os.path.abspath(args.helpoutdir)
     else:
-        helpoutdir = os.path.join(helpsrcdir, OUTPUTDIR)
+        raise RuntimeError("need to specify output directory")
     print "Writing fit function web pages to '%s'" % helpoutdir
-    if not os.path.exists(helpoutdir):
-        os.makedirs(helpoutdir)
+    assertDirs(helpoutdir)
     addWikiDir(helpsrcdir)
 
     # initialize mantid
@@ -140,5 +89,5 @@ if __name__ == "__main__":
     # setup the qhp file
     qhp = QHPFile("org.mantidproject.fitfunctions")
 
-    process(functions, qhp, helpoutdir)
+    process(functions, qhp, os.path.join(helpoutdir, HTML_DIR))
     qhp.write(os.path.join(helpoutdir, "fitfunctions.qhp"))

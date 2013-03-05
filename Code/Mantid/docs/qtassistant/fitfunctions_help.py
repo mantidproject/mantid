@@ -3,7 +3,7 @@ import lxml.html
 from lxml.html import builder as lhbuilder
 import os
 
-WEB_BASE  = "http://www.mantidproject.org/"
+from assistant_common import WEB_BASE
 
 def process_function(name, qhp, outputdir, **kwargs): # was (args, algo):
     import mantid.api

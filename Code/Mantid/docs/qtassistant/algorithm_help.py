@@ -8,7 +8,7 @@ DIRECTION = {
     1:"output",
     2:"input/output"
 }
-WEB_BASE  = "http://www.mantidproject.org/"
+from assistant_common import WEB_BASE
 
 def make_wiki(algo_name, version, latest_version):
     """ Return wiki text for a given algorithm
