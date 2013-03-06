@@ -24,19 +24,20 @@ def assertDirs(outputdir, verbose=False):
                 print "creating '%s'" % direc
             os.makedirs(direc)
 
-def addEle(doc, parent, tag, attrs={}):
+def addEle(doc, tag, parent=None, attrs={}):
     """Assumes that the 'doc' that comes in is a xml.dom.minidom.Document
     """
     ele = doc.createElement(tag)
     for key in attrs.keys():
         ele.setAttribute(key, attrs[key])
-    parent.appendChild(ele)
+    if parent is not None:
+        parent.appendChild(ele)
     return ele
 
-def addTxtEle(doc, parent, tag, text, attrs={}):
+def addTxtEle(doc, tag, text, parent=None, attrs={}):
     """Assumes that the 'doc' that comes in is a xml.dom.minidom.Document
     """
-    ele = addEle(doc, parent, tag, attrs)
+    ele = addEle(doc, tag, parent, attrs)
     text = doc.createTextNode(text)
     ele.appendChild(text)
     return ele
