@@ -1,4 +1,4 @@
-A small set of git extension commnads to support the Mantid [workflow](http://www.mantidproject.org/Git_Workflow).
+A small set of git extension commands to support the Mantid [workflow](http://www.mantidproject.org/Git_Workflow).
 
 Installation
 ------------

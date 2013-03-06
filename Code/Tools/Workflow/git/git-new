@@ -88,13 +88,97 @@ get_opts() {
     branchprefix=${branchprefix}"/"
 }
 
+# Checks if the branch exists locally
+local_branch_exists() { 
+    git branch --no-color | grep -E "^${1}$"
+    retval=$(($? == 1 ? 0 : 1))
+    return ${retval}
+}
+
+# Checks if there is a branch origin/branchname
+remote_branch_exists() { 
+    git branch --no-color | grep -E "^origin/${1}$" > /dev/null
+    retval=$(($? == 1 ? 0 : 1))
+    return ${retval}
+}
+
+check_branch_exists() {
+  local_branch_exists ${1}
+  if [ $? -eq 1 ]; then
+      echo "A branch with name '${branchname}' already exists locally. Check ticket reference."
+      exit 1
+  fi
+
+  remote_branch_exists ${1}
+  if [ $? -eq 1 ]; then
+      echo "A branch with name '${branchname}' already exists on the remote. Check ticket reference."
+      exit 1
+  fi
+}
+
+# Returns the name of the current branch
+current_branch() {
+    git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
+}
+
+# Returns 1 if there are modifications to the current index/working copy
+local_modifications() {
+    git status --porcelain | grep -v "?" > /dev/null
+    retval=$(($? == 1 ? 0 : 1))
+    return ${retval}
+}
+
+#
+run_git() {
+    echo "git $@"
+    git "$@"
+}
+
+run_fetch() {
+    run_git fetch -p
+    if [ $? -gt 0 ]; then
+	echo "Error running fetching. Most likely a network issue. Continuing with current state of ${BASE_BRANCH}."
+    fi
+}
+
+# Checks if we are actually within a git repo
+check_git_repo() {
+  git status | grep "fatal: Not a git repository (or any of the parent directories): .git" > /dev/null
+  if [ $? -eq 0 ]; then
+        exit 1
+  fi
+}
+
 main() {
+  # Are we in the right place?
+  check_git_repo
+
+  # Parse command line options
   get_opts "$@"
  
-  echo "Creating new branch ${branchprefix}${ticketno}_${descr} based on ${BASE_BRANCH}"
-  # Check if there are changes and warn as user may have forgotten
+  # Compute the new branchname
+  branchname=${branchprefix}${ticketno}_${descr}
 
+  # Sanity check and bail if it does
+  check_branch_exists ${branchname}
+  
+  # Update origin/master if possible
+  run_fetch
+  
+  local_modifications
+  if [ $? -eq 1 ]; then
+      current=$(current_branch)
+      echo "Warning: You have local modifications. Future commits will put these changes on '${branchname}' not '${current}'"
+      echo "         If you wish these changes to be on ${current} perform these steps after this command exits:"
+      echo "           git checkout ${current}"
+      echo "           git commit -a -m'Commit msg'"
+      echo "           git checkout ${branchname}"
+      echo
+  fi
 
+  # Create branch
+  echo "Creating new branch ${branchname} based on ${BASE_BRANCH}"
+  run_git checkout --no-track -b ${branchname} ${BASE_BRANCH}
 }
 
 main "$@"
