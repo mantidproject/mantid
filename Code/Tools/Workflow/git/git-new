@@ -50,42 +50,63 @@ usage() {
     echo "  short_descr   A short description of the branch (without spaces)"
     echo 
     echo "Switches:"
+    echo "  -h            Prints this help"
     echo "  -p            When creating a branch use this prefix in the"
     echo "                name (default=feature/)"
+    echo "  -s            Stash any local changes before switching to the new branch"
+    echo "                and unstash them once the switch has occurred"
 }
 
 get_opts() {
     # Can't use getopt cross-platform
-    # Allow either 2 or 4 arguments
-    if [ ! $# -eq 2 -a ! $# -eq 4 ]; then
+    if [ $# -lt 2 ]; then
 	usage
 	exit 1
     fi
-    
-    branchprefix=${DEFAULT_PREFIX}
+
+    args="$@"
+
+    BRANCH_PREFIX=${DEFAULT_PREFIX}
+    DO_STASH=0
+
     prefix_next=0
     pos_arg=0
-    for i in "$@"; do
-	if [ "$i" = "-p" ]; then
-	    prefix_next=1
+    for i in $args; do
+	if [ $prefix_next -eq 1 ]; then
+	    prefix_next=0
+	    BRANCH_PREFIX=$i
 	    continue
 	fi
-	if [ ${prefix_next} -eq 1 ]; then
-	    prefix_next=0
-	    branchprefix=${i}
-	else
-	    case $pos_arg in
-		0) ticketno=$i;;
-		1) descr=$i;;
-	    esac
-	    pos_arg=$((pos_arg+1))
-	fi
+	case $i in
+	    "-h") 
+		usage
+		exit 0
+		;;
+	    "-p") 
+		prefix_next=1
+		continue
+		;;
+	    "-s") 
+		DO_STASH=1
+		continue
+		;;
+	esac
+	case $pos_arg in
+	    0) TICKET_NO=$i;;
+	    1) DESCR=$i;;
+	esac
+	pos_arg=$((pos_arg+1))
     done
+
+    if [ ! $pos_arg -eq 2 ]; then
+	usage
+	exit 1
+    fi
 
     # Make sure the prefix ends with a / by removing it
     # if it exists and adding it back
-    branchprefix=${branchprefix%%"/"}
-    branchprefix=${branchprefix}"/"
+    BRANCH_PREFIX=${BRANCH_PREFIX%%"/"}
+    BRANCH_PREFIX=${BRANCH_PREFIX}"/"
 }
 
 # Checks if the branch exists locally
@@ -157,8 +178,8 @@ main() {
   get_opts "$@"
  
   # Compute the new branchname
-  branchname=${branchprefix}${ticketno}_${descr}
-
+  branchname=${BRANCH_PREFIX}${TICKET_NO}_${DESCR}
+    
   # Sanity check and bail if it does
   check_branch_exists ${branchname}
   
@@ -167,18 +188,28 @@ main() {
   
   local_modifications
   if [ $? -eq 1 ]; then
-      current=$(current_branch)
-      echo "Warning: You have local modifications. Future commits will put these changes on '${branchname}' not '${current}'"
-      echo "         If you wish these changes to be on ${current} perform these steps after this command exits:"
-      echo "           git checkout ${current}"
-      echo "           git commit -a -m'Commit msg'"
-      echo "           git checkout ${branchname}"
-      echo
+      if [ $DO_STASH -eq 1 ]; then
+	  run_git stash
+      else
+	  current=$(current_branch)
+	  echo "You have local modifications on the current branch."
+	  echo "Please do one of the following:"
+	  echo "  1) Commit the changes and rerun this command"
+	  echo "  2) Re-run this command with the -s option, i.e. 'git new -s $@' to stash/create branch/unstash";
+	  echo "  3) Wipe out all of the changes with 'git checkout -- .' and rerun this command"
+	  exit 1
+      fi
   fi
 
   # Create branch
   echo "Creating new branch ${branchname} based on ${BASE_BRANCH}"
   run_git checkout --no-track -b ${branchname} ${BASE_BRANCH}
+
+  # Pop off the stash if necessary
+  if [ $DO_STASH -eq 1 ]; then
+      run_git stash pop
+  fi
+
 }
 
 main "$@"
