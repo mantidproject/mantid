@@ -1,6 +1,5 @@
 import os
 from xml.dom.minidom import Document
-
 from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
 
 def process_function(name, qhp, outputdir, **kwargs): # was (args, algo):
