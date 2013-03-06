@@ -677,7 +677,8 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
 /** Creates or modifies the parameter map for the specified detector adding
 *  pressure and wall thickness information
 *  @param params :: these will be written to the detector paraments 3He(atm)=pressure) and wallT(m)=wall thickness
-*  @param change :: if the parameters are successfully changed they are stored here
+*  @param change :: if the parameters are successfully changed they are stored here if doLogging below is set to true
+*  @param doLogging:: if true, sets detectrorInfo &change to the current detector info value, if false, &change remains untouched by the routine
 *  @throw NotFoundError if a pointer to the specified detector couldn't be retrieved
 */
 void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInfo &change,bool doLogging)
