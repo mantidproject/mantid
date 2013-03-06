@@ -164,7 +164,32 @@ namespace Mantid
       typedef std::map <std::pair <unsigned, unsigned>, std::string> NameMapType;
       NameMapType m_nameMap;
 
+      // ---------------------------------------------------------------------------
 
+      // In cases where we're replaying historical data from the SMS, we're likely to get
+      // multiple value packets for various values, but we only want to process the most
+      // recent one.  Unfortunately, the only way to do this is to hold the packets in a
+      // cache until the SMS works its way through the older data and starts sending out
+      // the data we actual want.  At that point, we need to parse whatever variable value
+      // packets we have in order to set the state of the system properly.
+
+      // Maps the device ID / variable ID pair to the actual packet.  Using a map
+      // means we will only keep one packet (the most recent one) for each variable
+      typedef std::map <std::pair <unsigned, unsigned>, boost::shared_ptr<ADARA::Packet> > VariableMapType;
+      VariableMapType m_variableMap;
+
+      // Process all the variable value packets stored in m_variableMap
+      void replayVariableCache();
+
+      // ---------------------------------------------------------------------------
+      bool m_ignorePackets;        // used by filterPacket() below...
+      bool m_filterUntilRunStart;
+
+      // Called by the rxPacket() functions to determine if the packet should be processed
+      // (Depending on when it last indexed its data, SMS might send us packets that are
+      // older than we requested.)
+      // Returns false if the packet should be processed, true if is should be ignored
+      bool ignorePacket( const ADARA::PacketHeader &hdr, const ADARA::RunStatus::Enum status = ADARA::RunStatus::NO_RUN);
 
       // ----------------------------------------------------------------------------
 

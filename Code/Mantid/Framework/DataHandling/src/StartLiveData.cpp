@@ -138,8 +138,13 @@ namespace DataHandling
     if (FromNow)
       this->setPropertyValue("StartTime", DateAndTime::getCurrentTime().toISO8601String());
     else if (FromStartOfRun)
-      // TODO: implement
-      throw Kernel::Exception::NotImplementedError("Cannot start from the run start yet.");
+      // At this point, we don't know when the start of the run was.  Set the requested time
+      // to 1 second past the epoch (which will get turned into 1 when passed to SMSD in
+      // the ClientHello packet) which will cause the SMS to replay all the historical data
+      // it has.  We'll filter out unnecessary packets down in the live listener
+      this->setPropertyValue("StartTime", "1990-01-01T00:00:01");
+    // else ... don't touch the StartTime property.  It's already tied to the field in the dialog box
+
 
     // Get the listener (and start listening) as early as possible
     ILiveListener_sptr listener = this->getLiveListener();
