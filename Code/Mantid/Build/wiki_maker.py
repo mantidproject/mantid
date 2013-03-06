@@ -193,6 +193,11 @@ def make_wiki(algo_name, version, latest_version):
     
     out += "== Summary ==\n\n"
     out += alg._ProxyObject__obj.getWikiSummary().replace("\n", " ") + "\n\n"
+    
+    external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
+    out += "<anchor url='%s'><img width=400px align='right' src='%s'></anchor>" % (external_image, external_image)  
+    out += "<br clear=all>\n\n" 
+    
     out += "== Python Signature ==\n\n"
     out += " " + create_function_signature(algo_name) + "\n\n" 
     out += "== Properties ==\n\n"
