@@ -76,7 +76,8 @@ def processCategories(categories, qhp, outputdir):
         for subcategory in subcategories:
             anchor = subcategory.split('/')
             anchor = '_'.join(anchor[1:])
-            addTxtEle(doc, "h2", subcategory, body, {"name":anchor})
+            addTxtEle(doc, "h2", subcategory, body)
+            addEle(doc, 'a', body, {"name":anchor})
             ul = addEle(doc, "ul", body)
             for (name, versions) in categories[subcategory]:
                 appendAlgoElement(doc, ul, name, versions)
@@ -142,7 +143,8 @@ def process(algos, qhp, outputdir):
 
     # print the list of algorithms by name
     for letter in letters:
-        addTxtEle(doc, 'h3', letter, div_alpha, {"name":'algo'+letter})
+        addTxtEle(doc, 'h3', letter, div_alpha)
+        addEle(doc, 'a', div_alpha, {"name":'algo'+letter})
         ul = addEle(doc, "ul", div_alpha)
         for (name, versions) in letter_groups[letter]:
             appendAlgoElement(doc, ul, name, versions)

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-from lxml import etree as le # python-lxml on rpm based systems
-import lxml.html
-from lxml.html import builder as lh
+from xml.dom.minidom import Document
 import os
 from qhpfile import QHPFile
 from string import split,join
@@ -16,9 +14,9 @@ def addWikiDir(helpsrcdir):
     wikitoolsloc = os.path.abspath(wikitoolsloc)
     sys.path.append(wikitoolsloc)
 
-def genFuncElement(name):
-    text = '<a href="FitFunc_%s.html">%s</a>' % (name, name)
-    return lxml.html.fragment_fromstring(text)
+def appendFuncElement(doc, div, name):
+    li = addEle(doc, "li", div)
+    addTxtEle(doc, "a", name, li, {"href":"FitFunc_%s.html" % name})
 
 def process(functions, qhp, outputdir):
     import mantid.api
@@ -36,27 +34,27 @@ def process(functions, qhp, outputdir):
     categories_list.sort()
 
     ##### put together the top of the html document
-    root = le.Element("html")
-    head = le.SubElement(root, "head")
-    head.append(lh.META(lh.TITLE("Fit Functions Index")))
-    body = le.SubElement(root, "body")
-    body.append(lh.CENTER(lh.H1("Fit Functions Index")))
+    doc = Document()
+    root = addEle(doc, "html", doc)
+    head = addEle(doc, "head", root)
+    addTxtEle(doc, "title", "Fit Functions Index", head)
+    body = addEle(doc, "body", root)
+    temp = addEle(doc, "center", body)
+    addTxtEle(doc, "h1", "Fit Functions Index", temp)
 
     ##### section for categories 
-    div_cat = le.SubElement(body, "div", **{"id":"function_cats"})
+    div_cat = addEle(doc, "div", body, {"id":"function_cats"})
     for category in categories_list:
-        temp = le.SubElement(div_cat, "h2")
-        le.SubElement(temp, 'a', **{"name":category})
-        temp.text = category + " Category"
-        ul = le.SubElement(div_cat, "ul")
+        addTxtEle(doc, "h2", category + " Category", div_cat)
+        addEle(doc, "a", div_cat, {"name":category})
+        ul = addEle(doc, "ul", div_cat)
         funcs = categories[category]
         for func in funcs:
-            li = le.SubElement(ul, "li")
-            li.append(genFuncElement(func))
+            appendFuncElement(doc, ul, func)
 
     filename = os.path.join(outputdir, "fitfunctions_index.html")
     handle = open(filename, 'w')
-    handle.write(le.tostring(root, pretty_print=True, xml_declaration=False))
+    handle.write(doc.toprettyxml(indent="  ", encoding="utf-8"))
 
     shortname = os.path.split(filename)[1]
     qhp.addFile(os.path.join(HTML_DIR, shortname), "Fit Functions Index")
