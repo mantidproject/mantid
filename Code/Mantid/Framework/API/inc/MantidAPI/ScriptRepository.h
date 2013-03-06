@@ -24,8 +24,8 @@ namespace API{
     std::string description; 
     /// Time of the last update of this file (remotelly)
     Kernel::DateAndTime pub_date;
-    /// Integer that distinguishes the version of the file entry
-    int versionId;
+    /// Marked for auto update
+    bool auto_update;
   };
 
   /** Represent the possible states for a given file: 
@@ -320,11 +320,13 @@ They will work as was expected for folders @ref folders-sec.
 
        @code
          ScriptSharing spt; 
-         ScriptInfo info = spt.fileInfo("README.md"); 
+         ScriptInfo info = spt.info("README.md"); 
          // info.description : returns the file description.
        @endcode       
      */
-    virtual ScriptInfo fileInfo(const std::string path)   = 0;
+    virtual ScriptInfo info(const std::string path)   = 0;
+    /// @deprecated Previous version, to be removed.
+    ScriptInfo fileInfo(const std::string path){return info(path);}
     
 
     /**
@@ -445,8 +447,8 @@ They will work as was expected for folders @ref folders-sec.
                   may eventually, notify that the local repository may not be created. 
     */
     virtual void check4Update(void)  = 0;
-    /// @deprecated
-    virtual void update(void) = 0; 
+    /// @deprecated Used in the previous version. Use check4Update instead.
+    void update(void) {check4Update();}; 
 
 
     
@@ -492,6 +494,44 @@ They will work as was expected for folders @ref folders-sec.
     virtual void upload(const std::string file_path, const std::string comment,
                 const std::string author, 
                 const std::string description = std::string())  = 0;
+
+    /** Define the file patterns that will not be listed in listFiles. 
+        This is important to force the ScriptRepository to not list hidden files, 
+        automatic generated files and so on. This helps to present to the user a
+        clean presentation of the Repository
+    
+        For example, there are the pyc files that are automatically generated, and 
+        should be discarded. We could set also to ignore files that end with ~, 
+        temporary files in linux. The patterns will be evaluated as a csv regex patterns. 
+        
+        To discard all pyc files, set: "*pyc". 
+        
+        To discard all pyc files and hidden files and folders: "*pyc;\b\.*"
+        
+        @param patterns : csv regex patterns to be ignored when listing files.
+
+        This settings must be preserved, and be available after trough the configure system.
+    */
+    virtual void setIgnorePatterns(std::string patterns) = 0;
+
+    /** Return the ignore patters that was defined through ::setIgnorePatters*/
+    virtual std::string ignorePatterns(void) = 0;
+
+
+    /** Define the AutoUpdate option, which define if a file will be updated as soon as 
+        new versions are available at the central repository. 
+        
+        This information will be kept in a property system, in order to be available afterwards. 
+
+        @param path : file or folder inside the local repository
+        
+        @param option: flag to set for auto-update, or not. If true, new versions of the path will replace the local file as soon as they are available at the central repository.
+        
+        @exception ScriptRepoException : Invalid entry.
+                
+    */
+    virtual void setAutoUpdate(std::string path, bool option = true) = 0;
+
 
 protected:
     /// @deprecated get all the files from a repository
