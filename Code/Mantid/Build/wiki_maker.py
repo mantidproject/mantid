@@ -13,6 +13,7 @@ import subprocess
 import commands
 import sys
 import codecs
+import re
 import fnmatch
 import wiki_tools
 from wiki_tools import *
@@ -332,8 +333,12 @@ def last_page_editor(page):
 def wiki_maker_page(page):
     """
     returns True if the wikimaker was the last editor.
+    determines if there is a bot comment, which implies that the wikimaker was used to create the page last.
     """
-    return ("WikiMaker" == last_page_editor(page))
+    #Get the last editor of the page.
+    revisions = page.revisions()
+    for rev in revisions: 
+        return re.search("^Bot", rev['comment'])
 
 #======================================================================
 def create_function_signature(algo):
@@ -413,14 +418,15 @@ def do_algorithm(args, algo, version):
         print
         
         wiki_maker_edited_last = wiki_maker_page(page)
-        
+        last_modifier = last_page_editor(page);
         if not wiki_maker_edited_last:
-            print "The last editor was NOT the WIKIMAKER"
-            last_modifier = last_page_editor(page);
-            print "The last page editor was ", last_modifier
+            print "The last edit was manual. Last edit NOT done by WIKIMAKER script."
             if not last_modifier == None:
                 # Report a failure test case
                 reporter.addFailureTestCase(algo, version, last_modifier, ''.join(diff_list))
+        else:
+            print "The last edit was automatic via a script. Last edit was done by WIKIMAKER script."
+        print "Last change by ", last_modifier
         
         if args.dryrun:
             print "Dry run of saving page to http://www.mantidproject.org/%s" % wiki_page_name
