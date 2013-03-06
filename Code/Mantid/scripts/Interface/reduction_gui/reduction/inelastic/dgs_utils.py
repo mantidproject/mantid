@@ -1,12 +1,8 @@
-# Forced to use version 1 API.
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
-    import mantidplot
-
+    from mantid.kernel import ConfigService
+    import mantid.simpleapi as api
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -28,13 +24,13 @@ class InstrumentParameters(object):
         InstrumentParameters.instrument_name = inst_name
         ws_name = "__emptyInst_" + inst_name
         if IS_IN_MANTIDPLOT:
-            idf_loc = ConfigService().getInstrumentDirectory()
+            idf_loc = ConfigService.Instance().getInstrumentDirectory()
             idf_pattern = os.path.join(idf_loc, "%s_Definition*.xml") % inst_name
             import glob
             idf_files = glob.glob(idf_pattern)
-            output = LoadEmptyInstrument(Filename=idf_files[0], 
+            output_ws = api.LoadEmptyInstrument(Filename=idf_files[0], 
                                          OutputWorkspace=ws_name)
-            InstrumentParameters._instrument = output.workspace().getInstrument()
+            InstrumentParameters._instrument = output_ws.getInstrument()
 
     def _self_check(self):
         if self._instrument is None:
