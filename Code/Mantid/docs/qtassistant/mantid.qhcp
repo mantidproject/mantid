@@ -12,7 +12,7 @@
              <text>About Mantid</text>
          </aboutMenuText>
          <aboutDialog>
-             <file>@CMAKE_CURRENT_SOURCE_DIR@/src/about.txt</file>
+             <file>about.txt</file>
              <icon>src/images/Mantid_Logo_Transparent.png</icon>
          </aboutDialog>
      </assistant>

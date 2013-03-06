@@ -14,7 +14,7 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
          ${HELP_OUT_DIR}/mantid.qhcp
          ${HELP_IMG_DIR}/Mantid_Logo_Transparent.png
          ${HELP_IMG_DIR}/MantidPlot_Icon_32offset.png
-         src/about.txt
+         ${HELP_OUT_DIR}/about.txt
          ${HELP_OUT_DIR}/mantidgeneral.qhp
         )
 
@@ -29,9 +29,13 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
    add_custom_command( OUTPUT ${HELP_OUT_DIR}/mantidgeneral.qhp
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/mantidgeneral.qhp
                                ${HELP_OUT_DIR}/mantidgeneral.qhp )
+   add_custom_command( OUTPUT ${HELP_OUT_DIR}/about.txt
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/about.txt
+                               ${HELP_OUT_DIR}/about.txt )
 
-   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/mantid.qhcp.template
-                   ${HELP_OUT_DIR}/mantid.qhcp )
+   add_custom_command( OUTPUT ${HELP_OUT_DIR}/mantid.qhcp
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/mantid.qhcp
+                               ${HELP_OUT_DIR}/mantid.qhcp )
 
    set ( HELP_ALGO_OUT
          ${HELP_OUT_DIR}/algorithms.qhp
