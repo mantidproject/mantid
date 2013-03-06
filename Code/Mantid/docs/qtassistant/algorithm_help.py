@@ -115,6 +115,7 @@ def typeStr(property):
     return propType
 
 def propToHtml(doc, table, property, number):
+    # wiki_maker does this better
     row = addEle(doc, "tr", table)
     addTxtEle(doc, "td", str(number+1), row)
     addTxtEle(doc, "td", property.name, row)
