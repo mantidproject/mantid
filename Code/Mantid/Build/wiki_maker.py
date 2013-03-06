@@ -193,6 +193,8 @@ def make_wiki(algo_name, version, latest_version):
     
     out += "== Summary ==\n\n"
     out += alg._ProxyObject__obj.getWikiSummary().replace("\n", " ") + "\n\n"
+    out += "== Python Signature ==\n\n"
+    out += " " + create_function_signature(algo_name) + "\n\n" 
     out += "== Properties ==\n\n"
     
     out += """{| border="1" cellpadding="5" cellspacing="0" 
@@ -327,6 +329,32 @@ def wiki_maker_page(page):
     returns True if the wikimaker was the last editor.
     """
     return ("WikiMaker" == last_page_editor(page))
+
+#======================================================================
+def create_function_signature(algo):
+    """
+    create the function signature for the algorithm.
+    """
+    from mantid.simpleapi import _get_function_spec
+    import mantid.simpleapi
+    _alg = getattr(mantid.simpleapi, algo)
+    prototype =  algo + _get_function_spec(_alg)
+    
+    # Replace every nth column with a newline.
+    nth = 4
+    commacount = 0
+    prototype_reformated = ""
+    for char in prototype:
+        if char == ',':
+            commacount += 1
+            if (commacount % nth == 0):
+                prototype_reformated += ",\n  "
+            else:
+                prototype_reformated += char
+        else: 
+           prototype_reformated += char
+    prototype_reformated = prototype_reformated.replace(",[Version]", "")
+    return prototype_reformated
     
 #======================================================================
 def do_algorithm(args, algo, version):
@@ -399,6 +427,7 @@ def do_algorithm(args, algo, version):
     saved_text.write(new_contents)
     saved_text.close()
     
+    
 #======================================================================
 if __name__ == "__main__":
     
@@ -436,7 +465,7 @@ if __name__ == "__main__":
                         help="Force overwriting the wiki page on the website if different (don't ask the user)")
 
     parser.add_option('--alg-version', dest='algversion', default=noversion, 
-                        help='Algorithm version to create the wiki for.')
+                        help='Algorithm version to create the wiki for. Latest version if absent.')
     
     parser.add_option('--report', dest='wikimakerreport', default=False, action='store_const', const=True,
                         help="Record authors and corresponding algorithm wiki-pages that have not been generated with the wiki-maker")

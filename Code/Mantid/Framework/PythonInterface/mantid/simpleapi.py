@@ -511,7 +511,7 @@ def create_algorithm(algorithm, version, _algm_object):
     for p in _algm_object.mandatoryProperties():
         prop = _algm_object.getProperty(p)
         # Mandatory parameters are those for which the default value is not valid
-        if len(str(prop.isValid))>0:
+        if len(str(prop.isValid()))>0:
             arg_list.append(p)
         else:
             # None is not quite accurate here, but we are reproducing the 
@@ -730,3 +730,60 @@ def translate():
     
     return new_functions
 
+
+def _get_function_spec(func):
+    """
+    Get the python function signature for the body of 
+    """
+    import inspect
+    try:
+        argspec = inspect.getargspec(func)
+    except TypeError:
+        return ''
+    # Algorithm functions have varargs set not args
+    args = argspec[0]
+    if args != []:
+        # For methods strip the self argument
+        if hasattr(func, 'im_func'):
+            args = args[1:]
+        defs = argspec[3]
+    elif argspec[1] is not None:
+        # Get from varargs/keywords
+        arg_str = argspec[1].strip().lstrip('\b')
+        defs = []
+        # Keyword args
+        kwargs = argspec[2]
+        if kwargs is not None:
+            kwargs = kwargs.strip().lstrip('\b\b')
+            if kwargs == 'kwargs':
+                kwargs = '**' + kwargs + '=None'
+            arg_str += ',%s' % kwargs
+        # Any default argument appears in the string
+        # on the rhs of an equal
+        for arg in arg_str.split(','):
+            arg = arg.strip()
+            if '=' in arg:
+                arg_token = arg.split('=')
+                args.append(arg_token[0])
+                defs.append(arg_token[1])
+            else:
+                args.append(arg)
+        if len(defs) == 0: defs = None
+    else:
+        return ''
+
+    if defs is None:
+        calltip = ','.join(args)
+        calltip = '(' + calltip + ')'
+    else:
+        # The defaults list contains the default values for the last n arguments
+        diff = len(args) - len(defs)
+        calltip = ''
+        for index in range(len(args) - 1, -1, -1):
+            def_index = index - diff
+            if def_index >= 0:
+                calltip = '[' + args[index] + '],' + calltip
+            else:
+                calltip = args[index] + "," + calltip
+        calltip = '(' + calltip.rstrip(',') + ')'
+    return calltip
