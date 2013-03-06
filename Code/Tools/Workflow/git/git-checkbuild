@@ -21,6 +21,9 @@
 
 # Set top-level command name
 CMD_NAME="checkbuild"
+#
+BUILD_BRANCH="develop"
+
 
 # Get directory of this file
 # The sed expression here replaces all backslashes by forward slashes.
@@ -29,11 +32,11 @@ export CMDFILE_DIR=$(dirname "$(echo "$0" | sed -e 's@\\@/@g')")
 
 usage() {
     echo "Usage: git ${CMD_NAME} [SWITCHES]"
-    echo "Check the current branch against the build servers by merging to develop"
+    echo "Check the current branch against the build servers by merging to ${BUILD_BRANCH}"
     echo "and pushing to the remote. Any uncommitted changes are stashed temprorarily"
     echo "and will NOT be checked by the build servers."
     echo
-    echo "The current branch must not be master or develop, if it is then the script"
+    echo "The current branch must not be master or ${BUILD_BRANCH}, if it is then the script"
     echo "aborts. "
     echo
     echo "Equivalent to:"
@@ -51,49 +54,53 @@ usage() {
 }
 
 checkargs() {
-    if [ $# -eq 1 ]; then
-	if [ "$1" = "-h" ]; then
-	    usage
-	    exit 0
-	else
-	    usage
-	    exit 1
-	fi
-    elif [ $# -gt 1 ]; then
+    # Can't use getopt cross-platform
+    if [ ! $# -eq 0 ]; then
 	usage
 	exit 1
     fi
 }
 
-# Returns the name of the current branch
-current_branch() {
-    git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
-}
-
-# Returns 1 if there are modifications to the current index/working copy
-local_modifications() {
-    changes=$(git status --porcelain | grep -v "?")
-    if [ -z "${changes}" ]; then
-	retval=0
-    else
-	retval=1
-    fi
-    return ${retval}
-}
-
-# Stash any changes if necessary
-stash_local() {
-    # Mark that a stash has taken place, this is scoped to the file not to the function
-    stashed=1
-}
-
-# Unstash any changes if necessary
-resurrect_changes() {
-    echo $stashed
-}
-
 main() {
+    # Helper functions
+    . ${CMDFILE_DIR}/gitworkflow-helpers
+	
     checkargs "$@"
+
+    # Sanity check
+    currentbranch=$(current_branch)
+    if [ ${currentbranch} = "${BUILD_BRANCH}" ]; then
+	echo "Cannot merge develop into itself. Run this command on a branch that requires checking"
+	exit 1
+    fi
+
+    if [ ${currentbranch} = "master" ]; then
+	echo "Cannot use this command to merge master->${BUILD_BRANCH}"
+	exit 1
+    fi
+
+    # Run macro
+    local_modifications
+    if [ $? -eq 1 ]; then
+	echo "You have local modifications. Please either:"
+	echo " 1) Commit the changes and rerun this command. This will include them in the buildserver check."
+	echo " 2) Run 'git stash', rerun this command, then run 'git stash pop'. This will NOT include them in the buildserver check."
+	exit 1
+    fi
+
+    # Move to develop
+    run_git checkout ${BASE_BRANCH}
+
+    # Bring in any updates
+    run_git fetch -p
+    run_git rebase origin/${BASE_BRANCH}
+
+    # Merge the branch and push to check
+    run_git merge ${currentbranch}
+    run_git push origin ${BASE_BRANCH}
+
+    # Return to where we started
+    run_git checkout ${currentbranch}
 }
 
 main "$@"
