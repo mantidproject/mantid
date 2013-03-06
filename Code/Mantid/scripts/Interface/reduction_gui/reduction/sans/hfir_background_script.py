@@ -117,6 +117,8 @@ class Background(BaseScriptElement):
             Update data member from reduction output
         """
         if IS_IN_MANTIDPLOT:
+            # Allow for the old reducer code to work.
+            # The old reducer code uses the Python API v1.
             if self.PYTHON_API==1:
                 from reduction.command_interface import ReductionSingleton
                 if ReductionSingleton()._background_subtracter is not None:

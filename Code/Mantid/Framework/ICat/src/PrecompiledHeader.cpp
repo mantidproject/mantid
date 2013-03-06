@@ -1,1 +1,0 @@
-#include "MantidICat/PrecompiledHeader.h"

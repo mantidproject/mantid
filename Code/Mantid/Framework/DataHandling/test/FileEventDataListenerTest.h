@@ -24,7 +24,7 @@ public:
     ConfigService::Instance().setString("fileeventdatalistener.chunks","2");
 
     // Create the listener. Remember: this will call connect()
-    ILiveListener_sptr listener = LiveListenerFactory::Instance().create("FileEventDataListener");
+    ILiveListener_sptr listener = LiveListenerFactory::Instance().create("FileEventDataListener",true);
 
     // Test the 'property' methods
     TS_ASSERT( listener )

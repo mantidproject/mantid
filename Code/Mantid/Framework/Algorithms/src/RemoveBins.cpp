@@ -62,31 +62,31 @@ void RemoveBins::init()
   wsValidator->add<WorkspaceUnitValidator>();
   wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
-    "Name of the input workspace");
+    "The name of the input workspace.");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-    "Name of the output workspace");
+    "The name of the output workspace.");
 
   auto mustHaveValue = boost::make_shared<MandatoryValidator<double> >();
   declareProperty("XMin",Mantid::EMPTY_DBL(), mustHaveValue,
-    "The lower bound of the region to be removed");
+    "The lower bound of the region to be removed.");
   declareProperty("XMax",Mantid::EMPTY_DBL(), mustHaveValue,
-    "The upper bound of the region to be removed");
+    "The upper bound of the region to be removed.");
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(),"AsInput");
   declareProperty( "RangeUnit", "AsInput", boost::make_shared<StringListValidator>(units),
-    "The units of XMin and XMax" );
+    "The unit in which XMin/XMax are being given. If not given, it will peak the unit from the Input workspace X unit." );
 
   std::vector<std::string> propOptions;
   propOptions.push_back("None");
   propOptions.push_back("Linear");
   declareProperty("Interpolation", "None", boost::make_shared<StringListValidator>(propOptions),
-    "Used when the region to be removed is within a bin. Linear scales the value in that bin by the proportion of it that is outside the region to be removed and none sets it to zero" );
+    "Whether mid-axis bins should be interpolated linearly (\"Linear\") or set to zero (\"None\"). Note: Used when the region to be removed is within a bin. Linear scales the value in that bin by the proportion of it that is outside the region to be removed and none sets it to zero" );
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
-    "If set, only this spectrum will be acted upon (otherwise all are)");
+                  "If set, will remove data only in the given spectrum of the workspace. Otherwise, all spectra will be acted upon.");
 }
 
 /** Executes the algorithm

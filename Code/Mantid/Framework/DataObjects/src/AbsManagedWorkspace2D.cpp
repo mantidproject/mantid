@@ -4,6 +4,7 @@
 #include "MantidDataObjects/AbsManagedWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/ManagedDataBlock2D.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/ConfigService.h"
@@ -15,8 +16,6 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
-#include "MantidAPI/ISpectrum.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 
 using Mantid::API::ISpectrum;
 

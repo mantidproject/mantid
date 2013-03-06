@@ -2,13 +2,11 @@
 #define MANTID_MDEVENTS_MDLEANEVENT_H_
     
 #include "MantidKernel/System.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidAPI/BoxController.h"
 #include <numeric>
 #include <cmath>
-#include <napi.h>
 
 namespace Mantid
 {
@@ -101,7 +99,7 @@ namespace MDEvents
       signal(signal), errorSquared(errorSquared)
     {
       for (size_t i=0; i<nd; i++)
-        center[i] = (*(centers+i));
+        center[i] = centers[i];
     }
 
 #ifdef COORDT_IS_FLOAT
@@ -309,21 +307,22 @@ namespace MDEvents
         const uint64_t numEvents, const size_t numColumns)
     {
       //TODO: WARNING NEXUS NEEDS TO BE UPDATED TO USE 64-bit ints on Windows.
-      std::vector<int> start(2,0);
-      start[0] = int(startIndex);
+      std::vector<int64_t> start(2,0);
+      start[0] = int64_t(startIndex);
 
       // Specify the dimensions
-      std::vector<int> dims;
-      dims.push_back(int(numEvents));
-      dims.push_back(int(numColumns));
+      std::vector<int64_t> dims;
+      dims.push_back(int64_t(numEvents));
+      dims.push_back(int64_t(numColumns));
 
       // C-style call is much faster than the C++ call.
-      int dims_ignored[NX_MAXRANK];
-      int type = ::NeXus::FLOAT32;
-      int rank = 0;
-      NXgetinfo(file->getHandle(), &rank, dims_ignored, &type);
+//      int dims_ignored[NX_MAXRANK];
+//      int type = ::NeXus::FLOAT32;
+//      int rank = 0;
+//      NXgetinfo(file->getHandle(), &rank, dims_ignored, &type);
+      NeXus::Info info = file->getInfo();
 
-      if (type == ::NeXus::FLOAT64)
+      if (info.type == ::NeXus::FLOAT64)
       {
         // Handle file-backed OLD files that are in doubles.
 
@@ -439,14 +438,15 @@ namespace MDEvents
       coord_t * data = new coord_t[dataSize];
 
       // C-style call is much faster than the C++ call.
-      int dims[NX_MAXRANK];
-      int type = ::NeXus::FLOAT32;
-      int rank = 0;
-      NXgetinfo(file->getHandle(), &rank, dims, &type);
+//      int dims[NX_MAXRANK];
+//      int type = ::NeXus::FLOAT32;
+//      int rank = 0;
+//      NXgetinfo(file->getHandle(), &rank, dims, &type);
+      NeXus::Info info = file->getInfo();
 
 #ifdef COORDT_IS_FLOAT
       /* coord_t is a single-precision float */
-      if (type == ::NeXus::FLOAT64)
+      if (info.type == ::NeXus::FLOAT64)
       {
         // Handle old files that are recorded in DOUBLEs to load as FLOATS
         double * dblData = new double[dataSize];

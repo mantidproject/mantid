@@ -420,7 +420,7 @@ void FunctionBrowser::setFunction(QtProperty* prop, Mantid::API::IFunction_sptr 
 /**
  * Add a function.
  * @param prop :: Property of the parent composite function or NULL
- * @param funStr :: FunctionFactory function creation string
+ * @param fun :: FunctionFactory function creation string
  */
 void FunctionBrowser::addFunction(QtProperty* prop, Mantid::API::IFunction_sptr fun)
 {

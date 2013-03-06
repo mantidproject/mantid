@@ -24,6 +24,8 @@ DECLARE_ALGORITHM(MultipleScatteringCylinderAbsorption)   // Register the class 
 using namespace Kernel;
 using namespace API;
 using std::vector;
+using namespace Mantid::PhysicalConstants;
+using namespace Geometry;
 
   // Constants required internally only, so make them static 
 
@@ -70,9 +72,9 @@ void MultipleScatteringCylinderAbsorption::init()
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
                   "",Direction::Output), "The name of the output workspace.");
 
-  declareProperty("AttenuationXSection", 2.8, "Coefficient 1, absorption cross section / 1.81" );
-  declareProperty("ScatteringXSection", 5.1, "Coefficient 3, total scattering cross section" );
-  declareProperty("SampleNumberDensity", 0.0721, "Coefficient 2, density" );
+  declareProperty("AttenuationXSection", 2.8, "Coefficient 1, absorption cross section / 1.81 if not set with SetSampleMaterial" );
+  declareProperty("ScatteringXSection", 5.1, "Coefficient 3, total scattering cross section if not set with SetSampleMaterial" );
+  declareProperty("SampleNumberDensity", 0.0721, "Coefficient 2, density if not set with SetSampleMaterial" );
   declareProperty("CylinderSampleRadius", 0.3175, "Sample radius, in cm" );
 }
 
@@ -88,14 +90,28 @@ void MultipleScatteringCylinderAbsorption::exec()
   double coeff1     = getProperty("AttenuationXSection");
   double coeff2     = getProperty("SampleNumberDensity");
   double coeff3     = getProperty("ScatteringXSection");
+  const Material *m_sampleMaterial = &(in_WS->sample().getMaterial());
+  if( m_sampleMaterial->totalScatterXSection(1.81) != 0.0)
+  {
+        if(coeff2 == 0.0721) coeff2 =  m_sampleMaterial->numberDensity();
+        if(coeff3 == 5.1) coeff3 =  m_sampleMaterial->totalScatterXSection(1.81);
+        if(coeff1 == 2.8) coeff1 = m_sampleMaterial->absorbXSection(1.81);
+  }
+  else  //Save input in Sample with wrong atomic number and name
+  {
+    NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+                        0.0, 0.0, coeff3, 0.0, coeff3, coeff1);
+    Material *mat = new Material("SetInMultipleScattering", *neutron, coeff2);
+    in_WS->mutableSample().setMaterial(*mat);
+  }
 
   // geometry stuff
   size_t nHist = in_WS->getNumberHistograms();
-  Geometry::Instrument_const_sptr instrument = in_WS->getInstrument();
+  Instrument_const_sptr instrument = in_WS->getInstrument();
   if (instrument == NULL)
     throw std::runtime_error("Failed to find instrument attached to InputWorkspace");
-  Geometry::IObjComponent_const_sptr source = instrument->getSource();
-  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  IObjComponent_const_sptr source = instrument->getSource();
+  IObjComponent_const_sptr sample = instrument->getSample();
   if (source == NULL)
     throw std::runtime_error("Failed to find source in the instrument for InputWorkspace");
   if (sample == NULL)
@@ -107,7 +123,7 @@ void MultipleScatteringCylinderAbsorption::exec()
       in_WS->readX(0).size(), in_WS->readY(0).size());
 
   for (size_t index = 0; index < nHist; ++index) {
-    Geometry::IDetector_const_sptr det = in_WS->getDetector(index);
+    IDetector_const_sptr det = in_WS->getDetector(index);
     if (det == NULL)
       throw std::runtime_error("Failed to find detector");
     if ( det->isMasked() ) continue;

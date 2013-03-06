@@ -374,7 +374,7 @@ namespace Kernel
      *
      * @param prefix      :: a string that prefixes the generated file names.
      * @param suffix      :: a string that suffixes the generated file names.
-     * @param zeroPadding :: the number of zeros with which to pad the run number of genrerated file names.
+     * @param instString :: the instrument name
      */
     GenerateFileName::GenerateFileName(const std::string & prefix, const std::string & suffix, const std::string & instString) :
         m_prefix(prefix), m_suffix(suffix), m_instString(instString)
@@ -403,7 +403,7 @@ namespace Kernel
     /**
      * Overloaded function operator that takes in a runs, and returns a file name.
      *
-     * @param runs :: the vector of runs with which to make file names.
+     * @param run :: the vector of runs with which to make file names.
      *
      * @returns the generated vector of file names.
      */

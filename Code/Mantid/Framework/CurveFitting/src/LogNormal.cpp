@@ -22,7 +22,12 @@ LogNormal::LogNormal()
   declareParameter("Scale", 1.0);
 }
 
-
+/** \relates LogNormal
+ * Implements the LogNormal function
+ * @param out :: The result of evaluating the function
+ * @param xValues :: function domain values
+ * @param nData :: size of the function domain
+ */
 void LogNormal::function1D(double* out, const double* xValues, const size_t nData)const
 {
     const double h = getParameter("Height");
@@ -44,7 +49,13 @@ void LogNormal::function1D(double* out, const double* xValues, const size_t nDat
     }
 }
 
-void LogNormal::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
+/** \relates LogNormal
+ * Calculates the derivatives of the LogNormal
+ * @param out :: The resulting jacobian
+ * @param xValues :: function domain values
+ * @param nData :: size of the function domain
+ */
+void LogNormal::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
 {
     const double h = getParameter("Height");
     const double t = getParameter("Location");

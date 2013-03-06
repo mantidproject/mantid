@@ -3,27 +3,12 @@ from IndirectImport import import_mantidplot
 mp = import_mantidplot()
 from IndirectCommon import *
 from mantid import config, logger
+from mantid.api import NumericAxis
 import math, re, os.path, numpy as np
 
 ##############################################################################
 # Misc. Helper Functions
 ##############################################################################
-
-def concatWSs(workspaces, unit, name):
-    dataX = []
-    dataY = []
-    dataE = []
-    for ws in workspaces:
-        readX = mtd[ws].readX(0)
-        readY = mtd[ws].readY(0)
-        readE = mtd[ws].readE(0)
-        for i in range(0, len(readX)):
-            dataX.append(readX[i])
-        for i in range(0, len(readY)):
-            dataY.append(readY[i])
-            dataE.append(readE[i])
-    CreateWorkspace(OutputWorkspace=name, DataX=dataX, DataY=dataY, DataE=dataE, 
-        NSpec=len(workspaces), UnitX=unit)
 
 def split(l, n):
     #Yield successive n-sized chunks from l.
@@ -85,15 +70,15 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
         VerticalAxisValues=names)
     return outNm
 
-def confitPlotSeq(inputWS, plot):
+def confitPlotSeq(inputWS, Plot):
     nhist = mtd[inputWS].getNumberHistograms()
-    if ( plot == 'All' ):
+    if ( Plot == 'All' ):
         mp.plotSpectrum(inputWS, range(0, nhist), True)
         return    
     plotSpecs = []
-    if ( plot == 'Intensity' ):
+    if ( Plot == 'Intensity' ):
         res = 'Height$'
-    elif ( plot == 'HWHM' ):
+    elif ( Plot == 'HWHM' ):
         res = 'HWHM$'
     for i in range(0,nhist):
         title = mtd[inputWS].getAxis(1).label(i)
@@ -101,9 +86,11 @@ def confitPlotSeq(inputWS, plot):
             plotSpecs.append(i)
     mp.plotSpectrum(inputWS, plotSpecs, True)
 
-def confitSeq(inputWS, func, startX, endX, save, plot, ftype, bg, specMin, specMax, Verbose):
+def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bg, specMin, specMax, Verbose):
     StartTime('ConvFit')
     workdir = config['defaultsave.directory']
+    if Verbose:
+        logger.notice('Input files : '+str(inputWS))  
     input = inputWS+',i' + str(specMin)
     if (specMax == -1):
         specMax = mtd[inputWS].getNumberHistograms() - 1
@@ -117,12 +104,14 @@ def confitSeq(inputWS, func, startX, endX, save, plot, ftype, bg, specMin, specM
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
 	    StartX=startX, EndX=endX, FitType='Sequential')
     wsname = confitParsToWS(outNm, inputWS, bg, specMin, specMax)
-    RenameWorkspace(InputWorkspace=outNm,
-                    OutputWorkspace=outNm + "_Parameters")
-    if save:
-        SaveNexusProcessed(InputWorkspace=wsname, Filename=wsname+'.nxs')
-    if plot != 'None':
-        confitPlotSeq(wsname, plot)
+    RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
+    if Save:
+        o_path = os.path.join(workdir, wsname+'.nxs')					# path name for nxs file
+        if Verbose:
+            logger.notice('Creating file : '+o_path)
+        SaveNexusProcessed(InputWorkspace=wsname, Filename=o_path)
+    if Plot != 'None':
+        confitPlotSeq(wsname, Plot)
     EndTime('ConvFit')
 
 ##############################################################################
@@ -367,7 +356,6 @@ def furyfitParsToWS(Table, Data, option):
     dataE = np.append(dataE,np.array(Te1))
     names += ","+cName[7]
     nSpec = 3
-    logger.notice(' Option : '+str(npeak)+' '+type)
     if npeak == 1:
         By1 = ws.column(9)  #beta1 value
         Be1 = ws.column(10) #beta2 error
@@ -376,7 +364,6 @@ def furyfitParsToWS(Table, Data, option):
         dataE = np.append(dataE,np.array(Be1))
         names += ","+cName[9]
         nSpec += 1
-        logger.notice(' Nspec : '+str(nSpec)+' '+names)
     if npeak == 2:
         Iy2 = ws.column(9)  #intensity2 value
         Ie2 = ws.column(10) #intensity2 error
@@ -392,7 +379,6 @@ def furyfitParsToWS(Table, Data, option):
         dataE = np.append(dataE,np.array(Te2))
         names += ","+cName[11]
         nSpec += 1
-    logger.notice(' Ns : '+str(nSpec)+' '+names)
     wsname = Table + "_Workspace"
     CreateWorkspace(OutputWorkspace=wsname, DataX=dataX, DataY=dataY, DataE=dataE, 
         Nspec=nSpec, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
@@ -602,18 +588,19 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
         log_file = log_name+'.txt'
         log_path = FileFinder.getFullPath(log_file)
         if (log_path == ''):
-            logger.notice(' Run : '+run_name +' ; Temperature file not found')
+            if Verbose:
+                logger.notice(' Run : '+run_name +' ; Temperature file not found')
             xval = int(run_name[-3:])
-            xlabel = 'Run'
+            xlabel = 'Run-number (last 3 digits)'
         else:			
-            logger.notice('Found '+log_path)
             LoadLog(Workspace=root, Filename=log_path)
             run_logs = mtd[root].getRun()
             tmp = run_logs[log_name].value
             temp = tmp[len(tmp)-1]
-            logger.notice(' Run : '+run_name+' ; Temperature = '+str(temp))
+            if Verbose:
+                logger.notice(' Run : '+run_name+' ; Temperature = '+str(temp))
             xval = temp
-            xlabel = 'Temp'
+            xlabel = 'Temperature (K)'
         last = str(nr)
         if (nr == 0):
             first = run_name
@@ -781,13 +768,10 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     DeleteWorkspace('corrections')
     return CorrectedWS
                 
-def abscorFeeder(sample, container, geom, useCor, Verbose=False):
+def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, factor=1, Save=False,PlotResult='None', PlotContrib=False):
     '''Load up the necessary files and then passes them into the main
     applyCorrections routine.'''
     StartTime('ApplyCorrections')
-    Save = True
-    PlotResult = 'Both'
-    PlotContrib = 'Spectrum'
     workdir = config['defaultsave.directory']
     CheckAnalysers(sample,container,Verbose)
     s_hist,sxlen = CheckHistZero(sample)
@@ -795,6 +779,10 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False):
     if container != '':
         CheckHistSame(sample,'Sample',container,'Container')
         (instr, can_run) = getInstrRun(container)
+        if Scale:
+            Scale(InputWorkspace=container, OutputWorkspace=container, Factor=factor, Operation='Multiply')
+            if Verbose:
+                logger.notice('Container scaled by '+str(factor))
     if useCor:
         if Verbose:
             text = 'Correcting sample ' + sample
@@ -817,7 +805,7 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False):
             plot_list.append(container)
         if (PlotResult != 'None'):
             plotCorrResult(cor_result+'_rqw',PlotResult)
-        if (PlotContrib != 'None'):
+        if PlotContrib:
             plotCorrContrib(plot_list,0)
     else:
         if ( container == '' ):
@@ -839,7 +827,7 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False):
             plot_list = [sub_result+'_red',sample]
             if (PlotResult != 'None'):
                 plotCorrResult(sub_result+'_rqw',PlotResult)
-            if (PlotResult != 'None'):
+            if PlotContrib:
                 plotCorrContrib(plot_list,0)
     EndTime('ApplyCorrections')
 
@@ -860,8 +848,7 @@ def plotCorrContrib(plot_list,n):
         con_plot=mp.plotSpectrum(plot_list,n)
 
 def replace_workspace_axis(wsName, new_values):
-    from mantidsimple import createNumericAxis, mtd        #temporary use of old API
-    ax1 = createNumericAxis(len(new_values))
+    ax1 = NumericAxis.create(len(new_values))
     for i in range(len(new_values)):
         ax1.setValue(i, new_values[i])
     ax1.setUnit('MomentumTransfer')

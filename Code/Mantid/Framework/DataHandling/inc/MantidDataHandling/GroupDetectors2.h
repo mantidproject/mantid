@@ -17,11 +17,6 @@
 
 namespace Mantid
 {
-  namespace API
-  {
-    class SpectraDetectorMap;
-  }
-
 namespace DataHandling
 {
 /** An algorithm for grouping detectors and their associated spectra into

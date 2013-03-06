@@ -1,3 +1,29 @@
+"""*WIKI* 
+
+This algorithm is to import Fullprof .irf file (peak parameters) and .hkl file (reflections) and 
+record the information to TableWorkspaces, which serve as the inputs for algorithm LeBailFit. 
+
+==== Format of Instrument parameter TableWorkspace ====
+Instrument parameter TableWorkspace contains all the peak profile parameters imported from Fullprof .irf file.  
+
+Presently these are the peak profiles supported
+ * Thermal neutron back to back exponential convoluted with pseudo-voigt (profile No. 10 in Fullprof)
+
+Each row in TableWorkspace corresponds to one profile parameter.  
+
+Columns include Name, Value, FitOrTie, Min, Max and StepSize.
+
+
+==== Format of reflection TableWorkspace ====
+Each row of this workspace corresponds to one diffraction peak.  
+The information contains the peak's Miller index and (local) peak profile parameters of this peak.  
+For instance of a back-to-back exponential convoluted with Gaussian peak, 
+the peak profile parameters include Alpha, Beta, Sigma, centre and height. 
+
+== How to use algorithm with other algorithms ==
+This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in the wiki page of [[LeBailFit]].
+
+*WIKI*"""
 from mantid.api import PythonAlgorithm, registerAlgorithm, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
 from mantid.kernel import Direction, StringListValidator
 
@@ -20,17 +46,19 @@ class CreateLeBailFitInput(PythonAlgorithm):
         """ Declare properties
         """
         instruments=["POWGEN", "NOMAD", "VULCAN"]
+        self.setWikiSummary("""Create various input Workspaces required by algorithm LeBailFit.""")
+        
         self.declareProperty("Instrument", "POWGEN", StringListValidator(instruments), "Powder diffractometer's name")
 
         self.declareProperty(FileProperty("ReflectionsFile","", FileAction.Load, ['.hkl']),
-                "The Fullprof file containing non-absent HKLs.")
+                "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl file that contains the peaks.")
 
         self.declareProperty(FileProperty("FullprofParameterFile", "", FileAction.Load, ['.irf']),
-                "Fullprof's peak profile file containing starting peak profile parameters.")
+                "Fullprof's .irf file containing the peak parameters.")
 
         self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
-        self.declareProperty("LatticeConstant", 10.0, "Lattice constant for cubic lattice in nm.")
+        self.declareProperty("LatticeConstant", 10.0, "Lattice constant for cubic crystal.")
 
         self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output), 
                 "Name of Table Workspace Containing Peak Parameters From .irf File.")
@@ -213,9 +241,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
                 elif line.startswith("TOFRG"):
                     # Tof-min(us)    step      Tof-max(us)
                     terms = line.split()
-                    mdict[bank]["tof-min"] = float(terms[1])*1.0E-3
-                    mdict[bank]["tof-max"] = float(terms[3])*1.0E-3
-                    mdict[bank]["step"]    = float(terms[2])*1.0E-3
+                    mdict[bank]["tof-min"] = float(terms[1])
+                    mdict[bank]["tof-max"] = float(terms[3])
+                    mdict[bank]["step"]    = float(terms[2])
     
                 elif line.startswith("D2TOF"):
                     # Dtt1      Dtt2         Zero 

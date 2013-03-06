@@ -11,7 +11,6 @@
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -85,10 +84,10 @@ namespace MDEvents
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 
 
-    void addEvent(const MDE & point);
+    void addEvent(const MDE & event);
     void addAndTraceEvent(const MDE & point,size_t index);
 
-    void addEventUnsafe(const MDE & point);
+    void addEventUnsafe(const MDE & event);
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 

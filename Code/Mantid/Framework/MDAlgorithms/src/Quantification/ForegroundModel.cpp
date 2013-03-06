@@ -18,7 +18,7 @@ namespace Mantid
 
     /**
      * Constructor taking the fitted function to access the current parameter values
-     * @param A reference to the fitting function
+     * @param fittingFunction :: A reference to the fitting function
      */
     ForegroundModel::ForegroundModel(const API::IFunction & fittingFunction)
       : API::ParamFunction(), m_fittingFunction(NULL), m_parOffset(0)

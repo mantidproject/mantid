@@ -9,7 +9,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/Thread.h>
@@ -42,7 +41,7 @@ public:
     dae.setProperty("NPeriods",1);
     auto res = dae.executeAsync();
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER");
+    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER",true);
     TS_ASSERT( listener );
     TS_ASSERT( listener->isConnected() );
 
@@ -131,7 +130,7 @@ public:
     dae.setProperty("NPeriods",2);
     auto res = dae.executeAsync();
 
-    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER");
+    auto listener = Mantid::API::LiveListenerFactory::Instance().create("TESTHISTOLISTENER",true);
     TS_ASSERT( listener );
     TS_ASSERT( listener->isConnected() );
 

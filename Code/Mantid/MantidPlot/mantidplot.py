@@ -13,6 +13,8 @@ from mantidplotpy.proxies import threadsafe_call, new_proxy
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
+import os
+import time
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python
@@ -716,6 +718,147 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
         threadsafe_call(sv.setXYLimits, limits[0], limits[1], limits[2], limits[3])
     
     return svw
+
+
+def get_screenshot_dir():
+    """ Returns the directory for screenshots,
+    or NONE if not set """
+    expected_env_var = 'MANTID_SCREENSHOT_REPORT'
+    dest = os.getenv(expected_env_var)
+    if not dest is None:
+        # Create the report directory if needed
+        if not os.path.exists(dest):
+            os.mkdir(dest)
+    else:
+        errormsg = "The expected environmental does not exist: " + expected_env_var
+        print errormsg
+        raise RuntimeError(errormsg)
+    return dest
+
+    
+
+     
+#======================================================================
+def _replace_report_text(filename, section, newtext):
+    """ Search html report text to 
+replace a line <!-- Filename --> etc.
+Then, the contents of that section are replaced
+@param filename :: full path to .html report
+@param section :: string giving the name of the section
+@param newtext :: replacement contents of that section. No new lines!
+@return the new contents of the entire page 
+"""
+    # Get the current report contents if any
+    if os.path.exists(filename):
+        f = open(filename, 'r')
+        contents = f.read()
+        f.close()
+    else:
+        contents = ""
+
+
+    lines = contents.splitlines()
+    sections = dict()
+    # Find the text in each section
+    for line in lines:
+        if line.startswith("<!-- "):
+            # All lines should go <!-- Section -->
+            n = line.find(" ", 5)
+            if n > 0:
+                current_section = line[5:n].strip()
+                current_text = line[n+4:]
+                sections[current_section] = current_text
+            
+    # Replace the section
+    sections[section] = newtext.replace("\n","")
+    
+    # Make the output
+    items = sections.items()
+    items.sort()
+    output = []
+    for (section_name, text) in items:
+        output.append("<!-- %s -->%s" % (section_name, text))
+    
+    # Save the new text
+    contents = os.linesep.join(output)
+    f = open(filename, 'w')
+    f.write(contents)
+    f.close()
+   
+
+class Screenshot(QtCore.QObject):
+    """
+        Handles taking a screenshot while
+        ensuring the call takes place on the GUI
+        thread
+    """
+    
+    def take_picture(self, widget, filename):
+        """
+        Takes a screenshot and saves it to the 
+        filename given, ensuring the call is processed
+        through a slot if the call is from a separate 
+        thread
+        """
+        # First save the screenshot
+        widget.show()
+        widget.resize(widget.size())
+        QtCore.QCoreApplication.processEvents()
+        
+        pix = QtGui.QPixmap.grabWidget(widget)
+        pix.save(filename)
+
+def screenshot(widget, filename, description, png_exists=False):
+    """ Take a screenshot of the widget for displaying in a html report.
+    
+    The MANTID_SCREENSHOT_REPORT environment variable must be set 
+    to the destination folder. Screenshot taking is skipped otherwise.
+    
+    @param widget :: QWidget to grab
+    @param filename :: Save to this file (no extension!)
+    @param description :: Short descriptive text of what the 
+            screenshot should look like
+    @param png_exists :: if True, then the 'filename' already
+            exists. Don't grab a screenshot, but add to the report.
+    """
+    dest = get_screenshot_dir()
+    if not dest is None:
+        report = os.path.join(dest, "index.html")
+        
+        if png_exists:
+            pass
+        else:
+            # Find the widget if handled with a proxy
+            if hasattr(widget, "_getHeldObject"):
+                widget = widget._getHeldObject()
+                
+        if widget is not None:
+            camera = Screenshot()
+            threadsafe_call(camera.take_picture, widget, os.path.join(dest, filename+".png"))
+        
+        # Modify the section in the HTML page
+        section_text = '<h2>%s</h2>' % filename
+        now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        section_text += '%s (%s)<br />' % (description, now)
+        section_text += '<img src="%s.png" alt="%s"></img>' % (filename, description)
+        
+        _replace_report_text(report, filename, section_text)
+        
+def screenshot_to_dir(widget, filename, screenshot_dir):
+    """Take a screenshot_to_dir of a widget
+    
+    @param widget :: QWidget to take an image of
+    @param filename :: Destination filename for that image
+    @param screenshot_dir :: Directory to put the screenshots into.
+    """
+        # Find the widget if handled with a proxy
+    if hasattr(widget, "_getHeldObject"):
+        widget = widget._getHeldObject()
+                
+    if widget is not None:
+        camera = Screenshot()
+        threadsafe_call(camera.take_picture, widget, os.path.join(screenshot_dir, filename+".png"))
+    
 
 #=============================================================================
 # Helper methods

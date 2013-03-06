@@ -60,7 +60,6 @@ void SANSBeamFluxCorrection::init()
 
 void SANSBeamFluxCorrection::exec()
 {
-	std::string outputMessage = "";
 	Progress progress(this,0.0,1.0,10);
 	progress.report("Setting up beam flux correction");
 
@@ -78,7 +77,6 @@ void SANSBeamFluxCorrection::exec()
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr monitorWS = getProperty("InputMonitorWorkspace");
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // Load reference
   progress.report("Loading reference data");
@@ -112,7 +110,7 @@ void SANSBeamFluxCorrection::exec()
   divideAlg->setProperty("LHSWorkspace", inputWS);
   divideAlg->setProperty("RHSWorkspace", monitorWS);
   divideAlg->executeAsChildAlg();
-  outputWS = divideAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
 
   divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", outputWS);
@@ -144,7 +142,6 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference()
     m_output_message += "   | Using flux reference " + referenceFluxFile + "\n";
   } else {
     IAlgorithm_sptr loadAlg = createChildAlgorithm("Load");
-    loadAlg = createChildAlgorithm("Load");
     loadAlg->setProperty("Filename", referenceFluxFile);
     loadAlg->executeAsChildAlg();
     Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");

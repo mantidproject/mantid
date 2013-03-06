@@ -105,8 +105,8 @@ namespace Mantid
 
     /**
      * Creates the output workspace for this algorithm
-     * @param :: inputWorkspace A parent workspace to initialize from
-     * @return A pointer to the output workspace
+     * @param inputWorkspace A parent workspace to initialize from.
+     * @return A pointer to the output workspace.
      */
     API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace)
     {

@@ -66,7 +66,7 @@ namespace DataHandling
     /// Check whether a string starts from a specified sub-string
     bool startsWith(std::string s, std::string header);
 
-    /// Parse column name line staring with #L
+    /// Parse column name line staring with \#L
     void parseColumnNameLine(std::string line);
 
     /// Parse data line

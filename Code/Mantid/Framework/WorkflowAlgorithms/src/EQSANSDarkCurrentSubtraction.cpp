@@ -91,27 +91,6 @@ void EQSANSDarkCurrentSubtraction::exec()
   Progress progress(this,0.0,1.0,10);
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if ( outputWS != inputWS )
-  {
-    EventWorkspace_sptr eventInputWS = boost::dynamic_pointer_cast<EventWorkspace>(inputWS);
-    if (eventInputWS)
-    {
-      //Make a brand new EventWorkspace
-      EventWorkspace_sptr eventOutputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create("EventWorkspace", eventInputWS->getNumberHistograms(), 2, 1));
-      //Copy geometry over.
-      API::WorkspaceFactory::Instance().initializeFromParent(eventInputWS, eventOutputWS, false);
-      //You need to copy over the data as well.
-      eventOutputWS->copyDataFrom( (*eventInputWS) );
-
-      //Cast to the matrixOutputWS and save it
-      outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(eventOutputWS);
-    } else {
-      outputWS = WorkspaceFactory::Instance().create(inputWS);
-      outputWS->isDistribution(inputWS->isDistribution());
-    }
-  }
 
   const std::string fileName = getPropertyValue("Filename");
   MatrixWorkspace_sptr darkWS;
@@ -198,12 +177,15 @@ void EQSANSDarkCurrentSubtraction::exec()
   scaleAlg->setProperty("OutputWorkspace", scaledDarkWS);
   scaleAlg->setProperty("Operation", "Multiply");
   scaleAlg->executeAsChildAlg();
+  scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   IAlgorithm_sptr minusAlg = createChildAlgorithm("Minus", 0.6, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
-  minusAlg->setProperty("OutputWorkspace", outputWS);
+  const std::string outputWSname = getPropertyValue("OutputWorkspace");
+  minusAlg->setPropertyValue("OutputWorkspace", outputWSname);
   minusAlg->executeAsChildAlg();
+  MatrixWorkspace_sptr outputWS = minusAlg->getProperty("OutputWorkspace");
 
   setProperty("OutputWorkspace", outputWS);
   setProperty("OutputMessage", "Dark current subtracted: "+output_message);

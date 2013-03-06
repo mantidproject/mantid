@@ -36,6 +36,9 @@ namespace Mantid
 {
   namespace API
   {
+    // Doxygen can't handle member specialization at the moment: https://bugzilla.gnome.org/show_bug.cgi?id=406027
+    // so we have to ignore them
+    ///@cond
     template <typename NumT>
     bool Algorithm::isEmpty(const NumT toCheck)
     {
@@ -53,6 +56,7 @@ namespace Mantid
     template MANTID_API_DLL bool Algorithm::isEmpty<int> (const int);
     template MANTID_API_DLL bool Algorithm::isEmpty<int64_t> (const int64_t);
     template MANTID_API_DLL bool Algorithm::isEmpty<std::size_t> (const std::size_t);
+    ///@endcond
 
     //=============================================================================================
     //================================== Constructors/Destructors =================================
@@ -235,9 +239,6 @@ namespace Mantid
       // Bypass the initialization if the algorithm has already been initialized.
       if (m_isInitialized) return;
 
-      // Set the documentation. This virtual method is overridden by (nearly) all algorithms and gives documentation summary.
-      initDocs();
-
       g_log.setName(this->name());
       try
       {
@@ -247,7 +248,7 @@ namespace Mantid
         }
         catch(std::runtime_error& ex)
         {
-          g_log.error() << "Error initializing " << this->name() << " algorithm. " << ex.what();
+          g_log.error() << "Error initializing " << this->name() << " algorithm: " << ex.what() << std::endl;
           throw;
         }
 
@@ -267,6 +268,9 @@ namespace Mantid
         g_log.fatal("UNKNOWN Exception is caught in initialize()");
         throw;
       }
+
+      // Set the documentation. This virtual method is overridden by (nearly) all algorithms and gives documentation summary.
+      initDocs();
     }
 
     //---------------------------------------------------------------------------------------------
@@ -328,7 +332,6 @@ namespace Mantid
     /** Go through the workspace properties of this algorithm
      * and lock the workspaces for reading or writing.
      *
-     * @param props :: vector of Property * of this algorithm
      */
     void Algorithm::lockWorkspaces()
     {
@@ -848,6 +851,8 @@ namespace Mantid
           std::string::const_iterator start, end;
           start = propStr.begin();
           end = propStr.end();
+          // Accumulate them first so that we can set some out of order
+          std::map<std::string, std::string> propNameValues;
           while(boost::regex_search(start, end, what, nameValExp, flags))
           {
             std::string nameValue = what.str(1);
@@ -857,16 +862,28 @@ namespace Mantid
                  what, propNameExp, boost::match_not_null) )
             {
               const std::string name = what.str(1);
-              alg->setPropertyValue(name, value);
+              propNameValues[name] = value;
               end = what[1].first-1;
             } else {
               // The last property-value pair
-              alg->setPropertyValue(nameValue, value);
+              propNameValues[nameValue] = value;
               break;
             }
             // update flags:
             flags |= boost::match_prev_avail;
             flags |= boost::match_not_bob;
+          }
+
+          // Some algorithms require Filename to be set first do that here
+          auto it = propNameValues.find("Filename");
+          if(it != propNameValues.end())
+          {
+            alg->setPropertyValue(it->first, it->second);
+            propNameValues.erase(it);
+          }
+          for(auto cit = propNameValues.begin(); cit != propNameValues.end(); ++cit)
+          {
+            alg->setPropertyValue(cit->first, cit->second);
           }
         }
         return alg;
@@ -1059,7 +1076,7 @@ namespace Mantid
         // We're ok with empty groups if the workspace property is optional
         if (thisGroup.empty() && !m_inputWorkspaceProps[i]->isOptional())
           throw std::invalid_argument("Empty group passed as input");
-        if (thisGroup.size() >= 1)
+        if (!thisGroup.empty())
         {
           // Record the index of the single group.
           WorkspaceGroup_sptr wsGroup = m_groupWorkspaces[i];

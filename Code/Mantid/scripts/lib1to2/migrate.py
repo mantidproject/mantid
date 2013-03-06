@@ -6,6 +6,7 @@ from grammar import Grammar
 
 import os
 import shutil
+import traceback
 
 def run(files, backup=True):
     """
@@ -27,10 +28,11 @@ def run(files, backup=True):
         try:
             msg = script.migrate()
         except Exception, exc:
-            msg = str(exc)
+            traceback.print_exc()
             script.restore_backup()
-            msg += "\nBackup restored."
+            msg = "%s: Backup restored." % (filename)
         reports.append(msg)
+        del script
 
     messages.notify("\n" + "="*10 + " Report " + "="*10 + "\n")
     for report in reports:
@@ -79,11 +81,19 @@ class ScriptFile(object):
         input_as_str = input_file.read()
         input_file.close()
 
-        converted_str = self.grammar.translate(input_as_str)
+        converted_str, errors = self.grammar.translate(input_as_str)
         
-        output_file = open(self.filename, 'w')
+        filename = self.filename
+        if len(errors) > 0:
+            filename = self.filename + ".partial"
+            errors.append("Partial translation stored in '%s'" % filename)
+
+        output_file = open(filename, 'w')
         output_file.write(converted_str)
         output_file.close()
+
+        if len(errors) > 0:
+            raise RuntimeError("\n".join(errors))
 
         outcome = MigrationStatus(MigrationStatus.Migrated)
         return Report(self.filename, outcome)
@@ -94,8 +104,8 @@ class ScriptFile(object):
         a different filename with the
         extension defined by self.backup_ext
         """
-        messages.notify("Backing up %s to %s" % (self.filename, self.backup_filename))
         if self.dobackup and self.filename is not None:
+            messages.notify("Backing up %s to %s" % (self.filename, self.backup_filename))
             shutil.copy(self.filename, self.backup_filename)
    
     def restore_backup(self):
@@ -104,7 +114,7 @@ class ScriptFile(object):
         location
         """
         if not self.dobackup:
-            raise RuntimeError("Cannot restore from backup, no backup was requested")
+            messages.notify("Cannot restore from backup, no backup was requested")
         if os.path.exists(self.backup_filename):
             shutil.copy(self.backup_filename, self.filename)
 

@@ -1,6 +1,8 @@
 /*WIKI* 
+Masks detectors that are contained within a user defined 3 dimensional shape within the instrument.
 
-The algorithm places the user defined geometric shape within the virtual instrument and masks any detector detectors that in contained within it.  A detector is considered to be contained it its central location point is contained within the shape.
+The algorithm places the user defined geometric shape within the virtual instrument and masks any detector detectors that in contained within it.  
+A detector is considered to be contained it its central location point is contained within the shape.
 
 ===ChildAlgorithms used===
 MaskDetectorsInShape runs the following algorithms as child algorithms:
@@ -37,12 +39,13 @@ MaskDetectorsInShape::~MaskDetectorsInShape()
 {
 }
 
+
 void MaskDetectorsInShape::init()
 {
   declareProperty(new WorkspaceProperty<> ("Workspace", "", Direction::InOut),
-      "Name of the input workspace");
+      "The input workspace");
   declareProperty("ShapeXML", "", boost::make_shared<MandatoryValidator<std::string> >(),
-      "XML definition of the user defined shape");
+      "The XML definition of the user defined shape.  [[HowToDefineGeometricShape]] provides a description of the syntax.");
   declareProperty("IncludeMonitors", false,
       "Whether to include monitors if they are contained in the shape (default false)");
 }

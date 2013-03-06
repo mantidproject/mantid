@@ -38,11 +38,11 @@ void SplineBackground::init()
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
     "",Direction::Input), "The name of the input workspace.");
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
-    "",Direction::Output), "The name of the output workspace.");
+    "",Direction::Output), "The name to use for the output workspace.");
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
-  declareProperty("WorkspaceIndex",0,mustBePositive,"Spectrum number to use.");
-  declareProperty("NCoeff",10,"The number of spline coefficients.");
+  declareProperty("WorkspaceIndex",0,mustBePositive,"The index of the spectrum for fitting.");
+  declareProperty("NCoeff",10,"The number of b-spline coefficients.");
 }
 
 /** Executes the algorithm
@@ -160,7 +160,7 @@ void SplineBackground::exec()
   /* output the smoothed curve */
   API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS,1,X.size(),Y.size());
   {
-    outWS->getAxis(1)->spectraNo(0) = inWS->getAxis(1)->spectraNo(spec);
+    outWS->getAxis(1)->setValue(0, inWS->getAxis(1)->spectraNo(spec));
     double xi, yi, yerr;
     for (MantidVec::size_type i=0;i<Y.size();i++)
     {

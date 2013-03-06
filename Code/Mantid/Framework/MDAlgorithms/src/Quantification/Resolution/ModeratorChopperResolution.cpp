@@ -32,7 +32,6 @@ namespace Mantid
     /**
      * Returns the width, i.e the standard-deviation, in energy that the moderator-chopper contributes to
      * energy resolution
-     * @param detID :: The detector ID of the final pixel
      * @param deltaE :: The energy change of the final detector
      * @returns The standard deviation of the energy resolution in meV
      */

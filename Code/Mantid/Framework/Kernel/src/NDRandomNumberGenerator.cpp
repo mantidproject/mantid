@@ -29,6 +29,7 @@ namespace Mantid
     /**
      * Cache a value for a given dimension index, i.e. 0->ND-1
      * @param index :: An index for the dimension of the value generated
+     * @param value :: value to be cached
      *
      */
     void NDRandomNumberGenerator::cacheGeneratedValue(const size_t index, const double value)

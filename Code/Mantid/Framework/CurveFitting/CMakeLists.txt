@@ -39,7 +39,6 @@ set ( SRC_FILES
 	src/GaussianLinearBG1D.cpp
 	src/GramCharlierComptonProfile.cpp
 	src/IkedaCarpenterPV.cpp
-	src/LeBailFit.cpp
 	src/LeBailFit2.cpp
 	src/LeBailFunction.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
@@ -74,7 +73,7 @@ set ( SRC_FILES
 	src/TabulatedFunction.cpp
 	src/ThermalNeutronBk2BkExpAlpha.cpp
 	src/ThermalNeutronBk2BkExpBeta.cpp
-	src/ThermalNeutronBk2BkExpConvPV.cpp
+	src/ThermalNeutronBk2BkExpConvPVoigt.cpp
 	src/ThermalNeutronBk2BkExpSigma.cpp
 	src/ThermalNeutronDtoTOFFunction.cpp
 	src/UserFunction.cpp
@@ -131,7 +130,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
-	inc/MantidCurveFitting/LeBailFit.h
 	inc/MantidCurveFitting/LeBailFit2.h
 	inc/MantidCurveFitting/LeBailFunction.h
 	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
@@ -166,7 +164,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/TabulatedFunction.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpAlpha.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpBeta.h
-	inc/MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h
+	inc/MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpSigma.h
 	inc/MantidCurveFitting/ThermalNeutronDtoTOFFunction.h
 	inc/MantidCurveFitting/UserFunction.h
@@ -176,11 +174,13 @@ set ( INC_FILES
               
 set ( TEST_FILES
 	# ChebyshevPolynomialBackgroundTest.h
+	# FitPowderDiffPeaksTest.h
+	# RefinePowderInstrumentParametersTest.h
 	#DiffSphereTest.h
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
-	BackToBackExponentialTest.h
 	BFGSTest.h
+	BackToBackExponentialTest.h
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h
 	BoundaryConstraintTest.h
@@ -196,7 +196,6 @@ set ( TEST_FILES
 	ExpDecayTest.h
 	FRConjugateGradientTest.h
 	FitMWTest.h
-	# FitPowderDiffPeaksTest.h
 	FitPowderDiffPeaks2Test.h
 	FlatBackgroundTest.h
 	FunctionFactoryConstraintTest.h
@@ -209,7 +208,6 @@ set ( TEST_FILES
 	GramCharlierComptonProfileTest.h
 	IkedaCarpenterPVTest.h
 	LeBailFit2Test.h
-	LeBailFitTest.h
 	LeBailFunctionTest.h
 	LeastSquaresTest.h
 	LevenbergMarquardtMDTest.h
@@ -230,7 +228,6 @@ set ( TEST_FILES
 	ProductLinearExpTest.h
 	ProductQuadraticExpTest.h
 	QuadraticTest.h
-	# RefinePowderInstrumentParametersTest.h
 	RefinePowderInstrumentParameters2Test.h
 	ResolutionTest.h
 	SimplexTest.h
@@ -242,7 +239,7 @@ set ( TEST_FILES
 	TabulatedFunctionTest.h
 	ThermalNeutronBk2BkExpAlphaTest.h
 	ThermalNeutronBk2BkExpBetaTest.h
-	ThermalNeutronBk2BkExpConvPVTest.h
+	ThermalNeutronBk2BkExpConvPVoigtTest.h
 	ThermalNeutronBk2BkExpSigmaTest.h
 	ThermalNeutronDtoTOFFunctionTest.h
 	UserFunction1DTest.h
@@ -257,7 +254,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Add a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidCurveFitting/PrecompiledHeader.h MantidCurveFitting src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+enable_precompiled_headers( inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

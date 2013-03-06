@@ -12,7 +12,7 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/XML/XMLWriter.h>
+
 #include <sstream>
 
 using namespace Mantid::Kernel;

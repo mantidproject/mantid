@@ -5,7 +5,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include <iostream>
 #include <fstream>
 #include <iomanip>

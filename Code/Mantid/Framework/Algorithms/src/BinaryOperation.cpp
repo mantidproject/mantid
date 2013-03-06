@@ -46,16 +46,21 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName2(),"",Direction::Input));
       declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(),"",Direction::Output));
       declareProperty(new PropertyWithValue<bool>("AllowDifferentNumberSpectra", false, Direction::Input),
-          "Allow workspaces to have different number of spectra and perform\n"
-          "operation on LHS spectra using matching detector IDs in RHS.\n");
+          "Are workspaces with different number of spectra allowed? "
+          "For example, the LHSWorkspace might have one spectrum per detector, "
+          "but the RHSWorkspace could have its spectra averaged per bank. If true, "
+          "then matching between the LHS and RHS spectra is performed (all detectors "
+          "in a LHS spectrum have to be in the corresponding RHS) in order to apply the RHS spectrum to the LHS.");
 
       declareProperty(new PropertyWithValue<bool>("ClearRHSWorkspace", false, Direction::Input),
-          "Clear the RHS workspace as the operation is performed.\n"
-          "This can help prevent maxing out available memory for large workspaces.\n"
-          "This is ignored unless the RHS workspace is an EventWorkpsace.\n");
+          "For EventWorkspaces only. This will clear out event lists "
+          "from the RHS workspace as the binary operation is applied. "
+          "This can prevent excessive memory use, e.g. when subtracting "
+          "an EventWorkspace from another: memory use will be approximately "
+          "constant instead of increasing by 50%. At completion, the RHS workspace will be empty.");
     }
 
-
+    
     //--------------------------------------------------------------------------------------------
     /** Special handling for 1-WS and 1/WS.
      *
@@ -69,16 +74,15 @@ namespace Mantid
 
       if (lhs_singleVal)
       {
-        MatrixWorkspace_sptr out;
+        MatrixWorkspace_sptr out = getProperty("OutputWorkspace");
         if (this->name() == "Divide" && !bool(rhs_singleVal))
         {
-          std::cout << "Special DIVIDE of " << this->getPropertyValue(inputPropName2()) << " by " << this->getPropertyValue(inputPropName1()) << "\n";
           // x / workspace = Power(workspace, -1) * x
           // workspace ^ -1
           IAlgorithm_sptr pow = this->createChildAlgorithm("Power", 0.0, 0.5, true);
           pow->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_rhs));
           pow->setProperty("Exponent", -1.0);
-          pow->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+          pow->setProperty("OutputWorkspace", out);
           pow->executeAsChildAlg();
           out = pow->getProperty("OutputWorkspace");
 
@@ -89,10 +93,11 @@ namespace Mantid
           mult->setProperty(outputPropName(), out);
           mult->executeAsChildAlg();
           out = mult->getProperty("OutputWorkspace");
+          setProperty("OutputWorkspace", out);
+          return true;
         }
         else if (this->name() == "Minus")
         {
-          std::cout << "Special MINUS\n";
           // x - workspace = x + (workspace * -1)
           MatrixWorkspace_sptr minusOne = WorkspaceFactory::Instance().create("WorkspaceSingleValue",1,1,1);
           minusOne->dataY(0)[0] = -1.0;
@@ -102,7 +107,7 @@ namespace Mantid
           IAlgorithm_sptr mult = this->createChildAlgorithm("Multiply", 0.0, 0.5, true);
           mult->setProperty(inputPropName1(), boost::const_pointer_cast<MatrixWorkspace>(m_rhs));
           mult->setProperty(inputPropName2(), minusOne);
-          mult->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+          mult->setProperty("OutputWorkspace", out);
           mult->executeAsChildAlg();
           out = mult->getProperty("OutputWorkspace");
 
@@ -113,15 +118,12 @@ namespace Mantid
           plus->setProperty(outputPropName(), out);
           plus->executeAsChildAlg();
           out = plus->getProperty("OutputWorkspace");
-        }
-
-        // If something was done, return the output and finish now
-        if (out)
-        {
           setProperty("OutputWorkspace", out);
           return true;
         }
-      }
+
+      } // lhs_singleVal
+
       // Process normally
       return false;
     }
@@ -431,15 +433,6 @@ namespace Mantid
       }
       return continueOp;
     }
-
-    //--------------------------------------------------------------------------------------------
-    // Disable optimization under the Visual Studio compiler
-    // Optimizing, in combination with openmp parallelization causes occasional miscalculations
-    // Re-enabled below, after the doSingleValue, doSingleSpectrum, doSingleColumn & do2D methods
-    #ifdef _MSC_VER
-      #pragma optimize( "", off )
-      #pragma warning(disable:4748)  // This is about /Gs being irrelevant when not optimizing
-    #endif
 
     /**
      * Called when the rhs operand is a single value.
@@ -791,14 +784,6 @@ namespace Mantid
       if (m_ClearRHSWorkspace)
         m_erhs->clearMRU();
     }
-
-    // End of optimization disabling under Visual Studio
-    #ifdef _MSC_VER
-      #pragma optimize( "", on )
-      #pragma warning(default:4748)
-    #endif
-
-    //---------------------------------------------------------------------------------------------
 
     /** Copies any bin masking from the smaller/rhs input workspace to the output.
      *  Masks on the other input workspace are copied automatically by the workspace factory.

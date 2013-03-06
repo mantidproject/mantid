@@ -16,7 +16,6 @@ The instrumentView is the best way to visualize the grouping using the "show Ins
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
@@ -51,7 +50,8 @@ namespace Algorithms
   /// Sets documentation strings for this algorithm
   void ReadGroupsFromFile::initDocs()
   {
-    this->setWikiSummary("Read a diffraction [[CalFile|calibration file]] (*.cal) or an [[GroupDetectors|XML grouping file]] (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.  This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method. ");
+    this->setWikiSummary("Read a diffraction [[CalFile|calibration file]] (*.cal) or an [[GroupDetectors|XML grouping file]] (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.<p>This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.");
+
     this->setOptionalMessage("Read a diffraction calibration file (*.cal) or an XML grouping file (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.  This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.");
   }
   
@@ -78,21 +78,20 @@ namespace Algorithms
     // The name of the instrument
     declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InstrumentWorkspace", "", Direction::Input,
                                                             boost::make_shared<InstrumentValidator>()),
-      "A workspace that contains a reference to the instrument of interest.\n"
-      "You can use LoadEmptyInstrument if you do not have any data files to load.");
+                    "A workspace that refers to the instrument of interest. You can use [[LoadEmptyInstrument]] to create such a workspace.");
 
     // The calibration file that contains the grouping information
     std::vector<std::string> exts;
     exts.push_back(".cal");
     exts.push_back(".xml");
     declareProperty(new FileProperty("GroupingFileName","", FileProperty::Load, exts),
-        "The CalFile containing the grouping you want to visualize" );
+        "Either as a XML grouping file (see [[GroupDetectors]]) or as a [[CalFile]] (.cal extension)." );
     // Flag to consider unselected detectors in the cal file
     std::vector<std::string> select;
     select.push_back("True");
     select.push_back("False");
     declareProperty("ShowUnselected", "True", boost::make_shared<StringListValidator>(select),
-        "Whether to show detectors that are not in any group (default yes)" );
+        "Whether to show detectors that are not in any group" );
     // The output workspace (2D) that will contain the group information
     declareProperty(
         new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),

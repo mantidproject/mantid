@@ -20,10 +20,12 @@ namespace API{
   {
     /// Identification of the author of the script.
     std::string author; 
-    /// Description of the purpose of the script
+    /// Description of the purpose of the script @see @ref ScriptRepositoryDescription
     std::string description; 
     /// Time of the last update of this file (remotelly)
     Kernel::DateAndTime pub_date;
+    /// Integer that distinguishes the version of the file entry
+    int versionId;
   };
 
   /** Represent the possible states for a given file: 
@@ -51,7 +53,7 @@ namespace API{
                     LOCAL_CHANGED = (1u << 3), 
                     BOTH_CHANGED = (REMOTE_CHANGED | LOCAL_CHANGED),
                     }; 
-
+ 	
   /**
   The ScriptRepository class is intended to be used mainly by the users, who
   will be willing to share and download scripts for their analysis. As so, 
@@ -90,6 +92,7 @@ namespace API{
   */
   class MANTID_API_DLL ScriptRepoException : public std::exception
   {
+
   public:
     ///default constructor
   ScriptRepoException(const std::string info = std::string("Unknown Exception")):
@@ -113,13 +116,11 @@ namespace API{
     
     /// Returns the message string.
     const char* what() const throw(); 
-    /*
-    {
-      return _user_info.c_str();
-      }*/
-    std::string systemError(); 
-
-    std::string filePath(); 
+    
+    /// Returns the error description with technical details on the origin and cause.
+    std::string systemError(){return _system_error;}; 
+    /// Returns the file and position where the error was caused.
+    std::string filePath(){return _file_path;}; 
   private:
     /// The message returned by what()
     std::string _system_error;
@@ -136,7 +137,7 @@ namespace API{
   as well as to allow Mantid Team to distribute to the Mantid community scripts for analysis and 
   also to enhance the quality of the scripts used for the sake of data analysis. 
 
-  The ScriptSharing class aims to provide a simple way to interact with that repository in order to 
+  The ScriptRepository interface aims to provide a simple way to interact with that repository in order to 
   promote its usage. In order to enhance the usage, it is necessary:
   
     - List all scripts available at the repository
@@ -144,96 +145,45 @@ namespace API{
     - Check for updates
     - Allow to publish users scripts/folders. 
 
-  ScriptSharing may show all the files inside the script repository through ScriptSharing::listFiles.
+  ScriptRepository may show all the files inside the script repository through ScriptRepository::listFiles.
   Only the names of the files may not be sufficient, to help deciding if the file would be usefull or 
   not, so, the author, the description and when the file was last changed can be accessed through 
-  ScriptSharing::fileInfo. 
+  ScriptRepository::ScriptInfo. 
 
-  After looking at a file, you may be interested in downloading it through ScriptSharing::download. 
+  The list of the files could become confusing if a large amount of automatically created files is installed.
+  In order to avoid this, it is possible to edit the file patterns that should be ignored when listing files, 
+  this is done through ScriptRepository::setIgnorePatterns, and you can check this settings through the 
+  ScriptRepository::ignorePatterns. 
+
+  After looking at a file, you may be interested in downloading it through ScriptRepository::download. 
 
   When working with the repository, the files may be local only, if the user created a file inside 
   his folder, it may not be downloaded, it can be locally modified, or changed remotely and 
-  not up-to-date, or even, being modified locally and remotely. Use ScriptSharing::fileStatus in 
+  not up-to-date, or even, being modified locally and remotely. Use ScriptRepository::fileStatus in 
   order to get these informations of any file. 
 
   The user may decide to upload one of his file or folder, to share it. This is possible through
-  the ScriptSharing::upload. The same command may be used to publish also some updates made to an 
+  the ScriptRepository::upload. The same command may be used to publish also some updates made to an 
   already shared file.
 
-  For files that are not up-to-date, the user may be interested in what changes have been done,
-  before downloading it, this is possible through ScriptSharing::history. 
+  Finally, the ScriptRepository have to check periodically the remote repository 
+  (https://github.com/mantidproject/scripts), but it will be done indirectly through a mantid web service,
+  it is the responsibility of external tools to ensure
+  it is done periodically, through ScriptRepository::check4Update. For the sake of simplicity, this method
+  is used also to create the local repository in case it does not exists.
 
-  Finally, the ScriptSharing have to check periodically the remote repository 
-  (https://github.com/mantidproject/scripts), it is the responsibility of external tools to ensure
-  it is done periodically, through ScriptSharing::update. For the sake of simplicity, this method
-  is used also to create the local repository in case it does not exists. 
+  Before using the ScriptRepository, it must be installed inside a local folder (ScriptRepository::install).
+  If ScriptRepository is not created pointing to a valid local repository, the methog ScriptRepository::isValid 
+  will return false, and no method will be available, except, install. 
+  As a good practice, it is good to ensure that the connection between the local object and the 
+  mantid web service is available, through the ScriptRepository::connect.
 
   @note Exceptions will be triggered through ScriptRepoException in order user 
         understandable information as well as techinical details. 
 
 
-  @section script-description-sec Scripts Description
+@note Mantid::API::ScriptRepositoryImpl implements this class.
 
-  The description of the files and scripts will obey an agreement for the 
-  following type of files: 
- 
-   - @ref pyscript-sec
-   - @ref folders-sec
-   - @ref readme-sec 
-   
-
-  @subsection pyscript-sec Python Scripts
-
-  If the script is as python file, then the description will be the module __doc__ attribute. For
-  example, the following code: 
-
-  @code{.py}
-  import mantid
-  print mantid.__doc__
-  @endcode
-  
-  Produces: 
-  
-  @verbatim
-Mantid
-======
-
-http://www.mantidproject.org
-
-The Mantid project pro (...)  
-  @endverbatim
-
-
- @subsection folders-sec Folders
- 
- If the script is a folder, it will try to find a file that starts with name README, 
- and will show it. For example, if the mantid repository path would be passed, 
- it would show the content of its README.md file:
-
-@verbatim
-Mantid
-======
-
-The Mantid project provides (...)
-
-@endverbatim
-
- In this case, author should be any name found inside the README file that starts with 
- the following line: 'Author:'. 
-
-
-@subsection readme-sec README files
-
-They will work as was expected for folders @ref folders-sec. 
-
-
-  @todo Show the known implementations
-
-  @todo The ScriptSharing will use MantidProperties to know where to set the
-   local repository as well as the remote repository. (ConfigService)
-
-
-   @todo Create the abstract history method.
   
   @author Gesner Passos, ISIS, RAL
   @date 11/12/2012
@@ -258,48 +208,114 @@ They will work as was expected for folders @ref folders-sec.
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+
+
+  /** @page ScriptRepositoryDescription The Description of the ScriptRepository Files
+  
+  @section script-description-sec Scripts, Folders and Files Description
+
+  The description of the files and scripts will obey an agreement for the 
+  following type of files: 
+ 
+   - @ref pyscript-sec
+   - @ref folders-sec
+   - @ref readme-sec 
+   
+
+  @subsection pyscript-sec Python Scripts
+
+  If the script is as python file, then the description will be the module __doc__ attribute.
+  If this information is not availabe, them, it will try to get the first group of comments, at the
+  header of the file. For
+  example, the following code: 
+
+  @code{.py}
+  import mantid
+  print mantid.__doc__
+  @endcode
+  
+  Produces: 
+  
+  @verbatim
+Mantid
+======
+
+http://www.mantidproject.org
+
+The Mantid project pro (...)  
+  @endverbatim
+
+  Another example, consider this python file:
+
+  @code{.py}
+  #!/usr/bin/env python
+
+  ## This module is responsible to display a 
+  ## 'Hello world' greeting.
+
+  print 'Hello world'
+  @endcode
+
+  Will show the description as follow:
+
+  @verbatim
+This module is responsible to display a
+'Hello world' greeting.
+@endverbatim
+
+ @subsection folders-sec Folders
+ 
+ If the script is a folder, it will try to find a file __init__.py, so to check if this folder is 
+ a python module. If it does, it will parse the __init__.py as in section @ref pyscript-sec. Otherwise,
+ it will look for a file starting with name README, and will show it. 
+ For example, if the mantid repository path would be passed, 
+ it would show the content of its README.md file:
+
+@verbatim
+Mantid
+======
+
+The Mantid project provides (...)
+
+@endverbatim
+
+ In this case, author should be any name found inside the README file that starts with 
+ the following line: 'Author:'. 
+
+
+@subsection readme-sec README files
+
+They will work as was expected for folders @ref folders-sec. 
+
+*/
+
   class MANTID_API_DLL ScriptRepository
   {
   public:
+  /// @deprecated Define a file inside the repository
+  struct file_entry
+  {
+    /// path related to git
+    std::string path; 
+    /// file status
+    SCRIPTSTATUS status; 
+    /// show if it is a directory or not
+    bool directory;
+  };
+
    
     /// Virtual destructor (always needed for abstract classes)
-    virtual ~ScriptRepository() throw(){};
+    virtual ~ScriptRepository() {};
 
-    /// Define a file inside the repository
-    struct file_entry{
-      /// path related to git
-      std::string path; 
-      /// file status
-      SCRIPTSTATUS status; 
-      /// show if it is a directory or not
-      bool directory;
-    };
-
-         
-    /** The constructor of ScriptSharing. 
-        
-        Ideally, it requires the definition of the remote repository
-        and the local repository. But these values will be available inside
-        the mantid properties service (MantidKernel::ConfigService). 
-     */
-    // ScriptSharing();
-    
     /**
-       Return the information about the script through the ScriptRepoException 
+       Return the information about the script through the Mantid::API::ScriptInfo 
        struct. 
 
        It may throw exception if the file is not presented locally, or even remotelly. 
        
-       For directories, it will try to find a README file inside the directory 
-       wich will be used as the description, otherwise, it will return an empty 
-       ScriptInfo. 
-
-       The description of the scripts will follow the agreement @ref pyscript-sec.
-
-
-
-       @param path Script path related to the repository, or to operate system. 
-       @return ScriptInfo Information about the script. 
+       @param path : Script path related to the repository, or to operate system. 
+       @return Mantid::API::ScriptInfo : Information about the script. 
+       
        @exception ScriptRepoException Mainly for scripts not found. 
 
        @code
@@ -314,13 +330,15 @@ They will work as was expected for folders @ref folders-sec.
     /**
        Return the list of files inside the repository. It provides a file-system 
        like path for all the files, folders that are inside the local repository as
-       well as remotely.
+       well as remotely. 
+
+       @note The path used a normal slash to separate folders.
 
        Consider the following repository: 
        
        @verbatim 
        README.md
-       folderA/
+       folderA
        folderA/fileB
        fileC 
        @endverbatim
@@ -335,7 +353,7 @@ They will work as was expected for folders @ref folders-sec.
        List files, must show all the files:
        @verbatim 
        README.md
-       folderA/
+       folderA
        folderA/fileB
        fileC 
        NewFile
@@ -344,39 +362,92 @@ They will work as was expected for folders @ref folders-sec.
        @return List of all the files available inside the repository as a file system
        path relative to the local repository. 
        
-       @exception May throw Invalid Repository if the local repository was not generated. In this case, it is necessary to execute the ScriptRepository::update (at least once). 
+       @exception May throw Invalid Repository if the local repository was not generated. In this case, it is necessary to execute the ScriptRepository::install (at least once). 
      */
     virtual std::vector<std::string> listFiles()  = 0;
-    const std::vector<struct file_entry> & listEntries() {return repository_list;     
-    }
+    const std::vector<struct file_entry> & listEntries() {return repository_list;}
+    
     /**
        Create a copy of the remote file/folder inside the local repository.
        For folder, it will copy all the files inside the folder as well. 
 
-       @attention If one file is different locally and remotelly, the download
-                  will make a copy of the remote file, but will preserv a backup
-                  of the local file. This will be reported through throwing an
-                  exception.
-       
-       @param path of a file or folder to be downloaded. 
+       If one file is reported to have local changes (@see ScriptRepository::fileStatus)
+       the download will make a copy of the remote file, but will preserve a backup
+       of the local file. This incident will be reported through throwing an
+       exception. 
 
-       @exception ScriptRepoException to indicate file is not available at 
-                  remotely or to indicate that a confict was found.
+       For folders, the exception will also list all the files that a backup was created. 
+       
+       @param file_path of a file or folder to be downloaded.
+
+       @throws ScriptRepoException to indicate file is not available at
+                  remotely or to indicate that a conflict was found.
        
      */
-    virtual void download(const std::string file_path)  = 0 ;
+    virtual void download(const std::string file_path) = 0 ;
 
 
     
     /**
        Return the status of the file, according to the status defined in 
-       ::SCRIPTSTATUS. 
+       Mantid::API::SCRIPTSTATUS.
 
-       @param path for file/folder
-       @return SCRIPTSTATUS of the given file/folder
+       @param file_path: for file/folder
+       @return SCRIPTSTATUS : of the given file/folder
        @exception ScriptRepoException to indicate that file is not available.
      */
     virtual SCRIPTSTATUS fileStatus(const std::string file_path)  = 0; 
+
+
+    /** Check if the local repository exists. If there is no local repository, 
+      the repository was never installed, the isValid will return false, and the
+      only method valid is ScriptRepository::install.
+    */
+    virtual bool isValid(void) = 0;
+
+
+  /** Install the necessary resources at the local_path given that allows the ScriptRepository to operate
+    locally. 
+    It is allowed to create hidden files that would be necessary for the operation of this class. 
+    
+    At the end, a new folder is created, with the given local_path given. 
+
+    @param local_path: path where the folder (having the same name given) will be created.
+
+    @exception ScriptRepoException: If the local_path may not be created (because is an existing folder not empty).
+
+    */
+    virtual void install(std::string local_path) = 0;
+
+    /** Allow the ScriptRepository to double check the connection with the web server.
+    An optional argument is allowed webserverurl, but, it may be taken from the settings defined for the ScriptRepository. 
+
+    This method ensures that the network and the link is available.
+
+    @param webserverurl : url of the mantid web server. 
+    @exception ScriptRepoException: Failure to connect to the web server and the reason why.
+    */
+    virtual void connect(std::string webserverurl = "") = 0;
+
+    /**
+       Connects to the remote repository checking for updates. 
+              
+       This method, needs to know the remote URL wich must be available to the object before
+       calling the check4update.
+      
+       @attention The responsibility of executing this method periodically, is not of 
+                  the ScriptRepository it self. The others methods may not respond
+                  propperly, if this method is not executed. 
+ 
+       @note This operation requires internet connection.
+
+       @exception ScriptRepoException notifies mainly connection failure, but, 
+                  may eventually, notify that the local repository may not be created. 
+    */
+    virtual void check4Update(void)  = 0;
+    /// @deprecated
+    virtual void update(void) = 0; 
+
 
     
     /**
@@ -422,32 +493,8 @@ They will work as was expected for folders @ref folders-sec.
                 const std::string author, 
                 const std::string description = std::string())  = 0;
 
-    /** Check if the local repository exists. If there is no local repository, 
-      the repository was never cloned, the isValid will return false, and the
-      only method valid is update. 
-    */
-    virtual bool isValid(void) = 0;
-
-    /**
-       Connects to the remote repository, and checking for updates. 
-       
-       If necessary, it may create the local repository, specially, when first called. 
-       
-       This method, needs to know the remote URL wich will be provided
-       by the Mantid ConfigService. 
-      
-       @attention The responsibility of executing this method periodically, is not of 
-                  the ScriptRepository it self. The others methods may not respond
-                  propperly, if this method is not executed. 
- 
-       @note This operation requires internet connection.
-
-       @exception ScriptRepoException notifies mainly connection failure, but, 
-                  may eventually, notify that the local repository may not be created. 
-    */
-    virtual void update(void)  = 0; 
-  protected:
-    /// get all the files from a repository
+protected:
+    /// @deprecated get all the files from a repository
     std::vector<struct file_entry> repository_list; 
   };
 

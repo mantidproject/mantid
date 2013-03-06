@@ -33,16 +33,20 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_histogram.h>
 
-QwtHistogram::QwtHistogram(Table *t, const QString& xColName, const QString& name, int startRow, int endRow):
-	QwtBarCurve(QwtBarCurve::Vertical, t, xColName, name, startRow, endRow)
+QwtHistogram::QwtHistogram(Table *t, const QString& xColName, const QString& name, int startRow, int endRow)
+  : QwtBarCurve(QwtBarCurve::Vertical, t, xColName, name, startRow, endRow),
+    d_autoBin(false), d_bin_size(0.0), d_begin(0.0), d_end(0.0),
+    d_mean(0.0), d_standard_deviation(0.0), d_min(0.0), d_max(0.0)
 {
     d_matrix = 0;
     setType(Graph::Histogram);
     setStyle(QwtPlotCurve::UserCurve);
 }
 
-QwtHistogram::QwtHistogram(Matrix *m):
-    QwtBarCurve(QwtBarCurve::Vertical, NULL, "matrix", m->objectName(), 0, 0)
+QwtHistogram::QwtHistogram(Matrix *m)
+  : QwtBarCurve(QwtBarCurve::Vertical, NULL, "matrix", (m != NULL ? m->objectName() : QString() ), 0, 0),
+    d_bin_size(0.0), d_begin(0.0), d_end(0.0),
+    d_mean(0.0), d_standard_deviation(0.0), d_min(0.0), d_max(0.0)
 {
     if (m){
         d_autoBin = true;
@@ -52,9 +56,9 @@ QwtHistogram::QwtHistogram(Matrix *m):
     }
 }
 
-void QwtHistogram::copy(QwtHistogram *h)
+void QwtHistogram::copy(const QwtHistogram *h)
 {
-	QwtBarCurve::copy((const QwtBarCurve *)h);
+	QwtBarCurve::copy(h);
 
 	d_autoBin = h->d_autoBin;
 	d_bin_size = h->d_bin_size;
@@ -124,7 +128,7 @@ void QwtHistogram::loadData()
 		QString yval = d_table->text(i, ycol);
 		if (!yval.isEmpty()){
 		    bool valid_data = true;
-            Y[size] = ((Plot *)plot())->locale().toDouble(yval, &valid_data);
+            Y[size] = plot()->locale().toDouble(yval, &valid_data);
             if (valid_data)
                 size++;
 		}

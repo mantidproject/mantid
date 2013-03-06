@@ -49,7 +49,6 @@ namespace API
   public:
     //--------------------------------------------------------------------------------------------
     /** Constructor
-     * @param algo :: ptr to the calling Algorithm (type IPropertyManager)
      * @param otherPropName :: Name of the OTHER property that we will check.
      * @param enabledSetting :: Set Enabled on this property to this value when the workspace is of type T. Default true.
      */

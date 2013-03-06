@@ -1,16 +1,19 @@
 /*WIKI* 
 
-The LoadAscii algorithm reads in spectra data from a text file and stores it in a [[Workspace2D]] as data points. The data in the file must be organized in columns separated by commas, tabs, spaces, colons or semicolons. Only one separator type can be used throughout the file; use the "Separator" property to tell the algorithm which to use. 
+The LoadAscii algorithm reads in spectra data from a text file and stores it in a [[Workspace2D]] as data points. The data in the file must be organized in columns separated by commas, tabs, spaces, colons or semicolons. Only one separator type can be used throughout the file; use the "Separator" property to tell the algorithm which to use. The algorithm [[SaveAscii]] is normally able to produce such a file.
 
 By default the algorithm attempts to guess which lines are header lines by trying to see where a contiguous block of numbers starts. This can be turned off by specifying the "SkipNumLines" property, which will then tell the algorithm to simply use that as the the number of header lines.
 
 The format can be one of:
 * Two columns: 1st column=X, 2nd column=Y, E=0
 * For a workspace of ''n'' spectra, 2''n''+1 columns: 1''st'' column=X, 2i''th'' column=Y, 2i+1''th'' column =E
+* Four columns: 1st column=X, 2nd column=Y, 3rd column=E, 4th column=DX (X error)
 
 The number of bins is defined by the number of rows.
 
 The resulting workspace will have common X binning for all spectra.
+
+This algorithm cannot load a file created by [[SaveAscii]] if it has X errors written and several spectra.
 
 
 *WIKI*/
@@ -332,7 +335,7 @@ namespace Mantid
         if ( haveErrors ) localWorkspace->dataE(i) = spectra[i].dataE();
         if ( haveXErrors ) localWorkspace->dataDx(i) = spectra[i].dataDx();
         // Just have spectrum number start at 1 and count up
-        localWorkspace->getAxis(1)->spectraNo(i) = static_cast<specid_t>(i+1);
+        localWorkspace->getAxis(1)->setValue(i, static_cast<specid_t>(i+1));
       }
       return localWorkspace;
     }
@@ -413,9 +416,9 @@ namespace Mantid
       exts.push_back("");
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-        "A comma separated Ascii file");
+        "The name of the text file to read, including its full or relative path. The file extension must be .tst, .dat, or .csv");
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace",
-        "",Direction::Output), "The name of the workspace that will be created.");
+        "",Direction::Output), "The name of the workspace that will be created, filled with the read-in data and stored in the [[Analysis Data Service]].");
 
       std::string spacers[6][6] = { {"Automatic", ",\t:; "}, {"CSV", ","},
           {"Tab", "\t"}, {"Space", " "}, {"Colon", ":"}, {"SemiColon", ";"} };
@@ -428,17 +431,18 @@ namespace Mantid
         sepOptions.push_back(option);
       }
       declareProperty("Separator", "Automatic", boost::make_shared<StringListValidator>(sepOptions),
-        "The column separator character (default: Automatic selection)");
+        "The separator between data columns in the data file. The possible values are \"CSV\", \"Tab\", "
+        "\"Space\", \"SemiColon\", or \"Colon\" (default: Automatic selection).");
 
       std::vector<std::string> units = UnitFactory::Instance().getKeys();
       units.insert(units.begin(),"Dimensionless");
       declareProperty("Unit","Energy", boost::make_shared<StringListValidator>(units),
-        "The unit to assign to the X axis (default: Energy)");
+        "The unit to assign to the X axis (anything known to the [[Unit Factory]] or \"Dimensionless\")");
 
       auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
       declareProperty("SkipNumLines", EMPTY_INT(), mustBePosInt,
-        "If set, this number of lines from the top of the file are ignored.");
+        "If given, skip this number of lines at the start of the file.");
     }
 
     /** 

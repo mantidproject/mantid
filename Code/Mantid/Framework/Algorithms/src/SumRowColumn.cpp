@@ -43,24 +43,24 @@ using namespace Mantid::API;
 void SumRowColumn::init()
 {
   // Assume input workspace has correct spectra in it - no more and no less
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),"The input workspace, which must contain all the spectra from the bank of interest - no more and no less (so 128x128 or 192x192).");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"The name of the workspace in which to store the result.");
 
   // Need to select whether to sum rows or columns
   std::vector<std::string> orientation;
   orientation.push_back("D_H");
   orientation.push_back("D_V");
-  declareProperty("Orientation","",boost::make_shared<StringListValidator>(orientation));
+  declareProperty("Orientation","",boost::make_shared<StringListValidator>(orientation),"Whether to sum rows (D_H) or columns (D_V).");
 
   // This is the range to select - the whole lot by default
-  declareProperty("XMin",EMPTY_DBL());
-  declareProperty("XMax",EMPTY_DBL());
+  declareProperty("XMin",EMPTY_DBL(),"The starting X value for each spectrum to include in the summation.");
+  declareProperty("XMax",EMPTY_DBL(),"The ending X value for each spectrum to include in the summation.");
 
   // For selecting a column range - the whole lot by default
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
-  declareProperty("HOverVMin",EMPTY_INT(),mustBePositive);
-  declareProperty("HOverVMax",EMPTY_INT(),mustBePositive);
+  declareProperty("HOverVMin",EMPTY_INT(),mustBePositive,"The first row to include in the summation when summing by columns, or vice versa.");
+  declareProperty("HOverVMax",EMPTY_INT(),mustBePositive,"The last row to include in the summation when summing by columns, or vice versa.");
 }
 
 void SumRowColumn::exec()

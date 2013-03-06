@@ -56,7 +56,7 @@ QwtText TrackingPicker::trackerText( const QPoint & point ) const
  *  This overrides the base class trackerText() function so that we can
  *  continuously emit a signal as the mouse is moved.
  *
- *  @param point  The current mouse location.
+ *  @param pos  The current mouse location.
  */
 QwtText TrackingPicker::trackerText( const QwtDoublePoint & pos ) const
 {

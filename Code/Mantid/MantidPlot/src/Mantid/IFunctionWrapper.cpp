@@ -19,7 +19,7 @@ void IFunctionWrapper::setFunction(const QString& name)
   }
 }
 
-void IFunctionWrapper::setFunction(Mantid::API::IFunction_sptr function)
+void IFunctionWrapper::setFunction(boost::shared_ptr<Mantid::API::IFunction> function)
 {
   m_function = function;
   m_compositeFunction = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(m_function);

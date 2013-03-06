@@ -221,6 +221,10 @@ class HFIRSANSReduction(PythonAlgorithm):
                 background_ws = '__'+background_ws+'_reduced'
         
             # Subtract background
+            api.RebinToWorkspace(WorkspaceToRebin=background_ws,
+                                 WorkspaceToMatch=output_ws,
+                                 OutputWorkspace=background_ws+'_rebin',
+                                 PreserveEvents=False)
             api.Minus(LHSWorkspace=output_ws,
                          RHSWorkspace=background_ws,
                          OutputWorkspace=output_ws)

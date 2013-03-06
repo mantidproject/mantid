@@ -38,7 +38,7 @@ void ConvertToDistribution::init()
   wsValidator->add<RawCountValidator>();
   declareProperty(
     new WorkspaceProperty<>("Workspace","",Kernel::Direction::InOut,wsValidator),
-    "The name of the workspace to convert" );
+    "The name of the workspace to convert." );
 }
 
 void ConvertToDistribution::exec()

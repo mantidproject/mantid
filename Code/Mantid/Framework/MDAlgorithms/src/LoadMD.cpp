@@ -33,7 +33,7 @@ and used by other algorithms, they should not be needed in daily use.
 #include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDBoxFlatTree.h"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vector>
 #include "MantidMDEvents/MDHistoWorkspace.h"
@@ -291,14 +291,14 @@ namespace Mantid
       }
     }
 
-
-    /** Load a slab of double data into a bare array.
-    * Checks that the size is correct.
-    *
-    * @param data :: bare pointer to double array
-    * @param numPoints ::
-    * @param name
-    */
+    /**
+     * Load a slab of double data into a bare array.
+     * Checks that the size is correct.
+     * @param name
+     * @param data bare pointer to doublel array
+     * @param ws
+     * @param dataType
+     */
     void LoadMD::loadSlab(std::string name, void * data, MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType)
     {
       file->openData(name);

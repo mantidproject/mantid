@@ -1,7 +1,7 @@
 #include "DataPointMarker.h"
 
 DataPointMarker::DataPointMarker (Plot *plot)
-  : QObject(plot), PlotEnrichement(),  m_positionX(), m_positionY()
+  : QObject(plot), PlotEnrichement(),  m_positionX(), m_positionY(), d_x_right(0.0),d_y_bottom (0.0)
   {
   }
 

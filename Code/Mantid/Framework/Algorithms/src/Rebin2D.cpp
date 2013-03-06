@@ -66,8 +66,8 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
       const std::string docString = 
-        "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
-        "this can be followed by a comma and more widths and last boundary pairs.\n"
+        "A comma separated list of first bin boundary, width, last bin boundary. Optionally "
+        "this can be followed by a comma and more widths and last boundary pairs. "
         "Negative width values indicate logarithmic binning.";
       auto rebinValidator = boost::make_shared<RebinParamsValidator>();
       declareProperty(new ArrayProperty<double>("Axis1Binning", rebinValidator), docString);

@@ -43,11 +43,10 @@ would tell the algorithm to interpret the columns as:
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 #include "LoadRaw/isisraw2.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -66,7 +65,7 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void UpdateInstrumentFromFile::initDocs()
     {
-      this->setWikiSummary("Update detector positions initially loaded in from Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) from information the given file.");
+      this->setWikiSummary("Update detector positions initially loaded in from Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) from information the given file. Note doing this will results in a slower performance (likely slightly slower performance) compared to specifying the correct detector positions in the IDF in the first place. It is assumed that the positions specified in the raw file are all with respect to the a coordinate system defined with its origin at the sample position.  Note that this algorithm moves the detectors without subsequent rotation, hence this means that detectors may not for example face the sample perfectly after this algorithm has been applied.");
       this->setOptionalMessage("Updates detector positions initially loaded in from the Instrument Definition File (IDF) with information from the provided file.");
     }
     
@@ -239,12 +238,6 @@ namespace Mantid
       setDetectorPositions(detID, l2, theta, phi);
     }
 
-    namespace
-    {
-      ///@cond
-      ///@endcond
-    }
-
     /**
      * Updates from a more generic ascii file
      * @param filename :: The input filename
@@ -349,7 +342,7 @@ namespace Mantid
     /**
      * Parse the header and fill the headerInfo struct and returns a boolean
      * indicating if the table is spectrum or detector ID based
-     * @param headerInfo[Out] :: Fills the given struct with details about the header
+     * @param headerInfo :: [Out] Fills the given struct with details about the header
      * @returns True if the header is spectrum based, false otherwise
      */
     bool UpdateInstrumentFromFile::parseAsciiHeader(UpdateInstrumentFromFile::AsciiFileHeader & headerInfo)

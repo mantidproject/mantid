@@ -338,5 +338,77 @@ namespace MantidQt
       // We want to zoom out now, because any currently selected peak will be wrong.
       m_zoomablePlottingWidget->resetView();
     }
+
+    /**
+     * Set the peaks size on the current projection using the supplied fraction.
+     * @param fraction of the view width to use as the peak radius.
+     */
+    void CompositePeaksPresenter::setPeakSizeOnProjection(const double fraction)
+    {
+      if(useDefault())
+      {
+        return m_default->setPeakSizeOnProjection(fraction);
+      }
+      for(auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end(); ++presenterIterator)
+      {
+        (*presenterIterator)->setPeakSizeOnProjection(fraction);
+      }
+    }
+
+    /**
+     * Fraction of the z-range to use as the peak radius.
+     * @param fraction to use as the peak radius
+     */
+    void CompositePeaksPresenter::setPeakSizeIntoProjection(const double fraction)
+    {
+      if (useDefault())
+      {
+        return m_default->setPeakSizeIntoProjection(fraction);
+      }
+      for (auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end();
+          ++presenterIterator)
+      {
+        (*presenterIterator)->setPeakSizeIntoProjection(fraction);
+      }
+    }
+
+    double CompositePeaksPresenter::getPeakSizeOnProjection() const
+    {
+      if (useDefault())
+      {
+        return m_default->getPeakSizeOnProjection();
+      }
+      double result = 0;
+      for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it)
+      {
+        double temp = (*it)->getPeakSizeOnProjection();
+        if (temp > 0)
+        {
+          result = temp;
+          break;
+        }
+      }
+      return result;
+    }
+
+    double CompositePeaksPresenter::getPeakSizeIntoProjection() const
+    {
+      if (useDefault())
+      {
+        return m_default->getPeakSizeIntoProjection();
+      }
+      double result = 0;
+      for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it)
+      {
+        double temp  = (*it)->getPeakSizeIntoProjection();
+        if(temp > 0)
+        {
+          result = temp;
+          break;
+        }
+      }
+      return result;
+    }
+
   }
 }

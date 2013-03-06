@@ -188,7 +188,7 @@ void ColorBarWidget::setMinimum(double min)
 
 /** Set the range of values viewed in the color bar
  *
- * @param min :: min value = start of the color map
+ * @param max :: max value = start of the color map
  */
 void ColorBarWidget::setMaximum(double max)
 {

@@ -170,7 +170,7 @@ void FilterByLogValue::exec()
   const bool PulseFilter = getProperty("PulseFilter");
 
   // Find the start and stop times of the run, but handle it if they are not found.
-  DateAndTime run_start(0), run_stop("2100-01-01");
+  DateAndTime run_start(0), run_stop("2100-01-01T00:00:00");
   double handle_edge_values = false;
   try
   {

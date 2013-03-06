@@ -107,7 +107,13 @@ namespace MantidQt
 
     /**
      Create a formatted string for the dimension input based on an existing dimension.
-     @param dim : dimension to format to string.
+     As the input it is expected the dimension to format the string. 
+
+     It is expected that inherited classes will be able to implement this method, but
+     this class can not obviously define how the basis vectors could be automatically formed, 
+     so, it retuns always an empty string.
+
+     @return : empty string.
     */
     QString formatNonAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr)
     {

@@ -22,7 +22,6 @@
 #include <set>
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/scoped_ptr.hpp>
 #include "MantidAPI/IMDIterator.h"
 
@@ -100,7 +99,7 @@ namespace Mantid
       /// Build and populate the NearestNeighbours object
       void buildNearestNeighbours(const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a detector
-      std::map<specid_t, Mantid::Kernel::V3D> getNeighbours(const Mantid::Geometry::IDetector *comp, const double radius = 0.0, const bool ignoreMaskedDetectors=false) const;
+      std::map<specid_t, Mantid::Kernel::V3D> getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0, const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a given spectrum index using a search radius
       std::map<specid_t, Mantid::Kernel::V3D> getNeighbours(specid_t spec, const double radius, const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a given spectrum index using the direct number of nearest neighbours
@@ -336,11 +335,9 @@ namespace Mantid
       /// Has this workspace been initialised?
       bool m_isInitialized;
 
-    protected:
       /// A shared pointer to the spectra-detector map
       boost::shared_ptr<const Geometry::ISpectraDetectorMap> m_spectraMap;
 
-    private:
       /// The unit for the data values (e.g. Counts)
       std::string m_YUnit;
       /// A text label for use when plotting spectra

@@ -29,6 +29,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         return "CalibrateRectangularDetectors"
 
     def PyInit(self):
+        self.setWikiSummary("Calibrate the detector pixels and write a calibration file")
         sns = mtd.getSettings().facility("SNS")
         instruments = []
         for instr in sns.instruments():
@@ -220,7 +221,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if y_s[midBin] > ymax:
                         refpixel = s
                         ymax = y_s[midBin]
-            print "Reference spectra=",refpixel
+            print "Reference spectra = ",refpixel, ", lastpixel_3 = ", self._lastpixel3
             self._lastpixel2 = wksp.getNumberHistograms()*self._lastpixel2/self._lastpixel3-1
             CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2", ReferenceSpectra=refpixel,
                 WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=self._lastpixel2, XMin=self._peakmin2, XMax=self._peakmax2)

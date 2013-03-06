@@ -8,7 +8,7 @@ namespace MantidQt
   namespace SliceViewer
   {
     /**
-    @class DoubleParam
+    DoubleParam
     IntToType Parameter Type. Simple mechanism for ensuring type 
     safety when working with so many arguments of the same core type in PeakBoundingBox.
     */
@@ -59,9 +59,13 @@ namespace MantidQt
     {
     private:
       
+      /// Left edge
       Left m_left;
+      /// Right edge
       Right m_right;
+      /// Top edge
       Top m_top;
+      /// Bottom edge.
       Bottom m_bottom;
 
       /// Slice parellel to projection (z) position

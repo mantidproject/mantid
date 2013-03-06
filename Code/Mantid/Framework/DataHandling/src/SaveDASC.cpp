@@ -44,9 +44,9 @@ void SaveDASC::init()
   // the output of this algorithm is spectrum data, not histogram, but as a histogram to spectrum conversion is built in a spectrum as input would be no good, at the moment
   wsValidator->add<API::HistogramValidator>();
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,wsValidator),
-      "The input workspace");
+      "The name of the input workspace.");
   declareProperty(new FileProperty("Filename","",FileProperty::Save),
-    "The filename to use for the saved data");
+    "The filename to use for the saved data.");
 }
 
 /**

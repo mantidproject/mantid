@@ -7,6 +7,7 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <sstream>
 #include <iostream>
@@ -41,7 +42,7 @@ void ParamFunction::setParameter(size_t i, const double& value, bool explicitlyS
 {
   // Cppcheck confused by the check for NaN
   // cppcheck-suppress duplicateExpression
-  if (value != value)
+  if ((boost::math::isnan)(value))
   {
     // Check for NaN or -NaN
     std::stringstream errmsg;

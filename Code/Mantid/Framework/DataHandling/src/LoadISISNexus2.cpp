@@ -18,8 +18,8 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
@@ -167,44 +167,8 @@ namespace Mantid
 
       // Check input is consistent with the file, throwing if not
       checkOptionalProperties();
-
-      // Check which monitors need loading
-      const bool empty_spec_list = m_spec_list.empty(); 
-      for( std::map<int64_t, std::string>::iterator itr = m_monitors.begin(); itr != m_monitors.end(); )
-      {
-        int64_t index = itr->first;
-        std::vector<int64_t>::iterator spec_it = std::find(m_spec_list.begin(), m_spec_list.end(), index);
-        if( (!empty_spec_list && spec_it == m_spec_list.end()) ||
-          (m_range_supplied && (index < m_spec_min || index > m_spec_max)) )
-        {
-          std::map<int64_t, std::string>::iterator itr1 = itr;
-          ++itr;
-          m_monitors.erase(itr1);
-        }
-        // In the case that a monitor is in the spectrum list, we need to erase it from there
-        else if ( !empty_spec_list && spec_it != m_spec_list.end() )
-        {
-          m_spec_list.erase(spec_it);
-          ++itr;
-        }
-        else
-        {
-          ++itr;
-        }
-      }
-
-
-      size_t total_specs(0);
-      size_t list_size = m_spec_list.size();
-      if( m_range_supplied )
-      {
-        //Inclusive range + list size
-        total_specs = (m_spec_max - m_spec_min + 1) + list_size;
-      }
-      else
-      {
-        total_specs = list_size + static_cast<int>(m_monitors.size());
-      }
+      // Fill up m_spectraBlocks
+      size_t total_specs = prepareSpectraBlocks();
 
       m_progress = boost::shared_ptr<API::Progress>(new Progress(this, 0.0, 1.0, total_specs * m_numberOfPeriods));
 
@@ -247,6 +211,7 @@ namespace Mantid
       }
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, local_workspace);
+      local_workspace->updateSpectraUsingMap();
       
       // Clone the workspace at this point to provide a base object for future workspace generation.
       DataObjects::Workspace2D_sptr period_free_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
@@ -389,38 +354,154 @@ namespace Mantid
 
       //Check the list property
       m_spec_list = getProperty("SpectrumList");
-      if( m_spec_list.empty() ) 
+      if( ! m_spec_list.empty() ) 
+      {
+        // Sort the list so that we can check it's range
+        std::sort(m_spec_list.begin(), m_spec_list.end());
+
+        if( m_spec_list.back() > static_cast<int64_t>(m_numberOfSpectra) )
+        {
+          g_log.error() << "Inconsistent SpectraList property defined for a total of " << m_numberOfSpectra 
+            << " spectra." << std::endl;
+          throw std::invalid_argument("Inconsistent property defined");
+        }
+
+        //Check no negative numbers have been passed
+        std::vector<int64_t>::iterator itr =
+          std::find_if(m_spec_list.begin(), m_spec_list.end(), std::bind2nd(std::less<int>(), 0));
+        if( itr != m_spec_list.end() )
+        {
+          g_log.error() << "Negative SpectraList property encountered." << std::endl;
+          throw std::invalid_argument("Inconsistent property defined.");
+        }
+
+        range_check in_range(m_spec_min, m_spec_max);
+        if( m_range_supplied )
+        {
+          m_spec_list.erase(remove_if(m_spec_list.begin(), m_spec_list.end(), in_range), m_spec_list.end());
+        }
+      }
+      else
       {
         m_range_supplied = true;
-        return;
       }
 
-      // Sort the list so that we can check it's range
-      std::sort(m_spec_list.begin(), m_spec_list.end());
+    }
 
-      if( m_spec_list.back() > static_cast<int64_t>(m_numberOfSpectra) )
+    namespace
+    {
+      /// Compare two spectra blocks for ordering
+      bool compareSpectraBlocks(const LoadISISNexus2::SpectraBlock& block1, const LoadISISNexus2::SpectraBlock& block2)
       {
-        g_log.error() << "Inconsistent SpectraList property defined for a total of " << m_numberOfSpectra 
-          << " spectra." << std::endl;
-        throw std::invalid_argument("Inconsistent property defined");
+        bool res = block1.last < block2.first;
+        if ( !res )
+        {
+          assert( block2.last < block1.first );
+        }
+        return res;
       }
+    }
 
-      //Check no negative numbers have been passed
-      std::vector<int64_t>::iterator itr =
-        std::find_if(m_spec_list.begin(), m_spec_list.end(), std::bind2nd(std::less<int>(), 0));
-      if( itr != m_spec_list.end() )
+    /**
+     * Analyze the spectra ranges and prepare a list contiguous blocks. Each monitor must be
+     * in a separate block.
+     * @return :: Number of spectra to load.
+     */
+    size_t LoadISISNexus2::prepareSpectraBlocks()
+    {
+      std::vector<int64_t> includedMonitors;
+      // fill in the data block descriptor vector
+      if ( ! m_spec_list.empty() )
       {
-        g_log.error() << "Negative SpectraList property encountered." << std::endl;
-        throw std::invalid_argument("Inconsistent property defined.");
+        int64_t hist = m_spec_list[0];
+        SpectraBlock block(hist,hist,false);
+        for(auto spec = m_spec_list.begin() + 1; spec != m_spec_list.end(); ++spec)
+        {
+          // try to put all consequtive numbers in same block
+          bool isMonitor = m_monitors.find( hist ) != m_monitors.end();
+          if ( isMonitor || *spec != hist + 1 )
+          {
+            block.last = hist;
+            block.isMonitor =  isMonitor;
+            m_spectraBlocks.push_back( block );
+            if ( isMonitor ) includedMonitors.push_back( hist );
+            block = SpectraBlock(*spec,*spec,false);
+          }
+          hist = *spec;
+        }
+        // push the last block
+        hist = m_spec_list.back();
+        block.last = hist;
+        if ( m_monitors.find( hist ) != m_monitors.end() )
+        {
+          includedMonitors.push_back( hist );
+          block.isMonitor =  true;
+        }
+        m_spectraBlocks.push_back( block );
       }
 
-      range_check in_range(m_spec_min, m_spec_max);
-      if( m_range_supplied )
+      // put in the spectra range, possibly breaking it into parts by monitors
+      int64_t first = m_spec_min;
+      for(int64_t hist = first; hist < m_spec_max; ++hist)
       {
-        m_spec_list.erase(remove_if(m_spec_list.begin(), m_spec_list.end(), in_range), m_spec_list.end());
+          if ( m_monitors.find( hist ) != m_monitors.end() )
+          {
+            if ( hist != first )
+            {
+              m_spectraBlocks.push_back( SpectraBlock( first, hist - 1, false ) );
+            }
+            m_spectraBlocks.push_back( SpectraBlock( hist, hist, true) );
+            includedMonitors.push_back( hist );
+            first = hist + 1;
+          }
+      }
+      if ( first == m_spec_max && m_monitors.find( first ) != m_monitors.end() )
+      {
+        m_spectraBlocks.push_back( SpectraBlock( first, m_spec_max, true ) );
+        includedMonitors.push_back( m_spec_max );
+      }
+      else
+      {
+        m_spectraBlocks.push_back( SpectraBlock( first, m_spec_max, false ) );
       }
 
+      // sort and check for overlapping
+      if ( m_spectraBlocks.size() > 1 )
+      {
+        std::sort( m_spectraBlocks.begin(), m_spectraBlocks.end(), compareSpectraBlocks );
+      }
 
+      // remove monitors that weren't requested
+      if ( m_monitors.size() != includedMonitors.size() )
+      {
+        if ( includedMonitors.empty() )
+        {
+          m_monitors.clear();
+        }
+        else
+        {
+          for(auto it = m_monitors.begin(); it != m_monitors.end(); )
+          {
+            if ( std::find( includedMonitors.begin(), includedMonitors.end(), it->first ) == includedMonitors.end() )
+            {
+              auto it1 = it;
+              ++it;
+              m_monitors.erase( it1 );
+            }
+            else
+            {
+              ++it;
+            }
+          }
+        }
+      }
+      // count the number of spectra
+      size_t nSpec = 0;
+      for( auto it = m_spectraBlocks.begin(); it != m_spectraBlocks.end(); ++it )
+      {
+        nSpec += it->last - it->first + 1;
+      }
+      return nSpec;
     }
 
     /**
@@ -433,15 +514,14 @@ namespace Mantid
     {
       int64_t hist_index = 0;
       int64_t period_index(period - 1);
-      int64_t first_monitor_spectrum = 0;
+      //int64_t first_monitor_spectrum = 0;
 
-      if( !m_monitors.empty() )
+      for(auto block = m_spectraBlocks.begin(); block != m_spectraBlocks.end(); ++block)
       {
-        first_monitor_spectrum = m_monitors.begin()->first;
-        hist_index = first_monitor_spectrum - 1;
-        for(std::map<int64_t,std::string>::const_iterator it = m_monitors.begin();
-          it != m_monitors.end(); ++it)
+        if ( block->isMonitor )
         {
+          auto it = m_monitors.find( block->first );
+          assert( it != m_monitors.end() );
           NXData monitor = entry.openNXData(it->second);
           NXInt mondata = monitor.openIntData();
           m_progress->report("Loading monitor");
@@ -450,60 +530,27 @@ namespace Mantid
           Y.assign(mondata(),mondata() + m_numberOfChannels);
           MantidVec& E = local_workspace->dataE(hist_index);
           std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-          local_workspace->getAxis(1)->spectraNo(hist_index) = static_cast<specid_t>(it->first);
+          local_workspace->getAxis(1)->setValue(hist_index, static_cast<specid_t>(it->first));
 
           NXFloat timeBins = monitor.openNXFloat("time_of_flight");
           timeBins.load();
           local_workspace->dataX(hist_index).assign(timeBins(),timeBins() + timeBins.dim0());
           hist_index++;
         }
-
-        if (first_monitor_spectrum > 1)
+        else if( m_have_detector )
         {
-          hist_index = 0;
-        }
-      }
-      
-      if( m_have_detector )
-      {
-        NXData nxdata = entry.openNXData("detector_1");
-        NXDataSetTyped<int> data = nxdata.openIntData();
-        data.open();
-        //Start with thelist members that are lower than the required spectrum
-        const int * const spec_begin = m_spec.get();
-        std::vector<int64_t>::iterator min_end = m_spec_list.end();
-        if( !m_spec_list.empty() )
-        {
-          // If we have a list, by now it is ordered so first pull in the range below the starting block range
-          // Note the reverse iteration as we want the last one
-          if( m_range_supplied )
-          {
-            min_end = std::find_if(m_spec_list.begin(), m_spec_list.end(), std::bind2nd(std::greater<int>(), m_spec_min));
-          }
-
-          for( std::vector<int64_t>::iterator itr = m_spec_list.begin(); itr < min_end; ++itr )
-          {
-            // Load each
-            int64_t spectra_no = (*itr);
-            // For this to work correctly, we assume that the spectrum list increases monotonically
-            int64_t filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
-            m_progress->report("Loading data");
-            loadBlock(data, static_cast<int64_t>(1), period_index, filestart, hist_index, spectra_no, local_workspace);
-          }
-        }    
-
-        if( m_range_supplied )
-        {
+          NXData nxdata = entry.openNXData("detector_1");
+          NXDataSetTyped<int> data = nxdata.openIntData();
+          data.open();
+          //Start with thelist members that are lower than the required spectrum
+          const int * const spec_begin = m_spec.get();
           // When reading in blocks we need to be careful that the range is exactly divisible by the blocksize
           // and if not have an extra read of the left overs
           const int64_t blocksize = 8;
-          const int64_t rangesize = (m_spec_max - m_spec_min + 1) - m_monitors.size();
+          const int64_t rangesize = block->last - block->first + 1;
           const int64_t fullblocks = rangesize / blocksize;
-          int64_t spectra_no = m_spec_min;
-          if (first_monitor_spectrum == 1)
-          {// this if crudely checks whether the monitors are at the begining or end of the spectra
-            spectra_no += static_cast<int>(m_monitors.size());
-          }
+          int64_t spectra_no = block->first;
+
           // For this to work correctly, we assume that the spectrum list increases monotonically
           int64_t filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
           if( fullblocks > 0 )
@@ -519,16 +566,6 @@ namespace Mantid
           {
             loadBlock(data, finalblock, period_index, filestart, hist_index, spectra_no,  local_workspace);
           }
-        }
-
-        //Load in the last of the list indices
-        for( std::vector<int64_t>::iterator itr = min_end; itr < m_spec_list.end(); ++itr )
-        {
-          // Load each
-          int64_t spectra_no = (*itr);
-          // For this to work correctly, we assume that the spectrum list increases monotonically
-          int64_t filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
-          loadBlock(data, 1, period_index, filestart, hist_index, spectra_no, local_workspace);
         }
       }
 
@@ -584,7 +621,7 @@ namespace Mantid
         std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
         // Populate the workspace. Loop starts from 1, hence i-1
         local_workspace->setX(hist, m_tof_data);
-        local_workspace->getAxis(1)->spectraNo(hist)= static_cast<specid_t>(spec_num);
+        local_workspace->getAxis(1)->setValue(hist, static_cast<specid_t>(spec_num));
         ++hist;
         ++spec_num;
       }

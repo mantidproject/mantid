@@ -166,11 +166,7 @@ namespace Mantid
       {}
 
       MuonNexusReader nxload;
-      if (nxload.readFromFile(m_filename) != 0)
-      {
-        g_log.error("Unable to open file " + m_filename);
-        throw Exception::FileError("Unable to open File:" , m_filename);  
-      }
+      nxload.readFromFile(m_filename);
 
       // Read in the instrument name from the Nexus file
       m_instrument_name = nxload.getInstrumentName();
@@ -444,7 +440,7 @@ namespace Mantid
             // All two spectra
             for(detid_t k=0; k<static_cast<detid_t>(ngroups); k++)
             {
-              groupedWS->getAxis(1)->spectraNo(k)= k + 1;
+              groupedWS->getAxis(1)->setValue(k, k + 1);
             }
 
             groupedWS->replaceSpectraMap(new API::SpectraDetectorMap(spec.get(),dets.get(),numHists));
@@ -501,7 +497,7 @@ namespace Mantid
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
-      localWorkspace->getAxis(1)->spectraNo(hist)= static_cast<int>(hist) + 1;
+      localWorkspace->getAxis(1)->setValue(hist, static_cast<int>(hist) + 1);
     }
 
 

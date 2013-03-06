@@ -80,10 +80,13 @@ namespace Mantid
       }
       return true;
     }
-    /** Method updates the value of preprocessed detector coordinates in Q-space, used by other functions 
-    *@param i -- index of the detector, which corresponds to the spectra to process. 
-    * 
-    */
+
+    /**
+     * Method updates the value of pre-processed detector coordinates in Q-space, used by other functions
+     * @param Coord
+     * @param i -- index of the detector, which corresponds to the spectra to process.
+     * @return FALSE if spectra should be excluded (if masked)
+     */
     bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
     {
       UNUSED_ARG(Coord); 
@@ -103,14 +106,15 @@ namespace Mantid
       }
       return true;
     }
+
     /** function calculates workspace-dependent coordinates in inelastic case. 
     * Namely, it calculates module of Momentum transfer and the Energy 
     * transfer and put them into initial positions (0 and 1) in the Coord vector
     *
-    *@Param     E_tr   input energy transfer
-    *@returns   &Coord  vector of MD coordinates with filled in momentum and energy transfer 
+    *@param     E_tr   input energy transfer
+    *@param   &Coord  vector of MD coordinates with filled in momentum and energy transfer
 
-    *@returns   true if all momentum and energy are within the limits requested by the algorithm and false otherwise. 
+    *@return   true if all momentum and energy are within the limits requested by the algorithm and false otherwise.
     *
     * it also uses preprocessed detectors positions, which are calculated by PreprocessDetectors algorithm and set up by 
     * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method.    */    
@@ -146,10 +150,10 @@ namespace Mantid
     * Namely, it calculates module of Momentum transfer
     * put it into specified (0) position in the Coord vector
     *
-    *@Param     k0   module of input momentum
-    *@returns   &Coord  vector of MD coordinates with filled in momentum and energy transfer 
+    *@param     k0   module of input momentum
+    *@param   &Coord  vector of MD coordinates with filled in momentum and energy transfer
 
-    *@returns   true if momentum is within the limits requested by the algorithm and false otherwise. 
+    *@return   true if momentum is within the limits requested by the algorithm and false otherwise.
     *
     * it uses preprocessed detectors positions, which are calculated by PreprocessDetectors algorithm and set up by 
     * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method. */    
@@ -232,9 +236,10 @@ namespace Mantid
     }
     /**method returns default ID-s for ModQ elastic and inelastic modes. The ID-s are related to the units, 
     * this class produces its ouptut in. 
-    *@param Emode   -- energy conversion mode
+    *@param dEmode   -- energy conversion mode
+    *@param inWS -- Input Matrix workspace
 
-    *@returns       -- vector of default dimension ID-s for correspondent energy conversion mode. 
+    *@return       -- vector of default dimension ID-s for correspondent energy conversion mode.
     The position of each dimID in the vector corresponds to the position of each MD coordinate in the Coord vector
     */
     std::vector<std::string> MDTransfModQ::getDefaultDimID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const
@@ -265,7 +270,8 @@ namespace Mantid
 
 
     /**function returns units ID-s which this transformation prodiuces its ouptut. 
-    * @param Emode   -- energy conversion mode
+    * @param dEmode   -- energy conversion mode
+    * @param inWS -- Input Matrix workspace
     *
     * It is Momentum and DelteE in inelastic modes   */
     std::vector<std::string> MDTransfModQ::outputUnitID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const

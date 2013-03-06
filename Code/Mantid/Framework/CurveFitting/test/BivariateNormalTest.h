@@ -234,7 +234,7 @@ public:
 */
     }
 
-  void trestActual()
+ /* void trestActual()
   {
     BivariateNormal NormalFit;
     std::cout<<"--------------------------------- Start actual----------------------"<<std::endl;
@@ -304,12 +304,12 @@ public:
           Jacob Jac(7, nCells);
           NormalFit.functionDeriv1D( &Jac,xx,nCells);
           double out1[nCells];
-          /*    NormalFit.CalcVxy=false;
-          NormalFit.CalcVyy= false;
-          NormalFit.removeTie(5);
-          NormalFit.removeTie(6);
-          NormalFit.functionDeriv1D( &Jac,xx,nCells);
-       */   NormalFit.applyTies();
+         //  NormalFit.CalcVxy=false;
+         // NormalFit.CalcVyy= false;
+         // NormalFit.removeTie(5);
+         // NormalFit.removeTie(6);
+         // NormalFit.functionDeriv1D( &Jac,xx,nCells);
+      //   NormalFit.applyTies();
           NormalFit.function1D(out1, xx, nCells);
           double out2[nCells];
 
@@ -331,7 +331,7 @@ public:
 
 
   }
-
+*/
   void testForCategories()
   {
     BivariateNormal forCat;

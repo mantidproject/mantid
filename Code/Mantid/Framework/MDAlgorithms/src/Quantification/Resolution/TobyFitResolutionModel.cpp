@@ -79,7 +79,7 @@ namespace Mantid
 
     /**
      * Returns the value of the cross-section convoluted with the resolution an event. This assumes that
-     * the box forms a 4D point with axes: Qx, Qy, Qz, \f$\DeltaE\f$
+     * the box forms a 4D point with axes: Qx, Qy, Qz, \f$\Delta E\f$
      * @param box :: An iterator pointing at the current box under examination
      * @param eventIndex :: An index of the current event in the box
      * @param innerRunIndex :: An index of the current run within the workspace. This is NOT the run number. The experiment
@@ -257,7 +257,7 @@ namespace Mantid
     /**
      * Calculates the point in Q-E space where the foreground model will be evaluated.
      * @param observation :: The current observation defining the point experimental setup
-     * @param eventPoint :: The point in QE space that this refers to
+     * @param qOmega :: The point in QE space that this refers to
      */
     void TobyFitResolutionModel::calculatePerturbedQE(const CachedExperimentInfo & observation,const QOmegaPoint & qOmega) const
     {
@@ -472,7 +472,7 @@ namespace Mantid
       m_yvector = std::vector<TobyFitYVector>(nthreads, TobyFitYVector());
       m_etaInPlane = std::vector<double>(nthreads, 0.0);
       m_etaOutPlane = std::vector<double>(nthreads, 0.0);
-      m_deltaQE = std::vector<std::vector<double>>(nthreads, std::vector<double>(4, 0.0));
+      m_deltaQE = std::vector<std::vector<double> >(nthreads, std::vector<double>(4, 0.0));
     }
 
     /**

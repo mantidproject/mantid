@@ -116,9 +116,9 @@ namespace Mantid
     }
 
     /** 
-    * @param out :: Derivatives
-    * @param xValues :: X values for data points
-    * @param nData :: Number of data points
+    * @param domain :: the space on which the function acts
+    * @param jacobian :: the set of partial derivatives of the function with respect to the
+    * fitting parameters
     */
     void UserFunction::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
     {

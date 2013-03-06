@@ -78,7 +78,7 @@ namespace IDA
       pyInput += "useCor = False\n";
     }
 
-    pyInput += "abscorFeeder(sample, container, geom, useCor)\n";
+    pyInput += "abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, factor, Save=False, PlotResult='None', PlotContrib=False)\n";
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
 

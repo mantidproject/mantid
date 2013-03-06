@@ -50,7 +50,7 @@ namespace IDA
   }
 
   /**
-   * @param (unused) :: the detected close event
+   * @param :: the detected close event
    */
   void IndirectDataAnalysis::closeEvent(QCloseEvent*)
   {

@@ -5,7 +5,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/NormaliseToMonitor.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -59,11 +58,10 @@ public:
     }
 
      input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
-    // Now need to set up a minimal instrument and spectra-detector map
-    int forSpecDetMap[3] = {0,1,2};
-    input->getAxis(1)->spectraNo(0) = 0;
-    input->getAxis(1)->spectraNo(1) = 1;
-    input->getAxis(1)->spectraNo(2) = 2;
+    // Now need to set up a minimal instrument
+    input->getAxis(1)->setValue(0, 0);
+    input->getAxis(1)->setValue(1, 1);
+    input->getAxis(1)->setValue(2, 2);
     boost::shared_ptr<Instrument> instr(new Instrument);
     input->setInstrument(instr);
     Mantid::Geometry::Detector *mon = new Mantid::Geometry::Detector("monitor",0,NULL);
@@ -72,7 +70,6 @@ public:
     Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("NOTmonitor",1,NULL);
     instr->add(det);
     instr->markAsDetector(det);
-    input->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 3));
 
     AnalysisDataService::Instance().addOrReplace("normMon",input);
 
@@ -80,15 +77,8 @@ public:
     MatrixWorkspace_sptr monWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,20,0.1,0.5);
     monWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Now need to set up a minimal instrument and spectra-detector map
-    int forSpecDetMap2[1] = {0};
-    monWS->getAxis(1)->spectraNo(0) = 0;
+    monWS->getAxis(1)->setValue(0, 0);
     monWS->setInstrument(input->getInstrument());
-    //Mantid::Geometry::Detector *mon2 = new Mantid::Geometry::Detector("monitor",NULL);
-    //mon2->setID(0);
-    //instr = boost::dynamic_pointer_cast<Instrument>(monWS->getInstrument());
-    //instr->add(mon2);
-    //instr->markAsMonitor(mon2);
-    monWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap2, forSpecDetMap2, 1));
 
     AnalysisDataService::Instance().addOrReplace("monWS",monWS);
   }

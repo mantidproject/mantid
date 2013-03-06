@@ -132,7 +132,7 @@ public:
     // Copying this vector into the 3 properties then requires about 3Gb of memory
     // and if that's not available it ends up paging which can be very slow
     size_t nelements(100000000);
-    if(memInfo.totalMem() < 3000000)
+    if(memInfo.totalMem() < 4000000)
     {
       nelements = 40000000; // Needs about 1.2Gb
     }

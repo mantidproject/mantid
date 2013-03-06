@@ -67,7 +67,9 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor
-   * @param box :: MDBox containing the events to split */
+   * @param box :: MDBox containing the events to split
+   * @param splitRecursively :: flag to split boxes recursively
+   */
   TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box,bool splitRecursively)
    : MDBoxBase<MDE, nd>(*box),
      nPoints(0)
@@ -923,12 +925,12 @@ namespace MDEvents
    * @param event :: reference to a MDLeanEvent to add.
    * */
   TMDE(
-  inline void MDGridBox)::addEvent( const MDE & ev)
+  inline void MDGridBox)::addEvent( const MDE & event)
   {
     size_t index = 0;
     for (size_t d=0; d<nd; d++)
     {
-      coord_t x = ev.getCenter(d);
+      coord_t x = event.getCenter(d);
       int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
       // NOTE: No bounds checking is done (for performance).
       //if (i < 0 || i >= int(split[d])) return;
@@ -939,7 +941,7 @@ namespace MDEvents
 
     // Add it to the contained box
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      boxes[index]->addEvent(ev);
+      boxes[index]->addEvent(event);
   }
   /** Add a single MDLeanEvent to the grid box. If the boxes
    * contained within are also gridded, this will recursively push the event
@@ -951,6 +953,7 @@ namespace MDEvents
    * after all events have been added.
    *
    * @param point ::       reference to a MDEvent to add.
+   * @param ind :: index for something (unused)
    *
    * @returns boxToSplit:: pointer to the MDBox which has more events then it suppose to keep and should be split or NULL if 
    *                       this does not happens
@@ -994,13 +997,13 @@ namespace MDEvents
    * @param event :: reference to a MDEvent to add.
    * */
   TMDE(
-  inline void MDGridBox)::addEventUnsafe(const MDE & ev)
+  inline void MDGridBox)::addEventUnsafe(const MDE & event)
   {
     size_t index = 0;
     for (size_t d=0; d<nd; d++)
     {
 
-      coord_t x = ev.getCenter(d);
+      coord_t x = event.getCenter(d);
       int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
       // Accumulate the index
       index += (i * splitCumul[d]);
@@ -1008,7 +1011,7 @@ namespace MDEvents
 
     // Add it to the contained box
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      boxes[index]->addEventUnsafe(ev);
+      boxes[index]->addEventUnsafe(event);
   }
 
 

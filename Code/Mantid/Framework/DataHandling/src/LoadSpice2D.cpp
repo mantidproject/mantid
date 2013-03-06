@@ -90,7 +90,7 @@ namespace Mantid
       X[1] = wavelength+dwavelength/2.0;
       Y[0] = value;
       E[0] = error;
-      ws->getAxis(1)->spectraNo(specID) = specID;
+      ws->getAxis(1)->setValue(specID, specID);
     }
 
 
@@ -342,7 +342,7 @@ namespace Mantid
         store_value(ws, ipixel, count, error, wavelength, dwavelength);
 
         // Set the spectrum number
-        ws->getAxis(1)->spectraNo(ipixel) = ipixel;
+        ws->getAxis(1)->setValue(ipixel, ipixel);
 
         ++pixel;
         ipixel++;
@@ -503,9 +503,10 @@ namespace Mantid
       bool bspice2d(false);
       (!extn.compare("xml"))?bspice2d=true:bspice2d=false;
 
+      const char* full_hdr = reinterpret_cast<const char*>(header.full_hdr);
       const char* xml_header="<?xml version=";
       if ( ((unsigned)nread >= strlen(xml_header)) && 
-        !strncmp((char*)header.full_hdr, xml_header, strlen(xml_header)) )
+        !strncmp(full_hdr, xml_header, strlen(xml_header)) )
       {
       }
       return(bspice2d?true:false);

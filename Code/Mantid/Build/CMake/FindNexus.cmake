@@ -16,12 +16,26 @@ if( NOT NEXUS_INCLUDE_DIR )
   # The old path
   find_path ( NEXUS_INCLUDE_DIR napi.h )
 endif()
-	  
+
 # Find the C libraries
 find_library ( NEXUS_C_LIBRARIES NAMES NeXus libNeXus-0 )
 # Find the C++ libraries
 find_library ( NEXUS_CPP_LIBRARIES NAMES NeXusCPP libNeXusCPP-0)
-set ( NEXUS_LIBRARIES ${NEXUS_C_LIBRARIES} ${NEXUS_CPP_LIBRARIES} )
+
+# Debug variants
+# C
+find_library ( NEXUS_C_LIBRARIES_DEBUG NAMES NeXus libNeXus-0D )
+# C++
+find_library ( NEXUS_CPP_LIBRARIES_DEBUG NAMES NeXusCPP libNeXusCPP-0D)
+
+if ( NEXUS_C_LIBRARIES_DEBUG AND NEXUS_CPP_LIBRARIES_DEBUG )
+  set ( NEXUS_LIBRARIES optimized ${NEXUS_C_LIBRARIES} 
+                        optimized ${NEXUS_CPP_LIBRARIES} 
+                        debug ${NEXUS_C_LIBRARIES_DEBUG} 
+                        debug ${NEXUS_CPP_LIBRARIES_DEBUG} )
+else()
+  set ( NEXUS_LIBRARIES ${NEXUS_C_LIBRARIES} ${NEXUS_CPP_LIBRARIES} )
+endif()
 
 # Set a version string by examining the napi.h header
 if( NEXUS_INCLUDE_DIR ) 
@@ -37,4 +51,10 @@ endif()
 # Handle the QUIETLY and REQUIRED arguments and set NEXUS_FOUND to TRUE if 
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
-find_package_handle_standard_args( Nexus DEFAULT_MSG NEXUS_LIBRARIES NEXUS_INCLUDE_DIR )
+if (NEXUS_VERSION)
+  find_package_handle_standard_args( Nexus REQUIRED_VARS NEXUS_LIBRARIES NEXUS_INCLUDE_DIR
+				     VERSION_VAR NEXUS_VERSION )
+else (NEXUS_VERSION)
+  message (status "Failed to determine version: Ignoring version requirement")
+  find_package_handle_standard_args( Nexus DEFAULT_MSG NEXUS_LIBRARIES NEXUS_INCLUDE_DIR )
+endif (NEXUS_VERSION)

@@ -72,10 +72,10 @@ public:
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
 
-  /// Set the *stored" yAxisMinimum value.
+  /// Set the stored yAxisMinimum value.
   void setStoredYAxisMinimum(const QString & yAxisMinimum);
 
-  /// Set the *stored" yAxisMaximum value.
+  /// Set the stored yAxisMaximum value.
   void setStoredYAxisMaximum(const QString & yAxisMaximum);
 
   /// Set the stored custom time value.

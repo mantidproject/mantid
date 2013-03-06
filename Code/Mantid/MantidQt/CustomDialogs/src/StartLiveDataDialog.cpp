@@ -298,25 +298,34 @@ void StartLiveDataDialog::changePostProcessingAlgorithm()
 
 //------------------------------------------------------------------------------
 /** Slot called when picking a different instrument.
- * @param inst :: The instrument name.
+ *  Disables the 'Add' option if the listener is going to pass back histograms.
+ *  @param inst :: The instrument name.
  */
 void StartLiveDataDialog::setDefaultAccumulationMethod(const QString& inst)
 {
   if ( inst.isEmpty() ) return;
   try
   {
-    Mantid::Kernel::InstrumentInfo instrument = Mantid::Kernel::ConfigService::Instance().getInstrument(inst.toStdString());
-    std::string listenerName = instrument.liveListener();
-    if ( listenerName.find("Histo") != std::string::npos )
+    // Make sure 'Add' is enabled ahead of the check (the check may throw)
+    int addIndex = ui.cmbAccumulationMethod->findText("Add");
+    ui.cmbAccumulationMethod->setItemData(addIndex, QVariant(Qt::ItemIsSelectable | Qt::ItemIsEnabled), Qt::UserRole - 1);
+
+    // Check whether this listener will give back events. If not, disable 'Add' as an option
+    // The 'false' 2nd argument means don't connect the created listener
+    if ( ! Mantid::API::LiveListenerFactory::Instance().create(inst.toStdString(),false)->buffersEvents() )
     {
-      ui.cmbAccumulationMethod->setCurrentText("Replace");
-    }
-    else
-    {
-      ui.cmbAccumulationMethod->setCurrentText("Add");
+      // If 'Add' is currently selected, select 'Replace' instead
+      if ( ui.cmbAccumulationMethod->currentIndex() == addIndex )
+      {
+        ui.cmbAccumulationMethod->setCurrentText("Replace");
+      }
+      // Disable the 'Add' option in the combobox. It just wouldn't make sense.
+      ui.cmbAccumulationMethod->setItemData(addIndex, false, Qt::UserRole - 1);
     }
   }
-  catch( ... )
+  // If an exception is thrown, just swallow it and do nothing
+  // getInstrument can throw, particularly while we allow listener names to be passed in directly
+  catch( Mantid::Kernel::Exception::NotFoundError& )
   {
   }
 }

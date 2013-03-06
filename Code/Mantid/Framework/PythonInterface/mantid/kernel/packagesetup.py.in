@@ -3,9 +3,31 @@
 
     Handles set up of aspects related to extra Python packages e.g. adding
     any required paths to sys.path, setting environment variables etc.
-    
-    @todo: Add script directories here when old API is removed
 """
+
+###############################################################################
+
+def update_sys_paths(paths):
+    """
+        Add the required script directories to the path
+        @param paths A list of path strings or a string using a semi-colon
+                     separator
+    """
+    if paths == "":
+        return
+
+    import sys as _sys
+    if type(paths) == str:
+        dirs = paths.split(";")
+    elif type(dirs) == list:
+        dirs = paths
+    else:
+        raise RuntimeError("Expected a either a semicolon-separated string or list of paths")
+
+    for _path in dirs:
+        _path = _path.rstrip("\\").rstrip("/") #sys.path doesn't like trailing slashes
+        if _path not in _sys.path:
+            _sys.path.append(_path)
 
 ########################################################################################
 
@@ -27,5 +49,15 @@ def set_NEXUSLIB_var():
 
 #########################################################################################
 
-# On import run the setup
+## Setup on import ##
+import os as _os
+update_sys_paths(_os.environ.get("MANTIDPATH",""))
+
+from _aliases import config as _config
+_path_keys = ['requiredpythonscript.directories','pythonscripts.directories']
+for key in _path_keys:
+    paths = _config[key]
+    update_sys_paths(paths)
+
+# NeXus
 set_NEXUSLIB_var()

@@ -18,7 +18,6 @@
 
 // STL
 #include <vector>
-#include <xfwrap1>
 #include <map>
 #include <string>
 #include <set>

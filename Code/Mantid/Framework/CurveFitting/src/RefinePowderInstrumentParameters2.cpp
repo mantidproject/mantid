@@ -86,14 +86,17 @@ namespace CurveFitting
     declareProperty("StandardError", "ConstantValue", listvalidator,
                     "Algorithm to calculate the standard error of peak positions.");
 
-    /// Damping factor
+    // Damping factor
     declareProperty("Damping", 1.0, "Damping factor for (1) minimizer 'damping'. (2) Monte Calro. ");
 
-    /// Anealing temperature
+    // Anealing temperature
     declareProperty("AnnealingTemperature", 1.0, "Starting aneealing temperature.");
 
-    /// Monte Carlo iterations
+    // Monte Carlo iterations
     declareProperty("MonteCarloIterations", 100, "Number of iterations in Monte Carlo random walk.");
+
+    // Output
+    declareProperty("ChiSquare", DBL_MAX, Direction::Output);
 
     return;
   }
@@ -155,6 +158,8 @@ namespace CurveFitting
 
     Workspace2D_sptr outdataws = genOutputWorkspace(domain, rawvalues);
     setProperty("OutputPeakPositionWorkspace", outdataws);
+
+    setProperty("ChiSquare", finalchi2);
 
     return;
   }
@@ -302,12 +307,13 @@ namespace CurveFitting
     setFunctionParameterFitSetups(m_positionFunc, m_profileParameters);
 
     // 2. Fit function
-    double chi2;
-    fitFunction(m_positionFunc, m_dataWS, m_wsIndex, chi2);
+    // FIXME powerfit should be a user option before freezing this algorithm
+    bool powerfit = false;
+    double chi2 = fitFunction(m_positionFunc, m_dataWS, m_wsIndex, powerfit);
 
     // 2. Summary
     stringstream sumss;
-    sumss << "Monte Carlo Results:  Best Chi^2 = " << chi2;
+    sumss << "Non-Monte Carlo Results:  Best Chi^2 = " << chi2;
     g_log.notice(sumss.str());
 
     return chi2;
@@ -339,9 +345,7 @@ namespace CurveFitting
   {
     // 1. Prepare/initialization
     //    Data structure
-    // const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
     const MantidVec& dataY = m_dataWS->readY(m_wsIndex);
-    // const MantidVec& dataE = m_dataWS->readE(m_wsIndex);
 
     size_t numpts = dataY.size();
 
@@ -373,14 +377,6 @@ namespace CurveFitting
     m_bestChiSq = DBL_MAX;
     m_bestChiSqStep = -1;
     m_bestChiSqGroup = -1;
-
-    /*
-    stringstream dbss;
-    map<string, Parameter>::iterator dbiter;
-    for (dbiter = parammap.begin(); dbiter != parammap.end(); ++dbiter)
-      dbss << dbiter->first << " = " << dbiter->second.value << endl;
-    g_log.notice() << "DBx514  Starting Parameter Values: " << endl << dbss.str() << endl;
-    */
 
     double chisq0 = calculateFunction(parammap, vecY);
     double chisq0x = calculateFunctionError(m_positionFunc, m_dataWS, m_wsIndex);
@@ -518,10 +514,9 @@ namespace CurveFitting
   /** Propose new parameters
     *
     * @param mcgroup:     list of parameters to have new values proposed
-    * @param churrchisq:  present chi^2 (as a factor in step size)
+    * @param currchisq:  present chi^2 (as a factor in step size)
     * @param curparammap: current parameter maps
     * @param newparammap: parameters map containing new/proposed value
-    * @param prevBetterRwp: (removed.  only use random walk)
     */
   void RefinePowderInstrumentParameters2::proposeNewValues(vector<string> mcgroup,
                                                            map<string, Parameter>& curparammap,
@@ -631,6 +626,8 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Determine whether the proposed value should be accepted or denied
     *
+    * @param curchisq:  present chi^2 (as a factor in step size)
+    * @param newchisq:  new chi^2 (as a factor in step size)
     * @param temperature:  annealing temperature
     */
   bool RefinePowderInstrumentParameters2::acceptOrDenyChange(double curchisq, double newchisq,
@@ -795,6 +792,7 @@ namespace CurveFitting
     *
     * @param parnamesforMC: vector of parameter for MC minimizer
     * @param parname: name of parameter to check whether to put into refinement list
+    * @param parammap :: parammap
     */
   void RefinePowderInstrumentParameters2::addParameterToMCMinimize(vector<string>& parnamesforMC,
                                                                    string parname,
@@ -820,6 +818,7 @@ namespace CurveFitting
   /** Implement parameter values, calculate function and its chi square.
     *
     * @param parammap:  if size = 0, there is no action to set function parameter.
+    * @param vecY :: vecY
     * Return: chi^2
     */
   double RefinePowderInstrumentParameters2::calculateFunction(map<string, Parameter> parammap,
@@ -904,10 +903,14 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Fit a function by trying various minimizer or minimizer combination
     *
-    * @param chi2:  chi2 of the final (best) solution
+    * @param function :: an instance of a function to fit
+    * @param dataws :: a workspace with the data
+    * @param wsindex :: a histogram index
+    *
+    * Return: double chi2 of the final (best) solution.  If fitting fails, chi2 wil be maximum double
     */
   double RefinePowderInstrumentParameters2::fitFunction(IFunction_sptr function, Workspace2D_sptr dataws,
-                                                        int wsindex, double& chi2)
+                                                        int wsindex, bool powerfit)
   {
     // 1. Store original
     map<string, pair<double, double> > start_paramvaluemap, paramvaluemap1, paramvaluemap2,
@@ -916,83 +919,100 @@ namespace CurveFitting
 
     // 2. Calculate starting chi^2
     double startchisq = calculateFunctionError(function, dataws, wsindex);
-    g_log.notice() << "[DBx436] Starting Chi^2 = " << startchisq << endl;
+    g_log.notice() << "[DBx436] Starting Chi^2 = " << startchisq << ", Power-Fit is " << powerfit << endl;
 
     // 3. Fitting
-    // a) Simplex
-    string minimizer = "Simplex";
-    double chi2simplex;
-    string fitstatussimplex;
-    int numiters = 10000;
-    bool fitgood1 = doFitFunction(function, dataws, wsindex, minimizer, numiters,
-                                  chi2simplex, fitstatussimplex);
+    int numiters;
+    double final_chi2 = DBL_MAX;
 
-    if (fitgood1)
-      storeFunctionParameterValue(function, paramvaluemap1);
-    else
-      chi2simplex = DBL_MAX;
-
-    // b) Continue Levenberg-Marquardt following Simplex
-    minimizer = "Levenberg-MarquardtMD";
-    double chi2lv2;
-    string fitstatuslv2;
-    numiters = 1000;
-    bool fitgood2 = doFitFunction(function, dataws, wsindex, minimizer, numiters,
-                                  chi2lv2, fitstatuslv2);
-    if (fitgood2)
-      storeFunctionParameterValue(function, paramvaluemap2);
-    else
-      chi2lv2 = DBL_MAX;
-
-    // c) Fit by L.V. solely
-    map<string, Parameter> tempparmap;
-    restoreFunctionParameterValue(start_paramvaluemap, function, tempparmap);
-    double chi2lv1;
-    string fitstatuslv1;
-    bool fitgood3 = doFitFunction(function, dataws, wsindex, minimizer, numiters,
-                                  chi2lv1, fitstatuslv1);
-    if (fitgood3)
-      storeFunctionParameterValue(function, paramvaluemap3);
-    else
-      chi2lv1 = DBL_MAX;
-
-    // 4. Compare best
-    bool retvalue;
-    g_log.notice() << "Fit Result:  Chi2s: Simplex = " << chi2simplex << ", "
-                   << "Levenberg 1 = " << chi2lv2 << ", Levenberg 2 = " << chi2lv1 << endl;
-    if (fitgood1 || fitgood2 || fitgood3)
+    if (powerfit)
     {
-      // At least one good fit
-      if (fitgood1 && chi2simplex <= chi2lv2 && chi2simplex <= chi2lv1)
+      // a) Use Simplex to fit
+      string minimizer = "Simplex";
+      double chi2simplex;
+      string fitstatussimplex;
+      numiters = 10000;
+      bool fitgood1 = doFitFunction(function, dataws, wsindex, minimizer, numiters,
+                                    chi2simplex, fitstatussimplex);
+
+      if (fitgood1)
+        storeFunctionParameterValue(function, paramvaluemap1);
+      else
+        chi2simplex = DBL_MAX;
+
+      // b) Continue Levenberg-Marquardt following Simplex
+      minimizer = "Levenberg-MarquardtMD";
+      double chi2lv2;
+      string fitstatuslv2;
+      numiters = 1000;
+      bool fitgood2 = doFitFunction(function, dataws, wsindex, minimizer, numiters,
+                                    chi2lv2, fitstatuslv2);
+      if (fitgood2)
+        storeFunctionParameterValue(function, paramvaluemap2);
+      else
+        chi2lv2 = DBL_MAX;
+
+      // c) Fit by L.V. solely
+      map<string, Parameter> tempparmap;
+      restoreFunctionParameterValue(start_paramvaluemap, function, tempparmap);
+      double chi2lv1;
+      string fitstatuslv1;
+      bool fitgood3 = doFitFunction(function, dataws, wsindex, minimizer, numiters,
+                                    chi2lv1, fitstatuslv1);
+      if (fitgood3)
+        storeFunctionParameterValue(function, paramvaluemap3);
+      else
+        chi2lv1 = DBL_MAX;
+
+      // 4. Compare best
+      g_log.notice() << "Fit Result:  Chi2s: Simplex = " << chi2simplex << ", "
+                     << "Levenberg 1 = " << chi2lv2 << ", Levenberg 2 = " << chi2lv1 << endl;
+
+      if (fitgood1 || fitgood2 || fitgood3)
       {
-        chi2 = chi2simplex;
+        // At least one good fit
+        if (fitgood1 && chi2simplex <= chi2lv2 && chi2simplex <= chi2lv1)
+        {
+          final_chi2 = chi2simplex;
+          restoreFunctionParameterValue(paramvaluemap1, function, m_profileParameters);
+        }
+        else if (fitgood2 && chi2lv2 <= chi2lv1)
+        {
+          restoreFunctionParameterValue(paramvaluemap2, function, m_profileParameters);
+          final_chi2 = chi2lv2;
+        }
+        else if (fitgood3)
+        {
+          final_chi2 = chi2lv1;
+          restoreFunctionParameterValue(paramvaluemap3, function, m_profileParameters);
+        }
+        else
+        {
+          throw runtime_error("This situation is impossible to happen!");
+        }
+      } // END of Choosing Results
+    }
+    else
+    {
+      // 3B) Simple fit
+      string minimizer = "Levenberg-MarquardtMD";
+      string fitstatus;
+      numiters = 1000;
+      bool fitgood = doFitFunction(function, dataws, wsindex, minimizer, numiters,
+                                   final_chi2, fitstatus);
+      if (fitgood)
+      {
+        storeFunctionParameterValue(function, paramvaluemap1);
         restoreFunctionParameterValue(paramvaluemap1, function, m_profileParameters);
-      }
-      else if (fitgood2 && chi2lv2 <= chi2lv1)
-      {
-        restoreFunctionParameterValue(paramvaluemap2, function, m_profileParameters);
-        chi2 = chi2lv2;
-      }
-      else if (fitgood3)
-      {
-        chi2 = chi2lv1;
-        restoreFunctionParameterValue(paramvaluemap3, function, m_profileParameters);
       }
       else
       {
-        throw runtime_error("This situation is impossible to happen!");
+        g_log.warning() << "Fit by " << minimizer << " failed.  Reason: " << fitstatus
+                        << "\n";
       }
-
-      retvalue = true;
-    }
-    else
-    {
-      // No fit is good
-      retvalue = false;
-      chi2 = DBL_MAX;
     }
 
-    return retvalue;
+    return final_chi2;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1007,7 +1027,7 @@ namespace CurveFitting
     outss << "Fit function: " << m_positionFunc->asString() << endl << "Data To Fit: \n";
     for (size_t i = 0; i < dataws->readX(0).size(); ++i)
       outss << dataws->readX(wsindex)[i] << "\t\t" << dataws->readY(wsindex)[i] << "\t\t"
-            << dataws->readE(wsindex)[i] << endl;
+            << dataws->readE(wsindex)[i] << "\n";
     g_log.information() << outss.str();
 
     // 1. Create and setup fit algorithm
@@ -1046,7 +1066,7 @@ namespace CurveFitting
     vector<string> funcparnames = function->getParameterNames();
     for (size_t i = 0; i < funcparnames.size(); ++i)
       dbss << funcparnames[i] << " = " << setw(20) << function->getParameter(funcparnames[i])
-           << " +/- " << function->getError(i) << endl;
+           << " +/- " << function->getError(i) << "\n";
     g_log.debug() << dbss.str();
 
     return goodfit;
@@ -1069,7 +1089,11 @@ namespace CurveFitting
     tablews->addColumn("double", "StepSize");
     tablews->addColumn("double", "Error");
 
-    // 2. Set values
+    // 2. For chi^2
+    addOrReplace(parameters, "Chi2_Init", startchi2);
+    addOrReplace(parameters, "Chi2_Result", finalchi2);
+
+    // 3. Set values
     map<string, Parameter>::iterator pariter;
     for (pariter = parameters.begin(); pariter != parameters.end(); ++pariter)
     {
@@ -1086,16 +1110,34 @@ namespace CurveFitting
              << param.stepsize << param.error;
     }
 
-    // 3. Row for Chi^2
-    TableRow newrow = tablews->appendRow();
-    newrow << "Chi2_Init" << startchi2 << "t" << 0.0 << 0.0 << 0.0 << 0.0;
-
-    newrow = tablews->appendRow();
-    newrow << "Chi2_Result" << finalchi2 << "t" << 0.0 << 0.0 << 0.0 << 0.0;
-
     return tablews;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Add a parameter to parameter map.  If this parametere does exist, then replace the value
+    * of it.
+    * @param parameters:  map
+    * @param parname:     string, parameter name
+    * @param parvalue:    double, parameter value
+    */
+  void RefinePowderInstrumentParameters2::addOrReplace(map<string, Parameter>& parameters,
+                                                       string parname, double parvalue)
+  {
+    map<string, Parameter>::iterator pariter = parameters.find(parname);
+    if (pariter != parameters.end())
+    {
+      parameters[parname].value = parvalue;
+    }
+    else
+    {
+      Parameter newparameter;
+      newparameter.name = parname;
+      newparameter.value = parvalue;
+      parameters.insert(make_pair(parname, newparameter));
+    }
+
+    return;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Construct output
@@ -1234,7 +1276,7 @@ namespace CurveFitting
   /** Set parameter fitting setup (boundary, fix or unfix) to function from Parameter map
    */
   void RefinePowderInstrumentParameters2::setFunctionParameterFitSetups(IFunction_sptr function,
-                                                              map<string, Parameter> params)
+                                                                        map<string, Parameter> params)
   {
     // 1. Prepare
     vector<string> funparamnames = m_positionFunc->getParameterNames();
@@ -1280,6 +1322,8 @@ namespace CurveFitting
         throw runtime_error(errss.str());
       }
     } // ENDFOR parameter name
+
+    g_log.notice() << "Fit function:\n" << function->asString() << "\n";
 
     return;
   }
@@ -1395,7 +1439,8 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Restore function parameter values to a map
+  /** Restore function parameter values saved in a (string,double) map to a function object
+    * and a (string, Parameter) map
     */
   void restoreFunctionParameterValue(map<string, pair<double, double> > parvaluemap, IFunction_sptr function,
                                      map<string, Parameter>& parammap)

@@ -41,30 +41,12 @@ endfunction( SET_TARGET_OUTPUT_DIRECTORY )
 
 #######################################################################
 
-#
-# NAME: ADD_COMPILE_PY_TARGET
-# Adds a target that will compile the .py files into .pyc
-# bytecode in the given directory. This is done recursively and
-# the pyc files appear in the same directory as the source file
-# The target is NOT added to ALL.
-#   - TARGET_NAME :: The name of the target
-#   - SOURCE_DIR :: A directory containing python files
-#   - An optional regex to exclude certain files can be included as the final argument
-function( ADD_COMPILE_PY_TARGET TARGET_NAME SOURCE_DIR )
-    if( ARGC EQUAL 3 )
-        set( EXCLUDE_REGEX -x ${ARGV2} )
-    endif()
-    add_custom_target( ${TARGET_NAME}
-                       COMMAND ${PYTHON_EXECUTABLE} -m compileall ${EXCLUDE_REGEX} -q ${SOURCE_DIR}
-                       COMMENT "Byte-compiling python scripts" )
-endfunction( ADD_COMPILE_PY_TARGET )
-
 #######################################################################
 
 #
 # NAME: COPY_PYTHON_FILES_TO_DIR
 # Adds a set of custom commands for each python file to copy
-# the given file along with its .pyc file (generated).
+# the given file to the destination directory
 #   - PY_FILES :: A list of python files to copy. Note you will have
 #                 to quote an expanded list
 #   - SRC_DIR :: The src directory of the files to be copied
@@ -77,38 +59,14 @@ function( COPY_PYTHON_FILES_TO_DIR PY_FILES SRC_DIR DEST_DIR INSTALLED_FILES )
         get_filename_component( _basefilename ${PYFILE} NAME_WE )
         set( _py_src ${SRC_DIR}/${PYFILE} )
         set( _py_bin ${DEST_DIR}/${PYFILE} )
-        set( _pyc_src ${SRC_DIR}/${_basefilename}.pyc )
-        set( _pyc_bin ${DEST_DIR}/${_basefilename}.pyc )
-        add_custom_command ( OUTPUT ${_py_bin} ${_pyc_bin}
-                             DEPENDS ${SRC_DIR}/${PYFILE}
-                             COMMAND ${PYTHON_EXECUTABLE} -m compileall -q ${SRC_DIR}
+        add_custom_command ( OUTPUT ${_py_bin}
+                             DEPENDS ${_py_src}
                              COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                               ${_py_src} ${_py_bin}
-                             COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                               ${_pyc_src} ${_pyc_bin} )
+                               ${_py_src} ${_py_bin} )
     set ( COPIED_FILES ${COPIED_FILES} ${_py_bin} )
-    set ( COPIED_FILES ${COPIED_FILES} ${_pyc_bin} )
     endforeach ( PYFILE )
     set ( ${INSTALLED_FILES} ${COPIED_FILES} PARENT_SCOPE )
 endfunction( COPY_PYTHON_FILES_TO_DIR )
-
-#######################################################################
-
-# NAME: INSTALL_PYTHON_FILES
-# Adds an install target for a list of Python files and also includes 
-# pyc files, which are assumed to be next to each file.
-#  - SRC_DIR :: The source directory of the files
-#  - PY_FILES :: A list of the python files
-#  - DEST_DIR :: The final directory
-function( INSTALL_PYTHON_FILES SRC_DIR PY_FILES DEST_DIR )
-  foreach( PYFILE ${PY_FILES} )
-      set( _py_src ${SRC_DIR}/${PYFILE} )
-      get_filename_component( _basefilename ${_py_src} NAME_WE )
-      set( _pyc_src ${SRC_DIR}/${_basefilename}.pyc )
-      set( PY_INSTALL_FILES ${PY_INSTALL_FILES} ${_py_src} ${_pyc_src} )
-  endforeach( PYFILE )
-  install ( FILES ${PY_INSTALL_FILES} DESTINATION ${DEST_DIR} )
-endfunction( INSTALL_PYTHON_FILES )
 
 #######################################################################
 

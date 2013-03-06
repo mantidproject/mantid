@@ -14,7 +14,7 @@ namespace Mantid
     * @param WSD        -- class describing the target workspace. 
     *                      the algorithm uses target workspace limints, transformation matix from source to the target workspace and the parameters, needed for  
     *                      unit conversion (if any) 
-    * @param m_OutWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
+    * @param inWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
     */
     size_t  ConvToMDBase::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {

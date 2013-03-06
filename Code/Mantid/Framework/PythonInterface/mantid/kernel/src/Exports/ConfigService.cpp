@@ -82,6 +82,8 @@ void export_ConfigService()
     .def("setDataSearchDirs", &setDataSearchDirs,
          "Set the  datasearch.directories property from a list of strings.")
 
+    .def("saveConfig", &ConfigServiceImpl::saveConfig, "Saves the keys that have changed from their default to the given filename")
+
     // Treat this as a dictionary
     .def("__getitem__", getStringUsingCache)
     .def("__setitem__", &ConfigServiceImpl::setString)

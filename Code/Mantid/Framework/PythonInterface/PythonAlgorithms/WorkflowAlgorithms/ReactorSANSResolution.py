@@ -23,14 +23,15 @@ class ReactorSANSResolution(PythonAlgorithm):
 
     def PyInit(self):
         # Input workspace
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
-                                                     direction=Direction.Input))
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
+                                                     direction=Direction.Input),
+                             "Name the workspace to calculate the resolution for")
         
         # Dummy property for temporary backward compatibility
         # The output workspace property is not used and the resolution is
         # added to the input workspace
         self.declareProperty("OutputWorkspace", "",
-                             doc="Obsolete: not used")
+                             doc="Obsolete: not used - The resolution is added to input workspace")
 
     def PyExec(self):
         input_ws = self.getProperty("InputWorkspace").value

@@ -1,9 +1,27 @@
 /*WIKI*
 
+This algorithm is used to save a GroupingWorkspace to a file in XML format.
 
 
-This algorithm saves a GroupingWorkspace to an XML file.
+== XML File Format ==
 
+=== Parameters ===
+* "instrument": mandatory attribute of node 'detector-grouping'.  It must be valid instrument name.
+* "ID": mandatory attribute of node 'group'.  It must be valid group name, and the key to denote group.  
+* "detids": a node to define grouping by detectors' ID. Its value must be a list of integers separated by ','.  A '-' is used between 2 integers to define a range of detectors.
+* "component": a node to define that all detectors belonged to a component in the instrument are to be in a same group. Its value should be a valid component name.  
+
+Example 1: 
+
+
+  <?xml version="1.0" encoding="UTF-8" ?>
+  <detector-grouping instrument="VULCAN">
+   <group ID="1">
+    <detids>1-30,34-44,47-100</detids>
+   <group ID="2">
+    <detids>103-304,344-444,474-5000</detids>
+   </group>
+  </detector-grouping>
 
 *WIKI*/
 
@@ -21,7 +39,18 @@ This algorithm saves a GroupingWorkspace to an XML file.
 #include "Poco/DOM/Text.h"
 #include "Poco/DOM/AutoPtr.h"
 #include "Poco/DOM/DOMWriter.h"
-#include "Poco/XML/XMLWriter.h"
+#ifdef _MSC_VER
+// Disable a flood of warnings from Poco about inheriting from std::basic_istream
+  // See http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
+  #pragma warning( push )
+  #pragma warning( disable : 4250 )
+#endif
+
+#include <Poco/XML/XMLWriter.h>
+
+#ifdef _MSC_VER
+  #pragma warning( pop ) 
+#endif
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

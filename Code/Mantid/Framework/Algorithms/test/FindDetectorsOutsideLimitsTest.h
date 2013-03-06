@@ -6,7 +6,6 @@
 #include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -64,13 +63,12 @@ public:
       {
         work_in->setData(i, yStrange, yTooDead);
       }
-      work_in->getAxis(1)->spectraNo(i) = i;
+      work_in->getAxis(1)->setValue(i, i);
       Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("",i,NULL);
       instr->add(det);
       instr->markAsDetector(det);
+      work_in->getSpectrum(i)->setDetectorID(i);
     }
-    int forSpecDetMap[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
-    work_in->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap,forSpecDetMap,20));
 
     FindDetectorsOutsideLimits alg;
 
@@ -150,7 +148,7 @@ public:
     EventWorkspace_sptr work_in = WorkspaceCreationHelper::CreateEventWorkspace(50, 100, 100, 0.0, 1.0, 2, 1);
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(10);
     work_in->setInstrument(inst);
-    DateAndTime run_start("2010-01-01");
+    DateAndTime run_start("2010-01-01T00:00:00");
     // Add ten more at #10 so that it fails
     for (int i=0; i<10; i++)
       work_in->getEventList(10).addEventQuickly( TofEvent((i+0.5), run_start+double(i)) );

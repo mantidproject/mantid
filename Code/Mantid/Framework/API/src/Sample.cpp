@@ -8,7 +8,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusException.hpp>
 
 
 namespace Mantid

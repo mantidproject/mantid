@@ -78,7 +78,7 @@ namespace MDAlgorithms
   {
     // declare arbitrary number of input m_workspaces as a list of strings at the moment
     declareProperty(
-      new ArrayProperty<std::string>("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+      new ArrayProperty<std::string>("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string> > >()),
       "The names of the input MDWorkspaces as a comma-separated list" );
 
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),

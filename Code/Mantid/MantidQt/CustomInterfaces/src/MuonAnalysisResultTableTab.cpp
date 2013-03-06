@@ -463,7 +463,7 @@ void MuonAnalysisResultTableTab::populateFittings(const QVector<QString>& fitted
 /**
 * Get the colors corresponding to their position in the workspace list.
 *
-* @params wsList :: List of all workspaces with fitted parameters.
+* @param wsList :: List of all workspaces with fitted parameters.
 * @return colors :: List of colors (as numbers) with the key being position in wsList.
 */
 QMap<int, int> MuonAnalysisResultTableTab::getWorkspaceColors(const QVector<QString>& wsList)
@@ -642,7 +642,7 @@ void MuonAnalysisResultTableTab::createTable()
 /**
 * See if the workspaces selected have the same parameters.
 *
-* @params wsList :: A list of workspaces with fitted parameters.
+* @param wsList :: A list of workspaces with fitted parameters.
 * @return bool :: Whether or not the wsList given share the same fitting parameters.
 */
 bool MuonAnalysisResultTableTab::haveSameParameters(const QVector<QString>& wsList)

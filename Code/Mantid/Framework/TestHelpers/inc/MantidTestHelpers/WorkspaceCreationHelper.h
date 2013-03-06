@@ -10,7 +10,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"

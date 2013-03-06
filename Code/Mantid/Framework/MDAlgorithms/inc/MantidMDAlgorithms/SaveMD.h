@@ -4,7 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {

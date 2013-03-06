@@ -107,12 +107,34 @@ void export_Axis()
     ;
 }
 
+/**
+* Creates a NumericAxis
+* @param number :: of elements in the axis
+* @return pointer to the axis object
+*/
+Axis* createNumericAxis(int length)
+{
+  return new Mantid::API::NumericAxis(length);
+}
 
 void export_NumericAxis()
 {
   /// Exported so that Boost.Python can give back a NumericAxis class when an Axis* is returned
   class_< NumericAxis, bases<Axis>, boost::noncopyable >("NumericAxis", no_init)
+    .def("create", &createNumericAxis, return_internal_reference<>(), "Creates a new NumericAxis of a specified length")
+    .staticmethod("create")
    ;
+
+}
+
+/**
+* Creates a SpectraAxis
+* @param number :: of elements in the axis
+* @return pointer to the axis object
+*/
+Axis* createSpectraAxis(int length)
+{
+  return new Mantid::API::SpectraAxis(length);
 }
 
 void export_SpectraAxis()
@@ -120,15 +142,30 @@ void export_SpectraAxis()
   class_< SpectraAxis, bases<Axis>, boost::noncopyable >("SpectraAxis", no_init)
     .def("spectraNo", (const specid_t &(SpectraAxis::*)(const size_t &) const)&SpectraAxis::spectraNo,
           return_value_policy<copy_const_reference>(), "Returns the spectrum no at the given index")
-    .def("populateOneToOne", & SpectraAxis::populateOneToOne, "Populate the list with 1:1 values")
+    .def("create", &createSpectraAxis, return_internal_reference<>(), "Creates a new SpectraAxis of a specified length")
+    .staticmethod("create")
     ;
 }
+
+/**
+* Creates a TextAxis
+* @param number :: of elements in the axis
+* @return pointer to the axis object
+*/
+Axis* createTextAxis(int length)
+{
+  return new Mantid::API::TextAxis(length);
+}
+
 
 void export_TextAxis()
 {
   class_< TextAxis, bases<Axis>, boost::noncopyable >("TextAxis", no_init)
     .def("setLabel", & TextAxis::setLabel, "Set the label at the given entry")
     .def("label", & TextAxis::label, "Return the label at the given position")
+    .def("create", &createTextAxis, return_internal_reference<>(), "Creates a new TextAxis of a specified length")
+    .staticmethod("create")
     ;
+
 }
 

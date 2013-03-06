@@ -57,16 +57,7 @@ public:
         TS_ASSERT_EQUALS(b.Y(),-1.0);
         TS_ASSERT_EQUALS(b.Z(),-1.0);
     }
-    void testConstructorPointer()
-    {
-        double* t=new double[3];
-        t[0]=1.0;t[1]=2.0;t[2]=3.0;
-        Mantid::Kernel::V3D d(t);
-        TS_ASSERT_EQUALS(d.X(),1.0);
-        TS_ASSERT_EQUALS(d.Y(),2.0);
-        TS_ASSERT_EQUALS(d.Z(),3.0);
-        delete[] t;
-    }
+
     void testPlusOperation()
     {
         a(1.0,1.0,1.0);

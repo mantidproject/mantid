@@ -2,8 +2,8 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -254,7 +254,8 @@ namespace Mantid
       const std::string peaksIntegrated = "PeaksIntegrated";
       if (this->run().hasProperty(peaksIntegrated))
       {
-        ret = bool(boost::lexical_cast<int>(this->run().getProperty(peaksIntegrated)->value()));
+        const int value = boost::lexical_cast<int>(this->run().getProperty(peaksIntegrated)->value());
+        ret = (value != 0);
       }
       return ret;
     }

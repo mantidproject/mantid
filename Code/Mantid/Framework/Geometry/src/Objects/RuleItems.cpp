@@ -759,7 +759,7 @@ SurfPoint::setLeaf(Rule* nR,const int)
     Replaces a leaf with a rule.
     This REQUIRES that nR is of type SurfPoint
     @param nR :: new rule
-    @param int :: ignored
+    @param :: ignored
   */
 {
  // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
@@ -1037,7 +1037,7 @@ CompObj::setLeaf(Rule* aR,const int)
     Replaces a leaf with a rule.
     This REQUIRES that aR is of type SurfPoint
     @param aR :: new rule
-    @param int :: Null side point
+    @param :: Null side point
   */
 {
   CompObj* newX = dynamic_cast<CompObj*>(aR);
@@ -1262,7 +1262,8 @@ BoolValue::setLeaf(Rule* aR,const int)
     Replaces a leaf with a rule.
     This REQUIRES that aR is of type SurfPoint
     @param aR :: new rule
-    @param int :: Null side point
+    
+    secont argument ignored ( Null side point)
   */
 {
   //std::cerr<<"Calling BoolValue setLeaf"<<std::endl;

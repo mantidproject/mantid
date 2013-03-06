@@ -7,7 +7,6 @@
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FrameworkManager.h"

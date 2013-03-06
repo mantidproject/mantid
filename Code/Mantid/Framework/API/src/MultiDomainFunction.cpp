@@ -32,7 +32,7 @@ namespace API
    * Associate a member function and a list of domains. The function will only be applied
    * to the listed domains.
    * @param funIndex :: Index of a member function.
-   * @param domainIndex :: A vector with indices of domains to be associated with the function.
+   * @param domainIndices :: A vector with indices of domains to be associated with the function.
    */
   void MultiDomainFunction::setDomainIndices(size_t funIndex, const std::vector<size_t>& domainIndices)
   {

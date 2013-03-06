@@ -11,7 +11,6 @@ one or more points lying symmetrically either side of it. The statistical error 
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SmoothData.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 

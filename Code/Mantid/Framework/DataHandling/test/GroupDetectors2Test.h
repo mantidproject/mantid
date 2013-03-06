@@ -1,7 +1,6 @@
 #ifndef GROUPDETECTORS2TEST_H_
 #define GROUPDETECTORS2TEST_H_
 
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/GroupDetectors2.h"

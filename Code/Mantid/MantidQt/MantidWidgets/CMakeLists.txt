@@ -106,7 +106,7 @@ add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS )
 # Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidQtMantidWidgets/PrecompiledHeader.h MantidQtMantidWidgets src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
+enable_precompiled_headers( inc/MantidQtMantidWidgets/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser 

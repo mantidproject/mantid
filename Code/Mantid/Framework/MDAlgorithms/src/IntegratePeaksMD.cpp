@@ -322,6 +322,7 @@ namespace MDAlgorithms
   /** Calculate if this Q is on a detector
    *
    * @param QLabFrame of radius of integration
+   * @param r: Peak radius.
    */
   bool IntegratePeaksMD::detectorQ(Mantid::Kernel::V3D QLabFrame, double r)
   {

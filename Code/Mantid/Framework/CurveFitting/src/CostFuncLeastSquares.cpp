@@ -123,11 +123,10 @@ double CostFuncLeastSquares::valAndDeriv(std::vector<double>& der) const
 }
 
 /** Calculate the value and the first and second derivatives of the cost function
- *  @param der :: Container to output the first derivatives
- *  @param hessian :: Container to output the second derivatives
  *  @param evalFunction :: If false cost function isn't evaluated and returned value (0.0) should be ignored.
  *    It is for efficiency reasons.
- *  @return :: The value of the function if evalFunction is true.
+ *  @param evalDeriv :: flag for evaluation of the first derivatives
+ *  @param evalHessian :: flag for evaluation of the second derivatives
  */
 double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, bool evalHessian) const
 {

@@ -42,7 +42,9 @@ void ApplyTransmissionCorrection::init()
   wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
       "Workspace to apply the transmission correction to");
-  declareProperty("TransmissionWorkspace", "", "Workspace containing the transmission values");
+  declareProperty(new WorkspaceProperty<>("TransmissionWorkspace","",
+                                          Direction::Output, PropertyMode::Optional),
+      "Workspace containing the transmission values [optional]");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Workspace to store the corrected data in");
 
@@ -64,11 +66,6 @@ void ApplyTransmissionCorrection::exec()
   // Check whether we only need to divided the workspace by
   // the transmission.
   const bool thetaDependent = getProperty("ThetaDependent");
-  if (!thetaDependent)
-  {
-    simpleCorrection();
-    return;
-  }
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const double trans_value = getProperty("TransmissionValue");
@@ -82,8 +79,7 @@ void ApplyTransmissionCorrection::exec()
 
   if ( isEmpty(trans_value) ) {
     // Get the transmission workspace
-    MatrixWorkspace_const_sptr transWS = boost::dynamic_pointer_cast<MatrixWorkspace>
-          (AnalysisDataService::Instance().retrieve(getPropertyValue("TransmissionWorkspace")));
+    MatrixWorkspace_const_sptr transWS = getProperty("TransmissionWorkspace");
 
     // Check that the two input workspaces are consistent (same number of X bins)
     if ( transWS->readY(0).size() != inputWS->readY(0).size() )
@@ -133,8 +129,16 @@ void ApplyTransmissionCorrection::exec()
     const double exp_term = (1.0/cos( inputWS->detectorTwoTheta(det) ) + 1.0)/2.0;
     for (int j = 0; j < (int)inputWS->readY(0).size(); j++)
     {
-      EOut[j] = std::fabs(ETrIn[j]*exp_term/pow(TrIn[j], exp_term+1.0));
-      YOut[j] = 1.0/pow(TrIn[j], exp_term);
+      if (!thetaDependent)
+      {
+        YOut[j] = 1.0/TrIn[j];
+        EOut[j] = std::fabs(ETrIn[j]*TrIn[j]*TrIn[j]);
+      }
+      else
+      {
+        EOut[j] = std::fabs(ETrIn[j]*exp_term/pow(TrIn[j], exp_term+1.0));
+        YOut[j] = 1.0/pow(TrIn[j], exp_term);
+      }
     }
 
     progress.report("Applying Transmission Correction");
@@ -143,22 +147,6 @@ void ApplyTransmissionCorrection::exec()
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS = inputWS*corrWS;
-  setProperty("OutputWorkspace",outputWS);
-}
-
-void ApplyTransmissionCorrection::simpleCorrection()
-{
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  const double trans_value = getProperty("TransmissionValue");
-  const double trans_error = getProperty("TransmissionError");
-
-  MatrixWorkspace_sptr singleValued = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
-
-  singleValued->dataX(0)[0] = 0.0;
-  singleValued->dataY(0)[0] = trans_value;
-  singleValued->dataE(0)[0] = trans_error;
-
-  MatrixWorkspace_sptr outputWS = inputWS/singleValued;
   setProperty("OutputWorkspace",outputWS);
 }
 

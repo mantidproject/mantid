@@ -8,6 +8,7 @@ namespace Mantid
 
     /**
      * Constructs the table for the given ion, J & L
+     * @param length :: scattering length
      * @param ion :: A reference to the required ion
      * @param j :: The total angular momentum
      * @param l :: The orbital angular momentum

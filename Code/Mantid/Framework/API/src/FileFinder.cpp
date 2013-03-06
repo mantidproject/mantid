@@ -66,13 +66,13 @@ namespace Mantid
 
       // determine from Mantid property how sensitive Mantid should be
 #ifdef _WIN32
-      globOption = Poco::Glob::GLOB_DEFAULT;
+      m_globOption = Poco::Glob::GLOB_DEFAULT;
 #else
       std::string casesensitive = Mantid::Kernel::ConfigService::Instance().getString("filefinder.casesensitive");
       if ( boost::iequals("Off",casesensitive) )
-        globOption = Poco::Glob::GLOB_CASELESS;
+        m_globOption = Poco::Glob::GLOB_CASELESS;
       else
-        globOption = Poco::Glob::GLOB_DEFAULT;
+        m_globOption = Poco::Glob::GLOB_DEFAULT;
 #endif
     }
 
@@ -84,18 +84,18 @@ namespace Mantid
     void FileFinderImpl::setCaseSensitive(const bool cs) 
     {
       if ( cs )
-        globOption = Poco::Glob::GLOB_DEFAULT;
+        m_globOption = Poco::Glob::GLOB_DEFAULT;
       else
-        globOption = Poco::Glob::GLOB_CASELESS;
+        m_globOption = Poco::Glob::GLOB_CASELESS;
     }
 
     /**
      * Option to get if file finder should be case sensitive
      * @return cs :: If case sensitive return true, if not case sensitive return false
      */
-    int FileFinderImpl::getCaseSensitive() const
+    bool FileFinderImpl::getCaseSensitive() const
     {
-      return globOption;
+      return (m_globOption == Poco::Glob::GLOB_DEFAULT);
     }
 
     /**
@@ -138,7 +138,7 @@ namespace Mantid
           Poco::Path path(*it, fName);
           Poco::Path pathPattern(path);
           std::set < std::string > files;
-          Kernel::Glob::glob(pathPattern, files, getCaseSensitive());
+          Kernel::Glob::glob(pathPattern, files, m_globOption);
           if (!files.empty())
           {
             return *files.begin();
@@ -488,7 +488,7 @@ namespace Mantid
 
       std::set<std::string> filenames;
       filenames.insert(filename);
-      if (getCaseSensitive() == Poco::Glob::GLOB_CASELESS)
+      if (!getCaseSensitive())
       {
         std::string transformed(filename);
         std::transform(filename.begin(),filename.end(),transformed.begin(),toupper);
@@ -506,7 +506,7 @@ namespace Mantid
       auto cend = exts.end();
       for(auto cit = exts.begin(); cit != cend; ++cit)
       {
-        if (getCaseSensitive() == Poco::Glob::GLOB_DEFAULT) //prune case variations - this is a hack, see above
+        if (getCaseSensitive()) //prune case variations - this is a hack, see above
         {
           std::string transformed(*cit);
           std::transform(cit->begin(), cit->end(), transformed.begin(), tolower);
@@ -525,7 +525,7 @@ namespace Mantid
       cend = extensions.end();
       for(auto cit = extensions.begin(); cit != cend; ++cit)
       {
-        if (getCaseSensitive() == Poco::Glob::GLOB_DEFAULT)  //prune case variations - this is a hack, see above
+        if (getCaseSensitive())  //prune case variations - this is a hack, see above
         {
           std::string transformed(*cit);
           std::transform(cit->begin(), cit->end(), transformed.begin(), tolower);
@@ -659,8 +659,9 @@ namespace Mantid
 
     /**
      * Return the path to the file found in archive
-     * @param archs :: A full file name (without path) including extension
-     * @param fName :: A full file name (without path) including extension
+     * @param archs :: A list of archives to search
+     * @param filenames :: A list of filenames (without extensions) to pass to the archive
+     * @param exts :: A list of extensions to check for in turn against each file
      * @return The full path if the file exists and can be found in one of the search locations
      *  or an empty string otherwise.
      */
@@ -684,8 +685,10 @@ namespace Mantid
     }
 
     /**
-     * Return the full path to the file given its name
-     * @param fName :: A vector of full file name (without path) and a vector of extensions
+     * Return the full path to the file given its name, checking local directories first.
+     * @param archs :: A list of archives to search
+     * @param filenames :: A list of filenames (without extensions) to pass to the archive
+     * @param exts :: A list of extensions to check for in turn against each file
      * @return The full path if the file exists and can be found in one of the search locations
      *  or an empty string otherwise.
      */

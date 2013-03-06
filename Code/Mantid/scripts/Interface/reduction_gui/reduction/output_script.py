@@ -17,6 +17,7 @@ class Output(BaseScriptElement):
             Update data members according to reduction results
         """
         if IS_IN_MANTIDPLOT:
+            # Allow for the old reducer, which uses Python API v1
             if self.PYTHON_API==1:
                 from reduction.command_interface import ReductionSingleton
             else:

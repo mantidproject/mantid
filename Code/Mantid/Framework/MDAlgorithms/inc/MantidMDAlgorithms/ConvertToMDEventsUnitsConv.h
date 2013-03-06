@@ -48,11 +48,12 @@ inline double XValue<ConvertToMD::Centered>(const MantidVec& X,size_t j){return 
 template<ConvertToMD::CnvrtUnits CONV,ConvertToMD::XCoordType TYPE> 
 struct UnitsConverter
 { 
-    /** Set up all variables necessary for units conversion at the beginning of the conversion loop
-     * @param pHost     -- pointer to the Mantid algorithm, which calls this function to obtain the variables, 
-     *                     relevant to the units conversion
-     *@param targ_units -- the units we want to convert to 
-    */
+    /**
+     * Set up all variables necessary for units conversion at the beginning of the conversion loop
+     * @param targetWSDescr
+     * @param units_from
+     * @param units_to
+     */
     inline void  setUpConversion(const MDEvents::MDWSDescriptionDepricated &targetWSDescr, const std::string &units_from,const std::string &units_to )
     {UNUSED_ARG(targetWSDescr);UNUSED_ARG(units_from);UNUSED_ARG(units_to);}
     /// Update all spectra dependednt  variables, relevant to conversion in the loop over spectra (detectors)

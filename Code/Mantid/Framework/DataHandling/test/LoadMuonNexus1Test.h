@@ -19,7 +19,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include <Poco/Path.h>
 
 using namespace Mantid::API;
@@ -118,7 +117,7 @@ public:
     
 	/*
     //----------------------------------------------------------------------
-    // Tests to check that Loading SpectraDetectorMap is done correctly
+    // Tests to check that spectra-detector mapping is done correctly
     //----------------------------------------------------------------------
     map= output->getSpectraMap();
     
@@ -392,7 +391,6 @@ private:
   std::string entryName;
   std::string inputFile;
   std::string inputFile2;
-  boost::shared_ptr<SpectraDetectorMap> map;
 };
 
 //------------------------------------------------------------------------------

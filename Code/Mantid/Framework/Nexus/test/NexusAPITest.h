@@ -119,10 +119,10 @@ public:
 
     // 2d double data - slab test
     file.makeData("r8_data", ::NeXus::FLOAT64, array_dims, true);
-    vector<int> slab_start;
+    vector<int64_t> slab_start;
     slab_start.push_back(4);
     slab_start.push_back(0);
-    vector<int> slab_size;
+    vector<int64_t> slab_size;
     slab_size.push_back(1);
     slab_size.push_back(4);
     file.putSlab(&(r8_array[16]), slab_start, slab_size);

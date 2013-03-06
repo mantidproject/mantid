@@ -1,1 +1,0 @@
-#include "MantidAPI/PrecompiledHeader.h"

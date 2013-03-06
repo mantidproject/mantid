@@ -2,7 +2,7 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
 	see http://www.mantidproject.org/IDF -->
 <instrument name="IN5" valid-from="1900-01-31 23:59:59"
-	valid-to="2100-01-31 23:59:59" last-modified="2012-05-17 00:00:00">
+	valid-to="2100-01-31 23:59:59" last-modified="2013-02-28 00:00:01">
 
 	<!-- Author: ricardo.leal@ill.fr -->
 
@@ -24,7 +24,7 @@
 
 	<!-- Moderator: In the ILL this is the distance from the PU chopper to sample -->
 	<component type="moderator">
-		<location z="-2.10855" />
+		<location z="-2" />
 	</component>
 	<type name="moderator" is="Source"></type>
 
@@ -33,32 +33,6 @@
 		<location z="-1.22950" />
 	</component>
 	<type name="chopper-position" is="ChopperPos"></type>
-
-	<!-- Monitors: just one monitor present for IN5; Distance M1-Sample = 855.60mm -->
-	<component type="monitors" idlist="monitors">
-		<location />
-	</component>
-	<type name="monitors">
-		<component type="monitor">
-			<location z="-0.85560" name="monitor1" />
-		</component>
-	</type>
-	<!--MONITOR IDs -->
-	<idlist idname="monitors">
-		<id val="1" />
-	</idlist>
-
-	<!--MONITOR SHAPE: Copied from CNCS -->
-	<!--FIXME: Do something real here. -->
-	<type is="monitor" name="monitor">
-		<cylinder id="cyl-approx">
-			<centre-of-bottom-base y="0.0" x="0.0" z="0.0" />
-			<axis y="0.0" x="0.0" z="1.0" />
-			<radius radius="0.01" />
-			<height height="0.03" />
-		</cylinder>
-		<algebra val="cyl-approx" />
-	</type>
 
 	<!-- Sample position -->
 	<component type="sample-position">
@@ -69,11 +43,13 @@
 	<!-- **** DETECTORS **** -->
 	<!-- Detector IDs -->
 	<idlist idname="detectors">
-		<id start="0" end="98303" />
+		<id start="1" end="98304" />
 	</idlist>
+
 	<component type="detectors" idlist="detectors">
 		<location />
 	</component>
+
 	<!-- Detector Doors/Banks/Panels -->
 	<type name="detectors">
 		<component type="door1" idlist="door1">
@@ -112,7 +88,6 @@
 		<component type="door12" idlist="door12">
 			<location />
 		</component>
-
 	</type>
 	<!-- Position of tubes around 2 theta, 4m from the sample -->
 	<type name="door1">
@@ -1316,277 +1291,276 @@
 		</component>
 	</type>
 
-	<!-- Definition of standard-tube. TODO: This instrument may have different 
+	<!--Definition of standard-tube. TODO: This instrument may have different 
 		configurations: either 1025, 512 or 256 pixels per tube. We may have to create 
 		different IDFs according to the data collection dates / instrument configuration. 
 		This configuration has only 256 pixels -->
+	<!-- In 5: 2.95m / 241 positions = 256 - 7 pixel top - 8 pixels bottom -->
 	<type name="standard-tube" outline="yes">
 		<component type="standard-pixel">
-			<location y="-1.463569" />
-			<location y="-1.452090" />
-			<location y="-1.440611" />
-			<location y="-1.429132" />
-			<location y="-1.417653" />
-			<location y="-1.406174" />
-			<location y="-1.394695" />
-			<location y="-1.383217" />
-			<location y="-1.371738" />
-			<location y="-1.360259" />
-			<location y="-1.348780" />
-			<location y="-1.337301" />
-			<location y="-1.325822" />
-			<location y="-1.314343" />
-			<location y="-1.302864" />
-			<location y="-1.291385" />
-			<location y="-1.279906" />
-			<location y="-1.268427" />
-			<location y="-1.256948" />
-			<location y="-1.245469" />
-			<location y="-1.233990" />
-			<location y="-1.222511" />
-			<location y="-1.211032" />
-			<location y="-1.199553" />
-			<location y="-1.188074" />
-			<location y="-1.176595" />
-			<location y="-1.165116" />
-			<location y="-1.153637" />
-			<location y="-1.142158" />
-			<location y="-1.130679" />
-			<location y="-1.119200" />
-			<location y="-1.107721" />
-			<location y="-1.096242" />
-			<location y="-1.084763" />
-			<location y="-1.073284" />
-			<location y="-1.061805" />
-			<location y="-1.050326" />
-			<location y="-1.038847" />
-			<location y="-1.027368" />
-			<location y="-1.015889" />
-			<location y="-1.004410" />
-			<location y="-0.992931" />
-			<location y="-0.981452" />
-			<location y="-0.969973" />
-			<location y="-0.958494" />
-			<location y="-0.947015" />
-			<location y="-0.935536" />
-			<location y="-0.924058" />
-			<location y="-0.912579" />
-			<location y="-0.901100" />
-			<location y="-0.889621" />
-			<location y="-0.878142" />
-			<location y="-0.866663" />
-			<location y="-0.855184" />
-			<location y="-0.843705" />
-			<location y="-0.832226" />
-			<location y="-0.820747" />
-			<location y="-0.809268" />
-			<location y="-0.797789" />
-			<location y="-0.786310" />
-			<location y="-0.774831" />
-			<location y="-0.763352" />
-			<location y="-0.751873" />
-			<location y="-0.740394" />
-			<location y="-0.728915" />
-			<location y="-0.717436" />
-			<location y="-0.705957" />
-			<location y="-0.694478" />
-			<location y="-0.682999" />
-			<location y="-0.671520" />
-			<location y="-0.660041" />
-			<location y="-0.648562" />
-			<location y="-0.637083" />
-			<location y="-0.625604" />
-			<location y="-0.614125" />
-			<location y="-0.602646" />
-			<location y="-0.591167" />
-			<location y="-0.579688" />
-			<location y="-0.568209" />
-			<location y="-0.556730" />
-			<location y="-0.545251" />
-			<location y="-0.533772" />
-			<location y="-0.522293" />
-			<location y="-0.510814" />
-			<location y="-0.499335" />
-			<location y="-0.487856" />
-			<location y="-0.476377" />
-			<location y="-0.464898" />
-			<location y="-0.453420" />
-			<location y="-0.441941" />
-			<location y="-0.430462" />
-			<location y="-0.418983" />
-			<location y="-0.407504" />
-			<location y="-0.396025" />
-			<location y="-0.384546" />
-			<location y="-0.373067" />
-			<location y="-0.361588" />
-			<location y="-0.350109" />
-			<location y="-0.338630" />
-			<location y="-0.327151" />
-			<location y="-0.315672" />
-			<location y="-0.304193" />
-			<location y="-0.292714" />
-			<location y="-0.281235" />
-			<location y="-0.269756" />
-			<location y="-0.258277" />
-			<location y="-0.246798" />
-			<location y="-0.235319" />
-			<location y="-0.223840" />
-			<location y="-0.212361" />
-			<location y="-0.200882" />
-			<location y="-0.189403" />
-			<location y="-0.177924" />
-			<location y="-0.166445" />
-			<location y="-0.154966" />
-			<location y="-0.143487" />
-			<location y="-0.132008" />
-			<location y="-0.120529" />
-			<location y="-0.109050" />
-			<location y="-0.097571" />
-			<location y="-0.086092" />
-			<location y="-0.074613" />
-			<location y="-0.063134" />
-			<location y="-0.051655" />
-			<location y="-0.040176" />
-			<location y="-0.028697" />
-			<location y="-0.017218" />
-			<location y="-0.005739" />
-			<location y="0.005739" />
-			<location y="0.017218" />
-			<location y="0.028697" />
-			<location y="0.040176" />
-			<location y="0.051655" />
-			<location y="0.063134" />
-			<location y="0.074613" />
-			<location y="0.086092" />
-			<location y="0.097571" />
-			<location y="0.109050" />
-			<location y="0.120529" />
-			<location y="0.132008" />
-			<location y="0.143487" />
-			<location y="0.154966" />
-			<location y="0.166445" />
-			<location y="0.177924" />
-			<location y="0.189403" />
-			<location y="0.200882" />
-			<location y="0.212361" />
-			<location y="0.223840" />
-			<location y="0.235319" />
-			<location y="0.246798" />
-			<location y="0.258277" />
-			<location y="0.269756" />
-			<location y="0.281235" />
-			<location y="0.292714" />
-			<location y="0.304193" />
-			<location y="0.315672" />
-			<location y="0.327151" />
-			<location y="0.338630" />
-			<location y="0.350109" />
-			<location y="0.361588" />
-			<location y="0.373067" />
-			<location y="0.384546" />
-			<location y="0.396025" />
-			<location y="0.407504" />
-			<location y="0.418983" />
-			<location y="0.430462" />
-			<location y="0.441941" />
-			<location y="0.453420" />
-			<location y="0.464898" />
-			<location y="0.476377" />
-			<location y="0.487856" />
-			<location y="0.499335" />
-			<location y="0.510814" />
-			<location y="0.522293" />
-			<location y="0.533772" />
-			<location y="0.545251" />
-			<location y="0.556730" />
-			<location y="0.568209" />
-			<location y="0.579688" />
-			<location y="0.591167" />
-			<location y="0.602646" />
-			<location y="0.614125" />
-			<location y="0.625604" />
-			<location y="0.637083" />
-			<location y="0.648562" />
-			<location y="0.660041" />
-			<location y="0.671520" />
-			<location y="0.682999" />
-			<location y="0.694478" />
-			<location y="0.705957" />
-			<location y="0.717436" />
-			<location y="0.728915" />
-			<location y="0.740394" />
-			<location y="0.751873" />
-			<location y="0.763352" />
-			<location y="0.774831" />
-			<location y="0.786310" />
-			<location y="0.797789" />
-			<location y="0.809268" />
-			<location y="0.820747" />
-			<location y="0.832226" />
-			<location y="0.843705" />
-			<location y="0.855184" />
-			<location y="0.866663" />
-			<location y="0.878142" />
-			<location y="0.889621" />
-			<location y="0.901100" />
-			<location y="0.912579" />
-			<location y="0.924058" />
-			<location y="0.935536" />
-			<location y="0.947015" />
-			<location y="0.958494" />
-			<location y="0.969973" />
-			<location y="0.981452" />
-			<location y="0.992931" />
-			<location y="1.004410" />
-			<location y="1.015889" />
-			<location y="1.027368" />
-			<location y="1.038847" />
-			<location y="1.050326" />
-			<location y="1.061805" />
-			<location y="1.073284" />
-			<location y="1.084763" />
-			<location y="1.096242" />
-			<location y="1.107721" />
-			<location y="1.119200" />
-			<location y="1.130679" />
-			<location y="1.142158" />
-			<location y="1.153637" />
-			<location y="1.165116" />
-			<location y="1.176595" />
-			<location y="1.188074" />
-			<location y="1.199553" />
-			<location y="1.211032" />
-			<location y="1.222511" />
-			<location y="1.233990" />
-			<location y="1.245469" />
-			<location y="1.256948" />
-			<location y="1.268427" />
-			<location y="1.279906" />
-			<location y="1.291385" />
-			<location y="1.302864" />
-			<location y="1.314343" />
-			<location y="1.325822" />
-			<location y="1.337301" />
-			<location y="1.348780" />
-			<location y="1.360259" />
-			<location y="1.371738" />
-			<location y="1.383217" />
-			<location y="1.394695" />
-			<location y="1.406174" />
-			<location y="1.417653" />
-			<location y="1.429132" />
-			<location y="1.440611" />
-			<location y="1.452090" />
-			<location y="1.463569" />
-
+			<location y="-1.566805" />
+			<location y="-1.554516" />
+			<location y="-1.542228" />
+			<location y="-1.529939" />
+			<location y="-1.517650" />
+			<location y="-1.505362" />
+			<location y="-1.493073" />
+			<location y="-1.480784" />
+			<location y="-1.468496" />
+			<location y="-1.456207" />
+			<location y="-1.443918" />
+			<location y="-1.431630" />
+			<location y="-1.419341" />
+			<location y="-1.407052" />
+			<location y="-1.394764" />
+			<location y="-1.382475" />
+			<location y="-1.370186" />
+			<location y="-1.357898" />
+			<location y="-1.345609" />
+			<location y="-1.333320" />
+			<location y="-1.321032" />
+			<location y="-1.308743" />
+			<location y="-1.296454" />
+			<location y="-1.284166" />
+			<location y="-1.271877" />
+			<location y="-1.259588" />
+			<location y="-1.247300" />
+			<location y="-1.235011" />
+			<location y="-1.222722" />
+			<location y="-1.210434" />
+			<location y="-1.198145" />
+			<location y="-1.185856" />
+			<location y="-1.173568" />
+			<location y="-1.161279" />
+			<location y="-1.148990" />
+			<location y="-1.136702" />
+			<location y="-1.124413" />
+			<location y="-1.112124" />
+			<location y="-1.099836" />
+			<location y="-1.087547" />
+			<location y="-1.075258" />
+			<location y="-1.062970" />
+			<location y="-1.050681" />
+			<location y="-1.038392" />
+			<location y="-1.026104" />
+			<location y="-1.013815" />
+			<location y="-1.001526" />
+			<location y="-0.989238" />
+			<location y="-0.976949" />
+			<location y="-0.964660" />
+			<location y="-0.952372" />
+			<location y="-0.940083" />
+			<location y="-0.927794" />
+			<location y="-0.915506" />
+			<location y="-0.903217" />
+			<location y="-0.890928" />
+			<location y="-0.878640" />
+			<location y="-0.866351" />
+			<location y="-0.854062" />
+			<location y="-0.841774" />
+			<location y="-0.829485" />
+			<location y="-0.817196" />
+			<location y="-0.804908" />
+			<location y="-0.792619" />
+			<location y="-0.780330" />
+			<location y="-0.768042" />
+			<location y="-0.755753" />
+			<location y="-0.743464" />
+			<location y="-0.731176" />
+			<location y="-0.718887" />
+			<location y="-0.706598" />
+			<location y="-0.694310" />
+			<location y="-0.682021" />
+			<location y="-0.669732" />
+			<location y="-0.657444" />
+			<location y="-0.645155" />
+			<location y="-0.632866" />
+			<location y="-0.620578" />
+			<location y="-0.608289" />
+			<location y="-0.596000" />
+			<location y="-0.583712" />
+			<location y="-0.571423" />
+			<location y="-0.559134" />
+			<location y="-0.546846" />
+			<location y="-0.534557" />
+			<location y="-0.522268" />
+			<location y="-0.509980" />
+			<location y="-0.497691" />
+			<location y="-0.485402" />
+			<location y="-0.473114" />
+			<location y="-0.460825" />
+			<location y="-0.448536" />
+			<location y="-0.436248" />
+			<location y="-0.423959" />
+			<location y="-0.411670" />
+			<location y="-0.399382" />
+			<location y="-0.387093" />
+			<location y="-0.374804" />
+			<location y="-0.362516" />
+			<location y="-0.350227" />
+			<location y="-0.337938" />
+			<location y="-0.325650" />
+			<location y="-0.313361" />
+			<location y="-0.301072" />
+			<location y="-0.288784" />
+			<location y="-0.276495" />
+			<location y="-0.264206" />
+			<location y="-0.251918" />
+			<location y="-0.239629" />
+			<location y="-0.227340" />
+			<location y="-0.215052" />
+			<location y="-0.202763" />
+			<location y="-0.190474" />
+			<location y="-0.178186" />
+			<location y="-0.165897" />
+			<location y="-0.153608" />
+			<location y="-0.141320" />
+			<location y="-0.129031" />
+			<location y="-0.116742" />
+			<location y="-0.104454" />
+			<location y="-0.092165" />
+			<location y="-0.079876" />
+			<location y="-0.067588" />
+			<location y="-0.055299" />
+			<location y="-0.043010" />
+			<location y="-0.030722" />
+			<location y="-0.018433" />
+			<location y="-0.006144" />
+			<location y="0.006144" />
+			<location y="0.018433" />
+			<location y="0.030722" />
+			<location y="0.043010" />
+			<location y="0.055299" />
+			<location y="0.067588" />
+			<location y="0.079876" />
+			<location y="0.092165" />
+			<location y="0.104454" />
+			<location y="0.116742" />
+			<location y="0.129031" />
+			<location y="0.141320" />
+			<location y="0.153608" />
+			<location y="0.165897" />
+			<location y="0.178186" />
+			<location y="0.190474" />
+			<location y="0.202763" />
+			<location y="0.215052" />
+			<location y="0.227340" />
+			<location y="0.239629" />
+			<location y="0.251918" />
+			<location y="0.264206" />
+			<location y="0.276495" />
+			<location y="0.288784" />
+			<location y="0.301072" />
+			<location y="0.313361" />
+			<location y="0.325650" />
+			<location y="0.337938" />
+			<location y="0.350227" />
+			<location y="0.362516" />
+			<location y="0.374804" />
+			<location y="0.387093" />
+			<location y="0.399382" />
+			<location y="0.411670" />
+			<location y="0.423959" />
+			<location y="0.436248" />
+			<location y="0.448536" />
+			<location y="0.460825" />
+			<location y="0.473114" />
+			<location y="0.485402" />
+			<location y="0.497691" />
+			<location y="0.509980" />
+			<location y="0.522268" />
+			<location y="0.534557" />
+			<location y="0.546846" />
+			<location y="0.559134" />
+			<location y="0.571423" />
+			<location y="0.583712" />
+			<location y="0.596000" />
+			<location y="0.608289" />
+			<location y="0.620578" />
+			<location y="0.632866" />
+			<location y="0.645155" />
+			<location y="0.657444" />
+			<location y="0.669732" />
+			<location y="0.682021" />
+			<location y="0.694310" />
+			<location y="0.706598" />
+			<location y="0.718887" />
+			<location y="0.731176" />
+			<location y="0.743464" />
+			<location y="0.755753" />
+			<location y="0.768042" />
+			<location y="0.780330" />
+			<location y="0.792619" />
+			<location y="0.804908" />
+			<location y="0.817196" />
+			<location y="0.829485" />
+			<location y="0.841774" />
+			<location y="0.854062" />
+			<location y="0.866351" />
+			<location y="0.878640" />
+			<location y="0.890928" />
+			<location y="0.903217" />
+			<location y="0.915506" />
+			<location y="0.927794" />
+			<location y="0.940083" />
+			<location y="0.952372" />
+			<location y="0.964660" />
+			<location y="0.976949" />
+			<location y="0.989238" />
+			<location y="1.001526" />
+			<location y="1.013815" />
+			<location y="1.026104" />
+			<location y="1.038392" />
+			<location y="1.050681" />
+			<location y="1.062970" />
+			<location y="1.075258" />
+			<location y="1.087547" />
+			<location y="1.099836" />
+			<location y="1.112124" />
+			<location y="1.124413" />
+			<location y="1.136702" />
+			<location y="1.148990" />
+			<location y="1.161279" />
+			<location y="1.173568" />
+			<location y="1.185856" />
+			<location y="1.198145" />
+			<location y="1.210434" />
+			<location y="1.222722" />
+			<location y="1.235011" />
+			<location y="1.247300" />
+			<location y="1.259588" />
+			<location y="1.271877" />
+			<location y="1.284166" />
+			<location y="1.296454" />
+			<location y="1.308743" />
+			<location y="1.321032" />
+			<location y="1.333320" />
+			<location y="1.345609" />
+			<location y="1.357898" />
+			<location y="1.370186" />
+			<location y="1.382475" />
+			<location y="1.394764" />
+			<location y="1.407052" />
+			<location y="1.419341" />
+			<location y="1.431630" />
+			<location y="1.443918" />
+			<location y="1.456207" />
+			<location y="1.468496" />
+			<location y="1.480784" />
+			<location y="1.493073" />
+			<location y="1.505362" />
+			<location y="1.517650" />
+			<location y="1.529939" />
+			<location y="1.542228" />
+			<location y="1.554516" />
+			<location y="1.566805" />
 		</component>
 	</type>
 
 	<!-- Definition of standard-pixel -->
 	<type name="standard-pixel" is="detector">
 		<cylinder id="shape">
-			<centre-of-bottom-base x="0.0" y="-0.0014307"
-				z="0.0" />
+			<centre-of-bottom-base x="0.0" y="-0.006144" z="0.0" />
 			<axis x="0.0" y="1.0" z="0.0" />
 			<radius val="0.0127" />
 			<height val=".0114341328125" />
@@ -1598,425 +1572,413 @@
 
 	<!-- Auto generated Merlin has 1024 positions, IN5 only 256 -->
 	<idlist idname="door1">
-		<id start="11" end="266" />
-		<id start="267" end="522" />
-		<id start="523" end="778" />
-		<id start="779" end="1034" />
-		<id start="1035" end="1290" />
-		<id start="1291" end="1546" />
-		<id start="1547" end="1802" />
-		<id start="1803" end="2058" />
-		<id start="2059" end="2314" />
-		<id start="2315" end="2570" />
-		<id start="2571" end="2826" />
-		<id start="2827" end="3082" />
-		<id start="3083" end="3338" />
-		<id start="3339" end="3594" />
-		<id start="3595" end="3850" />
-		<id start="3851" end="4106" />
-		<id start="4107" end="4362" />
-		<id start="4363" end="4618" />
-		<id start="4619" end="4874" />
-		<id start="4875" end="5130" />
-		<id start="5131" end="5386" />
-		<id start="5387" end="5642" />
-		<id start="5643" end="5898" />
-		<id start="5899" end="6154" />
-		<id start="6155" end="6410" />
-		<id start="6411" end="6666" />
-		<id start="6667" end="6922" />
-		<id start="6923" end="7178" />
-		<id start="7179" end="7434" />
-		<id start="7435" end="7690" />
-		<id start="7691" end="7946" />
-		<id start="7947" end="8202" />
+		<id start="1" end="256" />
+		<id start="257" end="512" />
+		<id start="513" end="768" />
+		<id start="769" end="1024" />
+		<id start="1025" end="1280" />
+		<id start="1281" end="1536" />
+		<id start="1537" end="1792" />
+		<id start="1793" end="2048" />
+		<id start="2049" end="2304" />
+		<id start="2305" end="2560" />
+		<id start="2561" end="2816" />
+		<id start="2817" end="3072" />
+		<id start="3073" end="3328" />
+		<id start="3329" end="3584" />
+		<id start="3585" end="3840" />
+		<id start="3841" end="4096" />
+		<id start="4097" end="4352" />
+		<id start="4353" end="4608" />
+		<id start="4609" end="4864" />
+		<id start="4865" end="5120" />
+		<id start="5121" end="5376" />
+		<id start="5377" end="5632" />
+		<id start="5633" end="5888" />
+		<id start="5889" end="6144" />
+		<id start="6145" end="6400" />
+		<id start="6401" end="6656" />
+		<id start="6657" end="6912" />
+		<id start="6913" end="7168" />
+		<id start="7169" end="7424" />
+		<id start="7425" end="7680" />
+		<id start="7681" end="7936" />
+		<id start="7937" end="8192" />
 	</idlist>
 	<idlist idname="door2">
-		<id start="8203" end="8458" />
-		<id start="8459" end="8714" />
-		<id start="8715" end="8970" />
-		<id start="8971" end="9226" />
-		<id start="9227" end="9482" />
-		<id start="9483" end="9738" />
-		<id start="9739" end="9994" />
-		<id start="9995" end="10250" />
-		<id start="10251" end="10506" />
-		<id start="10507" end="10762" />
-		<id start="10763" end="11018" />
-		<id start="11019" end="11274" />
-		<id start="11275" end="11530" />
-		<id start="11531" end="11786" />
-		<id start="11787" end="12042" />
-		<id start="12043" end="12298" />
-		<id start="12299" end="12554" />
-		<id start="12555" end="12810" />
-		<id start="12811" end="13066" />
-		<id start="13067" end="13322" />
-		<id start="13323" end="13578" />
-		<id start="13579" end="13834" />
-		<id start="13835" end="14090" />
-		<id start="14091" end="14346" />
-		<id start="14347" end="14602" />
-		<id start="14603" end="14858" />
-		<id start="14859" end="15114" />
-		<id start="15115" end="15370" />
-		<id start="15371" end="15626" />
-		<id start="15627" end="15882" />
-		<id start="15883" end="16138" />
-		<id start="16139" end="16394" />
+		<id start="8193" end="8448" />
+		<id start="8449" end="8704" />
+		<id start="8705" end="8960" />
+		<id start="8961" end="9216" />
+		<id start="9217" end="9472" />
+		<id start="9473" end="9728" />
+		<id start="9729" end="9984" />
+		<id start="9985" end="10240" />
+		<id start="10241" end="10496" />
+		<id start="10497" end="10752" />
+		<id start="10753" end="11008" />
+		<id start="11009" end="11264" />
+		<id start="11265" end="11520" />
+		<id start="11521" end="11776" />
+		<id start="11777" end="12032" />
+		<id start="12033" end="12288" />
+		<id start="12289" end="12544" />
+		<id start="12545" end="12800" />
+		<id start="12801" end="13056" />
+		<id start="13057" end="13312" />
+		<id start="13313" end="13568" />
+		<id start="13569" end="13824" />
+		<id start="13825" end="14080" />
+		<id start="14081" end="14336" />
+		<id start="14337" end="14592" />
+		<id start="14593" end="14848" />
+		<id start="14849" end="15104" />
+		<id start="15105" end="15360" />
+		<id start="15361" end="15616" />
+		<id start="15617" end="15872" />
+		<id start="15873" end="16128" />
+		<id start="16129" end="16384" />
 	</idlist>
 	<idlist idname="door3">
-		<id start="16395" end="16650" />
-		<id start="16651" end="16906" />
-		<id start="16907" end="17162" />
-		<id start="17163" end="17418" />
-		<id start="17419" end="17674" />
-		<id start="17675" end="17930" />
-		<id start="17931" end="18186" />
-		<id start="18187" end="18442" />
-		<id start="18443" end="18698" />
-		<id start="18699" end="18954" />
-		<id start="18955" end="19210" />
-		<id start="19211" end="19466" />
-		<id start="19467" end="19722" />
-		<id start="19723" end="19978" />
-		<id start="19979" end="20234" />
-		<id start="20235" end="20490" />
-		<id start="20491" end="20746" />
-		<id start="20747" end="21002" />
-		<id start="21003" end="21258" />
-		<id start="21259" end="21514" />
-		<id start="21515" end="21770" />
-		<id start="21771" end="22026" />
-		<id start="22027" end="22282" />
-		<id start="22283" end="22538" />
-		<id start="22539" end="22794" />
-		<id start="22795" end="23050" />
-		<id start="23051" end="23306" />
-		<id start="23307" end="23562" />
-		<id start="23563" end="23818" />
-		<id start="23819" end="24074" />
-		<id start="24075" end="24330" />
-		<id start="24331" end="24586" />
+		<id start="16385" end="16640" />
+		<id start="16641" end="16896" />
+		<id start="16897" end="17152" />
+		<id start="17153" end="17408" />
+		<id start="17409" end="17664" />
+		<id start="17665" end="17920" />
+		<id start="17921" end="18176" />
+		<id start="18177" end="18432" />
+		<id start="18433" end="18688" />
+		<id start="18689" end="18944" />
+		<id start="18945" end="19200" />
+		<id start="19201" end="19456" />
+		<id start="19457" end="19712" />
+		<id start="19713" end="19968" />
+		<id start="19969" end="20224" />
+		<id start="20225" end="20480" />
+		<id start="20481" end="20736" />
+		<id start="20737" end="20992" />
+		<id start="20993" end="21248" />
+		<id start="21249" end="21504" />
+		<id start="21505" end="21760" />
+		<id start="21761" end="22016" />
+		<id start="22017" end="22272" />
+		<id start="22273" end="22528" />
+		<id start="22529" end="22784" />
+		<id start="22785" end="23040" />
+		<id start="23041" end="23296" />
+		<id start="23297" end="23552" />
+		<id start="23553" end="23808" />
+		<id start="23809" end="24064" />
+		<id start="24065" end="24320" />
+		<id start="24321" end="24576" />
 	</idlist>
 	<idlist idname="door4">
-		<id start="24587" end="24842" />
-		<id start="24843" end="25098" />
-		<id start="25099" end="25354" />
-		<id start="25355" end="25610" />
-		<id start="25611" end="25866" />
-		<id start="25867" end="26122" />
-		<id start="26123" end="26378" />
-		<id start="26379" end="26634" />
-		<id start="26635" end="26890" />
-		<id start="26891" end="27146" />
-		<id start="27147" end="27402" />
-		<id start="27403" end="27658" />
-		<id start="27659" end="27914" />
-		<id start="27915" end="28170" />
-		<id start="28171" end="28426" />
-		<id start="28427" end="28682" />
-		<id start="28683" end="28938" />
-		<id start="28939" end="29194" />
-		<id start="29195" end="29450" />
-		<id start="29451" end="29706" />
-		<id start="29707" end="29962" />
-		<id start="29963" end="30218" />
-		<id start="30219" end="30474" />
-		<id start="30475" end="30730" />
-		<id start="30731" end="30986" />
-		<id start="30987" end="31242" />
-		<id start="31243" end="31498" />
-		<id start="31499" end="31754" />
-		<id start="31755" end="32010" />
-		<id start="32011" end="32266" />
-		<id start="32267" end="32522" />
-		<id start="32523" end="32778" />
+		<id start="24577" end="24832" />
+		<id start="24833" end="25088" />
+		<id start="25089" end="25344" />
+		<id start="25345" end="25600" />
+		<id start="25601" end="25856" />
+		<id start="25857" end="26112" />
+		<id start="26113" end="26368" />
+		<id start="26369" end="26624" />
+		<id start="26625" end="26880" />
+		<id start="26881" end="27136" />
+		<id start="27137" end="27392" />
+		<id start="27393" end="27648" />
+		<id start="27649" end="27904" />
+		<id start="27905" end="28160" />
+		<id start="28161" end="28416" />
+		<id start="28417" end="28672" />
+		<id start="28673" end="28928" />
+		<id start="28929" end="29184" />
+		<id start="29185" end="29440" />
+		<id start="29441" end="29696" />
+		<id start="29697" end="29952" />
+		<id start="29953" end="30208" />
+		<id start="30209" end="30464" />
+		<id start="30465" end="30720" />
+		<id start="30721" end="30976" />
+		<id start="30977" end="31232" />
+		<id start="31233" end="31488" />
+		<id start="31489" end="31744" />
+		<id start="31745" end="32000" />
+		<id start="32001" end="32256" />
+		<id start="32257" end="32512" />
+		<id start="32513" end="32768" />
 	</idlist>
 	<idlist idname="door5">
-		<id start="32779" end="33034" />
-		<id start="33035" end="33290" />
-		<id start="33291" end="33546" />
-		<id start="33547" end="33802" />
-		<id start="33803" end="34058" />
-		<id start="34059" end="34314" />
-		<id start="34315" end="34570" />
-		<id start="34571" end="34826" />
-		<id start="34827" end="35082" />
-		<id start="35083" end="35338" />
-		<id start="35339" end="35594" />
-		<id start="35595" end="35850" />
-		<id start="35851" end="36106" />
-		<id start="36107" end="36362" />
-		<id start="36363" end="36618" />
-		<id start="36619" end="36874" />
-		<id start="36875" end="37130" />
-		<id start="37131" end="37386" />
-		<id start="37387" end="37642" />
-		<id start="37643" end="37898" />
-		<id start="37899" end="38154" />
-		<id start="38155" end="38410" />
-		<id start="38411" end="38666" />
-		<id start="38667" end="38922" />
-		<id start="38923" end="39178" />
-		<id start="39179" end="39434" />
-		<id start="39435" end="39690" />
-		<id start="39691" end="39946" />
-		<id start="39947" end="40202" />
-		<id start="40203" end="40458" />
-		<id start="40459" end="40714" />
-		<id start="40715" end="40970" />
+		<id start="32769" end="33024" />
+		<id start="33025" end="33280" />
+		<id start="33281" end="33536" />
+		<id start="33537" end="33792" />
+		<id start="33793" end="34048" />
+		<id start="34049" end="34304" />
+		<id start="34305" end="34560" />
+		<id start="34561" end="34816" />
+		<id start="34817" end="35072" />
+		<id start="35073" end="35328" />
+		<id start="35329" end="35584" />
+		<id start="35585" end="35840" />
+		<id start="35841" end="36096" />
+		<id start="36097" end="36352" />
+		<id start="36353" end="36608" />
+		<id start="36609" end="36864" />
+		<id start="36865" end="37120" />
+		<id start="37121" end="37376" />
+		<id start="37377" end="37632" />
+		<id start="37633" end="37888" />
+		<id start="37889" end="38144" />
+		<id start="38145" end="38400" />
+		<id start="38401" end="38656" />
+		<id start="38657" end="38912" />
+		<id start="38913" end="39168" />
+		<id start="39169" end="39424" />
+		<id start="39425" end="39680" />
+		<id start="39681" end="39936" />
+		<id start="39937" end="40192" />
+		<id start="40193" end="40448" />
+		<id start="40449" end="40704" />
+		<id start="40705" end="40960" />
 	</idlist>
 	<idlist idname="door6">
-		<id start="40971" end="41226" />
-		<id start="41227" end="41482" />
-		<id start="41483" end="41738" />
-		<id start="41739" end="41994" />
-		<id start="41995" end="42250" />
-		<id start="42251" end="42506" />
-		<id start="42507" end="42762" />
-		<id start="42763" end="43018" />
-		<id start="43019" end="43274" />
-		<id start="43275" end="43530" />
-		<id start="43531" end="43786" />
-		<id start="43787" end="44042" />
-		<id start="44043" end="44298" />
-		<id start="44299" end="44554" />
-		<id start="44555" end="44810" />
-		<id start="44811" end="45066" />
-		<id start="45067" end="45322" />
-		<id start="45323" end="45578" />
-		<id start="45579" end="45834" />
-		<id start="45835" end="46090" />
-		<id start="46091" end="46346" />
-		<id start="46347" end="46602" />
-		<id start="46603" end="46858" />
-		<id start="46859" end="47114" />
-		<id start="47115" end="47370" />
-		<id start="47371" end="47626" />
-		<id start="47627" end="47882" />
-		<id start="47883" end="48138" />
-		<id start="48139" end="48394" />
-		<id start="48395" end="48650" />
-		<id start="48651" end="48906" />
-		<id start="48907" end="49162" />
+		<id start="40961" end="41216" />
+		<id start="41217" end="41472" />
+		<id start="41473" end="41728" />
+		<id start="41729" end="41984" />
+		<id start="41985" end="42240" />
+		<id start="42241" end="42496" />
+		<id start="42497" end="42752" />
+		<id start="42753" end="43008" />
+		<id start="43009" end="43264" />
+		<id start="43265" end="43520" />
+		<id start="43521" end="43776" />
+		<id start="43777" end="44032" />
+		<id start="44033" end="44288" />
+		<id start="44289" end="44544" />
+		<id start="44545" end="44800" />
+		<id start="44801" end="45056" />
+		<id start="45057" end="45312" />
+		<id start="45313" end="45568" />
+		<id start="45569" end="45824" />
+		<id start="45825" end="46080" />
+		<id start="46081" end="46336" />
+		<id start="46337" end="46592" />
+		<id start="46593" end="46848" />
+		<id start="46849" end="47104" />
+		<id start="47105" end="47360" />
+		<id start="47361" end="47616" />
+		<id start="47617" end="47872" />
+		<id start="47873" end="48128" />
+		<id start="48129" end="48384" />
+		<id start="48385" end="48640" />
+		<id start="48641" end="48896" />
+		<id start="48897" end="49152" />
 	</idlist>
 	<idlist idname="door7">
-		<id start="49163" end="49418" />
-		<id start="49419" end="49674" />
-		<id start="49675" end="49930" />
-		<id start="49931" end="50186" />
-		<id start="50187" end="50442" />
-		<id start="50443" end="50698" />
-		<id start="50699" end="50954" />
-		<id start="50955" end="51210" />
-		<id start="51211" end="51466" />
-		<id start="51467" end="51722" />
-		<id start="51723" end="51978" />
-		<id start="51979" end="52234" />
-		<id start="52235" end="52490" />
-		<id start="52491" end="52746" />
-		<id start="52747" end="53002" />
-		<id start="53003" end="53258" />
-		<id start="53259" end="53514" />
-		<id start="53515" end="53770" />
-		<id start="53771" end="54026" />
-		<id start="54027" end="54282" />
-		<id start="54283" end="54538" />
-		<id start="54539" end="54794" />
-		<id start="54795" end="55050" />
-		<id start="55051" end="55306" />
-		<id start="55307" end="55562" />
-		<id start="55563" end="55818" />
-		<id start="55819" end="56074" />
-		<id start="56075" end="56330" />
-		<id start="56331" end="56586" />
-		<id start="56587" end="56842" />
-		<id start="56843" end="57098" />
-		<id start="57099" end="57354" />
+		<id start="49153" end="49408" />
+		<id start="49409" end="49664" />
+		<id start="49665" end="49920" />
+		<id start="49921" end="50176" />
+		<id start="50177" end="50432" />
+		<id start="50433" end="50688" />
+		<id start="50689" end="50944" />
+		<id start="50945" end="51200" />
+		<id start="51201" end="51456" />
+		<id start="51457" end="51712" />
+		<id start="51713" end="51968" />
+		<id start="51969" end="52224" />
+		<id start="52225" end="52480" />
+		<id start="52481" end="52736" />
+		<id start="52737" end="52992" />
+		<id start="52993" end="53248" />
+		<id start="53249" end="53504" />
+		<id start="53505" end="53760" />
+		<id start="53761" end="54016" />
+		<id start="54017" end="54272" />
+		<id start="54273" end="54528" />
+		<id start="54529" end="54784" />
+		<id start="54785" end="55040" />
+		<id start="55041" end="55296" />
+		<id start="55297" end="55552" />
+		<id start="55553" end="55808" />
+		<id start="55809" end="56064" />
+		<id start="56065" end="56320" />
+		<id start="56321" end="56576" />
+		<id start="56577" end="56832" />
+		<id start="56833" end="57088" />
+		<id start="57089" end="57344" />
 	</idlist>
 	<idlist idname="door8">
-		<id start="57355" end="57610" />
-		<id start="57611" end="57866" />
-		<id start="57867" end="58122" />
-		<id start="58123" end="58378" />
-		<id start="58379" end="58634" />
-		<id start="58635" end="58890" />
-		<id start="58891" end="59146" />
-		<id start="59147" end="59402" />
-		<id start="59403" end="59658" />
-		<id start="59659" end="59914" />
-		<id start="59915" end="60170" />
-		<id start="60171" end="60426" />
-		<id start="60427" end="60682" />
-		<id start="60683" end="60938" />
-		<id start="60939" end="61194" />
-		<id start="61195" end="61450" />
-		<id start="61451" end="61706" />
-		<id start="61707" end="61962" />
-		<id start="61963" end="62218" />
-		<id start="62219" end="62474" />
-		<id start="62475" end="62730" />
-		<id start="62731" end="62986" />
-		<id start="62987" end="63242" />
-		<id start="63243" end="63498" />
-		<id start="63499" end="63754" />
-		<id start="63755" end="64010" />
-		<id start="64011" end="64266" />
-		<id start="64267" end="64522" />
-		<id start="64523" end="64778" />
-		<id start="64779" end="65034" />
-		<id start="65035" end="65290" />
-		<id start="65291" end="65546" />
+		<id start="57345" end="57600" />
+		<id start="57601" end="57856" />
+		<id start="57857" end="58112" />
+		<id start="58113" end="58368" />
+		<id start="58369" end="58624" />
+		<id start="58625" end="58880" />
+		<id start="58881" end="59136" />
+		<id start="59137" end="59392" />
+		<id start="59393" end="59648" />
+		<id start="59649" end="59904" />
+		<id start="59905" end="60160" />
+		<id start="60161" end="60416" />
+		<id start="60417" end="60672" />
+		<id start="60673" end="60928" />
+		<id start="60929" end="61184" />
+		<id start="61185" end="61440" />
+		<id start="61441" end="61696" />
+		<id start="61697" end="61952" />
+		<id start="61953" end="62208" />
+		<id start="62209" end="62464" />
+		<id start="62465" end="62720" />
+		<id start="62721" end="62976" />
+		<id start="62977" end="63232" />
+		<id start="63233" end="63488" />
+		<id start="63489" end="63744" />
+		<id start="63745" end="64000" />
+		<id start="64001" end="64256" />
+		<id start="64257" end="64512" />
+		<id start="64513" end="64768" />
+		<id start="64769" end="65024" />
+		<id start="65025" end="65280" />
+		<id start="65281" end="65536" />
 	</idlist>
 	<idlist idname="door9">
-		<id start="65547" end="65802" />
-		<id start="65803" end="66058" />
-		<id start="66059" end="66314" />
-		<id start="66315" end="66570" />
-		<id start="66571" end="66826" />
-		<id start="66827" end="67082" />
-		<id start="67083" end="67338" />
-		<id start="67339" end="67594" />
-		<id start="67595" end="67850" />
-		<id start="67851" end="68106" />
-		<id start="68107" end="68362" />
-		<id start="68363" end="68618" />
-		<id start="68619" end="68874" />
-		<id start="68875" end="69130" />
-		<id start="69131" end="69386" />
-		<id start="69387" end="69642" />
-		<id start="69643" end="69898" />
-		<id start="69899" end="70154" />
-		<id start="70155" end="70410" />
-		<id start="70411" end="70666" />
-		<id start="70667" end="70922" />
-		<id start="70923" end="71178" />
-		<id start="71179" end="71434" />
-		<id start="71435" end="71690" />
-		<id start="71691" end="71946" />
-		<id start="71947" end="72202" />
-		<id start="72203" end="72458" />
-		<id start="72459" end="72714" />
-		<id start="72715" end="72970" />
-		<id start="72971" end="73226" />
-		<id start="73227" end="73482" />
-		<id start="73483" end="73738" />
+		<id start="65537" end="65792" />
+		<id start="65793" end="66048" />
+		<id start="66049" end="66304" />
+		<id start="66305" end="66560" />
+		<id start="66561" end="66816" />
+		<id start="66817" end="67072" />
+		<id start="67073" end="67328" />
+		<id start="67329" end="67584" />
+		<id start="67585" end="67840" />
+		<id start="67841" end="68096" />
+		<id start="68097" end="68352" />
+		<id start="68353" end="68608" />
+		<id start="68609" end="68864" />
+		<id start="68865" end="69120" />
+		<id start="69121" end="69376" />
+		<id start="69377" end="69632" />
+		<id start="69633" end="69888" />
+		<id start="69889" end="70144" />
+		<id start="70145" end="70400" />
+		<id start="70401" end="70656" />
+		<id start="70657" end="70912" />
+		<id start="70913" end="71168" />
+		<id start="71169" end="71424" />
+		<id start="71425" end="71680" />
+		<id start="71681" end="71936" />
+		<id start="71937" end="72192" />
+		<id start="72193" end="72448" />
+		<id start="72449" end="72704" />
+		<id start="72705" end="72960" />
+		<id start="72961" end="73216" />
+		<id start="73217" end="73472" />
+		<id start="73473" end="73728" />
 	</idlist>
 	<idlist idname="door10">
-		<id start="73739" end="73994" />
-		<id start="73995" end="74250" />
-		<id start="74251" end="74506" />
-		<id start="74507" end="74762" />
-		<id start="74763" end="75018" />
-		<id start="75019" end="75274" />
-		<id start="75275" end="75530" />
-		<id start="75531" end="75786" />
-		<id start="75787" end="76042" />
-		<id start="76043" end="76298" />
-		<id start="76299" end="76554" />
-		<id start="76555" end="76810" />
-		<id start="76811" end="77066" />
-		<id start="77067" end="77322" />
-		<id start="77323" end="77578" />
-		<id start="77579" end="77834" />
-		<id start="77835" end="78090" />
-		<id start="78091" end="78346" />
-		<id start="78347" end="78602" />
-		<id start="78603" end="78858" />
-		<id start="78859" end="79114" />
-		<id start="79115" end="79370" />
-		<id start="79371" end="79626" />
-		<id start="79627" end="79882" />
-		<id start="79883" end="80138" />
-		<id start="80139" end="80394" />
-		<id start="80395" end="80650" />
-		<id start="80651" end="80906" />
-		<id start="80907" end="81162" />
-		<id start="81163" end="81418" />
-		<id start="81419" end="81674" />
-		<id start="81675" end="81930" />
+		<id start="73729" end="73984" />
+		<id start="73985" end="74240" />
+		<id start="74241" end="74496" />
+		<id start="74497" end="74752" />
+		<id start="74753" end="75008" />
+		<id start="75009" end="75264" />
+		<id start="75265" end="75520" />
+		<id start="75521" end="75776" />
+		<id start="75777" end="76032" />
+		<id start="76033" end="76288" />
+		<id start="76289" end="76544" />
+		<id start="76545" end="76800" />
+		<id start="76801" end="77056" />
+		<id start="77057" end="77312" />
+		<id start="77313" end="77568" />
+		<id start="77569" end="77824" />
+		<id start="77825" end="78080" />
+		<id start="78081" end="78336" />
+		<id start="78337" end="78592" />
+		<id start="78593" end="78848" />
+		<id start="78849" end="79104" />
+		<id start="79105" end="79360" />
+		<id start="79361" end="79616" />
+		<id start="79617" end="79872" />
+		<id start="79873" end="80128" />
+		<id start="80129" end="80384" />
+		<id start="80385" end="80640" />
+		<id start="80641" end="80896" />
+		<id start="80897" end="81152" />
+		<id start="81153" end="81408" />
+		<id start="81409" end="81664" />
+		<id start="81665" end="81920" />
 	</idlist>
 	<idlist idname="door11">
-		<id start="81931" end="82186" />
-		<id start="82187" end="82442" />
-		<id start="82443" end="82698" />
-		<id start="82699" end="82954" />
-		<id start="82955" end="83210" />
-		<id start="83211" end="83466" />
-		<id start="83467" end="83722" />
-		<id start="83723" end="83978" />
-		<id start="83979" end="84234" />
-		<id start="84235" end="84490" />
-		<id start="84491" end="84746" />
-		<id start="84747" end="85002" />
-		<id start="85003" end="85258" />
-		<id start="85259" end="85514" />
-		<id start="85515" end="85770" />
-		<id start="85771" end="86026" />
-		<id start="86027" end="86282" />
-		<id start="86283" end="86538" />
-		<id start="86539" end="86794" />
-		<id start="86795" end="87050" />
-		<id start="87051" end="87306" />
-		<id start="87307" end="87562" />
-		<id start="87563" end="87818" />
-		<id start="87819" end="88074" />
-		<id start="88075" end="88330" />
-		<id start="88331" end="88586" />
-		<id start="88587" end="88842" />
-		<id start="88843" end="89098" />
-		<id start="89099" end="89354" />
-		<id start="89355" end="89610" />
-		<id start="89611" end="89866" />
-		<id start="89867" end="90122" />
+		<id start="81921" end="82176" />
+		<id start="82177" end="82432" />
+		<id start="82433" end="82688" />
+		<id start="82689" end="82944" />
+		<id start="82945" end="83200" />
+		<id start="83201" end="83456" />
+		<id start="83457" end="83712" />
+		<id start="83713" end="83968" />
+		<id start="83969" end="84224" />
+		<id start="84225" end="84480" />
+		<id start="84481" end="84736" />
+		<id start="84737" end="84992" />
+		<id start="84993" end="85248" />
+		<id start="85249" end="85504" />
+		<id start="85505" end="85760" />
+		<id start="85761" end="86016" />
+		<id start="86017" end="86272" />
+		<id start="86273" end="86528" />
+		<id start="86529" end="86784" />
+		<id start="86785" end="87040" />
+		<id start="87041" end="87296" />
+		<id start="87297" end="87552" />
+		<id start="87553" end="87808" />
+		<id start="87809" end="88064" />
+		<id start="88065" end="88320" />
+		<id start="88321" end="88576" />
+		<id start="88577" end="88832" />
+		<id start="88833" end="89088" />
+		<id start="89089" end="89344" />
+		<id start="89345" end="89600" />
+		<id start="89601" end="89856" />
+		<id start="89857" end="90112" />
 	</idlist>
 	<idlist idname="door12">
-		<id start="90123" end="90378" />
-		<id start="90379" end="90634" />
-		<id start="90635" end="90890" />
-		<id start="90891" end="91146" />
-		<id start="91147" end="91402" />
-		<id start="91403" end="91658" />
-		<id start="91659" end="91914" />
-		<id start="91915" end="92170" />
-		<id start="92171" end="92426" />
-		<id start="92427" end="92682" />
-		<id start="92683" end="92938" />
-		<id start="92939" end="93194" />
-		<id start="93195" end="93450" />
-		<id start="93451" end="93706" />
-		<id start="93707" end="93962" />
-		<id start="93963" end="94218" />
-		<id start="94219" end="94474" />
-		<id start="94475" end="94730" />
-		<id start="94731" end="94986" />
-		<id start="94987" end="95242" />
-		<id start="95243" end="95498" />
-		<id start="95499" end="95754" />
-		<id start="95755" end="96010" />
-		<id start="96011" end="96266" />
-		<id start="96267" end="96522" />
-		<id start="96523" end="96778" />
-		<id start="96779" end="97034" />
-		<id start="97035" end="97290" />
-		<id start="97291" end="97546" />
-		<id start="97547" end="97802" />
-		<id start="97803" end="98058" />
-		<id start="98059" end="98314" />
+		<id start="90113" end="90368" />
+		<id start="90369" end="90624" />
+		<id start="90625" end="90880" />
+		<id start="90881" end="91136" />
+		<id start="91137" end="91392" />
+		<id start="91393" end="91648" />
+		<id start="91649" end="91904" />
+		<id start="91905" end="92160" />
+		<id start="92161" end="92416" />
+		<id start="92417" end="92672" />
+		<id start="92673" end="92928" />
+		<id start="92929" end="93184" />
+		<id start="93185" end="93440" />
+		<id start="93441" end="93696" />
+		<id start="93697" end="93952" />
+		<id start="93953" end="94208" />
+		<id start="94209" end="94464" />
+		<id start="94465" end="94720" />
+		<id start="94721" end="94976" />
+		<id start="94977" end="95232" />
+		<id start="95233" end="95488" />
+		<id start="95489" end="95744" />
+		<id start="95745" end="96000" />
+		<id start="96001" end="96256" />
+		<id start="96257" end="96512" />
+		<id start="96513" end="96768" />
+		<id start="96769" end="97024" />
+		<id start="97025" end="97280" />
+		<id start="97281" end="97536" />
+		<id start="97537" end="97792" />
+		<id start="97793" end="98048" />
+		<id start="98049" end="98304" />
 	</idlist>
 
-	<!--DETECTOR PARAMETERS -->
-	<component-link name="detectors">
-		<parameter name="tube_pressure">
-			<value units="atm" val="6.0" />
-		</parameter>
-		<parameter name="tube_thickness">
-			<value units="metre" val="0.0005" />
-		</parameter>
-		<parameter name="tube_temperature">
-			<value units="K" val="290.0" />
-		</parameter>
-	</component-link>
 </instrument>
 

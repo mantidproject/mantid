@@ -72,7 +72,8 @@ namespace Mantid
 
     /**
      * Declare properties that specify the dataset within the workspace to fit to.
-     * @param domainIndex :: Index of created domain in a composite domain or 0 in single domain case
+     * @param suffix
+     * @param addProp
      */
     void FitMD::declareDatasetProperties(const std::string& suffix,bool addProp)
     {
@@ -134,7 +135,7 @@ namespace Mantid
      * @param baseName :: The base name for the workspace
      * @param function :: The function used for the calculation
      * @param domain :: A pointer to the input domain
-     * @param values :: A pointer to the calculated values
+     * @param ivalues :: A pointer to the calculated values
      */
     void FitMD::createOutputWorkspace(const std::string& baseName,
       API::IFunction_sptr,
@@ -160,7 +161,7 @@ namespace Mantid
       auto outputWS = MDEventFactory::CreateMDWorkspace(inputWS->getNumDims(), "MDEvent");
       // Add events
       // TODO: Generalize to ND (the current framework is a bit limiting)
-      auto mdWS = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4>>(outputWS);
+      auto mdWS = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4> >(outputWS);
       if(!mdWS)
       {
         return;

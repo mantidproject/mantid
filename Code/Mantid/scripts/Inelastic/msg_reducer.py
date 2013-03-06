@@ -2,9 +2,8 @@
 # Reducers for use by ISIS Molecular Spectroscopy Group
 import os.path
 
-from mantidsimple import *
+from mantid.simpleapi import *
 from mantid.kernel import config
-import MantidFramework
 import reduction.reducer as reducer
 import inelastic_indirect_reduction_steps as steps
 
@@ -66,13 +65,13 @@ class MSGReducer(reducer.Reducer):
         """
         
         inst_name = config.getInstrument().name()
-        inst = MantidFramework.mtd["__empty_" + inst_name].getInstrument()
+        inst = mtd["__empty_" + inst_name].getInstrument()
         props = inst.getStringParameter('Workflow.InfoTable')
         
         if props:
             self._info_table_props = props
         else:
-            mtd.sendErrorMessage("Instrument does not have Workflow.InfoTable " +
+            logger.error("Instrument does not have Workflow.InfoTable " +
                 "defined in its parameter file.  Unable to create info table for runs.")
 
     def set_detector_range(self, start, end):
@@ -126,8 +125,8 @@ class MSGReducer(reducer.Reducer):
         if self._instrument_name is None:
             raise ValueError("Instrument name not set.")
         self._parameter_file = \
-            os.path.join(mtd.settings["parameterDefinition.directory"], file)
-        LoadParameterFile(self._workspace_instrument, 
+            os.path.join(config["parameterDefinition.directory"], file)
+        LoadParameterFile(Workspace=self._workspace_instrument,Filename= 
             self._parameter_file)
 
     def set_rebin_string(self, rebin):
@@ -191,11 +190,11 @@ class MSGReducer(reducer.Reducer):
         if self._instrument_name is None:
             raise ValueError('No instrument selected.')
         self._workspace_instrument = '__empty_' + self._instrument_name
-        if mtd[self._workspace_instrument] is None:
-            idf_dir = mtd.getConfigProperty('instrumentDefinition.directory')
+        if not mtd.doesExist(self._workspace_instrument):
+            idf_dir = config.getString('instrumentDefinition.directory')
             idf = idf_dir + self._instrument_name + '_Definition.xml'
             try:
-                LoadEmptyInstrument(idf, self._workspace_instrument)
+                LoadEmptyInstrument(Filename=idf,OutputWorkspace= self._workspace_instrument)
             except RuntimeError:
                 raise ValueError('Invalid IDF')
         return mtd[self._workspace_instrument]

@@ -89,21 +89,21 @@ void UnwrapSNS::init()
   wsValidator->add<InstrumentValidator>();
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
-    "A workspace with x values in units of TOF and y values in counts" );
+    "Contains numbers counts against time of flight (TOF)." );
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-    "The name of the workspace to be created as the output of the algorithm" );
+    "This workspace will be in the [[Units|units]] of time of flight." );
 
   auto validator = boost::make_shared<BoundedValidator<double> >();
   validator->setLower(0.01);
   declareProperty("LRef", 0.0, validator,
-    "The length of the reference flight path (in metres)" );
+    "A distance at which it is possible to deduce if a particle is from the current or a past frame based on its arrival time. This time criterion can be set with the property below e.g. correct when arrival time < Tmin." );
   validator->setLower(0.01);
   declareProperty("Tmin", Mantid::EMPTY_DBL(), validator,
-                  "The minimum time-of-flight of the frame (in microseconds). If not set the data range will be used.");
+                  "With LRef this defines the maximum speed expected for particles. For each count or time bin the mean particle speed is calculated and if this is greater than LRef/Tmin its TOF is corrected.");
   validator->setLower(0.01);
   declareProperty("Tmax", Mantid::EMPTY_DBL(), validator,
-                  "The minimum time-of-flight of the frame (in microseconds). If not set the data range will be used.");
+                  "The maximum time of flight of the data used for the width of the frame. If not set the maximum time of flight of the data is used.");
 
   // Calculate and set the constant factor for the conversion to wavelength
   const double TOFisinMicroseconds = 1e6;

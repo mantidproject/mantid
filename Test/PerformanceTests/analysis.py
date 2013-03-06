@@ -620,22 +620,22 @@ def generate_html_report(path, last_num, x_field='revision'):
     html += get_html_summary_table(test_names)
         
     # -------- Overall success history graphs ------------
-    if dofigs:
-        # We report the overall success
-        fig_path = "OverallSuccess.png"
-        plot_success_count(type='',last_num=last_num, x_field=x_field)
-        savefig(os.path.join(basedir, fig_path))
-        close()
-    
-        fig_path2 = "OverallSuccess.ALL.png"
-        plot_success_count(type='',last_num=-1, x_field=x_field)
-        savefig(os.path.join(basedir, fig_path2))
-        close()
-    
-        html += """<h2>Overall Success/Failure</h2>
-        <img src="%s" />
-        <img src="%s" />
-        """ % (fig_path, fig_path2)
+    #if dofigs:
+    #    # We report the overall success
+    #    fig_path = "OverallSuccess.png"
+    #    plot_success_count(type='',last_num=last_num, x_field=x_field)
+    #    savefig(os.path.join(basedir, fig_path))
+    #    close()
+    #
+    #    fig_path2 = "OverallSuccess.ALL.png"
+    #    plot_success_count(type='',last_num=-1, x_field=x_field)
+    #    savefig(os.path.join(basedir, fig_path2))
+    #    close()
+    #
+    #    html += """<h2>Overall Success/Failure</h2>
+    #    <img src="%s" />
+    #    <img src="%s" />
+    #    """ % (fig_path, fig_path2)
         
     html += default_html_footer
         

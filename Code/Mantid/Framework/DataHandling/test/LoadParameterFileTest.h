@@ -15,7 +15,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include <vector>
 #include <iostream>
 

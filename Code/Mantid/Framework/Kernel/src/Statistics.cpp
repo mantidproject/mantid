@@ -162,7 +162,7 @@ namespace Mantid
     Statistics getStatistics(const vector<TYPE>& data, const bool sorted)
     {
       Statistics stats = getNanStatistics();
-      size_t num_data = data.size(); // chache since it is frequently used
+      size_t num_data = data.size(); // cache since it is frequently used
 
       if (num_data == 0)
       { // don't do anything
@@ -170,8 +170,8 @@ namespace Mantid
       }
 
       // calculate the mean
-      stats.mean = std::accumulate(data.begin(), data.end(), 0., std::plus<double>());
-      stats.mean /= (static_cast<double> (num_data));
+      const TYPE sum = std::accumulate(data.begin(), data.end(), static_cast<TYPE>(0), std::plus<TYPE>());
+      stats.mean = static_cast<double>(sum)/(static_cast<double>(num_data));
 
       // calculate the standard deviation, min, max
       stats.minimum = stats.mean;

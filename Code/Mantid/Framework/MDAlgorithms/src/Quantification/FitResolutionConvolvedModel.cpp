@@ -1,6 +1,6 @@
 /*WIKI*
-  Fits a dataset using a resolution function convolved with a foreground model
- *WIKI*/
+Fits a dataset using a resolution function convolved with a foreground model
+*WIKI*/
 
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
 
@@ -121,17 +121,17 @@ namespace Mantid
         "The name of the TableWorkspace in which to store the final covariance matrix" );
 
       std::vector<std::string> models = MDResolutionConvolutionFactory::Instance().getKeys();
-      declareProperty(RESOLUTION_NAME, "", boost::make_shared<ListValidator<std::string>>(models),
+      declareProperty(RESOLUTION_NAME, "", boost::make_shared<ListValidator<std::string> >(models),
                       "The name of a resolution model", Direction::Input);
 
       models = ForegroundModelFactory::Instance().getKeys();
-      declareProperty(FOREGROUND_NAME, "", boost::make_shared<ListValidator<std::string>>(models),
+      declareProperty(FOREGROUND_NAME, "", boost::make_shared<ListValidator<std::string> >(models),
                       "The name of a foreground function", Direction::Input);
 
       declareProperty(MAX_ITER_NAME, 20, "The maximum number of iterations to perform for the fitting",
                       Direction::Input);
 
-      declareProperty(PARS_NAME, "", boost::make_shared<MandatoryValidator<std::string>>(),
+      declareProperty(PARS_NAME, "", boost::make_shared<MandatoryValidator<std::string> >(),
                       "The parameters/attributes for the function & model. See Fit documentation for format",
                       Direction::Input);
     }

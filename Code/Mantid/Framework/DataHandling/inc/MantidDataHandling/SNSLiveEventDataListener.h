@@ -72,7 +72,6 @@ namespace Mantid
       //virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
       virtual bool rxPacket( const ADARA::RTDLPkt &pkt);
       virtual bool rxPacket( const ADARA::BankedEventPkt &pkt);
-      virtual bool rxPacket( const ADARA::HeartbeatPkt &pkt);
       virtual bool rxPacket( const ADARA::GeometryPkt &pkt);
       virtual bool rxPacket( const ADARA::BeamlineInfoPkt &pkt);
       virtual bool rxPacket( const ADARA::RunStatusPkt &pkt);
@@ -140,15 +139,10 @@ namespace Mantid
 
       Kernel::DateAndTime m_startTime;  // The requested start time for the data stream
                                         // (needed by the run() function)
-      Kernel::DateAndTime m_heartbeat;  // The time when we received the last ClientHello
-                                        // packet.  SMS is supposed to send these out
-                                        // periodicaly.  If we don't get them, there's a
-                                        // problem somewhere.
 
-      // Used to initialize the a few properties (run_start and scan_index) if we haven't received
-      // the packets with the 'real' values by the time we call initWorkspacePart2.  (We can't
-      // delay the call to initWorkspacePart2 because we might never receive 'real' values for
-      // those properties.
+      // Used to initialize the scan_index property if we haven't received a packet with the
+      // 'real' value by the time we call initWorkspacePart2.  (We can't delay the call to
+      // initWorkspacePart2 because we might never receive a 'real' value for that property.
       Kernel::DateAndTime m_dataStartTime;
 
       // These 2 determine whether or not we filter out events that arrive when
@@ -158,6 +152,10 @@ namespace Mantid
       int m_keepPausedEvents; // Set from a configuration property. (Should be a bool, but
                               // appearantly, we can't read bools from the config file?!?)
 
+
+      // Holds on to any exceptions that were thrown in the background thread so that we
+      // can re-throw them in the forground thread
+      boost::shared_ptr<std::runtime_error> m_backgroundException;
 
       // --- Data structures necessary for handling all the process variable info ---
 

@@ -11,7 +11,6 @@ Gathers workspaces from all processors of MPI run.  Add or append workspaces to 
 #include "MantidMPIAlgorithms/GatherWorkspaces.h"
 #include "MantidMPIAlgorithms/MPISerialization.h"
 #include <boost/mpi.hpp>
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"

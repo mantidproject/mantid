@@ -20,13 +20,10 @@ The log data in the Nexus file (NX_LOG sections) is loaded as TimeSeriesProperty
 Time is stored as seconds from the Unix epoch.
 Only floating point logs are stored and loaded at present.
 
-===ChildAlgorithms used===
+===Child algorithms used===
 
-The ChildAlgorithms used by LoadMuonNexus are:
+The Child Algorithms used by LoadMuonNexus are:
 * LoadInstrument - this algorithm looks for an XML description of the instrument and if found reads it.
-
-
-
 
 
 *WIKI*/
@@ -50,7 +47,7 @@ The ChildAlgorithms used by LoadMuonNexus are:
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include <nexus/NeXusFile.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <Poco/DateTimeParser.h>
@@ -104,14 +101,11 @@ void LoadNexusProcessed::init()
   exts.push_back(".nx5");
   exts.push_back(".xml");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-      "The name of the processed Nexus file to load" );
+      "The name of the Nexus file to read, as a full or relative path." );
   declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "",
       Direction::Output),
-      "The name of the workspace to be created as the output of the\n"
-      "algorithm. For multiperiod files, one workspace may be\n"
-      "generated for each period. Currently only one workspace can\n"
-      "be saved at a time so multiperiod Mantid files are not\n"
-      "generated");
+                  "The name of the workspace to be created as the output of the algorithm.  A workspace of this name will be created and stored in the Analysis Data Service. For multiperiod files, one workspace may be generated for each period. Currently only one workspace can be saved at a time so multiperiod Mantid files are not generated.");
+
 
 
   // optional
@@ -119,17 +113,13 @@ void LoadNexusProcessed::init()
   mustBePositive->setLower(0);
 
   declareProperty("SpectrumMin", (int64_t)1, mustBePositive,
-      "Index number of the first spectrum to read, only used if\n"
-      "spectrum_max is set and only for single period data, not\n"
-      " yet implemented (default 0)");
+                  "Number of first spectrum to read.");
   declareProperty("SpectrumMax", (int64_t)Mantid::EMPTY_INT(), mustBePositive,
-      "Index of last spectrum to read, only for single period data,\n"
-      " not yet implemented (default the last spectrum).");
+                  "Number of last spectrum to read.");
   declareProperty(new ArrayProperty<int64_t> ("SpectrumList"),
-      "Array, or comma separated list, of indexes of spectra to\n"
-      "load. Not yet implemented.");
+                  "List of spectrum numbers to read.");
   declareProperty("EntryNumber", (int64_t)0, mustBePositive,
-      "The particular entry number to read (default: read all entries)" );
+                  "The particular entry number to read. Default load all workspaces and creates a workspacegroup (default: read all entries)." );
 }
 
 
@@ -1044,7 +1034,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
       {
         if( m_axis1vals.empty() )
         {
-          axis1->spectraNo(index) = spectrum;
+          axis1->setValue(index, spectrum);
         }
         else
         {

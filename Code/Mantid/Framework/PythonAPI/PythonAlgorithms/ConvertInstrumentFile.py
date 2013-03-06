@@ -1,7 +1,25 @@
 """*WIKI* 
 
+Convert Fullprof's instrument resolution file (.irf) to  GSAS's instrument file (.iparm/.prm). 
 
-Convert .irf/.pcr/.pm1 to .iparm/.prm 
+==== Supported peak profiles ====
+* Time-of-flight back-to-back exponential convoluted with pseudo-voigt (planned)
+** Fullprof: Profile 9;
+** GSAS: Type 3 TOF profile.
+
+* Thermal neutron time-of-flight back-to-back exponential convoluted with pseudo-voigt (implemented)
+** Fullprof: Profile 10; 
+** GSAS: tabulated peak profile. 
+
+==== Supported input Fullprof file ====
+There can be several types of Fullprof files as the input file
+* resolution file .irf (implemented) 
+* configuration file .pcr (planned)
+
+==== Calculation of L2 ====
+* If 2Theta (<math>2\theta</math>) is given, L2 will be calculated from given 2Theta and L1 by <math>DIFC = 252.816\cdot2sin(\theta)\sqrt{L1+L2}</math>. Notice that <math>2\theta</math> given in input .irf file may have subtle difference to "2Theta", which is input by user in order to calculate L2.  
+
+* If "2Theta" (<math>2\theta</math>) is not given, L2 will be read from user input.
 
 
 *WIKI*"""

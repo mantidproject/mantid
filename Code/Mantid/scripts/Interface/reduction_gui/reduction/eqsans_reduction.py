@@ -8,9 +8,7 @@ from scripter import BaseReductionScripter
 
 HAS_MANTID = False
 try:
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
+    import mantidplot
     HAS_MANTID = True
 except:
     pass
@@ -22,8 +20,9 @@ class EQSANSReductionScripter(BaseReductionScripter):
         will each have their own UI representation.
     """
     
-    def __init__(self, name="EQSANS"):
-        super(EQSANSReductionScripter, self).__init__(name=name)        
+    def __init__(self, name="EQSANS", settings=None):
+        super(EQSANSReductionScripter, self).__init__(name=name)
+        self._settings = settings        
     
     def to_script(self, file_name=None):
         """
@@ -33,9 +32,15 @@ class EQSANSReductionScripter(BaseReductionScripter):
         script = "# EQSANS reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
-        script += "from MantidFramework import *\n"
-        script += "mtd.initialise(False)\n"
-        script += "from reduction.instruments.sans.sns_command_interface import *\n"
+        if self._settings.api2:
+            script += "import mantid\n"
+            script += "from mantid.simpleapi import *\n"
+            script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
+        else:
+            script += "from MantidFramework import *\n"
+            script += "mtd.initialise(False)\n"
+            script += "from reduction.instruments.sans.sns_command_interface import *\n"
+        
         script += "\n"
         
         for item in self._observers:
@@ -48,8 +53,12 @@ class EQSANSReductionScripter(BaseReductionScripter):
             xml_process = os.path.normpath(xml_process)
             self.to_xml(xml_process)
             
-        script += "SaveIqAscii(process=%r)\n" % xml_process
-        script += "Reduce1D()\n"
+        if self._settings.api2:
+            script += "SaveIq(process=%r)\n" % xml_process
+        else:
+            script += "SaveIqAscii(process=%r)\n" % xml_process
+
+        script += "Reduce()\n"
 
         if file_name is not None:
             f = open(file_name, 'w')
@@ -68,12 +77,19 @@ class EQSANSReductionScripter(BaseReductionScripter):
             script = "# Reduction script\n"
             script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
             
-            script += "from MantidFramework import *\n"
-            script += "mtd.initialise(False)\n"
-            script += "\n"
+            if self._settings.api2:
+                script += "import mantid\n"
+                script += "from mantid.simpleapi import *\n"
+                script += "\n"
+                script += "if AnalysisDataService.doesExist('%s'):\n" % table_ws
+                script += "   AnalysisDataService.remove('%s')\n\n" % table_ws
+            else:
+                script += "from MantidFramework import *\n"
+                script += "mtd.initialise(False)\n"
+                script += "\n"
+                script += "if mtd.workspaceExists('%s'):\n" % table_ws
+                script += "   mtd.deleteWorkspace('%s')\n\n" % table_ws
             
-            script += "if mtd.workspaceExists('%s'):\n" % table_ws
-            script += "   mtd.deleteWorkspace('%s')\n\n" % table_ws
             script += "SetupEQSANSReduction(\n"
             for item in self._observers:
                 if item.state() is not None:

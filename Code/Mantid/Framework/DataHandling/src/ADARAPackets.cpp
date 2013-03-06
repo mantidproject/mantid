@@ -206,8 +206,10 @@ void BankedEventPkt::firstEventInSource() const
   m_bankCount = m_fields[m_sourceStartIndex + 3];
   if (m_bankCount > 0)
   {
-    m_TOFOffset = m_fields[m_sourceStartIndex + 2] & 0x7FFFFFFF;
-    m_isCorrected = m_fields[m_sourceStartIndex + 2] & 0x80000000;
+    // The != 0 comparison avoids a warning on MSVC about performance of forcing
+	// a uint32_t to a bool
+    m_TOFOffset = ((m_fields[m_sourceStartIndex + 2] & 0x7FFFFFFF) != 0);
+    m_isCorrected = ((m_fields[m_sourceStartIndex + 2] & 0x80000000) != 0);
     m_bankNum = 1;  // banks are numbered from 1 to m_bankCount.
     m_curFieldIndex = m_sourceStartIndex + 4;
 

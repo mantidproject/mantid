@@ -29,14 +29,6 @@ And here's the corresponding contents of ''demo.txt'':
  6	6.1
  7	7.1
  8	8.1
- 9	9.1
- 10	10.1
- 11	11.1
- 12	12.1
- 13	13.1
- 14	14.1
- 15	15.1
- 16	16.1
 
 == Alternatives ==
 A very similar algorithm to this is [[CreateMDHistoWorkspace]], which takes it's input signal and error values from arrays rather than a text file. Another alternative is to use [[ConvertToMD]] which works on MatrixWorkspaces, and allows log values to be included in the dimensionality.

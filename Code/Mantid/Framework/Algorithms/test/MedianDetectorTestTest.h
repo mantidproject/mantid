@@ -8,7 +8,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
@@ -200,7 +199,6 @@ public:
     boost::shared_ptr<MantidVec> bigEnough( new MantidVec( specLength-1, 0 ) );
     (*bigEnough)[0] = 1.2*m_YSum*(0.5*Nhist);
 
-    int forSpecDetMap[Nhist];
     for (int j = 0; j < Nhist; ++j)
     {
       m_2DWS->setX(j, x);
@@ -216,8 +214,7 @@ public:
 
       m_2DWS->setData( j, spectrum, errors );
       // Just set the spectrum number to match the index
-      m_2DWS->getAxis(1)->spectraNo(j) = j+1;
-      forSpecDetMap[j] = j+1;
+      m_2DWS->getAxis(1)->setValue(j, j+1);
     }
 
     // Register the workspace in the data service
@@ -231,8 +228,6 @@ public:
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", m_IWSName);
     loader.execute(); 
-
-    m_2DWS->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, Nhist));
 
     m_2DWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 

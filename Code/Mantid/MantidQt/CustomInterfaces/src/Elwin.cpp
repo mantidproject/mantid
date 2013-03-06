@@ -115,13 +115,6 @@ namespace IDA
     pyInput +=
       "eq1_ws, eq2_ws = elwin(input, eRange, Save=save, Verbose=verbose, Plot=plot)\n";
 
-    if ( uiForm().elwin_ckConcat->isChecked() )
-    {
-      pyInput += "from IndirectDataAnalysis import concatWSs\n"
-        "concatWSs(eq1_ws, 'MomentumTransfer', 'ElwinQResults')\n"
-        "concatWSs(eq2_ws, 'QSquared', 'ElwinQSqResults')\n";
-    }
-
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
   }

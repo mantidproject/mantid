@@ -1,5 +1,7 @@
 /*WIKI* 
 
+Mask pixels in an EventWorkspace close to peak positions from a PeaksWorkspace. 
+Peaks could come from ISAW diamond stripping routine for SNAP data. Only works on EventWorkspaces and for instruments with RectangularDetector's. 
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -53,9 +55,9 @@ namespace Mantid
     {
 
       declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "", Direction::Input),
-                      "A 2D event workspace");
+                      "A workspace containing one or more rectangular area detectors. Each spectrum needs to correspond to only one pixelID (e.g. no grouping or previous calls to SumNeighbours).");
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input),
-                      "Name of the peaks workspace.");
+                      "The name of the workspace that will be created. Can replace the input workspace.");
       declareProperty("XMin", -2, "Minimum of X (col) Range to mask peak");
       declareProperty("XMax", 2, "Maximum of X (col) Range to mask peak");
       declareProperty("YMin", -2, "Minimum of Y (row) Range to mask peak");

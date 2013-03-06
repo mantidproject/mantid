@@ -21,6 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::PhysicalConstants;
 
 class LoadHKLTest : public CxxTest::TestSuite
 {
@@ -38,9 +39,13 @@ public:
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
+    double smu = 0.357;
+    double amu = 0.011;
+	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+  			0.0, 0.0, smu, 0.0, smu, amu);
+    Material *mat = new Material("SetInAnvredCorrection", *neutron, 1.0);
+    ws->mutableSample().setMaterial(*mat);
     API::Run & mrun = ws->mutableRun();
-    mrun.addProperty<double>("LinearScatteringCoef", 0.357, true);
-    mrun.addProperty<double>("LinearAbsorptionCoef", 0.011, true);
     mrun.addProperty<double>("Radius", 0.1, true);
 
     for (int run=1000; run<numRuns+1000; run++)
@@ -95,26 +100,19 @@ public:
     TS_ASSERT_DELTA(p.getWavelength(),1.5, 1e-4 );
     TS_ASSERT_EQUALS(p.getRunNumber(),1000. );
     TS_ASSERT_DELTA(p.getDSpacing(),3.5933, 1e-4 );
+    double radius;
+    const Geometry::Material *m_sampleMaterial = &(wsout->sample().getMaterial());
+    if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
+    {
+  	  double rho =  m_sampleMaterial->numberDensity();
+  	  smu =  m_sampleMaterial->totalScatterXSection(1.7982) * rho;
+  	  amu = m_sampleMaterial->absorbXSection(1.7982) * rho;
+    }
+    else
+    {
+      throw std::invalid_argument("Could not retrieve LinearScatteringCoef from material");
+    }
     const API::Run & run = wsout->run();
-    double smu, amu, radius;
-    if ( run.hasProperty("LinearScatteringCoef") )
-    {
-      Kernel::Property* prop = run.getProperty("LinearScatteringCoef");
-      smu = boost::lexical_cast<double,std::string>(prop->value());
-    }
-    else
-    {
-      throw std::invalid_argument("Could not retrieve LinearScatteringCoef from run object");
-    }
-    if ( run.hasProperty("LinearAbsorptionCoef") )
-    {
-      Kernel::Property* prop = run.getProperty("LinearAbsorptionCoef");
-      amu = boost::lexical_cast<double,std::string>(prop->value());
-    }
-    else
-    {
-      throw std::invalid_argument("Could not retrieve LinearAbsorptionCoef from run object");
-    }
     if ( run.hasProperty("Radius") )
     {
       Kernel::Property* prop = run.getProperty("Radius");

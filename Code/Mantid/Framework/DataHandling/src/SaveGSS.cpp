@@ -21,6 +21,7 @@ The format is limited to saving 99 spectra in total. Trying to save more will ge
 #include "MantidKernel/ListValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 #include <fstream>
 #include <iomanip>
 
@@ -62,12 +63,12 @@ namespace Mantid
       Split[0] = "True";
       Split[1] = "False";
       declareProperty("SplitFiles", "True", boost::make_shared<Kernel::StringListValidator>(Split),
-          "Save each spectrum in a different file (default true)");
+          "Whether to save each spectrum into a separate file ('true') or not ('false'). Note that this is a string, not a boolean property.");
       declareProperty("Append", true, "If true and Filename already exists, append, else overwrite");
       declareProperty(
           "Bank",
           1,
-          "Start bank (spectrum) numbers at this number in the file. The bank number in the file will be the workspace index + StartAtBankNumber. Default = 1.");
+          "The bank number to include in the file header for the first spectrum. This will increment for each spectrum or group member.");
       std::vector<std::string> formats;
       formats.push_back(RALF);
       formats.push_back(SLOG);
@@ -126,14 +127,6 @@ namespace Mantid
 
       std::string filename = getProperty("Filename");
 
-      std::size_t pos = filename.find_first_of(".");
-      std::string ext;
-      if (pos != std::string::npos) //Remove the extension
-      {
-        ext = filename.substr(pos + 1, filename.npos);
-        filename = filename.substr(0, pos);
-      }
-
       const int bank = getProperty("Bank");
       const bool MultiplyByBinWidth = getProperty("MultiplyByBinWidth");
       std::string split_string = getProperty("SplitFiles");
@@ -177,7 +170,7 @@ namespace Mantid
         // If     split, write to each histogram
         if (!split && i == 0) // Assign only one file
         {
-          const std::string file(filename + '.' + ext);
+          const std::string file(filename);
           Poco::File fileobj(file);
           const bool exists = fileobj.exists();
           out.open(file.c_str(), mode);
@@ -187,11 +180,18 @@ namespace Mantid
         }
         else if (split)//Several files will be created with names: filename-i.ext
         {
+          // New number
           number << "-" << i;
-          const std::string file(filename + number.str() + "." + ext);
-          Poco::File fileobj(file);
+
+          Poco::Path path(filename);
+          std::string basename = path.getBaseName(); // Filename minus extension
+          std::string ext = path.getExtension();
+          // Chop off filename
+          path.makeParent();
+          path.append(basename + number.str() + "." + ext);
+          Poco::File fileobj(path);
           const bool exists = fileobj.exists();
-          out.open(file.c_str(), mode);
+          out.open(path.toString().c_str(), mode);
           number.str("");
           if (!exists || !append)
             writeHeaders(outputFormat, out, inputWS, l1);
@@ -200,7 +200,6 @@ namespace Mantid
         { // New scope
           if (!out.is_open())
           {
-            g_log.information("Could not open filename: " + filename);
             throw std::runtime_error("Could not open filename: " + filename);
           }
 

@@ -100,7 +100,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidDataObjects/PrecompiledHeader.h MantidDataObjects src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+enable_precompiled_headers( inc/MantidDataObjects/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( DataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

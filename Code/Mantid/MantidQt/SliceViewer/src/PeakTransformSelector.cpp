@@ -118,7 +118,7 @@ namespace MantidQt
       {
         this->makeChoice(labelX, labelY);
       }
-      catch(std::invalid_argument)
+      catch(std::invalid_argument&)
       {
         hasFactoryForTransform = false;
       }

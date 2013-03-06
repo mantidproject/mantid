@@ -157,10 +157,14 @@ namespace Mantid
       static const std::type_info & m_dataitemTypeID;
     };
 
-    /// Intialize the DataItem_sptr typeinfo
-    template<typename T>
-    const std::type_info & TypedValidator<boost::shared_ptr<T>>::m_dataitemTypeID = typeid(boost::shared_ptr<DataItem>);
+    /// @cond
+    // This switch off an warning because oxygen could not figureout that this is a specialized type of the general one.
+    /** Intialize the DataItem_sptr typeinfo
+     */
+    template<typename T>    
+    const std::type_info & TypedValidator<boost::shared_ptr<T> >::m_dataitemTypeID = typeid(boost::shared_ptr<DataItem>);
   }
+  /// @endcond
 }
 
 #endif /* MANTID_KERNEL_TYPEDVALIDATOR_H_ */

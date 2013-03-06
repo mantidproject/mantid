@@ -1,3 +1,20 @@
+/*WIKI*
+This algorithm filters events from an [[EventWorkspace]] to one or multiple [[EventWorkspace]]s according to an input [[SplittersWorkspace]] containing a series of splitters (i.e., [[SplittingInterval]]s).
+
+==== Output ====
+The output will be one or multiple workspaces according to the number of index in splitters.  The output workspace name is the combination of parameter OutputWorkspaceBaseName and the index in splitter.
+
+==== Calibration File ====
+The calibration, or say correction, from the detector to sample must be consider in fast log.  Thus a calibration file is required.  The math is
+ TOF_calibrated = TOF_raw * correction(detector ID).
+
+The calibration is in column data format.
+
+A reasonable approximation of the correction is
+ correction(detecotr_ID) = L1/(L1+L2(detector_ID))
+
+*WIKI*/
+
 #include "MantidAlgorithms/FilterEvents.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -49,6 +66,8 @@ namespace Algorithms
    */
   void FilterEvents::init()
   {
+    this->setWikiSummary("Filter events from an [[EventWorkspace]] to one or multiple [[EventWorkspace]]s according to a series of splitters.");
+
     declareProperty(
           new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input),
           "An input event workspace" );

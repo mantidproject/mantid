@@ -3,7 +3,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadRaw3.h"
@@ -162,7 +161,7 @@ void testExecOnLoadraw()
     }
 
     //----------------------------------------------------------------------
-    // Tests to check that Loading SpectraDetectorMap is done correctly
+    // Tests to check that spectra-detector mapping is done correctly
     //----------------------------------------------------------------------
     TS_ASSERT_EQUALS( output2D->getSpectrum(0)->getDetectorIDs().size(), 1);
     TS_ASSERT_EQUALS( output2D->getSpectrum(0)->getSpectrumNo(), 1);

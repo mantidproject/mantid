@@ -250,56 +250,13 @@ namespace Mantid
     double IkedaCarpenterModerator::findMinumum(const double rangeMin, const double rangeMax, const double tolerance) const
     {
       return zeroBrent(rangeMin, rangeMax, tolerance);
-      // // Define helper structs for GSL root finding.
-      // // GSL requires a params struct + a function pointer to minize. Our function
-      // // is a method so we create a params object with a pointer to this object
-      // // that can call the necessary areaToTimeFunction from a static method
-      // // whose address can be passed to the GSL solver
-      // struct FunctionParams
-      // {
-      //   const IkedaCarpenterModerator & moderator;
-      // };
-      // struct FunctionCallback
-      // {
-      //   static double function(double x, void *params)
-      //   {
-      //     struct FunctionParams *p = (struct FunctionParams*)params;
-      //     return p->moderator.areaToTimeFunction(x);
-      //   }
-      // };
-
-      // gsl_function rootFindingFunction;
-      // rootFindingFunction.function = &FunctionCallback::function;
-      // struct FunctionParams params = { *this };
-      // rootFindingFunction.params = &params;
-
-      // const gsl_root_fsolver_type *solverType = gsl_root_fsolver_brent;
-      // gsl_root_fsolver *solver = gsl_root_fsolver_alloc(solverType);
-      // gsl_root_fsolver_set (solver, &rootFindingFunction, rangeMin, rangeMax);
-
-      // int status;
-      // int iter = 0, max_iter = 100;
-      // double root(0.0);
-      // do
-      // {
-      //   iter++;
-      //   status = gsl_root_fsolver_iterate (solver);
-      //   root = gsl_root_fsolver_root (solver);
-      //   const double xlo = gsl_root_fsolver_x_lower (solver);
-      //   const double xhi = gsl_root_fsolver_x_upper (solver);
-      //   status = gsl_root_test_interval (xlo, xhi, 0, tolerance);
-      // }
-      // while (status == GSL_CONTINUE && iter < max_iter);
-
-      // gsl_root_fsolver_free(solver);
-      // return root;
     }
 
     /**
      * Find the minimum of the areaToTimeFunction between the given interval with the given tolerance
-     * @param rangeMin :: The start of the range where the function changes sign
-     * @param rangeMax :: The end of the range where the function changes sign
-     * @param tolerance :: The required tolerance
+     * @param a :: The start of the range where the function changes sign
+     * @param b :: The end of the range where the function changes sign
+     * @param t :: The required tolerance
      * @return The location of the minimum
      */    
     double IkedaCarpenterModerator::zeroBrent (const double a, const double b, const double t) const

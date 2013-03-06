@@ -1,7 +1,4 @@
 /*WIKI* 
-
-
-Takes a 2D workspace as input and identifies all of the spectra that have a total integrated value across all bins which is less than or equal to a threshold 'dead' value.
 This is then used to mark all 'dead' detectors with a 'dead' marker value, while all spectra from live detectors are given a 'live' marker value.
 
 This algorithm is primarily used to ease identification using the instrument visualization tools.
@@ -16,7 +13,6 @@ Uses the [[Integration]] algorithm to sum the spectra.
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/System.h"
 #include <fstream>
 #include "MantidKernel/BoundedValidator.h"

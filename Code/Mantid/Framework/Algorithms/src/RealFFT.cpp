@@ -58,21 +58,21 @@ void RealFFT::init()
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
         "",Direction::Input), "The name of the input workspace.");
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
-        "",Direction::Output), "The name of the output workspace.");
+        "",Direction::Output), "The name of the output workspace. It will contain two spectra: the real and imaginary parts of the transform.");
 
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
-      declareProperty("WorkspaceIndex",0,mustBePositive,"Spectrum to transform");
+      declareProperty("WorkspaceIndex",0,mustBePositive,"The index of the spectrum in the input workspace to transform.");
 
       std::vector<std::string> fft_dir;
       fft_dir.push_back("Forward");
       fft_dir.push_back("Backward");
-      declareProperty("Transform","Forward",boost::make_shared<StringListValidator>(fft_dir),"Direction of the transform: forward or backward");
-
+      declareProperty("Transform","Forward",boost::make_shared<StringListValidator>(fft_dir),
+                      "The direction of the transform: \"Forward\" or \"Backward\".");
       declareProperty("IgnoreXBins",false,
-          "Ignores the requirement that X bins be linear and of the same size.\n"
-          "Set this to true if you are using log binning.\n"
-          "FFT result will not be valid for the X axis, and should be ignored.");
+                      "Ignores the requirement that X bins be linear and of the same size. "
+                      "Set this to true if you are using log binning. "
+                      "FFT result will not be valid for the X axis, and should be ignored.");
 }
 
 /** Executes the algorithm

@@ -25,7 +25,8 @@ def get_unittest_file(headerfile):
     """
     frameworkdir = get_frameworkdir(headerfile)
     submodule = get_submodule(headerfile)
-    testpath = os.path.join(frameworkdir, 'PythonInterface', 'test', 'python',submodule)
+    testpath = os.path.join(frameworkdir, 'PythonInterface', 'test', 
+                            'python','mantid',submodule)
     return os.path.join(testpath, os.path.basename(headerfile).replace('.h','Test.py'))
 
 def get_submodule(headerfile):

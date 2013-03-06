@@ -53,6 +53,8 @@ void Convolution::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian
 
 /**
  * Calculates convolution of the two member functions. 
+ * @param domain :: space on which the function acts
+ * @param values :: buffer to store the values returned by the function after acting on the domain.
  */
 void Convolution::function(const FunctionDomain& domain, FunctionValues& values)const
 {

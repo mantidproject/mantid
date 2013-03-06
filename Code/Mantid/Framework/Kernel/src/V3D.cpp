@@ -109,23 +109,7 @@ V3D& V3D::operator=(const V3D& rhs)
   return *this;
 }
 
-/**
-  Constructor from a pointer.
-  requires that the point is assigned after this has
-  been allocated since vPtr[x] may throw.
-*/
-V3D::V3D(const double* vPtr)
-
-{
-  if (vPtr)
-    {
-      x=vPtr[0];
-      y=vPtr[1];
-      z=vPtr[2];
-    }
-}
-
-  /// Destructor
+/// Destructor
 V3D::~V3D()
 {}
 

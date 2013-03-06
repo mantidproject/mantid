@@ -285,14 +285,14 @@ QWidget * RepoDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem
 }
 
 
-void RepoDelegate::setEditorData(QWidget */*editor*/, const QModelIndex &/*index*/) const
+void RepoDelegate::setEditorData(QWidget *, const QModelIndex &) const
 {
   /*    QString value = index.model()->data(index, Qt::DisplayRole).toString();  // Qt::EditRole
     QPushButton * pb = static_cast<QPushButton*>(editor);
     pb->setHidden(value == "true");*/
 }
 
-void RepoDelegate::setModelData(QWidget */*editor*/, QAbstractItemModel *model,
+void RepoDelegate::setModelData(QWidget *, QAbstractItemModel *model,
                                 const QModelIndex &index) const{  
    model->setData(index, QString("true"), Qt::EditRole);
 }

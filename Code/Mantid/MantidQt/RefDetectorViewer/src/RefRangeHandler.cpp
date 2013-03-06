@@ -155,6 +155,7 @@ void RefRangeHandler::GetRange( double &min, double &max, double &step )
  * @param max     This is an x value at the right edge of the last bin.
  * @param step    This is size of the step to use between min and max. 
  *                If it is less than zero, a log scale is requested.
+ * @param type    x or y
  */
 void RefRangeHandler::SetRange( double min, double max, double step, char type )
 {

@@ -133,6 +133,7 @@ set ( SRC_FILES
 	src/SaveSPE.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
+	src/SetSampleMaterial.cpp
 	src/SetScalingPSD.cpp
 	src/StartLiveData.cpp
 	src/UpdateInstrumentFromFile.cpp
@@ -268,6 +269,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
+	inc/MantidDataHandling/SetSampleMaterial.h
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/StartLiveData.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
@@ -282,6 +284,7 @@ set ( TEST_FILES
 	#LoadDAETest.h
 	#LoadSNSNexusTest.h # TODO has no active tests in it
 	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
+	ADARAPacketTest.h
 	AppendGeometryToSNSNexusTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
@@ -401,7 +404,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidDataHandling/PrecompiledHeader.h MantidDataHandling src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+enable_precompiled_headers( inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
@@ -424,7 +427,7 @@ ENDIF()
 include_directories ( inc ../Nexus/inc ${HDF5_INCLUDE_DIRS})
 #include_directories ( inc ../Nexus/inc)
 
-target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${HDF5_LIBRARIES})
+target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES})
 #target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus)
 
 # Add the unit tests directory

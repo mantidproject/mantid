@@ -1,10 +1,4 @@
 set ( SRC_FILES
-    src/GridDomain.cpp
-    src/GridDomain1D.cpp
-    src/ITransformScale.cpp
-    src/TransformScaleFactory.cpp
-    src/LinearScale.cpp
-    src/LogarithmScale.cpp
 	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
 	src/AlgorithmHasProperty.cpp
@@ -42,6 +36,8 @@ set ( SRC_FILES
 	src/FunctionFactory.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
+	src/GridDomain.cpp
+	src/GridDomain1D.cpp
 	src/IDataFileChecker.cpp
 	src/IDomainCreator.cpp
 	src/IEventList.cpp
@@ -62,6 +58,7 @@ set ( SRC_FILES
 	src/ISpectrum.cpp
 	src/ISplittersWorkspace.cpp
 	src/ITableWorkspace.cpp
+	src/ITransformScale.cpp
 	src/IkedaCarpenterModerator.cpp
 	src/ImmutableCompositeFunction.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
@@ -69,11 +66,13 @@ set ( SRC_FILES
 	src/ImplictFunctionFactory.cpp
 	src/InstrumentDataService.cpp
 	src/JointDomain.cpp
+	src/LinearScale.cpp
 	src/LiveListenerFactory.cpp
 	src/LoadAlgorithmFactory.cpp
 	src/LocatedDataRef.cpp
 	src/LocatedDataValue.cpp
-	src/LogManager.cpp	
+	src/LogManager.cpp
+	src/LogarithmScale.cpp
 	src/MDGeometry.cpp
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
@@ -81,9 +80,9 @@ set ( SRC_FILES
 	src/MemoryManager.cpp
 	src/ModeratorModel.cpp
 	src/MultiDomainFunction.cpp
+	src/MultiPeriodGroupAlgorithm.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
-	src/MultiPeriodGroupAlgorithm.cpp
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/ParamFunction.cpp
@@ -102,6 +101,7 @@ set ( SRC_FILES
 	src/SpectraDetectorMap.cpp
 	src/TableRow.cpp
 	src/TextAxis.cpp
+	src/TransformScaleFactory.cpp
 	src/Workspace.cpp
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
@@ -120,12 +120,6 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
 
 set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
-    inc/MantidAPI/GridDomain.h
-    inc/MantidAPI/GridDomain1D.h
-    inc/MantidAPI/ITransformScale.h
-    inc/MantidAPI/TransformScaleFactory.h
-    inc/MantidAPI/LinearScale.h
-    inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/Algorithm.h
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
@@ -167,6 +161,8 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionFactory.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
+	inc/MantidAPI/GridDomain.h
+	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -198,6 +194,7 @@ set ( INC_FILES
 	inc/MantidAPI/ISpectrum.h
 	inc/MantidAPI/ISplittersWorkspace.h
 	inc/MantidAPI/ITableWorkspace.h
+	inc/MantidAPI/ITransformScale.h
 	inc/MantidAPI/IWorkspaceProperty.h
 	inc/MantidAPI/IkedaCarpenterModerator.h
 	inc/MantidAPI/ImmutableCompositeFunction.h
@@ -211,11 +208,13 @@ set ( INC_FILES
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/JointDomain.h
+	inc/MantidAPI/LinearScale.h
 	inc/MantidAPI/LiveListenerFactory.h
 	inc/MantidAPI/LoadAlgorithmFactory.h
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
 	inc/MantidAPI/LogManager.h
+	inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/MDGeometry.h
 	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
@@ -223,9 +222,9 @@ set ( INC_FILES
 	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/ModeratorModel.h
 	inc/MantidAPI/MultiDomainFunction.h
+	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
-	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
@@ -242,11 +241,12 @@ set ( INC_FILES
 	inc/MantidAPI/ScriptRepositoryFactory.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
-        inc/MantidAPI/SpecialCoordinateSystem.h
+	inc/MantidAPI/SpecialCoordinateSystem.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraDetectorMap.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
+	inc/MantidAPI/TransformScaleFactory.h
 	inc/MantidAPI/VectorParameter.h
 	inc/MantidAPI/VectorParameterParser.h
 	inc/MantidAPI/Workspace.h
@@ -261,6 +261,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	#	IkedaCarpenterModeratorTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
 	AlgorithmManagerTest.h
@@ -293,7 +294,6 @@ set ( TEST_FILES
 	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
-#	IkedaCarpenterModeratorTest.h
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	InstrumentDataServiceTest.h
@@ -303,9 +303,9 @@ set ( TEST_FILES
 	MemoryManagerTest.h
 	ModeratorModelTest.h
 	MultiDomainFunctionTest.h
+	MultiPeriodGroupAlgorithmTest.h
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
-	MultiPeriodGroupAlgorithmTest.h
 	NumericAxisTest.h
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
@@ -344,7 +344,7 @@ if ( WIN32 )
 endif ()
 
 # Add a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidAPI/PrecompiledHeader.h MantidAPI src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+enable_precompiled_headers( inc/MantidAPI/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( API ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
@@ -353,7 +353,7 @@ set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} )
+target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} ${NEXUS_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

@@ -19,7 +19,7 @@ DECLARE_ALGORITHM(RebinToWorkspace)
 /// Sets documentation strings for this algorithm
 void RebinToWorkspace::initDocs()
 {
-  this->setWikiSummary("Rebin a selected workspace to the same binning as a different workspace ");
+  this->setWikiSummary("Rebin a selected workspace to the same binning as a different workspace");
   this->setOptionalMessage("Rebin a selected workspace to the same binning as a different workspace");
 }
 
@@ -41,8 +41,8 @@ void RebinToWorkspace::init()
     "The workspace to match the bin boundaries against" );
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
-  declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
-      "If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick.\n"
+  declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default). "
+      "If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. "
       "If false, then the workspace gets converted to a Workspace2D histogram.");
 }
 

@@ -15,7 +15,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
@@ -213,8 +212,10 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.wav_dw_opt->setItemData(1, "LOG");
 
   //the file widget always has a *.* filter, passing an empty list means we get only that
-  m_uiForm.floodFile->setAlgorithmProperty("CorrectToFile|Filename");
-  m_uiForm.floodFile->isOptional(true);
+  m_uiForm.floodRearFile->setAlgorithmProperty("CorrectToFile|Filename");
+  m_uiForm.floodRearFile->isOptional(true);
+  m_uiForm.floodFrontFile->setAlgorithmProperty("CorrectToFile|Filename");
+  m_uiForm.floodFrontFile->isOptional(true);
 
   //the unicode code for the angstrom symbol is 197, doing the below keeps this file ASCII compatible
   static const QChar ANGSROM_SYM(197);
@@ -378,7 +379,9 @@ void SANSRunWindow::connectAnalysDetSignals()
   connect(m_uiForm.frontDetQrangeOnOff, SIGNAL(stateChanged(int)), this, SLOT(updateFrontDetQrange(int)));
   updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->state());
 
-  connect(m_uiForm.enableFlood_ck, SIGNAL(stateChanged(int)), this, SLOT(prepareFlood(int)));
+  connect(m_uiForm.enableRearFlood_ck, SIGNAL(stateChanged(int)), this, SLOT(prepareFlood(int)));
+  connect(m_uiForm.enableFrontFlood_ck, SIGNAL(stateChanged(int)), this, SLOT(prepareFlood(int)));
+  
 
   connect(m_uiForm.wavRanges, SIGNAL(editingFinished()),
                                     this, SLOT(checkList()));
@@ -791,12 +794,22 @@ bool SANSRunWindow::loadUserFile()
     "print i.ReductionSingleton().instrument.detector_file('front')"));
 
   QString file = runReduceScriptFunction(
-    "print i.ReductionSingleton().prep_normalize.getPixelCorrFile()");
+    "print i.ReductionSingleton().prep_normalize.getPixelCorrFile('REAR')");
   file = file.trimmed();
   //Check if the file name is set to Python's None object and then adjust the controls if there is an empty entry
-  m_uiForm.floodFile->setFileTextWithSearch(file == "None" ? "" : file);
-  m_uiForm.enableFlood_ck->setChecked( ! m_uiForm.floodFile->isEmpty() );
-  prepareFlood(m_uiForm.enableFlood_ck->checkState());
+
+  m_uiForm.floodRearFile->setFileTextWithSearch(file == "None" ? "" : file);  
+  m_uiForm.enableRearFlood_ck->setChecked( ! m_uiForm.floodRearFile->isEmpty() );
+  m_uiForm.floodRearFile->setEnabled(m_uiForm.enableRearFlood_ck->checkState()
+                                     == Qt::Checked);
+  file = runReduceScriptFunction(
+    "print i.ReductionSingleton().prep_normalize.getPixelCorrFile('FRONT')");
+  file = file.trimmed();
+  m_uiForm.floodFrontFile->setFileTextWithSearch(file == "None" ? "" : file);  
+  m_uiForm.enableFrontFlood_ck->setChecked( ! m_uiForm.floodFrontFile->isEmpty() );
+  m_uiForm.floodFrontFile->setEnabled(m_uiForm.enableFrontFlood_ck->checkState()
+                                     == Qt::Checked);
+  
 
   //Scale factor
   dbl_param = runReduceScriptFunction(
@@ -1998,14 +2011,17 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
     exec_reduce += ", False";
   }
   exec_reduce += ")\n";
-  QString floodFile =
-    m_uiForm.enableFlood_ck->isChecked() ? m_uiForm.floodFile->getFirstFilename().trimmed() : "";
-  exec_reduce += "i.SetDetectorFloodFile('"+floodFile+"')\n";
+  QString floodRearFile =
+    m_uiForm.enableRearFlood_ck->isChecked() ? m_uiForm.floodRearFile->getFirstFilename().trimmed() : "";
+  QString floodFrontFile =
+    m_uiForm.enableFrontFlood_ck->isChecked() ? m_uiForm.floodFrontFile->getFirstFilename().trimmed() : "";
+  exec_reduce += "i.SetDetectorFloodFile('"+floodRearFile+"','REAR')\n";
+  exec_reduce += "i.SetDetectorFloodFile('"+floodFrontFile+"','FRONT')\n";
 
-  if ( ( ! floodFile.isEmpty() ) && ( m_uiForm.detbank_sel->currentText() == "HAB" ) )
-  {
-    g_log.warning() << "::SANS::Warning: Flood files will be ignored for the HAB/FRONT detector" <<std::endl; 
-  }
+  //  if ( ( ! floodFile.isEmpty() ) && ( m_uiForm.detbank_sel->currentText() == "HAB" ) )
+  //{
+  //  g_log.warning() << "::SANS::Warning: Flood files will be ignored for the HAB/FRONT detector" <<std::endl; 
+  //  }
   // Set the wavelength ranges, equal to those for the sample unless this box is checked
   // Also check if the Trans Fit on/off tick is on or off. If Off then set the trans_opt to off
   if (m_uiForm.transFit_ck->isChecked())
@@ -2761,7 +2777,10 @@ void SANSRunWindow::updateCentreFindingStatus(const QString & msg)
 */
 void SANSRunWindow::prepareFlood(int state)
 {
-  m_uiForm.floodFile->setEnabled(state == Qt::Checked);
+  if (sender() == m_uiForm.enableRearFlood_ck)
+    m_uiForm.floodRearFile->setEnabled(state == Qt::Checked);
+  if (sender() == m_uiForm.enableFrontFlood_ck)
+    m_uiForm.floodFrontFile->setEnabled(state == Qt::Checked);
 }
 /**Enables  the default save button, saveDefault_Btn, if there is an output workspace
 * stored in m_outputWS and text in outfile_edit

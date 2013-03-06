@@ -26,7 +26,7 @@ DECLARE_ALGORITHM(Linear)
 /// Sets documentation strings for this algorithm
 void Linear::initDocs()
 {
-  this->setWikiSummary("Performs linear least-squares regression on a spectrum (or portion of one). ");
+  this->setWikiSummary("Performs linear least-squares regression on a spectrum (or portion of one).");
   this->setOptionalMessage("Performs linear least-squares regression on a spectrum (or portion of one).");
 }
 
@@ -45,28 +45,28 @@ Linear::~Linear() {if(m_progress) delete m_progress;m_progress=NULL;}
 void Linear::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
-    "Workspace with the spectrum to fit");
+    "The name of the workspace containing the spectrum to fit.");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-    "Name of the workspace that will contain the result");
+    "A Workspace1D containing the fit result and errors for the X values of the input spectrum.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex",0, mustBePositive,
     "Index number of the Workspace to fit");
   declareProperty("StartX", EMPTY_DBL(),
-    "An X value in the first bin to include in the fit (default\n"
-    "lowest value of X)");
+    "The X value to start fitting from (default: "
+    "the lowest value of X)");
   declareProperty("EndX", EMPTY_DBL(),
-    "An X value in the last bin to be included in the range\n"
-    "(default the high X value");
+    "The last X value to include in the fitting range "
+    "(default: the highest X value");
   declareProperty("FitStatus", "", boost::make_shared<NullValidator>(),
-    "Empty if the fit succeeded, otherwise contains the gsl error\n"
+    "Empty if the fit succeeded, otherwise contains the gsl error "
     "message", Direction::Output);
   declareProperty("FitIntercept", 0.0,
-    "The intercept with the ordinate of the fitted line. c0 in the\n"
-    "equation below", Direction::Output);
+    "The intercept with the ordinate of the fitted line. <math>c0</math> in the equation below.", 
+                  Direction::Output);
   declareProperty("FitSlope",0.0,
-    "The slope of the fitted line. c1 in the equation below",
+                  "The slope of the fitted line. <math>c1</math> in the equation below.",
     Direction::Output);
   declareProperty("Cov00",0.0,
     "The first diagonal component of the covariance matrix.",
@@ -78,7 +78,8 @@ void Linear::init()
     "The off-diagonal component of the covariance matrix.",
     Direction::Output);
   declareProperty("Chi2",0.0,
-    "The goodness of the fit", Direction::Output);
+    "The <math> \\chi^2 </math> value for the goodness of the fit.", 
+                  Direction::Output);
 
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();

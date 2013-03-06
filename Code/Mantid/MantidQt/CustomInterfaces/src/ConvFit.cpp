@@ -4,7 +4,6 @@
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 

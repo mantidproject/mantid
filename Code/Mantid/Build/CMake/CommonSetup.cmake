@@ -50,7 +50,7 @@ add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 find_package ( Poco REQUIRED )
 include_directories( SYSTEM ${POCO_INCLUDE_DIRS} )
 
-find_package ( Nexus REQUIRED )
+find_package ( Nexus 4.3.0 REQUIRED )
 include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
 
 find_package ( MuParser REQUIRED )
@@ -187,7 +187,6 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/Algorithms/inc
         Framework/GPUAlgorithms/inc
         Framework/PythonInterface/inc
-        Framework/NexusCPP/inc
         Framework/Nexus/inc
         Framework/MPIAlgorithms/inc
         Framework/MDAlgorithms/inc
@@ -236,6 +235,8 @@ if ( CPPCHECK_EXECUTABLE )
   set ( CPPCHECK_HEADER_EXCLUDES
         Framework/ScriptRepository/libgit2/include/git2.h
         MantidPlot/src/origin/OPJFile.h
+        Framework/PythonAPI/inc/boost/python/detail/referent_storage.hpp
+        Framework/PythonAPI/inc/boost/python/detail/type_list_impl_no_pts.hpp
       )
 
   # setup the standard arguments

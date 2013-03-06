@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 
@@ -73,7 +72,7 @@ public:
         TofEvent event(1.23, int64_t(4.56));
         spaceEvent->getEventList(j).addEventQuickly(event);
         spaceEvent->getEventList(j).setDetectorID(j);
-        spaceEvent->getAxis(1)->spectraNo(j) = j;
+        spaceEvent->getAxis(1)->setValue(j, j);
       }
       spaceEvent->doneAddingEventLists();
       x.access().push_back(0.0);

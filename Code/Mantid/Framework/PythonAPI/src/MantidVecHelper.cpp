@@ -65,7 +65,7 @@ namespace Mantid
     {
       npy_intp dims[1] = { static_cast<int>(values.size()) };
       PyArrayObject * ndarray = 
-                   (PyArrayObject*)(PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)&(values[0])));
+                   (PyArrayObject*)(PyArray_SimpleNewFromData(1, dims, NPY_DOUBLE, (void*)const_cast<MantidVec::value_type*>(&(values[0]))));
       if( readonly )
       {
         ndarray->flags &= ~NPY_WRITEABLE;
@@ -122,7 +122,7 @@ namespace Mantid
     {
       npy_intp dims[2] =  {static_cast<int>(values.size().first),static_cast<int>(values.size().second)} ;
       PyArrayObject * ndarray = 
-          (PyArrayObject*)PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)&(values[0][0]));
+          (PyArrayObject*)PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE, (void*)const_cast<double*>( &(values[0][0]) ) );
       if( readonly )
       {
         ndarray->flags &= ~NPY_WRITEABLE;

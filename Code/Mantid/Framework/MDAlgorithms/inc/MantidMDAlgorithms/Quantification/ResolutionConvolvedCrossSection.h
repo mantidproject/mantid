@@ -90,7 +90,7 @@ namespace Mantid
       API::IMDEventWorkspace_const_sptr m_inputWS;
 
       /// Output events. Need to find a better way to handle other dimensions
-      mutable std::list<MDEvents::MDEvent<4>> m_simulatedEvents;
+      mutable std::list<MDEvents::MDEvent<4> > m_simulatedEvents;
 
       /// A reference to the logger
       static Kernel::Logger & g_log;

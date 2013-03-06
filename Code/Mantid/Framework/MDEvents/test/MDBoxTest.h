@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <Poco/File.h>
+#include <nexus/NeXusFile.hpp>
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
@@ -15,7 +16,6 @@
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid;
@@ -1121,7 +1121,7 @@ public:
     do_test_fileBackEnd_binningOperations(false);
   }
 
-  void xtest_fileBackEnd_binningOperations_inParallel()
+  void xest_fileBackEnd_binningOperations_inParallel()
   {
     do_test_fileBackEnd_binningOperations(true);
   }

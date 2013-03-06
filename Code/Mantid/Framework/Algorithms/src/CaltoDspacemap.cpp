@@ -1,5 +1,4 @@
 /*WIKI* 
-
 This is the inverse of the DspacemaptoCal algorithm.  The detector offset file created by this algorithm are in the form created by the ARIEL software. The offsets are a correction to the dSpacing values and are applied during the conversion from time-of-flight to dSpacing as follows:
 
 :<math> d = \frac{h}{m_N} \frac{t.o.f.}{L_{tot} sin \theta} (1+ \rm{offset})</math>
@@ -21,9 +20,24 @@ This is the inverse of the DspacemaptoCal algorithm.  The detector offset file c
     alg2->setPropertyValue("DspacemapFile", "PG3.dat");
     alg2->execute();
 
+== Additional Property Information ==
 
-
-
+{| border="1" cellpadding="5" cellspacing="0"
+!Name
+!Description
+|-
+|InputWorkspace
+|The name of the input workspace containing instrument geometry.  The [[instrument]] associated with the workspace must be fully defined because detector, source & sample position are needed.
+|-
+|CalibrationFile
+|The [[CalFile]] containing the groups from CreateCalFileByNames or CreateDummyCalFile is input.  Output [[CalFile]] contains both groups and offsets calculated from Dspacemap file.
+|-
+|DspacemapFile
+|The binary Dspacemap file [.dat] for ISAW.
+|-
+|PadDetID
+|Pad Dspacemap file to this number of pixels.
+|}
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -32,7 +46,6 @@ This is the inverse of the DspacemaptoCal algorithm.  The detector offset file c
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/CaltoDspacemap.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -89,6 +102,8 @@ CaltoDspacemap::~CaltoDspacemap()
 //-----------------------------------------------------------------------
 void CaltoDspacemap::init()
 {
+  this->setWikiSummary("Creates Dspacemap file from a calibration file with offsets.");
+
   declareProperty(
     new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input),
     "A workspace with units of TOF" );

@@ -31,6 +31,9 @@ DECLARE_ALGORITHM(ChopData)
 
 void ChopData::init()
 {
+  this->setWikiSummary("Splits an input workspace into a grouped workspace, where each spectra "
+      "if 'chopped' at a certain point (given in 'Step' input value) "
+      "and the X values adjusted to give all the workspace in the group the same binning.");
   auto wsVal = boost::make_shared<CompositeValidator>();
   wsVal->add<WorkspaceUnitValidator>("TOF");
   wsVal->add<HistogramValidator>();

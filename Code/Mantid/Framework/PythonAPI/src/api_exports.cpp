@@ -206,6 +206,7 @@ using namespace boost::python;
       .def("setLogging", &API::IAlgorithm::setLogging)
       .def("setAlwaysStoreInADS", &API::IAlgorithm::setAlwaysStoreInADS)
       .def("setRethrows", &API::IAlgorithm::setRethrows)
+      .def("setWikiSummary", &API::IAlgorithm::setWikiSummary)
       .def("existsProperty", &API::IAlgorithm::existsProperty)
       .def("setPropertyValue", &API::IAlgorithm::setPropertyValue)
       .def("getPropertyValue", &API::IAlgorithm::getPropertyValue)
@@ -825,7 +826,6 @@ void export_dataitem()
     class_< API::SpectraAxis, bases<API::Axis>, boost::noncopyable >("SpectraAxis", no_init)
       .def("spectraNumber", (const specid_t & (Mantid::API::SpectraAxis::*)(const size_t &) const) & API::SpectraAxis::spectraNo, return_value_policy<copy_const_reference>() )
       .def("setValue", & API::SpectraAxis::setValue)
-      .def("populateOneToOne", & API::SpectraAxis::populateOneToOne)
       ;
     // Text Axis subclass
     class_< API::TextAxis, bases<API::Axis>, boost::noncopyable >("TextAxis", no_init)

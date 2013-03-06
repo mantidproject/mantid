@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------
 #include "DllOption.h"
-#include "MantidKernel/SingletonHolder.h"
+//#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Instantiator.h"
 
 #include <QString>
@@ -75,7 +75,7 @@ class VatesViewerInterface;
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class EXPORT_OPT_MANTIDQT_API InterfaceManagerImpl
+class EXPORT_OPT_MANTIDQT_API InterfaceManager
 {
 
 public:
@@ -84,6 +84,9 @@ public:
   AlgorithmDialog* createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent = 0,
         bool forScript = false, const QHash<QString,QString> & preset_values = (QHash<QString,QString>()),
         const QString & optional_msg = QString(), const QStringList & enabled=QStringList(), const QStringList & disabled=QStringList());
+
+  /// Create an algorithm dialog for a given algorithm name.
+  AlgorithmDialog* createDialogFromName(const QString& algorithmName, bool forScript, QWidget* parent = 0);
 
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow* createSubWindow(const QString & interface_name, QWidget* parent = 0);
@@ -97,25 +100,20 @@ public:
    * Registration function for the Vates simple interface factory.
    * @param factory the factory instance
    */
-  void registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory);
+  static void registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory);
 
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
 
   /// Getter for vates libraries availablity
-  bool hasVatesLibraries() const;
+  static bool hasVatesLibraries();
+
+  ///Constructor
+  InterfaceManager();
+  ///Destructor
+  virtual ~InterfaceManager();
 
 private:
-  friend struct Mantid::Kernel::CreateUsingNew<InterfaceManagerImpl>;
-  
-  ///Private Constructor
-  InterfaceManagerImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  InterfaceManagerImpl(const InterfaceManagerImpl&);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  InterfaceManagerImpl& operator = (const InterfaceManagerImpl&);
-  ///Private Destructor
-  virtual ~InterfaceManagerImpl();
 
   //A static reference to the Logger
   static Mantid::Kernel::Logger & g_log;
@@ -124,24 +122,17 @@ private:
   static Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *m_vatesGuiFactory;
 };
 
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-	template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<InterfaceManagerImpl>;
-#endif /* _WIN32 */
-/// The specific instantiation of the templated type
-typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<InterfaceManagerImpl> InterfaceManager;
-
 }
 }
 
-/**
+/*
  * Used to register Vates GUI
  */
 #define REGISTER_VATESGUI(TYPE) \
   namespace { \
   Mantid::Kernel::RegistrationHelper \
   register_vatesgui \
-  (((MantidQt::API::InterfaceManager::Instance().registerVatesGuiFactory \
+  (((MantidQt::API::InterfaceManager::registerVatesGuiFactory \
   (new Mantid::Kernel::Instantiator<TYPE, VatesViewerInterface>())), 0)); \
 }
 #endif //MANTIDQT_API_DIALOGMANAGER

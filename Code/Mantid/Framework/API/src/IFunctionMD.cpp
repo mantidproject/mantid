@@ -77,8 +77,10 @@ namespace API
 
   }
 
-  /// Function you want to fit to. 
-  /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
+  /**
+   * @param domain :: The input domain over which to calculate the function
+   * @param values :: A result holder to store the output of the calculation
+   */
   void IFunctionMD::function(const FunctionDomain& domain,FunctionValues& values)const
   {
     const FunctionDomainMD* dmd = dynamic_cast<const FunctionDomainMD*>(&domain);

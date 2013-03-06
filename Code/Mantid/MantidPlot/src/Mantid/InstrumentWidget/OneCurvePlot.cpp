@@ -201,6 +201,7 @@ void OneCurvePlot::setYScale(double from, double to)
   * @param x :: A pointer to x values
   * @param y :: A pointer to y values
   * @param dataSize :: The size of the data
+  * @param xUnits :: Units for the data
   */
 void OneCurvePlot::setData(const double* x,const double* y,int dataSize,const std::string& xUnits)
 {
@@ -373,7 +374,7 @@ void OneCurvePlot::setYLinearScale()
 
 /**
  * Add new peak label
- * @param label :: A pointer to a PeakLabel, becomes owned by OneCurvePlot
+ * @param marker :: A pointer to a PeakLabel, becomes owned by OneCurvePlot
  */
 void OneCurvePlot::addPeakLabel(const PeakMarker2D* marker)
 {

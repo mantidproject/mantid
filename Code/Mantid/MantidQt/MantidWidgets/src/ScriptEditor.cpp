@@ -137,6 +137,7 @@ QColor ScriptEditor::g_error_colour = QColor("red");
 /**
  * Constructor
  * @param parent :: The parent widget (can be NULL)
+ * @param codelexer :: define the syntax highlighting and code completion.
  */
 ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer) :
   QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
@@ -309,7 +310,7 @@ void ScriptEditor::saveScript(const QString & filename)
  * Set the text on the given line, something I feel is missing from the QScintilla API. Note
  * that like QScintilla line numbers start from 0
  * @param lineno :: A zero-based index representing the linenumber, 
- * @param text :: The text to insert at the given line
+ * @param txt :: The text to insert at the given line
  * @param index :: The position of text in a line number,default value is zero
  */
 void ScriptEditor::setText(int lineno, const QString& txt,int index)
@@ -325,7 +326,7 @@ void ScriptEditor::setText(int lineno, const QString& txt,int index)
 /** 
  * Capture key presses. Enter/Return executes the code or asks for more input if necessary.
  * Up/Down search the command history
- * @event A pointer to the QKeyPressEvent object
+ * @param event A pointer to the QKeyPressEvent object
  */
 void ScriptEditor::keyPressEvent(QKeyEvent* event)
 {
@@ -374,7 +375,7 @@ void ScriptEditor::padMargin()
 
 /**
  * Set the marker state
- * @param enable :: If true then the progress arrow is enabled
+ * @param enabled :: If true then the progress arrow is enabled
  */
 void ScriptEditor::setMarkerState(bool enabled)
 {

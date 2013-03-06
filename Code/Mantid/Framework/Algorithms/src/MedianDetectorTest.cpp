@@ -238,9 +238,10 @@ namespace Mantid
 
     /**
      * Mask the outlier values to get a better median value.
-     * @param median The median value calculated from the current counts
-     * @param countsWS The counts workspace. Any outliers will be masked here
-     * @returns The number masked
+     * @param medianvec The median value calculated from the current counts.
+     * @param countsWS The counts workspace. Any outliers will be masked here.
+     * @param indexmap Index map.
+     * @returns The number failed.
      */
     int MedianDetectorTest::maskOutliers(const std::vector<double> medianvec, API::MatrixWorkspace_sptr countsWS,std::vector<std::vector<size_t> > indexmap)
     {
@@ -298,11 +299,11 @@ namespace Mantid
     /** 
      * Takes a single valued histogram workspace and assesses which histograms are within the limits. 
      * Those that are not are masked on the input workspace.
-     * @param countWorkspace :: Input/Output Integrated workspace to diagnose
-     * @param maskWS :: A mask workspace to apply
-     * @param average :: The expected number of counts, spectra within defined threshold won't fail
-     * @param badIndices :: If an index is in this list then it will not be included in the tests
-     * @return The number of detectors that failed the tests, not including those skipped
+     * @param countsWS :: Input/Output Integrated workspace to diagnose.
+     * @param medianvec The median value calculated from the current counts.
+     * @param indexmap Index map.
+     * @param maskWS :: A mask workspace to apply.
+     * @return The number of detectors that failed the tests, not including those skipped.
      */
     int MedianDetectorTest::doDetectorTests(const API::MatrixWorkspace_sptr countsWS, const std::vector<double> medianvec,
                                             std::vector<std::vector<size_t> > indexmap, API::MatrixWorkspace_sptr maskWS)

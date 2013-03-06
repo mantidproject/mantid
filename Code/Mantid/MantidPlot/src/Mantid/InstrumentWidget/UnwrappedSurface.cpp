@@ -34,7 +34,7 @@ u(0), v(0), width(0), height(0), uscale(0), vscale(0), detector()
 }
 
 UnwrappedDetector::UnwrappedDetector(const unsigned char* c,
-                     boost::shared_ptr<const Mantid::Geometry::IDetector> det
+                     boost::shared_ptr<const IDetector> det
                      ):
 u(0), v(0), width(0), height(0), uscale(0), vscale(0), detector(det)
 {

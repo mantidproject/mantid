@@ -200,15 +200,21 @@ class SANSReduction(PythonAlgorithm):
                     
                 if alg.existsProperty("OutputMessage"):
                     output_msg += alg.getProperty("OutputMessage").value+'\n'
+                else:
+                    output_msg += "Transmission correction applied\n"
                 background_ws = '__'+background_ws+'_reduced'
         
             # Subtract background
+            api.RebinToWorkspace(WorkspaceToRebin=background_ws,
+                                 WorkspaceToMatch=output_ws,
+                                 OutputWorkspace=background_ws+'_rebin',
+                                 PreserveEvents=True)
             api.Minus(LHSWorkspace=output_ws,
-                         RHSWorkspace=background_ws,
+                         RHSWorkspace=background_ws+'_rebin',
                          OutputWorkspace=output_ws)
             
             bck_msg = bck_msg.replace('\n','\n   |')
-            output_msg += "Background subtracted [%s]%s\n" % (background_ws, bck_msg)
+            output_msg += "Background subtracted [%s]\n   %s\n" % (background_ws, bck_msg)
         
         # Absolute scale correction
         output_msg += self._simple_execution("AbsoluteScaleAlgorithm", output_ws)

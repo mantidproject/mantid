@@ -10,6 +10,7 @@
 #include "MantidDataObjects/TableWorkspace.h" 
 #include "MantidAPI/TableRow.h" 
 #include "MantidAPI/ColumnFactory.h" 
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include <limits>
 
@@ -440,6 +441,11 @@ public:
     TS_ASSERT_DELTA(100,tw.getLogs()->getPropertyValueAsType<double>("SomeDouble"),1.e-7);
   }
 
+  void test_known_to_property_for_unmangling()
+  {
+    Mantid::API::WorkspaceProperty<TableWorkspace> property("DummyProperty", "DummyWorkspace", Mantid::Kernel::Direction::Input);
+    TS_ASSERT_EQUALS("TableWorkspace", Mantid::Kernel::getUnmangledTypeName(*property.type_info()));
+  }
 
 };
 

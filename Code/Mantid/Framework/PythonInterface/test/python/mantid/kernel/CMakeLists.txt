@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   LogFilterTest.py
   LoggerTest.py
   MandatoryValidatorTest.py
+  MemoryStatsTest.py
   NullValidatorTest.py
   PropertyWithValueTest.py
   PythonPluginsTest.py

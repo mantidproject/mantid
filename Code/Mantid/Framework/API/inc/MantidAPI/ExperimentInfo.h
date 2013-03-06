@@ -55,7 +55,7 @@ namespace API
     ExperimentInfo * cloneExperimentInfo()const;
 
     /// Instrument accessors
-    void setInstrument(const Geometry::Instrument_const_sptr&);
+    void setInstrument(const Geometry::Instrument_const_sptr& instr);
     /// Returns the parameterized instrument
     Geometry::Instrument_const_sptr getInstrument() const;
 
@@ -137,7 +137,7 @@ namespace API
     /// Description of the source object
     boost::shared_ptr<ModeratorModel> m_moderatorModel;
     /// Description of the choppers for this experiment.
-    std::list<boost::shared_ptr<ChopperModel>> m_choppers;
+    std::list<boost::shared_ptr<ChopperModel> > m_choppers;
     /// The information on the sample environment
     Kernel::cow_ptr<Sample> m_sample;
     /// The run information

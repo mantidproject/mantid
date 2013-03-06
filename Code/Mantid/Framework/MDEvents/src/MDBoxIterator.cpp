@@ -56,7 +56,6 @@ namespace MDEvents
    * @param function :: ImplicitFunction that limits iteration volume. NULL for don't limit this way.
    *        Note that the top level box is ALWAYS returned at least once, even if it is outside the
    *        implicit function
-   * @param skippingPolicy :: policy for skipping boxes upon next().
    */
   TMDE(void MDBoxIterator)::commonConstruct(MDBoxBase<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
       Mantid::Geometry::MDImplicitFunction * function)

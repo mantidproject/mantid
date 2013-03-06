@@ -42,7 +42,7 @@ namespace MantidQt
 
     /**
     Constructor
-    @param ws : Workspace model.
+    @param peaksWS : Workspace model.
     */
     QPeaksTableModel::QPeaksTableModel(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) : m_peaksWS(peaksWS)
     {
@@ -96,7 +96,7 @@ namespace MantidQt
 
     /**
     Find the column name at a given column index.
-    @colIndex : Index to find column name for.
+    @param colIndex : Index to find column name for.
     */
     QString QPeaksTableModel::findColumnName(const int colIndex) const
     {
@@ -136,9 +136,10 @@ namespace MantidQt
 
     /**
     Get the heading for a given section, orientation and role.
-    @section : Column index
-    @orientation : Heading orientation
-    @role : Role mode of table.
+    @param section : Column index
+    @param orientation : Heading orientation
+    @param role : Role mode of table.
+    @return HeaderData.
     */
     QVariant QPeaksTableModel::headerData(int section, Qt::Orientation orientation, int role) const
     {
@@ -154,7 +155,7 @@ namespace MantidQt
 
     /**
     Provide flags on an index by index basis
-    @index: To generate a flag for.
+    @param index: To generate a flag for.
     */
     Qt::ItemFlags QPeaksTableModel::flags(const QModelIndex &index) const
     {

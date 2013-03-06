@@ -8,7 +8,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include <iostream>
 #include <vector>

@@ -9,7 +9,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -21,8 +20,8 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 namespace Mantid
 {

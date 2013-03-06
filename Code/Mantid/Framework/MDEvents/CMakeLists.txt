@@ -175,7 +175,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidMDEvents/PrecompiledHeader.h MantidMDEvents src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+enable_precompiled_headers( inc/MantidMDEvents/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( MDEvents ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

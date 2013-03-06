@@ -5,7 +5,6 @@
 #include "MantidKernel/Timer.h"
 #ifdef _WIN32
 #include <Windows.h>
-#elif defined _WIN32
 #else
 #include <unistd.h>
 #endif

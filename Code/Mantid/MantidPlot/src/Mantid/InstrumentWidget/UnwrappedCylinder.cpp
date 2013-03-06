@@ -13,6 +13,8 @@ UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor* rootActor, const Man
  *
  * @param u :: set to U
  * @param v :: set to V
+ * @param uscale :: scaling for u direction
+ * @param vscale :: scaling for v direction
  * @param pos :: position in 3D
  */
 void UnwrappedCylinder::project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const

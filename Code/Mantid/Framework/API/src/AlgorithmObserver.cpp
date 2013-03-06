@@ -55,7 +55,6 @@ namespace Mantid
     }
 
     /**   Connect to AlgorithmManager and observe its starting notifications
-          @param alg :: Algorithm to be observed
     */
     void AlgorithmObserver::observeStarting()
     {

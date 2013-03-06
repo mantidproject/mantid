@@ -5,7 +5,6 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
-        inc/MantidNexus/DllConfig.h
         inc/MantidNexus/MuonNexusReader.h
         inc/MantidNexus/NexusClasses.h
         inc/MantidNexus/NexusFileIO.h

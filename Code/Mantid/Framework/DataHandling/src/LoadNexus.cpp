@@ -68,21 +68,20 @@ namespace Mantid
       exts.push_back(".xml");
       exts.push_back(".n*");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-        "The name of the Nexus file to load" );      
+        "The name of the Nexus file to read, as a full or relative path." );      
 
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), 
-        "The name of the workspace to be created as the output. For\n"
-        "multiperiod files, one workspace will be generated for each period");
+                      "The name of the workspace to be created as the output of the algorithm.  A workspace of this name will be created and stored in the Analysis Data Service. For multiperiod files, one workspace will be generated for each period.");
 
       // Declare optional input parameters
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
       declareProperty("SpectrumMin",1, mustBePositive,
-        "Index number of first spectrum to read, only for single period data");
+        "Number of first spectrum to read, only for single period data.");
       declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive,
-        "Index number of last spectrum to read, only for single period data");
+                      "Number of last spectrum to read, only for single period data.");
       declareProperty(new ArrayProperty<int>("SpectrumList"),
-        "A comma seperated or array with the list of index number to read" );
+                      "List of spectrum numbers to read, only for single period data.");
 
       declareProperty("EntryNumber",0, mustBePositive, 
         "The particular entry number to read (default: Load all workspaces and creates a workspace group)" );

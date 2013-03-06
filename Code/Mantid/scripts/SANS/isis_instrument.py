@@ -1,6 +1,7 @@
 from reduction import instrument
 import math
 from mantidsimple import *
+import sys
 
 class DetectorBank:
     class _DectShape:
@@ -311,11 +312,16 @@ class DetectorBank:
             output_name = input_name
 
         try:
-            CropWorkspace(input_name, output_name,
-                StartWorkspaceIndex = self.get_first_spec_num() - 1,
-                EndWorkspaceIndex = self.last_spec_num - 1)
-        except SystemExit:
-            raise ValueError('Can not find spectra for %s in the workspace %s'%(self.name(), output_name))
+            wki = mtd[input_name]
+            #Is it really necessary to crop?
+            if (wki.getNumberHistograms() != self.last_spec_num - self.get_first_spec_num() + 1):
+                CropWorkspace(input_name, output_name,
+                              StartWorkspaceIndex = self.get_first_spec_num() - 1,
+                              EndWorkspaceIndex = self.last_spec_num - 1)
+        except :            
+            raise ValueError('Can not find spectra for %s in the workspace %s [%d,%d]\nException:'
+                             %(self.name(), input_name,self.get_first_spec_num(),self.last_spec_num) 
+                             + str(sys.exc_info()))
 
 class ISISInstrument(instrument.Instrument):
     def __init__(self, filename=None):
@@ -333,7 +339,7 @@ class ISISInstrument(instrument.Instrument):
             'centre-finder-step-size')[0])
 
         firstDetect = DetectorBank(self.definition, 'low-angle')
-        firstDetect.disable_y_and_rot_corrs()
+        #firstDetect.disable_y_and_rot_corrs()
         secondDetect = DetectorBank(self.definition, 'high-angle')
         secondDetect.place_after(firstDetect)
         #add det_selection variable that will receive the DET/ REAR/FRONT/BOTH/MERGED
@@ -432,6 +438,18 @@ class ISISInstrument(instrument.Instrument):
         if self.lowAngDetSet : return self.DETECTORS['low-angle']
         else : return self.DETECTORS['high-angle']
     
+    def get_low_angle_detector(self):
+        """ Provide a direct way to get the low bank detector.
+        This method does not require to pass the name of the detector bank.
+        """
+        return self.DETECTORS['low-angle']
+   
+    def get_high_angle_detector(self):
+        """ Provide a direct way to get the high bank detector
+        This method does not require to pass the name of the detector bank.
+        """
+        return self.DETECTORS['high-angle']
+
     def other_detector(self) :
         if not self.lowAngDetSet : return self.DETECTORS['low-angle']
         else : return self.DETECTORS['high-angle']
@@ -553,10 +571,9 @@ class ISISInstrument(instrument.Instrument):
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
-        ws = mantid[ws_name]
-        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
-        cent_pos = 317.5/1000.0
-        return [cent_pos - pos.getX(), cent_pos - pos.getY()]
+        raise RuntimeError("Not Implemented")
+
+
 
 class LOQ(ISISInstrument):
     """
@@ -592,7 +609,15 @@ class LOQ(ISISInstrument):
         xshift = (317.5/1000.) - xbeam
         yshift = (317.5/1000.) - ybeam
         MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, RelativePosition="1")
-        # LOQ instrument description has detector at 0.0, 0.0
+
+        # Have a separate move for x_corr, y_coor and z_coor just to make it more obvious in the
+        # history, and to expert users what is going on
+        det = self.cur_detector()
+        if det.x_corr != 0.0 or det.y_corr != 0.0 or det.z_corr != 0.0: 
+            MoveInstrumentComponent(ws, det.name(), X = det.x_corr/1000.0, Y = det.y_corr/1000.0, Z = det.z_corr/1000.0, RelativePosition="1")
+            xshift = xshift + det.x_corr/1000.0
+            yshift = yshift + det.y_corr/1000.0
+
         return [xshift, yshift], [xshift, yshift]
 
     def get_marked_dets(self):
@@ -624,6 +649,13 @@ class LOQ(ISISInstrument):
             This function does nothing for LOQ
         """
         pass
+
+    def cur_detector_position(self, ws_name):
+        """Return the position of the center of the detector bank"""
+        ws = mantid[ws_name]
+        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        cent_pos = 317.5/1000.0
+        return [cent_pos - pos.getX(), cent_pos - pos.getY()]
 
 class SANS2D(ISISInstrument): 
     """
@@ -899,6 +931,14 @@ class SANS2D(ISISInstrument):
             Not required for SANS2D
         """
         pass
+
+    def cur_detector_position(self, ws_name):
+        """Return the position of the center of the detector bank"""
+        ws = mantid[ws_name]
+        pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
+        
+        return [-pos.getX(), -pos.getY()]
+
 
 
 if __name__ == '__main__':

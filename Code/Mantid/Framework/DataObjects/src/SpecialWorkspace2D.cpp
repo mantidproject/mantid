@@ -1,13 +1,11 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 
 #include <fstream>
 
 using Mantid::API::SpectraAxis;
-using Mantid::API::SpectraDetectorMap;
 using std::set;
 using std::size_t;
 
@@ -161,7 +159,7 @@ namespace DataObjects
    *
    * @param detectorID :: detector ID to look up
    * @param value :: holder for the Y value
-   * @return the Y value for that detector ID.
+   * @param error :: the Y value for that detector ID.
    * @throw std::invalid_argument if the detector ID was not found
    */
   void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value, const double error)
@@ -184,7 +182,7 @@ namespace DataObjects
    *
    * @param detectorIDs :: detector IDs to look up
    * @param value :: holder for the Y value
-   * @return the Y value for the detector IDs.
+   * @param error :: the Y value for the detector IDs.
    * @throw std::invalid_argument if any of the detector IDs are not found
    */
   void SpecialWorkspace2D::setValue(const set<detid_t> &detectorIDs, const double value, const double error)

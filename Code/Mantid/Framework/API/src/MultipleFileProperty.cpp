@@ -40,14 +40,11 @@ namespace API
   /**
    * Constructor
    *
-   * @param name ::          The name of the property
-   * @param exts ::          The allowed/suggested extensions
-   * @param optional ::      If true, the property is optional
+   * @param name :: The name of the property
+   * @param exts ::  The allowed/suggested extensions
    */
-  MultipleFileProperty::MultipleFileProperty(
-    const std::string & name,
-    const std::vector<std::string> & exts
-  ) : PropertyWithValue<std::vector<std::vector<std::string> > >( name,
+  MultipleFileProperty::MultipleFileProperty(const std::string & name, const std::vector<std::string> & exts)
+    : PropertyWithValue<std::vector<std::vector<std::string> > >( name,
         std::vector<std::vector<std::string> >(), boost::make_shared<MultiFileValidator>(exts), Direction::Input),
       m_multiFileLoadingEnabled(),
       m_exts(),
@@ -149,11 +146,11 @@ namespace API
    *
    * ((1), (2), (30, 31, 32), (100), (102)) becomes (1, 2, 30, 31, 32, 100, 102)
    *
-   * @param - a vector of vectors, containing all the file names.
+   * @param fileNames :: a vector of vectors, containing all the file names.
    * @return a single vector containing all the file names.
    */
-  std::vector<std::string> MultipleFileProperty::flattenFileNames(
-    const std::vector<std::vector<std::string> > & fileNames)
+  std::vector<std::string>
+  MultipleFileProperty::flattenFileNames(const std::vector<std::vector<std::string> > & fileNames)
   {
     std::vector<std::string> flattenedFileNames;
 
@@ -188,7 +185,7 @@ namespace API
     // Store.
     try
     {
-      std::vector<std::vector<std::string>> result;
+      std::vector<std::vector<std::string> > result;
       toValue(slaveFileProp(), result, "", "");
       PropertyWithValue<std::vector<std::vector<std::string> > >::operator=(result);
       return "";
@@ -247,7 +244,7 @@ namespace API
         commaTokenString.begin(), commaTokenString.end(), 
         boost::regex(PLUS_OPERATORS, boost::regex_constants::perl), -1);
 
-      std::vector<std::vector<std::string>> temp;
+      std::vector<std::vector<std::string> > temp;
 
       // Put the tokens into a vector before iterating over it this time,
       // so we can see how many we have.
@@ -271,7 +268,7 @@ namespace API
           errorMsg << "Unable to parse run(s): \"" << re.what() << "\", so will treat as a single file.  ";
         }
 
-        std::vector<std::vector<std::string>> f = m_parser.fileNames();
+        std::vector<std::vector<std::string> > f = m_parser.fileNames();
 
         // If there are no files, then we should keep this token as it was passed to the property,
         // in its untampered form. This will enable us to deal with the case where a user is trying to 
@@ -305,8 +302,8 @@ namespace API
       fileNames.insert(fileNames.end(), temp.begin(), temp.end());
     }
     
-    std::vector<std::vector<std::string>> allUnresolvedFileNames = fileNames;
-    std::vector<std::vector<std::string>> allFullFileNames;
+    std::vector<std::vector<std::string> > allUnresolvedFileNames = fileNames;
+    std::vector<std::vector<std::string> > allFullFileNames;
 
     // First, find the default extension.  Flatten all the unresolved filenames first, to make this easier.
     std::vector<std::string> flattenedAllUnresolvedFileNames = flattenFileNames(allUnresolvedFileNames);

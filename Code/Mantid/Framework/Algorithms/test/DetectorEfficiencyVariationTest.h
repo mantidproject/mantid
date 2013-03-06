@@ -8,7 +8,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include <boost/shared_ptr.hpp>
@@ -118,7 +117,6 @@ public:
     boost::shared_ptr<MantidVec> errors( new MantidVec( ySize, 1) );
     boost::shared_ptr<MantidVec> forInputA, forInputB;
 
-    int forSpecDetMap[Nhist];
     for (int j = 0; j < Nhist; ++j)
     {
       inputA->setX(j, x);
@@ -142,9 +140,8 @@ public:
       inputA->setData( j, forInputA, errors );
       inputB->setData( j, forInputB, errors );
       // Just set the spectrum number to match the index, spectra numbers and detector maps must be indentical for both 
-      inputA->getAxis(1)->spectraNo(j) = j+1;
-      inputB->getAxis(1)->spectraNo(j) = j+1;
-      forSpecDetMap[j] = j+1;
+      inputA->getAxis(1)->setValue(j, j+1);
+      inputB->getAxis(1)->setValue(j, j+1);
     }
 
     // Register the input workspaces to the ADS where they can be accessed by the algorithm
@@ -162,9 +159,6 @@ public:
     //both workspaces should use the same instrument information
     loader.setPropertyValue("Workspace", m_WB2Name);
     loader.execute(); 
-
-    inputA->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap,forSpecDetMap,Nhist));
-    inputB->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap,forSpecDetMap,Nhist));
 
     inputA->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     inputB->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");

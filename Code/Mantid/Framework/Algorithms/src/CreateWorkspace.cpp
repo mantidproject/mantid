@@ -19,7 +19,6 @@ Example of use in Python for create a simple histogram workspace, automatically 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"

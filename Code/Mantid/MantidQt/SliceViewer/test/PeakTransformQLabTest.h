@@ -18,12 +18,12 @@ public:
 
   void test_throws_with_unknown_xLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformQLab("?", "Q_lab_y"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformQLab("?", "Q_lab_y"), PeakTransformException&);
   }
 
   void test_throws_with_unknown_yLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformQLab("Q_lab_x", "?"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformQLab("Q_lab_x", "?"), PeakTransformException&);
   }
 
   void test_default_transform()
@@ -201,6 +201,12 @@ void test_getFriendlyName()
 {
   PeakTransformQLab transform;
   TS_ASSERT_EQUALS(PeakTransformQLab::name(), transform.getFriendlyName());
+}
+
+void test_getCoordinateSystem()
+{
+  PeakTransformQLab transform;
+  TS_ASSERT_EQUALS(Mantid::API::QLab, transform.getCoordinateSystem())
 }
 
 };

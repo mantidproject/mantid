@@ -57,5 +57,13 @@ namespace MantidQt
     return PeakTransform::transform(peak.getQSampleFrame());
   }
 
+  /**
+   * @return Special coordinate system associated with this type of transform.
+   */
+  Mantid::API::SpecialCoordinateSystem PeakTransformQSample::getCoordinateSystem() const
+  {
+    return Mantid::API::QSample;
+  }
+
 }
 }

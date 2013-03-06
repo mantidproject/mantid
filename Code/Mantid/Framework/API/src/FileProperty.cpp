@@ -161,7 +161,7 @@ std::string FileProperty::setValue(const std::string & propValue)
 /**
  * Checks whether the current value is considered valid. Use the validator unless the
  * value is an empty string. In this case it is only valid if the property is not optional
- * @Returns an empty string if the property is valid, otherwise contains an error message
+ * @returns an empty string if the property is valid, otherwise contains an error message
  */
 std::string FileProperty::isValid() const
 {

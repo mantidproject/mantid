@@ -10,7 +10,6 @@ See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] docume
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"

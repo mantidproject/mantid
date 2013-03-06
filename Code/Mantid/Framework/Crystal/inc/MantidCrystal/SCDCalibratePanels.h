@@ -129,6 +129,8 @@ namespace Crystal
   *
    * @param L0             The distance from source to sample( should be positive)
    *
+   * @param newSampPos     The  new sample position
+   *
    * @param  pmapOld     The Parameter map from the original instrument( not
   *                        NewInstrument). "Clones" relevant information into the
   *                        NewInstrument's parameter map.
@@ -213,7 +215,14 @@ namespace Crystal
        boost::shared_ptr<Geometry::ParameterMap> pmap,
        boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
+  void SaveIsawDetCal(  boost::shared_ptr<const Instrument> &NewInstrument,
+                        std::set<std::string> &AllBankName,
+                        double T0,std::string FileName);
 
+  void LoadISawDetCal(
+           boost::shared_ptr<const Instrument> &instrument,
+           std::set<std::string> &AllBankName,double &T0,std::string filename,
+           std::string bankPrefixName);
   private:
     void exec ();
 

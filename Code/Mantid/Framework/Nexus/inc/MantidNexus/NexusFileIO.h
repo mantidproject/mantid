@@ -1,6 +1,5 @@
 #ifndef NEXUSFILEIO_H
 #define NEXUSFILEIO_H
-#include <napi.h>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Progress.h"
@@ -10,6 +9,7 @@
 #include <boost/date_time/local_time_adjustor.hpp>
 #include <boost/date_time/c_local_time_adjustor.hpp>
 #include <limits.h>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid
 {
@@ -59,11 +59,11 @@ namespace Mantid
       ~NexusFileIO() {}
 
       /// open the nexus file for writing
-      int openNexusWrite(const std::string& fileName);
+      void openNexusWrite(const std::string& fileName);
       /// write the header ifon for the Mantid workspace format
       int writeNexusProcessedHeader( const std::string& title) const;
       /// close the nexus file
-      int closeNexusFile();
+      void closeNexusFile();
       /// Write a lgos section
       int writeNexusSampleLogs( const Mantid::API::Run& runProperties) const;
       /// write the workspace data
@@ -102,8 +102,8 @@ namespace Mantid
       NXhandle fileID;
 
     private:
-      /// Nexus format to use for writing
-      NXaccess m_nexusformat;
+      /// C++ API file handle
+      ::NeXus::File *m_filehandle;
       /// Nexus compression method
       int m_nexuscompression;
       /// Allow an externally supplied progress object to be used
@@ -111,8 +111,8 @@ namespace Mantid
       /// Write a simple value plus possible attributes
       template<class TYPE>
       bool writeNxValue(const std::string& name, const TYPE& value, const int nxType, 
-            const std::vector<std::string>& attributes,
-            const std::vector<std::string>& avalues) const;
+                        const std::vector<std::string>& attributes,
+                        const std::vector<std::string>& avalues) const;
       /// Returns true if the given property is a time series property
       bool isTimeSeries(Kernel::Property* prop) const;
       /// Write a time series log entry
@@ -131,7 +131,7 @@ namespace Mantid
       bool writeNxNote(const std::string& noteName, const std::string& author, const std::string& date,
                          const std::string& description, const std::string& pairValues) const;
       /// write a float array along with any defined attributes
-      bool writeNxFloatArray(const std::string& name, const std::vector<double>& values, 
+      void writeNxFloatArray(const std::string& name, const std::vector<double>& values,
                  const std::vector<std::string>& attributes,const std::vector<std::string>& avalues) const;
       /// write a char array along with any defined attributes
       bool writeNxStringArray(const std::string& name, const std::vector<std::string>& values, 

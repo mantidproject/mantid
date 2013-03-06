@@ -5,6 +5,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpecialCoordinateSystem.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/PeakTransformFactory.h"
@@ -605,7 +606,7 @@ public:
     ConcretePeaksPresenter_sptr presenter = concreteBuilder.create();
 
     const int badIndex = -1;
-    TSM_ASSERT_THROWS("Index is < 0, should throw", presenter->getBoundingBox(badIndex), std::out_of_range);
+    TSM_ASSERT_THROWS("Index is < 0, should throw", presenter->getBoundingBox(badIndex), std::out_of_range&);
   }
 
   void test_getBoundingBox_throws_if_index_too_high()
@@ -615,7 +616,7 @@ public:
 
     const size_t numberOfPeaks = (*presenter->presentedWorkspaces().begin())->rowCount();
     const int badIndex = static_cast<int>(numberOfPeaks) + 1;
-    TSM_ASSERT_THROWS("Index is < 0, should throw", presenter->getBoundingBox(badIndex), std::out_of_range);
+    TSM_ASSERT_THROWS("Index is < 0, should throw", presenter->getBoundingBox(badIndex), std::out_of_range&);
   }
 
   void test_getBoundingBox()
@@ -703,6 +704,13 @@ public:
   {
     bool sortAscending = false;
     doTestSorting(sortAscending);
+  }
+
+  void test_coordinateToString()
+  {
+    TS_ASSERT_EQUALS("HKL", coordinateToString(Mantid::API::HKL));
+    TS_ASSERT_EQUALS("QLab", coordinateToString(Mantid::API::QLab));
+    TS_ASSERT_EQUALS("QSample", coordinateToString(Mantid::API::QSample));
   }
 
 };

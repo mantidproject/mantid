@@ -212,7 +212,7 @@ class DataSet(object):
             ConvertToPointData(InputWorkspace=self._ws_scaled,
                                OutputWorkspace=self._ws_scaled)
             x = mtd[self._ws_scaled].readX(0)
-            dx = mtd[self._ws_scaled].readDx(0)
+            dx = dq_scaled
             y = mtd[self._ws_scaled].readY(0)
             e = mtd[self._ws_scaled].readE(0)
 

@@ -558,8 +558,8 @@ namespace Mantid
 
       /**
        *  takes a character string and evaluates
-       *  the first <T> object. The string is then filled with
-       *  spaces upto the end of the <T> object
+       *  the first \<T\> object. The string is then filled with
+       *  spaces upto the end of the \<T\> object
        *  @param out :: place for output
        *  @param A :: string for input and output.
        *  @return 1 on success 0 on failure

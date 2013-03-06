@@ -128,7 +128,8 @@ namespace
 
   /**
    * Declare properties that specify the dataset within the workspace to fit to.
-   * @param domainIndex :: Index of created domain in a composite domain or 0 in single domain case
+   * @param suffix :: names the dataset
+   * @param addProp :: allows for the declaration of certain properties of the dataset
    */
   void FitMW::declareDatasetProperties(const std::string& suffix,bool addProp)
   {
@@ -257,8 +258,10 @@ namespace
 
   /**
    * Create an output workspace with the calculated values.
-   * @param domain :: The domain
-   * @param ivalues :: The values
+   * @param baseName :: Specifies the name of the output workspace
+   * @param function :: A Pointer to the fitting function
+   * @param domain :: The domain containing x-values for the function
+   * @param ivalues :: A API::FunctionValues instance containing the fitting data
    */
   void FitMW::createOutputWorkspace(
         const std::string& baseName,

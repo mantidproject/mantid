@@ -9,7 +9,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/FindDeadDetectors.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAlgorithms/PolynomialCorrection.h"
 #include <fstream>
 #include <Poco/File.h>
@@ -173,8 +172,6 @@ public:
     work_in1->setInstrument(instr);
     work_in2->setInstrument(instr);
 
-    int forSpecDetMap[20] =
-    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
     //set some dead detectors
     boost::shared_ptr<Mantid::MantidVec> yDead(new Mantid::MantidVec(nHist, 0));
     for (int i = 0; i < nBins; i++)
@@ -183,12 +180,11 @@ public:
       {
         work_in1->setData(i, yDead, yDead);
       }
-      work_in1->getAxis(1)->spectraNo(i) = i;
+      work_in1->getAxis(1)->setValue(i, i);
       Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("", i, NULL);
       instr->add(det);
       instr->markAsDetector(det);
     }
-    work_in1->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 20));
 
     for (int i = 0; i < nBins; i++)
     {
@@ -196,9 +192,8 @@ public:
       {
         work_in2->setData(i, yDead, yDead);
       }
-      work_in2->getAxis(1)->spectraNo(i) = i;
+      work_in2->getAxis(1)->setValue(i, i);
     }
-    work_in2->replaceSpectraMap(new SpectraDetectorMap(forSpecDetMap, forSpecDetMap, 20));
 
     WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
     AnalysisDataService::Instance().add("testdead_in", wsSptr);

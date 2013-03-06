@@ -36,7 +36,7 @@ namespace Algorithms
   /// Sets documentation strings for this algorithm
   void ConvertSpectrumAxis::initDocs()
   {
-    this->setWikiSummary("Converts the axis of a [[Workspace2D]] which normally holds spectrum numbers to some other unit, which will normally be some physical value about the instrument such as Q, Q^2 or theta.  '''Note''': After running this algorithm, some features will be unavailable on the workspace as it will have lost all connection to the instrument. This includes things like the 3D Instrument Display. ");
+    this->setWikiSummary("Converts the axis of a [[Workspace2D]] which normally holds spectrum numbers to some other unit, which will normally be some physical value about the instrument such as Q, Q^2 or theta.<p>'''Note''': After running this algorithm, some features will be unavailable on the workspace as it will have lost all connection to the instrument. This includes things like the 3D Instrument Display. ");
     this->setOptionalMessage("Converts the axis of a Workspace2D which normally holds spectrum numbers to some other unit, which will normally be some physical value about the instrument such as Q, Q^2 or theta.  'Note': After running this algorithm, some features will be unavailable on the workspace as it will have lost all connection to the instrument. This includes things like the 3D Instrument Display.");
   }
   
@@ -49,18 +49,18 @@ namespace Algorithms
     wsVal->add<SpectraAxisValidator>();
     wsVal->add<InstrumentValidator>();
     
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsVal));
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, wsVal),"The name of the input workspace.");
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"The name to use for the output workspace.");
     std::vector<std::string> targetOptions = Mantid::Kernel::UnitFactory::Instance().getKeys();
     targetOptions.push_back("theta");
     targetOptions.push_back("signed_theta");
     declareProperty("Target","",boost::make_shared<StringListValidator>(targetOptions),
-      "The detector attribute to convert the spectrum axis to");
+      "The unit to which the spectrum axis should be converted. This can be either \"theta\" (for <math>\\theta</math> degrees), or any of the IDs known to the [[Unit Factory]].");
     std::vector<std::string> eModeOptions;
     eModeOptions.push_back("Direct");
     eModeOptions.push_back("Indirect");
     declareProperty("EMode", "Direct",boost::make_shared<StringListValidator>(eModeOptions),
-      "The energy mode type required for some conversions");
+      "Some unit conversions require this value to be set (\"Direct\" or \"Indirect\")");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
     declareProperty("EFixed",EMPTY_DBL(),mustBePositive,

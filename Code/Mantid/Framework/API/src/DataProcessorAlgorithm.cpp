@@ -128,9 +128,11 @@ namespace API
   /// Return true if we are running on the main thread
   bool DataProcessorAlgorithm::isMainThread()
   {
-    bool mainThread = true;
+    bool mainThread;
 #ifdef MPI_BUILD
     mainThread = (boost::mpi::communicator().rank()==0);
+#else
+    mainThread = true;
 #endif
     return mainThread;
   }
@@ -148,6 +150,7 @@ namespace API
   /**
    * Determine what kind of input data we have and load it
    * @param inputData :: File path or workspace name
+   * @param loadQuiet :: If true then the output is not stored in the ADS
    */
   Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData,
       const bool loadQuiet)

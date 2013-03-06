@@ -1,6 +1,5 @@
 /*WIKI* 
 
-
 ===Bin-by-bin mode===
 In this, the default scenario, each spectrum in the workspace is normalised on a bin-by-bin basis by the monitor spectrum given. The error on the monitor spectrum is taken into account.
 The normalisation scheme used is:
@@ -21,9 +20,9 @@ The error on the integrated monitor spectrum is taken into account in the normal
 
 The data must be histogram, non-distribution data.
 
-===ChildAlgorithms used===
+===Child Algorithms used===
 
-The [[ExtractSingleSpectrum]] algorithm is used to pull out the monitor spectrum if it's part of the InputWorkspace.
+The [[ExtractSingleSpectrum]] algorithm is used to pull out the monitor spectrum if it's part of the InputWorkspace or MonitorWorkspace.
 For the 'integrated range' option, the [[Integration]] algorithm is used to integrate the monitor spectrum.
 
 In both cases, the [[Divide]] algorithm is used to perform the normalisation.
@@ -36,7 +35,6 @@ In both cases, the [[Divide]] algorithm is used to perform the normalisation.
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -317,7 +315,6 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
   // separate ws takes over detectorID (this logic is dublicated within  getInWSMonitorSpectrum)
   if ( sepWS && monIDs ){
       g_log.information("Both input MonitorWorkspace and detector ID are specified. Ignoring Detector ID");
-      monIDs= false;
   }
 
 
@@ -346,9 +343,10 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
 }
 
 /** Checks and retrieves the requested spectrum out of the input workspace
- *  @param inputWorkspace The input workspace
- *  @returns A workspace containing the monitor spectrum only
- *  @returns spectra number (WS ID) which is used to normalize by
+ *  @param inputWorkspace The input workspace.
+ *  @param spectra_num The spectra number.
+ *  @returns A workspace containing the monitor spectrum only.
+ *  @returns spectra number (WS ID) which is used to normalize by.
  *  @throw std::runtime_error If the properties are invalid
  */
 API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace,int &spectra_num)
@@ -393,7 +391,8 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::Matrix
 }
 
 /** Checks and retrieves the monitor spectrum out of the input workspace
- *  @param inputWorkspace The input workspace
+ *  @param inputWorkspace The input workspace.
+ *  @param wsID The workspace ID.
  *  @returns A workspace containing the monitor spectrum only
  *  @throw std::runtime_error If the properties are invalid
  */

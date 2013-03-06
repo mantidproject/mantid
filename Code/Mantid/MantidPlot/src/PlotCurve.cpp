@@ -41,12 +41,12 @@
 #include <qwt_painter.h>
 
 PlotCurve::PlotCurve(const QString& name) : QwtPlotCurve(name),
-    d_type(0), d_x_offset(0.0), d_y_offset(0.0), d_side_lines(false), d_skip_symbols(1)
+    d_type(0), d_x_offset(0.0), d_y_offset(0.0), d_side_lines(false), d_skip_symbols(1), m_isDistribution(false)
 {}
 
 PlotCurve::PlotCurve(const PlotCurve& c) : QObject(), QwtPlotCurve(c.title().text()),
     d_type(c.d_type), d_x_offset(c.d_x_offset), d_y_offset(c.d_y_offset), d_side_lines(c.d_side_lines),
-    d_skip_symbols(c.d_skip_symbols)
+    d_skip_symbols(c.d_skip_symbols), m_isDistribution(c.m_isDistribution)
 {}
 
 QString PlotCurve::saveCurveLayout()
@@ -308,6 +308,8 @@ DataCurve::DataCurve(Table *t, const QString& xColName, const QString& name, int
         d_start_row(startRow),
         d_end_row(endRow),
         d_labels_column(QString()),
+        d_click_pos_x (0.0), 
+        d_click_pos_y (0.0),
         d_labels_color(Qt::black),
         d_labels_font(QFont()),
         d_labels_angle(0.0),
@@ -328,6 +330,8 @@ DataCurve::DataCurve(const DataCurve& c):
         d_start_row(c.d_start_row),
         d_end_row(c.d_end_row),
         d_labels_column(c.d_labels_column),
+        d_click_pos_x (c.d_click_pos_x), 
+        d_click_pos_y (c.d_click_pos_y),
         d_labels_color(c.d_labels_color),
         d_labels_font(c.d_labels_font),
         d_labels_angle(c.d_labels_angle),

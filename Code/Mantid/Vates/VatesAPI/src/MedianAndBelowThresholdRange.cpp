@@ -55,7 +55,7 @@ namespace Mantid
 
     /**
     Indicates wheter execution has occured or not.
-    @return : true if ::calculate() has been called previously, otherwise false.
+    @return : true if calculate has been called previously, otherwise false.
     */
     bool MedianAndBelowThresholdRange::hasCalculated() const
     {

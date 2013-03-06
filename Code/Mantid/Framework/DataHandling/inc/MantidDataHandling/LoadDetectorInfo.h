@@ -78,7 +78,7 @@ private:
     double phi; ///<phi
     /// Constructor
     detectorInfo(): detID(-1), pressure(-1.0), wallThick(DBL_MAX), l2(DBL_MAX),
-		    theta(DBL_MAX), phi(DBL_MAX) {}
+        theta(DBL_MAX), phi(DBL_MAX) {}
   };
   /// will store a pointer to the user selected workspace
   API::MatrixWorkspace_sptr m_workspace;
@@ -96,8 +96,6 @@ private:
   bool m_error;
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
   double m_FracCompl;
-  /// If set to true then update the detector positions base on the information in the given file
-  bool m_moveDets;
   /// Store the sample position as we may need it repeatedly
   Kernel::V3D m_samplePos;
   /// A pointer to the parameter map for the workspace
@@ -105,14 +103,21 @@ private:
   /// Store a pointer to a single parameterized instrument instance
   Geometry::Instrument_const_sptr m_instrument;
 
+  /// If set to true then update the detector positions base on the information in the given file
+  bool m_moveDets;
   // Implement abstract Algorithm methods
   void init();
   void exec();
-  
+protected: // for testing
+  void readNXS(const std::string& fName);
+private:
   void readDAT(const std::string& fName);
   void readRAW(const std::string& fName);
 
-  void setDetectorParams(const detectorInfo &params, detectorInfo &changed);
+  void readLibisisNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct,std::vector<int32_t>&detType,std::vector<float> &detOffset,std::vector<detid_t> &detList);
+  void readDetDotDatNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct,std::vector<int32_t>&detType,std::vector<float> &detOffset,std::vector<detid_t> &detList);
+
+  void setDetectorParams(const detectorInfo &params, detectorInfo &changed,bool doLogging=true);
   void adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<detid_t> &detectIDs=std::vector<detid_t>(), const std::vector<float> &delays=std::vector<float>());
   void adjDelayTOFs(double lastOffset, bool &differentDelays, const detid_t * const detectIDs, const float * const delays, int numDetectors);
   void adjustXs(const std::vector<detid_t> &detIDs, const std::vector<float> &offsets);

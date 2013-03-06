@@ -3,7 +3,7 @@
 
 The LoadNexusLogs algorithm loads the sample logs from the given nexus file. The logs are visible from MantidPlot if you right-click on a workspace and select "Sample Logs...".
 
-If you use [[LoadSNSEventNexus]] or [[LoadISISNexus]], calling this algorithm is not necessary, since it called as a Child Algorithm.
+If you use [[LoadSNSEventNexus]] or [[LoadISISNexus]], calling this algorithm is not necessary, since it called as a child algorithm.
 
 
 
@@ -12,7 +12,7 @@ If you use [[LoadSNSEventNexus]] or [[LoadISISNexus]], calling this algorithm is
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadNexusLogs.h"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusException.hpp>
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidAPI/FileProperty.h"
@@ -36,7 +36,7 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void LoadNexusLogs::initDocs()
     {
-      this->setWikiSummary("Loads run logs (temperature, pulse charges, etc.) from a NeXus file and adds it to the run information in a [[workspace]].");
+      this->setWikiSummary("Loads sample logs (temperature, pulse charges, etc.) from a NeXus file and adds it to the run information in a [[workspace]]. This is run automatically by [[LoadISISNexus]] and [[LoadEventNexus]]. This is useful when using [[LoadEventPreNeXus]], to add sample logs after loading.");
       this->setOptionalMessage("Loads run logs (temperature, pulse charges, etc.) from a NeXus file and adds it to the run information in a workspace.");
     }
     
@@ -54,13 +54,15 @@ namespace Mantid
     /// Initialisation method.
     void LoadNexusLogs::init()
     {
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
+                      "The name of the workspace that will be filled with the logs.");
       std::vector<std::string> exts;
       exts.push_back(".nxs");
       exts.push_back(".n*");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-                      "The name of the Nexus file to load" );
-      declareProperty(new PropertyWithValue<bool>("OverwriteLogs", true, Direction::Input));
+                      "Path to the .nxs file to load. Can be an EventNeXus or a histogrammed NeXus." );
+      declareProperty(new PropertyWithValue<bool>("OverwriteLogs", true, Direction::Input),
+                      "If true then existing logs will be overwritten, if false they will not.");
 
 
     }
@@ -575,11 +577,11 @@ namespace Mantid
       else if( info.type == ::NeXus::CHAR )
       {
         std::string values;
-        const int item_length = info.dims[1];        
+        const int64_t item_length = info.dims[1];
         try
         {
-          const int nitems = info.dims[0];
-          const int total_length = nitems*item_length;
+          const int64_t nitems = info.dims[0];
+          const int64_t total_length = nitems*item_length;
           boost::scoped_array<char> val_array(new char[total_length]);
           file.getData(val_array.get());
           file.closeData();

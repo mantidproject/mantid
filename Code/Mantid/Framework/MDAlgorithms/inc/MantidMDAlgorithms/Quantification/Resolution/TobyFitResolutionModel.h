@@ -156,7 +156,7 @@ namespace Mantid
       /// The generated value of the in-place mosaic (eta_3)
       mutable std::vector<double> m_etaOutPlane;
       /// A pre-sized vector for the QE position to be evaluated
-      mutable std::vector<std::vector<double>> m_deltaQE;
+      mutable std::vector<std::vector<double> > m_deltaQE;
 
       /// Cache of experiment info caches
       std::map<std::pair<int, detid_t>, CachedExperimentInfo*> m_exptCache;

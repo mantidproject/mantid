@@ -1,4 +1,6 @@
 import unittest
+import numpy as np
+
 from testhelpers import run_algorithm
 
 class TimeSeriesPropertyTest(unittest.TestCase):
@@ -24,15 +26,24 @@ class TimeSeriesPropertyTest(unittest.TestCase):
 
     def test_time_series_string_can_be_extracted(self):
         log_series = self._test_ws.getRun()["icp_event"]
-        self._check_has_time_series_attributes(log_series)
+        self._check_has_time_series_attributes(log_series, list)
         self.assertEquals(log_series.size(), 11)
         self.assertEquals(log_series.nthValue(0).strip(), 'CHANGE_PERIOD 1')
         
-        
-    def _check_has_time_series_attributes(self, log):
+    def test_time_series_bool_can_be_extracted(self):
+        log_series = self._test_ws.getRun()["period 1"]
+        self._check_has_time_series_attributes(log_series)
+        self.assertEquals(log_series.size(), 1)
+    
+    def _check_has_time_series_attributes(self, log, values_type=np.ndarray):
         self.assertTrue(hasattr(log, "value"))
         self.assertTrue(hasattr(log, "times"))
         self.assertTrue(hasattr(log, "getStatistics"))
+
+        values = log.value
+        self.assertTrue(isinstance(values, values_type))
+        self.assertEquals(log.size(), len(values))
+
 
 if __name__ == '__main__':
     unittest.main()

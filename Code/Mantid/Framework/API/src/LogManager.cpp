@@ -447,7 +447,7 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
  
 
 
-  /// @cond
+  /** @cond */
   /// Macro to instantiate concrete template members
 #define INSTANTIATE(TYPE) \
   template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE> * LogManager::getTimeSeriesProperty(const std::string &) const;\
@@ -458,7 +458,7 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
   INSTANTIATE(uint32_t);
   INSTANTIATE(std::string);
   INSTANTIATE(bool);
-  /// @endcond
+  /** @endcond */
 
 } //API namespace
 

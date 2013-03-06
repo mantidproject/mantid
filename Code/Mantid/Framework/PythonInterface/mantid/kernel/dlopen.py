@@ -92,7 +92,7 @@ def setup_dlopen(library, depends=[]):
         # the thread-local storage not being initialized properly unles
         # it is loaded before other libraries.
         dlloader(get_libpath(pythonlib, 'stdc++'))
-        dlloader(get_libpath(pythonlib, 'libNeXus'))
+        dlloader(get_libpath(pythonlib, 'libNeXus.so'))
     # Load the dependencies
     for dep in depends:
         dlloader(get_libpath(pythonlib, dep))

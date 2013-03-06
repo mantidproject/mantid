@@ -13,7 +13,6 @@
 #include <crtdefs.h>
 #include <istream>
 #include <limits.h>
-#include <xfwrap1>
 #include <iomanip>
 #include <cstdio>
 #include <cstdint>
@@ -35,5 +34,9 @@
 #include <Poco/Mutex.h>
 #include <Poco/Notification.h>
 #include <Poco/Message.h>
+
+// NeXus
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #endif

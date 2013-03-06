@@ -38,7 +38,7 @@ namespace Mantid
 
     /**
      * Initialize the object with a string of parameters
-     * @param :: params A key=value list of parameters
+     * @param params :: A key=value list of parameters
      */
     void ChopperModel::initialize(const std::string & params)
     {

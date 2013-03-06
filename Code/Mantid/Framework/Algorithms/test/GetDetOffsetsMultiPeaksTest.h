@@ -50,7 +50,7 @@ public:
     for (size_t i = 0; i < Y.size(); ++i)
     {
       const double x = (X[i]+X[i+1])/2;
-      Y[i] = 5.*exp(-0.5*pow((x-10)/1.0,2));
+      Y[i] = 5.1*exp(-0.5*pow((x-10)/1.0,2));
       E[i] = 0.001;
     }
 

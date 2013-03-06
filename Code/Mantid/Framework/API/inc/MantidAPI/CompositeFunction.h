@@ -19,9 +19,9 @@ namespace API
     Composite functions do not have their own parameters, they use parameters of the member functions.
     Functions are added to a composite functions with addFunction method and can be retrieved with
     getFinction(i) method. Function indices are defined by the order they are added. Parameter names
-    are formed from the member function's index and its parameter name: f<index>.<name>. For example,
+    are formed from the member function's index and its parameter name: f[index].[name]. For example,
     name "f0.Sigma" would be given to the "Sigma" parameter of a Gaussian added first to the composite
-    function. If a member function is a composite function itself the same principle applies: 'f<index>.'
+    function. If a member function is a composite function itself the same principle applies: 'f[index].'
     is prepended to a name, e.g. "f0.f1.Sigma".
 
     The default implementation expects its member to use the same type of FunctionDomain. The domain
@@ -68,7 +68,6 @@ public:
   void setWorkspace(boost::shared_ptr<const Workspace> ws);
 
   /// Function you want to fit to. 
-  /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
   virtual void function(const FunctionDomain& domain, FunctionValues& values)const;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);

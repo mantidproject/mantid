@@ -1,7 +1,5 @@
 /*WIKI* 
 
-
-
 Goes through all events in all EventLists and takes out any events with a PulseTime value not within the range specified.
 * Sample logs consisting of [[TimeSeriesProperty]]'s are also filtered out according to the same time.
 * The integrated proton charge of the run is also re-calculated according to the filtered out ProtonCharge pulse log.
@@ -11,9 +9,6 @@ You must specify:
 * Both AbsoluteStartTime and AbsoluteStop time.
 * But not another combination of the four, or the algorithm will abort.
 
-
-
-
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -21,7 +16,6 @@ You must specify:
 #include "MantidAlgorithms/FilterByTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/DateAndTime.h"
@@ -40,7 +34,7 @@ DECLARE_ALGORITHM(FilterByTime)
 /// Sets documentation strings for this algorithm
 void FilterByTime::initDocs()
 {
-  this->setWikiSummary("This algorithm filters out events from an EventWorkspace that are not between given start and stop times. ");
+  this->setWikiSummary("This algorithm filters out events from an EventWorkspace that are not between given start and stop times.");
   this->setOptionalMessage("This algorithm filters out events from an EventWorkspace that are not between given start and stop times.");
 }
 

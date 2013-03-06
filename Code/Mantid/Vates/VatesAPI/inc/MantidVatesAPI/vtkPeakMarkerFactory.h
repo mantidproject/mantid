@@ -106,7 +106,6 @@ private:
   double m_peakRadius; 
 
 };
-
 }
 }
 

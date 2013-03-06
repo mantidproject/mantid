@@ -1,3 +1,10 @@
+/*WIKI*
+
+This algorithm starts with a PeaksWorkspace containing the expected positions of peaks in detector space.
+It calculates the centroid of the peak by calculating the average of the coordinates of all events within a given radius of the peak, weighted by the weight (signal) of the event for event workspaces or the intensity for histogrammed workspaces.
+
+*WIKI*/
+
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidCrystal/CentroidPeaks.h"
@@ -393,6 +400,7 @@ namespace Crystal
   }
   bool CentroidPeaks::edgePixel(std::string bankName, int col, int row, int Edge)
   {
+	  if (bankName.compare("None") == 0) return false;
 	  Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
 	  boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
 	  if (parent->type().compare("RectangularDetector") == 0)

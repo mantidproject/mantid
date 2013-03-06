@@ -1,5 +1,6 @@
 from reduction.reducer import ReductionStep
-from mantidsimple import *
+from mantid.simpleapi import *
+from mantid import config
 import string
 import os
 
@@ -47,36 +48,37 @@ class LoadData(ReductionStep):
         wsname = ''
 
         for file in self._data_files:
-            mtd.sendLogMessage("Loading file %s" % file)
+            logger.notice("Loading file %s" % file)
 
-            loader_handle = Load(self._data_files[file], file, LoadLogFiles=False)
+            loaded_ws = Load(Filename=self._data_files[file], OutputWorkspace=file, LoadLogFiles=False)
+            loader_handle = loaded_ws.getHistory().lastAlgorithm()
             loader_name = loader_handle.getPropertyValue("LoaderName")
 
             if mtd[file].getInstrument().getName() == 'BASIS':
-                ModeratorTzero(file, file)
+                ModeratorTzero(InputWorkspace=file,OutputWorkspace= file)
                 basis_mask = mtd[file].getInstrument().getStringParameter(
                     'Workflow.MaskFile')[0]
                 # Quick hack for older BASIS files that only have one side
                 #if (mtd[file].getRun()['run_number'] < 16693):
                 #        basis_mask = "BASIS_Mask_before_16693.xml"
-                basis_mask_filename = os.path.join(mtd.getConfigProperty('maskFiles.directory')
+                basis_mask_filename = os.path.join(config.getString('maskFiles.directory')
                         , basis_mask)
                 if os.path.isfile(basis_mask_filename):
                         LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask", 
                                  InputFile=basis_mask_filename)
                         MaskDetectors(Workspace=file, MaskedWorkspace="__basis_mask")
                 else:
-                        mtd.sendLogMessage("Couldn't find specified mask file : " + str(basis_mask_filename))
+                        logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
                         
 
             if self._parameter_file != None:
-                LoadParameterFile(file, self._parameter_file)
+                LoadParameterFile(Workspace=file,Filename= self._parameter_file)
 
             if ( wsname == '' ):
                 wsname = file
 
             if self._require_chop_data(file):
-                ChopData(file, file, 20000.0, 5, IntegrationRangeLower=5000.0,
+                ChopData(InputWorkspace=file,OutputWorkspace= file,Step= 20000.0,NChops= 5, IntegrationRangeLower=5000.0,
                     IntegrationRangeUpper=10000.0, 
                     MonitorWorkspaceIndex=self._monitor_index)
                 self._multiple_frames = True
@@ -89,16 +91,16 @@ class LoadData(ReductionStep):
                 workspaces = [file]
 
 
-            mtd.sendDebugMessage('self._monitor_index = ' + str(self._monitor_index))
+            logger.debug('self._monitor_index = ' + str(self._monitor_index))
 
             for ws in workspaces:
                 if (loader_name.endswith('Nexus')):
-                    LoadNexusMonitors(self._data_files[file], ws+'_mon')
+                    LoadNexusMonitors(Filename=self._data_files[file],OutputWorkspace= ws+'_mon')
                 else:
                     ## Extract Monitor Spectrum
-                    ExtractSingleSpectrum(ws, ws+'_mon', self._monitor_index)
+                    ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace= ws+'_mon',WorkspaceIndex= self._monitor_index)
                     ## Crop the workspace to remove uninteresting detectors
-                    CropWorkspace(ws, ws,
+                    CropWorkspace(InputWorkspace=ws,OutputWorkspace= ws,
                         StartWorkspaceIndex=self._detector_range_start,
                         EndWorkspaceIndex=self._detector_range_end)
 
@@ -149,14 +151,14 @@ class LoadData(ReductionStep):
         for ws in self._data_files:
             merges[0].append(ws)
             merges[1].append(ws+'_mon')
-        MergeRuns(','.join(merges[0]), wsname)
-        MergeRuns(','.join(merges[1]), wsname+'_mon')
+        MergeRuns(InputWorkspaces=','.join(merges[0]),OutputWorkspace= wsname)
+        MergeRuns(InputWorkspaces=','.join(merges[1]),OutputWorkspace= wsname+'_mon')
         for n in range(1, len(merges[0])):
-            DeleteWorkspace(merges[0][n])
-            DeleteWorkspace(merges[1][n])
+            DeleteWorkspace(Workspace=merges[0][n])
+            DeleteWorkspace(Workspace=merges[1][n])
         factor = 1.0 / len(self._data_files)
-        Scale(wsname, wsname, factor)
-        Scale(wsname+'_mon', wsname+'_mon', factor)
+        Scale(InputWorkspace=wsname,OutputWorkspace= wsname,Factor= factor)
+        Scale(InputWorkspace=wsname+'_mon',OutputWorkspace= wsname+'_mon',Factor= factor)
 
     def _sum_chopped(self, wsname):
         merges = []
@@ -173,21 +175,21 @@ class LoadData(ReductionStep):
                         merges[0].append(file)
                         merges[1].append(file+'_mon')
         for merge in merges:
-            MergeRuns(','.join(merge), merge[0])
+            MergeRuns(InputWorkspaces=','.join(merge),OutputWorkspace= merge[0])
             factor = 1.0 / len(merge)
-            Scale(merge[0], merge[0], factor)
+            Scale(InputWorkspace=merge[0],OutputWorkspace= merge[0],Factor= factor)
             for n in range(1, len(merge)):
-                DeleteWorkspace(merge[n])
+                DeleteWorkspace(Workspace=merge[n])
 
     def _identify_bad_detectors(self, workspace):
-        IdentifyNoisyDetectors(workspace, '__temp_tsc_noise')
+        IdentifyNoisyDetectors(InputWorkspace=workspace,OutputWorkspace= '__temp_tsc_noise')
         ws = mtd['__temp_tsc_noise']
         nhist = ws.getNumberHistograms()
         self._masking_detectors = []
         for i in range(0, nhist):
             if ( ws.readY(i)[0] == 0.0 ):
                 self._masking_detectors.append(i)
-        DeleteWorkspace('__temp_tsc_noise')
+        DeleteWorkspace(Workspace='__temp_tsc_noise')
         return self._masking_detectors
 
     def _require_chop_data(self, ws):
@@ -196,7 +198,7 @@ class LoadData(ReductionStep):
                 'Workflow.ChopDataIfGreaterThan')[0]
         except IndexError:
             return False
-        if ( mtd[ws].readX(0)[mtd[ws].getNumberBins()] > cdigt ):
+        if ( mtd[ws].readX(0)[mtd[ws].blocksize()] > cdigt ):
             return True
         else:
             return False
@@ -229,10 +231,10 @@ class BackgroundOperations(ReductionStep):
             workspaces = [file_ws]
 
         for ws in workspaces:
-            ConvertToDistribution(ws)
-            FlatBackground(ws, ws, self._background_start, 
-                self._background_end, Mode='Mean')
-            ConvertFromDistribution(ws)
+            ConvertToDistribution(Workspace=ws)
+            FlatBackground(InputWorkspace=ws,OutputWorkspace= ws,StartX= self._background_start,
+                           EndX=self._background_end, Mode='Mean')
+            ConvertFromDistribution(Workspace=ws)
 
     def set_range(self, start, end):
         self._background_start = start
@@ -286,20 +288,20 @@ class CreateCalibrationWorkspace(ReductionStep):
             (direct, filename) = os.path.split(file)
             (root, ext) = os.path.splitext(filename)
             try:
-                Load(file, root, SpectrumMin=specMin, SpectrumMax=specMax,
+                Load(Filename=file,OutputWorkspace= root, SpectrumMin=specMin, SpectrumMax=specMax,
                     LoadLogFiles=False)
                 runs.append(root)
             except:
                 sys.exit('Indirect: Could not load raw file: ' + file)
         cwsn = 'calibration'
         if ( len(runs) > 1 ):
-            MergeRuns(",".join(runs), cwsn)
+            MergeRuns(InputWorkspaces=",".join(runs),OutputWorkspace= cwsn)
             factor = 1.0 / len(runs)
-            Scale(cwsn, cwsn, factor)
+            Scale(InputWorkspace=cwsn,OutputWorkspace= cwsn,Factor= factor)
         else:
             cwsn = runs[0]
-        FlatBackground(cwsn, cwsn, backMin, backMax, Mode='Mean')
-        Integration(cwsn, cwsn, peakMin, peakMax)
+        FlatBackground(InputWorkspace=cwsn,OutputWorkspace= cwsn,StartX= backMin,EndX= backMax, Mode='Mean')
+        Integration(InputWorkspace=cwsn,OutputWorkspace= cwsn,RangeLower= peakMin,RangeUpper= peakMax)
         cal_ws = mtd[cwsn]
         sum = 0
         for i in range(0, cal_ws.getNumberHistograms()):
@@ -309,13 +311,13 @@ class CreateCalibrationWorkspace(ReductionStep):
         outWS_n = runs[0][:3] + runNo + '_' + self._analyser + self._reflection + '_calib'
 
         value = 1.0 / ( sum / cal_ws.getNumberHistograms() )
-        Scale(cwsn, cwsn, value, 'Multiply')
+        Scale(InputWorkspace=cwsn,OutputWorkspace= cwsn,Factor= value,Operation= 'Multiply')
 
-        RenameWorkspace(cwsn, outWS_n)
+        RenameWorkspace(InputWorkspace=cwsn,OutputWorkspace= outWS_n)
         self._calib_workspace = outWS_n # Set result workspace value
         if ( len(runs) > 1 ):
             for run in runs:
-                DeleteWorkspace(run)
+                DeleteWorkspace(Workspace=run)
 
     def set_parameters(self, back_min, back_max, peak_min, peak_max):
         self._back_min = back_min
@@ -390,7 +392,7 @@ class ApplyCalibration(ReductionStep):
             workspaces = [file_ws]
 
         for ws in workspaces:
-            Divide(ws, self._calib_workspace, ws)
+            Divide(LHSWorkspace=ws,RHSWorkspace= self._calib_workspace,OutputWorkspace= ws)
 
     def set_is_multiple_frames(self, value):
         self._multiple_frames = value
@@ -432,7 +434,7 @@ class HandleMonitor(ReductionStep):
             if self._need_to_unwrap(ws):
                 self._unwrap_monitor(ws)
             else:
-                ConvertUnits(monitor, monitor, 'Wavelength')
+                ConvertUnits(InputWorkspace=monitor,OutputWorkspace= monitor,Target= 'Wavelength')
             self._monitor_efficiency(monitor)
             self._scale_monitor(monitor)
 
@@ -446,9 +448,9 @@ class HandleMonitor(ReductionStep):
             stepsize = mtd[ws].getInstrument().getNumberParameter(
                 'Workflow.Monitor.RebinStep')[0]
         except IndexError:
-            mtd.sendLogMessage("Monitor is not being rebinned.")
+            logger.notice("Monitor is not being rebinned.")
         else:
-            Rebin(ws+'_mon', ws+'_mon', stepsize)
+            Rebin(InputWorkspace=ws+'_mon',OutputWorkspace= ws+'_mon',Params= stepsize)
 
     def _need_to_unwrap(self, ws):
         try:
@@ -473,11 +475,10 @@ class HandleMonitor(ReductionStep):
     def _unwrap_monitor(self, ws):
         l_ref = self._get_reference_length(ws, 0)
         monitor = ws+'_mon'
-        alg = UnwrapMonitor(monitor, monitor, LRef=l_ref)
-        join = float(alg.getPropertyValue('JoinWavelength'))
-        RemoveBins(monitor, monitor, join-0.001, join+0.001, 
+        unwrapped_ws, join = UnwrapMonitor(InputWorkspace=monitor, OutputWorkspace=monitor, LRef=l_ref)
+        RemoveBins(InputWorkspace=monitor,OutputWorkspace= monitor,XMin= join-0.001,XMax= join+0.001, 
             Interpolation='Linear')
-        FFTSmooth(monitor, monitor, 0)
+        FFTSmooth(InputWorkspace=monitor,OutputWorkspace=monitor,WorkspaceIndex=0)
 
     def _get_reference_length(self, ws, index):
         workspace = mtd[ws]
@@ -502,7 +503,7 @@ class HandleMonitor(ReductionStep):
         else:
             if ( area == -1 or thickness == -1 ):
                 return
-            OneMinusExponentialCor(monitor, monitor, (8.3 * thickness), area)
+            OneMinusExponentialCor(InputWorkspace=monitor,OutputWorkspace= monitor,C= (8.3 * thickness),C1= area)
 
     def _scale_monitor(self, monitor):
         """Some instruments wish to scale their data. Doing this at the
@@ -517,7 +518,7 @@ class HandleMonitor(ReductionStep):
             print "Monitor is not being scaled."
         else:
             if factor != 1.0:
-                Scale(monitor, monitor, ( 1.0 / factor ), 'Multiply')
+                Scale(InputWorkspace=monitor,OutputWorkspace= monitor,Factor= ( 1.0 / factor ),Operation= 'Multiply')
 
 class CorrectByMonitor(ReductionStep):
     """
@@ -541,10 +542,10 @@ class CorrectByMonitor(ReductionStep):
             workspaces = [file_ws]
 
         for ws in workspaces:
-            ConvertUnits(ws, ws, "Wavelength", self._emode)
-            RebinToWorkspace(ws, ws+'_mon', ws)
-            Divide(ws, ws+'_mon', ws)
-            DeleteWorkspace(ws+'_mon')
+            ConvertUnits(InputWorkspace=ws,OutputWorkspace= ws,Target= "Wavelength",EMode= self._emode)
+            RebinToWorkspace(WorkspaceToRebin=ws,WorkspaceToMatch= ws+'_mon',OutputWorkspace= ws)
+            Divide(LHSWorkspace=ws,RHSWorkspace= ws+'_mon',OutputWorkspace= ws)
+            DeleteWorkspace(Workspace=ws+'_mon')
 
     def set_emode(self, emode):
         """
@@ -564,13 +565,13 @@ class FoldData(ReductionStep):
         except AttributeError:
             return # Not a grouped workspace
         ws = file_ws+'_merged'
-        MergeRuns(','.join(wsgroup), ws)
+        MergeRuns(InputWorkspaces=','.join(wsgroup),OutputWorkspace= ws)
         scaling = self._create_scaling_workspace(wsgroup, ws)
         for workspace in wsgroup:
-            DeleteWorkspace(workspace)
-        Divide(ws, scaling, ws)
-        DeleteWorkspace(scaling)
-        RenameWorkspace(ws, file_ws)
+            DeleteWorkspace(Workspace=workspace)
+        Divide(LHSWorkspace=ws,RHSWorkspace= scaling,OutputWorkspace= ws)
+        DeleteWorkspace(Workspace=scaling)
+        RenameWorkspace(InputWorkspace=ws,OutputWorkspace= file_ws)
         self._result_workspaces.append(file_ws)
         
     def get_result_workspaces(self):
@@ -584,19 +585,19 @@ class FoldData(ReductionStep):
         highest = 0
         for ws in wsgroup:
             if ( unit == '' ):
-                unit = mtd[ws].getAxis(0).getUnit().name()
+                unit = mtd[ws].getAxis(0).getUnit().unitID()
             low = mtd[ws].dataX(0)[0]
-            high = mtd[ws].dataX(0)[mtd[ws].getNumberBins()-1]
+            high = mtd[ws].dataX(0)[mtd[ws].blocksize()-1]
             ranges.append([low, high])
             if low < lowest: lowest = low
             if high > highest: highest = high
         dataX = mtd[merged].readX(0)
         dataY = []
         dataE = []
-        for i in range(0, mtd[merged].getNumberBins()):
+        for i in range(0, mtd[merged].blocksize()):
             dataE.append(0.0)
             dataY.append(self._ws_in_range(ranges, dataX[i]))
-        CreateWorkspace(wsname, dataX, dataY, dataE, UnitX=unit)
+        CreateWorkspace(OutputWorkspace=wsname,DataX= dataX,DataY= dataY,DataE= dataE, UnitX=unit)
         return wsname
 
     def _ws_in_range(self, ranges, xval):
@@ -661,11 +662,11 @@ class ConvertToEnergy(ReductionStep):
             workspaces = [file_ws]
             
         for ws in workspaces:
-            ConvertUnits(ws, ws, 'DeltaE', 'Indirect')
-            CorrectKiKf(ws, ws, 'Indirect')
+            ConvertUnits(InputWorkspace=ws,OutputWorkspace= ws,Target= 'DeltaE',EMode= 'Indirect')
+            CorrectKiKf(InputWorkspace=ws,OutputWorkspace= ws,EMode= 'Indirect')
             if self._rebin_string is not None:
                 if not self._multiple_frames:
-                    Rebin(ws, ws, self._rebin_string)
+                    Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= self._rebin_string)
                     
         if self._multiple_frames:
             self._rebin_mf(workspaces)
@@ -682,13 +683,13 @@ class ConvertToEnergy(ReductionStep):
         else:
             rstwo = self._rebin_string
         for ws in workspaces:
-            nbins = mtd[ws].getNumberBins()
+            nbins = mtd[ws].blocksize()
             if nbins > nbin: nbin = nbins
         for ws in workspaces:
-            if (mtd[ws].getNumberBins() == nbin):
-                Rebin(ws, ws, self._rebin_string)
+            if (mtd[ws].blocksize() == nbin):
+                Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= self._rebin_string)
             else:
-                Rebin(ws, ws, rstwo)
+                Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= rstwo)
 
 class DetailedBalance(ReductionStep):
     """
@@ -713,7 +714,7 @@ class DetailedBalance(ReductionStep):
             workspaces = [file_ws]
 
         for ws in workspaces:
-            ExponentialCorrection(ws, ws, 1.0, correction, Operation="Multiply")
+            ExponentialCorrection(InputWorkspace=ws,OutputWorkspace= ws,C0= 1.0,C1= correction, Operation="Multiply")
         
     def set_temperature(self, temp):
         self._temp = temp
@@ -739,7 +740,7 @@ class Scaling(ReductionStep):
             workspaces = [file_ws]
 
         for ws in workspaces:
-            Scale(ws, ws, self._scale_factor, Operation="Multiply")
+            Scale(InputWorkspace=ws,OutputWorkspace= ws,Factor= self._scale_factor, Operation="Multiply")
         
     def set_scale_factor(self, scaleFactor):
         self._scale_factor = scaleFactor
@@ -846,11 +847,11 @@ class Grouping(ReductionStep):
             xml += "</group>\n"
         xml += "</detector-grouping>\n"
         
-        xfile = os.path.join(mtd.getConfigProperty('defaultsave.directory'), 'fixedGrp.xml')
+        xfile = os.path.join(config.getString('defaultsave.directory'), 'fixedGrp.xml')
         file = open(xfile, 'w')
         file.write(xml)
         file.close()
-        GroupDetectors(workspace, workspace, MapFile=xfile, 
+        GroupDetectors(InputWorkspace=workspace,OutputWorkspace= workspace, MapFile=xfile, 
             Behaviour='Average')
         return workspace
 
@@ -864,7 +865,7 @@ class Grouping(ReductionStep):
             for i in range(0, nhist):
                 if i not in self._masking_detectors:
                     wslist.append(i)
-            GroupDetectors(workspace, workspace, 
+            GroupDetectors(InputWorkspace=workspace,OutputWorkspace= workspace, 
                 WorkspaceIndexList=wslist, Behaviour='Average')
         else:
             # Assume we have a grouping file.
@@ -872,11 +873,11 @@ class Grouping(ReductionStep):
             if (os.path.isfile(grouping)):
                 grouping_filename = grouping
             else:
-                grouping_filename = os.path.join(mtd.getConfigProperty('groupingFiles.directory'),
+                grouping_filename = os.path.join(config.getString('groupingFiles.directory'),
                         grouping)
             # Final check that the Mapfile exists, if not don't run the alg.
             if os.path.isfile(grouping_filename):
-                GroupDetectors(workspace, workspace, MapFile=grouping_filename, 
+                GroupDetectors(InputWorkspace=workspace,OutputWorkspace= workspace, MapFile=grouping_filename, 
                         Behaviour='Average')
         return workspace
 
@@ -902,25 +903,25 @@ class SaveItem(ReductionStep):
         filename = naming._get_ws_name(file_ws)
         for format in self._formats:
             if format == 'spe':
-                SaveSPE(file_ws, filename+'.spe')
+                SaveSPE(InputWorkspace=file_ws,Filename= filename+'.spe')
             elif format == 'nxs':
-                SaveNexusProcessed(file_ws, filename+'.nxs')
+                SaveNexusProcessed(InputWorkspace=file_ws,Filename= filename+'.nxs')
             elif format == 'nxspe':
-                SaveNXSPE(file_ws, filename+'.nxspe')
+                SaveNXSPE(InputWorkspace=file_ws,Filename= filename+'.nxspe')
             elif format == 'ascii':
-                SaveAscii(file_ws, filename+'.dat')
+                SaveAscii(InputWorkspace=file_ws,Filename= filename+'.dat')
             elif format == 'gss':
-                ConvertUnits(file_ws, "__save_item_temp", "TOF")
-                SaveGSS("__save_item_temp", filename+".gss")
-                DeleteWorkspace("__save_item_temp")
+                ConvertUnits(InputWorkspace=file_ws,OutputWorkspace= "__save_item_temp",Target= "TOF")
+                SaveGSS(InputWorkspace="__save_item_temp",Filename= filename+".gss")
+                DeleteWorkspace(Workspace="__save_item_temp")
             elif format == 'aclimax':
                 if (self._save_to_cm_1 == False):
                     bins = '3, -0.005, 500' #meV
                 else:
                     bins = '24, -0.005, 4000' #cm-1
-                Rebin(file_ws, file_ws + '_aclimax_save_temp', bins)
-                SaveAscii(file_ws + '_aclimax_save_temp', filename+ '_aclimax.dat', Separator='Tab')
-                DeleteWorkspace(file_ws + '_aclimax_save_temp')
+                Rebin(InputWorkspace=file_ws,OutputWorkspace= file_ws + '_aclimax_save_temp',Params= bins)
+                SaveAscii(InputWorkspace=file_ws + '_aclimax_save_temp',Filename= filename+ '_aclimax.dat', Separator='Tab')
+                DeleteWorkspace(Workspace=file_ws + '_aclimax_save_temp')
                 
     def set_formats(self, formats):
         self._formats = formats
@@ -942,7 +943,7 @@ class Naming(ReductionStep):
         
     def execute(self, reducer, file_ws):
         wsname = self._get_ws_name(file_ws)
-        RenameWorkspace(file_ws, wsname)
+        RenameWorkspace(InputWorkspace=file_ws,OutputWorkspace= wsname)
         self._result_workspaces.append(wsname)
 
     def get_result_workspaces(self):
@@ -968,7 +969,7 @@ class Naming(ReductionStep):
         title = ws.getRun()['run_title'].value.strip()
         runNo = ws.getRun()['run_number'].value
         inst = ws.getInstrument().getName()
-        isn = ConfigService().facility().instrument(inst).shortName().upper()
+        isn = config.getFacility().instrument(inst).shortName().upper()
         valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
         title = ''.join(ch for ch in title if ch in valid)
         title = isn + runNo + '-' + title
@@ -979,7 +980,7 @@ class Naming(ReductionStep):
             return ''
         ws = mtd[workspace]
         ins = ws.getInstrument().getName()
-        ins = ConfigService().facility().instrument(ins).shortName().lower()
+        ins = config.getFacility().instrument(ins).shortName().lower()
         run = ws.getRun().getLogData('run_number').value
         try:
             analyser = ws.getInstrument().getStringParameter('analyser')[0]

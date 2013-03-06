@@ -6,11 +6,6 @@
 The algorithm looks through the [[Instrument]] to find all the [[RectangularDetector]]s defined. For each detector, the SumX*SumY neighboring event lists are summed together and saved in the output workspace as a single spectrum. Therefore, the output workspace will have 1/(SumX*SumY) * the original number of spectra.
 
 
-
-
-
-
-
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -22,7 +17,6 @@ The algorithm looks through the [[Instrument]] to find all the [[RectangularDete
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include <boost/algorithm/string.hpp>
 #include "MantidKernel/BoundedValidator.h"
 
@@ -69,15 +63,7 @@ void SumNeighbours::init()
   declareProperty("SumY", 4, mustBePositive,
     "The number of Y (vertical) pixels to sum together. This must evenly divide the number of Y pixels in a detector" );
 
-  // TODO:  Add this capability for rectangular and non-rectangular
-  /*declareProperty(
-      new PropertyWithValue<bool>("SingleNeighbourhood", false, Direction::Input),
-    "Optional: Only applies if you specified a single Xpixel and Ypixel for DetectorName.\n");
-  declareProperty("Xpixel", 0, "Optional: Left-most X of neighbourhood when choosing only single neighbourhood." );
-  declareProperty("Ypixel", 0, "Optional: Lowest Y of neighbourhood when choosing only single neighbourhood." );
-  declareProperty("DetectorName", "", "Optional: Name of the detector when calculating for single neighbourhood." );*/
-
-
+  
 
 }
 

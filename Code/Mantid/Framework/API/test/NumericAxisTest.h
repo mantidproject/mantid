@@ -133,13 +133,6 @@ public:
   {
     TS_ASSERT_THROWS( numericAxis->spectraNo(-1), std::domain_error );
     TS_ASSERT_THROWS( numericAxis->spectraNo(5), std::domain_error );
-    
-    NumericAxis nAxis(5);
-    for (int i=0; i<5; ++i)
-    {
-      TS_ASSERT_THROWS( nAxis.spectraNo(i) = 2*i, std::domain_error);
-      TS_ASSERT_EQUALS( nAxis(i), 0 );
-    }    
   }
 
   void testConversionToBins()

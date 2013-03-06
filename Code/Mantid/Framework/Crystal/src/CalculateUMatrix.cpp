@@ -1,6 +1,7 @@
 /*WIKI* 
 
 Given a set of peaks (Q in the goniometer frame, HKL values), and given lattice parameters <math>(a,b,c,\alpha,\beta,\gamma)</math>, it will try to find the U matrix, using least squares approach and quaternions [http://www.cs.iastate.edu/~cs577/handouts/quaternion.pdf].
+Units of length are in in <math>\rm \AA</math>, angles are in degrees.
 
 The algorithm calculates first the B matrix according to Busing and Levi.
 
@@ -146,7 +147,7 @@ namespace Crystal
   /// Sets documentation strings for this algorithm
   void CalculateUMatrix::initDocs()
   {
-    this->setWikiSummary("Calculate the U matrix from a peaks workspace, given lattice parameters.");
+    this->setWikiSummary("Calculate the U matrix from a [[PeaksWorkspace]], given lattice parameters.");
     this->setOptionalMessage("Calculate the U matrix from a peaks workspace, given lattice parameters.");
   }
 

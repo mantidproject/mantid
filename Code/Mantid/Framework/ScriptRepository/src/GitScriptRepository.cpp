@@ -811,11 +811,11 @@ static int cred_acquire(git_cred **out,
 	char password[128] = {0};
 
 	printf("Username: ");
-	scanf("%s", username);
+	scanf("%40s", username);
 
 	/* Yup. Right there on your terminal. Careful where you copy/paste output. */
 	printf("Password: ");
-	scanf("%s", password);
+	scanf("%40s", password);
 
 	return git_cred_userpass_plaintext_new(out, username, password);
 }

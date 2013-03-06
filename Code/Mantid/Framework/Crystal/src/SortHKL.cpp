@@ -1,5 +1,5 @@
 /*WIKI* 
-
+Peaks are sorted first by H, then K, and then L.  For equivalent HKL in the point group, the intensity is averaged and all the equivalent HKLs have the same average intensity.  Outliers with zscore > 3 from each group of equivalent HKLs are not included in the average.
 
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
@@ -69,8 +69,8 @@ namespace Crystal
     declareProperty("PointGroup", propOptions[0], boost::make_shared<StringListValidator>(propOptions),
       "Which point group applies to this crystal?");
 
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output));
-    declareProperty("OutputChi2",0.0, Direction::Output);
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),"Output PeaksWorkspace");
+    declareProperty("OutputChi2",0.0,"Chi-square is available as output", Direction::Output);
 
   }
 
@@ -222,6 +222,11 @@ namespace Crystal
           sig2.erase(sig2.begin() + (*it));
       }
   }
+
+  /** Rounds the V3D to integer values
+  * @param hkl the input vector
+  * @returns The output V3D
+  */
   V3D SortHKL::round(V3D hkl)
   {
           V3D hkl1;
@@ -230,6 +235,11 @@ namespace Crystal
 	  hkl1.setZ(round(hkl.Z()));
 	  return hkl1;
   }
+
+  /** Rounds a double using 0.5 as the cut off for rounding down
+  * @param d the input value
+  * @returns The output value
+  */
   double SortHKL::round(double d)
   {
 	  return floor(d + 0.5);

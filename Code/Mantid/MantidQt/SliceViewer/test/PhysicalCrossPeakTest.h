@@ -191,6 +191,51 @@ public:
     TS_ASSERT_EQUALS(expectedBottom, boundingBox.bottom());
   }
 
+  void test_expand_peak_intoplane()
+  {
+    V3D origin(0, 0, 0);
+    const double maxZ = 1;
+    const double minZ = 0;
+    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
+
+    const double newEffectiveRadiusFactor = 0.2;
+    const double effectiveRadius = newEffectiveRadiusFactor * (maxZ - minZ);
+    physicalPeak.setOccupancyIntoView(newEffectiveRadiusFactor);
+    TS_ASSERT_EQUALS(newEffectiveRadiusFactor, physicalPeak.getOccupancyIntoView());
+    TS_ASSERT_EQUALS(effectiveRadius, physicalPeak.getEffectiveRadius());
+  }
+
+  void test_expand_peak_inplane()
+  {
+    V3D origin(0, 0, 0);
+    const double maxZ = 1;
+    const double minZ = 0;
+    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
+
+    const double occupancyFraction = 0.01; // 1%
+    physicalPeak.setOccupancyInView(occupancyFraction);// 1 %
+    auto drawingObject = physicalPeak.draw(1000, 1000);
+    TS_ASSERT_EQUALS(occupancyFraction, physicalPeak.getOccupancyInView());
+  }
+
+  void test_setOccupanyIntoView_ignores_zeros()
+  {
+    V3D origin(0, 0, 0);
+    const double maxZ = 1;
+    const double minZ = 0;
+    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
+
+    double defaultOccupancy = physicalPeak.getOccupancyIntoView();
+
+    // Now try to set it to zero.
+    physicalPeak.setOccupancyIntoView(0);
+
+    TSM_ASSERT_DIFFERS("Should have ignored the zero value input", 0,
+        physicalPeak.getOccupancyIntoView());
+    TS_ASSERT_EQUALS(defaultOccupancy, physicalPeak.getOccupancyIntoView());
+
+  }
+
 
 };
 

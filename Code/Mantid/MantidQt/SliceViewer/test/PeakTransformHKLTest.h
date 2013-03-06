@@ -17,12 +17,12 @@ public:
 
   void test_throws_with_unknown_xLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformHKL("?", "K (Lattice)"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformHKL("?", "K (Lattice)"), PeakTransformException&);
   }
 
   void test_throws_with_unknown_yLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformHKL("H (Lattice)", "?"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformHKL("H (Lattice)", "?"), PeakTransformException&);
   }
 
   void test_maps_to_hkl_on_ipeak()
@@ -200,6 +200,12 @@ void test_getFriendlyName()
 {
   PeakTransformHKL transform;
   TS_ASSERT_EQUALS(PeakTransformHKL::name(), transform.getFriendlyName());
+}
+
+void test_getCoordinateSystem()
+{
+  PeakTransformHKL transform;
+  TS_ASSERT_EQUALS(Mantid::API::HKL, transform.getCoordinateSystem())
 }
 
 };

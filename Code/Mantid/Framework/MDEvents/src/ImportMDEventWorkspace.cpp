@@ -1,7 +1,4 @@
 /*WIKI*
-
-
-
 Creates an MDEventWorkspace from a plain ASCII file. Uses a simple format for the file described below. This algorithm is suitable for importing small volumes of data only. This algorithm does not scale well for large input workspaces. The purpose of this algorithm is to allow users to quickly import data from existing applications for purposes of comparison.
 
 == Format ==
@@ -222,6 +219,7 @@ namespace MDEvents
     /// Creates a new instance of the MDEventInserter.
     MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr> inserter(ws);
     DataCollectionType::iterator mdEventEntriesIterator = m_posMDEventStart;
+    std::vector<Mantid::coord_t> centers(nd);
     for(size_t i = 0; i < m_nMDEvents; ++i)
     {
       float signal = convert<float>(*(++mdEventEntriesIterator));
@@ -233,13 +231,12 @@ namespace MDEvents
         run_no = convert<uint16_t>(*(++mdEventEntriesIterator));
         detector_no = convert<int32_t>(*(++mdEventEntriesIterator));
       }
-      Mantid::coord_t centers[nd];
       for(size_t j = 0; j < m_nDimensions; ++j)
       {
         centers[j] = convert<Mantid::coord_t>(*(++mdEventEntriesIterator));
       }
       // Actually add the mdevent.
-      inserter.insertMDEvent(signal, error*error, run_no, detector_no, centers);
+      inserter.insertMDEvent(signal, error*error, run_no, detector_no, centers.data());
     }
   }
 

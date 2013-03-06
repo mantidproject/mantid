@@ -1,17 +1,48 @@
 /*WIKI*
 
-This algorithm loads masking file to a SpecialWorkspace2D/MaskWorkspace.
+This algorithm is used to load a masking file, which can be in XML format (defined later in this page) or old-styled 
+calibration file. 
 
-The format can be
-* XML
-* ... ...
+== Definition of Mask ==
+ * If a pixel is masked, it means that the data from this pixel won't be used.  
+   In the masking workspace (i.e., [[SpecialWorkspace2D]]), the corresponding value is 1. 
+ * If a pixel is NOT masked, it means that the data from this pixel will be used.  
+   In the masking workspace (i.e., [[SpecialWorkspace2D]]), the corresponding value is 0.
+
+== File Format ==
+
+==== XML File Format ====
+Example 1: 
+
+  <?xml version="1.0" encoding="UTF-8" ?>
+  <detector-masking>
+   <group>
+    <detids>3,34-44,47</detids>
+    <component>bank123</component>
+    <component>bank124</component>
+   </group>
+  </detector-masking>
+
+==== ISIS File Format ====
+Example 2:
+
+  1-3 62-64
+  65-67 126-128
+  129-131 190-192
+  193-195 254-256
+  257-259 318-320
+  321-323 382-384
+  385 387 446 448
+  ... ...
+
+All the integers in file of this format are spectrum IDs to mask.  Two spectrum IDs with "-" in between indicate a continuous range of spectra to mask.  It does not matter if there is any space between integer number and "-".  There is no restriction on how the line is structured.  Be noticed that any line starting with a non-digit character, except space, will be treated as a comment line. 
+
+This algorithm loads masking file to a SpecialWorkspace2D/MaskWorkspace.
 
 Supporting
  * Component ID --> Detector IDs --> Workspace Indexes
  * Detector ID --> Workspace Indexes
  * Spectrum ID --> Workspace Indexes
-
-
 
 
 *WIKI*/
@@ -84,7 +115,7 @@ namespace DataHandling
   
   /// Sets documentation strings for this algorithm
   void LoadMask::initDocs(){
-    this->setWikiSummary("Loads an XML file or calibration file to generate MaskWorkspace.");
+    this->setWikiSummary("Load file containing masking information to a [[SpecialWorkspace2D]] (masking workspace). This algorithm is renamed from [[LoadMaskingFile]].");
     this->setOptionalMessage("");
   }
 
@@ -93,7 +124,7 @@ namespace DataHandling
   {
 
     // 1. Declare property
-    declareProperty("Instrument", "", "Name of instrument to mask.");
+    declareProperty("Instrument", "", "The name of the instrument to apply the mask.");
     std::vector<std::string> exts;
     exts.push_back(".xml");
     exts.push_back(".msk");
@@ -185,6 +216,9 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /**  Mask detectors or Unmask detectors
    *   @param tomask:  true to mask, false to unmask
+   *   @param singledetids: list of individual det ids to mask
+   *   @param pairdetids_low: list of lower bound of det ids to mask
+   *   @param pairdetids_up: list of upper bound of det ids to mask
    */
   void LoadMask::processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids,
                                         std::vector<int32_t> pairdetids_low,
@@ -578,8 +612,8 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Parse bank IDs (string name)
    * Sample:  bank2
-   * params:
-   * @valutext:  must be bank name
+   * @param valuetext:  must be bank name
+   * @param tomask: if true, mask, if not unmask
    */
   void LoadMask::parseComponent(std::string valuetext, bool tomask)
   {

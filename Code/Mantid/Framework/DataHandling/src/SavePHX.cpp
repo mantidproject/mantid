@@ -48,6 +48,13 @@ using namespace Mantid::Geometry;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+/// Sets documentation strings for this algorithm
+void SavePHX::initDocs()
+{
+  this->setWikiSummary("Writes the detector geometry information of a workspace into a PHX format file. Uses [[FindDetectorsPar]] child algorithm to calculate actual detector's parameters.");
+  this->setOptionalMessage("Writes the detector geometry information of a workspace into a PHX format file.");
+}
+
 void SavePHX::init() {
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "",
       Direction::Input, boost::make_shared<InstrumentValidator>()), "The input workspace");

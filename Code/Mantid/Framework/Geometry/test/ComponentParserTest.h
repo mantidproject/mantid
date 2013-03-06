@@ -10,12 +10,10 @@
 #include <iomanip>
 #include <iostream>
 #include <Poco/SAX/SAXParser.h>
-#include <Poco/XML/XMLWriter.h>
 #include <sstream>
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Strings.h"
 #include <Poco/SAX/AttributesImpl.h>
-#include "MantidNexusCPP/NeXusFile.hpp"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

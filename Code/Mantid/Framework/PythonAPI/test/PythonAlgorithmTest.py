@@ -207,5 +207,18 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertTrue(algm.isExecuted())
         self.assertTrue(mtd.workspaceExists("testout"))
         
+    def test_setWikiSummary_on_algoirthm(self):
+        alg = DummyAlg();
+        summary = "summary message"
+        alg.setWikiSummary(summary)
+        self.assertEquals(summary, alg.getWikiSummary())
+             
+    def test_setWikiSummary_on_proxy(self):
+        algm_par = mtd._createAlgProxy("CreateWorkspace")
+        summary = "summary message"
+        algm_par.setWikiSummary(summary)
+        self.assertEquals(summary, algm_par.getWikiSummary())
+        
+        
 if __name__ == '__main__':
     unittest.main()

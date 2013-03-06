@@ -119,7 +119,8 @@ class EQSANSNormalise(PythonAlgorithm):
         alg.setProperty("OutputWorkspace", output_ws_name)
         alg.execute()
         workspace = alg.getProperty("OutputWorkspace").value
-        self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n  Beam flux file: %s" % (workspace, str(flux_data_path))) 
+        workspace_name = alg.getPropertyValue("OutputWorkspace")
+        self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n   Beam flux file: %s" % (workspace_name, str(flux_data_path))) 
         self.setProperty("OutputWorkspace", workspace)
 
     def _normalise_to_monitor(self):

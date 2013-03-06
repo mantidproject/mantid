@@ -62,7 +62,6 @@ ENABLED_SECTIONS       =
 MAX_INITIALIZER_LINES  = 30
 SHOW_USED_FILES        = YES
 SHOW_FILES             = YES
-SHOW_DIRECTORIES       = YES
 FILE_VERSION_FILTER    = 
 #---------------------------------------------------------------------------
 # configuration options related to warning and progress messages
@@ -72,7 +71,7 @@ WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = YES
-WARN_FORMAT            = "$file:$line: $text "
+WARN_FORMAT            = @DOXY_WARN_FORMAT@
 WARN_LOGFILE           = 
 #---------------------------------------------------------------------------
 # configuration options related to the input files
@@ -198,7 +197,7 @@ HTML_FILE_EXTENSION    = .html
 HTML_HEADER            = 
 HTML_FOOTER            = 
 HTML_STYLESHEET        = 
-HTML_ALIGN_MEMBERS     = YES
+HTML_TIMESTAMP	       = YES
 GENERATE_HTMLHELP      = NO
 HTML_DYNAMIC_SECTIONS  = NO
 CHM_FILE               = 
@@ -273,11 +272,12 @@ QHG_LOCATION           = @QHELP_EXECUTABLE@
 #---------------------------------------------------------------------------
 ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = YES
-EXPAND_ONLY_PREDEF     = NO
+EXPAND_ONLY_PREDEF     = YES
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           = 
 INCLUDE_FILE_PATTERNS  = 
-PREDEFINED             = 
+PREDEFINED             = "TMDE(decl)=decl" \
+                         "INSTANTIATE(TYPE)=template MANTID_KERNEL_DLL Statistics getStatistics<TYPE> (const vector<TYPE> &, const bool);\template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE> (const vector<TYPE> &, const bool);\template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE> (const vector<TYPE> &, const bool);"
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------

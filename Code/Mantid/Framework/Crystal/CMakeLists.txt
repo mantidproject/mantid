@@ -4,7 +4,7 @@ set ( SRC_FILES
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
 	src/CombinePeaksWorkspaces.cpp
-	src/CreateFractionalPeaks.cpp
+	src/PredictFractionalPeaks.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/FilterPeaks.cpp
 	src/FindSXPeaks.cpp
@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/IndexPeaks.cpp
+	src/OptimizeCrystalPlacement.cpp
 	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadHKL.cpp
@@ -21,6 +22,7 @@ set ( SRC_FILES
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
 	src/OptimizeExtinctionParameters.cpp
+	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
 	src/PredictPeaks.cpp
@@ -48,7 +50,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
-	inc/MantidCrystal/CreateFractionalPeaks.h
+	inc/MantidCrystal/PredictFractionalPeaks.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindSXPeaks.h
@@ -58,6 +60,7 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/IndexPeaks.h
+	inc/MantidCrystal/OptimizeCrystalPlacement.h
 	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadHKL.h
@@ -66,6 +69,7 @@ set ( INC_FILES
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
 	inc/MantidCrystal/OptimizeExtinctionParameters.h
+	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
 	inc/MantidCrystal/PredictPeaks.h
@@ -92,7 +96,7 @@ set ( TEST_FILES
 	CalculateUMatrixTest.h
 	CentroidPeaksTest.h
 	CombinePeaksWorkspacesTest.h
-	CreateFractionalPeaksTest.h
+	PredictFractionalPeaksTest.h
 	DiffPeaksWorkspacesTest.h
 	FilterPeaksTest.h
 	FindSXPeaksTest.h
@@ -108,6 +112,7 @@ set ( TEST_FILES
 	LoadIsawUBTest.h
 	MaskPeaksWorkspaceTest.h
 	NormaliseVanadiumTest.h
+	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
 	PredictPeaksTest.h

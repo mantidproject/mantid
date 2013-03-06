@@ -104,7 +104,7 @@ namespace MDAlgorithms
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "An input MatrixWorkspace.");
     declareProperty(new ArrayProperty<int>("BankNumbers", Direction::Input),
-        "A list of the bank numbers to convert. If empty, will use all banks.");
+        "A list of the bank numbers to convert. If empty, will use all banksMust have at least one entry.");
 
     // Now the box controller settings
     this->initBoxControllerProps("2", 200, 20);
@@ -113,21 +113,19 @@ namespace MDAlgorithms
         "Name of the output MDEventWorkspace.");
   }
 
-
   //----------------------------------------------------------------------------------------------
   /** Convert an event list to 3/4D detector face space add it to the MDEventWorkspace
    *
-   * @tparam T :: the type of event in the input EventList (TofEvent, WeightedEvent, etc.)
-   * @tparam nd :: number of dimensions of the output
-   * @param workspaceIndex :: index into the workspace
-   * @param x :: x-coordinate for all output events
-   * @param y :: y-coordinate for all output events
-   * @param bankNum :: coordinate for the 4th dimension (optional)
-   * @param detectorID :: detectorID for this event list
-   * @param runIndex :: index of the run, starting at 0
+   * @param outWS
+   * @param workspaceIndex : index into the workspace
+   * @param x : x-coordinate for all output events
+   * @param y : y-coordinate for all output events
+   * @param bankNum : coordinate for the 4th dimension (optional)
+   * @param runIndex : index of the run, starting at 0
+   * @param detectorID : detectorID for this event list
    */
   template <class T, class MDE, size_t nd>
-  void ConvertToDetectorFaceMD::convertEventList(boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd>> outWS,
+  void ConvertToDetectorFaceMD::convertEventList(boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd> > outWS,
       size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
       uint16_t runIndex, int32_t detectorID)
   {

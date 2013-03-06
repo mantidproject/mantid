@@ -35,6 +35,8 @@ namespace MantidQt
       {
         return name();
       }
+      /// Getter for the special coordinate representation of this transform type.
+      Mantid::API::SpecialCoordinateSystem getCoordinateSystem() const;
     };
 
     /// Typedef a factory for type of PeaksTransform.

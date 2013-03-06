@@ -26,6 +26,8 @@ Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstra
  * @param paramName :: The parameter name
  * @param lowerBound :: The lower bound
  * @param upperBound :: The upper bound
+ * @param isDefault :: Flag to mark as default the value of an object associated with this reference:
+ *  a tie or a constraint.
  */
 BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound, bool isDefault) : 
 m_penaltyFactor(1000.0),
@@ -53,6 +55,8 @@ m_lowerBound(lowerBound)
  * @param expr :: The initializing expression which must look like this:
  * " 10 < Sigma < 20 " or
  * " Sigma > 20 "
+ * @param isDefault :: Flag to mark as default the value of an object associated with this reference:
+ *  a tie or a constraint.
  */
 void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& expr, bool isDefault)
 {

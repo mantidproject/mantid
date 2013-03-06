@@ -114,7 +114,7 @@ namespace Mantid
     void ICat3Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr)
     {
       CICatHelper helper;
-      helper.doISISSearch(inputs,ws_sptr);
+      helper.doAdvancedSearch(inputs,ws_sptr);
     }
 
     /// keep alive

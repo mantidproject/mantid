@@ -1,17 +1,22 @@
 /*WIKI* 
-
 This algorithm uses a numerical integration method to calculate attenuation factors resulting from absorption and single scattering in a sample with the material properties given. Factors are calculated for each spectrum (i.e. detector position) and wavelength point, as defined by the input workspace. 
 The sample is first bounded by a cuboid, which is divided up into small cubes. The cubes whose centres lie within the sample make up the set of integration elements (so you have a kind of 'Lego' model of the sample) and path lengths through the sample are calculated for the centre-point of each element, and a numerical integration is carried out using these path lengths over the volume elements.
 
 Note that the duration of this algorithm is strongly dependent on the element size chosen, and that too small an element size can cause the algorithm to fail because of insufficient memory.
+
+Note that The number density of the sample is in <math> \mathrm{\AA}^{-3} </math>
+
+== Choosing an absorption correction algorithm ==
+
+This flow chart is given as a way of selecting the most appropriate of the absorption correction algorithms. It also shows the algorithms that must be run first in each case. Note that this does not cover the following absorption correction algorithms: [[MonteCarloAbsorption]] (correction factors for a generic sample using a Monte Carlo instead of a numerical integration method), [[MultipleScatteringCylinderAbsorption]] & [[AnvredCorrection]] (corrections in a spherical sample, using a method imported from ISAW). Also, HRPD users can use the [[HRPDSlabCanAbsorption]] to add rudimentary calculations of the effects of the sample holder.
+[[File:AbsorptionFlow.png]]
+
 
 ==== Assumptions ====
 This algorithm assumes that the (parallel) beam illuminates the entire sample '''unless''' a 'gauge volume' has been defined using the [[DefineGaugeVolume]] algorithm (or by otherwise adding a valid XML string [[HowToDefineGeometricShape | defining a shape]] to a [[Run]] property called "GaugeVolume"). In this latter case only scattering within this volume (and the sample) is integrated, because this is all the detector can 'see'. The full sample is still used for the neutron paths. ('''N.B.''' If your gauge volume is of axis-aligned cuboid shape and fully enclosed by the sample then you will get a more accurate result from the [[CuboidGaugeVolumeAbsorption]] algorithm.)
 
 ==== Restrictions on the input workspace ====
 The input workspace must have units of wavelength. The [[instrument]] associated with the workspace must be fully defined because detector, source & sample position are needed.
-
-
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -34,6 +39,7 @@ namespace Algorithms
 using namespace Kernel;
 using namespace Geometry;
 using namespace API;
+using namespace Mantid::PhysicalConstants;
 
 AbsorptionCorrection::AbsorptionCorrection() : API::Algorithm(), m_inputWS(),
   m_sampleObject(NULL), m_L1s(), m_elementVolumes(), m_elementPositions(),
@@ -44,6 +50,8 @@ AbsorptionCorrection::AbsorptionCorrection() : API::Algorithm(), m_inputWS(),
 
 void AbsorptionCorrection::init()
 {
+  this->setWikiSummary("Calculates an approximation of the attenuation due to absorption and single scattering in a generic sample shape. The sample shape can be defined by, e.g., the [[CreateSampleShape]] algorithm. /n/n'''Note that if your sample is of cuboid or cylinder geometry, you will get a more accurate result from the [[FlatPlateAbsorption]] or [[CylinderAbsorption]] algorithms respectively.'''");
+
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
@@ -56,12 +64,12 @@ void AbsorptionCorrection::init()
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
-  declareProperty("AttenuationXSection", -1.0, mustBePositive,
-    "The ABSORPTION cross-section for the sample material in barns");
-  declareProperty("ScatteringXSection", -1.0, mustBePositive,
-    "The scattering cross-section (coherent + incoherent) for the sample material in barns");
-  declareProperty("SampleNumberDensity", -1.0, mustBePositive,
-    "The number density of the sample in number per cubic angstrom");
+  declareProperty("AttenuationXSection",  EMPTY_DBL(), mustBePositive,
+    "The ABSORPTION cross-section, at 1.8 Angstroms, for the sample material in barns. Column 8 of a table generated from http://www.ncnr.nist.gov/resources/n-lengths/.");
+  declareProperty("ScatteringXSection",  EMPTY_DBL(), mustBePositive,
+    "The (coherent + incoherent) scattering cross-section for the sample material in barns. Column 7 of a table generated from http://www.ncnr.nist.gov/resources/n-lengths/.");
+  declareProperty("SampleNumberDensity",  EMPTY_DBL(), mustBePositive,
+    "The number density of the sample in number per cubic angstrom if not set with SetSampleMaterial");
 
   auto positiveInt = boost::make_shared<BoundedValidator<int64_t> >();
   positiveInt->setLower(1);
@@ -236,9 +244,23 @@ void AbsorptionCorrection::exec()
 /// Fetch the properties and set the appropriate member variables
 void AbsorptionCorrection::retrieveBaseProperties()
 {
-  const double sigma_atten = getProperty("AttenuationXSection"); // in barns
-  const double sigma_s = getProperty("ScatteringXSection"); // in barns
+  double sigma_atten = getProperty("AttenuationXSection"); // in barns
+  double sigma_s = getProperty("ScatteringXSection"); // in barns
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+  const Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
+  if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
+  {
+        if(rho == EMPTY_DBL()) rho =  m_sampleMaterial->numberDensity();
+        if(sigma_s == EMPTY_DBL()) sigma_s =  m_sampleMaterial->totalScatterXSection(1.7982);
+        if(sigma_atten == EMPTY_DBL()) sigma_atten = m_sampleMaterial->absorbXSection(1.7982);
+  }
+  else  //Save input in Sample with wrong atomic number and name
+  {
+        NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+                        0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
+    Material *mat = new Material("SetInAbsorptionCorrection", *neutron, rho);
+    m_inputWS->mutableSample().setMaterial(*mat);
+  }
   rho *= 100;  // Needed to get the units right
   m_refAtten = -sigma_atten * rho / 1.798;
   m_scattering = -sigma_s * rho;
@@ -300,7 +322,7 @@ void AbsorptionCorrection::constructSample(API::Sample& sample)
 /// Calculate the distances traversed by the neutrons within the sample
 /// @param detector :: The detector we are working on
 /// @param L2s :: A vector of the sample-detector distance for  each segment of the sample
-void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& L2s) const
+void AbsorptionCorrection::calculateDistances(const IDetector_const_sptr& detector, std::vector<double>& L2s) const
 {
   V3D detectorPos(detector->getPos());
   if ( detector->nDets() > 1 )

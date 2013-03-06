@@ -160,9 +160,14 @@ double QScienceSpinBox::valueFromText(const QString &text) const
   return validateAndInterpret(copy, pos, state).toDouble();
 }
 
-// this function is never used...?
+/**
+ * Round
+ * @param value: Value to round.
+ * @return rounded value
+ */
 double QScienceSpinBox::round(double value) const
 {
+  //this function is never used...?
   const QString strDbl = locale().toString(value, 'g', dispDecimals);
   return locale().toDouble(strDbl);
 }

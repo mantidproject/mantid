@@ -62,7 +62,7 @@ include_directories ( ${OPENSSL_INCLUDE_DIR} )
 add_definitions ( -DWITH_OPENSSL -DWITH_NONAMESPACES )
 
 # Add a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidICat/PrecompiledHeader.h MantidICat src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+enable_precompiled_headers( inc/MantidICat/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( ICat ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

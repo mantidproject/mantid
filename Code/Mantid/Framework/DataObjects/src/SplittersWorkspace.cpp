@@ -128,3 +128,4 @@ namespace Mantid
 
   } // namespace Kernel
 } // namespace Mantid
+///\endcond

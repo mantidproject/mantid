@@ -35,18 +35,17 @@ namespace Mantid
     *  <LI> SScol -The variance of the column values in the peak for this time slice </LI>
     *  <LI> SSrow - The variance of the row values in the peak for this time slice </LI>
     *  <LI> SSrc - The covariance of the row and column values in the peak for this time slice </LI>
-    * </UL><P>
-    */
-    /** There is one attribute, This must be specified.
+    * </UL>
+    * There is one attribute, This must be specified.
     * <UL>
-    *   <LI> CalcVariances - <UL>
+    *   <LI> CalcVariances -
     *                           If true,calculates SScol, SSrow, and SSrc from the experimental data
     *                           given Background, Mcol, and Mrow,if the parameter has not been tied,
     *                           If false, the parameters SScol, SSrow, and SSrc will be fit, unless
-    *                            tied. </UL>  </LI>
+    *                            tied.
+    *  </LI>
     * </UL>
-    */
-    /**
+    *
     * This is a bivariate function.  The workspace must have three histograms of equal length.
     * Histogram 0: Contains the experimental values for each x and y, along with their errors.
     * Histogram 1: Contains the corresponding x value for the data in Histogram 0
@@ -54,8 +53,7 @@ namespace Mantid
     *
     * @author Ruth Mikkelson, SNS ORNL
     * @date 11/4/2011
-    */
-    /**
+    *
      Copyright &copy; 2011-12 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
      This file is part of Mantid.
@@ -71,12 +69,11 @@ namespace Mantid
      GNU General Public License for more details.
 
      You should have received a copy of the GNU General Public License
-     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+     along with this program.  If not, see <http://www.gnu.org/licenses>.
 
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-
    class  DLLExport  BivariateNormal: public API::ParamFunction, public virtual API::IFunction1D, public virtual API::IFunctionMW
    {
    public:

@@ -7,13 +7,22 @@
 import os
 import platform
 
+# Must be the same version that Mantid uses
+MSVC_VERSION=11.0
+
 include_dir = '../include'
 install_dir = '../plugins'
 link_flags = ['/OPT:REF','/OPT:ICF','/ltcg']
+target_arch=None
 if platform.architecture()[0] == '64bit':
+    target_arch="x86_64"
     link_flags.append('/MACHINE:X64')
+else:
+    target_arch="x86"
 
-env = Environment(ENV=os.environ,  
+env = Environment(ENV=os.environ,
+                  MSVC_VERSION=str(MSVC_VERSION),
+                  TARGET_ARCH=target_arch,
                   CPPPATH = include_dir, 
                   PATH = '.', 
                   LIBS = [

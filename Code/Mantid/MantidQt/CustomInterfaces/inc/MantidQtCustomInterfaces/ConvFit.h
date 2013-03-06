@@ -3,17 +3,9 @@
 
 #include "MantidQtCustomInterfaces/IDATab.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/CompositeFunction.h"
 
 #include "boost/shared_ptr.hpp"
-
-namespace Mantid
-{
-  namespace API
-  {
-    class IFunction;
-    class CompositeFunction;
-  }
-}
 
 namespace MantidQt
 {
@@ -55,7 +47,7 @@ namespace IDA
   private:
     boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tie=false);
     QtProperty* createLorentzian(const QString &);
-    void populateFunction(boost::shared_ptr<Mantid::API::IFunction>, boost::shared_ptr<Mantid::API::IFunction>, QtProperty*, const std::string & pref, const bool tie=false);
+    void populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie);
     QString fitTypeString() const;
     QString backgroundString() const;
 

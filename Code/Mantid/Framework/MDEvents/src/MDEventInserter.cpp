@@ -16,15 +16,6 @@ namespace MDEvents
   MDEventInserter::MDEventInserter()
   {
   }
-    
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  MDEventInserter::~MDEventInserter()
-  {
-  }
-  
-
 
 } // namespace Mantid
 } // namespace MDEvents

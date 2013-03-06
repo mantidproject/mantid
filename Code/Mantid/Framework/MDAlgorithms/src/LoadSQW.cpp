@@ -1,12 +1,8 @@
 /*WIKI* 
-== Summary ==
 
-Create an IMDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from a [http://horace.isis.rl.ac.uk/Main_Page Horace ] SQW file.
+The algorithm takes every pixel defined in the SQW horace file and converts it into an event.
 
-== Description ==
-
-The algorithm takes every pixel defined in the SQW horace file and converts it into an event. 
-Only top level binning information is currently taken from DND/Image data. All DND image information is currently ignored and the resulting MDEvent workspace is in the units of <math>Q^{-1}</math> (SQW dimensions, recalculated to the Lab frame, without HKL transformation).
+Only top level binning information is currently taken from DND/Image data. All DND image information is currently ignored and the resulting MDEvent workspace is in the units of <math>Q^{-1}</math> (SQW dimensions, recalculated to the Crystal? frame, without HKL transformation).
 
 U matrix is set to unity but the B-matrix is read from the SQW and attached to the workspace which may confuse the algorithms which work with [[MDEventWorkspace]] produced by Mantid algorithms.
 
@@ -207,7 +203,7 @@ namespace Mantid
     /// Provide wiki documentation.
     void LoadSQW::initDocs()
     {
-      this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz, Energy) from a SQW file.");
+      this->setWikiSummary("Create an IMDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from a [http://horace.isis.rl.ac.uk/Main_Page Horace ] SQW file.");
       this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz, Energy) from a SQW file.");
     }
 
@@ -218,7 +214,7 @@ namespace Mantid
       fileExtensions[0]=".sqw";
       declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load,fileExtensions), "File of type SQW format");
       declareProperty(new API::WorkspaceProperty<API::IMDEventWorkspace>("OutputWorkspace","", Kernel::Direction::Output),
-        "Name of the output MDEventWorkspace that will contain the SQW data read in.");
+        "Output IMDEventWorkspace reflecting SQW data read-in.");
       declareProperty(new Kernel::PropertyWithValue<bool>("MetadataOnly", false),
         "Load Metadata without events.");
       std::vector<std::string> fileExtensions2(1);
@@ -799,7 +795,7 @@ namespace LoadSQWHelper
 
     // auxiliary functions
    /**Block 1:  Main_header: Parse SQW main data header
-    *@param:        dataStream -- the open file hanlder responsible for IO operations
+    *@param dataStream -- the open file hanlder responsible for IO operations
      **/
    void dataPositions::parse_sqw_main_header(std::ifstream &dataStream)
     { // we do not need this header  at the moment -> just need to calculated its length;
@@ -840,8 +836,8 @@ namespace LoadSQWHelper
       }
     }
    /**Block 2: Header: Parse header of single SPE file
-    *@param:        dataStream -- the open file hanlder responsible for IO operations 
-    *@param:       start_location -- initial file position of the header within the binary file
+    *@param dataStream -- the open file hanlder responsible for IO operations
+    *@param start_location -- initial file position of the header within the binary file
     *
     *@returns: the file location of the first byte behind this header
    */
@@ -899,8 +895,8 @@ namespace LoadSQWHelper
 
     }
    /**Block 3: Detpar: parse positions of the contributed detectors. These detectors have to be the same for all contributing spe files
-    *@param:    dataStream -- the open file hanlder responsible for IO operations
-    *@param:   start_location -- initial file position of the detectors data within the binary file
+    *@param dataStream -- the open file hanlder responsible for IO operations
+    *@param start_location -- initial file position of the detectors data within the binary file
     *
     *@returns: the file location of the first byte behind this header   */
    std::streamoff dataPositions::parse_sqw_detpar(std::ifstream &dataStream,std::streamoff start_location)
@@ -933,12 +929,10 @@ namespace LoadSQWHelper
 
     }
    /**Block 4: Data: parse positions of the data fields 
-    *@param:        dataStream -- the open file hanlder responsible for IO operations
-    *@data_start:   Initial position of the data block4 within the data file
-     
-     @returns:   nBins     -- the vector of bin sizes for MD image
-     @returns:   nDims     -- numner of non-integrated dimensions in the MD image
-     @returns:  nDataPoints-- number of pixels (MD events) contributing to the image
+    *@param dataStream -- the open file hanlder responsible for IO operations
+    *@param data_start -- Initial position of the data block4 within the data file
+     @param nBins -- the vector of bin sizes for MD image
+     @param nDataPoints -- number of pixels (MD events) contributing to the image
    */
     void dataPositions::parse_data_locations(std::ifstream &dataStream,std::streamoff data_start,
                                                       std::vector<size_t> &nBins,uint64_t &nDataPoints)

@@ -5,6 +5,11 @@ The output workspace has the same number of spectra as the input workspace.
 This works on both [[EventWorkspace]]s and [[Workspace2D]]'s.
 It has two main modes of operation.
 
+=== Processing Either Generically or Assuming Rectangular Detectors ===
+
+You may either specify properties for the Rectangular Detector Group, or the Non-uniform Detector Group, but not both. If you provide inputs for the Rectangular Detector group,
+then the algorithm execution will assume that this is your desired processing route.
+
 === For All Instruments ===
 
 Going through the input workspace pixel-by-pixel, Mantid finds the nearest-neighbours with the given Radius of each
@@ -89,7 +94,6 @@ The algorithm will ignore masked detectors if this flag is set.
 
 
 #include "MantidAlgorithms/SmoothNeighbours.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"

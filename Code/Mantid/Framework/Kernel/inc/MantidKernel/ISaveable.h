@@ -43,7 +43,7 @@ namespace Kernel
     ISaveable();
     ISaveable(const size_t id);
     ISaveable(const ISaveable & other);
-    ~ISaveable();
+    virtual ~ISaveable();
 
     //-----------------------------------------------------------------------------------------------
     /** Returns the unique ID for this object/box     */
@@ -119,17 +119,8 @@ namespace Kernel
       return   m_fileNumEvents;
     }
 
-    /** Sets the location of the object on HDD 
-       @param newPos   -- the position of the object in the object's  array
-       @param newSize  -- the size of the object in the object's arrau
-       @param setSaved -- set object savedStatus to true. It indicates that the object or part of it (if it was changed in memory)
-                          has its place on HDD
-                          It is better to call save method immidiately after calling setFilePosition with setSaved=true
-                          when saving a workspace or load method when loading one in a particular place.
-
-                          Non-file based worksapce should set it to false to forget about the file, 
-                          which was the source of the object  */ 
-    void setFilePosition(uint64_t newPos,uint64_t newSize,bool setSaved=true);   
+    /** Sets the location of the object on HDD */
+    void setFilePosition(uint64_t newPos,uint64_t newSize,bool wasSaved=true);
 
     /** function returns true if the object have ever been saved on HDD and knows it place there*/
     bool wasSaved()const

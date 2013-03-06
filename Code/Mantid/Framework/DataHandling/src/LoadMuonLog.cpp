@@ -55,9 +55,9 @@ void LoadMuonLog::init()
   // When used as a Child Algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
-    "Name of the Muon Nexus file to read, as a full or relative path" );
+    "The name of the workspace to which the log data will be added.");
   declareProperty(new FileProperty("Filename","", FileProperty::Load),
-    "The name of the workspace to which the log data will be added" );
+    "The filename (including its full or relative path) of the Muon Nexus file." );
 }
 
 /** Executes the algorithm. Reading in Log entries from the Nexus file
@@ -72,11 +72,7 @@ void LoadMuonLog::exec()
   m_filename = getPropertyValue("Filename");
 
   MuonNexusReader nxload;
-  if ( nxload.readLogData(m_filename) != 0 )
-  {
-    g_log.error("In LoadMuonLog: " + m_filename + " can not be opened.");
-    throw Exception::FileError("File does not exist:" , m_filename);
-  }
+  nxload.readLogData(m_filename);
 
   // Get the input workspace and retrieve sample from workspace.
   // the log data will be loaded into the Sample container of the workspace

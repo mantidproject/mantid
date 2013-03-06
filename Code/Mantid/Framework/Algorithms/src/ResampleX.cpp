@@ -1,5 +1,9 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+
+This method will resample the x-axis with the number of specified bins. If the XMin and XMax parameters are supplied it will use those as the range, they can be supplied as a comma delimited list or as a single value.
+ 
+The LogBinning option calculates constant delta-X/X binning and rebins using that.
+
 *WIKI*/
 
 #include <sstream>
@@ -177,7 +181,7 @@ namespace Algorithms
   }
 
   /**
-   * Set the instance variables before running a test of @link ResampleX::determineBinning.
+   * Set the instance variables before running a test of @link ResampleX::determineBinning @endlink
    *
    * @param numBins The number of bins that will be used.
    * @param useLogBins True if you want log binning.

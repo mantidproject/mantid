@@ -406,7 +406,7 @@ void DateAndTime::setFromISO8601(const std::string str)
   // Some ARGUS files have an invalid date with a space instead of zero.
   // To enable such files to be loaded we correct the date and issue a warning (ticket #4017).
   std::string date = time.substr(0,10); // just take the date not the time or any date-time separator
-  size_t nSpace = date.find(' ');
+  const size_t nSpace = date.find(' ');
   if (nSpace != std::string::npos)
   {
     g_log.warning() << "Invalid ISO8601 date "  << time ;
@@ -414,8 +414,8 @@ void DateAndTime::setFromISO8601(const std::string str)
 
     // Do again in case of second space
     date[nSpace] = '0';
-    nSpace = date.find(' ');
-    if(nSpace != std::string::npos) time[nSpace] = '0';
+    const size_t nSecondSpace = date.find(' ');
+    if(nSecondSpace != std::string::npos) time[nSecondSpace] = '0';
 
     g_log.warning() << " corrected to " << time << std::endl;
   }
@@ -426,57 +426,55 @@ void DateAndTime::setFromISO8601(const std::string str)
   time_duration tz_offset = boost::posix_time::seconds(0);
 
   //Replace "T" with a space
-  size_t n = time.find('T');
-  if (n != std::string::npos)
+  const size_t nCharT = time.find('T');
+  if (nCharT != std::string::npos)
   {
     //Take out the T, for later
-    time[n] = ' ';
+    time[nCharT] = ' ';
 
     //Adjust for time zones. Fun!
     //Look for the time zone marker
-    size_t n2;
-    n2 = time.find('Z', n);
-    if (n2 != std::string::npos)
+    const size_t nCharZ = time.find('Z', nCharT);
+    if (nCharZ != std::string::npos)
     {
       //Found a Z. Remove it, and no timezone fix
-      time = time.substr(0, n2);
+      time = time.substr(0, nCharZ);
     }
     else
     {
       //Look for a + or - indicating time zone offset
       size_t n_plus,n_minus;
-      n_plus = time.find('+', n);
-      n_minus = time.find('-', n);
+      n_plus = time.find('+', nCharT);
+      n_minus = time.find('-', nCharT);
       if ((n_plus != std::string::npos) || (n_minus != std::string::npos))
       {
-          size_t n5;
+          size_t nPlusMinus;
           //Either a - or a + was found
           if (n_plus != std::string::npos)
           {
               positive_offset = true;
-              n5 = n_plus;
+              nPlusMinus = n_plus;
           }
           else
           {
               positive_offset = false;
-              n5 = n_minus;
+              nPlusMinus = n_minus;
           }
 
           //Now, parse the offset time
-          std::string offset_str = time.substr(n5+1, time.size()-n5-1);
+          std::string offset_str = time.substr(nPlusMinus+1, time.size()-nPlusMinus-1);
 
           //Take out the offset from time string
-          time = time.substr(0, n5);
+          time = time.substr(0, nPlusMinus);
 
           //Separate into minutes and hours
-          size_t n6;
           std::string hours_str("0"), minutes_str("0");
-          n6 = offset_str.find(':');
-          if ((n6 != std::string::npos))
+          const size_t nColon = offset_str.find(':');
+          if ((nColon != std::string::npos))
           {
               //Yes, minutes offset are specified
-              minutes_str = offset_str.substr(n6+1, offset_str.size()-n6-1);
-              hours_str = offset_str.substr(0, n6);
+              minutes_str = offset_str.substr(nColon+1, offset_str.size()-nColon-1);
+              hours_str = offset_str.substr(0, nColon);
           }
           else
               //Just hours
@@ -488,7 +486,6 @@ void DateAndTime::setFromISO8601(const std::string str)
 
       }
     }
-
   }
 
   //The boost conversion will convert the string, then we subtract the time zone offset
@@ -501,7 +498,7 @@ void DateAndTime::setFromISO8601(const std::string str)
     //The timezone is - so we need to ADD the hours
     this->set_from_ptime( boost::posix_time::time_from_string(time) + tz_offset );
   }
-  catch (boost::bad_lexical_cast &)
+  catch (std::exception &)
   {
     // Re-throw a more helpful error message
     throw std::invalid_argument("Error interpreting string '" + time + "' as a date/time.");

@@ -45,7 +45,7 @@ namespace MDEvents
 
     MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector, int64_t boxSize=-1,int64_t boxID=-1);
 
-    MDBox(const MDBox & other);
+    MDBox(const MDBox<MDE,nd> & other);
 
     virtual ~MDBox() {}
 
@@ -140,9 +140,9 @@ namespace MDEvents
     std::vector< MDE > * getEventsCopy();
 
 
-    void addEvent(const MDE & point);
+    void addEvent(const MDE & Evnt);
     void addAndTraceEvent(const MDE & point,size_t index);
-    void addEventUnsafe(const MDE & point);
+    void addEventUnsafe(const MDE & Evnt);
     size_t addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
     size_t addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
 

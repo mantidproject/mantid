@@ -56,7 +56,7 @@ namespace Mantid
   /** Macro TMDE to make declaring template functions
    * faster. Put this macro before function declarations.
    * Use:
-   * TMDE(void ClassName)::methodName()
+   * TMDE(void ClassName)\:\:methodName()
    * {
    *    // function body here
    * }

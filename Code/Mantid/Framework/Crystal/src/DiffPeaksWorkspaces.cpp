@@ -57,7 +57,7 @@ namespace Crystal
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),
         "The set of peaks that are in the first, but not the second, workspace.");
 
-    auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+    auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
     // N.B. Andrei reckons it should be delta_q/q
     declareProperty("Tolerance", 0.0, mustBePositive,

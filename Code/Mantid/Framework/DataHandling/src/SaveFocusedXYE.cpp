@@ -18,11 +18,11 @@
 //---------------------------------------------------
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ListValidator.h"
 #include <Poco/File.h>
 #include <fstream>
 #include <iomanip>
+#include <cmath>
 
 using namespace Mantid::DataHandling;
 
@@ -322,6 +322,6 @@ void SaveFocusedXYE::getFocusedPos(Mantid::API::MatrixWorkspace_const_sptr wksp,
   l1 = source->getDistance(*sample);
   Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
   l2 = det->getDistance(*sample);
-  tth = wksp->detectorTwoTheta(det);
+  tth = wksp->detectorTwoTheta(det) * 180. / M_PI;
 }
 

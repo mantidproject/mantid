@@ -41,6 +41,7 @@ void HRPDSlabCanAbsorption::initDocs()
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace Mantid::PhysicalConstants;
 
 void HRPDSlabCanAbsorption::init()
 {
@@ -49,12 +50,19 @@ void HRPDSlabCanAbsorption::init()
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
-  declareProperty("SampleAttenuationXSection", -1.0, mustBePositive,
-    "The ABSORPTION cross-section for the sample material in barns");
-  declareProperty("SampleScatteringXSection", -1.0, mustBePositive,
-    "The scattering cross-section (coherent + incoherent) for the sample material in barns");
-  declareProperty("SampleNumberDensity", -1.0, mustBePositive,
-    "The number density of the sample in number per cubic angstrom");
+  declareProperty("SampleAttenuationXSection",  EMPTY_DBL(), mustBePositive,
+    "The ABSORPTION cross-section for the sample material in barns if not set with SetSampleMaterial");
+  declareProperty("SampleScatteringXSection",  EMPTY_DBL(), mustBePositive,
+    "The scattering cross-section (coherent + incoherent) for the sample material in barns if not set with SetSampleMaterial");
+  declareProperty("SampleNumberDensity",  EMPTY_DBL(), mustBePositive,
+    "The number density of the sample in number per cubic angstrom if not set with SetSampleMaterial");
+
+  std::vector<std::string> thicknesses(4);
+  thicknesses[0] = "0.2";
+  thicknesses[1] = "0.5";
+  thicknesses[2] = "1.0";
+  thicknesses[3] = "1.5";
+  declareProperty("Thickness", "0.2", boost::make_shared<StringListValidator>(thicknesses));
 
   auto positiveInt = boost::make_shared<BoundedValidator<int64_t> >();
   positiveInt->setLower(1);
@@ -69,13 +77,6 @@ void HRPDSlabCanAbsorption::init()
     "Select the method to use to calculate exponentials, normal or a\n"
     "fast approximation (default: Normal)" );
 
-  std::vector<std::string> thicknesses(4);
-  thicknesses[0] = "0.2";
-  thicknesses[1] = "0.5";
-  thicknesses[2] = "1.0";
-  thicknesses[3] = "1.5";
-  declareProperty("Thickness", "", boost::make_shared<StringListValidator>(thicknesses));
-  
   auto moreThanZero = boost::make_shared<BoundedValidator<double> >();
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero, 
@@ -179,13 +180,32 @@ void HRPDSlabCanAbsorption::exec()
 
 API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption()
 {
+  MatrixWorkspace_sptr m_inputWS = getProperty("InputWorkspace");
+  double sigma_atten = getProperty("SampleAttenuationXSection"); // in barns
+  double sigma_s = getProperty("SampleScatteringXSection"); // in barns
+  double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+  const Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
+  if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
+  {
+        if(rho == EMPTY_DBL()) rho =  m_sampleMaterial->numberDensity();
+        if(sigma_s == EMPTY_DBL()) sigma_s =  m_sampleMaterial->totalScatterXSection(1.7982);
+        if(sigma_atten == EMPTY_DBL()) sigma_atten = m_sampleMaterial->absorbXSection(1.7982);
+  }
+  else  //Save input in Sample with wrong atomic number and name
+  {
+        NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+                        0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
+    Material *mat = new Material("SetInSphericalAbsorption", *neutron, rho);
+    m_inputWS->mutableSample().setMaterial(*mat);
+  }
+
   // Call FlatPlateAbsorption as a Child Algorithm
   IAlgorithm_sptr childAlg = createChildAlgorithm("FlatPlateAbsorption",0.0,0.9);
   // Pass through all the properties
-  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
-  childAlg->setProperty<double>("AttenuationXSection", getProperty("SampleAttenuationXSection"));
-  childAlg->setProperty<double>("ScatteringXSection", getProperty("SampleScatteringXSection"));
-  childAlg->setProperty<double>("SampleNumberDensity", getProperty("SampleNumberDensity"));
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_inputWS);
+  childAlg->setProperty<double>("AttenuationXSection", sigma_atten);
+  childAlg->setProperty<double>("ScatteringXSection", sigma_s);
+  childAlg->setProperty<double>("SampleNumberDensity", rho);
   childAlg->setProperty<int64_t>("NumberOfWavelengthPoints", getProperty("NumberOfWavelengthPoints"));
   childAlg->setProperty<std::string>("ExpMethod", getProperty("ExpMethod"));
   // The height and width of the sample holder are standard for HRPD

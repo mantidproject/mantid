@@ -15,17 +15,21 @@ Given the variable number and types of possible arguments that Load can take, it
 <div style="border:1pt dashed blue; background:#f9f9f9;padding: 1em 0;">
 <source lang="python">
 # Simple usage, ISIS NeXus file
-Load('INSTR00001000.nxs', 'run_ws')
+Load('INSTR00001000.nxs', OutputWorkspace='run_ws')
 
 # ISIS NeXus with SpectrumMin and SpectrumMax = 1
-Load('INSTR00001000.nxs', 'run_ws', SpectrumMin=1,SpectrumMax=1)
+Load('INSTR00001000.nxs', OutputWorkspace='run_ws', SpectrumMin=1, SpectrumMax=1)
 
 # SNS Event NeXus with precount on
-Load('INSTR_1000_event.nxs', 'event_ws', Precount=True)
+Load('INSTR_1000_event.nxs', OutputWorkspace='event_ws', Precount=True)
 
 # A mix of keyword and non-keyword is also possible
-Load('event_ws', Filename='INSTR_1000_event.nxs',Precount=True)
+Load(OutputWorkspace='event_ws', Filename='INSTR_1000_event.nxs', Precount=True)
 </source></div>
+
+==== Loading Multiple Files ====
+
+Loading multiple files is also possible with <code>Load</code>, as well as workspace addition.  For more information, see [[MultiFileLoading]].
 
 
 *WIKI*/
@@ -382,14 +386,15 @@ namespace Mantid
       exts.push_back(".nxspe");
 
       declareProperty(new MultipleFileProperty("Filename", exts),
-        "The name of the file(s) to read, including the full or relative\n"
-        "path. (N.B. case sensitive if running on Linux). Multiple runs\n"
+        "The name of the file(s) to read, including the full or relative "
+        "path. (N.B. case sensitive if running on Linux). Multiple runs "
         "can be loaded and added together, e.g. INST10,11+12,13.ext");
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",Direction::Output), 
-        "The name of the workspace that will be created, filled with the\n"
-        "read-in data and stored in the Analysis Data Service.");
+        "The name of the workspace that will be created, filled with the "
+        "read-in data and stored in the Analysis Data Service. Some algorithms "
+        "can created additional OutputWorkspace properties on the fly, e.g. multi-period data.");
 
-      declareProperty("LoaderName", std::string(""), "A string containing the name of the concrete loader used", 
+      declareProperty("LoaderName", std::string(""), "When an algorithm has been found that will load the given file, its name is set here.", 
         Direction::Output);
       // Save for later what the base Load properties are
       const std::vector<Property*> & props = this->getProperties();

@@ -144,6 +144,8 @@ class SNSPowderReduction(PythonAlgorithm):
             self._data[info.freq][info.wl]=info
         def __getFrequency(self, request):
             for freq in self._data.keys():
+                if abs(float(freq)-request) == 0.:
+                    return freq
                 if 100. * abs(float(freq)-request)/request < 5.:
                     return freq
             raise RuntimeError("Failed to find frequency: %fHz" % request)
@@ -239,6 +241,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("FilterMinimumValue", 0.0, "Minimum log value for which to keep events.")
         self.declareProperty("FilterMaximumValue", 0.0, "Maximum log value for which to keep events.")
         self.declareProperty("SaveAs", "gsas", StringListValidator(outfiletypes))
+        self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
         self.declareProperty("NormalizeByCurrent", True, "Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
@@ -343,8 +346,19 @@ class SNSPowderReduction(PythonAlgorithm):
         frequency = None
         if "SpeedRequest1" in logs.keys():
             frequency = logs['SpeedRequest1']
+            if frequency.getStatistics().mean == 0.:
+                self.log().information("'SpeedRequest1' mean value is zero")
+                frequency = None
         else:
             self.log().information("'SpeedRequest1' is not specified in logs")
+        if frequency is None and "Speed1" in logs.keys():
+            frequency = logs['Speed1']
+            if frequency.getStatistics().mean == 0.:
+                self.log().information("'Speed1' mean value is zero")
+                frequency = None
+        else:
+            self.log().information("'Speed1' is not specified in logs")
+        if frequency is None:
             if "frequency" in logs.keys():
                 frequency = logs['frequency']
             else:
@@ -366,7 +380,10 @@ class SNSPowderReduction(PythonAlgorithm):
         return self._config.getInfo(frequency, wavelength)
 
     def _save(self, wksp, info, normalized, pdfgetn):
-        filename = os.path.join(self._outDir, str(wksp))
+        prefix = str(wksp)
+        if len(self._outPrefix) > 0: # non-empty string
+            prefix = self._outPrefix
+        filename = os.path.join(self._outDir, prefix)
         if pdfgetn:
             if "pdfgetn" in self._outTypes:
                 pdfwksp = str(wksp)+"_norm"
@@ -421,6 +438,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams").value
         calib = self.getProperty("CalibrationFile").value
         self._outDir = self.getProperty("OutputDirectory").value
+        self._outPrefix = self.getProperty("OutputFilePrefix").value
         self._outTypes = self.getProperty("SaveAs").value
         samRuns = self.getProperty("RunNumber").value
         filterWall = (self.getProperty("FilterByTimeMin").value, self.getProperty("FilterByTimeMax").value)

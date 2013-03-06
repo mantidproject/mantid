@@ -1,8 +1,88 @@
 """*WIKI* 
 
-Liquids Reflectometer (REFL) NeXus viewer
-This routine will display some of the metadata defined by the IS
-for a given run or set of runs. 
+This program is a simple Reflectometer NeXus viewer. The various metadata will be displayed:
+ - Run title
+ - Run start
+ - Lambda requested
+ - tthd [degree]
+ - thi [degree]
+ - s1h [mm]
+ - s2h [mm]
+ - s1w [mm]
+ - s2w [mm]
+
+Input examples:
+ '''74099''' will display the metadata of run 74099
+ '''74099,74052''' will display the metadata of runs 74099 and 74052
+ '''74099-74102''' will display the metadata of runs 74099, 74100, 74101 and 74102
+ '''74099-74101, 74054''' will display the metadata of runs 74099, 74100, 74101 and 74054
+
+
+''Example:''
+
+'''74099-74102,74090'''
+
+
+<nowiki>*********</nowiki> Working with run: 74099 <nowiki>*********</nowiki>
+ Run title: direct beam Al2O3_No3Rep0
+ Run start: 2012-04-14T22:13:41
+ Lambda requested: 8.39999961853 Angstrom
+ tthd: -4.0001 degree
+ thi: -4.0003 degree
+ ths: -3.9998 degree
+ s1h: 1.2650 millimetre
+ s2h: 0.4240 millimetre
+ s1w: 7.9990 millimetre
+ s2w: 8.0010 millimetre
+
+<nowiki>*********</nowiki> Working with run: 74100<nowiki> *********</nowiki>
+ Run title: direct beam Al2O3_No4Rep0
+ Run start: 2012-04-14T22:20:49
+ Lambda requested: 6.17000007629 Angstrom
+ tthd: -4.0001 degree
+ thi: -4.0003 degree
+ ths: -3.9998 degree
+ s1h: 0.4260 millimetre
+ s2h: 0.4240 millimetre
+ s1w: 7.9990 millimetre
+ s2w: 8.0010 millimetre
+
+<nowiki>*********</nowiki> Working with run: 74101<nowiki> *********</nowiki>
+ Run title: direct beam Al2O3_No5Rep0
+ Run start: 2012-04-14T22:25:46
+ Lambda requested: 3.8900001049 Angstrom
+ tthd: -4.0001 degree
+ thi: -4.0003 degree
+ ths: -3.9998 degree
+ s1h: 0.3020 millimetre
+ s2h: 0.3000 millimetre
+ s1w: 7.9990 millimetre
+ s2w: 8.0010 millimetre
+
+<nowiki>*********</nowiki> Working with run: 74102 <nowiki>*********</nowiki>
+ Run title: NONE
+ Run start: 2012-04-14T22:29:07
+ Lambda requested: 3.75 Angstrom
+ tthd: -4.0001 degree
+ thi: -4.0003 degree
+ ths: -3.9998 degree
+ s1h: 0.2610 millimetre
+ s2h: 0.2590 millimetre
+ s1w: 7.9990 millimetre
+ s2w: 8.0010 millimetre
+
+<nowiki>*********</nowiki> Working with run: 74090 <nowiki>*********</nowiki>
+ Run title: _No3Rep0
+ Run start: 2012-04-14T21:03:00
+ Lambda requested: 8.39999961853 Angstrom
+ tthd: -2.8002 degree
+ thi: -4.0003 degree
+ ths: -3.4000 degree
+ s1h: 1.2610 millimetre
+ s2h: 0.4130 millimetre
+ s1w: 19.9980 millimetre
+ s2w: 19.9960 millimetre
+
 
 *WIKI*"""
 
@@ -27,7 +107,9 @@ class RefLview(PythonAlgorithm):
         self.declareListProperty("RunNumbers", [0], 
                                  Validator=ArrayBoundedValidator(Lower=0),
                                  Description="List of run numbers to process")
-
+        self.setWikiSummary("""Liquids Reflectometer (REFL) NeXus viewer
+This routine will display some of the metadata defined by the IS
+for a given run or set of runs.""") 
     def PyExec(self):   
         
         import os

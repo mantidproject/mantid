@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/ApplyDeadTimeCorr.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
+	src/AsymmetryCalc.cpp
 	src/AverageLogData.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
@@ -43,6 +44,7 @@ set ( SRC_FILES
 	src/ConvertUnits.cpp
 	src/CopyInstrumentParameters.cpp
 	src/CopySample.cpp
+	src/CorrectFlightPaths.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
 	src/CreateCalFileByNames.cpp
@@ -129,8 +131,6 @@ set ( SRC_FILES
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
-	src/MuonAsymmetryCalc.cpp
-	src/MuonRemoveExpDecay.cpp
 	src/NormaliseByCurrent.cpp
 	src/NormaliseByDetector.cpp
 	src/NormaliseToMonitor.cpp
@@ -161,6 +161,7 @@ set ( SRC_FILES
 	src/RecordPythonScript.cpp
 	src/Regroup.cpp
 	src/RemoveBins.cpp
+	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
 	src/RemovePromptPulse.cpp
 	src/RenameWorkspace.cpp
@@ -202,6 +203,7 @@ set ( SRC_FILES
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
+	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
 )
 
@@ -221,6 +223,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
+	inc/MantidAlgorithms/AsymmetryCalc.h
 	inc/MantidAlgorithms/AverageLogData.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
@@ -250,6 +253,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertUnits.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopySample.h
+	inc/MantidAlgorithms/CorrectFlightPaths.h
 	inc/MantidAlgorithms/CorrectKiKf.h
 	inc/MantidAlgorithms/CorrectToFile.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
@@ -337,8 +341,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
-	inc/MantidAlgorithms/MuonAsymmetryCalc.h
-	inc/MantidAlgorithms/MuonRemoveExpDecay.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
 	inc/MantidAlgorithms/NormaliseByDetector.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
@@ -369,6 +371,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RecordPythonScript.h
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBins.h
+	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RenameWorkspace.h
@@ -410,6 +413,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
+	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
 
@@ -439,6 +443,7 @@ set ( TEST_FILES
 	ApplyDeadTimeCorrTest.h
 	ApplyDetailedBalanceTest.h
 	ApplyTransmissionCorrectionTest.h
+	AsymmetryCalcTest.h
 	AverageLogDataTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
@@ -466,6 +471,7 @@ set ( TEST_FILES
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
 	CopySampleTest.h
+	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h
 	CorrectToFileTest.h
 	CreateCalFileByNamesTest.h
@@ -539,8 +545,6 @@ set ( TEST_FILES
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
-	MuonAsymmetryCalcTest.h
-	MuonRemoveExpDecayTest.h
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
@@ -568,6 +572,7 @@ set ( TEST_FILES
 	RebunchTest.h
 	RegroupTest.h
 	RemoveBinsTest.h
+	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemovePromptPulseTest.h
 	RenameWorkspaceTest.h
@@ -611,7 +616,7 @@ set ( TEST_FILES
 set ( TEST_PY_FILES NormaliseToUnityTest.py )
 
 # Add a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidAlgorithms/PrecompiledHeader.h MantidAlgorithms src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

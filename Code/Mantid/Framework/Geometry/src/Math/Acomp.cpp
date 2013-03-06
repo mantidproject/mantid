@@ -1348,7 +1348,7 @@ namespace Mantid
       std::map<int,int> Base;         // keynumber :: value
       getAbsLiterals(litMap);
 
-      if (litMap.size()<1)
+      if (litMap.empty())
         return -1;
 
       keyNumbers.clear();

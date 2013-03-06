@@ -7,9 +7,7 @@
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 
-#include <napi.h>
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------

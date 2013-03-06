@@ -666,7 +666,7 @@ double IndexingUtils::Find_UB(       DblMatrix        & UB,
         GetIndexedPeaks( UB, q_vectors, required_tolerance,
                          miller_ind, indexed_qs, fit_error );
       }
-      catch ( std::exception )
+      catch ( std::exception& )
       {
         // failed to improve with all peaks, so just keep the UB we had 
       }

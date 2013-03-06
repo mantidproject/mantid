@@ -75,6 +75,7 @@ namespace Mantid
     /** 
      * Create a function from an expression.
      * @param expr :: The input expression
+     * @param parentAttributes :: An output map filled with the attribute name & values of the parent function
      * @return A pointer to the created function
      */
     IFunction_sptr FunctionFactoryImpl::createSimple(const Expression& expr, std::map<std::string,std::string>& parentAttributes)const
@@ -141,6 +142,7 @@ namespace Mantid
     /** 
      * Create a composite function from an expression.
      * @param expr :: The input expression
+     * @param parentAttributes :: An output map filled with the attribute name & values of the parent function
      * @return A pointer to the created function
      */
     CompositeFunction_sptr FunctionFactoryImpl::createComposite(const Expression& expr, std::map<std::string,std::string>& parentAttributes)const

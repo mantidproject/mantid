@@ -86,8 +86,6 @@ public:
   virtual void setValue(const std::size_t& index, const double& value) = 0;
   /// Get a non-mutable spectrum index
   virtual const specid_t& spectraNo(const std::size_t& index) const;
-  /// Get a spectrum index
-  virtual specid_t& spectraNo(const std::size_t& index);
 
   /// Get the length of the axis
   virtual std::size_t length() const = 0;

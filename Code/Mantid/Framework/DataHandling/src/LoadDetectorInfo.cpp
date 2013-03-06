@@ -1,5 +1,264 @@
 /*WIKI* 
 
+The detection time delay for each detector is subtracted from the time of flight bin boundaries in the spectrum associated with that detector. It is required that all the monitors have the same time delay and if this is non-zero the delay time is added to all TOF values. It is important that the units of the input workspace are TOF in microseconds, that [[GroupDetectors]] has not been run and this algorithm is only applied once to a workspace.
+
+Values for the partial pressure of 3He and wall thickness are added into the parameter map for each detector in a form that can be read by [[DetectorEfficiencyCor]]. That is, the values are assumed to be in atmosheres and meters, respectively, and the properties are stored internally in the workspace parameter map as "3He(atm)" and "wallT(m)".  The values are likely to be read from the same RAW file that the workspace was loaded from or a DAT file that corrosponds to the same run or series of experimental runs.
+
+Spectra whose associated detector data are not found in the input DAT or RAW file will not have their time of flight bin boundaries adjusted. Similarly nothing will be written to the parameter map for those detectors, the algorithm will continue to process data as normal but a warning will be written to the log. Detectors that are listed in the input file but do not exist in the instrument definition file will be ignored and details will be written to the log.
+
+If all the time offsets are the same and the file ''appears'' to contain enough data for all detectors all detector spectra will use same bin boundaries, where possible. This will make the algorithm run much more quickly and use less memory.
+
+When using a RAW file the time offset for each detector is read from the "hold off" table in the file's header while pressure and wall thickness data must be present in the user table array. The format for .DAT files is specified in the document "DETECTOR.DAT format" written by Prof G Toby Perring ("detector format.doc")
+
+If the RelocateDets option is set to true, it is false by default, then the detectors are moved to the corresponding positions specified in the data file provided.
+
+=== Detectors.dat data format ===
+
+The the detector data can be stored as ASCII or [http://download.nexusformat.org/ NeXus] data file. The description of the ASCII DETECTOR.dat file is provided in the table below. Nexus file format can come in two flavours. The first one is completely equivalent to the ASCII 19 column data format and introduced to increase the speed of accessing these data in binary format, where the second one left for compatibility with Libisis. It has meaningful data corresponding to the columns 1-6, 17&18 below, but does not support multiple tube pressures and wall thickness. 
+
+The [[LoadDetectorInfo]] algorithm currently reads and interprets rows 1-6,17&18 of the table, provided below (or columns of det.dat file) or correspondent data blocks from the NeXus file. It also does not understand the short (15 columns) MARI detector.dat ASCII file format (see '''ISIS detector.dat files''' below). 
+
+==== Co-ordinate frames ====
+
+For the purposes of the detector table we choose a right handed set of axes fixed in the spectrometer:
+
+      x-axis  -- horizontal
+      y-axis  -- vertical
+      z-axis  -- parallel to ki
+
+Centres of each detector element are defined in spherical polar co-ordinates as seen from the sample position:
+
+  THETA Polar angle measured from the z-axis [what we would normally call the scattering angle PHI]. Note that  0< THETA <180
+  PHI   Azimuthal angle measured from the x-axis in a right handed sense [what TGP, CDF	and RD01 call -BETA].
+        For example, the West Bank of HET has PHI=0, the North Bank has PHI=90, the South Bank has PHI=270.
+
+To specify the orientation of a detector, define axes x', y', z' as follows:
+
+    x'-axis	increasing THETA
+    y'-axis	increasing PHI
+    z'-axis	parallel to the line joining sample and detector
+
+The natural coordinate frame for the detector, xd, yd, zd, may not coincide with x', y', z'. For example, the natural frame for a gas tube is with zd along the axis of the tube, and the direction of xd chosen to be perpendicular to the line joining the detector with the sample. The characteristic dimensions of the detector, W_x, W_y, W_z, are given in the frame xd, yd, zd.
+
+The detector coordinate axes xd, yd, zd are related to x', y', z' by a rotation. The transformation is be expressed by a three-component vector &alpha;<sub>x</sub>, &alpha;<sub>y</sub>, &alpha;<sub>z</sub>, where the magnitude of  the vector gives the angle of rotation in a right-hand sense, and the normalised elements give the components along x', y', z' of the unit vector about which the rotation takes place. The magnitude of the vector is in degrees. 
+
+     e.g. non-PSD gas tube on the Debye-Scherrer cone:
+       &alpha;<sub>x</sub> = -90<sup>0</sup>, &alpha;<sub>y</sub> = &alpha;<sub>z</sub> = 0<sup>0</sup>; Wx = Wy = 0.0254, Wz = 0.300
+
+    e.g. Davidson bead monitor filling the HET beam at the monitor_2 position:
+        &alpha;<sub>x</sub> = &alpha;<sub>y</sub> = &alpha;<sub>z</sub> = 0<sup>0</sup>; Wx = Wy = 0.045, Wz = 0.00025
+
+Note that for PSD detectors the angles and dimensions refer to the pixel, not the whole tube. For HET, Wz = 0.914/64 = 0.01428.
+
+==== File format ====
+The file consists of number of ASCII columns, separated by spaces. All distances are in meters, and all angles in degrees.
+{| border="1" cellpadding="5" cellspacing="0"
+!Column Number
+!Column Name
+!Column Type
+!Column Description
+|-
+| 1
+|DET_NO
+|integer
+|Detector index number as in SPECTRA.DAT
+|-
+| 2
+|DELTA
+|real
+|Electronics delay time (us). The origin is up to you. HOMER uses the peak in monitor_2 as the origin of time, so the only thing that really matters is the difference in the delay time between the detectors and the monitors.
+|-
+| 3
+|L2
+|real
+|Sample - detector distance (m)
+|-
+| 4
+|CODE
+|integer
+|Code number that describes the detector type.<span style="color:#FF0000"> Up to now this column has been redundant so the old files can contain unity for all detectors. </span>	Proper detectors should now follow the scheme:
+   0	Dummy detector entry (see later)
+   1	Davidson scintillator bead monitor (or just monitor)
+   2	non-PSD gas tube
+   3	PSD gas tube
+|-
+| 5
+|THETA
+|real
+|Scattering angle (deg)
+|-
+| 6
+|PHI
+|real
+|Azimuthal angle (deg). Origin and rotation sense defined above
+|-
+| 7
+|W_x
+|real
+|True detector dimensions (m) in the frame xd’
+|-
+| 8
+|W_y
+|real
+|True detector dimensions (m) in the frame yd’
+|-
+| 9
+|W_z
+|real
+|True detector dimensions (m) in the frame zd’
+|-
+| 10
+|F_x
+|real
+| False detector dimensions (m) in the frame xd' to avoid gaps between detectors
+|-
+| 11
+|F_y
+|real
+|False detector dimensions (m) in the frame yd' to avoid gaps between detectors
+|-
+| 12
+|F_z
+|real
+|False detector dimensions (m) in the frame zd' to avoid gaps between detectors
+|-
+| 13
+|&alpha;<sub>x</sub>
+|real
+| x-coordinate of the vector describing orientation of detector in the co-ordinate frame defined above.
+|-
+| 14
+|&alpha;<sub>y</sub>
+|real
+| y-coordinate of the vector describing orientation of detector in the co-ordinate frame defined above.
+|-
+| 15
+|&alpha;<sub>z</sub>
+|real
+| z-coordinate of the vector describing orientation of detector in the co-ordinate frame defined above.
+|-
+|COLSPAN='4' |<span style="color:#0101DF">The columns with numbers higher then those described above contain information about the detectors that is dependent on the detector type: </span>
+|-
+|COLSPAN='4' |CODE = 0 (Dummy detector entry) :
+|-
+|-
+| 16
+| det_1
+| real
+|Frequently, some of the inputs to the data acquisition electronics do not have any detectors plugged into them. To ensure that any noise on these inputs is safely directed to a ‘dust-bin’ spectrum, they are given detector numbers which are associated with spectrum 0 in SPECTRA.DAT.  Dummy entries in DETECTOR.DAT are required for each of these dummy detectors. These entries should be given detector CODE = 0, which will be used to indicate that the other entries in DETECTOR.DAT can be ignored. For the sake of clarity, set all DELTA, L2...DET_4 to zero for dummy detectors.
+|-
+| 17
+| det_2
+| real
+| The same as 16
+|-
+| 18
+| det_3
+| real
+| The same as 16
+|-
+| 19
+| det_4
+| real
+| The same as 16
+|-
+|-
+|COLSPAN='4' |CODE = 1 (monitor) :
+|-
+| 16
+| det_1
+| real
+| Dead time (us). Important for old detectors and high counting rate. 
+|-
+| 17
+| det_2
+| real
+|Macroscopic absorption cross-section &Sigma;(m-1meV-0.5). For our monitors this is for Li scintillator glass. [I think I know what &Sigma; is approximately, but we don’t at present use it anywhere, so set to zero]
+|-
+| 18
+| det_3
+| real
+| Ignored. Set to zero
+|-
+| 19
+| det_4
+| real
+| Ignored. Set to zero
+|-
+|-
+|COLSPAN='4' |CODE = 2 (non-PSD gas tube) :
+|-
+| 16
+| det_1
+| real
+| Dead time (us). Important for old detectors and high counting rate. 
+|-
+| 17
+| det_2
+| real
+|Gas tube detector 3He partial pressure (atms)
+|-
+| 18
+| det_3
+| real
+| Gas tube wall thickness (m) [0.00080]
+|-
+| 19
+| det_4
+| real
+| Ignored. Set to zero
+|-
+|-
+|COLSPAN='4' |CODE = 3  (PSD gas tube) :
+|-
+| 16
+| det_1
+| real
+| Dead time (us). Important for old detectors and high counting rate. 
+|-
+| 17
+| det_2
+| real
+|Gas tube detector 3He partial pressure (atms) [10.0 or 6.4]
+|-
+| 18
+| det_3
+| real
+| Gas tube wall thickness (m) [0.00080]
+|-
+| 19
+| det_4
+| real
+|Index of tube to which the pixel belongs. Each PSD gas tube must be given a unique identifier. This enables programs that use DETECTOR.DAT to recognise that pixels have come from the same PSD tube.
+|-
+
+|}
+
+==== ISIS DETECTOR.DAT files ====
+
+The ISIS raw files seem to have two possible entries - MARI is non-standard for some reason
+
+   nuse=14    nuse=10
+   	 	(ncol=19) 	(ncol=15)
+  det_no		spec		spec
+  delta		delt		delt
+  l2		len2		len2
+  code		code		code
+  theta		tthe		tthe
+  phi		ut1		ut1
+  W_x		ut2		ut2
+  W_y		ut3		ut3
+  W_z		ut4		ut4
+  F_x		ut5
+  F_y		ut6
+  F_z		ut7
+  &alpha;<sub>x</sub>		ut8		ut5
+  &alpha;<sub>y</sub>		ut9		ut6
+  &alpha;<sub>z</sub>		ut10		ut7
+  det_1		ut11		
+  det_2		ut12		ut8
+  det_3		ut13		ut9
+  det_4		ut14		ut10
 
 *WIKI*/
 #include "MantidDataHandling/LoadDetectorInfo.h"
@@ -7,13 +266,15 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include <algorithm>
 #include <fstream>
 #include <sstream>
 #include "LoadRaw/isisraw2.h"
+
+#include <Poco/File.h>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid
 {
@@ -26,7 +287,7 @@ DECLARE_ALGORITHM(LoadDetectorInfo)
 /// Sets documentation strings for this algorithm
 void LoadDetectorInfo::initDocs()
 {
-  this->setWikiSummary("Subtracts detector delay times from the time of flight X values in the workspace and modifies its information about detector pressures and wall thicknesses. This information can read from a DAT file or RAW file that corresponds to the same run or series of experimental runs as the workspace. ");
+  this->setWikiSummary("Subtracts detector delay times from the time of flight X values in the workspace and modifies its information about detector pressures and wall thicknesses. This information can read from a DAT, RAW or NXS file that corresponds to the same run or series of experimental runs at given instrument configuration.");
   this->setOptionalMessage("Subtracts detector delay times from the time of flight X values in the workspace and modifies its information about detector pressures and wall thicknesses. This information can read from a DAT file or RAW file that corresponds to the same run or series of experimental runs as the workspace.");
 }
 
@@ -43,7 +304,7 @@ const LoadDetectorInfo::detectDatForm
 LoadDetectorInfo::LoadDetectorInfo() 
   : Algorithm(), m_workspace(), m_numHists(-1), m_monitors(),
     m_monitorXs(), m_commonXs(false), m_monitOffset(UNSETOFFSET), m_error(false),
-    m_FracCompl(0.0), m_moveDets(false), m_samplePos(), m_pmap(NULL), m_instrument()
+    m_FracCompl(0.0), m_samplePos(), m_pmap(NULL), m_instrument(), m_moveDets(false)
 {
 }
 
@@ -61,15 +322,14 @@ void LoadDetectorInfo::init()
   exts.push_back(".dat");
   exts.push_back(".raw");
   exts.push_back(".sca");
+  exts.push_back(".nxs");
   declareProperty(new FileProperty("DataFilename","", FileProperty::Load, exts),
-    "A .DAT or .raw file that contains information about the detectors in the\n"
-    "workspace. Partial pressures of 3He will be loaded assuming units of\n"
-    "atmospheres, offset times in the same units as the workspace X-values and\n"
-    "and wall thicknesses in metres.");
+    "A .raw .DAT,nxs or sca file that contains information about the detectors in the "
+    "workspace. The description of Dat and nxs file format is provided below.");
   
   declareProperty("RelocateDets", false,
-		  "If true then update the detector positions with those from the input file, default=false.",
-		  Direction::Input);
+      "If true then the detectors are moved to the positions specified in the raw/dat/nxs file.",
+      Direction::Input);
 }
 
 /** Executes the algorithm
@@ -77,7 +337,6 @@ void LoadDetectorInfo::init()
 *  @throw FileError if there was a problem opening the file or its format
 *  @throw MisMatch<int> if not very spectra is associated with exaltly one detector
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
-*  @throw runtime_error if the SpectraDetectorMap had not been filled
 */
 void LoadDetectorInfo::exec()
 {
@@ -121,6 +380,12 @@ void LoadDetectorInfo::exec()
     readRAW(filename);
   }
 
+  if ( filename.find(".nxs") == filename.size()-4 ||
+    filename.find(".NXS") == filename.size()-4)
+  {
+    readNXS(filename);
+  }
+
   if (m_error)
   {
     g_log.warning() << "Note workspace " << getPropertyValue("Workspace") << " has been changed so if you intend to fix detector mismatch problems by running "
@@ -137,7 +402,6 @@ void LoadDetectorInfo::exec()
 *  @throw FileError if there was a problem opening the file or its format
 *  @throw MisMatch<int> if not very spectra is associated with exaltly one detector
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
-*  @throw runtime_error if the SpectraDetectorMap had not been filled
 */
 void LoadDetectorInfo::readDAT(const std::string& fName)
 {
@@ -266,7 +530,7 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
   }
 
   sometimesLogSuccess(log, noneSet = true);
-  g_log.debug() << "Adjusting time of flight X-values by detector delay times" << std::endl;
+  g_log.debug() << "Adjusting time of flight X-values by detector delay times, detectors have different offsets: "<< differentOffsets << std::endl;
   adjDelayTOFs(detectorOffset, differentOffsets, detectorList, offsets);
   
   if ( detectorProblemCount > 0 )
@@ -284,7 +548,6 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
 * @throw invalid_argument if the detection delay time is different for different monitors
 * @throw MisMatch<int> if not very spectra is associated with exaltly one detector
 * @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
-* @throw runtime_error if the SpectraDetectorMap had not been filled
 */
 void LoadDetectorInfo::readRAW(const std::string& fName)
 {
@@ -417,7 +680,7 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
 *  @param change :: if the parameters are successfully changed they are stored here
 *  @throw NotFoundError if a pointer to the specified detector couldn't be retrieved
 */
-void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInfo &change)
+void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInfo &change,bool doLogging)
 {
   Geometry::IDetector_const_sptr det = m_instrument->getDetector(params.detID);
   // Set the detectors pressure.
@@ -439,7 +702,8 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
 
 
   // this operation has been successful if we are here, the following information is useful for logging
-  change = params;
+  if(doLogging)
+    change = params;
 }
 
 /** Decides if the bin boundaries for all non-monitor spectra will be the same and runs the appropriate
@@ -498,7 +762,6 @@ void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, co
 *  @param offsets :: an array of values to change the bin boundaries by, these must be listed in the same order as detIDs
 *  @throw MisMatch<int> if not every spectra is associated with exaltly one detector
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
-*  @throw runtime_error if the SpectraDetectorMap had not been filled
 */
 void LoadDetectorInfo::adjustXs(const std::vector<detid_t> &detIDs, const std::vector<float> &offsets)
 {
@@ -795,6 +1058,296 @@ void LoadDetectorInfo::sometimesLogSuccess(const detectorInfo &params, bool &nee
     g_log.information() << name() << " has set pressure=" << params.pressure << " and wall thickness=" << params.wallThick << " for the detector with ID " << params.detID << std::endl;
   }
   needToLog = false;
+}
+
+/**The methor reads selected part of detector.nxs file and apply correspondent changes to the detectors */ 
+void LoadDetectorInfo::readNXS(const std::string& fName)
+{
+  auto hFile = new ::NeXus::File(fName,NXACC_READ);
+
+  std::map<std::string, std::string> entries;
+  hFile->getEntries(entries);
+  // define data requested
+  bool detDataFound(false);
+  std::vector<detectorInfo> detStruct;
+  std::vector<int32_t> detType;
+  std::vector<float> detOffset;
+  std::vector<detid_t> detectorList;
+  // identify what file we would read
+  if(entries.find("full_reference_detector")!=entries.end())
+  {
+    g_log.warning()<<" reading data from old Libisis format, which does not support multiple helium pressures and wall thickness\n";
+    hFile->openGroup("full_reference_detector","NXIXTdetector");
+    this->readLibisisNXS(hFile,detStruct,detType,detOffset,detectorList);
+    hFile->closeGroup();
+    detDataFound = true;
+  }
+  if(entries.find("detectors.dat")!=entries.end())
+  {  
+    hFile->openGroup("detectors.dat","NXEntry");
+    this->readDetDotDatNXS(hFile,detStruct,detType,detOffset,detectorList);
+    hFile->closeGroup();
+    detDataFound = true;
+  }
+  delete hFile;
+
+  if(!detDataFound)
+    throw std::invalid_argument("the NeXus file "+fName+" does not contain necessary detector's information");
+
+  g_log.notice() << "Detectors indo loaded from nexus file, starting applying corrections\n";
+
+  // process detectors and modify instrument
+  size_t nDetectors = detStruct.size();
+  float detectorOffset = UNSETOFFSET;
+  bool differentOffsets = false; 
+  std::vector<detid_t> missingDetectors;
+  detectorInfo log;
+
+  bool noneSet = true;
+  size_t detectorProblemCount(0);
+  //PRAGMA(omp parallel for reduction(|| : differentOffsets)) 
+  for(int i=0;i<int(nDetectors);i++)
+  {
+    //PARALLEL_START_INTERUPT_REGION
+
+    // check we have a supported code
+    switch (detType[i])
+    {
+    // these first two codes are detectors that we'll process, the code for this is below
+    case PSD_GAS_TUBE : break;
+    case NON_PSD_GAS_TUBE : break;
+
+    // the following detectors codes specify little or no analysis
+    case MONITOR_DEVICE :
+      //PARALLEL_CRITICAL(different_mon_offset)
+      {
+        // throws invalid_argument if the detection delay time is different for different monitors
+        noteMonitorOffset(detOffset[i], detStruct[i].detID);
+      }
+      // skip the rest of this loop and move on to the next detector
+      continue;
+
+      // the detector is set to dummy, we won't report any error for this we'll just do nothing
+    case DUMMY_DECT : continue;
+
+    //we can't use data for detectors with other codes because we don't know the format, ignore the data and write to g_log.warning() once at the end
+    default :
+      //PARALLEL_CRITICAL(problem_detector)
+      {
+        detectorProblemCount ++;
+        g_log.debug() << "Ignoring data for a detector with code " << detType[i] << std::endl;
+      }
+      continue;
+    }
+
+    // gas filled detector specific code now until the end of this method
+
+    // normally all the offsets are the same and things work faster, check for this
+    if ( detOffset[i] != detectorOffset )
+    {// could mean different detectors have different offsets and we need to do things thoroughly
+      if ( detectorOffset ==  UNSETOFFSET ) 
+      {
+        //PARALLEL_CRITICAL(det_offset)
+        {
+          if(detectorOffset ==  UNSETOFFSET) detectorOffset = detOffset[i];
+          if(detOffset[i] != detectorOffset) differentOffsets=true;
+        }
+      }
+      else
+      {
+        differentOffsets=true;
+
+    }
+
+
+    if(m_moveDets)
+    {
+      bool exception(false);
+      try
+      {
+        setDetectorParams(detStruct[i], log,false);
+      }
+      catch (Exception::NotFoundError &)
+      {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
+        //PARALLEL_CRITICAL(non_existing_detector)
+        {
+          missingDetectors.push_back(detStruct[i].detID);
+        }
+        // Set the flag to signal that we should call continue outside of the catch block. Works around a defect with the Intel compiler.
+        exception = true;
+      }
+      if ( exception ) continue;
+    }
+
+    // report progress and check for a user cancel message at regualar intervals
+
+    if ( i % 100 == 0 )
+    {	
+        //PARALLEL_CRITICAL(logging)
+        {
+            log = detStruct[i];
+            sometimesLogSuccess(log, noneSet);
+            progress(static_cast<double>(i));
+            interruption_point();
+        }
+    }
+    
+    }
+    //PARALLEL_END_INTERUPT_REGION
+  }
+  //PARALLEL_CHECK_INTERUPT_REGION
+
+  sometimesLogSuccess(log, noneSet = true);
+  g_log.notice() << "Adjusting time of flight X-values by detector delay times, detector have the different offsets:  "<< differentOffsets << std::endl;
+  adjDelayTOFs(detectorOffset, differentOffsets, detectorList, detOffset);
+  
+    if ( detectorProblemCount > 0 )
+    {
+      g_log.warning() << "Data for " << detectorProblemCount << " detectors that are neither monitors or psd gas tubes, the data have been ignored" << std::endl;
+    }
+    logErrorsFromRead(missingDetectors);
+    g_log.debug() << "Successfully read DAT file " << fName << std::endl;
+}
+/**Read detector.dat information from the old libisis NeXus format 
+ * @param hFile -- pointer to the opened NeXus file handle, opened at the group, which contains Libisis Detector information
+ * @param  detStruct -- the vector of the DetectorInfo structures, describing the detectors to modify
+ * @param  detType   -- the vector of the detector types, described in the algorithm description
+ * @param detOffset  -- the time delay for each detector's electronics, which should be corrected for.
+ * @param detList  -- list of detectors
+*/
+void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct, std::vector<int32_t>&detType,std::vector<float> &detOffset,
+                                      std::vector<detid_t>&detList)
+{
+
+    std::vector<double> delayTime;
+    std::vector<int32_t> detID;
+    // read detector ID
+    hFile->readData<int32_t>("det_no",detID);
+    // read detector type 
+    hFile->readData<int32_t>("det_type",detType);
+    // read the detector's type
+    hFile->readData<double>("delay_time",delayTime);
+
+    size_t nDetectors = delayTime.size();
+    std::vector<double> L2,Phi,Theta;
+    if(m_moveDets)
+    {
+      // the secondary flight path -- sample to detector
+        hFile->readData<double>("L2",L2);
+      // detector's polar angle Theta (2Theta in Brag's terminology)
+        hFile->readData<double>("theta",Theta);
+      // detector's polar angle, phi
+        hFile->readData<double>("phi",Phi);
+    }
+    else
+    {
+      L2.assign(nDetectors,DBL_MAX);
+      Phi.assign(nDetectors,DBL_MAX);
+      Theta.assign(nDetectors,DBL_MAX);
+    }
+    //We need He3 pressue and wall thikness
+    double pressure(0.0008),wallThickness(10.);
+    hFile->openGroup("det_he3","NXIXTdet_he3");
+        hFile->readData<double>("gas_pressure",pressure);
+        hFile->readData<double>("wall_thickness",wallThickness);
+    hFile->closeGroup();
+    if(pressure<=0)
+    {
+      g_log.warning("The data file does not contain correct He3 pressure, default value of 10Bar is used instead");
+      pressure = 10.;
+    }
+    if(wallThickness<=0)
+    {
+      g_log.warning("The data file does not contain correct detector's wall thickness, default value of 0.8mm is used instead");
+      wallThickness = 0.0008;
+    }
+
+
+   if(nDetectors!=L2.size()||nDetectors!=Phi.size()||nDetectors!=Theta.size()||nDetectors!=detID.size())
+     throw std::runtime_error("The size of nexus data columns is not equal to each other");
+
+   detStruct.resize(nDetectors);
+   detOffset.resize(nDetectors);
+   detList.resize(nDetectors);
+   for(size_t i=0;i<nDetectors;i++)
+   {
+      detStruct[i].detID = detID[i];
+      detStruct[i].l2    = L2[i];
+      detStruct[i].theta = Theta[i];
+      detStruct[i].phi   = Phi[i];
+      detStruct[i].pressure = pressure;
+      detStruct[i].wallThick = wallThickness;
+
+      detOffset[i]  = float(delayTime[i]);
+      detList[i] = detid_t(detID[i]);
+    }
+    
+}
+
+
+/**Read detector.dat information (see ) written in NeXus format 
+ * @param hFile -- pointer to the opened NeXus file handle, opened at the group, which contains Libisis Detector information
+ * @param  detStruct -- the vector of the DetectorInfo structures, describing the detectors to modify
+ * @param  detType   -- the vector of the detector types, described in the algorithm description
+ * @param  detOffset  -- the time delay for each detector's electronics, which should be corrected for.
+ * @param detList  -- list of detectors
+*/
+void LoadDetectorInfo::readDetDotDatNXS(::NeXus::File *hFile, std::vector<detectorInfo> &detStruct, std::vector<int32_t>&detType,std::vector<float> &detOffset,
+                                        std::vector<detid_t>&detList)
+{
+
+    std::vector<float> timeOffsets;
+    std::vector<int32_t> detID;
+    // read detector num and ID 
+    hFile->readData<int32_t>("detID",detID);
+
+    // read the detector's time offsets 
+    hFile->readData<float>("timeOffsets",timeOffsets);
+
+    size_t nDetectors = timeOffsets.size()/2;
+    std::vector<float> detSphericalCoord;
+    if(m_moveDets)
+    {
+        hFile->readData<float>("detSphericalCoord",detSphericalCoord);
+    }
+    else
+    {
+      detSphericalCoord.assign(3*nDetectors,FLT_MAX);
+    }
+    //We need He3 pressue and wall thikness
+    std::vector<float> detPrWall;
+    hFile->readData<float>("detPressureAndWall",detPrWall);
+
+
+
+
+   if(nDetectors!=detSphericalCoord.size()/3||nDetectors!=detPrWall.size()/2||nDetectors!=detID.size()/2)
+     throw std::runtime_error("The size of nexus data columns is not equal to each other");
+
+   if(nDetectors > std::numeric_limits<int>::max())
+       throw std::runtime_error("The number of detectors is bigger then max int for current architecture");
+
+
+   detStruct.resize(nDetectors);
+   detOffset.resize(nDetectors);
+   detType.resize(nDetectors);
+   detList.resize(nDetectors);
+   PARALLEL_FOR_NO_WSP_CHECK()
+   for(int i=0;i<static_cast<int>(nDetectors);i++)
+   {
+      detStruct[i].detID = detID[2*i];
+      detStruct[i].l2    = detSphericalCoord[3*i+0]; //L2,
+      detStruct[i].theta = detSphericalCoord[3*i+1]; // Theta
+      detStruct[i].phi   = detSphericalCoord[3*i+2]; // Phi
+
+      detStruct[i].pressure = detPrWall[2*i+0]; //pressure;
+      detStruct[i].wallThick =detPrWall[2*i+1]; // wallThickness;
+
+      detOffset[i]  = timeOffsets[2*i];
+      detType[i]    = detID[2*i+1];
+      detList[i]   = detid_t(detID[2*i]);
+    }
+    
 }
 
 } // namespace DataHandling

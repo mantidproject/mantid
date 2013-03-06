@@ -6,7 +6,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 
 namespace Mantid
 {
@@ -140,8 +139,8 @@ namespace Mantid
     //-------------------------------------------------------------------------------------------------------
     /**
      * Cache frequently accessed values
-     * @param :: The instrument for this run
-     * @param :: The det ID for this observation
+     * @param instrument : The instrument for this run
+     * @param detID : The det ID for this observation
      */
     void CachedExperimentInfo::initCaches(const Geometry::Instrument_const_sptr & instrument, const detid_t detID)
     {

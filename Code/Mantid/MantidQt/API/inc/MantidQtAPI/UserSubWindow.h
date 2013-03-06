@@ -49,7 +49,7 @@ namespace API
 //----------------------------------
 // Forward declarations
 //----------------------------------
-class InterfaceManagerImpl;
+class InterfaceManager;
 
 
 
@@ -151,7 +151,7 @@ private:
   // This is so that it can set the name
   // I can't pass anything as an argument to the constructor as I am using
   // the DynamicFactory
-  friend class InterfaceManagerImpl;
+  friend class InterfaceManager;
 
   /// Set the interface name
   void setInterfaceName(const QString & iface_name);

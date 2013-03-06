@@ -1,9 +1,11 @@
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/overloads.hpp>
 
 using Mantid::API::ExperimentInfo;
+using Mantid::API::ExperimentInfo_sptr;
 using namespace boost::python;
 
 /// Overload generator for getInstrumentFilename
@@ -11,6 +13,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload, ExperimentInfo::
 
 void export_ExperimentInfo()
 {
+  REGISTER_SHARED_PTR_TO_PYTHON(ExperimentInfo);
 
   class_<ExperimentInfo, boost::noncopyable>("ExperimentInfo", no_init)
           .def("getInstrument", &ExperimentInfo::getInstrument, "Returns the instrument for this run")

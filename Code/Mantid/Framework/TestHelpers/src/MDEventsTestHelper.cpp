@@ -66,7 +66,7 @@ namespace MDEventsTestHelper
     // Populate the instrument parameters in this workspace - this works around a bug
     retVal->populateInstrumentParameters();
 
-    DateAndTime run_start("2010-01-01");
+    DateAndTime run_start("2010-01-01T00:00:00");
 
     for (int pix = 0; pix < numPixels; pix++)
     {

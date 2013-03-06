@@ -103,7 +103,8 @@ void IFunction::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 /**
  * Ties a parameter to other parameters
  * @param parName :: The name of the parameter to tie.
- * @param expr ::    A math expression 
+ * @param expr :: A math expression
+ * @param isDefault :: Flag to mark as default the value of an object associated with this reference: a tie or a constraint.
  * @return newly ties parameters
  */
 ParameterTie* IFunction::tie(const std::string& parName,const std::string& expr, bool isDefault)
@@ -118,6 +119,8 @@ ParameterTie* IFunction::tie(const std::string& parName,const std::string& expr,
  * Add ties to the function.
  * @param ties :: Comma-separated list of name=value pairs where name is a parameter name and value
  *  is a math expression tying the parameter to other parameters or a constant.
+ * @param isDefault :: Flag to mark as default the value of an object associated with this reference: a tie or a constraint.
+ *
  */
 void IFunction::addTies(const std::string& ties, bool isDefault)
 {
@@ -228,6 +231,8 @@ std::string IFunction::asString()const
 
 /** Add a list of constraints from a string
  * @param str :: A comma-separated list of constraint expressions.
+ * @param isDefault :: Flag to mark as default the value of an object associated with this reference.
+ *
  */
 void IFunction::addConstraints(const std::string& str, bool isDefault)
 {

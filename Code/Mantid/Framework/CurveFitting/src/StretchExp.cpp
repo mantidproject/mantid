@@ -27,7 +27,12 @@ StretchExp::StretchExp()
   declareParameter("Stretching",1.0, "Stretching exponent");
 }
 
-
+/** \relates StretchExp
+ * Implements the StretchExp function
+ * @param out :: The result of evaluating the function
+ * @param xValues :: function domain values
+ * @param nData :: size of the function domain
+ */
 void StretchExp::function1D(double* out, const double* xValues, const size_t nData)const
 {
     const double h = getParameter("Height");
@@ -40,7 +45,13 @@ void StretchExp::function1D(double* out, const double* xValues, const size_t nDa
     }
 }
 
-void StretchExp::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
+/** \relates StretchExp
+ * Calculates the derivatives of the StretchExp
+ * @param out :: The resulting jacobian
+ * @param xValues :: function domain values
+ * @param nData :: size of the function domain
+ */
+void StretchExp::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
 {
     const double h = getParameter("Height");
     const double t = getParameter("Lifetime");

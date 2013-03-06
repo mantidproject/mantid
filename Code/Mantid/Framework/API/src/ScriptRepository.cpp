@@ -55,12 +55,9 @@ namespace Mantid
         }
     }
 
-
-
     const char * ScriptRepoException::what() const throw(){
-      return _system_error.c_str(); 
+      return _user_info.c_str(); 
     }
+
   } // namespace API
 } // namespace Mantid
-
-///\endcond TEMPLATE

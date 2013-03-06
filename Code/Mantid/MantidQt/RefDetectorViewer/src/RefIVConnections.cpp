@@ -22,6 +22,7 @@ namespace RefDetectorViewer
  *
  * @param ui               The object containing the gui components for 
  *                         the ImageView viewer.
+ * @param iv_main_window   The main window.
  * @param image_display    The ImageDisplay object that will dispaly the
  *                         image
  * @param h_graph_display  The GraphDisplay object that will display 

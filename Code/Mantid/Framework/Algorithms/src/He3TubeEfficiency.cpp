@@ -180,7 +180,6 @@ void He3TubeEfficiency::exec()
  *  @param spectraIndex :: index of the spectrum to get the efficiency for
  *  @throw invalid_argument if the shape of a detector is isn't a cylinder
  *  aligned along one axis
- *  @throw runtime_error if the SpectraDetectorMap has not been filled
  *  @throw NotFoundError if the detector or its gas pressure or wall thickness
  *  were not found
  */

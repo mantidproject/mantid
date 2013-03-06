@@ -89,10 +89,7 @@ void GraphDisplay::SetLogX( bool is_log_x )
  * @param xData    Vector of x coordinates of points to plot
  * @param yData    Vector of y coordinates of points to plot.  This should
  *                 be the same size as the xData vector.
- * @param image_x  X-coordinate of point on image that generated the graph
- *                 data
- * @param image_y  Y-coordinate of point on image that generated the graph
- *                 data
+ * @param cut_value  the cut value
  */
 void GraphDisplay::SetData(const QVector<double> & xData, 
                            const QVector<double> & yData,

@@ -7,7 +7,7 @@ Saves the data in a workspace into a file in the NeXus based 'NXSPE' format.
 
 The input workspace must have units of Momentum Transfer ('DeltaE') and contain histogram data with common binning on all spectra.
 
-==== ChildAlgorithm used ====
+==== Child Algorithms used ====
 
 [[FindDetectorsPar]] algorithm is used to calculate detectors parameters from the instrument description.
 
@@ -50,6 +50,13 @@ namespace Mantid
     {
     }
 
+    /// Sets documentation strings for this algorithm
+    void SaveNXSPE::initDocs()
+    {
+      this->setWikiSummary("Writes a workspace into a file in the nxspe format.");
+      this->setOptionalMessage("Writes a workspace into a file in the nxspe format.");
+    }
+
     /**
      * Initialise the algorithm
      */
@@ -63,7 +70,7 @@ namespace Mantid
 
       declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace",
           "", Direction::Input, wsValidator),
-          "Name of the workspace to be saved.");
+          "The name of the workspace to save.");
 
       std::vector < std::string > exts;
       exts.push_back(".nxspe");
@@ -82,14 +89,14 @@ namespace Mantid
       declareProperty("KiOverKfScaling", true,
           "Flags in the file whether Ki/Kf scaling has been done or not.");
 
-// optional par or phx file
+      // optional par or phx file
      std::vector<std::string> fileExts(2);
         fileExts[0]=".par";
         fileExts[1]=".phx";
         declareProperty(new FileProperty("ParFile","not_used.par",FileProperty::OptionalLoad, fileExts),
-       "An optional file that contains the list of angular parameters for the detectors and detectors groups,\n\
-        used if the values produced by Mantid FindDetectorsPar algorithm are for some reason unsatisfactory\n\
-        If specified, will use data from the file instead of the data, calculated from the instument description");
+       "If provided, will replace detectors parameters in resulting nxspe file with the values taken from the file. \n\
+       Should be used only if the parameters, calculated by the [[FindDetectorsPar]] algorithm are not suitable for some reason. \n\
+       See [[FindDetectorsPar]] description for the details.");
     }
 
     /**
@@ -229,12 +236,18 @@ namespace Mantid
       nxFile.makeData("data", ::NeXus::FLOAT64, array_dims, false);
       nxFile.makeData("error", ::NeXus::FLOAT64, array_dims, false);
 
-      std::vector<int> slab_start;
-      std::vector<int> slab_size;
+      // Add the axes attributes to the data
+      nxFile.openData("data");
+      nxFile.putAttr("signal", 1);
+      nxFile.putAttr("axes", "polar:energy");
+      nxFile.closeData();
+
+      std::vector<int64_t> slab_start;
+      std::vector<int64_t> slab_size;
 
       // What size slabs are we going to write...
       slab_size.push_back(1);
-      slab_size.push_back((int)nBins);
+      slab_size.push_back((int64_t)nBins);
 
       // And let's start at the beginning
       slab_start.push_back(0);

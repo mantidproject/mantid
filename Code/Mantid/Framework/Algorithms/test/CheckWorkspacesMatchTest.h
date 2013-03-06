@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"

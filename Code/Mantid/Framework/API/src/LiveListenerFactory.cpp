@@ -23,19 +23,20 @@ namespace API
   /** Creates an instance of the appropriate listener for the given instrument, and establishes the
    *  connection to the data acquisition.
    *  @param instrumentName The name of the instrument to 'listen to' (Note that the argument has
-   *                        different semantics to the overridden base class create method).
+   *                        different semantics to the base class create method).
+   *  @param connect        Whether to connect the listener to the data stream for the given instrument.
    *  @returns A shared pointer to the created ILiveListener implementation
    *  @throws Exception::NotFoundError If the requested listener is not registered
    *  @throws std::runtime_error If unable to connect to the listener at the configured address
    */
-  boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const std::string& instrumentName) const
+  boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const std::string& instrumentName, bool connect) const
   {
     ILiveListener_sptr listener;
     // See if we know about the instrument with the given name
     try {
       Kernel::InstrumentInfo inst = Kernel::ConfigService::Instance().getInstrument(instrumentName);
       listener = Kernel::DynamicFactory<ILiveListener>::create(inst.liveListener());
-      if ( ! listener->connect(Poco::Net::SocketAddress(inst.liveDataAddress())) )
+      if ( connect && !listener->connect(Poco::Net::SocketAddress(inst.liveDataAddress())) )
       {
         // If we can't connect, log and throw an exception
         std::stringstream ss;
@@ -50,7 +51,7 @@ namespace API
       // During development, and for testing, we allow the direct passing in of a listener name
       //   - so try to create that. Will throw if it doesn't exist - let that exception get out
       listener = Kernel::DynamicFactory<ILiveListener>::create(instrumentName);
-      listener->connect(Poco::Net::SocketAddress());  // Dummy argument for now
+      if ( connect ) listener->connect(Poco::Net::SocketAddress());  // Dummy argument for now
     }
     // The Poco SocketAddress can throw all manner of exceptions if the address string it gets is
     // badly formed, or it can't successfully look up the server given, or .......

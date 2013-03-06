@@ -31,13 +31,11 @@ namespace Mantid
     }
 
     /**
-     *  Construct a Y vector for the current set up
-     * @param tfResModel :: A reference to the current TobyFit model object to check
-     * which parameters are active in this run
+     *  Construct a Y vector for the current set up.
      */
     TobyFitYVector::TobyFitYVector() 
       : m_yvector(length(), 0.0),
-        m_curRandNums(NULL), m_randIndex(-1), m_curObs(NULL), m_curQOmega(NULL),
+        m_curRandNums(NULL), m_randIndex(0), m_curObs(NULL), m_curQOmega(NULL),
         m_moderator(true), m_aperture(true), m_chopper(true), m_chopperJitter(true), 
         m_sampleVolume(true), m_detectorDepth(true), m_detectorArea(true), m_detectionTime(true)
     {
@@ -134,7 +132,7 @@ namespace Mantid
       calculateTimeBinContribution();
 
       m_curRandNums = NULL;
-      m_randIndex = -1;
+      m_randIndex = 0;
       m_curObs = NULL;
       m_curQOmega = NULL;
 

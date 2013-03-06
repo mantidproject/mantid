@@ -154,7 +154,7 @@ namespace Mantid
     /** Links a SINGLE UDETs to the given spectrum.
      *  THIS METHOD SHOULD BE USED WITH CARE - IT CAN LEAD TO AN INCONSISTENT MAP
      *  @param spectrum :: The spectrum number to which detectors should be added
-     *  @param udetList :: The detectors id to add to the map
+     *  @param udett :: The detectors id to add to the map
      */
     void SpectraDetectorMap::addSpectrumEntry(const specid_t spectrum, const detid_t & udett)
     {

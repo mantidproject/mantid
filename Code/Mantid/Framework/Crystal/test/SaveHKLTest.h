@@ -20,6 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::PhysicalConstants;
 
 class SaveHKLTest : public CxxTest::TestSuite
 {
@@ -37,9 +38,13 @@ public:
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(4, 10, 1.0);
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
+    double smu = 0.357;
+    double amu = 0.011;
+	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+  			0.0, 0.0, smu, 0.0, smu, amu);
+    Material *mat = new Material("SetInSaveHKLTest", *neutron, 1.0);
+    ws->mutableSample().setMaterial(*mat);
     API::Run & mrun = ws->mutableRun();
-    mrun.addProperty<double>("LinearScatteringCoef", 0.357, true);
-    mrun.addProperty<double>("LinearAbsorptionCoef", 0.011, true);
     mrun.addProperty<double>("Radius", 0.1, true);
 
     for (int run=1000; run<numRuns+1000; run++)

@@ -88,7 +88,7 @@ namespace Mantid
         tolower(item[0])!='s' || item.length()>2)
         return -1;
 
-      double cent[3]={0,0,0};
+      std::vector<double> cent(3,0.0);
       double R;
       if (item.length()==2)       // sx/sy/sz
       {
@@ -114,7 +114,7 @@ namespace Mantid
       if (!Mantid::Kernel::Strings::section(Line,R))
         return -7;
 
-      Centre=Kernel::V3D(cent);
+      Centre = Kernel::V3D(cent[0],cent[1],cent[2]);
       Radius=R;
       setBaseEqn();
       return 0;

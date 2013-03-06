@@ -224,10 +224,10 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
       if( penaltyDeriv <=0)
           out->set(x, IXMEAN, penaltyDeriv+coefExp * expVals[x] * (-2*coefx2 * (c - LastParams[IXMEAN]) - coefxy * (r
                - LastParams[IYMEAN])));
-      else if(LastParams[IXMEAN] < 0)
+      else// if(LastParams[IXMEAN] < 0)
           out->set(x,IXMEAN, 0);
-      else
-          out->set(x,IXMEAN,0);
+     // else
+     //     out->set(x,IXMEAN,0);
 
 
       coefExp = coefNorm * LastParams[ITINTENS];
@@ -237,10 +237,10 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
       if( penaltyDeriv <=0)
          out->set(x, IYMEAN, penaltyDeriv+coefExp * expVals[x] * (-coefxy * (c - LastParams[IXMEAN]) - 2*coefy2 * (r
              - LastParams[IYMEAN])));
-      else if(LastParams[IYMEAN] < 0)
+      else //if(LastParams[IYMEAN] < 0)
           out->set(x,IYMEAN, 0);
-      else
-          out->set(x,IYMEAN,0);
+     // else
+     //     out->set(x,IYMEAN,0);
 
 
       double M=1;

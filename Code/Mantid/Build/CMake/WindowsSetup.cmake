@@ -24,12 +24,12 @@ endif()
 ##########################################################################
 # Additional compiler flags
 ##########################################################################
-# /MP - Multiprocessor compilation within a project
+# /MP     - Compile .cpp files in parallel
 # /w34296 - Treat warning C4396, about comparison on unsigned and zero, 
 #           as a level 3 warning
 # /w34389 - Treat warning C4389, about equality comparison on unsigned 
 #           and signed, as a level 3 warning
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389" ) 
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389" )
 # As discussed here: http://code.google.com/p/googletest/issues/detail?id=412
 # gtest requires changing the _VARAIDIC_MAX value for VS2012 as it defaults to 5
 if ( MSVC_VERSION EQUAL 1700 )
@@ -37,14 +37,35 @@ if ( MSVC_VERSION EQUAL 1700 )
   add_definitions ( /D _VARIADIC_MAX=10 ) 
 endif ()
 
+# Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
+# Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
+# in the GUI though...
+SET( VISUALSTUDIO_COMPILERHEAPLIMIT 150 )
+# It make or may not already be set so override if it is (assumes if in CXX also in C)
+if ( CMAKE_CXX_FLAGS MATCHES "(/Zm)([0-9]+)" )
+  string ( REGEX REPLACE "(/Zm)([0-9]+)" "\\1${VISUALSTUDIO_COMPILERHEAPLIMIT}" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
+  string ( REGEX REPLACE "(/Zm)([0-9]+)" "\\1${VISUALSTUDIO_COMPILERHEAPLIMIT}" CMAKE_C_FLAGS ${CMAKE_C_FLAGS} )
+else()
+ set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
+ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
+endif()
+
+
 ###########################################################################
 # On Windows we want to bundle Python. The necessary libraries are in
 # Third_Party/lib/win{BITNESS}/Python27
 ###########################################################################
 ## Set the variables that FindPythonLibs would set
 set ( PYTHON_INCLUDE_PATH "${CMAKE_INCLUDE_PATH}/Python27" "${CMAKE_INCLUDE_PATH}/Python27/Include" )
-set ( PYTHON_LIBRARIES "${CMAKE_LIBRARY_PATH}/Python27/python27.lib" )
-set ( PYTHON_DEBUG_LIBRARY "${CMAKE_LIBRARY_PATH}/Python27/python27_d.lib" )
+# Libraries can be in one of two places. This allows it still to build with the old locations
+if ( EXISTS "${CMAKE_LIBRARY_PATH}/Python27/libs" )
+  set ( PYTHON_LIBRARIES "${CMAKE_LIBRARY_PATH}/Python27/libs/python27.lib" )
+  set ( PYTHON_DEBUG_LIBRARY "${CMAKE_LIBRARY_PATH}/Python27/libs/python27_d.lib" )
+else()
+  set ( PYTHON_LIBRARIES "${CMAKE_LIBRARY_PATH}/Python27/python27.lib" )
+  set ( PYTHON_DEBUG_LIBRARY "${CMAKE_LIBRARY_PATH}/Python27/python27_d.lib" )
+endif()
+
 set ( PYTHON_DEBUG_LIBRARIES ${PYTHON_DEBUG_LIBRARY} )
 ## Add debug library into libraries variable
 set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )

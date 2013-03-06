@@ -8,7 +8,7 @@ namespace MDEvents
 {
 
 /** method sets up the pointer to the class which contains detectors parameters
-* @param -- DetLoc the class which contaits the preprocessed detectors parameters
+* @param  DetLoc -- DetLoc the class which contaits the preprocessed detectors parameters
 *
 * Throws if the parameters were not defined
 */
@@ -24,8 +24,7 @@ void MDWSDescriptionDepricated::setDetectors(const ConvToMDPreprocDet &DetLoc)
 * to the place where factory call to the solver is made , so no code modification is needed when new modes are added
 * to the factory
 *@param dEMode -- energy analysis mode (string representation). Should correspond to energy analysis modes, supported by selected Q-mode
-*@param dimPropertyNames -- the vector of names for additional ws properties, which will be used as dimensions.
-
+*@param dimProperyNames -- the vector of names for additional ws properties, which will be used as dimensions.
 */
 void MDWSDescriptionDepricated::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
   const std::vector<std::string> &dimProperyNames)
@@ -66,9 +65,9 @@ bool MDWSDescriptionDepricated::isDetInfoLost(Mantid::API::MatrixWorkspace_const
 
 /** Helper function to obtain the energy of incident neutrons from the input workspaec
 *
-*@param pHost the pointer to the algorithm to work with
+*@param inWS2D : 2D workspace to work with.
 *
-*@returns the incident energy of the neutrons or quet NaN if can not retrieve one 
+*@return the incident energy of the neutrons or quet NaN if can not retrieve one
 */
 double MDWSDescriptionDepricated::getEi(API::MatrixWorkspace_const_sptr inWS2D)
 {

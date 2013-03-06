@@ -346,6 +346,7 @@ namespace MDEvents
   /** Get the signal at a particular coordinate in the workspace.
    *
    * @param coords :: numDimensions-sized array of the coordinates to look at
+   * @param normalization : Normalisation to use.
    * @return the (normalized) signal at a given coordinates.
    *         NaN if outside the range of this workspace
    */
@@ -488,6 +489,7 @@ namespace MDEvents
    * @param normalize :: how to normalize the signal
    * @param x :: is set to the boundaries of the bins, relative to start of the line.
    * @param y :: is set to the normalized signal for each bin. Length = length(x) - 1
+   * @param e :: error vector for each bin.
    */
   void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
       Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const

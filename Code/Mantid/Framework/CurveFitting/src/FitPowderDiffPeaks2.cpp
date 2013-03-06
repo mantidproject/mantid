@@ -23,7 +23,7 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidCurveFitting/BackToBackExponential.h"
-#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
+#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidCurveFitting/DampingMinimizer.h"
 #include "MantidCurveFitting/CostFuncFitting.h"
 
@@ -580,7 +580,12 @@ namespace CurveFitting
     * 4. Use X0, I and S calculated by Gaussian, then use simulated annealing on A and B;
     *
     * Arguments
-    * @param chi2   :  (output) chi square of the fit result
+    * @param peak :: A peak function.
+    * @param backgroundfunction :: A background function
+    * @param peakleftbound :: peak left bound
+    * @param peakrightbound :: peak right bound
+    * @param rightpeakparammap :: peakrightbound
+    * @param finalchi2   ::  (output) chi square of the fit result
     *
     * Arguments:
     * 1. leftdev, rightdev:  search range for the peak from the estimatio (theoretical)
@@ -796,7 +801,10 @@ namespace CurveFitting
       else
       {
         finalchi2 = bestchi2;
-        throw runtime_error("Need to find out how this case peak value is changed from best fit.");
+        stringstream dbss;
+        dbss << "Fit peak-background composite function failed! "
+             << "Need to find out how this case peak value is changed from best fit.";
+        g_log.warning(dbss.str());
       }
     }
     else
@@ -1194,8 +1202,12 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Fit peak with trustful peak parameters
-    * @param leftbound:  left boundary of the peak for fitting
-    * @param rightbound: right boundary of the peak for fitting
+    * @param peak :: A peak BackToBackExponential function
+    * @param backgroundfunction :: A background function
+    * @param leftbound ::  left boundary of the peak for fitting
+    * @param rightbound :: right boundary of the peak for fitting
+    * @param chi2 :: The output chi squared
+    * @param annhilatedpeak :: (output) annhilatedpeak
     */
   bool FitPowderDiffPeaks2::fitSinglePeakConfident(BackToBackExponential_sptr peak,
                                                    BackgroundFunction_sptr backgroundfunction,
@@ -1441,8 +1453,10 @@ namespace CurveFitting
     *
     * Assumption: all peaks' parameters on centre and FWHM are close to the true value
     *
-    * @param ileftpeak:  index of the left most peak in the peak groups;
-    * @param irightpeak: index of the right most peak in the peak groups;
+    * @param ileftpeak ::  index of the left most peak in the peak groups;
+    * @param irightpeak :: index of the right most peak in the peak groups;
+    * @param peakleftboundary ::  left boundary of the peak for fitting (output)
+    * @param peakrightboundary :: right boundary of the peak for fitting (output)
     */
   void FitPowderDiffPeaks2::calculatePeakFitBoundary(size_t ileftpeak, size_t irightpeak,
                                                      double& peakleftboundary, double& peakrightboundary)
@@ -1495,7 +1509,8 @@ namespace CurveFitting
     * 1. Peak parameters are set up to the peak function
     * 2. Background is removed
     *
-    * @param tof_h: Estimated/guessed center of the peak
+    * @param dataws :: The data workspace
+    * @param peakfunction :: An instance of the BackToBackExponential peak function
     * @param guessedfwhm: Guessed fwhm in order to constain the peak.  If negative, then no constraint
     */
   std::pair<bool, double> FitPowderDiffPeaks2::doFitPeak(Workspace2D_sptr dataws,BackToBackExponential_sptr peakfunction,
@@ -1638,10 +1653,12 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------
   /** Fit 1 peak by 1 minimizer of 1 call of minimzer (simple version)
-    * @param dataws
-    * @param workspaceindex
-    * @param minimzer
-    * @param iteration
+    * @param dataws :: A data aworkspace
+    * @param workspaceindex :: A histogram index
+    * @param peakfunction :: An instance of the BackToBackExponential function
+    * @param minimzername :: A name of the minimizer to use
+    * @param maxiteration :: A maximum number of iterations
+    * @param chi2 :: The chi squared value (output)
     *
     * Return
     * 1. fit success?
@@ -1681,7 +1698,7 @@ namespace CurveFitting
 
     // 3. Execute and parse the result
     bool isexecute = fitalg->execute();
-    bool fitsuccess;
+    bool fitsuccess = false;
     chi2 = DBL_MAX;
 
     if (isexecute)
@@ -1707,78 +1724,14 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Fit 1 peak and background by 1 minimizer of 1 call of minimzer (simple version)
-    * @param dataws
-    * @param workspaceindex
-    * @param minimzer
-    * @param iteration
-    *
-    * Return
-    * 1. fit success?
-    * 2. chi2
-  bool FitPowderDiffPeaks2::doFit1PeakBackgroundSimple(Workspace2D_sptr dataws, size_t workspaceindex,
-                                                       BackToBackExponential_sptr peakfunction,
-                                                       BackgroundFunction_sptr backgroundfunction,
-                                                       string minimzername, size_t maxiteration, double& chi2)
-  {
-    // 1. Debug output
-    stringstream dbss;
-    dbss << peakfunction->asString() << endl;
-    dbss << "Starting Value: ";
-    vector<string> names = peakfunction->getParameterNames();
-    for (size_t i = 0; i < names.size(); ++i)
-      dbss << names[i] << "= " << peakfunction->getParameter(names[i]) << ", \t";
-    g_log.information() << "DBx921 " << dbss.str() << endl;
-
-    // 2. Create Composite function
-    CompositeFunction_sptr peakbkgdfunction(new CompositeFunction);
-    peakbkgdfunction->addFunction(peakfunction);
-    peakbkgdfunction->addFunction(backgroundfunction);
-
-    // 3. Create fit
-    Algorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
-    fitalg->initialize();
-
-    // 4. Set
-    fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(peakbkgdfunction));
-    fitalg->setProperty("InputWorkspace", dataws);
-    fitalg->setProperty("WorkspaceIndex", static_cast<int>(workspaceindex));
-    fitalg->setProperty("Minimizer", minimzername);
-    fitalg->setProperty("CostFunction", "Least squares");
-    fitalg->setProperty("MaxIterations", static_cast<int>(maxiteration));
-    fitalg->setProperty("Output", "FitPeak");
-
-    // 5. Execute and parse the result
-    bool isexecute = fitalg->execute();
-    bool fitsuccess;
-    chi2 = DBL_MAX;
-
-    if (isexecute)
-    {
-      std::string fitresult = parseFitResult(fitalg, chi2, fitsuccess);
-
-      // Figure out result
-      g_log.information() << "[DBx138A] Fit Peak @ " << peakfunction->centre() << " Result:"
-                    << fitsuccess << "\n"
-                    << "Detailed info = " << fitresult << ", Chi^2 = " << chi2 << endl;
-
-      // Debug information output
-      API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
-      std::string infofit = parseFitParameterWorkspace(paramws);
-      g_log.information() << "Fitted Parameters: " << endl << infofit << endl;
-    }
-    else
-    {
-      g_log.error() << "[DBx128B] Failed to execute fitting peak @ " << peakfunction->centre() << endl;
-    }
-
-    return fitsuccess;
-  }
-  */
-
-
-  //----------------------------------------------------------------------------------------------
   /** Fit 1 peak by using a sequential of minimizer
+    * @param dataws :: A data aworkspace
+    * @param workspaceindex :: A histogram index
+    * @param peakfunction :: An instance of the BackToBackExponential function
+    * @param minimzernames :: A vector of the minimizer names 
+    * @param maxiterations :: A vector if maximum numbers of iterations
+    * @param dampfactors :: A vector of damping factors
+    * @param chi2 :: The chi squared value (output)
     */
   bool FitPowderDiffPeaks2::doFit1PeakSequential(Workspace2D_sptr dataws, size_t workspaceindex,
                                                  BackToBackExponential_sptr peakfunction,
@@ -1935,6 +1888,8 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Fit peaks with confidence in fwhm and etc.
+    * @param peaks :: A vector of instances of BackToBackExponential
+    * @param backgroundfunction :: An instance of BackgroundFunction
     * @param gfwhm : guessed fwhm.  If negative, then use the input value
     */
   bool FitPowderDiffPeaks2::fitOverlappedPeaks(vector<BackToBackExponential_sptr> peaks,
@@ -2143,6 +2098,7 @@ namespace CurveFitting
   /** Use Le Bail method to estimate and set the peak heights
     * @param dataws:  workspace containing the background-removed data
     * @param wsindex: workspace index of the data without background
+    * @param peaks :: A vector of instances of BackToBackExponential function
     */
   void FitPowderDiffPeaks2::estimatePeakHeightsLeBail(Workspace2D_sptr dataws, size_t wsindex,
                                                       vector<BackToBackExponential_sptr> peaks)
@@ -2250,7 +2206,7 @@ namespace CurveFitting
 
     // 3. Execute and parse the result
     bool isexecute = fitalg->execute();
-    bool fitsuccess;
+    bool fitsuccess = false;
     chi2 = DBL_MAX;
 
     // 4. Output
@@ -2850,7 +2806,11 @@ namespace CurveFitting
   /** Generate a peak
     *
     * @param hklmap: a map containing one (HKL) entry
+    * @param parammap :: a map of parameters
+    * @param bk2bk2braggmap :: bk2bk2braggmap
+    * @param good :: (output) good
     * @param hkl   : (output) (HKL) of the peak generated.
+    * @param d_h :: (output) d_h
     * @return      : BackToBackExponential peak
     */
   BackToBackExponential_sptr FitPowderDiffPeaks2::genPeak(map<string, int> hklmap, map<string, double> parammap,
@@ -2949,7 +2909,7 @@ namespace CurveFitting
       {
         // d) Calculate a lot of peak parameters
         // Initialize the function
-        ThermalNeutronBk2BkExpConvPV tnb2bfunc;
+        ThermalNeutronBk2BkExpConvPVoigt tnb2bfunc;
         tnb2bfunc.initialize();
         tnb2bfunc.setMillerIndex(hkl[0], hkl[1], hkl[2]);
 
@@ -3340,6 +3300,11 @@ namespace CurveFitting
     * (2) Peak is inside
     * Algorithm: From the top.  Get the maximum value. Calculate the half maximum value.  Find the range of X
     * @param dataws:  data workspace containing peak data
+    * @param wsindex :: index of a histogram
+    * @param centre :: (output) peak centre
+    * @param height :: (output) peak height
+    * @param fwhm :: (output) peak FWHM
+    * @param errmsg :: (output) error message
     */
   bool observePeakParameters(Workspace2D_sptr dataws, size_t wsindex, double& centre, double& height, double& fwhm,
                               string& errmsg)
@@ -3436,7 +3401,7 @@ namespace CurveFitting
     y0 = Y[index-1];
     yf = Y[index];
 
-    // Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
+    // Formula for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
     double xr = linearInterpolateX(x0, xf, y0, yf, halfMax);
 
     double righthalffwhm = xr-centre;
@@ -3449,7 +3414,9 @@ namespace CurveFitting
 
   //-----------------------------------------------------------------------------------------------------------
   /** Find maximum value
-    */
+   * @param Y :: vector to get maximum value from
+   * @return index of the maximum value
+   */
   size_t findMaxValue(const MantidVec Y)
   {
     size_t imax = 0;
@@ -3469,7 +3436,12 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Find maximum value
-    */
+   * @param dataws :: a workspace to check
+   * @param wsindex :: the spectrum to check
+   * @param leftbound :: lower constraint for check
+   * @param rightbound :: upper constraint for check
+   * @return the index of the maximum value
+   */
   size_t findMaxValue(MatrixWorkspace_sptr dataws, size_t wsindex, double leftbound, double rightbound)
   {
     const MantidVec& X = dataws->readX(wsindex);

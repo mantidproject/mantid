@@ -22,11 +22,13 @@ set ( SRC_FILES
 	src/MuonAnalysisOptionTab.cpp
 	src/MuonAnalysisResultTableTab.cpp
 	src/QtWorkspaceMementoModel.cpp
-	src/RockingCurve.cpp
 	src/SANSAddFiles.cpp
 	src/SANSDiagnostics.cpp
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
+	src/MantidEV.cpp
+	src/MantidEVWorker.cpp
+	src/StepScan.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
   src/UserInputValidator.cpp
@@ -61,11 +63,13 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
-	inc/MantidQtCustomInterfaces/RockingCurve.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
+	inc/MantidQtCustomInterfaces/MantidEV.h
+	inc/MantidQtCustomInterfaces/MantidEVWorker.h
+	inc/MantidQtCustomInterfaces/StepScan.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/WorkspaceMemento.h
 	inc/MantidQtCustomInterfaces/RawFileMemento.h
@@ -96,11 +100,12 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
-                inc/MantidQtCustomInterfaces/RockingCurve.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
+		inc/MantidQtCustomInterfaces/MantidEV.h
+                inc/MantidQtCustomInterfaces/StepScan.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
@@ -109,9 +114,10 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
                inc/MantidQtCustomInterfaces/MuonAnalysis.ui
-               inc/MantidQtCustomInterfaces/RockingCurve.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
+               inc/MantidQtCustomInterfaces/MantidEV.ui
+               inc/MantidQtCustomInterfaces/StepScan.ui
 )
 
 set( TEST_FILES
@@ -150,7 +156,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( inc/MantidQtCustomInterfaces/PrecompiledHeader.h MantidQtCustomInterfaces src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
+enable_precompiled_headers( inc/MantidQtCustomInterfaces/PrecompiledHeader.h  ALL_SRC )
 add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # Set the name of the generated library

@@ -13,8 +13,8 @@ and calculates the resolved positions of all the detectors and then writes this 
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -348,7 +348,7 @@ namespace DataHandling
   /** Get the instrument name from the input NeXus file.
    *
    * @param nxfilename :: Input NeXus file.
-   * @param the instrument name, empty string if failed.
+   * @return the instrument name, empty string if failed.
    */
  std::string AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename)
  {

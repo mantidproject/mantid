@@ -38,14 +38,21 @@
 */
 
 /**
- * Definitions of the DLLImport and MANTID_KERNEL_DLL compiler directives for MSVC
+ * Definitions of the DLLImport compiler directives for MSVC
  */
 #ifdef _WIN32
+  // 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
+  // Things from the std library give these warnings and we can't do anything about them.
   #pragma warning( disable: 4251 )
-  /** MG: Given that we are compiling everything with msvc under Windows and 
-   * linking all with the same runtime we can disable the warning about
-   * inheriting from a non-exported interface, e.g. std::runtime_error */
+  // Given that we are compiling everything with msvc under Windows and
+  // linking all with the same runtime we can disable the warning about
+  // inheriting from a non-exported interface, e.g. std::runtime_error */
   #pragma warning( disable : 4275 )
+  // Warning C4373: previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers
+  // This is basically saying that it now follows the C++ standard and doesn't seem useful
+  #pragma warning( disable : 4373 )
+
+  // Export/Import declarations
   #define DLLExport __declspec( dllexport )
   #define DLLImport __declspec( dllimport )
 #else
@@ -54,7 +61,7 @@
 #endif
 
 /**
- * Function arguments are sometimes unused in certain implentations
+ * Function arguments are sometimes unused in certain implmentations
  * but are required for documentation purposes.
  * This is a macro to silence compiler warnings about the subject
  */

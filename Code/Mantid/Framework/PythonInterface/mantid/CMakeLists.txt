@@ -58,14 +58,10 @@ ENDFUNCTION()
 ####################################################################################
 # Root module 
 ####################################################################################
-# Compile all python modules (including sub modules) to pyc
-add_compile_py_target( CompilePythonInterfaceScripts ${CMAKE_CURRENT_SOURCE_DIR} )
-set_property ( TARGET CompilePythonInterfaceScripts PROPERTY FOLDER "MantidFramework/Python" )
-
 # The destination directory, used by sub modules
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT} )
 
-# Select the files to "build", i.e. copy to the bin directory
+# Select the pure Python files to be included in the distribution
 set ( PY_FILES
   __init__.py
   simpleapi.py
@@ -85,10 +81,17 @@ set_property ( TARGET PythonModule PROPERTY FOLDER "MantidFramework/Python" )
 set ( CMAKE_SHARED_LIBRARY_PREFIX )
 
 add_subdirectory ( kernel )
-add_dependencies ( PythonKernelModule CompilePythonInterfaceScripts PythonModule ) # Ensure the module files are in place
+add_dependencies ( PythonKernelModule PythonModule ) # Ensure the module files are in place
 add_subdirectory ( geometry )
 add_subdirectory ( api )
 
 # Create an overall target
 add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonGeometryModule PythonAPIModule  )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+# Pure Python files 
+install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid )

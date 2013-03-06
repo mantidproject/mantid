@@ -1,34 +1,34 @@
 /*WIKI* 
 
-  Following A.J.Schultz's anvred, the weight factors should be:
-  sin^2(theta) / (lamda^4 * spec * eff * trans)
-  where theta = scattering_angle/2
-        lamda = wavelength (in angstroms?)
-        spec  = incident spectrum correction
-        eff   = pixel efficiency
-        trans = absorption correction
-  The quantity:
-    sin^2(theta) / eff
-  depends only on the pixel and can be pre-calculated
-  for each pixel.  It could be saved in array pix_weight[].
-  For now, pix_weight[] is calculated by the method:
-  BuildPixWeights() and just holds the sin^2(theta) values.
-  The wavelength dependent portion of the correction is saved in
-  the array lamda_weight[].
-  The time-of-flight is converted to wave length by multiplying
-  by tof_to_lamda[id], then (int)STEPS_PER_ANGSTROM * lamda
-  gives an index into the table lamda_weight[].
-  The lamda_weight[] array contains values like:
-      1/(lamda^power * spec(lamda))
-  which are pre-calculated for each lamda.  These values are
-  saved in the array lamda_weight[].  The optimal value to use
-  for the power should be determined when a good incident spectrum
-  has been determined.  Currently, power=3 when used with an
-  incident spectrum and power=2.4 when used without an incident
-  spectrum.
-  The pixel efficiency and incident spectrum correction are NOT CURRENTLY USED.
-  The absorption correction, trans, depends on both lamda and the pixel,
-  Which is a fairly expensive calulation when done for each event.
+Following A.J.Schultz's anvred, the weight factors should be:
+sin^2(theta) / (lamda^4 * spec * eff * trans)
+where theta = scattering_angle/2
+lamda = wavelength (in angstroms?)
+spec  = incident spectrum correction
+eff   = pixel efficiency
+trans = absorption correction
+The quantity:
+sin^2(theta) / eff
+depends only on the pixel and can be pre-calculated
+for each pixel.  It could be saved in array pix_weight[].
+For now, pix_weight[] is calculated by the method:
+BuildPixWeights() and just holds the sin^2(theta) values.
+The wavelength dependent portion of the correction is saved in
+the array lamda_weight[].
+The time-of-flight is converted to wave length by multiplying
+by tof_to_lamda[id], then (int)STEPS_PER_ANGSTROM * lamda
+gives an index into the table lamda_weight[].
+The lamda_weight[] array contains values like:
+1/(lamda^power * spec(lamda))
+which are pre-calculated for each lamda.  These values are
+saved in the array lamda_weight[].  The optimal value to use
+for the power should be determined when a good incident spectrum
+has been determined.  Currently, power=3 when used with an
+incident spectrum and power=2.4 when used without an incident
+spectrum.
+The pixel efficiency and incident spectrum correction are NOT CURRENTLY USED.
+The absorption correction, trans, depends on both lamda and the pixel,
+Which is a fairly expensive calulation when done for each event.
 --
 
 
@@ -101,12 +101,14 @@ using namespace Kernel;
 using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
+using namespace Mantid::PhysicalConstants;
 
 AnvredCorrection::AnvredCorrection() : API::Algorithm()
 {}
 
 void AnvredCorrection::init()
 {
+  this->setWikiSummary("Calculates anvred correction factors for attenuation due to absorption and scattering in a spherical sample");
   // The input workspace must have an instrument and units of wavelength
   boost::shared_ptr<CompositeValidator> wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add(boost::make_shared<InstrumentValidator>());
@@ -115,22 +117,23 @@ void AnvredCorrection::init()
     "The X values for the input workspace must be in units of wavelength or TOF");
   declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
     "Output workspace name");
-   declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
-      "If false, then the workspace gets converted to a Workspace2D histogram.");
-   declareProperty("OnlySphericalAbsorption", false, "All corrections done if false (default).\n"
-      "If true, only the spherical absorption correction.");
-   declareProperty("ReturnTransmissionOnly", false, "Corrections applied to data if false (default).\n"
-      "If true, only return the transmission coefficient.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
-  declareProperty("LinearScatteringCoef", -1.0, mustBePositive,
-    "Linear scattering coefficient in 1/cm");
-  declareProperty("LinearAbsorptionCoef", -1.0, mustBePositive,
-    "Linear absorption coefficient at 1.8 Angstroms in 1/cm");
-  declareProperty("Radius", -1.0, mustBePositive, "Radius of the sample in centimeters");
+  declareProperty("LinearScatteringCoef", EMPTY_DBL(), mustBePositive,
+    "Linear scattering coefficient in 1/cm if not set with SetSampleMaterial");
+  declareProperty("LinearAbsorptionCoef", EMPTY_DBL(), mustBePositive,
+    "Linear absorption coefficient at 1.8 Angstroms in 1/cm if not set with SetSampleMaterial");
+  declareProperty("Radius", EMPTY_DBL(), mustBePositive, "Radius of the sample in centimeters");
+  declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
+     "If false, then the workspace gets converted to a Workspace2D histogram.");
+  declareProperty("OnlySphericalAbsorption", false, "All corrections done if false (default).\n"
+     "If true, only the spherical absorption correction.");
+  declareProperty("ReturnTransmissionOnly", false, "Corrections applied to data if false (default).\n"
+     "If true, only return the transmission coefficient.");
   declareProperty("PowerLambda", 4.0,
     "Power of lamda ");
+
 
   defineProperties();
 }
@@ -165,8 +168,7 @@ void AnvredCorrection::exec()
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputWS );
   if(eventW)eventW->sortAll(TOF_SORT, NULL);
-  bool transOnly = getProperty("ReturnTransmissionOnly");
-  if ((getProperty("PreserveEvents")) && (eventW != NULL) && !transOnly)
+  if ((getProperty("PreserveEvents")) && (eventW != NULL) && !ReturnTransmissionOnly)
   {
     //Input workspace is an event workspace. Use the other exec method
     this->execEvent();
@@ -178,6 +180,7 @@ void AnvredCorrection::exec()
 
   const int64_t numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
+  if (specSize < 3) throw std::runtime_error("Problem in AnvredCorrection::events not binned");
 
   const bool isHist = m_inputWS->isHistogramData();
 
@@ -239,7 +242,7 @@ void AnvredCorrection::exec()
       const double lambda = timeflight[0];
       timeflight.clear();
 
-      if (transOnly)
+      if (ReturnTransmissionOnly)
       {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
       }
@@ -262,8 +265,6 @@ void AnvredCorrection::exec()
 
   // set the absorption correction values in the run parameters
   API::Run & run = correctionFactors->mutableRun();
-  run.addProperty<double>("LinearScatteringCoef", smu, true);
-  run.addProperty<double>("LinearAbsorptionCoef", amu, true);
   run.addProperty<double>("Radius", radius, true);
   if (!OnlySphericalAbsorption && !ReturnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
@@ -374,8 +375,6 @@ void AnvredCorrection::execEvent()
   correctionFactors->doneAddingEventLists();
   // set the absorption correction values in the run parameters
   API::Run & run = correctionFactors->mutableRun();
-  run.addProperty<double>("LinearScatteringCoef", smu, true);
-  run.addProperty<double>("LinearAbsorptionCoef", amu, true);
   run.addProperty<double>("Radius", radius, true);
   if (!OnlySphericalAbsorption && !ReturnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
@@ -392,7 +391,20 @@ void AnvredCorrection::retrieveBaseProperties()
   amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
   radius = getProperty("Radius"); // in cm
   power_th = getProperty("PowerLambda"); // in cm
-
+  const Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
+  if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
+  {
+	double rho =  m_sampleMaterial->numberDensity();
+	if(smu == EMPTY_DBL()) smu =  m_sampleMaterial->totalScatterXSection(1.7982) * rho;
+	if(amu == EMPTY_DBL()) amu = m_sampleMaterial->absorbXSection(1.7982) * rho;
+  }
+  else  //Save input in Sample with wrong atomic number and name
+  {
+	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+  			0.0, 0.0, smu, 0.0, smu, amu);
+    Material *mat = new Material("SetInAnvredCorrection", *neutron, 1.0);
+    m_inputWS->mutableSample().setMaterial(*mat);
+  }
   // Call the virtual function for any further properties
   retrieveProperties();
 }

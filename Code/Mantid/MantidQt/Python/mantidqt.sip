@@ -83,6 +83,29 @@ enum MDNormalization
 
 namespace MantidQt
 {
+namespace API
+{
+
+class AlgorithmDialog : QDialog
+{
+%TypeHeaderCode
+#include "MantidQtAPI/AlgorithmDialog.h"
+%End
+private:
+  AlgorithmDialog();
+};
+
+class InterfaceManager
+{
+%TypeHeaderCode
+#include "MantidQtAPI/InterfaceManager.h"
+%End
+public:
+MantidQt::API::AlgorithmDialog * createDialogFromName(const QString& algorithmName,  bool forScript, QWidget* parent=0);
+};
+
+};
+
 namespace SliceViewer
 {
 

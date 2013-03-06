@@ -523,7 +523,7 @@ add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
 add_custom_command ( OUTPUT ${SIP_SRC}
                      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${SIP_SRC_IN} ${SIP_SRC}
                      DEPENDS ${SIP_SRC_AUTO}
-                     COMMENT "Generating sip wrapper"
+                     COMMENT ""
 )                     
 
 # Needed for sip.h header that can end up in a different place to to the main Python include directory
@@ -719,8 +719,9 @@ set ( MOCCED_FILES ${MOCCED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc
 set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+
 # Use a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER( src/PrecompiledHeader.h "" src/PrecompiledHeader.cpp ALL_SRC INC_FILES )
+enable_precompiled_headers( src/PrecompiledHeader.h ALL_SRC )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
@@ -804,8 +805,6 @@ endif ()
 # Required Python config files
 ###########################################################################
 
-add_compile_py_target( CompileMantidPlotScripts ${CMAKE_CURRENT_SOURCE_DIR} )
-
 # Top-level python scripts
 set( PY_FILES mantidplotrc.py mantidplot.py )
 copy_python_files_to_dir ( "${PY_FILES}" 
@@ -842,9 +841,6 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${RES_FILES} ${MANTID_RC_FILE}
 							${PYTHON_INSTALL_FILES} ${IPYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES}
 )
-
-# Target dependencies
-add_dependencies( MantidPlot CompileMantidPlotScripts )
 
 # Library dependencies
 target_link_libraries ( MantidPlot 
@@ -906,7 +902,8 @@ add_subdirectory( docs )
 ###########################################################################
 
 # List of .py files than must be run WITHIN MantidPlot.
-set ( MANTIDPLOT_TEST_PY_FILES 
+set ( MANTIDPLOT_TEST_PY_FILES
+    MantidPlotAlgorithmDialogTest.py
 	MantidPlotSliceViewerTest.py 
 	MantidPlot1DPlotTest.py
 	MantidPlotProxiesTest.py
@@ -969,9 +966,14 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
                              BUNDLE DESTINATION .
 )
 
-INSTALL_PYTHON_FILES ( ${CMAKE_CURRENT_SOURCE_DIR} "${PY_FILES}" ${BIN_DIR} )
-INSTALL_PYTHON_FILES ( ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy "${MTDPLOTPY_FILES}" ${BIN_DIR}/mantidplotpy )
-INSTALL_PYTHON_FILES ( ${CMAKE_CURRENT_SOURCE_DIR}/ipython_plugin "${IPY_FILES}" ${BIN_DIR}/ipython_plugin )
+# Ship required files. Explicit so some can be disabled easily if necessary
+install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
+foreach(PY_FILE ${MTDPLOTPY_FILES} )
+  install ( FILES mantidplotpy/${PY_FILE} DESTINATION ${BIN_DIR}/mantidplotpy )
+endforeach()
+foreach(PY_FILE ${IPY_FILES} )
+  install ( FILES ipython_plugin/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_plugin )
+endforeach()
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in

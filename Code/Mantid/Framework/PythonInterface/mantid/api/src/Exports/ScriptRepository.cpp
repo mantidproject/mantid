@@ -19,7 +19,7 @@ using namespace boost::python;
 using boost::python::tuple;
 namespace
 {
-  ///@cond
+  /** @cond */
 
   //------------------------------------------------------------------------------------------------------
   /**
@@ -81,7 +81,7 @@ namespace
     return value;
   }
 
-  ///@endcond
+  /** @endcond */
 }
 
 void export_ScriptRepository()

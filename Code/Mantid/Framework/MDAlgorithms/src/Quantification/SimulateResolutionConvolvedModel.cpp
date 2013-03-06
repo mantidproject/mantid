@@ -81,14 +81,14 @@ namespace Mantid
                       "The simulated output workspace");
 
       std::vector<std::string> models = MDResolutionConvolutionFactory::Instance().getKeys();
-      declareProperty(RESOLUTION_NAME, "", boost::make_shared<ListValidator<std::string>>(models),
+      declareProperty(RESOLUTION_NAME, "", boost::make_shared<ListValidator<std::string> >(models),
                       "The name of a resolution model", Direction::Input);
 
       models = ForegroundModelFactory::Instance().getKeys();
-      declareProperty(FOREGROUND_NAME, "", boost::make_shared<ListValidator<std::string>>(models),
+      declareProperty(FOREGROUND_NAME, "", boost::make_shared<ListValidator<std::string> >(models),
                       "The name of a foreground function", Direction::Input);
 
-      declareProperty(PARS_NAME, "", boost::make_shared<MandatoryValidator<std::string>>(),
+      declareProperty(PARS_NAME, "", boost::make_shared<MandatoryValidator<std::string> >(),
                       "The parameters/attributes for the function & model. See Fit documentation for format",
                       Direction::Input);
 

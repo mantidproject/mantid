@@ -16,8 +16,8 @@ If the DetectorTableFilename property is blank then it is assumed that a 1:1 spe
 #include "MantidKernel/VectorHelper.h"
 
 #include "LoadRaw/isisraw2.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <Poco/File.h>
 
@@ -56,7 +56,7 @@ namespace Mantid
     {
       using namespace Kernel;
 
-      declareProperty("Instrument", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      declareProperty("Instrument", "", boost::make_shared<MandatoryValidator<std::string> >(),
           "An instrument name or filename ( a full path or string containing an xml extension).", Direction::Input);
 
       declareProperty(new ArrayProperty<double>("BinParams", boost::make_shared<RebinParamsValidator>(),Direction::Input),
@@ -65,7 +65,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","", Direction::Output), "The new workspace");
 
       auto knownUnits = UnitFactory::Instance().getKeys();
-      declareProperty("UnitX", "DeltaE", boost::make_shared<ListValidator<std::string>>(knownUnits),
+      declareProperty("UnitX", "DeltaE", boost::make_shared<ListValidator<std::string> >(knownUnits),
                       "The unit to assign to the X axis", Direction::Input);
 
       declareProperty(new FileProperty("DetectorTableFilename", "",FileProperty::OptionalLoad,"", Direction::Input),
@@ -238,7 +238,7 @@ namespace Mantid
       {
         throw std::runtime_error("Cannot find path to isis_vms_compat. Is the file an ISIS NeXus file?");
       }
-      typedef boost::scoped_ptr<std::vector<int32_t>> NXIntArray;
+      typedef boost::scoped_ptr<std::vector<int32_t> > NXIntArray;
 
       nxsFile.openData("NDET");
       NXIntArray ndets(nxsFile.getData<int32_t>());

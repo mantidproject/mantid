@@ -11,6 +11,12 @@
 
 #include "MantidQtAPI/WorkspaceObserver.h"
 
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
+
     /* Forward declarations */
 
 class QtTreePropertyBrowser;
@@ -31,19 +37,6 @@ class QSignalMapper;
 class QMenu;
 class QAction;
 class QTreeWidget;
-
-namespace Mantid
-{
-  namespace API
-  {
-    class IFunction;
-    class IPeakFunction;
-    class CompositeFunction;
-    class Workspace;
-    class ParameterTie;
-    class MatrixWorkspace;
-  }
-}
 
 namespace MantidQt
 {
@@ -292,10 +285,11 @@ private slots:
   void loadFunctionFromString();
   void acceptFit();
   void closeFit();
-
   void copy();///< Copy the function string to the clipboard
   void paste();///< Paste a function string from the clipboard
   void reset();///< reset the function part, renew function, all handlers are new
+  void functionHelp(); ///< Open a web page with description of the current function
+  void browserHelp();  ///< Open a web page with description of FitPropertyBrowser
 
   void popupMenu(const QPoint &);
   /* Context menu slots */
@@ -431,7 +425,7 @@ private:
   /// Check that the properties match the function
   void checkFunction();
 
-  void setCurrentFunction(boost::shared_ptr<const Mantid::API::IFunction> f)const;
+  void setCurrentFunction(Mantid::API::IFunction_const_sptr f)const;
 
   /// Sets the new workspace to the current one
   virtual void workspaceChange(const QString& wsName);

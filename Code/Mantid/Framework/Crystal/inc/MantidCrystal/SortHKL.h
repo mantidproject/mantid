@@ -41,8 +41,10 @@ namespace Crystal
     void exec();
     void Outliers(std::vector<double>& data, std::vector<double>& err);
 
+    /// Rounds a double using 0.5 as the cut off for rounding down
     double round(double d);
-    Kernel::V3D round(Kernel::V3D d);
+    ///Rounds the V3D to integer values
+    Kernel::V3D round(Kernel::V3D hkl);
   };
 
 } // namespace Crystal

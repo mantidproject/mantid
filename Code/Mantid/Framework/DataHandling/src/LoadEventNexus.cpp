@@ -2,7 +2,7 @@
 
 The LoadEventNeXus algorithm loads data from an EventNexus file into an [[EventWorkspace]]. The default histogram bin boundaries consist of a single bin able to hold all events (in all pixels), and will have their [[units]] set to time-of-flight. Since it is an [[EventWorkspace]], it can be rebinned to finer bins with no loss of data.
 
-Sample logs, such as motor positions or e.g. temperature vs time, are also loaded using the [[LoadLogsFromSNSNexus]] Child Algorithm.
+Sample logs, such as motor positions or e.g. temperature vs time, are also loaded using the [[LoadLogsFromSNSNexus]] child algorithm.
 
 === Optional properties ===
 
@@ -55,6 +55,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 using std::endl;
 using std::map;
@@ -312,7 +313,7 @@ public:
             // NULL eventVector indicates a bad spectrum lookup
             if(eventVector)
             {
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
               // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
               eventVector->emplace_back( tof, pulsetime, weight, errorSq );
 #else
@@ -327,7 +328,7 @@ public:
             // NULL eventVector indicates a bad spectrum lookup
             if(eventVector)
             {
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
               // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
               eventVector->emplace_back( tof, pulsetime );
 #else
@@ -449,6 +450,7 @@ public:
    * @param entry_name :: The pathname of the bank to load
    * @param entry_type :: The classtype of the entry to load
    * @param numEvents :: The number of events in the bank.
+   * @param oldNeXusFileNames :: Identify if file is of old variety.
    * @param prog :: an optional Progress object
    * @param ioMutex :: a mutex shared for all Disk I-O tasks
    * @param scheduler :: the ThreadScheduler that runs this task.
@@ -513,6 +515,7 @@ public:
   /** Load the event_index field
    (a list of size of # of pulses giving the index in the event list for that pulse)
 
+   * @param file :: File handle for the NeXus file
    * @param event_index :: ref to the vector
    */
   void loadEventIndex(::NeXus::File & file, std::vector<uint64_t> & event_index)
@@ -545,6 +548,7 @@ public:
   //---------------------------------------------------------------------------------------------------
   /** Open the event_id field and validate the contents
    *
+   * @param file :: File handle for the NeXus file
    * @param start_event :: set to the index of the first event
    * @param stop_event :: set to the index of the last event + 1
    * @param event_index ::  (a list of size of # of pulses giving the index in the event list for that pulse)
@@ -996,7 +1000,7 @@ void LoadEventNexus::init()
   exts.push_back(".nxs.h5");
   exts.push_back(".nxs");
   this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-      "The name of the Event NeXus file to read, including its full or relative path. \n"
+      "The name of the Event NeXus file to read, including its full or relative path. "
       "The file name is typically of the form INST_####_event.nxs (N.B. case sensitive if running on Linux)." );
 
   this->declareProperty(
@@ -1005,12 +1009,12 @@ void LoadEventNexus::init()
 
   declareProperty(
       new PropertyWithValue<double>("FilterByTofMin", EMPTY_DBL(), Direction::Input),
-    "Optional: To exclude events that do not fall within a range of times-of-flight.\n"\
+    "Optional: To exclude events that do not fall within a range of times-of-flight. "\
     "This is the minimum accepted value in microseconds. Keep blank to load all events." );
 
   declareProperty(
       new PropertyWithValue<double>("FilterByTofMax", EMPTY_DBL(), Direction::Input),
-    "Optional: To exclude events that do not fall within a range of times-of-flight.\n"\
+    "Optional: To exclude events that do not fall within a range of times-of-flight. "\
     "This is the maximum accepted value in microseconds. Keep blank to load all events." );
 
   declareProperty(
@@ -1037,7 +1041,7 @@ void LoadEventNexus::init()
 
   declareProperty(
       new PropertyWithValue<bool>("SingleBankPixelsOnly", true, Direction::Input),
-    "Optional: Only applies if you specified a single bank to load with BankName.\n"
+    "Optional: Only applies if you specified a single bank to load with BankName. "
     "Only pixels in the specified bank will be created if true; all of the instrument's pixels will be created otherwise.");
   setPropertySettings("SingleBankPixelsOnly", new VisibleWhenProperty("BankName", IS_NOT_DEFAULT) );
 
@@ -1047,12 +1051,12 @@ void LoadEventNexus::init()
 
   declareProperty(
       new PropertyWithValue<bool>("Precount", false, Direction::Input),
-      "Pre-count the number of events in each pixel before allocating memory (optional, default False). \n"
+      "Pre-count the number of events in each pixel before allocating memory (optional, default False). "
       "This can significantly reduce memory use and memory fragmentation; it may also speed up loading.");
 
   declareProperty(
       new PropertyWithValue<double>("CompressTolerance", -1.0, Direction::Input),
-      "Run CompressEvents while loading (optional, leave blank or negative to not do). \n"
+      "Run CompressEvents while loading (optional, leave blank or negative to not do). "
       "This specified the tolerance to use (in microseconds) when compressing.");
   
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
@@ -1076,16 +1080,16 @@ void LoadEventNexus::init()
       "Load the monitors from the file (optional, default False).");
 
   declareProperty(new PropertyWithValue<bool>("MonitorsAsEvents", false, Direction::Input),
-      "If present, load the monitors as events.\nWARNING: WILL SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). \n");
+      "If present, load the monitors as events. '''WARNING:''' WILL SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
 
   declareProperty(
       new PropertyWithValue<double>("FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
-    "Optional: To exclude events from monitors that do not fall within a range of times-of-flight.\n"\
+    "Optional: To exclude events from monitors that do not fall within a range of times-of-flight. "\
     "This is the minimum accepted value in microseconds." );
 
   declareProperty(
       new PropertyWithValue<double>("FilterMonByTofMax", EMPTY_DBL(), Direction::Input),
-    "Optional: To exclude events from monitors that do not fall within a range of times-of-flight.\n"\
+    "Optional: To exclude events from monitors that do not fall within a range of times-of-flight. "\
     "This is the maximum accepted value in microseconds." );
 
   declareProperty(
@@ -1516,10 +1520,10 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   }
 
   prog->report("Initializing all pixels");
-
+  // Remove used banks if parameter is set
+  if (WS->getInstrument()->hasParameter("remove-unused-banks")) deleteBanks(WS, bankNames);
   //----------------- Pad Empty Pixels -------------------------------
   // Create the required spectra mapping so that the workspace knows what to pad to
-  deleteBanks(WS, bankNames);
   createSpectraMapping(m_filename, WS, monitors, onebank);
   WS->padSpectra();
 
@@ -1863,7 +1867,6 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
  *
  *  @param nexusfilename :: Used to pick the instrument.
  *  @param localWorkspace :: MatrixWorkspace in which to put the logs
- *  @param pulseTimes [out] :: vector of pulse times to fill
  *  @param alg :: Handle of an algorithm for logging access
  *  @return the BankPulseTimes object created, NULL if it failed.
  */
@@ -1891,7 +1894,7 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
     // Use the first pulse as the run_start time.
     if (!temp.empty())
     {
-      if (temp[0] < Kernel::DateAndTime("1991-01-01"))
+      if (temp[0] < Kernel::DateAndTime("1991-01-01T00:00:00"))
         alg->getLogger().warning() << "Found entries in the proton_charge sample log with invalid pulse time!\n";
 
       Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();

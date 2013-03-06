@@ -168,6 +168,7 @@ namespace Mantid
     * Return the property manager serialized as a string.
     * The format is propName=value,propName=value,propName=value
     * @param withDefaultValues :: If true then the value of default parameters will be included
+    * @param separator :: character for the separator
     * @returns A stringized version of the manager
     */
     std::string PropertyManagerOwner::asString(bool withDefaultValues, char separator) const

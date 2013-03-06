@@ -2,7 +2,19 @@
 #include "MantidKernel/ThreadSafeLogStream.h"
 #include <Poco/Logger.h>
 #include <Poco/Message.h>
+
+#ifdef _MSC_VER
+  // Disable a flood of warnings about inheriting from std streams
+  // See http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
+  #pragma warning( push )
+  #pragma warning( disable : 4250 )
+#endif
+
 #include <Poco/NullStream.h>
+#ifdef _MSC_VER
+  #pragma warning( pop )
+#endif
+
 #include <iostream>
 #include <sstream>
 

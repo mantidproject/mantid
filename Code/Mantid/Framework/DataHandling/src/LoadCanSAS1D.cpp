@@ -70,9 +70,9 @@ LoadCanSAS1D::~LoadCanSAS1D()
 void LoadCanSAS1D::init()
 {
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
-      "The name of the input  xml file to load");
+      "The name of the CanSAS1D file to load");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-      Kernel::Direction::Output), "The name of the Output workspace");
+      Kernel::Direction::Output), "The name to use for the output workspace");
 }
 
 /** Overwrites Algorithm exec method
@@ -336,8 +336,9 @@ bool LoadCanSAS1D::quickFileCheck(const std::string& filePath,size_t nread,const
   (!extn.compare("xml"))?bspice2d=true:bspice2d=false;
 
   const char* xml_header="<?xml version=";
+  const char* full_hdr = reinterpret_cast<const char*>(header.full_hdr);
   if ( ((unsigned)nread >= strlen(xml_header)) && 
-    !strncmp((char*)header.full_hdr, xml_header, strlen(xml_header)) )
+    !strncmp(full_hdr, xml_header, strlen(xml_header)) )
   {
   }
   return(bspice2d?true:false);

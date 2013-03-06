@@ -57,13 +57,13 @@ public:
   void test_MakeChoice_throws_without_candiates()
   {
     PeakTransformSelector selector;
-    TSM_ASSERT_THROWS("Nothing registered so should throw.", selector.makeChoice("H", "K"), std::runtime_error);
+    TSM_ASSERT_THROWS("Nothing registered so should throw.", selector.makeChoice("H", "K"), std::runtime_error&);
   }
 
   void test_MakeDefaultChoice_throws_without_candiates()
   {
     PeakTransformSelector selector;
-    TSM_ASSERT_THROWS("Nothing registered so should throw.", selector.makeDefaultChoice(), std::runtime_error);
+    TSM_ASSERT_THROWS("Nothing registered so should throw.", selector.makeDefaultChoice(), std::runtime_error&);
   }
 
   void test_MakeChoice_throws_with_empty_xLabel()
@@ -73,7 +73,7 @@ public:
 
     PeakTransformSelector selector;
     selector.registerCandidate(mockFactory);
-    TSM_ASSERT_THROWS("xLabel is empty. Should throw.", selector.makeChoice("", "K"), std::invalid_argument);
+    TSM_ASSERT_THROWS("xLabel is empty. Should throw.", selector.makeChoice("", "K"), std::invalid_argument&);
   }
 
   void test_MakeChoice_throws_with_empty_yLabel()
@@ -83,7 +83,7 @@ public:
 
     PeakTransformSelector selector;
     selector.registerCandidate(mockFactory);
-    TSM_ASSERT_THROWS("yLabel is empty. Should throw.", selector.makeChoice("H", ""), std::invalid_argument);
+    TSM_ASSERT_THROWS("yLabel is empty. Should throw.", selector.makeChoice("H", ""), std::invalid_argument&);
   }
 
   // Check that the selector can identify and return the appropriate factory.

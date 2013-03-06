@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """ A few tools for validating the wiki at mantidproject.org """
 import warnings
-import argparse
+import optparse
 import os
 import mwclient
 import ConfigParser
@@ -145,12 +145,20 @@ def initialize_Mantid(mantidpath):
     mantid_initialized = True
 
 #======================================================================
+def get_all_algorithms_tuples():
+    """Returns a list of all algorithm names and versions as a tuple"""
+    return mtd._getRegisteredAlgorithms(True)
+
+
+#======================================================================
 def get_all_algorithms():
-    """REturns a list of all algorithm names"""
-    temp = mtd._getRegisteredAlgorithms(True)
-    print temp
-    algos = [x for (x, version) in temp]
-    return algos
+    """Returns a list of all algorithm names"""
+    temp = get_all_algorithms_tuples()
+    if withversion:
+        return temp
+    else:
+        algos = [x for (x, version) in temp]
+        return algos
 
 #======================================================================
 def find_misnamed_algos():
@@ -286,32 +294,30 @@ if __name__ == "__main__":
     except:
         pass
     
-    parser = argparse.ArgumentParser(description='Generate the Wiki documentation for one '
+    parser = optparser.OptionParser(description='Generate the Wiki documentation for one '
                                       'or more algorithms, and updates the mantidproject.org website')
     
-    parser.add_argument('algos', metavar='ALGORITHM', type=str, nargs='*',
-                        help='Name of the algorithm(s) to generate wiki docs.')
     
-    parser.add_argument('--mantidpath', dest='mantidpath', default=defaultmantidpath,
+    parser.add_option('--mantidpath', dest='mantidpath', default=defaultmantidpath,
                         help="Full path to the Mantid compiled binary folder. Default: '%s'. This will be saved to an .ini file" % defaultmantidpath)
 
-    parser.add_argument('--validate', dest='validate_wiki', action='store_const',
+    parser.add_option('--validate', dest='validate_wiki', action='store_const',
                         const=True, default=False,
                         help="Validate algorithms' documentation. Validates them all if no algo is specified. Look for missing wiki pages, missing properties documentation, etc. using the list of registered algorithms.")
     
-    parser.add_argument('--show-missing', dest='show_missing', action='store_const',
+    parser.add_option('--show-missing', dest='show_missing', action='store_const',
                         const=True, default=False,
                         help="When validating, pull missing in-code documentation from the wiki and show it.")
     
-    parser.add_argument('--find-orphans', dest='find_orphans', action='store_const',
+    parser.add_option('--find-orphans', dest='find_orphans', action='store_const',
                         const=True, default=False,
                         help="Look for 'orphan' wiki pages that are set as Category:Algorithms but do not have a matching Algorithm in Mantid.")
     
-    parser.add_argument('--find-misnamed', dest='find_misnamed', action='store_const',
+    parser.add_option('--find-misnamed', dest='find_misnamed', action='store_const',
                         const=True, default=False,
                         help="Look for algorithms where the name of the algorithm does not match any filename.")
 
-    args = parser.parse_args()
+    (args, algos) = parser.parse_args()
         
     # Write out config for next time
     config = ConfigParser.ConfigParser()
@@ -321,7 +327,7 @@ if __name__ == "__main__":
     config.write(f)
     f.close()
     
-    if not args.validate_wiki and not args.find_misnamed and not args.find_orphans and len(args.algos)==0:
+    if not args.validate_wiki and not args.find_misnamed and not args.find_orphans and len(algos)==0:
         parser.error("You must specify at least one algorithm if not using --validate")
 
     initialize_Mantid(args.mantidpath)
@@ -338,7 +344,6 @@ if __name__ == "__main__":
 
     if args.validate_wiki:
         # Validate a few, or ALL algos
-        algos = args.algos
         if len(algos) == 0:
             algos = get_all_algorithms()
         validate_wiki(args, algos)        

@@ -1,1 +1,0 @@
-#include "MantidQtCustomInterfaces/PrecompiledHeader.h"

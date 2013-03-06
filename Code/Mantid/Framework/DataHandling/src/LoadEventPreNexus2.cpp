@@ -87,8 +87,6 @@ static const string PID_PARAM("SpectrumList");
 static const string PARALLEL_PARAM("UseParallelProcessing");
 static const string BLOCK_SIZE_PARAM("LoadingBlockSize");
 static const string OUT_PARAM("OutputWorkspace");
-/// Default number of items to read in from any of the files.
-static const size_t DEFAULT_BLOCK_SIZE = 1000000; // 100,000
 /// All pixel ids with matching this mask are errors.
 static const PixelType ERROR_PID = 0x80000000;
 /// The maximum possible tof as native type
@@ -974,7 +972,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
 
       // This is equivalent to workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
       // But should be faster as a bunch of these calls were cached.
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
       // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
       arrayOfVectors[pid]->emplace_back( tof, pulsetime );
 #else

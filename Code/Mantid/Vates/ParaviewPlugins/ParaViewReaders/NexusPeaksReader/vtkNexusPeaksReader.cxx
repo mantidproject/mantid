@@ -20,8 +20,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include <vtkPVGlyphFilter.h>
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>    
 
 vtkCxxRevisionMacro(vtkNexusPeaksReader, "$Revision: 1.0 $");

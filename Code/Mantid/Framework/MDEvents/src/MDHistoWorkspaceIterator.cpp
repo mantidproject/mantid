@@ -21,18 +21,27 @@ namespace MDEvents
    * @param function :: The implicit function to use. Becomes owned by this object.
    * @return
    */
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Constructor
+   * @param workspace :: MDHistoWorkspace_sptr being iterated
+   * @param function :: The implicit function to use. Becomes owned by this object.
+   * @param beginPos :: start position
+   * @param endPos :: end position
+   */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, Mantid::Geometry::MDImplicitFunction * function,
       size_t beginPos, size_t endPos): m_skippingPolicy(new SkipMaskedBins(this))
   {
     this->init(workspace.get(), function, beginPos, endPos);
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   *
+  /**
+   * Constructor
    * @param workspace :: MDHistoWorkspace_sptr being iterated
    * @param function :: The implicit function to use. Becomes owned by this object.
-   * @return
+   * @param beginPos
+   * @param endPos
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, Mantid::Geometry::MDImplicitFunction * function,
       size_t beginPos, size_t endPos) : m_skippingPolicy(new SkipMaskedBins(this))
@@ -40,13 +49,13 @@ namespace MDEvents
     this->init(workspace, function, beginPos, endPos);
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   *
+  /**
+   * Constructor
    * @param workspace :: MDHistoWorkspace_sptr being iterated
+   * @param skippingPolicy :: The skipping policy to use.
    * @param function :: The implicit function to use. Becomes owned by this object.
-   * @param skippingPolicy :: The skipping policy to use
-   * @return
+   * @param beginPos :: Start position
+   * @param endPos :: End position
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(MDHistoWorkspace_const_sptr workspace, SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function,
       size_t beginPos, size_t endPos) : m_skippingPolicy(skippingPolicy)
@@ -60,6 +69,8 @@ namespace MDEvents
    * @param workspace :: MDHistoWorkspace_sptr being iterated
    * @param function :: The implicit function to use. Becomes owned by this object.
    * @param skippingPolicy :: The skipping policy to use
+   * @param beginPos :: Start position
+   * @param endPos :: End position
    * @return
    */
   MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace * workspace, SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function,
@@ -68,11 +79,12 @@ namespace MDEvents
     this->init(workspace, function, beginPos, endPos);
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor helper
-   *
+  /**
+   * Constructor helper
    * @param workspace :: MDWorkspace
    * @param function :: implicit function or NULL for none. Gains ownership of the pointer.
+   * @param beginPos :: Start position
+   * @param endPos :: End position
    */
   void MDHistoWorkspaceIterator::init(const MDHistoWorkspace * workspace,
       Mantid::Geometry::MDImplicitFunction * function,

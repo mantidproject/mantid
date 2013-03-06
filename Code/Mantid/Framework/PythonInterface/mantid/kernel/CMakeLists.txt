@@ -37,6 +37,7 @@ set ( EXPORT_FILES
   src/Exports/UnitFactory.cpp
   src/Exports/DeltaEMode.cpp
   src/Exports/PropertyManager.cpp
+  src/Exports/Memory.cpp
 )  
 
 set ( SRC_FILES
@@ -123,8 +124,8 @@ endif()
 
 # Build version
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.py )
-# Copy py & generate pyc in build directory, taking care of multi-config (MSVC) builds
-copy_python_files_to_dir ( ${PACKAGESETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR} 
+# Copy py to build directory, taking care of multi-config (MSVC) builds
+copy_python_files_to_dir ( ${PACKAGESETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
                            PYTHON_INSTALL_FILES )
 
 # Package version
@@ -134,9 +135,6 @@ if ( WIN32 OR APPLE )
   set ( NEXUSLIB ../../${NEXUSLIB_FILE} )
 endif()
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py )
-# Generate pyc for the packaged version here as we can't hang things off install targets. compileall can't do single files
-# so mimic it with the -x regex exclude of the one we don't want to compile. -l turns of directory recursion
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -m compileall -l -x "${PACKAGESETUP_PY}.py" ${CMAKE_CURRENT_BINARY_DIR}/ OUTPUT_QUIET )
 
 #############################################################################################
 # Create the target for this directory
@@ -171,8 +169,8 @@ if ( UNIX )
   install ( TARGETS _dlopen DESTINATION ${BIN_DIR}/mantid/kernel )
 endif()
 
-# packagesetup.py & packagesetup.pyc that will overwrite the ones from the built target
+# Pure Python files 
+install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/kernel )
+# packagesetup.py that will overwrite the ones from the built target
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py DESTINATION
           ${BIN_DIR}/mantid/kernel RENAME ${PACKAGESETUP_PY}.py )
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.pyc DESTINATION
-          ${BIN_DIR}/mantid/kernel RENAME ${PACKAGESETUP_PY}.pyc )

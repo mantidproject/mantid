@@ -149,7 +149,7 @@ class ISISReducer(SANSReducer):
         self.prep_normalize = isis_reduction_steps.CalculateNormISIS(
                             [self.norm_mon, self.transmission_calculator])
 
-        self.to_Q =            sans_reduction_steps.ConvertToQ(
+        self.to_Q =            isis_reduction_steps.ConvertToQISIS(
                                                         self.prep_normalize)
         self.background_subtracter = None
         self.geometry_correcter =       sans_reduction_steps.SampleGeomCor(
@@ -180,6 +180,8 @@ class ISISReducer(SANSReducer):
         # Python 2.4 has a problem deep copying the _resolution_calculator in
         # the base class. ISIS don't need it so kill it off here
         self._resolution_calculator = None
+        #option to indicate if wide_angle_correction will be applied.
+        self.wide_angle_correction = False
 
     def set_sample(self, run, reload, period):
         """

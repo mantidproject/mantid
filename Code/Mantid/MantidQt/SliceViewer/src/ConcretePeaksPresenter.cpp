@@ -5,8 +5,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
-#include "MantidQtSliceViewer/PeakTransformFactory.h"
+#include "MantidKernel/Logger.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/regex.hpp>
 
@@ -17,6 +16,27 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+
+    /**
+     * Convert from a SpecialCoordinateSystem enum to a correpsonding enum name.
+     * @param coordSystem : enum option
+     * @return coordinate system as a string
+     */
+    std::string coordinateToString(Mantid::API::SpecialCoordinateSystem coordSystem)
+    {
+      switch(coordSystem)
+      {
+      case Mantid::API::QLab:
+        return "QLab";
+      case Mantid::API::QSample:
+        return "QSample";
+      case Mantid::API::HKL:
+        return "HKL";
+      default:
+        return "Unknown";
+      }
+    }
+
 
     /**
      * Produce the views for the internally held peaks workspace.
@@ -36,23 +56,11 @@ namespace MantidQt
     }
 
     /**
-     Constructor.
-
-     1) First check that the arguments provided are valid.
-     2) Then iterate over the MODEL and use it to construct VIEWs via the factory.
-     3) A collection of views is stored internally
-
-     @param nonIntegratedViewFactory : View Factory (THE VIEW via factory)
-     @param integratedViewFactory : View Factory (THE VIEW via factory)
-     @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
-     @param mdWS : IMDWorkspace also being visualised (THE MODEL)
-     @param peaksTransform : Peak Transformation Factory. This is about interpreting the MODEL.
+     * Check that the inputs provided are valid.
+     * @param integratedViewFactory
+     * @param nonIntegratedViewFactory
      */
-    ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory,
-        PeakOverlayViewFactory_sptr integratedViewFactory, IPeaksWorkspace_sptr peaksWS,
-        boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) :
-        m_viewPeaks(peaksWS->getNumberPeaks()), m_viewFactory(integratedViewFactory), m_peaksWS(peaksWS), m_transformFactory(
-            transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0)
+    void ConcretePeaksPresenter::validateInputs(PeakOverlayViewFactory_sptr integratedViewFactory, PeakOverlayViewFactory_sptr nonIntegratedViewFactory)
     {
       if (integratedViewFactory == NULL)
       {
@@ -62,11 +70,22 @@ namespace MantidQt
       {
         throw std::invalid_argument("NonIntegrated PeakOverlayViewFactory is null");
       }
-      if (peaksWS == NULL)
+      if (m_peaksWS == NULL)
       {
         throw std::invalid_argument("PeaksWorkspace is null");
       }
+    }
 
+    /**
+     * The view factory needs to be selected. This is done by looking at log value carried on the inputpeaks workspace.
+     * If the work-space is integrated, then the integratedViewFactory is used.
+     *
+     * @param nonIntegratedViewFactory: Non integrated view factory
+     * @param mdWS : Multi-dimensional workspace
+     */
+    void ConcretePeaksPresenter::constructViewFactory(
+        PeakOverlayViewFactory_sptr nonIntegratedViewFactory,  boost::shared_ptr<const MDGeometry> mdWS)
+    {
       double peakIntegrationRadius = 0;
       double backgroundInnerRadius = 0;
       double backgroundOuterRadius = 0;
@@ -98,6 +117,73 @@ namespace MantidQt
       }
       m_viewFactory->setPeakRadius(peakIntegrationRadius, backgroundInnerRadius, backgroundOuterRadius);
       m_viewFactory->setZRange(maxZ, minZ);
+    }
+
+    /**
+     * Check the work-space compatibilities.
+     *
+     * @param mdWS : MDWorkspace currently plotted.
+     */
+    void ConcretePeaksPresenter::checkWorkspaceCompatibilities(boost::shared_ptr<Mantid::API::MDGeometry>  mdWS)
+    {
+      if (auto imdWS = boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(mdWS))
+      {
+        const SpecialCoordinateSystem coordSystMD = imdWS->getSpecialCoordinateSystem();
+        const SpecialCoordinateSystem coordSystDim = m_transform->getCoordinateSystem();
+        const SpecialCoordinateSystem coordSystPK = m_peaksWS->getSpecialCoordinateSystem();
+        // Check that the MDWorkspace is self-consistent.
+        if (coordSystMD != coordSystDim)
+        {
+          std::stringstream ss;
+          ss << std::endl;
+          ss << "According to the dimension names in your MDWorkspace, this work-space is determined to be in: ";
+          ss << m_transform->getFriendlyName() << " in the PeaksViewer. ";
+          ss << "However, the MDWorkspace has properties indicating that it's coordinates are in: " << coordinateToString(coordSystMD);
+          ss << " To resolve the conflict, the MDWorkspace will be treated as though it has coordinates in: " << m_transform->getFriendlyName();
+          g_log.notice(ss.str());
+        }
+        // If the peaks work-space has been integrated. check cross-work-space compatibility.
+        if (coordSystDim != coordSystPK && m_peaksWS->hasIntegratedPeaks())
+        {
+          std::stringstream ss;
+          ss << std::endl;
+          ss << "You appear to be plotting your PeaksWorkspace in a different coordinate system from the one in which integration was performed. ";
+          ss << "This will distort the integrated peak shape on the PeaksViewer. ";
+          ss << "PeaksWorkspace was integrated against a MDWorkspace in the coordinate system: " << coordinateToString(m_peaksWS->getSpecialCoordinateSystem());
+          ss << "MDWorkspace is displayed in coordinate system: " << m_transform->getFriendlyName();
+          g_log.notice(ss.str());
+        }
+      }
+    }
+
+    /**
+     Constructor.
+
+     1 First check that the arguments provided are valid.
+     2 Then iterate over the MODEL and use it to construct VIEWs via the factory.
+     3 A collection of views is stored internally
+
+     @param nonIntegratedViewFactory : View Factory (THE VIEW via factory)
+     @param integratedViewFactory : View Factory (THE VIEW via factory)
+     @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
+     @param mdWS : IMDWorkspace also being visualised (THE MODEL)
+     @param transformFactory : Peak Transformation Factory. This is about interpreting the MODEL.
+     */
+    ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory,
+        PeakOverlayViewFactory_sptr integratedViewFactory, IPeaksWorkspace_sptr peaksWS,
+        boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) :
+        m_viewPeaks(peaksWS->getNumberPeaks()), m_viewFactory(integratedViewFactory), m_peaksWS(peaksWS), m_transformFactory(
+            transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0),
+            g_log(Mantid::Kernel::Logger::get("PeaksPresenter"))
+    {
+      // Check the inputs.
+      validateInputs(integratedViewFactory, nonIntegratedViewFactory);
+
+      // Check that the workspaces appear to be compatible. Log if otherwise.
+      checkWorkspaceCompatibilities(mdWS);
+
+      // Choose the view factory
+      constructViewFactory(nonIntegratedViewFactory, mdWS);
 
       const bool transformSucceeded = this->configureMappingTransform();
 
@@ -327,9 +413,11 @@ namespace MantidQt
       return this->m_viewPeaks[peakIndex]->getBoundingBox();
     }
 
-    void ConcretePeaksPresenter::sortPeaksWorkspace(const std::string& byColumnName, const bool ascending)
+    void ConcretePeaksPresenter::sortPeaksWorkspace(const std::string& byColumnName,
+        const bool ascending)
     {
-      Mantid::API::IPeaksWorkspace_sptr peaksWS = boost::const_pointer_cast < Mantid::API::IPeaksWorkspace> (this->m_peaksWS);
+      Mantid::API::IPeaksWorkspace_sptr peaksWS =
+          boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
 
       // Sort the Peaks in-place.
       Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SortPeaksWorkspace");
@@ -352,6 +440,61 @@ namespace MantidQt
         (*it)->setSlicePoint(this->m_slicePoint);
       }
     }
+
+    void ConcretePeaksPresenter::setPeakSizeOnProjection(const double fraction)
+    {
+      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      {
+        if ((*it) != NULL)
+        {
+          (*it)->changeOccupancyInView(fraction);
+          (*it)->updateView();
+        }
+      }
+    }
+
+    void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction)
+    {
+      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      {
+        if ((*it) != NULL)
+        {
+          (*it)->changeOccupancyIntoView(fraction);
+          (*it)->updateView();
+        }
+      }
+    }
+
+    double ConcretePeaksPresenter::getPeakSizeOnProjection() const
+    {
+      double result = 0;
+      for (VecPeakOverlayView::const_iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      {
+        PeakOverlayView_sptr view = (*it);
+        if (view != NULL && view->positionOnly())
+        {
+          result = m_viewPeaks.front()->getOccupancyInView();
+          break;
+        }
+      }
+      return result;
+    }
+
+    double ConcretePeaksPresenter::getPeakSizeIntoProjection() const
+    {
+      double result = 0;
+      for (VecPeakOverlayView::const_iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      {
+        PeakOverlayView_sptr view = (*it);
+        if (view != NULL && view->positionOnly())
+        {
+          result = m_viewPeaks.front()->getOccupancyIntoView();
+          break;
+        }
+      }
+      return result;
+    }
+
   }
 }
 

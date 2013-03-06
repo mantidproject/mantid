@@ -7,8 +7,7 @@
 #include <QMessageBox>
 
 UserFunction::UserFunction(const QString& s, SurfacePlot& pw)
-: Function(pw), formula(s), 
-m_hlpFun(0)//Mantid
+: Function(pw), formula(s), d_rows(0), d_columns(0), m_hlpFun(0)
 {}
 
 double UserFunction::operator()(double x, double y)

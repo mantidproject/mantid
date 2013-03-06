@@ -26,6 +26,7 @@ namespace ImageView
  * @param image_plot      The QwtPlot that will hold the image
  * @param slider_handler  The object that manages interaction with the
  *                        horizontal and vertical scroll bars
+ * @param range_handler   The object that manages interaction with the range.
  * @param h_graph         The GraphDisplay for the graph showing horizontal
  *                        cuts through the image at the bottom of the image.
  * @param v_graph         The GraphDisplay for the graph showing vertical 

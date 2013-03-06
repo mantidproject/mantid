@@ -29,6 +29,7 @@ public:
   ISaveableTester(size_t id) : ISaveable(id),
   m_memory(1)
   {}
+  virtual ~ISaveableTester(){}
 
   virtual bool isBox()const{return true;}
   virtual void save()const 
@@ -153,6 +154,9 @@ public:
   {
     this->setFilePosition(pos,size,false); 
   }
+
+  virtual ~ISaveableTesterWithFile(){}
+
   virtual void clearDataFromMemory()
   {
     is_loaded=false; 

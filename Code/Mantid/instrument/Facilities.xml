@@ -261,7 +261,7 @@
    
 </facility> 
 
-<facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs.h5,.nxs,.dat,_runinfo.xml,_histo.nxs">
+<facility name="SNS" delimiter="_" FileExtensions=".nxs.h5,_event.nxs,.nxs,.dat,_runinfo.xml,_histo.nxs">
 
    <archive>
       <archiveSearch plugin="SNSDataSearch" />
@@ -386,21 +386,18 @@
 
 </facility>
 
-<facility name="ILL" FileExtensions=".nxs,.dat">
+<facility name="ILL" FileExtensions=".nxs,.hdf">
 
   <instrument name="IN5">
     <technique>Neutron Spectroscopy</technique> 
-    <technique>Reactor Indirect Geometry Spectroscopy</technique> 
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>Disk chopper time-of-flight spectrometer IN5</technique>
   </instrument>
 
-  <instrument name="IN10">
+  <instrument name="IN6">
     <technique>Neutron Spectroscopy</technique> 
-    <technique>Reactor Indirect Geometry Spectroscopy</technique> 
-  </instrument>
-
-  <instrument name="IN16">
-    <technique>Neutron Spectroscopy</technique> 
-    <technique>Reactor Indirect Geometry Spectroscopy</technique> 
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>Cold neutron time-focussing time-of-flight spectrometer</technique>
   </instrument>
 
 </facility>

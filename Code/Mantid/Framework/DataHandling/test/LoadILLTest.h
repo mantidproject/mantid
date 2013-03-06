@@ -6,21 +6,28 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::API;
+using Mantid::DataHandling::LoadILL;
 
 class LoadILLTest: public CxxTest::TestSuite {
 public:
+
 	LoadILLTest() :
-			testFile("ILLIN5_094460.nxs") {
+			m_testFile("ILLIN5_094460.nxs")
+	{
 	}
+
 	void testName() {
+		LoadILL loader;
 		TS_ASSERT_EQUALS( loader.name(), "LoadILL");
 	}
 
 	void testVersion() {
+		LoadILL loader;
 		TS_ASSERT_EQUALS( loader.version(), 1);
 	}
 
 	void testInit() {
+		LoadILL loader;
 		TS_ASSERT_THROWS_NOTHING( loader.initialize());
 		TS_ASSERT( loader.isInitialized());
 	}
@@ -30,7 +37,9 @@ public:
 //	}
 
 	void testExec() {
-		loader.setPropertyValue("Filename", testFile);
+		LoadILL loader;
+		loader.initialize();
+		loader.setPropertyValue("Filename", m_testFile);
 
 		std::string outputSpace = "LoadILLTest_out";
 		loader.setPropertyValue("OutputWorkspace", outputSpace);
@@ -44,14 +53,14 @@ public:
 		MatrixWorkspace_sptr output2D = boost::dynamic_pointer_cast<
 				MatrixWorkspace>(output);
 
-		TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 98304+1);
+		TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 98304);
 
 		AnalysisDataService::Instance().clear();
 	}
 
 private:
-	Mantid::DataHandling::LoadILL loader;
-	std::string testFile;
+
+	std::string m_testFile;
 };
 
 //------------------------------------------------------------------------------

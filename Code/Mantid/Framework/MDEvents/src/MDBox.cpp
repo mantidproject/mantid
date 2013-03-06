@@ -1,6 +1,5 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/BoxCtrlChangesList.h"
@@ -26,6 +25,8 @@ namespace MDEvents
   /** Constructor
    * @param splitter :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
+   * @param boxSize :: size of reserve for data
+   * @param boxID :: id for the given box
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth,int64_t boxSize,int64_t boxID)
     : MDBoxBase<MDE, nd>(),
@@ -50,6 +51,8 @@ namespace MDEvents
    * @param splitter :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
    * @param extentsVector :: vector defining the extents
+   * @param boxSize :: size of reserve for data
+   * @param boxID :: id for the given box
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,int64_t boxSize,int64_t boxID)
    :   MDBoxBase<MDE, nd>(extentsVector),
@@ -71,7 +74,9 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Copy constructor */
+  /** Copy constructor
+   * @param other: MDBox object to copy from.
+   */
   TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other)
      : MDBoxBase<MDE, nd>(other),
      data(other.data),
@@ -297,6 +302,7 @@ namespace MDEvents
    * Clear existing data from memory!
    *
    * @param file :: Nexus File object, must already by opened with MDE::openNexusData()
+   * @param setIsLoaded :: flag if box is loaded from file
    */
   TMDE(
   inline void MDBox)::loadNexus(::NeXus::File * file, bool setIsLoaded)
@@ -470,7 +476,7 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Add a MDLeanEvent to the box.
-   * @param event :: reference to a MDEvent to add.
+   * @param Evnt :: reference to a MDEvent to add.
    * */
   TMDE(
   void MDBox)::addEvent( const MDE & Evnt)
@@ -506,8 +512,8 @@ namespace MDEvents
    // add a single event and set pounter to the box which needs splitting (if one actually need) 
 
    * @param point :: reference to a MDEvent to add.
-   * @returns  :: pointer to itself if the box should be split or NULL if not yet
-   * */
+   * @param index :: current index for box
+   */
   TMDE(
   void MDBox)::addAndTraceEvent( const MDE & point, size_t index)
   {
@@ -534,7 +540,7 @@ namespace MDEvents
    * No lock is performed. This is only safe if no 2 threads will
    * try to add to the same box at the same time.
    *
-   * @param event :: reference to a MDEvent to add.
+   * @param Evnt :: reference to a MDEvent to add.
    * */
   TMDE(
   void MDBox)::addEventUnsafe( const MDE & Evnt)

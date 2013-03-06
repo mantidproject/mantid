@@ -3,7 +3,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataObjects/CompressedWorkspace2D.h"
@@ -106,7 +105,7 @@ public:
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
 
     //----------------------------------------------------------------------
-    // Tests to check that Loading SpectraDetectorMap is done correctly
+    // Tests to check that spectra-detector mapping is done correctly
     //----------------------------------------------------------------------
     // Test one to one mapping, for example spectra 6 has only 1 pixel
     TS_ASSERT_EQUALS( output2D->getSpectrum(6)->getDetectorIDs().size(), 1);   // rummap.ndet(6),1);

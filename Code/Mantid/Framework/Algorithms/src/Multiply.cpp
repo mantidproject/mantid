@@ -1,6 +1,20 @@
 /*WIKI* 
+ {{BinaryOperation|verb=multiplied|prep=by|symbol=<math>\times</math>}}
 
+== Usage ==
+'''Python'''
+ Multiply("w1","w2","output")
+ w3 = w1 * w2
+ w1 *= w2  # Perform "in-place"
+ # Using a scalar
+ w3 = w1 * 2.5
+ w1 *= 2.5  # Perform "in-place"
 
+'''C++ Within an Algorithm''' <br/>
+The usage of basic workspace mathematical operations has been specially simplified for use within algorithms
+
+ //w1 and w2 are workspaces
+ Workspace output = w1 * w2;
 *WIKI*/
 // Includes
 //----------------------------------------------------------------------
@@ -23,7 +37,7 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void Multiply::initDocs()
     {
-      this->setWikiSummary("The Multiply algorithm will multiply the data values and calculate the corresponding [[Error Values|error values]] of two compatible workspaces.  {{BinaryOperation|verb=multiplied|prep=by|symbol=<math>\\times</math>}} ");
+      this->setWikiSummary("The Multiply algorithm will multiply the data values and calculate the corresponding [[Error Values|error values]] of two compatible workspaces.");
       this->setOptionalMessage("The Multiply algorithm will multiply the data values and calculate the corresponding error values of two compatible workspaces.  ");
     }
     

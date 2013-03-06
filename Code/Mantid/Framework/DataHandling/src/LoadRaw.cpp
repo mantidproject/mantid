@@ -24,7 +24,6 @@ LoadRaw runs the following algorithms as child algorithms to populate aspects of
 //----------------------------------------------------------------------
 #include "LoadRaw/isisraw.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadRawHelper.h"
@@ -368,7 +367,7 @@ namespace Mantid
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
 
-      localWorkspace->getAxis(1)->spectraNo(hist)= i;
+      localWorkspace->getAxis(1)->setValue(hist, i);
       // NOTE: Raw numbers go straight into the workspace
       //     - no account taken of bin widths/units etc.
     }

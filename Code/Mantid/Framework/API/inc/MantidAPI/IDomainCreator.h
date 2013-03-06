@@ -66,14 +66,13 @@ namespace Mantid
       /// Toggle output of either just composite or composite + members
       void separateCompositeMembersInOutput(const bool value);
 
-      /// declare properties that specify the dataset within the workspace to fit to.
+      /// Declare properties that specify the dataset within the workspace to fit to.
       /// @param suffix :: A suffix to give to all new properties.
       /// @param addProp :: If false don't actually declare new properties but do other stuff if needed
       virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true) 
       {UNUSED_ARG(suffix);UNUSED_ARG(addProp);}
 
       /// Create a domain and values from the input workspace. FunctionValues must be filled with data to fit to.
-      /// @param workspacePropetyName :: A name of a workspace property. Domain will be created for this workspace.
       /// @param domain :: Shared pointer to hold the created domain
       /// @param values :: Shared pointer to hold the created values with set fitting data and weights.
       ///  Implementations must check whether it's empty or not. If values pointer is empty create new values instance
@@ -85,9 +84,11 @@ namespace Mantid
         boost::shared_ptr<API::IFunctionValues>& values,
         size_t i0 = 0) = 0;
 
-      /**
-       * Create an output workspace filled with data simulated with the fitting function.
-       */
+       /// Create an output workspace filled with data simulated with the fitting function.
+       /// @param baseName :: Specifies the name of the output workspace
+       /// @param function :: A pointer to the fitting function
+       /// @param domain :: The domain containing x-values for the function
+       /// @param values :: A FunctionValues instance containing the fitting data
       virtual void createOutputWorkspace(
         const std::string& baseName,
         API::IFunction_sptr function,
@@ -96,6 +97,7 @@ namespace Mantid
       {UNUSED_ARG(baseName);UNUSED_ARG(function);UNUSED_ARG(domain);UNUSED_ARG(values);}
 
       /// Initialize the function
+      /// @param function :: A function to initialize.
       virtual void initFunction(API::IFunction_sptr function);
 
       /// Return the size of the domain to be created.

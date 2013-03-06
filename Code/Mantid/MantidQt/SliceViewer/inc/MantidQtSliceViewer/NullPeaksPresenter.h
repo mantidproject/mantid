@@ -27,6 +27,10 @@ namespace MantidQt
       void setShown(const bool){/*Do nothing*/}
       virtual PeakBoundingBox getBoundingBox(const int) const{return PeakBoundingBox();}
       virtual void sortPeaksWorkspace(const std::string&, const bool){/*Do Nothing*/}
+      virtual void setPeakSizeOnProjection(const double){/*Do Nothing*/}
+      virtual void setPeakSizeIntoProjection(const double){/*Do Nothing*/}
+      virtual double getPeakSizeOnProjection() const {return 0;}
+      virtual double getPeakSizeIntoProjection() const {return 0;}
     };
 
   }

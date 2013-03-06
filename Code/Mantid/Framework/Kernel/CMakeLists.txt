@@ -325,17 +325,18 @@ endif(UNITY_BUILD)
 
 include_directories ( ${GSL_INCLUDE_DIR} )
 
-# Add a precompiled header where they are supported
-ADD_PRECOMPILED_HEADER ( inc/MantidKernel/PrecompiledHeader.h MantidKernel src/PrecompiledHeader.cpp SRC_FILES INC_FILES )
+# Enable precompiled headers where supported (must be done before target is added)
+enable_precompiled_headers ( inc/MantidKernel/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel 
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
+                                          
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Kernel ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( Kernel ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} )
 if ( WIN32 )
   target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
 endif()
@@ -380,9 +381,40 @@ set ( PLUGINS "." )
 set ( PV_PLUGINS "./pvplugins" )
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
-set ( PYTHONALGS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/PythonAlgorithms" )
+set ( PYTHONALG_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/PythonAlgorithms" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
+
+# Construct script paths.
+set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
+# First the required scripts variable...
+# Omitting the following (as of now) empty directories as CMake doesn't copy them on install and you then end up with a warning message....
+# @MANTID_ROOT@/scripts/Crystallography;@MANTID_ROOT@/scripts/DisorderedMaterials;@MANTID_ROOT@/scripts/Engineering;@MANTID_ROOT@/scripts/Muons;@MANTID_ROOT@/scripts/Neutrinos
+set ( REQUIREDSCRIPT_SUBDIRS Inelastic Reflectometry SANS)
+
+set ( REQUIREDSCRIPT_DIRS ${MANTID_ROOT}/scripts )
+foreach ( SUBDIR ${REQUIREDSCRIPT_SUBDIRS} )
+  set ( REQUIREDSCRIPT_DIRS "${REQUIREDSCRIPT_DIRS};${MANTID_SCRIPTS}/${SUBDIR}" )
+endforeach()
+
+# Second the standard scripts variable. The variable in the file is NOT recursive so add the top level directories from here
+set ( EXCLUDED_DIRS test )
+set ( PYTHONSCRIPT_DIRS "" )
+file ( GLOB SCRIPT_SUBDIRS RELATIVE ${MANTID_SCRIPTS} ${MANTID_SCRIPTS}/* )
+foreach ( SUBDIR ${SCRIPT_SUBDIRS} )
+  set ( DIR ${MANTID_SCRIPTS}/${SUBDIR} )
+  if ( IS_DIRECTORY ${DIR} AND NOT EXISTS ${DIR}/__init__.py )
+    list ( FIND REQUIREDSCRIPT_SUBDIRS ${SUBDIR} HAVE_DIR )
+    list ( FIND EXCLUDED_DIRS ${SUBDIR} EXCLUDE_DIR )
+    if ( HAVE_DIR EQUAL -1 AND EXCLUDE_DIR EQUAL -1 ) # If it is not in REQUIRED and not EXCLUDED
+      if ( PYTHONSCRIPT_DIRS )
+        set ( PYTHONSCRIPT_DIRS "${PYTHONSCRIPT_DIRS};${DIR}" )
+      else()
+        set ( PYTHONSCRIPT_DIRS "${DIR}" ) # Avoid first ;
+      endif()
+    endif()
+  endif()
+endforeach()
 
 # For an mpi-enabled build, don't log to file and format console output (which winds up in a file) differently
 # These settings carry down to the installation configuration below
@@ -414,6 +446,7 @@ add_custom_command ( TARGET Kernel POST_BUILD
 install ( TARGETS Kernel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 # Create the properties file for the installer
+set ( MANTID_ROOT_BUILD ${MANTID_ROOT} )
 if ( APPLE )
   set ( MANTID_ROOT ../.. )
 else ()
@@ -421,8 +454,35 @@ else ()
 endif ()
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
-set ( PYTHONALGS ${PLUGINS}/PythonAlgs )
+set ( PYTHONALG_DIRS ${PLUGINS}/PythonAlgs )
 set ( DATADIRS "" )
+
+# Construct script paths by replacing the old MANTID_ROOT with the new one.
+# Unfortunately string (REGEX REPLACE ... )removes the semi-colons so we have to do this in a loop.
+
+# First REQUIREDSCRIPT_DIRS
+set ( WITH_SEMICOLONS "" )
+foreach ( DIR ${REQUIREDSCRIPT_DIRS} )
+  string ( REGEX REPLACE "${MANTID_ROOT_BUILD}" "${MANTID_ROOT}" DIR ${DIR} )
+  if ( WITH_SEMICOLONS )
+    set ( WITH_SEMICOLONS "${WITH_SEMICOLONS};${DIR}" )
+  else()
+    set ( WITH_SEMICOLONS "${DIR}" ) # Avoid first ;
+  endif()
+endforeach()
+set ( REQUIREDSCRIPT_DIRS "${WITH_SEMICOLONS}" )
+
+# Second PYTHONSCRIPT_DIRS
+set ( WITH_SEMICOLONS "" )
+foreach ( DIR ${PYTHONSCRIPT_DIRS} )
+  string ( REGEX REPLACE "${MANTID_ROOT_BUILD}" "${MANTID_ROOT}" DIR ${DIR} )
+  if ( WITH_SEMICOLONS )
+    set ( WITH_SEMICOLONS "${WITH_SEMICOLONS};${DIR}" )
+  else()
+    set ( WITH_SEMICOLONS "${DIR}" ) # Avoid first ;
+  endif()
+endforeach()
+set ( PYTHONSCRIPT_DIRS "${WITH_SEMICOLONS}" )
 
 # For a framework-only (e.g. MPI) build some of these are not relevant and should
 # be left empty to avoid warnings on starting Mantid

@@ -1,1 +1,0 @@
-#include "MantidMDAlgorithms/PrecompiledHeader.h"

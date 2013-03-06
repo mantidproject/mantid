@@ -17,10 +17,7 @@
 // Includes for parsing the XML device descriptions
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
-//#include "Poco/DOM/NodeIterator.h"
-#include "Poco/DOM/NodeFilter.h"
 #include "Poco/DOM/AutoPtr.h"
-#include "Poco/SAX/InputSource.h"
 
 #include <Poco/Thread.h>
 #include <Poco/Runnable.h>
@@ -33,9 +30,9 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-// Time we'll wait on a receive call (in milliseconds)
+// Time we'll wait on a receive call (in seconds)
 // Also used when shutting down the thread so we know how long to wait there
-#define RECV_TIMEOUT_MS 100
+#define RECV_TIMEOUT 30
 
 
 // Names for a couple of time series properties
@@ -83,10 +80,6 @@ namespace DataHandling
     // the workspace) that need to happen prior to receiving any packets.
     initWorkspacePart1();
 
-    // Initialize the heartbeat time to the current time so we don't get a bunch of
-    // timeout errors when the background thread starts.
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
     // Initialize m_keepPausedEvents from the config file.
     // NOTE: To the best of my knowledge, the existence of this property is not documented
     // anywhere and this lack of documentation is deliberate.
@@ -107,7 +100,7 @@ namespace DataHandling
       // seem to have an equivalent to pthread_cancel
       m_stopThread = true;
       try {
-      m_thread.join(RECV_TIMEOUT_MS * 2);
+      m_thread.join(RECV_TIMEOUT * 2 * 1000);  // *1000 because join() wants time in milliseconds
       } catch (Poco::TimeoutException &) {
         // And just what do we do here?!?
         // Log a message, sure, but other than that we can either hang the
@@ -123,6 +116,13 @@ namespace DataHandling
     }
   }
 
+  /// Connect to the SMS daemon.
+
+  /// Attempts to connect to the SMS daemon at the specified address.  Note:
+  /// if the address is '0.0.0.0', it looks on localhost:31415 (useful for
+  /// debugging and testing).
+  /// @param address The address to attempt to connect to
+  /// @return Returns true if the connection succeeds.  False otherwise.
   bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress& address)
   // The SocketAddress class will throw various exceptions if it encounters an error
   // We're assuming the calling function will catch any exceptions that are important
@@ -136,25 +136,45 @@ namespace DataHandling
     if (address.host().toString().compare( "0.0.0.0") == 0)
     {
       Poco::Net::SocketAddress tempAddress("localhost:31415");
-      m_socket.connect( tempAddress);  // BLOCKING connect
+      try {
+        m_socket.connect( tempAddress);  // BLOCKING connect
+      } catch (...) {
+        g_log.error() << "Connection to " << tempAddress.toString() << " failed." << std::endl;
+        return false;
+      }
     }
     else
     {
-      m_socket.connect( address);  // BLOCKING connect
+      try {
+        m_socket.connect( address);  // BLOCKING connect
+      } catch (...) {
+        g_log.error() << "Connection to " << address.toString() << " failed." << std::endl;
+        return false;
+      }
     }
 
-    m_socket.setReceiveTimeout( Poco::Timespan( 0, RECV_TIMEOUT_MS * 1000)); // POCO timespan is seconds, microseconds
+    m_socket.setReceiveTimeout( Poco::Timespan( RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
     g_log.information() << "Connected to " << m_socket.address().toString() << std::endl;
 
     rv = m_isConnected = true;
     return rv;
   }
 
+  /// Test to see if the object has connected to the SMS daemon
+
+  /// Test to see if the object has connected to the SMS daemon
+  /// @return Returns true if connected.  False otherwise.
   bool SNSLiveEventDataListener::isConnected()
   {
     return m_isConnected;
   }
 
+  /// Start the background thread
+
+  /// Starts the background thread which reads data from the network, parses it and
+  /// stores the resulting events in a temporary workspace.
+  /// @param startTime Specifies how much historical data the SMS should send before continuing
+  /// the current 'live' data.  Use 0 to indicate no historical data.
   void SNSLiveEventDataListener::start(Kernel::DateAndTime startTime)
   {
     // Save the startTime and kick off the background thread
@@ -164,6 +184,11 @@ namespace DataHandling
     m_thread.start( *this);
   }
 
+  /// The main function for the background thread
+
+  /// Loops until the forground thread requests it to stop.  Reads data from the network,
+  /// parses it and stores the resulting events (and other metadata) in a temporary
+  /// workspace.
   void SNSLiveEventDataListener::run()
   {
     try {
@@ -201,32 +226,44 @@ namespace DataHandling
         Poco::Thread::sleep( 100);  // 100 milliseconds
       }
 
-      // Read the packets, accumulate events in m_eventBuffer...
-      Kernel::DateAndTime lastHeartbeat = m_heartbeat;
-      read( m_socket);
-      if (lastHeartbeat == m_heartbeat)
+      // Get some more data from our socket and put it in the parser's buffer
+      unsigned int bufFillLen = bufferFillLength();
+      if (bufFillLen)
+      {
+        uint8_t *bufFillAddr = bufferFillAddress();
+        int bytesRead = 0;
+        try {
+          bytesRead = m_socket.receiveBytes( bufFillAddr, bufFillLen);
+        } catch (Poco::TimeoutException &) {
+          // Don't need to stop processing or anything - just log a warning
+          g_log.warning() << "Timeout reading from the network.  Is SMS still sending?" << std::endl;
+        } catch (Poco::Net::NetException &e) {
+          std::string msg("Parser::read(): ");
+          msg += e.name();
+          throw std::runtime_error(msg);
+        }
+
+        if (bytesRead > 0)
+        {
+          bufferBytesAppended( bytesRead);
+        }
+      }
+      int packetsParsed = bufferParse();
+      if (packetsParsed == 0)
       {
         // No packets were parsed.  Sleep a little to let some data accumulate
         // before calling read again.  (Keeps us from spinlocking the cpu...)
         Poco::Thread::sleep( 10);  // 10 milliseconds
       }
-
-      // Check the heartbeat
-#define HEARTBEAT_TIMEOUT (60 * 5)  // 5 minutes
-      time_duration elapsed = Kernel::DateAndTime().getCurrentTime() - m_heartbeat;
-      if ( elapsed.total_seconds() > HEARTBEAT_TIMEOUT)
-      {
-        // SMS seems to have gone away.  Log an error
-        g_log.error() << "SMS server has sent no data for " << HEARTBEAT_TIMEOUT
-                      << " seconds.  Is it still running?" << std::endl;
-      }
     }
 
     // If we've gotten here, it's because the thread has thrown an otherwise
     // uncaught exception.  In such a case, the thread will exit and there's
-    // nothing we can do about that.  The only thing we can do is log an error
-    // so hopefully the user will notice (instead of wondering why all the
-    // incoming data has just stopped...)
+    // nothing we can do about that.  We'll log an error and save a copy of the
+    // exception object so that we can re-throw it from the foreground thread (which
+    // will cause the algorithm to exit).
+    // NOTE: For the default exception handler, we actually create a new runtime_error
+    // object and throw that, since there's no exception object passed in to the handler.
     } catch ( ADARA::invalid_packet e) {  // exception handler for invalid packets
       // For now, log it and let the thread exit.  In the future, we might
       // try to recover from this.  (A bad event packet could probably just
@@ -240,6 +277,8 @@ namespace DataHandling
       m_workspaceInitialized = true;  // see the comments in the default exception
                                       // handler for why we set this value.
 
+      m_backgroundException = boost::shared_ptr<std::runtime_error>( new ADARA::invalid_packet(e));
+
     } catch (std::runtime_error e) {  // exception handler for generic runtime exceptions
       g_log.fatal() << "Caught a runtime exception." << std::endl
                     << "Exception message: " << e.what() << std::endl
@@ -247,6 +286,8 @@ namespace DataHandling
       m_isConnected = false;
       m_workspaceInitialized = true;  // see the comments in the default exception
                                       // handler for why we set this value.
+
+      m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
     } catch (...) {  // Default exception handler
       g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
@@ -259,22 +300,40 @@ namespace DataHandling
       // going to be completely bogus, but since the entire we're not going to be able to read
       // any data, that's not really an issue.
       m_workspaceInitialized = true;
+
+      m_backgroundException =
+          boost::shared_ptr<std::runtime_error>( new std::runtime_error( "Unknown error in backgound thread"));
     }
 
     return;
   }
 
 
+  /// Parse an RTDL packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::RTDLPkt packets.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RTDLPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
     // At the moment, all we need from the RTDL packets is the pulse
     // time (and its questionable whether we even need that).
     m_rtdlPulseId = pkt.pulseId();
     return false;
   }
 
+  /// Parse a banked event packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::BankedEventPkt packets.  Parsed events are stored
+  /// in the temporary workspace until the forground thread retrieves
+  /// them.
+  /// @see extractData()
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   // Note:  Before we can process a particular BankedEventPkt, we must have
   // received the RTDLPkt for pulse ID specified in the BankedEventPkt.
   // Normally this won't be an issue since the SMS will send out RTDLPkts
@@ -285,8 +344,6 @@ namespace DataHandling
     // A few counters that we use for logging purposes
     unsigned eventsPerBank = 0;
     unsigned totalEvents = 0;
-
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
 
     // First step - make sure the RTDL packet we've saved matches the
     // banked event packet we've just received and  make sure its RAW flag
@@ -312,61 +369,58 @@ namespace DataHandling
 
     // Append the events
     g_log.information() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
-    m_mutex.lock();
-
-    // Iterate through each event
-    const ADARA::Event *event = pkt.firstEvent();
-    unsigned lastBankID = pkt.curBankId();
-    while (event != NULL)
     {
-      eventsPerBank++;
-      totalEvents++;
-      if (lastBankID < 0xFFFFFFFE)  // Bank ID -1 & -2 are special cases and are not valid pixels
+      Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex)  ;
+
+      // Iterate through each event
+      const ADARA::Event *event = pkt.firstEvent();
+      unsigned lastBankID = pkt.curBankId();
+      while (event != NULL)
       {
-        // appendEvent needs tof to be in units of microseconds, but it comes
-        // from the ADARA stream in units of 100ns.
-        if (pkt.getSourceCORFlag())
+        eventsPerBank++;
+        totalEvents++;
+        if (lastBankID < 0xFFFFFFFE)  // Bank ID -1 & -2 are special cases and are not valid pixels
         {
-          appendEvent(event->pixel, event->tof / 10.0, pkt.pulseId());
+          // appendEvent needs tof to be in units of microseconds, but it comes
+          // from the ADARA stream in units of 100ns.
+          if (pkt.getSourceCORFlag())
+          {
+            appendEvent(event->pixel, event->tof / 10.0, pkt.pulseId());
+          }
+          else
+          {
+            appendEvent(event->pixel, (event->tof + pkt.getSourceTOFOffset()) / 10.0, pkt.pulseId());
+          }
         }
-        else
+
+        event = pkt.nextEvent();
+        if (pkt.curBankId() != lastBankID)
         {
-          appendEvent(event->pixel, (event->tof + pkt.getSourceTOFOffset()) / 10.0, pkt.pulseId());
+          g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank
+                        << " events" << std::endl;
+
+          lastBankID = pkt.curBankId();
+          eventsPerBank = 0;
         }
       }
+    }  // mutex automatically unlocks here
 
-      event = pkt.nextEvent();
-      if (pkt.curBankId() != lastBankID)
-      {
-        g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank
-                      << " events" << std::endl;
-
-        lastBankID = pkt.curBankId();
-        eventsPerBank = 0;
-      }
-    }
-
-
-    m_mutex.unlock();
     g_log.information() << "Total Events: " << totalEvents << std::endl;
     g_log.information() << "-------------------------------" << std::endl;
 
     return false;
   }
 
-  bool SNSLiveEventDataListener::rxPacket( const ADARA::HeartbeatPkt &)
-  {
-    // We don't actually need anything out of the heartbeat packet - we just
-    // need to know that it arrived (and thus the SMS is still online)
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-    return false;
-  }
+  /// Parse a geometry packet
 
-
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::GeometryPkt packets.  The data is used to initialize
+  /// the temporary workspace.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::GeometryPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
     // TODO: For now, I'm assuming that we only need to process one of these
     // packets the first time it comes in and we can ignore any others.
     if (m_workspaceInitialized == false)
@@ -384,10 +438,16 @@ namespace DataHandling
     return false;
   }
 
+  /// Parse a beamline info packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::BeamlineInfoPkt packets.  The data is used to initialize
+  /// the temporary workspace.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BeamlineInfoPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
     // We only need to process a beamlineinfo packet once
     if (m_workspaceInitialized == false)
     {
@@ -406,9 +466,19 @@ namespace DataHandling
   }
 
 
+  /// Parse a run status packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::RunStatusPkt packets.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
+    // Note: We don't really need to lock the mutex for the entire length of
+    // this function call, but it's far simpler to put the lock here than to
+    // have individual lock/unlocks every time we fiddle with a run property
+    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
 
     if (m_workspaceInitialized == false)
     {
@@ -432,29 +502,42 @@ namespace DataHandling
       // Add the run_start property
       if ( m_eventBuffer->mutableRun().hasProperty("run_start") )
       {
-        m_eventBuffer->mutableRun().removeProperty( "run_start"); // remove to old run_start value
+        // We should never hit this code.  And if we do, all we can really do is log
+        // the error - removing the property prior to adding the new value doesn't
+        // always work.  Depending on the value of the "Accumulation Method" in
+        // StartLiveData, the new run_start property may not actually be picked up.
+        g_log.error() << "run_start property already exists.  Current value will be ignored."  << std::endl
+                      << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
       }
+      else
+      {
 
-      // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
-      time_t runStartTime = pkt.runStart() + ADARA::EPICS_EPOCH_OFFSET;
+        // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
+        time_t runStartTime = pkt.runStart() + ADARA::EPICS_EPOCH_OFFSET;
 
-      // Add the run_start property
-      char timeString[64];  // largest the string should end up is 20 (plus a null terminator)
-      strftime( timeString, 64, "%FT%H:%M:%SZ", gmtime( &runStartTime));
-      // addProperty() wants the time as an ISO 8601 string
+        // Add the run_start property
+        char timeString[64];  // largest the string should end up is 20 (plus a null terminator)
+        strftime( timeString, 64, "%FT%H:%M:%SZ", gmtime( &runStartTime));
+        // addProperty() wants the time as an ISO 8601 string
 
-      m_eventBuffer->mutableRun().addProperty("run_start", std::string( timeString) );
+        m_eventBuffer->mutableRun().addProperty("run_start", std::string( timeString) );
+      }
 
       // Add the run_number property
       if ( m_eventBuffer->mutableRun().hasProperty("run_number") )
       {
-        m_eventBuffer->mutableRun().removeProperty( "run_number"); // remove to old run_start value
+        // Same problem as the run_start property above:  run_number should not exist
+        // at this point, and if it does, we can't do much about it.
+        g_log.error() << "run_snumber property already exists.  Current value will be ignored."  << std::endl
+                      << "(This should never happen.  Talk to the Mantid developers.)" << std::endl;
       }
-
-      // Oddly, the run number property needs to be a string....
-      std::ostringstream runNum;
-      runNum << pkt.runNumber();
-      m_eventBuffer->mutableRun().addProperty( "run_number", runNum.str());
+      else
+      {
+        // Oddly, the run number property needs to be a string....
+        std::ostringstream runNum;
+        runNum << pkt.runNumber();
+        m_eventBuffer->mutableRun().addProperty( "run_number", runNum.str());
+      }
 
     }
     else if (pkt.status() == ADARA::RunStatus::END_RUN)
@@ -499,9 +582,19 @@ namespace DataHandling
     // in the packet parser.
   }
 
+  /// Parse a variable value packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::VariableU32Pkt packets.  The extracted value is stored
+  /// in the sample log of the temporary workspace.
+  /// @warning The specified variable must have already been described in a
+  /// ADARA::DeviceDescriptorPkt packet.
+  /// @see SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &)
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableU32Pkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
@@ -516,15 +609,28 @@ namespace DataHandling
     }
     else
     {
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      {
+        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      }
     }
 
     return false;
   }
 
+  /// Parse a variable value packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::VariableDoublePkt packets.  The extracted value is stored
+  /// in the sample log of the temporary workspace.
+  /// @warning The specified variable must have already been described in a
+  /// ADARA::DeviceDescriptorPkt packet.
+  /// @see SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &)
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableDoublePkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
@@ -539,15 +645,31 @@ namespace DataHandling
     }
     else
     {
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      {
+        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      }
     }
 
     return false;
   }
 
+  /// Parse a variable value packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::VariableStringPkt packets.  The extracted value is stored
+  /// in the sample log of the temporary workspace.
+  /// @warning The specified variable must have already been described in a
+  /// ADARA::DeviceDescriptorPkt packet.
+  /// @see SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &)
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
+  /// @remarks As of Februrary 2013, the SMS does not actually send out packets
+  /// of this type.  As such, this particular function has received very little
+  /// testing.
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableStringPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
@@ -562,19 +684,32 @@ namespace DataHandling
     }
     else
     {
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      {
+        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      }
     }
 
     return false;
   }
 
+  /// Parse a device decriptor packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::DeviceDecriptorPkt packets.  These packets contain
+  /// XML text decribing variables that will be received in subsequent
+  /// ADARA::VariableU32Pkt, ADARA::VariableDoublePkt and
+  /// ADARA::VariableStringPkt packets.
+  /// @see rxPacket( const ADARA::VariableU32Pkt &)
+  /// @see rxPacket( const ADARA::VariableDoublePkt &)
+  /// @see rxPacket( const ADARA::VariableStringPkt &)
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-    std::istringstream input( pkt.description());
-    Poco::XML::InputSource src(input);
     Poco::XML::DOMParser parser;
-    Poco::AutoPtr<Poco::XML::Document> doc = parser.parse(&src);
+    Poco::AutoPtr<Poco::XML::Document> doc = parser.parseMemory( pkt.description().c_str(), pkt.description().length());
     const Poco::XML::Node* deviceNode = doc->firstChild();
 
     // The 'device' should be the root element of the document.  I'm just being paranoid here.
@@ -688,8 +823,13 @@ namespace DataHandling
               {
                   prop->setUnits( pvUnits);
               }
-
-              m_eventBuffer->mutableRun().addLogData(prop);
+              {
+                // Note: it's possible for us receive device descriptor packets in the middle
+                // of a run (after the call to initWorkspacePart2), so we really do need to
+                // the lock the mutex here.
+                Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+                m_eventBuffer->mutableRun().addLogData(prop);
+              }
 
               // Add the pv id, device id and pv name to the name map so we can find the
               // name when we process the variable value packets
@@ -705,42 +845,53 @@ namespace DataHandling
     return false;
   }
 
+  /// Parse a stream annotation packet
+
+  /// Overrides the default function defined in ADARA::Parser and processes
+  /// data from ADARA::AnnotationPkt packets.  Scan start, Scan stop, Pause
+  /// & Resume annotations are stored as time series properties in the
+  /// workspace.
+  /// @param pkt The packet to be parsed
+  /// @return Returns false if there were no problems.  Returns true if there
+  /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::AnnotationPkt &pkt)
   {
-    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-
-    switch (pkt.type())
     {
-    case ADARA::MarkerType::GENERIC:
-      // Do nothing.  We log the comment field below for all types
-      break;
+      Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+      // We have to lock the mutex prior to calling mutableRun()
+      switch (pkt.type())
+      {
+      case ADARA::MarkerType::GENERIC:
+        // Do nothing.  We log the comment field below for all types
+        break;
 
-    case ADARA::MarkerType::SCAN_START:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), pkt.scanIndex());
-      g_log.information() << "Scan Start: " << pkt.scanIndex() << std::endl;
-      break;
+      case ADARA::MarkerType::SCAN_START:
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), pkt.scanIndex());
+        g_log.information() << "Scan Start: " << pkt.scanIndex() << std::endl;
+        break;
 
-    case ADARA::MarkerType::SCAN_STOP:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), 0);
-      g_log.information() << "Scan Stop:  " << pkt.scanIndex() << std::endl;
-      break;
+      case ADARA::MarkerType::SCAN_STOP:
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), 0);
+        g_log.information() << "Scan Stop:  " << pkt.scanIndex() << std::endl;
+        break;
 
-    case ADARA::MarkerType::PAUSE:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 1);
-      g_log.information() << "Run paused" << std::endl;
-      m_runPaused = true;
-      break;
+      case ADARA::MarkerType::PAUSE:
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 1);
+        g_log.information() << "Run paused" << std::endl;
+        m_runPaused = true;
+        break;
 
-    case ADARA::MarkerType::RESUME:
-      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 0);
-      g_log.information() << "Run resumed" << std::endl;
-      m_runPaused = false;
-      break;
+      case ADARA::MarkerType::RESUME:
+        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 0);
+        g_log.information() << "Run resumed" << std::endl;
+        m_runPaused = false;
+        break;
 
-    case ADARA::MarkerType::OVERALL_RUN_COMMENT:
-      // Do nothing.  We log the comment field below for all types
-      break;
-    }
+      case ADARA::MarkerType::OVERALL_RUN_COMMENT:
+        // Do nothing.  We log the comment field below for all types
+        break;
+      }
+    } // mutex auto unlocks here
 
     // if there's a comment in the packet, log it at the info level
     std::string comment = pkt.comment();
@@ -753,6 +904,10 @@ namespace DataHandling
   }
 
 
+  /// First part of the workspace initialization
+
+  /// Performs various initialization steps that can (and, in some
+  /// cases, must) be done prior to receiving any packets from the SMS daemon.
   void SNSLiveEventDataListener::initWorkspacePart1()
   {
     m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
@@ -770,6 +925,10 @@ namespace DataHandling
 
   }
 
+  /// Second part of the workspace initialization
+
+  /// Finishes the workspace initialization using data from
+  /// various packets received from the SMS daemon
   void SNSLiveEventDataListener::initWorkspacePart2()
   {
     // Use the LoadEmptyInstrument algorithm to create a proper workspace
@@ -791,24 +950,9 @@ namespace DataHandling
 
     m_indexMap = m_eventBuffer->getDetectorIDToWorkspaceIndexMap( true /* bool throwIfMultipleDets */ );
 
-    // We must always have a run_start property or the LogManager throws an
-    // exception.  The "real" value will come from a RunStatus packet saying that
-    // a new run is starting.  By the time we get here, we may already have
-    // received one of these packets.  If not, we'll just use the time from the
-    // packet passed in to this function..  (In a truely "live" stream, current
-    // time would also work, but if we're replaying old data, then current time
-    // would be newer than the timestamps in the data, and that would cause strange
-    // time values in the sample log.
-    if ( ! m_eventBuffer->mutableRun().hasProperty("run_start") )
-    {
-      // addProperty() wants the time as an ISO 8601 string
-      m_eventBuffer->mutableRun().addProperty("run_start", m_dataStartTime.toISO8601String());
-    }
-
-    // Much like the run_start property, we always want to have at least one value
-    // for the the scan index time series.  We may have already gotten a scan start
-    // packet by the time we get here and therefor don't need to do anything.  If
-    // not, we need to put a 0 into the time series.
+    // We always want to have at least one value for the the scan index time series.  We may have
+    // already gotten a scan start packet by the time we get here and therefor don't need to do
+    // anything.  If not, we need to put a 0 into the time series.
     if ( m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->size() == 0 )
     {
       m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( m_dataStartTime, 0);
@@ -817,6 +961,7 @@ namespace DataHandling
     m_workspaceInitialized = true;
   }
 
+  /// Adds an event to the workspace
   void SNSLiveEventDataListener::appendEvent(uint32_t pixelId, double tof,
                                              const Mantid::Kernel::DateAndTime pulseTime)
   // NOTE: This function does NOT lock the mutex!  Make sure you do that
@@ -838,9 +983,14 @@ namespace DataHandling
     }
   }
 
+  /// Retrieve buffered data
+
+  /// Called by the foreground thread to fetch data that's accumulated in
+  /// the temporary workspace.  The temporary workspace is left empty and
+  /// ready to receive more data.
+  /// @return shared pointer to a workspace containing the accumulated data
   boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData()
   {
-
     // Block until the background thread has actually initialized the workspace
     // (Which won't happen until the SMS sends it the packet with the geometry
     // information in it.)
@@ -864,17 +1014,30 @@ namespace DataHandling
     // Clear out the old logs
     temp->mutableRun().clearTimeSeriesLogs();
 
-    // Get an exclusive lock
-    m_mutex.lock();
-    std::swap(m_eventBuffer, temp);
-    m_mutex.unlock();
+    // Lock the mutex and swap the workspaces
+    {
+      Poco::ScopedLock<Poco::FastMutex> scopedLock( m_mutex);
+      std::swap(m_eventBuffer, temp);
+    }  // mutex automatically unlocks here
 
     return temp;
   }
 
 
+  /// Check the status of the current run
+
+  /// Called by the foreground thread check the status of the current run
+  /// @returns Returns an enum indicating beginning of a run, in the middle
+  /// of a run, ending a run or not in a run.
   ILiveListener::RunStatus SNSLiveEventDataListener::runStatus()
   {
+    // First up, check to see if the background thread has thrown an
+    // exception.  If so, re-throw it here.
+    if (m_backgroundException)
+    {
+      throw( *m_backgroundException);
+    }
+
     // The MonitorLiveData algorithm calls this function *after* the call to
     // extract data, which means the value we return should reflect the
     // value that's appropriate for the events that were returned when

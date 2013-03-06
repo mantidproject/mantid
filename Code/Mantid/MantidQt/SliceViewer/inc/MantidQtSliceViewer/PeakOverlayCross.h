@@ -68,6 +68,16 @@ namespace SliceViewer
     virtual void changeBackgroundColour(const QColor);
     /// Get a bounding box for this peak.
     virtual PeakBoundingBox getBoundingBox() const;
+    /// Changes the size of the overlay to be the requested fraction of the current view width.
+    virtual void changeOccupancyInView(const double fraction);
+    /// Changes the size of the overlay to be the requested fraction of the view depth.
+    virtual void changeOccupancyIntoView(const double fraction);
+    /// Get the occupancy in the view.
+    virtual double getOccupancyInView() const;
+    /// Get the occupancy into the view.
+    virtual double getOccupancyIntoView() const;
+    /// Flag indicating that the peak is position only.
+    bool positionOnly() const;
 
   private:
 

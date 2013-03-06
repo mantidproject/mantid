@@ -6,7 +6,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
+#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -152,15 +152,15 @@ namespace CurveFitting
     bool generatePeaksFromInput();
 
     /// Examine whether the insturment parameter set to a peak can cause a valid set of peak profile of that peak
-    bool examinInstrumentParameterValid(ThermalNeutronBk2BkExpConvPV_sptr peak,
+    bool examinInstrumentParameterValid(ThermalNeutronBk2BkExpConvPVoigt_sptr peak,
                                         double &d_h, double &tof_h, string &errmsg);
 
     /// Set parameters to each peak
-    void setPeakParameters(ThermalNeutronBk2BkExpConvPV_sptr peak, map<string, Parameter> parammap,
+    void setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, map<string, Parameter> parammap,
                            double peakheight, bool setpeakheight);
 
     /// From table/map to set parameters to all peaks.
-    void setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peaks,
+    void setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
                             map<std::string, Parameter> parammap,
                             double peakheight, bool setpeakheight);
 
@@ -170,10 +170,10 @@ namespace CurveFitting
                                    vector<double>& allpeaksvalues);
 
     /// Group peaks together
-    void groupPeaks(vector<vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > > &peakgroupvec);
+    void groupPeaks(vector<vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > > &peakgroupvec);
 
     /// Calcualate the peak heights of a group of overlapped peaks
-    bool calculateGroupPeakIntensities(vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peakgroup,
+    bool calculateGroupPeakIntensities(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroup,
                                        MatrixWorkspace_sptr dataws, size_t wsindex, bool zerobackground,
                                        vector<double>& allpeaksvalues);
 
@@ -224,14 +224,14 @@ namespace CurveFitting
                                        double &rwp, double &rp);
 
     /// Calculate powder diffraction statistic Rwp
-    void calculatePowderPatternStatistic(MantidVec &values, vector<double> &background,
+    void calculatePowderPatternStatistic(const MantidVec &values, const vector<double> &background,
                                          double &rwp, double &rp);
 
     /// Determine whether the proposed value should be accepted or denied
     bool acceptOrDeny(double currwp, double newrwp);
 
     /// Propose new parameters
-    void proposeNewValues(vector<string> mcgroup, double m_totRwp,
+    bool proposeNewValues(vector<string> mcgroup, double m_totRwp,
                           map<string, Parameter> &curparammap, map<string, Parameter> &newparammap, bool prevBetterRwp);
 
     /// Book keep the (sopposed) best MC result
@@ -275,10 +275,10 @@ namespace CurveFitting
     vector<pair<vector<int>, double> > m_inputPeakInfoVec;
 
     /// Vector of pairs of d-spacing and peak reference for all Bragg peaks
-    std::vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > m_dspPeaks;
+    std::vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > m_dspPeaks;
 
     /* Phase out (HKL)^2 may not be in order of peak position if lattice is not cubic
-    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr> m_peaks;
+    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr> m_peaks;
     This can be assimilated to m_dspPeaks()
     std::map<int, double> mPeakHeights;
     -------------------------------*/

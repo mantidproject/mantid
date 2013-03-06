@@ -607,54 +607,69 @@ public:
   }
 };
 
-class MDEventWorkspaceTestPerformance :    public CxxTest::TestSuite
+class MDEventWorkspacePerformanceTest :    public CxxTest::TestSuite
 {
 
 private:
 
   MDEventWorkspace3Lean::sptr m_ws;
-
+  size_t nEvents,nBoxes;
 public:
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDEventWorkspaceTestPerformance *createSuite() { return new MDEventWorkspaceTestPerformance(); }
-  static void destroySuite( MDEventWorkspaceTestPerformance *suite ) { delete suite; }
+  static MDEventWorkspacePerformanceTest *createSuite() { return new MDEventWorkspacePerformanceTest(); }
+  static void destroySuite( MDEventWorkspacePerformanceTest *suite ) { delete suite; }
 
-  MDEventWorkspaceTestPerformance()
-  {    
-    size_t dim_size = 100;
-    size_t sq_dim_size = dim_size*dim_size;
-    m_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, (Mantid::coord_t)dim_size, 10 /*event per box*/);
-    m_ws->getBoxController()->setSplitThreshold(10);
-    std::vector<MDLeanEvent<3> > vecEvents(dim_size*dim_size*dim_size);
-    
-    for(size_t i = 0; i < dim_size; ++i)
+  MDEventWorkspacePerformanceTest()
+  { 
+  }
+    void setUp()
     {
-      for(size_t j = 0; j < dim_size; ++j)
+      size_t dim_size = 20;
+      size_t sq_dim_size = dim_size*dim_size;
+      m_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, (Mantid::coord_t)dim_size, 10 /*event per box*/);
+      m_ws->getBoxController()->setSplitThreshold(10);
+      nBoxes = dim_size*dim_size*dim_size;
+      std::vector<MDLeanEvent<3> > vecEvents(nBoxes);
+    
+      for(size_t i = 0; i < dim_size; ++i)
       {
-        for(size_t k = 0; k < dim_size; ++k)
+        for(size_t j = 0; j < dim_size; ++j)
         {
-          double centers[3] = {(double)i, (double)j, (double)k};
-          vecEvents[i + j*dim_size + k*sq_dim_size] = MDLeanEvent<3>(1, 1, centers);
+          for(size_t k = 0; k < dim_size; ++k)
+          {
+            double centers[3] = {(double)i, (double)j, (double)k};
+            vecEvents[i + j*dim_size + k*sq_dim_size] = MDLeanEvent<3>(1, 1, centers);
+          }
         }
       }
+      m_ws->addEvents(vecEvents);
     }
-    m_ws->addEvents(vecEvents);
-  }
 
-  void test_splitting_performance_single_threaded()
+    void teadDown()
+    {
+      m_ws.reset();
+    }
+   void test_splitting_performance_single_threaded()
   {
+    std::cout<<"Starting Workspace splitting performance test, single threaded with "<<nBoxes <<" events \n";
+    Kernel::Timer clock;
     m_ws->splitAllIfNeeded(NULL);
+    std::cout<<"Finished Workspace splitting performance test, single threaded in "<< clock.elapsed()<<" sec\n";
   }
 
-  //void test_splitting_performance_parallel()
-  //{
-  //  auto ts_splitter = new ThreadSchedulerFIFO();
-  //  ThreadPool tp_splitter(ts_splitter);
-  //  m_ws->splitAllIfNeeded(ts_splitter);
-  //  tp_splitter.joinAll();
-  //}
+  void test_splitting_performance_parallel()
+  {
+    auto ts_splitter = new ThreadSchedulerFIFO();
+    ThreadPool tp_splitter(ts_splitter,8);
+    Kernel::Timer clock;
+    std::cout<<"Starting Workspace splitting performance test, 8 thread with "<<nBoxes <<" events \n";
+    m_ws->splitAllIfNeeded(ts_splitter);
+    tp_splitter.joinAll();
+    std::cout << clock.elapsed()<<std::endl;
+    std::cout<<"Finished Workspace splitting performance test, 8 threads in "<< clock.elapsed()<<" sec\n";
+  }
 };
 
 #endif

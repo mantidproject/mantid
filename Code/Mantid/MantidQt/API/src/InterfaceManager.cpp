@@ -13,6 +13,7 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/Exception.h"
 
 #include <QStringList>
@@ -20,9 +21,9 @@
 using namespace MantidQt::API;
 
 //Initialize the logger
-Mantid::Kernel::Logger & InterfaceManagerImpl::g_log = Mantid::Kernel::Logger::get("InterfaceManager");
+Mantid::Kernel::Logger & InterfaceManager::g_log = Mantid::Kernel::Logger::get("InterfaceManager");
 
-Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManagerImpl::m_vatesGuiFactory = NULL;
+Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManager::m_vatesGuiFactory = NULL;
 
 //----------------------------------
 // Public member functions
@@ -38,7 +39,7 @@ Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *InterfaceManagerImpl
  * @param disabled :: TODO: Write description of this variable. 
  * @returns An AlgorithmDialog object
  */
-AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
+AlgorithmDialog* InterfaceManager::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
   bool forScript, const QHash<QString,QString> & preset_values, 
   const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled)
 {
@@ -86,11 +87,27 @@ AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg
 }
 
 /**
+ *  Create an algorithm dialog for a given algorithm name.
+ * @param algorithmName : Name of the algorithm
+ * @param forScript : True if this is being run from a script.
+ * @param parent : Parent widget
+ * @return new AlgorithmDialog
+ */
+AlgorithmDialog* InterfaceManager::createDialogFromName(const QString& algorithmName,  bool forScript, QWidget* parent)
+{
+    // Create the algorithm. This should throw if the algorithm can't be found.
+    auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(algorithmName.toStdString());
+
+    // Forward call.
+    return createDialog(alg, parent, forScript);
+}
+
+/**
  * Create a new instance of the correct type of UserSubWindow
  * @param interface_name :: The registered name of the interface
  * @param parent :: The parent widget
  */
-UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_name, QWidget* parent)
+UserSubWindow* InterfaceManager::createSubWindow(const QString & interface_name, QWidget* parent)
 {
   UserSubWindow *user_win = NULL;
   std::string iname = interface_name.toStdString();
@@ -120,7 +137,7 @@ UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_n
  * The keys associated with UserSubWindow classes
  * @returns A QStringList containing the keys from the InterfaceFactory that refer to UserSubWindow classes
  */
-QStringList InterfaceManagerImpl::getUserSubWindowKeys() const
+QStringList InterfaceManager::getUserSubWindowKeys() const
 {
   QStringList key_list;
   std::vector<std::string> keys = UserSubWindowFactory::Instance().getKeys();
@@ -136,50 +153,56 @@ QStringList InterfaceManagerImpl::getUserSubWindowKeys() const
 // Private member functions
 //----------------------------------
 /// Default Constructor
-InterfaceManagerImpl::InterfaceManagerImpl()
+InterfaceManager::InterfaceManager()
 {
   // Attempt to load libraries that may contain custom interface classes
   const std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("mantidqt.plugins.directory");
   if( !libpath.empty() )
   {
-    int nloaded = Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
-    if( nloaded == 0 )
+    // Lazy loading. Avoid loading libraries every time a new instance is created.
+    static bool isLoaded;
+    if(!isLoaded)
     {
-      g_log.warning() << "Unable to load Qt plugin libraries.\n"
-        << "Please check that the 'mantidqt.plugins.directory' variable in the .properties file points to "
-        << "the correct location."
-        << std::endl;
+      int nloaded = Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
+      if( nloaded == 0 )
+      {
+        g_log.warning() << "Unable to load Qt plugin libraries.\n"
+          << "Please check that the 'mantidqt.plugins.directory' variable in the .properties file points to "
+          << "the correct location."
+          << std::endl;
+      }
+      isLoaded = true;
     }
   }
 }
 
 /// Destructor
-InterfaceManagerImpl::~InterfaceManagerImpl()
+InterfaceManager::~InterfaceManager()
 {
 }
 
-void InterfaceManagerImpl::registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory)
+void InterfaceManager::registerVatesGuiFactory(Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *factory)
 {
-  this->m_vatesGuiFactory = factory;
+  m_vatesGuiFactory = factory;
 }
 
 /*
 Getter to determine if vates components have been installed.
 @return true if they are available.
 */
-bool InterfaceManagerImpl::hasVatesLibraries() const
+bool InterfaceManager::hasVatesLibraries()
 {
-  return NULL != this->m_vatesGuiFactory;
+  return NULL != m_vatesGuiFactory;
 }
 
 
 
-VatesViewerInterface *InterfaceManagerImpl::createVatesSimpleGui() const
+VatesViewerInterface *InterfaceManager::createVatesSimpleGui() const
 {
   if(m_vatesGuiFactory == NULL)
   {
-    g_log.error() << "InterfaceManagerImpl::createVatesSimpleGui is null. Mantid Vates package is probably not installed." << std::endl;
-    throw Mantid::Kernel::Exception::NullPointerException("InterfaceManagerImpl::createVatesSimpleGui", "m_vatesGuiFactory");
+    g_log.error() << "InterfaceManager::createVatesSimpleGui is null. Mantid Vates package is probably not installed." << std::endl;
+    throw Mantid::Kernel::Exception::NullPointerException("InterfaceManager::createVatesSimpleGui", "m_vatesGuiFactory");
   }
   else 
   {

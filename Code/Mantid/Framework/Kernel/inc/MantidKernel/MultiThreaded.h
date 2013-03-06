@@ -18,17 +18,15 @@ namespace Kernel
 } //namespace
 } //namespace
 
-
+// The syntax used to dfine a pragma within a macro is different on windows and GCC
+#ifdef _MSC_VER
+#define PRAGMA __pragma
+#else //_MSC_VER
+#define PRAGMA(x) _Pragma(#x)
+#endif //_MSC_VER
 
 // _OPENMP is automatically defined if openMP support is enabled in the compiler.
 #ifdef _OPENMP
-
-// The syntax used to dfine a pragma within a macro is different on windows and GCC
-#ifdef _MSC_VER 
-#define PRAGMA __pragma
-#else //_MSC_VER 
-#define PRAGMA(x) _Pragma(#x)
-#endif //_MSC_VER 
 
 #include <omp.h>
 

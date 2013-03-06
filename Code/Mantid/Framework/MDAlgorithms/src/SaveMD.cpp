@@ -269,8 +269,10 @@ namespace MDAlgorithms
     bc->getDiskBuffer().getFreeSpaceVector(freeSpaceBlocks);
     if (freeSpaceBlocks.empty())
       freeSpaceBlocks.resize(2, 0); // Needs a minimum size
-    std::vector<int> free_dims(2,2); free_dims[0] = int(freeSpaceBlocks.size()/2);
-    std::vector<int> free_chunk(2,2); free_chunk[0] =int(bc->getDataChunk());
+    std::vector<int64_t> free_dims(2,2);
+    free_dims[0] = int64_t(freeSpaceBlocks.size()/2);
+    std::vector<int64_t> free_chunk(2,2);
+    free_chunk[0] =int64_t(bc->getDataChunk());
 
     // Now the free space blocks under event_data -- should be done better
     try

@@ -11,7 +11,6 @@ The LoadRawBin0 algorithm stores bin 0 data from the selected [[RAW_File | RAW]]
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -37,7 +36,7 @@ DECLARE_ALGORITHM(LoadRawBin0)
 /// Sets documentation strings for this algorithm
 void LoadRawBin0::initDocs()
 {
-  this->setWikiSummary("Loads bin zero  from  ISIS [[RAW_File | raw]] file and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
+  this->setWikiSummary("Loads bin zero  from  ISIS [[RAW_File | raw]] file and stores it in a 2D [[workspace]] ([[Workspace2D]] class)."); 
   this->setOptionalMessage("Loads bin zero  from  ISIS  raw file and stores it in a 2D workspace (Workspace2D class).");
 }
 
@@ -63,13 +62,11 @@ void LoadRawBin0::init()
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(1);
   declareProperty("SpectrumMin", 1, mustBePositive,
-      "The index number of the first spectrum to read.  Only used if\n"
-      "spectrum_max is set.");
+                  "The number of the first spectrum to read.");
   declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
-      "The number of the last spectrum to read. Only used if explicitly\n"
-      "set.");
+                  "The number of the last spectrum to read.");
   declareProperty(new ArrayProperty<specid_t> ("SpectrumList"),
-      "A comma-separated list of individual spectra to read.  Only used if\n"
+      "A comma-separated list of individual spectra to read.  Only used if "
       "explicitly set.");
 
  }

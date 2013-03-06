@@ -1,7 +1,7 @@
 /*WIKI* 
 
 
-This algorithm sums, bin-by-bin, multiple spectra into a single spectra. The errors are summed in quadrature and the algorithm checks that the bin boundaries in X are the same. The new summed spectra are created at the start of the output workspace and have spectra index numbers that start at zero and increase in the order the groups are specified. Each new group takes the spectra numbers from the first input spectrum specified for that group. All detectors from the grouped spectra will be moved (in the [[SpectraDetectorMap]]) to belong to the new spectrum.
+This algorithm sums, bin-by-bin, multiple spectra into a single spectra. The errors are summed in quadrature and the algorithm checks that the bin boundaries in X are the same. The new summed spectra are created at the start of the output workspace and have spectra index numbers that start at zero and increase in the order the groups are specified. Each new group takes the spectra numbers from the first input spectrum specified for that group. All detectors from the grouped spectra will be moved to belong to the new spectrum.
 
 Not all spectra in the input workspace have to be copied to a group. If KeepUngroupedSpectra is set to true any spectra not listed will be copied to the output workspace after the groups in order. If KeepUngroupedSpectra is set to false only the spectra selected to be in a group will be used.
 
@@ -62,7 +62,7 @@ where <ids> is used to specify spectra IDs and <detids> detector IDs.
 == Previous Versions ==
 
 === version 1 ===
-The set of spectra to be grouped can be given as a list of either spectrum numbers, detector IDs or workspace indices. The new, summed spectrum will appear in the workspace at the first workspace index of the pre-grouped spectra (which will be given by the ResultIndex property after execution). The detectors for all the grouped spectra will be moved (in the [[SpectraDetectorMap]]) to belong to the first spectrum. ''A technical note: the workspace indices previously occupied by summed spectra will have their data zeroed and their spectrum number set to a value of -1.''
+The set of spectra to be grouped can be given as a list of either spectrum numbers, detector IDs or workspace indices. The new, summed spectrum will appear in the workspace at the first workspace index of the pre-grouped spectra (which will be given by the ResultIndex property after execution). The detectors for all the grouped spectra will be moved to belong to the first spectrum. ''A technical note: the workspace indices previously occupied by summed spectra will have their data zeroed and their spectrum number set to a value of -1.''
 
 
 *WIKI*/
@@ -71,7 +71,6 @@ The set of spectra to be grouped can be given as a list of either spectrum numbe
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <set>

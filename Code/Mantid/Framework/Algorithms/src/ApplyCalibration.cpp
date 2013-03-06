@@ -1,8 +1,7 @@
 /*WIKI* 
+Update detector positions from input table workspace. The positions are updated as absolute positions and so this update can be repeated.
 
-To be written
-
-
+The PositionTable must have columns ''Detector ID'' and ''Detector Position''. The entries of the ''Detector ID'' column are integer referring to the Detector ID and the enties of the ''Detector Position'' are [[V3D]]s referring to the position of the detector whose ID is in same row.
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -13,9 +12,6 @@ To be written
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidNexusCPP/NeXusException.hpp"
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid
@@ -28,8 +24,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void ApplyCalibration::initDocs()
     {
-      this->setWikiSummary(" TBA ");
-      this->setOptionalMessage(" TBA ");
+      this->setWikiSummary("Update detector positions from input table workspace.");
+      this->setOptionalMessage("Update detector positions from input table workspace.");
     }
     
     using namespace Kernel;

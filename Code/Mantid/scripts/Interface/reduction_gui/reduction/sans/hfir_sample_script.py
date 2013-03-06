@@ -194,6 +194,8 @@ class SampleData(BaseScriptElement):
             Update transmission from reduction output
         """
         if IS_IN_MANTIDPLOT:
+            # Allow the use of the old reducer code, which 
+            # uses the Python API v1
             if self.PYTHON_API==1:
                 from reduction.command_interface import ReductionSingleton
                 if ReductionSingleton()._transmission_calculator is not None:

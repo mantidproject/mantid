@@ -194,7 +194,7 @@ namespace Mantid
     Efficiency functions are then executed against the X data of the input workspace to generate new Y and E outputs for the denominatorWS.
     @param wsIndex: The index of the histogram in the input workspace to process.
     @param denominatorWS : Workspace that will become the denominator in the normalisation routine.
-    @param inputWorkspace: Workspace input. Contains instrument to use as well as X data to use.
+    @param inWS: Workspace input. Contains instrument to use as well as X data to use.
     @param prog: progress reporting object.
     */
     void NormaliseByDetector::processHistogram(size_t wsIndex, MatrixWorkspace_sptr denominatorWS, MatrixWorkspace_const_sptr inWS, Progress& prog)
@@ -259,8 +259,7 @@ namespace Mantid
 
     /**
     Controlling function. Processes the histograms either in parallel or sequentially.
-    @param denominatorWS : Workspace that will become the denominator in the normalisation routine.
-    @param inputWorkspace: Workspace input. Contains instrument to use as well as X data to use.
+    @param inWS: Workspace input. Contains instrument to use as well as X data to use.
     */
     MatrixWorkspace_sptr NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS)
     {

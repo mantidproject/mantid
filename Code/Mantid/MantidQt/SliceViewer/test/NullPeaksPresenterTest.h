@@ -87,6 +87,30 @@ public:
     TS_ASSERT_EQUALS(0, result.bottom());
   }
 
+  void test_setPeakSizeOnProjection()
+  {
+    NullPeaksPresenter presenter;
+    TS_ASSERT_THROWS_NOTHING(presenter.setPeakSizeOnProjection(1));
+  }
+
+  void test_setPeakSizeIntoProjection()
+  {
+    NullPeaksPresenter presenter;
+    TS_ASSERT_THROWS_NOTHING(presenter.setPeakSizeIntoProjection(1));
+  }
+
+  void test_getPeakSizeOnProjection()
+  {
+    NullPeaksPresenter presenter;
+    TS_ASSERT_EQUALS(0, presenter.getPeakSizeOnProjection());
+  }
+
+  void test_getPeakSizeIntoProjection()
+  {
+    NullPeaksPresenter presenter;
+    TS_ASSERT_EQUALS(0, presenter.getPeakSizeIntoProjection());
+  }
+
 };
 
 #endif

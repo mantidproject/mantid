@@ -63,7 +63,7 @@ namespace Mantid
         "workspace" );
       declareProperty(
         new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "The name of the workspace to be created as the output of the algorithm" );
+        "The name of the workspace to be created as the output of the algorithm.  A workspace of this name will be created and stored in the Analysis Data Service." );
 
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(0);
@@ -133,7 +133,7 @@ namespace Mantid
         int i = j + m_MinSpec;
         try {
           // Get the spectrum number for this histogram
-          outputWS->getAxis(1)->spectraNo(j) = inputWS->getAxis(1)->spectraNo(i);
+          outputWS->getAxis(1)->setValue(j, inputWS->getAxis(1)->spectraNo(i));
           // Now get the detector to which this relates
           Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
           // Solid angle should be zero if detector is masked ('dead')

@@ -106,3 +106,6 @@ target_link_libraries ( PythonAPIModule PythonGeometryModule PythonKernelModule 
 # Installation settings
 ###########################################################################
 install ( TARGETS PythonAPIModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/api )
+
+# Pure Python files 
+install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/api )

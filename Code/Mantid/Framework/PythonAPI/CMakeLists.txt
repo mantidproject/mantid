@@ -62,8 +62,6 @@ set ( TEST_PY_FILES
   WorkspaceHistoryTest.py
 )
 
-
-
 ###########################################################################
 # Clear stale pyc files
 ###########################################################################
@@ -80,14 +78,10 @@ include_directories ( ${PYTHON_NUMPY_INCLUDE_DIR} )
 include_directories ( inc )
 
 ###########################################################################
-# Build a pyc file in the binary directory for each python file 
+# Copy Python files to build's binary directory 
 ###########################################################################
 
-# Now the common files for all distributions
 copy_python_files_to_dir( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} PYTHON_INSTALL_FILES )
-
-# Python algorithms
-add_compile_py_target( PythonAlgorithmsOld ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
 
 ###########################################################################
 # Create the target for this directory
@@ -204,7 +198,7 @@ endif ()
 # to ensure that the stdc++ library appears as early in the link list as possible so that it
 # is loaded first, hence the hard coding of it here rather than leaving it to be implicitly defined.
 if ( UNIX ) 
-  set ( PYTHON_DEPS stdc++ ${NEXUS_C_LIBRARIES} ${MANTIDLIBS} ${PYTHON_LIBRARIES}  )
+  set ( PYTHON_DEPS stdc++ ${NEXUS_C_LIBRARIES} ${MANTIDLIBS} ${PYTHON_LIBRARIES} )
 else ()
   set ( PYTHON_DEPS ${MANTIDLIBS} ${PYTHON_LIBRARIES}  )
 endif ()
@@ -267,10 +261,9 @@ if ( UNIX )
   install ( TARGETS dlopen DESTINATION ${BIN_DIR} )
 endif ()
 
-###########################################################################
-# Ship .py & .pyc files
-###########################################################################
-install_python_files ( ${CMAKE_CURRENT_SOURCE_DIR} "${PY_FILES}" ${BIN_DIR} )
-
+# Pure Python files 
+install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
+# Algorithms
 install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
-                                      PATTERN ".svn" EXCLUDE )
+          PATTERN "*.pyc" EXCLUDE
+          PATTERN ".svn" EXCLUDE )

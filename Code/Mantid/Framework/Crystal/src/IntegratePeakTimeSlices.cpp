@@ -671,8 +671,8 @@ namespace Mantid
             delete [] NeighborIDs;
             NeighborIDs = new int[NN+2];
             NeighborIDs[0]=NN+2;
-          }else
-            NN= NeighborIDs[0]-2;
+          }//else
+           // NN= NeighborIDs[0]-2;
           NeighborIDs[1]=2;
           neighborRadius = 1.5*NewRadius;
           //CentNghbr = CentPos;
@@ -1847,8 +1847,8 @@ namespace Mantid
                delete [] NeighborIDs;
                NeighborIDs = new int[NN+2];
                NeighborIDs[0]=NN+2;
-             }else
-               NN= NeighborIDs[0]-2;
+             }//else
+              // NN= NeighborIDs[0]-2;
              NeighborIDs[1]=2;
              neighborRadius = 1.5*NewRadius;
              CentNghbr = CentPos;
@@ -1871,8 +1871,16 @@ namespace Mantid
 
     }
 
-
-
+    /**
+     * Prepares the data for futher analysis adding meta data and marking data on the edges of detectors
+     * @param Data: Output workspace
+     * @param inpWkSpace: Input workspace
+     * @param chanMin: Minimum channel
+     * @param chanMax: Maximum channel
+     * @param Radius: The radius of detectors
+     * @param CentPos: Center on plane
+     * @param spec_idList: List of spectra id's
+     */
     void  IntegratePeakTimeSlices:: SetUpData1(API::MatrixWorkspace_sptr              &Data,
                                                API::MatrixWorkspace_const_sptr        const &inpWkSpace,
                                                const int                               chanMin,
@@ -2377,7 +2385,7 @@ namespace Mantid
       double intensity=0;
 
      // if( !EdgePeak  )
-      {
+     // {
         err = AttributeValues->CalcISAWIntensityVariance(params.data(),errs.data(), chisqdivDOF);
             //CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceVariance, ncells);
         intensity =AttributeValues->CalcISAWIntensity( params.data());
@@ -2386,7 +2394,7 @@ namespace Mantid
 
         TotVariance += err ;
         g_log.debug()<<"TotIntensity/TotVariance="<<TotIntensity<<"/"<<TotVariance<<std::endl;
-      }
+     // }
 
       /*else
       {

@@ -1,4 +1,4 @@
-from mantidsimple import *
+from mantid.simpleapi import *
 import os
 import string
 
@@ -11,7 +11,7 @@ def find_file(run_number):
     except RuntimeError:
         message = 'Cannot find file matching hint "%s" on current search paths ' + \
                   'for instrument "%s"'
-        raise ValueError( message % (file_hint, mtd.settings['default.instrument']))
+        raise ValueError( message % (file_hint, config['default.instrument']))
 
 def create_resultname(run_number, prefix='', suffix=''):
     """Create a string based on the run number and optional prefix and 
@@ -66,7 +66,7 @@ def mark_as_loaded(filename):
     global _loaded_data
     data_name =  create_dataname(filename)
     if data_name not in _loaded_data:
-        mtd.sendLogMessage("Marking %s as loaded." % filename)
+        logger.notice("Marking %s as loaded." % filename)
         _loaded_data.append(data_name)
 
 def load_runs(runs, sum=True):
@@ -80,7 +80,7 @@ def load_runs(runs, sum=True):
             if len(runs) == 0: raise RuntimeError("load_runs was supplied an empty list.")
             result_ws = load_run(runs[0])
             summed = 'summed-run-files'
-            CloneWorkspace(result_ws, summed)
+            CloneWorkspace(InputWorkspace=result_ws,OutputWorkspace=summed)
             sum_files(summed, runs[1:])
             result_ws = mtd[summed]
             mark_as_loaded(summed)
@@ -108,8 +108,8 @@ def load_run(run_number, force=False):
     its workspace exists already.
     """
     # If a workspace with this name exists, then assume it is to be used in place of a file
-    if mtd.workspaceExists(str(run_number)):
-        mtd.sendLogMessage("%s already loaded as workspace." % str(run_number))
+    if str(run_number) in mtd:
+        logger.notice("%s already loaded as workspace." % str(run_number))
         if type(run_number) == str: return mtd[run_number]
         else: return run_number
 
@@ -128,25 +128,25 @@ def load_run(run_number, force=False):
        
     # The output name 
     output_name = create_dataname(filename)
-    if force == False and mtd.workspaceExists(output_name):
-        mtd.sendLogMessage("%s already loaded" % filename)
+    if (not force) and (output_name in mtd):
+        logger.notice("%s already loaded" % filename)
         return mtd[output_name]
 
     ext = os.path.splitext(filename)[1]
     if filename.endswith("_event.nxs"):
         LoadEventNexus(Filename=filename, OutputWorkspace=output_name) 
     elif ext.startswith(".n"):
-        LoadNexus(filename, output_name)
+        LoadNexus(Filename=filename,OutputWorkspace=output_name)
     elif filename.endswith("_event.dat"):
         #load the events
         LoadEventPreNexus(EventFilename=filename, OutputWorkspace=output_name)       
     else:
-        LoadRaw(filename, output_name)
+        LoadRaw(Filename=filename,OutputWorkspace=output_name)
         #LoadDetectorInfo(output_name, filename)
 
     # Attach the filename to the workspace so that it can be retrieved later in the reduction chain
-    AddSampleLog(output_name, "Filename", filename)
-    mtd.sendLogMessage("Loaded %s" % filename)
+    AddSampleLog(Workspace=output_name,LogName="Filename",LogText=filename)
+    logger.notice("Loaded %s" % filename)
     return mtd[output_name]
 
 def sum_files(accumulator, files, file_type):
@@ -157,6 +157,6 @@ def sum_files(accumulator, files, file_type):
     if type(files) == list:
         for filename in files:
             temp = load_run(filename, file_type)
-            Plus(accumulator, temp, accumulator)
+            Plus(LHSWorkspace=accumulator,RHSWorkspace=temp,OutputWorkspace=accumulator)
     else:
         pass

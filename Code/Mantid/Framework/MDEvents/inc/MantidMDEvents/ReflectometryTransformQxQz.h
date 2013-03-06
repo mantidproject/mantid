@@ -25,7 +25,7 @@ namespace Mantid
     };
 
     /**
-    @class Converts from inputs of wavelength, incident theta and final theta to Qx for reflectometry experiments
+    Converts from inputs of wavelength, incident theta and final theta to Qx for reflectometry experiments
     */
     class CalculateReflectometryQx : public CalculateReflectometryQBase
     {
@@ -61,7 +61,7 @@ namespace Mantid
     };
 
     /**
-    @class Converts from inputs of wavelength, incident theta and final theta to Qz for reflectometry experiments
+    Converts from inputs of wavelength, incident theta and final theta to Qz for reflectometry experiments
     */
     class CalculateReflectometryQz : public CalculateReflectometryQBase
     {

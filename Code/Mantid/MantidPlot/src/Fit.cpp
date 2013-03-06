@@ -47,13 +47,13 @@
 #include <QTextStream>
 
 Fit::Fit( ApplicationWindow *parent, Graph *g, const QString& name)
-: Filter( parent, g, name)
+: Filter( parent, g, name), d_f(NULL), d_df(NULL), d_fdf(NULL), d_fsimplex(NULL), d_w(NULL)
 {
 	init();
 }
 
 Fit::Fit( ApplicationWindow *parent, Table *t, const QString& name)
-: Filter( parent, t, name)
+: Filter( parent, t, name), d_f(NULL), d_df(NULL), d_fdf(NULL), d_fsimplex(NULL), d_w(NULL)
 {
 	init();
 }
@@ -594,7 +594,7 @@ void Fit::fit()
 	QString names = d_param_names.join (",");
 	const char *parNames = names.ascii();
 
-	struct FitData d_data = {d_n, d_p, d_x, d_y, d_w, function, parNames};
+	struct FitData d_data = {static_cast<size_t>(d_n), static_cast<size_t>(d_p), d_x, d_y, d_w, function, parNames};
 
 	int status, iterations = d_max_iterations;
 	if(d_solver == NelderMeadSimplex){

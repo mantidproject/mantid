@@ -36,13 +36,16 @@ namespace Algorithms
 
   void ExponentialCorrection::defineProperties()
   {
-    declareProperty("C0",1.0);
-    declareProperty("C1",0.0);
+    declareProperty("C0",1.0, "The value by which the entire exponent calculation is multiplied.");
+    declareProperty("C1",0.0, "The value by which the x value is multiplied prior to exponentiation.");
+    getPointerToProperty("InputWorkspace")->setDocumentation("The name of the workspace to apply the correction to.");
+    getPointerToProperty("OutputWorkspace")->setDocumentation("The name to use for the corrected workspace (can be the same as the input one).");
     
     std::vector<std::string> operations(2);
     operations[0] = "Multiply";
     operations[1] = "Divide";
-    declareProperty("Operation", "Divide", boost::make_shared<Kernel::StringListValidator>(operations));
+    declareProperty("Operation", "Divide", boost::make_shared<Kernel::StringListValidator>(operations),
+      "Whether to divide (the default) or multiply the data by the correction function.");
   }
   
   void ExponentialCorrection::retrieveProperties()

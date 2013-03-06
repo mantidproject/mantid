@@ -1545,7 +1545,8 @@ void ApplicationWindow::customMenu(MdiSubWindow* w)
   // Interface menu. Build the interface from the user sub windows list.
   // Modifications will be done through the ManageCustomMenus dialog and
   // remembered through QSettings.
-  QStringList user_windows = MantidQt::API::InterfaceManager::Instance().getUserSubWindowKeys();
+  MantidQt::API::InterfaceManager interfaceManager;
+  QStringList user_windows = interfaceManager.getUserSubWindowKeys();
   QStringListIterator itr(user_windows);
   QString menuName = "&Interfaces";
   addUserMenu(menuName);
@@ -3764,8 +3765,8 @@ void ApplicationWindow::defineErrorBars(const QString& name, int type, const QSt
   if (!direction)
     ycol=t->colIndex(xColName);
 
-  QVarLengthArray<double> Y(r);
-  Y=t->col(ycol);
+  QVarLengthArray<double> Y(t->col(ycol));
+ // Y=t->col(ycol);
   QString errColName=t->colName(c);
 
   double prc=percent.toDouble();
@@ -5317,8 +5318,10 @@ void ApplicationWindow::readSettings()
   //Top level scripts group
   settings.beginGroup("CustomScripts");
 
+  MantidQt::API::InterfaceManager interfaceManager;
+
   // Reference list of custom Interfaces that will be added to the Interfaces menu
-  QStringList user_windows = MantidQt::API::InterfaceManager::Instance().getUserSubWindowKeys();
+  QStringList user_windows =interfaceManager.getUserSubWindowKeys();
   // List it user items that will be moved to the Interfaces menu
   QStringList duplicated_custom_menu = QStringList();
 
@@ -8111,7 +8114,6 @@ void ApplicationWindow::addLabel()
   {
     g->setActiveTool(new LabelTool(g));
   }
-  displayBar->show();
 }
 
 void ApplicationWindow::addImage()
@@ -17086,7 +17088,8 @@ else
 
   MdiSubWindow* usr_win = new MdiSubWindow(this);
   usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  MantidQt::API::UserSubWindow *user_interface = MantidQt::API::InterfaceManager::Instance().createSubWindow(action_data, usr_win);
+  MantidQt::API::InterfaceManager interfaceManager;
+  MantidQt::API::UserSubWindow *user_interface = interfaceManager.createSubWindow(action_data, usr_win);
   if(user_interface)
   {
     connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));

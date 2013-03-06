@@ -10,9 +10,6 @@ namespace MDAlgorithms
    Kernel::Logger& ConvertToMDEventsWSBase::convert_log =Kernel::Logger::get("MD-Algorithms");
 
 /** Helper function to obtain the units set along X-axis of the input workspace. 
-  *
-  *@param pHost the pointer to the algorithm to work with
-  *
   *@returns the name(ID) of the unit, specified along X-axis of current workspace
 */
 Kernel::Unit_sptr    
@@ -71,12 +68,14 @@ bool ConvertToMDEventsWSBase::fillAddProperties(std::vector<coord_t> &Coord,size
      return true;
 }
 
-/** method which initates all main class variables
-   * @param WSD        -- class describing the target workspace. 
-  *                      the algorithm uses target workspace limints, transformation matix from source to the target workspace and the parameters, needed for  
-  *                      unit conversion (if any) 
-  * @param pWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
-*/
+/**
+ * method which initates all main class variables
+ * @param WSD : class describing the target workspace.
+ *              the algorithm uses target workspace limints, transformation matix from source to the target workspace and the parameters, needed for
+ *              unit conversion (if any)
+ * @param inWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
+ * @return
+ */
 size_t  ConvertToMDEventsWSBase::setUPConversion(const MDEvents::MDWSDescriptionDepricated &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
         TWS   = WSD;

@@ -56,8 +56,9 @@ namespace Mantid
       /// Virtual destructor
       virtual ~IArchiveSearch(){}
       /**
-        * Return the full path to a data file in an archive
-        * @param fName :: The file name
+        * Return the full path to a data file in an archive. The first match is returned
+        * @param filenames :: A list of filenames (without extensions) to pass to the archive
+        * @param exts :: A list of extensions to check for in turn against each file
         */
       virtual std::string getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts)const = 0;
     };

@@ -16,7 +16,6 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -147,8 +146,8 @@ void CheckWorkspacesMatch::processGroups(boost::shared_ptr<API::WorkspaceGroup> 
 
 void CheckWorkspacesMatch::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace1","",Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace2","",Direction::Input));
+  declareProperty(new WorkspaceProperty<Workspace>("Workspace1","",Direction::Input), "The name of the first input workspace.");
+  declareProperty(new WorkspaceProperty<Workspace>("Workspace2","",Direction::Input), "The name of the second input workspace.");
 
   declareProperty("Tolerance",0.0, "The maximum amount by which values may differ between the workspaces.");
   

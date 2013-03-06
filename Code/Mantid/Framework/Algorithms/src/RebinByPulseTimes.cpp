@@ -6,6 +6,15 @@ The x-axis is expressed in relative time to the start of the run in seconds.
 
 This algorithm may be used to diagnose problems with the electronics or data collection. Typically, detectors should see a uniform distribution of the events 
 generated between the start and end of the run. This algorithm allows anomalies to be detected.
+
+== Example of Use ==
+
+This diagnostic algorithm is particularly useful when coupled with the Instrument View. In the example below is a real-world usage example where we were able to highlight issues with data collection on the ISIS WISH instrument. Some blocks of tubes, where tubes are arranged vertically, are missing neutrons within large block of pulse time as a result of data-buffering. After running RebinByPulseTime, we were able to find both, which banks were affected, as well as the missing pulse times for each bank. The horizontal slider in the instrument view allows us to easily integrate over a section of pulse time and see the results as a colour map.
+
+
+[[File:RebinByPulseTime.png]]
+
+
 *WIKI*/
 
 #include "MantidAlgorithms/RebinByPulseTimes.h"

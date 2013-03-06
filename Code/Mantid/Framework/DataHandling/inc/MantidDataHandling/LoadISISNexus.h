@@ -8,31 +8,16 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
-#include <napi.h>
 #include <climits>
+#include <nexus/NeXusFile.hpp>
 
 #include <boost/shared_array.hpp>
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
 
 namespace Mantid
 {
     namespace DataHandling
     {
-
-        /** Structure for keeping information about a NeXus data set,
-         *  such as the dimensions and type
-         */
-        struct NexusInfo
-        {
-            int rank;    ///< number of dimensions of the data
-            int dims[4]; ///< sizes along each dimension
-            int type;    ///< type of the data, e.g. NX_CHAR, NX_FLOAT32, see napi.h
-        };
-
         /** @class LoadISISNexus LoadISISNexus.h DataHandling/LoadISISNexus.h
 
         Loads a file in a Nexus format and stores it in a 2D workspace 
@@ -104,8 +89,6 @@ namespace Mantid
             void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
             void parseISODateTime(const std::string & datetime_iso, std::string & date, std::string & time) const;
             template<class TYPE>
-            TYPE getEntryValue(const std::string & name);
-            template<class TYPE>
             TYPE getNXData(const std::string & name);
 
             void loadLogs(DataObjects::Workspace2D_sptr,std::size_t period = 1);
@@ -146,63 +129,18 @@ namespace Mantid
             /// Spectra numbers
             boost::shared_array<specid_t> m_spec;
 
-            /// Nexus file id
-            NXhandle m_fileID;
+            /// Nexus file handle
+            NeXus::File *m_filehandle;
             /// Reads in a string value from the nexus file
             std::string getNexusString(const std::string& name)const;
-            /// Opens a Nexus group.
-            void openNexusGroup(const std::string& name, const std::string& nx_class)const;
-            /// Closes Nexus group
-            void closeNexusGroup()const;
             /// Reads in the dimensions: number of periods, spectra and time bins.
             void readDataDimensions();
             /// Get time channels
             void getTimeChannels();
-            /// Opens a Nexus data set
-            void openNexusData(const std::string& name);
-            /// Close a Nexus data set
-            void closeNexusData();
-            /// Get the data from Nexus
-            void getNexusData(void* p);
-            /// Get info for the open data set
-            NexusInfo getNexusInfo();
             
             /// Personal wrapper for sqrt to allow msvs to compile
-            static double dblSqrt(double in);
+            inline static double dblSqrt(double in);
         };
-      
-      /**
-       * Get a value from the nexus file. The name should be relative and the parent group already opened.
-       * @param name :: The name of the NX entry
-       * @returns The value of entry
-       */
-      template<class TYPE>
-      TYPE LoadISISNexus::getEntryValue(const std::string & name)
-      {
-	openNexusData(name);
-	TYPE value;
-	getNexusData(&value);
-	closeNexusData();
-	return value;
-      }
-
-      /**
-       * Get the first entry from an NX data group
-       * @param name :: The group name
-       * @returns The data value
-       */
-      template<class TYPE>
-      TYPE LoadISISNexus::getNXData(const std::string & name)
-      {
-	openNexusData(name);
-	TYPE value[1];
-	getNexusData(value);
-	closeNexusData();
-	return value[0];
-      }
-
-
-
 
     } // namespace DataHandling
 } // namespace Mantid

@@ -6,6 +6,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -175,10 +176,13 @@ public:
       TS_ASSERT_EQUALS(ws1->getValue(did), 0);
       TS_ASSERT_EQUALS(ws3->getValue(did), 1);
     }
-
-
   }
 
+  void test_known_to_property_for_unmangling()
+  {
+    Mantid::API::WorkspaceProperty<DataObjects::SpecialWorkspace2D> property("DummyProperty", "DummyWorkspace", Mantid::Kernel::Direction::Input);
+    TS_ASSERT_EQUALS("SpecialWorkspace2D", Mantid::Kernel::getUnmangledTypeName(*property.type_info()));
+  }
 
 };
 

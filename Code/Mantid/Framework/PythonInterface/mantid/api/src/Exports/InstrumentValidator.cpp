@@ -8,7 +8,7 @@ void export_InstrumentValidator()
   using namespace Mantid::API;
   using namespace boost::python;
   EXPORT_TYPEDVALIDATOR(ExperimentInfo_sptr);
-  class_<InstrumentValidator, bases<Mantid::Kernel::TypedValidator<ExperimentInfo_sptr>>,
+  class_<InstrumentValidator, bases<Mantid::Kernel::TypedValidator<ExperimentInfo_sptr> >,
           boost::noncopyable
          >("InstrumentValidator", init<>("Checks that the workspace has an instrument defined"))
    ;

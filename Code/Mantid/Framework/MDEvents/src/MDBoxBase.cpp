@@ -1,6 +1,5 @@
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidKernel/System.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidKernel/VMD.h"
 #include <limits>
 #include <boost/make_shared.hpp>

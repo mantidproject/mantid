@@ -605,6 +605,7 @@ namespace Mantid
      * The median is an average that is less affected by small numbers of very large values.
      * @param input :: A histogram workspace with one entry in each bin
      * @param excludeZeroes :: If true then zeroes will not be included in the median calculation
+     * @param indexmap :: indexmap
      * @return The median value of the histograms in the workspace that was passed to it
      * @throw out_of_range if a value is negative
      */

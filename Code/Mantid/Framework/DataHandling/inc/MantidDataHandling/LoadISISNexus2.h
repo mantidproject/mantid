@@ -9,7 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
+#include <nexus/NeXusFile.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -86,6 +86,15 @@ namespace Mantid
       virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
       /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
       virtual int fileCheck(const std::string& filePath);
+      /// Spectra block descriptor
+      struct SpectraBlock
+      {
+        /// Constructor - initialise the block
+        SpectraBlock(int64_t f,int64_t l,bool m):first(f),last(l),isMonitor(m){}
+        int64_t first; ///< first spectrum number of the block
+        int64_t last; ///< last spectrum number of the block
+        bool isMonitor; ///< is the data in a monitor group
+      };
     private:
       /// Overwrites Algorithm method.
       void init();
@@ -93,6 +102,8 @@ namespace Mantid
       void exec();
       // Validate the optional input properties
       void checkOptionalProperties();
+      /// Prepare a vector of SpectraBlock structs to simplify loading
+      size_t prepareSpectraBlocks();
       /// Run LoadInstrument as a ChildAlgorithm
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       /// Load in details about the run
@@ -145,6 +156,9 @@ namespace Mantid
       /// The number of the input entry
       int64_t m_entrynumber;
 
+      /// List of disjoint data blocks to load
+      std::vector<SpectraBlock> m_spectraBlocks;
+
       /// Have the spectrum_min/max properties been set?
       bool m_range_supplied;
       /// Time channels
@@ -155,7 +169,7 @@ namespace Mantid
       boost::shared_array<int> m_spec;
       /// Pointer to one-past-the-end of spectrum number array (m_spec)
       const int * m_spec_end;
-      /// Monitors
+      /// Monitors, map spectrum index to monitor group name
       std::map<int64_t,std::string> m_monitors;
 
       /// A pointer to the ISISRunLogs creater

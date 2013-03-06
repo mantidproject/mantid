@@ -56,8 +56,18 @@ namespace MantidQt
       virtual void changeBackgroundColour(const QColor) = 0;
       /// Show the background radius
       virtual void showBackgroundRadius(const bool){}
+      /// Changes the size of the overlay to be the requested fraction of the current view width.
+      virtual void changeOccupancyInView(const double fraction) = 0;
+      /// Changes the size of the overlay to be the requested fraction of the view depth.
+      virtual void changeOccupancyIntoView(const double fraction) = 0;
       /// Get a bounding box around the peak in windows coordinates.
       virtual PeakBoundingBox getBoundingBox() const = 0;
+      /// Get the peak size (width/2 as a fraction of total width)  on projection
+      virtual double getOccupancyInView() const = 0;
+      /// Get the peaks size into the projection (effective radius as a fraction of z range)
+      virtual double getOccupancyIntoView() const = 0;
+      /// Get the flag indicating that the view represents the position only.
+      virtual bool positionOnly() const = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

@@ -117,6 +117,7 @@ namespace MantidQt
       /** Handler of the delete notifications. Could be overriden in inherited classes.
       The default handler is provided (doing nothing).
       @param wsName :: The name of the deleted workspace.
+      @param ws :: Pointer to the workspace to be deleted.
       */
       virtual void preDeleteHandle(const std::string& wsName, const Mantid::API::Workspace_sptr ws)
       {

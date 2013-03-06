@@ -26,8 +26,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void ScaleX::initDocs()
     {
-      this->setWikiSummary("Adjusts all the time bin values in a workspace by a specified amount. ");
-      this->setOptionalMessage("Adjusts all the time bin values in a workspace by a specified amount.");
+      this->setWikiSummary("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
+      this->setOptionalMessage("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
     }
     
 

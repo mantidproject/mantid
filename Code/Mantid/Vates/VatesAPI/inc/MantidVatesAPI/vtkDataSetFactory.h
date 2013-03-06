@@ -119,9 +119,9 @@ protected:
   /**
   Try to cast it to the specified IMDType and then run checks based on the non-integrated dimensionality. 
   The latter checks are only run if the factory is set to apply these checks.
-  @param: workspace : workspace to cast.
-  @param: bExactMatch : run an exact match on non-integarated dimensionality if TRUE, otherwise is less than or equal to ExpectedDimensions.
-  @return: correctly cast shared pointer or an empty shared pointer if cast or checks fail.
+  @param  workspace : workspace to cast.
+  @param  bExactMatch : run an exact match on non-integarated dimensionality if TRUE, otherwise is less than or equal to ExpectedDimensions.
+  @return  correctly cast shared pointer or an empty shared pointer if cast or checks fail.
   */
   template<typename IMDWorkspaceType, size_t ExpectedNDimensions>
   boost::shared_ptr<IMDWorkspaceType> castAndCheck(Mantid::API::Workspace_sptr workspace, bool bExactMatch=true) const
@@ -153,9 +153,9 @@ protected:
 
   /**
   Common initialization implementation. Most vtkDataSets will need this in order to correctly delegate initialization onto successors.
-  @param: workspace : workspace to cast.
-  @param: bExactMatch : run an exact match on non-integarated dimensionality if TRUE, otherwise is less than or equal to ExpectedDimensions.
-  @return: correctly cast shared pointer or an empty shared pointer if cast or checks fail.
+  @param workspace : workspace to cast.
+  @param bExactMatch : run an exact match on non-integarated dimensionality if TRUE, otherwise is less than or equal to ExpectedDimensions.
+  @return correctly cast shared pointer or an empty shared pointer if cast or checks fail.
   */
   template<typename IMDWorkspaceType, size_t ExpectedNDimensions>
   boost::shared_ptr<IMDWorkspaceType> doInitialize(Mantid::API::Workspace_sptr workspace, bool bExactMatch=true) const
@@ -184,10 +184,10 @@ protected:
 
   /**
   Common creation implementation whereby delegation to successor is attempted if appropriate. 
-  @param: workspace : workspace to cast and create from.
-  @param: progressUpdate : object used to pass progress information back up the stack.
-  @param: output : product vtkDataSet, set to NULL if FALSE is returned. Otherwise contains visualisation data if TRUE is returned.
-  @return: TRUE if delegation to successors has occured. Otherwise returns false.
+  @param workspace : workspace to cast and create from.
+  @param progressUpdate : object used to pass progress information back up the stack.
+  @param bExactMatch : Check for an exact match if true.
+  @return TRUE if delegation to successors has occured. Otherwise returns false.
   */
   template<typename IMDWorkspaceType, size_t ExpectedNDimensions>
   vtkDataSet* tryDelegatingCreation(Mantid::API::Workspace_sptr workspace, ProgressAction& progressUpdate, bool bExactMatch=true) const

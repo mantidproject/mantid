@@ -652,7 +652,8 @@ void MantidUI::showVatesSimpleInterface()
       m_vatesSubWindow->setWindowIcon(icon);
       connect(m_appWindow, SIGNAL(shutting_down()), m_vatesSubWindow, SLOT(close()));
 
-      MantidQt::API::VatesViewerInterface *vsui = MantidQt::API::InterfaceManager::Instance().createVatesSimpleGui();
+      MantidQt::API::InterfaceManager interfaceManager;
+      MantidQt::API::VatesViewerInterface *vsui = interfaceManager.createVatesSimpleGui();
       if (vsui)
       {
         vsui->setParent(m_vatesSubWindow);
@@ -1186,8 +1187,9 @@ void MantidUI::executeSaveNexus(QString algName,int version)
   }
   if (alg)
   {
+    MantidQt::API::InterfaceManager interfaceManager;
     MantidQt::API::AlgorithmDialog *dlg =
-      MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
+      interfaceManager.createDialog(alg.get(), m_appWindow);
     if( !dlg ) return;
     //getting the combo box which has input workspaces and removing the workspaces except the selected one
     QComboBox *combo = dlg->findChild<QComboBox*>();
@@ -1369,8 +1371,9 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IA
   //This is an optional message displayed at the top of the GUI.
   QString optional_msg(alg->getOptionalMessage().c_str());
 
+  MantidQt::API::InterfaceManager interfaceManager;
   MantidQt::API::AlgorithmDialog *dlg =
-    MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, optional_msg,enabled);
+      interfaceManager.createDialog(alg.get(), m_appWindow, false, presets, optional_msg,enabled);
   return dlg;
 }
 
@@ -1538,7 +1541,8 @@ void MantidUI::renameWorkspace(QString wsName)
   {
     return;
   }
-  MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
+  MantidQt::API::InterfaceManager interfaceManager;
+  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg.get(), m_appWindow);
   if( !dlg ) return;
   //getting the combo box which has input workspaces and removing the workspaces except the selected one
   QComboBox *combo = dlg->findChild<QComboBox*>();
@@ -2290,8 +2294,9 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
     presets.insert(name, value);
   }
 
+  MantidQt::API::InterfaceManager interfaceManager;
   MantidQt::API::AlgorithmDialog *dlg =
-    MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow->getScriptWindowHandle(),
+    interfaceManager.createDialog(alg.get(), m_appWindow->getScriptWindowHandle(),
     true, presets, optional_msg, enabled, disabled);
   return (dlg->exec() == QDialog::Accepted);
 }
@@ -2839,7 +2844,7 @@ y-values of the second spectrum (errs == false). Consecutive columns have
 y-values and errors (if errs is true) of the following spectra. If visible == true
 the table is made visible in Qtiplot.
 
-The name of a Y column is "Y"+QString::number(i), where i is the row in the MantidMatrix,
+The name of a Y column is "Y"+QString\:\:number(i), where i is the row in the MantidMatrix,
 not the spectrum index in the workspace.
 
 */
@@ -3382,8 +3387,7 @@ MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QStr
 
   if (!ws.get())return 0 ;
 
-  MantidMatrix* w = 0;
-  w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
+  MantidMatrix* w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
   if ( !w ) return 0;
 
   appWindow()->addMdiSubWindow(w);

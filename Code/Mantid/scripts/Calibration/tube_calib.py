@@ -85,7 +85,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
        This N slit method is suited for WISH or the five sharp peaks of MERLIN .
        
        @param IntegratedWorkspace: Workspace of integrated data
-       @param funcForms: array of function form 1=slit, 2=edge
+       @param funcForms: array of function form 1=slit/bar, 2=edge
        @param fitParams: a TubeCalibFitParams object contain the fit parameters
        @param whichTube:  a list of workspace indices for one tube
        @param showPlot: show plot for this tube
@@ -102,14 +102,13 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
     eHeight, eWidth = fitParams.getHeightAndWidth()
     outedge, inedge, endGrad = fitParams.getEdgeParameters()
     
-    #margin = 0.3
-    margin = 0.2
+    margin = 0.3
     
-    # Use a different workspace if plotting, so plot survives.
+    # Set workspace names, a different workspace if plotting, so plot survives.
+    calibPointWs = "CalibPoint"
+    getPointsWs = "getPoints"
     if(showPlot):
        getPointsWs = "TubePlot"
-    else:
-       getPointsWs = "getPoints"
     
     # Check functional form
     if ( nFf != 0 and nFf < nPts):
@@ -120,9 +119,14 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
     createTubeCalibtationWorkspaceByWorkspaceIndexList( IntegratedWorkspace, getPointsWs, whichTube, showPlot=showPlot )
     
     # Prepare to loop over points
+    tallPeak = False
     edgeMode = 1  # We assume first edge is approached from outside
     # Loop over the points
     for i in range(nPts):
+        # Use different workpace if plotting fit, so plot survives
+        if(showPlot):
+           calibPointWs = "TubeCalibPlot"+str(i)
+           
         if( nFf != 0 and funcForms[i] == 2 ):
            # We have an edge
            centre = eP[i]
@@ -132,10 +136,11 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
            else:
               start = eP[i] - inedge
               end = eP[i] + outedge
-           Fit(InputWorkspace=getPointsWs,Function=fitEndErfcParams(centre,endGrad*edgeMode),StartX=str(start),EndX=str(end),Output="CalibPoint") 
+           Fit(InputWorkspace=getPointsWs,Function=fitEndErfcParams(centre,endGrad*edgeMode),StartX=str(start),EndX=str(end),Output=calibPointWs) 
            edgeMode = -edgeMode # Next edge would be reverse of this edge
+           tallPeak = True
         else:
-           # We have a slit
+           # We have a slit or bar
            centre = eP[i]
            if( i == 0):
               start = (1-margin)*eP[i]
@@ -145,12 +150,18 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
               end = (1-margin)*eP[i] + (margin)*nDets
            else:
               end = (1-margin)*eP[i] + (margin)*eP[i+1]   
-           Fit(InputWorkspace=getPointsWs,Function=fitGaussianParams(eHeight,centre,eWidth), StartX=str(start),EndX=str(end),Output="CalibPoint")
+           Fit(InputWorkspace=getPointsWs,Function='name=LinearBackground, A0=1000',StartX=str(start),EndX=str(end),Output="Z1")
+           Fit(InputWorkspace="Z1_Workspace",Function=fitGaussianParams(eHeight,centre,eWidth), WorkspaceIndex='2',StartX=str(start),EndX=str(end),Output=calibPointWs)
+           tallPeak = False # Force peak height to be checked
            
-        paramCalibPeak = mtd['CalibPoint_Parameters']
+        paramCalibPeak = mtd[calibPointWs+'_Parameters']
+        if( not tallPeak ):
+            pkHeightRow = paramCalibPeak.row(0).items()
+            thisHeight = pkHeightRow[1][1]
+            tallPeak = ( thisHeight/eHeight > 0.2)
         pkRow = paramCalibPeak.row(1).items()
         thisResult = pkRow[1][1]
-        if( start < thisResult and thisResult < end):
+        if( tallPeak and start < thisResult and thisResult < end ):
             results.append( thisResult )
         else:
             results.append(-1.0) #ensure result is ignored
@@ -278,8 +289,8 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False )
     if( TestMode ):
         print "TestMode code"
         for i in range( len(usedTubePoints) ):
-           #print "used point",i,"shoving pixel",int(usedTubePoints[i]+0.5)
-           xResult[ int(usedTubePoints[i]+0.5) ] = xResult[0]
+           #print "used point",i,"shoving pixel",int(usedTubePoints[i])
+           xResult[ int(usedTubePoints[i]) ] = xResult[0]
          
     # print xResult	 
     return xResult
@@ -297,7 +308,7 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
        @param whichtube:  a list of workspace indices for the tube
        @param PeakTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
        
-       Return  Array of pixel detector IDs and array of their calibrated positions (in Y coords)
+       Return  Array of pixel detector IDs and array of their calibrated positions 
     """	
     
     # Arrays to be returned
@@ -332,6 +343,11 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     uY = (dNy - d0y)/tubeLength
     uZ = (dNz - d0z)/tubeLength
     
+    # Get Centre (really want to get if from IDF to allow calibration a multiple number of times)
+    cX = (d0x + dNx)/2
+    cY = (d0y + dNy)/2
+    cZ = (d0z + dNz)/2
+    
     # Move the pixel detectors (might not work for sloping tubes)
     for i in range(nDets):
         deti = ws.getDetector( whichTube[i])
@@ -340,9 +356,9 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
 	detiPositionZ = deti.getPos().Z()
 	pNew = pixels[i]
 	detIDs.append( deti.getID() )
-	xNew = (1.0 - uX*uX)*detiPositionX + uX*uX*pNew
-	yNew = (1.0 - uY*uY)*detiPositionY + uY*uY*pNew
-	zNew = (1.0 - uZ*uZ)*detiPositionZ + uZ*uZ*pNew
+	xNew = (1.0 - uX*uX)*detiPositionX + uX*uX*(pNew + cX)
+	yNew = (1.0 - uY*uY)*detiPositionY + uY*uY*(pNew + cY)
+	zNew = (1.0 - uZ*uZ)*detiPositionZ + uZ*uZ*(pNew + cZ)
 
 	detPositions.append( V3D( xNew, yNew, zNew ) )
         # print i, detIDs[i], detPositions[i]
@@ -434,7 +450,7 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
 
         # Deal with (i+1)st tube specified
         wht = tubeSet.getTube(i)
-        print "Calibrating tube", i+1,"of",nTubes, tubeSet.getTubeName(i) #, " length", tubeSet.getTubeLength(i) 
+        print "Calibrating tube", i+1,"of",nTubes, tubeSet.getTubeName(i)  #, " length", tubeSet.getTubeLength(i) 
         if ( len(wht) < 1 ):
            print "Unable to get any workspace indices (spectra) for this tube. Tube",tubeSet.getTubeName(i),"not calibrated."
         else:
@@ -469,12 +485,17 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
     if(nTubes == 0):
        return
 
-    # Delete temporary workspaces for obtaining slit points
+    # Delete temporary workspaces for obtaining points
     if( OverridePeaks == []):
        DeleteWorkspace('getPoints')
        DeleteWorkspace('CalibPoint_NormalisedCovarianceMatrix')
        DeleteWorkspace('CalibPoint_Parameters')
        DeleteWorkspace('CalibPoint_Workspace')
+       # Assume at least one slit or peak (else we'd need to check here)
+       DeleteWorkspace('Z1_NormalisedCovarianceMatrix')
+       DeleteWorkspace('Z1_Parameters')
+       DeleteWorkspace('Z1_Workspace')
+       
     
     # Delete temporary workspaces for getting new detector positions
     DeleteWorkspace('QuadraticFittingWorkspace')

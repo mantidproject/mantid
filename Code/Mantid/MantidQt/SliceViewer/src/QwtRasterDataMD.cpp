@@ -235,6 +235,8 @@ void QwtRasterDataMD::setOverlayWorkspace(Mantid::API::IMDWorkspace_sptr ws)
  *
  * @param dimX :: index of the X dimension
  * @param dimY :: index of the Y dimension
+ * @param X : X Dimension
+ * @param Y : Y Dimension
  * @param slicePoint :: vector of slice points
  */
 void QwtRasterDataMD::setSliceParams(size_t dimX, size_t dimY,

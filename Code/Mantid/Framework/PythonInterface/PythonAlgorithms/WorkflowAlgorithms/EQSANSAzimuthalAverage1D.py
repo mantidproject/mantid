@@ -48,7 +48,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         # Get the source aperture from the run logs
         source_aperture_radius = 10.0
         if workspace.getRun().hasProperty('source-aperture-diameter'):
-            source_aperture_radius = workspace.getRun().getProperty('source-aperture-diameter').value / 4.61169e+18
+            source_aperture_radius = workspace.getRun().getProperty('source-aperture-diameter').value / 2.0
         
         # Perform azimuthal averaging according to whether or not
         # we are in frame-skipping mode
@@ -72,26 +72,30 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         property_manager_name = self.getProperty('ReductionProperties').value
         pixel_size_x = workspace.getInstrument().getNumberParameter('x-pixel-size')[0]
         pixel_size_y = workspace.getInstrument().getNumberParameter('y-pixel-size')[0]
-        (output_msg, output_ws) = self._call_sans_averaging(workspace, None, 
-                                                            nbins, log_binning, 
-                                                            property_manager_name, 
-                                                            output_ws_name)
+        (output_msg, output_ws, output_binning) = \
+            self._call_sans_averaging(workspace, None, 
+                                      nbins, log_binning, 
+                                      property_manager_name, 
+                                      output_ws_name)
+        if compute_resolution:
+            sample_aperture_radius = self.getProperty('SampleApertureDiameter').value / 2.0
+            alg = AlgorithmManager.create("EQSANSResolution")
+            alg.initialize()
+            alg.setChild(True)
+            alg.setProperty("InputWorkspace", output_ws)
+            alg.setProperty("ReducedWorkspace", workspace)
+            alg.setPropertyValue("OutputBinning", output_binning)
+            alg.setProperty("PixelSizeX", pixel_size_x)
+            alg.setProperty("PixelSizeY", pixel_size_y)
+            alg.setProperty("SourceApertureRadius", source_aperture_radius)
+            alg.setProperty("SampleApertureRadius", sample_aperture_radius)
+            alg.execute()   
+            output_msg += "Resolution computed\n" 
+        
         if output_msg is not None:
             self.setProperty('OutputMessage', output_msg)
             
-        
         self.setProperty('OutputWorkspace', output_ws)
-        if compute_resolution:
-            Logger.get("EQSANS_IQ").error("RESOLUTION DOES NOT WORK YET")
-            sample_aperture_radius = self.getProperty('SampleApertureDiameter').value / 4.61169e+18
-            EQSANSResolution(InputWorkspace = output_ws_name, 
-                             ReducedWorkspace = workspace, 
-                             OutputBinning = self._binning, 
-                             PixelSizeX = pixel_size_x, 
-                             PixelSizeY = pixel_size_y, 
-                             SourceApertureRadius = source_aperture_radius, 
-                             SampleApertureRadius = sample_aperture_radius)        
-            
     
     def _call_sans_averaging(self, workspace, binning, nbins, log_binning, 
                              property_manager_name, output_workspace):
@@ -122,7 +126,10 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         else:
             output_msg = None
         output_ws = alg.getProperty('OutputWorkspace').value
-        return (output_msg, output_ws)
+        
+        # Get output binning
+        output_binning = alg.getPropertyValue("Binning")
+        return (output_msg, output_ws, output_binning)
 
     
     def _with_frame_skipping(self, source_aperture_radius):
@@ -179,7 +186,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
                                             source_aperture_radius, '1', binning)
         
         if scale_results:
-            output_frame1 = self._scale(output_frame1, output_frame2)
+            output_frame1 = self._scale(output_frame1, output_frame2)         
         
         self.setPropertyValue('OutputWorkspace', ws_frame1)
         self.setProperty('OutputWorkspace', output_frame1)
@@ -235,22 +242,26 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
 
-        output_msg, output_iq = self._call_sans_averaging(output_ws, binning, 
-                                                          nbins, log_binning, 
-                                                          property_manager_name, 
-                                                          ws_frame)
+        (output_msg, output_iq, output_binning) = \
+            self._call_sans_averaging(output_ws, binning, 
+                                      nbins, log_binning, 
+                                      property_manager_name, 
+                                      ws_frame)
         if compute_resolution:
-            Logger.get("EQSANS_IQ").error("RESOLUTION DOES NOT WORK YET")
-            sample_aperture_radius = self.getProperty('SampleApertureDiameter').value / 4.61169e+18
-            EQSANSResolution(InputWorkspace = output_iq, 
-                             ReducedWorkspace = workspace, 
-                             OutputBinning = binning, 
-                             MinWavelength = wl_min, 
-                             MaxWavelength = wl_max, 
-                             PixelSizeX = pixel_size_x, 
-                             PixelSizeY = pixel_size_y, 
-                             SourceApertureRadius = source_aperture_radius, 
-                             SampleApertureRadius = sample_aperture_radius)
+            sample_aperture_radius = self.getProperty('SampleApertureDiameter').value / 2.0
+            alg = AlgorithmManager.create("EQSANSResolution")
+            alg.initialize()
+            alg.setChild(True)
+            alg.setProperty("InputWorkspace", output_iq)
+            alg.setProperty("ReducedWorkspace", workspace)
+            alg.setPropertyValue("OutputBinning", output_binning)
+            alg.setProperty("MinWavelength", wl_min)
+            alg.setProperty("MaxWavelength", wl_max)
+            alg.setProperty("PixelSizeX", pixel_size_x)
+            alg.setProperty("PixelSizeY", pixel_size_y)
+            alg.setProperty("SourceApertureRadius", source_aperture_radius)
+            alg.setProperty("SampleApertureRadius", sample_aperture_radius)
+            alg.execute()
             
         return output_iq
     
@@ -260,10 +271,10 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
             @param ws_frame1: frame 1 workspace object
             @param ws_frame2: frame 2 workspace object
         """
-        iq_f1 = ws_frame1.dataY(0)
-        iq_f2 = ws_frame2.dataY(0)
-        q_f1 = ws_frame1.dataX(0)
-        q_f2 = ws_frame2.dataX(0)
+        iq_f1 = ws_frame1.readY(0)
+        iq_f2 = ws_frame2.readY(0)
+        q_f1 = ws_frame1.readX(0)
+        q_f2 = ws_frame2.readX(0)
         scale_f1 = 0.0
         scale_f2 = 0.0
         scale_factor = 1.0
@@ -307,6 +318,10 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         output_ws_name = self.getPropertyValue('OutputWorkspace')
         ws_frame1_name = output_ws_name.replace('_Iq', '_frame1_Iq')
 
+        # Dq is not propagated by scale, so do it by hand
+        # First, store Dq
+        dq = ws_frame1.readDx(0)
+        
         alg = AlgorithmManager.create("Scale")
         alg.initialize()
         alg.setChild(True)
@@ -316,6 +331,11 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         alg.setProperty("Operation", 'Multiply')
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
+        
+        # ... then put Dq back
+        dq_output = output_ws.dataDx(0)
+        for i in range(len(dq_output)):
+            dq_output[i]=dq[i]
 
         return output_ws
 

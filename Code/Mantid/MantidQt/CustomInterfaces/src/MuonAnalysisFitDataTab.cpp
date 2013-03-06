@@ -112,7 +112,7 @@ void MuonAnalysisFitDataTab::groupFittedWorkspaces(QString workspaceName)
 * Set up the string that will contain all the data needed for changing the data.
 * [wsName, connectType, plotType, Errors, Color]
 *
-* @param plotDetails :: The workspace name of the plot to be created.
+* @param workspace :: The workspace name of the plot to be created.
 */
 QStringList MuonAnalysisFitDataTab::getAllPlotDetails(const QString & workspace)
 {

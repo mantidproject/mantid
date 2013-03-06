@@ -51,9 +51,11 @@ namespace Kernel
   }
 
   /** Set the start/end point in the file where the events are located
-     * @param start :: start point,
-     * @param numEvents :: number of events in the file   */
-    void ISaveable::setFilePosition(uint64_t newPos,uint64_t newSize, bool wasSaved)
+     * @param newPos :: start point,
+     * @param newSize :: number of events in the file   
+     * @param wasSaved :: flag to mark if info was saved
+     */
+    void ISaveable::setFilePosition(uint64_t newPos, uint64_t newSize, bool wasSaved)
     {  
       m_fileIndexStart=newPos;  
       m_fileNumEvents =newSize;

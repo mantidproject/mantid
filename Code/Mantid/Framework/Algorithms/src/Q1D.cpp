@@ -132,7 +132,6 @@ The error was calculation did not include the errors due the normalization or an
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid

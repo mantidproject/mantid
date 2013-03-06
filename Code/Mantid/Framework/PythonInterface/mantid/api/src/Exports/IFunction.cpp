@@ -49,6 +49,13 @@ void export_IFunction()
       .def("name", &IFunction::name, "Return the name of the function")
       .def("__repr__", &IFunction::asString, "Return a string representation of the function")
       .def("categories", &getCategories, "Returns a list of the categories for an algorithm")
+      .def("numParams", &IFunction::nParams, "Return the number of parameters")
+      .def("getParamName", &IFunction::parameterName, "Return the name of the ith parameter")
+      .def("getParamDescr", &IFunction::parameterDescription, "Return a description of the ith parameter")
+      .def("getParamExplicit", &IFunction::isExplicitlySet,
+           "Return whether the ith parameter needs to be explicitely set")
+      .def("getParamValue", (double (IFunction::*)(std::size_t) const)&IFunction::getParameter,
+           "Get the value of the ith parameter")
     ;
 
 }
