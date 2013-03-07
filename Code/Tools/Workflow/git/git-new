@@ -72,35 +72,35 @@ get_opts() {
     prefix_next=0
     pos_arg=0
     for i in $args; do
-	if [ $prefix_next -eq 1 ]; then
-	    prefix_next=0
-	    BRANCH_PREFIX=$i
-	    continue
-	fi
-	case $i in
-	    "-h") 
-		usage
-		exit 0
-		;;
-	    "-p") 
-		prefix_next=1
-		continue
-		;;
-	    "-s") 
-		DO_STASH=1
-		continue
-		;;
-	esac
-	case $pos_arg in
-	    0) TICKET_NO=$i;;
-	    1) DESCR=$i;;
-	esac
-	pos_arg=$((pos_arg+1))
-    done
+        if [ $prefix_next -eq 1 ]; then
+            prefix_next=0
+            BRANCH_PREFIX=$i
+            continue
+        fi
+        case $i in
+            "-h") 
+            usage
+            exit 0
+            ;;
+            "-p") 
+            prefix_next=1
+            continue
+            ;;
+            "-s") 
+            DO_STASH=1
+            continue
+            ;;
+        esac
+        case $pos_arg in
+            0) TICKET_NO=$i;;
+            1) DESCR=$i;;
+        esac
+        pos_arg=$((pos_arg+1))
+        done
 
     if [ ! $pos_arg -eq 2 ]; then
-	usage
-	exit 1
+        usage
+        exit 1
     fi
 
     # Make sure the prefix ends with a / by removing it
@@ -131,15 +131,15 @@ main() {
   local_modifications
   if [ $? -eq 1 ]; then
       if [ $DO_STASH -eq 1 ]; then
-	  run_git stash
+        run_git stash
       else
-	  current=$(current_branch)
-	  echo "You have local modifications on the current branch."
-	  echo "Please do one of the following:"
-	  echo "  1) Commit the changes and rerun this command"
-	  echo "  2) Re-run this command with the -s option, i.e. 'git new -s $@' to stash/create branch/unstash";
-	  echo "  3) Wipe out all of the changes with 'git checkout -- .' and rerun this command"
-	  exit 1
+        current=$(current_branch)
+        echo "You have local modifications on the current branch."
+        echo "Please do one of the following:"
+        echo "  1) Commit the changes and rerun this command"
+        echo "  2) Re-run this command with the -s option, i.e. 'git new -s $@' to stash/create branch/unstash";
+        echo "  3) Wipe out all of the changes with 'git checkout -- .' and rerun this command"
+        exit 1
       fi
   fi
 
@@ -149,7 +149,7 @@ main() {
 
   # Pop off the stash if necessary
   if [ $DO_STASH -eq 1 ]; then
-      run_git stash pop
+        run_git stash pop
   fi
 
 }

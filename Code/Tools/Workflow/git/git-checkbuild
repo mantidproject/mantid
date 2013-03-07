@@ -56,8 +56,8 @@ usage() {
 checkargs() {
     # Can't use getopt cross-platform
     if [ ! $# -eq 0 ]; then
-	usage
-	exit 1
+        usage
+        exit 1
     fi
 }
 
@@ -70,22 +70,22 @@ main() {
     # Sanity check
     currentbranch=$(current_branch)
     if [ ${currentbranch} = "${BUILD_BRANCH}" ]; then
-	echo "Cannot merge develop into itself. Run this command on a branch that requires checking"
-	exit 1
+        echo "Cannot merge develop into itself. Run this command on a branch that requires checking"
+        exit 1
     fi
 
     if [ ${currentbranch} = "master" ]; then
-	echo "Cannot use this command to merge master->${BUILD_BRANCH}"
-	exit 1
+        echo "Cannot use this command to merge master->${BUILD_BRANCH}"
+        exit 1
     fi
 
     # Run macro
     local_modifications
     if [ $? -eq 1 ]; then
-	echo "You have local modifications. Please either:"
-	echo " 1) Commit the changes and rerun this command. This will include them in the buildserver check."
-	echo " 2) Run 'git stash', rerun this command, then run 'git stash pop'. This will NOT include them in the buildserver check."
-	exit 1
+        echo "You have local modifications. Please either:"
+        echo " 1) Commit the changes and rerun this command. This will include them in the buildserver check."
+        echo " 2) Run 'git stash', rerun this command, then run 'git stash pop'. This will NOT include them in the buildserver check."
+        exit 1
     fi
 
     # Move to develop
