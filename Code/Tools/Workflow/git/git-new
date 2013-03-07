@@ -111,7 +111,7 @@ get_opts() {
 
 main() {
   # Source the helpers
-  . ${CMDFILE_DIR}/gitworkflow-helpers
+  . "${CMDFILE_DIR}/gitworkflow-helpers"
 
   # Are we in the right place?
   check_git_repo

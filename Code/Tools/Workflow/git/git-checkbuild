@@ -63,7 +63,7 @@ checkargs() {
 
 main() {
     # Helper functions
-    . ${CMDFILE_DIR}/gitworkflow-helpers
+    . "${CMDFILE_DIR}/gitworkflow-helpers"
 	
     checkargs "$@"
 

@@ -4,6 +4,7 @@ Installation
 ------------
 
 * Mac/Linux: Run 'sudo make install'. The files will be placed in /usr/local/bin
+* Windows: Open this directory in explorer, right-click on install_git_macros.bat and click 'Run as administrator'
 
 Syntax
 ------
