@@ -33,7 +33,7 @@ export CMDFILE_DIR=$(dirname "$(echo "$0" | sed -e 's@\\@/@g')")
 
 usage() {
     echo "Usage: git ${CMD_NAME} [SWITCHES]"
-    echo "Nominally 'finishes' the current branch. In reality this simply means pushing pushing"
+    echo "'Finishes' the current branch. In reality this simply means pushing pushing"
     echo "the branch to origin so that it can be tested. If it is detected that some commits on"
     echo "this branch have not been merged to develop first, it prints a warning to do so."
     echo
@@ -45,15 +45,29 @@ usage() {
     echo
     echo "Switches:"
     echo "  -h  Prints this help"
+    echo "  -f  Do not check that the current branch has been merged to develop"
 
 }
 
 checkargs() {
     # Can't use getopt cross-platform
-    if [ ! $# -eq 0 ]; then
+    if [  $# -ne 0 -a $# -ne 1 ]; then
         usage
     exit 1
     fi
+
+    args=$@
+    FORCE=0
+    for i in $args; do
+        case $i in
+            "-h")
+                usage
+                exit 0
+                ;;
+            "-f")
+                FORCE=1;;
+        esac
+    done
 }
 
 main() {
@@ -77,9 +91,19 @@ main() {
         echo " 2) Run 'git stash' and then rerun this command. This will NOT include them in changes on the branch."
         exit 1
     fi
-    
-    # Check whether this branch is fulled merged to develop and warn that "git checkbuild" should be run first
-    
+
+    if [ $FORCE -eq 0 ]; then
+        # Check whether this branch is fulled merged to develop and warn that "git checkbuild" should be run first
+        # The merge base between this & develop must be the HEAD of the branch if is merged
+        merge_base_sha1=$(git merge-base ${BUILDER_BRANCH} HEAD)
+        head_sha1=$(git rev-parse HEAD)
+        if [ ! "${merge_base_sha1}" = ${head_sha1} ]; then
+            echo "Warning: Branch has not been fully merged to ${BUILDER_BRANCH}."
+            echo "It is strongly advised to check with the buildservers first by running 'git checkbuild'."
+            echo "You can force the push using the -f flag"
+            exit 1
+        fi
+    fi
     
     # Run the macro
     run_git push origin ${currentbranch}
