@@ -11,9 +11,11 @@ from reduction_gui.widgets.base_widget import BaseWidget
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
+    import mantid
+    #from MantidFramework import *
+    #mtd.initialise(False)
+    #from mantidsimple import *
+    from mantid.simpleapi import *
     from reduction.instruments.reflectometer import data_manipulation
 
     IS_IN_MANTIDPLOT = True
@@ -197,12 +199,13 @@ class BaseRefWidget(BaseWidget):
         This retrieve the metadata from the data event NeXus file
         """
         _full_file_name = file
-        LoadEventNexus(Filename=_full_file_name,
-                       OutputWorkspace='tmpWks',
+        tmpWks = LoadEventNexus(Filename=_full_file_name,
+#                       OutputWorkspace='tmpWks',
                        MetaDataOnly='1')
         
-        mt1 = mtd['tmpWks']
-        mt_run = mt1.getRun()
+        #mt1 = mtd['tmpWks']
+        #mt_run = mt1.getRun()
+        mt_run = tmpWks.getRun()
         
         #tthd
         tthd = mt_run.getProperty('tthd').value[0]
@@ -887,14 +890,23 @@ class BaseRefWidget(BaseWidget):
         range_max = int(self._summary.data_to_tof.text())
 
         ws_output_base = "Peak - " + basename + " - Y pixel _2D"
-        if mtd.workspaceExists(ws_output_base):
-            mtd.deleteWorkspace(ws_output_base)
+#        if mtd.workspaceExists(ws_output_base):
+#            mtd.deleteWorkspace(ws_output_base)
+#            ws_output_base_1 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs"
+#            mtd.deleteWorkspace(ws_output_base_1)
+#            ws_output_base_2 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs_all"
+#            mtd.deleteWorkspace(ws_output_base_2)
+#            ws_output_base_3 = "Peak - " + self.instrument_name + "_" + str(run_number) + "_event.nxs - Y pixel "
+#            mtd.deleteWorkspace(ws_output_base_3)
+
+        if mtd.doesExist(ws_output_base):
+            DeleteWorkspace(ws_output_base)
             ws_output_base_1 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs"
-            mtd.deleteWorkspace(ws_output_base_1)
+            DeleteWorkspace(ws_output_base_1)
             ws_output_base_2 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs_all"
-            mtd.deleteWorkspace(ws_output_base_2)
+            DeleteWorkspace(ws_output_base_2)
             ws_output_base_3 = "Peak - " + self.instrument_name + "_" + str(run_number) + "_event.nxs - Y pixel "
-            mtd.deleteWorkspace(ws_output_base_3)
+            DeleteWorkspace(ws_output_base_3)
 
         data_manipulation.counts_vs_pixel_distribution(file_path, 
                                                        is_pixel_y=True, 
@@ -1023,7 +1035,7 @@ class BaseRefWidget(BaseWidget):
             @param max_ctrl: control widget containing the range maximum
             @param isPeak: are we working with peak or with background
         """
-        
+
         if not IS_IN_MANTIDPLOT:
             return
         
