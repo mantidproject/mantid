@@ -1285,7 +1285,6 @@ void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detector
     }
     
 }
-#pragma GCC diagnostic ignored "-Wsign-compare"
 
 /**Read detector.dat information (see ) written in NeXus format 
  * @param hFile -- pointer to the opened NeXus file handle, opened at the group, which contains Libisis Detector information
@@ -1306,7 +1305,7 @@ void LoadDetectorInfo::readDetDotDatNXS(::NeXus::File *hFile, std::vector<detect
     // read the detector's time offsets 
     hFile->readData<float>("timeOffsets",timeOffsets);
 
-    size_t nDetectors = timeOffsets.size()/2;
+    int nDetectors = static_cast<int>(timeOffsets.size()/2);
     std::vector<float> detSphericalCoord;
     if(m_moveDets)
     {
@@ -1321,11 +1320,14 @@ void LoadDetectorInfo::readDetDotDatNXS(::NeXus::File *hFile, std::vector<detect
     hFile->readData<float>("detPressureAndWall",detPrWall);
 
 
+    if(nDetectors!=static_cast<int>(detSphericalCoord.size()/3)
+            ||nDetectors!=static_cast<int>(detPrWall.size()/2)
+            ||nDetectors!=static_cast<int>(detID.size()/2))
+    {
+        throw std::runtime_error("The size of nexus data columns is not equal to each other");
+    }
 
-
-   if(nDetectors!=detSphericalCoord.size()/3||nDetectors!=detPrWall.size()/2||nDetectors!=detID.size()/2)
-     throw std::runtime_error("The size of nexus data columns is not equal to each other");
-
+    // Redundant check - probably can be removed.
    if(nDetectors > std::numeric_limits<int>::max())
        throw std::runtime_error("The number of detectors is bigger then max int for current architecture");
 
