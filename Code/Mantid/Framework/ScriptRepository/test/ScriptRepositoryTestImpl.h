@@ -7,53 +7,170 @@
 #include <Poco/FileStream.h>
 #include <Poco/TemporaryFile.h>
 #include <algorithm>
-
+#include <Poco/DateTimeFormatter.h>
+#include <boost/algorithm/string.hpp>
 using namespace std; 
-/** These tests do no depend on the internet connection*/
-/**ctest -j8 -R ScriptRepositoryTestImpl_  --verbose*/
 using Mantid::API::ScriptRepositoryImpl;
+using Mantid::API::ScriptRepoException;
 
-class ScriptRepositoryImplLocal : public ScriptRepositoryImpl{
- public:
- ScriptRepositoryImplLocal(std::string a="", std::string b=""):
-  ScriptRepositoryImpl(a,b){}
-};
+const bool TEST_MANUALLY = false;
 
-const std::string repositoryjson = "{\n"
+/** To run this tests (LINUX):
+
+    make ScriptRepositoryTest
+
+    ctest -R ScriptRepositoryTest [-verbose]
+
+ **/
+
+const std::string REPOSITORYJSON = "{\n"
     "\"TofConv\":\n"
     "{\n"
-     " \"pub_date\": \"2012-02-13 10:00:50\",\n"
+     " \"pub_date\": \"2012-Feb-13 10:00:50\",\n"
      " \"description\": \"the description\",\n"
      " \"directory\": true \n"
     "},\n"
     "\"TofConv/README.txt\":\n"
     "{\n"
- 	  " \"pub_date\": \"2012-02-13 10:02:50\",\n"
+ 	  " \"pub_date\": \"2012-Feb-13 10:02:50\",\n"
 	  " \"description\": \"tofconv description\",\n"
 	  " \"directory\": false \n"
     "},\n"
     "\"TofConv/TofConverter.py\":\n"
     "{\n"
-	  "  \"pub_date\": \"2012-02-10 10:00:50\",\n"
+	  "  \"pub_date\": \"2012-Feb-10 10:00:50\",\n"
 	  "  \"description\": \"tofconverter description\",\n"
 	  "  \"directory\": false	\n"
     "},\n"
     "\"reflectometry\":\n"
     "{\n"
-    "	\"pub_date\": \"2012-01-13 10:00:50\",\n"
+    "	\"pub_date\": \"2012-Jan-13 10:00:50\",\n"
 	  "  \"directory\": true	\n"
     "},\n"
     "\"reflectometry/Quick.py\":\n"
     "{\n"
-  	"  \"pub_date\": \"2012-02-13 10:00:00\",\n"
+  	"  \"pub_date\": \"2012-Feb-13 10:00:00\",\n"
     "  \"description\": \"quick description\",\n"
 	  "\"directory\": false	\n"
     "}\n"
   "}\n";
 
+const std::string TOFCONV_README="This is the content of TOFCONV_README";
+const std::string TOFCONV_CONVERTER = "print 'hello world'";
+
 
 const std::string webserverurl = "http://localhost";
 
+
+/** The ScriptRepositoryTest aims to ensure and protect the logic and 
+the interfaces described for ScriptRepository without requiring 
+the connection to the internet. 
+
+In order to be able to do this, the ::ScriptRepositoryTestImpl 
+uses the ::ScriptRepositoryImplLocal, which is a derived class
+of ::ScriptRepositoryImpl, but adds the following: 
+
+ - It overrides the doDownloadFile method, scaping from downloading
+   to copy the files locally. 
+
+Through this strategy, all the logic and the behavior of the
+::ScriptRepositoryImpl can be tested. 
+
+It provides some public attributes repository_json_content, 
+tofconf_readme_content, tofconf_tofconverter_content that allows 
+to simulate changes and new values for the downloading.
+
+*/
+
+
+class ScriptRepositoryImplLocal : public ScriptRepositoryImpl{
+ public:
+ ScriptRepositoryImplLocal(std::string a="", std::string b=""):
+ ScriptRepositoryImpl(a,b){
+   repository_json_content = REPOSITORYJSON;
+   tofconv_readme_content = TOFCONV_README;
+   tofconv_tofconverter_content = TOFCONV_CONVERTER;
+ }
+ virtual ~ScriptRepositoryImplLocal()throw(){};
+
+ std::string repository_json_content;
+ std::string tofconv_readme_content; 
+ std::string tofconv_tofconverter_content;
+
+ /** Override the ScriptRepositoryImpl::doDownloadFile in order
+     to mock its functioning avoiding the internet connection.
+
+     It allows the following requests: 
+
+     @code
+     // download repository.json file
+     doDownloadFile("<remote_url>/repository.json","<localpath>/repository.json); 
+     // ping the site
+     doDownloadFile("<remote_url>","");
+     // download file TofConv/README.txt
+     doDownloadFile("<remote_url>/TofConv/README.txt","<localpath>/TofConv/README.txt");
+     // download file TofConv/README.txt
+     doDownloadFile("<remote_url>/TofConv/TofConverter.py","<localpath>/TofConv/TofConverter.py");
+     
+     @endcode
+
+     It also make it public, in order to be able to test this method itself.
+  */
+ void doDownloadFile(const std::string url_file, 
+                     const std::string local_file_path){
+
+   // answer when the download it to 'forget' the downloaded file
+   // request to ping the site
+   if (local_file_path.empty())
+     return;
+
+   Poco::FileStream _out(local_file_path); 
+   
+   if( url_file.find("repository.json") != std::string::npos){
+     // request to download repository.json
+     _out << repository_json_content;
+     _out.close();
+     return;
+   }
+   
+   if (url_file.find("TofConv/README.txt") != std::string::npos){
+     // request to download TofConv/README.txt
+     _out << tofconv_readme_content ; 
+     _out.close(); 
+     return;
+   }
+
+
+   if (url_file.find("TofConv/TofConverter.py") != std::string::npos){
+     // request to download TofConv/TofConverter.py
+     _out << tofconv_tofconverter_content ; 
+     _out.close(); 
+     return;
+   }
+
+   if (url_file == remote_url){
+     // request to ping the site
+     _out << "<html><body>Site Alive</body></html>"; 
+     _out.close(); 
+     return;
+   }
+   
+   std::stringstream ss; 
+   ss << "Failed to download this file : " << url_file << " to " << local_file_path << std::ends;
+   throw ScriptRepoException(ss.str()); 
+ }
+ 
+};
+
+
+/** Protect the logic and behavior of ScriptRepositoryImpl without requiring internet connection. 
+
+
+
+These tests do no depend on the internet connection
+ctest -j8 -R ScriptRepositoryTestImpl_  --verbose
+
+**/
 class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
   ScriptRepositoryImplLocal * repo;
   std::string local_rep;
@@ -81,6 +198,40 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
   }
 
 
+  /*****************
+   * ENSURING  ScriptRepositoryImplLocal::doDownloadFile do not introduce errors
+   ******************/
+  void test_doDownloadFile(){
+    // ensure it can ping the remote url
+    TS_ASSERT_THROWS_NOTHING(repo->doDownloadFile(webserverurl,"")); 
+    
+    // simulate the installation.
+    Poco::File dir(local_rep); 
+    dir.createDirectories(); 
+
+    {
+      // ensure it can download repository.json      
+    std::string local_j_file = std::string(local_rep).append("/.repository.json");
+    TS_ASSERT_THROWS_NOTHING(repo->doDownloadFile(std::string(webserverurl).append("/repository.json"),
+                                                  local_j_file));
+    }
+    {
+      // ensure it can download TofConv/README.txt
+    std::string local_j_file = std::string(local_rep).append("/TofConv/README.txt");
+    Poco::File dir(std::string(local_rep).append("/TofConv")); 
+    dir.createDirectories(); 
+    TS_ASSERT_THROWS_NOTHING(repo->doDownloadFile(std::string(webserverurl).append("/TofConv/README.txt"),
+                                                  local_j_file));
+    Poco::File f(local_j_file); 
+    TS_ASSERT(f.exists());
+    }
+  }
+
+
+  /*************************************
+   *   INSTALL
+   *************************************/
+
   /**
      Testing the installation of the Repository Service:
      
@@ -107,7 +258,6 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     ScriptRepositoryImplLocal * other = new ScriptRepositoryImplLocal(); 
     TSM_ASSERT("All the others should recognize that this is a valid repository",other->isValid()); 
     delete other; 
-
   }
 
   /** 
@@ -129,6 +279,10 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
   }
 
 
+  /*************************************
+   *   List Files
+   *************************************/
+
   /**
      List Files must list all the files at central repository
    */
@@ -138,15 +292,18 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
                                  "TofConv/TofConverter.py",
                                  "reflectometry",
                                  "reflectometry/Quick.py"};
-    
+    std::vector<std::string> list_files;
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
-    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+    TS_ASSERT_THROWS_NOTHING(list_files = repo->listFiles());
+    TS_ASSERT(list_files.size() == 5); 
     // check that all the files at the central repository are inside
     for (int i = 0; i< 5; i++)
-      TSM_ASSERT_THROWS_NOTHING(test_entries[i],repo->info(test_entries[i])); 
-    
+      TSM_ASSERT_THROWS_NOTHING(test_entries[i],repo->info(test_entries[i]));     
     }
 
+  /**
+     List File must list all the local files as well.
+   */
   void test_listFiles_must_list_all_local_files(){
     // will create the folder
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
@@ -161,11 +318,6 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     std::vector<std::string > files;
     TS_ASSERT_THROWS_NOTHING(files = repo->listFiles()); 
     
-    for (std::vector<std::string>::iterator it = files.begin(); 
-         it != files.end();
-         it++)
-      std::cout << "Files listed: " << *it << std::endl; 
-    
     // checking that the local_file was listed in listFiles.
     TSM_ASSERT_THROWS_NOTHING(local_file, repo->info("myfile"));  
     // MUST ACCEPT AN ABSOLUTE PATH AS WELL
@@ -173,6 +325,9 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
   }
 
 
+ /*************************************
+   *   File Info
+   *************************************/
   void test_info_correctly_parses_the_repository_json(){
     using Mantid::API::ScriptInfo;
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
@@ -184,11 +339,200 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     TS_ASSERT(!information.auto_update);
   }
 
+
+ /*************************************
+   *   Download
+   *************************************/
+
+
+  /** Test that we are able to download files from the remote repository
+   */
   void test_download_new_files_from_repository(){
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/README.txt"));    
+  }
+
+  /** 
+      Test that we are able to download folders from the remote repository
+   */
+  void test_download_new_folder_from_repository(){
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    TS_ASSERT_THROWS_NOTHING(repo->download("TofConv"));    
+  }
+
+  /** Test that we can download files inside folder one at once
+   */
+  void test_downloading_single_files(){
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
     TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/README.txt")); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py"));     
+  }
+
+
+  /** 
+      There is no point downloading files if they have only local_changes, 
+      so, this test that it is not possible to download the same file 
+      twice, witouth a new version.      
+   */
+  void tnoest_downloading_twice_the_same_file(){
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/README.txt")); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    // there is no new version, so there is no point to download it again.
+    // it throws that the file has not changed.
+    TS_ASSERT_THROWS(repo->download("TofConv/README.txt"),ScriptRepoException);       
+  }
+
+ /*************************************
+   *  UPDATE
+   *************************************/
+  void test_update(){
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    std::vector<string> list_of_files;
+    TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles()); 
+    TS_ASSERT (list_of_files.size() == 5); 
+
     
+    // simulate remove of cleaning up the repository, and having just a README.md file
+    // 
+    repo->repository_json_content = "{\n"
+      "\"README.md\":\n"
+      "{\n"
+      " \"pub_date\": \"2012-02-20 10:00:50\",\n"
+      " \"description\": \"Script Repository Script\",\n"
+      " \"directory\": false \n"
+      "}\n"
+      "}\n";
+    
+    TS_ASSERT_THROWS_NOTHING(repo->check4Update());
+    TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles()); 
+
+    std::cout << "After update, the files are: ";
+    for (std::vector<string>::iterator it = list_of_files.begin(); 
+         it != list_of_files.end();
+         it++){
+      std::cout << *it << ", ";
+    }
+    std::cout << std::endl; 
+    TS_ASSERT (list_of_files.size() == 1); 
+    TS_ASSERT (list_of_files[0] == "README.md");     
+}
+
+
+
+
+ /*************************************
+   *   FILE STATUS
+   *************************************/
+  void test_info_of_one_file(){
+    std::string file_name = "TofConv/README.txt";
+    std::string dir_name = "TofConv";
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    // before downloading the file is REMOTE_ONLY
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY);
+    TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::REMOTE_ONLY);
+
+
+    // do download
+    TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+
+    // after downloading the file is BOTH_UNCHANGED
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED) ;
+    TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::BOTH_UNCHANGED) ;
+   
+
+    std::string original_time = "2012-Feb-13 10:02:50"; 
+    std::string change_to_ =  "2012-Mar-13 10:02:50";
+
+    // simulate new version of the file
+    boost::replace_all(repo->repository_json_content,
+                       original_time,
+                       change_to_);
+
+    TS_ASSERT_THROWS_NOTHING(repo->check4Update());
+
+    // should change to REMOTE_CHANGED
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_CHANGED);
+    TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::REMOTE_CHANGED);
+
+
+    // restore the file
+    repo->repository_json_content = REPOSITORYJSON;
+
+    TS_ASSERT_THROWS_NOTHING(repo->check4Update());
+
+
+    // after downloading the file is BOTH_UNCHANGED
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED) ;
+    TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::BOTH_UNCHANGED) ;
+
+    /**
+       We have to change the local file in order to verify if 
+       it changes its local status. 
+
+       unfortunatelly, the only way to see a local change, is giving some time, at least 
+       one seccond.
+       
+       so, we will propose two versions, but for production, we will use the fastest one.
+    */
+
+    if (TEST_MANUALLY){
+      sleep(1);
+      Poco::FileStream _ap(std::string(local_rep).append("/").append(file_name));
+      _ap << "Local change";
+      _ap.close();
+    }else{
+      // we will simulate the change of the file, by, changin the local.json file
+
+      Poco::FileStream ss(std::string(local_rep).append("/local.json")); 
+      ss << "{\n"
+        <<"\"TofConv\\/README.txt\":\n"
+        <<"{\n"
+        <<"\"downloaded_date\": \"2013-Mar-07 14:30:09\",\n"
+        <<"\"downloaded_pubdate\": \"2012-Feb-13 10:02:50\"\n"
+        <<"}\n"
+         <<"}";
+      ss.close();
+      Poco::File f(std::string(local_rep).append("/local.json")); 
+      f.moveTo(std::string(local_rep).append("/.local.json"));
+    }
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+    
+    // file has local changes
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::LOCAL_CHANGED) ;
+    TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::LOCAL_CHANGED) ;
+
+    // simulate new version of the file
+    boost::replace_all(repo->repository_json_content,
+                       original_time,
+                       change_to_);
+
+    TS_ASSERT_THROWS_NOTHING(repo->check4Update());
+
+    
+    // file has local and remote changes
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_CHANGED);
+    TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::BOTH_CHANGED);
+
+
+  }
+
+
+
+
+  void test_list_files_after_download_repository(){
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py")); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    TS_ASSERT_THROWS_NOTHING(repo->check4Update()); 
   }
 
 

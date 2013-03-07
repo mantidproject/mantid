@@ -216,7 +216,7 @@ def make_entry(path, first_root):
     
     """
     try:
-        timeformat="%Y-%m-%d %H:%M:%S"
+        timeformat="%Y-%b-%d %H:%M:%S"
         stat = os.stat(path)
         pub_date = time.strftime(timeformat,time.gmtime(int(stat.st_mtime)))
         directory = os.path.isdir(path)

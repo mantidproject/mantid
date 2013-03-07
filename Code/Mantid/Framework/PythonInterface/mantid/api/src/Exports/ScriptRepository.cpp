@@ -43,12 +43,12 @@ namespace
 
   PyObject * getName(ScriptRepository & self){
     UNUSED_ARG(self);
-    PyObject * value = PyString_FromString("GitMyScriptRepository"); 
+    PyObject * value = PyString_FromString("ScriptRepository"); 
     return value;
   }
 
   tuple getInfo(ScriptRepository & self, const std::string path){
-    ScriptInfo info = self.fileInfo(path);
+    ScriptInfo info = self.info(path);
     return   boost::python::make_tuple<std::string>(info.author, info.description);
   }
 
@@ -117,6 +117,7 @@ promote its usage. In order to enhance the usage, it is necessary:\n\
     .def("download",&ScriptRepository::download,"Download file or folder ")
     .def("fileStatus",&getStatus,"Return the status")
     .def("upload",&ScriptRepository::upload,"Publish your script")
-    .def("update",&ScriptRepository::update,"Check if there is update remotely");
-    
+    .def("update",&ScriptRepository::check4Update,"Check if there is update remotely")
+    .def("install",&ScriptRepository::install,"Install this repository in the given path");
+   
 }

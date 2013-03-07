@@ -56,7 +56,7 @@ namespace API
     return ScriptRepoException(ss.str(), ex.displayText()); 
   }
 
-  const char * timeformat = "%Y-%m-%d %H:%M:%S"; 
+  const char * timeformat = "%Y-%b-%d %H:%M:%S"; 
 
   const char * emptyURL = "The initialization failed because no URL was given that points "
     "to the central repository.\nThis entry should be defined at the properties file, "
@@ -111,6 +111,9 @@ namespace API
     else
       local_repository = local_rep; 
     
+    if (local_repository[local_repository.size()-1] != '/')
+      local_repository.append("/");
+
     if (remote.empty())
       remote_url = rem; 
     else
@@ -320,6 +323,9 @@ namespace API
   */
   std::vector<std::string> ScriptRepositoryImpl::listFiles() {
     ensureValidRepository();
+    
+    repo.clear();
+    assert(repo.size() == 0);
 
     parseCentralRepository(repo); 
     parseDownloadedEntries(repo);
@@ -338,10 +344,10 @@ namespace API
       // for every entry, it takes the path and RepositoryEntry
       std::string entry_path = it->first; 
       RepositoryEntry & entry = it->second;
-      
+      g_log.debug() << "Evaluating the status of " << entry_path << std::endl;
       // fill up the output vector
       out[--i] = it->first;
-      g_log.debug() << "inserting file: " << it->first << std::endl; 
+      //      g_log.debug() << "inserting file: " << it->first << std::endl; 
 
       // get the path of the parent directory
       size_t pos = entry_path.rfind("/"); 
@@ -378,6 +384,8 @@ namespace API
           // diferent from the local downloaded pubdate.
           if (entry.pub_date != entry.downloaded_pubdate)
             st |= REMO; 
+          
+          
 
           switch(st){
           case UNCH:
@@ -428,6 +436,9 @@ namespace API
         acc_status = BOTH_CHANGED;
         break;        
       }     
+      
+      g_log.debug() << "entry status = " << std::hex<< (int) entry.status<<std::dec << std::endl; 
+
     }
 
     return out;
@@ -503,7 +514,9 @@ namespace API
         dir.createDirectories();
         
         it->second.status = BOTH_UNCHANGED;         
-        it->second.downloaded_date = DateAndTime(dir.getLastModified().utcTime());
+        it->second.downloaded_date = DateAndTime(
+             Poco::DateTimeFormatter::format(dir.getLastModified(),
+                                             timeformat));
         it->second.downloaded_pubdate = it->second.pub_date;
         updateLocalJson(it->first, it->second);
       
@@ -540,17 +553,36 @@ namespace API
       f.copyTo(bck);         
     }
 
-    
+
     // download the file
     std::string url_path = std::string(remote_url).append("/scripts/").append(file_path); 
     std::string local_path = std::string(local_repository).append(file_path); 
-    
-    doDownloadFile(url_path,local_path);
+    g_log.debug() << "Request to download url_path: " << url_path << " to " << local_path << std::endl;
 
+    // ensure that the path to the local_path exists
+    {
+      size_t slash_pos = local_path.rfind('/');
+      Poco::File file_out(local_path);
+      if (slash_pos != std::string::npos){
+        std::string dir_path = std::string(local_path.begin(),local_path.begin()+slash_pos);
+        if (!dir_path.empty()){
+          Poco::File dir_parent(dir_path);
+          if (!dir_parent.exists()){
+            dir_parent.createDirectories();
+          }
+        }// dir path is empty
+      }
+      if (!file_out.exists())
+        file_out.createFile();
+    }
+
+    doDownloadFile(url_path,local_path);
+    g_log.debug() << "Get file information" << std::endl; 
     {
       Poco::File local(local_path);
-      entry.downloaded_date = DateAndTime(local.getLastModified().utcTime()); 
-      entry.downloaded_pubdate = entry.downloaded_date;
+      entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(local.getLastModified(),
+                                                                          timeformat));
+      entry.downloaded_pubdate = entry.pub_date;
       entry.status = BOTH_UNCHANGED;      
     }
     
@@ -566,6 +598,7 @@ namespace API
     ///        directories trees.    
     ensureValidRepository();
     std::string file_path = convertPath(input_path); 
+    g_log.debug() << "Attempt to ask for the status of "<< file_path << std::endl;
     try{
       RepositoryEntry & entry = repo.at(file_path); 
       return entry.status;
@@ -610,8 +643,29 @@ namespace API
   {
     g_log.debug() << "ScriptRepositoryImpl::update ... begin\n" ; 
     // download the new repository json file
-    doDownloadFile(std::string(remote_url).append("/.repository.json"));
+    // download the repository json
+    std::string rep_json_file = std::string(local_repository).append(".repository.json");
+    std::string backup = std::string(rep_json_file).append("_backup");
+    { 
+      Poco::File f(rep_json_file);
+      f.moveTo(backup); 
+    }
+    try{
+      doDownloadFile(std::string(remote_url).append("/repository.json"),
+                   rep_json_file);
+    }catch(...){
+      // restore file
+      Poco::File f(backup); 
+      f.moveTo(rep_json_file);
+      throw;
+    }
     
+    // remote backup
+    {
+      Poco::File bak(backup);
+      bak.remove(); 
+    }
+
     // re list the files
     listFiles(); 
     
@@ -719,14 +773,14 @@ namespace API
           return;
         }else{
           try{
-            // prepare the file to be copied
-            Poco::File file_out(local_file_path);
-            file_out.createFile();
+            {
             // copy the file
-            Poco::FileStream _out(local_file_path); 
-            Poco::StreamCopier::copyStream(rs,_out); 
-            _out.close(); 
+              Poco::FileStream _out(local_file_path); 
+              Poco::StreamCopier::copyStream(rs,_out); 
+              _out.close(); 
+            }
           }catch(Poco::Exception & ex){            
+            g_log.warning() << "Receive exception: " << ex.what()<< std::endl; 
             throw pocoException("Downloading failed", ex);
           }        
         }      
@@ -759,6 +813,7 @@ namespace API
     read_json(filename, pt);
     
     BOOST_FOREACH(ptree::value_type & file, pt){
+      g_log.debug() << "Inserting : file.first " << file.first << std::endl; 
       RepositoryEntry & entry = repo[file.first];
       entry.remote = true;
       entry.directory = file.second.get("directory",false);
@@ -793,10 +848,20 @@ namespace API
     ptree local_json; 
     std::string filename = std::string(local_repository).append(".local.json");
     read_json(filename, local_json); 
-    boost::property_tree::ptree &localDataTree = local_json.get_child(path); 
-    localDataTree.put("downloaded_date",entry.downloaded_date.toFormattedString()); 
-    localDataTree.put("downloaded_pubdate",entry.downloaded_pubdate.toFormattedString());
-    localDataTree.put("auto_update",entry.auto_update);
+
+    ptree::const_assoc_iterator it = local_json.find(path);
+    if (it == local_json.not_found()){
+      boost::property_tree::ptree array;
+      array.push_back(std::make_pair("downloaded_date",entry.downloaded_date.toFormattedString())); 
+      array.push_back(std::make_pair("downloaded_pubdate",entry.downloaded_pubdate.toFormattedString()));
+      //      array.push_back(std::make_pair("auto_update",entry.auto_update)));
+      local_json.push_back(std::make_pair(path, array));
+    }else{
+      boost::property_tree::ptree &localDataTree = local_json.get_child(path); 
+      localDataTree.put("downloaded_date",entry.downloaded_date.toFormattedString()); 
+      localDataTree.put("downloaded_pubdate",entry.downloaded_pubdate.toFormattedString());
+      //localDataTree.put("auto_update",entry.auto_update);
+    }
     write_json(filename, local_json); 
   }
 
@@ -828,13 +893,30 @@ namespace API
     using Poco::DirectoryIterator;
     DirectoryIterator end;
     for (DirectoryIterator it(path); it != end; ++it){
+      std::string entry_path = convertPath(it->path()); 
+      
+      if (!isEntryValid(entry_path))
+        continue;
+
       RepositoryEntry & entry = repo[convertPath(it->path())]; 
       entry.local = true; 
-      entry.current_date = DateAndTime(it->getLastModified().utcTime()); 
+      entry.current_date = DateAndTime(
+                               Poco::DateTimeFormatter::format(it->getLastModified(),
+                                                               timeformat)); 
       entry.directory = it->isDirectory(); 
       if (it->isDirectory())
         recursiveParsingDirectories(it->path(),repo);
     }
+  }
+
+  bool ScriptRepositoryImpl::isEntryValid(std::string path){
+    if (path == ".repository.json")
+      return false;
+    if (path == ".local.json")
+      return false; 
+    // TODO: apply the pattern ingore checking
+
+    return true;
   }
 
   /**
@@ -867,7 +949,7 @@ namespace API
     file_is_local = Path::find(lookAfter.begin(), lookAfter.end(), path, pathFound);
     // get the absolute path: 
     std::string absolute_path;
-    if (file_is_local)
+    if (file_is_local)      
       absolute_path = pathFound.absolute().toString(); 
     else
       absolute_path = path;
@@ -875,18 +957,17 @@ namespace API
     // this is necessary because in windows, the absolute path is given with \ slash.
     boost::replace_all(absolute_path,"\\","/");     
     
-    
     //check it the path is inside the repository: 
     size_t pos = absolute_path.find(local_repository); 
 
-    if (pos == std::string::npos){
+    if (pos == std::string::npos){      
       // the given file is not inside the local repository. It can not be converted. 
       return path; 
     }else{
       // the path is inside the local repository
       // remove the repo_path from te absolute path 
       // +1 to remove the slash /
-      return std::string(absolute_path.begin() + pos + local_repository.size()+1, absolute_path.end());
+      return std::string(absolute_path.begin() + pos + local_repository.size(), absolute_path.end());
     }
     return path; 
   }

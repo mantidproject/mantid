@@ -117,7 +117,7 @@ namespace API{
 
  
  
-    void doDownloadFile(const std::string url_file, const std::string local_file_path = "");
+    virtual void doDownloadFile(const std::string url_file, const std::string local_file_path = "");
  protected:
     void parseCentralRepository(Repository & repo);
 
@@ -127,6 +127,13 @@ namespace API{
 
     void ensureValidRepository();
 
+
+    bool isEntryValid(std::string path);
+
+    /// Path of the local repository.
+    std::string local_repository; 
+    /// URL for the remote repository, usually: 
+    std::string remote_url;
 
 
   private:
@@ -147,6 +154,7 @@ namespace API{
     enum FILEINFOSUPPORT{READMEFILE, PYTHONFILE};
     std::string processInfo(const std::string path, FILEINFOSUPPORT filetype); */
 
+
   private: 
 
     static std::string printStatus(SCRIPTSTATUS st); 
@@ -154,10 +162,6 @@ namespace API{
     void download_file(const std::string, RepositoryEntry & ); 
     void updateLocalJson(const std::string & , const RepositoryEntry & ); 
 
-    /// Path of the local repository.
-    std::string local_repository; 
-    /// URL for the remote repository, usually: 
-    std::string remote_url;
     /// reference to the logger class
     Mantid::Kernel::Logger& g_log;
     /// flag that indicate a valid repository
