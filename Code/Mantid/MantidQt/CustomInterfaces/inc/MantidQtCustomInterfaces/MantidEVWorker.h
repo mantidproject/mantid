@@ -47,18 +47,24 @@ public:
   MantidEVWorker();
  ~MantidEVWorker();
 
-  /// Choose existing MD workspace in analysis data service
-  bool selectMDWorkspace( const std::string & md_ws_name );
+  
+  /// check for existence of MD workspace in analysis data service
+  bool isMDWorkspace( const std::string & md_ws_name );
 
-  /// Choose existing peaks workspace in analysis data service
-  bool selectPeaksWorkspace( const std::string & peaks_ws_name );
+  /// check for existence of peaks workspace in analysis data service
+  bool isPeaksWorkspace( const std::string & peaks_ws_name );
 
-  /// Check if the specified workspace is an EventWorkspace
+  /// check for existence of event workspace in analysis data service
   bool isEventWorkspace( const std::string & event_ws_name );
 
+  /// Load and event file and convert to MD workspace
+  bool loadAndConvertToMD( const std::string & file_name,
+                           const std::string & ev_ws_name,
+                           const std::string & md_ws_name );
 
   /// Find peaks in MD workspace and set peaks into peaks workspace
-  bool findPeaks( const std::string & peaks_ws_name,
+  bool findPeaks( const std::string & md_ws_name, 
+                  const std::string & peaks_ws_name,
                         double        max_abc,
                         size_t        num_to_find,
                         double        min_intensity );
@@ -131,11 +137,6 @@ public:
 
   /// Utility to get workspace ID from ADS, blank if none
   std::string workspaceType( const std::string & ws_name );  
-
-private:
-  std::string md_ws_name;  
-  std::string peaks_ws_name;
-
 
 };
 
