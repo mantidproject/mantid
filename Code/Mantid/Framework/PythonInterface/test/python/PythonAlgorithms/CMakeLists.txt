@@ -8,6 +8,7 @@ set ( TEST_PY_FILES
   MaskWorkspaceToCalFileTest.py
   RetrieveRunInfoTest.py
   Stitch1DTest.py
+  UpdatePeakParameterTableValueTest.py
 )
 
 # Prefix for test name=PythonAlgorithms
