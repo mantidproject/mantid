@@ -5,28 +5,37 @@
 #include "MantidKernel/V3D.h"
 #include "OpenGLError.h"
 
-GLViewport::GLViewport(int w, int h):mWidth(w),mHeight(h)
+GLViewport::GLViewport(int w, int h):
+mProjection(GLViewport::ORTHO),
+mWidth(w),
+mHeight(h),
+mZoomFactor(1.0),
+mXTrans(0.0),
+mYTrans(0.0),
+mLeft(-1),
+mRight(1),
+mBottom(-1),
+mTop(1),
+mNear(-1),
+mFar(1)
 {
-  mProjection=GLViewport::ORTHO;
-  mZoomFactor=1.0;
-  mXTrans=0.0;
-  mYTrans=0.0;
-  mLeft = -1;
-  mRight = 1;
-  mBottom = -1;
-  mTop = 1;
-  mNear = -1;
-  mFar = 1;
 }
 
 GLViewport::~GLViewport()
 {
 }
+
 void GLViewport::resize(int w,int h)
 {
     mWidth=w;
     mHeight=h;
 }
+
+/**
+ * Get the size of the viewport in screen pixels.
+ * @param w :: Buffer to accept the viewport width value.
+ * @param h :: Buffer to accept the viewport height value.
+ */
 void GLViewport::getViewport(int* w, int* h) const
 {
     *w=mWidth;
@@ -219,9 +228,9 @@ void GLViewport::issueGL() const
   {
     glOrtho(xmin,xmax,ymin,ymax,zmin,zmax);
 
-    if (OpenGLError::hasError("GLViewport::issueGL()"))
+    //if (OpenGLError::hasError("GLViewport::issueGL()"))
     {
-      OpenGLError::log() << "Arguments to glOrtho:\n";
+      OpenGLError::log() << "GL: Arguments to glOrtho:\n";
       OpenGLError::log() 
                          << xmin << ' ' << xmax << '\n'
                          << ymin << ' ' << ymax << '\n'

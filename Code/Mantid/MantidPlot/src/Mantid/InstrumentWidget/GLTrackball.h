@@ -14,34 +14,15 @@
   This class is an implementation of virtual trackball using mouse interactions. It uses Quaternions for
   performing the rotations.
 
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
 /// Forward declaration of class GLViewport
-class GLViewport;
+class Viewport;
 ///
 class GLTrackball
 {
 public:
-	GLTrackball(GLViewport* parent=0);
-	virtual ~GLTrackball();
+	GLTrackball(Viewport* viewport);
 	//! Call when the mouse button is pressed to initiate rotation
 	void initRotationFrom(int,int);
 	//! Call when the mouse is moving during a rotation
@@ -51,7 +32,7 @@ public:
 	//! To be called in the application drawing the OpenGL Scene
 	void IssueRotation() const;
   //! Associate the Trackball to a new viewport.
-  void setViewport(GLViewport*);
+  //void setViewport(GLViewport*);
 	//! Call when the mouse button is pressed to initiate zoom
 	void initZoomFrom(int,int);
 	//! Call when the mouse motion to issue zoom
@@ -82,26 +63,27 @@ public:
 	void reset();
 	//! Rotates a bounding box
 	void rotateBoundingBox(double& xmin,double& xmax,double& ymin,double& ymax,double& zmin,double& zmax);
-  Mantid::Kernel::Quat getRotation() const {return _quaternion;}
+  Mantid::Kernel::Quat getRotation() const {return m_quaternion;}
 private:
-	//! Pointer to the viewport to which the trackball is attached
-  GLViewport* _viewport;
   //! Project a point on the trackball sphere from viewport coordinates x,y
 	void projectOnSphere(int x,int y, Mantid::Kernel::V3D& p);
 	//! Generate a 3D point coordinates from coordinates on the viewport.
 	void generateTranslationPoint(int x,int y, Mantid::Kernel::V3D& p);
+
+  //! Pointer to the viewport to which the trackball is attached
+  Viewport* m_viewport;
 	//! Previous point selected on sphere
-	Mantid::Kernel::V3D _lastpoint;
+	Mantid::Kernel::V3D m_lastpoint;
 	//! Rotation matrix stored as a quaternion
-	Mantid::Kernel::Quat _quaternion;
+	Mantid::Kernel::Quat m_quaternion;
 	//! Rotation matrix (4x4 stored as linear array) used in OpenGL
-  double _rotationmatrix[16];
+  double m_rotationmatrix[16];
   //! Rotation speed of the trackball
-	double _rotationspeed;
+	double m_rotationspeed;
 	//! Center of rotation
-	Mantid::Kernel::V3D  _modelCenter;
+	Mantid::Kernel::V3D  m_modelCenter;
 	//! Is the centre of rotation offcentered
-	bool hasOffset;
+	bool m_hasOffset;
 };
 
 

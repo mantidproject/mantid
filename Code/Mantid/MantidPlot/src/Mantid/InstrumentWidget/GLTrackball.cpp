@@ -1,65 +1,65 @@
 #include "GLTrackball.h"
-#include <cmath>
-#include "MantidGeometry/Rendering/OpenGL_Headers.h"
-#include "GLViewport.h"
+#include "Viewport.h"
 #include "OpenGLError.h"
 
-GLTrackball::GLTrackball(GLViewport* parent):_viewport(parent)
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
+
+#include <cmath>
+
+GLTrackball::GLTrackball(Viewport* viewport):m_viewport(viewport)
 {
   reset();
   // Rotation speed defines as such is equal 1 in relative units,
   // i.e. the trackball will follow exactly the displacement of the mouse
   // on the sceen. The factor 180/M_PI is simply rad to deg conversion. THis
   // prevent recalculation of this factor every time a generateRotationTo call is issued.
-  _rotationspeed=180/M_PI;
-  _modelCenter=Mantid::Kernel::V3D(0.0,0.0,0.0);
-  hasOffset=false;
+  m_rotationspeed = 180 / M_PI;
+  m_modelCenter = Mantid::Kernel::V3D(0.0, 0.0, 0.0);
+  m_hasOffset = false;
 }
-GLTrackball::~GLTrackball()
-{
-}
+
 void GLTrackball::initRotationFrom(int a,int b)
 {
-  projectOnSphere(a,b,_lastpoint);
+  projectOnSphere(a,b,m_lastpoint);
 }
+
 void GLTrackball::generateRotationTo(int a,int b)
 {
-  Mantid::Kernel::V3D _newpoint;
-  projectOnSphere(a,b,_newpoint);
-  Mantid::Kernel::V3D diff(_lastpoint);
+  Mantid::Kernel::V3D newpoint;
+  projectOnSphere( a, b, newpoint );
+  Mantid::Kernel::V3D diff( m_lastpoint );
   // Difference between old point and new point
-  diff-=_newpoint;
+  diff -= newpoint;
   // Angle is given in degrees as the dot product of the two vectors
-  double angle=_rotationspeed*_newpoint.angle(_lastpoint);
-  diff=_lastpoint.cross_prod(_newpoint);
+  double angle = m_rotationspeed * newpoint.angle( m_lastpoint );
+  diff = m_lastpoint.cross_prod( newpoint );
   // Create a quaternion from the angle and vector direction
-  Mantid::Kernel::Quat temp(angle,diff);
+  Mantid::Kernel::Quat temp( angle, diff );
   // Left multiply
-  temp*=_quaternion;
+  temp *= m_quaternion;
   // Assignment of _quaternion
-  _quaternion(temp);
+  m_quaternion( temp );
   // Get the corresponding OpenGL rotation matrix
-  _quaternion.GLMatrix(&_rotationmatrix[0]);
-  return;
+  m_quaternion.GLMatrix( &m_rotationmatrix[0] );
 }
 
 void GLTrackball::initTranslateFrom(int a,int b)
 {
-  generateTranslationPoint(a,b,_lastpoint);
+  generateTranslationPoint(a, b, m_lastpoint);
 }
 
 void GLTrackball::generateTranslationTo(int a, int b)
 {
-  Mantid::Kernel::V3D _newpoint;
-  generateTranslationPoint(a,b,_newpoint);
+  Mantid::Kernel::V3D newpoint;
+  generateTranslationPoint(a, b, newpoint);
   // This is now the difference
-  _newpoint-=_lastpoint;
-  double x,y;
-  _viewport->getTranslation(x,y);
-  _viewport->setTranslation(x+_newpoint[0],y+_newpoint[1]);
+  newpoint -= m_lastpoint;
+  double x, y;
+  m_viewport->getTranslation( x, y );
+  m_viewport->setTranslation( x + newpoint[0], y + newpoint[1] );
 }
 
-void GLTrackball::initZoomFrom(int a,int b)
+void GLTrackball::initZoomFrom( int a, int b )
 {
   if (a<=0 || b<=0)
     return;
@@ -70,7 +70,7 @@ void GLTrackball::initZoomFrom(int a,int b)
     return;
   x=static_cast<double>((_viewport_w-a));
   y=static_cast<double>((b-_viewport_h));
-  _lastpoint(x,y,z);
+  m_lastpoint(x,y,z);
 }
 
 void GLTrackball::generateZoomTo(int a, int b)
@@ -80,8 +80,8 @@ void GLTrackball::generateZoomTo(int a, int b)
   _viewport->getViewport(&_viewport_w,&_viewport_h);
   if(a>=_viewport_w || b>=_viewport_h||a <= 0||b<=0)return;
   y=static_cast<double>((b-_viewport_h));
-  if(y==0) y=_lastpoint[1];
-  double diff= _lastpoint[1]/y ;
+  if(y==0) y=m_lastpoint[1];
+  double diff= m_lastpoint[1]/y ;
   diff*=_viewport->getZoomFactor();
   _viewport->setZoomFactor(diff);
 }
@@ -89,18 +89,18 @@ void GLTrackball::generateZoomTo(int a, int b)
 
 void GLTrackball::IssueRotation() const
 {
-  if (_viewport)
+  if (m_viewport)
   {
     // Translate if offset is defined
-    if (hasOffset)
+    if (m_hasOffset)
     {
-      glTranslated(_modelCenter[0],_modelCenter[1],_modelCenter[2]);
+      glTranslated( m_modelCenter[0], m_modelCenter[1], m_modelCenter[2] );
     }
     // Rotate with respect to the centre
-    glMultMatrixd(_rotationmatrix);
+    glMultMatrixd( m_rotationmatrix );
     // Translate back
-    if (hasOffset)
-      glTranslated(-_modelCenter[0],-_modelCenter[1],-_modelCenter[2]);
+    if ( m_hasOffset )
+      glTranslated( - m_modelCenter[0], - m_modelCenter[1], - m_modelCenter[2] );
   }
 
   OpenGLError::check("GLTrackball::IssueRotation()");
@@ -109,16 +109,16 @@ void GLTrackball::IssueRotation() const
 
 void GLTrackball::setModelCenter(const Mantid::Kernel::V3D& center)
 {
-  _modelCenter=center;
-  if (_modelCenter.nullVector())
-    hasOffset=false;
+  m_modelCenter = center;
+  if ( m_modelCenter.nullVector() )
+    m_hasOffset=false;
   else
-    hasOffset=true;
+    m_hasOffset=true;
 }
 
 Mantid::Kernel::V3D GLTrackball::getModelCenter() const
 {
-  return _modelCenter;
+  return m_modelCenter;
 }
 
 void GLTrackball::projectOnSphere(int a,int b,Mantid::Kernel::V3D& point)
@@ -126,7 +126,7 @@ void GLTrackball::projectOnSphere(int a,int b,Mantid::Kernel::V3D& point)
   // z initiaised to zero if out of the sphere
   double x,y,z=0;
   int _viewport_w, _viewport_h;
-  _viewport->getViewport(&_viewport_w,&_viewport_h);
+  m_viewport->getViewport(_viewport_w, _viewport_h);
   x=static_cast<double>((2.0*a-_viewport_w)/_viewport_w);
   y=static_cast<double>((_viewport_h-2.0*b)/_viewport_h);
   double norm=x*x+y*y;
@@ -156,25 +156,26 @@ void GLTrackball::generateTranslationPoint(int a,int b,Mantid::Kernel::V3D& poin
   y*=factor;
   // Assign new values to point
   point(x,y,z);
+  std::cerr << "-------------------------------" << std::endl;
+  std::cerr << a << ' ' << xmin << ' '<< xmax << std::endl;
+  std::cerr << _viewport_w << ' ' << factor << std::endl;
+  std::cerr << point << std::endl;
 }
+
 void GLTrackball::setRotationSpeed(double r)
 {
   // Rotation speed needs to contains conversion to degrees.
   //
-  if (r>0) _rotationspeed=r*180.0/M_PI;
-}
-void GLTrackball::setViewport(GLViewport* v)
-{
-  if (v) _viewport=v;
+  if ( r > 0 ) m_rotationspeed = r * 180.0 / M_PI;
 }
 
 void GLTrackball::reset()
 {
   //Reset rotation,scale and translation
-  _quaternion.init();
-  _quaternion.GLMatrix(&_rotationmatrix[0]);
-  _viewport->setTranslation(0.0,0.0);
-  _viewport->setZoomFactor(1.0);
+  m_quaternion.init();
+  m_quaternion.GLMatrix(&m_rotationmatrix[0]);
+  m_viewport->setTranslation(0.0,0.0);
+  m_viewport->setZoomFactor(1.0);
 }
 
 void GLTrackball::setViewToXPositive()

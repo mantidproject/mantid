@@ -38,14 +38,16 @@ using namespace Mantid::Geometry;
 
 Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int winHeight)
   :ProjectionSurface(rootActor,Mantid::Kernel::V3D(),Mantid::Kernel::V3D(0,0,1)),
-  m_viewport(new GLViewport),
+//  m_viewport(new GLViewport),
   m_drawAxes(true),
-  m_wireframe(false)
+  m_wireframe(false),
+  m_vport(0,0)
 {
 
   Instrument_const_sptr instr = rootActor->getInstrument();
 
-  m_viewport->resize(winWidth,winHeight);
+  m_vport.resize(winWidth,winHeight);
+//  m_viewport->resize(winWidth,winHeight);
   V3D minBounds,maxBounds;
   m_instrActor->getBoundingBox(minBounds,maxBounds);
 
@@ -53,10 +55,14 @@ Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int win
   double tmp = maxBounds.norm();
   if (tmp > radius) radius = tmp;
 
-  m_viewport->setOrtho(minBounds.X(),maxBounds.X(),
+  m_vport.setProjection(minBounds.X(),maxBounds.X(),
                        minBounds.Y(),maxBounds.Y(),
                        -radius,radius);
-  m_trackball = new GLTrackball(m_viewport);
+
+  //m_viewport->setOrtho(minBounds.X(),maxBounds.X(),
+  //                     minBounds.Y(),maxBounds.Y(),
+  //                     -radius,radius);
+  //m_trackball = new GLTrackball(m_viewport);
   changeColorMap();
   rootActor->invalidateDisplayLists();
 
@@ -74,8 +80,8 @@ Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int win
 
 Projection3D::~Projection3D()
 {
-  delete m_trackball;
-  delete m_viewport;
+  //delete m_trackball;
+//  delete m_viewport;
 }
 
 void Projection3D::init()
@@ -84,12 +90,13 @@ void Projection3D::init()
 
 void Projection3D::resize(int w, int h)
 {
-  if (m_viewport)
-  {
-    m_viewport->resize(w,h);
-    m_viewport->issueGL();
-    updateView();
-  }
+  //if (m_viewport)
+  //{
+  //  //m_viewport->resize(w,h);
+  //  //m_viewport->issueGL();
+  //}
+  m_vport.resize( w, h );
+  updateView();
 }
 
 void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
@@ -97,6 +104,7 @@ void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
   OpenGLError::check("GL3DWidget::draw3D()[begin]");
 
   glEnable(GL_DEPTH_TEST);
+  OpenGLError::check("GL3DWidget::draw3D()[depth] ");
 
   if (m_wireframe)
   {
@@ -109,25 +117,22 @@ void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
 
   setLightingModel(picking);
 
-  m_viewport->issueGL();
-
   // fill the buffer with background colour
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // if actor is undefined leave it with clear screen
-  if ( !m_instrActor ) return;
-
-  // Reset the rendering options just in case
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+  m_vport.applyProjection();
 
   // Issue the rotation, translation and zooming of the trackball to the object
-  m_trackball->IssueRotation();
+  m_vport.applyRotation();
   
-  QApplication::setOverrideCursor(Qt::WaitCursor);
-
-  m_instrActor->draw(picking);
-  OpenGLError::check("GL3DWidget::draw3D()[scene draw] ");
+  // if actor is undefined leave it with clear screen
+  if ( m_instrActor )
+  {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    m_instrActor->draw(picking);
+    OpenGLError::check("GL3DWidget::draw3D()[scene draw] ");
+    QApplication::restoreOverrideCursor();
+  }
 
   //Also some axes
   if (m_drawAxes && !picking)
@@ -140,8 +145,6 @@ void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
 
     drawAxes();
   }
-
-  QApplication::restoreOverrideCursor();
 
   OpenGLError::check("GL3DWidget::draw3D()");
 }
@@ -187,27 +190,27 @@ void Projection3D::setViewDirection(const QString& input)
 {
 	if(input.toUpper().compare("X+")==0)
 	{
-		m_trackball->setViewToXPositive();
+		m_vport.setViewToXPositive();
 	}
 	else if(input.toUpper().compare("X-")==0)
 	{
-		m_trackball->setViewToXNegative();
+		m_vport.setViewToXNegative();
 	}
 	else if(input.toUpper().compare("Y+")==0)
 	{
-		m_trackball->setViewToYPositive();
+		m_vport.setViewToYPositive();
 	}
 	else if(input.toUpper().compare("Y-")==0)
 	{
-		m_trackball->setViewToYNegative();
+		m_vport.setViewToYNegative();
 	}
 	else if(input.toUpper().compare("Z+")==0)
 	{
-		m_trackball->setViewToZPositive();
+		m_vport.setViewToZPositive();
 	}
 	else if(input.toUpper().compare("Z-")==0)
 	{
-		m_trackball->setViewToZNegative();
+		m_vport.setViewToZNegative();
 	}
   updateView();
 }
@@ -233,10 +236,10 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
   dets.clear();
   if (!hasSelection()) return;
   double xmin,xmax,ymin,ymax,zmin,zmax;
-  m_viewport->getInstantProjection(xmin,xmax,ymin,ymax,zmin,zmax);
+  //m_viewport->getInstantProjection(xmin,xmax,ymin,ymax,zmin,zmax);
   QRect rect = selectionRect();
   int w,h;
-  m_viewport->getViewport(&w,&h);
+  //m_viewport->getViewport(&w,&h);
 
   double xLeft = xmin + (xmax - xmin) * rect.left() / w;
   double xRight = xmin + (xmax - xmin) * rect.right() / w;
@@ -247,7 +250,7 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
   //                       << yBottom << ' ' << yTop << '\n'
   //                       << zmin << ' ' << zmax << "\n\n";
   size_t ndet = m_instrActor->ndetectors();
-  Quat rot = m_trackball->getRotation();
+  Quat rot;// = m_trackball->getRotation();
 
   // Cache all the detector positions if needed. This is slow, but just once.
   m_instrActor->cacheDetPos();
@@ -273,7 +276,7 @@ void Projection3D::getSelectedDetectors(QList<int>& dets)
  */
 void Projection3D::getMaskedDetectors(QList<int>& dets)const
 {
-  Quat rot = m_trackball->getRotation();
+  Quat rot;// = m_trackball->getRotation();
 
   // Cache all the detector positions if needed. This is slow, but just once.
   m_instrActor->cacheDetPos();
@@ -336,9 +339,9 @@ void Projection3D::componentSelected(Mantid::Geometry::ComponentID id)
     double tmp = maxBounds.norm();
     if (tmp > radius) radius = tmp;
 
-    m_viewport->setOrtho(minBounds.X(),maxBounds.X(),
-      minBounds.Y(),maxBounds.Y(),
-      -radius,radius);
+    //m_viewport->setOrtho(minBounds.X(),maxBounds.X(),
+    //  minBounds.Y(),maxBounds.Y(),
+    //  -radius,radius);
     return;
   }
 
@@ -368,13 +371,13 @@ void Projection3D::componentSelected(Mantid::Geometry::ComponentID id)
   rot.rotate(minBounds);
   rot.rotate(maxBounds);
 
-  m_viewport->setOrtho(minBounds.X(),maxBounds.X(),
-                       minBounds.Y(),maxBounds.Y(),
-                       -1000.,1000);
+  //m_viewport->setOrtho(minBounds.X(),maxBounds.X(),
+  //                     minBounds.Y(),maxBounds.Y(),
+  //                     -1000.,1000);
 
 
-  m_trackball->reset();
-  m_trackball->setRotation(rot);
+  //m_trackball->reset();
+  //m_trackball->setRotation(rot);
   //m_trackball->setModelCenter(comp->getPos());
 
 }
@@ -400,7 +403,7 @@ QString Projection3D::getInfoText()const
   */
 void Projection3D::initTranslation(int x, int y)
 {
-    m_trackball->initTranslateFrom( x, y );
+    //m_trackball->initTranslateFrom( x, y );
 }
 
 /**
@@ -410,8 +413,8 @@ void Projection3D::initTranslation(int x, int y)
   */
 void Projection3D::translate(int x, int y)
 {
-    m_trackball->generateTranslationTo( x, y );
-    m_trackball->initTranslateFrom( x, y );
+    //m_trackball->generateTranslationTo( x, y );
+    //m_trackball->initTranslateFrom( x, y );
     updateView();
 }
 
@@ -422,7 +425,7 @@ void Projection3D::translate(int x, int y)
   */
 void Projection3D::initZoom(int x, int y)
 {
-    m_trackball->initZoomFrom( x, y );
+    m_vport.initZoomFrom( x, y );
 }
 
 /**
@@ -432,8 +435,8 @@ void Projection3D::initZoom(int x, int y)
   */
 void Projection3D::zoom(int x, int y)
 {
-    m_trackball->generateZoomTo( x, y );
-    m_trackball->initZoomFrom( x, y );
+    m_vport.generateZoomTo( x, y );
+    m_vport.initZoomFrom( x, y );
     updateView();
 }
 
@@ -445,8 +448,7 @@ void Projection3D::zoom(int x, int y)
   */
 void Projection3D::wheelZoom(int x, int y, int d)
 {
-    m_trackball->initZoomFrom( x, y );
-    m_trackball->generateZoomTo( x, y - d );
+    m_vport.wheelZoom( x, y, d );
     updateView();
 }
 
@@ -457,7 +459,7 @@ void Projection3D::wheelZoom(int x, int y, int d)
   */
 void Projection3D::initRotation(int x, int y)
 {
-    m_trackball->initRotationFrom( x, y );
+    m_vport.initRotationFrom( x, y );
 }
 
 /**
@@ -467,15 +469,15 @@ void Projection3D::initRotation(int x, int y)
   */
 void Projection3D::rotate(int x, int y)
 {
-    m_trackball->generateRotationTo( x, y );
-    m_trackball->initRotationFrom( x, y );
+    m_vport.generateRotationTo( x, y );
+    m_vport.initRotationFrom( x, y );
     updateView();
 }
 
 RectF Projection3D::getSurfaceBounds()const
 {
   double xmin,xmax,ymin,ymax,zmin,zmax;
-  m_viewport->getInstantProjection(xmin,xmax,ymin,ymax,zmin,zmax);
+  m_vport.getInstantProjection(xmin,xmax,ymin,ymax,zmin,zmax);
   return RectF( QPointF(xmin, ymin), QPointF(xmax, ymax) );
 }
 
@@ -489,6 +491,7 @@ void Projection3D::setLightingModel(bool picking) const
   {
     glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)
     glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
+    glEnable(GL_NORMALIZE);            // Slow normal normalization
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
 
     const float lamp0_intensity = 0.3f;
@@ -518,6 +521,7 @@ void Projection3D::setLightingModel(bool picking) const
     glDisable(GL_LIGHT0);
     glDisable(GL_LIGHT1);
     glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_NORMALIZE);
   }
 }
 

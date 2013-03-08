@@ -2,8 +2,9 @@
 #define PROJECTION3D_H_
 
 #include "ProjectionSurface.h"
-#include "GLViewport.h"
-#include "GLTrackball.h"
+//#include "GLViewport.h"
+//#include "GLTrackball.h"
+#include "Viewport.h"
 
 #include "MantidGeometry/IComponent.h"
 
@@ -73,10 +74,12 @@ protected:
   void setLightingModel(bool picking)const;
 
   //const InstrumentActor& m_instrActor;
-  GLTrackball* m_trackball;       ///< Trackball for user interaction
-  GLViewport* m_viewport;         ///< Opengl View port [World -> Window]
+  //GLTrackball* m_trackball;       ///< Trackball for user interaction
+  //GLViewport* m_viewport;         ///< Opengl View port [World -> Window]
   bool m_drawAxes;
   bool m_wireframe;
+
+  Viewport m_vport;
 
 };
 
