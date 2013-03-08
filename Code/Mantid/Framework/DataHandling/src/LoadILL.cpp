@@ -204,6 +204,10 @@ void LoadILL::initInstrumentSpecific() {
 		m_l1 = 2.0;
 		m_l2 = 2.48;
 	}
+	else if (std::string::npos != m_instrumentName.find("IN4")) {
+		m_l1 = 2.0;
+		m_l2 = 2.0;
+	}
 	else{
 		g_log.warning("initInstrumentSpecific : Couldn't find instrument: " +  m_instrumentName);
 	}
