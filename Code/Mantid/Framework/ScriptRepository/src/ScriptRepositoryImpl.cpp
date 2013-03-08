@@ -218,17 +218,21 @@ namespace API
       
       The instalation consists of: 
       
-        - creation of the folder for the ScriptRepository.
+        - creation of the folder for the ScriptRepository (if it does not exists).
         - download of the repository.json file (Make it hidden)
-        - creation of the local.json file. 
+        - creation of the local.json file. (Make if hidden)
         
       The installation will also upate the ScriptLocalRepository setting, if necessary,
       to match the given path. 
         
       If it success, it will change the status of the ScriptRepository as valid.
       
-      @param path : Path for a folder inside the local machine. It must be a non existing 
-                    directory, or an empty directory.
+      @note Any directory may be given, from existing directories a new directory. 
+      If an existing directory is given, the installation will install the two necessary 
+      files to deal with this folder as a ScriptRepository.
+      
+
+      @param path : Path for a folder inside the local machine.
       
       
    */
@@ -236,31 +240,31 @@ namespace API
     using Poco::DirectoryIterator;
     std::string folder = std::string(path); 
     Poco::File repository_folder(folder); 
+    std::string rep_json_file = std::string(path).append("/.repository.json");
+    std::string local_json_file  = std::string(path).append("/.local.json");
     if (!repository_folder.exists()){
       g_log.debug() << "ScriptRepository creating folder " << folder << std::endl; 
       repository_folder.createDirectories();
-    }else{      
-      // FIXME: ensure that the folder is empty!
-      DirectoryIterator end; 
-      int i = 0; 
-      for (DirectoryIterator it(path); it != end; 
-           it ++){
-        if (it->path().find(".") == 0)
-          continue; // ignore the . and .. files and hidden
-        i++;
+    }else{
+      
+      // if the folder already exists, check if it is a ScriptRepository already: 
+      Poco::File rep(rep_json_file); 
+      Poco::File local(local_json_file); 
+      
+      if (rep.exists() && local.exists()){
+        g_log.information() << "ScriptRepository already installed at: " << path << std::endl; 
+        return;
       }
-      if (i)
-        throw ScriptRepoException("The ScriptRepository can not be installed on a non-empty directory"); 
     }
     
+    // install the two files inside the given folder
+    
     // download the repository json
-    std::string rep_json_file = std::string(path).append("/.repository.json");
     doDownloadFile(std::string(remote_url).append("/repository.json"),
                    rep_json_file);
     g_log.debug() << "ScriptRepository downloaded repository information" << std::endl; 
     // creation of the instance of local_json file
     ptree pt; 
-    std::string local_json_file  = std::string(path).append("/.local.json");
     write_json(local_json_file,pt); 
     g_log.debug() << "ScriptRepository created the local repository information"<<std::endl; 
     

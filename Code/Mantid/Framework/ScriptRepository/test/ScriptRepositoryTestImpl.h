@@ -270,7 +270,9 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
   }
 
   /** 
-      Installation should not install on a non-empty directory. 
+      Installation may install on non-empty directory. If the directory is already a ScriptRepository, 
+      the installation should just return. If it is not, the installation, should install the 
+      two hidden files in that directory. 
    */
   void test_installation_do_not_install_on_non_empty_directory(){
     // fill the local_rep path with files
@@ -284,7 +286,7 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     // before installing the repository, ScriptRepositoryImpl will be always invalid
     TSM_ASSERT("Why valid?",!repo->isValid()); 
     // the installation should throw, directory is not empty    
-    TS_ASSERT_THROWS(repo->install(local_rep), Mantid::API::ScriptRepoException); 
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
   }
 
 

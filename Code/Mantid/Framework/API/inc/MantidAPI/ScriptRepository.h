@@ -412,11 +412,11 @@ They will work as was expected for folders @ref folders-sec.
     locally. 
     It is allowed to create hidden files that would be necessary for the operation of this class. 
     
-    At the end, a new folder is created, with the given local_path given. 
+    At the end, a new folder is created (if it does not exists already), with the given local_path given. 
 
     @param local_path: path where the folder (having the same name given) will be created.
 
-    @exception ScriptRepoException: If the local_path may not be created (because is an existing folder not empty).
+    @exception ScriptRepoException: If the local_path may not be created (Permission issues).
 
     */
     virtual void install(std::string local_path) = 0;
