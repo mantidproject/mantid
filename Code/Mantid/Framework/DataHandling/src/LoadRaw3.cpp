@@ -578,11 +578,24 @@ namespace Mantid
       DataObjects::Workspace2D_sptr localWorkspace = DataObjects::Workspace2D_sptr(
           new ManagedRawFileWorkspace2D(fileName, static_cast<int>(option)));
       setProg( 0.2 );
+      progress(m_prog);
       loadRunParameters(localWorkspace);
-      runLoadInstrument(fileName,localWorkspace, 0.2, 0.4 );
       setProg( 0.4 );
-      runLoadMappingTable(fileName,localWorkspace);
+      progress(m_prog);
+      runLoadInstrument(fileName,localWorkspace, 0.2, 0.4 );
       setProg( 0.5 );
+      progress(m_prog);
+      // Since all spectra are being loaded if we get to here,
+      // we can just set the spectrum numbers to start at 1 and increase monotonically
+      for (int i = 0; i < m_numberOfSpectra; ++i)
+      {
+        localWorkspace->getSpectrum(i)->setSpectrumNo(i+1);
+      }
+      setProg( 0.6 );
+      progress(m_prog);
+      runLoadMappingTable(fileName,localWorkspace);
+      setProg( 0.7 );
+      progress(m_prog);
       if (bLoadlogFiles)
       {
         runLoadLog(fileName,localWorkspace, 0.5, 0.7);
@@ -591,14 +604,10 @@ namespace Mantid
       }
       setProtonCharge(localWorkspace->mutableRun());
 
-      setProg( 0.7 );
+      setProg( 0.8 );
       progress(m_prog);
-      for (int i = 0; i < m_numberOfSpectra; ++i)
-      {
-        localWorkspace->getAxis(1)->setValue(i, i + 1);
-      }
-      setProg( 0.9 );
       localWorkspace->populateInstrumentParameters();
+      setProg( 0.9 );
       separateOrexcludeMonitors(localWorkspace, bincludeMonitors, bexcludeMonitors,
           bseparateMonitors,m_numberOfSpectra,fileName);
       setProg( 1.0 );

@@ -100,10 +100,8 @@ namespace DataObjects
 
     //Create axes.
     m_axes.resize(2);
-    //I'm not sure what the heck this first axis is supposed to be; copying from Workspace2D
     m_axes[0] = new API::RefAxis(XLength, this);
-    // Spectrum axis
-    m_axes[1] = new API::SpectraAxis(m_noVectors);
+    m_axes[1] = new API::SpectraAxis(this);
   }
 
   //-----------------------------------------------------------------------------
@@ -559,31 +557,21 @@ namespace DataObjects
       throw std::runtime_error("EventWorkspace::padSpectra - The spectra-detector map has not been "
                                "populated.");
     }
-    API::Axis *ax1 = getAxis(1);
-    if( !ax1 )
-    {
-      throw std::runtime_error("EventWorkspace::padSpectra - NULL axis 1");
-    }
-    if( !ax1->isSpectra() )
-    {
-      throw std::runtime_error("EventWorkspace::padSpectra - Axis 1 is not a SpectraAxis");
-    }
     
     // Remove all old EventLists and resize the vector to hold everything
     this->clearData();
     data.resize(numSpectra);
     m_noVectors = numSpectra;
-    PRAGMA_OMP( parallel for )
-    for( int iwi = 0; iwi < int(numSpectra); ++iwi )
+    size_t wi = 0;
+    for ( auto it = spectramap.cbegin(); it != spectramap.cend(); ++it )
     {
-      size_t wi = size_t(iwi);
-      const specid_t specNo = ax1->spectraNo(wi);
+      const specid_t specNo = it->first;//ax1->spectraNo(wi);
       //Create an event list for here
       EventList * newel = new EventList(mru, specNo);
-      newel->addDetectorIDs( spectramap.getDetectors(specNo) );
-      newel->setSpectrumNo( specNo );
+      newel->setDetectorID( it->second );
       //Save it in the list
       data[wi] = newel;
+      ++wi;
     }
 
     // Put on a default set of X vectors, with one bin of 0 & extremely close to zero
