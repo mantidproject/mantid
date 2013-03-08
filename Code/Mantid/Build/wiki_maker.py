@@ -22,6 +22,8 @@ import platform
 
 # Junit report generator.
 reporter = WikiReporter()
+# no version identier
+noversion = -1
 
 #======================================================================
 def get_wiki_description(algo, version):
@@ -161,17 +163,18 @@ def make_wiki(algo_name, version, latest_version):
     @param version :: version requested
     @param latest_version :: the latest algorithm 
     """ 
-    
+    out = ""
     # Deprecated algorithms: Simply returnd the deprecation message
     print "Creating... ", algo_name, version
     deprec = mtd.algorithmDeprecationMessage(algo_name,version)
     if len(deprec) != 0:
-        out = deprec
-        out = out.replace(". Use ", ". Use [[")
-        out = out.replace(" instead.", "]] instead.")
-        return out
+        out = "== Deprecated ==\n\n"
+        deprecstr = deprec
+        deprecstr = deprecstr.replace(". Use ", ". Use [[")
+        deprecstr = deprecstr.replace(" instead.", "]] instead.")
+        out += deprecstr 
+        out += "\n\n"
     
-    out = ""
     alg = mtd.createAlgorithm(algo_name, version)
     
     if (latest_version > 1):
@@ -302,7 +305,15 @@ def make_redirect(from_page, to_page):
     page = site.Pages[from_page]
     contents = "#REDIRECT [[%s]]" % to_page
     page.save(contents, summary = 'Bot: created redirect to the latest version.' )
- 
+    
+#======================================================================
+def page_exists(page):
+    # Determine if the wikipage exists or not.
+    revisions = page.revisions()
+    for rev in revisions:
+        return True
+    return False
+
 #======================================================================   
 def last_page_editor(page):
     #Get the last editor of the page.
@@ -318,18 +329,17 @@ def wiki_maker_page(page):
     return ("WikiMaker" == last_page_editor(page))
     
 #======================================================================
-def do_algorithm(args, algo, version=-1):
+def do_algorithm(args, algo, version):
     """ Do the wiki page
-    @param algo_tuple :: the name of the algorithm, and it's version as a tuple"""
+    @param algo :: the name of the algorithm, and it's version as a tuple"""
     global mtd
     is_latest_version = True
-    latest_version = -1
     # Find the latest version        
-    latest_version = mtd.createAlgorithm(algo, -1).version()
-    if (version == -1): version = latest_version
+    latest_version = mtd.createAlgorithm(algo, noversion).version()
+    if (version == noversion): 
+        version = latest_version
 
     print "Latest version of %s is %d. You are making version %d." % (algo, latest_version, version)
-    
     # What should the name on the wiki page be?
     wiki_page_name = algo
     if latest_version > 1:
@@ -345,6 +355,10 @@ def do_algorithm(args, algo, version=-1):
     
     #Open the page with the name of the algo
     page = site.Pages[wiki_page_name]
+    if not page_exists(page):
+        print "Error: Wiki Page wiki_page_name %s does not exist on the wiki." % wiki_page_name
+        reporter.addFailureNoPage(algo, wiki_page_name)
+        return
     
     old_contents = page.edit() + "\n"
     
@@ -374,14 +388,13 @@ def do_algorithm(args, algo, version=-1):
             if not last_modifier == None:
                 # Report a failure test case
                 reporter.addFailureTestCase(algo, version, last_modifier, ''.join(diff_list))
+        
+        if args.dryrun:
+            print "Dry run of saving page to http://www.mantidproject.org/%s" % wiki_page_name
+        elif wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
+            print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
+            page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
             
-        if wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
-            if not args.dryrun:
-                print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
-                page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
-            else:
-                print "Dry run of saving page to http://www.mantidproject.org/%s" % wiki_page_name
-
     saved_text = open(wiki_page_name+'.txt', 'w')
     saved_text.write(new_contents)
     saved_text.close()
@@ -422,8 +435,8 @@ if __name__ == "__main__":
                         const=True, default=False,
                         help="Force overwriting the wiki page on the website if different (don't ask the user)")
 
-    parser.add_option('--no-version-check', dest='no_version_check', action='store_true',
-                        help='Do not perform version check on algorithm name.')
+    parser.add_option('--alg-version', dest='algversion', default=noversion, 
+                        help='Algorithm version to create the wiki for.')
     
     parser.add_option('--report', dest='wikimakerreport', default=False, action='store_const', const=True,
                         help="Record authors and corresponding algorithm wiki-pages that have not been generated with the wiki-maker")
@@ -469,7 +482,7 @@ if __name__ == "__main__":
             do_algorithm(args, algo_tuple[0], algo_tuple[1][0])
     else:
         for algo in algos:
-            do_algorithm(args, algo, -1)
+            do_algorithm(args, algo, int(args.algversion))
             
     if args.wikimakerreport:
         junit_file = open('WikiMakerReport.xml', 'w')
