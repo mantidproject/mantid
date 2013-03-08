@@ -368,7 +368,7 @@ namespace DataHandling
       MantidVec& y = workspace->dataY( wi );
       MantidVec& e = workspace->dataE( wi );
       workspace->getAxis(1)->setValue( wi, static_cast<specid_t>( index + i ));
-      size_t shift = i * (m_numberOfBins + 1);
+      size_t shift = i * (m_numberOfBins + 1) + 1;
       y.assign( dataBuffer.begin() + shift, dataBuffer.begin() + shift + y.size() );
       std::transform( y.begin(), y.end(), e.begin(), dblSqrt );
     }
