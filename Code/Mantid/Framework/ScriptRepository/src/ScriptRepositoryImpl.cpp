@@ -264,11 +264,11 @@ namespace API
     write_json(local_json_file,pt); 
     g_log.debug() << "ScriptRepository created the local repository information"<<std::endl; 
     
-    //    #if defined(_WIN32) ||  defined(_WIN64)
-    // set the .repository.json and .local.json hidden
-    // SetFileAttributes( local_json_file, FILE_ATTRIBUTE_HIDDEN); 
-    // SetFileAttributes (rep_json_file, FILE_ATTRIBUTE_HIDDEN);
-    //#endif
+    #if defined(_WIN32) ||  defined(_WIN64)
+    //set the .repository.json and .local.json hidden
+    SetFileAttributes( local_json_file.c_str(), FILE_ATTRIBUTE_HIDDEN); 
+    SetFileAttributes (rep_json_file.c_str(), FILE_ATTRIBUTE_HIDDEN);
+    #endif
     
     // save the path to the config service
     //
@@ -692,6 +692,11 @@ namespace API
       bak.remove(); 
     }
 
+    #if defined(_WIN32) ||  defined(_WIN64)
+    //set the .repository.json and .local.json hidden
+    SetFileAttributes (rep_json_file.c_str(), FILE_ATTRIBUTE_HIDDEN);
+    #endif
+
     // re list the files
     listFiles(); 
     
@@ -874,7 +879,7 @@ namespace API
     ptree local_json; 
     std::string filename = std::string(local_repository).append(".local.json");
     read_json(filename, local_json); 
-    
+
     ptree::const_assoc_iterator it = local_json.find(path);
     if (it == local_json.not_found()){
       boost::property_tree::ptree array;
@@ -887,7 +892,16 @@ namespace API
       localDataTree.put("downloaded_pubdate",entry.downloaded_pubdate.toFormattedString());
       //localDataTree.put("auto_update",entry.auto_update);
     }
+    g_log.debug() << "Update LOCAL JSON FILE" << std::endl; 
+    #if defined(_WIN32) ||  defined(_WIN64)
+    //set the .repository.json and .local.json hidden
+    SetFileAttributes( filename.c_str(), FILE_ATTRIBUTE_NORMAL);     
+    #endif
     write_json(filename, local_json); 
+    #if defined(_WIN32) ||  defined(_WIN64)
+    //set the .repository.json and .local.json hidden
+    SetFileAttributes( filename.c_str(), FILE_ATTRIBUTE_HIDDEN);     
+    #endif
   }
 
 
