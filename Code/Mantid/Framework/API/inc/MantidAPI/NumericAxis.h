@@ -51,8 +51,8 @@ class MANTID_API_DLL NumericAxis: public Axis
 public:
   NumericAxis(const std::size_t& length);
   virtual ~NumericAxis(){}
-  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
-  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace = NULL);
+  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace);
+  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace);
   ///Is the axis numeric - always true for this class
   virtual bool isNumeric() const{return true;}
   virtual std::size_t length() const{return m_values.size();}
