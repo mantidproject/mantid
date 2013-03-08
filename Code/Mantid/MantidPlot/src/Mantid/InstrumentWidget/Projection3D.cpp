@@ -506,7 +506,7 @@ void Projection3D::setLightingModel(bool picking) const
     float lamp0_pos[4]={0.0f, 0.0f, 0.0f, 1.0f};
     glLightfv(GL_LIGHT0, GL_POSITION, lamp0_pos);
 
-    // First light source
+    // Second light source
     // Its a directional light which follows camera position
     glEnable(GL_LIGHT1);               // Enable opengl second light
     float lamp1_diffuse[4]={lamp1_intensity, lamp1_intensity, lamp1_intensity, 1.0f};

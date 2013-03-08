@@ -34,6 +34,8 @@ public:
   /// Clear all transforamtions (rotation, translation. scaling)
   void reset();
 
+  /* Rotation */
+
 	/// Call to set the View to X+ direction
 	void setViewToXPositive();
 	/// Call to set the View to Y+ direction
@@ -47,6 +49,13 @@ public:
 	/// Call to set the View to Z- direction
 	void setViewToZNegative();
 
+  /// Init rotation at a point on the screen
+  void initRotationFrom(int a,int b);
+  /// Generate a new rotation matrix
+  void generateRotationTo(int a,int b);
+
+  /* Zooming */
+
   /// Init zooming with a point on the screen
   void initZoomFrom( int a, int b );
   /// Generate new zooming factor
@@ -54,14 +63,15 @@ public:
   /// Generate zooming factor using mouse wheel
   void wheelZoom( int a, int b, int d);
 
-  /// Init rotation at a point on the screen
-  void initRotationFrom(int a,int b);
-  /// Generate a new rotation matrix
-  void generateRotationTo(int a,int b);
+  /* Translation */
+
+	/// Call when the mouse button is pressed to translate
+	void initTranslateFrom(int,int);
+	/// Call when the mouse is moving during a translation
+	void generateTranslationTo(int,int);
 
   // void getProjection(double&,double&,double&,double&,double&,double&);
 	void getInstantProjection(double&,double&,double&,double&,double&,double&)const;
-	//void setPrespective(double,double,double,double,double,double);
 	//void setZoomFactor(double);
 	//double getZoomFactor();
 	//void setTranslation(double,double);
@@ -70,8 +80,10 @@ public:
 protected:
   /// Correct for aspect ratio
   void correctForAspectRatio(double& xmin, double& xmax, double& ymin, double& ymax)const;
-  /// Project a point on a sphere centtered at rotation point
+  /// Project a point onto a sphere centered at rotation point
   void projectOnSphere(int a, int b, Mantid::Kernel::V3D& point) const;
+	/// Generate a 3D point coordinates from coordinates on the viewport.
+	void generateTranslationPoint(int x,int y, Mantid::Kernel::V3D& p) const;
 
   /* Projection */
 
@@ -99,6 +111,14 @@ protected:
   /* Zooming */
 
   double m_zoomFactor;
+
+  /* Translation */
+
+  /// Translation in x direction 
+  double m_xTrans;
+  /// Translation in y direction 
+  double m_yTrans;
+
 };
 
 #endif /*VIEWPORT_H_*/

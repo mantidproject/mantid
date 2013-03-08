@@ -11,12 +11,13 @@
 Viewport::Viewport(int w, int h, ProjectionType type):
 m_projectionType( type ),
 m_width(w), m_height(h),
-m_left(-1), m_right(1), m_bottom(-1), m_top(1), m_near(-1), m_far(1)
+m_left(-1), m_right(1), m_bottom(-1), m_top(1), m_near(-1), m_far(1),
+m_rotationspeed(180.0 / M_PI),
+m_zoomFactor(1.0),
+m_xTrans(0.0),
+m_yTrans(0.0)
 {
-  m_rotationspeed = 180 / M_PI;
-  //m_quaternion(30.0,Mantid::Kernel::V3D(1,0.5,0));
   m_quaternion.GLMatrix( &m_rotationmatrix[0] );
-  m_zoomFactor = 1.0;
 }
 
 /**
@@ -94,28 +95,6 @@ void Viewport::correctForAspectRatio(double& xmin, double& xmax, double& ymin, d
     xmax = xmin + xSize;
   }
 }
-
-/**
- * This will set the projection to perspective.
- * UNUSED! as of 2010-11-01.
- *
- * @param l :: left side of the perspective projection (xmin)
- * @param r :: right side of the perspective projection (xmax)
- * @param b :: bottom side of the perspective projection (ymin)
- * @param t :: top side of the perspective projection (ymax)
- * @param nearz :: near side of the perspective Projection (zmin)
- * @param farz :: far side of the perspective Projection (zmax)
- */
-//void GLViewport::setPrespective(double l,double r,double b,double t,double nearz,double farz)
-//{
-//	mLeft=l;
-//	mRight=r;
-//	mBottom=b;
-//	mTop=t;
-//	mNear=nearz;
-//	mFar=farz;
-//	mProjection=GLViewport::PERSPECTIVE;
-//}
 
 Viewport::ProjectionType Viewport::getProjectionType()const
 {
@@ -323,11 +302,21 @@ void Viewport::wheelZoom( int a, int b, int d)
   m_zoomFactor *= diff;
 }
 
+/**
+ * Start a trackball rotation from here.
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ */
 void Viewport::initRotationFrom(int a,int b)
 {
   projectOnSphere(a,b,m_lastpoint);
 }
 
+/**
+ * Generate the rotation matrix to rotate to this point.
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ */
 void Viewport::generateRotationTo(int a,int b)
 {
   Mantid::Kernel::V3D newpoint;
@@ -347,4 +336,51 @@ void Viewport::generateRotationTo(int a,int b)
   // Get the corresponding OpenGL rotation matrix
   m_quaternion.GLMatrix( &m_rotationmatrix[0] );
 }
+
+/**
+ * Initialize scene translation at a point on the screen
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ */
+void Viewport::initTranslateFrom(int a,int b)
+{
+  generateTranslationPoint(a, b, m_lastpoint);
+}
+
+/**
+ * Generate scene translation such that a point of the last initTranslateFrom
+ * moved to the new position pointed by the mouse.
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ */
+void Viewport::generateTranslationTo(int a, int b)
+{
+  Mantid::Kernel::V3D newpoint;
+  generateTranslationPoint(a, b, newpoint);
+  // This is now the difference
+  newpoint -= m_lastpoint;
+  m_xTrans += newpoint[0];
+  m_yTrans += newpoint[1];
+}
+
+void Viewport::generateTranslationPoint(int a, int b, Mantid::Kernel::V3D& point)const
+{
+  double x,y,z=0.0;
+  double xmin,xmax,ymin,ymax,zmin,zmax;
+  zmin = m_near;
+  zmax = m_far;
+  correctForAspectRatio(xmin,xmax,ymin,ymax);
+  x=static_cast<double>((xmin+((xmax-xmin)*((double)a/(double)m_width))));
+  y=static_cast<double>((ymin+((ymax-ymin)*(m_height-b)/m_height)));
+  double factor=m_zoomFactor;
+  x*=factor;
+  y*=factor;
+  // Assign new values to point
+  point(x,y,z);
+  std::cerr << "-------------------------------" << std::endl;
+  std::cerr << a << ' ' << xmin << ' '<< xmax << std::endl;
+  std::cerr << m_width << ' ' << factor << std::endl;
+  std::cerr << point << std::endl;
+}
+
 
