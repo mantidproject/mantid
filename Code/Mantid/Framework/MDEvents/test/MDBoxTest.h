@@ -41,7 +41,7 @@ public:
     BoxController_sptr sc( new BoxController(3));
     MDBox<MDLeanEvent<3>,3> b3(sc, 2);
     TS_ASSERT_EQUALS( b3.getNumDims(), 3);
-    TS_ASSERT_EQUALS( b3.getBoxController(), sc);
+    TS_ASSERT( b3.getBoxController()==sc);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
     TS_ASSERT_EQUALS( b3.getDepth(), 2);
     TS_ASSERT_EQUALS( b3.getNumMDBoxes(), 1);
@@ -54,7 +54,7 @@ public:
     extents[0].setExtents(123,234);
     MDBox<MDLeanEvent<1>,1> box(sc, 2, extents);
     TS_ASSERT_EQUALS( box.getNumDims(), 1);
-    TS_ASSERT_EQUALS( box.getBoxController(), sc);
+    TS_ASSERT( box.getBoxController()==sc);
     TS_ASSERT_EQUALS( box.getNPoints(), 0);
     TS_ASSERT_EQUALS( box.getDepth(), 2);
     TS_ASSERT_EQUALS( box.getNumMDBoxes(), 1);
@@ -79,7 +79,7 @@ public:
     // Compare
     std::vector<MDLeanEvent<1> > events = box2.getEvents();
     TS_ASSERT_EQUALS( box2.getNumDims(), 1);
-    TS_ASSERT_EQUALS( box2.getBoxController(), sc);
+    TS_ASSERT( box2.getBoxController()==sc);
     TS_ASSERT_EQUALS( box2.getNPoints(), 15);
     TS_ASSERT_EQUALS( events.size(), 15);
     TS_ASSERT_DELTA( events[7].getCenter(0), 7.0, 1e-4);
@@ -308,7 +308,7 @@ public:
     for(size_t i=0; i < 12; i++) vec.push_back(ev);
     b3.addEvents( vec );
 
-    TS_ASSERT_EQUALS( b3.getBoxController(), sc);
+    TS_ASSERT( b3.getBoxController()==sc);
   }
 
 
@@ -524,7 +524,10 @@ public:
 
     // Start a NXS file
     std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + barefilename);
-    if (Poco::File(filename).exists())  Poco::File(filename).remove();
+    if (Poco::File(filename.c_str()).exists()) 
+    {
+		Poco::File(filename.c_str()).remove();
+    }
     ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
     file->makeGroup("my_test_group", "NXdata", 1);
 
@@ -593,8 +596,8 @@ public:
   void test_saveNexus()
   {
     std::string filename = do_saveNexus();
-    TS_ASSERT(Poco::File(filename).exists());
-    if (Poco::File(filename).exists()) Poco::File(filename).remove();
+    TS_ASSERT(Poco::File(filename.c_str()).exists());
+    if (Poco::File(filename.c_str()).exists()) Poco::File(filename).remove();
   }
 
   //-----------------------------------------------------------------------------------------
