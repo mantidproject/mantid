@@ -25,6 +25,8 @@
 CMD_NAME="test"
 # Branch to merge to for testing
 PRODUCTION_BRANCH="master"
+# Config key to store tested branch
+BRANCH_CFG_KEY=mantid.workflow.testbranch
 
 # Get directory of this file
 # The sed expression here replaces all backslashes by forward slashes.
@@ -36,17 +38,18 @@ usage() {
     echo "       git ${CMD_NAME} pass|fail"
     echo
     echo "In the first form start testing the given <branchname> by checking out ${PRODUCTION_BRANCH} and merging it."
-    echo "The branchname that is actually merged is origin/branchname to saving checking out a local copy of the branch"
+    echo "The branchname that is actually merged is origin/branchname to save checking out a local copy of the branch."
+    echo "The name of the branch is recorded in the config for reuse with the second form so that the branch can be deleted"
     echo "Equivalent to:"
     echo "  git fetch -p"
     echo "  git checkout ${PRODUCTION_BRANCH}"
     echo "  git reset --hard origin/${PRODUCTION_BRANCH} (Ensures it looks exactly like origin/${PRODUCTION_BRANCH})"
+    echo "  git merge --no-ff <branchname>"
     echo
-    echo "In the second form assume testing has been started and indicates whether the tests passed or failed and if"
-    echo "  passed: The commits are pushed to origin"
-    echo "  failed: The ${PRODUCTION_BRANCH} branch is hard reset to origin/${PRODUCTION_BRANCH}"
-    echo "After running 'git test pass/fail' you will be put back on the branch you started on when typing 'git test start...'"
-    echo 
+    echo "In the second form assume testing has started and indicates success/failure. If they"
+    echo "  passed: The commits are pushed to origin --> 'git push origin ${PRODUCTION_BRANCH}'"
+    echo "  failed: The merged commits are discarded --> 'git reset --hard origin/${PRODUCTION_BRANCH}'"
+    echo
     echo "In both forms a fetch & merge of origin/${PRODUCTION_BRANCH} is performed before merging the test branch."
 }
 
@@ -82,9 +85,71 @@ checkargs() {
     fi
 }
 
-main() {
-    exit 1
+start_testing() {
+   # Is the name correct
+    remote_branch_exists ${TEST_BRANCH}
+    if [ $? -eq 0 ]; then
+        echo "Cannot find branch \"${TEST_BRANCH}\" on the remote. Is the name correct?"
+        exit 1
+    fi    
+
+    startbranch=$(current_branch)
+    if [ "${startbranch}" != "${PRODUCTION_BRANCH}" ]; then
+        run_git checkout ${PRODUCTION_BRANCH}
+    fi
     
+    # Sanity check
+    currentbranch=$(current_branch)
+    if [ "${currentbranch}" != "${PRODUCTION_BRANCH}" ]; then
+        echo "Error switching to ${PRODUCTION_BRANCH}, cannot continue. Seek help!"
+        exit 1
+    fi
+    
+    # Record what we are testing for later pass/fail
+    git config ${BRANCH_CFG_KEY} ${startbranch}
+    
+    # Update master
+    run_git reset --hard origin/${PRODUCTION_BRANCH}
+    
+    # Merge test branch
+    run_git merge --no-ff origin/${TEST_BRANCH}
+
+    echo "Now build the code & test the changes."
+    echo "When complete if:"
+    echo "  success: run 'git test pass'"
+    echo "  failure: run 'git test fail'"
+    echo
+ 
+}
+
+end_testing() {
+    testbranch=$(git config ${BRANCH_CFG_KEY})
+    if [ -z ${testbranch} ]; then
+        echo "The name of the test branch has not been recorded in the config. Was the testing started with 'git test start'?"
+        exit 1
+    fi
+    
+    if [ $TEST_PASSED -eq 1 ]; then
+        run_git push origin ${PRODUCTION_BRANCH}
+        
+        # Delete branch on the remote
+        run_git push origin :${testbranch}
+        
+        # Delete local branch if there
+        local_branch_exists ${testbranch}
+        if [ $? -eq 1 ]; then
+            run_git branch -D ${testbranch}
+        fi
+
+    else
+        run_git reset --hard origin/${PRODUCTION_BRANCH}
+    fi
+    
+    # Remove the stored name
+    git config --remove ${BRANCH_CFG_KEY}
+}
+
+main() {
     # Helper functions
     . "${CMDFILE_DIR}/gitworkflow-helpers"
     
@@ -101,45 +166,12 @@ main() {
 
     # Ensure we have everything from the remote
     run_git fetch -p
-    
-    # Is the name correct
-    remote_branch_exists ${TEST_BRANCH}
-    if [ $? -eq 0 ];
-        echo "Cannot find branch \"${TEST_BRANCH}\" on the remote. Is the name correct?"
-        exit 1
-    fi    
-    
-    
-    #todo: Finish usage
-    #todo: Finish result mode and store starting branchfor final switch back
-    
+        
     if [ $START_MODE -eq 1 ]; then
-        currentbranch=$(current_branch)
-        if [ "${currentbranch}" != "${PRODUCTION_BRANCH}" ]; then
-            run_git checkout ${PRODUCTION_BRANCH}
-        fi
-        
-        # Sanity check
-        currentbranch=$(current_branch)
-        if [ "${currentbranch}" != "${PRODUCTION_BRANCH}" ]; then
-            echo "Error switching to ${PRODUCTION_BRANCH}, cannot continue. Seek help!"
-            exit 1
-        fi
-        
-        # Update master
-        run_git reset --hard origin/${PRODUCTION_BRANCH}
-        
-        # Merge test branch
-        run_git merge origin/${TEST_BRANCH}
-        
-        echo "Now build the code & test the changes."
-        echo "When complete if:"
-        echo "  success: run 'git test pass'"
-        echo "  failure: run 'git test fail'"
-        echo
+        start_testing
+    elif [ $RESULT_MODE -eq 1 ]; then
+        end_testing
     fi
-    
-    
 }
 
 main "$@"

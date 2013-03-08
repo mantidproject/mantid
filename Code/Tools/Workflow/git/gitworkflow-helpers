@@ -28,14 +28,14 @@ export CMDFILE_DIR=$(dirname "$(echo "$0" | sed -e 's@\\@/@g')")
 
 # Checks if the branch exists locally
 local_branch_exists() {
-    git branch --no-color | grep -E "^${1}$"
+    git branch --no-color | grep -E "${1}$" > /dev/null
     retval=$(($? == 1 ? 0 : 1))
     return ${retval}
 }
 
 # Checks if there is a branch origin/branchname
 remote_branch_exists() { 
-    git branch --no-color | grep -E "^origin/${1}$" > /dev/null
+    git branch -r --no-color | grep -E "origin/${1}$" > /dev/null
     retval=$(($? == 1 ? 0 : 1))
     return ${retval}
 }
