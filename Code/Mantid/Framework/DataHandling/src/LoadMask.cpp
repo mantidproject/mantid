@@ -402,7 +402,7 @@ namespace DataHandling
     for (size_t i = 0; i < pairslow.size(); i ++)
     {
       // TODO Make this function work!
-      g_log.warning() << "Mask Spectrum " << pairslow[i] << "  To " << pairsup[i] << std::endl;
+      g_log.debug() << "Mask Spectrum " << pairslow[i] << "  To " << pairsup[i] << std::endl;
 
       for (int32_t specid=pairslow[i]; specid<=pairsup[i]; specid++)
       {
