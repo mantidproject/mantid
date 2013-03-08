@@ -3,7 +3,7 @@
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
-
+#include <utility>
 using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl; 
@@ -14,10 +14,20 @@ using Mantid::Kernel::ConfigServiceImpl;
 #include <Poco/URI.h>
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
-#include <Poco/NullStream.h>
 #include <Poco/Exception.h>
 #include <Poco/Net/HTTPResponse.h>
+// Visual Studion compains with the inclusion of Poco/FileStream
+// disabling this warning.
+#if defined(_WIN32) || defined(_WIN64)
+#pragma warning( push )
+#pragma warning( disable : 4250 )
 #include <Poco/FileStream.h>
+#include <Poco/NullStream.h>
+#pragma warning( pop )
+#else
+#include <Poco/FileStream.h>
+#include <Poco/NullStream.h>
+#endif
 #include <Poco/StreamCopier.h>
 #include <Poco/Net/NetException.h>
 #include <Poco/DirectoryIterator.h>
@@ -140,6 +150,8 @@ namespace API
     //  - This folder must have the .repository.json file
     //  - This folder must have the .local.json file
     // These tests will be done with Poco library
+
+    
     
     
     Poco::Path local(local_repository); 
@@ -150,6 +162,7 @@ namespace API
       local_repository = aux_local_rep;
     }
 
+    
     try{// tests 1 and 2
       {
         Poco::File local_rep_dir(local);
@@ -175,6 +188,12 @@ namespace API
       g_log.error() << "Testing the existence of repository.json and local.json failed"<<std::endl; 
       return;
     }
+
+    // this is necessary because in windows, the absolute path is given with \ slash.
+    boost::replace_all(local_repository,"\\","/");
+    if (local_repository[local_repository.size()-1] != '/')
+      local_repository.append("/");
+
     g_log.debug() << "ScriptRepository initialized" << std::endl; 
     repo.clear();
     valid = true;
@@ -259,6 +278,13 @@ namespace API
       config.setString("ScriptLocalRepository", path); 
       config.saveConfig(config.getUserFilename()); 
     }
+
+    local_repository = path;
+    // this is necessary because in windows, the absolute path is given with \ slash.
+    boost::replace_all(local_repository,"\\","/");
+    if (local_repository[local_repository.size()-1] != '/')
+      local_repository.append("/");
+
     valid = true;
   }
 
@@ -347,7 +373,7 @@ namespace API
       g_log.debug() << "Evaluating the status of " << entry_path << std::endl;
       // fill up the output vector
       out[--i] = it->first;
-      //      g_log.debug() << "inserting file: " << it->first << std::endl; 
+      g_log.debug() << "inserting file: " << it->first << std::endl; 
 
       // get the path of the parent directory
       size_t pos = entry_path.rfind("/"); 
@@ -848,17 +874,16 @@ namespace API
     ptree local_json; 
     std::string filename = std::string(local_repository).append(".local.json");
     read_json(filename, local_json); 
-
+    
     ptree::const_assoc_iterator it = local_json.find(path);
     if (it == local_json.not_found()){
       boost::property_tree::ptree array;
-      array.push_back(std::make_pair("downloaded_date",entry.downloaded_date.toFormattedString())); 
-      array.push_back(std::make_pair("downloaded_pubdate",entry.downloaded_pubdate.toFormattedString()));
+      array.put(std::string("downloaded_date"), entry.downloaded_date.toFormattedString());
+      array.put(std::string("downloaded_pubdate"), entry.downloaded_pubdate.toFormattedString());
       //      array.push_back(std::make_pair("auto_update",entry.auto_update)));
       local_json.push_back(std::make_pair(path, array));
     }else{
       boost::property_tree::ptree &localDataTree = local_json.get_child(path); 
-      localDataTree.put("downloaded_date",entry.downloaded_date.toFormattedString()); 
       localDataTree.put("downloaded_pubdate",entry.downloaded_pubdate.toFormattedString());
       //localDataTree.put("auto_update",entry.auto_update);
     }
@@ -910,6 +935,7 @@ namespace API
   }
 
   bool ScriptRepositoryImpl::isEntryValid(std::string path){
+    g_log.debug() << "Is valid entry? " << path << std::endl; 
     if (path == ".repository.json")
       return false;
     if (path == ".local.json")
@@ -953,7 +979,7 @@ namespace API
       absolute_path = pathFound.absolute().toString(); 
     else
       absolute_path = path;
-
+    g_log.debug() << "ConvertPath: Entered: " << path  << " and local_repository: " << local_repository << std::endl; 
     // this is necessary because in windows, the absolute path is given with \ slash.
     boost::replace_all(absolute_path,"\\","/");     
     
@@ -966,8 +992,10 @@ namespace API
     }else{
       // the path is inside the local repository
       // remove the repo_path from te absolute path 
-      // +1 to remove the slash /
-      return std::string(absolute_path.begin() + pos + local_repository.size(), absolute_path.end());
+      // +1 to remove the slash /      
+      std::string retpath(absolute_path.begin() + pos + local_repository.size(), absolute_path.end()); 
+      g_log.debug() << "ConvertPath: Entered: " << path << " return: " << retpath << std::endl; 
+      return retpath;
     }
     return path; 
   }

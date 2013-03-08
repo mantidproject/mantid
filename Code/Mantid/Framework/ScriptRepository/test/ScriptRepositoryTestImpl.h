@@ -4,7 +4,16 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
 #include <Poco/File.h>
+// Visual Studion compains with the inclusion of Poco/FileStream
+// disabling this warning.
+#if defined(_WIN32) || defined(_WIN64)
+#pragma warning( push )
+#pragma warning( disable : 4250 )
 #include <Poco/FileStream.h>
+#pragma warning( pop )
+#else
+#include <Poco/FileStream.h>
+#endif
 #include <Poco/TemporaryFile.h>
 #include <algorithm>
 #include <Poco/DateTimeFormatter.h>
@@ -484,7 +493,11 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     */
 
     if (TEST_MANUALLY){
+#if defined(WIN32) || defined(WIN64)  
+      Sleep(1000000);
+#else
       sleep(1);
+#endif
       Poco::FileStream _ap(std::string(local_rep).append("/").append(file_name));
       _ap << "Local change";
       _ap.close();
