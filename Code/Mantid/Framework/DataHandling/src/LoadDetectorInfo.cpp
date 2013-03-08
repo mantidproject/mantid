@@ -1327,11 +1327,6 @@ void LoadDetectorInfo::readDetDotDatNXS(::NeXus::File *hFile, std::vector<detect
         throw std::runtime_error("The size of nexus data columns is not equal to each other");
     }
 
-    // Redundant check - probably can be removed.
-   if(nDetectors > std::numeric_limits<int>::max())
-       throw std::runtime_error("The number of detectors is bigger then max int for current architecture");
-
-
    detStruct.resize(nDetectors);
    detOffset.resize(nDetectors);
    detType.resize(nDetectors);
