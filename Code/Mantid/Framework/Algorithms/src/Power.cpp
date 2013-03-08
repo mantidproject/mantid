@@ -2,6 +2,7 @@
 
 
 The algorithm will raise the InputWorkspace to the power of the Exponent.
+When acting on an event workspace, the output will be a Workspace2D, with the default binning from the original workspace.
 
 == Errors ==
 
@@ -48,7 +49,7 @@ void Power::initDocs()
 
 void Power::defineProperties()
 {
-  declareProperty("Exponent", 1.0);
+  declareProperty("Exponent", 1.0,"The exponent with which to raise base values in the base workspace to.");
 }
 
 void Power::retrieveProperties()

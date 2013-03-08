@@ -103,7 +103,7 @@ namespace Mantid
      /// Sets documentation strings for this algorithm
      void LoadSpice2D::initDocs()
      {
-       this->setWikiSummary("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance. ");
+       this->setWikiSummary("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
        this->setOptionalMessage("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
      }
      
@@ -127,9 +127,9 @@ namespace Mantid
       auto mustBePositive = boost::make_shared< Kernel::BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
       declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
-          "Wavelength value to use when loading the data file (Angstrom).");
+          "Optional wavelength value to use when loading the data file (Angstrom). This value will be used instead of the value found in the data file.");
       declareProperty("WavelengthSpread", 0.1, mustBePositive,
-        "Wavelength spread to use when loading the data file (default 0.0)" );
+                      "Optional wavelength spread value to use when loading the data file (Angstrom). This value will be used instead of the value found in the data file."); 
 
     }
 

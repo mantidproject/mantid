@@ -94,7 +94,7 @@ set ( SRC_FILES
 	src/ManagedRawFileWorkspace2D.cpp
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
-	src/Merge2WorkspaceLogs.cpp
+	src/MergeLogs.cpp
 	src/ModifyDetectorDotDatFile.cpp
 	src/MonitorLiveData.cpp
 	src/MoveInstrumentComponent.cpp
@@ -105,7 +105,7 @@ set ( SRC_FILES
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
-    src/SNSDataArchiveICAT2.cpp
+	src/SNSDataArchiveICAT2.cpp
 	src/SNSLiveEventDataListener.cpp
 	src/SaveAscii.cpp
 	src/SaveCSV.cpp
@@ -222,14 +222,14 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
-    inc/MantidDataHandling/LoadSassena.h
+	inc/MantidDataHandling/LoadSassena.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
 	inc/MantidDataHandling/ManagedRawFileWorkspace2D.h
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
-	inc/MantidDataHandling/Merge2WorkspaceLogs.h
+	inc/MantidDataHandling/MergeLogs.h
 	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MonitorLiveData.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
@@ -240,7 +240,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/SNSDataArchive.h
-    inc/MantidDataHandling/SNSDataArchiveICAT2.h
+	inc/MantidDataHandling/SNSDataArchiveICAT2.h
 	inc/MantidDataHandling/SNSLiveEventDataListener.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveCSV.h
@@ -357,7 +357,7 @@ set ( TEST_FILES
 	ManagedRawFileWorkspace2DTest.h
 	MaskDetectorsInShapeTest.h
 	MaskDetectorsTest.h
-	Merge2WorkspaceLogsTest.h
+	MergeLogsTest.h
 	MonitorLiveDataTest.h
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h
@@ -365,7 +365,7 @@ set ( TEST_FILES
 	RawFileInfoTest.h
 	RemoveLogsTest.h
 	RenameLogTest.h
-    RotateInstrumentComponentTest.h
+	RotateInstrumentComponentTest.h
 	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
 	SaveAsciiTest.h

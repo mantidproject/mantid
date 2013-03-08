@@ -8,6 +8,10 @@ being the mid-point of the bin in the case of histogram data.
 The data and error values are either divided or multiplied by the value of this function, according to the
 setting of the Operation property.
 
+This algorithm is now event aware.
+
+This correction is applied to a copy of the input workpace and put into output workspace.
+If the input and output workspaces have the same name, the operation is applied to the workspace of that name.
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -39,14 +43,15 @@ namespace Algorithms
   {
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
-    declareProperty("C",1.0,mustBePositive);
+    declareProperty("C",1.0,mustBePositive,"The positive value by which the entire exponent calculation is multiplied (see formula below).");
     
-    declareProperty("C1",1.0);
+    declareProperty("C1",1.0,"The value by which the entire calculation is multiplied (see formula below).");
 
     std::vector<std::string> operations(2);
     operations[0] = "Multiply";
     operations[1] = "Divide";
-    declareProperty("Operation", "Divide", boost::make_shared<Kernel::StringListValidator>(operations));
+    declareProperty("Operation", "Divide", boost::make_shared<Kernel::StringListValidator>(operations),
+      "Whether to divide (the default) or multiply the data by the correction function.");
   }
   
   void OneMinusExponentialCor::retrieveProperties()

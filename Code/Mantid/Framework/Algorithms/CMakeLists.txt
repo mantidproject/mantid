@@ -136,7 +136,7 @@ set ( SRC_FILES
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
 	src/OneMinusExponentialCor.cpp
-	src/PDFFT.cpp
+	src/PDFFourierTransform.cpp
 	src/Pause.cpp
 	src/PlotAsymmetryByLogValue.cpp
 	src/Plus.cpp
@@ -346,7 +346,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
-	inc/MantidAlgorithms/PDFFT.h
+	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
 	inc/MantidAlgorithms/Plus.h
@@ -549,7 +549,7 @@ set ( TEST_FILES
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
 	OneMinusExponentialCorTest.h
-	PDFFTTest.h
+	PDFFourierTransformTest.h
 	PauseTest.h
 	PlotAsymmetryByLogValueTest.h
 	PlusTest.h

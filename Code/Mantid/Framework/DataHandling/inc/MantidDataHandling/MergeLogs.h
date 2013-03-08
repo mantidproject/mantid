@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_MERGE2WORKSPACELOGS_H_
-#define MANTID_DATAHANDLING_MERGE2WORKSPACELOGS_H_
+#ifndef MANTID_DATAHANDLING_MERGELOGS_H_
+#define MANTID_DATAHANDLING_MERGELOGS_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -68,4 +68,4 @@ namespace DataHandling
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_MERGE2WORKSPACELOGS_H_ */
+#endif  /* MANTID_DATAHANDLING_MERGELOGS_H_ */

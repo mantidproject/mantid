@@ -78,26 +78,25 @@ namespace Mantid
     void PlotAsymmetryByLogValue::init()
     {
       std::string ext(".nxs");
-      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, ext));
-      declareProperty(new FileProperty("LastRun","", FileProperty::Load, ext));
-      declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-      declareProperty("LogValue","",boost::make_shared<MandatoryValidator<std::string>>());
-      declareProperty("Red", 1, Direction::Input);
-      declareProperty("Green", EMPTY_INT(), Direction::Input);
-
+      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, ext), "The name of the first workspace in the series.");
+      declareProperty(new FileProperty("LastRun","", FileProperty::Load, ext), "The name of the last workspace in the series.");
+      declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The name of the output workspace containing the resulting asymmetries.");
+      declareProperty("LogValue","",boost::make_shared<MandatoryValidator<std::string>>(), "The name of the log values which will be used as the x-axis in the output workspace.");
+      declareProperty("Red", 1, "The period number for the 'red' data.");
+      declareProperty("Green", EMPTY_INT(), "The period number for the 'green' data.");
+      
       std::vector<std::string> options;
       options.push_back("Integral");
       options.push_back("Differential");
-      declareProperty("Type","Integral",boost::make_shared<StringListValidator>(options));
+      declareProperty("Type","Integral",boost::make_shared<StringListValidator>(options),"The calculation type: 'Integral' or 'Differential'.");
 
-      declareProperty("TimeMin",EMPTY_DBL(),"Starting X value for integration");
-      declareProperty("TimeMax",EMPTY_DBL(),"Ending X value for integration");
+      declareProperty("TimeMin",EMPTY_DBL(),"The beginning of the time interval used in the calculations.");
+      declareProperty("TimeMax",EMPTY_DBL(),"The end of the time interval used in the calculations.");
 
        declareProperty(new ArrayProperty<int> ("ForwardSpectra"),
-         "The spectra numbers of the forward group (default 0)");
+         "The list of spectra for the forward group. If not specified the following happens. The data will be grouped according to grouping information in the data, if available. The forward will use the first of these groups.");
        declareProperty(new ArrayProperty<int> ("BackwardSpectra"),
-         "The spectra numbers of the backward group (default 1)");
-      //declareProperty("Alpha",1.0,Direction::Input);
+         "The list of spectra for the backward group. If not specified the following happens. The data will be grouped according to grouping information in the data, if available. The backward will use the second of these groups.");
     }
 
     /** 

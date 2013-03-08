@@ -1,3 +1,13 @@
+"""*WIKI* 
+
+Loads an existing file of pre-calculated or measured absorption coefficients for the PEARL instrument.
+
+If the file contains "t=" on the first line then the number following this is assumed to be the thickness in mm. The values in the second column are assumed to be <math>\alpha(t)</math>. Upon reading the file the <math>\alpha</math> values for transformed into attenuation coefficients via <math>\frac{I}{I_0} = exp(-\alpha * t)</math>.
+ 
+If the file does not contain "t=" on the top line then the values are assumed to be calculated <math>\frac{I}{I_0}</math> values and are simply read in verbatim.
+
+*WIKI*"""
+
 from MantidFramework import *
 from mantidsimple import LoadAscii
 import math
@@ -8,10 +18,11 @@ class PearlMCAbsorption(PythonAlgorithm):
         return "CorrectionFunctions\\AbsorptionCorrections;PythonAlgorithms"
 
     def PyInit(self):
+        self.setWikiSummary("Loads pre-calculated or measured absorption correction files for Pearl.")
         # Input file
-        self.declareFileProperty("Filename","", FileAction.Load, ['.out','.dat'])
+        self.declareFileProperty("Filename","", FileAction.Load, ['.out','.dat'],"The name of the input file.")
         # Output workspace
-        self.declareWorkspaceProperty("OutputWorkspace","", Direction = Direction.Output)
+        self.declareWorkspaceProperty("OutputWorkspace","", Direction = Direction.Output, Description = "The name of the input file.")
         
     def PyExec(self):
         filename = self.getProperty("Filename")

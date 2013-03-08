@@ -54,6 +54,8 @@ public:
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Arithmetic";}
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   /// The value to replace ln(0)
   double log_Min;
   /// If the logarithm natural or 10-based

@@ -1,4 +1,12 @@
-#include "MantidDataHandling/Merge2WorkspaceLogs.h"
+/*WIKI* 
+
+Two [[TimeSeriesProperty]] logs are merged together by the time stamps.  
+
+==Output==
+A MatrixWorkspace.
+
+*WIKI*/
+#include "MantidDataHandling/MergeLogs.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -29,7 +37,7 @@ namespace DataHandling
   
   void Merge2WorkspaceLogs::initDocs(){
 
-    this->setWikiSummary("Merge 2 TimeSeries logs in a given Workspace. ");
+    this->setWikiSummary("Merge 2 logs of [[TimeSeriesProperty]] in a workspace to a new [[TimeSeriesProperty]] log.");
     this->setOptionalMessage("Merge 2 TimeSeries logs in a given Workspace.");
 
     return;
@@ -39,9 +47,9 @@ namespace DataHandling
 
     declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("Workspace", "Anonymous", Direction::InOut),
         "Workspace to have logs merged");
-    declareProperty("LogName1", "", "One of the log to be merged");
-    declareProperty("LogName2", "", "One of the log to be merged");
-    declareProperty("MergedLogName", "", "Name of the merged log.");
+    declareProperty("LogName1", "", "The name of the first log to be merged.");
+    declareProperty("LogName2", "", "The name of the second log to be merged.");
+    declareProperty("MergedLogName", "", "The name of the new log as the result of log 1 being merged with log 2.");
     declareProperty("ResetLogValue", false, "Reset both logs' values to unity for each one.");
     declareProperty("LogValue1", 0.0, "Unity value of log 1.");
     declareProperty("LogValue2", 1.0, "Unity value of log 2.");
