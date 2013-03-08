@@ -491,7 +491,7 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
        
        so, we will propose two versions, but for production, we will use the fastest one.
     */
-
+    
     if (TEST_MANUALLY){
 #if defined(WIN32) || defined(WIN64)  
       Sleep(1000000);
@@ -513,9 +513,20 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
         <<"}\n"
          <<"}";
       ss.close();
+      std::string localjson = string(local_rep).append("/.local.json");
       Poco::File f(std::string(local_rep).append("/local.json")); 
-      f.moveTo(std::string(local_rep).append("/.local.json"));
+      
+      #if defined(_WIN32) ||  defined(_WIN64)
+      //set the .repository.json and .local.json hidden
+      SetFileAttributes( localjson.c_str(), FILE_ATTRIBUTE_NORMAL);     
+      #endif
+      f.moveTo(localjson);
+      #if defined(_WIN32) ||  defined(_WIN64)
+     //set the .repository.json and .local.json hidden
+      SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_HIDDEN);     
+      #endif    
     }
+    
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
     
     // file has local changes
