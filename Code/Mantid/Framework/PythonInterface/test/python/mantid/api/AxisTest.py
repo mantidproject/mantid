@@ -1,6 +1,6 @@
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import NumericAxis, SpectraAxis, TextAxis
+from mantid.api import NumericAxis, TextAxis
 import numpy as np
 
 class AxisTest(unittest.TestCase):
