@@ -1,4 +1,5 @@
-from mantidsimple import *
+import os
+from mantid.simpleapi import *
 from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1
@@ -37,10 +38,11 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
       if inst.upper() != 'SANS2D' and isFirstDataSetEvent:      
         error = 'Adding event data not supported for ' + inst + ' for now'
         print error
-        mantid.sendLogMessage(error)
-        if mantid.workspaceExists('AddFilesSumTempory') : mantid.deleteWorkspace('AddFilesSumTempory')
-        if mantid.workspaceExists('AddFilesSumTempory_monitors') : mantid.deleteWorkspace('AddFilesSumTempory_monitors')        
-        return "" 
+        logger.notice(error)
+        for workspaceName in ('AddFilesSumTempory','AddFilesSumTempory_monitors'):
+            if workspaceName in mtd:
+                DeleteWorkspace(workspaceName)
+        return ""
   
       for i in range(len(runs)-1):
         userEntry = runs[i+1]
@@ -50,30 +52,32 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         if isDataSetEvent != isFirstDataSetEvent:
             error = 'Datasets added must be either ALL histogram data or ALL event data'
             print error
-            mantid.sendLogMessage(error)
-            if mantid.workspaceExists('AddFilesSumTempory')  : mantid.deleteWorkspace('AddFilesSumTempory')
-            if mantid.workspaceExists('AddFilesNewTempory')  : mantid.deleteWorkspace('AddFilesNewTempory')
+            logger.notice(error)
+            for workspaceName in ('AddFilesSumTempory','AddFilesNewTempory'):
+                if workspaceName in mtd:
+                    DeleteWorkspace(workspaceName)
             return ""
         
-        Plus('AddFilesSumTempory', 'AddFilesNewTempory', 'AddFilesSumTempory')
+        Plus(LHSWorkspace='AddFilesSumTempory',RHSWorkspace= 'AddFilesNewTempory',OutputWorkspace= 'AddFilesSumTempory')
         if isFirstDataSetEvent:
-            Plus('AddFilesSumTempory_monitors', 'AddFilesNewTempory_monitors', 'AddFilesSumTempory_monitors')
-        mantid.deleteWorkspace("AddFilesNewTempory")
+            Plus(LHSWorkspace='AddFilesSumTempory_monitors',RHSWorkspace= 'AddFilesNewTempory_monitors',OutputWorkspace= 'AddFilesSumTempory_monitors')
+        DeleteWorkspace("AddFilesNewTempory")
         if isFirstDataSetEvent:
-            mantid.deleteWorkspace("AddFilesNewTempory_monitors")      
+            DeleteWorkspace("AddFilesNewTempory_monitors")      
               
     except ValueError, reason:
       error = 'Error opening file ' + userEntry+': ' + reason.message
       print error
-      mantid.sendLogMessage(error)
-      if mantid.workspaceExists('AddFilesSumTempory')  : mantid.deleteWorkspace('AddFilesSumTempory')
+      logger.notice(error)
+      if 'AddFilesSumTempory' in mtd  : DeleteWorkspace('AddFilesSumTempory')
       return ""
     except Exception, reason:
       error = 'Error finding files: ' + reason.message
       print error
-      mantid.sendLogMessage(error)
-      if mantid.workspaceExists('AddFilesSumTempory') : mantid.deleteWorkspace('AddFilesSumTempory')
-      if mantid.workspaceExists('AddFilesNewTempory') : mantid.deleteWorkspace("AddFilesNewTempory")
+      logger.notice(error)
+      for workspaceName in ('AddFilesSumTempory','AddFilesNewTempory'):
+          if workspaceName in mtd:
+              DeleteWorkspace(workspaceName)      
       return ""
 
     # in case of event file force it into a histogram workspace
@@ -91,16 +95,16 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                     binning = binning + "," + str(monX[j-1]) + "," + str(binGap)    
             binning = binning + "," + str(monX[len(monX)-1])
             
-        mantid.sendLogMessage(binning)        
-        Rebin('AddFilesSumTempory','AddFilesSumTempory_Rebin', binning, PreserveEvents=False)
+        logger.notice(binning)        
+        Rebin(InputWorkspace='AddFilesSumTempory',OutputWorkspace='AddFilesSumTempory_Rebin',Params= binning, PreserveEvents=False)
         
         filename, ext = _makeFilename(runs[0], defType, inst)
-        LoadNexus(filename, OutputWorkspace='AddFilesSumTempory')
+        LoadNexus(Filename=filename, OutputWorkspace='AddFilesSumTempory')
         # User may have selected a binning which is different from the default
-        Rebin('AddFilesSumTempory','AddFilesSumTempory', binning)
+        Rebin(InputWorkspace='AddFilesSumTempory',OutputWorkspace='AddFilesSumTempory',Params= binning)
         # For now the monitor binning must be the same as the detector binning
         # since otherwise both cannot exist in the same output histogram file
-        Rebin('AddFilesSumTempory_monitors','AddFilesSumTempory_monitors', binning)
+        Rebin(InputWorkspace='AddFilesSumTempory_monitors',OutputWorkspace='AddFilesSumTempory_monitors',Params= binning)
         
         wsInMonitor = mtd['AddFilesSumTempory_monitors']
         wsOut = mtd['AddFilesSumTempory']    
@@ -124,22 +128,23 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                 outY[j] = detectorY[j]   
                 outE[j] = detectorE[j]                         
                        
-        if mantid.workspaceExists('AddFilesSumTempory_Rebin') : mantid.deleteWorkspace('AddFilesSumTempory_Rebin')
+        if 'AddFilesSumTempory_Rebin' in mtd : DeleteWorkspace('AddFilesSumTempory_Rebin')
 
     lastFile = os.path.splitext(lastFile)[0]
     # now save the added file
     outFile = lastFile+'-add.'+'nxs'
-    mantid.sendLogMessage('writing file:   '+outFile)
+    logger.notice('writing file:   '+outFile)
     if period == 1 or period == _NO_INDIVIDUAL_PERIODS:
       #replace the file the first time around
-      sav = SaveNexusProcessed("AddFilesSumTempory", outFile, Append=False)
+      SaveNexusProcessed(InputWorkspace="AddFilesSumTempory", 
+                               Filename=outFile, Append=False)
     else:
       #then append
-      sav = SaveNexusProcessed("AddFilesSumTempory", outFile, Append=True)
+      SaveNexusProcessed("AddFilesSumTempory", outFile, Append=True)
      
-    mantid.deleteWorkspace("AddFilesSumTempory")
+    DeleteWorkspace("AddFilesSumTempory")
     if isFirstDataSetEvent:
-            mantid.deleteWorkspace("AddFilesSumTempory_monitors")
+            DeleteWorkspace("AddFilesSumTempory_monitors")
   
     if period == num_periods:
       break
@@ -150,8 +155,12 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
       period += 1
 
   #this adds the path to the filename
-  outFile = sav.getPropertyValue('Filename')
-  pathout = os.path.split(outFile)[0]
+  
+  path,base = os.path.split(outFile)
+  if path == '' or base not in os.listdir(path):
+      path = config['defaultsave.directory'] + path
+      assert(base in os.listdir(path))
+  pathout = path
   if logFile:
     _copyLog(lastPath, logFile, pathout)
 
@@ -188,19 +197,21 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
     
   filename, ext = _makeFilename(entry, ext, inst)
 
-  mantid.sendLogMessage('reading file:   '+filename)
+  logger.notice('reading file:   '+filename)
 
   if period != _NO_INDIVIDUAL_PERIODS:
       #load just a single period
       if ext == ".nxs" or ext == ".NXS":
-        props = LoadNexus( Filename=filename,OutputWorkspace=wsName, EntryNumber=period)
+        outWs = LoadNexus( Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
       else:   
-        props = Load(Filename=filename,OutputWorkspace=wsName, EntryNumber=period)
+        outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
   else:
       if ext == ".nxs" or ext == ".NXS":
-        props = LoadNexus(Filename=filename,OutputWorkspace=wsName)
+        outWs = LoadNexus(Filename=filename,OutputWorkspace=wsName)
       else:
-        props = Load(Filename=filename,OutputWorkspace=wsName)
+        outWs = Load(Filename=filename,OutputWorkspace=wsName)
+
+  props = outWs.getHistory().lastAlgorithm()
 
   isDataSetEvent = False
   wsDataSet = mtd[wsName]
@@ -219,18 +230,18 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
       # cal time dif in seconds
       timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
       if timeDif > 172800:
-          mantid.sendLogMessage('::SANS::WARNING: Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
+          logger.notice('::SANS::WARNING: Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
                                 ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
           break 
-          
-  path = props.getPropertyValue('FileName')
+  
+  path = props.getPropertyValue('FileName')        
   path, fName = os.path.split(path)
   if path.find('/') == -1:
     #looks like we're on a windows system, convert the directory separators
     path = path.replace('\\', '/')
     
   if _isType(ext, rawTypes):
-    LoadSampleDetailsFromRaw(wsName, path+'/'+fName)
+    LoadSampleDetailsFromRaw(InputWorkspace=wsName,Filename= path+'/'+fName)
 
   logFile = None
   #change below when logs in Nexus files work  file types of .raw need their log files to be copied too
@@ -238,7 +249,7 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
     logFile = os.path.splitext(fName)[0]+'.log'
     
   try:
-    samp = mtd[wsName].getSampleDetails()
+    samp = mtd[wsName].getRun()
     numPeriods = samp.getLogData('nperiods').value
   except:
     #assume the run file didn't support multi-period data and so there is only one period
@@ -276,9 +287,8 @@ def _copyLog(lastPath, logFile, pathout):
     if os.path.exists(logFile):
         copyfile(logFile, pathout+'/'+os.path.basename(logFile))
     else:
-        mantid.sendLogMessage("Could not find log file %s" % logFile)
+        logger.notice("Could not find log file %s" % logFile)
   except Exception, reason:
     error = 'Error copying log file ' + logFile + ' to directory ' + pathout+'\n'
     print error
-    mantid.sendLogMessage(error)
-
+    logger.notice(error)

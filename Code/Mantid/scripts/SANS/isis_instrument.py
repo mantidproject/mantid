@@ -1,6 +1,8 @@
 from reduction import instrument
 import math
-from mantidsimple import *
+from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup
+
 import sys
 
 class DetectorBank:
@@ -252,7 +254,7 @@ class DetectorBank:
         base = self._first_spec_num
 
         if not self._shape.isRectangle():
-            mantid.sendLogMessage('::SANS::Warning: Attempting to block rows or columns in a non-rectangular detector, this is likely to give unexpected results!')
+            logger.notice('::SANS::Warning: Attempting to block rows or columns in a non-rectangular detector, this is likely to give unexpected results!')
             
         output = ''
         if self._orientation == 'Horizontal':
@@ -315,7 +317,7 @@ class DetectorBank:
             wki = mtd[input_name]
             #Is it really necessary to crop?
             if (wki.getNumberHistograms() != self.last_spec_num - self.get_first_spec_num() + 1):
-                CropWorkspace(input_name, output_name,
+                CropWorkspace(InputWorkspace=input_name,OutputWorkspace= output_name,
                               StartWorkspaceIndex = self.get_first_spec_num() - 1,
                               EndWorkspaceIndex = self.last_spec_num - 1)
         except :            
@@ -376,7 +378,7 @@ class ISISInstrument(instrument.Instrument):
             'default-transmission-monitor-spectrum')[0])
         self.incid_mon_4_trans_calc = self._incid_monitor
         
-        isis = mtd.settings.facility('ISIS')
+        isis = config.getFacility('ISIS')
         # Number of digits in standard file name
         self.run_number_width = isis.instrument(self._NAME).zeroPadding(0)
 
@@ -458,7 +460,7 @@ class ISISInstrument(instrument.Instrument):
         for n, detect in self.DETECTORS.iteritems():
             if detect.isAlias(requested):
                 return detect
-        mantid.sendLogMessage("::SANS::getDetector: Detector " + requested + "not found")
+        logger.notice("::SANS::getDetector: Detector " + requested + "not found")
 
     def listDetectors(self) :
         return self.cur_detector().name(), self.other_detector().name()
@@ -483,8 +485,8 @@ class ISISInstrument(instrument.Instrument):
             if self.cur_detector().isAlias(detName):
                 return True
             else:
-                mantid.sendLogMessage("::SANS::setDetector: Detector not found")
-                mantid.sendLogMessage("::SANS::setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
+                logger.notice("::SANS::setDetector: Detector not found")
+                logger.notice("::SANS::setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True
@@ -556,7 +558,7 @@ class ISISInstrument(instrument.Instrument):
             Move the sample object to the location set in the logs or user settings file
             @param ws: the workspace containing the sample to move
         """
-        MoveInstrumentComponent(ws, 'some-sample-holder', Z = self.SAMPLE_Z_CORR, RelativePosition=True)
+        MoveInstrumentComponent(Workspace=ws,ComponentName= 'some-sample-holder', Z = self.SAMPLE_Z_CORR, RelativePosition=True)
         
         for i in self.monitor_zs.keys():
             #get the current location
@@ -566,7 +568,7 @@ class ISISInstrument(instrument.Instrument):
             z_loc = mon.getPos().getZ()
             #now the relative move
             offset = (self.monitor_zs[i]/1000.) - z_loc
-            MoveInstrumentComponent(ws, component, Z = offset,
+            MoveInstrumentComponent(Workspace=ws,ComponentName= component, Z = offset,
                                     RelativePosition=True)
 
     def cur_detector_position(self, ws_name):
@@ -608,13 +610,13 @@ class LOQ(ISISInstrument):
         
         xshift = (317.5/1000.) - xbeam
         yshift = (317.5/1000.) - ybeam
-        MoveInstrumentComponent(ws, self.cur_detector().name(), X = xshift, Y = yshift, RelativePosition="1")
+        MoveInstrumentComponent(Workspace=ws,ComponentName= self.cur_detector().name(), X = xshift, Y = yshift, RelativePosition="1")
 
         # Have a separate move for x_corr, y_coor and z_coor just to make it more obvious in the
         # history, and to expert users what is going on
         det = self.cur_detector()
         if det.x_corr != 0.0 or det.y_corr != 0.0 or det.z_corr != 0.0: 
-            MoveInstrumentComponent(ws, det.name(), X = det.x_corr/1000.0, Y = det.y_corr/1000.0, Z = det.z_corr/1000.0, RelativePosition="1")
+            MoveInstrumentComponent(Workspace=ws,ComponentName= det.name(), X = det.x_corr/1000.0, Y = det.y_corr/1000.0, Z = det.z_corr/1000.0, RelativePosition="1")
             xshift = xshift + det.x_corr/1000.0
             yshift = yshift + det.y_corr/1000.0
 
@@ -640,9 +642,9 @@ class LOQ(ISISInstrument):
         """
             Loads information about the setup used for LOQ transmission runs
         """
-        trans_definition_file = mtd.getConfigProperty('instrumentDefinition.directory')
+        trans_definition_file = config.getString('instrumentDefinition.directory')
         trans_definition_file += '/'+self._NAME+'_trans_Definition.xml'
-        LoadInstrument(workspace, trans_definition_file, RewriteSpectraMap=False)
+        LoadInstrument(Workspace=workspace,Filename= trans_definition_file, RewriteSpectraMap=False)
 
     def check_can_logs(self):
         """
@@ -652,7 +654,7 @@ class LOQ(ISISInstrument):
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
-        ws = mantid[ws_name]
+        ws = mtd[ws_name]
         pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
         cent_pos = 317.5/1000.0
         return [cent_pos - pos.getX(), cent_pos - pos.getY()]
@@ -735,7 +737,7 @@ class SANS2D(ISISInstrument):
 		# Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
         # rotate front detector according to value in log file and correction value provided in user file
         rotateDet = (-self.FRONT_DET_ROT - frontDet.rot_corr)
-        RotateInstrumentComponent(ws, self.getDetector('front').name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)       
+        RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)       
         RotRadians = math.pi*(self.FRONT_DET_ROT + frontDet.rot_corr)/180.
         # The rear detector is translated to the beam position using the beam centre coordinates in the user file.
 		# (Note that the X encoder values in NOT used for the rear detector.)
@@ -754,7 +756,7 @@ class SANS2D(ISISInstrument):
 		# 21/3/12 RKH add .radius_corr
         zshift = (self.FRONT_DET_Z + frontDet.z_corr + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*(1 - math.cos(RotRadians)) - frontDet.side_corr*math.sin(RotRadians))/1000.
         zshift -= self.FRONT_DET_DEFAULT_SD_M
-        MoveInstrumentComponent(ws, self.getDetector('front').name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
+        MoveInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
         
         
         # deal with rear detector
@@ -763,8 +765,8 @@ class SANS2D(ISISInstrument):
         yshift = -ybeam
         zshift = (self.REAR_DET_Z + rearDet.z_corr)/1000.
         zshift -= self.REAR_DET_DEFAULT_SD_M
-        mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
-        MoveInstrumentComponent(ws, rearDet.name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")    
+        logger.notice("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
+        MoveInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")    
             
             
         super(SANS2D, self).move_components(ws)
@@ -784,9 +786,9 @@ class SANS2D(ISISInstrument):
             monitor_4_offset = self.monitor_4_offset/1000. 
             z_new = det_z + monitor_4_offset
             z_move = z_new - z_orig
-            MoveInstrumentComponent(ws, component, Z=z_move, 
+            MoveInstrumentComponent(Workspace=ws,ComponentName= component, Z=z_move, 
                                     RelativePosition=True)
-            mantid.sendLogMessage('::SANS:: Monitor 4 is at z = ' + str(z_new) )
+            logger.notice('::SANS:: Monitor 4 is at z = ' + str(z_new) )
             
         # Are these returned values used anywhere?    
         if self.cur_detector().name() == 'front-detector':
@@ -807,10 +809,10 @@ class SANS2D(ISISInstrument):
         """
         self._marked_dets = []
         #assume complete log information is stored in the first entry, it isn't stored in the group workspace itself
-        if wksp.isGroup():
+        if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]
 
-        samp = wksp.getSampleDetails()
+        samp = wksp.getRun()
 
         logvalues = {}
         logvalues['Front_Det_Z'] = self._get_const_num(samp, 'Front_Det_Z') 
@@ -909,7 +911,7 @@ class SANS2D(ISISInstrument):
         corr_names = ['Front_Det_Z', 'Front_Det_X','Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
         for i in range(0, len(existing_values)):
             if math.fabs(existing_values[i] - new_values[i]) > 5e-04:
-                mantid.sendLogMessage('::SANS::Warning: values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(existing_values[i]) + \
+                logger.notice('::SANS::Warning: values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(existing_values[i]) + \
                     ', can value is ' + str(new_values[i]))
                 errors += 1
 
@@ -934,7 +936,7 @@ class SANS2D(ISISInstrument):
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
-        ws = mantid[ws_name]
+        ws = mtd[ws_name]
         pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
         
         return [-pos.getX(), -pos.getY()]
