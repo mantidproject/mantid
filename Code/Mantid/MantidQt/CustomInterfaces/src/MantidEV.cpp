@@ -21,17 +21,137 @@ DECLARE_SUBWINDOW(MantidEV);
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-/// Constructor
+
+RunLoadAndConvertToMD::RunLoadAndConvertToMD(       MantidEVWorker * worker,
+                                              const std::string    & file_name,
+                                              const std::string    & ev_ws_name,
+                                              const std::string    & md_ws_name )
+{
+  this->worker     = worker;
+  this->file_name  = file_name;
+  this->ev_ws_name = ev_ws_name;
+  this->md_ws_name = md_ws_name;
+}
+
+void RunLoadAndConvertToMD::run()
+{
+  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name );
+}
+
+
+RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
+                            const std::string     & md_ws_name,
+                            const std::string     & peaks_ws_name,
+                                  double            max_abc,
+                                  size_t            num_to_find,
+                                  double            min_intensity )
+{
+  this->worker        = worker;
+  this->md_ws_name    = md_ws_name;
+  this->peaks_ws_name = peaks_ws_name;
+  this->max_abc       = max_abc;
+  this->num_to_find   = num_to_find;
+  this->min_intensity = min_intensity;
+}
+
+
+void RunFindPeaks::run()
+{
+  worker->findPeaks( md_ws_name, peaks_ws_name,
+                     max_abc, num_to_find, min_intensity );
+}
+
+
+RunSphereIntegrate::RunSphereIntegrate(       MantidEVWorker * worker,
+                                        const std::string    & peaks_ws_name,
+                                        const std::string    & event_ws_name,
+                                              double           peak_radius,
+                                              double           inner_radius,
+                                              double           outer_radius,
+                                              bool             integrate_edge )
+{ 
+  this->worker         = worker;
+  this->peaks_ws_name  = peaks_ws_name;
+  this->event_ws_name  = event_ws_name;
+  this->peak_radius    = peak_radius;
+  this->inner_radius   = inner_radius;
+  this->outer_radius   = outer_radius;
+  this->integrate_edge = integrate_edge;
+}
+
+
+void RunSphereIntegrate::run()
+{ 
+  worker->sphereIntegrate( peaks_ws_name, event_ws_name,
+                           peak_radius, inner_radius, outer_radius,
+                           integrate_edge );
+}
+
+
+RunFitIntegrate::RunFitIntegrate(       MantidEVWorker * worker,
+                                  const std::string    & peaks_ws_name,
+                                  const std::string    & event_ws_name,
+                                  const std::string    & rebin_params,
+                                  size_t                 n_bad_edge_pix,
+                                  bool                   use_ikeda_carpenter )
+{
+  this->worker              = worker;
+  this->peaks_ws_name       = peaks_ws_name;
+  this->event_ws_name       = event_ws_name;
+  this->rebin_params        = rebin_params;
+  this->n_bad_edge_pix      = n_bad_edge_pix;
+  this->use_ikeda_carpenter = use_ikeda_carpenter;
+}
+
+void RunFitIntegrate::run()
+{
+  worker->fitIntegrate( peaks_ws_name, event_ws_name,
+                        rebin_params, n_bad_edge_pix, use_ikeda_carpenter );
+}
+
+
+RunEllipsoidIntegrate::RunEllipsoidIntegrate(       MantidEVWorker * worker,
+                                              const std::string    & peaks_ws_name,
+                                              const std::string    & event_ws_name,
+                                              double                 region_radius,
+                                              bool                   specify_size,
+                                              double                 peak_size,
+                                              double                 inner_size,
+                                              double                 outer_size )
+{
+  this->worker        = worker;
+  this->peaks_ws_name = peaks_ws_name;
+  this->event_ws_name = event_ws_name;
+  this->region_radius = region_radius;
+  this->specify_size  = specify_size;
+  this->peak_size     = peak_size;
+  this->inner_size    = inner_size;
+  this->outer_size    = outer_size;
+}
+
+
+void RunEllipsoidIntegrate::run()
+{
+  worker->ellipsoidIntegrate( peaks_ws_name, event_ws_name,
+                              region_radius, specify_size,
+                              peak_size, inner_size, outer_size );
+}
+
+
+/// MantidEV Constructor
 MantidEV::MantidEV(QWidget *parent)
   : UserSubWindow(parent)
 {
-  worker = new MantidEVWorker();
+  worker        = new MantidEVWorker();
+  m_thread_pool = new QThreadPool( this );
+  m_thread_pool->setMaxThreadCount(1);
 }
 
 MantidEV::~MantidEV()
 {
   delete worker;
 }
+
 
 /// Set up the dialog layout
 void MantidEV::initLayout()
@@ -43,6 +163,9 @@ void MantidEV::initLayout()
                           // to carry out the requested action
    QObject::connect( m_uiForm.ApplySelectData_btn, SIGNAL(clicked()),
                     this, SLOT(selectWorkspace_slot()) );
+
+   QObject::connect( m_uiForm.SelectEventFile_btn, SIGNAL(clicked()),
+                     this, SLOT(loadEventFile_slot()) );
 
    QObject::connect( m_uiForm.ApplyFindPeaks_btn, SIGNAL(clicked()),
                     this, SLOT(findPeaks_slot()) );
@@ -62,9 +185,11 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.ApplyIntegrate_btn, SIGNAL(clicked()),
                     this, SLOT(integratePeaks_slot()) );
 
-
                           // connect the slots for enabling and disabling
                           // various subsets of widgets
+   QObject::connect( m_uiForm.LoadEventFile_rbtn, SIGNAL(toggled(bool)),
+                     this, SLOT( setEnabledLoadEventFileParams_slot(bool) ) );
+
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindPeaksParams_slot(bool) ) );
 
@@ -106,6 +231,10 @@ void MantidEV::initLayout()
                           // disabled as needed
    m_uiForm.MantidEV_tabwidg->setCurrentIndex(0);
 
+   m_uiForm.LoadEventFile_rbtn->setChecked(true);
+   m_uiForm.UseExistingWorkspaces_rbtn->setChecked(false);
+   setEnabledLoadEventFileParams_slot(true);
+
    m_uiForm.FindPeaks_rbtn->setChecked(true);
    m_uiForm.UseExistingPeaksWorkspace_rbtn->setChecked(false);
    setEnabledFindPeaksParams_slot(true);
@@ -128,6 +257,7 @@ void MantidEV::initLayout()
    setEnabledSetCellFormParams_slot(false);
 
    m_uiForm.SphereIntegration_rbtn->setChecked(true);
+   m_uiForm.IntegrateEdge_ckbx->setChecked(true);
    m_uiForm.TwoDFitIntegration_rbtn->setChecked(false);
    m_uiForm.EllipsoidIntegration_rbtn->setChecked(false);
    setEnabledSphereIntParams_slot(true);
@@ -155,25 +285,92 @@ void MantidEV::initLayout()
    m_uiForm.PeakSize_ledt->setValidator( new QDoubleValidator(m_uiForm.PeakSize_ledt));
    m_uiForm.BackgroundInnerSize_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundInnerSize_ledt));
    m_uiForm.BackgroundOuterSize_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundOuterSize_ledt));
-
 }
 
 
 void MantidEV::selectWorkspace_slot()
 {
    std::cout << std::endl << "Apply Select Data ....." << std::endl;
-   std::string ws_name = m_uiForm.MDworkspace_ledt->text().toStdString();
 
-   if ( ws_name.length() == 0 )
+   // Check that the event workspace name is non-blank.
+   std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().toStdString();
+
+   if ( ev_ws_name.length() == 0 )
+   {
+     errorMessage("Specify the name of an Event Workspace on Select Data tab.");
+     return;
+   }
+
+   // Check that the MD workspace name is non-blank.
+   std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().toStdString();
+
+   if ( md_ws_name.length() == 0 )
    {
      errorMessage("Specify the name of an MD Workspace on Select Data tab.");
      return;
    }
 
-   if ( !worker->selectMDWorkspace( ws_name ) )
+   if ( m_thread_pool->activeThreadCount() >= 1 )
    {
-     errorMessage("Requested Workspace is NOT an MD workspace");
+     errorMessage("Previous operation still running, please wait until it is finished");
+     return;
    }
+
+   if ( m_uiForm.LoadEventFile_rbtn->isChecked() )      // load file and
+   {                                                    // convert to MD workspace
+     std::string file_name = m_uiForm.EventFileName_ledt->text().toStdString();
+     if ( file_name.length() == 0 )
+     {
+       errorMessage("Specify the name of an event file to load.");
+       return;
+     }
+
+     RunLoadAndConvertToMD* runner = new RunLoadAndConvertToMD( worker, file_name, 
+                                                               ev_ws_name, md_ws_name );
+     bool running = m_thread_pool->tryStart( runner );
+     if ( !running )
+       errorMessage( "Failed to start Load and ConvertToMD thread...previous operation not complete" );
+   }
+   else if ( m_uiForm.UseExistingWorkspaces_rbtn->isChecked() )  // check existing
+   {                                                             // workspaces
+     if ( !worker->isEventWorkspace( ev_ws_name ) )
+     {
+       errorMessage("Requested Event Workspace is NOT a valid Event workspace");
+       return;
+     }
+     if ( !worker->isMDWorkspace( md_ws_name ) )
+     {
+       errorMessage("Requested MD Workspace is NOT a valid MD workspace");
+       return;
+     }
+   }
+}
+
+
+void MantidEV::loadEventFile_slot()
+{
+  std::cout << "Load event file Browse button pushed... " << std::endl;
+
+  QString file_path;
+  if ( last_event_file.length() != 0 )
+  {
+    QString Qfile_name = QString::fromUtf8( last_event_file.c_str() );
+    QFileInfo file_info( Qfile_name );
+    file_path = file_info.absolutePath();
+  }
+  else
+  {
+    file_path = QDir::homePath();
+  }
+
+  QString Qfile_name = QFileDialog::getOpenFileName( this,
+                                                tr("Load event file"),
+                                                file_path,
+                                                tr("Nexus Files (*.nxs)"));
+
+  last_event_file = Qfile_name.toStdString();
+
+  m_uiForm.EventFileName_ledt->setText( Qfile_name );
 }
 
 
@@ -188,8 +385,21 @@ void MantidEV::findPeaks_slot()
      return;
    }
 
-   bool find_new_peaks        = m_uiForm.FindPeaks_rbtn->isChecked();
-   bool use_existing_peaks    = !find_new_peaks;
+   std::string md_ws_name  = m_uiForm.MDworkspace_ledt->text().toStdString();
+   if ( md_ws_name.length() == 0 )
+   {
+     errorMessage("Specify an MD workspace name on Select Data tab.");
+     return;
+   }
+
+   if ( m_thread_pool->activeThreadCount() >= 1 )
+   {
+     errorMessage("Previous operation still running, please wait until it is finished");
+     return;
+   }
+
+   bool find_new_peaks     = m_uiForm.FindPeaks_rbtn->isChecked();
+   bool use_existing_peaks = !find_new_peaks;
 
    double max_abc       = 15;
    size_t num_to_find   = 50;
@@ -206,18 +416,20 @@ void MantidEV::findPeaks_slot()
 
    if ( use_existing_peaks )
    {
-     if ( !worker->selectPeaksWorkspace( peaks_ws_name ) )
+     if ( !worker->isPeaksWorkspace( peaks_ws_name ) )
      {
        errorMessage("Requested Peaks Workspace Doesn't Exist");
      }
    }
-
    else if ( find_new_peaks )
    {
-     if ( !worker->findPeaks( peaks_ws_name, max_abc, num_to_find, min_intensity ))
-     {
-       errorMessage("findPeaks failed");
-     }
+     RunFindPeaks* runner = new RunFindPeaks( worker,
+                                              md_ws_name, peaks_ws_name,
+                                              max_abc, num_to_find, min_intensity );
+
+     bool running = m_thread_pool->tryStart( runner );
+     if ( !running )
+       errorMessage( "Failed to start findPeaks thread...previous operation not complete" );   
    }
 }
 
@@ -230,6 +442,12 @@ void MantidEV::findUB_slot()
    if ( peaks_ws_name.length() == 0 )
    {
      errorMessage("Specify a peaks workspace name on Find Peaks tab.");
+     return;
+   }
+
+   if ( m_thread_pool->activeThreadCount() >= 1 )
+   {
+     errorMessage("Previous operation still running, please wait until it is finished");
      return;
    }
 
@@ -353,6 +571,12 @@ void MantidEV::chooseCell_slot()
      return;
    }
 
+   if ( m_thread_pool->activeThreadCount() >= 1 )
+   {
+     errorMessage("Previous operation still running, please wait until it is finished");
+     return;
+   }
+
    bool show_cells       = m_uiForm.ShowPossibleCells_rbtn->isChecked();
    bool select_cell_type = m_uiForm.SelectCellOfType_rbtn->isChecked();
    bool select_cell_form = m_uiForm.SelectCellWithForm_rbtn->isChecked();
@@ -402,6 +626,12 @@ void MantidEV::changeHKL_slot()
      return;
    }
 
+   if ( m_thread_pool->activeThreadCount() >= 1 )
+   {
+     errorMessage("Previous operation still running, please wait until it is finished");
+     return;
+   }
+
    std::string row_1_str = m_uiForm.HKL_tran_row_1_ledt->text().toStdString();
    std::string row_2_str = m_uiForm.HKL_tran_row_2_ledt->text().toStdString();
    std::string row_3_str = m_uiForm.HKL_tran_row_3_ledt->text().toStdString();
@@ -432,6 +662,12 @@ void MantidEV::integratePeaks_slot()
      return;
    }
 
+   if ( m_thread_pool->activeThreadCount() >= 1 )
+   {
+     errorMessage("Previous operation still running, please wait until it is finished");
+     return;
+   }
+
    bool sphere_integrate    = m_uiForm.SphereIntegration_rbtn->isChecked();
    bool fit_integrate       = m_uiForm.TwoDFitIntegration_rbtn->isChecked();
    bool ellipsoid_integrate = m_uiForm.EllipsoidIntegration_rbtn->isChecked();
@@ -451,12 +687,15 @@ void MantidEV::integratePeaks_slot()
        return;
 
      bool integrate_edge = m_uiForm.IntegrateEdge_ckbx->isChecked();
-     if ( !worker->sphereIntegrate( peaks_ws_name, event_ws_name,
-                                    peak_radius, inner_radius, outer_radius,
-                                    integrate_edge ) )
-     {
-       errorMessage("Failed to Integrate Peaks using Sphere Integration");
-     }
+
+     RunSphereIntegrate * runner = new RunSphereIntegrate( worker,
+                                              peaks_ws_name, event_ws_name,
+                                              peak_radius, inner_radius, outer_radius,
+                                              integrate_edge );
+
+     bool running = m_thread_pool->tryStart( runner );
+     if ( !running )
+       errorMessage( "Failed to start sphere integrate thread...previous operation not complete" );
    }
    else if ( fit_integrate )
    {
@@ -466,13 +705,15 @@ void MantidEV::integratePeaks_slot()
      if ( !getPositiveDouble( m_uiForm.NBadEdgePixels_ledt, n_bad_edge_pix ) )
        return;
 
-     if ( !worker->fitIntegrate( peaks_ws_name, event_ws_name,
-                                 rebin_params,
-                                 (size_t)n_bad_edge_pix,
-                                 use_ikeda_carpenter ) )
-     {
-       errorMessage( "Failed to Integrate Peaks using 2D Fit" );
-     }
+     RunFitIntegrate * runner = new RunFitIntegrate( worker,
+                                              peaks_ws_name, event_ws_name,
+                                              rebin_params, 
+                                              (size_t)n_bad_edge_pix,
+                                              use_ikeda_carpenter );
+
+     bool running = m_thread_pool->tryStart( runner );
+     if ( !running )
+       errorMessage( "Failed to start sphere integrate thread...previous operation not complete" );
    }
    else if ( ellipsoid_integrate )
    {
@@ -496,6 +737,7 @@ void MantidEV::integratePeaks_slot()
          return;
      }
 
+/*
      if ( !worker->ellipsoidIntegrate( peaks_ws_name, event_ws_name,
                                        region_radius,
                                        specify_size,
@@ -503,7 +745,24 @@ void MantidEV::integratePeaks_slot()
      {
        errorMessage( "Failed to Integrate Peaks using 3D Ellipsoids" );
      }
+*/
+     RunEllipsoidIntegrate * runner = new RunEllipsoidIntegrate( worker,
+                                              peaks_ws_name, event_ws_name,
+                                              region_radius, specify_size,
+                                              peak_size, inner_size, outer_size );
+
+     bool running = m_thread_pool->tryStart( runner );
+     if ( !running )
+       errorMessage( "Failed to start sphere integrate thread...previous operation not complete" );
    }
+}
+
+
+void MantidEV::setEnabledLoadEventFileParams_slot( bool on )
+{
+  m_uiForm.EventFileName_lbl->setEnabled( on );
+  m_uiForm.EventFileName_ledt->setEnabled( on );
+  m_uiForm.SelectEventFile_btn->setEnabled( on );
 }
 
 
