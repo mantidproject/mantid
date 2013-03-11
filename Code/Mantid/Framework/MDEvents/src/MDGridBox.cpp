@@ -174,8 +174,8 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor
    * @param other :: MDGridBox to copy */
-  TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> & other)
-   : MDBoxBase<MDE, nd>(other),
+  TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> & other,const Mantid::API::BoxController * otherBC)
+   : MDBoxBase<MDE, nd>(other,otherBC),
      numBoxes(other.numBoxes),
      diagonalSquared(other.diagonalSquared),
      nPoints(other.nPoints)
@@ -325,10 +325,10 @@ namespace MDEvents
    * @param index :: index into the array, within range 0..getNumChildren()-1
    * @return the child MDBoxBase pointer.
    */
-  template <typename MDE, size_t nd>
-  MDBoxBase<MDE,nd> * MDGridBox<MDE,nd>::getChild(size_t index)
+  TMDE(
+  API::IMDNode * MDGridBox)::getChild(size_t index)
   {
-    return boxes[index];
+    return m_Children[index];
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -340,14 +340,14 @@ namespace MDEvents
    * @param indexEnd :: end point in the vector, not-inclusive
    */
   TMDE(
-  void MDGridBox)::setChildren(const std::vector<MDBoxBase<MDE,nd> *> & otherBoxes, const size_t indexStart, const size_t indexEnd)
+  void MDGridBox)::setChildren(const std::vector<API::IMDNode *>  & otherBoxes, const size_t indexStart, const size_t indexEnd)
   {
-    boxes.clear();
-    boxes.assign( otherBoxes.begin()+indexStart, otherBoxes.begin()+indexEnd);
+    m_Children.clear();
+    m_Children.assign( otherBoxes.begin()+indexStart, otherBoxes.begin()+indexEnd);
     // Set the parent of each new child box.
     for (size_t i=0; i<boxes.size(); i++)
-      boxes[i]->setParent(this);
-    numBoxes = boxes.size();
+      m_Children[i]->setParent(this);
+    numBoxes = m_Children.size();
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -356,13 +356,13 @@ namespace MDEvents
    * @param controller: BoxController to set.
    */
   TMDE(
-  void MDGridBox)::setBoxController(Mantid::API::BoxController_sptr controller)
+  void MDGridBox)::setBoxController(Mantid::API::BoxController *controller)
   {
     MDBoxBase<MDE,nd>::setBoxController(controller);
     // Set on all childern.
     for (size_t i=0; i<boxes.size(); i++)
     {
-      boxes[i]->setBoxController(controller);
+      m_Children[i]->setBoxController(controller);
     }
   }
 
@@ -510,7 +510,7 @@ namespace MDEvents
    * @param leafOnly :: if true, only add the boxes that are no more subdivided (leaves on the tree)
    */
   TMDE(
-  void MDGridBox)::getBoxes(std::vector<MDBoxBase<MDE,nd> *> & outBoxes, size_t maxDepth, bool leafOnly)
+  void MDGridBox)::getBoxes(std::vector<API::IMDNode *> & outBoxes, size_t maxDepth, bool leafOnly)
   {
     // Add this box, unless we only want the leaves
     if (!leafOnly)
@@ -534,43 +534,7 @@ namespace MDEvents
 
   }
 
-  TMDE(
-  void MDGridBox)::getBoxes(std::vector<Kernel::ISaveable *> & outBoxes, size_t maxDepth, bool leafOnly)
-  {
-    // Add this box, unless we only want the leaves
-    if (!leafOnly)
-      outBoxes.push_back(this);
-
-    if (this->getDepth() + 1 <= maxDepth)
-    {
-      for (size_t i=0; i<numBoxes; i++)
-      {
-        // Recursively go deeper, if needed
-        boxes[i]->getBoxes(outBoxes, maxDepth, leafOnly);
-      }
-    }
-    else
-    {
-      // Oh, we reached the max depth and want only leaves.
-      // ... so we consider this box to be a leaf too.
-      if (leafOnly)
-        outBoxes.push_back(this);
-    }
-
-  }
-  TMDE(
-  void MDGridBox)::getBoxes(std::vector<Kernel::ISaveable *> & outBoxes, size_t maxDepth, bool leafOnly,Mantid::Geometry::MDImplicitFunction * function)
-  {
-    std::vector<MDBoxBase<MDE,nd> *> buf;
-    this->getBoxes(buf,maxDepth,leafOnly,function);
-    outBoxes.resize(buf.size());
-    for(size_t i=0;i<buf.size();i++)
-    {
-      outBoxes[i]=buf[i];
-    }
-  }
-
-
+ 
   //-----------------------------------------------------------------------------------------------
   /** Return all boxes contained within, limited by an implicit function.
    *
@@ -586,7 +550,7 @@ namespace MDEvents
    * @param function :: implicitFunction pointer
    */
   TMDE(
-  void MDGridBox)::getBoxes(std::vector<MDBoxBase<MDE,nd> *> & outBoxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function)
+  void MDGridBox)::getBoxes(std::vector<API::IMDNode *> & outBoxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function)
   {
     // Add this box, unless we only want the leaves
     if (!leafOnly)

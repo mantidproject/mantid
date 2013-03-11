@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_ISAVEABLE_H_
-#define MANTID_MDEVENTS_ISAVEABLE_H_
+#ifndef MANTID_KERNEL_ISAVEABLE_H_
+#define MANTID_KERNEL_ISAVEABLE_H_
     
 #include "MantidKernel/System.h"
 #include <vector>
@@ -169,4 +169,4 @@ namespace Kernel
 } // namespace Kernel
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_ISAVEABLE_H_ */
+#endif  /* MANTID_KERNEL_ISAVEABLE_H_ */

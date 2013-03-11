@@ -20,7 +20,7 @@ namespace MDEvents
 
     const std::string &getBCXMLdescr()const {return m_bcXMLDescr;}
 
-    std::vector<Kernel::ISaveable *> &getBoxes(){return m_Boxes;}
+    std::vector<API::IMDNode *> &getBoxes(){return m_Boxes;}
 
     // TODO: this does not have to be a template-> refactoring needed.
     template<typename MDE,size_t nd>
@@ -64,7 +64,7 @@ namespace MDEvents
     /// Start/end children IDs
     std::vector<int> m_BoxChildren;
 
-    std::vector<Kernel::ISaveable *> m_Boxes;
+    std::vector<API::IMDNode *> m_Boxes;
 
     std::string m_bcXMLDescr;
 

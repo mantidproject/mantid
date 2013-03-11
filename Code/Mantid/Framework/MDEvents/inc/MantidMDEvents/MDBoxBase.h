@@ -2,6 +2,7 @@
 #define MDBOXBASE_H_
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDNode.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ISaveable.h"
@@ -41,7 +42,7 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport MDBoxBase : public Mantid::Kernel::ISaveable
+  class DLLExport MDBoxBase : public Mantid::API::IMDNode
   {
   public:
 
@@ -50,22 +51,11 @@ namespace MDEvents
 
     MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
 
-    MDBoxBase(const MDBoxBase<MDE,nd> & box);
+    MDBoxBase(const MDBoxBase<MDE,nd> & box,const Mantid::API::BoxController * otherBC=NULL);
 
     /// Destructor
     virtual ~MDBoxBase() {}
 
-    /// Get number of dimensions
-    virtual size_t getNumDims() const = 0;
-
-    /// Getter for the masking
-    virtual bool getIsMasked() const = 0;
-
-    ///Setter for masking the box
-    virtual void mask() = 0;
-
-    ///Setter for unmasking the box
-    virtual void unmask() = 0;
 
     // ----------------------------- ISaveable Methods ------------------------------------------------------
 
@@ -101,23 +91,8 @@ namespace MDEvents
     virtual void clearDataFromMemory()
     {// no data so no operations
     }
-    // TODO: Kill it
-    virtual bool isBox()const{throw std::runtime_error("Non-overloaded boxBase is invoked "); return false;}
     // -------------------------------- Parents/Children-Related -------------------------------------------
-    /// Get the total # of unsplit MDBoxes contained.
-    virtual size_t getNumMDBoxes() const = 0;
-
-
-    /// Get the # of children MDBoxBase'es (non-recursive)
-    virtual size_t getNumChildren() const = 0;
-
-    /// Return the indexth child MDBoxBase.
-    virtual MDBoxBase<MDE,nd> * getChild(size_t index) = 0;
-
-    /// Sets the children from a vector of children
-    virtual void setChildren(const std::vector<MDBoxBase<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd) = 0;
-
-    /// Return a pointer to the parent box
+   /// Return a pointer to the parent box
     void setParent(MDBoxBase<MDE,nd> * parent)
     { m_parent = parent; }
 
@@ -130,20 +105,11 @@ namespace MDEvents
     { return m_parent; }
 
     /// Fill a vector with all the boxes up to a certain depth
-    virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly) = 0;
-    virtual void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly) = 0;
+    //virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly) = 0;
 
     /// Fill a vector with all the boxes up to a certain depth
-    virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
-    virtual void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
+    //virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
 
-    /** Split sub-boxes, if this is possible and neede for this box */
-    virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)
-    {  /* Do nothing by default. */ }
-
-    /** Recalculate signal etc. */
-    virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL)
-    {  /* Do nothing by default. */ }
 
     /// Returns the lowest-level box at the given coordinates
     virtual const MDBoxBase<MDE,nd> * getBoxAtCoord(const coord_t * /*coords*/) const
@@ -164,15 +130,8 @@ namespace MDEvents
 
     // -------------------------------- Events-Related -------------------------------------------
 
-    /// Clear all contained data
-    virtual void clear() = 0;
-
-    /// Get total number of points
-    virtual uint64_t getNPoints() const = 0;
-
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
-
     /// Add a single event
     virtual void addEvent(const MDE & point) = 0;
     // add a single event and set pointer to the box which needs splitting (if one actually need)    
@@ -204,23 +163,17 @@ namespace MDEvents
     /** Find the centroid around a sphere */
     virtual void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const = 0;
 
-
-    // -------------------------------------------------------------------------------------------
-    /** Cache the centroid of this box and all sub-boxes. */
-    virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL) {} //= 0;
-
-    virtual void calculateCentroid(coord_t * /*centroid*/) const {};
-
     // -------------------------------------------------------------------------------------------
     /// @return the box controller saved.
-    Mantid::API::BoxController_sptr getBoxController() const
+    Mantid::API::BoxController  *getBoxController() const
     { return m_BoxController; }
 
     /** Set the box controller used.
-     * @param controller :: Mantid::API::BoxController_sptr
+     * @param controller :: Mantid::API::BoxController *
      */
-    virtual void setBoxController(Mantid::API::BoxController_sptr controller)
+    virtual void setBoxController(Mantid::API::BoxController *controller)
     { m_BoxController = controller; }
+
 
     //-----------------------------------------------------------------------------------------------
     /** Set the extents of this box.
@@ -238,7 +191,7 @@ namespace MDEvents
 
       extents[dim].setExtents(min,max);
       // volume has to be recalculated as extents have changed;
-      //this->calcVolume();
+      this->calcVolume();
     }
     /** Set the extents of this box.
        * @param min :: min edge of the dimension
@@ -440,7 +393,7 @@ namespace MDEvents
       return m_centroid;
     }
 #endif
-
+    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)=0;
   protected:
     /** Array of MDDimensionStats giving the extents and
      * other stats on the box dimensions.
@@ -463,13 +416,13 @@ namespace MDEvents
     coord_t m_inverseVolume;
 
     /// The box splitting controller, shared with all boxes in the hierarchy
-    Mantid::API::BoxController_sptr m_BoxController;
+    Mantid::API::BoxController *m_BoxController;
 
     /// Recursion depth
     size_t m_depth;
 
     /// Pointer to the parent of this box. NULL if no parent.
-    MDBoxBase<MDE,nd> * m_parent;
+    Mantid::API::IMDNode * m_parent;
 
 #ifdef MDBOX_TRACK_CENTROID
     /** The centroid (weighted center of mass) of the events in this MDBox.

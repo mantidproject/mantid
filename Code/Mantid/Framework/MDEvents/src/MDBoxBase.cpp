@@ -61,16 +61,20 @@ namespace MDEvents
   /** Copy constructor. Copies the extents, depth, etc.
    * and recalculates the boxes' volume.
    * @param box :: incoming box to copy.
+   * @param otherBC :: if present, other (different from the current one) box controller pointer
    */
   TMDE(
-  MDBoxBase)::MDBoxBase(const MDBoxBase<MDE,nd> & box)
+  MDBoxBase)::MDBoxBase(const MDBoxBase<MDE,nd> & box,const Mantid::API::BoxController * otherBC)
   : ISaveable(box),
     m_signal(box.m_signal), m_errorSquared(box.m_errorSquared), m_totalWeight(box.m_totalWeight),
     m_inverseVolume(box.m_inverseVolume), m_depth(box.m_depth),
     m_parent(box.m_parent)
   {
     // Save the controller in this object.
-    this->m_BoxController = box.m_BoxController;
+    if(otherBC)
+        this->m_BoxController = otherBC;
+    else:
+        this->m_BoxController = box.m_BoxController;
     // Copy the extents
     for (size_t d=0; d<nd; d++)
       this->extents[d] = box.extents[d];

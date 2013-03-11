@@ -187,6 +187,7 @@ set ( INC_FILES
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDIterator.h
+    inc/MantidAPI/IMDNode.h        
 	inc/MantidAPI/IMDWorkspace.h
 	inc/MantidAPI/IMaskWorkspace.h
 	inc/MantidAPI/IPeak.h

@@ -102,7 +102,7 @@ namespace MDEvents
     size_t m_max;
 
     /// Vector of all the boxes that will be iterated.
-    std::vector<Kernel::ISaveable *> m_boxes;
+    std::vector<API::IMDNode *> m_boxes;
 
     /// Box currently pointed to
     MDBoxBase<MDE,nd>* m_current;

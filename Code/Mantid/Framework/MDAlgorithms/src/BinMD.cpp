@@ -393,7 +393,7 @@ namespace MDAlgorithms
       MDImplicitFunction * function = this->getImplicitFunctionForChunk(chunkMin, chunkMax);
 
       // Use getBoxes() to get an array with a pointer to each box
-      std::vector<Kernel::ISaveable *> boxes;
+      std::vector<API::IMDNode *> boxes;
       // Leaf-only; no depth limit; with the implicit function passed to it.
       ws->getBox()->getBoxes(boxes, 1000, true, function);
 

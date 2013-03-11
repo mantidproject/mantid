@@ -45,7 +45,7 @@ namespace MDEvents
 
     MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector, int64_t boxSize=-1,int64_t boxID=-1);
 
-    MDBox(const MDBox<MDE,nd> & other);
+    MDBox(const MDBox<MDE,nd> & other,const Mantid::API::BoxController * otherBC=NULL);
 
     virtual ~MDBox() {}
 
@@ -66,8 +66,13 @@ namespace MDEvents
     */
     void setLoaded()
     {
-    m_isLoaded=true;
+        m_isLoaded=true;
     }
+
+    /// @return whether the box data (from disk) is loaded in memory.
+    bool getInMemory() const
+    { return m_isLoaded; }
+
    
     /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getTotalDataSize() const
@@ -102,10 +107,6 @@ namespace MDEvents
     { throw std::runtime_error("MDBox cannot have children."); }
 
 
-    /// @return whether the box data (from disk) is loaded in memory.
-    bool getInMemory() const
-    { return m_isLoaded; }
-
    
     /// @return true if events were added to the box (using addEvent()) while the rest of the event list is cached to disk
     bool isDataAdded() const
@@ -139,6 +140,13 @@ namespace MDEvents
 
     std::vector< MDE > * getEventsCopy();
 
+    virtual void addEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId);
+    virtual void addAndTraceEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId,size_t index);
+    virtual void addEventUnsafe(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId);
+    //virtual size_t addEventsPart(const std::vector<coord_t> &coords,const signal_t *Signal,const signal_t *errorSq,const  uint16_t *runIndex,const uint32_t *detectorId, const size_t start_at, const size_t stop_at);
+    //virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
+    //               const std::vector<uint16_t> &runIndex=std::vector<uint16_t>(),const std::vector<uint32_t> &detectorId=std::vector<uint32_t>());
+    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
 
     void addEvent(const MDE & Evnt);
     void addAndTraceEvent(const MDE & point,size_t index);
@@ -167,10 +175,10 @@ namespace MDEvents
     void loadNexus(::NeXus::File * file, bool setLoaded=true);
 
     void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
-    void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
+    void getBoxes(std::vector<API::IMDNode *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
 
     void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
-    void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
+    void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 
@@ -207,7 +215,6 @@ namespace MDEvents
   };
 
 #pragma pack(pop) //Return to default packing size
-
 
 
 

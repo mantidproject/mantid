@@ -1,4 +1,5 @@
 #include "MantidMDEvents/MDBox.h"
+#include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidMDEvents/MDGridBox.h"
@@ -77,8 +78,8 @@ namespace MDEvents
   /** Copy constructor
    * @param other: MDBox object to copy from.
    */
-  TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other)
-     : MDBoxBase<MDE, nd>(other),
+  TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other,const Mantid::API::BoxController * otherBC)
+     : MDBoxBase<MDE, nd>(other,otherBC),
      data(other.data),
      m_isLoaded(other.m_isLoaded),
      m_bIsMasked(other.m_bIsMasked)
@@ -143,7 +144,7 @@ namespace MDEvents
     boxes.push_back(this);
   }
   TMDE(
-  void MDBox)::getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/)
+  void MDBox)::getBoxes(std::vector<API::IMDNode *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/)
   {
     boxes.push_back(this);
   }
@@ -157,7 +158,7 @@ namespace MDEvents
     boxes.push_back(this);
   }
   TMDE(
-  void MDBox)::getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/, Mantid::Geometry::MDImplicitFunction * /*function*/)
+  void MDBox)::getBoxes(std::vector<API::IMDNode *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/, Mantid::Geometry::MDImplicitFunction * /*function*/)
   {
     boxes.push_back(this);
   }
@@ -380,7 +381,7 @@ namespace MDEvents
   TMDE(
   void MDBox)::refreshCache(Kernel::ThreadScheduler * /*ts*/)
   {
-#ifndef MDBOX_TRACK_SIGNAL_WHEN_ADDING
+
     // Use the cached value if it is on disk
     double signalSum(0);
     double errorSum(0);
@@ -409,7 +410,7 @@ namespace MDEvents
 
     /// TODO #4734: sum the individual weights of each event?
     this->m_totalWeight = static_cast<double>(this->getNPoints());
-#endif
+
   }
 
 
@@ -473,6 +474,13 @@ namespace MDEvents
       }
     }
   }
+  /** Create evetn from fata and add it to the box.
+   * @param Evnt :: reference to a MDEvent to add.
+   * */
+   TMDE(
+   void MDBox)::addEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId)
+   {
+   }
 
   //-----------------------------------------------------------------------------------------------
   /** Add a MDLeanEvent to the box.
@@ -506,7 +514,17 @@ namespace MDEvents
 
     dataMutex.unlock();
   }
+  /** Create MD MDEvent amd add it to the box.
+   // add a single event and set pointer to the box which needs splitting (if one actually need) 
 
+   * @param point :: reference to a MDEvent to add.
+   * @param index :: current index for box
+   */
+
+   TMDE(
+   void MDBox)::addAndTraceEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId,size_t index)
+   {
+   }
   //-----------------------------------------------------------------------------------------------
   /** Add a MDEvent to the box.
    // add a single event and set pounter to the box which needs splitting (if one actually need) 
@@ -532,7 +550,18 @@ namespace MDEvents
     }
 
 
-
+  }
+ 
+  //-----------------------------------------------------------------------------------------------
+  /**Create MDEvent and add it to the box, in a NON-THREAD-SAFE manner.
+   * No lock is performed. This is only safe if no 2 threads will
+   * try to add to the same box at the same time.
+   *
+   * @param Evnt :: reference to a MDEvent to add.
+   * */
+  TMDE(
+  void MDBox)::addEventUnsafe(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId)
+  {
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -547,21 +576,51 @@ namespace MDEvents
   {
     this->data.push_back(Evnt );
 
-
-#ifdef MDBOX_TRACK_SIGNAL_WHEN_ADDING
-    // Keep the running total of signal and error
-    double signal = static_cast<signal_t>(Evnt.getSignal());
-    this->m_signal += signal;
-    this->m_errorSquared += static_cast<signal_t>(Evnt.getErrorSquared());
-#endif
-
-#ifdef MDBOX_TRACKCENTROID_WHENADDING
-    // Running total of the centroid
-    for (size_t d=0; d<nd; d++)
-      this->m_centroid[d] += Evnt.getCenter(d) * signal;
-#endif
   }
 
+  template<typename MDE,size_t nd>
+  class IF
+  {
+  public:
+      inline MDEvent<nd> EXEC(const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)
+      {
+          return MDEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1], runIndex[i], detectorId[i], Coord[i*nd]);
+      }
+  };
+
+  template<size_t nd>
+  class IF<MDLeanEvent<nd>,nd>
+  {
+  public:
+      inline MDLeanEvent<nd> EXEC(const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)
+      {
+          UNUSED_ARG(runIndex);
+          UNUSED_ARG(detectorId);
+          return MDLeanEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],Coord[i*nd]);
+      }
+  };
+
+
+  /** Create and Add several events. No bounds checking is made!
+   *
+   */
+  TMDE(
+  size_t MDBox)::addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)
+  {
+    size_t nEvents = sigErrSq.size()/2;
+    size_t nExisiting = data.size();
+    data.reserve(nExisiting+nEvents);
+    dataMutex.lock();
+    for(size_t i=0;i<nEvents;i++)
+    {
+        this->data.push_back(IF<MDE,nd>::EXEC(sigErrSq[2*i],sigErrSq[2*i+1], runIndex[i], detectorId[i], Coord[i*nd]));
+    }
+    dataMutex.unlock();
+
+  }
+
+ 
+   //virtual size_t addEventsPart(const std::vector<coord_t> &coords,const signal_t *Signal,const signal_t *errorSq,const  uint16_t *runIndex,const uint32_t *detectorId, const size_t start_at, const size_t stop_at);
   //-----------------------------------------------------------------------------------------------
   /** Add several events. No bounds checking is made!
    *
@@ -600,7 +659,6 @@ namespace MDEvents
     return 0;
   }
 
-
   //-----------------------------------------------------------------------------------------------
   /** Add several events, within a given range, with no bounds checking,
    * and not in a thread-safe way
@@ -616,7 +674,6 @@ namespace MDEvents
     // The regular MDBox is just as safe/unsafe
     return this->addEventsPart(events, start_at, stop_at);
   }
-
 
   //-----------------------------------------------------------------------------------------------
   /** Perform centerpoint binning of events.

@@ -403,7 +403,7 @@ namespace MDEvents
     UNUSED_ARG(start);
     UNUSED_ARG(num);
     // Boxes to show
-    std::vector<Kernel::ISaveable *> boxes;
+    std::vector<API::IMDNode *> boxes;
     std::vector<MDBoxBase<MDE,nd>* > boxes_filtered;
     this->getBox()->getBoxes(boxes, 1000, false);
 

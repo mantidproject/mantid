@@ -103,7 +103,7 @@ namespace MDEvents
 
     Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num);
 
-    virtual void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly)
+    virtual void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly)
     {
       this->getBox()->getBoxes(boxes,maxDepth,leafOnly);
     }

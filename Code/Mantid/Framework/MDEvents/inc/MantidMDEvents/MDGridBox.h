@@ -43,7 +43,7 @@ namespace MDEvents
 
     MDGridBox(MDBox<MDE, nd> * box, bool splitRecursively=false);
 
-    MDGridBox(const MDGridBox<MDE, nd> & box);
+    MDGridBox(const MDGridBox<MDE, nd> & box,const Mantid::API::BoxController * otherBC=NULL);
 
     virtual ~MDGridBox();
 
@@ -51,33 +51,33 @@ namespace MDEvents
 
     uint64_t getNPoints() const;
 
-    size_t getNumDims() const;
+   size_t getNumDims() const;
 
-    size_t getNumMDBoxes() const;
+   size_t getNumMDBoxes() const;
 
-    size_t getNumChildren() const;
+   size_t getNumChildren() const;
    virtual bool isBox()const{return false;}
 
     size_t getChildIndexFromID(size_t childId) const;
 
-    MDBoxBase<MDE,nd> * getChild(size_t index);
-    void setChild(size_t index,MDGridBox<MDE,nd> * newChild)
-    {
-      // Delete the old box  (supposetly ungridded);
-      delete this->boxes[index];
-      // set new box, supposetly gridded
-      this->boxes[index]=newChild;
-    }
+    API::IMDNode * getChild(size_t index);
+    //void setChild(size_t index,MDGridBox<MDE,nd> * newChild)
+    //{
+    //  // Delete the old box  (supposetly ungridded);
+    //  delete this->boxes[index];
+    //  // set new box, supposetly gridded
+    //  this->boxes[index]=newChild;
+    //}
 
-    void setChildren(const std::vector<MDBoxBase<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd);
+    void setChildren(const std::vector<API::IMDNode *> & boxes, const size_t indexStart, const size_t indexEnd);
 
     std::vector< MDE > * getEventsCopy();
 
-    void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly);
-    void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly);
+   // void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly);
+    void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly);
 
-    void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
-    void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
+    //void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
+    void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
     const MDBoxBase<MDE,nd> * getBoxAtCoord(const coord_t * coords) const;
 
@@ -109,12 +109,12 @@ namespace MDEvents
     void refreshCentroid(Kernel::ThreadScheduler * ts = NULL);
 
     // Set the box controller overrriden.
-    virtual void setBoxController(Mantid::API::BoxController_sptr controller);
+    virtual void setBoxController(Mantid::API::BoxController *controller);
 
     // ======================= Testing/Debugging Methods =================
     /** For testing: get (a reference to) the vector of boxes */
-    std::vector<MDBoxBase<MDE, nd>*> & getBoxes()
-    { return boxes; }
+    std::vector<API::IMDNode *> & getBoxes()
+    { return m_Children; }
 
   
     virtual bool getIsMasked() const;
@@ -136,20 +136,17 @@ namespace MDEvents
   private:
     /// Each dimension is split into this many equally-sized boxes
     size_t split[nd];
+    /** Cumulative dimension splitting: split[n] = 1*split[0]*split[..]*split[n-1]     */
+    size_t splitCumul[nd];
     /// size of each sub-box (the one this GridBox can be split into) in correspondent direction
     double m_SubBoxSize[nd];
 
-    /** Cumulative dimension splitting: split[n] = 1*split[0]*split[..]*split[n-1]
-     */
-    size_t splitCumul[nd];
-
-    /** 1D array of boxes contained within. These map
-     * to the nd-array.
-     */
-    std::vector<MDBoxBase<MDE, nd>*> boxes;
-
     /// How many boxes in the boxes vector? This is just to avoid boxes.size() calls.
     size_t numBoxes;
+  
+    /** 1D array of boxes contained within. These map
+     * to the nd-array.     */
+    std::vector<API::IMDNode *> m_Children;
 
    /** Length (squared) of the diagonal through every dimension = sum( boxSize[i]^2 )
      * Used in some calculations like peak integration */

@@ -192,7 +192,7 @@ namespace Mantid
     bool rememberBoxIsSaved = makeFileBacked;
     for(size_t i=0;i<m_Boxes.size();i++)
     {
-      Kernel::ISaveable * mdBox = m_Boxes[i];        
+      API::IMDNode * mdBox = m_Boxes[i];        
       size_t ID = mdBox->getId();
       if(mdBox->isBox())
       {
