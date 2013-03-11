@@ -119,7 +119,7 @@ namespace Mantid
       for (int i = spec_min; i <= spec_max; i++)
       {
         int out_index = i - spec_min;
-        out->getAxis(1)->setValue(out_index, inputWS->getAxis(1)->spectraNo(i));
+        out->getSpectrum(out_index)->setSpectrumNo(inputWS->getSpectrum(i)->getSpectrumNo());
         const MantidVec& refX = inputWS->readX(i);
         const MantidVec& refY = inputWS->readY(i);
         const MantidVec& refE = inputWS->readE(i);
@@ -144,10 +144,6 @@ namespace Mantid
         m_progress->report();
       }
       setProperty("OutputWorkspace", out);
-
-      // Now do some cleanup, necessary at this time since destructor is not called
-      Cij.clear();
-      Cij2.clear();
 
       return;
     }
