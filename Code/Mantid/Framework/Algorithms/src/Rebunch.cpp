@@ -73,12 +73,6 @@ namespace Mantid
       // workspace independent determination of length
       int histnumber = static_cast<int>(inputW->size() / inputW->blocksize());
 
-      /*
-       const std::vector<double>& Xold = inputW->readX(0);
-       const std::vector<double>& Yold = inputW->readY(0);
-       int size_x=Xold.size();
-       int size_y=Yold.size();
-       */
       int size_x = static_cast<int>(inputW->readX(0).size());
       int size_y = static_cast<int>(inputW->readY(0).size());
 
@@ -106,14 +100,6 @@ namespace Mantid
       for (int hist = 0; hist < histnumber; hist++)
       {
         PARALLEL_START_INTERUPT_REGION
-        // Ensure that axis information are copied to the output workspace if the axis exists
-        try
-        {
-          outputW->getAxis(1)->setValue(hist, inputW->getAxis(1)->spectraNo(hist));
-        } catch (Exception::IndexError&)
-        {
-          // Not a Workspace2D
-        }
 
         // get const references to input Workspace arrays (no copying)
         const MantidVec& XValues = inputW->readX(hist);
