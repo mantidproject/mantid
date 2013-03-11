@@ -297,7 +297,7 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
   /**
      List Files must list all the files at central repository
    */
-  void disable_test_listFiles_must_list_all_files_at_central_repository(){
+  void test_listFiles_must_list_all_files_at_central_repository(){
     const char * test_entries []= {"TofConv",
                                  "TofConv/README.txt",
                                  "TofConv/TofConverter.py",
@@ -315,7 +315,7 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
   /**
      List File must list all the local files as well.
    */
-  void disable_test_listFiles_must_list_all_local_files(){
+  void test_listFiles_must_list_all_local_files(){
     // will create the folder
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
     
@@ -339,7 +339,7 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
  /*************************************
    *   File Info
    *************************************/
-  void disable_test_info_correctly_parses_the_repository_json(){
+  void test_info_correctly_parses_the_repository_json(){
     using Mantid::API::ScriptInfo;
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
@@ -440,7 +440,7 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
  /*************************************
    *   FILE STATUS
    *************************************/
-  void disable_test_info_of_one_file(){
+  void test_info_of_one_file(){
     std::string file_name = "TofConv/README.txt";
     std::string dir_name = "TofConv";
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 

@@ -7,8 +7,8 @@ set ( INC_FILES inc/MantidScriptRepository/ScriptRepositoryImpl.h
 )
 
 #
-#set ( TEST_FILES
-#	ScriptRepositoryTestImpl.h)
+set ( TEST_FILES
+	ScriptRepositoryTestImpl.h)
 #        ScriptRepositoryFactoryTest.h)
 
 # uncomment these lines if you want to be able to test the
