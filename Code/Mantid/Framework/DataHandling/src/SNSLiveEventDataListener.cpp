@@ -510,9 +510,24 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
   {
-    // Check to see if we should process this packet (depending on what
-    // the user selected for start up options, the SMS might be replaying
-    // historical data that we don't care about).
+
+    // grab the time from the packet - we'll use it down in initializeWorkspacePart2()
+    // Note that we need this value even if we otherwise ignore the packet
+    if (m_workspaceInitialized == false)
+    {
+      m_dataStartTime = timeFromPacket( pkt);
+
+      // If we've now got all the data we need to initialize the workspace,
+      // then do so.
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
+      }
+    }
+    
+    // Check to see if we should process the rest of this packet (depending
+    //  on what the user selected for start up options, the SMS might be
+    // replaying historical data that we don't care about).
     if (ignorePacket( pkt, pkt.status()))
     {
       return false;
@@ -522,12 +537,6 @@ namespace DataHandling
     // this function call, but it's far simpler to put the lock here than to
     // have individual lock/unlocks every time we fiddle with a run property
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
-
-    if (m_workspaceInitialized == false)
-    {
-      // grab the time from the packet - we'll use it down in initializeWorkspacePart2()
-      m_dataStartTime = timeFromPacket( pkt);
-    }
 
     if (pkt.status() == ADARA::RunStatus::NEW_RUN)
     {
