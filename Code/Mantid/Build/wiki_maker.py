@@ -36,7 +36,7 @@ def get_wiki_description(algo, version):
     global mtd
     source = find_algo_file(algo, version)
     if source == '':
-        alg = mtd.createAlgorithm(algo, version)
+        alg =  createAlgorithm(algo, version)
         print "Getting algorithm description from binaries."
         return alg.getWikiDescription()
     else:
@@ -265,12 +265,14 @@ def make_wiki(algo_name, version, latest_version):
 
 
 #======================================================================
-def confirm(prompt=None, resp=False):
+def confirm(prompt=None, resp=False, continueconfirm=False):
     """prompts for yes or no response from the user. Returns True for yes and
     False for no.
 
     'resp' should be set to the default value assumed by the caller when
     user simply types ENTER.
+    
+    if 'continueconfirm', then skip the confirmation, using No (false) as the choice.
 
     >>> confirm(prompt='Create Directory?', resp=True)
     Create Directory? [y]|n: 
@@ -283,6 +285,11 @@ def confirm(prompt=None, resp=False):
     True
 
     """
+    
+    # Early exit. 
+    if continueconfirm:
+        print 'Skip confirmation, changes have not been accepted.'
+        return False
     
     if prompt is None:
         prompt = 'Confirm'
@@ -430,7 +437,7 @@ def do_algorithm(args, algo, version):
         
         if args.dryrun:
             print "Dry run of saving page to http://www.mantidproject.org/%s" % wiki_page_name
-        elif wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
+        elif wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True, args.continueconfirm):
             print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
             page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
             
@@ -482,10 +489,13 @@ if __name__ == "__main__":
                         help="Record authors and corresponding algorithm wiki-pages that have not been generated with the wiki-maker")
     
     parser.add_option('--cache-config', dest='cacheconfig', default=False, action='store_const', const=True,
-                        help="If true, the creditials of the executor will be cached for the next run.")
+                        help="If set, the creditials of the executor will be cached for the next run.")
     
     parser.add_option('--dry-run', dest='dryrun', default=False, action='store_const', const=True,
-                        help="If false, then the utility will work exactly the same, but no changes will actually be pushed to the wiki.")
+                        help="If set, then the utility will work exactly the same, but no changes will actually be pushed to the wiki.")
+    
+    parser.add_option('--continue-confirm', dest='continueconfirm', default=False, action='store_const', const=True,
+                        help="If set, then any user-required confirmation will be skipped, without applying the change.")
     
 
     (args, algos) = parser.parse_args()
