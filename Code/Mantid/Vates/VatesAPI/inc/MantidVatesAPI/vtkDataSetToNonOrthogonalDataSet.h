@@ -4,6 +4,8 @@
 #include "MantidKernel/System.h"
 
 class vtkDataSet;
+class vtkUnstructuredGrid;
+
 namespace Mantid
 {
 namespace VATES
@@ -49,7 +51,9 @@ namespace VATES
   private:
     vtkDataSetToNonOrthogonalDataSet& operator=(const vtkDataSetToNonOrthogonalDataSet& other);
     vtkDataSetToNonOrthogonalDataSet(const vtkDataSetToNonOrthogonalDataSet& other);
-    vtkDataSet *m_dataSet;
+    /// Add the skew basis to metadata
+    void updateMetaData(vtkUnstructuredGrid *ugrid);
+    vtkDataSet *m_dataSet; ///< Pointer to VTK dataset to modify
   };
 
 

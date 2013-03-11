@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 
+#include <vtkRectilinearGrid.h>
+
 using Mantid::VATES::vtkDataSetToNonOrthogonalDataSet;
 
 class vtkDataSetToNonOrthogonalDataSetTest : public CxxTest::TestSuite
@@ -21,6 +23,13 @@ public:
                      std::runtime_error);
   }
 
+  void testThrowIfVtkDatasetWrongType()
+  {
+    vtkRectilinearGrid *grid = vtkRectilinearGrid::New();
+    vtkDataSetToNonOrthogonalDataSet converter(grid);
+    TS_ASSERT_THROWS(converter.execute(), std::runtime_error);
+    grid->Delete();
+  }
 
 };
 
