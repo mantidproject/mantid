@@ -38,27 +38,43 @@ class DakotaChiSquared(PythonAlgorithm):
     def PyExec(self):
         """ Main execution body
         """
+	#get parameters
 	f1 = self.getProperty("DataFile").value
 	f2 = self.getProperty("CalculatedFile").value
 	fout = self.getProperty("OutputFile").value
-
+	
+	#load files
         __w1=mantid.simpleapi.Load(f1)
         __w2=mantid.simpleapi.Load(f2)   
 
-	#TODO validata inputs   
+	#validate inputs
+	if (type(__w1)!= mantid.api._api.MatrixWorkspace):
+		mantid.kernel.logger.error('Wrong workspace type for data file') 
+		raise ValueError( 'Wrong workspace type for data file')
+	if (type(__w2)!= mantid.api._api.MatrixWorkspace):
+		mantid.kernel.logger.error('Wrong workspace type for calculated file') 
+		raise ValueError( 'Wrong workspace type for calculated file')
+	if((__w1.blocksize()!=__w2.blocksize()) or (__w1.getNumberHistograms()!=__w2.getNumberHistograms())):
+		mantid.kernel.logger.error('The file sizes are different') 
+		raise ValueError( 'The file sizes are different')
+
+	#calculate chi^2
 	__diff=__w1-__w2
-        
 	__soe=mantid.simpleapi.SignalOverError(__diff)
 	__soe2=__soe*__soe
 	__soe2=mantid.simpleapi.ReplaceSpecialValues(__soe2,0,0,0,0)
+	
 	data=__soe2.extractY()
-
 	chisquared=numpy.sum(data)
 
+	#write out the Dakota chi squared file
 	f = open(fout,'w')
 	f.write(str(chisquared)+' obj_fn\n')
 	f.close()
+
         self.setProperty("ChiSquared",chisquared)
+	
+	#cleanup	
 	mantid.simpleapi.DeleteWorkspace(__w1.getName())
 	mantid.simpleapi.DeleteWorkspace(__w2.getName())
 	mantid.simpleapi.DeleteWorkspace(__diff.getName())
