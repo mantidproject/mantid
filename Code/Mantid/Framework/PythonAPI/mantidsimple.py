@@ -60,7 +60,7 @@ def create_algorithm(algorithm, version, _algm_object):
     for p in mtd._getPropertyOrder(_algm_object):
         prop = _algm_object.getProperty(p)
         # Mandatory parameters are those for which the default value is not valid
-        if len(str(prop.isValid()))>0:
+        if len(str(prop.isValid))>0:
             arg_list.append(p)
         else:
             # None is not quite accurate here, but we are reproducing the 
