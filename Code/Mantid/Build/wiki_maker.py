@@ -164,7 +164,10 @@ def make_wiki(algo_name, version, latest_version):
     @param version :: version requested
     @param latest_version :: the latest algorithm 
     """ 
-    out = ""
+    
+    external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
+    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000;'></anchor>\n\n" % (external_image, external_image)  
+    
     # Deprecated algorithms: Simply returnd the deprecation message
     print "Creating... ", algo_name, version
     deprec = mtd.algorithmDeprecationMessage(algo_name,version)
@@ -195,12 +198,9 @@ def make_wiki(algo_name, version, latest_version):
     out += "== Summary ==\n\n"
     out += alg._ProxyObject__obj.getWikiSummary().replace("\n", " ") + "\n\n"
     
-    external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
-    out += "<anchor url='%s'><img width=400px align='right' src='%s'></anchor>" % (external_image, external_image)  
-    out += "<br clear=all>\n\n" 
-    
-    out += "== Python Signature ==\n\n"
+    out += "\n\n== Usage ==\n\n"
     out += " " + create_function_signature(algo_name) + "\n\n" 
+    out += "<br clear=all>\n\n" 
     out += "== Properties ==\n\n"
     
     out += """{| border="1" cellpadding="5" cellspacing="0" 
