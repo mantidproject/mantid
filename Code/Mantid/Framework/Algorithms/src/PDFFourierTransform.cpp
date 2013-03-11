@@ -1,4 +1,23 @@
-#include "MantidAlgorithms/PDFFT.h"
+/*WIKI*
+
+The algorithm PDFFourierTransform imports S(Q) (or S(d)) or S(Q)-1 (or S(d)-1) in a Workspace object, does Fourier transform to it, 
+and then store the resulted PDF (paired distribution function) in another Workspace object. 
+
+The input Workspace can have the unit in d-space of Q-space.  The algorithm itself is able to identify the unit.  The allowed unit are MomentumTransfer and d-spacing. 
+
+=== Output Option 1: G(r) ===
+
+:<math> G(r) = 4\pi r[\rho(r)-\rho_0] = \frac{2}{\pi} \int_{0}^{\infty} Q[S(Q)-1]sin(Qr)dQ </math>
+
+and in this algorithm, it is implemented as
+
+:<math> G(r) =  \frac{2}{\pi} \sum_{Q_{min}}^{Q_{max}} Q[S(Q)-1]sin(Qr)\Delta Q </math>
+In Algorithm's input parameter "PDFType", it is noted as "G(r) = 4pi*r[rho(r)-rho_0]".  
+And r is from 0 to RMax with step size DeltaR.
+
+*WIKI*/
+
+#include "MantidAlgorithms/PDFFourierTransform.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -9,7 +28,7 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM( PDFFT)
+DECLARE_ALGORITHM( PDFFourierTransform)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -17,28 +36,28 @@ using namespace Mantid::API;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-PDFFT::PDFFT() {
+PDFFourierTransform::PDFFourierTransform() {
 	// TODO Auto-generated constructor stub
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-PDFFT::~PDFFT() {
+PDFFourierTransform::~PDFFourierTransform() {
 	// TODO Auto-generated destructor stub
 }
 
 //----------------------------------------------------------------------------------------------
 /// Sets documentation strings for this algorithm
-void PDFFT::initDocs() {
-	this->setWikiSummary("Fourier Transform for PDF Q-Space (VZ)");
-	this->setOptionalMessage("Data must be in Q-space (VZ).");
+void PDFFourierTransform::initDocs() {
+	this->setWikiSummary("PDFFourierTransform() does Fourier transform from S(Q) to G(r), which is paired distribution function (PDF). G(r) will be stored in another named workspace.");
+	this->setOptionalMessage("Fourier transform from S(Q) to G(r), which is paired distribution function (PDF). G(r) will be stored in another named workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void PDFFT::init() {
+void PDFFourierTransform::init() {
 	auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
 
 	// Set up input data type
@@ -51,28 +70,28 @@ void PDFFT::init() {
 	outputGoption.push_back(gtype1);
 
 	declareProperty(new WorkspaceProperty<> ("InputWorkspace", "",
-			Direction::Input, uv), "An input workspace S(d).");
+			Direction::Input, uv), "S(Q) or S(Q)-1.");
 	declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "",
-			Direction::Output), "An output workspace G(r)");
+			Direction::Output), "Result paired-distribution function G(r).");
 	declareProperty("InputSofQType", "S(Q)", boost::make_shared<StringListValidator>(input_options),
-	    "Select the input Workspace type.  It can be S(Q) or S(Q)-1");
+	    "To identify whether input is S(Q) or S(Q)-1.");
   declareProperty(new Kernel::PropertyWithValue<double>("RMax", 20, Direction::Input),
-      "Maximum r value of output G(r).");
+      "Maximum r for G(r) to calculate.");
 	// declareProperty("RMax", 20.0);
   declareProperty(new Kernel::PropertyWithValue<double>("DeltaR", -0.00, Direction::Input),
-      "Step of r in G(r). ");
+      "Step size of r of G(r) to calculate.  Default = <math>\\frac{\\pi}{Q_{max}}</math>.");
 	declareProperty(new Kernel::PropertyWithValue<double>("Qmin", 0.0, Direction::Input),
-	    "Staring value Q of S(Q) for Fourier Transform");
+	    "Minimum Q in S(Q) to calculate in Fourier transform.");
 	declareProperty(new Kernel::PropertyWithValue<double>("Qmax", 50.0, Direction::Input),
-	    "Ending value of Q of S(Q) for Fourier Transform");
+	    "Maximum Q in S(Q) to calculate in Fourier transform.  It is the cut-off of Q in summation.");
 	declareProperty("PDFType", "GofR", boost::make_shared<StringListValidator>(outputGoption),
-	    "Select the output PDF type");
+	    "Type of output PDF including G(r)");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void PDFFT::exec() {
+void PDFFourierTransform::exec() {
 
 	// Accept d-space S(d)
 	//
@@ -217,7 +236,7 @@ void PDFFT::exec() {
  *  @param qmax: maximum value of Q
  *  @param sofq: true if input is S(Q), false if input is S(Q)-1
  */
-double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax, bool sofq) {
+double PDFFourierTransform::CalculateGrFromD(double r, double& egr, double qmin, double qmax, bool sofq) {
 
 	double gr = 0;
 
@@ -251,7 +270,7 @@ double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax, 
 	return gr;
 }
 
-double PDFFT::CalculateGrFromQ(double r, double& egr, double qmin, double qmax, bool sofq) {
+double PDFFourierTransform::CalculateGrFromQ(double r, double& egr, double qmin, double qmax, bool sofq) {
 
 	const MantidVec& vq = Sspace->readX(0);
 	const MantidVec& vs = Sspace->readY(0);

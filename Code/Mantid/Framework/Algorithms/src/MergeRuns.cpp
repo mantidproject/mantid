@@ -51,7 +51,7 @@ DECLARE_ALGORITHM(MergeRuns)
 /// Sets documentation strings for this algorithm
 void MergeRuns::initDocs()
 {
-  this->setWikiSummary("Combines the data contained in an arbitrary number of input workspaces. ");
+  this->setWikiSummary("Combines the data contained in an arbitrary number of input workspaces.");
   this->setOptionalMessage("Combines the data contained in an arbitrary number of input workspaces.");
 }
 
@@ -76,7 +76,7 @@ void MergeRuns::init()
   // declare arbitrary number of input workspaces as a list of strings at the moment
   declareProperty(
     new ArrayProperty<std::string>("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
-    "The names of the input workspaces as a comma-separated list" );
+    "The names of the input workspaces as a comma-separated list. You may also group workspaces using the GUI or [[GroupWorkspaces]], and specify the name of the group instead." );
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace" );
 }

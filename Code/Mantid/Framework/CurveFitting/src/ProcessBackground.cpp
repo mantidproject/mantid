@@ -1,3 +1,14 @@
+/*WIKI*
+
+The algorithm ProcessBackground() provides several functions for user to process background to prepare Le Bail Fit.   
+
+==== Automatic Background Points Selection ====
+This feature is designed to select many background points with user's simple input.  
+User is required to select only a few background points in the middle of two adjacent peaks.  
+Algorithm will fit these few points (''BackgroundPoints'') to a background function of specified type.
+
+  
+*WIKI*/
 #include "MantidCurveFitting/ProcessBackground.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Property.h"
@@ -43,7 +54,8 @@ DECLARE_ALGORITHM(ProcessBackground)
 
   void ProcessBackground::initDocs()
   {
-      return;
+      this->setWikiSummary("ProcessBackground provides some tools to process powder diffraction pattern's background in order to help Le Bail Fit.");
+      this->setOptionalMessage("ProcessBackground provides some tools to process powder diffraction pattern's background in order to help Le Bail Fit.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -53,12 +65,12 @@ DECLARE_ALGORITHM(ProcessBackground)
   {
     // Input and output Workspace
     declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace", "Anonymous", Direction::Input),
-                            "Input workspace containg background.");
+                            "Name of the output workspace containing the processed background.");
     declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace", "", Direction::Output),
                             "Output workspace containing processed background");
     declareProperty(new WorkspaceProperty<Workspace2D>("ReferenceWorkspace", "", Direction::Input,
                                                        PropertyMode::Optional),
-                    "Optional reference workspace for adding data points. ");
+                    "Name of the workspace containing the data required by function DeleteRegion.");
 
     // Function Options
     std::vector<std::string> options;
@@ -68,30 +80,30 @@ DECLARE_ALGORITHM(ProcessBackground)
     options.push_back("SelectBackgroundPoints");
 
     auto validator = boost::make_shared<Kernel::StringListValidator>(options);
-    declareProperty("Options", "SimpleRemovePeaks", validator, "Option to process the background.");
+    declareProperty("Options", "SimpleRemovePeaks", validator, "Name of the functionality realized by this algorithm.");
 
     vector<string> pointsselectmode;
     pointsselectmode.push_back("All Background Points");
-    pointsselectmode.push_back("Input Background Pionts Only");
+    pointsselectmode.push_back("Input Background Points Only");
 
     auto modevalidator = boost::make_shared<StringListValidator>(pointsselectmode);
     declareProperty("BackgroundPointSelectMode", "All Background Points", modevalidator,
                     "Mode to select background points. ");
 
     // Boundary
-    declareProperty("LowerBound", Mantid::EMPTY_DBL(), "Lower boundary of the region to be deleted/added.");
-    declareProperty("UpperBound", Mantid::EMPTY_DBL(), "Upper boundary of the region to be deleted/added.");
+    declareProperty("LowerBound", Mantid::EMPTY_DBL(), "Lower boundary of the data to have background processed.");
+    declareProperty("UpperBound", Mantid::EMPTY_DBL(), "Upper boundary of the data to have background processed.");
 
     // Optional Function Type
     std::vector<std::string> bkgdtype;
     bkgdtype.push_back("Polynomial");
     bkgdtype.push_back("Chebyshev");
     auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
-    declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
+    declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Type of the background. Options include Polynomial and Chebyshev.");
 
     // User input background points for "SelectBackground"
     auto arrayproperty = new Kernel::ArrayProperty<double>("BackgroundPoints");
-    declareProperty(arrayproperty, "User specified background points as starting points");
+    declareProperty(arrayproperty, "Vector of doubles, each of which is the X-axis value of the background point selected by user.");
 
     // Workspace index
     declareProperty("WorkspaceIndex", 0, "Workspace index for the input workspaces.");
@@ -295,7 +307,7 @@ DECLARE_ALGORITHM(ProcessBackground)
       {
           if (vx[i] <= vx[i-1])
           {
-              g_log.error() << "The vector X with value inserted is not ordered incremently" << std::endl;
+              g_log.error() << "The vector X with value inserted is not ordered incrementally" << std::endl;
               throw std::runtime_error("Build new vector error!");
           }
       }
@@ -380,7 +392,7 @@ DECLARE_ALGORITHM(ProcessBackground)
       // Select (possibly) all background points
       outWS = autoBackgroundSelection(wsindex, bkgdWS);
     }
-    else if (mode.compare("Input Background Pionts Only") == 0)
+    else if (mode.compare("Input Background Points Only") == 0)
     {
       // Use the input background points only
       outWS = bkgdWS;
