@@ -88,14 +88,14 @@ main() {
         exit 1
     fi
 
-    # Move to develop
+    # Develop is occasionally binned & recreated from master so our local develop needs to be in the same state as the remote first
+    run_git fetch -p
+    # Deletes the local branch pointer
+    run_git branch -D ${BASE_BRANCH}
+    # Checkout fresh copy of branch pointer that will be created from the remote pointer
     run_git checkout ${BASE_BRANCH}
 
-    # Bring in any updates
-    run_git fetch -p
-    run_git rebase origin/${BASE_BRANCH}
-
-    # Merge the branch and push to check
+    # Merge the feature branch and push to check
     run_git merge ${currentbranch}
     run_git push origin ${BASE_BRANCH}
 
