@@ -166,6 +166,9 @@ namespace API{
     Mantid::Kernel::Logger& g_log;
     /// flag that indicate a valid repository
     bool valid;
+
+    std::string ignoreregex;    
+
   };
   
 }; // namespace API

@@ -16,6 +16,7 @@ using Mantid::Kernel::ConfigServiceImpl;
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Exception.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/RegularExpression.h>
 // Visual Studion compains with the inclusion of Poco/FileStream
 // disabling this warning.
 #if defined(_WIN32) || defined(_WIN64)
@@ -194,10 +195,16 @@ namespace API
     if (local_repository[local_repository.size()-1] != '/')
       local_repository.append("/");
 
+    // parsing the ignore pattern
+    std::string ignore = ignorePatterns(); 
+    boost::replace_all(ignore,";","|");
+    boost::replace_all(ignore,".","\\.");
+    boost::replace_all(ignore,"*",".*");
+    ignoreregex = std::string("(").append(ignore).append(")");
+
     g_log.debug() << "ScriptRepository initialized" << std::endl; 
     repo.clear();
     valid = true;
-
   }
 
 
@@ -723,15 +730,25 @@ namespace API
       @todo describe
   */
   void ScriptRepositoryImpl::setIgnorePatterns(std::string patterns){
-    UNUSED_ARG(patterns); 
-    notImplemented();
+    ConfigServiceImpl & config = ConfigService::Instance();
+    std::string ignore = config.getString("ScriptRepositoryIgnore"); 
+    if (ignore != patterns){
+      config.setString("ScriptRepositoryIgnore", patterns); 
+      config.saveConfig(config.getUserFilename()); 
+      std::string newignore=patterns; 
+      boost::replace_all(newignore,";","|");
+      boost::replace_all(newignore,".","\\.");
+      boost::replace_all(newignore,"*",".*");      
+      ignoreregex = std::string("(").append(newignore).append(")");
+    }
   };
   /** 
       @todo describe
   */
   std::string ScriptRepositoryImpl::ignorePatterns(void){    
-    notImplemented();
-    return "";
+    ConfigServiceImpl & config = ConfigService::Instance();
+    std::string ignore_string = config.getString("ScriptRepositoryIgnore",""); 
+    return ignore_string;
   }
 
   /** 
@@ -940,8 +957,10 @@ namespace API
       
       if (!isEntryValid(entry_path))
         continue;
+      
 
-      RepositoryEntry & entry = repo[convertPath(it->path())]; 
+      g_log.debug() << "RecursiveParsing: insert : " << entry_path << std::endl; 
+      RepositoryEntry & entry = repo[entry_path]; 
       entry.local = true; 
       entry.current_date = DateAndTime(
                                Poco::DateTimeFormatter::format(it->getLastModified(),
@@ -957,7 +976,12 @@ namespace API
     if (path == ".repository.json")
       return false;
     if (path == ".local.json")
-      return false; 
+      return false;
+    g_log.debug() << "path : " << path << " ignoreregex " << ignoreregex << std::endl; 
+    Poco::RegularExpression re1(ignoreregex);
+    
+    if (re1.match(path))
+      return false;
     // TODO: apply the pattern ingore checking
 
     return true;

@@ -561,6 +561,40 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     TS_ASSERT_THROWS_NOTHING(repo->check4Update()); 
   }
 
+ /*************************************
+   *   SET IGNORE FILES
+   *************************************/
+  void test_ignore_files(){
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    std::string backup = repo->ignorePatterns();
+
+    std::string file_path = std::string(local_rep).append("/myfile.pyc");
+    {// create a file inside 
+      Poco::File f(file_path);
+      f.createFile(); 
+      Poco::FileStream _out(file_path); 
+      _out << "qq"; _out.close(); 
+    }
+
+    // myfile.pyc should be ignored
+    repo->setIgnorePatterns("*.pyc");
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+    TS_ASSERT_THROWS(repo->info("myfile.pyc"), ScriptRepoException);
+
+
+    // myfile.pyc should not be ignored
+    repo->setIgnorePatterns(""); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+    TS_ASSERT_THROWS_NOTHING(repo->info("myfile.pyc"));
+
+
+    
+
+    // clean the ignore patterns
+    repo->setIgnorePatterns(backup); 
+    
+  }
 
 
 };
