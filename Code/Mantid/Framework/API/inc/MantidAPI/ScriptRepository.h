@@ -514,7 +514,7 @@ They will work as was expected for folders @ref folders-sec.
     */
     virtual void setIgnorePatterns(std::string patterns) = 0;
 
-    /** Return the ignore patters that was defined through ::setIgnorePatters*/
+    /** Return the ignore patters that was defined through ScriptRepository::setIgnorePatterns*/
     virtual std::string ignorePatterns(void) = 0;
 
 
