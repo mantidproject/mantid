@@ -66,14 +66,23 @@ local_modifications() {
     return ${retval}
 }
 
-# Run git, logging the command to stdout
-run_git() {
+# Run git, logging the command to stdout and halting on errors
+git_halt_on_error() {
+    echo "git $@"
+    git "$@"
+    if [ $? -gt 0 ]; then
+	echo "An error occurred, cannot continue"
+	exit 1
+    fi
+}
+
+git_ignore_errors() {
     echo "git $@"
     git "$@"
 }
 
 run_fetch() {
-    run_git fetch -p
+    git_ignore_errors fetch -p
     if [ $? -gt 0 ]; then
         echo "Error running fetching. Most likely a network issue. Continuing with current state of ${BASE_BRANCH}."
     fi
@@ -84,5 +93,19 @@ check_git_repo() {
     git status | grep "fatal: Not a git repository (or any of the parent directories): .git" > /dev/null
     if [ $? -eq 0 ]; then
         exit 1
+    fi
+}
+
+# Checks if the first branch has been merged into the second
+branch_is_merged() {
+    if [ ! $# -eq 2 ]; then
+	exit 1
+    fi
+    merge_base_sha1=$(git merge-base $1 $2)
+    branch_sha1=$(git rev-parse $1)
+    if [ ! "${merge_base_sha1}" = ${branch_sha1} ]; then
+	return 0
+    else
+	return 1
     fi
 }

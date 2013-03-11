@@ -93,11 +93,8 @@ main() {
     fi
 
     if [ $FORCE -eq 0 ]; then
-        # Check whether this branch is fulled merged to develop and warn that "git checkbuild" should be run first
-        # The merge base between this & develop must be the HEAD of the branch if is merged
-        merge_base_sha1=$(git merge-base ${BUILDER_BRANCH} HEAD)
-        head_sha1=$(git rev-parse HEAD)
-        if [ ! "${merge_base_sha1}" = ${head_sha1} ]; then
+	branch_is_merged HEAD ${BUILDER_BRANCH}
+        if [ $? -eq 0 ]; then
             echo "Warning: Branch has not been fully merged to ${BUILDER_BRANCH}."
             echo "It is strongly advised to check with the buildservers first by running 'git checkbuild'."
             echo "You can force the push using the -f flag"
@@ -106,7 +103,7 @@ main() {
     fi
     
     # Run the macro
-    run_git push origin ${currentbranch}
+    git_halt_on_error push origin ${currentbranch}
 }
 
 main "$@"

@@ -131,7 +131,7 @@ main() {
   local_modifications
   if [ $? -eq 1 ]; then
       if [ $DO_STASH -eq 1 ]; then
-        run_git stash
+        git_halt_on_error stash
       else
         current=$(current_branch)
         echo "You have local modifications on the current branch."
@@ -145,11 +145,11 @@ main() {
 
   # Create branch
   echo "Creating new branch ${branchname} based on ${BASE_BRANCH}"
-  run_git checkout --no-track -b ${branchname} ${BASE_BRANCH}
+  git_halt_on_error checkout --no-track -b ${branchname} ${BASE_BRANCH}
 
   # Pop off the stash if necessary
   if [ $DO_STASH -eq 1 ]; then
-        run_git stash pop
+        git_halt_on_error stash pop
   fi
 
 }

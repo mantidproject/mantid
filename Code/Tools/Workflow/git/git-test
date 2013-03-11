@@ -95,7 +95,7 @@ start_testing() {
 
     startbranch=$(current_branch)
     if [ "${startbranch}" != "${PRODUCTION_BRANCH}" ]; then
-        run_git checkout ${PRODUCTION_BRANCH}
+        git_ignore_errors checkout ${PRODUCTION_BRANCH}
     fi
     
     # Sanity check
@@ -109,10 +109,10 @@ start_testing() {
     git config ${BRANCH_CFG_KEY} ${startbranch}
     
     # Update master
-    run_git reset --hard origin/${PRODUCTION_BRANCH}
+    git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
     
     # Merge test branch
-    run_git merge --no-ff origin/${TEST_BRANCH}
+    git_halt_on_error merge --no-ff origin/${TEST_BRANCH}
 
     echo "Now build the code & test the changes."
     echo "When complete if:"
@@ -128,23 +128,23 @@ end_testing() {
         echo "The name of the test branch has not been recorded in the config. Was the testing started with 'git test start'?"
         exit 1
     fi
-    
+
     if [ $TEST_PASSED -eq 1 ]; then
-        run_git push origin ${PRODUCTION_BRANCH}
+        git_halt_on_error push origin ${PRODUCTION_BRANCH}
         
         # Delete branch on the remote
-        run_git push origin :${testbranch}
+        git_halt_on_error push origin :${testbranch}
         
         # Delete local branch if there
         local_branch_exists ${testbranch}
         if [ $? -eq 1 ]; then
-            run_git branch -D ${testbranch}
+            git_halt_on_error branch -D ${testbranch}
         fi
 
     else
-        run_git reset --hard origin/${PRODUCTION_BRANCH}
+         git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
     fi
-    
+
     # Remove the stored name
     git config --remove ${BRANCH_CFG_KEY}
 }
@@ -165,7 +165,7 @@ main() {
     fi
 
     # Ensure we have everything from the remote
-    run_git fetch -p
+    git_halt_on_error fetch -p
         
     if [ $START_MODE -eq 1 ]; then
         start_testing

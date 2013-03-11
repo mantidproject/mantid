@@ -24,7 +24,6 @@ CMD_NAME="checkbuild"
 #
 BUILD_BRANCH="develop"
 
-
 # Get directory of this file
 # The sed expression here replaces all backslashes by forward slashes.
 # This helps our Windows users, while not bothering our Unix users.
@@ -33,20 +32,18 @@ export CMDFILE_DIR=$(dirname "$(echo "$0" | sed -e 's@\\@/@g')")
 usage() {
     echo "Usage: git ${CMD_NAME} [SWITCHES]"
     echo "Check the current branch against the build servers by merging to ${BUILD_BRANCH}"
-    echo "and pushing to the remote. Any uncommitted changes are stashed temprorarily"
-    echo "and will NOT be checked by the build servers."
+    echo "and pushing to the remote."
     echo
     echo "The current branch must not be master or ${BUILD_BRANCH}, if it is then the script"
     echo "aborts. "
     echo
     echo "Equivalent to:"
-    echo "  git stash"
     echo "  git checkout develop"
-    echo "  git pull"
-    echo "  git merge <branchname>"
+    echo "  git merge --no-ff <branchname>"
+    echo "  git fetch -p"
+    echo "  git rebase -p origin/develop"
     echo "  git push origin develop"
     echo "  git checkout <branchname>"
-    echo "  git stash pop"
     echo
     echo "Switches:"
     echo "  -h  Prints this help"
@@ -79,7 +76,7 @@ main() {
         exit 1
     fi
 
-    # Run macro
+    # Require clean slate
     local_modifications
     if [ $? -eq 1 ]; then
         echo "You have local modifications. Please either:"
@@ -88,19 +85,44 @@ main() {
         exit 1
     fi
 
-    # Develop is occasionally binned & recreated from master so our local develop needs to be in the same state as the remote first
-    run_git fetch -p
-    # Deletes the local branch pointer
-    run_git branch -D ${BUILD_BRANCH}
     # Checkout fresh copy of branch pointer that will be created from the remote pointer
-    run_git checkout ${BUILD_BRANCH}
+    git_ignore_errors checkout ${BUILD_BRANCH}
 
-    # Merge the feature branch and push to check
-    run_git merge ${currentbranch}
-    run_git push origin ${BUILD_BRANCH}
+    # Sanity check again to check we are really on develop
+    currentbranch=$(current_branch)
+    if [ ${currentbranch} = "${BUILD_BRANCH}" ]; then
+	echo "Expected current branch to be ${BUILD_BRANCH} but we appear to be on ${currentbranch}. Cannot continue, seek help!"
+        exit 1
+    fi
 
-    # Return to where we started
-    run_git checkout ${currentbranch}
+    # Merge the feature branch
+    git_halt_on_error merge --no-ff ${currentbranch}
+    # If it failed, then there were likely conflicts that need to be resolved
+    # git will leave a message basically saying this so don't repeat it
+    if [ $? -gt 0 ]; then
+	echo "When you have resolved the conflicts with 'git add' then 'git commit' rerun this command."
+	exit 1
+    fi
+
+    # Update remote reference
+    # The remote may occasionally get recreated from master. If the update has been forced then delete the local develop branch
+    # and get the user to rerun the command
+    git_halt_on_error fetch -p
+    # This works by checking if the old branch tip, given by origin/${BUILD_BRANCH}@{1}, is reachable from the new one
+    force_update=$(git rev-list origin/${BUILD_BRANCH} | grep rev-parse origin/${BUILD_BRANCH}@{1})
+    if [ $force_update -eq 1 ]; then
+	echo "The remote ${BUILD_BRANCH} has been recreated from master. Local copy of ${BUILD_BRANCH} will be deleted."
+	echo "Please rerun this command to recreate the local copy and perform the merge again."
+	git_halt_on_error branch -D ${BUILD_BRANCH}
+	exit 1
+    fi
+
+    # We're okay to push
+    git_halt_on_error rebase --preserve-merges origin/${BUILD_BRANCH}
+    git_halt_on_error push origin ${BUILD_BRANCH}
+    
+    # We're okay, return to where we started
+    git_halt_on_error checkout ${currentbranch}
 }
 
 main "$@"
