@@ -66,12 +66,12 @@ def process(functions, qhp, outputdir):
 
 if __name__ == "__main__":
     parser = getParser("Generate qtassistant docs for the fit functions")
-    args = parser.parse_args()
+    (options, args) = parser.parse_args()
 
     # where to put the generated files
     helpsrcdir = os.path.dirname(os.path.abspath(__file__))
-    if args.helpoutdir is not None:
-        helpoutdir = os.path.abspath(args.helpoutdir)
+    if options.helpoutdir is not None:
+        helpoutdir = os.path.abspath(options.helpoutdir)
     else:
         raise RuntimeError("need to specify output directory")
     print "Writing fit function web pages to '%s'" % helpoutdir
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     # initialize mantid
     import wiki_tools
-    wiki_tools.initialize_Mantid(args.mantidpath)
+    wiki_tools.initialize_Mantid(options.mantidpath)
     import mantid.api
     functions = mantid.api.FunctionFactory.getFunctionNames()
 
