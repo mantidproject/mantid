@@ -109,7 +109,7 @@ void export_Axis()
 
 /**
 * Creates a NumericAxis
-* @param number :: of elements in the axis
+* @param length The length of the new axis
 * @return pointer to the axis object
 */
 Axis* createNumericAxis(int length)
@@ -129,7 +129,7 @@ void export_NumericAxis()
 
 /**
 * Creates a SpectraAxis
-* @param number :: of elements in the axis
+* @param length The length of the new axis
 * @return pointer to the axis object
 */
 Axis* createSpectraAxis(int length)
@@ -149,7 +149,7 @@ void export_SpectraAxis()
 
 /**
 * Creates a TextAxis
-* @param number :: of elements in the axis
+* @param length The length of the new axis
 * @return pointer to the axis object
 */
 Axis* createTextAxis(int length)
