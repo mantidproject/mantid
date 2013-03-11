@@ -685,7 +685,7 @@ namespace Mantid
               monitorwsList.push_back(static_cast<specid_t>(wsItr->second));
             if (bseparate)
             {
-              monitorWorkspace->getAxis(1)->setValue(monitorwsIndex, static_cast<specid_t>(i + 1));
+              monitorWorkspace->getSpectrum(monitorwsIndex)->setSpectrumNo(i+1);
               setWorkspaceData(monitorWorkspace, m_timeChannelsVec, monitorwsIndex, i + 1, m_noTimeRegimes,m_lengthIn,1);
               ++monitorwsIndex;
             }
@@ -696,10 +696,6 @@ namespace Mantid
       if ((bseparate && !monitorwsList.empty()) || bexclude)
       {
         localWorkspace->setMonitorList(monitorwsList);
-        // RJT: Comment this out on removal of method from Workspace2D. This whole method doesn't do
-        // the right thing anyway, so this only makes things slightly worse pending a fix.
-        //    localWorkspace->sethistogramNumbers(
-        //      m_numberOfSpectra - static_cast<int64_t>(monitorwsList.size()));
         if (bseparate)
         {
           fclose(file);
