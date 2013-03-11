@@ -91,13 +91,13 @@ main() {
     # Develop is occasionally binned & recreated from master so our local develop needs to be in the same state as the remote first
     run_git fetch -p
     # Deletes the local branch pointer
-    run_git branch -D ${BASE_BRANCH}
+    run_git branch -D ${BUILD_BRANCH}
     # Checkout fresh copy of branch pointer that will be created from the remote pointer
-    run_git checkout ${BASE_BRANCH}
+    run_git checkout ${BUILD_BRANCH}
 
     # Merge the feature branch and push to check
     run_git merge ${currentbranch}
-    run_git push origin ${BASE_BRANCH}
+    run_git push origin ${BUILD_BRANCH}
 
     # Return to where we started
     run_git checkout ${currentbranch}
