@@ -167,7 +167,7 @@ namespace API
     try{// tests 1 and 2
       {
         Poco::File local_rep_dir(local);
-        std::string repository_json = std::string(local_repository).append("/.repository.json");
+        std::string repository_json = std::string(local_repository).append(".repository.json");
         Poco::File rep_json(repository_json);
         if (!local_rep_dir.exists() || !rep_json.exists()){
           g_log.warning() << "ScriptRepository was not installed at " << local_repository << std::endl; 
@@ -176,7 +176,7 @@ namespace API
       }
       // third test
       {
-        std::string repository_json = std::string(local_repository).append("/.local.json");
+        std::string repository_json = std::string(local_repository).append(".local.json");
         Poco::File rep_json(repository_json);      
         if (!rep_json.exists()){
           g_log.error() << "Corrupted ScriptRepository at "<< local_repository 
@@ -861,7 +861,7 @@ namespace API
   */
   void ScriptRepositoryImpl::parseCentralRepository(Repository & repo){    
     ptree pt; 
-    std::string filename = std::string(local_repository).append("/.repository.json");
+    std::string filename = std::string(local_repository).append(".repository.json");
     read_json(filename, pt);
     
     BOOST_FOREACH(ptree::value_type & file, pt){
@@ -885,7 +885,7 @@ namespace API
   */
   void ScriptRepositoryImpl::parseDownloadedEntries(Repository & repo){
     ptree pt; 
-    std::string filename = std::string(local_repository).append("/.local.json");
+    std::string filename = std::string(local_repository).append(".local.json");
     read_json(filename, pt);
     
     BOOST_FOREACH(ptree::value_type & file, pt){
