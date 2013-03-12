@@ -1060,7 +1060,7 @@ namespace API
     std::vector<std::string> lookAfter; 
     using Poco::Path;
     lookAfter.push_back(Path::current()); 
-    lookAfter.push_back(Path::home()); 
+//    lookAfter.push_back(Path::home()); 
     lookAfter.push_back(local_repository); 
   
     Path pathFound; 
