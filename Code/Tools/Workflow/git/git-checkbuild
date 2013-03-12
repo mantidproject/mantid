@@ -23,6 +23,9 @@
 CMD_NAME="checkbuild"
 #
 BUILD_BRANCH="develop"
+# Config key to store merged branch name
+MERGENAME_CFG_KEY=mantid.workflow.mergebranch
+
 
 # Get directory of this file
 # The sed expression here replaces all backslashes by forward slashes.
@@ -58,25 +61,101 @@ checkargs() {
     fi
 }
 
+# Called when we are starting from a clean slate sitting on the feature branch
+start_on_feature() {
+    mergebranch=$(current_branch)
+    # No need to be careful about the state of develop so kill the local branch and recreate it
+    echo "Starting from branch ${mergebranch}. Deleting and recreating local copy of ${BUILD_BRANCH}"
+    git_halt_on_error branch -D ${BUILD_BRANCH}
+    git_halt_on_error fetch -p
+    git_halt_on_error checkout ${BUILD_BRANCH}
+    
+    # Do merge
+    git_ignore_errors merge --no-ff ${mergebranch}
+    if [ $? -gt 0 ]; then
+	# Record what was attempted to be merged
+	git config ${MERGENAME_CFG_KEY} ${mergebranch}
+	echo "When you have resolved the conflicts with 'git add' then 'git commit' rerun this command from ${BUILD_BRANCH}."
+	exit 1
+    else
+	# Remove any stored name
+	git config --remove ${MERGE_CFG_KEY} 2> /dev/null
+    fi
+    
+    # Publish
+    git_ignore_errors push origin ${BUILD_BRANCH}
+    if [ $? -gt 0 ]; then
+	echo "Could not push to remote. The remote ${BUILD_BRANCH} was probably recreated. Rerun this command to recreate local ${BUILD_BRANCH}"
+    fi
+
+    # Put us back where we started
+    git_ignore_errors checkout ${mergebranch}
+    if [ $? -gt 0 ]; then
+	echo "Warning: An error occurred when switching back to ${mergebranch}. Still on ${BUILD_BRANCH}!"
+    fi
+}
+
+# Assumes a previous failed merge has just been resolved 
+start_on_develop() {
+    mergebranch=$(git config ${MERGENAME_CFG_KEY})
+    if [ -z "${mergebranch}" ]; then
+	echo "No failed merge detected. Please run this command from your feature branch."
+	exit 1
+    fi
+    
+    # Has previous merge been resolved
+    git_dir="$(git rev-parse --show-toplevel)/.git"
+    if [ -f ${git_dir}/MERGE_HEAD ]; then
+	echo "It looks like there is a merge in progress."
+	echo "Resolve any current conflicts with 'git add' & 'git commit' then rerun this command."
+	exit 1
+    fi
+
+    # Merge as it has already been done, just push. It is likely, given the time spread that origin/develop has been updated and it
+    # is possible that develop has been recreated
+    prefetch_sha1=$(git rev-parse origin/${BUILD_BRANCH})
+    run_git_halt_on_error fetch -p
+    postfetch_sha1=$(git rev-parse origin/${BUILD_BRANCH})
+
+    # Check for forced update. Works by checking if there are commits reachable from the old that are not reachable from the new
+    # If this command produces output then an update has been forced and we need to start again
+    unreachable_commits=$(git rev-list $prefetch_sha1 ^$postfetch_sha1)
+    if [ ! -z "${unreachable_commits}" ]; then
+	echo "The remote ${BUILD_BRANCH} has been recreated, 'git checkbuild' needs to be started from scratch."
+	echo "On exit you will be back your branch. Please rerun the command."
+	git_ignore_errors checkout ${mergebranch}
+	exit 1
+    else
+	git_halt_on_error rebase --preserve-merges origin/${BUILD_BRANCH}
+    fi
+
+    git_ignore_errors push origin ${BUILD_BRANCH}
+    if [ $? -gt 0 ]; then
+	echo "Warning: Could not push to remote."
+    fi
+
+    # Put us back where we started
+    git_ignore_errors checkout ${mergebranch}
+    if [ $? -gt 0 ]; then
+	echo "Warning: An error occurred when switching back to ${mergebranch}. Still on ${BUILD_BRANCH}!"
+    fi
+}
+
 main() {
     # Helper functions
     . "${CMDFILE_DIR}/gitworkflow-helpers"
 	
     checkargs "$@"
 
-    # Sanity check
+    # Cannot be on master
     currentbranch=$(current_branch)
-    if [ ${currentbranch} = "${BUILD_BRANCH}" ]; then
-        echo "Cannot merge develop into itself. Run this command on a branch that requires checking"
-        exit 1
-    fi
-
     if [ ${currentbranch} = "master" ]; then
         echo "Cannot use this command to merge master->${BUILD_BRANCH}"
         exit 1
     fi
 
     # Require clean slate
+    # There could either be local changes or we're in the middle of a merge if there are conflicts
     local_modifications
     if [ $? -eq 1 ]; then
         echo "You have local modifications. Please either:"
@@ -85,44 +164,13 @@ main() {
         exit 1
     fi
 
-    # Checkout fresh copy of branch pointer that will be created from the remote pointer
-    git_ignore_errors checkout ${BUILD_BRANCH}
-
-    # Sanity check again to check we are really on develop
-    currentbranch=$(current_branch)
+    # Run
     if [ ${currentbranch} = "${BUILD_BRANCH}" ]; then
-	echo "Expected current branch to be ${BUILD_BRANCH} but we appear to be on ${currentbranch}. Cannot continue, seek help!"
-        exit 1
+	start_on_develop
+    else
+	start_on_feature
     fi
-
-    # Merge the feature branch
-    git_halt_on_error merge --no-ff ${currentbranch}
-    # If it failed, then there were likely conflicts that need to be resolved
-    # git will leave a message basically saying this so don't repeat it
-    if [ $? -gt 0 ]; then
-	echo "When you have resolved the conflicts with 'git add' then 'git commit' rerun this command."
-	exit 1
-    fi
-
-    # Update remote reference
-    # The remote may occasionally get recreated from master. If the update has been forced then delete the local develop branch
-    # and get the user to rerun the command
-    git_halt_on_error fetch -p
-    # This works by checking if the old branch tip, given by origin/${BUILD_BRANCH}@{1}, is reachable from the new one
-    force_update=$(git rev-list origin/${BUILD_BRANCH} | grep rev-parse origin/${BUILD_BRANCH}@{1})
-    if [ $force_update -eq 1 ]; then
-	echo "The remote ${BUILD_BRANCH} has been recreated from master. Local copy of ${BUILD_BRANCH} will be deleted."
-	echo "Please rerun this command to recreate the local copy and perform the merge again."
-	git_halt_on_error branch -D ${BUILD_BRANCH}
-	exit 1
-    fi
-
-    # We're okay to push
-    git_halt_on_error rebase --preserve-merges origin/${BUILD_BRANCH}
-    git_halt_on_error push origin ${BUILD_BRANCH}
-    
-    # We're okay, return to where we started
-    git_halt_on_error checkout ${currentbranch}
+   
 }
 
 main "$@"

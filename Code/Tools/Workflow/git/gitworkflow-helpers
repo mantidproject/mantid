@@ -96,7 +96,7 @@ check_git_repo() {
     fi
 }
 
-# Checks if the first branch has been merged into the second
+# Checks if the first branch has been fully merged into the second
 branch_is_merged() {
     if [ ! $# -eq 2 ]; then
 	exit 1
