@@ -66,9 +66,12 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
                        DEPENDS MantidPlot ${HELP_QCH_DIR}/mantid.qhc
                        )
 
-#   install ( FILES mantid.qhc algorithms.qch mantidgeneral.qch
-#             DESTINATION ${GUI_HELP_DEST} <- TODO define this variable
-#             COMPONENT help )             <- TODO define this component
+   set ( GUI_HELP_DEST share/doc )
+
+   install ( DIRECTORY   ${HELP_QCH_DIR} ${HELP_HTML_DIR} ${HELP_IMG_DIR}
+             DESTINATION ${GUI_HELP_DEST} )
+   install (FILES ${HELP_OUT_DIR}/mantid.qhc
+             DESTINATION ${GUI_HELP_DEST} )
 
 else (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
    message (FATAL_ERROR " Did not find qcollectiongenerator - cannot create qtassistant files")
