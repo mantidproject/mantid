@@ -45,8 +45,6 @@ usage() {
     echo
     echo "Switches:"
     echo "  -h  Prints this help"
-    echo "  -f  Do not check that the current branch has been merged to develop"
-
 }
 
 checkargs() {
@@ -57,15 +55,12 @@ checkargs() {
     fi
 
     args=$@
-    FORCE=0
     for i in $args; do
         case $i in
             "-h")
                 usage
                 exit 0
                 ;;
-            "-f")
-                FORCE=1;;
         esac
     done
 }
@@ -92,14 +87,11 @@ main() {
         exit 1
     fi
 
-    if [ $FORCE -eq 0 ]; then
-	branch_is_merged HEAD ${BUILDER_BRANCH}
-        if [ $? -eq 0 ]; then
-            echo "Warning: Branch has not been fully merged to ${BUILDER_BRANCH}."
-            echo "It is strongly advised to check with the buildservers first by running 'git checkbuild'."
-            echo "You can force the push using the -f flag"
-            exit 1
-        fi
+    branch_is_merged HEAD ${BUILDER_BRANCH}
+    if [ $? -eq 0 ]; then
+        echo "Error: Branch has not been fully merged to ${BUILDER_BRANCH}."
+        echo "Run 'git checkbuild' to check the branch on the buildservers and then rerun this command."
+        exit 1
     fi
     
     # Run the macro
