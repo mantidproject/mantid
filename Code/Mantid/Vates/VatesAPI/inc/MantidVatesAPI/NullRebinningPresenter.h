@@ -23,6 +23,8 @@ namespace Mantid
 
       virtual bool hasTDimensionAvailable() const;
 
+      virtual void makeNonOrthogonal(vtkDataSet *visualDataSet);
+
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
 
       virtual ~NullRebinningPresenter();

@@ -64,6 +64,8 @@ namespace Mantid
 
       std::string getTimeStepLabel() const;
 
+      virtual void makeNonOrthogonal(vtkDataSet* visualDataSet);
+
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
 
       /*-----------------------------------End MDRebinningPresenter methods -------------------------------------*/

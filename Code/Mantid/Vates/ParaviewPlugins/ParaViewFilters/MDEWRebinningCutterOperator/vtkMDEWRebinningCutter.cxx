@@ -284,6 +284,7 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
     delete p_1dMDFactory;
 
     output->ShallowCopy(outData);
+    m_presenter->makeNonOrthogonal(output);
     m_presenter->setAxisLabels(output);
   }
   return 1;
