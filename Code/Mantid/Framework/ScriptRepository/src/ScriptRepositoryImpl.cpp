@@ -159,7 +159,7 @@ namespace API
     
     std::string aux_local_rep;
     if (local.isRelative()){
-      aux_local_rep = std::string(Poco::Path::home()).append(local_repository);
+      aux_local_rep = std::string(Poco::Path::current()).append(local_repository);
       local_repository = aux_local_rep;
     }
 
