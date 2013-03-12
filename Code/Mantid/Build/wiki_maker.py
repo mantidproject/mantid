@@ -129,7 +129,7 @@ def make_property_table_line(propnum, p):
     # Name of the property
     out += "|" + p.name + "\n"
     # Direction
-    InputDirection = "Intput"
+    InputDirection = "Input"
     OutputDirection = "Output"
     InOutDirection = "InOut"
     NoDirection = "None"
