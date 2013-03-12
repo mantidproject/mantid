@@ -363,11 +363,17 @@ namespace API
     
     repo.clear();
     assert(repo.size() == 0);
-
-    parseCentralRepository(repo); 
-    parseDownloadedEntries(repo);
-    parseLocalRepository(repo);
-
+    try{
+      parseCentralRepository(repo); 
+      parseDownloadedEntries(repo);
+      parseLocalRepository(repo);
+      // it will not catch ScriptRepositoryExc, because, this means, that it was already processed.
+      // it will proceed in this situation.
+    }catch(Poco::Exception & ex){
+      g_log.error() << "ScriptRepository failed to list all entries inside the repository. Details: " << ex.className() << ":> " << ex.displayText() << std::endl;       
+    }catch(std::exception & ex){
+      g_log.error() << "ScriptRepository failed to list all entries inside the repository. Details: " << ex.what() << std::endl; 
+    }
     std::vector<std::string> out(repo.size());
     size_t i = repo.size(); 
 
@@ -864,24 +870,32 @@ namespace API
     std::string filename = std::string(local_repository).append(".repository.json");
     try{
       read_json(filename, pt);
+      
+      BOOST_FOREACH(ptree::value_type & file, pt){
+        g_log.debug() << "Inserting : file.first " << file.first << std::endl; 
+        RepositoryEntry & entry = repo[file.first];
+        entry.remote = true;
+        entry.directory = file.second.get("directory",false);
+        entry.pub_date = DateAndTime(file.second.get<std::string>("pub_date"));
+        entry.description = file.second.get("description",""); 
+        entry.author = file.second.get("author",""); 
+      }
+      
     }catch (boost::property_tree::json_parser_error & ex){
-      g_log.error() << "JSON_PARSER_ERROR (" << filename << ") >> " << ex.what() << std::endl;
-      throw ScriptRepoException(filename, ex.what()); 
+      stringstream ss;
+      ss << "Corrupted database : " << filename; 
+      
+      g_log.error() << "ScriptRepository: " << ss.str() 
+                    << "\nDetails: json_parser_error: " << ex.what() << std::endl; 
+      throw ScriptRepoException(ss.str(), ex.what()); 
     }catch(std::exception & ex){
-      g_log.error() << "STD::EXCEPTION(" << filename << ") >> " << ex.what() << std::endl;
-      throw ScriptRepoException(filename, ex.what()); 
+      stringstream ss; 
+      ss << "RuntimeError: checking database >> " << ex.what();
+      g_log.error() << "ScriptRepository: " << ss.str() << ". Input: " << filename << std::endl;
+      throw ScriptRepoException(ss.str(), filename); 
     }catch(...){
-      g_log.error() << "FATAL " << filename << std::endl; 
+      g_log.error() << "FATAL Unknown error (checking database): " << filename << std::endl;
       throw;
-    }
-    BOOST_FOREACH(ptree::value_type & file, pt){
-      g_log.debug() << "Inserting : file.first " << file.first << std::endl; 
-      RepositoryEntry & entry = repo[file.first];
-      entry.remote = true;
-      entry.directory = file.second.get("directory",false);
-      entry.pub_date = DateAndTime(file.second.get<std::string>("pub_date"));
-      entry.description = file.second.get("description",""); 
-      entry.author = file.second.get("author",""); 
     }
   }
     /** 
@@ -898,22 +912,29 @@ namespace API
     std::string filename = std::string(local_repository).append(".local.json");
     try{
       read_json(filename, pt);
+      BOOST_FOREACH(ptree::value_type & file, pt){
+        RepositoryEntry & entry = repo[file.first];
+        entry.local = true;
+        entry.downloaded_pubdate = DateAndTime(file.second.get<std::string>("downloaded_pubdate")); 
+        entry.downloaded_date = DateAndTime(file.second.get<std::string>("downloaded_date")); 
+      }  
+
     }catch (boost::property_tree::json_parser_error & ex){
-      g_log.error() << "JSON_PARSER_ERROR (" << filename << ") >> " << ex.what() << std::endl;
-      throw ScriptRepoException(filename, ex.what()); 
+      stringstream ss;
+      ss << "Corrupted local database : " << filename; 
+      
+      g_log.error() << "ScriptRepository: " << ss.str() 
+                    << "\nDetails: downloaded entries - json_parser_error: " << ex.what() << std::endl; 
+      throw ScriptRepoException(ss.str(), ex.what()); 
     }catch(std::exception & ex){
-      g_log.error() << "STD::EXCEPTION(" << filename << ") >> " << ex.what() << std::endl;
-      throw ScriptRepoException(filename, ex.what()); 
+      stringstream ss; 
+      ss << "RuntimeError: checking downloaded entries >> " << ex.what();
+      g_log.error() << "ScriptRepository: " << ss.str() << ". Input: " << filename << std::endl;
+      throw ScriptRepoException(ss.str(), filename); 
     }catch(...){
-      g_log.error() << "FATAL " << filename << std::endl; 
+      g_log.error() << "FATAL Unknown error (checking downloaded entries): " << filename << std::endl;
       throw;
-    }
-    BOOST_FOREACH(ptree::value_type & file, pt){
-      RepositoryEntry & entry = repo[file.first];
-      entry.local = true;
-      entry.downloaded_pubdate = DateAndTime(file.second.get<std::string>("downloaded_pubdate")); 
-      entry.downloaded_date = DateAndTime(file.second.get<std::string>("downloaded_date")); 
-    }  
+    }   
   }
   
   void ScriptRepositoryImpl::updateLocalJson(const std::string & path, const RepositoryEntry & entry){
@@ -972,22 +993,34 @@ namespace API
                                                          Repository & repo){
     using Poco::DirectoryIterator;
     DirectoryIterator end;
-    for (DirectoryIterator it(path); it != end; ++it){
-      std::string entry_path = convertPath(it->path()); 
-      
-      if (!isEntryValid(entry_path))
-        continue;
-      
-
-      g_log.debug() << "RecursiveParsing: insert : " << entry_path << std::endl; 
-      RepositoryEntry & entry = repo[entry_path]; 
-      entry.local = true; 
-      entry.current_date = DateAndTime(
-                               Poco::DateTimeFormatter::format(it->getLastModified(),
-                                                               timeformat)); 
-      entry.directory = it->isDirectory(); 
-      if (it->isDirectory())
-        recursiveParsingDirectories(it->path(),repo);
+    try{
+      for (DirectoryIterator it(path); it != end; ++it){
+        std::string entry_path = convertPath(it->path()); 
+        
+        if (!isEntryValid(entry_path))
+          continue;
+        
+        
+        g_log.debug() << "RecursiveParsing: insert : " << entry_path << std::endl; 
+        RepositoryEntry & entry = repo[entry_path]; 
+        entry.local = true; 
+        entry.current_date = DateAndTime(
+                                         Poco::DateTimeFormatter::format(it->getLastModified(),
+                                                                         timeformat)); 
+        entry.directory = it->isDirectory(); 
+        if (it->isDirectory())
+          recursiveParsingDirectories(it->path(),repo);
+      }
+    }catch(Poco::Exception & ex){
+      g_log.error() << "ScriptRepository: failed to parse the directory: " << path << " : "
+                    << ex.className() << " : " << ex.displayText() << std::endl; 
+      // silently ignore this exception.
+      // throw ScriptRepoException(ex.displayText()); 
+    }catch(std::exception & ex){
+      stringstream ss; 
+      ss << "unknown exception while checking local file system. " << ex.what() << ". Input = " << path ;
+      g_log.error() << "ScriptRepository: " << ss.str() << std::endl; 
+      throw ScriptRepoException(ss.str()); 
     }
   }
 
