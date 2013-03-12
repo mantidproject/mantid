@@ -81,17 +81,17 @@ public:
     TS_ASSERT_DELTA(xBasis[0], 1.0, eps);
     TS_ASSERT_DELTA(xBasis[1], 0.0, eps);
     TS_ASSERT_DELTA(xBasis[2], 0.0, eps);
-    delete xBasis[];
+    delete [] xBasis;
     float *yBasis = getRangeComp(ds, "AxisBaseForY", 3);
     TS_ASSERT_DELTA(yBasis[0], 0.0, eps);
     TS_ASSERT_DELTA(yBasis[1], 1.0, eps);
     TS_ASSERT_DELTA(yBasis[2], 0.0, eps);
-    delete yBasis[];
+    delete [] yBasis;
     float *zBasis = getRangeComp(ds, "AxisBaseForZ", 3);
     TS_ASSERT_DELTA(zBasis[0], 0.5, eps);
     TS_ASSERT_DELTA(zBasis[1], 0.0, eps);
     TS_ASSERT_DELTA(zBasis[2], 0.8660254, eps);
-    delete zBasis[];
+    delete [] zBasis;
     ds->Delete();
   }
 
