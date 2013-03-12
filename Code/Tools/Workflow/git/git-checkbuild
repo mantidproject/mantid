@@ -79,7 +79,7 @@ start_on_feature() {
 	exit 1
     else
 	# Remove any stored name
-	git config --remove ${MERGE_CFG_KEY} 2> /dev/null
+	git config --unset ${MERGE_CFG_KEY} 2> /dev/null
     fi
     
     # Publish
