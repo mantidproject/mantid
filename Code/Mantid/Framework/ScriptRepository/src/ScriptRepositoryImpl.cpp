@@ -882,14 +882,14 @@ namespace API
       }
       
     }catch (boost::property_tree::json_parser_error & ex){
-      stringstream ss;
+      std::stringstream ss;
       ss << "Corrupted database : " << filename; 
       
       g_log.error() << "ScriptRepository: " << ss.str() 
                     << "\nDetails: json_parser_error: " << ex.what() << std::endl; 
       throw ScriptRepoException(ss.str(), ex.what()); 
     }catch(std::exception & ex){
-      stringstream ss; 
+      std::stringstream ss; 
       ss << "RuntimeError: checking database >> " << ex.what();
       g_log.error() << "ScriptRepository: " << ss.str() << ". Input: " << filename << std::endl;
       throw ScriptRepoException(ss.str(), filename); 
@@ -920,14 +920,14 @@ namespace API
       }  
 
     }catch (boost::property_tree::json_parser_error & ex){
-      stringstream ss;
+      std::stringstream ss;
       ss << "Corrupted local database : " << filename; 
       
       g_log.error() << "ScriptRepository: " << ss.str() 
                     << "\nDetails: downloaded entries - json_parser_error: " << ex.what() << std::endl; 
       throw ScriptRepoException(ss.str(), ex.what()); 
     }catch(std::exception & ex){
-      stringstream ss; 
+      std::stringstream ss; 
       ss << "RuntimeError: checking downloaded entries >> " << ex.what();
       g_log.error() << "ScriptRepository: " << ss.str() << ". Input: " << filename << std::endl;
       throw ScriptRepoException(ss.str(), filename); 
@@ -1017,7 +1017,7 @@ namespace API
       // silently ignore this exception.
       // throw ScriptRepoException(ex.displayText()); 
     }catch(std::exception & ex){
-      stringstream ss; 
+      std::stringstream ss; 
       ss << "unknown exception while checking local file system. " << ex.what() << ". Input = " << path ;
       g_log.error() << "ScriptRepository: " << ss.str() << std::endl; 
       throw ScriptRepoException(ss.str()); 
