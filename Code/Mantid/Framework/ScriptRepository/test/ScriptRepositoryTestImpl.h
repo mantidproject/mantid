@@ -508,7 +508,7 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
 
       Poco::FileStream ss(std::string(local_rep).append("/local.json")); 
       ss << "{\n"
-        <<"\"TofConv\\/README.txt\":\n"
+        <<"\"TofConv/README.txt\":\n"
         <<"{\n"
         <<"\"downloaded_date\": \"2013-Mar-07 14:30:09\",\n"
         <<"\"downloaded_pubdate\": \"2012-Feb-13 10:02:50\"\n"
