@@ -283,6 +283,7 @@ def SqwMoments(samWS,erange,factor,Verbose,Plot,Save):
     Xin = mtd[samWS].readX(0)
     CheckElimits(erange,Xin)
     CropWorkspace(InputWorkspace=samWS, OutputWorkspace=samWS, XMin=erange[0], XMax=erange[1])
+    Xin = mtd[samWS].readX(0)
     nw = len(Xin)-1
     if Verbose:
         logger.notice('Energy range is '+str(Xin[0])+' to '+str(Xin[nw]))

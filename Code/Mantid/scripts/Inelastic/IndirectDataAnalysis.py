@@ -3,7 +3,6 @@ from IndirectImport import import_mantidplot
 mp = import_mantidplot()
 from IndirectCommon import *
 from mantid import config, logger
-from mantid.api import NumericAxis
 import math, re, os.path, numpy as np
 
 ##############################################################################
@@ -326,7 +325,7 @@ def furyfitParsToWS(Table, Data, option):
         npeak = option[0]
         type = option[1]
     elif nopt == 4:
-        npeak = 2
+        npeak = '2'
         type = 'SE'
     else:
         logger.notice('Bad option : ' +option)	    
@@ -356,7 +355,7 @@ def furyfitParsToWS(Table, Data, option):
     dataE = np.append(dataE,np.array(Te1))
     names += ","+cName[7]
     nSpec = 3
-    if npeak == 1:
+    if npeak == '1' and type == 'S':
         By1 = ws.column(9)  #beta1 value
         Be1 = ws.column(10) #beta2 error
         dataX = np.append(dataX,Qa)
@@ -364,7 +363,7 @@ def furyfitParsToWS(Table, Data, option):
         dataE = np.append(dataE,np.array(Be1))
         names += ","+cName[9]
         nSpec += 1
-    if npeak == 2:
+    if npeak == '2':
         Iy2 = ws.column(9)  #intensity2 value
         Ie2 = ws.column(10) #intensity2 error
         dataX = np.append(dataX,Qa)
@@ -768,7 +767,8 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     DeleteWorkspace('corrections')
     return CorrectedWS
                 
-def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, factor=1, Save=False,PlotResult='None', PlotContrib=False):
+def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, factor=1, Save=False,
+        PlotResult='None', PlotContrib=False):
     '''Load up the necessary files and then passes them into the main
     applyCorrections routine.'''
     StartTime('ApplyCorrections')
@@ -848,7 +848,8 @@ def plotCorrContrib(plot_list,n):
         con_plot=mp.plotSpectrum(plot_list,n)
 
 def replace_workspace_axis(wsName, new_values):
-    ax1 = NumericAxis.create(len(new_values))
+    from mantidsimple import createNumericAxis, mtd        #temporary use of old API
+    ax1 = createNumericAxis(len(new_values))
     for i in range(len(new_values)):
         ax1.setValue(i, new_values[i])
     ax1.setUnit('MomentumTransfer')
