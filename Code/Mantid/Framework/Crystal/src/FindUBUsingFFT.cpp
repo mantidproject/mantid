@@ -92,7 +92,7 @@ namespace Crystal
     double max_d       = this->getProperty("MaxD");
     double tolerance   = this->getProperty("Tolerance");
                                           
-    double degrees_per_step =  1;
+    double degrees_per_step =  1.5;
 
     PeaksWorkspace_sptr ws;
     ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
