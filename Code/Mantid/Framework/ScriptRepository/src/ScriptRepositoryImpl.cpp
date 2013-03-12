@@ -862,8 +862,18 @@ namespace API
   void ScriptRepositoryImpl::parseCentralRepository(Repository & repo){    
     ptree pt; 
     std::string filename = std::string(local_repository).append(".repository.json");
-    read_json(filename, pt);
-    
+    try{
+      read_json(filename, pt);
+    }catch (boost::property_tree::json_parser_error & ex){
+      g_log.error() << "JSON_PARSER_ERROR (" << filename << ") >> " << ex.what() << std::endl;
+      throw ScriptRepoException(filename, ex.what()); 
+    }catch(std::exception & ex){
+      g_log.error() << "STD::EXCEPTION(" << filename << ") >> " << ex.what() << std::endl;
+      throw ScriptRepoException(filename, ex.what()); 
+    }catch(...){
+      g_log.error() << "FATAL " << filename << std::endl; 
+      throw;
+    }
     BOOST_FOREACH(ptree::value_type & file, pt){
       g_log.debug() << "Inserting : file.first " << file.first << std::endl; 
       RepositoryEntry & entry = repo[file.first];
@@ -886,8 +896,18 @@ namespace API
   void ScriptRepositoryImpl::parseDownloadedEntries(Repository & repo){
     ptree pt; 
     std::string filename = std::string(local_repository).append(".local.json");
-    read_json(filename, pt);
-    
+    try{
+      read_json(filename, pt);
+    }catch (boost::property_tree::json_parser_error & ex){
+      g_log.error() << "JSON_PARSER_ERROR (" << filename << ") >> " << ex.what() << std::endl;
+      throw ScriptRepoException(filename, ex.what()); 
+    }catch(std::exception & ex){
+      g_log.error() << "STD::EXCEPTION(" << filename << ") >> " << ex.what() << std::endl;
+      throw ScriptRepoException(filename, ex.what()); 
+    }catch(...){
+      g_log.error() << "FATAL " << filename << std::endl; 
+      throw;
+    }
     BOOST_FOREACH(ptree::value_type & file, pt){
       RepositoryEntry & entry = repo[file.first];
       entry.local = true;
