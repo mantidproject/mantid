@@ -109,3 +109,14 @@ branch_is_merged() {
 	return 1
     fi
 }
+
+# Check if a merge is in progress
+merge_in_progress() {
+    git_dir="$(git rev-parse --show-toplevel)/.git"
+    if [ -f ${git_dir}/MERGE_HEAD ]; then
+	retval=1
+    else
+	retval=0
+    fi
+    return $retval
+}

@@ -27,6 +27,8 @@ CMD_NAME="test"
 PRODUCTION_BRANCH="master"
 # Config key to store tested branch
 BRANCH_CFG_KEY=mantid.workflow.testbranch
+# Changes filename
+CHANGESFILE_CFG_KEY=mantid.workflow.changesfilename
 
 # Get directory of this file
 # The sed expression here replaces all backslashes by forward slashes.
@@ -86,7 +88,15 @@ checkargs() {
 }
 
 start_testing() {
-   # Is the name correct
+    # Check we are not in the middle of testing something else that wasn't finished
+    testing=$(git config ${BRANCH_CFG_KEY})
+    if [ ! -z "${testing}" ]; then
+	echo "It looks like you have already run 'git test start' without a corresponding git test pass/fail."
+	echo "If you are unsure run 'git test fail'. This will drop any merges and reset master back to origin/${PRODUCTION_BRANCH}."
+	exit 1
+    fi    
+
+    # Is the name correct
     remote_branch_exists ${TEST_BRANCH}
     if [ $? -eq 0 ]; then
         echo "Cannot find branch \"${TEST_BRANCH}\" on the remote. Is the name correct?"
@@ -104,17 +114,42 @@ start_testing() {
         echo "Error switching to ${PRODUCTION_BRANCH}, cannot continue. Seek help!"
         exit 1
     fi
-    
-    # Record what we are testing for later pass/fail
-    git config ${BRANCH_CFG_KEY} ${startbranch}
-    
+        
     # Update master
     git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
     
     # Merge test branch
-    git_halt_on_error merge --no-ff origin/${TEST_BRANCH}
+    git_ignore_errors merge --no-ff origin/${TEST_BRANCH}
+    if [ $? -gt 0 ]; then
+	echo "There were conflicts during the merge. If they are trivial please fix them, resolve the merge with 'git add' & 'git commit' and rerun this command."
+	echo "If you are unsure, fail the ticket and the talk to the develop so they can solve the issues."
+	git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
+	exit 1
+    fi
 
-    echo "Now build the code & test the changes."
+
+    # Save a file of the changes made on this branch for review and point the tester to 
+    # a prettier version on github
+    # Direct tester to a pretty version of changes on branch on github
+    # If the branchname contains forward slashes they must be converted to semi-colons for github and underscores for the filename
+    changes_branch_gh=$(echo ${TEST_BRANCH} | sed -e "s@/@;@g")
+    changes_branch_file=$(echo ${TEST_BRANCH} | sed -e "s@/@_@g")
+    repo_stem=$(git config --get remote.origin.url | sed -e 's@.*github.com[:,/]@@' | sed -e 's@\.git$@@')
+    changes_address="https://github.com/${repo_stem}/compare/${changes_branch_gh}"
+
+    changes_file=${HOME}/${changes_branch_file}"_log"
+    git log --patch HEAD --not origin/master > ${changes_file}
+
+    # Record what we are testing for later pass/fail
+    git config ${BRANCH_CFG_KEY} ${TEST_BRANCH}
+    # Record the file for deletion later
+    git config ${CHANGESFILE_CFG_KEY} ${changes_file}
+
+    echo
+    echo "The log of the set of changes made on this branch has been saved to ${changes_file}"
+    echo "For a more readable version please visit ${changes_address}"
+    echo
+    echo "The code should be reviewed, built & the feature tested."
     echo "When complete if:"
     echo "  success: run 'git test pass'"
     echo "  failure: run 'git test fail'"
@@ -130,23 +165,31 @@ end_testing() {
     fi
 
     if [ $TEST_PASSED -eq 1 ]; then
-        git_halt_on_error push origin ${PRODUCTION_BRANCH}
-        
-        # Delete branch on the remote
-        git_halt_on_error push origin :${testbranch}
-        
-        # Delete local branch if there
-        local_branch_exists ${testbranch}
-        if [ $? -eq 1 ]; then
-            git_halt_on_error branch -D ${testbranch}
-        fi
-
+	echo "Testing passed on ${testbranch}. Push master to remote (y/n)?"
+	read publish
+	if [ "${publish}" = "y" ]; then
+	    git_halt_on_error push origin ${PRODUCTION_BRANCH}
+	    # Delete branch on the remote
+            git_halt_on_error push origin :${testbranch}
+            # Delete local branch if there
+            local_branch_exists ${testbranch}
+            if [ $? -eq 1 ]; then
+		git_halt_on_error branch -D ${testbranch}
+            fi
+	fi
     else
-         git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
+	echo "Testing failed on branch ${testbranch}. Resetting ${PRODUCTION_BRANCH} to origin/${PRODUCTION_BRANCH}"
+        git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
     fi
 
-    # Remove the stored name
-    git config --remove ${BRANCH_CFG_KEY}
+    # Remove the stored keys & changes file
+    changes_file=$(git config ${CHANGESFILE_CFG_KEY})
+    if [ -f "${changes_file}" ]; then
+	rm -f ${changes_file}
+    fi
+    
+    git config --unset ${BRANCH_CFG_KEY}
+    git config --unset ${CHANGESFILE_CFG_KEY}
 }
 
 main() {
@@ -162,6 +205,14 @@ main() {
         echo " 1) Commit the changes and rerun this command or"
         echo " 2) Run 'git stash', perform the testing, then run 'git stash pop' when testing has finished"
         exit 1
+    fi
+
+    # Has a previous merge been resolved?
+    merge_in_progress
+    if [ $? -eq 1 ]; then
+	echo "It looks like there is a merge in progress."
+	echo "Resolve any current conflicts with 'git add' & 'git commit' then rerun this command."
+	exit 1
     fi
 
     # Ensure we have everything from the remote
