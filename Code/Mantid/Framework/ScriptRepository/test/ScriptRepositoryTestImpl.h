@@ -190,11 +190,6 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
 
   // ensure that all tests will be perfomed in a fresh repository
   void setUp(){    
-    /*    
-    using Poco::TemporaryFile; 
-    TemporaryFile temp_f;    
-    local_rep = temp_f.path(); 
-    */
     local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
     TS_ASSERT_THROWS_NOTHING(repo = new ScriptRepositoryImplLocal(local_rep, webserverurl)); 
   }
