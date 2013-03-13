@@ -365,8 +365,8 @@ namespace API
     assert(repo.size() == 0);
     try{
       parseCentralRepository(repo); 
-      parseDownloadedEntries(repo);
       parseLocalRepository(repo);
+      parseDownloadedEntries(repo);
       // it will not catch ScriptRepositoryExc, because, this means, that it was already processed.
       // it will proceed in this situation.
     }catch(Poco::Exception & ex){
@@ -905,20 +905,76 @@ namespace API
     recursiveParsingDirectories(local_repository, repo); 
   }
   /** 
-      @todo describe
+      This method will parse through all the entries inside the local.json 
+      file to get the information about the downloaded date and the version 
+      of the downloaded file. This information will be used to extract the 
+      status of the file entry. 
+
+      All the entries should be already created before, because, if the entry 
+      was once downloaded, it should be already at the central repository, 
+      as well as in the local file system.
+
+      The parseDownloadedEntries is not expected to create any new entry.
+      If it finds that the entry is not set as local.
+      
+      The parseDownloadedEntries will remove all the entries that are not 
+      shown anymore inside the local file system or the central repository. 
+      This is usefull to understand that a file has been deleted. 
+
+      :param repo: Reference to the pointer so to update it with the information 
+     
   */
   void ScriptRepositoryImpl::parseDownloadedEntries(Repository & repo){
     ptree pt; 
     std::string filename = std::string(local_repository).append(".local.json");
+    std::vector<std::string> entries_to_delete;
+    Repository::iterator entry_it;
     try{
       read_json(filename, pt);
       BOOST_FOREACH(ptree::value_type & file, pt){
-        RepositoryEntry & entry = repo[file.first];
-        entry.local = true;
-        entry.downloaded_pubdate = DateAndTime(file.second.get<std::string>("downloaded_pubdate")); 
-        entry.downloaded_date = DateAndTime(file.second.get<std::string>("downloaded_date")); 
-      }  
+        entry_it = repo.find(file.first);        
+        if (entry_it != repo.end()){
+          // entry found, so, lets update the entry
+          if (entry_it->second.local && entry_it->second.remote){
+            // this is the normal condition, the downloaded entry
+            // was found at the local file system and at the remote repository
 
+            entry_it->second.downloaded_pubdate = DateAndTime(file.second.get<std::string>("downloaded_pubdate"));
+            entry_it->second.downloaded_date = DateAndTime(file.second.get<std::string>("downloaded_date"));
+
+
+          }else{
+            // if the entry was not found locally or remotelly, this means 
+            // that this entry was deleted (remotelly or locally), 
+            // so it should not appear at local_repository json any more
+            entries_to_delete.push_back(file.first);
+          }
+        }else{
+          // this entry was never created before, so it should not
+          // exist in local repository json
+          entries_to_delete.push_back(file.first);
+        }
+        
+      }// end loop FOREACH entry in local json
+
+      // delete the entries to be deleted in json file
+      if (entries_to_delete.size() > 0){
+        for (std::vector<std::string>::iterator it = entries_to_delete.begin();
+             it != entries_to_delete.end();
+             it++){
+          // remove this entry
+          pt.erase(*it);
+        }
+#if defined(_WIN32) ||  defined(_WIN64)
+        //set the .repository.json and .local.json not hidden (to be able to edit it)
+        SetFileAttributes( filename.c_str(), FILE_ATTRIBUTE_NORMAL);     
+#endif
+        write_json(filename,pt);
+#if defined(_WIN32) ||  defined(_WIN64)
+        //set the .repository.json and .local.json hidden
+        SetFileAttributes( filename.c_str(), FILE_ATTRIBUTE_HIDDEN);     
+#endif
+      }
     }catch (boost::property_tree::json_parser_error & ex){
       std::stringstream ss;
       ss << "Corrupted local database : " << filename; 
@@ -956,7 +1012,7 @@ namespace API
     }
     g_log.debug() << "Update LOCAL JSON FILE" << std::endl; 
     #if defined(_WIN32) ||  defined(_WIN64)
-    //set the .repository.json and .local.json hidden
+    //set the .repository.json and .local.json not hidden to be able to edit it
     SetFileAttributes( filename.c_str(), FILE_ATTRIBUTE_NORMAL);     
     #endif
     write_json(filename, local_json); 

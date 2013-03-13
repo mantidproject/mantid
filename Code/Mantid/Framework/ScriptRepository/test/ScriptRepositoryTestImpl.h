@@ -547,7 +547,28 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::BOTH_CHANGED);
   }
 
+  void test_downloading_and_removing_files(){
+    std::string file_name = "TofConv/TofConverter.py";
+    // install 
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    // list files
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());     
+    // download
+    TS_ASSERT_THROWS_NOTHING(repo->download(file_name)); 
+    // it must be unchanged
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED) ;
+    
+    // now, lets delete this file from the repository
 
+    {
+      Poco::File f(std::string(local_rep).append(file_name)); 
+      f.remove(); 
+    }
+
+    // so, the file should be remote_only and not Mantid::API::BOTH_CHANGED
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());     
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY);
+}
 
 
   void test_list_files_after_download_repository(){
