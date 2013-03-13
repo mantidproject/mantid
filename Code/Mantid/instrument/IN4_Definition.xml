@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
-<instrument name="IN4" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-03-08 12:55:36">
+<instrument name="IN4" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-03-11 14:06:56">
   <!-- Author: ricardo.leal@ill.fr -->
   <defaults>
     <length unit="meter" />
@@ -453,12 +453,12 @@
     <algebra val="pack-pixel-shape" />
   </type>
   <type name="point" is="detector">
-    <cuboid id="pack-pixel-shape">
+    <cuboid id="point-pixel-shape">
       <left-front-bottom-point z="-0.005" y="-0.005" x="-0.005" />
       <left-front-top-point z="-0.005" y="0.005" x="-0.005" />
       <left-back-bottom-point z="-0.005" y="-0.005" x="0.005" />
       <right-front-bottom-point z="0.005" y="-0.005" x="-0.005" />
     </cuboid>
-    <algebra val="pack-pixel-shape" />
+    <algebra val="point-pixel-shape" />
   </type>
 </instrument>
