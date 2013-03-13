@@ -1,7 +1,7 @@
 #ifndef LIBHELPER_H_
 #define LIBHELPER_H_
 
-#include <string>
+#include <QString>
 
 namespace Mantid
 {
@@ -10,7 +10,7 @@ namespace Vates
 namespace SimpleGui
 {
 
-const std::string QUADVIEW_LIBRARY = "@CMAKE_SHARED_LIBRARY_PREFIX@QuadView@CMAKE_SHARED_LIBRARY_SUFFIX@";
+const QString QUADVIEW_LIBRARY("@CMAKE_SHARED_LIBRARY_PREFIX@QuadView@CMAKE_SHARED_LIBRARY_SUFFIX@");
 
 } // namespace SimpleGui
 } // namespace Vates
