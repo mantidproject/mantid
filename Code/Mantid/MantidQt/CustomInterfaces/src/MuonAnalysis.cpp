@@ -550,11 +550,12 @@ void MuonAnalysis::runLoadCurrent()
   // Load dae file
   AnalysisDataService::Instance().remove(m_workspace_name);
 
+   //   "  " +  QString(m_workspace_name.c_str()) + "LoadDAE('" + daename + "')\n"
+
   QString pyString =
-      "from mantidsimple import *\n"
       "import sys\n"
       "try:\n"
-      "  LoadDAE('" + daename + "','" + m_workspace_name.c_str() + "')\n"
+      "  " +  QString(m_workspace_name.c_str()) + "LoadDAE('" + daename + "')\n"
       "except SystemExit, message:\n"
       "  print str(message)";
   QString pyOutput = runPythonCode( pyString ).trimmed();
@@ -1930,8 +1931,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
   if ( !AnalysisDataService::Instance().doesExist(groupName) )
   {
     QString rubbish = "boevsMoreBoevs";
-    QString groupStr = "from mantid.simpleapi import *\n";
-    groupStr += rubbish + QString("=CloneWorkspace(InputWorkspace='") + outWS.c_str() + "')\n";
+    QString groupStr = rubbish + QString("=CloneWorkspace(InputWorkspace='") + outWS.c_str() + "')\n";
     groupStr += groupName.c_str() + QString("=GroupWorkspaces(InputWorkspaces='") + outWS.c_str() + "," + rubbish
       + "')\n";
     runPythonCode( groupStr ).trimmed();
@@ -1960,26 +1960,34 @@ void MuonAnalysis::handlePeriodChoice(const QString wsName, const QStringList& p
 {
   if ( periodLabel.size() == 2 )
   {
-    QString pyS;
     if ( m_uiForm.homePeriodBoxMath->currentText()=="+" )
     {
-      pyS += "Plus(\"" + wsName + periodLabel.at(0)
-        + "\",\"" + wsName + periodLabel.at(1) + "\",\""
-        + wsName + periodLabel.at(0) + "\")\n";
-      pyS += "Plus(\"" + wsName + periodLabel.at(0) + "_Raw"
-        + "\",\"" + wsName + periodLabel.at(1) + "_Raw" + "\",\""
-        + wsName + periodLabel.at(0) + "_Raw\")\n";
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Plus");
+      alg->setPropertyValue("LHSWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString());
+      alg->setPropertyValue("RHSWorkspace", wsName.toStdString() + periodLabel.at(1).toStdString());
+      alg->setPropertyValue("OutputWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString());
+      alg->execute();
+
+      alg = Mantid::API::AlgorithmManager::Instance().create("Plus");
+      alg->setPropertyValue("LHSWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString() + "_Raw");
+      alg->setPropertyValue("RHSWorkspace", wsName.toStdString() + periodLabel.at(1).toStdString() + "_Raw");
+      alg->setPropertyValue("OutputWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString() + "_Raw");
+      alg->execute();
     }
     else
     {
-      pyS += "Minus(\"" + wsName + periodLabel.at(0)
-        + "\",\"" + wsName + periodLabel.at(1) + "\",\""
-        + wsName + periodLabel.at(0) + "\")\n";
-      pyS += "Minus(\"" + wsName + periodLabel.at(0) + "_Raw"
-        + "\",\"" + wsName + periodLabel.at(1) + "_Raw" + "\",\""
-        + wsName + periodLabel.at(0) + "_Raw\")\n";
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Minus");
+      alg->setPropertyValue("LHSWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString());
+      alg->setPropertyValue("RHSWorkspace", wsName.toStdString() + periodLabel.at(1).toStdString());
+      alg->setPropertyValue("OutputWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString());
+      alg->execute();
+
+      alg = Mantid::API::AlgorithmManager::Instance().create("Minus");
+      alg->setPropertyValue("LHSWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString() + "_Raw");
+      alg->setPropertyValue("RHSWorkspace", wsName.toStdString() + periodLabel.at(1).toStdString() + "_Raw");
+      alg->setPropertyValue("OutputWorkspace", wsName.toStdString() + periodLabel.at(0).toStdString() + "_Raw");
+      alg->execute();
     }
-    runPythonCode( pyS );
 
     Mantid::API::AnalysisDataService::Instance().remove((wsName + periodLabel.at(1)).toStdString() );
     Mantid::API::AnalysisDataService::Instance().remove((wsName + periodLabel.at(1) + "_Raw").toStdString() ); 
@@ -2141,29 +2149,54 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
                    cropWS_2.toStdString());
     }
 
-    QString pyString;
     if (plotType.compare("Counts") == 0)
     {
-      pyString = "";
+      // nothing to do
     }
     else if (plotType.compare("Asymmetry") == 0)
     {
-      pyString = "RemoveExpDecay(\"" + cropWS_1 + "\",\"" + cropWS_1 + "\")\n";
-      pyString += "RemoveExpDecay(\"" + cropWS_1 + "_Raw\",\"" + cropWS_1 + "_Raw\")\n";
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("RemoveExpDecay");
+      alg->setPropertyValue("InputWorkspace", cropWS_1.toStdString());
+      alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString());
+      alg->execute();
+      alg = Mantid::API::AlgorithmManager::Instance().create("RemoveExpDecay");
+      alg->setPropertyValue("InputWorkspace", cropWS_1.toStdString() + "_Raw");
+      alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString() + "_Raw");
+      alg->execute();
+
       if (periodLabel.size() == 2)  
       {    
-        pyString += "RemoveExpDecay(\"" + cropWS_2 + "\",\"" + cropWS_2 + "\")\n";
-        pyString += "RemoveExpDecay(\"" + cropWS_2 + "_Raw\",\"" + cropWS_2 + "_Raw\")\n";
+        alg = Mantid::API::AlgorithmManager::Instance().create("RemoveExpDecay");
+        alg->setPropertyValue("InputWorkspace", cropWS_2.toStdString());
+        alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString());
+        alg->execute();
+        alg = Mantid::API::AlgorithmManager::Instance().create("RemoveExpDecay");
+        alg->setPropertyValue("InputWorkspace", cropWS_2.toStdString() + "_Raw");
+        alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString() + "_Raw");
+        alg->execute();  
       }
     }
     else if (plotType.compare("Logorithm") == 0)
     {
-      pyString = "Logarithm(\"" + cropWS_1 + "\",\"" + cropWS_1 + "\")\n";
-      pyString += "Logarithm(\"" + cropWS_1 + "_Raw\",\"" + cropWS_1 + "_Raw\")\n";
-      if (periodLabel.size() == 2)      
-      {
-        pyString += "Logarithm(\"" + cropWS_2 + "\",\"" + cropWS_2 + "\")\n";
-        pyString += "Logarithm(\"" + cropWS_2 + "_Raw\",\"" + cropWS_2 + "_Raw\")\n";
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Logarithm");
+      alg->setPropertyValue("InputWorkspace", cropWS_1.toStdString());
+      alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString());
+      alg->execute();
+      alg = Mantid::API::AlgorithmManager::Instance().create("Logarithm");
+      alg->setPropertyValue("InputWorkspace", cropWS_1.toStdString() + "_Raw");
+      alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString() + "_Raw");
+      alg->execute();
+
+      if (periodLabel.size() == 2)  
+      {    
+        alg = Mantid::API::AlgorithmManager::Instance().create("Logarithm");
+        alg->setPropertyValue("InputWorkspace", cropWS_2.toStdString());
+        alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString());
+        alg->execute();
+        alg = Mantid::API::AlgorithmManager::Instance().create("Logarithm");
+        alg->setPropertyValue("InputWorkspace", cropWS_2.toStdString() + "_Raw");
+        alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString() + "_Raw");
+        alg->execute();  
       }
     }
     else
@@ -2172,9 +2205,6 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       m_updating = false;
       return;
     }
-
-    // Any treatment to the cropWS before plotting?
-    runPythonCode( pyString );
     
     // If user has specified this do algebra on periods
     // note after running this method you are just left with the processed cropWS (and curresponding _Raw)
@@ -2217,7 +2247,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
   int pairNum = getPairNumberFromRow(m_pairTableRowInFocus);
   if ( pairNum >= 0 )
   {
-    QTableWidgetItem *item = m_uiForm.pairTable->item(m_pairTableRowInFocus,3);
+    QTableWidgetItem *itemAlpha = m_uiForm.pairTable->item(m_pairTableRowInFocus,3);
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(m_pairTableRowInFocus,0);
     QString pairName = itemName->text();
     QString wsGroupName(getGroupName());
@@ -2262,23 +2292,43 @@ void MuonAnalysis::plotPair(const std::string& plotType)
                    cropWS_2.toStdString());
     }
 
-    QString pyString;
     if (plotType.compare("Asymmetry") == 0)
     {
       QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
       QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,2));
 
-      pyString = "AsymmetryCalc(\"" + cropWS_1 + "\",\"" + cropWS_1 + "\","
-        + QString::number(qw1->currentIndex()) + "," + QString::number(qw2->currentIndex()) + "," + item->text() + ")\n";
-      pyString += "AsymmetryCalc(\"" + cropWS_1 + "_Raw\",\"" + cropWS_1 + "_Raw\","
-        + QString::number(qw1->currentIndex()) + "," + QString::number(qw2->currentIndex()) + "," + item->text() + ")\n";
-      if (periodLabel.size() == 2) 
-      {        
-        pyString += "AsymmetryCalc(\"" + cropWS_2 + "\",\"" + cropWS_2 + "\","
-          + QString::number(qw1->currentIndex()) + "," + QString::number(qw2->currentIndex()) + "," + item->text() + ")\n";
-        pyString += "AsymmetryCalc(\"" + cropWS_2 + "_Raw\",\"" + cropWS_2 + "_Raw\","
-          + QString::number(qw1->currentIndex()) + "," + QString::number(qw2->currentIndex()) + "," + item->text() + ")\n"; 
-      }       
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("AsymmetryCalc");
+      alg->setPropertyValue("InputWorkspace", cropWS_1.toStdString());
+      alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString());
+      alg->setPropertyValue("ForwardSpectra", QString::number(qw1->currentIndex()).toStdString());
+      alg->setPropertyValue("BackwardSpectra", QString::number(qw2->currentIndex()).toStdString());
+      alg->setPropertyValue("OutputWorkspace", itemAlpha->text().toStdString());
+      alg->execute();
+      alg = Mantid::API::AlgorithmManager::Instance().create("AsymmetryCalc");
+      alg->setPropertyValue("InputWorkspace", cropWS_1.toStdString() + "_Raw");
+      alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString() + "_Raw");
+      alg->setPropertyValue("ForwardSpectra", QString::number(qw1->currentIndex()).toStdString());
+      alg->setPropertyValue("BackwardSpectra", QString::number(qw2->currentIndex()).toStdString());
+      alg->setPropertyValue("OutputWorkspace", itemAlpha->text().toStdString());
+      alg->execute();
+
+      if (periodLabel.size() == 2)  
+      {    
+        Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("AsymmetryCalc");
+        alg->setPropertyValue("InputWorkspace", cropWS_2.toStdString());
+        alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString());
+        alg->setPropertyValue("ForwardSpectra", QString::number(qw1->currentIndex()).toStdString());
+        alg->setPropertyValue("BackwardSpectra", QString::number(qw2->currentIndex()).toStdString());
+        alg->setPropertyValue("OutputWorkspace", itemAlpha->text().toStdString());
+        alg->execute();
+        alg = Mantid::API::AlgorithmManager::Instance().create("AsymmetryCalc");
+        alg->setPropertyValue("InputWorkspace", cropWS_2.toStdString() + "_Raw");
+        alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString() + "_Raw");
+        alg->setPropertyValue("ForwardSpectra", QString::number(qw1->currentIndex()).toStdString());
+        alg->setPropertyValue("BackwardSpectra", QString::number(qw2->currentIndex()).toStdString());
+        alg->setPropertyValue("OutputWorkspace", itemAlpha->text().toStdString());
+        alg->execute(); 
+      }
     }
     else
     {
@@ -2286,9 +2336,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
       m_updating = false;
       return;
     }
-    
-    // Any treatment to the cropWS before plotting?
-    runPythonCode( pyString );
 
     // If user has specified this do algebra on periods
     // note after running this method you are just left with the processed cropWS (and curresponding _Raw)
@@ -2373,27 +2420,20 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
   {
     AnalysisDataService::Instance().remove(outputWS);
 
-    QString pyString =
-      "from mantidsimple import *\n"
-      "import sys\n"
-      "try:\n"
-      "  GroupDetectors('" + QString(inputWS.c_str()) + "','" + outputWS.c_str() + "','" + filename.c_str() + "')\n"
-      "except SystemExit, message:\n"
-      "  print str(message)";
-
-    // run python script
-    QString pyOutput = runPythonCode( pyString ).trimmed();
-
-    // if output is none empty something has gone wrong
-    if ( !pyOutput.toStdString().empty() )
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("GroupDetectors");
+    alg->setPropertyValue("InputWorkspace", inputWS);
+    alg->setPropertyValue("OutputWorkspace", outputWS);
+    alg->setPropertyValue("MapFile", filename);
+    try
+    {
+      alg->execute();
+      return true;
+    }
+    catch(...)
     {
       m_optionTab->noDataAvailable();
       QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Can't group data file according to group-table. Plotting disabled.");
       return false;
-    }
-    else
-    {
-      return true;
     }
   }
   return false;

@@ -68,6 +68,10 @@ public:
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
 
+  void initLocalPython()
+  {
+    runPythonCode("from mantid.simpleapi import *");
+  }
 
 private slots:
   /// Guess Alpha clicked

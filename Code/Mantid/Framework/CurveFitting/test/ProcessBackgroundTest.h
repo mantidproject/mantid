@@ -202,7 +202,7 @@ public:
     alg.setProperty("InputWorkspace", dataws);
     alg.setProperty("OutputWorkspace", "SelectedBackgroundPoints");
     alg.setProperty("Options", "SelectBackgroundPoints");
-    alg.setProperty("BackgroundPointSelectMode", "Input Background Pionts Only");
+    alg.setProperty("BackgroundPointSelectMode", "Input Background Points Only");
 
     alg.setProperty("BackgroundType", "Polynomial");
     alg.setProperty("BackgroundPoints", bkgdpts);
