@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
+#include "MantidVatesSimpleGuiViewWidgets/LibHelper.h"
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
@@ -30,7 +31,7 @@ ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
   pqPluginManager* pm = pqApplicationCore::instance()->getPluginManager();
   QString error;
   pm->loadExtension(pqActiveObjects::instance().activeServer(),
-                    "libQuadView.so", &error, false);
+                    QUADVIEW_LIBRARY, &error, false);
 
   this->mainView = this->createRenderView(this->ui.mainRenderFrame,
                                           QString("pqQuadView"));
