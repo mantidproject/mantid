@@ -3,10 +3,11 @@ from xml.dom.minidom import Document
 from assistant_common import addEle, addTxtEle
 
 class QHPFile:
-    def __init__(self, namespace, folder="doc"):
+    def __init__(self, namespace, folder="doc", prettyxml=False):
         self.__doc = Document()
         self.__root = addEle(self.__doc,"QtHelpProject", self.__doc,
                              {"version":"1.0"})
+        self.__prettyxml = prettyxml
 
         addTxtEle(self.__doc, "namespace", namespace, self.__root)
         addTxtEle(self.__doc, "virtualFolder", folder, self.__root)
@@ -45,7 +46,10 @@ class QHPFile:
             self.__files.append(filename)
 
     def __str__(self):
-        return self.__doc.toprettyxml(indent="  ")
+        if self.__prettyxml:
+            return self.__doc.toprettyxml(indent="  ")
+        else:
+            return self.__doc.toxml()
 
     def write(self, filename):
         """

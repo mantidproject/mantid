@@ -54,7 +54,7 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
    add_custom_command(OUTPUT ${HELP_FIT_OUT}
                       DEPENDS make_fitfunctions_help.py qhpfile.py fitfunctions_help.py
                       COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_fitfunctions_help.py
-                              -m ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
+                              -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
 		      )
 
    add_custom_command(OUTPUT  ${HELP_QCH_DIR}/mantid.qhc ${HELP_QCH_DIR}/algorithms.qch ${HELP_QCH_DIR}/fitfunctions.qch ${HELP_QCH_DIR}/mantidgeneral.qch
