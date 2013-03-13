@@ -562,16 +562,32 @@ namespace DataObjects
     this->clearData();
     data.resize(numSpectra);
     m_noVectors = numSpectra;
-    size_t wi = 0;
-    for ( auto it = spectramap.cbegin(); it != spectramap.cend(); ++it )
+
+    // Loop through the map creating an event list for each unique spectrum number
+    ISpectraDetectorMap::const_iterator itr = spectramap.cbegin();
+    ISpectraDetectorMap::const_iterator iend = spectramap.cend();
+    specid_t previous = itr->first;
+    data[0] = new EventList(mru, previous);
+    data[0]->addDetectorID(itr->second);
+    ++itr;
+    size_t index(0);
+    for(; itr != iend; ++itr)
     {
-      const specid_t specNo = it->first;//ax1->spectraNo(wi);
-      //Create an event list for here
-      EventList * newel = new EventList(mru, specNo);
-      newel->setDetectorID( it->second );
-      //Save it in the list
-      data[wi] = newel;
-      ++wi;
+      const specid_t current = itr->first;
+      if( current == previous )
+      {
+        data[index]->addDetectorID(itr->second);
+      }
+      else
+      {
+        // go to the next workspace index
+        ++index;
+        // the spectrum number (in the iterator) just changed.
+        // Create an event list for this spectrum number
+        data[index] = new EventList(mru, current);
+        data[index]->addDetectorID(itr->second);
+        previous = current;
+      }
     }
 
     // Put on a default set of X vectors, with one bin of 0 & extremely close to zero
