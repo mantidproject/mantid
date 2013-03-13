@@ -304,7 +304,7 @@ void InstrumentWindowRenderTab::showAxes(bool on)
 /**
  * Toggle display of guide and other non-detector components.
  *
- * @param on :: True of false for on and off.
+ * @param yes :: True of false for on and off.
  */
 void InstrumentWindowRenderTab::displayDetectorsOnly(bool yes)
 {

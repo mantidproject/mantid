@@ -9,7 +9,6 @@
  * Initialize with defaults.
  * @param w :: Vieport width in pixels
  * @param h :: Vieport height in pixels
- * @param type :: Projection type: ORTHO or PERSPECTIVE
  */
 Viewport::Viewport(int w, int h):
 m_projectionType( Viewport::ORTHO ),
@@ -452,6 +451,7 @@ void Viewport::generateTranslationTo(int a, int b)
  * Find coordinates of a point on z = 0 plane under the mouse.
  * @param a :: The x mouse coordinate
  * @param b :: The y mouse coordinate
+ * @param point :: Return the result through this reference.
  */
 void Viewport::generateTranslationPoint(int a, int b, Mantid::Kernel::V3D& point)const
 {
