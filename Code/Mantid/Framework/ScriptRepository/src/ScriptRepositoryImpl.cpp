@@ -1004,7 +1004,7 @@ namespace API
       array.put(std::string("downloaded_date"), entry.downloaded_date.toFormattedString());
       array.put(std::string("downloaded_pubdate"), entry.downloaded_pubdate.toFormattedString());
       //      array.push_back(std::make_pair("auto_update",entry.auto_update)));
-      local_json.push_back(std::make_pair(path, array));
+      local_json.push_back( std::pair<std::string, boost::property_tree::basic_ptree<std::string,std::string> >(path,array) );     
     }else{
       boost::property_tree::ptree &localDataTree = local_json.get_child(path); 
       localDataTree.put("downloaded_pubdate",entry.downloaded_pubdate.toFormattedString());
