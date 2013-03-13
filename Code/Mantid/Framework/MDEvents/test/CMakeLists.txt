@@ -6,7 +6,9 @@ if ( CXXTEST_FOUND )
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp 
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../../TestHelpers/src/MDEventsTestHelper.cpp )
+                        ../../TestHelpers/src/MDEventsTestHelper.cpp 
+                        ../../TestHelpers/src/ScopedFileHelper.cpp
+                        )
   
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
