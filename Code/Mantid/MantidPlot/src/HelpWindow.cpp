@@ -192,15 +192,19 @@ void HelpWindow::determineFileLocs()
     if (!Poco::File(m_assistantExe).exists())
     {
         m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
-        m_assistantExe = "/usr/bin/assistant";
+        m_assistantExe = "/usr/local/bin/assistant";
         if (!Poco::File(m_assistantExe).exists())
         {
-            m_log.debug() << "File \"" << m_assistantExe
-                          << "\" does not exist. Assuming it is elsewhere in the path.\n";
-            m_assistantExe = "assistant";
+            m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+            m_assistantExe = "/usr/bin/assistant-qt4";
+            if (!Poco::File(m_assistantExe).exists())
+            {
+                m_log.debug() << "File \"" << m_assistantExe
+                              << "\" does not exist. Assuming it is elsewhere in the path.\n";
+                m_assistantExe = "assistant";
+            }
         }
     }
-    m_assistantExe = "/usr/bin/assistant";
 #else
     // windows it is next to MantidPlot
     m_assistantExe = Poco::Path(binDir, "assistant").absolute().toString();
