@@ -35,6 +35,12 @@ namespace MantidQt
       ui.btnBackgroundColor->setStyle(new QPlastiqueStyle);
       ui.btnPeakColor->setStyle(new QPlastiqueStyle);
 
+      // Hide controls that don't apply when peaks are integrated.
+      const bool integratedPeaks = m_ws->hasIntegratedPeaks();
+      ui.btnBackgroundColor->setVisible(integratedPeaks);
+      ui.ckShowBackground->setVisible(integratedPeaks);
+      ui.lblShowBackgroundColour->setVisible(integratedPeaks);
+
       // Populate controls with data.
       populate();
     }
