@@ -22,48 +22,6 @@ using namespace Mantid::Kernel;
 using Mantid::Kernel::CPUTimer;
 
 
-//====================================================================================
-class ISaveableTester : public ISaveable
-{
-public:
-  ISaveableTester(size_t id) : ISaveable(id),
-  m_memory(1)
-  {}
-  virtual ~ISaveableTester(){}
-
-  virtual bool isBox()const{return true;}
-  virtual void save()const 
-  {
-    // Fake writing to a file
-    std::ostringstream out;
-    out << getId() <<",";
-    streamMutex.lock();
-    fakeFile += out.str();
-    streamMutex.unlock();
-  }
-
-  virtual void clearDataFromMemory(){m_memory = 0; }
-  virtual void load() {}
-  virtual void flushData() const {}
-
-  uint64_t m_memory;
-  virtual uint64_t getTotalDataSize() const { return m_memory; };
-  virtual size_t getDataMemorySize() const  {  return size_t(m_memory);  }
-
-
-  // File position = same as its ID
-  //virtual uint64_t getFilePosition() const { return uint64_t(10-getId()); }
-
-  static std::string fakeFile;
-
-  static Kernel::Mutex streamMutex;
-};
-
-// Declare the static members here.
-std::string ISaveableTester::fakeFile = "";
-Kernel::Mutex ISaveableTester::streamMutex;
-
-
 
 
 //====================================================================================
@@ -271,118 +229,8 @@ public:
 #endif
 
   }
-  void testIsaveable()
-  {
-      ISaveableTester Sav(0);
-      TSM_ASSERT("ISaveable Should never been saved",!Sav.wasSaved());
-      TSM_ASSERT("ISaveable should be free",!Sav.isBusy());
-      TSM_ASSERT("ISaveable have not been changed",!Sav.isDataChanged());
 
-      TSM_ASSERT_EQUALS("Default data ID should be 0 ",0,Sav.getId());
-      TSM_ASSERT_EQUALS("Default file position is wrong ",std::numeric_limits<uint64_t>::max(),Sav.getFilePosition());
-      TSM_ASSERT_EQUALS("Default size should be 0 ",0,Sav.getFileSize());
-
-
-      ISaveableTester CopyTester(Sav);
-      TSM_ASSERT("ISaveable Should never been saved",!CopyTester.wasSaved());
-      TSM_ASSERT("ISaveable should be free",!CopyTester.isBusy());
-      TSM_ASSERT("ISaveable have not been changed",!CopyTester.isDataChanged());
-
-      TSM_ASSERT_EQUALS("Default data ID should be 0 ",0,CopyTester.getId());
-      TSM_ASSERT_EQUALS("Default file position is wrong ",std::numeric_limits<uint64_t>::max(),CopyTester.getFilePosition());
-      TSM_ASSERT_EQUALS("Default size should be 0 ",0,CopyTester.getFileSize());
-
-  }
-
-  //--------------------------------------------------------------------------------
-  /** Getting and setting the cache sizes */
-  void test_set_and_get_methods()
-  {
-    DiskBuffer dbuf(3);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferSize(), 3);
-    dbuf.setWriteBufferSize(11);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferSize(), 11);
-  }
-
-  //--------------------------------------------------------------------------------
-  /** Test calling toWrite() */
-  void test_basic()
-  {
-    // No MRU, 3 in the to-write cache
-    DiskBuffer dbuf(3);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferSize(), 3);
-
-    // Nothing in cache
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-
-    dbuf.toWrite(data[0]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 1);
-    dbuf.toWrite(data[1]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 2);
-    dbuf.toWrite(data[2]);
-    // Write buffer now got flushed out
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-
-    //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,1,0,");
-    // The "file" was written out this way (the right order):
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,");
-    ISaveableTester::fakeFile ="";
-
-    // If you add the same one multiple times, it only is tracked once in the to-write buffer.
-    dbuf.toWrite(data[4]);
-    dbuf.toWrite(data[4]);
-    dbuf.toWrite(data[4]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 1);
-  }
-
-
-  //--------------------------------------------------------------------------------
-  /** Set a buffer size of 0 */
-  void test_basic_WriteBuffer()
-  {
-    // No write buffer
-    DiskBuffer dbuf(0);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferSize(), 0);
-    // Nothing in cache
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-
-    dbuf.toWrite(data[0]);
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,");
-    dbuf.toWrite(data[1]);
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,");
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-    dbuf.toWrite(data[2]);
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,");
-    dbuf.toWrite(data[3]);
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,");
-    dbuf.toWrite(data[4]);
-    // Everything get written immidiately;
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,");
-  }
-
-
-
-  //--------------------------------------------------------------------------------
-  /// Empty out the cache with the flushCache() method
-  void test_flushCache()
-  {
-    DiskBuffer dbuf(10);
-    for (size_t i=0; i<6; i++)
-      dbuf.toWrite(data[i]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 6);
-    // Nothing written out yet
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "");
-    dbuf.flushCache();
-    //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "5,4,3,2,1,0,");
-    // Everything was written out at once (sorted by file index)
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,5,");
-    // Nothing left in cache
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-  }
-
-
-  //--------------------------------------------------------------------------------
-  /** Extreme case with nothing writable but exceeding the writable buffer */
+/** Extreme case with nothing writable but exceeding the writable buffer */
   void test_noWriteBuffer_nothingWritable()
   {
     // Room for 4 in the write buffer
@@ -404,7 +252,6 @@ public:
     //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "9,8,7,6,5,4,3,2,1,0,");
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,5,6,7,8,9,");
   }
-
 
   //--------------------------------------------------------------------------------
   /** Sorts by file position when writing to a file */
@@ -430,28 +277,6 @@ public:
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "5,1,9,2,3,4,");
   }
 
-  //--------------------------------------------------------------------------------
-  /** Any ISaveable that says it can't be written remains in the cache */
-  void test_skips_dataBusy_Blocks()
-  {
-    DiskBuffer dbuf(3);
-    dbuf.toWrite(data[0]);
-    dbuf.toWrite(data[1]); data[1]->setBusy(true); // Won't get written out
-    dbuf.toWrite(data[2]);
-    dbuf.flushCache();
-
-    // Item #1 was skipped and is still in the buffer!
-    //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,0,");
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,2,");
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 1);
-
-    // But it'll get written out next time
-    ISaveableTester::fakeFile = "";
-    data[1]->setBusy(false);
-    dbuf.flushCache();
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "1,");
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-  }
 
 
   //--------------------------------------------------------------------------------

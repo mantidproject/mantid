@@ -65,6 +65,7 @@ set ( SRC_FILES
 	src/ReadLock.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
+	src/Saveable.cpp        
 	src/SignalChannel.cpp
 	src/SingletonHolder.cpp
 	src/SobolSequence.cpp
@@ -141,6 +142,7 @@ set ( INC_FILES
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
 	inc/MantidKernel/Glob.h
+	inc/MantidKernel/INode.h    
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
 	inc/MantidKernel/ISaveable.h
@@ -191,6 +193,7 @@ set ( INC_FILES
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
 	inc/MantidKernel/RegistrationHelper.h
+	inc/MantidKernel/Saveable.h    
 	inc/MantidKernel/SignalChannel.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
@@ -242,6 +245,7 @@ set ( TEST_FILES
 	DateValidatorTest.h
 	DeltaEModeTest.h
 	DirectoryValidatorTest.h
+	DiskBufferISaveableTest.h    
 	DiskBufferTest.h
 	DynamicFactoryTest.h
 	EnabledWhenPropertyTest.h

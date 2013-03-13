@@ -1,66 +1,29 @@
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include <limits>
+#include "MantidKernel/INode.h"
 
 namespace Mantid
 {
 namespace Kernel
 {
 
-
-//----------------------------------------------------------------------------------------------
   /** Constructor
    */
   ISaveable::ISaveable()
-  : m_id(0),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),
-  m_Busy(false),m_dataChanged(false),m_wasSaved(false)
-  {
-  }
+  : m_FileId(0),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),m_BufMemorySize(0)
+  {}
 
   //----------------------------------------------------------------------------------------------
-  /** Copy constructor --> big qusetions about the validity of such implementation
+  /** Copy constructor --> needed? for std containers.
    */
-  ISaveable::ISaveable(const ISaveable & other)
-  : m_id(other.m_id),m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents),
-   m_Busy(other.m_Busy),m_dataChanged(other.m_dataChanged),m_wasSaved(other.m_wasSaved)
-  {
-  }
+  /*ISaveable::ISaveable(const ISaveable & other)
+  : m_FileId(other.m_FileId),m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents)
+  { }*/
 
- ISaveable::ISaveable(const size_t id)
-  : m_id(id),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),
-    m_Busy(false),m_dataChanged(false),m_wasSaved(false)
-  {
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  ISaveable::~ISaveable()
-  {
-  }
-
-  void ISaveable::saveAt(uint64_t newPos, uint64_t newSize)
-  {
-      // load everything which is not in memory yet
-      this->load(); 
-      m_fileIndexStart= newPos;
-      m_fileNumEvents = newSize;
-      m_wasSaved   = true;
-      this->save();
-      this->clearDataFromMemory();      
-  }
-
-  /** Set the start/end point in the file where the events are located
-     * @param newPos :: start point,
-     * @param newSize :: number of events in the file   
-     * @param wasSaved :: flag to mark if info was saved
-     */
-    void ISaveable::setFilePosition(uint64_t newPos, uint64_t newSize, bool wasSaved)
-    {  
-      m_fileIndexStart=newPos;  
-      m_fileNumEvents =newSize;
-      m_wasSaved = wasSaved;
-    }
+  ISaveable::ISaveable(const size_t fileId)
+  : m_FileId(fileId),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),m_BufMemorySize(0)
+  {}
 
 
   //-----------------------------------------------------------------------------------------------
@@ -72,9 +35,14 @@ namespace Kernel
    * @return
    */
   
-  inline bool CompareFilePosition (const ISaveable * a, const ISaveable * b)
+  inline bool CompareFilePosition (const INode * const a, const INode * const b)
   {
-    return (a->getId() < b->getId());
+    const ISaveable *const as = a->getISaveable();
+    if(!as)return false;
+    const ISaveable *const bs = b->getISaveable();
+    if(!bs)return false;
+
+    return (as->getFileId() < bs->getFileId());
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -84,13 +52,40 @@ namespace Kernel
    *
    * @param boxes :: ref to a vector of boxes. It will be sorted in-place.
    */
-  void ISaveable::sortObjByFilePos(std::vector<ISaveable *> & boxes)
+  void ISaveable::sortObjByFileID(std::vector<INode *const> & boxes)
   {
     std::sort( boxes.begin(), boxes.end(), CompareFilePosition);
   }
 
+  /** Method stores the position of the object in Disc buffer and returns the size of this object for disk buffer to store 
+   * @param bufPosition -- the allocator which specifies the position of the object in the list of objects to write
+   * @returns the size of the object it currently occupies in memory. This size is also stored by the object itself for further references
+  */
+  size_t ISaveable::setBufferPosition(std::list<ISaveable *const>::iterator &bufPosition)
+  {
+      m_BufPosition = boost::optional<std::list<ISaveable *const>::iterator >(bufPosition);
+      m_BufMemorySize  = this->getDataMemorySize();
+      return m_BufMemorySize ;
+  }
 
-
+  /** private function which used by the disk buffer to save the contents of the  */
+  void ISaveable::saveAt(uint64_t newPos, uint64_t newSize)
+  {
+   
+      // load everything which is not in memory yet
+      this->load(); 
+      m_fileIndexStart= newPos;
+      m_fileNumEvents = newSize;
+      this->save();
+      this->clearDataFromMemory();      
+  }
+  
+  /// clears the state of the object, and indicate that it is not stored in buffer any more 
+  void ISaveable::clearBufferState()
+  {
+      m_BufMemorySize=0;
+      m_BufPosition = boost::optional<std::list<ISaveable *const>::iterator>();
+  }
 } // namespace Mantid
 } // namespace Kernel
 

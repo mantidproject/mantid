@@ -14,6 +14,7 @@
 #include <map>
 #include <stdint.h>
 #include <vector>
+#include <forward_list>
 
 namespace Mantid
 {
@@ -56,21 +57,6 @@ namespace Kernel
   public:
 
 
-    /** A map for the buffer of "toWrite" objects.
-     * Index 1: Order in the file to save to
-     * Index 2: ID of the object
-     */
-    typedef boost::multi_index::multi_index_container<
-      const ISaveable *,
-      boost::multi_index::indexed_by<
-        boost::multi_index::ordered_non_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, uint64_t, getFilePosition)>,
-        boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, size_t, getId)>
-      >
-    > writeBuffer_t;
-
-    /// A way to index the toWrite buffer by ID (instead of the file position)
-    typedef writeBuffer_t::nth_index<1>::type writeBuffer_byId_t;
-
     /** A map for the list of free space blocks in the file.
      * Index 1: Position in the file.
      * Index 2: Size of the free block
@@ -91,9 +77,9 @@ namespace Kernel
     DiskBuffer(uint64_t m_writeBufferSize);
     virtual ~DiskBuffer();
 
-    void toWrite(const ISaveable * item);
+    void toWrite(ISaveable * const item);
     void flushCache();
-    void objectDeleted(const ISaveable * item);
+    void objectDeleted(ISaveable *const item);
 
     // Free space map methods
     void freeBlock(uint64_t const pos, uint64_t const fileSize);
@@ -142,7 +128,7 @@ namespace Kernel
 
     //-------------------------------------------------------------------------------------------
     /** @return the file-access mutex */
-    Kernel::RecursiveMutex & getFileMutex()
+    Kernel::Mutex & getFileMutex()
     { return m_fileMutex; }
 
 
@@ -150,26 +136,24 @@ namespace Kernel
     inline void writeOldObjects();
 
     /// Mutex for accessing the file being buffered
-    Kernel::RecursiveMutex m_fileMutex;
+    Kernel::Mutex m_fileMutex;
 
     // ----------------------- To-write buffer --------------------------------------
     /// Do we use the write buffer? Always now
     //bool m_useWriteBuffer;
 
     /// Amount of memory to accumulate in the write buffer before writing.
-    uint64_t m_writeBufferSize;
-
-    /// List of the data objects that should be written out. Ordered by file position.
-    writeBuffer_t m_writeBuffer;
-
-    /// Reference to the same m_writeBuffer map, but indexed by item ID instead of by file position.
-    writeBuffer_byId_t & m_writeBuffer_byId;
+    size_t m_writeBufferSize;
 
     /// Total amount of memory in the "toWrite" buffer.
-    uint64_t m_writeBufferUsed;
+    size_t m_writeBufferUsed;
+    /// number of objects stored in to write buffer list
+    size_t m_nObjectsToWrite;
+    /** A forward list for the buffer of "toWrite" objects.   */
+    std::list<ISaveable * const> m_toWriteBuffer;
 
     /// Mutex for modifying the the toWrite buffer.
-    Kernel::RecursiveMutex m_mutex;
+    Kernel::Mutex m_mutex;
 
     // ----------------------- Free space map --------------------------------------
     /// Map of the free blocks in the file
