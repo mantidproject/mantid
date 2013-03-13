@@ -57,21 +57,6 @@ namespace MDEvents
 
     /// Load the data which are not in memory yet and merge them with the data in memory;
     virtual void load();
-    /** Method sets the attribite which tells that data were loaded in memory. 
-
-        Usually one should not use this method  as load operation sets this attribute by itself 
-        but in some specific situations where the data were loaded from extermal source and exchanged with the box and the
-        data file position in new place is known this attribute should be set to true manually, to not allowing attempt to download 
-        data again (see mergeMD files where target box data were loaded from the external source and been added to the box
-    */
-    void setLoaded()
-    {
-        m_isLoaded=true;
-    }
-
-    /// @return whether the box data (from disk) is loaded in memory.
-    bool getInMemory() const
-    { return m_isLoaded; }
 
    
     /// @return the amount of memory that the object takes up in the MRU.
@@ -81,6 +66,7 @@ namespace MDEvents
     (because it might be cached to disk) or the size on disk (because you might have called AddEvents) */
     virtual size_t getDataMemorySize()const 
             {  return data.size();}
+    /** teturns true if it is box*/
     virtual bool isBox()const{return true;}
     //-----------------------------------------------------------------------------------------------
 
@@ -198,10 +184,7 @@ namespace MDEvents
     /// Mutex for modifying the event list
     Mantid::Kernel::Mutex dataMutex;
 
-    /// True when the events, which were saved before have been loaded up from disk. Load sets it true and memory clean-up resets it to false
-    mutable bool m_isLoaded;
-
-    /// Flag indicating that masking has been applied.
+     /// Flag indicating that masking has been applied.
     bool m_bIsMasked;
 
   public:

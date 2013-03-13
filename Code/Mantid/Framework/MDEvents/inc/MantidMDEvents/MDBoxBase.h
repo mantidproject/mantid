@@ -82,15 +82,6 @@ namespace MDEvents
     virtual void load()
     { }
 
-    /// @return the amount of memory that the object takes up in the MRU.
-    virtual uint64_t getTotalDataSize() const
-    { return 0; }
-    virtual size_t getDataMemorySize()const
-    {return 0;}
-
-    virtual void clearDataFromMemory()
-    {// no data so no operations
-    }
     // -------------------------------- Parents/Children-Related -------------------------------------------
    /// Return a pointer to the parent box
     void setParent(MDBoxBase<MDE,nd> * parent)
@@ -375,25 +366,6 @@ namespace MDEvents
       m_inverseVolume = invVolume;
     }
 
-#ifdef MDBOX_TRACK_CENTROID
-    //-----------------------------------------------------------------------------------------------
-    /** Return the centroid of the box.
-     * @param d :: index of the dimension to return.
-     */
-    coord_t getCentroid(size_t d) const
-    {
-      return m_centroid[d];
-    }
-
-    //-----------------------------------------------------------------------------------------------
-    /** Return the centroid array of the box.
-     */
-    const coord_t * getCentroid() const
-    {
-      return m_centroid;
-    }
-#endif
-    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)=0;
   protected:
     /** Array of MDDimensionStats giving the extents and
      * other stats on the box dimensions.

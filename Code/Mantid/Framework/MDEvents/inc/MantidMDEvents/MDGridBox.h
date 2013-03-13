@@ -73,10 +73,7 @@ namespace MDEvents
 
     std::vector< MDE > * getEventsCopy();
 
-   // void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly);
     void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly);
-
-    //void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
     void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
     const MDBoxBase<MDE,nd> * getBoxAtCoord(const coord_t * coords) const;
