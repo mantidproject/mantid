@@ -38,6 +38,7 @@ set ( EXPORT_FILES
   src/Exports/DeltaEMode.cpp
   src/Exports/PropertyManager.cpp
   src/Exports/Memory.cpp
+  src/Exports/ProgressBase.cpp
 )  
 
 set ( SRC_FILES
