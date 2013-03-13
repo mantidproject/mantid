@@ -238,9 +238,9 @@ public:
     // Check that the properties are unaffected. Should just reflect the defaults.
     Mantid::Kernel::Property* p = alg.getProperty("SplitThreshold");
     TS_ASSERT(p->isDefault());
-    Mantid::Kernel::Property* p = alg.getProperty("SplitInto");
+    p = alg.getProperty("SplitInto");
     TS_ASSERT(p->isDefault());
-    Mantid::Kernel::Property* p = alg.getProperty("MaxRecursionDepth");
+    p = alg.getProperty("MaxRecursionDepth");
     TS_ASSERT(p->isDefault());
   }
 
