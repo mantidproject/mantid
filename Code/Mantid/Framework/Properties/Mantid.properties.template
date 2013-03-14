@@ -202,4 +202,4 @@ ScriptLocalRepository =
 # Url for the remote script repository.
 ScriptRepository = http://download.mantidproject.org/master_builds/
 # Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';' 
-ScriptRepositoryIgnore = *pyc;system/scriptrepositoryparser.py
+ScriptRepositoryIgnore = *pyc;

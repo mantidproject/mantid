@@ -1099,6 +1099,9 @@ namespace API
       return false;
     if (path == ".local.json")
       return false;
+    // hide everything under system folder
+    if (path == "system" || path.find("system/") == 0)
+      return false; 
 
     Poco::RegularExpression re1(ignoreregex);
     
