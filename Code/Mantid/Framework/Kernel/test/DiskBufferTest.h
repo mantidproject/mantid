@@ -113,7 +113,6 @@ public:
 
    
   static std::string fakeFile;
-
   static Kernel::Mutex streamMutex;
 };
 
@@ -660,6 +659,7 @@ public:
 
 };
 //====================================================================================
+// THIS TEST DOES NOT PROBABLY EXIST IN A WHILD ANY MORE; LEFT JUST IN CASE
 //====================================================================================
 //====================================================================================
 /** An Saveable that will fake seeking to disk */
@@ -669,6 +669,7 @@ class SaveableTesterWithSeek : public Saveable
 public:
   SaveableTesterWithSeek(size_t id) : Saveable(id)
   {
+    m_memory=1;
     this->setFilePosition(10+id,this->m_memory);
   }
   
@@ -679,18 +680,14 @@ public:
       or modified.
      * If the object has never been loaded, this should be equal to number of data points in the file
      */
-    virtual uint64_t getTotalDataSize() const{return 1;}
+    virtual uint64_t getTotalDataSize() const{return m_memory;}
     /// the data size kept in memory
-    virtual size_t getDataMemorySize()const{return 1;};
-
-   static std::string fakeFile;
-   static Kernel::Mutex streamMutex;
-
+    virtual size_t getDataMemorySize()const{return m_memory;};
 
   virtual void load(DiskBuffer & /*dbuf*/) 
   {
     uint64_t myFilePos = this->getFilePosition();
-    std::cout << "Block " << getFileId() << " loading at " << myFilePos << std::endl;
+    //std::cout << "Block " << getFileId() << " loading at " << myFilePos << std::endl;
     SaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
     this->setLoaded();
   }
@@ -699,7 +696,7 @@ public:
   {
     // Pretend to seek to the point and write
     uint64_t myFilePos = this->getFilePosition();
-    std::cout << "Block " << getFileId() << " saving at " << myFilePos << std::endl;
+    //std::cout << "Block " << getFileId() << " saving at " << myFilePos << std::endl;
     fakeSeekAndWrite(myFilePos);
   }
   virtual void clearDataFromMemory()
@@ -713,11 +710,11 @@ public:
   {
     // OK first you seek to where the OLD data was and load it.
     uint64_t myFilePos = this->getFilePosition();
-    std::cout << "Block " << getFileId() << " loading at " << myFilePos << std::endl;
+    //std::cout << "Block " << getFileId() << " loading at " << myFilePos << std::endl;
     SaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
     // Simulate that the data is growing and so needs to be written out
     size_t newfilePos = dbuf.relocate(myFilePos, m_memory, m_memory+1);
-    std::cout << "Block " << getFileId() << " has moved from " << myFilePos << " to " << newfilePos << std::endl;
+    //std::cout << "Block " << getFileId() << " has moved from " << myFilePos << " to " << newfilePos << std::endl;
     myFilePos = newfilePos;
     // Grow the size by 1
     m_memory++;
@@ -740,12 +737,25 @@ public:
     filePos = newPos;
     streamMutex.unlock();
   }
+  virtual void load()
+  {
+      if(this->wasSaved()&&!this->isLoaded())
+      {
+          m_memory+=this->getFileSize();
+      }
+      this->setLoaded();
+  }
+
 
   static uint64_t filePos;
+  static std::string fakeFile;
+  static Kernel::Mutex streamMutex;
+
 };
 uint64_t SaveableTesterWithSeek::filePos;
-
-
+// Declare the static members here.
+std::string SaveableTesterWithSeek::fakeFile;
+Kernel::Mutex SaveableTesterWithSeek::streamMutex;
 
 
 
@@ -814,6 +824,7 @@ public:
     {
       // Pretend you just loaded the data
       dataSeek[i]->grow(dbuf, true);
+      dbuf.toWrite(dataSeek[i]);
     }
     std::cout << "About to flush the cache to finish writes." << std::endl;
     dbuf.flushCache();
