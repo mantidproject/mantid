@@ -26,6 +26,10 @@ CMD_NAME="finish"
 # Branch that the build servers see
 BUILDER_BRANCH="develop"
 
+# Set git to merge silently if everything succceeded
+# See http://git-blame.blogspot.co.uk/2012/02/anticipating-git-1710.html
+export GIT_MERGE_AUTOEDIT=no
+
 # Get directory of this file
 # The sed expression here replaces all backslashes by forward slashes.
 # This helps our Windows users, while not bothering our Unix users.
