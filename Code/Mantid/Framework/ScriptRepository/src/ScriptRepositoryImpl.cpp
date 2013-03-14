@@ -152,15 +152,25 @@ namespace API
     // if no folder is given, the repository is invalid.
     if (local_repository.empty())
       return;
+
+    // parsing the ignore pattern
+    std::string ignore = ignorePatterns(); 
+    boost::replace_all(ignore,"/","\\/");
+    boost::replace_all(ignore,";","|");
+    boost::replace_all(ignore,".","\\.");
+    boost::replace_all(ignore,"*",".*");
+    ignoreregex = std::string("(").append(ignore).append(")");  
+    g_log.debug() << "Ignore regex pattern: " << ignoreregex << std::endl; 
+    g_log.debug() << "ScriptRepository initialized" << std::endl; 
+
+
     // A valid repository must pass 3 tests:
     //  - An existing folder
     //  - This folder must have the .repository.json file
     //  - This folder must have the .local.json file
     // These tests will be done with Poco library
 
-    
-    
-    
+      
     Poco::Path local(local_repository); 
     
     std::string aux_local_rep;
@@ -201,14 +211,6 @@ namespace API
     if (local_repository[local_repository.size()-1] != '/')
       local_repository.append("/");
 
-    // parsing the ignore pattern
-    std::string ignore = ignorePatterns(); 
-    boost::replace_all(ignore,";","|");
-    boost::replace_all(ignore,".","\\.");
-    boost::replace_all(ignore,"*",".*");
-    ignoreregex = std::string("(").append(ignore).append(")");
-
-    g_log.debug() << "ScriptRepository initialized" << std::endl; 
     repo.clear();
     valid = true;
   }
@@ -750,10 +752,12 @@ namespace API
       config.setString("ScriptRepositoryIgnore", patterns); 
       config.saveConfig(config.getUserFilename()); 
       std::string newignore=patterns; 
+      boost::replace_all(ignore,"/","\\/");
       boost::replace_all(newignore,";","|");      
       boost::replace_all(newignore,".","\\.");
       boost::replace_all(newignore,"*",".*");      
       ignoreregex = std::string("(").append(newignore).append(")");
+      g_log.debug() << "Ignore regex pattern: " << ignoreregex << std::endl; 
     }
   };
   /** 
@@ -1095,7 +1099,7 @@ namespace API
       return false;
     if (path == ".local.json")
       return false;
-    g_log.debug() << "path : " << path << " ignoreregex " << ignoreregex << std::endl; 
+
     Poco::RegularExpression re1(ignoreregex);
     
     if (re1.match(path))
