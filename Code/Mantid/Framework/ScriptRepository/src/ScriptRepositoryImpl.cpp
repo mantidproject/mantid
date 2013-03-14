@@ -336,8 +336,9 @@ namespace API
       info.pub_date = entry.pub_date;
       info.auto_update = entry.auto_update;
     }catch(const std::out_of_range & ex){
-      // fixme: readable exception
-      throw ScriptRepoException(ex.what()); 
+      std::stringstream ss; 
+      ss << "The file \""<< input_path << "\" was not found inside the repository!";            
+      throw ScriptRepoException(ss.str(), ex.what()); 
     }
     return info; 
   }
@@ -652,8 +653,9 @@ namespace API
       RepositoryEntry & entry = repo.at(file_path); 
       return entry.status;
     }catch(const std::out_of_range & ex){
-      // fixme: readable exception
-      throw ScriptRepoException(ex.what()); 
+      std::stringstream ss; 
+      ss << "The file \""<< input_path << "\" was not found inside the repository!";            
+      throw ScriptRepoException(ss.str(), ex.what()); 
     }
     // this line will never be executed, just for avoid compiler warnings.
     return BOTH_UNCHANGED;
@@ -1012,7 +1014,7 @@ namespace API
       array.put(std::string("downloaded_date"), entry.downloaded_date.toFormattedString());
       array.put(std::string("downloaded_pubdate"), entry.downloaded_pubdate.toFormattedString());
       //      array.push_back(std::make_pair("auto_update",entry.auto_update)));
-      local_json.put(std::string(path), array);
+      local_json.push_back( std::pair<std::string, boost::property_tree::basic_ptree<std::string,std::string> >(path,array) );
     }else{
       boost::property_tree::ptree &localDataTree = local_json.get_child(path); 
       localDataTree.put("downloaded_pubdate",entry.downloaded_pubdate.toFormattedString());
@@ -1146,7 +1148,7 @@ namespace API
     size_t pos = absolute_path.find(local_repository); 
 
     if (pos == std::string::npos){      
-      // the given file is not inside the local repository. It can not be converted. 
+      // the given file is not inside the local repository. It can not be converted.
       return path; 
     }else{
       // the path is inside the local repository
