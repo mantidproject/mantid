@@ -163,7 +163,7 @@ namespace Kernel
     freeSpace_bySize_t & m_free_bySize;
 
     /// Mutex for modifying the free space list
-    Kernel::RecursiveMutex m_freeMutex;
+    Kernel::Mutex m_freeMutex;
 
     // ----------------------- File object --------------------------------------
     /// Length of the file. This is where new blocks that don't fit get placed.

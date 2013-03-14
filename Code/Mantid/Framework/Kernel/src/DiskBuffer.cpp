@@ -80,7 +80,7 @@ namespace Kernel
             m_nObjectsToWrite++;
         m_mutex.unlock();
     }
-    
+     
 
    // Should we now write out the old data?
      if (m_writeBufferUsed > m_writeBufferSize)
@@ -117,8 +117,8 @@ namespace Kernel
     //std::cout << "DiskBuffer deleting ID " << item->getId() << "; new size " << m_writeBuffer.size() << std::endl;
 
     // Mark the amount of space used on disk as free
-    //this->freeBlock(item->getFilePosition(), sizeOnFile);
-    this->freeBlock(item->getFilePosition(), item->getFileSize());
+    if(item->wasSaved())
+        this->freeBlock(item->getFilePosition(), item->getFileSize());
   }
 
 
@@ -149,27 +149,27 @@ namespace Kernel
       obj = *it;
       if (!obj->isBusy())
       {
-        uint64_t NumAllEvents = obj->getTotalDataSize();
+        uint64_t NumObjEvents = obj->getTotalDataSize();
         uint64_t fileIndexStart;
         if (!obj->wasSaved())
         {
-            fileIndexStart=this->allocate(NumAllEvents);
+            fileIndexStart=this->allocate(NumObjEvents);
            // Write to the disk; this will call the object specific save function;
           // Prevent simultaneous file access (e.g. write while loading)
             m_fileMutex.lock();
-            obj->saveAt(fileIndexStart,NumAllEvents);
+            obj->saveAt(fileIndexStart,NumObjEvents);
             m_fileMutex.unlock();	  
         }
         else
         {
           uint64_t NumFileEvents= obj->getFileSize();
-          if (NumAllEvents != NumFileEvents)
+          if (NumObjEvents != NumFileEvents)
           {
           // Event list changed size. The MRU can tell us where it best fits now.
-            fileIndexStart= this->relocate(obj->getFilePosition(), NumFileEvents, NumAllEvents);
+            fileIndexStart= this->relocate(obj->getFilePosition(), NumFileEvents, NumObjEvents);
             m_fileMutex.lock();
            // Write to the disk; this will call the object specific save function;
-            obj->saveAt(fileIndexStart,NumAllEvents);
+            obj->saveAt(fileIndexStart,NumObjEvents);
             m_fileMutex.unlock();	  
           }       
           else // despite object size have not been changed, it can be modified other way. In this case, the method which changed the data should set dataChanged ID
@@ -177,16 +177,18 @@ namespace Kernel
             if(obj->isDataChanged())
             {
               fileIndexStart = obj->getFilePosition();
-              m_fileMutex.lock();	  
+              m_fileMutex.lock(); 
               // Write to the disk; this will call the object specific save function;
-              obj->saveAt(fileIndexStart,NumAllEvents);
-              m_fileMutex.unlock();	  
+              obj->saveAt(fileIndexStart,NumObjEvents);
+              m_fileMutex.unlock(); 
+              // this is questionable operation, which adjust file size in case when the file postions were allocated externaly
+              if(fileIndexStart+NumObjEvents>m_fileLength)m_fileLength=fileIndexStart+NumObjEvents;
             }
             else // just clean the object up -- it just occupies memory
               obj->clearDataFromMemory();
           }
         }
-       // mark the object removed from the buffer
+       // tell the object that it has been removed from the buffer
         obj->clearBufferState();
       } 
       else // object busy

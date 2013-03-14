@@ -79,7 +79,6 @@ namespace Kernel
       this->save();
       this->clearDataFromMemory();      
   }
-  
   /// clears the state of the object, and indicate that it is not stored in buffer any more 
   void ISaveable::clearBufferState()
   {

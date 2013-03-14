@@ -78,7 +78,7 @@ std::string ISaveableTester::fakeFile = "";
 Kernel::Mutex ISaveableTester::streamMutex;
 
 //====================================================================================
-class DiskBufferTest : public CxxTest::TestSuite
+class DiskBufferISaveableTest : public CxxTest::TestSuite
 {
 public:
 

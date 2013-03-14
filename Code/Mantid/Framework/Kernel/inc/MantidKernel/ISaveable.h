@@ -103,7 +103,7 @@ namespace Kernel
     /// Start point in the NXS file where the events are located
     uint64_t m_fileIndexStart;
     /// Number of events saved in the file, after the start index location
-    uint64_t m_fileNumEvents;
+    uint64_t m_fileNumEvents;  
   private:
     // the iterator which describes the position of this object in the DiskBuffer. Undefined if not placed to buffer
     boost::optional< std::list<ISaveable * const >::iterator> m_BufPosition;
