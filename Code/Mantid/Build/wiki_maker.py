@@ -25,6 +25,12 @@ import platform
 reporter = WikiReporter()
 # no version identier
 noversion = -1
+# Direction
+InputDirection = "Input"
+OutputDirection = "Output"
+InOutDirection = "InOut"
+NoDirection = "None"
+direction_string = [InputDirection, OutputDirection, InOutDirection, NoDirection]
 
 #======================================================================
 def get_wiki_description(algo, version):
@@ -128,12 +134,7 @@ def make_property_table_line(propnum, p):
     out += "|" + str(propnum) + "\n"
     # Name of the property
     out += "|" + p.name + "\n"
-    # Direction
-    InputDirection = "Input"
-    OutputDirection = "Output"
-    InOutDirection = "InOut"
-    NoDirection = "None"
-    direction_string = [InputDirection, OutputDirection, InOutDirection, NoDirection]
+
     out += "|" + direction_string[p.direction] + "\n"
     # Type (as string) wrap an IWorkspaceProperty in a link.
     if isinstance(p, IWorkspaceProperty): 
@@ -199,7 +200,7 @@ def make_wiki(algo_name, version, latest_version):
     out += alg._ProxyObject__obj.getWikiSummary().replace("\n", " ") + "\n\n"
     
     out += "\n\n== Usage ==\n\n"
-    out += " " + create_function_signature(algo_name) + "\n\n" 
+    out += " " + create_function_signature(alg, algo_name) + "\n\n" 
     out += "<br clear=all>\n\n" 
     out += "== Properties ==\n\n"
     
@@ -348,14 +349,14 @@ def wiki_maker_page(page):
         return re.search("^Bot", rev['comment'])
 
 #======================================================================
-def create_function_signature(algo):
+def create_function_signature(alg, algo_name):
     """
     create the function signature for the algorithm.
     """
     from mantid.simpleapi import _get_function_spec
     import mantid.simpleapi
-    _alg = getattr(mantid.simpleapi, algo)
-    prototype =  algo + _get_function_spec(_alg)
+    _alg = getattr(mantid.simpleapi, algo_name)
+    prototype =  algo_name + _get_function_spec(_alg)
     
     # Replace every nth column with a newline.
     nth = 4
@@ -370,8 +371,37 @@ def create_function_signature(algo):
                 prototype_reformated += char
         else: 
            prototype_reformated += char
+           
+    # Strip out the version.
     prototype_reformated = prototype_reformated.replace(",[Version]", "")
-    return prototype_reformated
+    
+    # Add the output properties
+    props = alg._ProxyObject__obj.getProperties()
+    allreturns = []
+    workspacereturn = None
+    # Loop through all the properties looking for output properties
+    for prop in props:
+        if (direction_string[prop.direction] == OutputDirection):
+            allreturns.append(prop.name)
+            # Cache the last workspace property seen.
+            if isinstance(prop, IWorkspaceProperty): 
+                workspacereturn = prop.name
+                
+    lhs = ""
+    comments = ""
+    if not allreturns:
+        pass
+    elif (len(allreturns) == 1) and (workspacereturn is not None): 
+        lhs =   workspacereturn + " = "
+    else :
+        lhs = "result = "
+        comments = "\n "
+        comments += "\n # -------------------------------------------------- \n"
+        comments += " # result is a tuple containing\n"
+        comments += " # (" + ",".join(allreturns ) + ")\n"
+        comments += " # To access individual outputs use result[i], where i is the index of the required output.\n"
+        
+    return lhs + prototype_reformated + comments
     
 #======================================================================
 def do_algorithm(args, algo, version):
@@ -520,7 +550,7 @@ if __name__ == "__main__":
     
     initialize_Mantid(args.mantidpath)
     global mtd
-    from MantidFramework import IWorkspaceProperty
+    from MantidFramework import IWorkspaceProperty, WorkspaceProperty
     mtd = wiki_tools.mtd
     intialize_files()
     initialize_wiki(args)
