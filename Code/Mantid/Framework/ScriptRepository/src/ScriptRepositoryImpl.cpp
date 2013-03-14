@@ -43,6 +43,7 @@ using Mantid::Kernel::ConfigServiceImpl;
 
 using boost::property_tree::ptree;
 
+const std::string SCRIPTREPPATH = "scripts_repo/";
 
 namespace Mantid
 {
@@ -130,11 +131,16 @@ namespace API
     else
       remote_url = remote;
 
+
     // empty remote url is not allowed
     if (remote_url.empty()){
       g_log.error() << emptyURL<<std::endl; 
       throw ScriptRepoException(emptyURL,"Constructor Failed: remote_url.empty");
     }
+
+    if (remote_url[remote_url.size()-1] != '/')
+      remote_url.append("/");
+
 
     g_log.debug() << "ScriptRepositoryImpl constructor: local_rep " 
                   << local_repository << "; remote = " << remote_url << "\n";
@@ -598,7 +604,7 @@ namespace API
 
 
     // download the file
-    std::string url_path = std::string(remote_url).append("/scripts/").append(file_path); 
+    std::string url_path = std::string(remote_url).append(SCRIPTREPPATH).append(file_path); 
     std::string local_path = std::string(local_repository).append(file_path); 
     g_log.debug() << "Request to download url_path: " << url_path << " to " << local_path << std::endl;
 
@@ -742,7 +748,7 @@ namespace API
       config.setString("ScriptRepositoryIgnore", patterns); 
       config.saveConfig(config.getUserFilename()); 
       std::string newignore=patterns; 
-      boost::replace_all(newignore,";","|");
+      boost::replace_all(newignore,";","|");      
       boost::replace_all(newignore,".","\\.");
       boost::replace_all(newignore,"*",".*");      
       ignoreregex = std::string("(").append(newignore).append(")");
@@ -872,6 +878,8 @@ namespace API
       read_json(filename, pt);
       
       BOOST_FOREACH(ptree::value_type & file, pt){
+        if (!isEntryValid(file.first))
+          continue;
         g_log.debug() << "Inserting : file.first " << file.first << std::endl; 
         RepositoryEntry & entry = repo[file.first];
         entry.remote = true;
@@ -1004,7 +1012,7 @@ namespace API
       array.put(std::string("downloaded_date"), entry.downloaded_date.toFormattedString());
       array.put(std::string("downloaded_pubdate"), entry.downloaded_pubdate.toFormattedString());
       //      array.push_back(std::make_pair("auto_update",entry.auto_update)));
-      local_json.push_back( std::pair<std::string, boost::property_tree::basic_ptree<std::string,std::string> >(path,array) );     
+      local_json.put(std::string(path), array);
     }else{
       boost::property_tree::ptree &localDataTree = local_json.get_child(path); 
       localDataTree.put("downloaded_pubdate",entry.downloaded_pubdate.toFormattedString());
@@ -1104,12 +1112,12 @@ namespace API
      For example: 
      
      @code 
-     // consider the local repository at /opt/scripts/
+     // consider the local repository at /opt/scripts_repo/
      bool flag; 
-     convertPath("/opt/scripts/README.md", flag) // returns: README.md
+     convertPath("/opt/scripts_repo/README.md", flag) // returns: README.md
      convertPath("README.md", flag) // returns: README.md
-     // consider the local repository at c:\MantidInstall\scripts
-     convertPath("c:\MantidInstall\scripts\README.md", flag)// returns README.md
+     // consider the local repository at c:\MantidInstall\scripts_repo
+     convertPath("c:\MantidInstall\scripts_repo\README.md", flag)// returns README.md
      @endcode
   */
   std::string ScriptRepositoryImpl::convertPath(const std::string path){

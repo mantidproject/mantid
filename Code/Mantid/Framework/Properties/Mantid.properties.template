@@ -195,9 +195,11 @@ loading.multifilelimit=100
 
 # ScriptRepository Properties: 
 
-# Url for the WebServer that support the upload of the files that the users want to share
-UploaderWebServer = http://127.0.0.1:8000/upload/
+# Url for the WebServer that support the upload of the files that the users want to share (not in usage)
+UploaderWebServer =
 # Local system path for the script repository.
 ScriptLocalRepository = 
-# Url for the remote script repository. Write a list of urls separating them with ";", the system will try them in the order passed.
-ScriptRepository = git://github.com/mantidproject/scripts.git;https://github.com/mantidproject/scripts.git
+# Url for the remote script repository.
+ScriptRepository = http://download.mantidproject.org/master_builds/
+# Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';' 
+ScriptRepositoryIgnore = *pyc;system/scriptrepositoryparser.py
