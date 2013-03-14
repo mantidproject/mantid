@@ -597,8 +597,8 @@ namespace API
     if (state == BOTH_CHANGED){
       // make a back up of the local version
       Poco::File f(std::string(local_repository).append(file_path));
-      std::string bck = std::string(f.path()).append(file_path);
-      g_log.notice() << "The current file " << file_path << " has some local changes"
+      std::string bck = std::string(f.path()).append("_bck");
+      g_log.notice() << "The current file " << f.path() << " has some local changes"
                      << " so, a back up copy will be created at " << bck << std::endl; 
       f.copyTo(bck);         
     }
@@ -1016,9 +1016,8 @@ namespace API
       //      array.push_back(std::make_pair("auto_update",entry.auto_update)));
       local_json.push_back( std::pair<std::string, boost::property_tree::basic_ptree<std::string,std::string> >(path,array) );
     }else{
-      boost::property_tree::ptree &localDataTree = local_json.get_child(path); 
-      localDataTree.put("downloaded_pubdate",entry.downloaded_pubdate.toFormattedString());
-      //localDataTree.put("auto_update",entry.auto_update);
+      local_json.put(std::string(path).append(".downloaded_pubdate"), 
+                     entry.downloaded_pubdate.toFormattedString());
     }
     g_log.debug() << "Update LOCAL JSON FILE" << std::endl; 
     #if defined(_WIN32) ||  defined(_WIN64)

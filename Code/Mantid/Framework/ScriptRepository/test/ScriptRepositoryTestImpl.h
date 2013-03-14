@@ -571,12 +571,96 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
 }
 
 
+  /** If a file has local changes, than, download should create a backup
+   **/
+void test_downloading_locally_modified_file(){
+    std::string file_name = "TofConv/README.txt";
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    // do download
+    TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
+
+    /**
+       We have to change the local file in order to verify if 
+       it changes its local status. 
+
+       unfortunatelly, the only way to see a local change, is giving some time, at least 
+       one seccond.
+       
+       so, we will propose two versions, but for production, we will use the fastest one.
+    */
+    
+    if (TEST_MANUALLY){
+#if defined(WIN32) || defined(WIN64)  
+      Sleep(1000000);
+#else
+      sleep(1);
+#endif
+      Poco::FileStream _ap(std::string(local_rep).append("/").append(file_name));
+      _ap << "Local change";
+      _ap.close();
+    }else{
+      // we will simulate the change of the file, by, changin the local.json file
+
+      Poco::FileStream ss(std::string(local_rep).append("/local.json")); 
+      ss << "{\n"
+        <<"\"TofConv/README.txt\":\n"
+        <<"{\n"
+        <<"\"downloaded_date\": \"2013-Mar-07 14:30:09\",\n"
+        <<"\"downloaded_pubdate\": \"2012-Feb-13 10:02:50\"\n"
+        <<"}\n"
+         <<"}";
+      ss.close();
+      std::string localjson = string(local_rep).append("/.local.json");
+      Poco::File f(std::string(local_rep).append("/local.json")); 
+      
+      #if defined(_WIN32) ||  defined(_WIN64)
+      //set the .repository.json and .local.json hidden
+      SetFileAttributes( localjson.c_str(), FILE_ATTRIBUTE_NORMAL);     
+      #endif
+      f.moveTo(localjson);
+      #if defined(_WIN32) ||  defined(_WIN64)
+     //set the .repository.json and .local.json hidden
+      SetFileAttributes(localjson.c_str(), FILE_ATTRIBUTE_HIDDEN);     
+      #endif    
+      }
+    
+    // now, we will simulate a new version of the file   
+    std::string original_time = "2012-Feb-13 10:02:50"; 
+    std::string change_to_ =  "2012-Mar-13 10:02:50";
+
+    // simulate new version of the file
+    boost::replace_all(repo->repository_json_content,
+                       original_time,
+                       change_to_);
+    
+    TS_ASSERT_THROWS_NOTHING(repo->check4Update());
+
+    // should change to REMOTE_CHANGED
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_CHANGED);
+
+    // download the file
+    TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
+
+    // ensure that a backup was created
+    {
+      Poco::File bckf(std::string(local_rep).append(file_name).append("_bck"));
+      TSM_ASSERT("No backup file was created!",bckf.exists());                      
+    }
+  }
+
+
+
+
+
+
+
   void test_list_files_after_download_repository(){
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
     TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py")); 
-    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
     TS_ASSERT_THROWS_NOTHING(repo->check4Update()); 
+    TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py")); 
   }
 
  /*************************************
