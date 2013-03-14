@@ -142,8 +142,8 @@ namespace API
       remote_url.append("/");
 
 
-    g_log.debug() << "ScriptRepositoryImpl constructor: local_rep " 
-                  << local_repository << "; remote = " << remote_url << "\n";
+    g_log.debug() << "ScriptRepository creation pointing to " 
+                  << local_repository << " and " << remote_url << "\n";
 
 
     
@@ -160,8 +160,6 @@ namespace API
     boost::replace_all(ignore,".","\\.");
     boost::replace_all(ignore,"*",".*");
     ignoreregex = std::string("(").append(ignore).append(")");  
-    g_log.debug() << "Ignore regex pattern: " << ignoreregex << std::endl; 
-    g_log.debug() << "ScriptRepository initialized" << std::endl; 
 
 
     // A valid repository must pass 3 tests:
@@ -258,7 +256,6 @@ namespace API
     std::string rep_json_file = std::string(path).append("/.repository.json");
     std::string local_json_file  = std::string(path).append("/.local.json");
     if (!repository_folder.exists()){
-      g_log.debug() << "ScriptRepository creating folder " << folder << std::endl; 
       repository_folder.createDirectories();
     }else{
       
@@ -396,10 +393,10 @@ namespace API
       // for every entry, it takes the path and RepositoryEntry
       std::string entry_path = it->first; 
       RepositoryEntry & entry = it->second;
-      g_log.debug() << "Evaluating the status of " << entry_path << std::endl;
+      //g_log.debug() << "Evaluating the status of " << entry_path << std::endl;
       // fill up the output vector
       out[--i] = it->first;
-      g_log.debug() << "inserting file: " << it->first << std::endl; 
+      //g_log.debug() << "inserting file: " << it->first << std::endl; 
 
       // get the path of the parent directory
       size_t pos = entry_path.rfind("/"); 
@@ -489,8 +486,6 @@ namespace API
         break;        
       }     
       
-      g_log.debug() << "entry status = " << std::hex<< (int) entry.status<<std::dec << std::endl; 
-
     }
 
     return out;
@@ -609,7 +604,7 @@ namespace API
     // download the file
     std::string url_path = std::string(remote_url).append(SCRIPTREPPATH).append(file_path); 
     std::string local_path = std::string(local_repository).append(file_path); 
-    g_log.debug() << "Request to download url_path: " << url_path << " to " << local_path << std::endl;
+    g_log.debug() << "ScriptRepository download url_path: " << url_path << " to " << local_path << std::endl;
 
     // ensure that the path to the local_path exists
     {
@@ -629,7 +624,6 @@ namespace API
     }
 
     doDownloadFile(url_path,local_path);
-    g_log.debug() << "Get file information" << std::endl; 
     {
       Poco::File local(local_path);
       entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(local.getLastModified(),
@@ -639,7 +633,7 @@ namespace API
     }
     
     updateLocalJson(file_path, entry); ///FIXME: performance!    
-
+    g_log.debug() << "ScriptRepository download " << local_path << " success!"<<std::endl; 
   }
 
   /**
@@ -650,7 +644,7 @@ namespace API
     ///        directories trees.    
     ensureValidRepository();
     std::string file_path = convertPath(input_path); 
-    g_log.debug() << "Attempt to ask for the status of "<< file_path << std::endl;
+    //g_log.debug() << "Attempt to ask for the status of "<< file_path << std::endl;
     try{
       RepositoryEntry & entry = repo.at(file_path); 
       return entry.status;
@@ -694,7 +688,7 @@ namespace API
   */
   void ScriptRepositoryImpl::check4Update(void) 
   {
-    g_log.debug() << "ScriptRepositoryImpl::update ... begin\n" ; 
+    g_log.debug() << "ScriptRepositoryImpl checking for update\n" ; 
     // download the new repository json file
     // download the repository json
     std::string rep_json_file = std::string(local_repository).append(".repository.json");
@@ -739,7 +733,7 @@ namespace API
         }
       }
     }
-    g_log.debug() << "ScriptRepositoryImpl::update ... end\n" ; 
+    g_log.debug() << "ScriptRepositoryImpl::checking for update finished\n" ; 
   }
 
   /** 
@@ -757,7 +751,6 @@ namespace API
       boost::replace_all(newignore,".","\\.");
       boost::replace_all(newignore,"*",".*");      
       ignoreregex = std::string("(").append(newignore).append(")");
-      g_log.debug() << "Ignore regex pattern: " << ignoreregex << std::endl; 
     }
   };
   /** 
@@ -775,7 +768,7 @@ namespace API
   void ScriptRepositoryImpl::setAutoUpdate(std::string input_path, bool option){
     ensureValidRepository();
     std::string path = convertPath(input_path); 
-    g_log.debug() << "SetAutoUpdate... begin" << std::endl; 
+    //g_log.debug() << "SetAutoUpdate... begin" << std::endl; 
     try{
       RepositoryEntry & entry = repo.at(path);
       entry.auto_update = option; 
@@ -784,7 +777,7 @@ namespace API
       // fixme: readable exception
       throw ScriptRepoException(ex.what()); 
     }
-    g_log.debug() << "SetAutoUpdate... end" << std::endl; 
+    //g_log.debug() << "SetAutoUpdate... end" << std::endl; 
   }
   
 
@@ -886,7 +879,7 @@ namespace API
       BOOST_FOREACH(ptree::value_type & file, pt){
         if (!isEntryValid(file.first))
           continue;
-        g_log.debug() << "Inserting : file.first " << file.first << std::endl; 
+        //g_log.debug() << "Inserting : file.first " << file.first << std::endl; 
         RepositoryEntry & entry = repo[file.first];
         entry.remote = true;
         entry.directory = file.second.get("directory",false);
@@ -1023,7 +1016,7 @@ namespace API
       local_json.put(std::string(path).append(".downloaded_pubdate"), 
                      entry.downloaded_pubdate.toFormattedString());
     }
-    g_log.debug() << "Update LOCAL JSON FILE" << std::endl; 
+    //g_log.debug() << "Update LOCAL JSON FILE" << std::endl; 
     #if defined(_WIN32) ||  defined(_WIN64)
     //set the .repository.json and .local.json not hidden to be able to edit it
     SetFileAttributes( filename.c_str(), FILE_ATTRIBUTE_NORMAL);     
@@ -1070,7 +1063,7 @@ namespace API
           continue;
         
         
-        g_log.debug() << "RecursiveParsing: insert : " << entry_path << std::endl; 
+        //g_log.debug() << "RecursiveParsing: insert : " << entry_path << std::endl; 
         RepositoryEntry & entry = repo[entry_path]; 
         entry.local = true; 
         entry.current_date = DateAndTime(
@@ -1094,7 +1087,7 @@ namespace API
   }
 
   bool ScriptRepositoryImpl::isEntryValid(std::string path){
-    g_log.debug() << "Is valid entry? " << path << std::endl; 
+    //g_log.debug() << "Is valid entry? " << path << std::endl; 
     if (path == ".repository.json")
       return false;
     if (path == ".local.json")
@@ -1146,7 +1139,7 @@ namespace API
       absolute_path = pathFound.absolute().toString(); 
     else
       absolute_path = path;
-    g_log.debug() << "ConvertPath: Entered: " << path  << " and local_repository: " << local_repository << std::endl; 
+    //g_log.debug() << "ConvertPath: Entered: " << path  << " and local_repository: " << local_repository << std::endl; 
     // this is necessary because in windows, the absolute path is given with \ slash.
     boost::replace_all(absolute_path,"\\","/");     
     
@@ -1161,7 +1154,7 @@ namespace API
       // remove the repo_path from te absolute path 
       // +1 to remove the slash /      
       std::string retpath(absolute_path.begin() + pos + local_repository.size(), absolute_path.end()); 
-      g_log.debug() << "ConvertPath: Entered: " << path << " return: " << retpath << std::endl; 
+      //g_log.debug() << "ConvertPath: Entered: " << path << " return: " << retpath << std::endl; 
       return retpath;
     }
     return path; 
