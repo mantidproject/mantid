@@ -64,16 +64,19 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
                        0.0, 0.274499039, 0.0,
                        0.0, 0.0, 0.172980453};
   */
+
   // Gd, HEKL
-  double convert[9] = {0.316964188, 0.0, 0.158482094,
+  double convert[9] = {1.0, 0.0, 0.5,
                        0.0, 1.0, 0.0,
-                       0.0, 0.0, 0.274499039};
+                       0.0, 0.0, 0.8660254};
+
   /*
   // Gd2, HEKL
   double convert[9] = {0.475446282, 0.0, 0.158482094,
                        0.0, 1.0, 0.0,
                        0.274499039, 0.0, -0.274499039};
   */
+
   for(int i = 0; i < points->GetNumberOfPoints(); i++)
   {
     inPoint = points->GetPoint(i);
@@ -98,10 +101,12 @@ void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkUnstructuredGrid *ugrid
   double baseY[3] = {0.5, 0.8660254, 0.0};
   double baseZ[3] = {0.0, 0.0, 1.0};
   */
+
   // Gd, HEKL
   double baseX[3] = {1.0, 0.0, 0.0};
   double baseY[3] = {0.0, 1.0, 0.0};
   double baseZ[3] = {0.5, 0.0, 0.8660254};
+
   /*
   // Gd2, HEKL
   double baseX[3] = {0.8660254, 0.0, 0.5};

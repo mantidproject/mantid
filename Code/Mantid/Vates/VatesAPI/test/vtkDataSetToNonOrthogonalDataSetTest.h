@@ -73,9 +73,9 @@ public:
     /// Get the (1,1,1) point
     const double eps = 1.0e-5;
     double *point = ds->GetPoint(6);
-    TS_ASSERT_DELTA(point[0], 0.47544628, eps);
+    TS_ASSERT_DELTA(point[0], 1.5, eps);
     TS_ASSERT_DELTA(point[1], 1.0, eps);
-    TS_ASSERT_DELTA(point[2], 0.27449904, eps);
+    TS_ASSERT_DELTA(point[2], 0.8660254, eps);
     // See if the basis vectors are available
     float *xBasis = getRangeComp(ds, "AxisBaseForX", 3);
     TS_ASSERT_DELTA(xBasis[0], 1.0, eps);
