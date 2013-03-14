@@ -40,8 +40,8 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
    if (WIN32) # copy the assistant executable for windows 32 and 64
       add_custom_command( OUTPUT ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/assistant.exe
                           COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${THIRD_PARTY}/assistant.exe
-                                  ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/assistant.exe )
-      install (FILES  ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/assistant.exe
+                                  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assistant.exe )
+      install (FILES  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assistant.exe
                DESTINATION ${CMAKE_INSTALL_PREFIX} )
    endif (WIN32)
 
@@ -56,7 +56,7 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
    add_custom_command(OUTPUT ${HELP_ALGO_OUT}
                       DEPENDS make_algorithms_help.py qhpfile.py algorithm_help.py
                       COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_algorithms_help.py
-                              -m ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
+                              -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
 		      )
 
    add_custom_command(OUTPUT ${HELP_FIT_OUT}
