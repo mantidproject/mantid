@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   AlgorithmManagerTest.py
   AnalysisDataServiceTest.py
   AxisTest.py
+  DeprecatedAlgorithmCheckerTest.py
   ExperimentInfoTest.py
   FilePropertyTest.py
   FileFinderTest.py
