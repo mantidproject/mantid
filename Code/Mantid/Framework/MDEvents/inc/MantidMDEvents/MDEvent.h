@@ -184,6 +184,72 @@ namespace MDEvents
     }
 
 
+    /* static method used to convert vector of lean events into vector of their coordinates & signal and error 
+     @param events    -- vector of events
+     @return coord    -- vector of events coordinates, their signal and error casted to coord_t type
+     @return ncols    -- the number of colunts  in the data (it is nd+4 here but may be different for other data types) 
+     @return totalSignal -- total signal in the vector of events
+     @return totalErr   -- total error corresponting to the vector of events
+    */
+    static inline void eventsToData(const std::vector<MDEvent<nd> > & events,std::vector<coord_t> &coord,size_t &ncols,double &totalSignal,double &totalErrSq )
+    {
+      ncols = nd+4;
+      size_t nEvents=events.size()/nd;
+      coord.resize(nEvents+ncols);
+
+
+      totalSignal = 0;
+      totalErrSq = 0;
+
+      size_t index(0);
+      typename std::vector<MDEvent<nd> >::const_iterator it = events.begin();
+      typename std::vector<MDEvent<nd> >::const_iterator it_end = events.end();
+      for (; it != it_end; ++it)
+      {
+        const MDEvent<nd> & event = *it;
+        float signal = event.signal;
+        float errorSquared = event.errorSquared;
+        data[index++] = static_cast<coord_t>(signal);
+        data[index++] = static_cast<coord_t>(errorSquared);
+     // Additional stuff for MDEvent
+        data[index++] = static_cast<coord_t>(event.runIndex);
+        data[index++] = static_cast<coord_t>(event.detectorId);
+        for(size_t d=0; d<nd; d++)
+          data[index++] = event.center[d];
+        // Track the total signal
+        totalSignal += signal_t(signal);
+        totalErrorSquared += signal_t(errorSquared);
+      }
+
+    }
+    /* static method used to convert vector of data into vector of lean events 
+     @return coord    -- vector of events coordinates, their signal and error casted to coord_t type
+     @param events    -- vector of events
+    */
+    static inline void dataToEvents(const std::vector<coord_t> &coord, std::vector<MDLeanEvent<nd> > & events)
+    {
+    // Number of columns = number of dimensions + 2 (signal/error)
+      size_t numColumns = nd+4;
+      size_t numEvents = events.size()/numColumns;
+      if(numEvents*numColumns!=events.size())
+          throw(std::invalid_argument("wrong input array of data to convert to lean events "));
+
+         // Reserve the amount of space needed. Significant speed up (~30% thanks to this)
+      events.reserve(numEvents);
+      for (size_t i=0; i<numEvents; i++)
+      {
+        // Index into the data array
+        size_t ii = i*numColumns;
+
+        // Point directly into the data block for the centers.
+        coord_t * centers = &(data[ii+2]);
+
+        // Create the event with signal, error squared, and the centers
+        events.push_back( MDLeanEvent<nd>(coord_t(data[ii]), coord_t(data[ii + 1]), 
+                                          uint16_t(data[ii + 2]), int32_t(data[ii+3]), centers) );
+      }
+    }
+
 
 
     //---------------------------------------------------------------------------------------------

@@ -18,7 +18,8 @@ namespace MDEvents
 {
 
 #pragma pack(push, 4) //Ensure the structure is no larger than it needs to
-
+    // predefinition;
+    class MDBoxSaveable;
   //===============================================================================================
   /** Templated class for a multi-dimensional event "box".
    *
@@ -35,6 +36,7 @@ namespace MDEvents
    * @date Dec 7, 2010
    *
    * */
+  
   TMDE_CLASS
   class DLLExport MDBox :  public MDBoxBase<MDE, nd>
   {
@@ -47,26 +49,12 @@ namespace MDEvents
 
     MDBox(const MDBox<MDE,nd> & other,const Mantid::API::BoxController * otherBC=NULL);
 
-    virtual ~MDBox() {}
+    virtual ~MDBox();
 
 
     // ----------------------------- ISaveable Methods ------------------------------------------------------
 
-    /// Save the data to the place, specified by the object
-    virtual void save()const;
-
-    /// Load the data which are not in memory yet and merge them with the data in memory;
-    virtual void load();
-
-   
-    /// @return the amount of memory that the object takes up in the MRU.
-    virtual uint64_t getTotalDataSize() const
-            { return getNPoints(); }
-  /** @return the size of the event vector. ! Note that this is NOT necessarily the same as the number of points 
-    (because it might be cached to disk) or the size on disk (because you might have called AddEvents) */
-    virtual size_t getDataMemorySize()const 
-            {  return data.size();}
-    /** teturns true if it is box*/
+    /** returns true if it is box (avoid rtti?) */
     virtual bool isBox()const{return true;}
     //-----------------------------------------------------------------------------------------------
 
@@ -126,6 +114,9 @@ namespace MDEvents
 
     std::vector< MDE > * getEventsCopy();
 
+    virtual void getEventsData(std::vector<coord_t> &coordTable,size_t &nColumns)const ;
+    virtual void setEventsData(const std::vector<coord_t> &coordTable);
+
     virtual void addEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId);
     virtual void addAndTraceEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId,size_t index);
     virtual void addEventUnsafe(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId);
@@ -175,14 +166,15 @@ namespace MDEvents
     void unmask();
 
   protected:
-
-  
+    // the pointer to the class, responsible for saving/restoring this class to the hdd
+    mutable MDBoxSaveable * m_Saveable;
+    /// Mutex for modifying the event list
+    Mantid::Kernel::Mutex dataMutex;
+ 
     /** Vector of MDLeanEvent's, in no particular order.
      * */
     mutable std::vector< MDE > data;
 
-    /// Mutex for modifying the event list
-    Mantid::Kernel::Mutex dataMutex;
 
      /// Flag indicating that masking has been applied.
     bool m_bIsMasked;

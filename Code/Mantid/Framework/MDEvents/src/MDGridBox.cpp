@@ -288,12 +288,15 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** Returns the total number of points (events) in this box */
-  TMDE(uint64_t MDGridBox)::getNPoints() const
-  {
-    //Use the cached value
-    return nPoints;
-  }
+  /// Recursiveluy calculates the amount of the data located in memory. Slow 
+    TMDE(size_t  MDGridBox)::getDataInMemorySize()const
+    {
+        size_t nPoints(0);
+        for(size_t i=0;i<numBoxes;i++)
+            nPoints+=m_Children[i]->getDataInMemorySize();
+        return nPoints;
+    }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the number of un-split MDBoxes in this box (recursively including all children)

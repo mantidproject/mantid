@@ -57,70 +57,36 @@ namespace MDEvents
     virtual ~MDBoxBase() {}
 
 
-    // ----------------------------- ISaveable Methods ------------------------------------------------------
-
-    /// Save the data - to be overriden
-    virtual void save() const
-    {
-      std::cerr << "ID " << getId() << std::endl;
-      throw std::runtime_error("MDBoxBase::save() called and should have been overridden.");
-    }
-
-    /// Flush the data to disk. Allows NXS api to actually write out the file. 
-     //TODO: DO WE WANT IT ?????, I suspect not as muliple writes can be combined in the NXS buffer
-    virtual void flushData() const
-    {
-      ::NeXus::File * file = this->m_BoxController->getFile();
-      if (file)
-      {
-        API::BoxController::closeNexusData(file);
-        API::BoxController::openEventNexusData(file);
-      }
-    }
-
-    /// Load the data - to be overriden
-    virtual void load()
-    { }
-
     // -------------------------------- Parents/Children-Related -------------------------------------------
    /// Return a pointer to the parent box
-    void setParent(MDBoxBase<MDE,nd> * parent)
+    void setParent(IMDNode * parent)
     { m_parent = parent; }
 
     /// Return a pointer to the parent box
-    MDBoxBase<MDE,nd> * getParent()
+    IMDNode * getParent()
     { return m_parent; }
 
     /// Return a pointer to the parent box (const)
-    const MDBoxBase<MDE,nd> * getParent() const
+    const IMDNode * getParent() const
     { return m_parent; }
 
-    /// Fill a vector with all the boxes up to a certain depth
-    //virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly) = 0;
-
-    /// Fill a vector with all the boxes up to a certain depth
-    //virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
-
-
     /// Returns the lowest-level box at the given coordinates
-    virtual const MDBoxBase<MDE,nd> * getBoxAtCoord(const coord_t * /*coords*/) const
+    virtual const IMDNode * getBoxAtCoord(const coord_t * /*coords*/) const
     { return this; }
 
-
-
-    // -------------------------------- Geometry/vertexes-Related -------------------------------------------
-
-    std::vector<Mantid::Kernel::VMD> getVertexes() const;
-
-    coord_t * getVertexesArray(size_t & numVertices) const;
-
-    coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const;
-
-    virtual void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
-
-
     // -------------------------------- Events-Related -------------------------------------------
-
+   /** The method to convert events in a box into a table of coodrinates/signal/errors casted into coord_t type 
+     *   Used to save events from plain binary file
+     *   @returns coordTable -- vector of events parameters
+     *   @return nColumns    -- number of parameters for each event
+     */
+    virtual void getEventsData(std::vector<coord_t> &/*coordTable*/,size_t &/*nColumns*/)const{};
+    /** The method to convert the table of data into vector of events 
+     *   Used to load events from plain binary file
+     *   @param coordTable -- vector of events parameters
+     *   @param nColumns    -- number of parameters for each event
+     */
+    virtual void setEventsData(const std::vector<coord_t> &/*coordTable*/){};
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
     /// Add a single event
@@ -165,6 +131,16 @@ namespace MDEvents
     virtual void setBoxController(Mantid::API::BoxController *controller)
     { m_BoxController = controller; }
 
+
+    // -------------------------------- Geometry/vertexes-Related -------------------------------------------
+
+    std::vector<Mantid::Kernel::VMD> getVertexes() const;
+
+    coord_t * getVertexesArray(size_t & numVertices) const;
+
+    coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const;
+
+    virtual void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
 
     //-----------------------------------------------------------------------------------------------
     /** Set the extents of this box.
@@ -395,13 +371,6 @@ namespace MDEvents
 
     /// Pointer to the parent of this box. NULL if no parent.
     Mantid::API::IMDNode * m_parent;
-
-#ifdef MDBOX_TRACK_CENTROID
-    /** The centroid (weighted center of mass) of the events in this MDBox.
-     * Set when refreshCentroid() is called.
-     */
-    coord_t m_centroid[nd];
-#endif
 
   public:
     /// Convenience typedef for a shared pointer to a this type of class

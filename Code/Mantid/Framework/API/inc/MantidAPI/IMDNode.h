@@ -15,13 +15,9 @@ namespace API
 class IMDNode : public Kernel::INode
 {
 public:
+//---------------- ISAVABLE
     virtual Kernel::ISaveable *const getISaveable(){return NULL;}
     virtual Kernel::ISaveable *const getISaveable()const{return NULL;}
-//---------------- ISAVABLE
-  /// @return the amount of memory that the object takes up in the MRU.
-    virtual uint64_t getTotalDataSize() const=0;
-
-    virtual size_t getDataMemorySize()const=0;
    
     virtual void clearDataFromMemory()=0;
 //-------------------------------------------------------------
@@ -71,9 +67,25 @@ public:
     // -------------------------------- Events-Related -------------------------------------------
     /// Clear all contained data
     virtual void clear() = 0;
-    /// Get total number of points
+    /// Get total number of points both in memory and on file if present;
     virtual uint64_t getNPoints() const = 0;
+    /// get size of the data located in memory, it is equivalent to getNPoints above for memory based workspace but may be different for file based one ;
+    virtual size_t getDataInMemorySize()const = 0;
+   /// @return the amount of memory that the object takes up in the MRU.
+    virtual uint64_t getTotalDataSize() const=0;
 
+    /** The method to convert events in a box into a table of coodrinates/signal/errors casted into coord_t type 
+     *   Used to save events from plain binary file
+     *   @returns coordTable -- vector of events parameters
+     *   @return nColumns    -- number of parameters for each event
+     */
+    virtual void getEventsData(std::vector<coord_t> &coordTable,size_t &nColumns)const =0;
+    /** The method to convert the table of data into vector of events 
+     *   Used to load events from plain binary file
+     *   @param coordTable -- vector of events parameters
+     *   @param nColumns    -- number of parameters for each event
+     */
+    virtual void setEventsData(const std::vector<coord_t> &coordTable)=0;
 
     /// Return a copy of contained events
     //virtual std::vector<coor> & getEventsCopy() = 0;
@@ -127,6 +139,17 @@ public:
     virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly) = 0;
     /// Fill a vector with all the boxes up to a certain depth
     virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
+
+
+    // -------------------------------- Geometry/vertexes-Related -------------------------------------------
+
+    virtual std::vector<Mantid::Kernel::VMD> getVertexes() const =0;
+
+    virtual coord_t * getVertexesArray(size_t & numVertices) const=0;
+
+    virtual coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const=0;
+
+    virtual void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)=0;
 
 
   

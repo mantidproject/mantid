@@ -48,8 +48,13 @@ namespace MDEvents
     virtual ~MDGridBox();
 
     void clear();
-
-    uint64_t getNPoints() const;
+    /** Returns the total number of points (events) in this box  (in memory and in file if present)*/
+    uint64_t getNPoints() const //Use the cached value    
+    {    return nPoints; }
+    /// @return the amount of memory that the object takes up in t.
+    virtual uint64_t getTotalDataSize() const
+    {   return nPoints; }
+   size_t  getDataInMemorySize()const;
 
    size_t getNumDims() const;
 

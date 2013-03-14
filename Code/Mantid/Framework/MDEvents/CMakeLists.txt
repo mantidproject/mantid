@@ -26,6 +26,7 @@ set ( SRC_FILES
 	src/MDBoxIterator.cpp
     src/MDBoxFlatTree.cpp    
 	src/MDBoxToChange.cpp
+	src/MDBoxSaveable.cpp    
 	src/MDEventFactory.cpp
 	src/MDEventWSWrapper.cpp
 	src/MDEventWorkspace.cpp
@@ -46,8 +47,8 @@ set ( SRC_FILES
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
-        src/Integrate3DEvents.cpp
-        src/IntegrateEllipsoids.cpp
+    src/Integrate3DEvents.cpp
+    src/IntegrateEllipsoids.cpp
 	src/SaveIsawQvector.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
@@ -90,6 +91,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDBoxIterator.h
     inc/MantidMDEvents/MDBoxFlatTree.h
 	inc/MantidMDEvents/MDBoxToChange.h
+	inc/MantidMDEvents/MDBoxSaveable.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
