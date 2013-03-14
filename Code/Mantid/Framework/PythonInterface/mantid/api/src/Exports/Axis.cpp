@@ -109,7 +109,7 @@ void export_Axis()
 
 /**
 * Creates a NumericAxis
-* @param number :: of elements in the axis
+* @param length The length of the new axis
 * @return pointer to the axis object
 */
 Axis* createNumericAxis(int length)
@@ -127,29 +127,17 @@ void export_NumericAxis()
 
 }
 
-/**
-* Creates a SpectraAxis
-* @param number :: of elements in the axis
-* @return pointer to the axis object
-*/
-Axis* createSpectraAxis(int length)
-{
-  return new Mantid::API::SpectraAxis(length);
-}
-
 void export_SpectraAxis()
 {
   class_< SpectraAxis, bases<Axis>, boost::noncopyable >("SpectraAxis", no_init)
     .def("spectraNo", (const specid_t &(SpectraAxis::*)(const size_t &) const)&SpectraAxis::spectraNo,
           return_value_policy<copy_const_reference>(), "Returns the spectrum no at the given index")
-    .def("create", &createSpectraAxis, return_internal_reference<>(), "Creates a new SpectraAxis of a specified length")
-    .staticmethod("create")
     ;
 }
 
 /**
 * Creates a TextAxis
-* @param number :: of elements in the axis
+* @param length The length of the new axis
 * @return pointer to the axis object
 */
 Axis* createTextAxis(int length)
