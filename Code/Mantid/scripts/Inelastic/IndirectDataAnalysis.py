@@ -117,6 +117,30 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bg, specMin, specM
 # Elwin
 ##############################################################################
 
+def GetTemperature(root,tempWS,log_type,Verbose):
+    (instr, run) = getInstrRun(root)
+    run_name = instr+run
+    log_name = run_name+'_'+log_type
+    logger.notice(log_name)
+    log_file = log_name+'.txt'
+    log_path = FileFinder.getFullPath(log_file)
+    logger.notice(log_path)
+    if (log_path == ''):
+        mess = ' Run : '+run_name +' ; Temperature file not found'
+        xval = int(run_name[-3:])
+        xlabel = 'Run-numbers (last 3 digits)'
+    else:			
+        LoadLog(Workspace=tempWS, Filename=log_path)
+        run_logs = mtd[tempWS].getRun()
+        tmp = run_logs[log_name].value
+        temp = tmp[len(tmp)-1]
+        mess = ' Run : '+run_name+' ; Temperature = '+str(temp)
+        xval = temp
+        xlabel = 'Temperature (K)'
+    if Verbose:
+        logger.notice(mess)
+    return xval,xlabel
+
 def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False): 
     StartTime('ElWin')
     workdir = config['defaultsave.directory']
@@ -135,9 +159,11 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         (direct, file_name) = os.path.split(file)
         (root, ext) = os.path.splitext(file_name)
         LoadNexus(Filename=file, OutputWorkspace=tempWS)
+        nsam,ntc = CheckHistZero(tempWS)
+        log_type = 'sample'
+        (xval, xlabel) = GetTemperature(root,tempWS,log_type,Verbose)
         if Verbose:
             logger.notice('Reading file : '+file)
-        nsam,ntc = CheckHistZero(tempWS)
         if ( len(eRange) == 4 ):
             ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1], 
                 Range2Start=eRange[2], Range2End=eRange[3],
@@ -168,6 +194,7 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         i2 = np.array(logy)
         e2 = np.array(loge)
         if (nr == 0):
+            CloneWorkspace(InputWorkspace='__eq1', OutputWorkspace='__elf')
             first = getWSprefix(tempWS,root)
             datX1 = q1
             datY1 = i1
@@ -175,16 +202,43 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
             datX2 = q2
             datY2 = i2
             datE2 = e2
-            Vaxis = last
+            Tvalue = [xval]
+            Terror = [0.0]
+            Taxis = str(xval)
         else:
+            CloneWorkspace(InputWorkspace='__eq1', OutputWorkspace='__elftmp')
+            ConjoinWorkspaces(InputWorkspace1='__elf', InputWorkspace2='__elftmp', CheckOverlapping=False)
             datX1 = np.append(datX1,q1)
             datY1 = np.append(datY1,i1)
             datE1 = np.append(datE1,e1)
             datX2 = np.append(datX2,q2)
             datY2 = np.append(datY2,i2)
             datE2 = np.append(datE2,e2)
-            Vaxis += ','+last
+            Tvalue.append(xval)
+            Terror.append(0.0)
+            Taxis += ','+str(xval)
         nr += 1
+    Txa = np.array(Tvalue)
+    Tea = np.array(Terror)
+    nQ = len(q1)
+    for nq in range(0,nQ):
+        iq = []
+        eq = []
+        for nt in range(0,len(Tvalue)):
+            ii = mtd['__elf'].readY(nt)
+            iq.append(ii[nq])
+            ie = mtd['__elf'].readE(nt)
+            eq.append(ie[nq])
+        iqa = np.array(iq)
+        eqa = np.array(eq)
+        if (nq == 0):
+            datTx = Txa
+            datTy = iqa
+            datTe = eqa
+        else:
+            datTx = np.append(datTx,Txa)
+            datTy = np.append(datTy,iqa)
+            datTe = np.append(datTe,eqa)
     DeleteWorkspace(tempWS)
     DeleteWorkspace('__eq1')
     DeleteWorkspace('__eq2')
@@ -192,15 +246,18 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         ename = first[:-1]
     else:
         ename = first+'to_'+last
+    elfWS = ename+'_elf'    # interchange Q & T
+    CreateWorkspace(OutputWorkspace=elfWS, DataX=datTx, DataY=datTy, DataE=datTe,
+        Nspec=nQ, UnitX='Energy')
+    DeleteWorkspace('__elf')
     e1WS = ename+'_eq1'
-    e2WS = ename+'_eq2'
-    elwWS = ename+'_elw'    # temporary fix to do plotting
-    CreateWorkspace(OutputWorkspace=elwWS, DataX=datX1, DataY=datY1, DataE=datE1,
-        Nspec=nr, UnitX='MomentumTransfer')
     CreateWorkspace(OutputWorkspace=e1WS, DataX=datX1, DataY=datY1, DataE=datE1,
-        Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis)
+        Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
+    AddSampleLog(Workspace=e1WS, LogName="Vaxis", LogType="String", LogText=xlabel)
+    e2WS = ename+'_eq2'
     CreateWorkspace(OutputWorkspace=e2WS, DataX=datX2, DataY=datY2, DataE=datE2,
-        Nspec=nr, UnitX='QSquared', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis)
+        Nspec=nr, UnitX='QSquared', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
+    AddSampleLog(Workspace=e2WS, LogName="Vaxis", LogType="String", LogText=xlabel)
     if Save:
         e1_path = os.path.join(workdir, e1WS+'.nxs')					# path name for nxs file
         e2_path = os.path.join(workdir, e2WS+'.nxs')					# path name for nxs file
@@ -210,11 +267,11 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         SaveNexusProcessed(InputWorkspace=e1WS, Filename=e1_path)
         SaveNexusProcessed(InputWorkspace=e2WS, Filename=e2_path)
     if Plot:
-        elwinPlot(e1WS,e2WS)
+        elwinPlot(e1WS,e2WS,elfWS)
     EndTime('Elwin')
     return e1WS,e2WS
 
-def elwinPlot(eq1,eq2):
+def elwinPlot(eq1,eq2,elf):
     nhist = mtd[eq1].getNumberHistograms()                      # no. of hist/groups in sam
     nBins = mtd[eq1].blocksize()
     lastXeq1 = mtd[eq1].readX(0)[nBins-1]
@@ -228,6 +285,10 @@ def elwinPlot(eq1,eq2):
     layer2 = graph2.activeLayer()
     layer2.setScale(mp.Layer.Bottom, 0.0, lastXeq2)
     layer2.setAxisTitle(mp.Layer.Left,'log(Elastic Intensity)')
+    ntemp = mtd[elf].getNumberHistograms()                      # no. of hist/groups in sam
+    graph3 = mp.plotSpectrum(elf, range(0,ntemp))
+    layer3 = graph3.activeLayer()
+    layer3.setAxisTitle(mp.Layer.Bottom, 'Temperature(K)')
 
 ##############################################################################
 # Fury
@@ -572,42 +633,24 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
         logger.notice('Reading Run : '+file)
     LoadNexusProcessed(FileName=file, OutputWorkspace=root)
     nHist = mtd[root].getNumberHistograms()
-    nfirst = int(first)
     file_list = []
     run_list = []
-    x_list = []
+    ws = mtd[root]
+    ws_run = ws.getRun()
+    vertAxisValues = ws.getAxis(1).extractValues()
+    x_list = vertAxisValues
+    if 'Vaxis' in ws_run:
+        xlabel = ws_run.getLogData('Vaxis').value
     for nr in range(0, nHist):
         nsam,ntc = CheckHistZero(root)
-        run_name = instr + mtd[root].getAxis(1).label(nr)
-        lnWS = run_name+'_lnI'
+        lnWS = '__lnI_'+str(nr)
         file_list.append(lnWS)
         ExtractSingleSpectrum(InputWorkspace=root, OutputWorkspace=lnWS,
             WorkspaceIndex=nr)
-        log_name = run_name+'_'+log_type
-        log_file = log_name+'.txt'
-        log_path = FileFinder.getFullPath(log_file)
-        if (log_path == ''):
-            if Verbose:
-                logger.notice(' Run : '+run_name +' ; Temperature file not found')
-            xval = int(run_name[-3:])
-            xlabel = 'Run-number (last 3 digits)'
-        else:			
-            LoadLog(Workspace=root, Filename=log_path)
-            run_logs = mtd[root].getRun()
-            tmp = run_logs[log_name].value
-            temp = tmp[len(tmp)-1]
-            if Verbose:
-                logger.notice(' Run : '+run_name+' ; Temperature = '+str(temp))
-            xval = temp
-            xlabel = 'Temperature (K)'
-        last = str(nr)
         if (nr == 0):
-            first = run_name
             run_list = lnWS
         else:
             run_list += ';'+lnWS
-        x_list.append(xval)
-        nr += 1
     mname = root[:-4]
     msdWS = mname+'_msd'
     if Verbose:
@@ -618,7 +661,6 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
         StartX=startX, EndX=endX, FitType = 'Sequential')
     msdfitParsToWS(msdWS, x_list)
     nr = 0
-    lniWS = mname+'_lnI'
     fitWS = mname+'_Fit'
     a0 = mtd[msdWS+'_a0'].readY(0)
     a1 = mtd[msdWS+'_a1'].readY(0)
