@@ -2,8 +2,7 @@
 #define PROJECTION3D_H_
 
 #include "ProjectionSurface.h"
-#include "GLViewport.h"
-#include "GLTrackball.h"
+#include "Viewport.h"
 
 #include "MantidGeometry/IComponent.h"
 
@@ -14,26 +13,8 @@
 #include <boost/scoped_ptr.hpp>
 
 /**
-  TODO: Add description
+  This is an implementation of ProjectionSurface for viewing the instrument in 3D.
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class Projection3D : public ProjectionSurface
 {
@@ -48,7 +29,6 @@ public:
   void setViewDirection(const QString& vd);
   void set3DAxesState(bool on);
   void setWireframe(bool on);
-  void enableLighting(bool on);
 
   virtual void componentSelected(Mantid::Geometry::ComponentID = NULL);
   virtual void getSelectedDetectors(QList<int>& dets);
@@ -66,19 +46,17 @@ protected slots:
   void rotate(int x, int y);
 
 protected:
-  virtual void init();
+  virtual void init() {}
   virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const;
   virtual void changeColorMap();
 
   void drawAxes(double axis_length = 100.0)const;
   void setLightingModel(bool picking)const;
 
-  //const InstrumentActor& m_instrActor;
-  GLTrackball* m_trackball;       ///< Trackball for user interaction
-  GLViewport* m_viewport;         ///< Opengl View port [World -> Window]
   bool m_drawAxes;
   bool m_wireframe;
-  bool m_isLightingOn;            ///< Lighting on/off flag
+
+  Viewport m_viewport;
 
 };
 
