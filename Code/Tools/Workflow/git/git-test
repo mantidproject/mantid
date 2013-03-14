@@ -142,7 +142,7 @@ start_testing() {
     changes_address="https://github.com/${repo_stem}/compare/${changes_branch_gh}"
 
     changes_file=${HOME}/${changes_branch_file}"_log"
-    git log --patch HEAD --not origin/master > ${changes_file}
+    git log HEAD --not origin/master > ${changes_file}
 
     # Record what we are testing for later pass/fail
     git config ${BRANCH_CFG_KEY} ${TEST_BRANCH}
