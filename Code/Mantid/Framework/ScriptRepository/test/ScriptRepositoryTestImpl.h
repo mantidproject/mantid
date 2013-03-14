@@ -666,36 +666,6 @@ void test_downloading_locally_modified_file(){
  /*************************************
    *   SET IGNORE FILES
    *************************************/
-  void test_default_ignore_files(){
-    // the default ignore patterns is set to ignore pyc and system/scriptrepositoryparser.py
-    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
-    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
-
-    std::string file_path = std::string(local_rep).append("/myfile.pyc");
-    {// create a file inside 
-      Poco::File f(file_path);
-      f.createFile(); 
-      Poco::FileStream _out(file_path); 
-      _out << "qq"; _out.close(); 
-    }
-
-
-    {// create a file inside 
-    std::string dir_path = std::string(local_rep).append("/system");
-    std::string file_path2 = std::string(dir_path).append("/scriptrepositoryparser.py");
-    Poco::File d(dir_path); 
-    d.createDirectories();
-    Poco::File f(file_path2);
-    f.createFile(); 
-     Poco::FileStream _out(file_path); 
-      _out << "qq"; _out.close(); 
-    }
-
-    // myfile.pyc should be ignored
-    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
-    TS_ASSERT_THROWS(repo->info("myfile.pyc"), ScriptRepoException);
-    TS_ASSERT_THROWS(repo->info("system/scriptrepositoryparser.py"),ScriptRepoException);
-  }
 
   void test_ignore_files(){
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
