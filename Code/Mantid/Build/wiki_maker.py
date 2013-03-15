@@ -6,6 +6,7 @@ import optparse
 import os
 import ConfigParser
 import sys
+import re
 import wiki_tools
 from wiki_tools import *
 from wiki_report import WikiReporter
