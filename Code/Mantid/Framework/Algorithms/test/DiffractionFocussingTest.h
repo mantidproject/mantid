@@ -4,13 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/DiffractionFocussing.h"
-#include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadNexus.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
-using namespace Mantid::DataObjects;
 
 class DiffractionFocussingTest : public CxxTest::TestSuite
 {

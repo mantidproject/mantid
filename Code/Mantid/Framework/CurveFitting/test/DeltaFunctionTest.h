@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Fit.h"
-#include "MantidDataHandling/LoadRaw.h"
 
 #include "MantidCurveFitting/DeltaFunction.h"
 #include "MantidCurveFitting/Convolution.h"
@@ -14,8 +13,6 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
-using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 
 //same class as ConvolutionTest_Gauss in ConvolutionTest.h
 class DeltaFunctionTest_Gauss: public IPeakFunction

@@ -5,8 +5,6 @@
 // workspace names (workspace2D/1D etc), instrument classes and not for this test case.
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
-//
-#include "MantidDataHandling/LoadRaw.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
