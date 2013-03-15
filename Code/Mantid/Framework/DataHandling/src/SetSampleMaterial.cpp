@@ -141,6 +141,7 @@ namespace DataHandling
         	{
         		Atom myAtom = getAtom(atoms[i], aNumbers[i]);
         		Material *atom = new Material(atoms[i], myAtom.neutron, myAtom.number_density);
+        		g_log.notice() << " atom = "<< atoms[i]<< " aNumber = "<< aNumbers[i]<< " numberAtoms = "<< numberAtoms[i] << "\n";
         		sigma_s +=  numberAtoms[i] * atom->totalScatterXSection(1.7982);
         		sigma_atten +=  numberAtoms[i] * atom->absorbXSection(1.7982);
         	}
