@@ -118,7 +118,7 @@ def create_function_signature(alg, algo_name):
     create the function signature for the algorithm.
     """
     import mantid.simpleapi
-    from mantid.api IWorkspaceProperty
+    from mantid.api import IWorkspaceProperty
     from mantid.simpleapi import _get_function_spec
 
     _alg = getattr(mantid.simpleapi, algo_name)
