@@ -4,17 +4,9 @@ to the mantidproject.org"""
 from pdb import set_trace as trace
 import optparse
 import os
-import mwclient
 import ConfigParser
-import string
-import time
-import datetime
-import subprocess
-import commands
 import sys
-import codecs
 import re
-import fnmatch
 import wiki_tools
 from wiki_tools import *
 from wiki_report import WikiReporter
@@ -23,247 +15,6 @@ import platform
 
 # Junit report generator.
 reporter = WikiReporter()
-# no version identier
-noversion = -1
-# Direction
-InputDirection = "Input"
-OutputDirection = "Output"
-InOutDirection = "InOut"
-NoDirection = "None"
-direction_string = [InputDirection, OutputDirection, InOutDirection, NoDirection]
-
-#======================================================================
-def get_wiki_description(algo, version):
-    """ Extract the text between the *WIKI* tags in the .cpp file
-    
-    @param algo :: name of the algorithm
-    @param version :: version, -1 for latest 
-    """
-    global mtd
-    source = find_algo_file(algo, version)
-    if source == '':
-        alg =  createAlgorithm(algo, version)
-        print "Getting algorithm description from binaries."
-        return alg.getWikiDescription()
-    else:
-        f = open(source,'r')
-        lines = f.read().split('\n')
-        print lines
-        f.close()
-        n = 0
-        print algo
-        while not lines[n].lstrip().startswith("/*WIKI*") and not lines[n].lstrip().startswith('"""*WIKI*'):
-            n += 1
-        desc = ""
-        n += 1
-        while not lines[n].lstrip().startswith("*WIKI*"):
-            desc += lines[n] + "\n"
-            n += 1
-        print "Getting algorithm description from source."
-        return desc
-    
-    
-#======================================================================
-def make_group_header_line(group):
-    """ Make a group header line for the property table
-    
-     Args:
-        group :: name of the group
-    Returns:
-        string to add to the wiki
-    """
-    if group=="":
-        return "|colspan=6 align=center|   \n|-\n"
-    else:
-        return "|colspan=6 align=center|'''%s'''\n|-\n" % group
-
-#======================================================================  
-def create_property_default_string(prop):
-    """ Create a default string 
-    
-     Args:
-        default. The property default value.
-    Returns:
-        string to add to the wiki property table default section.
-    """
-    # Convert to int, then float, then any string
-    
-    default = prop.getDefault
-    defaultstr = ""
-    try:
-        val = int(default)
-        if (val >= 2147483647):
-            defaultstr = "Optional"
-        else:
-            defaultstr = str(val)
-    except:
-        try:
-            val = float(default)
-            if (val >= 1e+307):
-                defaultstr = "Optional"
-            else:
-                defaultstr = str(val)
-        except:
-            # Fall-back default for anything
-            defaultstr = str(default)
-            
-    # Replace the ugly default values with "optional"
-    if (defaultstr == "8.9884656743115785e+307") or \
-       (defaultstr == "1.7976931348623157e+308") or \
-       (defaultstr == "2147483647"):
-        defaultstr = "Optional"
-        
-    if str(prop.type) == "boolean":
-        if defaultstr == "1": defaultstr = "True" 
-        else: defaultstr = "False"
-    return defaultstr
-
-#======================================================================
-def make_property_table_line(propnum, p):
-    """ Make one line of the property table
-    
-    Args:
-        propnum :: number of the prop
-        p :: Property object
-    Returns:
-        string to add to the wiki
-    """
-    
-    out = ""
-    # The property number
-    out += "|" + str(propnum) + "\n"
-    # Name of the property
-    out += "|" + p.name + "\n"
-
-    out += "|" + direction_string[p.direction] + "\n"
-    # Type (as string) wrap an IWorkspaceProperty in a link.
-    if isinstance(p, IWorkspaceProperty): 
-        out += "|[[" + str(p.type) + "]]\n"
-    else:
-        out += "|" + str(p.type) + "\n"
-       
-    if (direction_string[p.direction] == OutputDirection) and (not isinstance(p, IWorkspaceProperty)):
-      out += "|\n" # Nothing to show under the default section for an output properties that are not workspace properties.
-    elif (p.isValid == ""): #Nothing was set, but it's still valid = NOT  mandatory
-      defaultstr = create_property_default_string(p)
-      out += "| " + defaultstr + "\n"
-    else:
-      out += "|Mandatory\n"
-      
-    # Documentation
-    out += "|" + p.documentation.replace("\n", "<br />") + "\n"
-    # End of table line
-    out += "|-\n"
-    return out
-    
-    
-        
-#======================================================================
-def make_wiki(algo_name, version, latest_version):
-    """ Return wiki text for a given algorithm
-    @param algo_name :: name of the algorithm (bare)
-    @param version :: version requested
-    @param latest_version :: the latest algorithm 
-    """ 
-    
-    external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
-    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000;'></anchor>\n\n" % (external_image, external_image)  
-    
-    # Deprecated algorithms: Simply returnd the deprecation message
-    print "Creating... ", algo_name, version
-    deprec = mtd.algorithmDeprecationMessage(algo_name,version)
-    if len(deprec) != 0:
-        out = "== Deprecated ==\n\n"
-        deprecstr = deprec
-        deprecstr = deprecstr.replace(". Use ", ". Use [[")
-        deprecstr = deprecstr.replace(" instead.", "]] instead.")
-        out += deprecstr 
-        out += "\n\n"
-    
-    alg = mtd.createAlgorithm(algo_name, version)
-    
-    if (latest_version > 1):
-        if (version < latest_version):
-            out += "Note: This page refers to version %d of %s. The latest version is %d - see [[%s v.%d]].\n\n" % (version, algo_name, latest_version, algo_name, latest_version)
-        else:
-            out += "Note: This page refers to version %d of %s. "% (version, algo_name)
-            if latest_version > 2:
-                out += "The documentation for older versions is available at: "
-            else:
-                out += "The documentation for the older version is available at: "
-            for v in xrange(1,latest_version):
-                out += "[[%s v.%d]] " % (algo_name, v)
-            out += "\n\n"
-        
-    
-    out += "== Summary ==\n\n"
-    out += alg._ProxyObject__obj.getWikiSummary().replace("\n", " ") + "\n\n"
-    
-    out += "\n\n== Usage ==\n\n"
-    out += " " + create_function_signature(alg, algo_name) + "\n\n" 
-    out += "<br clear=all>\n\n" 
-    out += "== Properties ==\n\n"
-    
-    out += """{| border="1" cellpadding="5" cellspacing="0" 
-!Order\n!Name\n!Direction\n!Type\n!Default\n!Description
-|-\n"""
-
-    # Do all the properties
-    props = alg._ProxyObject__obj.getProperties()
-    propnum = 1
-    last_group = ""
-    for prop in props:
-        group = prop.getGroup
-        if (group != last_group):
-            out += make_group_header_line(group)
-            last_group = group
-        out += make_property_table_line(propnum, prop)
-        propnum += 1
-        
-        
-    # Close the table
-    out += "|}\n\n"
-
-
-    out += "== Description ==\n"
-    out += "\n"
-    desc = ""
-    try:
-        desc = get_wiki_description(algo_name,version)
-    except IndexError:
-        pass
-    if (desc == ""):
-      out += "INSERT FULL DESCRIPTION HERE\n"
-      print "Warning: missing wiki description for %s! Placeholder inserted instead." % algo_name
-    else:
-      out += desc + "\n"
-    out += "\n"
-    out += "[[Category:Algorithms]]\n"
-    
-    # All other categories
-    categories = alg.categories()
-    for categ in categories:
-        n = categ.find("\\")
-        if (n>0):
-            # Category is "first\second"
-            first = categ[0:n]
-            second = categ[n+1:]
-            out += "[[Category:" + first + "]]\n"
-            out += "[[Category:" + second + "]]\n"
-        else:
-            out += "[[Category:" + categ + "]]\n"
-
-    # Point to the right source ffiles
-    if version > 1:
-        out +=  "{{AlgorithmLinks|%s%d}}\n" % (algo_name, version)
-    else:
-        out +=  "{{AlgorithmLinks|%s}}\n" % (algo_name)
-
-    return out
-
-
-
-
 
 #======================================================================
 def confirm(prompt=None, resp=False, continueconfirm=False):
@@ -349,72 +100,17 @@ def wiki_maker_page(page):
         return re.search("^Bot", rev['comment'])
 
 #======================================================================
-def create_function_signature(alg, algo_name):
-    """
-    create the function signature for the algorithm.
-    """
-    from mantid.simpleapi import _get_function_spec
-    import mantid.simpleapi
-    _alg = getattr(mantid.simpleapi, algo_name)
-    prototype =  algo_name + _get_function_spec(_alg)
-    
-    # Replace every nth column with a newline.
-    nth = 4
-    commacount = 0
-    prototype_reformated = ""
-    for char in prototype:
-        if char == ',':
-            commacount += 1
-            if (commacount % nth == 0):
-                prototype_reformated += ",\n  "
-            else:
-                prototype_reformated += char
-        else: 
-           prototype_reformated += char
-           
-    # Strip out the version.
-    prototype_reformated = prototype_reformated.replace(",[Version]", "")
-    
-    # Add the output properties
-    props = alg._ProxyObject__obj.getProperties()
-    allreturns = []
-    workspacereturn = None
-    # Loop through all the properties looking for output properties
-    for prop in props:
-        if (direction_string[prop.direction] == OutputDirection):
-            allreturns.append(prop.name)
-            # Cache the last workspace property seen.
-            if isinstance(prop, IWorkspaceProperty): 
-                workspacereturn = prop.name
-                
-    lhs = ""
-    comments = ""
-    if not allreturns:
-        pass
-    elif (len(allreturns) == 1) and (workspacereturn is not None): 
-        lhs =   workspacereturn + " = "
-    else :
-        lhs = "result = "
-        comments = "\n "
-        comments += "\n # -------------------------------------------------- \n"
-        comments += " # result is a tuple containing\n"
-        comments += " # (" + ",".join(allreturns ) + ")\n"
-        comments += " # To access individual outputs use result[i], where i is the index of the required output.\n"
-        
-    return lhs + prototype_reformated + comments
-    
-#======================================================================
 def do_algorithm(args, algo, version):
     """ Do the wiki page
     @param algo :: the name of the algorithm, and it's version as a tuple"""
-    global mtd
     is_latest_version = True
     # Find the latest version        
-    latest_version = mtd.createAlgorithm(algo, noversion).version()
+    latest_version = find_latest_alg_version(algo)
     if (version == noversion): 
         version = latest_version
 
     print "Latest version of %s is %d. You are making version %d." % (algo, latest_version, version)
+
     # What should the name on the wiki page be?
     wiki_page_name = algo
     if latest_version > 1:
@@ -544,22 +240,31 @@ if __name__ == "__main__":
 
     if len(algos)==0:
         parser.error("You must specify at least one algorithm.")
-    
+
+    # Command-line overrides anything for finding Mantid
+    if args.mantidpath is not None:
+        os.environ['MANTIDPATH'] = args.mantidpath        
+    elif not "MANTIDPATH" in os.environ:
+        raise RuntimeError("Cannot find Mantid. MANTIDPATH environment variable not set & --mantidpath option not given")
+    else:
+        pass
+    # Make sure the internal module use can find Mantid 
+    sys.path.append(os.environ['MANTIDPATH'])
+
+        # Check if python_d must be used to call into Mantid
     if platform.system() == 'Windows':
-        os.environ['MANTIDPATH'] = args.mantidpath
+        flag_if_build_is_debug(os.environ['MANTIDPATH'])
+        module_dir = os.path.dirname(__file__)
+        os.environ["PYTHONPATH"] = os.environ.get("PYTHONPATH","") + ";" + module_dir + ";" + os.environ['MANTIDPATH']
     
-    initialize_Mantid(args.mantidpath)
-    global mtd
-    from MantidFramework import IWorkspaceProperty, WorkspaceProperty
-    mtd = wiki_tools.mtd
-    intialize_files()
     initialize_wiki(args)
   
     if len(algos) == 1 and algos[0] == "ALL":
-        print "Documenting All Algorithms"
-        allAlgorithms = get_all_algorithms_tuples()
-        for algo_tuple in allAlgorithms:
-            do_algorithm(args, algo_tuple[0], algo_tuple[1][0])
+        print "Documenting ALL Algorithms"
+        alg_to_vers = get_algorithm_to_version_lookup()
+        for name, versions in alg_to_vers.iteritems():
+            for version in versions:
+                do_algorithm(args, name, version)
     else:
         for algo in algos:
             do_algorithm(args, algo, int(args.algversion))

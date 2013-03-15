@@ -10,6 +10,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
   src/Exports/Algorithm.cpp
+  src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/PythonAlgorithmExport.cpp
   src/Exports/AlgorithmFactory.cpp
   src/Exports/AlgorithmManager.cpp

@@ -32,21 +32,35 @@ void export_Property()
     .value("None", Direction::None)
     ;
 
+  // Add properties as that's what old version had
   class_<Property, boost::noncopyable>("Property", no_init)
     .add_property("name", make_function(&Mantid::Kernel::Property::name, return_value_policy<copy_const_reference>()),
                   "The name of the property")
-    .add_property("documentation", make_function(&Mantid::Kernel::Property::documentation, return_value_policy<copy_const_reference>()),
-                  "The property's doc string")
+
+    .add_property("isValid", make_function(&Mantid::Kernel::Property::isValid), 
+                  "An empty string if the property is valid, otherwise it contains an error message.")
+
+    .add_property("isDefault", make_function(&Mantid::Kernel::Property::isDefault), "Is the property set at the default value")
+    
+    .add_property("getDefault", make_function(&Mantid::Kernel::Property::getDefault), "Get the default value as a string")
+
     .add_property("direction", &Mantid::Kernel::Property::direction,
                   "Input, Output, InOut or Unknown. See the Direction class")
+
+    .add_property("documentation", make_function(&Mantid::Kernel::Property::documentation, return_value_policy<copy_const_reference>()),
+                  "The property's doc string")
+
+    .add_property("type", make_function(&Mantid::Kernel::Property::type), "Returns a string identifier for the type")
+
     .add_property("units", make_function(&Mantid::Kernel::Property::units, return_value_policy<copy_const_reference>()),
                   "The units attached to this property")
+
     .add_property("valueAsStr", &Mantid::Kernel::Property::value, "The value of the property as a string. "
                   "For some property types, e.g. Workspaces, it is useful to be able to refer to the string value directly")
+
     .add_property("allowedValues", &Mantid::Kernel::Property::allowedValues, "A list of allowed values")
-    .def("isValid", &Mantid::Kernel::Property::isValid, "An empty string if the property is valid, otherwise it contains an error message.")
-    .def("isDefault", &Mantid::Kernel::Property::isDefault, "Is the property set at the default value")
-    .def("getGroup", &Mantid::Kernel::Property::getGroup, return_value_policy<copy_const_reference>(),
+
+    .add_property("getGroup", make_function(&Mantid::Kernel::Property::getGroup, return_value_policy<copy_const_reference>()),
          "Return the 'group' of the property, that is, the header in the algorithm's list of properties.")
    ;
 }

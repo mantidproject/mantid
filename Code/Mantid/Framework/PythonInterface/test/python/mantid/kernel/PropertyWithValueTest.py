@@ -18,6 +18,10 @@ class PropertyWithValueTest(unittest.TestCase):
             self.__class__._mask_dets = AlgorithmManager.createUnmanaged("MaskDetectors")
             self.__class__._mask_dets.initialize()
   
+    def test_type_str_is_not_empty(self):
+        rangeLower=self.__class__._integration.getProperty("RangeLower")
+        self.assertTrue(len(rangeLower.type) > 0)
+  
     def test_getproperty_value_returns_derived_type(self):
         data = [1.0,2.0,3.0]
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength',child=True)
