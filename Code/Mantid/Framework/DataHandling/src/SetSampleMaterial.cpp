@@ -47,7 +47,31 @@ namespace DataHandling
     declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "The workspace with which to associate the sample ");
-    declareProperty("ChemicalFormula", "", "ChemicalFormula or AtomicNumber must be given");
+    declareProperty("ChemicalFormula", "", "ChemicalFormula or AtomicNumber must be given. "
+		"Enter a composition as a molecular formula of \n"
+		"elements or isotopes.  For example, basic "
+		"elements might be \"H\", \"Fe\" or \"Si\", etc. \n"
+		"A molecular formula of elements might be "
+		"\"H4-N2-C3\", which corresponds to a molecule \n"
+		"with 4 Hydrogen atoms, 2 Nitrogen atoms and "
+		"3 Carbon atoms.  Each element in a molecular \n"
+		"formula is followed by the number of the atoms "
+		"for that element, specified _without a hyphen_, \n"
+		"because each element is separated from other "
+		"elements using a hyphen.  The number of atoms \n"
+		"can be integer or float, but must start with "
+		"a digit, e.g. 0.6 is fine but .6 is not. \n"
+		"Isotopes may also be included in a material "
+		"composition, and can be specified alone \n"
+		"(as in \"Li7\"), or in a molecular formula "
+		"(as in \"(Li7)2-C-H4-N-Cl6\").  Note, however, \n"
+		"that No Spaces or Hyphens are allowed in an "
+		"isotope symbol specification.  Also Note \n"
+		"that for isotopes specified in a molecular "
+		"expression, the isotope must be enclosed \n"
+		"by parenthesis, except for two special "
+		"cases, D and T, which stand for H2 and H3, \n"
+		"respectively.");
     declareProperty("AtomicNumber", EMPTY_INT(), "ChemicalFormula or AtomicNumber must be given");
     declareProperty("MassNumber", 0, "Mass number if ion (default is 0)");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
@@ -96,21 +120,21 @@ namespace DataHandling
     // Use chemical symbol if given by user
     try
     {
-      Atom myAtom = getAtom(chemicalSymbol, static_cast<uint16_t>(a_number));
-      Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
-      workspace->mutableSample().setMaterial(*mat);
-      g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
-      g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(1.7982) << "\n";
-      g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(1.7982)<< "\n";
+		Atom myAtom = getAtom(chemicalSymbol, static_cast<uint16_t>(a_number));
+		Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
+		workspace->mutableSample().setMaterial(*mat);
+		g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
+		g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(1.7982) << "\n";
+		g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(1.7982)<< "\n";
     }
     catch (...)
     {
         // Use chemical formula if given by user
     	try
     	{
-                std::vector<std::string> atoms;
-    	        std::vector<uint16_t> numberAtoms, aNumbers;
-    	        this->parseChemicalFormula(chemicalSymbol, atoms, numberAtoms, aNumbers);
+			std::vector<std::string> atoms;
+			std::vector<uint16_t> numberAtoms, aNumbers;
+			this->parseChemicalFormula(chemicalSymbol, atoms, numberAtoms, aNumbers);
         	sigma_s = 0;
         	sigma_atten = 0;
         	for (size_t i=0; i<atoms.size(); i++)
@@ -120,9 +144,9 @@ namespace DataHandling
         		sigma_s +=  numberAtoms[i] * atom->totalScatterXSection(1.7982);
         		sigma_atten +=  numberAtoms[i] * atom->absorbXSection(1.7982);
         	}
-		rho = zParameter / unitCellVolume;
-		NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
-				0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
+			rho = zParameter / unitCellVolume;
+			NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
+					0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
     		Material *mat = new Material(chemicalSymbol, *neutron, rho);
 	        g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
 	        g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(1.7982) << "\n";
@@ -137,9 +161,9 @@ namespace DataHandling
 				Atom myAtom = getAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number));
 				Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
 				workspace->mutableSample().setMaterial(*mat);
-	        		g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
-	        		g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(1.7982) << "\n";
-	        		g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(1.7982)<< "\n";
+				g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
+				g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(1.7982) << "\n";
+				g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(1.7982)<< "\n";
 			}
 			catch(std::invalid_argument&)
 			{

@@ -392,6 +392,7 @@ set ( TEST_FILES
 	SaveRKHTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
+        SetSampleMaterialTest.h
 	SetScalingPSDTest.h
 	StartLiveDataTest.h
 	UpdateInstrumentFromFileTest.h
