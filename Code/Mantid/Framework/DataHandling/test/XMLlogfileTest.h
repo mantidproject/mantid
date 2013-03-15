@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/XMLlogfile.h"
-#include "MantidDataHandling/LoadRaw2.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -27,7 +27,7 @@ public:
   // checks that this is done ok
   void testParameterMap()
   {
-    LoadRaw2 loader;
+    LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "CSP79590.raw");
     loader.setPropertyValue("OutputWorkspace", "CRISPdata");
@@ -37,7 +37,7 @@ public:
 
     // Get back the workspaces
     MatrixWorkspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("CRISPdata") );
+    TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("CRISPdata_1") );
     TS_ASSERT_EQUALS( output1->getNumberHistograms(), 4 )
     MatrixWorkspace_sptr output2;
     TS_ASSERT_THROWS_NOTHING( output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("CRISPdata_2") );
