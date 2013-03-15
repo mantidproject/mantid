@@ -97,7 +97,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         """
         # 1. Obtain all information
         runsetupdict = paramdict["RunSetupWidget"]
-        advsetupdict = paramdict["VanadiumSetupWidget"]
+        advsetupdict = paramdict["AdvancedSetupWidget"]
         filterdict = paramdict["FilterSetupWidget"]
 
         # 2. Obtain some information
@@ -351,7 +351,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         for observer in self._observers:
             observertype = observer._subject.__class__.__name__
             print "[ToScript] Observer Type = ", observertype
-            if observertype.count("VanadiumSetupWidget") == 1:
+            if observertype.count("AdvancedWidget") == 1:
                 self.instrument_name = observer._subject._instrument_name
 
         return
