@@ -140,7 +140,9 @@ def initialize_Mantid(mantidpath):
         import MantidFramework
         from MantidFramework import mtd
     except:
-        raise Exception("Error importing MantidFramework. Did you specify the --mantidpath option?")
+        msg = "Error importing MantidFramework. Did you specify the --mantidpath option? "
+        msg += "Tried to initialize from '%s'" % str(mantidpath)
+        raise Exception(msg)
     mtd.initialise()
     mantid_initialized = True
 
