@@ -1,15 +1,15 @@
 ################################################################################ 
-# Vanadium (and advanced) Setup Widget
+# Advanced Setup Widget
 ################################################################################
 from PyQt4 import QtGui, uic, QtCore
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 import reduction_gui.widgets.util as util
 
-from reduction_gui.reduction.diffraction.diffraction_van_setup_script import VanadiumSetupScript 
-import ui.diffraction.ui_diffraction_van_setup
+from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript 
+import ui.diffraction.ui_diffraction_adv_setup
 
-class VanadiumSetupWidget(BaseWidget):
+class AdvancedSetupWidget(BaseWidget):
     """ Widget that presents run setup including sample run, optional vanadium run and etc.
     """
     # Widge name
@@ -18,16 +18,16 @@ class VanadiumSetupWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         """ Initialization
         """
-        super(VanadiumSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
+        super(AdvancedSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
         
-        class VanadiumSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_van_setup.Ui_Frame): 
+        class AdvancedSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_adv_setup.Ui_Frame): 
             """ Define class linked to UI Frame
             """
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
                 
-        self._content = VanadiumSetFrame(self)
+        self._content = AdvancedSetFrame(self)
         self._layout.addWidget(self._content)
         self._instrument_name = settings.instrument_name
         self._facility_name = settings.facility_name
@@ -36,7 +36,7 @@ class VanadiumSetupWidget(BaseWidget):
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(VanadiumSetupScript(self._instrument_name))
+            self.set_state(AdvancedSetupScript(self._instrument_name))
 
         return
 
@@ -125,7 +125,7 @@ class VanadiumSetupWidget(BaseWidget):
         """ Returns a RunSetupScript with the state of Run_Setup_Interface
         Set up all the class parameters in RunSetupScrpt with values in the content
         """
-        s = VanadiumSetupScript(self._instrument_name)
+        s = AdvancedSetupScript(self._instrument_name)
 
         s.pushdatapositive = str(self._content.pushdatapos_combo.currentText())
         s.unwrapref = self._content.unwrap_edit.text()
