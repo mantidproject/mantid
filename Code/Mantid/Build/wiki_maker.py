@@ -13,6 +13,7 @@ import subprocess
 import commands
 import sys
 import codecs
+import re
 import fnmatch
 import wiki_tools
 from wiki_tools import *
@@ -24,6 +25,12 @@ import platform
 reporter = WikiReporter()
 # no version identier
 noversion = -1
+# Direction
+InputDirection = "Input"
+OutputDirection = "Output"
+InOutDirection = "InOut"
+NoDirection = "None"
+direction_string = [InputDirection, OutputDirection, InOutDirection, NoDirection]
 
 #======================================================================
 def get_wiki_description(algo, version):
@@ -35,7 +42,7 @@ def get_wiki_description(algo, version):
     global mtd
     source = find_algo_file(algo, version)
     if source == '':
-        alg = mtd.createAlgorithm(algo, version)
+        alg =  createAlgorithm(algo, version)
         print "Getting algorithm description from binaries."
         return alg.getWikiDescription()
     else:
@@ -127,12 +134,7 @@ def make_property_table_line(propnum, p):
     out += "|" + str(propnum) + "\n"
     # Name of the property
     out += "|" + p.name + "\n"
-    # Direction
-    InputDirection = "Intput"
-    OutputDirection = "Output"
-    InOutDirection = "InOut"
-    NoDirection = "None"
-    direction_string = [InputDirection, OutputDirection, InOutDirection, NoDirection]
+
     out += "|" + direction_string[p.direction] + "\n"
     # Type (as string) wrap an IWorkspaceProperty in a link.
     if isinstance(p, IWorkspaceProperty): 
@@ -163,7 +165,10 @@ def make_wiki(algo_name, version, latest_version):
     @param version :: version requested
     @param latest_version :: the latest algorithm 
     """ 
-    out = ""
+    
+    external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
+    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000;'></anchor>\n\n" % (external_image, external_image)  
+    
     # Deprecated algorithms: Simply returnd the deprecation message
     print "Creating... ", algo_name, version
     deprec = mtd.algorithmDeprecationMessage(algo_name,version)
@@ -193,6 +198,10 @@ def make_wiki(algo_name, version, latest_version):
     
     out += "== Summary ==\n\n"
     out += alg._ProxyObject__obj.getWikiSummary().replace("\n", " ") + "\n\n"
+    
+    out += "\n\n== Usage ==\n\n"
+    out += " " + create_function_signature(alg, algo_name) + "\n\n" 
+    out += "<br clear=all>\n\n" 
     out += "== Properties ==\n\n"
     
     out += """{| border="1" cellpadding="5" cellspacing="0" 
@@ -257,12 +266,14 @@ def make_wiki(algo_name, version, latest_version):
 
 
 #======================================================================
-def confirm(prompt=None, resp=False):
+def confirm(prompt=None, resp=False, continueconfirm=False):
     """prompts for yes or no response from the user. Returns True for yes and
     False for no.
 
     'resp' should be set to the default value assumed by the caller when
     user simply types ENTER.
+    
+    if 'continueconfirm', then skip the confirmation, using No (false) as the choice.
 
     >>> confirm(prompt='Create Directory?', resp=True)
     Create Directory? [y]|n: 
@@ -275,6 +286,11 @@ def confirm(prompt=None, resp=False):
     True
 
     """
+    
+    # Early exit. 
+    if continueconfirm:
+        print 'Skip confirmation, changes have not been accepted.'
+        return False
     
     if prompt is None:
         prompt = 'Confirm'
@@ -325,8 +341,67 @@ def last_page_editor(page):
 def wiki_maker_page(page):
     """
     returns True if the wikimaker was the last editor.
+    determines if there is a bot comment, which implies that the wikimaker was used to create the page last.
     """
-    return ("WikiMaker" == last_page_editor(page))
+    #Get the last editor of the page.
+    revisions = page.revisions()
+    for rev in revisions: 
+        return re.search("^Bot", rev['comment'])
+
+#======================================================================
+def create_function_signature(alg, algo_name):
+    """
+    create the function signature for the algorithm.
+    """
+    from mantid.simpleapi import _get_function_spec
+    import mantid.simpleapi
+    _alg = getattr(mantid.simpleapi, algo_name)
+    prototype =  algo_name + _get_function_spec(_alg)
+    
+    # Replace every nth column with a newline.
+    nth = 4
+    commacount = 0
+    prototype_reformated = ""
+    for char in prototype:
+        if char == ',':
+            commacount += 1
+            if (commacount % nth == 0):
+                prototype_reformated += ",\n  "
+            else:
+                prototype_reformated += char
+        else: 
+           prototype_reformated += char
+           
+    # Strip out the version.
+    prototype_reformated = prototype_reformated.replace(",[Version]", "")
+    
+    # Add the output properties
+    props = alg._ProxyObject__obj.getProperties()
+    allreturns = []
+    workspacereturn = None
+    # Loop through all the properties looking for output properties
+    for prop in props:
+        if (direction_string[prop.direction] == OutputDirection):
+            allreturns.append(prop.name)
+            # Cache the last workspace property seen.
+            if isinstance(prop, IWorkspaceProperty): 
+                workspacereturn = prop.name
+                
+    lhs = ""
+    comments = ""
+    if not allreturns:
+        pass
+    elif (len(allreturns) == 1) and (workspacereturn is not None): 
+        lhs =   workspacereturn + " = "
+    else :
+        lhs = "result = "
+        comments = "\n "
+        comments += "\n # -------------------------------------------------- \n"
+        comments += " # result is a tuple containing\n"
+        comments += " # (" + ",".join(allreturns ) + ")\n"
+        comments += " # To access individual outputs use result[i], where i is the index of the required output.\n"
+        
+    return lhs + prototype_reformated + comments
     
 #======================================================================
 def do_algorithm(args, algo, version):
@@ -380,24 +455,26 @@ def do_algorithm(args, algo, version):
         print
         
         wiki_maker_edited_last = wiki_maker_page(page)
-        
+        last_modifier = last_page_editor(page);
         if not wiki_maker_edited_last:
-            print "The last editor was NOT the WIKIMAKER"
-            last_modifier = last_page_editor(page);
-            print "The last page editor was ", last_modifier
+            print "The last edit was manual. Last edit NOT done by WIKIMAKER script."
             if not last_modifier == None:
                 # Report a failure test case
                 reporter.addFailureTestCase(algo, version, last_modifier, ''.join(diff_list))
+        else:
+            print "The last edit was automatic via a script. Last edit was done by WIKIMAKER script."
+        print "Last change by ", last_modifier
         
         if args.dryrun:
             print "Dry run of saving page to http://www.mantidproject.org/%s" % wiki_page_name
-        elif wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
+        elif wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True, args.continueconfirm):
             print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
             page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
             
     saved_text = open(wiki_page_name+'.txt', 'w')
     saved_text.write(new_contents)
     saved_text.close()
+    
     
 #======================================================================
 if __name__ == "__main__":
@@ -436,16 +513,19 @@ if __name__ == "__main__":
                         help="Force overwriting the wiki page on the website if different (don't ask the user)")
 
     parser.add_option('--alg-version', dest='algversion', default=noversion, 
-                        help='Algorithm version to create the wiki for.')
+                        help='Algorithm version to create the wiki for. Latest version if absent.')
     
     parser.add_option('--report', dest='wikimakerreport', default=False, action='store_const', const=True,
                         help="Record authors and corresponding algorithm wiki-pages that have not been generated with the wiki-maker")
     
     parser.add_option('--cache-config', dest='cacheconfig', default=False, action='store_const', const=True,
-                        help="If true, the creditials of the executor will be cached for the next run.")
+                        help="If set, the creditials of the executor will be cached for the next run.")
     
     parser.add_option('--dry-run', dest='dryrun', default=False, action='store_const', const=True,
-                        help="If false, then the utility will work exactly the same, but no changes will actually be pushed to the wiki.")
+                        help="If set, then the utility will work exactly the same, but no changes will actually be pushed to the wiki.")
+    
+    parser.add_option('--continue-confirm', dest='continueconfirm', default=False, action='store_const', const=True,
+                        help="If set, then any user-required confirmation will be skipped, without applying the change.")
     
 
     (args, algos) = parser.parse_args()
@@ -470,7 +550,7 @@ if __name__ == "__main__":
     
     initialize_Mantid(args.mantidpath)
     global mtd
-    from MantidFramework import IWorkspaceProperty
+    from MantidFramework import IWorkspaceProperty, WorkspaceProperty
     mtd = wiki_tools.mtd
     intialize_files()
     initialize_wiki(args)

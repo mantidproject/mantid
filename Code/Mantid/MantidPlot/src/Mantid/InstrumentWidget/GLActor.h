@@ -20,10 +20,7 @@
 #include <ostream>
 
 #include <QList>
-//#include <QObject>
 
-class UnwrappedCylinder;
-class UnwrappedDetectorCyl;
 class GLActorVisitor;
 
 namespace Mantid
@@ -67,42 +64,28 @@ class GLActor
 {
 public:
   GLActor():m_visible(true){}
-  virtual ~GLActor();             ///< Virtual destructor
+  ///< Virtual destructor
+  virtual ~GLActor();
+  /// Toggle the visibility of the actor.
   virtual void setVisibility(bool on){m_visible = on;}
+  /// Get the visibility status.
   bool isVisible()const{return m_visible;}
+  /// Draw the actor in 3D.
   virtual void draw(bool picking = false)const = 0;
+  /// Get the 3D bounding box of the actor
   virtual void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const = 0;
-  virtual bool accept(const GLActorVisitor& visitor);
+  /// Accept a visitor 
+  virtual bool accept(GLActorVisitor& visitor);
+  /// Convert a "pick ID" to a colour to put into the pick image.
   static GLColor makePickColor(size_t pickID);
+  /// Decode a pick colour and return corresponding "pick ID"
   static size_t decodePickColor(const GLColor& c);
+  /// Decode a pick colour and return corresponding "pick ID"
   static size_t decodePickColor(unsigned char r,unsigned char g,unsigned char b);
+  /// Get colour of a component which doesn't have any counts associated with it.
   static GLColor defaultDetectorColor();
 protected:
   bool  m_visible;					 ///< Flag whether the actor is visible or not
-};
-
-class GLActorVisitor
-{
-public:
-  virtual ~GLActorVisitor(){}
-  virtual bool visit(GLActor*)const = 0;
-};
-
-/*
- * The accept() method must return true if an actor is set visible and false otherwise
- */
-class SetVisibilityVisitor: public GLActorVisitor
-{
-};
-
-class SetAllVisibleVisitor: public SetVisibilityVisitor
-{
-public:
-  bool visit(GLActor* actor)const
-  {
-    actor->setVisibility(true);
-    return true;
-  }
 };
 
 #endif /*GLACTOR_H_*/
