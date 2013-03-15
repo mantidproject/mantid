@@ -771,7 +771,6 @@ namespace WorkspaceCreationHelper
     while(rHist*rHist<numPixels)rHist++;
 
     Mantid::API::MatrixWorkspace_sptr  ws = CreateGroupedWorkspace2DWithRingsAndBoxes(rHist,10,0.1);
-    ws->replaceAxis(1, new SpectraAxis(rHist, true));
     NumericAxis *pAxis0 = new NumericAxis(numBins);
  
     for(size_t i=0;i<numBins;i++){
@@ -840,7 +839,6 @@ namespace WorkspaceCreationHelper
          }
     }
     // set axis, correspondent to the X-values
-     ws->replaceAxis(1, new SpectraAxis(numPixels, true));
      NumericAxis *pAxis0 = new NumericAxis(numBins); 
      MantidVec& E_transfer = ws->dataX(0);
      for(size_t i=0; i < numBins; i++){

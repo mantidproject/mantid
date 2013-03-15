@@ -141,7 +141,6 @@ void MuonAnalysis::initLayout()
 
   // Load current
   connect(m_uiForm.loadCurrent, SIGNAL(clicked()), this, SLOT(runLoadCurrent()));
-  connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(disableLoading() ) );
 
   // If group table change
   // currentCellChanged ( int currentRow, int currentColumn, int previousRow, int previousColumn )
@@ -1848,24 +1847,14 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
 {
   m_loaded = true;
 
-  Mantid::API::IAlgorithm_sptr cropAlg = Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
-  cropAlg->setPropertyValue("InputWorkspace", inputWS);
-  cropAlg->setPropertyValue("OutputWorkspace", outWS);
-  cropAlg->setProperty("Xmin", plotFromTime());
-  if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )
-    cropAlg->setProperty("Xmax", plotToTime());
-  cropAlg->execute();
-
   // adjust for time zero if necessary
   if ( m_nexusTimeZero != boost::lexical_cast<double>(timeZero().toStdString()) )
   {
     try {
-      Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(outWS));
-
       double shift = m_nexusTimeZero - boost::lexical_cast<double>(timeZero().toStdString());
       Mantid::API::IAlgorithm_sptr rebinAlg = Mantid::API::AlgorithmManager::Instance().create("ChangeBinOffset");
-      rebinAlg->setPropertyValue("InputWorkspace", outWS);
-      rebinAlg->setPropertyValue("OutputWorkspace", outWS);
+      rebinAlg->setPropertyValue("InputWorkspace", inputWS);
+      rebinAlg->setPropertyValue("OutputWorkspace", inputWS);
       rebinAlg->setProperty("Offset", shift);
       rebinAlg->execute();    
     }
@@ -1873,6 +1862,14 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
       QMessageBox::information(this, "Mantid - Muon Analysis", "The workspace couldn't be corrected for time zero.");
     }
   }
+
+  Mantid::API::IAlgorithm_sptr cropAlg = Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
+  cropAlg->setPropertyValue("InputWorkspace", inputWS);
+  cropAlg->setPropertyValue("OutputWorkspace", outWS);
+  cropAlg->setProperty("Xmin", plotFromTime());
+  if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )
+    cropAlg->setProperty("Xmax", plotToTime());
+  cropAlg->execute();
 
   // Copy the data and keep as raw for later
   m_fitDataTab->makeRawWorkspace(outWS);
@@ -3174,14 +3171,6 @@ void MuonAnalysis::allowLoading(bool enabled)
   m_uiForm.previousRun->setEnabled(enabled);
   m_uiForm.loadCurrent->setEnabled(enabled);
   m_uiForm.mwRunFiles->setEnabled(enabled);
-}
-
-/**
- * SLOT to disable loading by greying out the buttons and MWRunfiles widget responsible.
- */
-void MuonAnalysis::disableLoading()
-{
-  allowLoading(false);
 }
 
 /**

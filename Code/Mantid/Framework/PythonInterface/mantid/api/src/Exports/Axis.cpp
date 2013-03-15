@@ -127,13 +127,6 @@ void export_NumericAxis()
 
 }
 
-void export_SpectraAxis()
-{
-  class_< SpectraAxis, bases<Axis>, boost::noncopyable >("SpectraAxis", no_init)
-    .def("spectraNo", (const specid_t &(SpectraAxis::*)(const size_t &) const)&SpectraAxis::spectraNo,
-          return_value_policy<copy_const_reference>(), "Returns the spectrum no at the given index")
-    ;
-}
 
 /**
 * Creates a TextAxis

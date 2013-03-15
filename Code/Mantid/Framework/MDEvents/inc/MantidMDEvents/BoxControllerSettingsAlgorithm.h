@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
 #include "MantidAPI/BoxController.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid
 {
@@ -49,10 +50,18 @@ namespace MDEvents
     void initBoxControllerProps(const std::string & SplitInto="5", int SplitThreshold=1000, int MaxRecursionDepth=5);
 
     /// Set the settings in the given box controller
+    void setBoxController(Mantid::API::BoxController_sptr bc, Mantid::Geometry::Instrument_const_sptr instrument);
+
+    /// Set the settings in the given box controller
     void setBoxController(Mantid::API::BoxController_sptr bc);
 
     std::string getBoxSettingsGroupName()
     { return "Box Splitting Settings"; }
+
+  private:
+
+    /// Take the defaults for the box splitting from the instrument parameters.
+    void takeDefaultsFromInstrument(Mantid::Geometry::Instrument_const_sptr instrument, const size_t ndims);
 
   };
 

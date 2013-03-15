@@ -83,7 +83,7 @@ double Axis::getValue(const std::size_t& index, const std::size_t& verticalIndex
  *  @return The spectrum number as an int
  *  @throw  domain_error If this method is called on a numeric axis
  */
-const specid_t& Axis::spectraNo(const std::size_t& index) const
+specid_t Axis::spectraNo(const std::size_t& index) const
 {
   UNUSED_ARG(index)
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");

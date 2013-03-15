@@ -73,6 +73,66 @@ namespace MDEvents
     setPropertyGroup("MaxRecursionDepth", grp);
   }
 
+  /**
+   * Looks at each of the parameters, to see if they are default, and if they are, over-writes them
+   * with the values set in the instrument parameters (if they exist).
+   * @param instrument : Instrument on input workspace.
+   * @param ndims : Number of dimensions in output workspace.
+   */
+    void BoxControllerSettingsAlgorithm::takeDefaultsFromInstrument(
+        Mantid::Geometry::Instrument_const_sptr instrument, const size_t ndims)
+    {
+      const std::string splitThresholdName = "SplitThreshold";
+      const std::string splitIntoName = "SplitInto";
+      const std::string maxRecursionDepthName = "MaxRecursionDepth";
+      Property* p = getProperty(splitThresholdName);
+      if (p->isDefault())
+      {
+        std::vector<double> instrumentSplitThresholds = instrument->getNumberParameter(splitThresholdName,
+            true);
+        if (!instrumentSplitThresholds.empty())
+        {
+          setProperty(splitThresholdName, static_cast<int>(instrumentSplitThresholds.front()));
+        }
+      }
+      p = getProperty(splitIntoName);
+      if (p->isDefault())
+      {
+        std::vector<double> instrumentSplitInto = instrument->getNumberParameter(splitIntoName, true);
+        if (!instrumentSplitInto.empty())
+        {
+          const int splitInto = static_cast<int>(instrumentSplitInto.front());
+          std::vector<int> newSplitInto(ndims, splitInto);
+          setProperty(splitIntoName, newSplitInto);
+        }
+      }
+      p = getProperty(maxRecursionDepthName);
+      if (p->isDefault())
+      {
+        std::vector<double> instrumentMaxRecursionDepth = instrument->getNumberParameter(
+            maxRecursionDepthName, true);
+        if (!instrumentMaxRecursionDepth.empty())
+        {
+          setProperty(maxRecursionDepthName, static_cast<int>(instrumentMaxRecursionDepth.front()));
+        }
+      }
+    }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set the settings in the given box controller
+   * This should only be called immediately after creating the workspace
+   *
+   * @param bc :: box controller to modify
+   * @param instrument :: instrument to read parameters from.
+   */
+  void BoxControllerSettingsAlgorithm::setBoxController(BoxController_sptr bc, Mantid::Geometry::Instrument_const_sptr instrument)
+  {
+    size_t nd = bc->getNDims();
+
+    takeDefaultsFromInstrument(instrument, nd);
+
+    setBoxController(bc);
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Set the settings in the given box controller

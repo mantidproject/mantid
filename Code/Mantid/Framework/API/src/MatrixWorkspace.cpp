@@ -177,20 +177,10 @@ namespace Mantid
     */
     void MatrixWorkspace::updateSpectraUsingMap()
     {
-      // The Axis1 needs to be set correctly for the ISpectraDetectorMap to make any sense
-      if (m_axes.size() < 2) throw std::runtime_error("MatrixWorkspace::updateSpectraUsingMap() needs a SpectraAxis at index 1 to work.");
-      SpectraAxis * ax1 = dynamic_cast<SpectraAxis *>(m_axes[1]);
-      if (!ax1)
-        throw std::runtime_error("MatrixWorkspace::updateSpectraUsingMap() needs a SpectraAxis at index 1 to work.");
-      if (ax1->length() < this->getNumberHistograms())
-        throw std::runtime_error("MatrixWorkspace::updateSpectraUsingMap(): the SpectraAxis is shorter than the number of histograms! Cannot run.");
-
       for (size_t wi=0; wi < this->getNumberHistograms(); wi++)
       {
-        specid_t specNo = ax1->spectraNo(wi);
-
         ISpectrum * spec = getSpectrum(wi);
-        spec->setSpectrumNo(specNo);
+        specid_t specNo = spec->getSpectrumNo();
 
         std::vector<detid_t> dets = m_spectraMap->getDetectors(specNo);
         spec->clearDetectorIDs();
@@ -221,12 +211,12 @@ namespace Mantid
       if( m_axes.size() > 1 && m_axes[1]->isSpectra() )
       {
         delete m_axes[1];
-        m_axes[1] = new SpectraAxis(pixelIDs.size(), false);
+        m_axes[1] = new SpectraAxis(this);
       }
       else
       {
         if (m_axes.size() == 0) m_axes.push_back( new NumericAxis(this->blocksize()) );
-        m_axes.push_back(  new SpectraAxis(pixelIDs.size(), false) );
+        m_axes.push_back(  new SpectraAxis(this) );
       }
 
       try
@@ -242,9 +232,6 @@ namespace Mantid
           const specid_t specNo = specid_t(index + 1);
           // We keep the entry in the spectraDetectorMap. TODO: Deprecate spectraDetectorMap entirely.
           spectramap->addSpectrumEntry(specNo, detId);
-
-          // Also set the spectrum number in the axis(1). TODO: Remove this, it is redundant (but it is stuck everywhere)
-          m_axes[1]->setValue(index, specNo);
 
           if (index < this->getNumberHistograms())
           {
@@ -287,12 +274,11 @@ namespace Mantid
       if( m_axes.size() > 1 )
       {
         delete m_axes[1];
-        m_axes[1] = new SpectraAxis(this->getNumberHistograms(), false);
+        m_axes[1] = new SpectraAxis(this);
       }
       else
-        m_axes.push_back(  new SpectraAxis(this->getNumberHistograms(), false) );
+        m_axes.push_back(  new SpectraAxis(this) );
 
-      API::Axis *ax1 = getAxis(1);
       API::SpectraDetectorMap *newMap = new API::SpectraDetectorMap;
 
       //Go through all the spectra
@@ -301,7 +287,6 @@ namespace Mantid
         ISpectrum * spec = getSpectrum(wi);
         specid_t specNo = spec->getSpectrumNo();
         newMap->addSpectrumEntries(specNo, spec->getDetectorIDs());
-        ax1->setValue(wi, specNo);
         //std::cout << "generateSpectraMap : wi " << wi << " specNo " << specNo << " detID " << *spec->getDetectorIDs().begin() << std::endl;
       }
 
