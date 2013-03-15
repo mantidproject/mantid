@@ -8,18 +8,10 @@
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-
-// Small class for testing the protected copy constructor
-class SpectraAxisTester : public SpectraAxis
-{
-public:
-  SpectraAxisTester() : SpectraAxis(1) {}
-  SpectraAxisTester(const SpectraAxisTester& right) : SpectraAxis(right) {}
-};
-
 
 // Now the unit test class itself
 class SpectraAxisTest : public CxxTest::TestSuite
@@ -32,7 +24,9 @@ public:
 
   SpectraAxisTest()
   {
-    spectraAxis = new SpectraAxis(5);
+    ws = new WorkspaceTester;
+    ws->init(5,1,1);
+    spectraAxis = new SpectraAxis(ws);
     spectraAxis->title() = "A spectra axis";
   }
   
@@ -41,7 +35,7 @@ public:
     delete spectraAxis;
   }
   
-  void testConstructorWithLengthAndDefaultInit()
+  void testConstructor()
   {
     TS_ASSERT_EQUALS( spectraAxis->title(), "A spectra axis" );
     TS_ASSERT( spectraAxis->unit().get() );
@@ -51,75 +45,23 @@ public:
     }
   }
 
-  void testConstructorWithLengthAndNoDefaultInit()
-  {
-    SpectraAxis local(5, false);
-    TS_ASSERT_EQUALS( local.title(), "" );
-    TS_ASSERT( local.unit().get() );
-    for (int i=0; i<5; ++i)
-    {
-      TS_ASSERT_EQUALS( local(i), 0.0 );
-    }
-  }
-
-  void testConstructorWithSpectraDetectorMap()
-  {
-    using Mantid::Geometry::ISpectraDetectorMap;
-    using Mantid::Geometry::OneToOneSpectraDetectorMap;
-    ISpectraDetectorMap *one2one = new OneToOneSpectraDetectorMap(5,9);
-    TS_ASSERT_EQUALS(one2one->nElements(), 5);
-
-    SpectraAxis local(one2one->nElements(),*one2one);
-    TS_ASSERT_EQUALS(local.length(), 5);
-    TS_ASSERT_EQUALS( local.title(), "" );
-    TS_ASSERT( local.unit().get() );
-    for (int i=0; i<5; ++i)
-    {
-      TS_ASSERT_EQUALS( local(i), static_cast<double>(i+5) );
-    }
-    
-    // Now limit the axis length
-    SpectraAxis localShort(2,*one2one);
-    TS_ASSERT_EQUALS(localShort.length(), 2);
-    TS_ASSERT_EQUALS( localShort.title(), "" );
-    TS_ASSERT( localShort.unit().get() );
-    for (int i=0; i<2; ++i)
-    {
-      TS_ASSERT_EQUALS( localShort(i), static_cast<double>(i+5) );
-    }
-    
-    delete one2one;
-  }
-
-  void testCopyConstructor()
-  {
-    SpectraAxisTester axistester1;
-    axistester1.title() = "tester1";
-    axistester1.setValue(0,5);
-    
-    SpectraAxisTester copiedAxis1 = axistester1;
-    TS_ASSERT_EQUALS( copiedAxis1.title(), "tester1" );
-    TS_ASSERT( copiedAxis1.isSpectra() );
-    TS_ASSERT_EQUALS( copiedAxis1(0), 5 );
-    TS_ASSERT_THROWS( copiedAxis1(1), Exception::IndexError );
-  }
-  
   void testClone()
   {
-    Axis* newSpecAxis = spectraAxis->clone();
+    Axis* newSpecAxis = spectraAxis->clone(ws);
     TS_ASSERT_DIFFERS( newSpecAxis, spectraAxis );
     delete newSpecAxis;
   }
   
   void testCloneDifferentLength()
   {
-    Axis* newSpecAxis = spectraAxis->clone(2);
+    Axis* newSpecAxis = spectraAxis->clone(2,ws);
     TS_ASSERT_DIFFERS( newSpecAxis, spectraAxis );
     TS_ASSERT( newSpecAxis->isSpectra() );
     TS_ASSERT_EQUALS( newSpecAxis->title(), "A spectra axis" );
     TS_ASSERT_EQUALS( newSpecAxis->unit()->unitID(), "Empty" );
-    TS_ASSERT_EQUALS( newSpecAxis->length(), 2 );
-    TS_ASSERT_EQUALS( (*newSpecAxis)(1), 0.0 );
+    // Although the 'different length' constructor is still there (for now) it has no effect.
+    TS_ASSERT_EQUALS( newSpecAxis->length(), 5 );
+    TS_ASSERT_EQUALS( (*newSpecAxis)(1), 2.0 );
     delete newSpecAxis;
   }
 
@@ -183,6 +125,7 @@ public:
   }
 
 private:
+  WorkspaceTester *ws;
   Axis *spectraAxis;
 };
 

@@ -876,7 +876,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
     g_log.information() << "Axis 0 set to unitless quantity \"" << unit1 << "\"\n";
   }
 
-  // Setting a unit onto a SpectraAxis makes no sense.
+  // Setting a unit onto a TextAxis makes no sense.
   if ( unit2 == "TextAxis" )
   {
     Mantid::API::TextAxis* newAxis = new Mantid::API::TextAxis(nspectra);
@@ -1020,7 +1020,6 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
 
   //Now build the spectra list
   int *spectra_list = new int[ndets];
-  API::Axis *axis1 = local_workspace->getAxis(1);
   int index=0;
 
   for(int i = 1; i <= nspectra; ++i)
@@ -1034,11 +1033,11 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
       {
         if( m_axis1vals.empty() )
         {
-          axis1->setValue(index, spectrum);
+          local_workspace->getSpectrum(index)->setSpectrumNo(spectrum);
         }
         else
         {
-          axis1->setValue(index, m_axis1vals[i-1]);
+          local_workspace->getSpectrum(index)->setSpectrumNo(static_cast<specid_t>(m_axis1vals[i-1]));
         }
         ++index;
       }

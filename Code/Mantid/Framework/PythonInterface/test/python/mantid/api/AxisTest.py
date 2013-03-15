@@ -1,6 +1,6 @@
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import NumericAxis, SpectraAxis, TextAxis
+from mantid.api import NumericAxis, TextAxis
 import numpy as np
 
 class AxisTest(unittest.TestCase):
@@ -14,7 +14,6 @@ class AxisTest(unittest.TestCase):
 
     def test_constructor_methods_return_the_correct_type(self):
         self.assertTrue(isinstance(NumericAxis.create(2),NumericAxis))
-        self.assertTrue(isinstance(SpectraAxis.create(2),SpectraAxis))
         self.assertTrue(isinstance(TextAxis.create(2),TextAxis))
   
     def test_axis_meta_data(self):

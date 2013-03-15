@@ -15,7 +15,9 @@ using namespace Geometry;
 ObjComponentActor::ObjComponentActor(const InstrumentActor& instrActor,Mantid::Geometry::ComponentID compID)
   : ComponentActor(instrActor,compID)
 {
+  // set the displayed colour
   setColors();
+  // register the component with InstrumentActor and set the pick colour
   IDetector_const_sptr det = getDetector();
   if (det)
   {
@@ -24,7 +26,9 @@ ObjComponentActor::ObjComponentActor(const InstrumentActor& instrActor,Mantid::G
   }
   else
   {
+    // default pick colour invisible to picking tools
     m_pickColor = GLColor();
+    // by default non-
   }
 }
 
@@ -53,6 +57,9 @@ void ObjComponentActor::draw(bool picking)const
   OpenGLError::check("ObjComponentActor::draw()");
 }
 
+/**
+ * Set displayed component colour. If it's a detector the colour maps to the integrated counts in it.
+ */
 void ObjComponentActor::setColors()
 {
   IDetector_const_sptr det = getDetector();

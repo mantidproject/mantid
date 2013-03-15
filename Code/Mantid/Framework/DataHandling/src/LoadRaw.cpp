@@ -367,7 +367,7 @@ namespace Mantid
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
 
-      localWorkspace->getAxis(1)->setValue(hist, i);
+      localWorkspace->getSpectrum(hist)->setSpectrumNo(i);
       // NOTE: Raw numbers go straight into the workspace
       //     - no account taken of bin widths/units etc.
     }

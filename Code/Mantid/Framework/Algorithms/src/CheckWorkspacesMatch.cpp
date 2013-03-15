@@ -556,7 +556,8 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
     }
     
     // Use Axis's equality operator to check length and values
-    if ( ! ax1->operator==(*ax2) )
+    // Don't check spectra axis as that just takes it values from the ISpectrum (see checkSpectraMap)
+    if ( ! ax1->isSpectra() && ! ax1->operator==(*ax2) )
     {
       result = axis_name + " values mismatch";
       return false;

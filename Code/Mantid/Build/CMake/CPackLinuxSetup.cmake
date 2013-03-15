@@ -45,7 +45,7 @@ if ( ${UNIX_DIST} MATCHES "Ubuntu" )
 endif ( ${UNIX_DIST} MATCHES "Ubuntu" )
 
 #RedHatEnterpriseClient RedHatEnterpriseWorkstation
-if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora")
+if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora" OR ${UNIX_DIST} MATCHES "SUSE LINUX" )
   find_program ( RPMBUILD_CMD rpmbuild )
   if ( RPMBUILD_CMD )
     set ( CPACK_GENERATOR "RPM" )
@@ -61,6 +61,10 @@ if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora")
       set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc15" )
     elseif ( ${UNIX_CODENAME} MATCHES "Verne" )
       set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc16" )
+    elseif ( ${UNIX_CODENAME} MATCHES "BeefyMiracle" )
+      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc17" )
+    elseif ( ${UNIX_CODENAME} MATCHES "SphericalCow" )
+      set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.fc18" )
     endif ( ${UNIX_CODENAME} MATCHES "Tikanga" )
     
     # If CPACK_SET_DESTDIR is ON then the Prefix doesn't get put in the spec file
@@ -73,4 +77,5 @@ if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora")
     set ( CPACK_PACKAGE_FILE_NAME
       "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
   endif ( RPMBUILD_CMD)
-endif ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora")
+endif ( ${UNIX_DIST} MATCHES "RedHatEnterprise" OR ${UNIX_DIST} MATCHES "Fedora" OR ${UNIX_DIST} MATCHES "SUSE LINUX" )
+

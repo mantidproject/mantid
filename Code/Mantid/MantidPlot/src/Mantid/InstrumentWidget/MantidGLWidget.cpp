@@ -32,7 +32,7 @@ const Qt::CursorShape cursorShape = Qt::ArrowCursor;
 MantidGLWidget::MantidGLWidget(QWidget* parent):
   QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel),parent),
   //m_polygonMode(SOLID),
-  m_lightingState(0),
+  //m_lightingState(0),
   m_isKeyPressed(false),
   m_firstFrame(true)
 {
@@ -277,16 +277,14 @@ void MantidGLWidget::resetWidget()
 }
 
 /**
-  * Enables / disables lighting
+  * Enables / disables lighting on the surfaces that support it.
   * @param on :: Set true to turn lighting on or false to turn it off.
   */
 void MantidGLWidget::enableLighting(bool on)
 {
-  auto surface3D = boost::dynamic_pointer_cast<Projection3D>(m_surface);
-
-  if (surface3D)
+  if ( m_surface )
   {
-    surface3D->enableLighting( on );
+    m_surface->enableLighting( on );
     updateView();
   }
 }

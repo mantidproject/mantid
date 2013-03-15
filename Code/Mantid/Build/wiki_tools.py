@@ -15,6 +15,12 @@ mantid_debug = False
 python_d_exe = None
 # no version identier
 noversion = -1
+# Direction
+InputDirection = "Input"
+OutputDirection = "Output"
+InOutDirection = "InOut"
+NoDirection = "None"
+direction_string = [InputDirection, OutputDirection, InOutDirection, NoDirection]
 
 # Holds on to location of sources
 file_search_done=False
@@ -105,6 +111,61 @@ def get_wiki_description(algo, version):
             n += 1
         print "Getting algorithm description from source."
         return desc
+
+#======================================================================
+def create_function_signature(alg, algo_name):
+    """
+    create the function signature for the algorithm.
+    """
+    from mantid.simpleapi import _get_function_spec
+    import mantid.simpleapi
+    _alg = getattr(mantid.simpleapi, algo_name)
+    prototype =  algo_name + _get_function_spec(_alg)
+    
+    # Replace every nth column with a newline.
+    nth = 4
+    commacount = 0
+    prototype_reformated = ""
+    for char in prototype:
+        if char == ',':
+            commacount += 1
+            if (commacount % nth == 0):
+                prototype_reformated += ",\n  "
+            else:
+                prototype_reformated += char
+        else: 
+           prototype_reformated += char
+           
+    # Strip out the version.
+    prototype_reformated = prototype_reformated.replace(",[Version]", "")
+    
+    # Add the output properties
+    props = alg.getProperties()
+    allreturns = []
+    workspacereturn = None
+    # Loop through all the properties looking for output properties
+    for prop in props:
+        if (direction_string[prop.direction] == OutputDirection):
+            allreturns.append(prop.name)
+            # Cache the last workspace property seen.
+            if isinstance(prop, IWorkspaceProperty): 
+                workspacereturn = prop.name
+                
+    lhs = ""
+    comments = ""
+    if not allreturns:
+        pass
+    elif (len(allreturns) == 1) and (workspacereturn is not None): 
+        lhs =   workspacereturn + " = "
+    else :
+        lhs = "result = "
+        comments = "\n "
+        comments += "\n # -------------------------------------------------- \n"
+        comments += " # result is a tuple containing\n"
+        comments += " # (" + ",".join(allreturns ) + ")\n"
+        comments += " # To access individual outputs use result[i], where i is the index of the required output.\n"
+        
+    return lhs + prototype_reformated + comments
 
 #======================================================================
 def intialize_files():
@@ -415,13 +476,19 @@ def make_wiki(algo_name, version, latest_version):
             raise RuntimeError("Error in processing output from subprocess. Most likely a bug in wiki_tools")
     return output
     
+#======================================================================
 def do_make_wiki(algo_name, version, latest_version):
     """ Return wiki text for a given algorithm
     @param algo_name :: name of the algorithm (bare)
     @param version :: version requested
     @param latest_version :: the latest algorithm 
     """ 
-    out = ""
+    
+    external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
+    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000;'></anchor>\n\n" % (external_image, external_image)  
+    
+    # Deprecated algorithms: Simply return the deprecation message
+    print "Creating... ", algo_name, version
     import mantid
     from mantid.api import AlgorithmManager,DeprecatedAlgorithmChecker
     # Deprecated algorithms: Simply returnd the deprecation message
@@ -435,10 +502,10 @@ def do_make_wiki(algo_name, version, latest_version):
         deprecstr = deprecstr.replace(" instead.", "]] instead.")
         out += deprecstr 
         out += "\n\n"
-
+    
     alg = AlgorithmManager.createUnmanaged(algo_name, version)
     alg.initialize()
-
+    
     if (latest_version > 1):
         if (version < latest_version):
             out += "Note: This page refers to version %d of %s. The latest version is %d - see [[%s v.%d]].\n\n" % (version, algo_name, latest_version, algo_name, latest_version)
@@ -455,6 +522,10 @@ def do_make_wiki(algo_name, version, latest_version):
     
     out += "== Summary ==\n\n"
     out += alg.getWikiSummary().replace("\n", " ") + "\n\n"
+    
+    out += "\n\n== Usage ==\n\n"
+    out += " " + create_function_signature(alg, algo_name) + "\n\n" 
+    out += "<br clear=all>\n\n" 
     out += "== Properties ==\n\n"
     
     out += """{| border="1" cellpadding="5" cellspacing="0" 
@@ -513,7 +584,7 @@ def do_make_wiki(algo_name, version, latest_version):
         out +=  "{{AlgorithmLinks|%s}}\n" % (algo_name)
 
     return out
-    
+
 #======================================================================
 def make_property_table_line(propnum, p):
     """ Make one line of the property table
@@ -523,7 +594,7 @@ def make_property_table_line(propnum, p):
         p :: Property object
     Returns:
         string to add to the wiki
-    """
+    """    
     from mantid.api import IWorkspaceProperty
     
     out = ""
@@ -531,12 +602,7 @@ def make_property_table_line(propnum, p):
     out += "|" + str(propnum) + "\n"
     # Name of the property
     out += "|" + p.name + "\n"
-    # Direction
-    InputDirection = "Intput"
-    OutputDirection = "Output"
-    InOutDirection = "InOut"
-    NoDirection = "None"
-    direction_string = [InputDirection, OutputDirection, InOutDirection, NoDirection]
+
     out += "|" + direction_string[p.direction] + "\n"
     # Type (as string) wrap an IWorkspaceProperty in a link.
     if isinstance(p, IWorkspaceProperty): 
@@ -557,6 +623,7 @@ def make_property_table_line(propnum, p):
     # End of table line
     out += "|-\n"
     return out
+    
 
 #======================================================================
 def make_group_header_line(group):

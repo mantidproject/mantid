@@ -16,12 +16,14 @@ import platform
 reporter = WikiReporter()
 
 #======================================================================
-def confirm(prompt=None, resp=False):
+def confirm(prompt=None, resp=False, continueconfirm=False):
     """prompts for yes or no response from the user. Returns True for yes and
     False for no.
 
     'resp' should be set to the default value assumed by the caller when
     user simply types ENTER.
+    
+    if 'continueconfirm', then skip the confirmation, using No (false) as the choice.
 
     >>> confirm(prompt='Create Directory?', resp=True)
     Create Directory? [y]|n: 
@@ -34,6 +36,11 @@ def confirm(prompt=None, resp=False):
     True
 
     """
+    
+    # Early exit. 
+    if continueconfirm:
+        print 'Skip confirmation, changes have not been accepted.'
+        return False
     
     if prompt is None:
         prompt = 'Confirm'
@@ -84,9 +91,13 @@ def last_page_editor(page):
 def wiki_maker_page(page):
     """
     returns True if the wikimaker was the last editor.
+    determines if there is a bot comment, which implies that the wikimaker was used to create the page last.
     """
-    return ("WikiMaker" == last_page_editor(page))
-    
+    #Get the last editor of the page.
+    revisions = page.revisions()
+    for rev in revisions: 
+        return re.search("^Bot", rev['comment'])
+
 #======================================================================
 def do_algorithm(args, algo, version):
     """ Do the wiki page
@@ -139,24 +150,26 @@ def do_algorithm(args, algo, version):
         print
         
         wiki_maker_edited_last = wiki_maker_page(page)
-        
+        last_modifier = last_page_editor(page);
         if not wiki_maker_edited_last:
-            print "The last editor was NOT the WIKIMAKER"
-            last_modifier = last_page_editor(page);
-            print "The last page editor was ", last_modifier
+            print "The last edit was manual. Last edit NOT done by WIKIMAKER script."
             if not last_modifier == None:
                 # Report a failure test case
                 reporter.addFailureTestCase(algo, version, last_modifier, ''.join(diff_list))
+        else:
+            print "The last edit was automatic via a script. Last edit was done by WIKIMAKER script."
+        print "Last change by ", last_modifier
         
         if args.dryrun:
             print "Dry run of saving page to http://www.mantidproject.org/%s" % wiki_page_name
-        elif wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True):
+        elif wiki_maker_edited_last or args.force or confirm("Do you want to replace the website wiki page?", True, args.continueconfirm):
             print "Saving page to http://www.mantidproject.org/%s" % wiki_page_name
             page.save(new_contents, summary = 'Bot: replaced contents using the wiki_maker.py script.' )
             
     saved_text = open(wiki_page_name+'.txt', 'w')
     saved_text.write(new_contents)
     saved_text.close()
+    
     
 #======================================================================
 if __name__ == "__main__":
@@ -195,16 +208,19 @@ if __name__ == "__main__":
                         help="Force overwriting the wiki page on the website if different (don't ask the user)")
 
     parser.add_option('--alg-version', dest='algversion', default=noversion, 
-                        help='Algorithm version to create the wiki for.')
+                        help='Algorithm version to create the wiki for. Latest version if absent.')
     
     parser.add_option('--report', dest='wikimakerreport', default=False, action='store_const', const=True,
                         help="Record authors and corresponding algorithm wiki-pages that have not been generated with the wiki-maker")
     
     parser.add_option('--cache-config', dest='cacheconfig', default=False, action='store_const', const=True,
-                        help="If true, the creditials of the executor will be cached for the next run.")
+                        help="If set, the creditials of the executor will be cached for the next run.")
     
     parser.add_option('--dry-run', dest='dryrun', default=False, action='store_const', const=True,
-                        help="If false, then the utility will work exactly the same, but no changes will actually be pushed to the wiki.")
+                        help="If set, then the utility will work exactly the same, but no changes will actually be pushed to the wiki.")
+    
+    parser.add_option('--continue-confirm', dest='continueconfirm', default=False, action='store_const', const=True,
+                        help="If set, then any user-required confirmation will be skipped, without applying the change.")
     
 
     (args, algos) = parser.parse_args()

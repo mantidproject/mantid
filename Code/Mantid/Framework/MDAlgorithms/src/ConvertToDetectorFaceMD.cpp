@@ -284,7 +284,7 @@ namespace MDAlgorithms
     IMDEventWorkspace_sptr outWS = MDEventFactory::CreateMDWorkspace(nd, "MDEvent");
     outWS->initGeometry(dims);
     outWS->initialize();
-    this->setBoxController(outWS->getBoxController());
+    this->setBoxController(outWS->getBoxController(), mws->getInstrument());
     outWS->splitBox();
 
     MDEventWorkspace3::sptr outWS3 = boost::dynamic_pointer_cast<MDEventWorkspace3>(outWS);

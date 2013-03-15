@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/ISpectraDetectorMap.h"
@@ -16,82 +17,42 @@ namespace API
 
 using std::size_t;
 
-/**
- * Constructor taking a length and optional flag for initialization
- * @param length :: The length of the axis
- * @param initWithDefaults :: If true the axis values will be initialized 
- * with values from 1->length
+/** Virtual constructor
+ *  @param parentWorkspace The workspace to which this axis belongs
  */
-SpectraAxis::SpectraAxis(const std::size_t& length, const bool initWithDefaults ): Axis()
+SpectraAxis::SpectraAxis(const MatrixWorkspace* const parentWorkspace)
+  : Axis(), m_parentWS(parentWorkspace)
 {
-  m_values.resize(length);
-  if( initWithDefaults )
-  {
-    // For small axes there is no point in the additional thread overhead
-    PARALLEL_FOR_IF((length > 1000)) 
-    for(specid_t i = 0; i < specid_t(length); ++i)
-    {
-      m_values[i] = i + 1;
-    }
-  }
-}
-
-/**
- * Constructor taking a reference to an ISpectraDetectorMap implementation. The
- * axis is initialized to first length unique spectra values provided by the map
- * @param length :: The length of the axis
- * @param spectramap :: A reference to an ISpectraDetectorMap implementation.
- */
-SpectraAxis::SpectraAxis(const std::size_t length, const Geometry::ISpectraDetectorMap & spectramap) :
-  Axis()
-{
-  m_values.resize(length);
-  if( length == 0 ) return;
-  Geometry::ISpectraDetectorMap::const_iterator itr = spectramap.cbegin();
-  Geometry::ISpectraDetectorMap::const_iterator iend = spectramap.cend();
-  if( itr == iend )
-  {
-      m_values.resize(0);
-      return;
-  }
-  // it->first = the spectrum number
-  specid_t previous = itr->first;
-  m_values[0] = previous;
-  ++itr;
-  size_t index(1);
-  for(; itr != iend; ++itr)
-  {
-    if( index == length ) break;
-    const specid_t current = itr->first;
-    if( current != previous )
-    {
-      // the spectrum number (in the iterator) just changed.
-      // save this new spectrum number in the SpectraAxis
-      m_values[index] = current;
-      previous = current;
-      // go to the next workspace index
-      ++index;
-    }
-  }
 }
 
 /** Virtual constructor
- *  @param parentWorkspace :: not used in this implementation
+ *  @param parentWorkspace The workspace to which the cloned axis belongs
  *  @return A pointer to a copy of the SpectraAxis on which the method is called
  */
 Axis* SpectraAxis::clone(const MatrixWorkspace* const parentWorkspace)
 {
-  (void) parentWorkspace; //Avoid compiler warning
-  return new SpectraAxis(*this);
+  SpectraAxis * newAxis = new SpectraAxis(parentWorkspace);
+  // A couple of base class members need copying over manually
+  newAxis->title() = this->title();
+  newAxis->unit() = this->unit();
+  return newAxis;
 }
 
+/** Virtual constructor
+ *  @param length Not used in this implementation
+ *  @param parentWorkspace The workspace to which the cloned axis belongs
+ *  @return A pointer to a copy of the SpectraAxis on which the method is called
+ */
 Axis* SpectraAxis::clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace)
 {
-  UNUSED_ARG(parentWorkspace)
-    SpectraAxis * newAxis = new SpectraAxis(*this);
-  newAxis->m_values.clear();
-  newAxis->m_values.resize(length);
-  return newAxis;
+  UNUSED_ARG(length)
+  // In this implementation, there's no difference between the clone methods - call the other one
+  return clone(parentWorkspace);
+}
+
+std::size_t SpectraAxis::length() const
+{
+  return m_parentWS->getNumberHistograms();
 }
 
 /** Get the axis value at the position given
@@ -108,7 +69,7 @@ double SpectraAxis::operator()(const std::size_t& index, const std::size_t& vert
     throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
   }
 
-  return static_cast<double>(m_values[index]);
+  return static_cast<double>(m_parentWS->getSpectrum(index)->getSpectrumNo());
 }
 
 /** Sets the axis value at a given position
@@ -123,23 +84,23 @@ void SpectraAxis::setValue(const std::size_t& index, const double& value)
     throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
   }
 
-  m_values[index] = static_cast<specid_t>(value);
+  // TODO: Remove this evilness, preferably by removing the setValue method entirely
+  const_cast<MatrixWorkspace*>(m_parentWS)->getSpectrum(index)->setSpectrumNo(static_cast<specid_t>(value));
 }
 
 /** Returns the spectrum number at the position given (Spectra axis only)
  *  @param  index The position for which the value is required
  *  @return The spectrum number as an int
- *  @throw  domain_error If this method is called on a numeric axis
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-const specid_t& SpectraAxis::spectraNo(const std::size_t& index) const
+specid_t SpectraAxis::spectraNo(const std::size_t& index) const
 {
   if (index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
   }
 
-  return m_values[index];
+  return m_parentWS->getSpectrum(index)->getSpectrumNo();
 }
 
 /** Returns a map where index is the key and spectra is the value
@@ -148,14 +109,14 @@ const specid_t& SpectraAxis::spectraNo(const std::size_t& index) const
  */
 void SpectraAxis::getIndexSpectraMap(index2spec_map& map)const
 {
-  size_t nel=m_values.size();
+  size_t nel = length();
 
   if (nel==0)
     throw std::runtime_error("getSpectraIndexMap(),  zero elements");
   map.clear();
   for (size_t i=0; i < nel; ++i )
   {
-    map.insert(std::make_pair(i, m_values[i]));
+    map.insert(std::make_pair(i, m_parentWS->getSpectrum(i)->getSpectrumNo()));
   }
 }
 
@@ -166,14 +127,14 @@ void SpectraAxis::getIndexSpectraMap(index2spec_map& map)const
  */
 void SpectraAxis::getSpectraIndexMap(spec2index_map& map)const
 {
-  size_t nel=m_values.size();
+  size_t nel = length();
   
   if (nel==0)
     throw std::runtime_error("getSpectraIndexMap(),  zero elements");
   map.clear();
   for (size_t i=0; i < nel; ++i )
   {
-    map.insert(std::make_pair(m_values[i],i));
+    map.insert(std::make_pair(m_parentWS->getSpectrum(i)->getSpectrumNo(),i));
   }
 }
 
@@ -192,7 +153,12 @@ bool SpectraAxis::operator==(const Axis& axis2) const
   {
     return false;
   }
-  return std::equal(m_values.begin(),m_values.end(),spec2->m_values.begin());
+  for ( size_t i = 0; i < length(); ++i )
+  {
+    if ( spectraNo(i) != axis2.spectraNo(i) ) return false;
+  }
+  // All good if we get to here
+  return true;
 }
 
 /** Returns a text label which shows the value at index and identifies the
@@ -203,6 +169,18 @@ bool SpectraAxis::operator==(const Axis& axis2) const
 std::string SpectraAxis::label(const std::size_t& index)const
 {
   return "sp-" + boost::lexical_cast<std::string>(spectraNo(index));
+}
+
+/// returns min value defined on axis
+double SpectraAxis::getMin() const
+{
+  return m_parentWS->getSpectrum(0)->getSpectrumNo();
+}
+
+ /// returns max value defined on axis
+double SpectraAxis::getMax() const
+{
+  return m_parentWS->getSpectrum(length()-1)->getSpectrumNo();
 }
 
 } // namespace API

@@ -8,6 +8,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Exception.h"
 #include <cfloat>
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -66,7 +67,8 @@ public:
   
   void testClone()
   {
-    Axis* newNumAxis = numericAxis->clone();
+    WorkspaceTester ws; // Fake workspace to pass to clone
+    Axis* newNumAxis = numericAxis->clone(&ws);
     TS_ASSERT_DIFFERS( newNumAxis, numericAxis );
     delete newNumAxis;
   }
@@ -74,7 +76,8 @@ public:
   void testCloneDifferentLength()
   {
     numericAxis->setValue(0,9.9);
-    Axis* newNumAxis = numericAxis->clone(1);
+    WorkspaceTester ws; // Fake workspace to pass to clone
+    Axis* newNumAxis = numericAxis->clone(1,&ws);
     TS_ASSERT_DIFFERS( newNumAxis, numericAxis );
     TS_ASSERT( newNumAxis->isNumeric() );
     TS_ASSERT_EQUALS( newNumAxis->title(), "A numeric axis" );

@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>MantidAbout</class>
- <widget class="QDialog" name="MantidAbout" >
-  <property name="geometry" >
+ <widget class="QDialog" name="MantidAbout">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,151 +10,96 @@
     <height>477</height>
    </rect>
   </property>
-  <property name="font" >
+  <property name="font">
    <font>
     <weight>75</weight>
     <bold>true</bold>
    </font>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>MantidPlot-About</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" >
-   <property name="topMargin" >
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="topMargin">
     <number>2</number>
    </property>
-   <property name="bottomMargin" >
+   <property name="bottomMargin">
     <number>2</number>
    </property>
-   <item row="0" column="0" >
-    <layout class="QGridLayout" name="gridLayout_3" >
-     <item row="1" column="0" >
-      <spacer name="horizontalSpacer_2" >
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0" >
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="1" column="2" >
-      <spacer name="horizontalSpacer_4" >
-       <property name="orientation" >
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0" >
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="1" column="1" >
-      <widget class="QLabel" name="mantidPlotLogo" >
-       <property name="minimumSize" >
-        <size>
-         <width>223</width>
-         <height>100</height>
-        </size>
-       </property>
-       <property name="maximumSize" >
-        <size>
-         <width>184</width>
-         <height>100</height>
-        </size>
-       </property>
-       <property name="text" >
-        <string/>
-       </property>
-       <property name="pixmap" >
-        <pixmap resource="../../../Images/images.qrc" >:/Mantid_Logo_Transparent_Cropped.png</pixmap>
-       </property>
-       <property name="scaledContents" >
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="4" column="0" >
-    <widget class="QDialogButtonBox" name="buttonBox" >
-     <property name="orientation" >
+   <item row="4" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <property name="standardButtons" >
+     <property name="standardButtons">
       <set>QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
-   <item row="1" column="0" >
-    <widget class="QGroupBox" name="groupBox" >
-     <property name="title" >
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
       <string>Mantid Framework</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout" >
-      <property name="margin" >
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="margin">
        <number>2</number>
       </property>
       <item>
-       <layout class="QFormLayout" name="gridLayout_5" >
-        <property name="fieldGrowthPolicy" >
+       <layout class="QFormLayout" name="gridLayout_5">
+        <property name="fieldGrowthPolicy">
          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
         </property>
-        <item row="1" column="0" >
-         <widget class="QLabel" name="release_datelabel" >
-          <property name="font" >
+        <item row="1" column="0">
+         <widget class="QLabel" name="release_datelabel">
+          <property name="font">
            <font>
             <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
-          <property name="text" >
+          <property name="text">
            <string>Release Date:</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1" >
-         <widget class="QLabel" name="release_datevalue" >
-          <property name="text" >
+        <item row="1" column="1">
+         <widget class="QLabel" name="release_datevalue">
+          <property name="text">
            <string>TextLabel</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="0" >
-         <widget class="QLabel" name="release_versionlabel" >
-          <property name="font" >
+        <item row="2" column="0">
+         <widget class="QLabel" name="release_versionlabel">
+          <property name="font">
            <font>
             <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
-          <property name="text" >
+          <property name="text">
            <string>Version:</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1" >
-         <widget class="QLabel" name="release_versionvalue" >
-          <property name="text" >
+        <item row="2" column="1">
+         <widget class="QLabel" name="release_versionvalue">
+          <property name="text">
            <string>TextLabel</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="0" >
-         <widget class="QLabel" name="mantidlabel" >
-          <property name="text" >
+        <item row="3" column="0">
+         <widget class="QLabel" name="mantidlabel">
+          <property name="text">
            <string>Homepage</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="1" >
-         <widget class="QLabel" name="mantidurl" >
-          <property name="text" >
+        <item row="3" column="1">
+         <widget class="QLabel" name="mantidurl">
+          <property name="text">
            <string>TextLabel</string>
           </property>
          </widget>
@@ -163,37 +109,37 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0" >
-    <widget class="QGroupBox" name="groupBox_2" >
-     <property name="title" >
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
       <string>MantidPlot</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2" >
-      <property name="margin" >
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="margin">
        <number>2</number>
       </property>
       <item>
-       <layout class="QFormLayout" name="gridLayout_4" >
-        <property name="fieldGrowthPolicy" >
+       <layout class="QFormLayout" name="gridLayout_4">
+        <property name="fieldGrowthPolicy">
          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
         </property>
-        <item row="1" column="0" >
-         <widget class="QLabel" name="builitusing_label" >
-          <property name="text" >
+        <item row="1" column="0">
+         <widget class="QLabel" name="builitusing_label">
+          <property name="text">
            <string>Extended from</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1" >
-         <widget class="QLabel" name="builtusing_labelvalue" >
-          <property name="font" >
+        <item row="1" column="1">
+         <widget class="QLabel" name="builtusing_labelvalue">
+          <property name="font">
            <font>
             <pointsize>8</pointsize>
             <weight>50</weight>
             <bold>false</bold>
            </font>
           </property>
-          <property name="text" >
+          <property name="text">
            <string>TextLabel</string>
           </property>
          </widget>
@@ -203,73 +149,73 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="0" >
-    <widget class="QGroupBox" name="groupBox_3" >
-     <property name="title" >
+   <item row="3" column="0">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
       <string>Contributors</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3" >
-      <property name="margin" >
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <property name="margin">
        <number>2</number>
       </property>
       <item>
-       <layout class="QGridLayout" name="gridLayout_2" >
-        <item row="0" column="1" >
-         <widget class="QLabel" name="label" >
-          <property name="minimumSize" >
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="1">
+         <widget class="QLabel" name="label">
+          <property name="minimumSize">
            <size>
             <width>0</width>
             <height>0</height>
            </size>
           </property>
-          <property name="maximumSize" >
+          <property name="maximumSize">
            <size>
             <width>1000</width>
             <height>1000</height>
            </size>
           </property>
-          <property name="text" >
+          <property name="text">
            <string/>
           </property>
-          <property name="pixmap" >
+          <property name="pixmap">
            <pixmap>:/Logos/Images/ISIS Logo.gif</pixmap>
           </property>
-          <property name="scaledContents" >
+          <property name="scaledContents">
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="1" column="3" >
-         <widget class="QLabel" name="tessellaLogo" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+        <item row="1" column="3">
+         <widget class="QLabel" name="tessellaLogo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
             <horstretch>0</horstretch>
             <verstretch>100</verstretch>
            </sizepolicy>
           </property>
-          <property name="maximumSize" >
+          <property name="maximumSize">
            <size>
             <width>187</width>
             <height>75</height>
            </size>
           </property>
-          <property name="text" >
+          <property name="text">
            <string/>
           </property>
-          <property name="pixmap" >
-           <pixmap resource="../../../Images/images.qrc" >:/Tessella_Logo_Transparent.gif</pixmap>
+          <property name="pixmap">
+           <pixmap resource="../../../Images/images.qrc">:/Tessella_Logo_Transparent.gif</pixmap>
           </property>
-          <property name="scaledContents" >
+          <property name="scaledContents">
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="1" column="2" >
-         <spacer name="horizontalSpacer" >
-          <property name="orientation" >
+        <item row="1" column="2">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0" >
+          <property name="sizeHint" stdset="0">
            <size>
             <width>40</width>
             <height>20</height>
@@ -277,74 +223,74 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="1" >
-         <widget class="QLabel" name="isislogo" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+        <item row="1" column="1">
+         <widget class="QLabel" name="isislogo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>100</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
+          <property name="minimumSize">
            <size>
             <width>0</width>
             <height>0</height>
            </size>
           </property>
-          <property name="maximumSize" >
+          <property name="maximumSize">
            <size>
             <width>169</width>
             <height>75</height>
            </size>
           </property>
-          <property name="text" >
+          <property name="text">
            <string/>
           </property>
-          <property name="pixmap" >
-           <pixmap resource="../../../Images/images.qrc" >:/ISIS_Logo_Transparent.gif</pixmap>
+          <property name="pixmap">
+           <pixmap resource="../../../Images/images.qrc">:/ISIS_Logo_Transparent.gif</pixmap>
           </property>
-          <property name="scaledContents" >
+          <property name="scaledContents">
            <bool>true</bool>
           </property>
-          <property name="alignment" >
+          <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
-          <property name="wordWrap" >
+          <property name="wordWrap">
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="2" column="1" >
-         <widget class="QLabel" name="snsLogo" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+        <item row="2" column="1">
+         <widget class="QLabel" name="snsLogo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="maximumSize" >
+          <property name="maximumSize">
            <size>
             <width>110</width>
             <height>75</height>
            </size>
           </property>
-          <property name="text" >
+          <property name="text">
            <string/>
           </property>
-          <property name="pixmap" >
-           <pixmap resource="../../../Images/images.qrc" >:/SNS_logo_trans_back.gif</pixmap>
+          <property name="pixmap">
+           <pixmap resource="../../../Images/images.qrc">:/SNS_logo_trans_back.gif</pixmap>
           </property>
-          <property name="scaledContents" >
+          <property name="scaledContents">
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="2" column="2" >
-         <spacer name="horizontalSpacer_3" >
-          <property name="orientation" >
+        <item row="2" column="2">
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0" >
+          <property name="sizeHint" stdset="0">
            <size>
             <width>40</width>
             <height>20</height>
@@ -352,12 +298,12 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="0" >
-         <spacer name="horizontalSpacer_5" >
-          <property name="orientation" >
+        <item row="1" column="0">
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0" >
+          <property name="sizeHint" stdset="0">
            <size>
             <width>40</width>
             <height>20</height>
@@ -365,12 +311,12 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="4" >
-         <spacer name="horizontalSpacer_6" >
-          <property name="orientation" >
+        <item row="1" column="4">
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0" >
+          <property name="sizeHint" stdset="0">
            <size>
             <width>40</width>
             <height>20</height>
@@ -378,12 +324,12 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="0" >
-         <spacer name="horizontalSpacer_7" >
-          <property name="orientation" >
+        <item row="2" column="0">
+         <spacer name="horizontalSpacer_7">
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0" >
+          <property name="sizeHint" stdset="0">
            <size>
             <width>40</width>
             <height>20</height>
@@ -391,12 +337,12 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="4" >
-         <spacer name="horizontalSpacer_8" >
-          <property name="orientation" >
+        <item row="2" column="4">
+         <spacer name="horizontalSpacer_8">
+          <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0" >
+          <property name="sizeHint" stdset="0">
            <size>
             <width>40</width>
             <height>20</height>
@@ -404,24 +350,24 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="3" >
-         <widget class="QLabel" name="hfirLogo" >
-          <property name="maximumSize" >
+        <item row="2" column="3">
+         <widget class="QLabel" name="hfirLogo">
+          <property name="maximumSize">
            <size>
             <width>169</width>
             <height>75</height>
            </size>
           </property>
-          <property name="text" >
+          <property name="text">
            <string/>
           </property>
-          <property name="pixmap" >
-           <pixmap resource="../../../Images/images.qrc" >:/HFIR_logo_small.png</pixmap>
+          <property name="pixmap">
+           <pixmap resource="../../../Images/images.qrc">:/HFIR_logo_small.png</pixmap>
           </property>
-          <property name="scaledContents" >
+          <property name="scaledContents">
            <bool>true</bool>
           </property>
-          <property name="alignment" >
+          <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
@@ -431,11 +377,67 @@
      </layout>
     </widget>
    </item>
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="1" column="0">
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="2">
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="mantidPlotLogo">
+       <property name="minimumSize">
+        <size>
+         <width>276</width>
+         <height>150</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>276</width>
+         <height>150</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../../../Images/images.qrc">:/Mantid_Logo_Transparent.png</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
   </layout>
  </widget>
  <resources>
-  <include location="../../../Images/images.qrc" />
-  <include location="../../../Images/images.qrc" />
+  <include location="../../../Images/images.qrc"/>
+  <include location="../../../Images/images.qrc"/>
+  <include location="../../../Images/images.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -444,11 +446,11 @@
    <receiver>MantidAbout</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>248</x>
      <y>254</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>157</x>
      <y>274</y>
     </hint>
@@ -460,11 +462,11 @@
    <receiver>MantidAbout</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>316</x>
      <y>260</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
     </hint>

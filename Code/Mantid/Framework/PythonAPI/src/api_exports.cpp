@@ -834,7 +834,6 @@ void export_dataitem()
       ;
     // Axis creation helpers
     def("createNumericAxis", & Mantid::PythonAPI::createNumericAxis, return_internal_reference<>());
-    def("createSpectraAxis", & Mantid::PythonAPI::createSpectraAxis, return_internal_reference<>());
     def("createTextAxis", & Mantid::PythonAPI::createTextAxis, return_internal_reference<>());
   }
   

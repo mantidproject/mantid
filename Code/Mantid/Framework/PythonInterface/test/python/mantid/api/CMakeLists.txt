@@ -20,6 +20,7 @@ set ( TEST_PY_FILES
   MDHistoWorkspaceTest.py
   MultipleExperimentInfos.py
   MultipleFilePropertyTest.py
+  ProgressTest.py
   PythonAlgorithmPropertiesTest.py
   PythonAlgorithmChildAlgCallTest.py
   PythonAlgorithmTraitsTest.py
