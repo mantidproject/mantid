@@ -141,9 +141,9 @@ namespace DataHandling
         	{
         		Atom myAtom = getAtom(atoms[i], aNumbers[i]);
         		Material *atom = new Material(atoms[i], myAtom.neutron, myAtom.number_density);
-        		g_log.notice() << " atom = "<< atoms[i]<< " aNumber = "<< aNumbers[i]<< " numberAtoms = "<< numberAtoms[i] << "\n";
-        		sigma_s +=  numberAtoms[i] * atom->totalScatterXSection(1.7982);
-        		sigma_atten +=  numberAtoms[i] * atom->absorbXSection(1.7982);
+        		g_log.notice() << " atom = "<< myAtom << "\n";
+        		sigma_s +=  static_cast<double>(numberAtoms[i]) * atom->totalScatterXSection(1.7982);
+        		sigma_atten +=  static_cast<double>(numberAtoms[i]) * atom->absorbXSection(1.7982);
         	}
 			rho = zParameter / unitCellVolume;
 			NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
