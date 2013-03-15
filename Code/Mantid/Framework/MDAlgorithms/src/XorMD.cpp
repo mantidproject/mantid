@@ -4,14 +4,14 @@ Perform the Xor (exclusive-or) boolean operation on two MDHistoWorkspaces.
 The xor operation is performed element-by-element.
 A signal of 0.0 means "false" and any non-zero signal is "true".
 
-== Usage ==
-
+*WIKI*/
+/*WIKI_USAGE*
  C = A ^ B
  A ^= B
 
 See [[MDHistoWorkspace#Boolean_Operations|this page]] for examples on using boolean operations.
 
-*WIKI*/
+*WIKI_USAGE*/
 
 #include "MantidMDAlgorithms/XorMD.h"
 #include "MantidKernel/System.h"

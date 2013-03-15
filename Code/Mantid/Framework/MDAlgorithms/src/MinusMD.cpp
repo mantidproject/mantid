@@ -12,17 +12,15 @@ Subtract two [[MDHistoWorkspace]]'s or a MDHistoWorkspace and a scalar.
 ** The number of events in the output MDEventWorkspace is that of the LHS and RHS workspaces put together.
 * '''[[MDEventWorkspace]] - Scalar or MDHistoWorkspace'''
 ** This is not possible.
-
-== Usage ==
-
+*WIKI*/
+/*WIKI_USAGE*
  C = A - B
  C = A - 123.4
  A -= B
  A -= 123.4
 
 See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
-
-*WIKI*/
+*WIKI_USAGE*/
 
 #include "MantidMDAlgorithms/MinusMD.h"
 #include "MantidKernel/System.h"
