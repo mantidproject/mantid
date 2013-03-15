@@ -62,6 +62,7 @@ if __name__ == '__main__':
     def _ScopeInspector_GetFunctionAttributes(definitions):
         if type(definitions) != dict:
             return []
+        from mantid.simpleapi import _get_function_spec
         keywords = []
         for name,obj in definitions.iteritems():
             if name.startswith('_') : continue
