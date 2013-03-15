@@ -10,6 +10,7 @@ from reflectometer_l_interface_dev import REFLInterface
 from reflectometer_m_interface_dev import REFMInterface
 from reflectometer_sf_interface_dev import REFLSFInterface
 from dgs_interface_dev import DgsInterface
+from diffraction_interface_dev import DiffractionInterface
 
 INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface, 
                             "GPSANS": HFIRInterface},
@@ -23,7 +24,10 @@ INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface,
                             "REFL": REFLInterface,
                             "REFLSF": REFLSFInterface,
                             "REFM": REFMInterface,
-                            "SEQUOIA": DgsInterface,
+                            "SEQUOIA": DgsInterface,                            
+                            "PG3": DiffractionInterface,
+                            "NOM": DiffractionInterface,
+                            "VULCAN": DiffractionInterface,
                             "Example": ExampleInterface}
                   }               
 
