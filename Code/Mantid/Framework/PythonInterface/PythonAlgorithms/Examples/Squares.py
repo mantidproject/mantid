@@ -30,19 +30,25 @@ class Squares(PythonAlgorithm):
         if endrange <= 0:
             raise RuntimeError('No values to use!')
 
+        # Create standard 2D matrix-like workspace
         wspace = WorkspaceFactory.create("Workspace2D",NVectors=1,XLength=endrange,YLength=endrange)
+
+        # Setup progress reporting. start/end=fractions of whole progress to report over (nreports does not have to be exact)
+        prog_reporter = Progress(self,start=0.0,end=1.0,nreports=endrange+1) # extra call below when summing
+
         for i in range(1,endrange + 1):
             wspace.dataX(0)[i-1] = 1
             wspace.dataY(0)[i-1] = i*i
             wspace.dataE(0)[i-1] = i
+            prog_reporter.report("Setting %dth bin in workspace" % (i-1))
 
         self.setProperty("OutputWorkspace", wspace) # Stores the workspace as the given name
         if do_sum:
             sum = 0
+            prog_reporter.report("Summing bin values") # Message is left until cleared
             for i in range(1,endrange + 1):
                 sum += i*i
             self.log().notice('The sum of the squares of numbers up to ' + str(endrange) + ' is: ' + str(sum))
-
 
             filename = self.getProperty("OutputFile").value # convert to a string
             sumfile = open(filename,'w')
