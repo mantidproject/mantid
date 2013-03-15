@@ -27,7 +27,7 @@ def getBooleanElement(instrument_dom, keyname, default):
 
     return returnbool
 
-class VanadiumSetupScript(BaseScriptElement):
+class AdvancedSetupScript(BaseScriptElement):
     """ Run setup script for tab 'Run Setup'
     """
 
@@ -47,7 +47,7 @@ class VanadiumSetupScript(BaseScriptElement):
     def __init__(self, inst_name):
         """ Initialization
         """
-        super(VanadiumSetupScript, self).__init__()
+        super(AdvancedSetupScript, self).__init__()
         self.createParametersList()
 
         self.set_default_pars(inst_name)
@@ -122,7 +122,7 @@ class VanadiumSetupScript(BaseScriptElement):
         """
         pardict = self.buildParameterDict()
 
-        xml = "<VanadiumSetup>\n"
+        xml = "<AdvancedSetup>\n"
         for parname in self.parnamelist:
             value = pardict[parname]
             keyname = parname.lower()
@@ -132,7 +132,7 @@ class VanadiumSetupScript(BaseScriptElement):
                 value = '0'
             xml += " <%s>%s</%s>\n" % (keyname, str(value), keyname)
         # ENDFOR
-        xml += "</VanadiumSetup>\n"
+        xml += "</AdvancedSetup>\n"
 
         return xml
     
@@ -141,42 +141,42 @@ class VanadiumSetupScript(BaseScriptElement):
             @param xml_str: text to read the data from
         """       
         dom = xml.dom.minidom.parseString(xml_str)
-        element_list = dom.getElementsByTagName("VanadiumSetup")
+        element_list = dom.getElementsByTagName("AdvancedSetup")
         if len(element_list)>0:
             instrument_dom = element_list[0]
 
 
 
             tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "unwrapref", default=VanadiumSetupScript.unwrapref)
+                    "unwrapref", default=AdvancedSetupScript.unwrapref)
             try:
                 self.unwrapref = float(tempfloat)
             except ValueError:
                 self.unwrapref = ""
 
             tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "lowresref", default=VanadiumSetupScript.lowresref)
+                    "lowresref", default=AdvancedSetupScript.lowresref)
             try:
                 self.lowresref = float(tempfloat)
             except ValueError:
                 self.lowresref = ""
 
             tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "cropwavelengthmin", default=VanadiumSetupScript.cropwavelengthmin)
+                    "cropwavelengthmin", default=AdvancedSetupScript.cropwavelengthmin)
             try:
                 self.cropwavelengthmin = float(tempfloat)
             except ValueError:
                 self.cropwavelengthmin = ""
 
             tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "removepromptpulsewidth", default=VanadiumSetupScript.removepropmppulsewidth)
+                    "removepromptpulsewidth", default=AdvancedSetupScript.removepropmppulsewidth)
             try:
                 self.removepropmppulsewidth = float(tempfloat)
             except ValueError:
                 self.removepropmppulsewidth = ""
 
             tempint = BaseScriptElement.getStringElement(instrument_dom,
-                    "maxchunksize", default=VanadiumSetupScript.maxchunksize)
+                    "maxchunksize", default=AdvancedSetupScript.maxchunksize)
             try:
                 self.maxchunksize = int(tempint)
             except ValueError:
@@ -184,30 +184,30 @@ class VanadiumSetupScript(BaseScriptElement):
 
 
             self.filterbadpulses = getBooleanElement(instrument_dom, 
-                    "filterbadpulses", VanadiumSetupScript.filterbadpulses)
+                    "filterbadpulses", AdvancedSetupScript.filterbadpulses)
 
             self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,
-                    "pushdatapositive", default=VanadiumSetupScript.pushdatapositive)
+                    "pushdatapositive", default=AdvancedSetupScript.pushdatapositive)
 
             self.stripvanadiumpeaks = getBooleanElement(instrument_dom, 
-                    "stripvanadiumpeaks", VanadiumSetupScript.stripvanadiumpeaks)
+                    "stripvanadiumpeaks", AdvancedSetupScript.stripvanadiumpeaks)
 
             tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "vanadiumfwhm", default=VanadiumSetupScript.vanadiumfwhm)
+                    "vanadiumfwhm", default=AdvancedSetupScript.vanadiumfwhm)
             try:
                 self.vanadiumfwhm = float(tempfloat)
             except ValueError:
                 self.vanadiumfwhm = ""
 
             tempfloat = BaseScriptElement.getStringElement(instrument_dom,
-                    "vanadiumpeaktol", default=VanadiumSetupScript.vanadiumpeaktol)
+                    "vanadiumpeaktol", default=AdvancedSetupScript.vanadiumpeaktol)
             try:
                 self.vanadiumpeaktol = float(tempfloat)
             except ValueError:
                 self.vanadiumpeaktol = ""
 
             self.vanadiumsmoothparams = BaseScriptElement.getStringElement(instrument_dom,
-                "vanadiumsmoothparams", default=VanadiumSetupScript.vanadiumsmoothparams)
+                "vanadiumsmoothparams", default=AdvancedSetupScript.vanadiumsmoothparams)
 
             return
 
