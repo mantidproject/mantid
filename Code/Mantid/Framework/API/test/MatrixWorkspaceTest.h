@@ -107,7 +107,7 @@ public:
     testWS->initialize(nhist,1,1);
     for (size_t i=0; i<testWS->getNumberHistograms(); i++)
     {
-      TS_ASSERT_EQUALS(testWS->getSpectrum(i)->getSpectrumNo(), specid_t(i));
+      TS_ASSERT_EQUALS(testWS->getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
       TS_ASSERT(testWS->getSpectrum(i)->hasDetectorID(detid_t(i)));
     }
   }
@@ -117,10 +117,9 @@ public:
     boost::scoped_ptr<MatrixWorkspace> testWS(new WorkspaceTester);
     testWS->initialize(1,1,1);
     // Default one
-    TS_ASSERT_EQUALS(testWS->getSpectrum(0)->getSpectrumNo(), 0);
+    TS_ASSERT_EQUALS(testWS->getSpectrum(0)->getSpectrumNo(), 1);
 
     ISpectraDetectorMap * spectraMap = new OneToOneSpectraDetectorMap(1,10);
-    testWS->replaceAxis(1, new SpectraAxis(10, true));
     testWS->replaceSpectraMap(spectraMap);
     // Has it been replaced
     for (size_t i=0; i<testWS->getNumberHistograms(); i++)
@@ -135,7 +134,6 @@ public:
     boost::shared_ptr<MatrixWorkspace> parent(new WorkspaceTester);
     parent->initialize(1,1,1);
     ISpectraDetectorMap * spectraMap = new OneToOneSpectraDetectorMap(1,10);
-    parent->replaceAxis(1, new SpectraAxis(10, true));
     parent->replaceSpectraMap(spectraMap);
 
     MatrixWorkspace_sptr copied = WorkspaceFactory::Instance().create(parent,1,1,1);
@@ -174,7 +172,7 @@ public:
 
   void testReplaceAxis()
   {
-    Axis* ax = new SpectraAxis(1);
+    Axis* ax = new SpectraAxis(ws.get());
     TS_ASSERT_THROWS( ws->replaceAxis(2,ax), Exception::IndexError );
     TS_ASSERT_THROWS_NOTHING( ws->replaceAxis(0,ax) );
     TS_ASSERT( ws->getAxis(0)->isSpectra() );
@@ -591,7 +589,7 @@ public:
     std::vector<size_t> out;
     detid_t offset = -1234;
     TS_ASSERT_THROWS_NOTHING( ws->getSpectrumToWorkspaceIndexVector(out, offset) );
-    TS_ASSERT_EQUALS( offset, 0);
+    TS_ASSERT_EQUALS( offset, -1);
     TS_ASSERT_EQUALS( out.size(), 100);
     TS_ASSERT_EQUALS( out[0], 0);
     TS_ASSERT_EQUALS( out[1], 1);

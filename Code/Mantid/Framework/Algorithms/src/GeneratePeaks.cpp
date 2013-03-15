@@ -382,25 +382,15 @@ namespace Algorithms
     for (size_t ip = 0; ip < spectra.size(); ip ++)
       std::copy(xarray.begin(), xarray.end(), ws->dataX(ip).begin());
 
-    // 3. Link spectrum to workspace index
-    API::SpectraAxis * ax = dynamic_cast<API::SpectraAxis * >( ws->getAxis(1));
-    if (!ax)
-      throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
-
+    // 3. Set spectrum numbers
     std::map<specid_t, specid_t>::iterator spiter;
     for (spiter = mSpectrumMap.begin(); spiter != mSpectrumMap.end(); ++spiter)
     {
       specid_t specid = spiter->first;
       specid_t wsindex = spiter->second;
       g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , " << specid << std::endl;
-      ax->setValue(wsindex, specid);
+      ws->getSpectrum(wsindex)->setSpectrumNo(specid);
     }
-
-    // TODO Remove after test
-    spec2index_map* tmap = ws->getSpectrumToWorkspaceIndexMap();
-    spec2index_map::iterator titer;
-    for (titer = tmap->begin(); titer != tmap->end(); ++titer)
-      g_log.notice() << "Map built:  wsindex = " << titer->first << "\t\tspectrum = " << titer->second << std::endl;
 
     return ws;
   }

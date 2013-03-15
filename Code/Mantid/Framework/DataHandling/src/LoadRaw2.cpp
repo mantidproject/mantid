@@ -164,6 +164,10 @@ namespace Mantid
         progress(0.,"Reading raw file...");
         helper->loadRunParameters(localWorkspace, isisRaw.get());
         runLoadInstrument(localWorkspace );
+        for (int i = 0; i < m_numberOfSpectra; ++i)
+        {
+          localWorkspace->getSpectrum(i)->setSpectrumNo(i+1);
+        }
         runLoadMappingTable(localWorkspace );
         runLoadLog(localWorkspace );
         const int period_number = 1;
@@ -173,9 +177,7 @@ namespace Mantid
           localWorkspace->mutableRun().addLogData(log);
           localWorkspace->mutableRun().addLogData(createCurrentPeriodLog(period_number));
         }
-              localWorkspace->mutableRun().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
-        for (int i = 0; i < m_numberOfSpectra; ++i)
-          localWorkspace->getAxis(1)->setValue(i, i+1);
+        localWorkspace->mutableRun().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
         localWorkspace->populateInstrumentParameters();
         setProperty("OutputWorkspace",localWorkspace);
         return;
@@ -230,7 +232,7 @@ namespace Mantid
                 std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
                 // Set the X vector pointer and spectrum number
                 localWorkspace->setX(counter, timeChannelsVec);
-                localWorkspace->getAxis(1)->setValue(counter, i);
+                localWorkspace->getSpectrum(counter)->setSpectrumNo(i);
                 // NOTE: Raw numbers go straight into the workspace
                 //     - no account taken of bin widths/units etc.
                 ++counter;
