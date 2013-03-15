@@ -72,7 +72,7 @@ namespace DataHandling
 		"by parenthesis, except for two special "
 		"cases, D and T, which stand for H2 and H3, \n"
 		"respectively.");
-    declareProperty("AtomicNumber", EMPTY_INT(), "ChemicalFormula or AtomicNumber must be given");
+    declareProperty("AtomicNumber", 0, "ChemicalFormula or AtomicNumber must be given");
     declareProperty("MassNumber", 0, "Mass number if ion (default is 0)");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
@@ -135,13 +135,14 @@ namespace DataHandling
 			std::vector<std::string> atoms;
 			std::vector<uint16_t> numberAtoms, aNumbers;
 			this->parseChemicalFormula(chemicalSymbol, atoms, numberAtoms, aNumbers);
-        	sigma_s = 0;
-        	sigma_atten = 0;
+        	sigma_s = 0.0;
+        	sigma_atten = 0.0;
         	for (size_t i=0; i<atoms.size(); i++)
         	{
         		Atom myAtom = getAtom(atoms[i], aNumbers[i]);
         		Material *atom = new Material(atoms[i], myAtom.neutron, myAtom.number_density);
-        		g_log.notice() << " atom = "<< myAtom << "\n";
+        		g_log.notice() << myAtom << " sigma_s = "<< atom->totalScatterXSection(1.7982) << "\n";
+        		g_log.notice() << myAtom << " sigma_atten = "<< atom->absorbXSection(1.7982) << "\n";
         		sigma_s +=  static_cast<double>(numberAtoms[i]) * atom->totalScatterXSection(1.7982);
         		sigma_atten +=  static_cast<double>(numberAtoms[i]) * atom->absorbXSection(1.7982);
         	}
