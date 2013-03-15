@@ -141,7 +141,6 @@ void MuonAnalysis::initLayout()
 
   // Load current
   connect(m_uiForm.loadCurrent, SIGNAL(clicked()), this, SLOT(runLoadCurrent()));
-  connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(disableLoading() ) );
 
   // If group table change
   // currentCellChanged ( int currentRow, int currentColumn, int previousRow, int previousColumn )
@@ -3174,14 +3173,6 @@ void MuonAnalysis::allowLoading(bool enabled)
   m_uiForm.previousRun->setEnabled(enabled);
   m_uiForm.loadCurrent->setEnabled(enabled);
   m_uiForm.mwRunFiles->setEnabled(enabled);
-}
-
-/**
- * SLOT to disable loading by greying out the buttons and MWRunfiles widget responsible.
- */
-void MuonAnalysis::disableLoading()
-{
-  allowLoading(false);
 }
 
 /**
