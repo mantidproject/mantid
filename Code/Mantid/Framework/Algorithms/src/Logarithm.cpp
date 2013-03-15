@@ -6,14 +6,13 @@ Some values in a workspace can normally be equal to zero. Logarithm is not calcu
 
 When acting on an event workspace, the output will be a Workspace2D, with the default binning from the original workspace.
 
-== Usage ==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
 
-Logarithm("Input","output",[Filler],[is_Natural])
+ Logarithm("Input","output",[Filler],[is_Natural])
 
-
-
-*WIKI*/
+*WIKI_USAGE*/
 #include "MantidAlgorithms/Logarithm.h"
 #include "MantidAPI/WorkspaceProperty.h"
 

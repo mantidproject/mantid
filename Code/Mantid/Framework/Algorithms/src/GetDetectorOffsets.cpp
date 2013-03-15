@@ -8,13 +8,12 @@ The algorithm iterates over each spectrum in the workspace and fits a [[Gaussian
 
 This is then written into a [[CalFile|.cal file]] for every detector that contributes to that spectrum.  All of the entries in the cal file are initially set to both be included, but also to all group into a single group on [[DiffractionFocussing]].  The [[CreateCalFileByNames]] algorithm can be used to alter the grouping in the cal file.
 
-== Usage ==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
 
-GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal","offsets","mask")
-
-
-*WIKI*/
+ GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal","offsets","mask")
+*WIKI_USAGE*/
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"

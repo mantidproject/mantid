@@ -21,7 +21,8 @@ The algorithm can be used with an [[EventWorkspace]] input, and will create an E
 
 The main difference vs. using a Workspace2D is that the event lists from all the incoming pixels are simply appended in the grouped spectra; this means that you can rebin the resulting spectra to finer bins with no loss of data. In fact, it is unnecessary to bin your incoming data at all; binning can be performed as the very last step.
 
-==Usage==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
     DiffractionFocussing("InWS","OutWS","filename")
 '''C++'''
@@ -31,9 +32,7 @@ The main difference vs. using a Workspace2D is that the event lists from all the
     alg->setPropertyValue("GroupingFileName", "filename");
     alg->execute();
     Workspace* ws = FrameworkManager::Instance().getWorkspace("OutWS");
-
-
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

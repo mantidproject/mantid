@@ -5,14 +5,13 @@ This algorithm requires a workspace that is both in d-spacing, but has also been
 The algorithm iterates over each spectrum in the workspace and fits a [[Gaussian]] function to the reference peak.  The fit is used to calculate the centre of the fitted peak, and the offset is then calculated as:
 
 This is then written into a [[CalFile|.cal file]] for every detector that contributes to that spectrum.  All of the entries in the cal file are initially set to both be included, but also to all group into a single group on [[DiffractionFocussing]].  The [[CreateCalFileByNames]] algorithm can be used to alter the grouping in the cal file.
-
-== Usage ==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
 
-GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
+ GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 
-
-*WIKI*/
+*WIKI_USAGE*/
 #include "MantidAlgorithms/GetDetOffsetsMultiPeaks.h"
 #include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidAPI/FileProperty.h"

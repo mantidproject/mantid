@@ -1,7 +1,5 @@
 /*WIKI* 
 
-
-
 The algorithm rebins data with new bin boundaries. The 'params' property defines new boundaries in intervals <math>x_i-x_{i+1}\,</math>. Positive <math>\Delta x_i\,</math> make constant width bins, whilst negative ones create logarithmic binning using the formula <math>x(j+1)=x(j)(1+|\Delta x_i|)\,</math>
 
 This algorithms is useful both in data reduction, but also in remapping [[Ragged Workspace|ragged workspaces]] to a regular set of bin boundaries.
@@ -28,15 +26,13 @@ If "Preserve Events" is false., then the output workspace will be created as a [
 
 If the input workspace contains data points, rather than histograms, then Rebin will automatically use the [[ConvertToHistogram]] and [[ConvertToPointData]] algorithms before and after the rebinning has taken place.
 
-== Usage ==
+
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
  Rebin("InWS2","OutWS","x1,dx1,x2")
 
-
-
-
-
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

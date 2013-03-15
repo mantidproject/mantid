@@ -2,13 +2,11 @@
 
 The algorithm rebins data by adding together ''n_bunch'' successive bins.
 
-==Usage==
-
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
  Rebunch("InWS, "OutWS", "3")
-
-
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
