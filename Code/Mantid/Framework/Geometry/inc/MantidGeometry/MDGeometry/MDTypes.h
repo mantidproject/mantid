@@ -74,6 +74,9 @@ namespace Mantid
    */
   #define TMDE_CLASS template <typename MDE, size_t nd>
 
+  #define UNDEF_SIZET   std::numeric_limits<size_t>::max()
+  #define UNDEF_COORDT  std::numeric_limits<coord_t>::quiet_NaN()
+
 }
 
 #endif //MANTID_GEOMETRY_MDTYPES_H_

@@ -2,24 +2,26 @@
 #define IMD_NODE_H_
 
 #include <vector>
+#include <algorithm>
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/INode.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidAPI/BoxController.h"
+#include "MantidAPI/CoordTransform.h"
 
 namespace Mantid
 {
 namespace API
 {
 
-class IMDNode : public Kernel::INode
+class IMDNode 
 {
 public:
 //---------------- ISAVABLE
-    virtual Kernel::ISaveable *const getISaveable(){return NULL;}
-    virtual Kernel::ISaveable *const getISaveable()const{return NULL;}
-   
-    virtual void clearDataFromMemory()=0;
+    virtual size_t getFileID()const=0;
+    virtual Kernel::ISaveable *const getISaveable()=0;
+    virtual Kernel::ISaveable *const getISaveable()const=0;        
+      
 //-------------------------------------------------------------
     /// Get number of dimensions
     virtual size_t getNumDims() const = 0;
@@ -34,15 +36,16 @@ public:
     virtual void unmask() = 0;
 
     /// get box controller
-    virtual Mantid::API::BoxController  *getBoxController() const=0;
+    virtual Mantid::API::BoxController  *const getBoxController() const=0;
+    virtual Mantid::API::BoxController  *const getBoxController() =0;
 
     /** Set the box controller used.
      * @param controller :: Mantid::API::BoxController *
      */
-    virtual void setBoxController(Mantid::API::BoxController *controller)=0;
+    //virtual void setBoxController(Mantid::API::BoxController *controller)=0;
 
     // -------------------------------- Parents/Children-Related -------------------------------------------
-    ///  Avoid rtti
+    ///  Avoid rtti ?
     virtual bool isBox()const=0;
     /// Get the total # of unsplit MDBoxes contained.
     virtual size_t getNumMDBoxes() const = 0;
@@ -151,10 +154,38 @@ public:
 
     virtual void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)=0;
 
+  // ----------------------------- Helper Methods --------------------------------------------------------
+  //-----------------------------------------------------------------------------------------------
+  /** Helper method for sorting MDBoxBasees by file position.
+   * MDGridBoxes return 0 for file position and so aren't sorted.
+   *
+   * @param a :: an MDBoxBase pointer
+   * @param b :: an MDBoxBase pointer
+   * @return
+   */
 
-  
+  static inline bool CompareFilePosition (const IMDNode * const a, const IMDNode * const b)
+  {
+ 
+    return (a->getFileID() < b->getFileID());
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Static method for sorting a list of MDBoxBase pointers by their file position,
+   * ascending. This should optimize the speed of loading a bit by
+   * reducing the amount of disk seeking.
+   *
+   * @param boxes :: ref to a vector of boxes. It will be sorted in-place.
+   */
+  static void sortObjByFileID(std::vector<IMDNode *const> & boxes)
+  {
+    std::sort( boxes.begin(), boxes.end(), CompareFilePosition);
+  } 
 
 };
+  
+ 
+
 
 }
 }

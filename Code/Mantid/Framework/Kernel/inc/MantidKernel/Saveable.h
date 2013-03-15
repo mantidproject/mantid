@@ -38,7 +38,7 @@ namespace Kernel
   {
   public:
     Saveable();
-    Saveable(const size_t id);
+    //Saveable(const size_t id);
     Saveable(const Saveable & other);
     virtual ~Saveable();
 

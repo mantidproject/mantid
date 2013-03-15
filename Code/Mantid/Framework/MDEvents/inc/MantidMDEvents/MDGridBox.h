@@ -39,15 +39,23 @@ namespace MDEvents
   public:
     MDGridBox();
 
-    MDGridBox(Mantid::API::BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
+    MDGridBox(Mantid::API::BoxController *bc, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
 
     MDGridBox(MDBox<MDE, nd> * box, bool splitRecursively=false);
 
     MDGridBox(const MDGridBox<MDE, nd> & box,const Mantid::API::BoxController * otherBC=NULL);
 
     virtual ~MDGridBox();
+    // ----------------------------- ISaveable Methods ------------------------------------------------------
+    virtual Kernel::ISaveable *const getISaveable(){return NULL;}
+    virtual Kernel::ISaveable *const getISaveable()const{return NULL;}
 
+    /** returns true if it is box (avoid rtti?) */
+    virtual bool isBox()const{return false;}
+    //-------------------------------------------------------------------------------------------------------
     void clear();
+
+
     /** Returns the total number of points (events) in this box  (in memory and in file if present)*/
     uint64_t getNPoints() const //Use the cached value    
     {    return nPoints; }
@@ -61,7 +69,7 @@ namespace MDEvents
    size_t getNumMDBoxes() const;
 
    size_t getNumChildren() const;
-   virtual bool isBox()const{return false;}
+
 
     size_t getChildIndexFromID(size_t childId) const;
 
@@ -76,16 +84,15 @@ namespace MDEvents
 
     void setChildren(const std::vector<API::IMDNode *> & boxes, const size_t indexStart, const size_t indexEnd);
 
-    std::vector< MDE > * getEventsCopy();
-
     void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly);
     void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
-    const MDBoxBase<MDE,nd> * getBoxAtCoord(const coord_t * coords) const;
+    const API::IMDNode * getBoxAtCoord(const coord_t * coords) const;
 
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
+    //----------------------------------------------------------------------------
 
-
+    std::vector< MDE > * getEventsCopy();
     void addEvent(const MDE & event);
     void addAndTraceEvent(const MDE & point,size_t index);
 

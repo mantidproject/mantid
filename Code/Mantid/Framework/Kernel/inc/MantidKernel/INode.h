@@ -36,8 +36,7 @@ namespace Mantid
     class DLLExport INode
     {
         public:
-        virtual ISaveable *const getISaveable()=0;
-        virtual ISaveable *const getISaveable()const=0;        
+
         virtual ~INode(){};
     };
   }

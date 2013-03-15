@@ -1,4 +1,5 @@
 #include "MantidMDEvents/MDBoxBase.h"
+#include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include <limits>
@@ -16,38 +17,42 @@ namespace MDEvents
   /** Default constructor.
    */
   TMDE(
-  MDBoxBase)::MDBoxBase()
-    : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
+  MDBoxBase)::MDBoxBase(Mantid::API::BoxController * const boxController,const uint32_t depth,const size_t boxID):
+      m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_inverseVolume(std::numeric_limits<coord_t>::quiet_NaN()),
-      m_BoxController(boost::make_shared<API::BoxController>(nd)),
-      m_depth(0),
-      m_parent(NULL)
+      m_BoxController(boxController),
+      m_depth(depth),
+      m_parent(NULL),
+      m_fileID(boxID)
   {
+      if(boxController)
+      {
+        // Give it a fresh ID from the controller.
+          if(boxID==std::numeric_limits<size_t>::max()) // Give it a fresh ID from the controller.
+            this->m_fileID =  boxController->getNextId() ;
+      }
 
-#ifdef MDBOX_TRACK_CENTROID
-    // Clear the running total of the centroid
-    for (size_t d=0; d<nd; d++)
-      m_centroid[d] = 0;
-#endif
+
   }
-
-
   //-----------------------------------------------------------------------------------------------
   /** Constructor with extents
    */
   TMDE(
-  MDBoxBase)::MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
+  MDBoxBase)::MDBoxBase(Mantid::API::BoxController *const boxController,const uint32_t depth,const size_t boxID,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
-      m_inverseVolume(1.0),
-      m_BoxController(boost::make_shared<API::BoxController>(nd)),
-      m_depth(0),
-      m_parent(NULL)
+      m_inverseVolume(UNDEF_COORDT),
+      m_BoxController(boxController),
+      m_depth(depth),
+      m_parent(NULL),
+      m_fileID(boxID)
   {
-#ifdef MDBOX_TRACK_CENTROID
-    // Clear the running total of the centroid
-    for (size_t d=0; d<nd; d++)
-      m_centroid[d] = 0;
-#endif
+      if(boxController)
+      {
+        // Give it a fresh ID from the controller.
+          if(boxID==UNDEF_SIZET) // Give it a fresh ID from the controller.
+            this->m_fileID =  boxController->getNextId() ;
+      }
+
     // Set the extents
     if (extentsVector.size() != nd) throw std::invalid_argument("MDBoxBase::ctor(): extentsVector.size() must be == nd.");
     for (size_t d=0; d<nd; d++)
@@ -64,27 +69,18 @@ namespace MDEvents
    * @param otherBC :: if present, other (different from the current one) box controller pointer
    */
   TMDE(
-  MDBoxBase)::MDBoxBase(const MDBoxBase<MDE,nd> & box,const Mantid::API::BoxController * otherBC)
-  : ISaveable(box),
+  MDBoxBase)::MDBoxBase(const MDBoxBase<MDE,nd> & box,Mantid::API::BoxController * const otherBC):
     m_signal(box.m_signal), m_errorSquared(box.m_errorSquared), m_totalWeight(box.m_totalWeight),
-    m_inverseVolume(box.m_inverseVolume), m_depth(box.m_depth),
-    m_parent(box.m_parent)
+    m_inverseVolume(box.m_inverseVolume),
+    m_BoxController(otherBC),
+    m_depth(box.m_depth),
+    m_parent(box.m_parent),
+    m_fileID(box.m_fileID)
   {
-    // Save the controller in this object.
-    if(otherBC)
-        this->m_BoxController = otherBC;
-    else:
-        this->m_BoxController = box.m_BoxController;
+  
     // Copy the extents
     for (size_t d=0; d<nd; d++)
       this->extents[d] = box.extents[d];
-    // Copy the depth
-    this->m_depth = box.getDepth();
-#ifdef MDBOX_TRACK_CENTROID
-    // Clear the running total of the centroid
-    for (size_t d=0; d<nd; d++)
-      m_centroid[d] = 0;
-#endif
  
   }
 
@@ -356,6 +352,68 @@ namespace MDEvents
   }
 
 
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+  /* Internal TMP class to simplify building event constructor box for events and lean events using single interface*/
+  template<typename MDE,size_t nd>
+  struct IF
+  {
+  public:
+      static inline MDEvent<nd> BUILD_EVENT(const signal_t Signal, const signal_t Error, const  coord_t *Coord,const uint16_t runIndex=0,const uint32_t detectorId=0)
+      {
+          return MDEvent<nd>(Signal,Error, runIndex, detectorId, Coord);
+      }
+  };
+  /* Specialize for the case of LeanEvent */
+  template<size_t nd>
+  struct IF<MDLeanEvent<nd>,nd>
+  {
+  public:
+      static inline MDLeanEvent<nd> BUILD_EVENT(const signal_t Signal, const signal_t Error, const  coord_t *Coord,const uint16_t /*runIndex*/,const uint32_t /*detectorId*/)
+      {
+          return MDLeanEvent<nd>(Signal,Error,Coord);
+      }
+  };
+
+
+  /** Create event from the input data and add it to the box.
+   * @param point :: reference to the  MDEvent coordinates
+   * @param Signal  :: events signal
+   * @param errorSq :: events Error squared
+   * @param index   run  index
+   * @param index   detector's ID
+   * */
+   TMDE(
+   void MDBoxBase)::addEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId)
+   {
+       this->addEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0],runIndex, detectorId));
+   }
+
+  /** Create MD MDEvent amd add it to the box.
+   // add a single event and set pointer to the box which needs splitting (if one actually need) 
+
+   * @param point :: reference to a MDEvent to add.
+   * @param index :: current index for box
+   */
+   TMDE(
+   void MDBoxBase)::addAndTraceEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId,size_t index)
+   {
+       this->addAndTraceEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId),index);
+   }
+
+  //-----------------------------------------------------------------------------------------------
+  /**Create MDEvent and add it to the box, in a NON-THREAD-SAFE manner.
+   * No lock is performed. This is only safe if no 2 threads will
+   * try to add to the same box at the same time.
+   *
+   * @param Evnt :: reference to a MDEvent to add.
+   * */
+  TMDE(
+  void MDBoxBase)::addEventUnsafe(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId)
+  {
+       this->addEventUnsafe(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId));
+  }
+
+ 
 
 
 

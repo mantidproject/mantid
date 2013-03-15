@@ -25,13 +25,15 @@ using Mantid::Kernel::CPUTimer;
 //====================================================================================
 class ISaveableTester : public ISaveable
 {
+    size_t id;
     bool _isBusy;
 public:
-  ISaveableTester(size_t id) : ISaveable(id),
+  ISaveableTester(size_t idIn) : ISaveable(),
+      id(idIn),
       _isBusy(false)
   {}
   virtual ~ISaveableTester(){}
-
+  size_t getFileId()const{return id;}
     // temporary functions
     virtual bool isBusy()const{return _isBusy;}
     virtual bool isDataChanged()const{return true;}
@@ -45,7 +47,7 @@ public:
    {
     // Fake writing to a file
     std::ostringstream out;
-    out << getFileId() <<",";
+    out << id <<",";
     streamMutex.lock();
     fakeFile += out.str();
     streamMutex.unlock();

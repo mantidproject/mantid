@@ -2,7 +2,7 @@
 #define MANTID_KERNEL_ISAVEABLE_H_
     
 #include "MantidKernel/System.h"
-#include <forward_list>
+#include <list>
 #include <vector>
 #include <algorithm>
 #include <boost/optional.hpp>
@@ -46,20 +46,20 @@ namespace Kernel
   {
   public:
     ISaveable();
-    ISaveable(const size_t id);
+    //ISaveable(const ISaveable &other); --> no pointers, standard CC
     virtual ~ISaveable(){};
 
-    //-----------------------------------------------------------------------------------------------
-    /** Returns the unique ID for this object/box     */
-    size_t getFileId() const
-    {  return m_FileId;   }
+    ////-----------------------------------------------------------------------------------------------
+    ///** Returns the unique ID for this object/box     */
+    //size_t getFileId() const
+    //{  return m_FileId;   }
 
-    /** Sets the unique ID for this object/box
-     * @param newId :: new ID value. */
-    virtual void setFileId(size_t newId)
-    {    m_FileId = newId;   }
+    ///** Sets the unique ID for this object/box
+    // * @param newId :: new ID value. */
+    //virtual void setFileId(size_t newId)
+    //{    m_FileId = newId;   }
 
-    /** @return the position in the file where the data will be stored. This is used to optimize file writing. */
+    ///** @return the position in the file where the data will be stored. This is used to optimize file writing. */
     virtual uint64_t getFilePosition() const
     {   return m_fileIndexStart;   }
     /**Return the number of units this block occipies on file */
@@ -92,14 +92,12 @@ namespace Kernel
     virtual uint64_t getTotalDataSize() const=0;
     /// the data size kept in memory
     virtual size_t getDataMemorySize()const=0;
- 
-    // ----------------------------- Helper Methods --------------------------------------------------------
-    static void sortObjByFileID(std::vector<INode *const> & boxes); 
+
   protected:
     /** Unique, sequential ID of the object/box within the containing workspace.
         This ID also relates to boxes order as the boxes with adjacent 
         ID should usually occupy adjacent places on HDD         */
-    size_t m_FileId;
+  //  size_t m_FileId;
     /// Start point in the NXS file where the events are located
     uint64_t m_fileIndexStart;
     /// Number of events saved in the file, after the start index location

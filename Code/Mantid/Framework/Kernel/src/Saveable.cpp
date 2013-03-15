@@ -26,11 +26,11 @@ namespace Kernel
   {
   }
 
-  Saveable::Saveable(const size_t id)
+ /* Saveable::Saveable(const size_t id)
       :ISaveable(id),
        m_Busy(false),m_dataChanged(false),m_wasSaved(false),m_isLoaded(false)
   {
-  }
+  }*/
 
   //----------------------------------------------------------------------------------------------
   /** Destructor

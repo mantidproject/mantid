@@ -28,9 +28,10 @@ using Mantid::Kernel::CPUTimer;
 /** An ISaveable that fakes writing to a fixed-size file */
 class SaveableTesterWithFile : public Saveable
 {
+    size_t ID;
 public:
-  SaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch,bool wasSaved=true) : Saveable(id),
-    m_memory(size),m_ch(ch)
+  SaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch,bool wasSaved=true) : Saveable(),
+    ID(id),m_memory(size),m_ch(ch)
   {
     // the object knows its place on file
     this->setFilePosition(pos,size,wasSaved);
@@ -665,9 +666,11 @@ public:
 /** An Saveable that will fake seeking to disk */
 class SaveableTesterWithSeek : public Saveable
 {  
+    size_t ID;
     size_t m_memory;
 public:
-  SaveableTesterWithSeek(size_t id) : Saveable(id)
+  SaveableTesterWithSeek(size_t id) : Saveable(),
+      ID(id)
   {
     m_memory=1;
     this->setFilePosition(10+id,this->m_memory);

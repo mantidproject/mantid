@@ -18,86 +18,86 @@ namespace Mantid
   template<typename MDE,size_t nd>
   void MDBoxFlatTree::initFlatStructure(API::IMDEventWorkspace_sptr pws,const std::string &fileName)
   {
-    m_bcXMLDescr = pws->getBoxController()->toXMLString();
-    m_FileName = fileName;
+    //m_bcXMLDescr = pws->getBoxController()->toXMLString();
+    //m_FileName = fileName;
 
-    m_nDim = int(pws->getNumDims());
-    // flatten the box structure
-    pws->getBoxes(m_Boxes, 1000, false);
+    //m_nDim = int(pws->getNumDims());
+    //// flatten the box structure
+    //pws->getBoxes(m_Boxes, 1000, false);
 
-    Kernel::ISaveable::sortObjByFilePos(m_Boxes);
+    //Kernel::ISaveable::sortObjByFilePos(m_Boxes);
 
-    size_t maxBoxes = m_Boxes.size();
-    // Box type (0=None, 1=MDBox, 2=MDGridBox
-    m_BoxType.assign(maxBoxes, 0);
-    // Recursion depth
-    m_Depth.assign(maxBoxes, -1);
-    // Start/end indices into the list of events
-    m_BoxEventIndex.assign(maxBoxes*2, 0);
-    // Min/Max extents in each dimension
-    m_Extents.assign(maxBoxes*m_nDim*2, 0);
-    // Inverse of the volume of the cell
-    m_InverseVolume.assign(maxBoxes, 0);
-    // Box cached signal/error squared
-    m_BoxSignalErrorsquared.assign(maxBoxes*2, 0);
-    // Start/end children IDs
-    m_BoxChildren.assign(maxBoxes*2, 0);
+    //size_t maxBoxes = m_Boxes.size();
+    //// Box type (0=None, 1=MDBox, 2=MDGridBox
+    //m_BoxType.assign(maxBoxes, 0);
+    //// Recursion depth
+    //m_Depth.assign(maxBoxes, -1);
+    //// Start/end indices into the list of events
+    //m_BoxEventIndex.assign(maxBoxes*2, 0);
+    //// Min/Max extents in each dimension
+    //m_Extents.assign(maxBoxes*m_nDim*2, 0);
+    //// Inverse of the volume of the cell
+    //m_InverseVolume.assign(maxBoxes, 0);
+    //// Box cached signal/error squared
+    //m_BoxSignalErrorsquared.assign(maxBoxes*2, 0);
+    //// Start/end children IDs
+    //m_BoxChildren.assign(maxBoxes*2, 0);
 
-    MDBoxBase<MDE,nd> *Box;
-    for(size_t i=0;i<maxBoxes;i++)
-    {
-      Box = dynamic_cast<MDBoxBase<MDE,nd> *>(m_Boxes[i]);
-      // currently ID is the number of the box, but it may change in a future. TODO: uint64_t
-      size_t id = Box->getId();
-      size_t numChildren = Box->getNumChildren();
-      if (numChildren > 0)
-      {
-        // DEBUG:
-        //// Make sure that all children are ordered. TODO: This might not be needed if the IDs are rigorously done
-        //size_t lastId = Box->getChild(0)->getId();
-        //for (size_t i = 1; i < numChildren; i++)
-        //{
-        //  if (Box->getChild(i)->getId() != lastId+1)
-        //    throw std::runtime_error("Non-sequential child ID encountered!");
-        //  lastId = Box->getChild(i)->getId();
-        //}
+    //MDBoxBase<MDE,nd> *Box;
+    //for(size_t i=0;i<maxBoxes;i++)
+    //{
+    //  Box = dynamic_cast<MDBoxBase<MDE,nd> *>(m_Boxes[i]);
+    //  // currently ID is the number of the box, but it may change in a future. TODO: uint64_t
+    //  size_t id = Box->getId();
+    //  size_t numChildren = Box->getNumChildren();
+    //  if (numChildren > 0)
+    //  {
+    //    // DEBUG:
+    //    //// Make sure that all children are ordered. TODO: This might not be needed if the IDs are rigorously done
+    //    //size_t lastId = Box->getChild(0)->getId();
+    //    //for (size_t i = 1; i < numChildren; i++)
+    //    //{
+    //    //  if (Box->getChild(i)->getId() != lastId+1)
+    //    //    throw std::runtime_error("Non-sequential child ID encountered!");
+    //    //  lastId = Box->getChild(i)->getId();
+    //    //}
 
-        m_BoxType[id] = 2;
-        m_BoxChildren[id*2] = int(Box->getChild(0)->getId());
-        m_BoxChildren[id*2+1] = int(Box->getChild(numChildren-1)->getId());
+    //    m_BoxType[id] = 2;
+    //    m_BoxChildren[id*2] = int(Box->getChild(0)->getId());
+    //    m_BoxChildren[id*2+1] = int(Box->getChild(numChildren-1)->getId());
 
-        // no events but index defined -- TODO -- The proper file has to have consequent indexes for all boxes too. 
-        m_BoxEventIndex[id*2]   = 0;
-        m_BoxEventIndex[id*2+1] = 0;
-      }
-      else
-      {
-        m_BoxType[id] = 1;
-        m_BoxChildren[id*2]=0;
-        m_BoxChildren[id*2+1]=0;
+    //    // no events but index defined -- TODO -- The proper file has to have consequent indexes for all boxes too. 
+    //    m_BoxEventIndex[id*2]   = 0;
+    //    m_BoxEventIndex[id*2+1] = 0;
+    //  }
+    //  else
+    //  {
+    //    m_BoxType[id] = 1;
+    //    m_BoxChildren[id*2]=0;
+    //    m_BoxChildren[id*2+1]=0;
 
-        MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(Box);
-        if(!mdBox) throw std::runtime_error("found unfamiliar type of box");
-        // Store the index
+    //    MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(Box);
+    //    if(!mdBox) throw std::runtime_error("found unfamiliar type of box");
+    //    // Store the index
 
-        uint64_t nPoints = mdBox->getNPoints();
-        m_BoxEventIndex[id*2]   = mdBox->getFilePosition();
-        m_BoxEventIndex[id*2+1] = nPoints;   
-      }
+    //    uint64_t nPoints = mdBox->getNPoints();
+    //    m_BoxEventIndex[id*2]   = mdBox->getFilePosition();
+    //    m_BoxEventIndex[id*2+1] = nPoints;   
+    //  }
 
-      // Various bits of data about the box
-      m_Depth[id] = int(Box->getDepth());
-      m_BoxSignalErrorsquared[id*2] = double(Box->getSignal());
-      m_BoxSignalErrorsquared[id*2+1] = double(Box->getErrorSquared());
-      m_InverseVolume[id] = Box->getInverseVolume();
-      for (size_t d=0; d<nd; d++)
-      {
-        size_t newIndex = id*(nd*2) + d*2;
-        m_Extents[newIndex]   = Box->getExtents(d).getMin();
-        m_Extents[newIndex+1] = Box->getExtents(d).getMax();
+    //  // Various bits of data about the box
+    //  m_Depth[id] = int(Box->getDepth());
+    //  m_BoxSignalErrorsquared[id*2] = double(Box->getSignal());
+    //  m_BoxSignalErrorsquared[id*2+1] = double(Box->getErrorSquared());
+    //  m_InverseVolume[id] = Box->getInverseVolume();
+    //  for (size_t d=0; d<nd; d++)
+    //  {
+    //    size_t newIndex = id*(nd*2) + d*2;
+    //    m_Extents[newIndex]   = Box->getExtents(d).getMin();
+    //    m_Extents[newIndex+1] = Box->getExtents(d).getMax();
 
-      }
-    }
+    //  }
+    //}
 
   }
   /**TODO: this should not be here, refactor out*/ 
@@ -183,123 +183,123 @@ namespace Mantid
   }
   void MDBoxFlatTree::setBoxesFilePositions(bool makeFileBacked)
   {
-    // this will preserve file-backed workspace and information in it as we are not loading old box data and not?
-    // this would be right for binary axcess but questionable for Nexus --TODO: needs testing
-    // Done in INIT--> need check if ID and index in the tree are always the same.
-    //Kernel::ISaveable::sortObjByFilePos(m_Boxes);
-    // calculate the box positions in the resulting file and save it on place
-    uint64_t eventsStart=0;
-    bool rememberBoxIsSaved = makeFileBacked;
-    for(size_t i=0;i<m_Boxes.size();i++)
-    {
-      API::IMDNode * mdBox = m_Boxes[i];        
-      size_t ID = mdBox->getId();
-      if(mdBox->isBox())
-      {
-          size_t nEvents = mdBox->getTotalDataSize();
-          mdBox->setFilePosition(eventsStart,nEvents,rememberBoxIsSaved);
-          m_BoxEventIndex[ID*2]   = eventsStart;
-          m_BoxEventIndex[ID*2+1] = nEvents;
+  //  // this will preserve file-backed workspace and information in it as we are not loading old box data and not?
+  //  // this would be right for binary axcess but questionable for Nexus --TODO: needs testing
+  //  // Done in INIT--> need check if ID and index in the tree are always the same.
+  //  //Kernel::ISaveable::sortObjByFilePos(m_Boxes);
+  //  // calculate the box positions in the resulting file and save it on place
+  //  uint64_t eventsStart=0;
+  //  bool rememberBoxIsSaved = makeFileBacked;
+  //  for(size_t i=0;i<m_Boxes.size();i++)
+  //  {
+  //    API::IMDNode * mdBox = m_Boxes[i];        
+  //    size_t ID = mdBox->getFileID();
+  //    if(mdBox->isBox())
+  //    {
+  //        size_t nEvents = mdBox->getTotalDataSize();
+  //        mdBox->setFilePosition(eventsStart,nEvents,rememberBoxIsSaved);
+  //        m_BoxEventIndex[ID*2]   = eventsStart;
+  //        m_BoxEventIndex[ID*2+1] = nEvents;
 
-          eventsStart+=nEvents;
-      }
-      else
-      {
-        m_BoxEventIndex[ID*2]   = 0;
-        m_BoxEventIndex[ID*2+1] = 0;
-      }
-    }
+  //        eventsStart+=nEvents;
+  //    }
+  //    else
+  //    {
+  //      m_BoxEventIndex[ID*2]   = 0;
+  //      m_BoxEventIndex[ID*2+1] = 0;
+  //    }
+  //  }
 
-  }
-  void MDBoxFlatTree::saveBoxStructure(const std::string &fileName)
-  {
-    m_FileName = fileName;
-    ::NeXus::File * hFile;
-      // Erase the file if it exists
-    Poco::File oldFile(fileName);
-    if (oldFile.exists())
-    {
-      hFile = new ::NeXus::File(m_FileName, NXACC_RDWR);
-      hFile->openGroup("MDEventWorkspace", "NXentry");
-    }
-    else
-    {
-      // Create a new file in HDF5 mode.
-      hFile = new ::NeXus::File(m_FileName, NXACC_CREATE5);
-      hFile->makeGroup("MDEventWorkspace", "NXentry", true);
-      // Write out some general information like # of dimensions
-      hFile->writeData("dimensions", int32_t(m_nDim));
-    }  
+  //}
+  //void MDBoxFlatTree::saveBoxStructure(const std::string &fileName)
+  //{
+  //  m_FileName = fileName;
+  //  ::NeXus::File * hFile;
+  //    // Erase the file if it exists
+  //  Poco::File oldFile(fileName);
+  //  if (oldFile.exists())
+  //  {
+  //    hFile = new ::NeXus::File(m_FileName, NXACC_RDWR);
+  //    hFile->openGroup("MDEventWorkspace", "NXentry");
+  //  }
+  //  else
+  //  {
+  //    // Create a new file in HDF5 mode.
+  //    hFile = new ::NeXus::File(m_FileName, NXACC_CREATE5);
+  //    hFile->makeGroup("MDEventWorkspace", "NXentry", true);
+  //    // Write out some general information like # of dimensions
+  //    hFile->writeData("dimensions", int32_t(m_nDim));
+  //  }  
 
-    //Save box structure;
-    this->saveBoxStructure(hFile);
+  //  //Save box structure;
+  //  this->saveBoxStructure(hFile);
 
-    hFile->close();
-    // close workspace group
-    delete hFile;
+  //  hFile->close();
+  //  // close workspace group
+  //  delete hFile;
 
-  }
+  //}
 
-  void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile)
-  {
-    size_t maxBoxes = this->getNBoxes();
-    if(maxBoxes==0)return;
+  //void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile)
+  //{
+  //  size_t maxBoxes = this->getNBoxes();
+  //  if(maxBoxes==0)return;
 
-    bool update=true;
-    // Start the box data group
-    try
-    {
-      hFile->openGroup("box_structure", "NXdata");
-    }catch(...)
-    {
-      update = false;
-      hFile->makeGroup("box_structure", "NXdata",true);
-    }
-    hFile->putAttr("version", "1.0");
-    // Add box controller info to this group
-    hFile->putAttr("box_controller_xml", m_bcXMLDescr);
+  //  bool update=true;
+  //  // Start the box data group
+  //  try
+  //  {
+  //    hFile->openGroup("box_structure", "NXdata");
+  //  }catch(...)
+  //  {
+  //    update = false;
+  //    hFile->makeGroup("box_structure", "NXdata",true);
+  //  }
+  //  hFile->putAttr("version", "1.0");
+  //  // Add box controller info to this group
+  //  hFile->putAttr("box_controller_xml", m_bcXMLDescr);
 
-    std::vector<int64_t> exents_dims(2,0);
-    exents_dims[0] = (int64_t(maxBoxes));
-    exents_dims[1] = (m_nDim*2);
-    std::vector<int64_t> exents_chunk(2,0);
-    exents_chunk[0] = int64_t(16384);
-    exents_chunk[1] = (m_nDim*2);
+  //  std::vector<int64_t> exents_dims(2,0);
+  //  exents_dims[0] = (int64_t(maxBoxes));
+  //  exents_dims[1] = (m_nDim*2);
+  //  std::vector<int64_t> exents_chunk(2,0);
+  //  exents_chunk[0] = int64_t(16384);
+  //  exents_chunk[1] = (m_nDim*2);
 
-    std::vector<int64_t> box_2_dims(2,0);
-    box_2_dims[0] = int64_t(maxBoxes);
-    box_2_dims[1] = (2);
-    std::vector<int64_t> box_2_chunk(2,0);
-    box_2_chunk[0] = int64_t(16384);
-    box_2_chunk[1] = (2);
+  //  std::vector<int64_t> box_2_dims(2,0);
+  //  box_2_dims[0] = int64_t(maxBoxes);
+  //  box_2_dims[1] = (2);
+  //  std::vector<int64_t> box_2_chunk(2,0);
+  //  box_2_chunk[0] = int64_t(16384);
+  //  box_2_chunk[1] = (2);
 
-    if (update)
-    {
-      // Update the extendible data sets
-      hFile->writeUpdatedData("box_type", m_BoxType);
-      hFile->writeUpdatedData("depth", m_Depth);
-      hFile->writeUpdatedData("inverse_volume", m_InverseVolume);
-      hFile->writeUpdatedData("extents", m_Extents, exents_dims);
-      hFile->writeUpdatedData("box_children", m_BoxChildren, box_2_dims);
-      hFile->writeUpdatedData("box_signal_errorsquared", m_BoxSignalErrorsquared, box_2_dims);
-      hFile->writeUpdatedData("box_event_index", m_BoxEventIndex, box_2_dims);
+  //  if (update)
+  //  {
+  //    // Update the extendible data sets
+  //    hFile->writeUpdatedData("box_type", m_BoxType);
+  //    hFile->writeUpdatedData("depth", m_Depth);
+  //    hFile->writeUpdatedData("inverse_volume", m_InverseVolume);
+  //    hFile->writeUpdatedData("extents", m_Extents, exents_dims);
+  //    hFile->writeUpdatedData("box_children", m_BoxChildren, box_2_dims);
+  //    hFile->writeUpdatedData("box_signal_errorsquared", m_BoxSignalErrorsquared, box_2_dims);
+  //    hFile->writeUpdatedData("box_event_index", m_BoxEventIndex, box_2_dims);
 
-    }
-    else
-    {
-      // Write it for the first time
-      hFile->writeExtendibleData("box_type", m_BoxType);
-      hFile->writeExtendibleData("depth", m_Depth);
-      hFile->writeExtendibleData("inverse_volume", m_InverseVolume);
-      hFile->writeExtendibleData("extents", m_Extents, exents_dims, exents_chunk);
-      hFile->writeExtendibleData("box_children", m_BoxChildren, box_2_dims, box_2_chunk);
-      hFile->writeExtendibleData("box_signal_errorsquared", m_BoxSignalErrorsquared, box_2_dims, box_2_chunk);
-      hFile->writeExtendibleData("box_event_index", m_BoxEventIndex, box_2_dims, box_2_chunk);
-    }
+  //  }
+  //  else
+  //  {
+  //    // Write it for the first time
+  //    hFile->writeExtendibleData("box_type", m_BoxType);
+  //    hFile->writeExtendibleData("depth", m_Depth);
+  //    hFile->writeExtendibleData("inverse_volume", m_InverseVolume);
+  //    hFile->writeExtendibleData("extents", m_Extents, exents_dims, exents_chunk);
+  //    hFile->writeExtendibleData("box_children", m_BoxChildren, box_2_dims, box_2_chunk);
+  //    hFile->writeExtendibleData("box_signal_errorsquared", m_BoxSignalErrorsquared, box_2_dims, box_2_chunk);
+  //    hFile->writeExtendibleData("box_event_index", m_BoxEventIndex, box_2_dims, box_2_chunk);
+  //  }
 
-    hFile->closeGroup();
-    // Finished - close the file. This ensures everything gets written out even when updating.
-    hFile->close();
+  //  hFile->closeGroup();
+  //  // Finished - close the file. This ensures everything gets written out even when updating.
+  //  hFile->close();
 
   }
 
@@ -392,93 +392,94 @@ namespace Mantid
   uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<MDBoxBase<MDE,nd> *>&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly)
   {
 
-    size_t numBoxes = this->getNBoxes();
-    Boxes.assign(numBoxes, NULL);
+    //size_t numBoxes = this->getNBoxes();
+    //Boxes.assign(numBoxes, NULL);
 
-    uint64_t totalNumEvents(0);
-    m_nDim = int(bc->getNDims());
-    if(m_nDim<=0||m_nDim>11 )throw std::runtime_error("Workspace dimesnions are not defined properly");
+    //uint64_t totalNumEvents(0);
+    //m_nDim = int(bc->getNDims());
+    //if(m_nDim<=0||m_nDim>11 )throw std::runtime_error("Workspace dimesnions are not defined properly");
 
-    for (size_t i=0; i<numBoxes; i++)
-    {
+    //for (size_t i=0; i<numBoxes; i++)
+    //{
 
-      size_t box_type = m_BoxType[i];
-      if (box_type == 0)continue;
+    //  size_t box_type = m_BoxType[i];
+    //  if (box_type == 0)continue;
 
-      MDBoxBase<MDE,nd> * ibox = NULL;
-      MDBox<MDE,nd> * box;
+    //  MDBoxBase<MDE,nd> * ibox = NULL;
+    //  MDBox<MDE,nd> * box;
 
-      // Extents of the box, as a vector
-      std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(m_nDim);
-      for (size_t d=0; d<size_t(m_nDim); d++)
-        extentsVector[d].setExtents(static_cast<double>(m_Extents[i*m_nDim*2 + d*2]),static_cast<double>(m_Extents[i*m_nDim*2 + d*2 + 1]));
+    //  // Extents of the box, as a vector
+    ////  std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(m_nDim);
+    //  for (size_t d=0; d<size_t(m_nDim); d++)
+    //    extentsVector[d].setExtents(static_cast<double>(m_Extents[i*m_nDim*2 + d*2]),static_cast<double>(m_Extents[i*m_nDim*2 + d*2 + 1]));
 
-      // retrieve initial and file location and the numner of the events which belong to this box stored on the HDD
-      uint64_t indexStart = m_BoxEventIndex[i*2];
-      uint64_t numEvents  = m_BoxEventIndex[i*2+1];
+    //  // retrieve initial and file location and the numner of the events which belong to this box stored on the HDD
+    //  uint64_t indexStart = m_BoxEventIndex[i*2];
+    //  uint64_t numEvents  = m_BoxEventIndex[i*2+1];
 
-      totalNumEvents+=numEvents;
-      if (box_type == 1)
-      {
-        // --- Make a MDBox -----
-        if(BoxStructureOnly)
-        {
-          box = new MDBox<MDE,nd>(bc, m_Depth[i], extentsVector,-1);
-          // Only the box structure is being loaded, so ISavable will be undefined (NeverSaved, 0 size data)
-          box->setFilePosition(std::numeric_limits<uint64_t>::max(), 0,false); // this should be default state of ISavable
-        }
-        else // !BoxStructureOnly)
-        {
+    //  totalNumEvents+=numEvents;
+    //  if (box_type == 1)
+    //  {
+    //    // --- Make a MDBox -----
+    //    if(BoxStructureOnly)
+    //    {
+    //      box = new MDBox<MDE,nd>(bc, m_Depth[i], extentsVector);
+    //      // Only the box structure is being loaded, so ISavable will be undefined (NeverSaved, 0 size data)
+    //      box->setFilePosition(std::numeric_limits<uint64_t>::max(), 0,false); // this should be default state of ISavable
+    //    }
+    //    else // !BoxStructureOnly)
+    //    {
 
-          if(FileBackEnd)
-          {
-            box = new MDBox<MDE,nd>(bc, m_Depth[i], extentsVector,-1);
-            // Set the index in the file in the box data
-            box->setFilePosition(indexStart, numEvents,true);
-          }
-          else
-          {
-            box = new MDBox<MDE,nd>(bc, m_Depth[i], extentsVector,int64_t(numEvents));
-            // Set the index in the file in the box data, and indicate that data were not saved
-            box->setFilePosition(indexStart, numEvents,false);
-          }           
-        } // ifBoxStructureOnly
-        ibox = box;
-      }
-      else if (box_type == 2)
-      {
-        // --- Make a MDGridBox -----
-        ibox = new MDGridBox<MDE,nd>(bc, m_Depth[i], extentsVector);
-      }
-      else
-        continue;
+    //      if(FileBackEnd)
+    //      {
+    //        box = new MDBox<MDE,nd>(bc, m_Depth[i], extentsVector,-1);
+    //        // Set the index in the file in the box data
+    //        box->setFilePosition(indexStart, numEvents,true);
+    //      }
+    //      else
+    //      {
+    //        box = new MDBox<MDE,nd>(bc, m_Depth[i], extentsVector,int64_t(numEvents));
+    //        // Set the index in the file in the box data, and indicate that data were not saved
+    //        box->setFilePosition(indexStart, numEvents,false);
+    //      }           
+    //    } // ifBoxStructureOnly
+    //    ibox = box;
+    //  }
+    //  else if (box_type == 2)
+    //  {
+    //    // --- Make a MDGridBox -----
+    //    ibox = new MDGridBox<MDE,nd>(bc, m_Depth[i], extentsVector);
+    //  }
+    //  else
+    //    continue;
 
-      // Force correct ID
-      ibox->setId(i);
-      // calculate volume from extents;
-      ibox->calcVolume();
+    //  // Force correct ID
+    //  ibox->setId(i);
+    //  // calculate volume from extents;
+    //  ibox->calcVolume();
 
-      // Set the cached values
-      ibox->setSignal(m_BoxSignalErrorsquared[i*2]);
-      ibox->setErrorSquared(m_BoxSignalErrorsquared[i*2+1]);
+    //  // Set the cached values
+    //  ibox->setSignal(m_BoxSignalErrorsquared[i*2]);
+    //  ibox->setErrorSquared(m_BoxSignalErrorsquared[i*2+1]);
 
-      // Save the box at its index in the vector.
-      Boxes[i] = ibox;
+    //  // Save the box at its index in the vector.
+    //  Boxes[i] = ibox;
 
-    } // end Box loop
+    //} // end Box loop
 
-    // Go again, giving the children to the parents
-    for (size_t i=0; i<numBoxes; i++)
-    {
-      if (m_BoxType[i] == 2)
-      {
-        size_t indexStart = m_BoxChildren[i*2];
-        size_t indexEnd   = m_BoxChildren[i*2+1] + 1;
-        Boxes[i]->setChildren(Boxes, indexStart, indexEnd);
-      }
-    }
-    bc->setMaxId(numBoxes);
-    return totalNumEvents;
+    //// Go again, giving the children to the parents
+    //for (size_t i=0; i<numBoxes; i++)
+    //{
+    //  if (m_BoxType[i] == 2)
+    //  {
+    //    size_t indexStart = m_BoxChildren[i*2];
+    //    size_t indexEnd   = m_BoxChildren[i*2+1] + 1;
+    //    Boxes[i]->setChildren(Boxes, indexStart, indexEnd);
+    //  }
+    //}
+    //bc->setMaxId(numBoxes);
+    //return totalNumEvents;
+      return 0;
   }
 
 

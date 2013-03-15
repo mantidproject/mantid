@@ -45,14 +45,12 @@ namespace MDEvents
    * @param depth :: recursive split depth
    * @param extentsVector :: size of the box
    */
-  TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
-   : MDBoxBase<MDE, nd>(extentsVector),
+  TMDE(MDGridBox)::MDGridBox(BoxController *const bc, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
+   : MDBoxBase<MDE, nd>(bc,depth,extentsVector),
      numBoxes(0), nPoints(0)
   {
-    this->m_depth = depth;
     if (!bc)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
-    this->m_BoxController = bc;
 
     // How many is it split?
     for (size_t d=0; d<nd; d++)
@@ -76,12 +74,9 @@ namespace MDEvents
   {
     BoxController_sptr bc = box->getBoxController();
     if (!bc)
-      throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
+      throw std::runtime_error("MDGridBox::ctor(): constructing from box:: No BoxController specified in box.");
 
 //    std::cout << "Splitting MDBox ID " << box->getId() << " with " << box->getNPoints() << " events into MDGridBox" << std::endl;
-
-    // Steal the ID from the parent box that is being split.
-    this->setId( box->getId() );
 
     // How many is it split?
     for (size_t d=0; d<nd; d++)
@@ -90,7 +85,7 @@ namespace MDEvents
     // Compute sizes etc.   
     size_t tot = computeSizesFromSplit();
     if (tot == 0)
-      throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
+      throw std::runtime_error("MDGridBox::ctor(): constructing from box::Invalid splitting criterion (one was zero).");
 
    double ChildVol(1);
    for(size_t d=0;d<nd;d++)
@@ -144,7 +139,7 @@ namespace MDEvents
     {
       // Create the box
       // (Increase the depth of this box to one more than the parent (this))
-       MDBox<MDE,nd> * splitBox = new MDBox<MDE,nd>(this->m_BoxController, this->m_depth + 1,-1,int64_t(ID0+i));
+       MDBox<MDE,nd> * splitBox = new MDBox<MDE,nd>(this->m_BoxController, this->m_depth + 1,std::numeric_limits<size_t>::max(),size_t(ID0+i));
       // This MDGridBox is the parent of the new child.
        splitBox->setParent(this);
 
@@ -195,13 +190,13 @@ namespace MDEvents
       const MDGridBox<MDE, nd>* otherMDGridBox = dynamic_cast<const MDGridBox<MDE, nd>* >(otherBox);
       if (otherMDBox)
       {
-        MDBox<MDE, nd> * newBox = new MDBox<MDE, nd>(*otherMDBox);
+        MDBox<MDE, nd> * newBox = new MDBox<MDE, nd>(*otherMDBox,otherBC);
         newBox->setParent(this);
         boxes.push_back( newBox );
       }
       else if (otherMDGridBox)
       {
-        MDGridBox<MDE, nd> * newBox = new MDGridBox<MDE, nd>(*otherMDGridBox);
+        MDGridBox<MDE, nd> * newBox = new MDGridBox<MDE, nd>(*otherMDGridBox,otherBC);
         newBox->setParent(this);
         boxes.push_back( newBox );
       }
@@ -403,10 +398,6 @@ namespace MDEvents
     this->m_errorSquared = 0;
     this->m_totalWeight = 0;
 
-#ifdef MDBOX_TRACK_CENTROID
-    for (size_t d=0; d<nd; d++)
-      this->m_centroid[d] = 0;
-#endif
 
     typename boxVector_t::iterator it;
     typename boxVector_t::iterator it_end = boxes.end();
@@ -427,11 +418,6 @@ namespace MDEvents
         this->m_errorSquared += ibox->getErrorSquared();
         this->m_totalWeight += ibox->getTotalWeight();
 
-#ifdef MDBOX_TRACK_CENTROID
-        // And track the centroid
-        for (size_t d=0; d<nd; d++)
-          this->m_centroid[d] += ibox->getCentroid(d) * ibox->getSignal();
-#endif
       }
     }
     else
@@ -451,45 +437,6 @@ namespace MDEvents
   void MDGridBox)::refreshCentroid(Kernel::ThreadScheduler * ts)
   {
     UNUSED_ARG(ts);
-#ifdef MDBOX_TRACK_CENTROID
-
-    // Start at 0.0
-    for (size_t d=0; d<nd; d++)
-      this->m_centroid[d] = 0;
-
-    // Signal was calculated before (when adding)
-    // Keep 0.0 if the signal is null. This avoids dividing by 0.0
-    if (this->m_signal == 0) return;
-
-    typename boxVector_t::iterator it;
-    typename boxVector_t::iterator it_end = boxes.end();
-
-    if (!ts)
-    {
-      //--------- Serial -----------
-      for (it = boxes.begin(); it != it_end; ++it)
-      {
-        MDBoxBase<MDE,nd> * ibox = *it;
-
-        // Refresh the centroid of all sub-boxes.
-        ibox->refreshCentroid();
-
-        signal_t iBoxSignal = ibox->getSignal();
-        // And track the centroid
-        for (size_t d=0; d<nd; d++)
-          this->m_centroid[d] += ibox->getCentroid(d) * iBoxSignal;
-      }
-    }
-    else
-    {
-      //---------- Parallel refresh --------------
-      throw std::runtime_error("Not implemented");
-    }
-
-    // Normalize centroid by the total signal
-    for (size_t d=0; d<nd; d++)
-      this->m_centroid[d] /= this->m_signal;
-#endif
   }
 
 
@@ -731,7 +678,7 @@ namespace MDEvents
    * @return MDBoxBase pointer.
    */
   template <typename MDE, size_t nd>
-  const MDBoxBase<MDE,nd> * MDGridBox<MDE,nd>::getBoxAtCoord(const coord_t * coords) const
+  const API::IMDNode * MDGridBox<MDE,nd>::getBoxAtCoord(const coord_t * coords) const
   {
     size_t index = 0;
     for (size_t d=0; d<nd; d++)

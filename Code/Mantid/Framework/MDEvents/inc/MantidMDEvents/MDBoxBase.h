@@ -47,16 +47,16 @@ namespace MDEvents
   public:
 
     //-----------------------------------------------------------------------------------------------
-    MDBoxBase();
+    MDBoxBase(Mantid::API::BoxController * const BoxController=NULL,const uint32_t depth=0,const size_t boxID=UNDEF_SIZET);
 
-    MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
+    MDBoxBase(Mantid::API::BoxController * const BoxController,const uint32_t depth,const size_t boxID,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
 
-    MDBoxBase(const MDBoxBase<MDE,nd> & box,const Mantid::API::BoxController * otherBC=NULL);
+    MDBoxBase(const MDBoxBase<MDE,nd> & box,Mantid::API::BoxController *const otherBC);
 
     /// Destructor
     virtual ~MDBoxBase() {}
 
-
+    size_t getFileID()const{return m_fileID;}
     // -------------------------------- Parents/Children-Related -------------------------------------------
    /// Return a pointer to the parent box
     void setParent(IMDNode * parent)
@@ -104,6 +104,16 @@ namespace MDEvents
     /// Add several events, within a given range, with no bounds checking
     virtual size_t addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
     size_t addEventsUnsafe(const std::vector<MDE> & events);
+    //----------------------------------------------------------------------------------------------------------------------
+    /*--------------->  EVENTS from event parts               <-------------------------------------------------------------*/
+    virtual void addEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId);
+    virtual void addAndTraceEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId,size_t index);
+    virtual void addEventUnsafe(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId);
+    //virtual size_t addEventsPart(const std::vector<coord_t> &coords,const signal_t *Signal,const signal_t *errorSq,const  uint16_t *runIndex,const uint32_t *detectorId, const size_t start_at, const size_t stop_at);
+    //virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
+    //               const std::vector<uint16_t> &runIndex=std::vector<uint16_t>(),const std::vector<uint32_t> &detectorId=std::vector<uint32_t>());
+    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
+    //----------------------------------------------------------------------------------------------------------------------
 
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.
@@ -121,15 +131,18 @@ namespace MDEvents
     virtual void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const = 0;
 
     // -------------------------------------------------------------------------------------------
-    /// @return the box controller saved.
-    Mantid::API::BoxController  *getBoxController() const
+    /// @return the const box controller for this box.
+    Mantid::API::BoxController  *const getBoxController() const
     { return m_BoxController; }
+    /// @return the box controller for this box.
+    virtual Mantid::API::BoxController  *const getBoxController()
+     { return m_BoxController; }
 
     /** Set the box controller used.
      * @param controller :: Mantid::API::BoxController *
      */
-    virtual void setBoxController(Mantid::API::BoxController *controller)
-    { m_BoxController = controller; }
+    //virtual void setBoxController(Mantid::API::BoxController *controller)
+    //{ m_BoxController = controller; }
 
 
     // -------------------------------- Geometry/vertexes-Related -------------------------------------------
@@ -315,7 +328,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     /** For testing, mostly: set the recursion depth of this box. SHOULD NOT BE CALLED OUTSIDE OF TESTS!
      * @param depth :: split recursion depth */
-    void setDepth(size_t depth)
+    void setDepth(uint32_t depth)
     {
       m_depth = depth;
     }
@@ -364,14 +377,16 @@ namespace MDEvents
     coord_t m_inverseVolume;
 
     /// The box splitting controller, shared with all boxes in the hierarchy
-    Mantid::API::BoxController *m_BoxController;
+    Mantid::API::BoxController * const m_BoxController;
 
     /// Recursion depth
-    size_t m_depth;
+    uint32_t m_depth;
 
     /// Pointer to the parent of this box. NULL if no parent.
     Mantid::API::IMDNode * m_parent;
 
+    // The id which specify location of this box in a linear chain of ordered boxes (e.g. on file)
+    size_t m_fileID;
   public:
     /// Convenience typedef for a shared pointer to a this type of class
     typedef boost::shared_ptr< MDBoxBase<MDE, nd> > sptr;

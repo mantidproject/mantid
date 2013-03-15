@@ -41,28 +41,31 @@ namespace MDEvents
   class DLLExport MDBox :  public MDBoxBase<MDE, nd>
   {
   public:
-    MDBox();
+    MDBox(Mantid::API::BoxController *const splitter=NULL, const uint32_t depth = 0,
+                        const size_t nBoxEvents=UNDEF_SIZET,const size_t boxID=UNDEF_SIZET);
 
-    MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth = 0,int64_t boxSize=-1,int64_t boxID=-1);
+    MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
+                       const size_t nBoxEvents=UNDEF_SIZET,const size_t boxID=UNDEF_SIZET);
 
-    MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector, int64_t boxSize=-1,int64_t boxID=-1);
-
-    MDBox(const MDBox<MDE,nd> & other,const Mantid::API::BoxController * otherBC=NULL);
+    MDBox(const MDBox<MDE,nd> & other,Mantid::API::BoxController *const otherBC);
 
     virtual ~MDBox();
 
 
     // ----------------------------- ISaveable Methods ------------------------------------------------------
-
+    virtual Kernel::ISaveable *const getISaveable(){return m_Saveable;}
+    virtual Kernel::ISaveable *const getISaveable()const{return m_Saveable;}
+    
+ 
     /** returns true if it is box (avoid rtti?) */
     virtual bool isBox()const{return true;}
     //-----------------------------------------------------------------------------------------------
-
     void clear();
-    /** Remove box data from memory */
-    void clearDataFromMemory();
+
 
     uint64_t getNPoints() const;
+    size_t getDataInMemorySize()const{return data.size();}
+    uint64_t getTotalDataSize()const{return getNPoints();}
 
     size_t getNumDims() const;
 
@@ -73,23 +76,16 @@ namespace MDEvents
     { return 0; }
 
     /// Return the indexth child MDBoxBase.
-    MDBoxBase<MDE,nd> * getChild(size_t /*index*/)
+    API::IMDNode * getChild(size_t /*index*/)
         { throw std::runtime_error("MDBox does not have children."); }
 
     /// Sets the children from a vector of children
-    void setChildren(const std::vector<MDBoxBase<MDE,nd> *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
+    void setChildren(const std::vector<API::IMDNode *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
     { throw std::runtime_error("MDBox cannot have children."); }
-
 
    
     /// @return true if events were added to the box (using addEvent()) while the rest of the event list is cached to disk
-    bool isDataAdded() const
-    {
-      if(m_isLoaded)
-        return data.size()!=this->getFileSize();
-      else
-        return (data.size() != 0);
-    }
+    bool isDataAdded() const;
 
  
     /* Getter to determine if masking is applied.
@@ -117,13 +113,6 @@ namespace MDEvents
     virtual void getEventsData(std::vector<coord_t> &coordTable,size_t &nColumns)const ;
     virtual void setEventsData(const std::vector<coord_t> &coordTable);
 
-    virtual void addEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId);
-    virtual void addAndTraceEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId,size_t index);
-    virtual void addEventUnsafe(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId);
-    //virtual size_t addEventsPart(const std::vector<coord_t> &coords,const signal_t *Signal,const signal_t *errorSq,const  uint16_t *runIndex,const uint32_t *detectorId, const size_t start_at, const size_t stop_at);
-    //virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
-    //               const std::vector<uint16_t> &runIndex=std::vector<uint16_t>(),const std::vector<uint32_t> &detectorId=std::vector<uint32_t>());
-    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
 
     void addEvent(const MDE & Evnt);
     void addAndTraceEvent(const MDE & point,size_t index);
@@ -135,21 +124,27 @@ namespace MDEvents
 
     void generalBin(MDBin<MDE,nd> & bin, Mantid::Geometry::MDImplicitFunction & function) const;
 
+  //---------------------------------------------------------------------------------------------------------------------------------
+    void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)
+    { /* Do nothing with a box default. */ }
+
+    /** Recalculate signal etc. */
+    void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL);
+   /** Calculate the centroid of this box. */
+    void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL)
+    {};
+    void calculateCentroid(coord_t * centroid) const;
+
     void calculateDimensionStats(MDDimensionStats * stats) const;
 
     void integrateSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
 
     void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const;
+ 
+  //------------------------------------------------------------------------------------------------------------------------------------
+    //void saveNexus(::NeXus::File * file) const;
 
-    void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL);
-
-    void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL);
-
-    void calculateCentroid(coord_t * centroid) const;
-
-    void saveNexus(::NeXus::File * file) const;
-
-    void loadNexus(::NeXus::File * file, bool setLoaded=true);
+    //void loadNexus(::NeXus::File * file, bool setLoaded=true);
 
     void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
     void getBoxes(std::vector<API::IMDNode *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
@@ -178,7 +173,8 @@ namespace MDEvents
 
      /// Flag indicating that masking has been applied.
     bool m_bIsMasked;
-
+  private:
+    void clearDataFromMemory();
   public:
     /// Typedef for a shared pointer to a MDBox
     typedef boost::shared_ptr< MDBox<MDE, nd> > sptr;
