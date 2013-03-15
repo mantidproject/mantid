@@ -39,7 +39,7 @@ public:
 
   void testExec()
   {
-    IAlgorithm* setmat = Mantid::API::FrameworkManager::Instance().createAlgorithm("SetSZampleMaterial");
+    IAlgorithm* setmat = Mantid::API::FrameworkManager::Instance().createAlgorithm("SetSampleMaterial");
     if ( !setmat->isInitialized() ) setmat->initialize();
 
     // Create a small test workspace
