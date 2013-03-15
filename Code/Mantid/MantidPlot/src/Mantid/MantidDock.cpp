@@ -44,6 +44,7 @@
 #include <iomanip>
 #include <cstdio>
 #include <algorithm>
+#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -1671,7 +1672,8 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
     static_cast<MantidDockWidget*>(parentWidget())->populateChildData(*it);
 
     // Look for children (workspace groups)
-    if ( (*it)->child(0)->text(0) == "WorkspaceGroup" )
+    QTreeWidgetItem *child = (*it)->child(0);
+    if ( child && child->text(0) == "WorkspaceGroup" )
     {
       // Have to populate the group's children if it hasn't been expanded
       if (!(*it)->isExpanded()) static_cast<MantidDockWidget*>(parentWidget())->populateChildData(*it);
