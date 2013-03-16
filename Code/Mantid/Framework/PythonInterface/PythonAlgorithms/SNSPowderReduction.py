@@ -634,7 +634,7 @@ class SNSPowderReduction(PythonAlgorithm):
         numwksp = 1
         if splitwksp is not None: 
             # FIXME Unfiltered workspace (remainder) is not considered here
-            numwksp = splitwksp.rowCount()
+            numwksp = self.getNumberOfSplittedWorkspace(splitwksp)
             if filterWall[0] < 1.0E-20 and filterWall[1] < 1.0E-20: 
                 # do splitting if and only if filterWall is not defined well (redundent check)
                 dosplit = True
@@ -904,5 +904,20 @@ class SNSPowderReduction(PythonAlgorithm):
 
         return filterWall
 
+
+    def getNumberOfSplittedWorkspace(self, splitwksp):
+        """ Get number of splitted workspaces due to input splitwksp
+
+        Return : integer
+        """
+        splitws = mtd["PG3_9829_event_splitters"]
+        numrows = splitws.rowCount()
+        wscountdict = {}
+        for r in xrange(numrows): 
+            wsindex = splitws.cell(r,2) 
+            wscountdict[wsindex] = 0
+
+        return len(wscountdict.keys())
+        
 # Register algorthm with Mantid.
 registerAlgorithm(SNSPowderReduction)
