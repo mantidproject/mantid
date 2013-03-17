@@ -94,7 +94,7 @@ namespace Crystal
 
      void setHeighHalfWidthInfo( Mantid::MantidVecPtr &xvals,
          Mantid::MantidVecPtr &yvals,Mantid::MantidVecPtr &counts,
-         double ROW,double COL);
+         double ROW,double COL, std::vector<double> & StatBase);
 
      void setCurrentRadius( double radius)
      {
