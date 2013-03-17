@@ -257,16 +257,6 @@ namespace DataHandling
 		for (size_t i0=0; i0<ia; i0++)
 		{
                         if (numberAtoms[i0] == 0)numberAtoms[i0] = 1;
-			if (atoms[i0].compare("D") == 0)
-			{
-				atoms[i0] = "H";
-				aNumbers[i0] = 2;
-			}
-			else if (atoms[i0].compare("T") == 0)
-			{
-				atoms[i0] = "H";
-				aNumbers[i0] = 3;
-			}
 		}
   }
 }
