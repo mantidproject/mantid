@@ -120,3 +120,50 @@ merge_in_progress() {
     fi
     return $retval
 }
+
+# Publish given branch
+publish_branch() {
+    if [ ! $# -eq 1 ]; then
+	echo "publish_branch requires a single local branchname argument"
+	exit 1
+    fi
+    
+     git_halt_on_error push origin $1
+}
+
+# Update given local branch to remote
+# Essentially
+# git fetch -p
+# git rebase --preserve-merges origin/<branchname>
+update_branch_from_remote() {
+    if [ ! $# -eq 1 ]; then
+	echo "update_branch_from_remote requires a single local branchname argument"
+	exit 1
+    fi
+
+    git_halt_on_error fetch -p
+    git_halt_on_error rebase --preserve-merges origin/$1
+}
+
+# Delete branch on remote
+delete_remote_branch() {
+    if [ ! $# -eq 1 ]; then
+	echo "delete_remote_branch requires a single local branchname argument"
+	exit 1
+    fi
+    # Delete branch on the remote
+    git_halt_on_error push origin :$1
+}
+
+# Delete branch locally
+delete_local_branch() {
+    if [ ! $# -eq 1 ]; then
+	echo "delete_local_branch requires a single local branchname argument"
+	exit 1
+    fi
+    # Delete local branch if there
+    local_branch_exists $1
+    if [ $? -eq 1 ]; then
+	git_halt_on_error branch -D $1
+    fi
+}

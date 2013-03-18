@@ -100,6 +100,9 @@ start_testing() {
 	exit 1
     fi    
 
+    # Ensure we have everything from the remote
+    git_halt_on_error fetch -p
+
     # Is the name correct
     remote_branch_exists ${TEST_BRANCH}
     if [ $? -eq 0 ]; then
@@ -176,15 +179,10 @@ end_testing() {
 	    read publish
 	done
 	if [ "${publish}" = "y" ]; then
-	    # Publish
-	    git_halt_on_error push origin ${PRODUCTION_BRANCH}
-	    # Delete branch on the remote
-            git_halt_on_error push origin :${testbranch}
-            # Delete local branch if there
-            local_branch_exists ${testbranch}
-            if [ $? -eq 1 ]; then
-		git_halt_on_error branch -D ${testbranch}
-            fi
+	    update_branch_from_remote ${PRODUCTION_BRANCH}
+	    publish_branch ${PRODUCTION_BRANCH}
+	    delete_remote_branch ${testbranch}
+	    delete_local_branch ${testbranch}
 	else
 	    echo "Warning: Branch is still merged locally but has NOT been pushed to the remote."
 	    exit 0
@@ -227,9 +225,6 @@ main() {
 	exit 1
     fi
 
-    # Ensure we have everything from the remote
-    git_halt_on_error fetch -p
-        
     if [ $START_MODE -eq 1 ]; then
         start_testing
     elif [ $RESULT_MODE -eq 1 ]; then
