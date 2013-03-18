@@ -906,6 +906,7 @@ namespace CurveFitting
     * @param function :: an instance of a function to fit
     * @param dataws :: a workspace with the data
     * @param wsindex :: a histogram index
+    * @param powerfit :: a flag to choose a robust algorithm to fit function
     *
     * Return: double chi2 of the final (best) solution.  If fitting fails, chi2 wil be maximum double
     */
