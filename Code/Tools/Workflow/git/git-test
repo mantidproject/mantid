@@ -123,17 +123,17 @@ start_testing() {
     fi
         
     # Update master
-    git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
+    git_halt_on_error rebase --preserve-merges origin/${PRODUCTION_BRANCH}
     
     # Merge test branch
     git_ignore_errors merge --no-ff origin/${TEST_BRANCH}
     if [ $? -gt 0 ]; then
-	echo "There were conflicts during the merge. If they are trivial please fix them, resolve the merge with 'git add' & 'git commit' and rerun this command."
-	echo "If you are unsure, fail the ticket and the talk to the develop so they can solve the issues."
-	git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
+	echo
+	echo "WARNING: There were conflicts during the merge. If they are trivial please fix them, "
+        echo "resolve the merge with 'git add' & 'git commit' and rerun this command."
+	echo "If you are unsure fail the ticket, run 'git merge --abort' and talk to the develop about solving the issues."
 	exit 1
     fi
-
 
     # Save a file of the changes made on this branch for review and point the tester to 
     # a prettier version on github
