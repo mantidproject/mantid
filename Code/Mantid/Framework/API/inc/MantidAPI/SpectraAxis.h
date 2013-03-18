@@ -58,12 +58,11 @@ class MatrixWorkspace;
 class MANTID_API_DLL SpectraAxis: public Axis
 {
 public:
-  explicit SpectraAxis(const std::size_t& length, const bool initWithDefaults = true);
-  explicit SpectraAxis(const std::size_t length, const Geometry::ISpectraDetectorMap & spectramap);
+  explicit SpectraAxis(const MatrixWorkspace* const parentWorkspace);
   virtual ~SpectraAxis(){}
-  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
-  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace = NULL);
-  virtual std::size_t length() const{return m_values.size();}
+  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace);
+  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace);
+  virtual std::size_t length() const;
   /// If this is a spectra Axis - always true for this class
   virtual bool isSpectra() const{return true;}
   virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
@@ -71,22 +70,23 @@ public:
   virtual bool operator==(const Axis&) const;
   std::string label(const std::size_t& index)const;
 
-  const specid_t& spectraNo(const std::size_t& index) const;
+  specid_t spectraNo(const std::size_t& index) const;
   // Get a map that contains the spectra index as the key and the index in the array as teh value
   void getSpectraIndexMap(spec2index_map&) const;
   void getIndexSpectraMap(index2spec_map& map) const;
 
-  /// returns min value defined on axis
-  double getMin()const{return double(m_values.front()) ; }
-   /// returns max value defined on axis
-  double getMax()const{return double(m_values.back()); }
+  double getMin() const;
+  double getMax() const;
+
 private:
   /// Default constructor
   SpectraAxis();
+  /// Private, undefined copy constructor
+  SpectraAxis(const SpectraAxis&);
   /// Private, undefined copy assignment operator
   const SpectraAxis& operator=(const SpectraAxis&);
-  /// A vector holding the axis values for the axis.
-  std::vector<specid_t> m_values;
+  /// A pointer to the workspace holding the axis
+  const MatrixWorkspace* const m_parentWS;
 };
 
 } // namespace API

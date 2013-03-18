@@ -4,17 +4,9 @@ to the mantidproject.org"""
 from pdb import set_trace as trace
 import optparse
 import os
-import mwclient
 import ConfigParser
-import string
-import time
-import datetime
-import subprocess
-import commands
 import sys
-import codecs
 import re
-import fnmatch
 import wiki_tools
 from wiki_tools import *
 from wiki_report import WikiReporter
@@ -23,14 +15,6 @@ import platform
 
 # Junit report generator.
 reporter = WikiReporter()
-# no version identier
-noversion = -1
-# Direction
-InputDirection = "Input"
-OutputDirection = "Output"
-InOutDirection = "InOut"
-NoDirection = "None"
-direction_string = [InputDirection, OutputDirection, InOutDirection, NoDirection]
 
 #======================================================================
 def get_wiki_description(algo, version):
@@ -451,14 +435,14 @@ def create_function_signature(alg, algo_name):
 def do_algorithm(args, algo, version):
     """ Do the wiki page
     @param algo :: the name of the algorithm, and it's version as a tuple"""
-    global mtd
     is_latest_version = True
     # Find the latest version        
-    latest_version = mtd.createAlgorithm(algo, noversion).version()
+    latest_version = find_latest_alg_version(algo)
     if (version == noversion): 
         version = latest_version
 
     print "Latest version of %s is %d. You are making version %d." % (algo, latest_version, version)
+
     # What should the name on the wiki page be?
     wiki_page_name = algo
     if latest_version > 1:
@@ -588,22 +572,31 @@ if __name__ == "__main__":
 
     if len(algos)==0:
         parser.error("You must specify at least one algorithm.")
-    
+
+    # Command-line overrides anything for finding Mantid
+    if args.mantidpath is not None:
+        os.environ['MANTIDPATH'] = args.mantidpath        
+    elif not "MANTIDPATH" in os.environ:
+        raise RuntimeError("Cannot find Mantid. MANTIDPATH environment variable not set & --mantidpath option not given")
+    else:
+        pass
+    # Make sure the internal module use can find Mantid 
+    sys.path.append(os.environ['MANTIDPATH'])
+
+        # Check if python_d must be used to call into Mantid
     if platform.system() == 'Windows':
-        os.environ['MANTIDPATH'] = args.mantidpath
+        flag_if_build_is_debug(os.environ['MANTIDPATH'])
+        module_dir = os.path.dirname(__file__)
+        os.environ["PYTHONPATH"] = os.environ.get("PYTHONPATH","") + ";" + module_dir + ";" + os.environ['MANTIDPATH']
     
-    initialize_Mantid(args.mantidpath)
-    global mtd
-    from MantidFramework import IWorkspaceProperty, WorkspaceProperty
-    mtd = wiki_tools.mtd
-    intialize_files()
     initialize_wiki(args)
   
     if len(algos) == 1 and algos[0] == "ALL":
-        print "Documenting All Algorithms"
-        allAlgorithms = get_all_algorithms_tuples()
-        for algo_tuple in allAlgorithms:
-            do_algorithm(args, algo_tuple[0], algo_tuple[1][0])
+        print "Documenting ALL Algorithms"
+        alg_to_vers = get_algorithm_to_version_lookup()
+        for name, versions in alg_to_vers.iteritems():
+            for version in versions:
+                do_algorithm(args, name, version)
     else:
         for algo in algos:
             do_algorithm(args, algo, int(args.algversion))

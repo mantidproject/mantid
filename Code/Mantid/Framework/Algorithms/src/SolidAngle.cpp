@@ -132,8 +132,8 @@ namespace Mantid
         PARALLEL_START_INTERUPT_REGION
         int i = j + m_MinSpec;
         try {
-          // Get the spectrum number for this histogram
-          outputWS->getAxis(1)->setValue(j, inputWS->getAxis(1)->spectraNo(i));
+          // Copy over the spectrum number & detector IDs
+          outputWS->getSpectrum(j)->copyInfoFrom(*inputWS->getSpectrum(i));
           // Now get the detector to which this relates
           Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
           // Solid angle should be zero if detector is masked ('dead')

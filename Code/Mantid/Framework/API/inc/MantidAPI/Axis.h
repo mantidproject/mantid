@@ -50,9 +50,9 @@ public:
   virtual ~Axis();
 
   /// Virtual constructor
-  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL) = 0;
+  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace) = 0;
   /// Virtual constructor for axis of different length
-  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace = NULL) = 0;
+  virtual Axis* clone(const std::size_t length, const MatrixWorkspace* const parentWorkspace) = 0;
 
   const std::string& title() const;
   std::string& title();
@@ -84,8 +84,8 @@ public:
   /// @param index :: The index
   /// @param value :: The new value
   virtual void setValue(const std::size_t& index, const double& value) = 0;
-  /// Get a non-mutable spectrum index
-  virtual const specid_t& spectraNo(const std::size_t& index) const;
+  /// Get the spectrum index
+  virtual specid_t spectraNo(const std::size_t& index) const;
 
   /// Get the length of the axis
   virtual std::size_t length() const = 0;

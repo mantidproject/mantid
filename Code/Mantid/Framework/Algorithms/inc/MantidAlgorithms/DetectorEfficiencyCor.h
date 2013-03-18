@@ -111,7 +111,7 @@ class DLLExport DetectorEfficiencyCor : public API::Algorithm
   /// Computes an approximate expansion of a Chebysev polynomial
   double chebevApprox(double a, double b, const double exspansionCoefs[], double x) const;
   /// Log any errors with spectra that occurred
-  void logErrors() const;
+  void logErrors(size_t totalNDetectors) const;
 
 
 private:

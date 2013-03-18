@@ -530,7 +530,7 @@ namespace Mantid
           Y.assign(mondata(),mondata() + m_numberOfChannels);
           MantidVec& E = local_workspace->dataE(hist_index);
           std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-          local_workspace->getAxis(1)->setValue(hist_index, static_cast<specid_t>(it->first));
+          //local_workspace->getAxis(1)->setValue(hist_index, static_cast<specid_t>(it->first));
 
           NXFloat timeBins = monitor.openNXFloat("time_of_flight");
           timeBins.load();
@@ -621,7 +621,7 @@ namespace Mantid
         std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
         // Populate the workspace. Loop starts from 1, hence i-1
         local_workspace->setX(hist, m_tof_data);
-        local_workspace->getAxis(1)->setValue(hist, static_cast<specid_t>(spec_num));
+        //local_workspace->getAxis(1)->setValue(hist, static_cast<specid_t>(spec_num));
         ++hist;
         ++spec_num;
       }

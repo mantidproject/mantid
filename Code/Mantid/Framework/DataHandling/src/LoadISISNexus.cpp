@@ -373,7 +373,7 @@ namespace Mantid
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, m_timeChannelsVec);
-      localWorkspace->getAxis(1)->setValue(hist, m_spec[i]);
+      //localWorkspace->getAxis(1)->setValue(hist, m_spec[i]);
 
       m_filehandle->closeData();
     }

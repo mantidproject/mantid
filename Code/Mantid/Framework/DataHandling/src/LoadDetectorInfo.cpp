@@ -677,7 +677,8 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
 /** Creates or modifies the parameter map for the specified detector adding
 *  pressure and wall thickness information
 *  @param params :: these will be written to the detector paraments 3He(atm)=pressure) and wallT(m)=wall thickness
-*  @param change :: if the parameters are successfully changed they are stored here
+*  @param change :: if the parameters are successfully changed they are stored here if doLogging below is set to true
+*  @param doLogging:: if true, sets detectrorInfo &change to the current detector info value, if false, &change remains untouched by the routine
 *  @throw NotFoundError if a pointer to the specified detector couldn't be retrieved
 */
 void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInfo &change,bool doLogging)
@@ -1095,6 +1096,11 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
     throw std::invalid_argument("the NeXus file "+fName+" does not contain necessary detector's information");
 
   g_log.notice() << "Detectors indo loaded from nexus file, starting applying corrections\n";
+  // adjust progress and allow user to cancel
+  progress(0.1);  
+  interruption_point();
+
+
 
   // process detectors and modify instrument
   size_t nDetectors = detStruct.size();
@@ -1156,43 +1162,39 @@ void LoadDetectorInfo::readNXS(const std::string& fName)
       else
       {
         differentOffsets=true;
-
+      }
     }
 
 
-    if(m_moveDets)
+    bool exception(false);
+    try
     {
-      bool exception(false);
-      try
-      {
-        setDetectorParams(detStruct[i], log,false);
-      }
-      catch (Exception::NotFoundError &)
-      {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
-        //PARALLEL_CRITICAL(non_existing_detector)
-        {
-          missingDetectors.push_back(detStruct[i].detID);
-        }
-        // Set the flag to signal that we should call continue outside of the catch block. Works around a defect with the Intel compiler.
-        exception = true;
-      }
-      if ( exception ) continue;
+        setDetectorParams(detStruct[i], log);
+        sometimesLogSuccess(log, noneSet);
     }
+    catch (Exception::NotFoundError &)
+    {// there are likely to be some detectors that we can't find in the instrument definition and we can't save parameters for these. We can't do anything about this just report the problem at the end
+        //PARALLEL_CRITICAL(non_existing_detector)
+      {
+          missingDetectors.push_back(detStruct[i].detID);
+      }
+        // Set the flag to signal that we should call continue outside of the catch block. Works around a defect with the Intel compiler.
+       exception = true;
+    }
+    if ( exception ) continue;   
 
     // report progress and check for a user cancel message at regualar intervals
-
     if ( i % 100 == 0 )
     {	
         //PARALLEL_CRITICAL(logging)
         {
-            log = detStruct[i];
-            sometimesLogSuccess(log, noneSet);
+            //log = detStruct[i];
+            //sometimesLogSuccess(log, noneSet);
             progress(static_cast<double>(i));
             interruption_point();
         }
     }
-    
-    }
+        
     //PARALLEL_END_INTERUPT_REGION
   }
   //PARALLEL_CHECK_INTERUPT_REGION
@@ -1284,7 +1286,6 @@ void LoadDetectorInfo::readLibisisNXS(::NeXus::File *hFile, std::vector<detector
     
 }
 
-
 /**Read detector.dat information (see ) written in NeXus format 
  * @param hFile -- pointer to the opened NeXus file handle, opened at the group, which contains Libisis Detector information
  * @param  detStruct -- the vector of the DetectorInfo structures, describing the detectors to modify
@@ -1304,7 +1305,7 @@ void LoadDetectorInfo::readDetDotDatNXS(::NeXus::File *hFile, std::vector<detect
     // read the detector's time offsets 
     hFile->readData<float>("timeOffsets",timeOffsets);
 
-    size_t nDetectors = timeOffsets.size()/2;
+    int nDetectors = static_cast<int>(timeOffsets.size()/2);
     std::vector<float> detSphericalCoord;
     if(m_moveDets)
     {
@@ -1319,14 +1320,12 @@ void LoadDetectorInfo::readDetDotDatNXS(::NeXus::File *hFile, std::vector<detect
     hFile->readData<float>("detPressureAndWall",detPrWall);
 
 
-
-
-   if(nDetectors!=detSphericalCoord.size()/3||nDetectors!=detPrWall.size()/2||nDetectors!=detID.size()/2)
-     throw std::runtime_error("The size of nexus data columns is not equal to each other");
-
-   if(nDetectors > std::numeric_limits<int>::max())
-       throw std::runtime_error("The number of detectors is bigger then max int for current architecture");
-
+    if(nDetectors!=static_cast<int>(detSphericalCoord.size()/3)
+            ||nDetectors!=static_cast<int>(detPrWall.size()/2)
+            ||nDetectors!=static_cast<int>(detID.size()/2))
+    {
+        throw std::runtime_error("The size of nexus data columns is not equal to each other");
+    }
 
    detStruct.resize(nDetectors);
    detOffset.resize(nDetectors);
