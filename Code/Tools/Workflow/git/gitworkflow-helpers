@@ -54,6 +54,21 @@ check_branch_exists() {
     fi
 }
 
+# Given a hint try and find the branch on the remote
+# If the name resolves unambigously then the branchname is returned, otherwise
+# and empty string is returned
+find_remote_branch_from_hint() {
+    if [ ! $# -eq 1 ]; then
+	echo "find_remote_branch requires a hint"
+	exit 1
+    fi
+    remote_branches=$(git branch -r --no-color | grep -E "${1}" | grep origin)
+    nbranches=$(echo "${remote_branches}" | wc -l) # the quotes are necessary to make it keep the separate lines!
+    if [ $nbranches -eq 1 ]; then
+	echo ${remote_branches}
+    fi
+}
+
 # Returns the name of the current branch
 current_branch() {
     git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
