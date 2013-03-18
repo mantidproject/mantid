@@ -118,7 +118,7 @@ start_on_develop() {
     # Merge as it has already been done, just push. It is likely, given the time spread that origin/develop has been updated and it
     # is possible that develop has been recreated
     prefetch_sha1=$(git rev-parse origin/${BUILD_BRANCH})
-    run_git_halt_on_error fetch -p
+    git_halt_on_error fetch -p
     postfetch_sha1=$(git rev-parse origin/${BUILD_BRANCH})
 
     # Check for forced update. Works by checking if there are commits reachable from the old that are not reachable from the new
