@@ -172,6 +172,7 @@ end_testing() {
 	echo "Testing passed on ${testbranch}. Push master to remote (y/n)?"
 	read publish
 	if [ "${publish}" = "y" ]; then
+	    # Publish
 	    git_halt_on_error push origin ${PRODUCTION_BRANCH}
 	    # Delete branch on the remote
             git_halt_on_error push origin :${testbranch}
@@ -180,9 +181,12 @@ end_testing() {
             if [ $? -eq 1 ]; then
 		git_halt_on_error branch -D ${testbranch}
             fi
+	else
+	    echo "Warning: Branch is still merged locally but has NOT been pushed to the remote."
+	    exit 0
 	fi
     else
-	echo "Testing failed on branch ${testbranch}. Resetting ${PRODUCTION_BRANCH} to origin/${PRODUCTION_BRANCH}"
+	echo "Testing failed on branch ${testbranch}. ${PRODUCTION_BRANCH} reset to origin/${PRODUCTION_BRANCH}"
         git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
     fi
 
