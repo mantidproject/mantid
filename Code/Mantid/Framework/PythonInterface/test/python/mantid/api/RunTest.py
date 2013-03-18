@@ -1,6 +1,7 @@
 import unittest
 from testhelpers import run_algorithm
 from mantid.geometry import Goniometer
+from mantid.kernel import DateAndTime
 
 class RunTest(unittest.TestCase):
 
@@ -86,6 +87,7 @@ class RunTest(unittest.TestCase):
         runstart = run.startTime()
         runstartstr = str(runstart)
         self.assertEquals(runstartstr, "2008-12-18T17:58:38")
+        self.assertTrue(isinstance(runstart, DateAndTime))
 
         return
 
