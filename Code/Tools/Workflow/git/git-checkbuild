@@ -79,6 +79,7 @@ start_on_feature() {
     if [ $? -gt 0 ]; then
 	# Record what was attempted to be merged
 	git config ${MERGENAME_CFG_KEY} ${mergebranch}
+	echo
 	echo "When you have resolved the conflicts with 'git add' then 'git commit' rerun this command from ${BUILD_BRANCH}."
 	exit 1
     else
@@ -143,6 +144,9 @@ start_on_develop() {
     if [ $? -gt 0 ]; then
 	echo "Warning: An error occurred when switching back to ${mergebranch}. Still on ${BUILD_BRANCH}!"
     fi
+
+    # Remove any stored name
+    git config --unset ${MERGE_CFG_KEY} 2> /dev/null
 }
 
 main() {
