@@ -51,7 +51,10 @@ class QSettings;
   \date   September 2008
   \version 1.0
 
-  This is a QT widget for the controls and display of instrument geometry
+  This is a QT widget for the controls and display of instrument geometry. 
+  The user documentation can be found at http://www.mantidproject.org/MantidPlot:_Instrument_View
+  and needs to be updated whenever the instrument view functionality changes.
+
  */
 class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver
 {
