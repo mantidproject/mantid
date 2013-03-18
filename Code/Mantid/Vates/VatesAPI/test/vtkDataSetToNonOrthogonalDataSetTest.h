@@ -3,6 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <vtkDataArray.h>
 #include <vtkFieldData.h>
@@ -11,11 +17,59 @@
 #include <vtkRectilinearGrid.h>
 #include <vtkUnstructuredGrid.h>
 
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::MDEvents;
+using namespace Mantid::MDEvents::MDEventsTestHelper;
 using namespace Mantid::VATES;
 
 class vtkDataSetToNonOrthogonalDataSetTest : public CxxTest::TestSuite
 {
 private:
+
+  std::string createMantidWorkspace()
+  {
+    // Creating an MDEventWorkspace as the content is not germain to the
+    // information necessary for the non-orthogonal axes
+    std::string wsName = "simpleWS";
+    IMDEventWorkspace_sptr ws = makeAnyMDEW<MDEvent<4>, 4>(1, 0.0, 1.0, 1, wsName);
+
+    // Set the UB matrix
+    ExperimentInfo_sptr expInfo = ExperimentInfo_sptr(new ExperimentInfo());
+    ws->addExperimentInfo(expInfo);
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SetUB");
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("Workspace", wsName);
+    alg->setProperty("a", 3.643);
+    alg->setProperty("b", 3.643);
+    alg->setProperty("c", 5.781);
+    alg->setProperty("alpha", 90.0);
+    alg->setProperty("beta", 90.0);
+    alg->setProperty("gamma", 120.0);
+    std::vector<double> uVec {1, 1, 0};
+    std::vector<double> vVec {0, 0, 1};
+    alg->setProperty("u", uVec);
+    alg->setProperty("v", vVec);
+    alg->execute();
+
+    // Create the coordinate transformation information
+    std::vector<Mantid::coord_t> affMatVals {1, 0, 0, 0, 0,
+                                             0, 0, 1, 0, 0,
+                                             0, 0, 0, 1, 0,
+                                             0, 1, 0, 0, 0,
+                                             0, 0, 0, 0, 1};
+    CoordTransformAffine affMat(4, 4);
+    affMat.setMatrix(Matrix<Mantid::coord_t>(affMatVals));
+
+    // Create the transform (W) matrix
+    DblMatrix wMat(3, 3, true);
+    ws->setWTransf(wMat);
+
+    return wsName;
+  }
+
   vtkUnstructuredGrid *createSingleVoxelPoints()
   {
     vtkUnstructuredGrid* ds = vtkUnstructuredGrid::New();
@@ -66,6 +120,7 @@ public:
 
   void testSimpleDataset()
   {
+    std::string wsName = createMantidWorkspace();
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
     vtkDataSetToNonOrthogonalDataSet converter(ds);
     TS_ASSERT_THROWS_NOTHING(converter.execute());
