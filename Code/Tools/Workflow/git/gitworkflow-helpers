@@ -57,9 +57,9 @@ check_branch_exists() {
 # Given a hint try and find the branch on the remote
 # If the name resolves unambigously then the branchname is returned, otherwise
 # and empty string is returned
-find_remote_branch_from_hint() {
+find_branch_on_remote() {
     if [ ! $# -eq 1 ]; then
-	echo "find_remote_branch requires a hint"
+	echo "find_branch_on_remote requires a hint"
 	exit 1
     fi
     remote_branches=$(git branch -r --no-color | grep -E "${1}" | grep origin)
