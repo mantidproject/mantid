@@ -99,7 +99,7 @@ namespace MDEvents
 
     /// Add several events, within a given range
     virtual size_t addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
-    size_t addEvents(const std::vector<MDE> & events);
+    virtual size_t addEvents(const std::vector<MDE> & events);
 
     /// Add several events, within a given range, with no bounds checking
     virtual size_t addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);

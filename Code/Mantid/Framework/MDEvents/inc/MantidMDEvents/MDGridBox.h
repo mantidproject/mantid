@@ -92,10 +92,8 @@ namespace MDEvents
     std::vector< MDE > * getEventsCopy();
     void addEvent(const MDE & event);
     void addAndTraceEvent(const MDE & point,size_t index);
-
-    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
-
     void addEventUnsafe(const MDE & event);
+    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 

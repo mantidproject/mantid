@@ -1,14 +1,18 @@
 #ifndef MDBOX_H_
 #define MDBOX_H_
 
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+
+
+#include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDDimensionStats.h"
 #include "MantidMDEvents/MDLeanEvent.h"
-#include "MantidKernel/ThreadScheduler.h"
+
 
 #undef MDBOX_TRACK_SIGNAL_WHEN_ADDING
 
@@ -41,7 +45,7 @@ namespace MDEvents
   class DLLExport MDBox :  public MDBoxBase<MDE, nd>
   {
   public:
-    MDBox(Mantid::API::BoxController *const splitter=NULL, const uint32_t depth = 0,
+    MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth = 0,
                         const size_t nBoxEvents=UNDEF_SIZET,const size_t boxID=UNDEF_SIZET);
 
     MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
@@ -115,6 +119,7 @@ namespace MDEvents
     void addEventUnsafe(const MDE & Evnt);
     size_t addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
     size_t addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
+    size_t addEvents(const std::vector<MDE> & events);
 
     virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
 

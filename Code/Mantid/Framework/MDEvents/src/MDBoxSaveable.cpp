@@ -5,6 +5,7 @@ namespace Mantid
 {
 namespace MDEvents
 {
+   using Mantid::Kernel::DiskBuffer;
    MDBoxSaveable::MDBoxSaveable(API::IMDNode *const, size_t ID)
    {
    }

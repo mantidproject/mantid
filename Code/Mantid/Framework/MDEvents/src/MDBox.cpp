@@ -6,7 +6,6 @@
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/BoxCtrlChangesList.h"
 
-using Mantid::Kernel::DiskBuffer;
 using namespace Mantid::API;
 
 namespace Mantid
@@ -469,8 +468,6 @@ namespace MDEvents
 
   }
 
-
-
  
    //virtual size_t addEventsPart(const std::vector<coord_t> &coords,const signal_t *Signal,const signal_t *errorSq,const  uint16_t *runIndex,const uint32_t *detectorId, const size_t start_at, const size_t stop_at);
   //-----------------------------------------------------------------------------------------------
@@ -493,6 +490,16 @@ namespace MDEvents
      dataMutex.unlock();
     return 0;
   }
+  /**Add all events 
+   * @param events :: vector of events to be copied.
+   * @return the number of events that were rejected (because of being out of bounds)
+  */ 
+  TMDE(
+  size_t MDBox)::addEvents(const std::vector<MDE> & events)
+  {
+      return this->addEventsPart(events,0,events.size());
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Add several events, within a given range, with no bounds checking,
