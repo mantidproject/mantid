@@ -83,35 +83,80 @@ def add_wiki_description(algo, wikidesc):
         f = codecs.open(source, encoding='utf-8', mode='w+')
         f.write(text)
         f.close()
-        
+
 #======================================================================
 def get_wiki_description(algo, version):
+    tryUseDescriptionFromBinaries = True
+    return get_custom_wiki_section(algo, version, "*WIKI*", tryUseDescriptionFromBinaries)
+
+#======================================================================
+def get_wiki_usage(algo, version):
+    wiki_usage = get_custom_wiki_section(algo, version, "*WIKI_USAGE*")
+    if wiki_usage:
+        return (True, wiki_usage)
+    else:
+        wiki_no_sig_usage = get_custom_wiki_section(algo, version, "*WIKI_USAGE_NO_SIGNATURE*")
+        return (False, wiki_no_sig_usage)
+
+#======================================================================
+def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=False):
     """ Extract the text between the *WIKI* tags in the .cpp file
     
     @param algo :: name of the algorithm
     @param version :: version, -1 for latest 
     """
+    
+    desc = ""
     source = find_algo_file(algo, version)
-    if source == '':
+    if source == '' and tryUseDescriptionFromBinaries:
         from mantid.api import AlgorithmManager
         alg = AlgorithmManager.createUnmanaged(algo, version)
         print "Getting algorithm description from binaries."
         return alg.getWikiDescription()
+    elif source == '' and not tryUseDescriptionFromBinaries:
+        print "Warning: Cannot find source for algorithm"
+        return desc
     else:
         f = open(source,'r')
         lines = f.read().split('\n')
+        print lines
         f.close()
-        n = 0
-        while not lines[n].lstrip().startswith("/*WIKI*") and not lines[n].lstrip().startswith('"""*WIKI*'):
-            n += 1
-        desc = ""
-        n += 1
-        while not lines[n].lstrip().startswith("*WIKI*"):
-            desc += lines[n] + "\n"
-            n += 1
-        print "Getting algorithm description from source."
-        return desc
+        
+        print algo
+        try:
+            # Start and end location markers.
+            start_tag_cpp = "/" + tag 
+            start_tag_python = '"""%s' % tag
+            end_tag_cpp = tag + "/"
+            end_tag_python = '%s"""' % tag
+            
+            # Find the start and end lines for the wiki section in the source.
+            start_index = 0
+            end_index = 0
+            for line_index in range(0, len(lines)):
+                line = lines[line_index]
+                if line.lstrip().startswith(start_tag_cpp) or line.lstrip().startswith(start_tag_python):
+                    start_index = line_index + 1
+                    continue
+                if line.lstrip().startswith(end_tag_cpp) or line.lstrip().startswith(end_tag_python):
+                    end_index = line_index
+                    break
+            
+            # Concatinate across the range.
+            for line_index in range(start_index, end_index):
+                desc += lines[line_index] + "\n"
+            
+            if start_index == end_index:
+                print "No algorithm %s section in source." % tag
+            else:
+                print "Getting algorithm %s section from source." % tag
+        
+        except IndexError:
+            print "No algorithm %s section in source." % tag
+        return desc        
 
+        
+        
 #======================================================================
 def create_function_signature(alg, algo_name):
     """
@@ -520,14 +565,16 @@ def do_make_wiki(algo_name, version, latest_version):
             for v in xrange(1,latest_version):
                 out += "[[%s v.%d]] " % (algo_name, v)
             out += "\n\n"
-        
     
     out += "== Summary ==\n\n"
     out += alg.getWikiSummary().replace("\n", " ") + "\n\n"
-    
+    # Fetch the custom usage wiki section.
+    include_signature, custom_usage = get_wiki_usage(algo_name, version)
     out += "\n\n== Usage ==\n\n"
-    out += " " + create_function_signature(alg, algo_name) + "\n\n" 
+    if include_signature:
+        out += " " + create_function_signature(alg, algo_name) + "\n\n" 
     out += "<br clear=all>\n\n" 
+    out += custom_usage
     out += "== Properties ==\n\n"
     
     out += """{| border="1" cellpadding="5" cellspacing="0" 
