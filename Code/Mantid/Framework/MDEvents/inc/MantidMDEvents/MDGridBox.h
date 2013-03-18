@@ -49,9 +49,6 @@ namespace MDEvents
     // ----------------------------- ISaveable Methods ------------------------------------------------------
     virtual Kernel::ISaveable *const getISaveable(){return NULL;}
     virtual Kernel::ISaveable *const getISaveable()const{return NULL;}
-
-    /** returns true if it is box (avoid rtti?) */
-    //virtual bool isBox()const{return false;}
     //-------------------------------------------------------------------------------------------------------
     void clear();
 

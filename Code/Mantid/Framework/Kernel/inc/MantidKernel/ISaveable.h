@@ -40,7 +40,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
   // forward declaration
-  class INode;
+
 
   class DLLExport ISaveable 
   {

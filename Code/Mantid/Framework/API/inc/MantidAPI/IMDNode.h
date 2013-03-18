@@ -22,7 +22,7 @@ public:
 //---------------- ISAVABLE
     virtual size_t getFileID()const=0;
     virtual Kernel::ISaveable *const getISaveable()=0;
-    virtual Kernel::ISaveable *const getISaveable()const=0;        
+    virtual Kernel::ISaveable *const  getISaveable()const=0;        
 //-------------------------------------------------------------
     /// Get number of dimensions
     virtual size_t getNumDims() const = 0;
@@ -40,14 +40,7 @@ public:
     virtual Mantid::API::BoxController  *const getBoxController() const=0;
     virtual Mantid::API::BoxController  *const getBoxController() =0;
 
-    /** Set the box controller used.
-     * @param controller :: Mantid::API::BoxController *
-     */
-    //virtual void setBoxController(Mantid::API::BoxController *controller)=0;
-
-    // -------------------------------- Parents/Children-Related -------------------------------------------
-    ///  Avoid rtti ?
-    //virtual bool isBox()const=0;
+      // -------------------------------- Parents/Children-Related -------------------------------------------
     /// Get the total # of unsplit MDBoxes contained.
     virtual size_t getNumMDBoxes() const = 0;
     /// Get the # of children MDBoxBase'es (non-recursive)
@@ -120,25 +113,20 @@ public:
 
     /** Sphere (peak) integration */
     virtual void integrateSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const = 0;
-
     /** Find the centroid around a sphere */
     virtual void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const = 0;
 
-// box-related
-    /** Split sub-boxes, if this is possible and neede for this box */
-    virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)=0;
-  
 
+    /** Split sub-boxes, if this is possible and neede for this box */
+    virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)=0; 
     /** Recalculate signal etc. */
     virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL)=0;
-
-    // -------------------------------------------------------------------------------------------
     /** Cache the centroid of this box and all sub-boxes. */
     virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL)= 0;
-
     virtual void calculateCentroid(coord_t * /*centroid*/) const=0;
 
-
+    // -------------------------------------------------------------------------------------------
+// box-related
    /// Fill a vector with all the boxes up to a certain depth
     virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly) = 0;
     /// Fill a vector with all the boxes up to a certain depth

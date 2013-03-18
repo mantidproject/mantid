@@ -148,10 +148,10 @@ namespace MDEventsTestHelper
   //=====================================================================================
 
   /** Generate an empty MDBox */
-  MDBox<MDLeanEvent<1>,1> * makeMDBox1(size_t splitInto=10);
+  MDBox<MDLeanEvent<1>,1> * makeMDBox1(size_t splitInto, API::BoxController *& splitter);
 
   /** Generate an empty MDBox with 3 dimensions, split 10x5x2 */
-  MDBox<MDLeanEvent<3>,3> * makeMDBox3();
+  MDBox<MDLeanEvent<3>,3> * makeMDBox3(API::BoxController * & splitter);
 
   /** Return a vector with this many MDEvents, spaced evenly from 0.5, 1.5, etc. */
   std::vector<MDLeanEvent<1> > makeMDEvents1(size_t num);

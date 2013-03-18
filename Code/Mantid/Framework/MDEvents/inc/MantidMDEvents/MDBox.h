@@ -53,12 +53,8 @@ namespace MDEvents
 
 
     // ----------------------------- ISaveable Methods ------------------------------------------------------
-    virtual Kernel::ISaveable *const getISaveable(){return m_Saveable;}
-    virtual Kernel::ISaveable *const getISaveable()const{return m_Saveable;}
-    
- 
-    /** returns true if it is box (avoid rtti?) */
-    //virtual bool isBox()const{return true;}
+    virtual Kernel::ISaveable *const getISaveable();
+    virtual Kernel::ISaveable *const getISaveable()const;   
     //-----------------------------------------------------------------------------------------------
     void clear();
 
@@ -164,7 +160,7 @@ namespace MDEvents
 
   protected:
     // the pointer to the class, responsible for saving/restoring this class to the hdd
-    mutable MDBoxSaveable * m_Saveable;
+    mutable MDBoxSaveable *m_Saveable;
     /// Mutex for modifying the event list
     Mantid::Kernel::Mutex dataMutex;
  

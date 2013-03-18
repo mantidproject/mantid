@@ -91,6 +91,17 @@ namespace MDEvents
 
   }
 
+  TMDE(
+  Kernel::ISaveable *const MDBox)::getISaveable()
+  {
+      return m_Saveable;
+  }
+  TMDE(
+  Kernel::ISaveable *const MDBox)::getISaveable()const
+  {
+      return m_Saveable;
+  }
+
   //-----------------------------------------------------------------------------------------------
   /** Clear the data[] vector ONLY but does not change the file-backed settings.
    * Used to free up the memory in a file-backed workspace without removing the events from disk. */
