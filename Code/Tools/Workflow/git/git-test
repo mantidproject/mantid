@@ -169,8 +169,12 @@ end_testing() {
     fi
 
     if [ $TEST_PASSED -eq 1 ]; then
-	echo "Testing passed on ${testbranch}. Push master to remote (y/n)?"
-	read publish
+	publish=""
+	while [ "$publish" != "y" -a "$publish" != "n" ];
+	do
+	    echo -n "Testing passed on ${testbranch}. Push master to remote (y/n): "
+	    read publish
+	done
 	if [ "${publish}" = "y" ]; then
 	    # Publish
 	    git_halt_on_error push origin ${PRODUCTION_BRANCH}
