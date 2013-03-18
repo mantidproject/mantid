@@ -22,7 +22,7 @@
 prefix=$(if ${PREFIX},${PREFIX},/usr/local)
 
 # These files will have executable status when installed
-EXEC_FILES=git-new git-checkbuild gitworkflow-helpers git-finish git-test
+EXEC_FILES=git-new git-checkbuild gitworkflow-helpers git-finish git-test git-publish
 
 all:
 	@echo "usage: make install"
