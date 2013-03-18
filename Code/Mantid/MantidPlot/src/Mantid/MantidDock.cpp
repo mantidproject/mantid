@@ -1795,6 +1795,9 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
   bool thisShouldBeSorted = data(0,Qt::UserRole).isNull();
   bool otherShouldBeSorted = other.data(0,Qt::UserRole).isNull();
 
+  // just in case m_parent is NULL. I think I saw this once but cannot reproduce.
+  if ( !m_parent ) return false;
+
   if(!thisShouldBeSorted && !otherShouldBeSorted)
   {
     if(m_parent->getSortOrder() == Qt::Ascending)
