@@ -89,30 +89,19 @@ namespace MDEvents
     virtual void setEventsData(const std::vector<coord_t> &/*coordTable*/){};
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
+
+
     /// Add a single event
     virtual void addEvent(const MDE & point) = 0;
     // add a single event and set pointer to the box which needs splitting (if one actually need)    
     virtual void addAndTraceEvent(const MDE & point,size_t index) = 0;
-
     /// Add a single event, with no mutex locking
     virtual void addEventUnsafe(const MDE & point) = 0;
-
-    /// Add several events, within a given range
-    virtual size_t addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
+    /// Add several events
     virtual size_t addEvents(const std::vector<MDE> & events);
-
-    /// Add several events, within a given range, with no bounds checking
-    virtual size_t addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
-    size_t addEventsUnsafe(const std::vector<MDE> & events);
+    /// Add several events, with no bounds checking
+    virtual size_t addEventsUnsafe(const std::vector<MDE> & events);
     //----------------------------------------------------------------------------------------------------------------------
-    /*--------------->  EVENTS from event parts               <-------------------------------------------------------------*/
-    virtual void addEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);
-    virtual void addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index);
-    virtual void addEventUnsafe(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);
-    //virtual size_t addEventsPart(const std::vector<coord_t> &coords,const signal_t *Signal,const signal_t *errorSq,const  uint16_t *runIndex,const uint32_t *detectorId, const size_t start_at, const size_t stop_at);
-    //virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
-    //               const std::vector<uint16_t> &runIndex=std::vector<uint16_t>(),const std::vector<uint32_t> &detectorId=std::vector<uint32_t>());
-
     //----------------------------------------------------------------------------------------------------------------------
 
     /** Perform centerpoint binning of events

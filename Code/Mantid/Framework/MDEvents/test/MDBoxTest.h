@@ -123,6 +123,27 @@ public:
     TS_ASSERT_EQUALS( b.getTotalWeight(), 1.0);
 
   }
+  /** Adding events tracks the total signal */
+  void test_BuildAndAddEvent()
+  {
+    BoxController_sptr sc( new BoxController(2));
+    MDBox<MDLeanEvent<2>,2> b(sc.get());
+	std::vector<coord_t> coord(2.,2);
+	coord[1]=3;
+
+    b.addEvent(1.2,3.4,coord,0,0);
+    TS_ASSERT_EQUALS( b.getNPoints(), 1)
+
+    b.refreshCache();
+
+    // Did it keep a running total of the signal and error?
+    TS_ASSERT_DELTA( b.getSignal(), 1.2*1, 1e-5);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*1, 1e-5);
+    // Weight of 1.0 per event.
+    TS_ASSERT_EQUALS( b.getTotalWeight(), 1.0);
+
+  }
+
   /** Adding events in unsafe way also works */
   void test_addEventUnsafe()
   {
@@ -164,6 +185,56 @@ public:
     TS_ASSERT_DELTA( b.getSignal(), 1.2*3, 1e-5);
     TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*3, 1e-5);
   }
+
+  /** Add a vector of events */
+  void test_BuildAndAddLeanEvents()
+  {
+    BoxController_sptr sc( new BoxController(2));
+    MDBox<MDLeanEvent<2>,2> b(sc.get());
+    std::vector<signal_t> SigErrSq(3*2,1.2);
+    std::vector<coord_t> Coord(3*2,2);
+    std::vector<uint16_t> ind;
+    std::vector<uint32_t> RunID;
+    SigErrSq[1]=SigErrSq[3]=SigErrSq[5]=3.4;
+    Coord[1]=Coord[3]=Coord[5] = 3.0;
+
+    b.addEvents(SigErrSq,Coord,ind,RunID);
+
+    b.refreshCache();
+
+    TS_ASSERT_EQUALS( b.getNPoints(), 3)
+    TS_ASSERT_DELTA( b.getEvents()[2].getSignal(), 1.2, 1e-5)
+    // Did it keep a running total of the signal and error?
+    TS_ASSERT_DELTA( b.getSignal(), 1.2*3, 1e-5);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*3, 1e-5);
+  }
+
+  /** Add a vector of events */
+  void test_BuildAndAddFatEvents()
+  {
+    BoxController_sptr sc( new BoxController(2));
+    MDBox<MDEvent<2>,2> b(sc.get());
+    std::vector<signal_t> SigErrSq(3*2,1.2);
+    std::vector<coord_t> Coord(3*2,2);
+    std::vector<uint16_t> ind(3,10);
+    std::vector<uint32_t> RunID(3,20);
+    SigErrSq[1]=SigErrSq[3]=SigErrSq[5]=3.4;
+    Coord[1]=Coord[3]=Coord[5] = 3.0;
+
+    b.addEvents(SigErrSq,Coord,ind,RunID);
+
+    b.refreshCache();
+
+    TS_ASSERT_EQUALS( b.getNPoints(), 3)
+    TS_ASSERT_DELTA( b.getEvents()[2].getSignal(), 1.2, 1e-5)
+    // Did it keep a running total of the signal and error?
+    TS_ASSERT_DELTA( b.getSignal(), 1.2*3, 1e-5);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*3, 1e-5);
+
+    TS_ASSERT_EQUALS(b.getEvents()[2].getRunIndex(),10);
+    TS_ASSERT_EQUALS(b.getEvents()[2].getDetectorID(),20);
+  }
+
 
   /** Add a vector of events and give start/end spots*/
   void test_addEvents_with_start_stop()
@@ -429,8 +500,8 @@ public:
 
     // Must call the signal cache first.
     b.refreshCache();
-	coord_t centroid[2];
-	b.calculateCentroid(centroid);
+    coord_t centroid[2];
+    b.calculateCentroid(centroid);
     TS_ASSERT_DELTA( centroid[0], 3.333, 0.001);
     TS_ASSERT_DELTA( centroid[1], 3.666, 0.001);
 
@@ -450,8 +521,8 @@ public:
     MDBox<MDLeanEvent<2>,2> b(sc.get());
     b.refreshCache();
 
-	coord_t centroid[2];
-	b.calculateCentroid(centroid);
+    coord_t centroid[2];
+    b.calculateCentroid(centroid);
     TS_ASSERT_DELTA( centroid[0], 0.000, 0.001);
     TS_ASSERT_DELTA( centroid[1], 0.000, 0.001);
 //#ifdef MDBOX_TRACK_CENTROID
