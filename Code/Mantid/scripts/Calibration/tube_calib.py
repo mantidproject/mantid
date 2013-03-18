@@ -102,7 +102,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
     eHeight, eWidth = fitParams.getHeightAndWidth()
     outedge, inedge, endGrad = fitParams.getEdgeParameters()
     
-    margin = 0.3
+    margin = 0.4 # Margin could be put into fitpar
     
     # Set workspace names, a different workspace if plotting, so plot survives.
     calibPointWs = "CalibPoint"
