@@ -101,6 +101,19 @@ namespace MDEvents
       for (size_t i=0; i<nd; i++)
         center[i] = centers[i];
     }
+  //---------------------------------------------------------------------------------------------
+    /** Constructor with signal and error and an array of centers
+     *
+     * @param signal :: signal (aka weight)
+     * @param errorSquared :: square of the error on the weight
+     * @param centers :: pointer to a nd-sized array of values to set for all coordinates.
+     * */
+    MDLeanEvent(const double signal, const double errorSquared, const coord_t * centers) :
+      signal(float(signal)), errorSquared(float(errorSquared))
+    {
+      for (size_t i=0; i<nd; i++)
+        center[i] = centers[i];
+    }
 
 #ifdef COORDT_IS_FLOAT
     //---------------------------------------------------------------------------------------------
@@ -269,17 +282,17 @@ namespace MDEvents
 
     /* static method used to convert vector of lean events into vector of their coordinates & signal and error 
      @param events    -- vector of events
-     @return coord    -- vector of events coordinates, their signal and error casted to coord_t type
+     @return data     -- vector of events coordinates, their signal and error casted to coord_t type
      @return ncols    -- the number of colunts  in the data (it is nd+2 here but may be different for other data types) 
      @return totalSignal -- total signal in the vector of events
      @return totalErr   -- total error corresponting to the vector of events
     */
     template<size_t nd> 
-    static inline void eventsToData(const std::vector<MDLeanEvent<nd> > & events,std::vector<coord_t> &coord,size_t &ncols,double &totalSignal,double &totalErrSq )
+    static inline void eventsToData(const std::vector<MDLeanEvent<nd> > & events,std::vector<coord_t> &data,size_t &ncols,double &totalSignal,double &totalErrSq )
     {
       ncols = nd+2;
-      size_t nEvents=events.size()/nd;
-      coord.resize(nEvents+ncols);
+      size_t nEvents=events.size();
+      data.resize(nEvents*ncols);
 
 
       totalSignal = 0;
@@ -299,7 +312,7 @@ namespace MDEvents
           data[index++] = event.center[d];
         // Track the total signal
         totalSignal += signal_t(signal);
-        totalErrorSquared += signal_t(errorSquared);
+        totalErrSq  += signal_t(errorSquared);
       }
 
     }
@@ -324,10 +337,10 @@ namespace MDEvents
         size_t ii = i*numColumns;
 
         // Point directly into the data block for the centers.
-        coord_t * centers = &(data[ii+2]);
+        const coord_t * centers = &(coord[ii+2]);
 
         // Create the event with signal, error squared, and the centers
-        events.push_back( MDLeanEvent<nd>(coord_t(data[ii]), coord_t(data[ii + 1]), centers) );
+        events.push_back( MDLeanEvent<nd>(signal_t(coord[ii]), signal_t(coord[ii + 1]), centers) );
       }
     }
 

@@ -58,7 +58,7 @@ namespace MDEvents
     
  
     /** returns true if it is box (avoid rtti?) */
-    virtual bool isBox()const{return true;}
+    //virtual bool isBox()const{return true;}
     //-----------------------------------------------------------------------------------------------
     void clear();
 
@@ -119,6 +119,8 @@ namespace MDEvents
     void addEventUnsafe(const MDE & Evnt);
     size_t addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
     size_t addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
+
+    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 

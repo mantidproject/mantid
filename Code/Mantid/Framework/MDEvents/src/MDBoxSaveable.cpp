@@ -5,16 +5,17 @@ namespace Mantid
 {
 namespace MDEvents
 {
+   MDBoxSaveable::MDBoxSaveable(API::IMDNode *const, size_t ID)
+   {
+   }
 
-//
-//  //-----------------------------------------------------------------------------------------------
-//  /** Call to save the data (if needed) and release the memory used.
-//   *  Called from the DiskBuffer.
-//   *  If called directly presumes to know its file location and [TODO: refactor this] needs the file to be open correctly on correct group 
-//   */
-//  TMDE(
-//  void MDBox)::save()const
-//  {
+ //-----------------------------------------------------------------------------------------------
+ /** Call to save the data (if needed) and release the memory used.
+  *  Called from the DiskBuffer.
+  *  If called directly presumes to know its file location and [TODO: refactor this] needs the file to be open correctly on correct group 
+  */
+  void MDBoxSaveable::save()
+  {
 //  //      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
 //
 //
@@ -39,37 +40,10 @@ namespace MDEvents
 //     if(data.size()>0)  throw std::runtime_error(" Attempt to save undefined event");
 //   
 //   
-//  }
+  }
 //
-//
-//  //-----------------------------------------------------------------------------------------------
-//  /** Load the box's Event data from an open nexus file.
-//   * The FileIndex start and numEvents must be set correctly already.
-//   * Clear existing data from memory!
-//   *
-//   * @param file :: Nexus File object, must already by opened with MDE::openNexusData()
-//   * @param setIsLoaded :: flag if box is loaded from file
-//   */
-//  TMDE(
-//  inline void MDBox)::loadNexus(::NeXus::File * file, bool setIsLoaded)
-//  {
-//    this->data.clear();
-//    uint64_t fileIndexStart = this->getFilePosition();
-//    uint64_t fileNumEvents  = this->getFileSize();
-//    if(fileIndexStart == std::numeric_limits<uint64_t>::max())
-//      throw(std::runtime_error("MDBox::loadNexus -- attempt to load box from undefined location"));
-//    MDE::loadVectorFromNexusSlab(this->data, file, fileIndexStart, fileNumEvents);
-//
-//   
-//    this->m_isLoaded=setIsLoaded;
-//  
-//  }
-//
-//
-//
-// TMDE(
-// inline void MDBox)::load()
-// {
+ void MDBoxSaveable::load()
+ {
 //    // Is the data in memory right now (cached copy)?
 //    if (!m_isLoaded)
 //    {
@@ -97,7 +71,34 @@ namespace MDEvents
 //        }
 //      }
 //    }
+  }
+
+
+
+//
+//  //-----------------------------------------------------------------------------------------------
+//  /** Load the box's Event data from an open nexus file.
+//   * The FileIndex start and numEvents must be set correctly already.
+//   * Clear existing data from memory!
+//   *
+//   * @param file :: Nexus File object, must already by opened with MDE::openNexusData()
+//   * @param setIsLoaded :: flag if box is loaded from file
+//   */
+//  TMDE(
+//  inline void MDBox)::loadNexus(::NeXus::File * file, bool setIsLoaded)
+//  {
+//    this->data.clear();
+//    uint64_t fileIndexStart = this->getFilePosition();
+//    uint64_t fileNumEvents  = this->getFileSize();
+//    if(fileIndexStart == std::numeric_limits<uint64_t>::max())
+//      throw(std::runtime_error("MDBox::loadNexus -- attempt to load box from undefined location"));
+//    MDE::loadVectorFromNexusSlab(this->data, file, fileIndexStart, fileNumEvents);
+//
+//   
+//    this->m_isLoaded=setIsLoaded;
+//  
 //  }
+//
 //
 // //-----------------------------------------------------------------------------------------------
 //  /** Save the box's Event data to an open nexus file.

@@ -42,7 +42,7 @@ namespace MDEvents
   : m_BoxController(boost::make_shared<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > >(nd))
   {
     // First box is at depth 0, and has this default boxController
-    data = new MDBox<MDE, nd>(m_BoxController, 0);
+    data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ namespace MDEvents
   MDEventWorkspace)::~MDEventWorkspace()
   {
     delete data;
-  m_BoxController->closeFile();
+    m_BoxController->closeFile();
   }
 
 
@@ -172,13 +172,12 @@ namespace MDEvents
     for (size_t depth = 1; depth < minDepth; depth++)
     {
       // Get all the MDGridBoxes in the workspace
-      std::vector<MDBoxBase<MDE,nd>*> boxes;
-      boxes.clear();
-      this->getBox()->getBoxes(boxes, depth-1, false);
+       std::vector<API::IMDNode*> boxes;
+       boxes.clear();
+       this->getBox()->getBoxes(boxes, depth-1, false);
       for (size_t i=0; i<boxes.size(); i++)
       {
-        MDBoxBase<MDE,nd> * box = boxes[i];
-        MDGridBox<MDE,nd>* gbox = dynamic_cast<MDGridBox<MDE,nd>*>(box);
+        MDGridBox<MDE,nd>* gbox = dynamic_cast<MDGridBox<MDE,nd>*>(boxes[i]);
         if (gbox)
         {
           // Split ALL the contents.
@@ -225,7 +224,7 @@ namespace MDEvents
       Mantid::Geometry::MDImplicitFunction * function) const
   {
     // Get all the boxes in this workspaces
-    std::vector<MDBoxBase<MDE,nd> *> boxes;
+    std::vector<IMDNode *> boxes;
     // TODO: Should this be leaf only? Depends on most common use case
     if (function)
       this->data->getBoxes(boxes, 10000, true, function);
@@ -272,7 +271,7 @@ namespace MDEvents
         return std::numeric_limits<signal_t>::quiet_NaN();
     }
     // If you got here, then the point is in the workspace.
-    const MDBoxBase<MDE,nd> * box = data->getBoxAtCoord(coords);
+    const API::IMDNode * box = data->getBoxAtCoord(coords);
     if (box)
     {
       // What is our normalization factor?
@@ -305,14 +304,14 @@ namespace MDEvents
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > MDEventWorkspace)::getMinimumExtents(size_t depth)
   {
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > out(nd);
-    std::vector<MDBoxBase<MDE,nd>*> boxes;
+    std::vector<API::IMDNode *> boxes;
     // Get all the end (leaf) boxes
     this->data->getBoxes(boxes, depth, true);
     auto  it = boxes.begin();
     auto  it_end = boxes.end();
     for (; it != it_end; ++it)
     {
-      MDBoxBase<MDE,nd>* box = *it;
+      API::IMDNode * box = *it;
       if (box->getNPoints() > 0)
       {
         for (size_t d=0; d<nd; d++)
@@ -393,82 +392,83 @@ namespace MDEvents
     return a->getId() < b->getId();
   }
 
+  //TODO:  The meaniong for this have changed
+  ////-----------------------------------------------------------------------------------------------
+  ///** Create a table of data about the boxes contained */
+  //TMDE(
+  //Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(size_t start, size_t num)
+  //{
+  //  CPUTimer tim;
+  //  UNUSED_ARG(start);
+  //  UNUSED_ARG(num);
+  //  // Boxes to show
+  //  std::vector<API::IMDNode *> boxes;
+  //  std::vector<MDBoxBase<MDE,nd>* > boxes_filtered;
+  //  this->getBox()->getBoxes(boxes, 1000, false);
 
-  //-----------------------------------------------------------------------------------------------
-  /** Create a table of data about the boxes contained */
-  TMDE(
-  Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(size_t start, size_t num)
-  {
-    CPUTimer tim;
-    UNUSED_ARG(start);
-    UNUSED_ARG(num);
-    // Boxes to show
-    std::vector<API::IMDNode *> boxes;
-    std::vector<MDBoxBase<MDE,nd>* > boxes_filtered;
-    this->getBox()->getBoxes(boxes, 1000, false);
+  //  bool withPointsOnly = true;
+  //  boxes_filtered.reserve(boxes.size());
 
-    bool withPointsOnly = true;
-    boxes_filtered.reserve(boxes.size());
+  //  for (size_t i=0; i<boxes.size(); i++)
+  //  {
+  //      MDBoxBase<MDE,nd>* box = dynamic_cast<MDBoxBase<MDE,nd>* >(boxes[i]);
+  //      if (box->getNPoints() > 0 && withPointsOnly)
+  //        boxes_filtered.push_back(box);
+  //      else
+  //        boxes_filtered.push_back(box);
+  //  }
+  //    
 
-    for (size_t i=0; i<boxes.size(); i++)
-    {
-        MDBoxBase<MDE,nd>* box = dynamic_cast<MDBoxBase<MDE,nd>* >(boxes[i]);
-        if (box->getNPoints() > 0 && withPointsOnly)
-          boxes_filtered.push_back(box);
-        else
-          boxes_filtered.push_back(box);
-    }
-      
-
-    // Now sort by ID
-    typedef MDBoxBase<MDE,nd> * ibox_t;
-    std::sort(boxes_filtered.begin(), boxes_filtered.end(), SortBoxesByID<ibox_t> );
+  //  // Now sort by ID
+  //  typedef MDBoxBase<MDE,nd> * ibox_t;
+  //  std::sort(boxes_filtered.begin(), boxes_filtered.end(), SortBoxesByID<ibox_t> );
 
 
-    // Create the table
-    int numRows = int(boxes_filtered.size());
-    TableWorkspace_sptr ws(new TableWorkspace(numRows));
-    ws->addColumn("int", "ID");
-    ws->addColumn("int", "Depth");
-    ws->addColumn("int", "# children");
-    ws->addColumn("int", "File Pos.");
-    ws->addColumn("int", "File Size");
-    ws->addColumn("int", "EventVec Size");
-    ws->addColumn("str", "OnDisk?");
-    ws->addColumn("str", "InMemory?");
-    ws->addColumn("str", "Changes?");
-    ws->addColumn("str", "Extents");
+  //  // Create the table
+  //  int numRows = int(boxes_filtered.size());
+  //  TableWorkspace_sptr ws(new TableWorkspace(numRows));
+  //  ws->addColumn("int", "ID");
+  //  ws->addColumn("int", "Depth");
+  //  ws->addColumn("int", "# children");
+  //  ws->addColumn("int", "File Pos.");
+  //  ws->addColumn("int", "File Size");
+  //  ws->addColumn("int", "EventVec Size");
+  //  ws->addColumn("str", "OnDisk?");
+  //  ws->addColumn("str", "InMemory?");
+  //  ws->addColumn("str", "Changes?");
+  //  ws->addColumn("str", "Extents");
 
-    for (int i=0; i<int(boxes_filtered.size()); i++)
-    {
-      MDBoxBase<MDE,nd>* box = boxes_filtered[i];
-      int col = 0;
-      ws->cell<int>(i, col++) = int(box->getId());;
-      ws->cell<int>(i, col++) = int(box->getDepth());
-      ws->cell<int>(i, col++) = int(box->getNumChildren());
-      ws->cell<int>(i, col++) = int(box->getFilePosition());
-      MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
-      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getFileSize()) : 0;
-      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getDataMemorySize()) : -1;
-      if (mdbox)
-      {
-        ws->cell<std::string>(i, col++) = (mdbox->wasSaved() ? "yes":"no");
-        ws->cell<std::string>(i, col++) = (mdbox->getInMemory() ? "yes":"no");
-        // there is no exact equivalent of data added, but we assume that data added if data on file are not equal to data in memory
-        bool isDataAdded = (mdbox->getFileSize()!=mdbox->getNPoints());
-        ws->cell<std::string>(i, col++) = std::string(isDataAdded ? "Added ":"") + std::string(mdbox->isBusy() ? "Modif.":"") ;
-      }
-      else
-      {
-        ws->cell<std::string>(i, col++) = "-";
-        ws->cell<std::string>(i, col++) = "-";
-        ws->cell<std::string>(i, col++) = "-";
-      }
-      ws->cell<std::string>(i, col++) = box->getExtentsStr();
-    }
-    std::cout << tim << " to create the MDBox data table." << std::endl;
-    return ws;
-  }
+  //  for (int i=0; i<int(boxes_filtered.size()); i++)
+  //  {
+  //    MDBoxBase<MDE,nd>* box = boxes_filtered[i];
+  //    int col = 0;
+
+  //    ws->cell<int>(i, col++) = int(box->getId());;
+  //    ws->cell<int>(i, col++) = int(box->getDepth());
+  //    ws->cell<int>(i, col++) = int(box->getNumChildren());
+  //    ws->cell<int>(i, col++) = int(box->getFilePosition());
+  //    MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
+  //    ws->cell<int>(i, col++) = mdbox ? int(mdbox->getFileSize()) : 0;
+  //    ws->cell<int>(i, col++) = mdbox ? int(mdbox->getDataMemorySize()) : -1;
+  //    if (mdbox)
+  //    {
+  //      ws->cell<std::string>(i, col++) = (mdbox->wasSaved() ? "yes":"no");
+  //      ws->cell<std::string>(i, col++) = (mdbox->getInMemory() ? "yes":"no");
+  //      // there is no exact equivalent of data added, but we assume that data added if data on file are not equal to data in memory
+  //      bool isDataAdded = (mdbox->getFileSize()!=mdbox->getNPoints());
+  //      ws->cell<std::string>(i, col++) = std::string(isDataAdded ? "Added ":"") + std::string(mdbox->isBusy() ? "Modif.":"") ;
+  //    }
+  //    else
+  //    {
+  //      ws->cell<std::string>(i, col++) = "-";
+  //      ws->cell<std::string>(i, col++) = "-";
+  //      ws->cell<std::string>(i, col++) = "-";
+  //    }
+  //    ws->cell<std::string>(i, col++) = box->getExtentsStr();
+  //  }
+  //  std::cout << tim << " to create the MDBox data table." << std::endl;
+  //  return ws;
+  //}
 
   //-----------------------------------------------------------------------------------------------
   /** @returns the number of bytes of memory used by the workspace. */
@@ -727,7 +727,8 @@ namespace MDEvents
       x.push_back(static_cast<coord_t>(stepLength * double(i)));
 
       // Look for the box at this coordinate
-      const MDBoxBase<MDE,nd> * box = NULL;
+      //const MDBoxBase<MDE,nd> * box = NULL;
+      const IMDNode * box = NULL;
 
       // Do an initial bounds check
       bool outOfBounds = false;
@@ -792,7 +793,7 @@ namespace MDEvents
   {
     if(maskingRegion)
     {
-      std::vector<MDBoxBase<MDE,nd> *> toMaskBoxes;
+      std::vector<API::IMDNode *> toMaskBoxes;
 
       //Apply new masks
       this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
@@ -811,7 +812,7 @@ namespace MDEvents
   TMDE(
   void MDEventWorkspace)::clearMDMasking()
   {    
-    std::vector<MDBoxBase<MDE,nd> *> allBoxes;
+      std::vector<API::IMDNode *> allBoxes;
     //Clear old masks
     this->data->getBoxes(allBoxes, 10000, true);
     for(size_t i = 0; i < allBoxes.size(); ++i)

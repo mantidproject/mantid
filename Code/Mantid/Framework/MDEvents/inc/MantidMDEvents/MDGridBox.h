@@ -39,11 +39,11 @@ namespace MDEvents
   public:
     MDGridBox();
 
-    MDGridBox(Mantid::API::BoxController *bc, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
+    MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
 
     MDGridBox(MDBox<MDE, nd> * box, bool splitRecursively=false);
 
-    MDGridBox(const MDGridBox<MDE, nd> & box,const Mantid::API::BoxController * otherBC=NULL);
+    MDGridBox(const MDGridBox<MDE, nd> & box,Mantid::API::BoxController *const otherBC);
 
     virtual ~MDGridBox();
     // ----------------------------- ISaveable Methods ------------------------------------------------------
@@ -51,7 +51,7 @@ namespace MDEvents
     virtual Kernel::ISaveable *const getISaveable()const{return NULL;}
 
     /** returns true if it is box (avoid rtti?) */
-    virtual bool isBox()const{return false;}
+    //virtual bool isBox()const{return false;}
     //-------------------------------------------------------------------------------------------------------
     void clear();
 
@@ -70,8 +70,8 @@ namespace MDEvents
 
    size_t getNumChildren() const;
 
-
-    size_t getChildIndexFromID(size_t childId) const;
+   //TODO: -- The meaning of this stuff have changed
+    //size_t getChildIndexFromID(size_t childId) const;
 
     API::IMDNode * getChild(size_t index);
     //void setChild(size_t index,MDGridBox<MDE,nd> * newChild)
@@ -87,7 +87,7 @@ namespace MDEvents
     void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly);
     void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
 
-    const API::IMDNode * getBoxAtCoord(const coord_t * coords) const;
+    const API::IMDNode * getBoxAtCoord(const coord_t * coords);
 
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
     //----------------------------------------------------------------------------
@@ -95,6 +95,8 @@ namespace MDEvents
     std::vector< MDE > * getEventsCopy();
     void addEvent(const MDE & event);
     void addAndTraceEvent(const MDE & point,size_t index);
+
+    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
 
     void addEventUnsafe(const MDE & event);
 
@@ -118,12 +120,12 @@ namespace MDEvents
     void refreshCentroid(Kernel::ThreadScheduler * ts = NULL);
 
     // Set the box controller overrriden.
-    virtual void setBoxController(Mantid::API::BoxController *controller);
+    //virtual void setBoxController(Mantid::API::BoxController *controller);
 
     // ======================= Testing/Debugging Methods =================
     /** For testing: get (a reference to) the vector of boxes */
-    std::vector<API::IMDNode *> & getBoxes()
-    { return m_Children; }
+    //std::vector<API::IMDNode *> & getBoxes()
+    //{ return m_Children; }
 
   
     virtual bool getIsMasked() const;
@@ -134,6 +136,12 @@ namespace MDEvents
     ///Setter for unmasking the box
     virtual void unmask();
 
+//------------------------------------------------------------------------- 
+  /** The function used to satisfy IMDNode interface but the physical meaning is unclear */
+  void calculateCentroid(coord_t *  /*centroid*/= NULL) const
+  {
+      throw(std::runtime_error("This function should not be called on MDGridBox (as its meaning for MDbox is dubious too)"));
+  }
   public:
     /// Typedef for a shared pointer to a MDGridBox
     typedef boost::shared_ptr< MDGridBox<MDE, nd> > sptr;
@@ -155,7 +163,7 @@ namespace MDEvents
   
     /** 1D array of boxes contained within. These map
      * to the nd-array.     */
-    std::vector<API::IMDNode *> m_Children;
+    std::vector<MDBoxBase<MDE,nd> *> m_Children;
 
    /** Length (squared) of the diagonal through every dimension = sum( boxSize[i]^2 )
      * Used in some calculations like peak integration */

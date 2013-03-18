@@ -6,6 +6,7 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/INode.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/CoordTransform.h"
 
@@ -17,11 +18,11 @@ namespace API
 class IMDNode 
 {
 public:
+    virtual ~IMDNode(){};
 //---------------- ISAVABLE
     virtual size_t getFileID()const=0;
     virtual Kernel::ISaveable *const getISaveable()=0;
     virtual Kernel::ISaveable *const getISaveable()const=0;        
-      
 //-------------------------------------------------------------
     /// Get number of dimensions
     virtual size_t getNumDims() const = 0;
@@ -46,7 +47,7 @@ public:
 
     // -------------------------------- Parents/Children-Related -------------------------------------------
     ///  Avoid rtti ?
-    virtual bool isBox()const=0;
+    //virtual bool isBox()const=0;
     /// Get the total # of unsplit MDBoxes contained.
     virtual size_t getNumMDBoxes() const = 0;
     /// Get the # of children MDBoxBase'es (non-recursive)
@@ -93,12 +94,12 @@ public:
     /// Return a copy of contained events
     //virtual std::vector<coor> & getEventsCopy() = 0;
     /// Add a single event
-    virtual void addEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId) = 0;
+    virtual void addEvent(const signal_t Signal, const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId) = 0;
     // add a single event and set pointer to the box which needs splitting (if one actually need)    
-    virtual void addAndTraceEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId,size_t index) = 0;
+    virtual void addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index) = 0;
 
     /// Add a single event, with no mutex locking
-    virtual void addEventUnsafe(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId) = 0;
+    virtual void addEventUnsafe(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId) = 0;
 
     /// Add several events, within a given range
     //virtual size_t addEventsPart(const std::vector<coord_t> &coords,const signal_t *Signal,const signal_t *errorSq,const  uint16_t *runIndex,const uint32_t *detectorId, const size_t start_at, const size_t stop_at)=0;
@@ -142,6 +143,17 @@ public:
     virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly) = 0;
     /// Fill a vector with all the boxes up to a certain depth
     virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
+    //----------------------------------------------------------------------------------------------------------------------------------
+    // MDBoxBase interface
+    virtual signal_t getSignal() const=0;
+    virtual signal_t getError() const=0;
+    virtual signal_t getErrorSquared() const=0;
+    virtual coord_t getInverseVolume() const=0;
+    virtual Mantid::Geometry::MDDimensionExtents<coord_t>  & getExtents(size_t dim)=0;
+    virtual const IMDNode * getBoxAtCoord(const coord_t * /*coords*/)=0;
+    virtual void getCenter(coord_t *const  /*boxCenter*/)const =0;
+    virtual  uint32_t getDepth() const=0;
+
 
 
     // -------------------------------- Geometry/vertexes-Related -------------------------------------------

@@ -56,7 +56,7 @@ namespace MDEvents
     if (splitter->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
 
-    if(nBoxEvents!=std::numeric_limits<size_t>::max()) data.reserve(nBoxEvents);
+    if(nBoxEvents!=UNDEF_SIZET) data.reserve(nBoxEvents);
   }
 
 
@@ -703,9 +703,42 @@ namespace MDEvents
     m_bIsMasked = false;
   }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+  /* Internal TMP class to simplify adding events to the box for events and lean events using single interface*/
+  template<typename MDE,size_t nd>
+  struct ON_EVENT
+  {
+  public:
+      static inline void EXEC(std::vector<MDE> &data,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
+                              const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId,size_t nEvents)
+      {
+       for(size_t i=0;i<nEvents;i++)
+       {
+            data.push_back(MDEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],runIndex[i], detectorId[i],&Coord[i*nd]));
+       }
+
+      }
+  };
+  /* Specialize for the case of LeanEvent */
+  template<size_t nd>
+  struct ON_EVENT<MDLeanEvent<nd>,nd>
+  {
+  public:
+      static inline void EXEC(std::vector<MDLeanEvent<nd> > &data,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
+                              const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId,size_t nEvents)
+      {
+       for(size_t i=0;i<nEvents;i++)
+       {
+            data.push_back(MDLeanEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],&Coord[i*nd]));
+       }
+      
+      }
+  };
+
  
  /** Create and Add several events. No bounds checking is made!
    *
+   *@return number of events rejected (0 as nothing is rejected here)
    */
   TMDE(
   size_t MDBox)::addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)
@@ -715,26 +748,10 @@ namespace MDEvents
        size_t nExisiting = data.size();
        data.reserve(nExisiting+nEvents);
        dataMutex.lock();
-       for(size_t i=0;i<nEvents;i++)
-       {
-         this->data.push_back(MDEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],&Coord[i*nd],runIndex[i], detectorId[i]));
-       }
+       ON_EVENT<MDE,nd>::EXEC(this->data,sigErrSq,Coord,runIndex,detectorId,nEvents);
        dataMutex.unlock();
-  }
 
-  template<size_t nd>
-  size_t MDBox<MDLeanEvent<nd>,nd>::addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)
-  {
-
-       size_t nEvents = sigErrSq.size()/2;
-       size_t nExisiting = data.size();
-       data.reserve(nExisiting+nEvents);
-       dataMutex.lock();
-       for(size_t i=0;i<nEvents;i++)
-       {
-         this->data.push_back(MDLeanEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],&Coord[i*nd]));
-       }
-       dataMutex.unlock();
+       return 0;
   }
 
 }//namespace MDEvents

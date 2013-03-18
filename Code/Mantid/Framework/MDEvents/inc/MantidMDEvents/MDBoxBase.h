@@ -71,7 +71,7 @@ namespace MDEvents
     { return m_parent; }
 
     /// Returns the lowest-level box at the given coordinates
-    virtual const IMDNode * getBoxAtCoord(const coord_t * /*coords*/) const
+    virtual const IMDNode *getBoxAtCoord(const coord_t * /*coords*/) 
     { return this; }
 
     // -------------------------------- Events-Related -------------------------------------------
@@ -106,13 +106,13 @@ namespace MDEvents
     size_t addEventsUnsafe(const std::vector<MDE> & events);
     //----------------------------------------------------------------------------------------------------------------------
     /*--------------->  EVENTS from event parts               <-------------------------------------------------------------*/
-    virtual void addEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId);
-    virtual void addAndTraceEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId,size_t index);
-    virtual void addEventUnsafe(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId);
+    virtual void addEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);
+    virtual void addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index);
+    virtual void addEventUnsafe(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);
     //virtual size_t addEventsPart(const std::vector<coord_t> &coords,const signal_t *Signal,const signal_t *errorSq,const  uint16_t *runIndex,const uint32_t *detectorId, const size_t start_at, const size_t stop_at);
     //virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
     //               const std::vector<uint16_t> &runIndex=std::vector<uint16_t>(),const std::vector<uint32_t> &detectorId=std::vector<uint32_t>());
-    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
+
     //----------------------------------------------------------------------------------------------------------------------
 
     /** Perform centerpoint binning of events
@@ -189,7 +189,7 @@ namespace MDEvents
 
     //-----------------------------------------------------------------------------------------------
     /** Get the extents for this box */
-    Mantid::Geometry::MDDimensionExtents<coord_t>  & getExtents(size_t dim)
+    virtual Mantid::Geometry::MDDimensionExtents<coord_t>  & getExtents(size_t dim)
     {
       return extents[dim];
     }
@@ -219,7 +219,7 @@ namespace MDEvents
     /** Get the center of the box
      * @param center :: bare array of size[nd] that will get set with the mid-point of each dimension.
      */
-    void getCenter(coord_t * center) const
+    virtual void getCenter(coord_t *const center) const
     {
       for (size_t d=0; d<nd; ++d)
         center[d] = extents[d].getCentre();
@@ -320,7 +320,7 @@ namespace MDEvents
     /** For testing, mostly: return the recursion depth of this box.
      * 0 is the top-level box, 1 is one deeper, etc.
      * @return split recursion depth*/
-    size_t getDepth() const
+    uint32_t getDepth() const
     {
       return m_depth;
     }
@@ -342,7 +342,7 @@ namespace MDEvents
 
     //-----------------------------------------------------------------------------------------------
     /** Return the inverse of the volume of the cell */
-    coord_t getInverseVolume() const
+    virtual coord_t getInverseVolume() const
     {
       return m_inverseVolume;
     }

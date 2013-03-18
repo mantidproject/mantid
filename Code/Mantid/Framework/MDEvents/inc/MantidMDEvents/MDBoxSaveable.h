@@ -47,13 +47,13 @@ namespace MDEvents
             virtual void load();
 
    
-        /// @return the amount of memory that the object takes up in the MRU.
-        virtual uint64_t getTotalDataSize() const
-            { return m_MDNode->getTotalDataSize(); }
-        /** @return the size of the event vector. ! Note that this is NOT necessarily the same as the number of points 
-                (because it might be cached to disk) or the size on disk (because you might have called AddEvents) */
-        virtual size_t getDataMemorySize()const 
-        {  return m_MDNode->getDataInMemorySize();}
+           /// @return the amount of memory that the object takes up in the MRU.
+           virtual uint64_t getTotalDataSize() const
+                 { return m_MDNode->getTotalDataSize(); }
+           /** @return the size of the event vector. ! Note that this is NOT necessarily the same as the number of points 
+                   (because it might be cached to disk) or the size on disk (because you might have called AddEvents) */
+           virtual size_t getDataMemorySize()const 
+           {  return m_MDNode->getDataInMemorySize();}
         private:
             API::IMDNode *m_MDNode;
     };

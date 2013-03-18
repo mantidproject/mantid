@@ -383,7 +383,7 @@ namespace MDEvents
    * @param index   detector's ID
    * */
    TMDE(
-   void MDBoxBase)::addEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId)
+   void MDBoxBase)::addEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
    {
        this->addEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0],runIndex, detectorId));
    }
@@ -395,7 +395,7 @@ namespace MDEvents
    * @param index :: current index for box
    */
    TMDE(
-   void MDBoxBase)::addAndTraceEvent(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId,size_t index)
+   void MDBoxBase)::addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
    {
        this->addAndTraceEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId),index);
    }
@@ -408,7 +408,7 @@ namespace MDEvents
    * @param Evnt :: reference to a MDEvent to add.
    * */
   TMDE(
-  void MDBoxBase)::addEventUnsafe(const std::vector<coord_t> &point, signal_t Signal, signal_t errorSq,uint16_t runIndex,uint32_t detectorId)
+  void MDBoxBase)::addEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
   {
        this->addEventUnsafe(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId));
   }

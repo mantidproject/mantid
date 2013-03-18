@@ -123,7 +123,18 @@ namespace MDEvents
       runIndex(0), detectorId(0)
     {
     }
-
+ //---------------------------------------------------------------------------------------------
+    /** Constructor with signal and error and an array of centers
+     *
+     * @param signal :: signal (aka weight)
+     * @param errorSquared :: square of the error on the weight
+     * @param centers :: pointer to a nd-sized array of values to set for all coordinates.
+     * */
+    MDEvent(const double signal, const double errorSquared, const coord_t * centers)
+    : MDLeanEvent<nd>(signal, errorSquared, centers),
+      runIndex(0), detectorId(0)
+    {
+    }
     //---------------------------------------------------------------------------------------------
     /** Constructor with signal and error and an array of centers, and the runIndex and detectorID
      *
@@ -134,6 +145,12 @@ namespace MDEvents
      * @param centers :: pointer to a nd-sized array of values to set for all coordinates.
      * */
     MDEvent(const float signal, const float errorSquared, const uint16_t runIndex, const int32_t detectorId, const coord_t * centers)
+    : MDLeanEvent<nd>(signal, errorSquared, centers),
+      runIndex(runIndex), detectorId(detectorId)
+    {
+    }
+
+    MDEvent(const double signal, const double errorSquared, const uint16_t runIndex, const int32_t detectorId, const coord_t * centers)
     : MDLeanEvent<nd>(signal, errorSquared, centers),
       runIndex(runIndex), detectorId(detectorId)
     {
@@ -194,8 +211,8 @@ namespace MDEvents
     static inline void eventsToData(const std::vector<MDEvent<nd> > & events,std::vector<coord_t> &data,size_t &ncols,double &totalSignal,double &totalErrSq )
     {
       ncols = nd+4;
-      size_t nEvents=events.size()/nd;
-      data.resize(nEvents+ncols);
+      size_t nEvents=events.size();
+      data.resize(nEvents*ncols);
 
 
       totalSignal = 0;
@@ -245,7 +262,7 @@ namespace MDEvents
         coord_t const *const centers = &(data[ii+4]);
 
         // Create the event with signal, error squared, and the centers
-        events.push_back( MDEvent<nd>(coord_t(data[ii]), coord_t(data[ii + 1]), 
+        events.push_back( MDEvent<nd>(signal_t(data[ii]), signal_t(data[ii + 1]), 
                                        uint16_t(data[ii + 2]), int32_t(data[ii+3]), centers) );
       }
     }
