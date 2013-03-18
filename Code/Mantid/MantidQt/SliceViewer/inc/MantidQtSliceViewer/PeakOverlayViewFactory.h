@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
+#include "MantidQtSliceViewer/PeakTransform.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -46,12 +47,8 @@ namespace MantidQt
     class DLLExport PeakOverlayViewFactory
     {
     public:
-      /// Create a peak view from the peak object.
-      virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::Kernel::V3D&) const = 0;
-      /// Setter for the peak radius to use for all peaks.
-      virtual void setPeakRadius(const double& peakRadius, const double& peakInnerRadius, const double& peakOuterRadius) = 0;
-      /// Setter for the z range.
-      virtual void setZRange(const double& max, const double& min) = 0;
+      /// Create a peak view from the index of a peak in the peaks workspace
+      virtual boost::shared_ptr<PeakOverlayView> createView(const int peakIndex, PeakTransform_const_sptr transform) const = 0;
       /// Destructor
       virtual ~PeakOverlayViewFactory()
       {

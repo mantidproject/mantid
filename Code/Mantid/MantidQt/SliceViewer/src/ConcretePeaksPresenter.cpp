@@ -48,10 +48,7 @@ namespace MantidQt
       // Loop through the peaks workspace, and use the factory to create a view from each peaks.
       for (int i = 0; i < m_peaksWS->getNumberPeaks(); ++i)
       {
-        const IPeak& peak = m_peaksWS->getPeak(i);
-        PeakOverlayView_sptr view = boost::shared_ptr<PeakOverlayView>(
-            m_viewFactory->createView(m_transform->transformPeak(peak)));
-        m_viewPeaks[i] = view;
+        m_viewPeaks[i] = m_viewFactory->createView(i, m_transform);
       }
     }
 
@@ -86,37 +83,19 @@ namespace MantidQt
     void ConcretePeaksPresenter::constructViewFactory(
         PeakOverlayViewFactory_sptr nonIntegratedViewFactory,  boost::shared_ptr<const MDGeometry> mdWS)
     {
-      double peakIntegrationRadius = 0;
-      double backgroundInnerRadius = 0;
-      double backgroundOuterRadius = 0;
-      double maxZ = 0;
-      double minZ = 0;
+
+      // TODO perform selection based on Figure Of Merit of each view factory.
+
       if (m_peaksWS->hasIntegratedPeaks())
       {
-        peakIntegrationRadius = boost::lexical_cast<double>(
-            m_peaksWS->run().getProperty("PeakRadius")->value());
-        backgroundInnerRadius = boost::lexical_cast<double>(
-            m_peaksWS->run().getProperty("BackgroundInnerRadius")->value());
-        backgroundOuterRadius = boost::lexical_cast<double>(
-            m_peaksWS->run().getProperty("BackgroundOuterRadius")->value());
+
       }
       else
       {
         // Swap the view factory. We are not plotting integrated peaks now.
         m_viewFactory.swap(nonIntegratedViewFactory);
-        // Find the range for the z slider axis.
-        for (size_t dimIndex = 0; dimIndex < mdWS->getNumDims(); ++dimIndex)
-        {
-          IMDDimension_const_sptr dimensionMappedToZ = mdWS->getDimension(dimIndex);
-          if (this->isDimensionNameOfFreeAxis(dimensionMappedToZ->getName()))
-          {
-            maxZ = dimensionMappedToZ->getMaximum();
-            minZ = dimensionMappedToZ->getMinimum();
-          }
-        }
+
       }
-      m_viewFactory->setPeakRadius(peakIntegrationRadius, backgroundInnerRadius, backgroundOuterRadius);
-      m_viewFactory->setZRange(maxZ, minZ);
     }
 
     /**

@@ -165,11 +165,9 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
     auto pMockViewFactory = new MockPeakOverlayFactory;
     
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
-    EXPECT_CALL(*pMockViewFactory, setPeakRadius(_,_,_)).Times(AtLeast(0));
-    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(0));
 
     // Create an input MODEL Peaks workspace (INTEGRATED)
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
@@ -258,17 +256,13 @@ public:
     // Mock View Factory for integrated peaks. We expect that this will never be used.
     auto pMockIntegratedViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockIntegratedViewFactory(pMockIntegratedViewFactory);
-    EXPECT_CALL(*pMockIntegratedViewFactory, setPeakRadius(_,_,_)).Times(1);
-    EXPECT_CALL(*pMockIntegratedViewFactory, setZRange(_,_)).Times(1);
-    EXPECT_CALL(*pMockIntegratedViewFactory, createView(_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockIntegratedViewFactory, createView(_,_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockIntegratedViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*pMockIntegratedViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
     // Create a mock transform object.
     auto pMockTransform = new NiceMock<MockPeakTransform>;
     PeakTransform_sptr mockTransform(pMockTransform);
-    const int numberOfTimesCalled = static_cast<int>(peaksWS->rowCount());// Should be called for every peak i.e. row.
-    EXPECT_CALL(*pMockTransform, transformPeak(_)).Times(numberOfTimesCalled).WillRepeatedly(Return(V3D()));
 
     // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
@@ -307,9 +301,7 @@ public:
     // Mock View Factory for NON-INTEGRATED peaks. We expect that this will be used.
     auto pMockNonIntegratedViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockNonIntegratedViewFactory(pMockNonIntegratedViewFactory);
-    EXPECT_CALL(*pMockNonIntegratedViewFactory, setPeakRadius(_,_,_)).Times(1);
-    EXPECT_CALL(*pMockNonIntegratedViewFactory, setZRange(_,_)).Times(1);
-    EXPECT_CALL(*pMockNonIntegratedViewFactory, createView(_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockNonIntegratedViewFactory, createView(_,_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockNonIntegratedViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*pMockNonIntegratedViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -320,8 +312,6 @@ public:
     // Mock Peaks transform
     auto pMockTransform = new MockPeakTransform;
     PeakTransform_sptr mockTransform(pMockTransform);  
-    const int numberOfTimesCalled = static_cast<int>(peaksWS->rowCount());// Should be called for every peak i.e. row.
-    EXPECT_CALL(*pMockTransform, transformPeak(_)).Times(numberOfTimesCalled).WillRepeatedly(Return(V3D()));
  
     // Mock Peak transform factory
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
@@ -357,9 +347,7 @@ public:
     EXPECT_CALL(*pMockView, updateView()).Times(expectedNumberPeaks);
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
     
-    EXPECT_CALL(*pMockIntegratedPeakViewFactory, setPeakRadius(_,_,_)).Times(1);
-    EXPECT_CALL(*pMockIntegratedPeakViewFactory, setZRange(_,_)).Times(1);
-    EXPECT_CALL(*pMockIntegratedPeakViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockIntegratedPeakViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockIntegratedPeakViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*pMockIntegratedPeakViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -401,9 +389,7 @@ public:
     EXPECT_CALL(*pMockView, setSlicePoint(slicePoint)).Times(expectedNumberPeaks);
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
-    EXPECT_CALL(*mockViewFactory, setPeakRadius(_, _, _)).Times(1);
-    EXPECT_CALL(*mockViewFactory, setZRange(_,_)).Times(1);
-    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -445,9 +431,7 @@ public:
     EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberPeaks);
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
-    EXPECT_CALL(*mockViewFactory, setPeakRadius(_, _, _)).Times(1);
-    EXPECT_CALL(*mockViewFactory, setZRange(_,_)).Times(1);
-    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -487,9 +471,7 @@ public:
     EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberPeaks); // This will be called automatically because the presenter won't be able to map Qx (below).
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
-    EXPECT_CALL(*mockViewFactory, setPeakRadius(_, _, _)).Times(1);
-    EXPECT_CALL(*mockViewFactory, setZRange(_,_)).Times(1);
-    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("Qx")); // Not either H, K or L
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     // Create an input MODEL Peaks workspace (INTEGRATED)
@@ -526,11 +508,9 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
-    EXPECT_CALL(*pMockViewFactory, setPeakRadius(_,_,_)).Times(AtLeast(1));
-    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(1));
 
     auto presenterBuilder = createStandardBuild(nPeaks); // Creates a default Concrete presenter product.
     presenterBuilder.withIntegratedViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
@@ -555,11 +535,9 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
-    EXPECT_CALL(*pMockViewFactory, setPeakRadius(_,_,_)).Times(AtLeast(1));
-    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(1));
 
     auto presenterBuilder = createStandardBuild(nPeaks); // Creates a default Concrete presenter product.
     presenterBuilder.withIntegratedViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
@@ -585,11 +563,9 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
-    EXPECT_CALL(*pMockViewFactory, setPeakRadius(_,_,_)).Times(AtLeast(1));
-    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(1));
 
     concreteBuilder.withIntegratedViewFactory(mockViewFactory);
 
@@ -632,11 +608,9 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
-    EXPECT_CALL(*pMockViewFactory, setPeakRadius(_,_,_)).Times(AtLeast(1));
-    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(1));
 
     concreteBuilder.withIntegratedViewFactory(mockViewFactory);
 
@@ -660,11 +634,9 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
-    EXPECT_CALL(*pMockViewFactory, setPeakRadius(_,_,_)).Times(AtLeast(1));
-    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(1));
 
     concreteBuilder.withIntegratedViewFactory(mockViewFactory);
 
@@ -683,7 +655,7 @@ public:
 
     if (sortAscending == true)
     {
-      TSM_ASSERT("The internal peaks workspace shuld have been internally sorted ASCENDING by H values",
+      TSM_ASSERT("The internal peaks workspace should have been internally sorted ASCENDING by H values",
           this->isSortedAscending(potentiallySortedHValues));
     }
     else
