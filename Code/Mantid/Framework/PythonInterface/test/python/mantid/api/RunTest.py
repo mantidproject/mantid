@@ -78,5 +78,16 @@ class RunTest(unittest.TestCase):
         self.assertTrue('run_start' in names)
         self.assertFalse('not a log' in names)
 
+    def test_startime(self):
+        """ Test exported function startTime()
+        """
+        run = self._expt_ws.run()
+
+        runstart = run.startTime()
+        runstartstr = str(runstart)
+        self.assertEquals(runstartstr, "2008-12-18T17:58:38")
+
+        return
+
 if __name__ == '__main__':
     unittest.main()
