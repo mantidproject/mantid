@@ -62,13 +62,13 @@ class FilterSetupWidget(BaseWidget):
         self._content.logvaluefilter_checkBox.setChecked(False)
 
         #   radio buttons
-        self._content.usesize_radiob.setChecked(True)
+        # self._content.usesize_radiob.setChecked(True)
         
         # Constraints/Validator
         #   integers
-        iv0 = QtGui.QIntValidator(self._content.numtimeinterval_edit)
-        iv0.setBottom(0)
-        self._content.numtimeinterval_edit.setValidator(iv0)
+        # iv0 = QtGui.QIntValidator(self._content.numtimeinterval_edit)
+        # iv0.setBottom(0)
+        # self._content.numtimeinterval_edit.setValidator(iv0)
        
         iv1 = QtGui.QIntValidator(self._content.run_number_edit)
         iv1.setBottom(0)
@@ -128,8 +128,8 @@ class FilterSetupWidget(BaseWidget):
 
         # Chop in time
         self._content.timefilter_checkBox.setChecked(state.filterbytime)
-        if state.numbertimeinterval is not None and state.numbertimeinterval != "": 
-            self._content.numtimeinterval_edit.setText(str(state.numbertimeinterval))
+        # if state.numbertimeinterval is not None and state.numbertimeinterval != "": 
+        #     self._content.numtimeinterval_edit.setText(str(state.numbertimeinterval))
         if state.lengthtimeinterval is not None and state.lengthtimeinterval != "": 
             self._content.timintervallength_edit.setText(str(state.lengthtimeinterval))
         self._content.timeunit_combo.setCurrentIndex(self._content.timeunit_combo.findText(str(state.unitoftime)))
@@ -170,7 +170,7 @@ class FilterSetupWidget(BaseWidget):
 
         # Filter by time
         s.filterbytime        = self._content.timefilter_checkBox.isChecked()
-        s.numbertimeinterval  = self._content.numtimeinterval_edit.text() 
+        # s.numbertimeinterval  = self._content.numtimeinterval_edit.text() 
         s.lengthtimeinterval  = self._content.timintervallength_edit.text() 
         s.unitoftime          = self._content.timeunit_combo.currentText()
 
@@ -179,12 +179,13 @@ class FilterSetupWidget(BaseWidget):
         s.logname             = self._content.logname_edit.text() 
         s.minimumlogvalue     = self._content.logminvalue_edit.text() 
         s.maximumlogvalue     = self._content.logmaxvalue_edit.text() 
-        if self._content.usesize_radiob.isChecked():
-            s.numlogvalueinterval = ""
-            s.logvalueinterval    = self._content.logintervalvalue_edit.text() 
-        elif self._content.usenumstep_radiob.isChecked():
-            s.numlogvalueinterval = self._content.numloginterval_edit.text()
-            s.logvalueinterval    = ""
+        s.logvalueinterval    = self._content.logintervalvalue_edit.text() 
+        # if self._content.usesize_radiob.isChecked():
+        #     s.numlogvalueinterval = ""
+        #     s.logvalueinterval    = self._content.logintervalvalue_edit.text() 
+        # elif self._content.usenumstep_radiob.isChecked():
+        #     s.numlogvalueinterval = self._content.numloginterval_edit.text()
+        #     s.logvalueinterval    = ""
         s.timetolerance       = self._content.timetol_edit.text() 
         s.logboundary         = self._content.logbound_combo.currentText() 
         s.logvaluetolerance   = self._content.logtol_edit.text() 
