@@ -1,6 +1,7 @@
 import unittest
 from testhelpers import run_algorithm
 from mantid.geometry import Goniometer
+from mantid.kernel import DateAndTime
 
 class RunTest(unittest.TestCase):
 
@@ -77,6 +78,18 @@ class RunTest(unittest.TestCase):
         self.assertTrue('nspectra' in names)
         self.assertTrue('run_start' in names)
         self.assertFalse('not a log' in names)
+
+    def test_startime(self):
+        """ Test exported function startTime()
+        """
+        run = self._expt_ws.run()
+
+        runstart = run.startTime()
+        runstartstr = str(runstart)
+        self.assertEquals(runstartstr, "2008-12-18T17:58:38")
+        self.assertTrue(isinstance(runstart, DateAndTime))
+
+        return
 
 if __name__ == '__main__':
     unittest.main()
