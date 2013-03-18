@@ -75,9 +75,9 @@ class RunSetupWidget(BaseWidget):
         iv1.setBottom(0)
         self._content.vanrun_edit.setValidator(iv1)
 
-        iv2 = QtGui.QIntValidator(self._content.vannoiserun_edit)
-        iv2.setBottom(0)
-        self._content.vannoiserun_edit.setValidator(iv2)
+        # iv2 = QtGui.QIntValidator(self._content.vannoiserun_edit)
+        # iv2.setBottom(0)
+        # self._content.vannoiserun_edit.setValidator(iv2)
 
         iv3 = QtGui.QIntValidator(self._content.vanbkgdrun_edit)
         iv3.setBottom(0)
