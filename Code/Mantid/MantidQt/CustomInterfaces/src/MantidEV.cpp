@@ -92,8 +92,8 @@ RunFitIntegrate::RunFitIntegrate(       MantidEVWorker * worker,
                                   const std::string    & peaks_ws_name,
                                   const std::string    & event_ws_name,
                                   const std::string    & rebin_params,
-                                  size_t                 n_bad_edge_pix,
-                                  bool                   use_ikeda_carpenter )
+                                        size_t           n_bad_edge_pix,
+                                        bool             use_ikeda_carpenter )
 {
   this->worker              = worker;
   this->peaks_ws_name       = peaks_ws_name;
@@ -110,14 +110,14 @@ void RunFitIntegrate::run()
 }
 
 
-RunEllipsoidIntegrate::RunEllipsoidIntegrate(       MantidEVWorker * worker,
-                                              const std::string    & peaks_ws_name,
-                                              const std::string    & event_ws_name,
-                                              double                 region_radius,
-                                              bool                   specify_size,
-                                              double                 peak_size,
-                                              double                 inner_size,
-                                              double                 outer_size )
+RunEllipsoidIntegrate::RunEllipsoidIntegrate(   MantidEVWorker * worker,
+                                          const std::string    & peaks_ws_name,
+                                          const std::string    & event_ws_name,
+                                                double           region_radius,
+                                                bool             specify_size,
+                                                double           peak_size,
+                                                double           inner_size,
+                                                double           outer_size )
 {
   this->worker        = worker;
   this->peaks_ws_name = peaks_ws_name;
@@ -170,11 +170,14 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.ApplyFindPeaks_btn, SIGNAL(clicked()),
                     this, SLOT(findPeaks_slot()) );
 
+   QObject::connect( m_uiForm.SelectPeaksFile_btn, SIGNAL(clicked()),
+                     this, SLOT(getLoadPeaksFileName_slot()) );
+
    QObject::connect( m_uiForm.ApplyFindUB_btn, SIGNAL(clicked()),
                     this, SLOT(findUB_slot()) );
 
    QObject::connect( m_uiForm.SelectUBFile_btn, SIGNAL(clicked()),
-                     this, SLOT(loadUB_slot()) );
+                     this, SLOT(getLoadUB_FileName_slot()) );
 
    QObject::connect( m_uiForm.ApplyChooseCell_btn, SIGNAL(clicked()),
                     this, SLOT(chooseCell_slot()) );
@@ -185,6 +188,25 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.ApplyIntegrate_btn, SIGNAL(clicked()),
                     this, SLOT(integratePeaks_slot()) );
 
+                          // connect the slots for the menu items
+  QObject::connect( m_uiForm.actionSave_State, SIGNAL(triggered()),
+                    this, SLOT(saveState_slot()) );
+
+  QObject::connect( m_uiForm.actionLoad_State, SIGNAL(triggered()),
+                    this, SLOT(loadState_slot()) );
+
+  QObject::connect( m_uiForm.actionSave_Isaw_UB, SIGNAL(triggered()),
+                    this, SLOT(saveIsawUB_slot()) );
+
+  QObject::connect( m_uiForm.actionLoad_Isaw_UB, SIGNAL(triggered()),
+                    this, SLOT(loadIsawUB_slot()) );
+
+  QObject::connect( m_uiForm.actionSave_Isaw_Peaks, SIGNAL(triggered()),
+                    this, SLOT(saveIsawPeaks_slot()) );
+
+  QObject::connect( m_uiForm.actionLoad_Isaw_Peaks, SIGNAL(triggered()),
+                    this, SLOT(loadIsawPeaks_slot()) );
+
                           // connect the slots for enabling and disabling
                           // various subsets of widgets
    QObject::connect( m_uiForm.LoadEventFile_rbtn, SIGNAL(toggled(bool)),
@@ -192,6 +214,9 @@ void MantidEV::initLayout()
 
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindPeaksParams_slot(bool) ) );
+
+   QObject::connect( m_uiForm.LoadIsawPeaks_rbtn, SIGNAL(toggled(bool)),
+                     this, SLOT( setEnabledLoadPeaksParams_slot(bool) ) );
 
    QObject::connect( m_uiForm.FindUBUsingFFT_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindUBFFTParams_slot(bool) ) );
@@ -237,11 +262,14 @@ void MantidEV::initLayout()
 
    m_uiForm.FindPeaks_rbtn->setChecked(true);
    m_uiForm.UseExistingPeaksWorkspace_rbtn->setChecked(false);
+   m_uiForm.LoadIsawPeaks_rbtn->setChecked(false);
    setEnabledFindPeaksParams_slot(true);
+   setEnabledLoadPeaksParams_slot(false);
 
    m_uiForm.FindUBUsingFFT_rbtn->setChecked(true);
    m_uiForm.FindUBUsingIndexedPeaks_rbtn->setChecked(false);
    m_uiForm.LoadISAWUB_rbtn->setChecked(false);
+   m_uiForm.UseCurrentUB_rbtn->setChecked(false);
    setEnabledFindUBFFTParams_slot(true);
    setEnabledLoadUBParams_slot(false);
    setEnabledMaxOptimizeDegrees_slot();
@@ -316,8 +344,8 @@ void MantidEV::selectWorkspace_slot()
      return;
    }
 
-   if ( m_uiForm.LoadEventFile_rbtn->isChecked() )      // load file and
-   {                                                    // convert to MD workspace
+   if ( m_uiForm.LoadEventFile_rbtn->isChecked() )  // load file and
+   {                                                // convert to MD workspace
      std::string file_name = m_uiForm.EventFileName_ledt->text().toStdString();
      if ( file_name.length() == 0 )
      {
@@ -325,14 +353,14 @@ void MantidEV::selectWorkspace_slot()
        return;
      }
 
-     RunLoadAndConvertToMD* runner = new RunLoadAndConvertToMD( worker, file_name, 
-                                                               ev_ws_name, md_ws_name );
+     RunLoadAndConvertToMD* runner = new RunLoadAndConvertToMD(worker,file_name,
+                                                       ev_ws_name, md_ws_name );
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
        errorMessage( "Failed to start Load and ConvertToMD thread...previous operation not complete" );
    }
-   else if ( m_uiForm.UseExistingWorkspaces_rbtn->isChecked() )  // check existing
-   {                                                             // workspaces
+   else if ( m_uiForm.UseExistingWorkspaces_rbtn->isChecked() )// check existing
+   {                                                           // workspaces
      if ( !worker->isEventWorkspace( ev_ws_name ) )
      {
        errorMessage("Requested Event Workspace is NOT a valid Event workspace");
@@ -364,9 +392,9 @@ void MantidEV::loadEventFile_slot()
   }
 
   QString Qfile_name = QFileDialog::getOpenFileName( this,
-                                                tr("Load event file"),
-                                                file_path,
-                                                tr("Nexus Files (*.nxs)"));
+                              tr("Load event file"),
+                              file_path,
+                              tr("Nexus Files (*.nxs);; All files(*.*)"));
 
   last_event_file = Qfile_name.toStdString();
 
@@ -378,17 +406,10 @@ void MantidEV::findPeaks_slot()
 {
    std::cout << std::endl << "Apply Find Peaks ....." << std::endl;
 
-   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
-     errorMessage("Specify a peaks workspace name on Find Peaks tab.");
-     return;
-   }
-
-   std::string md_ws_name  = m_uiForm.MDworkspace_ledt->text().toStdString();
-   if ( md_ws_name.length() == 0 )
-   {
-     errorMessage("Specify an MD workspace name on Select Data tab.");
+     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
      return;
    }
 
@@ -399,38 +420,118 @@ void MantidEV::findPeaks_slot()
    }
 
    bool find_new_peaks     = m_uiForm.FindPeaks_rbtn->isChecked();
-   bool use_existing_peaks = !find_new_peaks;
+   bool use_existing_peaks = m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked();
+   bool load_peaks         = m_uiForm.LoadIsawPeaks_rbtn->isChecked();
 
-   double max_abc       = 15;
-   size_t num_to_find   = 50;
-   double min_intensity = 10;
+   if ( find_new_peaks )
+   {
+     std::string md_ws_name  = m_uiForm.MDworkspace_ledt->text().toStdString();
+     if ( md_ws_name.length() == 0 )
+     {
+       errorMessage("Specify an MD workspace name on Select Data tab.");
+       return;
+     }
 
-   if ( !getPositiveDouble( m_uiForm.MaxABC_ledt, max_abc ) )
-     return;
+     double max_abc       = 15;
+     size_t num_to_find   = 50;
+     double min_intensity = 10;
 
-   if ( !getPositiveInt( m_uiForm.NumToFind_ledt, num_to_find ) )
-     return;
+     if ( !getPositiveDouble( m_uiForm.MaxABC_ledt, max_abc ) )
+       return;
 
-   if ( !getPositiveDouble( m_uiForm.MinIntensity_ledt, min_intensity ) )
-     return;
+     if ( !getPositiveInt( m_uiForm.NumToFind_ledt, num_to_find ) )
+       return;
 
-   if ( use_existing_peaks )
+     if ( !getPositiveDouble( m_uiForm.MinIntensity_ledt, min_intensity ) )
+       return;
+
+     RunFindPeaks* runner = new RunFindPeaks( worker,
+                                         md_ws_name, peaks_ws_name,
+                                         max_abc, num_to_find, min_intensity );
+
+     bool running = m_thread_pool->tryStart( runner );
+     if ( !running )
+       errorMessage( "Failed to start findPeaks thread...previous operation not complete" );   
+   }
+   else if ( use_existing_peaks )
    {
      if ( !worker->isPeaksWorkspace( peaks_ws_name ) )
      {
        errorMessage("Requested Peaks Workspace Doesn't Exist");
      }
    }
-   else if ( find_new_peaks )
+   else if ( load_peaks )
    {
-     RunFindPeaks* runner = new RunFindPeaks( worker,
-                                              md_ws_name, peaks_ws_name,
-                                              max_abc, num_to_find, min_intensity );
-
-     bool running = m_thread_pool->tryStart( runner );
-     if ( !running )
-       errorMessage( "Failed to start findPeaks thread...previous operation not complete" );   
+     std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().toStdString();
+     if ( file_name.length() == 0 )
+     {
+       errorMessage("Specify a peaks file with the peaks to be loaded.");
+       return;
+     }
+ 
+     if ( !worker->loadIsawPeaks( peaks_ws_name, file_name ) )
+     {
+       errorMessage("Could not load requested peaks file");
+     }
    }
+}
+
+
+void MantidEV::getLoadPeaksFileName_slot()
+{
+  std::cout << "getting Load peaks file name... " << std::endl;
+
+  QString file_path;
+  if ( last_peaks_file.length() != 0 )
+  {
+    QString Qfile_name = QString::fromUtf8( last_peaks_file.c_str() );
+    QFileInfo file_info( Qfile_name );
+    file_path = file_info.absolutePath();
+  }
+  else
+  {
+    file_path = QDir::homePath();
+  }
+
+  QString Qfile_name = QFileDialog::getOpenFileName( this,
+                         tr("Load peaks file"),
+                         file_path,
+                         tr("Peaks Files (*.peaks *.integrate);; All files(*.*)"));
+
+  if ( Qfile_name.length()> 0 )
+  {
+    last_peaks_file = Qfile_name.toStdString();
+    m_uiForm.SelectPeaksFile_ledt->setText( Qfile_name );
+  }
+}
+
+
+void MantidEV::getSavePeaksFileName()
+{
+  std::cout << "getting Save peaks file name... " << std::endl;
+
+  QString file_path;
+  if ( last_peaks_file.length() != 0 )
+  {
+    QString Qfile_name = QString::fromUtf8( last_peaks_file.c_str() );
+    QFileInfo file_info( Qfile_name );
+    file_path = file_info.absolutePath();
+  }
+  else
+  {
+    file_path = QDir::homePath();
+  }
+
+  QString Qfile_name = QFileDialog::getSaveFileName( this,
+                          tr("Save peaks file"),
+                          file_path,
+                          tr("Peaks Files (*.peaks *.integrate);; All files(*.*) "));
+
+  if ( Qfile_name.length() > 0 )
+  {
+    last_peaks_file = Qfile_name.toStdString();
+    m_uiForm.SelectPeaksFile_ledt->setText( Qfile_name );
+  }
 }
 
 
@@ -441,7 +542,7 @@ void MantidEV::findUB_slot()
    std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
-     errorMessage("Specify a peaks workspace name on Find Peaks tab.");
+     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
      return;
    }
 
@@ -476,7 +577,7 @@ void MantidEV::findUB_slot()
      if ( !getPositiveDouble( m_uiForm.FFTTolerance_ledt, fft_tolerance ) )
        return;
 
-     if ( !worker->findUBUsingFFT( peaks_ws_name, min_abc, max_abc, fft_tolerance ) )
+     if (!worker->findUBUsingFFT(peaks_ws_name,min_abc,max_abc,fft_tolerance))
      {
        errorMessage( "Find UB Using FFT Failed" );
        return;
@@ -509,7 +610,7 @@ void MantidEV::findUB_slot()
        }
        if ( optimize_angles )
        {
-         if ( !getPositiveDouble( m_uiForm.MaxGoniometerChange_ledt, max_degrees ) )
+         if (!getPositiveDouble( m_uiForm.MaxGoniometerChange_ledt,max_degrees))
            return;
 
          if ( !worker->optimizePhiChiOmega( peaks_ws_name, max_degrees ) )
@@ -534,9 +635,9 @@ void MantidEV::findUB_slot()
 }
 
 
-void MantidEV::loadUB_slot()
+void MantidEV::getLoadUB_FileName_slot()
 {
-  std::cout << "Load UB file Browse button pushed... " << std::endl;
+  std::cout << "getting Load UB file name... " << std::endl;
 
   QString file_path;
   if ( last_UB_file.length() != 0 )
@@ -551,13 +652,43 @@ void MantidEV::loadUB_slot()
   }
 
   QString Qfile_name = QFileDialog::getOpenFileName( this,
-                                                tr("Load matrix file"),
-                                                file_path,
-                                                tr("Matrix Files (*.mat)"));
+                         tr("Load matrix file"),
+                         file_path,
+                         tr("Matrix Files (*.mat);; All files(*.*)"));
+  if ( Qfile_name.length()> 0 )
+  {
+    last_UB_file = Qfile_name.toStdString();
+    m_uiForm.SelectUBFile_ledt->setText( Qfile_name );
+  }
+}
 
-  last_UB_file = Qfile_name.toStdString();
 
-  m_uiForm.SelectUBFile_ledt->setText( Qfile_name );
+void MantidEV::getSaveUB_FileName()
+{
+  std::cout << "getting Save UB file name... " << std::endl;
+
+  QString file_path;
+  if ( last_UB_file.length() != 0 )
+  {
+    QString Qfile_name = QString::fromUtf8( last_UB_file.c_str() );
+    QFileInfo file_info( Qfile_name );
+    file_path = file_info.absolutePath();
+  }
+  else
+  {
+    file_path = QDir::homePath();
+  }
+
+  QString Qfile_name = QFileDialog::getSaveFileName( this,
+                            tr("Save matrix file"),
+                            file_path,
+                            tr("Matrix Files (*.mat);; All files(*.*)"));
+
+  if ( Qfile_name.length() > 0 )
+  {
+    last_UB_file = Qfile_name.toStdString();
+    m_uiForm.SelectUBFile_ledt->setText( Qfile_name );
+  }
 }
 
 
@@ -567,7 +698,7 @@ void MantidEV::chooseCell_slot()
    std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
-     errorMessage("Specify a peaks workspace name on Find Peaks tab.");
+     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
      return;
    }
 
@@ -619,10 +750,10 @@ void MantidEV::chooseCell_slot()
 void MantidEV::changeHKL_slot()
 {
    std::cout << std::endl << "Apply Change HKL ....." << std::endl;
-   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
-     errorMessage("Specify a peaks workspace name on Find Peaks tab.");
+     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
      return;
    }
 
@@ -643,19 +774,18 @@ void MantidEV::changeHKL_slot()
 }
 
 
-
 void MantidEV::integratePeaks_slot()
 {
    std::cout << std::endl <<"Apply Integrate ....."<<std::endl;
-   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+
    if ( peaks_ws_name.length() == 0 )
    {
-     errorMessage("Specify a peaks workspace name on Find Peaks tab.");
+     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
      return;
    }
 
-   std::string event_ws_name =
-                            m_uiForm.SelectEventWorkspace_ledt->text().toStdString();
+   std::string event_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().toStdString();
    if ( event_ws_name.length() == 0 )
    {
      errorMessage("Specify a time-of-flight event workspace name.");
@@ -680,18 +810,18 @@ void MantidEV::integratePeaks_slot()
      if ( !getPositiveDouble( m_uiForm.PeakRadius_ledt, peak_radius ) )
        return;
 
-     if ( !getPositiveDouble( m_uiForm.BackgroundInnerRadius_ledt, inner_radius ) )
+     if ( !getPositiveDouble(m_uiForm.BackgroundInnerRadius_ledt, inner_radius))
        return;
 
-     if ( !getPositiveDouble( m_uiForm.BackgroundOuterRadius_ledt, outer_radius ) )
+     if ( !getPositiveDouble(m_uiForm.BackgroundOuterRadius_ledt, outer_radius))
        return;
 
      bool integrate_edge = m_uiForm.IntegrateEdge_ckbx->isChecked();
 
      RunSphereIntegrate * runner = new RunSphereIntegrate( worker,
-                                              peaks_ws_name, event_ws_name,
-                                              peak_radius, inner_radius, outer_radius,
-                                              integrate_edge );
+                                        peaks_ws_name, event_ws_name,
+                                        peak_radius, inner_radius, outer_radius,
+                                        integrate_edge );
 
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
@@ -730,31 +860,157 @@ void MantidEV::integratePeaks_slot()
        if ( !getPositiveDouble( m_uiForm.PeakSize_ledt, peak_size ) )
          return;
 
-       if ( !getPositiveDouble( m_uiForm.BackgroundInnerSize_ledt, inner_size ) )
+       if ( !getPositiveDouble(m_uiForm.BackgroundInnerSize_ledt, inner_size) )
          return;
 
-       if ( !getPositiveDouble( m_uiForm.BackgroundOuterSize_ledt, outer_size ) )
+       if ( !getPositiveDouble(m_uiForm.BackgroundOuterSize_ledt, outer_size) )
          return;
      }
 
-/*
-     if ( !worker->ellipsoidIntegrate( peaks_ws_name, event_ws_name,
-                                       region_radius,
-                                       specify_size,
-                                       peak_size, inner_size, outer_size ) )
-     {
-       errorMessage( "Failed to Integrate Peaks using 3D Ellipsoids" );
-     }
-*/
      RunEllipsoidIntegrate * runner = new RunEllipsoidIntegrate( worker,
-                                              peaks_ws_name, event_ws_name,
-                                              region_radius, specify_size,
-                                              peak_size, inner_size, outer_size );
+                                            peaks_ws_name, event_ws_name,
+                                            region_radius, specify_size,
+                                            peak_size, inner_size, outer_size );
 
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
        errorMessage( "Failed to start sphere integrate thread...previous operation not complete" );
    }
+}
+
+
+void MantidEV::saveState_slot()
+{
+  std::cout << "saveState_slot called..." << std::endl;
+}
+
+
+void MantidEV::loadState_slot()
+{
+  std::cout << "loadState_slot called..." << std::endl;
+}
+
+
+void MantidEV::saveIsawUB_slot()
+{
+  std::cout << "saveIsawUB_slot called..." << std::endl;
+
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+  if ( peaks_ws_name.length() == 0 )
+  {
+    errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
+    return;
+  }
+
+  getSaveUB_FileName();
+
+  std::string file_name = m_uiForm.SelectUBFile_ledt->text().toStdString();
+  if ( file_name.length() == 0 )
+  {
+     errorMessage("Select a .mat file with the UB matrix to be loaded.");
+     return;
+  }
+  else
+  {
+    if ( !worker->saveIsawUB( peaks_ws_name, file_name ) )
+    {
+      errorMessage( "Failed to Save UB Matrix" );
+      return;
+    }
+  }
+}
+
+
+void MantidEV::loadIsawUB_slot()
+{
+  std::cout << "loadIsawUB_slot called..." << std::endl;
+
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+  if ( peaks_ws_name.length() == 0 )
+  {
+    errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
+    return;
+  }
+
+  getLoadUB_FileName_slot();
+
+  std::string file_name = m_uiForm.SelectUBFile_ledt->text().toStdString();
+  if ( file_name.length() == 0 )
+  {
+     errorMessage("Select a .mat file with the UB matrix to be loaded.");
+     return;
+  }
+  else
+  {
+    if ( !worker->loadIsawUB( peaks_ws_name, file_name ) )
+    {
+      errorMessage( "Failed to Load UB Matrix" );
+      return;
+    }
+  }
+}
+
+
+void MantidEV::saveIsawPeaks_slot()
+{
+  std::cout << "saveIsawPeaks_slot called..." << std::endl;
+
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+  if ( peaks_ws_name.length() == 0 )
+  {
+    errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
+    return;
+  }
+
+  getSavePeaksFileName();
+
+  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().toStdString();
+  if ( file_name.length() == 0 )
+  {
+     errorMessage("Specify a peaks file name for saving the peaks workspace.");
+     return;
+  }
+  else
+  {
+    if ( !worker->saveIsawPeaks( peaks_ws_name, file_name, false ) )
+    {
+      errorMessage( "Failed to save peaks to file" );
+      return;
+    }
+  }
+}
+
+
+/**
+ *  Called from file menu item
+ */
+void MantidEV::loadIsawPeaks_slot()
+{
+  std::cout << "loadIsawPeaks_slot called..." << std::endl;
+
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+  if ( peaks_ws_name.length() == 0 )
+  {
+    errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
+    return;
+  }
+
+  getLoadPeaksFileName_slot();
+
+  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().toStdString();
+  if ( file_name.length() == 0 )
+  {
+     errorMessage("Select a peaks file to be loaded.");
+     return;
+  }
+  else
+  {
+    if ( !worker->loadIsawPeaks( peaks_ws_name, file_name ) )
+    {
+      errorMessage( "Failed to Load Peaks File" );
+      return;
+    }
+  }
 }
 
 
@@ -774,6 +1030,14 @@ void MantidEV::setEnabledFindPeaksParams_slot( bool on )
   m_uiForm.NumToFind_ledt->setEnabled( on );
   m_uiForm.MinIntensity_lbl->setEnabled( on );
   m_uiForm.MinIntensity_ledt->setEnabled( on );
+}
+
+
+void MantidEV::setEnabledLoadPeaksParams_slot( bool on )
+{
+  m_uiForm.SelectPeaksFile_lbl->setEnabled( on );
+  m_uiForm.SelectPeaksFile_ledt->setEnabled( on );
+  m_uiForm.SelectPeaksFile_btn->setEnabled( on );
 }
 
 

@@ -141,10 +141,6 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
   std::cout << "num_to_find   = " << num_to_find << std::endl;
   std::cout << "min_intensity = " << min_intensity << std::endl;
 
-//  const auto& ADS = AnalysisDataService::Instance();
-//  if ( ! ( ADS.isValid( peaks_ws_name ) ) )
-//    return false;
-
   double min_separation = 0.9 * 6.28 / max_abc;
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("FindPeaksMD");
   alg->setProperty("InputWorkspace",md_ws_name);
@@ -156,6 +152,45 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
   if ( alg->execute() )
     return true;
 
+  return false;
+}
+
+
+bool MantidEVWorker::loadIsawPeaks( const std::string & peaks_ws_name,
+                                    const std::string & file_name )
+{
+  std::cout << "worker->loadIsawPeaks called" << std::endl;
+  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
+  std::cout << "file_name     = " << file_name << std::endl;
+
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadIsawPeaks");
+  alg->setProperty("Filename",file_name );
+  alg->setProperty("OutputWorkspace", peaks_ws_name );
+
+  if ( alg->execute() )
+    return true;
+
+  return false;
+}
+
+
+bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
+                                    const std::string & file_name,
+                                          bool          append  )
+{
+  std::cout << "worker->saveIsawPeaks called" << std::endl;
+  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
+  std::cout << "append        = " << append << std::endl;
+  std::cout << "file_name     = " << file_name << std::endl;
+                                           
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SaveIsawPeaks");
+  alg->setProperty("InputWorkspace", peaks_ws_name );
+  alg->setProperty("AppendFile", append );
+  alg->setProperty("Filename",file_name );
+  
+  if ( alg->execute() )
+    return true;
+  
   return false;
 }
 
@@ -219,6 +254,27 @@ bool MantidEVWorker::loadIsawUB( const std::string & peaks_ws_name,
   alg->setProperty("InputWorkspace",peaks_ws_name);
   alg->setProperty("Filename",file_name);
   alg->setProperty("CheckUMatrix",true);
+
+  if ( alg->execute() )
+    return true;
+
+  return false;
+}
+
+
+bool MantidEVWorker::saveIsawUB( const std::string & peaks_ws_name,
+                                 const std::string & file_name)
+{
+  std::cout << "worker->saveIsawUB called" << std::endl;
+  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
+  std::cout << "file_name     = " << file_name << std::endl;
+
+  if ( !isPeaksWorkspace( peaks_ws_name ) )
+    return false;
+
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SaveIsawUB");
+  alg->setProperty("InputWorkspace",peaks_ws_name);
+  alg->setProperty("Filename",file_name);
 
   if ( alg->execute() )
     return true;

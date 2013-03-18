@@ -26,7 +26,6 @@
       <addaction name="actionLoad_Isaw_UB"/>
       <addaction name="actionSave_Isaw_Peaks"/>
       <addaction name="actionLoad_Isaw_Peaks"/>
-      <addaction name="actionExit"/>
      </widget>
      <widget class="QMenu" name="menuView">
       <property name="title">
@@ -41,7 +40,7 @@
    <item row="1" column="0">
     <widget class="QTabWidget" name="MantidEV_tabwidg">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
@@ -326,6 +325,55 @@
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
+      <widget class="QRadioButton" name="LoadIsawPeaks_rbtn">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>320</y>
+         <width>361</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Load ISAW Peaks (or Integrate) File</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="SelectPeaksFile_btn">
+       <property name="geometry">
+        <rect>
+         <x>480</x>
+         <y>366</y>
+         <width>94</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Browse</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="SelectPeaksFile_lbl">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>370</y>
+         <width>101</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Filename</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="SelectPeaksFile_ledt">
+       <property name="geometry">
+        <rect>
+         <x>172</x>
+         <y>363</y>
+         <width>291</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="FindUB">
       <attribute name="title">
@@ -348,7 +396,7 @@
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>160</y>
+         <y>150</y>
          <width>431</width>
          <height>27</height>
         </rect>
@@ -361,7 +409,7 @@
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>210</y>
+         <y>190</y>
          <width>271</width>
          <height>27</height>
         </rect>
@@ -374,7 +422,7 @@
        <property name="geometry">
         <rect>
          <x>500</x>
-         <y>250</y>
+         <y>220</y>
          <width>81</width>
          <height>31</height>
         </rect>
@@ -491,7 +539,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>300</y>
+         <y>260</y>
          <width>361</width>
          <height>23</height>
         </rect>
@@ -504,7 +552,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>350</y>
+         <y>290</y>
          <width>301</width>
          <height>22</height>
         </rect>
@@ -517,7 +565,7 @@
        <property name="geometry">
         <rect>
          <x>400</x>
-         <y>340</y>
+         <y>280</y>
          <width>81</width>
          <height>31</height>
         </rect>
@@ -581,8 +629,8 @@
       <widget class="QLineEdit" name="SelectUBFile_ledt">
        <property name="geometry">
         <rect>
-         <x>172</x>
-         <y>253</y>
+         <x>180</x>
+         <y>220</y>
          <width>311</width>
          <height>31</height>
         </rect>
@@ -592,13 +640,26 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>260</y>
+         <y>230</y>
          <width>101</width>
          <height>18</height>
         </rect>
        </property>
        <property name="text">
         <string>Filename</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="UseCurrentUB_rbtn">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>340</y>
+         <width>521</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Use Current UB (if already found or loaded)</string>
        </property>
       </widget>
      </widget>
@@ -1495,9 +1556,9 @@
     <string>Load Isaw Peaks</string>
    </property>
   </action>
-  <action name="actionExit">
+  <action name="actionClose">
    <property name="text">
-    <string>Exit</string>
+    <string>Close</string>
    </property>
   </action>
  </widget>
