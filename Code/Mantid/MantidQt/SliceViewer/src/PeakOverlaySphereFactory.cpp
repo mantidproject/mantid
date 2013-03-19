@@ -30,7 +30,7 @@ namespace MantidQt
 
     boost::shared_ptr<PeakOverlayView> PeakOverlaySphereFactory::createView(const int peakIndex, PeakTransform_const_sptr transform) const
     {
-      auto peak = m_peaksWS->getPeak(peakIndex);
+      const IPeak& peak = m_peaksWS->getPeak(peakIndex);
       auto position = transform->transformPeak(peak);
       return boost::make_shared<PeakOverlaySphere>(m_plot, m_parent, position, this->m_peakRadius, this->m_backgroundInnerRadius, this->m_backgroundOuterRadius, this->m_peakColour, this->m_backColour);
     }

@@ -41,7 +41,7 @@ namespace MantidQt
 
     boost::shared_ptr<PeakOverlayView> PeakOverlayCrossFactory::createView(const int peakIndex, PeakTransform_const_sptr transform) const
     {
-      auto peak = m_peaksWS->getPeak(peakIndex);
+      const IPeak& peak = m_peaksWS->getPeak(peakIndex);
       auto position = transform->transformPeak(peak);
       return boost::make_shared<PeakOverlayCross>(m_plot, m_parent, position, m_zMax, m_zMin, this->m_peakColour);
     }
