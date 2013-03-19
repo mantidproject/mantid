@@ -148,10 +148,10 @@ namespace MDEventsTestHelper
   //=====================================================================================
 
   /** Generate an empty MDBox */
-  MDBox<MDLeanEvent<1>,1> * makeMDBox1(size_t splitInto, API::BoxController *& splitter);
+  MDBox<MDLeanEvent<1>,1> * makeMDBox1(size_t splitInto=10,API::BoxController *splitter=NULL);
 
   /** Generate an empty MDBox with 3 dimensions, split 10x5x2 */
-  MDBox<MDLeanEvent<3>,3> * makeMDBox3(API::BoxController * & splitter);
+  MDBox<MDLeanEvent<3>,3> * makeMDBox3();
 
   /** Return a vector with this many MDEvents, spaced evenly from 0.5, 1.5, etc. */
   std::vector<MDLeanEvent<1> > makeMDEvents1(size_t num);
@@ -170,7 +170,7 @@ namespace MDEventsTestHelper
   static MDGridBox<MDLeanEvent<nd>,nd> * makeMDGridBox(size_t split0=10, size_t split1=10, coord_t dimensionMin=0.0, coord_t dimensionMax=10.0)
   {
     // Split at 5 events
-    Mantid::API::BoxController_sptr splitter(new Mantid::API::BoxController(nd));
+    Mantid::API::BoxController *splitter = new Mantid::API::BoxController(nd);
     splitter->setSplitThreshold(5);
     // Splits into 10x10x.. boxes
     splitter->setSplitInto(split0);
@@ -267,7 +267,7 @@ namespace MDEventsTestHelper
   static MDGridBox<MDLeanEvent<nd>,nd> * makeRecursiveMDGridBox(size_t splitInto, size_t levels)
   {
     // Split at 5 events
-    Mantid::API::BoxController_sptr splitter(new Mantid::API::BoxController(nd));
+    Mantid::API::BoxController* splitter(new Mantid::API::BoxController(nd));
     splitter->setSplitThreshold(5);
     splitter->resetNumBoxes();
     splitter->setMaxDepth(levels+1);

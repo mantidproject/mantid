@@ -69,18 +69,17 @@ namespace MDEvents
    * @param splitRecursively :: flag to split boxes recursively
    */
   TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box,bool splitRecursively)
-   : MDBoxBase<MDE, nd>(*box),
+   : MDBoxBase<MDE, nd>(*box,box->getBoxController()),
      nPoints(0)
   {
-    BoxController *bc = box->getBoxController();
-    if (!bc)
+    if (!this->m_BoxController)
       throw std::runtime_error("MDGridBox::ctor(): constructing from box:: No BoxController specified in box.");
 
 //    std::cout << "Splitting MDBox ID " << box->getId() << " with " << box->getNPoints() << " events into MDGridBox" << std::endl;
 
     // How many is it split?
     for (size_t d=0; d<nd; d++)
-      split[d] = bc->getSplitInto(d);
+      split[d] = this->m_BoxController->getSplitInto(d);
 
     // Compute sizes etc.   
     size_t tot = computeSizesFromSplit();

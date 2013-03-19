@@ -374,6 +374,8 @@ namespace MDEvents
 
     // The id which specify location of this box in a linear chain of ordered boxes (e.g. on file)
     size_t m_fileID;
+  private:
+        MDBoxBase(const MDBoxBase<MDE,nd> & box);
   public:
     /// Convenience typedef for a shared pointer to a this type of class
     typedef boost::shared_ptr< MDBoxBase<MDE, nd> > sptr;

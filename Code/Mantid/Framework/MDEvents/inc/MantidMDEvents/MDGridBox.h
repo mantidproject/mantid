@@ -95,6 +95,12 @@ namespace MDEvents
     void addEvent(const MDE & event);
     void addEventUnsafe(const MDE & event);
     void addAndTraceEvent(const MDE & point,size_t index);
+    // unhide MDBoxBase methods
+    virtual size_t addEvents(const std::vector<MDE> & events)
+    { return MDBoxBase::addEvents(events); }
+    virtual size_t addEventsUnsafe(const std::vector<MDE> & events)
+    {return MDBoxBase::addEventsUnsafe( events);}
+
 
     /*--------------->  EVENTS from event data              <-------------------------------------------------------------*/
     virtual void addEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);
@@ -124,24 +130,21 @@ namespace MDEvents
 
     // Set the box controller overrriden.
     //virtual void setBoxController(Mantid::API::BoxController *controller);
-
-    // ======================= Testing/Debugging Methods =================
-    /** For testing: get (a reference to) the vector of boxes */
-    //std::vector<API::IMDNode *> & getBoxes()
-    //{ return m_Children; }
-
-  
+ 
     virtual bool getIsMasked() const;
-
     ///Setter for masking the box
     virtual void mask();
-
     ///Setter for unmasking the box
     virtual void unmask();
+    // ======================= Testing/Debugging Methods =================
+    /** For testing: get (a reference to) the vector of boxes */
+    std::vector<MDBoxBase<MDE,nd> *> & getBoxes()
+    { return m_Children; }
+
 
 //------------------------------------------------------------------------- 
   /** The function used to satisfy IMDNode interface but the physical meaning is unclear */
-  void calculateCentroid(coord_t *  /*centroid*/= NULL) const
+  void calculateCentroid(coord_t *  /*centroid*/) const
   {
       throw(std::runtime_error("This function should not be called on MDGridBox (as its meaning for MDbox is dubious too)"));
   }
@@ -183,57 +186,57 @@ namespace MDEvents
 
     size_t getLinearIndex(size_t * indices) const;
 
-
-
     size_t computeSizesFromSplit();
     void fillBoxShell(const size_t tot,const coord_t inverseVolume);
+
+    MDGridBox(const MDGridBox<MDE, nd> & box);
   public:
 
-    //===============================================================================================
-    //===============================================================================================
-    /** Task for adding events to a MDGridBox. */
-    class AddEventsTask : public Mantid::Kernel::Task
-    {
-    public:
-      /// Pointer to MDGridBox.
-      MDBoxBase<MDE, nd> * box;
-      /// Reference to the MD events that will be added
-      const std::vector<MDE> & events;
-      /// Where to start in vector
-      size_t start_at;
-      /// Where to stop in vector
-      size_t stop_at;
-      /// Progress report
-      Mantid::Kernel::ProgressBase * prog;
+    ////===============================================================================================
+    ////===============================================================================================
+    ///** Task for adding events to a MDGridBox. */
+    //class AddEventsTask : public Mantid::Kernel::Task
+    //{
+    //public:
+    //  /// Pointer to MDGridBox.
+    //  MDBoxBase<MDE, nd> * box;
+    //  /// Reference to the MD events that will be added
+    //  const std::vector<MDE> & events;
+    //  /// Where to start in vector
+    //  size_t start_at;
+    //  /// Where to stop in vector
+    //  size_t stop_at;
+    //  /// Progress report
+    //  Mantid::Kernel::ProgressBase * prog;
 
-      /** Ctor
-       *
-       * @param box :: Pointer to MDGridBox
-       * @param events :: Reference to the MD events that will be added
-       * @param start_at :: Where to start in vector
-       * @param stop_at :: Where to stop in vector
-       * @param prog :: ProgressReporting
-       * @return
-       */
-      AddEventsTask(MDBoxBase<MDE, nd> * box, const std::vector<MDE> & events,
-                    const size_t start_at, const size_t stop_at, Mantid::Kernel::ProgressBase * prog)
-      : Mantid::Kernel::Task(),
-        box(box), events(events), start_at(start_at), stop_at(stop_at), prog(prog)
-      {
-      }
+    //  /** Ctor
+    //   *
+    //   * @param box :: Pointer to MDGridBox
+    //   * @param events :: Reference to the MD events that will be added
+    //   * @param start_at :: Where to start in vector
+    //   * @param stop_at :: Where to stop in vector
+    //   * @param prog :: ProgressReporting
+    //   * @return
+    //   */
+    //  AddEventsTask(MDBoxBase<MDE, nd> * box, const std::vector<MDE> & events,
+    //                const size_t start_at, const size_t stop_at, Mantid::Kernel::ProgressBase * prog)
+    //  : Mantid::Kernel::Task(),
+    //    box(box), events(events), start_at(start_at), stop_at(stop_at), prog(prog)
+    //  {
+    //  }
 
-      /// Add the events in the MDGridBox.
-      void run()
-      {
-        box->addEvents(events);
-        if (prog)
-        {
-          std::ostringstream out;
-          out << "Adding events " << start_at;
-          prog->report(out.str());
-        }
-      }
-    };
+    //  /// Add the events in the MDGridBox.
+    //  void run()
+    //  {
+    //    box->addEvents(events);
+    //    if (prog)
+    //    {
+    //      std::ostringstream out;
+    //      out << "Adding events " << start_at;
+    //      prog->report(out.str());
+    //    }
+    //  }
+    //};
 
 
 

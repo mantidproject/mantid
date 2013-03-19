@@ -267,6 +267,9 @@ public:
     TS_ASSERT_EQUALS( it->getBox(), A);
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    BoxController *const bc = A->getBoxController();
+    delete bc;
   }
 
   //--------------------------------------------------------------------------------------
@@ -295,6 +298,10 @@ public:
 
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    BoxController *const bc = A->getBoxController();
+    delete bc;
+
   }
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_above11()

@@ -114,7 +114,7 @@ namespace MDEvents
 
     size_t addEvents(const std::vector<MDE> & events);
 
-    void addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog);
+    //void addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog);
 
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > getMinimumExtents(size_t depth=2);
 

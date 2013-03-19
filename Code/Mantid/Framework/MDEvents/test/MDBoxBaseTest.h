@@ -35,6 +35,10 @@ public:
     //this->setId(filePos);
    // this->setFilePosition(filePos,10,false);
   }
+  MDBoxBaseTester(const MDBoxBaseTester  &source):
+      MDBoxBase(source,source.getBoxController())
+  {
+  }
 
   MDBoxBaseTester(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
   : MDBoxBase<MDE,nd>(NULL,0,0,extentsVector)
