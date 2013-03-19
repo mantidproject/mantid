@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 
+#include <string>
+
 class vtkDataSet;
 class vtkUnstructuredGrid;
 
@@ -41,9 +43,9 @@ namespace VATES
   {
   public:
     /// Static execution method
-    static void exec(vtkDataSet *dataset);
+    static void exec(vtkDataSet *dataset, std::string name);
     /// Constructor
-    vtkDataSetToNonOrthogonalDataSet(vtkDataSet *dataset);
+    vtkDataSetToNonOrthogonalDataSet(vtkDataSet *dataset, std::string name);
     /// Class execution method
     void execute();
     /// Destructor
@@ -54,6 +56,9 @@ namespace VATES
     /// Add the skew basis to metadata
     void updateMetaData(vtkUnstructuredGrid *ugrid);
     vtkDataSet *m_dataSet; ///< Pointer to VTK dataset to modify
+    std::string m_wsName; ///< The name of the workspace to fetch
+    //FIXME: Temp var for getting hardcoded stuff back
+    unsigned int m_hc;
   };
 
 

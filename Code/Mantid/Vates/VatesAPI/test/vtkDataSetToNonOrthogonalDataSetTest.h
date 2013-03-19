@@ -106,14 +106,22 @@ public:
   void testThrowIfVtkDatasetNull()
   {
     vtkDataSet *dataset = NULL;
-    TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(dataset),
+    TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(dataset, ""),
                      std::runtime_error);
+  }
+
+  void testThrowsIfWorkspaceNameEmpty()
+  {
+    vtkUnstructuredGrid *dataset = vtkUnstructuredGrid::New();
+    TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(dataset, ""),
+                     std::runtime_error);
+    dataset->Delete();
   }
 
   void testThrowIfVtkDatasetWrongType()
   {
     vtkRectilinearGrid *grid = vtkRectilinearGrid::New();
-    vtkDataSetToNonOrthogonalDataSet converter(grid);
+    vtkDataSetToNonOrthogonalDataSet converter(grid, "name");
     TS_ASSERT_THROWS(converter.execute(), std::runtime_error);
     grid->Delete();
   }
@@ -122,7 +130,7 @@ public:
   {
     std::string wsName = createMantidWorkspace();
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    vtkDataSetToNonOrthogonalDataSet converter(ds);
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
     TS_ASSERT_THROWS_NOTHING(converter.execute());
     // Now, check some values
     /// Get the (1,1,1) point
@@ -152,8 +160,10 @@ public:
 
   void testStaticUseForSimpleDataSet()
   {
+    std::string wsName = createMantidWorkspace();
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    TS_ASSERT_THROWS_NOTHING(vtkDataSetToNonOrthogonalDataSet::exec(ds));
+    TS_ASSERT_THROWS_NOTHING(vtkDataSetToNonOrthogonalDataSet::exec(ds,
+                                                                    wsName));
     ds->Delete();
   }
 

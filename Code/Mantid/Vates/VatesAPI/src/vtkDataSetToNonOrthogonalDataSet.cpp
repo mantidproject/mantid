@@ -15,18 +15,23 @@ namespace Mantid
 namespace VATES
 {
 
-void vtkDataSetToNonOrthogonalDataSet::exec(vtkDataSet *dataset)
+void vtkDataSetToNonOrthogonalDataSet::exec(vtkDataSet *dataset, std::string name)
 {
-  vtkDataSetToNonOrthogonalDataSet temp(dataset);
+  vtkDataSetToNonOrthogonalDataSet temp(dataset, name);
   temp.execute();
 }
 
-vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(vtkDataSet *dataset) :
-  m_dataSet(dataset)
+vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(vtkDataSet *dataset,
+                                                                   std::string name) :
+  m_dataSet(dataset), m_wsName(name)
 {
   if (NULL == m_dataSet)
   {
     throw std::runtime_error("Cannot construct vtkDataSetToNonOrthogonalDataSet with null VTK dataset");
+  }
+  if (name.empty())
+  {
+    throw std::runtime_error("Cannot construct vtkDataSetToNonOrthogonalDataSet without associated workspace name");
   }
 }
 

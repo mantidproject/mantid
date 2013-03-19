@@ -435,7 +435,8 @@ namespace Mantid
 
     void MDEWRebinningPresenter::makeNonOrthogonal(vtkDataSet *visualDataSet)
     {
-      vtkDataSetToNonOrthogonalDataSet converter(visualDataSet);
+      vtkDataSetToNonOrthogonalDataSet converter(visualDataSet,
+                                                 m_serializer.getWorkspaceName());
       converter.execute();
     }
 
