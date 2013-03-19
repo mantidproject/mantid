@@ -91,7 +91,8 @@ main() {
         exit 1
     fi
 
-    branch_is_merged HEAD ${BUILDER_BRANCH}
+    git_halt_on_error fetch -p
+    branch_is_merged HEAD origin/${BUILDER_BRANCH}
     if [ $? -eq 0 ]; then
         echo "Error: Branch has not been fully merged to ${BUILDER_BRANCH}."
         echo "Run 'git checkbuild' to check the branch on the buildservers and then rerun this command."
