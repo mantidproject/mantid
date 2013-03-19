@@ -65,6 +65,15 @@ class RunSetupWidget(BaseWidget):
         self._content.disablevancorr_chkbox.setChecked(False)
         self._content.disablevanbkgdcorr_chkbox.setChecked(False)
 
+        self._content.override_emptyrun_checkBox.setChecked(False)
+        self._content.override_vanrun_checkBox.setChecked(False)
+        self._content.override_vanbkgdrun_checkBox.setChecked(False) 
+
+        # Line edit
+        self._content.emptyrun_edit.setEnabled(False)
+        self._content.vanrun_edit.setEnabled(False)
+        self._content.vanbkgdrun_edit.setEnabled(False)
+
         # Constraints/Validator
         # Integers
         iv0 = QtGui.QIntValidator(self._content.emptyrun_edit)
@@ -91,16 +100,7 @@ class RunSetupWidget(BaseWidget):
         fiv = QtGui.QDoubleValidator(self._content.binning_edit)
         self._content.binning_edit.setValidator(fiv)
 
-        # dv = QtGui.QDoubleValidator(self._content.ei_guess_edit)
-        # dv.setBottom(0.0)
-        # self._content.ei_guess_edit.setValidator(dv)
-        # if "SNS" != self._facility_name:
-        #     util.set_valid(self._content.ei_guess_edit, False)
-        # self._content.etr_width_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_width_edit))
-        # self._content.monitor2_specid_edit.setValidator(QtGui.QIntValidator(self._content.monitor2_specid_edit))
-        
         # Default states
-        # self._handle_preserveevents(self._content.preserveevents_checkbox.isChecked())
 
         # self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
         
@@ -116,13 +116,21 @@ class RunSetupWidget(BaseWidget):
         self.connect(self._content.bintype_combo, QtCore.SIGNAL("currentIndexChanged(QString)"),
                 self._bintype_process)
 
+        self.connect(self._content.override_emptyrun_checkBox, QtCore.SIGNAL("clicked()"), 
+                self._overrideemptyrun_clicked)
+        self.connect(self._content.override_vanrun_checkBox, QtCore.SIGNAL("clicked()"), 
+                self._overridevanrun_clicked)
+        self.connect(self._content.override_vanbkgdrun_checkBox, QtCore.SIGNAL("clicked()"), 
+                self._overridevanbkgdrun_clicked)
 
-        # self.connect(self._content.use_ei_guess_chkbox, QtCore.SIGNAL("stateChanged(int)"),
-        #              self._handle_tzero_guess)
+        self.connect(self._content.disablebkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
+                self._disablebkgdcorr_clicked) 
+        self.connect(self._content.disablevancorr_chkbox, QtCore.SIGNAL("clicked()"),
+                self._disablevancorr_clicked) 
+        self.connect(self._content.disablevanbkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
+                self._disablevanbkgdcorr_clicked) 
         
         # Validated widgets
-        # self._connect_validated_lineedit(self._content.sample_edit)
-        # self._connect_validated_lineedit(self._content.ei_guess_edit)
 
         return 
     
@@ -320,6 +328,68 @@ class RunSetupWidget(BaseWidget):
 
         return (True, "")
 
+    def _overrideemptyrun_clicked(self):
+        """ Handling event if overriding emptry run
+        """
+        if self._content.override_emptyrun_checkBox.isChecked() is True:
+            self._content.emptyrun_edit.setEnabled(True)
+            self._content.disablebkgdcorr_chkbox.setChecked(False)
+        else:
+            self._content.emptyrun_edit.setEnabled(False)
+            self._content.emptyrun_edit.setText("")
 
-            
+        return
+
+    def _overridevanrun_clicked(self):
+        """ Handling event if overriding emptry run
+        """
+        if self._content.override_vanrun_checkBox.isChecked() is True:
+            self._content.vanrun_edit.setEnabled(True) 
+            self._content.disablebkgdcorr_chkbox.setChecked(False)
+        else:
+            self._content.emptyrun_edit.setEnabled(False)
+            self._content.vanrun_edit.setText("")
+
+        return
+
+    def _overridevanbkgdrun_clicked(self):
+        """ Handling event if overriding emptry run
+        """
+        if self._content.override_vanbkgdrun_checkBox.isChecked() is True:
+            self._content.vanbkgdrun_edit.setEnabled(True)
+        else:
+            self._content.vanbkgdrun_edit.setEnabled(False)
+            self._content.vanbkgdrun_edit.setText("")
+
+        return
+
+    def _disablebkgdcorr_clicked(self):
+        """ Handling event if disable empty run check box is clicked
+        """
+        if self._content.disablebkgdcorr_chkbox.isChecked() is True:
+            self._content.emptyrun_edit.setEnabled(False)
+            self._content.emptyrun_edit.setText("")
+            self._content.override_emptyrun_checkBox.setChecked(False)
+
+        return
+
+    def _disablevancorr_clicked(self):
+        """ Handling event if disable empty run check box is clicked
+        """
+        if self._content.disablevancorr_chkbox.isChecked() is True:
+            self._content.vanrun_edit.setEnabled(False)
+            self._content.vanrun_edit.setText("")
+            self._content.override_vanrun_checkBox.setChecked(False)
+
+        return
+
+    def _disablevanbkgdcorr_clicked(self):
+        """ Handling event if disable empty run check box is clicked
+        """
+        if self._content.disablevanbkgdcorr_chkbox.isChecked() is True:
+            self._content.vanbkgdrun_edit.setEnabled(False)
+            self._content.vanbkgdrun_edit.setText("")
+            self._content.override_vanbkgdrun_checkBox.setChecked(False)
+
+        return
 

@@ -73,31 +73,14 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vanpeaktol_edit.setValidator(dv6)
 
         # Default states
-        # self._handle_preserveevents(self._content.preserveevents_checkbox.isChecked())
 
         # self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
         
         # Connections from action/event to function to handle 
-        # self.connect(self._content.calfile_browse, QtCore.SIGNAL("clicked()"), 
-        #         self._calfile_browse)
-        # self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"), 
-        #         self._charfile_browse)
-        # self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),
-        #         self._outputdir_browse)
 
         # Hanlder for events
-        # self.connect(self._content.detcal_browse, QtCore.SIGNAL("clicked()"), 
-        #              self._detcal_browse)
-        # self.connect(self._content.hardmask_browse, QtCore.SIGNAL("clicked()"), 
-        #              self._hardmask_browse)
-        # self.connect(self._content.grouping_browse, QtCore.SIGNAL("clicked()"), 
-        #              self._grouping_browse)
-        # self.connect(self._content.use_ei_guess_chkbox, QtCore.SIGNAL("stateChanged(int)"),
-        #              self._handle_tzero_guess)
         
         # Validated widgets
-        # self._connect_validated_lineedit(self._content.sample_edit)
-        # self._connect_validated_lineedit(self._content.ei_guess_edit)
 
         return 
     
