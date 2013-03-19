@@ -62,6 +62,7 @@ private:
                                              0, 0, 0, 0, 1};
     CoordTransformAffine affMat(4, 4);
     affMat.setMatrix(Matrix<Mantid::coord_t>(affMatVals));
+    ws->setTransformToOriginal(affMat.clone(), 0);
 
     // Create the transform (W) matrix
     DblMatrix wMat(3, 3, true);
