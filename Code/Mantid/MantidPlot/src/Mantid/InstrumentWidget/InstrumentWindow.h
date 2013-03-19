@@ -92,6 +92,8 @@ public:
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
   InstrumentWindowTab *getTab()const;
+  /// Get a filename for saving
+  QString getSaveFileName(const QString& title, const QString& filters, QString& selectedFilter);
 
 signals:
   void enableLighting(bool);

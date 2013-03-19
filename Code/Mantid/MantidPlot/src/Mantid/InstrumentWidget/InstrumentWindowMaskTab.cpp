@@ -2,6 +2,7 @@
 #include "InstrumentWindowMaskTab.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
+#include "DetXMLFile.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -35,6 +36,7 @@
 #include <QHBoxLayout>
 #include <QGridLayout>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QTextEdit>
 #include <QMenu>
 #include <QAction>
@@ -43,12 +45,14 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QToolTip>
+#include <QTemporaryFile>
 
 #include "MantidQtAPI/FileDialogHandler.h"
 
 #include <numeric>
 #include <cfloat>
 #include <algorithm>
+#include <fstream>
 
 InstrumentWindowMaskTab::InstrumentWindowMaskTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow),
@@ -59,6 +63,16 @@ m_userEditing(true)
 
   // main layout
   QVBoxLayout* layout=new QVBoxLayout(this);
+
+  QHBoxLayout* radioLayout = new QHBoxLayout();
+  m_masking_on = new QRadioButton("Mask");
+  m_grouping_on = new QRadioButton("Group");
+  m_masking_on->setChecked(true);
+  connect(m_masking_on,SIGNAL(toggled(bool)),this,SLOT(toggleMaskGroup(bool)));
+  radioLayout->addWidget(m_masking_on);
+  radioLayout->addWidget(m_grouping_on);
+
+  layout->addLayout(radioLayout);
 
   // Create the tool buttons
 
@@ -487,6 +501,16 @@ void InstrumentWindowMaskTab::saveInvertedMaskToCalFile()
 void InstrumentWindowMaskTab::showSaveMenuTooltip(QAction *action)
 {
     QToolTip::showText(QCursor::pos(),action->toolTip(),this);
+}
+
+/**
+  * Toggle between masking and grouping.
+  *
+  * @param maskOn :: True if masking functionality to be set. False is for grouping.
+  */
+void InstrumentWindowMaskTab::toggleMaskGroup(bool maskOn)
+{
+    std::cerr << (maskOn? "mask" : "group") << std::endl;
 }
 
 /**

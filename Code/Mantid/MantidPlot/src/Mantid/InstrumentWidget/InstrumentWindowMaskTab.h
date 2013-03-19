@@ -15,6 +15,7 @@ class OneCurvePlot;
 class Shape2D;
 
 class QPushButton;
+class QRadioButton;
 class QTextEdit;
 class QComboBox;
 class QCheckBox;
@@ -40,7 +41,10 @@ namespace Mantid
 }
 
 /**
-  * Implements the Mask tab in InstrumentWindow
+  * Implements the Mask/Group tab in InstrumentWindow.
+  *
+  * Contains controls to create, manipulate and apply masking and grouping to underlying workspace.
+  *
   */
 class InstrumentWindowMaskTab: public InstrumentWindowTab
 {
@@ -68,6 +72,7 @@ protected slots:
   void saveMaskToCalFile();
   void saveInvertedMaskToCalFile();
   void showSaveMenuTooltip(QAction*);
+  void toggleMaskGroup(bool);
 
   void doubleChanged(QtProperty*);
 protected:
@@ -88,6 +93,9 @@ protected:
   Activity m_activity;
   /// True if there is a mask not applied to the data workspace
   bool m_hasMaskToApply;
+
+  QRadioButton* m_masking_on;
+  QRadioButton* m_grouping_on;
 
   // buttons
   QPushButton* m_move;

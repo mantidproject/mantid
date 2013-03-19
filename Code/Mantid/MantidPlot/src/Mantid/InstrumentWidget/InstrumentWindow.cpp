@@ -9,6 +9,7 @@
 #include "UnwrappedSphere.h"
 #include "Projection3D.h"
 #include "SimpleWidget.h"
+#include "DetXMLFile.h"
 #include "../MantidUI.h"
 #include "../AlgorithmMonitor.h"
 
@@ -45,7 +46,6 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 
 #include <numeric>
-#include <fstream>
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -255,6 +255,28 @@ InstrumentWindowTab *InstrumentWindow::getTab()const
 }
 
 /**
+  * Opens Qt file dialog to select the filename.
+  * The dialog opens in the directory used last for saving or the default user directory.
+  *
+  * @param title :: The title of the dialog.
+  * @param filters :: The filters
+  * @param selectedFilter :: The selected filter.
+  */
+QString InstrumentWindow::getSaveFileName(const QString& title, const QString& filters, QString& selectedFilter)
+{
+    QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(this, title, m_savedialog_dir, filters, &selectedFilter);
+
+    // If its empty, they cancelled the dialog
+    if( !filename.isEmpty() )
+    {
+        //Save the directory used
+        QFileInfo finfo(filename);
+        m_savedialog_dir = finfo.dir().path();
+    }
+    return filename;
+}
+
+/**
   * Update the info text displayed at the bottom of the window.
   */
 void InstrumentWindow::updateInfoText()
@@ -436,13 +458,13 @@ void InstrumentWindow::showPickOptions()
     context.addAction(mDetTableAction);
 
     context.insertSeparator();
-    context.addAction(mGroupDetsAction);
-    context.addAction(mMaskDetsAction);
+//    context.addAction(mGroupDetsAction);
+//    context.addAction(mMaskDetsAction);
     context.addAction(m_ExtractDetsToWorkspaceAction);
     context.addAction(m_SumDetsToWorkspaceAction);
-    QMenu *gfileMenu = context.addMenu("Create grouping file");
-    gfileMenu->addAction(m_createIncludeGroupingFileAction);
-    gfileMenu->addAction(m_createExcludeGroupingFileAction);
+//    QMenu *gfileMenu = context.addMenu("Create grouping file");
+//    gfileMenu->addAction(m_createIncludeGroupingFileAction);
+//    gfileMenu->addAction(m_createExcludeGroupingFileAction);
 
     context.exec(QCursor::pos());
   }
@@ -689,14 +711,12 @@ void InstrumentWindow::saveImage()
     }
   }
   QString selectedFilter = "*.png";
-  QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(this, "Save image ...", m_savedialog_dir, filter, &selectedFilter);
+  QString filename = getSaveFileName("Save image ...", filter, selectedFilter);
 
   // If its empty, they cancelled the dialog
   if( filename.isEmpty() ) return;
   
-  //Save the directory used
   QFileInfo finfo(filename);
-  m_savedialog_dir = finfo.dir().path();
 
   QString ext = finfo.completeSuffix();
   if( ext.isEmpty() )
@@ -943,106 +963,6 @@ void InstrumentWindow::componentSelected(ComponentID id)
       updateInstrumentView();
     }
 }
-
-/** A class for creating grouping xml files
-  */
-class DetXMLFile
-{
-public:
-  enum Option {List,Sum};
-  /// Create a grouping file to extract all detectors in detector_list excluding those in dets
-  DetXMLFile(const std::vector<int>& detector_list, const QList<int>& dets, const QString& fname)
-  {
-    m_fileName = fname;
-    m_delete = false;
-    std::ofstream out(m_fileName.toStdString().c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
-    out << "<group name=\"sum\"> <detids val=\"";
-    std::vector<int>::const_iterator idet = detector_list.begin();
-    for(; idet != detector_list.end(); ++idet)
-    {
-      if (!dets.contains(*idet))
-      {
-        out <<  *idet << ',';
-      }
-    }
-    out << "\"/> </group> \n</detector-grouping>\n";
-  }
-
-  /// Create a grouping file to extract detectors in dets. Option List - one group - one detector,
-  /// Option Sum - one group which is a sum of the detectors
-  /// If fname is empty create a temporary file
-  DetXMLFile(const QList<int>& dets, Option opt = List, const QString& fname = "")
-  {
-    if (dets.empty())
-    {
-      m_fileName = "";
-      return;
-    }
-
-    if (fname.isEmpty())
-    {
-      QTemporaryFile mapFile;
-      mapFile.open();
-      m_fileName = mapFile.fileName() + ".xml";
-      mapFile.close();
-      m_delete = true;
-    }
-    else
-    {
-      m_fileName = fname;
-      m_delete = false;
-    }
-
-    switch(opt)
-    {
-    case Sum: makeSumFile(dets); break;
-    case List: makeListFile(dets); break;
-    }
-
-  }
-
-  /// Make grouping file where each detector is put into its own group
-  void makeListFile(const QList<int>& dets)
-  {
-    std::ofstream out(m_fileName.toStdString().c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
-    foreach(int det,dets)
-    {
-      out << "<group name=\"" << det << "\"> <detids val=\"" << det << "\"/> </group> \n";
-    }
-    out << "</detector-grouping>\n";
-  }
-
-  /// Make grouping file for putting the detectors into one group (summing the detectors)
-  void makeSumFile(const QList<int>& dets)
-  {
-    std::ofstream out(m_fileName.toStdString().c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
-    out << "<group name=\"sum\"> <detids val=\"";
-    foreach(int det,dets)
-    {
-      out << det << ',';
-    }
-    out << "\"/> </group> \n</detector-grouping>\n";
-  }
-
-  ~DetXMLFile()
-  {
-    if (m_delete)
-    {
-      QDir dir;
-      dir.remove(m_fileName);
-    }
-  }
-
-  /// Return the name of the created grouping file
-  const std::string operator()()const{return m_fileName.toStdString();}
-
-private:
-  QString m_fileName; ///< holds the grouping file name
-  bool m_delete;      ///< if true delete the file on destruction
-};
 
 /**
   * Extract selected detectors to a new workspace
@@ -1442,7 +1362,7 @@ void InstrumentWindow::createTabs(QSettings& settings)
 
     // Mask controls
     InstrumentWindowMaskTab *maskTab = new InstrumentWindowMaskTab(this);
-    mControlsTab->addTab( maskTab, QString("Mask"));
+    mControlsTab->addTab( maskTab, QString("Mask/Group"));
     connect(maskTab,SIGNAL(executeAlgorithm(const QString&, const QString&)),this,SLOT(executeAlgorithm(const QString&, const QString&)));
     maskTab->loadSettings(settings);
 
