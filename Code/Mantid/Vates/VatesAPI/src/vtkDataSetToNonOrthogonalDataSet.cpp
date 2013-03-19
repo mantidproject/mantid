@@ -29,7 +29,15 @@ void vtkDataSetToNonOrthogonalDataSet::exec(vtkDataSet *dataset, std::string nam
 
 vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(vtkDataSet *dataset,
                                                                    std::string name) :
-  m_dataSet(dataset), m_wsName(name), m_hc(1), m_numDims(3), m_skewMat()
+  m_dataSet(dataset),
+  m_wsName(name),
+  m_hc(0),
+  m_numDims(3),
+  m_skewMat(),
+  m_basisNorm(),
+  m_basisX(1, 0, 0),
+  m_basisY(0, 1, 0),
+  m_basisZ(0, 0, 1)
 {
   if (NULL == m_dataSet)
   {
@@ -157,9 +165,13 @@ void vtkDataSetToNonOrthogonalDataSet::createSkewInformation(Geometry::OrientedL
   // Apply the W tranform matrix
   bMat *= w;
 
+  // Setup basis normalisation array
+  m_basisNorm = {ol.astar(), ol.bstar(), ol.cstar()};
+
   // Expand matrix to 4 dimensions if necessary
   if (4 == m_numDims)
   {
+    m_basisNorm.push_back(1.0);
     Kernel::DblMatrix temp(4, 4, true);
     for (std::size_t i = 0; i < 3; i++)
     {
@@ -185,11 +197,29 @@ void vtkDataSetToNonOrthogonalDataSet::createSkewInformation(Geometry::OrientedL
 
   // Perform similarity transform to get coordinate orientation correct
   bMat *= affMat;
+  m_basisNorm = affMat * m_basisNorm;
   m_skewMat = affMat.Transpose() * bMat;
   if (4 == m_numDims)
   {
     this->stripMatrix(m_skewMat);
   }
+  this->findSkewBasis(m_basisX, m_basisNorm[0]);
+  this->findSkewBasis(m_basisY, m_basisNorm[1]);
+  this->findSkewBasis(m_basisZ, m_basisNorm[2]);
+}
+
+/**
+ * This function calculates the given skew basis vector.
+ *
+ * @param basis : The "base" basis vector.
+ * @param scale : Scale factor for the basis vector.
+ */
+void vtkDataSetToNonOrthogonalDataSet::findSkewBasis(Kernel::V3D &basis,
+                                                     double scale)
+{
+  basis = m_skewMat * basis;
+  basis /= scale;
+  basis.normalize();
 }
 
 /**
@@ -212,32 +242,58 @@ void vtkDataSetToNonOrthogonalDataSet::stripMatrix(Kernel::DblMatrix &mat)
   mat = temp;
 }
 
+/**
+ * This function copies a vector to a C array.
+ *
+ * @param arr : The array to copy into
+ * @param vec : The vector to copy from
+ */
+void vtkDataSetToNonOrthogonalDataSet::copyToRaw(double *arr, MantidVec vec)
+{
+  for (std::size_t i = 0; i < vec.size(); i++)
+  {
+    arr[i] = vec[i];
+  }
+}
+
 void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkUnstructuredGrid *ugrid)
 {
-  /*
-  // Gd2, HKLE
-  double baseX[3] = {0.8660254, 0.5, 0.0};
-  double baseY[3] = {0.5, -0.8660254, 0.0};
-  double baseZ[3] = {0.0, 0.0, 1.0};
-  */
-  /*
-  // Gd, HKLE
-  double baseX[3] = {1.0, 0.0, 0.0};
-  double baseY[3] = {0.5, 0.8660254, 0.0};
-  double baseZ[3] = {0.0, 0.0, 1.0};
-  */
-
-  // Gd, HEKL
-  double baseX[3] = {1.0, 0.0, 0.0};
-  double baseY[3] = {0.0, 1.0, 0.0};
-  double baseZ[3] = {0.5, 0.0, 0.8660254};
-
-  /*
-  // Gd2, HEKL
-  double baseX[3] = {0.8660254, 0.0, 0.5};
-  double baseY[3] = {0.0, 1.0, 0.0};
-  double baseZ[3] = {0.5, 0.0, -0.8660254};
-  */
+  double baseX[3];
+  double baseY[3];
+  double baseZ[3];
+  switch (m_hc)
+  {
+  case 1:
+    // Gd, HEKL
+    baseX[0] = 1.0;
+    baseX[1] = 0.0;
+    baseX[2] = 0.0;
+    baseY[0] = 0.0;
+    baseY[1] = 1.0;
+    baseY[2] = 0.0;
+    baseZ[0] = 0.5;
+    baseZ[1] = 0.0;
+    baseZ[2] = 0.8660254;
+    break;
+  case 2:
+    // Gd2, HEKL
+    baseX[0] = 0.8660254;
+    baseX[1] = 0.0;
+    baseX[2] = 0.5;
+    baseY[0] = 0.0;
+    baseY[1] = 1.0;
+    baseY[2] = 0.0;
+    baseZ[0] = 0.5;
+    baseZ[1] = 0.0;
+    baseZ[2] = -0.8660254;
+    break;
+  default:
+    // Create from the internal basis vectors
+    this->copyToRaw(baseX, m_basisX);
+    this->copyToRaw(baseY, m_basisY);
+    this->copyToRaw(baseZ, m_basisZ);
+    break;
+  }
 
   vtkFieldData *fieldData = ugrid->GetFieldData();
 

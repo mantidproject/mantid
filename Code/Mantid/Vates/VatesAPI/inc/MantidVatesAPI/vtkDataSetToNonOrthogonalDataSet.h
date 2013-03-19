@@ -2,17 +2,19 @@
 #define MANTID_VATES_VTKDATASETTONONORTHOGONALDATASET_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 
 #include <string>
+#include <vector>
 
 class vtkDataSet;
 class vtkUnstructuredGrid;
 
 namespace Mantid
 {
-
 namespace Geometry
 {
   class OrientedLattice;
@@ -61,10 +63,14 @@ namespace VATES
   private:
     vtkDataSetToNonOrthogonalDataSet& operator=(const vtkDataSetToNonOrthogonalDataSet& other);
     vtkDataSetToNonOrthogonalDataSet(const vtkDataSetToNonOrthogonalDataSet& other);
+    /// Copy a vector to an array
+    void copyToRaw(double *arr, MantidVec vec);
     /// Calculate the skew matrix and basis.
     void createSkewInformation(Geometry::OrientedLattice &ol,
                                Kernel::DblMatrix &w,
                                Kernel::Matrix<coord_t> &aff);
+    /// Calculate the skew basis vector
+    void findSkewBasis(Kernel::V3D &basis, double scale);
     /// Reduce the dimensionality of matrix by 1
     void stripMatrix(Kernel::DblMatrix &mat);
     /// Add the skew basis to metadata
@@ -75,6 +81,10 @@ namespace VATES
     unsigned int m_hc;
     std::size_t m_numDims; ///< Number of dimensions in workspace
     Kernel::DblMatrix m_skewMat; ///< The skew matrix for non-orthogonal representation
+    MantidVec m_basisNorm; ///< Holder for the basis normalisation values
+    Kernel::V3D m_basisX; ///< The X direction basis vector
+    Kernel::V3D m_basisY; ///< The Y direction basis vector
+    Kernel::V3D m_basisZ; ///< The Z direction basis vector
   };
 
 
