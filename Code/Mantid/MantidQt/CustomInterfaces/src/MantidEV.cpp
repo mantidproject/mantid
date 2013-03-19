@@ -1,6 +1,7 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QSettings>
 
 #include "MantidQtCustomInterfaces/MantidEV.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -139,8 +140,7 @@ void RunEllipsoidIntegrate::run()
 
 
 /// MantidEV Constructor
-MantidEV::MantidEV(QWidget *parent)
-  : UserSubWindow(parent)
+MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent)
 {
   worker        = new MantidEVWorker();
   m_thread_pool = new QThreadPool( this );
@@ -149,6 +149,7 @@ MantidEV::MantidEV(QWidget *parent)
 
 MantidEV::~MantidEV()
 {
+  saveSettings("");
   delete worker;
 }
 
@@ -313,6 +314,8 @@ void MantidEV::initLayout()
    m_uiForm.PeakSize_ledt->setValidator( new QDoubleValidator(m_uiForm.PeakSize_ledt));
    m_uiForm.BackgroundInnerSize_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundInnerSize_ledt));
    m_uiForm.BackgroundOuterSize_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundOuterSize_ledt));
+
+   loadSettings("");
 }
 
 
@@ -382,7 +385,7 @@ void MantidEV::loadEventFile_slot()
   QString file_path;
   if ( last_event_file.length() != 0 )
   {
-    QString Qfile_name = QString::fromUtf8( last_event_file.c_str() );
+    QString Qfile_name = QString::fromStdString( last_event_file );
     QFileInfo file_info( Qfile_name );
     file_path = file_info.absolutePath();
   }
@@ -396,9 +399,11 @@ void MantidEV::loadEventFile_slot()
                               file_path,
                               tr("Nexus Files (*.nxs);; All files(*.*)"));
 
-  last_event_file = Qfile_name.toStdString();
-
-  m_uiForm.EventFileName_ledt->setText( Qfile_name );
+  if ( Qfile_name.length() > 0 )
+  {
+    last_event_file = Qfile_name.toStdString();
+    m_uiForm.EventFileName_ledt->setText( Qfile_name );
+  }
 }
 
 
@@ -484,7 +489,7 @@ void MantidEV::getLoadPeaksFileName_slot()
   QString file_path;
   if ( last_peaks_file.length() != 0 )
   {
-    QString Qfile_name = QString::fromUtf8( last_peaks_file.c_str() );
+    QString Qfile_name = QString::fromStdString( last_peaks_file );
     QFileInfo file_info( Qfile_name );
     file_path = file_info.absolutePath();
   }
@@ -513,7 +518,7 @@ void MantidEV::getSavePeaksFileName()
   QString file_path;
   if ( last_peaks_file.length() != 0 )
   {
-    QString Qfile_name = QString::fromUtf8( last_peaks_file.c_str() );
+    QString Qfile_name = QString::fromStdString( last_peaks_file );
     QFileInfo file_info( Qfile_name );
     file_path = file_info.absolutePath();
   }
@@ -642,7 +647,7 @@ void MantidEV::getLoadUB_FileName_slot()
   QString file_path;
   if ( last_UB_file.length() != 0 )
   {
-    QString Qfile_name = QString::fromUtf8( last_UB_file.c_str() );
+    QString Qfile_name = QString::fromStdString( last_UB_file );
     QFileInfo file_info( Qfile_name );
     file_path = file_info.absolutePath();
   }
@@ -670,7 +675,7 @@ void MantidEV::getSaveUB_FileName()
   QString file_path;
   if ( last_UB_file.length() != 0 )
   {
-    QString Qfile_name = QString::fromUtf8( last_UB_file.c_str() );
+    QString Qfile_name = QString::fromStdString( last_UB_file );
     QFileInfo file_info( Qfile_name );
     file_path = file_info.absolutePath();
   }
@@ -882,12 +887,58 @@ void MantidEV::integratePeaks_slot()
 void MantidEV::saveState_slot()
 {
   std::cout << "saveState_slot called..." << std::endl;
+  
+  QString file_path;
+  if ( last_ini_file.length() != 0 )
+  {
+    QString Qfile_name = QString::fromStdString( last_ini_file );
+    QFileInfo file_info( Qfile_name );
+    file_path = file_info.absolutePath();
+  }
+  else
+  {
+    file_path = QDir::homePath();
+  }
+
+  QString Qfile_name = QFileDialog::getSaveFileName( this,
+                          tr("Save Settings File(.ini)"),
+                          file_path,
+                          tr("Settings Files (*.ini);; All files(*.*) "));
+
+  if ( Qfile_name.length() > 0 )
+  {
+    last_ini_file = Qfile_name.toStdString();
+    saveSettings( last_ini_file );
+  }
+
 }
 
 
 void MantidEV::loadState_slot()
 {
   std::cout << "loadState_slot called..." << std::endl;
+  QString file_path;
+  if ( last_ini_file.length() != 0 )
+  {
+    QString Qfile_name = QString::fromStdString( last_ini_file );
+    QFileInfo file_info( Qfile_name );
+    file_path = file_info.absolutePath();
+  }
+  else
+  {
+    file_path = QDir::homePath();
+  }
+
+  QString Qfile_name = QFileDialog::getOpenFileName( this,
+                         tr("Load Settings File(.ini)"),
+                         file_path,
+                         tr("Settings Files (*.ini);; All files(*.*)"));
+
+  if ( Qfile_name.length()> 0 )
+  {
+    last_ini_file = Qfile_name.toStdString();
+    loadSettings( last_ini_file );
+  }
 }
 
 
@@ -1152,7 +1203,7 @@ void MantidEV::setEnabledEllipseSizeOptions_slot()
 }
 
 
-void MantidEV::errorMessage( const std::string message )
+void MantidEV::errorMessage( const std::string & message )
 {
   std::cout << "ERROR: " << message << std::endl;
   QMessageBox::critical(this,"ERROR", QString::fromStdString(message));
@@ -1223,6 +1274,208 @@ bool MantidEV::getPositiveInt( QLineEdit *ledt,
   message += ledt->text().toStdString();
   errorMessage( message );
   return false;
+}
+
+
+void MantidEV::saveSettings( const std::string & filename )
+{
+  QSettings* state;
+  if ( filename.length() > 0 )
+    state = new QSettings( QString::fromStdString(filename), QSettings::IniFormat, this );
+  else
+    state = new QSettings;
+                                                // Save Tab 1, Select Data
+  state->setValue("SelectEventWorkspace_ledt", m_uiForm.SelectEventWorkspace_ledt->text());
+  state->setValue("MDworkspace_ledt", m_uiForm.MDworkspace_ledt->text());
+  state->setValue("LoadEventFile_rbtn", m_uiForm.LoadEventFile_rbtn->isChecked());
+  state->setValue("EventFileName_ledt", m_uiForm.EventFileName_ledt->text());
+  state->setValue("UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn->isChecked());
+
+                                                // Save Tab 2, Find Peaks
+  state->setValue("PeaksWorkspace_ledt", m_uiForm.PeaksWorkspace_ledt->text());
+  state->setValue("FindPeaks_rbtn", m_uiForm.FindPeaks_rbtn->isChecked());
+  state->setValue("MaxABC_ledt", m_uiForm.MaxABC_ledt->text());
+  state->setValue("NumToFind_ledt", m_uiForm.NumToFind_ledt->text());
+  state->setValue("MinIntensity_ledt", m_uiForm.MinIntensity_ledt->text());
+  state->setValue("UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn->isChecked());
+  state->setValue("LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn->isChecked());
+  state->setValue("SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt->text());
+
+                                                // Save Tab 3, Find UB 
+  state->setValue("FindUBUsingFFT_rbtn", m_uiForm.FindUBUsingFFT_rbtn->isChecked());
+  state->setValue("MinD_ledt", m_uiForm.MinD_ledt->text());
+  state->setValue("MaxD_ledt", m_uiForm.MaxD_ledt->text());
+  state->setValue("FFTTolerance_ledt", m_uiForm.FFTTolerance_ledt->text());
+  state->setValue("FindUBUsingIndexedPeaks_rbtn", m_uiForm.FindUBUsingIndexedPeaks_rbtn->isChecked());
+  state->setValue("LoadISAWUB_rbtn", m_uiForm.LoadISAWUB_rbtn->isChecked());
+  state->setValue("SelectUBFile_ledt", m_uiForm.SelectUBFile_ledt->text());
+  state->setValue("OptimizeGoniometerAngles_ckbx", m_uiForm.OptimizeGoniometerAngles_ckbx->isChecked());
+  state->setValue("MaxGoniometerChange_ledt", m_uiForm.MaxGoniometerChange_ledt->text());
+  state->setValue("UseCurrentUB_rbtn", m_uiForm.UseCurrentUB_rbtn->isChecked());
+  state->setValue("IndexPeaks_ckbx", m_uiForm.IndexPeaks_ckbx->isChecked());
+  state->setValue("IndexingTolerance_ledt", m_uiForm.IndexingTolerance_ledt->text());
+  state->setValue("RoundHKLs_ckbx", m_uiForm.RoundHKLs_ckbx->isChecked());
+
+                                                // Save Tab 4, Choose Cell
+  state->setValue("ShowPossibleCells_rbtn",m_uiForm.ShowPossibleCells_rbtn->isChecked());
+  state->setValue("MaxScalarError_ledt",m_uiForm.MaxScalarError_ledt->text());
+  state->setValue("BestCellOnly_ckbx",m_uiForm.BestCellOnly_ckbx->isChecked());
+  state->setValue("SelectCellOfType_rbtn",m_uiForm.SelectCellOfType_rbtn->isChecked());
+  state->setValue("CellType_cmbx",m_uiForm.CellType_cmbx->currentIndex());
+  state->setValue("CellCentering_cmbx",m_uiForm.CellCentering_cmbx->currentIndex());
+  state->setValue("SelectCellWithForm_rbtn",m_uiForm.SelectCellWithForm_rbtn->isChecked());
+  state->setValue("CellFormNumber_cmbx",m_uiForm.CellFormNumber_cmbx->currentIndex());
+
+                                                // Save Tab 5,Change HKL 
+  state->setValue("HKL_tran_row_1_ledt",m_uiForm.HKL_tran_row_1_ledt->text());
+  state->setValue("HKL_tran_row_2_ledt",m_uiForm.HKL_tran_row_2_ledt->text());
+  state->setValue("HKL_tran_row_3_ledt",m_uiForm.HKL_tran_row_3_ledt->text());
+
+                                                // Save Tab 6, Integrate
+  state->setValue("SphereIntegration_rbtn",m_uiForm.SphereIntegration_rbtn->isChecked());
+  state->setValue("PeakRadius_ledt",m_uiForm.PeakRadius_ledt->text());
+  state->setValue("BackgroundInnerRadius_ledt",m_uiForm.BackgroundInnerRadius_ledt->text());
+  state->setValue("BackgroundOuterRadius_ledt",m_uiForm.BackgroundOuterRadius_ledt->text());
+  state->setValue("IntegrateEdge_ckbx",m_uiForm.IntegrateEdge_ckbx->isChecked());
+  state->setValue("TwoDFitIntegration_rbtn",m_uiForm.TwoDFitIntegration_rbtn->isChecked());
+  state->setValue("FitRebinParams_ledt",m_uiForm.FitRebinParams_ledt->text());
+  state->setValue("NBadEdgePixels_ledt",m_uiForm.NBadEdgePixels_ledt->text());
+  state->setValue("IkedaCarpenter_ckbx",m_uiForm.IkedaCarpenter_ckbx->isChecked());
+  state->setValue("EllipsoidIntegration_rbtn",m_uiForm.EllipsoidIntegration_rbtn->isChecked());
+  state->setValue("RegionRadius_ledt",m_uiForm.RegionRadius_ledt->text());
+  state->setValue("SpecifySize_ckbx",m_uiForm.SpecifySize_ckbx->isChecked());
+  state->setValue("PeakSize_ledt",m_uiForm.PeakSize_ledt->text());
+  state->setValue("BackgroundInnerSize_ledt",m_uiForm.BackgroundInnerSize_ledt->text());
+  state->setValue("BackgroundOuterSize_ledt",m_uiForm.BackgroundOuterSize_ledt->text());
+
+                                                // save info for file paths
+  state->setValue("last_UB_file",QString::fromStdString(last_UB_file));
+  state->setValue("last_event_file",QString::fromStdString(last_event_file));
+  state->setValue("last_peaks_file",QString::fromStdString(last_peaks_file));
+  state->setValue("last_ini_file",QString::fromStdString(last_ini_file));
+  delete state;
+}
+
+
+void MantidEV::loadSettings( const std::string & filename )
+{
+  QSettings* state;
+  if ( filename.length() > 0 )
+    state = new QSettings( QString::fromStdString(filename), QSettings::IniFormat, this );
+  else
+    state = new QSettings;
+
+                                                  // Load Tab 1, Select Data 
+  restore( state, "SelectEventWorkspace_ledt", m_uiForm.SelectEventWorkspace_ledt );
+  restore( state, "MDworkspace_ledt", m_uiForm.MDworkspace_ledt );
+  restore( state, "LoadEventFile_rbtn", m_uiForm.LoadEventFile_rbtn );
+  restore( state, "EventFileName_ledt", m_uiForm.EventFileName_ledt );
+  restore( state, "UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn );
+
+                                                  // Load Tab 2, Find Peaks
+  restore( state, "PeaksWorkspace_ledt", m_uiForm.PeaksWorkspace_ledt );
+  restore( state, "FindPeaks_rbtn", m_uiForm.FindPeaks_rbtn );
+  restore( state, "MaxABC_ledt", m_uiForm.MaxABC_ledt );
+  restore( state, "NumToFind_ledt", m_uiForm.NumToFind_ledt );
+  restore( state, "MinIntensity_ledt", m_uiForm.MinIntensity_ledt );
+  restore( state, "UseExistingPeaksWorkspace_rbtn", m_uiForm.UseExistingPeaksWorkspace_rbtn );
+  restore( state, "LoadIsawPeaks_rbtn", m_uiForm.LoadIsawPeaks_rbtn );
+  restore( state, "SelectPeaksFile_ledt", m_uiForm.SelectPeaksFile_ledt );
+
+                                                  // Load Tab 3, Find UB 
+  restore( state, "FindUBUsingFFT_rbtn", m_uiForm.FindUBUsingFFT_rbtn );
+  restore( state, "MinD_ledt", m_uiForm.MinD_ledt );
+  restore( state, "MaxD_ledt", m_uiForm.MaxD_ledt );
+  restore( state, "FFTTolerance_ledt", m_uiForm.FFTTolerance_ledt );
+  restore( state, "FindUBUsingIndexedPeaks_rbtn", m_uiForm.FindUBUsingIndexedPeaks_rbtn );
+  restore( state, "LoadISAWUB_rbtn", m_uiForm.LoadISAWUB_rbtn );
+  restore( state, "SelectUBFile_ledt", m_uiForm.SelectUBFile_ledt );
+  restore( state, "OptimizeGoniometerAngles_ckbx", m_uiForm.OptimizeGoniometerAngles_ckbx );
+  restore( state, "MaxGoniometerChange_ledt", m_uiForm.MaxGoniometerChange_ledt );
+  restore( state, "UseCurrentUB_rbtn", m_uiForm.UseCurrentUB_rbtn );
+  restore( state, "IndexPeaks_ckbx", m_uiForm.IndexPeaks_ckbx );
+  restore( state, "IndexingTolerance_ledt", m_uiForm.IndexingTolerance_ledt );
+  restore( state, "RoundHKLs_ckbx", m_uiForm.RoundHKLs_ckbx );
+
+                                                // Load Tab 4, Choose Cell
+  restore( state, "ShowPossibleCells_rbtn", m_uiForm.ShowPossibleCells_rbtn );
+  restore( state, "MaxScalarError_ledt", m_uiForm.MaxScalarError_ledt );
+  restore( state, "BestCellOnly_ckbx", m_uiForm.BestCellOnly_ckbx );
+  restore( state, "SelectCellOfType_rbtn", m_uiForm.SelectCellOfType_rbtn );
+  restore( state, "CellType_cmbx", m_uiForm.CellType_cmbx );
+  restore( state, "CellCentering_cmbx", m_uiForm.CellCentering_cmbx );
+  restore( state, "SelectCellWithForm_rbtn", m_uiForm.SelectCellWithForm_rbtn );
+  restore( state, "CellFormNumber_cmbx", m_uiForm.CellFormNumber_cmbx );
+  
+                                                // Load Tab 5,Change HKL 
+  restore( state, "HKL_tran_row_1_ledt", m_uiForm.HKL_tran_row_1_ledt );
+  restore( state, "HKL_tran_row_2_ledt", m_uiForm.HKL_tran_row_2_ledt );
+  restore( state, "HKL_tran_row_3_ledt", m_uiForm.HKL_tran_row_3_ledt );
+
+                                                // Load Tab 6, Integrate
+  restore( state, "SphereIntegration_rbtn", m_uiForm.SphereIntegration_rbtn );
+  restore( state, "PeakRadius_ledt", m_uiForm.PeakRadius_ledt );
+  restore( state, "BackgroundInnerRadius_ledt", m_uiForm.BackgroundInnerRadius_ledt );
+  restore( state, "BackgroundOuterRadius_ledt", m_uiForm.BackgroundOuterRadius_ledt );
+  restore( state, "IntegrateEdge_ckbx", m_uiForm.IntegrateEdge_ckbx );
+  restore( state, "TwoDFitIntegration_rbtn", m_uiForm.TwoDFitIntegration_rbtn );
+  restore( state, "FitRebinParams_ledt", m_uiForm.FitRebinParams_ledt );
+  restore( state, "NBadEdgePixels_ledt", m_uiForm.NBadEdgePixels_ledt );
+  restore( state, "IkedaCarpenter_ckbx", m_uiForm.IkedaCarpenter_ckbx );
+  restore( state, "EllipsoidIntegration_rbtn", m_uiForm.EllipsoidIntegration_rbtn );
+  restore( state, "RegionRadius_ledt", m_uiForm.RegionRadius_ledt );
+  restore( state, "SpecifySize_ckbx", m_uiForm.SpecifySize_ckbx );
+  restore( state, "PeakSize_ledt", m_uiForm.PeakSize_ledt );
+  restore( state, "BackgroundInnerSize_ledt", m_uiForm.BackgroundInnerSize_ledt );
+  restore( state, "BackgroundOuterSize_ledt", m_uiForm.BackgroundOuterSize_ledt );
+
+                                                // load info for file paths
+  last_UB_file    = state->value("last_UB_file", "").toString().toStdString();
+  last_event_file = state->value("last_event_file", "").toString().toStdString();
+  last_peaks_file = state->value("last_peaks_file", "").toString().toStdString();
+  last_ini_file   = state->value("last_ini_file", "").toString().toStdString();
+
+  delete state;
+}
+
+
+/*
+ * Restore the value of the QLineEdit component from QSettings
+ */
+void MantidEV::restore( QSettings *state, QString name, QLineEdit *ledt )
+{
+  // NOTE: If state was not saved yet, we don't want to change the
+  // default value, so we only change the text if it's non-empty
+  QString sText = state->value(name, "").toString();
+  if ( sText.length() > 0 )
+  {
+    ledt->setText( sText );
+  }
+}
+
+
+/*
+ * Restore the value of the QCheckbox or QRadioButton component from QSettings
+ */
+void MantidEV::restore( QSettings *state, QString name, QAbstractButton *btn )
+{
+  btn->setChecked( state->value(name, false).toBool() );
+}
+
+
+/*
+ * Restore the value of a QComboBox from QSettings
+ */
+void MantidEV::restore( QSettings *state, QString name, QComboBox *cmbx )
+{
+  // NOTE: If state was not saved yet, we don't want to change the
+  // default value, so we only change the selected item if the index
+  // has been set to a valid value. 
+  int val = state->value(name, -1).toInt();
+  if ( val > 0 )
+  {
+    cmbx->setCurrentItem( val );
+  }
 }
 
 
