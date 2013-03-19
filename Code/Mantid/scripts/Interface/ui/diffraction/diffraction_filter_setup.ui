@@ -167,7 +167,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QGroupBox" name="reduction_options_group">
+        <widget class="QGroupBox" name="general_setup_group">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -196,13 +196,13 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>100</width>
+                <width>120</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>100</width>
+                <width>120</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -221,7 +221,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>360</width>
+                <width>16777215</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -233,25 +233,24 @@
               </property>
              </widget>
             </item>
-            <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
            </layout>
           </item>
           <item>
            <layout class="QHBoxLayout" name="monitor_layout">
             <item>
              <widget class="QLabel" name="label_3">
+              <property name="minimumSize">
+               <size>
+                <width>120</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>120</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
                <string>Filter Start Time</string>
               </property>
@@ -259,6 +258,18 @@
             </item>
             <item>
              <widget class="QLineEdit" name="starttime_edit">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="toolTip">
                <string>Enter a valid path for the beam monitor reference file.</string>
               </property>
@@ -285,13 +296,38 @@
             </item>
             <item>
              <widget class="QLabel" name="label_5">
+              <property name="minimumSize">
+               <size>
+                <width>120</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>120</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
                <string>Filter Stop Time</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="stoptime_edit"/>
+             <widget class="QLineEdit" name="stoptime_edit">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item>
              <spacer name="horizontalSpacer_5">
@@ -309,9 +345,9 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <layout class="QHBoxLayout" name="horizontalLayout_buffer">
             <item>
-             <spacer name="horizontalSpacer_13">
+             <spacer name="horizontalSpacer_6">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -323,8 +359,19 @@
               </property>
              </spacer>
             </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
              <widget class="QLabel" name="label_14">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <italic>true</italic>
+                <bold>true</bold>
+               </font>
+              </property>
               <property name="text">
                <string>Filter Generator Assistant</string>
               </property>
@@ -351,13 +398,13 @@
              <widget class="QLabel" name="direct_beam_label">
               <property name="minimumSize">
                <size>
-                <width>60</width>
+                <width>120</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>150</width>
+                <width>120</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -370,8 +417,14 @@
              <widget class="QLineEdit" name="run_number_edit">
               <property name="minimumSize">
                <size>
-                <width>80</width>
+                <width>160</width>
                 <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
                </size>
               </property>
               <property name="toolTip">
@@ -383,12 +436,40 @@
              </widget>
             </item>
             <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QPushButton" name="load_button">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
               </property>
               <property name="text">
                <string>Load</string>
@@ -419,7 +500,29 @@
                 <height>0</height>
                </size>
               </property>
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
+               </size>
+              </property>
              </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
             <item>
              <widget class="QPushButton" name="plot_log_button">
@@ -435,14 +538,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="syn_logname_button">
-              <property name="text">
-               <string>Use</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_3">
+             <spacer name="horizontalSpacer_10">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -457,10 +553,52 @@
               </property>
              </spacer>
             </item>
+            <item>
+             <widget class="QPushButton" name="syn_logname_button">
+              <property name="text">
+               <string>Use</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
            </layout>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="QLabel" name="label_15">
+              <property name="minimumSize">
+               <size>
+                <width>120</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>120</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Message</string>
+              </property>
+             </widget>
+            </item>
             <item>
              <widget class="QLineEdit" name="info_text_browser">
               <property name="sizePolicy">
@@ -566,26 +704,14 @@
                <string notr="true">font: italic 10pt &quot;Bitstream Charter&quot;;</string>
               </property>
               <property name="text">
-               <string>Characterization file can be overriden or disabled</string>
+               <string>Filtering events by chopping data into equal (absolute) time interval</string>
               </property>
              </widget>
             </item>
            </layout>
           </item>
           <item>
-           <layout class="QFormLayout" name="formLayout_3">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
-            </property>
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-            </property>
-            <property name="labelAlignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-            <property name="formAlignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-            </property>
+           <layout class="QGridLayout" name="gridLayout_2">
             <item row="0" column="1">
              <widget class="QLineEdit" name="timintervallength_edit">
               <property name="sizePolicy">
@@ -596,13 +722,13 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>80</width>
+                <width>160</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>80</width>
+                <width>160</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -616,19 +742,46 @@
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>120</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>120</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
-               <string>Duration of Time Interval</string>
+               <string>Time Interval</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>Time Unit</string>
+            <item row="0" column="2">
+             <spacer name="horizontalSpacer_11">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
               </property>
-             </widget>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
-            <item row="1" column="1">
+            <item row="0" column="3">
              <widget class="QComboBox" name="timeunit_combo">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -653,6 +806,19 @@
                </property>
               </item>
              </widget>
+            </item>
+            <item row="0" column="4">
+             <spacer name="horizontalSpacer_12">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>
@@ -695,9 +861,9 @@
                </font>
               </property>
               <property name="text">
-               <string>Choose a file to set your mask. Note that only the mask information, not the data, will be used in the reduction.
-The data is only used to help you setting the mask.
-The mask information is saved separately so that your data file will NOT be modified.</string>
+               <string>Filtering events by chopping data according to log values.
+(1) From user specified log value range;
+(2)Log values are separated to equal intervals.</string>
               </property>
              </widget>
             </item>
@@ -720,7 +886,20 @@ The mask information is saved separately so that your data file will NOT be modi
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLineEdit" name="logname_edit"/>
+             <widget class="QLineEdit" name="logname_edit">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item row="2" column="2">
              <spacer name="horizontalSpacer">
@@ -738,13 +917,6 @@ The mask information is saved separately so that your data file will NOT be modi
               </property>
              </spacer>
             </item>
-            <item row="0" column="7">
-             <widget class="QLabel" name="label_6">
-              <property name="text">
-               <string>Value Change Direction</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_4">
               <property name="text">
@@ -753,7 +925,20 @@ The mask information is saved separately so that your data file will NOT be modi
              </widget>
             </item>
             <item row="0" column="5">
-             <widget class="QLineEdit" name="logminvalue_edit"/>
+             <widget class="QLineEdit" name="logminvalue_edit">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item row="2" column="4">
              <widget class="QLabel" name="label_9">
@@ -770,12 +955,140 @@ The mask information is saved separately so that your data file will NOT be modi
              </widget>
             </item>
             <item row="3" column="5">
-             <widget class="QLineEdit" name="logtol_edit"/>
+             <widget class="QLineEdit" name="logtol_edit">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item row="2" column="5">
-             <widget class="QLineEdit" name="logmaxvalue_edit"/>
+             <widget class="QLineEdit" name="logmaxvalue_edit">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
-            <item row="2" column="7">
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="logintervalvalue_edit">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="6">
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="4">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Minimum Log Value</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QLineEdit" name="timetol_edit">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>Time Tolerance</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="4">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>Log Boundary</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="5">
+             <widget class="QComboBox" name="logbound_combo">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <item>
+               <property name="text">
+                <string>Centre</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Left</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Value Change Direction</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
              <widget class="QComboBox" name="valuechange_combo">
               <property name="minimumSize">
                <size>
@@ -802,63 +1115,6 @@ The mask information is saved separately so that your data file will NOT be modi
               <item>
                <property name="text">
                 <string>Decrease</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QLineEdit" name="logintervalvalue_edit"/>
-            </item>
-            <item row="2" column="6">
-             <spacer name="horizontalSpacer_4">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Fixed</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="0" column="4">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Minimum Log Value</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QLineEdit" name="timetol_edit"/>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_12">
-              <property name="text">
-               <string>Time Tolerance</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="4">
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>Log Boundary</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="5">
-             <widget class="QComboBox" name="logbound_combo">
-              <item>
-               <property name="text">
-                <string>Centre</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Left</string>
                </property>
               </item>
              </widget>
