@@ -90,20 +90,18 @@ namespace MDEvents
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
 
-
+    //----------------------------------------------------------------------------------------------------------------------
     /// Add a single event
     virtual void addEvent(const MDE & point) = 0;
     // add a single event and set pointer to the box which needs splitting (if one actually need)    
     virtual void addAndTraceEvent(const MDE & point,size_t index) = 0;
     /// Add a single event, with no mutex locking
     virtual void addEventUnsafe(const MDE & point) = 0;
-    /// Add several events
+    //----------------------------------------------------------------------------------------------------------------------
+    // add range of events 
     virtual size_t addEvents(const std::vector<MDE> & events);
-    /// Add several events, with no bounds checking
     virtual size_t addEventsUnsafe(const std::vector<MDE> & events);
     //----------------------------------------------------------------------------------------------------------------------
-    //----------------------------------------------------------------------------------------------------------------------
-
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.
      * @param fullyContained :: optional bool array sized [nd] of which dimensions are known to be fully contained (for MDSplitBox)

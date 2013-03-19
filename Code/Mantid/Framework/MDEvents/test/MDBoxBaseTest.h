@@ -94,6 +94,14 @@ public:
   {}
   virtual size_t addEvents(const std::vector<signal_t> & /*sigErrSq*/,const  std::vector<coord_t> & /*Coord*/,const std::vector<uint16_t> & /*runIndex*/,const std::vector<uint32_t> & /*detectorId*/)
   {return 0;}
+  virtual void addEvent(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t)
+  {};
+  virtual void addAndTraceEvent(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t,size_t)
+  {};
+  virtual void addEventUnsafe(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t)
+  {};
+
+
   /** Perform centerpoint binning of events
    * @param bin :: MDBin object giving the limits of events to accept.
    */

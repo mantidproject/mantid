@@ -408,114 +408,8 @@ namespace MDEvents
     }
   }
 
-  //-----------------------------------------------------------------------------------------------
-  /** Add a MDLeanEvent to the box.
-   * @param Evnt :: reference to a MDEvent to add.
-   * */
-  TMDE(
-  void MDBox)::addEvent( const MDE & Evnt)
-  {
-    dataMutex.lock();
-    this->data.push_back(Evnt );
-
-//    // When we reach the split threshold exactly, track that the MDBox is too small
-//    // We check on equality and not >= to only add a box once.
-//    if (this->data.size() == this->m_BoxController->getSplitThreshold())
-//    {
-//      this->m_BoxController->addBoxToSplit(this);
-//    }
-
-    dataMutex.unlock();
-  }
-  //-----------------------------------------------------------------------------------------------
-  /** Add a MDEvent to the box.
-   // add a single event and set pounter to the box which needs splitting (if one actually need) 
-
-   * @param point :: reference to a MDEvent to add.
-   * @param index :: current index for box
-   */
-  TMDE(
-  void MDBox)::addAndTraceEvent( const MDE & point, size_t index)
-  {
-    dataMutex.lock();
-    this->data.push_back(point);
-
-    dataMutex.unlock();
-
-    // When we reach the split threshold exactly, track that the MDBox is too small
-    // We check on equality and not >= to only add a box once.
-    if (this->data.size() == this->m_BoxController->getSplitThreshold())
-    {     
-       auto BoxCtrl = dynamic_cast<BoxCtrlChangesList<MDBoxToChange<MDE,nd> >*>(this->m_BoxController);
-       BoxCtrl->addBoxToSplit(MDBoxToChange<MDE,nd>(this,index));
-
-    }
-
-  }
+     
  
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add a MDLeanEvent to the box, in a NON-THREAD-SAFE manner.
-   * No lock is performed. This is only safe if no 2 threads will
-   * try to add to the same box at the same time.
-   *
-   * @param Evnt :: reference to a MDEvent to add.
-   * */
-  TMDE(
-  void MDBox)::addEventUnsafe( const MDE & Evnt)
-  {
-    this->data.push_back(Evnt );
-
-  }
-
- 
-   //virtual size_t addEventsPart(const std::vector<coord_t> &coords,const signal_t *Signal,const signal_t *errorSq,const  uint16_t *runIndex,const uint32_t *detectorId, const size_t start_at, const size_t stop_at);
-  //-----------------------------------------------------------------------------------------------
-  /** Add several events. No bounds checking is made!
-   *
-   * @param events :: vector of events to be copied.
-   * @param start_at :: index to start at in vector
-   * @param stop_at :: index to stop at in vector (exclusive)
-   * @return the number of events that were rejected (because of being out of bounds)
-   */
-  TMDE(
-  size_t MDBox)::addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
-  {
-    dataMutex.lock();
-    typename std::vector<MDE>::const_iterator start = events.begin()+start_at;
-    typename std::vector<MDE>::const_iterator end = events.begin()+stop_at;
-    // Copy all the events
-    this->data.insert(this->data.end(), start, end);
-
-     dataMutex.unlock();
-    return 0;
-  }
-  /**Add all events 
-   * @param events :: vector of events to be copied.
-   * @return the number of events that were rejected (because of being out of bounds)
-  */ 
-  TMDE(
-  size_t MDBox)::addEvents(const std::vector<MDE> & events)
-  {
-      return this->addEventsPart(events,0,events.size());
-  }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add several events, within a given range, with no bounds checking,
-   * and not in a thread-safe way
-   *
-   * @param events :: vector of events to be copied.
-   * @param start_at :: index to start at in vector
-   * @param stop_at :: index to stop at in vector (exclusive)
-   * @return the number of events that were rejected (because of being out of bounds)
-   */
-  TMDE(
-  size_t MDBox)::addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
-  {
-    // The regular MDBox is just as safe/unsafe
-    return this->addEventsPart(events, start_at, stop_at);
-  }
 
   //-----------------------------------------------------------------------------------------------
   /** Perform centerpoint binning of events.
@@ -724,9 +618,10 @@ namespace MDEvents
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
   /* Internal TMP class to simplify adding events to the box for events and lean events using single interface*/
   template<typename MDE,size_t nd>
-  struct ON_EVENT
+  struct IF
   {
   public:
+      // create generic events from array of events data and add them to the grid box 
       static inline void EXEC(std::vector<MDE> &data,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
                               const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId,size_t nEvents)
       {
@@ -736,13 +631,20 @@ namespace MDEvents
        }
 
       }
+      // create single generic event from event's data
+     static inline MDEvent<nd> BUILD_EVENT(const signal_t Signal, const signal_t Error, const  coord_t *Coord,const uint16_t runIndex,const uint32_t detectorId)
+     {
+          return MDEvent<nd>(Signal,Error, runIndex, detectorId, Coord);
+     }
+
   };
   /* Specialize for the case of LeanEvent */
   template<size_t nd>
-  struct ON_EVENT<MDLeanEvent<nd>,nd>
+  struct IF<MDLeanEvent<nd>,nd>
   {
   public:
-      static inline void EXEC(std::vector<MDLeanEvent<nd> > &data,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
+    // create lean events from array of events data and add them to the box 
+    static inline void EXEC(std::vector<MDLeanEvent<nd> > &data,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
                               const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId,size_t nEvents)
       {
        for(size_t i=0;i<nEvents;i++)
@@ -751,6 +653,12 @@ namespace MDEvents
        }
       
       }
+    // create single lean event from event's data
+    static inline MDLeanEvent<nd> BUILD_EVENT(const signal_t Signal, const signal_t Error, const  coord_t *Coord,const uint16_t /*runIndex*/,const uint32_t /*detectorId*/)
+    {
+          return MDLeanEvent<nd>(Signal,Error,Coord);
+    }
+
   };
 
  
@@ -766,11 +674,133 @@ namespace MDEvents
        size_t nExisiting = data.size();
        data.reserve(nExisiting+nEvents);
        dataMutex.lock();
-       ON_EVENT<MDE,nd>::EXEC(this->data,sigErrSq,Coord,runIndex,detectorId,nEvents);
+       IF<MDE,nd>::EXEC(this->data,sigErrSq,Coord,runIndex,detectorId,nEvents);
        dataMutex.unlock();
 
        return 0;
   }
+ 
+  /** Create event from the input data and add it to the box.
+   * @param point :: reference to the  MDEvent coordinates
+   * @param Signal  :: events signal
+   * @param errorSq :: events Error squared
+   * @param index   run  index
+   * @param index   detector's ID
+   * */
+   TMDE(
+   void MDBox)::addEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
+   {
+       dataMutex.lock();
+       this->data.push_back(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0],runIndex, detectorId));
+       dataMutex.unlock();
+   }
+
+  /** Create MD MDEvent amd add it to the box.
+   // add a single event and set pointer to the box which needs splitting (if one actually need) 
+
+   * @param point :: reference to a MDEvent to add.
+   * @param index :: current index for box
+   */
+   TMDE(
+   void MDBox)::addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
+   {
+       this->addAndTraceEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId),index);
+   }
+
+  //-----------------------------------------------------------------------------------------------
+  /**Create MDEvent and add it to the box, in a NON-THREAD-SAFE manner.
+   * No lock is performed. This is only safe if no 2 threads will
+   * try to add to the same box at the same time.
+   *
+   * @param Evnt :: reference to a MDEvent to add.
+   * */
+  TMDE(
+  void MDBox)::addEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
+  {
+       this->data.push_back(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId));
+  }
+
+//-----------------------------------------------------------------------------------------------
+  /** Add a MDLeanEvent to the box.
+   * @param Evnt :: reference to a MDEvent to add.
+   * */
+  TMDE(
+  void MDBox)::addEvent( const MDE & Evnt)
+  {
+    dataMutex.lock();
+    this->data.push_back(Evnt );
+
+//    // When we reach the split threshold exactly, track that the MDBox is too small
+//    // We check on equality and not >= to only add a box once.
+//    if (this->data.size() == this->m_BoxController->getSplitThreshold())
+//    {
+//      this->m_BoxController->addBoxToSplit(this);
+//    }
+
+    dataMutex.unlock();
+  }
+  //-----------------------------------------------------------------------------------------------
+  /** Add a MDEvent to the box.
+   // add a single event and set pounter to the box which needs splitting (if one actually need) 
+
+   * @param point :: reference to a MDEvent to add.
+   * @param index :: current index for box
+   */
+  TMDE(
+  void MDBox)::addAndTraceEvent( const MDE & point, size_t index)
+  {
+    dataMutex.lock();
+    this->data.push_back(point);
+
+    dataMutex.unlock();
+
+    // When we reach the split threshold exactly, track that the MDBox is too small
+    // We check on equality and not >= to only add a box once.
+    if (this->data.size() == this->m_BoxController->getSplitThreshold())
+    {     
+       auto BoxCtrl = dynamic_cast<BoxCtrlChangesList<MDBoxToChange<MDE,nd> >*>(this->m_BoxController);
+       BoxCtrl->addBoxToSplit(MDBoxToChange<MDE,nd>(this,index));
+
+    }
+
+  }
+ 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add a MDLeanEvent to the box, in a NON-THREAD-SAFE manner.
+   * No lock is performed. This is only safe if no 2 threads will
+   * try to add to the same box at the same time.
+   *
+   * @param Evnt :: reference to a MDEvent to add.
+   * */
+  TMDE(
+  void MDBox)::addEventUnsafe( const MDE & Evnt)
+  {
+    this->data.push_back(Evnt );
+
+  }
+
+    //-----------------------------------------------------------------------------------------------
+  /** Add Add all events . No bounds checking is made!
+   *
+   * @param events :: vector of events to be copied.
+   * @param start_at :: index to start at in vector
+   * @param stop_at :: index to stop at in vector (exclusive)
+   * @return the number of events that were rejected (because of being out of bounds)
+   */
+  TMDE(
+  size_t MDBox)::addEvents(const std::vector<MDE> & events)
+  {
+    dataMutex.lock();
+    typename std::vector<MDE>::const_iterator start = events.begin();
+    typename std::vector<MDE>::const_iterator end = events.end();
+    // Copy all the events
+    this->data.insert(this->data.end(), start, end);
+
+     dataMutex.unlock();
+    return 0;
+  }
+
 
 }//namespace MDEvents
 

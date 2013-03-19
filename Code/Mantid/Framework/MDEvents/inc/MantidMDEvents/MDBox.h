@@ -114,12 +114,15 @@ namespace MDEvents
     virtual void setEventsData(const std::vector<coord_t> &coordTable);
 
 
-    void addEvent(const MDE & Evnt);
-    void addAndTraceEvent(const MDE & point,size_t index);
-    void addEventUnsafe(const MDE & Evnt);
-    size_t addEvents(const std::vector<MDE> & events);
+    virtual void addEvent(const MDE & Evnt);
+    virtual void addAndTraceEvent(const MDE & point,size_t index);
+    virtual void addEventUnsafe(const MDE & Evnt);
 
-    /*--------------->  EVENTS from event parts               <-------------------------------------------------------------*/
+    // add range of events 
+    virtual size_t addEvents(const std::vector<MDE> & events);
+    //virtual size_t addEventsUnsafe(const std::vector<MDE> & events);
+
+    /*--------------->  EVENTS from event data              <-------------------------------------------------------------*/
     virtual void addEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);
     virtual void addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index);
     virtual void addEventUnsafe(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);

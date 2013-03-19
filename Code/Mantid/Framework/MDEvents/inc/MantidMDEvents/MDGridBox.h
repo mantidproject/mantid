@@ -90,10 +90,18 @@ namespace MDEvents
     //----------------------------------------------------------------------------
 
     std::vector< MDE > * getEventsCopy();
+
+    //----------------------------------------------------------------------------------------------------------------------
     void addEvent(const MDE & event);
-    void addAndTraceEvent(const MDE & point,size_t index);
     void addEventUnsafe(const MDE & event);
+    void addAndTraceEvent(const MDE & point,size_t index);
+
+    /*--------------->  EVENTS from event data              <-------------------------------------------------------------*/
+    virtual void addEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);
+    virtual void addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index);
+    virtual void addEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);
     virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
+    //----------------------------------------------------------------------------------------------------------------------
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
@@ -188,7 +196,7 @@ namespace MDEvents
     {
     public:
       /// Pointer to MDGridBox.
-      MDGridBox<MDE, nd> * box;
+      MDBoxBase<MDE, nd> * box;
       /// Reference to the MD events that will be added
       const std::vector<MDE> & events;
       /// Where to start in vector
@@ -207,7 +215,7 @@ namespace MDEvents
        * @param prog :: ProgressReporting
        * @return
        */
-      AddEventsTask(MDGridBox<MDE, nd> * box, const std::vector<MDE> & events,
+      AddEventsTask(MDBoxBase<MDE, nd> * box, const std::vector<MDE> & events,
                     const size_t start_at, const size_t stop_at, Mantid::Kernel::ProgressBase * prog)
       : Mantid::Kernel::Task(),
         box(box), events(events), start_at(start_at), stop_at(stop_at), prog(prog)
@@ -217,7 +225,7 @@ namespace MDEvents
       /// Add the events in the MDGridBox.
       void run()
       {
-        box->addEventsPart(events, start_at, stop_at);
+        box->addEvents(events);
         if (prog)
         {
           std::ostringstream out;

@@ -84,63 +84,7 @@ namespace MDEvents
  
   }
 
-  //-----------------------------------------------------------------------------------------------
-  /** Add several events, starting and stopping at particular point in a vector.
-   * Bounds checking IS performed, and events outside the range are rejected.
-   *
-   * NOTE: You must call refreshCache() after you are done, to calculate the
-   *  nPoints, signal and error.
-   *
-   * @param events :: vector of events to be copied.
-   * @param start_at :: begin at this index in the array
-   * @param stop_at :: stop at this index in the array
-   * @return the number of events that were rejected (because of being out of bounds)
-   */
-  TMDE(
-  size_t MDBoxBase)::addEvents(const std::vector<MDE> & events)
-  {
-    size_t numBad = 0;
-    // --- Go event by event and add them ----
-    typename std::vector<MDE>::const_iterator it = events.begin();
-    typename std::vector<MDE>::const_iterator it_end = events.begin();
-    for (; it != it_end; ++it)
-    {
-      //Check out-of-bounds-ness
-      bool badEvent = false;
-      for (size_t d=0; d<nd; d++)
-      {
-        coord_t x = it->getCenter(d);
-        if (extents[d].outside(x))
-        {
-          badEvent = true;
-          break;
-        }
-      }
-
-      if (badEvent)
-        // Event was out of bounds. Count it
-        ++numBad;
-      else
-        // Event was in bounds; add it
-        addEvent(*it);
-    }
-
-    return numBad;
-  }
-
-
-  //---------------------------------------------------------------------------------------------------
-  /** Add all of the events contained in a vector, with:
-   * - No bounds checking.
-   * - No thread-safety.
-   *
-   * @param events :: Vector of MDEvent
-   */
-  TMDE(
-  size_t MDBoxBase)::addEventsUnsafe(const std::vector<MDE> & events)
-  {
-    return this->addEventsPartUnsafe(events, 0, events.size());
-  }
+  
 
  
 
@@ -311,72 +255,75 @@ namespace MDEvents
     return out;
   }
 
-
-//------------------------------------------------------------------------------------------------------------------------------------------------------------
-  /* Internal TMP class to simplify building event constructor box for events and lean events using single interface*/
-  template<typename MDE,size_t nd>
-  struct IF
-  {
-  public:
-      static inline MDEvent<nd> BUILD_EVENT(const signal_t Signal, const signal_t Error, const  coord_t *Coord,const uint16_t runIndex,const uint32_t detectorId)
-      {
-          return MDEvent<nd>(Signal,Error, runIndex, detectorId, Coord);
-      }
-  };
-  /* Specialize for the case of LeanEvent */
-  template<size_t nd>
-  struct IF<MDLeanEvent<nd>,nd>
-  {
-  public:
-      static inline MDLeanEvent<nd> BUILD_EVENT(const signal_t Signal, const signal_t Error, const  coord_t *Coord,const uint16_t /*runIndex*/,const uint32_t /*detectorId*/)
-      {
-          return MDLeanEvent<nd>(Signal,Error,Coord);
-      }
-  };
-
-
-  /** Create event from the input data and add it to the box.
-   * @param point :: reference to the  MDEvent coordinates
-   * @param Signal  :: events signal
-   * @param errorSq :: events Error squared
-   * @param index   run  index
-   * @param index   detector's ID
-   * */
-   TMDE(
-   void MDBoxBase)::addEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
-   {
-       this->addEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0],runIndex, detectorId));
-   }
-
-  /** Create MD MDEvent amd add it to the box.
-   // add a single event and set pointer to the box which needs splitting (if one actually need) 
-
-   * @param point :: reference to a MDEvent to add.
-   * @param index :: current index for box
-   */
-   TMDE(
-   void MDBoxBase)::addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
-   {
-       this->addAndTraceEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId),index);
-   }
-
-  //-----------------------------------------------------------------------------------------------
-  /**Create MDEvent and add it to the box, in a NON-THREAD-SAFE manner.
-   * No lock is performed. This is only safe if no 2 threads will
-   * try to add to the same box at the same time.
+//-----------------------------------------------------------------------------------------------
+  /** Add several events, starting and stopping at particular point in a vector.
+   * Bounds checking IS performed, and events outside the range are rejected.
    *
-   * @param Evnt :: reference to a MDEvent to add.
-   * */
+   * NOTE: You must call refreshCache() after you are done, to calculate the
+   *  nPoints, signal and error.
+   *
+   * @param events :: vector of events to be copied.
+   * @param start_at :: begin at this index in the array
+   * @param stop_at :: stop at this index in the array
+   * @return the number of events that were rejected (because of being out of bounds)
+   */
   TMDE(
-  void MDBoxBase)::addEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
+  size_t MDBoxBase)::addEvents(const std::vector<MDE> & events)
   {
-       this->addEventUnsafe(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId));
+    size_t numBad = 0;
+    // --- Go event by event and add them ----
+    typename std::vector<MDE>::const_iterator it = events.begin();
+    typename std::vector<MDE>::const_iterator it_end = events.begin();
+    for (; it != it_end; ++it)
+    {
+      //Check out-of-bounds-ness
+      bool badEvent = false;
+      for (size_t d=0; d<nd; d++)
+      {
+        coord_t x = it->getCenter(d);
+        if (extents[d].outside(x))
+        {
+          badEvent = true;
+          break;
+        }
+      }
+
+      if (badEvent)
+        // Event was out of bounds. Count it
+        ++numBad;
+      else
+        // Event was in bounds; add it
+        addEvent(*it);
+    }
+
+    return numBad;
   }
 
- 
 
+  //---------------------------------------------------------------------------------------------------
+  /** Add all of the events contained in a vector, with:
+   * - No bounds checking.
+   * - No thread-safety.
+   *
+   * @param events :: Vector of MDEvent
+   */
+  TMDE(
+  size_t MDBoxBase)::addEventsUnsafe(const std::vector<MDE> & events)
+  {
+   // --- Go event by event and add them ----
+    typename std::vector<MDE>::const_iterator it = events.begin() ;
+    typename std::vector<MDE>::const_iterator it_end = events.end() ;
+    for (; it != it_end; ++it)
+    {
+      //Check out-of-bounds-ness
+      // Event was in bounds; add it
+      addEventUnsafe(*it);
+    }
 
+    return 0;    
 
+  }  
+   
 } // namespace Mantid
 } // namespace MDEvents
 

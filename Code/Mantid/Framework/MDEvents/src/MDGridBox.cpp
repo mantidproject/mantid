@@ -6,7 +6,7 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include <ostream>
 #include "MantidKernel/Strings.h"
@@ -832,111 +832,6 @@ namespace MDEvents
     }
   }
 
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add a single MDLeanEvent to the grid box. If the boxes
-   * contained within are also gridded, this will recursively push the event
-   * down to the deepest level.
-   * Warning! No bounds checking is done (for performance). It must
-   * be known that the event is within the bounds of the grid box before adding.
-   *
-   * Note! nPoints, signal and error must be re-calculated using refreshCache()
-   * after all events have been added.
-   *
-   * @param event :: reference to a MDLeanEvent to add.
-   * */
-  TMDE(
-  inline void MDGridBox)::addEvent( const MDE & event)
-  {
-    size_t index = 0;
-    for (size_t d=0; d<nd; d++)
-    {
-      coord_t x = event.getCenter(d);
-      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
-      // NOTE: No bounds checking is done (for performance).
-      //if (i < 0 || i >= int(split[d])) return;
-
-      // Accumulate the index
-      index += (i * splitCumul[d]);
-    }
-
-    // Add it to the contained box
-    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      m_Children[index]->addEvent(event);
-  }
-  /** Add a single MDLeanEvent to the grid box. If the boxes
-   * contained within are also gridded, this will recursively push the event
-   * down to the deepest level.
-   * Warning! No bounds checking is done (for performance). It must
-   * be known that the event is within the bounds of the grid box before adding.
-   *
-   * Note! nPoints, signal and error must be re-calculated using refreshCache()
-   * after all events have been added.
-   *
-   * @param point ::       reference to a MDEvent to add.
-   * @param ind :: index for something (unused)
-   *
-   * @returns boxToSplit:: pointer to the MDBox which has more events then it suppose to keep and should be split or NULL if 
-   *                       this does not happens
-    * */
-
-  TMDE(
-  inline void MDGridBox)::addAndTraceEvent(const MDE & point,size_t ind)
-  {
-    UNUSED_ARG(ind);
-
-    size_t index = 0;
-    for (size_t d=0; d<nd; d++)
-    {
-      coord_t x = point.getCenter(d);
-      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
-
-      // Accumulate the index
-      index += (i * splitCumul[d]);
-    }
-
-    // Add it to the contained box
-    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      m_Children[index]->addAndTraceEvent(point,index);
-  
-
-  }
-  //-----------------------------------------------------------------------------------------------
-  /** Add a single MDLeanEvent to the grid box. If the boxes
-   * contained within are also gridded, this will recursively push the event
-   * down to the deepest level.
-   *
-   * Warning! No bounds checking is done (for performance). It must
-   * be known that the event is within the bounds of the grid box before adding.
-   *
-   * Warning! Call is NOT thread-safe. Only 1 thread should be writing to this
-   * box (or any child boxes) at a time
-   *
-   * Note! nPoints, signal and error must be re-calculated using refreshCache()
-   * after all events have been added.
-   *
-   * @param event :: reference to a MDEvent to add.
-   * */
-  TMDE(
-  inline void MDGridBox)::addEventUnsafe(const MDE & event)
-  {
-    size_t index = 0;
-    for (size_t d=0; d<nd; d++)
-    {
-
-      coord_t x = event.getCenter(d);
-      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
-      // Accumulate the index
-      index += (i * splitCumul[d]);
-    }
-
-    // Add it to the contained box
-    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      m_Children[index]->addEventUnsafe(event);
-  }
-
-
-
   //-----------------------------------------------------------------------------------------------
   /** Perform centerpoint binning of events, with bins defined
    * in axes perpendicular to the axes of the workspace.
@@ -1473,13 +1368,15 @@ namespace MDEvents
       box->unmask();
     }
   }
-
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
-  /* Internal TMP class to simplify adding events to the box for events and lean events using single interface*/
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+/* Internal TMP class to simplify adding events to the box for events and lean events using single interface. One would nead to overload the box class otherwise*/
   template<typename MDE,size_t nd>
-  struct ON_EVENTS
+  struct IF_EVENT
   {
   public:
+      // create generic events from array of events data and add them to the grid box 
       static inline void EXEC(MDGridBox<MDE,nd> *pBox,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
                               const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId,size_t nEvents)
       {
@@ -1487,12 +1384,14 @@ namespace MDEvents
            pBox->addEvent(MDEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],runIndex[i], detectorId[i],&Coord[i*nd]));
 
       }
+
   };
   /* Specialize for the case of LeanEvent */
   template<size_t nd>
-  struct ON_EVENTS<MDLeanEvent<nd>,nd>
+  struct IF_EVENT<MDLeanEvent<nd>,nd>
   {
   public:
+    // create lean events from array of events data and add them to the grid box 
     static inline void EXEC(MDGridBox<MDLeanEvent<nd>,nd> *pBox,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
                               const std::vector<uint16_t> & /*runIndex*/,const std::vector<uint32_t> &/*detectorId*/,size_t nEvents)
     {
@@ -1500,6 +1399,7 @@ namespace MDEvents
            pBox->addEvent(MDLeanEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],&Coord[i*nd]));
       
     }
+
   };
 
 
@@ -1513,10 +1413,153 @@ namespace MDEvents
   {
 
        size_t nEvents = sigErrSq.size()/2;
-       ON_EVENTS<MDE,nd>::EXEC(this,sigErrSq,Coord,runIndex,detectorId,nEvents);
+       IF_EVENT<MDE,nd>::EXEC(this,sigErrSq,Coord,runIndex,detectorId,nEvents);
 
        return 0;
   }
+
+  /** Create event from the input data and add it to the box.
+   * @param point :: reference to the  MDEvent coordinates
+   * @param Signal  :: events signal
+   * @param errorSq :: events Error squared
+   * @param index   run  index
+   * @param index   detector's ID
+   * */
+   TMDE(
+   void MDGridBox)::addEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
+   {
+       this->addEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0],runIndex, detectorId));
+   }
+
+  /** Create MD MDEvent amd add it to the box.
+   // add a single event and set pointer to the box which needs splitting (if one actually need) 
+
+   * @param point :: reference to a MDEvent to add.
+   * @param index :: current index for box
+   */
+   TMDE(
+   void MDGridBox)::addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
+   {
+       this->addAndTraceEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId),index);
+   }
+
+  //-----------------------------------------------------------------------------------------------
+  /**Create MDEvent and add it to the box, in a NON-THREAD-SAFE manner.
+   * No lock is performed. This is only safe if no 2 threads will
+   * try to add to the same box at the same time.
+   *
+   * @param Evnt :: reference to a MDEvent to add.
+   * */
+  TMDE(
+  void MDGridBox)::addEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
+  {
+       this->addEventUnsafe(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId));
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add a single MDLeanEvent to the grid box. If the boxes
+   * contained within are also gridded, this will recursively push the event
+   * down to the deepest level.
+   * Warning! No bounds checking is done (for performance). It must
+   * be known that the event is within the bounds of the grid box before adding.
+   *
+   * Note! nPoints, signal and error must be re-calculated using refreshCache()
+   * after all events have been added.
+   *
+   * @param event :: reference to a MDLeanEvent to add.
+   * */
+  TMDE(
+  inline void MDGridBox)::addEvent( const MDE & event)
+  {
+    size_t index = 0;
+    for (size_t d=0; d<nd; d++)
+    {
+      coord_t x = event.getCenter(d);
+      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
+      // NOTE: No bounds checking is done (for performance).
+      //if (i < 0 || i >= int(split[d])) return;
+
+      // Accumulate the index
+      index += (i * splitCumul[d]);
+    }
+
+    // Add it to the contained box
+    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
+      m_Children[index]->addEvent(event);
+  }
+  /** Add a single MDLeanEvent to the grid box. If the boxes
+   * contained within are also gridded, this will recursively push the event
+   * down to the deepest level.
+   * Warning! No bounds checking is done (for performance). It must
+   * be known that the event is within the bounds of the grid box before adding.
+   *
+   * Note! nPoints, signal and error must be re-calculated using refreshCache()
+   * after all events have been added.
+   *
+   * @param point ::       reference to a MDEvent to add.
+   * @param ind :: index for something (unused)
+   *
+   * @returns boxToSplit:: pointer to the MDBox which has more events then it suppose to keep and should be split or NULL if 
+   *                       this does not happens
+    * */
+
+  TMDE(
+  inline void MDGridBox)::addAndTraceEvent(const MDE & point,size_t ind)
+  {
+    UNUSED_ARG(ind);
+
+    size_t index = 0;
+    for (size_t d=0; d<nd; d++)
+    {
+      coord_t x = point.getCenter(d);
+      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
+
+      // Accumulate the index
+      index += (i * splitCumul[d]);
+    }
+
+    // Add it to the contained box
+    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
+      m_Children[index]->addAndTraceEvent(point,index);
+  
+
+  }
+  //-----------------------------------------------------------------------------------------------
+  /** Add a single MDLeanEvent to the grid box. If the boxes
+   * contained within are also gridded, this will recursively push the event
+   * down to the deepest level.
+   *
+   * Warning! No bounds checking is done (for performance). It must
+   * be known that the event is within the bounds of the grid box before adding.
+   *
+   * Warning! Call is NOT thread-safe. Only 1 thread should be writing to this
+   * box (or any child boxes) at a time
+   *
+   * Note! nPoints, signal and error must be re-calculated using refreshCache()
+   * after all events have been added.
+   *
+   * @param event :: reference to a MDEvent to add.
+   * */
+  TMDE(
+  inline void MDGridBox)::addEventUnsafe(const MDE & event)
+  {
+    size_t index = 0;
+    for (size_t d=0; d<nd; d++)
+    {
+
+      coord_t x = event.getCenter(d);
+      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
+      // Accumulate the index
+      index += (i * splitCumul[d]);
+    }
+
+    // Add it to the contained box
+    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
+      m_Children[index]->addEventUnsafe(event);
+  }
+
+
 }//namespace MDEvents
 
 }//namespace Mantid
