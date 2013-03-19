@@ -5,6 +5,7 @@
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidKernel/ClassMacros.h"
 #include <set>
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt
 {
@@ -28,6 +29,9 @@ namespace MantidQt
       PeakOverlayViewFactory_sptr makeSelection() const;
       size_t countCandidates() const;
     };
+
+    typedef boost::shared_ptr<PeakOverlayViewFactorySelector> PeakOverlayViewFactorySelector_sptr;
+    typedef boost::shared_ptr<const PeakOverlayViewFactorySelector> PeakOverlayViewFactorySelector_const_sptr;
 
   }
 }

@@ -31,7 +31,7 @@ namespace MantidQt
     class DLLExport ConcretePeaksPresenter : public PeaksPresenter
     {
     public:
-      ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory, PeakOverlayViewFactory_sptr integratedViewFactory, Mantid::API::IPeaksWorkspace_sptr peaksWS, boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory);
+      ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, Mantid::API::IPeaksWorkspace_sptr peaksWS, boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory);
       virtual ~ConcretePeaksPresenter();
       virtual void update();
       virtual void updateWithSlicePoint(const double& slicePoint);
@@ -75,12 +75,6 @@ namespace MantidQt
       void showBackgroundRadius(const bool show);
       /// Produce the views from the PeaksWorkspace
       void produceViews();
-      /// Validate inputs.
-      void validateInputs( PeakOverlayViewFactory_sptr integratedViewFactory,
-           PeakOverlayViewFactory_sptr nonIntegratedViewFactory);
-      /// Construct a the correct view factory.
-      void constructViewFactory(PeakOverlayViewFactory_sptr nonIntegratedViewFactory,
-          const boost::shared_ptr<const Mantid::API::MDGeometry> mdWS);
       /// Check workspace compatibilities.
       void checkWorkspaceCompatibilities(boost::shared_ptr<Mantid::API::MDGeometry> mdWS);
     };
