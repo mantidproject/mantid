@@ -130,7 +130,10 @@ void ProjectionSurface::clear()
  */
 void ProjectionSurface::draw(MantidGLWidget *widget)const
 {
-  if ( m_viewChanged && ( m_redrawPicking || m_interactionMode == PickSingleMode || m_interactionMode == PickTubeMode ) )
+  if ( m_viewChanged && ( m_redrawPicking
+                          || m_interactionMode == PickSingleMode
+                          || m_interactionMode == PickTubeMode
+                          || m_interactionMode == DrawMode ) )
   {
     draw(widget,true);
     m_redrawPicking = false;
