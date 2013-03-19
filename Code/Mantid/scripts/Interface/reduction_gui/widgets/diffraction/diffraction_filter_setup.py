@@ -61,6 +61,20 @@ class FilterSetupWidget(BaseWidget):
         self._content.timefilter_checkBox.setChecked(False)
         self._content.logvaluefilter_checkBox.setChecked(False)
 
+        #   disable some input
+        self._content.logname_edit.setEnabled(False)
+        self._content.logminvalue_edit.setEnabled(False)
+        self._content.logmaxvalue_edit.setEnabled(False)
+        self._content.logintervalvalue_edit.setEnabled(False)
+        self._content.valuechange_combo.setEnabled(False)
+        self._content.logtol_edit.setEnabled(False)
+        self._content.timetol_edit.setEnabled(False)
+        self._content.logbound_combo.setEnabled(False)
+
+        boolvalue = False
+        self._content.timintervallength_edit.setEnabled(boolvalue)
+        self._content.timeunit_combo.setEnabled(boolvalue)
+
         #   radio buttons
         # self._content.usesize_radiob.setChecked(True)
         
@@ -69,6 +83,7 @@ class FilterSetupWidget(BaseWidget):
         # iv0 = QtGui.QIntValidator(self._content.numtimeinterval_edit)
         # iv0.setBottom(0)
         # self._content.numtimeinterval_edit.setValidator(iv0)
+
        
         iv1 = QtGui.QIntValidator(self._content.run_number_edit)
         iv1.setBottom(0)
@@ -304,6 +319,24 @@ class FilterSetupWidget(BaseWidget):
         if self._content.timefilter_checkBox.isChecked():
             self._content.logvaluefilter_checkBox.setChecked(False)
 
+            boolvalue = False
+            self._content.logname_edit.setEnabled(boolvalue)
+            self._content.logminvalue_edit.setEnabled(boolvalue)
+            self._content.logmaxvalue_edit.setEnabled(boolvalue)
+            self._content.logintervalvalue_edit.setEnabled(boolvalue)
+            self._content.valuechange_combo.setEnabled(boolvalue)
+            self._content.logtol_edit.setEnabled(boolvalue)
+            self._content.timetol_edit.setEnabled(boolvalue)
+            self._content.logbound_combo.setEnabled(boolvalue)
+
+            boolvalue = True
+            self._content.timintervallength_edit.setEnabled(boolvalue)
+            self._content.timeunit_combo.setEnabled(boolvalue)
+        else:
+            boolvalue = False
+            self._content.timintervallength_edit.setEnabled(boolvalue)
+            self._content.timeunit_combo.setEnabled(boolvalue)
+
         return
 
     def _filterbylogvalue_statechanged(self):
@@ -311,6 +344,30 @@ class FilterSetupWidget(BaseWidget):
         """
         if self._content.logvaluefilter_checkBox.isChecked():
             self._content.timefilter_checkBox.setChecked(False)
+
+            boolvalue = True
+            self._content.logname_edit.setEnabled(boolvalue)
+            self._content.logminvalue_edit.setEnabled(boolvalue)
+            self._content.logmaxvalue_edit.setEnabled(boolvalue)
+            self._content.logintervalvalue_edit.setEnabled(boolvalue)
+            self._content.valuechange_combo.setEnabled(boolvalue)
+            self._content.logtol_edit.setEnabled(boolvalue)
+            self._content.timetol_edit.setEnabled(boolvalue)
+            self._content.logbound_combo.setEnabled(boolvalue)
+            
+            boolvalue = False
+            self._content.timintervallength_edit.setEnabled(boolvalue)
+            self._content.timeunit_combo.setEnabled(boolvalue)
+        else:
+            boolvalue = False
+            self._content.logname_edit.setEnabled(boolvalue)
+            self._content.logminvalue_edit.setEnabled(boolvalue)
+            self._content.logmaxvalue_edit.setEnabled(boolvalue)
+            self._content.logintervalvalue_edit.setEnabled(boolvalue)
+            self._content.valuechange_combo.setEnabled(boolvalue)
+            self._content.logtol_edit.setEnabled(boolvalue)
+            self._content.timetol_edit.setEnabled(boolvalue)
+            self._content.logbound_combo.setEnabled(boolvalue)
 
         return
 
