@@ -59,7 +59,7 @@ namespace Mantid
 
     private:
       const std::string m_filename;   ///< The file to read
-      const std::string m_tempWSname; ///< The name of the hidden workspace that holds the next chunk
+      std::string m_tempWSname;       ///< The name of the hidden workspace that holds the next chunk
       int m_numChunks;                ///< The number of pieces to divide the file into
       int m_nextChunk;                ///< The number of the next chunk to be loaded
 
