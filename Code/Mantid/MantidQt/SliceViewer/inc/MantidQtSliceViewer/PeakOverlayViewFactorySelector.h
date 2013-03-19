@@ -10,6 +10,11 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+    /**
+     * @class PeakOverlayViewFactorySelector
+     * Uses a figure of merit to determine which registered view factory would be
+     * best to use.
+     */
     class DLLExport PeakOverlayViewFactorySelector
     {
     private:
@@ -21,6 +26,7 @@ namespace MantidQt
       ~PeakOverlayViewFactorySelector();
       void registerCandidate(PeakOverlayViewFactory_sptr factory);
       PeakOverlayViewFactory_sptr makeSelection() const;
+      size_t countCandidates() const;
     };
 
   }

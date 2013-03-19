@@ -14,7 +14,8 @@ namespace MantidQt
         m_peakRadius(0),
         m_backgroundInnerRadius(0),
         m_backgroundOuterRadius(0),
-        m_peaksWS(peaksWS)
+        m_peaksWS(peaksWS),
+        m_FOM(0)
     {
       if (m_peaksWS->hasIntegratedPeaks())
       {
@@ -24,8 +25,8 @@ namespace MantidQt
             m_peaksWS->run().getProperty("BackgroundInnerRadius")->value());
         m_backgroundOuterRadius = boost::lexical_cast<double>(
             m_peaksWS->run().getProperty("BackgroundOuterRadius")->value());
+        m_FOM = 2; // Possible to display workspaces with this factory.
       }
-      //TODO ADD FIGURE OF MERIT!
     }
 
     boost::shared_ptr<PeakOverlayView> PeakOverlaySphereFactory::createView(const int peakIndex, PeakTransform_const_sptr transform) const
@@ -37,6 +38,11 @@ namespace MantidQt
 
     PeakOverlaySphereFactory::~PeakOverlaySphereFactory()
     {
+    }
+
+    int PeakOverlaySphereFactory::FOM() const
+    {
+      return m_FOM;
     }
 
   }

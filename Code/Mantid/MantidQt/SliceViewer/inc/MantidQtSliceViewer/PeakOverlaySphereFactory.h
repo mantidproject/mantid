@@ -41,10 +41,12 @@ namespace MantidQt
       double m_backgroundInnerRadius;
       double m_backgroundOuterRadius;
       Mantid::API::IPeaksWorkspace_sptr m_peaksWS;
+      int m_FOM;
     public:
       PeakOverlaySphereFactory(Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
       virtual ~PeakOverlaySphereFactory();
       virtual boost::shared_ptr<PeakOverlayView> createView(const int peakIndex, PeakTransform_const_sptr transform) const;
+      virtual int FOM() const;
     };
   }
 }

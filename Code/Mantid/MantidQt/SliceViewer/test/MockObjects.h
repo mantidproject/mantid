@@ -131,6 +131,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_CONST_METHOD0(getPlotXLabel, std::string());
     MOCK_CONST_METHOD0(getPlotYLabel, std::string());
     MOCK_METHOD0(updateView, void());
+    MOCK_CONST_METHOD0(FOM, int());
   };
   
   

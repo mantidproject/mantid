@@ -57,6 +57,8 @@ namespace MantidQt
       virtual std::string getPlotXLabel() const = 0;
       /// Get the plot y-axis label
       virtual std::string getPlotYLabel() const = 0;
+      /// Get the Figure Of Merit for this factory
+      virtual int FOM() const = 0;
     };
 
     /// Factory Shared Pointer typedef.

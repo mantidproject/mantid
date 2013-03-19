@@ -32,7 +32,6 @@ namespace MantidQt
           break;
         }
       }
-      // TODO Figure Of MERIT
     }
 
     PeakOverlayCrossFactory::~PeakOverlayCrossFactory()
@@ -44,6 +43,11 @@ namespace MantidQt
       const IPeak& peak = m_peaksWS->getPeak(peakIndex);
       auto position = transform->transformPeak(peak);
       return boost::make_shared<PeakOverlayCross>(m_plot, m_parent, position, m_zMax, m_zMin, this->m_peakColour);
+    }
+
+    int PeakOverlayCrossFactory::FOM() const
+    {
+      return 1; // It's always possible to represent a peak position. FOM is the lowest valid value.
     }
   }
 }
