@@ -2,6 +2,8 @@
 #define MANTID_VATES_VTKDATASETTONONORTHOGONALDATASET_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 #include <string>
 
@@ -10,6 +12,12 @@ class vtkUnstructuredGrid;
 
 namespace Mantid
 {
+
+namespace Geometry
+{
+  class OrientedLattice;
+}
+
 namespace VATES
 {
 
@@ -53,12 +61,20 @@ namespace VATES
   private:
     vtkDataSetToNonOrthogonalDataSet& operator=(const vtkDataSetToNonOrthogonalDataSet& other);
     vtkDataSetToNonOrthogonalDataSet(const vtkDataSetToNonOrthogonalDataSet& other);
+    /// Calculate the skew matrix and basis.
+    void createSkewInformation(Geometry::OrientedLattice &ol,
+                               Kernel::DblMatrix &w,
+                               Kernel::Matrix<coord_t> &aff);
+    /// Reduce the dimensionality of matrix by 1
+    void stripMatrix(Kernel::DblMatrix &mat);
     /// Add the skew basis to metadata
     void updateMetaData(vtkUnstructuredGrid *ugrid);
     vtkDataSet *m_dataSet; ///< Pointer to VTK dataset to modify
     std::string m_wsName; ///< The name of the workspace to fetch
     //FIXME: Temp var for getting hardcoded stuff back
     unsigned int m_hc;
+    std::size_t m_numDims; ///< Number of dimensions in workspace
+    Kernel::DblMatrix m_skewMat; ///< The skew matrix for non-orthogonal representation
   };
 
 
