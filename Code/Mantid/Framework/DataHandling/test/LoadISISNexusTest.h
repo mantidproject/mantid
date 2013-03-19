@@ -265,6 +265,15 @@ public:
         TSM_ASSERT_DELTA("Something is badly wrong if the sum accross the periods does not correspond to the total charge.", totalCharge, chargeSum, 0.000001);
         AnalysisDataService::Instance().remove(wsName);
     }
+
+    // Test the stub remnant of version 1 of this algorithm - that it can be run without setting any properties, and throws an exception.
+    void testRemovedVersion1Throws()
+    {
+      LoadISISNexus v1;
+      v1.setRethrows(true);
+      TS_ASSERT_THROWS_NOTHING( v1.initialize() );
+      TS_ASSERT_THROWS( v1.execute(), Exception::NotImplementedError)
+    }
 };
 
 //------------------------------------------------------------------------------

@@ -14,7 +14,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataHandling/LoadInstrument.h"
