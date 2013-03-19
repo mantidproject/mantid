@@ -36,4 +36,4 @@ namespace MantidQt
   }
 }
 
-#endif SLICE_VIEWER_PEAKOVERLAYVIEWFACTORYSELECTOR_H_
+#endif
