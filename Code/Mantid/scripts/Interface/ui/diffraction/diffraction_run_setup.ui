@@ -196,13 +196,13 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>100</width>
+                <width>160</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>100</width>
+                <width>160</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -234,31 +234,6 @@
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="sum_checkbox">
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>180</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Select to normalize to the beam monitor data</string>
-              </property>
-              <property name="statusTip">
-               <string>Select to normalize to the beam monitor data</string>
-              </property>
-              <property name="text">
-               <string>Sum</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <spacer name="horizontalSpacer_2">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -277,6 +252,18 @@
            <layout class="QHBoxLayout" name="monitor_layout">
             <item>
              <widget class="QLabel" name="label_3">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
                <string>Calibration File</string>
               </property>
@@ -327,9 +314,15 @@
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
              <widget class="QLabel" name="label_4">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="maximumSize">
                <size>
-                <width>100</width>
+                <width>160</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -348,7 +341,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>400</width>
+                <width>360</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -402,6 +395,44 @@
              </widget>
             </item>
             <item>
+             <spacer name="horizontalSpacer_11">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="sum_checkbox">
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>180</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Select to normalize to the beam monitor data</string>
+              </property>
+              <property name="statusTip">
+               <string>Select to normalize to the beam monitor data</string>
+              </property>
+              <property name="text">
+               <string>Sum</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="horizontalSpacer_20">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -422,13 +453,13 @@
              <widget class="QLabel" name="direct_beam_label">
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>160</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>150</width>
+                <width>160</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -488,6 +519,18 @@
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
              <widget class="QLabel" name="label">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
                <string>Output Directory</string>
               </property>
@@ -556,6 +599,18 @@
            <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
              <widget class="QLabel" name="label_2">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
                <string>Save As</string>
               </property>
@@ -702,27 +757,40 @@
                <string notr="true">font: italic 10pt &quot;Bitstream Charter&quot;;</string>
               </property>
               <property name="text">
-               <string>Characterization file can be overriden or disabled</string>
+               <string>If characterization file is given, the correction run numbers are given by the file. 
+The corrections can be overriden and disabled though.</string>
               </property>
              </widget>
             </item>
            </layout>
           </item>
           <item>
-           <layout class="QFormLayout" name="formLayout_3">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
-            </property>
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-            </property>
-            <property name="labelAlignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-            <property name="formAlignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-            </property>
-            <item row="0" column="0">
+           <layout class="QGridLayout" name="correction_gridlayout">
+            <item row="2" column="4">
+             <widget class="QCheckBox" name="disablevanbkgdcorr_chkbox">
+              <property name="text">
+               <string>Disable </string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="vanbkgdrun_edit">
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QCheckBox" name="override_vanrun_checkBox">
+              <property name="text">
+               <string>Override</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
              <widget class="QCheckBox" name="disablebkgdcorr_chkbox">
               <property name="toolTip">
                <string>Select to set the detector distance offset.</string>
@@ -734,7 +802,27 @@
                <string/>
               </property>
               <property name="text">
-               <string>Disable Empty Run Correction</string>
+               <string>Disable</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_5">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Empty Run Correction</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QCheckBox" name="override_emptyrun_checkBox">
+              <property name="text">
+               <string>Override</string>
               </property>
              </widget>
             </item>
@@ -748,7 +836,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>80</width>
+                <width>200</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -760,7 +848,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
+            <item row="1" column="4">
              <widget class="QCheckBox" name="disablevancorr_chkbox">
               <property name="toolTip">
                <string>Select to force the sample-detector distance.</string>
@@ -769,7 +857,21 @@
                <string>Select to force the sample-detector distance.</string>
               </property>
               <property name="text">
-               <string>Disable Vanadium Run Correction</string>
+               <string>Disable</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Vanadium Run Correction</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>Vandium Background Run Correction</string>
               </property>
              </widget>
             </item>
@@ -789,7 +891,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>80</width>
+                <width>200</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -801,22 +903,41 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QCheckBox" name="disablevanbkgdcorr_chkbox">
+            <item row="0" column="5">
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="2" column="2">
+             <widget class="QCheckBox" name="override_vanbkgdrun_checkBox">
               <property name="text">
-               <string>Disable Vanariumd Background Correction</string>
+               <string>Override</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QLineEdit" name="vanbkgdrun_edit">
-              <property name="maximumSize">
+            <item row="0" column="3">
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
                <size>
-                <width>80</width>
-                <height>16777215</height>
+                <width>40</width>
+                <height>20</height>
                </size>
               </property>
-             </widget>
+             </spacer>
             </item>
            </layout>
           </item>
@@ -966,21 +1087,21 @@ The mask information is saved separately so that your data file will NOT be modi
             </item>
            </layout>
           </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>
