@@ -196,3 +196,19 @@ github_compare_url() {
     # Echo so it can be caputured in a variable
     echo ${changes_address}
 }
+
+# Get the author name
+get_author_name() {
+    if [ ! $# -eq 1 ]; then
+	echo "get_contact_info requires a single argument giving the branch name"
+    fi
+    git log -1 $1 --format="format:%an"
+}
+
+# Get the author name
+get_author_email() {
+    if [ ! $# -eq 1 ]; then
+	echo "get_contact_info requires a single argument giving the branch name"
+    fi
+    git log -1 $1 --format="format:%ae"
+}

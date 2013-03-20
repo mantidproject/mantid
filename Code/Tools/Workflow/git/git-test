@@ -25,6 +25,8 @@
 CMD_NAME="test"
 # Branch to merge to for testing
 PRODUCTION_BRANCH="master"
+# Branch for buildserver support
+BUILDER_BRANCH="develop"
 # Config key to store tested branch
 BRANCH_CFG_KEY=mantid.workflow.testbranch
 
@@ -113,8 +115,23 @@ start_testing() {
 
     remote_testbranch=$(find_branch_on_remote ${ARG_TEST_BRANCH})
     if [ -z "$remote_testbranch" ]; then
-	echo "Cannot find branch on remote using hint '$1'."
+	echo "Cannot find branch on remote using hint '${ARG_TEST_BRANCH}'."
 	echo "Please give full name (without origin/ prefix)."
+	exit 1
+    fi
+
+    # Check if the branch has been fully merged to develop
+    local_testbranch=${remote_testbranch#"origin/"}
+    branch_is_merged ${remote_testbranch} origin/${BUILDER_BRANCH}
+    if [ $? -eq 0 ]; then
+	author_name=$(get_author_name ${remote_testbranch})
+	author_email=$(get_author_email ${remote_testbranch})
+	echo "ERROR: Branch '${local_testbranch}' has not been fully merged to ${BUILDER_BRANCH},"
+	echo "meaning it is not possible to know whether the code is valid on all environments."
+	echo
+	echo "Contact ${author_name} on ${author_email} (or via skype) and ask them to merge the code"
+	echo "to ${BUILDER_BRANCH} using 'git checkbuild' from their branch ${local_testbranch} and let you know when"
+	echo "it passes testing on the buildservers so you can start testing."
 	exit 1
     fi
 
@@ -144,7 +161,6 @@ start_testing() {
     fi
 
     # Prompt user to examine changes
-    local_testbranch=${remote_testbranch#"origin/"}
     changes_url=$(github_compare_url ${local_testbranch})
 
     # Record what we are testing for later pass/fail
