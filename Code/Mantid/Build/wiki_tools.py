@@ -92,11 +92,15 @@ def get_wiki_description(algo, version):
 #======================================================================
 def get_wiki_usage(algo, version):
     wiki_usage = get_custom_wiki_section(algo, version, "*WIKI_USAGE*")
+    wiki_no_sig_usage = get_custom_wiki_section(algo, version, "*WIKI_USAGE_NO_SIGNATURE*")
+    
     if wiki_usage:
         return (True, wiki_usage)
-    else:
-        wiki_no_sig_usage = get_custom_wiki_section(algo, version, "*WIKI_USAGE_NO_SIGNATURE*")
+    elif wiki_no_sig_usage:
         return (False, wiki_no_sig_usage)
+    else:
+        return (True, "")
+            
 
 #======================================================================
 def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=False):
@@ -543,7 +547,7 @@ def do_make_wiki(algo_name, version, latest_version):
     deprec_check = DeprecatedAlgorithmChecker(algo_name,version)
     deprec = deprec_check.isDeprecated()
     if len(deprec) != 0:
-        out = "== Deprecated ==\n\n"
+        out += "== Deprecated ==\n\n"
         deprecstr = deprec
         deprecstr = deprecstr.replace(". Use ", ". Use [[")
         deprecstr = deprecstr.replace(" instead.", "]] instead.")
