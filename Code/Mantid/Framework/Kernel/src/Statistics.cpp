@@ -229,8 +229,14 @@ namespace Mantid
       if (obsI.size() != calI.size() || obsI.size() != obsE.size())
       {
         std::stringstream errss;
-        errss << "GetRFactor() Input Error!  Observed Intensity, Calculated Intensity and Observed Error have different number of elements.";
+        errss << "GetRFactor() Input Error!  Observed Intensity (" << obsI.size()
+              << "), Calculated Intensity (" << calI.size() << ") and Observed Error ("
+              << obsE.size() << ") have different number of elements.";
         throw std::runtime_error(errss.str());
+      }
+      if (obsI.size() == 0)
+      {
+        throw std::runtime_error("getRFactor(): the input arrays are empty.");
       }
 
       double sumnom = 0;
