@@ -2,7 +2,7 @@
 #
 from IndirectImport import *
 from mantid.simpleapi import *
-from mantid import config, logger, mtd
+from mantid import config, logger, mtd, FileFinder
 from mantid.kernel import V3D
 import sys, math, os.path, numpy as np
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
@@ -93,7 +93,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):      #Ascii s
 	workdir = config['defaultsave.directory']
 	file = instr +'_'+ run
 	filext = file + '.asc'
-	path = os.path.join(workdir, filext)
+	path = FileFinder.getFullPath(filext)
 	if Verbose:
 		logger.notice('Reading file : ' + path)
 	handle = open(path, 'r')
@@ -224,7 +224,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):      #Ascii s
 		SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
 		if Verbose:
 			logger.notice('Output file : ' + opath)
-	if (Plot != 'None'):
+	if (Plot):
 		plotForce(outWS,Plot)
 	EndTime('Iback')
 
@@ -251,7 +251,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):
 	workdir = config['defaultsave.directory']
 	file = instr +'_'+ run
 	filext = file + '.inx'
-	path = os.path.join(workdir, filext)
+	path = FileFinder.getFullPath(filext)
 	if Verbose:
 		logger.notice('Reading file : ' + path)
 	handle = open(path, 'r')
@@ -322,7 +322,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):
 		SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
 		if Verbose:
 			logger.notice('Output file : ' + opath)
-	if (Plot != 'None'):
+	if (Plot):
 		plotForce(outWS,Plot)
 	EndTime('Inx')
 	
