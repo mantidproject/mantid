@@ -8,6 +8,7 @@ import reduction_gui.widgets.util as util
 
 from reduction_gui.reduction.diffraction.diffraction_filter_setup_script import FilterSetupScript 
 import ui.diffraction.ui_diffraction_filter_setup
+import ui.diffraction.ui_filter_info 
 
 import mantid.simpleapi as api
 
@@ -47,8 +48,6 @@ class FilterSetupWidget(BaseWidget):
     def initialize_content(self):
         """ Initialize content/UI
         """
-        # FIXME : Fill in the contraints, states and connections to this method ASAP
-
         # Initial value
         #   combo-boxes
         self._content.timeunit_combo.setCurrentIndex(0)
@@ -83,7 +82,6 @@ class FilterSetupWidget(BaseWidget):
         # iv0 = QtGui.QIntValidator(self._content.numtimeinterval_edit)
         # iv0.setBottom(0)
         # self._content.numtimeinterval_edit.setValidator(iv0)
-
        
         iv1 = QtGui.QIntValidator(self._content.run_number_edit)
         iv1.setBottom(0)
@@ -123,6 +121,9 @@ class FilterSetupWidget(BaseWidget):
         self.connect(self._content.syn_logname_button, QtCore.SIGNAL("clicked()"),
                 self._sync_logname_clicked)
 
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+                self._show_help)
+
         # Validated widgets
         # self._connect_validated_lineedit(self._content.sample_edit)
 
@@ -147,19 +148,42 @@ class FilterSetupWidget(BaseWidget):
         #     self._content.numtimeinterval_edit.setText(str(state.numbertimeinterval))
         if state.lengthtimeinterval is not None and state.lengthtimeinterval != "": 
             self._content.timintervallength_edit.setText(str(state.lengthtimeinterval))
-        self._content.timeunit_combo.setCurrentIndex(self._content.timeunit_combo.findText(str(state.unitoftime)))
+        index = self._content.timeunit_combo.findText(str(state.unitoftime))
+        if index >= 0: 
+            self._content.timeunit_combo.setCurrentIndex(index)
+        else:
+            self._content.timeunit_combo.setCurrentIndex(0)
+            print "Input value of unit of time '%s' is not allowed. " % (state.unitoftime)
 
         # Chop by log value
         self._content.logvaluefilter_checkBox.setChecked(state.filterbylogvalue)
         self._content.logname_edit.setText(state.logname)
-        self._content.logminvalue_edit.setText(str(state.minimumlogvalue))
-        self._content.logmaxvalue_edit.setText(str(state.maximumlogvalue))
+        if state.minimumlogvalue is not None: 
+            self._content.logminvalue_edit.setText(str(state.minimumlogvalue))
+        else:
+            self._content.logminvalue_edit.setText("")
+        if state.maximumlogvalue is not None: 
+            self._content.logmaxvalue_edit.setText(str(state.maximumlogvalue))
+        else:
+            self._content.logmaxvalue_edit.setText("")
         if state.logvalueinterval is not None: 
             self._content.logintervalvalue_edit.setText(str(state.logvalueinterval))
+        else:
+            self._content.logintervalvalue_edit.setText("")
         if state.logvaluetolerance is not None: 
             self._content.logtol_edit.setText(str(state.logvaluetolerance))
-        self._content.valuechange_combo.setCurrentIndex(self._content.valuechange_combo.findText(state.filterlogvaluebychangingdirection))
-        self._content.logbound_combo.setCurrentIndex(self._content.logbound_combo.findText(state.logboundary))
+        index = self._content.valuechange_combo.findText(str(state.filterlogvaluebychangingdirection))
+        if index >= 0: 
+            self._content.valuechange_combo.setCurrentIndex(index)
+        else:
+            self._content.valuechange_combo.setCurrentIndex(0)
+            print "Input value of filter log value by changing direction '%s' is not allowed." % (state.filterlogvaluebychangingdirection)
+        index = self._content.logbound_combo.findText(str(state.logboundary))
+        if index >= 0: 
+            self._content.logbound_combo.setCurrentIndex(index)
+        else:
+            self._content.logbound_combo.setCurrentIndex(0)
+            print "Input value for log boundary '%s' is not allowed." % (state.logboundary)
         if state.timetolerance is not None: 
             self._content.timetol_edit.setText(str(state.timetolerance))
 
@@ -408,6 +432,16 @@ class FilterSetupWidget(BaseWidget):
             from LargeScaleStructures import data_stitching         
             data_stitching.RangeSelector.connect([workspace], callback,
                                              xmin=xmin, xmax=xmax)
+
+        return
+
+    def _show_help(self):
+        class HelpDialog(QtGui.QDialog, ui.diffraction.ui_filter_info.Ui_Dialog): 
+            def __init__(self, parent=None):
+                QtGui.QDialog.__init__(self, parent)
+                self.setupUi(self)
+        dialog = HelpDialog(self)
+        dialog.exec_()
 
         return
 

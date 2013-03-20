@@ -187,7 +187,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QLabel" name="att_scale_factor_label">
+             <widget class="QLabel" name="filte_title_label">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -205,6 +205,9 @@
                 <width>120</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Base title for splitted workspaces. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Title</string>
@@ -226,7 +229,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter a scaling factor to be multiplied to I(Q).</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter (base) title for splitted workspaces. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Enter a scaling factor to be multiplied to I(Q).</string>
@@ -251,6 +254,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The filter start time, in (a) seconds, (b) nanoseconds since the start of the run. Events before this time are filtered out. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Filter Start Time</string>
               </property>
@@ -271,7 +277,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter a valid path for the beam monitor reference file.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid number for filter staring time.  Default is to use run start time. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Enter a valid path for the beam monitor reference file.</string>
@@ -308,6 +314,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The stop time, in (a) seconds, (b) nanoseconds since the start of the run. OR (d) absolute time.  Events at or after this time are filtered out. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Filter Stop Time</string>
               </property>
@@ -326,6 +335,9 @@
                 <width>160</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid number for filter stopping time.  Default is run end time. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -408,6 +420,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Run number of the data to plot sample log.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Run Number</string>
               </property>
@@ -428,7 +443,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter a valid file path for a direct beam data file.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid integer as run number to plot sample log. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Enter a valid file path for a direct beam data file.</string>
@@ -471,6 +486,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load the data file with run number specified in the left. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Load</string>
               </property>
@@ -506,6 +524,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose a sample log of the run loaded. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -532,6 +553,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to lot the sample log specified in the left. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Plot</string>
               </property>
@@ -555,6 +579,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="syn_logname_button">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to copy the specified log name in the left to &amp;quot;Log Name&amp;quot; in 'Filter By Log Value' section. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Use</string>
               </property>
@@ -593,6 +620,9 @@
                 <width>120</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Message of loading the run to plot sample log. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Message</string>
@@ -673,7 +703,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Select to set the detector distance offset.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to select 'filter by time'. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Select to set the detector distance offset.</string>
@@ -733,7 +763,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter the value of the sample-to-detector distance in mm.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid number for time interval length. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Enter the value of the sample-to-detector distance in mm.</string>
@@ -759,6 +789,9 @@
                 <width>120</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Duration of time interval for each chopped data file. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Time Interval</string>
@@ -794,6 +827,9 @@
                 <width>160</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the unit of time interval. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <item>
                <property name="text">
@@ -847,6 +883,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Check to enable 'filter by log value' mode.  &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -873,6 +912,9 @@
            <layout class="QGridLayout" name="gridLayout">
             <item row="3" column="4">
              <widget class="QLabel" name="label_10">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tolerance of the log value to be included in filter. It is used in the case to filter by multiple values. By default, it is equal to (maxlogvalue-minlogvalue)/interval. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Log Value Tolerance</string>
               </property>
@@ -899,6 +941,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid log name to split data by. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
              </widget>
             </item>
             <item row="2" column="2">
@@ -919,6 +964,9 @@
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_4">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Name of the log to split event by. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Log Name</string>
               </property>
@@ -938,17 +986,26 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid number as minimum log value to filter with.  Any events corresponding to the log value smaller than this value will be filtered out. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
              </widget>
             </item>
             <item row="2" column="4">
              <widget class="QLabel" name="label_9">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum log value for which to keep events. By default, it is the maximum value of the given log. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Maximum Log Value</string>
               </property>
              </widget>
             </item>
             <item row="3" column="0">
-             <widget class="QLabel" name="label_11">
+             <widget class="QLabel" name="logstep_label">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Step size of the log value to determine the log value range by which data is to be splitted into multiple workspaces. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Log Step Size</string>
               </property>
@@ -968,6 +1025,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid number as log value tolerance. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
              </widget>
             </item>
             <item row="2" column="5">
@@ -984,6 +1044,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid number as maximum log value to filter with.  Any events corresponding to the log value larger than this value will be filtered out. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
              </widget>
             </item>
             <item row="3" column="1">
@@ -999,6 +1062,9 @@
                 <width>200</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid value for log size step to determine multiple log value ranges.  Default is to have only 1 log value range from user specified minimum log value to maximum log value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
@@ -1020,6 +1086,9 @@
             </item>
             <item row="0" column="4">
              <widget class="QLabel" name="label_8">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum log value for which to keep events. By default, it is the minimum value of the given log. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Minimum Log Value</string>
               </property>
@@ -1039,10 +1108,16 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid number for time tolerance. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
              </widget>
             </item>
             <item row="4" column="0">
              <widget class="QLabel" name="label_12">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tolerance in time for the event times to keep. It is used in the case to filter by single value. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Time Tolerance</string>
               </property>
@@ -1050,6 +1125,9 @@
             </item>
             <item row="4" column="4">
              <widget class="QLabel" name="label_13">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How to treat log values as being measured in the centre of time. It is related to time-tolerance &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Log Boundary</string>
               </property>
@@ -1068,6 +1146,9 @@
                 <width>200</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a method to treat log values as being measured in the centre of time or on the left. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <item>
                <property name="text">
