@@ -187,7 +187,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QLabel" name="att_scale_factor_label">
+             <widget class="QLabel" name="run_number_label">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -206,6 +206,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Run number of the data to reduce&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Run Numbers</string>
               </property>
@@ -215,21 +218,62 @@
              <widget class="QLineEdit" name="runnumbers_edit">
               <property name="minimumSize">
                <size>
+                <width>160</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>160</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter one or several run numbers.  &lt;/p&gt;&lt;p&gt;Example 1: 1234&lt;/p&gt;&lt;p&gt;Example 2: 1234, 2345&lt;/p&gt;&lt;p&gt;Example 3: 1234-2345&lt;/p&gt;&lt;p&gt;Example 4: 1234, 2345-3456, 4567&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="statusTip">
+               <string>Enter a scaling factor to be multiplied to I(Q).</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_11">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>160</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="sum_checkbox">
+              <property name="minimumSize">
+               <size>
                 <width>80</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>360</width>
+                <width>80</width>
                 <height>16777215</height>
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter a scaling factor to be multiplied to I(Q).</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select to sum several runs to same file&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
-               <string>Enter a scaling factor to be multiplied to I(Q).</string>
+               <string>Select to normalize to the beam monitor data</string>
+              </property>
+              <property name="text">
+               <string>Sum</string>
               </property>
              </widget>
             </item>
@@ -251,7 +295,7 @@
           <item>
            <layout class="QHBoxLayout" name="monitor_layout">
             <item>
-             <widget class="QLabel" name="label_3">
+             <widget class="QLabel" name="calfile_label">
               <property name="minimumSize">
                <size>
                 <width>160</width>
@@ -264,6 +308,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Instrument calibration file to time focus diffraction data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Calibration File</string>
               </property>
@@ -272,7 +319,7 @@
             <item>
              <widget class="QLineEdit" name="calfile_edit">
               <property name="toolTip">
-               <string>Enter a valid path for the beam monitor reference file.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid path for the instrument calibration file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Enter a valid path for the beam monitor reference file.</string>
@@ -286,6 +333,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to browse the instrument calibration file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Browse</string>
@@ -311,146 +361,9 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QLabel" name="label_4">
-              <property name="minimumSize">
-               <size>
-                <width>160</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>160</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>File Extension</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="extension_combo">
-              <property name="minimumSize">
-               <size>
-                <width>200</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>360</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <item>
-               <property name="text">
-                <string>_event.nxs</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>_histo.nxs</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>_runinfo.xml</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_13">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="preserveevents_checkbox">
-              <property name="maximumSize">
-               <size>
-                <width>160</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Check to calculate the absolute scale factor using the direct beam method.</string>
-              </property>
-              <property name="statusTip">
-               <string>Check to calculate the absolute scale factor using the direct beam method.</string>
-              </property>
-              <property name="text">
-               <string>Preserve Events</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_11">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="sum_checkbox">
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>180</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Select to normalize to the beam monitor data</string>
-              </property>
-              <property name="statusTip">
-               <string>Select to normalize to the beam monitor data</string>
-              </property>
-              <property name="text">
-               <string>Sum</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_20">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item>
            <layout class="QHBoxLayout" name="abs_scale_direct_beam_layout">
             <item>
-             <widget class="QLabel" name="direct_beam_label">
+             <widget class="QLabel" name="characterfile_label">
               <property name="minimumSize">
                <size>
                 <width>160</width>
@@ -462,6 +375,9 @@
                 <width>160</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Characterization file containing specific run information.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Characterizaton File</string>
@@ -477,7 +393,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter a valid file path for a direct beam data file.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid file name for characterization file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Enter a valid file path for a direct beam data file.</string>
@@ -491,6 +407,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to browse the characterization file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Browse</string>
@@ -518,7 +437,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="outputdir_label">
               <property name="minimumSize">
                <size>
                 <width>160</width>
@@ -530,6 +449,9 @@
                 <width>160</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;File directory to save output reduced file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Output Directory</string>
@@ -557,7 +479,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter a valid file path to be used for the dark current data.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a valid file directory to save output reduced file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Enter a valid file path to be used for the dark current data.</string>
@@ -571,6 +493,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to browse the output directory.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
                <string>Browse</string>
@@ -611,6 +536,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;File format(s) to save. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Save As</string>
               </property>
@@ -620,9 +548,18 @@
              <widget class="QComboBox" name="saveas_combo">
               <property name="minimumSize">
                <size>
-                <width>120</width>
+                <width>240</width>
                 <height>0</height>
                </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>240</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the file formats to save the reduced data as. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <item>
                <property name="text">
@@ -651,9 +588,12 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>40</width>
+                <width>80</width>
                 <height>20</height>
                </size>
               </property>
@@ -661,6 +601,21 @@
             </item>
             <item>
              <widget class="QLabel" name="label_6">
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Final unit of the output workspace. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Final Unit</string>
               </property>
@@ -673,6 +628,9 @@
                 <width>100</width>
                 <height>0</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose the final unit of output workspace.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <item>
                <property name="text">
@@ -768,6 +726,9 @@ The corrections can be overriden and disabled though.</string>
            <layout class="QGridLayout" name="correction_gridlayout">
             <item row="2" column="4">
              <widget class="QCheckBox" name="disablevanbkgdcorr_chkbox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disable vanadium background correction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Disable </string>
               </property>
@@ -781,10 +742,16 @@ The corrections can be overriden and disabled though.</string>
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter vanadium background run number.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
              </widget>
             </item>
             <item row="1" column="2">
              <widget class="QCheckBox" name="override_vanrun_checkBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Override vanadium run given in characterization file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Override</string>
               </property>
@@ -793,7 +760,7 @@ The corrections can be overriden and disabled though.</string>
             <item row="0" column="4">
              <widget class="QCheckBox" name="disablebkgdcorr_chkbox">
               <property name="toolTip">
-               <string>Select to set the detector distance offset.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disable emptry/background correction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Select to set the detector distance offset.</string>
@@ -814,6 +781,9 @@ The corrections can be overriden and disabled though.</string>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Empty (background) run to correct diffraction data. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Empty Run Correction</string>
               </property>
@@ -821,6 +791,9 @@ The corrections can be overriden and disabled though.</string>
             </item>
             <item row="0" column="2">
              <widget class="QCheckBox" name="override_emptyrun_checkBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Override empty (background) run given in characterization file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Override</string>
               </property>
@@ -841,7 +814,7 @@ The corrections can be overriden and disabled though.</string>
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter the detector distance offset in mm.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter empty (background) run number.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Enter the detector distance offset in mm.</string>
@@ -851,7 +824,7 @@ The corrections can be overriden and disabled though.</string>
             <item row="1" column="4">
              <widget class="QCheckBox" name="disablevancorr_chkbox">
               <property name="toolTip">
-               <string>Select to force the sample-detector distance.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disable vanadium correction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Select to force the sample-detector distance.</string>
@@ -863,6 +836,9 @@ The corrections can be overriden and disabled though.</string>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_10">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Vanadium run to correct diffraction data. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Vanadium Run Correction</string>
               </property>
@@ -870,6 +846,9 @@ The corrections can be overriden and disabled though.</string>
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_11">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Vanadium background run to correct diffraction data. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Vandium Background Run Correction</string>
               </property>
@@ -896,7 +875,7 @@ The corrections can be overriden and disabled though.</string>
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter the value of the sample-to-detector distance in mm.</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter vanadium run number.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Enter the value of the sample-to-detector distance in mm.</string>
@@ -918,6 +897,9 @@ The corrections can be overriden and disabled though.</string>
             </item>
             <item row="2" column="2">
              <widget class="QCheckBox" name="override_vanbkgdrun_checkBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Override vanadium background run given in characterization file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Override</string>
               </property>
@@ -975,13 +957,20 @@ The mask information is saved separately so that your data file will NOT be modi
            <layout class="QGridLayout" name="gridLayout">
             <item row="2" column="5">
              <widget class="QLabel" name="label_9">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;User specified maximum TOF of the data. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>TOF Max</string>
               </property>
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QLineEdit" name="resamplex_edit"/>
+             <widget class="QLineEdit" name="resamplex_edit">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter value as ResampleX parameter. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
             </item>
             <item row="2" column="3">
              <widget class="QComboBox" name="bintype_combo">
@@ -997,6 +986,9 @@ The mask information is saved separately so that your data file will NOT be modi
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select type of binning, linear or logarithmic.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <item>
                <property name="text">
                 <string>Linear Binning</string>
@@ -1011,6 +1003,9 @@ The mask information is saved separately so that your data file will NOT be modi
             </item>
             <item row="0" column="5">
              <widget class="QLabel" name="label_8">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;User specified minimum TOF of the data. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>TOF Min</string>
               </property>
@@ -1018,6 +1013,9 @@ The mask information is saved separately so that your data file will NOT be modi
             </item>
             <item row="0" column="0">
              <widget class="QRadioButton" name="usebin_button">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose to use binning parameter other than resampling. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Binning</string>
               </property>
@@ -1032,6 +1030,9 @@ The mask information is saved separately so that your data file will NOT be modi
             </item>
             <item row="0" column="3">
              <widget class="QCheckBox" name="binind_checkbox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Bin data in d-space.  Otherwise in TOF&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Bin In d-spacing</string>
               </property>
@@ -1039,19 +1040,34 @@ The mask information is saved separately so that your data file will NOT be modi
             </item>
             <item row="2" column="0">
              <widget class="QRadioButton" name="resamplex_button">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose to resample on X-axis. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>ResampleX</string>
               </property>
              </widget>
             </item>
             <item row="2" column="6">
-             <widget class="QLineEdit" name="tofmax_edit"/>
+             <widget class="QLineEdit" name="tofmax_edit">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a value as the allowed maximum TOF. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLineEdit" name="binning_edit"/>
+             <widget class="QLineEdit" name="binning_edit">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter value as binning parameter.  Negative number is for logarithmic binning.  Positive number is for linear binning. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
             </item>
             <item row="0" column="6">
-             <widget class="QLineEdit" name="tofmin_edit"/>
+             <widget class="QLineEdit" name="tofmin_edit">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter a value as allowed minimum TOF. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
             </item>
             <item row="2" column="2">
              <spacer name="horizontalSpacer">

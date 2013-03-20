@@ -43,6 +43,8 @@ class AdvancedSetupScript(BaseScriptElement):
     vanadiumfwhm = ""
     vanadiumpeaktol = ""
     vanadiumsmoothparams = ""
+    preserveevents = False
+    extension = "_event.nxs"
 
     def __init__(self, inst_name):
         """ Initialization
@@ -70,6 +72,8 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("VanadiumSmoothParams")
         self.parnamelist.append("FilterBadPulses")
         self.parnamelist.append("PushDataPositive")
+        self.parnamelist.append("Extension")
+        self.parnamelist.append("PreserveEvents")
 
         return
         
@@ -114,6 +118,8 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["VanadiumFWHM"] = self.vanadiumfwhm
         pardict["VanadiumPeakTol"] = self.vanadiumpeaktol
         pardict["VanadiumSmoothParams"] = self.vanadiumsmoothparams
+        pardict["Extension"] = str(self.extension)
+        pardict["PreserveEvents"] = str(int(self.preserveevents))
 
         return pardict
         
@@ -144,8 +150,6 @@ class AdvancedSetupScript(BaseScriptElement):
         element_list = dom.getElementsByTagName("AdvancedSetup")
         if len(element_list)>0:
             instrument_dom = element_list[0]
-
-
 
             tempfloat = BaseScriptElement.getStringElement(instrument_dom,
                     "unwrapref", default=AdvancedSetupScript.unwrapref)
@@ -182,7 +186,6 @@ class AdvancedSetupScript(BaseScriptElement):
             except ValueError:
                 self.maxchunksize = ""
 
-
             self.filterbadpulses = getBooleanElement(instrument_dom, 
                     "filterbadpulses", AdvancedSetupScript.filterbadpulses)
 
@@ -209,6 +212,13 @@ class AdvancedSetupScript(BaseScriptElement):
             self.vanadiumsmoothparams = BaseScriptElement.getStringElement(instrument_dom,
                 "vanadiumsmoothparams", default=AdvancedSetupScript.vanadiumsmoothparams)
 
+            self.extension = BaseScriptElement.getStringElement(instrument_dom, 
+                    "extension", default=AdvancedSetupScript.extension)
+
+            tempbool = BaseScriptElement.getStringElement(instrument_dom, 
+                    "preserveevents", default=str(int(AdvancedSetupScript.preserveevents)))
+            self.preserveevents = bool(int(tempbool))
+
             return
 
     def reset(self):
@@ -232,5 +242,7 @@ class AdvancedSetupScript(BaseScriptElement):
         # self.grouping_file = RunSetupScript.grouping_file
         # self.show_workspaces = RunSetupScript.show_workspaces
 
+        self.extension =     AdvancedSetupScript.extension 
+        self.reserveevents = AdvancedSetupScript.preserveevents
         return
 
