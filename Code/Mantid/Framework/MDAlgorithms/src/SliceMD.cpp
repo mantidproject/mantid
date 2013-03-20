@@ -229,13 +229,13 @@ namespace MDAlgorithms
     // Function defining which events (in the input dimensions) to place in the output
     MDImplicitFunction * function = this->getImplicitFunctionForChunk(NULL, NULL);
 
-    std::vector<Kernel::ISaveable *> boxes;
+    std::vector<API::IMDNode *> boxes;
     // Leaf-only; no depth limit; with the implicit function passed to it.
     ws->getBox()->getBoxes(boxes, 1000, true, function);
     // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
     bool fileBackedWS = bc->isFileBacked();
     if (fileBackedWS)
-      Kernel::ISaveable::sortObjByFilePos(boxes);
+        API::IMDNode::sortObjByID(boxes);
 
     Progress * prog = new Progress(this, 0.0, 1.0, boxes.size());
 
@@ -257,7 +257,10 @@ namespace MDAlgorithms
         coord_t outCenter[ond];
 
         const std::vector<MDE> & events = box->getConstEvents();
-        bool clearBox = box->wasSaved();
+        bool clearBox(false);
+        Kernel::ISaveable *const pSaver(box->getISaveable());
+        if(pSaver)
+            clearBox=pSaver->wasSaved();
 
         typename std::vector<MDE>::const_iterator it = events.begin();
         typename std::vector<MDE>::const_iterator it_end = events.end();

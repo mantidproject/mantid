@@ -191,7 +191,7 @@ namespace Mantid
           PARALLEL_CRITICAL(ResolutionConvolvedCrossSection_functionMD)
           {
             m_simulatedEvents.insert(m_simulatedEvents.end(),
-                MDEvents::MDEvent<4>(static_cast<float>(contribution), 0.0, innerRun, box.getInnerDetectorID(j), centers));
+                MDEvents::MDEvent<4>(static_cast<float>(contribution), 0.0f, innerRun, box.getInnerDetectorID(j), centers));
           }
         }
 

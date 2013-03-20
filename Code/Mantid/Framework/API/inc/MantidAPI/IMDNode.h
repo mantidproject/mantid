@@ -163,7 +163,7 @@ public:
    *
    * @param boxes :: ref to a vector of boxes. It will be sorted in-place.
    */
-  static void sortObjByID(std::vector<IMDNode *const> & boxes)
+  static void sortObjByID(std::vector<IMDNode *> & boxes)
   {
     std::sort( boxes.begin(), boxes.end(), CompareFilePosition);
   } 

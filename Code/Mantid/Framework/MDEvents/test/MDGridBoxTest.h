@@ -1414,112 +1414,112 @@ public:
     do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
   }
 
-  //void test_getIsMasked_WhenNoMasking()
-  //{
-  //    std::vector<API::IMDNode *> boxes;
+  void test_getIsMasked_WhenNoMasking()
+  {
+      std::vector<API::IMDNode *> boxes;
 
-  //  MockMDBox* a = new MockMDBox;
-  //  MockMDBox* b = new MockMDBox;
+    MockMDBox* a = new MockMDBox;
+    MockMDBox* b = new MockMDBox;
 
-  //  EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(false)); //Not masked
-  //  EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(false)); //Not masked
+    EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(false)); //Not masked
+    EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(false)); //Not masked
 
-  //  boxes.push_back(a);
-  //  boxes.push_back(b);
+    boxes.push_back(a);
+    boxes.push_back(b);
 
-  //  MDGridBox<MDLeanEvent<1>,1> g(NULL);
-  //  g.setChildren(boxes, 0, 2);
+    MDGridBox<MDLeanEvent<1>,1> g(NULL);
+    g.setChildren(boxes, 0, 2);
 
-  //  TSM_ASSERT("No inner boxes were masked so the MDGridBox should not report that it is masked", !g.getIsMasked());
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(a));
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(b));
-  //}
+    TSM_ASSERT("No inner boxes were masked so the MDGridBox should not report that it is masked", !g.getIsMasked());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(a));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(b));
+  }
 
-  ////void test_getIsMasked_WhenFirstMasked()
-  //{
-  //  std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
+  void test_getIsMasked_WhenFirstMasked()
+  {
+    std::vector<API::IMDNode *> boxes;
 
-  //  MockMDBox* a = new MockMDBox(gbc);
-  //  MockMDBox* b = new MockMDBox(gbc);
+    MockMDBox* a = new MockMDBox;
+    MockMDBox* b = new MockMDBox;
 
-  //  EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(true)); //MASKED
-  //  EXPECT_CALL(*b, getIsMasked()).Times(0); //Not masked, but will never be called.
+    EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(true)); //MASKED
+    EXPECT_CALL(*b, getIsMasked()).Times(0); //Not masked, but will never be called.
 
-  //  boxes.push_back(a);
-  //  boxes.push_back(b);
+    boxes.push_back(a);
+    boxes.push_back(b);
 
-  //  MDGridBox<MDLeanEvent<1>,1> g;
-  //  g.setChildren(boxes, 0, 2);
+    MDGridBox<MDLeanEvent<1>,1> g;
+    g.setChildren(boxes, 0, 2);
 
-  //  TSM_ASSERT("First inner box masked, so should return masked", g.getIsMasked());
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(a));
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(b));
-  //}
+    TSM_ASSERT("First inner box masked, so should return masked", g.getIsMasked());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(a));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(b));
+  }
 
-  //void test_getIsMasked_WhenLastMasked()
-  //{
-  //  std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
+  void test_getIsMasked_WhenLastMasked()
+  {
+      std::vector<API::IMDNode *> boxes;
 
-  //  MockMDBox* a = new MockMDBox(gbc);
-  //  MockMDBox* b = new MockMDBox(gbc);
+    MockMDBox* a = new MockMDBox;
+    MockMDBox* b = new MockMDBox;
 
-  //  EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(false)); //NOT MASKED
-  //  EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(true)); //MASKED
+    EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(false)); //NOT MASKED
+    EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(true)); //MASKED
 
-  //  boxes.push_back(a);
-  //  boxes.push_back(b);
+    boxes.push_back(a);
+    boxes.push_back(b);
 
-  //  MDGridBox<MDLeanEvent<1>,1> g;
-  //  g.setChildren(boxes, 0, 2);
+    MDGridBox<MDLeanEvent<1>,1> g;
+    g.setChildren(boxes, 0, 2);
 
-  //  TSM_ASSERT("Second inner box masked, so should return masked", g.getIsMasked());
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(a));
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(b));
-  //}
+    TSM_ASSERT("Second inner box masked, so should return masked", g.getIsMasked());
+    TS_ASSERT(Mock::VerifyAndClearExpectations(a));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(b));
+  }
 
-  //void test_mask()
-  //{
-  //  std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
+  void test_mask()
+  {
+    std::vector<API::IMDNode *> boxes;
 
-  //  MockMDBox* a = new MockMDBox(gbc);
-  //  MockMDBox* b = new MockMDBox(gbc);
+    MockMDBox* a = new MockMDBox;
+    MockMDBox* b = new MockMDBox;
 
-  //  EXPECT_CALL(*a, mask()).Times(1); 
-  //  EXPECT_CALL(*b, mask()).Times(1); 
+    EXPECT_CALL(*a, mask()).Times(1); 
+    EXPECT_CALL(*b, mask()).Times(1); 
 
-  //  boxes.push_back(a);
-  //  boxes.push_back(b);
+    boxes.push_back(a);
+    boxes.push_back(b);
 
-  //  MDGridBox<MDLeanEvent<1>,1> griddedBox;
-  //  griddedBox.setChildren(boxes, 0, 2);
+    MDGridBox<MDLeanEvent<1>,1> griddedBox;
+    griddedBox.setChildren(boxes, 0, 2);
 
-  //  TS_ASSERT_THROWS_NOTHING(griddedBox.mask());//Mask the gridded box
+    TS_ASSERT_THROWS_NOTHING(griddedBox.mask());//Mask the gridded box
 
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(a));
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(b));
-  //}
+    TS_ASSERT(Mock::VerifyAndClearExpectations(a));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(b));
+  }
 
-  //void test_unmask()
-  //{
-  //  std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
+  void test_unmask()
+  {
+    std::vector<API::IMDNode *> boxes;
 
-  //  MockMDBox* a = new MockMDBox(gbc);
-  //  MockMDBox* b = new MockMDBox(gbc);
+    MockMDBox* a = new MockMDBox;
+    MockMDBox* b = new MockMDBox;
 
-  //  EXPECT_CALL(*a, unmask()).Times(1); 
-  //  EXPECT_CALL(*b, unmask()).Times(1); 
+    EXPECT_CALL(*a, unmask()).Times(1); 
+    EXPECT_CALL(*b, unmask()).Times(1); 
 
-  //  boxes.push_back(a);
-  //  boxes.push_back(b);
+    boxes.push_back(a);
+    boxes.push_back(b);
 
-  //  MDGridBox<MDLeanEvent<1>,1> griddedBox;
-  //  griddedBox.setChildren(boxes, 0, 2);
+    MDGridBox<MDLeanEvent<1>,1> griddedBox;
+    griddedBox.setChildren(boxes, 0, 2);
 
-  //  TS_ASSERT_THROWS_NOTHING(griddedBox.unmask());//Un-Mask the gridded box
+    TS_ASSERT_THROWS_NOTHING(griddedBox.unmask());//Un-Mask the gridded box
 
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(a));
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(b));
-  //}
+    TS_ASSERT(Mock::VerifyAndClearExpectations(a));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(b));
+  }
 
 private:
   std::string message;

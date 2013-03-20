@@ -211,7 +211,7 @@ namespace MDAlgorithms
     size_t initial_numEvents = ws1->getNPoints();
 
     // Make a leaf-only iterator through all boxes with events in the RHS workspace
-    std::vector<MDBoxBase<MDE,nd> *> boxes;
+    std::vector<API::IMDNode *> boxes;
     box2->getBoxes(boxes, 1000, true);
     int numBoxes = int(boxes.size());
 

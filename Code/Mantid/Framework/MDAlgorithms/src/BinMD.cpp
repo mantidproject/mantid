@@ -399,7 +399,7 @@ namespace MDAlgorithms
 
       // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
       if (bc->isFileBacked())
-        Kernel::ISaveable::sortObjByFilePos(boxes);
+          API::IMDNode::sortObjByID(boxes);
 
       // For progress reporting, the # of boxes
       if (prog)

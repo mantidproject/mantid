@@ -98,7 +98,7 @@ namespace MDAlgorithms
 
     // Get all the MDBoxes contained
     MDBoxBase<MDE,nd> * parentBox = ws->getBox();
-    std::vector<MDBoxBase<MDE,nd> *> boxes;
+    std::vector<API::IMDNode *> boxes;
     parentBox->getBoxes(boxes, 1000, true);
 
     for (size_t i=0; i<boxes.size(); i++)
