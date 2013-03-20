@@ -7,6 +7,7 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Statistics.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
@@ -448,7 +449,14 @@ namespace CurveFitting
 
     // 5. Calculate Rwp
     double rwp, rp;
-    calculatePowderPatternStatistic(m_outputWS->dataY(FITTEDPUREPEAKINDEX), m_outputWS->dataY(FITTEDBACKGROUNDINDEX), rwp, rp);
+    rp = -100.0;
+
+    const MantidVec& peakvalues = m_outputWS->readY(FITTEDPUREPEAKINDEX);
+    const MantidVec& background =  m_outputWS->readY(FITTEDBACKGROUNDINDEX);
+    vector<double> caldata(values.size(), 0.0);
+    std::transform(peakvalues.begin(), peakvalues.end(), background.begin(), caldata.begin(), std::plus<double>());
+    rwp = getRFactor(m_dataWS->readY(m_wsIndex), caldata, m_dataWS->readE(m_wsIndex));
+    // calculatePowderPatternStatistic(m_outputWS->dataY(FITTEDPUREPEAKINDEX), m_outputWS->dataY(FITTEDBACKGROUNDINDEX), rwp, rp);
     g_log.notice() << "Rwp = " << rwp << ", Rp = " << rp << "\n";
 
     Parameter par_rwp;
@@ -1583,7 +1591,9 @@ namespace CurveFitting
     {
       stringstream errss;
       errss << "[Calcualte Peak Intensity] Group range is unphysical.  iLeft = " << ileft << ", iRight = "
-            << iright << "; Number of peaks = " << peakgroup.size();
+            << iright << "; Number of peaks = " << peakgroup.size()
+            << "; Left boundary = " << leftbound << ", Right boundary = " << rightbound
+            << "; Left peak FWHM = " << leftpeak->fwhm() << ", Right peak FWHM = " << rightpeak->fwhm();
       for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
       {
         ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = peakgroup[ipk].second;
@@ -3047,7 +3057,11 @@ namespace CurveFitting
       //         examine la ter!
 
       // 5. Calculate Rwp
-      calculatePowderPatternStatistic(values, background, rwp, rp);
+      vector<double> caldata(values.size(), 0.0);
+      std::transform(values.begin(), values.end(), background.begin(), caldata.begin(), std::plus<double>());
+      rwp = getRFactor(m_dataWS->readY(m_wsIndex), values, m_dataWS->readE(m_wsIndex));
+      rp = -100;
+      // calculatePowderPatternStatistic(values, background, rwp, rp);
     }
 
     if (!paramsvalid)
@@ -3060,94 +3074,6 @@ namespace CurveFitting
     }
 
     return paramsvalid;
-  }
-
-  /** Calculate powder diffraction statistic Rwp
-   *
-   * @param values     : calcualted data (pattern) w/o background
-   * @param background : calcualted background
-   * @param rwp        : output as Rwp of the model function
-   * @param rp         : output as Rp of the model function
-   */
-  void LeBailFit::calculatePowderPatternStatistic(const MantidVec& values, const vector<double>& background, double& rwp,
-                                                   double& rp)
-  {
-    // 1. Init the statistics
-    const MantidVec& obsdata = m_dataWS->readY(m_wsIndex);
-    const MantidVec& stderrs = m_dataWS->readE(m_wsIndex);
-    size_t numdata = obsdata.size();
-
-    vector<double> caldata(values.size(), 0.0);
-    std::transform(values.begin(), values.end(), background.begin(), caldata.begin(), std::plus<double>());
-
-    // 2. Calculate
-    rwp = 0.0;
-    rp = 0.0;
-
-    double sumobsdata = 0.0;
-    // double sumobsdatanobkgd = 0.0;
-    double sumwgtobsdatasq = 0.0;
-    // double sumwgtobsdatnobkgdsq = 0.0;
-    for (size_t i = 0; i < numdata; ++i)
-    {
-      double obsy = obsdata[i];
-      // double bkgd = background[i];
-      double xstderr = stderrs[i];
-      // double tmpx = obsy - bkgd;
-
-      sumobsdata += obsy;
-      // sumobsdatanobkgd += tmpx;
-      sumwgtobsdatasq += obsy*obsy*xstderr;
-      // sumwgtobsdatnobkgdsq += tmpx*tmpx*stderr;
-
-      double tmp1 = fabs(obsy - caldata[i]); // Rp
-      double tmp2 = xstderr*tmp1*tmp1;    // Mp
-      // double tmp3 = fabs( tmp1*(obsdata[i] - bkgddata[i])/obsdata[i] );
-      // double tmp4 = stderrs[i]*tmp3*tmp3;
-
-      rp += tmp1;
-      rwp += tmp2;
-      // powstats.Rpb += tmp3;
-      // powstats.Rwpb += tmp4;
-    }
-
-    rp = rp/sumobsdata;
-    rwp = sqrt(rwp/sumwgtobsdatasq);
-
-    // 3. Calculate peak related Rwp
-    /* Disabled
-  // a) Highest peak
-  double maxheight = 0.0;
-  for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
-  {
-    ThermalNeutronBk2BkExpConvPVoigt_sptr peak = m_dspPeaks[ipk].second;
-    if (peak->height() > maxheight)
-      maxheight = peak->height();
-  }
-
-  // b) Set the threshold
-  // FIXME A magic number is used here.
-  size_t numcovered = 0;
-  double peakthreshold = maxheight * 1.0E-4;
-  double diff2sum = 0.0;
-  double obs2sum = 0.0;
-  for (size_t i = 0; i < numdata; ++i)
-  {
-    if (values[i] > peakthreshold)
-    {
-      double diff = obsdata[i] - caldata[i];
-      diff2sum += diff * diff / stderrs[i];
-      obs2sum += obsdata[i] * obsdata[i] / stderrs[i];
-      ++ numcovered;
-    }
-  }
-  double peakrwp = sqrt(diff2sum/obs2sum);
-
-  g_log.information() << "Complete Rwp = " << rwp << "; Peak only Rwp = " << peakrwp
-                      << " Number of points included = " << numcovered << " out of " << numdata << "\n";
-  */
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
