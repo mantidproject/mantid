@@ -2,8 +2,8 @@
 
 Takes two MDHistoWorkspaces and calculates the weighted mean for each bin. See [[WeightedMean]] for more details on the algorithm workings. Both inputs must be MDHistoWorkspaces, the algorithm will not run with MDEventWorkspaces.
 
-== Usage ==
-
+*WIKI*/
+/*WIKI_USAGE*
 The following utilises [[WeightedMean]] and [[WeightedMeanMD]] to inspect the same data.
 
  import math
@@ -37,8 +37,7 @@ The following utilises [[WeightedMean]] and [[WeightedMeanMD]] to inspect the sa
  # Produce the weithed mean as a 1D MD workspace. Contents sould be identical to the output created above.
  mean_md = WeightedMeanMD(LHSWorkspace=md_1,RHSWorkspace=md_2)
 
-
-*WIKI*/
+*WIKI_USAGE*/
 
 #include "MantidMDAlgorithms/WeightedMeanMD.h"
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"

@@ -1,7 +1,8 @@
 """*WIKI* 
 This algorithms writes a cal file with the selection column set to the masking status of the workspaces provided.  The offsets and grouping details of the cal file are not completed, so you would normally use MargeCalFiles afterwards to import these values from another file.
   
-== Usage ==
+*WIKI*"""
+"""*WIKI_USAGE*
 Example:
  #Load up two workspaces and mask some data
  ws1=Load("GEM38370")
@@ -32,8 +33,7 @@ Example:
  MergeCalFiles(UpdateFile = dataDir+"mask.cal", MasterFile=dataDir+"offsets_2006_cycle064.cal", \
  OutputFile=dataDir+"resultCal.cal", MergeOffsets=False, MergeSelections=True,MergeGroups=False)
 
-
-*WIKI*"""
+*WIKI_USAGE*"""
 import sys
 from mantid.kernel import *
 from mantid.api import *

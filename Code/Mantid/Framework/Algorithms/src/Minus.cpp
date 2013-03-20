@@ -3,7 +3,8 @@
 
 The Minus algorithm will subtract the data values and calculate the corresponding [[Error Values|error values]] for two compatible workspaces.
 
-=== Usage ===
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
  Minus("w1","w2","output")
  w3 = w1 - w2
@@ -15,7 +16,7 @@ The usage of basic workspace mathematical operations has been specially simplifi
  //w1 and w2 are workspaces
  Workspace output = w1 - w2;
 
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

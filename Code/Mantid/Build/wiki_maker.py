@@ -14,7 +14,102 @@ import difflib
 import platform
 
 # Junit report generator.
-reporter = WikiReporter()
+reporter = WikiReporter()        
+    
+#======================================================================
+def make_group_header_line(group):
+    """ Make a group header line for the property table
+    
+     Args:
+        group :: name of the group
+    Returns:
+        string to add to the wiki
+    """
+    if group=="":
+        return "|colspan=6 align=center|   \n|-\n"
+    else:
+        return "|colspan=6 align=center|'''%s'''\n|-\n" % group
+
+#======================================================================  
+def create_property_default_string(prop):
+    """ Create a default string 
+    
+     Args:
+        default. The property default value.
+    Returns:
+        string to add to the wiki property table default section.
+    """
+    # Convert to int, then float, then any string
+    
+    default = prop.getDefault
+    defaultstr = ""
+    try:
+        val = int(default)
+        if (val >= 2147483647):
+            defaultstr = "Optional"
+        else:
+            defaultstr = str(val)
+    except:
+        try:
+            val = float(default)
+            if (val >= 1e+307):
+                defaultstr = "Optional"
+            else:
+                defaultstr = str(val)
+        except:
+            # Fall-back default for anything
+            defaultstr = str(default)
+            
+    # Replace the ugly default values with "optional"
+    if (defaultstr == "8.9884656743115785e+307") or \
+       (defaultstr == "1.7976931348623157e+308") or \
+       (defaultstr == "2147483647"):
+        defaultstr = "Optional"
+        
+    if str(prop.type) == "boolean":
+        if defaultstr == "1": defaultstr = "True" 
+        else: defaultstr = "False"
+    return defaultstr
+
+#======================================================================
+def make_property_table_line(propnum, p):
+    """ Make one line of the property table
+    
+    Args:
+        propnum :: number of the prop
+        p :: Property object
+    Returns:
+        string to add to the wiki
+    """
+    
+    out = ""
+    # The property number
+    out += "|" + str(propnum) + "\n"
+    # Name of the property
+    out += "|" + p.name + "\n"
+
+    out += "|" + direction_string[p.direction] + "\n"
+    # Type (as string) wrap an IWorkspaceProperty in a link.
+    if isinstance(p, IWorkspaceProperty): 
+        out += "|[[" + str(p.type) + "]]\n"
+    else:
+        out += "|" + str(p.type) + "\n"
+       
+    if (direction_string[p.direction] == OutputDirection) and (not isinstance(p, IWorkspaceProperty)):
+      out += "|\n" # Nothing to show under the default section for an output properties that are not workspace properties.
+    elif (p.isValid == ""): #Nothing was set, but it's still valid = NOT  mandatory
+      defaultstr = create_property_default_string(p)
+      out += "| " + defaultstr + "\n"
+    else:
+      out += "|Mandatory\n"
+      
+    # Documentation
+    out += "|" + p.documentation.replace("\n", "<br />") + "\n"
+    # End of table line
+    out += "|-\n"
+    return out
+    
+
 
 #======================================================================
 def confirm(prompt=None, resp=False, continueconfirm=False):
@@ -99,6 +194,62 @@ def wiki_maker_page(page):
     for rev in revisions: 
         return re.search("^Bot", rev['comment'])
 
+#======================================================================
+def create_function_signature(alg, algo_name):
+    """
+    create the function signature for the algorithm.
+    """
+    from mantid.simpleapi import _get_function_spec
+    import mantid.simpleapi
+    _alg = getattr(mantid.simpleapi, algo_name)
+    prototype =  algo_name + _get_function_spec(_alg)
+    
+    # Replace every nth column with a newline.
+    nth = 3
+    commacount = 0
+    prototype_reformated = ""
+    for char in prototype:
+        if char == ',':
+            commacount += 1
+            if (commacount % nth == 0):
+                prototype_reformated += ",\n  "
+            else:
+                prototype_reformated += char
+        else: 
+           prototype_reformated += char
+           
+    # Strip out the version.
+    prototype_reformated = prototype_reformated.replace(",[Version]", "")
+    prototype_reformated = prototype_reformated.replace(",\n  [Version]", "")
+    
+    # Add the output properties
+    props = alg._ProxyObject__obj.getProperties()
+    allreturns = []
+    workspacereturn = None
+    # Loop through all the properties looking for output properties
+    for prop in props:
+        if (direction_string[prop.direction] == OutputDirection):
+            allreturns.append(prop.name)
+            # Cache the last workspace property seen.
+            if isinstance(prop, IWorkspaceProperty): 
+                workspacereturn = prop.name
+                
+    lhs = ""
+    comments = ""
+    if not allreturns:
+        pass
+    elif (len(allreturns) == 1) and (workspacereturn is not None): 
+        lhs =   workspacereturn + " = "
+    else :
+        lhs = "result = "
+        comments = "\n "
+        comments += "\n # -------------------------------------------------- \n"
+        comments += " # result is a tuple containing\n"
+        comments += " # (" + ",".join(allreturns ) + ")\n"
+        comments += " # To access individual outputs use result[i], where i is the index of the required output.\n"
+        
+    return lhs + prototype_reformated + comments
+    
 #======================================================================
 def do_algorithm(args, algo, version):
     """ Do the wiki page

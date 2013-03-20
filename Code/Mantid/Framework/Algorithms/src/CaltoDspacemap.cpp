@@ -4,22 +4,6 @@ This is the inverse of the DspacemaptoCal algorithm.  The detector offset file c
 :<math> d = \frac{h}{m_N} \frac{t.o.f.}{L_{tot} sin \theta} (1+ \rm{offset})</math>
 
 
-==Usage==
-'''Python'''
-    LoadEmptyInstrument("POWGEN_Definition.xml","POWGEN")
-    CaltoDspacemap("POWGEN","PG3.cal", "PG3.dat")
-
-'''C++'''
-    IAlgorithm* alg1 = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
-    alg1->setPropertyValue("Filename", "POWGEN_Definition.xml");
-    alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", "POWGEN");
-    alg1->execute();
-    IAlgorithm* alg2 = FrameworkManager::Instance().createAlgorithm("DspacemaptoCal");
-    alg2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", "POWGEN");
-    alg2->setPropertyValue("CalibrationFile", "PG3.cal");
-    alg2->setPropertyValue("DspacemapFile", "PG3.dat");
-    alg2->execute();
-
 == Additional Property Information ==
 
 {| border="1" cellpadding="5" cellspacing="0"
@@ -40,6 +24,22 @@ This is the inverse of the DspacemaptoCal algorithm.  The detector offset file c
 |}
 
 *WIKI*/
+/*WIKI_USAGE*
+'''Python'''
+    LoadEmptyInstrument("POWGEN_Definition.xml","POWGEN")
+    CaltoDspacemap("POWGEN","PG3.cal", "PG3.dat")
+
+'''C++'''
+    IAlgorithm* alg1 = FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
+    alg1->setPropertyValue("Filename", "POWGEN_Definition.xml");
+    alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", "POWGEN");
+    alg1->execute();
+    IAlgorithm* alg2 = FrameworkManager::Instance().createAlgorithm("DspacemaptoCal");
+    alg2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", "POWGEN");
+    alg2->setPropertyValue("CalibrationFile", "PG3.cal");
+    alg2->setPropertyValue("DspacemapFile", "PG3.dat");
+    alg2->execute();
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

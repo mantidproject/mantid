@@ -3,7 +3,9 @@
 {{BinaryOperation|verb=divided|prep=by|symbol=<math>\div</math>}}
 {{BinaryOperationFooterMultiply|verb=divided|prep=by|symbol=<math>\div</math>}}
 
-== Usage ==
+
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
  Divide("w1","w2","output")
  w3 = w1 / w2
@@ -17,7 +19,7 @@ The usage of basic workspace mathematical operations has been specially simplifi
 
  //w1 and w2 are workspaces
  workspace_sptr output = w1 / w2;
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

@@ -17,12 +17,12 @@ The same syntax as for [[Rebin]]
 ;0,100,10000,200,20000
 :From 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000
 
-== Usage ==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
  InterpolatingRebin("InWS2","OutWS","x1,dx1,x2")
 
-
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
