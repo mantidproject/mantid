@@ -34,6 +34,7 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
+
 class MDEventWorkspaceTest :    public CxxTest::TestSuite
 {
 private:
@@ -414,7 +415,7 @@ public:
 
 //
 //  //-------------------------------------------------------------------------------------
-//  /** Tests that bad events are thrown out when using addEvents.
+//  /** Tests that bad events are thrown out when using addEvents. 
 //   * */
 //  void test_addManyEvents_Performance()
 //  {
@@ -610,23 +611,27 @@ public:
   }
 };
 
-class MDEventWorkspacePerformanceTest :    public CxxTest::TestSuite
+
+
+class MDEventWorkspaceTestPerformance :    public CxxTest::TestSuite
 {
 
-private:
-
-  MDEventWorkspace3Lean::sptr m_ws;
-  size_t nEvents,nBoxes;
 public:
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDEventWorkspacePerformanceTest *createSuite() { return new MDEventWorkspacePerformanceTest(); }
-  static void destroySuite( MDEventWorkspacePerformanceTest *suite ) { delete suite; }
+  static MDEventWorkspaceTestPerformance *createSuite() { return new MDEventWorkspaceTestPerformance(); }
+  static void destroySuite( MDEventWorkspaceTestPerformance *suite ) { delete suite; }
 
-  MDEventWorkspacePerformanceTest()
+  MDEventWorkspaceTestPerformance()
   { 
   }
+
+
+private:
+  MDEventWorkspace3Lean::sptr m_ws;
+  size_t nEvents,nBoxes;
+public: 
     void setUp()
     {
       size_t dim_size = 20;
