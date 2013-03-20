@@ -75,7 +75,7 @@ namespace CurveFitting
     int movedirection;
   };
 
-  class DLLExport LeBailFit2 : public API::Algorithm
+  class DLLExport LeBailFit : public API::Algorithm
   {
   public:
     /// Enumerate
@@ -87,14 +87,14 @@ namespace CurveFitting
       MONTECARLO
     };
 
-    LeBailFit2();
-    virtual ~LeBailFit2();
+    LeBailFit();
+    virtual ~LeBailFit();
 
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "LeBailFit";}
 
     /// Algorithm's version for identification overriding a virtual method
-    virtual int version() const { return 3;}
+    virtual int version() const { return 1;}
 
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Diffraction";}

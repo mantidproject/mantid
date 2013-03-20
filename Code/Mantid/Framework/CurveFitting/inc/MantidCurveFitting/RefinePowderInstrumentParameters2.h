@@ -8,7 +8,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-#include "MantidCurveFitting/LeBailFit2.h"
+#include "MantidCurveFitting/LeBailFit.h"
 #include "MantidCurveFitting/ThermalNeutronDtoTOFFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 
