@@ -115,6 +115,75 @@ public:
     TS_ASSERT(my_isnan(stats.maximum));
     TS_ASSERT(my_isnan(stats.median));
   }
+
+  /** Test function to calculate Rwp
+    */
+  void testRwp()
+  {
+    vector<double> obsY(4);
+    vector<double> calY(4);
+    vector<double> obsE(4);
+
+    obsY[0] = 1.0;
+    calY[0] = 1.1;
+    obsE[0] = 1.0;
+
+    obsY[1] = 2.0;
+    calY[1] = 2.1;
+    obsE[1] = 1.2;
+
+    obsY[2] = 3.0;
+    calY[2] = 3.5;
+    obsE[2] = 1.4;
+
+    obsY[3] = 1.0;
+    calY[3] = 1.3;
+    obsE[3] = 1.0;
+
+    double rwp = getRFactor(obsY, calY, obsE);
+
+    TS_ASSERT_DELTA(rwp, 0.1582, 0.0001);
+
+  }
 };
 
 #endif // STATISTICSTEST_H_
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
