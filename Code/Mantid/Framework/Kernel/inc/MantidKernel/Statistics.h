@@ -63,7 +63,7 @@ namespace Mantid
     template<typename TYPE>
     std::vector<double> getModifiedZscore(const std::vector<TYPE>& data, const bool sorted=false);
     /// Return the R-factors (Rwp) of a diffraction pattern data
-    double getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE);
+    double MANTID_KERNEL_DLL getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE);
   
   } // namespace Kernel
 } // namespace Mantid

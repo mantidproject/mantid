@@ -217,11 +217,13 @@ namespace Mantid
     }
 
     /** Return the Rwp of a diffraction pattern data
-      * @param obsY :: array of observed intensity values
-      * @param calY :: array of calculated intensity values;
+      * @param obsI :: array of observed intensity values
+      * @param calI :: array of calculated intensity values;
+      * @param obsE :: array of error of the observed data;
+      * @return :: Rwp
       *
       */
-    DLLExport double getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE)
+    double getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE)
     {
       // 1. Check
       if (obsI.size() != calI.size() || obsI.size() != obsE.size())
