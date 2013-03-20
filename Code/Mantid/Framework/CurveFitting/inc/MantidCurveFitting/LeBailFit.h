@@ -224,8 +224,8 @@ namespace CurveFitting
                                        double &rwp, double &rp);
 
     /// Calculate powder diffraction statistic Rwp
-    void calculatePowderPatternStatistic(const MantidVec &values, const vector<double> &background,
-                                         double &rwp, double &rp);
+    //void calculatePowderPatternStatistic(const MantidVec &values, const vector<double> &background,
+      //                                   double &rwp, double &rp);
 
     /// Determine whether the proposed value should be accepted or denied
     bool acceptOrDeny(double currwp, double newrwp);
