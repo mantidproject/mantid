@@ -56,7 +56,10 @@ namespace MDEvents
     /// Destructor
     virtual ~MDBoxBase() {}
 
-    size_t getFileID()const{return m_fileID;}
+    ///@return The special ID which specify location of this node in the chain of ordered boxes (e.g. on a file)
+    virtual size_t getID()const{return m_fileID;}
+    /// sets the special id, which specify the position of this node in the chain linearly ordered nodes
+    virtual void setID(const size_t &newID){m_fileID = newID;}
     // -------------------------------- Parents/Children-Related -------------------------------------------
    /// Return a pointer to the parent box
     void setParent(IMDNode * parent)
@@ -372,7 +375,7 @@ namespace MDEvents
     /// Pointer to the parent of this box. NULL if no parent.
     Mantid::API::IMDNode * m_parent;
 
-    // The id which specify location of this box in a linear chain of ordered boxes (e.g. on file)
+    /// The id which specify location of this box in a linear chain of ordered boxes (e.g. on file). Calculated algorithmically 
     size_t m_fileID;
   private:
         MDBoxBase(const MDBoxBase<MDE,nd> & box);

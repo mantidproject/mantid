@@ -78,7 +78,7 @@ public:
     TS_ASSERT(ew3.getBoxController() );
     TS_ASSERT(ew3.getBox());
     TS_ASSERT(ew3.getBox()->getBoxController());
-    TS_ASSERT_EQUALS(ew3.getBox()->getId(), 0);
+    TS_ASSERT_EQUALS(ew3.getBox()->getID(), 0);
 
     // Now with the MDEvent type
     MDEventWorkspace<MDEvent<3>, 3> ew3b;

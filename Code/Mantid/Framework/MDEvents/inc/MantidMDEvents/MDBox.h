@@ -14,8 +14,6 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 
 
-#undef MDBOX_TRACK_SIGNAL_WHEN_ADDING
-
 namespace Mantid
 {
 namespace MDEvents
@@ -185,6 +183,8 @@ namespace MDEvents
     bool m_bIsMasked;
   private:
     void clearDataFromMemory();
+    /// private default copy constructor as the only correct constructor is the one with the boxController;
+    MDBox(const MDBox &);
   public:
     /// Typedef for a shared pointer to a MDBox
     typedef boost::shared_ptr< MDBox<MDE, nd> > sptr;

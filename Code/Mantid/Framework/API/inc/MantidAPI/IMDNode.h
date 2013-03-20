@@ -20,21 +20,24 @@ class IMDNode
 public:
     virtual ~IMDNode(){};
 //---------------- ISAVABLE
-    virtual size_t getFileID()const=0;
     virtual Kernel::ISaveable *const getISaveable()=0;
     virtual Kernel::ISaveable *const  getISaveable()const=0;        
 //-------------------------------------------------------------
+    ///@return The special ID which specify location of this node in the chain of ordered boxes (e.g. on a file)
+    virtual size_t getID()const=0;
+    /// sets the special id, which specify the position of this node in the chain linearly ordered nodes
+    virtual void setID(const size_t &newID)=0;
+
     /// Get number of dimensions
     virtual size_t getNumDims() const = 0;
 
     /// Getter for the masking
     virtual bool getIsMasked() const = 0;
-
     ///Setter for masking the box
     virtual void mask() = 0;
-
     ///Setter for unmasking the box
     virtual void unmask() = 0;
+
 
     /// get box controller
     virtual Mantid::API::BoxController  *const getBoxController() const=0;
@@ -47,19 +50,20 @@ public:
     virtual size_t getNumChildren() const = 0;
     /// Return the indexth child MDBoxBase.
     virtual IMDNode * getChild(size_t index) = 0;
-
     /// Sets the children from a vector of children
     virtual void setChildren(const std::vector<IMDNode *> & boxes, const size_t indexStart, const size_t indexEnd) = 0;
-
     /// Return a pointer to the parent box
     virtual void setParent(IMDNode * parent)=0;
-
     /// Return a pointer to the parent box
     virtual IMDNode * getParent()=0;
-
-
     /// Return a pointer to the parent box (const)
     virtual const IMDNode * getParent() const = 0;
+    // -------------------------------------------------------------------------------------------
+// box-related
+   /// Fill a vector with all the boxes up to a certain depth
+    virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly) = 0;
+    /// Fill a vector with all the boxes up to a certain depth
+    virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
 
     // -------------------------------- Events-Related -------------------------------------------
     /// Clear all contained data
@@ -70,7 +74,6 @@ public:
     virtual size_t getDataInMemorySize()const = 0;
    /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getTotalDataSize() const=0;
-
     /** The method to convert events in a box into a table of coodrinates/signal/errors casted into coord_t type 
      *   Used to save events from plain binary file
      *   @returns coordTable -- vector of events parameters
@@ -83,19 +86,18 @@ public:
      *   @param nColumns    -- number of parameters for each event
      */
     virtual void setEventsData(const std::vector<coord_t> &coordTable)=0;
-
-    /// Return a copy of contained events
-    //virtual std::vector<coor> & getEventsCopy() = 0;
-    /// Add a single event
+      
+    /// Add a single event defined by its components
     virtual void addEvent(const signal_t Signal, const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId) = 0;
-    // add a single event and set pointer to the box which needs splitting (if one actually need)    
+    /// add a single event and set pointer to the box which needs splitting (if one actually need)    
     virtual void addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index) = 0;
     /// Add a single event, with no mutex locking
     virtual void addEventUnsafe(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId) = 0;
-    /// Add several events, within a given range
+    /// Add several events from the vector of event parameters
     virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)=0;
 
 
+    // -------------------------------------------------------------------------------------------
 
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.
@@ -119,15 +121,8 @@ public:
     /** Cache the centroid of this box and all sub-boxes. */
     virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL)= 0;
     virtual void calculateCentroid(coord_t * /*centroid*/) const=0;
-
-    // -------------------------------------------------------------------------------------------
-// box-related
-   /// Fill a vector with all the boxes up to a certain depth
-    virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly) = 0;
-    /// Fill a vector with all the boxes up to a certain depth
-    virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
     //----------------------------------------------------------------------------------------------------------------------------------
-    // MDBoxBase interface
+    // MDBoxBase interface, related to average signals/box parameters
     virtual signal_t getSignal() const=0;
     virtual signal_t getError() const=0;
     virtual signal_t getErrorSquared() const=0;
@@ -162,7 +157,7 @@ public:
   static inline bool CompareFilePosition (const IMDNode * const a, const IMDNode * const b)
   {
  
-    return (a->getFileID() < b->getFileID());
+    return (a->getID() < b->getID());
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -172,7 +167,7 @@ public:
    *
    * @param boxes :: ref to a vector of boxes. It will be sorted in-place.
    */
-  static void sortObjByFileID(std::vector<IMDNode *const> & boxes)
+  static void sortObjByID(std::vector<IMDNode *const> & boxes)
   {
     std::sort( boxes.begin(), boxes.end(), CompareFilePosition);
   } 

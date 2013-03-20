@@ -32,7 +32,6 @@ public:
   MDBoxBaseTester(uint64_t filePos)
   : MDBoxBase<MDE,nd>()
   { 
-    //this->setId(filePos);
    // this->setFilePosition(filePos,10,false);
   }
   MDBoxBaseTester(const MDBoxBaseTester  &source):
@@ -272,7 +271,7 @@ public:
     b.setExtents(1, -4.0, 6.0);
     b.setSignal(123.0);
     b.setErrorSquared(456.0);
-    //TODO: b.setId(8765);
+    b.setID(8765);
     b.calcVolume();
 
     // Perform the copy
@@ -284,7 +283,7 @@ public:
     TS_ASSERT_DELTA( box.getSignal(), b.getSignal(), 1e-6);
     TS_ASSERT_DELTA( box.getErrorSquared(), b.getErrorSquared(), 1e-6);
     TS_ASSERT_DELTA( box.getInverseVolume(), b.getInverseVolume(), 1e-6);
-    //TS_ASSERT_EQUALS( box.getId(), b.getId());
+    TS_ASSERT_EQUALS( box.getID(), b.getID());
     TS_ASSERT_EQUALS( box.getDepth(), b.getDepth());
   }
 

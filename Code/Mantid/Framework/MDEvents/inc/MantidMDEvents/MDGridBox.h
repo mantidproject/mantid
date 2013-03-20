@@ -47,29 +47,33 @@ namespace MDEvents
 
     virtual ~MDGridBox();
     // ----------------------------- ISaveable Methods ------------------------------------------------------
+    /**get object responsible for saving the box to a file. 
+      *@return the const pointer to the object. The GridBox is not saveable at the moment so it is always NULL */ 
     virtual Kernel::ISaveable *const getISaveable(){return NULL;}
+    /**get const object responsible for saving the box to a file. 
+      *@return the const pointer the const object. The GridBox is not saveable at the moment so it is always NULL */ 
     virtual Kernel::ISaveable *const getISaveable()const{return NULL;}
     //-------------------------------------------------------------------------------------------------------
     void clear();
 
 
-    /** Returns the total number of points (events) in this box  (in memory and in file if present)*/
-    uint64_t getNPoints() const //Use the cached value    
+    /** Uses the cached value of points stored in the grid box  
+      *  @return the total number of points (events) in this box  (in memory and in file if present)     */
+    uint64_t getNPoints() const
     {    return nPoints; }
-    /// @return the amount of memory that the object takes up in t.
+    /// @return the amount of memory that the object's data ocupy. Currently uses cached value.
     virtual uint64_t getTotalDataSize() const
     {   return nPoints; }
+    /**  @return the number of points (events) this box keeps in memory. May be different from total number of points for
+       * file based workspaces/boxes.   Calculates recursively from child boxes  */
    size_t  getDataInMemorySize()const;
 
    size_t getNumDims() const;
-
    size_t getNumMDBoxes() const;
-
    size_t getNumChildren() const;
 
-   //TODO: -- The meaning of this stuff have changed
-    //size_t getChildIndexFromID(size_t childId) const;
-
+   
+    size_t getChildIndexFromID(size_t childId) const;
     API::IMDNode * getChild(size_t index);
     //void setChild(size_t index,MDGridBox<MDE,nd> * newChild)
     //{

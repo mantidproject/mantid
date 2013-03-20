@@ -748,16 +748,16 @@ namespace MDEvents
    * @param childId :: ID of the child you want
    * @return the index into the children of this grid box; size_t(-1) if NOT found.
    */
- /* TMDE(
+  TMDE(
   size_t MDGridBox)::getChildIndexFromID(size_t childId) const
   {
     for (size_t index=0; index<numBoxes; index++)
     {
-      if (m_Children[index]->getId() == childId)
+      if (m_Children[index]->getID() == childId)
         return index;
     }
-    return size_t(-1);
-  }*/
+    return UNDEF_SIZET;
+  }
 
 
 

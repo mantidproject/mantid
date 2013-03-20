@@ -81,7 +81,7 @@ public:
     TS_ASSERT_DELTA( b->getExtents(0).getMax(), 10.0, 1e-5);
     TS_ASSERT_DELTA( b->getVolume(), 10.0, 1e-5);
     // Start at ID 0.
-    //TS_ASSERT_EQUALS( b->getId(), 0);
+    TS_ASSERT_EQUALS( b->getID(), 0);
 
     BoxController *const bcc = b->getBoxController();
     delete b;
@@ -117,7 +117,7 @@ public:
   void check_MDGridBox(MDGridBox<MDLeanEvent<1>,1> * g)
   {
     // The grid box stole the ID of the box it replaces.
-    //TS_ASSERT_EQUALS( g->getId(), 0);
+    TS_ASSERT_EQUALS( g->getID(), 0);
 
     // Look overall; it has 10 points
     TS_ASSERT_EQUALS(g->getNumDims(), 1);
@@ -144,7 +144,7 @@ public:
       MDBox<MDLeanEvent<1>,1> * box = dynamic_cast<MDBox<MDLeanEvent<1>,1> *>(boxes[i]);
 
       // Sequential ID, starting at 1 since 0 was used by the parent.
-      //TS_ASSERT_EQUALS( box->getId(), i+1);
+      TS_ASSERT_EQUALS( box->getID(), i+1);
       // At the right place?
       TS_ASSERT_DELTA(box->getExtents(0).getMin(), double(i)*1.0, 1e-6);
       TS_ASSERT_DELTA(box->getExtents(0).getMax(), double(i+1)*1.0, 1e-6);
@@ -169,7 +169,7 @@ public:
   {
     MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
     // Start at ID 0.
-    //TS_ASSERT_EQUALS( b->getId(), 0);
+    TS_ASSERT_EQUALS( b->getID(), 0);
     // Give it 10 events
     const std::vector<MDLeanEvent<1> > events = MDEventsTestHelper::makeMDEvents1(10);
     b->addEvents( events );
@@ -227,7 +227,7 @@ public:
   void test_MDGridBox_copy_constructor()
   {
     MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1(10);
-    //TS_ASSERT_EQUALS( b->getId(), 0);
+    TS_ASSERT_EQUALS( b->getID(), 0);
     const std::vector<MDLeanEvent<1> > events = MDEventsTestHelper::makeMDEvents1(10);
     b->addEvents( events );
     TS_ASSERT_EQUALS( b->getNPoints(), 10 );
@@ -294,10 +294,10 @@ public:
   {
     // Build the grid box
     MDGridBox<MDLeanEvent<1>,1> * g = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
-    //TS_ASSERT_EQUALS(g->getChildIndexFromID( g->getChild(0)->getId() ), 0);
-    //TS_ASSERT_EQUALS(g->getChildIndexFromID( g->getChild(5)->getId() ), 5);
-    //TS_ASSERT_EQUALS(g->getChildIndexFromID(0), size_t(-1) );
-    //TS_ASSERT_EQUALS(g->getChildIndexFromID(11), size_t(-1) );
+    TS_ASSERT_EQUALS(g->getChildIndexFromID( g->getChild(0)->getID() ), 0);
+    TS_ASSERT_EQUALS(g->getChildIndexFromID( g->getChild(5)->getID() ), 5);
+    TS_ASSERT_EQUALS(g->getChildIndexFromID(0), UNDEF_SIZET );
+    TS_ASSERT_EQUALS(g->getChildIndexFromID(11), UNDEF_SIZET );
     BoxController *const bcc = g->getBoxController();
     delete g;
     delete bcc;
@@ -357,7 +357,7 @@ public:
     // Start with 100 boxes
     TS_ASSERT_EQUALS( superbox->getNumMDBoxes(), 100);
     // And ID 0
-    //TS_ASSERT_EQUALS( superbox->getId(), 0 );
+    TS_ASSERT_EQUALS( superbox->getID(), 0 );
 
     // The box is a MDBox at first
     boxes = superbox->getBoxes();
@@ -366,7 +366,7 @@ public:
     TS_ASSERT_DELTA( b->getVolume(), 1.0, 1e-5 );
 
     // It is the first child, so ID is 1
-    //TS_ASSERT_EQUALS( b->getId(), 1 );
+    TS_ASSERT_EQUALS( b->getID(), 1 );
     // There were 101 assigned IDs
     TS_ASSERT_EQUALS( b->getBoxController()->getMaxId(), 100+1);
 
@@ -379,11 +379,11 @@ public:
     TS_ASSERT_DELTA( gb->getVolume(), 1.0, 1e-5 );
 
     // ID of first child remains unchanged at 1
-    //TS_ASSERT_EQUALS( gb->getId(), 1 );
+    TS_ASSERT_EQUALS( gb->getID(), 1 );
     // There were 101 assigned IDs
     TS_ASSERT_EQUALS( gb->getBoxController()->getMaxId(), 200+1);
     // The first child of the sub-divided box got 101 as its id
-    //TS_ASSERT_EQUALS( gb->getBoxes()[0]->getId(), 101 );
+    TS_ASSERT_EQUALS( gb->getBoxes()[0]->getID(), 101 );
 
     // There are now 199 MDBoxes; the 99 at level 1, and 100 at level 2
     TS_ASSERT_EQUALS( superbox->getNumMDBoxes(), 199);
@@ -1061,25 +1061,24 @@ public:
     // Now check the results. Each sub-box should be MDGridBox and have that many events
     std::vector<ibox_t*> boxes = b->getBoxes();
     TS_ASSERT_EQUALS(boxes.size(), 100);
-    //TODO:
-    //for (size_t i=0; i<boxes.size(); i++)
-    //{
-    //  ibox_t * box = boxes[i];
-    //  TS_ASSERT_EQUALS( box->getNPoints(), num_repeat );
-    //  TS_ASSERT( dynamic_cast<gbox_t *>(box) );
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      ibox_t * box = boxes[i];
+      TS_ASSERT_EQUALS( box->getNPoints(), num_repeat );
+      TS_ASSERT( dynamic_cast<gbox_t *>(box) );
 
-    //  size_t numChildren = box->getNumChildren();
-    //  if (numChildren > 0)
-    //  {
-    //    size_t lastId = box->getChild(0)->getId();
-    //    for (size_t i = 1; i < numChildren; i++)
-    //    {
-    //      TSM_ASSERT_EQUALS("Children IDs need to be sequential!", box->getChild(i)->getId(), lastId+1);
-    //      lastId = box->getChild(i)->getId();
-    //    }
-    //  }
+      size_t numChildren = box->getNumChildren();
+      if (numChildren > 0)
+      {
+        size_t lastId = box->getChild(0)->getID();
+        for (size_t i = 1; i < numChildren; i++)
+        {
+          TSM_ASSERT_EQUALS("Children IDs need to be sequential!", box->getChild(i)->getID(), lastId+1);
+          lastId = box->getChild(i)->getID();
+        }
+      }
 
-    //}
+    }
 
     // clean up  behind 
     BoxController *const bcc = b->getBoxController();
