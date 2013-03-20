@@ -163,7 +163,7 @@ void  MDEventWSWrapper::calcCentroidND(void)
   MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(this->m_Workspace.get());
   if(!pWs) throw(std::bad_cast());
 
-  pWs->getBox()->refreshCentroid(NULL);
+  //pWs->getBox()->refreshCentroid(NULL);
 }
 /// the function used in template metaloop termination on 0 dimensions and as the function which will throw the error on undefined MDWorkspaceWrapper  
 template<>

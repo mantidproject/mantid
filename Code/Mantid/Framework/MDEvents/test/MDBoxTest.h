@@ -509,7 +509,7 @@ public:
 
   //-----------------------------------------------------------------------------------------
   /** refreshCache() tracks the centroid */
-  void test_refreshCentroid()
+  void test_calculateCentroid()
   {
     BoxController_sptr sc( new BoxController(2));
     MDBox<MDLeanEvent<2>,2> b(sc.get());

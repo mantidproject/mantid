@@ -128,13 +128,7 @@ namespace MDEvents
     virtual Mantid::API::BoxController  *const getBoxController()
      { return m_BoxController; }
 
-    /** Set the box controller used.
-     * @param controller :: Mantid::API::BoxController *
-     */
-    //virtual void setBoxController(Mantid::API::BoxController *controller)
-    //{ m_BoxController = controller; }
-
-
+  
     // -------------------------------- Geometry/vertexes-Related -------------------------------------------
 
     std::vector<Mantid::Kernel::VMD> getVertexes() const;

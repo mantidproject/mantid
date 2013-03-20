@@ -305,7 +305,7 @@ namespace MDAlgorithms
 
     // TODO: This might be slow, progress report?
     // Make sure all centroids are fresh
-    ws->getBox()->refreshCentroid();
+    //ws->getBox()->refreshCentroid();
 
     if (ws->getNumExperimentInfo() == 0)
       throw std::runtime_error("No instrument was found in the MDEventWorkspace. Cannot find peaks.");

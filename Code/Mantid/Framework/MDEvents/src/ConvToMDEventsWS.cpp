@@ -180,7 +180,7 @@ namespace Mantid
 
       // Recount totals at the end.
       m_OutWSWrapper->pWorkspace()->refreshCache(); 
-      m_OutWSWrapper->refreshCentroid();
+      //m_OutWSWrapper->refreshCentroid();
       pProgress->report();
 
       /// Set the special coordinate system flag on the output workspace.

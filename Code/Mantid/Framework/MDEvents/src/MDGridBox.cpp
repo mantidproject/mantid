@@ -435,14 +435,14 @@ namespace MDEvents
 
 
   // -------------------------------------------------------------------------------------------
-  /** Cache the centroid of this box and all sub-boxes.
-   * @param ts :: ThreadScheduler for parallel processing.
-   */
-  TMDE(
-  void MDGridBox)::refreshCentroid(Kernel::ThreadScheduler * ts)
-  {
-    UNUSED_ARG(ts);
-  }
+  ///** Cache the centroid of this box and all sub-boxes.
+  // * @param ts :: ThreadScheduler for parallel processing.
+  // */
+  //TMDE(
+  //void MDGridBox)::refreshCentroid(Kernel::ThreadScheduler * ts)
+  //{
+  //  UNUSED_ARG(ts);
+  //}
 
 
   //-----------------------------------------------------------------------------------------------
@@ -1558,6 +1558,18 @@ namespace MDEvents
       m_Children[index]->addEventUnsafe(event);
   }
 
+  /**Sets particular child MDgridBox at the index, specified by the input parameters
+  *@param index     -- the position of the new child in the list of GridBox children
+  *@param newChild  -- the pointer to the new child grid box
+  */
+  TMDE(
+  inline void MDGridBox)::setChild(size_t index,MDGridBox<MDE,nd> * newChild)
+    {
+      // Delete the old box  (supposetly ungridded);
+      delete this->m_Children[index];
+      // set new box, supposetly gridded
+      this->m_Children[index]=newChild;
+    }
 
 }//namespace MDEvents
 

@@ -75,13 +75,7 @@ namespace MDEvents
    
     size_t getChildIndexFromID(size_t childId) const;
     API::IMDNode * getChild(size_t index);
-    //void setChild(size_t index,MDGridBox<MDE,nd> * newChild)
-    //{
-    //  // Delete the old box  (supposetly ungridded);
-    //  delete this->boxes[index];
-    //  // set new box, supposetly gridded
-    //  this->boxes[index]=newChild;
-    //}
+    void setChild(size_t index,MDGridBox<MDE,nd> * newChild);
 
     void setChildren(const std::vector<API::IMDNode *> & boxes, const size_t indexStart, const size_t indexEnd);
 
@@ -130,7 +124,7 @@ namespace MDEvents
 
     void refreshCache(Kernel::ThreadScheduler * ts = NULL);
 
-    void refreshCentroid(Kernel::ThreadScheduler * ts = NULL);
+    //void refreshCentroid(Kernel::ThreadScheduler * ts = NULL);
 
     // Set the box controller overrriden.
     //virtual void setBoxController(Mantid::API::BoxController *controller);
@@ -192,7 +186,7 @@ namespace MDEvents
 
     size_t computeSizesFromSplit();
     void fillBoxShell(const size_t tot,const coord_t inverseVolume);
-
+    /**private default copy constructor as the only correct constructor is the one with box controller */
     MDGridBox(const MDGridBox<MDE, nd> & box);
   public:
 

@@ -118,8 +118,7 @@ public:
     virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)=0; 
     /** Recalculate signal etc. */
     virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL)=0;
-    /** Cache the centroid of this box and all sub-boxes. */
-    virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL)= 0;
+    /** Calculate the centroid of this box and all sub-boxes. */
     virtual void calculateCentroid(coord_t * /*centroid*/) const=0;
     //----------------------------------------------------------------------------------------------------------------------------------
     // MDBoxBase interface, related to average signals/box parameters

@@ -389,86 +389,89 @@ namespace MDEvents
   template <typename BOXTYPE>
   bool SortBoxesByID(const BOXTYPE& a, const BOXTYPE& b)
   {
-    return a->getId() < b->getId();
+    return a->getID() < b->getID();
   }
 
-  //TODO:  The meaniong for this have changed
-  ////-----------------------------------------------------------------------------------------------
-  ///** Create a table of data about the boxes contained */
-  //TMDE(
-  //Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(size_t start, size_t num)
-  //{
-  //  CPUTimer tim;
-  //  UNUSED_ARG(start);
-  //  UNUSED_ARG(num);
-  //  // Boxes to show
-  //  std::vector<API::IMDNode *> boxes;
-  //  std::vector<MDBoxBase<MDE,nd>* > boxes_filtered;
-  //  this->getBox()->getBoxes(boxes, 1000, false);
+  
+  //-----------------------------------------------------------------------------------------------
+  /** Create a table of data about the boxes contained */
+  TMDE(
+  Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(size_t start, size_t num)
+  {
+    CPUTimer tim;
+    UNUSED_ARG(start);
+    UNUSED_ARG(num);
+    // Boxes to show
+    std::vector<API::IMDNode *> boxes;
+    std::vector<MDBoxBase<MDE,nd>* > boxes_filtered;
+    this->getBox()->getBoxes(boxes, 1000, false);
 
-  //  bool withPointsOnly = true;
-  //  boxes_filtered.reserve(boxes.size());
+    bool withPointsOnly = true;
+    boxes_filtered.reserve(boxes.size());
 
-  //  for (size_t i=0; i<boxes.size(); i++)
-  //  {
-  //      MDBoxBase<MDE,nd>* box = dynamic_cast<MDBoxBase<MDE,nd>* >(boxes[i]);
-  //      if (box->getNPoints() > 0 && withPointsOnly)
-  //        boxes_filtered.push_back(box);
-  //      else
-  //        boxes_filtered.push_back(box);
-  //  }
-  //    
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+        MDBoxBase<MDE,nd>* box = dynamic_cast<MDBoxBase<MDE,nd>* >(boxes[i]);
+        if (box->getNPoints() > 0 && withPointsOnly)
+          boxes_filtered.push_back(box);
+        else
+          boxes_filtered.push_back(box);
+    }
+      
 
-  //  // Now sort by ID
-  //  typedef MDBoxBase<MDE,nd> * ibox_t;
-  //  std::sort(boxes_filtered.begin(), boxes_filtered.end(), SortBoxesByID<ibox_t> );
+    // Now sort by ID
+    typedef MDBoxBase<MDE,nd> * ibox_t;
+    std::sort(boxes_filtered.begin(), boxes_filtered.end(), SortBoxesByID<ibox_t> );
 
 
-  //  // Create the table
-  //  int numRows = int(boxes_filtered.size());
-  //  TableWorkspace_sptr ws(new TableWorkspace(numRows));
-  //  ws->addColumn("int", "ID");
-  //  ws->addColumn("int", "Depth");
-  //  ws->addColumn("int", "# children");
-  //  ws->addColumn("int", "File Pos.");
-  //  ws->addColumn("int", "File Size");
-  //  ws->addColumn("int", "EventVec Size");
-  //  ws->addColumn("str", "OnDisk?");
-  //  ws->addColumn("str", "InMemory?");
-  //  ws->addColumn("str", "Changes?");
-  //  ws->addColumn("str", "Extents");
+    // Create the table
+    int numRows = int(boxes_filtered.size());
+    TableWorkspace_sptr ws(new TableWorkspace(numRows));
+    ws->addColumn("int", "ID");
+    ws->addColumn("int", "Depth");
+    ws->addColumn("int", "# children");
+    ws->addColumn("int", "File Pos.");
+    ws->addColumn("int", "File Size");
+    ws->addColumn("int", "EventVec Size");
+    ws->addColumn("str", "OnDisk?");
+    ws->addColumn("str", "InMemory?");
+    ws->addColumn("str", "Changes?");
+    ws->addColumn("str", "Extents");
 
-  //  for (int i=0; i<int(boxes_filtered.size()); i++)
-  //  {
-  //    MDBoxBase<MDE,nd>* box = boxes_filtered[i];
-  //    int col = 0;
+    for (int i=0; i<int(boxes_filtered.size()); i++)
+    {
+      MDBoxBase<MDE,nd>* box = boxes_filtered[i];
+      int col = 0;
 
-  //    ws->cell<int>(i, col++) = int(box->getId());;
-  //    ws->cell<int>(i, col++) = int(box->getDepth());
-  //    ws->cell<int>(i, col++) = int(box->getNumChildren());
-  //    ws->cell<int>(i, col++) = int(box->getFilePosition());
-  //    MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
-  //    ws->cell<int>(i, col++) = mdbox ? int(mdbox->getFileSize()) : 0;
-  //    ws->cell<int>(i, col++) = mdbox ? int(mdbox->getDataMemorySize()) : -1;
-  //    if (mdbox)
-  //    {
-  //      ws->cell<std::string>(i, col++) = (mdbox->wasSaved() ? "yes":"no");
-  //      ws->cell<std::string>(i, col++) = (mdbox->getInMemory() ? "yes":"no");
-  //      // there is no exact equivalent of data added, but we assume that data added if data on file are not equal to data in memory
-  //      bool isDataAdded = (mdbox->getFileSize()!=mdbox->getNPoints());
-  //      ws->cell<std::string>(i, col++) = std::string(isDataAdded ? "Added ":"") + std::string(mdbox->isBusy() ? "Modif.":"") ;
-  //    }
-  //    else
-  //    {
-  //      ws->cell<std::string>(i, col++) = "-";
-  //      ws->cell<std::string>(i, col++) = "-";
-  //      ws->cell<std::string>(i, col++) = "-";
-  //    }
-  //    ws->cell<std::string>(i, col++) = box->getExtentsStr();
-  //  }
-  //  std::cout << tim << " to create the MDBox data table." << std::endl;
-  //  return ws;
-  //}
+      ws->cell<int>(i, col++) = int(box->getID());;
+      ws->cell<int>(i, col++) = int(box->getDepth());
+      ws->cell<int>(i, col++) = int(box->getNumChildren());
+      
+      MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
+      Kernel::ISaveable const*const pSaver(box->getISaveable());
+
+      ws->cell<int>(i, col++) = pSaver ? int(pSaver->getFilePosition()):-1;
+      ws->cell<int>(i, col++) = pSaver ? int(pSaver->getFileSize()) : 0;
+      ws->cell<int>(i, col++) = mdbox ?  int(mdbox->getDataInMemorySize()) : -1;
+      if (mdbox && pSaver)
+      {
+        ws->cell<std::string>(i, col++) = (pSaver->wasSaved() ? "yes":"no");
+        ws->cell<std::string>(i, col++) = (pSaver->isLoaded() ? "yes":"no");
+  
+        bool isDataAdded = (mdbox->isDataAdded());
+        ws->cell<std::string>(i, col++) = std::string(isDataAdded ? "Added ":"") + std::string(pSaver->isBusy() ? "Modif.":"") ;
+      }
+      else
+      {
+        ws->cell<std::string>(i, col++) = (pSaver ? "-":"NA");
+        ws->cell<std::string>(i, col++) = (pSaver ? "-":"NA");
+        ws->cell<std::string>(i, col++) = (pSaver ? "-":"NA");
+      }
+      ws->cell<std::string>(i, col++) = box->getExtentsStr();
+    }
+    std::cout << tim << " to create the MDBox data table." << std::endl;
+    return ws;
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** @returns the number of bytes of memory used by the workspace. */

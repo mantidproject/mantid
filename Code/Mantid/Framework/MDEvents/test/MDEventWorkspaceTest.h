@@ -119,18 +119,18 @@ public:
 
     /*Test that the boxes were deep copied and that their BoxController pointers have been updated too.*/
     typedef MDBoxBase<MDLeanEvent<3>, 3> MDBoxBaseType;
-    std::vector<MDBoxBaseType *> originalBoxes;
+    std::vector<API::IMDNode *> originalBoxes;
     ew3.getBox()->getBoxes(originalBoxes, 10000, false);
 
-    std::vector<MDBoxBaseType *> copiedBoxes;
+    std::vector<API::IMDNode *> copiedBoxes;
     copy.getBox()->getBoxes(copiedBoxes, 10000, false);
 
     // Quick check.
     TSM_ASSERT_EQUALS("Number of boxes should be the same before and after the copy.", originalBoxes.size(), copiedBoxes.size());
     for(size_t i = 0; i < originalBoxes.size(); ++i)
     {
-       MDBoxBaseType* originalMDBox = originalBoxes[i];
-       MDBoxBaseType* copiedMDBox = copiedBoxes[i];
+       API::IMDNode * originalMDBox = originalBoxes[i];
+       API::IMDNode * copiedMDBox = copiedBoxes[i];
 
        auto originalBoxTypeName = std::string(typeid(*originalMDBox).name());
        auto copiedBoxTypeName = std::string(typeid(*copiedMDBox).name());
@@ -138,7 +138,7 @@ public:
        // Check the types
        TSM_ASSERT("Box types are not the same", originalBoxTypeName.compare(copiedBoxTypeName)==0); // Comparing them this way will at least produce a useful error if type matching fails.
        TSM_ASSERT_DIFFERS( "BoxController should be different between original and copied boxes", originalMDBox->getBoxController(), copiedMDBox->getBoxController());
-       TSM_ASSERT_EQUALS("BoxController on copied box does not match that in copied workspace", copy.getBoxController(), copiedMDBox->getBoxController());
+       TSM_ASSERT_EQUALS("BoxController on copied box does not match that in copied workspace", copy.getBoxController().get(), copiedMDBox->getBoxController());
     }
   }
 

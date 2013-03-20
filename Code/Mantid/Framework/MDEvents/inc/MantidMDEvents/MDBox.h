@@ -66,7 +66,6 @@ namespace MDEvents
     uint64_t getTotalDataSize()const{return getNPoints();}
 
     size_t getNumDims() const;
-
     size_t getNumMDBoxes() const;
 
     /// Get the # of children MDBoxBase'es (non-recursive)
@@ -81,19 +80,11 @@ namespace MDEvents
     void setChildren(const std::vector<API::IMDNode *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
     { throw std::runtime_error("MDBox cannot have children."); }
 
-   
+  
     /// @return true if events were added to the box (using addEvent()) while the rest of the event list is cached to disk
     bool isDataAdded() const;
 
- 
-    /* Getter to determine if masking is applied.
-    @return true if masking is applied.
-    */
-    virtual bool getIsMasked() const
-    {
-      return m_bIsMasked;
-    }
-    /**Get vector of events to change. Beware, that calling this funtion for file-based workspace sets both dataChanged and dataBusy flags
+     /**Get vector of events to change. Beware, that calling this funtion for file-based workspace sets both dataChanged and dataBusy flags
        first forces disk buffer to write the object contents to HDD when disk buffer is full and the second one prevents DB 
        from clearing object from memory untill the events are released. One HAS TO call releaseEvents when finished using data on file-based WS    */ 
     std::vector< MDE > & getEvents();
@@ -103,7 +94,6 @@ namespace MDEvents
     const std::vector<MDE> & getConstEvents()const ;
     // the same as getConstEvents above, 
     const std::vector< MDE > & getEvents()const;
-
     void releaseEvents() ;
 
     std::vector< MDE > * getEventsCopy();
@@ -131,40 +121,31 @@ namespace MDEvents
   //---------------------------------------------------------------------------------------------------------------------------------
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
     void generalBin(MDBin<MDE,nd> & bin, Mantid::Geometry::MDImplicitFunction & function) const;
-
-  //---------------------------------------------------------------------------------------------------------------------------------
     void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)
     { /* Do nothing with a box default. */ }
 
-    /** Recalculate signal etc. */
+  //---------------------------------------------------------------------------------------------------------------------------------
+    /** Recalculate signal and various averages dependent on signal and the signal coordinates */
     void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL);
-   /** Calculate the centroid of this box. */
-    void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL)
-    {};
     void calculateCentroid(coord_t * centroid) const;
-
     void calculateDimensionStats(MDDimensionStats * stats) const;
-
     void integrateSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
-
     void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const;
  
   //------------------------------------------------------------------------------------------------------------------------------------
-    //void saveNexus(::NeXus::File * file) const;
-
-    //void loadNexus(::NeXus::File * file, bool setLoaded=true);
-
     void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
     void getBoxes(std::vector<API::IMDNode *> & boxes, size_t /*maxDepth*/, bool /*leafOnly*/);
 
     void getBoxes(std::vector<MDBoxBase<MDE,nd> *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
     void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function);
-
+  //------------------------------------------------------------------------------------------------------------------------------------
     void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset);
-
+  //------------------------------------------------------------------------------------------------------------------------------------
+    /* Getter to determine if masking is applied.
+    @return true if masking is applied.   */
+    virtual bool getIsMasked() const {  return m_bIsMasked;  }
     ///Setter for masking the box
     void mask();
-
     ///Setter for unmasking the box
     void unmask();
 
@@ -172,12 +153,9 @@ namespace MDEvents
     // the pointer to the class, responsible for saving/restoring this class to the hdd
     mutable MDBoxSaveable *m_Saveable;
     /// Mutex for modifying the event list
-    Mantid::Kernel::Mutex dataMutex;
- 
-    /** Vector of MDLeanEvent's, in no particular order.
-     * */
+    Mantid::Kernel::Mutex dataMutex; 
+    /** Vector of MDLeanEvent's, in no particular order. */
     mutable std::vector< MDE > data;
-
 
      /// Flag indicating that masking has been applied.
     bool m_bIsMasked;

@@ -31,32 +31,32 @@
 #include <memory>
 #include <Poco/File.h>
 #include <vector>
-//#include <gmock/gmock.h>
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-//using namespace testing;
+using namespace testing;
 
 class MDGridBoxTest :    public CxxTest::TestSuite
 {
 private:
   
-  /*///Mock type to help determine if masking is being determined correctly
-  class MockMDBox : public MDBox<MDLeanEvent<1>, 1>
+  ///Mock type to help determine if masking is being determined correctly
+    class MockMDBox : public MDBox<MDLeanEvent<1>, 1>
   {
   public:
-      MockMDBox(BoxController_sptr ctrl):
-          MDBox<MDLeanEvent<1>, 1>(ctrl.get())
-      {}
- */   //MOCK_CONST_METHOD0(getIsMasked, bool());
-    //;MOCK_METHOD0(mask, void());
-    //MOCK_METHOD0(unmask, void());
- // };
+      MockMDBox():MDBox<MDLeanEvent<1>, 1>(NULL){};
+      MOCK_CONST_METHOD0(getIsMasked, bool());
+      MOCK_METHOD0(mask, void());
+      MOCK_METHOD0(unmask, void());
+  };
 
-    BoxController_sptr gbc;
+  // the sp to a box controller used as general reference to all tested classes/operations including MockMDBox
+   BoxController_sptr gbc;
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -86,31 +86,33 @@ public:
     BoxController *const bcc = b->getBoxController();
     delete b;
     delete bcc;
+    if(DODEBUG)
+    {
+        std::cout << sizeof( MDLeanEvent<3>) << " bytes per MDLeanEvent(3)" << std::endl;
+        std::cout << sizeof( MDLeanEvent<4>) << " bytes per MDLeanEvent(4)" << std::endl;
+        std::cout << sizeof( Mantid::Kernel::Mutex ) << " bytes per Mutex" << std::endl;
+        std::cout << sizeof( MDDimensionExtents<coord_t>) << " bytes per MDDimensionExtents" << std::endl;
+        std::cout << sizeof( MDBox<MDLeanEvent<3>,3>) << " bytes per MDBox(3)" << std::endl;
+        std::cout << sizeof( MDBox<MDLeanEvent<4>,4> ) << " bytes per MDBox(4)" << std::endl;
+        std::cout << sizeof( MDGridBox<MDLeanEvent<3>,3>) << " bytes per MDGridBox(3)" << std::endl;
+        std::cout << sizeof( MDGridBox<MDLeanEvent<4>,4> ) << " bytes per MDGridBox(4)" << std::endl;
 
-//    std::cout << sizeof( MDLeanEvent<3>) << " bytes per MDLeanEvent(3)" << std::endl;
-//    std::cout << sizeof( MDLeanEvent<4>) << " bytes per MDLeanEvent(4)" << std::endl;
-//    std::cout << sizeof( Mantid::Kernel::Mutex ) << " bytes per Mutex" << std::endl;
-//    std::cout << sizeof( MDDimensionExtents) << " bytes per MDDimensionExtents" << std::endl;
-//    std::cout << sizeof( MDBox<MDLeanEvent<3>,3>) << " bytes per MDBox(3)" << std::endl;
-//    std::cout << sizeof( MDBox<MDLeanEvent<4>,4> ) << " bytes per MDBox(4)" << std::endl;
-//    std::cout << sizeof( MDGridBox<MDLeanEvent<3>,3>) << " bytes per MDGridBox(3)" << std::endl;
-//    std::cout << sizeof( MDGridBox<MDLeanEvent<4>,4> ) << " bytes per MDGridBox(4)" << std::endl;
-//
-//    MemoryStats mem;
-//    size_t start = mem.availMem();
-//    std::cout << start << " KB before" << std::endl;
-//    CPUTimer tim;
-//    for (size_t i=0; i<1000000; i++)
-//    {
-//      MDBox<MDLeanEvent<3>,3> * box = new MDBox<MDLeanEvent<3>,3>();
-//      (void) box;
-//    }
-//    std::cout << tim << " to allocate a million boxes" << std::endl;
-//    mem.update();
-//    size_t stop = mem.availMem();
-//    std::cout << stop << " KB after " << std::endl;
-//    std::cout << start-stop << " KB change " << std::endl;
-//    std::cout << (start-stop)*1024 / sizeof( MDBox<MDLeanEvent<3>,3>) << " times the sizeof MDBox3" << std::endl;
+        MemoryStats mem;
+        size_t start = mem.availMem();
+        std::cout << start << " KB before" << std::endl;
+        CPUTimer tim;
+        for (size_t i=0; i<1000000; i++)
+        {
+          MDBox<MDLeanEvent<3>,3> * box = new MDBox<MDLeanEvent<3>,3>(NULL);
+          (void) box;
+        }
+        std::cout << tim << " to allocate a million boxes" << std::endl;
+        mem.update();
+        size_t stop = mem.availMem();
+        std::cout << stop << " KB after " << std::endl;
+        std::cout << start-stop << " KB change " << std::endl;
+        std::cout << (start-stop)*1024 / sizeof( MDBox<MDLeanEvent<3>,3>) << " times the sizeof MDBox3" << std::endl;
+    }
   }
 
 
@@ -1414,10 +1416,10 @@ public:
 
   //void test_getIsMasked_WhenNoMasking()
   //{
-  //  std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
+  //    std::vector<API::IMDNode *> boxes;
 
-  //  MockMDBox* a = new MockMDBox(gbc);
-  //  MockMDBox* b = new MockMDBox(gbc);
+  //  MockMDBox* a = new MockMDBox;
+  //  MockMDBox* b = new MockMDBox;
 
   //  EXPECT_CALL(*a, getIsMasked()).Times(1).WillOnce(Return(false)); //Not masked
   //  EXPECT_CALL(*b, getIsMasked()).Times(1).WillOnce(Return(false)); //Not masked
@@ -1425,7 +1427,7 @@ public:
   //  boxes.push_back(a);
   //  boxes.push_back(b);
 
-  //  MDGridBox<MDLeanEvent<1>,1> g;
+  //  MDGridBox<MDLeanEvent<1>,1> g(NULL);
   //  g.setChildren(boxes, 0, 2);
 
   //  TSM_ASSERT("No inner boxes were masked so the MDGridBox should not report that it is masked", !g.getIsMasked());
@@ -1433,7 +1435,7 @@ public:
   //  TS_ASSERT(Mock::VerifyAndClearExpectations(b));
   //}
 
-  //void test_getIsMasked_WhenFirstMasked()
+  ////void test_getIsMasked_WhenFirstMasked()
   //{
   //  std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
 

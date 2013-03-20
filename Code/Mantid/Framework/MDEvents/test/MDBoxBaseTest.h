@@ -112,7 +112,7 @@ public:
   {}
   virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL){}; 
   virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL){};
-  virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
+  //virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
   virtual void calculateCentroid(coord_t * /*centroid*/) const{};
 
   virtual void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const {};
