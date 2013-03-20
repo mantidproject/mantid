@@ -25,10 +25,10 @@
 CMD_NAME="test"
 # Branch to merge to for testing
 PRODUCTION_BRANCH="master"
+# Branch for buildserver support
+BUILDER_BRANCH="develop"
 # Config key to store tested branch
 BRANCH_CFG_KEY=mantid.workflow.testbranch
-# Changes filename
-CHANGESFILE_CFG_KEY=mantid.workflow.changesfilename
 
 # Set git to merge silently if everything succceeded
 # See http://git-blame.blogspot.co.uk/2012/02/anticipating-git-1710.html
@@ -41,6 +41,7 @@ export CMDFILE_DIR=$(dirname "$(echo "$0" | sed -e 's@\\@/@g')")
 
 usage() {
     echo "Usage: git ${CMD_NAME} start <branchname>"
+    echo "       git ${CMD_NAME} review"
     echo "       git ${CMD_NAME} pass|fail"
     echo
     echo "In the first form start testing the given <branchname> by checking out ${PRODUCTION_BRANCH} and merging it."
@@ -52,7 +53,12 @@ usage() {
     echo "  git reset --hard origin/${PRODUCTION_BRANCH} (Ensures it looks exactly like origin/${PRODUCTION_BRANCH})"
     echo "  git merge --no-ff <branchname>"
     echo
-    echo "In the second form assume testing has started and indicates success/failure. If they"
+    echo "In the second form assume testing has started and open the compare view on github so that the"
+    echo "changes can be reviewed"
+    echo "Equivalent to:"
+    echo "  git web--browse https://github.com/mantidproject/[REPO]/compare/[branchname]"
+    echo
+    echo "In the third form assume testing has started and indicates success/failure. If they"
     echo "  passed: The commits are pushed to origin --> 'git push origin ${PRODUCTION_BRANCH}'"
     echo "  failed: The merged commits are discarded --> 'git reset --hard origin/${PRODUCTION_BRANCH}'"
     echo
@@ -63,9 +69,10 @@ checkargs() {
     # Can't use getopt cross-platform
     # 2 args assumes the word start and then a string
     
-    TEST_BRANCH=""
+    ARG_TEST_BRANCH=""
     START_MODE=0
     RESULT_MODE=0
+    REVIEW_MODE=0
     TEST_PASSED=0
     
     if [ $# -eq 2 ]; then
@@ -74,12 +81,15 @@ checkargs() {
             exit 1
         fi
         START_MODE=1
-        TEST_BRANCH=$2
+        ARG_TEST_BRANCH=$2
     elif [ $# -eq 1 ]; then
-        RESULT_MODE=1
-        if [ "$1" = "pass" ]; then
+	if [ "$1" = "review" ]; then
+	    REVIEW_MODE=1
+	elif [ "$1" = "pass" ]; then
+            RESULT_MODE=1
             TEST_PASSED=1
         elif [ "$1" = "fail" ]; then
+            RESULT_MODE=1
             TEST_PASSED=0
         else
             usage
@@ -103,12 +113,27 @@ start_testing() {
     # Ensure we have everything from the remote
     git_halt_on_error fetch -p
 
-    # Is the name correct
-    remote_branch_exists ${TEST_BRANCH}
+    remote_testbranch=$(find_branch_on_remote ${ARG_TEST_BRANCH})
+    if [ -z "$remote_testbranch" ]; then
+	echo "Cannot find branch on remote using hint '${ARG_TEST_BRANCH}'."
+	echo "Please give full name (without origin/ prefix)."
+	exit 1
+    fi
+
+    # Check if the branch has been fully merged to develop
+    local_testbranch=${remote_testbranch#"origin/"}
+    branch_is_merged ${remote_testbranch} origin/${BUILDER_BRANCH}
     if [ $? -eq 0 ]; then
-        echo "Cannot find branch \"${TEST_BRANCH}\" on the remote. Is the name correct?"
-        exit 1
-    fi    
+	author_name=$(get_author_name ${remote_testbranch})
+	author_email=$(get_author_email ${remote_testbranch})
+	echo "ERROR: Branch '${local_testbranch}' has not been fully merged to ${BUILDER_BRANCH},"
+	echo "meaning it is not possible to know whether the code is valid on all environments."
+	echo
+	echo "Contact ${author_name} on ${author_email} (or via skype) and ask them to merge the code"
+	echo "to ${BUILDER_BRANCH} using 'git checkbuild' from their branch ${local_testbranch} and let you know when"
+	echo "it passes testing on the buildservers so you can start testing."
+	exit 1
+    fi
 
     startbranch=$(current_branch)
     if [ "${startbranch}" != "${PRODUCTION_BRANCH}" ]; then
@@ -125,8 +150,8 @@ start_testing() {
     # Update master
     git_halt_on_error rebase --preserve-merges origin/${PRODUCTION_BRANCH}
     
-    # Merge test branch
-    git_ignore_errors merge --no-ff origin/${TEST_BRANCH}
+    # Merge test branch (name includes remote name)
+    git_ignore_errors merge --no-ff ${remote_testbranch}
     if [ $? -gt 0 ]; then
 	echo
 	echo "WARNING: There were conflicts during the merge. If they are trivial please fix them, "
@@ -135,28 +160,17 @@ start_testing() {
 	exit 1
     fi
 
-    # Save a file of the changes made on this branch for review and point the tester to 
-    # a prettier version on github
-    # Direct tester to a pretty version of changes on branch on github
-    # If the branchname contains forward slashes they must be converted to semi-colons for github and underscores for the filename
-    changes_branch_gh=$(echo ${TEST_BRANCH} | sed -e "s@/@;@g")
-    changes_branch_file=$(echo ${TEST_BRANCH} | sed -e "s@/@_@g")
-    repo_stem=$(git config --get remote.origin.url | sed -e 's@.*github.com[:,/]@@' | sed -e 's@\.git$@@')
-    changes_address="https://github.com/${repo_stem}/compare/${changes_branch_gh}"
-
-    changes_file=${HOME}/${changes_branch_file}"_log"
-    git log HEAD --not origin/master > "${changes_file}"
+    # Prompt user to examine changes
+    changes_url=$(github_compare_url ${local_testbranch})
 
     # Record what we are testing for later pass/fail
-    git config ${BRANCH_CFG_KEY} ${TEST_BRANCH}
-    # Record the file for deletion later
-    git config ${CHANGESFILE_CFG_KEY} ${changes_file}
+    git config ${BRANCH_CFG_KEY} ${local_testbranch}
 
     echo
-    echo "The log of the set of changes made on this branch has been saved to ${changes_file}"
-    echo "For a more readable version please visit ${changes_address}"
+    echo "To review the changes that have been made on this branch run 'git test review'"
+    echo "(This will open the default browser & point it to: ${changes_url} "
     echo
-    echo "The code should be reviewed, built & the feature tested."
+    echo "Along with the review the code should now be built & the feature tested."
     echo "When complete if:"
     echo "  success: run 'git test pass'"
     echo "  failure: run 'git test fail'"
@@ -165,8 +179,8 @@ start_testing() {
 }
 
 end_testing() {
-    testbranch=$(git config ${BRANCH_CFG_KEY})
-    if [ -z ${testbranch} ]; then
+    local_testbranch=$(git config ${BRANCH_CFG_KEY})
+    if [ -z ${local_testbranch} ]; then
         echo "The name of the test branch has not been recorded in the config. Was the testing started with 'git test start'?"
         exit 1
     fi
@@ -175,31 +189,36 @@ end_testing() {
 	publish=""
 	while [ "$publish" != "y" -a "$publish" != "n" ];
 	do
-	    echo -n "Testing passed on ${testbranch}. Push master to remote (y/n): "
+	    echo -n "Testing passed on ${local_testbranch}. Push master to remote (y/n): "
 	    read publish
 	done
 	if [ "${publish}" = "y" ]; then
 	    update_branch_from_remote ${PRODUCTION_BRANCH}
 	    publish_branch ${PRODUCTION_BRANCH}
-	    delete_remote_branch ${testbranch}
-	    delete_local_branch ${testbranch}
+	    delete_remote_branch ${local_testbranch}
+	    delete_local_branch ${local_testbranch}
 	else
 	    echo "Warning: Branch is still merged locally but has NOT been pushed to the remote."
 	    exit 0
 	fi
     else
-	echo "Testing failed on branch ${testbranch}. ${PRODUCTION_BRANCH} reset to origin/${PRODUCTION_BRANCH}"
+	echo "Testing failed on branch ${local_testbranch}. ${PRODUCTION_BRANCH} reset to origin/${PRODUCTION_BRANCH}"
         git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
     fi
 
-    # Remove the stored keys & changes file
-    changes_file=$(git config ${CHANGESFILE_CFG_KEY})
-    if [ -f "${changes_file}" ]; then
-	rm -f ${changes_file}
-    fi
-    
+    # Clear saved config
     git config --unset ${BRANCH_CFG_KEY}
-    git config --unset ${CHANGESFILE_CFG_KEY}
+
+}
+
+review_changes() {
+    local_testbranch=$(git config ${BRANCH_CFG_KEY})
+    if [ -z ${local_testbranch} ]; then
+        echo "The name of the test branch has not been recorded in the config. Was the testing started with 'git test start'?"
+        exit 1
+    fi
+    changes_url=$(github_compare_url ${local_testbranch})
+    git_halt_on_error web--browse ${changes_url}
 }
 
 main() {
@@ -227,6 +246,8 @@ main() {
 
     if [ $START_MODE -eq 1 ]; then
         start_testing
+    elif [ $REVIEW_MODE -eq 1 ]; then
+	review_changes
     elif [ $RESULT_MODE -eq 1 ]; then
         end_testing
     fi

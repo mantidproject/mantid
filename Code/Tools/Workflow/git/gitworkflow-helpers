@@ -54,6 +54,21 @@ check_branch_exists() {
     fi
 }
 
+# Given a hint try and find the branch on the remote
+# If the name resolves unambigously then the branchname is returned, otherwise
+# and empty string is returned
+find_branch_on_remote() {
+    if [ ! $# -eq 1 ]; then
+	echo "find_branch_on_remote requires a hint"
+	exit 1
+    fi
+    remote_branches=$(git branch -r --no-color | grep -E "${1}" | grep origin)
+    nbranches=$(echo "${remote_branches}" | wc -l) # the quotes are necessary to make it keep the separate lines!
+    if [ $nbranches -eq 1 ]; then
+	echo ${remote_branches}
+    fi
+}
+
 # Returns the name of the current branch
 current_branch() {
     git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
@@ -128,7 +143,7 @@ publish_branch() {
 	exit 1
     fi
     
-     git_halt_on_error push origin $1
+    git_halt_on_error push origin $1
 }
 
 # Update given local branch to remote
@@ -166,4 +181,34 @@ delete_local_branch() {
     if [ $? -eq 1 ]; then
 	git_halt_on_error branch -D $1
     fi
+}
+
+# Construct address for compare view on github given the branch name
+github_compare_url() {
+    if [ ! $# -eq 1 ]; then
+	echo "github_compare_address requires a single argument giving the branch name"
+    fi
+    # Any forward slashes must be replaced with semicolons
+    changes_branch_gh=$(echo $1 | sed -e "s@/@;@g")
+    # Find which repository we are in
+    repo_stem=$(git config --get remote.origin.url | sed -e 's@.*github.com[:,/]@@' | sed -e 's@\.git$@@')
+    changes_address="https://github.com/${repo_stem}/compare/${changes_branch_gh}"
+    # Echo so it can be caputured in a variable
+    echo ${changes_address}
+}
+
+# Get the author name
+get_author_name() {
+    if [ ! $# -eq 1 ]; then
+	echo "get_contact_info requires a single argument giving the branch name"
+    fi
+    git log -1 $1 --format="format:%an"
+}
+
+# Get the author name
+get_author_email() {
+    if [ ! $# -eq 1 ]; then
+	echo "get_contact_info requires a single argument giving the branch name"
+    fi
+    git log -1 $1 --format="format:%ae"
 }

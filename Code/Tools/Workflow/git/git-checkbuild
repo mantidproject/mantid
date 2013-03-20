@@ -69,8 +69,15 @@ checkargs() {
 start_on_feature() {
     mergebranch=$(current_branch)
     # No need to be careful about the state of develop so kill the local branch and recreate it
-    echo "Starting from branch ${mergebranch}. Deleting and recreating local copy of ${BUILD_BRANCH}"
-    git_halt_on_error branch -D ${BUILD_BRANCH}
+    echo "Starting from branch ${mergebranch}."
+
+    local_branch_exists ${BUILD_BRANCH}
+    if [ $? -eq 1 ]; then
+	echo "Deleting local copy of ${BUILD_BRANCH}"
+	git_halt_on_error branch -D ${BUILD_BRANCH}
+    fi
+
+    echo "Creating local copy of ${BUILD_BRANCH}"
     git_halt_on_error fetch -p
     git_halt_on_error checkout ${BUILD_BRANCH}
     
