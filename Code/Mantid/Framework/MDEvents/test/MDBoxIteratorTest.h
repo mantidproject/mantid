@@ -62,21 +62,21 @@ public:
     B2 = dynamic_cast<gbox_t *>(A->getChild(2));
     B2->splitContents(1); // Split C21 into D210 to D212
 
-    B1 = A->getChild(1);
-    B3 = A->getChild(3);
-    TS_ASSERT_EQUALS( B1, A->getChild(1));
-    C00 = B0->getChild(0);
-    C01 = B0->getChild(1);
-    C02 = B0->getChild(2);
-    C03 = B0->getChild(3);
-    C20 = B2->getChild(0);
+    B1 = dynamic_cast<ibox_t *>(A->getChild(1));
+    B3 = dynamic_cast<ibox_t *>(A->getChild(3));
+    TS_ASSERT_EQUALS( B1, dynamic_cast<ibox_t *>(A->getChild(1)));
+    C00 = dynamic_cast<ibox_t *>(B0->getChild(0));
+    C01 = dynamic_cast<ibox_t *>(B0->getChild(1));
+    C02 = dynamic_cast<ibox_t *>(B0->getChild(2));
+    C03 = dynamic_cast<ibox_t *>(B0->getChild(3));
+    C20 = dynamic_cast<ibox_t *>(B2->getChild(0));
     C21 = dynamic_cast<gbox_t *>(B2->getChild(1));
-    C22 = B2->getChild(2);
-    C23 = B2->getChild(3);
-    D210 = C21->getChild(0);
-    D211 = C21->getChild(1);
-    D212 = C21->getChild(2);
-    D213 = C21->getChild(3);
+    C22 = dynamic_cast<ibox_t *>(B2->getChild(2));
+    C23 = dynamic_cast<ibox_t *>(B2->getChild(3));
+    D210 = dynamic_cast<ibox_t *>(C21->getChild(0));
+    D211 = dynamic_cast<ibox_t *>(C21->getChild(1));
+    D212 = dynamic_cast<ibox_t *>(C21->getChild(2));
+    D213 = dynamic_cast<ibox_t *>(C21->getChild(3));
   }
 
   //--------------------------------------------------------------------------------------
