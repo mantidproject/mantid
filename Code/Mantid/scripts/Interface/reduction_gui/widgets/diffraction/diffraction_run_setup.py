@@ -8,6 +8,7 @@ import reduction_gui.widgets.util as util
 
 from reduction_gui.reduction.diffraction.diffraction_run_setup_script import RunSetupScript 
 import ui.diffraction.ui_diffraction_run_setup
+import ui.diffraction.ui_diffraction_info
 
 #import mantid.simpleapi as api
 from mantid.api import *
@@ -52,7 +53,6 @@ class RunSetupWidget(BaseWidget):
         # Combo boxes
         self._content.saveas_combo.setCurrentIndex(1)
         self._content.unit_combo.setCurrentIndex(1)
-        self._content.extension_combo.setCurrentIndex(1)
         self._content.bintype_combo.setCurrentIndex(1)
 
         # Radio buttons
@@ -73,6 +73,7 @@ class RunSetupWidget(BaseWidget):
         self._content.emptyrun_edit.setEnabled(False)
         self._content.vanrun_edit.setEnabled(False)
         self._content.vanbkgdrun_edit.setEnabled(False)
+        self._content.resamplex_edit.setEnabled(False)
 
         # Constraints/Validator
         # Integers
@@ -129,6 +130,14 @@ class RunSetupWidget(BaseWidget):
                 self._disablevancorr_clicked) 
         self.connect(self._content.disablevanbkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
                 self._disablevanbkgdcorr_clicked) 
+
+        self.connect(self._content.usebin_button, QtCore.SIGNAL("clicked()"),
+                self._usebin_clicked)
+        self.connect(self._content.resamplex_button, QtCore.SIGNAL("clicked()"),
+                self._resamplex_clicked)
+
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+                self._show_help)
         
         # Validated widgets
 
@@ -141,9 +150,7 @@ class RunSetupWidget(BaseWidget):
         self._content.runnumbers_edit.setText(state.runnumbers)
         self._content.calfile_edit.setText(state.calibfilename)
         self._content.charfile_edit.setText(state.charfilename)
-        self._content.preserveevents_checkbox.setChecked(state.preserveevents)
         self._content.sum_checkbox.setChecked(state.dosum)
-        self._content.extension_combo.setCurrentIndex(self._content.extension_combo.findText(state.extension))
         self._content.binning_edit.setText(str(state.binning))
         state.binning = float(state.binning)
         if state.binning > 0.0:
@@ -197,9 +204,7 @@ class RunSetupWidget(BaseWidget):
 
         s.calibfilename = self._content.calfile_edit.text()
         s.charfilename = self._content.charfile_edit.text()
-        s.preserveevents = self._content.preserveevents_checkbox.isChecked()
         s.dosum = self._content.sum_checkbox.isChecked()
-        s.extension = str(self._content.extension_combo.currentText())
         s.binning = self._content.binning_edit.text()
         bintypestr = self._content.bintype_combo.currentText()
         if s.binning != "" and s.binning is not None:
@@ -393,3 +398,34 @@ class RunSetupWidget(BaseWidget):
 
         return
 
+    def _usebin_clicked(self):
+        """ Handling event if 'Binning' button is clicked
+        """
+        if self._content.usebin_button.isChecked() is True:
+            self._content.binning_edit.setEnabled(True)
+            self._content.resamplex_edit.setEnabled(False)
+        else:
+            self._content.binning_edit.setEnabled(False)
+            self._content.resamplex_edit.setEnabled(True)
+
+        return
+
+    def _resamplex_clicked(self):
+        """ Handling event if 'ResampleX' is clicked
+        """
+        if self._content.resamplex_button.isChecked() is True:
+            self._content.binning_edit.setEnabled(False)
+            self._content.resamplex_edit.setEnabled(True)
+        else:
+            self._content.binning_edit.setEnabled(True)
+            self._content.resamplex_edit.setEnabled(False)
+        
+        return
+
+    def _show_help(self):
+        class HelpDialog(QtGui.QDialog, ui.diffraction.ui_diffraction_info.Ui_Dialog): 
+            def __init__(self, parent=None):
+                QtGui.QDialog.__init__(self, parent)
+                self.setupUi(self)
+        dialog = HelpDialog(self)
+        dialog.exec_()

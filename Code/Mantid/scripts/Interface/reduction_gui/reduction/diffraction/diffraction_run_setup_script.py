@@ -17,9 +17,7 @@ class RunSetupScript(BaseScriptElement):
     runnumbers = ""
     calibfilename = ""
     charfilename = ""
-    preserveevents = False
     dosum = False
-    extension = "_event.nxs"
     binning = -0.0001
     binningtype = "Logarithmic"
     tofmin = ""
@@ -57,8 +55,6 @@ class RunSetupScript(BaseScriptElement):
         """
         self.parnamelist = []
         self.parnamelist.append("RunNumber")
-        self.parnamelist.append("Extension")
-        self.parnamelist.append("PreserveEvents")
         self.parnamelist.append("Sum")
         self.parnamelist.append("CalibrationFile")
         self.parnamelist.append("CharacterizationRunsFile")
@@ -85,8 +81,6 @@ class RunSetupScript(BaseScriptElement):
         pardict = {}
 
         pardict["RunNumber"] = str(self.runnumbers)
-        pardict["Extension"] = str(self.extension)
-        pardict["PreserveEvents"] = str(int(self.preserveevents))
         pardict["Sum"] = str(int(self.dosum))
         pardict["CalibrationFile"] = self.calibfilename
         pardict["CharacterizationRunsFile"] = self.charfilename
@@ -169,12 +163,6 @@ class RunSetupScript(BaseScriptElement):
             self.runnumbers = BaseScriptElement.getStringElement(instrument_dom, 
                     "runnumber", default=RunSetupScript.runnumbers)
 
-            self.extension = BaseScriptElement.getStringElement(instrument_dom, 
-                    "extension", default=RunSetupScript.extension)
-
-            tempbool = BaseScriptElement.getStringElement(instrument_dom, 
-                    "preserveevents", default=str(int(RunSetupScript.preserveevents)))
-            self.preserveevents = bool(int(tempbool))
 
             tempbool = BaseScriptElement.getStringElement(instrument_dom, 
                     "sum", default=str(int(RunSetupScript.dosum)))
@@ -249,9 +237,7 @@ class RunSetupScript(BaseScriptElement):
         self.runnumbers = RunSetupScript.runnumbers
         self.calibfilename = RunSetupScript.calibfilename 
         self.charfilename  = RunSetupScript.charfilename 
-        self.reserveevents = RunSetupScript.preserveevents
         self.dosum = RunSetupScript.dosum 
-        self.extension = RunSetupScript.extension 
         self.binning = RunSetupScript.binning 
         self.resamplex = RunSetupScript.resamplex 
         self.binindspace = RunSetupScript.binindspace 

@@ -101,7 +101,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         filterdict = paramdict["FilterSetupWidget"]
 
         # 2. Obtain some information
-        datafilenames = self.getDataFileNames(runsetupdict)
+        datafilenames = self.getDataFileNames(runsetupdict, advsetupdict)
         if len(datafilenames) == 0:
             raise NotImplementedError("RunNumber cannot be neglected. ")
 
@@ -200,7 +200,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         return dofilter
 
 
-    def getDataFileNames(self, runsetupdict):
+    def getDataFileNames(self, runsetupdict, advsetupdict):
         """ Obtain the data file names (run names + SUFFIX)
 
         Return: list of files
@@ -261,7 +261,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         # ENDFOR: term
 
         # 2. Attach file extension 
-        extension = runsetupdict["Extension"].replace("\"", "").replace("'", "")
+        extension = advsetupdict["Extension"].replace("\"", "").replace("'", "")
         for run in runnumbers:
             filename = str(self.instrument_name +"_" + str(run) + extension)
             datafilenames.append((run, filename))

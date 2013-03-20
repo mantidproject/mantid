@@ -8,6 +8,7 @@ import reduction_gui.widgets.util as util
 
 from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript 
 import ui.diffraction.ui_diffraction_adv_setup
+import ui.diffraction.ui_diffraction_info
 
 class AdvancedSetupWidget(BaseWidget):
     """ Widget that presents run setup including sample run, optional vanadium run and etc.
@@ -73,11 +74,21 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vanpeaktol_edit.setValidator(dv6)
 
         # Default states
+        self._content.extension_combo.setCurrentIndex(1)
+
+        self._content.stripvanpeaks_chkbox.setChecked(False)
+        self._content.vanpeakfwhm_edit.setEnabled(False)
+        self._content.vansmoothpar_edit.setEnabled(False)
+        self._content.vanpeaktol_edit.setEnabled(False)
 
         # self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
         
         # Connections from action/event to function to handle 
+        self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),
+                self._stripvanpeaks_clicked)
 
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+                self._show_help)
         # Hanlder for events
         
         # Validated widgets
@@ -101,6 +112,9 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vanpeaktol_edit.setText(str(state.vanadiumpeaktol))
         self._content.vansmoothpar_edit.setText(str(state.vanadiumsmoothparams))
 
+        self._content.preserveevents_checkbox.setChecked(state.preserveevents)
+        self._content.extension_combo.setCurrentIndex(self._content.extension_combo.findText(state.extension))
+
         return
 
 
@@ -123,6 +137,9 @@ class AdvancedSetupWidget(BaseWidget):
         s.vanadiumpeaktol = self._content.vanpeaktol_edit.text()
         s.vanadiumsmoothparams = self._content.vansmoothpar_edit.text()
 
+        s.preserveevents = self._content.preserveevents_checkbox.isChecked()
+        s.extension = str(self._content.extension_combo.currentText())
+
         return s
 
 
@@ -132,4 +149,31 @@ class AdvancedSetupWidget(BaseWidget):
         self._instrument_name = str(self._content.instrument_combo.currentText())
 
         return
+
+    def _stripvanpeaks_clicked(self):
+        """ Handling if strip-vanadium-peak check box is clicked
+        """
+        if self._content.stripvanpeaks_chkbox.isChecked() is True:
+            # Enable all the edits
+            self._content.vanpeakfwhm_edit.setEnabled(True)
+            self._content.vansmoothpar_edit.setEnabled(True)
+            self._content.vanpeaktol_edit.setEnabled(True)
+        else:
+            # Disable all the edits
+            self._content.vanpeakfwhm_edit.setEnabled(False)
+            self._content.vansmoothpar_edit.setEnabled(False)
+            self._content.vanpeaktol_edit.setEnabled(False)
+
+        return
+
+    def _show_help(self):
+        class HelpDialog(QtGui.QDialog, ui.diffraction.ui_diffraction_info.Ui_Dialog): 
+            def __init__(self, parent=None):
+                QtGui.QDialog.__init__(self, parent)
+                self.setupUi(self)
+        dialog = HelpDialog(self)
+        dialog.exec_()
+
+        return
+
 #ENDCLASSDEF
