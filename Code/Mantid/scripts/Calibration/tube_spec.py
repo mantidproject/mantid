@@ -109,7 +109,7 @@ class TubeSpec:
             return self.component
         
         # We look for the component    
-        #print self.specString, 
+        print "Looking for", self.specString, 
         
         comp = self.inst.getComponentByName(self.specString)
 
@@ -141,7 +141,20 @@ class TubeSpec:
 	if(comp != 0):
             firstDet = comp[0].getID()
 	    numDet = comp.nelements()
+	    # Allow for reverse numbering of Detectors
+	    lastDet = comp[numDet-1].getID()
+	    if (lastDet < firstDet):
+	       if( firstDet - lastDet + 1 != numDet):
+	       	  print "Detector number range",firstDet-lastDet+1," not equal to number of detectors",numDet
+	          print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
+	       firstDet = lastDet
+	    else:
+	       if( lastDet - firstDet + 1 != numDet):
+	       	  print "Detector number range",lastDet-firstDet+1," not equal to number of detectors",numDet
+	          print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
+	          
             #print "First dectector ", firstDet," Last detector ", firstDet+numDet-1, "Number of detectors ", numDet
+            #print "First dectector ", firstDet," Last detector ", comp[numDet-1].getID()
         else:
             print self.specString, tubeIx, "not found"
             return 0, 0
@@ -214,8 +227,8 @@ class TubeSpec:
         """
 	firstDet, numDet = self.getDetectorInfoFromTube( tubeIx )			   
         wkIds = []
-        #print " First dectector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
-        #print "Histograms", self.ws.getNumberHistograms()
+        # print " First dectector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
+        # print "Histograms", self.ws.getNumberHistograms()
         
         # First check we have one detector per histogram/workpsaceID/spectrum
         sp = self.ws.getSpectrum(10)
@@ -235,7 +248,7 @@ class TubeSpec:
 	             if (detID  >= firstDet and detID < firstDet+numDet):
 	                 iPixel = detID - firstDet
 	                 wkIds = range( i - iPixel, i - iPixel + numDet)
-	                 #print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
+	                 # print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
 
         else: #We can't assume continuous indices within tube, must loop over all indices (there are many). 
             if( numDet > 0):
