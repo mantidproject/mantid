@@ -170,11 +170,7 @@ void IndirectDiffractionReduction::instrumentSelected(int)
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
-  if ( pyOutput == "" )
-  {
-    showInformationBox("Could not get list of analysers from Instrument Parameter file.");
-  }
-  else
+  if(pyOutput.length() > 0)
   {
     QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
 
@@ -199,31 +195,35 @@ void IndirectDiffractionReduction::instrumentSelected(int)
     {
       m_uiForm.swReflections->setCurrentIndex(1);
     }
-    
-    reflectionSelected(m_uiForm.cbReflection->currentIndex());
+  }
+  else
+  {
+    m_uiForm.swReflections->setCurrentIndex(1);
+  }
 
-    m_uiForm.cbReflection->blockSignals(false);
+  reflectionSelected(m_uiForm.cbReflection->currentIndex());
+  m_uiForm.cbReflection->blockSignals(false);
 
-    pyInput = "from IndirectDiffractionReduction import getStringProperty\n"
+  pyInput = "from IndirectDiffractionReduction import getStringProperty\n"
       "print getStringProperty('__empty_" + m_uiForm.cbInst->currentText() + "', 'Workflow.Diffraction.Correction')\n";
 
-    pyOutput = runPythonCode(pyInput).trimmed();
+  pyOutput = runPythonCode(pyInput).trimmed();
 
-    if ( pyOutput == "Vanadium" )
-    {
-      m_uiForm.swVanadium->setCurrentIndex(0);
-    }
-    else
-    {
-      m_uiForm.swVanadium->setCurrentIndex(1);
-    }
-
-    // Turn off summing files options for OSIRIS.
-    if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
-      m_uiForm.dem_ckSumFiles->setEnabled(true);
-    else
-      m_uiForm.dem_ckSumFiles->setEnabled(false);
+  if ( pyOutput == "Vanadium" )
+  {
+    m_uiForm.swVanadium->setCurrentIndex(0);
   }
+  else
+  {
+    m_uiForm.swVanadium->setCurrentIndex(1);
+  }
+
+  // Turn off summing files options for OSIRIS.
+  if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
+    m_uiForm.dem_ckSumFiles->setEnabled(true);
+  else
+    m_uiForm.dem_ckSumFiles->setEnabled(false);
+
 }
 
 void IndirectDiffractionReduction::reflectionSelected(int)

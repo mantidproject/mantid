@@ -1,4 +1,4 @@
-from mantid.simpleapi import *
+from mantidsimple import *
 from msg_reducer import MSGReducer
 import inelastic_indirect_reduction_steps as steps
 
