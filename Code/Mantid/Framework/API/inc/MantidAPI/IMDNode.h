@@ -130,17 +130,14 @@ public:
     virtual const IMDNode * getBoxAtCoord(const coord_t * /*coords*/)=0;
     virtual void getCenter(coord_t *const  /*boxCenter*/)const =0;
     virtual  uint32_t getDepth() const=0;
-
+    virtual signal_t getSignalNormalized() const=0;
 
 
     // -------------------------------- Geometry/vertexes-Related -------------------------------------------
 
     virtual std::vector<Mantid::Kernel::VMD> getVertexes() const =0;
-
     virtual coord_t * getVertexesArray(size_t & numVertices) const=0;
-
     virtual coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const=0;
-
     virtual void transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)=0;
 
   // ----------------------------- Helper Methods --------------------------------------------------------

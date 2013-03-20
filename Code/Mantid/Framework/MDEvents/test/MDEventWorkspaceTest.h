@@ -387,8 +387,10 @@ public:
       }
     // So it doesn't split
     ws->getBoxController()->setSplitThreshold(1000);
+    // but split once to get grid box in the centre
+    ws->splitBox();
     //ws->addManyEvents( events, NULL );
-    ws->getBox()->addEvents(events);
+    ws->addEvents(events);
     ws->refreshCache();
 
     // Base extents
@@ -663,13 +665,12 @@ public:
   void test_splitting_performance_parallel()
   {
     auto ts_splitter = new ThreadSchedulerFIFO();
-    ThreadPool tp_splitter(ts_splitter,8);
+    ThreadPool tp_splitter(ts_splitter,4);
+    std::cout<<"Starting Workspace splitting performance test, 4 thread with "<<nBoxes <<" events \n";
     Kernel::Timer clock;
-    std::cout<<"Starting Workspace splitting performance test, 8 thread with "<<nBoxes <<" events \n";
     m_ws->splitAllIfNeeded(ts_splitter);
     tp_splitter.joinAll();
-    std::cout << clock.elapsed()<<std::endl;
-    std::cout<<"Finished Workspace splitting performance test, 8 threads in "<< clock.elapsed()<<" sec\n";
+    std::cout<<"Finished Workspace splitting performance test, 4 threads in "<< clock.elapsed()<<" sec\n";
   }
 };
 
