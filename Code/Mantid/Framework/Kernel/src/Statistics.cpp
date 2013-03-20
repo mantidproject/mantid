@@ -221,7 +221,7 @@ namespace Mantid
       * @param calY :: array of calculated intensity values;
       *
       */
-    double getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE)
+    DLLExport double getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE)
     {
       // 1. Check
       if (obsI.size() != calI.size() || obsI.size() != obsE.size())
