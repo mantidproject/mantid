@@ -208,6 +208,9 @@ void MantidEV::initLayout()
   QObject::connect( m_uiForm.actionLoad_Isaw_Peaks, SIGNAL(triggered()),
                     this, SLOT(loadIsawPeaks_slot()) );
 
+  QObject::connect( m_uiForm.actionShow_UB, SIGNAL(triggered()),
+                    this, SLOT(showUB_slot()) );
+
                           // connect the slots for enabling and disabling
                           // various subsets of widgets
    QObject::connect( m_uiForm.LoadEventFile_rbtn, SIGNAL(toggled(bool)),
@@ -1062,6 +1065,21 @@ void MantidEV::loadIsawPeaks_slot()
       return;
     }
   }
+}
+
+
+void MantidEV::showUB_slot()
+{
+  std::cout << "showUB_slot called..." << std::endl;
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+  if ( peaks_ws_name.length() == 0 )
+  {
+    errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
+    return;
+  }
+
+  if ( !worker->showUB( peaks_ws_name ) )
+    errorMessage("The specified workspace does not have a UB matrix");
 }
 
 

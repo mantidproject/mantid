@@ -227,6 +227,9 @@ private slots:
 
   /// Slot to load a peaks workspace to the current MantidEV named workspace
   void loadIsawPeaks_slot();
+
+  /// Slot to show the UB matrix
+  void showUB_slot();
   
   //
   // The following slots just take care of enabling and disabling

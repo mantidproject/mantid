@@ -7,6 +7,9 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+
 
 namespace MantidQt
 {
@@ -15,6 +18,9 @@ namespace CustomInterfaces
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+
+// Initialize the logger
+Logger& MantidEVWorker::g_log = Logger::get("MantidEV");
 
 
 MantidEVWorker::MantidEVWorker()
@@ -601,6 +607,61 @@ bool MantidEVWorker::ellipsoidIntegrate( const std::string & peaks_ws_name,
 
   std::cout << "IntegrateEllipsoids FAILED" << std::endl;
   return false;
+}
+
+
+bool MantidEVWorker::showUB( const std::string & peaks_ws_name )
+{
+  if ( !isPeaksWorkspace( peaks_ws_name ) )
+  {
+    return false;
+  }   
+
+  const auto& ADS = AnalysisDataService::Instance();
+  IPeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+
+  try
+  {
+    char logInfo[200];
+
+    Mantid::Geometry::OrientedLattice o_lattice = peaks_ws->mutableSample().getOrientedLattice();
+    Matrix<double> UB = o_lattice.getUB();
+
+    g_log.notice() << std::endl;
+    g_log.notice() << "Mantid UB = " << std::endl;
+    sprintf( logInfo,
+             std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f %12.8f\n %12.8f %12.8f %12.8f\n").c_str(),
+             UB[0][0], UB[0][1], UB[0][2],
+             UB[1][0], UB[1][1], UB[1][2],
+             UB[2][0], UB[2][1], UB[2][2] );
+    g_log.notice( std::string(logInfo) );
+
+    g_log.notice() << "ISAW UB = " << std::endl;
+    sprintf( logInfo,
+             std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f %12.8f\n %12.8f %12.8f %12.8f\n").c_str(),
+             UB[2][0], UB[0][0], UB[1][0],
+             UB[2][1], UB[0][1], UB[1][1],
+             UB[2][2], UB[0][2], UB[1][2] );
+    g_log.notice( std::string(logInfo) );
+    
+    double calc_a = o_lattice.a();
+    double calc_b = o_lattice.b();
+    double calc_c = o_lattice.c();
+    double calc_alpha = o_lattice.alpha();
+    double calc_beta  = o_lattice.beta();
+    double calc_gamma = o_lattice.gamma();
+                                       // Show the modified lattice parameters
+    sprintf( logInfo,
+             std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
+             calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
+    g_log.notice( std::string(logInfo) );
+  }
+  catch(...)
+  {
+    return false;
+  }
+
+  return true;
 }
 
 } // namespace CustomInterfaces

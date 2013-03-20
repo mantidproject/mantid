@@ -1,5 +1,7 @@
 
 #include <MantidKernel/System.h>
+#include "MantidKernel/Logger.h"
+
 
 #ifndef  INTERFACES_MANTID_EV_WORKER_H
 #define  INTERFACES_MANTID_EV_WORKER_H
@@ -148,9 +150,16 @@ public:
                                  double        inner_size,
                                  double        outer_size );
 
+  /// Display UB and lattice parameters in MantidPlot
+  bool showUB( const std::string & peaks_ws_name );
+
+private:
+
   /// Utility to get workspace ID from ADS, blank if none
   std::string workspaceType( const std::string & ws_name );  
 
+  /// Reference to a logger
+  static Mantid::Kernel::Logger & g_log;
 };
 
 }  // namespace CustomInterfaces 
