@@ -251,8 +251,6 @@ class TubeSpec:
 	             deti = self.ws.getDetector(i)
 	             detID = deti.getID()
 	             if (detID  >= startDet and detID < startDet+numDet):
-	                 # iPixel = detID - startDet
-	                 # wkIds = range( i - iPixel, i - iPixel + numDet)
 	                 iPixel = detID - firstDet
 	                 wkIds = range( i - iPixel, i - iPixel + step*numDet, step)
 	                 # print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
