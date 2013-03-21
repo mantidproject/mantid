@@ -156,69 +156,69 @@ namespace Mantid
 
 
 
-    ////----------------------------------------------------------------------------------------------
-    ///** Load the ExperimentInfo blocks, if any, in the NXS file
-    //*
-    //* @param ws :: MDEventWorkspace/MDHisto to load
-    //*/
-    //void LoadMD::loadExperimentInfos(boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws)
-    //{
-    //  // First, find how many experimentX blocks there are
-    //  std::map<std::string,std::string> entries;
-    //  file->getEntries(entries);
-    //  std::map<std::string,std::string>::iterator it = entries.begin();
-    //  std::vector<bool> hasExperimentBlock;
-    //  uint16_t numExperimentInfo = 0;
-    //  for (; it != entries.end(); ++it)
-    //  {
-    //    std::string name = it->first;
-    //    if (boost::starts_with(name, "experiment"))
-    //    {
-    //      try
-    //      {
-    //        uint16_t num = boost::lexical_cast<uint16_t>(name.substr(10, name.size()-10));
-    //        if (num+1 > numExperimentInfo)
-    //        {
-    //          numExperimentInfo = uint16_t(num+uint16_t(1));
-    //          hasExperimentBlock.resize(numExperimentInfo, false);
-    //          hasExperimentBlock[num] = true;
-    //        }
-    //      }
-    //      catch (boost::bad_lexical_cast &)
-    //      { /* ignore */ }
-    //    }
-    //  }
+    //----------------------------------------------------------------------------------------------
+    /** Load the ExperimentInfo blocks, if any, in the NXS file
+    *
+    * @param ws :: MDEventWorkspace/MDHisto to load
+    */
+    void LoadMD::loadExperimentInfos(boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws)
+    {
+      // First, find how many experimentX blocks there are
+      std::map<std::string,std::string> entries;
+      file->getEntries(entries);
+      std::map<std::string,std::string>::iterator it = entries.begin();
+      std::vector<bool> hasExperimentBlock;
+      uint16_t numExperimentInfo = 0;
+      for (; it != entries.end(); ++it)
+      {
+        std::string name = it->first;
+        if (boost::starts_with(name, "experiment"))
+        {
+          try
+          {
+            uint16_t num = boost::lexical_cast<uint16_t>(name.substr(10, name.size()-10));
+            if (num+1 > numExperimentInfo)
+            {
+              numExperimentInfo = uint16_t(num+uint16_t(1));
+              hasExperimentBlock.resize(numExperimentInfo, false);
+              hasExperimentBlock[num] = true;
+            }
+          }
+          catch (boost::bad_lexical_cast &)
+          { /* ignore */ }
+        }
+      }
 
-    //  // Now go through in order, loading and adding
-    //  for (uint16_t i=0; i < numExperimentInfo; i++)
-    //  {
-    //    std::string groupName = "experiment" + Strings::toString(i);
-    //    if (!numExperimentInfo)
-    //    {
-    //      g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName << ". Workspace will be missing ExperimentInfo." << std::endl;
-    //      break;
-    //    }
-    //    file->openGroup(groupName, "NXgroup");
-    //    ExperimentInfo_sptr ei(new ExperimentInfo);
-    //    std::string parameterStr;
-    //    try
-    //    {
-    //      // Get the sample, logs, instrument
-    //      ei->loadExperimentInfoNexus(file, parameterStr);
-    //      // Now do the parameter map
-    //      ei->readParameterMap(parameterStr);
-    //      // And set it in the workspace.
-    //      ws->addExperimentInfo(ei);
-    //    }
-    //    catch (std::exception & e)
-    //    {
-    //      g_log.information("Error loading section '" + groupName + "' of nxs file.");
-    //      g_log.information(e.what());
-    //    }
-    //    file->closeGroup();
-    //  }
+      // Now go through in order, loading and adding
+      for (uint16_t i=0; i < numExperimentInfo; i++)
+      {
+        std::string groupName = "experiment" + Strings::toString(i);
+        if (!numExperimentInfo)
+        {
+          g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName << ". Workspace will be missing ExperimentInfo." << std::endl;
+          break;
+        }
+        file->openGroup(groupName, "NXgroup");
+        ExperimentInfo_sptr ei(new ExperimentInfo);
+        std::string parameterStr;
+        try
+        {
+          // Get the sample, logs, instrument
+          ei->loadExperimentInfoNexus(file, parameterStr);
+          // Now do the parameter map
+          ei->readParameterMap(parameterStr);
+          // And set it in the workspace.
+          ws->addExperimentInfo(ei);
+        }
+        catch (std::exception & e)
+        {
+          g_log.information("Error loading section '" + groupName + "' of nxs file.");
+          g_log.information(e.what());
+        }
+        file->closeGroup();
+      }
 
-    //}
+    }
 
 
     ////----------------------------------------------------------------------------------------------
@@ -289,112 +289,112 @@ namespace Mantid
     //  {
     //    delete file;
     //  }
-    //}
+    }
 
-    ///**
-    // * Load a slab of double data into a bare array.
-    // * Checks that the size is correct.
-    // * @param name
-    // * @param data bare pointer to doublel array
-    // * @param ws
-    // * @param dataType
-    // */
-    //void LoadMD::loadSlab(std::string name, void * data, MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType)
-    //{
-    //  file->openData(name);
-    //  if (file->getInfo().type != dataType)
-    //    throw std::runtime_error("Unexpected data type for '" + name + "' data set.'");
-    //  if (file->getInfo().dims[0] != static_cast<int>(ws->getNPoints()))
-    //    throw std::runtime_error("Inconsistency between the number of points in '" + name + "' and the number of bins defined by the dimensions.");
-    //  std::vector<int> start(1,0);
-    //  std::vector<int> size(1, static_cast<int>(ws->getNPoints()));
-    //  file->getSlab(data, start, size);
-    //  file->closeData();
+    /**
+     * Load a slab of double data into a bare array.
+     * Checks that the size is correct.
+     * @param name
+     * @param data bare pointer to doublel array
+     * @param ws
+     * @param dataType
+     */
+    void LoadMD::loadSlab(std::string name, void * data, MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType)
+    {
+      file->openData(name);
+      if (file->getInfo().type != dataType)
+        throw std::runtime_error("Unexpected data type for '" + name + "' data set.'");
+      if (file->getInfo().dims[0] != static_cast<int>(ws->getNPoints()))
+        throw std::runtime_error("Inconsistency between the number of points in '" + name + "' and the number of bins defined by the dimensions.");
+      std::vector<int> start(1,0);
+      std::vector<int> size(1, static_cast<int>(ws->getNPoints()));
+      file->getSlab(data, start, size);
+      file->closeData();
    }
 
-    ////----------------------------------------------------------------------------------------------
-    ///** Perform loading for a MDHistoWorkspace.
-    //* The entry should be open already.
-    //*/
-    //void LoadMD::loadHisto()
-    //{
-    //  // Create the initial MDHisto.
-    //  MDHistoWorkspace_sptr ws(new MDHistoWorkspace(m_dims));
+    //----------------------------------------------------------------------------------------------
+   /** Perform loading for a MDHistoWorkspace.
+    * The entry should be open already.
+    */
+    void LoadMD::loadHisto()
+    {
+      // Create the initial MDHisto.
+      MDHistoWorkspace_sptr ws(new MDHistoWorkspace(m_dims));
 
-    //  // Now the ExperimentInfo
-    //  loadExperimentInfos(ws);
+      // Now the ExperimentInfo
+      loadExperimentInfos(ws);
 
-    //  // Load the WorkspaceHistory "process"
-    //  ws->history().loadNexus(file);
+      // Load the WorkspaceHistory "process"
+      ws->history().loadNexus(file);
 
-    //  // Load each data slab
-    //  this->loadSlab("signal", ws->getSignalArray(), ws, ::NeXus::FLOAT64);
-    //  this->loadSlab("errors_squared", ws->getErrorSquaredArray(), ws, ::NeXus::FLOAT64);
-    //  this->loadSlab("num_events", ws->getNumEventsArray(), ws, ::NeXus::FLOAT64);
-    //  this->loadSlab("mask", ws->getMaskArray(), ws, ::NeXus::INT8);
+      // Load each data slab
+      this->loadSlab("signal", ws->getSignalArray(), ws, ::NeXus::FLOAT64);
+      this->loadSlab("errors_squared", ws->getErrorSquaredArray(), ws, ::NeXus::FLOAT64);
+      this->loadSlab("num_events", ws->getNumEventsArray(), ws, ::NeXus::FLOAT64);
+      this->loadSlab("mask", ws->getMaskArray(), ws, ::NeXus::INT8);
 
-    //  file->close();
+      file->close();
 
-    //  // Save to output
-    //  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-    //}
-
-
-    ////----------------------------------------------------------------------------------------------
-    ///** Load all the dimensions into this->m_dims */
-    //void LoadMD::loadDimensions()
-    //{
-    //  m_dims.clear();
-
-    //  // Load each dimension, as their XML representation
-    //  for (size_t d=0; d<m_numDims; d++)
-    //  {
-    //    std::ostringstream mess;
-    //    mess << "dimension" << d;
-    //    std::string dimXML;
-    //    file->getAttr(mess.str(), dimXML);
-    //    // Use the dimension factory to read the XML
-    //    IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimXML);
-    //    IMDDimension_sptr dim(factory.create());
-    //    m_dims.push_back(dim);
-    //  }
-
-    //}
+      // Save to output
+      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    }
 
 
-    ////----------------------------------------------------------------------------------------------
-    ///** Do the loading.
-    //*
-    //* The file should be open at the entry level at this point.
-    //*
-    //* @param ws :: MDEventWorkspace of the given type
-    //*/
-    //template<typename MDE, size_t nd>
-    //void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws)
-    //{
+    //----------------------------------------------------------------------------------------------
+    /** Load all the dimensions into this->m_dims */
+    void LoadMD::loadDimensions()
+    {
+      m_dims.clear();
+
+      // Load each dimension, as their XML representation
+      for (size_t d=0; d<m_numDims; d++)
+      {
+        std::ostringstream mess;
+        mess << "dimension" << d;
+        std::string dimXML;
+        file->getAttr(mess.str(), dimXML);
+        // Use the dimension factory to read the XML
+        IMDDimensionFactory factory = IMDDimensionFactory::createDimensionFactory(dimXML);
+        IMDDimension_sptr dim(factory.create());
+        m_dims.push_back(dim);
+      }
+
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+    /** Do the loading.
+    *
+    * The file should be open at the entry level at this point.
+    *
+    * @param ws :: MDEventWorkspace of the given type
+    */
+    template<typename MDE, size_t nd>
+    void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws)
+    {
     //  // Are we using the file back end?
-    //  bool FileBackEnd = getProperty("FileBackEnd");
-    //  bool BoxStructureOnly = getProperty("BoxStructureOnly");
+      bool FileBackEnd = getProperty("FileBackEnd");
+      bool BoxStructureOnly = getProperty("BoxStructureOnly");
 
-    //  if (FileBackEnd && BoxStructureOnly)
-    //    throw std::invalid_argument("Both BoxStructureOnly and FileBackEnd were set to TRUE: this is not possible.");
+      if (FileBackEnd && BoxStructureOnly)
+         throw std::invalid_argument("Both BoxStructureOnly and FileBackEnd were set to TRUE: this is not possible.");
 
-    //  CPUTimer tim;
-    //  Progress * prog = new Progress(this, 0.0, 1.0, 100);
+      CPUTimer tim;
+      Progress * prog = new Progress(this, 0.0, 1.0, 100);
 
-    //  prog->report("Opening file.");
-    //  std::string title;
-    //  file->getAttr("title", title);
-    //  ws->setTitle("title");
+      prog->report("Opening file.");
+      std::string title;
+      file->getAttr("title", title);
+      ws->setTitle("title");
 
-    //  // Load the WorkspaceHistory "process"
-    //  ws->history().loadNexus(file);
+      // Load the WorkspaceHistory "process"
+      ws->history().loadNexus(file);
 
-    //  // Add each of the dimension
-    //  for (size_t d=0; d<nd; d++)
-    //    ws->addDimension(m_dims[d]);
+      // Add each of the dimension
+      for (size_t d=0; d<nd; d++)
+        ws->addDimension(m_dims[d]);
 
-    //  bool bMetadataOnly = getProperty("MetadataOnly");
+      bool bMetadataOnly = getProperty("MetadataOnly");
 
     //  // ----------------------------------------- Box Structure ------------------------------
     //  MDBoxFlatTree FlatBoxTree(m_filename);
@@ -473,9 +473,9 @@ namespace Mantid
     //  ws->refreshCache();
     //  g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh." << std::endl;
 
-    //  g_log.debug() << tim << " to finish up." << std::endl;
-    //  delete prog;
-    //}
+      g_log.debug() << tim << " to finish up." << std::endl;
+      delete prog;
+    }
 
 
   } // namespace Mantid

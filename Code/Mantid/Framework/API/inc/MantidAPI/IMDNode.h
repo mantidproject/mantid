@@ -18,7 +18,7 @@ namespace API
 class IMDNode 
 {
 public:
-    virtual ~IMDNode(){};
+    virtual ~IMDNode(){}; 
 //---------------- ISAVABLE
     virtual Kernel::ISaveable *const getISaveable()=0;
     virtual Kernel::ISaveable *const  getISaveable()const=0;        

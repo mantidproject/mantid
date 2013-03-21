@@ -1,5 +1,5 @@
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDBoxSaveable.h"
+#include "MantidMDEvents/MDBoxNXSaveable.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidKernel/DiskBuffer.h"
@@ -165,7 +165,9 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Returns the total number of points (events) in this box */
+  /** Returns the total number of points (events) in this box either they are all in memory, or on disk or partially on memory and partially on disk
+   * for partially loaded object substantially relies on correct settings of wasSaved and isLoaded switches of iSaveable object
+  */
   TMDE(
   uint64_t MDBox)::getNPoints() const
   {

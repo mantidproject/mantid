@@ -49,16 +49,7 @@ namespace Kernel
     //ISaveable(const ISaveable &other); --> no pointers, standard CC
     virtual ~ISaveable(){};
 
-    ////-----------------------------------------------------------------------------------------------
-    ///** Returns the unique ID for this object/box     */
-    //size_t getFileId() const
-    //{  return m_FileId;   }
-
-    ///** Sets the unique ID for this object/box
-    // * @param newId :: new ID value. */
-    //virtual void setFileId(size_t newId)
-    //{    m_FileId = newId;   }
-
+ 
     ///** @return the position in the file where the data will be stored. This is used to optimize file writing. */
     virtual uint64_t getFilePosition() const
     {   return m_fileIndexStart;   }

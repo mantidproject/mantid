@@ -1,4 +1,4 @@
-#ifndef MANTID_MDEVENTS_MDBOX_SAVEABLE_H
+#ifndef MANTID_MDEVENTS_MDBOX_NEXUSSAVEABLE_H
 #define MANTID_MDEVENTS_MDBOX_SAVEABLE_H
 
 #include "MantidKernel/Saveable.h"
@@ -10,7 +10,7 @@ namespace MDEvents
 {
 
   //===============================================================================================
-  /** The class responsible for implementing methods which automatically save/load MDBox in conjuction with 
+  /** The class responsible for implementing methods which automatically save/load MDBox into NEXus in conjuction with 
       DiskBuffer
 
       @date March 15, 2013
@@ -35,16 +35,21 @@ namespace MDEvents
       File change history is stored at: <https://github.com/mantidproject/mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-    class DLLExport MDBoxSaveable : public Kernel::Saveable
+    class DLLExport MDBoxNXSaveable : public Kernel::Saveable
     {
         public:
-            MDBoxSaveable(API::IMDNode *const, size_t ID);
+            MDBoxNXSaveable(API::IMDNode *const);
 
             /// Save the data to the place, specified by the object
             virtual void save();
 
             /// Load the data which are not in memory yet and merge them with the data in memory;
             virtual void load();
+            /// Method to flush the data to disk and ensure it is written.
+            virtual void flushData() const = 0;
+            /// remove objects data from memory !!!! wrond overload 
+            virtual void clearDataFromMemory()
+            {m_MDNode->clear();}
 
    
            /// @return the amount of memory that the object takes up in the MRU.
@@ -57,6 +62,20 @@ namespace MDEvents
         private:
             API::IMDNode *m_MDNode;
     };
+
+   static void prepareEventNexusData(::NeXus::File * file,const size_t DataChunk,const size_t nColumns,const std::string &descr);
+
+  //---------------------------------------------------------------------------------------------
+    /** Open the NXS event data blocks for loading.
+     *
+     * @param file :: open NXS file.
+     * @return the number of events currently in the data field.
+     */
+  static uint64_t openEventNexusData(::NeXus::File * file);
+
+  static void closeNexusData(::NeXus::File * file);
+
+
 
 }
 }

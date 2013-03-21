@@ -5,6 +5,8 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/Exception.h"
+#include "MantidAPI/IBoxControllerIO.h"
 #include <nexus/NeXusFile.hpp>
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -34,21 +36,20 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0),m_SplitThreshold(1024), m_numSplit(1), m_file(NULL), m_diskBuffer()//, m_useWriteBuffer(true)
+    :nd(nd), m_maxId(0),m_SplitThreshold(1024), m_numSplit(1), m_diskBuffer()//, m_useWriteBuffer(true)
       {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
       m_addingEvents_eventsPerTask = 1000;
       m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
       m_splitInto.resize(this->nd, 1);
-      m_DataChunk = 10000;
       resetNumBoxes();
     }
 
-    BoxController(const BoxController & other );
-
     virtual ~BoxController();
 
+    // create new box controller from the existing one
+    boost::shared_ptr<BoxController> clone()const;
     /// Serialize
     std::string toXMLString() const;
 
@@ -264,19 +265,6 @@ namespace API
       // Return true if the average # of events per box is big enough to split.
       return ((eventsAdded / numMDBoxes) > m_SplitThreshold);
     }
-    /**The method returns the data chunk (continious part of the NeXus array) used to write data on HDD */ 
-    size_t getDataChunk()const
-    {
-      return m_DataChunk;
-    }
-    /** The method used to load nexus data chunk size to the box controller. Used when loading MDEvent nexus file 
-        Disabled at the moment as it is unclear how to get acsess to physical size of NexUs data set and optimal chunk size should be physical Nexus chunk size
-    */ 
-    //void setChunkSize(size_t chunkSize)
-    //{
-    //  m_DataChunk = chunkSize;
-    // }
-
     //-----------------------------------------------------------------------------------
     /** Call to track the number of MDBoxes are contained in the MDEventWorkspace
      * This should be called when a MDBox gets split into a MDGridBox.
@@ -359,33 +347,6 @@ namespace API
       m_mutexNumMDBoxes.unlock();
     }
 
-
-    //-----------------------------------------------------------------------------------
-    /** @return the open NeXus file handle. NULL if not file-backed. */
-    ::NeXus::File * getFile() const
-    { return m_file; }
-
-    /** Sets the open Nexus file to use with file-based back-end
-     * @param file :: file handle
-     * @param filename :: full path to the file
-     * @param fileLength :: length of the file being open, in number of events in this case */
-    void setFile(::NeXus::File * file, const std::string & filename, const uint64_t fileLength)
-    {
-      m_file = file;
-      m_filename = filename;
-      m_diskBuffer.setFileLength(fileLength);
-    }
-
-    /** @return true if the MDEventWorkspace is backed by a file */
-    bool isFileBacked() const
-    { return m_file != NULL; }
-
-    /// @return the full path to the file open as the file-based back end.
-    const std::string & getFilename() const
-    { return m_filename; }
-
-    void closeFile(bool deleteFile = false);
-
     //-----------------------------------------------------------------------------------
     /** Return the DiskBuffer for disk caching */
     const Mantid::Kernel::DiskBuffer & getDiskBuffer() const
@@ -398,6 +359,14 @@ namespace API
     /** Return true if the DiskBuffer should be used  -- in current edition it is always used*/
     bool useWriteBuffer() const{return true;}
    // { return m_useWriteBuffer; }
+    /// Returns if current box controller is file backed. Assumes that BC(workspace) is fileBackd if fileIO is defined;
+     bool isFileBacked()const
+     {return m_fileIO;}
+     /// returns the pointer to the class, responsible for fileIO operations;
+     IBoxControllerIO * getFileIO()
+     {return m_fileIO.get();}
+     /// makes box controller file based by providing class, responsible for fileIO. 
+     void setFileBacked(IBoxControllerIO *newFileIO,const std::string &fileName="");
 
     //-----------------------------------------------------------------------------------
     /** Set the memory-caching parameters for a file-backed
@@ -451,6 +420,8 @@ namespace API
     }
 
   private:
+    /// box controller is an ws-based singleton so it should not be possible to copy it  
+    BoxController(const BoxController & other );
     /// Number of dimensions
     size_t nd;
 
@@ -498,12 +469,7 @@ namespace API
     /// Mutex for getting IDs
     Mantid::Kernel::Mutex m_idMutex;
 
-    /// Filename of the file backend
-    std::string m_filename;
-
-    /// Open file handle to the file back-end
-    ::NeXus::File * m_file;
-
+    boost::shared_ptr<IBoxControllerIO> m_fileIO;
     /// Instance of the disk-caching MRU list.
     mutable Mantid::Kernel::DiskBuffer m_diskBuffer;
 
@@ -512,21 +478,7 @@ namespace API
 
     /// Number of bytes in a single MDLeanEvent<> of the workspace.
     size_t m_bytesPerEvent;
-    /// The size of the events block which can be written in the neXus array at once (continious part of the data block)
-    size_t m_DataChunk;
   public:
-
-  static void prepareEventNexusData(::NeXus::File * file,const size_t DataChunk,const size_t nColumns,const std::string &descr);
-
-  //---------------------------------------------------------------------------------------------
-    /** Open the NXS event data blocks for loading.
-     *
-     * @param file :: open NXS file.
-     * @return the number of events currently in the data field.
-     */
-  static uint64_t openEventNexusData(::NeXus::File * file);
-
-  static void closeNexusData(::NeXus::File * file);
   };
 
 

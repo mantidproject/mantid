@@ -20,8 +20,7 @@ namespace MDEvents
 {
 
 #pragma pack(push, 4) //Ensure the structure is no larger than it needs to
-    // predefinition;
-    class MDBoxSaveable;
+   
   //===============================================================================================
   /** Templated class for a multi-dimensional event "box".
    *
@@ -151,7 +150,7 @@ namespace MDEvents
 
   protected:
     // the pointer to the class, responsible for saving/restoring this class to the hdd
-    mutable MDBoxSaveable *m_Saveable;
+    mutable Kernel::ISaveable *m_Saveable;
     /// Mutex for modifying the event list
     Mantid::Kernel::Mutex dataMutex; 
     /** Vector of MDLeanEvent's, in no particular order. */

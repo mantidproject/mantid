@@ -3,6 +3,7 @@
 
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidAPI/BoxController.h"
+#include "MantidAPI/IBoxControllerIO.h"
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
@@ -11,6 +12,33 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+class FakeBoxControllerIO : public IBoxControllerIO
+{
+    std::string m_fileName;
+    bool m_isOpened;
+public:
+    FakeBoxControllerIO():m_isOpened(false){}
+    bool openFile(const std::string &fileName)
+    {
+        this->m_fileName=fileName;
+        m_isOpened=true;
+        return true;
+    }
+    virtual bool isOpened()const
+    { return this->m_isOpened ;}
+    const std::string &getFileName()const
+    {return m_fileName;}
+
+    virtual void saveBlock(void const * const /* Block */, const uint64_t /*blockPosition*/,const size_t /*blockSize*/){};
+    virtual void loadBlock(void  * const  /* Block */, const uint64_t /*blockPosition*/,const size_t /*blockSize*/){};
+    virtual void flushData(){};
+    virtual void closeFile()
+    {m_isOpened=false;}
+
+     ~FakeBoxControllerIO()
+     {this->closeFile();}
+
+};
 class BoxControllerTest :    public CxxTest::TestSuite
 {
 public:
@@ -160,6 +188,10 @@ public:
     {
       TS_ASSERT_EQUALS( a.getSplitInto(d), b.getSplitInto(d));
     }
+    if(a.isFileBacked() && b.isFileBacked())
+    {
+        TS_ASSERT_DIFFERS(a.getFileIO(),b.getFileIO());
+    }
   }
 
   /// Generate XML and read it back
@@ -181,16 +213,41 @@ public:
     compareBoxControllers(a, b);
   }
 
-  void test_copy_constructor()
+  void test_Clone()
   {
     BoxController a(2);
     a.setMaxDepth(4);
     a.setSplitInto(10);
     a.setMaxDepth(10);
     a.setMaxId(123456);
-    BoxController b(a);
-    // Check that it is the same
-    compareBoxControllers(a, b);
+    BoxController_sptr b  = a.clone();
+    // Check that settings are the same but BC are different
+    compareBoxControllers(a, *b);
+  }
+
+  void test_CloneFileBased()
+  {
+    BoxController a(2);
+    a.setMaxDepth(4);
+    a.setSplitInto(10);
+    a.setMaxDepth(10);
+    a.setMaxId(123456);
+    TS_ASSERT_THROWS_NOTHING(a.setFileBacked(new FakeBoxControllerIO(),"fakeFile"));
+    TS_ASSERT(a.isFileBacked());
+
+    BoxController_sptr b  = a.clone();
+    // Check that settings are the same but BC are different
+    compareBoxControllers(a, *b);
+
+    TS_ASSERT(!b->isFileBacked());
+    TS_ASSERT_THROWS_NOTHING(b->setFileBacked(new FakeBoxControllerIO(),"fakeFile2"));
+
+    // Check that settings are the same but BC are different
+    compareBoxControllers(a, *b);
+    TS_ASSERT(b->isFileBacked());
+
+
+
   }
 
   void test_MRU_access()

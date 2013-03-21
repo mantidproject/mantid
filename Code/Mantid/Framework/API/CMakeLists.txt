@@ -167,6 +167,7 @@ set ( INC_FILES
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
+	inc/MantidAPI/IBoxControllerIO.h    
 	inc/MantidAPI/ICatalog.h
 	inc/MantidAPI/IConstraint.h
 	inc/MantidAPI/ICostFunction.h

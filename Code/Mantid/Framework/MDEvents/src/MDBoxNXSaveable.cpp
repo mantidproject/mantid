@@ -1,4 +1,4 @@
-#include "MantidMDEvents/MDBoxSaveable.h"
+#include "MantidMDEvents/MDBoxNXSaveable.h"
 #include "MantidMDEvents/MDBox.h"
 
 namespace Mantid
@@ -6,7 +6,7 @@ namespace Mantid
 namespace MDEvents
 {
    using Mantid::Kernel::DiskBuffer;
-   MDBoxSaveable::MDBoxSaveable(API::IMDNode *const, size_t ID)
+   MDBoxNXSaveable::MDBoxNXSaveable(API::IMDNode *const)
    {
    }
 
@@ -15,7 +15,7 @@ namespace MDEvents
   *  Called from the DiskBuffer.
   *  If called directly presumes to know its file location and [TODO: refactor this] needs the file to be open correctly on correct group 
   */
-  void MDBoxSaveable::save()
+  void MDBoxNXSaveable::save()
   {
 //  //      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
 //
@@ -43,7 +43,7 @@ namespace MDEvents
 //   
   }
 //
- void MDBoxSaveable::load()
+ void MDBoxNXSaveable::load()
  {
 //    // Is the data in memory right now (cached copy)?
 //    if (!m_isLoaded)
@@ -462,8 +462,122 @@ namespace MDEvents
 //      delete [] data;
 //    }
 
+    ////-----------------------------------------------------------------------------------
+    /// Filename of the file backend
+   // std::string m_filename;
+    /// The size of the events block which can be written in the neXus array at once (continious part of the data block)
+    //size_t m_DataChunk;
+
+    /// Open file handle to the file back-end
+   //    ::NeXus::File * m_file;
+    ///**The method returns the data chunk (continious part of the NeXus array) used to write data on HDD */ 
+    //size_t getDataChunk()const
+    //{
+    //  return m_DataChunk;
+    //}
+    ///** The method used to load nexus data chunk size to the box controller. Used when loading MDEvent nexus file 
+    //    Disabled at the moment as it is unclear how to get acsess to physical size of NexUs data set and optimal chunk size should be physical Nexus chunk size
+    //*/ 
+    ////void setChunkSize(size_t chunkSize)
+    ////{
+    ////  m_DataChunk = chunkSize;
+    //// }
+      //m_DataChunk = 10000;
+
+
+    ///** @return the open NeXus file handle. NULL if not file-backed. */
+    //::NeXus::File * getFile() const
+    //{ return m_file; }
+
+    ///** Sets the open Nexus file to use with file-based back-end
+    // * @param file :: file handle
+    // * @param filename :: full path to the file
+    // * @param fileLength :: length of the file being open, in number of events in this case */
+    //void setFile(::NeXus::File * file, const std::string & filename, const uint64_t fileLength)
+    //{
+    //  m_file = file;
+    //  m_filename = filename;
+    //  m_diskBuffer.setFileLength(fileLength);
+    //}
+
+    ///** @return true if the MDEventWorkspace is backed by a file */
+    //bool isFileBacked() const
+    //{ return m_file != NULL; }
+
+    ///// @return the full path to the file open as the file-based back end.
+    //const std::string & getFilename() const
+    //{ return m_filename; }
+
+    //void closeFile(bool deleteFile = false);
+
+
+
 //
 //  };
+
+
+//  //------------------------------------------------------------------------------------------------------
+//  /** Close the open file for the back-end, if any
+//   * Note: this does not save any data that might be, e.g., in the MRU.
+//   * @param deleteFile :: if true, will delete the file. Default false.
+//   */
+//  void BoxController::closeFile(bool deleteFile)
+//  {
+//    if (m_file)
+//    {
+//      m_file->close();
+//      m_file = NULL;
+//    }
+//    if (deleteFile && !m_filename.empty())
+//    {
+//      Poco::File file(m_filename);
+//      if (file.exists()) file.remove();
+//      m_filename = "";
+//    }
+//  }
+//
+//
+//  void BoxController::prepareEventNexusData(::NeXus::File * file, const size_t chunkSize,const size_t nColumns,const std::string &descr)
+//  {
+//      std::vector<int> dims(2,0);
+//      dims[0] = NX_UNLIMITED;
+//      // One point per dimension, plus signal, plus error, plus runIndex, plus detectorID = nd+4
+//      dims[1] = int(nColumns);
+//
+//      // Now the chunk size.
+//      std::vector<int> chunk(dims);
+//      chunk[0] = int(chunkSize);
+//
+//      // Make and open the data
+//#ifdef COORDT_IS_FLOAT
+//      file->makeCompData("event_data", ::NeXus::FLOAT32, dims, ::NeXus::NONE, chunk, true);
+//#else
+//      file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
+//#endif
+//
+//      // A little bit of description for humans to read later
+//      file->putAttr("description", descr);
+//
+//  }
+//
+//  //---------------------------------------------------------------------------------------------
+//    /** Open the NXS data blocks for loading.
+//     * The data should have been created before.
+//     *
+//     * @param file :: open NXS file.
+//     * @return the number of events currently in the data field.
+//     */
+//    uint64_t BoxController::openEventNexusData(::NeXus::File * file)
+//    {
+//      // Open the data
+//      file->openData("event_data");
+//      // Return the size of dimension 0 = the number of events in the field
+//      return uint64_t(file->getInfo().dims[0]);
+//    }
+//    void BoxController::closeNexusData(::NeXus::File * file)
+//    {
+//      file->closeData();
+//    }
 
 
 }
