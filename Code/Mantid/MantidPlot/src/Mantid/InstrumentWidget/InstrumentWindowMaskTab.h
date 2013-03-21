@@ -21,6 +21,7 @@ class QComboBox;
 class QCheckBox;
 class QLabel;
 class QAction;
+class QMenu;
 
 class QtTreePropertyBrowser;
 class QtGroupPropertyManager;
@@ -71,6 +72,10 @@ protected slots:
   void saveMaskToFile();
   void saveMaskToCalFile();
   void saveInvertedMaskToCalFile();
+  void extractDetsToWorkspace();
+  void sumDetsToWorkspace();
+  void saveIncludeGroupToFile();
+  void saveExcludeGroupToFile();
   void showSaveMenuTooltip(QAction*);
   void toggleMaskGroup(bool);
 
@@ -85,9 +90,15 @@ protected:
   void saveMaskingToFile(bool invertMask = false);
   void saveMaskingToCalFile(bool invertMask = false);
   std::string generateMaskWorkspaceName(bool temp = false) const;
-  void enableApply(bool on);
-  void enableClear(bool on);
+  void enableApply();
+  void enableClear();
   void setSelectActivity();
+  /// True if in masking mode, flase if in grouping.
+  bool isMasking() const;
+  /// Get mask/group border color
+  QColor getShapeBorderColor() const;
+  /// Get mask/group fill color
+  QColor getShapeFillColor() const;
 
   /// Is it used?
   Activity m_activity;
@@ -109,12 +120,19 @@ protected:
   QPushButton* m_clear_all;
   QPushButton* m_saveButton;
 
+  QMenu* m_saveMask;
   QAction* m_save_as_workspace_include;
   QAction* m_save_as_workspace_exclude;
   QAction* m_save_as_file_include;
   QAction* m_save_as_file_exclude;
   QAction* m_save_as_cal_file_include;
   QAction* m_save_as_cal_file_exclude;
+
+  QMenu* m_saveGroup;
+  QAction* m_extract_to_workspace;
+  QAction* m_sum_to_workspace;
+  QAction* m_save_group_file_include;
+  QAction* m_save_group_file_exclude;
 
   // properties
   bool m_userEditing;

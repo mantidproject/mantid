@@ -15,8 +15,8 @@ class DetXMLFile
 {
 public:
   enum Option {List,Sum};
-  /// Create a grouping file to extract all detectors in detector_list excluding those in dets
-  DetXMLFile(const std::vector<int>& detector_list, const QList<int>& dets, const QString& fname);
+  /// Create a grouping file to extract all detectors in detector_list excluding those in exclude
+  DetXMLFile(const std::vector<int>& detector_list, const QList<int>& exclude, const QString& fname);
 
   /// Create a grouping file to extract detectors in dets. Option List - one group - one detector,
   /// Option Sum - one group which is a sum of the detectors

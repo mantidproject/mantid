@@ -5,8 +5,13 @@
 
 #include <fstream>
 
-/// Create a grouping file to extract all detectors in detector_list excluding those in dets
-DetXMLFile::DetXMLFile(const std::vector<int>& detector_list, const QList<int>& dets, const QString& fname)
+/**
+  * Create a grouping file to extract all detectors in detector_list excluding those in exclude.
+  * @param detector_list :: List of detector ids to include in the grouping file.
+  * @param exclude :: List of detector ids which if founfd in detector_list to be excluded from grouping.
+  * @param fname :: Name of the file to save the grouping to.
+  */
+DetXMLFile::DetXMLFile(const std::vector<int>& detector_list, const QList<int>& exclude, const QString& fname)
 {
     m_fileName = fname;
     m_delete = false;
@@ -16,7 +21,7 @@ DetXMLFile::DetXMLFile(const std::vector<int>& detector_list, const QList<int>& 
     std::vector<int>::const_iterator idet = detector_list.begin();
     for(; idet != detector_list.end(); ++idet)
     {
-      if (!dets.contains(*idet))
+      if (!exclude.contains(*idet))
       {
         out <<  *idet << ',';
       }
@@ -24,9 +29,11 @@ DetXMLFile::DetXMLFile(const std::vector<int>& detector_list, const QList<int>& 
     out << "\"/> </group> \n</detector-grouping>\n";
 }
 
-/// Create a grouping file to extract detectors in dets. Option List - one group - one detector,
-/// Option Sum - one group which is a sum of the detectors
-/// If fname is empty create a temporary file
+/**
+  * Create a grouping file to extract detectors in dets. Option List - one group - one detector,
+  * Option Sum - one group which is a sum of the detectors
+  * If fname is empty create a temporary file
+  */
 DetXMLFile::DetXMLFile(const QList<int>& dets, Option opt, const QString& fname)
 {
     if (dets.empty())
@@ -81,6 +88,9 @@ void DetXMLFile::makeSumFile(const QList<int>& dets)
     out << "\"/> </group> \n</detector-grouping>\n";
 }
 
+/**
+  * Destructor. Removes the temporary file.
+  */
 DetXMLFile::~DetXMLFile()
 {
     if (m_delete)

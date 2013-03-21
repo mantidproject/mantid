@@ -132,24 +132,6 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   mDetTableAction = new QAction(tr("&Extract Data"), this);
   connect(mDetTableAction, SIGNAL(triggered()), this, SLOT(showDetectorTable()));
 
-  mGroupDetsAction = new QAction(tr("&Group"), this);
-  connect(mGroupDetsAction, SIGNAL(triggered()), this, SLOT(groupDetectors()));
-
-  mMaskDetsAction = new QAction(tr("&Mask"), this);
-  connect(mMaskDetsAction, SIGNAL(triggered()), this, SLOT(maskDetectors()));
-
-  m_ExtractDetsToWorkspaceAction = new QAction("Extract to new workspace",this);
-  connect(m_ExtractDetsToWorkspaceAction,SIGNAL(activated()),this,SLOT(extractDetsToWorkspace()));
-
-  m_SumDetsToWorkspaceAction = new QAction("Sum to new workspace",this);
-  connect(m_SumDetsToWorkspaceAction,SIGNAL(activated()),this,SLOT(sumDetsToWorkspace()));
-
-  m_createIncludeGroupingFileAction = new QAction("Include",this);
-  connect(m_createIncludeGroupingFileAction,SIGNAL(activated()),this,SLOT(createIncludeGroupingFile()));
-
-  m_createExcludeGroupingFileAction = new QAction("Exclude",this);
-  connect(m_createExcludeGroupingFileAction,SIGNAL(activated()),this,SLOT(createExcludeGroupingFile()));
-
   m_clearPeakOverlays = new QAction("Clear peaks",this);
   connect(m_clearPeakOverlays,SIGNAL(activated()),this,SLOT(clearPeakOverlays()));
 
@@ -262,9 +244,9 @@ InstrumentWindowTab *InstrumentWindow::getTab()const
   * @param filters :: The filters
   * @param selectedFilter :: The selected filter.
   */
-QString InstrumentWindow::getSaveFileName(const QString& title, const QString& filters, QString& selectedFilter)
+QString InstrumentWindow::getSaveFileName(const QString& title, const QString& filters, QString *selectedFilter)
 {
-    QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(this, title, m_savedialog_dir, filters, &selectedFilter);
+    QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(this, title, m_savedialog_dir, filters, selectedFilter);
 
     // If its empty, they cancelled the dialog
     if( !filename.isEmpty() )
@@ -449,22 +431,13 @@ void InstrumentWindow::changeColormap(const QString &filename)
 
 void InstrumentWindow::showPickOptions()
 {
-  if (/*m_pickTab->canUpdateTouchedDetector() &&*/ !m_selectedDetectors.empty())
+  if ( !m_selectedDetectors.empty() )
   {
     QMenu context(m_InstrumentDisplay);
 
     context.addAction(mInfoAction);
     context.addAction(mPlotAction);
     context.addAction(mDetTableAction);
-
-    context.insertSeparator();
-//    context.addAction(mGroupDetsAction);
-//    context.addAction(mMaskDetsAction);
-    context.addAction(m_ExtractDetsToWorkspaceAction);
-    context.addAction(m_SumDetsToWorkspaceAction);
-//    QMenu *gfileMenu = context.addMenu("Create grouping file");
-//    gfileMenu->addAction(m_createIncludeGroupingFileAction);
-//    gfileMenu->addAction(m_createExcludeGroupingFileAction);
 
     context.exec(QCursor::pos());
   }
@@ -571,54 +544,6 @@ QString InstrumentWindow::confirmDetectorOperation(const QString & opName, const
 }
 
 /**
- * Group selected detectors
- */
-void InstrumentWindow::groupDetectors()
-{
-  if (m_selectedDetectors.empty()) return;
-  std::vector<int> wksp_indices;
-  for(int i = 0; i < m_selectedDetectors.size(); ++i)
-  {
-    try {
-      wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      continue; // Detector doesn't have a workspace index relating to it
-    }
-  }
-
-  QString inputWS = m_workspaceName;
-  QString outputWS = confirmDetectorOperation("grouped", inputWS, static_cast<int>(m_selectedDetectors.size()));
-  if( outputWS.isEmpty() ) return;
-  QString param_list = "InputWorkspace=%1;OutputWorkspace=%2;WorkspaceIndexList=%3;KeepUngroupedSpectra=1";
-  emit execMantidAlgorithm("GroupDetectors",
-			   param_list.arg(inputWS, outputWS, asString(wksp_indices)),
-         this
-			   );
-}
-
-/**
- * Mask selected detectors
- */
-void InstrumentWindow::maskDetectors()
-{
-  if (m_selectedDetectors.empty()) return;
-  std::vector<int> wksp_indices;
-  for(int i = 0; i < m_selectedDetectors.size(); ++i)
-  {
-    try {
-      wksp_indices.push_back(int(m_instrumentActor->getWorkspaceIndex(m_selectedDetectors[i])));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      continue; // Detector doesn't have a workspace index relating to it
-    }
-  }
-
-  QString inputWS = m_workspaceName;
-  // Masking can only replace the input workspace so no need to ask for confirmation
-  QString param_list = "Workspace=%1;WorkspaceIndexList=%2";
-  emit execMantidAlgorithm("MaskDetectors",param_list.arg(inputWS, asString(wksp_indices)),this);
-}
-
-/**
  * Convert a list of integers to a comma separated string of numbers 
  */
 QString InstrumentWindow::asString(const std::vector<int>& numbers) const
@@ -711,7 +636,7 @@ void InstrumentWindow::saveImage()
     }
   }
   QString selectedFilter = "*.png";
-  QString filename = getSaveFileName("Save image ...", filter, selectedFilter);
+  QString filename = getSaveFileName("Save image ...", filter, &selectedFilter);
 
   // If its empty, they cancelled the dialog
   if( filename.isEmpty() ) return;
@@ -962,67 +887,6 @@ void InstrumentWindow::componentSelected(ComponentID id)
       surface->updateView();
       updateInstrumentView();
     }
-}
-
-/**
-  * Extract selected detectors to a new workspace
-  */
-void InstrumentWindow::extractDetsToWorkspace()
-{
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  DetXMLFile mapFile(m_selectedDetectors);
-  std::string fname = mapFile();
-
-  if (!fname.empty())
-  {
-    Mantid::API::IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace",m_workspaceName.toStdString());
-    alg->setPropertyValue("MapFile",fname);
-    alg->setPropertyValue("OutputWorkspace",m_workspaceName.toStdString()+"_selection");
-    alg->execute();
-  }
-
-  QApplication::restoreOverrideCursor();
-}
-
-/**
-  * Sum selected detectors to a new workspace
-  */
-void InstrumentWindow::sumDetsToWorkspace()
-{
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  DetXMLFile mapFile(m_selectedDetectors,DetXMLFile::Sum);
-  std::string fname = mapFile();
-
-  if (!fname.empty())
-  {
-    Mantid::API::IAlgorithm* alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace",m_workspaceName.toStdString());
-    alg->setPropertyValue("MapFile",fname);
-    alg->setPropertyValue("OutputWorkspace",m_workspaceName.toStdString()+"_sum");
-    alg->execute();
-  }
-
-  QApplication::restoreOverrideCursor();
-}
-
-void InstrumentWindow::createIncludeGroupingFile()
-{
-  QString fname = MantidQt::API::FileDialogHandler::getSaveFileName(this,"Save grouping file");
-  if (!fname.isEmpty())
-  {
-    DetXMLFile mapFile(m_selectedDetectors,DetXMLFile::Sum,fname);
-  }
-
-}
-
-void InstrumentWindow::createExcludeGroupingFile()
-{
-  QString fname = MantidQt::API::FileDialogHandler::getSaveFileName(this,"Save grouping file");
-  if (!fname.isEmpty())
-  {
-    DetXMLFile mapFile(m_instrumentActor->getAllDetIDs(),m_selectedDetectors,fname);
-  }
 }
 
 void InstrumentWindow::executeAlgorithm(const QString& alg_name, const QString& param_list)
