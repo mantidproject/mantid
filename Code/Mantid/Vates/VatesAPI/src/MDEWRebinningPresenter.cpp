@@ -13,6 +13,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
+#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidVatesAPI/Common.h"
@@ -430,6 +431,13 @@ namespace Mantid
       label += sourceGeometry.getTDimension()->getUnits();
       label += ")";
       return label;
+    }
+
+    void MDEWRebinningPresenter::makeNonOrthogonal(vtkDataSet *visualDataSet)
+    {
+      vtkDataSetToNonOrthogonalDataSet converter(visualDataSet,
+                                                 m_serializer.getWorkspaceName());
+      converter.execute();
     }
 
     void MDEWRebinningPresenter::setAxisLabels(vtkDataSet *visualDataSet)
