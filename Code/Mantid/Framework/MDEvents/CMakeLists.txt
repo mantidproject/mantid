@@ -26,7 +26,7 @@ set ( SRC_FILES
 	src/MDBoxIterator.cpp
     src/MDBoxFlatTree.cpp    
 	src/MDBoxToChange.cpp
-	src/MDBoxSaveable.cpp    
+	src/MDBoxNXSaveable.cpp    
 	src/MDEventFactory.cpp
 	src/MDEventWSWrapper.cpp
 	src/MDEventWorkspace.cpp
@@ -91,7 +91,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDBoxIterator.h
     inc/MantidMDEvents/MDBoxFlatTree.h
 	inc/MantidMDEvents/MDBoxToChange.h
-	inc/MantidMDEvents/MDBoxSaveable.h
+	inc/MantidMDEvents/MDBoxNXSaveable.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
@@ -144,6 +144,7 @@ set ( TEST_FILES
 	MDBoxBaseTest.h
 	MDBoxIteratorTest.h
 	MDBoxTest.h
+	MDBoxNXSaveableTest.h    
 	MDBoxToChangeTest.h
 	MDDimensionStatsTest.h
 	MDEventFactoryTest.h
