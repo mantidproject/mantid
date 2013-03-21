@@ -324,8 +324,6 @@ void MantidEV::initLayout()
 
 void MantidEV::selectWorkspace_slot()
 {
-   std::cout << std::endl << "Apply Select Data ....." << std::endl;
-
    // Check that the event workspace name is non-blank.
    std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().toStdString();
 
@@ -383,8 +381,6 @@ void MantidEV::selectWorkspace_slot()
 
 void MantidEV::loadEventFile_slot()
 {
-  std::cout << "Load event file Browse button pushed... " << std::endl;
-
   QString file_path;
   if ( last_event_file.length() != 0 )
   {
@@ -412,8 +408,6 @@ void MantidEV::loadEventFile_slot()
 
 void MantidEV::findPeaks_slot()
 {
-   std::cout << std::endl << "Apply Find Peaks ....." << std::endl;
-
    std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
@@ -487,8 +481,6 @@ void MantidEV::findPeaks_slot()
 
 void MantidEV::getLoadPeaksFileName_slot()
 {
-  std::cout << "getting Load peaks file name... " << std::endl;
-
   QString file_path;
   if ( last_peaks_file.length() != 0 )
   {
@@ -516,8 +508,6 @@ void MantidEV::getLoadPeaksFileName_slot()
 
 void MantidEV::getSavePeaksFileName()
 {
-  std::cout << "getting Save peaks file name... " << std::endl;
-
   QString file_path;
   if ( last_peaks_file.length() != 0 )
   {
@@ -545,8 +535,6 @@ void MantidEV::getSavePeaksFileName()
 
 void MantidEV::findUB_slot()
 {
-   std::cout << std::endl << "Apply Find UB ....." << std::endl;
-
    std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
@@ -567,15 +555,12 @@ void MantidEV::findUB_slot()
    bool round_hkls       = m_uiForm.RoundHKLs_ckbx->isChecked();
    bool optimize_angles  = m_uiForm.OptimizeGoniometerAngles_ckbx->isChecked();
 
-   double min_abc         = 3;
-   double max_abc         = 15;
-   double fft_tolerance   = 0.12;
-   double max_degrees     = 5;
-   double index_tolerance = 0.12;
-
-
    if ( use_FFT )
    {
+     double min_abc         = 3;
+     double max_abc         = 15;
+     double fft_tolerance   = 0.12;
+
      if ( !getPositiveDouble( m_uiForm.MinD_ledt, min_abc ) )
        return;
 
@@ -618,6 +603,7 @@ void MantidEV::findUB_slot()
        }
        if ( optimize_angles )
        {
+         double max_degrees = 5;
          if (!getPositiveDouble( m_uiForm.MaxGoniometerChange_ledt,max_degrees))
            return;
 
@@ -632,6 +618,7 @@ void MantidEV::findUB_slot()
 
    if ( index_peaks )
    {
+     double index_tolerance = 0.12;
      if ( !getPositiveDouble( m_uiForm.IndexingTolerance_ledt, index_tolerance ) )
        return;
 
@@ -645,8 +632,6 @@ void MantidEV::findUB_slot()
 
 void MantidEV::getLoadUB_FileName_slot()
 {
-  std::cout << "getting Load UB file name... " << std::endl;
-
   QString file_path;
   if ( last_UB_file.length() != 0 )
   {
@@ -673,8 +658,6 @@ void MantidEV::getLoadUB_FileName_slot()
 
 void MantidEV::getSaveUB_FileName()
 {
-  std::cout << "getting Save UB file name... " << std::endl;
-
   QString file_path;
   if ( last_UB_file.length() != 0 )
   {
@@ -702,7 +685,6 @@ void MantidEV::getSaveUB_FileName()
 
 void MantidEV::chooseCell_slot()
 {
-   std::cout << std::endl << "Apply Choose Cell ....." << std::endl;
    std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
@@ -757,7 +739,6 @@ void MantidEV::chooseCell_slot()
 
 void MantidEV::changeHKL_slot()
 {
-   std::cout << std::endl << "Apply Change HKL ....." << std::endl;
    std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
@@ -784,7 +765,6 @@ void MantidEV::changeHKL_slot()
 
 void MantidEV::integratePeaks_slot()
 {
-   std::cout << std::endl <<"Apply Integrate ....."<<std::endl;
    std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
 
    if ( peaks_ws_name.length() == 0 )
@@ -889,8 +869,6 @@ void MantidEV::integratePeaks_slot()
 
 void MantidEV::saveState_slot()
 {
-  std::cout << "saveState_slot called..." << std::endl;
-  
   QString file_path;
   if ( last_ini_file.length() != 0 )
   {
@@ -919,7 +897,6 @@ void MantidEV::saveState_slot()
 
 void MantidEV::loadState_slot()
 {
-  std::cout << "loadState_slot called..." << std::endl;
   QString file_path;
   if ( last_ini_file.length() != 0 )
   {
@@ -947,8 +924,6 @@ void MantidEV::loadState_slot()
 
 void MantidEV::saveIsawUB_slot()
 {
-  std::cout << "saveIsawUB_slot called..." << std::endl;
-
   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
   if ( peaks_ws_name.length() == 0 )
   {
@@ -977,8 +952,6 @@ void MantidEV::saveIsawUB_slot()
 
 void MantidEV::loadIsawUB_slot()
 {
-  std::cout << "loadIsawUB_slot called..." << std::endl;
-
   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
   if ( peaks_ws_name.length() == 0 )
   {
@@ -1007,8 +980,6 @@ void MantidEV::loadIsawUB_slot()
 
 void MantidEV::saveIsawPeaks_slot()
 {
-  std::cout << "saveIsawPeaks_slot called..." << std::endl;
-
   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
   if ( peaks_ws_name.length() == 0 )
   {
@@ -1040,8 +1011,6 @@ void MantidEV::saveIsawPeaks_slot()
  */
 void MantidEV::loadIsawPeaks_slot()
 {
-  std::cout << "loadIsawPeaks_slot called..." << std::endl;
-
   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
   if ( peaks_ws_name.length() == 0 )
   {
@@ -1070,7 +1039,6 @@ void MantidEV::loadIsawPeaks_slot()
 
 void MantidEV::showUB_slot()
 {
-  std::cout << "showUB_slot called..." << std::endl;
   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
   if ( peaks_ws_name.length() == 0 )
   {
@@ -1223,7 +1191,6 @@ void MantidEV::setEnabledEllipseSizeOptions_slot()
 
 void MantidEV::errorMessage( const std::string & message )
 {
-  std::cout << "ERROR: " << message << std::endl;
   QMessageBox::critical(this,"ERROR", QString::fromStdString(message));
 }
 

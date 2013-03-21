@@ -25,13 +25,11 @@ Logger& MantidEVWorker::g_log = Logger::get("MantidEV");
 
 MantidEVWorker::MantidEVWorker()
 {
-  std::cout << "Constructed MantidEVWorker" << std::endl;
 }
 
 
 MantidEVWorker::~MantidEVWorker()
 {
-  std::cout << "Destroyed MantidEVWorker" << std::endl;
 }
 
 
@@ -99,11 +97,6 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
                                          const std::string & ev_ws_name,
                                          const std::string & md_ws_name )
 {
-  std::cout << "worker->loadAndConvertToMD called" << std::endl;
-  std::cout << "file_name  = " << file_name << std::endl;
-  std::cout << "ev_ws_name = " << ev_ws_name << std::endl;
-  std::cout << "md_ws_name = " << md_ws_name << std::endl;
-
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
   alg->setProperty("Filename",file_name);
   alg->setProperty("OutputWorkspace",ev_ws_name);
@@ -140,13 +133,6 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
                                       size_t        num_to_find,
                                       double        min_intensity )
 {
-  std::cout << "worker->findPeaks called" << std::endl;
-  std::cout << "md_ws_name    = " << md_ws_name << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-  std::cout << "max_abc       = " << max_abc << std::endl;
-  std::cout << "num_to_find   = " << num_to_find << std::endl;
-  std::cout << "min_intensity = " << min_intensity << std::endl;
-
   double min_separation = 0.9 * 6.28 / max_abc;
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("FindPeaksMD");
   alg->setProperty("InputWorkspace",md_ws_name);
@@ -165,10 +151,6 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
 bool MantidEVWorker::loadIsawPeaks( const std::string & peaks_ws_name,
                                     const std::string & file_name )
 {
-  std::cout << "worker->loadIsawPeaks called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-  std::cout << "file_name     = " << file_name << std::endl;
-
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadIsawPeaks");
   alg->setProperty("Filename",file_name );
   alg->setProperty("OutputWorkspace", peaks_ws_name );
@@ -184,11 +166,6 @@ bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
                                     const std::string & file_name,
                                           bool          append  )
 {
-  std::cout << "worker->saveIsawPeaks called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-  std::cout << "append        = " << append << std::endl;
-  std::cout << "file_name     = " << file_name << std::endl;
-                                           
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SaveIsawPeaks");
   alg->setProperty("InputWorkspace", peaks_ws_name );
   alg->setProperty("AppendFile", append );
@@ -206,12 +183,6 @@ bool MantidEVWorker::findUBUsingFFT( const std::string & peaks_ws_name,
                                            double              max_abc,
                                            double              tolerance )
 {
-  std::cout << "worker->findUBUsingFFT called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-  std::cout << "min_abc       = " << min_abc << std::endl;
-  std::cout << "max_abc       = " << max_abc << std::endl;
-  std::cout << "tolerance     = " << tolerance << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -230,9 +201,6 @@ bool MantidEVWorker::findUBUsingFFT( const std::string & peaks_ws_name,
 
 bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string & peaks_ws_name)
 {
-  std::cout << "worker->findUBUsingIndexedPeaks called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -249,10 +217,6 @@ bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string & peaks_ws_name)
 bool MantidEVWorker::loadIsawUB( const std::string & peaks_ws_name,
                                  const std::string & file_name)
 {
-  std::cout << "worker->loadIsawUB called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-  std::cout << "file_name     = " << file_name << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -271,10 +235,6 @@ bool MantidEVWorker::loadIsawUB( const std::string & peaks_ws_name,
 bool MantidEVWorker::saveIsawUB( const std::string & peaks_ws_name,
                                  const std::string & file_name)
 {
-  std::cout << "worker->saveIsawUB called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-  std::cout << "file_name     = " << file_name << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -292,10 +252,6 @@ bool MantidEVWorker::saveIsawUB( const std::string & peaks_ws_name,
 bool MantidEVWorker::optimizePhiChiOmega( const std::string & peaks_ws_name, 
                                                 double        max_change )
 {
-  std::cout << "worker->optimizePhiChiOmega called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-  std::cout << "max_change    = " << max_change << std::endl;
-
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("OptimizeCrystalPlacement");
   alg->setProperty("PeaksWorkspace",peaks_ws_name);
   alg->setProperty("ModifiedPeaksWorkspace",peaks_ws_name);
@@ -317,11 +273,6 @@ bool MantidEVWorker::indexPeaksWithUB( const std::string & peaks_ws_name,
                                              double        tolerance, 
                                              bool          round_hkls )
 {
-  std::cout << "worker->indexPeaksWithUB called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-  std::cout << "tolerance     = " << tolerance     << std::endl;
-  std::cout << "round_hkls    = " << round_hkls    << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -341,11 +292,6 @@ bool MantidEVWorker::showCells( const std::string & peaks_ws_name,
                                       double        max_scalar_error,
                                       bool          best_only )
 {
-  std::cout << "worker->showCells called" << std::endl;
-  std::cout << "peaks_ws_name    = " << peaks_ws_name    << std::endl;
-  std::cout << "max_scalar_error = " << max_scalar_error << std::endl;
-  std::cout << "best_only        = " << best_only        << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -365,11 +311,6 @@ bool MantidEVWorker::selectCellOfType( const std::string & peaks_ws_name,
                                        const std::string & cell_type,
                                        const std::string & centering )
 {
-  std::cout << "worker->selectCellOfType called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name    << std::endl;
-  std::cout << "cell_type     = " << cell_type << std::endl;
-  std::cout << "centering     = " << centering << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -390,10 +331,6 @@ bool MantidEVWorker::selectCellOfType( const std::string & peaks_ws_name,
 bool MantidEVWorker::selectCellWithForm(  const std::string & peaks_ws_name,
                                                 size_t        form_num )
 {
-  std::cout << "worker->selectCellWithForm called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-  std::cout << "form_num      = " << form_num      << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -415,12 +352,6 @@ bool MantidEVWorker::changeHKL(  const std::string & peaks_ws_name,
                                  const std::string & row_2_str,
                                  const std::string & row_3_str )
 {
-  std::cout << "worker->changeHKL called" << std::endl;
-  std::cout << "peaks_ws_name = " << peaks_ws_name << std::endl;
-  std::cout << "row_1         = " << row_1_str     << std::endl;
-  std::cout << "row_2         = " << row_2_str     << std::endl;
-  std::cout << "row_3         = " << row_3_str     << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -444,14 +375,6 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
                                              double        outer_radius,
                                              bool          integrate_edge )
 {
-  std::cout << "worker->sphereIntegrate called" << std::endl;
-  std::cout << "Peaks Workspace         = " << peaks_ws_name << std::endl;
-  std::cout << "Event Workspace         = " << event_ws_name << std::endl;
-  std::cout << "Peak Radius             = " << peak_radius << std::endl;
-  std::cout << "Background Inner Radius = " << inner_radius << std::endl;
-  std::cout << "Background Outer Radius = " << outer_radius << std::endl;
-  std::cout << "Integrate if On Edge    = " << integrate_edge << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -515,12 +438,6 @@ bool MantidEVWorker::fitIntegrate(  const std::string & peaks_ws_name,
                                           size_t        n_bad_edge_pix,
                                           bool          use_ikeda_carpenter )
 {
-  std::cout << "worker->fitIntegrate called" << std::endl;
-  std::cout << "Peaks Workspace            = " << peaks_ws_name << std::endl;
-  std::cout << "Event Workspace            = " << event_ws_name << std::endl;
-  std::cout << "Rebin Parameters           = " << rebin_param_str << std::endl;
-  std::cout << "Number of Badd Edge Pixels = " << n_bad_edge_pix << std::endl;
-  std::cout << "Ikeda-Carpenter TOF        = " << use_ikeda_carpenter << std::endl;
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
@@ -572,15 +489,6 @@ bool MantidEVWorker::ellipsoidIntegrate( const std::string & peaks_ws_name,
                                          double        inner_size,
                                          double        outer_size )
 {
-  std::cout << "worker->ellipsoidintegrate called" << std::endl;
-  std::cout << "Peaks Workspace            = " << peaks_ws_name << std::endl;
-  std::cout << "Event Workspace            = " << event_ws_name << std::endl;
-  std::cout << "Region Radius              = " << region_radius << std::endl;
-  std::cout << "Specify Size               = " << specify_size << std::endl;
-  std::cout << "Peak Size                  = " << peak_size << std::endl;
-  std::cout << "Background Inner Size      = " << inner_size << std::endl;
-  std::cout << "Background Outer Size      = " << outer_size << std::endl;
-
   if ( !isPeaksWorkspace( peaks_ws_name ) )
     return false;
 
