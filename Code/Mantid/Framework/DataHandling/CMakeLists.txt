@@ -40,6 +40,7 @@ set ( SRC_FILES
 	src/LoadEventNexus.cpp
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
+	src/LoadFullprofResolution.cpp
 	src/LoadGSS.cpp
 	src/LoadILL.cpp
 	src/LoadISISNexus.cpp
@@ -180,6 +181,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
+	inc/MantidDataHandling/LoadFullprofResolution.h
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadISISNexus.h
@@ -315,6 +317,7 @@ set ( TEST_FILES
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
 	LoadEventPreNexusTest.h
+	LoadFullprofResolutionTest.h
 	LoadGSSTest.h
 	LoadILLTest.h
 	LoadISISNexusTest.h
