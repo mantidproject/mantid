@@ -536,7 +536,7 @@ def do_make_wiki(algo_name, version, latest_version):
     """ 
     
     external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
-    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000;'></anchor>\n\n" % (external_image, external_image)  
+    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000; padding-left:5px;'></anchor>\n\n" % (external_image, external_image)  
     
     # Deprecated algorithms: Simply return the deprecation message
     print "Creating... ", algo_name, version
@@ -558,17 +558,8 @@ def do_make_wiki(algo_name, version, latest_version):
     alg.initialize()
     
     if (latest_version > 1):
-        if (version < latest_version):
-            out += "Note: This page refers to version %d of %s. The latest version is %d - see [[%s v.%d]].\n\n" % (version, algo_name, latest_version, algo_name, latest_version)
-        else:
-            out += "Note: This page refers to version %d of %s. "% (version, algo_name)
-            if latest_version > 2:
-                out += "The documentation for older versions is available at: "
-            else:
-                out += "The documentation for the older version is available at: "
-            for v in xrange(1,latest_version):
-                out += "[[%s v.%d]] " % (algo_name, v)
-            out += "\n\n"
+        out += "Note: This page refers to version %d of %s. \n\n"% (version, algo_name)
+            
     
     out += "== Summary ==\n\n"
     out += alg.getWikiSummary().replace("\n", " ") + "\n\n"
