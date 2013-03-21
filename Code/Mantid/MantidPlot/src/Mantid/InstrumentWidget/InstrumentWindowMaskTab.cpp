@@ -84,37 +84,43 @@ m_userEditing(true)
   m_move->setCheckable(true);
   m_move->setAutoExclusive(true);
   m_move->setIcon(QIcon(":/PickTools/selection-tube.png"));
-  m_move->setToolTip("Move the instrument");
+  m_move->setToolTip("Move the instrument (Ctrl+Alt+M)");
+  m_move->setShortcut(QKeySequence("Ctrl+Alt+M"));
 
   m_pointer = new QPushButton();
   m_pointer->setCheckable(true);
   m_pointer->setAutoExclusive(true);
   m_pointer->setIcon(QIcon(":/MaskTools/selection-pointer.png"));
-  m_pointer->setToolTip("Select and edit shapes");
+  m_pointer->setToolTip("Select and edit shapes (Ctrl+Alt+P)");
+  m_pointer->setShortcut(QKeySequence("Ctrl+Alt+P"));
 
   m_ellipse = new QPushButton();
   m_ellipse->setCheckable(true);
   m_ellipse->setAutoExclusive(true);
   m_ellipse->setIcon(QIcon(":/MaskTools/selection-circle.png"));
-  m_ellipse->setToolTip("Draw an ellipse");
+  m_ellipse->setToolTip("Draw an ellipse (Ctrl+Alt+E)");
+  m_ellipse->setShortcut(QKeySequence("Ctrl+Alt+E"));
 
   m_rectangle = new QPushButton();
   m_rectangle->setCheckable(true);
   m_rectangle->setAutoExclusive(true);
   m_rectangle->setIcon(QIcon(":/MaskTools/selection-box.png"));
-  m_rectangle->setToolTip("Draw a rectangle");
+  m_rectangle->setToolTip("Draw a rectangle (Ctrl+Alt+R)");
+  m_rectangle->setShortcut(QKeySequence("Ctrl+Alt+R"));
 
   m_ring_ellipse = new QPushButton();
   m_ring_ellipse->setCheckable(true);
   m_ring_ellipse->setAutoExclusive(true);
   m_ring_ellipse->setIcon(QIcon(":/MaskTools/selection-circle-ring.png"));
-  m_ring_ellipse->setToolTip("Draw an elliptical ring");
+  m_ring_ellipse->setToolTip("Draw an elliptical ring (Shift+Alt+E)");
+  m_ring_ellipse->setShortcut(QKeySequence("Shift+Alt+E"));
 
   m_ring_rectangle = new QPushButton();
   m_ring_rectangle->setCheckable(true);
   m_ring_rectangle->setAutoExclusive(true);
   m_ring_rectangle->setIcon(QIcon(":/MaskTools/selection-box-ring.png"));
-  m_ring_rectangle->setToolTip("Draw a rectangular ring ");
+  m_ring_rectangle->setToolTip("Draw a rectangular ring (Shift+Alt+R)");
+  m_ring_rectangle->setShortcut(QKeySequence("Shift+Alt+R"));
 
   QHBoxLayout* toolBox = new QHBoxLayout();
   toolBox->addWidget(m_move);
@@ -229,6 +235,7 @@ m_userEditing(true)
   m_saveGroup->addSeparator();
   m_saveGroup->addAction(m_save_group_file_include);
   m_saveGroup->addAction(m_save_group_file_exclude);
+  connect(m_saveGroup,SIGNAL(hovered(QAction*)),this,SLOT(showSaveMenuTooltip(QAction*)));
 
 
   QGridLayout* buttons = new QGridLayout();
@@ -373,10 +380,10 @@ void InstrumentWindowMaskTab::setProperties()
   // bounding rect property
   QtProperty* boundingRectGroup = m_groupManager->addProperty("Bounging Rect");
   m_browser->addProperty(boundingRectGroup);
-  m_left = m_doubleManager->addProperty("left");
-  m_top = m_doubleManager->addProperty("top");
-  m_right = m_doubleManager->addProperty("right");
-  m_bottom = m_doubleManager->addProperty("bottom");
+  m_left   = addDoubleProperty("left");
+  m_top    = addDoubleProperty("top");
+  m_right  = addDoubleProperty("right");
+  m_bottom = addDoubleProperty("bottom");
   boundingRectGroup->addSubProperty(m_left);
   boundingRectGroup->addSubProperty(m_top);
   boundingRectGroup->addSubProperty(m_right);
@@ -387,8 +394,8 @@ void InstrumentWindowMaskTab::setProperties()
   foreach(QString name,pointProperties)
   {
     QtProperty* point = m_groupManager->addProperty(name);
-    QtProperty* prop_x = m_doubleManager->addProperty("x");
-    QtProperty* prop_y = m_doubleManager->addProperty("y");
+    QtProperty* prop_x = addDoubleProperty("x");
+    QtProperty* prop_y = addDoubleProperty("y");
     point->addSubProperty(prop_x);
     point->addSubProperty(prop_y);
     m_browser->addProperty(point);
@@ -401,7 +408,7 @@ void InstrumentWindowMaskTab::setProperties()
   QStringList doubleProperties = m_instrWindow->getSurface()->getCurrentDoubleNames();
   foreach(QString name,doubleProperties)
   {
-    QtProperty* prop = m_doubleManager->addProperty(name);
+    QtProperty* prop = addDoubleProperty(name);
     m_browser->addProperty(prop);
     m_doublePropertyMap[prop] = name;
   }
@@ -797,6 +804,13 @@ QColor InstrumentWindowMaskTab::getShapeBorderColor() const
 QColor InstrumentWindowMaskTab::getShapeFillColor() const
 {
     return QColor(255,255,255,100);
+}
+
+QtProperty *InstrumentWindowMaskTab::addDoubleProperty(const QString &name) const
+{
+    QtProperty* prop = m_doubleManager->addProperty( name );
+    m_doubleManager->setDecimals(prop, 6);
+    return prop;
 }
 
 /**

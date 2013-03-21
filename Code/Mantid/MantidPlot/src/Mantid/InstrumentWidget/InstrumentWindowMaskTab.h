@@ -99,6 +99,8 @@ protected:
   QColor getShapeBorderColor() const;
   /// Get mask/group fill color
   QColor getShapeFillColor() const;
+  /// Add a double property to the shape property browser
+  QtProperty* addDoubleProperty(const QString& name)const;
 
   /// Is it used?
   Activity m_activity;
