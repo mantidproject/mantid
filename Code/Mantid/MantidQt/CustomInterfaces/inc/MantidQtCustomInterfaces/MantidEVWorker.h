@@ -46,7 +46,12 @@ class DLLExport MantidEVWorker
 {
 
 public:
+
+  /// Default constructor
   MantidEVWorker();
+
+
+  /// Default destructor
  ~MantidEVWorker();
 
   

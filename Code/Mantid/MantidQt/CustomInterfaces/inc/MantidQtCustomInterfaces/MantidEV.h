@@ -164,13 +164,21 @@ class RunEllipsoidIntegrate : public QRunnable
 // START of the actual MantidEV Class ----------------------------------
 //
 
+/**
+ *  The MantidEV class has slots that handle user input from the Qt GUI
+ *  and then call methods in the MantidEVWorker class.  Roughly speaking,
+ *  MantidEV deals with the Qt GUI and MantideEVWorker deals with Mantid.
+ */
 class MantidEV : public API::UserSubWindow
 {
   Q_OBJECT
 
 public:
 
+  /// Constructor
   MantidEV(QWidget *parent = 0);
+
+  /// Destructor
   ~MantidEV();
 
   /// The name of the interface as registered into the factory
@@ -188,7 +196,7 @@ private slots:
   /// Slot for the find peaks tab's Apply button 
   void findPeaks_slot();
 
-  /// Slot for choosing a matrix file name
+  /// Slot for choosing a peaks file name
   void getLoadPeaksFileName_slot();
 
   /// Slot for the find UB tab's Apply button 

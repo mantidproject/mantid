@@ -23,6 +23,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 
+/**
+ *  Class to call loadAndConvertToMD in a separate thread.
+ */
 RunLoadAndConvertToMD::RunLoadAndConvertToMD(       MantidEVWorker * worker,
                                               const std::string    & file_name,
                                               const std::string    & ev_ws_name,
@@ -40,6 +43,9 @@ void RunLoadAndConvertToMD::run()
 }
 
 
+/**
+ * Class to call findPeaks in a separate thread.
+ */
 RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
                             const std::string     & md_ws_name,
                             const std::string     & peaks_ws_name,
@@ -55,7 +61,6 @@ RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
   this->min_intensity = min_intensity;
 }
 
-
 void RunFindPeaks::run()
 {
   worker->findPeaks( md_ws_name, peaks_ws_name,
@@ -63,6 +68,9 @@ void RunFindPeaks::run()
 }
 
 
+/**
+ *  Class to call sphereIntegrate in a separate thread.
+ */
 RunSphereIntegrate::RunSphereIntegrate(       MantidEVWorker * worker,
                                         const std::string    & peaks_ws_name,
                                         const std::string    & event_ws_name,
@@ -80,7 +88,6 @@ RunSphereIntegrate::RunSphereIntegrate(       MantidEVWorker * worker,
   this->integrate_edge = integrate_edge;
 }
 
-
 void RunSphereIntegrate::run()
 { 
   worker->sphereIntegrate( peaks_ws_name, event_ws_name,
@@ -89,6 +96,9 @@ void RunSphereIntegrate::run()
 }
 
 
+/**
+ *  Class to call fitIntegrate in a separate thread.
+ */
 RunFitIntegrate::RunFitIntegrate(       MantidEVWorker * worker,
                                   const std::string    & peaks_ws_name,
                                   const std::string    & event_ws_name,
@@ -111,6 +121,9 @@ void RunFitIntegrate::run()
 }
 
 
+/**
+ *  Class to call ellipsoidIntegrate in a separate thread.
+ */
 RunEllipsoidIntegrate::RunEllipsoidIntegrate(   MantidEVWorker * worker,
                                           const std::string    & peaks_ws_name,
                                           const std::string    & event_ws_name,
@@ -130,7 +143,6 @@ RunEllipsoidIntegrate::RunEllipsoidIntegrate(   MantidEVWorker * worker,
   this->outer_size    = outer_size;
 }
 
-
 void RunEllipsoidIntegrate::run()
 {
   worker->ellipsoidIntegrate( peaks_ws_name, event_ws_name,
@@ -139,7 +151,15 @@ void RunEllipsoidIntegrate::run()
 }
 
 
-/// MantidEV Constructor
+/// 
+/// Start of the MantidEV class 
+///
+
+
+/**
+ *  Constructor for MantidEV.  Makes the thread pool and instance of
+ *  MantidEVWorker.
+ */
 MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent)
 {
   worker        = new MantidEVWorker();
@@ -147,14 +167,22 @@ MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent)
   m_thread_pool->setMaxThreadCount(1);
 }
 
+
+/**
+ *  Destructor for MantidEV.  Deletes the thread pool and instance of
+ *  MantidEVWorker.
+ */
 MantidEV::~MantidEV()
 {
   saveSettings("");
   delete worker;
+  delete m_thread_pool;
 }
 
 
-/// Set up the dialog layout
+/**
+ *  This method is called by the super class to initialize the GUI.
+ */
 void MantidEV::initLayout()
 {
   m_uiForm.setupUi(this);
@@ -322,6 +350,9 @@ void MantidEV::initLayout()
 }
 
 
+/**
+ *  Slot called when the Apply button is pressed on the Select Data tab.
+ */
 void MantidEV::selectWorkspace_slot()
 {
    // Check that the event workspace name is non-blank.
@@ -379,6 +410,10 @@ void MantidEV::selectWorkspace_slot()
 }
 
 
+/**
+ *  Slot called when the Browse button for loading data from an event file
+ *  is pressed on the SelectData tab.
+ */
 void MantidEV::loadEventFile_slot()
 {
   QString file_path;
@@ -406,6 +441,9 @@ void MantidEV::loadEventFile_slot()
 }
 
 
+/**
+ *  Slot called when the Apply button is pressed on the Find Peaks tab.
+ */
 void MantidEV::findPeaks_slot()
 {
    std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
@@ -479,6 +517,10 @@ void MantidEV::findPeaks_slot()
 }
 
 
+/**
+ *  Slot called when the Browse button for loading peaks from a peaks file
+ *  is pressed on the FindPeaks tab.
+ */
 void MantidEV::getLoadPeaksFileName_slot()
 {
   QString file_path;
@@ -506,6 +548,10 @@ void MantidEV::getLoadPeaksFileName_slot()
 }
 
 
+/**
+ *  Utility to pop up a dialog box to get the name of a peaks file to
+ *  save.
+ */
 void MantidEV::getSavePeaksFileName()
 {
   QString file_path;
@@ -533,6 +579,9 @@ void MantidEV::getSavePeaksFileName()
 }
 
 
+/**
+ *  Slot called when the Apply button is pressed on the Find UB tab
+ */
 void MantidEV::findUB_slot()
 {
    std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
@@ -630,6 +679,10 @@ void MantidEV::findUB_slot()
 }
 
 
+/**
+ *  Slot called when the brows button is pressed for getting the UB file name
+ *  to load, on the Find UB tab.
+ */
 void MantidEV::getLoadUB_FileName_slot()
 {
   QString file_path;
@@ -656,6 +709,9 @@ void MantidEV::getLoadUB_FileName_slot()
 }
 
 
+/**
+ *  Utility to get the name of a UB file to save.
+ */
 void MantidEV::getSaveUB_FileName()
 {
   QString file_path;
@@ -683,6 +739,9 @@ void MantidEV::getSaveUB_FileName()
 }
 
 
+/**
+ *  Slot called when the apply button is pressed on the Choose Cell tab.
+ */
 void MantidEV::chooseCell_slot()
 {
    std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
@@ -737,6 +796,9 @@ void MantidEV::chooseCell_slot()
 }
 
 
+/**
+ *  Slot called when the Apply button is pressed on the Change HKL tab.
+ */
 void MantidEV::changeHKL_slot()
 {
    std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
@@ -763,6 +825,9 @@ void MantidEV::changeHKL_slot()
 }
 
 
+/**
+ *  Slot called when the Apply button is pressed on the Integrate tab.
+ */
 void MantidEV::integratePeaks_slot()
 {
    std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
@@ -867,6 +932,9 @@ void MantidEV::integratePeaks_slot()
 }
 
 
+/**
+ *  Slot called when the Save Settings action is selected from the File menu.
+ */
 void MantidEV::saveState_slot()
 {
   QString file_path;
@@ -895,6 +963,9 @@ void MantidEV::saveState_slot()
 }
 
 
+/**
+ *  Slot called when the Load Settings action is selected from the File menu.
+ */
 void MantidEV::loadState_slot()
 {
   QString file_path;
@@ -922,6 +993,9 @@ void MantidEV::loadState_slot()
 }
 
 
+/**
+ *  Slot called when the Save Isaw UB action is selected from the File menu.
+ */
 void MantidEV::saveIsawUB_slot()
 {
   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
@@ -950,6 +1024,9 @@ void MantidEV::saveIsawUB_slot()
 }
 
 
+/**
+ *  Slot called when the Load Isaw UB action is selected from the File menu.
+ */
 void MantidEV::loadIsawUB_slot()
 {
   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
@@ -978,6 +1055,9 @@ void MantidEV::loadIsawUB_slot()
 }
 
 
+/**
+ *  Slot called when the Save Isaw Peaks action is selected from the File menu.
+ */
 void MantidEV::saveIsawPeaks_slot()
 {
   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
@@ -1007,7 +1087,7 @@ void MantidEV::saveIsawPeaks_slot()
 
 
 /**
- *  Called from file menu item
+ *  Slot called when the Load Isaw Peaks action is selected from the File menu.
  */
 void MantidEV::loadIsawPeaks_slot()
 {
@@ -1037,6 +1117,9 @@ void MantidEV::loadIsawPeaks_slot()
 }
 
 
+/**
+ *  Slot called when the Show UB action is selected from the View menu.
+ */
 void MantidEV::showUB_slot()
 {
   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
@@ -1051,6 +1134,12 @@ void MantidEV::showUB_slot()
 }
 
 
+/**
+ * Set the enabled state of the load event file components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledLoadEventFileParams_slot( bool on )
 {
   m_uiForm.EventFileName_lbl->setEnabled( on );
@@ -1059,6 +1148,12 @@ void MantidEV::setEnabledLoadEventFileParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the load find peaks components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledFindPeaksParams_slot( bool on )
 {
   m_uiForm.MaxABC_lbl->setEnabled( on );
@@ -1070,6 +1165,12 @@ void MantidEV::setEnabledFindPeaksParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the load peaks file components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledLoadPeaksParams_slot( bool on )
 {
   m_uiForm.SelectPeaksFile_lbl->setEnabled( on );
@@ -1078,6 +1179,12 @@ void MantidEV::setEnabledLoadPeaksParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the find UB using FFT components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledFindUBFFTParams_slot( bool on )
 {
   m_uiForm.MinD_lbl->setEnabled( on );
@@ -1089,6 +1196,12 @@ void MantidEV::setEnabledFindUBFFTParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the load UB file components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledLoadUBParams_slot( bool on )
 {
   m_uiForm.SelectUBFile_lbl->setEnabled( on );
@@ -1099,6 +1212,12 @@ void MantidEV::setEnabledLoadUBParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the optimize goniometer angle components
+ * based on the state of the Load UB button and the Optiimze 
+ * Goniometer Angle buttons.
+ *
+ */
 void MantidEV::setEnabledMaxOptimizeDegrees_slot()
 {
   bool load_ub         = m_uiForm.LoadISAWUB_rbtn->isChecked();
@@ -1116,6 +1235,12 @@ void MantidEV::setEnabledMaxOptimizeDegrees_slot()
 }
 
 
+/**
+ * Set the enabled state of the index peaks components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledIndexParams_slot( bool on )
 {
   m_uiForm.IndexingTolerance_lbl->setEnabled( on );
@@ -1124,6 +1249,12 @@ void MantidEV::setEnabledIndexParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the show cells components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledShowCellsParams_slot( bool on )
 {
   m_uiForm.MaxScalarError_lbl->setEnabled( on );
@@ -1132,6 +1263,12 @@ void MantidEV::setEnabledShowCellsParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the select cell of type components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledSetCellTypeParams_slot( bool on )
 {
   m_uiForm.CellType_cmbx->setEnabled( on );
@@ -1139,12 +1276,24 @@ void MantidEV::setEnabledSetCellTypeParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the select cell with form components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledSetCellFormParams_slot( bool on )
 {
   m_uiForm.CellFormNumber_cmbx->setEnabled( on );
 }
 
 
+/**
+ * Set the enabled state of the sphere integration components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledSphereIntParams_slot( bool on )
 {
   m_uiForm.PeakRadius_lbl->setEnabled( on );
@@ -1157,6 +1306,12 @@ void MantidEV::setEnabledSphereIntParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the fit integration components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledFitIntParams_slot( bool on )
 {
   m_uiForm.FitRebinParams_lbl->setEnabled( on );
@@ -1167,6 +1322,12 @@ void MantidEV::setEnabledFitIntParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the ellipse integration components to the
+ * specified value.
+ *
+ * @param on  If true, components will be enabled, if false, disabled.
+ */
 void MantidEV::setEnabledEllipseIntParams_slot( bool on )
 {
   m_uiForm.RegionRadius_lbl->setEnabled( on );
@@ -1176,6 +1337,11 @@ void MantidEV::setEnabledEllipseIntParams_slot( bool on )
 }
 
 
+/**
+ * Set the enabled state of the load event file components base on
+ * the state of the ellipse integrate radio button and the
+ * specify size checkbox.
+ */
 void MantidEV::setEnabledEllipseSizeOptions_slot()
 {
   bool on = m_uiForm.EllipsoidIntegration_rbtn->isChecked() &&
@@ -1189,12 +1355,26 @@ void MantidEV::setEnabledEllipseSizeOptions_slot()
 }
 
 
+/**
+ * Utility to display an error message.
+ *
+ * @param  message  The error message to display.
+ */
 void MantidEV::errorMessage( const std::string & message )
 {
   QMessageBox::critical(this,"ERROR", QString::fromStdString(message));
 }
 
 
+/**
+ *  Utility to get a double precision value from the specified string.
+ *
+ *  @param  str    The string containing the string form of a double value.
+ *  @param  value  Reference to a double that will be set to the value
+ *                 extracted from the string.
+ *
+ *  @return true if a double was extacted from the string.
+ */
 bool MantidEV::getDouble( std::string str, double &value )
 {
   std::istringstream strs( str );
@@ -1206,6 +1386,17 @@ bool MantidEV::getDouble( std::string str, double &value )
 }
 
 
+/**
+ *  Utility to get a double precision value from the specified
+ *  QLineEdit component.
+ *
+ *  @param  ledt   Pointer to a QLineEdit object that should contain
+ *                 the string form of a double.
+ *  @param  value  Reference to a double that will be set to the value
+ *                 extracted from the QLineEdit object.
+ *
+ *  @return true if a double was successfully extacted.
+ */
 bool MantidEV::getDouble( QLineEdit *ledt,
                           double    &value )
 {
@@ -1221,6 +1412,17 @@ bool MantidEV::getDouble( QLineEdit *ledt,
 }
 
 
+/**
+ *  Utility to get a positive double precision value from the specified
+ *  QLineEdit component.
+ *
+ *  @param  ledt   Pointer to a QLineEdit object that should contain
+ *                 the string form of a positive double.
+ *  @param  value  Reference to a double that will be set to the value
+ *                 extracted from the QLineEdit object.
+ *
+ *  @return true if a positive double value was successfully extacted.
+ */
 bool MantidEV::getPositiveDouble( QLineEdit *ledt,
                                   double    &value )
 {
@@ -1239,6 +1441,17 @@ bool MantidEV::getPositiveDouble( QLineEdit *ledt,
 }
 
 
+/**
+ *  Utility to get a positive integer value from the specified
+ *  QLineEdit component.          
+ *
+ *  @param  ledt   Pointer to a QLineEdit object that should contain
+ *                 the string form of a positive integer.
+ *  @param  value  Reference to an integer that will be set to the value
+ *                 extracted from the QLineEdit object.
+ *
+ *  @return true if a positive integer value was successfully extacted.
+ */
 bool MantidEV::getPositiveInt( QLineEdit *ledt,
                                size_t    &value )
 {
@@ -1262,6 +1475,17 @@ bool MantidEV::getPositiveInt( QLineEdit *ledt,
 }
 
 
+/**
+ *  Utility to save the current state of all GUI components into the
+ *  specified file name.  If the filename has length zero, the settings
+ *  will be saved to a system dependent default location.  This is 
+ *  called in the destructor to automatically save the last settings to
+ *  the default location.  It is also called to save the settings to 
+ *  a specific file when the Save Settings File menu item is selected.
+ *
+ *  @param  filename   The name of the file to save the settings to, 
+ *                     or a blank string to use the default location.
+ */
 void MantidEV::saveSettings( const std::string & filename )
 {
   QSettings* state;
@@ -1342,6 +1566,18 @@ void MantidEV::saveSettings( const std::string & filename )
 }
 
 
+/**
+ *  Utility to load the current state of all GUI components from the 
+ *  specified file name.  If the filename has length zero, the settings
+ *  will be loaded from a system dependent default location.  This is 
+ *  called at the end of initLayout() to automatically restore the last 
+ *  settings from the default location.  It is also called to load the
+ *  settings from a specific file when the Load Settings File menu item
+ *  is selected.
+ *
+ *  @param  filename   The name of the file to load the settings from, 
+ *                     or a blank string to use the default location.
+ */
 void MantidEV::loadSettings( const std::string & filename )
 {
   QSettings* state;
@@ -1425,7 +1661,13 @@ void MantidEV::loadSettings( const std::string & filename )
 
 
 /*
- * Restore the value of the QLineEdit component from QSettings
+ * Restore the value of the specified QLineEdit component from the 
+ * specifed QSettings object.
+ *
+ * @param state    pointer to the QSettings object to use
+ * @param name     the name of the setting to use
+ * @param ledt     pointer to the QLineEdit component whose state
+ *                 is to be restored.
  */
 void MantidEV::restore( QSettings *state, QString name, QLineEdit *ledt )
 {
@@ -1440,7 +1682,13 @@ void MantidEV::restore( QSettings *state, QString name, QLineEdit *ledt )
 
 
 /*
- * Restore the value of the QCheckbox or QRadioButton component from QSettings
+ * Restore the value of the QCheckbox or QRadioButton component from the
+ * specifed QSettings object.
+ *
+ * @param state    pointer to the QSettings object to use
+ * @param name     the name of the setting to use
+ * @param btn      pointer to the QCheckbox or QRadioButton component 
+ *                 whose state is to be restored.
  */
 void MantidEV::restore( QSettings *state, QString name, QAbstractButton *btn )
 {
@@ -1449,7 +1697,12 @@ void MantidEV::restore( QSettings *state, QString name, QAbstractButton *btn )
 
 
 /*
- * Restore the value of a QComboBox from QSettings
+ * Restore the value of a QComboBox from the specified QSettings object
+ *
+ * @param state    pointer to the QSettings object to use
+ * @param name     the name of the setting to use
+ * @param cmbx     pointer to the QComboBox component whose state is 
+ *                 to be restored.
  */
 void MantidEV::restore( QSettings *state, QString name, QComboBox *cmbx )
 {

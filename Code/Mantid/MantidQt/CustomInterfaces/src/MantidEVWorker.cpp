@@ -23,16 +23,34 @@ using namespace Mantid::API;
 Logger& MantidEVWorker::g_log = Logger::get("MantidEV");
 
 
+/**
+ *  Default constructor
+ */
 MantidEVWorker::MantidEVWorker()
 {
 }
 
 
+/**
+ *  Default destructor
+ */
 MantidEVWorker::~MantidEVWorker()
 {
 }
 
 
+/**
+ *  Utility method to get the type of a workspace.  If the named workspace
+ *  is NOT present in the ADS a zero length string is returned.  If the named
+ *  workspace is in the ADS, the id string for the workspace is returned.  
+ *  For example for a PeaksWorkspace, the id string returned is 
+ *  "PeaksWorkspace".
+ *
+ *  @param  ws_name   The name of the workspace
+ *
+ *  @return The workspace id, or and zero length string if the workspace
+ *          doesn't exist.
+ */
 std::string MantidEVWorker::workspaceType( const std::string & ws_name )
 {
   const auto& ADS = AnalysisDataService::Instance();
@@ -46,7 +64,13 @@ std::string MantidEVWorker::workspaceType( const std::string & ws_name )
 }
 
 
-// check for existence of specified MDWorkspace
+/**
+ * Utility method to check if a name is the name of an MDWorkspace. 
+ *
+ *  @param  ws_name   The name of the workspace
+ *
+ *  @return true if the named workspace exists and is an MDWorkspace. 
+ */
 bool MantidEVWorker::isMDWorkspace( const std::string & md_ws_name )
 {
   std::string ws_type = workspaceType(md_ws_name);
@@ -61,7 +85,13 @@ bool MantidEVWorker::isMDWorkspace( const std::string & md_ws_name )
 }
 
 
-// check for existence of specified PeaksWorkspace
+/**
+ * Utility method to check if a name is the name of a PeaksWorkspace. 
+ *
+ *  @param  ws_name   The name of the workspace
+ *
+ *  @return true if the named workspace exists and is a PeaksWorkspace. 
+ */
 bool MantidEVWorker::isPeaksWorkspace( const std::string & peaks_ws_name )
 {
   std::string ws_type = workspaceType(peaks_ws_name);
@@ -76,7 +106,13 @@ bool MantidEVWorker::isPeaksWorkspace( const std::string & peaks_ws_name )
 }
 
 
-// check for existence of specified EventWorkspace
+/**
+ * Utility method to check if a name is the name of an EventWorkspace. 
+ *
+ *  @param  ws_name   The name of the workspace
+ *
+ *  @return true if the named workspace exists and is an EventWorkspace. 
+ */
 bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
 {
   std::string ws_type = workspaceType(event_ws_name);
@@ -93,6 +129,17 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
 }
 
 
+/**
+ *  Load the specified NeXus event file into the specified EventWorkspace
+ *  and convert it to the specified MD workspace.
+ *
+ *  @param file_name     Name of the NeXus file to load
+ *  @param ev_ws_name    Name of the event workspace to create
+ *  @param md_ws_name    Name of the MD workspace to create
+ *
+ *  @return true if the file was loaded and MD workspace was 
+ *          successfully created.
+ */
 bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
                                          const std::string & ev_ws_name,
                                          const std::string & md_ws_name )
@@ -127,6 +174,25 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
 }
 
 
+/**
+ *  Find peaks in the specified MD workspace and save them in the
+ *  specified peaks workspace.
+ *
+ *  @param md_ws_name     Name of the MD workspace to use 
+ *  @param peaks_ws_name  Name of the peaks workspace to create
+ *
+ *  @param max_abc        Estimate of the maximum real space
+ *                        edge length.  This is used to get an
+ *                        estimate of the minimum peak separation
+ *                        in reciprocal space.
+ *  @param num_to_find    The number of peaks to find.
+ *  @param min_intensity  Sets the minimum value to consider an
+ *                        MD box to be a possible peak.  If this
+ *                        is 10, only boxes with intensity 10 times
+ *                        the average intensity will be considered.
+ *
+ *  @return true if FindPeaksMD completed successfully.
+ */
 bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
                                 const std::string & peaks_ws_name,
                                       double        max_abc,
@@ -148,11 +214,20 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
 }
 
 
+/**
+ *  Load the specified peaks workspace from the specified peaks file.
+ *
+ *  @param peaks_ws_name   The name of the peaks workspace to load/create.
+ *  @param file_name       The name of the peaks file to load.
+ *
+ *  @return true if LoadIsawPeaks completed successfully.
+ */
 bool MantidEVWorker::loadIsawPeaks( const std::string & peaks_ws_name,
                                     const std::string & file_name )
 {
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadIsawPeaks");
   alg->setProperty("Filename",file_name );
+
   alg->setProperty("OutputWorkspace", peaks_ws_name );
 
   if ( alg->execute() )
@@ -162,6 +237,17 @@ bool MantidEVWorker::loadIsawPeaks( const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Load the specified peaks workspace to the specified peaks file.
+ *
+ *  @param peaks_ws_name   The name of the peaks workspace to save.
+ *  @param file_name       The name of the peaks file to write to.
+ *  @param append          Append the peaks from the peaks workspace
+ *                         onto the specified peaks file, if append
+ *                         is true and the peaks file already exists.
+ *
+ *  @return true if SaveIsawPeaks completed successfully.
+ */
 bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
                                     const std::string & file_name,
                                           bool          append  )
@@ -178,6 +264,18 @@ bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Find an optimized UB matrix that indexes the peaks in the specified
+ *  peaks workspace.
+ *
+ *  @param peaks_ws_name   The name of the peaks workspace.
+ *  @param min_abc         Lower bound for the real space edge lengths.
+ *  @param max_abc         Upper bound for the real space edge lengths.
+ *  @param tolerance       The tolerance on hkl values to use when 
+ *                         determining whether or not a peak is indexed.
+ *
+ *  @return true if FindUBusingFFT completed successfully.
+ */
 bool MantidEVWorker::findUBUsingFFT( const std::string & peaks_ws_name,
                                            double              min_abc,
                                            double              max_abc,
@@ -199,6 +297,14 @@ bool MantidEVWorker::findUBUsingFFT( const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Find an optimized UB matrix from the indexed peaks in the specified
+ *  peaks workspace.
+ * 
+ *  @param peaks_ws_name   The name of the peaks workspace.
+ *
+ *  @return true if FindUBusingIndexedPeaks completed successfully.
+ */
 bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string & peaks_ws_name)
 {
   if ( !isPeaksWorkspace( peaks_ws_name ) )
@@ -214,6 +320,15 @@ bool MantidEVWorker::findUBUsingIndexedPeaks(const std::string & peaks_ws_name)
 }
 
 
+/**
+ *  Load a UB matrix from the specified ISAW peaks file into the specified
+ *  peaks workspace.
+ * 
+ *  @param peaks_ws_name   The name of the peaks workspace.
+ *  @param file_name       The name of the ISAW peaks file to load.
+ *
+ *  @return true if LoadIsawUB completed successfully.
+ */
 bool MantidEVWorker::loadIsawUB( const std::string & peaks_ws_name,
                                  const std::string & file_name)
 {
@@ -232,6 +347,15 @@ bool MantidEVWorker::loadIsawUB( const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Save the UB matrix from the specified peaks workspace into the specified
+ *  ISAW matrix file. 
+ * 
+ *  @param peaks_ws_name   The name of the peaks workspace.
+ *  @param file_name       The name of the ISAW matrix file to write. 
+ *
+ *  @return true if SaveIsawUB completed successfully.
+ */
 bool MantidEVWorker::saveIsawUB( const std::string & peaks_ws_name,
                                  const std::string & file_name)
 {
@@ -249,6 +373,18 @@ bool MantidEVWorker::saveIsawUB( const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Adjust the goniometer angles in the specified peaks workspace to
+ *  maximize the number of peaks that are indexed with the current UB
+ *  matrix.
+ *
+ *  @param peaks_ws_name  The name of the peaks workspace.
+ *  @param max_change     The maximum change allowed for any
+ *                        goniometer angle, in degrees.
+ *
+ *  @return true if the OptimizeCrystalPlacement algorithm completes
+ *          successfully.
+ */
 bool MantidEVWorker::optimizePhiChiOmega( const std::string & peaks_ws_name, 
                                                 double        max_change )
 {
@@ -269,6 +405,17 @@ bool MantidEVWorker::optimizePhiChiOmega( const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Actually index the peaks in the specified peaks workspace using the
+ *  current UB matrix in the workspace.
+ *
+ *  @param peaks_ws_name  The name of the peaks workspace.
+ *  @param tolerance      The tolerance on hkl to use while indexing.
+ *  @param round_hkls     If true, the computed hkl values will be 
+ *                        rounded to the nearest integer value.
+ *
+ *  @return true if the IndexPeaks algorithm completes successfully.
+ */
 bool MantidEVWorker::indexPeaksWithUB( const std::string & peaks_ws_name, 
                                              double        tolerance, 
                                              bool          round_hkls )
@@ -288,6 +435,19 @@ bool MantidEVWorker::indexPeaksWithUB( const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Display the possible conventional cells corresponding to the current
+ *  UB.  NOTE: This only makes sense if the current UB matrix corresponds
+ *  to the Niggli reduced cell.
+ *
+ *  @param peaks_ws_name     The name of the peaks workspace.
+ *  @param max_scalar_error  The maximum error in the cell scalars that
+ *                           is allowed for a possible cell to be listed.
+ *  @param best_only         If true, only the best fitting cell of any
+ *                           particular type will be displayed.
+ *
+ *  @return true if the ShowPossibleCells algorithm completes successfully.
+ */
 bool MantidEVWorker::showCells( const std::string & peaks_ws_name,
                                       double        max_scalar_error,
                                       bool          best_only )
@@ -307,6 +467,18 @@ bool MantidEVWorker::showCells( const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Change the UB matrix and indexing from the current Niggli reduced
+ *  cell to the specified cell type and centering.
+ *  NOTE: This only makes sense if the current UB matrix corresponds
+ *  to the Niggli reduced cell.
+ *
+ *  @param peaks_ws_name     The name of the peaks workspace.
+ *  @param cell_type         String with the cell type, such as "Cubic".
+ *  @param centering         String with the centering such as "F".
+ *
+ *  @return true if the SelectCellOfType algorithm completes successfully.
+ */
 bool MantidEVWorker::selectCellOfType( const std::string & peaks_ws_name,
                                        const std::string & cell_type,
                                        const std::string & centering )
@@ -328,6 +500,17 @@ bool MantidEVWorker::selectCellOfType( const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Change the UB matrix and indexing from the current Niggli reduced
+ *  cell to the cell with the specified form number.
+ *  NOTE: This only makes sense if the current UB matrix corresponds
+ *  to the Niggli reduced cell.        
+ *
+ *  @param peaks_ws_name     The name of the peaks workspace.
+ *  @param form_num          The form number, 1..44.
+ *
+ *  @return true if the SelectCellWithForm algorithm completes successfully.
+ */
 bool MantidEVWorker::selectCellWithForm(  const std::string & peaks_ws_name,
                                                 size_t        form_num )
 {
@@ -347,6 +530,20 @@ bool MantidEVWorker::selectCellWithForm(  const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Change the UB matrix and indexing using the specified tranformation
+ *  that maps the current hkl vectors to the desired hkl values.
+ *
+ *  @param peaks_ws_name     The name of the peaks workspace.
+ *  @param row_1_string      String with the three entries from the
+ *                           first row of the matrix.
+ *  @param row_2_string      String with the three entries from the
+ *                           second row of the matrix.
+ *  @param row_3_string      String with the three entries from the
+ *                           third row of the matrix.
+ *
+ *  @return true if the TransformHKL algorithm completes successfully.
+ */
 bool MantidEVWorker::changeHKL(  const std::string & peaks_ws_name,
                                  const std::string & row_1_str,
                                  const std::string & row_2_str,
@@ -368,6 +565,27 @@ bool MantidEVWorker::changeHKL(  const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Integrate the peaks from the specified peaks workspace by generating
+ *  raw unweighted events in reciprocal space from the specified events
+ *  workspace and applying the IntegratePeaksMD algorithm to the raw
+ *  event MD workspace.
+ *
+ *  @param peaks_ws_name   The name of the peaks workspace with the peaks
+ *                         to integrate.
+ *  @param event_ws_name   The name of the event workspace to use when
+ *                         generating the temporary raw MD event workspace.
+ *  @param peak_radius     The radius of the peak region.
+ *  @param inner_radius    The radius of the inner surface of the background
+ *                         region.
+ *  @param outer_radius    The radius of the outer surface of the background
+ *                         region.
+ *  @param integrate_edge  If true, integrate peaks for which the sphere
+ *                         goes off the edge of the detector.
+ *
+ *  @return true if the unweighted workspace was successfully created and
+ *          integrated using IntegratePeaksMD.
+ */
 bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
                                        const std::string & event_ws_name,
                                              double        peak_radius,
@@ -432,6 +650,25 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Integrate the peaks from the specified peaks workspace by applying 
+ *  the PeakIntegration algorithm to the event workspace.
+ *
+ *  @param peaks_ws_name       The name of the peaks workspace with the
+ *                             peaks to integrate.
+ *  @param event_ws_name       The name of the event workspace to use.
+ *  @param rebin_param_str     String listing the rebinning parameters 
+ *                             to use when forming the event workspace
+ *                             into a histogram workspace.
+ *  @param n_bad_edge_pix      The number of pixels to omit at the edge
+ *                             of all detectors.
+ *  @param use_ikeda_carpenter If true, the integrated intensities on
+ *                             the time-of-flight slices will be fit
+ *                             using the Ikeda-Carpenter function to
+ *                             obtain the final integrated intensities.
+ *
+ *  @return true if the PeakIntegration algorithm completed successfully.
+ */
 bool MantidEVWorker::fitIntegrate(  const std::string & peaks_ws_name,
                                     const std::string & event_ws_name,
                                     const std::string & rebin_param_str,
@@ -481,6 +718,26 @@ bool MantidEVWorker::fitIntegrate(  const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Integrate the peaks from the specified peaks workspace by applying 
+ *  the IntegrateEllipsoids algorithm to the event workspace.
+ *
+ *  @param peaks_ws_name   The name of the peaks workspace with the peaks
+ *                         to integrate.
+ *  @param event_ws_name   The name of the event workspace to use.
+ *  @param region_radius   The radius of the whole spherical region 
+ *                         enclosing the peak and background ellipsoids.
+ *  @param specify_size    If true the sizes of the peak and background
+ *                         regions are specified by the last three 
+ *                         parameters to this method.
+ *  @param peak_size       The size of the major axis of the peak ellipsoid.
+ *  @param inner_size      The size of the major axis of the inner surface 
+ *                         of the background ellipsoid.
+ *  @param outer_size      The size of the major axis of the outer surface 
+ *                         of the background ellipsoid.
+ *
+ *  @return true if the IntegrateEllipsoids algorithm completed successfully.
+ */
 bool MantidEVWorker::ellipsoidIntegrate( const std::string & peaks_ws_name,
                                          const std::string & event_ws_name,
                                          double        region_radius,
@@ -518,6 +775,15 @@ bool MantidEVWorker::ellipsoidIntegrate( const std::string & peaks_ws_name,
 }
 
 
+/**
+ *  Show the current UB matrix from the specified peaks workspace
+ *  in both the Mantid and ISAW forms.
+ *
+ *  @param peaks_ws_name  The name of the peaks workspace with the UB
+ *                        matrix.
+ *
+ *  @return true if the peaks workspace had a UB matrix to show.
+ */
 bool MantidEVWorker::showUB( const std::string & peaks_ws_name )
 {
   if ( !isPeaksWorkspace( peaks_ws_name ) )
