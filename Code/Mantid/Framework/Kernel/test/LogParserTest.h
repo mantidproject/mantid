@@ -374,7 +374,8 @@ public:
       TS_ASSERT_DELTA(timeMean(log), 56.0, 1e-3);
     }
 
-    void test_timeMean_duplicate()
+    /// Tests to see if we can cope with duplicate log values that have the same time.
+    void test_timeMean_duplicate_values_with_same_timestamp()
     {
         TimeSeriesProperty<double> * log = new TimeSeriesProperty<double>("MydoubleLog");
         // Add the same value twice
