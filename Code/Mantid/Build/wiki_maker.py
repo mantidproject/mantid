@@ -158,16 +158,6 @@ def confirm(prompt=None, resp=False, continueconfirm=False):
         if ans == 'n' or ans == 'N':
             return False
     
-    
-#======================================================================
-def make_redirect(from_page, to_page):
-    """Make a redirect from_page to to_page"""
-    print "Making a redirect from %s to %s" % (from_page, to_page)
-    site = wiki_tools.site
-    page = site.Pages[from_page]
-    contents = "#REDIRECT [[%s]]" % to_page
-    page.save(contents, summary = 'Bot: created redirect to the latest version.' )
-    
 #======================================================================
 def page_exists(page):
     # Determine if the wikipage exists or not.
@@ -255,22 +245,21 @@ def do_algorithm(args, algo, version):
     """ Do the wiki page
     @param algo :: the name of the algorithm, and it's version as a tuple"""
     is_latest_version = True
+    
     # Find the latest version        
     latest_version = find_latest_alg_version(algo)
     if (version == noversion): 
         version = latest_version
-
+    # Abort if a version has bee requested that is not the latest version.
+    elif version < latest_version:
+        print "Warning: You are trying to use wiki maker on an old version of an algorithm."
+        return
+        
     print "Latest version of %s is %d. You are making version %d." % (algo, latest_version, version)
 
     # What should the name on the wiki page be?
     wiki_page_name = algo
-    if latest_version > 1:
-        wiki_page_name = algo + " v." + str(version)
-        # Make sure there is a redirect to latest version
-        if not args.dryrun:
-            make_redirect(algo, algo + " v." + str(latest_version))
         
-    
     print "Generating wiki page for %s at http://www.mantidproject.org/%s" % (algo, wiki_page_name)
     site = wiki_tools.site
     new_contents = make_wiki(algo, version, latest_version) 
