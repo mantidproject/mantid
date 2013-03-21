@@ -15,8 +15,8 @@ import os
 
 RUN_PROP = "RunNumbers"
 WKSP_PROP = "OutputWorkspace"
-DIFF_PROP = "DifferenceType"
-DIFF_PROP_MAP = {"Single":1, "Double":2, "Thick":3}
+MODE_PROP = "Mode"
+MODES=["SingleDifference", "DoubleDifference", "ThickDifference", "FoilOut", "FoilIn"]
 SPECTRA_PROP = "SpectrumList"
 INST_PAR_PROP = "InstrumentParFile"
 
@@ -52,8 +52,8 @@ class LoadVesuvio(PythonAlgorithm):
                                               Direction.Input), 
                              doc="The spectrum numbers to load")
 
-        self.declareProperty(DIFF_PROP, "Double", StringListValidator(DIFF_PROP_MAP.keys()),
-                             doc="The difference option. Valid values: Single, Double, Thick")
+        self.declareProperty(MODE_PROP, "DoubleDifference", StringListValidator(MODES),
+                             doc="The difference option. Valid values: %s" % str(MODES))
 
         self.declareProperty(FileProperty(INST_PAR_PROP,"",action=FileAction.OptionalLoad,
                                           extensions=["dat"]), 
@@ -64,15 +64,27 @@ class LoadVesuvio(PythonAlgorithm):
     def PyExec(self):
         self._load_inst_parameters()
         self._retrieve_input()
+        
+        if self._diff_opt is not None:
+            self._exec_difference_mode()
+        else:
+            self._exec_single_foil_state_mode()
 
+#----------------------------------------------------------------------------------------
+
+    def _exec_difference_mode(self):
+        """
+           Execution path when a difference mode is selected
+        """
         try:
             self._setup_raw(self._spectra)
             self._create_foil_workspaces()
 
             for ws_index, spectrum_no in enumerate(self._spectra):
                 self._ws_index, self._spectrum_no = ws_index, spectrum_no
+                self._set_spectra_type(spectrum_no)
                 self.foil_map = SpectraToFoilPeriodMap(self._nperiods,self._mon_spectra)
-                
+
                 self._integrate_periods()
                 self._sum_foil_periods()
                 self._apply_dead_time_correction()
@@ -84,6 +96,27 @@ class LoadVesuvio(PythonAlgorithm):
             self._store_results()
         finally: # Ensures it happens whether there was an error or not
             self._cleanup_raw()
+
+#----------------------------------------------------------------------------------------
+
+    def _exec_single_foil_state_mode(self):
+        """
+        Execution path when a single foil state is requested
+        """
+        raise RuntimeError("Not Implemented")
+
+        runs = self._get_runs()
+        if len(runs) > 1:
+            raise RuntimeError("Single soil state mode does not currently support summing multiple files")
+        
+        # Include the monitor spectrum
+        spectra = str(self._mon_spectra) + "," + self._spectra
+        LoadRaw(Filename=runs[0], OutputWorkspace=SUMMED_WS, SpecutrumList=spectra,
+                EnableLogging=_LOGGING_)
+        
+        raw_group = mtd[SUMMED_WS]
+        self.foil_out = WorkspaceFactory.create(raw_group[0])
+        
 
 #----------------------------------------------------------------------------------------
 
@@ -147,55 +180,20 @@ class LoadVesuvio(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
     def _retrieve_input(self):
-        self._diff_opt = DIFF_PROP_MAP[self.getProperty(DIFF_PROP).value]
-        self._spectra = self.getProperty(SPECTRA_PROP).value
-        self._spectra_type = self._check_no_bank_overlap(self._spectra)
+        mode = self.getProperty(MODE_PROP).value
+        if "Difference" in mode:
+            self._diff_opt = mode
+        else:
+            self._diff_opt = None
         
-        # Get the correct normalization ranges for this run
-        if self._spectra_type == BACKWARD:
-            self._mon_norm_start, self._mon_norm_end = self._back_mon_norm
-            self._period_sum1_start, self._period_sum1_end = self._back_period_sum1
-            self._period_sum2_start, self._period_sum2_end = self._back_period_sum2
-            self._foil_out_norm_start, self._foil_out_norm_end = self._back_foil_out_norm
-        else:
-            self._mon_norm_start, self._mon_norm_end = self._forw_mon_norm
-            self._period_sum1_start, self._period_sum1_end = self._forw_period_sum1
-            self._period_sum2_start, self._period_sum2_end = self._forw_period_sum2
-            self._foil_out_norm_start, self._foil_out_norm_end = self._forw_foil_out_norm
-            
-#----------------------------------------------------------------------------------------
-    def _check_no_bank_overlap(self, spectra):
-        """
-            Runs a sanity check to ensure that the spectra are from either the
-            back-scattering banks or the forward-scattering banks and not a mix.
-            Also verifies that the spectra are not just monitors
-            @param spectra :: A list of spectra numbers that will be loaded
-            @returns An enumeration specifying which set of detectors
-        """
-        npspectra = np.array(spectra)
-        npspectra.sort()
-        in_back = np.all((npspectra >= self._backward_spectra_list[0]) & (npspectra <= self._backward_spectra_list[-1]))
-        if in_back:
-            return BACKWARD
-        else:
-            in_forward = np.all((npspectra >= self._forward_spectra_list[0]) & (npspectra <= self._forward_spectra_list[-1]))
-            if in_forward:
-                return FORWARD
-            else:
-                raise RuntimeError("Invalid spectra range. There is an overlap of the forward/backward spectra ranges")
+        self._spectra = self.getProperty(SPECTRA_PROP).value
+
 #----------------------------------------------------------------------------------------
 
     def _setup_raw(self, spectra):
         self._raw_grp, self._raw_monitors = self._load_and_sum_runs(spectra)
         nperiods = self._raw_grp.size()
-        # Sanity check the number of periods
-        if self._spectra_type == BACKWARD:
-            if nperiods not in (2,3,6,9):
-                raise RuntimeError("Invalid number of periods for backward scattering spectra. nperiods=%d" %(nperiods))
-        else:
-            if nperiods != 6:
-                 raise RuntimeError("Invalid number of periods for forward scattering spectra. nperiods=%d" %(nperiods))
-        
+
         self._nperiods = nperiods
         self._goodframes = self._raw_grp[0].getRun().getLogData("goodfrm").value
         
@@ -222,17 +220,8 @@ class LoadVesuvio(PythonAlgorithm):
         isis = config.getFacility("ISIS")
         inst_prefix = isis.instrument("VESUVIO").shortName()
 
-        run_str = self.getProperty(RUN_PROP).value
-        # Load is not doing the right thing when summing. The numbers don't look correct
-        if "-" in run_str:
-            lower,upper =  run_str.split("-")
-            runs = range(int(lower),int(upper)+1) #range goes lower to up-1 but we want to include the last number
-            
-        elif "," in run_str:
-            runs =  run_str.split(",")
-        else:
-            runs = [run_str]
-
+        runs = self._get_runs()
+        
         self.summed_ws, self.summed_mon = "__loadraw_evs", "__loadraw_evs_monitors"
         for index, run in enumerate(runs):
             run = inst_prefix + str(run)
@@ -258,6 +247,51 @@ class LoadVesuvio(PythonAlgorithm):
         CropWorkspace(Inputworkspace= SUMMED_MON, OutputWorkspace= SUMMED_MON,
                       XMax=self._mon_tof_max,EnableLogging=_LOGGING_)
         return mtd[SUMMED_WS], mtd[SUMMED_MON]
+
+#----------------------------------------------------------------------------------------
+
+    def _get_runs(self):
+        """
+        Returns the runs as a list of strings
+        """
+        run_str = self.getProperty(RUN_PROP).value
+        # Load is not doing the right thing when summing. The numbers don't look correct
+        if "-" in run_str:
+            lower,upper =  run_str.split("-")
+            runs = range(int(lower),int(upper)+1) #range goes lower to up-1 but we want to include the last number
+            
+        elif "," in run_str:
+            runs =  run_str.split(",")
+        else:
+            runs = [run_str]
+            
+        return runs
+#----------------------------------------------------------------------------------------
+
+    def _set_spectra_type(self,spectrum_no):
+        """
+            Set whether this spectrum no is forward/backward scattering
+            and set the normalization range appropriately
+            @param spectrum_no The current spectrum no 
+        """
+        if spectrum_no >= self._backward_spectra_list[0] and spectrum_no <= self._backward_spectra_list[-1]:
+            self._spectra_type=BACKWARD
+        elif spectrum_no >= self._forward_spectra_list[0] and spectrum_no <= self._forward_spectra_list[-1]:
+            self._spectra_type=FORWARD
+        else:
+            raise RuntimeError("Invalid spectra %d. Not defined as forward or backward spectrum" % spectrum_no)
+
+        if self._spectra_type == BACKWARD:
+            self._mon_norm_start, self._mon_norm_end = self._back_mon_norm
+            self._period_sum1_start, self._period_sum1_end = self._back_period_sum1
+            self._period_sum2_start, self._period_sum2_end = self._back_period_sum2
+            self._foil_out_norm_start, self._foil_out_norm_end = self._back_foil_out_norm
+        else:
+            self._mon_norm_start, self._mon_norm_end = self._forw_mon_norm
+            self._period_sum1_start, self._period_sum1_end = self._forw_period_sum1
+            self._period_sum2_start, self._period_sum2_end = self._forw_period_sum2
+            self._foil_out_norm_start, self._foil_out_norm_end = self._forw_foil_out_norm
+
 
 #----------------------------------------------------------------------------------------
     def _integrate_periods(self):
@@ -473,11 +507,11 @@ class LoadVesuvio(PythonAlgorithm):
             spectra for the current workspace index
         """
         wsindex = self._ws_index
-        if self._diff_opt == 1:
+        if self._diff_opt == "SingleDifference":
             self._calculate_thin_difference(wsindex)
-        elif self._diff_opt == 2:
+        elif self._diff_opt == "DoubleDifference":
             self._calculate_double_difference(wsindex)
-        elif self._diff_opt == 3:
+        elif self._diff_opt == "ThickDifference":
             self._calculate_thick_difference(wsindex)
         else:
             raise RuntimeError("Unknown difference type requested: %d" % self._diff_opt)
