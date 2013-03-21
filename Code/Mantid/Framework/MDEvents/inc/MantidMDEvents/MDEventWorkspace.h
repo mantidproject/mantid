@@ -160,8 +160,8 @@ namespace MDEvents
     MDBoxBase<MDE, nd> * data;
 
     /// Box controller in use
-    //Mantid::API::BoxController_sptr m_BoxController;
-    boost::shared_ptr<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > > m_BoxController;
+    Mantid::API::BoxController_sptr m_BoxController;
+    //boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
   private:
 
   public:

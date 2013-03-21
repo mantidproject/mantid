@@ -30,10 +30,8 @@ namespace API
    */
   BoxController_sptr BoxController::clone()const
   {
-        BoxController * theClone = new BoxController(*this);
         // reset the clone file IO controller to avoid dublicated file based operations for different box controllers
-        theClone->m_fileIO.reset();
-        return BoxController_sptr(theClone);
+        return BoxController_sptr(new BoxController(*this));
   }
    /** makes box controller file based by providing class, responsible for fileIO. The box controller become responsible for the FileIO pointer
     *@param newFileIO -- instance of the box controller responsible for the IO;

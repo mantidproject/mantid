@@ -38,8 +38,11 @@ public:
     virtual bool isBusy()const{return _isBusy;}
     virtual bool isDataChanged()const{return true;}
     virtual bool wasSaved()const{return false;}
+    virtual void setLoaded(bool ){};
     virtual bool isLoaded()const{return true;}
     virtual void setBusy(bool On=true){_isBusy=On;}
+    virtual void setDataChanged(){}
+    virtual void clearDataChanged(){}
     //-----------------------------------------------------------------------------------------------
 
     /// Save the data - to be overriden

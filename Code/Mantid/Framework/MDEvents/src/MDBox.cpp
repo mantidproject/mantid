@@ -114,7 +114,7 @@ namespace MDEvents
     {
         m_Saveable->setLoaded(false);
         m_Saveable->setBusy(false);
-        m_Saveable->resetDataChanges();
+        m_Saveable->clearDataChanged();
     }
 
   }
@@ -204,7 +204,7 @@ namespace MDEvents
         // Load and concatenate the events if needed
         m_Saveable->load();
       // The data vector is busy - can't release the memory yet
-        m_Saveable->setBusy();
+        m_Saveable->setBusy(true);
       // Tell the to-write buffer to write out/discard the object (when no longer busy)
         this->m_BoxController->getDiskBuffer().toWrite(m_Saveable);
       }
@@ -234,7 +234,7 @@ namespace MDEvents
       // Load and concatenate the events if needed
         m_Saveable->load();  // this will set isLoaded to true if not already loaded;
         // The data vector is busy - can't release the memory yet
-        m_Saveable->setBusy();
+        m_Saveable->setBusy(true);
 
       // This access to data was const. Don't change the m_dataModified flag.
 
@@ -756,14 +756,13 @@ namespace MDEvents
 
     dataMutex.unlock();
 
-    // When we reach the split threshold exactly, track that the MDBox is too small
-    // We check on equality and not >= to only add a box once.
-    if (this->data.size() == this->m_BoxController->getSplitThreshold())
-    {     
-       auto BoxCtrl = dynamic_cast<BoxCtrlChangesList<MDBoxToChange<MDE,nd> >*>(this->m_BoxController);
-       BoxCtrl->addBoxToSplit(MDBoxToChange<MDE,nd>(this,index));
+    //// When we reach the split threshold exactly, track that the MDBox is too small
+    //// We check on equality and not >= to only add a box once.
+    //if (this->data.size() == this->m_BoxController->getSplitThreshold())
+    //{
 
-    }
+    //   this->m_BoxController->addBoxToSplit(new MDBoxToChange<MDE,nd>(this,index));
+    //}
 
   }
  

@@ -579,6 +579,86 @@ namespace MDEvents
 //      file->closeData();
 //    }
 
-
+//  void MDBoxFlatTree::initEventFileStorage(const std::string &fileName,API::BoxController_sptr bc,bool FileBacked,const std::string &EventType)
+//  {
+//    m_FileName = fileName;
+//    ::NeXus::File * hFile;
+//      // Erase the file if it exists
+//    Poco::File oldFile(m_FileName);
+//    if (oldFile.exists())
+//    {
+//      hFile = new ::NeXus::File(m_FileName, NXACC_RDWR);
+//      hFile->openGroup("MDEventWorkspace", "NXentry");
+//    }
+//    else
+//    {
+//      // Create a new file in HDF5 mode.
+//      hFile = new ::NeXus::File(m_FileName, NXACC_CREATE5);
+//      hFile->makeGroup("MDEventWorkspace", "NXentry", true);
+//
+//      auto nDim = int32_t(bc->getNDims());
+//   // Write out some general information like # of dimensions
+//      hFile->writeData("dimensions", nDim);
+//      hFile->putAttr("event_type", EventType);
+//      //TODO: what about history here?
+//    }  
+//
+//    initEventFileStorage(hFile,bc,FileBacked,EventType);
+//    if(!FileBacked)
+//    {
+//      hFile->closeGroup();
+//      hFile->close();
+//      delete hFile;
+//    }
+//  }
+///**TODO: this should not be here, refactor out*/ 
+//  void MDBoxFlatTree::initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool MakeFileBacked,const std::string &EventType)
+//  {
+//    bool update=true;
+//// Start the event Data group, TODO: should be better way of checking existing group
+//    try
+//    {
+//      hFile->openGroup("event_data", "NXdata");
+//    }
+//    catch(...)
+//    {
+//      update=false;
+//      hFile->makeGroup("event_data", "NXdata",true);
+//    }
+//    hFile->putAttr("version", "1.0");
+//
+//
+//    // Prepare the data chunk storage.
+//    size_t chunkSize = bc->getDataChunk();
+//    size_t nDim = bc->getNDims();
+//    uint64_t NumOldEvents(0);
+//    if (update)
+//       NumOldEvents= API::BoxController::openEventNexusData(hFile);
+//    else
+//    {
+//      std::string descr;
+//      size_t nColumns;
+//      if(EventType=="MDEvent")
+//      {
+//        nColumns = nDim+4;
+//        descr="signal, errorSquared, runIndex, detectorId, center (each dim.)";
+//      }
+//      else if(EventType=="MDLeanEvent")
+//      {
+//        nColumns = nDim+2;
+//        descr="signal, errorsquared, center (each dim.)";
+//      }
+//      else
+//        throw std::runtime_error("unknown event type encontered");
+//
+//      API::BoxController::prepareEventNexusData(hFile, chunkSize,nColumns,descr);
+//   }
+//      // Initialize the file-backing
+//    if (MakeFileBacked)         // Set it back to the new file handle
+//       bc->setFile(hFile, m_FileName, NumOldEvents);
+//
+//
+//  }
+//
 }
 }

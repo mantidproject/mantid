@@ -49,34 +49,39 @@ namespace MDEvents
     /**@return XML description of the workspace box controller */
     const std::string &getBCXMLdescr()const {return m_bcXMLDescr;}
 
+    //---------------------------------------------------------------------------------------------------------------------
     /**@return internal linearized box structure of md workspace. Defined only when the class is properly initiated*/
     std::vector<API::IMDNode *> &getBoxes(){return m_Boxes;}
     /**@return number of boxes */
     size_t getNBoxes()const{return m_BoxType.size();}
+    /**@return the vector of data which describes signals and errors over boxes */
+    std::vector<double> &getSigErrData(){return m_BoxSignalErrorsquared;}
+    /**@return the vector of data which describes signals and errors locations on file */
+    std::vector<uint64_t> &getEventIndex(){return m_BoxEventIndex;}
 
+    //---------------------------------------------------------------------------------------------------------------------
     /// convert MDWS box structure into flat structure used for saving/loading on hdd 
     void initFlatStructure(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-    /**Method resotores the interconnected box structure in memory, namely the nodes and their connectivity */
+    /**Method resotores the interconnected box structure in memory, namely the nodes and their connectivity -->TODO: refactor this into single fucntion and move templating into MDEventFactory */
     template<typename MDE,size_t nd>
     uint64_t restoreBoxTree(std::vector<API::IMDNode *>&Boxes ,API::BoxController_sptr bc, bool FileBackEnd,bool NoFileInfo=false);
 
     /*** this function tries to set file positions of the boxes to 
-          make data slatially located close to each otger to be as close as possible on the HDD */
+          make data physiclly located close to each otger to be as close as possible on the HDD */
     void setBoxesFilePositions(bool makeFileBacked);
+
+    /**Save flat box structure into a file, defined by the file name*/
+    void saveBoxStructure(const std::string &fileName);
+    /**load box structure from the file, defined by file name */
+    void loadBoxStructure(const std::string &fileName);
+ 
+  private:
     /**Save flat box structure into properly open nexus file*/
     void saveBoxStructure(::NeXus::File *hFile);
-    void saveBoxStructure(const std::string &fileName);
     /**Load flat box structure from a nexus file*/
     void loadBoxStructure(::NeXus::File *hFile);
 
-    void loadBoxStructure(const std::string &fileName);
-
-    void initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool MakeFileBacked,const std::string &EventType);
-    void initEventFileStorage(const std::string &fileName,API::BoxController_sptr bc,bool FileBacked,const std::string &EventType);
-
-    std::vector<double> &getSigErrData(){return m_BoxSignalErrorsquared;}
-    std::vector<uint64_t> &getEventIndex(){return m_BoxEventIndex;}
-  private:
+   //----------------------------------------------------------------------------------------------
     int m_nDim;
     // The name of the file the class will be working with 
     std::string m_FileName;

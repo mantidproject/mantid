@@ -35,7 +35,7 @@ public:
   {
     // the object knows its place on file
     this->setFilePosition(pos,size,wasSaved);
-    this->setLoaded();
+    this->setLoaded(true);
   }
   // this is testing/special routine
   void setSaved(bool On=true)
@@ -108,7 +108,7 @@ public:
       {
           m_memory+=this->getFileSize();
       }
-      this->setLoaded();
+      this->setLoaded(true);
   }
   virtual void flushData() const {}
 
@@ -160,7 +160,7 @@ public:
     DiskBuffer dbuf(4);
     for (size_t i=0; i<9; i++)
     {
-      data[i]->setBusy();
+      data[i]->setBusy(true);
       dbuf.toWrite(data[i]);
     }
     // We ended up with too much in the buffer since nothing could be written.
@@ -187,7 +187,7 @@ public:
     DiskBuffer dbuf(4);
     for (size_t i=0; i<10; i++)
     {
-      data[i]->setBusy();
+      data[i]->setBusy(true);
       data[i]->setSaved(false);
       dbuf.toWrite(data[i]);
     }
@@ -692,7 +692,7 @@ public:
     uint64_t myFilePos = this->getFilePosition();
     //std::cout << "Block " << getFileId() << " loading at " << myFilePos << std::endl;
     SaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
-    this->setLoaded();
+    this->setLoaded(true);
   }
 
   virtual void save()const
@@ -746,7 +746,7 @@ public:
       {
           m_memory+=this->getFileSize();
       }
-      this->setLoaded();
+      this->setLoaded(true);
   }
 
 

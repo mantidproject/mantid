@@ -69,6 +69,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
+	inc/MantidMDEvents/BoxCtrlChangesList.h 
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h

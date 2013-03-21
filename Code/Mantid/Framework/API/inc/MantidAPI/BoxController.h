@@ -49,7 +49,7 @@ namespace API
     virtual ~BoxController();
 
     // create new box controller from the existing one
-    boost::shared_ptr<BoxController> clone()const;
+    virtual boost::shared_ptr<BoxController> clone()const;
     /// Serialize
     std::string toXMLString() const;
 
@@ -418,10 +418,11 @@ namespace API
       for (size_t depth=1; depth<m_maxNumMDBoxes.size(); depth++)
         m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth-1] * double(m_numSplit);
     }
-
-  private:
-    /// box controller is an ws-based singleton so it should not be possible to copy it  
+  protected:
+   /// box controller is an ws-based singleton so it should not be possible to copy it, left for inheritance;
     BoxController(const BoxController & other );
+ 
+  private:
     /// Number of dimensions
     size_t nd;
 

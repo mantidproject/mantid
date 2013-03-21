@@ -74,6 +74,8 @@ namespace MDEvents
   static uint64_t openEventNexusData(::NeXus::File * file);
 
   static void closeNexusData(::NeXus::File * file);
+  void initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool MakeFileBacked,const std::string &EventType);
+  void initEventFileStorage(const std::string &fileName,API::BoxController_sptr bc,bool FileBacked,const std::string &EventType);
 
 
 

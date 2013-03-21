@@ -49,7 +49,7 @@ namespace Kernel
       return m_Busy;
     }
     /// @ set the data busy to prevent from removing them from memory. The process which does that should clean the data when finished with them
-    void setBusy(bool On=true)
+    void setBusy(bool On)
     {
         m_Busy=On;
     }
@@ -65,7 +65,7 @@ namespace Kernel
     }
     /** this method has to be called if the object has been discarded from memory and is not changed any more. 
     It expected to be called from clearDataFromMemory. */
-    void resetDataChanges()
+    void clearDataChanged()
     {
       m_dataChanged=false;
     }
@@ -84,7 +84,7 @@ namespace Kernel
     bool isLoaded()const
     { return m_isLoaded;}
 
-    void setLoaded(bool Yes=true)
+    void setLoaded(bool Yes)
     { m_isLoaded = Yes;}
   protected:
     //-------------- 

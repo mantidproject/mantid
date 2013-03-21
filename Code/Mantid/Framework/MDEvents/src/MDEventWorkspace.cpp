@@ -37,9 +37,8 @@ namespace MDEvents
   /** Default constructor
    */
   TMDE(
-  MDEventWorkspace)::MDEventWorkspace()
-    //m_BoxController(boost::make_shared<BoxController>(nd))
-  : m_BoxController(boost::make_shared<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > >(nd))
+  MDEventWorkspace)::MDEventWorkspace():
+  m_BoxController(new BoxController(nd))
   {
     // First box is at depth 0, and has this default boxController
     data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
@@ -50,24 +49,25 @@ namespace MDEvents
    */
   TMDE(
   MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE,nd> & other)
-  : IMDEventWorkspace(other),
-    m_BoxController( new BoxCtrlChangesList<MDBoxToChange<MDE,nd> >(*other.m_BoxController) )
+  : IMDEventWorkspace(other)
   {
-    const MDBox<MDE,nd> * mdbox = dynamic_cast<const MDBox<MDE,nd> *>(other.data);
-    const MDGridBox<MDE,nd> * mdgridbox = dynamic_cast<const MDGridBox<MDE,nd> *>(other.data);
-    if (mdbox)
-    {
-        data = new MDBox<MDE, nd>(*mdbox,m_BoxController.get());
-    }
-    else if (mdgridbox)
-    {
+      m_BoxController = other.m_BoxController->clone();
+
+      const MDBox<MDE,nd> * mdbox = dynamic_cast<const MDBox<MDE,nd> *>(other.data);
+      const MDGridBox<MDE,nd> * mdgridbox = dynamic_cast<const MDGridBox<MDE,nd> *>(other.data);
+      if (mdbox)
+      {
+          data = new MDBox<MDE, nd>(*mdbox,m_BoxController.get());
+      }
+      else if (mdgridbox)
+      {
         data = new MDGridBox<MDE, nd>(*mdgridbox,m_BoxController.get());
-    }
-    else
-    {
-      throw std::runtime_error("MDEventWorkspace::copy_ctor(): unexpected data box type found.");
-    }
-    //data->setBoxController(m_BoxController);
+      }
+      else
+      {
+         throw std::runtime_error("MDEventWorkspace::copy_ctor(): unexpected data box type found.");
+      }
+
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -77,7 +77,6 @@ namespace MDEvents
   MDEventWorkspace)::~MDEventWorkspace()
   {
     delete data;
-    m_BoxController->closeFile();
   }
 
 
@@ -360,7 +359,7 @@ namespace MDEvents
 //    }
 //    out.push_back(mess.str()); mess.str("");
 
-    if (m_BoxController->getFile())
+    if (m_BoxController->isFileBacked())
     {
       mess << "File backed: ";
       double avail = double(m_BoxController->getDiskBuffer().getWriteBufferSize() * sizeof(MDE)) / (1024*1024);
@@ -371,7 +370,7 @@ namespace MDEvents
       mess << "File";
       if (this->fileNeedsUpdating())
         mess << " (needs updating)";
-      mess << ": " << this->m_BoxController->getFilename();
+      mess << ": " << this->m_BoxController->getFileIO()->getFileName();
       out.push_back(mess.str()); mess.str("");
     }
     else
@@ -482,7 +481,7 @@ namespace MDEvents
 //    std::cout << "sizeof(MDBox<MDE,nd>) " << sizeof(MDBox<MDE,nd>) << std::endl;
 //    std::cout << "sizeof(MDGridBox<MDE,nd>) " << sizeof(MDGridBox<MDE,nd>) << std::endl;
     size_t total = 0;
-    if (this->m_BoxController->getFile())
+    if (this->m_BoxController->isFileBacked())
     {
       // File-backed workspace
       // How much is in the cache?
