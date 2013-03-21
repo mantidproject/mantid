@@ -28,6 +28,7 @@ class LoadData(ReductionStep):
     _masking_detectors = []
     _parameter_file = None
     _data_files = {}
+    _extra_load_opts = {}
 
     def __init__(self):
         """Initialise the ReductionStep. Constructor should set the initial
@@ -80,6 +81,9 @@ class LoadData(ReductionStep):
         self._detector_range_start = start
         self._detector_range_end = end
 
+    def set_extra_load_opts(self, opts):
+        self._extra_load_opts = opts
+
     def get_mask_list(self):
         return self._masking_detectors
 
@@ -92,9 +96,7 @@ class LoadData(ReductionStep):
     def _load_single_file(self, filename, output_ws):
         logger.notice("Loading file %s" % filename)
 
-        loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False)
-        loader_handle = loaded_ws.getHistory().lastAlgorithm()
-        loader_name = loader_handle.getPropertyValue("LoaderName")
+        loader_name = self._load_data(filename, output_ws)
 
         inst_name = mtd[output_ws].getInstrument().getName()
         if inst_name == 'BASIS':
@@ -150,6 +152,16 @@ class LoadData(ReductionStep):
             msk = 'None'
         if ( msk == 'IdentifyNoisyDetectors' ):
             self._identify_bad_detectors(workspaces[0])
+
+    def _load_data(self, filename, output_ws):
+        if "VESUVIO" in self._parameter_file:
+            loaded_ws = LoadVesuvio(Filename=filename, OutputWorkspace=output_ws, SpectrumList="1,3-198", **self._extra_load_opts)
+            loader_name = "LoadVesuvio"
+        else:
+            loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
+            loader_handle = loaded_ws.getHistory().lastAlgorithm()
+            loader_name = loader_handle.getPropertyValue("LoaderName")
+        return loader_name
 
     def _sum_regular(self, wsname):
         merges = [[], []]
@@ -210,6 +222,8 @@ class LoadData(ReductionStep):
 
     def is_multiple_frames(self):
         return self._multiple_frames
+
+#--------------------------------------------------------------------------------------------------
 
 class BackgroundOperations(ReductionStep):
     """Removes, if requested, a background from the detectors data in TOF

@@ -25,6 +25,7 @@ class MSGReducer(reducer.Reducer):
     _fold_multiple_frames = True
     _save_formats = []
     _info_table_props = None
+    _extra_load_opts = {}
     
     def __init__(self):
         super(MSGReducer, self).__init__()
@@ -39,6 +40,7 @@ class MSGReducer(reducer.Reducer):
         loadData.set_detector_range(self._detector_range[0],
             self._detector_range[1])
         loadData.set_parameter_file(self._parameter_file)
+        loadData.set_extra_load_opts(self._extra_load_opts)
         loadData.execute(self, None)
         
         self._multiple_frames = loadData.is_multiple_frames()
@@ -159,6 +161,13 @@ class MSGReducer(reducer.Reducer):
         if not isinstance(formats, list):
             raise TypeError("formats variable must be of list type")
         self._save_formats = formats
+
+    def append_load_option(self, name, value):
+        """
+           Additional options for the Load call, require name & value
+           of property
+        """
+        self._extra_load_opts[name] = value
         
     def get_result_workspaces(self):
         """Returns a Python list object containing the names of the workspaces
