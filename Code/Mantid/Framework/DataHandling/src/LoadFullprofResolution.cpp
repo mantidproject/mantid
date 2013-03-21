@@ -23,6 +23,9 @@ namespace DataHandling
 {
 
 
+  DECLARE_ALGORITHM(LoadFullprofResolution)
+
+
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
