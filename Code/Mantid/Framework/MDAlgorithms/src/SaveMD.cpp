@@ -400,11 +400,11 @@ namespace MDAlgorithms
 //  }
 //
 //
-//  //----------------------------------------------------------------------------------------------
-//  /** Execute the algorithm.
-//   */
-//  void SaveMD::exec()
-//  {
+  //----------------------------------------------------------------------------------------------
+  /** Execute the algorithm.
+   */
+  void SaveMD::exec()
+  {
 //    IMDWorkspace_sptr ws = getProperty("InputWorkspace");
 //    IMDEventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
 //    MDHistoWorkspace_sptr histoWS =  boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
@@ -420,9 +420,9 @@ namespace MDAlgorithms
 //    }
 //    else
 //      throw std::runtime_error("SaveMD can only save MDEventWorkspaces and MDHistoWorkspaces.\nPlease use SaveNexus or another algorithm appropriate for this workspace type.");
-//  }
-//
-//
+  }
+
+
 
 } // namespace Mantid
 } // namespace MDEvents

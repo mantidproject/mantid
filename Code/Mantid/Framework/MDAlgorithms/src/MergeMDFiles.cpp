@@ -377,36 +377,36 @@ namespace MDAlgorithms
   //}
 
 
-  ////----------------------------------------------------------------------------------------------
-  ///** Execute the algorithm.
-  // */
-  //void MergeMDFiles::exec()
-  //{
-  //  // clear disk buffer which can remain from previous runs 
-  //  // the existance/ usage of the buffer idicates if the algorithm works with file based or memory based target workspaces;
-  //  pDiskBuffer = NULL;
-  //  MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filenames"));
-  //  m_Filenames = MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
-  //  if (m_Filenames.size() == 0)
-  //    throw std::invalid_argument("Must specify at least one filename.");
-  //  std::string firstFile = m_Filenames[0];
+  //----------------------------------------------------------------------------------------------
+  /** Execute the algorithm.
+   */
+  void MergeMDFiles::exec()
+  {
+    //// clear disk buffer which can remain from previous runs 
+    //// the existance/ usage of the buffer idicates if the algorithm works with file based or memory based target workspaces;
+    //pDiskBuffer = NULL;
+    //MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filenames"));
+    //m_Filenames = MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
+    //if (m_Filenames.size() == 0)
+    //  throw std::invalid_argument("Must specify at least one filename.");
+    //std::string firstFile = m_Filenames[0];
 
-  //  // Start by loading the first file but just the box structure, no events, and not file-backed
-  //  IAlgorithm_sptr loader = createChildAlgorithm("LoadMD", 0.0, 0.05, false);
-  //  loader->setPropertyValue("Filename", firstFile);
-  //  loader->setProperty("MetadataOnly", false);
-  //  loader->setProperty("BoxStructureOnly", true);
-  //  loader->setProperty("FileBackEnd", false);
-  //  loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace") );
-  //  loader->executeAsChildAlg();
-  //  IMDWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
+    //// Start by loading the first file but just the box structure, no events, and not file-backed
+    //IAlgorithm_sptr loader = createChildAlgorithm("LoadMD", 0.0, 0.05, false);
+    //loader->setPropertyValue("Filename", firstFile);
+    //loader->setProperty("MetadataOnly", false);
+    //loader->setProperty("BoxStructureOnly", true);
+    //loader->setProperty("FileBackEnd", false);
+    //loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace") );
+    //loader->executeAsChildAlg();
+    //IMDWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
 
 
-  //  // Call the templated method
-  //  CALL_MDEVENT_FUNCTION( this->doExecByCloning, firstWS);
+    //// Call the templated method
+    //CALL_MDEVENT_FUNCTION( this->doExecByCloning, firstWS);
 
-  //  setProperty("OutputWorkspace", m_OutIWS);
-  //}
+    //setProperty("OutputWorkspace", m_OutIWS);
+  }
 
 
 

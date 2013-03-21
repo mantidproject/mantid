@@ -37,8 +37,6 @@ static MDBoxTest *createSuite() { return new MDBoxTest(); }
 static void destroySuite(MDBoxTest * suite) { delete suite; }    
 
 
-
-public:
   void test_default_constructor()
   {
     MDBox<MDLeanEvent<3>,3> b3(sc.get());

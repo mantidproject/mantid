@@ -325,11 +325,13 @@ namespace MDEvents
     {
     // Number of columns = number of dimensions + 2 (signal/error)
       size_t numColumns = nd+2;
-      size_t numEvents = events.size()/numColumns;
-      if(numEvents*numColumns!=events.size())
-          throw(std::invalid_argument("wrong input array of data to convert to lean events "));
+      size_t numEvents = coord.size()/numColumns;
+      if(numEvents*numColumns!=coord.size())
+          throw(std::invalid_argument("wrong input array of data to convert to lean events, suspected column data for different dimensions/(type of) events "));
+
 
          // Reserve the amount of space needed. Significant speed up (~30% thanks to this)
+      events.clear();
       events.reserve(numEvents);
       for (size_t i=0; i<numEvents; i++)
       {

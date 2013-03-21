@@ -245,13 +245,15 @@ namespace MDEvents
     */
     static inline void dataToEvents(const std::vector<coord_t> &data, std::vector<MDEvent<nd> > & events)
     {
-    // Number of columns = number of dimensions + 2 (signal/error)
+    // Number of columns = number of dimensions + 4 (signal/error)+detId+runID
       size_t numColumns = nd+4;
       size_t numEvents = data.size()/numColumns;
-      if(numEvents*numColumns!=events.size())
-          throw(std::invalid_argument("wrong input array of data to convert to lean events "));
+      if(numEvents*numColumns!=data.size())
+          throw(std::invalid_argument("wrong input array of data to convert to lean events, suspected column data for different dimensions/(type of) events "));
 
-         // Reserve the amount of space needed. Significant speed up (~30% thanks to this)
+
+      // Reserve the amount of space needed. Significant speed up (~30% thanks to this)
+      events.clear();
       events.reserve(numEvents);
       for (size_t i=0; i<numEvents; i++)
       {
