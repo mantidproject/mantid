@@ -1,8 +1,10 @@
 #ifndef MANTID_VATES_COMMON_H_
 #define MANTID_VATES_COMMON_H_
+#include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
+class vtkFieldData;
 
 namespace Mantid
 {
@@ -30,6 +32,12 @@ enum RebinningIterationAction {
   RecalculateAll, // Rebin and create 3D visualisation slice from 4D dataset.
   ReloadAndRecalculateAll // Reload the original workspace and then Rebin it.
 };
+
+std::string makeAxisTitle(Dimension_const_sptr dim);
+
+void setAxisLabel(std::string metadataLabel,
+                  std::string labelString,
+                  vtkFieldData *fieldData);
 
 }
 

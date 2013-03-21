@@ -1,12 +1,17 @@
 #include "vtkScaleWorkspace.h"
-#include "vtkInformation.h"
-#include "vtkInformationVector.h"
-#include "vtkObjectFactory.h"
-#include "vtkUnstructuredGridAlgorithm.h"
-#include "vtkUnstructuredGrid.h"
 
-vtkCxxRevisionMacro(vtkScaleWorkspace, "$Revision: 1.0 $");
+#include "MantidVatesAPI/vtkDataSetToScaledDataSet.h"
+
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
+#include <vtkNew.h>
+#include <vtkObjectFactory.h>
+#include <vtkUnstructuredGridAlgorithm.h>
+#include <vtkUnstructuredGrid.h>
+
 vtkStandardNewMacro(vtkScaleWorkspace);
+
+using namespace Mantid::VATES;
 
 vtkScaleWorkspace::vtkScaleWorkspace()
 {
@@ -21,28 +26,15 @@ vtkScaleWorkspace::~vtkScaleWorkspace()
 
 int vtkScaleWorkspace::RequestData(vtkInformation*, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
 {
-  vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
-  vtkPointSet * inputDataSet = vtkPointSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
+  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
+  vtkUnstructuredGrid *inputDataSet = vtkUnstructuredGrid::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
-  vtkUnstructuredGrid *dataset = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkUnstructuredGrid *outputDataSet = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  vtkPoints* points = inputDataSet->GetPoints();
-  double* point;
-  vtkPoints* newPoints = vtkPoints::New();
-  newPoints->Allocate(points->GetNumberOfPoints());
-  for(int i = 0; i < points->GetNumberOfPoints(); i++)
-  {
-    point = points->GetPoint(i);
-    point[0] *= m_xScaling;
-    point[1] *= m_yScaling;
-    point[2] *= m_zScaling;
-    newPoints->InsertNextPoint(point);
-  }
-  //Shallow copy the input.
-  dataset->ShallowCopy(inputDataSet);
-  //Give the output dataset the scaled set of points.
-  dataset->SetPoints(newPoints);
+  vtkDataSetToScaledDataSet scaler(inputDataSet, outputDataSet);
+  scaler.initialize(m_xScaling, m_yScaling, m_zScaling);
+  scaler.execute();
   return 1;
 }
 

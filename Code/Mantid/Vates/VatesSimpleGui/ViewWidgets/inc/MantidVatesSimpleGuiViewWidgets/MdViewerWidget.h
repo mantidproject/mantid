@@ -11,6 +11,7 @@
 
 class pqLoadDataReaction;
 class pqPipelineSource;
+class pqViewSettingsReaction;
 class vtkSMDoubleVectorProperty;
 
 class QAction;
@@ -102,6 +103,7 @@ private:
   RotationPointDialog *rotPointDialog; ///< Holder for the rotation point dialog
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
+  pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
 
   /// Check the environmental variables.
   void checkEnvSetup();

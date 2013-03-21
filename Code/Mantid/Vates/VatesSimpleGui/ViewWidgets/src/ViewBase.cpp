@@ -18,6 +18,7 @@
 #include <vtkSMProxy.h>
 #include <vtkSMSourceProxy.h>
 
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QPointer>
 
@@ -39,17 +40,23 @@ ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
 /**
  * This function creates a single standard ParaView view instance.
  * @param widget the UI widget to associate the view with
+ * @param viewName the requested view type, if empty will default to RenderView
  * @return the created view
  */
-pqRenderView* ViewBase::createRenderView(QWidget* widget)
+pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
 {
   QHBoxLayout *hbox = new QHBoxLayout(widget);
   hbox->setMargin(0);
 
+  if (viewName == QString(""))
+  {
+    viewName = pqRenderView::renderViewType();
+  }
+
   // Create a new render view.
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
   pqRenderView *view = qobject_cast<pqRenderView*>(\
-        builder->createView(pqRenderView::renderViewType(),
+        builder->createView(viewName,
                             pqActiveObjects::instance().activeServer()));
   pqActiveObjects::instance().setActiveView(view);
 
@@ -86,7 +93,14 @@ void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
  */
 void ViewBase::onAutoScale()
 {
-  QPair <double, double> range = this->colorUpdater.autoScale(this->getRep());
+  pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    // Can't get a good rep, just return
+    //qDebug() << "Bad rep for auto scale";
+    return;
+  }
+  QPair <double, double> range = this->colorUpdater.autoScale(rep);
   this->renderAll();
   emit this->dataRange(range.first, range.second);
 }
@@ -126,9 +140,8 @@ void ViewBase::onLogScale(int state)
  * This function is used to correct post-accept visibility issues. Most
  * views won't need to do anything.
  */
-void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
+void ViewBase::correctVisibility()
 {
-  UNUSED_ARG(pbw);
 }
 
 /**
@@ -184,7 +197,8 @@ void ViewBase::setPluginSource(QString pluginName, QString wsName)
   vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
   srcProxy->UpdateVTKObjects();
   srcProxy->Modified();
-  srcProxy->UpdatePipelineInformation();;
+  srcProxy->UpdatePipelineInformation();
+  src->updatePipeline();
 }
 
 /**
@@ -301,10 +315,14 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
   if (NULL == dvp)
   {
     // This is a normal filter and therefore has no timesteps.
+    //qDebug() << "No timestep vector, returning.";
     return;
   }
+
   const int numTimesteps = static_cast<int>(dvp->GetNumberOfElements());
-  if (0 != numTimesteps)
+  //qDebug() << "# timesteps: " << numTimesteps;
+
+  if (1 < numTimesteps)
   {
     if (doUpdate)
     {

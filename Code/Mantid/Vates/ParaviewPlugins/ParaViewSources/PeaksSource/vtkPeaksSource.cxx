@@ -15,7 +15,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
-vtkCxxRevisionMacro(vtkPeaksSource, "$Revision: 1.0 $");
+
 vtkStandardNewMacro(vtkPeaksSource);
 
 using namespace Mantid::VATES;
@@ -107,8 +107,8 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
     }
 
     vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
-    glyphFilter->SetInput(structuredMesh);
-    glyphFilter->SetSource(shapeMarker->GetOutput());
+    glyphFilter->SetInputData(structuredMesh);
+    glyphFilter->SetSourceConnection(shapeMarker->GetOutputPort());
     glyphFilter->Update();
     vtkPolyData *glyphed = glyphFilter->GetOutput();
 

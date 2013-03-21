@@ -33,6 +33,7 @@ src/UserDefinedThresholdRange.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkDataSetToImplicitFunction.cpp
+src/vtkDataSetToScaledDataSet.cpp
 src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
 src/vtkMDLineFactory.cpp
@@ -91,6 +92,7 @@ inc/MantidVatesAPI/UserDefinedThresholdRange.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
+inc/MantidVatesAPI/vtkDataSetToScaledDataSet.h
 inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
@@ -145,6 +147,7 @@ test/UserDefinedThresholdRangeTest.h
 test/MedianAndBelowThresholdRangeTest.h
 test/NoThresholdRangeTest.h
 test/IgnoreZerosThresholdRangeTest.h
+test/vtkDataSetToScaledDataSetTest.h
 )
 
 include_directories( inc )
@@ -169,8 +172,8 @@ set_property( TARGET VatesAPI PROPERTY FOLDER "MantidVates" )
 
 target_link_libraries( VatesAPI
 ${MANTID_SUBPROJECT_LIBS} 
-vtkCommon 
-vtkFiltering
+vtkCommonCore
+vtkCommonDataModel
 )
 
 # Create test file projects

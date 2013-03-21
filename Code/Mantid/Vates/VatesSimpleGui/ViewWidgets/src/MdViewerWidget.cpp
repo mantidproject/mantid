@@ -24,6 +24,7 @@
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
 #include <pqStatusBar.h>
+#include <pqViewSettingsReaction.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
@@ -37,12 +38,15 @@
 // Used for plugin mode
 #include <pqAlwaysConnectedBehavior.h>
 #include <pqAutoLoadPluginXMLBehavior.h>
+#include <pqCollaborationBehavior.h>
 #include <pqCommandLineOptionsBehavior.h>
 #include <pqCrashRecoveryBehavior.h>
 #include <pqDataTimeStepBehavior.h>
 #include <pqDefaultViewBehavior.h>
 #include <pqDeleteBehavior.h>
 #include <pqFixPathsInStateFilesBehavior.h>
+#include <pqInterfaceTracker.h>
+#include <pqMultiServerBehavior.h>
 #include <pqObjectPickingBehavior.h>
 //#include <pqPersistentMainWindowStateBehavior.h>
 #include <pqPipelineContextMenuBehavior.h>
@@ -52,9 +56,11 @@
 #include <pqPVNewSourceBehavior.h>
 #include <pqQtMessageHandlerBehavior.h>
 #include <pqSpreadSheetVisibilityBehavior.h>
+#include <pqStandardPropertyWidgetInterface.h>
 #include <pqStandardViewModules.h>
 #include <pqUndoRedoBehavior.h>
 #include <pqViewFrameActionsBehavior.h>
+#include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 
 #include <QAction>
@@ -232,10 +238,12 @@ void MdViewerWidget::createAppCoreForPlugin()
 void MdViewerWidget::setupParaViewBehaviors()
 {
   // Register ParaView interfaces.
-  pqPluginManager* pgm = pqApplicationCore::instance()->getPluginManager();
+  pqInterfaceTracker* pgm = pqApplicationCore::instance()->interfaceTracker();
 
   // * adds support for standard paraview views.
   pgm->addInterface(new pqStandardViewModules(pgm));
+
+  pgm->addInterface(new pqStandardPropertyWidgetInterface(pgm));
 
   // Load plugins distributed with application.
   pqApplicationCore::instance()->loadDistributedPlugins();
@@ -260,6 +268,9 @@ void MdViewerWidget::setupParaViewBehaviors()
   new pqCommandLineOptionsBehavior(this);
   //new pqPersistentMainWindowStateBehavior(mainWindow);
   new pqObjectPickingBehavior(this);
+  new pqCollaborationBehavior(this);
+  new pqMultiServerBehavior(this);
+  new pqViewStreamingBehavior(this);
 }
 
 /**
@@ -282,7 +293,7 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action)
 void MdViewerWidget::removeProxyTabWidgetConnections()
 {
   QObject::disconnect(&pqActiveObjects::instance(), 0,
-                      this->ui.proxyTabWidget, 0);
+                      this->ui.propertiesPanel, 0);
 }
 
 /**
@@ -332,35 +343,31 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
 void MdViewerWidget::setParaViewComponentsForView()
 {
   // Extra setup stuff to hook up view to other items
-  this->ui.proxyTabWidget->setupDefaultConnections();
-  this->ui.proxyTabWidget->setView(this->currentView->getView());
-  this->ui.proxyTabWidget->setShowOnAccept(true);
+  this->ui.propertiesPanel->setView(this->currentView->getView());
   this->ui.pipelineBrowser->setActiveView(this->currentView->getView());
-  QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
-                   SIGNAL(postaccept()),
-                   this, SLOT(checkForUpdates()));
-  QObject::connect(this->currentView, SIGNAL(triggerAccept()),
-                   this->ui.proxyTabWidget->getObjectInspector(),
-                   SLOT(accept()));
 
-  if (this->currentView->inherits("MultiSliceView"))
-  {
-    QObject::connect(this->ui.pipelineBrowser,
-                     SIGNAL(clicked(const QModelIndex &)),
-                     static_cast<MultiSliceView *>(this->currentView),
-                     SLOT(selectIndicator()));
-    QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
-                     SIGNAL(accepted()),
-                     static_cast<MultiSliceView *>(this->currentView),
-                     SLOT(updateSelectedIndicator()));
-  }
+  pqActiveObjects *activeObjects = &pqActiveObjects::instance();
+  QObject::connect(activeObjects, SIGNAL(portChanged(pqOutputPort*)),
+                   this->ui.propertiesPanel, SLOT(setOutputPort(pqOutputPort*)));
+  QObject::connect(activeObjects, SIGNAL(representationChanged(pqRepresentation*)),
+                   this->ui.propertiesPanel, SLOT(setRepresentation(pqRepresentation*)));
+  QObject::connect(activeObjects, SIGNAL(viewChanged(pqView*)),
+                   this->ui.propertiesPanel, SLOT(setView(pqView*)));
+
+  QObject::connect(this->currentView,
+                   SIGNAL(triggerAccept()),
+                   this->ui.propertiesPanel,
+                   SLOT(apply()));
+  QObject::connect(this->ui.propertiesPanel,
+                   SIGNAL(applied()),
+                   this, SLOT(checkForUpdates()));
 
   SplatterPlotView *spv = dynamic_cast<SplatterPlotView *>(this->currentView);
   if (spv)
   {
-    QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
-                     SIGNAL(postaccept()),
-                     static_cast<SplatterPlotView *>(this->currentView),
+    QObject::connect(this->ui.propertiesPanel,
+                     SIGNAL(applied()),
+                     spv,
                      SLOT(checkPeaksCoordinates()));
   }
 
@@ -403,7 +410,7 @@ void MdViewerWidget::setParaViewComponentsForView()
  */
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
-  UNUSED_ARG(source);
+  source->updatePipeline();
   this->renderAndFinalSetup();
 }
 
@@ -453,7 +460,12 @@ void MdViewerWidget::renderAndFinalSetup()
 void MdViewerWidget::checkForUpdates()
 {
   pqPipelineSource *src = pqActiveObjects::instance().activeSource();
+  if (NULL == src)
+  {
+    return;
+  }
   vtkSMProxy *proxy = src->getProxy();
+
   if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
   {
     this->currentView->resetDisplay();
@@ -472,6 +484,10 @@ void MdViewerWidget::checkForUpdates()
           proxy->GetProperty("ThresholdBetween"));
     this->ui.colorSelectionWidget->setColorScaleRange(range->GetElement(0),
                                                       range->GetElement(1));
+  }
+  if (QString(proxy->GetXMLName()).contains("ScaleWorkspace"))
+  {
+    this->currentView->resetDisplay();
   }
 }
 
@@ -500,7 +516,8 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   delete this->hiddenView;
   this->currentView->render();
   this->currentView->checkViewOnSwitch();
-  this->currentView->correctVisibility(this->ui.pipelineBrowser);
+  this->currentView->correctVisibility();
+  this->viewSettings->updateEnableState();
 }
 
 /**
@@ -556,8 +573,13 @@ void MdViewerWidget::createMenus()
     menubar = qobject_cast<QMainWindow *>(this->parentWidget())->menuBar();
   }
 
-  QMenu *viewMenu = menubar->addMenu(QApplication::tr("&View"));\
-  UNUSED_ARG(viewMenu)
+  QMenu *viewMenu = menubar->addMenu(QApplication::tr("&View"));
+
+  QAction *settingsAction = new QAction(QApplication::tr("View Settings..."), this);
+  settingsAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+S"));
+  settingsAction->setStatusTip(QApplication::tr("Show the settings for the current view."));
+  this->viewSettings = new pqViewSettingsReaction(settingsAction);
+  viewMenu->addAction(settingsAction);
 
   QMenu *helpMenu = menubar->addMenu(QApplication::tr("&Help"));
 

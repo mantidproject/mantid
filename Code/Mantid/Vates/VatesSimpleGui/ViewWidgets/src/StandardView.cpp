@@ -2,17 +2,12 @@
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
-#include <pqChartValue.h>
-#include <pqColorMapModel.h>
 #include <pqDataRepresentation.h>
 #include <pqObjectBuilder.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
 #include <pqRenderView.h>
-#include <pqScalarsToColors.h>
-#include <pqSMAdaptor.h>
 #include <vtkDataObject.h>
-#include <vtkProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 
@@ -43,6 +38,10 @@ StandardView::StandardView(QWidget *parent) : ViewBase(parent)
   // Set the rebin button to create the RebinCutter operator
   QObject::connect(this->ui.rebinButton, SIGNAL(clicked()), this,
                    SLOT(onRebinButtonClicked()));
+
+  // Set the scale button to create the ScaleWorkspace operator
+  QObject::connect(this->ui.scaleButton, SIGNAL(clicked()),
+                   this, SLOT(onScaleButtonClicked()));
 
   // Check for rebinning source being deleted
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -90,12 +89,12 @@ void StandardView::render()
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSrc->getOutputPort(0), this->view);
-  int reptype = VTK_SURFACE;
+  QString reptype = "Surface";
   if (this->isPeaksWorkspace(this->origSrc))
   {
-    reptype = VTK_WIREFRAME;
+    reptype = "Wireframe";
   }
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype);
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype.toStdString().c_str());
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
   this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
@@ -133,6 +132,14 @@ void StandardView::onRebinButtonClicked()
     // so disable that mode.
     emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
   }
+}
+
+void StandardView::onScaleButtonClicked()
+{
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  this->scaler = builder->createFilter("filters",
+                                       "MantidParaViewScaleWorkspace",
+                                       this->getPvActiveSrc());
 }
 
 void StandardView::renderAll()

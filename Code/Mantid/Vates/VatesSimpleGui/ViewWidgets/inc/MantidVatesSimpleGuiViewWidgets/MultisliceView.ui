@@ -19,58 +19,11 @@
   <property name="windowTitle">
    <string>MultiSliceView</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" rowstretch="0,1" columnstretch="0,1,0" rowminimumheight="1,0" columnminimumwidth="1,0,1">
-   <property name="sizeConstraint">
-    <enum>QLayout::SetNoConstraint</enum>
-   </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="margin">
     <number>1</number>
    </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>2</number>
-   </property>
-   <property name="spacing">
-    <number>0</number>
-   </property>
-   <item row="0" column="1">
-    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="yAxisWidget" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="xAxisWidget" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
+   <item>
     <widget class="QFrame" name="renderFrame">
      <property name="enabled">
       <bool>true</bool>
@@ -95,33 +48,9 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="2">
-    <widget class="Mantid::Vates::SimpleGui::AxisInteractor" name="zAxisWidget" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>Mantid::Vates::SimpleGui::AxisInteractor</class>
-   <extends>QWidget</extends>
-   <header>MantidVatesSimpleGuiQtWidgets/AxisInteractor.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
