@@ -105,7 +105,7 @@ namespace DataHandling
                << datafile << ".\n";
         errmsg << "In input .irf file, Bank ID ";
         for (size_t i = 0; i < banks.size(); ++i)
-          errmsg << i << ", ";
+          errmsg << banks[i] << ", ";
         errmsg << " are found.";
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
@@ -166,14 +166,6 @@ namespace DataHandling
       throw runtime_error(errmsg.str());
     }
 
-    /*
-    cout << "[DB1115] Lines of input file: \n";
-    for (size_t i = 0; i < lines.size(); ++i)
-    {
-      cout << "Line " << i << "\t\t" << lines[i] << "\n";
-    }
-    */
-
     return;
   }
 
@@ -223,11 +215,11 @@ namespace DataHandling
       bankendindexmap.insert(make_pair(banks.back(), endindex));
     }
 
-    cout << "[DB1112] Number of bank IDs = " << banks.size() << ", "
+    g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
          << "Number of ranges = " << bankstartindexmap.size() << endl;
     for (size_t i = 0; i < banks.size(); ++i)
     {
-      cout << "Bank " << banks[i] << " From line " << bankstartindexmap[banks[i]] << " to "
+      g_log.debug() << "Bank " << banks[i] << " From line " << bankstartindexmap[banks[i]] << " to "
            << bankendindexmap[banks[i]] << endl;
     }
 
@@ -243,7 +235,7 @@ namespace DataHandling
     double cwl;
     int tmpbankid;
     parseBankLine(bankline, cwl, tmpbankid);
-    cout << "Found CWL = " << cwl << ", Bank ID = " << tmpbankid << "\n";
+    g_log.debug() << "Found CWL = " << cwl << ", Bank ID = " << tmpbankid << "\n";
     if (bankid != tmpbankid)
     {
       throw runtime_error("Scanned bank is not same as bank found in the specified region.");
@@ -259,7 +251,7 @@ namespace DataHandling
         continue;
 
       // Parse
-      cout << "Parse Line " << i << "\t\t" << line << "\n";
+      g_log.debug() << "Parse Line " << i << "\t\t" << line << "\n";
 
       if (boost::starts_with(line, "TOFRG"))
       {
@@ -525,7 +517,7 @@ namespace DataHandling
       boost::split(v, infostr, boost::is_any_of("=A"));
       for (size_t i = 0; i < v.size(); ++i)
       {
-        cout << "Last CWL splitted.  Term " << i << ": \t\t" << "'" << v[i] << "'\n";
+        g_log.debug() << "Last CWL splitted.  Term " << i << ": \t\t" << "'" << v[i] << "'\n";
         string candidate = v[i];
         boost::algorithm::trim(candidate);
         if (candidate.size() > 0)
@@ -551,7 +543,7 @@ namespace DataHandling
 
     // 2. Add rows
     size_t numparams = parammap.size();
-    cout << "[DBx240] Number of imported parameters is " << numparams << "\n";
+    g_log.debug() << "[DBx240] Number of imported parameters is " << numparams << "\n";
 
     map<string, double>::iterator mapiter;
     for (mapiter = parammap.begin(); mapiter != parammap.end(); ++mapiter)
