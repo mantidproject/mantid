@@ -136,7 +136,7 @@ namespace DataHandling
     string line;
 
     //the variable of type ifstream:
-    ifstream myfile (filename);
+    ifstream myfile (filename.c_str());
 
     //check to see if the file is opened:
     if (myfile.is_open())
