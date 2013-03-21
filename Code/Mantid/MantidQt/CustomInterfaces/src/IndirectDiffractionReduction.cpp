@@ -53,19 +53,23 @@ void IndirectDiffractionReduction::demonRun()
     return;
   }
 
-  if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
+  QString instName=m_uiForm.cbInst->currentText();
+  if ( instName != "OSIRIS" )
   {
     // MSGDiffractionReduction
-    QString pfile = m_uiForm.cbInst->currentText() + "_diffraction_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml";
+    QString pfile = instName + "_diffraction_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml";
     QString pyInput =
       "from IndirectDiffractionReduction import MSGDiffractionReducer\n"
       "reducer = MSGDiffractionReducer()\n"
-      "reducer.set_instrument_name('" + m_uiForm.cbInst->currentText() + "')\n"
+      "reducer.set_instrument_name('" + instName + "')\n"
       "reducer.set_detector_range("+m_uiForm.set_leSpecMin->text()+"-1, " +m_uiForm.set_leSpecMax->text()+"-1)\n"
       "reducer.set_parameter_file('" + pfile + "')\n"
       "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
       "for file in files:\n"
       "    reducer.append_data_file(file)\n";
+    // Fix Vesuvio to FoilOut for now
+    if(instName == "VESUVIO")
+      pyInput += "reducer.append_load_option('Mode','FoilOut')\n";
         
     if ( m_uiForm.dem_ckSumFiles->isChecked() )
     {
