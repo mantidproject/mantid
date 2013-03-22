@@ -324,8 +324,8 @@ namespace Mantid
     }
 
     /**
-    Create a log vale for the current period.
-    @param period: The period number to create the log entry for.
+     * Create a log vale for the current period.
+     * @param period: The period number to create the log entry for.
     */
     Kernel::Property* LogParser::createCurrentPeriodLog(const int& period) const
     {
@@ -346,28 +346,28 @@ namespace Mantid
     }
 
 
-    /** Returns the time-weigthed mean value if the property is TimeSeriesProperty<double>.
+    /**
+     * Returns the time-weighted mean value if the property is TimeSeriesProperty<double>.
      *
      * TODO: Make this more efficient.
      *
-      @param p :: Property with the data. Will throw if not TimeSeriesProperty<double>.
-      @return The mean value over time.
-      @throw runtime_error if the property is not TimeSeriesProperty<double>
+     * @param p :: Property with the data. Will throw if not TimeSeriesProperty<double>.
+     * @return The mean value over time.
+     * @throw runtime_error if the property is not TimeSeriesProperty<double>
     */
     double timeMean(const Kernel::Property* p)
     {
-      const Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<const Kernel::TimeSeriesProperty<double>*>(p);
+      Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Kernel::TimeSeriesProperty<double>*>(p);
       if (!dp)
       {
-        throw std::runtime_error("Property of a wrong type.");
+        throw std::runtime_error("Property of a wrong type. Cannot be cast to a TimeSeriesProperty<double>.");
       }
 
-      //Special case for only one value - the algorithm
+      // Special case for only one value - the algorithm
       if (dp->size() == 1)
       {
         return dp->nthValue(1);
       }
-
       double res = 0.;
       Kernel::time_duration total(0,0,0,0);
 
@@ -381,6 +381,7 @@ namespace Mantid
       }
 
       double total_seconds = Kernel::DateAndTime::secondsFromDuration(total);
+
       if (total_seconds > 0) res /= total_seconds;
 
       return res;

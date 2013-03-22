@@ -104,6 +104,7 @@ namespace Mantid
 
         if ( m_extractSingleValueAs.compare("mean" ) == 0 )
         {
+          logData->eliminateDuplicates();
           extractedValue = timeMean(logData);
         }
         else if(bUsingStandardStatistics)
