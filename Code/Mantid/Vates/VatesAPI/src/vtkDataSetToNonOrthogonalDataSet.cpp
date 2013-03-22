@@ -22,12 +22,22 @@ namespace Mantid
 namespace VATES
 {
 
+/**
+ * This function constructs and executes the helper class.
+ * @param dataset : The VTK data to modify
+ * @param name : The MDWorkspace containing the information to construct modification
+ */
 void vtkDataSetToNonOrthogonalDataSet::exec(vtkDataSet *dataset, std::string name)
 {
   vtkDataSetToNonOrthogonalDataSet temp(dataset, name);
   temp.execute();
 }
 
+/**
+ * This is the private class constructor.
+ * @param dataset : The VTK data to modify
+ * @param name : The MDWorkspace containing the information to construct modification
+ */
 vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(vtkDataSet *dataset,
                                                                    std::string name) :
   m_dataSet(dataset),
@@ -286,6 +296,11 @@ void vtkDataSetToNonOrthogonalDataSet::copyToRaw(double *arr, MantidVec vec)
   }
 }
 
+/**
+ * This function is responsible for adding the skew basis information to the
+ * VTK dataset.
+ * @param ugrid : The VTK dataset to add the metadata to
+ */
 void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkUnstructuredGrid *ugrid)
 {
   double baseX[3];
