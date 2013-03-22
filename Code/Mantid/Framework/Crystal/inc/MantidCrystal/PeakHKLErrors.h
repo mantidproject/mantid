@@ -16,6 +16,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/Matrix.h"
 using Mantid::API::IFunction;
 using Mantid::Geometry::Instrument;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
@@ -28,9 +29,27 @@ namespace Mantid
     /** IndexOptimizePeaks
 
      Description:
-     This algorithm basically indexes peaks with the crystal orientation matrix stored in the peaks workspace.
+     This algorithm basically indexes peaks with the sample orientation matrix stored in the peaks workspace.
      The optimization is on the goniometer settings for the runs in the peaks workspace and also the sample
      orientation is optimized.
+
+     Attributes:
+        OptRuns : a list of run numbers whose sample orientations are to be optimized.  The list is separated by /.
+        PeakWorkspaceName : The name of the PeaksWorkspace in the AnalysisDataService
+
+      Parameters:
+        SampleXOffset
+        SampleYOffset
+        SampleZOffset
+        chixxx - xxx is a run number from OptRuns. This is the chi angle in degrees
+        phixxx - xxx is a run number from OptRuns. This is the phi angle in degrees
+        omegaxxx - xxx is a run number from OptRuns. This is the omega angle in degrees
+
+
+      Workspace:
+        For each peak used, there are 3 pieces of Data, one for the h int offset, one for the k int offset and one for
+        the l int offset.  The x Values represent the peak number in the peaks workspace.
+
 
      Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -92,6 +111,10 @@ namespace Mantid
       {
         return (size_t) 2;
       }
+
+     static Kernel::Matrix<double> DerivRotationMatrixAboutRegAxis( double theta, char axis);
+
+     static Kernel::Matrix<double> RotationMatrixAboutRegAxis( double theta, char axis);
 
       boost::shared_ptr<Geometry::Instrument>
           getNewInstrument(DataObjects::PeaksWorkspace_sptr Peaks) const;

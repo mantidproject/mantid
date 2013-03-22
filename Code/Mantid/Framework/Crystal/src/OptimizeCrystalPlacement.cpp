@@ -85,18 +85,20 @@ namespace Mantid
           "Workspace of Results");
 
 
-      declareProperty("IncludeVaryingSampleOffsets", true,
+      declareProperty("AdjustSampleOffsets", true,
           "If true sample offsets will be adjusted to give better fits, otherwise they will be fixed as zero(def=true)");
+
+      declareProperty("OptimizeGoniometerTilt", false, "Set true if main error is due to a tilted Goniometer(def=false)");
 
       declareProperty("Chi2overDoF", -1.0, "chi squared over dof", Direction::Output);
       declareProperty("nPeaks", -1, "Number of Peaks Used", Direction::Output);
       declareProperty("nParams", -1, "Number of Parameters fit", Direction::Output);
 
 
-      declareProperty("ToleranceChiPhiOmega", 5.0, "Max offset in degrees from current settings(def=5)");
+      declareProperty("MaxAngularChange", 5.0, "Max offset in degrees from current settings(def=5)");
 
-      declareProperty("MaxIntHKLOffsetPeaks2Use", .25,
-          "Use only peaks whose h,k,and l offsets from and integer are below this level(def=.25)");
+      declareProperty("MaxIndexingError", .25,
+          "Use only peaks whose fractional hkl values are below this tolerance(def=.25)");
 
       declareProperty(
           "MaxHKLPeaks2Use", -1.0,
@@ -105,14 +107,19 @@ namespace Mantid
           "Maximum Change in Sample position in meters(def=.005)");
 
 
-      setPropertyGroup("ToleranceChiPhiOmega", "Tolerance settings");
+      setPropertyGroup("MaxAngularChange", "Tolerance settings");
 
       setPropertyGroup("MaxSamplePositionChange_meters", "Tolerance settings");
       setPropertyGroup("MaxHKLPeaks2Use", "Tolerance settings");
-      setPropertyGroup("MaxIntHKLOffsetPeaks2Use", "Tolerance settings");
+      setPropertyGroup("MaxIndexingError", "Tolerance settings");
 
-      setPropertySettings("MaxSamplePositionChange_meters",new EnabledWhenProperty("IncludeVaryingSampleOffsets",
+      setPropertySettings("MaxSamplePositionChange_meters",new EnabledWhenProperty("AdjustSampleOffsets",
             Kernel::IS_EQUAL_TO, "1" ));
+
+      //-------- Output values----------------------------------
+      //Sample offset and goniometer tilt. Can be retrieved from tables, but....
+
+
 
     }
 
@@ -142,7 +149,7 @@ namespace Mantid
       Mantid::MantidVec &errB = errs.access();
 
       int nPeaksUsed =0;
-      double HKLintOffsetMax= getProperty("MaxIntHKLOffsetPeaks2Use");
+      double HKLintOffsetMax= getProperty("MaxIndexingError");
       double HKLMax=getProperty("MaxHKLPeaks2Use");
       for ( int i = 0; i < Peaks->getNumberPeaks(); i++ )
       {
@@ -183,11 +190,17 @@ namespace Mantid
         xRef.push_back( ( double ) i );
         yvalB.push_back( 0.0 );
         errB.push_back( 1.0 );
+        xRef.push_back( ( double ) i );
+        yvalB.push_back( 0.0 );
+        errB.push_back( 1.0 );
+        xRef.push_back( ( double ) i );
+        yvalB.push_back( 0.0 );
+        errB.push_back( 1.0 );
 
       }
 
       MatrixWorkspace_sptr mwkspc;
-      int N = Peaks->getNumberPeaks();
+      int N = 3*nPeaksUsed;//Peaks->getNumberPeaks();
       mwkspc =  WorkspaceFactory::Instance().create( "Workspace2D" , (size_t) 1 , N , N );
       mwkspc->setX( 0 , pX );
       mwkspc->setData( 0 , yvals , errs );
@@ -230,7 +243,7 @@ namespace Mantid
 
 
       int nParams=3;
-      double DegreeTol=getProperty("ToleranceChiPhiOmega");
+      double DegreeTol=getProperty("MaxAngularChange");
       std::string startConstraint ="";
       for ( size_t i = 0; i < RunNumList.size(); i++ )
       {
@@ -263,11 +276,11 @@ namespace Mantid
       V3D sampPos = instr->getSample()->getPos();
 
       oss<< ",SampleXOffset="<<sampPos.X()<<",SampleYOffset="<<sampPos.Y()<<",SampleZOffset="<<sampPos.Z();
-
+      oss<<",GonRotx=0.0,GonRoty=0.0,GonRotz=0.0";
       double maxSampshift = getProperty("MaxSamplePositionChange_meters");
       oss1 << startConstraint << sampPos.X()-maxSampshift<<"<SampleXOffset<"<<sampPos.X()+maxSampshift<<","<<sampPos.Y()-maxSampshift<<
           "<SampleYOffset<"<<sampPos.Y()+maxSampshift <<","<<sampPos.Z()-maxSampshift<<"<SampleZOffset<" <<sampPos.Z()+maxSampshift;
-
+      oss1<<","<<-DegreeTol<<"<GonRotx<"<<DegreeTol<<","<<-DegreeTol<<"<GonRoty<"<<DegreeTol<<","<<-DegreeTol<<"<GonRotz<"<<DegreeTol;
       FuncArg += oss.str();
       std::string Constr = oss1.str();
 
@@ -288,14 +301,27 @@ namespace Mantid
 
       fit_alg->setProperty( "CreateOutput" , true );
 
-      if( !(bool)getProperty("IncludeVaryingSampleOffsets"))
+      std::string Ties ="";
+      if( !(bool)getProperty("AdjustSampleOffsets"))
       {
-        std::ostringstream oss( std::ostringstream::out );
-        oss.precision( 3 );
-        oss<<"SampleXOffset="<<sampPos.X()<<",SampleYOffset="<<sampPos.Y()<<",SampleZOffset="<<sampPos.Z();
+        std::ostringstream oss3( std::ostringstream::out );
+        oss3.precision( 3 );
 
-        fit_alg->setProperty("Ties",oss.str());
+        oss3<<"SampleXOffset="<<sampPos.X()<<",SampleYOffset="<<sampPos.Y()<<",SampleZOffset="<<sampPos.Z();
+        Ties =oss3.str();
       }
+
+      if( !(bool)getProperty("OptimizeGoniometerTilt"))
+      {
+        if( !Ties.empty())
+           Ties +=",";
+
+        Ties +="GonRotx=0.0,GonRoty=0.0,GonRotz=0.0";
+
+      }
+
+      if( !Ties.empty())
+         fit_alg->setProperty("Ties",Ties);
 
       fit_alg->setProperty( "Output" , "out" );
 
@@ -311,8 +337,10 @@ namespace Mantid
 
       setProperty( "nPeaks", nPeaksUsed) ;
       setProperty("nParams", nParams );
+
       g_log.debug() << "Chi2overDof=" << chisq <<"    # Peaks used="<< nPeaksUsed
                    << "# fitting parameters ="<< nParams << "   dof=" << (nPeaksUsed - nParams) <<std::endl;
+
       ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters" );
 
       double sigma = sqrt( chisq );
@@ -341,7 +369,7 @@ namespace Mantid
         std::string namee = RRes->getRef<std::string> ( "Name" , prm );
 
         std::string start= namee.substr(0,3);
-        if( start !="chi" && start !="phi" && start !="ome" && start !="Sam")
+        if( start !="chi" && start !="phi" && start !="ome" && start !="Sam" && start!="Gon")
           continue;
 
         double value = RRes->getRef<double>("Value",prm);
@@ -355,11 +383,14 @@ namespace Mantid
       }
 
     //-----------Fix up Resultant workspace return info -------------------
+
       std::string ResultWorkspaceName = getPropertyValue( "FitInfoTable" );
       AnalysisDataService::Instance().addOrReplace( ResultWorkspaceName , RRes );
+
       setPropertyValue( "FitInfoTable" , ResultWorkspaceName );
 
       //----------- update instrument -------------------------
+
       IPeak& peak =Peaks->getPeak(0);
       boost::shared_ptr<const Instrument>OldInstrument = peak.getInstrument();
       boost::shared_ptr<const ParameterMap>pmap_old = OldInstrument->getParameterMap();
@@ -388,6 +419,10 @@ namespace Mantid
       OutPeaks->setInstrument( NewInstrument );
 
 
+      Matrix<double> GonTilt = PeakHKLErrors::RotationMatrixAboutRegAxis( Results["GonRotx"] ,'x')*
+                               PeakHKLErrors::RotationMatrixAboutRegAxis( Results["GonRoty"] ,'y')*
+                               PeakHKLErrors::RotationMatrixAboutRegAxis( Results["GonRotz"] ,'z');
+   /*   std::set<int> RunNums;
       for( std::vector<std::string>::iterator it  =ChRunNumList.begin(); it !=ChRunNumList.end(); ++it)
       {
         std::string runNumStr = *it;
@@ -402,7 +437,7 @@ namespace Mantid
         uniGonio.setRotationAngle( "chi", chi );
         uniGonio.setRotationAngle( "omega", omega) ;
 
-        Matrix<double> GonMatrix = uniGonio.getR();
+        Matrix<double> GonMatrix = GonTilt*uniGonio.getR();
 
         for( int i = 0 ; i < OutPeaks->getNumberPeaks() ; ++i)
           if( OutPeaks->getPeak(i).getRunNumber()== boost::lexical_cast<int>(runNumStr))
@@ -410,7 +445,48 @@ namespace Mantid
                OutPeaks->getPeak( i ).setGoniometerMatrix( GonMatrix );
 
             }
-      }
+          else
+            RunNums.insert( OutPeaks->getPeak(i).getRunNumber());
+
+       }
+     */
+      int prevRunNum = -1;
+      std::map<int, Matrix<double> > MapRunNum2GonMat;
+      std::string OptRun2 ="/"+OptRunNums+"/";
+      for (int i = 0; i < OutPeaks->getNumberPeaks(); ++i)
+      {
+
+        int RunNum = OutPeaks->getPeak(i).getRunNumber();
+        std::string RunNumStr = boost::lexical_cast<std::string>(RunNum);
+        Matrix<double> GonMatrix;
+        if (RunNum == prevRunNum || MapRunNum2GonMat.find(RunNum) != MapRunNum2GonMat.end())
+          GonMatrix = MapRunNum2GonMat[RunNum];
+        else if (OptRun2.find("/" + RunNumStr + "/") < OptRun2.size() - 2)
+        {
+
+          double chi = Results["chi" + RunNumStr];
+          double phi = Results["phi" + RunNumStr];
+          double omega = Results["omega" + RunNumStr];
+
+          Mantid::Geometry::Goniometer uniGonio;
+          uniGonio.makeUniversalGoniometer();
+
+          uniGonio.setRotationAngle("phi", phi);
+          uniGonio.setRotationAngle("chi", chi);
+          uniGonio.setRotationAngle("omega", omega);
+
+          GonMatrix = GonTilt * uniGonio.getR();
+          MapRunNum2GonMat[RunNum] = GonMatrix;
+        }
+        else
+        {
+          GonMatrix = GonTilt * OutPeaks->getPeak(i).getGoniometerMatrix();
+          MapRunNum2GonMat[RunNum] = GonMatrix;
+        }
+
+        OutPeaks->getPeak(i).setGoniometerMatrix( GonMatrix );
+        prevRunNum= RunNum;
+    }
 
 
       std::string OutputPeaksName= getPropertyValue("ModifiedPeaksWorkspace");
