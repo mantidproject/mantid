@@ -52,7 +52,7 @@ iTube = IdealTube()
 iTube.setPositionsAndForm([-0.65,-0.22,-0.00, 0.22, 0.65 ],[2,1,1,1,2])
 
 # Get fitting parameters
-fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth )
+fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth, Margin=0.45 )
 
 print "Created objects needed for calibration."
 

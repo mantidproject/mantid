@@ -102,7 +102,7 @@ def getPoints ( IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=F
     eHeight, eWidth = fitParams.getHeightAndWidth()
     outedge, inedge, endGrad = fitParams.getEdgeParameters()
     
-    margin = 0.3
+    margin = fitParams.getMargin() 
     
     # Set workspace names, a different workspace if plotting, so plot survives.
     calibPointWs = "CalibPoint"
@@ -248,14 +248,17 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False )
     # Filter out rogue slit points
     usedTubePoints = []
     usedIdealTubePoints = []
+    missedTubePoints = [] # Used for diagnostic print only
     for i in range(len(tubePoints)):
         if( tubePoints[i] > 0.0 and tubePoints[i] < nDets): 
             usedTubePoints.append( tubePoints[i] )
             usedIdealTubePoints.append ( idealTubePoints[i] )
+        else:
+            missedTubePoints.append(i+1)
             
     # State number of rogue slit points, if any
     if( len(tubePoints) != len(usedTubePoints)):
-        print "Only",len(usedTubePoints),"out of",len(tubePoints)," slit points used."
+        print "Only",len(usedTubePoints),"out of",len(tubePoints)," slit points used. Missed",missedTubePoints
     
     # Check number of usable points
     if( len(usedTubePoints) < 3):
