@@ -57,7 +57,7 @@ public:
     parseTableWorkspace(outws, parammap);
 
     TS_ASSERT_DELTA(parammap["Zero"], -1.00, 0.0001);
-    TS_ASSERT_DELTA(parammap["Sig2"], 514.546, 0.0001);
+    TS_ASSERT_DELTA(parammap["Sig2"], sqrt(514.546), 0.0001);
     TS_ASSERT_DELTA(parammap["Beta0t"], 85.918922, 0.00001);
 
     // 4. Clean
@@ -98,7 +98,7 @@ public:
     parseTableWorkspace(outws, parammap);
 
     TS_ASSERT_DELTA(parammap["Dtt1"], 22586.10156, 0.0001);
-    TS_ASSERT_DELTA(parammap["Sig1"], 10.00, 0.0001);
+    TS_ASSERT_DELTA(parammap["Sig1"], sqrt(10.00), 0.0001);
     TS_ASSERT_DELTA(parammap["Alph0t"], 86.059, 0.00001);
 
     // 4. Clean

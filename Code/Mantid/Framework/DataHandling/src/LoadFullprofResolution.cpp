@@ -407,11 +407,11 @@ namespace DataHandling
         else
         {
           tempdb = atof(terms[1].c_str());
-          parammap["Sig2"] = tempdb;
+          parammap["Sig2"] = sqrt(tempdb);
           tempdb = atof(terms[2].c_str());
-          parammap["Sig1"] = tempdb;
+          parammap["Sig1"] = sqrt(tempdb);
           tempdb = atof(terms[3].c_str());
-          parammap["Sig0"] = tempdb;
+          parammap["Sig0"] = sqrt(tempdb);
         }
       } // "SIGMA"
       else if (boost::starts_with(line, "GAMMA"))
