@@ -357,7 +357,7 @@ namespace Mantid
     */
     double timeMean(const Kernel::Property* p)
     {
-      Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Kernel::TimeSeriesProperty<double>*>(p);
+      const Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<const Kernel::TimeSeriesProperty<double>*>(p);
       if (!dp)
       {
         throw std::runtime_error("Property of a wrong type. Cannot be cast to a TimeSeriesProperty<double>.");
@@ -370,7 +370,6 @@ namespace Mantid
       }
       double res = 0.;
       Kernel::time_duration total(0,0,0,0);
-
       size_t dp_size = dp->size();
       for(size_t i=0;i<dp_size;i++)
       {
@@ -381,6 +380,9 @@ namespace Mantid
       }
 
       double total_seconds = Kernel::DateAndTime::secondsFromDuration(total);
+
+      // If all the time stamps were the same, just return the first value.
+      if (total_seconds == 0.0 ) res = dp->nthValue(1);
 
       if (total_seconds > 0) res /= total_seconds;
 
