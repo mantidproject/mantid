@@ -8,6 +8,7 @@ import sys
 import codecs
 import fnmatch
 import platform
+import re
 
 module_name=os.path.basename(os.path.splitext(__file__)[0])
 mantid_initialized = False
@@ -199,7 +200,7 @@ def create_function_signature(alg, algo_name):
         if (direction_string[prop.direction] == OutputDirection):
             allreturns.append(prop.name)
             # Cache the last workspace property seen.
-            if isinstance(prop, IWorkspaceProperty): 
+            if isinstance(prop, IWorkspaceProperty) or re.search("(Workspace)", prop.name):  
                 workspacereturn = prop.name
                 
     lhs = ""

@@ -184,61 +184,6 @@ def wiki_maker_page(page):
     for rev in revisions: 
         return re.search("^Bot", rev['comment'])
 
-#======================================================================
-def create_function_signature(alg, algo_name):
-    """
-    create the function signature for the algorithm.
-    """
-    from mantid.simpleapi import _get_function_spec
-    import mantid.simpleapi
-    _alg = getattr(mantid.simpleapi, algo_name)
-    prototype =  algo_name + _get_function_spec(_alg)
-    
-    # Replace every nth column with a newline.
-    nth = 3
-    commacount = 0
-    prototype_reformated = ""
-    for char in prototype:
-        if char == ',':
-            commacount += 1
-            if (commacount % nth == 0):
-                prototype_reformated += ",\n  "
-            else:
-                prototype_reformated += char
-        else: 
-           prototype_reformated += char
-           
-    # Strip out the version.
-    prototype_reformated = prototype_reformated.replace(",[Version]", "")
-    prototype_reformated = prototype_reformated.replace(",\n  [Version]", "")
-    
-    # Add the output properties
-    props = alg._ProxyObject__obj.getProperties()
-    allreturns = []
-    workspacereturn = None
-    # Loop through all the properties looking for output properties
-    for prop in props:
-        if (direction_string[prop.direction] == OutputDirection):
-            allreturns.append(prop.name)
-            # Cache the last workspace property seen.
-            if isinstance(prop, IWorkspaceProperty): 
-                workspacereturn = prop.name
-                
-    lhs = ""
-    comments = ""
-    if not allreturns:
-        pass
-    elif (len(allreturns) == 1) and (workspacereturn is not None): 
-        lhs =   workspacereturn + " = "
-    else :
-        lhs = "result = "
-        comments = "\n "
-        comments += "\n # -------------------------------------------------- \n"
-        comments += " # result is a tuple containing\n"
-        comments += " # (" + ",".join(allreturns ) + ")\n"
-        comments += " # To access individual outputs use result[i], where i is the index of the required output.\n"
-        
-    return lhs + prototype_reformated + comments
     
 #======================================================================
 def do_algorithm(args, algo, version):
