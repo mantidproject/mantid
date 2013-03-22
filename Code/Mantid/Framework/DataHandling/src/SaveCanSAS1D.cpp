@@ -461,9 +461,6 @@ void SaveCanSAS1D::createSASDataElement(std::string& sasData)
       sasIData="\n\t\t\t<Idata><Q unit=\"1/A\">";
       sasIData+=x.str();
       sasIData+="</Q>";
-      sasIData+="<Qdev unit=\"1/A\">";
-      sasIData+=dx_str.str();
-      sasIData+="</Qdev>";
       sasIData+="<I unit=";
       sasIData+="\"";
       sasIData+=dataUnit;
@@ -485,6 +482,10 @@ void SaveCanSAS1D::createSASDataElement(std::string& sasData)
 
       sasIData+=e.str();
       sasIData+="</Idev>";
+
+      sasIData+="<Qdev unit=\"1/A\">";
+      sasIData+=dx_str.str();
+      sasIData+="</Qdev>";
 
       sasIData+="</Idata>";
       // outFile<<sasIData;
@@ -533,7 +534,7 @@ void SaveCanSAS1D::createSASSourceElement(std::string& sasSource )
 
 }
 /** This method creates XML elements named "SASdetector". This method
-    appends ot sasDet.
+    appends to sasDet.
  *  @param sasDet :: string for one or more sasdetector elements
  */
 void SaveCanSAS1D::createSASDetectorElement(std::string& sasDet)
@@ -541,7 +542,13 @@ void SaveCanSAS1D::createSASDetectorElement(std::string& sasDet)
   const std::string detectorNames = getProperty("DetectorNames");
 
   if ( detectorNames.empty() )
+  {
+      sasDet += "\n\t\t\t<SASdetector>";
+      std::string sasDetname="\n\t\t\t\t<name/>";
+      sasDet+=sasDetname;
+      sasDet+="\n\t\t\t</SASdetector>";
     return;
+  }
 
   std::list<std::string> detList;
   boost::algorithm::split(detList, detectorNames, std::bind2nd(std::equal_to<char>(), ','));
@@ -626,6 +633,9 @@ void SaveCanSAS1D::createSASProcessElement(std::string& sasProcess)
   sasProcuserfile+="</term>";
   //outFile<<sasProcuserfile;
   sasProcess+=sasProcuserfile;
+
+  sasProcess+="\n\t\t\t<SASprocessnote/>";
+
   sasProcess+="\n\t\t</SASprocess>";
 }
 
