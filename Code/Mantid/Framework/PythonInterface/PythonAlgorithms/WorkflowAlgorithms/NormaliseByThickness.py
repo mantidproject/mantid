@@ -14,7 +14,7 @@ class NormaliseByThickness(PythonAlgorithm):
     """
     
     def category(self):
-        return "Workflow\\SANS;PythonAlgorithms"
+        return "Workflow\\SANS"
 
     def name(self):
         return "NormaliseByThickness"

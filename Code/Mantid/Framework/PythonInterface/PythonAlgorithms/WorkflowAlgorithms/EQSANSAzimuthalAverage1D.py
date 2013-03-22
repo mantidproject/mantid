@@ -9,7 +9,7 @@ import math
 class EQSANSAzimuthalAverage1D(PythonAlgorithm):
     
     def category(self):
-        return 'Workflow\\SANS;PythonAlgorithms'
+        return 'Workflow\\SANS\\UsesPropertyManager'
     
     def name(self):
         return 'EQSANSAzimuthalAverage1D'
