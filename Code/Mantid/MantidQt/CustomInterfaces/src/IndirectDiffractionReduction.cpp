@@ -53,19 +53,23 @@ void IndirectDiffractionReduction::demonRun()
     return;
   }
 
-  if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
+  QString instName=m_uiForm.cbInst->currentText();
+  if ( instName != "OSIRIS" )
   {
     // MSGDiffractionReduction
-    QString pfile = m_uiForm.cbInst->currentText() + "_diffraction_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml";
+    QString pfile = instName + "_diffraction_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml";
     QString pyInput =
       "from IndirectDiffractionReduction import MSGDiffractionReducer\n"
       "reducer = MSGDiffractionReducer()\n"
-      "reducer.set_instrument_name('" + m_uiForm.cbInst->currentText() + "')\n"
+      "reducer.set_instrument_name('" + instName + "')\n"
       "reducer.set_detector_range("+m_uiForm.set_leSpecMin->text()+"-1, " +m_uiForm.set_leSpecMax->text()+"-1)\n"
       "reducer.set_parameter_file('" + pfile + "')\n"
       "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
       "for file in files:\n"
       "    reducer.append_data_file(file)\n";
+    // Fix Vesuvio to FoilOut for now
+    if(instName == "VESUVIO")
+      pyInput += "reducer.append_load_option('Mode','FoilOut')\n";
         
     if ( m_uiForm.dem_ckSumFiles->isChecked() )
     {
@@ -170,11 +174,7 @@ void IndirectDiffractionReduction::instrumentSelected(int)
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
-  if ( pyOutput == "" )
-  {
-    showInformationBox("Could not get list of analysers from Instrument Parameter file.");
-  }
-  else
+  if(pyOutput.length() > 0)
   {
     QStringList analysers = pyOutput.split("\n", QString::SkipEmptyParts);
 
@@ -199,31 +199,35 @@ void IndirectDiffractionReduction::instrumentSelected(int)
     {
       m_uiForm.swReflections->setCurrentIndex(1);
     }
-    
-    reflectionSelected(m_uiForm.cbReflection->currentIndex());
+  }
+  else
+  {
+    m_uiForm.swReflections->setCurrentIndex(1);
+  }
 
-    m_uiForm.cbReflection->blockSignals(false);
+  reflectionSelected(m_uiForm.cbReflection->currentIndex());
+  m_uiForm.cbReflection->blockSignals(false);
 
-    pyInput = "from IndirectDiffractionReduction import getStringProperty\n"
+  pyInput = "from IndirectDiffractionReduction import getStringProperty\n"
       "print getStringProperty('__empty_" + m_uiForm.cbInst->currentText() + "', 'Workflow.Diffraction.Correction')\n";
 
-    pyOutput = runPythonCode(pyInput).trimmed();
+  pyOutput = runPythonCode(pyInput).trimmed();
 
-    if ( pyOutput == "Vanadium" )
-    {
-      m_uiForm.swVanadium->setCurrentIndex(0);
-    }
-    else
-    {
-      m_uiForm.swVanadium->setCurrentIndex(1);
-    }
-
-    // Turn off summing files options for OSIRIS.
-    if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
-      m_uiForm.dem_ckSumFiles->setEnabled(true);
-    else
-      m_uiForm.dem_ckSumFiles->setEnabled(false);
+  if ( pyOutput == "Vanadium" )
+  {
+    m_uiForm.swVanadium->setCurrentIndex(0);
   }
+  else
+  {
+    m_uiForm.swVanadium->setCurrentIndex(1);
+  }
+
+  // Turn off summing files options for OSIRIS.
+  if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
+    m_uiForm.dem_ckSumFiles->setEnabled(true);
+  else
+    m_uiForm.dem_ckSumFiles->setEnabled(false);
+
 }
 
 void IndirectDiffractionReduction::reflectionSelected(int)
