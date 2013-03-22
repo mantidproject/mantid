@@ -2,6 +2,8 @@
 #define MANTID_SLICEVIEWER_PEAKOVERLAYCROSS_FACTORY_H_
 
 #include "MantidQtSliceViewer/PeakOverlayViewFactoryBase.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MDGeometry.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt
@@ -36,15 +38,13 @@ namespace MantidQt
     class DLLExport PeakOverlayCrossFactory : public PeakOverlayViewFactoryBase
     {
     public:
-      PeakOverlayCrossFactory(QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
+      PeakOverlayCrossFactory(boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransform_const_sptr transform, Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
       virtual ~PeakOverlayCrossFactory();
-      boost::shared_ptr<PeakOverlayView> createView(const Mantid::Kernel::V3D& position) const;
-      virtual void setPeakRadius(const double&, const double&, const double&)
-      {
-        //Do nothing.
-      }
-      virtual void setZRange(const double& max, const double& min);
+      virtual boost::shared_ptr<PeakOverlayView> createView(const int peakIndex, PeakTransform_const_sptr transform) const;
+      virtual int FOM() const;
     private:
+      /// Peaks workspace.
+      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
       double m_zMax;
       double m_zMin;
     };
