@@ -110,15 +110,27 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
     break;
   case 2:
     // Gd2, HEKL
-    skew[0] = 0.8660254;
+    skew[0] = 1.0;
     skew[1] = 0.0;
-    skew[2] = 0.5;
+    skew[2] = 0.0;
     skew[3] = 0.0;
     skew[4] = 1.0;
     skew[5] = 0.0;
-    skew[6] = 0.5;
+    skew[6] = 0.0;
     skew[7] = 0.0;
-    skew[8] = -0.8660254;
+    skew[8] = 1.0;
+    break;
+  case 3:
+    // Gd2, HEKL, a scaled
+    skew[0] = 1.0;
+    skew[1] = 0.0;
+    skew[2] = -0.65465367;
+    skew[3] = 0.0;
+    skew[4] = 1.0;
+    skew[5] = 0.0;
+    skew[6] = 0.0;
+    skew[7] = 0.0;
+    skew[8] = 0.75592895;
     break;
   default:
     // Create from the internal skew matrix
@@ -295,15 +307,27 @@ void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkUnstructuredGrid *ugrid
     break;
   case 2:
     // Gd2, HEKL
-    baseX[0] = 0.8660254;
+    baseX[0] = 1.0;
     baseX[1] = 0.0;
-    baseX[2] = 0.5;
+    baseX[2] = 0.0;
     baseY[0] = 0.0;
     baseY[1] = 1.0;
     baseY[2] = 0.0;
-    baseZ[0] = 0.5;
+    baseZ[0] = 0.0;
     baseZ[1] = 0.0;
-    baseZ[2] = -0.8660254;
+    baseZ[2] = 1.0;
+    break;
+  case 3:
+    // Gd2, HEKL, a scaled
+    baseX[0] = 1.0;
+    baseX[1] = 0.0;
+    baseX[2] = 0.0;
+    baseY[0] = 0.0;
+    baseY[1] = 1.0;
+    baseY[2] = 0.0;
+    baseZ[0] = -0.65465367;
+    baseZ[1] = 0.0;
+    baseZ[2] = 0.75592895;
     break;
   default:
     // Create from the internal basis vectors
