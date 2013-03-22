@@ -1,5 +1,5 @@
 #ifndef MANTID_MDEVENTS_MDBOX_NEXUSSAVEABLE_H
-#define MANTID_MDEVENTS_MDBOX_SAVEABLE_H
+#define MANTID_MDEVENTS_MDBOX_NEXUSSAVEABLE_H
 
 #include "MantidKernel/Saveable.h"
 #include "MantidAPI/IMDNode.h"
@@ -10,8 +10,9 @@ namespace MDEvents
 {
 
   //===============================================================================================
-  /** The class responsible for implementing methods which automatically save/load MDBox into NEXus in conjuction with 
+  /** Two classes responsible for implementing methods which automatically save/load MDBox into NEXus in conjuction with 
       DiskBuffer
+      One class responsible for saving events into nexus and another one -- for identifying the data positions in a file in conjuction with DB 
 
       @date March 15, 2013
 
@@ -35,6 +36,11 @@ namespace MDEvents
       File change history is stored at: <https://github.com/mantidproject/mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+    class DLLExport MDBoxNxSIO : public IBoxControllerIO
+    {
+
+    };
+
     class DLLExport MDBoxNXSaveable : public Kernel::Saveable
     {
         public:
