@@ -1,5 +1,6 @@
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -155,15 +156,32 @@ void vtkDataSetToNonOrthogonalDataSet::createSkewInformation(Geometry::OrientedL
                                                              Kernel::DblMatrix &w,
                                                              Kernel::Matrix<coord_t> &aff)
 {
-  // Get and scale the B matrix
+  // Get the B matrix
   Kernel::DblMatrix bMat = ol.getB();
-  Kernel::DblMatrix scaleMat(3, 3, true);
-  scaleMat[0][0] /= ol.astar();
-  scaleMat[1][1] /= ol.bstar();
-  scaleMat[2][2] /= ol.cstar();
-  bMat *= scaleMat;
   // Apply the W tranform matrix
   bMat *= w;
+  // Create G*
+  Kernel::DblMatrix gStar = bMat.Tprime() * bMat;
+  Geometry::UnitCell uc(ol);
+  uc.recalculateFromGstar(gStar);
+  m_skewMat = uc.getB();
+  // Calculate the column normalisation
+  std::vector<double> bNorm;
+  for (std::size_t i = 0; i < m_skewMat.numCols(); i++)
+  {
+    double sum = 0.0;
+    for (std::size_t j = 0; j < m_skewMat.numRows(); j++)
+    {
+      sum += m_skewMat[j][i] * m_skewMat[j][i];
+    }
+    bNorm.push_back(std::sqrt(sum));
+  }
+  // Apply column normalisation to skew matrix
+  Kernel::DblMatrix scaleMat(3, 3, true);
+  scaleMat[0][0] /= bNorm[0];
+  scaleMat[1][1] /= bNorm[1];
+  scaleMat[2][2] /= bNorm[2];
+  m_skewMat *= scaleMat;
 
   // Setup basis normalisation array
   m_basisNorm = {ol.astar(), ol.bstar(), ol.cstar()};
@@ -177,10 +195,10 @@ void vtkDataSetToNonOrthogonalDataSet::createSkewInformation(Geometry::OrientedL
     {
       for (std::size_t j = 0; j < 3; j++)
       {
-        temp[i][j] = bMat[i][j];
+        temp[i][j] = m_skewMat[i][j];
       }
     }
-    bMat = temp;
+    m_skewMat = temp;
   }
 
   // Convert affine matrix to similar type as others
@@ -196,13 +214,13 @@ void vtkDataSetToNonOrthogonalDataSet::createSkewInformation(Geometry::OrientedL
   this->stripMatrix(affMat);
 
   // Perform similarity transform to get coordinate orientation correct
-  bMat *= affMat;
+  m_skewMat = affMat.Tprime() * (m_skewMat * affMat);
   m_basisNorm = affMat * m_basisNorm;
-  m_skewMat = affMat.Transpose() * bMat;
   if (4 == m_numDims)
   {
     this->stripMatrix(m_skewMat);
   }
+
   this->findSkewBasis(m_basisX, m_basisNorm[0]);
   this->findSkewBasis(m_basisY, m_basisNorm[1]);
   this->findSkewBasis(m_basisZ, m_basisNorm[2]);
