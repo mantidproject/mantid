@@ -1,78 +1,84 @@
 # Basic parameters  for  Triphylite Crystal
 #Name of the workspaces to create
-ws = "TOPAZ_3131"
-filename = ws+"_event.nxs"
-LoadEventNexus(Filename=filename,OutputWorkspace=ws,FilterByTofMin='3000',FilterByTofMax='16000')
+ws_name = "TOPAZ_3132"
+filename = ws_name +"_event.nxs"
+ws = LoadEventNexus(Filename=filename,FilterByTofMin=3000, FilterByTofMax=16000)
 
-# Load optimized DetCal file
-#LoadIsawDetCal(InputWorkspace=ws,Filename="/SNS/TOPAZ/shared/Spectra/TOPAZ_8Sept11.DetCal")
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Part 1. Basic Reduction
 
 # Spherical Absorption and Lorentz Corrections
-AnvredCorrection(InputWorkspace=ws,OutputWorkspace=ws,LinearScatteringCoef="0.451",LinearAbsorptionCoef="0.993",Radius="0.14")
+ws = AnvredCorrection(InputWorkspace=ws, LinearScatteringCoef=0.451, LinearAbsorptionCoef=0.993, Radius=0.14)
 
 # Convert to Q space
-ConvertToDiffractionMDWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_MD2',LorentzCorrection='0',
-        OutputDimensions='Q (lab frame)', SplitInto='2',SplitThreshold='150')
+LabQ = ConvertToDiffractionMDWorkspace(InputWorkspace=ws, LorentzCorrection='0',
+        OutputDimensions='Q (lab frame)', SplitInto=2, SplitThreshold=150)
+	
 # Find peaks
-FindPeaksMD(InputWorkspace=ws+'_MD2',MaxPeaks='100',OutputWorkspace=ws+'_peaksLattice')
+PeaksLattice = FindPeaksMD(InputWorkspace=LabQ,MaxPeaks=100)
+
 # 3d integration to centroid peaks
-CentroidPeaksMD(InputWorkspace=ws+'_MD2',CoordinatesToUse='Q (lab frame)',
-	PeakRadius='0.12',PeaksWorkspace=ws+'_peaksLattice',OutputWorkspace=ws+'_peaksLattice')
+PeaksLattice = CentroidPeaksMD(InputWorkspace=LabQ, CoordinatesToUse='Q (lab frame)',
+	PeakRadius=0.12, PeaksWorkspace=PeaksLattice)
+	
 # Find the UB matrix using the peaks and known lattice parameters
-FindUBUsingLatticeParameters(PeaksWorkspace=ws+'_peaksLattice',a='10.3522',b='6.0768',c='4.7276',
-                alpha='90',beta='90',gamma='90', NumInitial='20', Tolerance='0.12')
+FindUBUsingLatticeParameters(PeaksWorkspace=PeaksLattice, a=10.3522, b=6.0768, c=4.7276,
+                alpha=90, beta=90, gamma=90, NumInitial=20, Tolerance=0.12)
+		
 # And index to HKL            
-IndexPeaks(PeaksWorkspace=ws+'_peaksLattice', Tolerance='0.12')
-# Integrate peaks in Q space using spheres
-IntegratePeaksMD(InputWorkspace=ws+'_MD2',PeakRadius='0.12',
-	BackgroundOuterRadius='0.18',BackgroundInnerRadius='0.15',
-	PeaksWorkspace=ws+'_peaksLattice',OutputWorkspace=ws+'_peaksLattice')
-# Save for SHELX
-SaveHKL(InputWorkspace=ws+'_peaksLattice', Filename=ws+'.hkl')
+IndexPeaks(PeaksWorkspace=PeaksLattice, Tolerance=0.12)
 
+# Integrate peaks in Q space using spheres
+PeaksLattice_Integrated = IntegratePeaksMD(InputWorkspace=LabQ,PeakRadius=0.12,
+	BackgroundOuterRadius=0.18,BackgroundInnerRadius=0.15,
+	PeaksWorkspace=PeaksLattice)
+	
+# Save for SHELX
+SaveHKL(InputWorkspace=PeaksLattice, Filename=ws_name + '.hkl')
+	
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Part 2. Alternative/Advanced Processing Steps
+	
+	
 # Find peaks again for FFT
-FindPeaksMD(InputWorkspace=ws+'_MD2',MaxPeaks='100',OutputWorkspace=ws+'_peaksFFT')
-# 3d integration to centroid peaks
-CentroidPeaksMD(InputWorkspace=ws+'_MD2',	CoordinatesToUse='Q (lab frame)',
-	PeakRadius='0.12',PeaksWorkspace=ws+'_peaksFFT',OutputWorkspace=ws+'_peaksFFT')
-# Find the UB matrix using FFT
-FindUBUsingFFT(PeaksWorkspace=ws+'_peaksFFT',MinD=3.,MaxD=14.)
+PeaksLatticeFFT = FindPeaksMD(InputWorkspace=LabQ, MaxPeaks=100)
 
-## TODO conventional cell
+# 3d integration to centroid peaks
+PeaksLatticeFFT = CentroidPeaksMD(InputWorkspace=LabQ, CoordinatesToUse='Q (lab frame)',
+	PeakRadius=0.12, PeaksWorkspace=PeaksLatticeFFT)
+	
+# Find the UB matrix using FFT
+FindUBUsingFFT(PeaksWorkspace=PeaksLatticeFFT, MinD=3.0, MaxD=14.0)
 
 # And index to HKL            
-IndexPeaks(PeaksWorkspace=ws+'_peaksFFT', Tolerance='0.12')
-# Integrate peaks in Q space using spheres
-IntegratePeaksMD(InputWorkspace=ws+'_MD2',PeakRadius='0.12',
-	BackgroundOuterRadius='0.18',BackgroundInnerRadius='0.15',
-	PeaksWorkspace=ws+'_peaksFFT',OutputWorkspace=ws+'_peaksFFT')
-# Save for SHELX
-SaveHKL(InputWorkspace=ws+'_peaksFFT', Filename=ws+'FFT.hkl')
+IndexPeaks(PeaksWorkspace=PeaksLatticeFFT, Tolerance=0.12)
 
+# Integrate peaks in Q space using spheres
+PeaksLatticeFFT = IntegratePeaksMD(InputWorkspace=LabQ, PeakRadius=0.12,
+	BackgroundOuterRadius=0.18,BackgroundInnerRadius=0.15,
+	PeaksWorkspace=PeaksLatticeFFT)
+	
+# Save for SHELX
+SaveHKL(InputWorkspace=PeaksLatticeFFT, Filename=ws_name + '.hkl')
+
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Part 3. Utilising the UB
 
 # Copy the UB matrix back to the original workspace
-CopySample(InputWorkspace=ws+'_peaksLattice',OutputWorkspace=ws,
+CopySample(InputWorkspace=PeaksLattice, OutputWorkspace=ws,
 		CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',  CopyLattice=1)
+		
 # Convert to reciprocal space, in the sample frame
-ConvertToDiffractionMDWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_HKL',
+HKL = ConvertToDiffractionMDWorkspace(InputWorkspace=ws,
 		OutputDimensions='HKL',LorentzCorrection='0', SplitInto='2',SplitThreshold='150')
+
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Part 4. Displaying 
+
 # Bin to a regular grid
-BinMD(InputWorkspace=ws+'_HKL',AlignedDim0='H, -20, 20, 800',AlignedDim1='K, -5, 5, 50',
-      AlignedDim2='L, -10, 10,  800',OutputWorkspace=ws+'_binned')
+Binned = BinMD(InputWorkspace=HKL,AlignedDim0='H, -15, 5, 150',AlignedDim1='K, -0, 10, 50',
+      AlignedDim2='L, 0, 12,  150')
+      
 # Show in slice Viewer		
-sv = plotSlice(ws+'_binned', xydim=('H','L'), slicepoint=[0, +0, 0], colorscalelog=True)
+sv = plotSlice(Binned, xydim=('H','L'), slicepoint=[0, +9, 0], colorscalelog=True)
 sv.setColorMapBackground(0,0,0)
-
-# Again, lower resolution
-BinMD(InputWorkspace=ws+'_HKL',AlignedDim0='H, -20, 20, 200',AlignedDim1='K, -5, 5, 50',
-      AlignedDim2='L, -10, 10, 100',OutputWorkspace=ws+'_binned_lowres')
-sv = plotSlice(ws+'_binned_lowres', xydim=('H','L'), slicepoint=[0, +0, 0], colorscalelog=True)
-sv.setColorMapBackground(0,0,0)
-
-# Dynamic binning
-#SliceMD(InputWorkspace=ws+'_HKL',AlignedDim0='H, -20, 20, 2',AlignedDim1='K, -2, +2, 1',
-#     AlignedDim2='L, -10, 10, 2',OutputWorkspace=ws+'_slice')
-#sv = plotSlice(ws+'_slice', xydim=('H','L'), slicepoint=[0, +0, 0], colorscalelog=True)
-#sv.setColorMapBackground(0,0,0)
-
-
