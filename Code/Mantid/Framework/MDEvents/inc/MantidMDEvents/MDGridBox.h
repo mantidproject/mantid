@@ -53,10 +53,24 @@ namespace MDEvents
     /**get const object responsible for saving the box to a file. 
       *@return the const pointer the const object. The GridBox is not saveable at the moment so it is always NULL */ 
     virtual Kernel::ISaveable *const getISaveable()const{return NULL;}
+    /**Recursively make all underlaying boxes file-backed*/
+    virtual void makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/);
+    /**Save the box at specific disk position. The IMDNode has to be file backed for this method to work */
+    virtual void save()
+    {/*Not saveable */};
+    /**Load the box data of specified size from the disk location provided. The IMDNode has to be file backed for this method to work */
+    virtual void load()
+    {/*Not directly loadable */};
     //-------------------------------------------------------------------------------------------------------
     void clear();
+    /**Save the box at specific disk position using the class, respoinsible for the file IO. */
+    virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)
+    {/*Not saveable */};    
+    /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO. */
+    virtual void loadFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */)
+    {/*Not directly loadable */};
 
-
+    
     /** Uses the cached value of points stored in the grid box  
       *  @return the total number of points (events) in this box  (in memory and in file if present)     */
     uint64_t getNPoints() const

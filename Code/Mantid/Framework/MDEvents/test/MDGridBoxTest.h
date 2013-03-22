@@ -250,7 +250,7 @@ public:
   {
     MDGridBox<MDLeanEvent<1>,1> * box = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
     BoxController * originalBoxController = box->getBoxController();
-    BoxController*const newBoxController(new BoxController(*originalBoxController));
+    BoxController*const newBoxController = originalBoxController->clone().get();
 
     MDGridBox<MDLeanEvent<1>,1> * box1 = new MDGridBox<MDLeanEvent<1>,1>(*box,newBoxController);
 

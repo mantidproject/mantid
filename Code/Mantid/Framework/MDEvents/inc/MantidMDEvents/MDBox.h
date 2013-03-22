@@ -56,7 +56,13 @@ namespace MDEvents
     // ----------------------------- ISaveable Methods ------------------------------------------------------
     virtual Kernel::ISaveable *const getISaveable();
     virtual Kernel::ISaveable *const getISaveable()const;   
+    virtual void makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/);
+    virtual void save();
+    virtual void load();
     //-----------------------------------------------------------------------------------------------
+    virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/);
+    virtual void loadFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */);
+
     void clear();
 
 

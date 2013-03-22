@@ -353,24 +353,7 @@ namespace MDEvents
     numBoxes = m_Children.size();
   }
 
-  //-----------------------------------------------------------------------------------------------
-  ///** Setter for the box controller. Sets the box controller on all children.
-  // *
-  // * @param controller: BoxController to set.
-  // */
-  //TMDE(
-  //void MDGridBox)::setBoxController(Mantid::API::BoxController *controller)
-  //{
-  //  MDBoxBase<MDE,nd>::setBoxController(controller);
-  //  // Set on all childern.
-  //  for (size_t i=0; i<m_Children.size(); i++)
-  //  {
-  //    m_Children[i]->setBoxController(controller);
-  //  }
-  //}
-
-
-  //-----------------------------------------------------------------------------------------------
+   //-----------------------------------------------------------------------------------------------
   /** Helper function to get the index into the linear array given
    * an array of indices for each dimension (0 to nd)
    * @param indices :: array of size[nd]
@@ -1570,7 +1553,12 @@ namespace MDEvents
       // set new box, supposetly gridded
       this->m_Children[index]=newChild;
     }
-
+  /**Recursively make this and all underlaying boxes file-backed */
+  TMDE(
+  void MDGridBox)::makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)
+  {
+      throw(Kernel::Exception::NotImplementedError("Recursive file backed is not yet implemented"));
+  }
 }//namespace MDEvents
 
 }//namespace Mantid

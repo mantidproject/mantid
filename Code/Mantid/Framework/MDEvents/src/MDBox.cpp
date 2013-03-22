@@ -802,6 +802,61 @@ namespace MDEvents
     return 0;
   }
 
+    /**Recursively make all underlaying boxes file-backed*/
+    TMDE(
+    void MDBox)::makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)
+    {
+        throw(Kernel::Exception::NotImplementedError("MDBox::makeFileBacked() not yet implemented"));
+    }
+    /**Save the box at specific disk position. The IMDNode has to be file backed for this method to work */
+    TMDE(
+    void MDBox)::save()
+    {
+        API::IBoxControllerIO *fileIO = this->m_BoxController->getFileIO();
+        Kernel::ISaveable *const Saver(this->getISaveable());
+        if(!fileIO || !Saver)
+            throw(std::runtime_error(" The box is not file based to save it using save method"));
+
+        this->saveAt(fileIO,Saver->getFilePosition());       
+    }
+
+    /**Save the box at specific disk position using the class, responsible for the file IO. 
+      * 
+      *@param FileSaver -- the pointer to the class, responsible for File IO operations
+      *@param position  -- the position of the data within the class.
+    */
+   TMDE(
+   void MDBox)::saveAt(API::IBoxControllerIO *const FileSaver,  uint64_t position)
+   {
+       if(!FileSaver)
+           throw(std::invalid_argument(" Needs defined file saver to save data to it"));
+       if(!FileSaver->isOpened())
+           throw(std::invalid_argument(" The file has to be opened to use box SaveAt function"));
+
+       std::vector<coord_t> TabledData;
+       size_t nDataColumns;
+       double totalSignal,totalErrSq;
+       
+       MDE::eventsToData(this->data,TabledData,nDataColumns,totalSignal,totalErrSq );
+
+       this->m_signal = static_cast<signal_t>(totalSignal);
+       this->m_errorSquared = static_cast<signal_t>(totalErrSq);
+
+       FileSaver->saveBlock(&TabledData[0],position,nDataColumns*data.size());
+
+   };
+    /**Load the box data of specified size from the disk location provided. The IMDNode has to be file backed for this method to work */
+   TMDE(
+   void MDBox)::load()
+   {
+      throw(Kernel::Exception::NotImplementedError("MDBox::load() not yet implemented"));
+   }
+   /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO. */
+   TMDE(
+   void MDBox)::loadFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */)
+   {
+      throw(Kernel::Exception::NotImplementedError("MDBox::loadFrom() not yet implemented"));
+   };
 
 }//namespace MDEvents
 

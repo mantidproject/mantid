@@ -4,7 +4,8 @@
 #include <vector>
 #include <algorithm>
 #include "MantidKernel/ThreadScheduler.h"
-#include "MantidKernel/INode.h"
+//#include "MantidKernel/INode.h"
+#include "MantidAPI/IBoxControllerIO.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidAPI/BoxController.h"
@@ -20,8 +21,21 @@ class IMDNode
 public:
     virtual ~IMDNode(){}; 
 //---------------- ISAVABLE
+    /**Return the pointer to the structure responsible for saving the box on disk if the workspace occupies too much memory */
     virtual Kernel::ISaveable *const getISaveable()=0;
+    /**Return the pointer to the sconst tructure responsible for saving the box on disk if the workspace occupies too much memory */
     virtual Kernel::ISaveable *const  getISaveable()const=0;        
+    /** initiate the structure responsible for swapping the box on HDD if out of memory. */
+    virtual void makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)=0;
+    /**Save the box at the position, specified by ISaveable. The IMDNode has to be file backed for this method to work */
+    virtual void save()=0;
+    /**Load the box from the location specified by ISaveable. The IMDNode has to be file backed for this method to work */
+    virtual void load()=0;
+    /**Save the box at specific disk position using the class, respoinsible for the file IO. */
+    virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)=0;
+    /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO. */
+    virtual void loadFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */)=0;
+
 //-------------------------------------------------------------
     ///@return The special ID which specify location of this node in the chain of ordered boxes (e.g. on a file)
     virtual size_t getID()const=0;

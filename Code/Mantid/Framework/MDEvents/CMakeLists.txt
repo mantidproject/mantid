@@ -93,6 +93,7 @@ set ( INC_FILES
     inc/MantidMDEvents/MDBoxFlatTree.h
 #	inc/MantidMDEvents/MDBoxToChange.h
 	inc/MantidMDEvents/MDBoxNXSaveable.h
+	inc/MantidMDEvents/MDBoxNxSIO.h    
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h

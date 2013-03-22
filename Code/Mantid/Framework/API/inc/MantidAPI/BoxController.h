@@ -419,7 +419,7 @@ namespace API
         m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth-1] * double(m_numSplit);
     }
   protected:
-   /// box controller is an ws-based singleton so it should not be possible to copy it, left for inheritance;
+   /// box controller is an ws-based singleton so it should not be possible to copy it, left protected for inheritance;
     BoxController(const BoxController & other );
  
   private:

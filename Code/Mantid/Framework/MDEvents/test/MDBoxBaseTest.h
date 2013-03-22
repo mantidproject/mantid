@@ -103,6 +103,11 @@ public:
   {};
   virtual void addEventUnsafe(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t)
   {};
+  virtual void makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/){};
+  virtual void save(){};
+  virtual void load(){};
+  virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/){/*Not saveable */};    
+  virtual void loadFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */){/*Not directly loadable */};
 
 
   /** Perform centerpoint binning of events

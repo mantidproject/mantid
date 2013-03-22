@@ -61,8 +61,9 @@ namespace Kernel
     virtual bool isBusy()const=0;
     virtual bool wasSaved()const=0;
     virtual bool isLoaded()const=0;
-    virtual void setLoaded(bool /*Yes*/)=0;
     virtual void setBusy(bool /*On*/)=0;
+    //protected?
+    virtual void setLoaded(bool /*Yes*/)=0;
     virtual bool isDataChanged()const=0;
     virtual void setDataChanged()=0;
     virtual void clearDataChanged()=0;
