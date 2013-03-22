@@ -193,9 +193,8 @@ namespace MDAlgorithms
     int tempDepth =  getProperty("MaxRecursionDepth");
     size_t maxDepth = bTakeDepthFromInputWorkspace? bc->getMaxDepth() : size_t(tempDepth);
     obc->setMaxDepth(maxDepth);
-    // the buffer size for resulting workspace; reasonable size is at least 10 data chunk sizes (nice to verify)
+
     size_t outputSize = writeBufSize;
-    if(outputSize<10*obc->getDataChunk())outputSize=10*obc->getDataChunk();
     obc->setCacheParameters(sizeof(OMDE),outputSize);
 
     obc->resetNumBoxes();
@@ -206,7 +205,14 @@ namespace MDAlgorithms
     std::string filename = getProperty("OutputFilename");
     if (!filename.empty())
     {
-      // First save to the NXS file
+      // the buffer size for resulting workspace; reasonable size is at least 10 data chunk sizes (nice to verify)
+      //if(outputSize<10*obc->getDataChunk())
+      //  {
+      //      outputSize=10*obc->getDataChunk();
+      //      obc->setCacheParameters(sizeof(OMDE),outputSize);
+      //  }
+
+        // First save to the NXS file
       g_log.notice() << "Running SaveMD" << std::endl;
       IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
       alg->setPropertyValue("Filename", filename);

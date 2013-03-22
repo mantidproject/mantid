@@ -25,7 +25,7 @@ set ( SRC_FILES
 	src/MDBoxBase.cpp
 	src/MDBoxIterator.cpp
     src/MDBoxFlatTree.cpp    
-	src/MDBoxToChange.cpp
+#	src/MDBoxToChange.cpp
 	src/MDBoxNXSaveable.cpp    
 	src/MDEventFactory.cpp
 	src/MDEventWSWrapper.cpp
@@ -69,7 +69,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
-	inc/MantidMDEvents/BoxCtrlChangesList.h 
+#	inc/MantidMDEvents/BoxCtrlChangesList.h 
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h
@@ -91,7 +91,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDBoxBase.h
 	inc/MantidMDEvents/MDBoxIterator.h
     inc/MantidMDEvents/MDBoxFlatTree.h
-	inc/MantidMDEvents/MDBoxToChange.h
+#	inc/MantidMDEvents/MDBoxToChange.h
 	inc/MantidMDEvents/MDBoxNXSaveable.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
@@ -146,7 +146,7 @@ set ( TEST_FILES
 	MDBoxIteratorTest.h
 	MDBoxTest.h
 	MDBoxNXSaveableTest.h    
-	MDBoxToChangeTest.h
+#	MDBoxToChangeTest.h
 	MDDimensionStatsTest.h
 	MDEventFactoryTest.h
 	MDEventInserterTest.h

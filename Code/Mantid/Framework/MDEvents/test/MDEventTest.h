@@ -265,7 +265,7 @@ public:
 
   void test_serialize_deserializeLean()
   {
-      size_t nPoints=num; // the number should not be nPoints%4=0 to hold test TS_ASSERT_THROWS below
+      size_t nPoints=num;
       std::vector<MDLeanEvent<3> > events(nPoints);
       double sumGuess(0),errGuess(0);
       for(size_t i=0;i<nPoints;i++)
@@ -297,7 +297,7 @@ public:
   }
   void test_serialize_deserializeFat()
   {
-      size_t nPoints=num; // the number should not be nPoints%3=0 to hold test TS_ASSERT_THROWS below
+      size_t nPoints=num; 
       std::vector<MDEvent<4> > events(nPoints);
       double sumGuess(0),errGuess(0);
       for(size_t i=0;i<nPoints;i++)
