@@ -87,9 +87,14 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
       double adj = (double)detectAdj->readY(i)[0];
       if( adj <= 0.0) 
       {
-        if( ! dataWS->getDetector(i)->isMasked())
-        {
-          throw std::invalid_argument ("Every detector with non-positive PixelAdj value must be masked");
+        try{
+          if( ! dataWS->getDetector(i)->isMasked())
+            {
+              throw std::invalid_argument ("Every detector with non-positive PixelAdj value must be masked");
+            }
+        }catch(...){
+          // just ignore. There are times, when the detector is not masked
+          // because it does not exist at all.
         }
       }
     }
