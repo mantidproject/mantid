@@ -138,6 +138,13 @@ m_freezePlot(false)
 
   m_activeTool = new QLabel(this);
   // set up the tool bar
+
+  m_zoom = new QPushButton();
+  m_zoom->setCheckable(true);
+  m_zoom->setAutoExclusive(true);
+  m_zoom->setIcon(QIcon(":/PickTools/zoom.png"));
+  m_zoom->setToolTip("Zoom in and out");
+
   m_one = new QPushButton();
   m_one->setCheckable(true);
   m_one->setAutoExclusive(true);
@@ -164,12 +171,14 @@ m_freezePlot(false)
   m_peakSelect->setToolTip("Erase single crystal peak(s)");
 
   QHBoxLayout* toolBox = new QHBoxLayout();
+  toolBox->addWidget(m_zoom);
   toolBox->addWidget(m_one);
   toolBox->addWidget(m_tube);
   toolBox->addWidget(m_peak);
   toolBox->addWidget(m_peakSelect);
   toolBox->addStretch();
   toolBox->setSpacing(2);
+  connect(m_zoom,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_one,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_tube,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_peak,SIGNAL(clicked()),this,SLOT(setSelectionType()));
@@ -588,7 +597,13 @@ void InstrumentWindowPickTab::plotTubeIntegrals(int detid)
 void InstrumentWindowPickTab::setSelectionType()
 {
   ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickSingleMode;
-  if (m_one->isChecked())
+  if (m_zoom->isChecked())
+  {
+    m_selectionType = Single;
+    m_activeTool->setText("Tool: Navigation");
+    surfaceMode = ProjectionSurface::MoveMode;
+  }
+  else if (m_one->isChecked())
   {
     m_selectionType = Single;
     m_activeTool->setText("Tool: Pixel selection");
