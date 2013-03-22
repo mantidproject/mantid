@@ -154,7 +154,7 @@ class LoadData(ReductionStep):
             self._identify_bad_detectors(workspaces[0])
 
     def _load_data(self, filename, output_ws):
-        if "VESUVIO" in self._parameter_file:
+        if self._parameter_file is not None and "VESUVIO" in self._parameter_file:
             loaded_ws = LoadVesuvio(Filename=filename, OutputWorkspace=output_ws, SpectrumList="1-198", **self._extra_load_opts)
             loader_name = "LoadVesuvio"
         else:
