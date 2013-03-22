@@ -204,6 +204,10 @@ void LoadILL::initInstrumentSpecific() {
 		m_l1 = 2.0;
 		m_l2 = 2.48;
 	}
+	else if (std::string::npos != m_instrumentName.find("IN4")) {
+		m_l1 = 2.0;
+		m_l2 = 2.0;
+	}
 	else{
 		g_log.warning("initInstrumentSpecific : Couldn't find instrument: " +  m_instrumentName);
 	}
@@ -458,10 +462,18 @@ int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
 		//calculatedDetectorElasticPeakPosition = *it;
 		calculatedDetectorElasticPeakPosition = static_cast<int>(std::distance(cumulatedSumOfSpectras.begin(), it));
 
-		g_log.debug() << "Calculated Detector EPP: "
-				<< calculatedDetectorElasticPeakPosition;
-		g_log.debug() << " :: Read EPP from the nexus file: "
-				<< m_monitorElasticPeakPosition << std::endl;
+		if (calculatedDetectorElasticPeakPosition == 0) {
+			g_log.warning()
+							<< "Elastic peak position is ZERO Assuming the EPP in the Nexus file: "
+							<< m_monitorElasticPeakPosition << std::endl;
+			calculatedDetectorElasticPeakPosition = m_monitorElasticPeakPosition;
+
+		} else {
+			g_log.debug() << "Calculated Detector EPP: "
+					<< calculatedDetectorElasticPeakPosition;
+			g_log.debug() << " :: Read EPP from the nexus file: "
+					<< m_monitorElasticPeakPosition << std::endl;
+		}
 	}
 	return calculatedDetectorElasticPeakPosition;
 
