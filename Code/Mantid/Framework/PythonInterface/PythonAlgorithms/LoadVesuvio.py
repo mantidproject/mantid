@@ -303,12 +303,8 @@ class LoadVesuvio(PythonAlgorithm):
         """
         if spectrum_no >= self._backward_spectra_list[0] and spectrum_no <= self._backward_spectra_list[-1]:
             self._spectra_type=BACKWARD
-        elif spectrum_no >= self._forward_spectra_list[0] and spectrum_no <= self._forward_spectra_list[-1]:
-            self._spectra_type=FORWARD
-        elif spectrum_no == self._mon_spectra[0]:
-            self._spectra_type=FORWARD
         else:
-            raise RuntimeError("Invalid spectra %d. Not defined as forward or backward spectrum" % spectrum_no)
+            self._spectra_type=FORWARD
 
         if self._spectra_type == BACKWARD:
             self._mon_norm_start, self._mon_norm_end = self._back_mon_norm
