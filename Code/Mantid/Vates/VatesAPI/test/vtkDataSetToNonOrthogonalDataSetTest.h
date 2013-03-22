@@ -27,7 +27,8 @@ class vtkDataSetToNonOrthogonalDataSetTest : public CxxTest::TestSuite
 {
 private:
 
-  std::string createMantidWorkspace()
+  std::string createMantidWorkspace(bool nonUnityTransform,
+                                    double scale = 1.0)
   {
     // Creating an MDEventWorkspace as the content is not germain to the
     // information necessary for the non-orthogonal axes
@@ -42,13 +43,13 @@ private:
     alg->initialize();
     alg->setRethrows(true);
     alg->setProperty("Workspace", wsName);
-    alg->setProperty("a", 3.643);
+    alg->setProperty("a", 3.643*scale);
     alg->setProperty("b", 3.643);
     alg->setProperty("c", 5.781);
     alg->setProperty("alpha", 90.0);
     alg->setProperty("beta", 90.0);
     alg->setProperty("gamma", 120.0);
-    std::vector<double> uVec {1, 1, 0};
+    std::vector<double> uVec {1*scale, 1, 0};
     std::vector<double> vVec {0, 0, 1};
     alg->setProperty("u", uVec);
     alg->setProperty("v", vVec);
@@ -65,7 +66,18 @@ private:
     ws->setTransformToOriginal(affMat.clone(), 0);
 
     // Create the transform (W) matrix
-    DblMatrix wMat(3, 3, true);
+    DblMatrix wMat;
+    if (!nonUnityTransform)
+    {
+      DblMatrix temp(3, 3, true);
+      wMat = temp;
+    }
+    else
+    {
+      std::vector<double> trans {1, 1, 0, 1, -1, 0, 0, 0, 1};
+      DblMatrix temp(trans);
+      wMat = temp;
+    }
     ws->setWTransf(wMat);
 
     return wsName;
@@ -96,6 +108,35 @@ private:
     float *vals = new float[size];
     farr->GetTupleValue(0, vals);
     return vals;
+  }
+
+  void checkUnityTransformation(vtkUnstructuredGrid *grid)
+  {
+    // This function can be used for both the unscaled and scaled
+    // unity transformation, since the outcome is identical.
+    // Now, check some values
+    /// Get the (1,1,1) point
+    const double eps = 1.0e-5;
+    double *point = grid->GetPoint(6);
+    TS_ASSERT_DELTA(point[0], 1.5, eps);
+    TS_ASSERT_DELTA(point[1], 1.0, eps);
+    TS_ASSERT_DELTA(point[2], 0.8660254, eps);
+    // See if the basis vectors are available
+    float *xBasis = getRangeComp(grid, "AxisBaseForX", 3);
+    TS_ASSERT_DELTA(xBasis[0], 1.0, eps);
+    TS_ASSERT_DELTA(xBasis[1], 0.0, eps);
+    TS_ASSERT_DELTA(xBasis[2], 0.0, eps);
+    delete [] xBasis;
+    float *yBasis = getRangeComp(grid, "AxisBaseForY", 3);
+    TS_ASSERT_DELTA(yBasis[0], 0.0, eps);
+    TS_ASSERT_DELTA(yBasis[1], 1.0, eps);
+    TS_ASSERT_DELTA(yBasis[2], 0.0, eps);
+    delete [] yBasis;
+    float *zBasis = getRangeComp(grid, "AxisBaseForZ", 3);
+    TS_ASSERT_DELTA(zBasis[0], 0.5, eps);
+    TS_ASSERT_DELTA(zBasis[1], 0.0, eps);
+    TS_ASSERT_DELTA(zBasis[2], 0.8660254, eps);
+    delete [] zBasis;
   }
 
 public:
@@ -129,7 +170,26 @@ public:
 
   void testSimpleDataset()
   {
-    std::string wsName = createMantidWorkspace();
+    std::string wsName = createMantidWorkspace(false);
+    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    TS_ASSERT_THROWS_NOTHING(converter.execute());
+    this->checkUnityTransformation(ds);
+    ds->Delete();
+  }
+
+  void testStaticUseForSimpleDataSet()
+  {
+    std::string wsName = createMantidWorkspace(false);
+    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
+    TS_ASSERT_THROWS_NOTHING(vtkDataSetToNonOrthogonalDataSet::exec(ds,
+                                                                    wsName));
+    ds->Delete();
+  }
+
+  void testNonUnitySimpleDataset()
+  {
+    std::string wsName = createMantidWorkspace(true);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
     TS_ASSERT_THROWS_NOTHING(converter.execute());
@@ -137,9 +197,9 @@ public:
     /// Get the (1,1,1) point
     const double eps = 1.0e-5;
     double *point = ds->GetPoint(6);
-    TS_ASSERT_DELTA(point[0], 1.5, eps);
+    TS_ASSERT_DELTA(point[0], 1.0, eps);
     TS_ASSERT_DELTA(point[1], 1.0, eps);
-    TS_ASSERT_DELTA(point[2], 0.8660254, eps);
+    TS_ASSERT_DELTA(point[2], 1.0, eps);
     // See if the basis vectors are available
     float *xBasis = getRangeComp(ds, "AxisBaseForX", 3);
     TS_ASSERT_DELTA(xBasis[0], 1.0, eps);
@@ -152,22 +212,54 @@ public:
     TS_ASSERT_DELTA(yBasis[2], 0.0, eps);
     delete [] yBasis;
     float *zBasis = getRangeComp(ds, "AxisBaseForZ", 3);
-    TS_ASSERT_DELTA(zBasis[0], 0.5, eps);
+    TS_ASSERT_DELTA(zBasis[0], 0.0, eps);
     TS_ASSERT_DELTA(zBasis[1], 0.0, eps);
-    TS_ASSERT_DELTA(zBasis[2], 0.8660254, eps);
+    TS_ASSERT_DELTA(zBasis[2], 1.0, eps);
     delete [] zBasis;
     ds->Delete();
   }
 
-  void testStaticUseForSimpleDataSet()
+  void testScaledSimpleDataset()
   {
-    std::string wsName = createMantidWorkspace();
+    std::string wsName = createMantidWorkspace(false, 2.0);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
-    TS_ASSERT_THROWS_NOTHING(vtkDataSetToNonOrthogonalDataSet::exec(ds,
-                                                                    wsName));
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    TS_ASSERT_THROWS_NOTHING(converter.execute());
+    this->checkUnityTransformation(ds);
     ds->Delete();
   }
 
+  void testScaledNonUnitySimpleDataset()
+  {
+    std::string wsName = createMantidWorkspace(true, 2.0);
+    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    TS_ASSERT_THROWS_NOTHING(converter.execute());
+    // Now, check some values
+    /// Get the (1,1,1) point
+    const double eps = 1.0e-5;
+    double *point = ds->GetPoint(6);
+    TS_ASSERT_DELTA(point[0], 0.34534633, eps);
+    TS_ASSERT_DELTA(point[1], 1.0, eps);
+    TS_ASSERT_DELTA(point[2], 0.75592895, eps);
+    // See if the basis vectors are available
+    float *xBasis = getRangeComp(ds, "AxisBaseForX", 3);
+    TS_ASSERT_DELTA(xBasis[0], 1.0, eps);
+    TS_ASSERT_DELTA(xBasis[1], 0.0, eps);
+    TS_ASSERT_DELTA(xBasis[2], 0.0, eps);
+    delete [] xBasis;
+    float *yBasis = getRangeComp(ds, "AxisBaseForY", 3);
+    TS_ASSERT_DELTA(yBasis[0], 0.0, eps);
+    TS_ASSERT_DELTA(yBasis[1], 1.0, eps);
+    TS_ASSERT_DELTA(yBasis[2], 0.0, eps);
+    delete [] yBasis;
+    float *zBasis = getRangeComp(ds, "AxisBaseForZ", 3);
+    TS_ASSERT_DELTA(zBasis[0], -0.65465367, eps);
+    TS_ASSERT_DELTA(zBasis[1], 0.0, eps);
+    TS_ASSERT_DELTA(zBasis[2], 0.75592895, eps);
+    delete [] zBasis;
+    ds->Delete();
+  }
 };
 
 
