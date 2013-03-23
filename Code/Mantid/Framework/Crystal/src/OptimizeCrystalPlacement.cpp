@@ -85,7 +85,7 @@ namespace Mantid
           "Workspace of Results");
 
 
-      declareProperty("AdjustSampleOffsets", false,
+      declareProperty("AdjustSampleOffsets", true,
           "If true sample offsets will be adjusted to give better fits, otherwise they will be fixed as zero(def=true)");
 
       declareProperty("OptimizeGoniometerTilt", false, "Set true if main error is due to a tilted Goniometer(def=false)");
@@ -103,8 +103,8 @@ namespace Mantid
       declareProperty(
           "MaxHKLPeaks2Use", -1.0,
           "If less than 0 all peaks are used, otherwise only peaks whose h,k, and l values are below the level are used(def=-1)");
-      declareProperty("MaxSamplePositionChange_meters", .0005,
-          "Maximum Change in Sample position in meters(def=.0005)");
+      declareProperty("MaxSamplePositionChange_meters", .005,
+          "Maximum Change in Sample position in meters(def=.005)");
 
 
       setPropertyGroup("MaxAngularChange", "Tolerance settings");
@@ -350,14 +350,14 @@ namespace Mantid
 
       //------------------ Fix up Covariance output --------------------
       declareProperty( new  WorkspaceProperty< ITableWorkspace>(
-          "OutputNormalisedCovarianceMatrixOptX" , "" ,  Direction::Output ) ,
+          "OutputNormalisedCovarianceMatrix" , "" ,  Direction::Output ) ,
           "The name of the TableWorkspace in which to store the final covariance matrix" );
 
 
       ITableWorkspace_sptr NormCov = fit_alg->getProperty( "OutputNormalisedCovarianceMatrix" );
 
       AnalysisDataService::Instance().addOrReplace( std::string( "CovarianceInfo" ) , NormCov );
-      setPropertyValue( "OutputNormalisedCovarianceMatrixOptX" , std::string( "CovarianceInfo" ) );//What if 2 instances are run
+      setPropertyValue( "OutputNormalisedCovarianceMatrix" , std::string( "CovarianceInfo" ) );//What if 2 instances are run
 
       if ( chisq < 0 || chisq != chisq )
         sigma = -1;

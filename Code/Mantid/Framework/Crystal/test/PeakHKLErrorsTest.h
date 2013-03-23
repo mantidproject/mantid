@@ -66,7 +66,7 @@ public:
         alg.execute();
         alg.setProperty("OutputWorkspace","abcd");
         DataObjects::PeaksWorkspace_sptr peaks =alg.getProperty("OutputWorkspace");
-        //std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<std::endl;
+        std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<std::endl;
 
         LoadIsawUB loadUB;
         loadUB.initialize();
