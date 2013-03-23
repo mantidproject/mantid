@@ -112,6 +112,7 @@ set ( TEST_FILES
 	LoadIsawUBTest.h
 	MaskPeaksWorkspaceTest.h
 	NormaliseVanadiumTest.h
+	OptimizeCrystalPlacementTest.h
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
