@@ -388,31 +388,34 @@ namespace Algorithms
                    << ", " << dtmax << ")\n";
 
     Workspace2D_sptr distws = boost::dynamic_pointer_cast<Workspace2D>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", 1, numbins, numbins-1));
-    MantidVec& vecx = distws->dataX(0);
-    MantidVec& veccount = distws->dataY(0);
+          API::WorkspaceFactory::Instance().create("Workspace2D", 1, numbins, numbins));
+    MantidVec& vecDeltaT = distws->dataX(0);
+    MantidVec& vecCount = distws->dataY(0);
     for (size_t i = 0; i < numbins; ++i)
-      vecx[i] = dtmin + (static_cast<double>(i)-1) * stepsize;
-    for (size_t i = 0; i < numbins-1; ++i)
-      veccount[i] = 0;
+      vecDeltaT[i] = dtmin + (static_cast<double>(i)-1) * stepsize;
+    for (size_t i = 0; i < numbins; ++i)
+      vecCount[i] = 0;
 
     // 3. Count
     for (size_t i = 0; i < vecdt.size(); ++i)
     {
-      int index = static_cast<int>(lower_bound(vecx.begin(), vecx.end(), vecdt[i]) - vecx.begin());
-      if (index >= static_cast<int>(vecx.size()))
+      double dt = vecdt[i];
+      vector<double>::iterator viter = lower_bound(vecDeltaT.begin(), vecDeltaT.end(), dt);
+      int index = static_cast<int>(viter - vecDeltaT.begin());
+      if (index >= static_cast<int>(vecDeltaT.size()))
       {
         // Out of upper boundary
-        g_log.error() << "Find index = " << index << " > vecX.size = " << vecx.size() << ".\n";
+        g_log.error() << "Find index = " << index << " > vecX.size = " << vecDeltaT.size() << ".\n";
       }
-      else if (vecdt[i] < vecx[index])
+      else if (vecdt[i] < vecDeltaT[index])
       {
         -- index;
       }
+
       if (index < 0)
         throw runtime_error("How can this happen.");
 
-      veccount[index] += 1;
+      vecCount[index] += 1;
     }
 
     return distws;
