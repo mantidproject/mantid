@@ -45,7 +45,7 @@ public:
   /// Destructor
   virtual ~Sort() {};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Sort";}
+  virtual const std::string name() const { return "Deprecated";}
 
 };
 

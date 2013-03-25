@@ -57,6 +57,8 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const;
+  /// category
+  virtual const std::string category() const { return "Deprecated"; }
 };
 
 } // namespace Algorithm
