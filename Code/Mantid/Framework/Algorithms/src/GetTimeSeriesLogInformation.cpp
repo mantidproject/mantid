@@ -17,6 +17,7 @@ Get information from a TimeSeriesProperty log.
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventList.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Events.h"
@@ -58,834 +59,268 @@ namespace Algorithms
 
   }
 
-  /*
-   * Definition of all input arguments
+  /** Definition of all input arguments
    */
   void GetTimeSeriesLogInformation::init()
   {
-    declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace", "Anonymous", Direction::InOut),
+    declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous", Direction::InOut),
         "Input EventWorkspace.  Each spectrum corresponds to 1 pixel");
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","Dummy",Direction::Output),
-                    "Name of the workspace containing (1) the log events in Export Log mode; "
-                    "(2) statistic on time in Overall Statistic mode. ");
+                    "Name of the workspace of log delta T distribution. ");
 
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("PercentOutputWorkspace", "PercentStat", Direction::Output),
-        "Output Workspace as the statistic on percentage time.");
+    auto tablewsprop = new WorkspaceProperty<TableWorkspace>("InformationWorkspace", "", Direction::Output);
+    declareProperty(tablewsprop, "Name of optional log statistic information output Tableworkspace.");
 
-    std::vector<std::string> funcoptions;
-    funcoptions.push_back("Overall Statistic");
-    funcoptions.push_back("Time Range Info");
-    funcoptions.push_back("Generate Calibration File");
-    funcoptions.push_back("Export Log");
-    this->declareProperty("Function", "Time Range Info", boost::make_shared<StringListValidator>(funcoptions),
-        "Options for functionalities.");
-
-    this->declareProperty("LogName", "", "Log's name to filter events.");
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("SampleEnvironmentWorkspace", "",
-         Direction::Input, PropertyMode::Optional),
-        "Input 2D workspace storing sample environment data along with absolute time");
+    declareProperty("LogName", "", "Log's name to filter events.");
 
     std::vector<std::string> timeoptions;
     timeoptions.push_back("Absolute Time (nano second)");
     timeoptions.push_back("Relative Time (second)");
-    timeoptions.push_back("Percentage");
-    this->declareProperty("TimeRangeOption", "Relative Time (second)", boost::make_shared<StringListValidator>(timeoptions),
-        "User defined time range (T0, Tf) is of absolute time (second). ");
-    this->declareProperty("T0", 0.0, "Earliest time of the events to be selected.  It can be absolute time (ns), relative time (second) or percentage.");
-    this->declareProperty("Tf", 100.0, "Latest time of the events to be selected.  It can be absolute time (ns), relative time (second) or percentage.");
+    declareProperty("TimeRangeOption", "Relative Time (second)", boost::make_shared<StringListValidator>(timeoptions),
+                    "User defined time range (T0, Tf) is of absolute time (second). ");
 
+    declareProperty("FilterStartTime", EMPTY_DBL(),
+                    "Earliest time of the events to be selected.  "
+                    "It can be absolute time (ns), relative time (second) or percentage.");
+    declareProperty("FilterStopTime", EMPTY_DBL(),
+                    "Latest time of the events to be selected.  "
+                    "It can be absolute time (ns), relative time (second) or percentage.");
 
-    // this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("TimeOutputWorkspace", "TimeStat", Direction::Output, PropertyMode::Optional),
-    //    "Output Workspace as the statistic on time (second).");
-
-
-    this->declareProperty("Resolution", 10, "Resolution of statistic workspace");
-
-    this->declareProperty("DetectorOffset", 1.0, "Unified offset value of detectors.");
-    this->declareProperty(new API::FileProperty("CalibrationFile", "", API::FileProperty::OptionalSave),
-        "Name of the output calibration file.");
-
-    this->declareProperty("NumberEntriesExport", 0, "Number of entries of the log to be exported.  Default is all entries.");
-    this->declareProperty(new API::FileProperty("OutputPartialLogFile", "", API::FileProperty::OptionalSave),
-        "Column file to record the first N entries of the designated log. (Optional for Export Log)");
-
-    this->declareProperty("IsEventWorkspace", true, "Option to select output workspace to be EventWorkspace or "
-                          "Workspce2D");
-    this->declareProperty(new API::FileProperty("OutputDirectory", "", API::FileProperty::OptionalSave),
-        "Directory where the information file will be written to.");
+    declareProperty("TimeStepBinResolution", 0.0001,
+                    "Time resolution (second) for time stamp delta T disibution. ");
 
     return;
   }
 
-  /*
-   * Main execution
+  /** Main execution
    */
   void GetTimeSeriesLogInformation::exec()
   {
-    // 1. Get property
-    eventWS = this->getProperty("InputWorkspace");
-
-    std::string funcoption = this->getProperty("Function");
-
-    // 2. Do the work
-    if (funcoption.compare("Time Range Info") == 0){
-      // 2a) Calculate and output time range information
-      this->doTimeRangeInformation();
-    }
-    else if (funcoption.compare("Overall Statistic") == 0)
+    // 1. Get wrokspace, log property and etc.
+    m_dataWS = this->getProperty("InputWorkspace");
+    if (!m_dataWS)
     {
-      this->doStatistic();
+      throw runtime_error("Inputworkspace cannot be parsed to a MatrixWorkspace.");
     }
-    else if (funcoption.compare("Generate Calibration File") == 0){
-      // 2c) Generate calibration file
-      this->generateCalibrationFile();
-    }
-    else if (funcoption.compare("Export Log") == 0)
+
+    string logname = getProperty("LogName");
+    if (logname.size() == 0)
+      throw runtime_error("Input log value cannot be an empty string. ");
+
+    Kernel::Property* log = m_dataWS->run().getProperty(logname);
+    if (!log)
     {
-      // 2d) Export file
-      this->exportLog();
+      stringstream errmsg;
+      errmsg << "Property " << logname << " does not exit in sample of workspace " << m_dataWS->getName() << ".";
+      g_log.error(errmsg.str());
+      throw std::invalid_argument(errmsg.str());
     }
-    else{
-      g_log.error() << "Functionality option " << funcoption << " is not supported!" << std::endl;
-    }
-
-    return;
-  }
-
-  /** Export part of designated log to an file in column format and a output file
-   */
-  void GetTimeSeriesLogInformation::exportLog()
-  {
-
-    // 1.  Get log, time, and etc.
-    std::string logname = getProperty("LogName");
-    std::vector<Kernel::DateAndTime> times;
-    std::vector<double> values;
-    if (logname.size() > 0)
+    else
     {
-      // Log
-      Kernel::TimeSeriesProperty<double>* tlog = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(
-          eventWS->run().getProperty(logname));
-      if (!tlog)
+      m_log = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(log);
+      if (!m_log)
       {
-        std::stringstream errmsg;
-        errmsg << "TimeSeriesProperty Log " << logname << " does not exist in workspace " <<
-                  eventWS->getName();
+        stringstream errmsg;
+        errmsg << "Log " << logname << " is found, but is not a double type time series log";
         g_log.error(errmsg.str());
         throw std::invalid_argument(errmsg.str());
       }
-      times = tlog->timesAsVector();
-      values = tlog->valuesAsVector();
     }
-    else
+
+    m_timeVec = m_log->timesAsVector();
+    m_valueVec = m_log->valuesAsVector();
+
+    m_starttime = m_dataWS->run().startTime();
+    m_endtime = m_dataWS->run().endTime();
+
+    // 2. Process start time and end time
+    processTimeRange();
+
+    // 3. Check time stamps
+    checkLogBasicInforamtion();
+
+    // 4. Calculate distribution of delta T
+    double resolution = getProperty("TimeStepBinResolution");
+    Workspace2D_sptr timestatws = calDistributions(m_timeVec, resolution);
+
+    // 5. Check whether the log is alternating
+    checkLogValueChanging(m_timeVec, m_valueVec, 0.1);
+
+    // 6. Export error log
+    if (false)
     {
-      throw std::runtime_error("Log name must be given for \'Export Log\'!");
+      double userinputdt = 1/240.1;
+      exportErrorLog(m_dataWS, m_timeVec, userinputdt);
     }
 
-    int numentries = this->getProperty("NumberEntriesExport");
-    if (numentries < 0)
-    {
-      stringstream errmsg;
-      errmsg << "For Export Log, NumberEntriesExport must be greater than 0.  Input = "
-             << numentries;
-      g_log.error(errmsg.str());
-      throw std::runtime_error(errmsg.str());
-    }
-    else if (numentries == 0 || static_cast<size_t>(numentries) > times.size())
-    {
-      numentries = static_cast<int>(times.size());
-    }
+    // -1. Finish set output properties.
+    TableWorkspace_sptr infows = generateStatisticTable();
+    setProperty("InformationWorkspace", infows);
 
-    // 2. Optional output to file with relative time (second)
-    std::string outputfilename = this->getProperty("OutputPartialLogFile");
-	if(!outputfilename.empty())
-	{
-	  std::ofstream ofs;
-	  ofs.open(outputfilename.c_str(), std::ios::out);
-
-	  Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
-
-	  for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
-	  {
-		Kernel::DateAndTime tnow = times[i];
-		int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
-		ofs << i << "\t" << dt << "\t" << values[i] << std::endl;
-	  }
-
-	  ofs.close();
-	}
-
-	// 3. Optional output to output workspace
-	if (!getPropertyValue("OutputWorkspace").empty())
-	{
-	  bool iseventws = getProperty("IsEventWorkspace");
-
-	  if (iseventws)
-	  {
-		setupEventWorkspace(numentries, times, values);
-	  }
-	  else
-	  {
-		setupWorkspace2D(numentries, times, values);
-	  }
-	}
-
-	// 4. Dummy
-	DataObjects::Workspace2D_sptr percentstatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-		API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
-	this->setProperty("PercentOutputWorkspace", percentstatws);
-
-    return;
-  }
-
-  /** Set up the output workspace in a Workspace2D
-    */
-  void GetTimeSeriesLogInformation::setupWorkspace2D(int numentries, vector<DateAndTime>& times,
-                                                     vector<double> values)
-  {
-    Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
-
-    size_t size = static_cast<size_t>(numentries);
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
-    if (!outWS)
-      throw runtime_error("Unable to create a Workspace2D casted to MatrixWorkspace.");
-
-    MantidVec& vecX = outWS->dataX(0);
-    MantidVec& vecY = outWS->dataY(0);
-    MantidVec& vecE = outWS->dataE(0);
-
-    for (size_t i = 0; i < size; ++i)
-    {
-      int64_t dtns = times[i].totalNanoseconds() - runstart.totalNanoseconds();
-      vecX[i] = static_cast<double>(dtns)*1.0E-9;
-      vecY[i] = values[i];
-      vecE[i] = 0.0;
-    }
-
-    Axis* xaxis = outWS->getAxis(0);
-    xaxis->setUnit("Time");
-
-    setProperty("OutputWorkspace", outWS);
-
-    return;
-  }
-
-  /** Set up an Event workspace
-    */
-  void GetTimeSeriesLogInformation::setupEventWorkspace(int numentries, vector<DateAndTime>& times,
-                                                        vector<double> values)
-  {
-    Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
-
-    //Get some stuff from the input workspace
-    const size_t numberOfSpectra = 1;
-    const int YLength = static_cast<int>(eventWS->blocksize());
-
-	EventWorkspace_sptr outWS;
-	//Make a brand new EventWorkspace
-	outWS = boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", numberOfSpectra, YLength+1, YLength));
-	//Copy geometry over.
-	API::WorkspaceFactory::Instance().initializeFromParent(eventWS, outWS, false);
-
-	MatrixWorkspace_sptr outMatrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
-	if (outMatrixWS)
-	  this->setProperty("OutputWorkspace", outMatrixWS);
-	else
-	  throw runtime_error("Output workspace cannot be casted to a MatrixWorkspace.");
-
-	g_log.notice("[DBx336] An output workspace is generated.!");
-
-	// Create the output event list (empty)
-	EventList & outEL = outWS->getOrAddEventList(0);
-	outEL.switchTo(WEIGHTED_NOTIME);
-
-	// Allocate all the required memory
-	outEL.reserve(numentries);
-	outEL.clearDetectorIDs();
-
-	for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
-	{
-	  Kernel::DateAndTime tnow = times[i];
-	  int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
-
-	  // convert to microseconds
-	  double dtmsec = static_cast<double>(dt)/1000.0;
-	  outEL.addEventQuickly( WeightedEventNoTime( dtmsec, values[i], values[i]) );
-	}
-	outWS->doneAddingEventLists();
-	// Ensure thread-safety
-	outWS->sortAll(TOF_SORT, NULL);
-
-	//Now, create a default X-vector for histogramming, with just 2 bins.
-	Kernel::cow_ptr<MantidVec> axis;
-	MantidVec& xRef = axis.access();
-	xRef.resize(2);
-	std::vector<WeightedEventNoTime>& events = outEL.getWeightedEventsNoTime();
-	xRef[0] = events.begin()->tof();
-	xRef[1] = events.rbegin()->tof();
-
-	//Set the binning axis using this.
-	outWS->setX(0, axis);
-
-    return;
-  }
-
-
-  /** Generate a calibration file to correct error of fast log time
-   */
-  void GetTimeSeriesLogInformation::generateCalibrationFile()
-  {
-    g_log.notice() << "Generating calibration file.\n";
-
-    double offset = this->getProperty("DetectorOffset");
-
-    // 1. Open file
-    std::string calfilename = this->getProperty("CalibrationFile");
-    std::ofstream ofs;
-    ofs.open(calfilename.c_str(), std::ios::out);
-
-    // 2. Write file
-    for (size_t i = 0; i < eventWS->getNumberHistograms(); i ++){
-
-      // a) Find detector of the spectrum
-      DataObjects::EventList* events = eventWS->getEventListPtr(i);
-      std::set<detid_t> detids = events->getDetectorIDs();
-
-      if (detids.size() != 1){
-        g_log.error() << "Spectrum (workspace) " << i << " has " << detids.size() << " detectors.  It is not allowed!" << std::endl;
-        break;
-      }
-
-      detid_t detid = 0;
-      for (std::set<detid_t>::iterator it=detids.begin(); it!=detids.end(); ++it)
-        detid = *it;
-
-      // b) Write
-      ofs << std::setw(10) << detid << std::setprecision(5) << std::setw(15) << offset << std::endl;
-
-    }
-
-
-    // 3. Close file
-    ofs.close();
-
-    // 4. Dummy output workspace
-    DataObjects::Workspace2D_sptr outputws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
-    DataObjects::Workspace2D_sptr percentstatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
-    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputws));
-    this->setProperty("PercentOutputWorkspace", percentstatws);
-
-    return;
-  }
-
-  /*
-   * Do statistic on user proposed range and examine the log
-   * inside the given time range.
-   */
-  void GetTimeSeriesLogInformation::doTimeRangeInformation()
-  {
-
-    // 1.  Get log, time, and etc.
-    // 1.1 General
-    std::string logname = getProperty("LogName");
-    std::vector<Kernel::DateAndTime> times;
-    if (logname.size() > 0)
-    {
-      // Log
-      Kernel::TimeSeriesProperty<double>* tlog = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(
-          eventWS->run().getProperty(logname));
-      if (!tlog){
-        g_log.error() << "TimeSeriesProperty Log " << logname << " does not exist in workspace " <<
-            eventWS->getName() << std::endl;
-        throw std::invalid_argument("TimeSeriesProperty log cannot be found");
-      }
-      times = tlog->timesAsVector();
-    }
-    else
-    {
-      throw std::invalid_argument("Log must be given!");
-    }
-
-    // 1.2 Time
-    double t0r = this->getProperty("T0");
-    double tfr = this->getProperty("Tf");
-    if (t0r >= tfr){
-      g_log.error() << "User defined filter starting time (T0 = " << t0r
-          << ") is later than ending time (Tf = " << tfr << ")" << std::endl;
-      throw std::invalid_argument("User input T0 and Tf error!");
-    }
-    std::string timeoption = this->getProperty("TimeRangeOption");
-
-    // 2) Set up data structures
-    const API::Run& runlog = eventWS->run();
-    std::string runstartstr = runlog.getProperty("run_start")->value();
-    Kernel::DateAndTime runstart(runstartstr);
-    mRunStartTime = runstart;
-
-    if (timeoption.compare("Absolute Time (nano second)")==0){
-      // i. absolute time
-      mFilterT0 = Kernel::DateAndTime(static_cast<int64_t>(t0r));
-      mFilterTf = Kernel::DateAndTime(static_cast<int64_t>(tfr));
-    }
-    else if (timeoption.compare("Relative Time (second)") == 0){
-      // ii. relative time
-      mFilterT0 = runstart + t0r;
-      mFilterTf = runstart + tfr;
-    }
-    else{
-      // iii. percentage
-      if (t0r < 0.0){
-        t0r = 0.0;
-        g_log.warning() << "For percentage T0 cannot be less than 0.  Auto-reset to 0.0 percent." << std::endl;
-      }
-      if (tfr > 100.0){
-        tfr = 100.0;
-        g_log.warning() << "For percentage Tf cannot be larger than 100.  Auto-reset to 100 percent." << std::endl;
-      }
-
-      int64_t ts = times[0].totalNanoseconds();
-      int64_t te = times[times.size()-1].totalNanoseconds();
-      mFilterT0 = times[0] + static_cast<int64_t>(static_cast<double>(te-ts)*t0r*0.01);
-      mFilterTf = times[0] + static_cast<int64_t>(static_cast<double>(te-ts)*tfr*0.01);
-    } // end-if-else
-
-    // 2. Print out some information about log and run
-    std::stringstream loginfoss;
-    int64_t dt0_ns = times[0].totalNanoseconds()-runstart.totalNanoseconds();
-    int64_t dtf_ns = times[times.size()-1].totalNanoseconds()-runstart.totalNanoseconds();
-    loginfoss << "Run Start Time = " << runstart << std::endl <<
-        "                 " << runstart.totalNanoseconds() << std::endl;
-    loginfoss << "Log Start Time = " << times[0] << std::endl <<
-        "                 " << times[0].totalNanoseconds() << "nano-second = "<<
-        (static_cast<double>(times[0].totalNanoseconds())*1.0E-9) << " seconds " << std::endl <<
-        "  To Run Start dT = " << dt0_ns << " ns" << std::endl <<
-        "                    " << static_cast<double>(dt0_ns)/static_cast<double>(dtf_ns) << std::endl;
-    loginfoss << "Log End   Time = " << times[times.size()-1] << std::endl <<
-        "                 " << times[times.size()-1].totalNanoseconds() << " nano-second  =  " <<
-        (static_cast<double>(times[times.size()-1].totalNanoseconds())*1.0E-9) << " seconds " << std::endl <<
-        "  To Run Start dT = " << dtf_ns << " ns" << std::endl <<
-        "                    " << static_cast<double>(dtf_ns)/static_cast<double>(dtf_ns)*100 << " percent" << std::endl;;
-
-    loginfoss << "User Filter:  T0 = " << mFilterT0 << std::endl <<
-        "                   " << mFilterT0.totalNanoseconds() << std::endl;
-    loginfoss << "              Tf = " << mFilterTf << std::endl <<
-        "                   " << mFilterTf.totalNanoseconds() << std::endl;
-
-    g_log.notice(loginfoss.str());
+    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(timestatws));
 
     // 4. Do more staticts (examine)
-    std::string outputdir = this->getProperty("OutputDirectory");
-    examLog(logname, outputdir);
-
-    return;
-
-  } // END
-
-  /*
-   * Examine the log.  Output relative information.  It is a simulation to real filtering
-   * Output the error statistic to workspace
-   * NOTE: All record about time are in unit as nano-second
-   *
-   * @param resolution:  int, 1, 10, 100... as the resolution for statistic
-   */
-  void GetTimeSeriesLogInformation::examLog(std::string logname, std::string outputdir){
-
-    std::vector<Kernel::DateAndTime> times;
-    std::vector<double> values;
-
-    // 1. Get vector of all times
-    Kernel::TimeSeriesProperty<double> *prop = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(
-        eventWS->run().getProperty(logname));
-    bool logerror = false;
-    if (!prop){
-      logerror = true;
-    } else {
-      times = prop->timesAsVector();
-    }
-
-    if (logerror)
-    {
-      g_log.error() << "Log " << logname << " is not a TimeSeriesProperty log" << std::endl;
-      throw std::invalid_argument("Input log is not a TimeSeriesProperty log");
-    }
-
-    // 2. Calculate the frequency and standard deviation of DELTA-TIME
-    std::stringstream msgss;
-    msgss << "\n";
-
-    double sumdeltatime1 = 0.0;
-    double sumdeltatime2 = 0.0;
-    size_t numpoints = 0;
-    size_t numzerodt = 0;
-
-    numpoints = times.size();
-    if (numpoints == 0)
-    {
-      g_log.error() << "Zero entries in times array!  Cannot be true!" << std::endl;
-      throw std::invalid_argument("Log has zero entries!");
-    } else
-    {
-      g_log.notice() << "Log has " << numpoints << " entries" << std::endl;
-    }
-
-    for (size_t i = 0; i < times.size(); i ++)
-    {
-      values.push_back(prop->getSingleValue(times[i]));
-    }
-
-
-    // 2 (i)   Check whether times is an ordered (ascending) vector
-    //   (ii)  Do statistic
-    size_t numevents = 0;
-    size_t numoutrange = 0;
-    for (size_t i = 1; i < times.size(); i++)
-    {
-      // (a) Filter out the time out of range
-      if (times[i] < mFilterT0 || times[i] > mFilterTf)
-      {
-        numoutrange ++;
-        continue;
-      }
-
-      int64_t dtns = times[i].totalNanoseconds() - times[i-1].totalNanoseconds();
-
-      // (b) Check not-allowed situations
-      if (dtns < 0)
-      {
-        g_log.error() << "Vector time is not ordered!" << std::endl;
-        throw std::runtime_error("Vector times (absolute time) is not ordered!");
-      }
-      else if (dtns == 0)
-      {
-        numzerodt ++;
-      }
-      else {
-        numevents ++;
-      }
-
-      // (b) Statistics
-      sumdeltatime1 += static_cast<double> (dtns);
-      sumdeltatime2 += static_cast<double> (dtns) * static_cast<double> (dtns);
-
-    } // FOR: i
-
-    // 3. Output for delta(T) on time stamps within selected range
-    double avgdeltatime = sumdeltatime1 / static_cast<double> (numpoints);
-    double stddeltatime = sqrt(sumdeltatime2 / static_cast<double> (numpoints) - avgdeltatime
-        * avgdeltatime);
-
-    msgss << "Time Range            = " << mFilterT0 << ", " << mFilterTf << ".  Delta(T) = " << mFilterTf-mFilterT0 << std::endl;
-    msgss << "Number of Points In   = " << numevents << "(" << numpoints << "), Same Points = " << numzerodt << std::endl;
-    msgss << "NUmber of Points Out  = " << numoutrange << std::endl;
-    msgss << "Min.             Time = " << times[0] << " / " << times[0].totalNanoseconds()
-        << "  ns " << std::endl;
-    msgss << "Max.             Time = " << times[times.size() - 1] << " / " << times[times.size()
-        - 1].totalNanoseconds() << " ns" << std::endl;
-    msgss << "Average       Delta T = " << avgdeltatime << "  ns,  Standard Deviation = "
-        << stddeltatime << std::endl;
-
-    // 4.  Record values out of standard deviation
-    std::vector<size_t> oddindicies;
-    std::vector<Kernel::DateAndTime> oddtimes;
-    std::vector<double> oddvalues;
-    for (size_t i = 1; i < times.size(); i++)
-    {
-
-      // (0) Filter out the time out of range
-      if (times[i] < mFilterT0 || times[i] > mFilterTf){
-        continue;
-      }
-
-      int64_t dtns = times[i].totalNanoseconds() - times[i - 1].totalNanoseconds();
-
-      if (fabs(static_cast<double> (dtns) - avgdeltatime) > stddeltatime)
-      {
-        oddindicies.push_back(i);
-        oddtimes.push_back(times[i]);
-        oddvalues.push_back(static_cast<double> (dtns) - avgdeltatime);
-      }
-    }
-
-    // 4.2 Write out the record for all DeltaT out of 1 \sigma, if file size is not too large
-    std::ofstream sigfs;
-    std::string sigfilename = outputdir + "/outofsigma.txt";
-
-    size_t numwriteout = 1000;
-    if (oddvalues.size() < numwriteout)
-      numwriteout = oddvalues.size();
-
-    g_log.notice() << "Writing " << numwriteout << " events outside 1 sigma out of " << oddvalues.size() <<
-        " to file " << sigfilename << std::endl;
-
-    int64_t timespan_ns = times[times.size() - 1].totalNanoseconds() - times[0].totalNanoseconds();
-
-    sigfs.open(sigfilename.c_str(), std::ios::out);
-    sigfs << "Index" << std::setw(30) << "Time (ns)" << std::setw(30) << "Delta T (ns)"
-        << std::setw(30) << "DeltaT - Avg(DeltaT) " << std::setw(30) << "Percent of Time"
-        << std::endl;
-    for (size_t i = 0; i < oddvalues.size(); i++)
-    {
-      int64_t temets_ns = oddtimes[i].totalNanoseconds() - times[0].totalNanoseconds();
-      double timepercent = static_cast<double> (temets_ns) / static_cast<double> (timespan_ns) * 100;
-      sigfs << oddindicies[i] << std::setw(30) << oddtimes[i].totalNanoseconds() << std::setw(30)
-          << std::setprecision(10) << (oddvalues[i] + avgdeltatime) << std::setw(30)
-          << std::setprecision(10) << oddvalues[i] << std::setw(30) << timepercent << std::endl;
-    }
-    sigfs.close();
-
-
-    // 5. Output statistic of bad time stamps to Matrixworkspace
-    int resin = this->getProperty("Resolution");
-    if (resin <= 0){
-      throw std::invalid_argument("Resolution cannot be equal or less than 0");
-    }
-    size_t resolution = static_cast<size_t>(resin);
-
-    DataObjects::Workspace2D_sptr timestatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, resolution, resolution));
-    DataObjects::Workspace2D_sptr percentstatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, resolution, resolution));
-    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(timestatws));
-    this->setProperty("PercentOutputWorkspace", percentstatws);
-
-    double ddt0f_ns = static_cast<double>(timespan_ns);
-
-    // 5.1 set up x-axis
-    double deltatns = ddt0f_ns/static_cast<double>(resolution);
-    for (size_t i = 0; i < resolution; i ++){
-      double xp = static_cast<double>(i)/static_cast<double>(resolution);
-      double xt = static_cast<double>(mFilterT0.totalNanoseconds())+static_cast<double>(i)*deltatns;
-      timestatws->dataX(0)[i] = xt;
-      timestatws->dataY(0)[i] = 0.0;
-      percentstatws->dataX(0)[i] = xp;
-      percentstatws->dataY(0)[i] = 0.0;
-    }
-
-    // 5.2 go through all weird data points
-    for (size_t i = 0; i < oddtimes.size(); i ++)
-    {
-      double roughpos = static_cast<double>(oddtimes[i].totalNanoseconds()-mFilterT0.totalNanoseconds())/ddt0f_ns;
-      size_t pos = static_cast<size_t>(roughpos*static_cast<double>(resolution));
-
-      if (pos == resolution)
-      {
-        g_log.warning() << "Slightly out of bound for time stamp " << oddtimes[i] << std::endl;
-        pos --;
-      } else if (pos > resolution)
-      {
-        g_log.error() << "Programming error!" << std::endl;
-        throw std::invalid_argument("Programming logic error!");
-      }
-
-      timestatws->dataY(0)[pos] += 1.0;
-      percentstatws->dataY(0)[pos] += 1.0;
-    }
-
-    // 5.3 Output largest 20% Delta T (original order is destroyed)
-    /*
-    msgss << "Delta(T) larger than standard deviation:  Number = " << oddindicies.size()
-        << std::endl;
-    if (oddindicies.size() >= 2)
-    {
-      msgss << "First Odd @ " << oddindicies[0] << ", Time = " << oddtimes[0] << ",  Delta(T) = "
-          << oddvalues[0] << std::endl;
-      size_t li = oddindicies.size() - 1;
-      msgss << "Last  Odd @ " << oddindicies[li] << ", Time = " << oddtimes[li] << ",  Delta(T) = "
-          << oddvalues[li] << std::endl;
-    }
-    */
-
-    // 5.4 Find Max Delta(T)
-    size_t imaxdt = 0;
-    double maxdt = -1;
-    for (size_t i = 0; i < oddindicies.size(); i++)
-    {
-      if (oddvalues[i] > maxdt)
-      {
-        imaxdt = oddindicies[i];
-        maxdt = oddvalues[i];
-      }
-    }
-    msgss << "Max Delta(T) @ " << imaxdt << " = " << maxdt << std::endl;
-
-    /*
-    std::sort(oddvalues.begin(), oddvalues.end());
-    for (size_t i = oddvalues.size() - 1; i >= oddvalues.size() - 10; i--)
-    {
-      msgss << "Index = " << i << "   Delta T = " << oddvalues[i] << std::endl;
-    }
-    */
-
-    std::string msgstr = msgss.str();
-
-    if (msgstr.size() > 0){
-      g_log.notice(msgstr);
-    }
-
-    // 6. Print out part result
-    /*
-    size_t numput = 1000;
-
-    // a) Redefine numput if out of range
-    if (times.size() < numput*3){
-      numput = times.size()/3;
-    }
-
-    // b) Output to buffer: first, middle and last
-    std::string opfname = outputdir+"/"+"pulse.dat";
-    std::ofstream ofs;
-    ofs.open(opfname.c_str(), std::ios::out);
-
-    for (size_t i = 0; i < numput; i ++){
-      ofs << times[i].totalNanoseconds()-1 << "   " << 0 << std::endl;
-      ofs << times[i].totalNanoseconds() << "   " << 1 << std::endl;
-      ofs << times[i].totalNanoseconds()+1 << "   " << 0 << std::endl;
-    } // ENDFOR
-    ofs << std::endl;
-    for (size_t i = times.size()/2-numput/2; i < times.size()/2+numput/2; i ++){
-      ofs << times[i].totalNanoseconds()-1 << "   " << 0 << std::endl;
-      ofs << times[i].totalNanoseconds() << "   " << 1 << std::endl;
-      ofs << times[i].totalNanoseconds()+1 << "   " << 0 << std::endl;
-    } // ENDFOR
-    ofs << std::endl;
-    for (size_t i = times.size()-1-numput; i < times.size(); i ++){
-      ofs << times[i].totalNanoseconds()-1 << "   " << 0 << std::endl;
-      ofs << times[i].totalNanoseconds() << "   " << 1 << std::endl;
-      ofs << times[i].totalNanoseconds()+1 << "   " << 0 << std::endl;
-    } //ENDFOR
-
-    ofs.close();
-
-    std::string opfname2 = outputdir+"/"+"partial_log.dat";
-    std::ofstream ofs2;
-    ofs2.open(opfname2.c_str(), std::ios::out);
-    for (size_t i = 0; i < numput; i ++){
-      ofs2 << times[i].totalNanoseconds() << "   " << values[i] << std::endl;
-    } // ENDFOR
-    ofs2 << std::endl;
-    for (size_t i = times.size()/2-numput/2; i < times.size()/2+numput/2; i ++){
-      ofs2 << times[i].totalNanoseconds() << "   " << values[i] << std::endl;
-    } // ENDFOR
-    ofs << std::endl;
-    for (size_t i = times.size()-1-numput; i < times.size(); i ++){
-      ofs2 << times[i].totalNanoseconds() << "   " << values[i] << std::endl;
-    } //ENDFOR
-
-    ofs2.close();
-     */
+    // std::string outputdir = this->getProperty("OutputDirectory");
+    // examLog(logname, outputdir);
 
     return;
   }
 
-  /*
-   *  Perform statistic to log including its distribution and etc.
-   *  Code is migrated from
+  /** Do statistic on user proposed range and examine the log
+   * inside the given time range.
    */
-  void GetTimeSeriesLogInformation::doStatistic()
+  void GetTimeSeriesLogInformation::processTimeRange()
   {
-    // 1. Get time series values and vector
-    std::string logname = getProperty("LogName");
-    std::vector<double> values;
-    std::vector<Kernel::DateAndTime> timevec;
-    if (!logname.empty())
+    // Input time
+    double t0r = this->getProperty("FilterStartTime");
+    double tfr = this->getProperty("FilterStopTime");
+
+    // Time unit option
+    string timeoption = this->getProperty("TimeRangeOption");
+    int timecase = 0;
+    if (timeoption.compare("Absolute Time (nano second)")==0)
+      timecase = 1;
+    else if (timeoption.compare("Relative Time (second)") == 0)
+      timecase = 0;
+    else
+      timecase = -1;
+
+    double duration = static_cast<double>(m_timeVec.back().totalNanoseconds()-m_timeVec[0].totalNanoseconds())*1.0E-9;
+
+    // Process start time
+    if (t0r == EMPTY_DBL())
     {
-      Kernel::TimeSeriesProperty<double>* tlog = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(
-          eventWS->run().getProperty(logname));
-      if (!tlog){
-        g_log.error() << "TimeSeriesProperty Log " << logname << " does not exist in workspace " <<
-            eventWS->getName() << std::endl;
-        throw std::invalid_argument("TimeSeriesProperty log cannot be found");
-      }
-      timevec = tlog->timesAsVector();
-      values = tlog->valuesAsVector();
+      // Default
+      mFilterT0 = m_timeVec[0];
     }
     else
     {
-      throw std::invalid_argument("Log name must be given!");
+      switch (timecase)
+      {
+        case 0:
+          // Relative time (second)
+          mFilterT0 = calculateRelativeTime(t0r);
+          break;
+        case 1:
+          // Absolute time (nano second)
+          mFilterT0 = getAbsoluteTime(t0r);
+          break;
+        case -1:
+          mFilterT0 = calculateRelativeTime(t0r*duration);
+          break;
+        default:
+          throw runtime_error("Coding error!");
+          break;
+      }
+    } // Filter start time
+
+    // Process filter end time
+    if (tfr == EMPTY_DBL())
+    {
+      // Default
+      mFilterTf = m_endtime;
+    }
+    else
+    {
+      switch (timecase)
+      {
+        // Set with input
+        case 0:
+          // Relative time (second)
+          mFilterTf = calculateRelativeTime(tfr);
+          break;
+        case 1:
+          // Absolute time (nano second)
+          mFilterTf = getAbsoluteTime(tfr);
+          break;
+        case -1:
+          mFilterTf = calculateRelativeTime(tfr*duration);
+          break;
+        default:
+          throw runtime_error("Coding error!");
+          break;
+      }
     }
 
-    // 1. Check whether the log is alternating
-    this->checkLogBasicInforamtion(eventWS, logname);
-    checkLogAlternating(timevec, values, 0.1);
-
-    // 2. Do some static on time stamps
-    g_log.notice() << "Vector size = " << timevec.size() << std::endl;
-    double sum1dtms = 0.0; // sum(dt^2)
-    double sum2dtms = 0.0; // sum(dt^2)
-    size_t numinvert = 0;
-    size_t numsame = 0;
-    size_t numnormal = 0;
-    double maxdtms = 0;
-    double mindtms = 1.0E20;
-    size_t numdtabove10p = 0;
-    size_t numdtbelow10p = 0;
-
-    double sampledtms = 0.00832646*1.0E6;
-    double dtmsA10p = sampledtms*1.1;
-    double dtmsB10p = sampledtms/1.0;
-
-    for (size_t i = 1; i < timevec.size(); i ++)
+    // Check validity
+    if (mFilterTf.totalNanoseconds() <= mFilterT0.totalNanoseconds())
     {
-      int64_t dtns = timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds();
-      double dtms = static_cast<double>(dtns)*1.0E-3;
-
-      sum1dtms += dtms;
-      sum2dtms += dtms*dtms;
-      if (dtns == 0)
-        numsame ++;
-      else if (dtns < 0)
-        numinvert ++;
-      else
-        numnormal ++;
-
-      if (dtms > maxdtms)
-        maxdtms = dtms;
-      if (dtms < mindtms)
-        mindtms = dtms;
-
-      if (dtms > dtmsA10p)
-        numdtabove10p ++;
-      else if (dtms < dtmsB10p)
-        numdtbelow10p ++;
-
-    } // ENDFOR
-
-    double dt = sum1dtms/static_cast<double>(timevec.size())*1.0E-6;
-    double stddt = sqrt(sum2dtms/static_cast<double>(timevec.size())*1.0E-12 - dt*dt);
-
-    g_log.notice() << "Normal   dt = " << numnormal << std::endl;
-    g_log.notice() << "Zero     dt = " << numsame << std::endl;
-    g_log.notice() << "Negative dt = " << numinvert << std::endl;
-    g_log.notice() << "Avg d(T) = " << dt << " seconds +/- " << stddt << ",  Frequency = " << 1.0/dt << std::endl;
-    g_log.notice() << "d(T) (unit ms) is in range [" << mindtms << ", " << maxdtms << "]"<< std::endl;
-    g_log.notice() << "Number of d(T) 10% larger than average  = " << numdtabove10p << std::endl;
-    g_log.notice() << "Number of d(T) 10% smaller than average = " << numdtbelow10p << std::endl;
-
-    g_log.notice() << "Size of timevec = " << timevec.size() << std::endl;
-
-    exportErrorLog(eventWS, timevec, 1/(240.1));
-    calDistributions(timevec, 1/(240.1));
-
-    // Fake output
-    DataObjects::Workspace2D_sptr timestatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
-    DataObjects::Workspace2D_sptr percentstatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
-    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(timestatws));
-    this->setProperty("PercentOutputWorkspace", percentstatws);
+      stringstream errmsg;
+      errmsg << "User defined filter starting time @ " << mFilterT0 << " (T = " << t0r
+             << ") is later than or equal to filer ending time @ " << mFilterTf
+             << " (T = " << tfr << ").";
+      g_log.error(errmsg.str());
+      throw std::invalid_argument(errmsg.str());
+    }
 
     return;
   }
 
-  /*
-   * Export time stamps looking erroreous
-   * @param dts: standard delta T in second
+  /** Convert a value in nanosecond to DateAndTime.  The value is treated as an absolute time from
+    * 1990.01.01
+    */
+  Kernel::DateAndTime GetTimeSeriesLogInformation::getAbsoluteTime(double abstimens)
+  {
+    DateAndTime temptime(static_cast<int64_t>(abstimens)) ;
+
+    return temptime;
+  }
+
+  /** Calculate the time from a given relative time from run start
+    * @param deltatime :: double as a relative time to run start time in second
+    */
+  Kernel::DateAndTime GetTimeSeriesLogInformation::calculateRelativeTime(double deltatime)
+  {
+    int64_t totaltime = m_starttime.totalNanoseconds() + static_cast<int64_t>(deltatime*1.0E9);
+    DateAndTime abstime(totaltime);
+
+    return abstime;
+  }
+
+
+  /** Generate statistic information table workspace
+    */
+  TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable()
+  {
+    TableWorkspace_sptr tablews(new TableWorkspace());
+
+    tablews->addColumn("str", "Name");
+    tablews->addColumn("double", "Value");
+
+    // 1. Integer part
+    map<string, int>::iterator intmapiter;
+    for (intmapiter = m_intInfoMap.begin(); intmapiter != m_intInfoMap.end(); ++intmapiter)
+    {
+      string name = intmapiter->first;
+      int value = intmapiter->second;
+
+      TableRow newrow = tablews->appendRow();
+      newrow << name << static_cast<double>(value);
+    }
+
+    // 2. Double part
+    map<string, double>::iterator dblmapiter;
+    for (dblmapiter = m_dblInfoMap.begin(); dblmapiter != m_dblInfoMap.end(); ++dblmapiter)
+    {
+      string name = dblmapiter->first;
+      double value = dblmapiter->second;
+
+      TableRow newrow = tablews->appendRow();
+      newrow << name << value;
+    }
+
+    return tablews;
+  }
+
+
+  /** Export time stamps looking erroreous
+   *  @param dts: standard delta T in second
+   *
+   *  This algorithm should be reconsidered how to work with it.
    */
-  void GetTimeSeriesLogInformation::exportErrorLog(API::MatrixWorkspace_sptr ws, std::vector<Kernel::DateAndTime> abstimevec, double dts)
+  void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws, vector<DateAndTime> abstimevec,
+                                                   double dts)
   {
     std::string outputdir = getProperty("OutputDirectory");
     if (!outputdir.empty() && outputdir[outputdir.size()-1] != '/')
@@ -923,158 +358,177 @@ namespace Algorithms
     }
 
     ofs.close();
-
   }
 
-  /*
-   * Output distributions in order for a better understanding of the log
-   * @param dts: d(T) in second
-   */
-  void GetTimeSeriesLogInformation::calDistributions(std::vector<Kernel::DateAndTime> timevec, double dts)
+  /** Output distributions in order for a better understanding of the log
+    * Result is written to a Workspace2D
+    *
+    * @param timevec  :: a vector of time stamps
+    * @param stepsize :: resolution of the delta time count bin
+    */
+  Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(std::vector<Kernel::DateAndTime> timevec, double stepsize)
   {
-    // 1. Calculate percent deviation vs. number of cases
-    std::vector<double> x1, y1;
-    for (int i=-99; i < 100; i++)
+    // 1. Get a vector of delta T (in unit of seconds)
+    double dtmin = static_cast<double>(timevec.back().totalNanoseconds()-timevec[0].totalNanoseconds())*1.0E-9;
+    double dtmax = 0.0;
+
+    vector<double> vecdt(timevec.size()-1, 0.0);
+    for (size_t i = 1; i < timevec.size(); ++i)
     {
-      x1.push_back(static_cast<double>(i));
-      y1.push_back(0);
+      vecdt[i-1] = static_cast<double>(timevec[i].totalNanoseconds() - timevec[i-1].totalNanoseconds())*1.0E-9;
+      if (vecdt[i-1] < dtmin)
+        dtmin = vecdt[i-1];
+      else if (vecdt[i-1] > dtmax)
+        dtmax = vecdt[i-1];
     }
 
-    for (size_t i = 1; i < timevec.size(); i ++)
+    // 2. Create a vector of counts
+    size_t numbins = static_cast<size_t>(ceil((dtmax-dtmin)/stepsize))+2;
+    g_log.notice() << "Distribution has " << numbins << " bins.  Delta T = (" << dtmin
+                   << ", " << dtmax << ")\n";
+
+    Workspace2D_sptr distws = boost::dynamic_pointer_cast<Workspace2D>(
+          API::WorkspaceFactory::Instance().create("Workspace2D", 1, numbins, numbins-1));
+    MantidVec& vecx = distws->dataX(0);
+    MantidVec& veccount = distws->dataY(0);
+    for (size_t i = 0; i < numbins; ++i)
+      vecx[i] = dtmin + (static_cast<double>(i)-1) * stepsize;
+    for (size_t i = 0; i < numbins-1; ++i)
+      veccount[i] = 0;
+
+    // 3. Count
+    for (size_t i = 0; i < vecdt.size(); ++i)
     {
-      double tempdts = static_cast<double>(timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds())*1.0E-9;
-      int index = static_cast<int>((tempdts-dts)/dts*100)+99;
-      if (index < 0)
-        index = 0;
-      else if (index > 199)
-        index = 19;
-      y1[static_cast<size_t>(index)]++;
-    }
-
-    /* Skip output */
-    for (size_t i = 0; i < x1.size(); i ++)
-      g_log.notice() << i << "\t\t" << x1[i] << "\t\t" << y1[i] << std::endl;
-     /**/
-
-    // 2. Calculate space distribution on error cases
-    std::vector<double> x2s;
-    std::vector<size_t> y2;
-
-    size_t numperiods = 100;
-    int64_t spanns = timevec[timevec.size()-1].totalNanoseconds()-timevec[0].totalNanoseconds();
-    double timestepsec = static_cast<double>(spanns)*1.0E-9/static_cast<double>(numperiods);
-
-    for (size_t i = 0; i < numperiods; i++)
-    {
-      x2s.push_back(static_cast<double>(i)*timestepsec);
-      y2.push_back(0);
-    }
-
-    size_t numbaddt = 0;
-    for (size_t i = 1; i < timevec.size(); i ++)
-    {
-      double tempdts = static_cast<double>(timevec[i].totalNanoseconds()-timevec[i-1].totalNanoseconds())*1.0E-9;
-      double dev = (tempdts-dts)/dts;
-      bool baddt = false;
-      if (fabs(dev) > 0.5)
-        baddt = true;
-
-      if (baddt)
+      int index = static_cast<int>(lower_bound(vecx.begin(), vecx.end(), vecdt[i]) - vecx.begin());
+      if (index >= static_cast<int>(vecx.size()))
       {
-        numbaddt ++;
-        int index = static_cast<int>(static_cast<double>(timevec[i].totalNanoseconds()-timevec[0].totalNanoseconds())*1.0E-9/timestepsec);
-        if (index < 0)
-          throw std::runtime_error("Impossible to have index less than 0");
-        if (index >= static_cast<int>(numperiods))
-        {
-          g_log.error() << "Logic error X" << std::endl;
-          index = static_cast<int>(numperiods)-1;
-        }
-        y2[static_cast<size_t>(index)] ++;
+        // Out of upper boundary
+        g_log.error() << "Find index = " << index << " > vecX.size = " << vecx.size() << ".\n";
       }
-    } // ENDFOR
+      else if (vecdt[i] < vecx[index])
+      {
+        -- index;
+      }
+      if (index < 0)
+        throw runtime_error("How can this happen.");
 
-    /* Skip
-    for (size_t i = 0; i < x2s.size(); i ++)
-      g_log.notice() << i << "\t\t" << x2s[i] << "\t\t" << y2[i] << std::endl;
-      */
-    g_log.notice() << "total number of wrong dt = " << numbaddt << std::endl;
+      veccount[index] += 1;
+    }
 
-    return;
+    return distws;
   }
 
 
-  /*
-   * Check log in workspace
+  /** Check log in workspace including ... ...
    */
-  void GetTimeSeriesLogInformation::checkLogBasicInforamtion(API::MatrixWorkspace_sptr ws, std::string logname)
+  void GetTimeSeriesLogInformation::checkLogBasicInforamtion()
   {
-    // 1. Get log
-    Kernel::Property* log = ws->run().getProperty(logname);
-    if (!log)
-    {
-      g_log.error() << "Log " << logname << " does not exist!" << std::endl;
-      throw std::invalid_argument("Non-exising log name");
-    }
-    Kernel::TimeSeriesProperty<double>* tslog = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(log);
-    if (!tslog)
-    {
-      g_log.error() << "Log " << logname << " is not time series log" << std::endl;
-      throw std::invalid_argument("Log type error!");
-    }
-
-    // 2. Survey
-    std::vector<Kernel::DateAndTime> times = tslog->timesAsVector();
-    g_log.information() << "Entries of times = " << times.size() << std::endl;
+    // 1. Time correctness: same time, disordered time
     size_t countsame = 0;
     size_t countinverse = 0;
-    for (size_t i=1; i<times.size(); i++)
+    for (size_t i=1; i<m_timeVec.size(); i++)
     {
-      Kernel::DateAndTime tprev = times[i-1];
-      Kernel::DateAndTime tpres = times[i];
+      Kernel::DateAndTime tprev = m_timeVec[i-1];
+      Kernel::DateAndTime tpres = m_timeVec[i];
       if (tprev == tpres)
         countsame ++;
       else if (tprev > tpres)
         countinverse ++;
     }
 
-    // 3. Output
-    Kernel::DateAndTime t0(ws->run().getProperty("run_start")->value());
-    Kernel::time_duration dts = times[0]-t0;
-    Kernel::time_duration dtf = times[times.size()-1]-t0;
-    size_t f = times.size()-1;
+    //   Written to summary map
+    /*
+    Kernel::time_duration dts = m_timeVec[0]-m_starttime;
+    Kernel::time_duration dtf = m_timeVec.back() - m_timeVec[0];
+    size_t f = m_timeVec.size()-1;
+    */
 
-    g_log.information() << "Number of Equal Time Stamps    = " << countsame << std::endl;
-    g_log.information() << "Number of Inverted Time Stamps = " << countinverse << std::endl;
-    g_log.information() << "Run Start = " << t0.totalNanoseconds() << std::endl;
-    g_log.information() << "First Log (Absolute Time, Relative Time): " << times[0].totalNanoseconds() << ", "
-        << Kernel::DateAndTime::nanosecondsFromDuration(dts) << std::endl;
-    g_log.information() << "Last  Log (Absolute Time, Relative Time): " << times[f].totalNanoseconds() << ", "
-        << Kernel::DateAndTime::nanosecondsFromDuration(dtf) << std::endl;
+    m_intInfoMap.insert(make_pair("Number of Time Stamps", m_timeVec.size()));
+    m_intInfoMap.insert(make_pair("Number of Equal Time Stamps", countsame));
+    m_intInfoMap.insert(make_pair("Number of Reversed Time Stamps", countinverse));
+
+    // 2. Average and standard deviation (delta t)
+    double sum_deltaT1 = 0.0; // sum(dt  ) in second
+    double sum_deltaT2 = 0.0; // sum(dt^2) in second^2
+    double max_dt = 0;
+    double min_dt = static_cast<double>(m_endtime.totalNanoseconds()-m_starttime.totalNanoseconds()) * 1.0E-9;
+
+    size_t numpts = m_timeVec.size();
+    for (size_t i = 0; i < numpts-1; ++i)
+    {
+      int64_t dtns = m_timeVec[i+1].totalNanoseconds()-m_timeVec[i].totalNanoseconds();
+      double dt = static_cast<double>(dtns)*1.0E-9; // in second
+
+      sum_deltaT1 += dt;
+      sum_deltaT2 += dt*dt;
+
+      if (dt > max_dt)
+        max_dt = dt;
+      if (dt < min_dt)
+        min_dt = dt;
+    }
+
+    double avg_dt = sum_deltaT1/static_cast<double>(numpts-1);
+    double std_dt = sqrt(sum_deltaT2/static_cast<double>(numpts-1) - avg_dt*avg_dt);
+
+    m_dblInfoMap.insert(make_pair("Average(dT)", avg_dt));
+    m_dblInfoMap.insert(make_pair("Sigma(dt)", std_dt));
+    m_dblInfoMap.insert(make_pair("Min(dT)", min_dt));
+    m_dblInfoMap.insert(make_pair("Max(dT)", max_dt));
+
+    // 3. Count number of time intervals beyond 10% of deviation
+    /* Temporarily disabled
+    for (size_t i = 1; ; i ++)
+    {
+      int64_t dtns = m_timeVec[i].totalNanoseconds()-m_timeVec[i-1].totalNanoseconds();
+      double dtms = static_cast<double>(dtns)*1.0E-3;
+
+      if (dtms > dtmsA10p)
+        numdtabove10p ++;
+      else if (dtms < dtmsB10p)
+        numdtbelow10p ++;
+
+    } // ENDFOR
+    */
+
+    // 4. Output
+    /* Temporily disabled
+    g_log.notice() << "Run Start = " << t0.totalNanoseconds() << std::endl;
+    g_log.notice() << "First Log: " << "Absolute Time = " << m_timeVec[0].totalNanoseconds() << "(ns), "
+                   << "Relative Time = " << DateAndTime::nanosecondsFromDuration(dts) << "(ns) \n";
+    g_log.notice() << "Last  Log: " << "Absolute Time = " << m_timeVec[f].totalNanoseconds() << "(ns), "
+                   << "Relative Time = " << DateAndTime::nanosecondsFromDuration(dtf) << "(ns) \n";
+    g_log.notice() << "Normal   dt = " << numnormal << std::endl;
+    g_log.notice() << "Zero     dt = " << numsame << std::endl;
+    g_log.notice() << "Negative dt = " << numinvert << std::endl;
+    g_log.notice() << "Avg d(T) = " << dt << " seconds +/- " << stddt << ",  Frequency = " << 1.0/dt << std::endl;
+    g_log.notice() << "d(T) (unit ms) is in range [" << mindtms << ", " << maxdtms << "]"<< std::endl;
+    g_log.notice() << "Number of d(T) 10% larger than average  = " << numdtabove10p << std::endl;
+    g_log.notice() << "Number of d(T) 10% smaller than average = " << numdtbelow10p << std::endl;
+
+    g_log.notice() << "Size of timevec = " << m_timeVec.size() << std::endl;
+    */
 
     return;
   }
 
-  /*
-   * Check whether log values are alternating
-   * @param delta: if adjacent log values differs less than this number, then it is not considered as alternating
+  /** Check whether log values are changing from 2 adjacent time stamps
+   *  @param delta :: if adjacent log values differs less than this number, then it is not considered as alternating
    */
-  void GetTimeSeriesLogInformation::checkLogAlternating(std::vector<Kernel::DateAndTime>timevec, std::vector<double> values,
-      double delta)
+  void GetTimeSeriesLogInformation::checkLogValueChanging(vector<DateAndTime>timevec, vector<double> values,
+                                                          double delta)
   {
     std::stringstream ss;
-
     ss << "Alternating Threashold = " << delta << std::endl;
 
-    size_t numocc = 0;
-
+    size_t numchange = 0;
     for (size_t i = 1; i < values.size(); i ++)
     {
       double tempdelta = values[i]-values[i-1];
       if (fabs(tempdelta) < delta)
       {
         // Value are 'same'
-        numocc ++;
+        numchange ++;
 
         // An error message
         ss << "@ " << i << "\tDelta = " << tempdelta << "\t\tTime From " << timevec[i-1].totalNanoseconds()
@@ -1082,8 +536,8 @@ namespace Algorithms
       }
     }
 
-    g_log.warning() << "Total non-alternating time stamps = " << numocc << " among " << timevec.size() << " cases. " << std::endl;
-    g_log.warning() << ss.str();
+    m_intInfoMap.insert(make_pair("Number of adjacent time stamp w/o value change", numchange));
+    g_log.debug() << ss.str();
 
     return;
   }

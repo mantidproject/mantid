@@ -3,8 +3,10 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
 {
@@ -41,51 +43,64 @@ namespace Algorithms
     GetTimeSeriesLogInformation();
     virtual ~GetTimeSeriesLogInformation();
     
-    virtual const std::string name() const {return "GetTimeSeriesLogInformation"; };
-    virtual int version() const {return 1; };
-    virtual const std::string category() const {return "Diffraction;Events\\EventFiltering"; };
+    virtual const std::string name() const {return "GetTimeSeriesLogInformation"; }
+    virtual int version() const {return 1; }
+    virtual const std::string category() const {return "Diffraction;Events\\EventFiltering"; }
 
   private:
-    DataObjects::EventWorkspace_sptr eventWS;
-     DataObjects::Workspace2D_const_sptr seWS;
-     DataObjects::EventWorkspace_sptr outputWS;
+    API::MatrixWorkspace_sptr m_dataWS;
 
-     std::vector<int64_t> mSETimes;
-     std::vector<double> mSEValues;
+    Kernel::DateAndTime mRunStartTime;
+    Kernel::DateAndTime mFilterT0;
+    Kernel::DateAndTime mFilterTf;
 
-     Kernel::DateAndTime mRunStartTime;
-     Kernel::DateAndTime mFilterT0;
-     Kernel::DateAndTime mFilterTf;
+    std::map<std::string, int> m_intInfoMap;
+    std::map<std::string, double> m_dblInfoMap;
 
-     virtual void initDocs();
+    Kernel::TimeSeriesProperty<double>* m_log;
+    std::vector<Kernel::DateAndTime> m_timeVec;
+    std::vector<double> m_valueVec;
 
-     void init();
+    Kernel::DateAndTime m_starttime;
+    Kernel::DateAndTime m_endtime;
 
-     void exec();
+    virtual void initDocs();
 
-     void examLog(std::string logname, std::string outputdir);
+    void init();
 
-     void generateCalibrationFile();
+    void exec();
 
-     void doTimeRangeInformation();
+    void examLog(std::string logname, std::string outputdir);
 
-     void calDistributions(std::vector<Kernel::DateAndTime> timevec, double dts);
+    void generateCalibrationFile();
 
-     void exportLog();
+    void processTimeRange();
 
-     void setupEventWorkspace(int numentries, std::vector<Kernel::DateAndTime> &times, std::vector<double> values);
+    /// Calcualte the distribution of delta T in time stamps
+    DataObjects::Workspace2D_sptr calDistributions(std::vector<Kernel::DateAndTime> timevec, double stepsize);
 
-     void setupWorkspace2D(int numentries, std::vector<Kernel::DateAndTime> &times, std::vector<double> values);
+    void exportLog();
 
-     void doStatistic();
+    void setupEventWorkspace(int numentries, std::vector<Kernel::DateAndTime> &times, std::vector<double> values);
 
-     void exportErrorLog(API::MatrixWorkspace_sptr ws, std::vector<Kernel::DateAndTime> abstimevec, double dts);
+    void setupWorkspace2D(int numentries, std::vector<Kernel::DateAndTime> &times, std::vector<double> values);
 
-     void checkLogAlternating(std::vector<Kernel::DateAndTime>timevec, std::vector<double> values,  double delta);
+    void execQuickStatistics();
 
-     void checkLogBasicInforamtion(API::MatrixWorkspace_sptr ws, std::string logname);
+    void exportErrorLog(API::MatrixWorkspace_sptr ws, std::vector<Kernel::DateAndTime> abstimevec, double dts);
+
+    void checkLogValueChanging(std::vector<Kernel::DateAndTime>timevec, std::vector<double> values,  double delta);
+
+    void checkLogBasicInforamtion();
+
+    /// Generate statistic information table workspace
+    DataObjects::TableWorkspace_sptr generateStatisticTable();
+
+    Kernel::DateAndTime getAbsoluteTime(double abstimens);
+
+    Kernel::DateAndTime calculateRelativeTime(double deltatime);
+
   };
-
 
 } // namespace Algorithms
 } // namespace Mantid

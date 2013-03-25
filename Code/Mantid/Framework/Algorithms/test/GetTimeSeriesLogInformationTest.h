@@ -57,8 +57,8 @@ public:
 
     getalg.setProperty("InputWorkspace", eventWS);
     getalg.setProperty("OutputWorkspace", "TimeStat");
-    getalg.setProperty("Function", "Overall Statistic");
     getalg.setProperty("LogName", "FastSineLog");
+    getalg.setProperty("InformationWorkspace", "LogInfoTable");
 
     getalg.execute();
     TS_ASSERT(getalg.isExecuted());
@@ -86,7 +86,9 @@ public:
     int64_t pulsetime_ns    =     100000;
 
     Kernel::DateAndTime runstarttime(runstarttime_ns);
+    Kernel::DateAndTime runendtime(runstoptime_ns);
     eventws->mutableRun().addProperty("run_start", runstarttime.toISO8601String());
+    eventws->mutableRun().addProperty("run_end", runendtime.toISO8601String());
 
     // 3. Proton charge log
     Kernel::TimeSeriesProperty<double> *protonchargelog =
