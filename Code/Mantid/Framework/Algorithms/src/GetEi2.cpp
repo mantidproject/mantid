@@ -231,12 +231,6 @@ double GetEi2::calculateEi(const double initial_guess)
     size_t ws_index = mon_indices[i];
     det_distances[i] = getDistanceFromSource(ws_index);
     const double peak_guess = det_distances[i]*std::sqrt(m_t_to_mev/initial_guess);
-    if( m_fixedei && i == 0 )
-    {
-      m_peak1_pos = std::make_pair(static_cast<int>(ws_index), peak_guess);
-      g_log.information() << "First monitor peak = " << peak_guess << " microseconds from fixed Ei = " << initial_guess << " meV\n"; 
-      break;
-    }
     const double t_min = (1.0 - m_tof_window)*peak_guess;
     const double t_max = (1.0 + m_tof_window)*peak_guess;
     g_log.information() << "Time-of-flight window for peak " << (i+1) << ": tmin = " << t_min << " microseconds, tmax = " << t_max << " microseconds\n";
@@ -246,6 +240,11 @@ double GetEi2::calculateEi(const double initial_guess)
     {  
       //Store for later adjustment of bins
       m_peak1_pos = std::make_pair(static_cast<int>(ws_index), peak_times[i]);
+      if(m_fixedei)
+      {
+        g_log.information() << "Using fixed Ei=" << initial_guess << " meV\n";
+        break;
+      }
     }
   }
   
