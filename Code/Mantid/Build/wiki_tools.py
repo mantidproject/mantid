@@ -194,21 +194,17 @@ def create_function_signature(alg, algo_name):
     # Add the output properties
     props = alg.getProperties()
     allreturns = []
-    workspacereturn = None
     # Loop through all the properties looking for output properties
     for prop in props:
         if (direction_string[prop.direction] == OutputDirection):
             allreturns.append(prop.name)
-            # Cache the last workspace property seen.
-            if isinstance(prop, IWorkspaceProperty) or re.search("(Workspace)", prop.name):  
-                workspacereturn = prop.name
                 
     lhs = ""
     comments = ""
     if not allreturns:
         pass
-    elif (len(allreturns) == 1) and (workspacereturn is not None): 
-        lhs =   workspacereturn + " = "
+    elif (len(allreturns) == 1): 
+        lhs =   allreturns[0] + " = "
     else :
         lhs = "result = "
         comments = "\n "
