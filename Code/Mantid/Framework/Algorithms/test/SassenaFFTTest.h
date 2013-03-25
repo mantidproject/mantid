@@ -22,7 +22,7 @@ public:
   static  SassenaFFTTest* createSuite() { return new SassenaFFTTest(); }
   static void destroySuite( SassenaFFTTest *suite ) { delete suite; }
 
-  SassenaFFTTest() : T2ueV(1000.0/Mantid::PhysicalConstants::meVtoKelvin), ps2ueV(4136.0), nbins(2001) { }
+  SassenaFFTTest() : T2ueV(1000.0/Mantid::PhysicalConstants::meVtoKelvin), ps2meV(4.136), nbins(2001) { }
 
   void test_init()
   {
@@ -150,7 +150,7 @@ private:
     double factor;  // remove the detailed balance condition
     for(size_t i=0; i<nspectra; i++)
     {
-      double goldStandard = ps2ueV*(1+ static_cast<double>(i) )*value; // recall each spectra was created with a different stdev
+      double goldStandard = ps2meV*(1+ static_cast<double>(i) )*value; // recall each spectra was created with a different stdev
       double dx = (-2.0) * ws->readX(i).at(0); // extent along the X-axis
       yv = ws->readY(i);
       size_t index = nbins/2; // This position should yield ws->readX(i).at(index)==0.0
@@ -264,7 +264,7 @@ private:
 
   Algorithms::SassenaFFT m_alg;
   const double T2ueV; //conversion factor from Kelvin to ueV
-  const double ps2ueV; // conversion factor from picosecond to micro-eV
+  const double ps2meV; // conversion factor from picosecond to micro-eV
   const size_t nbins;
 }; // class ApplyDetailedBalanceTest
 
