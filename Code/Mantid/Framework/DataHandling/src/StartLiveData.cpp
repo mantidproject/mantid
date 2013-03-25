@@ -118,7 +118,7 @@ namespace DataHandling
     initProps();
 
     declareProperty(new AlgorithmProperty("MonitorLiveData", boost::make_shared<NullValidator>(), Direction::Output ),
-        "The MonitorLiveData algorithm that continues to read live data after this algorithm completes.");
+        "A handle to the MonitorLiveData algorithm instance that continues to read live data after this algorithm completes.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -147,8 +147,6 @@ namespace DataHandling
 
     // Get the listener (and start listening) as early as possible
     ILiveListener_sptr listener = this->getLiveListener();
-
-    // TODO: Wait a bit to make sure something gets accumulated?
 
     LoadLiveData loadAlg;
     loadAlg.initialize();
