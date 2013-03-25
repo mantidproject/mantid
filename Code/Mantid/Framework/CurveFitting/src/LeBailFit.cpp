@@ -27,6 +27,7 @@
 #define INPUTBACKGROUNDINDEX  6   // Input background
 #define SMOOTHEDBACKGROUND    8   // Smoothed background
 const double NEG_DBL_MAX(-1.*DBL_MAX);
+const double NOBOUNDARYLIMIT(1.0E10);
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
@@ -3157,6 +3158,20 @@ namespace CurveFitting
         newvalue = fabs(newvalue);
       }
 
+      // keep the new value in the boundary
+      if (newvalue < param.minvalue)
+      {
+        int toss = rand()%2;
+        double direction = -1.0;
+        newvalue = limitProposedValueInBound(param, newvalue, direction, toss);
+      }
+      else if (newvalue > param.maxvalue)
+      {
+        int toss = rand()%2;
+        double direction = 1.0;
+        newvalue = limitProposedValueInBound(param, newvalue, direction, toss);
+      }
+
       // apply to new parameter map
       newparammap[paramname].value = newvalue;
 
@@ -3187,6 +3202,76 @@ namespace CurveFitting
     }
 
     return anyparameterrefined;
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Limit proposed value in the specified boundary
+    * @param param     :: Parameter
+    * @param newvalue  :: proposed new value that is out of boundary
+    * @param direction :: direction of parameter moved.  -1 for lower.  1 for upper
+    * @param option    :: option for various method  0: half distance.  1: periodic / reflection
+    *                     based on boundary
+    *
+    * @return :: new value in boundary
+    */
+  double LeBailFit::limitProposedValueInBound(Parameter param, double newvalue, double direction, int choice)
+  {
+    if (choice == 0)
+    {
+      // Half distance
+      if (direction > 0)
+      {
+        newvalue = (param.maxvalue - param.value)*0.5 + param.value;
+      }
+      else
+      {
+        newvalue = param.minvalue + 0.5 * (param.value - param.minvalue);
+      }
+    }
+    else
+    {
+      double deltaX = param.maxvalue-param.minvalue;
+
+      if (deltaX < NOBOUNDARYLIMIT)
+      {
+        choice = 1;  // periodic
+      }
+      else
+      {
+        choice = 2;  // reflection
+      }
+
+      if (choice == 1)
+      {
+        // Periodic boundary
+        if (direction > 0)
+        {
+          // newvalue = param.minvalue + (newvalue - param.maxvalue) % deltaX;
+          double dval = (newvalue - param.maxvalue)/deltaX;
+          newvalue = param.minvalue + deltaX * (dval - floor(dval));
+        }
+        else
+        {
+          // newvalue = param.maxvalue - (param.minvalue - newvalue) % deltaX;
+          double dval = (param.minvalue - newvalue)/deltaX;
+          newvalue = param.maxvalue - deltaX * (dval - floor(dval));
+        }
+      }
+      else
+      {
+        // Reflective boundary
+        if (direction > 0)
+        {
+          newvalue = param.maxvalue - (newvalue - param.maxvalue);
+        }
+        else
+        {
+          newvalue = param.minvalue + (param.maxvalue - newvalue);
+        }
+      }
+    }
+
+    return newvalue;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -3241,14 +3326,14 @@ namespace CurveFitting
       m_bestMCStep = istep;
 
       if (m_bestParameters.size() == 0)
-    {
-      // If not be initialized, initialize it!
-      m_bestParameters = parammap;
-      // copyParameterMap(parammap, m_bestParameters);
-    }
-    else
-    {
-      applyParameterValues(parammap, m_bestParameters);
+      {
+        // If not be initialized, initialize it!
+        m_bestParameters = parammap;
+        // copyParameterMap(parammap, m_bestParameters);
+      }
+      else
+      {
+        applyParameterValues(parammap, m_bestParameters);
       }
 
       m_bestBackgroundData = bkgddata;

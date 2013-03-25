@@ -234,6 +234,9 @@ namespace CurveFitting
     bool proposeNewValues(vector<string> mcgroup, double m_totRwp,
                           map<string, Parameter> &curparammap, map<string, Parameter> &newparammap, bool prevBetterRwp);
 
+    ///  Limit proposed value in the specified boundary
+    double limitProposedValueInBound(Parameter param, double newvalue, double direction, int choice);
+
     /// Book keep the (sopposed) best MC result
     void bookKeepBestMCResult(map<string, Parameter> parammap,
                               vector<double> &bkgddata, double rwp, size_t istep);
