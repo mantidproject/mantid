@@ -137,7 +137,7 @@ void SassenaFFT::exec()
   }
 
   // Set the Energy unit for the X-axis
-  sqw->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Energy");
+  sqw->getAxis(0)->title() = "Energy transfer";
 
   // Add to group workspace
   gws->add( sqwName );
