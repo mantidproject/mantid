@@ -193,6 +193,7 @@ set ( SRC_FILES
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
+	src/SubmitRemoteJob.cpp
 	src/SumEventsByLogValue.cpp
 	src/SumNeighbours.cpp
 	src/SumRowColumn.cpp
@@ -407,6 +408,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
+	inc/MantidAlgorithms/SubmitRemoteJob.h
 	inc/MantidAlgorithms/SumEventsByLogValue.h
 	inc/MantidAlgorithms/SumNeighbours.h
 	inc/MantidAlgorithms/SumRowColumn.h

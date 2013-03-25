@@ -23,6 +23,8 @@ namespace Poco
   }
 }
 
+class RemoteJobManager;
+
 namespace Mantid
 {
 namespace Kernel
@@ -50,8 +52,6 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-
-class RemoteJobManager;
 
 class MANTID_KERNEL_DLL FacilityInfo
 {
@@ -86,6 +86,8 @@ public:
   std::vector<InstrumentInfo> instruments(const std::string& tech) const;
   /// Returns instruments with given name
   const InstrumentInfo & instrument(std::string iName = "") const;
+  /// Returns the RemoteJobManager for the named compute resource
+  boost::shared_ptr<RemoteJobManager> getRemoteJobManager( const std::string &name) const;
 
 private:
   void fillZeroPadding(const Poco::XML::Element* elem);

@@ -218,7 +218,7 @@ void FacilityInfo::fillHTTPProxy(const Poco::XML::Element* elem)
   }
 }
 
-/// Called from constructor to fill compute resources vector
+/// Called from constructor to fill compute resources map
 void FacilityInfo::fillComputeResources(const Poco::XML::Element* elem)
 {
   Poco::XML::NodeList* pNL_compute = elem->getElementsByTagName("computeResource");
@@ -305,6 +305,22 @@ std::vector<InstrumentInfo> FacilityInfo::instruments(const std::string& tech)co
     }
   }
   return out;
+}
+
+/**
+  * Returns a reference to the requested remote job manager
+  * @param name :: Name of the cluster we want to submit jobs to
+  * @return a shared pointer to the RemoteJobManager instance (or
+  * Null if the name wasn't recognized)
+  */
+boost::shared_ptr <RemoteJobManager> FacilityInfo::getRemoteJobManager( const std::string &name) const
+{
+  auto it = m_computeResources.find( name);
+  if (it == m_computeResources.end())
+  {
+    return boost::shared_ptr<RemoteJobManager>();  // return Null
+  }
+  return (*it).second;
 }
 
 } // namespace Kernel

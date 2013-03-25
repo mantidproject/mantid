@@ -390,8 +390,9 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
     // Path should be something like "/mws/rest", append "/jobs" to it.
     path += "/jobs";
 
+    // TODO: Probably don't need this parameter any more
     // append the outfile variable to the URL (the PHP remembers this so we can download the file later)
-    path += "?outfile=" + remoteTask.getSubstitutionParamValue( "outfile");
+    //path += "?outfile=" + remoteTask.getSubstitutionParamValue( "outfile");
 
     Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_POST, path, Poco::Net::HTTPRequest::HTTP_1_1);
     req.setContentType( "application/json");

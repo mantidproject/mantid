@@ -267,8 +267,8 @@
    </archive>
 
    <computeResource name="Fermi" type="MWS">
-      <baseURL>http://fermi.ornl.gov/moab</baseURL>
-      <configFileURL>http://fermi.ornl.gov/moab/config.xml</configFileURL>
+      <baseURL>https://fermi.ornl.gov/moab</baseURL>
+      <configFileURL>https://fermi.ornl.gov/moab/config.xml</configFileURL>
    </computeResource>
 
    <instrument name="DAS"> 
