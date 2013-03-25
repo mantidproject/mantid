@@ -50,6 +50,7 @@ can do by your available memory and CPUs.
 #include "MantidDataHandling/MonitorLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/AlgorithmProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -115,6 +116,9 @@ namespace DataHandling
 
     // Initialize the properties common to LiveDataAlgorithm.
     initProps();
+
+    declareProperty(new AlgorithmProperty("MonitorLiveData", boost::make_shared<NullValidator>(), Direction::Output ),
+        "A handle to the MonitorLiveData algorithm instance that continues to read live data after this algorithm completes.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -143,8 +147,6 @@ namespace DataHandling
 
     // Get the listener (and start listening) as early as possible
     ILiveListener_sptr listener = this->getLiveListener();
-
-    // TODO: Wait a bit to make sure something gets accumulated?
 
     LoadLiveData loadAlg;
     loadAlg.initialize();
@@ -186,6 +188,9 @@ namespace DataHandling
 
       // Launch asyncronously
       monitorAlg->executeAsync();
+
+      // Set the output property that passes back a handle to the ongoing live algorithm
+      setProperty("MonitorLiveData",algBase);
     }
 
   }
