@@ -55,13 +55,13 @@ namespace CurveFitting
   {
     // Regular
     std::string name;
-    double value;
+    double curvalue;
     double prevalue;
     double minvalue;
     double maxvalue;
     bool fit;
     double stepsize;
-    double error;
+    double fiterror;
     // Monte Carlo
     bool nonnegative;
     double mcA0;
@@ -69,6 +69,8 @@ namespace CurveFitting
     // Monte Carlo record
     double sumstepsize;
     double maxabsstepsize;
+    double maxrecordvalue;
+    double minrecordvalue;
     size_t numpositivemove;
     size_t numnegativemove;
     size_t numnomove;
@@ -231,7 +233,7 @@ namespace CurveFitting
     bool acceptOrDeny(double currwp, double newrwp);
 
     /// Propose new parameters
-    bool proposeNewValues(vector<string> mcgroup, double m_totRwp,
+    bool proposeNewValues(vector<string> mcgroup, double totalrwp,
                           map<string, Parameter> &curparammap, map<string, Parameter> &newparammap, bool prevBetterRwp);
 
     ///  Limit proposed value in the specified boundary

@@ -194,8 +194,8 @@ namespace CurveFitting
     processInputProperties();
 
     // 2. Import parameters from table workspace
-    this->parseInstrumentParametersTable();
-    this->parseBraggPeaksParametersTable();
+    parseInstrumentParametersTable();
+    parseBraggPeaksParametersTable();
 
     // 3. Create LeBail Function & initialize from input
     // a. All individual peaks
@@ -462,7 +462,7 @@ namespace CurveFitting
 
     Parameter par_rwp;
     par_rwp.name = "Rwp";
-    par_rwp.value = rwp;
+    par_rwp.curvalue = rwp;
 
     m_funcParameters["Rwp"] = par_rwp;
 
@@ -651,7 +651,7 @@ namespace CurveFitting
           // TODO: Make a map between peak parameter name and index. And use fix() to replace tie
           std::stringstream ss1, ss2;
           ss1 << "f" << ipk << "." << parname;
-          ss2 << funcparam.value;
+          ss2 << funcparam.curvalue;
           std::string tiepart1 = ss1.str();
           std::string tievalue = ss2.str();
           m_lebailFunction->tie(tiepart1, tievalue);
@@ -781,14 +781,14 @@ namespace CurveFitting
       {
         // Update the function parameters' error
         Parameter& thisparam = m_funcParameters[parname];
-        thisparam.error = error;
+        thisparam.fiterror = error;
 
         // Output
         std::string parnamex = results[1];
         if (parammap[parnamex].fit)
         {
           // Fit
-          parammap[parnamex].value = curvalue;
+          parammap[parnamex].curvalue = curvalue;
           parammap[parnamex].fit = true;
 
           rmsg << std::setw(10) << parnamex << " = " << setw(7) << setprecision(5) << curvalue
@@ -1329,7 +1329,7 @@ namespace CurveFitting
       else
       {
         // Set value
-        double value = pit->second.value;
+        double value = pit->second.curvalue;
         peak->setParameter(parname, value);
         g_log.debug() << "LeBailFit Set " << parname << "= " << value << "\n";
       }
@@ -1388,7 +1388,7 @@ namespace CurveFitting
         }
 
         // Set value to each peak
-        double parvalue = pit->second.value;
+        double parvalue = pit->second.curvalue;
         for (size_t ipk = 0; ipk < numpeaks; ++ipk)
           peaks[ipk].second->setParameter(i, parvalue);
 
@@ -1874,7 +1874,7 @@ namespace CurveFitting
       dbliter = tempdblmap.find("Value");
       if (dbliter != tempdblmap.end())
       {
-        newparameter.value = dbliter->second;
+        newparameter.curvalue = dbliter->second;
       }
       else
       {
@@ -1919,14 +1919,18 @@ namespace CurveFitting
       }
 
       // vii. error
-      newparameter.error = 1.0E10;
+      newparameter.fiterror = 1.0E10;
+
+      // viii.  some historical records
+      newparameter.minrecordvalue = newparameter.maxvalue + 1.0;
+      newparameter.maxrecordvalue = newparameter.minvalue - 1.0;
 
       m_funcParameters.insert(std::make_pair(newparameter.name, newparameter));
-      m_origFuncParameters.insert(std::make_pair(newparameter.name, newparameter.value));
+      m_origFuncParameters.insert(std::make_pair(newparameter.name, newparameter.curvalue));
 
       if (newparameter.fit)
       {
-        g_log.information() << "[Input]: " << newparameter.name << ": value = " << newparameter.value
+        g_log.information() << "[Input]: " << newparameter.name << ": value = " << newparameter.curvalue
                             << " Range: [" << newparameter.minvalue << ", " << newparameter.maxvalue
                             << "], MC Step = " << newparameter.stepsize << ", Fit? = "
                             << newparameter.fit << "\n";
@@ -2300,7 +2304,7 @@ namespace CurveFitting
       {
         // If not Height
         // a. current value
-        double parvalue = paramiter->second.value;
+        double parvalue = paramiter->second.curvalue;
 
         // b. fit or tie?
         char fitortie = 't';
@@ -2322,7 +2326,7 @@ namespace CurveFitting
         double diff = origparvalue - parvalue;
 
         // d. (standard) error
-        double paramerror = paramiter->second.error;
+        double paramerror = paramiter->second.fiterror;
 
         // e. create the row
         double min = paramiter->second.minvalue;
@@ -2381,7 +2385,7 @@ namespace CurveFitting
 
     Parameter localchi2;
     localchi2.name = "LocalChi2";
-    localchi2.value = chi2;
+    localchi2.curvalue = chi2;
 
     m_funcParameters.insert(std::make_pair("LocalChi2", localchi2));
 
@@ -2635,10 +2639,11 @@ namespace CurveFitting
       for (size_t igroup = 0; igroup < m_numMCGroups; ++igroup)
       {
         // i.   Propose the value
-        bool hasnewvalues = proposeNewValues(m_MCGroups[igroup], currp, parammap, newparammap, prevcyclebetterrwp);
+        bool hasnewvalues = proposeNewValues(m_MCGroups[igroup], currwp, parammap, newparammap, prevcyclebetterrwp);
 
         if (!hasnewvalues)
         {
+          // No new value.  Skip the rest.
           // g_log.notice() << "[DB1035.  Group " << igroup << " has no new value propsed. \n";
           continue;
         }
@@ -2755,7 +2760,9 @@ namespace CurveFitting
                        << ", Max Step Size = " << setw(10) << setprecision(5) << param.maxabsstepsize
                        << ", Number of Positive Move = " << setw(4) << param.numpositivemove
                        << ", Number of Negative Move = " << setw(4) << param.numnegativemove
-                       << ", Number of No Move = " << setw(4) << param.numnomove << "\n";
+                       << ", Number of No Move = " << setw(4) << param.numnomove
+                       << ", Minimum tried value = " << setw(4) << param.minrecordvalue
+                       << ", Maximum tried value = " << setw(4) << param.maxrecordvalue << "\n";
       }
     }
     g_log.notice() << "Number of invalid proposed moves = " << numinvalidmoves << "\n";
@@ -2785,7 +2792,7 @@ namespace CurveFitting
     applyParameterValues(m_bestParameters, parammap);
     Parameter par_rwp;
     par_rwp.name = "Rwp";
-    par_rwp.value = m_bestRwp;
+    par_rwp.curvalue = m_bestRwp;
     parammap["Rwp"] = par_rwp;
 
     return;
@@ -2978,9 +2985,9 @@ namespace CurveFitting
    * @param rp:   output, Rp o the model to data
    */
   bool LeBailFit::calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws, size_t wsindex,
-                                                 map<string, Parameter> funparammap,
-                                                 MantidVec& background, MantidVec& values,
-                                                 double &rwp, double& rp)
+                                                map<string, Parameter> funparammap,
+                                                MantidVec& background, MantidVec& values,
+                                                double &rwp, double& rp)
   {
     // 1. Set the parameters
     // a) Set the parameters to all peaks
@@ -3088,7 +3095,7 @@ namespace CurveFitting
     * Return: Boolean to indicate whether there is any parameter that have proposed new values in
     *         this group
     */
-  bool LeBailFit::proposeNewValues(vector<string> mcgroup, double m_totRwp, map<string, Parameter>& curparammap,
+  bool LeBailFit::proposeNewValues(vector<string> mcgroup, double totalrwp, map<string, Parameter>& curparammap,
                                     map<string, Parameter>& newparammap, bool prevBetterRwp)
   {
     // TODO: Study the possibility to merge curparammap and newparammap
@@ -3107,14 +3114,17 @@ namespace CurveFitting
 
       // random number between -1 and 1
       double randomnumber = 2*static_cast<double>(rand())/static_cast<double>(RAND_MAX) - 1.0;
-      double stepsize = m_dampingFactor * m_totRwp * (param.value * param.mcA1 + param.mcA0) * randomnumber;
+      double stepsize = m_dampingFactor * totalrwp * (param.curvalue * param.mcA1 + param.mcA0) * randomnumber;
+
+      //if (param.name.compare("Width") == 0)
+      //  g_log.notice() << "Width.  Step size = " << stepsize << ", Rwp = " << totalrwp << "\n";
 
       // drunk walk or random walk
       double newvalue;
       if (m_walkStyle == RANDOMWALK)
       {
         // Random walk.  No preference on direction
-        newvalue = param.value + stepsize;
+        newvalue = param.curvalue + stepsize;
       }
       else if (m_walkStyle == DRUNKENWALK)
       {
@@ -3143,7 +3153,7 @@ namespace CurveFitting
           stepsize = fabs(stepsize)*static_cast<double>(param.movedirection*prevRightDirection);
         }
 
-        newvalue = param.value + stepsize;
+        newvalue = param.curvalue + stepsize;
       }
       else
       {
@@ -3173,7 +3183,7 @@ namespace CurveFitting
       }
 
       // apply to new parameter map
-      newparammap[paramname].value = newvalue;
+      newparammap[paramname].curvalue = newvalue;
 
       // record some trace
       Parameter& p = curparammap[paramname];
@@ -3196,9 +3206,14 @@ namespace CurveFitting
       if (fabs(stepsize) > p.maxabsstepsize)
         p.maxabsstepsize = fabs(stepsize);
 
+      if (newvalue > p.maxrecordvalue)
+        p.maxrecordvalue = newvalue;
+      else if (newvalue < p.minrecordvalue)
+        p.minrecordvalue = newvalue;
+
       g_log.debug() << "[DBx257] " << paramname << "\t" << "Proposed value = " << setw(15)
-                    << newvalue << " (orig = " << param.value << ",  step = "
-                    << stepsize << "), totRwp = " << m_totRwp << "\n";
+                    << newvalue << " (orig = " << param.curvalue << ",  step = "
+                    << stepsize << "), totRwp = " << totalrwp << "\n";
     }
 
     return anyparameterrefined;
@@ -3221,11 +3236,11 @@ namespace CurveFitting
       // Half distance
       if (direction > 0)
       {
-        newvalue = (param.maxvalue - param.value)*0.5 + param.value;
+        newvalue = (param.maxvalue - param.curvalue)*0.5 + param.curvalue;
       }
       else
       {
-        newvalue = param.minvalue + 0.5 * (param.value - param.minvalue);
+        newvalue = param.minvalue + 0.5 * (param.curvalue - param.minvalue);
       }
     }
     else
@@ -3370,7 +3385,7 @@ namespace CurveFitting
         throw runtime_error("Programming or memory error!  This situation cannot happen!");
       }
 
-      tgtmapiter->second.value = srcparam.value;
+      tgtmapiter->second.curvalue = srcparam.curvalue;
     }
 
     return;
