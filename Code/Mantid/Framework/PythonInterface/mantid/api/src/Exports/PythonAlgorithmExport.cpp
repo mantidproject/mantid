@@ -13,6 +13,7 @@
 
 using Mantid::API::Algorithm;
 using Mantid::PythonInterface::AlgorithmWrapper;
+using Mantid::PythonInterface::PythonAlgorithm;
 using Mantid::Kernel::Direction;
 using namespace boost::python;
 
@@ -38,29 +39,32 @@ namespace
 void export_leaf_classes()
 {
 
-  // Export the algorithm wrapper that boost.python makes look like a PythonAlgorithm
-  class_<AlgorithmWrapper, bases<Algorithm>, boost::noncopyable>("PythonAlgorithm", "Base class for all Python algorithms")
-    .def("declareProperty", (declarePropertyType1)&AlgorithmWrapper::declareProperty,
+  // Export PythonAlgorithm but the actual held type in Python is boost::shared_ptr<AlgorithmWrapper>
+  // See http://wiki.python.org/moin/boost.python/HowTo#ownership_of_C.2B-.2B-_object_extended_in_Python
+
+  class_<PythonAlgorithm, bases<Algorithm>, boost::shared_ptr<AlgorithmWrapper>,
+         boost::noncopyable>("PythonAlgorithm", "Base class for all Python algorithms")
+    .def("declareProperty", (declarePropertyType1)&PythonAlgorithm::declareProperty,
           declarePropertyType1_Overload((arg("prop"), arg("doc") = "")))
 
-    .def("declareProperty", (declarePropertyType2)&AlgorithmWrapper::declareProperty,
+    .def("declareProperty", (declarePropertyType2)&PythonAlgorithm::declareProperty,
           declarePropertyType2_Overload((arg("name"), arg("defaultValue"), arg("validator")=object(), arg("doc")="",arg("direction")=Direction::Input),
                                         "Declares a named property where the type is taken from "
                                         "the type of the defaultValue and mapped to an appropriate C++ type"))
 
-    .def("declareProperty", (declarePropertyType3)&AlgorithmWrapper::declareProperty,
+    .def("declareProperty", (declarePropertyType3)&PythonAlgorithm::declareProperty,
          declarePropertyType3_Overload((arg("name"), arg("defaultValue"), arg("doc")="",arg("direction")=Direction::Input),
                                        "Declares a named property where the type is taken from the type "
                                        "of the defaultValue and mapped to an appropriate C++ type"))
 
-    .def("declareProperty", (declarePropertyType4)&AlgorithmWrapper::declareProperty,
+    .def("declareProperty", (declarePropertyType4)&PythonAlgorithm::declareProperty,
         (arg("name"), arg("defaultValue"), arg("direction")=Direction::Input),
          "Declares a named property where the type is taken from the type "
          "of the defaultValue and mapped to an appropriate C++ type")
 
-    .def("getLogger", &AlgorithmWrapper::getLogger, return_value_policy<reference_existing_object>(),
+    .def("getLogger", &PythonAlgorithm::getLogger, return_value_policy<reference_existing_object>(),
          "Returns a reference to this algorithm's logger")
-    .def("log", &AlgorithmWrapper::getLogger, return_value_policy<reference_existing_object>(),
+    .def("log", &PythonAlgorithm::getLogger, return_value_policy<reference_existing_object>(),
          "Returns a reference to this algorithm's logger") // Traditional name
   ;
 }
