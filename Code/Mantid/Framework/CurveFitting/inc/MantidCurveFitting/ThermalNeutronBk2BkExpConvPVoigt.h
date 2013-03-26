@@ -52,7 +52,7 @@ namespace CurveFitting
 
     /// Overwrite IFunction base class methods
     std::string name()const{return "ThermalNeutronBk2BkExpConvPVoigt";}
-    virtual const std::string category() const { return "Peak";}
+    virtual const std::string category() const { return "General";}
 
     /// Overwrite IPeakFunction base class methods
     double centre()const;
