@@ -27,6 +27,8 @@ public:
     virtual Kernel::ISaveable *const  getISaveable()const=0;        
     /** initiate the structure responsible for swapping the box on HDD if out of memory. */
     virtual void makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)=0;
+    /** initiate the structure responsible for swapping the box on HDD if out of memory with default parameters (it does not know its place on HDD and was not saved). */
+    virtual void makeFileBacked()=0;
     /**Save the box at the position, specified by ISaveable. The IMDNode has to be file backed for this method to work */
     virtual void save()=0;
     /**Load the box from the location specified by ISaveable. The IMDNode has to be file backed for this method to work */

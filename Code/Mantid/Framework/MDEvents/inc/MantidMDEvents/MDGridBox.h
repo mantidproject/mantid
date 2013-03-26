@@ -55,6 +55,7 @@ namespace MDEvents
     virtual Kernel::ISaveable *const getISaveable()const{return NULL;}
     /**Recursively make all underlaying boxes file-backed*/
     virtual void makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/);
+    virtual void makeFileBacked();
     /**Save the box at specific disk position. The IMDNode has to be file backed for this method to work */
     virtual void save()
     {/*Not saveable */};

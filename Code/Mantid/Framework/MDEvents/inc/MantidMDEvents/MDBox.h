@@ -57,6 +57,7 @@ namespace MDEvents
     virtual Kernel::ISaveable *const getISaveable();
     virtual Kernel::ISaveable *const getISaveable()const;   
     virtual void makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/);
+    virtual void makeFileBacked();
     virtual void save();
     virtual void load();
     //-----------------------------------------------------------------------------------------------

@@ -1559,6 +1559,11 @@ namespace MDEvents
   {
       throw(Kernel::Exception::NotImplementedError("Recursive file backed is not yet implemented"));
   }
+  TMDE(
+  void MDGridBox)::makeFileBacked()
+  {
+      this->makeFileBacked(UNDEF_UINT64,0,false);
+  }
 }//namespace MDEvents
 
 }//namespace Mantid

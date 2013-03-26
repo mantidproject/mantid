@@ -43,6 +43,8 @@ public:
     virtual void setBusy(bool On=true){_isBusy=On;}
     virtual void setDataChanged(){}
     virtual void clearDataChanged(){}
+    virtual void setFilePosition(uint64_t,size_t, bool)
+    {}
     //-----------------------------------------------------------------------------------------------
 
     /// Save the data - to be overriden

@@ -71,8 +71,12 @@ namespace Kernel
     }
 
   
-    /** Sets the location of the object on HDD */
-    void setFilePosition(uint64_t newPos,uint64_t newSize,bool wasSaved=true);
+    /** Sets the location of the object on HDD 
+     *@param newPos -- the file position where the opbject should/was saved
+     *@param newSize -- the object size on file (in some object units)
+     *@param wasSaved -- if true, the object was indeed saved by some other means so can be loaded if necessary. if false, only place for it is reserved
+    */
+    void setFilePosition(uint64_t newPos,size_t newSize,bool wasSaved);
 
     /** function returns true if the object have ever been saved on HDD and knows it place there*/
     bool wasSaved()const

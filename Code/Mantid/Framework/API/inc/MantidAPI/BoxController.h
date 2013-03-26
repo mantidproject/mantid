@@ -470,6 +470,7 @@ namespace API
     /// Mutex for getting IDs
     Mantid::Kernel::Mutex m_idMutex;
 
+    // the class which does actual IO operations
     boost::shared_ptr<IBoxControllerIO> m_fileIO;
     /// Instance of the disk-caching MRU list.
     mutable Mantid::Kernel::DiskBuffer m_diskBuffer;

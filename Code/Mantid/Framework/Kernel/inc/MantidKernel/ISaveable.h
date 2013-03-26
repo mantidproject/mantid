@@ -67,6 +67,9 @@ namespace Kernel
     virtual bool isDataChanged()const=0;
     virtual void setDataChanged()=0;
     virtual void clearDataChanged()=0;
+
+    /** Sets the location of the object on HDD */
+    virtual void setFilePosition(uint64_t newPos,size_t newSize,bool wasSaved)=0;
     //-----------------------------------------------------------------------------------------------
 
     /// Save the data - to be overriden

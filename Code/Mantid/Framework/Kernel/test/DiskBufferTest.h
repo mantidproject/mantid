@@ -270,7 +270,7 @@ public:
      for (size_t i=0; i<5; i++)
      {
         if(i==1)continue;
-        data[i]->setFilePosition(2*ic,2);
+        data[i]->setFilePosition(2*ic,2,true);
         data[i]->m_memory = 2;
         data[i]->setDataChanged();
         dbuf.toWrite(data[i]);
@@ -555,7 +555,7 @@ public:
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 17);
 
     // Simulate saving
-    blockB->setFilePosition(newPos,7);
+    blockB->setFilePosition(newPos,7,true);
     blockB->save();    
     TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
 
@@ -571,7 +571,7 @@ public:
     blockD->AddNewObjects(1);
     newPos = dbuf.relocate(2, 2, 3);
     TSM_ASSERT_EQUALS( "Block D stayed in the same place since there was room after it", newPos, 2 );
-    blockD->setFilePosition(newPos,3);
+    blockD->setFilePosition(newPos,3,true);
     blockD->save();
     dbuf.flushCache();
     TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AADDDCCCCCBBBBBBB");
@@ -673,7 +673,7 @@ public:
       ID(id)
   {
     m_memory=1;
-    this->setFilePosition(10+id,this->m_memory);
+    this->setFilePosition(10+id,this->m_memory,true);
   }
   
    /// Method to flush the data to disk and ensure it is written.
@@ -722,7 +722,7 @@ public:
     // Grow the size by 1
     m_memory++;
   
-    this->setFilePosition(myFilePos,m_memory);
+    this->setFilePosition(myFilePos,m_memory,true);
   }
 
   /// Fake a seek followed by a write

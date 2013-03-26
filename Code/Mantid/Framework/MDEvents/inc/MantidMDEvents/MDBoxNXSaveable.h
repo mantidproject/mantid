@@ -47,7 +47,7 @@ namespace MDEvents
             /// Load the data which are not in memory yet and merge them with the data in memory;
             virtual void load();
             /// Method to flush the data to disk and ensure it is written.
-            virtual void flushData() const = 0;
+            virtual void flushData();
             /// remove objects data from memory !!!! wrond overload 
             virtual void clearDataFromMemory()
             {m_MDNode->clear();}
@@ -63,21 +63,6 @@ namespace MDEvents
         private:
             API::IMDNode *m_MDNode;
     };
-
-   static void prepareEventNexusData(::NeXus::File * file,const size_t DataChunk,const size_t nColumns,const std::string &descr);
-
-  //---------------------------------------------------------------------------------------------
-    /** Open the NXS event data blocks for loading.
-     *
-     * @param file :: open NXS file.
-     * @return the number of events currently in the data field.
-     */
-  static uint64_t openEventNexusData(::NeXus::File * file);
-
-  static void closeNexusData(::NeXus::File * file);
-  void initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool MakeFileBacked,const std::string &EventType);
-  void initEventFileStorage(const std::string &fileName,API::BoxController_sptr bc,bool FileBacked,const std::string &EventType);
-
 
 
 }

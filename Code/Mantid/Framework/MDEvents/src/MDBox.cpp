@@ -804,10 +804,18 @@ namespace MDEvents
 
     /**Recursively make all underlaying boxes file-backed*/
     TMDE(
-    void MDBox)::makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)
+    void MDBox)::makeFileBacked(const uint64_t fileLocation,const size_t fileSize, const bool markSaved)
     {
-        throw(Kernel::Exception::NotImplementedError("MDBox::makeFileBacked() not yet implemented"));
+        m_Saveable = new MDBoxNXSaveable(this);
+        m_Saveable->setFilePosition(fileLocation,fileSize,markSaved);
     }
+
+    TMDE(
+    void MDBox)::makeFileBacked()
+    {
+        this->makeFileBacked(UNDEF_UINT64,this->getDataInMemorySize(),false);
+    }
+
     /**Save the box at specific disk position. The IMDNode has to be file backed for this method to work */
     TMDE(
     void MDBox)::save()
@@ -818,6 +826,8 @@ namespace MDEvents
             throw(std::runtime_error(" The box is not file based to save it using save method"));
 
         this->saveAt(fileIO,Saver->getFilePosition());       
+
+        pSaver->setFilePosition(mPos,mMem,true);
     }
 
     /**Save the box at specific disk position using the class, responsible for the file IO. 
@@ -831,7 +841,7 @@ namespace MDEvents
        if(!FileSaver)
            throw(std::invalid_argument(" Needs defined file saver to save data to it"));
        if(!FileSaver->isOpened())
-           throw(std::invalid_argument(" The file has to be opened to use box SaveAt function"));
+           throw(std::invalid_argument(" The data file has to be opened to use box SaveAt function"));
 
        std::vector<coord_t> TabledData;
        size_t nDataColumns;
@@ -849,13 +859,25 @@ namespace MDEvents
    TMDE(
    void MDBox)::load()
    {
-      throw(Kernel::Exception::NotImplementedError("MDBox::load() not yet implemented"));
+        API::IBoxControllerIO *fileIO = this->m_BoxController->getFileIO();
+        Kernel::ISaveable *const loader(this->getISaveable());
+        if(!fileIO || !Saver)
+            throw(std::runtime_error(" The box is not file based to save it using save method"));
+
    }
    /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO. */
    TMDE(
-   void MDBox)::loadFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */)
+   void MDBox)::loadFrom(API::IBoxControllerIO *const FileSaver, uint64_t filePosition, size_t nEvents)
    {
-      throw(Kernel::Exception::NotImplementedError("MDBox::loadFrom() not yet implemented"));
+       if(!FileSaver)
+           throw(std::invalid_argument(" Needs defined file saver to load data using it"));
+       if(!FileSaver->isOpened())
+           throw(std::invalid_argument(" The data file has to be opened to use box loadFrom function"));
+
+       std::vector<coord_t> TableData;
+       FileSaver->loadBlock(TableData,filePosition,nEvents);
+       // convert loaded events to data;
+       MDE::dataToEvents(TableData,this->data);
    };
 
 }//namespace MDEvents

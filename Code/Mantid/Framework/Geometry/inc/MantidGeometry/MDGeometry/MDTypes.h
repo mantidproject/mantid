@@ -76,6 +76,7 @@ namespace Mantid
 
   #define UNDEF_SIZET   std::numeric_limits<size_t>::max()
   #define UNDEF_COORDT  std::numeric_limits<coord_t>::quiet_NaN()
+  #define UNDEF_UINT64  std::numeric_limits<uint64_t>::max()
 
 }
 

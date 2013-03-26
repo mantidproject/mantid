@@ -145,11 +145,8 @@ namespace Mantid
       eventsStart+=nEvents;
       // m_BoxEventIndex[ID*2]   = 0; should we do this for the boxes without events?
 
-      Kernel::ISaveable *pSaver = m_Boxes[i]->getISaveable();
-      if(pSaver)
-      {
-//TODO:          pSaver->setFilePosition(eventsStart,nEvents,rememberBoxIsSaved);
-      }
+      if(makeFileBacked)
+          mdBox->makeFileBacked(eventsStart,nEvents,true);
     }
   }
 

@@ -46,10 +46,10 @@ namespace Kernel
      * @param newSize :: number of events in the file   
      * @param wasSaved :: flag to mark if the info was saved, by default it does
    */
-  void Saveable::setFilePosition(uint64_t newPos, uint64_t newSize, bool wasSaved)
+  void Saveable::setFilePosition(uint64_t newPos, size_t newSize, bool wasSaved)
   {  
-      m_fileIndexStart=newPos;  
-      m_fileNumEvents =newSize;
+      this->m_fileIndexStart=newPos;  
+      this->m_fileNumEvents =static_cast<uint64_t>(newSize);
       m_wasSaved = wasSaved;
   }
 
