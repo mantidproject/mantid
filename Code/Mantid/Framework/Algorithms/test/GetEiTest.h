@@ -22,6 +22,21 @@ public:
 
   void test_Result_For_Good_Estimate()
   {
+    const double input_ei=15.0;
+    const bool fixei=false;
+    do_test_on_result_values(input_ei, fixei);
+
+  }
+
+  void test_Result_When_Fixing_Ei()
+  {
+    const double input_ei=15.0;
+    const bool fixei=true;
+    do_test_on_result_values(input_ei, fixei);
+  }
+
+  void do_test_on_result_values(double input_ei, bool fixei)
+  {
     Workspace2D_sptr testWS = createTestWorkspaceWithMonitors();
     // This algorithm needs a name attached to the workspace
     const std::string outputName("eitest");
@@ -32,24 +47,40 @@ public:
     alg.setPropertyValue("InputWorkspace", outputName);
     alg.setProperty("Monitor1Spec", 1);
     alg.setProperty("Monitor2Spec", 2);
-    alg.setProperty("EnergyEstimate", 15.0);
+    alg.setProperty("EnergyEstimate", input_ei);
+    alg.setProperty("FixEi", fixei);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     // Test output answers
-    const double expected_ei = 15.00322845;
+    // The monitor peak should always be calculated from the data
+    const double expected_mon_peak = 6496.00571578;
+    const int expected_mon_index = 0;
+    const double expected_ei = (fixei) ? input_ei : 15.00322845;
     const double ei = alg.getProperty("IncidentEnergy");
-    
+    const double first_mon_peak = alg.getProperty("FirstMonitorPeak");
+    const int mon_index = alg.getProperty("FirstMonitorIndex");
+
     TS_ASSERT_DELTA(ei, expected_ei, 1e-08);
+    TS_ASSERT_DELTA(first_mon_peak, expected_mon_peak, 1e-08);
+    TS_ASSERT_EQUALS(mon_index, expected_mon_index);
     // and verify it has been store on the run object
     Property *ei_runprop = testWS->run().getProperty("Ei");
     PropertyWithValue<double> *ei_propvalue = dynamic_cast<PropertyWithValue<double> *>(ei_runprop);
     TS_ASSERT_DELTA((*ei_propvalue)(), expected_ei, 1e-08);
 
-    // T0 value
-    const double tzero = alg.getProperty("Tzero");
-    const double expected_tzero = 3.2641273;
-    TS_ASSERT_DELTA(tzero, expected_tzero, 1e-08);
+    const Mantid::Kernel::Property *tzeroProp = alg.getProperty("Tzero");
+    if(fixei)
+    {
+      TS_ASSERT(tzeroProp->isDefault());
+    }
+    else
+    {
+      // T0 value
+      const double tzero = alg.getProperty("Tzero");
+      const double expected_tzero = 3.2641273;
+      TS_ASSERT_DELTA(tzero, expected_tzero, 1e-08);
+    }
 
     AnalysisDataService::Instance().remove(outputName);
   }
