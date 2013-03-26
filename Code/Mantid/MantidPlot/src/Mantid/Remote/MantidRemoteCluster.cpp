@@ -1,5 +1,4 @@
 #include "MantidRemoteCluster.h"
-#include "QtMwsRemoteJobManager.h"
 #include "JobStatusDialog.h"
 #include "../MantidDock.h"
 #include "NewClusterDialog.h"
