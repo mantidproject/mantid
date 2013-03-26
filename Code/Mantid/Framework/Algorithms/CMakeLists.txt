@@ -182,6 +182,8 @@ set ( SRC_FILES
 	src/SignalOverError.cpp
 	src/SmoothData.cpp
 	src/SmoothNeighbours.cpp
+	src/StartRemoteTransaction.cpp
+	src/StopRemoteTransaction.cpp
 	src/SofQW.cpp
 	src/SofQW2.cpp
 	src/SofQW3.cpp
@@ -405,6 +407,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
+	inc/MantidAlgorithms/StartRemoteTransaction.h
+	inc/MantidAlgorithms/StopRemoteTransaction.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
