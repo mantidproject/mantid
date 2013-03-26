@@ -101,8 +101,7 @@ void GetEi2::init()
   declareProperty("FirstMonitorIndex", 0,
     "The spectrum index of the first montitor in the input workspace.", Direction::Output);
 
-  declareProperty("Tzero", EMPTY_DBL(),
-    "", Direction::Output);
+  declareProperty("Tzero", 0.0, "", Direction::Output);
 
 }
 
@@ -234,11 +233,20 @@ double GetEi2::calculateEi(const double initial_guess)
     const double t_min = (1.0 - m_tof_window)*peak_guess;
     const double t_max = (1.0 + m_tof_window)*peak_guess;
     g_log.information() << "Time-of-flight window for peak " << (i+1) << ": tmin = " << t_min << " microseconds, tmax = " << t_max << " microseconds\n";
-    peak_times[i] = calculatePeakPosition(ws_index, t_min, t_max);
-    g_log.information() << "Peak for monitor " << (i+1) << " (at " << det_distances[i] << " metres) = " << peak_times[i] << " microseconds\n";
+    try
+    {
+      peak_times[i] = calculatePeakPosition(ws_index, t_min, t_max);
+      g_log.information() << "Peak for monitor " << (i+1) << " (at " << det_distances[i] << " metres) = " << peak_times[i] << " microseconds\n";
+    }
+    catch(std::invalid_argument &)
+    {
+      peak_times[i] = 0.0;
+      g_log.information() << "No peak found for monitor " << (i+1) << " (at " << det_distances[i] << " metres). Setting peak time to zero\n";
+    }
+
     if( i == 0 )
     {  
-      //Store for later adjustment of bins
+      // Store for later adjustment of bins
       m_peak1_pos = std::make_pair(static_cast<int>(ws_index), peak_times[i]);
       if(m_fixedei)
       {
