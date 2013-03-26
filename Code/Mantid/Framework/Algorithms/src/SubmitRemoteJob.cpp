@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/SubmitRemoteJob.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/MaskedProperty.h"
 
 #include "MantidRemote/RemoteTask.h"
 #include "MantidRemote/RemoteJobManager.h"
@@ -23,20 +25,15 @@ DECLARE_ALGORITHM(SubmitRemoteJob)
 
 void SubmitRemoteJob::init()
 {
-  // Put your initialisation code (e.g. declaring properties) here...
-
-  // Virtually all algorithms will want an input and an output workspace as properties.
-  // Here are the lines for this, so just uncomment them:
-  //   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
-  //   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-
-  // Unlike most algorithms, we don't deal with workspaces.
+  // Unlike most algorithms, this wone doesn't deal with workspaces....
 
   auto mustBePositive = boost::make_shared<Mantid::Kernel::BoundedValidator<int> >();
   mustBePositive->setLower(0);
 
-  // TODO: need a validator for the compute facility property
-  declareProperty( "ComputeResource", "", Mantid::Kernel::Direction::Input);
+  auto requireValue = boost::make_shared<Mantid::Kernel::MandatoryValidator<std::string> >();
+
+  // TODO: need a better validator for the compute facility property
+  declareProperty( "ComputeResource", "", requireValue, "", Mantid::Kernel::Direction::Input);
   declareProperty( "NumNodes", 0,  mustBePositive, "", Mantid::Kernel::Direction::Input);
   declareProperty( "CoresPerNode", 0,  mustBePositive, "", Mantid::Kernel::Direction::Input);
   // Number of actual MPI processes will be (NumNodes * CoresPerNode)
@@ -45,28 +42,23 @@ void SubmitRemoteJob::init()
   // all the jobs the user has submitted recently...)
   declareProperty( "TaskName", "", Mantid::Kernel::Direction::Input);
 
-  // TODO: can we get the default location for mpirun from facilities.xml?
-  declareProperty( "Executable", "/usr/bin/mpirun", Mantid::Kernel::Direction::Input);
-  // we'll build the rest of the command line from other properties down in exec()
-
   // TODO: Can we figure out the user name/group name automatically?
   // (Group can probably be in the facilities.xml file.  Username can from
   // from the user's prefs file.  Password should never be written to disk ever!
   // Note that these are really implementation details: some other cluster
   // might want globus certificates or something like that...
-  // TODO: Need a validator that doesn't allow empty strings...
-  // TODO: make sure the password isn't echoed to the screen in the GUI dialog!
-  declareProperty( "UserName", "", Mantid::Kernel::Direction::Input);
-  declareProperty( "GroupName", "", Mantid::Kernel::Direction::Input);
-  declareProperty( "Password", "", Mantid::Kernel::Direction::Input);
+  declareProperty( "UserName", "", requireValue, "", Mantid::Kernel::Direction::Input);
+  declareProperty( "GroupName", "", requireValue, "", Mantid::Kernel::Direction::Input);
+
+  // Password doesn't get echoed to the screen...
+  declareProperty( new Mantid::Kernel::MaskedProperty<std::string>( "Password", "", requireValue, Mantid::Kernel::Direction::Input), "");
 
   // The transaction ID comes from the OpenTransaction algortithm (as yet unwritten...)
-  declareProperty( "TransactionID", "", Mantid::Kernel::Direction::Input);
+  declareProperty( "TransactionID", "", requireValue, "", Mantid::Kernel::Direction::Input);
 
   // Assuming the submission succeeded, this property will be set with a value
   // we can use to track the job
   declareProperty( "JobID", "", Mantid::Kernel::Direction::Output);
-
 
   // TODO: not sure we need these - we throw an exception when the submission fails
   // If there was a problem submitting the job, details will be stored in these properties
@@ -97,9 +89,9 @@ void SubmitRemoteJob::exec()
 
 
   // Create a RemoteTask object for this job
-  RemoteTask task(getPropertyValue( "TaskName"), getPropertyValue( "Executable"), getPropertyValue( "TransactionID"));
-  task.appendResource( "Group", getPropertyValue( "GroupName"));
-  task.appendResource( "Nodes", getPropertyValue( "NumNodes"));
+  RemoteTask task(getPropertyValue( "TaskName"), getPropertyValue( "TransactionID"));
+  task.appendResource( "group", getPropertyValue( "GroupName"));
+  task.appendResource( "nodes", getPropertyValue( "NumNodes"));
 
   // Need to figure out the total number of MPI processes
   unsigned coresPerNode, numNodes;
@@ -122,7 +114,8 @@ void SubmitRemoteJob::exec()
   task.appendCmdLineParam( "-hostfile");
   task.appendCmdLineParam( "$PBS_NODEFILE");  // This is obviously specific to PBS...
 
-  task.appendCmdLineParam( "/usr/bin/python");  // TODO:  store the location of the python interpreter in facilities.xml??
+  task.appendCmdLineParam( "/usr/bin/python");  // TODO: the python executable is stored in facilities.xml, but actually making
+                                                // use of it would be very ugly (it's copied into MWSRemoteJobManager)
 
   // HACK! this is where we'd normally specify a file name for the python script to run...
   task.appendCmdLineParam( "-c");

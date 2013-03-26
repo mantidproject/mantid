@@ -37,18 +37,21 @@ RemoteJobManager::RemoteJobManager( const Poco::XML::Element* elem)
     throw std::runtime_error("Compute Resources must have a name attribute");
   }
 
-  Poco::XML::NodeList* pNL_configFileUrl = elem->getElementsByTagName("configFileURL");
-  if (pNL_configFileUrl->length() != 1)
+  Poco::XML::NodeList* nl;
+  Poco::XML::Text* txt;
+
+  nl = elem->getElementsByTagName("configFileURL");
+  if (nl->length() != 1)
   {
     g_log.error("Compute Resources must have exactly one configFileURL tag");
     throw std::runtime_error("Compute Resources must have exactly one configFileURL tag");
   }
   else
   {
-    Poco::XML::NodeList* pNL = pNL_configFileUrl->item(0)->childNodes();
-    if (pNL->length() > 0)
+    nl = nl->item(0)->childNodes();
+    if (nl->length() > 0)
     {
-      Poco::XML::Text* txt = dynamic_cast<Poco::XML::Text*>(pNL->item(0));
+      txt = dynamic_cast<Poco::XML::Text*>(nl->item(0));
       if (txt)
       {
         m_configFileUrl = txt->getData();
@@ -62,18 +65,18 @@ RemoteJobManager::RemoteJobManager( const Poco::XML::Element* elem)
 HttpRemoteJobManager::HttpRemoteJobManager( const Poco::XML::Element* elem)
   : RemoteJobManager( elem)
 {
-  Poco::XML::NodeList* pNL_baseUrl = elem->getElementsByTagName("baseURL");
-  if (pNL_baseUrl->length() != 1)
+  Poco::XML::NodeList* nl = elem->getElementsByTagName("baseURL");
+  if (nl->length() != 1)
   {
     g_log.error("HTTP Compute Resources must have exactly one baseURL tag");
     throw std::runtime_error("HTTP Compute Resources must have exactly one baseURL tag");
   }
   else
   {
-    Poco::XML::NodeList* pNL = pNL_baseUrl->item(0)->childNodes();
-    if (pNL->length() > 0)
+    nl = nl->item(0)->childNodes();
+    if (nl->length() > 0)
     {
-      Poco::XML::Text* txt = dynamic_cast<Poco::XML::Text*>(pNL->item(0));
+      Poco::XML::Text* txt = dynamic_cast<Poco::XML::Text*>(nl->item(0));
       if (txt)
       {
         m_serviceBaseUrl = txt->getData();
@@ -311,6 +314,48 @@ MwsRemoteJobManager::MwsRemoteJobManager(const Poco::XML::Element *elem)
   m_tzOffset["PST"] = "-8";
   m_tzOffset["PDT"] = "-9";
   m_tzOffset["UTC"] = "+0";
+
+  // Parse the XML for the mpirun and python executables
+  Poco::XML::NodeList* nl;
+  Poco::XML::Text* txt;
+
+  nl = elem->getElementsByTagName("mpirunExecutable");
+  if (nl->length() != 1)
+  {
+    g_log.error("Compute Resources must have exactly one mpirunExecutable tag");
+    throw std::runtime_error("Compute Resources must have exactly one mpirunExecutable tag");
+  }
+  else
+  {
+    nl = nl->item(0)->childNodes();
+    if (nl->length() > 0)
+    {
+      txt = dynamic_cast<Poco::XML::Text*>(nl->item(0));
+      if (txt)
+      {
+        m_mpirunExecutable = txt->getData();
+      }
+    }
+  }
+
+  nl = elem->getElementsByTagName("pythonExecutable");
+  if (nl->length() != 1)
+  {
+    g_log.error("Compute Resources must have exactly one pythonExecutable tag");
+    throw std::runtime_error("Compute Resources must have exactly one pythonExecutable tag");
+  }
+  else
+  {
+    nl = nl->item(0)->childNodes();
+    if (nl->length() > 0)
+    {
+      txt = dynamic_cast<Poco::XML::Text*>(nl->item(0));
+      if (txt)
+      {
+        m_pythonExecutable = txt->getData();
+      }
+    }
+  }
 }
 
 
@@ -342,11 +387,11 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
     std::ostringstream json;
 
     json << "{\n ";
-    json << "\"commandFile\": \"" << remoteTask .getExecutable() << "\",\n";
-    json << "\"commandLineArguments\": \"" << escapeQuoteChars( remoteTask .getCmdLineParams() )<< "\",\n";
+    json << "\"commandFile\": \"" << m_mpirunExecutable << "\",\n";
+    json << "\"commandLineArguments\": \"" << escapeQuoteChars( remoteTask.getCmdLineParams() )<< "\",\n";
     json << "\"user\": \"" << m_userName << "\",\n";
-    json << "\"group\": \"" << remoteTask .getResourceValue( "group") << "\",\n";
-    json << "\"name\": \"" << remoteTask .getName() << "\",\n";
+    json << "\"group\": \"" << remoteTask.getResourceValue( "group") << "\",\n";
+    json << "\"name\": \"" << remoteTask.getName() << "\",\n";
     json << "\"variables\": {\"SUBMITTING_APP\": \"MantidPlot\"},\n";
     json << "\"requirements\": [{\n";
     json << "\t\"requiredProcessorCountMinimum\": \"" << remoteTask .getResourceValue("nodes") << "\"}]\n";  // don't forget the , before the \n if this is no longer the last line in the json

@@ -188,7 +188,11 @@ public:
 protected:
 
   std::string escapeQuoteChars( const std::string & str); // puts a \ char in front of any " chars it finds
-                                                            // (needed for the JSON stuff
+                                                          // (needed for the JSON stuff
+
+  // Locations of the mpirun and python executables - specified in the Facilities.xml file
+  std::string m_mpirunExecutable;
+  std::string m_pythonExecutable;
 
 private:
   bool convertToISO8601( std::string &time);

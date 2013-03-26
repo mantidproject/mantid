@@ -16,8 +16,8 @@ class RemoteTask
 {
 public:
 
-  RemoteTask( const std::string &taskName = "", const std::string &executable = "", const std::string &transId = "") :
-      m_executable( executable), m_transactionId( transId) { setName( taskName);}
+  RemoteTask( const std::string &taskName = "", const std::string &transId = "") :
+      m_transactionId( transId) { setName( taskName);}
     
     // At this point, the default copy constructor and assignment operator are all
     // valid and useful.  If that changes, we'll either need to explicitly implement them
@@ -25,7 +25,6 @@ public:
     
     // Getter funcs for task name, executable, and transaction ID
     const std::string & getName() const { return m_name; }
-    const std::string & getExecutable() const { return m_executable; }
     const std::string & getTransactionId() const { return m_transactionId; }
     
     // Builds up a string of all the command line parameters and returns it
@@ -44,7 +43,6 @@ public:
     // sets the m_name member, replacing all whitespace with '_' chars.  (Moab, and
     // possibly other job managers, doesn't allow spaces in job names.)
     void setName( const std::string &name);
-    void setExecutable( const std::string  &executable) { m_executable = executable; }
     void setTransactionId( const std::string &transId) { m_transactionId = transId; }
 
     void appendCmdLineParam( const std::string &param) { m_cmdLineParams.push_back( param); }
@@ -57,12 +55,11 @@ public:
     
     bool isValid() const
     {       
-        // The only things that are really necessary are the task name, the
-        // executable name and the transaction ID.  (MWS also requires the the
-        // number of nodes, but other job managers might not. Perhaps we create
+        // The only things that are really necessary are the task name, and
+        // the transaction ID.  (MWS also requires the number of nodes, but
+        // other job managers might not. Perhaps we create
         // an MWSRemoteTask subclass?)
         return (m_name.length() > 0 &&
-                m_executable.length() > 0 &&
                 m_transactionId.length() > 0);
     }
     
@@ -70,7 +67,6 @@ public:
 private:
     std::string m_name;         // The name of the task.  Is sent over to the cluster (which will probably
                                 // use it for naming the files for stdout and stderr).
-    std::string m_executable;  // The name of the program to run.  Probably something like /usr/bin/mpirun...
     std::vector<std::string> m_cmdLineParams;
 
     std::string m_transactionId;  // The transaction that this task is associated with
