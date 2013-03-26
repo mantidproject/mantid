@@ -18,7 +18,7 @@ class FakeBoxControllerIO : public IBoxControllerIO
     bool m_isOpened;
 public:
     FakeBoxControllerIO():m_isOpened(false){}
-    bool openFile(const std::string &fileName)
+    bool openFile(const std::string &fileName,const std::string &mode)
     {
         this->m_fileName=fileName;
         m_isOpened=true;

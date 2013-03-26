@@ -36,11 +36,6 @@ namespace MDEvents
       File change history is stored at: <https://github.com/mantidproject/mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-    class DLLExport MDBoxNxSIO : public IBoxControllerIO
-    {
-
-    };
-
     class DLLExport MDBoxNXSaveable : public Kernel::Saveable
     {
         public:

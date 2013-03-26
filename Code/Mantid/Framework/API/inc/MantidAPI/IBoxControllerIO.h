@@ -36,7 +36,7 @@ namespace API
   class DLLExport IBoxControllerIO
   {
   public:
-      virtual bool openFile(const std::string &fileName)=0;
+      virtual bool openFile(const std::string &fileName,const std::string &mode)=0;
       virtual bool isOpened()const=0;
       virtual const std::string &getFileName()const=0;
 
@@ -46,6 +46,15 @@ namespace API
       virtual void closeFile()=0;
 
       virtual ~IBoxControllerIO(){}
+
+      ///  the method which returns the size of data block used in IO operations
+      virtual size_t getDataChunk()const =0;
+
+      /** As save/load operations use void data type, these function allow set up/get  the type name provided for the IO operations
+       *  and the size of the data type in bytes (e.g. the  class dependant physical  meaning of the blockSize and blockPosition used 
+       *  by save/load operations     */
+      virtual void setDataType(const size_t blockSize, const std::string &typeName) =0;
+      virtual void getDataType(size_t &blockSize, std::string &typeName) =0;
   };
 }
 }

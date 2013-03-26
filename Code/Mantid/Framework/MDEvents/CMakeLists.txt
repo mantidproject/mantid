@@ -3,6 +3,7 @@ set ( SRC_FILES
 	#
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
+	src/BoxControllerNxSIO.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
@@ -68,6 +69,7 @@ set ( INC_FILES
 	#
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
+	inc/MantidMDEvents/BoxControllerNxSIO.h        
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 #	inc/MantidMDEvents/BoxCtrlChangesList.h 
 	inc/MantidMDEvents/ConvToMDBase.h
@@ -93,7 +95,6 @@ set ( INC_FILES
     inc/MantidMDEvents/MDBoxFlatTree.h
 #	inc/MantidMDEvents/MDBoxToChange.h
 	inc/MantidMDEvents/MDBoxNXSaveable.h
-	inc/MantidMDEvents/MDBoxNxSIO.h    
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
@@ -131,6 +132,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	AffineMatrixParameterParserTest.h
 	AffineMatrixParameterTest.h
+	BoxControllerNxSIOTest.h                
 	BoxControllerSettingsAlgorithmTest.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToReflectometryQTest.h

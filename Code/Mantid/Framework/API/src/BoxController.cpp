@@ -40,7 +40,7 @@ namespace API
    void BoxController::setFileBacked(IBoxControllerIO *newFileIO,const std::string &fileName)
      {
          if(!newFileIO->isOpened())
-             newFileIO->openFile(fileName);
+             newFileIO->openFile(fileName,"w");
 
          if(!newFileIO->isOpened())
          {
