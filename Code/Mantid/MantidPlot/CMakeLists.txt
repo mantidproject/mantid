@@ -229,7 +229,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/Remote/JobStatusDialog.cpp
                    src/Mantid/Remote/MantidRemoteCluster.cpp
                    src/Mantid/Remote/NewClusterDialog.cpp
-                   src/Mantid/Remote/QtMwsRemoteJobManager.cpp
 )
 
 ###########################################################################
@@ -460,7 +459,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/Remote/JobStatusDialog.h
                    src/Mantid/Remote/MantidRemoteCluster.h
                    src/Mantid/Remote/NewClusterDialog.h
-                   src/Mantid/Remote/QtMwsRemoteJobManager.h
 )
 
 ###########################################################################
@@ -704,7 +702,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/Remote/JobStatusDialog.h
                        src/Mantid/Remote/MantidRemoteCluster.h
                        src/Mantid/Remote/NewClusterDialog.h
-                       src/Mantid/Remote/QtMwsRemoteJobManager.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui

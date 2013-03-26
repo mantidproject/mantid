@@ -1,6 +1,7 @@
 #include "MantidRemote/RemoteJobManager.h"
 #include "MantidRemote/RemoteTask.h"
 #include "MantidKernel/ConfigService.h"
+#include <MantidKernel/RemoteJobManagerFactory.h>
 #include "MantidRemote/SimpleJSON.h"
 
 #include <Poco/Base64Encoder.h>
@@ -19,6 +20,9 @@
 #include <sstream>
 using namespace std;
 
+
+// Register with the job manager factory class
+DECLARE_RJM( MwsRemoteJobManager, "MWS")
 
 // Get a reference to the logger
 Mantid::Kernel::Logger& RemoteJobManager::g_log = Mantid::Kernel::Logger::get("RemoteJobManager");
@@ -75,20 +79,6 @@ HttpRemoteJobManager::HttpRemoteJobManager( const Poco::XML::Element* elem)
         m_serviceBaseUrl = txt->getData();
       }
     }
-  }
-}
-
-
-
-// If the user name member has been set, save that in the properties file
-// so the user won't have to enter it next time.
-void HttpRemoteJobManager::saveProperties()
-{
-  if (m_userName.length() > 0)
-  {
-    Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
-    string key("Cluster." + m_displayName + ".UserName");
-    config.setString( key, m_userName);
   }
 }
 
@@ -272,11 +262,6 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::initGetRequest( Poco
   ostringstream encodedAuth;
   Poco::Base64Encoder encoder( encodedAuth);
 
-  if (m_password.empty())
-  {
-    getPassword();
-  }
-
   encoder << m_userName << ":" << m_password;
   encoder.close();
 
@@ -401,11 +386,6 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
     ostringstream encodedAuth;
     Poco::Base64Encoder encoder( encodedAuth);
 
-    if (m_password.empty())
-    {
-      getPassword();
-    }
-
     encoder << m_userName << ":" << m_password;
     encoder.close();
 
@@ -524,11 +504,6 @@ bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
   // Set the Authorization header (base64 encoded)
   ostringstream encodedAuth;
   Poco::Base64Encoder encoder( encodedAuth);
-
-  if (m_password.empty())
-  {
-    getPassword();
-  }
 
   encoder << m_userName << ":" << m_password;
   encoder.close();
@@ -665,11 +640,6 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
   // Set the Authorization header (base64 encoded)
   ostringstream encodedAuth;
   Poco::Base64Encoder encoder( encodedAuth);
-
-  if (m_password.empty())
-  {
-    getPassword();
-  }
 
   encoder << m_userName << ":" << m_password;
   encoder.close();
@@ -826,11 +796,6 @@ bool MwsRemoteJobManager::jobOutputReady( const std::string &jobId)
   ostringstream encodedAuth;
   Poco::Base64Encoder encoder( encodedAuth);
 
-  if (m_password.empty())
-  {
-    getPassword();
-  }
-
   encoder << m_userName << ":" << m_password;
   encoder.close();
 
@@ -894,11 +859,6 @@ bool MwsRemoteJobManager::getJobOutput( const std::string &jobId, std::ostream &
   // Set the Authorization header (base64 encoded)
   ostringstream encodedAuth;
   Poco::Base64Encoder encoder( encodedAuth);
-
-  if (m_password.empty())
-  {
-    getPassword();
-  }
 
   encoder << m_userName << ":" << m_password;
   encoder.close();

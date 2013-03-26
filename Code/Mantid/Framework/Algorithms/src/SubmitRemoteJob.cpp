@@ -55,6 +55,7 @@ void SubmitRemoteJob::init()
   // Note that these are really implementation details: some other cluster
   // might want globus certificates or something like that...
   // TODO: Need a validator that doesn't allow empty strings...
+  // TODO: make sure the password isn't echoed to the screen in the GUI dialog!
   declareProperty( "UserName", "", Mantid::Kernel::Direction::Input);
   declareProperty( "GroupName", "", Mantid::Kernel::Direction::Input);
   declareProperty( "Password", "", Mantid::Kernel::Direction::Input);
@@ -109,6 +110,10 @@ void SubmitRemoteJob::exec()
 
   convert.str("");
   convert << (numNodes * coresPerNode);
+
+  // Set the username and password from the properties
+  jobManager->setUserName( getPropertyValue ("UserName"));
+  jobManager->setPassword( getPropertyValue( "Password"));
 
   // append command line options in the order that we want them displayed
   task.appendCmdLineParam( "-n");

@@ -15,9 +15,8 @@
   *
   * RemoteJobManager         Top-level abstract class
   * HttpRemoteJobManager     Mid-level abstract class - handles HTTP-specific stuff
-  * MwsRemoteJobManager      Abstract class - communicates w/ Moab Web Services, inherits from HttpRemoteJobManager
-  * QtMwsRemoteJobManager    Concrete class - Uses a Qt dialog box to ask for the password for MWS,
-  *                                           inherits from MwsRemoteJobManager
+  * MwsRemoteJobManager      Concrete class - communicates w/ Moab Web Services, inherits from HttpRemoteJobManager
+  *
   * CondorRemoteJobManager   Concrete class - communicates w/ Condor.  Doesn't exist & probably never will
   * GlobusRemoteJobManager   Concrete class - communicates w/ Globus.  Doesn't exist yet, but the ISIS folks need it
   **/
@@ -97,12 +96,23 @@ public:
   // Returns the type of job manager it actually is (MWS, Globus, etc..)
   virtual const std::string getType() const = 0;
 
+  void setUserName( const std::string &name) { m_userName = name; }
+  void setPassword( const std::string &pwd) { m_password = pwd; }
+
 protected:
+
   static Mantid::Kernel::Logger& g_log;   ///< reference to the logger class
 
   std::string m_displayName;      // This will show up in the list of configured clusters
   std::string m_configFileUrl;    // A URL for a file that describes the jobs that are available
                                   // on this particular cluster
+
+  // Username and password for HTTP Basic Auth
+  // NOTE: This is really an implementation detail and as such shouldn't reside up here
+  // at the API level.  With the currently design, I don't have any way to avoid it,
+  // though.  The best I can hope for is to fix this when I re-factor this code later.
+  std::string m_userName;
+  std::string m_password;
 
 private:
   // Default constructor deliberately left unimplemented so it will cause a
@@ -117,37 +127,21 @@ private:
 // transaction and file transfer functions (because these are all
 // via HTTP and don't actually involve the particular job manager
 // that we use.
-// Note that getPassword() is new (it's not declared in RemoteJobManager)
-// and is protected.  I expect the final child class to implement it
-// in whatever makes sense (presumably using a Qt dialog box if we're
-// in MantidPlot).
 class HttpRemoteJobManager : public RemoteJobManager
 {
 public:
   HttpRemoteJobManager( const Poco::XML::Element* elem);
-   ~HttpRemoteJobManager() { saveProperties(); }
+   ~HttpRemoteJobManager() { }
 
   virtual JobManagerErrorCode startTransaction( std::string &transId, std::string &directory, std::string &serverErr);
   virtual JobManagerErrorCode stopTransaction( std::string &transId, std::string &serverErr);
 
 
 protected:
-  // Save the m_username in the user's properties file
-  void saveProperties();
 
   // Wraps up some of the boilerplate code needed to execute an HTTP GET request
   JobManagerErrorCode initGetRequest( Poco::Net::HTTPRequest &req, std::string extraPath, std::string queryString);
 
-  virtual bool getPassword() = 0; // This needs to be implemented in whatever way makes sense
-                                  // for the environment where it's being used...
-
-  // Username and password for HTTP Basic Auth
-  std::string m_userName;
-  std::string m_password; // This does  **NOT** get saved in the properties file.  It's merely
-                          // a convenient place to hold the password in memory (and I don't
-                          // even like doing that, but the alternative is for the user to enter
-                          // it every time and that would be way too tedious).  I'm expecting
-                          // the GUI to pop up a dialog box asking for it before it's needed.
 
   std::string m_serviceBaseUrl; // What we're going to connect to.  The full URL will be
                                 // built by appending a path (and possibly a query string)
@@ -165,17 +159,6 @@ protected:
 
 };
 
-/*
- * Note: MwsRemoteJobManager is abstract!  (getPassword is still a pure virtual
- * function).  I don't really like doing this, but I need to ask for a password
- * somehow.  In MantidPlot, the best way to do that is to use a Qt dialog box.
- * However, I really wanted to keep the Qt specific stuff separated.  (There's
- * been some talk about using MWS in other contexts where Qt may not be available.)
- * So, my solution is to have most of the implementation here, but create a child
- * class that implements the getPassword function.  If I ever need to use this
- * code someplace where Qt is unavailable, I'll have to create another child class
- * with a different implementation
- */
 class MwsRemoteJobManager : public HttpRemoteJobManager
 {
 public:
