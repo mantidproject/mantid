@@ -842,7 +842,7 @@ namespace MDEvents
        this->m_signal = static_cast<signal_t>(totalSignal);
        this->m_errorSquared = static_cast<signal_t>(totalErrSq);
 
-       FileSaver->saveBlock(&TabledData[0],position,nDataColumns*data.size());
+       FileSaver->saveBlock(TabledData,position);
 
    };
     /**Load the box data of specified size from the disk location provided. The IMDNode has to be file backed for this method to work */

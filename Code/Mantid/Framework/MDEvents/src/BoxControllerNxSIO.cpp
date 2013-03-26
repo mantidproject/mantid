@@ -1,6 +1,7 @@
 #include "MantidMDEvents/BoxControllerNxSIO.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FileFinder.h"
+#include <NeXusFile.hpp>
 
 #include <string>
 
@@ -27,9 +28,11 @@ namespace MDEvents
        m_CoordSize(sizeof(coord_t)),
        m_EventType(FatEvent),
        m_ReadOnly(true),
-       m_EventsVersion("1.0")
+       m_EventsVersion("1.0"),
+       m_BlockStart(2,0),
+       m_BlockSize(2,0)
    {
-       m_dataColumnSize=4+m_bc->getNDims();
+       m_BlockSize[1] = 4+m_bc->getNDims();
 
        m_EventsTypesSupported.assign(EventTypes,std::end(EventTypes));
        m_EventsTypeHeaders.assign(EventHeaders,std::end(EventHeaders));
@@ -62,10 +65,10 @@ namespace MDEvents
           switch(m_EventType)
           {
           case (LeanEvent):
-              m_dataColumnSize = 2+m_bc->getNDims();
+              m_BlockSize[1] = 2+m_bc->getNDims();
               break;
           case (FatEvent):
-              m_dataColumnSize = 4+m_bc->getNDims();
+              m_BlockSize[1] = 4+m_bc->getNDims();
               break;
           default:
               throw std::invalid_argument(" Unsupported event kind Identified  ");
@@ -248,20 +251,17 @@ namespace MDEvents
       else  // no, create it
       {
          // Prepare the event data array for writing operations:
-         std::vector<int> dims(2,0);
-         dims[0] = NX_UNLIMITED;
-         // One point per dimension, plus signal, plus error, plus runIndex, plus detectorID = nd+4
-         dims[1] = int(m_dataColumnSize);
+         m_BlockSize[0] = NX_UNLIMITED;
 
         // Now the chunk size.
-        std::vector<int> chunk(dims);
-        chunk[0] = int(m_dataChunk);
+        std::vector<int64_t> chunk(m_BlockSize);
+        chunk[0] = static_cast<int64_t>(m_dataChunk);
 
         // Make and open the data
         if(m_CoordSize==4)
-            m_File->makeCompData("event_data", ::NeXus::FLOAT32, dims, ::NeXus::NONE, chunk, true);
+            m_File->makeCompData("event_data", ::NeXus::FLOAT32, m_BlockSize, ::NeXus::NONE, chunk, true);
         else
-            m_File->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
+            m_File->makeCompData("event_data", ::NeXus::FLOAT64, m_BlockSize, ::NeXus::NONE, chunk, true);
 
         // A little bit of description for humans to read later
         m_File->putAttr("description", m_EventsTypeHeaders[m_EventType]);
@@ -339,14 +339,34 @@ namespace MDEvents
 
 
   }
- void BoxControllerNxSIO::saveBlock(void const * const /* Block */, const uint64_t /*blockPosition*/,const size_t /*blockSize*/)
+ void BoxControllerNxSIO::saveBlock(const std::vector<float> & DataBlock, const uint64_t blockPosition)
  {
+      std::vector<int64_t> start(2,0);
+      start[0] = int64_t(blockPosition);
+
+      // Specify the dimensions
+      std::vector<int64_t> dims(m_BlockSize);
+      dims[0] =  int64_t(DataBlock.size()/this->getNDataColums());
+
+
+     // ugly cast but why would putSlab change the data?
+     std::vector<float> &mData = const_cast<std::vector<float>& >(DataBlock);
+     m_File->putSlab<float>(mData,start,dims);
+
  }
- void BoxControllerNxSIO::loadBlock(void  * const  /* Block */, const uint64_t /*blockPosition*/,const size_t /*blockSize*/)
+ void BoxControllerNxSIO::loadBlock(std::vector<float> & Block, const uint64_t blockPosition,const size_t nPoints)
  {
+     std::vector<int64_t> start(2,0);
+     start[0] = static_cast<int64_t>(blockPosition);
+     std::vector<int64_t> size(m_BlockSize);
+     size[0]=static_cast<int64_t>(nPoints);
+     Block.resize(size[0]*size[1]);
+
+     m_File->getSlab(&Block[0],start,size);
  }
  void BoxControllerNxSIO::flushData()
  {
+     m_File->flush();
  }
  void BoxControllerNxSIO::closeFile()
  {

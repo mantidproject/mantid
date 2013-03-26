@@ -49,21 +49,32 @@ namespace MDEvents
             {
                 return m_fileName;
             }
-
-            virtual void saveBlock(void const * const /* Block */, const uint64_t /*blockPosition*/,const size_t /*blockSize*/);
-            virtual void loadBlock(void  * const  /* Block */, const uint64_t /*blockPosition*/,const size_t /*blockSize*/);
-            virtual void flushData();
-            virtual void closeFile();
-
-            virtual ~BoxControllerNxSIO();
             /**Return the size of the NeXus data block used by NeXus*/ 
             size_t getDataChunk()const
             {
                 return m_dataChunk;
             }
+            
+
+
+            virtual void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/);
+            virtual void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/)
+            {throw Kernel::Exception::NotImplementedError("Saving double presision events blocks is not supported at the moment");}
+            virtual void loadBlock(std::vector<float> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/);
+            virtual void loadBlock(std::vector<double> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)
+            {throw Kernel::Exception::NotImplementedError("Loading double presision events blocks is not supported at the moment");}
+            virtual void flushData();
+            virtual void closeFile();
+
+            virtual ~BoxControllerNxSIO();
             virtual void setDataType(const size_t coordSize, const std::string &typeName);
             virtual void getDataType(size_t &coordSize, std::string &typeName);
 
+            //Auxiliary functions (non-virtual, currently used at testing)
+            int64_t getNDataColums()const
+            {
+                return m_BlockSize[1];
+            }
     private:
         /// full file name (with path) of the Nexis file responsible for the IO operations (as NeXus filename has very strange properties and often trunkated to 64 bytes)
         std::string m_fileName;
@@ -86,9 +97,8 @@ namespace MDEvents
         };
 
         /// the type of event (currently MD event or MDLean event this class is deals with. 
-        EventType m_EventType;
-        /// the event specific data column size, which describes how many column an event is composed into and this class reads/writres
-        size_t m_dataColumnSize;
+        EventType m_EventType;   
+
        /// identifier if the file open only for reading or is  in read/write 
         bool m_ReadOnly;
 
@@ -121,6 +131,11 @@ namespace MDEvents
         void prepareNxSToRead_CurVersion();
 
         static EventType TypeFromString(const std::vector<std::string> &typesSupported,const std::string typeName);
+
+        //
+        std::vector<int64_t> m_BlockStart;
+     /// the vector, which describes the event specific data size, which describes how many column an event is composed into and this class reads/writres
+        std::vector<int64_t> m_BlockSize;
 
     };
 

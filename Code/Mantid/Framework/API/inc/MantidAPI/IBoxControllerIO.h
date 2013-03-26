@@ -40,8 +40,12 @@ namespace API
       virtual bool isOpened()const=0;
       virtual const std::string &getFileName()const=0;
 
-      virtual void saveBlock(void const * const /* Block */, const uint64_t /*blockPosition*/,const size_t /*blockSize*/)=0;
-      virtual void loadBlock(void  * const  /* Block */, const uint64_t /*blockPosition*/,const size_t /*blockSize*/)=0;
+
+      virtual void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/)=0;
+      virtual void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/)=0;           
+      virtual void loadBlock(std::vector<float> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)=0;
+      virtual void loadBlock(std::vector<double> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)=0;
+
       virtual void flushData()=0;
       virtual void closeFile()=0;
 
