@@ -2,6 +2,7 @@
 #define MANTID_MDEVENTS_BOXCONTROLLER_NEXUSS_IO_H
 
 #include "MantidAPI/IBoxControllerIO.h"
+#include "MantidAPI/BoxController.h"
 
 namespace Mantid
 {
@@ -36,7 +37,7 @@ namespace MDEvents
     class DLLExport BoxControllerNxSIO : public API::IBoxControllerIO
     {
         public:
-            BoxControllerNxSIO(size_t nDims);
+            BoxControllerNxSIO(API::BoxController_sptr theBC);
             virtual bool openFile(const std::string &fileName,const std::string &mode);
            ///@return true if the file to write events is opened and false otherwise
             virtual bool isOpened()const
@@ -70,8 +71,9 @@ namespace MDEvents
         ::NeXus::File * m_File;
         /// The size of the events block which can be written in the neXus array at once (continious part of the data block)
         size_t m_dataChunk;
-        /// The number of dimensions in the events, this class is responsible to read/write to. 
-        unsigned int m_numDims;
+        // shared pointer to the box controller, which is repsoponsible for this IO
+        API::BoxController_sptr m_bc;
+
         /// number of bytes in the event coorinates (coord_t length). Set by  setDataType but can be defined statically with coord_t 
         unsigned int m_CoordSize;
 
@@ -87,7 +89,8 @@ namespace MDEvents
         EventType m_EventType;
         /// the event specific data column size, which describes how many column an event is composed into and this class reads/writres
         size_t m_dataColumnSize;
-       
+       /// identifier if the file open only for reading or is  in read/write 
+        bool m_ReadOnly;
 
         /// Default size of the events block which can be written in the NeXus array at once identified by efficiency or some other external reasons
         static enum {DATA_CHUNK=10000};
@@ -100,14 +103,21 @@ namespace MDEvents
 
         /// The version of the MDEvents data block
         std::string m_EventsVersion;
-        ///
-        std::string m_EventWSGroupName;
+        /// the name of the MD workspace group. Should be common with save/load, who uses this group to put other pieces of information about the workspace.
+        static std::string g_EventWSGroupName;
         /// the name of the Nexus data group for saving the events
-        std::string m_EventGroupName; 
+        static std::string g_EventGroupName; 
+        /// the group name to save disk buffer data
+        static std::string g_DBDataName;
 
     // helper functions:
-        /// prepare to write event nexus data in current data version format
-        void prepareNxSToWrite_CurVersion(bool wsGroupExists,bool groupExists);
+        // prepare to write event nexus data in current data version format
+        void CreateEventGroup();
+        void CreateWSGroup();
+        void OpenAndCheckWSGroup();
+        void OpenAndCheckEventGroup();
+        void getDiskBufferFileData();
+        void prepareNxSToWrite_CurVersion();
         void prepareNxSToRead_CurVersion();
 
         static EventType TypeFromString(const std::vector<std::string> &typesSupported,const std::string typeName);

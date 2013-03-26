@@ -13,24 +13,23 @@ namespace MDEvents
     // Default headers(attributes) describing the contents of the data, written by this class
     const char *EventHeaders[] ={"signal, errorSquared, center (each dim.)","signal, errorSquared, runIndex, detectorId, center (each dim.)"};
 
-
+    std::string BoxControllerNxSIO::g_EventWSGroupName("MDEventWorkspace");
+    std::string BoxControllerNxSIO::g_EventGroupName("event_data");
+    std::string BoxControllerNxSIO::g_DBDataName("free_space_blocks");
 
    /**Constructor 
     @param nDim -- number of dimensions within the data to write
    */ 
-   BoxControllerNxSIO::BoxControllerNxSIO(size_t nDim) :
+   BoxControllerNxSIO::BoxControllerNxSIO(API::BoxController_sptr bc) :
        m_File(NULL),
        m_dataChunk(DATA_CHUNK),
-       m_numDims(static_cast<unsigned int>(nDim)),
+       m_bc(bc),
        m_CoordSize(sizeof(coord_t)),
        m_EventType(FatEvent),
-       m_dataColumnSize(4+m_numDims),
-       m_EventsVersion("1.0"),
-       m_EventWSGroupName("MDEventWorkspace"),
-       m_EventGroupName("event_data")
+       m_ReadOnly(true),
+       m_EventsVersion("1.0")
    {
-       if(nDim > 10)
-           throw std::invalid_argument("Attempt to initialie IO for events with more then 10 dimensions. It looks like too many dimensions ");
+       m_dataColumnSize=4+m_bc->getNDims();
 
        m_EventsTypesSupported.assign(EventTypes,std::end(EventTypes));
        m_EventsTypeHeaders.assign(EventHeaders,std::end(EventHeaders));
@@ -63,10 +62,10 @@ namespace MDEvents
           switch(m_EventType)
           {
           case (LeanEvent):
-              m_dataColumnSize = 2+m_numDims;
+              m_dataColumnSize = 2+m_bc->getNDims();
               break;
           case (FatEvent):
-              m_dataColumnSize = 4+m_numDims;
+              m_dataColumnSize = 4+m_bc->getNDims();
               break;
           default:
               throw std::invalid_argument(" Unsupported event kind Identified  ");
@@ -101,11 +100,11 @@ namespace MDEvents
       // file already opened 
       if(m_File)return false;
 
-      bool openToWrite(false);
+      m_ReadOnly = true;;
       NXaccess access(NXACC_READ);
       if(mode.find("w")!=std::string::npos ||mode.find("W")!=std::string::npos)
       {
-          openToWrite=true; 
+          m_ReadOnly=false; 
           access     =NXACC_RDWR;
       }
 
@@ -115,7 +114,7 @@ namespace MDEvents
       if(m_fileName.empty())
       {
           fileExists = false;
-          if(openToWrite)
+          if(!m_ReadOnly)
           {
               std::string filePath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
               if(filePath.empty())
@@ -139,84 +138,102 @@ namespace MDEvents
       }
 
       // idenity if neessary group is already in the file
+
       std::map<std::string, std::string> groupEntries;
+
       m_File->getEntries(groupEntries);
-
-      bool wsGroupExist(true);
-      if(groupEntries.find(m_EventWSGroupName)==groupEntries.end())
-          wsGroupExist=false;
-
-      bool eventGroupExists(false);
-      if(wsGroupExist)
+      if(groupEntries.find(g_EventWSGroupName)!=groupEntries.end()) // WS group exist
       {
-          eventGroupExists = true;
-          m_File->openGroup(m_EventWSGroupName, "NXentry");
+          OpenAndCheckWSGroup();
+          // get WS group entries
           m_File->getEntries(groupEntries);
-          if(groupEntries.find(m_EventGroupName)==groupEntries.end())
-              eventGroupExists=false;
-          m_File->closeGroup();
+
+         if(groupEntries.find(g_EventGroupName)!=groupEntries.end()) // Event gropup exist
+              OpenAndCheckEventGroup();
+         else
+              CreateEventGroup();
+      }
+      else // create ws group and Event Group place Event attribute to it. 
+      {
+          CreateWSGroup();
+          CreateEventGroup();
       }
 
-      if((!openToWrite) && (!eventGroupExists))
-          throw Kernel::Exception::FileError("The NXdata group: "+m_EventGroupName+" does not exist in the file attempted for read",m_fileName);
+      // we are in MDEvnt data group now
 
+      // read if exist and create if not the group, which is responsible for saving DiskBuffer infornation;
+      getDiskBufferFileData();
 
-      if(openToWrite)
-          prepareNxSToWrite_CurVersion(wsGroupExist,eventGroupExists);
-      else
+      if(m_ReadOnly)
           prepareNxSToRead_CurVersion();
+      else
+          prepareNxSToWrite_CurVersion();
 
 
       return true;
   }
-  /** Helper function which prepares NeXus event structure to accept events 
-   *@param groupExist -- if true, indicate that group for events already exist and new data have to be created within existing group
-   */ 
-  void BoxControllerNxSIO::prepareNxSToWrite_CurVersion(bool wsGroupExists,bool eventGroupExists)
+  /**Create group responsible for keeping events and add necessary attributes to it*/ 
+  void BoxControllerNxSIO::CreateEventGroup()
   {
-        if (wsGroupExists) // open workspace group
-        {
-           m_File->openGroup(m_EventWSGroupName, "NXentry");
-           std::string eventType;
-           m_File->getAttr("event_type",eventType);
-           if(eventType!=m_EventsTypesSupported[m_EventType])
-               throw Kernel::Exception::FileError("trying to write-access a workspace with the type of events different from intended to write ",m_fileName);
-        }
-        else // create and open workspace group
-        {
-            try
-            {
-                m_File->makeGroup(m_EventWSGroupName, "NXentry", true);
-                m_File->putAttr("event_type", m_EventsTypesSupported[m_EventType]);
-            }catch(...)
-            {
-               throw Kernel::Exception::FileError("Can not create new NXdata group: "+m_EventWSGroupName,m_fileName);
-            }
-        }
+       if(m_ReadOnly) 
+           throw Kernel::Exception::FileError("The NXdata group: "+g_EventGroupName+" does not exist in the file opened for read",m_fileName);
 
-
-      if(eventGroupExists)
-      {      
-         m_File->openGroup(m_EventGroupName, "NXdata");
-         std::string fileGroupVersion;
-         m_File->getAttr("version",fileGroupVersion);
-
-         if(fileGroupVersion!=m_EventsVersion)
-             throw Kernel::Exception::FileError("Trying to open existing data grop to write new event data but the group with differetn version: "+
-                                                 fileGroupVersion+" already exists ",m_fileName);
-      }
-      else
-      {
-        try
-        {
-            m_File->makeGroup(m_EventGroupName, "NXdata",true);
+       try
+       {
+            m_File->makeGroup(g_EventGroupName, "NXdata",true);
             m_File->putAttr("version", m_EventsVersion);
         }
         catch(...)
-        {
-            throw Kernel::Exception::FileError("Can not create new NXdata group: "+m_EventGroupName,m_fileName);
-        }
+       {
+            throw Kernel::Exception::FileError("Can not create new NXdata group: "+g_EventGroupName,m_fileName);
+       }
+  }
+  /**Create group responsible for keeping MD event workspace and add necessary  (some) attributes to it*/ 
+  void BoxControllerNxSIO::CreateWSGroup()
+  {
+     if(m_ReadOnly) 
+        throw Kernel::Exception::FileError("The NXdata group: "+g_EventWSGroupName+" does not exist in the file opened for read",m_fileName);
+
+      try
+      {
+              m_File->makeGroup(g_EventWSGroupName, "NXentry", true);
+              m_File->putAttr("event_type", m_EventsTypesSupported[m_EventType]);
+      }catch(...)
+      {
+               throw Kernel::Exception::FileError("Can not create new NXdata group: "+g_EventWSGroupName,m_fileName);
       }
+
+  }
+  /** Open existing Workspace group and check the attributes necessary for this algorithm to work*/ 
+  void BoxControllerNxSIO::OpenAndCheckWSGroup()
+  {
+      m_File->openGroup(g_EventWSGroupName, "NXentry");
+
+      std::string eventType;
+      m_File->getAttr("event_type",eventType);
+      if(eventType!=m_EventsTypesSupported[m_EventType])
+               throw Kernel::Exception::FileError("trying to write-access a workspace with the type of events different from the one intended to write ",m_fileName);
+
+  }
+  /** Open existing Event group and check the attributes necessary for this algorithm to work */ 
+  void BoxControllerNxSIO::OpenAndCheckEventGroup()
+  {
+
+      m_File->openGroup(g_EventGroupName, "NXdata");
+      std::string fileGroupVersion;
+      m_File->getAttr("version",fileGroupVersion);
+
+      if(fileGroupVersion!=m_EventsVersion)
+             throw Kernel::Exception::FileError("Trying to open existing data grop to write new event data but the group with differetn version: "+
+                                                 fileGroupVersion+" already exists ",m_fileName);
+
+  }
+  /** Helper function which prepares NeXus event structure to accept events 
+   *@param groupExist -- if true, indicate that group for events already exist and new data have to be created within existing group
+   */ 
+  void BoxControllerNxSIO::prepareNxSToWrite_CurVersion()
+  {
+
       // Are data already there?
       std::string EventData("event_data");
       std::map<std::string, std::string> groupEntries;
@@ -224,14 +241,17 @@ namespace MDEvents
       if(groupEntries.find(EventData)!=groupEntries.end()) // yes, open it
       {
              m_File->openData(EventData);
+          //HACK -- there is no difference between empty event dataset and the dataset with 1 event. It is unclear how to deal with this stuff
+             int64_t nFilePoints = m_File->getInfo().dims[0];
+             m_bc->getDiskBuffer().setFileLength(nFilePoints);
       }
       else  // no, create it
       {
-          // Prepare the event data array for writing operations:
-          std::vector<int> dims(2,0);
-        dims[0] = NX_UNLIMITED;
-        // One point per dimension, plus signal, plus error, plus runIndex, plus detectorID = nd+4
-        dims[1] = int(m_dataColumnSize);
+         // Prepare the event data array for writing operations:
+         std::vector<int> dims(2,0);
+         dims[0] = NX_UNLIMITED;
+         // One point per dimension, plus signal, plus error, plus runIndex, plus detectorID = nd+4
+         dims[1] = int(m_dataColumnSize);
 
         // Now the chunk size.
         std::vector<int> chunk(dims);
@@ -245,6 +265,8 @@ namespace MDEvents
 
         // A little bit of description for humans to read later
         m_File->putAttr("description", m_EventsTypeHeaders[m_EventType]);
+        // disk buffer knows that the file has no events
+        m_bc->getDiskBuffer().setFileLength(0);
 
       }
      
@@ -259,30 +281,13 @@ namespace MDEvents
      */
   void BoxControllerNxSIO::prepareNxSToRead_CurVersion()
   {
-
-      m_File->openGroup(m_EventWSGroupName, "NXentry");
-
-      std::string eventType;
-      m_File->getAttr("event_type",eventType);
-      EventType fileEvent = TypeFromString(m_EventsTypesSupported,eventType);
-      if(fileEvent!=m_EventType)
-               throw Kernel::Exception::FileError("trying to write-access a workspace with the type of events different from intended to write ",m_fileName);
-
-
-      m_File->openGroup(m_EventGroupName, "NXdata");
-      std::string fileGroupVersion;
-      m_File->getAttr("version",fileGroupVersion);
-      if(fileGroupVersion!=m_EventsVersion)
-             throw Kernel::Exception::FileError("Trying to open existing data grop: "+m_EventGroupName+" to write new event data but the group with differetn version: "+
-                                                 fileGroupVersion+" already exists ",m_fileName);
-
       // Open the data
       m_File->openData("event_data");
 
       // check if the number of dimensions in the file corresponds to the number of dimesnions to read.
-      int64_t nFileDim;
-      int64_t ndim2    = m_File->getInfo().dims[1];
-      switch(fileEvent)
+      size_t nFileDim;
+      size_t ndim2    = static_cast<size_t>(m_File->getInfo().dims[1]);
+      switch(m_EventType)
       {
       case(LeanEvent):
           nFileDim = ndim2-2;
@@ -294,10 +299,46 @@ namespace MDEvents
           throw Kernel::Exception::FileError("Unexpected type of events in the data file",m_fileName);
       }
 
-      if(nFileDim != m_numDims)
+      if(nFileDim != m_bc->getNDims())
           throw Kernel::Exception::FileError("Trying to open event data with different number of dimensions ",m_fileName);
+
+      //HACK -- there is no difference between empty event dataset and the dataset with 1 event. It is unclear how to deal with this stuff
+      int64_t nFilePoints = m_File->getInfo().dims[0];
+      m_bc->getDiskBuffer().setFileLength(nFilePoints);
+
     }
 
+  void BoxControllerNxSIO::getDiskBufferFileData()
+  {
+      std::vector<uint64_t> freeSpaceBlocks;
+      m_bc->getDiskBuffer().getFreeSpaceVector(freeSpaceBlocks);
+     if (freeSpaceBlocks.empty())
+         freeSpaceBlocks.resize(2, 0); // Needs a minimum size
+
+  //    // Get a vector of the free space blocks to save to the file
+      std::vector<int64_t> free_dims(2,2);
+      free_dims[0] = int64_t(freeSpaceBlocks.size()/2);
+      std::vector<int64_t> free_chunk(2,2);
+      free_chunk[0] =int64_t(m_dataChunk);
+
+      std::map<std::string, std::string> groupEntries;
+      m_File->getEntries(groupEntries);
+      if(groupEntries.find(g_DBDataName)!=groupEntries.end()) // data exist, open it
+      {
+          if(!m_ReadOnly)
+              m_File->writeUpdatedData(g_DBDataName, freeSpaceBlocks, free_dims);
+          //else  TODO:  we are not currently able to read and set free space blocks into memory !!!
+              // m_File->readData("free_space_blocks",freeSpaceBlocks);
+      }
+      else  // create and open the group
+      {
+          if(m_ReadOnly)
+              throw Kernel::Exception::FileError("Attempt to create new DB group in the read-only file",m_fileName);
+           m_File->writeExtendibleData(g_DBDataName, freeSpaceBlocks, free_dims, free_chunk);
+      }
+
+
+  }
  void BoxControllerNxSIO::saveBlock(void const * const /* Block */, const uint64_t /*blockPosition*/,const size_t /*blockSize*/)
  {
  }
@@ -311,8 +352,23 @@ namespace MDEvents
  {
     if(m_File)
     {
-         m_File->closeData();
-         m_File->closeGroup();
+         m_File->closeData(); // close events data
+
+         if(!m_ReadOnly)    // write free space groups from the disk buffer
+         {
+            std::vector<uint64_t> freeSpaceBlocks;
+            m_bc->getDiskBuffer().getFreeSpaceVector(freeSpaceBlocks);
+            if (!freeSpaceBlocks.empty())
+            {
+                std::vector<int64_t> free_dims(2,2);
+                free_dims[0] = int64_t(freeSpaceBlocks.size()/2);
+                std::vector<int64_t> free_chunk(2,2);
+                free_chunk[0] =int64_t(m_dataChunk);
+                m_File->writeUpdatedData("free_space_blocks", freeSpaceBlocks, free_dims);
+            }
+         }
+         
+         m_File->closeGroup(); // close events group
          m_File->closeGroup();
          m_File->close();
          delete m_File;

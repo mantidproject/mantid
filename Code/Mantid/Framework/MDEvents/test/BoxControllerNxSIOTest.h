@@ -19,33 +19,33 @@ using namespace Mantid::API;
 class BoxControllerSaveableTest : public CxxTest::TestSuite
 {
     BoxController_sptr sc;
+    std::string testFileName;
 
     BoxControllerSaveableTest()
     {
-        sc = BoxController_sptr(new BoxController(3));
+        sc = BoxController_sptr(new BoxController(4));
+        testFileName= "BoxCntrlNexusIOtestFile.nxs";
     }
 
 
-
-  /** Deletes the file created by do_saveNexus */
-  static void do_deleteNexusFile(std::string barefilename = "MDBoxTest.nxs")
-  {
-    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + barefilename);
-    if (Poco::File(filename).exists())  Poco::File(filename).remove();
-  }
 
 public:
 static BoxControllerSaveableTest *createSuite() { return new BoxControllerSaveableTest(); }
 static void destroySuite(BoxControllerSaveableTest * suite) { delete suite; }    
 
+void setUp()
+{
+    std::string FullPathFile = API::FileFinder::Instance().getFullPath(this->testFileName);
+    if(!FullPathFile.empty())
+            Poco::File(FullPathFile).remove();   
 
+}
 
  void test_contstructor_setters()
  {
-     TS_ASSERT_THROWS(MDEvents::BoxControllerNxSIO Saver(11),std::invalid_argument);
 
      MDEvents::BoxControllerNxSIO *pSaver;
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(4));
+     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc));
 
      size_t CoordSize;
      std::string typeName;
@@ -75,16 +75,13 @@ static void destroySuite(BoxControllerSaveableTest * suite) { delete suite; }
  void testCreateOrOpenFile()
  {
      MDEvents::BoxControllerNxSIO *pSaver;
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(4));
+     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc));
 
-     std::string testFile = "testFile.nxs";
-     std::string FullPathFile = API::FileFinder::Instance().getFullPath(testFile);
-     if(!FullPathFile.empty())
-            Poco::File(FullPathFile).remove();   
+     std::string FullPathFile;
 
-     TSM_ASSERT_THROWS("new file does not open in read mode",pSaver->openFile(testFile,"r"), Kernel::Exception::FileError);
+     TSM_ASSERT_THROWS("new file does not open in read mode",pSaver->openFile(this->testFileName,"r"), Kernel::Exception::FileError);
 
-     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(testFile,"w"));
+     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->testFileName,"w"));
      TS_ASSERT_THROWS_NOTHING(FullPathFile = pSaver->getFileName());
      TS_ASSERT(pSaver->isOpened());
      TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
@@ -109,6 +106,23 @@ static void destroySuite(BoxControllerSaveableTest * suite) { delete suite; }
      delete pSaver;
      if(Poco::File(FullPathFile).exists())
          Poco::File(FullPathFile).remove();   
+ }
+
+ void testWriteReadWrite()
+ {
+     MDEvents::BoxControllerNxSIO *pSaver;
+     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc));
+      std::string FullPathFile;
+
+     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->testFileName,"w"));
+     TS_ASSERT_THROWS_NOTHING(FullPathFile = pSaver->getFileName());
+
+     
+     
+     delete pSaver;
+     if(Poco::File(FullPathFile).exists())
+         Poco::File(FullPathFile).remove();   
+
  }
 //
 //
