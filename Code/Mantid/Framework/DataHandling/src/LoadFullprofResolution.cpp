@@ -64,10 +64,15 @@ namespace DataHandling
 
     // Output workspace
     auto wsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "", Direction::Output);
-    declareProperty(wsprop, "Name of the output TableWorkspace. ");
+    declareProperty(wsprop, "Name of the output TableWorkspace containing profile parameters or bank information. ");
 
     // Bank to import
     declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is the first bank in the file.");
+
+
+    // Type of output workspace
+    declareProperty("BankInformation", false, "If true, output workspace contains the bank information. "
+                    "Otherwise, output workspace contains profile parameters. ");
 
     return;
   }
@@ -95,38 +100,51 @@ namespace DataHandling
       throw runtime_error("No Bank is found in input file.");
     }
 
-    // 4. Check whether input bank ID exists in .irf file
-    if (bankid != EMPTY_INT())
+    // 2-different functions
+    bool exportbankinfo = getProperty("BankInformation");
+    TableWorkspace_sptr outws;
+    if (exportbankinfo)
     {
-      // User has bank ID input
-      sort(banks.begin(), banks.end());
-      vector<int>::iterator fiter = lower_bound(banks.begin(), banks.end(), bankid);
-      if (fiter == banks.end() || *fiter != bankid)
-      {
-        stringstream errmsg;
-        errmsg << "User input bank (ID) = " << bankid << " cannot be found in input .irf file "
-               << datafile << ".\n";
-        errmsg << "In input .irf file, Bank ID ";
-        for (size_t i = 0; i < banks.size(); ++i)
-          errmsg << banks[i] << ", ";
-        errmsg << " are found.";
-        g_log.error(errmsg.str());
-        throw runtime_error(errmsg.str());
-      }
+      // 4. Export bank information
+      outws = genInfoTableWorkspace(banks);
     }
     else
     {
-      // Default bank ID.  Use the first appeared.
-      bankid = banks[0];
+      // 5. Parse .irf and export profile parameters
+      // a) Check whether input bank ID exists in .irf file
+      if (bankid != EMPTY_INT())
+      {
+        // User has bank ID input
+        sort(banks.begin(), banks.end());
+        vector<int>::iterator fiter = lower_bound(banks.begin(), banks.end(), bankid);
+        if (fiter == banks.end() || *fiter != bankid)
+        {
+          stringstream errmsg;
+          errmsg << "User input bank (ID) = " << bankid << " cannot be found in input .irf file "
+                 << datafile << ".\n";
+          errmsg << "In input .irf file, Bank ID ";
+          for (size_t i = 0; i < banks.size(); ++i)
+            errmsg << banks[i] << ", ";
+          errmsg << " are found.";
+          g_log.error(errmsg.str());
+          throw runtime_error(errmsg.str());
+        }
+      }
+      else
+      {
+        // Default bank ID.  Use the first appeared.
+        bankid = banks[0];
+      }
+
+      // b) Parse to a map
+      map<string, double> parammap;
+      parseResolutionStrings(parammap, lines, bankid, bankstartindexmap[bankid], bankendindexmap[bankid]);
+
+      // c) Generate output workspaces
+      outws = genTableWorkspace(parammap);
     }
 
-    // 5. Parse to a map
-    map<string, double> parammap;
-    parseResolutionStrings(parammap, lines, bankid, bankstartindexmap[bankid], bankendindexmap[bankid]);
-
-    // 6. Generate a workspace
-    TableWorkspace_sptr outws = genTableWorkspace(parammap);
-
+    // 6. Output
     setProperty("OutputWorkspace", outws);
 
     return;
@@ -556,6 +574,24 @@ namespace DataHandling
 
       TableRow newrow = tablews->appendRow();
       newrow << parname << parvalue;
+    }
+
+    return tablews;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate bank information workspace
+    */
+  TableWorkspace_sptr LoadFullprofResolution::genInfoTableWorkspace(vector<int> banks)
+  {
+    TableWorkspace_sptr tablews(new TableWorkspace());
+
+    tablews->addColumn("int", "Bank");
+
+    for (size_t i = 0; i < banks.size(); ++i)
+    {
+      TableRow newrow = tablews->appendRow();
+      newrow << banks[i];
     }
 
     return tablews;

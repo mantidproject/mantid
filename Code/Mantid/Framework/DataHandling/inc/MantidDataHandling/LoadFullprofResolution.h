@@ -70,6 +70,9 @@ namespace DataHandling
     /// Generate output workspace
     DataObjects::TableWorkspace_sptr genTableWorkspace(std::map<std::string, double> parammap);
 
+    /// Generate bank information workspace
+    DataObjects::TableWorkspace_sptr genInfoTableWorkspace(std::vector<int> banks);
+
   };
 
 
