@@ -116,9 +116,10 @@ namespace Mantid
       for (size_t i = 0; i < n_peaks; i++)
       {
         Peak& peak = ws->getPeak(i);
-        if (overwrite || (peak.getHKL() == V3D(0, 0, 0)))
+        if (overwrite || (peak.getHKL().nullVector()))
         {
-          V3D hkl = UB_inverse * peak.getQLabFrame() / (2.0 * M_PI);
+          V3D qlab = peak.getQSampleFrame();
+          V3D hkl = UB_inverse * qlab / (2.0 * M_PI);
           peak.setHKL(hkl);
           ++peaksIndexed;
         }

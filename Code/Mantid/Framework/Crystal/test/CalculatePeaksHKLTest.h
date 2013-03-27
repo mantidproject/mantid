@@ -69,7 +69,7 @@ public:
     for (size_t i = 0; i < ws->getNumberPeaks(); i++)
     {
       Peak& peak = ws->getPeak(i);
-      Mantid::Kernel::V3D expectedHKL = peak.getQLabFrame() / (2.0 * M_PI); // Simulate the transform. UB is unity.
+      Mantid::Kernel::V3D expectedHKL = peak.getQSampleFrame() / (2.0 * M_PI); // Simulate the transform. UB is unity.
 
       TS_ASSERT_EQUALS(expectedHKL, peak.getHKL());
     }
@@ -123,7 +123,6 @@ public:
     const int numberIndexed = alg.getProperty("NumIndexed");
     const int expectedNumberIndexed = ws->getNumberPeaks();
     TS_ASSERT_EQUALS(expectedNumberIndexed, numberIndexed);
-
   }
 
 
