@@ -36,7 +36,7 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0),m_SplitThreshold(1024), m_numSplit(1), m_diskBuffer()//, m_useWriteBuffer(true)
+    :nd(nd), m_maxId(0),m_SplitThreshold(1024), m_numSplit(1)
       {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -347,18 +347,7 @@ namespace API
       m_mutexNumMDBoxes.unlock();
     }
 
-    //-----------------------------------------------------------------------------------
-    /** Return the DiskBuffer for disk caching */
-    const Mantid::Kernel::DiskBuffer & getDiskBuffer() const
-    { return m_diskBuffer; }
-
-    /** Return the DiskBuffer for disk caching */
-    Mantid::Kernel::DiskBuffer & getDiskBuffer()
-    { return m_diskBuffer; }
-
-    /** Return true if the DiskBuffer should be used  -- in current edition it is always used*/
-    bool useWriteBuffer() const{return true;}
-   // { return m_useWriteBuffer; }
+    // { return m_useWriteBuffer; }
     /// Returns if current box controller is file backed. Assumes that BC(workspace) is fileBackd if fileIO is defined;
      bool isFileBacked()const
      {return m_fileIO;}
@@ -375,15 +364,16 @@ namespace API
      * @param bytesPerEvent :: sizeof(MDLeanEvent) that is in the workspace
      * @param writeBufferSize :: number of EVENTS to accumulate before performing a disk write.
      */
-    void setCacheParameters(size_t bytesPerEvent,uint64_t writeBufferSize)
+    void setCacheParameters(uint64_t writeBufferSize)
     {
-      if (bytesPerEvent == 0)
-        throw std::invalid_argument("Size of an event cannot be == 0.");
+      if(m_fileIO)
+      {
       // Save the values
-      m_diskBuffer.setWriteBufferSize(writeBufferSize);
+        m_fileIO->setWriteBufferSize(writeBufferSize);
       // If all caches are 0, don't use the MRU at all
 //      m_useWriteBuffer = !(writeBufferSize==0);
-      m_bytesPerEvent = bytesPerEvent;
+      //  m_fileIO->m_bytesPerEvent = bytesPerEvent;
+      }
     }
 
     //BoxCtrlChangesInterface *getChangesList(){return m_ChangesList;}
@@ -473,13 +463,13 @@ namespace API
     // the class which does actual IO operations
     boost::shared_ptr<IBoxControllerIO> m_fileIO;
     /// Instance of the disk-caching MRU list.
-    mutable Mantid::Kernel::DiskBuffer m_diskBuffer;
+   // mutable Mantid::Kernel::DiskBuffer m_diskBuffer;
 
     /// Do we use the DiskBuffer at all? Always use WB
     // bool m_useWriteBuffer;
 
     /// Number of bytes in a single MDLeanEvent<> of the workspace.
-    size_t m_bytesPerEvent;
+    //size_t m_bytesPerEvent;
   public:
   };
 

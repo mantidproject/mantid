@@ -26,13 +26,11 @@ public:
   MDBoxBaseTester()
   : MDBoxBase<MDE,nd>()
   {     
-    //this->setFilePosition(0,1,false);
   }
   virtual ~MDBoxBaseTester(){}
   MDBoxBaseTester(uint64_t filePos)
   : MDBoxBase<MDE,nd>()
   { 
-   // this->setFilePosition(filePos,10,false);
   }
   MDBoxBaseTester(const MDBoxBaseTester  &source):
       MDBoxBase(source,source.getBoxController())
@@ -42,10 +40,15 @@ public:
   MDBoxBaseTester(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
   : MDBoxBase<MDE,nd>(NULL,0,0,extentsVector)
   { 
-    //this->setFilePosition(0,10,false);
   }
+  //-----------------------------------------------------------------------------------------------
   Kernel::ISaveable *const getISaveable(){return NULL;}
   Kernel::ISaveable *const getISaveable()const{return NULL;}
+  void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/){};
+  void setFileBacked(){};
+  void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)const{/*Not saveable */};
+  void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */){};
+
 
   /// Clear all contained data
   virtual void clear()
@@ -103,11 +106,7 @@ public:
   {};
   virtual void addEventUnsafe(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t)
   {};
-  virtual void makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/){};
-  virtual void save(){};
-  virtual void load(){};
-  virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/){/*Not saveable */};    
-  virtual void loadFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */){/*Not directly loadable */};
+
 
 
   /** Perform centerpoint binning of events

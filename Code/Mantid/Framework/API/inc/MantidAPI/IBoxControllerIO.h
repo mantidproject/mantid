@@ -1,6 +1,7 @@
 #ifndef H_IBOXCONTROLLER_IO
 #define H_IBOXCONTROLLER_IO
 #include "MantidKernel/System.h"
+#include "MantidKernel/DiskBuffer.h"
 
 namespace Mantid
 {
@@ -8,7 +9,9 @@ namespace API
 {
 
   /** The header describes interface to IO Operations perfomed by the box controller 
-   *  May be replaced by a boos filestream in a future. 
+   *  May be replaced by a boost filestream in a future. 
+   *  It also currently assumes disk buffer usage. 
+   *
    * @date March 21, 2013
 
      Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -33,20 +36,31 @@ namespace API
 
    */
 
-  class DLLExport IBoxControllerIO
+  class DLLExport IBoxControllerIO : public Kernel::DiskBuffer
   {
   public:
+      /** open file for i/o operations 
+       * @param fileName -- the name of the file to open
+       * @param mode     -- the string describing file access mode. if w or W is present in the string file is opened in read/write mode. 
+                            it is opened in read mode otherwise     
+       * @return false if the file had been already opened. Throws if problems with openeing */
       virtual bool openFile(const std::string &fileName,const std::string &mode)=0;
+      /**@return true if file is already opened */ 
       virtual bool isOpened()const=0;
+      /**@return the full name of the used data file*/
       virtual const std::string &getFileName()const=0;
 
+      /**Save a float data block in the specified file position */ 
+      virtual void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/)const=0;
+      /**Save a double data block in the specified file position */ 
+      virtual void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/)const=0;           
+      /** load known size float data block from spefied file position */ 
+      virtual void loadBlock(std::vector<float> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)const=0;
+      virtual void loadBlock(std::vector<double> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)const=0;
 
-      virtual void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/)=0;
-      virtual void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/)=0;           
-      virtual void loadBlock(std::vector<float> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)=0;
-      virtual void loadBlock(std::vector<double> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)=0;
-
-      virtual void flushData()=0;
+      /** flush the IO buffers */ 
+      virtual void flushData()const=0;
+      /** Close the file */ 
       virtual void closeFile()=0;
 
       virtual ~IBoxControllerIO(){}
@@ -58,7 +72,7 @@ namespace API
        *  and the size of the data type in bytes (e.g. the  class dependant physical  meaning of the blockSize and blockPosition used 
        *  by save/load operations     */
       virtual void setDataType(const size_t blockSize, const std::string &typeName) =0;
-      virtual void getDataType(size_t &blockSize, std::string &typeName) =0;
+      virtual void getDataType(size_t &blockSize, std::string &typeName)const =0;
   };
 }
 }

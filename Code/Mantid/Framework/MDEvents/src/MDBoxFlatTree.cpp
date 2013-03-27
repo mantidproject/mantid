@@ -125,7 +125,7 @@ namespace Mantid
 
   }
 
-  void MDBoxFlatTree::setBoxesFilePositions(bool makeFileBacked)
+  void MDBoxFlatTree::setBoxesFilePositions(bool setFileBacked)
   {
     // this will preserve file-backed workspace and information in it as we are not loading old box data and not?
     // this would be right for binary axcess but questionable for Nexus --TODO: needs testing
@@ -133,7 +133,7 @@ namespace Mantid
     //Kernel::ISaveable::sortObjByFilePos(m_Boxes);
     // calculate the box positions in the resulting file and save it on place
     uint64_t eventsStart=0;
-    bool rememberBoxIsSaved = makeFileBacked;
+    bool rememberBoxIsSaved = setFileBacked;
     for(size_t i=0;i<m_Boxes.size();i++)
     {
       API::IMDNode * mdBox = m_Boxes[i];        
@@ -145,8 +145,8 @@ namespace Mantid
       eventsStart+=nEvents;
       // m_BoxEventIndex[ID*2]   = 0; should we do this for the boxes without events?
 
-      if(makeFileBacked)
-          mdBox->makeFileBacked(eventsStart,nEvents,true);
+      if(setFileBacked)
+          mdBox->setFileBacked(eventsStart,nEvents,true);
     }
   }
 
@@ -370,14 +370,12 @@ namespace Mantid
           if(FileBackEnd)
           {
             box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,-1);
-            // Set the index in the file in the box data
-           // box->setFilePosition(indexStart, numEvents,true);
+            // Mark the box as file backed and set the index in the file in the box data
+            box->setFileBacked(indexStart,numEvents,true);
           }
           else
           {
             box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,int64_t(numEvents));
-            // Set the index in the file in the box data, and indicate that data were not saved
-           // box->setFilePosition(indexStart, numEvents,false);
           }           
         } // ifBoxStructureOnly
         ibox = box;

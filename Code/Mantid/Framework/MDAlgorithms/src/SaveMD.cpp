@@ -298,7 +298,7 @@ namespace MDAlgorithms
 //    //Save box structure;
 //    BoxFlatStruct.saveBoxStructure(file);
 //
-//    if (update || MakeFileBacked)
+//    if (update || setFileBacked)
 //    {
 //      // Need to keep the file open since it is still used as a back end.
 //      // Reopen the file

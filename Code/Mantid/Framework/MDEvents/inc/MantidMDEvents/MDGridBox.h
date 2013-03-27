@@ -54,23 +54,17 @@ namespace MDEvents
       *@return the const pointer the const object. The GridBox is not saveable at the moment so it is always NULL */ 
     virtual Kernel::ISaveable *const getISaveable()const{return NULL;}
     /**Recursively make all underlaying boxes file-backed*/
-    virtual void makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/);
-    virtual void makeFileBacked();
-    /**Save the box at specific disk position. The IMDNode has to be file backed for this method to work */
-    virtual void save()
-    {/*Not saveable */};
-    /**Load the box data of specified size from the disk location provided. The IMDNode has to be file backed for this method to work */
-    virtual void load()
-    {/*Not directly loadable */};
-    //-------------------------------------------------------------------------------------------------------
+    virtual void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/);
+    virtual void setFileBacked();
     void clear();
+    void clearDataFromMemory(){/*it seems works on boxes only though recursive clearing makes sence*/};
     /**Save the box at specific disk position using the class, respoinsible for the file IO. */
-    virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)
+    virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)const
     {/*Not saveable */};    
     /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO. */
-    virtual void loadFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */)
+    virtual void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */)
     {/*Not directly loadable */};
-
+    //-------------------------------------------------------------------------------------------------------
     
     /** Uses the cached value of points stored in the grid box  
       *  @return the total number of points (events) in this box  (in memory and in file if present)     */

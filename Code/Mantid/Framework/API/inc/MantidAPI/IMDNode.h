@@ -18,6 +18,31 @@ namespace API
 
 class IMDNode 
 {
+/** This is an interface to MDBox or MDGridBox of an MDWorkspace
+
+    @date 01/03/2013
+
+    Copyright &copy; 2009-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+
 public:
     virtual ~IMDNode(){}; 
 //---------------- ISAVABLE
@@ -26,25 +51,31 @@ public:
     /**Return the pointer to the sconst tructure responsible for saving the box on disk if the workspace occupies too much memory */
     virtual Kernel::ISaveable *const  getISaveable()const=0;        
     /** initiate the structure responsible for swapping the box on HDD if out of memory. */
-    virtual void makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)=0;
+    virtual void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)=0;
     /** initiate the structure responsible for swapping the box on HDD if out of memory with default parameters (it does not know its place on HDD and was not saved). */
-    virtual void makeFileBacked()=0;
-    /**Save the box at the position, specified by ISaveable. The IMDNode has to be file backed for this method to work */
-    virtual void save()=0;
-    /**Load the box from the location specified by ISaveable. The IMDNode has to be file backed for this method to work */
-    virtual void load()=0;
+    virtual void setFileBacked()=0;
     /**Save the box at specific disk position using the class, respoinsible for the file IO. */
-    virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)=0;
-    /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO. */
-    virtual void loadFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */)=0;
+    virtual void saveAt(API::IBoxControllerIO *const /*saver */,  uint64_t /*position*/)const=0;
+    /**Load the additional box data of specified size from the disk location provided using the class, respoinsible for the file IO and append them to the box */
+    virtual void loadAndAddFrom(API::IBoxControllerIO *const /*saver */, uint64_t /*position*/, size_t /* Size */)=0;
+    /// drop event data from memory but keep averages
+    virtual void clearDataFromMemory()=0;
+//-------------------------------------------------------------
+    /// Clear all contained data including precalculated averages. 
+    virtual void clear() = 0;
 
+    ///@return the type of the event this box contains 
+    virtual std::string getEventType()const =0;
+    ///@return the length of the coordinates (in bytes), the events in the box contain.
+    virtual unsigned int  getCoordType()const = 0;
 //-------------------------------------------------------------
     ///@return The special ID which specify location of this node in the chain of ordered boxes (e.g. on a file)
     virtual size_t getID()const=0;
     /// sets the special id, which specify the position of this node in the chain linearly ordered nodes
     virtual void setID(const size_t &newID)=0;
 
-    /// Get number of dimensions
+
+    /// Get number of dimensions, the box with this interface has
     virtual size_t getNumDims() const = 0;
 
     /// Getter for the masking
@@ -76,20 +107,19 @@ public:
     virtual const IMDNode * getParent() const = 0;
     // -------------------------------------------------------------------------------------------
 // box-related
-   /// Fill a vector with all the boxes up to a certain depth
+   /// Fill a vector with all the boxes who are the childred of this one up to a certain depth
     virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly) = 0;
-    /// Fill a vector with all the boxes up to a certain depth
+    /// Fill a vector with all the boxes who are the childred of this one  up to a certain depth and selected by the function.
     virtual void getBoxes(std::vector<IMDNode *> & boxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function) = 0;
 
     // -------------------------------- Events-Related -------------------------------------------
-    /// Clear all contained data
-    virtual void clear() = 0;
     /// Get total number of points both in memory and on file if present;
     virtual uint64_t getNPoints() const = 0;
     /// get size of the data located in memory, it is equivalent to getNPoints above for memory based workspace but may be different for file based one ;
     virtual size_t getDataInMemorySize()const = 0;
-   /// @return the amount of memory that the object takes up in the MRU.
+    /// @return the amount of memory that the object takes up in the MRU.
     virtual uint64_t getTotalDataSize() const=0;
+
     /** The method to convert events in a box into a table of coodrinates/signal/errors casted into coord_t type 
      *   Used to save events from plain binary file
      *   @returns coordTable -- vector of events parameters
@@ -114,7 +144,6 @@ public:
 
 
     // -------------------------------------------------------------------------------------------
-
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.
      * @param fullyContained :: optional bool array sized [nd] of which dimensions are known to be fully contained (for MDSplitBox)
@@ -137,7 +166,7 @@ public:
     /** Calculate the centroid of this box and all sub-boxes. */
     virtual void calculateCentroid(coord_t * /*centroid*/) const=0;
     //----------------------------------------------------------------------------------------------------------------------------------
-    // MDBoxBase interface, related to average signals/box parameters
+    // MDBoxBase interface, related to average signals/error box parameters
     virtual signal_t getSignal() const=0;
     virtual signal_t getError() const=0;
     virtual signal_t getErrorSquared() const=0;
@@ -150,7 +179,6 @@ public:
 
 
     // -------------------------------- Geometry/vertexes-Related -------------------------------------------
-
     virtual std::vector<Mantid::Kernel::VMD> getVertexes() const =0;
     virtual coord_t * getVertexesArray(size_t & numVertices) const=0;
     virtual coord_t * getVertexesArray(size_t & numVertices, const size_t outDimensions, const bool * maskDim) const=0;

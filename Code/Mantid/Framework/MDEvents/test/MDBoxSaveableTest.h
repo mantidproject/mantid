@@ -16,13 +16,15 @@
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/BoxControllerNxSIO.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/BoxControllerDummyIO.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-//using namespace Mantid::MDEvens;
+using namespace Mantid::MDEvents;
 
 class MDBoxSaveableTest : public CxxTest::TestSuite
 {
@@ -36,10 +38,11 @@ class MDBoxSaveableTest : public CxxTest::TestSuite
 
 
   /** Deletes the file created by do_saveNexus */
-  static void do_deleteNexusFile(std::string barefilename = "MDBoxTest.nxs")
+  static std::string do_deleteNexusFile(std::string barefilename = "MDBoxTest.nxs")
   {
     std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + barefilename);
-    if (Poco::File(filename).exists())  Poco::File(filename).remove();
+    if (Poco::File(filename.c_str()).exists())  Poco::File(filename.c_str()).remove();
+    return filename;
   }
 
 public:
@@ -48,9 +51,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
 
 
- void test_nothing()
- {}
-//
+ //
 //
 //  //-----------------------------------------------------------------------------------------
 //  /** Can we save to a file ? */
@@ -65,74 +66,134 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 //
 //
 //    //-----------------------------------------------------------------------------------------
-//  /** xest the methods related to the file back-end */
-//  void xest_fileBackEnd_related()
-//  {
-//    // Box with 100 events
-//    MDBox<MDLeanEvent<2>,2> b;
-//    MDEventsxestHelper::feedMDBox(&b, 1, 10, 0.5, 1.0);
-//    TS_ASSERT_EQUALS( b.getNPoints(), 100);
-//    b.refreshCache();
-//    TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
-//    TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
+  /** test the methods related to the file back-end */
+  void test_fileBackEnd_related()
+  {
+    auto bc = BoxController_sptr(new BoxController(2));
+    // Box with 100 events
+    MDBox<MDLeanEvent<2>,2> b(bc.get());
+    MDEventsTestHelper::feedMDBox(&b, 1, 10, 0.5, 1.0);
+    
+    TS_ASSERT_EQUALS( b.getNPoints(), 100);
+    b.refreshCache();
+    TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
+
+    // Because it wasn't set, the # of points on disk is 0, so NPoints = data.size() + 0
+    TS_ASSERT_EQUALS( b.getNPoints(), 100);
+    TS_ASSERT_THROWS_NOTHING(b.setFileBacked(1234,100,true))
+
+    // Now it returns the cached number of points + the number in the data
+    TS_ASSERT_EQUALS( b.getNPoints(), 200);
+    // Still returns the signal/error
+    TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
+  }
 //
-//    // Because it wasn't set, the # of points on disk is 0, so NPoints = data.size() + 0
-//    TS_ASSERT_EQUALS( b.getNPoints(), 100);
-//    b.setFilePosition(1234, 100);
-//    // Now it returns the cached number of points + the number in the data
-//    TS_ASSERT_EQUALS( b.getNPoints(), 200);
-//    // Still returns the signal/error
-//    TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
-//    TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
-//  }
-//
-//  //-----------------------------------------------------------------------------------------
-//  /** Create a xest .NXS file with some data for a MDBox<3>
-//   * 1000 events starting at position 500 of the file are made.
-//   *
-//   * @param goofyWeights :: weights increasing from 0 to 999
-//   * @param barefilename :: file to save to (no path)
-//   * @return filename with full path that was saved.
-//   * */
-//  static std::string do_saveNexus(bool goofyWeights = true, std::string barefilename = "MDBoxTest.nxs")
-//  {
-//    // Box with 1000 events evenly spread
-//    MDBox<MDLeanEvent<3>,3> b;
-//    MDEventsTestHelper::feedMDBox(&b, 1, 10, 0.5, 1.0);
-//    TS_ASSERT_EQUALS( b.getNPoints(), 1000);
-//    if (goofyWeights)
-//    {
-//      // Give them goofy weights to be more interesting
-//      for (size_t i=0; i<1000; i++)
-//      {
-//        b.getEvents()[i].setSignal(float(i));
-//        b.getEvents()[i].setErrorSquared(float(i)+float(0.5));
-//      }
-//    }
-//
-//    // Start a NXS file
-//    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + barefilename);
-//    if (Poco::File(filename.c_str()).exists()) 
-//    {
-//        Poco::File(filename.c_str()).remove();
-//    }
-//    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE5);
-//    file->makeGroup("my_test_group", "NXdata", 1);
-//
-//    // Must prepare the data.
-//    MDLeanEvent<3>::prepareNexusData(file, 2000);
-//    //b.getBoxController()->setFile(file,filename,2000);
-//
-//    // Save it with some offset
-//    b.setFilePosition(500, 1000);
-//    b.saveNexus(file);
-//
-//    file->closeData();
-//    file->closeGroup();
-//    file->close();
-//
-//    return filename;
-//  }
+  //-----------------------------------------------------------------------------------------
+  /** Create a test .NXS file with some data for a MDBox<3>
+   * 1000 events starting at position 500 of the file are made.
+   *
+   * @param goofyWeights :: weights increasing from 0 to 999
+   * @param barefilename :: file to save to (no path)
+   * @return filename with full path that was saved.
+   * */
+  std::string do_saveNexus(bool goofyWeights = true, std::string barefilename = "MDBoxTest.nxs")
+  {
+    // Box with 1000 events evenly spread
+    MDBox<MDLeanEvent<3>,3> b(sc.get());
+    MDEventsTestHelper::feedMDBox(&b, 1, 10, 0.5, 1.0);
+    TS_ASSERT_EQUALS( b.getNPoints(), 1000);
+    if (goofyWeights)
+    {
+      // Give them goofy weights to be more interesting
+      for (size_t i=0; i<1000; i++)
+      {
+        b.getEvents()[i].setSignal(float(i));
+        b.getEvents()[i].setErrorSquared(float(i)+float(0.5));
+      }
+    }
+
+    // Start a class which saves to NXS file
+    auto Saver = new BoxControllerNxSIO(sc);
+    Saver->setDataType(b.getCoordType(),b.getEventType());
+
+    std::string filename = do_deleteNexusFile();
+
+    Saver->openFile(filename,"w");
+
+    // save events in the file, specifying direct position
+    TS_ASSERT_THROWS_NOTHING(b.saveAt(Saver,500));
+
+    delete Saver;
+    return filename;
+  }
+  //-----------------------------------------------------------------------------------------
+  /** Can we load it back? */
+  void test_loadDirectNexus()
+  {
+    // A box to load stuff from
+    MDBox<MDLeanEvent<3>,3> c(sc.get());
+    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
+
+    std::string fileName = do_saveNexus();
+    // Start a class which loads NXS file
+    auto loader = new BoxControllerNxSIO(sc);
+    loader->setDataType(c.getCoordType(),c.getEventType());
+    loader->openFile(fileName,"r");
+
+    c.loadAndAddFrom(loader,500,1000);
+
+    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+    //// still on disk
+    //TS_ASSERT_EQUALS( c.getFileSize(), 1000);
+    //TS_ASSERT_EQUALS( c.getDataMemorySize(), 1000);
+    const std::vector<MDLeanEvent<3> > & events = c.getEvents();
+    //TSM_ASSERT("Got events so data should be busy unill events are released ",c.isBusy());
+
+    // Try a couple of events to see if they are correct
+    TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
+    TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
+    TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
+
+    delete loader;
+    do_deleteNexusFile();
+  }
+
+  //-----------------------------------------------------------------------------------------
+  /** What if the box has no events, does it crash? */
+  void test_SetFileBacked_fileEvents()
+  {
+    // A box to load stuff from
+    MDBox<MDLeanEvent<3>,3> c(sc.get());
+    TS_ASSERT_EQUALS( c.getNPoints(), 0);
+
+    auto loader = new BCTestHelpers::BoxControllerDummyIO(sc);
+    loader->setDataType(c.getCoordType(),c.getEventType());
+
+    // Create and open the test dummy file with 1000 floats in it (have to recalulate to events differently)
+    sc->setFileBacked(loader,"existingDummy");
+
+
+
+    // Tell it we have 10 events on file located after first three events ;
+    size_t base = 3;
+    c.setFileBacked(base,10,true);
+
+    TSM_ASSERT_EQUALS("No data in memory yet", c.getDataInMemorySize(), 0);
+    TSM_ASSERT_EQUALS("there are some data on file", c.getNPoints(),10);
+
+    const std::vector<MDLeanEvent<3> > & events = c.getEvents();
+    TSM_ASSERT_EQUALS("No data in memory yet", c.getDataInMemorySize(), 10);
+
+    TS_ASSERT_DELTA( events[0].getErrorSquared(), base*base, 1e-5);
+    TS_ASSERT_DELTA( events[2].getSignal(), 2+base, 1e-5);
+    TS_ASSERT_DELTA( events[9].getErrorSquared(), (base+9)*(base+9), 1e-5);
+    
+
+  }
+
+
 //
 //
 //  //-----------------------------------------------------------------------------------------
@@ -171,53 +232,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 //  }
 //
 //
-//  //-----------------------------------------------------------------------------------------
-//  /** Can we load it back? */
-//  void xest_loadNexus()
-//  {
-//    // A box to load stuff from
-//    MDBox<MDLeanEvent<3>,3> c;
-//    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
 //
-//    // Create and open the xest NXS file
-//    ::NeXus::File * file = do_saveAndOpenNexus(c);
-//
-//    //c.loadNexus(file);
-//    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
-//    // still on disk
-//    TS_ASSERT_EQUALS( c.getFileSize(), 1000);
-//    TS_ASSERT_EQUALS( c.getDataMemorySize(), 0);
-//    const std::vector<MDLeanEvent<3> > & events = c.getEvents();
-//    TSM_ASSERT("Got events so data should be busy unill events are released ",c.isBusy());
-//
-//    // Try a couple of events to see if they are correct
-//    TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
-//    TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
-//    TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
-//
-//    file->close();
-//    do_deleteNexusFile();
-//  }
-//
-//
-//  //-----------------------------------------------------------------------------------------
-//  /** What if the box has no events, does it crash? */
-//  void xest_loadNexus_noEvents()
-//  {
-//    // A box to load stuff from
-//    MDBox<MDLeanEvent<3>,3> c;
-//    TS_ASSERT_EQUALS( c.getNPoints(), 0);
-//
-//    // Create and open the test NXS file
-//    ::NeXus::File * file = do_saveAndOpenNexus(c);
-//    // Tell it we actually have no events
-//    c.setFilePosition(500, 0);
-//    c.loadNexus(file);
-//    TS_ASSERT_EQUALS( c.getNPoints(), 0);
-//
-//    file->close();
-//    do_deleteNexusFile();
-//  }
 //
 //  //-----------------------------------------------------------------------------------------
 //  /** Set up the file back end and xest accessing data */
@@ -487,159 +502,157 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 //
 //
 //
-//  //-----------------------------------------------------------------------------------------
-//  /** If a MDBox is file-backed, test that
-//   * you can add events to it without having to load the data from disk.
-//   */
-//  void xest_fileBackEnd_addEvent()
-//  {
-//    // Create a box with a controller for the back-end
-//    BoxController_sptr bc(new BoxController(3));
-//    bc->setCacheParameters(sizeof(MDLeanEvent<3>),10000);
-//    DiskBuffer & dbuf = bc->getDiskBuffer();
-//
-//    // Create and open the test NXS file
-//    MDBox<MDLeanEvent<3>,3> c(bc, 0);
-//    ::NeXus::File * file = do_saveAndOpenNexus(c, "MDBoxTest.nxs", false);
-//    TSM_ASSERT_EQUALS("Nothing in memory", c.getDataMemorySize(), 0);
-//    TSM_ASSERT_EQUALS("Nothing in memory", c.getTotalDataSize(), 1000);
-//    TSM_ASSERT_EQUALS("1000 events on file", c.getFileSize(), 1000);
-//    TSM_ASSERT("The data was NOT loaded from disk.", !c.getInMemory());
-//    TSM_ASSERT_DELTA("Correct cached signal", c.getSignal(), 1000.0, 1e-3);
-//    TSM_ASSERT("Data is not flagged as modified", !c.isDataChanged());
-//
-//
-//    // Add an event to it
-//    MDLeanEvent<3> ev(1.2, 3.4);
-//    ev.setCenter(0, 1.5);
-//    ev.setCenter(1, 2.5);
-//    ev.setCenter(2, 3.5);
-//    c.addEvent(ev);
-//
-//    TSM_ASSERT_EQUALS("Still 1000 events on file", c.getFileSize(), 1000);
-//    TSM_ASSERT_EQUALS("But now 1001 events total because they are in two places.", c.getNPoints(), 1001);
-//    TSM_ASSERT_EQUALS("But only one in memory", c.getDataMemorySize(), 1);
-//    TSM_ASSERT_EQUALS("The object size -- number of points in it", c.getTotalDataSize(), 1001);
-//    TSM_ASSERT("The data is STILL NOT loaded from disk.", !c.getInMemory());
-//    TSM_ASSERT_DELTA("At this point the cached signal is still incorrect - this is normal", c.getSignal(), 1000.0, 1e-3);
-//
-//    // Get the const vector of events AFTER adding events
-//    const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
-//    TSM_ASSERT("The data is ALL in memory right now.", c.getInMemory());
-//    TSM_ASSERT("Data is not flagged as modified (const access)", !c.isDataChanged());
-//    TSM_ASSERT_EQUALS("The resulting event vector has concatenated both", events.size(), 1001);
-//    TSM_ASSERT_DELTA("The first event is the one that was manually added.", events[0].getSignal(), 1.2, 1e-4);
-//    c.releaseEvents();
-//
-//    // Flush the cache to write out the modified data
-//    dbuf.flushCache();
-//    TSM_ASSERT("Data is not flagged as modified because it was written out to disk.", !c.isDataChanged());
-//    TSM_ASSERT_EQUALS("Now there is nothing in memory", c.getDataMemorySize(), 0);
-//    TSM_ASSERT_EQUALS("There is 1001 ppoint in total", c.getTotalDataSize(), 1001);
-//    TSM_ASSERT_EQUALS("Now there is 1001 event in file", c.getFileSize(), 1001);
-//    TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
-//    TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
-//    TSM_ASSERT("And the data is on disk.", c.wasSaved());
-//    TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1001);
-//    TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1001.2, 1e-3);
-//
-//    TSM_ASSERT_EQUALS("The size of the file's field matches the last available point", file->getInfo().dims[0], 3001);
-//
-//    {
-//    // Now getEvents in a const way then call addEvent()
-//    const std::vector<MDLeanEvent<3> > & events2 = c.getConstEvents();
-//    TSM_ASSERT("Data is not flagged as modified because it was accessed as const", !c.isDataChanged());
-//    (void) events2;
-//    c.addEvent(ev);
-//
-//    TSM_ASSERT("Data is still not flagged as modified because it was accessed as const", !c.isDataChanged());
-//    TSM_ASSERT_EQUALS("Still 1001 events on file", c.getFileSize(), 1001);
-//    TSM_ASSERT_EQUALS("And  1002 events in memory ", c.getTotalDataSize(), 1002);
-//    TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1002);
-//    c.releaseEvents();
-//    dbuf.flushCache();
-//    TSM_ASSERT("Data is not flagged as modified because it was written out to disk.", !c.isDataChanged());
-//    TSM_ASSERT_EQUALS("Now there are 1002 events on file", c.getFileSize(), 1002);
-//    TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 3001);
-//    TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
-//    TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1002);
-//    TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1002.4, 1e-3);
-//    }
-//
-//    {
-//    // Now getEvents in a non-const way then call addEvent()
-//    std::vector<MDLeanEvent<3> > & events3 = c.getEvents();
-//    (void) events3;
-//    c.addEvent(ev);
-//    TSM_ASSERT_EQUALS("Still 1002 events on file", c.getFileSize(), 1002);
-//    TSM_ASSERT_EQUALS("And 1003 events in memory", c.getTotalDataSize(), 1003);
-//    TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1003);
-//    c.releaseEvents();
-//    dbuf.flushCache();
-//    TSM_ASSERT_EQUALS("Nothing in memory", c.getDataMemorySize(), 0);
-//    TSM_ASSERT_EQUALS("1003 events in total", c.getTotalDataSize(), 1003);
-//    TSM_ASSERT_EQUALS("1003 events on file", c.getFileSize(), 1003);
-//    TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getFilePosition(), 2000);
-//    TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
-//    TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1003);
-//    TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1003.6, 1e-3);
-//    }
-//
-//    {
-//    // changes have been saved
-//    std::vector<MDLeanEvent<3> > & events4 = c.getEvents();
-//    TSM_ASSERT("Data  flagged as modified", c.isDataChanged());
-//    TSM_ASSERT_DELTA("This was on file",events4[234].getSignal(),1.,1.e-6);
-//    events4[234].setSignal(234.);
-//    c.releaseEvents();
-//    dbuf.flushCache();
-//    TSM_ASSERT_EQUALS("Nothing in memory", c.getDataMemorySize(), 0);
-//    TSM_ASSERT_EQUALS("All gone ",events4.size(),0);
-//    TSM_ASSERT_EQUALS("1003 events on the file", c.getFileSize(), 1003);
-//    TSM_ASSERT_EQUALS("The file have not changed ", c.getFilePosition(), 2000);
-//    TSM_ASSERT("And the data is no longer in memory.", !c.getInMemory());
-//    const std::vector<MDLeanEvent<3> > & events5 = c.getConstEvents();
-//    TSM_ASSERT_DELTA("The changes have been stored ",events5[234].getSignal(),234.,1.e-6);
-//    }
-//
-// // changes have been lost
-//    {
-//    const std::vector<MDLeanEvent<3> > & events6 = c.getConstEvents();
-//    TSM_ASSERT("Data  flagged as unmodifiable ", !c.isDataChanged());
-//    TSM_ASSERT_DELTA("This was on file",events6[234].getSignal(),234.,1.e-6);
-//    // now do nasty thing and modify the signal
-//    std::vector<MDLeanEvent<3> > & events6m = const_cast<std::vector<MDLeanEvent<3> > &>(events6);
-//    events6m[234].setSignal(0.);
-//    c.releaseEvents();
-//    dbuf.flushCache();
-//    // changes lost; checks that constEvents are not saved back on HDD 
-//    const std::vector<MDLeanEvent<3> > & events7 = c.getConstEvents();
-//    TSM_ASSERT("Data  flagged as unmodifiable ", !c.isDataChanged());
-//    TSM_ASSERT_DELTA("This was on file",events7[234].getSignal(),234.,1.e-6);
-//    }
-//    // changes forced: save of data to HDD is controlled by isDataChanged parameter
-//    {
-//    const std::vector<MDLeanEvent<3> > & events6 = c.getConstEvents();
-//    TSM_ASSERT("Data  flagged as unmodifiable ", !c.isDataChanged());
-//    c.setDataChanged();
-//    TSM_ASSERT("Data  flagged as modifiable ", c.isDataChanged());
-//    TSM_ASSERT_DELTA("This was on file",events6[234].getSignal(),234.,1.e-6);
-//    // now do nasty thing and modify the signal
-//    std::vector<MDLeanEvent<3> > & events6m = const_cast<std::vector<MDLeanEvent<3> > &>(events6);
-//    events6m[234].setSignal(0.);
-//
-//    c.releaseEvents();
-//    dbuf.flushCache();
-//    // changes now saved 
-//    const std::vector<MDLeanEvent<3> > & events7 = c.getConstEvents();
-//    TSM_ASSERT("Data  flagged as unmodifiable ", !c.isDataChanged());
-//    TSM_ASSERT_DELTA("This was on file",events7[234].getSignal(),0.,1.e-6);
-//    }
-//
-//
-//    file->close();
-//    do_deleteNexusFile();
-//  }
+  //-----------------------------------------------------------------------------------------
+  /** If a MDBox is file-backed, test that
+   * you can add events to it without having to load the data from disk.
+   */
+  void test_fileBackEnd_addEvent()
+  {
+    // Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+
+    // Create and open the test NXS file
+    MDBox<MDLeanEvent<3>,3> c(bc.get(), 0);
+    auto loader = new BCTestHelpers::BoxControllerDummyIO(bc);
+    loader->setDataType(c.getCoordType(),c.getEventType());
+
+    // Create and open the test dummy file with 1000 floats in it 
+    bc->setFileBacked(loader,"existingDummy");
+    bc->setCacheParameters(10000);
+    c.setFileBacked(0,1000,true);
+
+
+
+    TSM_ASSERT_EQUALS("Nothing in memory", c.getDataInMemorySize(), 0);
+    TSM_ASSERT_EQUALS("Nothing in memory", c.getTotalDataSize(), 1000);
+    TSM_ASSERT_EQUALS("1000 events on file", c.getNPoints(), 1000);
+    TSM_ASSERT_DELTA("Incorrect cached signal", c.getSignal(),0, 1.e-6);
+    TSM_ASSERT("Data is not flagged as modified", !c.isDataAdded());
+
+
+    // Add an event to it
+    MDLeanEvent<3> ev(1.2, 3.4);
+    ev.setCenter(0, 1.5);
+    ev.setCenter(1, 2.5);
+    ev.setCenter(2, 3.5);
+    c.addEvent(ev);
+
+    TSM_ASSERT_EQUALS("But now 1001 events total because they are in two places.", c.getNPoints(), 1001);
+    TSM_ASSERT_EQUALS("But only one in memory", c.getDataInMemorySize(), 1);
+    TSM_ASSERT_EQUALS("The object size -- number of points in it", c.getTotalDataSize(), 1001);
+    TSM_ASSERT_DELTA("At this point the cached signal is still incorrect - this is normal", c.getSignal(), 0, 1e-3);
+
+    // Get the const vector of events AFTER adding events
+    const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
+    TSM_ASSERT_EQUALS("The data is ALL in memory right now.", c.getDataInMemorySize(),1001);
+    TSM_ASSERT_EQUALS("The resulting event vector has concatenated both", events.size(), 1001);
+    TSM_ASSERT_DELTA("The first event is the one that was manually added.", events[0].getSignal(), 1.2, 1e-4);
+    c.releaseEvents();
+
+    // Flush the cache to write out the modified data
+    loader->flushCache();
+    TSM_ASSERT_EQUALS("Now there is nothing in memory", c.getDataInMemorySize(), 0);
+    TSM_ASSERT_EQUALS("There is 1001 ppoint in total", c.getTotalDataSize(), 1001);
+    TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getISaveable()->getFilePosition(), 1000);
+    TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1001);
+    //TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1001.2, 1e-3);
+    TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1000.*(1000.-1)/2.+1.2, 1e-3);
+
+    TSM_ASSERT_EQUALS("The size of the file's field matches the last available point", loader->getFileLength(), 2001);
+
+    {
+    // Now getEvents in a const way then call addEvent()
+    const std::vector<MDLeanEvent<3> > & events2 = c.getConstEvents();
+    TSM_ASSERT("Data is not flagged as modified because it was accessed as const", !c.getISaveable()->isDataChanged());
+    (void) events2;
+    c.addEvent(ev);
+
+    TSM_ASSERT("Data is still not flagged as modified because it was accessed as const", !c.getISaveable()->isDataChanged());
+    TSM_ASSERT_EQUALS("Still 1001 events on file", c.getISaveable()->getFileSize(), 1001);
+    TSM_ASSERT_EQUALS("And  1002 events in memory ", c.getTotalDataSize(), 1002);
+    TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1002);
+    c.releaseEvents();
+    loader->flushCache();
+    TSM_ASSERT("Data is not flagged as modified because it was written out to disk.", !c.getISaveable()->isDataChanged());
+    TSM_ASSERT_EQUALS("Now there are 1002 events on file", c.getISaveable()->getFileSize(), 1002);
+    TSM_ASSERT_EQUALS("And the block must have been moved back as the file length was 2001", c.getISaveable()->getFilePosition(), 0);
+    TSM_ASSERT_EQUALS("And the data is no longer in memory.", c.getDataInMemorySize(),0);
+    TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1002);
+    //TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1002.4, 1e-3);
+     TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(), 1000.*(1000.-1)/2.+2.4, 1e-3);
+    }
+
+    {
+    // Now getEvents in a non-const way then call addEvent()
+    std::vector<MDLeanEvent<3> > & events3 = c.getEvents();
+    (void) events3;
+    c.addEvent(ev);
+    TSM_ASSERT_EQUALS("Still 1002 events on file", c.getISaveable()->getFileSize(), 1002);
+    TSM_ASSERT_EQUALS("And 1003 events in memory", c.getTotalDataSize(), 1003);
+    TSM_ASSERT_EQUALS("But the number of points had grown.", c.getNPoints(), 1003);
+    c.releaseEvents();
+    loader->flushCache();
+    TSM_ASSERT_EQUALS("Nothing in memory", c.getDataInMemorySize(), 0);
+    TSM_ASSERT_EQUALS("1003 events in total", c.getTotalDataSize(), 1003);
+    TSM_ASSERT_EQUALS("1003 events on file", c.getISaveable()->getFileSize(), 1003);
+    //TSM_ASSERT_EQUALS("And the block must have been moved since it grew", c.getISaveable()->getFilePosition(), 2000);
+    TSM_ASSERT_EQUALS("Now there is nothing in memory", c.getDataInMemorySize(), 0);
+    TSM_ASSERT_EQUALS("And the number of points is still accurate.", c.getNPoints(), 1003);
+    TSM_ASSERT_DELTA("The cached signal was updated", c.getSignal(),  1000.*(1000.-1)/2.+3.6, 1e-3);
+    }
+
+    {
+    // changes have been saved
+    std::vector<MDLeanEvent<3> > & events4 = c.getEvents();
+    TSM_ASSERT("Data  flagged as modified", c.getISaveable()->isDataChanged());
+    TSM_ASSERT_DELTA("This was on file",events4[234].getSignal(),234.,1.e-6);
+    events4[234].setSignal(1.);
+    c.releaseEvents();
+    loader->flushCache();
+    TSM_ASSERT_EQUALS("Nothing in memory", c.getDataInMemorySize(), 0);
+    TSM_ASSERT_EQUALS("All gone ",events4.size(),0);
+    TSM_ASSERT_EQUALS("1003 events on the file", c.getISaveable()->getFileSize(), 1003);
+    //TSM_ASSERT_EQUALS("The file have not changed ", c.getISaveable()->getFilePosition(), 2000);
+    TSM_ASSERT_EQUALS("Now there is nothing in memory", c.getDataInMemorySize(), 0);
+    const std::vector<MDLeanEvent<3> > & events5 = c.getConstEvents();
+    TSM_ASSERT_DELTA("The changes have been stored ",events5[234].getSignal(),1.,1.e-6);
+    }
+
+ // changes have been lost
+    {
+    const std::vector<MDLeanEvent<3> > & events6 = c.getConstEvents();
+    TSM_ASSERT("Data  flagged as unmodifiable ", !c.getISaveable()->isDataChanged());
+    TSM_ASSERT_DELTA("This was on file",events6[234].getSignal(),234.,1.e-6);
+    // now do nasty thing and modify the signal
+    std::vector<MDLeanEvent<3> > & events6m = const_cast<std::vector<MDLeanEvent<3> > &>(events6);
+    events6m[234].setSignal(0.);
+    c.releaseEvents();
+    loader->flushCache();
+    // changes lost; checks that constEvents are not saved back on HDD 
+    const std::vector<MDLeanEvent<3> > & events7 = c.getConstEvents();
+    TSM_ASSERT("Data  flagged as unmodifiable ", !c.getISaveable()->isDataChanged());
+    TSM_ASSERT_DELTA("This was on file",events7[234].getSignal(),1.,1.e-6);
+    }
+    // changes forced: save of data to HDD is controlled by isDataChanged parameter
+    {
+    const std::vector<MDLeanEvent<3> > & events6 = c.getConstEvents();
+    TSM_ASSERT("Data  flagged as unmodifiable ", !c.getISaveable()->isDataChanged());
+    c.getISaveable()->setDataChanged();
+    TSM_ASSERT("Data  flagged as modifiable ", c.getISaveable()->isDataChanged());
+    TSM_ASSERT_DELTA("This was on file",events6[234].getSignal(),1.,1.e-6);
+    // now do nasty thing and modify the signal
+    std::vector<MDLeanEvent<3> > & events6m = const_cast<std::vector<MDLeanEvent<3> > &>(events6);
+    events6m[234].setSignal(0.);
+
+    c.releaseEvents();
+    loader->flushCache();
+    // changes now saved 
+    const std::vector<MDLeanEvent<3> > & events7 = c.getConstEvents();
+    TSM_ASSERT("Data  flagged as unmodifiable ", !c.getISaveable()->isDataChanged());
+    TSM_ASSERT_DELTA("This was on file",events7[234].getSignal(),0.,1.e-6);
+    }
+
+  }
 //
 //
 //  //-----------------------------------------------------------------------------------------

@@ -123,7 +123,7 @@ namespace Kernel
 
     /** Set the length of the file that this MRU writes to.
      * @param length :: length in the same units as the cache, etc. (not necessarily bytes)  */
-    void setFileLength(const uint64_t length)
+    void setFileLength(const uint64_t length)const
     { m_fileLength = length; }
 
     //-------------------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ namespace Kernel
 
     // ----------------------- File object --------------------------------------
     /// Length of the file. This is where new blocks that don't fit get placed.
-    uint64_t m_fileLength;
+    mutable uint64_t m_fileLength;
 
   private:
     /// Private Copy constructor: NO COPY ALLOWED

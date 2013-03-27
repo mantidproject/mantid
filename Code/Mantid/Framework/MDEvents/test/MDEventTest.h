@@ -133,6 +133,20 @@ static void destroySuite(MDEventTest * suite) { delete suite; }
           TS_ASSERT_DELTA(events[i].getCenter(1),transfEvents[i].getCenter(1),1.e-6);
           TS_ASSERT_DELTA(events[i].getCenter(2),transfEvents[i].getCenter(2),1.e-6);
       }
+      /// test append
+      transfEvents.reserve(2*nPoints);
+      TS_ASSERT_THROWS_NOTHING(MDLeanEvent<3>::dataToEvents(data,transfEvents,false));
+      TS_ASSERT_EQUALS(2*nPoints,transfEvents.size());
+      for(size_t i=0;i<nPoints;i++)
+      {
+          TS_ASSERT_DELTA(transfEvents[i].getSignal(),transfEvents[nPoints+i].getSignal(),1.e-6);
+          TS_ASSERT_DELTA(transfEvents[i].getErrorSquared(),transfEvents[nPoints+i].getErrorSquared(),1.e-6);
+          TS_ASSERT_DELTA(transfEvents[i].getCenter(0),transfEvents[nPoints+i].getCenter(0),1.e-6);
+          TS_ASSERT_DELTA(transfEvents[i].getCenter(1),transfEvents[nPoints+i].getCenter(1),1.e-6);
+          TS_ASSERT_DELTA(transfEvents[i].getCenter(2),transfEvents[nPoints+i].getCenter(2),1.e-6);
+      }
+
+
 
   }
   void test_serialize_deserializeFat()
@@ -197,6 +211,21 @@ static void destroySuite(MDEventTest * suite) { delete suite; }
           TS_ASSERT_DELTA(events[i].getCenter(2),transfEvents[i].getCenter(2),1.e-6);
           TS_ASSERT_DELTA(events[i].getCenter(3),transfEvents[i].getCenter(3),1.e-6);
       }
+
+      /// test append
+      transfEvents.reserve(2*nPoints);
+      TS_ASSERT_THROWS_NOTHING(MDEvent<3>::dataToEvents(data,transfEvents,false));
+      TS_ASSERT_EQUALS(2*nPoints,transfEvents.size());
+      for(size_t i=0;i<nPoints;i++)
+      {
+          TS_ASSERT_DELTA(transfEvents[i].getSignal(),transfEvents[nPoints+i].getSignal(),1.e-6);
+          TS_ASSERT_DELTA(transfEvents[i].getErrorSquared(),transfEvents[nPoints+i].getErrorSquared(),1.e-6);
+          TS_ASSERT_DELTA(transfEvents[i].getCenter(0),transfEvents[nPoints+i].getCenter(0),1.e-6);
+          TS_ASSERT_DELTA(transfEvents[i].getCenter(1),transfEvents[nPoints+i].getCenter(1),1.e-6);
+          TS_ASSERT_DELTA(transfEvents[i].getCenter(2),transfEvents[nPoints+i].getCenter(2),1.e-6);
+      }
+
+
 
   }
 

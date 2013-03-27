@@ -1,13 +1,21 @@
-#include "MantidMDEvents/MDBoxNXSaveable.h"
+#include "MantidMDEvents/MDBoxSaveable.h"
 #include "MantidMDEvents/MDBox.h"
 
 namespace Mantid
 {
 namespace MDEvents
 {
-   using Mantid::Kernel::DiskBuffer;
-   MDBoxNXSaveable::MDBoxNXSaveable(API::IMDNode *const)
+   //using Mantid::Kernel::DiskBuffer;
+
+   MDBoxSaveable::MDBoxSaveable(API::IMDNode *const Host):
+       m_MDNode(Host)
    {
+   }
+
+   /** flush data out of the write buffer */
+   void  MDBoxSaveable::flushData()const
+   {
+      m_MDNode->getBoxController()->getFileIO()->flushData();
    }
 
  //-----------------------------------------------------------------------------------------------
@@ -15,8 +23,18 @@ namespace MDEvents
   *  Called from the DiskBuffer.
   *  If called directly presumes to know its file location and [TODO: refactor this] needs the file to be open correctly on correct group 
   */
-  void MDBoxNXSaveable::save()
+  void MDBoxSaveable::save()const 
   {
+    /**Save the box at the disk position defined by this class. The IMDNode has to be file backed for this method to work */
+      API::IBoxControllerIO *fileIO = m_MDNode->getBoxController()->getFileIO();
+      if(this->wasSaved())
+      {
+        auto loader = const_cast<MDBoxSaveable *>(this);
+        loader->load();  
+      }
+
+      m_MDNode->saveAt(fileIO,this->getFilePosition());
+
 //  //      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
 //
 //
@@ -24,9 +42,9 @@ namespace MDEvents
 //   if (this->wasSaved())
 //   {
 //     //TODO: redesighn const_cast
-//    // This will load and append events ONLY if needed.
+//    
 //      MDBox<MDE,nd> *loader = const_cast<MDBox<MDE,nd> *>(this);
-//      loader->load();  // this will set isLoaded to true if not already loaded;
+//      loader->load();  
 //   
 //
 //      // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
@@ -42,64 +60,22 @@ namespace MDEvents
 //   
 //   
   }
+ 
 //
- void MDBoxNXSaveable::load()
+ void MDBoxSaveable::load()
  {
-//    // Is the data in memory right now (cached copy)?
-//    if (!m_isLoaded)
-//    {
-//      // Perform the data loading
-//      ::NeXus::File * file = this->m_BoxController->getFile();
-//      if (file)
-//      {
-//        // Mutex for disk access (prevent read/write at the same time)
-//        Kernel::RecursiveMutex & mutex = this->m_BoxController->getDiskBuffer().getFileMutex();
-//        mutex.lock();
-//        // Note that this APPENDS any events to the existing event list
-//        //  (in the event that addEvent() was called for a box that was on disk)
-//        try
-//        {
-//          uint64_t fileIndexStart = this->getFilePosition();
-//          uint64_t fileNumEvents  = this->getFileSize();
-//          MDE::loadVectorFromNexusSlab(data, file,fileIndexStart, fileNumEvents);
-//          m_isLoaded = true;
-//          mutex.unlock();
-//        }
-//        catch (std::exception &e)
-//        {
-//          mutex.unlock();
-//          throw e;
-//        }
-//      }
-//    }
+      API::IBoxControllerIO *fileIO = m_MDNode->getBoxController()->getFileIO(); 
+
+    // Is the data in memory right now (cached copy)?
+    if (!m_isLoaded)
+    {
+        m_MDNode->loadAndAddFrom(fileIO,this->m_fileIndexStart,this->m_fileNumEvents);
+        this->m_isLoaded = true;
+    }
+
   }
 
 
-
-//
-//  //-----------------------------------------------------------------------------------------------
-//  /** Load the box's Event data from an open nexus file.
-//   * The FileIndex start and numEvents must be set correctly already.
-//   * Clear existing data from memory!
-//   *
-//   * @param file :: Nexus File object, must already by opened with MDE::openNexusData()
-//   * @param setIsLoaded :: flag if box is loaded from file
-//   */
-//  TMDE(
-//  inline void MDBox)::loadNexus(::NeXus::File * file, bool setIsLoaded)
-//  {
-//    this->data.clear();
-//    uint64_t fileIndexStart = this->getFilePosition();
-//    uint64_t fileNumEvents  = this->getFileSize();
-//    if(fileIndexStart == std::numeric_limits<uint64_t>::max())
-//      throw(std::runtime_error("MDBox::loadNexus -- attempt to load box from undefined location"));
-//    MDE::loadVectorFromNexusSlab(this->data, file, fileIndexStart, fileNumEvents);
-//
-//   
-//    this->m_isLoaded=setIsLoaded;
-//  
-//  }
-//
 //
 //    //---------------------------------------------------------------------------------------------
 //    /** Do any final clean up of NXS event data blocks
@@ -431,7 +407,7 @@ namespace MDEvents
 
 
 ///**TODO: this should not be here, refactor out*/ 
-//  void MDBoxFlatTree::initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool MakeFileBacked,const std::string &EventType)
+//  void MDBoxFlatTree::initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool setFileBacked,const std::string &EventType)
 //  {
 //    bool update=true;
 //// Start the event Data group, TODO: should be better way of checking existing group
@@ -473,7 +449,7 @@ namespace MDEvents
 //      API::BoxController::prepareEventNexusData(hFile, chunkSize,nColumns,descr);
 //   }
 //      // Initialize the file-backing
-//    if (MakeFileBacked)         // Set it back to the new file handle
+//    if (setFileBacked)         // Set it back to the new file handle
 //       bc->setFile(hFile, m_FileName, NumOldEvents);
 //
 //

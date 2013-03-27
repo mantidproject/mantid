@@ -55,6 +55,13 @@ namespace MDEvents
 
     /// Destructor
     virtual ~MDBoxBase() {}
+    ///@return the type of the event this box contains 
+    virtual std::string getEventType()const
+    {return MDE::getTypeName();}
+    ///@return the length of the coordinates (in bytes), the events in the box contain.
+    virtual unsigned int getCoordType()const
+    {return sizeof(coord_t);}
+
 
     ///@return The special ID which specify location of this node in the chain of ordered boxes (e.g. on a file)
     virtual size_t getID()const{return m_fileID;}

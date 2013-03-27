@@ -1,17 +1,17 @@
-#ifndef MANTID_MDEVENTS_BOXCONTROLLER_NEXUSS_IO_H
-#define MANTID_MDEVENTS_BOXCONTROLLER_NEXUSS_IO_H
+#ifndef MANTID_TESTHELPERS_BOXCONTROLLER_DUMMUY_IO_H
+#define MANTID_TESTHELPERS_BOXCONTROLLER_DUMMUY_IO_H
 
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidKernel/DiskBuffer.h"
 
-namespace Mantid
-{
-namespace MDEvents
+
+namespace BCTestHelpers
 {
 
   //===============================================================================================
-  /** The class responsible for saving events into nexus file using generic box controller interface
+  /** The class responsible for dummy IO operations, which mimick saving events into a direct access 
+      file using generic box controller interface
 
       @date March 15, 2013
 
@@ -35,15 +35,15 @@ namespace MDEvents
       File change history is stored at: <https://github.com/mantidproject/mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-    class DLLExport BoxControllerNxSIO : public API::IBoxControllerIO
+    class DLLExport BoxControllerDummyIO : public Mantid::API::IBoxControllerIO
     {
         public:
-            BoxControllerNxSIO(API::BoxController_sptr theBC);
+            BoxControllerDummyIO(Mantid::API::BoxController_sptr theBC);
 
            ///@return true if the file to write events is opened and false otherwise
             virtual bool isOpened()const
             {
-                return  (m_File!=NULL);
+                return  (m_isOpened);
             }
             /// get the full file name of the file used for IO operations
             virtual const std::string &getFileName()const
@@ -53,20 +53,20 @@ namespace MDEvents
             /**Return the size of the NeXus data block used in NeXus data array*/ 
             size_t getDataChunk()const
             {
-                return m_dataChunk;
+                return 1;
             }
                  
             virtual bool openFile(const std::string &fileName,const std::string &mode);
             virtual void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/)const;
             virtual void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/)const
-            {throw Kernel::Exception::NotImplementedError("Saving double presision events blocks is not supported at the moment");}
+            {throw Mantid::Kernel::Exception::NotImplementedError("Saving double presision events blocks is not supported at the moment");}
             virtual void loadBlock(std::vector<float> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)const;
             virtual void loadBlock(std::vector<double> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)const
-            {throw Kernel::Exception::NotImplementedError("Loading double presision events blocks is not supported at the moment");}
-            virtual void flushData()const;
-            virtual void closeFile();
+            {throw Mantid::Kernel::Exception::NotImplementedError("Loading double presision events blocks is not supported at the moment");}
+            virtual void flushData()const{};
+            virtual void closeFile(){m_isOpened=false;}
 
-            virtual ~BoxControllerNxSIO();
+            virtual ~BoxControllerDummyIO();
             //Auxiliary functions. Used to change default state of this object which is not fully supported. Should be replaced by some IBoxControllerIO factory
             virtual void setDataType(const size_t coordSize, const std::string &typeName);
             virtual void getDataType(size_t &coordSize, std::string &typeName)const;
@@ -74,73 +74,30 @@ namespace MDEvents
             //Auxiliary functions (non-virtual, used at testing)
             int64_t getNDataColums()const
             {
-                return m_BlockSize[1];
+                return 2;
             }
     private:
         /// full file name (with path) of the Nexis file responsible for the IO operations (as NeXus filename has very strange properties and often trunkated to 64 bytes)
         std::string m_fileName;
         // the file Handler responsible for Nexus IO operations;
-        ::NeXus::File * m_File;
-        /// The size of the events block which can be written in the neXus array at once (continious part of the data block)
-        size_t m_dataChunk;
+        mutable std::vector<float> fileContents;
         /// shared pointer to the box controller, which is repsoponsible for this IO
-        API::BoxController_sptr m_bc;
+        Mantid::API::BoxController_sptr m_bc;
 
+        mutable Mantid::Kernel::Mutex m_fileMutex;
         /// number of bytes in the event coorinates (coord_t length). Set by  setDataType but can be defined statically with coord_t 
         unsigned int m_CoordSize;
-
-        /// possible event types this class understands. The enum numbers have to correspond to the numbers of symbolic event types, 
-        /// defined in EVENT_TYPES_SUPPORTED vector
-        static enum EventType
-        {
-            LeanEvent=0, //< the event consisting of signal error and event coordinate
-            FatEvent=1   //< the event havint the same as lean event plus RunID and detID
-        };
-
-        /// the type of event (currently MD event or MDLean event this class is deals with. 
-        EventType m_EventType;   
+        unsigned int m_EventSize;
+        std::string m_TypeName;
 
        /// identifier if the file open only for reading or is  in read/write 
         bool m_ReadOnly;
+        /// identified of the file state, if it is open or not.
+        bool m_isOpened;
 
-        /// Default size of the events block which can be written in the NeXus array at once identified by efficiency or some other external reasons
-        static enum {DATA_CHUNK=10000};
 
-        /// lock Nexus file operations as Nexus is not thread safe
-        mutable Mantid::Kernel::Mutex m_fileMutex;
-        /// the symblolic description of the event types currently supported by the class
-        std::vector<std::string> m_EventsTypesSupported;
-        /// data headers used for different events types
-        std::vector<std::string> m_EventsTypeHeaders;
-
-        /// The version of the MDEvents data block
-        std::string m_EventsVersion;
-        /// the name of the MD workspace group. Should be common with save/load, who uses this group to put other pieces of information about the workspace.
-        static std::string g_EventWSGroupName;
-        /// the name of the Nexus data group for saving the events
-        static std::string g_EventGroupName; 
-        /// the group name to save disk buffer data
-        static std::string g_DBDataName;
-
-    // helper functions:
-        // prepare to write event nexus data in current data version format
-        void CreateEventGroup();
-        void CreateWSGroup();
-        void OpenAndCheckWSGroup();
-        void OpenAndCheckEventGroup();
-        void getDiskBufferFileData();
-        void prepareNxSToWrite_CurVersion();
-        void prepareNxSdata_CurVersion();
-
-        static EventType TypeFromString(const std::vector<std::string> &typesSupported,const std::string typeName);
-
-        //
-        std::vector<int64_t> m_BlockStart;
-     /// the vector, which describes the event specific data size, which describes how many column an event is composed into and this class reads/writres
-        std::vector<int64_t> m_BlockSize;
 
     };
 
-}
 }
 #endif

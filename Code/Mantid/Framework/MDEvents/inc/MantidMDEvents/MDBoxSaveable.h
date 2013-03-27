@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDBOX_NEXUSSAVEABLE_H
-#define MANTID_MDEVENTS_MDBOX_NEXUSSAVEABLE_H
+#ifndef MANTID_MDEVENTS_MDBOX_SAVEABLE_H
+#define MANTID_MDEVENTS_MDBOX_SAVEABLE_H
 
 #include "MantidKernel/Saveable.h"
 #include "MantidAPI/IMDNode.h"
@@ -10,7 +10,7 @@ namespace MDEvents
 {
 
   //===============================================================================================
-  /** Two classes responsible for implementing methods which automatically save/load MDBox into NEXus in conjuction with 
+  /** Two classes responsible for implementing methods which automatically save/load MDBox in conjuction with 
       DiskBuffer
       One class responsible for saving events into nexus and another one -- for identifying the data positions in a file in conjuction with DB 
 
@@ -36,32 +36,34 @@ namespace MDEvents
       File change history is stored at: <https://github.com/mantidproject/mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-    class DLLExport MDBoxNXSaveable : public Kernel::Saveable
+    class DLLExport MDBoxSaveable : public Kernel::Saveable
     {
         public:
-            MDBoxNXSaveable(API::IMDNode *const);
+            MDBoxSaveable(API::IMDNode *const);
 
             /// Save the data to the place, specified by the object
-            virtual void save();
+            virtual void save()const;
 
             /// Load the data which are not in memory yet and merge them with the data in memory;
             virtual void load();
             /// Method to flush the data to disk and ensure it is written.
-            virtual void flushData();
-            /// remove objects data from memory !!!! wrond overload 
+            virtual void flushData()const;
+            /// remove objects data from memory  
             virtual void clearDataFromMemory()
-            {m_MDNode->clear();}
+            {m_MDNode->clearDataFromMemory();}
 
    
            /// @return the amount of memory that the object takes up in the MRU.
            virtual uint64_t getTotalDataSize() const
                  { return m_MDNode->getTotalDataSize(); }
-           /** @return the size of the event vector. ! Note that this is NOT necessarily the same as the number of points 
-                   (because it might be cached to disk) or the size on disk (because you might have called AddEvents) */
+           /**@return the size of the event vector. ! Note that this is NOT necessarily the same as the number of points 
+                 (because it might be cached to disk) or the size on disk (because you might have called AddEvents) */
            virtual size_t getDataMemorySize()const 
            {  return m_MDNode->getDataInMemorySize();}
+
+           ~MDBoxSaveable(){}
         private:
-            API::IMDNode *m_MDNode;
+            API::IMDNode *const m_MDNode;
     };
 
 

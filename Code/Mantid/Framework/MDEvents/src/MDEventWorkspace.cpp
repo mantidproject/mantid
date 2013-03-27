@@ -362,14 +362,15 @@ namespace MDEvents
     if (m_BoxController->isFileBacked())
     {
       mess << "File backed: ";
-      double avail = double(m_BoxController->getDiskBuffer().getWriteBufferSize() * sizeof(MDE)) / (1024*1024);
-      double used = double(m_BoxController->getDiskBuffer().getWriteBufferUsed() * sizeof(MDE)) / (1024*1024);
+      double avail = double(m_BoxController->getFileIO()->getWriteBufferSize() * sizeof(MDE)) / (1024*1024);
+      double used = double(m_BoxController->getFileIO()->getWriteBufferUsed() * sizeof(MDE)) / (1024*1024);
       mess << "Write buffer: " << used << " of " << avail << " MB. ";
       out.push_back(mess.str()); mess.str("");
 
       mess << "File";
       if (this->fileNeedsUpdating())
         mess << " (needs updating)";
+
       mess << ": " << this->m_BoxController->getFileIO()->getFileName();
       out.push_back(mess.str()); mess.str("");
     }
@@ -485,7 +486,7 @@ namespace MDEvents
     {
       // File-backed workspace
       // How much is in the cache?
-      total = this->m_BoxController->getDiskBuffer().getWriteBufferUsed() * sizeof(MDE);
+      total = this->m_BoxController->getFileIO()->getWriteBufferUsed() * sizeof(MDE);
     }
     else
     {

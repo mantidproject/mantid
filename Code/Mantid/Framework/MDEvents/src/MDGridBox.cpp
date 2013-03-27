@@ -790,8 +790,9 @@ namespace MDEvents
             Kernel::ISaveable *const pSaver(box->getISaveable());
             if (pSaver && box->getDataInMemorySize()>0)
             {        
-              //Mark the box as "to-write" in DiskBuffer. If the buffer is full, the box will be dropped on disk
-              this->m_BoxController->getDiskBuffer().toWrite(pSaver);
+              //Mark the box as "to-write" in DiskBuffer. If the buffer is full, the boxes will be dropped on disk
+                
+              this->m_BoxController->getFileIO()->toWrite(pSaver);
             }
         }
       }
@@ -1555,14 +1556,14 @@ namespace MDEvents
     }
   /**Recursively make this and all underlaying boxes file-backed */
   TMDE(
-  void MDGridBox)::makeFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)
+  void MDGridBox)::setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)
   {
       throw(Kernel::Exception::NotImplementedError("Recursive file backed is not yet implemented"));
   }
   TMDE(
-  void MDGridBox)::makeFileBacked()
+  void MDGridBox)::setFileBacked()
   {
-      this->makeFileBacked(UNDEF_UINT64,0,false);
+      this->setFileBacked(UNDEF_UINT64,0,false);
   }
 }//namespace MDEvents
 

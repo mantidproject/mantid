@@ -85,7 +85,7 @@ namespace MDEvents
    *@return typeName  -- the name of the event used in the operations. The name itself defines the size and the format of the event
   */
 
-  void BoxControllerNxSIO::getDataType(size_t &CoordSize, std::string &typeName)
+  void BoxControllerNxSIO::getDataType(size_t &CoordSize, std::string &typeName)const
   {
       CoordSize= m_CoordSize;
       typeName = m_EventsTypesSupported[m_EventType];
@@ -103,6 +103,7 @@ namespace MDEvents
       // file already opened 
       if(m_File)return false;
 
+      m_fileMutex.lock();
       m_ReadOnly = true;;
       NXaccess access(NXACC_READ);
       if(mode.find("w")!=std::string::npos ||mode.find("W")!=std::string::npos)
@@ -168,10 +169,10 @@ namespace MDEvents
       getDiskBufferFileData();
 
       if(m_ReadOnly)
-          prepareNxSToRead_CurVersion();
+          prepareNxSdata_CurVersion();
       else
           prepareNxSToWrite_CurVersion();
-
+      m_fileMutex.unlock();
 
       return true;
   }
@@ -191,7 +192,7 @@ namespace MDEvents
             throw Kernel::Exception::FileError("Can not create new NXdata group: "+g_EventGroupName,m_fileName);
        }
   }
-  /**Create group responsible for keeping MD event workspace and add necessary  (some) attributes to it*/ 
+  /**Create group responsible for keeping MD event workspace and add necessary (some) attributes to it*/ 
   void BoxControllerNxSIO::CreateWSGroup()
   {
      if(m_ReadOnly) 
@@ -214,8 +215,10 @@ namespace MDEvents
 
       std::string eventType;
       m_File->getAttr("event_type",eventType);
-      if(eventType!=m_EventsTypesSupported[m_EventType])
-               throw Kernel::Exception::FileError("trying to write-access a workspace with the type of events different from the one intended to write ",m_fileName);
+      if(eventType != m_EventsTypesSupported[m_EventType])
+          throw Kernel::Exception::FileError("BoxControllerNxSIO set up to read the type of event, different from the type: "
+                                              +eventType+" find in the file",m_fileName);
+     
 
   }
   /** Open existing Event group and check the attributes necessary for this algorithm to work */ 
@@ -243,10 +246,7 @@ namespace MDEvents
       m_File->getEntries(groupEntries);
       if(groupEntries.find(EventData)!=groupEntries.end()) // yes, open it
       {
-             m_File->openData(EventData);
-          //HACK -- there is no difference between empty event dataset and the dataset with 1 event. It is unclear how to deal with this stuff
-             int64_t nFilePoints = m_File->getInfo().dims[0];
-             m_bc->getDiskBuffer().setFileLength(nFilePoints);
+          prepareNxSdata_CurVersion();
       }
       else  // no, create it
       {
@@ -266,7 +266,8 @@ namespace MDEvents
         // A little bit of description for humans to read later
         m_File->putAttr("description", m_EventsTypeHeaders[m_EventType]);
         // disk buffer knows that the file has no events
-        m_bc->getDiskBuffer().setFileLength(0);
+        this->setFileLength(0);
+
 
       }
      
@@ -279,14 +280,23 @@ namespace MDEvents
      * @param file :: open NXS file.
      * @return the number of events currently in the data field.
      */
-  void BoxControllerNxSIO::prepareNxSToRead_CurVersion()
+  void BoxControllerNxSIO::prepareNxSdata_CurVersion()
   {
       // Open the data
       m_File->openData("event_data");
+////      int type = ::NeXus::FLOAT32;
+////      int rank = 0;
+////      NXgetinfo(file->getHandle(), &rank, dims, &type);
+       NeXus::Info info = m_File->getInfo();
+       if(info.type == ::NeXus::FLOAT64)
+       {
+           if(m_CoordSize == 4)
+               throw Kernel::Exception::NotImplementedError("converting from old style 64-bit event file data is not yet implemented ");
+       }
 
       // check if the number of dimensions in the file corresponds to the number of dimesnions to read.
       size_t nFileDim;
-      size_t ndim2    = static_cast<size_t>(m_File->getInfo().dims[1]);
+      size_t ndim2    = static_cast<size_t>(info.dims[1]);
       switch(m_EventType)
       {
       case(LeanEvent):
@@ -303,15 +313,15 @@ namespace MDEvents
           throw Kernel::Exception::FileError("Trying to open event data with different number of dimensions ",m_fileName);
 
       //HACK -- there is no difference between empty event dataset and the dataset with 1 event. It is unclear how to deal with this stuff
-      int64_t nFilePoints = m_File->getInfo().dims[0];
-      m_bc->getDiskBuffer().setFileLength(nFilePoints);
+      uint64_t nFilePoints = info.dims[0];
+      this->setFileLength(nFilePoints);
 
     }
 
   void BoxControllerNxSIO::getDiskBufferFileData()
   {
       std::vector<uint64_t> freeSpaceBlocks;
-      m_bc->getDiskBuffer().getFreeSpaceVector(freeSpaceBlocks);
+      this->getFreeSpaceVector(freeSpaceBlocks);
      if (freeSpaceBlocks.empty())
          freeSpaceBlocks.resize(2, 0); // Needs a minimum size
 
@@ -339,7 +349,7 @@ namespace MDEvents
 
 
   }
- void BoxControllerNxSIO::saveBlock(const std::vector<float> & DataBlock, const uint64_t blockPosition)
+ void BoxControllerNxSIO::saveBlock(const std::vector<float> & DataBlock, const uint64_t blockPosition)const 
  {
       std::vector<int64_t> start(2,0);
       start[0] = int64_t(blockPosition);
@@ -351,20 +361,34 @@ namespace MDEvents
 
      // ugly cast but why would putSlab change the data?
      std::vector<float> &mData = const_cast<std::vector<float>& >(DataBlock);
+
+     m_fileMutex.lock();
      m_File->putSlab<float>(mData,start,dims);
 
+     if(blockPosition+dims[0]>this->getFileLength())
+         this->setFileLength(blockPosition+dims[0]);
+      m_fileMutex.unlock();
+
  }
- void BoxControllerNxSIO::loadBlock(std::vector<float> & Block, const uint64_t blockPosition,const size_t nPoints)
+ void BoxControllerNxSIO::loadBlock(std::vector<float> & Block, const uint64_t blockPosition,const size_t nPoints)const
  {
+     if(blockPosition+nPoints>this->getFileLength())
+         throw Kernel::Exception::FileError("Attemtp to read behind the file end",m_fileName);
+
+
      std::vector<int64_t> start(2,0);
      start[0] = static_cast<int64_t>(blockPosition);
      std::vector<int64_t> size(m_BlockSize);
      size[0]=static_cast<int64_t>(nPoints);
      Block.resize(size[0]*size[1]);
 
+     m_fileMutex.lock();
      m_File->getSlab(&Block[0],start,size);
+     m_fileMutex.unlock();
+
+
  }
- void BoxControllerNxSIO::flushData()
+ void BoxControllerNxSIO::flushData()const
  {
      m_File->flush();
  }
@@ -372,12 +396,13 @@ namespace MDEvents
  {
     if(m_File)
     {
+      m_fileMutex.lock();
          m_File->closeData(); // close events data
 
          if(!m_ReadOnly)    // write free space groups from the disk buffer
          {
             std::vector<uint64_t> freeSpaceBlocks;
-            m_bc->getDiskBuffer().getFreeSpaceVector(freeSpaceBlocks);
+            this->getFreeSpaceVector(freeSpaceBlocks);
             if (!freeSpaceBlocks.empty())
             {
                 std::vector<int64_t> free_dims(2,2);
@@ -393,6 +418,7 @@ namespace MDEvents
          m_File->close();
          delete m_File;
          m_File=NULL;
+      m_fileMutex.unlock();
     }
  }
 
@@ -776,7 +802,7 @@ namespace MDEvents
 //    }
 //  }
 ///**TODO: this should not be here, refactor out*/ 
-//  void MDBoxFlatTree::initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool MakeFileBacked,const std::string &EventType)
+//  void MDBoxFlatTree::initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool setFileBacked,const std::string &EventType)
 //  {
 //    bool update=true;
 //// Start the event Data group, TODO: should be better way of checking existing group
@@ -818,7 +844,7 @@ namespace MDEvents
 //      API::BoxController::prepareEventNexusData(hFile, chunkSize,nColumns,descr);
 //   }
 //      // Initialize the file-backing
-//    if (MakeFileBacked)         // Set it back to the new file handle
+//    if (setFileBacked)         // Set it back to the new file handle
 //       bc->setFile(hFile, m_FileName, NumOldEvents);
 //
 //

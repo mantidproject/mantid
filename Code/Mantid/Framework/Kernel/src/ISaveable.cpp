@@ -43,8 +43,6 @@ namespace Kernel
   void ISaveable::saveAt(uint64_t newPos, uint64_t newSize)
   {
    
-      // load everything which is not in memory yet
-      this->load(); 
       m_fileIndexStart= newPos;
       m_fileNumEvents = newSize;
       this->save();

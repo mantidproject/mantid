@@ -48,6 +48,7 @@ namespace API
              throw(Kernel::Exception::FileError("Can not open target file for filebased box controller ",fileName));
          }
 
+         // kill old fileIO if any 
          if(this->m_fileIO) // should happen in destructor anyway but just to be carefull about it
              this->m_fileIO->closeFile();
 
@@ -64,8 +65,7 @@ namespace API
     m_addingEvents_numTasksPerBlock(other.m_addingEvents_numTasksPerBlock),
     m_numMDBoxes(other.m_numMDBoxes),
     m_numMDGridBoxes(other.m_numMDGridBoxes),
-    m_maxNumMDBoxes(other.m_maxNumMDBoxes),   
-    m_bytesPerEvent(other.m_bytesPerEvent)
+    m_maxNumMDBoxes(other.m_maxNumMDBoxes)
   {
   }
 

@@ -68,7 +68,7 @@ namespace MDEvents
 
     /*** this function tries to set file positions of the boxes to 
           make data physiclly located close to each otger to be as close as possible on the HDD */
-    void setBoxesFilePositions(bool makeFileBacked);
+    void setBoxesFilePositions(bool setFileBacked);
 
     /**Save flat box structure into a file, defined by the file name*/
     void saveBoxStructure(const std::string &fileName);

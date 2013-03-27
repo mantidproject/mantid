@@ -1,5 +1,5 @@
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDBoxNXSaveable.h"
+#include "MantidMDEvents/MDBoxSaveable.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidKernel/DiskBuffer.h"
@@ -81,7 +81,8 @@ namespace MDEvents
     // Make sure the object is not in any of the disk MRUs, and mark any space it used as free
     //if (this->m_BoxController->useWriteBuffer())
     if(m_Saveable)
-       this->m_BoxController->getDiskBuffer().objectDeleted(m_Saveable);
+        this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
+
     // Clear all contents
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
@@ -206,7 +207,7 @@ namespace MDEvents
       // The data vector is busy - can't release the memory yet
         m_Saveable->setBusy(true);
       // Tell the to-write buffer to write out/discard the object (when no longer busy)
-        this->m_BoxController->getDiskBuffer().toWrite(m_Saveable);
+        this->m_BoxController->getFileIO()->toWrite(m_Saveable);
       }
     // else: do nothing if the events are already in memory.
       // the non-const access to events assumes that the data will be modified;
@@ -239,7 +240,7 @@ namespace MDEvents
       // This access to data was const. Don't change the m_dataModified flag.
 
       // Tell the to-write buffer to discard the object (when no longer busy) as it has not been modified
-        this->m_BoxController->getDiskBuffer().toWrite(m_Saveable);
+        this->m_BoxController->getFileIO()->toWrite(m_Saveable);
     }
     // else: do nothing if the events are already in memory.
     return data;
@@ -802,46 +803,37 @@ namespace MDEvents
     return 0;
   }
 
-    /**Recursively make all underlaying boxes file-backed*/
+    /**Make this box file-backed 
+    * @param fileLocation -- the starting position of this box data are/should be located in direct access file
+    * @param fileSize     -- the size this box data occupy on the file (in the units of  the data whatever it is)
+    * @param markSaved    -- set to true if the data indeed are physically there and one can indedd read then from there
+    */
     TMDE(
-    void MDBox)::makeFileBacked(const uint64_t fileLocation,const size_t fileSize, const bool markSaved)
+    void MDBox)::setFileBacked(const uint64_t fileLocation,const size_t fileSize, const bool markSaved)
     {
-        m_Saveable = new MDBoxNXSaveable(this);
+        m_Saveable = new MDBoxSaveable(this);
         m_Saveable->setFilePosition(fileLocation,fileSize,markSaved);
     }
-
+     /**Make this box file-backed but its place on the file is not identified yet. It will be identified by the disk buffer */
     TMDE(
-    void MDBox)::makeFileBacked()
+    void MDBox)::setFileBacked()
     {
-        this->makeFileBacked(UNDEF_UINT64,this->getDataInMemorySize(),false);
+        this->setFileBacked(UNDEF_UINT64,this->getDataInMemorySize(),false);
     }
 
-    /**Save the box at specific disk position. The IMDNode has to be file backed for this method to work */
-    TMDE(
-    void MDBox)::save()
-    {
-        API::IBoxControllerIO *fileIO = this->m_BoxController->getFileIO();
-        Kernel::ISaveable *const Saver(this->getISaveable());
-        if(!fileIO || !Saver)
-            throw(std::runtime_error(" The box is not file based to save it using save method"));
-
-        this->saveAt(fileIO,Saver->getFilePosition());       
-
-        pSaver->setFilePosition(mPos,mMem,true);
-    }
-
-    /**Save the box at specific disk position using the class, responsible for the file IO. 
+    /**Save the box dataat specific disk position using the class, responsible for the file IO. 
       * 
       *@param FileSaver -- the pointer to the class, responsible for File IO operations
       *@param position  -- the position of the data within the class.
     */
    TMDE(
-   void MDBox)::saveAt(API::IBoxControllerIO *const FileSaver,  uint64_t position)
+   void MDBox)::saveAt(API::IBoxControllerIO *const FileSaver,  uint64_t position)const
    {
        if(!FileSaver)
            throw(std::invalid_argument(" Needs defined file saver to save data to it"));
        if(!FileSaver->isOpened())
            throw(std::invalid_argument(" The data file has to be opened to use box SaveAt function"));
+
 
        std::vector<coord_t> TabledData;
        size_t nDataColumns;
@@ -854,31 +846,32 @@ namespace MDEvents
 
        FileSaver->saveBlock(TabledData,position);
 
-   };
-    /**Load the box data of specified size from the disk location provided. The IMDNode has to be file backed for this method to work */
-   TMDE(
-   void MDBox)::load()
-   {
-        API::IBoxControllerIO *fileIO = this->m_BoxController->getFileIO();
-        Kernel::ISaveable *const loader(this->getISaveable());
-        if(!fileIO || !Saver)
-            throw(std::runtime_error(" The box is not file based to save it using save method"));
-
    }
-   /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO. */
+   /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO and append them to exisiting events
+    * Clear events vector first if overwriting the exisitng events is necessary. The efficiency would be higher if jentle cleaning occurs (the size of event data vector 
+      is nullified but memory still allocated)
+    * 
+   * @param FileSaver    -- the pointer to the class, responsible for file IO
+   * @param filePosition -- the place in the direct access file, where necessary data are located
+   * @param nEvents      -- number of events reqested to load
+   */
    TMDE(
-   void MDBox)::loadFrom(API::IBoxControllerIO *const FileSaver, uint64_t filePosition, size_t nEvents)
+   void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver, uint64_t filePosition, size_t nEvents)
    {
        if(!FileSaver)
            throw(std::invalid_argument(" Needs defined file saver to load data using it"));
        if(!FileSaver->isOpened())
-           throw(std::invalid_argument(" The data file has to be opened to use box loadFrom function"));
+           throw(std::invalid_argument(" The data file has to be opened to use box loadAndAddFrom function"));
+
 
        std::vector<coord_t> TableData;
        FileSaver->loadBlock(TableData,filePosition,nEvents);
        // convert loaded events to data;
-       MDE::dataToEvents(TableData,this->data);
-   };
+       size_t nCurrentEvents = data.size();
+       this->data.reserve(nCurrentEvents+nEvents);
+       // convert data to events appending new events to existing
+       MDE::dataToEvents(TableData,data,false);
+   }
 
 }//namespace MDEvents
 
