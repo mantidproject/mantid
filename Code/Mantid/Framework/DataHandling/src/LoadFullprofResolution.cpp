@@ -151,6 +151,8 @@ namespace DataHandling
   }
 
   /** Load file
+    * @param filename :: string for name of the .irf file
+    * @param lines :: vector of strings for each non-empty line in .irf file
     */
   void LoadFullprofResolution::loadFile(string filename, vector<string>& lines)
   {
@@ -193,7 +195,8 @@ namespace DataHandling
   /** Scan lines for bank IDs
     * @param lines :: vector of string of all non-empty lines in input file;
     * @param banks :: output vector of integers for existing banks in .irf file;
-    * @param bankrange :: output vector of integer pairs. Each pair records the start and end line indexes of that bank
+    * @param bankstartindexmap :: map to indicate the first line of each bank in vector lines.
+    * @param bankendindexmap :: map to indicate the last lie of each bank in vector lines
     */
   void LoadFullprofResolution::scanBanks(const vector<string>& lines, vector<int>& banks,
                                          map<int, int>& bankstartindexmap, map<int, int>& bankendindexmap)
