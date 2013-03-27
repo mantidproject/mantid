@@ -138,13 +138,11 @@ def initialize_Mantid(mantidpath):
     sys.path.append(os.getcwd())
     sys.path.append( os.path.join( os.getcwd(), 'bin') )
     try:
-        import MantidFramework
-        from MantidFramework import mtd
+        import mantid
     except:
         msg = "Error importing MantidFramework. Did you specify the --mantidpath option? "
         msg += "Tried to initialize from '%s'" % str(mantidpath)
         raise Exception(msg)
-    mtd.initialise()
     mantid_initialized = True
 
 #======================================================================
