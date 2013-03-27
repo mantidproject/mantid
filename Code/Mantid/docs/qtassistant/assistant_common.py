@@ -23,7 +23,12 @@ def assertDirs(outputdir, verbose=False):
         if not os.path.exists(direc):
             if verbose:
                 print "creating '%s'" % direc
-            os.makedirs(direc)
+            try:
+                os.makedirs(direc)
+            except OSError, e:
+                # EEXIST says that the file already exists
+                if e.errno != os.errno.EEXIST:
+                    raise e
 
 def addEle(doc, tag, parent=None, attrs={}):
     """Assumes that the 'doc' that comes in is a xml.dom.minidom.Document
