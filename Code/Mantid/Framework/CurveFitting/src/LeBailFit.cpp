@@ -278,8 +278,6 @@ namespace CurveFitting
         // Monte carlo Le Bail refinement
         g_log.notice("Function: Do LeBail Fit By Monte Carlo Random Walk.");
         execRandomWalkMinimizer(m_numMinimizeSteps, m_funcParameters);
-        doResultStatistics();
-        g_log.notice() << "Final Rwp = " << m_bestRwp << "\n";
 
         break;
 
@@ -296,7 +294,8 @@ namespace CurveFitting
     // 7. Output peak (table) and parameter workspace
     exportBraggPeakParameterToTable();
     exportInstrumentParameterToTable(m_funcParameters);
-    this->setProperty("OutputWorkspace", m_outputWS);
+
+    setProperty("OutputWorkspace", m_outputWS);
 
     return;
   }
@@ -448,22 +447,20 @@ namespace CurveFitting
       } // FOR PEAKS
     } // ENDIF: plot.each.peak
 
-    // 5. Calculate Rwp
-    double rwp, rp;
-    rp = -100.0;
+    // 5. Calculate Rwp and Rp
+    Rfactor rfactor;
 
     const MantidVec& peakvalues = m_outputWS->readY(FITTEDPUREPEAKINDEX);
     const MantidVec& background =  m_outputWS->readY(FITTEDBACKGROUNDINDEX);
     vector<double> caldata(values.size(), 0.0);
     std::transform(peakvalues.begin(), peakvalues.end(), background.begin(), caldata.begin(), std::plus<double>());
-    rwp = getRFactor(m_dataWS->readY(m_wsIndex), caldata, m_dataWS->readE(m_wsIndex));
+    rfactor = getRFactor(m_dataWS->readY(m_wsIndex), caldata, m_dataWS->readE(m_wsIndex));
     // calculatePowderPatternStatistic(m_outputWS->dataY(FITTEDPUREPEAKINDEX), m_outputWS->dataY(FITTEDBACKGROUNDINDEX), rwp, rp);
-    g_log.notice() << "Rwp = " << rwp << ", Rp = " << rp << "\n";
+    g_log.notice() << "Rwp = " << rfactor.Rwp << ", Rp = " << rfactor.Rp << "\n";
 
     Parameter par_rwp;
     par_rwp.name = "Rwp";
-    par_rwp.curvalue = rwp;
-
+    par_rwp.curvalue = rfactor.Rwp;
     m_funcParameters["Rwp"] = par_rwp;
 
     return;
@@ -2292,6 +2289,7 @@ namespace CurveFitting
     tablews->addColumn("double", "Min");
     tablews->addColumn("double", "Max");
     tablews->addColumn("double", "StepSize");
+    tablews->addColumn("double", "StartValue");
     tablews->addColumn("double", "Diff");
 
     // 2. Add profile parameter value
@@ -2302,11 +2300,12 @@ namespace CurveFitting
       std::string parname = paramiter->first;
       if (parname.compare("Height"))
       {
-        // If not Height
-        // a. current value
+        // Export every parameter except "Height"
+
+        // a) current value
         double parvalue = paramiter->second.curvalue;
 
-        // b. fit or tie?
+        // b) fit or tie?
         char fitortie = 't';
         if (paramiter->second.fit)
         {
@@ -2316,7 +2315,7 @@ namespace CurveFitting
         ss << fitortie;
         std::string fit_tie = ss.str();
 
-        // c. original value
+        // c) starting value
         opiter = m_origFuncParameters.find(parname);
         double origparvalue = -1.0E100;
         if (opiter != m_origFuncParameters.end())
@@ -2334,7 +2333,7 @@ namespace CurveFitting
         double step = paramiter->second.stepsize;
 
         API::TableRow newparam = tablews->appendRow();
-        newparam << parname << parvalue << fit_tie << paramerror << min << max << step << diff;
+        newparam << parname << parvalue << fit_tie << paramerror << min << max << step << origparvalue << diff;
       } // ENDIF
     }
 
@@ -2351,23 +2350,24 @@ namespace CurveFitting
       m_lebailFitChi2 = DBL_MAX;
     }
 
-    API::TableRow fitchi2row = tablews->appendRow();
-    fitchi2row << "FitChi2" << m_lebailFitChi2 << "t" << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
-    API::TableRow chi2row = tablews->appendRow();
-    chi2row << "Chi2" << m_lebailCalChi2 << "t" << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
+    if (m_fitMode == FIT)
+    {
+      // Do this for FIT mode only
+      API::TableRow fitchi2row = tablews->appendRow();
+      fitchi2row << "FitChi2" << m_lebailFitChi2 << "t" << 0.0 << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
+      API::TableRow chi2row = tablews->appendRow();
+      chi2row << "Chi2" << m_lebailCalChi2 << "t" << 0.0 << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
+    }
 
     // 4. Add to output peroperty
-    this->setProperty("OutputParameterWorkspace", parameterws);
-
-    g_log.debug("[DBx404] Set Property To Instrument Parameter Workspace.");
+    setProperty("OutputParameterWorkspace", parameterws);
 
     return;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Do statistics to result (fitted or calcualted)
-  */
-  void LeBailFit::doResultStatistics()
+  void LeBailFit::calChiSquare()
   {
     const MantidVec& oY = m_outputWS->readY(0);
     const MantidVec& eY = m_outputWS->readY(1);
@@ -2393,6 +2393,7 @@ namespace CurveFitting
 
     return;
   }
+  */
 
   //-----------------------------------------------------------------------------
   /** Create output data workspace
@@ -2551,14 +2552,18 @@ namespace CurveFitting
     MantidVec values(domain.size(), 0.0);
 
     //    Strategy and map
+#if 0
     setupRandomWalkStrategy();
+#else
+    setupRandomWalkStrategyTestGeometry();
+#endif
     map<string, Parameter> newparammap = parammap;
 
     //    Random seed
     int randomseed = getProperty("RandomSeed");
     srand(randomseed);
 
-    double startrwp, currwp, startrp, currp;
+    Rfactor startR, currR;
 
     // Annealing temperature
     m_Temperature = getProperty("AnnealingTemperature");
@@ -2599,7 +2604,7 @@ namespace CurveFitting
 
     // 3. Calcualte starting Rwp and etc
     bool startvaluevalid = calculateDiffractionPatternMC(m_outputWS, PUREPEAKINDEX, parammap,
-                                                         background, values, startrwp, startrp);
+                                                         background, values, startR);
 
     if (!startvaluevalid)
     {
@@ -2608,20 +2613,23 @@ namespace CurveFitting
                           " unphyiscal parameters values.");
     }
 
-    currwp = startrwp;
-    currp = startrp;
-    m_bestRwp = currwp + 1.0;
-    bookKeepBestMCResult(parammap, background, currwp, 0);
+    currR = startR;
 
-    g_log.notice() << "[DBx255] Random-walk Starting Rwp = " << currwp << "\n";
+    m_bestRwp = currR.Rwp + 0.001;
+    m_bestRp = currR.Rp + 0.001;
+
+    bookKeepBestMCResult(parammap, background, currR, 0);
+
+    g_log.notice() << "[DBx255] Random-walk Starting Rwp = " << currR.Rwp
+                   << ", Rp = " << currR.Rp << "\n";
 
     // 4. Random walk loops
     // generate some MC trace structure
     vector<double> vecIndex(maxcycles+1);
-    vector<double> vecRwp(maxcycles+1);
+    vector<Rfactor> vecR(maxcycles+1);
     size_t numinvalidmoves = 0;
     size_t numacceptance = 0;
-    bool prevcyclebetterrwp = true;
+    bool prevcyclebetterR = true;
 
     // Annealing record
     int numRecentAcceptance = 0;
@@ -2639,7 +2647,8 @@ namespace CurveFitting
       for (size_t igroup = 0; igroup < m_numMCGroups; ++igroup)
       {
         // i.   Propose the value
-        bool hasnewvalues = proposeNewValues(m_MCGroups[igroup], currwp, parammap, newparammap, prevcyclebetterrwp);
+        bool hasnewvalues = proposeNewValues(m_MCGroups[igroup], currR, parammap, newparammap,
+                                             prevcyclebetterR);
 
         if (!hasnewvalues)
         {
@@ -2649,9 +2658,9 @@ namespace CurveFitting
         }
 
         // ii.  Evaluate
-        double newrwp, newrp;
+        Rfactor newR;
         bool validparams = calculateDiffractionPatternMC(m_outputWS, PUREPEAKINDEX, newparammap, background,
-                                                         values, newrwp, newrp);
+                                                         values, newR);
 
         // iii. Determine whether to take the change or not
         bool acceptchange;
@@ -2659,19 +2668,21 @@ namespace CurveFitting
         {
           ++ numinvalidmoves;
           acceptchange = false;
-          prevcyclebetterrwp = false;
+          prevcyclebetterR = false;
         }
         else
         {
-          acceptchange = acceptOrDeny(currwp, newrwp);
-          if (newrwp < currwp)
-            prevcyclebetterrwp = true;
+          acceptchange = acceptOrDeny(currR, newR);
+
+          // FIXME - [RPRWP] Using Rp for goodness now
+          if (newR.Rp < currR.Rp)
+            prevcyclebetterR = true;
           else
-            prevcyclebetterrwp = false;
+            prevcyclebetterR = false;
         }
 
         g_log.debug() << "[DBx317] Step " << icycle << ": New Rwp = " << setprecision(10)
-                      << newrwp << ", Rp = " << setprecision(5) << newrp
+                      << newR.Rwp << ", Rp = " << setprecision(5) << newR.Rp
                       << "; Accepted = " << acceptchange << "; Proposed parameters valid ="
                       << validparams << "\n";
 
@@ -2680,14 +2691,14 @@ namespace CurveFitting
         {
           // Apply the change to current
           applyParameterValues(newparammap, parammap);
-          currwp = newrwp;
-          currp = newrp;
+          currR = newR;
 
           // All tim ebest
-          if (currwp < m_bestRwp)
+          // FIXME - [RPRWP] Use Rp now
+          if (currR.Rp < m_bestRp)
           {
             // Book keep the best
-            bookKeepBestMCResult(parammap, background, currwp, icycle);
+            bookKeepBestMCResult(parammap, background, currR, icycle);
           }
 
           // Statistic
@@ -2703,7 +2714,7 @@ namespace CurveFitting
           if (numRecentSteps == 10)
           {
             // i. Change temperature
-            if (numRecentAcceptance < 2)
+            if (numRecentAcceptance <= 2)
             {
               m_Temperature *= 2.0;
             }
@@ -2722,17 +2733,23 @@ namespace CurveFitting
       } // END FOR Group
 
       // v. Improve the background
-      if (currwp < m_bestRwp)
+      // FIXME - [RPRWP] Use Rp now
+      if (currR.Rp < m_bestRp)
       {
         fitBackground(m_wsIndex, domainB, valuesB, background);
       }
 
       // vi. Record some information
       vecIndex[icycle] = static_cast<double>(icycle);
-      if (currwp < 1.0E5)
-        vecRwp[icycle] = currwp;
+      if (currR.Rwp < 1.0E5)
+        vecR[icycle] = currR;
       else
-        vecRwp[icycle] = -1;
+      {
+        Rfactor dum;
+        dum.Rwp = -1;
+        dum.Rp = -1;
+        vecR[icycle] = dum;
+      }
 
       // vii. progress
       if (icycle%10 == 0)
@@ -2744,10 +2761,10 @@ namespace CurveFitting
 
     // 5. Sum up
     // a) Summary output
-    g_log.notice() << "[SUMMARY] Random-walk Rwp:  Starting = " << startrwp << ", Best = " << m_bestRwp
-                   << " @ Step = " << m_bestMCStep << "; Last Step Rwp = " << currwp
-                   << ", Rp = " << currp
-                   << ", Acceptance ratio = " << double(numacceptance)/double(maxcycles*m_numMCGroups) << "\n";
+    g_log.notice() << "[SUMMARY] Random-walk R-factor:  Best step @ " << m_bestMCStep
+                   << ", Acceptance ratio = " << double(numacceptance)/double(maxcycles*m_numMCGroups) << ".\n"
+                   << "Rwp: Starting = " << startR.Rwp << ", Best = " << m_bestRwp << ", Ending = " << currR.Rwp << "\n"
+                   << "Rp : Starting = " << startR.Rp  << ", Best = " << m_bestRp  << ", Ending = " << currR.Rp  << "\n";
 
     map<string,Parameter>::iterator mapiter;
     for (mapiter = parammap.begin(); mapiter != parammap.end(); ++mapiter)
@@ -2766,11 +2783,15 @@ namespace CurveFitting
       }
     }
     g_log.notice() << "Number of invalid proposed moves = " << numinvalidmoves << "\n";
-    exportXYDataToFile(vecIndex, vecRwp, "rwp_trace.dat");
 
-    // b) Calculate again
+    // b) Export trace of R
+    stringstream filenamess;
+    filenamess << "r_trace_" << vecR.size() << ".dat";
+    writeRfactorsToFile(vecIndex, vecR, filenamess.str());
+
+    // c) Calculate again
     calculateDiffractionPatternMC(m_outputWS, PUREPEAKINDEX, m_bestParameters, background,
-                                  values, currwp, currp);
+                                  values, currR);
 
     MantidVec& vecModel = m_outputWS->dataY(1);
     MantidVec& vecDiff = m_outputWS->dataY(2);
@@ -2796,7 +2817,96 @@ namespace CurveFitting
     parammap["Rwp"] = par_rwp;
 
     return;
+  } // Main Exec MC
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up Monte Carlo random walk strategy
+   */
+  void LeBailFit::setupRandomWalkStrategyTestGeometry()
+  {
+    stringstream dboutss;
+    dboutss << "Monte Carlo minimizer refines: ";
+
+    // 1. Monte Carlo groups
+    // a. Instrument gemetry
+    vector<string> geomparams1;
+    addParameterToMCMinimize(geomparams1, "Dtt1");
+    m_MCGroups.push_back(geomparams1);
+
+    vector<string> geomparams2;
+    addParameterToMCMinimize(geomparams2, "Dtt1t");
+    m_MCGroups.push_back(geomparams2);
+
+    vector<string> geomparams3;
+    addParameterToMCMinimize(geomparams3, "Zerot");
+    m_MCGroups.push_back(geomparams3);
+
+    vector<string> geomparams4;
+    addParameterToMCMinimize(geomparams4, "Width");
+    m_MCGroups.push_back(geomparams4);
+
+    m_numMCGroups = m_MCGroups.size();
+
+    // 2. Dictionary for each parameter for non-negative, mcX0, mcX1
+    // a) Sig0, Sig1, Sig2
+
+
+    // b) Alpha
+    m_funcParameters["Alph0"].mcA0 = 0.05;
+    m_funcParameters["Alph1"].mcA0 = 0.02;
+    m_funcParameters["Alph0t"].mcA0 = 0.1;
+    m_funcParameters["Alph1t"].mcA0 = 0.05;
+
+    // c) Beta
+    m_funcParameters["Beta0"].mcA0 = 0.5;
+    m_funcParameters["Beta1"].mcA0 = 0.05;
+    m_funcParameters["Beta0t"].mcA0 = 0.5;
+    m_funcParameters["Beta1t"].mcA0 = 0.05;
+
+    // d) Geometry might be more complicated
+    m_funcParameters["Width"].mcA0 = 0.0;
+    m_funcParameters["Width"].mcA1 = 0.1;
+    m_funcParameters["Width"].nonnegative = true;
+
+    m_funcParameters["Tcross"].mcA0 = 0.0;
+    m_funcParameters["Tcross"].mcA1 = 1.0;
+    m_funcParameters["Tcross"].nonnegative = true;
+
+    m_funcParameters["Zero"].mcA0 = 5.0;  // 5.0
+    m_funcParameters["Zero"].mcA1 = 0.0;
+    m_funcParameters["Zero"].nonnegative = false;
+
+    m_funcParameters["Zerot"].mcA0 = 5.0; // 5.0
+    m_funcParameters["Zerot"].mcA1 = 0.0;
+    m_funcParameters["Zerot"].nonnegative = false;
+
+    m_funcParameters["Dtt1"].mcA0 = 5.0;  // 20.0
+    m_funcParameters["Dtt1"].mcA1 = 0.0;
+    m_funcParameters["Dtt1"].nonnegative = true;
+
+    m_funcParameters["Dtt1t"].mcA0 = 5.0; // 20.0
+    m_funcParameters["Dtt1t"].mcA1 = 0.0;
+    m_funcParameters["Dtt1t"].nonnegative = true;
+
+    m_funcParameters["Dtt2t"].mcA0 = 0.1;
+    m_funcParameters["Dtt2t"].mcA1 = 1.0;
+    m_funcParameters["Dtt2t"].nonnegative = false;
+
+    // 4. Reset
+    map<string, Parameter>::iterator mapiter;
+    for (mapiter = m_funcParameters.begin(); mapiter != m_funcParameters.end(); ++mapiter)
+    {
+      mapiter->second.movedirection = 1;
+      mapiter->second.sumstepsize = 0.0;
+      mapiter->second.numpositivemove = 0;
+      mapiter->second.numnegativemove = 0;
+      mapiter->second.numnomove = 0;
+      mapiter->second.maxabsstepsize = -0.0;
+    }
+
+    return;
   }
+
 
   //----------------------------------------------------------------------------------------------
   /** Set up Monte Carlo random walk strategy
@@ -2904,7 +3014,7 @@ namespace CurveFitting
 
     // d) Geometry might be more complicated
     m_funcParameters["Width"].mcA0 = 0.0;
-    m_funcParameters["Width"].mcA1 = 1.0;
+    m_funcParameters["Width"].mcA1 = 0.1;
     m_funcParameters["Width"].nonnegative = true;
 
     m_funcParameters["Tcross"].mcA0 = 0.0;
@@ -2980,14 +3090,13 @@ namespace CurveFitting
    * @param wsindex :  workspace index of the data with background removed.
    * @param funparammap:  map of Parameters of the function to optimize
    * @param background:  background values
-   * @param values:  function values
-   * @param rwp:  output, Rwp of the model to data
-   * @param rp:   output, Rp o the model to data
+   * @param values:   function values
+   * @param RFactor:  R-factor (Rwp and Rp) as output
    */
   bool LeBailFit::calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws, size_t wsindex,
                                                 map<string, Parameter> funparammap,
                                                 MantidVec& background, MantidVec& values,
-                                                double &rwp, double& rp)
+                                                Rfactor& rfactor)
   {
     // 1. Set the parameters
     // a) Set the parameters to all peaks
@@ -3067,8 +3176,7 @@ namespace CurveFitting
       // 5. Calculate Rwp
       vector<double> caldata(values.size(), 0.0);
       std::transform(values.begin(), values.end(), background.begin(), caldata.begin(), std::plus<double>());
-      rwp = getRFactor(m_dataWS->readY(m_wsIndex), values, m_dataWS->readE(m_wsIndex));
-      rp = -100;
+      rfactor = getRFactor(m_dataWS->readY(m_wsIndex), values, m_dataWS->readE(m_wsIndex));
       // calculatePowderPatternStatistic(values, background, rwp, rp);
     }
 
@@ -3077,8 +3185,8 @@ namespace CurveFitting
       // If the propose instrument parameters have some unphysical parameter
       g_log.information() << "Proposed new instrument profile values cause peak(s) to have "
                           << "unphysical parameter values.\n";
-      rwp = DBL_MAX;
-      rp = DBL_MAX;
+      rfactor.Rwp = DBL_MAX;
+      rfactor.Rp = DBL_MAX;
     }
 
     return paramsvalid;
@@ -3087,7 +3195,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Propose new parameters
     * @param mcgroup:  monte carlo group
-    * @param m_totRwp: total Rwp
+    * @param r: R factor (Rp, Rwp)
     * @param curparammap:  current map of Parameters whose values are used for propose new values
     * @param newparammap:  map of Parameters hold new values
     * @param prevBetterRwp: boolean.  true if previously proposed value resulted in a better Rwp
@@ -3095,16 +3203,18 @@ namespace CurveFitting
     * Return: Boolean to indicate whether there is any parameter that have proposed new values in
     *         this group
     */
-  bool LeBailFit::proposeNewValues(vector<string> mcgroup, double totalrwp, map<string, Parameter>& curparammap,
+  bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r, map<string, Parameter>& curparammap,
                                     map<string, Parameter>& newparammap, bool prevBetterRwp)
   {
     // TODO: Study the possibility to merge curparammap and newparammap
 
+    // 1. Set up some flags
     bool anyparameterrefined = false;
 
+    // 2. Find out parameters to refine in this step/MC group
     for (size_t i = 0; i < mcgroup.size(); ++i)
     {
-      // parameter information
+      // a) Find out i-th parameter to be refined or not
       string paramname = mcgroup[i];
       Parameter param = curparammap[paramname];
       if (param.fit)
@@ -3112,14 +3222,14 @@ namespace CurveFitting
       else
         continue;
 
-      // random number between -1 and 1
+      // b) Pick a random number between -1 and 1 and calculate step size
       double randomnumber = 2*static_cast<double>(rand())/static_cast<double>(RAND_MAX) - 1.0;
-      double stepsize = m_dampingFactor * totalrwp * (param.curvalue * param.mcA1 + param.mcA0) * randomnumber;
+      g_log.debug() << "[TestRandom] random = " << randomnumber << "\n";
 
-      //if (param.name.compare("Width") == 0)
-      //  g_log.notice() << "Width.  Step size = " << stepsize << ", Rwp = " << totalrwp << "\n";
+      // FIXME - [RPRWP] Try using Rp this time.
+      double stepsize = m_dampingFactor * r.Rp * (param.curvalue * param.mcA1 + param.mcA0) * randomnumber;
 
-      // drunk walk or random walk
+      // c) Direction of new value: drunk walk or random walk
       double newvalue;
       if (m_walkStyle == RANDOMWALK)
       {
@@ -3136,6 +3246,7 @@ namespace CurveFitting
           prevRightDirection = -1;
 
         double randirint = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+        g_log.debug() << "[TestRandom] random = " << randirint << "\n";
 
         // FIXME Here are some MAGIC numbers
         if (randirint < 0.1)
@@ -3161,14 +3272,14 @@ namespace CurveFitting
         throw runtime_error("Unrecoganized walk style. ");
       }
 
-      // restriction
+      // d) Restriction on the new value: non-negative
       if (param.nonnegative && newvalue < 0)
       {
         // If not allowed to be negative
         newvalue = fabs(newvalue);
       }
 
-      // keep the new value in the boundary
+      // e) Restriction on the new value: keep the new value in the boundary
       if (newvalue < param.minvalue)
       {
         int toss = rand()%2;
@@ -3182,10 +3293,10 @@ namespace CurveFitting
         newvalue = limitProposedValueInBound(param, newvalue, direction, toss);
       }
 
-      // apply to new parameter map
+      // f) Apply to new parameter map
       newparammap[paramname].curvalue = newvalue;
 
-      // record some trace
+      // g) record some trace
       Parameter& p = curparammap[paramname];
       if (stepsize > 0)
       {
@@ -3213,8 +3324,8 @@ namespace CurveFitting
 
       g_log.debug() << "[DBx257] " << paramname << "\t" << "Proposed value = " << setw(15)
                     << newvalue << " (orig = " << param.curvalue << ",  step = "
-                    << stepsize << "), totRwp = " << totalrwp << "\n";
-    }
+                    << stepsize << "), totRwp = " << r.Rwp << "\n";
+    } // ENDFOR (i): Each parameter in this MC group/step
 
     return anyparameterrefined;
   }
@@ -3291,23 +3402,28 @@ namespace CurveFitting
 
   //-----------------------------------------------------------------------------------------------
   /** Determine whether the proposed value should be accepted or denied
-    * @param currwp:  current Rwp
-    * @param newrwp:  Rwp of function whose parameters' values are the proposed.
+    * @param currR:  current R-factor Rwp
+    * @param newR:  R-factor of function whose parameters' values are the proposed.
     */
-  bool LeBailFit::acceptOrDeny(double currwp, double newrwp)
+  bool LeBailFit::acceptOrDeny(Rfactor currR, Rfactor newR)
   {
     bool accept;
 
-    if (newrwp < currwp)
+    // FIXME - [RPRWP] Using Rp for peak fitting
+    double new_goodness = newR.Rp;
+    double cur_goodness = currR.Rp;
+
+    if (new_goodness < cur_goodness)
     {
       // Lower Rwp.  Take the change
       accept = true;
     }
     else
     {
-      // Higher Rwp. Take a chance to accept
+      // Higher Rwp/Rp. Take a chance to accept
       double dice = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
-      double bar = exp(-(newrwp-currwp)/(currwp*m_Temperature));
+      g_log.debug() << "[TestRandom] dice " << dice << "\n";
+      double bar = exp(-(new_goodness-cur_goodness)/(cur_goodness*m_Temperature));
       // double bar = exp(-(newrwp-currwp)/m_bestRwp);
       // g_log.notice() << "[DBx329] Bar = " << bar << ", Dice = " << dice << "\n";
       if (dice < bar)
@@ -3329,33 +3445,43 @@ namespace CurveFitting
   /** Book keep the (sopposed) best MC result
     * @param parammap:  map of Parameters to book keep with
     * @param bkgddata:  background data to book keep with
-    * @param rwp :: rwp
+    * @param rfactor :: R-factor (Rwp and Rp)
     * @param istep:     current MC step to be recorded
    */
-  void LeBailFit::bookKeepBestMCResult(map<string, Parameter> parammap, vector<double>& bkgddata, double rwp, size_t istep)
+  void LeBailFit::bookKeepBestMCResult(map<string, Parameter> parammap, vector<double>& bkgddata, Rfactor rfactor, size_t istep)
   {
-    if (rwp < m_bestRwp)
+    // TODO : [RPRWP] Here is a metric of goodness of it.
+    double goodness = rfactor.Rp;
+    bool better = goodness < m_bestRp;
+
+    if (better)
     {
-      // A better solution
-      m_bestRwp = rwp;
+      // In case obtain the best solution so far
+
+      // a) Record goodness and step
+      m_bestRwp = rfactor.Rwp;
+      m_bestRp = rfactor.Rp;
       m_bestMCStep = istep;
 
+      // b) Record parameters
       if (m_bestParameters.size() == 0)
       {
         // If not be initialized, initialize it!
         m_bestParameters = parammap;
-        // copyParameterMap(parammap, m_bestParameters);
       }
       else
       {
+        // in case initialized, copy the value over
         applyParameterValues(parammap, m_bestParameters);
       }
 
+      // c) Background
       m_bestBackgroundData = bkgddata;
     }
     else
     {
-      g_log.warning("Shouldn't be here!");
+      // In code calling this function, it should be better always.
+      g_log.warning("[Book keep best MC result] Shouldn't be here as it is found that it is not the best solution ");
     }
 
     return;
@@ -3554,14 +3680,16 @@ namespace CurveFitting
 
   /** Write a set of (XY) data to a column file
     */
-  void exportXYDataToFile(vector<double> vecX, vector<double> vecY, string filename)
+  void writeRfactorsToFile(vector<double> vecX, vector<Rfactor> vecR, string filename)
   {
     ofstream ofile;
     ofile.open(filename.c_str());
 
     for (size_t i = 0; i < vecX.size(); ++i)
-      ofile << setw(15) << setprecision(5) << vecX[i] << setw(15) << setprecision(5)
-            << vecY[i] << "\n";
+      ofile << setw(15) << setprecision(5) << vecX[i]
+            << setw(15) << setprecision(5) << vecR[i].Rwp
+            << setw(15) << setprecision(5) << vecR[i].Rp
+            << "\n";
 
     ofile.close();
 

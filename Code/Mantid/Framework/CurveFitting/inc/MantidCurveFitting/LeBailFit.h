@@ -215,6 +215,8 @@ namespace CurveFitting
     /// Set up Monte Carlo random walk strategy
     void setupRandomWalkStrategy();
 
+    void setupRandomWalkStrategyTestGeometry();
+
     /// Add parameter (to a vector of string/name) for MC random walk
     void addParameterToMCMinimize(vector<string>& parnamesforMC, string parname);
 
@@ -223,17 +225,17 @@ namespace CurveFitting
                                        size_t wsindex,
                                        map<string, Parameter> funparammap,
                                        MantidVec &background, MantidVec &values,
-                                       double &rwp, double &rp);
+                                       Rfactor& rfactor);
 
     /// Calculate powder diffraction statistic Rwp
     //void calculatePowderPatternStatistic(const MantidVec &values, const vector<double> &background,
       //                                   double &rwp, double &rp);
 
     /// Determine whether the proposed value should be accepted or denied
-    bool acceptOrDeny(double currwp, double newrwp);
+    bool acceptOrDeny(Rfactor currR, Rfactor newR);
 
     /// Propose new parameters
-    bool proposeNewValues(vector<string> mcgroup, double totalrwp,
+    bool proposeNewValues(vector<string> mcgroup, Rfactor r,
                           map<string, Parameter> &curparammap, map<string, Parameter> &newparammap, bool prevBetterRwp);
 
     ///  Limit proposed value in the specified boundary
@@ -241,7 +243,7 @@ namespace CurveFitting
 
     /// Book keep the (sopposed) best MC result
     void bookKeepBestMCResult(map<string, Parameter> parammap,
-                              vector<double> &bkgddata, double rwp, size_t istep);
+                              vector<double> &bkgddata, Rfactor rfactor, size_t istep);
 
     /// Apply the value of parameters in the source to target
     void applyParameterValues(map<string, Parameter> &srcparammap,
@@ -306,7 +308,7 @@ namespace CurveFitting
     // std::map<std::string, double> mFuncParameterErrors;
 
     /// Calculate some statistics for fitting/calculating result
-    void doResultStatistics();
+    // void calChiSquare();
 
     /// =============================    =========================== ///
     // size_t mWSIndexToWrite;
@@ -343,6 +345,8 @@ namespace CurveFitting
     size_t m_numMCGroups;
 
     double m_bestRwp;
+    double m_bestRp;
+
     map<string, Parameter> m_bestParameters;
     vector<double> m_bestBackgroundData;
     size_t m_bestMCStep;
@@ -374,7 +378,7 @@ namespace CurveFitting
   void exportDomainValueToFile(FunctionDomain1DVector domain, FunctionValues values, string filename);
 
   /// Write a set of (XY) data to a column file
-  void exportXYDataToFile(vector<double> vecX, vector<double> vecY, string filename);
+  void writeRfactorsToFile(vector<double> vecX, vector<Rfactor> vecR, string filename);
 
   /// Convert a Table to space to some vectors of maps
   void convertTableWorkspaceToMaps(TableWorkspace_sptr tablews, vector<map<string, int> > intmaps,
