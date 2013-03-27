@@ -76,7 +76,7 @@ namespace Algorithms
   int RebinByPulseTimes::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string RebinByPulseTimes::category() const { return "General";}
+  const std::string RebinByPulseTimes::category() const { return "Transforms\\Rebin";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
