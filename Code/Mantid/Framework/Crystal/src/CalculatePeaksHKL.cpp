@@ -96,7 +96,7 @@ namespace Mantid
       Mantid::DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
       const bool overwrite = getProperty("OverWrite");
       std::vector<Peak> &peaks = ws->getPeaks();
-      size_t n_peaks = ws->getNumberPeaks();
+      const int n_peaks = ws->getNumberPeaks();
 
       OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
       Matrix<double> UB = o_lattice.getUB();
@@ -113,7 +113,7 @@ namespace Mantid
       }
 
       int peaksIndexed = 0;
-      for (size_t i = 0; i < n_peaks; i++)
+      for (int i = 0; i < n_peaks; i++)
       {
         Peak& peak = ws->getPeak(i);
         if (overwrite || (peak.getHKL().nullVector()))

@@ -66,7 +66,7 @@ public:
     int numberIndexed = alg.getProperty("NumIndexed");
     TS_ASSERT_EQUALS(numberIndexed, ws->getNumberPeaks());
 
-    for (size_t i = 0; i < ws->getNumberPeaks(); i++)
+    for (int i = 0; i < ws->getNumberPeaks(); i++)
     {
       Peak& peak = ws->getPeak(i);
       Mantid::Kernel::V3D expectedHKL = peak.getQSampleFrame() / (2.0 * M_PI); // Simulate the transform. UB is unity.
