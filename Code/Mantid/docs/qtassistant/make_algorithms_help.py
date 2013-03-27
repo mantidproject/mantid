@@ -97,7 +97,12 @@ def process(algos, qhp, outputdir):
         versions = algos[name]
 
         alg = mantid.FrameworkManager.createAlgorithm(name, versions[-1])
-        for category in alg.categories().split(';'):
+        alg_categories = alg.categories()
+        try:
+            alg_categories = alg_categories.split(';')
+        except AttributeError, e:
+            pass # the categories are already a list
+        for category in alg_categories:
             category = category.replace('\\', '/')
             if not categories.has_key(category):
                 categories[category] = []
