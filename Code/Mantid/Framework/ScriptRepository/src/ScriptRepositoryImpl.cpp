@@ -153,13 +153,29 @@ namespace API
     if (local_repository.empty())
       return;
 
-    // parsing the ignore pattern
+    // parsing the ignore pattern    
     std::string ignore = ignorePatterns(); 
-    boost::replace_all(ignore,"/","\\/");
-    boost::replace_all(ignore,";","|");
-    boost::replace_all(ignore,".","\\.");
-    boost::replace_all(ignore,"*",".*");
-    ignoreregex = std::string("(").append(ignore).append(")");  
+    std::vector<std::string> parts, parsedparts;
+    boost::split(parts,ignore,boost::is_any_of(";"));
+    for (std::vector<std::string>::iterator it = parts.begin();
+         it != parts.end(); 
+         it++){
+      if (it->empty()) continue; 
+      std::string aux = *it; 
+      boost::replace_all(aux,"/","\\/");
+      boost::replace_all(aux,".","\\.");
+      boost::replace_all(aux,"*",".*");
+      parsedparts.push_back(aux);
+    }
+    if (parsedparts.size() == 0)
+      ignoreregex = "";
+    else if (parsedparts.size() == 1)
+      ignoreregex = parsedparts[0]; 
+    else
+      {
+        ignore = boost::algorithm::join(parsedparts,"|");
+        ignoreregex =  std::string("(").append(ignore).append(")");
+      }
 
 
     // A valid repository must pass 3 tests:
@@ -741,16 +757,32 @@ namespace API
   */
   void ScriptRepositoryImpl::setIgnorePatterns(std::string patterns){
     ConfigServiceImpl & config = ConfigService::Instance();
-    std::string ignore = config.getString("ScriptRepositoryIgnore"); 
-    if (ignore != patterns){
+    std::string currignore = config.getString("ScriptRepositoryIgnore"); 
+    if (currignore != patterns){
       config.setString("ScriptRepositoryIgnore", patterns); 
       config.saveConfig(config.getUserFilename()); 
-      std::string newignore=patterns; 
-      boost::replace_all(ignore,"/","\\/");
-      boost::replace_all(newignore,";","|");      
-      boost::replace_all(newignore,".","\\.");
-      boost::replace_all(newignore,"*",".*");      
-      ignoreregex = std::string("(").append(newignore).append(")");
+    std::string ignore = ignorePatterns(); 
+    std::vector<std::string> parts, parsedparts;
+    boost::split(parts,ignore,boost::is_any_of(";"));
+    for (std::vector<std::string>::iterator it = parts.begin();
+         it != parts.end(); 
+         it++){
+      if (it->empty()) continue; 
+      std::string aux = *it; 
+      boost::replace_all(aux,"/","\\/");
+      boost::replace_all(aux,".","\\.");
+      boost::replace_all(aux,"*",".*");
+      parsedparts.push_back(aux);
+    }
+    if (parsedparts.size() == 0)
+      ignoreregex = "";
+    else if (parsedparts.size() == 1)
+      ignoreregex = parsedparts[0]; 
+    else
+      {
+        ignore = boost::algorithm::join(parsedparts,"|");
+        ignoreregex =  std::string("(").append(ignore).append(")");
+      }
     }
   };
   /** 
@@ -1095,12 +1127,17 @@ namespace API
     // hide everything under system folder
     if (path == "system" || path.find("system/") == 0)
       return false; 
-
-    Poco::RegularExpression re1(ignoreregex);
+    try{
+      Poco::RegularExpression re1(ignoreregex);
     
-    if (re1.match(path))
-      return false;
-    // TODO: apply the pattern ingore checking
+      if (re1.match(path))
+        return false;
+    }catch (Poco::Exception & ex){
+      g_log.debug() << "Internal error: regular expression " << ignoregex << std::endl;
+      // better to say that is valid (risking listing more than we should) than 
+      // the opposite.
+      return true;
+    }
 
     return true;
   }
