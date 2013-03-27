@@ -79,7 +79,7 @@ namespace Algorithms
     /// Calcualte the distribution of delta T in time stamps
     DataObjects::Workspace2D_sptr calDistributions(std::vector<Kernel::DateAndTime> timevec, double stepsize);
 
-    void exportLog();
+    void exportLog(API::MatrixWorkspace_sptr ws, std::vector<Kernel::DateAndTime> abstimevec, double dts);
 
     void setupEventWorkspace(int numentries, std::vector<Kernel::DateAndTime> &times, std::vector<double> values);
 

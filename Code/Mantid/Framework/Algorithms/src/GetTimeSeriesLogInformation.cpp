@@ -315,7 +315,9 @@ namespace Algorithms
 
 
   /** Export time stamps looking erroreous
-   *  @param dts: standard delta T in second
+   *  @param dts :: standard delta T in second
+   *  @param ws  ::  shared pointer to a matrix workspace, which has the log to study
+   *  @param abstimevec :: vector of log time
    *
    *  This algorithm should be reconsidered how to work with it.
    */
@@ -517,6 +519,8 @@ namespace Algorithms
 
   /** Check whether log values are changing from 2 adjacent time stamps
    *  @param delta :: if adjacent log values differs less than this number, then it is not considered as alternating
+   *  @param timevec :: vector of DateAndTime as the all the time stamps in a time series log
+   *  @param values :: vector double of as the all the values in the time series log to study.
    */
   void GetTimeSeriesLogInformation::checkLogValueChanging(vector<DateAndTime>timevec, vector<double> values,
                                                           double delta)
