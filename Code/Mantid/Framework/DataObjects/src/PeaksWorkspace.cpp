@@ -198,7 +198,7 @@ namespace Mantid
      * @param peakNum :: index of the peak to get.
      * @return a reference to a Peak object.
      */
-    API::IPeak & PeaksWorkspace::getPeak(const int peakNum)
+    Peak & PeaksWorkspace::getPeak(const int peakNum)
     {
       if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0)
       {
@@ -212,7 +212,7 @@ namespace Mantid
      * @param peakNum :: index of the peak to get.
      * @return a reference to a Peak object.
      */
-    const API::IPeak & PeaksWorkspace::getPeak(const int peakNum) const
+    const Peak & PeaksWorkspace::getPeak(const int peakNum) const
     {
       if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0)
       {
