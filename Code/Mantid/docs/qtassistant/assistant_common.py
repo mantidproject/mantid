@@ -19,6 +19,7 @@ def assertDirs(outputdir, verbose=False):
 
     for direc in (HTML_DIR, QCH_DIR, IMG_DIR):
         direc = os.path.join(outputdir, direc)
+        direc = os.path.abspath(direc)
         if not os.path.exists(direc):
             if verbose:
                 print "creating '%s'" % direc
