@@ -95,7 +95,6 @@ namespace Mantid
     {
       Mantid::DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
       const bool overwrite = getProperty("OverWrite");
-      std::vector<Peak> &peaks = ws->getPeaks();
       const int n_peaks = ws->getNumberPeaks();
 
       OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
