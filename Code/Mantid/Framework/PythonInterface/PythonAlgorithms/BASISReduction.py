@@ -21,6 +21,8 @@ import os
 MICROEV_TO_MILLIEV = 1000.0
 DEFAULT_BINS = [0., 0., 0.]
 DEFAULT_RANGE = [6.24, 6.30]
+DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce"
+DEFAULT_MASK_FILE = "BASIS_Mask.xml"
 
 class BASISReduction(PythonAlgorithm):
     def category(self):
@@ -50,7 +52,8 @@ class BASISReduction(PythonAlgorithm):
                                                 DEFAULT_BINS, 
                                                 direction=Direction.Input), 
                              "Momentum transfer binning scheme")
-        self.declareProperty("MaskGroupFileDir", "/SNS/BSS/shared/autoreduce",
+        self.declareProperty(FileProperty(name="MaskFile", defaultValue="",
+                                          action=FileAction.OptionalLoad, extensions=['.xml']),
                              "Directory location for standard masking and grouping files.")
         grouping_type = ["None", "Low-Resolution", "By-Tube"]
         self.declareProperty("GroupDetectors", "None", 
@@ -64,17 +67,21 @@ class BASISReduction(PythonAlgorithm):
         self._etBins = self.getProperty("EnergyBins").value / MICROEV_TO_MILLIEV
         self._qBins = self.getProperty("MomentumTransferBins").value
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
-        self._ancFileDir = self.getProperty("MaskGroupFileDir").value
+        self._maskFile = self.getProperty("MaskFile").value
         self._groupDetOpt = self.getProperty("GroupDetectors").value
 
         datasearch = config["datasearch.searcharchive"]
         if (datasearch != "On"):
             config["datasearch.searcharchive"] = "On"
 
-        config.appendDataSearchDir(self._ancFileDir)
+        # Handle masking file override if necessary
+        self._overrideMask = bool(self._maskFile)
+        if not self._overrideMask:
+            config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
+            self._maskFile = DEFAULT_MASK_FILE
 
         api.LoadMask(Instrument='BASIS', OutputWorkspace='BASIS_MASK', 
-                     InputFile='BASIS_Mask.xml')
+                     InputFile=self._maskFile)
 	
 	# Do normalization if run numbers are present
 	norm_runs = self.getProperty("NormRunNumbers").value
@@ -131,6 +138,11 @@ class BASISReduction(PythonAlgorithm):
                     grp_file = "BASIS_Grouping_LR.xml"
                 else:
                     grp_file = "BASIS_Grouping.xml"
+                # If mask override used, we need to add default grouping file location to
+                # search paths
+                if self._overrideMask:
+                    config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
+
                 api.GroupDetectors(InputWorkspace=self._samWs, 
                                    OutputWorkspace=self._samWs,
                                    MapFile=grp_file, Behaviour="Sum")
