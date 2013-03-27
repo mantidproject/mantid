@@ -5,6 +5,7 @@
 
 #
 from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
+from mantid.kernel import config  # To set default instrument to MAPS
 from tube_calib_fit_params import * # To handle fit parameters
 from ideal_tube import * # For ideal tube
 from tube_calib import *  # For tube calibration functions
@@ -12,12 +13,13 @@ from tube_spec import * # For tube specification class
 
 def CalibrateMaps( RunNumber ):
    '''
-   RunNumber is the five-digit run number.
+   RunNumber is the run number for the calibration.
    '''
 
    # == Set parameters for calibration ==
-
-   filename = 'MAPS'+str(RunNumber)+'.raw' # Name of calibration run
+   previousDefaultInstrument = config['default.instrument']
+   config['default.instrument']="MAPS"
+   filename = str(RunNumber) # Name of calibration run
    print "Filename",filename
    rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper 
    rangeUpper = 10000 #
@@ -74,6 +76,9 @@ def CalibrateMaps( RunNumber ):
    # == Save workspace ==
    SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMapsResult.nxs',"Result of Running MAPS Calibration")
    print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
+   
+   # == Reset dafault instrument ==
+   config['default.instrument'] = previousDefaultInstrument
 
    # ==== End of CalibrateMaps() ====
 

@@ -4,6 +4,7 @@
 # Here we run the calibration of WISH panel03 using a simple CalibrateWish function.
 #
 from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
+from mantid.kernel import config  # To set default instrument to WISH
 from ideal_tube import * # for ideal tube
 from tube_calib_fit_params import * # To handle fit parameters
 from tube_calib import *  # For tube calibration functions
@@ -11,11 +12,13 @@ from tube_spec import * # For tube specification class
 
 def CalibrateWish( RunNumber, PanelNumber ):
    '''
-   RunNumber is the run number as a string and including any leading zeros that would occur in the raw file name.
-   PanelNumber is the two-digit number of the panel being calibrated
+   RunNumber is the run number of the calibration.
+   PanelNumber is a string of two-digit number of the panel being calibrated
    '''
    # == Set parameters for calibration ==
-   filename = 'WISH'+RunNumber+".raw"
+   previousDefaultInstrument = config['default.instrument']
+   config['default.instrument']="WISH"
+   filename = str(RunNumber)
    CalibratedComponent = 'WISH/panel'+PanelNumber
 
    
@@ -58,7 +61,10 @@ def CalibrateWish( RunNumber, PanelNumber ):
    nexusName = "TubeCalibDemoWish"+PanelNumber+"Result.nxs"
    SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoWishResult.nxs',"Result of Running TubeCalibWishMerlin_Simple.py")
    print "saved calibrated workspace (CalibInstWS) into Nexus file",nexusName
+      
+   # == Reset dafault instrument ==
+   config['default.instrument'] = previousDefaultInstrument
 
    # ==== End of CalibrateWish() ====
    
-CalibrateWish( '00017701', '03' )
+CalibrateWish( 17701, '03' )
