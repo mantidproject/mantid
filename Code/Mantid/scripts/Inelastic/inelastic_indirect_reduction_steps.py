@@ -165,7 +165,7 @@ class LoadData(ReductionStep):
         else:
             if self._load_logs == True:
                 loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=True, **self._extra_load_opts)
-                logger.notice("LoadLogFiles successful")
+                logger.notice("Loaded logs")
             else:
                 loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
             loader_handle = loaded_ws.getHistory().lastAlgorithm()

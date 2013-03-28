@@ -290,7 +290,7 @@
                   <item>
                    <widget class="QCheckBox" name="ckLoadLogs">
                     <property name="text">
-                     <string>Load Log File</string>
+                     <string>Load Logs</string>
                     </property>
                    </widget>
                   </item>
