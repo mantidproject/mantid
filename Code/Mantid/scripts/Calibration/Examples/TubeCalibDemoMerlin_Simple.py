@@ -10,6 +10,7 @@
 # The workspace with calibrated instrument is saved to a Nexus file
 #
 from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
+from mantid.kernel import config  # To set default instrument to MERLIN
 from tube_calib_fit_params import * # To handle fit parameters
 from ideal_tube import * # For ideal tube
 from tube_calib import *  # For tube calibration functions
@@ -17,12 +18,13 @@ from tube_spec import * # For tube specification class
 
 def CalibrateMerlin( RunNumber ):
    '''
-   RunNumber is the run number as a string and including any leading zeros that would occur in the raw file name.
+   RunNumber is the run number of the calibration.
    '''
 
    # == Set parameters for calibration ==
-
-   filename = 'MER'+str(RunNumber) # Name of calibration run. 
+   previousDefaultInstrument = config['default.instrument']
+   config['default.instrument']="MERLIN"
+   filename = str(RunNumber) # Name of calibration run. 
    rangeLower = 3000 # Integrate counts in each spectra from rangeLower to rangeUpper 
    rangeUpper = 20000 #
 
@@ -79,6 +81,9 @@ def CalibrateMerlin( RunNumber ):
    # == Save workspace ==
    SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Simple.py")
    print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
+   
+   # == Reset dafault instrument ==
+   config['default.instrument'] = previousDefaultInstrument
    
    # ==== End of CalibrateMerlin() ====
 
