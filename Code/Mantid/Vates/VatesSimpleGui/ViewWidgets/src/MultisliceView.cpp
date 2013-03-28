@@ -146,12 +146,17 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> srcs = smModel->findItems<pqPipelineSource *>();
   pqPipelineSource *src1 = NULL;
+  pqPipelineSource *src2 = NULL;
   foreach (pqPipelineSource *src, srcs)
   {
     const QString name(src->getProxy()->GetXMLName());
     if (name.contains("MDEWRebinningCutter"))
     {
       src1 = src;
+    }
+    if (name.contains("ScaleWorkspace"))
+    {
+      src2 = src;
     }
   }
   if (NULL == src1)
@@ -174,6 +179,34 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
     geomXML = std::string(inGeomXML);
   }
 
+  if (NULL != src2)
+  {
+    // Need to see if scaling is applied to axis
+    QString scalingProperty("Scaling Factor");
+    switch (axisIndex)
+    {
+    case 0:
+      scalingProperty.prepend("X ");
+      break;
+    case 1:
+      scalingProperty.prepend("Y ");
+      break;
+    case 2:
+      scalingProperty.prepend("Z ");
+      break;
+    default:
+      break;
+    }
+
+    std::vector<double> scaling = vtkSMPropertyHelper(src2->getProxy(),
+                                                      scalingProperty,
+                                                      true).GetDoubleArray();
+
+    if (!scaling.empty())
+    {
+      sliceOffsetOnAxis /= scaling[0];
+    }
+  }
   const double *orient = this->mainView->GetSliceNormal(axisIndex);
 
   // Construct origin vector from orientation vector
