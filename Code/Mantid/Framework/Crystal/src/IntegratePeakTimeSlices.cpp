@@ -1592,6 +1592,7 @@ namespace Mantid
     {
       UNUSED_ARG( ROW );
       UNUSED_ARG( COL );
+      UNUSED_ARG( StatBase );
       double minCount,
              maxCount;
       MantidVec X = xvals.access();

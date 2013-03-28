@@ -191,7 +191,7 @@ namespace Mantid
        Kernel::DblMatrix UB= ol.getUB();
        vector< vector<int> > AlreadyDonePeaks;
        bool done = false;
-       int ErrPos = 1;//Used to determine position in code of a throw
+       int ErrPos =1;//Used to determine position in code of a throw
        while( !done)
        {
          for( size_t hoffset=0;hoffset<hOffsets.size();hoffset++)

@@ -66,7 +66,7 @@ public:
         alg.execute();
         alg.setProperty("OutputWorkspace","abcd");
         DataObjects::PeaksWorkspace_sptr peaks =alg.getProperty("OutputWorkspace");
-        std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<std::endl;
+        //std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<std::endl;
 
         LoadIsawUB loadUB;
         loadUB.initialize();
@@ -98,38 +98,43 @@ public:
         peakErrs.setParameter("SampleZOffset",0.0);
 
         const int NPeaks(peaks->getNumberPeaks());
-        std::vector<double>out(NPeaks);
-        std::vector<double>out1(NPeaks);
-        std::vector<double> xValues(NPeaks);
-        for( int i=0; i<peaks->getNumberPeaks();i++)
-          xValues[i]=i;
+        std::vector<double>out(3*NPeaks);
+        std::vector<double>out1(3*NPeaks);
+        std::vector<double> xValues(3*NPeaks);
+        for( int i=0; i<NPeaks ;i++)
+        {
+          xValues[3*i]=i;
+          xValues[3*i+1]=i;
+          xValues[3*i+2]=i;
+        }
 
-        peakErrs.function1D( out.data(),xValues.data(),(size_t) peaks->getNumberPeaks());
+        peakErrs.function1D( out.data(),xValues.data(),(size_t) (3*NPeaks));
 
-       // std::cout<<out[0]<<","<<out[1]<<","<<out[2]<<","<<out[3]<<","<<out[4]<<std::endl;
+      //       std::cout<<out[0]<<","<<out[4]<<","<<out[8]<<","<<out[12]<<","<<out[16]<<",";
+      // std::cout<<std::endl;
 
-       TS_ASSERT_DELTA(-0.021081,   out[0], .01 );
-        TS_ASSERT_DELTA( -0.00969701,out[1], .01 );
-        TS_ASSERT_DELTA(-0.0170111, out[2], .01 );
-       TS_ASSERT_DELTA( -0.0237843, out[3], .01 );
-        TS_ASSERT_DELTA( -0.0277816, out[4], .01 );
+        TS_ASSERT_DELTA(-0.0074152,   out[0], .01 );
+        TS_ASSERT_DELTA( -0.00969701,out[4], .01 );
+        TS_ASSERT_DELTA(0.0120299, out[8], .01 );
+        TS_ASSERT_DELTA( -0.0060874, out[12], .01 );
+        TS_ASSERT_DELTA( -0.0103673, out[16], .01 );
 
-        boost::shared_ptr<Jacob>Jac(new Jacob ((int)peakErrs.nParams(), (int)peaks->getNumberPeaks()));
-        peakErrs.functionDeriv1D(Jac.get(),xValues.data(),(size_t)peaks->getNumberPeaks());
+        boost::shared_ptr<Jacob>Jac(new Jacob ((int)peakErrs.nParams(), (int)(3*NPeaks)));
+        peakErrs.functionDeriv1D(Jac.get(),xValues.data(),(size_t)(3*NPeaks));
 
-     TS_ASSERT_DELTA( Jac->get(1,0), -1.75829, .4);
-        TS_ASSERT_DELTA( Jac->get(3,1), 6.862,.4);
-        TS_ASSERT_DELTA( Jac->get(10,2),-16.30, .4);
-        TS_ASSERT_DELTA( Jac->get(55,3), 0,.1);
-        TS_ASSERT_DELTA( Jac->get(85,3),0,.1 );
-        TS_ASSERT_DELTA( Jac->get(235,4), 0.0360823,.1);
-        TS_ASSERT_DELTA( Jac->get(110,5),0, .1);
-        TS_ASSERT_DELTA( Jac->get(100,0), -1.22155, .4);
-        TS_ASSERT_DELTA( Jac->get(200,1), -1.54298, .4);
-        TS_ASSERT_DELTA( Jac->get(160,2), -1.48504,.1);
-        TS_ASSERT_DELTA( Jac->get(80,4),0 ,.1);
+        TS_ASSERT_DELTA( Jac->get(1,0), -1.39557, .4);
+        TS_ASSERT_DELTA( Jac->get(3,1),2.24071,.4);
+        TS_ASSERT_DELTA( Jac->get(10,2),-6.80222, .4);
+        TS_ASSERT_DELTA( Jac->get(55,3), .188203,.1);
+        TS_ASSERT_DELTA( Jac->get(85,3),.127,.1 );
+        TS_ASSERT_DELTA( Jac->get(235,4), -.05,.1);
+        TS_ASSERT_DELTA( Jac->get(110,5),.0678, .1);
+        TS_ASSERT_DELTA( Jac->get(100,0), -1.4782, .4);
+        TS_ASSERT_DELTA( Jac->get(200,1), -8.24138, .4);
+        TS_ASSERT_DELTA( Jac->get(160,2), -12.7745,.1);
+        TS_ASSERT_DELTA( Jac->get(80,4),-.0943 ,.1);
 
-        /*  std::cout<<"Derivatives"<<std::endl;
+        /*   std::cout<<"Derivatives"<<std::endl;
         std::cout<< Jac->get(1,0)<<std::endl;
         std::cout<< Jac->get(3,1)<<std::endl;
         std::cout<< Jac->get(10,2)<<std::endl;
@@ -141,20 +146,20 @@ public:
         std::cout<< Jac->get(200,1)<<std::endl;
         std::cout<< Jac->get(160,2)<<std::endl;
         std::cout<< Jac->get(80,4)<<std::endl;
-*/
-       /* double offset =.0001;
-        for( size_t param=1; param < peakErrs.nParams(); param+=2)
+
+         double offset =.0001;
+        for( size_t param=0; param < peakErrs.nParams(); param++)
         {
-         //std::cout<<"Result for param="<<param<<std::endl;
+         // std::cout<<"Result for param="<<param<< peakErrs.parameterName(param)<<std::endl;
           double paramValSav= peakErrs.getParameter(param);
           peakErrs.setParameter(param, paramValSav+offset);
-          peakErrs.function1D( out.data(),xValues.data(),(size_t) peaks->getNumberPeaks());
+          peakErrs.function1D( out.data(),xValues.data(),(size_t) 3*NPeaks);
 
           peakErrs.setParameter(param, paramValSav-offset);
-          peakErrs.function1D( out1.data(),xValues.data(),(size_t) peaks->getNumberPeaks());
+          peakErrs.function1D( out1.data(),xValues.data(),(size_t) 3*NPeaks);
 
           peakErrs.setParameter(param, paramValSav);
-          for( int p = 0; p <= peaks->getNumberPeaks(); p += 40 )
+          for( int p = 0; p <= 3*peaks->getNumberPeaks(); p += 10 )
           {
             double calc= (out[p] - out1[p]) / (2*offset);
             //std::cout<<"("<<calc<<","<<Jac->get(p,param)<<")";
@@ -164,15 +169,19 @@ public:
 
             if( param >= 3) delta =.003;
             if( fabs( calc-Jac->get(p,param)) >  delta)
-              std::cout<<"param and peak="<<param<<","<<p<<","<< fabs( calc-Jac->get(p,param))<<std::endl;
-            TS_ASSERT_DELTA( calc,Jac->get(p,param), delta );//NOTE: may differ a LOT when 2 of hkl values are about as
+            {   std::cout<<"param and peak="<<param<<","<<p<<","<< fabs( calc-Jac->get(p,param))<<std::endl;
+                std::cout<<"      out2,out1,offset="<<out1[p]<<","<<out[p]<<","<<offset<<","<<Jac->get(p,param)<<std::endl;
+          //  TS_ASSERT_DELTA( calc,Jac->get(p,param), delta );//NOTE: may differ a LOT when 2 of hkl values are about as
                                                              //far from int on different sides
+            }
           }
-          if( param > 2)
-            offset =.005;
+          if( param >= 2)
+            offset =.05;
+          if(param >= 5)
+            offset =.001;
 
-        }
-      */
+        }*/
+
       }
     };
 
