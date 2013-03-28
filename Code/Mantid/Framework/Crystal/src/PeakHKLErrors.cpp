@@ -558,7 +558,7 @@ namespace Mantid
               Matrix<double> InvGon = InvGonRot*peak.getGoniometerMatrix();
               InvGon.Invert();
               V3D  DGonx =(UBinv * InvGon * InvGonRotzMat * InvGonRotyMat
-                                          * DerivRotationMatrixAboutRegAxis(-GonRotx, 'x') *// - gives inverse of GonRot
+                                          * DerivRotationMatrixAboutRegAxis(-GonRotx, 'x') * // - gives inverse of GonRot
                                            peak.getQLabFrame())*-1;
 
               V3D DGony  = (UBinv * InvGon * InvGonRotzMat *
