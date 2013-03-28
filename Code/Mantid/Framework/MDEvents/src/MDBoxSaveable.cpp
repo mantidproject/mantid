@@ -19,9 +19,8 @@ namespace MDEvents
    }
 
  //-----------------------------------------------------------------------------------------------
- /** Call to save the data (if needed) and release the memory used.
+ /** Physical save the whole data. Tries to load any previous data from HDD 
   *  Called from the DiskBuffer.
-  *  If called directly presumes to know its file location and [TODO: refactor this] needs the file to be open correctly on correct group 
   */
   void MDBoxSaveable::save()const 
   {
@@ -35,6 +34,23 @@ namespace MDEvents
 
       m_MDNode->saveAt(fileIO,this->getFilePosition());
 
+  }
+ 
+/** Loads the data from HDD if these data were not loaded before. */
+ void MDBoxSaveable::load()
+ {
+      API::IBoxControllerIO *fileIO = m_MDNode->getBoxController()->getFileIO(); 
+
+    // Is the data in memory right now (cached copy)?
+    if (!m_isLoaded)
+    {
+        m_MDNode->loadAndAddFrom(fileIO,this->m_fileIndexStart,this->m_fileNumEvents);
+        this->m_isLoaded = true;
+    }
+
+  }
+
+// old save parts
 //  //      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
 //
 //
@@ -59,22 +75,7 @@ namespace MDEvents
 //     if(data.size()>0)  throw std::runtime_error(" Attempt to save undefined event");
 //   
 //   
-  }
  
-//
- void MDBoxSaveable::load()
- {
-      API::IBoxControllerIO *fileIO = m_MDNode->getBoxController()->getFileIO(); 
-
-    // Is the data in memory right now (cached copy)?
-    if (!m_isLoaded)
-    {
-        m_MDNode->loadAndAddFrom(fileIO,this->m_fileIndexStart,this->m_fileNumEvents);
-        this->m_isLoaded = true;
-    }
-
-  }
-
 
 //
 //    //---------------------------------------------------------------------------------------------

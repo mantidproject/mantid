@@ -72,6 +72,7 @@ namespace Kernel
     virtual void setFilePosition(uint64_t newPos,size_t newSize,bool wasSaved)=0;
     //-----------------------------------------------------------------------------------------------
 
+
     /// Save the data - to be overriden
     virtual void save()const =0;
   

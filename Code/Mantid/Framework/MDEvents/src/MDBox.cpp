@@ -13,7 +13,7 @@ namespace Mantid
 namespace MDEvents
 {
 
-
+  /**Destructor */ 
   TMDE(MDBox)::~MDBox()
   {
       if(m_Saveable)delete m_Saveable;
@@ -56,6 +56,11 @@ namespace MDEvents
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
 
     if(nBoxEvents!=UNDEF_SIZET) data.reserve(nBoxEvents);
+
+    if(splitter->isFileBacked())
+        this->setFileBacked();
+
+
   }
 
 
@@ -69,7 +74,12 @@ namespace MDEvents
      data(other.data),
      m_bIsMasked(other.m_bIsMasked)
   {
-      //TODO: inheriting Saveable logic on the basis of otherBC
+    if(otherBC) // may be absent in some tests but generally present
+    {
+        if(otherBC->isFileBacked())
+            this->setFileBacked();
+
+    }
   }
 
 
