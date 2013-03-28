@@ -189,6 +189,7 @@ if __name__ == "__main__":
 
     # initialize mantid
     sys.path.append(options.mantidpath)
+    os.environ['MANTIDPATH'] = options.mantidpath
     import mantid.api
     algos = mantid.api.AlgorithmFactory.getRegisteredAlgorithms(True)
 

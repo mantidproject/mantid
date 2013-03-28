@@ -80,6 +80,7 @@ if __name__ == "__main__":
 
     # initialize mantid
     sys.path.append(options.mantidpath)
+    os.environ['MANTIDPATH'] = options.mantidpath
     import mantid.api
     functions = mantid.api.FunctionFactory.getFunctionNames()
 
