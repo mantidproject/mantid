@@ -156,7 +156,7 @@ namespace MDEvents
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string IntegrateEllipsoids::category() const 
   { 
-    return "General";
+    return "Crystal";
   }
 
   //---------------------------------------------------------------------

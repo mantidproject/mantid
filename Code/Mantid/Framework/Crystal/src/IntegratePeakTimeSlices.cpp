@@ -1583,12 +1583,9 @@ namespace Mantid
        return NewRadius;
     }
 
-    void DataModeHandler::setHeighHalfWidthInfo( Mantid::MantidVecPtr &xvals,
+    void DataModeHandler::setHeightHalfWidthInfo( Mantid::MantidVecPtr &xvals,
                                                  Mantid::MantidVecPtr &yvals,
-                                                 Mantid::MantidVecPtr &counts,
-                                                 double ROW,
-                                                 double COL,
-                                                 std::vector<double>&StatBase)
+                                                 Mantid::MantidVecPtr &counts)
     {
       double minCount,
              maxCount;
@@ -2084,7 +2081,7 @@ namespace Mantid
       ws->setData(0, yvals, errs);
       ws->setData(1, xvals);
       ws->setData(2, Yvals);
-      AttributeValues->setHeighHalfWidthInfo(xvals,Yvals,yvals,ROW,COL, StatBase);
+      AttributeValues->setHeightHalfWidthInfo(xvals,Yvals,yvals);
 
       ws->setName("index0");
       StatBase[IStartRow] = minRow;
