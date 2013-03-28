@@ -97,9 +97,11 @@ class BASISReduction(PythonAlgorithm):
 	    # Process normalization runs
 	    self._norm_run_list = self._getRuns(norm_runs)
 	    for norm_set in self._norm_run_list:
+                extra_extension = "_norm"
                 self._normWs = self._makeRunName(norm_set[0])
+                self._normWs += extra_extension
 	        self._normMonWs = self._normWs + "_monitors"
-                self._sumRuns(norm_set, self._normWs, self._normMonWs)
+                self._sumRuns(norm_set, self._normWs, self._normMonWs, extra_extension)
 	        self._calibData(self._normWs, self._normMonWs)
 	    
 	    api.Rebin(InputWorkspace=self._normWs, OutputWorkspace=self._normWs,
@@ -193,9 +195,11 @@ class BASISReduction(PythonAlgorithm):
         """
         return self._short_inst + str(run) 
 
-    def _sumRuns(self, run_set, sam_ws, mon_ws):
+    def _sumRuns(self, run_set, sam_ws, mon_ws, extra_ext=None):
         for run in run_set:
             ws_name = self._makeRunName(run)
+            if extra_ext is not None:
+                ws_name += extra_ext
             mon_ws_name = ws_name  + "_monitors"
             run_file = self._makeRunFile(run)
                 
