@@ -156,9 +156,7 @@ namespace Kernel
             fileIndexStart=this->allocate(NumObjEvents);
            // Write to the disk; this will call the object specific save function;
           // Prevent simultaneous file access (e.g. write while loading)
-            m_fileMutex.lock();
             obj->saveAt(fileIndexStart,NumObjEvents);
-            m_fileMutex.unlock();	  
         }
         else
         {
@@ -167,20 +165,16 @@ namespace Kernel
           {
           // Event list changed size. The MRU can tell us where it best fits now.
             fileIndexStart= this->relocate(obj->getFilePosition(), NumFileEvents, NumObjEvents);
-            m_fileMutex.lock();
            // Write to the disk; this will call the object specific save function;
             obj->saveAt(fileIndexStart,NumObjEvents);
-            m_fileMutex.unlock();	  
           }       
           else // despite object size have not been changed, it can be modified other way. In this case, the method which changed the data should set dataChanged ID
           {
             if(obj->isDataChanged())
             {
               fileIndexStart = obj->getFilePosition();
-              m_fileMutex.lock(); 
               // Write to the disk; this will call the object specific save function;
               obj->saveAt(fileIndexStart,NumObjEvents);
-              m_fileMutex.unlock(); 
               // this is questionable operation, which adjust file size in case when the file postions were allocated externaly
               if(fileIndexStart+NumObjEvents>m_fileLength)m_fileLength=fileIndexStart+NumObjEvents;
             }
@@ -208,9 +202,7 @@ namespace Kernel
     {
       // NXS needs to flush the writes to file by closing and re-opening the data block.
       // For speed, it is best to do this only once per write dump, using last object saved
-      m_fileMutex.lock();	  
       obj->flushData();
-      m_fileMutex.unlock();	  
     }
 
     // Exchange with the new map you built out of the not-written blocks.

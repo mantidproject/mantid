@@ -11,6 +11,7 @@ namespace API
   /** The header describes interface to IO Operations perfomed by the box controller 
    *  May be replaced by a boost filestream in a future. 
    *  It also currently assumes disk buffer usage. 
+   *  Disk buffer also assumes that actual IO operations performed by the class, inhereted from this one are thread-safe
    *
    * @date March 21, 2013
 

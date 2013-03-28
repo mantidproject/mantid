@@ -41,7 +41,8 @@ class MDBoxSaveableTest : public CxxTest::TestSuite
   static std::string do_deleteNexusFile(std::string barefilename = "MDBoxTest.nxs")
   {
     std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + barefilename);
-    if (Poco::File(filename.c_str()).exists())  Poco::File(filename.c_str()).remove();
+    if (Poco::File(filename.c_str()).exists())  
+        Poco::File(filename.c_str()).remove();
     return filename;
   }
 
@@ -84,7 +85,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
    * @param barefilename :: file to save to (no path)
    * @return filename with full path that was saved.
    * */
-  std::string do_saveNexus(bool goofyWeights = true, std::string barefilename = "MDBoxTest.nxs")
+  std::string do_createNexus(bool goofyWeights = true, std::string barefilename = "MDBoxTest.nxs")
   {
     // Box with 1000 events evenly spread
     MDBox<MDLeanEvent<3>,3> b(sc.get());
@@ -122,7 +123,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     MDBox<MDLeanEvent<3>,3> c(sc.get());
     TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
 
-    std::string fileName = do_saveNexus();
+    std::string fileName = do_createNexus();
     // Start a class which loads NXS file
     auto loader = new BoxControllerNxSIO(sc);
     loader->setDataType(c.getCoordType(),c.getEventType());
@@ -178,6 +179,10 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     
 
   }
+//---------------------------------------------------------------------------------------------------------------
+// TESTS BELOW ARE NOT UNIT TESTS ANY MORE AS THE UNIT FUNCTIONALITY IS TESTED ELSEWHERE
+// THEY STILL LEFT HERE AS SIMPLIFIED SYSTEM TESTS 
+//---------------------------------------------------------------------------------------------------------------
 //
   //-----------------------------------------------------------------------------------------
   /** If a MDBox is file-backed, test that
@@ -192,10 +197,10 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     MDBox<MDLeanEvent<3>,3> c(bc.get(), 0);
     auto loader = new BCTestHelpers::BoxControllerDummyIO(bc);
     loader->setDataType(c.getCoordType(),c.getEventType());
+    loader->setWriteBufferSize(10000);
 
     // Create and open the test dummy file with 1000 floats in it 
     bc->setFileBacked(loader,"existingDummy");
-    bc->setCacheParameters(10000);
     c.setFileBacked(0,1000,true);
 
 
@@ -337,318 +342,272 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     }
 
   }
-//---------------------------------------------------------------------------------------------------------------
-// TESTS BELOW ARE NOT UNIT TESTS ANY MORE AS THE UNIT FUNCTIONALITY IS TESTED ELSEWHERE
-// THEY STILL LEFT HERE AS SIMPLIFIED SYSTEM TESTS 
-//---------------------------------------------------------------------------------------------------------------
 
-//
-//
-//  //-----------------------------------------------------------------------------------------
-//  /** Create a test .NXS file with some data for a MDBox<3>.
-//   * 1000 events starting at position 500 of the file are made.
-//   * Each event is spread evenly around a 10x10x10 region from 0.5 to 9.5 in each direction
-//   * Then the file is open appropriately and returned.
-//   *
-//   * @param goofyWeights :: weights increasing from 0 to 999
-//   * @param barefilename :: file to save to (no path)
-//   * @param box :: MDBox3 that will get set to be file-backed
-//   * @return ptr to the NeXus file object
-//   * */
-//  static ::NeXus::File * do_saveAndOpenNexus(MDBox<MDLeanEvent<3>,3> & box,
-//      std::string barefilename = "MDBoxTest.nxs", bool goofyWeights = true)
-//  {
-//    // Create the NXS file
-//    std::string filename = do_saveNexus(goofyWeights, barefilename);
-//    // Open the NXS file
-//    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_RDWR);
-//    file->openGroup("my_test_group", "NXdata");
-//    // Must get ready to load in the data
-//    API::BoxController::openEventNexusData(file);
-//
-//    // Set it in the BoxController
-//    if (box.getBoxController())
-//      box.getBoxController()->setFile(file,filename, 2000);
-//
-//    // Make the box know where it is in the file
-//    box.setFilePosition(500, 1000);
-//    // This would be set on loading. Only makes sense with GoofyWeights == false
-//    box.setSignal(1000.0);
-//    box.setErrorSquared(1000.0);
-//
-//    return file;
-//  }
-//
-//
-//
-//
-//  //-----------------------------------------------------------------------------------------
-//  /** Set up the file back end and xest accessing data */
-//  void xest_fileBackEnd()
-//  {
-//    // Create a box with a controller for the back-end
-//    BoxController_sptr bc(new BoxController(3));
-//
-//    // Handle the disk DiskBuffer values
-//    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
-//    DiskBuffer & dbuf = bc->getDiskBuffer();
-//    // It is empty now
-//    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-//
-//    // Create and open the test NXS file
-//    MDBox<MDLeanEvent<3>,3> c(bc, 0);
-//    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
-//    ::NeXus::File * file = do_saveAndOpenNexus(c);
-//
-//    // Set the stuff that is handled outside the box itself
-//    c.setSignal(1234.5); // fake value loaded from disk
-//    c.setErrorSquared(456.78);
-//
-//    // Now it gives the cached value
-//    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
-//    TS_ASSERT_DELTA( c.getSignal(), 1234.5, 1e-5);
-//    TS_ASSERT_DELTA( c.getErrorSquared(), 456.78, 1e-5);
-//    TSM_ASSERT("Data is not flagged as busy", !c.isBusy());
-//    TSM_ASSERT("System expects that data were saved ",c.wasSaved());
-//
-//    // This should actually load the events from the file
-//    const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
-//    TSM_ASSERT("Data accessed and flagged as modified", c.isBusy());
-//    // Try a couple of events to see if they are correct
-//    TS_ASSERT_EQUALS( events.size(), 1000);
-//    if (events.size() != 1000) return;
-//    TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
-//    TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
-//    TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
-//
-//    // The box's data is busy
-//    TS_ASSERT( c.isBusy() );
-//    // Done with the data.
-//    c.releaseEvents();
-//    TS_ASSERT( !c.isBusy() );
-//    // Something in the to-write buffer
-//    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 1000);
-//
-//     // Now this actually does it
-//    c.refreshCache();
-//    // The real values are back
-//    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
-//    TS_ASSERT_DELTA( c.getSignal(), 499500.0, 1e-2);
-//    TS_ASSERT_DELTA( c.getErrorSquared(), 500000.0, 1e-2);
-//
-//     // This should NOT call the write method since we had const access. Hard to test though!
-//    dbuf.flushCache();
-//    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-//
-//    file->close();
-//    do_deleteNexusFile();
-//  }
-//
-//
-//  //-----------------------------------------------------------------------------------------
-//  /** Set up the file back end and test accessing data.
-//   * This time, use no DiskBuffer so that reading/loading is done within the object itself */
-//  void xest_fileBackEnd_noMRU()
-//  {
-//    // Create a box with a controller for the back-end
-//    BoxController_sptr bc(new BoxController(3));
-//
-//    // Handle the disk DiskBuffer values
-//    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0);
-//    // DiskBuffer won't be used
-////    TS_ASSERT( !bc->useWriteBuffer());
-//    DiskBuffer & dbuf = bc->getDiskBuffer();
-//    // It is empty now
-//    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-//
-//    // Create and open the test NXS file
-//    MDBox<MDLeanEvent<3>,3> c(bc, 0);
-//    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
-//    ::NeXus::File * file = do_saveAndOpenNexus(c);
-//
-//    // Set the stuff that is handled outside the box itself
-//    c.setSignal(1234.5); // fake value loaded from disk
-//    c.setErrorSquared(456.78);
-//
-//    // Now it gives the cached value
-//    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
-//    TS_ASSERT_DELTA( c.getSignal(), 1234.5, 1e-5);
-//    TS_ASSERT_DELTA( c.getErrorSquared(), 456.78, 1e-5);
-//    TSM_ASSERT("Data is not flagged as modified", !c.isDataChanged());
-//
-//    // This should actually load the events from the file
-//    const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
-//    TSM_ASSERT("Data is STILL not flagged as modified", !c.isDataChanged());
-//    // Try a couple of events to see if they are correct
-//    TS_ASSERT_EQUALS( events.size(), 1000);
-//    if (events.size() != 1000) return;
-//    TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
-//    TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
-//    TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
-//
-//  //  TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  dbuf.getWriteBufferUsed(), 0);
-//    TSM_ASSERT_EQUALS( "DiskBuffer has this object inside",  dbuf.getWriteBufferUsed(), 1000);
-//    TSM_ASSERT("Data is busy", c.isBusy() );
-//    TSM_ASSERT("Data is in memory", c.getInMemory() );
-//    // Done with the data.
-//    c.releaseEvents();
-//    TSM_ASSERT("Data is no longer busy", !c.isBusy() );
-//    TSM_ASSERT("Data stillin memory", c.getInMemory() );
-//    dbuf.flushCache();
-//    TSM_ASSERT("Data is not in memory", !c.getInMemory() );
-//    TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  dbuf.getWriteBufferUsed(), 0);
-//
-//    file->close();
-//    do_deleteNexusFile();
-//  }
-//
-//
-//  //-----------------------------------------------------------------------------------------
-//  /** Set up the file back end and test accessing data
-//   * in a non-const way, and writing it back out*/
-//  void xest_fileBackEnd_nonConst_access()
-//  {
-//    // Create a box with a controller for the back-end
-//    BoxController_sptr bc(new BoxController(3));
-//
-//    // Handle the disk DiskBuffer values
-//    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
-//    DiskBuffer & dbuf = bc->getDiskBuffer();
-//    // It is empty now
-//    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-//
-//    // A new empty box.
-//    MDBox<MDLeanEvent<3>,3> c(bc, 0);
-//
-//    // Create and open the test NXS file
-//    ::NeXus::File * file = do_saveAndOpenNexus(c);
-//
-//    // The # of points (from the file, not in memory)
-//    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
-//    TSM_ASSERT("Data is not flagged as modified", !c.isDataChanged());
-//
-//    // Non-const access to the events.
-//    std::vector<MDLeanEvent<3> > & events = c.getEvents();
-//    TSM_ASSERT("Data is flagged as modified", c.isDataChanged());
-//    TS_ASSERT_EQUALS( events.size(), 1000);
-//    if (events.size() != 1000) return;
-//    TS_ASSERT_DELTA( events[123].getSignal(), 123.0, 1e-5);
-//
-//    // Modify the event
-//    events[123].setSignal(456.0);
-//
-//    // Done with the events
-//    c.releaseEvents();
-//
-//    // Flushing the cache will write out the events.
-//    dbuf.flushCache();
-//
-//    // Now let's pretend we re-load that data into another box
-//    MDBox<MDLeanEvent<3>,3> c2(bc, 0);
-//    c2.setFilePosition(500, 1000);
-// 
-//
-//    // Is that event modified?
-//    std::vector<MDLeanEvent<3> > & events2 = c2.getEvents();
-//    TS_ASSERT_EQUALS( events2.size(), 1000);
-//    if (events2.size() != 1000) return;
-//    TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
-//
-//    file->close();
-//    do_deleteNexusFile();
-//  }
-//
-//  
-//
-//
-//  //-----------------------------------------------------------------------------------------
-//  /** Set up the file back end and xest accessing data
-//   * where the number of events in the box is reduced or increased. */
-//  void xest_fileBackEnd_nonConst_EventListChangesSize()
-//  {
-//    // Create a box with a controller for the back-end
-//    BoxController_sptr bc(new BoxController(3));
-//
-//    // Handle the disk DiskBuffer values
-//    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
-//    DiskBuffer & dbuf = bc->getDiskBuffer();
-//    // It is empty now
-//    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-//
-//    // A new empty box.
-//    MDBox<MDLeanEvent<3>,3> c(bc, 0);
-//
-//    // Create and open the test NXS file
-//    ::NeXus::File * file = do_saveAndOpenNexus(c);
-//
-//    // The # of points (from the file, not in memory)
-//    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
-//    TSM_ASSERT("Data is not flagged as modified", !c.isDataChanged());
-//
-//    // Non-const access to the events.
-//    std::vector<MDLeanEvent<3> > & events = c.getEvents();
-//    TSM_ASSERT("Data is flagged as modified", c.isDataChanged());
-//    TS_ASSERT_EQUALS( events.size(), 1000);
-//    if (events.size() != 1000) return;
-//    TS_ASSERT_DELTA( events[123].getSignal(), 123.0, 1e-5);
-//
-//    // Modify an event
-//    events[123].setSignal(456.0);
-//    // Also change the size of the event list
-//    events.resize(600);
-//
-//    // Done with the events
-//    c.releaseEvents();
-//
-//    // Flushing the cache will write out the events.
-//    dbuf.flushCache();
-//
-//    // The size on disk should have been changed (but not the position since that was the only free spot)
-//    TS_ASSERT_EQUALS( c.getFilePosition(), 500);
-//    TS_ASSERT_EQUALS( c.getTotalDataSize(), 600);
-//    TS_ASSERT_EQUALS( c.getDataMemorySize(), 0);
-//    TS_ASSERT_EQUALS( c.getNPoints(), 600);
-//
-//    // Now let's pretend we re-load that data into another box
-//    MDBox<MDLeanEvent<3>,3> c2(bc, 0);
-//    c2.setFilePosition(500, 600);
-//    // Is that event modified?
-//    std::vector<MDLeanEvent<3> > & events2 = c2.getEvents();
-//    TS_ASSERT_EQUALS( events2.size(), 600);
-//    if (events2.size() != 600) return;
-//    TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
-//
-//    // Now we GROW the event list
-//    events2.resize(1500);
-//    events2[1499].setSignal(789.0);
-//    // And we finish and write it out
-//    c2.releaseEvents();
-//    dbuf.flushCache();
-//    // The new event list should have ended up at the end of the file
-//    TS_ASSERT_EQUALS( c2.getFilePosition(), 2000);
-//    TS_ASSERT_EQUALS( c2.getDataMemorySize(), 0);
-//    TS_ASSERT_EQUALS( c2.getTotalDataSize(), 1500);
-//    // The file has now grown.
-//    TS_ASSERT_EQUALS( dbuf.getFileLength(), 3500);
-//
-//    // This counts the number of events actually in the file.
-//    TS_ASSERT_EQUALS( file->getInfo().dims[0], 3500);
-//
-//    // Now let's pretend we re-load that data into a 3rd box
-//    MDBox<MDLeanEvent<3>,3> c3(bc, 0);
-//    c3.setFilePosition(2000, 1500);
-//    // Is that event modified?
-//    const std::vector<MDLeanEvent<3> > & events3 = c3.getEvents();
-//    TS_ASSERT_EQUALS( events3.size(), 1500);
-//    TS_ASSERT_DELTA( events3[1499].getSignal(), 789.0, 1e-5);
-//    c3.releaseEvents();
-//
-//    file->closeData();
-//    file->close();
-//    do_deleteNexusFile();
-//  }
-//
-//
+
+
+  //-----------------------------------------------------------------------------------------
+  /** Create a test .NXS file with some data for a MDBox<3>.
+   * 1000 events starting at position 500 of the file are made.
+   * Each event is spread evenly around a 10x10x10 region from 0.5 to 9.5 in each direction
+   * Then the file is open appropriately and returned.
+   *
+   * @param goofyWeights :: weights increasing from 0 to 999
+   * @param barefilename :: file to save to (no path)
+   * @param box :: MDBox3 that will get set to be file-backed
+   * @return ptr to the NeXus file object
+   * */
+  void do_createNeXusBackedBox(MDBox<MDLeanEvent<3>,3> & box,BoxController_sptr bc,
+      std::string barefilename = "MDBoxTest.nxs", bool goofyWeights = true)
+  {
+    // Create the NXS file
+    std::string filename = do_createNexus(goofyWeights, barefilename);
+
+  
+    // Must get ready to load in the data
+    auto loader  =new BoxControllerNxSIO(bc);
+    loader->setDataType(box.getCoordType(),box.getEventType());
+
+    // Make BoxController file based
+    bc->setFileBacked(loader,filename);
+    // Handle the disk DiskBuffer values
+    bc->getFileIO()->setWriteBufferSize(10000);
+
+
+    // Make the box know where it is in the file
+    box.setFileBacked(500,1000,true);
+    // This would be set on loading. Only makes sense with GoofyWeights == false
+    box.setSignal(1000.0);
+    box.setErrorSquared(1000.0);
+
+
+  }
+
+
+
+
+  //-----------------------------------------------------------------------------------------
+  /** Set up the file back end and xest accessing data */
+  void test_fileBackEnd()
+  {
+    // Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+
+    MDBox<MDLeanEvent<3>,3> c(bc.get(), 0);
+    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
+
+    // Create test NXS file and make box file-backed
+    do_createNeXusBackedBox(c,bc);
+
+    DiskBuffer * dbuf = bc->getFileIO();
+    // It is empty now
+    TS_ASSERT_EQUALS(dbuf->getWriteBufferUsed(), 0);
+
+    // Set the stuff that is handled outside the box itself
+    c.setSignal(1234.5); // fake value loaded from disk
+    c.setErrorSquared(456.78);
+
+    // Now it gives the cached value
+    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+    TS_ASSERT_DELTA( c.getSignal(), 1234.5, 1e-5);
+    TS_ASSERT_DELTA( c.getErrorSquared(), 456.78, 1e-5);
+    TSM_ASSERT("Data is not flagged as busy", !c.getISaveable()->isBusy());
+    TSM_ASSERT("System expects that data were saved ",c.getISaveable()->wasSaved());
+
+    // This should actually load the events from the file
+    const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
+    TSM_ASSERT("Data accessed and flagged as modified", c.getISaveable()->isBusy());
+    // Try a couple of events to see if they are correct
+    TS_ASSERT_EQUALS( events.size(), 1000);
+    if (events.size() != 1000) return;
+    TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
+    TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
+    TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
+
+    // The box's data is busy
+    TS_ASSERT( c.getISaveable()->isBusy() );
+    // Done with the data.
+    c.releaseEvents();
+    TS_ASSERT( !c.getISaveable()->isBusy() );
+    // Something in the to-write buffer
+    TS_ASSERT_EQUALS( dbuf->getWriteBufferUsed(), 1000);
+
+     // Now this actually does it
+    c.refreshCache();
+    // The real values are back
+    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+    TS_ASSERT_DELTA( c.getSignal(), 499500.0, 1e-2);
+    TS_ASSERT_DELTA( c.getErrorSquared(), 500000.0, 1e-2);
+
+     // This should NOT call the write method since we had const access. Hard to test though!
+    dbuf->flushCache();
+    TS_ASSERT_EQUALS( dbuf->getWriteBufferUsed(), 0);
+
+    // this operation should not happends in real lifa as it destroys file-backed stuff but here we do it just to allow the following operation to work
+    bc->getFileIO()->closeFile();
+    do_deleteNexusFile();
+  }
+
+  //-----------------------------------------------------------------------------------------
+  /** Set up the file back end and test accessing data
+   * in a non-const way, and writing it back out*/
+  void test_fileBackEnd_nonConst_access()
+  {
+    // Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+
+    MDBox<MDLeanEvent<3>,3> c(bc.get(), 0);
+    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
+
+    // Create test NXS file and make box file-backed
+    do_createNeXusBackedBox(c,bc);
+
+    DiskBuffer * dbuf = bc->getFileIO();
+    // It is empty now
+    TS_ASSERT_EQUALS(dbuf->getWriteBufferUsed(), 0);
+
+
+    // The # of points (from the file, not in memory)
+    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+    TSM_ASSERT("Data is not flagged as modified", !c.getISaveable()->isDataChanged());
+
+    // Non-const access to the events.
+    std::vector<MDLeanEvent<3> > & events = c.getEvents();
+    TSM_ASSERT("Data is flagged as modified", c.getISaveable()->isDataChanged());
+    TS_ASSERT_EQUALS( events.size(), 1000);
+    if (events.size() != 1000) return;
+    TS_ASSERT_DELTA( events[123].getSignal(), 123.0, 1e-5);
+
+    // Modify the event
+    events[123].setSignal(456.0);
+
+    // Done with the events
+    c.releaseEvents();
+
+    // Flushing the cache will write out the events.
+    dbuf->flushCache();
+
+    // Now let's pretend we re-load that data into another box. It makes the box file backed but the location appears undefined
+    MDBox<MDLeanEvent<3>,3> c2(c,bc.get());
+    TSM_ASSERT_EQUALS("the data should not be in memory", c2.getDataInMemorySize(),0); 
+    c2.setFileBacked(500,1000,true);
+    TSM_ASSERT_EQUALS("the data should not be in memory", c2.getDataInMemorySize(),0); 
+
+    // Is that event modified?
+    std::vector<MDLeanEvent<3> > & events2 = c2.getEvents();
+    TS_ASSERT_EQUALS( events2.size(), 1000);
+    if (events2.size() != 1000) return;
+    TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
+
+ // this operation should not happends in real lifa as it destroys file-backed stuff but here we do it just to allow the following operation to work
+    bc->getFileIO()->closeFile();
+
+    do_deleteNexusFile();
+  }
+
+
+  //-----------------------------------------------------------------------------------------
+  /** Set up the file back end and xest accessing data
+   * where the number of events in the box is reduced or increased. */
+  void test_fileBackEnd_nonConst_EventListChangesSize()
+  {
+    // Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+
+    MDBox<MDLeanEvent<3>,3> c(bc.get(), 0);
+    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
+
+    // Create test NXS file and make box file-backed
+    do_createNeXusBackedBox(c,bc);
+
+    DiskBuffer * dbuf = bc->getFileIO();
+    // It is empty now
+    TS_ASSERT_EQUALS(dbuf->getWriteBufferUsed(), 0);
+
+
+    // The # of points (from the file, not in memory)
+    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+    TSM_ASSERT("Data is not flagged as modified", !c.getISaveable()->isDataChanged());
+
+    // Non-const access to the events.
+    std::vector<MDLeanEvent<3> > & events = c.getEvents();
+    TSM_ASSERT("Data is flagged as modified", c.getISaveable()->isDataChanged());
+    TS_ASSERT_EQUALS( events.size(), 1000);
+    if (events.size() != 1000) return;
+    TS_ASSERT_DELTA( events[123].getSignal(), 123.0, 1e-5);
+
+    // Modify an event
+    events[123].setSignal(456.0);
+    // Also change the size of the event list
+    events.resize(600);
+    events[599].setSignal(995.);
+
+    // Done with the events
+    c.releaseEvents();
+
+    // Flushing the cache will write out the events.
+    dbuf->flushCache();
+
+    // The size on disk should have been changed (but not the position since that was the only free spot)
+    TS_ASSERT_EQUALS( c.getISaveable()->getFilePosition(), 500);
+    TS_ASSERT_EQUALS( c.getISaveable()->getTotalDataSize(), 600);
+    TS_ASSERT_EQUALS( c.getDataInMemorySize(), 0);
+    TS_ASSERT_EQUALS( c.getNPoints(), 600);
+
+
+    // Now let's pretend we re-load that data into another box
+    MDBox<MDLeanEvent<3>,3> c2(c,bc.get());
+    c2.setFileBacked(500,600,true);
+    
+    // Is that event modified?
+    std::vector<MDLeanEvent<3> > & events2 = c2.getEvents();
+    TS_ASSERT_EQUALS( events2.size(), 600);
+    if (events2.size() != 600) return;
+    TS_ASSERT_DELTA( events2[123].getSignal(), 456.0, 1e-5);
+
+    // Now we GROW the event list
+    events2.resize(1500);
+    events2[1499].setSignal(789.0);
+    // and disentangle new events from old events as DB would think that they are on the same place and would write it accordingly
+    c2.setFileBacked(1100,1500,false);
+    // And we finish and write it out
+    c2.releaseEvents();
+    dbuf->flushCache();
+    // The new event list should have ended up at the end of the file
+    TS_ASSERT_EQUALS( c2.getISaveable()->getFilePosition(), 1500);
+    TS_ASSERT_EQUALS( c2.getDataInMemorySize(), 0);
+    TS_ASSERT_EQUALS( c2.getTotalDataSize(), 1500);
+    // The file has now grown.
+    TS_ASSERT_EQUALS( dbuf->getFileLength(), 3000);
+
+    // and c-box data are there
+    const std::vector<MDLeanEvent<3> > & events0a = c.getEvents();
+
+    TS_ASSERT_DELTA(events0a[599].getSignal(),995.,1.e-6);
+    // no writing shuld happen, just discarded from memory
+    c.releaseEvents();
+    dbuf->flushCache();
+    TS_ASSERT_EQUALS( dbuf->getFileLength(), 3000);
+    TS_ASSERT_EQUALS( c.getISaveable()->getFilePosition(), 500);
+    TS_ASSERT_EQUALS( c.getISaveable()->getTotalDataSize(), 600);
+    TS_ASSERT_EQUALS( c.getDataInMemorySize(), 0);
+
+
+    // Now let's pretend we re-load that data into a 3rd box from c2 file location
+    MDBox<MDLeanEvent<3>,3> c3(c,bc.get());
+    c3.setFileBacked(c2.getISaveable()->getFilePosition(),1500,true);
+
+    // Is that event modified?
+    const std::vector<MDLeanEvent<3> > & events3 = c3.getEvents();
+    TS_ASSERT_EQUALS( events3.size(), 1500);
+    TS_ASSERT_DELTA( events3[1499].getSignal(), 789.0, 1e-5);
+    c3.releaseEvents();
+
+ // this operation should not happends in real lifa as it destroys file-backed stuff but here we do it just to allow the following operation to work
+    bc->getFileIO()->closeFile();
+    do_deleteNexusFile();
+  }
+
+
 //
 //
 //  //-----------------------------------------------------------------------------------------
@@ -826,6 +785,65 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 //  }
 //
 
+// 
+// THIS MODE IS NOT SUPPORTED IN THIS FORM
+//  //-----------------------------------------------------------------------------------------
+//  /** Set up the file back end and test accessing data.
+//   * This time, use no DiskBuffer so that reading/loading is done within the object itself */
+//  void xest_fileBackEnd_noMRU()
+//  {
+//    // Create a box with a controller for the back-end
+//    BoxController_sptr bc(new BoxController(3));
+//
+//    // Handle the disk DiskBuffer values
+//    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 0);
+//    // DiskBuffer won't be used
+////    TS_ASSERT( !bc->useWriteBuffer());
+//    DiskBuffer & dbuf = bc->getDiskBuffer();
+//    // It is empty now
+//    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
+//
+//    // Create and open the test NXS file
+//    MDBox<MDLeanEvent<3>,3> c(bc, 0);
+//    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
+//    ::NeXus::File * file = do_saveAndOpenNexus(c);
+//
+//    // Set the stuff that is handled outside the box itself
+//    c.setSignal(1234.5); // fake value loaded from disk
+//    c.setErrorSquared(456.78);
+//
+//    // Now it gives the cached value
+//    TS_ASSERT_EQUALS( c.getNPoints(), 1000);
+//    TS_ASSERT_DELTA( c.getSignal(), 1234.5, 1e-5);
+//    TS_ASSERT_DELTA( c.getErrorSquared(), 456.78, 1e-5);
+//    TSM_ASSERT("Data is not flagged as modified", !c.isDataChanged());
+//
+//    // This should actually load the events from the file
+//    const std::vector<MDLeanEvent<3> > & events = c.getConstEvents();
+//    TSM_ASSERT("Data is STILL not flagged as modified", !c.isDataChanged());
+//    // Try a couple of events to see if they are correct
+//    TS_ASSERT_EQUALS( events.size(), 1000);
+//    if (events.size() != 1000) return;
+//    TS_ASSERT_DELTA( events[0].getErrorSquared(), 0.5, 1e-5);
+//    TS_ASSERT_DELTA( events[50].getSignal(), 50.0, 1e-5);
+//    TS_ASSERT_DELTA( events[990].getErrorSquared(), 990.5, 1e-5);
+//
+//  //  TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  dbuf.getWriteBufferUsed(), 0);
+//    TSM_ASSERT_EQUALS( "DiskBuffer has this object inside",  dbuf.getWriteBufferUsed(), 1000);
+//    TSM_ASSERT("Data is busy", c.isBusy() );
+//    TSM_ASSERT("Data is in memory", c.getInMemory() );
+//    // Done with the data.
+//    c.releaseEvents();
+//    TSM_ASSERT("Data is no longer busy", !c.isBusy() );
+//    TSM_ASSERT("Data stillin memory", c.getInMemory() );
+//    dbuf.flushCache();
+//    TSM_ASSERT("Data is not in memory", !c.getInMemory() );
+//    TSM_ASSERT_EQUALS( "DiskBuffer has nothing still - it wasn't used",  dbuf.getWriteBufferUsed(), 0);
+//
+//    file->close();
+//    do_deleteNexusFile();
+//  }
+//
 
 
 };

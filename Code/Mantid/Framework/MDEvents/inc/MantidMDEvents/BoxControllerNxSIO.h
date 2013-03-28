@@ -12,6 +12,7 @@ namespace MDEvents
 
   //===============================================================================================
   /** The class responsible for saving events into nexus file using generic box controller interface
+    * Expected to provide thread-safe file access.
 
       @date March 15, 2013
 
@@ -77,18 +78,30 @@ namespace MDEvents
                 return m_BlockSize[1];
             }
     private:
-        /// full file name (with path) of the Nexis file responsible for the IO operations (as NeXus filename has very strange properties and often trunkated to 64 bytes)
+        /// Default size of the events block which can be written in the NeXus array at once identified by efficiency or some other external reasons
+        static enum {DATA_CHUNK=10000};
+
+        /// full file name (with path) of the Nexis file responsible for the IO operations (as NeXus filename has very strange properties and often truncated to 64 bytes)
         std::string m_fileName;
-        // the file Handler responsible for Nexus IO operations;
+        /// the file Handler responsible for Nexus IO operations;
         ::NeXus::File * m_File;
+       /// identifier if the file open only for reading or is  in read/write 
+        bool m_ReadOnly;
         /// The size of the events block which can be written in the neXus array at once (continious part of the data block)
         size_t m_dataChunk;
         /// shared pointer to the box controller, which is repsoponsible for this IO
         API::BoxController_sptr m_bc;
+        //------ 
+        /// the start of the current data block to read from. It related to current physical representation of the data in NeXus file
+        std::vector<int64_t> m_BlockStart;
+        /// the vector, which describes the event specific data size, namely how many column an event is composed into and this class reads/writres
+        std::vector<int64_t> m_BlockSize;
+        /// lock Nexus file operations as Nexus is not thread safe
+        mutable Mantid::Kernel::Mutex m_fileMutex;
 
+// Mainly static information which may be split into different IO classes selected through chein of responsibility. 
         /// number of bytes in the event coorinates (coord_t length). Set by  setDataType but can be defined statically with coord_t 
         unsigned int m_CoordSize;
-
         /// possible event types this class understands. The enum numbers have to correspond to the numbers of symbolic event types, 
         /// defined in EVENT_TYPES_SUPPORTED vector
         static enum EventType
@@ -96,25 +109,17 @@ namespace MDEvents
             LeanEvent=0, //< the event consisting of signal error and event coordinate
             FatEvent=1   //< the event havint the same as lean event plus RunID and detID
         };
-
         /// the type of event (currently MD event or MDLean event this class is deals with. 
         EventType m_EventType;   
 
-       /// identifier if the file open only for reading or is  in read/write 
-        bool m_ReadOnly;
 
-        /// Default size of the events block which can be written in the NeXus array at once identified by efficiency or some other external reasons
-        static enum {DATA_CHUNK=10000};
-
-        /// lock Nexus file operations as Nexus is not thread safe
-        mutable Mantid::Kernel::Mutex m_fileMutex;
+        /// The version of the MDEvents data block
+        std::string m_EventsVersion;
         /// the symblolic description of the event types currently supported by the class
         std::vector<std::string> m_EventsTypesSupported;
         /// data headers used for different events types
         std::vector<std::string> m_EventsTypeHeaders;
 
-        /// The version of the MDEvents data block
-        std::string m_EventsVersion;
         /// the name of the MD workspace group. Should be common with save/load, who uses this group to put other pieces of information about the workspace.
         static std::string g_EventWSGroupName;
         /// the name of the Nexus data group for saving the events
@@ -129,15 +134,12 @@ namespace MDEvents
         void OpenAndCheckWSGroup();
         void OpenAndCheckEventGroup();
         void getDiskBufferFileData();
+        void checkWSDimesnions();
         void prepareNxSToWrite_CurVersion();
         void prepareNxSdata_CurVersion();
-
+       // get the event type from event name
         static EventType TypeFromString(const std::vector<std::string> &typesSupported,const std::string typeName);
 
-        //
-        std::vector<int64_t> m_BlockStart;
-     /// the vector, which describes the event specific data size, which describes how many column an event is composed into and this class reads/writres
-        std::vector<int64_t> m_BlockSize;
 
     };
 

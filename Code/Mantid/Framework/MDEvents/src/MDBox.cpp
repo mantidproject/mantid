@@ -74,7 +74,7 @@ namespace MDEvents
      data(other.data),
      m_bIsMasked(other.m_bIsMasked)
   {
-    if(otherBC) // may be absent in some tests but generally present
+    if(otherBC) // may be absent in some tests but generally have to be present
     {
         if(otherBC->isFileBacked())
             this->setFileBacked();
@@ -337,8 +337,8 @@ namespace MDEvents
             if(!m_Saveable->isLoaded())  // events were saved,  averages calculated and stored 
             {
                 // the partial data were not loaded from HDD but their averages should be calculated when loaded. Add them 
-                 signalSum +=double(this->m_signal);
-                 errorSum  +=double(this->m_errorSquared);
+                 signalSum =double(this->m_signal);
+                 errorSum  =double(this->m_errorSquared);
             }
         }
     }
@@ -821,14 +821,17 @@ namespace MDEvents
     TMDE(
     void MDBox)::setFileBacked(const uint64_t fileLocation,const size_t fileSize, const bool markSaved)
     {
-        m_Saveable = new MDBoxSaveable(this);
+        if(!m_Saveable)
+            m_Saveable = new MDBoxSaveable(this);
+
         m_Saveable->setFilePosition(fileLocation,fileSize,markSaved);
     }
      /**Make this box file-backed but its place on the file is not identified yet. It will be identified by the disk buffer */
     TMDE(
     void MDBox)::setFileBacked()
     {
-        this->setFileBacked(UNDEF_UINT64,this->getDataInMemorySize(),false);
+        if(!m_Saveable)
+            this->setFileBacked(UNDEF_UINT64,this->getDataInMemorySize(),false);
     }
 
     /**Save the box dataat specific disk position using the class, responsible for the file IO. 
@@ -876,11 +879,13 @@ namespace MDEvents
 
        std::vector<coord_t> TableData;
        FileSaver->loadBlock(TableData,filePosition,nEvents);
+       dataMutex.lock();
        // convert loaded events to data;
        size_t nCurrentEvents = data.size();
        this->data.reserve(nCurrentEvents+nEvents);
        // convert data to events appending new events to existing
        MDE::dataToEvents(TableData,data,false);
+       dataMutex.unlock();
    }
 
 }//namespace MDEvents

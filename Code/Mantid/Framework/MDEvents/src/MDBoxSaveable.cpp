@@ -33,6 +33,7 @@ namespace MDEvents
       }
 
       m_MDNode->saveAt(fileIO,this->getFilePosition());
+      this->m_wasSaved=true;
 
   }
  

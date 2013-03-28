@@ -358,25 +358,7 @@ namespace API
      void setFileBacked(IBoxControllerIO *newFileIO,const std::string &fileName="");
 
     //-----------------------------------------------------------------------------------
-    /** Set the memory-caching parameters for a file-backed
-     * MDEventWorkspace.
-     *
-     * @param bytesPerEvent :: sizeof(MDLeanEvent) that is in the workspace
-     * @param writeBufferSize :: number of EVENTS to accumulate before performing a disk write.
-     */
-    void setCacheParameters(uint64_t writeBufferSize)
-    {
-      if(m_fileIO)
-      {
-      // Save the values
-        m_fileIO->setWriteBufferSize(writeBufferSize);
-      // If all caches are 0, don't use the MRU at all
-//      m_useWriteBuffer = !(writeBufferSize==0);
-      //  m_fileIO->m_bytesPerEvent = bytesPerEvent;
-      }
-    }
-
-    //BoxCtrlChangesInterface *getChangesList(){return m_ChangesList;}
+      //BoxCtrlChangesInterface *getChangesList(){return m_ChangesList;}
     //void setChangesList(BoxCtrlChangesInterface *pl){m_ChangesList=pl;}
     //-----------------------------------------------------------------------------------
     // increase the counter, calculatinb events at max;

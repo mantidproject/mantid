@@ -98,8 +98,10 @@ namespace Kernel
         when it decides it suitable,  if the size of iSavable object in cache is unchanged from the previous 
         save/load operation */
     bool m_dataChanged;
-    /// this 
-    bool m_wasSaved;
+    // this tracks the history of operations, occuring over the data. 
+    /// this boolean indicates if the data were saved on HDD and have physical representation on it (though this representation may be incorrect as data changed in memory)
+    mutable bool m_wasSaved;
+    /// this boolean indicates, if the data have its copy in memory 
     bool m_isLoaded;
 
     /// the function saveAt has to be availible to DiskBuffer and nobody else. To highlight this we make it private

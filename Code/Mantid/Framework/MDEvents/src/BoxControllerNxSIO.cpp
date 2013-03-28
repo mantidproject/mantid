@@ -24,13 +24,14 @@ namespace MDEvents
    BoxControllerNxSIO::BoxControllerNxSIO(API::BoxController_sptr bc) :
        m_File(NULL),
        m_dataChunk(DATA_CHUNK),
+       m_ReadOnly(true),
        m_bc(bc),
+       m_BlockStart(2,0),
+       m_BlockSize(2,0),
+
        m_CoordSize(sizeof(coord_t)),
        m_EventType(FatEvent),
-       m_ReadOnly(true),
-       m_EventsVersion("1.0"),
-       m_BlockStart(2,0),
-       m_BlockSize(2,0)
+       m_EventsVersion("1.0")
    {
        m_BlockSize[1] = 4+m_bc->getNDims();
 
@@ -104,7 +105,7 @@ namespace MDEvents
       if(m_File)return false;
 
       m_fileMutex.lock();
-      m_ReadOnly = true;;
+      m_ReadOnly = true;
       NXaccess access(NXACC_READ);
       if(mode.find("w")!=std::string::npos ||mode.find("W")!=std::string::npos)
       {
@@ -195,16 +196,20 @@ namespace MDEvents
   /**Create group responsible for keeping MD event workspace and add necessary (some) attributes to it*/ 
   void BoxControllerNxSIO::CreateWSGroup()
   {
-     if(m_ReadOnly) 
-        throw Kernel::Exception::FileError("The NXdata group: "+g_EventWSGroupName+" does not exist in the file opened for read",m_fileName);
+      if(m_ReadOnly) 
+          throw Kernel::Exception::FileError("The NXdata group: "+g_EventWSGroupName+" does not exist in the file opened for read",m_fileName);
 
       try
       {
-              m_File->makeGroup(g_EventWSGroupName, "NXentry", true);
-              m_File->putAttr("event_type", m_EventsTypesSupported[m_EventType]);
+          m_File->makeGroup(g_EventWSGroupName, "NXentry", true);
+          m_File->putAttr("event_type", m_EventsTypesSupported[m_EventType]);
+
+          auto nDim = int32_t(m_bc->getNDims());
+          // Write out  # of dimensions
+          m_File->writeData("dimensions", nDim);
       }catch(...)
       {
-               throw Kernel::Exception::FileError("Can not create new NXdata group: "+g_EventWSGroupName,m_fileName);
+          throw Kernel::Exception::FileError("Can not create new NXdata group: "+g_EventWSGroupName,m_fileName);
       }
 
   }
@@ -214,13 +219,52 @@ namespace MDEvents
       m_File->openGroup(g_EventWSGroupName, "NXentry");
 
       std::string eventType;
-      m_File->getAttr("event_type",eventType);
-      if(eventType != m_EventsTypesSupported[m_EventType])
-          throw Kernel::Exception::FileError("BoxControllerNxSIO set up to read the type of event, different from the type: "
-                                              +eventType+" find in the file",m_fileName);
-     
+      if(m_File->hasAttr("event_type"))
+      {
+        m_File->getAttr("event_type",eventType);
+
+        if(eventType != m_EventsTypesSupported[m_EventType])
+              throw Kernel::Exception::FileError("BoxControllerNxSIO set up to read the type of event, different from the type: "
+                                                  +eventType+" find in the file",m_fileName);
+      }
+      else // it is possible that woerkspace group has been created by somebody else and there are no this kind of attribute attached to it. 
+      {
+          if(m_ReadOnly) 
+              throw Kernel::Exception::FileError("The NXdata group: "+g_EventWSGroupName+
+                                                 " does not have necessary attribute describing the event type used",m_fileName);
+
+           m_File->putAttr("event_type", m_EventsTypesSupported[m_EventType]);
+
+      }
+      checkWSDimesnions();
 
   }
+  /** Open and check dimesnions datafield. Write it if absend or read and compare it with exisiting dimension information if present*/ 
+  void BoxControllerNxSIO::checkWSDimesnions()
+  {
+      std::map<std::string, std::string> groupEntries;
+      bool dimDatasetExist(false);
+      m_File->getEntries(groupEntries);
+      if(groupEntries.find("dimensions")!=groupEntries.end()) //dimesnions dataset exist
+          dimDatasetExist = true;
+
+      if(dimDatasetExist)
+      {
+          int32_t nDims;
+          m_File->readData<int32_t>("dimensions",nDims);
+          if(nDims != m_bc->getNDims())
+              throw Kernel::Exception::FileError("BoxControllerNxSIO set up to read the file with dimensions, different from the specified in the workspace ",
+              m_fileName);
+      }
+      else
+      {
+          auto nDim = int32_t(m_bc->getNDims());
+          // Write out  # of dimensions
+          m_File->writeData("dimensions", nDim);
+      }
+
+  };
+
   /** Open existing Event group and check the attributes necessary for this algorithm to work */ 
   void BoxControllerNxSIO::OpenAndCheckEventGroup()
   {
@@ -234,9 +278,7 @@ namespace MDEvents
                                                  fileGroupVersion+" already exists ",m_fileName);
 
   }
-  /** Helper function which prepares NeXus event structure to accept events 
-   *@param groupExist -- if true, indicate that group for events already exist and new data have to be created within existing group
-   */ 
+  /** Helper function which prepares NeXus event structure to accept events   */ 
   void BoxControllerNxSIO::prepareNxSToWrite_CurVersion()
   {
 
@@ -273,20 +315,16 @@ namespace MDEvents
      
 
   }
-
-    /** Open the NXS data blocks for loading.
-     * The data should have been created before.
-     *
-     * @param file :: open NXS file.
-     * @return the number of events currently in the data field.
-     */
+  /** Open the NXS data blocks for loading/saving.
+    * The data should have been created before.     */
   void BoxControllerNxSIO::prepareNxSdata_CurVersion()
   {
       // Open the data
       m_File->openData("event_data");
-////      int type = ::NeXus::FLOAT32;
-////      int rank = 0;
-////      NXgetinfo(file->getHandle(), &rank, dims, &type);
+// There are rummors that this is faster. Not sure if it is important
+//      int type = ::NeXus::FLOAT32; 
+//      int rank = 0;
+//      NXgetinfo(file->getHandle(), &rank, dims, &type);
        NeXus::Info info = m_File->getInfo();
        if(info.type == ::NeXus::FLOAT64)
        {
@@ -312,12 +350,13 @@ namespace MDEvents
       if(nFileDim != m_bc->getNDims())
           throw Kernel::Exception::FileError("Trying to open event data with different number of dimensions ",m_fileName);
 
-      //HACK -- there is no difference between empty event dataset and the dataset with 1 event. It is unclear how to deal with this stuff
+      //HACK -- there is no difference between empty event dataset and the dataset with 1 event. 
+      // It is unclear how to deal with this stuff but the situations, where the dataset was created and closed without writing there anything 
+      // and then opened again to write data into it are probably rare. 
       uint64_t nFilePoints = info.dims[0];
       this->setFileLength(nFilePoints);
-
     }
-
+  /** Load free space blocks from the data file or create the NeXus place to read/write them*/
   void BoxControllerNxSIO::getDiskBufferFileData()
   {
       std::vector<uint64_t> freeSpaceBlocks;
@@ -346,9 +385,11 @@ namespace MDEvents
               throw Kernel::Exception::FileError("Attempt to create new DB group in the read-only file",m_fileName);
            m_File->writeExtendibleData(g_DBDataName, freeSpaceBlocks, free_dims, free_chunk);
       }
+ }
 
-
-  }
+ /** Save data block on specific position within properly opened NeXus data array
+   *@param DataBlock     -- the vector with data to write
+   *@param blockPosition -- The starting place to save data to   */ 
  void BoxControllerNxSIO::saveBlock(const std::vector<float> & DataBlock, const uint64_t blockPosition)const 
  {
       std::vector<int64_t> start(2,0);
@@ -359,17 +400,27 @@ namespace MDEvents
       dims[0] =  int64_t(DataBlock.size()/this->getNDataColums());
 
 
-     // ugly cast but why would putSlab change the data?
+     // ugly cast but why would putSlab change the data?. This is NeXus bug which makes putSlab method non-constant
      std::vector<float> &mData = const_cast<std::vector<float>& >(DataBlock);
 
      m_fileMutex.lock();
-     m_File->putSlab<float>(mData,start,dims);
+     {
+        m_File->putSlab<float>(mData,start,dims);
 
-     if(blockPosition+dims[0]>this->getFileLength())
-         this->setFileLength(blockPosition+dims[0]);
-      m_fileMutex.unlock();
+        if(blockPosition+dims[0]>this->getFileLength())
+             this->setFileLength(blockPosition+dims[0]);
+     }
+     m_fileMutex.unlock();
 
  }
+
+ /** Load particular data block from the opened NeXus file. 
+   *@param Block         -- the storage vector to place data into
+   *@param blockPosition -- The starting place to read data from
+   *@param nPoints       -- number of data points (events) to read 
+
+   *@returns Block -- resized block of data containing serialized events representation. 
+ */
  void BoxControllerNxSIO::loadBlock(std::vector<float> & Block, const uint64_t blockPosition,const size_t nPoints)const
  {
      if(blockPosition+nPoints>this->getFileLength())
@@ -383,392 +434,60 @@ namespace MDEvents
      Block.resize(size[0]*size[1]);
 
      m_fileMutex.lock();
-     m_File->getSlab(&Block[0],start,size);
+       m_File->getSlab(&Block[0],start,size);
      m_fileMutex.unlock();
 
 
  }
+ /// Clear NeXus internal cache
  void BoxControllerNxSIO::flushData()const
  {
+   m_fileMutex.lock();
      m_File->flush();
+   m_fileMutex.unlock();
  }
+ /** flash disk buffer data from memory and close underlying NeXus file*/ 
  void BoxControllerNxSIO::closeFile()
  {
-    if(m_File)
-    {
-      m_fileMutex.lock();
-         m_File->closeData(); // close events data
-
-         if(!m_ReadOnly)    // write free space groups from the disk buffer
+     if(m_File)
+     {
+         // write all file-backed data still stack in the data buffer into the file.
+         this->flushCache();
+         m_fileMutex.lock();
          {
-            std::vector<uint64_t> freeSpaceBlocks;
-            this->getFreeSpaceVector(freeSpaceBlocks);
-            if (!freeSpaceBlocks.empty())
-            {
-                std::vector<int64_t> free_dims(2,2);
-                free_dims[0] = int64_t(freeSpaceBlocks.size()/2);
-                std::vector<int64_t> free_chunk(2,2);
-                free_chunk[0] =int64_t(m_dataChunk);
-                m_File->writeUpdatedData("free_space_blocks", freeSpaceBlocks, free_dims);
-            }
+             m_File->closeData(); // close events data
+
+             if(!m_ReadOnly)    // write free space groups from the disk buffer
+             {
+                 std::vector<uint64_t> freeSpaceBlocks;
+                 this->getFreeSpaceVector(freeSpaceBlocks);
+                 if (!freeSpaceBlocks.empty())
+                 {
+                     std::vector<int64_t> free_dims(2,2);
+                     free_dims[0] = int64_t(freeSpaceBlocks.size()/2);
+                     std::vector<int64_t> free_chunk(2,2);
+                     free_chunk[0] =int64_t(m_dataChunk);
+                     m_File->writeUpdatedData("free_space_blocks", freeSpaceBlocks, free_dims);
+                 }
+             }
+
+             m_File->closeGroup(); // close events group
+             m_File->closeGroup();
+             m_File->close();
+
+             delete m_File;
+             m_File=NULL;
          }
-         
-         m_File->closeGroup(); // close events group
-         m_File->closeGroup();
-         m_File->close();
-         delete m_File;
-         m_File=NULL;
-      m_fileMutex.unlock();
-    }
+         m_fileMutex.unlock();
+     }
  }
 
-  BoxControllerNxSIO::~BoxControllerNxSIO()
-  {
-      this->closeFile();
-  }
+ BoxControllerNxSIO::~BoxControllerNxSIO()
+ {
+     this->closeFile();
+ }
 
-
-// //-----------------------------------------------------------------------------------------------
-// /** Call to save the data (if needed) and release the memory used.
-//  *  Called from the DiskBuffer.
-//  *  If called directly presumes to know its file location and [TODO: refactor this] needs the file to be open correctly on correct group 
-//  */
-//  void MDBoxNXSaveable::save()
-//  {
-////  //      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
-////
-////
-////   // this aslo indirectly checks if the object knows its place (may be wrong place but no checks for that here)
-////   if (this->wasSaved())
-////   {
-////     //TODO: redesighn const_cast
-////    // This will load and append events ONLY if needed.
-////      MDBox<MDE,nd> *loader = const_cast<MDBox<MDE,nd> *>(this);
-////      loader->load();  // this will set isLoaded to true if not already loaded;
-////   
-////
-////      // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
-////      if (data.size() > 0)
-////      {
-////
-////         // Save at the ISaveable specified place
-////          this->saveNexus(this->m_BoxController->getFile());
-////      }
-////   } 
-////   else
-////     if(data.size()>0)  throw std::runtime_error(" Attempt to save undefined event");
-////   
-////   
-//  }
-////
-// void MDBoxNXSaveable::load()
-// {
-////    // Is the data in memory right now (cached copy)?
-////    if (!m_isLoaded)
-////    {
-////      // Perform the data loading
-////      ::NeXus::File * file = this->m_BoxController->getFile();
-////      if (file)
-////      {
-////        // Mutex for disk access (prevent read/write at the same time)
-////        Kernel::RecursiveMutex & mutex = this->m_BoxController->getDiskBuffer().getFileMutex();
-////        mutex.lock();
-////        // Note that this APPENDS any events to the existing event list
-////        //  (in the event that addEvent() was called for a box that was on disk)
-////        try
-////        {
-////          uint64_t fileIndexStart = this->getFilePosition();
-////          uint64_t fileNumEvents  = this->getFileSize();
-////          MDE::loadVectorFromNexusSlab(data, file,fileIndexStart, fileNumEvents);
-////          m_isLoaded = true;
-////          mutex.unlock();
-////        }
-////        catch (std::exception &e)
-////        {
-////          mutex.unlock();
-////          throw e;
-////        }
-////      }
-////    }
-//  }
-//
-
-
-//
-//  //-----------------------------------------------------------------------------------------------
-//  /** Load the box's Event data from an open nexus file.
-//   * The FileIndex start and numEvents must be set correctly already.
-//   * Clear existing data from memory!
-//   *
-//   * @param file :: Nexus File object, must already by opened with MDE::openNexusData()
-//   * @param setIsLoaded :: flag if box is loaded from file
-//   */
-//  TMDE(
-//  inline void MDBox)::loadNexus(::NeXus::File * file, bool setIsLoaded)
-//  {
-//    this->data.clear();
-//    uint64_t fileIndexStart = this->getFilePosition();
-//    uint64_t fileNumEvents  = this->getFileSize();
-//    if(fileIndexStart == std::numeric_limits<uint64_t>::max())
-//      throw(std::runtime_error("MDBox::loadNexus -- attempt to load box from undefined location"));
-//    MDE::loadVectorFromNexusSlab(this->data, file, fileIndexStart, fileNumEvents);
-//
-//   
-//    this->m_isLoaded=setIsLoaded;
-//  
-//  }
-//
-//
-// //-----------------------------------------------------------------------------------------------
-//  /** Save the box's Event data to an open nexus file.
-//   *
-//   * @param file :: Nexus File object, must already by opened with MDE::prepareNexusData()
-//   */
-//  TMDE(
-//  inline void MDBox)::saveNexus(::NeXus::File * file) const
-//  {
-//    //std::cout << "Box " << this->getId() << " saving to " << m_fileIndexStart << std::endl;
-//    MDE::saveVectorToNexusSlab(this->data, file, this->getFilePosition(),
-//                               this->m_signal, this->m_errorSquared);
-//
-//  }
-//
-//    //---------------------------------------------------------------------------------------------
-//    /** When first creating a NXS file containing the data, the proper
-//     * data block(s) need to be created.
-//     *
-//     * @param file :: open NXS file.
-//     * @param chunkSize :: chunk size to use when creating the data set (in number of events).
-//     */
-//    static void prepareNexusData(::NeXus::File * file, const uint64_t chunkSize)
-//    {
-//       API::BoxController::prepareEventNexusData(file,chunkSize,nd+4,"signal, errorSquared, runIndex, detectorId, center (each dim.)");
-//    }
-//
-//
-
-//
-//    //---------------------------------------------------------------------------------------------
-//    /** When first creating a NXS file containing the data, the proper
-//     * data block(s) need to be created.
-//     *
-//     * @param file :: open NXS file.
-//     * @param chunkSize :: chunk size to use when creating the data set (in number of events).
-//     */
-//    static void prepareNexusData(::NeXus::File * file, const uint64_t chunkSize)
-//    {
-//      API::BoxController::prepareEventNexusData(file,chunkSize,nd+2,"signal, errorsquared, center (each dim.)");
-//    }
-//
-//  
-//    //---------------------------------------------------------------------------------------------
-//    /** Do any final clean up of NXS event data blocks
-//     *
-//     * @param file :: open NXS file.
-//     */  
-//
-//
-//    //---------------------------------------------------------------------------------------------
-//    /** Put a slab of MDEvent data into the nexus file.
-//     * This is reused by both MDEvent and MDLeanEvent
-//     *
-//     * If needed, coerce it to the format of the output file (for old
-//     * .nxs files in doubles)
-//     *
-//     * @param file :: open NXS file.
-//     * @param data :: pointer to the numEvents*numColumn-sized array of data
-//     *        This gets deleted by this method!
-//     * @param startIndex :: index in the array to start saving to
-//     * @param numEvents :: number of events to save.
-//     * @param numColumns :: how many columns in the data set (depends on the data type)
-//     */
-//    static inline void putDataInNexus(::NeXus::File * file,
-//        coord_t * data, const uint64_t startIndex,
-//        const uint64_t numEvents, const size_t numColumns)
-//    {
-//      //TODO: WARNING NEXUS NEEDS TO BE UPDATED TO USE 64-bit ints on Windows.
-//      std::vector<int64_t> start(2,0);
-//      start[0] = int64_t(startIndex);
-//
-//      // Specify the dimensions
-//      std::vector<int64_t> dims;
-//      dims.push_back(int64_t(numEvents));
-//      dims.push_back(int64_t(numColumns));
-//
-//      // C-style call is much faster than the C++ call.
-////      int dims_ignored[NX_MAXRANK];
-////      int type = ::NeXus::FLOAT32;
-////      int rank = 0;
-////      NXgetinfo(file->getHandle(), &rank, dims_ignored, &type);
-//      NeXus::Info info = file->getInfo();
-//
-//      if (info.type == ::NeXus::FLOAT64)
-//      {
-//        // Handle file-backed OLD files that are in doubles.
-//
-//        // Convert the floats to doubles
-//        size_t dataSize = (numEvents*numColumns);
-//        double * dblData = new double[dataSize];
-//        for (size_t i=0; i<dataSize;i++)
-//          dblData[i] = static_cast<double>(data[i]);
-//        delete [] data;
-//
-//        // And save as doubles
-//        try
-//        {
-//          file->putSlab(dblData, start, dims);
-//        }
-//        catch (std::exception &)
-//        {
-//          delete [] dblData;
-//          throw;
-//        }
-//
-//        delete [] dblData;
-//      }
-//      else
-//      {
-//        /* ------------- Normal files, saved in floats -------- */
-//        try
-//        {
-//          file->putSlab(data, start, dims);
-//        }
-//        catch (std::exception &)
-//        {
-//          delete [] data;
-//          throw;
-//        }
-//        delete [] data;
-//      }
-//
-//    }
-//
-
-//    //---------------------------------------------------------------------------------------------
-//    /** Get a slab of MDEvent data out of the nexus file.
-//     * This is reused by both MDEvent and MDLeanEvent
-//     *
-//     * If needed, coerce it to the desired output data type (coord_t)
-//     *
-//     * @param file :: open NXS file.
-//     * @param indexStart :: index (in events) in the data field to start at
-//     * @param numEvents :: number of events to load.
-//     * @param numColumns :: how many columns in the data set (depends on the data type)
-//     * @return a pointer to the allocated data array. Must be deleted by caller.
-//     */
-//    static inline coord_t * getDataFromNexus(::NeXus::File * file,
-//        uint64_t indexStart, uint64_t numEvents,
-//        size_t numColumns)
-//    {
-//
-//      // Start/size descriptors
-//      std::vector<int> start(2,0);
-//      start[0] = int(indexStart); //TODO: What if # events > size of int32???
-//
-//      std::vector<int> size(2,0);
-//      size[0] = int(numEvents);
-//      size[1] = int(numColumns);
-//
-//      // Allocate the data
-//      size_t dataSize = numEvents*(numColumns);
-//      coord_t * data = new coord_t[dataSize];
-//
-//      // C-style call is much faster than the C++ call.
-////      int dims[NX_MAXRANK];
-////      int type = ::NeXus::FLOAT32;
-////      int rank = 0;
-////      NXgetinfo(file->getHandle(), &rank, dims, &type);
-//      NeXus::Info info = file->getInfo();
-//
-//#ifdef COORDT_IS_FLOAT
-//      /* coord_t is a single-precision float */
-//      if (info.type == ::NeXus::FLOAT64)
-//      {
-//        // Handle old files that are recorded in DOUBLEs to load as FLOATS
-//        double * dblData = new double[dataSize];
-//        file->getSlab(dblData, start, size);
-//        for (size_t i=0; i<dataSize;i++)
-//          data[i] = static_cast<coord_t>(dblData[i]);
-//        delete [] dblData;
-//      }
-//      else
-//      {
-//        // Get the slab into the allocated data
-//        file->getSlab(data, start, size);
-//      }
-//#else
-//      /* coord_t is double */
-//      if (type == ::NeXus::FLOAT32)
-//        throw std::runtime_error("The .nxs file's data is set as FLOATs but Mantid was compiled to work with data (coord_t) as doubles. Cannot load this file");
-//
-//      // Get the slab into the allocated data
-//      file->getSlab(data, start, size);
-//#endif
-//      return data;
-//    }
-//
-
-   
-
-    ///** @return the open NeXus file handle. NULL if not file-backed. */
-    //::NeXus::File * getFile() const
-    //{ return m_file; }
-
-    ///** Sets the open Nexus file to use with file-based back-end
-    // * @param file :: file handle
-    // * @param filename :: full path to the file
-    // * @param fileLength :: length of the file being open, in number of events in this case */
-    //void setFile(::NeXus::File * file, const std::string & filename, const uint64_t fileLength)
-    //{
-    //  m_file = file;
-    //  m_filename = filename;
-    //  m_diskBuffer.setFileLength(fileLength);
-    //}
-
-    ///** @return true if the MDEventWorkspace is backed by a file */
-    //bool isFileBacked() const
-    //{ return m_file != NULL; }
-
-    ///// @return the full path to the file open as the file-based back end.
-    //const std::string & getFilename() const
-    //{ return m_filename; }
-
-    //void closeFile(bool deleteFile = false);
-
-
-
-//
-//  };
-
-
-//  //------------------------------------------------------------------------------------------------------
-//  /** Close the open file for the back-end, if any
-//   * Note: this does not save any data that might be, e.g., in the MRU.
-//   * @param deleteFile :: if true, will delete the file. Default false.
-//   */
-//  void BoxController::closeFile(bool deleteFile)
-//  {
-//    if (m_file)
-//    {
-//      m_file->close();
-//      m_file = NULL;
-//    }
-//    if (deleteFile && !m_filename.empty())
-//    {
-//      Poco::File file(m_filename);
-//      if (file.exists()) file.remove();
-//      m_filename = "";
-//    }
-//  }
-//
-//
-//
-//  //---------------------------------------------------------------------------------------------
-//    void BoxController::closeNexusData(::NeXus::File * file)
-//    {
-//      file->closeData();
-//    }
-
+///**TODO: this should not be here, refactor out*/ 
 //  void MDBoxFlatTree::initEventFileStorage(const std::string &fileName,API::BoxController_sptr bc,bool FileBacked,const std::string &EventType)
 //  {
 //    m_FileName = fileName;
@@ -786,9 +505,6 @@ namespace MDEvents
 //      hFile = new ::NeXus::File(m_FileName, NXACC_CREATE5);
 //      hFile->makeGroup("MDEventWorkspace", "NXentry", true);
 //
-//      auto nDim = int32_t(bc->getNDims());
-//   // Write out some general information like # of dimensions
-//      hFile->writeData("dimensions", nDim);
 //      hFile->putAttr("event_type", EventType);
 //      //TODO: what about history here?
 //    }  
@@ -801,7 +517,7 @@ namespace MDEvents
 //      delete hFile;
 //    }
 //  }
-///**TODO: this should not be here, refactor out*/ 
+
 //  void MDBoxFlatTree::initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool setFileBacked,const std::string &EventType)
 //  {
 //    bool update=true;
