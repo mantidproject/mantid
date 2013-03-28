@@ -211,7 +211,7 @@ def do_algorithm(args, algo, version):
     
     #Open the page with the name of the algo
     page = site.Pages[wiki_page_name]
-    if not page_exists(page):
+    if args.dryrun and (not page_exists(page)):
         print "Error: Wiki Page wiki_page_name %s does not exist on the wiki." % wiki_page_name
         reporter.addFailureNoPage(algo, wiki_page_name)
         return
@@ -242,6 +242,8 @@ def do_algorithm(args, algo, version):
             if not last_modifier == None:
                 # Report a failure test case
                 reporter.addFailureTestCase(algo, version, last_modifier, ''.join(diff_list))
+            else:
+                print "This looks like a new wiki page."
         else:
             print "The last edit was automatic via a script. Last edit was done by WIKIMAKER script."
         print "Last change by ", last_modifier
