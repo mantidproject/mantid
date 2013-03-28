@@ -2299,14 +2299,14 @@ void MuonAnalysis::plotPair(const std::string& plotType)
       alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString());
       alg->setPropertyValue("ForwardSpectra", QString::number(qw1->currentIndex()).toStdString());
       alg->setPropertyValue("BackwardSpectra", QString::number(qw2->currentIndex()).toStdString());
-      alg->setPropertyValue("OutputWorkspace", itemAlpha->text().toStdString());
+      alg->setPropertyValue("Alpha", itemAlpha->text().toStdString());
       alg->execute();
       alg = Mantid::API::AlgorithmManager::Instance().create("AsymmetryCalc");
       alg->setPropertyValue("InputWorkspace", cropWS_1.toStdString() + "_Raw");
       alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString() + "_Raw");
       alg->setPropertyValue("ForwardSpectra", QString::number(qw1->currentIndex()).toStdString());
       alg->setPropertyValue("BackwardSpectra", QString::number(qw2->currentIndex()).toStdString());
-      alg->setPropertyValue("OutputWorkspace", itemAlpha->text().toStdString());
+      alg->setPropertyValue("Alpha", itemAlpha->text().toStdString());
       alg->execute();
 
       if (periodLabel.size() == 2)  
@@ -2316,14 +2316,14 @@ void MuonAnalysis::plotPair(const std::string& plotType)
         alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString());
         alg->setPropertyValue("ForwardSpectra", QString::number(qw1->currentIndex()).toStdString());
         alg->setPropertyValue("BackwardSpectra", QString::number(qw2->currentIndex()).toStdString());
-        alg->setPropertyValue("OutputWorkspace", itemAlpha->text().toStdString());
+        alg->setPropertyValue("Alpha", itemAlpha->text().toStdString());
         alg->execute();
         alg = Mantid::API::AlgorithmManager::Instance().create("AsymmetryCalc");
         alg->setPropertyValue("InputWorkspace", cropWS_2.toStdString() + "_Raw");
         alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString() + "_Raw");
         alg->setPropertyValue("ForwardSpectra", QString::number(qw1->currentIndex()).toStdString());
         alg->setPropertyValue("BackwardSpectra", QString::number(qw2->currentIndex()).toStdString());
-        alg->setPropertyValue("OutputWorkspace", itemAlpha->text().toStdString());
+        alg->setPropertyValue("Alpha", itemAlpha->text().toStdString());
         alg->execute(); 
       }
     }
