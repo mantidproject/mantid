@@ -139,12 +139,11 @@ namespace CurveFitting
                           int numiteration, string &status, double &chi2, bool outputcovarmatrix);
 
     /// Calcualte background by fitting peak heights
-    void calBackground(size_t workspaceindex);
+    void execCalBackground(size_t workspaceindex);
 
     //--------------  Functions to set up the Le Bail Fit -----------------
     /// Create LeBailFunction
-    void createLeBailFunction(std::string backgroundtype, std::vector<double>& bkgdorderparams,
-                              DataObjects::TableWorkspace_sptr bkgdparamws);
+    void createLeBailFunction();
 
     /// Crop the workspace for better usage
     API::MatrixWorkspace_sptr cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex);
@@ -152,6 +151,9 @@ namespace CurveFitting
     //-------------- Operation with Bragg Peaks -------------------------------
     /// Create a list of peaks
     bool generatePeaksFromInput();
+
+    /// Process and calculate input background
+    void processInputBackground();
 
     /// Examine whether the insturment parameter set to a peak can cause a valid set of peak profile of that peak
     bool examinInstrumentParameterValid(ThermalNeutronBk2BkExpConvPVoigt_sptr peak,
@@ -199,7 +201,7 @@ namespace CurveFitting
     void createOutputDataWorkspace();
 
     /// Fake calculated pattern
-    void writeFakedDataToOutputWS(size_t workspaceindex, int functionmode);
+    // Disabled void writeFakedDataToOutputWS(size_t workspaceindex, int functionmode);
 
     /// Write out (domain, values) to output workspace
     void writeToOutputWorkspace(size_t wsindex, FunctionDomain1DVector domain,  FunctionValues values);
@@ -213,9 +215,9 @@ namespace CurveFitting
     void execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter> &parammap);
 
     /// Set up Monte Carlo random walk strategy
-    void setupRandomWalkStrategy();
+    void setupBuiltInRandomWalkStrategy();
 
-    void setupRandomWalkStrategyTestGeometry();
+    void setupRandomWalkStrategyFromTable(TableWorkspace_sptr tablews);
 
     /// Add parameter (to a vector of string/name) for MC random walk
     void addParameterToMCMinimize(vector<string>& parnamesforMC, string parname);
@@ -294,8 +296,6 @@ namespace CurveFitting
     CurveFitting::BackgroundFunction_sptr m_backgroundFunction;
     /// Le Bail Function (Composite)
     API::CompositeFunction_sptr m_lebailFunction;
-    /// Vector to hold background
-    vector<double> m_backgroundVec;
 
     /// Function parameters updated by fit
     std::map<std::string, Parameter> m_funcParameters; // char = f: fit... = t: tie to value
@@ -341,7 +341,7 @@ namespace CurveFitting
     FunctionMode m_fitMode;
 
     //-------------------------- Monte Carlo Variables--------------------------
-    vector<vector<string> > m_MCGroups;
+    map<int, vector<string> > m_MCGroups;
     size_t m_numMCGroups;
 
     double m_bestRwp;

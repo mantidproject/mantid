@@ -21,11 +21,21 @@
 
 #include <fstream>
 
-#define FITTEDPUREPEAKINDEX   3
+const int OBSDATAINDEX(0);
+const int CALDATAINDEX(1);
+const int DATADIFFINDEX(2);
+const int CALPUREPEAKINDEX(3);
+const int CALBKGDINDEX(4);
+const int INPUTCALDATAINDEX(5);
+const int INPUTBKGDINDEX(6);
+const int INPUTPUREPEAKINDEX(7);
+const int SMOOTHEDBKGDINDEX(8);
+/*
 #define PUREPEAKINDEX         7   // Output workspace pure peak (data with background removed)
 #define FITTEDBACKGROUNDINDEX 4   // Output workspace background at ws index 4
 #define INPUTBACKGROUNDINDEX  6   // Input background
 #define SMOOTHEDBACKGROUND    8   // Smoothed background
+*/
 const double NEG_DBL_MAX(-1.*DBL_MAX);
 const double NOBOUNDARYLIMIT(1.0E10);
 
@@ -162,7 +172,10 @@ namespace CurveFitting
 
     declareProperty("NumberMinimizeSteps", 100, "Number of Monte Carlo random walk steps.");
 
-    declareProperty("FitGeometryParameter", false, "Option to choose to fit geometry-related parameters.");
+    //-----------------  Parameters for Monte Carlo Simulated Annealing --------------------------
+    auto mcwsprop = new WorkspaceProperty<TableWorkspace>("MCSetupWorkspace", "", Direction::Input,
+                                                          PropertyMode::Optional);
+    declareProperty(mcwsprop, "Name of table workspace containing parameters' setup for Monte Carlo simualted annearling. ");
 
     declareProperty("RandomSeed", 1, "Randum number seed.");
 
@@ -196,22 +209,19 @@ namespace CurveFitting
     // 2. Import parameters from table workspace
     parseInstrumentParametersTable();
     parseBraggPeaksParametersTable();
-
-    // 3. Create LeBail Function & initialize from input
-    // a. All individual peaks
     bool inputparamcorrect = generatePeaksFromInput();
 
-    // b. Background information
-    std::string backgroundtype = this->getProperty("BackgroundType");
-    std::vector<double> bkgdorderparams = this->getProperty("BackgroundParameters");
-    DataObjects::TableWorkspace_sptr bkgdparamws = this->getProperty("BackgroundParametersWorkspace");
+    // 3. Create output workspace/workspace
+    createOutputDataWorkspace();
 
-    // c. Create CompositeFunction
-    createLeBailFunction(backgroundtype, bkgdorderparams, bkgdparamws);
+    // 4. Background function and calculation on it
+    processInputBackground();
 
+    // 5. Create CompositeFunction (Le bail function)
+    createLeBailFunction();
     g_log.debug() << "LeBail Composite Function: " << m_lebailFunction->asString() << "\n";
 
-    // d. Function mode
+    // 6. Adjust function mode according to input values
     if (inputparamcorrect)
     {
       // All peaks within range are physical and good to refine
@@ -221,44 +231,26 @@ namespace CurveFitting
     {
       // Some peaks within range have unphysical parameters.  Just calcualtion for reference
       m_inputParameterPhysical = false;
-      g_log.warning() << "Input instrument parameters generate some peaks with unphysical profile "
-                         "parameters.\n";
-      if (m_fitMode == FIT)
+      g_log.warning() << "Input instrument parameters values cause some peaks to have "
+                         "unphysical profile arameters.\n";
+      if (m_fitMode == FIT || m_fitMode == MONTECARLO)
       {
         g_log.warning() << "Function mode FIT is disabled.  Convert to Calculation mode.\n";
         m_fitMode = CALCULATION;
       }
     }
 
-    // 5. Create output workspace
-    this->createOutputDataWorkspace();
-
-    // 6. Real work
+    // 7. Do calculation or fitting
     m_lebailFitChi2 = -1; // Initialize
     m_lebailCalChi2 = -1;
 
-    // a) Calculate background
-    FunctionDomain1DVector domainBkgd(m_dataWS->readX(m_wsIndex));
-    FunctionValues valuesBkgd(domainBkgd);
-    m_backgroundFunction->function(domainBkgd, valuesBkgd);
-    m_backgroundVec.resize(domainBkgd.size());
-    for (size_t i = 0; i < domainBkgd.size(); ++i)
-      m_backgroundVec[i] = valuesBkgd[i];
-
-    // b) Calculate/fit peaks
     switch (m_fitMode)
     {
       case FIT:
         // LeBail Fit
         g_log.notice() << "Function: Do LeBail Fit.\n";
-        if (inputparamcorrect)
-        {
-          execLeBailFit();
-        }
-        else
-        {
-          writeFakedDataToOutputWS(m_wsIndex, m_fitMode);
-        }
+        execLeBailFit();
+
         break;
 
       case CALCULATION:
@@ -271,7 +263,8 @@ namespace CurveFitting
         // Calculating background
         // FIXME : Determine later whether this functionality is kept or removed!
         g_log.notice() << "Function: Calculate Background (Precisely).\n";
-        calBackground(m_wsIndex);
+        throw runtime_error("This is to be removed!");
+        execCalBackground(m_wsIndex);
         break;
 
       case MONTECARLO:
@@ -296,6 +289,79 @@ namespace CurveFitting
     exportInstrumentParameterToTable(m_funcParameters);
 
     setProperty("OutputWorkspace", m_outputWS);
+
+    // 8. Final statistic
+    Rfactor finalR = getRFactor(m_outputWS->readY(0), m_outputWS->readY(1), m_outputWS->readE(0));
+    g_log.notice() << "\nFinal R factor: Rwp = " << finalR.Rwp
+                   << ", Rp = " << finalR.Rp << ", Data points = " << m_outputWS->readY(1).size()
+                   << ", Range = " << m_outputWS->readX(0)[0] << ", " << m_outputWS->readX(0).back() << "\n";
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Process input background properties and do the calculation upon it
+    * and also calculate the input data with (input) background reduced
+    */
+  void LeBailFit::processInputBackground()
+  {
+    // 1. Get input properties
+    string backgroundtype = getProperty("BackgroundType");
+    vector<double> bkgdorderparams = getProperty("BackgroundParameters");
+    TableWorkspace_sptr bkgdparamws = getProperty("BackgroundParametersWorkspace");
+
+    // 2. Determine where the background parameters are from
+    if (!bkgdparamws)
+    {
+      g_log.information() << "[Input] Use background specified with vector with input vector sized "
+                          << bkgdorderparams.size() << ".\n";
+    }
+    else
+    {
+      g_log.information() << "[Input] Use background specified by table workspace.\n";
+      parseBackgroundTableWorkspace(bkgdparamws, bkgdorderparams);
+    }
+
+    // 3. Create background function
+    auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
+    m_backgroundFunction = boost::dynamic_pointer_cast<BackgroundFunction>(background);
+
+    size_t order = bkgdorderparams.size();
+
+    m_backgroundFunction->setAttributeValue("n", int(order));
+    m_backgroundFunction->initialize();
+
+    for (size_t i = 0; i < order; ++i)
+    {
+      std::stringstream ss;
+      ss << "A" << i;
+      std::string parname = ss.str();
+      m_backgroundFunction->setParameter(parname, bkgdorderparams[i]);
+    }
+
+    g_log.information() << "Generated background function: " << m_backgroundFunction->asString() << "\n";
+
+    // 4. Calculate background function and set to output workspace
+    if (!m_outputWS)
+    {
+      throw runtime_error("Output workspace hasn't been created!");
+    }
+
+    FunctionDomain1DVector domainBkgd(m_dataWS->readX(m_wsIndex));
+    FunctionValues valuesBkgd(domainBkgd);
+    m_backgroundFunction->function(domainBkgd, valuesBkgd);
+
+    MantidVec& inpvec = m_outputWS->dataY(INPUTBKGDINDEX);
+    MantidVec& calvec = m_outputWS->dataY(CALBKGDINDEX);
+    MantidVec& purevec = m_outputWS->dataY(INPUTPUREPEAKINDEX);
+    const MantidVec& obsYvec = m_dataWS->readY(m_wsIndex);
+    size_t numpts = inpvec.size();
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      inpvec[i] = valuesBkgd[i];
+      calvec[i] = valuesBkgd[i];
+      purevec[i] = obsYvec[i] - valuesBkgd[i];
+    }
 
     return;
   }
@@ -450,12 +516,11 @@ namespace CurveFitting
     // 5. Calculate Rwp and Rp
     Rfactor rfactor;
 
-    const MantidVec& peakvalues = m_outputWS->readY(FITTEDPUREPEAKINDEX);
-    const MantidVec& background =  m_outputWS->readY(FITTEDBACKGROUNDINDEX);
+    const MantidVec& peakvalues = m_outputWS->readY(CALPUREPEAKINDEX);
+    const MantidVec& background =  m_outputWS->readY(CALBKGDINDEX);
     vector<double> caldata(values.size(), 0.0);
     std::transform(peakvalues.begin(), peakvalues.end(), background.begin(), caldata.begin(), std::plus<double>());
     rfactor = getRFactor(m_dataWS->readY(m_wsIndex), caldata, m_dataWS->readE(m_wsIndex));
-    // calculatePowderPatternStatistic(m_outputWS->dataY(FITTEDPUREPEAKINDEX), m_outputWS->dataY(FITTEDBACKGROUNDINDEX), rwp, rp);
     g_log.notice() << "Rwp = " << rfactor.Rwp << ", Rp = " << rfactor.Rp << "\n";
 
     Parameter par_rwp;
@@ -919,7 +984,7 @@ namespace CurveFitting
   * 2. fit only heights of the peaks in a peak-group and background coefficients (assumed order 2 or 3 polynomial)
   * 3. remove peaks by the fitting result
   */
-  void LeBailFit::calBackground(size_t workspaceindex)
+  void LeBailFit::execCalBackground(size_t workspaceindex)
   {
     throw std::runtime_error("This method is suspended.");
     UNUSED_ARG(workspaceindex);
@@ -934,53 +999,21 @@ namespace CurveFitting
     * @param bkgdorderparams:  vector of background polynomials from order 0
     * @param bkgdparamws:     TableWorkspace containing background polynomials
    */
-  void LeBailFit::createLeBailFunction(string backgroundtype, vector<double>& bkgdorderparams,
-                                        TableWorkspace_sptr bkgdparamws)
+  void LeBailFit::createLeBailFunction()
   {
-    // 1. Background parameters are from ...
-    if (!bkgdparamws)
-    {
-      g_log.information() << "[Input] Use background specified with vector with input vector sized "
-                          << bkgdorderparams.size() << ".\n";
-    }
-    else
-    {
-      g_log.information() << "[Input] Use background specified by table workspace.\n";
-      parseBackgroundTableWorkspace(bkgdparamws, bkgdorderparams);
-    }
-
-    // 2. Create background function
-    auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
-    m_backgroundFunction = boost::dynamic_pointer_cast<BackgroundFunction>(background);
-
-    size_t order = bkgdorderparams.size();
-
-    m_backgroundFunction->setAttributeValue("n", int(order));
-    m_backgroundFunction->initialize();
-
-    for (size_t i = 0; i < order; ++i)
-    {
-      std::stringstream ss;
-      ss << "A" << i;
-      std::string parname = ss.str();
-      m_backgroundFunction->setParameter(parname, bkgdorderparams[i]);
-    }
-
-    g_log.information() << "Generate background function.  Type = " << backgroundtype
-                        << " Order = " << order << "\n";
-    g_log.debug() << "DBx423: Create background function: " << m_backgroundFunction->asString() << "\n";
-
-    // 3. Generate the composite function
+    // 1. Generate the composite function
     API::CompositeFunction compfunction;
     m_lebailFunction = boost::make_shared<API::CompositeFunction>(compfunction);
     m_lebailFunction->useNumericDerivatives(true);
 
-    // 4. Add peaks to LeBail Function
+    // 2. Add peaks to LeBail Function
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
     {
       ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
       m_lebailFunction->addFunction(thispeak);
     }
+
+    // 3. Add background
     m_lebailFunction->addFunction(m_backgroundFunction);
 
     return;
@@ -1347,8 +1380,8 @@ namespace CurveFitting
     * @param setpeakheight: flag to set peak height to each peak or not.
    */
   void LeBailFit::setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
-                                      map<std::string, Parameter> parammap,
-                                      double peakheight, bool setpeakheight)
+                                     map<std::string, Parameter> parammap,
+                                     double peakheight, bool setpeakheight)
   {
     // 1. Prepare, sort parameters by name
     std::map<std::string, Parameter>::iterator pit;
@@ -2097,7 +2130,6 @@ namespace CurveFitting
   /** Make output workspace valid if there is some error.
     * @param workspaceindex:  the workspace index of the spectra in m_outputWS to write fake data
     * @param functionmode:    LeBailFit's mode of function
-    */
   void LeBailFit::writeFakedDataToOutputWS(size_t workspaceindex, int functionmode)
   {
     // 1. Initialization
@@ -2139,6 +2171,7 @@ namespace CurveFitting
 
     return;
   }
+      */
 
   //----------------------------------------------------------------------------------------------
   /** Create and set up an output TableWorkspace for each individual peaks
@@ -2397,135 +2430,74 @@ namespace CurveFitting
 
   //-----------------------------------------------------------------------------
   /** Create output data workspace
-    */
+   * Basic spectra list:
+   * (0) original data
+   * (1) fitted data
+   * (2) difference
+   * (3) fitted pattern w/o background
+   * (4) background (being fitted after peak)
+   * (5) calculation based on input only (no fit)
+   * (6) background (input)
+   * (7) original data with background removed;
+   * (8) Smoothed background
+   * In mode of CALCULATION
+   * (9+) One spectrum for each peak
+   */
   void LeBailFit::createOutputDataWorkspace()
   {
     // 1. Determine number of output spectra
-    size_t nspec;
-    bool plotindpeak = this->getProperty("PlotIndividualPeaks");
+    size_t nspec = 9;
 
-    switch (m_fitMode)
+    if (m_fitMode == CALCULATION)
     {
-      case FIT:
-        // Lebail Fit mode
-        // (0) original data
-        // (1) fitted data
-        // (2) difference
-        // --------------------------------------------
-        // (3) fitted pattern w/o background
-        // (4) background (being fitted after peak)
-        // (5) calculation based on input only (no fit)
-        // (6) background (input)
-        // (7) original data with background removed;
-        ;
-
-      case MONTECARLO:
-        // Monte Carlo fit mode.  Same as LebailFit mode
-        nspec = 9;
-
-        break;
-
-      case CALCULATION:
-        // Calcualtion mode
-        // (0) Data
-        // (1) Calculation (LeBail)
-        // (2) Difference
-        // (3) Calculation w/o background
-        // (4) Background
-        // (5+) One spectrum for each peak
-        nspec = 5;
-        if (plotindpeak)
-          nspec += m_dspPeaks.size();
-
-        break;
-
-      case BACKGROUNDPROCESS:
-        // Background calculation mode
-        nspec = 3;
-
-        break;
-
-      default:
-        // Error default
-        std::stringstream errmsg;
-        errmsg << "Function mode " << m_fitMode << " is not supported in createOutputWorkspace.";
-        g_log.error() << errmsg.str() << "\n";
-        throw std::runtime_error(errmsg.str());
-
-        break;
+      bool plotindpeak = this->getProperty("PlotIndividualPeaks");
+      if (plotindpeak)
+        nspec += m_dspPeaks.size();
     }
 
     // 2. Create workspace2D and set the data to spectrum 0 (common among all)
-    size_t nbin = m_dataWS->dataX(m_wsIndex).size();
+    size_t nbinx = m_dataWS->readX(m_wsIndex).size();
+    size_t nbiny = m_dataWS->readY(m_wsIndex).size();
     m_outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", nspec, nbin, nbin));
-    for (size_t i = 0; i < nbin; ++i)
-    {
+          API::WorkspaceFactory::Instance().create("Workspace2D", nspec, nbinx, nbiny));
+
+    // 3. Add values
+    //    All X.
+    for (size_t i = 0; i < nbinx; ++i)
       for (size_t j = 0; j < m_outputWS->getNumberHistograms(); ++j)
         m_outputWS->dataX(j)[i] = m_dataWS->readX(m_wsIndex)[i];
-      m_outputWS->dataY(0)[i] = m_dataWS->readY(m_wsIndex)[i];
-      m_outputWS->dataE(0)[i] = m_dataWS->readE(m_wsIndex)[i];
+
+    //    Observation
+    for (size_t i = 0; i < nbiny; ++i)
+    {
+      m_outputWS->dataY(OBSDATAINDEX)[i] = m_dataWS->readY(m_wsIndex)[i];
+      m_outputWS->dataE(OBSDATAINDEX)[i] = m_dataWS->readE(m_wsIndex)[i];
     }
 
-    // 3. Set axis
+    // 4. Set axis
     m_outputWS->getAxis(0)->setUnit("TOF");
 
     API::TextAxis* tAxis = 0;
+    tAxis = new API::TextAxis(nspec);
+    tAxis->setLabel(0, "Data");
+    tAxis->setLabel(1, "Calc");
+    tAxis->setLabel(2, "Diff");
+    tAxis->setLabel(3, "CalcNoBkgd");
+    tAxis->setLabel(4, "OutBkgd");
+    tAxis->setLabel(5, "InpCalc");
+    tAxis->setLabel(6, "InBkgd");
+    tAxis->setLabel(7, "DataNoBkgd");
+    tAxis->setLabel(8, "SmoothedBkgd");
 
-    switch (m_fitMode)
+    if (m_fitMode == CALCULATION)
     {
-      case FIT:
-        // Fit mode
-        ;
-      case MONTECARLO:
-        // Monte carlo mode, same as FIT
-        tAxis = new API::TextAxis(nspec);
-        tAxis->setLabel(0, "Data");
-        tAxis->setLabel(1, "Calc");
-        tAxis->setLabel(2, "Diff");
-        tAxis->setLabel(3, "CalcNoBkgd");
-        tAxis->setLabel(4, "OutBkgd");
-        tAxis->setLabel(5, "InpCalc");
-        tAxis->setLabel(6, "InBkgd");
-        tAxis->setLabel(7, "DataNoBkgd");
-        tAxis->setLabel(8, "SmoothedBkgd");
-
-        break;
-
-      case CALCULATION:
-        // Calculation (Le Bail) mode
-        tAxis = new API::TextAxis(nspec);
-        tAxis->setLabel(0, "Data");
-        tAxis->setLabel(1, "Calc");
-        tAxis->setLabel(2, "Diff");
-        tAxis->setLabel(3, "CalcNoBkgd");
-        tAxis->setLabel(4, "Bkgd");
-        for (size_t i = 0; i < (nspec-5); ++i)
-        {
-          std::stringstream ss;
-          ss << "Peak_" << i;
-          tAxis->setLabel(5+i, ss.str());
-        }
-
-        break;
-
-      case BACKGROUNDPROCESS:
-        // Background mode
-        tAxis = new API::TextAxis(nspec);
-        tAxis->setLabel(0, "Data");
-        tAxis->setLabel(1, "Background");
-        tAxis->setLabel(2, "DataNoBackground");
-
-        break;
-
-      default:
-        // Error default
-        std::stringstream errmsg;
-        errmsg << "Function mode " << m_fitMode << " is not supported in createOutputWorkspace.";
-        g_log.error() << errmsg.str() << "\n";
-        throw std::runtime_error(errmsg.str());
-
-        break;
+      // Set the single peak labels
+      for (size_t i = 0; i < (nspec-9); ++i)
+      {
+        std::stringstream ss;
+        ss << "Peak_" << i;
+        tAxis->setLabel(9+i, ss.str());
+      }
     }
 
     m_outputWS->replaceAxis(1, tAxis);
@@ -2545,31 +2517,37 @@ namespace CurveFitting
   {
     // 1. Initialization
     const MantidVec& vecInY = m_dataWS->readY(m_wsIndex);
-    const MantidVec& vecE = m_dataWS->readE(m_wsIndex);
+    // const MantidVec& vecE = m_dataWS->readE(m_wsIndex);
     size_t numpts = vecInY.size();
 
     const MantidVec& domain = m_dataWS->readX(m_wsIndex);
-    MantidVec values(domain.size(), 0.0);
+    MantidVec purepeakvalues(domain.size(), 0.0);
 
     //    Strategy and map
-#if 0
-    setupRandomWalkStrategy();
-#else
-    setupRandomWalkStrategyTestGeometry();
-#endif
+    TableWorkspace_sptr mctablews = getProperty("MCSetupWorkspace");
+    if (mctablews)
+    {
+      setupRandomWalkStrategyFromTable(mctablews);
+    }
+    else
+    {
+      setupBuiltInRandomWalkStrategy();
+    }
+
+    //    Set up a parameter map for new ...
     map<string, Parameter> newparammap = parammap;
 
     //    Random seed
     int randomseed = getProperty("RandomSeed");
     srand(randomseed);
 
-    Rfactor startR, currR;
+    //    R-factors used for MC procedure
+    Rfactor startR, currR, newR;
 
     // Annealing temperature
     m_Temperature = getProperty("AnnealingTemperature");
     if (m_Temperature < 0)
       m_Temperature = fabs(m_Temperature);
-
     m_useAnnealing = getProperty("UseAnnealing");
 
     // Walking style
@@ -2580,20 +2558,8 @@ namespace CurveFitting
       m_walkStyle = RANDOMWALK;
 
     // 2. Process background.
-    // a) Calculate background
-    FunctionDomain1DVector domainB(domain);
-    FunctionValues valuesB(domainB);
-    m_backgroundFunction->function(domainB, valuesB);
-    MantidVec& background = m_outputWS->dataY(INPUTBACKGROUNDINDEX);
-    MantidVec& purepeakdata = m_outputWS->dataY(PUREPEAKINDEX);
-    MantidVec& purepeakerror = m_outputWS->dataE(PUREPEAKINDEX);
-
-    for (size_t i = 0; i < numpts; ++i)
-    {
-      background[i] = valuesB[i];
-      purepeakdata[i] = vecInY[i] - background[i];
-      purepeakerror[i] = vecE[i];
-    }
+    // a) Retrieve background
+    MantidVec& background = m_outputWS->dataY(INPUTBKGDINDEX);
 
     // b) Reset LeBailFunction's background component to 'zero'
     vector<string> bkgdnames = m_backgroundFunction->getParameterNames();
@@ -2603,8 +2569,9 @@ namespace CurveFitting
     }
 
     // 3. Calcualte starting Rwp and etc
-    bool startvaluevalid = calculateDiffractionPatternMC(m_outputWS, PUREPEAKINDEX, parammap,
-                                                         background, values, startR);
+    // a) Do calculation
+    bool startvaluevalid = calculateDiffractionPatternMC(m_outputWS, INPUTPUREPEAKINDEX, parammap,
+                                                         background, purepeakvalues, startR);
 
     if (!startvaluevalid)
     {
@@ -2613,12 +2580,20 @@ namespace CurveFitting
                           " unphyiscal parameters values.");
     }
 
+    // b) Set starting parameters
     currR = startR;
 
     m_bestRwp = currR.Rwp + 0.001;
     m_bestRp = currR.Rp + 0.001;
 
     bookKeepBestMCResult(parammap, background, currR, 0);
+
+    // c) Set to output
+    MantidVec& initcalVec = m_outputWS->dataY(INPUTCALDATAINDEX);
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      initcalVec[i] = purepeakvalues[i] + background[i];
+    }
 
     g_log.notice() << "[DBx255] Random-walk Starting Rwp = " << currR.Rwp
                    << ", Rp = " << currR.Rp << "\n";
@@ -2638,29 +2613,25 @@ namespace CurveFitting
     // Loop start
     for (size_t icycle = 1; icycle <= maxcycles; ++icycle)
     {
-      // a) Remove background as background is in the fitting process too
-      MantidVec& pVecY = m_outputWS->dataY(PUREPEAKINDEX);
-      for (size_t i = 0; i < numpts; ++i)
-        pVecY[i] = vecInY[i] - background[i];
-
-      // b) Refine parameters (for all parameters in turn) to data with background removed
-      for (size_t igroup = 0; igroup < m_numMCGroups; ++igroup)
+      // a) Refine parameters (for all parameters in turn) to data with background removed
+      for (map<int, vector<string> >::iterator giter = m_MCGroups.begin(); giter != m_MCGroups.end(); ++giter)
       {
         // i.   Propose the value
-        bool hasnewvalues = proposeNewValues(m_MCGroups[igroup], currR, parammap, newparammap,
+        int igroup = giter->first; // group id
+        g_log.debug() << "BigTrouble: Group " << igroup << "\n";
+        bool hasnewvalues = proposeNewValues(giter->second, currR, parammap, newparammap,
                                              prevcyclebetterR);
 
         if (!hasnewvalues)
         {
           // No new value.  Skip the rest.
-          // g_log.notice() << "[DB1035.  Group " << igroup << " has no new value propsed. \n";
+          // g_log.debug() << "[DB1035.  Group " << igroup << " has no new value propsed. \n";
           continue;
         }
 
         // ii.  Evaluate
-        Rfactor newR;
-        bool validparams = calculateDiffractionPatternMC(m_outputWS, PUREPEAKINDEX, newparammap, background,
-                                                         values, newR);
+        bool validparams = calculateDiffractionPatternMC(m_outputWS, INPUTPUREPEAKINDEX, newparammap, background,
+                                                         purepeakvalues, newR);
 
         // iii. Determine whether to take the change or not
         bool acceptchange;
@@ -2700,6 +2671,9 @@ namespace CurveFitting
             // Book keep the best
             bookKeepBestMCResult(parammap, background, currR, icycle);
           }
+          // FIXME - Make it more clean
+          if (currR.Rwp < m_bestRwp)
+            m_bestRwp = currR.Rwp;
 
           // Statistic
           ++ numacceptance;
@@ -2736,7 +2710,8 @@ namespace CurveFitting
       // FIXME - [RPRWP] Use Rp now
       if (currR.Rp < m_bestRp)
       {
-        fitBackground(m_wsIndex, domainB, valuesB, background);
+        // FIXME - Fit background is disabled at this moment
+        // fitBackground(m_wsIndex, domainB, valuesB, background);
       }
 
       // vi. Record some information
@@ -2790,23 +2765,23 @@ namespace CurveFitting
     writeRfactorsToFile(vecIndex, vecR, filenamess.str());
 
     // c) Calculate again
-    calculateDiffractionPatternMC(m_outputWS, PUREPEAKINDEX, m_bestParameters, background,
-                                  values, currR);
+    calculateDiffractionPatternMC(m_outputWS, INPUTPUREPEAKINDEX, m_bestParameters, background,
+                                  purepeakvalues, currR);
 
-    MantidVec& vecModel = m_outputWS->dataY(1);
-    MantidVec& vecDiff = m_outputWS->dataY(2);
-    MantidVec& vecModelNoBkgd = m_outputWS->dataY(FITTEDPUREPEAKINDEX);
-    MantidVec& vecBkgd = m_outputWS->dataY(FITTEDBACKGROUNDINDEX);
+    MantidVec& vecCalY = m_outputWS->dataY(CALDATAINDEX);
+    MantidVec& vecDiff = m_outputWS->dataY(DATADIFFINDEX);
+    MantidVec& vecCalPurePeak = m_outputWS->dataY(CALPUREPEAKINDEX);
+    MantidVec& vecCalBkgd = m_outputWS->dataY(CALBKGDINDEX);
     for (size_t i = 0; i < numpts; ++i)
     {
-      // Fitted data
-      vecModel[i] = values[i] + background[i];
+      // Calculated (refined) data
+      vecCalY[i] = purepeakvalues[i] + background[i];
       // Diff
-      vecDiff[i] = vecInY[i] - vecModel[i];
-      // Model no background
-      vecModelNoBkgd[i] = values[i];
+      vecDiff[i] = vecInY[i] - vecCalY[i];
+      // Calcualted without background (pure peaks)
+      vecCalPurePeak[i] = purepeakvalues[i];
       // Different between calculated peaks and raw data
-      vecBkgd[i] = vecInY[i] - values[i];
+      vecCalBkgd[i] = vecInY[i] - purepeakvalues[i];
     }
 
     // c) Apply the best parameters to param
@@ -2821,76 +2796,48 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Set up Monte Carlo random walk strategy
+    * @param tablews :: TableWorkspace containing the Monte Carlo setup
    */
-  void LeBailFit::setupRandomWalkStrategyTestGeometry()
+  void LeBailFit::setupRandomWalkStrategyFromTable(DataObjects::TableWorkspace_sptr tablews)
   {
-    stringstream dboutss;
-    dboutss << "Monte Carlo minimizer refines: ";
+    // Scan the table
+    size_t numrows = tablews->rowCount();
+    for (size_t i = 0; i < numrows; ++i)
+    {
+      // 1. Get a row and pass out
+      TableRow temprow = tablews->getRow(i);
+      string parname;
+      double a0, a1;
+      int nonnegative, group;
 
-    // 1. Monte Carlo groups
-    // a. Instrument gemetry
-    vector<string> geomparams1;
-    addParameterToMCMinimize(geomparams1, "Dtt1");
-    m_MCGroups.push_back(geomparams1);
+      temprow >> parname >> a0 >> a1 >> nonnegative >> group;
 
-    vector<string> geomparams2;
-    addParameterToMCMinimize(geomparams2, "Dtt1t");
-    m_MCGroups.push_back(geomparams2);
+      // 2. MC group
+      map<int, vector<string> >::iterator giter;
+      giter = m_MCGroups.find(group);
+      if (giter != m_MCGroups.end())
+      {
+        giter->second.push_back(parname);
+      }
+      else
+      {
+        // First instance in the new group.
+        vector<string> newpars;
+        newpars.push_back(parname);
+        m_MCGroups.insert(make_pair(group, newpars));
+      }
 
-    vector<string> geomparams3;
-    addParameterToMCMinimize(geomparams3, "Zerot");
-    m_MCGroups.push_back(geomparams3);
-
-    vector<string> geomparams4;
-    addParameterToMCMinimize(geomparams4, "Width");
-    m_MCGroups.push_back(geomparams4);
+      // 3. Set up MC parameters, A0, A1, non-negative
+      map<string, Parameter>::iterator piter = m_funcParameters.find(parname);
+      if (piter != m_funcParameters.end())
+      {
+        piter->second.mcA0 = a0;
+        piter->second.mcA1 = a1;
+        piter->second.nonnegative = static_cast<bool>(nonnegative);
+      }
+    }
 
     m_numMCGroups = m_MCGroups.size();
-
-    // 2. Dictionary for each parameter for non-negative, mcX0, mcX1
-    // a) Sig0, Sig1, Sig2
-
-
-    // b) Alpha
-    m_funcParameters["Alph0"].mcA0 = 0.05;
-    m_funcParameters["Alph1"].mcA0 = 0.02;
-    m_funcParameters["Alph0t"].mcA0 = 0.1;
-    m_funcParameters["Alph1t"].mcA0 = 0.05;
-
-    // c) Beta
-    m_funcParameters["Beta0"].mcA0 = 0.5;
-    m_funcParameters["Beta1"].mcA0 = 0.05;
-    m_funcParameters["Beta0t"].mcA0 = 0.5;
-    m_funcParameters["Beta1t"].mcA0 = 0.05;
-
-    // d) Geometry might be more complicated
-    m_funcParameters["Width"].mcA0 = 0.0;
-    m_funcParameters["Width"].mcA1 = 0.1;
-    m_funcParameters["Width"].nonnegative = true;
-
-    m_funcParameters["Tcross"].mcA0 = 0.0;
-    m_funcParameters["Tcross"].mcA1 = 1.0;
-    m_funcParameters["Tcross"].nonnegative = true;
-
-    m_funcParameters["Zero"].mcA0 = 5.0;  // 5.0
-    m_funcParameters["Zero"].mcA1 = 0.0;
-    m_funcParameters["Zero"].nonnegative = false;
-
-    m_funcParameters["Zerot"].mcA0 = 5.0; // 5.0
-    m_funcParameters["Zerot"].mcA1 = 0.0;
-    m_funcParameters["Zerot"].nonnegative = false;
-
-    m_funcParameters["Dtt1"].mcA0 = 5.0;  // 20.0
-    m_funcParameters["Dtt1"].mcA1 = 0.0;
-    m_funcParameters["Dtt1"].nonnegative = true;
-
-    m_funcParameters["Dtt1t"].mcA0 = 5.0; // 20.0
-    m_funcParameters["Dtt1t"].mcA1 = 0.0;
-    m_funcParameters["Dtt1t"].nonnegative = true;
-
-    m_funcParameters["Dtt2t"].mcA0 = 0.1;
-    m_funcParameters["Dtt2t"].mcA1 = 1.0;
-    m_funcParameters["Dtt2t"].nonnegative = false;
 
     // 4. Reset
     map<string, Parameter>::iterator mapiter;
@@ -2911,10 +2858,8 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Set up Monte Carlo random walk strategy
    */
-  void LeBailFit::setupRandomWalkStrategy()
+  void LeBailFit::setupBuiltInRandomWalkStrategy()
   {
-    bool fitgeometry = getProperty("FitGeometryParameter");
-
     stringstream dboutss;
     dboutss << "Monte Carlo minimizer refines: ";
 
@@ -2928,8 +2873,7 @@ namespace CurveFitting
     addParameterToMCMinimize(geomparams, "Zerot");
     addParameterToMCMinimize(geomparams, "Width");
     addParameterToMCMinimize(geomparams, "Tcross");
-    if (fitgeometry)
-      m_MCGroups.push_back(geomparams);
+    m_MCGroups.insert(make_pair(0, geomparams));
 
     dboutss << "Geometry parameters: ";
     for (size_t i = 0; i < geomparams.size(); ++i)
@@ -2942,7 +2886,7 @@ namespace CurveFitting
     addParameterToMCMinimize(alphs, "Alph1");
     addParameterToMCMinimize(alphs, "Alph0t");
     addParameterToMCMinimize(alphs, "Alph1t");
-    m_MCGroups.push_back(alphs);
+    m_MCGroups.insert(make_pair(1, alphs));
 
     dboutss << "Alpha parameters";
     for (size_t i = 0; i < alphs.size(); ++i)
@@ -2955,7 +2899,7 @@ namespace CurveFitting
     addParameterToMCMinimize(betas, "Beta1");
     addParameterToMCMinimize(betas, "Beta0t");
     addParameterToMCMinimize(betas, "Beta1t");
-    m_MCGroups.push_back(betas);
+    m_MCGroups.insert(make_pair(2, betas));
 
     dboutss << "Beta parameters";
     for (size_t i = 0; i < betas.size(); ++i)
@@ -2967,7 +2911,7 @@ namespace CurveFitting
     addParameterToMCMinimize(sigs, "Sig0");
     addParameterToMCMinimize(sigs, "Sig1");
     addParameterToMCMinimize(sigs, "Sig2");
-    m_MCGroups.push_back(sigs);
+    m_MCGroups.insert(make_pair(3, sigs));
 
     dboutss << "Sig parameters";
     for (size_t i = 0; i < sigs.size(); ++i)
@@ -3087,10 +3031,10 @@ namespace CurveFitting
   /** Calculate diffraction pattern in Le Bail algorithm for MC Random walk
    *
    * @param dataws  :  workspace of the data
-   * @param wsindex :  workspace index of the data with background removed.
+   * @param wsindex :  workspace index of observed data with background removed.
    * @param funparammap:  map of Parameters of the function to optimize
    * @param background:  background values
-   * @param values:   function values
+   * @param values:   (output) function values, i.e., summation of all peaks but no background
    * @param RFactor:  R-factor (Rwp and Rp) as output
    */
   bool LeBailFit::calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws, size_t wsindex,
@@ -3176,7 +3120,7 @@ namespace CurveFitting
       // 5. Calculate Rwp
       vector<double> caldata(values.size(), 0.0);
       std::transform(values.begin(), values.end(), background.begin(), caldata.begin(), std::plus<double>());
-      rfactor = getRFactor(m_dataWS->readY(m_wsIndex), values, m_dataWS->readE(m_wsIndex));
+      rfactor = getRFactor(m_dataWS->readY(m_wsIndex), caldata, m_dataWS->readE(m_wsIndex));
       // calculatePowderPatternStatistic(values, background, rwp, rp);
     }
 
@@ -3212,6 +3156,7 @@ namespace CurveFitting
     bool anyparameterrefined = false;
 
     // 2. Find out parameters to refine in this step/MC group
+    g_log.debug() << "BigTrouble.  Parameter Number In Group = " << mcgroup.size() << "\n";
     for (size_t i = 0; i < mcgroup.size(); ++i)
     {
       // a) Find out i-th parameter to be refined or not
@@ -3532,7 +3477,7 @@ namespace CurveFitting
   {
     UNUSED_ARG(background);
 
-    MantidVec& vecSmoothBkgd = m_outputWS->dataY(SMOOTHEDBACKGROUND);
+    MantidVec& vecSmoothBkgd = m_outputWS->dataY(SMOOTHEDBKGDINDEX);
 
     smoothBackgroundAnalytical(wsindex, domain, values, vecSmoothBkgd);
     // smoothBackgroundExponential(wsindex, domain, values, vecSmoothBkgd);
@@ -3623,8 +3568,8 @@ namespace CurveFitting
   {
     // 1. Make data ready
     MantidVec& vecData = m_dataWS->dataY(wsindex);
-    MantidVec& vecFitBkgd = m_outputWS->dataY(FITTEDBACKGROUNDINDEX);
-    MantidVec& vecFitBkgdErr = m_outputWS->dataE(FITTEDBACKGROUNDINDEX);
+    MantidVec& vecFitBkgd = m_outputWS->dataY(CALBKGDINDEX);
+    MantidVec& vecFitBkgdErr = m_outputWS->dataE(CALBKGDINDEX);
     size_t numpts = vecFitBkgd.size();
     for (size_t i = 0; i < numpts; ++i)
     {
@@ -3643,7 +3588,7 @@ namespace CurveFitting
     calalg->initialize();
     calalg->setProperty("Function", boost::shared_ptr<API::IFunction>(bkgdfunc));
     calalg->setProperty("InputWorkspace", m_outputWS);
-    calalg->setProperty("WorkspaceIndex", FITTEDBACKGROUNDINDEX);
+    calalg->setProperty("WorkspaceIndex", CALDATAINDEX);
     calalg->setProperty("StartX", domain[0]);
     calalg->setProperty("EndX", domain[numpts-1]);
     calalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
