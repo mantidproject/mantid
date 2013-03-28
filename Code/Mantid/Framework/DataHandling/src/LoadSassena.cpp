@@ -335,9 +335,17 @@ void LoadSassena::init()
  */
 void LoadSassena::exec()
 {
-  API::WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
+  API::WorkspaceGroup_sptr gws=getProperty("OutputWorkspace");
+  if(gws)
+  {
+    gws->deepRemoveAll(); // remove workspace members
+  }
+  else
+  {
+    gws = boost::make_shared<API::WorkspaceGroup>();
+    setProperty("OutputWorkspace", gws);
+  }
   gws->observeADSNotifications( false ); // Prevent sending unnecessary notifications
-  setProperty("OutputWorkspace", gws); // Register the groupWorkspace in the analysis data service
 
   //populate m_validSets
   int nvalidSets = 4;
