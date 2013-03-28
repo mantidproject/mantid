@@ -317,7 +317,7 @@ void MultiTabScriptInterpreter::toggleCodeFolding(bool state)
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
-    interpreterAt(index)->toggleProgressReporting(state);
+    interpreterAt(index)->toggleCodeFolding(state);
   }
 }
 
