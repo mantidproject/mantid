@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/PeakOverlaySphereFactory.cpp
 	src/PeakOverlayCrossFactory.cpp
 	src/PeakOverlayViewFactoryBase.cpp
+	src/PeakOverlayViewFactorySelector.cpp
 	src/PeakPalette.cpp
 	src/PeakTransform.cpp
 	src/PeakTransformHKL.cpp
@@ -53,6 +54,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakOverlayView.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactoryBase.h
+	inc/MantidQtSliceViewer/PeakOverlayViewFactorySelector.h
 	inc/MantidQtSliceViewer/PeakOverlaySphereFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayCrossFactory.h
 	inc/MantidQtSliceViewer/PeakPalette.h
@@ -116,6 +118,7 @@ set ( TEST_FILES
     test/ConcretePeaksPresenterTest.h
     test/PeakBoundingBoxTest.h
     test/PeakPaletteTest.h
+    test/PeakOverlayViewFactorySelectorTest.h
     test/PeakTransformHKLTest.h
     test/PeakTransformQSampleTest.h
     test/PeakTransformQLabTest.h

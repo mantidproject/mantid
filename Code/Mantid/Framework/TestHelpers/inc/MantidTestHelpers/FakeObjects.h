@@ -11,7 +11,8 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RefAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -88,15 +89,13 @@ public:
       vec[i].dataY().resize(k,1.0);
       vec[i].dataE().resize(k,1.0);
       vec[i].addDetectorID(detid_t(i));
-      vec[i].setSpectrumNo(specid_t(i));
+      vec[i].setSpectrumNo(specid_t(i+1));
     }
 
     // Put an 'empty' axis in to test the getAxis method
-    m_axes.resize(0);
-    m_axes.push_back(new NumericAxis(1));
-    m_axes[0]->title() = "1";
-    m_axes.push_back(new NumericAxis(1));
-    m_axes[1]->title() = "2";
+    m_axes.resize(2);
+    m_axes[0] = new Mantid::API::RefAxis(j, this);
+    m_axes[1] = new Mantid::API::SpectraAxis(this);
 
     generateSpectraMap();
   }

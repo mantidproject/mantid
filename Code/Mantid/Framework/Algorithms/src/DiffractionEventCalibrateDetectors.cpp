@@ -1,10 +1,9 @@
 /*WIKI* 
 
-
 Moves the detectors in an instrument to optimize the maximum intensity of each detector using gsl_multimin_fminimizer_nmsimplex.  Only bin data close to peak you wish to maximize.
 
-
-==Usage==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
     DiffractionEventCalibrateDetectors(InputWorkspace=SNAP_4307, Params="1.9308,0.0002,2.1308", LocationOfPeakToOptimize=2.0308, MaxIterations=100, DetCalFilename="./SNAP_4307.DetCal")
 
@@ -16,9 +15,7 @@ Moves the detectors in an instrument to optimize the maximum intensity of each d
     alg->setPropertyValue("MaxIterations", "100");
     alg->setPropertyValue("DetCalFilename", "./SNAP_4307.DetCal");
     alg->execute();
-
-
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

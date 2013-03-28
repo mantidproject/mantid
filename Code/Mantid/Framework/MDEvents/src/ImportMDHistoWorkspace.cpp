@@ -11,8 +11,13 @@ The Names, Units, Extents and NumberOfBins inputs are all linked by the order th
 
 Signal and Error inputs are read in such that, the first entries in the file will be entered across the first dimension specified, and the zeroth index in the other dimensions. The second set of entries will be entered across the first dimension and the 1st index in the second dimension, and the zeroth index in the others.
 
-== Usage ==
+== Alternatives ==
+A very similar algorithm to this is [[CreateMDHistoWorkspace]], which takes it's input signal and error values from arrays rather than a text file. Another alternative is to use [[ConvertToMD]] which works on MatrixWorkspaces, and allows log values to be included in the dimensionality.
 
+[[Category:MDAlgorithms]]
+
+*WIKI*/
+/*WIKI_USAGE*
 The following call will create an MDHistoWorkspace called ''demo'' with 3 dimensions with 2 bins in each dimension. Each dimension will
 span from -1 to 1 in units of T.
 
@@ -29,13 +34,7 @@ And here's the corresponding contents of ''demo.txt'':
  6	6.1
  7	7.1
  8	8.1
-
-== Alternatives ==
-A very similar algorithm to this is [[CreateMDHistoWorkspace]], which takes it's input signal and error values from arrays rather than a text file. Another alternative is to use [[ConvertToMD]] which works on MatrixWorkspaces, and allows log values to be included in the dimensionality.
-
-[[Category:MDAlgorithms]]
-
-*WIKI*/
+*WIKI_USAGE*/
 
 #include "MantidMDEvents/ImportMDHistoWorkspace.h"
 #include "MantidAPI/FileProperty.h"

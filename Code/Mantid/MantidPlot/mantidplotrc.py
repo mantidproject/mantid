@@ -62,13 +62,14 @@ if __name__ == '__main__':
     def _ScopeInspector_GetFunctionAttributes(definitions):
         if type(definitions) != dict:
             return []
+        from mantid.simpleapi import _get_function_spec
         keywords = []
         for name,obj in definitions.iteritems():
             if name.startswith('_') : continue
             if inspect.isclass(obj) or inspect.ismodule(obj):
                 continue
             if inspect.isfunction(obj) or inspect.isbuiltin(obj):
-                keywords.append(name + _ScopeInspector_GetFunctionSpec(obj))
+                keywords.append(name + _get_function_spec(obj))
                 continue
             # Object could be a proxy so check and use underlying object
             if hasattr(obj,"_getHeldObject"):
@@ -80,62 +81,9 @@ if __name__ == '__main__':
                     continue
                 if inspect.isfunction(fattr) or inspect.ismethod(fattr) or \
                         hasattr(fattr,'im_func'):
-                    keywords.append(name + '.' + att + _ScopeInspector_GetFunctionSpec(fattr))
+                    keywords.append(name + '.' + att + _get_function_spec(fattr))
 
         return keywords;
-
-    def _ScopeInspector_GetFunctionSpec(func):
-        try:
-            argspec = inspect.getargspec(func)
-        except TypeError:
-            return ''
-        # Algorithm functions have varargs set not args
-        args = argspec[0]
-        if args != []:
-            # For methods strip the self argument
-            if hasattr(func, 'im_func'):
-                args = args[1:]
-            defs = argspec[3]
-        elif argspec[1] is not None:
-            # Get from varargs/keywords
-            arg_str = argspec[1].strip().lstrip('\b')
-            defs = []
-            # Keyword args
-            kwargs = argspec[2]
-            if kwargs is not None:
-                kwargs = kwargs.strip().lstrip('\b\b')
-                if kwargs == 'kwargs':
-                    kwargs = '**' + kwargs + '=None'
-                arg_str += ',%s' % kwargs
-            # Any default argument appears in the string
-            # on the rhs of an equal
-            for arg in arg_str.split(','):
-                arg = arg.strip()
-                if '=' in arg:
-                    arg_token = arg.split('=')
-                    args.append(arg_token[0])
-                    defs.append(arg_token[1])
-                else:
-                    args.append(arg)
-            if len(defs) == 0: defs = None
-        else:
-            return ''
-
-        if defs is None:
-            calltip = ','.join(args)
-            calltip = '(' + calltip + ')'
-        else:
-            # The defaults list contains the default values for the last n arguments
-            diff = len(args) - len(defs)
-            calltip = ''
-            for index in range(len(args) - 1, -1,-1):
-                def_index = index - diff
-                if def_index >= 0:
-                    calltip = '[' + args[index] + '],' + calltip
-                else:
-                    calltip = args[index] + "," + calltip
-            calltip = '(' + calltip.rstrip(',') + ')'
-        return calltip
     
     import sys
     sys.path.insert(0,'')

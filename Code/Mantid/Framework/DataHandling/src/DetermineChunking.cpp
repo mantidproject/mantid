@@ -21,7 +21,6 @@ for event nexus, runinfo.xml, raw, or histo nexus files
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "LoadRaw/isisraw.h"
-#include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"

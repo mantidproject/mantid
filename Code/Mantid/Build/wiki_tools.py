@@ -3,25 +3,32 @@
 import warnings
 import optparse
 import os
-import mwclient
 import ConfigParser
-import string
-import time
-import datetime
-import subprocess
-import commands
 import sys
 import codecs
 import fnmatch
+import platform
+import re
 
-
+module_name=os.path.basename(os.path.splitext(__file__)[0])
 mantid_initialized = False
+mantid_debug = False
+python_d_exe = None
+# no version identier
+noversion = -1
+# Direction
+InputDirection = "Input"
+OutputDirection = "Output"
+InOutDirection = "InOut"
+NoDirection = "None"
+direction_string = [InputDirection, OutputDirection, InOutDirection, NoDirection]
+
+# Holds on to location of sources
+file_search_done=False
 cpp_files = []
 cpp_files_bare = []
 python_files = []
 python_files_bare = []
-
-
 
 #======================================================================
 def remove_wiki_from_header():
@@ -77,8 +84,137 @@ def add_wiki_description(algo, wikidesc):
         f = codecs.open(source, encoding='utf-8', mode='w+')
         f.write(text)
         f.close()
+
+#======================================================================
+def get_wiki_description(algo, version):
+    tryUseDescriptionFromBinaries = True
+    return get_custom_wiki_section(algo, version, "*WIKI*", tryUseDescriptionFromBinaries)
+
+#======================================================================
+def get_wiki_usage(algo, version):
+    wiki_usage = get_custom_wiki_section(algo, version, "*WIKI_USAGE*")
+    wiki_no_sig_usage = get_custom_wiki_section(algo, version, "*WIKI_USAGE_NO_SIGNATURE*")
+    
+    if wiki_usage:
+        return (True, wiki_usage)
+    elif wiki_no_sig_usage:
+        return (False, wiki_no_sig_usage)
+    else:
+        return (True, "")
+            
+
+#======================================================================
+def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=False):
+    """ Extract the text between the *WIKI* tags in the .cpp file
+    
+    @param algo :: name of the algorithm
+    @param version :: version, -1 for latest 
+    """
+    
+    desc = ""
+    source = find_algo_file(algo, version)
+    if source == '' and tryUseDescriptionFromBinaries:
+        from mantid.api import AlgorithmManager
+        alg = AlgorithmManager.createUnmanaged(algo, version)
+        print "Getting algorithm description from binaries."
+        return alg.getWikiDescription()
+    elif source == '' and not tryUseDescriptionFromBinaries:
+        print "Warning: Cannot find source for algorithm"
+        return desc
+    else:
+        f = open(source,'r')
+        lines = f.read().split('\n')
+        print lines
+        f.close()
+        
+        print algo
+        try:
+            # Start and end location markers.
+            start_tag_cpp = "/" + tag 
+            start_tag_python = '"""%s' % tag
+            end_tag_cpp = tag + "/"
+            end_tag_python = '%s"""' % tag
+            
+            # Find the start and end lines for the wiki section in the source.
+            start_index = 0
+            end_index = 0
+            for line_index in range(0, len(lines)):
+                line = lines[line_index]
+                if line.lstrip().startswith(start_tag_cpp) or line.lstrip().startswith(start_tag_python):
+                    start_index = line_index + 1
+                    continue
+                if line.lstrip().startswith(end_tag_cpp) or line.lstrip().startswith(end_tag_python):
+                    end_index = line_index
+                    break
+            
+            # Concatinate across the range.
+            for line_index in range(start_index, end_index):
+                desc += lines[line_index] + "\n"
+            
+            if start_index == end_index:
+                print "No algorithm %s section in source." % tag
+            else:
+                print "Getting algorithm %s section from source." % tag
+        
+        except IndexError:
+            print "No algorithm %s section in source." % tag
+        return desc        
+
         
         
+#======================================================================
+def create_function_signature(alg, algo_name):
+    """
+    create the function signature for the algorithm.
+    """
+    import mantid.simpleapi
+    from mantid.api import IWorkspaceProperty
+    from mantid.simpleapi import _get_function_spec
+
+    _alg = getattr(mantid.simpleapi, algo_name)
+    prototype =  algo_name + _get_function_spec(_alg)
+    
+    # Replace every nth column with a newline.
+    nth = 4
+    commacount = 0
+    prototype_reformated = ""
+    for char in prototype:
+        if char == ',':
+            commacount += 1
+            if (commacount % nth == 0):
+                prototype_reformated += ",\n  "
+            else:
+                prototype_reformated += char
+        else: 
+           prototype_reformated += char
+           
+    # Strip out the version.
+    prototype_reformated = prototype_reformated.replace(",[Version]", "")
+    
+    # Add the output properties
+    props = alg.getProperties()
+    allreturns = []
+    # Loop through all the properties looking for output properties
+    for prop in props:
+        if (direction_string[prop.direction] == OutputDirection):
+            allreturns.append(prop.name)
+                
+    lhs = ""
+    comments = ""
+    if not allreturns:
+        pass
+    elif (len(allreturns) == 1): 
+        lhs =   allreturns[0] + " = "
+    else :
+        lhs = "result = "
+        comments = "\n "
+        comments += "\n # -------------------------------------------------- \n"
+        comments += " # result is a tuple containing\n"
+        comments += " # (" + ",".join(allreturns ) + ")\n"
+        comments += " # To access individual outputs use result[i], where i is the index of the required output.\n"
+        
+    return lhs + prototype_reformated + comments
+
 #======================================================================
 def intialize_files():
     """ Get path to every header file """
@@ -98,6 +234,11 @@ def intialize_files():
 #======================================================================
 def find_algo_file(algo, version=-1):
     """Find the files for a given algorithm (and version)"""
+    global file_search_done
+    if not file_search_done:
+        intialize_files()
+        file_search_done=True
+
     source = ''
     filename = algo
     if version > 1:
@@ -115,6 +256,13 @@ def find_algo_file(algo, version=-1):
 #======================================================================
 def initialize_wiki(args):
     global site
+    exec_path=sys.executable
+    if sys.executable.endswith('python_d.exe'):
+        msg="wiki_maker must be called with standard python.exe not the debug python_d.exe" + \
+            "You can still use a debug build of Mantid with wiki_maker, the use of python_d is handled internally"
+        raise RuntimeError(msg)
+
+    import mwclient
     # Init site object
     print "Connecting to site mantidproject.org"
     site = mwclient.Site('www.mantidproject.org', path='/')
@@ -122,44 +270,89 @@ def initialize_wiki(args):
     if hasattr(args, 'username'):
         print "Logging in as %s" % args.username
         site.login(args.username, args.password) 
-#        if res is None:
-#            warnings.warn("Login with username '%s' failed! Check your username and password." % args.username)
     
     
 #======================================================================
-def initialize_Mantid(mantidpath):
-    """ Start mantid framework """
-    global mtd
-    global mantid_initialized
-    if mantid_initialized:   return
-    mantidpath = os.path.abspath(mantidpath)
-    sys.path.append(mantidpath)
-    sys.path.append( os.path.join(mantidpath, 'bin') )
-    sys.path.append(os.getcwd())
-    sys.path.append( os.path.join( os.getcwd(), 'bin') )
-    try:
-        import mantid
-    except:
-        msg = "Error importing MantidFramework. Did you specify the --mantidpath option? "
-        msg += "Tried to initialize from '%s'" % str(mantidpath)
-        raise Exception(msg)
-    mantid_initialized = True
+def flag_if_build_is_debug(mantidpath):
+    """
+    Check if the given build is a debug build of Mantid
+    """
+    global mantid_debug
+    global python_d_exe
+    if platform.system() != 'Windows':
+        return
 
-#======================================================================
-def get_all_algorithms_tuples():
-    """Returns a list of all algorithm names and versions as a tuple"""
-    return mtd._getRegisteredAlgorithms(True)
-
-
-#======================================================================
-def get_all_algorithms():
-    """Returns a list of all algorithm names"""
-    temp = get_all_algorithms_tuples()
-    if withversion:
-        return temp
+    kernel_path=os.path.join(mantidpath,"mantid","kernel")
+    if os.path.exists(os.path.join(kernel_path,"_kernel_d.pyd")):
+        mantid_debug=True
+        #Try & find python_d exe to use.
+        exec_path=sys.executable.replace(".exe","_d.exe")
+        if os.path.exists(exec_path):
+           python_d_exe = exec_path
+        else:
+            raise RuntimeError("No python_d.exe found next to python.exe at %s" %(sys.executable))
+        
+    elif os.path.exists(os.path.join(kernel_path,"_kernel.pyd")):
+        mantid_debug=False
     else:
-        algos = [x for (x, version) in temp]
-        return algos
+        raise RuntimeError("Unable to locate Mantid python libraries.")
+
+#======================================================================
+def get_algorithm_to_version_lookup():
+    """
+        Returns a dictionary of all algorithm names along with a list of their versions.
+        If necessary done via a subprocess
+    """
+    global mantid_debug
+    if not mantid_debug:
+        lookup=do_get_algorithm_to_version_lookup()
+    else:
+        import subprocess
+        marker='@@@@@@@@@@@WIKI_TOOLS_END_OF_FUNCTION_CALL_STDOUT@@@@@@@@@@@@@@'
+        code="import %s;out=%s.do_get_algorithm_to_version_lookup(as_str=True);print '%s';print out" % (module_name,module_name,marker)
+        sp_output = subprocess.check_output([python_d_exe,"-c",code])
+        try:
+            fn_prints,fn_retval = sp_output.split(marker)
+            # Reconstruct dictionary
+            lookup = {}
+            all_lines = fn_retval.strip().splitlines()
+            for line in all_lines:
+                columns = line.split()
+                # First is name remaining are version numbers
+                versions = []
+                for v in columns[1:]:
+                    versions.append(int(v))
+                lookup[columns[0]] = versions
+        except ValueError:
+            raise RuntimeError("Error in processing output from subprocess. Most likely a bug in wiki_tools")
+
+    return lookup
+    
+def do_get_algorithm_to_version_lookup(as_str=False):
+    """
+        Returns a list of all algorithm names and versions as a dictionary
+        @param as_str If True, then the dictionary is transformed to a string 
+                      of one algorithm per line: "name 1 2 3 ..." with as many columns as versions afterward
+    """
+    import mantid
+    from mantid.api import AlgorithmFactory
+    algs = AlgorithmFactory.getRegisteredAlgorithms(True)
+    if not as_str:
+        return algs
+        
+    out=""
+    for name, versions in algs.iteritems():
+        out += name + " "
+        for version in versions:
+            out += str(version) + " "
+        out += "\n"
+    return out
+
+#======================================================================
+def get_all_algorithm_names():
+    """Returns a list of all algorithm names"""
+    alg_lookup = get_algorithm_to_version_lookup()
+    return alg_lookup.keys() 
 
 #======================================================================
 def find_misnamed_algos():
@@ -283,69 +476,246 @@ def find_orphan_wiki():
                 print "Algorithm %s was not found." % algo_name
 
 #======================================================================
-if __name__ == "__main__":
-   
-    # First, get the config for the last settings
-    config = ConfigParser.ConfigParser()
-    config_filename = os.path.split(__file__)[0] + "/wiki_tools.ini"
-    config.read(config_filename)
-    defaultmantidpath = ""
+def find_latest_alg_version(algo_name):
+    """
+        Calls into mantid to find the latest version of the given algorithm
+        via subprocess call to mantid if necessary
+        @param algo_name The name of the algorithm
+    """
+    if not mantid_debug:  
+        return do_find_latest_alg_version(algo_name)
+    else:
+        import subprocess
+        code="import %s;print %s.do_find_latest_alg_version('%s')" % (module_name,module_name,algo_name)
+        output = subprocess.check_output([python_d_exe,"-c",code])
+        # Output will contain possible warnings,notices etc. Just want the last character
+        return int(output.strip()[-1])
+    
+def do_find_latest_alg_version(algo_name):
+    """
+        Calls into mantid to find the latest version of the given algorithm
+        @param algo_name The name of the algorithm
+    """
+    import mantid
+    from mantid.api import AlgorithmManager
+    return AlgorithmManager.createUnmanaged(algo_name, noversion).version()
+    
+#======================================================================
+
+def make_wiki(algo_name, version, latest_version):
+    """ Return wiki text for a given algorithm via subprocess call to mantid
+    if necessary, this allows it to work in debug on Windows.
+    @param algo_name :: name of the algorithm (bare)
+    @param version :: version requested
+    @param latest_version :: the latest algorithm 
+    """
+    if not mantid_debug:  
+        output=do_make_wiki(algo_name,version,latest_version)
+    else:
+        import subprocess
+        marker='@@@@@@@@@@@WIKI_TOOLS_END_OF_FUNCTION_CALL_STDOUT@@@@@@@@@@@@@@'
+        code="import %s;import mantid;out=%s.do_make_wiki('%s',%d,%d);print '%s';print out" % (module_name,module_name,algo_name,version,latest_version,marker)
+        sp_output = subprocess.check_output([python_d_exe,"-c",code])
+        try:
+            fn_prints,fn_retval = sp_output.split(marker)
+            output=fn_retval
+        except ValueError:
+            raise RuntimeError("Error in processing output from subprocess. Most likely a bug in wiki_tools")
+    return output
+    
+#======================================================================
+def do_make_wiki(algo_name, version, latest_version):
+    """ Return wiki text for a given algorithm
+    @param algo_name :: name of the algorithm (bare)
+    @param version :: version requested
+    @param latest_version :: the latest algorithm 
+    """ 
+    
+    external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
+    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000; padding-left:5px;'></anchor>\n\n" % (external_image, external_image)  
+    
+    # Deprecated algorithms: Simply return the deprecation message
+    print "Creating... ", algo_name, version
+    import mantid
+    from mantid.api import AlgorithmManager,DeprecatedAlgorithmChecker
+    # Deprecated algorithms: Simply returnd the deprecation message
+    print "Creating... ", algo_name, version
+    deprec_check = DeprecatedAlgorithmChecker(algo_name,version)
+    deprec = deprec_check.isDeprecated()
+    if len(deprec) != 0:
+        out += "== Deprecated ==\n\n"
+        deprecstr = deprec
+        deprecstr = deprecstr.replace(". Use ", ". Use [[")
+        deprecstr = deprecstr.replace(" instead.", "]] instead.")
+        out += deprecstr 
+        out += "\n\n"
+    
+    alg = AlgorithmManager.createUnmanaged(algo_name, version)
+    alg.initialize()
+    
+    if (latest_version > 1):
+        out += "Note: This page refers to version %d of %s. \n\n"% (version, algo_name)
+            
+    
+    out += "== Summary ==\n\n"
+    out += alg.getWikiSummary().replace("\n", " ") + "\n\n"
+    # Fetch the custom usage wiki section.
+    include_signature, custom_usage = get_wiki_usage(algo_name, version)
+    out += "\n\n== Usage ==\n\n"
+    if include_signature:
+        out += " " + create_function_signature(alg, algo_name) + "\n\n" 
+    out += "<br clear=all>\n\n" 
+    out += custom_usage
+    out += "== Properties ==\n\n"
+    
+    out += """{| border="1" cellpadding="5" cellspacing="0" 
+!Order\n!Name\n!Direction\n!Type\n!Default\n!Description
+|-\n"""
+
+    # Do all the properties
+    props = alg.getProperties()
+    propnum = 1
+    last_group = ""
+    for prop in props:
+        group = prop.getGroup
+        if (group != last_group):
+            out += make_group_header_line(group)
+            last_group = group
+        out += make_property_table_line(propnum, prop)
+        propnum += 1
+        
+        
+    # Close the table
+    out += "|}\n\n"
+
+
+    out += "== Description ==\n"
+    out += "\n"
+    desc = ""
     try:
-        defaultmantidpath = config.get("mantid", "path")
-    except:
+        desc = get_wiki_description(algo_name,version)
+    except IndexError:
         pass
+    if (desc == ""):
+      out += "INSERT FULL DESCRIPTION HERE\n"
+      print "Warning: missing wiki description for %s! Placeholder inserted instead." % algo_name
+    else:
+      out += desc + "\n"
+    out += "\n"
+    out += "[[Category:Algorithms]]\n"
     
-    parser = optparser.OptionParser(description='Generate the Wiki documentation for one '
-                                      'or more algorithms, and updates the mantidproject.org website')
-    
-    
-    parser.add_option('--mantidpath', dest='mantidpath', default=defaultmantidpath,
-                        help="Full path to the Mantid compiled binary folder. Default: '%s'. This will be saved to an .ini file" % defaultmantidpath)
+    # All other categories
+    categories = alg.categories()
+    for categ in categories:
+        n = categ.find("\\")
+        if (n>0):
+            # Category is "first\second"
+            first = categ[0:n]
+            second = categ[n+1:]
+            out += "[[Category:" + first + "]]\n"
+            out += "[[Category:" + second + "]]\n"
+        else:
+            out += "[[Category:" + categ + "]]\n"
 
-    parser.add_option('--validate', dest='validate_wiki', action='store_const',
-                        const=True, default=False,
-                        help="Validate algorithms' documentation. Validates them all if no algo is specified. Look for missing wiki pages, missing properties documentation, etc. using the list of registered algorithms.")
-    
-    parser.add_option('--show-missing', dest='show_missing', action='store_const',
-                        const=True, default=False,
-                        help="When validating, pull missing in-code documentation from the wiki and show it.")
-    
-    parser.add_option('--find-orphans', dest='find_orphans', action='store_const',
-                        const=True, default=False,
-                        help="Look for 'orphan' wiki pages that are set as Category:Algorithms but do not have a matching Algorithm in Mantid.")
-    
-    parser.add_option('--find-misnamed', dest='find_misnamed', action='store_const',
-                        const=True, default=False,
-                        help="Look for algorithms where the name of the algorithm does not match any filename.")
+    # Point to the right source ffiles
+    if version > 1:
+        out +=  "{{AlgorithmLinks|%s%d}}\n" % (algo_name, version)
+    else:
+        out +=  "{{AlgorithmLinks|%s}}\n" % (algo_name)
 
-    (args, algos) = parser.parse_args()
+    return out
+
+#======================================================================
+def make_property_table_line(propnum, p):
+    """ Make one line of the property table
+    
+    Args:
+        propnum :: number of the prop
+        p :: Property object
+    Returns:
+        string to add to the wiki
+    """    
+    from mantid.api import IWorkspaceProperty
+    
+    out = ""
+    # The property number
+    out += "|" + str(propnum) + "\n"
+    # Name of the property
+    out += "|" + p.name + "\n"
+
+    out += "|" + direction_string[p.direction] + "\n"
+    # Type (as string) wrap an IWorkspaceProperty in a link.
+    if isinstance(p, IWorkspaceProperty): 
+        out += "|[[" + str(p.type) + "]]\n"
+    else:
+        out += "|" + str(p.type) + "\n"
+       
+    if (direction_string[p.direction] == OutputDirection) and (not isinstance(p, IWorkspaceProperty)):
+      out += "|\n" # Nothing to show under the default section for an output properties that are not workspace properties.
+    elif (p.isValid == ""): #Nothing was set, but it's still valid = NOT  mandatory
+      defaultstr = create_property_default_string(p)
+      out += "| " + defaultstr + "\n"
+    else:
+      out += "|Mandatory\n"
+      
+    # Documentation
+    out += "|" + p.documentation.replace("\n", "<br />") + "\n"
+    # End of table line
+    out += "|-\n"
+    return out
+    
+
+#======================================================================
+def make_group_header_line(group):
+    """ Make a group header line for the property table
+    
+     Args:
+        group :: name of the group
+    Returns:
+        string to add to the wiki
+    """
+    if group=="":
+        return "|colspan=6 align=center|   \n|-\n"
+    else:
+        return "|colspan=6 align=center|'''%s'''\n|-\n" % group
+
+#======================================================================  
+def create_property_default_string(prop):
+    """ Create a default string 
+    
+     Args:
+        default. The property default value.
+    Returns:
+        string to add to the wiki property table default section.
+    """
+    # Convert to int, then float, then any string
+    
+    default = prop.getDefault
+    defaultstr = ""
+    try:
+        val = int(default)
+        if (val >= 2147483647):
+            defaultstr = "Optional"
+        else:
+            defaultstr = str(val)
+    except:
+        try:
+            val = float(default)
+            if (val >= 1e+307):
+                defaultstr = "Optional"
+            else:
+                defaultstr = str(val)
+        except:
+            # Fall-back default for anything
+            defaultstr = str(default)
+            
+    # Replace the ugly default values with "optional"
+    if (defaultstr == "8.9884656743115785e+307") or \
+       (defaultstr == "1.7976931348623157e+308") or \
+       (defaultstr == "2147483647"):
+        defaultstr = "Optional"
         
-    # Write out config for next time
-    config = ConfigParser.ConfigParser()
-    config.add_section("mantid")
-    config.set("mantid", "path", args.mantidpath)
-    f = open(config_filename, 'w')
-    config.write(f)
-    f.close()
-    
-    if not args.validate_wiki and not args.find_misnamed and not args.find_orphans and len(algos)==0:
-        parser.error("You must specify at least one algorithm if not using --validate")
-
-    initialize_Mantid(args.mantidpath)
-    intialize_files()
-    initialize_wiki(args)
-
-    if args.find_misnamed:
-        find_misnamed_algos()
-        sys.exit(1)
-  
-    if args.find_orphans:
-        find_orphan_wiki()
-        sys.exit(1)
-
-    if args.validate_wiki:
-        # Validate a few, or ALL algos
-        if len(algos) == 0:
-            algos = get_all_algorithms()
-        validate_wiki(args, algos)        
-        
+    if str(prop.type) == "boolean":
+        if defaultstr == "1": defaultstr = "True" 
+        else: defaultstr = "False"
+    return defaultstr

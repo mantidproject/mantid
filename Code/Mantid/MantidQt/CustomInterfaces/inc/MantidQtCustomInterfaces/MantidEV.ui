@@ -26,7 +26,6 @@
       <addaction name="actionLoad_Isaw_UB"/>
       <addaction name="actionSave_Isaw_Peaks"/>
       <addaction name="actionLoad_Isaw_Peaks"/>
-      <addaction name="actionExit"/>
      </widget>
      <widget class="QMenu" name="menuView">
       <property name="title">
@@ -41,7 +40,7 @@
    <item row="1" column="0">
     <widget class="QTabWidget" name="MantidEV_tabwidg">
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
@@ -326,6 +325,55 @@
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
+      <widget class="QRadioButton" name="LoadIsawPeaks_rbtn">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>320</y>
+         <width>361</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Load ISAW Peaks (or Integrate) File</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="SelectPeaksFile_btn">
+       <property name="geometry">
+        <rect>
+         <x>480</x>
+         <y>366</y>
+         <width>94</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Browse</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="SelectPeaksFile_lbl">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>370</y>
+         <width>101</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Filename</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="SelectPeaksFile_ledt">
+       <property name="geometry">
+        <rect>
+         <x>172</x>
+         <y>363</y>
+         <width>291</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
      <widget class="QWidget" name="FindUB">
       <attribute name="title">
@@ -348,7 +396,7 @@
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>160</y>
+         <y>150</y>
          <width>431</width>
          <height>27</height>
         </rect>
@@ -361,7 +409,7 @@
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>210</y>
+         <y>190</y>
          <width>271</width>
          <height>27</height>
         </rect>
@@ -374,7 +422,7 @@
        <property name="geometry">
         <rect>
          <x>500</x>
-         <y>250</y>
+         <y>220</y>
          <width>81</width>
          <height>31</height>
         </rect>
@@ -491,7 +539,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>300</y>
+         <y>260</y>
          <width>361</width>
          <height>23</height>
         </rect>
@@ -504,7 +552,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>350</y>
+         <y>290</y>
          <width>301</width>
          <height>22</height>
         </rect>
@@ -517,7 +565,7 @@
        <property name="geometry">
         <rect>
          <x>400</x>
-         <y>340</y>
+         <y>280</y>
          <width>81</width>
          <height>31</height>
         </rect>
@@ -581,8 +629,8 @@
       <widget class="QLineEdit" name="SelectUBFile_ledt">
        <property name="geometry">
         <rect>
-         <x>172</x>
-         <y>253</y>
+         <x>180</x>
+         <y>220</y>
          <width>311</width>
          <height>31</height>
         </rect>
@@ -592,13 +640,26 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>260</y>
+         <y>230</y>
          <width>101</width>
          <height>18</height>
         </rect>
        </property>
        <property name="text">
         <string>Filename</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="UseCurrentUB_rbtn">
+       <property name="geometry">
+        <rect>
+         <x>40</x>
+         <y>340</y>
+         <width>521</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Use Current UB (if already found or loaded)</string>
        </property>
       </widget>
      </widget>
@@ -1138,7 +1199,7 @@
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>60</y>
+         <y>10</y>
          <width>301</width>
          <height>27</height>
         </rect>
@@ -1151,7 +1212,7 @@
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>210</y>
+         <y>160</y>
          <width>311</width>
          <height>27</height>
         </rect>
@@ -1164,7 +1225,7 @@
        <property name="geometry">
         <rect>
          <x>50</x>
-         <y>330</y>
+         <y>280</y>
          <width>481</width>
          <height>27</height>
         </rect>
@@ -1177,7 +1238,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>360</y>
+         <y>310</y>
          <width>271</width>
          <height>21</height>
         </rect>
@@ -1190,7 +1251,7 @@
        <property name="geometry">
         <rect>
          <x>350</x>
-         <y>360</y>
+         <y>310</y>
          <width>81</width>
          <height>21</height>
         </rect>
@@ -1203,7 +1264,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>420</y>
+         <y>370</y>
          <width>231</width>
          <height>24</height>
         </rect>
@@ -1216,7 +1277,7 @@
        <property name="geometry">
         <rect>
          <x>350</x>
-         <y>420</y>
+         <y>370</y>
          <width>81</width>
          <height>24</height>
         </rect>
@@ -1229,7 +1290,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>390</y>
+         <y>340</y>
          <width>271</width>
          <height>21</height>
         </rect>
@@ -1242,7 +1303,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>450</y>
+         <y>400</y>
          <width>241</width>
          <height>24</height>
         </rect>
@@ -1255,7 +1316,7 @@
        <property name="geometry">
         <rect>
          <x>350</x>
-         <y>450</y>
+         <y>400</y>
          <width>81</width>
          <height>24</height>
         </rect>
@@ -1268,7 +1329,7 @@
        <property name="geometry">
         <rect>
          <x>100</x>
-         <y>480</y>
+         <y>430</y>
          <width>241</width>
          <height>31</height>
         </rect>
@@ -1281,7 +1342,7 @@
        <property name="geometry">
         <rect>
          <x>350</x>
-         <y>480</y>
+         <y>430</y>
          <width>81</width>
          <height>24</height>
         </rect>
@@ -1294,7 +1355,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>240</y>
+         <y>190</y>
          <width>201</width>
          <height>21</height>
         </rect>
@@ -1307,7 +1368,7 @@
        <property name="geometry">
         <rect>
          <x>280</x>
-         <y>240</y>
+         <y>190</y>
          <width>251</width>
          <height>21</height>
         </rect>
@@ -1320,7 +1381,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>270</y>
+         <y>220</y>
          <width>271</width>
          <height>24</height>
         </rect>
@@ -1333,7 +1394,7 @@
        <property name="geometry">
         <rect>
          <x>350</x>
-         <y>270</y>
+         <y>220</y>
          <width>81</width>
          <height>24</height>
         </rect>
@@ -1346,7 +1407,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>300</y>
+         <y>250</y>
          <width>271</width>
          <height>23</height>
         </rect>
@@ -1359,7 +1420,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>90</y>
+         <y>40</y>
          <width>211</width>
          <height>22</height>
         </rect>
@@ -1372,7 +1433,7 @@
        <property name="geometry">
         <rect>
          <x>350</x>
-         <y>90</y>
+         <y>40</y>
          <width>81</width>
          <height>22</height>
         </rect>
@@ -1385,7 +1446,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>120</y>
+         <y>70</y>
          <width>281</width>
          <height>24</height>
         </rect>
@@ -1398,7 +1459,7 @@
        <property name="geometry">
         <rect>
          <x>350</x>
-         <y>120</y>
+         <y>70</y>
          <width>81</width>
          <height>24</height>
         </rect>
@@ -1411,7 +1472,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>150</y>
+         <y>100</y>
          <width>261</width>
          <height>24</height>
         </rect>
@@ -1424,7 +1485,7 @@
        <property name="geometry">
         <rect>
          <x>350</x>
-         <y>150</y>
+         <y>100</y>
          <width>81</width>
          <height>24</height>
         </rect>
@@ -1437,7 +1498,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>180</y>
+         <y>130</y>
          <width>271</width>
          <height>23</height>
         </rect>
@@ -1462,27 +1523,42 @@
   </widget>
   <action name="actionSave_State">
    <property name="text">
-    <string>Save State</string>
+    <string>Save Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Save current control settings to a specified .ini file.</string>
    </property>
   </action>
   <action name="actionLoad_State">
    <property name="text">
-    <string>Load State</string>
+    <string>Load Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Load new control settings from a specified .ini file.</string>
    </property>
   </action>
   <action name="actionSave_Isaw_UB">
    <property name="text">
     <string>Save Isaw UB</string>
    </property>
+   <property name="toolTip">
+    <string>Save the UB matrix from the peaks workspace to an ISAW format UB matrix.</string>
+   </property>
   </action>
   <action name="actionLoad_Isaw_UB">
    <property name="text">
     <string>Load Isaw UB</string>
    </property>
+   <property name="toolTip">
+    <string>Load an ISAW format UB matrix into the peaks workspace.</string>
+   </property>
   </action>
   <action name="actionSave_Isaw_Peaks">
    <property name="text">
     <string>Save Isaw Peaks</string>
+   </property>
+   <property name="toolTip">
+    <string>Save the peaks workspace to an ISAW format .peaks (or .integrate) file.</string>
    </property>
   </action>
   <action name="actionShow_UB">
@@ -1494,10 +1570,13 @@
    <property name="text">
     <string>Load Isaw Peaks</string>
    </property>
+   <property name="toolTip">
+    <string>Load the peaks workspace from and ISAW format .peaks (or .integrate) file.</string>
+   </property>
   </action>
-  <action name="actionExit">
+  <action name="actionClose">
    <property name="text">
-    <string>Exit</string>
+    <string>Close</string>
    </property>
   </action>
  </widget>

@@ -1,12 +1,17 @@
 # Algorithm to start Force
 from MantidFramework import *
-import IndirectForce as Main
+from IndirectForce import IbackStart, InxStart
 
 class ForCE(PythonAlgorithm):
  
+	def category(self):
+		return "Workflow\\MIDAS;PythonAlgorithms"
+
 	def PyInit(self):
 		self.declareProperty('Mode','ASCII',ListValidator(['ASCII','INX']),Description = 'Ascii format type')
 		self.declareProperty('Instrument','IN10',ListValidator(['IN10','IN16']),Description = 'Instrument name')
+		self.declareProperty('Analyser','silicon',ListValidator(['silicon']),Description = 'Analyser crystal')
+		self.declareProperty('Reflection','111',ListValidator(['111']),Description = 'Analyuser reflection')
 		self.declareProperty('RunName', DefaultValue='', Validator = MandatoryValidator(),Description = 'Run name (after <Instr>_)')
 		self.declareProperty(Name='RejectZero',DefaultValue=False,Description = 'Reject spectra with zero total count')
 		self.declareProperty(Name='UseMap',DefaultValue=False,Description = 'Use detector map')
@@ -19,6 +24,8 @@ class ForCE(PythonAlgorithm):
 		self.log().information('ForCE input')
 		mode = self.getPropertyValue('Mode')
 		instr = self.getPropertyValue('Instrument')
+		ana = self.getPropertyValue('Analyser')
+		refl = self.getPropertyValue('Reflection')
 		run = self.getPropertyValue('RunName')
 		rejectZ = self.getProperty('RejectZero')
 		useM = self.getProperty('UseMap')
@@ -27,8 +34,8 @@ class ForCE(PythonAlgorithm):
 		plotOp = self.getPropertyValue('Plot')
 
 		if mode == 'ASCII':
-			Main.IbackStart(instr,run,rejectZ,useM,verbOp,plotOp,saveOp)
+			IbackStart(instr,run,ana,refl,rejectZ,useM,verbOp,plotOp,saveOp)
 		if mode == 'INX':
-			Main.InxStart(instr,run,rejectZ,useM,verbOp,plotOp,saveOp)
+			InxStart(instr,run,ana,refl,rejectZ,useM,verbOp,plotOp,saveOp)
  
 mantid.registerPyAlgorithm(ForCE())                    # Register algorithm with Mantid

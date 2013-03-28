@@ -12,6 +12,8 @@ The PositionTable must have columns ''Detector ID'' and ''Detector Position''. T
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid
@@ -33,7 +35,7 @@ namespace Mantid
     using Geometry::Instrument;
     using Geometry::Instrument_sptr;
     using Geometry::IDetector_sptr;
-    using Kernel::V3D;
+    using Geometry::IComponent_const_sptr;
 
     /// Empty default constructor
     ApplyCalibration::ApplyCalibration()
@@ -91,32 +93,14 @@ namespace Mantid
     */
     void ApplyCalibration::setDetectorPosition(const Geometry::Instrument_const_sptr & instrument, int detID, V3D pos, bool /*sameParent*/ )
     {
-       Geometry::IDetector_const_sptr det = instrument->getDetector(detID);
-       // Then find the corresponding relative position
-       boost::shared_ptr<const Geometry::IComponent> parent = det->getParent();
-       if (parent)
-       {
-         pos -= parent->getPos();
-         Quat rot = parent->getRelativeRot();
-         rot.inverse();
-         rot.rotate(pos);
-       }
-       boost::shared_ptr<const Geometry::IComponent>grandparent = parent->getParent();
-       if (grandparent)
-       {
-         Quat rot = grandparent->getRelativeRot();
-         rot.inverse();
-         rot.rotate(pos);
-         boost::shared_ptr<const Geometry::IComponent>greatgrandparent = grandparent->getParent();
-         if (greatgrandparent) {
-           Quat rot2 = greatgrandparent->getRelativeRot();
-            rot2.inverse();
-            rot2.rotate(pos);
-         }
-       }
 
-       // Add a parameter for the new position
-       m_pmap->addV3D(det.get(), "pos", pos);
+       IComponent_const_sptr det =instrument->getDetector(detID); ;
+       // Do the move
+       using namespace Geometry::ComponentHelper;
+       TransformType positionType = Absolute;
+       // TransformType positionType = Relative;
+       Geometry::ComponentHelper::moveComponent(*det, *m_pmap, pos, positionType);
+
     }
 
   } // namespace Algorithms

@@ -43,7 +43,7 @@ class ArrayPropertyTest(unittest.TestCase):
         validator = NullValidator()
         arr = FloatArrayProperty(name, validator, direc)
         self._check_object_attributes(arr, name, direc)
-        self.assertEquals(arr.isValid(), "")
+        self.assertEquals(arr.isValid, "")
 
     def test_name_string_values_validator_direction_constructor_gives_correct_object(self):
         """
@@ -55,7 +55,7 @@ class ArrayPropertyTest(unittest.TestCase):
         values_str = "1.345,34.2,5345.3,4,5.3948"
         arr = FloatArrayProperty(name, values_str, validator, direc)
         self._check_object_attributes(arr, name, direc, length = 5)
-        self.assertEquals(arr.isValid(), "")
+        self.assertEquals(arr.isValid, "")
         values = arr.value
         self.assertTrue(isinstance(values, np.ndarray))
         

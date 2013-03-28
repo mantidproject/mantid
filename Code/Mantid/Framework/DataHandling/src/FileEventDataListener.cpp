@@ -32,6 +32,13 @@ namespace DataHandling
       g_log.error("Configuration property fileeventdatalistener.chunks not found. The algorithm will fail!");
       m_numChunks = 0; // Set it to 0 so the algorithm just fails
     }
+
+    // Add an integer, incremented for each listener instance, to the temporary workspace name so that multiple
+    // listeners can be in existence at the same time.
+    static int counter = 0;
+    std::stringstream count;
+    count << ++counter;
+    m_tempWSname += count.str();
   }
     
   /// Destructor
@@ -85,7 +92,7 @@ namespace DataHandling
     m_chunkload->wait();
     if ( ! m_chunkload->data() ) throw std::runtime_error("LoadEventPreNexus failed for some reason.");
     // The loading succeeded: get the workspace from the ADS.
-    MatrixWorkspace_sptr chunk = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__filelistenerchunk");
+    MatrixWorkspace_sptr chunk = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_tempWSname);
     // Remove the workspace from the ADS now we've extracted it
     AnalysisDataService::Instance().remove(m_tempWSname);
     // Delete the ActiveResult to signify that we're done with it.

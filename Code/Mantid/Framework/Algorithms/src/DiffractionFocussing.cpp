@@ -21,7 +21,8 @@ The algorithm can be used with an [[EventWorkspace]] input, and will create an E
 
 The main difference vs. using a Workspace2D is that the event lists from all the incoming pixels are simply appended in the grouped spectra; this means that you can rebin the resulting spectra to finer bins with no loss of data. In fact, it is unnecessary to bin your incoming data at all; binning can be performed as the very last step.
 
-==Usage==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
     DiffractionFocussing("InWS","OutWS","filename")
 '''C++'''
@@ -31,9 +32,7 @@ The main difference vs. using a Workspace2D is that the event lists from all the
     alg->setPropertyValue("GroupingFileName", "filename");
     alg->execute();
     Workspace* ws = FrameworkManager::Instance().getWorkspace("OutWS");
-
-
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -175,16 +174,10 @@ void DiffractionFocussing::exec()
   // Create a new workspace that's the right size for the meaningful spectra and copy them in
   int64_t newSize = tmpW->blocksize();
   API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(tmpW,resultIndeces.size(),newSize+1,newSize);
-  // Copy units
-  outputW->getAxis(0)->unit() = tmpW->getAxis(0)->unit();
-  outputW->getAxis(1)->unit() = tmpW->getAxis(1)->unit();
-
-  API::Axis *spectraAxisNew = outputW->getAxis(1);
 
   for(int64_t hist=0; hist < static_cast<int64_t>(resultIndeces.size()); hist++)
   {
     int64_t i = resultIndeces[hist];
-    double spNo = static_cast<double>(spectraAxis->spectraNo(i));
     MantidVec &tmpE = tmpW->dataE(i);
     MantidVec &outE = outputW->dataE(hist);
     MantidVec &tmpY = tmpW->dataY(i);
@@ -194,8 +187,9 @@ void DiffractionFocussing::exec()
     outE.assign(tmpE.begin(),tmpE.end());
     outY.assign(tmpY.begin(),tmpY.end());
     outX.assign(tmpX.begin(),tmpX.end());
-    spectraAxisNew->setValue(hist,spNo);
-    spectraAxis->setValue(i,-1);
+    API::ISpectrum * inSpec = tmpW->getSpectrum(i);
+    outputW->getSpectrum(hist)->setSpectrumNo(inSpec->getSpectrumNo());
+    inSpec->setSpectrumNo(-1);
   }
 
   progress(1.);

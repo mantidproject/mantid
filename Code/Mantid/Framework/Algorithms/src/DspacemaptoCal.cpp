@@ -4,8 +4,8 @@ The detector offset file created by this algorithm are in the form created by th
 
 :<math> d = \frac{h}{m_N} \frac{t.o.f.}{L_{tot} sin \theta} (1+ \rm{offset})</math>
 
-
-==Usage==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
     LoadEmptyInstrument("POWGEN_Definition.xml","POWGEN")
     CreateCalFileByNames("POWGEN","PG3.cal","Group1,Group2,Group3,Group4")
@@ -26,12 +26,7 @@ The detector offset file created by this algorithm are in the form created by th
     alg3->setPropertyValue("DspacemapFile", "PG3_D1370_dspacemap_2010_09_12.dat");
     alg3->setPropertyValue("CalibrationFile", "PG3.cal");
     alg3->execute();
-
-
-
-
-
-*WIKI*/
+*WIKI_USAGE*/
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/DspacemaptoCal.h"
 #include "MantidAPI/FileProperty.h"

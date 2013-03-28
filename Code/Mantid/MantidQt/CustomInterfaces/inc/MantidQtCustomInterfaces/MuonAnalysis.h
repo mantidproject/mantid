@@ -143,9 +143,6 @@ private slots:
   ///
   void runFirstGoodBinFront();
 
-  // Slot for disabling loading buttons and MWRunFiles widget
-  void disableLoading();
-
   /// Check to see if the user want to append the previous run and set accordingly
   void checkAppendingPreviousRun();
 

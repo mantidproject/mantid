@@ -56,7 +56,8 @@ namespace DataHandling
 
         /// Algorithm's version for identification overriding a virtual method
         virtual int version() const;
-
+		/// category 
+		virtual const std::string category() const { return "Deprecated"; }
         int fileCheck(const std::string& filePath);
     };
 

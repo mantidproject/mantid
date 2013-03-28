@@ -51,7 +51,7 @@ void AbsManagedWorkspace2D::init(const std::size_t &NVectors, const std::size_t 
   m_noVectors = NVectors;
   m_axes.resize(2);
   m_axes[0] = new API::RefAxis(XLength, this);
-  m_axes[1] = new API::SpectraAxis(NVectors);
+  m_axes[1] = new API::SpectraAxis(this);
   m_XLength = XLength;
   m_YLength = YLength;
 }

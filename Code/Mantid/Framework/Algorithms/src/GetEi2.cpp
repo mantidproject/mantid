@@ -101,8 +101,7 @@ void GetEi2::init()
   declareProperty("FirstMonitorIndex", 0,
     "The spectrum index of the first montitor in the input workspace.", Direction::Output);
 
-  declareProperty("Tzero", EMPTY_DBL(),
-    "", Direction::Output);
+  declareProperty("Tzero", 0.0, "", Direction::Output);
 
 }
 
@@ -130,10 +129,6 @@ void GetEi2::exec()
       }
   }
   double incident_energy = calculateEi(initial_guess);
-  if( !m_fixedei )
-  {
-    g_log.notice() << "Incident energy = " << incident_energy << " meV from initial guess = " << initial_guess << " meV\n";
-  }
   
   storeEi(incident_energy);
   
@@ -231,41 +226,44 @@ double GetEi2::calculateEi(const double initial_guess)
     size_t ws_index = mon_indices[i];
     det_distances[i] = getDistanceFromSource(ws_index);
     const double peak_guess = det_distances[i]*std::sqrt(m_t_to_mev/initial_guess);
-    if( m_fixedei && i == 0 )
-    {
-      m_peak1_pos = std::make_pair(static_cast<int>(ws_index), peak_guess);
-      g_log.information() << "First monitor peak = " << peak_guess << " microseconds from fixed Ei = " << initial_guess << " meV\n"; 
-      break;
-    }
     const double t_min = (1.0 - m_tof_window)*peak_guess;
     const double t_max = (1.0 + m_tof_window)*peak_guess;
     g_log.information() << "Time-of-flight window for peak " << (i+1) << ": tmin = " << t_min << " microseconds, tmax = " << t_max << " microseconds\n";
-    peak_times[i] = calculatePeakPosition(ws_index, t_min, t_max);
-    g_log.information() << "Peak for monitor " << (i+1) << " (at " << det_distances[i] << " metres) = " << peak_times[i] << " microseconds\n";
-    if( i == 0 )
-    {  
-      //Store for later adjustment of bins
+    try
+    {
+      peak_times[i] = calculatePeakPosition(ws_index, t_min, t_max);
+      g_log.information() << "Peak for monitor " << (i+1) << " (at " << det_distances[i] << " metres) = " << peak_times[i] << " microseconds\n";
+    }
+    catch(std::invalid_argument &)
+    {
+      if(!m_fixedei) throw;
+      peak_times[i] = 0.0;
+      g_log.information() << "No peak found for monitor " << (i+1) << " (at " << det_distances[i] << " metres). Setting peak time to zero\n";
+    }
+    if(i == 0) 
+    {
       m_peak1_pos = std::make_pair(static_cast<int>(ws_index), peak_times[i]);
+      if(m_fixedei) break;
     }
   }
   
   if( m_fixedei )
   {
+    g_log.notice() << "Incident energy fixed at Ei=" << initial_guess << " meV\n";
     return initial_guess;
   }
   else
   {
     double mean_speed = (det_distances[1] - det_distances[0])/(peak_times[1] - peak_times[0]);
-    
     double tzero = peak_times[1] - ((1.0/mean_speed)*det_distances[1]);
-    setProperty("Tzero", tzero);
-    
     g_log.debug() << "T0 = " << tzero << std::endl;
-    
     g_log.debug() << "Mean Speed = " << mean_speed << std::endl;
-    g_log.debug() << "Energy (meV) = " << mean_speed*mean_speed*m_t_to_mev << std::endl;
-        
-    return mean_speed*mean_speed*m_t_to_mev;
+    setProperty("Tzero", tzero);
+
+    const double energy = mean_speed*mean_speed*m_t_to_mev;
+    g_log.notice() << "Incident energy calculated at Ei= " << energy 
+                   << " meV from initial guess = " << initial_guess << " meV\n";        
+    return energy;
   }
 }
 

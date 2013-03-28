@@ -29,7 +29,7 @@
 
 #Make the reduction module available
 from ISISCommandInterface import *
-from mantidsimple import *
+from mantid.simpleapi import *
 import copy
 import sys
 
@@ -122,6 +122,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     if reducer:
         ReductionSingleton().replace(reducer)
     ins_name = ReductionSingleton().instrument.name()
+    # is used for SaveCanSAS1D go give the detectors names
+    detnames = ', '.join(ReductionSingleton().instrument.listDetectors())
     scale_shift = {'scale':1.0000, 'shift':0.0000}
     #first copy the user settings in case running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
@@ -167,18 +169,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         delete_workspaces(raw_workspaces)
             
 
-        file = run['output_as']
-        #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
-        if file:
-            for algor in saveAlgs.keys():
-                #add the file extension, important when saving different types of file so they don't over-write each other
-                ext = saveAlgs[algor]
-                if not ext.startswith('.'):
-                    ext = '.' + ext
-                exec(algor+'(reduced,file+ext)')
-
         if verbose:
-            mantid.sendLogMessage('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, filename))
+            logger.notice('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, filename))
         # Rename the final workspace
         final_name = run['output_as']
         if final_name == '':
@@ -188,18 +180,18 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         names = [final_name]
         if combineDet == 'rear':
             names = [final_name+'_rear']
-            RenameWorkspace(reduced, final_name+'_rear')
+            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace= final_name+'_rear')
         elif combineDet == 'front':
             names = [final_name+'_front']
-            RenameWorkspace(reduced, final_name+'_front')
+            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace= final_name+'_front')
         elif combineDet == 'both':
             names = [final_name+'_front', final_name+'_rear']
             if ins_name == 'SANS2D':
                 rear_reduced = reduced.replace('front','rear')
             else: #if ins_name == 'lOQ':
                 rear_reduced = reduced.replace('HAB','main')
-            RenameWorkspace(reduced,final_name+'_front')
-            RenameWorkspace(rear_reduced,final_name+'_rear')
+            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace=final_name+'_front')
+            RenameWorkspace(InputWorkspace=rear_reduced,OutputWorkspace=final_name+'_rear')
         elif combineDet == 'merged':            
             names = [final_name + '_merged', final_name + '_rear',  final_name+'_front']
             if ins_name == 'SANS2D':
@@ -208,11 +200,27 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             else:
                 rear_reduced = reduced.replace('_merged','')
                 front_reduced = rear_reduced.replace('main','HAB')
-            RenameWorkspace(reduced, final_name + '_merged')
-            RenameWorkspace(rear_reduced, final_name + '_rear')
-            RenameWorkspace(front_reduced, final_name+'_front')            
+            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace= final_name + '_merged')
+            RenameWorkspace(InputWorkspace=rear_reduced,OutputWorkspace= final_name + '_rear')
+            RenameWorkspace(InputWorkspace=front_reduced,OutputWorkspace= final_name+'_front')            
         else:            
-            RenameWorkspace(reduced,final_name)
+            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace=final_name)
+
+        file = run['output_as']
+        #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
+        if file:
+            for algor in saveAlgs.keys():
+                for workspace_name in names:
+                    #add the file extension, important when saving different types of file so they don't over-write each other
+                    ext = saveAlgs[algor]
+                    if not ext.startswith('.'):
+                        ext = '.' + ext
+                    if algor == "SaveCanSAS1D":
+                        SaveCanSAS1D(workspace_name, workspace_name+ext, DetectorNames=detnames)
+                    elif algor == "SaveRKH":
+                        SaveRKH(workspace_name, workspace_name+ext, Append=False)
+                    else:
+                        exec(algor+'(workspace_name, workspace_name+ext)')
 
         if plotresults == 1:
             for final_name in names:
@@ -307,9 +315,9 @@ def delete_workspaces(workspaces):
             workspaces = [workspaces]
 
     for wksp in workspaces:
-        if wksp and mtd.workspaceExists(wksp):
+        if wksp and wksp in mtd:
             try:
-                DeleteWorkspace(wksp)
+                DeleteWorkspace(Workspace=wksp)
             except:
                 #we're only deleting to save memory, if the workspace really won't delete leave it
                 pass

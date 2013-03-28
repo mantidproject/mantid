@@ -2,7 +2,7 @@
 # This module contains utility functions common to the 
 # SANS data reduction scripts
 ########################################################
-from mantidsimple import *
+from mantid.simpleapi import *
 import math
 
 def GetInstrumentDetails(instrum):
@@ -52,7 +52,7 @@ def InfinitePlaneXML(id, plane_pt, normal_pt):
 	return '<infinite-plane id="' + str(id) + '">' + \
 	    '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
 	    '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
-	    '</infinite-plane>\n'
+	    '</infinite-plane>'
 
 def InfiniteCylinderXML(id, centre, radius, axis):
 	return  '<infinite-cylinder id="' + str(id) + '">' + \
@@ -67,7 +67,7 @@ def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
     xmldef = InfiniteCylinderXML('shape', [xcentre, ycentre, 0.0], radius, [0,0,1])
     xmldef += '<algebra val="' + algebra + 'shape" />'
     # Apply masking
-    MaskDetectorsInShape(workspace,xmldef)
+    MaskDetectorsInShape(Workspace=workspace,ShapeXML=xmldef)
 
 # Mask the inside of a cylinder
 def MaskInsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
@@ -108,7 +108,7 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
 	      # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
             xmldef += '<algebra val="#(pla pla2)" />'
     
-    MaskDetectorsInShape(workspace, xmldef)	
+    MaskDetectorsInShape(Workspace=workspace,ShapeXML= xmldef)	
 ##END REMOVED STEVE 08 September 2010 (mask_phi ISISReductionSteps.py)
 ##START REMOVED to SANSInsts
 # Essentially an enumeration
@@ -218,7 +218,7 @@ def MaskBySpecNumber(workspace, speclist):
     speclist = speclist.rstrip(',')
     if speclist == '':
         return ''
-    MaskDetectors(workspace, SpectraList = speclist)
+    MaskDetectors(Workspace=workspace, SpectraList = speclist)
 ##END REMOVED to SANSReductionSteps    
 # Mask by bin range
 def MaskByBinRange(workspace, timemask):
@@ -227,25 +227,25 @@ def MaskByBinRange(workspace, timemask):
 	for r in ranges:
 		limits = r.split()
 		if len(limits) == 2:
-			MaskBins(workspace, workspace, XMin= limits[0] ,XMax=limits[1])
+			MaskBins(InputWorkspace=workspace,OutputWorkspace= workspace, XMin= limits[0] ,XMax=limits[1])
 ##START REMOVED STEVE (SANSReductionSteps.py)
 # Setup the transmission workspace
 def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, interpolate, loqremovebins):
     tmpWS = inputWS + '_tmp'
-    CropWorkspace(inputWS,tmpWS, StartWorkspaceIndex=0, EndWorkspaceIndex=2)
+    CropWorkspace(InputWorkspace=inputWS,OutputWorkspace=tmpWS, StartWorkspaceIndex=0, EndWorkspaceIndex=2)
 
     if loqremovebins == True:
-        RemoveBins(tmpWS,tmpWS, 19900, 20500, Interpolation='Linear')
+        RemoveBins(InputWorkspace=tmpWS,OutputWorkspace=tmpWS,XMin= 19900,XMax= 20500, Interpolation='Linear')
     if backmon_start != None and backmon_end != None:
-        FlatBackground(tmpWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list, Mode='Mean')
+        FlatBackground(InputWorkspace=tmpWS,OutputWorkspace= tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list, Mode='Mean')
 
     # Convert and rebin
-    ConvertUnits(tmpWS,tmpWS,"Wavelength")
+    ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace=tmpWS,Target="Wavelength")
     
     if interpolate :
-        InterpolatingRebin(tmpWS, tmpWS, wavbining)
+        InterpolatingRebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
     else :
-        Rebin(tmpWS, tmpWS, wavbining)
+        Rebin(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Params= wavbining)
 
     return tmpWS
  # Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness
@@ -264,11 +264,6 @@ def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
 	ws = mtd[inputWS]
 	ws *= scalefactor
 ##END REMOVED STEVE (SANSReductionSteps.py)
-def InfinitePlaneXML(id, planept, normalpt):
-	return  '<infinite-plane id="' + str(id) + '">' + \
-	    '<point-in-plane x="' + str(planept[0]) + '" y="' + str(planept[1]) + '" z="' + str(planept[2]) + '" />' + \
-	    '<normal-to-plane x="' +str(normalpt[0]) + '" y="' + str(normalpt[1]) + '" z="' + str(normalpt[2]) + '" />' + \
-	    '</infinite-plane>'
 								     
 def QuadrantXML(centre,rmin,rmax,quadrant):
 	cin_id = 'cyl-in'
@@ -299,7 +294,7 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
 	return xmlstring
 ##START REMOVED STEVE 13 September 2010 (SANSReductionSteps.py)
 def StripEndZeroes(workspace, flag_value = 0.0):
-        result_ws = mantid.getMatrixWorkspace(workspace)
+        result_ws = mtd[workspace]
         y_vals = result_ws.readY(0)
         length = len(y_vals)
         # Find the first non-zero value
@@ -320,7 +315,7 @@ def StripEndZeroes(workspace, flag_value = 0.0):
         startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001*x_vals[stop + 1]
-        CropWorkspace(workspace,workspace,startX,endX)
+        CropWorkspace(InputWorkspace=workspace,OutputWorkspace=workspace,XMin=startX,XMax=endX)
 ##END REMOVED STEVE 13 September 2010 (SANSReductionSteps.py)
 ##
 # A small class holds the run number with the workspace name, because the run number is not contained in the workspace at the moment

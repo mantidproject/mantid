@@ -490,7 +490,7 @@ API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(const MDEvents::MD
     // Build up the box controller
     Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
     // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
-    this->setBoxController(bc);
+    this->setBoxController(bc, m_InWS2D->getInstrument());
     // split boxes;
     spws->splitBox();
   // Do we split more due to MinRecursionDepth?

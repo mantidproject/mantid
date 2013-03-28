@@ -2,10 +2,9 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
 	see http://www.mantidproject.org/IDF -->
 <instrument name="IN5" valid-from="1900-01-31 23:59:59"
-	valid-to="2100-01-31 23:59:59" last-modified="2013-02-28 00:00:01">
+	valid-to="2100-01-31 23:59:59" last-modified="2013-03-01 00:00:01">
 
 	<!-- Author: ricardo.leal@ill.fr -->
-
 	<defaults>
 		<length unit="meter" />
 		<angle unit="degree" />
@@ -1572,38 +1571,7 @@
 
 	<!-- Auto generated Merlin has 1024 positions, IN5 only 256 -->
 	<idlist idname="door1">
-		<id start="1" end="256" />
-		<id start="257" end="512" />
-		<id start="513" end="768" />
-		<id start="769" end="1024" />
-		<id start="1025" end="1280" />
-		<id start="1281" end="1536" />
-		<id start="1537" end="1792" />
-		<id start="1793" end="2048" />
-		<id start="2049" end="2304" />
-		<id start="2305" end="2560" />
-		<id start="2561" end="2816" />
-		<id start="2817" end="3072" />
-		<id start="3073" end="3328" />
-		<id start="3329" end="3584" />
-		<id start="3585" end="3840" />
-		<id start="3841" end="4096" />
-		<id start="4097" end="4352" />
-		<id start="4353" end="4608" />
-		<id start="4609" end="4864" />
-		<id start="4865" end="5120" />
-		<id start="5121" end="5376" />
-		<id start="5377" end="5632" />
-		<id start="5633" end="5888" />
-		<id start="5889" end="6144" />
-		<id start="6145" end="6400" />
-		<id start="6401" end="6656" />
-		<id start="6657" end="6912" />
-		<id start="6913" end="7168" />
-		<id start="7169" end="7424" />
-		<id start="7425" end="7680" />
-		<id start="7681" end="7936" />
-		<id start="7937" end="8192" />
+		<id start="1" end="8192" />
 	</idlist>
 	<idlist idname="door2">
 		<id start="8193" end="8448" />

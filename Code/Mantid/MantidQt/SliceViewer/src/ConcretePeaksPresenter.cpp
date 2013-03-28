@@ -48,75 +48,8 @@ namespace MantidQt
       // Loop through the peaks workspace, and use the factory to create a view from each peaks.
       for (int i = 0; i < m_peaksWS->getNumberPeaks(); ++i)
       {
-        const IPeak& peak = m_peaksWS->getPeak(i);
-        PeakOverlayView_sptr view = boost::shared_ptr<PeakOverlayView>(
-            m_viewFactory->createView(m_transform->transformPeak(peak)));
-        m_viewPeaks[i] = view;
+        m_viewPeaks[i] = m_viewFactory->createView(i, m_transform);
       }
-    }
-
-    /**
-     * Check that the inputs provided are valid.
-     * @param integratedViewFactory
-     * @param nonIntegratedViewFactory
-     */
-    void ConcretePeaksPresenter::validateInputs(PeakOverlayViewFactory_sptr integratedViewFactory, PeakOverlayViewFactory_sptr nonIntegratedViewFactory)
-    {
-      if (integratedViewFactory == NULL)
-      {
-        throw std::invalid_argument("Integrated PeakOverlayViewFactory is null");
-      }
-      if (nonIntegratedViewFactory == NULL)
-      {
-        throw std::invalid_argument("NonIntegrated PeakOverlayViewFactory is null");
-      }
-      if (m_peaksWS == NULL)
-      {
-        throw std::invalid_argument("PeaksWorkspace is null");
-      }
-    }
-
-    /**
-     * The view factory needs to be selected. This is done by looking at log value carried on the inputpeaks workspace.
-     * If the work-space is integrated, then the integratedViewFactory is used.
-     *
-     * @param nonIntegratedViewFactory: Non integrated view factory
-     * @param mdWS : Multi-dimensional workspace
-     */
-    void ConcretePeaksPresenter::constructViewFactory(
-        PeakOverlayViewFactory_sptr nonIntegratedViewFactory,  boost::shared_ptr<const MDGeometry> mdWS)
-    {
-      double peakIntegrationRadius = 0;
-      double backgroundInnerRadius = 0;
-      double backgroundOuterRadius = 0;
-      double maxZ = 0;
-      double minZ = 0;
-      if (m_peaksWS->hasIntegratedPeaks())
-      {
-        peakIntegrationRadius = boost::lexical_cast<double>(
-            m_peaksWS->run().getProperty("PeakRadius")->value());
-        backgroundInnerRadius = boost::lexical_cast<double>(
-            m_peaksWS->run().getProperty("BackgroundInnerRadius")->value());
-        backgroundOuterRadius = boost::lexical_cast<double>(
-            m_peaksWS->run().getProperty("BackgroundOuterRadius")->value());
-      }
-      else
-      {
-        // Swap the view factory. We are not plotting integrated peaks now.
-        m_viewFactory.swap(nonIntegratedViewFactory);
-        // Find the range for the z slider axis.
-        for (size_t dimIndex = 0; dimIndex < mdWS->getNumDims(); ++dimIndex)
-        {
-          IMDDimension_const_sptr dimensionMappedToZ = mdWS->getDimension(dimIndex);
-          if (this->isDimensionNameOfFreeAxis(dimensionMappedToZ->getName()))
-          {
-            maxZ = dimensionMappedToZ->getMaximum();
-            minZ = dimensionMappedToZ->getMinimum();
-          }
-        }
-      }
-      m_viewFactory->setPeakRadius(peakIntegrationRadius, backgroundInnerRadius, backgroundOuterRadius);
-      m_viewFactory->setZRange(maxZ, minZ);
     }
 
     /**
@@ -163,27 +96,19 @@ namespace MantidQt
      2 Then iterate over the MODEL and use it to construct VIEWs via the factory.
      3 A collection of views is stored internally
 
-     @param nonIntegratedViewFactory : View Factory (THE VIEW via factory)
-     @param integratedViewFactory : View Factory (THE VIEW via factory)
+     @param viewFactory : View Factory (THE VIEW via factory)
      @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
      @param mdWS : IMDWorkspace also being visualised (THE MODEL)
      @param transformFactory : Peak Transformation Factory. This is about interpreting the MODEL.
      */
-    ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory,
-        PeakOverlayViewFactory_sptr integratedViewFactory, IPeaksWorkspace_sptr peaksWS,
+    ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, IPeaksWorkspace_sptr peaksWS,
         boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) :
-        m_viewPeaks(peaksWS->getNumberPeaks()), m_viewFactory(integratedViewFactory), m_peaksWS(peaksWS), m_transformFactory(
+        m_viewPeaks(peaksWS->getNumberPeaks()), m_viewFactory(viewFactory), m_peaksWS(peaksWS), m_transformFactory(
             transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0),
             g_log(Mantid::Kernel::Logger::get("PeaksPresenter"))
     {
-      // Check the inputs.
-      validateInputs(integratedViewFactory, nonIntegratedViewFactory);
-
       // Check that the workspaces appear to be compatible. Log if otherwise.
       checkWorkspaceCompatibilities(mdWS);
-
-      // Choose the view factory
-      constructViewFactory(nonIntegratedViewFactory, mdWS);
 
       const bool transformSucceeded = this->configureMappingTransform();
 

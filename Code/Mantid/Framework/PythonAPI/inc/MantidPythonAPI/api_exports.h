@@ -154,15 +154,6 @@ namespace PythonAPI
     return new Mantid::API::NumericAxis(length);
   }
   /**
-  * Creates a SpectraAxis
-  * @param number :: of elements in the axis
-  * @return pointer to the axis object
-  */
-  Mantid::API::Axis* createSpectraAxis(int length)
-  {
-    return new Mantid::API::SpectraAxis(length);
-  }
-  /**
   * Creates a TextAxis
   * @param number :: of elements in the axis
   * @return pointer to the axis object

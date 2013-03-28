@@ -11,7 +11,8 @@ The output workspace contains one set of data for the time of flight, the asymme
 
 Note: this algorithm does not perform any grouping; the grouping must be done via the GroupDetectors algorithm or when the NeXus file is loaded auto_group must be set to true.
 
-==Usage==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
     AsymmetryCalc("EmuData","OutWS","1.0","0,1,2,3,4","16,17,18,19,20")
 
@@ -25,7 +26,7 @@ Note: this algorithm does not perform any grouping; the grouping must be done vi
     alg->execute();
     Workspace* ws = FrameworkManager::Instance().getWorkspace("OutWS");
 
-*WIKI*/
+*WIKI_USAGE*/
 
 //----------------------------------------------------------------------
 // Includes

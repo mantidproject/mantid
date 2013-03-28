@@ -12,15 +12,16 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 class ConvertUnitsTest : public CxxTest::TestSuite
 {
@@ -183,22 +184,32 @@ public:
 
   void testDeltaE()
   {
-    Mantid::DataHandling::LoadRaw loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "MAR11001.raw");
-    loader.setPropertyValue("SpectrumList", "900");
-    std::string ws = "mar";
-    loader.setPropertyValue("OutputWorkspace", ws);
-    TS_ASSERT_THROWS_NOTHING( loader.execute() );
-    TS_ASSERT( loader.isExecuted() );
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,2663,5,7.5);
+    ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
-    MatrixWorkspace_const_sptr input;
-    TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws) );
-    TS_ASSERT( input->getSpectrum(0)->hasDetectorID(3810));
+    Instrument_sptr testInst(new Instrument);
+    ws->setInstrument(testInst);
+    // Make it look like MARI (though not bin boundaries are different to the real MARI file used before)
+    // Define a source and sample position
+    //Define a source component
+    ObjComponent *source = new ObjComponent("moderator", Object_sptr(), testInst.get());
+    source->setPos(V3D(0, 0.0, -11.739));
+    testInst->add(source);
+    testInst->markAsSource(source);
+    // Define a sample as a simple sphere
+    ObjComponent *sample = new ObjComponent("samplePos", Object_sptr(), testInst.get());
+    testInst->setPos(0.0, 0.0, 0.0);
+    testInst->add(sample);
+    testInst->markAsSamplePos(sample);
+    Detector * physicalPixel = new Detector("pixel", 1, testInst.get());
+    physicalPixel->setPos(-0.34732,-3.28797,-2.29022);
+    testInst->add(physicalPixel);
+    testInst->markAsDetector(physicalPixel);
+    ws->getSpectrum(0)->addDetectorID(physicalPixel->getID());
 
     ConvertUnits conv;
     conv.initialize();
-    conv.setPropertyValue("InputWorkspace",ws);
+    conv.setProperty("InputWorkspace",ws);
     std::string outputSpace = "outWorkspace";
     conv.setPropertyValue("OutputWorkspace",outputSpace);
     conv.setPropertyValue("Target","DeltaE");
@@ -209,15 +220,11 @@ public:
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE");
-    TS_ASSERT_EQUALS( output->blocksize(), 2068 );  // Value from IDF
-
-    TS_ASSERT( output->getSpectrum(0)->hasDetectorID(3810));
-
-    AnalysisDataService::Instance().remove(outputSpace);
+    TS_ASSERT_EQUALS( output->blocksize(), 1669 );
 
     ConvertUnits conv2;
     conv2.initialize();
-    conv2.setPropertyValue("InputWorkspace",ws);
+    conv2.setProperty("InputWorkspace",ws);
     conv2.setPropertyValue("OutputWorkspace",outputSpace);
     conv2.setPropertyValue("Target","DeltaE_inWavenumber");
     conv2.setPropertyValue("Emode","Indirect");
@@ -226,9 +233,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE_inWavenumber");
-    TS_ASSERT_EQUALS( output->blocksize(), 2546 );
+    TS_ASSERT_EQUALS( output->blocksize(), 2275 );
 
-    AnalysisDataService::Instance().remove(ws);
     AnalysisDataService::Instance().remove(outputSpace);
   }
 

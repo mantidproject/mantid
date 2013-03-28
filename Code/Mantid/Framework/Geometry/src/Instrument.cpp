@@ -719,12 +719,8 @@ namespace Mantid
 
       //Create a (non-deleting) shared pointer to it
       IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting() );
-      if ( !m_detectorCache.insert( std::map<int, IDetector_const_sptr >::value_type(det->getID(), det_sptr) ).second )
-      {
-        std::stringstream convert;
-        convert << det->getID();
-        g_log.error() << "Not successful in adding Detector with ID = " << convert.str() << " and name = " << det->getName() << " to _detectorCache." << std::endl;
-      }
+      std::map<int, IDetector_const_sptr >::iterator it = m_detectorCache.end();
+      m_detectorCache.insert( it, std::map<int, IDetector_const_sptr >::value_type(det->getID(), det_sptr) );
     }
 
     /** Mark a Component which has already been added to the Instrument class

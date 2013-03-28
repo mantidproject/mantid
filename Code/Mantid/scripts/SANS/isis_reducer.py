@@ -8,7 +8,7 @@
 from reduction.instruments.sans.sans_reducer import SANSReducer
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
-from mantidsimple import *
+from mantid.simpleapi import *
 import os
 import copy
 
@@ -323,11 +323,11 @@ class ISISReducer(SANSReducer):
             user_file = 'None'
         else:
             user_file = self.user_settings.filename
-        AddSampleLog(self.output_wksp, "UserFile", LogText=user_file)
+        AddSampleLog(Workspace=self.output_wksp,LogName= "UserFile", LogText=user_file)
 	
         for role in self._temporys.keys():
             try:
-                DeleteWorkspace(self._temporys[role])
+                DeleteWorkspace(Workspace=self._temporys[role])
             except:
             #if cleaning up isn't possible there is probably nothing we can do
                 pass
@@ -461,8 +461,8 @@ def deleteWorkspaces(workspaces):
     """
     for wk in workspaces:
         try:
-            if wk and mantid.workspaceExists(wk):
-                DeleteWorkspace(wk)
+            if wk and wk in mtd:
+                DeleteWorkspace(Workspace=wk)
         except:
             #if the workspace can't be deleted this function does nothing
             pass

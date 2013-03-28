@@ -12,9 +12,11 @@ class AlgorithmTest(unittest.TestCase):
             self._load.initialize()
   
     def test_alg_attrs_are_correct(self):
-        self.assertTrue(self._load.name(), 'Load')
-        self.assertTrue(self._load.version(), 1)
-        self.assertTrue(self._load.category(), 'DataHandling')
+        self.assertEquals('Load', self._load.name())
+        self.assertEquals(1, self._load.version())
+        self.assertEquals('DataHandling', self._load.category())
+        self.assertEquals(1, len(self._load.categories()))
+        self.assertEquals('DataHandling', self._load.categories()[0])
 
     def test_get_unknown_property_raises_error(self):
         self.assertRaises(RuntimeError, self._load.getProperty, "NotAProperty")

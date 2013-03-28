@@ -11,7 +11,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadRaw.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

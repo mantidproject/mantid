@@ -97,6 +97,7 @@ QModelIndex InstrumentTreeWidget::findComponentByName(const QString & name) cons
 void InstrumentTreeWidget::sendComponentSelectedSignal(const QModelIndex index)
 {
   Mantid::Geometry::ComponentID id = static_cast<Mantid::Geometry::ComponentID>(index.internalPointer());
-  m_instrActor->accept(SetVisibleComponentVisitor(id));
+  auto visitor = SetVisibleComponentVisitor(id);
+  m_instrActor->accept( visitor );
   emit componentSelected(id);
 }

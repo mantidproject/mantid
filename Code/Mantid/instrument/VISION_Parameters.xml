@@ -60,7 +60,12 @@
 <parameter name="Workflow.Masking" type="string">
     <value val="IdentifyNoisyDetectors" />
 </parameter>
-  
+
+<!-- formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators-->
+<parameter name="t0_formula" type="string">
+  <value val="34.746 - 0.166672*incidentEnergy + 0.00020538*incidentEnergy^(2.0)" />
+</parameter>
+
 </component-link>
 
 </parameter-file>

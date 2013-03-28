@@ -37,6 +37,12 @@ except ImportError:
     __gui__ = False
 
 ###############################################################################
+# Set deprecation warnings back to default (they are ignored in 2.7)
+###############################################################################
+import warnings as _warnings
+_warnings.filterwarnings("default",category=DeprecationWarning)
+
+###############################################################################
 # Try to be smarter when finding Mantid framework libraries
 ###############################################################################
 # Peek to see if a Mantid.properties file is in the parent directory,

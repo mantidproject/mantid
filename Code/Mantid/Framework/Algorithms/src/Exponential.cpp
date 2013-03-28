@@ -3,10 +3,11 @@ The algorithm will apply the exponential function (i.e. <math>e^y</math>) to the
 The units of the workspace are not updated, so the user must take care in the use of such output workspaces. 
 When acting on an event workspace, the output will be a Workspace2D, with the default binning from the original workspace.
 
-== Usage ==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
  Exponential("input","output")
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

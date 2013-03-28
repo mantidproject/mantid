@@ -1,5 +1,7 @@
 
 #include <MantidKernel/System.h>
+#include "MantidKernel/Logger.h"
+
 
 #ifndef  INTERFACES_MANTID_EV_WORKER_H
 #define  INTERFACES_MANTID_EV_WORKER_H
@@ -44,7 +46,12 @@ class DLLExport MantidEVWorker
 {
 
 public:
+
+  /// Default constructor
   MantidEVWorker();
+
+
+  /// Default destructor
  ~MantidEVWorker();
 
   
@@ -69,6 +76,15 @@ public:
                         size_t        num_to_find,
                         double        min_intensity );
 
+  /// Load the peaks workspace from a .peaks or .integrate file
+  bool loadIsawPeaks( const std::string & peaks_ws_name,
+                      const std::string & file_name );
+
+  /// Save the peaks workspace to a .peaks or .integrate file
+  bool saveIsawPeaks( const std::string & peaks_ws_name,
+                      const std::string & file_name,
+                            bool          append );
+
   /// Index the peaks using the FFT method
   bool findUBUsingFFT( const std::string & peaks_ws_name,
                        double              min_abc,
@@ -80,7 +96,11 @@ public:
 
   /// Load the UB matrix from a file
   bool loadIsawUB( const std::string & peaks_ws_name,
-                   const std::string & file_name);
+                   const std::string & file_name );
+
+  /// Save the UB matrix to a file
+  bool saveIsawUB( const std::string & peaks_ws_name,
+                   const std::string & file_name );
 
   /// Optimize the phi, chi, omega angles in the peaks wkspace, using stored UB
   bool optimizePhiChiOmega( const std::string & peaks_ws_name, 
@@ -135,9 +155,16 @@ public:
                                  double        inner_size,
                                  double        outer_size );
 
+  /// Display UB and lattice parameters in MantidPlot
+  bool showUB( const std::string & peaks_ws_name );
+
+private:
+
   /// Utility to get workspace ID from ADS, blank if none
   std::string workspaceType( const std::string & ws_name );  
 
+  /// Reference to a logger
+  static Mantid::Kernel::Logger & g_log;
 };
 
 }  // namespace CustomInterfaces 

@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>FirstTimeSetup</class>
- <widget class="QDialog" name="FirstTimeSetup" >
-  <property name="geometry" >
+ <widget class="QDialog" name="FirstTimeSetup">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,36 +10,36 @@
     <height>386</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Welcome to Mantid</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3" >
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QLabel" name="lbImageLogo" >
-       <property name="enabled" >
+      <widget class="QLabel" name="lbImageLogo">
+       <property name="enabled">
         <bool>true</bool>
        </property>
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="maximumSize" >
+       <property name="maximumSize">
         <size>
-         <width>382</width>
+         <width>309</width>
          <height>172</height>
         </size>
        </property>
-       <property name="text" >
+       <property name="text">
         <string/>
        </property>
-       <property name="pixmap" >
-        <pixmap resource="../../../Images/images.qrc" >:/Mantid_Logo_Transparent.png</pixmap>
+       <property name="pixmap">
+        <pixmap resource="../../../Images/images.qrc">:/Mantid_Logo_Transparent.png</pixmap>
        </property>
-       <property name="scaledContents" >
+       <property name="scaledContents">
         <bool>true</bool>
        </property>
       </widget>
@@ -46,60 +47,60 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_3" >
-     <property name="text" >
+    <widget class="QLabel" name="label_3">
+     <property name="text">
       <string>Welcome to Mantid!
 
 It looks like this is the first time you have used this program, as you do not have a default facility or instrument selected. Selecting these now will allow the program to tailor itself more closely to your needs.</string>
      </property>
-     <property name="wordWrap" >
+     <property name="wordWrap">
       <bool>true</bool>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout" >
-     <item row="0" column="0" >
-      <widget class="QLabel" name="label" >
-       <property name="text" >
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
         <string>Default Facility</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0" >
-      <widget class="QLabel" name="label_2" >
-       <property name="text" >
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
         <string>Default Instrument</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1" >
-      <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInstrument" />
+     <item row="1" column="1">
+      <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInstrument"/>
      </item>
-     <item row="0" column="1" >
-      <widget class="QComboBox" name="cbFacility" />
+     <item row="0" column="1">
+      <widget class="QComboBox" name="cbFacility"/>
      </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" >
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="lbMUD" >
-       <property name="text" >
-        <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+      <widget class="QLabel" name="lbMUD">
+       <property name="text">
+        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">You may wish to set the default directories for Mantid. This can be done by clicking on this button.&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;You may wish to set the default directories for Mantid. This can be done by clicking on this button.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
-       <property name="wordWrap" >
+       <property name="wordWrap">
         <bool>true</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pbMUD" >
-       <property name="text" >
+      <widget class="QPushButton" name="pbMUD">
+       <property name="text">
         <string>Manage User Directories</string>
        </property>
       </widget>
@@ -107,25 +108,25 @@ p, li { white-space: pre-wrap; }
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="lbUpdate" >
-     <property name="text" >
-      <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+    <widget class="QLabel" name="lbUpdate">
+     <property name="text">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">You can revisit this dialog by selecting "First Time Setup" on the Help menu, or adjust other properties in the "Preferences" dialog accessed from the View menu.&lt;/p>&lt;/body>&lt;/html></string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;You can revisit this dialog by selecting &quot;First Time Setup&quot; on the Help menu, or adjust other properties in the &quot;Preferences&quot; dialog accessed from the View menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
-     <property name="wordWrap" >
+     <property name="wordWrap">
       <bool>true</bool>
      </property>
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer" >
-     <property name="orientation" >
+    <spacer name="verticalSpacer">
+     <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <property name="sizeHint" stdset="0" >
+     <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
        <height>40</height>
@@ -134,13 +135,13 @@ p, li { white-space: pre-wrap; }
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" >
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <spacer name="horizontalSpacer" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -149,15 +150,15 @@ p, li { white-space: pre-wrap; }
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pbCancel" >
-       <property name="text" >
+      <widget class="QPushButton" name="pbCancel">
+       <property name="text">
         <string>ASK ME NEXT TIME</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pbConfirm" >
-       <property name="text" >
+      <widget class="QPushButton" name="pbConfirm">
+       <property name="text">
         <string>SET</string>
        </property>
       </widget>
@@ -174,7 +175,7 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../Images/images.qrc" />
+  <include location="../../../Images/images.qrc"/>
  </resources>
  <connections/>
 </ui>

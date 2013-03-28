@@ -167,7 +167,7 @@ void SaveRKH::write1D()
     else
     {
       try {
-        XVal = m_workspace->getAxis(1)->spectraNo(i);
+        XVal = m_workspace->getSpectrum(i)->getSpectrumNo();
       } catch (...) { XVal = i+1; }
     }
 

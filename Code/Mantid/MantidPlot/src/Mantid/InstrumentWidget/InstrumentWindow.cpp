@@ -718,6 +718,24 @@ void InstrumentWindow::saveImage()
     m_InstrumentDisplay->saveToFile(filename);
 }
 
+/**
+ * Use the file dialog to select a filename to save grouping.
+ */
+QString InstrumentWindow::getSaveGroupingFilename()
+{
+  QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(this, "Save grouping file", m_savedialog_dir, "Grouping (*.xml);;All files (*.*)");
+
+  // If its empty, they cancelled the dialog
+  if( !filename.isEmpty() )
+  {
+    //Save the directory used
+    QFileInfo finfo(filename);
+    m_savedialog_dir = finfo.dir().path();
+  }
+
+  return filename;
+}
+
 ///**
 // * Update the text display that informs the user of the current mode and details about it
 // */
@@ -951,19 +969,23 @@ class DetXMLFile
 public:
   enum Option {List,Sum};
   /// Create a grouping file to extract all detectors in detector_list excluding those in dets
-  DetXMLFile(const std::vector<int>& detector_list, const QList<int>& dets, const QString& fname)
+  DetXMLFile(const std::string& instrName, const std::vector<int>& detector_list, const QList<int>& dets, const QString& fname)
   {
+    m_instrName = instrName;
     m_fileName = fname;
     m_delete = false;
     std::ofstream out(m_fileName.toStdString().c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping instrument=\"" << m_instrName << "\"> \n";
     out << "<group name=\"sum\"> <detids val=\"";
     std::vector<int>::const_iterator idet = detector_list.begin();
+    bool first = true;
     for(; idet != detector_list.end(); ++idet)
     {
       if (!dets.contains(*idet))
       {
-        out <<  *idet << ',';
+        if ( !first ) out << ',';
+        out <<  *idet ;
+        first = false;
       }
     }
     out << "\"/> </group> \n</detector-grouping>\n";
@@ -972,7 +994,7 @@ public:
   /// Create a grouping file to extract detectors in dets. Option List - one group - one detector,
   /// Option Sum - one group which is a sum of the detectors
   /// If fname is empty create a temporary file
-  DetXMLFile(const QList<int>& dets, Option opt = List, const QString& fname = "")
+  DetXMLFile(const std::string& instrName, const QList<int>& dets, Option opt = List, const QString& fname = "")
   {
     if (dets.empty())
     {
@@ -980,6 +1002,7 @@ public:
       return;
     }
 
+    m_instrName = instrName;
     if (fname.isEmpty())
     {
       QTemporaryFile mapFile;
@@ -1006,7 +1029,7 @@ public:
   void makeListFile(const QList<int>& dets)
   {
     std::ofstream out(m_fileName.toStdString().c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping instrument=\"" << m_instrName << "\"> \n";
     foreach(int det,dets)
     {
       out << "<group name=\"" << det << "\"> <detids val=\"" << det << "\"/> </group> \n";
@@ -1018,11 +1041,13 @@ public:
   void makeSumFile(const QList<int>& dets)
   {
     std::ofstream out(m_fileName.toStdString().c_str());
-    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping instrument=\"" << m_instrName << "\"> \n";
     out << "<group name=\"sum\"> <detids val=\"";
+    int first_det = dets[0];
     foreach(int det,dets)
     {
-      out << det << ',';
+      if ( det != first_det ) out << ',';
+      out << det;
     }
     out << "\"/> </group> \n</detector-grouping>\n";
   }
@@ -1040,8 +1065,9 @@ public:
   const std::string operator()()const{return m_fileName.toStdString();}
 
 private:
-  QString m_fileName; ///< holds the grouping file name
-  bool m_delete;      ///< if true delete the file on destruction
+  std::string m_instrName; ///< the instrument name
+  QString m_fileName;  ///< holds the grouping file name
+  bool m_delete;       ///< if true delete the file on destruction
 };
 
 /**
@@ -1050,7 +1076,7 @@ private:
 void InstrumentWindow::extractDetsToWorkspace()
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  DetXMLFile mapFile(m_selectedDetectors);
+  DetXMLFile mapFile(m_instrumentActor->getInstrument()->getName(), m_selectedDetectors);
   std::string fname = mapFile();
 
   if (!fname.empty())
@@ -1071,7 +1097,7 @@ void InstrumentWindow::extractDetsToWorkspace()
 void InstrumentWindow::sumDetsToWorkspace()
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  DetXMLFile mapFile(m_selectedDetectors,DetXMLFile::Sum);
+  DetXMLFile mapFile(m_instrumentActor->getInstrument()->getName(), m_selectedDetectors,DetXMLFile::Sum);
   std::string fname = mapFile();
 
   if (!fname.empty())
@@ -1088,20 +1114,20 @@ void InstrumentWindow::sumDetsToWorkspace()
 
 void InstrumentWindow::createIncludeGroupingFile()
 {
-  QString fname = MantidQt::API::FileDialogHandler::getSaveFileName(this,"Save grouping file");
+  QString fname = getSaveGroupingFilename();
   if (!fname.isEmpty())
   {
-    DetXMLFile mapFile(m_selectedDetectors,DetXMLFile::Sum,fname);
+    DetXMLFile mapFile(m_instrumentActor->getInstrument()->getName(), m_selectedDetectors,DetXMLFile::Sum,fname);
   }
 
 }
 
 void InstrumentWindow::createExcludeGroupingFile()
 {
-  QString fname = MantidQt::API::FileDialogHandler::getSaveFileName(this,"Save grouping file");
+  QString fname = getSaveGroupingFilename();
   if (!fname.isEmpty())
   {
-    DetXMLFile mapFile(m_instrumentActor->getAllDetIDs(),m_selectedDetectors,fname);
+    DetXMLFile mapFile(m_instrumentActor->getInstrument()->getName(), m_instrumentActor->getAllDetIDs(),m_selectedDetectors,fname);
   }
 }
 

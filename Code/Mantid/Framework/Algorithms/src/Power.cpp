@@ -9,12 +9,12 @@ When acting on an event workspace, the output will be a Workspace2D, with the de
 Defining the power algorithm as: <math>  y = \left ( a^b \right )  </math>, we can describe the error as: 
 <math>s_{y} = by\left ( s_{a}/a \right )</math>, where <math>s_{y}</math> is the error in the result ''y'' and <math>s_{a}</math> is the error in the input ''a''.
 
-== Usage ==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
  Power("InputWorkspace","Exponent")
 
-
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
