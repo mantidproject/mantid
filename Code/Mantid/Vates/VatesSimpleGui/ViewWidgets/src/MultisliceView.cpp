@@ -107,7 +107,7 @@ void MultiSliceView::resetCamera()
 void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
                                        int button, int modifier)
 {
-  if (modifier == vtkContextMouseEvent::CONTROL_MODIFIER &&
+  if (modifier == vtkContextMouseEvent::SHIFT_MODIFIER &&
       (button == vtkContextMouseEvent::LEFT_BUTTON ||
        button == vtkContextMouseEvent::RIGHT_BUTTON))
   {
