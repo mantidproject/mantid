@@ -16,12 +16,10 @@ namespace Kernel
   {}
 
   //----------------------------------------------------------------------------------------------
-  /** Copy constructor --> needed? for std containers.
-   */
-  //ISaveable::ISaveable(const ISaveable & other):
-  ////m_FileId(other.m_FileId),
-  // m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents)
-  //{ }
+  /** Copy constructor --> needed for std containers and not to copy mutexes   */
+  ISaveable::ISaveable(const ISaveable & other):
+     m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents)
+ { }
 
   //ISaveable::ISaveable(const size_t fileId):
   // m_FileId(fileId),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),m_BufMemorySize(0)
@@ -34,25 +32,30 @@ namespace Kernel
   */
   size_t ISaveable::setBufferPosition(std::list<ISaveable *const>::iterator &bufPosition)
   {
+      m_setter.lock();
       m_BufPosition = boost::optional<std::list<ISaveable *const>::iterator >(bufPosition);
       m_BufMemorySize  = this->getDataMemorySize();
+      m_setter.unlock();
       return m_BufMemorySize ;
   }
 
   /** private function which used by the disk buffer to save the contents of the  */
   void ISaveable::saveAt(uint64_t newPos, uint64_t newSize)
   {
-   
+      m_setter.lock();
       m_fileIndexStart= newPos;
       m_fileNumEvents = newSize;
       this->save();
       this->clearDataFromMemory();      
+      m_setter.unlock();
   }
   /// clears the state of the object, and indicate that it is not stored in buffer any more 
   void ISaveable::clearBufferState()
   {
+      m_setter.lock();
       m_BufMemorySize=0;
       m_BufPosition = boost::optional<std::list<ISaveable *const>::iterator>();
+      m_setter.unlock();
   }
 } // namespace Mantid
 } // namespace Kernel

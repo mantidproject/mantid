@@ -36,6 +36,10 @@ namespace MDEvents
 
 
     if(nBoxEvents!=UNDEF_SIZET) data.reserve(nBoxEvents);
+
+    if(splitter->isFileBacked())
+        this->setFileBacked();
+
    }
 
   //-----------------------------------------------------------------------------------------------
@@ -477,11 +481,10 @@ namespace MDEvents
       }
     }
   // it is constant access, so no saving or fiddling with the buffer is needed. Events just can be dropped if necessary
+    // releaseEvents
     if(m_Saveable)
-    {
-        m_Saveable->setBusy(false);
-      //m_Saveable->releaseEvents();
-    }
+        m_Saveable->setBusy(false);  
+
   }
 
 
@@ -545,10 +548,10 @@ namespace MDEvents
       }
     }
     // it is constant access, so no saving or fiddling with the buffer is needed. Events just can be dropped if necessary
+   //m_Saveable->releaseEvents();
     if(m_Saveable)
     {
-        m_Saveable->setBusy(false);
-      //m_Saveable->releaseEvents();
+        m_Saveable->setBusy(false);  
     }
   }
 

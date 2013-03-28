@@ -45,51 +45,27 @@ namespace Kernel
 
     /// @return true if it the data of the object is busy and so cannot be cleared; false if the data was released and can be cleared/written.
     bool isBusy() const
-    {
-      return m_Busy;
-    }
-    /// @ set the data busy to prevent from removing them from memory. The process which does that should clean the data when finished with them
-    void setBusy(bool On)
-    {
-        m_Busy=On;
-    }
+    {   return m_Busy;  }
+
     /** Returns the state of the parameter, which tells disk buffer to force writing data 
      * to disk despite the size of the object have not changed (so one have probably done something with object contents. */
-    bool isDataChanged()const{return m_dataChanged;}
-
-    /** Call this method from the method which changes the object but keeps the object size the same to tell DiskBuffer to write it back
-        the dataChanged ID is reset after save from the DataBuffer is emptied   */
-    void setDataChanged()
-    { 
-      if(this->wasSaved())m_dataChanged=true;
-    }
-    /** this method has to be called if the object has been discarded from memory and is not changed any more. 
-    It expected to be called from clearDataFromMemory. */
-    void clearDataChanged()
-    {
-      m_dataChanged=false;
-    }
-
-  
-    /** Sets the location of the object on HDD 
-     *@param newPos -- the file position where the opbject should/was saved
-     *@param newSize -- the object size on file (in some object units)
-     *@param wasSaved -- if true, the object was indeed saved by some other means so can be loaded if necessary. if false, only place for it is reserved
-    */
-    void setFilePosition(uint64_t newPos,size_t newSize,bool wasSaved);
+    bool isDataChanged()const
+    {return m_dataChanged;}
 
     /** function returns true if the object have ever been saved on HDD and knows it place there*/
-    bool wasSaved()const
-    { // for speed it returns this boolean, but for relaibility this should be m_wasSaved&&(m_fileIndexStart!=max())
-      return m_wasSaved;  
-    }
+    bool wasSaved()const // for speed it returns this boolean, but for relaibility this should be m_wasSaved&&(m_fileIndexStart!=max())
+    {  return m_wasSaved;    }
 
-  
     bool isLoaded()const
     { return m_isLoaded;}
 
-    void setLoaded(bool Yes)
-    { m_isLoaded = Yes;}
+
+    void setBusy(bool On);
+    void setDataChanged();
+    void clearDataChanged();
+    void setFilePosition(uint64_t newPos,size_t newSize,bool wasSaved);
+    void setLoaded(bool Yes);
+
   protected:
     //-------------- 
     /// a user needs to set this variable to true preventing from deleting data from buffer

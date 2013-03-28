@@ -8,6 +8,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../TestHelpers/src/ScopedFileHelper.cpp
+                        ../../TestHelpers/src/BoxControllerDummyIO.cpp
                         )
   
   if ( GMOCK_FOUND AND GTEST_FOUND )

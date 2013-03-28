@@ -2,6 +2,7 @@
 #define MANTID_KERNEL_ISAVEABLE_H_
     
 #include "MantidKernel/System.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <list>
 #include <vector>
 #include <algorithm>
@@ -46,7 +47,7 @@ namespace Kernel
   {
   public:
     ISaveable();
-    //ISaveable(const ISaveable &other); --> no pointers, standard CC
+    ISaveable(const ISaveable &other); 
     virtual ~ISaveable(){};
 
  
@@ -102,6 +103,8 @@ namespace Kernel
     uint64_t m_fileIndexStart;
     /// Number of events saved in the file, after the start index location
     uint64_t m_fileNumEvents;  
+
+    Kernel::Mutex m_setter; 
   private:
     // the iterator which describes the position of this object in the DiskBuffer. Undefined if not placed to buffer
     boost::optional< std::list<ISaveable * const >::iterator> m_BufPosition;

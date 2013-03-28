@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace BCTestHelpers
+namespace MantidTestHelpers
 {
    /**Constructor 
     @param nDim -- number of dimensions within the data to write

@@ -6,11 +6,11 @@
 #include "MantidKernel/DiskBuffer.h"
 
 
-namespace BCTestHelpers
+namespace MantidTestHelpers
 {
 
   //===============================================================================================
-  /** The class responsible for dummy IO operations, which mimick saving events into a direct access 
+  /** The class responsible for dummy IO operations, which mimic saving events into a direct access 
       file using generic box controller interface
 
       @date March 15, 2013

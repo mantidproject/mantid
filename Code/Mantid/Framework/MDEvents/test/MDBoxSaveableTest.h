@@ -155,7 +155,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     MDBox<MDLeanEvent<3>,3> c(sc.get());
     TS_ASSERT_EQUALS( c.getNPoints(), 0);
 
-    auto loader = new BCTestHelpers::BoxControllerDummyIO(sc);
+    auto loader = new MantidTestHelpers::BoxControllerDummyIO(sc);
     loader->setDataType(c.getCoordType(),c.getEventType());
 
     // Create and open the test dummy file with 1000 floats in it (have to recalulate to events differently)
@@ -195,7 +195,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
     // Create and open the test NXS file
     MDBox<MDLeanEvent<3>,3> c(bc.get(), 0);
-    auto loader = new BCTestHelpers::BoxControllerDummyIO(bc);
+    auto loader = new MantidTestHelpers::BoxControllerDummyIO(bc);
     loader->setDataType(c.getCoordType(),c.getEventType());
     loader->setWriteBufferSize(10000);
 
@@ -608,104 +608,121 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
   }
 
 
-//
-//
-//  //-----------------------------------------------------------------------------------------
-//  /** Set up the file back end and test accessing data
-//   * by binning and stuff */
-//  void do_test_fileBackEnd_binningOperations(bool parallel)
-//  {
-//    // Create a box with a controller for the back-end
-//    BoxController_sptr bc(new BoxController(3));
-//    MDBox<MDLeanEvent<3>,3> c(bc, 0);
-//
-//    // Create and open the test NXS file
-//    ::NeXus::File * file = do_saveAndOpenNexus(c, "MDBoxBinningTest.nxs", false);
-//
-//    PARALLEL_FOR_IF(parallel)
-//    for (int i=0; i<20; i++)
-//    {
-//      //std::cout << "Bin try " << i << "\n";
-//      // Try a bin, 2x2x2 so 8 events should be in there
-//      MDBin<MDLeanEvent<3>,3> bin;
-//      for (size_t d=0; d<3; d++)
-//      {
-//        bin.m_min[d] = 2.0;
-//        bin.m_max[d] = 4.0;
-//        bin.m_signal = 0;
-//      }
-//      c.centerpointBin(bin, NULL);
-//      TS_ASSERT_DELTA( bin.m_signal, 8.0, 1e-4);
-//      TS_ASSERT_DELTA( bin.m_errorSquared, 8.0, 1e-4);
-//    }
-//
-//    PARALLEL_FOR_IF(parallel)
-//    for (int i=0; i<20; i++)
-//    {
-//      //std::cout << "Sphere try " << i << "\n";
-//      // Integrate a sphere in the middle
-//      bool dimensionsUsed[3] = {true,true,true};
-//      coord_t center[3] = {5,5,5};
-//      CoordTransformDistance sphere(3, center, dimensionsUsed);
-//
-//      signal_t signal = 0;
-//      signal_t error = 0;
-//      c.integrateSphere(sphere, 1.0, signal, error);
-//      TS_ASSERT_DELTA( signal, 8.0, 1e-4);
-//      TS_ASSERT_DELTA( error, 8.0, 1e-4);
-//    }
-//
-//    file->close();
-//    do_deleteNexusFile("MDBoxBinningxest.nxs");
-//  }
-//
-//  void xest_fileBackEnd_binningOperations()
-//  {
-//    do_test_fileBackEnd_binningOperations(false);
-//  }
-//
-//  void xest_fileBackEnd_binningOperations_inParallel()
-//  {
-//    do_test_fileBackEnd_binningOperations(true);
-//  }
-//
-//
-//  //-----------------------------------------------------------------------------------------
-//  /** Test splitting of a MDBox into a MDGridBox when the
-//   * original box is backed by a file. */
-//  void xest_fileBackEnd_construction()
-//  {
-//    // Create a box with a controller for the back-end
-//    BoxController_sptr bc(new BoxController(3));
-//    bc->setSplitInto(5);
-//    // Handle the disk MRU values
-//    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
-//    DiskBuffer & dbuf = bc->getDiskBuffer();
-//    // Make a box from 0-10 in 3D
-//    MDBox<MDLeanEvent<3>,3> * c = new MDBox<MDLeanEvent<3>,3>(bc, 0);
-//    for (size_t d=0; d<3; d++) c->setExtents(d, 0, 10);
-//
-//    // Create and open the test NXS file
-//    ::NeXus::File * file = MDBoxTest::do_saveAndOpenNexus(*c, "MDGridBoxTest.nxs");
-//    TSM_ASSERT_EQUALS( "1000 events (on file)", c->getNPoints(), 1000);
-//
-//    // At this point the MDBox is set to be on disk
-//    TSM_ASSERT_EQUALS( "No free blocks to start with", dbuf.getFreeSpaceMap().size(), 0);
-//
-//    // Construct the grid box by splitting the MDBox
-//    MDGridBox<MDLeanEvent<3>,3> * gb = new MDGridBox<MDLeanEvent<3>,3>(c);
-//    TSM_ASSERT_EQUALS( "Grid box also has 1000 points", gb->getNPoints(), 1000);
-//    TSM_ASSERT_EQUALS( "Grid box has 125 children (5x5x5)", gb->getNumChildren(), 125);
-//    TSM_ASSERT_EQUALS( "The old spot in the file is now free", dbuf.getFreeSpaceMap().size(), 1);
-//
-//    // Get a child
-//    MDBox<MDLeanEvent<3>,3> * b = dynamic_cast<MDBox<MDLeanEvent<3>,3> *>(gb->getChild(22));
-//    TSM_ASSERT_EQUALS( "Child has 8 events", b->getNPoints(), 8);
-//    TSM_ASSERT_EQUALS( "Child is NOT on disk", b->wasSaved(), false);
-//
-//    file->close();
-//    MDBoxTest::do_deleteNexusFile("MDGridBoxTest.nxs");
-//  }
+
+
+  //-----------------------------------------------------------------------------------------
+  /** Set up the file back end and test accessing data
+   * by binning and stuff */
+  void do_test_fileBackEnd_binningOperations(bool parallel)
+  {
+// Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+
+    MDBox<MDLeanEvent<3>,3> c(bc.get(), 0);
+    TSM_ASSERT_EQUALS( "Box starts empty", c.getNPoints(), 0);
+
+    // Create test NXS file and make box file-backed
+    do_createNeXusBackedBox(c,bc,"MDBoxBinningxest.nxs",false);
+
+    DiskBuffer * dbuf = bc->getFileIO();
+    // It is empty now
+    TS_ASSERT_EQUALS(dbuf->getWriteBufferUsed(), 0);
+
+    PARALLEL_FOR_IF(parallel)
+    for (int i=0; i<20; i++)
+    {
+      //std::cout << "Bin try " << i << "\n";
+      // Try a bin, 2x2x2 so 8 events should be in there
+      MDBin<MDLeanEvent<3>,3> bin;
+      for (size_t d=0; d<3; d++)
+      {
+        bin.m_min[d] = 2.0;
+        bin.m_max[d] = 4.0;
+        bin.m_signal = 0;
+      }
+      c.centerpointBin(bin, NULL);
+      TS_ASSERT_DELTA( bin.m_signal, 8.0, 1e-4);
+      TS_ASSERT_DELTA( bin.m_errorSquared, 8.0, 1e-4);
+    }
+
+    PARALLEL_FOR_IF(parallel)
+    for (int i=0; i<20; i++)
+    {
+      //std::cout << "Sphere try " << i << "\n";
+      // Integrate a sphere in the middle
+      bool dimensionsUsed[3] = {true,true,true};
+      coord_t center[3] = {5,5,5};
+      CoordTransformDistance sphere(3, center, dimensionsUsed);
+
+      signal_t signal = 0;
+      signal_t error = 0;
+      c.integrateSphere(sphere, 1.0, signal, error);
+      TS_ASSERT_DELTA( signal, 8.0, 1e-4);
+      TS_ASSERT_DELTA( error, 8.0, 1e-4);
+    }
+
+    bc->getFileIO()->closeFile();    
+    do_deleteNexusFile("MDBoxBinningxest.nxs");
+  }
+
+  void test_fileBackEnd_binningOperations()
+  {
+    do_test_fileBackEnd_binningOperations(false);
+  }
+
+  // TODO : does not work multithreaded and have not been ever worked. 
+  void xest_fileBackEnd_binningOperations_inParallel()
+  {
+    do_test_fileBackEnd_binningOperations(true);
+  }
+
+
+  //-----------------------------------------------------------------------------------------
+  /** Test splitting of a MDBox into a MDGridBox when the
+   * original box is backed by a file. */
+  void test_fileBackEnd_construction()
+  {
+// Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+    bc->setSplitInto(5);
+
+
+    // Make a box from 0-10 in 3D
+    MDBox<MDLeanEvent<3>,3> * c = new MDBox<MDLeanEvent<3>,3>(bc.get(), 0);
+    for (size_t d=0; d<3; d++) c->setExtents(d, 0, 10);
+
+    TSM_ASSERT_EQUALS( "Box starts empty", c->getNPoints(), 0);
+
+    // Create test NXS file and make box file-backed
+    do_createNeXusBackedBox(*c,bc,"MDGridBoxTest.nxs");
+    // Handle the disk MRU values
+    bc->getFileIO()->setWriteBufferSize(10000);
+
+    DiskBuffer * dbuf = bc->getFileIO();
+
+    // Create and open the test NXS file
+    TSM_ASSERT_EQUALS( "1000 events (on file)", c->getNPoints(), 1000);
+
+    // At this point the MDBox is set to be on disk
+    TSM_ASSERT_EQUALS( "No free blocks to start with", dbuf->getFreeSpaceMap().size(), 0);
+
+    // Construct the grid box by splitting the MDBox
+    MDGridBox<MDLeanEvent<3>,3> * gb = new MDGridBox<MDLeanEvent<3>,3>(c);
+    TSM_ASSERT_EQUALS( "Grid box also has 1000 points", gb->getNPoints(), 1000);
+    TSM_ASSERT_EQUALS( "Grid box has 125 children (5x5x5)", gb->getNumChildren(), 125);
+    TSM_ASSERT_EQUALS( "The old spot in the file is now free", dbuf->getFreeSpaceMap().size(), 1);
+
+    // Get a child
+    MDBox<MDLeanEvent<3>,3> * b = dynamic_cast<MDBox<MDLeanEvent<3>,3> *>(gb->getChild(22));
+    TSM_ASSERT_EQUALS( "Child has 8 events", b->getNPoints(), 8);
+    TSM_ASSERT("The child is also saveabele",b->getISaveable()!=NULL);
+    if(!b->getISaveable())return;
+
+    TSM_ASSERT_EQUALS( "Child is NOT on disk", b->getISaveable()->wasSaved(), false);
+
+    bc->getFileIO()->closeFile();      
+    do_deleteNexusFile("MDGridBoxTest.nxs");
+  }
 //
 //  //------------------------------------------------------------------------------------------------
 //  /** This test splits a large number of events,
@@ -786,7 +803,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 //
 
 // 
-// THIS MODE IS NOT SUPPORTED IN THIS FORM
+// THIS MODE IS NOT SUPPORTED IN THIS FORM aNY MORE
 //  //-----------------------------------------------------------------------------------------
 //  /** Set up the file back end and test accessing data.
 //   * This time, use no DiskBuffer so that reading/loading is done within the object itself */
