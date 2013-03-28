@@ -79,8 +79,7 @@ if __name__ == "__main__":
     addWikiDir(helpsrcdir)
 
     # initialize mantid
-    import wiki_tools
-    wiki_tools.initialize_Mantid(options.mantidpath)
+    sys.path.append(options.mantidpath)
     import mantid.api
     functions = mantid.api.FunctionFactory.getFunctionNames()
 
