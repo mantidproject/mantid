@@ -19,7 +19,10 @@ The Interpolation property is applicable to this situation. If it is set to "Lin
 * The input workspace must have a unit set
 * The input workspace must contain histogram data
 
-
+==Related Algorithms==
+===MaskBins==
+[[MaskBins]] will set the data in the desired bins to 0 and importantly also marks those bins as masked, so that further algorithms should not include this data in their grouping calculations.  This is particularly used for Diffraction Focussing.
+ 
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
