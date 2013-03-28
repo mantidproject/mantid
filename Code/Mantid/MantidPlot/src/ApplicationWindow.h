@@ -42,6 +42,7 @@ Description          : QtiPlot's main window
 #include <QSet>
 #include <QSettings>
 
+#include "HelpWindow.h"
 #include "Table.h"
 #include "ScriptingEnv.h"
 #include "Scripted.h"
@@ -1367,6 +1368,8 @@ private:
   // Flag telling if table values should be automatically recalculated when values in a column are modified.
   bool d_auto_update_table_values;
   int d_matrix_undo_stack_size;
+  /// Smart pointer to the help window
+  boost::shared_ptr<HelpWindow> m_helpWindow;
 
   /// A method to populate the CurveLayout struct on loading a project
   CurveLayout fillCurveSettings(const QStringList & curve, unsigned int offset = 0);

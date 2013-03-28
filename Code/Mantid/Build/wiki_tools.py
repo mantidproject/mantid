@@ -273,7 +273,6 @@ def initialize_wiki(args):
     
     
 #======================================================================
-
 def flag_if_build_is_debug(mantidpath):
     """
     Check if the given build is a debug build of Mantid

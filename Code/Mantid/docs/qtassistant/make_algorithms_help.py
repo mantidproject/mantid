@@ -1,15 +1,10 @@
 #!/usr/bin/env python
-import argparse
-from lxml import etree as le # python-lxml on rpm based systems
-import lxml.html
-from lxml.html import builder as lh
+from xml.dom.minidom import Document
 import os
 from qhpfile import QHPFile
 from string import split,join
 import sys
-
-OUTPUTDIR = "generated"
-WEB_BASE  = "http://www.mantidproject.org/"
+from assistant_common import *
 
 def addWikiDir(helpsrcdir):
     """
@@ -19,25 +14,42 @@ def addWikiDir(helpsrcdir):
     wikitoolsloc = os.path.abspath(wikitoolsloc)
     sys.path.append(wikitoolsloc)
 
-def genCatElement(category):
+def addLetterIndex(doc, div, letters):
+    para = addEle(doc, "p", div)
+    for letter in map(chr, range(65, 91)):
+        if letter in letters:
+            addTxtEle(doc, "a", letter, para, {"href":'#algo%s' % letter})
+            text = doc.createTextNode(" ")
+            para.appendChild(text)
+        else:
+            text = doc.createTextNode(letter+" ")
+            para.appendChild(text)
+
+
+def appendCatElement(doc, ul, category):
     category = category.split('/')
-    text = "<li>"
     filename = 'AlgoCat_' + category[0] + '.html'
     url = filename
-    if len(category) > 1:
-        text += '/'.join(category[:-1]) + '/'
-        url += '#' + '_'.join(category[1:])
-    text += '<a href="%s">%s</a></li>' % (url, category[-1])
-    return lxml.html.fragment_fromstring(text)
+    
+    li = addEle(doc, "li", ul)
 
-def genAlgoElement(name, versions):
-    text = '<li><a href="Algo_%s.html">%s' % (name, name)
-    text += ' v%d</a>' % versions[-1]
+    if len(category) > 1:
+        text = '/'.join(category[:-1]) + '/'
+        url += '#' + '_'.join(category[1:])
+        text = doc.createTextNode(text)
+        li.appendChild(text)
+    addTxtEle(doc, "a", category[-1], li, {"href":url})
+
+def appendAlgoElement(doc, ul, name, versions):
+    li = addEle(doc, "li", ul)
+    text = "%s v%d" % (name, versions[-1])
+    addTxtEle(doc, "a", text, li, {'href':'Algo_%s.html' % (name)})
 
     if len(versions) > 1:
+        text = ''
         text += ', ' + ', '.join(['v'+str(version) for version in versions[:-1]])
-    text += '</li>'
-    return lxml.html.fragment_fromstring(text)
+        text = doc.createTextNode(text)
+        li.appendChild(text)
 
 def processCategories(categories, qhp, outputdir):
     # determine the list of html pages
@@ -51,31 +63,30 @@ def processCategories(categories, qhp, outputdir):
     pages.sort()
 
     for page_name in pages:
-
-        root = le.Element("html")
-        head = le.SubElement(root, "head")
-        head.append(lh.META(lh.TITLE(page_name + " Algorithm Category")))
-        body = le.SubElement(root, "body")
-        body.append(lh.CENTER(lh.H1(page_name)))
+        doc = Document()
+        root = addEle(doc, "html", doc)
+        head = addEle(doc, "head", root)
+        addTxtEle(doc, "title", page_name + " Algorithm Category", head)
+        body = addEle(doc, "body", root)
+        temp = addEle(doc, "center", body)
+        addTxtEle(doc, "h1", page_name, temp)
 
         subcategories = grouped_categories[page_name]
         subcategories.sort()
         for subcategory in subcategories:
             anchor = subcategory.split('/')
             anchor = '_'.join(anchor[1:])
-            temp = le.SubElement(body, "h2")
-            le.SubElement(temp, 'a', **{"name":anchor})
-            temp.text=subcategory
-            #body.append(lh.H2(subcategory))
-            ul = le.SubElement(body, "ul")
+            addTxtEle(doc, "h2", subcategory, body)
+            addEle(doc, 'a', body, {"name":anchor})
+            ul = addEle(doc, "ul", body)
             for (name, versions) in categories[subcategory]:
-                ul.append(genAlgoElement(name, versions))
+                appendAlgoElement(doc, ul, name, versions)
 
         filename = "AlgoCat_%s.html" % page_name
-        qhp.addFile(filename, page_name+" Algorithm Category")
+        qhp.addFile(os.path.join(HTML_DIR, filename), page_name)
         filename = os.path.join(outputdir, filename)
         handle = open(filename, 'w')
-        handle.write(le.tostring(root, pretty_print=True, xml_declaration=False))
+        handle.write(doc.toprettyxml(indent="  ", encoding="utf-8"))
 
 def process(algos, qhp, outputdir):
     import mantid
@@ -86,7 +97,12 @@ def process(algos, qhp, outputdir):
         versions = algos[name]
 
         alg = mantid.FrameworkManager.createAlgorithm(name, versions[-1])
-        for category in alg.categories().split(';'):
+        alg_categories = alg.categories()
+        try:
+            alg_categories = alg_categories.split(';')
+        except AttributeError, e:
+            pass # the categories are already a list
+        for category in alg_categories:
             category = category.replace('\\', '/')
             if not categories.has_key(category):
                 categories[category] = []
@@ -104,56 +120,49 @@ def process(algos, qhp, outputdir):
         letter_groups[letter].append((str(name), versions))
 
     ##### put together the top of the html document
-    root = le.Element("html")
-    head = le.SubElement(root, "head")
-    head.append(lh.META(lh.TITLE("Algorithms Index")))
-    body = le.SubElement(root, "body")
-    body.append(lh.CENTER(lh.H1("Algorithms Index")))
+    doc = Document()
+    root = addEle(doc, "html", doc)
+    head = addEle(doc, "head", root)
+    addTxtEle(doc, "title", "Algorithms Index", head)
+    body = addEle(doc, "body", root)
+    temp = addEle(doc, "center", body)
+    addTxtEle(doc, "h1", "Algorithms Index", temp)
 
     ##### section for categories 
-    div_cat = le.SubElement(body, "div", **{"id":"alg_cats"})
-    div_cat.append(lh.H2("Subcategories"))
+    div_cat = addEle(doc, "div", body, {"id":"alg_cats"})
+    addTxtEle(doc, "h2", "Subcategories", div_cat)
     above = None
-    ul = le.SubElement(div_cat, "ul")
+    ul = addEle(doc, "ul", div_cat)
     for category in categories_list:
-        ul.append(genCatElement(category))
+        appendCatElement(doc, ul, category)
 
     ##### section for alphabetical 
-    div_alpha = le.SubElement(body, "div", **{"id":"alg_alpha"})
-    div_alpha.append(lh.H2("Alphabetical"))
+    div_alpha = addEle(doc, "div", body, {"id":"alg_alpha"})
+    addTxtEle(doc, "h2", "Alphabetical", div_alpha)
 
     letters = letter_groups.keys()
     letters.sort()
 
     # print an index within the page
-    para_text = "<p>"
-    for letter in map(chr, range(65, 91)):
-        if letter in letters:
-            para_text += "<a href='#algo%s'>%s</a> " % (letter, letter)
-        else:
-            para_text += letter + ' '
-    para_text += "</p>"
-    div_alpha.append( lxml.html.fragment_fromstring(para_text))
+    addLetterIndex(doc, div_alpha, letters)
 
     # print the list of algorithms by name
     for letter in letters:
-        temp = le.SubElement(div_alpha, 'h3')
-        le.SubElement(temp, 'a', **{"name":'algo'+letter})
-        temp.text = letter
-
-        ul = le.SubElement(div_alpha, "ul")
+        addTxtEle(doc, 'h3', letter, div_alpha)
+        addEle(doc, 'a', div_alpha, {"name":'algo'+letter})
+        ul = addEle(doc, "ul", div_alpha)
         for (name, versions) in letter_groups[letter]:
-            ul.append(genAlgoElement(name, versions))
+            appendAlgoElement(doc, ul, name, versions)
 
     # print an index within the page
-    div_alpha.append( lxml.html.fragment_fromstring(para_text))
+    addLetterIndex(doc, div_alpha, letters)
 
     filename = os.path.join(outputdir, "algorithms_index.html")
     handle = open(filename, 'w')
-    handle.write(le.tostring(root, pretty_print=True, xml_declaration=False))
+    handle.write(doc.toprettyxml(indent="  ", encoding="utf-8"))
 
     shortname = os.path.split(filename)[1]
-    qhp.addFile(shortname, "Algorithms Index")
+    qhp.addFile(os.path.join(HTML_DIR, shortname), "Algorithms Index")
 
     # create all of the category pages
     processCategories(categories, qhp, outputdir)
@@ -162,40 +171,30 @@ def process(algos, qhp, outputdir):
     from algorithm_help import process_algorithm
     for name in algos.keys():
         versions = algos[name]
-        process_algorithm(name, versions, qhp, helpoutdir)
+        process_algorithm(name, versions, qhp, outputdir)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate qtassistant docs " \
-                  + "for the algorithms")
-    defaultmantidpath = ""
-    parser.add_argument('-m', '--mantidpath', dest='mantidpath',
-                        default=defaultmantidpath,
-                        help="Full path to the Mantid compiled binary folder. Default: '%s'. This will be saved to an .ini file" % defaultmantidpath)
-    parser.add_argument('-o', '--output', dest='helpoutdir',
-                        help="Full path to where the output files should go.")
-
-    args = parser.parse_args()
+    parser = getParser("Generate qtassistant docs for the algorithms")
+    (options, args) = parser.parse_args()
 
     # where to put the generated files
     helpsrcdir = os.path.dirname(os.path.abspath(__file__))
-    if args.helpoutdir is not None:
-        helpoutdir = os.path.abspath(args.helpoutdir)
+    if options.helpoutdir is not None:
+        helpoutdir = os.path.abspath(options.helpoutdir)
     else:
-        helpoutdir = os.path.join(helpsrcdir, OUTPUTDIR)
+        raise RuntimeError("need to specify output directory")
     print "Writing algorithm web pages to '%s'" % helpoutdir
-    if not os.path.exists(helpoutdir):
-        os.makedirs(helpoutdir)
+    assertDirs(helpoutdir)
     addWikiDir(helpsrcdir)
 
     # initialize mantid
-    if not args.mantidpath.endswith("bin"):
-        args.mantidpath = os.path.join(args.mantidpath, "bin")
-    sys.path.append(args.mantidpath)
+    sys.path.append(options.mantidpath)
+    os.environ['MANTIDPATH'] = options.mantidpath
     import mantid.api
     algos = mantid.api.AlgorithmFactory.getRegisteredAlgorithms(True)
 
     # setup the qhp file
     qhp = QHPFile("org.mantidproject.algorithms")
 
-    process(algos, qhp, helpoutdir)
+    process(algos, qhp, os.path.join(helpoutdir, HTML_DIR))
     qhp.write(os.path.join(helpoutdir, "algorithms.qhp"))

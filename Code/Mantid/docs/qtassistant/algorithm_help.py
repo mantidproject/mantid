@@ -1,14 +1,13 @@
-from lxml import etree as le # python-lxml on rpm based systems
-import lxml.html
-from lxml.html import builder as lhbuilder
 import os
+from xml.dom.minidom import Document
+from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
 
 DIRECTION = {
     0:"input",
     1:"output",
     2:"input/output"
 }
-WEB_BASE  = "http://www.mantidproject.org/"
+from assistant_common import WEB_BASE, HTML_DIR
 
 def make_wiki(algo_name, version, latest_version):
     """ Return wiki text for a given algorithm
@@ -115,14 +114,15 @@ def typeStr(property):
         return "double"
     return propType
 
-def propToHtml(table, property, number):
-    row = le.SubElement(table, "tr")
-    row.append(lhbuilder.TD(str(number+1)))
-    row.append(lhbuilder.TD(property.name))
-    row.append(lhbuilder.TD(DIRECTION[property.direction]))
-    row.append(lhbuilder.TD(typeStr(property)))
-    row.append(lhbuilder.TD('???')) # default
-    row.append(lhbuilder.TD(property.documentation))
+def propToHtml(doc, table, property, number):
+    # wiki_maker does this better
+    row = addEle(doc, "tr", table)
+    addTxtEle(doc, "td", str(number+1), row)
+    addTxtEle(doc, "td", property.name, row)
+    addTxtEle(doc, "td", DIRECTION[property.direction], row)
+    addTxtEle(doc, "td", typeStr(property), row)
+    addTxtEle(doc, "td", '???', row)
+    addTxtEle(doc, "td", property.documentation, row)
     """ property methods
     ['__class__', '__delattr__', '__dict__', '__doc__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'allowedValues', 'direction', 'documentation', 'getGroup', 'isDefault', 'isValid', 'name', 'units', 'value', 'valueAsStr']
     """
@@ -133,57 +133,57 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
     versions = list(versions)
     versions.reverse()
 
-    root = le.Element("html")
-    head = le.SubElement(root, "head")
-    head.append(lhbuilder.META(lhbuilder.TITLE(name)))
-    body = le.SubElement(root, "body")
-    body.append(lhbuilder.CENTER(lhbuilder.H1(name)))
-    text = '<a href="%s">wiki help</a>' % (WEB_BASE+name)
-    body.append(lxml.html.fragment_fromstring(text))
-    body.append(lhbuilder.HR())
+    doc = Document()
+    root = addEle(doc, "html", doc)
+    head = addEle(doc, "head", root)
+    addTxtEle(doc, "title", name, head)
+    body = addEle(doc, "body", root)
+    temp = addEle(doc, "center", body)
+    addTxtEle(doc, "h1", name, temp)
+    addTxtEle(doc, "a", "wiki help", body, {"href":WEB_BASE+name})
+    addEle(doc, "hr", body)
+
     num_versions = len(versions)
     for version in versions:
-        section = le.SubElement(body, "div", **{"id":"version_"+str(version)})
+        section = addEle(doc, "div", body, {"id":"version_"+str(version)})
         if num_versions > 0:
-            section.append(lhbuilder.H2("Version %d" % version))
+            addTxtEle(doc, "h2", "Version %d" % version, section)
 
         alg = mantid.FrameworkManager.createAlgorithm(name, version)
 
-        section.append(lhbuilder.H3("Summary"))
-        section.append(lhbuilder.P(alg.getWikiSummary()))
+        addTxtEle(doc, "h3", "Summary", section)
+        addTxtEle(doc, "p", alg.getWikiSummary(), section)
 
-        section.append(lhbuilder.H3("Properties"))
-        table = le.SubElement(section, "table",
-                              **{"border":"1", "cellpadding":"5", "cellspacing":"0"})
-        header_row = le.SubElement(table, "tr")
-        header_row.append(lhbuilder.TH("Order"))
-        header_row.append(lhbuilder.TH("Name"))
-        header_row.append(lhbuilder.TH("Direction"))
-        header_row.append(lhbuilder.TH("Type"))
-        header_row.append(lhbuilder.TH("Default"))
-        header_row.append(lhbuilder.TH("Description"))
+        addTxtEle(doc, "h3", "Properties", section)
+        table = addEle(doc, "table", section, {"border":"1", "cellpadding":"5", "cellspacing":"0"})
+        header_row = addEle(doc, "tr", table)
+        addTxtEle(doc, "th", "Order", header_row)
+        addTxtEle(doc, "th", "Name", header_row)
+        addTxtEle(doc, "th", "Direction", header_row)
+        addTxtEle(doc, "th", "Type", header_row)
+        addTxtEle(doc, "th", "Default", header_row)
+        addTxtEle(doc, "th", "Description", header_row)
         properties = alg.getProperties()
         mandatory = alg.mandatoryProperties()
         for (i, property) in zip(range(len(properties)), properties):
-            propToHtml(table, property, i)
+            propToHtml(doc, table, property, i)
 
-        section.append(lhbuilder.H3("Description"))
-        section.append(lhbuilder.P(alg.getWikiDescription()))
+        addTxtEle(doc, "h3", "Description", section)
+        addTxtEle(doc, "p", alg.getWikiDescription(), section)
 
         """ algorithm methods
 ['__class__', '__contains__', '__delattr__', '__dict__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__init__', '__len__', '__module__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'alias', 'categories', 'category', 'docString', 'execute', 'existsProperty', 'getOptionalMessage', 'getProperties', 'getProperty', 'getPropertyValue', 'getWikiDescription', 'getWikiSummary', 'initialize', 'isChild', 'isExecuted', 'isInitialized', 'mandatoryProperties', 'name', 'orderedProperties', 'outputProperties', 'propertyCount', 'setAlwaysStoreInADS', 'setChild', 'setLogging', 'setProperty', 'setPropertyValue', 'setRethrows', 'version']
         """
 
         if version > 1:
-            body.append(lhbuilder.HR())
+            addEle(doc, "hr", body)
 
-    # write out the fiel
+    # write out the file
     outfile = "Algo_%s.html" % (name)
-    qhp.addFile(outfile, name)
+    qhp.addFile(os.path.join(HTML_DIR, outfile), name)
     outfile = os.path.join(outputdir, outfile)
     handle = open(outfile, 'w')
-    handle.write(le.tostring(root, pretty_print=True,
-                             xml_declaration=False))
+    handle.write(doc.toprettyxml(indent="  ", encoding="utf-8"))
 
 
     """ Do the wiki page
