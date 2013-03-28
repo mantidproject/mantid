@@ -814,12 +814,10 @@ def screenshot(widget, filename, description, png_exists=False):
     The MANTID_SCREENSHOT_REPORT environment variable must be set 
     to the destination folder. Screenshot taking is skipped otherwise.
     
-    @param widget :: QWidget to grab
-    @param filename :: Save to this file (no extension!)
-    @param description :: Short descriptive text of what the 
-            screenshot should look like
-    @param png_exists :: if True, then the 'filename' already
-            exists. Don't grab a screenshot, but add to the report.
+    :param widget: QWidget to grab.
+    :param filename: Save to this file (no extension!).
+    :param description: Short descriptive text of what the screenshot should look like.
+    :param png_exists: if True, then the 'filename' already exists. Don't grab a screenshot, but add to the report.
     """
     dest = get_screenshot_dir()
     if not dest is None:
