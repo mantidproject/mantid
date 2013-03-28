@@ -21,8 +21,8 @@ Example format:
 
 *WIKI*/
 #include "MantidAlgorithms/GeneratePythonScript.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmHistory.h"
 
@@ -200,34 +200,15 @@ std::string GeneratePythonScript::genParamString(
         params += ",";
       }
 
-      if(algHistName == "Load")
-      {
-        if(propHist.type() == "string")
-        {
-          params += name + "=r'" + value + "'";
-        }
-        else
-        {
-          params += name + "='" + value + "'";
-        }
-      }
-      else
-      {
-        // Try and cast the property to a FileProperty type.  If successful, we have to guard against
-        // the the occurence of directory separators (forward or back slashes) in the file path that the 
-        // property contains. We do this by appending "r" onto the parameter in the output, to make it 
-        // a Python "raw" string.
-        Property *p = ialg_Sptr->getPointerToProperty(name);
-        FileProperty* fp = dynamic_cast<FileProperty*> ((p));
-        if(NULL != fp)
-        {
-          params += name + "=r'" + value + "'";
-        }
-        else
-        {
-          params += name + "='" + value + "'";
-        }
-      }
+      // Try and cast the property to a MultiFileProperty or FileProperty type.  If successful, we have to guard against
+      // the the occurence of directory separators (forward or back slashes) in the file path that the
+      // property contains. We do this by appending "r" onto the parameter in the output, to make it
+      // a Python "raw" string.
+      Property *p = ialg_Sptr->getPointerToProperty(name);
+      auto* fp = dynamic_cast<FileProperty*>(p);
+      auto* mp = dynamic_cast<MultipleFileProperty*>(p);
+      if(fp || mp) params += name + "=r'" + value + "'";
+      else params += name + "='" + value + "'";
     }
   }
 
