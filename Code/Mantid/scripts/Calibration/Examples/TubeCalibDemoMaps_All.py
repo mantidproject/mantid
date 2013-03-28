@@ -14,15 +14,15 @@ from tube_spec import * # For tube specification class
 # == Set parameters for calibration ==
 
 path = r"C:/Temp/" # Path name of folder containing input and output files
-filename = 'MAPS14919.raw' # Name of calibration run
+filename = 'MAPS14919.raw'  # Calibration run ( found in \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5 )
 rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper 
 rangeUpper = 10000 #
 
 
 # Set initial parameters for peak finding
-ExpectedHeight = -1000.0 # Expected Height of Peaks (initial value of fit parameter)
-ExpectedWidth = 8.0 # Expected width of centre peak (initial value of fit parameter)
-ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0] # Expected positions of the edges and peak (initial values of fit parameters)
+ExpectedHeight = -1000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
+ExpectedWidth = 8.0 # Expected width of Gaussian peaks in pixels  (initial value of fit parameter)
+ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0] # Expected positions of the edges and Gaussian peaks in pixels (initial values of fit parameters)
 
 # Set what we want to calibrate (e.g whole intrument or one door )
 CalibratedComponent = 'MAPS'  # Calibrate all
@@ -48,8 +48,9 @@ thisTubeSet.setTubeSpecByString(CalibratedComponent)
 
 # Get ideal tube
 iTube = IdealTube()
-# Set positions of where the shadows and ends should be. 
-# An intelligent guess is used here that is not correct for all tubes.
+# The positions of the shadows and ends here are an intelligent guess.
+# First array gives positions in Metres and second array gives type 1=Gaussian peak 2=edge.
+# See http://www.mantidproject.org/IdealTube for details.
 iTube.setPositionsAndForm([-0.50,-0.16,-0.00, 0.16, 0.50 ],[2,1,1,1,2]) 
 
 # Get fitting parameters
