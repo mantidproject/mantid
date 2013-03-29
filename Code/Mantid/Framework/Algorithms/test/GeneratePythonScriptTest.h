@@ -111,7 +111,7 @@ public:
         }
 
         file.close();
-        //if (Poco::File(filename).exists()) Poco::File(filename).remove();
+        if (Poco::File(filename).exists()) Poco::File(filename).remove();
     }
 };
 
