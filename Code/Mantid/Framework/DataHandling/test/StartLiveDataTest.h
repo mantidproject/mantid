@@ -119,7 +119,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
 
     // The MonitorLiveData algorithm is left running in the manager
-    TS_ASSERT_EQUALS( AlgorithmManager::Instance().algorithms().size(), 1);
+    TS_ASSERT_EQUALS( AlgorithmManager::Instance().size(), 1);
     // Get at it via the StartLiveData output property of the same name
     IAlgorithm_sptr monAlg = alg.getProperty("MonitorLiveData");
     TS_ASSERT_EQUALS( monAlg->name(), "MonitorLiveData");
