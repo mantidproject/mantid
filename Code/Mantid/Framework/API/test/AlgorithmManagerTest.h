@@ -285,35 +285,19 @@ public:
 
   }
 
-  /**
-   * Disabled due to random failures that cannot be pinned down and are most likely timing issues.
-   * This test has never failed legitimately and only serves to cause confusion when it fails
-   * due to completely unrelated changes.
-   */
-  void xtestDroppingOldOnes_extremeCase()
+  void testDroppingOldOnes_extremeCase()
   {
   /** Extreme case where your queue fills up and all algos are running */
     AlgorithmManager::Instance().clear();
-    std::vector<Poco::ActiveResult<bool>> results;
-    std::vector<IAlgorithm_sptr> algs;
     for (size_t i=0; i<5; i++)
     {
-      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("AlgRunsForever");
-      algs.push_back(alg);
-      results.push_back(alg->executeAsync());
+      AlgorithmManager::Instance().create("AlgRunsForever");
     }
-    // give it some time to start
-    Poco::Thread::sleep(100);
 
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
+    // Create another that takes it past the normal max size (of 5)
     AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 6);
-
-    for (size_t i=0; i<5; i++)
-    {
-      algs[i]->cancel();
-      results[i].wait();
-    }
   }
 
   void testThreadSafety()
