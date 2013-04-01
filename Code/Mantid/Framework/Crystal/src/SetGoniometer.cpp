@@ -22,6 +22,7 @@ The run's sample logs will be used in order to determine the actual angles of ro
 #include <boost/algorithm/string/detail/classification.hpp>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::Geometry::Goniometer;
 using namespace Mantid::Geometry;
@@ -113,6 +114,26 @@ namespace Crystal
         axisName = Strings::strip(axisName);
         if (axisName.empty())
           throw std::invalid_argument("The name must not be empty");
+
+        // If axisName is a number, add a new log value
+        double angle=0;
+        if (Strings::convert(axisName, angle))
+        {
+            g_log.information()<<"Axis "<<i<<" - create a new log value GoniometerAxis"<<i<<"_FixedValue"<<std::endl;
+            axisName="GoniometerAxis"+Strings::toString(i)+"_FixedValue";
+            try
+            {
+                Kernel::DateAndTime now = Kernel::DateAndTime::getCurrentTime();
+                Kernel::TimeSeriesProperty<double> * tsp = new Kernel::TimeSeriesProperty<double>(axisName);
+                tsp->addValue(now, angle);
+                ws->mutableRun().addLogData(tsp);
+            }
+            catch (...)
+            {
+                g_log.error("Could not add axis");
+            }
+
+        }
 
         double x=0,y=0,z=0;
         if (!Strings::convert(tokens[1], x)) throw std::invalid_argument("Error converting string '" + tokens[1] + "' to a number.");
