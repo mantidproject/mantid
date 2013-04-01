@@ -137,6 +137,16 @@ void ViewBase::onLogScale(int state)
 }
 
 /**
+ * This function passes the color selection widget to the color updater
+ * object.
+ * @param cs : Reference to the color selection widget
+ */
+void ViewBase::setColorScaleState(ColorSelectionWidget &cs)
+{
+  this->colorUpdater.updateState(cs);
+}
+
+/**
  * This function is used to correct post-accept visibility issues. Most
  * views won't need to do anything.
  */

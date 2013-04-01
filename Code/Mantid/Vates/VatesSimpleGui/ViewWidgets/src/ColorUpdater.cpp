@@ -96,6 +96,16 @@ void ColorUpdater::logScale(pqPipelineRepresentation *repr, int state)
   lut->getProxy()->UpdateVTKObjects();
 }
 
+/**
+ * This function takes information from the color selection widget and
+ * sets it into the interanl state variables.
+ * @param cs : Reference to the color selection widget
+ */
+void ColorUpdater::updateState(ColorSelectionWidget &cs)
+{
+
+}
+
 }
 }
 }

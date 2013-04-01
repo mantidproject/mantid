@@ -24,6 +24,9 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+class ColorSelectionWidget;
+
 /**
  *
   This class is an abstract base class for all of the Vates simple GUI's views.
@@ -103,6 +106,8 @@ public:
   virtual void resetDisplay() = 0;
   /// Setup axis scales
   virtual void setAxisScales();
+  /// Set the current color scale state
+  virtual void setColorScaleState(ColorSelectionWidget &cs);
   /// Create source for plugin mode.
   virtual void setPluginSource(QString pluginName, QString wsName);
   /// Determines if source has timesteps (4D).
