@@ -45,25 +45,6 @@ namespace Mantid
         return AlgorithmFactory::Instance().create(algName,version);                // Throws on fail:
     }
 
-    /** Gets the names and categories of all the currently available algorithms
-    *
-    *  @return A vector of pairs of algorithm names and categories
-    */
-    const std::vector<std::pair<std::string,std::string> > 
-      AlgorithmManagerImpl::getNamesAndCategories() const
-    {
-      Mutex::ScopedLock _lock(this->m_managedMutex);
-      std::vector<std::pair<std::string,std::string> > retVector;
-
-      for (unsigned int i=0; i < m_managed_algs.size(); ++i)
-      {
-        std::pair<std::string,std::string> alg(m_managed_algs[i]->name(),m_managed_algs[i]->category());
-        retVector.push_back(alg);
-      }
-
-      return retVector;
-    }
-
     /** Creates and initialises an instance of an algorithm.
      *
      * The algorithm gets tracked in the list of "managed" algorithms,

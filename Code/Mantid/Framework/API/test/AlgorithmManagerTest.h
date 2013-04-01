@@ -125,26 +125,6 @@ public:
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), std::runtime_error );
   }
 
-  void testGetNamesAndCategories()
-  {
-    AlgorithmManager::Instance().clear();
-    TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
-    TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
-    std::vector<std::pair<std::string,std::string> > names = AlgorithmManager::Instance().getNamesAndCategories();
-    TS_ASSERT_EQUALS(names.size(), 2);
-    if (names.size() > 0)
-    {
-      TS_ASSERT_EQUALS(names[0].first, "AlgTest");
-      TS_ASSERT_EQUALS(names[0].second, "Cat4");
-    }
-    if (names.size() > 1)
-    {
-      TS_ASSERT_EQUALS(names[1].first, "AlgTestSecond");
-      TS_ASSERT_EQUALS(names[1].second, "Cat3");
-    }
-
-  }
-
   void testClear()
   {
     AlgorithmManager::Instance().clear();

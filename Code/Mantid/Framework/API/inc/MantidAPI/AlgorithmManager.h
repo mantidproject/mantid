@@ -37,10 +37,7 @@ namespace API
 /** The AlgorithmManagerImpl class is responsible for controlling algorithm 
     instances. It incorporates the algorithm factory and initializes algorithms.
 
-    @author Dickon Champion, ISIS, RAL
-    @date 30/10/2007
-
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid. 
 
@@ -77,8 +74,6 @@ public:
   {
     return static_cast<int>(m_managed_algs.size());
   }
-  /// Returns the names and categories of all algorithms
-  const std::vector<std::pair<std::string, std::string> > getNamesAndCategories() const;
 
   /// Return the pointer to an algorithm with the given ID
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
@@ -97,14 +92,12 @@ public:
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
 
-  ///Class cannot be instantiated by normal means
   AlgorithmManagerImpl();
-  ///destructor
   ~AlgorithmManagerImpl();
-  ///Copy constructor
-  AlgorithmManagerImpl(const AlgorithmManagerImpl&);
 
-  /// Standard Assignment operator    
+  /// Unimplemented copy constructor
+  AlgorithmManagerImpl(const AlgorithmManagerImpl&);
+  /// Unimplemented assignment operator
   AlgorithmManagerImpl& operator =(const AlgorithmManagerImpl&);
 
   /// Reference to the logger class
