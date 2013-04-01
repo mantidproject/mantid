@@ -79,11 +79,7 @@ public:
   }
   /// Returns the names and categories of all algorithms
   const std::vector<std::pair<std::string, std::string> > getNamesAndCategories() const;
-  /// Returns a reference to the container of managed algorithms
-  const std::deque<IAlgorithm_sptr>& algorithms() const
-  {
-    return m_managed_algs;
-  }
+
   /// Return the pointer to an algorithm with the given ID
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
 
