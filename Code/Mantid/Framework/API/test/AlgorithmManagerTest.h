@@ -77,8 +77,8 @@ public:
   void init() { }
   void exec()
   {
-//    while (!this->m_cancel)
-//      Poco::Thread::sleep(10);
+    while (!this->m_cancel)
+      Poco::Thread::sleep(10);
   }
   virtual const std::string name() const {return "AlgRunsForever";}
   virtual int version() const {return(1);}
@@ -115,36 +115,30 @@ public:
     
   }
 
- void testVersionPass()
+  void testVersionPass()
   {
-	TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestPass>());
+    TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestPass>());
   }
 
   void testInstance()
   {
-    // Not really much to test
-    //AlgorithmManager *tester = AlgorithmManager::Instance();
-    //TS_ASSERT_EQUALS( manager, tester);
-
     TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
-    TS_ASSERT_THROWS(
-    AlgorithmManager::Instance().create("AlgTest",3)
-    , std::runtime_error );
+    TS_ASSERT_THROWS( AlgorithmManager::Instance().create("AlgTest",3), std::runtime_error );
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), std::runtime_error );
   }
 
   void testGetNamesAndCategories()
   {
-	  AlgorithmManager::Instance().clear();
-	  TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
-	  TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
+    AlgorithmManager::Instance().clear();
+    TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
+    TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
     std::vector<std::pair<std::string,std::string> > names = AlgorithmManager::Instance().getNamesAndCategories();
-	  TS_ASSERT_EQUALS(names.size(), 2);
+    TS_ASSERT_EQUALS(names.size(), 2);
     if (names.size() > 0)
-	  {
+    {
       TS_ASSERT_EQUALS(names[0].first, "AlgTest");
       TS_ASSERT_EQUALS(names[0].second, "Cat4");
-	  }
+    }
     if (names.size() > 1)
     {
       TS_ASSERT_EQUALS(names[1].first, "AlgTestSecond");
@@ -242,14 +236,13 @@ public:
       AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
 
-//    // The first one is at the front
-//    TS_ASSERT(AlgorithmManager::Instance().algorithms().front() == first);
-//
-//    // Add one more, drops the oldest one
-//    AlgorithmManager::Instance().create("AlgTest");
-//    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
-//    TSM_ASSERT("The first(oldest) algorithm is gone",
-//        AlgorithmManager::Instance().algorithms().front() != first);
+    // The first one is still in the list
+    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) == first);
+
+    // Add one more, drops the oldest one
+    AlgorithmManager::Instance().create("AlgTest");
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
+    TS_ASSERT( ! AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) );
   }
 
 
@@ -276,35 +269,35 @@ public:
       AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
 
-//    // The right ones are at the front
-//    TS_ASSERT( *(AlgorithmManager::Instance().algorithms().begin()+0) == first);
-//    TS_ASSERT( *(AlgorithmManager::Instance().algorithms().begin()+1) == second);
-//    TS_ASSERT( *(AlgorithmManager::Instance().algorithms().begin()+2) == third);
-//
-//    // Add one more, drops the SECOND oldest one
-//    AlgorithmManager::Instance().create("AlgTest");
-//    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-//
-//    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-//        *(AlgorithmManager::Instance().algorithms().begin()+0) == first);
-//    TSM_ASSERT("The second oldest was popped, replaced with the 3rd",
-//        *(AlgorithmManager::Instance().algorithms().begin()+1) == third);
-//
-//    // One more time
-//    AlgorithmManager::Instance().create("AlgTest");
-//    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-//
-//    // The right ones are at the front
-//    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-//        *(AlgorithmManager::Instance().algorithms().begin()+0) == first);
-//    TSM_ASSERT("The third algorithm (is still running) so it is still there",
-//        *(AlgorithmManager::Instance().algorithms().begin()+1) == third);
-//
-//    // Cancel the long-running ones
-//    first->cancel();
-//    third->cancel();
-//    res1.wait();
-//    res3.wait();
+    // The first three created are in the list
+    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) == first);
+    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(second->getAlgorithmID()) == second);
+    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(third->getAlgorithmID()) == third);
+
+    // Add one more, drops the SECOND oldest one
+    AlgorithmManager::Instance().create("AlgTest");
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
+
+    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
+        AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) == first);
+    TSM_ASSERT("The second oldest was popped, so trying to get it should return null",
+        !AlgorithmManager::Instance().getAlgorithm(second->getAlgorithmID()) );
+
+    // One more time
+    AlgorithmManager::Instance().create("AlgTest");
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
+
+    // The right ones are at the front
+    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
+        AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) == first);
+    TSM_ASSERT("The third algorithm (is still running) so it is still there",
+        AlgorithmManager::Instance().getAlgorithm(third->getAlgorithmID()) == third);
+
+    // Cancel the long-running ones
+    first->cancel();
+    third->cancel();
+    res1.wait();
+    res3.wait();
   }
 
   /**
