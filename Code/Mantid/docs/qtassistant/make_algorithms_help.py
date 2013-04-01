@@ -188,7 +188,7 @@ if __name__ == "__main__":
     addWikiDir(helpsrcdir)
 
     # initialize mantid
-    sys.path.append(options.mantidpath)
+    sys.path.insert(0, options.mantidpath)
     os.environ['MANTIDPATH'] = options.mantidpath
     import mantid.api
     algos = mantid.api.AlgorithmFactory.getRegisteredAlgorithms(True)
