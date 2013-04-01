@@ -233,6 +233,56 @@ void ColorSelectionWidget::enableControls(bool state)
   this->ui.presetButton->setEnabled(state);
 }
 
+/**
+ * This function returns the state of the automatic color scaling.
+ * Since a checkbox is used, the checked state is actually 2, so it needs
+ * to be decremented to cast to a boolean.
+ * @return the state of automatic color scaling
+ */
+bool ColorSelectionWidget::getAutoScaleState()
+{
+  int state = this->ui.autoColorScaleCheckBox->isChecked();
+  if (Qt::Checked == state)
+  {
+    state -= 1;
+  }
+  return static_cast<bool>(state);
+}
+
+/**
+ * This function returns the state of the logarithmic color scaling.
+ * Since a checkbox is used, the checked state is actually 2, so it needs
+ * to be decremented to cast to a boolean.
+ * @return the state of logarithmic color scaling
+ */
+bool ColorSelectionWidget::getLogScaleState()
+{
+  int state = this->ui.useLogScaleCheckBox->isChecked();
+  if (Qt::Checked == state)
+  {
+    state -= 1;
+  }
+  return static_cast<bool>(state);
+}
+
+/**
+ * This function returns the minimum range value for the color scaling.
+ * @return current minimum color scaling value
+ */
+double ColorSelectionWidget::getMinRange()
+{
+  return this->ui.minValLineEdit->text().toDouble();
+}
+
+/**
+ * This function returns the maximum range value for the color scaling.
+ * @return current maximum color scaling value
+ */
+double ColorSelectionWidget::getMaxRange()
+{
+  return this->ui.maxValLineEdit->text().toDouble();
+}
+
 } // SimpleGui
 } // Vates
 } // Mantid
