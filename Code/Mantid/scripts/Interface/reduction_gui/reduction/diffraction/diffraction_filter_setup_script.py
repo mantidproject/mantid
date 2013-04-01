@@ -218,7 +218,8 @@ class FilterSetupScript(BaseScriptElement):
         """ Get a float value from xml
         """
         floatstr = BaseScriptElement.getStringElement(instrument_dom, xmlname, default)
-        if floatstr != "" and floatstr is not None:
+        
+        if floatstr != "" and floatstr is not None and floatstr != "None":
             try: 
                 value = float(floatstr)
             except ValueError:
@@ -233,7 +234,7 @@ class FilterSetupScript(BaseScriptElement):
         """ Get a float value from xml
         """
         integerstr = BaseScriptElement.getStringElement(instrument_dom, xmlname, default)
-        if integerstr != "" and integerstr is not None:
+        if integerstr != "" and integerstr is not None and integerstr != "None":
             try: 
                 value = int(integerstr)
             except ValueError:
