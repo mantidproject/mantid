@@ -395,8 +395,10 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
 
     if ( std::abs(commonSum) < 1.0E-7 && std::abs(sum) < 1.0E-7 ) 
     {
-      if (std::abs(*WS->readX(0).begin() - *WS->readX(j).begin()) > 1.0E-7 ) return false;
-      if (std::abs(*WS->readX(0).end() - *WS->readX(j).end()) > 1.0E-7 ) return false;
+    	for (size_t i = 0; i < WS->blocksize(); i++)
+    	{
+    		if (std::abs(WS->readX(0)[i] - WS->readX(j)[i]) > 1.0E-7 ) return false;
+    	}
     }
     else if ( std::abs(commonSum-sum)/std::max<double>(commonSum,sum) > 1.0E-7 ) return false;
   }
@@ -421,8 +423,10 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
   const double secondWS = std::accumulate(ws2->readX(0).begin(),ws2->readX(0).end(),0.);
   if ( std::abs(firstWS) < 1.0E-7 && std::abs(secondWS) < 1.0E-7 ) 
   {
-    if (std::abs(*ws1->readX(0).begin() - *ws2->readX(0).begin()) > 1.0E-7 ) return false;
-    if (std::abs(*ws1->readX(0).end() - *ws2->readX(0).end()) > 1.0E-7 ) return false;
+  	for (size_t i = 0; i < ws1->readX(0).size(); i++)
+  	{
+  		if (std::abs(ws1->readX(0)[i] - ws2->readX(0)[i]) > 1.0E-7 ) return false;
+  	}
   }
   else if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
 
@@ -447,8 +451,10 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
     const double secondWS = std::accumulate(ws2->readX(i).begin(),ws2->readX(i).end(),0.);
     if ( std::abs(firstWS) < 1.0E-7 && std::abs(secondWS) < 1.0E-7 ) 
     {
-      if (std::abs(*ws1->readX(i).begin() - *ws2->readX(i).begin()) > 1.0E-7 )  return false;
-      if (std::abs(*ws1->readX(i).end() - *ws2->readX(i).end())  > 1.0E-7 ) return false;
+    	for (size_t j = 0; j < ws1->readX(i).size(); j++)
+    	{
+    		if (std::abs(ws1->readX(i)[j] - ws2->readX(i)[j]) > 1.0E-7 ) return false;
+    	}
     }
     else if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
   }
