@@ -81,7 +81,8 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vansmoothpar_edit.setEnabled(False)
         self._content.vanpeaktol_edit.setEnabled(False)
 
-        # self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
+        self._content.preserveevents_checkbox.setChecked(True)
+        self._content.filterbadpulses_chkbox.setChecked(True)
         
         # Connections from action/event to function to handle 
         self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),
