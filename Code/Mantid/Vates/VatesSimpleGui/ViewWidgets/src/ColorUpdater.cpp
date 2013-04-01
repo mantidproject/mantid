@@ -109,6 +109,38 @@ void ColorUpdater::updateState(ColorSelectionWidget *cs)
   this->maxScale = cs->getMaxRange();
 }
 
+/**
+ * @return  the current auto scaling state
+ */
+bool ColorUpdater::isAutoScale()
+{
+  return this->autoScaleState;
+}
+
+/**
+ * @return the current logarithmic scaling state
+ */
+bool ColorUpdater::isLogScale()
+{
+  return this->logScaleState;
+}
+
+/**
+ * @return the current maximum range for the color scaling
+ */
+double ColorUpdater::getMaximumRange()
+{
+  return this->maxScale;
+}
+
+/**
+ * @return the current minimum range for the color scaling
+ */
+double ColorUpdater::getMinimumRange()
+{
+  return this->minScale;
+}
+
 }
 }
 }

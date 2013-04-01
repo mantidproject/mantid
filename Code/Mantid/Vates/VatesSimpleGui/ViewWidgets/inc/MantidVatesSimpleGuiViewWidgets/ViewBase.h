@@ -134,6 +134,8 @@ public slots:
   void onResetCenterToData();
   /// Reset center of rotation to given point.
   void onResetCenterToPoint(double x, double y, double z);
+  /// Set color scaling for a view.
+  void setColorsForView();
   /// Setup the animation controls.
   void setTimeSteps(bool withUpdate = false);
   /// Provide updates to UI.

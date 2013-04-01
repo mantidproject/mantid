@@ -73,13 +73,20 @@ public:
    */
   void colorScaleChange(pqPipelineRepresentation *repr, double min,
                         double max);
+  /// Get the auto scaling state.
+  bool isAutoScale();
+  /// Get the logarithmic scaling state.
+  bool isLogScale();
+  /// Get the maximum color scaling range value.
+  double getMaximumRange();
+  /// Get the minimum color scaling range value.
+  double getMinimumRange();
   /**
    * Set logarithmic color scaling on the data.
    * @param repr the representation to set logarithmic color scale
    * @param state flag to determine whether or not to use log color scaling
    */
   void logScale(pqPipelineRepresentation *repr, int state);
-
   /// Update the internal state.
   void updateState(ColorSelectionWidget *cs);
 

@@ -147,6 +147,27 @@ void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
 }
 
 /**
+ * This function checks the current state from the color updater and
+ * processes the necessary color changes.
+ */
+void ViewBase::setColorsForView()
+{
+  if (this->colorUpdater.isAutoScale())
+  {
+    this->onAutoScale();
+  }
+  else
+  {
+    this->onColorScaleChange(this->colorUpdater.getMinimumRange(),
+                             this->colorUpdater.getMaximumRange());
+  }
+  if (this->colorUpdater.isLogScale())
+  {
+    this->onLogScale(true);
+  }
+}
+
+/**
  * This function is used to correct post-accept visibility issues. Most
  * views won't need to do anything.
  */
