@@ -81,7 +81,7 @@ public:
   void logScale(pqPipelineRepresentation *repr, int state);
 
   /// Update the internal state.
-  void updateState(ColorSelectionWidget &cs);
+  void updateState(ColorSelectionWidget *cs);
 
 private:
   bool autoScaleState; ///< Holder for the auto scaling state

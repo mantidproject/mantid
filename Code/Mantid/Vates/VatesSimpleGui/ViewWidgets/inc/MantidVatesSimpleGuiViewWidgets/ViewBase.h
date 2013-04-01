@@ -107,7 +107,7 @@ public:
   /// Setup axis scales
   virtual void setAxisScales();
   /// Set the current color scale state
-  virtual void setColorScaleState(ColorSelectionWidget &cs);
+  virtual void setColorScaleState(ColorSelectionWidget *cs);
   /// Create source for plugin mode.
   virtual void setPluginSource(QString pluginName, QString wsName);
   /// Determines if source has timesteps (4D).

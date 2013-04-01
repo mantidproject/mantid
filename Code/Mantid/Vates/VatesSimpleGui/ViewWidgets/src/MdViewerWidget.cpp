@@ -502,6 +502,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->disconnectDialogs();
   this->removeProxyTabWidgetConnections();
   this->hiddenView = this->setMainViewWidget(this->ui.viewWidget, v);
+  this->hiddenView->setColorScaleState(this->ui.colorSelectionWidget);
   this->hiddenView->hide();
   this->viewLayout->removeWidget(this->currentView);
   this->swapViews();

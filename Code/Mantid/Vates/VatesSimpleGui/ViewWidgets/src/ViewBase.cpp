@@ -141,7 +141,7 @@ void ViewBase::onLogScale(int state)
  * object.
  * @param cs : Reference to the color selection widget
  */
-void ViewBase::setColorScaleState(ColorSelectionWidget &cs)
+void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
 {
   this->colorUpdater.updateState(cs);
 }
