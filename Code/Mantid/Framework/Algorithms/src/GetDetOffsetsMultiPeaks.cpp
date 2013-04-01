@@ -5,13 +5,14 @@ This algorithm requires a workspace that is both in d-spacing, but has also been
 The algorithm iterates over each spectrum in the workspace and fits a [[Gaussian]] function to the reference peak.  The fit is used to calculate the centre of the fitted peak, and the offset is then calculated as:
 
 This is then written into a [[CalFile|.cal file]] for every detector that contributes to that spectrum.  All of the entries in the cal file are initially set to both be included, but also to all group into a single group on [[DiffractionFocussing]].  The [[CreateCalFileByNames]] algorithm can be used to alter the grouping in the cal file.
-*WIKI*/
-/*WIKI_USAGE*
+
+== Usage ==
 '''Python'''
 
- GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
+GetDetOffsetsMultiPeaks("InputW","OutputW",0.01,2.0,1.8,2.2,"output.cal")
 
-*WIKI_USAGE*/
+
+*WIKI*/
 #include "MantidAlgorithms/GetDetOffsetsMultiPeaks.h"
 #include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidAPI/FileProperty.h"
@@ -143,6 +144,8 @@ namespace Mantid
           "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
       declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace","",Direction::Output),
           "An output workspace containing the offsets.");
+      declareProperty(new WorkspaceProperty<OffsetsWorkspace>("NumberPeaksWorkspace","NumberPeaksFitted",Direction::Output),
+          "An output workspace containing the offsets.");
       declareProperty(new WorkspaceProperty<>("MaskWorkspace","Mask",Direction::Output),
           "An output workspace containing the mask.");
       declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
@@ -209,6 +212,8 @@ namespace Mantid
       int nspec=static_cast<int>(inputW->getNumberHistograms());
       // Create the output OffsetsWorkspace
       OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
+      // Create the output OffsetsWorkspace
+      OffsetsWorkspace_sptr outputNP(new OffsetsWorkspace(inputW->getInstrument()));
       // determine min/max d-spacing of the workspace
       double wkspDmin, wkspDmax;
       inputW->getXMinMax(wkspDmin, wkspDmax);
@@ -253,6 +258,8 @@ namespace Mantid
         PARALLEL_START_INTERUPT_REGION
         double offset = 0.0;
         double fitSum = 0.0;
+        double chisqSum = 0.0;
+        double peakPosFittedSize = 0.0;
         // checks for dead detectors
         if ((isEvent) && (eventW->getEventList(wi).empty()))
         {
@@ -293,9 +300,11 @@ namespace Mantid
           {
             params[i+3+nparams] = peakPosFitted[i];
           }
+          peakPosFittedSize = static_cast<double>(peakPosFitted.size());
           for (size_t i = 0; i < nparams; i++)
           {
             params[i+3+2*nparams] = chisq[i];
+            chisqSum += chisq[i];
           }
     
           const gsl_multimin_fminimizer_type *T =
@@ -378,6 +387,7 @@ namespace Mantid
           for (it = dets.begin(); it != dets.end(); ++it)
           {
             outputW->setValue(*it, offset, fitSum);
+            outputNP->setValue(*it, peakPosFittedSize, chisqSum);
             if (mask == 1.)
             {
               // Being masked
@@ -398,6 +408,7 @@ namespace Mantid
 
       // Return the output
       setProperty("OutputWorkspace",outputW);
+      setProperty("NumberPeaksWorkspace",outputNP);
       setProperty("MaskWorkspace",maskWS);
 
       // Also save to .cal file, if requested
