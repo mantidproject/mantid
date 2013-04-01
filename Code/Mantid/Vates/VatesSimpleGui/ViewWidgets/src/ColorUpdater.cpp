@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
@@ -10,6 +11,8 @@
 #include <QColor>
 #include <QList>
 
+#include <limits>
+
 namespace Mantid
 {
 namespace Vates
@@ -17,7 +20,11 @@ namespace Vates
 namespace SimpleGui
 {
 
-ColorUpdater::ColorUpdater()
+ColorUpdater::ColorUpdater() :
+  autoScaleState(true),
+  logScaleState(false),
+  minScale(std::numeric_limits<double>::min()),
+  maxScale(std::numeric_limits<double>::max())
 {
 }
 

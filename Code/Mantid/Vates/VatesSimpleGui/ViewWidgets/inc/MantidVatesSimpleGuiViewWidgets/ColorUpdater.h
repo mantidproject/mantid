@@ -14,6 +14,9 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+class ColorSelectionWidget;
+
 /**
  *
   This class handles the application of requests from the ColorSelectionWidget.
@@ -76,6 +79,15 @@ public:
    * @param state flag to determine whether or not to use log color scaling
    */
   void logScale(pqPipelineRepresentation *repr, int state);
+
+  /// Update the internal state.
+  void updateState(ColorSelectionWidget &cs);
+
+private:
+  bool autoScaleState; ///< Holder for the auto scaling state
+  bool logScaleState; ///< Holder for the log scaling state
+  double minScale; ///< Holder for the minimum color range state
+  double maxScale; ///< Holder for the maximum color range state
 };
 
 }
