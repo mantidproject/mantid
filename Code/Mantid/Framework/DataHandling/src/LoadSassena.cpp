@@ -326,7 +326,7 @@ void LoadSassena::init()
   // Declare the Filename algorithm property. Mandatory. Sets the path to the file to load.
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),"A Sassena file");
   // Declare the OutputWorkspace property
-  declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("OutputWorkspace","",Kernel::Direction::Output), "The name of the group workspace to be created.");
+  declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",Kernel::Direction::Output), "The name of the group workspace to be created.");
   declareProperty(new Kernel::PropertyWithValue<double>("TimeUnit", 1.0, Kernel::Direction::Input),"The Time unit in between data points, in picoseconds");
 }
 
@@ -335,7 +335,10 @@ void LoadSassena::init()
  */
 void LoadSassena::exec()
 {
-  API::WorkspaceGroup_sptr gws=getProperty("OutputWorkspace");
+  //auto gws=boost::dynamic_pointer_cast<API::WorkspaceGroup>(getProperty("OutputWorkspace"));
+  //API::WorkspaceGroup_sptr gws=getProperty("OutputWorkspace");
+  API::Workspace_sptr ows=getProperty("OutputWorkspace");
+  API::WorkspaceGroup_sptr gws=boost::dynamic_pointer_cast<API::WorkspaceGroup>(ows);
   if(gws)
   {
     gws->deepRemoveAll(); // remove workspace members
@@ -343,7 +346,7 @@ void LoadSassena::exec()
   else
   {
     gws = boost::make_shared<API::WorkspaceGroup>();
-    setProperty("OutputWorkspace", gws);
+    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<API::Workspace>(gws));
   }
   gws->observeADSNotifications( false ); // Prevent sending unnecessary notifications
 
