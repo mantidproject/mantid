@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -30,7 +32,6 @@ namespace Mantid
     */
     AlgorithmManagerImpl::~AlgorithmManagerImpl()
     {
-      //std::cerr << "Algorithm Manager destroyed." << std::endl;
     }
 
     /** Creates an instance of an algorithm, but does not own that instance
@@ -124,10 +125,15 @@ namespace Mantid
       return;
     }
 
+    std::size_t AlgorithmManagerImpl::size() const
+    {
+      return m_managed_algs.size();
+    }
+
     /**
      * Returns a shared pointer by algorithm id
      * @param id :: The ID of the algorithm
-     * @returns A shared pointer tot eh algorithm
+     * @returns A shared pointer to the algorithm
      */
     IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const
     {
