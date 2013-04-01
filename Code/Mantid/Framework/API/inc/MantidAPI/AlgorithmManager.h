@@ -89,7 +89,8 @@ public:
 
   void notifyAlgorithmStarting(AlgorithmID id);
 
-  std::vector<IAlgorithm_const_sptr> runningInstancesOf(const std::string algorithmName) const;
+  IAlgorithm_sptr newestInstanceOf(const std::string& algorithmName) const;
+  std::vector<IAlgorithm_const_sptr> runningInstancesOf(const std::string& algorithmName) const;
 
   void cancelAll();
 
