@@ -98,12 +98,15 @@ void ColorUpdater::logScale(pqPipelineRepresentation *repr, int state)
 
 /**
  * This function takes information from the color selection widget and
- * sets it into the interanl state variables.
+ * sets it into the internal state variables.
  * @param cs : Reference to the color selection widget
  */
 void ColorUpdater::updateState(ColorSelectionWidget &cs)
 {
-
+  this->autoScaleState = cs.getAutoScaleState();
+  this->logScaleState = cs.getLogScaleState();
+  this->minScale = cs.getMinRange();
+  this->maxScale = cs.getMaxRange();
 }
 
 }
