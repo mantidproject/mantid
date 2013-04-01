@@ -223,7 +223,6 @@ namespace MDEventsTestHelper
     box->refreshCache(NULL);
   }
 
-
   //-------------------------------------------------------------------------------------
   /** Recursively split an existing MDGridBox
    *

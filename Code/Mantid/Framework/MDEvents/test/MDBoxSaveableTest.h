@@ -30,9 +30,12 @@ class MDBoxSaveableTest : public CxxTest::TestSuite
 {
     BoxController_sptr sc;
 
+    bool  DODEBUG;
+    
     MDBoxSaveableTest()
     {
         sc = BoxController_sptr(new BoxController(3));
+        DODEBUG = false;
     }
 
 
@@ -51,33 +54,44 @@ static MDBoxSaveableTest *createSuite() { return new MDBoxSaveableTest(); }
 static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }    
 
 
-
-   //-----------------------------------------------------------------------------------------
-  /** test the methods related to the file back-end */
-  void test_fileBackEnd_related()
-  {
-    auto bc = BoxController_sptr(new BoxController(2));
-    // Box with 100 events
-    MDBox<MDLeanEvent<2>,2> b(bc.get());
-    MDEventsTestHelper::feedMDBox(&b, 1, 10, 0.5, 1.0);
-    
-    TS_ASSERT_EQUALS( b.getNPoints(), 100);
-    b.refreshCache();
-    TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
-    TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
-
-    // Because it wasn't set, the # of points on disk is 0, so NPoints = data.size() + 0
-    TS_ASSERT_EQUALS( b.getNPoints(), 100);
-    TS_ASSERT_THROWS_NOTHING(b.setFileBacked(1234,100,true))
-
-    // Now it returns the cached number of points + the number in the data
-    TS_ASSERT_EQUALS( b.getNPoints(), 200);
-    // Still returns the signal/error
-    TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
-    TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
-  }
-//
   //-----------------------------------------------------------------------------------------
+  /** Create a test .NXS file with some data for a MDBox<3>.
+   * 1000 events starting at position 500 of the file are made.
+   * Each event is spread evenly around a 10x10x10 region from 0.5 to 9.5 in each direction
+   * Then the file is open appropriately and returned.
+   *
+   * @param goofyWeights :: weights increasing from 0 to 999
+   * @param barefilename :: file to save to (no path)
+   * @param box :: MDBox3 that will get set to be file-backed
+   * @return ptr to the NeXus file object
+   * */
+  void do_createNeXusBackedBox(MDBox<MDLeanEvent<3>,3> & box,BoxController_sptr bc,
+      std::string barefilename = "MDBoxTest.nxs", bool goofyWeights = true)
+  {
+    // Create the NXS file
+    std::string filename = do_createNexus(goofyWeights, barefilename);
+
+  
+    // Must get ready to load in the data
+    auto loader  =new BoxControllerNxSIO(bc);
+    loader->setDataType(box.getCoordType(),box.getEventType());
+
+    // Make BoxController file based
+    bc->setFileBacked(loader,filename);
+    // Handle the disk DiskBuffer values
+    bc->getFileIO()->setWriteBufferSize(10000);
+
+
+    // Make the box know where it is in the file
+    box.setFileBacked(500,1000,true);
+    // This would be set on loading. Only makes sense with GoofyWeights == false
+    box.setSignal(1000.0);
+    box.setErrorSquared(1000.0);
+
+
+  }
+
+ //-----------------------------------------------------------------------------------------
   /** Create a test .NXS file with some data for a MDBox<3>
    * 1000 events starting at position 500 of the file are made.
    *
@@ -115,6 +129,36 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     delete Saver;
     return filename;
   }
+
+
+ //-----------------------------------------------------------------------------------------
+ //-----------------------------------------------------------------------------------------
+ //-----------------------------------------------------------------------------------------
+  /** test the methods related to the file back-end */
+  void test_fileBackEnd_related()
+  {
+    auto bc = BoxController_sptr(new BoxController(2));
+    // Box with 100 events
+    MDBox<MDLeanEvent<2>,2> b(bc.get());
+    MDEventsTestHelper::feedMDBox(&b, 1, 10, 0.5, 1.0);
+    
+    TS_ASSERT_EQUALS( b.getNPoints(), 100);
+    b.refreshCache();
+    TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
+
+    // Because it wasn't set, the # of points on disk is 0, so NPoints = data.size() + 0
+    TS_ASSERT_EQUALS( b.getNPoints(), 100);
+    TS_ASSERT_THROWS_NOTHING(b.setFileBacked(1234,100,true))
+
+    // Now it returns the cached number of points + the number in the data
+    TS_ASSERT_EQUALS( b.getNPoints(), 200);
+    // Still returns the signal/error
+    TS_ASSERT_DELTA( b.getSignal(), 100., 0.001);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 100., 0.001);
+  }
+//
+ 
   //-----------------------------------------------------------------------------------------
   /** Can we load it back? */
   void test_loadDirectNexus()
@@ -179,6 +223,54 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     
 
   }
+/** Test splitting of a MDBox into a MDGridBox when the
+   * original box is backed by a file. */
+  void test_fileBackEnd_construction()
+  {
+// Create a box with a controller for the back-end
+    BoxController_sptr bc(new BoxController(3));
+    bc->setSplitInto(5);
+
+
+    // Make a box from 0-10 in 3D
+    MDBox<MDLeanEvent<3>,3> * c = new MDBox<MDLeanEvent<3>,3>(bc.get(), 0);
+    for (size_t d=0; d<3; d++) c->setExtents(d, 0, 10);
+
+    TSM_ASSERT_EQUALS( "Box starts empty", c->getNPoints(), 0);
+
+    // Create test NXS file and make box file-backed
+    do_createNeXusBackedBox(*c,bc,"MDGridBoxTest.nxs");
+    // Handle the disk MRU values
+    bc->getFileIO()->setWriteBufferSize(10000);
+
+    DiskBuffer * dbuf = bc->getFileIO();
+
+    // Create and open the test NXS file
+    TSM_ASSERT_EQUALS( "1000 events (on file)", c->getNPoints(), 1000);
+
+    // At this point the MDBox is set to be on disk
+    TSM_ASSERT_EQUALS( "No free blocks to start with", dbuf->getFreeSpaceMap().size(), 0);
+
+    // Construct the grid box by splitting the MDBox
+    MDGridBox<MDLeanEvent<3>,3> * gb = new MDGridBox<MDLeanEvent<3>,3>(c);
+    TSM_ASSERT_EQUALS( "Grid box also has 1000 points", gb->getNPoints(), 1000);
+    TSM_ASSERT_EQUALS( "Grid box has 125 children (5x5x5)", gb->getNumChildren(), 125);
+    TSM_ASSERT_EQUALS( "The old spot in the file is now free", dbuf->getFreeSpaceMap().size(), 1);
+
+    // Get a child
+    MDBox<MDLeanEvent<3>,3> * b = dynamic_cast<MDBox<MDLeanEvent<3>,3> *>(gb->getChild(22));
+    TSM_ASSERT_EQUALS( "Child has 8 events", b->getNPoints(), 8);
+    TSM_ASSERT("The child is also saveabele",b->getISaveable()!=NULL);
+    if(!b->getISaveable())return;
+
+    TSM_ASSERT_EQUALS( "Child is NOT on disk", b->getISaveable()->wasSaved(), false);
+
+    bc->getFileIO()->closeFile();      
+    do_deleteNexusFile("MDGridBoxTest.nxs");
+  }
+
+
+
 //---------------------------------------------------------------------------------------------------------------
 // TESTS BELOW ARE NOT UNIT TESTS ANY MORE AS THE UNIT FUNCTIONALITY IS TESTED ELSEWHERE
 // THEY STILL LEFT HERE AS SIMPLIFIED SYSTEM TESTS 
@@ -340,45 +432,6 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     TSM_ASSERT("Data  flagged as unmodifiable ", !c.getISaveable()->isDataChanged());
     TSM_ASSERT_DELTA("This was on file",events7[234].getSignal(),0.,1.e-6);
     }
-
-  }
-
-
-
-  //-----------------------------------------------------------------------------------------
-  /** Create a test .NXS file with some data for a MDBox<3>.
-   * 1000 events starting at position 500 of the file are made.
-   * Each event is spread evenly around a 10x10x10 region from 0.5 to 9.5 in each direction
-   * Then the file is open appropriately and returned.
-   *
-   * @param goofyWeights :: weights increasing from 0 to 999
-   * @param barefilename :: file to save to (no path)
-   * @param box :: MDBox3 that will get set to be file-backed
-   * @return ptr to the NeXus file object
-   * */
-  void do_createNeXusBackedBox(MDBox<MDLeanEvent<3>,3> & box,BoxController_sptr bc,
-      std::string barefilename = "MDBoxTest.nxs", bool goofyWeights = true)
-  {
-    // Create the NXS file
-    std::string filename = do_createNexus(goofyWeights, barefilename);
-
-  
-    // Must get ready to load in the data
-    auto loader  =new BoxControllerNxSIO(bc);
-    loader->setDataType(box.getCoordType(),box.getEventType());
-
-    // Make BoxController file based
-    bc->setFileBacked(loader,filename);
-    // Handle the disk DiskBuffer values
-    bc->getFileIO()->setWriteBufferSize(10000);
-
-
-    // Make the box know where it is in the file
-    box.setFileBacked(500,1000,true);
-    // This would be set on loading. Only makes sense with GoofyWeights == false
-    box.setSignal(1000.0);
-    box.setErrorSquared(1000.0);
-
 
   }
 
@@ -670,137 +723,100 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     do_test_fileBackEnd_binningOperations(false);
   }
 
-  // TODO : does not work multithreaded and have not been ever worked. 
+  // TODO : does not work multithreaded and have never been workging. -- to fix 
   void xest_fileBackEnd_binningOperations_inParallel()
   {
     do_test_fileBackEnd_binningOperations(true);
   }
 
 
-  //-----------------------------------------------------------------------------------------
-  /** Test splitting of a MDBox into a MDGridBox when the
-   * original box is backed by a file. */
-  void test_fileBackEnd_construction()
+  //------------------------------------------------------------------------------------------------
+  /** This test splits a large number of events,
+   * for a workspace that is backed by a file (and thus tries to stay below
+   * a certain amount of memory used).
+   */
+  void test_splitAllIfNeeded_fileBacked()
   {
-// Create a box with a controller for the back-end
-    BoxController_sptr bc(new BoxController(3));
-    bc->setSplitInto(5);
+    typedef MDLeanEvent<2> MDE;
 
+   
+    // Create the grid box and make it file-backed.
+    MDBoxBase<MDE,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
+    // box controlled is owned by the workspace, so here we make shared pointer from the box pointer as it is owned by this function
+    BoxController_sptr spBc = boost::shared_ptr<BoxController >(b->getBoxController());
 
-    // Make a box from 0-10 in 3D
-    MDBox<MDLeanEvent<3>,3> * c = new MDBox<MDLeanEvent<3>,3>(bc.get(), 0);
-    for (size_t d=0; d<3; d++) c->setExtents(d, 0, 10);
+    API::IBoxControllerIO * fbc = new BoxControllerNxSIO(spBc);
+    spBc->setSplitThreshold(100);
+    spBc->setMaxDepth(4);
+    spBc->setFileBacked(fbc,"MDGridBoxTest.nxs");
 
-    TSM_ASSERT_EQUALS( "Box starts empty", c->getNPoints(), 0);
+    spBc->getFileIO()->setWriteBufferSize(1000);
 
-    // Create test NXS file and make box file-backed
-    do_createNeXusBackedBox(*c,bc,"MDGridBoxTest.nxs");
-    // Handle the disk MRU values
-    bc->getFileIO()->setWriteBufferSize(10000);
+    DiskBuffer * dbuf = fbc;
+    //dbuf->setFileLength(0);
 
-    DiskBuffer * dbuf = bc->getFileIO();
+    size_t num_repeat = 10;
+    if (DODEBUG) num_repeat = 20;
+    Timer tim;
+    if (DODEBUG) std::cout << "Adding " << num_repeat*10000 << " events...\n";
+    MDEventsTestHelper::feedMDBox<2>(b, num_repeat, 100, 0.05f, 0.1f);
+    if (DODEBUG) std::cout << "Adding events done in " << tim.elapsed() << "!\n";
 
-    // Create and open the test NXS file
-    TSM_ASSERT_EQUALS( "1000 events (on file)", c->getNPoints(), 1000);
+    // Split those boxes in parallel.
+    ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts);
+    b->splitAllIfNeeded(ts);
+    tp.joinAll();
 
-    // At this point the MDBox is set to be on disk
-    TSM_ASSERT_EQUALS( "No free blocks to start with", dbuf->getFreeSpaceMap().size(), 0);
+    if (DODEBUG) std::cout << "Splitting events done in " << tim.elapsed() << " sec.\n";
 
-    // Construct the grid box by splitting the MDBox
-    MDGridBox<MDLeanEvent<3>,3> * gb = new MDGridBox<MDLeanEvent<3>,3>(c);
-    TSM_ASSERT_EQUALS( "Grid box also has 1000 points", gb->getNPoints(), 1000);
-    TSM_ASSERT_EQUALS( "Grid box has 125 children (5x5x5)", gb->getNumChildren(), 125);
-    TSM_ASSERT_EQUALS( "The old spot in the file is now free", dbuf->getFreeSpaceMap().size(), 1);
+    // Get all the MDBoxes created
+    std::vector<API::IMDNode *> boxes;
+    b->getBoxes(boxes, 1000, true);
+    TS_ASSERT_EQUALS(boxes.size(), 10000);
+    size_t numOnDisk = 0;
+    uint64_t eventsOnDisk = 0;
+    uint64_t maxFilePos = 0;
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      API::IMDNode * box = boxes[i];
+      TS_ASSERT_EQUALS( box->getNPoints(), num_repeat );
+      auto  mdbox = dynamic_cast<MDBox<MDE,2> *>(box);
+      TS_ASSERT( mdbox);
 
-    // Get a child
-    MDBox<MDLeanEvent<3>,3> * b = dynamic_cast<MDBox<MDLeanEvent<3>,3> *>(gb->getChild(22));
-    TSM_ASSERT_EQUALS( "Child has 8 events", b->getNPoints(), 8);
-    TSM_ASSERT("The child is also saveabele",b->getISaveable()!=NULL);
-    if(!b->getISaveable())return;
+      auto pIO = mdbox->getISaveable();
+      TS_ASSERT(pIO!=NULL);
+      if(!pIO)continue;
 
-    TSM_ASSERT_EQUALS( "Child is NOT on disk", b->getISaveable()->wasSaved(), false);
+      if ( pIO->wasSaved() ) 
+      {
+           numOnDisk++;
+           eventsOnDisk += pIO->getFileSize();
+           // Track the last point used in the file
+           uint64_t fileEnd = pIO->getFilePosition() + pIO->getFileSize();
+           if (fileEnd > maxFilePos) maxFilePos = fileEnd;
+      //std::cout << mdbox->getFilePosition() << " file pos " << i << std::endl;
+      }
+    }
+    TSM_ASSERT_EQUALS("disk buffer correctly knows the last point  in the file used",dbuf->getFileLength(),maxFilePos);
+    dbuf->flushCache();
+    TSM_ASSERT_EQUALS("All new boxes were set to be cached to disk.", dbuf->getFileLength(), 10000*num_repeat);
+    TSM_ASSERT_EQUALS("Nothing left in memory.", dbuf->getWriteBufferUsed(), 0);
+    uint64_t minimumSaved = 10000*(num_repeat-2);
+    TSM_ASSERT_LESS_THAN("Length of the file makes sense", minimumSaved, dbuf->getFileLength());
+    TSM_ASSERT_LESS_THAN("Most of the boxes' events were cached to disk (some remain in memory because of the MRU cache)", minimumSaved, eventsOnDisk);
+    TSM_ASSERT_LESS_THAN("And the events were properly saved sequentially in the files.", minimumSaved, maxFilePos);
+    std::cout << dbuf->getMemoryStr() << std::endl;
+    
 
-    bc->getFileIO()->closeFile();      
-    do_deleteNexusFile("MDGridBoxTest.nxs");
+    const std::string filename = fbc->getFileName();
+    fbc->closeFile();
+    if (Poco::File(filename).exists()) Poco::File(filename).remove();
   }
-//
-//  //------------------------------------------------------------------------------------------------
-//  /** This test splits a large number of events,
-//   * for a workspace that is backed by a file (and thus tries to stay below
-//   * a certain amount of memory used).
-//   */
-//  void xest_splitAllIfNeeded_fileBacked()
-//  {
-//    typedef MDLeanEvent<2> MDE;
-//    typedef MDGridBox<MDE,2> gbox_t;
-//    typedef MDBox<MDE,2> box_t;
-//    typedef MDBoxBase<MDE,2> ibox_t;
-//
-//    // Make a fake file-backing for the grid box
-//    std::string filename = "MDGridBoxTest.nxs";
-//    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE);
-//    file->makeGroup("MDEventWorkspaceTest", "NXentry", 1);
-//    MDE::prepareNexusData(file, 2000);
-//    file->close();
-//    file = new ::NeXus::File(filename, NXACC_RDWR);
-//    file->openGroup("MDEventWorkspaceTest", "NXentry");
-//    API::BoxController::openEventNexusData(file);
-//
-//    // Create the grid box and make it file-backed.
-//    gbox_t * b = MDEventsTestHelper::makeMDGridBox<2>();
-//    BoxController_sptr bc = b->getBoxController();
-//    bc->setSplitThreshold(100);
-//    bc->setMaxDepth(4);
-//    bc->setCacheParameters(1, 1000);
-//    bc->setFile(file, filename, 0);
-//    DiskBuffer & dbuf = bc->getDiskBuffer();
-//    dbuf.setFileLength(0);
-//
-//    size_t num_repeat = 10;
-//    if (DODEBUG) num_repeat = 20;
-//    Timer tim;
-//    if (DODEBUG) std::cout << "Adding " << num_repeat*10000 << " events...\n";
-//    MDEventsTestHelper::feedMDBox<2>(b, num_repeat, 100, 0.05f, 0.1f);
-//    if (DODEBUG) std::cout << "Adding events done in " << tim.elapsed() << "!\n";
-//
-//    // Split those boxes in parallel.
-//    ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
-//    ThreadPool tp(ts);
-//    b->splitAllIfNeeded(ts);
-//    tp.joinAll();
-//
-//    if (DODEBUG) std::cout << "Splitting events done in " << tim.elapsed() << " sec.\n";
-//
-//    // Get all the MDBoxes created
-//    std::vector<ibox_t*> boxes;
-//    b->getBoxes(boxes, 1000, true);
-//    TS_ASSERT_EQUALS(boxes.size(), 10000);
-//    size_t numOnDisk = 0;
-//    uint64_t eventsOnDisk = 0;
-//    uint64_t maxFilePos = 0;
-//    for (size_t i=0; i<boxes.size(); i++)
-//    {
-//      ibox_t * box = boxes[i];
-//      TS_ASSERT_EQUALS( box->getNPoints(), num_repeat );
-//      box_t * mdbox = dynamic_cast<box_t *>(box);
-//      TS_ASSERT( mdbox);
-//      if ( mdbox->wasSaved() ) numOnDisk++;
-//      eventsOnDisk += mdbox->getFileSize();
-//      // Track the last point used in the file
-//      uint64_t fileEnd = mdbox->getFilePosition() + mdbox->getFileSize();
-//      if (fileEnd > maxFilePos) maxFilePos = fileEnd;
-//      //std::cout << mdbox->getFilePosition() << " file pos " << i << std::endl;
-//    }
-//    TSM_ASSERT_EQUALS("All new boxes were set to be cached to disk.", numOnDisk, 10000);
-//    uint64_t minimumSaved = 10000*(num_repeat-2);
-//    TSM_ASSERT_LESS_THAN("Length of the file makes sense", minimumSaved, dbuf.getFileLength());
-//    TSM_ASSERT_LESS_THAN("Most of the boxes' events were cached to disk (some remain in memory because of the MRU cache)", minimumSaved, eventsOnDisk);
-//    TSM_ASSERT_LESS_THAN("And the events were properly saved sequentially in the files.", minimumSaved, maxFilePos);
-//    std::cout << dbuf.getMemoryStr() << std::endl;
-//    file->close();
-//    if (Poco::File(filename).exists()) Poco::File(filename).remove();
-//  }
-//
+
+
+  //-----------------------------------------------------------------------------------------
+  
 
 // 
 // THIS MODE IS NOT SUPPORTED IN THIS FORM aNY MORE
