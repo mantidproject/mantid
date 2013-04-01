@@ -68,18 +68,14 @@ public:
 };
 
 
-/** Algorithm that runs until cancelled */
+/** Algorithm that always says it's running if asked */
 class AlgRunsForever : public Algorithm
 {
 public:
   AlgRunsForever() : Algorithm() {}
   virtual ~AlgRunsForever() {}
   void init() { }
-  void exec()
-  {
-    while (!this->m_cancel)
-      Poco::Thread::sleep(10);
-  }
+  void exec() { }
   virtual const std::string name() const {return "AlgRunsForever";}
   virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat1");}
@@ -112,7 +108,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestFail>());
     // Size should be the same
     TS_ASSERT_EQUALS(AlgorithmFactory::Instance().getKeys().size(), nalgs);
-    
   }
 
   void testVersionPass()
@@ -252,18 +247,13 @@ public:
     AlgorithmManager::Instance().clear();
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
 
-    // Start one algorithm that never stops
+    // Create one algorithm that appears never to stop
     IAlgorithm_sptr first = AlgorithmManager::Instance().create("AlgRunsForever");
-    Poco::ActiveResult<bool> res1 = first->executeAsync();
 
     IAlgorithm_sptr second = AlgorithmManager::Instance().create("AlgTest");
 
     // Another long-running algo
     IAlgorithm_sptr third = AlgorithmManager::Instance().create("AlgRunsForever");
-    Poco::ActiveResult<bool> res3 = third->executeAsync();
-
-    // give it some time to start
-    Poco::Thread::sleep(100);
 
     for (size_t i=3; i<5; i++)
       AlgorithmManager::Instance().create("AlgTest");
@@ -293,11 +283,6 @@ public:
     TSM_ASSERT("The third algorithm (is still running) so it is still there",
         AlgorithmManager::Instance().getAlgorithm(third->getAlgorithmID()) == third);
 
-    // Cancel the long-running ones
-    first->cancel();
-    third->cancel();
-    res1.wait();
-    res3.wait();
   }
 
   /**
