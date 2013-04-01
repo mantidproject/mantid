@@ -171,5 +171,22 @@ namespace Mantid
       notificationCenter.postNotification(new AlgorithmStartingNotification(alg));
     }
 
+    /// Returns all running (& managed) occurances of the named algorithm, oldest first
+    std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(const std::string algorithmName) const
+    {
+      std::vector<IAlgorithm_const_sptr> theRunningInstances;
+      Mutex::ScopedLock _lock(this->m_managedMutex);
+      for( auto alg = m_managed_algs.begin(); alg != m_managed_algs.end(); ++alg )
+      {
+        auto currentAlgorithm = *alg;
+        if ( currentAlgorithm->name() == algorithmName && currentAlgorithm->isRunning() )
+        {
+          theRunningInstances.push_back(currentAlgorithm);
+        }
+      }
+
+      return theRunningInstances;
+    }
+
   } // namespace API
 } // namespace Mantid

@@ -89,6 +89,8 @@ public:
 
   void notifyAlgorithmStarting(AlgorithmID id);
 
+  std::vector<IAlgorithm_const_sptr> runningInstancesOf(const std::string algorithmName) const;
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
 
