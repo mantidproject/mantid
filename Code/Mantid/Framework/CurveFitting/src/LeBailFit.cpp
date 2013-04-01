@@ -557,6 +557,8 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Calculate Le Bail function values with calculating peak intensities
+    * by calling m_lebailFunction directly
+    *
     * Arguments:
     * @param dataws :  workspace2D holding data
     * @param workspaceindex:  workspace index of the data in dataws
@@ -566,8 +568,8 @@ namespace CurveFitting
     * @param recalpeakintensity: option to calculate peak intensity or use them stored in parammap
    */
   bool LeBailFit::calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
-                                               FunctionDomain1DVector domain, FunctionValues& values,
-                                               map<string, Parameter > parammap, bool recalpeakintensity)
+                                              FunctionDomain1DVector domain, FunctionValues& values,
+                                              map<string, Parameter > parammap, bool recalpeakintensity)
   {
     // 1. Set parameters to each peak
     bool allpeaksvalid = true;
@@ -589,30 +591,13 @@ namespace CurveFitting
       }
     }
 
-    // 2. Calculate peak intensities
+    // 2. Calculate peak intensities. Otherwise, using input peaks' intensities
     if (recalpeakintensity)
     {
-      // a) Calcualte peak intensity
+      // Calcualte peak intensity
       bool zerobackground = false;
       vector<double> peaksvalues(dataws->readY(workspaceindex).size());
       calculatePeaksIntensities(dataws, workspaceindex, zerobackground, peaksvalues);
-
-      // b) Debug output
-      std::stringstream msg;
-      msg << "[DB1209 Pattern Calcuation]  Number of Peaks = " << m_dspPeaks.size() << "\n";
-      for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
-      {
-        CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr peak = m_dspPeaks[ipk].second;
-        int h, k, l;
-        peak->getMillerIndex(h, k, l);
-        msg << "(" << h << ", " << k << ", " << l << "), H = " << std::setw(7)
-            << std::setprecision(5) << peak->height();
-        if ((ipk+1) % 4 == 0)
-          msg << "\n";
-        else
-          msg << ";  ";
-      } // ENDFOR: Peak
-      g_log.information() << msg.str() << "\n";
     }
 
     // 3. Calcualte model pattern
@@ -2646,7 +2631,7 @@ namespace CurveFitting
           acceptchange = acceptOrDeny(currR, newR);
 
           // FIXME - [RPRWP] Using Rp for goodness now
-          if (newR.Rp < currR.Rp)
+          if (newR.Rwp < currR.Rwp)
             prevcyclebetterR = true;
           else
             prevcyclebetterR = false;
@@ -2666,12 +2651,14 @@ namespace CurveFitting
 
           // All tim ebest
           // FIXME - [RPRWP] Use Rp now
-          if (currR.Rp < m_bestRp)
+          if (currR.Rwp < m_bestRwp)
           {
             // Book keep the best
             bookKeepBestMCResult(parammap, background, currR, icycle);
           }
-          // FIXME - Make it more clean
+          // FIXME - After determining to use Rp or Rwp, this should be got into bookKeepBestMCResult
+          if (currR.Rp < m_bestRp)
+            m_bestRp = currR.Rp;
           if (currR.Rwp < m_bestRwp)
             m_bestRwp = currR.Rwp;
 
@@ -2708,7 +2695,7 @@ namespace CurveFitting
 
       // v. Improve the background
       // FIXME - [RPRWP] Use Rp now
-      if (currR.Rp < m_bestRp)
+      if (currR.Rwp < m_bestRwp)
       {
         // FIXME - Fit background is disabled at this moment
         // fitBackground(m_wsIndex, domainB, valuesB, background);
@@ -3029,6 +3016,9 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Calculate diffraction pattern in Le Bail algorithm for MC Random walk
+   *  (1) The calculation will be cased on vectors.
+   *  (2) m_lebailFunction will NOT be used;
+   *  (3) background will not be calculated.
    *
    * @param dataws  :  workspace of the data
    * @param wsindex :  workspace index of observed data with background removed.
@@ -3172,7 +3162,7 @@ namespace CurveFitting
       g_log.debug() << "[TestRandom] random = " << randomnumber << "\n";
 
       // FIXME - [RPRWP] Try using Rp this time.
-      double stepsize = m_dampingFactor * r.Rp * (param.curvalue * param.mcA1 + param.mcA0) * randomnumber;
+      double stepsize = m_dampingFactor * r.Rwp * (param.curvalue * param.mcA1 + param.mcA0) * randomnumber;
 
       // c) Direction of new value: drunk walk or random walk
       double newvalue;
@@ -3355,8 +3345,8 @@ namespace CurveFitting
     bool accept;
 
     // FIXME - [RPRWP] Using Rp for peak fitting
-    double new_goodness = newR.Rp;
-    double cur_goodness = currR.Rp;
+    double new_goodness = newR.Rwp;
+    double cur_goodness = currR.Rwp;
 
     if (new_goodness < cur_goodness)
     {
@@ -3387,7 +3377,9 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Book keep the (sopposed) best MC result
+  /** Book keep the (sopposed) best MC result including
+    * a) best MC step, Rp, Rwp
+    * b) parameter values of these
     * @param parammap:  map of Parameters to book keep with
     * @param bkgddata:  background data to book keep with
     * @param rfactor :: R-factor (Rwp and Rp)
@@ -3396,8 +3388,8 @@ namespace CurveFitting
   void LeBailFit::bookKeepBestMCResult(map<string, Parameter> parammap, vector<double>& bkgddata, Rfactor rfactor, size_t istep)
   {
     // TODO : [RPRWP] Here is a metric of goodness of it.
-    double goodness = rfactor.Rp;
-    bool better = goodness < m_bestRp;
+    double goodness = rfactor.Rwp;
+    bool better = goodness < m_bestRwp;
 
     if (better)
     {
