@@ -154,13 +154,13 @@ class RunSetupWidget(BaseWidget):
         self._content.binning_edit.setText(str(state.binning))
         state.binning = float(state.binning)
         if state.binning > 0.0:
-            print "[DBx304-1]: state.binning = %f, Set binning type to Linear" % (state.binning)
+            #print "[DBx304-1]: state.binning = %f, Set binning type to Linear" % (state.binning)
             self._content.bintype_combo.setCurrentIndex(0)
-            print "[DBx304-2]: Done... Set to self._content.bintype_combo.currentText()"
+            #print "[DBx304-2]: Done... Set to self._content.bintype_combo.currentText()"
         else:
-            print "[DBx304-1]: state.binning = %f, Set binning type to Logarithmic" % (state.binning)
+            #print "[DBx304-1]: state.binning = %f, Set binning type to Logarithmic" % (state.binning)
             self._content.bintype_combo.setCurrentIndex(1)
-            print "[DBx304-2]: Done... Set to self._content.bintype_combo.currentText()"
+            #print "[DBx304-2]: Done... Set to self._content.bintype_combo.currentText()"
 
         self._content.binind_checkbox.setChecked(state.binindspace)
         self._content.resamplex_edit.setText(str(state.resamplex))
