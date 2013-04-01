@@ -23,7 +23,8 @@ class FilterSetupWidget(BaseWidget):
         """
         super(FilterSetupWidget, self).__init__(parent, state, settings, data_type=data_type)
 
-        print "[FilterSetupWidget.Init]: settings is of type %s.  data type is of type %s.  DBx237. " % (type(settings), type(data_type))
+        #print "[FilterSetupWidget.Init]: settings is of type %s.  data type is of type %s.  
+        #       DBx237. " % (type(settings), type(data_type))
         
         class FilterSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_filter_setup.Ui_Frame): 
             """ Define class linked to UI Frame
@@ -148,12 +149,16 @@ class FilterSetupWidget(BaseWidget):
         #     self._content.numtimeinterval_edit.setText(str(state.numbertimeinterval))
         if state.lengthtimeinterval is not None and state.lengthtimeinterval != "": 
             self._content.timintervallength_edit.setText(str(state.lengthtimeinterval))
-        index = self._content.timeunit_combo.findText(str(state.unitoftime))
-        if index >= 0: 
-            self._content.timeunit_combo.setCurrentIndex(index)
+        if state.unitoftime != "":
+            index = self._content.timeunit_combo.findText(str(state.unitoftime))
+            if index >= 0: 
+                self._content.timeunit_combo.setCurrentIndex(index)
+            else:
+                self._content.timeunit_combo.setCurrentIndex(0)
+                print "Input value of unit of time '%s' is not allowed. " % (state.unitoftime)
         else:
+            # Default
             self._content.timeunit_combo.setCurrentIndex(0)
-            print "Input value of unit of time '%s' is not allowed. " % (state.unitoftime)
 
         # Chop by log value
         self._content.logvaluefilter_checkBox.setChecked(state.filterbylogvalue)
@@ -172,18 +177,28 @@ class FilterSetupWidget(BaseWidget):
             self._content.logintervalvalue_edit.setText("")
         if state.logvaluetolerance is not None: 
             self._content.logtol_edit.setText(str(state.logvaluetolerance))
-        index = self._content.valuechange_combo.findText(str(state.filterlogvaluebychangingdirection))
-        if index >= 0: 
-            self._content.valuechange_combo.setCurrentIndex(index)
+        if state.filterlogvaluebychangingdirection != "":
+            index = self._content.valuechange_combo.findText(str(state.filterlogvaluebychangingdirection))
+            if index >= 0: 
+                self._content.valuechange_combo.setCurrentIndex(index)
+            else:
+                self._content.valuechange_combo.setCurrentIndex(0)
+                print "Input value of filter log value by changing direction '%s' is not allowed." % (state.filterlogvaluebychangingdirection)
         else:
+            # Default
             self._content.valuechange_combo.setCurrentIndex(0)
-            print "Input value of filter log value by changing direction '%s' is not allowed." % (state.filterlogvaluebychangingdirection)
-        index = self._content.logbound_combo.findText(str(state.logboundary))
-        if index >= 0: 
-            self._content.logbound_combo.setCurrentIndex(index)
+
+        if state.logboundary != "":
+            index = self._content.logbound_combo.findText(str(state.logboundary))
+            if index >= 0: 
+                self._content.logbound_combo.setCurrentIndex(index)
+            else:
+                self._content.logbound_combo.setCurrentIndex(0)
+                print "Input value for log boundary '%s' is not allowed." % (state.logboundary)
         else:
+            # Default
             self._content.logbound_combo.setCurrentIndex(0)
-            print "Input value for log boundary '%s' is not allowed." % (state.logboundary)
+
         if state.timetolerance is not None: 
             self._content.timetol_edit.setText(str(state.timetolerance))
 
