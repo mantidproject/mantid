@@ -115,6 +115,7 @@ class AdvancedSetupWidget(BaseWidget):
 
         self._content.preserveevents_checkbox.setChecked(state.preserveevents)
         self._content.extension_combo.setCurrentIndex(self._content.extension_combo.findText(state.extension))
+        self._content.outputfileprefix_edit.setText(state.outputfileprefix)
 
         return
 
@@ -140,6 +141,8 @@ class AdvancedSetupWidget(BaseWidget):
 
         s.preserveevents = self._content.preserveevents_checkbox.isChecked()
         s.extension = str(self._content.extension_combo.currentText())
+
+        s.outputfileprefix = self._content.outputfileprefix_edit.text()
 
         return s
 

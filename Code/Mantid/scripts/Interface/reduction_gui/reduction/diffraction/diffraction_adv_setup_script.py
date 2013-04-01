@@ -45,6 +45,7 @@ class AdvancedSetupScript(BaseScriptElement):
     vanadiumsmoothparams = ""
     preserveevents = False
     extension = "_event.nxs"
+    outputfileprefix = ""
 
     def __init__(self, inst_name):
         """ Initialization
@@ -74,6 +75,7 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("PushDataPositive")
         self.parnamelist.append("Extension")
         self.parnamelist.append("PreserveEvents")
+        self.parnamelist.append("OutputFilePrefix")
 
         return
         
@@ -120,6 +122,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["VanadiumSmoothParams"] = self.vanadiumsmoothparams
         pardict["Extension"] = str(self.extension)
         pardict["PreserveEvents"] = str(int(self.preserveevents))
+        pardict["OutputFilePrefix"] = self.outputfileprefix
 
         return pardict
         
@@ -219,30 +222,20 @@ class AdvancedSetupScript(BaseScriptElement):
                     "preserveevents", default=str(int(AdvancedSetupScript.preserveevents)))
             self.preserveevents = bool(int(tempbool))
 
+            self.outputfileprefix = BaseScriptElement.getStringElement(instrument_dom,
+                    "outputfileprefix", default = AdvancedSetupScript.outputfileprefix)
+
             return
 
     def reset(self):
         """ 'Public' method to reset state
         """
-        # self.sample_file = RunSetupScript.sample_file
-        # self.output_wsname = RunSetupScript.output_wsname
-        # self.detcal_file = RunSetupScript.detcal_file
-        # self.relocate_dets = RunSetupScript.relocate_dets
-        # self.incident_energy_guess = RunSetupScript.incident_energy_guess
-        # self.use_ei_guess = RunSetupScript.use_ei_guess
-        # self.tzero_guess = RunSetupScript.tzero_guess
-        # self.monitor1_specid = RunSetupScript.monitor1_specid
-        # # self.monitor2_specid = RunSetupScript.monitor2_specid
-        # self.rebin_et = RunSetupScript.rebin_et
-        # self.et_range_low = RunSetupScript.et_range_low
-        # self.et_range_width = RunSetupScript.et_range_width
-        # self.et_range_high = RunSetupScript.et_range_high
-        # self.et_is_distribution = RunSetupScript.et_is_distribution
-        # self.hardmask_file = RunSetupScript.hardmask_file
-        # self.grouping_file = RunSetupScript.grouping_file
-        # self.show_workspaces = RunSetupScript.show_workspaces
-
+        self.stripvanadiumpeaks = AdvancedSetupScript.stripvanadiumpeaks
         self.extension =     AdvancedSetupScript.extension 
         self.reserveevents = AdvancedSetupScript.preserveevents
+
+        self.outputfileprefix = AdvancedSetupScript.outputfileprefix
+
+
         return
 
