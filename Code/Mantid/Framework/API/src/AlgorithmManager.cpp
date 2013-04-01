@@ -188,5 +188,15 @@ namespace Mantid
       return theRunningInstances;
     }
 
+    /// Requests cancellation of all running algorithms
+    void AlgorithmManagerImpl::cancelAll()
+    {
+      Mutex::ScopedLock _lock(this->m_managedMutex);
+      for ( auto it = m_managed_algs.begin(); it != m_managed_algs.end(); ++it )
+      {
+        if ( (*it)->isRunning() ) (*it)->cancel();
+      }
+    }
+
   } // namespace API
 } // namespace Mantid

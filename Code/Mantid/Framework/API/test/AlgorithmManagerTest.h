@@ -71,8 +71,10 @@ public:
 /** Algorithm that always says it's running if asked */
 class AlgRunsForever : public Algorithm
 {
+private:
+  bool isRunningFlag;
 public:
-  AlgRunsForever() : Algorithm() {}
+  AlgRunsForever() : Algorithm(), isRunningFlag(true) {}
   virtual ~AlgRunsForever() {}
   void init() { }
   void exec() { }
@@ -80,7 +82,8 @@ public:
   virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat1");}
   // Override method so we can manipulate whether it appears to be running
-  virtual bool isRunning() { return true; }
+  virtual bool isRunning() { return isRunningFlag; }
+  void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
 };
 
 
@@ -323,16 +326,36 @@ public:
     auto runningAlgorithms = AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever");
     TS_ASSERT_EQUALS( runningAlgorithms.size(), 1 );
     TS_ASSERT_EQUALS( runningAlgorithms.at(0)->name(), "AlgRunsForever" );
-    // Create another 'runs forever' algorithm and another 'normal' one
-    auto aRunningAlgorithm = AlgorithmManager::Instance().create("AlgRunsForever");
+    // Create another 'runs forever' algorithm (without proxy) and another 'normal' one
+    auto aRunningAlgorithm = AlgorithmManager::Instance().create("AlgRunsForever", 1, false);
     TS_ASSERT( AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty() )
     TS_ASSERT_EQUALS( AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever").size(), 2);
-    // TODO: Test the count drops back when the algorithm has finished running
+    // 'Stop' one of the running algorithms and check the count drops
+    dynamic_cast<AlgRunsForever*>(aRunningAlgorithm.get())->setIsRunningTo(false);
+    TS_ASSERT_EQUALS( AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever").size(), 1);
     TS_ASSERT( AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty() )
     TS_ASSERT_EQUALS( AlgorithmManager::Instance().size(), 3 );
   }
 
-int m_notificationValue;
+  void test_cancelAll()
+  {
+    AlgorithmManager::Instance().clear();
+    std::vector<Algorithm_sptr> algs(5);
+    for (size_t i=0; i<5; i++)
+    {
+      // Create without proxy so that I can cast it to an Algorithm and get at getCancel()
+      algs[i] = boost::dynamic_pointer_cast<Algorithm>(AlgorithmManager::Instance().create("AlgRunsForever",1,false));
+      TS_ASSERT( !algs[i]->getCancel() );
+    }
+
+    AlgorithmManager::Instance().cancelAll();
+    for (size_t i=0; i<5; i++)
+    {
+      TS_ASSERT( algs[i]->getCancel() );
+    }
+  }
+
+  int m_notificationValue;
 };
 
 #endif /* AlgorithmManagerTest_H_*/

@@ -91,6 +91,8 @@ public:
 
   std::vector<IAlgorithm_const_sptr> runningInstancesOf(const std::string algorithmName) const;
 
+  void cancelAll();
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
 
