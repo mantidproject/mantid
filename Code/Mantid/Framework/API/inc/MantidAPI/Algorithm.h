@@ -200,8 +200,7 @@ public:
 
   /** @name Asynchronous Execution */
   Poco::ActiveResult<bool> executeAsync();
-  /// True if the algorithm is running asynchronously.
-  bool isRunningAsync(){return m_runningAsync;}
+
   /// True if the algorithm is running.
   bool isRunning(){return m_running;}
 

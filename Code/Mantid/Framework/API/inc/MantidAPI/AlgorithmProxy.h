@@ -110,7 +110,6 @@ namespace Mantid
       //@}
 
       void cancel() const;
-      bool isRunningAsync();
       bool isRunning();
 
       void addObserver(const Poco::AbstractObserver& observer)const;

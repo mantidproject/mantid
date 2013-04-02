@@ -119,9 +119,6 @@ public:
   /// and if true terminates the algorithm.
   virtual void cancel()const = 0;
 
-  /// True if the algorithm is running asynchronously.
-  virtual bool isRunningAsync() = 0;
-
   /// True if the algorithm is running.
   virtual bool isRunning() = 0;
 
