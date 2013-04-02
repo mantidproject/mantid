@@ -113,13 +113,24 @@ void ScaleX::exec()
     for (int j=0; j <  static_cast<int>(inputW->readX(i).size()); ++j)
     {
       //Change bin value by offset
-      if ((i >= wi_min) && (i <= wi_max)) outputW->dataX(i)[j] = inputW->readX(i)[j] * factor;
+      if ((i >= wi_min) && (i <= wi_max))
+      {
+        if(op=="Multiply")
+        {
+          outputW->dataX(i)[j] = inputW->readX(i)[j] * factor;
+        }
+        else if(op=="Add")
+        {
+          outputW->dataX(i)[j] = inputW->readX(i)[j] + factor;
+        }
+      }
       else outputW->dataX(i)[j] = inputW->readX(i)[j];
     }
     //Copy y and e data
     outputW->dataY(i) = inputW->dataY(i);
     outputW->dataE(i) = inputW->dataE(i);
-    if( (i >= wi_min) && (i <= wi_max) && factor<0 )
+    // reverse the vector if multiplicative factor was negative
+    if( (i >= wi_min) && (i <= wi_max) && op=="Multiply" && factor<0 )
     {
       std::reverse( outputW->dataX(i).begin(), outputW->dataX(i).end() );
       std::reverse( outputW->dataY(i).begin(), outputW->dataY(i).end() );
@@ -161,6 +172,7 @@ void ScaleX::execEvent()
 {
   g_log.information("Processing event workspace");
   const MatrixWorkspace_const_sptr matrixInputWS = this->getProperty("InputWorkspace");
+  const std::string op = getPropertyValue("Operation");
   EventWorkspace_const_sptr inputWS=boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
   // generate the output workspace pointer
   API::MatrixWorkspace_sptr matrixOutputWS = this->getProperty("OutputWorkspace");
@@ -187,10 +199,17 @@ void ScaleX::execEvent()
     //Do the offsetting
     if ((i >= wi_min) && (i <= wi_max))
     {
-      outputWS->getEventList(i).scaleTof(factor);
-      if( factor < 0 )
+      if(op=="Multiply")
       {
-        outputWS->getEventList(i).reverse();
+        outputWS->getEventList(i).scaleTof(factor);
+        if( factor < 0 )
+        {
+          outputWS->getEventList(i).reverse();
+        }
+      }
+      else if(op=="Add")
+      {
+        outputWS->getEventList(i).addTof(factor);
       }
     }
     m_progress->report("Scaling X");
