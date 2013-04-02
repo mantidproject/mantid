@@ -91,8 +91,9 @@ void SmoothData::exec()
   // Loop over all the spectra in the workspace
   for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms()); ++i)
   {
-	if (groupWS)
-	{
+    PARALLEL_START_INTERUPT_REGION
+    if (groupWS)
+    {
 		const int group = validateSpectrumInGroup(static_cast<size_t>(i));
                 if (group < 0)npts = 3;
                 else npts = nptsGroup[group-1];
@@ -107,9 +108,8 @@ void SmoothData::exec()
 		    g_log.information("Adding 1 to number of smoothing points, since it must always be odd");
 		    ++npts;
 		}
-	}
+    }
 
-    PARALLEL_START_INTERUPT_REGION
     // Copy the X data over. Preserves data sharing if present in input workspace.
     outputWorkspace->setX(i,inputWorkspace->refX(i));
 
