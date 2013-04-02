@@ -152,6 +152,8 @@ void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
  */
 void ViewBase::setColorsForView()
 {
+  std::cout << "In ViewBase::setColorsForView" << std::endl;
+  this->colorUpdater.print();
   if (this->colorUpdater.isAutoScale())
   {
     this->onAutoScale();
@@ -165,6 +167,7 @@ void ViewBase::setColorsForView()
   {
     this->onLogScale(true);
   }
+  this->renderAll();
 }
 
 /**
@@ -173,6 +176,8 @@ void ViewBase::setColorsForView()
  */
 void ViewBase::correctVisibility()
 {
+  std::cout << "In ViewBase::correctVisibility" << std::endl;
+  this->setColorsForView();
 }
 
 /**

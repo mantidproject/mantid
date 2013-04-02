@@ -141,6 +141,14 @@ double ColorUpdater::getMinimumRange()
   return this->minScale;
 }
 
+void ColorUpdater::print()
+{
+  std::cout << "Auto Scale: " << this->autoScaleState << std::endl;
+  std::cout << "Log Scale: " << this->logScaleState << std::endl;
+  std::cout << "Min Range: " << this->minScale << std::endl;
+  std::cout << "Max Range: " << this->maxScale << std::endl;
+}
+
 }
 }
 }

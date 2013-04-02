@@ -100,7 +100,7 @@ void StandardView::render()
   this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
   this->resetDisplay();
-  this->onAutoScale();
+  //this->setColorsForView();
   emit this->triggerAccept();
 }
 
@@ -144,6 +144,7 @@ void StandardView::onScaleButtonClicked()
 
 void StandardView::renderAll()
 {
+  std::cout << "In StandardView::renderAll" << std::endl;
   this->view->render();
 }
 
