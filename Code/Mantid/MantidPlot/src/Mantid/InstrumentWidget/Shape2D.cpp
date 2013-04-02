@@ -151,18 +151,6 @@ bool Shape2D::isMasked(const QPointF& p)const
     return m_fill_color != QColor() && contains(p);
 }
 
-///**
-//  * Set new color.
-//  *
-//  * @param color :: The new color to set.
-//  */
-//void Shape2D::setColor(const QColor &color)
-//{
-//  m_color.setRed(color.red());
-//  m_color.setGreen(color.green());
-//  m_color.setBlue(color.blue());
-//}
-
 // --- Shape2DEllipse --- //
 
 Shape2DEllipse::Shape2DEllipse(const QPointF& center,double radius1,double radius2)
