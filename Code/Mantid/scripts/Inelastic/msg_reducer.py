@@ -59,9 +59,6 @@ class MSGReducer(reducer.Reducer):
         if ( self._sum ):
             self._data_files = loadData.get_ws_list()
         
-        '''if (self._load_logs):
-            self._data_files = loadData.set_load_logs(True)
-        '''
         self._setup_steps()
     
     def create_info_table(self):
