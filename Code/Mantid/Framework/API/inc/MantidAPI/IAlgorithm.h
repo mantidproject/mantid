@@ -120,7 +120,7 @@ public:
   virtual void cancel()const = 0;
 
   /// True if the algorithm is running.
-  virtual bool isRunning() = 0;
+  virtual bool isRunning() const = 0;
 
   /// To query whether algorithm is a child. Default to false
   virtual bool isChild() const = 0;

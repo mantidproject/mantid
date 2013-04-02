@@ -190,6 +190,8 @@ public:
   virtual std::map<std::string, std::string> validateInputs();
   virtual bool isInitialized() const;
   virtual bool isExecuted() const;
+  bool isRunning() const;
+
   using Kernel::PropertyManagerOwner::getProperty;
 
   bool isChild() const;
@@ -200,9 +202,6 @@ public:
 
   /** @name Asynchronous Execution */
   Poco::ActiveResult<bool> executeAsync();
-
-  /// True if the algorithm is running.
-  bool isRunning(){return m_running;}
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver& observer)const;
@@ -380,7 +379,8 @@ private:
   size_t m_groupSize;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
-
+  /// A non-recursive mutex for thread-safety
+  mutable Kernel::Mutex m_mutex;
 };
 
 ///Typedef for a shared pointer to an Algorithm

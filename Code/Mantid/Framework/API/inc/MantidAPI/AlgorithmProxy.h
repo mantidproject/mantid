@@ -110,7 +110,7 @@ namespace Mantid
       //@}
 
       void cancel() const;
-      bool isRunning();
+      bool isRunning() const;
 
       void addObserver(const Poco::AbstractObserver& observer)const;
       void removeObserver(const Poco::AbstractObserver& observer)const;

@@ -125,7 +125,7 @@ namespace Mantid
     }
 
     /// True if the algorithm is running.
-    bool AlgorithmProxy::isRunning()
+    bool AlgorithmProxy::isRunning() const
     {
       return m_alg ? m_alg->isRunning() : false;
     }
