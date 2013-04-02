@@ -335,7 +335,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._diffractionfocus:
             DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                 GroupingWorkspace=str(wksp)+"group")
-        if not "histo" in self.getProperty("Extension") and len(self._smoothGroups) == 0:
+        if not "histo" in self.getProperty("Extension"):
             SortEvents(InputWorkspace=wksp, SortBy="X Value")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning)
         return wksp
@@ -423,7 +423,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 samRun = self._cccalibrate(samRun, calib, filterLogs)
             else:
                 samRun = self._multicalibrate(samRun, calib, filterLogs)
-            if self._xpixelbin*self._ypixelbin>1:
+            if self._xpixelbin*self._ypixelbin>1 or len(self._smoothGroups) > 0:
                	mtd.deleteWorkspace(str(samRun))
             	if str(self._instrument) == "SNAP":
 			alg = RenameWorkspace(origRun,"%s_%d" % (self._instrument, samNum))
