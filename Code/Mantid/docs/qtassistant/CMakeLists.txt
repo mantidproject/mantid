@@ -19,13 +19,13 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
         )
 
    add_custom_command( OUTPUT ${HELP_IMG_DIR}/Mantid_Logo_Transparent.png
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/img/Mantid_Logo_Transparent.png
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_SOURCE_DIR}/Images/Mantid_Logo_Transparent.png
                                ${HELP_IMG_DIR}/Mantid_Logo_Transparent.png
-                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/img/Mantid_Logo_Transparent.png )
+                       DEPENDS ${CMAKE_SOURCE_DIR}/Images/Mantid_Logo_Transparent.png )
    add_custom_command( OUTPUT ${HELP_IMG_DIR}/MantidPlot_Icon_32offset.png
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/img/MantidPlot_Icon_32offset.png
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_SOURCE_DIR}/Images/MantidPlot_Icon_32offset.png
                                ${HELP_IMG_DIR}/MantidPlot_Icon_32offset.png
-                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/img/MantidPlot_Icon_32offset.png )
+                       DEPENDS ${CMAKE_SOURCE_DIR}/Images/MantidPlot_Icon_32offset.png )
    add_custom_command( OUTPUT ${HELP_OUT_DIR}/mantidgeneral.qhp
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/mantidgeneral.qhp
                                ${HELP_OUT_DIR}/mantidgeneral.qhp )
