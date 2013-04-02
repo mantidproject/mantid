@@ -44,6 +44,7 @@ protected slots:
   void wheelZoom(int x, int y, int d);
   void initRotation(int x, int y);
   void rotate(int x, int y);
+  void finishMove();
 
 protected:
   virtual void init() {}

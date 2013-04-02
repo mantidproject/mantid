@@ -81,7 +81,6 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
 
 ProjectionSurface::~ProjectionSurface()
 {
-  //std::cerr<<"ProjectionSurface deleted\n";
   if (m_viewImage)
   {
     delete m_viewImage;
@@ -120,6 +119,7 @@ void ProjectionSurface::clear()
     m_pickImage = NULL;
   }
   m_viewChanged = true;
+  m_redrawPicking = true;
   m_viewRect = RectF();
   m_selectRect = QRect();
 }
@@ -317,7 +317,11 @@ void ProjectionSurface::leaveEvent(QEvent *e)
 void ProjectionSurface::updateView(bool picking)
 {
   m_viewChanged = true;
-  m_redrawPicking = picking;
+  if (picking)
+  {
+    // don't change to false if it's already true
+    m_redrawPicking = true;
+  }
 }
 
 void ProjectionSurface::updateDetectors()

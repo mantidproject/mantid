@@ -64,6 +64,7 @@ Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int win
   connect(moveController,SIGNAL(initZoom(int,int)),this,SLOT(initZoom(int,int)));
   connect(moveController,SIGNAL(zoom(int,int)),this,SLOT(zoom(int,int)));
   connect(moveController,SIGNAL(wheelZoom(int,int,int)),this,SLOT(wheelZoom(int,int,int)));
+  connect(moveController,SIGNAL(finish()),this,SLOT(finishMove()));
 }
 
 Projection3D::~Projection3D()
@@ -437,6 +438,14 @@ void Projection3D::rotate(int x, int y)
     m_viewport.generateRotationTo( x, y );
     m_viewport.initRotationFrom( x, y );
     updateView();
+}
+
+/**
+  * Call upon finishing all moves to update the pick image.
+  */
+void Projection3D::finishMove()
+{
+    updateView(true);
 }
 
 /**
