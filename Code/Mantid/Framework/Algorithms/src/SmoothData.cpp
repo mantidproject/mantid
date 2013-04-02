@@ -59,7 +59,6 @@ void SmoothData::exec()
   inputWorkspace = getProperty("InputWorkspace");
 
   std::vector<int> nptsGroup = getProperty("NPoints");
-  int npts =nptsGroup[0];
   Mantid::DataObjects::GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
   if (groupWS)
   {
@@ -67,21 +66,9 @@ void SmoothData::exec()
 	  int64_t nGroups;
 	  groupWS->makeDetectorIDToGroupVector(udet2group, nGroups);
   }
-  // Number of smoothing points must always be an odd number, so add 1 if it isn't.
-  if (!(npts%2))
-  {
-    g_log.information("Adding 1 to number of smoothing points, since it must always be odd");
-    ++npts;
-  }
 
   // Check that the number of points in the smoothing isn't larger than the spectrum length
   const int vecSize = static_cast<int>(inputWorkspace->blocksize());
-  if ( npts >= vecSize )
-  {
-    g_log.error("The number of averaging points requested is larger than the spectrum length");
-    throw std::out_of_range("The number of averaging points requested is larger than the spectrum length");
-  }
-  int halfWidth = (npts-1)/2;
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
@@ -92,23 +79,25 @@ void SmoothData::exec()
   for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms()); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
+    int npts =nptsGroup[0];
     if (groupWS)
     {
 		const int group = validateSpectrumInGroup(static_cast<size_t>(i));
                 if (group < 0)npts = 3;
                 else npts = nptsGroup[group-1];
-		if ( npts >= vecSize )
-		{
+    }
+    if ( npts >= vecSize )
+    {
 		    g_log.error("The number of averaging points requested is larger than the spectrum length");
 		    throw std::out_of_range("The number of averaging points requested is larger than the spectrum length");
-		}
-		halfWidth = (npts-1)/2;
-		if (!(npts%2))
-		{
+    }
+    // Number of smoothing points must always be an odd number, so add 1 if it isn't.
+    if (!(npts%2))
+    {
 		    g_log.information("Adding 1 to number of smoothing points, since it must always be odd");
 		    ++npts;
-		}
     }
+    int halfWidth = (npts-1)/2;
 
     // Copy the X data over. Preserves data sharing if present in input workspace.
     outputWorkspace->setX(i,inputWorkspace->refX(i));
