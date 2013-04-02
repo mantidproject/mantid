@@ -63,13 +63,13 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
                               -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
 		      )
 
-   add_custom_command(OUTPUT  ${HELP_QCH_DIR}/mantid.qhc ${HELP_QCH_DIR}/algorithms.qch ${HELP_QCH_DIR}/fitfunctions.qch ${HELP_QCH_DIR}/mantidgeneral.qch
+   add_custom_command(OUTPUT  ${HELP_OUT_DIR}/mantid.qhc ${HELP_QCH_DIR}/algorithms.qch ${HELP_QCH_DIR}/fitfunctions.qch ${HELP_QCH_DIR}/mantidgeneral.qch
                       DEPENDS ${HELP_ALGO_OUT} ${HELP_FIT_OUT} ${HELP_QHCP_SOURCE}
 		      COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} ${HELP_OUT_DIR}/mantid.qhcp
 		      )
               
    add_custom_target ( qtassistant ALL
-                       DEPENDS MantidPlot ${HELP_QCH_DIR}/mantid.qhc
+                       DEPENDS Framework ${HELP_OUT_DIR}/mantid.qhc
                        )
 
    # Copy to correct location in bin
