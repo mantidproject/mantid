@@ -143,7 +143,7 @@ namespace Mantid
     }
 
     ///Cancel the execution of the algorithm
-    void AlgorithmProxy::cancel()const
+    void AlgorithmProxy::cancel()
     {
       if (m_alg)
         m_alg->cancel();

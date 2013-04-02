@@ -1354,7 +1354,7 @@ namespace Mantid
     /**
      * Cancel an algorithm
      */
-    void Algorithm::cancel() const
+    void Algorithm::cancel()
     {
       Poco::FastMutex::ScopedLock _lock(m_mutex);
       //set myself to be cancelled

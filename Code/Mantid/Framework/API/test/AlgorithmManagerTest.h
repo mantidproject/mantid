@@ -82,7 +82,7 @@ public:
   virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat1");}
   // Override method so we can manipulate whether it appears to be running
-  virtual bool isRunning() { return isRunningFlag; }
+  virtual bool isRunning() const { return isRunningFlag; }
   void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
 };
 

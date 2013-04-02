@@ -210,7 +210,7 @@ public:
   void removeObserver(const Poco::AbstractObserver& observer)const;
 
   /// Raises the cancel flag.
-  virtual void cancel() const;
+  virtual void cancel();
   /// Returns the cancellation state
   bool getCancel() const { return m_cancel; }
 
@@ -296,7 +296,7 @@ protected:
   bool isWorkspaceProperty(const Kernel::Property* const prop) const;
 
   /// Set to true to stop execution
-  mutable bool m_cancel;
+  bool m_cancel;
   /// Set if an exception is thrown, and not caught, within a parallel region
   bool m_parallelException;
   /// Reference to the logger class
@@ -320,9 +320,6 @@ protected:
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
 
 private:
-  /// VectorWorkspaces
-  
-
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
   /// Private assignment operator: NO ASSIGNMENT ALLOWED

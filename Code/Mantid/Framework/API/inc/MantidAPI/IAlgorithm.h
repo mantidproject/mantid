@@ -117,7 +117,7 @@ public:
 
   /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
   /// and if true terminates the algorithm.
-  virtual void cancel()const = 0;
+  virtual void cancel() = 0;
 
   /// True if the algorithm is running.
   virtual bool isRunning() const = 0;

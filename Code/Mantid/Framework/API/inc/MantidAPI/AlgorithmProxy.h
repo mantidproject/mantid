@@ -109,7 +109,7 @@ namespace Mantid
       void afterPropertySet(const std::string&);
       //@}
 
-      void cancel() const;
+      void cancel();
       bool isRunning() const;
 
       void addObserver(const Poco::AbstractObserver& observer)const;
