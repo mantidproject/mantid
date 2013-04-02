@@ -127,10 +127,10 @@ void SmoothData::exec()
     // Use total to help hold our moving average
     double total = 0.0, totalE = 0.0;
     // First push the values ahead of the current point onto total
-    for (int i = 0; i < halfWidth; ++i)
+    for (int k = 0; k < halfWidth; ++k)
     {
-      if ( Y[i] == Y[i] ) total += Y[i]; // Exclude if NaN
-      totalE += E[i]*E[i];
+      if ( Y[k] == Y[k] ) total += Y[k]; // Exclude if NaN
+      totalE += E[k]*E[k];
     }
     // Now calculate the smoothed values for the 'end' points, where the number contributing
     // to the smoothing will be less than NPoints

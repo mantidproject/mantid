@@ -335,7 +335,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._diffractionfocus:
             DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                 GroupingWorkspace=str(wksp)+"group")
-        if not "histo" in self.getProperty("Extension"):
+        if not "histo" in self.getProperty("Extension") and len(self._smoothGroups) > 0:
             SortEvents(InputWorkspace=wksp, SortBy="X Value")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning)
         return wksp
