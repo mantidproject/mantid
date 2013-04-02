@@ -1739,7 +1739,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   }
   catch(...)
   {
-    m_appWindow->writeToLogWindow("Error when getting/downloading data file from isis server ", true);
+    m_appWindow->writeToLogWindow("Error when getting/downloading data file from server ", true);
     return;
   }
   try
@@ -1770,7 +1770,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   }
   catch(...)
   {
-    m_appWindow->writeToLogWindow("Error when getting/downloading data file from isis server", true);
+    m_appWindow->writeToLogWindow("Error when getting/downloading data file from server", true);
     return;
   }
   try
@@ -1879,9 +1879,7 @@ void MantidUI::logMessage(const Poco::Message& msg)
 {
   if (!appWindow()->results) return;
   QString str = msg.getText().c_str();
-  //if (s_logEdit->document()->blockCount() > 1000) s_logEdit->document()->clear();
-  //Ticket #671
-  //to display the logwindow if there is ann error or higher log message
+
   if (msg.getPriority() <= Poco::Message::PRIO_ERROR)
   {
     appWindow()->logWindow->show();
