@@ -142,7 +142,24 @@ namespace API
 
     return xmlstream.str().c_str();
   }
-
+  /** the function left for compartibility with the previous bc python interface. 
+   @return  -- the file name of the file used for backup if file backup mode is enabled or emtpy sting if the workspace is not file backed   */
+   std::string BoxController::getFilename()const
+   {
+       if(m_fileIO)
+           return m_fileIO->getFileName();
+       else
+           return "";
+   }
+   /** the function left for compartibility with the previous bc python interface. 
+   @return true if the workspace is file based and false otherwise */ 
+   bool BoxController::useWriteBuffer()const
+   {
+       if(m_fileIO)
+           return true;
+       else
+           return false;
+   }
 
   //------------------------------------------------------------------------------------------------------
   /** Static method that sets the data inside this BoxController from an XML string

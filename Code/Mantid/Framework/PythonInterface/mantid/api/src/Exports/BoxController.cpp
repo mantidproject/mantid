@@ -22,8 +22,7 @@ void export_BoxController()
     .def("getTotalNumMDGridBoxes", &BoxController::getTotalNumMDGridBoxes, "Return the total number of MDGridBox'es, irrespective of depth")
     .def("getAverageDepth", &BoxController::getAverageDepth, "Return the average recursion depth of gridding.")
     .def("isFileBacked", &BoxController::isFileBacked, "Return True if the MDEventWorkspace is backed by a file ")
-    .def("getFilename", &BoxController::getFilename, return_value_policy< copy_const_reference >(),
-         "Return  the full path to the file open as the file-based back end.")
+    .def("getFilename", &BoxController::getFilename, "Return  the full path to the file open as the file-based back or empty string if no file back-end is initiated")
     .def("useWriteBuffer", &BoxController::useWriteBuffer, "Return true if the MRU should be used")
   ;
 }

@@ -5,7 +5,6 @@ namespace Mantid
 {
 namespace MDEvents
 {
-   //using Mantid::Kernel::DiskBuffer;
 
    MDBoxSaveable::MDBoxSaveable(API::IMDNode *const Host):
        m_MDNode(Host)
@@ -19,8 +18,8 @@ namespace MDEvents
    }
 
  //-----------------------------------------------------------------------------------------------
- /** Physical save the whole data. Tries to load any previous data from HDD 
-  *  Called from the DiskBuffer.
+ /** Physically save the box data. Tries to load any previous data from HDD 
+  *  Private function called from the DiskBuffer.
   */
   void MDBoxSaveable::save()const 
   {
@@ -37,7 +36,9 @@ namespace MDEvents
 
   }
  
-/** Loads the data from HDD if these data were not loaded before. */
+/** Loads the data from HDD if these data has not been loaded before. 
+  * private function called from the DiskBuffer
+ */
  void MDBoxSaveable::load()
  {
       API::IBoxControllerIO *fileIO = m_MDNode->getBoxController()->getFileIO(); 
@@ -52,39 +53,7 @@ namespace MDEvents
   }
 
 // old save parts
-//  //      std::cout << "MDBox ID " << this->getId() << " being saved." << std::endl;
-//
-//
-//   // this aslo indirectly checks if the object knows its place (may be wrong place but no checks for that here)
-//   if (this->wasSaved())
-//   {
-//     //TODO: redesighn const_cast
-//    
-//      MDBox<MDE,nd> *loader = const_cast<MDBox<MDE,nd> *>(this);
-//      loader->load();  
-//   
-//
-//      // This is the new size of the event list, possibly appended (if used AddEvent) or changed otherwise (non-const access)
-//      if (data.size() > 0)
-//      {
-//
-//         // Save at the ISaveable specified place
-//          this->saveNexus(this->m_BoxController->getFile());
-//      }
-//   } 
-//   else
-//     if(data.size()>0)  throw std::runtime_error(" Attempt to save undefined event");
-//   
-//   
- 
 
-//
-//    //---------------------------------------------------------------------------------------------
-//    /** Do any final clean up of NXS event data blocks
-//     *
-//     * @param file :: open NXS file.
-//     */  
-//
 //
 //    //---------------------------------------------------------------------------------------------
 //    /** Put a slab of MDEvent data into the nexus file.
@@ -161,52 +130,6 @@ namespace MDEvents
 //
 //    }
 //
-//    //---------------------------------------------------------------------------------------------
-//    /** Static method to save a vector of MDEvents of this type to a nexus file
-//     * open to the right group.
-//     * This method plops the events as a slab at a particular point in an already created array.
-//     * The data block MUST be already open.
-//     *
-//     * This will be re-implemented by any other MDLeanEvent-like type.
-//     *
-//     * @param events :: reference to the vector of events to save.
-//     * @param file :: open NXS file.
-//     * @param startIndex :: index in the array to start saving to
-//     * @param[out] totalSignal :: returns the integrated signal of all events
-//     * @param[out] totalErrorSquared :: returns the integrated squared error of all events
-//     * */
-//    static void saveVectorToNexusSlab(const std::vector<MDLeanEvent<nd> > & events, ::NeXus::File * file, const uint64_t startIndex,
-//        signal_t & totalSignal, signal_t & totalErrorSquared)
-//    {
-//      size_t numEvents = events.size();
-//      size_t numColumns = nd+2;
-//      coord_t * data = new coord_t[numEvents*numColumns];
-//
-//      totalSignal = 0;
-//      totalErrorSquared = 0;
-//
-//      size_t index = 0;
-//      typename std::vector<MDLeanEvent<nd> >::const_iterator it = events.begin();
-//      typename std::vector<MDLeanEvent<nd> >::const_iterator it_end = events.end();
-//      for (; it != it_end; ++it)
-//      {
-//        const MDLeanEvent<nd> & event = *it;
-//        float signal = event.signal;
-//        float errorSquared = event.errorSquared;
-//        data[index++] = static_cast<coord_t>(signal);
-//        data[index++] = static_cast<coord_t>(errorSquared);
-//        for(size_t d=0; d<nd; d++)
-//          data[index++] = event.center[d];
-//        // Track the total signal
-//        totalSignal += signal_t(signal);
-//        totalErrorSquared += signal_t(errorSquared);
-//      }
-//
-//      putDataInNexus(file, data, startIndex, numEvents, numColumns);
-//
-//    }
-//
-//    //---------------------------------------------------------------------------------------------
 //    /** Get a slab of MDEvent data out of the nexus file.
 //     * This is reused by both MDEvent and MDLeanEvent
 //     *
@@ -267,46 +190,6 @@ namespace MDEvents
 //      file->getSlab(data, start, size);
 //#endif
 //      return data;
-//    }
-//
-//    //---------------------------------------------------------------------------------------------
-//    /** Static method to load part of a HDF block into a vector of MDEvents.
-//     * The data block MUST be already open, using e.g. openNexusData()
-//     *
-//     * This will be re-implemented by any other MDLeanEvent-like type.
-//     *
-//     * @param events :: reference to the vector of events to load. This is NOT cleared by the method before loading.
-//     * @param file :: open NXS file.
-//     * @param indexStart :: index (in events) in the data field to start at
-//     * @param numEvents :: number of events to load.
-//     * */
-//    static void loadVectorFromNexusSlab(std::vector<MDLeanEvent<nd> > & events, ::NeXus::File * file,
-//        uint64_t indexStart, uint64_t numEvents)
-//    {
-//      if (numEvents == 0)
-//        return;
-//
-//      // Number of columns = number of dimensions + 2 (signal/error)
-//      size_t numColumns = nd+2;
-//      // Load the data
-//      coord_t * data = getDataFromNexus(file, indexStart, numEvents, numColumns);
-//
-//      // Reserve the amount of space needed. Significant speed up (~30% thanks to this)
-//      events.reserve( events.size() + numEvents);
-//      for (size_t i=0; i<numEvents; i++)
-//      {
-//        // Index into the data array
-//        size_t ii = i*numColumns;
-//
-//        // Point directly into the data block for the centers.
-//        coord_t * centers = data + ii+2;
-//
-//        // Create the event with signal, error squared, and the centers
-//        events.push_back( MDLeanEvent<nd>(float(data[ii]), float(data[ii + 1]), centers) );
-//      }
-//
-//      // Release the memory (all has been COPIED into MDLeanEvent's)
-//      delete [] data;
 //    }
 
     ////-----------------------------------------------------------------------------------
@@ -388,74 +271,6 @@ namespace MDEvents
 //
 //  }
 //
-//  //---------------------------------------------------------------------------------------------
-//    /** Open the NXS data blocks for loading.
-//     * The data should have been created before.
-//     *
-//     * @param file :: open NXS file.
-//     * @return the number of events currently in the data field.
-//     */
-//    uint64_t BoxController::openEventNexusData(::NeXus::File * file)
-//    {
-//      // Open the data
-//      file->openData("event_data");
-//      // Return the size of dimension 0 = the number of events in the field
-//      return uint64_t(file->getInfo().dims[0]);
-//    }
-//    void BoxController::closeNexusData(::NeXus::File * file)
-//    {
-//      file->closeData();
-//    }
 
-
-///**TODO: this should not be here, refactor out*/ 
-//  void MDBoxFlatTree::initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool setFileBacked,const std::string &EventType)
-//  {
-//    bool update=true;
-//// Start the event Data group, TODO: should be better way of checking existing group
-//    try
-//    {
-//      hFile->openGroup("event_data", "NXdata");
-//    }
-//    catch(...)
-//    {
-//      update=false;
-//      hFile->makeGroup("event_data", "NXdata",true);
-//    }
-//    hFile->putAttr("version", "1.0");
-//
-//
-//    // Prepare the data chunk storage.
-//    size_t chunkSize = bc->getDataChunk();
-//    size_t nDim = bc->getNDims();
-//    uint64_t NumOldEvents(0);
-//    if (update)
-//       NumOldEvents= API::BoxController::openEventNexusData(hFile);
-//    else
-//    {
-//      std::string descr;
-//      size_t nColumns;
-//      if(EventType=="MDEvent")
-//      {
-//        nColumns = nDim+4;
-//        descr="signal, errorSquared, runIndex, detectorId, center (each dim.)";
-//      }
-//      else if(EventType=="MDLeanEvent")
-//      {
-//        nColumns = nDim+2;
-//        descr="signal, errorsquared, center (each dim.)";
-//      }
-//      else
-//        throw std::runtime_error("unknown event type encontered");
-//
-//      API::BoxController::prepareEventNexusData(hFile, chunkSize,nColumns,descr);
-//   }
-//      // Initialize the file-backing
-//    if (setFileBacked)         // Set it back to the new file handle
-//       bc->setFile(hFile, m_FileName, NumOldEvents);
-//
-//
-//  }
-//
 }
 }

@@ -125,6 +125,7 @@ public:
   virtual void getBoxes(std::vector<API::IMDNode *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
 
   virtual void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {}
+  virtual void clearDataFromMemory(){};
 
   virtual bool getIsMasked() const
   {

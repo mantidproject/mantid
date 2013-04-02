@@ -6,7 +6,7 @@
 namespace MantidTestHelpers
 {
    /**Constructor 
-    @param nDim -- number of dimensions within the data to write
+    @param bc shared pointer to the box controller which will use this IO operations
    */ 
    BoxControllerDummyIO::BoxControllerDummyIO(Mantid::API::BoxController_sptr bc) :
        m_bc(bc),
@@ -42,7 +42,7 @@ namespace MantidTestHelpers
       }
       else if (m_TypeName == "MDLeanEvent")
       {
-m_EventSize = static_cast<unsigned int>(m_bc->getNDims()+2);
+          m_EventSize = static_cast<unsigned int>(m_bc->getNDims()+2);
       }
       else
       {   throw std::invalid_argument("unsupported event type");}
@@ -67,8 +67,6 @@ m_EventSize = static_cast<unsigned int>(m_bc->getNDims()+2);
            if file name has word exist, the file is opened as existing with 100 floats equal 2.
            othewise if assumed to be new and size 0
    *@more  opening mode (read or read/write)
-   *
-   *
   */ 
   bool BoxControllerDummyIO::openFile(const std::string &fileName,const std::string &mode)
   {
@@ -107,7 +105,10 @@ m_EventSize = static_cast<unsigned int>(m_bc->getNDims()+2);
 
       return true;
   }
-
+ /**Save block of data into properly opened and initiated direct access data file
+  @param DataBlock     -- the vector with the data to write
+  @param blockPosision -- the position of the data block within the data file itself
+ */ 
  void BoxControllerDummyIO::saveBlock(const std::vector<float> & DataBlock, const uint64_t blockPosition)const 
  {
      size_t nEvents = DataBlock.size()/m_EventSize;
@@ -129,7 +130,14 @@ m_EventSize = static_cast<unsigned int>(m_bc->getNDims()+2);
 
 
  }
+ /**Load a block of data from properly prepared direct access data file
+  @param DataBlock     -- the vector for data to place into. If the size of the block is smaller then the requested size, the vector will be realocated.
+                          The data are placed at the beginnign of the block. 
+  @param blockPosision -- the position of the data block within the data file 
+  @param nPoints       -- number of data points to read from the file. The datapoint size is defined when opened file or by calling the setDataType directrly
 
+  *Thros if attempted to read data outside of the file. 
+ */ 
  void BoxControllerDummyIO::loadBlock(std::vector<float> & Block, const uint64_t blockPosition,const size_t nPoints)const
  {
      m_fileMutex.lock();

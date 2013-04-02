@@ -153,7 +153,8 @@ namespace MDEvents
 
     /// Set the special coordinate system.
     void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem);
-
+    /// make the workspace file backed if it has not been already file backed;
+    void setFileBacked(const std::string &fileName);
   protected:
 
     /** MDBox containing all of the events in the workspace. */

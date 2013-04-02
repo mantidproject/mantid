@@ -6,7 +6,7 @@ namespace Mantid
 {
   namespace MDEvents
   {
-    /**function converts particular list of events of type T into MD workspace space and adds these events to the workspace itself  */
+    /**function converts particular list of events of type T into MD workspace and adds these events to the workspace itself  */
     template <class T>
     size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex)
     {

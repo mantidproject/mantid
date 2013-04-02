@@ -44,6 +44,7 @@ namespace MDEvents
     data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
   }
 
+
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor
    */
@@ -78,7 +79,14 @@ namespace MDEvents
   {
     delete data;
   }
-
+  /**Make workspace file backed if it has not been already file backed 
+   * @param fileName -- short or full file name of the file, which should be used as the file back end
+  */
+  TMDE(
+  void MDEventWorkspace)::setFileBacked(const std::string &fileName)
+  {
+      throw Kernel::Exception::NotImplementedError(" Not yet implemented");
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Perform initialization after m_dimensions (and others) have been set.

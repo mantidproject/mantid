@@ -124,7 +124,10 @@ namespace Mantid
     }
 
   }
-
+  /*** this function tries to set file positions of the boxes to 
+       make data physiclly located close to each otger to be as close as possible on the HDD 
+       @param setFileBacked  -- initiate the boxes to be fileBacked.
+  */
   void MDBoxFlatTree::setBoxesFilePositions(bool setFileBacked)
   {
     // this will preserve file-backed workspace and information in it as we are not loading old box data and not?
@@ -146,7 +149,7 @@ namespace Mantid
       // m_BoxEventIndex[ID*2]   = 0; should we do this for the boxes without events?
 
       if(setFileBacked)
-          mdBox->setFileBacked(eventsStart,nEvents,true);
+          mdBox->setFileBacked(eventsStart,nEvents,false);
     }
   }
 
@@ -184,19 +187,26 @@ namespace Mantid
     size_t maxBoxes = this->getNBoxes();
     if(maxBoxes==0)return;
 
-    bool update=true;
+    std::map<std::string, std::string> groupEntries;
+    hFile->getEntries(groupEntries);
+ 
+
+    bool update(false);
+    if(groupEntries.find("box_structure")!=groupEntries.end()) //dimesnions dataset exist
+          update = true;
+
     // Start the box data group
-    try
+    if(update)
     {
-      hFile->openGroup("box_structure", "NXdata");
-    }catch(...)
-    {
-      update = false;
       hFile->makeGroup("box_structure", "NXdata",true);
+      hFile->putAttr("version", "1.0");
+     // Add box controller info to this group
+      hFile->putAttr("box_controller_xml", m_bcXMLDescr);
+
     }
-    hFile->putAttr("version", "1.0");
-    // Add box controller info to this group
-    hFile->putAttr("box_controller_xml", m_bcXMLDescr);
+    else
+      hFile->openGroup("box_structure", "NXdata");
+
 
     std::vector<int64_t> exents_dims(2,0);
     exents_dims[0] = (int64_t(maxBoxes));
@@ -419,9 +429,8 @@ namespace Mantid
 
 
 
-  // TODO: Get rid of this --> create  the box generator and move it into MDBoxFactory!
-
-
+  // TODO: Get rid of this --> create  the box generator and move all below into MDBoxFactory!
+  
   template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<1>, 1>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
   template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<2>, 2>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
   template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<3>, 3>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);

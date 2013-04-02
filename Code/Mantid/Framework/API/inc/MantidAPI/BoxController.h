@@ -369,6 +369,11 @@ namespace API
     {return m_numEventsAtMax;}
     /// get range of id-s and increment box ID by this range;
     size_t claimIDRange(size_t range);
+
+    /// the function left for compartibility with the previous bc python interface. 
+    std::string getFilename()const;
+    /// the compartibility function -- the write buffer is always used for file based workspaces
+    bool useWriteBuffer()const;
   private:
     /// When you split a MDBox, it becomes this many sub-boxes
     void calcNumSplit()
@@ -447,9 +452,7 @@ namespace API
     /// Instance of the disk-caching MRU list.
    // mutable Mantid::Kernel::DiskBuffer m_diskBuffer;
 
-    /// Do we use the DiskBuffer at all? Always use WB
-    // bool m_useWriteBuffer;
-
+ 
     /// Number of bytes in a single MDLeanEvent<> of the workspace.
     //size_t m_bytesPerEvent;
   public:
