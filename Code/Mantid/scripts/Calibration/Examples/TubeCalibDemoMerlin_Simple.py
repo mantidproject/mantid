@@ -1,7 +1,8 @@
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MERLIN 
 #
-# This is a simple example for running calibration for and calibration run of MERLIN. Execute all.
+# This is a simple example for running calibration for and calibration run of MERLIN. 
+# It uses the CalibrateMerlin Function
 #
 # Here we run the calibration of MERLIN or selected part of MERLIN
 # (excluding short tubes of door 3) 
@@ -10,6 +11,7 @@
 # The workspace with calibrated instrument is saved to a Nexus file
 #
 from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
+from mantid.kernel import config  # To set default instrument to MERLIN
 from tube_calib_fit_params import * # To handle fit parameters
 from ideal_tube import * # For ideal tube
 from tube_calib import *  # For tube calibration functions
@@ -17,25 +19,26 @@ from tube_spec import * # For tube specification class
 
 def CalibrateMerlin( RunNumber ):
    '''
-   RunNumber is the run number as a string and including any leading zeros that would occur in the raw file name.
+   RunNumber is the run number of the calibration.
    '''
 
    # == Set parameters for calibration ==
-
-   filename = 'MER'+str(RunNumber) # Name of calibration run. 
+   previousDefaultInstrument = config['default.instrument']
+   config['default.instrument']="MERLIN"
+   filename = str(RunNumber) # Name of calibration run. 
    rangeLower = 3000 # Integrate counts in each spectra from rangeLower to rangeUpper 
    rangeUpper = 20000 #
 
    # Set parameters for ideal tube. 
    Left = 2.0 # Where the left end of tube should be in pixels (target for AP)
    Centre = 512.5 # Where the centre of the tube should be in pixels (target for CP)
-   Right = 1023.0 # Where the right of the tube should be in pxels (target for BP)
+   Right = 1023.0 # Where the right of the tube should be in pixels (target for BP)
    ActiveLength = 2.9 # Active length of tube in Metres
 
    # Set initial parameters for peak finding
-   ExpectedHeight = 1000.0 # Expected Height of Peaks (initial value of fit parameter)
-   ExpectedWidth = 32.0 # Expected width of centre peak (initial value of fit parameter)
-   ExpectedPositions = [35.0, 512.0, 989.0] # Expected positions of the edges and peak (initial values of fit parameters)
+   ExpectedHeight = 1000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
+   ExpectedWidth = 32.0 # Expected width of centre peak in Pixels (initial value of fit parameter)
+   ExpectedPositions = [35.0, 512.0, 989.0] # Expected positions of the edges and peak in pixels (initial values of fit parameters)
 
    # Set what we want to calibrate (e.g whole intrument or one door )
    CalibratedComponent = 'MERLIN'  # Calibrate whole instrument 
@@ -79,6 +82,9 @@ def CalibrateMerlin( RunNumber ):
    # == Save workspace ==
    SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Simple.py")
    print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
+   
+   # == Reset dafault instrument ==
+   config['default.instrument'] = previousDefaultInstrument
    
    # ==== End of CalibrateMerlin() ====
 

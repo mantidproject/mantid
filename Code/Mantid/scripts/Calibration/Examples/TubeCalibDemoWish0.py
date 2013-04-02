@@ -33,7 +33,7 @@ iTube = IdealTube()
 iTube.setArray([-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ])
 
 # Set fitting parameters
-eP = [65.0, 113.0, 161.0, 209.0, 257.0, 305.0, 353.0, 401.0, 449.0]
+eP = [57.5, 107.0, 156.5, 206.0, 255.5, 305.0, 354.5, 404.0, 453.5]
 ExpectedHeight = 2000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
 ExpectedWidth = 32.0 # Expected width of Gaussian peaks in pixels  (initial value of fit parameter)
 

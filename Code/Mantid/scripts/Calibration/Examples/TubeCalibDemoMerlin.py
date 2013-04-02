@@ -23,7 +23,7 @@ rangeUpper = 20000 #
 # Set parameters for ideal tube. 
 Left = 2.0 # Where the left end of tube should be in pixels (target for AP)
 Centre = 512.5 # Where the centre of the tube should be in pixels (target for CP)
-Right = 1023.0 # Where the right of the tube should be in pxels (target for BP)
+Right = 1023.0 # Where the right of the tube should be in pixels (target for BP)
 ActiveLength = 2.9 # Active length of tube in Metres
 
 # Set initial parameters for peak finding
