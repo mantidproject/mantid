@@ -18,7 +18,7 @@ class TubeSpec:
 	self.ws = ws
         self.inst = ws.getInstrument()
         self.numTubes = 0
-        self.tubeSpecString = ""
+        self.specComponentArray = []
         self.component = 0
         self.minNumDetsInTube = 200 
         self.tubes = []
@@ -40,7 +40,7 @@ class TubeSpec:
         If the specification is not unique, the first found will be used and there will
         be no error message. So if in doubt don't skip a step.
         """	
-        self.specString = tubeSpecString
+        self.specComponentArray.append(tubeSpecString) 
         self.delimiter = '/' # delimiter between parts of string in tree
         self.numTubes = -1  # Negative value forces tubes to be searched and counted
                
@@ -108,9 +108,9 @@ class TubeSpec:
             return self.component
         
         # We look for the component    
-        print "Looking for", self.specString, 
+        print "Looking for", self.specComponentArray[0], 
         
-        comp = self.inst.getComponentByName(self.specString)
+        comp = self.inst.getComponentByName(self.specComponentArray[0])
 
 	if( comp ):
 	     self.component = comp
@@ -156,7 +156,7 @@ class TubeSpec:
             #print "First dectector ", firstDet," Last detector ", firstDet+numDet-1, "Number of detectors ", numDet
             #print "First dectector ", firstDet," Last detector ", comp[numDet-1].getID()
         else:
-            print self.specString, tubeIx, "not found"
+            print self.specComponentArray[0], tubeIx, "not found"
             return 0, 0, 1
                         
         return firstDet, numDet, step
@@ -184,7 +184,7 @@ class TubeSpec:
 	    numDet = comp.nelements()
             return comp[0].getDistance( comp[numDet-1] )
         else:
-            print self.specString, tubeIx, "not found"
+            print self.specComponentArray[0], tubeIx, "not found"
             return 0.0
             
     def getTubeName ( self, tubeIx ):
@@ -210,7 +210,7 @@ class TubeSpec:
 	if(comp != 0):
 	    return comp.getFullName()
         else:
-            print self.specString, tubeIx, "not found"
+            print self.specComponentArray[0], tubeIx, "not found"
             return "Unknown"
 
                         
