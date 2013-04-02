@@ -43,9 +43,9 @@ class MDBoxSaveableTest : public CxxTest::TestSuite
   /** Deletes the file created by do_saveNexus */
   static std::string do_deleteNexusFile(std::string barefilename = "MDBoxTest.nxs")
   {
-    std::string filename = (ConfigService::Instance().getString("defaultsave.directory") + barefilename);
-    if (Poco::File(filename.c_str()).exists())  
-        Poco::File(filename.c_str()).remove();
+    std::string filename(ConfigService::Instance().getString("defaultsave.directory") + barefilename);
+    if (Poco::File(filename).exists())  
+        Poco::File(filename()).remove();
     return filename;
   }
 
@@ -753,10 +753,10 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     spBc->getFileIO()->setWriteBufferSize(1000);
 
     DiskBuffer * dbuf = fbc;
-    //dbuf->setFileLength(0);
+
 
     size_t num_repeat = 10;
-    if (DODEBUG) num_repeat = 20;
+    if (DODEBUG) num_repeat = 40;
     Timer tim;
     if (DODEBUG) std::cout << "Adding " << num_repeat*10000 << " events...\n";
     MDEventsTestHelper::feedMDBox<2>(b, num_repeat, 100, 0.05f, 0.1f);
@@ -799,6 +799,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
       }
     }
     TSM_ASSERT_EQUALS("disk buffer correctly knows the last point  in the file used",dbuf->getFileLength(),maxFilePos);
+    TSM_ASSERT_EQUALS("disk buffer correctly knows the number of events",10000*num_repeat,eventsOnDisk+dbuf->getWriteBufferUsed());
     dbuf->flushCache();
     TSM_ASSERT_EQUALS("All new boxes were set to be cached to disk.", dbuf->getFileLength(), 10000*num_repeat);
     TSM_ASSERT_EQUALS("Nothing left in memory.", dbuf->getWriteBufferUsed(), 0);
