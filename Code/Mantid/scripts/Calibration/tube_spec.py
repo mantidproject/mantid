@@ -23,7 +23,7 @@ class TubeSpec:
         self.minNumDetsInTube = 200 
         self.tubes = []
         
-    def setTubeSpecByString(self, tubeSpecString, DiscontinousIndicesInTube=False):
+    def setTubeSpecByString(self, tubeSpecString ):
         """     
         Sets tube specification by string. The string specifies a component of the intrument
         as in the instrument tree of its IDF file. This component may contain one or more tubes
@@ -43,7 +43,6 @@ class TubeSpec:
         self.specString = tubeSpecString
         self.delimiter = '/' # delimiter between parts of string in tree
         self.numTubes = -1  # Negative value forces tubes to be searched and counted
-        self.continuousIndicesInTube = not DiscontinousIndicesInTube
                
     def getInstrumentName (self):
         return self.inst.getName()
@@ -241,28 +240,18 @@ class TubeSpec:
             return wkIds
         
         # Go and get workspace Indices
-        if(self.continuousIndicesInTube):
-            if(step == -1):
-               startDet = firstDet - numDet + 1
-            else:
-               startDet = firstDet
-            if( numDet > 0):
-                 for i in range (0, self.ws.getNumberHistograms(), numDet):
-	             deti = self.ws.getDetector(i)
-	             detID = deti.getID()
-	             if (detID  >= startDet and detID < startDet+numDet):
-	                 iPixel = detID - firstDet
-	                 wkIds = range( i - iPixel, i - iPixel + step*numDet, step)
-	                 # print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
-
-        else: #We can't assume continuous indices within tube, must loop over all indices (there are many). 
-            if( numDet > 0):
-                 for i in range(self.ws.getNumberHistograms()):
-	             sp=self.ws.getSpectrum(i)
-	             detids = sp.getDetectorIDs()
-	             for j in range(len(detids)):
-	                if (detids[j]  >= firstDet and detids[j] < firstDet+numDet):
-	                    wkIds.append(i)
+        if(step == -1):
+            startDet = firstDet - numDet + 1
+        else:
+            startDet = firstDet
+        if( numDet > 0):
+            for i in range (0, self.ws.getNumberHistograms(), numDet):
+	         deti = self.ws.getDetector(i)
+	         detID = deti.getID()
+	         if (detID  >= startDet and detID < startDet+numDet):
+	             iPixel = detID - firstDet
+	             wkIds = range( i - iPixel, i - iPixel + step*numDet, step)
+	             # print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
 
         #print  firstDet, numDet
         if (numDet > 0):
