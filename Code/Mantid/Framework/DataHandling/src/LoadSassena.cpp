@@ -327,7 +327,7 @@ void LoadSassena::init()
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),"A Sassena file");
   // Declare the OutputWorkspace property
   declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",Kernel::Direction::Output), "The name of the group workspace to be created.");
-  declareProperty(new Kernel::PropertyWithValue<double>("TimeUnit", 1.0, Kernel::Direction::Input),"The Time unit in between data points, in picoseconds");
+  declareProperty(new Kernel::PropertyWithValue<double>("TimeUnit", 1.0, Kernel::Direction::Input),"The Time unit in between data points, in picoseconds. Default is 1.0 picosec.");
 }
 
 /**
