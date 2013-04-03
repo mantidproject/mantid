@@ -121,6 +121,8 @@ public slots:
   void onColorMapChange(const pqColorMapModel *model);
   /// Set the data color scale range to the requested bounds.
   void onColorScaleChange(double min, double max);
+  /// Set the view to use a LOD threshold.
+  void onLodThresholdChange(bool state, double defVal);
   /// Set logarithmic color scaling on the data.
   void onLogScale(int state);
   /// Set the view to use a parallel projection.

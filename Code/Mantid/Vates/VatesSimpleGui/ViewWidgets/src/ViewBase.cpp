@@ -416,6 +416,27 @@ void ViewBase::onParallelProjection(bool state)
 }
 
 /**
+ * This function is used to set the LOD threshold for the view.
+ * @param state : whether or not to use the LOD threshold
+ * @param defVal : default value of LOD threshold
+ */
+void ViewBase::onLodThresholdChange(bool state, double defVal)
+{
+  pqRenderView *cview = this->getPvActiveView();
+  vtkSMProxy *proxy = cview->getProxy();
+  if (state)
+  {
+    vtkSMPropertyHelper(proxy, "LODThreshold").Set(defVal);
+  }
+  else
+  {
+    vtkSMPropertyHelper(proxy, "LODThreshold").Set(VTK_DOUBLE_MAX);
+  }
+  proxy->UpdateVTKObjects();
+  cview->render();
+}
+
+/**
  * This function retrieves the active pqRenderView object according to
  * ParaView's ActiveObjects mechanism.
  * @return the currently active view
