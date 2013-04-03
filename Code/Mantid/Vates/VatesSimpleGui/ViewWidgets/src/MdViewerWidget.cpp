@@ -23,6 +23,7 @@
 #include <pqPipelineSource.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
+#include <pqSettings.h>
 #include <pqStatusBar.h>
 #include <pqViewSettingsReaction.h>
 #include <vtkSMDoubleVectorProperty.h>
@@ -127,6 +128,7 @@ void MdViewerWidget::internalSetup(bool pMode)
   this->isPluginInitialized = false;
   this->pluginMode = pMode;
   this->rotPointDialog = NULL;
+  this->lodThreshold = 5.0;
 }
 
 /**
@@ -517,7 +519,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->currentView->render();
   this->currentView->checkViewOnSwitch();
   this->currentView->correctVisibility();
-  this->viewSettings->updateEnableState();
+  this->updateAppState();
 }
 
 /**
@@ -575,6 +577,15 @@ void MdViewerWidget::createMenus()
 
   QMenu *viewMenu = menubar->addMenu(QApplication::tr("&View"));
 
+  this->lodAction = new QAction(QApplication::tr("Level-of-Detail (LOD...)"), this);
+  this->lodAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
+  this->lodAction->setStatusTip(QApplication::tr("Enable/disable level-of-detail threshold."));
+  this->lodAction->setCheckable(true);
+  this->lodAction->setChecked(true);
+  QObject::connect(this->lodAction, SIGNAL(toggled(bool)),
+                   this, SLOT(onLodToggled(bool)));
+  viewMenu->addAction(this->lodAction);
+
   QAction *settingsAction = new QAction(QApplication::tr("View Settings..."), this);
   settingsAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+S"));
   settingsAction->setStatusTip(QApplication::tr("Show the settings for the current view."));
@@ -604,6 +615,16 @@ void MdViewerWidget::createMenus()
 void MdViewerWidget::addMenus()
 {
   this->createMenus();
+}
+
+/**
+ * This function intercepts the LOD menu action checking and calls the
+ * correct slot on the current view.
+ * @param state : whether the action is checked or not
+ */
+void MdViewerWidget::onLodToggled(bool state)
+{
+  this->currentView->onLodThresholdChange(state, this->lodThreshold);
 }
 
 /**
@@ -695,6 +716,27 @@ void MdViewerWidget::connectRotationPointDialog()
 void MdViewerWidget::connectDialogs()
 {
   this->connectRotationPointDialog();
+}
+
+/**
+ * This function handles any update to the state of application components
+ * like menus, menu items, buttons, views etc.
+ */
+void MdViewerWidget::updateAppState()
+{
+  this->viewSettings->updateEnableState();
+
+  ThreeSliceView *tsv = dynamic_cast<ThreeSliceView *>(this->currentView);
+  if (tsv)
+  {
+    this->currentView->onLodThresholdChange(false, this->lodThreshold);
+    this->lodAction->setChecked(false);
+  }
+  else
+  {
+    this->currentView->onLodThresholdChange(true, this->lodThreshold);
+    this->lodAction->setChecked(true);
+  }
 }
 
 } // namespace SimpleGui
