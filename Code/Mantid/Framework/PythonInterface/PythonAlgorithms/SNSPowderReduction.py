@@ -606,7 +606,11 @@ class SNSPowderReduction(PythonAlgorithm):
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
         print "[DBx116] File Name : %s,\t\tMax chunk size: %s" % (str(wksp+extension), str(self._chunks))
-        Chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
+        if False:
+            Chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
+        else:
+            api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
+            Chunks = AnalysisDataService.retrieve("Chunks")
         for row in Chunks: strategy.append(row)
         #For table with no rows
         if not strategy:
