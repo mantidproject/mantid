@@ -19,7 +19,7 @@ class TubeSpec:
         self.inst = ws.getInstrument()
         self.numTubes = 0
         self.specComponentArray = []
-        self.component = 0
+        self.component = 0  # NEXT STEP: Put self.component into array ##########
         self.minNumDetsInTube = 200 
         self.tubes = []
         
@@ -27,7 +27,9 @@ class TubeSpec:
         """     
         Sets tube specification by string. The string specifies a component of the intrument
         as in the instrument tree of its IDF file. This component may contain one or more tubes
-        and possibly all the tunes in the instrument. 
+        and possibly all the tunes in the instrument.
+        If the tube specification is not empty this component is added to those already
+        in the specification. 
         
         @param tubeSpecString: string specifying tubes of a component of the instrument
         
@@ -88,7 +90,7 @@ class TubeSpec:
         if(self.numTubes >= 0):
             return self.numTubes
         
-        # We have a negative number set in self.numTubes, so we search for tubes	           
+        # We have a negative number set in self.numTubes, so we search for tubes
         comp = self.getComponent()
         if( comp == 0): 
             return self.numTubes
