@@ -29,7 +29,7 @@ class TubeSpec:
         as in the instrument tree of its IDF file. This component may contain one or more tubes
         and possibly all the tunes in the instrument.
         If the tube specification is not empty this component is added to those already
-        in the specification. 
+        in the specification. No checking is done for repeated or overlapping components. 
         
         @param tubeSpecString: string specifying tubes of a component of the instrument
         
@@ -65,7 +65,7 @@ class TubeSpec:
            
     def searchForTubes(self, comp):
          """     
-         Searches the component for tubes and saves them in array
+         Searches the component for tubes and saves them in array, appending if array is not empty.
          
          @param comp: the component
          """
@@ -91,11 +91,13 @@ class TubeSpec:
             return self.numTubes
         
         # We have a negative number set in self.numTubes, so we search for tubes
-        comp = self.getComponent()
-        if( comp == 0): 
+        comps = self.getComponents()
+        if( comps == []): 
             return self.numTubes
         
-        self.searchForTubes(comp)
+        for i in range( len(comps)):
+           self.searchForTubes(comps[i])
+           
         self.numTubes = len(self.tubes)
         return self.numTubes
             
@@ -118,7 +120,34 @@ class TubeSpec:
 	     self.componentArray.append(comp)
 	     
 	return self.componentArray[0]
+	
+	
+    def getComponents ( self ):
+        """     
+        Returns instrument components corresponding to specification
+         	
+	@Return value: array of instrument components
+        """
+        if( self.componentArray != []):
+            return self.componentArray
+        
+        # We look for the components
+        for i in range( len(self.componentNameArray)):    
+           print "Looking for", self.componentNameArray[i], 
+        
+           comp = self.inst.getComponentByName(self.componentNameArray[i])
+
+	   if( comp ):
+	        self.componentArray.append(comp)
+	   else:
+	        print "Did not find", self.componentNameArray[i]
+	        print "Tube specification not valid"
+	        self.componentArray = []
+	        return []
+	     
+	return self.componentArray
  
+
 	
     def getDetectorInfoFromTube( self, tubeIx ):
         """     
