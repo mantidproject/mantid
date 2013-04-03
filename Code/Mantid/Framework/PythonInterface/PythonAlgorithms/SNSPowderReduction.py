@@ -605,8 +605,7 @@ class SNSPowderReduction(PythonAlgorithm):
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
-        print "[DBx116] File Name : ", str(wksp+extension)
-        print "[DBx117] Max chunk size = ", str(self._chunks)
+        print "[DBx116] File Name : %s,\t\tMax chunk size: %s" % (str(wksp+extension), str(self._chunks))
         Chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
         for row in Chunks: strategy.append(row)
         #For table with no rows
@@ -648,14 +647,14 @@ class SNSPowderReduction(PythonAlgorithm):
             firstChunkList.append(True)
             wksplist.append(None)
 
-        print "Number of workspace = ", str(numwksp)
+        print "Number of workspace to process = %d" %(numwksp)
 
         # reduce data by chunks
         ichunk = -1
         for chunk in strategy:
             ichunk += 1
 
-            print "Process chunk ", str(ichunk)
+            print "Process chunk %d" %(ichunk)
 
             # Log information
             if "ChunkNumber" in chunk:
@@ -690,7 +689,6 @@ class SNSPowderReduction(PythonAlgorithm):
                         tempws = mtd[wsname]
                         if tempws is not None: 
                             if wsname.endswith("_unfiltered") is False: 
-                                print type(tempws)
                                 tempwslist.append(tempws)
                             else:
                                 api.DeleteWorkspace(Workspace=tempws)
@@ -718,8 +716,7 @@ class SNSPowderReduction(PythonAlgorithm):
             for itemp in xrange(numwksp):
                 temp = tempwslist[itemp]
                 # Align and focus
-                print "[DB1141] Align and focus workspace %s" % (str(temp))
-                print "[DB1050-2] Number of events = %d of chunk %d" % (temp.getNumberEvents(), ichunk)
+                print "[DB1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk)
                 temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                     DMin=self._info.dmin, DMax=self._info.dmax, TMin=self._info.tmin, TMax=self._info.tmax,
