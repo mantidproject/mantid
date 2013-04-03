@@ -408,7 +408,7 @@ namespace Mantid
             declareProperty(new WorkspaceProperty<Workspace>(outws,WSName,Direction::Output));
           }
           g_log.information() << "Workspace " << WSName << " created. \n";
-          if(wsGrpSptr)wsGrpSptr->add(WSName);
+          if (wsGrpSptr) wsGrpSptr->addWorkspace(localWorkspace);
           // Assign the result to the output workspace property
           setProperty(outws,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
         }
