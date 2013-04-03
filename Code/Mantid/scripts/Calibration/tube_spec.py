@@ -133,7 +133,7 @@ class TubeSpec:
         
         # We look for the components
         for i in range( len(self.componentNameArray)):    
-           print "Looking for", self.componentNameArray[i], 
+           print "Looking for", self.componentNameArray[i] 
         
            comp = self.inst.getComponentByName(self.componentNameArray[i])
 
