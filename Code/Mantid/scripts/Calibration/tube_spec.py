@@ -22,6 +22,8 @@ class TubeSpec:
         self.componentArray = [] 
         self.minNumDetsInTube = 200 
         self.tubes = []
+        self.delimiter = '/' # delimiter between parts of string in tree
+        
         
     def setTubeSpecByString(self, tubeSpecString ):
         """     
@@ -43,8 +45,17 @@ class TubeSpec:
         be no error message. So if in doubt don't skip a step.
         """	
         self.componentNameArray.append(tubeSpecString) 
-        self.delimiter = '/' # delimiter between parts of string in tree
         self.numTubes = -1  # Negative value forces tubes to be searched and counted
+        
+        
+    def setTubeSpecByStringArray( self, tubeSpecArray ):
+        """
+        Set tube specification like setTubeSpecByString, but with an array of string
+        to enable multiple components to be calibrated
+        """
+        for i in range(len(tubeSpecArray)):
+           self.setTubeSpecByString(tubeSpecArray[i])
+           
                
     def getInstrumentName (self):
         return self.inst.getName()

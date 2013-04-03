@@ -2,7 +2,7 @@
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MAPS - Execute this
 #
 # Here we run the calibration of a selected part of MAPS consisting of several components
-# by running setTubeSpecByString several times. 
+# specifying them in an array of strings. 
 
 #
 from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
@@ -26,9 +26,7 @@ ExpectedWidth = 8.0 # Expected width of centre peak (initial value of fit parame
 ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0] # Expected positions of the edges and peak (initial values of fit parameters)
 
 # Set what we want to calibrate (e.g whole intrument or one door )
-CalibratedComponent1 = 'C4_window'  # Calibrate C4 window
-CalibratedComponent2 = 'C3_window'  # Calibrate C3 window
- 
+CalibratedComponents = ['C4_window','C3_window','C2_window']  # Calibrate three C windows
     
 # Get calibration raw file and integrate it    
 rawCalibInstWS = Load(path+filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
@@ -46,8 +44,7 @@ calibrationTable.addColumn(type="V3D",name="Detector Position")  # "Detector Pos
 
 # Specify components to calibrate
 thisTubeSet = TubeSpec(CalibInstWS)
-thisTubeSet.setTubeSpecByString(CalibratedComponent1)
-thisTubeSet.setTubeSpecByString(CalibratedComponent2)
+thisTubeSet.setTubeSpecByStringArray(CalibratedComponents)
 
 # Get ideal tube
 iTube = IdealTube()
