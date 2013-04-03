@@ -1,31 +1,31 @@
 set ( SRC_FILES
-	src/AlgorithmDialog.cpp
-	src/AlgorithmInputHistory.cpp
-	src/AlgorithmPropertiesWidget.cpp
-	src/AlgorithmRunner.cpp
-	src/BoolPropertyWidget.cpp
-	src/FilePropertyWidget.cpp
-	src/GenericDialog.cpp
-        src/HelpWindow.cpp
-	src/InterfaceFactory.cpp
-	src/InterfaceManager.cpp
-	src/ManageUserDirectories.cpp
-	src/MantidColorMap.cpp
-	src/MantidDialog.cpp
-	src/MantidQwtIMDWorkspaceData.cpp
-	src/MantidQwtMatrixWorkspaceData.cpp
-	src/MantidWidget.cpp
-	src/OptionsPropertyWidget.cpp
-	src/PropertyWidget.cpp
-	src/PropertyWidgetFactory.cpp
-	src/PythonRunner.cpp
-	src/ScriptRepositoryView.cpp
+  src/AlgorithmDialog.cpp
+  src/AlgorithmInputHistory.cpp
+  src/AlgorithmPropertiesWidget.cpp
+  src/AlgorithmRunner.cpp
+  src/BoolPropertyWidget.cpp
+  src/FilePropertyWidget.cpp
+  src/GenericDialog.cpp
+  src/HelpWindow.cpp
+  src/InterfaceFactory.cpp
+  src/InterfaceManager.cpp
+  src/ManageUserDirectories.cpp
+  src/MantidColorMap.cpp
+  src/MantidDialog.cpp
+  src/MantidQwtIMDWorkspaceData.cpp
+  src/MantidQwtMatrixWorkspaceData.cpp
+  src/MantidWidget.cpp
+  src/OptionsPropertyWidget.cpp
+  src/PropertyWidget.cpp
+  src/PropertyWidgetFactory.cpp
+  src/PythonRunner.cpp
+  src/ScriptRepositoryView.cpp
   src/RepoModel.cpp
-	src/SyncedCheckboxes.cpp
-	src/TextPropertyWidget.cpp
-	src/UserSubWindow.cpp
-	src/VatesViewerInterface.cpp
-	src/WorkspaceObserver.cpp
+  src/SyncedCheckboxes.cpp
+  src/TextPropertyWidget.cpp
+  src/UserSubWindow.cpp
+  src/VatesViewerInterface.cpp
+  src/WorkspaceObserver.cpp
 )
 
 set ( MOC_FILES
