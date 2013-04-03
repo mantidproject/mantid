@@ -606,8 +606,8 @@ class SNSPowderReduction(PythonAlgorithm):
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
         print "[DBx116] File Name : %s,\t\tMax chunk size: %s" % (str(wksp+extension), str(self._chunks))
-        if False:
-            Chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
+        if True:
+            Chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks)
         else:
             api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
             Chunks = AnalysisDataService.retrieve("Chunks")
