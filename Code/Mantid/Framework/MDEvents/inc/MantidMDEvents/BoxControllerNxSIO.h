@@ -130,11 +130,8 @@ namespace MDEvents
     // helper functions:
         // prepare to write event nexus data in current data version format
         void CreateEventGroup();
-        void CreateWSGroup();
-        void OpenAndCheckWSGroup();
         void OpenAndCheckEventGroup();
         void getDiskBufferFileData();
-        void checkWSDimesnions();
         void prepareNxSToWrite_CurVersion();
         void prepareNxSdata_CurVersion();
        // get the event type from event name

@@ -92,7 +92,7 @@ namespace MDAlgorithms
     if (!bc) throw std::runtime_error("Error with InputWorkspace: no BoxController!");
     if (bc->isFileBacked())
     {
-      if (ws->fileNeedsUpdating())
+      //if (ws->fileNeedsUpdating())
       {
         // Data was modified! You need to save first.
         g_log.notice() << "InputWorkspace's file-backend being updated. " << std::endl;

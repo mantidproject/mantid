@@ -43,8 +43,12 @@ namespace Kernel
   void ISaveable::saveAt(uint64_t newPos, uint64_t newSize)
   {
       m_setter.lock();
+      // load old contents
+      this->load();
+      // set new position, derived by the disk buffer
       m_fileIndexStart= newPos;
       m_fileNumEvents = newSize;
+      // save in the new location
       this->save();
       this->clearDataFromMemory();      
       m_setter.unlock();

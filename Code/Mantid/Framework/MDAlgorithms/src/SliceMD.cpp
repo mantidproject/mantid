@@ -179,7 +179,7 @@ namespace MDAlgorithms
     BoxController_sptr bc = ws->getBoxController();
 
     // store wrute buffer size for the future 
-    uint64_t writeBufSize = bc->getDiskBuffer().getWriteBufferSize();
+    //uint64_t writeBufSize = bc->getFileIO()getDiskBuffer().getWriteBufferSize();
     // and disable write buffer (if any) for input MD Events for this algorithm purposes;
     //bc->setCacheParameters(1,0);
 
@@ -194,8 +194,8 @@ namespace MDAlgorithms
     size_t maxDepth = bTakeDepthFromInputWorkspace? bc->getMaxDepth() : size_t(tempDepth);
     obc->setMaxDepth(maxDepth);
 
-    size_t outputSize = writeBufSize;
-    obc->setCacheParameters(sizeof(OMDE),outputSize);
+    //size_t outputSize = writeBufSize;
+    //obc->setCacheParameters(sizeof(OMDE),outputSize);
 
     obc->resetNumBoxes();
     // Perform the first box splitting
@@ -330,7 +330,7 @@ namespace MDAlgorithms
       alg->executeAsChildAlg();
     }
     // return the size of the input workspace write buffer to its initial value
-    bc->setCacheParameters(sizeof(MDE),writeBufSize);
+    //bc->setCacheParameters(sizeof(MDE),writeBufSize);
     this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS));
     delete prog;
   }

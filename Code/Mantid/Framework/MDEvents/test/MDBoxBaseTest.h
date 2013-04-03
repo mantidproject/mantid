@@ -45,6 +45,7 @@ public:
   Kernel::ISaveable *const getISaveable(){return NULL;}
   Kernel::ISaveable *const getISaveable()const{return NULL;}
   void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/){};
+  void clearFileBacked(){/**does nothing*/};
   void setFileBacked(){};
   void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)const{/*Not saveable */};
   void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */){};

@@ -890,6 +890,17 @@ namespace MDEvents
        MDE::dataToEvents(TableData,data,false);
        dataMutex.unlock();
    }
+   /** clear file-backed information from the box if such information exists */
+   TMDE(
+   void  MDBox)::clearFileBacked()
+   {
+       if(m_Saveable)
+       {
+           delete m_Saveable;
+           m_Saveable=NULL;
+
+       }
+   }
 
 }//namespace MDEvents
 

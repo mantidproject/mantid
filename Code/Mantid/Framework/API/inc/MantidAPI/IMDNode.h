@@ -54,6 +54,9 @@ public:
     virtual void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)=0;
     /** initiate the structure responsible for swapping the box on HDD if out of memory with default parameters (it does not know its place on HDD and was not saved). */
     virtual void setFileBacked()=0;
+  /// if node was fileBacked, it should clear file-backed information 
+    virtual void clearFileBacked()=0;
+
     /**Save the box at specific disk position using the class, respoinsible for the file IO. */
     virtual void saveAt(API::IBoxControllerIO *const /*saver */,  uint64_t /*position*/)const=0;
     /**Load the additional box data of specified size from the disk location provided using the class, respoinsible for the file IO and append them to the box */
@@ -63,7 +66,7 @@ public:
 //-------------------------------------------------------------
     /// Clear all contained data including precalculated averages. 
     virtual void clear() = 0;
-
+  
     ///@return the type of the event this box contains 
     virtual std::string getEventType()const =0;
     ///@return the length of the coordinates (in bytes), the events in the box contain.

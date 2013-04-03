@@ -355,8 +355,8 @@ namespace API
      IBoxControllerIO * getFileIO()
      {return m_fileIO.get();}
      /// makes box controller file based by providing class, responsible for fileIO. 
-     void setFileBacked(IBoxControllerIO *newFileIO,const std::string &fileName="");
-
+     void setFileBacked(boost::shared_ptr<IBoxControllerIO> newFileIO,const std::string &fileName="");
+     void clearFileBacked();
     //-----------------------------------------------------------------------------------
       //BoxCtrlChangesInterface *getChangesList(){return m_ChangesList;}
     //void setChangesList(BoxCtrlChangesInterface *pl){m_ChangesList=pl;}

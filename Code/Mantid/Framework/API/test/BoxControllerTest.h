@@ -207,7 +207,8 @@ public:
     a->setSplitInto(10);
     a->setMaxDepth(10);
     a->setMaxId(123456);
-    TS_ASSERT_THROWS_NOTHING(a->setFileBacked(new MantidTestHelpers::BoxControllerDummyIO(a),"fakeFile"));
+    boost::shared_ptr<IBoxControllerIO> pS(new MantidTestHelpers::BoxControllerDummyIO(a));
+    TS_ASSERT_THROWS_NOTHING(a->setFileBacked(pS,"fakeFile"));
     TS_ASSERT(a->isFileBacked());
 
     BoxController_sptr b  = a->clone();
@@ -215,7 +216,8 @@ public:
     compareBoxControllers(*a, *b);
 
     TS_ASSERT(!b->isFileBacked());
-    TS_ASSERT_THROWS_NOTHING(b->setFileBacked(new MantidTestHelpers::BoxControllerDummyIO(b),"fakeFile2"));
+    boost::shared_ptr<IBoxControllerIO> pS2(new MantidTestHelpers::BoxControllerDummyIO(b));
+    TS_ASSERT_THROWS_NOTHING(b->setFileBacked(pS2,"fakeFile2"));
 
     // Check that settings are the same but BC are different
     compareBoxControllers(*a, *b);
@@ -228,8 +230,8 @@ public:
   void test_MRU_access()
   {
     BoxController_sptr a = boost::shared_ptr<BoxController>(new BoxController(2));
-
-    a->setFileBacked(new MantidTestHelpers::BoxControllerDummyIO(a),"existingFakeFile");
+    boost::shared_ptr<IBoxControllerIO> pS(new MantidTestHelpers::BoxControllerDummyIO(a));
+    a->setFileBacked(pS,"existingFakeFile");
     DiskBuffer * dbuf = a->getFileIO();
 
     // Set the cache parameters
@@ -244,6 +246,24 @@ public:
     TS_ASSERT_EQUALS(2, box_controller.getNDims());
     TS_ASSERT_EQUALS(1, box_controller.getNumSplit());
     TS_ASSERT_EQUALS(0, box_controller.getMaxId());
+  }
+
+  void test_openCloseFileBacked()
+  {
+    BoxController_sptr a = boost::shared_ptr<BoxController>(new BoxController(2));
+    TS_ASSERT(!a->isFileBacked());
+  
+    boost::shared_ptr<IBoxControllerIO> pS(new MantidTestHelpers::BoxControllerDummyIO(a));
+    TS_ASSERT_THROWS_NOTHING(a->setFileBacked(pS,"fakeFile"));
+
+    TSM_ASSERT("Box controller should have open faked file",pS->isOpened());
+    std::string fileName = pS->getFileName();
+    TSM_ASSERT_EQUALS("Box controller file should be named as requested ",0,fileName.compare(fileName.size()-8,8,std::string("fakeFile")));
+    TS_ASSERT(a->isFileBacked());
+
+    TS_ASSERT_THROWS_NOTHING(a->clearFileBacked());
+    TS_ASSERT(!a->isFileBacked());
+    TSM_ASSERT("Box controller should now close the faked file",!pS->isOpened());
   }
 
 

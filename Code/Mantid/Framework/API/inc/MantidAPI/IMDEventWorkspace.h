@@ -72,9 +72,9 @@ namespace API
     /// Split all boxes that exceed the split threshold.
     virtual void splitAllIfNeeded(Kernel::ThreadScheduler * ts) = 0;
 
-    bool fileNeedsUpdating() const;
+   // bool fileNeedsUpdating() const;
 
-    void setFileNeedsUpdating(bool value);
+    //void setFileNeedsUpdating(bool value);
 
     virtual bool threadSafe() const;
 
@@ -82,7 +82,7 @@ namespace API
 
   protected:
     /// Marker set to true when a file-backed workspace needs its back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
-    bool m_fileNeedsUpdating;
+    //bool m_fileNeedsUpdating;
 
   };
 

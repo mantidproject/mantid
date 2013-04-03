@@ -157,8 +157,8 @@ namespace MDAlgorithms
     ws1->refreshCache();
 
     // Set a marker that the file-back-end needs updating if the # of events changed.
-    if (ws1->getNPoints() != initial_numEvents)
-      ws1->setFileNeedsUpdating(true);
+    //if (ws1->getNPoints() != initial_numEvents)
+    //  ws1->setFileNeedsUpdating(true);
 
   }
 

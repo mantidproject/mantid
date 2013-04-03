@@ -111,8 +111,10 @@ namespace Mantid
 
       /// Clear existing masks
       virtual void clearMDMasking() = 0;
-
+      ///
       virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const = 0;
+      /// if a workspace was filebacked, this should clear file-based status, delete file-based information and close related files.
+      virtual void clearFileBacked(){};
     };
     
     /// Shared pointer to the IMDWorkspace base class

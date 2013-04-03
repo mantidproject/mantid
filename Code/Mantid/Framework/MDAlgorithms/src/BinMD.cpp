@@ -324,9 +324,9 @@ namespace MDAlgorithms
   {
     BoxController_sptr bc = ws->getBoxController();
     // store exisiting write buffer size for the future 
-    uint64_t writeBufSize =bc->getDiskBuffer().getWriteBufferSize();
+    //uint64_t writeBufSize =bc->getDiskBuffer().getWriteBufferSize();
     // and disable write buffer (if any) for input MD Events for this algorithm purposes;
-    bc->setCacheParameters(1,0);
+    //bc->setCacheParameters(1,0);
 
 
     // Cache some data to speed up accessing them a bit
@@ -440,7 +440,7 @@ namespace MDAlgorithms
     }
 
     // return the size of the input workspace write buffer to its initial value
-    bc->setCacheParameters(sizeof(MDE),writeBufSize);
+    //bc->setCacheParameters(sizeof(MDE),writeBufSize);
 
   }
 

@@ -109,7 +109,7 @@ public:
     if (MakeFileBacked)
     {
       TSM_ASSERT("Workspace was made file-backed", ws->isFileBacked() );
-      TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
+//      TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
     }
 
     // Continue the test
@@ -117,7 +117,8 @@ public:
       do_test_UpdateFileBackEnd(ws, filename);
     else
     {
-      ws->getBoxController()->closeFile(true);
+
+      ws->clearFileBacked();
       if (Poco::File(this_filename).exists()) Poco::File(this_filename).remove();
     }
 
@@ -136,9 +137,10 @@ public:
       ev.setCenter(0, double(i) * 0.01 + 0.4);
       ws->addEvent(ev);
     }
+    ws->splitAllIfNeeded(NULL);
     ws->refreshCache();
     // Manually set the flag that the algo would set
-    ws->setFileNeedsUpdating(true);
+ //   ws->setFileNeedsUpdating(true);
 
     TSM_ASSERT_EQUALS("Correctly added 100 events to original 230.",  ws->getNPoints(), 230+100);
 
@@ -154,13 +156,13 @@ public:
 //    ws->getBoxController()->closeFile();
 
     // Since there are 330 events, the file needs to be that big (or bigger).
-    TS_ASSERT_LESS_THAN( 330, ws->getBoxController()->getFile()->getInfo().dims[0]);
+    TS_ASSERT_LESS_THAN( 330, ws->getBoxController()->getFileIO()->getFileLength());
 
-    TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
+    //TSM_ASSERT("File back-end no longer needs updating.", !ws->fileNeedsUpdating() );
     // Clean up file
-  ws->getBoxController()->closeFile(true);
-    //std::string fullPath = alg.getPropertyValue("Filename");
-    //if (Poco::File(fullPath).exists()) Poco::File(fullPath).remove();
+    ws->clearFileBacked();
+    std::string fullPath = alg.getPropertyValue("Filename");
+    if (Poco::File(fullPath).exists()) Poco::File(fullPath).remove();
   }
 
   void test_saveExpInfo()
@@ -203,8 +205,8 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
 
-    ws->getBoxController()->closeFile(true);
-  //  if (Poco::File(filename).exists()) Poco::File(filename).remove();
+    ws->clearFileBacked();
+    if (Poco::File(filename).exists()) Poco::File(filename).remove();
 
   }
 

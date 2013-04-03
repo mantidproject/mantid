@@ -1,7 +1,9 @@
+#include "MantidKernel/Strings.h"
 #include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidAPI/BoxController.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include <Poco/File.h>
 
 
@@ -9,9 +11,10 @@ namespace Mantid
 {
   namespace MDEvents
   {
+   Kernel::Logger &MDBoxFlatTree::g_log = Kernel::Logger::get("Algorithm");
 
-    MDBoxFlatTree::MDBoxFlatTree(const std::string &fileName):
-  m_nDim(-1),m_FileName(fileName)
+    MDBoxFlatTree::MDBoxFlatTree():
+  m_nDim(-1)
   {     
   }
 
@@ -126,7 +129,7 @@ namespace Mantid
   }
   /*** this function tries to set file positions of the boxes to 
        make data physiclly located close to each otger to be as close as possible on the HDD 
-       @param setFileBacked  -- initiate the boxes to be fileBacked.
+       @param setFileBacked  -- initiate the boxes to be fileBacked. The boxes assumed not to be saved before.
   */
   void MDBoxFlatTree::setBoxesFilePositions(bool setFileBacked)
   {
@@ -142,42 +145,31 @@ namespace Mantid
       API::IMDNode * mdBox = m_Boxes[i];        
       size_t ID = mdBox->getID();
 
+      // avoid grid boxes;
+      if(m_BoxType[ID]==2) continue;
+
       size_t nEvents = mdBox->getTotalDataSize();
       m_BoxEventIndex[ID*2]   = eventsStart;
       m_BoxEventIndex[ID*2+1] = nEvents;
-      eventsStart+=nEvents;
-      // m_BoxEventIndex[ID*2]   = 0; should we do this for the boxes without events?
-
       if(setFileBacked)
           mdBox->setFileBacked(eventsStart,nEvents,false);
+
+      eventsStart+=nEvents;
     }
   }
 
   void MDBoxFlatTree::saveBoxStructure(const std::string &fileName)
   {
     m_FileName = fileName;
-    ::NeXus::File * hFile;
-      // Erase the file if it exists
-    Poco::File oldFile(fileName);
-    if (oldFile.exists())
-    {
-      hFile = new ::NeXus::File(m_FileName, NXACC_RDWR);
-      hFile->openGroup("MDEventWorkspace", "NXentry");
-    }
-    else
-    {
-      // Create a new file in HDF5 mode.
-      hFile = new ::NeXus::File(m_FileName, NXACC_CREATE5);
-      hFile->makeGroup("MDEventWorkspace", "NXentry", true);
-      // Write out some general information like # of dimensions
-      hFile->writeData("dimensions", int32_t(m_nDim));
-    }  
+
+    ::NeXus::File * hFile = createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_Boxes[0]->getEventType(),false);
 
     //Save box structure;
     this->saveBoxStructure(hFile);
-
-    hFile->close();
     // close workspace group
+    hFile->closeGroup();
+    // close file
+    hFile->close();  
     delete hFile;
 
   }
@@ -191,12 +183,12 @@ namespace Mantid
     hFile->getEntries(groupEntries);
  
 
-    bool update(false);
-    if(groupEntries.find("box_structure")!=groupEntries.end()) //dimesnions dataset exist
-          update = true;
+    bool create(false);
+    if(groupEntries.find("box_structure")==groupEntries.end()) //dimesnions dataset exist
+          create = true;
 
     // Start the box data group
-    if(update)
+    if(create)
     {
       hFile->makeGroup("box_structure", "NXdata",true);
       hFile->putAttr("version", "1.0");
@@ -222,9 +214,20 @@ namespace Mantid
     box_2_chunk[0] = int64_t(16384);
     box_2_chunk[1] = (2);
 
-    if (update)
+    if (create)
     {
-      // Update the extendible data sets
+      // Write it for the first time
+      hFile->writeExtendibleData("box_type", m_BoxType);
+      hFile->writeExtendibleData("depth", m_Depth);
+      hFile->writeExtendibleData("inverse_volume", m_InverseVolume);
+      hFile->writeExtendibleData("extents", m_Extents, exents_dims, exents_chunk);
+      hFile->writeExtendibleData("box_children", m_BoxChildren, box_2_dims, box_2_chunk);
+      hFile->writeExtendibleData("box_signal_errorsquared", m_BoxSignalErrorsquared, box_2_dims, box_2_chunk);
+      hFile->writeExtendibleData("box_event_index", m_BoxEventIndex, box_2_dims, box_2_chunk);  
+    }
+    else
+    {
+    // Update the extendible data sets
       hFile->writeUpdatedData("box_type", m_BoxType);
       hFile->writeUpdatedData("depth", m_Depth);
       hFile->writeUpdatedData("inverse_volume", m_InverseVolume);
@@ -234,21 +237,9 @@ namespace Mantid
       hFile->writeUpdatedData("box_event_index", m_BoxEventIndex, box_2_dims);
 
     }
-    else
-    {
-      // Write it for the first time
-      hFile->writeExtendibleData("box_type", m_BoxType);
-      hFile->writeExtendibleData("depth", m_Depth);
-      hFile->writeExtendibleData("inverse_volume", m_InverseVolume);
-      hFile->writeExtendibleData("extents", m_Extents, exents_dims, exents_chunk);
-      hFile->writeExtendibleData("box_children", m_BoxChildren, box_2_dims, box_2_chunk);
-      hFile->writeExtendibleData("box_signal_errorsquared", m_BoxSignalErrorsquared, box_2_dims, box_2_chunk);
-      hFile->writeExtendibleData("box_event_index", m_BoxEventIndex, box_2_dims, box_2_chunk);
-    }
-
+    // close the box group.
     hFile->closeGroup();
-    // Finished - close the file. This ensures everything gets written out even when updating.
-    hFile->close();
+ 
 
   }
 
@@ -336,6 +327,48 @@ namespace Mantid
     hFile->closeGroup();
 
   }
+
+/// Save each NEW ExperimentInfo to a spot in the file
+ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws)
+ {
+
+    std::map<std::string,std::string> entries;
+    file->getEntries(entries);
+    for (uint16_t i=0; i < ws->getNumExperimentInfo(); i++)
+    {
+      API::ExperimentInfo_const_sptr ei = ws->getExperimentInfo(i);
+      std::string groupName = "experiment" + Kernel::Strings::toString(i);
+      if (entries.find(groupName) == entries.end())
+      {
+        // Can't overwrite entries. Just add the new ones
+        file->makeGroup(groupName, "NXgroup", true);
+        file->putAttr("version", 1);
+        ei->saveExperimentInfoNexus(file);
+        file->closeGroup();
+
+        // Warning for high detector IDs.
+        // The routine in MDEvent::saveVectorToNexusSlab() converts detector IDs to single-precision floats
+        // Floats only have 24 bits of int precision = 16777216 as the max, precise detector ID
+        detid_t min = 0;
+        detid_t max = 0;
+        try
+        {
+          ei->getInstrument()->getMinMaxDetectorIDs(min, max);
+        }
+        catch (std::runtime_error &)
+        { /* Ignore error. Min/max will be 0 */ }
+
+        if (max > 16777216)
+        {
+          g_log.warning() << "This instrument (" << ei->getInstrument()->getName() <<
+              ") has detector IDs that are higher than can be saved in the .NXS file as single-precision floats." << std::endl;
+          g_log.warning() << "Detector IDs above 16777216 will not be precise. Please contact the developers." << std::endl;
+        }
+      }
+    }
+
+ }
+
 
   template<typename MDE,size_t nd>
   uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *>&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly)
@@ -426,7 +459,109 @@ namespace Mantid
     return totalNumEvents;
       return 0;
   }
+  /** The function to create a NeXus MD workspace group with specified events type and number of dimensions or opens the existing group, 
+      which corresponds to the input parameters.
+   *@param fileName -- the name of the file to create  or open WS group 
+   *@param nDims     -- number of workspace dimensions;
+   *@param WSEventType -- the string describing event type
+   *@param readOnly    -- true if the file is opened for read-only access
 
+   *@return   NeXus pointer to properly opened NeXus data file and group.
+   *
+   *@throws if group or its component do not exist and the file is opened read-only or if the existing file parameters are not equal to the 
+              input parameters.
+  */
+  ::NeXus::File * MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName,size_t nDims, const std::string &WSEventType, bool readOnly)
+  {
+        Poco::File oldFile(fileName);
+        bool fileExists = oldFile.exists();
+        if (!fileExists && readOnly)
+            throw Kernel::Exception::FileError("Attempt to open non-existing file in read-only mode",fileName);
+
+       NXaccess access(NXACC_RDWR);
+       if(readOnly)
+           access =NXACC_READ;
+
+       std::unique_ptr<::NeXus::File> hFile;
+        try
+        {
+           if(fileExists)
+              hFile = std::unique_ptr<::NeXus::File> ( new ::NeXus::File(fileName, access));
+          else
+              hFile = std::unique_ptr<::NeXus::File> (new ::NeXus::File(fileName, NXACC_CREATE5));
+        }
+        catch(...)
+        {
+          throw Kernel::Exception::FileError("Can not open NeXus file",fileName);
+        }
+
+      std::map<std::string, std::string> groupEntries;
+
+        hFile->getEntries(groupEntries);
+        if(groupEntries.find("MDEventWorkspace")!=groupEntries.end()) // WS group exist
+        {
+        // Open and check ws group -------------------------------------------------------------------------------->>>
+            hFile->openGroup("MDEventWorkspace", "NXentry");
+
+            std::string eventType;
+            if(hFile->hasAttr("event_type"))
+            {
+                hFile->getAttr("event_type",eventType);
+
+                if(eventType != WSEventType)
+                      throw Kernel::Exception::FileError("Trying to open MDWorkspace nexus file with the the events: "+eventType+
+                      "\n different from workspace type: "  +WSEventType,fileName);
+            }
+            else // it is possible that woerkspace group has been created by somebody else and there are no this kind of attribute attached to it. 
+            {
+                if(readOnly) 
+                    throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace opened in read-only mode but \n"
+                                                       " does not have necessary attribute describing the event type used",fileName);
+                 hFile->putAttr("event_type", WSEventType);
+            }
+            // check dimesions dataset
+            bool dimDatasetExist(false);
+            hFile->getEntries(groupEntries);
+            if(groupEntries.find("dimensions")!=groupEntries.end()) //dimesnions dataset exist
+                dimDatasetExist = true;
+
+              if(dimDatasetExist)
+              {
+                int32_t nFileDims;
+                hFile->readData<int32_t>("dimensions",nFileDims);
+                if(nFileDims != nDims)
+                        throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace initiated for different number of dimensions then requested ",
+                        fileName);
+              }
+              else
+              {
+                 auto nFileDim = int32_t(nDims);
+              // Write out  # of dimensions
+                 hFile->writeData("dimensions", nFileDim);
+              }
+        // END Open and check ws group --------------------------------------------------------------------------------<<<<
+        }
+        else 
+        {
+        // create new WS group      ------------------------------------------------------------------------------->>>>>
+          if(readOnly) 
+              throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace does not exist in the read-only file",fileName);
+
+           try
+           {
+                hFile->makeGroup("MDEventWorkspace", "NXentry", true);
+                hFile->putAttr("event_type",WSEventType);
+
+                auto nDim = int32_t(nDims);
+              // Write out  # of dimensions
+                 hFile->writeData("dimensions", nDim);
+           }catch(...){
+                throw Kernel::Exception::FileError("Can not create new NXdata group: MDEventWorkspace",fileName);
+           }
+          //END create new WS group      -------------------------------------------------------------------------------<<<
+        }
+        return hFile.release();
+  }
 
 
   // TODO: Get rid of this --> create  the box generator and move all below into MDBoxFactory!

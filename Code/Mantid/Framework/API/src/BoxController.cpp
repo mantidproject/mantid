@@ -33,27 +33,6 @@ namespace API
         // reset the clone file IO controller to avoid dublicated file based operations for different box controllers
         return BoxController_sptr(new BoxController(*this));
   }
-   /** makes box controller file based by providing class, responsible for fileIO. The box controller become responsible for the FileIO pointer
-    *@param newFileIO -- instance of the box controller responsible for the IO;
-    *@param fileName  -- if newFileIO comes without opened file, this is the file name to open for the file based IO operations
-   */
-   void BoxController::setFileBacked(IBoxControllerIO *newFileIO,const std::string &fileName)
-     {
-         if(!newFileIO->isOpened())
-             newFileIO->openFile(fileName,"w");
-
-         if(!newFileIO->isOpened())
-         {
-             delete newFileIO;
-             throw(Kernel::Exception::FileError("Can not open target file for filebased box controller ",fileName));
-         }
-
-         // kill old fileIO if any 
-         if(this->m_fileIO) // should happen in destructor anyway but just to be carefull about it
-             this->m_fileIO->closeFile();
-
-         this->m_fileIO = boost::shared_ptr<IBoxControllerIO>(newFileIO);
-     }
 
   /*Private Copy constructor used in cloning */
   BoxController::BoxController(const BoxController & other)
@@ -197,8 +176,42 @@ namespace API
 
     this->calcNumSplit();
   }
+  /** function clears the file-backed status of the box controller */ 
+   void BoxController::clearFileBacked()
+   {
+       if(m_fileIO)
+       {
+          m_fileIO->flushCache();
+          // close underlying file
+          m_fileIO->closeFile();
+          // decrease the sp counter by one and nullify this instance of sp.
+          m_fileIO.reset();
+       }
+   }
+   /** makes box controller file based by providing class, responsible for fileIO. The box controller become responsible for the FileIO pointer
+    *@param newFileIO -- instance of the box controller responsible for the IO;
+    *@param fileName  -- if newFileIO comes without opened file, this is the file name to open for the file based IO operations
+   */
+   void BoxController::setFileBacked( boost::shared_ptr<IBoxControllerIO> newFileIO,const std::string &fileName)
+     {
+         if(!newFileIO->isOpened())
+             newFileIO->openFile(fileName,"w");
 
+         if(!newFileIO->isOpened())
+         {
+             newFileIO.reset();
+             throw(Kernel::Exception::FileError("Can not open target file for filebased box controller ",fileName));
+         }
 
+         // kill old fileIO if any 
+         if(this->m_fileIO)// should happen in destructor anyway but just to be carefull about it
+         {
+             this->m_fileIO->flushCache();
+             this->m_fileIO->closeFile();
+         }
+
+         this->m_fileIO = newFileIO;
+     }
 
 
 } // namespace Mantid

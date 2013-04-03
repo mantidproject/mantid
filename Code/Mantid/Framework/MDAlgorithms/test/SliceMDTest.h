@@ -177,7 +177,7 @@ public:
     AnalysisDataService::Instance().remove("SliceMDTest_ws");
     AnalysisDataService::Instance().remove("SliceMDTest_outWS");
     // Clean up file
-    out->getBoxController()->closeFile(true);
+    out->clearFileBased();
 
  
 

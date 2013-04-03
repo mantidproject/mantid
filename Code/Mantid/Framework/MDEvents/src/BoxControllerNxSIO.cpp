@@ -1,4 +1,5 @@
 #include "MantidMDEvents/BoxControllerNxSIO.h"
+#include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FileFinder.h"
 #include <NeXusFile.hpp>
@@ -14,7 +15,6 @@ namespace MDEvents
     // Default headers(attributes) describing the contents of the data, written by this class
     const char *EventHeaders[] ={"signal, errorSquared, center (each dim.)","signal, errorSquared, runIndex, detectorId, center (each dim.)"};
 
-    std::string BoxControllerNxSIO::g_EventWSGroupName("MDEventWorkspace");
     std::string BoxControllerNxSIO::g_EventGroupName("event_data");
     std::string BoxControllerNxSIO::g_DBDataName("free_space_blocks");
 
@@ -130,41 +130,16 @@ namespace MDEvents
           else
               throw Kernel::Exception::FileError("Can not open file to read ",m_fileName);
       }
-      try
-      {
-          if(fileExists)
-              m_File = new ::NeXus::File(m_fileName, access);
-          else
-              m_File = new ::NeXus::File(m_fileName, NXACC_CREATE5);
-      }
-      catch(...)
-      {
-          throw Kernel::Exception::FileError("Can not open NeXus file",m_fileName);
-      }
-
-      // idenity if neessary group is already in the file
-
+      m_File = MDBoxFlatTree::createOrOpenMDWSgroup(m_fileName,this->m_bc->getNDims(), m_EventsTypesSupported[m_EventType],m_ReadOnly);
+      // we are in MD workspace Class  group now
       std::map<std::string, std::string> groupEntries;
-
       m_File->getEntries(groupEntries);
-      if(groupEntries.find(g_EventWSGroupName)!=groupEntries.end()) // WS group exist
-      {
-          OpenAndCheckWSGroup();
-          // get WS group entries
-          m_File->getEntries(groupEntries);
-
-         if(groupEntries.find(g_EventGroupName)!=groupEntries.end()) // Event gropup exist
-              OpenAndCheckEventGroup();
-         else
-              CreateEventGroup();
-      }
-      else // create ws group and Event Group place Event attribute to it. 
-      {
-          CreateWSGroup();
+      if(groupEntries.find(g_EventGroupName)!=groupEntries.end()) // yes, open it
+          OpenAndCheckEventGroup();
+      else // create and open it
           CreateEventGroup();
-      }
+      // we are in MDEvent group now (either created or opened)
 
-      // we are in MDEvnt data group now
 
       // read if exist and create if not the group, which is responsible for saving DiskBuffer infornation;
       getDiskBufferFileData();
@@ -193,78 +168,7 @@ namespace MDEvents
             throw Kernel::Exception::FileError("Can not create new NXdata group: "+g_EventGroupName,m_fileName);
        }
   }
-  /**Create group responsible for keeping MD event workspace and add necessary (some) attributes to it*/ 
-  void BoxControllerNxSIO::CreateWSGroup()
-  {
-      if(m_ReadOnly) 
-          throw Kernel::Exception::FileError("The NXdata group: "+g_EventWSGroupName+" does not exist in the file opened for read",m_fileName);
-
-      try
-      {
-          m_File->makeGroup(g_EventWSGroupName, "NXentry", true);
-          m_File->putAttr("event_type", m_EventsTypesSupported[m_EventType]);
-
-          auto nDim = int32_t(m_bc->getNDims());
-          // Write out  # of dimensions
-          m_File->writeData("dimensions", nDim);
-      }catch(...)
-      {
-          throw Kernel::Exception::FileError("Can not create new NXdata group: "+g_EventWSGroupName,m_fileName);
-      }
-
-  }
-  /** Open existing Workspace group and check the attributes necessary for this algorithm to work*/ 
-  void BoxControllerNxSIO::OpenAndCheckWSGroup()
-  {
-      m_File->openGroup(g_EventWSGroupName, "NXentry");
-
-      std::string eventType;
-      if(m_File->hasAttr("event_type"))
-      {
-        m_File->getAttr("event_type",eventType);
-
-        if(eventType != m_EventsTypesSupported[m_EventType])
-              throw Kernel::Exception::FileError("BoxControllerNxSIO set up to read the type of event, different from the type: "
-                                                  +eventType+" find in the file",m_fileName);
-      }
-      else // it is possible that woerkspace group has been created by somebody else and there are no this kind of attribute attached to it. 
-      {
-          if(m_ReadOnly) 
-              throw Kernel::Exception::FileError("The NXdata group: "+g_EventWSGroupName+
-                                                 " does not have necessary attribute describing the event type used",m_fileName);
-
-           m_File->putAttr("event_type", m_EventsTypesSupported[m_EventType]);
-
-      }
-      checkWSDimesnions();
-
-  }
-  /** Open and check dimesnions datafield. Write it if absend or read and compare it with exisiting dimension information if present*/ 
-  void BoxControllerNxSIO::checkWSDimesnions()
-  {
-      std::map<std::string, std::string> groupEntries;
-      bool dimDatasetExist(false);
-      m_File->getEntries(groupEntries);
-      if(groupEntries.find("dimensions")!=groupEntries.end()) //dimesnions dataset exist
-          dimDatasetExist = true;
-
-      if(dimDatasetExist)
-      {
-          int32_t nDims;
-          m_File->readData<int32_t>("dimensions",nDims);
-          if(nDims != m_bc->getNDims())
-              throw Kernel::Exception::FileError("BoxControllerNxSIO set up to read the file with dimensions, different from the specified in the workspace ",
-              m_fileName);
-      }
-      else
-      {
-          auto nDim = int32_t(m_bc->getNDims());
-          // Write out  # of dimensions
-          m_File->writeData("dimensions", nDim);
-      }
-
-  };
-
+  
   /** Open existing Event group and check the attributes necessary for this algorithm to work */ 
   void BoxControllerNxSIO::OpenAndCheckEventGroup()
   {
@@ -359,8 +263,8 @@ namespace MDEvents
   /** Load free space blocks from the data file or create the NeXus place to read/write them*/
   void BoxControllerNxSIO::getDiskBufferFileData()
   {
-      std::vector<uint64_t> freeSpaceBlocks;
-      this->getFreeSpaceVector(freeSpaceBlocks);
+     std::vector<uint64_t> freeSpaceBlocks;
+     this->getFreeSpaceVector(freeSpaceBlocks);
      if (freeSpaceBlocks.empty())
          freeSpaceBlocks.resize(2, 0); // Needs a minimum size
 
@@ -472,8 +376,8 @@ namespace MDEvents
              }
 
              m_File->closeGroup(); // close events group
-             m_File->closeGroup();
-             m_File->close();
+             m_File->closeGroup(); // close workspace group
+             m_File->close();      // close NeXus file
 
              delete m_File;
              m_File=NULL;

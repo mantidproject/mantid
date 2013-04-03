@@ -130,7 +130,7 @@ namespace MDAlgorithms
     // Recalculate the totals
     ws->refreshCache();
     // Mark file-backed workspace as dirty
-    ws->setFileNeedsUpdating(true);
+    //ws->setFileNeedsUpdating(true);
   }
 
 

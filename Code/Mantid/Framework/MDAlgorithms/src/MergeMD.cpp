@@ -245,9 +245,9 @@ namespace MDAlgorithms
     tp.joinAll();
 
     // Set a marker that the file-back-end needs updating if the # of events changed.
-    if (ws1->getNPoints() != initial_numEvents)
-      ws1->setFileNeedsUpdating(true);
-
+   // if (ws1->getNPoints() != initial_numEvents)
+   //   ws1->setFileNeedsUpdating(true);
+//
     //std::cout << tim << " to add workspace " << ws2->name() << std::endl;
 
   }

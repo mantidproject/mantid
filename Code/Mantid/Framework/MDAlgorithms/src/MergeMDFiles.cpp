@@ -42,8 +42,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  MergeMDFiles::MergeMDFiles() :
-  m_BoxStruct("")
+  MergeMDFiles::MergeMDFiles()
   {
   }
     

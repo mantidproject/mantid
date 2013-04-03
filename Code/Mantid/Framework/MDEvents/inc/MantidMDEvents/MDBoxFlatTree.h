@@ -43,7 +43,7 @@ namespace MDEvents
     /**The constructor of the flat box tree
      *@param -- fileName -- the name of the file to load/save the box strucure to. 
     */
-    MDBoxFlatTree(const std::string &fileName);
+    MDBoxFlatTree();
 
 
     /**@return XML description of the workspace box controller */
@@ -72,15 +72,15 @@ namespace MDEvents
 
     /**Save flat box structure into a file, defined by the file name*/
     void saveBoxStructure(const std::string &fileName);
-    /**load box structure from the file, defined by file name */
-    void loadBoxStructure(const std::string &fileName);
- 
-  private:
     /**Save flat box structure into properly open nexus file*/
     void saveBoxStructure(::NeXus::File *hFile);
+
+    /**load box structure from the file, defined by file name */
+    void loadBoxStructure(const std::string &fileName);
+  protected: // for testing
+  private:
     /**Load flat box structure from a nexus file*/
     void loadBoxStructure(::NeXus::File *hFile);
-
    //----------------------------------------------------------------------------------------------
     int m_nDim;
     // The name of the file the class will be working with 
@@ -104,7 +104,16 @@ namespace MDEvents
 
     std::string m_bcXMLDescr;
 
+  /// Reference to the logger class
+    static Kernel::Logger& g_log;
+  public:
+    static ::NeXus::File * createOrOpenMDWSgroup(const std::string &fileName,size_t nDims, const std::string &WSEventType, bool readOnly);
+    // save each experiment info into its own NeXus group within an existing opened group
+    static void saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws);
+
   };
+
+
 }
 }
 #endif

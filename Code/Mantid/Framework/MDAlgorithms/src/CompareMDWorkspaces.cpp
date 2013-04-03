@@ -215,7 +215,7 @@ namespace MDAlgorithms
         API::IMDNode* box2 = boxes2[j];
 
       this->compare( box1->getID(), box2->getID(), "Boxes have different ID" );
-      this->compare( box1->getDepth(), box2->getDepth(), "Boxes are at a different depth" );
+      this->compare(size_t(box1->getDepth()), size_t(box2->getDepth()), "Boxes are at a different depth" );
       this->compare( box1->getNumChildren(), box2->getNumChildren(), "Boxes do not have the same number of children");
       for (size_t i=0; i<box1->getNumChildren(); i++)
         this->compare( box1->getChild(i)->getID(), box2->getChild(i)->getID(), "Child of boxes do not match IDs" );

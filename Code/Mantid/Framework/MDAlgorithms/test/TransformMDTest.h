@@ -83,8 +83,8 @@ public:
     }
 
     // Clean up files
-    ws1->getBoxController()->closeFile(true);
-    ws2->getBoxController()->closeFile(true);
+    ws1->clearFileBased();
+    ws2->clearFileBased();
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(inWSName);

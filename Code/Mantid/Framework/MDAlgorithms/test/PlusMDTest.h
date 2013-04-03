@@ -78,27 +78,38 @@ public:
           "UpdateFileBackEnd", "1");
 
       Mantid::API::BoxController_sptr bc = ws->getBoxController();
-      std::cout << bc->getDiskBuffer().getFreeSpaceMap().size() << " entries in the free space map" << std::endl;
+      std::cout << bc->getFileIO()->getFreeSpaceMap().size() << " entries in the free space map" << std::endl;
       ::NeXus::File * file = bc->getFile();
       // The file should have an entry of 20000 points too (with some error due to the free space blocks). This means the file back-end was updated
       TS_ASSERT_DELTA(file->getInfo().dims[0], 20000, 100);
 
       // Close the file so you can delete it. Otherwise the following test gets confused.
       if (deleteFile)
-        ws->getBoxController()->closeFile(true);
+      {
+          std::string fileName = ws->getBoxController()->getFileIO()->getFileName();
+          ws->clearFileBased();         
+          Poco::File(fileName).remove();
+      }
+
     }
     //cleanup
     if ((inPlace==1)&&rhs->isFileBacked())
     {
-        rhs->getBoxController()->closeFile(true);
+          std::string fileName = ws->getBoxController()->getFileIO()->getFileName();
+          rhs->clearFileBased();         
+          Poco::File(fileName).remove();
     }
     if ((inPlace==2)&&lhs->isFileBacked())
     {
-        lhs->getBoxController()->closeFile(true);
+          std::string fileName = ws->getBoxController()->getFileIO()->getFileName();
+          lhs->clearFileBased();         
+          Poco::File(fileName).remove();
     }
     if (ws->isFileBacked())
     {
-        ws->getBoxController()->closeFile(true);
+          std::string fileName = ws->getBoxController()->getFileIO()->getFileName();
+          ws->clearFileBased();         
+          Poco::File(fileName).remove();
     }
   }
   

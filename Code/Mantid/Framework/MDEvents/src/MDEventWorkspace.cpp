@@ -87,7 +87,16 @@ namespace MDEvents
   {
       throw Kernel::Exception::NotImplementedError(" Not yet implemented");
   }
-
+  /** If the workspace was filebacked, this would clear file-backed information from the workspace nodes and close the underlying files*/ 
+  TMDE(
+  void MDEventWorkspace)::clearFileBacked()
+  {     
+      if(m_BoxController->isFileBacked())
+      {
+          m_BoxController->clearFileBacked();
+          data->clearFileBacked();
+      }
+  }
   //-----------------------------------------------------------------------------------------------
   /** Perform initialization after m_dimensions (and others) have been set.
    * This sets the size of the box.
@@ -375,9 +384,9 @@ namespace MDEvents
       mess << "Write buffer: " << used << " of " << avail << " MB. ";
       out.push_back(mess.str()); mess.str("");
 
-      mess << "File";
-      if (this->fileNeedsUpdating())
-        mess << " (needs updating)";
+      //mess << "File";
+      //if (this->fileNeedsUpdating())
+      //  mess << " (needs updating)";
 
       mess << ": " << this->m_BoxController->getFileIO()->getFileName();
       out.push_back(mess.str()); mess.str("");
@@ -872,6 +881,7 @@ namespace MDEvents
     }
     return result;
   }
+
 
 }//namespace MDEvents
 

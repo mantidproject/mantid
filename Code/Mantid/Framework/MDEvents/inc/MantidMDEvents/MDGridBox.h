@@ -56,8 +56,9 @@ namespace MDEvents
     /**Recursively make all underlaying boxes file-backed*/
     virtual void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/);
     virtual void setFileBacked();
+    virtual void clearFileBacked();
     void clear();
-    void clearDataFromMemory(){/*it seems works on boxes only though recursive clearing makes sence*/};
+    void clearDataFromMemory(){/*it seems works on boxes only though recursive clearing makes sence, not yet implemented*/};
     /**Save the box at specific disk position using the class, respoinsible for the file IO. */
     virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)const
     {/*Not saveable */};    

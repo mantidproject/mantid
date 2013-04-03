@@ -48,7 +48,7 @@ namespace MDEvents
             virtual void load();
             /// Method to flush the data to disk and ensure it is written.
             virtual void flushData()const;
-            /// remove objects data from memory  
+            /// remove objects data from memory but keep all averages
             virtual void clearDataFromMemory()
             {m_MDNode->clearDataFromMemory();}
 

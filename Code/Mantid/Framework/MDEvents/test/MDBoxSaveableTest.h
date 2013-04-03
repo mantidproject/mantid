@@ -45,7 +45,7 @@ class MDBoxSaveableTest : public CxxTest::TestSuite
   {
     std::string filename(ConfigService::Instance().getString("defaultsave.directory") + barefilename);
     if (Poco::File(filename).exists())  
-        Poco::File(filename()).remove();
+        Poco::File(filename).remove();
     return filename;
   }
 

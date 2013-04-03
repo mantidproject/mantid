@@ -1558,12 +1558,23 @@ namespace MDEvents
   TMDE(
   void MDGridBox)::setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)
   {
-      throw(Kernel::Exception::NotImplementedError("Recursive file backed is not yet implemented"));
+      throw(Kernel::Exception::NotImplementedError("Recursive file backed is not yet implemented (unclear how to set file location etc)"));
   }
   TMDE(
   void MDGridBox)::setFileBacked()
   {
       this->setFileBacked(UNDEF_UINT64,0,false);
+  }
+  /** Clear file-backed information, stored in mdBoxes */ 
+  TMDE(
+  void MDGridBox)::clearFileBacked()
+  {
+      auto it=m_Children.begin();
+      auto it_end = m_Children.end();
+      for(;it!=it_end;it++)
+      {
+          (*it)->clearFileBacked();
+      }
   }
 }//namespace MDEvents
 
