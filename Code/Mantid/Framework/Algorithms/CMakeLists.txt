@@ -52,6 +52,7 @@ set ( SRC_FILES
 	src/CreateFlatEventWorkspace.cpp
 	src/CreateGroupingWorkspace.cpp
 	src/CreateLogPropertyTable.cpp
+	src/CreateLogTimeCorrection.cpp
 	src/CreatePSDBleedMask.cpp
 	src/CreatePeaksWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
@@ -261,6 +262,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateFlatEventWorkspace.h
 	inc/MantidAlgorithms/CreateGroupingWorkspace.h
 	inc/MantidAlgorithms/CreateLogPropertyTable.h
+	inc/MantidAlgorithms/CreateLogTimeCorrection.h
 	inc/MantidAlgorithms/CreatePSDBleedMask.h
 	inc/MantidAlgorithms/CreatePeaksWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
@@ -480,6 +482,7 @@ set ( TEST_FILES
 	CreateFlatEventWorkspaceTest.h
 	CreateGroupingWorkspaceTest.h
 	CreateLogPropertyTableTest.h
+	CreateLogTimeCorrectionTest.h
 	CreatePSDBleedMaskTest.h
 	CreatePeaksWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
