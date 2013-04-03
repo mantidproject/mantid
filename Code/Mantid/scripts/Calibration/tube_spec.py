@@ -18,8 +18,8 @@ class TubeSpec:
 	self.ws = ws
         self.inst = ws.getInstrument()
         self.numTubes = 0
-        self.specComponentArray = []
-        self.component = 0  # NEXT STEP: Put self.component into array ##########
+        self.componentNameArray = []
+        self.componentArray = [] 
         self.minNumDetsInTube = 200 
         self.tubes = []
         
@@ -42,7 +42,7 @@ class TubeSpec:
         If the specification is not unique, the first found will be used and there will
         be no error message. So if in doubt don't skip a step.
         """	
-        self.specComponentArray.append(tubeSpecString) 
+        self.componentNameArray.append(tubeSpecString) 
         self.delimiter = '/' # delimiter between parts of string in tree
         self.numTubes = -1  # Negative value forces tubes to be searched and counted
                
@@ -106,18 +106,18 @@ class TubeSpec:
          	
 	@Return value: instrument component
         """
-        if( self.component != 0):
-            return self.component
+        if( self.componentArray != []):
+            return self.componentArray[0]
         
         # We look for the component    
-        print "Looking for", self.specComponentArray[0], 
+        print "Looking for", self.componentNameArray[0], 
         
-        comp = self.inst.getComponentByName(self.specComponentArray[0])
+        comp = self.inst.getComponentByName(self.componentNameArray[0])
 
 	if( comp ):
-	     self.component = comp
+	     self.componentArray.append(comp)
 	     
-	return self.component
+	return self.componentArray[0]
  
 	
     def getDetectorInfoFromTube( self, tubeIx ):
@@ -158,7 +158,7 @@ class TubeSpec:
             #print "First dectector ", firstDet," Last detector ", firstDet+numDet-1, "Number of detectors ", numDet
             #print "First dectector ", firstDet," Last detector ", comp[numDet-1].getID()
         else:
-            print self.specComponentArray[0], tubeIx, "not found"
+            print self.componentNameArray[0], tubeIx, "not found"
             return 0, 0, 1
                         
         return firstDet, numDet, step
@@ -186,7 +186,7 @@ class TubeSpec:
 	    numDet = comp.nelements()
             return comp[0].getDistance( comp[numDet-1] )
         else:
-            print self.specComponentArray[0], tubeIx, "not found"
+            print self.componentNameArray[0], tubeIx, "not found"
             return 0.0
             
     def getTubeName ( self, tubeIx ):
@@ -212,7 +212,7 @@ class TubeSpec:
 	if(comp != 0):
 	    return comp.getFullName()
         else:
-            print self.specComponentArray[0], tubeIx, "not found"
+            print self.componentNameArray[0], tubeIx, "not found"
             return "Unknown"
 
                         
