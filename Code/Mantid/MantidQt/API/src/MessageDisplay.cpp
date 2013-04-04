@@ -61,16 +61,32 @@ namespace MantidQt
       }
 
       connect(m_logChannel, SIGNAL(messageReceived(const QString&)),
-          this, SLOT(displayMessage(const QString &)));
+          this, SLOT(append(const QString &)));
     }
 
-
     /**
-     * @param A message that is echoed to the display
+     * @param msg A message that is echoed to the display after the
+     * current text
      */
-    void MessageDisplay::displayMessage(const QString & msg)
+    void MessageDisplay::append(const QString & msg)
     {
       m_textDisplay->append(msg);
+    }
+
+    /**
+     * @param msg Replace the curren contents with this message
+     */
+    void MessageDisplay::replace(const QString & msg)
+    {
+      m_textDisplay->setText(msg);
+    }
+
+    /**
+     * Clear all of the text
+     */
+    void MessageDisplay::clear()
+    {
+      m_textDisplay->clear();
     }
 
     /**

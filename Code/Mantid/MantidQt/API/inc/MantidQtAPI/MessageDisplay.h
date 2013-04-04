@@ -47,8 +47,12 @@ namespace MantidQt
       void attachLoggingChannel();
 
     public slots:
-      /// Write a message
-      void displayMessage(const QString & msg);
+      /// Write a message after the current contents
+      void append(const QString & msg);
+      /// Replace the display text with the given contents
+      void replace(const QString & msg);
+      /// Clear all of the text
+      void clear();
 
     private slots:
       /// Provide a custom context menu
