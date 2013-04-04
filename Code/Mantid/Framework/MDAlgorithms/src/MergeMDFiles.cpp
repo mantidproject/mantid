@@ -23,6 +23,7 @@ See also: [[MergeMD]], for merging any MDWorkspaces in system memory (faster, bu
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/BoxControllerNxSIO.h"
 #include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidAPI/MemoryManager.h"
 
@@ -51,6 +52,7 @@ namespace MDAlgorithms
    */
   MergeMDFiles::~MergeMDFiles()
   {
+      clearEventLoaders();
   }
   
 
@@ -85,295 +87,263 @@ namespace MDAlgorithms
 
   //----------------------------------------------------------------------------------------------
   /** Loads all of the box data required (no events) for later use.
-    * Calculates total number events in each box
-   * Also opens the files and leaves them open */
-  //template<typename MDE, size_t nd>
-  //void MergeMDFiles::loadBoxData()
-  //{
-  //  this->progress(0.05, "Loading File Info");
-  //  std::vector<double> &sigErr      = m_BoxStruct.getSigErrData();
-  //  std::vector<uint64_t>& eventPlaces = m_BoxStruct.getEventIndex();
-  //  // prepare target workspace arrays of data/indexes
-  //  for(size_t i=0;i<sigErr.size();i++)
-  //  {
-  //    sigErr[i]=0;
-  //    eventPlaces[i]=0;
-  //  }
-  //  // Get plain box structure and box tree
-  //  std::vector<Kernel::ISaveable *> &pBoxes = m_BoxStruct.getBoxes();
+  * Calculates total number events in each box
+  * Also opens the files and leaves them open */
+  template<typename MDE, size_t nd>
+  void MergeMDFiles::loadBoxData()
+  {
+      this->progress(0.05, "Loading File Info");
+     // Get plain box structure and box tree
+      std::vector<API::IMDNode *> &Boxes = m_BoxStruct.getBoxes();
+      std::vector<uint64_t>       &targetEventIndexes= m_BoxStruct.getEventIndex();
+      // clear the averages for target event indexes;
+      targetEventIndexes.assign(targetEventIndexes.size(),0);
 
-  //  // Total number of events in ALL files.
-  //  totalEvents = 0;
-  //  m_EachBoxIndexes.reserve(m_Filenames.size());
-  //  m_pFiles.reserve(m_Filenames.size());
-  //  std::vector<double> fileN_SigErr;
-  //  try
-  //  {
-  //    for (size_t i=0; i<m_Filenames.size(); i++)
-  //    {
-  //      // Open the file to read
-  //      ::NeXus::File * file = new ::NeXus::File(m_Filenames[i], NXACC_READ);
-  //      m_pFiles.push_back(file);
+      // Total number of events in ALL files.
+      totalEvents = 0;
 
-  //      file->openGroup("MDEventWorkspace", "NXentry");
-  //      file->openGroup("box_structure", "NXdata");
+      m_fileComponentsStructure.resize(m_Filenames.size());
+      m_EventLoader.assign(m_Filenames.size(),NULL);
 
-  //      // Start index/length into the list of events
-  //      auto spBoxEventsInd = boost::shared_ptr<std::vector<uint64_t> >(new std::vector<uint64_t>());//box_event_index;
-  //      file->readData("box_event_index", *spBoxEventsInd);
-  //      m_EachBoxIndexes.push_back(spBoxEventsInd);
+      try
+      {
+          for (size_t i=0; i<m_Filenames.size(); i++)
+          {
+              m_fileComponentsStructure[i].loadBoxStructure(m_Filenames[i],nd,MDE::getTypeName(),true);
 
-  //      file->readData("box_signal_errorsquared",fileN_SigErr);
+              // Check for consistency
+              if (i>0)
+              {
+                  if (m_fileComponentsStructure[i].getEventIndex().size() != targetEventIndexes.size())
+                      throw std::runtime_error("Inconsistent number of boxes found in file " + m_Filenames[i] + 
+                      ". Cannot merge these files. Did you generate them all with exactly the same box structure?");
+              }
 
-  //      // Check for consistency
-  //      if (i>0)
-  //      {
-  //        if (spBoxEventsInd->size() != m_EachBoxIndexes[0]->size())
-  //          throw std::runtime_error("Inconsistent number of boxes found in file " + m_Filenames[i] + ". Cannot merge these files. Did you generate them all with exactly the same box structure?");
-  //      }
-  //      file->closeGroup();
-  //      // calculate total number of events per cell and total signal/error
-  //      size_t nBoxes = spBoxEventsInd->size()/2;
-  //      for(size_t j=0;j<nBoxes;j++)
-  //      {
-  //        size_t ID = pBoxes[j]->getId();
-  //        eventPlaces[2*ID+1]+= spBoxEventsInd->operator[](2*ID+1);
-  //        sigErr[2*ID  ]+= fileN_SigErr[2*ID ];
-  //        sigErr[2*ID+1]+= fileN_SigErr[2*ID+1];
-  //      }
+              // calculate total number of events per target cell, which will be 
+              size_t nBoxes = Boxes.size();
+              for(size_t j=0;j<nBoxes;j++)
+              {
+                  size_t ID = Boxes[j]->getID();
+                  targetEventIndexes[2*ID+1]+= m_fileComponentsStructure[i].getEventIndex()[2*ID+1];
+                  totalEvents               +=m_fileComponentsStructure[i].getEventIndex()[2*ID+1];
+              }
 
-  //      // Navigate to the event_data block and leave it open
-  //      file->openGroup("event_data", "NXdata");
-  //      // Open the event data, track the total number of events
-  //      totalEvents += API::BoxController::openEventNexusData(file);
-  //    }
-  //  }
-  //  catch (...)
-  //  {
-  //    // Close all open files in case of error
-  //    for (size_t i=0; i<m_pFiles.size(); i++)
-  //      m_pFiles[i]->close();
-  //    throw;
-  //  }
+              // Open the event data, track the total number of events
+              auto  bc = boost::shared_ptr<API::BoxController>(new API::BoxController(nd));
+              bc->fromXMLString(m_fileComponentsStructure[i].getBCXMLdescr());
 
-  //  // This is how many boxes are in all the files.
-  //  size_t numBoxes = m_EachBoxIndexes[0]->size() / 2;
-  //  //Kernel::ISaveable::sortObjByFilePos(pBoxes);
-  //  if(pDiskBuffer)
-  //  {
-  //    // synchronize plain box structure and box tree
-  //      uint64_t filePos=0;
-  //      for(size_t i=0;i<numBoxes;i++)
-  //      {
-  //        size_t ID = pBoxes[i]->getId();
-  //        uint64_t nEvents = eventPlaces[2*ID+1];
-  //        pBoxes[i]->setFilePosition(filePos,nEvents,false);
+              m_EventLoader[i] = new BoxControllerNxSIO(bc);
+              m_EventLoader[i]->setDataType(sizeof(coord_t),MDE::getTypeName());
+              m_EventLoader[i]->openFile(m_Filenames[i],"r");
 
-  //        filePos +=nEvents;
+          }
+      }
+      catch (...)
+      {
+          // Close all open files in case of error
+          clearEventLoaders();
+          throw;
+      }
 
-  //        MDBoxBase<MDE,nd> * box = dynamic_cast<MDBoxBase<MDE,nd> *>(pBoxes[i]);
-  //      // clear event data from memory if something left there from cloning -- it is rubbish anyway;
-  //        box->clear();
-  //      // set up integral signal and error
-  //        box->setSignal(sigErr[2*ID  ]);
-  //        box->setErrorSquared(sigErr[2*ID+1]);
-  //      }
-  //    if(filePos!=totalEvents)throw std::runtime_error("Number of total events is not equal to number of events in all files, logic");  
-  //  }
-  //  else
-  //  {  // just clear boxes to be on a safe side
-  //     for(size_t i=0;i<numBoxes;i++)
-  //      {
-  //        MDBoxBase<MDE,nd> * box = dynamic_cast<MDBoxBase<MDE,nd> *>(pBoxes[i]);
-  //      // clear event data from memory if something left there from cloning -- it is rubbish anyway;
-  //        box->clear();
-  //      }
+      const std::vector<int> &boxType =m_BoxStruct.getBoxType();
+      // calculate event positions in the target file. 
+      uint64_t eventsStart=0;
+      for(size_t i=0;i<Boxes.size();i++)
+      {
+          API::IMDNode * mdBox = Boxes[i];        
+          mdBox->clear();
+          size_t ID = mdBox->getID();
 
+          // avoid grid boxes;
+          if(boxType[ID]==2) continue;
 
-  //  }
+          uint64_t nEvents = targetEventIndexes[2*ID+1];
+          targetEventIndexes[ID*2]   = eventsStart;
+          if(m_fileBasedTargetWS)
+              mdBox->setFileBacked(eventsStart,nEvents,false);
 
-  //  g_log.notice() << totalEvents << " events in " << m_pFiles.size() << " files." << std::endl;
-  //}
+          eventsStart+=nEvents;
+      }
 
-  ///** Task that loads all of the events from correspondend boxes of all files
-  //  * that is being merged into a particular box in the output workspace.
-  //*/
-  //template<typename MDE, size_t nd>
-  //uint64_t MergeMDFiles::loadEventsFromSubBoxes(MDBox<MDE, nd> *TargetBox)
-  //{
-  //  /// the events which are in the 
-  //  std::vector<MDE> AllBoxEvents;
-  //  AllBoxEvents.reserve(TargetBox->getFileSize());
+      g_log.notice() << totalEvents << " events in " << m_Filenames.size() << " files." << std::endl;
+  }
 
-  //  uint64_t nBoxEvents(0);
-  //  for (size_t iw=0; iw<this->m_pFiles.size(); iw++)
-  //  {
-  //    size_t ID = TargetBox->getId();
-  // // The file and the indexes into that file
-  //    ::NeXus::File * file = this->m_pFiles[iw];
-  //     auto spBoxEventInd = this->m_EachBoxIndexes[iw];
+  /** Task that loads all of the events from correspondend boxes of all files
+    * that is being merged into a particular box in the output workspace.
+  */
 
-  //     uint64_t fileLocation   = spBoxEventInd->operator[](ID*2+0);
-  //     uint64_t numFileEvents  = spBoxEventInd->operator[](ID*2+1);
+  uint64_t MergeMDFiles::loadEventsFromSubBoxes(API::IMDNode *TargetBox)
+  {
+    /// the events which are in the 
+    TargetBox->clear();
 
-  //    if (numFileEvents == 0) continue;
-  //    nBoxEvents += numFileEvents;
+    uint64_t nBoxEvents(0);
+    for (size_t iw=0; iw<this->m_EventLoader.size(); iw++)
+    {
+      size_t ID = TargetBox->getID();
 
-  //        //// Occasionally release free memory (has an effect on Linux only).
-  //        //if (numEvents > 1000000)
-  //        //  MemoryManager::Instance().releaseFreeMemory();
+       uint64_t fileLocation   = m_fileComponentsStructure[iw].getEventIndex()[2*ID+0];
+       size_t   numFileEvents  = static_cast<size_t>(m_fileComponentsStructure[iw].getEventIndex()[2*ID+1]);
+       //TODO: it is possible to avoid the reallocation of the memory at each load 
+      TargetBox->loadAndAddFrom(m_EventLoader[iw],fileLocation,numFileEvents);
 
-  //    // This will APPEND the events to the one vector
-  //    MDE::loadVectorFromNexusSlab(AllBoxEvents, file, fileLocation, numFileEvents);
-  //  }
-  //  std::vector<MDE> &data = TargetBox->getEvents();
-  //  data.swap(AllBoxEvents);
-  //  if(pDiskBuffer) // file based workspaces have to have correct file size and position already set
-  //  {
-  //    if(nBoxEvents!=TargetBox->getFileSize())
-  //      throw std::runtime_error("Initially estimated and downloaded number of events are not consitant");
-  //  }
-  //  // tell everybody that these events will not be needed any more and can be saved on HDD if necessary
-  //  TargetBox->releaseEvents();
-  //  // set box attribute telling that the data were loaded from HDD to not trying to load them again (from the target file which is wrong)
-  //  TargetBox->setLoaded();
-  //  return nBoxEvents;
-  //}
-  ////----------------------------------------------------------------------------------------------
-  ///** Perform the merging, but clone the initial workspace and use the same splitting
-  // * as it
-  // *
-  // * @param ws :: first MDEventWorkspace in the list to merge
-  // */
-  //template<typename MDE, size_t nd>
-  //void MergeMDFiles::doExecByCloning(typename MDEventWorkspace<MDE, nd>::sptr ws)
-  //{
-  //  std::string outputFile = getProperty("OutputFilename");
-  //  bool fileBasedWS(false);
-  //  if (!outputFile.empty())
-  //      fileBasedWS = true;
+      if (numFileEvents == 0) continue;
+          nBoxEvents += numFileEvents;
+    }
 
-  // // Run the tasks in parallel? TODO: enable
-  //  //bool Parallel = this->getProperty("Parallel");
+    return nBoxEvents;
+  }
 
-  //  // Fix the box controller settings in the output workspace so that it splits normally
-  //  BoxController_sptr bc = ws->getBoxController();
-  //  // Fix the max depth to something bigger.
-  //  bc->setMaxDepth(20);
-  //  bc->setSplitThreshold(5000);
-  //  if(fileBasedWS)
-  //  {
-  //  // Complete the file-back-end creation.
-  //    pDiskBuffer = &(bc->getDiskBuffer());
-  //    g_log.notice() << "Setting cache to 400 MB write." << std::endl;
-  //    bc->setCacheParameters(sizeof(MDE), 400000000/sizeof(MDE));
-  //  }
-  //  // Init box structure used for memory/file space calculations
-  //  m_BoxStruct.initFlatStructure<MDE,nd>(ws,outputFile);
-  //  // First, load all the box data and calculate file positions of the target workspace
-  //  this->loadBoxData<MDE,nd>();
+  //----------------------------------------------------------------------------------------------
+  /** Perform the merging, but clone the initial workspace and use the same splitting
+   * as its structure is equivalent to the partial box structures. 
+   *
+   * @param ws :: first MDEventWorkspace in the list to merge
+   */
+  template<typename MDE, size_t nd>
+  void MergeMDFiles::doExecByCloning(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    std::string outputFile = getProperty("OutputFilename");
+    m_fileBasedTargetWS = false;
+    if (!outputFile.empty())
+    {
+        m_fileBasedTargetWS = true;
+    }
 
+   // Run the tasks in parallel? TODO: enable
+    //bool Parallel = this->getProperty("Parallel");
 
-  //  if(fileBasedWS)
-  //  {
-  //    m_BoxStruct.saveBoxStructure(outputFile);
-  //    m_BoxStruct.initEventFileStorage(outputFile,bc,fileBasedWS,MDE::getTypeName());
-  //  }
+    // Fix the box controller settings in the output workspace so that it splits normally
+    BoxController_sptr bc = ws->getBoxController();
+    // Fix the max depth to something bigger.
+    bc->setMaxDepth(20);
+    bc->setSplitThreshold(5000);
+    auto saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc));
+    saver->setDataType(sizeof(coord_t),MDE::getTypeName());    
+    if(m_fileBasedTargetWS)
+    {
+        bc->setFileBacked(saver,outputFile);
+    // Complete the file-back-end creation.
+        g_log.notice() << "Setting cache to 400 MB write." << std::endl;
+        bc->getFileIO()->setWriteBufferSize(400000000/sizeof(MDE));
+    }
+ /*   else
+    {
+        saver->openFile(outputFile,"w");
+    }*/
+    // Init box structure used for memory/file space calculations
+    m_BoxStruct.initFlatStructure(ws,outputFile);
+
+    // First, load all the box data and calculate file positions of the target workspace
+    this->loadBoxData<MDE,nd>();
 
 
 
-  //  size_t numBoxes = m_BoxStruct.getNBoxes();
-  //    // Progress report based on events processed.
-  //  this->prog = new Progress(this, 0.1, 0.9, size_t(numBoxes));
-  //  prog->setNotifyStep(0.1);
+    size_t numBoxes = m_BoxStruct.getNBoxes();
+      // Progress report based on events processed.
+    this->prog = new Progress(this, 0.1, 0.9, size_t(numBoxes));
+    prog->setNotifyStep(0.1);
 
-  //  // For tracking progress
-  //  //uint64_t totalEventsInTasks = 0;
-  // 
-  //  // Prepare thread pool
-  //  CPUTimer overallTime;
+    // For tracking progress
+    //uint64_t totalEventsInTasks = 0;
+   
+    // Prepare thread pool
+    CPUTimer overallTime;
 
-  //  ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
-  //  ThreadPool tp(ts);
+    ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts);
+    Kernel::DiskBuffer *DiskBuf(NULL);
+    if(m_fileBasedTargetWS)
+    {
+        DiskBuf = bc->getFileIO();
+    }
 
-  //  this->totalLoaded = 0;
-  //  std::vector<API::IMDNode *> &boxes = m_BoxStruct.getBoxes();
-  //  for(size_t ib=0;ib<numBoxes;ib++)
-  //  {
-  //    MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[ib]);
-  //    if(!box)continue;
-  //    // load all contributed events into current box;
-  //    this->loadEventsFromSubBoxes<MDE,nd>(box);
+    this->totalLoaded = 0;
+    std::vector<API::IMDNode *> &boxes = m_BoxStruct.getBoxes();
+    std::vector<uint64_t>      &targetEventIndexes= m_BoxStruct.getEventIndex();    
 
-  //    if(pDiskBuffer)
-  //    {
-  //      if(box->getDataInMemorySize()>0)
-  //        pDiskBuffer->toWrite(box);
-  //    }
-  //    //
-  //    //if (!Parallel)
-  //    //{
-  //    //  // Run the task serially only
-  //    //  task->run();
-  //    //  delete task;
-  //    //}
-  //    //else
-  //    //{
-  //    //  // Enqueue to run in parallel (at the joinAll() call below).
-  //    //  ts->push(task);
-  //    //}
+    for(size_t ib=0;ib<numBoxes;ib++)
+    {
+      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[ib]);
+      if(!box)continue;
+      // load all contributed events into current box;
+      this->loadEventsFromSubBoxes(box);
 
-  //    prog->reportIncrement(ib,"Loading and merging box data");
-  //  }
-  //  if(pDiskBuffer)
-  //    pDiskBuffer->flushCache();
-  //  //// Run any final tasks
-  //  //tp.joinAll();
-  //  g_log.information() << overallTime << " to do all the adding." << std::endl;
+      if(DiskBuf)
+      {
+        if(box->getDataInMemorySize()>0)
+        {  // data position has been already precalculated 
+            box->getISaveable()->save();
+            box->clearDataFromMemory();
+            //Kernel::ISaveable *Saver = box->getISaveable();
+            //DiskBuf->toWrite(Saver);
+        }
+      }
+      //else
+      //{   size_t ID = box->getID();
+      //    uint64_t filePosition = targetEventIndexes[2*ID];
+      //    box->saveAt(saver.get(), filePosition);
+      //}
+      //
+      //if (!Parallel)
+      //{
+      //  // Run the task serially only
+      //  task->run();
+      //  delete task;
+      //}
+      //else
+      //{
+      //  // Enqueue to run in parallel (at the joinAll() call below).
+      //  ts->push(task);
+      //}
 
-  //  // Close any open file handle
-  //  for (size_t iw=0; iw<this->m_pFiles.size(); iw++)
-  //  {
-  //    ::NeXus::File * file = this->m_pFiles[iw];
-  //    if (file)
-  //    { // subfile was left open on MDEventsDataGroup
-  //      file->closeGroup(); // close MDEvents group
-  //      file->closeGroup(); // close MDWorkspace group
-  //      file->close();
-  //    }
-  //  }
+      prog->reportIncrement(ib,"Loading and merging box data");
+    }
+    if(DiskBuf)
+    {
+      DiskBuf->flushCache();
+      bc->getFileIO()->flushData();
+    }
+    //// Run any final tasks
+    //tp.joinAll();
+    g_log.information() << overallTime << " to do all the adding." << std::endl;
 
-  //  // Finish things up
-  //  this->finalizeOutput<MDE,nd>(ws);
-  //}
+    // Close any open file handle
+    clearEventLoaders();
+
+    // Finish things up
+    this->finalizeOutput<MDE,nd>(ws);
+  }
 
 
 
-  ////----------------------------------------------------------------------------------------------
-  ///** Now re-save the MDEventWorkspace to update the file back end */
-  //template<typename MDE, size_t nd>
-  //void MergeMDFiles::finalizeOutput(typename MDEventWorkspace<MDE, nd>::sptr outWS)
-  //{
-  //  CPUTimer overallTime;
+  //----------------------------------------------------------------------------------------------
+  /** Now re-save the MDEventWorkspace to update the file back end */
+  template<typename MDE, size_t nd>
+  void MergeMDFiles::finalizeOutput(typename MDEventWorkspace<MDE, nd>::sptr outWS)
+  {
+    CPUTimer overallTime;
 
-  //  this->progress(0.90, "Refreshing Cache");
-  //  outWS->refreshCache();
-  //  m_OutIWS = outWS;
-  //  g_log.information() << overallTime << " to run refreshCache()." << std::endl;
 
-  //  std::string outputFile = getProperty("OutputFilename");
-  //  if (!outputFile.empty())
-  //  {
-  //    g_log.notice() << "Starting SaveMD to update the file back-end." << std::endl;
-  //    IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD" ,0.9, 1.00);
-  //    saver->setProperty("InputWorkspace", m_OutIWS);
-  //    saver->setProperty("UpdateFileBackEnd", true);
-  //    saver->executeAsChildAlg();
-  //  }
+
+    this->progress(0.90, "Refreshing Cache");
+    outWS->refreshCache();
+    m_OutIWS = outWS;
+    g_log.information() << overallTime << " to run refreshCache()." << std::endl;
+
+    std::string outputFile = getProperty("OutputFilename");
+    if (!outputFile.empty())
+    {
+      g_log.notice() << "Starting SaveMD to update the file back-end." << std::endl;
+      IAlgorithm_sptr saver = this->createChildAlgorithm("SaveMD" ,0.9, 1.00);
+      saver->setProperty("InputWorkspace", m_OutIWS);
+      saver->setProperty("UpdateFileBackEnd", true);
+      saver->executeAsChildAlg();
+    }
 
  
-  //  g_log.information() << overallTime << " to run SaveMD." << std::endl;
-  //}
+    g_log.information() << overallTime << " to run SaveMD." << std::endl;
+  }
 
 
   //----------------------------------------------------------------------------------------------
@@ -381,32 +351,44 @@ namespace MDAlgorithms
    */
   void MergeMDFiles::exec()
   {
-    //// clear disk buffer which can remain from previous runs 
-    //// the existance/ usage of the buffer idicates if the algorithm works with file based or memory based target workspaces;
-    //pDiskBuffer = NULL;
-    //MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filenames"));
-    //m_Filenames = MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
-    //if (m_Filenames.size() == 0)
-    //  throw std::invalid_argument("Must specify at least one filename.");
-    //std::string firstFile = m_Filenames[0];
+    // clear disk buffer which can remain from previous runs 
+    // the existance/ usage of the buffer idicates if the algorithm works with file based or memory based target workspaces;
+   // pDiskBuffer = NULL;
+    MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filenames"));
+    m_Filenames = MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
+    if (m_Filenames.size() == 0)
+      throw std::invalid_argument("Must specify at least one filename.");
+    std::string firstFile = m_Filenames[0];
 
-    //// Start by loading the first file but just the box structure, no events, and not file-backed
-    //IAlgorithm_sptr loader = createChildAlgorithm("LoadMD", 0.0, 0.05, false);
-    //loader->setPropertyValue("Filename", firstFile);
-    //loader->setProperty("MetadataOnly", false);
-    //loader->setProperty("BoxStructureOnly", true);
-    //loader->setProperty("FileBackEnd", false);
-    //loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace") );
-    //loader->executeAsChildAlg();
-    //IMDWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
+    // Start by loading the first file but just the box structure, no events, and not file-backed
+    IAlgorithm_sptr loader = createChildAlgorithm("LoadMD", 0.0, 0.05, false);
+    loader->setPropertyValue("Filename", firstFile);
+    loader->setProperty("MetadataOnly", false);
+    loader->setProperty("BoxStructureOnly", true);
+    loader->setProperty("FileBackEnd", false);
+    loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace") );
+    loader->executeAsChildAlg();
+    IMDWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
 
 
-    //// Call the templated method
-    //CALL_MDEVENT_FUNCTION( this->doExecByCloning, firstWS);
+    // Call the templated method
+    CALL_MDEVENT_FUNCTION( this->doExecByCloning, firstWS);
 
-    //setProperty("OutputWorkspace", m_OutIWS);
+    setProperty("OutputWorkspace", m_OutIWS);
   }
+  /**Delete all event loaders */ 
+  void MergeMDFiles::clearEventLoaders()
+  {
+      for(size_t i=0;i<m_EventLoader.size();i++)
+      {
+          if(m_EventLoader[i])
+          {
+              delete m_EventLoader[i];
+              m_EventLoader[i]=NULL;
+          }
+      }
 
+  }
 
 
 } // namespace Mantid

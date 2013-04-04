@@ -139,7 +139,6 @@ namespace Mantid
     //Kernel::ISaveable::sortObjByFilePos(m_Boxes);
     // calculate the box positions in the resulting file and save it on place
     uint64_t eventsStart=0;
-    bool rememberBoxIsSaved = setFileBacked;
     for(size_t i=0;i<m_Boxes.size();i++)
     {
       API::IMDNode * mdBox = m_Boxes[i];        
@@ -246,7 +245,7 @@ namespace Mantid
 
   }
 
-  void MDBoxFlatTree::loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType)
+  void MDBoxFlatTree::loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType,bool onlyEventInfo)
   {
 
     m_FileName = fileName;
@@ -279,18 +278,26 @@ namespace Mantid
       //  // Use the factory to make the workspace of the right type
       //  IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
       //}
-    this->loadBoxStructure(hFile.get());
+    this->loadBoxStructure(hFile.get(),onlyEventInfo);
 
     // close workspace group
     hFile->closeGroup();
     // close the NeXus file
     hFile->close();
   }
-  void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile)
+  void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile,bool onlyEventInfo)
   {
     // ----------------------------------------- Box Structure ------------------------------
     hFile->openGroup("box_structure", "NXdata");
 
+    if(onlyEventInfo)
+    {
+      // Load the box controller description
+        hFile->getAttr("box_controller_xml", m_bcXMLDescr);
+        hFile->readData("box_type", m_BoxType);
+        hFile->readData("box_event_index", m_BoxEventIndex);
+        return;
+    }
     // Load the box controller description
     hFile->getAttr("box_controller_xml", m_bcXMLDescr);
 

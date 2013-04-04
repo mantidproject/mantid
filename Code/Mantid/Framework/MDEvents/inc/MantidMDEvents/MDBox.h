@@ -62,7 +62,9 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)const;
     virtual void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */);
-
+    /**drop events data from memory but keep averages (and file-backed info) */
+    void clearDataFromMemory();
+    /** */
     void clear();
 
 
@@ -165,7 +167,6 @@ namespace MDEvents
      /// Flag indicating that masking has been applied.
     bool m_bIsMasked;
   private:
-    void clearDataFromMemory();
     /// private default copy constructor as the only correct constructor is the one with the boxController;
     MDBox(const MDBox &);
   public:

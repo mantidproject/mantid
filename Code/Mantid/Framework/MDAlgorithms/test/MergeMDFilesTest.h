@@ -110,7 +110,7 @@ public:
     { 
         if(inWorkspaces[i]->getBoxController()->isFileBacked())
         {
-            std::string fileName  = 
+            std::string fileName  = inWorkspaces[i]->getBoxController()->getFileIO()->getFileName();
             inWorkspaces[i]->clearFileBacked(false);
             Poco::File(fileName).remove();
 

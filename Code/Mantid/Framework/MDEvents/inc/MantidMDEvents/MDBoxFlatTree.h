@@ -58,6 +58,7 @@ namespace MDEvents
     std::vector<double> &getSigErrData(){return m_BoxSignalErrorsquared;}
     /**@return the vector of data which describes signals and errors locations on file */
     std::vector<uint64_t> &getEventIndex(){return m_BoxEventIndex;}
+    const std::vector<int> &getBoxType()const{return m_BoxType;}
 
     //---------------------------------------------------------------------------------------------------------------------
     /// convert MDWS box structure into flat structure used for saving/loading on hdd 
@@ -73,11 +74,12 @@ namespace MDEvents
     /**Save flat box structure into a file, defined by the file name*/
     void saveBoxStructure(const std::string &fileName);
     /**load box structure from the file, defined by file name */
-    void loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType);
+    void loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType,bool onlyEventInfo=false);
   protected: // for testing
   private:
     /**Load flat box structure from a nexus file*/
-    void loadBoxStructure(::NeXus::File *hFile);
+    void loadBoxStructure(::NeXus::File *hFile,bool onlyEventInfo=false);
+    /**Load the part of the box structure, responsible for locating events only*/ 
   /**Save flat box structure into properly open nexus file*/
     void saveBoxStructure(::NeXus::File *hFile);
    //----------------------------------------------------------------------------------------------
