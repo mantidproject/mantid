@@ -13,6 +13,7 @@
 #include <Poco/File.h>
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidMDEvents/BoxControllerNxSIO.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -79,8 +80,13 @@ public:
 
       Mantid::API::BoxController_sptr bc = ws->getBoxController();
       std::cout << bc->getFileIO()->getFreeSpaceMap().size() << " entries in the free space map" << std::endl;
-      ::NeXus::File * file = bc->getFile();
-      // The file should have an entry of 20000 points too (with some error due to the free space blocks). This means the file back-end was updated
+
+       auto loader = dynamic_cast<MDEvents::BoxControllerNxSIO *>( bc->getFileIO());
+       TS_ASSERT(loader);
+       if(!loader)return;
+
+       ::NeXus::File * file =loader->getFile();
+     // The file should have an entry of 20000 points too (with some error due to the free space blocks). This means the file back-end was updated
       TS_ASSERT_DELTA(file->getInfo().dims[0], 20000, 100);
 
       // Close the file so you can delete it. Otherwise the following test gets confused.
