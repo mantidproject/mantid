@@ -15,10 +15,12 @@ set ( SRC_FILES
   src/MantidQwtIMDWorkspaceData.cpp
   src/MantidQwtMatrixWorkspaceData.cpp
   src/MantidWidget.cpp
+  src/MessageDisplay.cpp
   src/OptionsPropertyWidget.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
   src/PythonRunner.cpp
+  src/QtSignalChannel.cpp
   src/ScriptRepositoryView.cpp
   src/RepoModel.cpp
   src/SyncedCheckboxes.cpp
@@ -38,9 +40,11 @@ set ( MOC_FILES
   inc/MantidQtAPI/ManageUserDirectories.h
   inc/MantidQtAPI/MantidDialog.h
   inc/MantidQtAPI/MantidWidget.h
+  inc/MantidQtAPI/MessageDisplay.h
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
+  inc/MantidQtAPI/QtSignalChannel.h
   inc/MantidQtAPI/ScriptRepositoryView.h
   inc/MantidQtAPI/RepoModel.h
   inc/MantidQtAPI/SyncedCheckboxes.h
