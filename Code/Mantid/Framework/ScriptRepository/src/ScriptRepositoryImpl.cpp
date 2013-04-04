@@ -185,7 +185,7 @@ namespace API
         std::string repository_json = std::string(local_repository).append(".repository.json");
         Poco::File rep_json(repository_json);
         if (!local_rep_dir.exists() || !rep_json.exists()){
-          g_log.warning() << "ScriptRepository was not installed at " << local_repository << std::endl; 
+          g_log.information() << "ScriptRepository was not installed at " << local_repository << std::endl; 
           return; // this is an invalid repository, because it was not created (installed)
         }
       }
