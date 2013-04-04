@@ -1801,6 +1801,11 @@ namespace CurveFitting
                     << " Number of columns (Input =" << parameterWS->columnCount() << ") >= 3 as required.\n";
       throw std::invalid_argument("Input parameter workspace is wrong. ");
     }
+    else
+    {
+      g_log.information() << "[DB] Starting to parse instrument parameter table workspace "
+                          << parameterWS->name() << ".\n";
+    }
 
     // 2. Import data to maps
     size_t numrows = parameterWS->rowCount();
@@ -1945,14 +1950,14 @@ namespace CurveFitting
 
       if (newparameter.fit)
       {
-        g_log.information() << "[Input]: " << newparameter.name << ": value = " << newparameter.curvalue
+        g_log.debug() << "[Input]: " << newparameter.name << ": value = " << newparameter.curvalue
                             << " Range: [" << newparameter.minvalue << ", " << newparameter.maxvalue
                             << "], MC Step = " << newparameter.stepsize << ", Fit? = "
                             << newparameter.fit << "\n";
       }
-    }
+    } // ENDFOR rows in Table
 
-    g_log.information() << "DB1118: Successfully Imported Peak Parameters TableWorkspace "
+    g_log.information() << "[DB]: Successfully Imported Peak Parameters TableWorkspace "
                         << parameterWS->name() << "\n";
 
     return;
@@ -1965,7 +1970,8 @@ namespace CurveFitting
   */
   void LeBailFit::parseBraggPeaksParametersTable()
   {
-    g_log.debug() << "DB1119:  Importing HKL TableWorkspace\n";
+    g_log.information() << "[DB]:  Importing Bragg peaks TableWorkspace"
+                        << reflectionWS->name() << ".\n";
 
     // 1. Check column orders
     std::vector<std::string> colnames = reflectionWS->getColumnNames();
@@ -2028,8 +2034,8 @@ namespace CurveFitting
       m_inputPeakInfoVec.push_back(make_pair(hkl, peakheight));
     } // ENDFOR row
 
-    g_log.debug() << "DB1119:  Finished importing HKL TableWorkspace.   Size of Rows = "
-                  << numrows << "\n";
+    g_log.information() << "[DB]:  Finished importing HKL TableWorkspace.   Size of Rows = "
+                        << numrows << "\n";
 
     return;
   }
