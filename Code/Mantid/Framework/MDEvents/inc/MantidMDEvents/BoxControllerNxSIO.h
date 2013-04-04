@@ -71,12 +71,14 @@ namespace MDEvents
             //Auxiliary functions. Used to change default state of this object which is not fully supported. Should be replaced by some IBoxControllerIO factory
             virtual void setDataType(const size_t coordSize, const std::string &typeName);
             virtual void getDataType(size_t &coordSize, std::string &typeName)const;
-
+  //------------------------------------------------------------------------------------------------------------------------
             //Auxiliary functions (non-virtual, used at testing)
             int64_t getNDataColums()const
             {
                 return m_BlockSize[1];
             }
+            //get pointer to the Nexus file --> compatribility testing only. 
+            ::NeXus::File * getFile(){return m_File;}
     private:
         /// Default size of the events block which can be written in the NeXus array at once identified by efficiency or some other external reasons
         static enum {DATA_CHUNK=10000};

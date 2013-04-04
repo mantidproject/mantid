@@ -72,15 +72,14 @@ namespace MDEvents
 
     /**Save flat box structure into a file, defined by the file name*/
     void saveBoxStructure(const std::string &fileName);
-    /**Save flat box structure into properly open nexus file*/
-    void saveBoxStructure(::NeXus::File *hFile);
-
     /**load box structure from the file, defined by file name */
-    void loadBoxStructure(const std::string &fileName);
+    void loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType);
   protected: // for testing
   private:
     /**Load flat box structure from a nexus file*/
     void loadBoxStructure(::NeXus::File *hFile);
+  /**Save flat box structure into properly open nexus file*/
+    void saveBoxStructure(::NeXus::File *hFile);
    //----------------------------------------------------------------------------------------------
     int m_nDim;
     // The name of the file the class will be working with 
@@ -99,10 +98,12 @@ namespace MDEvents
     std::vector<double> m_BoxSignalErrorsquared;
     /// Start/end children IDs
     std::vector<int> m_BoxChildren;
-
+    /// linear vector of boxes;
     std::vector<API::IMDNode *> m_Boxes;
-
+    /// XML representation of the box controller
     std::string m_bcXMLDescr;
+    /// name of the event type
+    std::string m_eventType;
 
   /// Reference to the logger class
     static Kernel::Logger& g_log;
@@ -110,6 +111,8 @@ namespace MDEvents
     static ::NeXus::File * createOrOpenMDWSgroup(const std::string &fileName,size_t nDims, const std::string &WSEventType, bool readOnly);
     // save each experiment info into its own NeXus group within an existing opened group
     static void saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws);
+    // load experiment infos, previously saved through the the saveExperimentInfo function
+    static void loadExperimentInfos(::NeXus::File * const file, boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
 
   };
 

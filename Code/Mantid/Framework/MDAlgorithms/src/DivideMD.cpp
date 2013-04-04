@@ -107,9 +107,19 @@ namespace MDAlgorithms
     std::vector<API::IMDNode *> boxes;
     parentBox->getBoxes(boxes, 1000, true);
 
+    bool fileBackedTarget(false);
+    Kernel::DiskBuffer *dbuff(NULL);
+    if(ws->isFileBacked())
+    {
+        fileBackedTarget = true;
+        dbuff = ws->getBoxController()->getFileIO();
+    }
+ 
+
     for (size_t i=0; i<boxes.size(); i++)
     {
       MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
+      size_t ic(0);
       if (box)
       {
         typename std::vector<MDE> & events = box->getEvents();
@@ -123,14 +133,21 @@ namespace MDAlgorithms
           float errorSquared = signal * signal * (it->getErrorSquared() / (oldSignal * oldSignal) + scalarRelativeErrorSquared);
           it->setSignal(signal);
           it->setErrorSquared(errorSquared);
+          ic++;
         }
+
         box->releaseEvents();
+        if(fileBackedTarget && ic>0)
+        {
+            Kernel::ISaveable *const pSaver(box->getISaveable());
+            dbuff->toWrite(pSaver);
+        }
       }
     }
     // Recalculate the totals
     ws->refreshCache();
     // Mark file-backed workspace as dirty
-    //ws->setFileNeedsUpdating(true);
+    ws->setFileNeedsUpdating(true);
   }
 
 

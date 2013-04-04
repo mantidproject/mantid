@@ -43,8 +43,9 @@ namespace Kernel
   void ISaveable::saveAt(uint64_t newPos, uint64_t newSize)
   {
       m_setter.lock();
-      // load old contents
-      this->load();
+      // load old contents if it was there
+      if(this->wasSaved())
+         this->load();
       // set new position, derived by the disk buffer
       m_fileIndexStart= newPos;
       m_fileNumEvents = newSize;

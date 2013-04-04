@@ -137,9 +137,9 @@ namespace MDEvents
 
     /** Set the base-level box contained within.
      * Used in file loading */
-    void setBox(MDBoxBase<MDE,nd> * box)
+    void setBox(API::IMDNode * box)
     {
-      data = box;
+      data = dynamic_cast<MDBoxBase<MDE,nd> *>(box);
     }
 
     /// Apply masking
@@ -156,7 +156,7 @@ namespace MDEvents
     /// make the workspace file backed if it has not been already file backed;
     virtual void setFileBacked(const std::string &fileName);
     /// if workspace was file-backed, this should clear file-backed information and close back-up files. 
-    virtual void clearFileBacked();
+    virtual void clearFileBacked(bool LoadFileBackedData);
   protected:
 
     /** MDBox containing all of the events in the workspace. */

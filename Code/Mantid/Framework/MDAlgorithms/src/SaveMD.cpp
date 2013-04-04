@@ -117,15 +117,23 @@ namespace MDAlgorithms
     }
 
     Progress * prog = new Progress(this, 0.0, 0.05,1);
+    if(update)  // workspace has its own file and ignores any changes to the algorithm parameters
+    {
+       if(!ws->isFileBacked())
+            throw std::runtime_error(" attemtp to update non-file backed workspace");
+        filename = bc->getFileIO()->getFileName();
+    }
+
     //-----------------------------------------------------------------------------------------------------
     // create or open WS group and put there additional information about WS and its dimesnions
+    auto file =std::unique_ptr<::NeXus::File>(MDBoxFlatTree::createOrOpenMDWSgroup(filename,nd,MDE::getTypeName(),false));
+    // Save each NEW ExperimentInfo to a spot in the file
+    MDBoxFlatTree::saveExperimentInfos(file.get(),ws);
+
     if(!update)
     {    
-        ::NeXus::File * file = MDBoxFlatTree::createOrOpenMDWSgroup(filename,nd,MDE::getTypeName(),false);
         // Save the algorithm history under "process"
-        ws->getHistory().saveNexus(file);  
-        // Save each NEW ExperimentInfo to a spot in the file
-        MDBoxFlatTree::saveExperimentInfos(file,ws);
+        ws->getHistory().saveNexus(file.get());  
 
         // Save some info as attributes. (Note: need to use attributes, not data sets because those cannot be resized).
         file->putAttr("definition",  ws->id());
@@ -136,11 +144,11 @@ namespace MDAlgorithms
             std::ostringstream mess;
             mess << "dimension" << d;
             file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
-        }
-        file->closeGroup();
-        file->close();
-        delete file;
+        }      
     }
+    file->closeGroup();
+    file->close();
+
 
     MDBoxFlatTree BoxFlatStruct; 
     //-----------------------------------------------------------------------------------------------------
@@ -215,6 +223,7 @@ namespace MDAlgorithms
 
     delete prog;
 
+     ws->setFileNeedsUpdating(false);
   }
 
 

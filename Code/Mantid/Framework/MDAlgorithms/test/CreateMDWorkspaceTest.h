@@ -158,7 +158,8 @@ public:
       std::string s = alg.getPropertyValue("Filename");
       TSM_ASSERT( "File for the back-end was created.", Poco::File(s).exists() );
       std::cout << "Closing the file." << std::endl;
-      bc->closeFile();
+
+      ws->clearFileBacked(false);
       if (Poco::File(s).exists()) Poco::File(s).remove();
     }
   }

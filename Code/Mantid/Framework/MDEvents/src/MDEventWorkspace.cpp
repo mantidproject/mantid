@@ -87,14 +87,17 @@ namespace MDEvents
   {
       throw Kernel::Exception::NotImplementedError(" Not yet implemented");
   }
-  /** If the workspace was filebacked, this would clear file-backed information from the workspace nodes and close the underlying files*/ 
+  /** If the workspace was filebacked, this would clear file-backed information from the workspace nodes and close the underlying files
+  *@param loadFileBacked -- if true, load data which were initially backed to hdd when breaking connection between the file and the workspace. 
+                             if false, data on hdd are lost if not previously loaded in memory
+  */ 
   TMDE(
-  void MDEventWorkspace)::clearFileBacked()
+  void MDEventWorkspace)::clearFileBacked(bool LoadFileBackedData)
   {     
       if(m_BoxController->isFileBacked())
       {
           m_BoxController->clearFileBacked();
-          data->clearFileBacked();
+          data->clearFileBacked(LoadFileBackedData);
       }
   }
   //-----------------------------------------------------------------------------------------------
@@ -384,9 +387,9 @@ namespace MDEvents
       mess << "Write buffer: " << used << " of " << avail << " MB. ";
       out.push_back(mess.str()); mess.str("");
 
-      //mess << "File";
-      //if (this->fileNeedsUpdating())
-      //  mess << " (needs updating)";
+      mess << "File";
+      if (this->fileNeedsUpdating())
+        mess << " (needs updating)";
 
       mess << ": " << this->m_BoxController->getFileIO()->getFileName();
       out.push_back(mess.str()); mess.str("");

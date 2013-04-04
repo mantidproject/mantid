@@ -58,7 +58,7 @@ namespace MDEvents
     virtual Kernel::ISaveable *const getISaveable()const;   
     virtual void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/);
     virtual void setFileBacked();
-    virtual void clearFileBacked();
+    virtual void clearFileBacked(bool loadDiskBackedData);
     //-----------------------------------------------------------------------------------------------
     virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)const;
     virtual void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */);

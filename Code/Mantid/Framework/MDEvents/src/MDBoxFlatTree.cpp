@@ -162,15 +162,14 @@ namespace Mantid
   {
     m_FileName = fileName;
 
-    ::NeXus::File * hFile = createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_Boxes[0]->getEventType(),false);
+    auto hFile = std::unique_ptr<::NeXus::File>(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_Boxes[0]->getEventType(),false));
 
     //Save box structure;
-    this->saveBoxStructure(hFile);
+    this->saveBoxStructure(hFile.get());
     // close workspace group
     hFile->closeGroup();
     // close file
     hFile->close();  
-    delete hFile;
 
   }
 
@@ -197,7 +196,11 @@ namespace Mantid
 
     }
     else
+    {
       hFile->openGroup("box_structure", "NXdata");
+      // update box controller information
+      hFile->putAttr("box_controller_xml", m_bcXMLDescr);
+    }
 
 
     std::vector<int64_t> exents_dims(2,0);
@@ -243,35 +246,26 @@ namespace Mantid
 
   }
 
-  void MDBoxFlatTree::loadBoxStructure(const std::string &fileName)
+  void MDBoxFlatTree::loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType)
   {
 
     m_FileName = fileName;
-     // open file
-    ::NeXus::File *hFile = new ::NeXus::File(m_FileName, NXACC_READ);
+    m_nDim = unsigned int(nDim);
+    m_eventType = EventType;
+ 
+    // open the file and the MD workspace group.
+    auto hFile = std::unique_ptr<::NeXus::File>(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_eventType,true));
 
-    // The main entry
-    std::map<std::string, std::string> entries;
-    hFile->getEntries(entries);
 
-    std::string entryName;
-    if (entries.find("MDEventWorkspace") != entries.end())
-       entryName = "MDEventWorkspace";
-    else
-       throw std::runtime_error("Unexpected NXentry name. Expected 'MDEventWorkspace' or 'MDHistoWorkspace'.");
+    //// How many dimensions?
+    //std::vector<int32_t> vecDims;
+    //hFile->readData("dimensions", vecDims);
+    //if (vecDims.empty())
+    //    throw std::runtime_error("LoadBoxStructure:: Error loading number of dimensions.");
 
-    // Open the ws
-    hFile->openGroup(entryName, "NXentry");
-
-    // How many dimensions?
-    std::vector<int32_t> vecDims;
-    hFile->readData("dimensions", vecDims);
-    if (vecDims.empty())
-        throw std::runtime_error("LoloadBoxStructure:: Error loading number of dimensions.");
-
-    m_nDim = vecDims[0];
-    if (m_nDim<= 0)
-        throw std::runtime_error("loadBoxStructure:: number of dimensions <= 0.");
+    //m_nDim = vecDims[0];
+    //if (m_nDim<= 0)
+    //    throw std::runtime_error("loadBoxStructure:: number of dimensions <= 0.");
 
       // Now load all the dimension xml
       //this->loadDimensions();
@@ -285,10 +279,12 @@ namespace Mantid
       //  // Use the factory to make the workspace of the right type
       //  IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
       //}
-    this->loadBoxStructure(hFile);
+    this->loadBoxStructure(hFile.get());
 
-    delete hFile;
-    //return hFile;
+    // close workspace group
+    hFile->closeGroup();
+    // close the NeXus file
+    hFile->close();
   }
   void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile)
   {
@@ -328,46 +324,111 @@ namespace Mantid
 
   }
 
-/// Save each NEW ExperimentInfo to a spot in the file
- void MDBoxFlatTree::saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws)
- {
+  /// Save each NEW ExperimentInfo to a spot in the file
+  void MDBoxFlatTree::saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws)
+  {
 
-    std::map<std::string,std::string> entries;
-    file->getEntries(entries);
-    for (uint16_t i=0; i < ws->getNumExperimentInfo(); i++)
-    {
-      API::ExperimentInfo_const_sptr ei = ws->getExperimentInfo(i);
-      std::string groupName = "experiment" + Kernel::Strings::toString(i);
-      if (entries.find(groupName) == entries.end())
+      std::map<std::string,std::string> entries;
+      file->getEntries(entries);
+      for (uint16_t i=0; i < ws->getNumExperimentInfo(); i++)
       {
-        // Can't overwrite entries. Just add the new ones
-        file->makeGroup(groupName, "NXgroup", true);
-        file->putAttr("version", 1);
-        ei->saveExperimentInfoNexus(file);
-        file->closeGroup();
+          API::ExperimentInfo_const_sptr ei = ws->getExperimentInfo(i);
+          std::string groupName = "experiment" + Kernel::Strings::toString(i);
+          if (entries.find(groupName) == entries.end())
+          {
+              // Can't overwrite entries. Just add the new ones
+              file->makeGroup(groupName, "NXgroup", true);
+              file->putAttr("version", 1);
+              ei->saveExperimentInfoNexus(file);
+              file->closeGroup();
 
-        // Warning for high detector IDs.
-        // The routine in MDEvent::saveVectorToNexusSlab() converts detector IDs to single-precision floats
-        // Floats only have 24 bits of int precision = 16777216 as the max, precise detector ID
-        detid_t min = 0;
-        detid_t max = 0;
-        try
-        {
-          ei->getInstrument()->getMinMaxDetectorIDs(min, max);
-        }
-        catch (std::runtime_error &)
-        { /* Ignore error. Min/max will be 0 */ }
+              // Warning for high detector IDs.
+              // The routine in MDEvent::saveVectorToNexusSlab() converts detector IDs to single-precision floats
+              // Floats only have 24 bits of int precision = 16777216 as the max, precise detector ID
+              detid_t min = 0;
+              detid_t max = 0;
+              try
+              {
+                  ei->getInstrument()->getMinMaxDetectorIDs(min, max);
+              }
+              catch (std::runtime_error &)
+              { /* Ignore error. Min/max will be 0 */ }
 
-        if (max > 16777216)
-        {
-          g_log.warning() << "This instrument (" << ei->getInstrument()->getName() <<
-              ") has detector IDs that are higher than can be saved in the .NXS file as single-precision floats." << std::endl;
-          g_log.warning() << "Detector IDs above 16777216 will not be precise. Please contact the developers." << std::endl;
-        }
+              if (max > 16777216)
+              {
+                  g_log.warning() << "This instrument (" << ei->getInstrument()->getName() <<
+                      ") has detector IDs that are higher than can be saved in the .NXS file as single-precision floats." << std::endl;
+                  g_log.warning() << "Detector IDs above 16777216 will not be precise. Please contact the developers." << std::endl;
+              }
+          }
       }
-    }
 
- }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Load the ExperimentInfo blocks, if any, in the NXS file
+  *
+  * @param ws :: MDEventWorkspace/MDHisto to load
+  */
+  void MDBoxFlatTree::loadExperimentInfos(::NeXus::File * const file,boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws)
+  {
+      // First, find how many experimentX blocks there are
+      std::map<std::string,std::string> entries;
+      file->getEntries(entries);
+      std::map<std::string,std::string>::iterator it = entries.begin();
+      std::vector<bool> hasExperimentBlock;
+      uint16_t numExperimentInfo = 0;
+      for (; it != entries.end(); ++it)
+      {
+          std::string name = it->first;
+          if (boost::starts_with(name, "experiment"))
+          {
+              try
+              {
+                  uint16_t num = boost::lexical_cast<uint16_t>(name.substr(10, name.size()-10));
+                  if (num+1 > numExperimentInfo)
+                  {
+                      numExperimentInfo = uint16_t(num+uint16_t(1));
+                      hasExperimentBlock.resize(numExperimentInfo, false);
+                      hasExperimentBlock[num] = true;
+                  }
+              }
+              catch (boost::bad_lexical_cast &)
+              { /* ignore */ }
+          }
+      }
+
+      // Now go through in order, loading and adding
+      for (uint16_t i=0; i < numExperimentInfo; i++)
+      {
+          std::string groupName = "experiment" + Kernel::Strings::toString(i);
+          if (!numExperimentInfo)
+          {
+              g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName << ". Workspace will be missing ExperimentInfo." << std::endl;
+              break;
+          }
+          file->openGroup(groupName, "NXgroup");
+          API::ExperimentInfo_sptr ei(new API::ExperimentInfo);
+          std::string parameterStr;
+          try
+          {
+              // Get the sample, logs, instrument
+              ei->loadExperimentInfoNexus(file, parameterStr);
+              // Now do the parameter map
+              ei->readParameterMap(parameterStr);
+              // And set it in the workspace.
+              ws->addExperimentInfo(ei);
+          }
+          catch (std::exception & e)
+          {
+              g_log.information("Error loading section '" + groupName + "' of nxs file.");
+              g_log.information(e.what());
+          }
+          file->closeGroup();
+      }
+
+  }
+
 
 
   template<typename MDE,size_t nd>
@@ -399,7 +460,7 @@ namespace Mantid
       uint64_t indexStart = m_BoxEventIndex[i*2];
       uint64_t numEvents  = m_BoxEventIndex[i*2+1];
 
-      totalNumEvents+=numEvents;
+         totalNumEvents+=numEvents;
       if (box_type == 1)
       {
         // --- Make a MDBox -----
@@ -430,11 +491,15 @@ namespace Mantid
       }
       else
         continue;
-
       // Force correct ID
       ibox->setID(i);
       // calculate volume from extents;
       ibox->calcVolume();
+      if(std::fabs(ibox->getInverseVolume()-m_InverseVolume[i])>1.e-4)
+      {
+          g_log.debug()<<" Accuracy warning for box N "<<i<<" as stored inverse volume is : "<<m_InverseVolume[i]<<" and calculated from extents: "<<ibox->getInverseVolume()<<std::endl;
+          ibox->setInverseVolume(coord_t(m_InverseVolume[i]));
+      }
 
       // Set the cached values
       ibox->setSignal(m_BoxSignalErrorsquared[i*2]);

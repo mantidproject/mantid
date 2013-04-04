@@ -286,7 +286,7 @@ public:
     MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
     MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "B");
     MDBoxBase<MDLeanEvent<3>, 3> *parentBox = dynamic_cast<MDBoxBase<MDLeanEvent<3>, 3> *>(mdews2->getBox());
-    std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes;
+    std::vector<IMDNode *> boxes;
     parentBox->getBoxes(boxes, 1000, true);
     MDBox<MDLeanEvent<3>, 3> *box = dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[0]);
     std::vector<MDLeanEvent<3> > &events = box->getEvents();
@@ -304,7 +304,7 @@ public:
     MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "A");
     MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<3>, 3>(2, 0.0, 10.0, 1000, "B");
     MDBoxBase<MDLeanEvent<3>, 3> *parentBox = dynamic_cast<MDBoxBase<MDLeanEvent<3>, 3> *>(mdews2->getBox());
-    std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes;
+    std::vector<IMDNode *> boxes;
     parentBox->getBoxes(boxes, 1000, true);
     MDBox<MDLeanEvent<3>, 3> *box = dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(boxes[0]);
     std::vector<MDLeanEvent<3> > &events = box->getEvents();

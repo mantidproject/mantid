@@ -890,12 +890,21 @@ namespace MDEvents
        MDE::dataToEvents(TableData,data,false);
        dataMutex.unlock();
    }
-   /** clear file-backed information from the box if such information exists */
+   /** clear file-backed information from the box if such information exists 
+    *
+    * @param loadDiskBackedData -- if true, load the data initially saved to HDD before breaking connection between the file and memory
+    *                              if false -- just forget about the data on the HDD
+    * not entirely fool-proof, as if the data is actually loaded is controlled by isLoaded switch in ISaveable 
+    * and this switch has to be set up correctly
+   */
    TMDE(
-   void  MDBox)::clearFileBacked()
+   void  MDBox)::clearFileBacked(bool loadDiskBackedData)
    {
        if(m_Saveable)
        {
+           if(loadDiskBackedData)
+               m_Saveable->load();
+
            delete m_Saveable;
            m_Saveable=NULL;
 

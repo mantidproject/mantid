@@ -215,6 +215,15 @@ namespace MDAlgorithms
     box2->getBoxes(boxes, 1000, true);
     int numBoxes = int(boxes.size());
 
+    bool fileBackedTarget(false);
+    Kernel::DiskBuffer *dbuff(NULL);
+    if(ws1->isFileBacked())
+    {
+        fileBackedTarget = true;
+        dbuff = ws1->getBoxController()->getFileIO();
+    }
+
+
     // Add the boxes in parallel. They should be spread out enough on each
     // core to avoid stepping on each other.
     // cppcheck-suppress syntaxError
@@ -227,9 +236,17 @@ namespace MDAlgorithms
       {
         // Copy the events from WS2 and add them into WS1
         const std::vector<MDE> & events = box->getConstEvents();
+        size_t ic = events.size();
         // Add events, with bounds checking
         box1->addEvents(events);
+
         box->releaseEvents();
+        if(fileBackedTarget && ic>0)
+        {
+            Kernel::ISaveable *const pSaver(box->getISaveable());
+            dbuff->toWrite(pSaver);
+        }
+
       }
       PARALLEL_END_INTERUPT_REGION
     }
@@ -245,8 +262,8 @@ namespace MDAlgorithms
     tp.joinAll();
 
     // Set a marker that the file-back-end needs updating if the # of events changed.
-   // if (ws1->getNPoints() != initial_numEvents)
-   //   ws1->setFileNeedsUpdating(true);
+    if (ws1->getNPoints() != initial_numEvents)
+       ws1->setFileNeedsUpdating(true);
 //
     //std::cout << tim << " to add workspace " << ws2->name() << std::endl;
 

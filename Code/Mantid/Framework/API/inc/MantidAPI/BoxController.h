@@ -291,6 +291,7 @@ namespace API
     {
       return m_numMDBoxes;
     }
+   
 
     /** Return the vector giving the MAXIMUM number of MD Boxes as a function of depth */
     const std::vector<double> & getMaxNumMDBoxes() const

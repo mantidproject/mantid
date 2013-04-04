@@ -83,8 +83,8 @@ public:
     }
 
     // Clean up files
-    ws1->clearFileBased();
-    ws2->clearFileBased();
+    ws1->clearFileBacked(false);
+    ws2->clearFileBacked(false);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(inWSName);

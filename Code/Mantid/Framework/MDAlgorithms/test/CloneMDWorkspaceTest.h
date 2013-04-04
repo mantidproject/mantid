@@ -89,8 +89,8 @@ public:
       TS_ASSERT( Poco::File( realFile ).exists() );
     }
     // Clean up files
-    ws1->getBoxController()->closeFile(true);
-    ws2->getBoxController()->closeFile(true);
+    ws1->clearFileBacked(false);
+    ws2->clearFileBacked(false);
 
     // Modifying the cloned dimension does not change the original
     double oldMin = ws1->getDimension(0)->getMinimum();

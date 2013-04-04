@@ -424,7 +424,7 @@ namespace MDAlgorithms
     CALL_MDEVENT_FUNCTION(this->addFakeUniformData, in_ws)
 
     // Mark that events were added, so the file back end (if any) needs updating
-    //in_ws->setFileNeedsUpdating(true);
+    in_ws->setFileNeedsUpdating(true);
   }
 
   /**

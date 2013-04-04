@@ -1565,15 +1565,22 @@ namespace MDEvents
   {
       this->setFileBacked(UNDEF_UINT64,0,false);
   }
-  /** Clear file-backed information, stored in mdBoxes */ 
+   /**Recursively clear the file-backed information stored in mdBoxes from the boxes if such information exists 
+    *
+    * @param loadDiskBackedData -- if true, load the data initially saved to HDD before breaking connection between the file and memory
+    *                              if false -- just forget about the data on the HDD
+    * not entirely fool-proof, as if the data is actually loaded is controlled by isLoaded switch in ISaveable 
+    * and this switch has to be set up correctly
+   */
+
   TMDE(
-  void MDGridBox)::clearFileBacked()
+  void MDGridBox)::clearFileBacked(bool loadDiskBackedData)
   {
       auto it=m_Children.begin();
       auto it_end = m_Children.end();
       for(;it!=it_end;it++)
       {
-          (*it)->clearFileBacked();
+          (*it)->clearFileBacked(loadDiskBackedData);
       }
   }
 }//namespace MDEvents

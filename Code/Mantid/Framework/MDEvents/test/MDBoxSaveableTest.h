@@ -73,7 +73,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
   
     // Must get ready to load in the data
-    auto loader  =new BoxControllerNxSIO(bc);
+    auto loader  =boost::shared_ptr<API::IBoxControllerIO>(new BoxControllerNxSIO(bc));
     loader->setDataType(box.getCoordType(),box.getEventType());
 
     // Make BoxController file based
@@ -199,7 +199,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     MDBox<MDLeanEvent<3>,3> c(sc.get());
     TS_ASSERT_EQUALS( c.getNPoints(), 0);
 
-    auto loader = new MantidTestHelpers::BoxControllerDummyIO(sc);
+    auto loader =boost::shared_ptr<API::IBoxControllerIO>(new MantidTestHelpers::BoxControllerDummyIO(sc));
     loader->setDataType(c.getCoordType(),c.getEventType());
 
     // Create and open the test dummy file with 1000 floats in it (have to recalulate to events differently)
@@ -287,7 +287,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
     // Create and open the test NXS file
     MDBox<MDLeanEvent<3>,3> c(bc.get(), 0);
-    auto loader = new MantidTestHelpers::BoxControllerDummyIO(bc);
+    auto loader =boost::shared_ptr<API::IBoxControllerIO>(new MantidTestHelpers::BoxControllerDummyIO(bc));
     loader->setDataType(c.getCoordType(),c.getEventType());
     loader->setWriteBufferSize(10000);
 
@@ -745,14 +745,15 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     // box controlled is owned by the workspace, so here we make shared pointer from the box pointer as it is owned by this function
     BoxController_sptr spBc = boost::shared_ptr<BoxController >(b->getBoxController());
 
-    API::IBoxControllerIO * fbc = new BoxControllerNxSIO(spBc);
+
+    auto fbc =boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(spBc));
     spBc->setSplitThreshold(100);
     spBc->setMaxDepth(4);
     spBc->setFileBacked(fbc,"MDGridBoxTest.nxs");
 
     spBc->getFileIO()->setWriteBufferSize(1000);
 
-    DiskBuffer * dbuf = fbc;
+    DiskBuffer * dbuf = fbc.get();
 
 
     size_t num_repeat = 10;

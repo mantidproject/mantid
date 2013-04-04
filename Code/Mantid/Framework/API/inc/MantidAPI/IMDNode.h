@@ -55,7 +55,7 @@ public:
     /** initiate the structure responsible for swapping the box on HDD if out of memory with default parameters (it does not know its place on HDD and was not saved). */
     virtual void setFileBacked()=0;
   /// if node was fileBacked, it should clear file-backed information 
-    virtual void clearFileBacked()=0;
+    virtual void clearFileBacked(bool loadFileData)=0;
 
     /**Save the box at specific disk position using the class, respoinsible for the file IO. */
     virtual void saveAt(API::IBoxControllerIO *const /*saver */,  uint64_t /*position*/)const=0;

@@ -100,7 +100,7 @@ public:
     {
       TS_ASSERT( ws->isFileBacked() );
       TS_ASSERT( Poco::File(actualOutputFilename).exists());
-      ws->clearFileBacked();
+      ws->clearFileBacked(false);
       Poco::File(actualOutputFilename).remove();
 
     }
@@ -111,7 +111,7 @@ public:
         if(inWorkspaces[i]->getBoxController()->isFileBacked())
         {
             std::string fileName  = 
-            inWorkspaces[i]->clearFileBacked();
+            inWorkspaces[i]->clearFileBacked(false);
             Poco::File(fileName).remove();
 
         }

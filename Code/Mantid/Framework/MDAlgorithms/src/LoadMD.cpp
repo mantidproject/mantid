@@ -33,10 +33,13 @@ and used by other algorithms, they should not be needed in daily use.
 #include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDBoxFlatTree.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDEvents/BoxControllerNxSIO.h"
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vector>
-#include "MantidMDEvents/MDHistoWorkspace.h"
+
+
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -156,139 +159,74 @@ namespace Mantid
 
 
 
-    //----------------------------------------------------------------------------------------------
-    /** Load the ExperimentInfo blocks, if any, in the NXS file
-    *
-    * @param ws :: MDEventWorkspace/MDHisto to load
-    */
-    void LoadMD::loadExperimentInfos(boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws)
-    {
-      // First, find how many experimentX blocks there are
-      std::map<std::string,std::string> entries;
-      file->getEntries(entries);
-      std::map<std::string,std::string>::iterator it = entries.begin();
-      std::vector<bool> hasExperimentBlock;
-      uint16_t numExperimentInfo = 0;
-      for (; it != entries.end(); ++it)
-      {
-        std::string name = it->first;
-        if (boost::starts_with(name, "experiment"))
-        {
-          try
-          {
-            uint16_t num = boost::lexical_cast<uint16_t>(name.substr(10, name.size()-10));
-            if (num+1 > numExperimentInfo)
-            {
-              numExperimentInfo = uint16_t(num+uint16_t(1));
-              hasExperimentBlock.resize(numExperimentInfo, false);
-              hasExperimentBlock[num] = true;
-            }
-          }
-          catch (boost::bad_lexical_cast &)
-          { /* ignore */ }
-        }
-      }
-
-      // Now go through in order, loading and adding
-      for (uint16_t i=0; i < numExperimentInfo; i++)
-      {
-        std::string groupName = "experiment" + Strings::toString(i);
-        if (!numExperimentInfo)
-        {
-          g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName << ". Workspace will be missing ExperimentInfo." << std::endl;
-          break;
-        }
-        file->openGroup(groupName, "NXgroup");
-        ExperimentInfo_sptr ei(new ExperimentInfo);
-        std::string parameterStr;
-        try
-        {
-          // Get the sample, logs, instrument
-          ei->loadExperimentInfoNexus(file, parameterStr);
-          // Now do the parameter map
-          ei->readParameterMap(parameterStr);
-          // And set it in the workspace.
-          ws->addExperimentInfo(ei);
-        }
-        catch (std::exception & e)
-        {
-          g_log.information("Error loading section '" + groupName + "' of nxs file.");
-          g_log.information(e.what());
-        }
-        file->closeGroup();
-      }
-
-    }
-
 
     ////----------------------------------------------------------------------------------------------
     ///** Execute the algorithm.
     //*/
     void LoadMD::exec()
     {
-    //  m_filename = getPropertyValue("Filename");
+      m_filename = getPropertyValue("Filename");
 
-    //  // Start loading
-    //  bool fileBacked = this->getProperty("FileBackEnd");
-    //  if (fileBacked)
-    //    file = new ::NeXus::File(m_filename, NXACC_RDWR);
-    //  else
-    //    file = new ::NeXus::File(m_filename, NXACC_READ);
+      // Start loading
+      bool fileBacked = this->getProperty("FileBackEnd");
+      if (fileBacked)
+        file = new ::NeXus::File(m_filename, NXACC_RDWR);
+      else
+        file = new ::NeXus::File(m_filename, NXACC_READ);
 
-    //  // The main entry
-    //  std::map<std::string, std::string> entries;
-    //  file->getEntries(entries);
+      // The main entry
+      std::map<std::string, std::string> entries;
+      file->getEntries(entries);
 
-    //  std::string entryName;
-    //  if (entries.find("MDEventWorkspace") != entries.end())
-    //    entryName = "MDEventWorkspace";
-    //  else if (entries.find("MDHistoWorkspace") != entries.end())
-    //    entryName = "MDHistoWorkspace";
-    //  else
-    //    throw std::runtime_error("Unexpected NXentry name. Expected 'MDEventWorkspace' or 'MDHistoWorkspace'.");
+      std::string entryName;
+      if (entries.find("MDEventWorkspace") != entries.end())
+        entryName = "MDEventWorkspace";
+      else if (entries.find("MDHistoWorkspace") != entries.end())
+        entryName = "MDHistoWorkspace";
+      else
+        throw std::runtime_error("Unexpected NXentry name. Expected 'MDEventWorkspace' or 'MDHistoWorkspace'.");
 
-    //  // Open the entry
-    //  file->openGroup(entryName, "NXentry");
+      // Open the entry
+      file->openGroup(entryName, "NXentry");
 
-    //  // How many dimensions?
-    //  std::vector<int32_t> vecDims;
-    //  file->readData("dimensions", vecDims);
-    //  if (vecDims.empty())
-    //    throw std::runtime_error("LoadMD:: Error loading number of dimensions.");
-    //  m_numDims = vecDims[0];
-    //  if (m_numDims <= 0)
-    //    throw std::runtime_error("LoadMD:: number of dimensions <= 0.");
+      // How many dimensions?
+      std::vector<int32_t> vecDims;
+      file->readData("dimensions", vecDims);
+      if (vecDims.empty())
+        throw std::runtime_error("LoadMD:: Error loading number of dimensions.");
+      m_numDims = vecDims[0];
+      if (m_numDims <= 0)
+        throw std::runtime_error("LoadMD:: number of dimensions <= 0.");
 
-    //  // Now load all the dimension xml
-    //  this->loadDimensions();
+      // Now load all the dimension xml
+      this->loadDimensions();
 
-    //  if (entryName == "MDEventWorkspace")
-    //  {
-    //    //The type of event
-    //    std::string eventType;
-    //    file->getAttr("event_type", eventType);
+      if (entryName == "MDEventWorkspace")
+      {
+        //The type of event
+        std::string eventType;
+        file->getAttr("event_type", eventType);
 
-    //    // Use the factory to make the workspace of the right type
-    //    IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
+        // Use the factory to make the workspace of the right type
+        IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
 
-    //    // Now the ExperimentInfo
-    //    loadExperimentInfos(ws);
+        // Now the ExperimentInfo
+        MDBoxFlatTree::loadExperimentInfos(file,ws);
 
-    //    // Wrapper to cast to MDEventWorkspace then call the function
-    //    CALL_MDEVENT_FUNCTION(this->doLoad, ws);
+        // Wrapper to cast to MDEventWorkspace then call the function
+        CALL_MDEVENT_FUNCTION(this->doLoad, ws);
 
-    //    // Save to output
-    //    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-    //  }
-    //  else
-    //  {
-    //    // MDHistoWorkspace case.
-    //    this->loadHisto();
-    //  }
-    //  if(!fileBacked)
-    //  {
-    //    delete file;
-    //  }
+        // Save to output
+        setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+      }
+      else
+      {
+        // MDHistoWorkspace case.
+        this->loadHisto();
+      }
+
+      delete file;
+
     }
 
     /**
@@ -322,7 +260,7 @@ namespace Mantid
       MDHistoWorkspace_sptr ws(new MDHistoWorkspace(m_dims));
 
       // Now the ExperimentInfo
-      loadExperimentInfos(ws);
+      MDBoxFlatTree::loadExperimentInfos(file,ws);
 
       // Load the WorkspaceHistory "process"
       ws->history().loadNexus(file);
@@ -390,89 +328,84 @@ namespace Mantid
       // Load the WorkspaceHistory "process"
       ws->history().loadNexus(file);
 
+      file->closeGroup();
+      file->close();
       // Add each of the dimension
       for (size_t d=0; d<nd; d++)
         ws->addDimension(m_dims[d]);
 
       bool bMetadataOnly = getProperty("MetadataOnly");
 
-    //  // ----------------------------------------- Box Structure ------------------------------
-    //  MDBoxFlatTree FlatBoxTree(m_filename);
-    //  FlatBoxTree.loadBoxStructure(file);
+      // ----------------------------------------- Box Structure ------------------------------
+      MDBoxFlatTree FlatBoxTree;
+      FlatBoxTree.loadBoxStructure(m_filename,nd,MDE::getTypeName());
 
-    //  BoxController_sptr bc = ws->getBoxController();
-    //  bc->fromXMLString(FlatBoxTree.getBCXMLdescr());
+      BoxController_sptr bc = ws->getBoxController();
+      bc->fromXMLString(FlatBoxTree.getBCXMLdescr());
 
-    //  std::vector<MDBoxBase<MDE,nd> *> boxTree;
-    //  uint64_t totalNumEvents = FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,FileBackEnd,bMetadataOnly);
-    //  size_t numBoxes = boxTree.size();
+      std::vector<API::IMDNode *> boxTree;
+      uint64_t totalNumEvents = FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,FileBackEnd,bMetadataOnly);
+      size_t numBoxes = boxTree.size();
 
-    //  // open data group for usage
-    //  file->openGroup("event_data", "NXdata");
-    //  totalNumEvents = API::BoxController::openEventNexusData(file);
-    //  // ---------------------------------------- MEMORY FOR CACHE ------------------------------------
+    // ---------------------------------------- DEAL WITH BOXES  ------------------------------------
+      if (FileBackEnd)
+      { // TODO:: call to the file format factory
+          auto loader = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc));
+          loader->setDataType(sizeof(size_t),MDE::getTypeName());
+          bc->setFileBacked(loader,m_filename);
+          // boxes have been already made file-backed when restoring the boxTree;
+      // How much memory for the cache?
+        {
+          double mb = getProperty("Memory");
+       
+          // Defaults have changed, defauld disk buffer size should be 10 data chunks TODO: find optimal, 100 may be better. 
+          if (mb <= 0) mb = double(10*loader->getDataChunk()* sizeof(MDE))/double(1024*1024);
 
-    //  if (FileBackEnd)
-    //  {
-    //  // How much memory for the cache?
-    //    {
-    //    // TODO: Clean up, only a write buffer now
-    //      double mb = getProperty("Memory");
-    //   
-    //      // Defaults have changed, defauld disk buffer size should be 10 data chunks TODO: find optimal, 100 may be better. 
-    //      if (mb <= 0) mb = double(10*bc->getDataChunk()* sizeof(MDE)*1024*1024);
+          // Express the cache memory in units of number of events.
+          uint64_t cacheMemory = static_cast<uint64_t>((mb * 1024. * 1024.) / sizeof(MDE))+1;
+              
+          // Set these values in the diskMRU
+          bc->getFileIO()->setWriteBufferSize(cacheMemory);
 
-    //      // Express the cache memory in units of number of events.
-    //      uint64_t cacheMemory = (uint64_t(mb) * 1024 * 1024) / sizeof(MDE);
+          g_log.information() << "Setting a DiskBuffer cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
+        }   
+      } // Not file back end
+      else
+      {
+        // ---------------------------------------- READ IN THE BOXES ------------------------------------
+       // TODO:: call to the file format factory
+        auto loader = std::unique_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc));
+        loader->setDataType(sizeof(size_t),MDE::getTypeName());
 
-    //      double writeBufferMB = mb;
-    //      uint64_t writeBufferMemory = (uint64_t(writeBufferMB) * 1024 * 1024) / sizeof(MDE);
+        loader->openFile(m_filename,"r");
 
-    //      // Set these values in the diskMRU
-    //      bc->setCacheParameters(sizeof(MDE), writeBufferMemory);
+        const std::vector<uint64_t> &BoxEventIndex = FlatBoxTree.getEventIndex();
+        prog->setNumSteps(numBoxes);
 
-    //      g_log.information() << "Setting a DiskBuffer cache size of " << mb << " MB, or " << cacheMemory << " events." << std::endl;
-    //    }
+        for (size_t i=0; i<numBoxes; i++)
+        {
+          prog->report();
 
-    //    // Leave the file open in the box controller
-    //    bc->setFile(file, m_filename, totalNumEvents);
+          if(BoxEventIndex[2*i+1]>0) // Load in memory NOT using the file as the back-end,
+              boxTree[i]->loadAndAddFrom(loader.get(),BoxEventIndex[2*i],static_cast<size_t>(BoxEventIndex[2*i+1]));
 
-    //  } // Not file back end
-    //  else
-    //  {
-    //    // ---------------------------------------- READ IN THE BOXES ------------------------------------
-    //    prog->setNumSteps(numBoxes);
-    //    for (size_t i=0; i<numBoxes; i++)
-    //    {
-    //      prog->report();
-    //      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxTree[i]);
-    //      if(!box)continue;
+        }
+        loader->closeFile();
+      }
 
-    //      if(box->getFileSize()>0) // Load in memory NOT using the file as the back-end,
-    //        box->loadNexus(file,false);
-    //    }
-    //    // Done reading in all the events.
-    //    file->closeData();
-    //    file->closeGroup();
-    //    file->close();
-    //    // Make sure no back-end is used
-    //    bc->setFile(NULL, "", 0);
-    //  }
-
-    //  g_log.debug() << tim << " to create all the boxes and fill them with events." << std::endl;
+      g_log.debug() << tim << " to create all the boxes and fill them with events." << std::endl;
 
 
-    //  // Box of ID 0 is the head box.
-    //  ws->setBox(boxTree[0] );
-    //  // Make sure the max ID is ok for later ID generation
-    //  bc->setMaxId(numBoxes);
+      // Box of ID 0 is the head box.
+      ws->setBox(boxTree[0] );
+      // Make sure the max ID is ok for later ID generation
+      bc->setMaxId(numBoxes);
 
-    //  //end-of bMetaDataOnly
-    //  // Refresh cache
-    //  //TODO:if(!FileBackEnd)ws->refreshCache();
-    //  ws->refreshCache();
-    //  g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh." << std::endl;
-
+      //end-of bMetaDataOnly
+      // Refresh cache
+      //TODO:if(!FileBackEnd)ws->refreshCache();
+      ws->refreshCache();
+      g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh." << std::endl;
       g_log.debug() << tim << " to finish up." << std::endl;
       delete prog;
     }
