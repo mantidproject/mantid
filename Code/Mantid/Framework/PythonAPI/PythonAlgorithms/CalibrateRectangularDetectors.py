@@ -310,7 +310,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
         GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
             DReference=self._peakpos, FitWindowMaxWidth=self.getProperty("PeakWindowMax"), BackgroundType=self.getProperty("BackgroundType"),
-            MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
+            MaxOffset=self._maxoffset, NumberPeaksWorkspace=str(wksp)+"peaks", MaskWorkspace=str(wksp)+"mask")
         #Fixed SmoothNeighbours for non-rectangular and rectangular
         if self._smoothoffsets and self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
                 SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset", WeightedSum="Flat",
@@ -423,7 +423,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 samRun = self._cccalibrate(samRun, calib, filterLogs)
             else:
                 samRun = self._multicalibrate(samRun, calib, filterLogs)
-            if self._xpixelbin*self._ypixelbin>1:
+            if self._xpixelbin*self._ypixelbin>1 or len(self._smoothGroups) > 0:
                	mtd.deleteWorkspace(str(samRun))
             	if str(self._instrument) == "SNAP":
 			alg = RenameWorkspace(origRun,"%s_%d" % (self._instrument, samNum))

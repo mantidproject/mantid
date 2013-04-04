@@ -36,6 +36,7 @@ public:
         // a valid choice to test the output of the Algorithm against.
         loader.setPropertyValue("Filename", "IRS26173_ipg.nxs");
         loader.setPropertyValue("OutputWorkspace","LoadedWorkspace");
+        loader.setPropertyValue("SpectrumMax","1");
         loader.setRethrows(true);
 
         std::string result[] = {
@@ -56,7 +57,7 @@ public:
             "Divide(LHSWorkspace='Spec',RHSWorkspace='Mon',OutputWorkspace='Spec')",
             "ConvertUnits(InputWorkspace='Spec',OutputWorkspace='Spec',Target='DeltaE',EMode='Indirect',EFixed='1.84')",
             "GroupDetectors(InputWorkspace='Spec',OutputWorkspace='IPG_3',MapFile=r'G:/Spencer/Science/Mantid/IRIS/PG1op3.map')",      // Not tested.
-            "Load(Filename=r'C:/Mantid/Test/AutoTestData/IRS26173_ipg.nxs',OutputWorkspace='IRS26173_ipg')",                           // Not tested.
+            "Load(Filename=r'C:/Mantid/Test/AutoTestData/IRS26173_ipg.nxs',OutputWorkspace='IRS26173_ipg',SpectrumMax='1')",                           // Not tested.
             ""
         };
 
@@ -76,49 +77,39 @@ public:
         TS_ASSERT_THROWS_NOTHING( alg.execute(); );
         TS_ASSERT( alg.isExecuted() );
 
-        // Read in the file, and parse each line into a vector of strings.
-        std::string filename = alg.getProperty("Filename");
-        std::ifstream file(filename.c_str(), std::ifstream::in);
-        std::vector<std::string> lines;
-
-        while (file.good())
-        {
-            char testArray[256];
-            file.getline(testArray, 256);
-            std::string line = testArray;
-            lines.push_back(line);
-        }
-
-        std::vector<std::string>::iterator lineIter = lines.begin();
-
-        int lineCount = 0;
 
         // Compare the contents of the file to the expected result line-by-line.
         // If the line contains Filename or MapFile then just check that the string
         // is prefixed with r to convert it to a Python raw string and not the actual content
         // as the file paths are different
-        for( ; lineIter != lines.end(); ++lineIter) 
+        std::string filename = alg.getProperty("Filename");
+        std::ifstream file(filename.c_str(), std::ifstream::in);
+        std::string scriptLine;
+        int lineCount(0);
+        while(std::getline(file, scriptLine))
         {
-          const std::string & algLine = *lineIter;
-          std::string::size_type filenamePos = algLine.find("Filename=");
-          std::string::size_type mapfilePos = algLine.find("MapFile=");
+          std::string::size_type filenamePos = scriptLine.find("Filename=");
+          std::string::size_type mapfilePos = scriptLine.find("MapFile=");
           if(filenamePos != std::string::npos)
           {
-            TS_ASSERT_EQUALS(algLine[filenamePos+9], 'r');
+            TS_ASSERT_EQUALS(scriptLine[filenamePos+9], 'r');
+            if(scriptLine.find("Load(") != std::string::npos)
+            {
+              // Check Load call has SpectrumMax
+              TS_ASSERT(scriptLine.find("SpectrumMax='1'") != std::string::npos);
+            }
           }
           else if(mapfilePos != std::string::npos)
           {
-            TS_ASSERT_EQUALS(algLine[mapfilePos+8], 'r');
+            TS_ASSERT_EQUALS(scriptLine[mapfilePos+8], 'r');
           }
           else
           {
-            TS_ASSERT_EQUALS(algLine,result[lineCount]);
+            TS_ASSERT_EQUALS(scriptLine,result[lineCount]);
           }
           lineCount++;
         }
 
-        // Remove workspace from the data service.
-        // AnalysisDataService::Instance().remove(outWSName);
         file.close();
         if (Poco::File(filename).exists()) Poco::File(filename).remove();
     }

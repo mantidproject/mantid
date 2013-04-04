@@ -80,7 +80,7 @@ def Load(*args, **kwargs):
       # The output workspace name is picked up from the LHS unless overridden
       Load('INSTR00001000.nxs',OutputWorkspace='run_ws')
     """
-    filename, = get_mandatory_args('Load', ["Filename"], *args, **kwargs)
+    filename, = _get_mandatory_args('Load', ["Filename"], *args, **kwargs)
     
     # Create and execute
     algm = _framework.createAlgorithm('Load')
@@ -98,8 +98,8 @@ def Load(*args, **kwargs):
         raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
                            "Load to a variable or use the OutputWorkspace keyword.") 
     
-    lhs_args = get_args_from_lhs(lhs, algm)
-    final_keywords = merge_keywords_with_lhs(kwargs, lhs_args)
+    lhs_args = _get_args_from_lhs(lhs, algm)
+    final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
     # Check for any properties that aren't known and warn they will not be used
     for key in final_keywords.keys():
         if key not in algm:
@@ -110,7 +110,7 @@ def Load(*args, **kwargs):
         
     # If a WorkspaceGroup was loaded then there will be a set of properties that have an underscore in the name
     # and users will simply expect the groups to be returned NOT the groups + workspaces.
-    return gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','.*_.*'])
+    return _gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','.*_.*'])
 
 # Have a better load signature for autocomplete
 _signature = "\bFilename"
@@ -175,7 +175,7 @@ def Fit(*args, **kwargs):
       Fit(Function='name=LinearBackground,A0=0.3', InputWorkspace=dataWS',
           StartX='0.05',EndX='1.0',Output="Z1")
     """
-    Function, InputWorkspace = get_mandatory_args('Fit', ["Function", "InputWorkspace"], *args, **kwargs)
+    Function, InputWorkspace = _get_mandatory_args('Fit', ["Function", "InputWorkspace"], *args, **kwargs)
     # Check for behaviour consistent with old API
     if type(Function) == str and Function in _ads:
         raise ValueError("Fit API has changed. The function must now come first in the argument list and the workspace second.")
@@ -200,7 +200,7 @@ def Fit(*args, **kwargs):
     _set_properties(algm, **kwargs)
     algm.execute()
     
-    return gather_returns('Fit', lhs, algm)
+    return _gather_returns('Fit', lhs, algm)
 
 # Have a better load signature for autocomplete
 _signature = "\bFunction, InputWorkspace"
@@ -225,7 +225,7 @@ def FitDialog(*args, **kwargs):
     """
     arguments = {}
     try:
-        function, inputworkspace = get_mandatory_args('FitDialog', ['Function', 'InputWorkspace'], *args, **kwargs)
+        function, inputworkspace = _get_mandatory_args('FitDialog', ['Function', 'InputWorkspace'], *args, **kwargs)
         arguments['Function'] = function
         arguments['InputWorkspace'] = inputworkspace
     except RuntimeError:
@@ -240,19 +240,82 @@ def FitDialog(*args, **kwargs):
     algm.execute()
     return algm
 
+#--------------------------------------------------- --------------------------
 
-def get_mandatory_args(func_name, required_args ,*args, **kwargs):
+def _get_function_spec(func):
+    """Get the python function signature for the given function object
+    
+    :param func: A Python function object
     """
-    Given a list of required arguments, parse them
+    import inspect
+    try:
+        argspec = inspect.getargspec(func)
+    except TypeError:
+        return ''
+    # Algorithm functions have varargs set not args
+    args = argspec[0]
+    if args != []:
+        # For methods strip the self argument
+        if hasattr(func, 'im_func'):
+            args = args[1:]
+        defs = argspec[3]
+    elif argspec[1] is not None:
+        # Get from varargs/keywords
+        arg_str = argspec[1].strip().lstrip('\b')
+        defs = []
+        # Keyword args
+        kwargs = argspec[2]
+        if kwargs is not None:
+            kwargs = kwargs.strip().lstrip('\b\b')
+            if kwargs == 'kwargs':
+                kwargs = '**' + kwargs + '=None'
+            arg_str += ',%s' % kwargs
+        # Any default argument appears in the string
+        # on the rhs of an equal
+        for arg in arg_str.split(','):
+            arg = arg.strip()
+            if '=' in arg:
+                arg_token = arg.split('=')
+                args.append(arg_token[0])
+                defs.append(arg_token[1])
+            else:
+                args.append(arg)
+        if len(defs) == 0: defs = None
+    else:
+        return ''
+
+    if defs is None:
+        calltip = ','.join(args)
+        calltip = '(' + calltip + ')'
+    else:
+        # The defaults list contains the default values for the last n arguments
+        diff = len(args) - len(defs)
+        calltip = ''
+        for index in range(len(args) - 1, -1, -1):
+            def_index = index - diff
+            if def_index >= 0:
+                calltip = '[' + args[index] + '],' + calltip
+            else:
+                calltip = args[index] + "," + calltip
+        calltip = '(' + calltip.rstrip(',') + ')'
+    return calltip
+
+#--------------------------------------------------- --------------------------
+
+def _get_mandatory_args(func_name, required_args ,*args, **kwargs):
+    """Given a list of required arguments, parse them
     from the given args & kwargs and raise an error if they
     are not provided
     
-        @param func_name :: The name of the function call
-        @param required_args :: A list of names of required arguments
-        @param args :: The positional arguments to check
-        @param kwargs :: The keyword arguments to check
-        
-        @returns A tuple of provided mandatory arguments
+    :param func_name: The name of the function call
+    :type str.
+    :param required_args: A list of names of required arguments
+    :type list.
+    :param args :: The positional arguments to check
+    :type dict.
+    :param kwargs :: The keyword arguments to check
+    :type dict.
+    :returns: A tuple of provided mandatory arguments
     """
     def get_argument_value(key, kwargs):
         try:
@@ -292,8 +355,9 @@ def _is_workspace_property(prop):
         Currently several properties , i.e WorspaceProperty<EventWorkspace>
         cannot be recognised by Python so we have to resort to a name test
         
-        @param prop - A property object
-        @returns True if the property is considered to be of type workspace
+        :param prop: A property object
+        :type Property
+        :returns: True if the property is considered to be of type workspace
     """
     if isinstance(prop, _api.IWorkspaceProperty):
         return True
@@ -301,7 +365,7 @@ def _is_workspace_property(prop):
     # Doesn't look like a workspace property
     return False
 
-def get_args_from_lhs(lhs, algm_obj):
+def _get_args_from_lhs(lhs, algm_obj):
     """
         Return the extra arguments that are to be passed to the algorithm
         from the information in the lhs tuple. These are basically the names 
@@ -311,12 +375,9 @@ def get_args_from_lhs(lhs, algm_obj):
         workspace property an entry is added to the returned dictionary
         that contains {PropertyName:lhs_name}.
         
-        @param lhs :: A 2-tuple that contains the number of variables supplied 
-                      on the lhs of the function call and the names of these
-                      variables
-        @param algm_obj :: An initialised algorithm object
-        @returns A dictionary mapping property names to the values
-                 extracted from the lhs variables
+        :param lhs: A 2-tuple that contains the number of variables supplied on the lhs of the function call and the names of these variables
+        :param algm_obj: An initialised algorithm object
+        :returns: A dictionary mapping property names to the values extracted from the lhs variables
     """
     ret_names = lhs[1]
     extra_args = {}
@@ -337,36 +398,30 @@ def get_args_from_lhs(lhs, algm_obj):
         i += 1
     return extra_args
 
-def merge_keywords_with_lhs(keywords, lhs_args):
+def _merge_keywords_with_lhs(keywords, lhs_args):
     """
         Merges the arguments from the two dictionaries specified
         by the keywords passed to a function and the lhs arguments
         that have been parsed. Any value in keywords overrides on
         in lhs_args.
         
-        @param keywords :: A dictionary of keywords that has been 
-                           passed to the function call
-        @param lhs_args :: A dictionary of arguments retrieved from the lhs
-                           of the function call
+        :param keywords: A dictionary of keywords that has been passed to the function call
+        :param lhs_args: A dictionary of arguments retrieved from the lhs of the function call
     """
     final_keywords = lhs_args
     final_keywords.update(keywords)
     return final_keywords
     
-def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
-    """
-        Gather the return values and ensure they are in the
-        correct order as defined by the output properties and
-        return them as a tuple. If their is a single return
-        value it is returned on its own
+def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
+    """Gather the return values and ensure they are in the
+       correct order as defined by the output properties and
+       return them as a tuple. If their is a single return
+       value it is returned on its own
         
-        @param func_name :: The name of the calling function
-        @param lhs :: A 2-tuple that contains the number of variables supplied 
-               on the lhs of the function call and the names of these
-               variables
-        @param algm_obj :: An executed algorithm object
-        @param ignore_regex :: A list of strings containing regex expressions to match against property names
-                               that will be ignored & not returned
+       :param func_name: The name of the calling function.
+       :param lhs: A 2-tuple that contains the number of variables supplied on the lhs of the function call and the names of these variables.
+       :param algm_obj: An executed algorithm object.
+       :param ignore_regex: A list of strings containing regex expressions to match against property names that will be ignored & not returned.
     """
     import re
     def ignore_property(name, ignore_regex):
@@ -430,9 +485,8 @@ def _set_logging_option(algm_obj, kwargs):
         algorithm logging accordingly and removes the value from the dictionary. If the keyword 
         does not exist then it does nothing.
 
-        @param alg_object An initialised algorithm object
-        @param **kwargs A dictionary of the keyword arguments passed to the simple function 
-        call
+        :param alg_object: An initialised algorithm object
+        :param **kwargs: A dictionary of the keyword arguments passed to the simple function call
     """
     if __LOGGING_KEYWORD__ in kwargs:
         algm_obj.setLogging(kwargs[__LOGGING_KEYWORD__])
@@ -441,9 +495,9 @@ def _set_logging_option(algm_obj, kwargs):
 def _set_properties(alg_object, *args, **kwargs):
     """
         Set all of the properties of the algorithm
-        @param alg_object An initialised algorithm object
-        @param *args Positional arguments
-        @param **kwargs Keyword arguments  
+        :param alg_object: An initialised algorithm object
+        :param *args: Positional arguments
+        :param **kwargs: Keyword arguments  
     """
     prop_order = alg_object.mandatoryProperties()
     # add the args to the kw list so everything can be set in a single way
@@ -465,12 +519,12 @@ def _set_properties(alg_object, *args, **kwargs):
         else:
             alg_object.setProperty(key, value)
 
-def create_algorithm(algorithm, version, _algm_object):
+def _create_algorithm(algorithm, version, _algm_object):
     """
         Create a function that will set up and execute an algorithm.
         The help that will be displayed is that of the most recent version.
-        @param algorithm: name of the algorithm
-        @param _algm_object :: the created algorithm object.
+        :param algorithm: name of the algorithm
+        :param _algm_object: the created algorithm object.
     """
     
     def algorithm_wrapper(*args, **kwargs):
@@ -485,11 +539,11 @@ def create_algorithm(algorithm, version, _algm_object):
         algm = _framework.createAlgorithm(algorithm, _version)
         _set_logging_option(algm, kwargs)
         lhs = _funcreturns.lhs_info()
-        lhs_args = get_args_from_lhs(lhs, algm)
-        final_keywords = merge_keywords_with_lhs(kwargs, lhs_args)
+        lhs_args = _get_args_from_lhs(lhs, algm)
+        final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
         _set_properties(algm, *args, **final_keywords)
         algm.execute()
-        return gather_returns(algorithm, lhs, algm)
+        return _gather_returns(algorithm, lhs, algm)
         
     
     algorithm_wrapper.__name__ = algorithm
@@ -548,6 +602,8 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
     Set the properties all in one go assuming that you are preparing for a
     dialog box call. If the dialog is cancelled raise a runtime error, otherwise 
     return the algorithm ready to execute.
+    
+    :param algm_object An initialized algorithm object
     """
     if not __gui__:
         raise RuntimeError("Can only display properties dialog in gui mode")
@@ -602,12 +658,14 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
     if dialog == False:
         raise RuntimeError('Dialog cancel pressed. Script execution halted.')
 
-def create_algorithm_dialog(algorithm, version, _algm_object):
+#----------------------------------------------------------------------------------------------------------------------
+
+def _create_algorithm_dialog(algorithm, version, _algm_object):
     """
         Create a function that will set up and execute an algorithm dialog.
         The help that will be displayed is that of the most recent version.
-        @param algorithm: name of the algorithm
-        @param _algm_object :: the created algorithm object.
+        :param algorithm: name of the algorithm
+        :param _algm_object: the created algorithm object.
     """
     def algorithm_wrapper(*args, **kwargs):
         _version = version
@@ -646,9 +704,9 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
         if len(alias)>0:
             globals()["%sDialog" % alias] = algorithm_wrapper
 
-#==============================================================================
+#--------------------------------------------------------------------------------------------------
 
-def mockup(plugins):
+def _mockup(plugins):
     """
         Creates fake, error-raising functions for all loaded algorithms plus
         any plugins given. 
@@ -662,7 +720,9 @@ def mockup(plugins):
         in the alphabet. The first algorithm stops with an import error as that function
         is not yet known. By having a pre-loading step all of the necessary functions
         on this module can be created and after the plugins are loaded the correct
-        function definitions can overwrite the "fake" ones. 
+        function definitions can overwrite the "fake" ones.
+        
+        :param plugins: A list of  modules that have been loaded
     """
     #--------------------------------------------------------------------------------------------------------
     def create_fake_function(name):
@@ -684,14 +744,13 @@ def mockup(plugins):
         # Replace the code object of the wrapper function
         fake_function.func_code = c
         globals()[name] = fake_function
-    #--------------------------------------------------------------------------------------------------------
+    #--------------------------------------------------------
     def create_fake_functions(alg_names):
         """Create fake functions for all of the listed names
         """
-        #----------------------------------------------------------------------------------------------------
         for alg_name in alg_names:
             create_fake_function(alg_name)
-    #--------------------------------------------------------------------------------------------------------
+    #-------------------------------------
 
     # Start with the loaded C++ algorithms
     from api import AlgorithmFactory
@@ -705,14 +764,14 @@ def mockup(plugins):
         name = os.path.splitext(name)[0]
         create_fake_function(name)
 
-#==============================================================================
+#------------------------------------------------------------------------------------------------------------
 
-def translate():
+def _translate():
     """
         Loop through the algorithms and register a function call 
         for each of them
         
-        @returns a list of new function calls
+        :returns: a list of new function calls
     """
     from api import AlgorithmFactory, AlgorithmManager
     
@@ -728,66 +787,8 @@ def translate():
             _algm_object.initialize()
         except Exception:
             continue
-        create_algorithm(name, max(versions), _algm_object)
-        create_algorithm_dialog(name, max(versions), _algm_object)
+        _create_algorithm(name, max(versions), _algm_object)
+        _create_algorithm_dialog(name, max(versions), _algm_object)
         new_functions.append(name)
     
     return new_functions
-
-
-def _get_function_spec(func):
-    """
-    Get the python function signature for the body of 
-    """
-    import inspect
-    try:
-        argspec = inspect.getargspec(func)
-    except TypeError:
-        return ''
-    # Algorithm functions have varargs set not args
-    args = argspec[0]
-    if args != []:
-        # For methods strip the self argument
-        if hasattr(func, 'im_func'):
-            args = args[1:]
-        defs = argspec[3]
-    elif argspec[1] is not None:
-        # Get from varargs/keywords
-        arg_str = argspec[1].strip().lstrip('\b')
-        defs = []
-        # Keyword args
-        kwargs = argspec[2]
-        if kwargs is not None:
-            kwargs = kwargs.strip().lstrip('\b\b')
-            if kwargs == 'kwargs':
-                kwargs = '**' + kwargs + '=None'
-            arg_str += ',%s' % kwargs
-        # Any default argument appears in the string
-        # on the rhs of an equal
-        for arg in arg_str.split(','):
-            arg = arg.strip()
-            if '=' in arg:
-                arg_token = arg.split('=')
-                args.append(arg_token[0])
-                defs.append(arg_token[1])
-            else:
-                args.append(arg)
-        if len(defs) == 0: defs = None
-    else:
-        return ''
-
-    if defs is None:
-        calltip = ','.join(args)
-        calltip = '(' + calltip + ')'
-    else:
-        # The defaults list contains the default values for the last n arguments
-        diff = len(args) - len(defs)
-        calltip = ''
-        for index in range(len(args) - 1, -1, -1):
-            def_index = index - diff
-            if def_index >= 0:
-                calltip = '[' + args[index] + '],' + calltip
-            else:
-                calltip = args[index] + "," + calltip
-        calltip = '(' + calltip.rstrip(',') + ')'
-    return calltip

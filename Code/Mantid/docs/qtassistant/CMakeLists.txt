@@ -4,7 +4,7 @@
 #QT_QCOLLECTIONGENERATOR_EXECUTABLE
 if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
    # set directories to follow structure of qt4 on linux
-   set (HELP_OUT_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/qtassistant)
+   set (HELP_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/qtassistant)
    set (HELP_QCH_DIR ${HELP_OUT_DIR}/qch)
    set (HELP_HTML_DIR ${HELP_OUT_DIR}/html)
    set (HELP_IMG_DIR ${HELP_OUT_DIR}/src/images)
@@ -41,8 +41,6 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
       add_custom_command( OUTPUT ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/assistant.exe
                           COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${THIRD_PARTY}/assistant.exe
                                   ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assistant.exe )
-      install (FILES  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assistant.exe
-               DESTINATION ${CMAKE_INSTALL_PREFIX} )
    endif (WIN32)
 
    set ( HELP_ALGO_OUT
@@ -69,11 +67,21 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
                       DEPENDS ${HELP_ALGO_OUT} ${HELP_FIT_OUT} ${HELP_QHCP_SOURCE}
 		      COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} ${HELP_OUT_DIR}/mantid.qhcp
 		      )
-
+              
    add_custom_target ( qtassistant ALL
                        DEPENDS MantidPlot ${HELP_QCH_DIR}/mantid.qhc
                        )
 
+   # Copy to correct location in bin
+   set (HELP_BIN_OUT_DIR  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/qtassistant )
+   add_custom_command( TARGET qtassistant
+                       POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${HELP_OUT_DIR} ${HELP_BIN_OUT_DIR} 
+                       COMMENT "Copying qtassistant to bin" )
+
+   ###########################################################################################
+   # Installation settings
+   ###########################################################################################
    set ( GUI_HELP_DEST share/doc )
 
    install ( DIRECTORY   ${HELP_QCH_DIR} ${HELP_HTML_DIR} ${HELP_IMG_DIR}

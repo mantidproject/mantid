@@ -1,7 +1,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
+#include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -76,7 +76,7 @@ namespace
 {
     using Mantid::PythonInterface::PythonObjectInstantiator;
     using Mantid::Kernel::AbstractInstantiator;
-    using Mantid::PythonInterface::AlgorithmWrapper;
+    using Mantid::PythonInterface::PythonAlgorithm;
     using Mantid::API::Algorithm;
     using Mantid::API::IAlgorithm_sptr;
 
@@ -92,7 +92,7 @@ namespace
   {
     Poco::ScopedLock<Poco::Mutex> lock(PYALG_REGISTER_MUTEX);
 
-    static PyObject * const pyAlgClass = (PyObject*)converter::registered<AlgorithmWrapper>::converters.to_python_target_type();
+    static PyObject * const pyAlgClass = (PyObject*)converter::registered<PythonAlgorithm>::converters.to_python_target_type();
     // obj could be or instance/class, check instance first
     PyObject *classObject(NULL);
     if( PyObject_IsInstance(obj.ptr(), pyAlgClass) )

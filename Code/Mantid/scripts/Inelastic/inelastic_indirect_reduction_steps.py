@@ -116,7 +116,7 @@ class LoadData(ReductionStep):
             if os.path.isfile(basis_mask_filename):
                     LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask", 
                              InputFile=basis_mask_filename)
-                    MaskDetectors(Workspace=filename, MaskedWorkspace="__basis_mask")
+                    MaskDetectors(Workspace=output_ws, MaskedWorkspace="__basis_mask")
             else:
                     logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
 

@@ -1,7 +1,7 @@
 .. _mantid:
 
 ##################################
-  Mantid Framework class reference
+  Mantid Framework API reference
 ##################################
 
 .. module:: mantid
