@@ -212,3 +212,18 @@ get_author_email() {
     fi
     git log -1 $1 --format="format:%ae"
 }
+
+# Removes a key and section if it is empty
+remove_config_value() {
+    if [ ! $# -eq 1 ]; then
+	echo "remove_config_value requires the key as an arguments"
+    fi
+    # Clear saved config
+    git config --unset $1
+    # & the section if there is nothing left
+    section_name=$(echo $1 | cut -d'.' -f 1,2)
+    remaining_keys=$(git config --list | grep ${section_name})
+    if [ -z "${remaining_keys}" ]; then
+	git config --remove-section ${section_name}
+    fi
+}
