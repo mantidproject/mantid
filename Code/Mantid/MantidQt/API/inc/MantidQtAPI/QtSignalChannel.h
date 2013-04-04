@@ -39,7 +39,6 @@ namespace MantidQt
     Q_OBJECT
 
     public:
-
       /// Constructor
       QtSignalChannel();
       /// Destructor
@@ -48,11 +47,17 @@ namespace MantidQt
       /// Converts the Poco::Message to a Qt signal
       void log(const Poco::Message& msg);
 
-    signals:
+    public slots:
+      /// Set the log level for all loggers
+      void setGlobalLogLevel(int level);
 
+    signals:
       // Emitted when a Poco log message is received in this channel
       void messageReceived(const QString & msg);
-    };
+
+    private:
+      Q_DISABLE_COPY(QtSignalChannel);
+   };
   }
 }
 

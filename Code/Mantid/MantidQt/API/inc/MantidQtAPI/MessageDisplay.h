@@ -31,8 +31,15 @@ namespace MantidQt
       Q_OBJECT
 
     public:
-      /// Constructor
-      MessageDisplay(QWidget *parent=NULL);
+      /// Controls whether the display is allowed to set the log levels
+      enum LogLevelControl {
+        EnableLogLevelControl = 0,
+        DisableLogLevelControl = 1
+      };
+
+      /// Default constructor
+      MessageDisplay(LogLevelControl logLevelControl=DisableLogLevelControl,
+                     QWidget *parent=NULL);
       ///Destructor
       ~MessageDisplay();
 
@@ -56,6 +63,8 @@ namespace MantidQt
       /// Set the properties of the text display
       void setupTextArea();
 
+      /// Are we allowed to affect the log level
+      LogLevelControl m_logLevelControl;
       /// A reference to the
       QtSignalChannel *m_logChannel;
       /// The actual widget holding the text

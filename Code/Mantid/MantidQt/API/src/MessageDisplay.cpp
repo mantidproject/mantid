@@ -27,11 +27,12 @@ namespace MantidQt
     // Public member functions
     //-------------------------------------------
     /**
+     * @param loggerControl Controls whether the log-level applies globally or only to this channel (default=MessageDisplay::Global)
      * @param parent An optional parent widget
      */
-    MessageDisplay::MessageDisplay(QWidget *parent)
-    : QWidget(parent), m_logChannel(NULL), m_textDisplay(new QTextEdit(this)),
-      m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
+    MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
+    : QWidget(parent), m_logLevelControl(logLevelControl), m_logChannel(new QtSignalChannel),
+      m_textDisplay(new QTextEdit(this)), m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
       m_error(new QAction(tr("&Error"), this)), m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)), m_information(new QAction(tr("&Information"), this)),
       m_debug(new QAction(tr("&Debug"), this))
@@ -47,7 +48,6 @@ namespace MantidQt
     void MessageDisplay::attachLoggingChannel()
     {
       // Setup logging
-      m_logChannel = new QtSignalChannel;
       auto & rootLogger = Poco::Logger::root();
       auto * rootChannel = Poco::Logger::root().getChannel();
       // The root channel might be a SplitterChannel
@@ -62,7 +62,6 @@ namespace MantidQt
 
       connect(m_logChannel, SIGNAL(messageReceived(const QString&)),
           this, SLOT(displayMessage(const QString &)));
-
     }
 
 
@@ -93,63 +92,32 @@ namespace MantidQt
       QMenu * menu = m_textDisplay->createStandardContextMenu();
       if(!m_textDisplay->text().isEmpty()) menu->addAction("Clear",m_textDisplay, SLOT(clear()));
 
-      // Change the log level
-      QMenu *logLevelMenu = menu->addMenu("&Log Level");
-      logLevelMenu->addAction(m_error);
-      logLevelMenu->addAction(m_warning);
-      logLevelMenu->addAction(m_notice);
-      logLevelMenu->addAction(m_information);
-      logLevelMenu->addAction(m_debug);
+      if(m_logLevelControl == MessageDisplay::EnableLogLevelControl)
+      {
+        menu->addSeparator();
+        QMenu *logLevelMenu = menu->addMenu("&Log Level");
+        logLevelMenu->addAction(m_error);
+        logLevelMenu->addAction(m_warning);
+        logLevelMenu->addAction(m_notice);
+        logLevelMenu->addAction(m_information);
+        logLevelMenu->addAction(m_debug);
 
-      //check the right level
-      int level = Mantid::Kernel::Logger::get("").getLevel(); //get the root logger logging level
-      if (level == Poco::Message::PRIO_ERROR)
-        m_error->setChecked(true);
-      if (level == Poco::Message::PRIO_WARNING)
-        m_warning->setChecked(true);
-      if (level == Poco::Message::PRIO_NOTICE)
-        m_notice->setChecked(true);
-      if (level == Poco::Message::PRIO_INFORMATION)
-        m_information->setChecked(true);
-      if (level == Poco::Message::PRIO_DEBUG)
-        m_debug->setChecked(true);
+        //check the right level
+        int level = Mantid::Kernel::Logger::get("").getLevel(); //get the root logger logging level
+        if (level == Poco::Message::PRIO_ERROR)
+          m_error->setChecked(true);
+        if (level == Poco::Message::PRIO_WARNING)
+          m_warning->setChecked(true);
+        if (level == Poco::Message::PRIO_NOTICE)
+          m_notice->setChecked(true);
+        if (level == Poco::Message::PRIO_INFORMATION)
+          m_information->setChecked(true);
+        if (level == Poco::Message::PRIO_DEBUG)
+          m_debug->setChecked(true);
+      }
 
       menu->exec(this->mapToGlobal(mousePos));
       delete menu;
-
-      //      QMenu *menu = results->createStandardContextMenu();
-//      if(!menu) return;
-//      if(results->text().isEmpty())
-//      {
-//        actionClearLogInfo->setEnabled(false);
-//      }
-//      else
-//      {
-//        actionClearLogInfo->setEnabled(true);
-//      }
-//
-//      menu->addAction(actionClearLogInfo);
-//      //Mantid log level changes
-//      QMenu *logLevelMenu = menu->addMenu("&Log Level");
-//      logLevelMenu->addAction(actionLogLevelError);
-//      logLevelMenu->addAction(actionLogLevelWarning);
-//      logLevelMenu->addAction(actionLogLevelNotice);
-//      logLevelMenu->addAction(actionLogLevelInformation);
-//      logLevelMenu->addAction(actionLogLevelDebug);
-//
-//      //check the right level
-//      int level = Mantid::Kernel::Logger::get("").getLevel(); //get the root logger logging level
-//      if (level == Poco::Message::PRIO_ERROR)
-//        actionLogLevelError->setChecked(true);
-//      if (level == Poco::Message::PRIO_WARNING)
-//        actionLogLevelWarning->setChecked(true);
-//      if (level == Poco::Message::PRIO_NOTICE)
-//        actionLogLevelNotice->setChecked(true);
-//      if (level == Poco::Message::PRIO_INFORMATION)
-//        actionLogLevelInformation->setChecked(true);
-//      if (level == Poco::Message::PRIO_DEBUG)
-//        actionLogLevelDebug->setChecked(true);
-
     }
 
     /*
@@ -192,7 +160,7 @@ namespace MantidQt
       connect(m_information, SIGNAL(activated()), m_logLevelMapping, SLOT (map()));
       connect(m_debug, SIGNAL(activated()), m_logLevelMapping, SLOT (map()));
 
-      connect(m_logLevelMapping, SIGNAL(mapped(int)), this, SLOT(setGlobalLogLevel(int)));
+      connect(m_logLevelMapping, SIGNAL(mapped(int)), m_logChannel, SLOT(setGlobalLogLevel(int)));
     }
 
     /**
