@@ -2,6 +2,7 @@
 // Includes
 //-------------------------------------------
 #include "MantidQtAPI/MessageDisplay.h"
+#include "MantidQtAPI/Message.h"
 
 #include "MantidKernel/Logger.h"
 
@@ -68,17 +69,17 @@ namespace MantidQt
      * @param msg A message that is echoed to the display after the
      * current text
      */
-    void MessageDisplay::append(const QString & msg)
+    void MessageDisplay::append(const Message & msg)
     {
-      m_textDisplay->append(msg);
+      m_textDisplay->append(msg.text());
     }
 
     /**
      * @param msg Replace the curren contents with this message
      */
-    void MessageDisplay::replace(const QString & msg)
+    void MessageDisplay::replace(const Message & msg)
     {
-      m_textDisplay->setText(msg);
+      m_textDisplay->setText(msg.text());
     }
 
     /**

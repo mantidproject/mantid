@@ -21,6 +21,11 @@ namespace MantidQt
 {
   namespace API
   {
+    //----------------------------------------------------------
+    // Forward declarations
+    //----------------------------------------------------------
+    class Message;
+
     /** @class MessageDisplay
      * Provides a widget for display messages in a text box
      * It deals with Message objects which in turn hide whether
@@ -48,9 +53,9 @@ namespace MantidQt
 
     public slots:
       /// Write a message after the current contents
-      void append(const QString & msg);
+      void append(const Message & msg);
       /// Replace the display text with the given contents
-      void replace(const QString & msg);
+      void replace(const Message & msg);
       /// Clear all of the text
       void clear();
 
