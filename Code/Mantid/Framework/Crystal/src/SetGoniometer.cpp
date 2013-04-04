@@ -77,7 +77,7 @@ namespace Crystal
     declareProperty("Goniometers", gonOptions[0],boost::make_shared<StringListValidator>(gonOptions),
       "Set the axes and motor names according to goniometers that we define in the code (Universal defined for SNS)");
 
-    std::string axisHelp = ": name, x,y,z, 1/-1 (1 for ccw, -1 for cw rotation). Leave blank for no axis";
+    std::string axisHelp = ": name, x,y,z, 1/-1 (1 for ccw, -1 for cw rotation). A number of degrees can be used instead of name. Leave blank for no axis";
     for (size_t i=0; i< NUM_AXES; i++)
     {
       std::ostringstream propName;
@@ -126,6 +126,11 @@ namespace Crystal
                 Kernel::DateAndTime now = Kernel::DateAndTime::getCurrentTime();
                 Kernel::TimeSeriesProperty<double> * tsp = new Kernel::TimeSeriesProperty<double>(axisName);
                 tsp->addValue(now, angle);
+                tsp->setUnits("degree");
+                if (ws->mutableRun().hasProperty(axisName))
+                {
+                    ws->mutableRun().removeLogData(axisName);
+                }
                 ws->mutableRun().addLogData(tsp);
             }
             catch (...)
