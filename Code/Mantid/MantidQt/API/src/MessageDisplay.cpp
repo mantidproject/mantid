@@ -61,7 +61,7 @@ namespace MantidQt
         Poco::Logger::setChannel(rootLogger.name(), m_logChannel);
       }
 
-      connect(m_logChannel, SIGNAL(messageReceived(const QString&)),
+      connect(m_logChannel, SIGNAL(messageReceived(const API::Message&)),
           this, SLOT(append(const QString &)));
     }
 

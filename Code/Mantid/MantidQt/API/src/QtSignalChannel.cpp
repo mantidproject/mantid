@@ -1,9 +1,8 @@
 #include "MantidQtAPI/QtSignalChannel.h"
+#include "MantidQtAPI/Message.h"
 #include "MantidKernel/Logger.h"
 
 #include <Poco/Message.h>
-
-#include <sstream>
 
 namespace MantidQt
 {
@@ -29,7 +28,7 @@ namespace MantidQt
      */
     void QtSignalChannel::log(const Poco::Message& msg)
     {
-      emit messageReceived(QString::fromStdString(msg.getText()));
+      emit messageReceived(API::Message(QString::fromStdString(msg.getText()), msg.getPriority()));
     }
 
     /*

@@ -10,6 +10,11 @@ namespace MantidQt
 {
   namespace API
   {
+    //---------------------------------------------------------------------
+    //
+    //---------------------------------------------------------------------
+    class Message;
+
     /** 
     Provides a translation layer that takes a Poco::Message and converts it
     to a Qt signal.
@@ -53,7 +58,7 @@ namespace MantidQt
 
     signals:
       // Emitted when a Poco log message is received in this channel
-      void messageReceived(const QString & msg);
+      void messageReceived(const Message & msg);
 
     private:
       Q_DISABLE_COPY(QtSignalChannel);
