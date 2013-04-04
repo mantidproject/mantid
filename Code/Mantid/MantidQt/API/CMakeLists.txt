@@ -56,25 +56,25 @@ set ( MOC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-	${MOC_FILES}
-	inc/MantidQtAPI/AlgorithmInputHistory.h
-	inc/MantidQtAPI/AlgorithmRunner.h
-	inc/MantidQtAPI/DllOption.h
-	inc/MantidQtAPI/FileDialogHandler.h
-	inc/MantidQtAPI/GraphOptions.h
-        inc/MantidQtAPI/HelpWindow.h
-	inc/MantidQtAPI/InterfaceFactory.h
-	inc/MantidQtAPI/InterfaceManager.h
-	inc/MantidQtAPI/MantidColorMap.h
-    inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
-    inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
-	inc/MantidQtAPI/MantidQwtWorkspaceData.h
-	inc/MantidQtAPI/PropertyWidgetFactory.h
-	inc/MantidQtAPI/ScriptRepositoryView.h
+  ${MOC_FILES}
+  inc/MantidQtAPI/AlgorithmInputHistory.h
+  inc/MantidQtAPI/AlgorithmRunner.h
+  inc/MantidQtAPI/DllOption.h
+  inc/MantidQtAPI/FileDialogHandler.h
+  inc/MantidQtAPI/GraphOptions.h
+  inc/MantidQtAPI/HelpWindow.h
+  inc/MantidQtAPI/InterfaceFactory.h
+  inc/MantidQtAPI/InterfaceManager.h
+  inc/MantidQtAPI/MantidColorMap.h
+  inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
+  inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
+  inc/MantidQtAPI/MantidQwtWorkspaceData.h
+  inc/MantidQtAPI/PropertyWidgetFactory.h
+  inc/MantidQtAPI/ScriptRepositoryView.h
 )
 
 set ( UI_FILES 
-	inc/MantidQtAPI/ManageUserDirectories.ui
+  inc/MantidQtAPI/ManageUserDirectories.ui
   inc/MantidQtAPI/ScriptRepositoryView.ui 
 )
 
@@ -115,5 +115,6 @@ install ( TARGETS MantidQtAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 
 set ( TEST_FILES
-	ScriptRepositoryViewTest.h
+  ScriptRepositoryViewTest.h
 )
+
