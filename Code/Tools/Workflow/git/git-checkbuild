@@ -90,7 +90,7 @@ start_on_feature() {
 	echo "When you have resolved the conflicts with 'git add' then 'git commit' rerun this command from ${BUILD_BRANCH}."
 	exit 1
     else
-	# Remove any stored name
+	# Remove any stored name if there was one
 	remove_config_value ${MERGENAME_CFG_KEY}
     fi
     
