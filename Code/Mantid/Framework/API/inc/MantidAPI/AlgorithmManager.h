@@ -6,12 +6,11 @@
 //----------------------------------------------------------------------
 #include <deque>
 #include <string>
+#include <Poco/NotificationCenter.h>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include <Poco/NotificationCenter.h>
 
 namespace Mantid
 {
@@ -37,10 +36,7 @@ namespace API
 /** The AlgorithmManagerImpl class is responsible for controlling algorithm 
     instances. It incorporates the algorithm factory and initializes algorithms.
 
-    @author Dickon Champion, ISIS, RAL
-    @date 30/10/2007
-
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid. 
 
@@ -68,42 +64,29 @@ public:
   /// Creates an unmanaged algorithm with the option of choosing a version
   boost::shared_ptr<Algorithm> createUnmanaged(const std::string& algName, const int& version = -1) const;
 
-  /// deletes all registered algorithms
-  void clear();
-  /** Gives the number of managed algorithms
-   *  @return The number of registered algorithms
-   */
-  int size() const
-  {
-    return static_cast<int>(m_managed_algs.size());
-  }
-  /// Returns the names and categories of all algorithms
-  const std::vector<std::pair<std::string, std::string> > getNamesAndCategories() const;
-  /// Returns a reference to the container of managed algorithms
-  const std::deque<IAlgorithm_sptr>& algorithms() const
-  {
-    return m_managed_algs;
-  }
-  /// Return the pointer to an algorithm with the given ID
+  std::size_t size() const;
+
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
+  IAlgorithm_sptr newestInstanceOf(const std::string& algorithmName) const;
+  std::vector<IAlgorithm_const_sptr> runningInstancesOf(const std::string& algorithmName) const;
 
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
   /// using Poco::NotificationCenter::addObserver(...)
   Poco::NotificationCenter notificationCenter;
-
   void notifyAlgorithmStarting(AlgorithmID id);
+
+  void clear();
+  void cancelAll();
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
 
-  ///Class cannot be instantiated by normal means
   AlgorithmManagerImpl();
-  ///destructor
   ~AlgorithmManagerImpl();
-  ///Copy constructor
-  AlgorithmManagerImpl(const AlgorithmManagerImpl&);
 
-  /// Standard Assignment operator    
+  /// Unimplemented copy constructor
+  AlgorithmManagerImpl(const AlgorithmManagerImpl&);
+  /// Unimplemented assignment operator
   AlgorithmManagerImpl& operator =(const AlgorithmManagerImpl&);
 
   /// Reference to the logger class

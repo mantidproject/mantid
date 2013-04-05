@@ -696,7 +696,7 @@ namespace Mantid
     /*
     * Overrides the default cancel() method. Calls cancel() on the actual loader.
     */
-    void Load::cancel()const
+    void Load::cancel()
     {
       if (m_loader)
       {
