@@ -911,7 +911,8 @@ class SNSPowderReduction(PythonAlgorithm):
 
         Return : integer
         """
-        splitws = mtd["PG3_9829_event_splitters"]
+        # splitws = mtd["PG3_9829_event_splitters"]
+        splitws = AnalysisDataService.retrieve(str(splitwksp))
         numrows = splitws.rowCount()
         wscountdict = {}
         for r in xrange(numrows): 
