@@ -117,6 +117,12 @@ namespace MDEvents
 
     }
   }
+  // unhide MDBoxBase method
+  TMDE(
+  size_t MDBox)::addEventsUnsafe(const std::vector<MDE> & events)
+  {
+      return MDBoxBase<MDE,nd>::addEventsUnsafe( events);
+  }
 
 
   //-----------------------------------------------------------------------------------------------

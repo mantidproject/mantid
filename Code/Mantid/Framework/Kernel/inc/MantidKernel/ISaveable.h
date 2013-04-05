@@ -107,7 +107,7 @@ namespace Kernel
     Kernel::Mutex m_setter; 
   private:
     // the iterator which describes the position of this object in the DiskBuffer. Undefined if not placed to buffer
-    boost::optional< std::list<ISaveable * const >::iterator> m_BufPosition;
+    boost::optional< std::list<ISaveable * >::iterator> m_BufPosition;
     // the size of the object in the memory buffer, used to calculate the total amount of memory the objects occupy
     size_t m_BufMemorySize;
 
@@ -120,9 +120,9 @@ namespace Kernel
     void saveAt(uint64_t newPos, uint64_t newSize);
 
     /// sets the iterator pointing to the location of this object in the memory buffer to write later
-    size_t setBufferPosition(std::list<ISaveable *const >::iterator &bufPosition);
+    size_t setBufferPosition(std::list<ISaveable * >::iterator bufPosition);
     /// returns the iterator pointing to the position of this object within the memory to-write buffer
-    boost::optional<std::list<ISaveable *const>::iterator > & getBufPostion()
+    boost::optional<std::list<ISaveable *>::iterator > & getBufPostion()
     {return m_BufPosition;}
     /// return the amount of memory, this object had when it was stored in buffer last time;
     size_t getBufferSize()const{return m_BufMemorySize;}

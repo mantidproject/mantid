@@ -81,7 +81,7 @@ namespace MDEvents
             ::NeXus::File * getFile(){return m_File;}
     private:
         /// Default size of the events block which can be written in the NeXus array at once identified by efficiency or some other external reasons
-        static enum {DATA_CHUNK=10000};
+        enum {DATA_CHUNK=10000};
 
         /// full file name (with path) of the Nexis file responsible for the IO operations (as NeXus filename has very strange properties and often truncated to 64 bytes)
         std::string m_fileName;
@@ -106,7 +106,7 @@ namespace MDEvents
         unsigned int m_CoordSize;
         /// possible event types this class understands. The enum numbers have to correspond to the numbers of symbolic event types, 
         /// defined in EVENT_TYPES_SUPPORTED vector
-        static enum EventType
+        enum EventType
         {
             LeanEvent=0, //< the event consisting of signal error and event coordinate
             FatEvent=1   //< the event havint the same as lean event plus RunID and detID

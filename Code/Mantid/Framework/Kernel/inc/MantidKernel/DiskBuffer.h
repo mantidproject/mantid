@@ -14,7 +14,7 @@
 #include <map>
 #include <stdint.h>
 #include <vector>
-#include <forward_list>
+#include <list>
 
 namespace Mantid
 {
@@ -77,9 +77,9 @@ namespace Kernel
     DiskBuffer(uint64_t m_writeBufferSize);
     virtual ~DiskBuffer();
 
-    void toWrite(ISaveable * const item);
+    void toWrite(ISaveable *  item);
     void flushCache();
-    void objectDeleted(ISaveable *const item);
+    void objectDeleted(ISaveable * item);
 
     // Free space map methods
     void freeBlock(uint64_t const pos, uint64_t const fileSize);
@@ -143,7 +143,7 @@ namespace Kernel
     /// number of objects stored in to write buffer list
     size_t m_nObjectsToWrite;
     /** A forward list for the buffer of "toWrite" objects.   */
-    std::list<ISaveable * const> m_toWriteBuffer;
+    std::list<ISaveable * > m_toWriteBuffer;
 
     /// Mutex for modifying the the toWrite buffer.
     Kernel::Mutex m_mutex;

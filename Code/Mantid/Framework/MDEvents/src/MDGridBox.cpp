@@ -38,8 +38,16 @@ namespace MDEvents
   // : MDBoxBase<MDE, nd>(), numBoxes(0), nPoints(0)
   //{
   //}
- 
-
+   template<typename MDE,size_t nd>
+    size_t MDGridBox<MDE,nd>::addEvents(const std::vector<MDE> & events)
+    {
+        return MDBoxBase<MDE,nd>::addEvents(events);
+    }
+   template<typename MDE,size_t nd>
+   size_t MDGridBox<MDE,nd>::addEventsUnsafe(const std::vector<MDE> & events)
+   {
+        return MDBoxBase<MDE,nd>::addEventsUnsafe( events);
+   }
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor with a box controller.

@@ -98,7 +98,7 @@ namespace Kernel
    *
    * @param item :: ISaveable object that is getting deleted.
    */
-  void DiskBuffer::objectDeleted(ISaveable *const item)
+  void DiskBuffer::objectDeleted(ISaveable * item)
   {
     // have it ever been in the buffer?
     auto opt2it = item->getBufPostion();
@@ -133,7 +133,7 @@ namespace Kernel
 
     m_mutex.lock();
     // Holder for any objects that you were NOT able to write.
-    std::list<ISaveable *const> couldNotWrite;
+    std::list<ISaveable *> couldNotWrite;
     size_t objectsNotWritten(0);
     size_t memoryNotWritten(0);
 

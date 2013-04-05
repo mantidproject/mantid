@@ -2,7 +2,7 @@
 #include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FileFinder.h"
-#include <NeXusFile.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include <string>
 
@@ -35,8 +35,14 @@ namespace MDEvents
    {
        m_BlockSize[1] = 4+m_bc->getNDims();
 
-       m_EventsTypesSupported.assign(EventTypes,std::end(EventTypes));
-       m_EventsTypeHeaders.assign(EventHeaders,std::end(EventHeaders));
+       for(size_t  i=0;i<2;i++)
+       {
+           m_EventsTypesSupported.push_back(EventTypes[i]);
+           m_EventsTypeHeaders.push_back(EventHeaders[i]);
+       }
+
+       //m_EventsTypesSupported.assign(EventTypes,std::end(EventTypes));
+       //m_EventsTypeHeaders.assign(EventHeaders,std::end(EventHeaders));
    }
    /**get event type form its string representation*/ 
    BoxControllerNxSIO::EventType BoxControllerNxSIO::TypeFromString(const std::vector<std::string> &typesSupported,const std::string typeName)

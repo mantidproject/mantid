@@ -120,8 +120,8 @@ namespace MDEvents
     // add range of events 
     virtual size_t addEvents(const std::vector<MDE> & events);
     // unhide MDBoxBase methods
-    virtual size_t addEventsUnsafe(const std::vector<MDE> & events)
-    {return MDBoxBase::addEventsUnsafe( events);}
+    virtual size_t addEventsUnsafe(const std::vector<MDE> & events);
+
 
     /*--------------->  EVENTS from event data              <-------------------------------------------------------------*/
     virtual void addEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);

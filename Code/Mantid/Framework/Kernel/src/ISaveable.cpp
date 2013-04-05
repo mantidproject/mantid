@@ -18,7 +18,9 @@ namespace Kernel
   //----------------------------------------------------------------------------------------------
   /** Copy constructor --> needed for std containers and not to copy mutexes   */
   ISaveable::ISaveable(const ISaveable & other):
-     m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents)
+     m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents),
+     m_BufPosition(other.m_BufPosition),
+     m_BufMemorySize(other.m_BufMemorySize)
  { }
 
   //ISaveable::ISaveable(const size_t fileId):
@@ -30,10 +32,10 @@ namespace Kernel
    * @param bufPosition -- the allocator which specifies the position of the object in the list of objects to write
    * @returns the size of the object it currently occupies in memory. This size is also stored by the object itself for further references
   */
-  size_t ISaveable::setBufferPosition(std::list<ISaveable *const>::iterator &bufPosition)
+  size_t ISaveable::setBufferPosition(std::list<ISaveable *>::iterator bufPosition)
   {
       m_setter.lock();
-      m_BufPosition = boost::optional<std::list<ISaveable *const>::iterator >(bufPosition);
+      m_BufPosition = boost::optional<std::list<ISaveable *>::iterator >(bufPosition);
       m_BufMemorySize  = this->getDataMemorySize();
       m_setter.unlock();
       return m_BufMemorySize ;
@@ -59,7 +61,7 @@ namespace Kernel
   {
       m_setter.lock();
       m_BufMemorySize=0;
-      m_BufPosition = boost::optional<std::list<ISaveable *const>::iterator>();
+      m_BufPosition = boost::optional<std::list<ISaveable *>::iterator>();
       m_setter.unlock();
   }
 } // namespace Mantid
