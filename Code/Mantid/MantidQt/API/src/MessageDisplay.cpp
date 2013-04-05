@@ -2,7 +2,6 @@
 // Includes
 //-------------------------------------------
 #include "MantidQtAPI/MessageDisplay.h"
-#include "MantidQtAPI/Message.h"
 
 #include "MantidKernel/Logger.h"
 
@@ -65,17 +64,71 @@ namespace MantidQt
           this, SLOT(append(const Message &)));
     }
 
+    //----------------------------------------------------------------------------------------
+    // Public slots
+    //----------------------------------------------------------------------------------------
+    /**
+     * @param text The text string to append at PRIO_FATAL level
+     */
+    void MessageDisplay::appendFatal(const QString & text)
+    {
+      this->append(Message(text, Message::Priority::PRIO_FATAL));
+    }
+
+    /**
+     * @param text The text string to append at PRIO_ERROR level
+     */
+    void MessageDisplay::appendError(const QString & text)
+    {
+      this->append(Message(text, Message::Priority::PRIO_ERROR));
+    }
+
+    /**
+     * @param text The text string to append at PRIO_WARNING level
+     */
+    void MessageDisplay::appendWarning(const QString & text)
+    {
+      this->append(Message(text, Message::Priority::PRIO_WARNING));
+    }
+
+    /**
+     * @param text The text string to append at PRIO_NOTICE level
+     */
+    void MessageDisplay::appendNotice(const QString & text)
+    {
+      this->append(Message(text, Message::Priority::PRIO_NOTICE));
+    }
+
+    /**
+     * @param text The text string to append at PRIO_INFORMATION level
+     */
+    void MessageDisplay::appendInformation(const QString & text)
+    {
+      this->append(Message(text, Message::Priority::PRIO_INFORMATION));
+    }
+
+    /**
+     * @param text The text string to append at PRIO_DEBUG level
+     */
+    void MessageDisplay::appendDebug(const QString & text)
+    {
+      this->append(Message(text, Message::Priority::PRIO_DEBUG));
+    }
+
     /**
      * @param msg A message that is echoed to the display after the
      * current text
      */
     void MessageDisplay::append(const Message & msg)
     {
-      m_textDisplay->append(msg.text());
+      setTextColor(msg.priority());
+      appendText(msg.text());
+      //set the colour back to the default (black) for historical reasons
+      setTextColor(Message::Priority::PRIO_INFORMATION);
     }
 
     /**
-     * @param msg Replace the curren contents with this message
+     * @param msg Replace the current contents with this message
      */
     void MessageDisplay::replace(const Message & msg)
     {
@@ -199,6 +252,42 @@ namespace MantidQt
           this, SLOT(showContextMenu(const QPoint&)));
     }
 
+    /**
+     *  @param priority A priority enumeration
+     */
+    void MessageDisplay::setTextColor(const Message::Priority priority)
+    {
+      m_textDisplay->setTextColor(this->textColor(priority));
+    }
 
+    /**
+     * @param priority A priority enumeration
+     */
+    QColor MessageDisplay::textColor(const Message::Priority priority) const
+    {
+      switch(priority)
+      {
+      case Message::Priority::PRIO_ERROR: return Qt::red;
+        break;
+      case Message::Priority::PRIO_WARNING: return QColor::fromRgb(255, 100, 0); //orange
+        break;
+      case Message::Priority::PRIO_INFORMATION: return Qt::gray;
+        break;
+      case Message::Priority::PRIO_NOTICE: return Qt::darkBlue;
+        break;
+      default: return Qt::black;
+      }
+    }
+
+    /**
+     * @param text Text to append
+     */
+    void MessageDisplay::appendText(const QString & text)
+    {
+      m_textDisplay->append(text);
+      QTextCursor cur = m_textDisplay->textCursor();
+      cur.movePosition(QTextCursor::End);
+      m_textDisplay->setTextCursor(cur);
+    }
   }
 }

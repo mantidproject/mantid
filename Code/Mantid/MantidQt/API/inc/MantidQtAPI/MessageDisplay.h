@@ -4,8 +4,10 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "MantidQtAPI/Message.h"
 #include "MantidQtAPI/QtSignalChannel.h"
 
+#include <QColor>
 #include <QWidget>
 
 //----------------------------------------------------------
@@ -24,7 +26,6 @@ namespace MantidQt
     //----------------------------------------------------------
     // Forward declarations
     //----------------------------------------------------------
-    class Message;
 
     /** @class MessageDisplay
      * Provides a widget for display messages in a text box
@@ -52,8 +53,22 @@ namespace MantidQt
       void attachLoggingChannel();
 
     public slots:
+      /// Convenience method for appending message at fatal level
+      void appendFatal(const QString & text);
+      /// Convenience method for appending message at error level
+      void appendError(const QString & text);
+      /// Convenience method for appending message at warning level
+      void appendWarning(const QString & text);
+      /// Convenience method for appending message at notice level
+      void appendNotice(const QString & text);
+      /// Convenience method for appending message at information level
+      void appendInformation(const QString & text);
+      /// Convenience method for appending message at debug level
+      void appendDebug(const QString & text);
+
       /// Write a message after the current contents
       void append(const Message & msg);
+
       /// Replace the display text with the given contents
       void replace(const Message & msg);
       /// Clear all of the text
@@ -71,6 +86,12 @@ namespace MantidQt
       void initActions();
       /// Set the properties of the text display
       void setupTextArea();
+      /// Sets the text color for the given priority
+      void setTextColor(const Message::Priority priority);
+      /// Returns the text color for a given priority
+      QColor textColor(const Message::Priority priority) const;
+      /// Appends the given text & makes sure it can be seen
+      void appendText(const QString & text);
 
       /// Are we allowed to affect the log level
       LogLevelControl m_logLevelControl;

@@ -17,8 +17,27 @@ namespace MantidQt
     Message::Message() : QObject(), m_text(), m_priority(Priority::PRIO_NOTICE)
     {}
 
-    /// Construct a message from a string with a given priority (default=notice)
+    /**
+     * @param text A QString containing the message text
+     * @param priority A enumeration indicating the priority
+     */
     Message::Message(const QString & text, Priority priority)
+      : QObject(), m_text(text), m_priority(priority)
+    {}
+
+    /**
+     * @param text A std::string containing the message text
+     * @param priority A enumeration indicating the priority
+     */
+    Message::Message(const std::string & text, Priority priority)
+      : QObject(), m_text(QString::fromStdString(text)), m_priority(priority)
+    {}
+
+    /**
+     * @param text A c-style string containing the message text
+     * @param priority A enumeration indicating the priority
+     */
+    Message::Message(const char * text, Priority priority)
       : QObject(), m_text(text), m_priority(priority)
     {}
 
@@ -29,7 +48,6 @@ namespace MantidQt
       : QObject(), m_text(msg.text()), m_priority(msg.priority())
     {
     }
-
 
   }
 }

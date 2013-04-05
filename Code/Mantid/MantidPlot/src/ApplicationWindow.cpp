@@ -278,11 +278,12 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   logWindow->setObjectName("logWindow"); // this is needed for QMainWindow::restoreState()
   logWindow->setWindowTitle(tr("Results Log"));
   addDockWidget( Qt::TopDockWidgetArea, logWindow );
+
   using MantidQt::API::MessageDisplay;
+  using MantidQt::API::Message;
+  qRegisterMetaType<Message>("Message"); // Required to use it in signals-slots
   resultsLog = new MantidQt::API::MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
   logWindow->setWidget(resultsLog);
-  using MantidQt::API::Message;
-  qRegisterMetaType<Message>(); // Required to use it in signals-slots
 
   // Start Mantid
   // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
@@ -4785,7 +4786,8 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
 
   if( m_bad_script_envs.contains(lang) ) 
   {
-    this->writeErrorToLogWindow("Previous initialization of " + lang + " failed, cannot retry.");
+    using MantidQt::API::Message;
+    writeToLogWindow(Message("Previous initialization of " + lang + " failed, cannot retry.",Message::Priority::PRIO_ERROR));
     return false;
   }
 
@@ -17716,36 +17718,15 @@ void ApplicationWindow::ICatLogout()
 }
 
 /**
- * Write a message to the log window
+ * Write a message to the log window. The message priority will be information
+ * or error if error=true
  * @param message :: A string containing the message
  * @param error :: A boolean indicating if this is an error
  */
-void ApplicationWindow::writeToLogWindow(const QString& message,bool error)
-{		
-  if(error)
-  {
-    results->setTextColor(Qt::red);
-  }
-  else
-  {
-    results->setTextColor(Qt::black);
-  }
-  QTextCursor cursor = results->textCursor();
-  cursor.movePosition(QTextCursor::End);
-  results->setTextCursor(cursor);
-  results->insertPlainText(message + "\n");
-  cursor = results->textCursor();
-  cursor.movePosition(QTextCursor::End);
+void ApplicationWindow::writeToLogWindow(const MantidQt::API::Message & msg)
+{
+  resultsLog->append(msg);
 }
-
-  /**
-  * Write an error message to the log window (convenience slot)
-  * @param message :: The string to send the log window
-  */
-  void ApplicationWindow::writeErrorToLogWindow(const QString& message)
-  {
-    writeToLogWindow(message, true);
-  }
 
 /* This method executes loadraw asynchrnously
  * @param  fileName - name of the file to load

@@ -101,6 +101,7 @@ namespace MantidQt
 {
   namespace API
   {
+    class Message;
     class MessageDisplay;
   }
   namespace MantidWidgets
@@ -1030,9 +1031,7 @@ public slots:
   void savetoNexusFile();
 
   //Slot for writing to log window
-  void writeToLogWindow(const QString& message,bool error = false);
-  /// Write an error message to the log window (convenience slot)
-  void writeErrorToLogWindow(const QString& message);
+  void writeToLogWindow(const MantidQt::API::Message& message);
   /// execute loadraw asynchronously
   void executeLoadRawAsynch(const QString& fileName,const QString& wsName ) ;
 
