@@ -2119,7 +2119,7 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Make output workspace valid if there is some error.
+  /* Make output workspace valid if there is some error.
     * @param workspaceindex:  the workspace index of the spectra in m_outputWS to write fake data
     * @param functionmode:    LeBailFit's mode of function
   void LeBailFit::writeFakedDataToOutputWS(size_t workspaceindex, int functionmode)
@@ -2391,7 +2391,7 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Do statistics to result (fitted or calcualted)
+  /* Do statistics to result (fitted or calcualted)
   void LeBailFit::calChiSquare()
   {
     const MantidVec& oY = m_outputWS->readY(0);
