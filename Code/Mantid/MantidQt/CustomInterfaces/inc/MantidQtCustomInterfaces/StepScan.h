@@ -36,7 +36,7 @@ private slots:
   void fillPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr& ws);
   void fillNormalizationCombobox();
   void runStepScanAlg();
-  void runStepScanAlgLive(std::string&& stepScanProperties);
+  void runStepScanAlgLive(std::string stepScanProperties);
 
   void updateForNormalizationChange();
   void generateCurve(const QString& var);

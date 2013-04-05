@@ -24,7 +24,7 @@ using namespace Mantid::API;
 /// Constructor
 StepScan::StepScan(QWidget *parent)
   : UserSubWindow(parent), m_dataReloadNeeded(false),
-    m_instrument(ConfigService::Instance().getInstrument().name()),
+    m_instrument("FileEventDataListener" /* ConfigService::Instance().getInstrument().name() */),
     m_addObserver(*this, &StepScan::handleAddEvent),
     m_replObserver(*this, &StepScan::handleReplEvent)
 {
@@ -312,7 +312,7 @@ void StepScan::runStepScanAlg()
   generateCurve( m_uiForm.plotVariable->currentText() );
 }
 
-void StepScan::runStepScanAlgLive(std::string&& stepScanProperties)
+void StepScan::runStepScanAlgLive(std::string stepScanProperties)
 {
   // First stop the currently running live algorithm
   IAlgorithm_sptr oldMonitorLiveData = stopLiveListener();
