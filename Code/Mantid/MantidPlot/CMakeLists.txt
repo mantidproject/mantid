@@ -228,6 +228,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/Shape2DCollection.cpp
                    src/Mantid/InstrumentWidget/SimpleWidget.cpp
                    src/Mantid/InstrumentWidget/Viewport.cpp
+                   src/Mantid/InstrumentWidget/DetXMLFile.cpp
 )
 
 ###########################################################################
@@ -457,6 +458,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/Shape2DCollection.h
                    src/Mantid/InstrumentWidget/SimpleWidget.h
                    src/Mantid/InstrumentWidget/Viewport.h
+                   src/Mantid/InstrumentWidget/DetXMLFile.h
 )
 
 ###########################################################################
