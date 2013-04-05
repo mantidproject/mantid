@@ -1,13 +1,9 @@
 /*WIKI* 
 
-
-
-
 Moves the detectors in an instrument using the origin and 2 vectors of the rotated plane from an ISAW DetCal file.
 
-
-
-==Usage==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
     LoadIsawDetCal("SNAP_4111","SNAP.DetCal")
 
@@ -16,12 +12,7 @@ Moves the detectors in an instrument using the origin and 2 vectors of the rotat
     alg->setPropertyValue("InputWorkspace", "SNAP_4111");
     alg->setPropertyValue("Filename", "SNAP.DetCal");
     alg->execute();
-
-
-
-
-
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

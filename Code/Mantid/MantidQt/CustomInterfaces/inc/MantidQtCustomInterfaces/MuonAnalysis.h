@@ -68,6 +68,10 @@ public:
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
 
+  void initLocalPython()
+  {
+    runPythonCode("from mantid.simpleapi import *");
+  }
 
 private slots:
   /// Guess Alpha clicked
@@ -138,9 +142,6 @@ private slots:
   
   ///
   void runFirstGoodBinFront();
-
-  // Slot for disabling loading buttons and MWRunFiles widget
-  void disableLoading();
 
   /// Check to see if the user want to append the previous run and set accordingly
   void checkAppendingPreviousRun();

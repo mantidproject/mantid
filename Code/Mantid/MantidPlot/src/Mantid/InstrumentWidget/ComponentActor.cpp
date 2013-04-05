@@ -5,6 +5,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 using namespace Mantid;
 using namespace Geometry;
@@ -34,5 +35,18 @@ boost::shared_ptr<const Mantid::Geometry::IDetector> ComponentActor::getDetector
 boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> ComponentActor::getObjCompAssembly() const
 {
   return boost::dynamic_pointer_cast<const Mantid::Geometry::ObjCompAssembly>(getComponent());
+}
+
+/**
+ * An component is a non-detector if it's an ObjComponent (has a shape) and not an ObjCompAssembly
+ * (a single object) and not a RectangularDetector (which is an assembly).
+ */
+bool ComponentActor::isNonDetector() const
+{
+  auto obj = getObjComponent();
+  return  obj && 
+          !getObjCompAssembly() && 
+          !getDetector() &&
+          !boost::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(obj);
 }
 

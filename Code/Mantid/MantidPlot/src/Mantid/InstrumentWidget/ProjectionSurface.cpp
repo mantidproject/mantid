@@ -37,6 +37,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
     m_viewRect(),
     m_selectRect(),
     m_interactionMode(MoveMode),
+    m_isLightingOn(false),
     m_peakLabelPrecision(6),
     m_peakShapesStyle(0),
     m_viewChanged(true),
@@ -129,7 +130,10 @@ void ProjectionSurface::clear()
  */
 void ProjectionSurface::draw(MantidGLWidget *widget)const
 {
-  if ( m_viewChanged && ( m_redrawPicking || m_interactionMode == PickSingleMode || m_interactionMode == PickTubeMode ) )
+  if ( m_viewChanged && ( m_redrawPicking
+                          || m_interactionMode == PickSingleMode
+                          || m_interactionMode == PickTubeMode
+                          || m_interactionMode == DrawMode ) )
   {
     draw(widget,true);
     m_redrawPicking = false;
@@ -696,3 +700,13 @@ void ProjectionSurface::erasePeaks(const QRect &rect)
     }
 
 }
+
+/**
+ * Enable or disable lighting in non-picking mode
+ * @param on :: True for enabling, false for disabling.
+ */
+void ProjectionSurface::enableLighting(bool on)
+{
+  m_isLightingOn = on;
+}
+

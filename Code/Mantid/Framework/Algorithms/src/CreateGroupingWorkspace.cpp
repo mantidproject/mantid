@@ -313,7 +313,7 @@ namespace Algorithms
           GroupNames = "";
           // cppcheck-suppress syntaxError
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-          for (int num = 0; num < 200; ++num)
+          for (int num = 0; num < 300; ++num)
           {
               PARALLEL_START_INTERUPT_REGION
               std::ostringstream mess;

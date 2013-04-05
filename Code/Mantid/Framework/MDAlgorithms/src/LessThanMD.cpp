@@ -6,17 +6,15 @@ The output workspace has a signal of 0.0 to mean "false" and a signal of 1.0 to 
 For two MDHistoWorkspaces, the operation is performed element-by-element.
 
 For a MDHistoWorkspace and a scalar, the operation is performed on each element of the output.
-
-== Usage ==
-
+*WIKI*/
+/*WIKI_USAGE*
  # Compare two workspaces, element-by-element
  C = A > B
  # Compare a workspace and a number, element-by-element
  C = A > 123.4
 
 See [[MDHistoWorkspace#Boolean_Operations|this page]] for examples on using boolean operations.
-
-*WIKI*/
+*WIKI_USAGE*/
 
 #include "MantidMDAlgorithms/LessThanMD.h"
 #include "MantidKernel/System.h"

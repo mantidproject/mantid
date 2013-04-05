@@ -23,17 +23,15 @@ See [[CloneMDWorkspace]] for details, but note that a file-backed [[MDEventWorks
 
 Also, be aware that events added to a MDEventWorkspace are currently added '''in memory''' and are not cached to file until [[SaveMD]]
 or another algorithm requiring it is called. The workspace is marked as 'requiring file update'.
-
-== Usage ==
-
+*WIKI*/
+/*WIKI_USAGE*
  C = A + B
  C = A + 123.4
  A += B
  A += 123.4
 
 See [[MDHistoWorkspace#Arithmetic_Operations|this page]] for examples on using arithmetic operations.
-
-*WIKI*/
+*WIKI_USAGE*/
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"

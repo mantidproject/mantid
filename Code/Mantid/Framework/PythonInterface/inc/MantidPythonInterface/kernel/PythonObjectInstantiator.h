@@ -57,7 +57,7 @@ namespace Mantid
     {
     public:
       /// Constructor taking a Python class object wrapped as a boost::python:object
-      PythonObjectInstantiator(boost::python::object classObject)
+      PythonObjectInstantiator(const boost::python::object & classObject)
         : m_classObject(classObject) {}
 
       /// Creates an instance of the object as shared_ptr to the Base type
@@ -79,7 +79,7 @@ namespace Mantid
     boost::shared_ptr<Base> PythonObjectInstantiator<Base>::createInstance() const
     {
       // A custom deleter is required since calling delete is not what we want
-      return boost::shared_ptr<Base>(createUnwrappedInstance(), NoDelete<Base>());
+      return boost::shared_ptr<Base>(createUnwrappedInstance());
     }
 
     /**
@@ -91,10 +91,27 @@ namespace Mantid
     {
       using namespace boost::python;
       Environment::GlobalInterpreterLock gil;
-      PyObject *alg = PyObject_CallObject(m_classObject.ptr(), NULL); // No args
-      object wrap(handle<>(borrowed(alg))); // borrowed: Do not decrement reference count on destruction
-      Base *ptr = extract<Base*>(wrap);
-      return ptr;
+
+      PyObject *newObj = PyObject_CallObject(m_classObject.ptr(), NULL); // No args
+      // borrowed: Do not decrement reference count on destruction
+      // we are passing out a new reference for something else to manage
+      object wrap(handle<>(borrowed(newObj)));
+      try
+      {
+        // In Python the actual object type is different to that of the main exported
+        // type. This is required so that Python we can take over lifetime management of
+        // the object when we create it here
+        // See http://wiki.python.org/moin/boost.python/HowTo#ownership_of_C.2B-.2B-_object_extended_in_Python
+        boost::shared_ptr<Base> newObj = extract<boost::shared_ptr<Base>>(object(wrap));
+        Base *barePtr = newObj.get();
+        newObj.reset(); // We take ownership
+        return barePtr;
+      }
+      catch(boost::python::error_already_set&)
+      {
+        throw std::runtime_error("PythonObjectInstantiator::createUnwrapped - Could not extract boost::shared_ptr<> to base type. "
+                                 "Please make sure the HeldType in the Python wrapper is boost::shared_ptr<Base>.");
+      }
     }
 
   }

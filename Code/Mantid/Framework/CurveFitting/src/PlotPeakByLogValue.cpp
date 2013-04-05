@@ -73,19 +73,19 @@ namespace Mantid
     void PlotPeakByLogValue::init()
     {
       declareProperty("Input","",boost::make_shared<MandatoryValidator<std::string> >(),
-        "List of input strings separated by ';'. Each string has a format: "
-        "file | workspace[,sp<spectrum>|i<ws index>|v<from>:<to>[,<period>]]. "
-        "'|' means 'or', [] means optional, <...> means a number");
+        "A list of sources of data to fit. \n"
+        "Sources can be either workspace names or file names followed optionally by a list of spectra/workspace-indices \n"
+        "or values using the notation described in the description section of the help page.");
 
-      declareProperty("Spectrum", 1, "The spectrum number to be fitted in"
-        " each workspace of the input list");
-      declareProperty("WorkspaceIndex", 0, "The index of a spectrum to be fitted in"
-        " each workspace of the input list");
-      declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output));
+      declareProperty("Spectrum", 1, "Set a spectrum to fit. \n"
+        "However, if spectra lists (or workspace-indices/values lists) are specified in the Input parameter string these take precedence.");
+      declareProperty("WorkspaceIndex", 0, "Set a workspace-index to fit (alternative option to Spectrum). "
+        "However, if spectra lists (or workspace-indices/values lists) are specified in the Input parameter string, \n"
+        "or the Spectrum parameter integer, these take precedence.");
+      declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output),"The output TableWorkspace");
       declareProperty("Function","",boost::make_shared<MandatoryValidator<std::string> >(),
-        "The fitting function, common for all workspaces");
-      declareProperty("LogValue","","Name of the log value to plot the parameters against. "
-        "If empty the axis1 values are used. If \"SourceName\" the name of the workspace or file is used.");
+        "The fitting function, common for all workspaces in the input WorkspaceGroup");
+      declareProperty("LogValue","","Name of the log value to plot the parameters against. Default: use spectra numbers.");
       declareProperty("StartX", EMPTY_DBL(),
         "A value of x in, or on the low x boundary of, the first bin to include in\n"
         "the fit (default lowest value of x)" );
@@ -97,17 +97,18 @@ namespace Mantid
       fitOptions.push_back("Sequential");
       fitOptions.push_back("Individual");
       declareProperty("FitType","Sequential",boost::make_shared<StringListValidator>(fitOptions),
-        "Specifies the way the initial guesses are set for each fit. Individual means that "
-        "all fits use the same initial values while in Sequential the result of the previous "
-        "fit becomes initial guesses for the next one.");
+        "Defines the way of setting initial values. \n"
+        "If set to 'Sequential' every next fit starts with parameters returned by the previous fit. \n"
+        "If set to 'Individual' each fit starts with the same initial values defined in the Function property.");
 
       std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
       declareProperty("Minimizer","Levenberg-Marquardt",boost::make_shared<StringListValidator>(minimizerOptions),
-        "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
+        "Minimizer to use for fitting. Minimizers available are 'Levenberg-Marquardt', 'Simplex', \n"
+        "'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate gradient (Polak-Ribiere imp.)' and 'BFGS'", Direction::InOut);
 
       std::vector<std::string> costFuncOptions = CostFunctionFactory::Instance().getKeys();
       declareProperty("CostFunction","Least squares",boost::make_shared<StringListValidator>(costFuncOptions),
-        "The cost function to be used for the fit, default is Least squares", Direction::InOut);
+        "Cost functions to use for fitting. Cost functions available are 'Least squares' and 'Ignore positive peaks'", Direction::InOut);
     }
 
     /** 

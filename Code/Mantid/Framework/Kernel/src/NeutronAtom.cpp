@@ -609,9 +609,9 @@ bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
  * @param a_number :: Mass number of the atom to get
  * @return The atom corresponding to the given Z and A
  */
-NeutronAtom getNeutronAtom(const int z_number, const int a_number)
+NeutronAtom getNeutronAtom(const uint16_t z_number, const uint16_t a_number)
 {
-  NeutronAtom temp(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number), 
+  NeutronAtom temp(z_number, a_number, 
 		   NAN, NAN, NAN, NAN, NAN, NAN);
 
   NeutronAtom *result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);

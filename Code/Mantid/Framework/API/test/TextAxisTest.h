@@ -9,6 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -70,7 +71,8 @@ public:
     ta1.setLabel(0,"First");
     ta1.setLabel(1,"Second");
 
-    Axis* a2 = ta1.clone();
+    WorkspaceTester ws; // Fake workspace to pass to clone
+    Axis* a2 = ta1.clone(&ws);
     TS_ASSERT(a2);
     if (a2)
     {
@@ -83,7 +85,8 @@ public:
   {
     Axis * ta = new TextAxis(2);
     ta->title() = "A text axis";
-    Axis* newTextAxis = ta->clone(1);
+    WorkspaceTester ws; // Fake workspace to pass to clone
+    Axis* newTextAxis = ta->clone(1,&ws);
     TS_ASSERT_DIFFERS( newTextAxis, ta );
     TS_ASSERT( newTextAxis->isText() );
     TS_ASSERT_EQUALS( newTextAxis->title(), "A text axis" );

@@ -95,6 +95,7 @@ set ( SRC_FILES
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
+	src/SelectionNotificationService.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
 	src/SpectraAxis.cpp
@@ -239,6 +240,7 @@ set ( INC_FILES
 	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/ScriptRepository.h
 	inc/MantidAPI/ScriptRepositoryFactory.h
+	inc/MantidAPI/SelectionNotificationService.h
 	inc/MantidAPI/SingleValueParameter.h
 	inc/MantidAPI/SingleValueParameterParser.h
 	inc/MantidAPI/SpecialCoordinateSystem.h
@@ -315,6 +317,7 @@ set ( TEST_FILES
 	RunTest.h
 	SampleEnvironmentTest.h
 	SampleTest.h
+	SelectionNotificationServiceTest.h
 	SpectraAxisTest.h
 	SpectraDetectorMapTest.h
 	TextAxisTest.h

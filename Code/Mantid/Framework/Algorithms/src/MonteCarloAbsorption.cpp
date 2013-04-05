@@ -101,18 +101,17 @@ namespace Mantid
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
           wsValidator),
-          "The X values for the input workspace must be in units of wavelength");
+          "The name of the input workspace.  The input workspace must have X units of wavelength.");
       declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
-          "Output workspace name");
+          "The name to use for the output workspace.");
       auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int> >();
       positiveInt->setLower(1);
       declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
-          "The number of wavelength points for which a simulation is\n"
-          "performed (default: all points)");
+          "The number of wavelength points for which a simulation is atttempted (default: all points)");
       declareProperty("EventsPerPoint", 300, positiveInt,
-          "The number of events to simulate per wavelength point used.");
+          "The number of \"neutron\" events to generate per simulated point");
       declareProperty("SeedValue", 123456789, positiveInt,
-          "A seed for the random number generator");
+          "Seed the random number generator with this value");
 
     }
     

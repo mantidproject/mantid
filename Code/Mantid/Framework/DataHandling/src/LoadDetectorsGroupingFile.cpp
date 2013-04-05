@@ -399,13 +399,9 @@ namespace DataHandling
     size_t numvectors = spectrumidgroupmap.size();
     mGroupWS = DataObjects::GroupingWorkspace_sptr(new DataObjects::GroupingWorkspace(numvectors));
 
-    API::SpectraAxis * ax = dynamic_cast<API::SpectraAxis * >( mGroupWS->getAxis(1));
-    if (!ax)
-      throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
-
     for (size_t i = 0; i < mGroupWS->getNumberHistograms(); i ++)
     {
-      ax->setValue(i, static_cast<double>(specids[i]));
+      mGroupWS->getSpectrum(i)->setSpectrumNo(specids[i]);
     }
 
     return;

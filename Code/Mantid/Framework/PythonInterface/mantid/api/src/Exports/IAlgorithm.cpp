@@ -155,7 +155,7 @@ namespace
         buffer << "      " << prop->documentation();
         if (!allowed.empty())
         {
-          buffer << " [" << Mantid::Kernel::Strings::join(allowed.begin(), allowed.end(), ", ");
+          buffer << "[" << Mantid::Kernel::Strings::join(allowed.begin(), allowed.end(), ", ");
           buffer << "]";
         }
         buffer << EOL;
@@ -218,7 +218,7 @@ void export_ialgorithm()
     .def("alias", &IAlgorithm::alias, "Return the aliases for the algorithm")
     .def("version", &IAlgorithm::version, "Returns the version number of the algorithm")
     .def("category", &IAlgorithm::category, "Returns the category containing the algorithm")
-    .def("categories", &IAlgorithm::category, "Returns the list of categories this algorithm belongs to")
+    .def("categories", &IAlgorithm::categories, "Returns the list of categories this algorithm belongs to")
     .def("getOptionalMessage", &IAlgorithm::getOptionalMessage, "Returns the optional user message attached to the algorithm")
     .def("getWikiSummary", &IAlgorithm::getWikiSummary, "Returns the summary found on the wiki page")
     .def("getWikiDescription", &IAlgorithm::getWikiDescription, "Returns the description found on the wiki page using wiki markup")

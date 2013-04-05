@@ -2,18 +2,19 @@
 
 
 The algorithm will raise the InputWorkspace to the power of the Exponent.
+When acting on an event workspace, the output will be a Workspace2D, with the default binning from the original workspace.
 
 == Errors ==
 
 Defining the power algorithm as: <math>  y = \left ( a^b \right )  </math>, we can describe the error as: 
 <math>s_{y} = by\left ( s_{a}/a \right )</math>, where <math>s_{y}</math> is the error in the result ''y'' and <math>s_{a}</math> is the error in the input ''a''.
 
-== Usage ==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
  Power("InputWorkspace","Exponent")
 
-
-*WIKI*/
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -48,7 +49,7 @@ void Power::initDocs()
 
 void Power::defineProperties()
 {
-  declareProperty("Exponent", 1.0);
+  declareProperty("Exponent", 1.0,"The exponent with which to raise base values in the base workspace to.");
 }
 
 void Power::retrieveProperties()

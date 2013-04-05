@@ -8,20 +8,7 @@ Mantid Python Documentation
 .. default-domain:: py
    
 .. Welcome to the Mantid Python documentation
-   
-.. Contents
-.. ========
 
-.. .. toctree::
-..    :maxdepth: 1
+.. toctree::
 
-..    api/mantid.rst
-..    api/mantidplot.rst
-
-.. Indices and tables
-.. ==================
-
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`
-
+   contents

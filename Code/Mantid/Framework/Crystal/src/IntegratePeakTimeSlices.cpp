@@ -262,9 +262,9 @@ namespace Mantid
 
     void DataModeHandler::CalcVariancesFromData( double background, double meanx, double meany,
                                                         double &Varxx, double &Varxy, double &Varyy,
-                                                        std::vector<double>&ParameterValues)
+                                                        std::vector<double>&StatBase)
     {
-      UNUSED_ARG(ParameterValues);
+
       double Den = StatBase[IIntensities]-background*StatBase[ISS1];
       Varxx =(StatBase[ISSIxx]-2*meanx*StatBase[ISSIx]+meanx*meanx*StatBase[IIntensities]-
                background*(StatBase[ISSxx]-2*meanx*StatBase[ISSx]+meanx*meanx*StatBase[ISS1]))
@@ -546,7 +546,7 @@ namespace Mantid
               names.push_back( ParameterNames[IVXY] );
               double Varxx, Varxy,Varyy;
               AttributeValues->CalcVariancesFromData( params[IBACK], params[IXMEAN], params[IYMEAN],
-                  Varxx, Varxy, Varyy, params);
+                  Varxx, Varxy, Varyy, AttributeValues->StatBase);
               params.push_back( Varxx );
               params.push_back( Varyy );
               params.push_back( Varxy );
@@ -840,6 +840,7 @@ namespace Mantid
                                                    getProperty("CalculateVariances"),NBadEdgeCells,NCOLS-NBadEdgeCells,
                                                    NBadEdgeCells,NROWS-NBadEdgeCells));
               AttributeValues = XXX;
+              XXX->setCurrentRadius(R);
 
               SetUpData1(Data, inpWkSpace,  Chan+dir*t, Chan+dir*t,  R ,CenterDet->getPos(), spec_idList);
 
@@ -1102,9 +1103,9 @@ namespace Mantid
 
                 //Now set up the center for this peak
                 int i = find("Mrow", names);
-                lastRow = (int) params[i];
+                lastRow = (int)( params[i]+.5);
                 i = find("Mcol", names);
-                lastCol = (int) params[i];
+                lastCol = (int)( params[i]+.5);
                 prog.report();
 
 
@@ -1447,10 +1448,10 @@ namespace Mantid
       }
 
       double Varx,Vary;
-      Varx =StatBase[INCol]/5 ;
-      Vary =StatBase[INRows]/5 ;
-      Varx*=Varx;
-      Vary*=Vary;
+      Varx =StatBase[INCol]/7 ;
+      Vary =StatBase[INRows]/7 ;
+      Varx *= Varx;
+      Vary *= Vary;
 
       double Rx = lastRCRadius/CellWidth - EdgeX;
       double Ry = lastRCRadius/CellHeight - EdgeY;
@@ -1582,14 +1583,10 @@ namespace Mantid
        return NewRadius;
     }
 
-    void DataModeHandler::setHeighHalfWidthInfo( Mantid::MantidVecPtr &xvals,
+    void DataModeHandler::setHeightHalfWidthInfo( Mantid::MantidVecPtr &xvals,
                                                  Mantid::MantidVecPtr &yvals,
-                                                 Mantid::MantidVecPtr &counts,
-                                                 double ROW,
-                                                 double COL)
+                                                 Mantid::MantidVecPtr &counts)
     {
-      UNUSED_ARG( ROW );
-      UNUSED_ARG( COL );
       double minCount,
              maxCount;
       MantidVec X = xvals.access();
@@ -1618,8 +1615,8 @@ namespace Mantid
         else if (X[i]>highX)highX=X[i];
 
 
-        if( Y[i]<lowY) lowY=Y[i];
-        else if (Y[i]>highY)highY=Y[i];
+        if( Y[i]<lowY)        lowY=Y[i];
+        else if (Y[i]>highY)  highY=Y[i];
 
         if( C[i] > maxCount )
         {
@@ -1645,32 +1642,43 @@ namespace Mantid
       MaxX /=nmax;
       MaxY /=nmax;
 
-
+      double dCount = std::max<double>(.51,(maxCount- minCount)/6.2);
+      double CountUp = (maxCount+ minCount)/2 + dCount;
+      double CountLow =( maxCount+ minCount)/2 - dCount;
 
       //Checking for weak peak not really reaching edge, so could use full peak work
       double d2Edge= min<double>(min<double>(MaxX-lowX,highX-MaxX),min<double>(MaxY-lowY,highY-MaxY));
+      double dSpanx = (highX-lowX)/6.;
+      double dSpany= (highY-lowY)/6.0;
       if( MaxX+d2Edge >= highX-.000001)
       {
         lowX = highX-(highX-MaxX)/4;
-        highY=MaxY+(highX-MaxX)/4;
-        lowY=MaxY-(highX-MaxX)/4;
+        if( (int)lowX ==(int)highX) lowX -=1;
+        highY=highY-(highX-MaxX)/4;
+        lowY=lowY + (highX-MaxX)/4;
+
+
       }else if( MaxX-d2Edge <= lowX+.000001)
       {
         highX= lowX+(MaxX-lowX)/4;
-        highY=MaxY+(MaxX-lowX)/4;
-        lowY=MaxY-(MaxX-lowX)/4;
+        if( (int) highX == (int)lowX)highX +=1.0;
+
+        highY -=(MaxX-lowX)/4;
+        lowY  +=(MaxX-lowX)/4;
 
       }else if(MaxY+d2Edge >= highY-.000001)
       {
         lowY = highY-(highY-MaxY)/4;
-        highX=MaxX+(highY-MaxY)/4;
-        lowX=MaxX-(highY-MaxY)/4;
+        if( (int)lowY ==(int)highY) lowY -=1;
+        highX -=(highY-MaxY)/4;
+        lowX += (highY-MaxY)/4;
 
       }else
       {
         highY = lowY+(MaxY-lowY)/4;
-        highX=MaxX+(MaxY-lowY)/4;
-        lowX=MaxX-(MaxY-lowY)/4;
+        if( (int)lowY ==(int)highY) highY -=1;
+        highX -= (MaxY-lowY)/4;
+        lowX  += (MaxY-lowY)/4;
 
       }
 
@@ -1686,16 +1694,18 @@ namespace Mantid
       int nintCells =0;
       int nBoundEdge1Cells =0;
       int nBoundIntCells =0;
-      double TotRx=0;
-      double TotRy=0;
-      double TotC=0;
+      double TotRx0=0;
+      double TotRy0=0;
+      double TotCx=0;
+      double TotCy=0;
+      double IntOffset = std::min<double>( highX-lowX , highY-lowY );
       for (int i = 0; i < N ; i++)
       {
         if ( C[i] > maxCount - offset)
         {
           TotMax += C[i];
           nMax++;
-          TotR_max+= sqrt( (X[i]-MaxX)*(X[i]-MaxX)+ (Y[i]-MaxY)*(Y[i]-MaxY));
+          TotR_max+= C[i]*sqrt( (X[i]-MaxX)*(X[i]-MaxX)+ (Y[i]-MaxY)*(Y[i]-MaxY));
 
         }
         if (C[i] < minCount + offset)
@@ -1704,49 +1714,75 @@ namespace Mantid
           TotMin += C[i];
           nMin++;
 
-          TotR_min+= sqrt( (X[i]-MaxX)*(X[i]-MaxX)+ (Y[i]-MaxY)*(Y[i]-MaxY));
+          TotR_min+= C[i]*sqrt( (X[i]-MaxX)*(X[i]-MaxX)+ (Y[i]-MaxY)*(Y[i]-MaxY));
         }
 
-        if( X[i]>=lowX && X[i]<=highX&&Y[i]>=lowY && Y[i]<=highY)
+        if( X[i] >= lowX && X[i] <= highX &&  Y[i]>=lowY && Y[i]<=highY)
         {
           nedge1Cells++;
           if( C[i]<minCount+offset) nBoundEdge1Cells++;
         }
-        if( fabs(MaxX-X[i])<highX-lowX && fabs(MaxY-Y[i])<highY-lowY)
+        if( fabs(MaxX-X[i])<  IntOffset && fabs(MaxY-Y[i])< IntOffset)
         {
           nintCells++;
-          if( C[i]<minCount+offset) nBoundIntCells++;
+          if( C[i] < minCount+offset) nBoundIntCells++;
 
         }
-        TotRx += (C[i]-minCount)*(X[i]-MaxX)*(X[i]-MaxX);
-        TotRy += (C[i]-minCount)*(Y[i]-MaxY)*(Y[i]-MaxY);
-        TotC +=C[i]-minCount;
-      }
-
-      if( maxCount-minCount < 5 || nBoundIntCells > .2*nintCells)
-      {
-        if(nedge1Cells <=10 || nBoundEdge1Cells< .7*nedge1Cells )
-          return ;
-        else
+        if(fabs(MaxY-Y[i])<1.2 &&  fabs(MaxX-X[i])>1.2 && C[i]>= CountLow && C[i] <= CountUp && fabs(MaxX-X[i])<dSpanx)
         {
-          VarxHW= TotRx/TotC;
-          VaryHW=TotRy/TotC;
-          HalfWidthAtHalfHeightRadius=sqrt( (TotRx+TotRy)/N);
-          return ;
+          TotRx0 += (C[i]-minCount)*(X[i]-MaxX)*(X[i]-MaxX);
+          TotCx += C[i]-minCount;
+        }
+
+        if(fabs(MaxX-X[i]) <1.2 && fabs(MaxY-Y[i])>1.2 &&  C[i]>= CountLow && C[i] <= CountUp && fabs(MaxY-Y[i])<dSpany )
+        {
+          TotRy0 += (C[i]-minCount)*(Y[i]-MaxY)*(Y[i]-MaxY);
+          TotCy +=C[i]-minCount;
         }
       }
 
       if( nMax + nMin == N)      // all data are on two  levels essentially
       {
-        double AvR = .5*(TotR_max/nMax + TotR_min/nMin);
+        if( TotMax <=0) TotMax =1;
+        if (TotMin <=0)TotMin =1;
+        double AvR = .5*(TotR_max/TotMax + TotR_min/TotMin);
         HalfWidthAtHalfHeightRadius = AvR/.8326;
+
         VarxHW = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
         VaryHW = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
         return ;
       }
+     /* if( maxCount-minCount < 5 || nBoundIntCells > .2*nintCells)
+      {
+        if(nedge1Cells >10 && nBoundEdge1Cells> .7*nedge1Cells )
+        {
+          std::vector<double> blankParams;
+          double Cov;
+          CalcVariancesFromData( (double)minCount, MaxX,MaxY,VarxHW,VaryHW, Cov,StatBase);
+          HalfWidthAtHalfHeightRadius=sqrt( VarxHW+VaryHW);
+        }
+        else if( TotCx >0 && TotCy > 0)
+        {
+          VarxHW= TotRx0/TotCx;
+          VaryHW=TotRy0/TotCy;
+          HalfWidthAtHalfHeightRadius=sqrt( (TotRx0+TotRy0)/N);
+          return ;
+        }
+        else if( TotCx >0 || TotCy > 0)
+        {
+          VarxHW=VaryHW= std::max<double>(TotRx0,TotRy0)/std::max<double>(TotCx,TotCy);
+
+          HalfWidthAtHalfHeightRadius=sqrt( VarxHW);
+          return;
+         }else
+
+          return;
+      }
+      */
+
       double TotR=0,nR=-1,nRx=-1,nRy=-1;
       double MidVal = ( TotMax/nMax + TotMin/nMin )/2.0;
-      TotRx=0;TotRy=0;
+      double TotRx=0,TotRy=0;
       while( (nR <= 0 || nRy <=0 || nRx <=0) && offset < MidVal )
       {
          TotR = 0;
@@ -1763,12 +1799,12 @@ namespace Mantid
           double Y1 = Y[i] - MaxY;
           TotR += sqrt( X1*X1 + Y1*Y1 );
           nR++;
-          if((X1>=-1.2 && X1<=1.2)&& fabs(Y1)>1.2)
+          if((X1>=-1.2 && X1<=1.2)&& fabs(Y1)>1.2  &&  fabs(Y1)<dSpany)
           {
             nRy++;
             TotRy += abs(Y1);
           }
-          if( (Y1>=-1.2 && Y1 <= 1.2)&& fabs(X1)>1.2)
+          if( (Y1>=-1.2 && Y1 <= 1.2)&& fabs(X1)>1.2 && fabs(X1)<dSpanx)
           {
             nRx++;
             TotRx += fabs(X1);
@@ -1782,12 +1818,21 @@ namespace Mantid
 
       if( nRx > 0)
         VarxHW= (TotRx/nRx)*(TotRx/nRx)/.8326/.8326;
-      else
+      else if( TotCx >0)
+        VarxHW = TotRx0*TotRx0/TotCx/TotCx/.8326/.8326;
+      else if( HalfWidthAtHalfHeightRadius >0)
         VarxHW = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
+      else
+        VarxHW = -1;
+
       if( nRy > 0)
         VaryHW= (TotRy/nRy)*(TotRy/nRy)/.8326/.8326;
-      else
+      else if( TotCy > 0)
+        VaryHW = TotRy0*TotRy0/TotCy/TotCy/.8326/.8326;
+      else if(HalfWidthAtHalfHeightRadius > 0)
         VaryHW = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
+      else
+        VaryHW = -1;
 
     }
     //Data is the slice subdate, inpWkSpace is ALl the data,
@@ -1891,7 +1936,7 @@ namespace Mantid
                                                )
     {
       UNUSED_ARG(g_log);
-      std::vector<double> StatBase(NAttributes);
+      std::vector<double> StatBase( NAttributes );
       if( NeighborIDs[1] < 10)
       {
          StatBase[ISSIxx]= -1;
@@ -2036,7 +2081,7 @@ namespace Mantid
       ws->setData(0, yvals, errs);
       ws->setData(1, xvals);
       ws->setData(2, Yvals);
-      AttributeValues->setHeighHalfWidthInfo(xvals,Yvals,yvals,ROW,COL);
+      AttributeValues->setHeightHalfWidthInfo(xvals,Yvals,yvals);
 
       ws->setName("index0");
       StatBase[IStartRow] = minRow;
@@ -2069,6 +2114,8 @@ namespace Mantid
         Vary = params[IVYY];
       }
 
+      if( Varx <=0 || Vary <= 0 || HalfWidthAtHalfHeightRadius <=0 )
+        return true;
       double Rx = lastRCRadius/CellWidth - EdgeX;
       double Ry = lastRCRadius/CellHeight - EdgeY;
 
@@ -2216,8 +2263,8 @@ namespace Mantid
        if(GoodNums) Err ="Isaw Variance is negative";
       if (IsawVariance > 0)
         {
-         if( GoodNums)Err= "I/sigI >3";
-         if (IsawIntensity*IsawIntensity/IsawVariance < 9)
+         if( GoodNums)Err= "I/sigI > 3";
+         if (IsawIntensity*IsawIntensity/IsawVariance < 9.0 )
            GoodNums = false;
         }
       else
@@ -2432,7 +2479,7 @@ namespace Mantid
       // Check if flat
     double Varx,Vary, Cov;
 
-      std::vector<double>PP(ParameterValues, ParameterValues+IVXY);
+     // std::vector<double>PP(ParameterValues, ParameterValues+IVXY);
       if( StatBase.size() <=0)
         return false;
       double ncells = (int)StatBase[IIntensities];
@@ -2449,7 +2496,7 @@ namespace Mantid
         Vary = ParameterValues[IVYY];
         Cov  =ParameterValues[IVXY];
       }else
-         CalcVariancesFromData( 0, meanx,meany, Varx,Cov,Vary, PP);
+         CalcVariancesFromData( ParameterValues[0], meanx,meany, Varx,Cov,Vary, StatBase);
 
       if( Varx <.6 || Vary <.6)  //All data essentially the same.
          return false;

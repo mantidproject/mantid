@@ -160,7 +160,7 @@ void SplineBackground::exec()
   /* output the smoothed curve */
   API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS,1,X.size(),Y.size());
   {
-    outWS->getAxis(1)->setValue(0, inWS->getAxis(1)->spectraNo(spec));
+    outWS->getSpectrum(0)->setSpectrumNo(inWS->getSpectrum(spec)->getSpectrumNo());
     double xi, yi, yerr;
     for (MantidVec::size_type i=0;i<Y.size();i++)
     {

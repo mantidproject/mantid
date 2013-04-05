@@ -3,6 +3,7 @@
 #include "ObjCompAssemblyActor.h"
 #include "RectangularDetectorActor.h"
 #include "OpenGLError.h"
+#include "GLActorVisitor.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/V3D.h"
@@ -151,9 +152,9 @@ void CompAssemblyActor::draw(bool picking)const
   OpenGLError::check("CompAssemblyActor::draw()");
 }
 
-bool CompAssemblyActor::accept(const GLActorVisitor& visitor)
+bool CompAssemblyActor::accept(GLActorVisitor& visitor)
 {
-  const SetVisibilityVisitor* svv = dynamic_cast<const SetVisibilityVisitor*>(&visitor);
+  SetVisibilityVisitor* svv = dynamic_cast<SetVisibilityVisitor*>(&visitor);
   // accepting a set visibility visitor. 
   if (svv)
   {

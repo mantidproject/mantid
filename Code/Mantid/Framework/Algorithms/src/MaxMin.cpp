@@ -29,7 +29,7 @@ using namespace API;
 /// Set the documentation strings
 void MaxMin::initDocs()
 {
-  this->setWikiSummary("Takes a 2D workspace as input and find the maximum (minimum) in each 1D spectrum.");
+  this->setWikiSummary("Takes a 2D workspace as input and find the maximum (minimum) in each 1D spectrum. The algorithm creates a new 1D workspace containing all maxima (minima) as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
   this->setOptionalMessage("Takes a 2D workspace as input and find the maximum (minimum) in each 1D spectrum.");
 }
 
@@ -52,8 +52,6 @@ void MaxMin::init()
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex",0, mustBePositive,
       "Start spectrum number (default 0)");
-  // As the property takes ownership of the validator pointer, have to take care to pass in a unique
-  // pointer to each property.
   declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive,
       "End spectrum number  (default max)");
 }
@@ -105,10 +103,8 @@ void MaxMin::exec()
   {
     PARALLEL_START_INTERUPT_REGION
     int newindex=i-m_MinSpec;
-    if (localworkspace->axes() > 1)
-    {
-      outputWorkspace->getAxis(1)->setValue(newindex, localworkspace->getAxis(1)->spectraNo(i));
-    }
+    // Copy over spectrum and detector number info
+    outputWorkspace->getSpectrum(newindex)->copyInfoFrom(*localworkspace->getSpectrum(i));
 
     // Retrieve the spectrum into a vector
     const MantidVec& X = localworkspace->readX(i);

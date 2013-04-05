@@ -6,20 +6,14 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidCurveFitting/Lorentzian.h"
-//#include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Expression.h"
-//#include "MantidDataObjects/Workspace2D.h"
-//#include "MantidDataHandling/LoadRaw.h"
-//#include "MantidKernel/Exception.h"
 
-//using namespace Mantid::Kernel;
 using namespace Mantid::API;
-//using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 
 

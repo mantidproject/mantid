@@ -7,6 +7,8 @@
 #include <cmath>
 #include <numeric>
 #include <string>
+#include <stdexcept>
+#include <sstream>
 
 namespace Mantid
 {
@@ -213,6 +215,51 @@ namespace Mantid
       UNUSED_ARG(data);
       return getNanStatistics();
     }
+
+    /** Return the Rwp of a diffraction pattern data
+      * @param obsI :: array of observed intensity values
+      * @param calI :: array of calculated intensity values;
+      * @param obsE :: array of error of the observed data;
+      * @return :: Rwp
+      *
+      */
+    double getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE)
+    {
+      // 1. Check
+      if (obsI.size() != calI.size() || obsI.size() != obsE.size())
+      {
+        std::stringstream errss;
+        errss << "GetRFactor() Input Error!  Observed Intensity (" << obsI.size()
+              << "), Calculated Intensity (" << calI.size() << ") and Observed Error ("
+              << obsE.size() << ") have different number of elements.";
+        throw std::runtime_error(errss.str());
+      }
+      if (obsI.size() == 0)
+      {
+        throw std::runtime_error("getRFactor(): the input arrays are empty.");
+      }
+
+      double sumnom = 0;
+      double sumdenom = 0;
+
+      size_t numpts = obsI.size();
+      for (size_t i = 0; i < numpts; ++i)
+      {
+        double cal_i = calI[i];
+        double obs_i = obsI[i];
+        double sigma = obsE[i];
+        double weight = 1.0/(sigma*sigma);
+        double diff = obs_i - cal_i;
+
+        sumnom += weight*diff*diff;
+        sumdenom += weight*obs_i*obs_i;
+      }
+
+      double rwp = std::sqrt(sumnom/sumdenom);
+
+      return rwp;
+    }
+
 
     // -------------------------- Macro to instantiation concrete types --------------------------------
 #define INSTANTIATE(TYPE) \

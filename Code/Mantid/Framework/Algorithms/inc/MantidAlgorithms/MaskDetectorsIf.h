@@ -64,6 +64,8 @@ public:
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
+  /// Returns an allowed values statement to insert into decumentation
+  std::string allowedValuesStatement( std::vector<std::string> vals);
 #ifndef HAS_UNORDERED_MAP_H
   /// Typedef for detector to value map
 	typedef std::map<detid_t,bool> udet2valuem;

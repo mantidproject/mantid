@@ -47,6 +47,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Graph3D.cpp
                    src/Graph.cpp
                    src/Grid.cpp
+		   src/HelpWindow.cpp
                    src/ImageDialog.cpp
                    src/ImageExportDialog.cpp
                    src/ImageMarker.cpp
@@ -192,10 +193,9 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/SampleActor.cpp
                    src/Mantid/InstrumentWidget/GLActorCollection.cpp
                    src/Mantid/InstrumentWidget/GLActor.cpp
+                   src/Mantid/InstrumentWidget/GLActorVisitor.cpp
                    src/Mantid/InstrumentWidget/GLColor.cpp
                    src/Mantid/InstrumentWidget/GLObject.cpp
-                   src/Mantid/InstrumentWidget/GLTrackball.cpp
-                   src/Mantid/InstrumentWidget/GLViewport.cpp
                    src/Mantid/InstrumentWidget/ICompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/InputController.cpp
                    src/Mantid/InstrumentWidget/InstrumentActor.cpp
@@ -227,6 +227,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/Shape2D.cpp
                    src/Mantid/InstrumentWidget/Shape2DCollection.cpp
                    src/Mantid/InstrumentWidget/SimpleWidget.cpp
+                   src/Mantid/InstrumentWidget/Viewport.cpp
 )
 
 ###########################################################################
@@ -277,6 +278,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Graph3D.h
                    src/Graph.h
                    src/Grid.h
+		   src/HelpWindow.h
                    src/ImageDialog.h
                    src/ImageExportDialog.h
                    src/ImageMarker.h
@@ -420,10 +422,9 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/SampleActor.h
                    src/Mantid/InstrumentWidget/GLActorCollection.h
                    src/Mantid/InstrumentWidget/GLActor.h
+                   src/Mantid/InstrumentWidget/GLActorVisitor.h
                    src/Mantid/InstrumentWidget/GLColor.h
                    src/Mantid/InstrumentWidget/GLObject.h
-                   src/Mantid/InstrumentWidget/GLTrackball.h
-                   src/Mantid/InstrumentWidget/GLViewport.h
                    src/Mantid/InstrumentWidget/ICompAssemblyActor.h
                    src/Mantid/InstrumentWidget/InputController.h
                    src/Mantid/InstrumentWidget/InstrumentActor.h
@@ -455,6 +456,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/Shape2D.h
                    src/Mantid/InstrumentWidget/Shape2DCollection.h
                    src/Mantid/InstrumentWidget/SimpleWidget.h
+                   src/Mantid/InstrumentWidget/Viewport.h
 )
 
 ###########################################################################

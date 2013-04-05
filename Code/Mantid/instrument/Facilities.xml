@@ -134,6 +134,7 @@
 
   <instrument name="VESUVIO" shortname="EVS">
     <technique>Neutron Compton Scattering</technique>
+    <technique>TOF Indirect Geometry Diffraction</technique>
     <livedata address="NDXVESUVIO:6789" />
   </instrument>
   
@@ -387,6 +388,12 @@
 </facility>
 
 <facility name="ILL" FileExtensions=".nxs,.hdf">
+
+  <instrument name="IN4">
+    <technique>Neutron Spectroscopy</technique> 
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>Disk chopper time-of-flight spectrometer IN5</technique>
+  </instrument>
 
   <instrument name="IN5">
     <technique>Neutron Spectroscopy</technique> 

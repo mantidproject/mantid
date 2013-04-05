@@ -37,6 +37,12 @@ except ImportError:
     __gui__ = False
 
 ###############################################################################
+# Set deprecation warnings back to default (they are ignored in 2.7)
+###############################################################################
+import warnings as _warnings
+_warnings.filterwarnings("default",category=DeprecationWarning)
+
+###############################################################################
 # Try to be smarter when finding Mantid framework libraries
 ###############################################################################
 # Peek to see if a Mantid.properties file is in the parent directory,
@@ -93,11 +99,11 @@ for directory in plugin_dirs:
         continue
 
 # Mockup the full API first so that any Python algorithm module has something to import
-_simpleapi.mockup(plugin_files)
+_simpleapi._mockup(plugin_files)
 # Now actually load the Python plugins
 plugin_modules = _plugins.load(plugin_files)
 # Create the proper definitions in the module
-new_attrs = _simpleapi.translate()
+new_attrs = _simpleapi._translate()
 # Finally, overwrite the mocked function definitions in the loaded modules with the real ones 
 _plugins.sync_attrs(_simpleapi, new_attrs, plugin_modules)
 ################################################################################

@@ -422,14 +422,6 @@ namespace CurveFitting
     return m_centre;
   }
 
-  /** Set peak center.  Not allowed
- */
-  void ThermalNeutronBk2BkExpConvPVoigt::setCentre(const double c)
-  {
-    UNUSED_ARG(c);
-    throw std::invalid_argument("ThermalNuetronBk2BkExpConvPV: do not allow to set peak's centre");
-  }
-
   /** Set peak height
  */
   void ThermalNeutronBk2BkExpConvPVoigt::setHeight(const double h)
@@ -456,17 +448,9 @@ namespace CurveFitting
     return m_fwhm;
   }
 
-  /** Set peak's FWHM
- */
-  void ThermalNeutronBk2BkExpConvPVoigt::setFwhm(const double w)
-  {
-    UNUSED_ARG(w);
-    throw std::invalid_argument("Unable to set FWHM");
-  }
-
   //-------------  Private Function To Calculate Peak Profile --------------------------------------------
   /** Calcualte H and eta for the peak
- */
+*/
   void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma, double& H, double& eta) const
   {
     // 1. Calculate H
@@ -687,6 +671,55 @@ namespace CurveFitting
     // cout << "[DB] Final exp_e1 = " << exp_e1 << "\n";
 
     return exp_e1;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** (Migrated from IPeakFunction)
+   * General implementation of the method for all peaks. Limits the peak evaluation to
+   * a certain number of FWHMs around the peak centre. The outside points are set to 0.
+   * Calls functionLocal() to compute the actual values
+   * @param out :: Output function values
+   * @param xValues :: X values for data points
+   * @param nData :: Number of data points
+   */
+  void ThermalNeutronBk2BkExpConvPVoigt::function1D(double* out, const double* xValues, const size_t nData)const
+  {
+    double c = this->centre();
+    double dx = fabs(s_peakRadius*this->fwhm());
+    int i0 = -1;
+    int n = 0;
+    for(size_t i = 0; i < nData; ++i)
+    {
+      if (fabs(xValues[i] - c) < dx)
+      {
+        if (i0 < 0) i0 = static_cast<int>(i);
+        ++n;
+      }
+      else
+      {
+        out[i] = 0.0;
+      }
+    }
+    if (i0 < 0 || n == 0) return;
+    this->functionLocal(out+i0, xValues+i0, n);
+
+    return;
+  }
+
+  /// Default value for the peak radius
+  int ThermalNeutronBk2BkExpConvPVoigt::s_peakRadius = 5;
+
+  //----------------------------------------------------------------------------------------------
+  /** Set peak radius
+    */
+  void ThermalNeutronBk2BkExpConvPVoigt::setPeakRadius(const int& r)
+  {
+    if (r > 0)
+    {
+      s_peakRadius = r;
+      std::string setting = boost::lexical_cast<std::string>(r);
+      Kernel::ConfigService::Instance().setString("curvefitting.peakRadius",setting);
+    }
   }
 
 } // namespace CurveFitting

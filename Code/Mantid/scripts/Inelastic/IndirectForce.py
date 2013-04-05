@@ -2,9 +2,9 @@
 #
 from IndirectImport import *
 from mantid.simpleapi import *
-from mantid import config, logger, mtd
+from mantid import config, logger, mtd, FileFinder
 from mantid.kernel import V3D
-import sys, math, os.path
+import sys, math, os.path, numpy as np
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
 mp = import_mantidplot()
 
@@ -88,15 +88,12 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 		e.append(ee)
 	return next,x,y,e                                #values of x,y,e as lists
 
-def IbackStart(instr,run,rejectZ,useM,Verbose,Plot,Save):      #Ascii start routine
+def IbackStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('Iback')
-	config['default.facility'] = "ILL"
 	workdir = config['defaultsave.directory']
-	idf_dir = config['instrumentDefinition.directory']
-	idf = idf_dir + instr + '_Definition.xml'
 	file = instr +'_'+ run
 	filext = file + '.asc'
-	path = os.path.join(workdir, filext)
+	path = FileFinder.getFullPath(filext)
 	if Verbose:
 		logger.notice('Reading file : ' + path)
 	handle = open(path, 'r')
@@ -205,15 +202,16 @@ def IbackStart(instr,run,rejectZ,useM,Verbose,Plot,Save):      #Ascii start rout
 			Qaxis += ','
 		xDat.append(2*xDat[new-1]-xDat[new-2])
 		Qaxis += str(theta[n])
-	ascWS = file+'_asc'
-	outWS = file+'_red'
+	ascWS = file +'_' +ana+refl +'_asc'
+	outWS = file +'_' +ana+refl +'_red'
 	CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
 		Nspec=nsp, UnitX='Energy')
 	Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,
 		AllowDifferentNumberSpectra=True)
 	DeleteWorkspace(monWS)								# delete monitor WS
-	LoadInstrument(Workspace=ascWS, Filename=idf, RewriteSpectraMap=False)
-	ChangeAngles(ascWS,theta,Verbose)
+	InstrParas(ascWS,instr,ana,refl)
+	efixed = RunParas(ascWS,instr,run,title,Verbose)
+	ChangeAngles(ascWS,instr,theta,Verbose)
 	if useM:
 		map = ReadMap(instr,Verbose)
 		UseMap(ascWS,map,Verbose)
@@ -226,7 +224,7 @@ def IbackStart(instr,run,rejectZ,useM,Verbose,Plot,Save):      #Ascii start rout
 		SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
 		if Verbose:
 			logger.notice('Output file : ' + opath)
-	if (Plot != 'None'):
+	if (Plot):
 		plotForce(outWS,Plot)
 	EndTime('Iback')
 
@@ -248,15 +246,12 @@ def ReadInxGroup(asc,n,lgrp):                  # read ascii x,y,e
 	npt = len(x)
 	return Q,npt,x,y,e                                 #values of x,y,e as lists
 
-def InxStart(instr,run,rejectZ,useM,Verbose,Plot,Save):
+def InxStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):
 	StartTime('Inx')
-	config['default.facility'] = "ILL"
 	workdir = config['defaultsave.directory']
-	idf_dir = config['instrumentDefinition.directory']
-	idf = idf_dir + instr + '_Definition.xml'
 	file = instr +'_'+ run
 	filext = file + '.inx'
-	path = os.path.join(workdir, filext)
+	path = FileFinder.getFullPath(filext)
 	if Verbose:
 		logger.notice('Reading file : ' + path)
 	handle = open(path, 'r')
@@ -285,6 +280,7 @@ def InxStart(instr,run,rejectZ,useM,Verbose,Plot,Save):
 	yDat = []
 	eDat = []
 	ns = 0
+	Q = []
 	for m in range(0,ngrp):
 		Qq,nd,xd,yd,ed = ReadInxGroup(asc,m,lgrp)
 		tot = sum(yd)
@@ -293,17 +289,27 @@ def InxStart(instr,run,rejectZ,useM,Verbose,Plot,Save):
 		if ns != 0:
 			Qaxis += ','
 		Qaxis += str(Qq)
+		Q.append(Qq)
 		for n in range(0,nd):
 			xDat.append(xd[n])
 			yDat.append(yd[n])
 			eDat.append(ed[n])
 		xDat.append(2*xd[nd-1]-xd[nd-2])
 		ns += 1
-	ascWS = file+'_red'
-	outWS = file+'_red'
+	ascWS = file +'_' +ana+refl +'_asc'
+	outWS = file +'_' +ana+refl +'_red'
 	CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
-		Nspec=ns, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
-	LoadInstrument(Workspace=ascWS, Filename=idf, RewriteSpectraMap=False)
+		Nspec=ns, UnitX='Energy')
+	InstrParas(ascWS,instr,ana,refl)
+	efixed = RunParas(ascWS,instr,run,title,Verbose)	
+	pi4 = 4.0*math.pi
+	wave=1.8*math.sqrt(25.2429/efixed)
+	theta = []
+	for n in range(0,ngrp):
+		qw = wave*Q[n]/pi4
+		ang = 2.0*math.degrees(math.asin(qw))
+		theta.append(ang)
+	ChangeAngles(ascWS,instr,theta,Verbose)
 	if useM:
 		map = ReadMap(instr,Verbose)
 		UseMap(ascWS,map,Verbose)
@@ -316,9 +322,11 @@ def InxStart(instr,run,rejectZ,useM,Verbose,Plot,Save):
 		SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
 		if Verbose:
 			logger.notice('Output file : ' + opath)
-	if (Plot != 'None'):
+	if (Plot):
 		plotForce(outWS,Plot)
 	EndTime('Inx')
+	
+# General routines
 
 def RejectZero(inWS,tot,Verbose):
 	nin = mtd[inWS].getNumberHistograms()                      # no. of hist/groups in sam
@@ -393,34 +401,45 @@ def plotForce(inWS,Plot):
 	if (Plot == 'Contour' or Plot == 'Both'):
 		cont_plot=mp.importMatrixWorkspace(inWS).plotGraph2D()
 
-def ChangeAngles(inWS,theta,Verbose):
-	ngrp = len(theta)
-	SpectrumIDs = []
-	L2 = []
-	Polar = theta
-	Azimuthal = []
-	for n in range(0,ngrp):
-		SpectrumIDs.append(n+1)
-		L2.append(1.0)
-		Azimuthal.append(0.0)
+def ChangeAngles(inWS,instr,theta,Verbose):
+	workdir = config['defaultsave.directory']
+	file = instr+'_angles.txt'
+	path = os.path.join(workdir, file)
 	if Verbose:
-		logger.notice('SpectrumIDs = '+str(SpectrumIDs))
-		logger.notice('Polar = '+str(Polar))
-	for i in range(len(SpectrumIDs)):
-		spec_num = SpectrumIDs[i]
-		ws_index = spec_num - 1
-		move_spectrum(mtd[inWS], ws_index, L2[i],Polar[i],Azimuthal[i])
+		logger.notice('Creating angles file : ' + path)
+	handle = open(path, 'w')
+	head = 'spectrum,theta'
+	handle.write(head +" \n" )
+	for n in range(0,len(theta)):
+		handle.write(str(n+1) +'   '+ str(theta[n]) +"\n" )
+		if Verbose:
+			logger.notice('Spectrum ' +str(n+1)+ ' = '+str(theta[n]))
+	handle.close()
+	UpdateInstrumentFromFile(Workspace=inWS, Filename=path, MoveMonitors=False, IgnorePhi=False,
+		AsciiHeader=head)
 
-def get_pos(R,theta,phi):
-	deg2rad=math.pi/180.0
-	z = R*math.cos(theta*deg2rad)
-	st=math.sin(theta*deg2rad)
-	x=R*st*math.cos(phi*deg2rad)
-	y=R*st*math.sin(phi*deg2rad)
-	return V3D(x,y,z)
-	
-def move_spectrum(wkspace, ws_index, l2, polar, azimuth):
-	det = wkspace.getDetector(ws_index)
-	new_pos = get_pos(l2,polar, azimuth)
-	MoveInstrumentComponent(Workspace=wkspace,DetectorID=det.getID(),X=new_pos.X(),Y=new_pos.Y(),Z=new_pos.Z(),RelativePosition=False)
+def InstrParas(ws,instr,ana,refl):
+	idf_dir = config['instrumentDefinition.directory']
+	idf = idf_dir + instr + '_Definition.xml'
+	LoadInstrument(Workspace=ws, Filename=idf, RewriteSpectraMap=False)
+	ipf = idf_dir + instr + '_' + ana + '_' + refl + '_Parameters.xml'
+	LoadParameterFile(Workspace=ws, Filename=ipf)
+
+def RunParas(ascWS,instr,run,title,Verbose):
+	ws = mtd[ascWS]
+	inst = ws.getInstrument()
+	AddSampleLog(Workspace=ascWS, LogName="facility", LogType="String", LogText="ILL")
+	ws.getRun()['run_number'] = run
+	ws.getRun()['run_title'] = title
+	efixed = inst.getNumberParameter('efixed-val')[0]
+	if Verbose:
+		facility = ws.getRun().getLogData('facility').value
+		logger.notice('Facility is ' +facility)
+		runNo = ws.getRun()['run_number'].value
+		runTitle = ws.getRun()['run_title'].value.strip()
+		logger.notice('Run : ' +runNo + ' ; Title : ' + runTitle)
+		an = inst.getStringParameter('analyser')[0]
+		ref = inst.getStringParameter('reflection')[0]
+		logger.notice('Analyser : ' +an+ref +' with energy = ' + str(efixed))
+	return efixed
 

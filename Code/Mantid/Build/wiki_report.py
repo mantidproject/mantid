@@ -36,8 +36,18 @@ class WikiReporter:
         docEl.setAttribute('time',str(self._time_taken))
         return self._doc.toxml()
     
-    def __failureMessage__(self, algorithm, version, last_editor, diff):
-        return "Algorithm %s Version %i last edited by %s is out of sync.\n\nDifferences are:\n\n%s" % (algorithm, version, last_editor, diff)
+    def __addGenericFailure__(self, contents, algorithm):
+        elem = self._doc.createElement('testcase')
+        elem.setAttribute('classname', 'WikiMaker')
+        elem.setAttribute('name', algorithm)
+        self._failures.append(algorithm)
+        failEl = self._doc.createElement('failure')
+        failEl.appendChild(self._doc.createTextNode(contents))
+        elem.appendChild(failEl)
+        time_taken = 0
+        elem.setAttribute('time',str(time_taken))
+        elem.setAttribute('totalTime',str(time_taken))
+        self._doc.documentElement.appendChild(elem)
     
     def addSuccessTestCase(self, algorithm):
         elem = self._doc.createElement('testcase')
@@ -50,61 +60,11 @@ class WikiReporter:
     
     
     def addFailureTestCase(self, algorithm, version, last_editor, diff):
-        elem = self._doc.createElement('testcase')
-        elem.setAttribute('classname', 'WikiMaker')
-        elem.setAttribute('name', algorithm)
-        self._failures.append(algorithm)
-        failEl = self._doc.createElement('failure')
-        failEl.appendChild(self._doc.createTextNode(self.__failureMessage__(algorithm, version, last_editor, diff)))
-        elem.appendChild(failEl)
-        time_taken = 0
-        elem.setAttribute('time',str(time_taken))
-        elem.setAttribute('totalTime',str(time_taken))
-        self._doc.documentElement.appendChild(elem)
-            
-             
-        
-        
+        contents = "Algorithm %s Version %i last edited by %s is out of sync.\n\nDifferences are:\n\n%s" % (algorithm, version, last_editor, diff)
+        self.__addGenericFailure__(contents, algorithm)
 
-"""   def dispatchResults(self, result):
-        ''' This relies on the order and names of the items to give the correct output '''
-        test_name = result.name.split('.')
-        if len(test_name) > 1:
-            class_name = '.'.join(test_name[:-1])
-            name = test_name[-1]
-        else:
-            class_name = result.name
-            name = result.name
-        elem = self._doc.createElement('testcase')
-        elem.setAttribute('classname',"SystemTests." + class_name)
-        elem.setAttribute('name',name)
-        if result.status == 'skipped':
-            self._skipped.append(result)
-            skipEl = self._doc.createElement('skipped')
-            if len(result.output) > 0:
-                if "Missing required file" in result.output:
-                    skipEl.setAttribute('message', "MissingRequiredFile")
-                else:
-                    skipEl.setAttribute('message', result.output)
-                skipEl.appendChild(self._doc.createTextNode(result.output))
-            elem.appendChild(skipEl)
-        elif result.status != 'success':
-            self._failures.append(result)
-            failEl = self._doc.createElement('failure')
-            failEl.setAttribute('file',result.filename)
-            output = ''
-            if len(result.output) > 0:
-                output += result.output
-            if len(output) > 0:
-                failEl.appendChild(self._doc.createTextNode(output))
-            elem.appendChild(failEl)
-        time_taken = 0.0
-        for t in result.resultLogs():
-            if t[0] == 'iteration time_taken':
-                time_taken = float(t[1].split(' ')[1])
-                self._time_taken += time_taken
-        elem.setAttribute('time',str(time_taken))
-        elem.setAttribute('totalTime',str(time_taken))
-        self._doc.documentElement.appendChild(elem)
-"""
+        
+    def addFailureNoPage(self, algorithm, expected_page):
+        contents = "Algorithm %s has no wiki page. Wiki page expected %s still needs creating." % (algorithm, expected_page)
+        self.__addGenericFailure__(contents, algorithm)
 

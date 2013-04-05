@@ -10,6 +10,7 @@ set ( MODULE_TEMPLATE src/api.cpp.in )
 set ( EXPORT_FILES
   src/Exports/IAlgorithm.cpp
   src/Exports/Algorithm.cpp
+  src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/PythonAlgorithmExport.cpp
   src/Exports/AlgorithmFactory.cpp
   src/Exports/AlgorithmManager.cpp
@@ -38,6 +39,7 @@ set ( EXPORT_FILES
   src/Exports/IPeaksWorkspace.cpp
   src/Exports/BinaryOperations.cpp
   src/Exports/WorkspaceGroup.cpp
+  src/Exports/WorkspaceGroupProperty.cpp
   src/Exports/WorkspaceValidators.cpp
   src/Exports/InstrumentValidator.cpp
   src/Exports/Axis.cpp
@@ -52,6 +54,9 @@ set ( EXPORT_FILES
   src/Exports/IFunction.cpp
   src/Exports/PropertyManagerDataService.cpp
   src/Exports/FunctionFactory.cpp
+  src/Exports/Progress.cpp
+  src/Exports/FunctionProperty.cpp
+  src/Exports/AlgorithmProperty.cpp
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions

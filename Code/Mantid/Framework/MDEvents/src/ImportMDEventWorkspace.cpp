@@ -17,8 +17,12 @@ The usage example below shows demo files with both of these formats.
 
 Comments are denoted by lines starting with '''#'''. There is no multi-line comment. 
 
-== Usage ==
+== Alternatives ==
+Other alternatives to importing/creating MDWorkspaces are [[ImportMDHistoWorkspace]], [[CreateMDHistoWorkspace]] and [[CreateMDWorkspace]]
 
+
+*WIKI*/
+/*WIKI_USAGE*
 The following example creates a 2D MDEventWorkspace called ''demo'' with 10 * 2 bins.
 
 
@@ -84,12 +88,7 @@ The equivalent with run numbers and detector ids specified is:
     2.7	1.10	1	19	-0.3	1
     2.8	1.00	1	20	-0.2	1
     2.9	0.90	1	20	-0.1	1
-
-== Alternatives ==
-Other alternatives to importing/creating MDWorkspaces are [[ImportMDHistoWorkspace]], [[CreateMDHistoWorkspace]] and [[CreateMDWorkspace]]
-
-
-*WIKI*/
+*WIKI_USAGE*/
 
 #include "MantidMDEvents/ImportMDEventWorkspace.h"
 #include "MantidKernel/System.h"

@@ -1,3 +1,25 @@
+/*WIKI* 
+
+The LoadRaw algorithm stores data from the [[RAW_File | RAW]] file in a [[Workspace2D]], which will naturally contain histogram data with each spectrum going into a separate histogram. The time bin boundaries (X values) will be common to all histograms and will have their [[units]] set to time-of-flight. The Y values will contain the counts and will be unit-less (i.e. no division by bin width or normalisation of any kind). The errors, currently assumed Gaussian, will be set to be the square root of the number of counts in the bin.
+
+=== Optional properties ===
+If only a portion of the data in the [[RAW_File | RAW]] file is required, then the optional 'spectrum' properties can be set before execution of the algorithm. Prior to loading of the data the values provided are checked and the algorithm will fail if they are found to be outside the limits of the dataset.
+
+=== Multiperiod data === 
+If the RAW file contains multiple periods of data this will be detected and the different periods will be output as separate workspaces, which after the first one will have the period number appended (e.g. OutputWorkspace_period).
+Each workspace will share the same [[Instrument]], SpectraToDetectorMap and [[Sample]] objects.
+If the optional 'spectrum' properties are set for a multiperiod dataset, then they will ignored.
+
+===Subalgorithms used===
+LoadRaw runs the following algorithms as child algorithms to populate aspects of the output [[Workspace]]:
+* [[LoadInstrument]] - Looks for an instrument definition file named XXX_Definition.xml, where XXX is the 3 letter instrument prefix on the RAW filename, in the directory specified by the "instrumentDefinition.directory" property given in the config file (or, if not provided, in the relative path ../Instrument/). If the instrument definition file is not found then the [[LoadInstrumentFromRaw]] algorithm will be run instead.
+* [[LoadMappingTable]] - To build up the mapping between the spectrum numbers and the Detectors of the attached [[Instrument]].
+* [[LoadLog]] - Will look for any log files in the same directory as the RAW file and load their data into the workspace's [[Sample]] object.
+
+==Previous Versions==
+LoadRaw version 1 and 2 are no longer available in Mantid.  Version 3 has been validated and in active use for several years, if you really need a previous version of this algorithm you will need to use an earlier version of Mantid.
+*WIKI*/
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -74,10 +96,11 @@ namespace Mantid
       monitorOptions.push_back("Exclude");
       monitorOptions.push_back("Separate");
       declareProperty("LoadMonitors","Include", boost::make_shared<StringListValidator>(monitorOptions),
-          "Use this option to control the loading of monitors.\n"
-          "The defalut is Include option  which loads the monitors into the output workspace.\n"
-          "Other options are Exclude and Separate.The Exclude option exludes monitors from the output workspace \n"
-          "and the Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n");
+          "Option to control the loading of monitors.\n"
+			"Allowed options are Include,Exclude and Separate.\n"
+			"Include:The default is Include option which loads the monitors into the output workspace.\n"
+			"Exclude:The Exclude option excludes monitors from the output workspace.\n"
+			"Separate:The Separate option loads monitors into a separate workspace called OutputWorkspace_Monitor.\n");
     }
 
 
@@ -109,7 +132,7 @@ namespace Mantid
       //read workspace title from raw file
       readTitle(file,title);
 
-      //read workspace dimensions,mumber of periods etc from the raw file.
+      //read workspace dimensions,number of periods etc from the raw file.
       readworkspaceParameters(m_numberOfSpectra,m_numberOfPeriods,m_lengthIn,m_noTimeRegimes);
 
       setOptionalProperties();
@@ -578,11 +601,24 @@ namespace Mantid
       DataObjects::Workspace2D_sptr localWorkspace = DataObjects::Workspace2D_sptr(
           new ManagedRawFileWorkspace2D(fileName, static_cast<int>(option)));
       setProg( 0.2 );
+      progress(m_prog);
       loadRunParameters(localWorkspace);
-      runLoadInstrument(fileName,localWorkspace, 0.2, 0.4 );
       setProg( 0.4 );
-      runLoadMappingTable(fileName,localWorkspace);
+      progress(m_prog);
+      runLoadInstrument(fileName,localWorkspace, 0.2, 0.4 );
       setProg( 0.5 );
+      progress(m_prog);
+      // Since all spectra are being loaded if we get to here,
+      // we can just set the spectrum numbers to start at 1 and increase monotonically
+      for (int i = 0; i < m_numberOfSpectra; ++i)
+      {
+        localWorkspace->getSpectrum(i)->setSpectrumNo(i+1);
+      }
+      setProg( 0.6 );
+      progress(m_prog);
+      runLoadMappingTable(fileName,localWorkspace);
+      setProg( 0.7 );
+      progress(m_prog);
       if (bLoadlogFiles)
       {
         runLoadLog(fileName,localWorkspace, 0.5, 0.7);
@@ -591,14 +627,10 @@ namespace Mantid
       }
       setProtonCharge(localWorkspace->mutableRun());
 
-      setProg( 0.7 );
+      setProg( 0.8 );
       progress(m_prog);
-      for (int i = 0; i < m_numberOfSpectra; ++i)
-      {
-        localWorkspace->getAxis(1)->setValue(i, i + 1);
-      }
-      setProg( 0.9 );
       localWorkspace->populateInstrumentParameters();
+      setProg( 0.9 );
       separateOrexcludeMonitors(localWorkspace, bincludeMonitors, bexcludeMonitors,
           bseparateMonitors,m_numberOfSpectra,fileName);
       setProg( 1.0 );
@@ -676,7 +708,7 @@ namespace Mantid
               monitorwsList.push_back(static_cast<specid_t>(wsItr->second));
             if (bseparate)
             {
-              monitorWorkspace->getAxis(1)->setValue(monitorwsIndex, static_cast<specid_t>(i + 1));
+              monitorWorkspace->getSpectrum(monitorwsIndex)->setSpectrumNo(i+1);
               setWorkspaceData(monitorWorkspace, m_timeChannelsVec, monitorwsIndex, i + 1, m_noTimeRegimes,m_lengthIn,1);
               ++monitorwsIndex;
             }
@@ -687,10 +719,6 @@ namespace Mantid
       if ((bseparate && !monitorwsList.empty()) || bexclude)
       {
         localWorkspace->setMonitorList(monitorwsList);
-        // RJT: Comment this out on removal of method from Workspace2D. This whole method doesn't do
-        // the right thing anyway, so this only makes things slightly worse pending a fix.
-        //    localWorkspace->sethistogramNumbers(
-        //      m_numberOfSpectra - static_cast<int64_t>(monitorwsList.size()));
         if (bseparate)
         {
           fclose(file);

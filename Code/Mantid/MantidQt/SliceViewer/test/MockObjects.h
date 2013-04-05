@@ -127,12 +127,11 @@ class MockPeakTransformFactory : public PeakTransformFactory
   class MockPeakOverlayFactory : public PeakOverlayViewFactory
   {
   public:
-    MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(const Mantid::Kernel::V3D&));
-    MOCK_METHOD3(setPeakRadius, void(const double&, const double&, const double&));
-    MOCK_METHOD2(setZRange, void(const double&, const double&));
+    MOCK_CONST_METHOD2(createView, boost::shared_ptr<PeakOverlayView>(const int, PeakTransform_const_sptr));
     MOCK_CONST_METHOD0(getPlotXLabel, std::string());
     MOCK_CONST_METHOD0(getPlotYLabel, std::string());
     MOCK_METHOD0(updateView, void());
+    MOCK_CONST_METHOD0(FOM, int());
   };
   
   

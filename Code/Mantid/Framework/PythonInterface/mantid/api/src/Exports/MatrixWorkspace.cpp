@@ -102,6 +102,28 @@ namespace
     setSpectrumFromPyObject(self, &MatrixWorkspace::dataE, wsIndex, values);
   }
 
+  /**
+   * Adds a deprecation warning to the getNumberBins call to warn about using blocksize instead
+   * @param self A reference to the calling object
+   * @returns The blocksize()
+   */
+  size_t getNumberBinsDeprecated(MatrixWorkspace & self)
+  {
+    PyErr_Warn(PyExc_DeprecationWarning, "'getNumberBins' is deprecated, use 'blocksize' instead.");
+    return self.blocksize();
+  }
+
+  /**
+   * Adds a deprecation warning to the getSampleDetails call to warn about using getRun instead
+   * @param self A reference to the calling object
+   * @returns getRun()
+   */
+  Mantid::API::Run & getSampleDetailsDeprecated(MatrixWorkspace & self)
+  {
+    PyErr_Warn(PyExc_DeprecationWarning, "'getSampleDetails' is deprecated, use 'getRun' instead.");
+    return self.mutableRun();
+  }
+
 }
 
 void export_MatrixWorkspace()
@@ -129,6 +151,10 @@ void export_MatrixWorkspace()
          return_value_policy<copy_const_reference>(), "Returns the status of the distribution flag")
     .def("YUnit", &MatrixWorkspace::YUnit, "Returns the current Y unit for the data (Y axis) in the workspace")
     .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, "Returns the caption for the Y axis")
+
+    // Deprecated
+    .def("getNumberBins", &getNumberBinsDeprecated, "Returns size of the Y data array (deprecated, use blocksize instead)")
+    .def("getSampleDetails", &getSampleDetailsDeprecated, return_internal_reference<>(), "Return the Run object for this workspace (deprecated, use getRun instead)")
 
     //--------------------------------------- Setters -------------------------------------------------------------------------------
     .def("setYUnitLabel", &MatrixWorkspace::setYUnitLabel, "Sets a new caption for the data (Y axis) in the workspace")

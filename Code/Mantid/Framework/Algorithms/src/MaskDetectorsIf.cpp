@@ -55,7 +55,7 @@ void MaskDetectorsIf::init()
 	  select_mode[0] = "SelectIf";
 	  select_mode[1] = "DeselectIf";
 	  declareProperty("Mode", "SelectIf", boost::make_shared<StringListValidator>(select_mode),
-	    "Mode to select or deselect detectors based on comparison with values. Allowed Values: DeselectIf, SelectIf " );
+	    "Mode to select or deselect detectors based on comparison with values. " + allowedValuesStatement(select_mode) );
 	std::vector<std::string> select_operator(6);
 	  select_operator[0] = "Equal";
 	  select_operator[1] = "NotEqual";
@@ -64,7 +64,7 @@ void MaskDetectorsIf::init()
 	  select_operator[4] = "Less";
 	  select_operator[5] = "LessEqual";
 	  declareProperty("Operator", "Equal", boost::make_shared<StringListValidator>(select_operator),
-	  	    "Unary operator to compare to given values. Allowed Values: Equal, Greater, GreaterEqual, Less, LessEqual, NotEqual" );
+	  	    "Unary operator to compare to given values. " + allowedValuesStatement(select_operator) );
 	  declareProperty("Value",0.0);
 	  declareProperty(new API::FileProperty("InputCalFile","", API::FileProperty::Load, ".cal"),
 			  "The name of the CalFile with grouping data. Allowed Values: *.cal ." );
@@ -204,6 +204,19 @@ void MaskDetectorsIf::createNewCalFile(const std::string& oldfile, const std::st
   newf.close();
   return;
 }
+
+std::string MaskDetectorsIf::allowedValuesStatement( std::vector<std::string> vals)
+{
+  std::ostringstream statement;
+  statement << "Allowed Values: ";
+  for (size_t i=0;i<vals.size();++i)
+  {
+    statement << vals[i];
+    if( i < vals.size()) statement << ", ";
+  }
+  return statement.str();
+}
+
 
 } // namespace Algorithm
 } // namespace Mantid

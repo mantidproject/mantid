@@ -14606,7 +14606,9 @@ void ApplicationWindow::showMantidConcepts()
 }
 void ApplicationWindow::showalgorithmDescriptions()
 {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Algorithms"));
+  if (!m_helpWindow)
+      m_helpWindow = boost::make_shared<HelpWindow>();
+  m_helpWindow->showURL("qthelp://org.mantidproject/doc/html/algorithms_index.html");
 }
 
 void ApplicationWindow::showSetupParaview()
@@ -14630,7 +14632,9 @@ void ApplicationWindow::showFirstTimeSetup()
  */
 void ApplicationWindow::showmantidplotHelp()
 {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_Help"));
+  if (!m_helpWindow)
+    m_helpWindow = boost::make_shared<HelpWindow>();
+  m_helpWindow->showURL("qthelp://org.mantidproject/doc/html/index.html");
 }
 
 //

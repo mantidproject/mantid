@@ -4,6 +4,7 @@
 #include <QtCore/QtCore>
 #include <QtGui/QWidget>
 #include <QActionGroup>
+#include <QRunnable>
 #include <MantidKernel/System.h>
 
 #include "ui_MantidEV.h"
@@ -15,13 +16,169 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
+// NOTE: The first several internal classes are just simple QRunnable
+// objects that will run worker code using one or more algorithms, in
+// a separate thread.  This avoids blocking the MantidPlot GUI by 
+// keeping the main Qt thread free.
+//
+
+//
+// START OF SIMPLE QRunnable classes -------------------------------------
+//
+
+/// Local class to load file and convert to MD in a Non-Qt thread.
+class RunLoadAndConvertToMD : public QRunnable
+{
+  public:
+
+  /// Constructor just saves the info needed by the run() method
+  RunLoadAndConvertToMD(       MantidEVWorker * worker, 
+                         const std::string    & file_name,
+                         const std::string    & ev_ws_name,
+                         const std::string    & md_ws_name );
+
+  /// Calls worker->loadAndConvertToMD from a separate thread
+  void run();
+
+  private:
+    MantidEVWorker * worker;
+    std::string      file_name;
+    std::string      ev_ws_name;
+    std::string      md_ws_name;
+};
+
+
+/// Local class to run FindPeaks in a Non-Qt thread.
+class RunFindPeaks : public QRunnable
+{
+  public:
+
+  /// Constructor just saves the info needed by the run() method
+  RunFindPeaks(       MantidEVWorker * worker,
+                const std::string    & md_ws_name,
+                const std::string    & peaks_ws_name,
+                      double           max_abc,
+                      size_t           num_to_find,
+                      double           min_intensity );
+
+  /// Calls worker->findPeaks from a separate thread
+  void run();
+
+  private:
+    MantidEVWorker * worker;
+    std::string      md_ws_name;
+    std::string      peaks_ws_name;
+    double           max_abc;
+    size_t           num_to_find;
+    double           min_intensity;
+};
+
+
+/// Local class to run IntegratePeaksMD in a Non-Qt thread.
+class RunSphereIntegrate : public QRunnable
+{
+  public:
+
+  /// Constructor just saves the info needed by the run() method
+  RunSphereIntegrate(       MantidEVWorker * worker,
+                      const std::string    & peaks_ws_name,
+                      const std::string    & event_ws_name,
+                            double           peak_radius,
+                            double           inner_radius,
+                            double           outer_radius,
+                            bool             integrate_edge );
+
+  /// Calls worker->sphereIntegrate from a separate thread
+  void run();
+
+  private:
+    MantidEVWorker * worker;
+    std::string      peaks_ws_name;
+    std::string      event_ws_name;
+    double           peak_radius; 
+    double           inner_radius; 
+    double           outer_radius; 
+    bool             integrate_edge; 
+};
+
+
+/// Local class to run PeakIntegration in a Non-Qt thread.
+class RunFitIntegrate : public QRunnable
+{
+  public:
+
+  /// Constructor just saves the info needed by the run() method
+  RunFitIntegrate(       MantidEVWorker * worker,
+                   const std::string    & peaks_ws_name,
+                   const std::string    & event_ws_name,
+                   const std::string    & rebin_params,
+                         size_t           n_bad_edge_pix,
+                         bool             use_ikeda_carpenter );
+
+  /// Calls worker->fitIntegrate from a separate thread
+  void run();
+
+  private:
+    MantidEVWorker * worker;
+    std::string      peaks_ws_name;
+    std::string      event_ws_name;
+    std::string      rebin_params;
+    size_t           n_bad_edge_pix;
+    bool             use_ikeda_carpenter;
+};
+
+
+/// Local class to run ellipsoidIntegrate in a Non-Qt thread.
+class RunEllipsoidIntegrate : public QRunnable
+{
+  public:
+
+  /// Constructor just saves the info needed by the run() method
+  RunEllipsoidIntegrate(       MantidEVWorker * worker,
+                         const std::string    & peaks_ws_name,
+                         const std::string    & event_ws_name,
+                               double           region_radius,
+                               bool             specify_size,
+                               double           peak_size, 
+                               double           inner_size, 
+                               double           outer_size );
+
+  /// Calls worker->ellipsoidIntegrate from a separate thread
+  void run();
+
+  private:
+    MantidEVWorker * worker;
+    std::string      peaks_ws_name;
+    std::string      event_ws_name;
+    double           region_radius;
+    bool             specify_size;
+    double           peak_size;
+    double           inner_size;
+    double           outer_size;
+};
+
+
+//
+// END OF SIMPLE QRunnable classes -------------------------------------
+//
+// START of the actual MantidEV Class ----------------------------------
+//
+
+/**
+ *  The MantidEV class has slots that handle user input from the Qt GUI
+ *  and then call methods in the MantidEVWorker class.  Roughly speaking,
+ *  MantidEV deals with the Qt GUI and MantideEVWorker deals with Mantid.
+ */
 class MantidEV : public API::UserSubWindow
 {
   Q_OBJECT
 
 public:
 
+  /// Constructor
   MantidEV(QWidget *parent = 0);
+
+  /// Destructor
   ~MantidEV();
 
   /// The name of the interface as registered into the factory
@@ -33,14 +190,20 @@ private slots:
   /// Slot for the select workspace tab's Apply button 
   void selectWorkspace_slot();
 
+  /// Slot for the Browse button for loading an event file 
+  void loadEventFile_slot();
+
   /// Slot for the find peaks tab's Apply button 
   void findPeaks_slot();
+
+  /// Slot for choosing a peaks file name
+  void getLoadPeaksFileName_slot();
 
   /// Slot for the find UB tab's Apply button 
   void findUB_slot();
 
-  /// Slot for the Browse button for choosing a matrix file 
-  void loadUB_slot();
+  /// Slot for choosing a matrix file name
+  void getLoadUB_FileName_slot();
 
   /// Slot for the choose cell tab's Apply button 
   void chooseCell_slot();
@@ -51,8 +214,44 @@ private slots:
   /// Slot for the integrate tab's Apply button 
   void integratePeaks_slot();
 
+  // 
+  // The following slots take care of the menu items
+  //
+ 
+  /// Slot to save the current MantidEV GUI state
+  void saveState_slot();
+
+  /// Slot to load a previous MantidEV GUI state
+  void loadState_slot();
+
+  /// Slot to save the UB matrix from the current MantidEV peaks workspace
+  void saveIsawUB_slot();
+
+  /// Slot to a previous UB matrix into the current MantidEV peaks workspace
+  void loadIsawUB_slot();
+
+  /// Slot to save the current MantidEV peaks workspace 
+  void saveIsawPeaks_slot();
+
+  /// Slot to load a peaks workspace to the current MantidEV named workspace
+  void loadIsawPeaks_slot();
+
+  /// Slot to show the UB matrix
+  void showUB_slot();
+  
+  //
+  // The following slots just take care of enabling and disabling
+  // some of the controls, as needed
+  //
+
+  /// Slot to enable/disable the Load Event File controls
+  void setEnabledLoadEventFileParams_slot( bool on );
+
   /// Slot to enable/disable the find peaks controls
   void setEnabledFindPeaksParams_slot( bool on );
+
+  /// Slot to enable/disable the Load Peaks File controls
+  void setEnabledLoadPeaksParams_slot( bool on );
 
   /// Slot to enable/disable the find UB using FFT controls
   void setEnabledFindUBFFTParams_slot( bool on );
@@ -93,29 +292,62 @@ private:
   virtual void initLayout();
 
   /// Utility method to display an error message
-  void errorMessage( const std::string message );
+  void errorMessage( const std::string & message );
 
   /// Utility method to parse a double value in a string
   bool getDouble( std::string str, double & value );
 
   /// Utility method to get a double value from a QtLineEdit widget 
-  bool getDouble( QLineEdit *ledt, double &value );
+  bool getDouble( QLineEdit *ledt, double & value );
 
   /// Utility method to get a positive double from a QtLineEdit widget 
-  bool getPositiveDouble( QLineEdit *ledt, double &value );
+  bool getPositiveDouble( QLineEdit *ledt, double & value );
 
   /// Utility method to get a positive integer value from a QtLineEdit widget 
-  bool getPositiveInt( QLineEdit *ledt, size_t &value );
+  bool getPositiveInt( QLineEdit *ledt, size_t & value );
+
+  /// Get name of file for saving peaks
+  void getSavePeaksFileName();
+
+  /// Get name of file for saving UB matrix 
+  void getSaveUB_FileName();
+
+  /// Save QSettings to specified file, or default, if filename empty
+  void saveSettings( const std::string & filename );
+
+  /// Load QSettings from specified file, or default, if filename empty
+  void loadSettings( const std::string & filename );
+
+  /// Restore the value of the QLineEdit component from QSettings
+  void restore( QSettings *state, QString name, QLineEdit *ledt );
+
+  /// Restore the value of the QCheckbox or QRadioButton from QSettings
+  void restore( QSettings *state, QString name, QAbstractButton *btn );
+
+  /// Restore the value of a QComboBox from QSettings
+  void restore( QSettings *state, QString name, QComboBox *cmbx );
 
 
-  Ui::MantidEV   m_uiForm;    ///< The form generated by Qt Designer
+  Ui::MantidEV   m_uiForm;     ///< The form generated by Qt Designer
 
-  MantidEVWorker *worker;     /// class that uses Mantid algorithms
-                              /// to do the actual work
+  MantidEVWorker *worker;      /// class that uses Mantid algorithms
+                               /// to do the actual work
 
-  std::string  last_UB_file;  /// filename of last UB file that was
-                              /// loaded, if any.
+  std::string  last_UB_file;   /// filename of last UB file that was loaded
+                               /// or saved from MantidEV, if any.
 
+  std::string  last_event_file;/// filename of last event file that was loaded
+                               /// or saved from MantidEV, if any.
+
+  std::string  last_peaks_file;/// filename of last peaks file that was loaded
+                               /// or saved from MantidEV, if any.
+ 
+  std::string  last_ini_file;  /// filename of last settings file that was
+                               /// loaded or saved, if any. 
+
+  QThreadPool  *m_thread_pool; /// local thread pool with only one thread to 
+                               /// allow running precisely one operation 
+                               /// at a time in a separate thread.
 };
 
 } // namespace CustomInterfaces

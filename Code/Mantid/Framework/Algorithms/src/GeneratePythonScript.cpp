@@ -200,9 +200,11 @@ std::string GeneratePythonScript::genParamString(
         params += ",";
       }
 
+      // Needs to deal with properties that don't exist 
+      // yet in a much better way
       if(algHistName == "Load")
       {
-        if(propHist.type() == "string")
+        if(name == "Filename") 
         {
           params += name + "=r'" + value + "'";
         }

@@ -4,14 +4,15 @@
 
 Some values in a workspace can normally be equal to zero. Logarithm is not calculated for values which are less or equal to 0, but the value of ''Filler'' is used instead. The errors for such cells set to zeros
 
-== Usage ==
-'''Python'''
-
-Logarithm("Input","output",[Filler],[is_Natural])
-
-
+When acting on an event workspace, the output will be a Workspace2D, with the default binning from the original workspace.
 
 *WIKI*/
+/*WIKI_USAGE*
+'''Python'''
+
+ Logarithm("Input","output",[Filler],[is_Natural])
+
+*WIKI_USAGE*/
 #include "MantidAlgorithms/Logarithm.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
@@ -26,6 +27,11 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Logarithm)
 
+void Logarithm::initDocs(){
+  this->setWikiSummary("''Logarithm'' function calculates the logarithm of the data, held in a workspace. A user can choose between natural (default) or base 10 logarithm");
+  this->setOptionalMessage("Logarithm function calculates the logarithm of the data, held in a workspace. A user can choose between natural (default) or base 10 logarithm");
+}
+
 Logarithm::Logarithm():UnaryOperation(),log_Min(0),is_natural(true)
 {
   this->useHistogram=true;
@@ -34,10 +40,8 @@ Logarithm::Logarithm():UnaryOperation(),log_Min(0),is_natural(true)
 void Logarithm::defineProperties()
 {
   declareProperty("Filler", 0.0,
-    "Some values in a workspace can normally be zeros or may get negative values after transformations\n"
-    "log(x) is not defined for such values, so here is the value, that will be placed as the result of log(x<=0) operation\n"
-    "Default value is 0");
-  declareProperty("Natural",true,"Switch to choose between natural or base 10 logarithm");
+"The value that will be placed into the output workspace if an input value is equal or less than 0. Default value is 0");
+  declareProperty("Natural",true,"Logical value which specifies if user wands to calculate natural or base 10 logarithm.");
 }
 
 void Logarithm::retrieveProperties()

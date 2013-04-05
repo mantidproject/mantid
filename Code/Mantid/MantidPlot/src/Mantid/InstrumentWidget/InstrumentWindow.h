@@ -188,6 +188,8 @@ private:
   void selectOpenGLDisplay(bool yes);
   /// Set the surface type.
   void setSurfaceType(const QString& typeStr);
+  /// Return a filename to save a grouping to
+  QString getSaveGroupingFilename();
 
   // GUI elements
   QLabel*      mInteractionInfo;

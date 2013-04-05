@@ -11,7 +11,7 @@ from reduction_workflow.find_data import find_data
 class SANSBeamSpreaderTransmission(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\SANS;PythonAlgorithms"
+        return "Workflow\\SANS\\UsesPropertyManager"
 
     def name(self):
         return "SANSBeamSpreaderTransmission"

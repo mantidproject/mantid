@@ -21,7 +21,7 @@ DECLARE_ALGORITHM(MultiplyRange)
 /// Sets documentation strings for this algorithm
 void MultiplyRange::initDocs()
 {
-  this->setWikiSummary("An algorithm to multiply a range of bins in a workspace by the factor given. ");
+  this->setWikiSummary("An algorithm to multiply a range of bins in a workspace by the factor given.");
   this->setOptionalMessage("An algorithm to multiply a range of bins in a workspace by the factor given.");
 }
 
@@ -32,9 +32,9 @@ using namespace API;
 void MultiplyRange::init()
 {
   // Declare an input workspace property.
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),"The name of the input workspace.");
   // Declare an output workspace property.
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"The name of the output workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
@@ -43,7 +43,7 @@ void MultiplyRange::init()
   // EndBin
   declareProperty("EndBin", EMPTY_INT(), mustBePositive, "Bin index to finish at");
   // factor
-  declareProperty("Factor", 0.0, "Multiplier");
+  declareProperty("Factor", 0.0, "The value by which to multiply the input data range");
 }
 
 /** Executes the algorithm

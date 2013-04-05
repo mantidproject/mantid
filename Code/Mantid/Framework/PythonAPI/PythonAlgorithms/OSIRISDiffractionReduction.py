@@ -1,5 +1,4 @@
 """*WIKI* 
-== Usage ==
 
 == Source Code ==
 The source code for the Python Algorithm may be viewed at: [http://trac.mantidproject.org/mantid/browser/trunk/Code/Mantid/Framework/PythonAPI/PythonAlgorithms/OSIRISDiffractionReduction.py OSIRISDiffractionReduction.py]
@@ -7,6 +6,7 @@ The source code for the Python Algorithm may be viewed at: [http://trac.mantidpr
 The source code for the reducer class which is used may be viewed at: [http://trac.mantidproject.org/mantid/browser/trunk/Code/Mantid/scripts/Inelastic/osiris_diffraction_reducer.py osiris_diffraction_reducer.py]
 
 *WIKI*"""
+
 
 from MantidFramework import *
 from mantidsimple import *
@@ -147,10 +147,11 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 	"""
 	
 	def PyInit(self):
-		self.declareProperty('Sample', '')
-		self.declareProperty('Vanadium', '')
-		self.declareProperty('CalFile', '')
-		self.declareWorkspaceProperty('OutputWorkspace', '', Direction.Output)
+	        self.setWikiSummary("This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS into dSpacing, by correcting for the monitor and linking the various d-ranges together.")
+		self.declareProperty('Sample', '', Description='The list of run numbers that are part of the sample run. There should be five of these in most cases. Enter them as comma seperated values.')
+		self.declareProperty('Vanadium', '', Description='The list of run numbers that are part of the vanadium run. There should be five of these in most cases. Enter them as comma seperated values.')
+		self.declareProperty('CalFile', '', Description='Filename of the .cal file to use in the [[AlignDetectors]] and [[DiffractionFocussing]] child algorithms.')
+		self.declareWorkspaceProperty('OutputWorkspace', '', Direction.Output, Description="Name to give the output workspace. If no name is provided, one will be generated based on the run numbers.")
 		
 		self._sams = []
 		self._vans = []

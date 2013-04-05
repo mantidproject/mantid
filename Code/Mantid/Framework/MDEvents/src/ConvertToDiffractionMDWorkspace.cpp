@@ -473,7 +473,7 @@ namespace MDEvents
 
       // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
       BoxController_sptr bc = ws->getBoxController();
-      this->setBoxController(bc);
+      this->setBoxController(bc, m_inWS->getInstrument());
       // We always want the box to be split (it will reject bad ones)
       ws->splitBox();
 

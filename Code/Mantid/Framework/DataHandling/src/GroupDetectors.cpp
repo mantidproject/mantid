@@ -59,12 +59,6 @@ In addition the following XML grouping format is also supported
 </source></div>
 where <ids> is used to specify spectra IDs and <detids> detector IDs.
 
-== Previous Versions ==
-
-=== version 1 ===
-The set of spectra to be grouped can be given as a list of either spectrum numbers, detector IDs or workspace indices. The new, summed spectrum will appear in the workspace at the first workspace index of the pre-grouped spectra (which will be given by the ResultIndex property after execution). The detectors for all the grouped spectra will be moved to belong to the first spectrum. ''A technical note: the workspace indices previously occupied by summed spectra will have their data zeroed and their spectrum number set to a value of -1.''
-
-
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes

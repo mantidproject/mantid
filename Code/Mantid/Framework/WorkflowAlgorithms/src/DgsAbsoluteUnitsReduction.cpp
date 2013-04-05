@@ -47,7 +47,7 @@ namespace Mantid
     int DgsAbsoluteUnitsReduction::version() const { return 1; };
 
     /// Algorithm's category for identification. @see Algorithm::category
-    const std::string DgsAbsoluteUnitsReduction::category() const { return "Workflow\\Inelastic"; }
+    const std::string DgsAbsoluteUnitsReduction::category() const { return "Workflow\\Inelastic\\UsesPropertyManager"; }
 
     //----------------------------------------------------------------------------------------------
     /// Sets documentation strings for this algorithm

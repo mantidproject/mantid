@@ -15,7 +15,7 @@ class RunPythonScript(PythonAlgorithm):
     """
    
     def category(self):
-        return "DataHandling\\LiveData"
+        return "DataHandling\\LiveData\\Support"
 
     def name(self):
         return "RunPythonScript"

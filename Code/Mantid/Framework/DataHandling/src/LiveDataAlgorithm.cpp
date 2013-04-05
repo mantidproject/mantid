@@ -287,7 +287,15 @@ namespace DataHandling
     std::map<std::string, std::string> out;
 
     const std::string instrument = getPropertyValue("Instrument");
-    const bool eventListener = LiveListenerFactory::Instance().create(instrument,false)->buffersEvents();
+    bool eventListener;
+    if ( m_listener )
+    {
+      eventListener = m_listener->buffersEvents();
+    }
+    else
+    {
+      eventListener = LiveListenerFactory::Instance().create(instrument,false)->buffersEvents();
+    }
     if ( !eventListener && getPropertyValue("AccumulationMethod") == "Add" )
     {
       out["AccumulationMethod"] = "The " + instrument + " live stream produces histograms. Add is not a sensible accumulation method.";

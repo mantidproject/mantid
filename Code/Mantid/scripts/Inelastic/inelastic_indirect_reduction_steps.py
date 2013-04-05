@@ -28,6 +28,7 @@ class LoadData(ReductionStep):
     _masking_detectors = []
     _parameter_file = None
     _data_files = {}
+    _extra_load_opts = {}
 
     def __init__(self):
         """Initialise the ReductionStep. Constructor should set the initial
@@ -47,71 +48,14 @@ class LoadData(ReductionStep):
         """
         wsname = ''
 
-        for file in self._data_files:
-            logger.notice("Loading file %s" % file)
-
-            loaded_ws = Load(Filename=self._data_files[file], OutputWorkspace=file, LoadLogFiles=False)
-            loader_handle = loaded_ws.getHistory().lastAlgorithm()
-            loader_name = loader_handle.getPropertyValue("LoaderName")
-
-            if mtd[file].getInstrument().getName() == 'BASIS':
-                ModeratorTzero(InputWorkspace=file,OutputWorkspace= file)
-                basis_mask = mtd[file].getInstrument().getStringParameter(
-                    'Workflow.MaskFile')[0]
-                # Quick hack for older BASIS files that only have one side
-                #if (mtd[file].getRun()['run_number'] < 16693):
-                #        basis_mask = "BASIS_Mask_before_16693.xml"
-                basis_mask_filename = os.path.join(config.getString('maskFiles.directory')
-                        , basis_mask)
-                if os.path.isfile(basis_mask_filename):
-                        LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask", 
-                                 InputFile=basis_mask_filename)
-                        MaskDetectors(Workspace=file, MaskedWorkspace="__basis_mask")
-                else:
-                        logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
-                        
-
-            if self._parameter_file != None:
-                LoadParameterFile(Workspace=file,Filename= self._parameter_file)
-
-            if ( wsname == '' ):
-                wsname = file
-
-            if self._require_chop_data(file):
-                ChopData(InputWorkspace=file,OutputWorkspace= file,Step= 20000.0,NChops= 5, IntegrationRangeLower=5000.0,
-                    IntegrationRangeUpper=10000.0, 
-                    MonitorWorkspaceIndex=self._monitor_index)
-                self._multiple_frames = True
-            else:
-                self._multiple_frames = False
-
-            if ( self._multiple_frames ):
-                workspaces = mtd[file].getNames()
-            else:
-                workspaces = [file]
-
-
-            logger.debug('self._monitor_index = ' + str(self._monitor_index))
-
-            for ws in workspaces:
-                if (loader_name.endswith('Nexus')):
-                    LoadNexusMonitors(Filename=self._data_files[file],OutputWorkspace= ws+'_mon')
-                else:
-                    ## Extract Monitor Spectrum
-                    ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace= ws+'_mon',WorkspaceIndex= self._monitor_index)
-                    ## Crop the workspace to remove uninteresting detectors
-                    CropWorkspace(InputWorkspace=ws,OutputWorkspace= ws,
-                        StartWorkspaceIndex=self._detector_range_start,
-                        EndWorkspaceIndex=self._detector_range_end)
-
-
+        for output_ws, filename in self._data_files.iteritems():
             try:
-                msk = mtd[workspaces[0]].getInstrument().getStringParameter(
-                    'Workflow.Masking')[0]
-            except IndexError:
-                msk = 'None'
-            if ( msk == 'IdentifyNoisyDetectors' ):
-                self._identify_bad_detectors(workspaces[0])
+                self._load_single_file(filename,output_ws)
+                if wsname == "":
+                    wsname = output_ws
+            except RuntimeError, exc:
+                logger.warning("Error loading '%s': %s. File skipped" % (filename, str(exc)))
+                continue
 
         if ( self._sum ) and ( len(self._data_files) > 1 ):
             ## Sum files
@@ -137,6 +81,9 @@ class LoadData(ReductionStep):
         self._detector_range_start = start
         self._detector_range_end = end
 
+    def set_extra_load_opts(self, opts):
+        self._extra_load_opts = opts
+
     def get_mask_list(self):
         return self._masking_detectors
 
@@ -145,6 +92,76 @@ class LoadData(ReductionStep):
 
     def get_ws_list(self):
         return self._data_files
+
+    def _load_single_file(self, filename, output_ws):
+        logger.notice("Loading file %s" % filename)
+
+        loader_name = self._load_data(filename, output_ws)
+
+        inst_name = mtd[output_ws].getInstrument().getName()
+        if inst_name == 'BASIS':
+            ModeratorTzero(InputWorkspace=output_ws,OutputWorkspace= output_ws)
+            basis_mask = mtd[output_ws].getInstrument().getStringParameter(
+                'Workflow.MaskFile')[0]
+            # Quick hack for older BASIS files that only have one side
+            #if (mtd[file].getRun()['run_number'] < 16693):
+            #        basis_mask = "BASIS_Mask_before_16693.xml"
+            basis_mask_filename = os.path.join(config.getString('maskFiles.directory')
+                    , basis_mask)
+            if os.path.isfile(basis_mask_filename):
+                    LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask", 
+                             InputFile=basis_mask_filename)
+                    MaskDetectors(Workspace=output_ws, MaskedWorkspace="__basis_mask")
+            else:
+                    logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
+
+        if self._parameter_file != None:
+            LoadParameterFile(Workspace=output_ws,Filename= self._parameter_file)
+
+
+        if self._require_chop_data(output_ws):
+            ChopData(InputWorkspace=output_ws,OutputWorkspace= output_ws,Step= 20000.0,NChops= 5, IntegrationRangeLower=5000.0,
+                IntegrationRangeUpper=10000.0, 
+                MonitorWorkspaceIndex=self._monitor_index)
+            self._multiple_frames = True
+        else:
+            self._multiple_frames = False
+
+        if ( self._multiple_frames ):
+            workspaces = mtd[output_ws].getNames()
+        else:
+            workspaces = [output_ws]
+
+
+        logger.debug('self._monitor_index = ' + str(self._monitor_index))
+
+        for ws in workspaces:
+            if (loader_name.endswith('Nexus')):
+                LoadNexusMonitors(Filename=self._data_files[output_ws],OutputWorkspace= ws+'_mon')
+            else:
+                ## Extract Monitor Spectrum
+                ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace= ws+'_mon',WorkspaceIndex= self._monitor_index)
+                ## Crop the workspace to remove uninteresting detectors
+                CropWorkspace(InputWorkspace=ws,OutputWorkspace= ws,
+                    StartWorkspaceIndex=self._detector_range_start,
+                    EndWorkspaceIndex=self._detector_range_end)
+
+        try:
+            msk = mtd[workspaces[0]].getInstrument().getStringParameter('Workflow.Masking')[0]
+        except IndexError:
+            msk = 'None'
+        if ( msk == 'IdentifyNoisyDetectors' ):
+            self._identify_bad_detectors(workspaces[0])
+
+    def _load_data(self, filename, output_ws):
+        if self._parameter_file is not None and "VESUVIO" in self._parameter_file:
+            loaded_ws = LoadVesuvio(Filename=filename, OutputWorkspace=output_ws, SpectrumList="1-198", **self._extra_load_opts)
+            loader_name = "LoadVesuvio"
+        else:
+            loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
+            loader_handle = loaded_ws.getHistory().lastAlgorithm()
+            loader_name = loader_handle.getPropertyValue("LoaderName")
+        return loader_name
 
     def _sum_regular(self, wsname):
         merges = [[], []]
@@ -205,6 +222,8 @@ class LoadData(ReductionStep):
 
     def is_multiple_frames(self):
         return self._multiple_frames
+
+#--------------------------------------------------------------------------------------------------
 
 class BackgroundOperations(ReductionStep):
     """Removes, if requested, a background from the detectors data in TOF
@@ -445,8 +464,7 @@ class HandleMonitor(ReductionStep):
         instrument.  If no parameter is present, no rebinning will occur.
         """
         try:
-            stepsize = mtd[ws].getInstrument().getNumberParameter(
-                'Workflow.Monitor.RebinStep')[0]
+            stepsize = mtd[ws].getInstrument().getNumberParameter('Workflow.Monitor.RebinStep')[0]
         except IndexError:
             logger.notice("Monitor is not being rebinned.")
         else:

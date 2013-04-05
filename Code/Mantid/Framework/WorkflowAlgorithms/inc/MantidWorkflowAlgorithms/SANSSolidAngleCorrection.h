@@ -46,7 +46,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\SANS;CorrectionFunctions\\InstrumentCorrections"; }
+  virtual const std::string category() const { return "Workflow\\SANS\\UsesPropertyManager;CorrectionFunctions\\InstrumentCorrections"; }
 
 private:
   /// Sets documentation strings for this algorithm
