@@ -127,6 +127,7 @@ void MdViewerWidget::internalSetup(bool pMode)
   this->isPluginInitialized = false;
   this->pluginMode = pMode;
   this->rotPointDialog = NULL;
+  this->viewSwitched = false;
 }
 
 /**
@@ -362,6 +363,11 @@ void MdViewerWidget::setParaViewComponentsForView()
                    SIGNAL(applied()),
                    this, SLOT(checkForUpdates()));
 
+  QObject::connect(this->currentView,
+                   SIGNAL(renderingDone()),
+                   this,
+                   SLOT(renderingDone()));
+
   SplatterPlotView *spv = dynamic_cast<SplatterPlotView *>(this->currentView);
   if (spv)
   {
@@ -412,6 +418,16 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
   source->updatePipeline();
   this->renderAndFinalSetup();
+}
+
+void MdViewerWidget::renderingDone()
+{
+  if (this->viewSwitched)
+  {
+    std::cout << "Setting colors" << std::endl;
+    this->viewSwitched = false;
+    this->currentView->setColorsForView();
+  }
 }
 
 /**
@@ -500,6 +516,7 @@ void MdViewerWidget::checkForUpdates()
  */
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 {
+  this->viewSwitched = true;
   std::cout << "In MdViewerWidget::switchViews" << std::endl;
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
@@ -522,7 +539,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->currentView->checkViewOnSwitch();
   this->viewSettings->updateEnableState();
   this->currentView->correctVisibility();
-  this->currentView->getView()->forceRender();
+  std::cout << "End MdViewerWidget::switchViews" << std::endl;
 }
 
 /**

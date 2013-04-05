@@ -89,6 +89,7 @@ protected slots:
   void onWikiHelp();
   /// Load and render data.
   void onDataLoaded(pqPipelineSource *source);
+  void renderingDone();
   /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);
 
@@ -104,6 +105,7 @@ private:
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
   pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
+  bool viewSwitched;
 
   /// Check the environmental variables.
   void checkEnvSetup();
