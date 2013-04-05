@@ -16,26 +16,55 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
          ${HELP_IMG_DIR}/MantidPlot_Icon_32offset.png
          ${HELP_OUT_DIR}/about.txt
          ${HELP_OUT_DIR}/mantidgeneral.qhp
+	 ${HELP_HTML_DIR}/index.html
+         ${HELP_HTML_DIR}/mantidplot.html
+         ${HELP_HTML_DIR}/userui.html
+         ${HELP_HTML_DIR}/mantidpython.html
+         ${HELP_HTML_DIR}/developers.html
         )
 
    add_custom_command( OUTPUT ${HELP_IMG_DIR}/Mantid_Logo_Transparent.png
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/img/Mantid_Logo_Transparent.png
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_SOURCE_DIR}/Images/Mantid_Logo_Transparent.png
                                ${HELP_IMG_DIR}/Mantid_Logo_Transparent.png
-                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/img/Mantid_Logo_Transparent.png )
+                       DEPENDS ${CMAKE_SOURCE_DIR}/Images/Mantid_Logo_Transparent.png )
    add_custom_command( OUTPUT ${HELP_IMG_DIR}/MantidPlot_Icon_32offset.png
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/img/MantidPlot_Icon_32offset.png
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_SOURCE_DIR}/Images/MantidPlot_Icon_32offset.png
                                ${HELP_IMG_DIR}/MantidPlot_Icon_32offset.png
-                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/img/MantidPlot_Icon_32offset.png )
+                       DEPENDS ${CMAKE_SOURCE_DIR}/Images/MantidPlot_Icon_32offset.png )
    add_custom_command( OUTPUT ${HELP_OUT_DIR}/mantidgeneral.qhp
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/mantidgeneral.qhp
-                               ${HELP_OUT_DIR}/mantidgeneral.qhp )
+                               ${HELP_OUT_DIR}/mantidgeneral.qhp
+                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/mantidgeneral.qhp )
    add_custom_command( OUTPUT ${HELP_OUT_DIR}/about.txt
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/about.txt
-                               ${HELP_OUT_DIR}/about.txt )
+                               ${HELP_OUT_DIR}/about.txt
+                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/about.txt )
 
    add_custom_command( OUTPUT ${HELP_OUT_DIR}/mantid.qhcp
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/mantid.qhcp
-                               ${HELP_OUT_DIR}/mantid.qhcp )
+                               ${HELP_OUT_DIR}/mantid.qhcp
+                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/mantid.qhcp )
+
+   add_custom_command( OUTPUT ${HELP_HTML_DIR}/index.html
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/index.html
+                               ${HELP_HTML_DIR}/index.html
+                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/index.html )
+   add_custom_command( OUTPUT ${HELP_HTML_DIR}/mantidplot.html
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/mantidplot.html
+                               ${HELP_HTML_DIR}/mantidplot.html
+                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/mantidplot.html )
+   add_custom_command( OUTPUT ${HELP_HTML_DIR}/userui.html
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/userui.html
+                               ${HELP_HTML_DIR}/userui.html
+                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/userui.html )
+   add_custom_command( OUTPUT ${HELP_HTML_DIR}/mantidpython.html
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/mantidpython.html
+                               ${HELP_HTML_DIR}/mantidpython.html
+                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/mantidpython.html )
+   add_custom_command( OUTPUT ${HELP_HTML_DIR}/developers.html
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/src/developers.html
+                               ${HELP_HTML_DIR}/developers.html
+                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/developers.html )
 
    if (WIN32) # copy the assistant executable for windows 32 and 64
       add_custom_command( OUTPUT ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/assistant.exe
@@ -63,13 +92,13 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
                               -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
 		      )
 
-   add_custom_command(OUTPUT  ${HELP_QCH_DIR}/mantid.qhc ${HELP_QCH_DIR}/algorithms.qch ${HELP_QCH_DIR}/fitfunctions.qch ${HELP_QCH_DIR}/mantidgeneral.qch
+   add_custom_command(OUTPUT  ${HELP_OUT_DIR}/mantid.qhc ${HELP_QCH_DIR}/algorithms.qch ${HELP_QCH_DIR}/fitfunctions.qch ${HELP_QCH_DIR}/mantidgeneral.qch
                       DEPENDS ${HELP_ALGO_OUT} ${HELP_FIT_OUT} ${HELP_QHCP_SOURCE}
 		      COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} ${HELP_OUT_DIR}/mantid.qhcp
 		      )
               
    add_custom_target ( qtassistant ALL
-                       DEPENDS MantidPlot ${HELP_QCH_DIR}/mantid.qhc
+                       DEPENDS Framework ${HELP_OUT_DIR}/mantid.qhc
                        )
 
    # Copy to correct location in bin
