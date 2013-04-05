@@ -431,7 +431,7 @@ namespace Algorithms
     // 1. Time correctness: same time, disordered time
     size_t countsame = 0;
     size_t countinverse = 0;
-    for (size_t i=1; i<m_timeVec.size(); i++)
+    for (size_t i=1; i < m_timeVec.size(); i++)
     {
       Kernel::DateAndTime tprev = m_timeVec[i-1];
       Kernel::DateAndTime tpres = m_timeVec[i];
@@ -453,16 +453,35 @@ namespace Algorithms
     m_intInfoMap.insert(make_pair("Number of Reversed Time Stamps", countinverse));
 
     // 2. Average and standard deviation (delta t)
+    double runduration_sec = static_cast<double>(m_endtime.totalNanoseconds()-m_starttime.totalNanoseconds()) * 1.0E-9;
+    if (runduration_sec < 0.0)
+    {
+      g_log.warning() << "It shows that the run duration is not right.  "
+                      << "Run start = " << m_starttime.toFormattedString() << "; "
+                      << "Run End = " << m_endtime.toFormattedString() << ".\n";
+      g_log.notice() << "Log start time = " << m_timeVec[0].toFormattedString() << "; "
+                     << "Log end time = " << m_timeVec.back().toFormattedString() << ".\n";
+    }
+
     double sum_deltaT1 = 0.0; // sum(dt  ) in second
     double sum_deltaT2 = 0.0; // sum(dt^2) in second^2
     double max_dt = 0;
-    double min_dt = static_cast<double>(m_endtime.totalNanoseconds()-m_starttime.totalNanoseconds()) * 1.0E-9;
+    double min_dt = 0;
+    if (runduration_sec > 0)
+      min_dt = runduration_sec;
 
     size_t numpts = m_timeVec.size();
     for (size_t i = 0; i < numpts-1; ++i)
     {
       int64_t dtns = m_timeVec[i+1].totalNanoseconds()-m_timeVec[i].totalNanoseconds();
       double dt = static_cast<double>(dtns)*1.0E-9; // in second
+
+      if (dt < 0)
+      {
+        g_log.warning() << "Reversed dT: dt = " << dt << " between "
+                        << m_timeVec[i].toFormattedString() << " and " << m_timeVec[i+1].toFormattedString()
+                        << " @ index = " << i << ".\n";
+      }
 
       sum_deltaT1 += dt;
       sum_deltaT2 += dt*dt;
