@@ -100,6 +100,7 @@ namespace MDAlgorithms
     size_t initial_numEvents = ws1->getNPoints();
 
     // Make a leaf-only iterator through all boxes with events in the RHS workspace
+//TODO:    OMP
     MDBoxIterator<MDE,nd> it2(box2, 1000, true);
     do
     {
@@ -123,37 +124,46 @@ namespace MDAlgorithms
     prog2->resetNumSteps( ts->size(), 0.4, 0.6);
     tp.joinAll();
 
-    // Now we need to save all the data that was not saved before.
-    if (ws1->isFileBacked())
-    {
-        // flusush disk kernel buffer and save all still in memory
-        ws1->getBoxController()->getFileIO()->flushCache();
-      //// Flush anything else in the to-write buffer
-      //BoxController_sptr bc = ws1->getBoxController();
+    //// Now we need to save all the data that was not saved before.
+    //if (ws1->isFileBacked())
+    //{
+    //    // flusush disk kernel buffer and save all still in memory
+    //    ws1->getBoxController()->getFileIO()->flushCache();
+    //  // Flush the data writes to disk from nexus IO buffer
+    //    ws1->getBoxController()->getFileIO()->flushData();
+    //}
+    //if(ws2->isFileBacked())
+    //{
+    //    // flusush disk kernel buffer and save all still in memory
+    //    ws2->getBoxController()->getFileIO()->flushCache();
+    //  // Flush the data writes to disk from nexus IO buffer
+    //    ws2->getBoxController()->getFileIO()->flushData();
 
-      //prog.resetNumSteps(bc->getTotalNumMDBoxes(), 0.6, 1.0);
-      //MDBoxIterator<MDE,nd> it1(box1, 1000, true);
-      //while (true)
-      //{
-      //  MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(it1.getBox());
-      //  if (box)
-      //  {
-      //    // Something was maybe added to this box
-      //    if (box->getEventVectorSize() > 0)
-      //    {
-      //      // By getting the events, this will merge the newly added and the cached events.
-      //      box->getEvents();
-      //      // The MRU to-write cache will optimize writes by reducing seek times
-      //      box->releaseEvents();
-      //    }
-      //  }
-      //  prog.report("Saving");
-      //  if (!it1.next()) break;
-      //}
-      //bc->getDiskBuffer().flushCache();
-      // Flush the data writes to disk.
-        box1->getISaveable()->flushData();
-    }
+    //  //// Flush anything else in the to-write buffer
+    //  //BoxController_sptr bc = ws1->getBoxController();
+
+    //  //prog.resetNumSteps(bc->getTotalNumMDBoxes(), 0.6, 1.0);
+    //  //MDBoxIterator<MDE,nd> it1(box1, 1000, true);
+    //  //while (true)
+    //  //{
+    //  //  MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(it1.getBox());
+    //  //  if (box)
+    //  //  {
+    //  //    // Something was maybe added to this box
+    //  //    if (box->getEventVectorSize() > 0)
+    //  //    {
+    //  //      // By getting the events, this will merge the newly added and the cached events.
+    //  //      box->getEvents();
+    //  //      // The MRU to-write cache will optimize writes by reducing seek times
+    //  //      box->releaseEvents();
+    //  //    }
+    //  //  }
+    //  //  prog.report("Saving");
+    //  //  if (!it1.next()) break;
+    //  //}
+    //  //bc->getDiskBuffer().flushCache();
+
+    //}
 
     this->progress(0.95, "Refreshing cache");
     ws1->refreshCache();

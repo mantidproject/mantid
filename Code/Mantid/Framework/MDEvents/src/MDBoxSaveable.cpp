@@ -41,11 +41,10 @@ namespace MDEvents
  */
  void MDBoxSaveable::load()
  {
-      API::IBoxControllerIO *fileIO = m_MDNode->getBoxController()->getFileIO(); 
-
     // Is the data in memory right now (cached copy)?
     if (!m_isLoaded)
     {
+        API::IBoxControllerIO *fileIO = m_MDNode->getBoxController()->getFileIO(); 
         m_MDNode->loadAndAddFrom(fileIO,this->m_fileIndexStart,this->m_fileNumEvents);
         this->m_isLoaded = true;
     }

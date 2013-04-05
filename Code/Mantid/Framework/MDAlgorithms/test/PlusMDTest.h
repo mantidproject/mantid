@@ -84,10 +84,18 @@ public:
        auto loader = dynamic_cast<MDEvents::BoxControllerNxSIO *>( bc->getFileIO());
        TS_ASSERT(loader);
        if(!loader)return;
+       std::vector<uint64_t> freeSpaceMap;
+       loader->getFreeSpaceVector(freeSpaceMap);
+       uint64_t freeSpace(0);
+       for(size_t i=0;i<freeSpaceMap.size()/2;i++)
+       {
+           freeSpace+=freeSpaceMap[2*i+1];
+       }
+
 
        ::NeXus::File * file =loader->getFile();
      // The file should have an entry of 20000 points too (with some error due to the free space blocks). This means the file back-end was updated
-      TS_ASSERT_DELTA(file->getInfo().dims[0], 20000, 100);
+      TS_ASSERT_EQUALS(file->getInfo().dims[0], 20000+freeSpace);
 
       // Close the file so you can delete it. Otherwise the following test gets confused.
       if (deleteFile)
@@ -101,13 +109,13 @@ public:
     //cleanup
     if ((inPlace==1)&&rhs->isFileBacked())
     {
-          std::string fileName = ws->getBoxController()->getFileIO()->getFileName();
+          std::string fileName = rhs->getBoxController()->getFileIO()->getFileName();
           rhs->clearFileBacked(false);         
           Poco::File(fileName).remove();
     }
     if ((inPlace==2)&&lhs->isFileBacked())
     {
-          std::string fileName = ws->getBoxController()->getFileIO()->getFileName();
+          std::string fileName = lhs->getBoxController()->getFileIO()->getFileName();
           lhs->clearFileBacked(false);         
           Poco::File(fileName).remove();
     }
@@ -144,14 +152,14 @@ public:
   { do_test(true, true, 0); }
 
   void test_file_plus_file_inPlace()
-  { do_test(true, true, 1); }
+  {  
+      do_test(true, true, 1);
+  }
 
   void test_file_plus_file_inPlace_ofRHS()
   { do_test(true, true, 2); }
 
-
-
-
+ 
   void test_histo_histo()
   {
     MDHistoWorkspace_sptr out;

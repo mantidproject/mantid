@@ -375,6 +375,8 @@ namespace MDEvents
 
     /// The id which specify location of this box in a linear chain of ordered boxes (e.g. on file). Calculated algorithmically 
     size_t m_fileID;
+    /// Mutex for modifying the event list or box averages
+    Mantid::Kernel::Mutex m_dataMutex; 
   private:
         MDBoxBase(const MDBoxBase<MDE,nd> & box);
   public:

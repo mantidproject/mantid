@@ -91,7 +91,6 @@ public:
 
     BoxController *const bcc = b->getBoxController();
     delete b;
-    delete bcc;
     if(DODEBUG)
     {
         std::cout << sizeof( MDLeanEvent<3>) << " bytes per MDLeanEvent(3)" << std::endl;
@@ -109,7 +108,7 @@ public:
         CPUTimer tim;
         for (size_t i=0; i<1000000; i++)
         {
-          MDBox<MDLeanEvent<3>,3> * box = new MDBox<MDLeanEvent<3>,3>(NULL);
+          MDBox<MDLeanEvent<3>,3> * box = new MDBox<MDLeanEvent<3>,3>(bcc);
           (void) box;
         }
         std::cout << tim << " to allocate a million boxes" << std::endl;
@@ -118,7 +117,10 @@ public:
         std::cout << stop << " KB after " << std::endl;
         std::cout << start-stop << " KB change " << std::endl;
         std::cout << (start-stop)*1024 / sizeof( MDBox<MDLeanEvent<3>,3>) << " times the sizeof MDBox3" << std::endl;
+        delete bcc;
     }
+    else
+       delete bcc;
   }
 
 
@@ -176,6 +178,7 @@ public:
   void test_MDGridBox_constructor_from_MDBox()
   {
     MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
+    TS_ASSERT(b->getBoxController());
     // Start at ID 0.
     TS_ASSERT_EQUALS( b->getID(), 0);
     // Give it 10 events

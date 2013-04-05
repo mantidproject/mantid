@@ -481,7 +481,7 @@ namespace Mantid
           if(FileBackEnd)
           {
             box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,-1);
-            // Mark the box as file backed and set the index in the file in the box data
+            // Mark the box as file backed and indicate that the box was saved
             box->setFileBacked(indexStart,numEvents,true);
           }
           else

@@ -16,7 +16,12 @@ namespace MDEvents
   /**Destructor */ 
   TMDE(MDBox)::~MDBox()
   {
-      if(m_Saveable)delete m_Saveable;
+      if(m_Saveable)
+      {
+         // tell disk buffer that there are no point of tracking this box any more.   
+          this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
+          delete m_Saveable;
+      }
   }
 //-----------------------------------------------------------------------------------------------
   /** Convenience Constructor/default constructor for accepting shared pointer
@@ -70,6 +75,7 @@ namespace MDEvents
    * @param depth :: splitting depth of the new box.
    * @param extentsVector :: vector defining the extents
    * @param boxSize :: size of reserve for data
+   * @param nBoxEvents :: if defined, we expect box to have such number of events so will allocate memory for it. 
    * @param boxID :: id for the given box
    */
   TMDE(MDBox)::MDBox(BoxController *const splitter, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
@@ -238,21 +244,22 @@ namespace MDEvents
   {
       if(!m_Saveable)
           return data;
-
-
-      if (m_Saveable->wasSaved())
+      else
       {
-        // Load and concatenate the events if needed
-        m_Saveable->load();
-      // The data vector is busy - can't release the memory yet
-        m_Saveable->setBusy(true);
-      // Tell the to-write buffer to write out/discard the object (when no longer busy)
-        this->m_BoxController->getFileIO()->toWrite(m_Saveable);
+          if (m_Saveable->wasSaved())
+          {  // Load and concatenate the events if needed
+              m_Saveable->load();  // this will set isLoaded to true if not already loaded;         
+          }
+          // The data vector is busy - can't release the memory yet
+          m_Saveable->setBusy(true);
+          // the non-const access to events assumes that the data will be modified;
+          m_Saveable->setDataChanged();
+
+          // Tell the to-write buffer to discard the object (when no longer busy) as it has not been modified
+          this->m_BoxController->getFileIO()->toWrite(m_Saveable);
+          // else: do nothing if the events are already in memory.
+          return data;
       }
-    // else: do nothing if the events are already in memory.
-      // the non-const access to events assumes that the data will be modified;
-       m_Saveable->setDataChanged();
-      return data;
   }
 
   TMDE(
@@ -265,25 +272,27 @@ namespace MDEvents
    * VERY IMPORTANT: call MDBox::releaseEvents() when you are done accessing that data.
    */
   TMDE(
-  const std::vector<MDE> & MDBox)::getConstEvents()const 
+      const std::vector<MDE> & MDBox)::getConstEvents()const 
   {
-    if(!m_Saveable)
+      if(!m_Saveable)    
+          return data;     
+      else
+      {
+          if (m_Saveable->wasSaved())
+          {
+              // Load and concatenate the events if needed
+              m_Saveable->load();  // this will set isLoaded to true if not already loaded;
+              // This access to data was const. Don't change the m_dataModified flag.
+          }
+          // The data vector is busy - can't release the memory yet
+          m_Saveable->setBusy(true);
+
+          // Tell the to-write buffer to discard the object (when no longer busy) as it has not been modified
+          this->m_BoxController->getFileIO()->toWrite(m_Saveable);
+         // else: do nothing if the events are already in memory.
           return data;
-
-    if (m_Saveable->wasSaved())
-    {
-      // Load and concatenate the events if needed
-        m_Saveable->load();  // this will set isLoaded to true if not already loaded;
-        // The data vector is busy - can't release the memory yet
-        m_Saveable->setBusy(true);
-
-      // This access to data was const. Don't change the m_dataModified flag.
-
-      // Tell the to-write buffer to discard the object (when no longer busy) as it has not been modified
-        this->m_BoxController->getFileIO()->toWrite(m_Saveable);
-    }
-    // else: do nothing if the events are already in memory.
-    return data;
+      }
+    
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -715,9 +724,9 @@ namespace MDEvents
        size_t nEvents = sigErrSq.size()/2;
        size_t nExisiting = data.size();
        data.reserve(nExisiting+nEvents);
-       dataMutex.lock();
+       this->m_dataMutex.lock();
        IF<MDE,nd>::EXEC(this->data,sigErrSq,Coord,runIndex,detectorId,nEvents);
-       dataMutex.unlock();
+       this->m_dataMutex.unlock();
 
        return 0;
   }
@@ -732,9 +741,9 @@ namespace MDEvents
    TMDE(
    void MDBox)::addEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
    {
-       dataMutex.lock();
+       this->m_dataMutex.lock();
        this->data.push_back(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0],runIndex, detectorId));
-       dataMutex.unlock();
+       this->m_dataMutex.unlock();
    }
 
   /** Create MD MDEvent amd add it to the box.
@@ -769,7 +778,7 @@ namespace MDEvents
   TMDE(
   void MDBox)::addEvent( const MDE & Evnt)
   {
-    dataMutex.lock();
+    this->m_dataMutex.lock();
     this->data.push_back(Evnt );
 
 //    // When we reach the split threshold exactly, track that the MDBox is too small
@@ -779,7 +788,7 @@ namespace MDEvents
 //      this->m_BoxController->addBoxToSplit(this);
 //    }
 
-    dataMutex.unlock();
+    this->m_dataMutex.unlock();
   }
   //-----------------------------------------------------------------------------------------------
   /** Add a MDEvent to the box.
@@ -791,10 +800,10 @@ namespace MDEvents
   TMDE(
   void MDBox)::addAndTraceEvent( const MDE & point, size_t index)
   {
-    dataMutex.lock();
+    this->m_dataMutex.lock();
     this->data.push_back(point);
 
-    dataMutex.unlock();
+    this->m_dataMutex.unlock();
 
     //// When we reach the split threshold exactly, track that the MDBox is too small
     //// We check on equality and not >= to only add a box once.
@@ -832,13 +841,13 @@ namespace MDEvents
   TMDE(
   size_t MDBox)::addEvents(const std::vector<MDE> & events)
   {
-    dataMutex.lock();
+    this->m_dataMutex.lock();
     typename std::vector<MDE>::const_iterator start = events.begin();
     typename std::vector<MDE>::const_iterator end = events.end();
     // Copy all the events
     this->data.insert(this->data.end(), start, end);
 
-     dataMutex.unlock();
+     this->m_dataMutex.unlock();
     return 0;
   }
 
@@ -908,13 +917,13 @@ namespace MDEvents
 
        std::vector<coord_t> TableData;
        FileSaver->loadBlock(TableData,filePosition,nEvents);
-       dataMutex.lock();
+       this->m_dataMutex.lock();
        // convert loaded events to data;
        size_t nCurrentEvents = data.size();
        this->data.reserve(nCurrentEvents+nEvents);
        // convert data to events appending new events to existing
        MDE::dataToEvents(TableData,data,false);
-       dataMutex.unlock();
+       this->m_dataMutex.unlock();
    }
    /** clear file-backed information from the box if such information exists 
     *
@@ -930,7 +939,8 @@ namespace MDEvents
        {
            if(loadDiskBackedData)
                m_Saveable->load();
-
+           // tell disk buffer that there are no point of tracking this box any more.   
+           this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
            delete m_Saveable;
            m_Saveable=NULL;
 

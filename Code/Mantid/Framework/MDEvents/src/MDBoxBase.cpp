@@ -274,6 +274,7 @@ namespace MDEvents
     // --- Go event by event and add them ----
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
+    m_dataMutex.lock();
     for (; it != it_end; ++it)
     {
       //Check out-of-bounds-ness
@@ -293,9 +294,9 @@ namespace MDEvents
         ++numBad;
       else
         // Event was in bounds; add it
-        addEvent(*it);
+        addEventUnsafe(*it);
     }
-
+    m_dataMutex.unlock();
     return numBad;
   }
 

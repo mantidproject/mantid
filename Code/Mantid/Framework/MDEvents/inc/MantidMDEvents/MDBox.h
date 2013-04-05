@@ -163,9 +163,7 @@ namespace MDEvents
   protected:
     // the pointer to the class, responsible for saving/restoring this class to the hdd
     mutable Kernel::ISaveable *m_Saveable;
-    /// Mutex for modifying the event list
-    Mantid::Kernel::Mutex dataMutex; 
-    /** Vector of MDLeanEvent's, in no particular order. */
+    /** Vector of MDEvent's, in no particular order. */
     mutable std::vector< MDE > data;
 
      /// Flag indicating that masking has been applied.

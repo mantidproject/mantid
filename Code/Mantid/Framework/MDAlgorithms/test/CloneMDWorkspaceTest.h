@@ -83,9 +83,10 @@ public:
     LoadMDTest::do_compare_MDEW(ws1, ws2);
     
     // Check that the custom file name file exists
+    std::string realFile;
     if (fileBacked && !Filename.empty())
     {
-      std::string realFile = alg.getPropertyValue("Filename");
+      realFile = alg.getPropertyValue("Filename");
       TS_ASSERT( Poco::File( realFile ).exists() );
     }
     // Clean up files

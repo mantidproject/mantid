@@ -44,9 +44,10 @@ namespace API
     m_addingEvents_numTasksPerBlock(other.m_addingEvents_numTasksPerBlock),
     m_numMDBoxes(other.m_numMDBoxes),
     m_numMDGridBoxes(other.m_numMDGridBoxes),
-    m_maxNumMDBoxes(other.m_maxNumMDBoxes)
+    m_maxNumMDBoxes(other.m_maxNumMDBoxes),
+    m_fileIO(boost::shared_ptr<API::IBoxControllerIO>())
   {
-      m_fileIO.reset();
+
   }
 
   /// Destructor
@@ -181,12 +182,13 @@ namespace API
    void BoxController::clearFileBacked()
    {
        if(m_fileIO)
-       {
+       { 
+           // flush DB cache
           m_fileIO->flushCache();
           // close underlying file
           m_fileIO->closeFile();
           // decrease the sp counter by one and nullify this instance of sp.
-          m_fileIO.reset();
+          m_fileIO.reset();// = boost::shared_ptr<API::IBoxControllerIO>();
        }
    }
    /** makes box controller file based by providing class, responsible for fileIO. The box controller become responsible for the FileIO pointer
@@ -200,15 +202,7 @@ namespace API
 
          if(!newFileIO->isOpened())
          {
-             newFileIO.reset();
              throw(Kernel::Exception::FileError("Can not open target file for filebased box controller ",fileName));
-         }
-
-         // kill old fileIO if any 
-         if(this->m_fileIO)// should happen in destructor anyway but just to be carefull about it
-         {
-             this->m_fileIO->flushCache();
-             this->m_fileIO->closeFile();
          }
 
          this->m_fileIO = newFileIO;

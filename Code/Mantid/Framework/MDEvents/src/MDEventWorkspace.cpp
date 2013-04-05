@@ -97,8 +97,8 @@ namespace MDEvents
   {     
       if(m_BoxController->isFileBacked())
       {
-          m_BoxController->clearFileBacked();
           data->clearFileBacked(LoadFileBackedData);
+          m_BoxController->clearFileBacked();
       }
   }
   //-----------------------------------------------------------------------------------------------

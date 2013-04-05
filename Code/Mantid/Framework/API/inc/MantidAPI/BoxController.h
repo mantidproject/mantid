@@ -36,7 +36,8 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0),m_SplitThreshold(1024), m_numSplit(1)
+    :nd(nd), m_maxId(0),m_SplitThreshold(1024), m_numSplit(1),
+    m_fileIO(boost::shared_ptr<API::IBoxControllerIO>())
       {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -44,7 +45,6 @@ namespace API
       m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
       m_splitInto.resize(this->nd, 1);
       resetNumBoxes();
-      m_fileIO.reset();
     }
 
     virtual ~BoxController();
@@ -449,11 +449,9 @@ namespace API
     /// Mutex for getting IDs
     Mantid::Kernel::Mutex m_idMutex;
 
-    // the class which does actual IO operations
+    // the class which does actual IO operations, including MRU support list
     boost::shared_ptr<IBoxControllerIO> m_fileIO;
-    /// Instance of the disk-caching MRU list.
-   // mutable Mantid::Kernel::DiskBuffer m_diskBuffer;
-
+  
  
     /// Number of bytes in a single MDLeanEvent<> of the workspace.
     //size_t m_bytesPerEvent;

@@ -154,7 +154,7 @@ namespace MDEvents
     {
       // Create the box
       // (Increase the depth of this box to one more than the parent (this))
-       MDBox<MDE,nd> * splitBox = new MDBox<MDE,nd>(this->m_BoxController, this->m_depth + 1,std::numeric_limits<size_t>::max(),size_t(ID0+i));
+       MDBox<MDE,nd> * splitBox = new MDBox<MDE,nd>(this->m_BoxController, this->m_depth + 1,UNDEF_SIZET,size_t(ID0+i));
       // This MDGridBox is the parent of the new child.
        splitBox->setParent(this);
 
