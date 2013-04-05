@@ -1,9 +1,8 @@
+from assistant_common import WEB_BASE, HTML_DIR
+from htmlwriter import HtmlWriter
 import mantid
 import os
 import wiki_tools
-from xml.dom.minidom import Document
-from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
-from htmlwriter import HtmlWriter
 
 DIRECTION = {
     0:"input",
@@ -65,7 +64,9 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
     htmlfile.h1(name, newline=False)
     htmlfile.closeTag(True)
 
+    htmlfile.openTag("p")
     htmlfile.link("wiki help", WEB_BASE+name)
+    htmlfile.closeTag(True)
     htmlfile.nl()
     htmlfile.hr()
 
@@ -84,6 +85,11 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
 
         htmlfile.h3("Usage")
         text = wiki_tools.create_function_signature(alg, name)
+        text = text.split("\n")
+        if len(text) > 1:
+            text[0] = text[0] + "<pre>"
+            text[-1] = text[-1] + "</pre>"
+        text = "\n".join(text)
         htmlfile.openTag("p")
         htmlfile.addTxtEle("code", text)
         htmlfile.closeTag(True)
@@ -97,10 +103,10 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
             htmlfile.writeRow(propToList(property, i))
         htmlfile.closeTag(True)
 
+        from mediawiki import MediaWiki
+        wiki = MediaWiki(htmlfile)
         text = wiki_tools.get_custom_wiki_section(name, version, "*WIKI*", True, False)
-        if len(text) > 0:
-            htmlfile.h3("Description")
-            htmlfile.p(text)
+        wiki.parse(text)
 
         htmlfile.closeTag(True)
 
