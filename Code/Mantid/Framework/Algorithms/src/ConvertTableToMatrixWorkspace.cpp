@@ -53,6 +53,10 @@ void ConvertTableToMatrixWorkspace::exec()
   std::string columnE = getProperty("ColumnE");
 
   size_t nrows = inputWorkspace->rowCount();
+  if ( nrows == 0 )
+  {
+    throw std::runtime_error("The input table is empty");
+  }
   std::vector<double> X(nrows);
   std::vector<double> Y(nrows);
   std::vector<double> E(nrows);
