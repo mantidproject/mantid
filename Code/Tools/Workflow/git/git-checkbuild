@@ -67,8 +67,11 @@ checkargs() {
 
 # Called when we are starting from a clean slate sitting on the feature branch
 start_on_feature() {
-    mergebranch=$(current_branch)
+    # We're starting again so clear out previous saved setting
+    remove_config_value ${MERGENAME_CFG_KEY}
+
     # No need to be careful about the state of develop so kill the local branch and recreate it
+    mergebranch=$(current_branch)
     echo "Starting from branch ${mergebranch}."
 
     local_branch_exists ${BUILD_BRANCH}
