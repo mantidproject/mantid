@@ -980,9 +980,6 @@ namespace CurveFitting
   //===================================  Set up the Le Bail Fit   ================================
   //----------------------------------------------------------------------------------------------
   /** Create LeBailFunction
-    * @param backgroundtype:  string, type of background function
-    * @param bkgdorderparams:  vector of background polynomials from order 0
-    * @param bkgdparamws:     TableWorkspace containing background polynomials
    */
   void LeBailFit::createLeBailFunction()
   {
@@ -3035,7 +3032,9 @@ namespace CurveFitting
    * @param funparammap:  map of Parameters of the function to optimize
    * @param background:  background values
    * @param values:   (output) function values, i.e., summation of all peaks but no background
-   * @param RFactor:  R-factor (Rwp and Rp) as output
+   * @param rfactor:  R-factor (Rwp and Rp) as output
+   *
+   * @return :: boolean value.  whether all the peaks' parameters are physical.
    */
   bool LeBailFit::calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws, size_t wsindex,
                                                 map<string, Parameter> funparammap,
@@ -3280,7 +3279,7 @@ namespace CurveFitting
     * @param param     :: Parameter
     * @param newvalue  :: proposed new value that is out of boundary
     * @param direction :: direction of parameter moved.  -1 for lower.  1 for upper
-    * @param option    :: option for various method  0: half distance.  1: periodic / reflection
+    * @param choice    :: option for various method  0: half distance.  1: periodic / reflection
     *                     based on boundary
     *
     * @return :: new value in boundary
