@@ -202,7 +202,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         
         tablews.addColumn("str",    "Name")
         tablews.addColumn("double", "Value")
-        tablews.addColumn("str", "  FitOrTie")
+        tablews.addColumn("str",    "FitOrTie")
         tablews.addColumn("double", "Min")
         tablews.addColumn("double", "Max")
         tablews.addColumn("double", "StepSize")
