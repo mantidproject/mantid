@@ -30,6 +30,9 @@ cpp_files_bare = []
 python_files = []
 python_files_bare = []
 
+# Missing description tag.
+missing_description = "INSERT FULL DESCRIPTION HERE"
+
 #======================================================================
 def remove_wiki_from_header():
     """One-time method to remove *WIKI* tags from all header files """
@@ -597,7 +600,7 @@ def do_make_wiki(algo_name, version, latest_version):
     except IndexError:
         pass
     if (desc == ""):
-      out += "INSERT FULL DESCRIPTION HERE\n"
+      out +=  missing_description + "\n"
       print "Warning: missing wiki description for %s! Placeholder inserted instead." % algo_name
     else:
       out += desc + "\n"
