@@ -164,7 +164,7 @@ namespace MDAlgorithms
         // the boxes file positions are unknown and we need to calculate it.
         BoxFlatStruct.initFlatStructure(ws,filename);
         // create saver class
-        auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc));
+        auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc.get()));
         Saver->setDataType(sizeof(coord_t),MDE::getTypeName());
         if(MakeFileBacked)
         {

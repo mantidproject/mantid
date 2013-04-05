@@ -19,9 +19,9 @@ namespace MDEvents
     std::string BoxControllerNxSIO::g_DBDataName("free_space_blocks");
 
    /**Constructor 
-    @param nDim -- number of dimensions within the data to write
+    @param bc shared pointer to the box controller which uses this IO operations
    */ 
-   BoxControllerNxSIO::BoxControllerNxSIO(API::BoxController_sptr bc) :
+   BoxControllerNxSIO::BoxControllerNxSIO(API::BoxController *const bc) :
        m_File(NULL),
        m_dataChunk(DATA_CHUNK),
        m_ReadOnly(true),

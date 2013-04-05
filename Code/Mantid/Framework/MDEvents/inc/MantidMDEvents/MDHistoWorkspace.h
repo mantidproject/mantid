@@ -397,6 +397,9 @@ namespace MDEvents
     /// sum the array of contributing events m_numEvents array
     uint64_t sumNContribEvents()const;
     void updateSum(){m_nEventsContributed = sumNContribEvents();}
+
+    Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num)
+    {throw Kernel::Exception::NotImplementedError("makeBoxTable is not implemented for MDTable workspace ");}
   private:
 
     void initVertexesArray();

@@ -45,7 +45,7 @@ void setUp()
  {
 
      MDEvents::BoxControllerNxSIO *pSaver;
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc));
+     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
 
      size_t CoordSize;
      std::string typeName;
@@ -75,7 +75,7 @@ void setUp()
  void testCreateOrOpenFile()
  {
      MDEvents::BoxControllerNxSIO *pSaver;
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc));
+     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
 
      std::string FullPathFile;
 
@@ -111,7 +111,7 @@ void setUp()
  void testWriteReadReadFloat()
  {
      MDEvents::BoxControllerNxSIO *pSaver;
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc));
+     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
       std::string FullPathFile;
 
      TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->testFileName,"w"));

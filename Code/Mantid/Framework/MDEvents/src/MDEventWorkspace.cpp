@@ -50,9 +50,10 @@ namespace MDEvents
    */
   TMDE(
   MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE,nd> & other)
-  : IMDEventWorkspace(other)
+  : IMDEventWorkspace(other),
+    m_BoxController(other.m_BoxController->clone())
   {
-      m_BoxController = other.m_BoxController->clone();
+
 
       const MDBox<MDE,nd> * mdbox = dynamic_cast<const MDBox<MDE,nd> *>(other.data);
       const MDGridBox<MDE,nd> * mdgridbox = dynamic_cast<const MDGridBox<MDE,nd> *>(other.data);

@@ -37,9 +37,9 @@ namespace MDEvents
   class DLLExport MDGridBox : public MDBoxBase<MDE, nd>
   {
   public:
-    MDGridBox();
-
-    MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
+  
+    MDGridBox(boost::shared_ptr<Mantid::API::BoxController> &bc, const uint32_t depth,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
+    MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
 
     MDGridBox(MDBox<MDE, nd> * box, bool splitRecursively=false);
 
@@ -198,6 +198,10 @@ namespace MDEvents
     void fillBoxShell(const size_t tot,const coord_t inverseVolume);
     /**private default copy constructor as the only correct constructor is the one with box controller */
     MDGridBox(const MDGridBox<MDE, nd> & box);
+    /**Private constructor as it does not work without box controller */
+    MDGridBox(){};
+    /// common part of MDGridBox contstructor;
+    void initGridBox();
   public:
 
     ////===============================================================================================

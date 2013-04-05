@@ -195,7 +195,7 @@ public:
     a.setSplitInto(10);
     a.setMaxDepth(10);
     a.setMaxId(123456);
-    BoxController_sptr b  = a.clone();
+    auto b  = BoxController_sptr(a.clone());
     // Check that settings are the same but BC are different
     compareBoxControllers(a, *b);
   }
@@ -211,7 +211,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(a->setFileBacked(pS,"fakeFile"));
     TS_ASSERT(a->isFileBacked());
 
-    BoxController_sptr b  = a->clone();
+     auto b  = BoxController_sptr(a->clone());
     // Check that settings are the same but BC are different
     compareBoxControllers(*a, *b);
 

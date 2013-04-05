@@ -44,12 +44,13 @@ namespace API
       m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
       m_splitInto.resize(this->nd, 1);
       resetNumBoxes();
+      m_fileIO.reset();
     }
 
     virtual ~BoxController();
 
     // create new box controller from the existing one
-    virtual boost::shared_ptr<BoxController> clone()const;
+    virtual BoxController *clone()const;
     /// Serialize
     std::string toXMLString() const;
 

@@ -28,10 +28,10 @@ namespace API
   /** create new box controller from the existing one
    * @param pointer to new instance of a class responsible for boxes IO-operations
    */
-  BoxController_sptr BoxController::clone()const
+  BoxController * BoxController::clone()const
   {
         // reset the clone file IO controller to avoid dublicated file based operations for different box controllers
-        return BoxController_sptr(new BoxController(*this));
+        return new BoxController(*this);
   }
 
   /*Private Copy constructor used in cloning */
@@ -46,6 +46,7 @@ namespace API
     m_numMDGridBoxes(other.m_numMDGridBoxes),
     m_maxNumMDBoxes(other.m_maxNumMDBoxes)
   {
+      m_fileIO.reset();
   }
 
   /// Destructor

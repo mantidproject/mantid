@@ -39,7 +39,7 @@ namespace MDEvents
     class DLLExport BoxControllerNxSIO : public API::IBoxControllerIO
     {
         public:
-            BoxControllerNxSIO(API::BoxController_sptr theBC);
+            BoxControllerNxSIO(API::BoxController *const theBC);
 
            ///@return true if the file to write events is opened and false otherwise
             virtual bool isOpened()const
@@ -92,7 +92,7 @@ namespace MDEvents
         /// The size of the events block which can be written in the neXus array at once (continious part of the data block)
         size_t m_dataChunk;
         /// shared pointer to the box controller, which is repsoponsible for this IO
-        API::BoxController_sptr m_bc;
+        API::BoxController *const m_bc;
         //------ 
         /// the start of the current data block to read from. It related to current physical representation of the data in NeXus file
         std::vector<int64_t> m_BlockStart;

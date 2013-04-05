@@ -268,7 +268,7 @@ namespace Mantid
       // set file backed;
       if(!m_outputFile.empty()) 
       {
-          auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc));
+          auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc.get()));
           bc->setFileBacked(Saver,m_outputFile);
           pWs->getBox()->setFileBacked();
           bc->getFileIO()->setWriteBufferSize(1000000);

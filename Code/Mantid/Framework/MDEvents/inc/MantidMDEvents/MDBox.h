@@ -42,9 +42,13 @@ namespace MDEvents
   class DLLExport MDBox :  public MDBoxBase<MDE, nd>
   {
   public:
+    MDBox(Mantid::API::BoxController_sptr &splitter, const uint32_t depth = 0,
+                        const size_t nBoxEvents=UNDEF_SIZET,const size_t boxID=UNDEF_SIZET);
     MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth = 0,
                         const size_t nBoxEvents=UNDEF_SIZET,const size_t boxID=UNDEF_SIZET);
 
+    MDBox(Mantid::API::BoxController_sptr &splitter, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
+                       const size_t nBoxEvents=UNDEF_SIZET,const size_t boxID=UNDEF_SIZET);
     MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
                        const size_t nBoxEvents=UNDEF_SIZET,const size_t boxID=UNDEF_SIZET);
 
@@ -167,8 +171,11 @@ namespace MDEvents
      /// Flag indicating that masking has been applied.
     bool m_bIsMasked;
   private:
+
     /// private default copy constructor as the only correct constructor is the one with the boxController;
     MDBox(const MDBox &);
+    /// common part of mdBox constructor
+    void initMDBox(const size_t numEvents);
   public:
     /// Typedef for a shared pointer to a MDBox
     typedef boost::shared_ptr< MDBox<MDE, nd> > sptr;

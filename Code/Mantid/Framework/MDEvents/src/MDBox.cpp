@@ -18,6 +18,20 @@ namespace MDEvents
   {
       if(m_Saveable)delete m_Saveable;
   }
+//-----------------------------------------------------------------------------------------------
+  /** Convenience Constructor/default constructor for accepting shared pointer
+   * @param splitter :: BoxController that controls how boxes split
+   * @param depth :: splitting depth of the new box.
+   * @param boxSize :: size to reserve for data
+   * @param boxID :: id for the given box
+   */
+  TMDE(MDBox)::MDBox(API::BoxController_sptr & splitter, const uint32_t depth,const size_t nBoxEvents,const size_t boxID)
+    : MDBoxBase<MDE, nd>(splitter.get(),depth,boxID),
+      m_Saveable(NULL),
+      m_bIsMasked(false)
+  {
+      initMDBox(nBoxEvents);
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor/default constructor
@@ -31,17 +45,25 @@ namespace MDEvents
       m_Saveable(NULL),
       m_bIsMasked(false)
   {
-    if (splitter->getNDims() != nd)
-      throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
+      initMDBox(nBoxEvents);
+  }
 
-
-    if(nBoxEvents!=UNDEF_SIZET) data.reserve(nBoxEvents);
-
-    if(splitter->isFileBacked())
-        this->setFileBacked();
-
-   }
-
+//-----------------------------------------------------------------------------------------------
+  /** Constructor
+   * @param splitter :: BoxController that controls how boxes split
+   * @param depth :: splitting depth of the new box.
+   * @param extentsVector :: vector defining the extents
+   * @param boxSize :: size of reserve for data
+   * @param boxID :: id for the given box
+   */
+  TMDE(MDBox)::MDBox(BoxController_sptr &splitter, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
+       const size_t nBoxEvents,const size_t boxID)
+   :   MDBoxBase<MDE, nd>(splitter.get(),depth,boxID,extentsVector),
+       m_Saveable(NULL),
+       m_bIsMasked(false)
+  {
+      initMDBox(nBoxEvents);
+  }
   //-----------------------------------------------------------------------------------------------
   /** Constructor
    * @param splitter :: BoxController that controls how boxes split
@@ -56,17 +78,21 @@ namespace MDEvents
        m_Saveable(NULL),
        m_bIsMasked(false)
   {
-    if (splitter->getNDims() != nd)
+      initMDBox(nBoxEvents);
+  }
+  /**Common part of MD box constructor */
+ TMDE(
+ void MDBox)::initMDBox(const size_t nBoxEvents)
+ {
+    if (this->m_BoxController->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
 
     if(nBoxEvents!=UNDEF_SIZET) data.reserve(nBoxEvents);
 
-    if(splitter->isFileBacked())
+    if(this->m_BoxController->isFileBacked())
         this->setFileBacked();
 
-
-  }
-
+ }
 
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor

@@ -99,8 +99,9 @@ namespace MDEvents
 
     virtual void setMinRecursionDepth(size_t minDepth);
 
-    //------------------------ (END) IMDEventWorkspace Methods -----------------------------------------
     Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num);
+    //------------------------ (END) IMDEventWorkspace Methods -----------------------------------------
+
 
     virtual void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly)
     {

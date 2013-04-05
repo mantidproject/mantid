@@ -350,7 +350,7 @@ namespace Mantid
     // ---------------------------------------- DEAL WITH BOXES  ------------------------------------
       if (FileBackEnd)
       { // TODO:: call to the file format factory
-          auto loader = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc));
+          auto loader = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc.get()));
           loader->setDataType(sizeof(size_t),MDE::getTypeName());
           bc->setFileBacked(loader,m_filename);
           // boxes have been already made file-backed when restoring the boxTree;
@@ -374,7 +374,7 @@ namespace Mantid
       {
         // ---------------------------------------- READ IN THE BOXES ------------------------------------
        // TODO:: call to the file format factory
-        auto loader = std::unique_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc));
+        auto loader = std::unique_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc.get()));
         loader->setDataType(sizeof(size_t),MDE::getTypeName());
 
         loader->openFile(m_filename,"r");

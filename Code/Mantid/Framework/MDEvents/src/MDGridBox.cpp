@@ -29,15 +29,17 @@ namespace Mantid
 namespace MDEvents
 {
 
-  //===============================================================================================
-  //===============================================================================================
-  //-----------------------------------------------------------------------------------------------
-  /** Empty constructor. Used when loading from NXS files.
-   * */
-  TMDE(MDGridBox)::MDGridBox()
-   : MDBoxBase<MDE, nd>(), numBoxes(0), nPoints(0)
-  {
-  }
+  ////===============================================================================================
+  ////===============================================================================================
+  ////-----------------------------------------------------------------------------------------------
+  ///** Empty constructor. Used when loading from NXS files.
+  // * */
+  //TMDE(MDGridBox)::MDGridBox()
+  // : MDBoxBase<MDE, nd>(), numBoxes(0), nPoints(0)
+  //{
+  //}
+ 
+
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor with a box controller.
@@ -49,7 +51,21 @@ namespace MDEvents
    : MDBoxBase<MDE, nd>(bc,depth,UNDEF_SIZET,extentsVector),
      numBoxes(0), nPoints(0)
   {
-    if (!bc)
+      initGridBox();
+  }
+
+ /** convenience Constructor, taking the shared pointer and extracting const pointer from it */
+  TMDE(MDGridBox)::MDGridBox(boost::shared_ptr<API::BoxController> &bc, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
+   : MDBoxBase<MDE, nd>(bc.get(),depth,UNDEF_SIZET,extentsVector),
+     numBoxes(0), nPoints(0)
+  {
+       initGridBox();
+  }
+  /// common part of MDGridBox contstructor;
+  template<typename MDE,size_t nd>
+  void MDGridBox<MDE,nd>::initGridBox()
+  {
+    if (!this->m_BoxController)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
 
     // How many is it split?
@@ -60,8 +76,8 @@ namespace MDEvents
     size_t tot = computeSizesFromSplit();
     if (tot == 0)
       throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
-  }
 
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor

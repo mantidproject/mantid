@@ -132,7 +132,7 @@ namespace MDAlgorithms
               auto  bc = boost::shared_ptr<API::BoxController>(new API::BoxController(nd));
               bc->fromXMLString(m_fileComponentsStructure[i].getBCXMLdescr());
 
-              m_EventLoader[i] = new BoxControllerNxSIO(bc);
+              m_EventLoader[i] = new BoxControllerNxSIO(bc.get());
               m_EventLoader[i]->setDataType(sizeof(coord_t),MDE::getTypeName());
               m_EventLoader[i]->openFile(m_Filenames[i],"r");
 
@@ -218,7 +218,7 @@ namespace MDAlgorithms
     // Fix the max depth to something bigger.
     bc->setMaxDepth(20);
     bc->setSplitThreshold(5000);
-    auto saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc));
+    auto saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc.get()));
     saver->setDataType(sizeof(coord_t),MDE::getTypeName());    
     if(m_fileBasedTargetWS)
     {

@@ -476,9 +476,17 @@ public:
     //Mock MDBox. Only one method of interest to the mocking.
     class MockMDBox : public MDBox<MDLeanEvent<2>, 2>
     {
+        API::BoxController *const pBC;
     public:
-        MockMDBox():MDBox<MDLeanEvent<2>, 2>(NULL){}
-      MOCK_CONST_METHOD0(getIsMasked, bool());
+        MockMDBox():
+            MDBox<MDLeanEvent<2>, 2>(new API::BoxController(2)),
+            pBC(MDBox<MDLeanEvent<2>, 2>::getBoxController())
+
+        {}
+        MOCK_CONST_METHOD0(getIsMasked, bool());
+       ~MockMDBox()
+        {delete pBC;}
+
     };
 
     MockMDBox mockBox;

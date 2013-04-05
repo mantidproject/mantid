@@ -47,11 +47,17 @@ private:
   ///Mock type to help determine if masking is being determined correctly
     class MockMDBox : public MDBox<MDLeanEvent<1>, 1>
   {
+      API::BoxController *const pBC;
   public:
-      MockMDBox():MDBox<MDLeanEvent<1>, 1>(NULL){};
+      MockMDBox():
+          MDBox<MDLeanEvent<1>, 1>(new API::BoxController(1)),
+          pBC(MDBox<MDLeanEvent<1>, 1>::getBoxController())
+      {}
       MOCK_CONST_METHOD0(getIsMasked, bool());
       MOCK_METHOD0(mask, void());
       MOCK_METHOD0(unmask, void());
+      ~MockMDBox()
+      {delete pBC;}
   };
 
   // the sp to a box controller used as general reference to all tested classes/operations including MockMDBox
@@ -250,13 +256,15 @@ public:
   {
     MDGridBox<MDLeanEvent<1>,1> * box = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
     BoxController * originalBoxController = box->getBoxController();
-    BoxController*const newBoxController = originalBoxController->clone().get();
+    BoxController*const newBoxController = originalBoxController->clone();
+
+    TS_ASSERT_DIFFERS(originalBoxController,newBoxController);
 
     MDGridBox<MDLeanEvent<1>,1> * box1 = new MDGridBox<MDLeanEvent<1>,1>(*box,newBoxController);
 
     auto boxes = box1->getBoxes();
     for(size_t i = 0; i < boxes.size(); ++i)
-    {
+    {       
       TSM_ASSERT_EQUALS("All child boxes should have the same box controller as the parent.", newBoxController, boxes[i]->getBoxController()); 
     }
     delete newBoxController;
@@ -1427,7 +1435,9 @@ public:
     boxes.push_back(a);
     boxes.push_back(b);
 
-    MDGridBox<MDLeanEvent<1>,1> g(NULL);
+    auto bc = boost::shared_ptr<BoxController>(new BoxController(1));
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(1);
+    MDGridBox<MDLeanEvent<1>,1> g(bc,0,extentsVector);
     g.setChildren(boxes, 0, 2);
 
     TSM_ASSERT("No inner boxes were masked so the MDGridBox should not report that it is masked", !g.getIsMasked());
@@ -1448,7 +1458,9 @@ public:
     boxes.push_back(a);
     boxes.push_back(b);
 
-    MDGridBox<MDLeanEvent<1>,1> g;
+    auto bc = boost::shared_ptr<BoxController>(new BoxController(1));
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(1);
+    MDGridBox<MDLeanEvent<1>,1> g(bc,0,extentsVector);
     g.setChildren(boxes, 0, 2);
 
     TSM_ASSERT("First inner box masked, so should return masked", g.getIsMasked());
@@ -1469,7 +1481,10 @@ public:
     boxes.push_back(a);
     boxes.push_back(b);
 
-    MDGridBox<MDLeanEvent<1>,1> g;
+    auto bc = boost::shared_ptr<BoxController>(new BoxController(1));
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(1);
+    MDGridBox<MDLeanEvent<1>,1> g(bc,0,extentsVector);
+
     g.setChildren(boxes, 0, 2);
 
     TSM_ASSERT("Second inner box masked, so should return masked", g.getIsMasked());
@@ -1490,7 +1505,10 @@ public:
     boxes.push_back(a);
     boxes.push_back(b);
 
-    MDGridBox<MDLeanEvent<1>,1> griddedBox;
+    auto bc = boost::shared_ptr<BoxController>(new BoxController(1));
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(1);
+    MDGridBox<MDLeanEvent<1>,1> griddedBox(bc,0,extentsVector);
+
     griddedBox.setChildren(boxes, 0, 2);
 
     TS_ASSERT_THROWS_NOTHING(griddedBox.mask());//Mask the gridded box
@@ -1512,7 +1530,10 @@ public:
     boxes.push_back(a);
     boxes.push_back(b);
 
-    MDGridBox<MDLeanEvent<1>,1> griddedBox;
+    auto bc = boost::shared_ptr<BoxController>(new BoxController(1));
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(1);
+    MDGridBox<MDLeanEvent<1>,1> griddedBox(bc,0,extentsVector);
+
     griddedBox.setChildren(boxes, 0, 2);
 
     TS_ASSERT_THROWS_NOTHING(griddedBox.unmask());//Un-Mask the gridded box

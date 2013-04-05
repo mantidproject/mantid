@@ -73,9 +73,9 @@ namespace MDEvents
     /**constructor with number of dimensions */
     BoxCtrlChangesList(size_t nd):BoxController(nd){};
 
-    boost::shared_ptr<BoxController > clone()const
+    BoxController * clone()const
     {
-        return boost::shared_ptr<BoxController >(new BoxCtrlChangesList(*this));
+        return new BoxCtrlChangesList(*this);
     }
  private: 
     /**Copy constructor from a BoxCtrlChangesList*/
