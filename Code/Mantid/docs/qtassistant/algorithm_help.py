@@ -9,6 +9,19 @@ DIRECTION = {
 }
 from assistant_common import WEB_BASE, HTML_DIR
 
+def addCatLink(doc, node, category):
+    category = category.replace('\\', '/')
+    category = category.split('/')
+    filename = 'AlgoCat_' + category[0] + '.html'
+    url = filename
+    
+    if len(category) > 1:
+        text = '/'.join(category[:-1]) + '/'
+        url += '#' + '_'.join(category[1:])
+        text = doc.createTextNode(text)
+        node.appendChild(text)
+    addTxtEle(doc, "a", category[-1], node, {"href":url})
+
 def make_wiki(algo_name, version, latest_version):
     """ Return wiki text for a given algorithm
     @param algo_name :: name of the algorithm (bare)
@@ -128,6 +141,9 @@ def propToHtml(doc, table, property, number):
     """
 def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, algo):
     import mantid
+    import wiki_tools
+
+    categories = []
 
     # put newest first
     versions = list(versions)
@@ -150,9 +166,15 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
             addTxtEle(doc, "h2", "Version %d" % version, section)
 
         alg = mantid.FrameworkManager.createAlgorithm(name, version)
+        categories.extend(alg.categories())
 
         addTxtEle(doc, "h3", "Summary", section)
         addTxtEle(doc, "p", alg.getWikiSummary(), section)
+
+        addTxtEle(doc, "h3", "Usage", section)
+        text = wiki_tools.create_function_signature(alg, name)
+        node = addEle(doc, "p", section)
+        addTxtEle(doc, "code", text, node)
 
         addTxtEle(doc, "h3", "Properties", section)
         table = addEle(doc, "table", section, {"border":"1", "cellpadding":"5", "cellspacing":"0"})
@@ -169,7 +191,10 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
             propToHtml(doc, table, property, i)
 
         addTxtEle(doc, "h3", "Description", section)
-        addTxtEle(doc, "p", alg.getWikiDescription(), section)
+        text = wiki_tools.get_custom_wiki_section(name, version, "*WIKI*", True, False)
+        #print name, version, "***", text
+        addTxtEle(doc, "p", text, section)
+
 
         """ algorithm methods
 ['__class__', '__contains__', '__delattr__', '__dict__', '__doc__', '__format__', '__getattribute__', '__getitem__', '__hash__', '__init__', '__len__', '__module__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'alias', 'categories', 'category', 'docString', 'execute', 'existsProperty', 'getOptionalMessage', 'getProperties', 'getProperty', 'getPropertyValue', 'getWikiDescription', 'getWikiSummary', 'initialize', 'isChild', 'isExecuted', 'isInitialized', 'mandatoryProperties', 'name', 'orderedProperties', 'outputProperties', 'propertyCount', 'setAlwaysStoreInADS', 'setChild', 'setLogging', 'setProperty', 'setPropertyValue', 'setRethrows', 'version']
@@ -178,12 +203,21 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
         if version > 1:
             addEle(doc, "hr", body)
 
+    # add index for categories
+    addEle(doc, "hr", body)
+    categories = list(set(categories)) # remove duplicates
+    node = addTxtEle(doc, "p", "Categories: ", body)
+    for i in range(len(categories)):
+         addCatLink(doc, node, categories[i])
+         if i + 1 < len(categories):
+             node.appendChild(doc.createTextNode(', '))
+
     # write out the file
     outfile = "Algo_%s.html" % (name)
     qhp.addFile(os.path.join(HTML_DIR, outfile), name)
     outfile = os.path.join(outputdir, outfile)
     handle = open(outfile, 'w')
-    handle.write(doc.toprettyxml(indent="  ", encoding="utf-8"))
+    handle.write(doc.toprettyxml(indent="  "))#.encode('ascii', 'xmlcharrefreplace'))#, encoding="utf-8"))
 
 
     """ Do the wiki page
