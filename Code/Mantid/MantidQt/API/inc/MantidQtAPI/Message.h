@@ -4,6 +4,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include <QMetaType>
 #include <QObject>
 #include <QString>
 
@@ -29,26 +30,27 @@ namespace MantidQt
       /// Priority matches Mantid Logger priority
       typedef Mantid::Kernel::Logger::Priority Priority;
 
+      /// Default constuctor required by Qt meta-type system
+      Message();
       /// Construct a message from a string with a given priority (default=notice)
-      Message(const QString & text, Priority priority=Priority::PRIO_NOTICE)
-        : m_text(text), m_priority(priority)
-      {}
+      Message(const QString & text, Priority priority=Priority::PRIO_NOTICE);
+      /// Copy constructor
+      Message(const Message & msg);
 
     public:
-
       /// @returns The message text
       inline QString text() const {return m_text;}
       /// @returns The message priority
       inline Priority priority() const {return m_priority;}
 
     private:
-      DISABLE_DEFAULT_CONSTRUCT(Message);
-
       QString m_text;
       Priority m_priority;
     };
-
   }
 }
+
+/// Required to operate in signals/slots
+Q_DECLARE_METATYPE(MantidQt::API::Message);
 
 #endif //MESSAGE_H_

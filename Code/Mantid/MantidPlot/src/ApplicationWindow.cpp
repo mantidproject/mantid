@@ -189,6 +189,8 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtAPI/MessageDisplay.h"
+#include "MantidQtAPI/Message.h"
 
 #include "MantidQtMantidWidgets/ICatSearch.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
@@ -259,21 +261,44 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 {
   QCoreApplication::setOrganizationName("ISIS");
   QCoreApplication::setApplicationName("MantidPlot");
-#ifdef SHARED_MENUBAR
-  m_sharedMenuBar = new QMenuBar(NULL);
-  //setMenuBar(m_sharedMenuBar);
-  m_sharedMenuBar->setNativeMenuBar(true);
-#endif
-  mantidUI = new MantidUI(this);
   setAttribute(Qt::WA_DeleteOnClose);
 
+  #ifdef SHARED_MENUBAR
+  m_sharedMenuBar = new QMenuBar(NULL);
+  m_sharedMenuBar->setNativeMenuBar(true);
+#endif
   setWindowTitle(tr("MantidPlot - untitled"));//Mantid
   setObjectName("main application");
   initGlobalConstants();
   QPixmapCache::setCacheLimit(20*QPixmapCache::cacheLimit ());
 
-  tablesDepend = new QMenu(this);
+  // Logging as early as possible
+  logWindow = new QDockWidget(this);
+  logWindow->hide();
+  logWindow->setObjectName("logWindow"); // this is needed for QMainWindow::restoreState()
+  logWindow->setWindowTitle(tr("Results Log"));
+  addDockWidget( Qt::TopDockWidgetArea, logWindow );
+  using MantidQt::API::MessageDisplay;
+  resultsLog = new MantidQt::API::MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
+  logWindow->setWidget(resultsLog);
+  using MantidQt::API::Message;
+  qRegisterMetaType<Message>(); // Required to use it in signals-slots
 
+  // Start Mantid
+  // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
+  // the logs being poluted with library loading errors.
+  trySetParaviewPath(args);
+  using Mantid::Kernel::ConfigService;
+  ConfigService::Instance(); // Starts logging
+  resultsLog->attachLoggingChannel(); // Must be done after logging starts
+  using Mantid::API::FrameworkManager;
+  FrameworkManager::Instance(); // Starts logging
+
+  // Create UI object
+  mantidUI = new MantidUI(this);
+
+  // Everything else...
+  tablesDepend = new QMenu(this);
   explorerWindow = new QDockWidget( this );
   explorerWindow->setWindowTitle(tr("Project Explorer"));
   explorerWindow->setObjectName("explorerWindow"); // this is needed for QMainWindow::restoreState()
@@ -331,18 +356,12 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   explorerSplitter->setSizes( splitterSizes << 45 << 45);
   explorerWindow->hide();
 
-  logWindow = new QDockWidget(this);
-  logWindow->setObjectName("logWindow"); // this is needed for QMainWindow::restoreState()
-  logWindow->setWindowTitle(tr("Results Log"));
-  addDockWidget( Qt::TopDockWidgetArea, logWindow );
-
   results=new QTextEdit(logWindow);
   results->setReadOnly (true);
-  results->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(results, SIGNAL(customContextMenuRequested(const QPoint &)), this, 
-	  SLOT(showLogWindowContextMenu(const QPoint &)));
-  logWindow->setWidget(results);
-  logWindow->hide();
+  results->hide();
+//  results->setContextMenuPolicy(Qt::CustomContextMenu);
+//  connect(results, SIGNAL(customContextMenuRequested(const QPoint &)), this,
+//	  SLOT(showLogWindowContextMenu(const QPoint &)));
 
   consoleWindow = new QDockWidget(this);
   consoleWindow->setObjectName("consoleWindow"); // this is needed for QMainWindow::restoreState()
@@ -374,17 +393,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   undoStackWindow->setWidget(d_undo_view);
   undoStackWindow->hide();
 
-  /*
-  If applicable, set the Paraview path BEFORE libaries are loaded. Doing it here, before the call to MantidUI::init() prevents 
-  the logs being poluted with library loading errors.
-  */
-  trySetParaviewPath(args);
-
-  //Initialize Mantid
-  // MG: 01/02/2009 - Moved this to before scripting so that the logging is connected when
-  // we register Python algorithms
-  mantidUI->init();
-
   // Needs to be done after initialization of dock windows,
   // because we now use QDockWidget::toggleViewAction()
   createActions();
@@ -414,8 +422,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   createLanguagesList();
   insertTranslatedStrings();
   disableToolbars();
-
-//  assistant = new QAssistantClient( QString(), this );
 
   actionNextWindow = new QAction(QIcon(getQPixmap("next_xpm")), tr("&Next","next window"), this);
   actionNextWindow->setShortcut( tr("F5","next window shortcut") );
@@ -448,7 +454,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
       this, SLOT(renameWindow(Q3ListViewItem *, int, const QString &)));
 
   connect(recent, SIGNAL(activated(int)), this, SLOT(openRecentProject(int)));
-  //connect(&http, SIGNAL(done(bool)), this, SLOT(receivedVersionFile(bool)));
 
   //apply user settings
   updateAppFonts();
@@ -475,7 +480,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   actionIPythonConsole->setVisible(testForIPython());
 
   // Need to show first time setup dialog?
-  Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
+  using Mantid::Kernel::ConfigServiceImpl;
+  ConfigServiceImpl& config = ConfigService::Instance();
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
   if ( facility.empty() || instrument.empty() )

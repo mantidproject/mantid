@@ -92,6 +92,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
   m_appWindow(aw), m_vatesSubWindow(NULL),
   g_log(Mantid::Kernel::Logger::get("MantidUI"))
 {
+
   // To be able to use them in queued signals they need to be registered
   static bool registered_addtional_types = false;
   if( !registered_addtional_types )
@@ -160,31 +161,27 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
 
   menuMantidMatrix = new QMenu(m_appWindow);
   connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
+
+  init();
 }
 
 // Should it be moved to the constructor?
 void MantidUI::init()
 {
-  Mantid::Kernel::ConfigService::Instance();
-  // Echo Mantid's welcome message to the logger
-  m_appWindow->writeToLogWindow(QString::fromStdString(Mantid::welcomeMessage()));
-  MantidLog::connect(this);
-  FrameworkManager::Instance();
+  AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+  dataStore.notificationCenter.addObserver(m_addObserver);
+  dataStore.notificationCenter.addObserver(m_replaceObserver);
+  dataStore.notificationCenter.addObserver(m_deleteObserver);
+  dataStore.notificationCenter.addObserver(m_clearADSObserver);
+  dataStore.notificationCenter.addObserver(m_renameObserver);
+  dataStore.notificationCenter.addObserver(m_groupworkspacesObserver);
+  dataStore.notificationCenter.addObserver(m_ungroupworkspaceObserver);
+  dataStore.notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
 
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
-
-  // Now that the framework is initialized we need to populate the algorithm tree
   m_exploreAlgorithms->update();
   try
   {
-    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, m_appWindow->mantidUI);
+    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
     m_fitFunction->init();
         // this make the progress bar work with Fit algorithm running form the fit browser
     connect(m_fitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),

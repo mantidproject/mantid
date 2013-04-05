@@ -15,6 +15,7 @@ set ( SRC_FILES
   src/MantidQwtIMDWorkspaceData.cpp
   src/MantidQwtMatrixWorkspaceData.cpp
   src/MantidWidget.cpp
+  src/Message.cpp
   src/MessageDisplay.cpp
   src/OptionsPropertyWidget.cpp
   src/PropertyWidget.cpp

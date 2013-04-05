@@ -38,10 +38,15 @@ class AlgorithmMonitor;
 class InstrumentWindow;
 namespace MantidQt
 {
-namespace MantidWidgets
-{
-class FitPropertyBrowser;
-}}
+  namespace API
+  {
+    class Message;
+  }
+  namespace MantidWidgets
+  {
+    class FitPropertyBrowser;
+  }
+}
 
 namespace Ui
 {

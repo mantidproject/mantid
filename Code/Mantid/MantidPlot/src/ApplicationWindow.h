@@ -99,11 +99,15 @@ class MantidTable;
 
 namespace MantidQt
 {
-namespace MantidWidgets
-{
-class FitPropertyBrowser;
-}}
-
+  namespace API
+  {
+    class MessageDisplay;
+  }
+  namespace MantidWidgets
+  {
+    class FitPropertyBrowser;
+  }
+}
 //Mantid
 class MantidUI;
 class ScriptingWindow;
@@ -1394,6 +1398,7 @@ private:
   Script *m_iface_script;
   QTranslator *appTranslator, *qtTranslator;
   QDockWidget *explorerWindow, *undoStackWindow;
+  MantidQt::API::MessageDisplay *resultsLog;
   QTextEdit *results;
   QDockWidget *consoleWindow;
   QTextEdit *console;
