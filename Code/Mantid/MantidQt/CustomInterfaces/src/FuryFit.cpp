@@ -512,7 +512,8 @@ namespace IDA
     if ( uiForm().furyfit_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
-    pyInput += uiForm().furyfit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
+    if ( uiForm().furyfit_ckSaveSeq->isChecked() ) pyInput += "save = True\n";
+    else pyInput += "save = False\n";
 
     pyInput += "furyfitSeq(input, func, ftype, startx, endx, save, plot, verbose)\n";
   
