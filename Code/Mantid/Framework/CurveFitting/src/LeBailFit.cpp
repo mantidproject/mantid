@@ -1837,13 +1837,17 @@ namespace CurveFitting
         if (colname.compare("FitOrTie") != 0 && colname.compare("Name") != 0)
         {
           // double data
+          g_log.information() << "Col-name = " << colname << ", ";
           trow >> dblvalue;
+          g_log.information() << "Value = " << dblvalue << ".\n";;
           tempdblmap.insert(std::make_pair(colname, dblvalue));
         }
         else
         {
           // string data
+          g_log.information() << "Col-name = " << colname << ", ";
           trow >> strvalue;
+          g_log.information() << "Value = " << strvalue << ".\n";
           tempstrmap.insert(std::make_pair(colname, strvalue));
         }
       }
