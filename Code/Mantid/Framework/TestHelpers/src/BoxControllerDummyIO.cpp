@@ -31,7 +31,7 @@ namespace MantidTestHelpers
   {
       if(blockSize==4 || blockSize==8)
       {
-          m_CoordSize = unsigned int(blockSize);
+          m_CoordSize = static_cast<unsigned int>(blockSize);
       }
       else
           throw std::invalid_argument("The class currently supports 4(float) and 8(double) event coordinates only");
