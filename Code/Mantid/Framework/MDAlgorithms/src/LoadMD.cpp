@@ -39,6 +39,12 @@ and used by other algorithms, they should not be needed in daily use.
 #include <boost/algorithm/string.hpp>
 #include <vector>
 
+#if defined (__INTEL_COMPILER)
+ typedef std::auto_ptr< Mantid::API::IBoxControllerIO>  file_holder_type;
+#else 
+typedef std::unique_ptr< Mantid::API::IBoxControllerIO>  file_holder_type;
+#endif
+
 
 
 using namespace Mantid::Kernel;
@@ -374,7 +380,7 @@ namespace Mantid
       {
         // ---------------------------------------- READ IN THE BOXES ------------------------------------
        // TODO:: call to the file format factory
-        auto loader = std::unique_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc.get()));
+        auto loader = file_holder_type(new MDEvents::BoxControllerNxSIO(bc.get()));
         loader->setDataType(sizeof(size_t),MDE::getTypeName());
 
         loader->openFile(m_filename,"r");

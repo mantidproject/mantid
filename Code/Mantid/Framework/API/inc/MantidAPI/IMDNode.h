@@ -42,7 +42,7 @@ class IMDNode
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) || defined(__INTEL_COMPILER)
   #pragma GCC diagnostic ignored "-Wignored-qualifiers"
 #endif
 

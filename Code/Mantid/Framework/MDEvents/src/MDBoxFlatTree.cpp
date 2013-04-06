@@ -6,6 +6,11 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include <Poco/File.h>
 
+#if defined (__INTEL_COMPILER)
+ typedef std::auto_ptr< ::NeXus::File>  file_holder_type;
+#else 
+ typedef std::unique_ptr< ::NeXus::File>  file_holder_type;
+#endif
 
 namespace Mantid
 {
@@ -161,7 +166,7 @@ namespace Mantid
   {
     m_FileName = fileName;
 
-    auto hFile = std::unique_ptr< ::NeXus::File>(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_Boxes[0]->getEventType(),false));
+    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_Boxes[0]->getEventType(),false));
 
     //Save box structure;
     this->saveBoxStructure(hFile.get());
@@ -253,7 +258,7 @@ namespace Mantid
     m_eventType = EventType;
  
     // open the file and the MD workspace group.
-    auto hFile = std::unique_ptr< ::NeXus::File>(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_eventType,true));
+    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_eventType,true));
 
 
     //// How many dimensions?
@@ -480,9 +485,9 @@ namespace Mantid
 
           if(FileBackEnd)
           {
-            box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,-1);
-            // Mark the box as file backed and indicate that the box was saved
-            box->setFileBacked(indexStart,numEvents,true);
+              box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,UNDEF_SIZET);
+              // Mark the box as file backed and indicate that the box was saved
+              box->setFileBacked(indexStart,numEvents,true);
           }
           else
           {
@@ -554,13 +559,13 @@ namespace Mantid
        if(readOnly)
            access =NXACC_READ;
 
-       std::unique_ptr< ::NeXus::File> hFile;
+        file_holder_type hFile;
         try
         {
            if(fileExists)
-              hFile = std::unique_ptr< ::NeXus::File> ( new ::NeXus::File(fileName, access));
+              hFile = file_holder_type( new ::NeXus::File(fileName, access));
           else
-              hFile = std::unique_ptr< ::NeXus::File> (new ::NeXus::File(fileName, NXACC_CREATE5));
+              hFile = file_holder_type(new ::NeXus::File(fileName, NXACC_CREATE5));
         }
         catch(...)
         {

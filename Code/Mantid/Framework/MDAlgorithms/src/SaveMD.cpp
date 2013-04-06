@@ -24,6 +24,13 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 #include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidMDEvents/BoxControllerNxSIO.h"
 
+
+#if defined (__INTEL_COMPILER)
+ typedef std::auto_ptr< ::NeXus::File>  file_holder_type;
+#else 
+ typedef std::unique_ptr< ::NeXus::File>  file_holder_type;
+#endif
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
@@ -126,7 +133,7 @@ namespace MDAlgorithms
 
     //-----------------------------------------------------------------------------------------------------
     // create or open WS group and put there additional information about WS and its dimesnions
-    auto file =std::unique_ptr< ::NeXus::File>(MDBoxFlatTree::createOrOpenMDWSgroup(filename,nd,MDE::getTypeName(),false));
+    auto file = file_holder_type(MDBoxFlatTree::createOrOpenMDWSgroup(filename,nd,MDE::getTypeName(),false));
     // Save each NEW ExperimentInfo to a spot in the file
     MDBoxFlatTree::saveExperimentInfos(file.get(),ws);
 
