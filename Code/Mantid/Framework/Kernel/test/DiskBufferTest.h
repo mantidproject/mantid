@@ -292,7 +292,7 @@ public:
   {
     // Room for 3 in the to-write cache
     DiskBuffer dbuf(3);
-    int bigNum=1000;
+    size_t bigNum=1000;
     std::vector<ISaveable *> bigData;
     bigData.reserve(bigNum);
     for (size_t i=0; i<bigNum; i++)
@@ -305,7 +305,7 @@ public:
       dbuf.toWrite(bigData[i]);
     }
     //std::cout << ISaveableTester::fakeFile << std::endl;
-    for (size_t i=0; i<bigNum; i++)
+    for (size_t i=0; i<size_t(bigNum); i++)
         delete bigData[i];
 
   }
