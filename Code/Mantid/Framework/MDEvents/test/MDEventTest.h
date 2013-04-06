@@ -213,8 +213,8 @@ static void destroySuite(MDEventTest * suite) { delete suite; }
       }
 
       /// test append
-      transfEvents.reserve(2*nPoints);
-      TS_ASSERT_THROWS_NOTHING(MDEvent<3>::dataToEvents(data,transfEvents,false));
+      transfEvents3.reserve(2*nPoints);
+      TS_ASSERT_THROWS_NOTHING(MDEvent<3>::dataToEvents(data,transfEvents3,false));
       TS_ASSERT_EQUALS(2*nPoints,transfEvents.size());
       for(size_t i=0;i<nPoints;i++)
       {
