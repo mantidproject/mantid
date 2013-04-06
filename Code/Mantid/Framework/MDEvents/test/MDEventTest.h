@@ -213,8 +213,8 @@ static void destroySuite(MDEventTest * suite) { delete suite; }
       }
 
       /// test append
-      transfEvents3.reserve(2*nPoints);
-      TS_ASSERT_THROWS_NOTHING(MDEvent<3>::dataToEvents(data,transfEvents3,false));
+      transfEvents.reserve(2*nPoints);
+      TS_ASSERT_THROWS_NOTHING(MDEvent<4>::dataToEvents(data,transfEvents,false));
       TS_ASSERT_EQUALS(2*nPoints,transfEvents.size());
       for(size_t i=0;i<nPoints;i++)
       {
@@ -223,6 +223,7 @@ static void destroySuite(MDEventTest * suite) { delete suite; }
           TS_ASSERT_DELTA(transfEvents[i].getCenter(0),transfEvents[nPoints+i].getCenter(0),1.e-6);
           TS_ASSERT_DELTA(transfEvents[i].getCenter(1),transfEvents[nPoints+i].getCenter(1),1.e-6);
           TS_ASSERT_DELTA(transfEvents[i].getCenter(2),transfEvents[nPoints+i].getCenter(2),1.e-6);
+          TS_ASSERT_DELTA(transfEvents[i].getCenter(3),transfEvents[nPoints+i].getCenter(3),1.e-6);
       }
 
 
