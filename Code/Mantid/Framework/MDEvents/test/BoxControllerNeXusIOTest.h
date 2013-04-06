@@ -16,26 +16,27 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 //using namespace Mantid::MDEvens;
 
-class BoxControllerNxSIOTest : public CxxTest::TestSuite
+class BoxControllerNeXusIOTest : public CxxTest::TestSuite
 {
     BoxController_sptr sc;
-    std::string testFileName;
+    std::string xxfFileName;
 
-    BoxControllerNxSIOTest()
+
+    BoxControllerNeXusIOTest()
     {
         sc = BoxController_sptr(new BoxController(4));
-        testFileName= "BoxCntrlNexusIOtestFile.nxs";
+        xxfFileName= "BoxCntrlNexusIOxxfFile.nxs";
     }
 
 
 
 public:
-static BoxControllerNxSIOTest *createSuite() { return new BoxControllerNxSIOTest(); }
-static void destroySuite(BoxControllerNxSIOTest * suite) { delete suite; }    
+static BoxControllerNeXusIOTest *createSuite() { return new BoxControllerNeXusIOTest(); }
+static void destroySuite(BoxControllerNeXusIOTest * suite) { delete suite; }    
 
 void setUp()
 {
-    std::string FullPathFile = API::FileFinder::Instance().getFullPath(this->testFileName);
+    std::string FullPathFile = API::FileFinder::Instance().getFullPath(this->xxfFileName);
     if(!FullPathFile.empty())
             Poco::File(FullPathFile).remove();   
 
@@ -72,7 +73,7 @@ void setUp()
      delete pSaver;
  }
 
- void testCreateOrOpenFile()
+ void xest_CreateOrOpenFile()
  {
      MDEvents::BoxControllerNxSIO *pSaver(NULL);
      TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
@@ -108,7 +109,7 @@ void setUp()
          Poco::File(FullPathFile).remove();   
  }
 
- void testWriteReadReadFloat()
+ void xest_WriteReadReadFloat()
  {
      MDEvents::BoxControllerNxSIO *pSaver(NULL);
      TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));

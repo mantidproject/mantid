@@ -132,7 +132,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	AffineMatrixParameterParserTest.h
 	AffineMatrixParameterTest.h
-	BoxControllerNxSIOTest.h                
+	BoxControllerNeXusIOTest.h                
 	BoxControllerSettingsAlgorithmTest.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToReflectometryQTest.h
