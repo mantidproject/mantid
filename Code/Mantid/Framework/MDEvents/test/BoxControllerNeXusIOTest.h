@@ -80,9 +80,9 @@ void setUp()
 
      std::string FullPathFile;
 
-     TSM_ASSERT_THROWS("new file does not open in read mode",pSaver->openFile(this->testFileName,"r"), Kernel::Exception::FileError);
+     TSM_ASSERT_THROWS("new file does not open in read mode",pSaver->openFile(this->xxfFileName,"r"), Kernel::Exception::FileError);
 
-     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->testFileName,"w"));
+     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->xxfFileName,"w"));
      TS_ASSERT_THROWS_NOTHING(FullPathFile = pSaver->getFileName());
      TS_ASSERT(pSaver->isOpened());
      TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
@@ -115,7 +115,7 @@ void setUp()
      TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
       std::string FullPathFile;
 
-     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->testFileName,"w"));
+     TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->xxfFileName,"w"));
      TS_ASSERT_THROWS_NOTHING(FullPathFile = pSaver->getFileName());
 
      size_t nEvents=20;
