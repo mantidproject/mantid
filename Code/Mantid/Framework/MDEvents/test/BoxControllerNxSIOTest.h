@@ -44,7 +44,7 @@ void setUp()
  void test_contstructor_setters()
  {
 
-     MDEvents::BoxControllerNxSIO *pSaver;
+     MDEvents::BoxControllerNxSIO *pSaver(NULL);
      TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
 
      size_t CoordSize;
@@ -74,7 +74,7 @@ void setUp()
 
  void testCreateOrOpenFile()
  {
-     MDEvents::BoxControllerNxSIO *pSaver;
+     MDEvents::BoxControllerNxSIO *pSaver(NULL);
      TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
 
      std::string FullPathFile;

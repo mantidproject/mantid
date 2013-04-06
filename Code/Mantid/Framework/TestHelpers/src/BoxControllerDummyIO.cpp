@@ -20,7 +20,7 @@ namespace MantidTestHelpers
    }
    
    /**The optional method to set up the event type and the size of the event coordinate
-  /** As save/load operations use void data type, these function allow set up/get  the type name provided for the IO operations
+   * As save/load operations use void data type, these function allow set up/get  the type name provided for the IO operations
    *  and the size of the data type in bytes (e.g. the  class dependant physical  meaning of the blockSize and blockPosition used 
    *  by save/load operations     
    *@param CoordSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations. 4 and 8 are supported only

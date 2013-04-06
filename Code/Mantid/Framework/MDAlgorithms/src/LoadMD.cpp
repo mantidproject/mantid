@@ -350,7 +350,8 @@ namespace Mantid
       bc->fromXMLString(FlatBoxTree.getBCXMLdescr());
 
       std::vector<API::IMDNode *> boxTree;
-      uint64_t totalNumEvents = FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,FileBackEnd,bMetadataOnly);
+   //   uint64_t totalNumEvents = FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,FileBackEnd,bMetadataOnly);
+      FlatBoxTree.restoreBoxTree<MDE,nd>(boxTree,bc,FileBackEnd,bMetadataOnly);
       size_t numBoxes = boxTree.size();
 
     // ---------------------------------------- DEAL WITH BOXES  ------------------------------------

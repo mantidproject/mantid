@@ -92,8 +92,8 @@ static void destroySuite(MDEventTest * suite) { delete suite; }
 
           events[i].setSignal(static_cast<float>(i));
           events[i].setErrorSquared(static_cast<float>(i*i));
-          sumGuess+=i;
-          errGuess+=i*i;
+          sumGuess+=double(i);
+          errGuess+=double(i*i);
           events[i].setCenter(0,0.1*static_cast<double>(i));
           events[i].setCenter(1,static_cast<double>(i));
           events[i].setCenter(2,10*static_cast<double>(i));
@@ -102,8 +102,8 @@ static void destroySuite(MDEventTest * suite) { delete suite; }
 
       std::vector<coord_t> data;
       size_t ncols;
-      double totalSignal;
-      double totalErrSq; 
+      double totalSignal(0);
+      double totalErrSq(0); 
       TS_ASSERT_THROWS_NOTHING(MDLeanEvent<3>::eventsToData(events,data,ncols,totalSignal,totalErrSq));
       TS_ASSERT_EQUALS(3+2,ncols);
       TS_ASSERT_EQUALS((3+2)*nPoints,data.size());
@@ -161,8 +161,8 @@ static void destroySuite(MDEventTest * suite) { delete suite; }
           events[i].setErrorSquared(static_cast<float>(i*i));
           events[i].setDetectorId(uint32_t(i));
           events[i].setRunIndex(uint16_t(i/10));
-          sumGuess+=i;
-          errGuess+=i*i;
+          sumGuess+=double(i);
+          errGuess+=(i*i);
           events[i].setCenter(0,0.1*static_cast<double>(i));
           events[i].setCenter(1,static_cast<double>(i));
           events[i].setCenter(2,10*static_cast<double>(i));
@@ -172,8 +172,8 @@ static void destroySuite(MDEventTest * suite) { delete suite; }
 
       std::vector<coord_t> data;
       size_t ncols;
-      double totalSignal;
-      double totalErrSq; 
+      double totalSignal(0);
+      double totalErrSq(0); 
       TS_ASSERT_THROWS_NOTHING(MDEvent<4>::eventsToData(events,data,ncols,totalSignal,totalErrSq));
       TS_ASSERT_EQUALS(4+4,ncols);
       TS_ASSERT_EQUALS((4+4)*nPoints,data.size());
@@ -303,8 +303,8 @@ public:
 
           events[i].setSignal(static_cast<float>(i));
           events[i].setErrorSquared(static_cast<float>(i*i));
-          sumGuess+=i;
-          errGuess+=i*i;
+          sumGuess+=double(i);
+          errGuess+=double(i*i);
           events[i].setCenter(0,0.1*static_cast<double>(i));
           events[i].setCenter(1,static_cast<double>(i));
           events[i].setCenter(2,10*static_cast<double>(i));
@@ -313,8 +313,8 @@ public:
 
       std::vector<coord_t> data;
       size_t ncols;
-      double totalSignal;
-      double totalErrSq; 
+      double totalSignal(0);
+      double totalErrSq(0); 
       TS_ASSERT_THROWS_NOTHING(MDLeanEvent<3>::eventsToData(events,data,ncols,totalSignal,totalErrSq));
       TS_ASSERT_EQUALS(3+2,ncols);
       TS_ASSERT_EQUALS((3+2)*nPoints,data.size());
@@ -337,8 +337,8 @@ public:
           events[i].setErrorSquared(static_cast<float>(i*i));
           events[i].setDetectorId(uint32_t(i));
           events[i].setRunIndex(uint16_t(i/10));
-          sumGuess+=i;
-          errGuess+=i*i;
+          sumGuess+=double(i);
+          errGuess+=double(i*i);
           events[i].setCenter(0,0.1*static_cast<double>(i));
           events[i].setCenter(1,static_cast<double>(i));
           events[i].setCenter(2,10*static_cast<double>(i));
@@ -348,8 +348,8 @@ public:
 
       std::vector<coord_t> data;
       size_t ncols;
-      double totalSignal;
-      double totalErrSq; 
+      double totalSignal(0);
+      double totalErrSq(0); 
       TS_ASSERT_THROWS_NOTHING(MDEvent<4>::eventsToData(events,data,ncols,totalSignal,totalErrSq));
       TS_ASSERT_EQUALS(4+4,ncols);
       TS_ASSERT_EQUALS((4+4)*nPoints,data.size());

@@ -28,7 +28,7 @@ public:
   {     
   }
   virtual ~MDBoxBaseTester(){}
-  MDBoxBaseTester(uint64_t filePos)
+  MDBoxBaseTester(uint64_t /*filePos*/)
   : MDBoxBase<MDE,nd>()
   { 
   }

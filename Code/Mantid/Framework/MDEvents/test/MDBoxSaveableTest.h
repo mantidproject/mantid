@@ -119,7 +119,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     auto Saver = new BoxControllerNxSIO(sc.get());
     Saver->setDataType(b.getCoordType(),b.getEventType());
 
-    std::string filename = do_deleteNexusFile();
+    std::string filename = do_deleteNexusFile(barefilename);
 
     Saver->openFile(filename,"w");
 
