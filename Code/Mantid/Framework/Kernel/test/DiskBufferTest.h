@@ -151,7 +151,7 @@ public:
   }
   void test_nothing()
   {
-	TS_WARNING("Tests here were disabled for the time being")
+    TS_WARN("Tests here were disabled for the time being");
   }
 
 /** Extreme case with nothing writable but exceeding the writable buffer */
@@ -792,7 +792,7 @@ public:
 
   void test_nothing()
   {
-	TS_WARNING("Tests here were disabled for the time being")
+    TS_WARN("Tests here were disabled for the time being");
   }
 
 
