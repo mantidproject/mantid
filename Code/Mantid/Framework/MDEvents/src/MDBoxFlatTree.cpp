@@ -104,9 +104,9 @@ namespace Mantid
       m_BoxSignalErrorsquared[id*2] = double(Box->getSignal());
       m_BoxSignalErrorsquared[id*2+1] = double(Box->getErrorSquared());
       m_InverseVolume[id] = Box->getInverseVolume();
-      for (size_t d=0; d<m_nDim; d++)
+      for (int d=0; d<m_nDim; d++)
       {
-        size_t newIndex = id*(m_nDim*2) + d*2;
+        size_t newIndex = id*size_t(m_nDim*2) + d*2;
         m_Extents[newIndex]   = Box->getExtents(d).getMin();
         m_Extents[newIndex+1] = Box->getExtents(d).getMax();
 

@@ -58,7 +58,7 @@ namespace Mantid
       /**function checks if the containing box has enough data 
        * the definition "enough" is also specified within this function
       */
-      bool isFull(size_t maxSize=1000)
+      bool isFull(size_t /*maxSize=1000*/)
       {
         /**stub */
         return true;

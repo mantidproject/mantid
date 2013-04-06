@@ -759,7 +759,7 @@ namespace MDEvents
    * @param index :: current index for box
    */
   TMDE(
-  void MDBox)::addAndTraceEvent( const MDE & point, size_t index)
+  void MDBox)::addAndTraceEvent( const MDE & point, size_t /*index*/)
   {
     this->m_dataMutex.lock();
     this->data.push_back(point);

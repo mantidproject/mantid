@@ -260,7 +260,7 @@ namespace MDAlgorithms
 
     this->totalLoaded = 0;
     std::vector<API::IMDNode *> &boxes = m_BoxStruct.getBoxes();
-    std::vector<uint64_t>      &targetEventIndexes= m_BoxStruct.getEventIndex();    
+    //std::vector<uint64_t>      &targetEventIndexes= m_BoxStruct.getEventIndex();    
 
     for(size_t ib=0;ib<numBoxes;ib++)
     {

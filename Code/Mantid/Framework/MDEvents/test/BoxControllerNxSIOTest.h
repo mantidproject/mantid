@@ -110,7 +110,7 @@ void setUp()
 
  void testWriteReadReadFloat()
  {
-     MDEvents::BoxControllerNxSIO *pSaver;
+     MDEvents::BoxControllerNxSIO *pSaver(NULL);
      TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
       std::string FullPathFile;
 
