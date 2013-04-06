@@ -141,13 +141,13 @@ public:
     virtual void setEventsData(const std::vector<coord_t> &coordTable)=0;
       
     /// Add a single event defined by its components
-    virtual void addEvent(const signal_t Signal, const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId) = 0;
+    virtual void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId) = 0;
     /// add a single event and set pointer to the box which needs splitting (if one actually need)    
-    virtual void addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index) = 0;
+    virtual void buildAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index) = 0;
     /// Add a single event, with no mutex locking
-    virtual void addEventUnsafe(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId) = 0;
+    virtual void buildAndAddEventUnsafe(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId) = 0;
     /// Add several events from the vector of event parameters
-    virtual size_t addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)=0;
+    virtual size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)=0;
 
 
     // -------------------------------------------------------------------------------------------

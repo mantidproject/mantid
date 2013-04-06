@@ -217,7 +217,7 @@ public:
         coord[i] = events[i].getCenter(0);
     }
 
-    g->addEvents(sigErr,coord,runIndex,detID);
+    g->buildAndAddEvents(sigErr,coord,runIndex,detID);
 
     for (size_t i=0; i<10; i++)
     {
@@ -459,16 +459,16 @@ public:
 
     { // One event in 0th box of the 0th box.
       std::vector<coord_t> centers(2,0.05f) ;
-      superbox->addEvent(2.,2.,centers,0,0);
+      superbox->buildAndAddEvent(2.,2.,centers,0,0);
     }
     { // One event in 1st box of the 0th box.
       std::vector<coord_t> centers(2,0.05f);
       centers[0]=0.15f;
-      superbox->addEvent(2.,2., centers,0,0 );
+      superbox->buildAndAddEvent(2.,2., centers,0,0 );
     }
     { // One event in 99th box.
       std::vector<coord_t> centers(2,9.5);
-      superbox->addEvent(2.0, 2.0, centers,0,0 );
+      superbox->buildAndAddEvent(2.0, 2.0, centers,0,0 );
     }
     TS_ASSERT_EQUALS( superbox->getNPoints(), 3 );
 

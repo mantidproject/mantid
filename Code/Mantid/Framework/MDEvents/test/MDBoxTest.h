@@ -129,7 +129,7 @@ static void destroySuite(MDBoxTest * suite) { delete suite; }
     std::vector<coord_t> coord(2,2.);
     coord[1]=3;
 
-    b.addEvent(1.2,3.4,coord,0,0);
+    b.buildAndAddEvent(1.2,3.4,coord,0,0);
     TS_ASSERT_EQUALS( b.getNPoints(), 1)
 
     b.refreshCache();
@@ -196,7 +196,7 @@ static void destroySuite(MDBoxTest * suite) { delete suite; }
     SigErrSq[1]=SigErrSq[3]=SigErrSq[5]=3.4;
     Coord[1]=Coord[3]=Coord[5] = 3.0;
 
-    b.addEvents(SigErrSq,Coord,ind,RunID);
+    b.buildAndAddEvents(SigErrSq,Coord,ind,RunID);
 
     b.refreshCache();
 
@@ -219,7 +219,7 @@ static void destroySuite(MDBoxTest * suite) { delete suite; }
     SigErrSq[1]=SigErrSq[3]=SigErrSq[5]=3.4;
     Coord[1]=Coord[3]=Coord[5] = 3.0;
 
-    b.addEvents(SigErrSq,Coord,ind,RunID);
+    b.buildAndAddEvents(SigErrSq,Coord,ind,RunID);
 
     b.refreshCache();
 
@@ -298,7 +298,7 @@ static void destroySuite(MDBoxTest * suite) { delete suite; }
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i < num; i++)
     {
-      b.addEvent(1.2,3.4,Coord,1,10);
+      b.buildAndAddEvent(1.2,3.4,Coord,1,10);
     }
 
     b.refreshCache();

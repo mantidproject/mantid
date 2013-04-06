@@ -32,8 +32,8 @@ public:
   : MDBoxBase<MDE,nd>()
   { 
   }
-  MDBoxBaseTester(const MDBoxBaseTester  &source):
-      MDBoxBase(source,source.getBoxController())
+  MDBoxBaseTester(const MDBoxBaseTester  &source)
+  : MDBoxBase<MDE,nd>(source,source.getBoxController())
   {
   }
 
@@ -99,13 +99,13 @@ public:
   /// Add a single event
   virtual void addEventUnsafe(const MDE & /*point*/)
   {}
-  virtual size_t addEvents(const std::vector<signal_t> & /*sigErrSq*/,const  std::vector<coord_t> & /*Coord*/,const std::vector<uint16_t> & /*runIndex*/,const std::vector<uint32_t> & /*detectorId*/)
+  virtual size_t buildAndAddEvents(const std::vector<signal_t> & /*sigErrSq*/,const  std::vector<coord_t> & /*Coord*/,const std::vector<uint16_t> & /*runIndex*/,const std::vector<uint32_t> & /*detectorId*/)
   {return 0;}
-  virtual void addEvent(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t)
+  virtual void buildAndAddEvent(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t)
   {};
-  virtual void addAndTraceEvent(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t,size_t)
+  virtual void buildAndTraceEvent(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t,size_t)
   {};
-  virtual void addEventUnsafe(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t)
+  virtual void buildAndAddEventUnsafe(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t)
   {};
 
 

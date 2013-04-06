@@ -679,7 +679,7 @@ namespace MDEvents
    *@return number of events rejected (0 as nothing is rejected here)
    */
   TMDE(
-  size_t MDBox)::addEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)
+  size_t MDBox)::buildAndAddEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)
   {
 
        size_t nEvents = sigErrSq.size()/2;
@@ -700,7 +700,7 @@ namespace MDEvents
    * @param index   detector's ID
    * */
    TMDE(
-   void MDBox)::addEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
+   void MDBox)::buildAndAddEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
    {
        this->m_dataMutex.lock();
        this->data.push_back(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0],runIndex, detectorId));
@@ -714,7 +714,7 @@ namespace MDEvents
    * @param index :: current index for box
    */
    TMDE(
-   void MDBox)::addAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
+   void MDBox)::buildAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
    {
        this->addAndTraceEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId),index);
    }
@@ -727,7 +727,7 @@ namespace MDEvents
    * @param Evnt :: reference to a MDEvent to add.
    * */
   TMDE(
-  void MDBox)::addEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
+  void MDBox)::buildAndAddEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
   {
        this->data.push_back(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId));
   }
