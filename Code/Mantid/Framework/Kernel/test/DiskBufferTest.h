@@ -134,20 +134,20 @@ public:
   void setUp()
   {
     // Create the ISaveables
-    //num = 10;
-    //SaveableTesterWithFile::fakeFile = "";
-    //data.clear();
-    //for (size_t i=0; i<num; i++)
-    //  data.push_back( new SaveableTesterWithFile(i,2*i,2,char(i+0x41)) );  
+    num = 10;
+    SaveableTesterWithFile::fakeFile = "";
+    data.clear();
+    for (size_t i=0; i<num; i++)
+      data.push_back( new SaveableTesterWithFile(i,2*i,2,char(i+0x41)) );  
   }
 
   void tearDown()
   {
-    //for (size_t i=0; i<data.size(); i++)
-   // {
-    //  delete data[i];
-     // data[i]= NULL;
-    //}
+    for (size_t i=0; i<data.size(); i++)
+    {
+      delete data[i];
+      data[i]= NULL;
+    }
   }
   void test_nothing()
   {
@@ -155,7 +155,7 @@ public:
   }
 
 /** Extreme case with nothing writable but exceeding the writable buffer */
-  void xest_noWriteBuffer_nothingWritable()
+  void test_noWriteBuffer_nothingWritable()
   {
      //Room for 4 in the write buffer
     DiskBuffer dbuf(4);
