@@ -138,7 +138,7 @@ public:
     SaveableTesterWithFile::fakeFile = "";
     data.clear();
     for (size_t i=0; i<num; i++)
-      data.push_back( new SaveableTesterWithFile(i,2*i,2,char(i+0x41)) );  
+      data.push_back( new SaveableTesterWithFile(i,uint64_t(2*i),2,char(i+0x41)) );  
   }
 
   void tearDown()
@@ -155,7 +155,7 @@ public:
   }
 
 /** Extreme case with nothing writable but exceeding the writable buffer */
-  void test_noWriteBuffer_nothingWritable()
+  void xest_noWriteBuffer_nothingWritable()
   {
      //Room for 4 in the write buffer
     DiskBuffer dbuf(4);
