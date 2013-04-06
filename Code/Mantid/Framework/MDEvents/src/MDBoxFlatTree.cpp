@@ -161,7 +161,7 @@ namespace Mantid
   {
     m_FileName = fileName;
 
-    auto hFile = std::unique_ptr<::NeXus::File>(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_Boxes[0]->getEventType(),false));
+    auto hFile = std::unique_ptr< ::NeXus::File>(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_Boxes[0]->getEventType(),false));
 
     //Save box structure;
     this->saveBoxStructure(hFile.get());
@@ -172,7 +172,7 @@ namespace Mantid
 
   }
 
-  void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile)
+  void MDBoxFlatTree::saveBoxStructure( ::NeXus::File *hFile)
   {
     size_t maxBoxes = this->getNBoxes();
     if(maxBoxes==0)return;
@@ -249,11 +249,11 @@ namespace Mantid
   {
 
     m_FileName = fileName;
-    m_nDim = unsigned int(nDim);
+    m_nDim = static_cast<unsigned int>(nDim);
     m_eventType = EventType;
  
     // open the file and the MD workspace group.
-    auto hFile = std::unique_ptr<::NeXus::File>(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_eventType,true));
+    auto hFile = std::unique_ptr< ::NeXus::File>(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_eventType,true));
 
 
     //// How many dimensions?
@@ -554,13 +554,13 @@ namespace Mantid
        if(readOnly)
            access =NXACC_READ;
 
-       std::unique_ptr<::NeXus::File> hFile;
+       std::unique_ptr< ::NeXus::File> hFile;
         try
         {
            if(fileExists)
-              hFile = std::unique_ptr<::NeXus::File> ( new ::NeXus::File(fileName, access));
+              hFile = std::unique_ptr< ::NeXus::File> ( new ::NeXus::File(fileName, access));
           else
-              hFile = std::unique_ptr<::NeXus::File> (new ::NeXus::File(fileName, NXACC_CREATE5));
+              hFile = std::unique_ptr< ::NeXus::File> (new ::NeXus::File(fileName, NXACC_CREATE5));
         }
         catch(...)
         {
@@ -601,13 +601,13 @@ namespace Mantid
               {
                 int32_t nFileDims;
                 hFile->readData<int32_t>("dimensions",nFileDims);
-                if(nFileDims != nDims)
+                if(nFileDims != static_cast<int32_t>(nDims))
                         throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace initiated for different number of dimensions then requested ",
                         fileName);
               }
               else
               {
-                 auto nFileDim = int32_t(nDims);
+                 auto nFileDim = static_cast<int32_t>(nDims);
               // Write out  # of dimensions
                  hFile->writeData("dimensions", nFileDim);
               }

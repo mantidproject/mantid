@@ -82,7 +82,7 @@ namespace MantidTestHelpers
 
 
       // open file if it exists or crate it if not in the mode requested
-      bool fileExists(true);
+      //bool fileExists(true);
       if(fileName.find("exist")!=std::string::npos)
       {
           size_t nEvents = 1000;
@@ -113,7 +113,7 @@ namespace MantidTestHelpers
  {
      size_t nEvents = DataBlock.size()/m_EventSize;
      uint64_t position= blockPosition;
-     uint64_t fileLength = this->getFileLength();
+     //uint64_t fileLength = this->getFileLength();
      m_fileMutex.lock();
      if(m_EventSize*(position+nEvents)>fileContents.size())
      {

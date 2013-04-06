@@ -84,7 +84,7 @@ namespace MDEvents
    * @param fileName -- short or full file name of the file, which should be used as the file back end
   */
   TMDE(
-  void MDEventWorkspace)::setFileBacked(const std::string &fileName)
+  void MDEventWorkspace)::setFileBacked(const std::string &/*fileName*/)
   {
       throw Kernel::Exception::NotImplementedError(" Not yet implemented");
   }

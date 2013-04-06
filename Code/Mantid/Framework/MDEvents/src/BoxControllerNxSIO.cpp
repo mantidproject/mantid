@@ -2,7 +2,6 @@
 #include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FileFinder.h"
-#include <nexus/NeXusFile.hpp>
 
 #include <string>
 
@@ -23,12 +22,11 @@ namespace MDEvents
    */ 
    BoxControllerNxSIO::BoxControllerNxSIO(API::BoxController *const bc) :
        m_File(NULL),
-       m_dataChunk(DATA_CHUNK),
        m_ReadOnly(true),
+       m_dataChunk(DATA_CHUNK),  
        m_bc(bc),
        m_BlockStart(2,0),
        m_BlockSize(2,0),
-
        m_CoordSize(sizeof(coord_t)),
        m_EventType(FatEvent),
        m_EventsVersion("1.0")
@@ -53,14 +51,14 @@ namespace MDEvents
 
           return static_cast<EventType>(std::distance(typesSupported.begin(), it ));
    }
-   /**The optional method to set up the event type and the size of the event coordinate
-  /** As save/load operations use void data type, these function allow set up/get  the type name provided for the IO operations
+ /** The optional method to set up the event type and the size of the event coordinate
+   *  As save/load operations use void data type, these function allow set up/get  the type name provided for the IO operations
    *  and the size of the data type in bytes (e.g. the  class dependant physical  meaning of the blockSize and blockPosition used 
    *  by save/load operations     
-   *@param CoordSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations. 4 and 8 are supported only
-   *@paramtypeName  -- the name of the event used in the operations. The name itself defines the size and the format of the event
+   * @param CoordSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations. 4 and 8 are supported only
+   * @paramtypeName  -- the name of the event used in the operations. The name itself defines the size and the format of the event
                        The events described in the class header are supported only
-  */  
+ */
   void BoxControllerNxSIO::setDataType(const size_t blockSize, const std::string &typeName)
   {
       if(blockSize==4 || blockSize==8)

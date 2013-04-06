@@ -4,6 +4,8 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidKernel/DiskBuffer.h"
+#include <nexus/NeXusFile.hpp>
+
 
 namespace Mantid
 {

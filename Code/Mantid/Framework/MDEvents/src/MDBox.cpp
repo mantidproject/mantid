@@ -672,51 +672,6 @@ namespace MDEvents
     m_bIsMasked = false;
   }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------------------------------------------
-  /* Internal TMP class to simplify adding events to the box for events and lean events using single interface*/
-  template<typename MDE,size_t nd>
-  struct IF
-  {
-  public:
-      // create generic events from array of events data and add them to the grid box 
-      static inline void EXEC(std::vector<MDE> &data,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
-                              const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId,size_t nEvents)
-      {
-       for(size_t i=0;i<nEvents;i++)
-       {
-            data.push_back(MDEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],runIndex[i], detectorId[i],&Coord[i*nd]));
-       }
-
-      }
-      // create single generic event from event's data
-     static inline MDEvent<nd> BUILD_EVENT(const signal_t Signal, const signal_t Error, const  coord_t *Coord,const uint16_t runIndex,const uint32_t detectorId)
-     {
-          return MDEvent<nd>(Signal,Error, runIndex, detectorId, Coord);
-     }
-
-  };
-  /* Specialize for the case of LeanEvent */
-  template<size_t nd>
-  struct IF<MDLeanEvent<nd>,nd>
-  {
-  public:
-    // create lean events from array of events data and add them to the box 
-    static inline void EXEC(std::vector<MDLeanEvent<nd> > &data,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
-                              const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId,size_t nEvents)
-      {
-       for(size_t i=0;i<nEvents;i++)
-       {
-            data.push_back(MDLeanEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],&Coord[i*nd]));
-       }
-      
-      }
-    // create single lean event from event's data
-    static inline MDLeanEvent<nd> BUILD_EVENT(const signal_t Signal, const signal_t Error, const  coord_t *Coord,const uint16_t /*runIndex*/,const uint32_t /*detectorId*/)
-    {
-          return MDLeanEvent<nd>(Signal,Error,Coord);
-    }
-
-  };
 
  
  /** Create and Add several events. No bounds checking is made!

@@ -126,7 +126,7 @@ namespace MDAlgorithms
 
     //-----------------------------------------------------------------------------------------------------
     // create or open WS group and put there additional information about WS and its dimesnions
-    auto file =std::unique_ptr<::NeXus::File>(MDBoxFlatTree::createOrOpenMDWSgroup(filename,nd,MDE::getTypeName(),false));
+    auto file =std::unique_ptr< ::NeXus::File>(MDBoxFlatTree::createOrOpenMDWSgroup(filename,nd,MDE::getTypeName(),false));
     // Save each NEW ExperimentInfo to a spot in the file
     MDBoxFlatTree::saveExperimentInfos(file.get(),ws);
 

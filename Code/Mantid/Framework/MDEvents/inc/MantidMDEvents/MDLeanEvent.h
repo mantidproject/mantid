@@ -279,13 +279,7 @@ namespace MDEvents
     {
       return 0;
     }
-    /**The function returns number of data fields present in an Lean event.
-    For lean event it is nd+2 where nd describes the events coordinates and 2 goes for signal and error*/ 
-    template<size_t nd>
-    static inline size_t getNumFields()
-    {
-        return nd+2;
-    }
+  
 
     /* static method used to convert vector of lean events into vector of their coordinates & signal and error 
      @param events    -- vector of events
@@ -294,10 +288,9 @@ namespace MDEvents
      @return totalSignal -- total signal in the vector of events
      @return totalErr   -- total error corresponting to the vector of events
     */
-    template<size_t nd> 
     static inline void eventsToData(const std::vector<MDLeanEvent<nd> > & events,std::vector<coord_t> &data,size_t &ncols,double &totalSignal,double &totalErrSq )
     {
-      ncols = getNumFields<nd>();
+      ncols = nd+2;
       size_t nEvents=events.size();
       data.resize(nEvents*ncols);
 
@@ -329,11 +322,10 @@ namespace MDEvents
      @param events    -- vector of events
      @param reserveMemory -- reserve memory for events copying. Set to false if one wants to add new events to the existing one.  
     */
-    template<size_t nd> 
     static inline void dataToEvents(const std::vector<coord_t> &coord, std::vector<MDLeanEvent<nd> > & events, bool reserveMemory=true)
     {
     // Number of columns = number of dimensions + 2 (signal/error)
-      size_t numColumns = getNumFields<nd>();
+      size_t numColumns = (nd+2);
       size_t numEvents = coord.size()/numColumns;
       if(numEvents*numColumns!=coord.size())
           throw(std::invalid_argument("wrong input array of data to convert to lean events, suspected column data for different dimensions/(type of) events "));
