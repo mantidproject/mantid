@@ -156,7 +156,7 @@ public:
   }
 
 /** Extreme case with nothing writable but exceeding the writable buffer */
-  void test_noWriteBuffer_nothingWritable()
+  void xest_noWriteBuffer_nothingWritable()
   {
      //Room for 4 in the write buffer
     DiskBuffer dbuf(4);
