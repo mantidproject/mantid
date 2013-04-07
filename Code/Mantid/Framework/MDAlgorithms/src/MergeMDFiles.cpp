@@ -174,7 +174,7 @@ namespace MDAlgorithms
 
   uint64_t MergeMDFiles::loadEventsFromSubBoxes(API::IMDNode *TargetBox)
   {
-    /// the events which are in the 
+    /// get rid of the events and averages which are in the memory erroneously (from clonning)
     TargetBox->clear();
 
     uint64_t nBoxEvents(0);
@@ -184,11 +184,11 @@ namespace MDAlgorithms
 
        uint64_t fileLocation   = m_fileComponentsStructure[iw].getEventIndex()[2*ID+0];
        size_t   numFileEvents  = static_cast<size_t>(m_fileComponentsStructure[iw].getEventIndex()[2*ID+1]);
+       if(numFileEvents==0)continue;
        //TODO: it is possible to avoid the reallocation of the memory at each load 
       TargetBox->loadAndAddFrom(m_EventLoader[iw],fileLocation,numFileEvents);
 
-      if (numFileEvents == 0) continue;
-          nBoxEvents += numFileEvents;
+       nBoxEvents += numFileEvents;
     }
 
     return nBoxEvents;

@@ -841,6 +841,8 @@ namespace MDEvents
    TMDE(
    void MDBox)::saveAt(API::IBoxControllerIO *const FileSaver,  uint64_t position)const
    {
+       if(data.empty())return;
+
        if(!FileSaver)
            throw(std::invalid_argument(" Needs defined file saver to save data to it"));
        if(!FileSaver->isOpened())
@@ -870,11 +872,12 @@ namespace MDEvents
    TMDE(
    void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver, uint64_t filePosition, size_t nEvents)
    {
+       if(nEvents==0)return;
+
        if(!FileSaver)
            throw(std::invalid_argument(" Needs defined file saver to load data using it"));
        if(!FileSaver->isOpened())
            throw(std::invalid_argument(" The data file has to be opened to use box loadAndAddFrom function"));
-
 
        std::vector<coord_t> TableData;
        FileSaver->loadBlock(TableData,filePosition,nEvents);
