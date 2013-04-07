@@ -19,7 +19,14 @@ namespace MDEvents
       if(m_Saveable)
       {
          // tell disk buffer that there are no point of tracking this box any more.   
-          this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
+          //BAD!!!
+          if(this->m_BoxController) // it is destructor, in tests everything may fall apart, though it should not be issue for a worspace
+          {
+              if(this->m_BoxController->isFileBacked())
+              {
+                this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
+              }
+          }
           delete m_Saveable;
       }
   }

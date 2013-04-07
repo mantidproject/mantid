@@ -52,7 +52,10 @@ namespace API
   BoxController::~BoxController()
   {
      if(m_fileIO)
+     {
         m_fileIO->closeFile();
+        m_fileIO.reset();
+     }
   }
    /**reserve range of id-s for use on set of adjacent boxes. 
     * Needed to be thread safe as adjacent boxes have to have subsequent ID-s

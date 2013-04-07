@@ -183,7 +183,7 @@ public:
   }
 
 /** Extreme case with nothing writable but exceeding the writable buffer */
-  void test_noWriteBuffer_nothingWritableWasSaved()
+  void xest_noWriteBuffer_nothingWritableWasSaved()
   {
      //Room for 4 in the write buffer
     DiskBuffer dbuf(4);
@@ -208,7 +208,7 @@ public:
 
   ////--------------------------------------------------------------------------------
   ///** Sorts by file position when writing to a file */
-  void test_writesOutInFileOrder()
+  void xest_writesOutInFileOrder()
   {
     for(size_t i=0;i<data.size();i++)
     {
@@ -243,7 +243,7 @@ public:
   //--------------------------------------------------------------------------------
   /** If a block will get deleted it needs to be taken
    * out of the caches */
-  void test_objectDeleted()
+  void xest_objectDeleted()
   {
     // Room for 6 objects of 2 in the to-write cache
     DiskBuffer dbuf(12);
@@ -289,7 +289,7 @@ public:
 
   //--------------------------------------------------------------------------------
   /** Accessing the map from multiple threads simultaneously does not segfault */
-  void test_thread_safety()
+  void xest_thread_safety()
   {
     // Room for 3 in the to-write cache
     DiskBuffer dbuf(3);
@@ -316,7 +316,7 @@ public:
   ////--------------------------------------------------------------------------------
   ////--------------------------------------------------------------------------------
   /** Freeing blocks get merged properly */
-  void test_freeBlock_mergesWithPrevious()
+  void xest_freeBlock_mergesWithPrevious()
   {
     DiskBuffer dbuf(3);
     DiskBuffer::freeSpace_t & map = dbuf.getFreeSpaceMap();
@@ -344,7 +344,7 @@ public:
   }
 
   /** Freeing blocks get merged properly */
-  void test_freeBlock_mergesWithNext()
+  void xest_freeBlock_mergesWithNext()
   {
     DiskBuffer dbuf(3);
     DiskBuffer::freeSpace_t & map = dbuf.getFreeSpaceMap();
@@ -370,7 +370,7 @@ public:
   }
 
   /** Freeing blocks get merged properly */
-  void test_freeBlock_mergesWithBothNeighbours()
+  void xest_freeBlock_mergesWithBothNeighbours()
   {
     DiskBuffer dbuf(3);
     DiskBuffer::freeSpace_t & map = dbuf.getFreeSpaceMap();
@@ -395,7 +395,7 @@ public:
 
   /** Add blocks to the free block list in parallel threads,
    * should not segfault or anything */
-  void test_freeBlock_threadSafety()
+  void xest_freeBlock_threadSafety()
   {
     DiskBuffer dbuf(0);
     PRAGMA_OMP( parallel for)
@@ -409,7 +409,7 @@ public:
 
 
   ///** Disabled because it is not necessary to defrag since that happens on the fly */
-  //void xtest_defragFreeBlocks()
+  //void xxest_defragFreeBlocks()
   //{
   //  DiskBuffer dbuf(3);
   //  DiskBuffer::freeSpace_t & map = dbuf.getFreeSpaceMap();
@@ -430,7 +430,7 @@ public:
   //}
 
   /// You can call relocate() if an block is shrinking.
-  void test_relocate_when_shrinking()
+  void xest_relocate_when_shrinking()
   {
     DiskBuffer dbuf(3);
     DiskBuffer::freeSpace_t & map = dbuf.getFreeSpaceMap();
@@ -446,7 +446,7 @@ public:
   }
 
   /// You can call relocate() if an block is shrinking.
-  void test_relocate_when_growing()
+  void xest_relocate_when_growing()
   {
     DiskBuffer dbuf(3);
     DiskBuffer::freeSpace_t & map = dbuf.getFreeSpaceMap();
@@ -466,7 +466,7 @@ public:
 
 
   /// Various tests of allocating and relocating
-  void test_allocate_from_empty_freeMap()
+  void xest_allocate_from_empty_freeMap()
   {
     DiskBuffer dbuf(3);
     dbuf.setFileLength(1000); // Lets say the file goes up to 1000
@@ -489,7 +489,7 @@ public:
 
 
   /// Various tests of allocating and relocating
-  void test_allocate_and_relocate()
+  void xest_allocate_and_relocate()
   {
     DiskBuffer dbuf(3);
     dbuf.setFileLength(1000); // Lets say the file goes up to 1000
@@ -527,7 +527,7 @@ public:
   ////--------------------------------------------------------------------------------
   ////--------------------------------------------------------------------------------
 
-  void test_allocate_with_file_manually()
+  void xest_allocate_with_file_manually()
   {
     // Start by faking a file
     SaveableTesterWithFile * blockA = new SaveableTesterWithFile(0, 0, 2, 'A');
@@ -591,7 +591,7 @@ public:
     //std::cout <<  SaveableTesterWithFile::fakeFile << "!" << std::endl;
   }
 
-  void test_allocate_with_file()
+  void xest_allocate_with_file()
   {
     SaveableTesterWithFile::fakeFile ="";
     // filePosition has to be identified by the fileBuffer
@@ -798,7 +798,7 @@ public:
 
 
   /** Demonstrate that using a write buffer reduces time spent seeking on disk */
-  void test_withFakeSeeking_withWriteBuffer()
+  void xest_withFakeSeeking_withWriteBuffer()
   {
     CPUTimer tim;
     DiskBuffer dbuf(10);
@@ -811,7 +811,7 @@ public:
   }
 
   /** Use a 0-sized write buffer so that it constantly needs to seek and write out. This should be slower due to seeking. */
-  void test_withFakeSeeking_noWriteBuffer()
+  void xest_withFakeSeeking_noWriteBuffer()
   {
     CPUTimer tim;
     DiskBuffer dbuf(0);
@@ -825,7 +825,7 @@ public:
 
   /** Example of a situation where vectors grew, meaning that they need to be
    * relocated causing lots of seeking if no write buffer exists.*/
-  void test_withFakeSeeking_growingData()
+  void xest_withFakeSeeking_growingData()
   {
     CPUTimer tim;
     DiskBuffer dbuf(20);
@@ -843,7 +843,7 @@ public:
 
   /** Demonstrate that calling "save" manually without using the MRU write buffer will slow things down
    * due to seeking. Was an issue in LoadMD */
-  void test_withFakeSeeking_growingData_savingWithoutUsingMRU()
+  void xest_withFakeSeeking_growingData_savingWithoutUsingMRU()
   {
     CPUTimer tim;
     DiskBuffer dbuf(dataSeek.size());
@@ -857,7 +857,7 @@ public:
   }
 
   /** Speed of freeing a lot of blocks and putting them in the free space map */
-  void test_freeBlock()
+  void xest_freeBlock()
   {
     CPUTimer tim;
     DiskBuffer dbuf(0);

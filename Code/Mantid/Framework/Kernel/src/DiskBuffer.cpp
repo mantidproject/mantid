@@ -103,6 +103,7 @@ namespace Kernel
    */
   void DiskBuffer::objectDeleted(ISaveable * item)
   {
+    if(item==NULL)return ;
     // have it ever been in the buffer?
     m_mutex.lock();
     auto opt2it = item->getBufPostion();
