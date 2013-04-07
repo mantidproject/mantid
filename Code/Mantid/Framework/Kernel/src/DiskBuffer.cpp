@@ -1,5 +1,6 @@
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/System.h"
+#include <Poco/ScopedLock.h>
 #include <iostream>
 #include <sstream>
 
@@ -66,12 +67,12 @@ namespace Kernel
     if(item->getBufPostion()) // already in the buffer and probably have changed its size in memory
     {
         // forget old memory size
-	    m_mutex.lock();	
+        m_mutex.lock();	
           m_writeBufferUsed-=item->getBufferSize();
           // add new size
           size_t newMemorySize =item->getDataMemorySize(); 
           m_writeBufferUsed+=newMemorySize;
-	    m_mutex.unlock();	
+        m_mutex.unlock();	
         item->setBufferSize(newMemorySize);
     }
     else
@@ -103,19 +104,22 @@ namespace Kernel
   void DiskBuffer::objectDeleted(ISaveable * item)
   {
     // have it ever been in the buffer?
+    m_mutex.lock();
     auto opt2it = item->getBufPostion();
     if(opt2it)
     {
-        m_mutex.lock();
-            m_writeBufferUsed -=item->getBufferSize();
-            m_toWriteBuffer.erase(*opt2it);
-        m_mutex.unlock();
+          m_writeBufferUsed -=item->getBufferSize();
+          m_toWriteBuffer.erase(*opt2it);
     }
     else
+    {
+        m_mutex.unlock();
         return;
+    }
 
-    // indicate to the object that it is not stored in memory any more
-    item->clearBufferState();
+      // indicate to the object that it is not stored in memory any more
+     item->clearBufferState();
+     m_mutex.unlock();
     //std::cout << "DiskBuffer deleting ID " << item->getId() << "; new size " << m_writeBuffer.size() << std::endl;
 
     // Mark the amount of space used on disk as free
@@ -146,6 +150,7 @@ namespace Kernel
     auto it_end = m_toWriteBuffer.end();
 
     ISaveable * obj = NULL;
+
     for (; it != it_end; ++it)
     {
       obj = *it;
