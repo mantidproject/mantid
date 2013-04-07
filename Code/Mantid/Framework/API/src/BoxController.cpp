@@ -25,9 +25,7 @@ namespace API
 {
 
   //-----------------------------------------------------------------------------------
-  /** create new box controller from the existing one
-   * @param pointer to new instance of a class responsible for boxes IO-operations
-   */
+  /** create new box controller from the existing one. Drops file-based state if the box-controller was file-based   */
   BoxController * BoxController::clone()const
   {
         // reset the clone file IO controller to avoid dublicated file based operations for different box controllers

@@ -86,16 +86,11 @@ namespace MDEvents
 
     // -------------------------------- Events-Related -------------------------------------------
    /** The method to convert events in a box into a table of coodrinates/signal/errors casted into coord_t type 
-     *   Used to save events from plain binary file
-     *   @returns coordTable -- vector of events parameters
-     *   @return nColumns    -- number of parameters for each event
-     */
+     *   Used to conver events into plain data array. Does nothing for GridBox     */
     virtual void getEventsData(std::vector<coord_t> &/*coordTable*/,size_t &/*nColumns*/)const{};
     /** The method to convert the table of data into vector of events 
-     *   Used to load events from plain binary file
-     *   @param coordTable -- vector of events parameters
-     *   @param nColumns    -- number of parameters for each event
-     */
+     *   Used to convert from a vector of values (2D table in Fortran representation (by rows) into box events. 
+	     Does nothing for GridBox (may be temporary) -- can be combined with build and add events	 */
     virtual void setEventsData(const std::vector<coord_t> &/*coordTable*/){};
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;

@@ -135,8 +135,7 @@ public:
     virtual void getEventsData(std::vector<coord_t> &coordTable,size_t &nColumns)const =0;
     /** The method to convert the table of data into vector of events 
      *   Used to load events from plain binary file
-     *   @param coordTable -- vector of events parameters
-     *   @param nColumns    -- number of parameters for each event
+     *   @param coordTable -- vector of events data, which would be packed into events
      */
     virtual void setEventsData(const std::vector<coord_t> &coordTable)=0;
       
@@ -160,9 +159,26 @@ public:
     /// General binning method for any shape.
     //virtual void generalBin(MDBin<MDE,nd> & bin, Mantid::Geometry::MDImplicitFunction & function) const = 0;
 
-    /** Sphere (peak) integration */
+   /** Sphere (peak) integration
+   * The CoordTransform object could be used for more complex shapes, e.g. "lentil" integration, as long
+   * as it reduces the dimensions to a single value.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radiusSquared :: radius^2 below which to integrate
+   * @param signal [out] :: set to the integrated signal
+   * @param errorSquared [out] :: set to the integrated squared error.
+    */
     virtual void integrateSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const = 0;
-    /** Find the centroid around a sphere */
+   /** Find the centroid of all events contained within by doing a weighted average
+   * of their coordinates.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radiusSquared :: radius^2 below which to integrate
+   * @param[out] centroid :: array of size [nd]; its centroid will be added
+   * @param[out] signal :: set to the integrated signal
+   */
     virtual void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const = 0;
 
 

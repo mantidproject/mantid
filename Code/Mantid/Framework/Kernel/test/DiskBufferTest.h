@@ -97,6 +97,7 @@ public:
 
     for (size_t i=mPos; i< mPos+mMem; i++)
       fakeFile[i] = m_ch;
+	  
     streamMutex.unlock();
 
     (const_cast<SaveableTesterWithFile *>(this))->setFilePosition(mPos,mMem,true);

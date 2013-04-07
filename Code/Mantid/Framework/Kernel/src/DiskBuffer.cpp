@@ -66,10 +66,12 @@ namespace Kernel
     if(item->getBufPostion()) // already in the buffer and probably have changed its size in memory
     {
         // forget old memory size
-        m_writeBufferUsed-=item->getBufferSize();
-        // add new size
-        size_t newMemorySize =item->getDataMemorySize(); 
-        m_writeBufferUsed+=newMemorySize;
+	    m_mutex.lock();	
+          m_writeBufferUsed-=item->getBufferSize();
+          // add new size
+          size_t newMemorySize =item->getDataMemorySize(); 
+          m_writeBufferUsed+=newMemorySize;
+	    m_mutex.unlock();	
         item->setBufferSize(newMemorySize);
     }
     else
