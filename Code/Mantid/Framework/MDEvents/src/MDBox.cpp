@@ -4,7 +4,7 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidMDEvents/MDGridBox.h"
-#include "MantidMDEvents/BoxCtrlChangesList.h"
+
 
 using namespace Mantid::API;
 
