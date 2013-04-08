@@ -91,7 +91,7 @@ public:
       TS_ASSERT_DELTA( dim->getMaximum(), +20.0, 1e-3);
     }
 
-    TS_ASSERT(3,ws->getNumExperimentInfo());
+    TS_ASSERT_EQUALS(3,ws->getNumExperimentInfo());
     
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
