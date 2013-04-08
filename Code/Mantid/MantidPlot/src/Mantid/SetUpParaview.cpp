@@ -32,7 +32,7 @@ bool isParaviewHere(const QString& location)
     {
       it.next();
       QString file =it.fileName();
-      regex expression("^(pqcore)", boost::regex::icase);
+      regex expression("^(vtkpqcore)", boost::regex::icase);
       if(regex_search(file.toStdString(), expression) && it.fileInfo().isFile())
       {
         found = true;
@@ -54,7 +54,7 @@ SetUpParaview::SetUpParaview(StartUpFrom from, QWidget *parent) : QDialog(parent
   //Do our best to figure out the location based on where paraview normally sits.
   if(m_candidateLocation.isEmpty())
   {
-    const QString predictedLocation = "C:/Program Files (x86)/ParaView 3.10.1/bin";
+    const QString predictedLocation = "C:/Program Files (x86)/ParaView 3.98.1/bin";
     if(isParaviewHere(predictedLocation))
     {
       acceptPotentialLocation(predictedLocation);
