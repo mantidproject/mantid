@@ -9,6 +9,8 @@
 from reduction import ReductionStep
 import isis_reducer
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
+sanslog = sans_reduction_steps.sanslog
+
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 import SANSUtility
@@ -23,7 +25,7 @@ def _issueWarning(msg):
         @param msg: message to be issued
     """
     print msg
-    logger.warning('::SANS::Warning: ' + msg)
+    sanslog.warning(msg)
 
 def _issueInfo(msg):
     """
@@ -31,7 +33,7 @@ def _issueInfo(msg):
         @param msg: message to be issued
     """
     print msg
-    logger.notice(msg)
+    sanslog.notice(msg)
 
 
 class LoadRun(object):
@@ -191,13 +193,13 @@ class LoadRun(object):
                     self._spec_max = 8
                 self.periods_in_file, logs = self._load(reducer.instrument)
             except RuntimeError, err:
-                logger.notice("::SANS::Warning: "+str(err))
+                sanslog.warning(str(err))
                 return '', -1
         else:
             try:
                 self.periods_in_file, logs = self._load(reducer.instrument)
             except RuntimeError, details:
-                logger.notice("::SANS::Warning: "+str(details))
+                sanslog.warning(str(details))
                 self.wksp_name = ''
                 return '', -1
         
@@ -416,7 +418,7 @@ class CanSubtraction(ReductionStep):
         logs = self.workspace._assignHelper(reducer)
 
         if self.workspace.wksp_name == '':
-            logger.notice('::SANS::Warning: Unable to load SANS can run, cannot continue.')
+            sanslog.warning('Unable to load SANS can run, cannot continue.')
             return '()'
           
         if logs:
@@ -1081,7 +1083,7 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
         if raw_ws is None:
             raw_ws = reducer.get_sample().wksp_name
 
-        logger.notice('::SANS::Normalizing to monitor ' + str(normalization_spectrum))
+        sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
         self.output_wksp = 'Monitor'       
         CropWorkspace(InputWorkspace=raw_ws,OutputWorkspace= self.output_wksp,

@@ -5,6 +5,8 @@
 import isis_instrument
 from reduction.command_interface import ReductionSingleton  
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
+sanslog = sans_reduction_steps.sanslog
+
 import isis_reduction_steps
 import isis_reducer
 from centre_finder import CentreFinder as CentreFinder
@@ -38,7 +40,7 @@ def SetVerboseMode(state):
 # Print a message and log it if the 
 def _printMessage(msg, log = True, no_console=False):
     if log == True and _VERBOSE_ == True:
-        logger.notice('::SANS::' + msg)
+        sanslog.notice(msg)
     if not no_console:
         print msg
     
@@ -1033,14 +1035,14 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     xstart = beamcoords[0]
     ystart = beamcoords[1]
     
-    logger.notice("::SANS:: xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.)) 
-    _printMessage("Starting centre finding routine ...")
 
     #remove this if we know running the Reducer() doesn't change i.e. all execute() methods are const
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
     centre = CentreFinder(original)
+    centre.logger.notice("xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.)) 
+    centre.logger.notice("Starting centre finding routine ...")
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
     resX_old, resY_old = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
@@ -1062,7 +1064,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
         LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
-        logger.notice(centre.status_str(it, resX, resY))
+        centre.logger.notice(centre.status_str(it, resX, resY))
         
         try :
             if not graph_handle:
@@ -1082,7 +1084,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
             YSTEP = -YSTEP/2.
         if abs(XSTEP) < 0.1251/1000. and abs(YSTEP) < 0.1251/1000. :
             # this is the success criteria, we've close enough to the center
-            logger.notice("::SANS:: Converged - check if stuck in local minimum!")
+            centre.logger.notice("Converged - check if stuck in local minimum!")
             break
         
         resX_old = resX
@@ -1091,13 +1093,13 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         YNEW += YSTEP
     
     if it == MaxIter:
-        logger.notice("::SANS:: Out of iterations, new coordinates may not be the best!")
+        centre.logger.notice("Out of iterations, new coordinates may not be the best!")
         XNEW -= XSTEP
         YNEW -= YSTEP
     
     ReductionSingleton().set_beam_finder(
         sans_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
-    _printMessage("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
+    centre.logger.notice("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
     
     return XNEW, YNEW
 
