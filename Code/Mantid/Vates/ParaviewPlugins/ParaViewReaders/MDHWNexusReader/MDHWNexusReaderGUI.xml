@@ -1,6 +1,6 @@
 <ParaViewReaders>
-  <Reader name="MDEWNexusReader"
+  <Reader name="MDHWNexusReader"
     extensions="nxs"
-    file_description="MDEW Nexus File">
+    file_description="MDHW Nexus File">
   </Reader>
 </ParaViewReaders>

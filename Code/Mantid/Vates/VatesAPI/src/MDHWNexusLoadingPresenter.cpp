@@ -45,11 +45,10 @@ bool MDHWNexusLoadingPresenter::canReadFile() const
   {
     return 0;
   }
-
   ::NeXus::File * file = NULL;
 
   file = new ::NeXus::File(this->m_filename);
-  // MDEventWorkspace file has a different name for the entry
+  // MDHistoWorkspace file has a different name for the entry
   try
   {
     file->openGroup("MDHistoWorkspace", "NXentry");
@@ -91,7 +90,7 @@ vtkDataSet* MDHWNexusLoadingPresenter::execute(vtkDataSetFactory* factory, Progr
     alg->removeObserver(observer);
   }
 
-  Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
+  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
   Mantid::API::IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
 
   factory->setRecursionDepth(this->m_view->getRecursionDepth());
@@ -124,10 +123,10 @@ void MDHWNexusLoadingPresenter::executeLoadMetadata()
   alg->setProperty("FileBackEnd", false); //Only require metadata, so do it in memory.
   alg->execute();
 
-  Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
+  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
   IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
   m_wsTypeName = histoWs->id();
-  //Call base-class extraction method.
+  // Call base-class extraction method.
   this->extractMetadata(histoWs);
 
   AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
@@ -150,5 +149,6 @@ std::string MDHWNexusLoadingPresenter::getWorkspaceTypeName()
 {
   return m_wsTypeName;
 }
+
 }
 }
