@@ -160,7 +160,6 @@ void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
  */
 void ViewBase::setColorsForView()
 {
-  std::cout << "In ViewBase::setColorsForView" << std::endl;
   if (this->colorUpdater.isAutoScale())
   {
     this->onAutoScale();
@@ -174,16 +173,6 @@ void ViewBase::setColorsForView()
   {
     this->onLogScale(true);
   }
-}
-
-/**
- * This function is used to correct post-accept visibility issues. Most
- * views won't need to do anything.
- */
-void ViewBase::correctVisibility()
-{
-  std::cout << "In ViewBase::correctVisibility" << std::endl;
-  this->setColorsForView();
 }
 
 /**

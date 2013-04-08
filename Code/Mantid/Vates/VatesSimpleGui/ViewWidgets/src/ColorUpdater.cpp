@@ -141,6 +141,10 @@ double ColorUpdater::getMinimumRange()
   return this->minScale;
 }
 
+/**
+ * This function prints out the values of the current state of the
+ * color updater.
+ */
 void ColorUpdater::print()
 {
   std::cout << "Auto Scale: " << this->autoScaleState << std::endl;

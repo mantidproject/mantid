@@ -429,7 +429,6 @@ void MdViewerWidget::renderingDone()
 {
   if (this->viewSwitched)
   {
-    std::cout << "Setting colors" << std::endl;
     this->viewSwitched = false;
     this->currentView->setColorsForView();
   }
@@ -468,7 +467,6 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
  */
 void MdViewerWidget::renderAndFinalSetup()
 {
-  std::cout << "In MdViewerWidget::renderAndFinalSetup" << std::endl;
   this->currentView->render();
   this->currentView->setColorsForView();
   this->currentView->checkView();
@@ -522,7 +520,6 @@ void MdViewerWidget::checkForUpdates()
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 {
   this->viewSwitched = true;
-  std::cout << "In MdViewerWidget::switchViews" << std::endl;
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
   this->removeProxyTabWidgetConnections();
@@ -544,7 +541,6 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->currentView->setColorsForView();
   this->currentView->checkViewOnSwitch();
   this->viewSettings->updateEnableState();
-  std::cout << "End MdViewerWidget::switchViews" << std::endl;
 }
 
 /**

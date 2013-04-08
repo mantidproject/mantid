@@ -68,8 +68,6 @@ public:
   virtual void checkViewOnSwitch();
   /// Close view generated sub-windows.
   virtual void closeSubWindows();
-  /// Correct post-accept visibility issues.
-  virtual void correctVisibility();
   /// Creates a single view instance.
   virtual pqRenderView *createRenderView(QWidget *container,
                                          QString viewName=QString(""));

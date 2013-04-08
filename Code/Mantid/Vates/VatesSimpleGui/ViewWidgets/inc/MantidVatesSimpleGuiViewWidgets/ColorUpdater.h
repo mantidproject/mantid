@@ -87,6 +87,7 @@ public:
    * @param state flag to determine whether or not to use log color scaling
    */
   void logScale(pqPipelineRepresentation *repr, int state);
+  /// Print internal information.
   void print();
   /// Update the internal state.
   void updateState(ColorSelectionWidget *cs);
