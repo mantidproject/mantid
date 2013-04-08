@@ -319,13 +319,13 @@ namespace MDEvents
  void BoxControllerNeXusIO::saveGenericBlock(const std::vector<Type> & DataBlock, const uint64_t blockPosition)const 
  {
       std::vector<int64_t> start(2,0);
-      start[0] = int64_t(blockPosition);
-
       // Specify the dimensions
       std::vector<int64_t> dims(m_BlockSize);
 
      Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+     start[0] = int64_t(blockPosition);
      dims[0] =  int64_t(DataBlock.size()/this->getNDataColums());
+     
 
      // ugly cast but why would putSlab change the data?. This is NeXus bug which makes putSlab method non-constant
      std::vector<Type> &mData = const_cast<std::vector<Type>& >(DataBlock);
@@ -370,12 +370,15 @@ namespace MDEvents
 
 
      std::vector<int64_t> start(2,0);
-     start[0] = static_cast<int64_t>(blockPosition);
      std::vector<int64_t> size(m_BlockSize);
+
+     Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+
+     start[0] = static_cast<int64_t>(blockPosition);
      size[0]=static_cast<int64_t>(nPoints);
      Block.resize(size[0]*size[1]);
 
-     Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+
      m_File->getSlab(&Block[0],start,size);
 
 
@@ -447,15 +450,16 @@ void BoxControllerNeXusIO::loadBlock(std::vector<double> & Block, const uint64_t
      m_File->flush();
 
  }
- /** flash disk buffer data from memory and close underlying NeXus file*/ 
+ /** flush disk buffer data from memory and close underlying NeXus file*/ 
  void BoxControllerNeXusIO::closeFile()
  {
      if(m_File)
      {
-         // write all file-backed data still stack in the data buffer into the file.
-         this->flushCache();
+         this->flushData();
          // lock file
          Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+         // write all file-backed data still stack in the data buffer into the file.
+         this->flushCache();
          {
              m_File->closeData(); // close events data
 
