@@ -552,7 +552,7 @@ void RepoModel::setupModelData(RepoItem *parent)
   using Mantid::API::ScriptRepositoryFactory; 
   using Mantid::API::ScriptRepository_sptr;
   using Mantid::API::ScriptRepository;
-  repo_ptr = ScriptRepositoryFactory::Instance().create("GitScriptRepository");
+  repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
   QStringList lines;
   repo_ptr->listFiles();
   const std::vector<ScriptRepository::file_entry> & entries = repo_ptr->listEntries(); 
