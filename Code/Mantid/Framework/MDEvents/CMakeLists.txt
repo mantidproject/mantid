@@ -3,7 +3,7 @@ set ( SRC_FILES
 	#
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
-	src/BoxControllerNxSIO.cpp
+	src/BoxControllerNeXusIO.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
@@ -69,7 +69,7 @@ set ( INC_FILES
 	#
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
-	inc/MantidMDEvents/BoxControllerNxSIO.h        
+	inc/MantidMDEvents/BoxControllerNeXusIO.h        
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 #	inc/MantidMDEvents/BoxCtrlChangesList.h 
 	inc/MantidMDEvents/ConvToMDBase.h

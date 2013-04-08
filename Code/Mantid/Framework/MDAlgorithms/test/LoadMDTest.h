@@ -9,7 +9,7 @@
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/BoxControllerNxSIO.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include "SaveMDTest.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
@@ -332,7 +332,7 @@ public:
     TS_ASSERT( saver.isExecuted() );
 
     // Now we look at the file that's currently open
-    auto loader = dynamic_cast<BoxControllerNxSIO *>( ws2->getBoxController()->getFileIO());
+    auto loader = dynamic_cast<BoxControllerNeXusIO *>( ws2->getBoxController()->getFileIO());
     TS_ASSERT(loader);
     if(!loader)return;
 

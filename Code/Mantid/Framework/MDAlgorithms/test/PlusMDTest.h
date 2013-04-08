@@ -13,7 +13,7 @@
 #include <Poco/File.h>
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidMDEvents/BoxControllerNxSIO.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -81,7 +81,7 @@ public:
       Mantid::API::BoxController_sptr bc = ws->getBoxController();
       std::cout << bc->getFileIO()->getFreeSpaceMap().size() << " entries in the free space map" << std::endl;
 
-       auto loader = dynamic_cast<MDEvents::BoxControllerNxSIO *>( bc->getFileIO());
+       auto loader = dynamic_cast<MDEvents::BoxControllerNeXusIO *>( bc->getFileIO());
        TS_ASSERT(loader);
        if(!loader)return;
        std::vector<uint64_t> freeSpaceMap;

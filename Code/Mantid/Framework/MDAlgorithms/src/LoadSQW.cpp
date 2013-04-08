@@ -158,7 +158,7 @@ Parts of the code were written with the idea of generalising functionality at a 
 #include <iostream>
 #include <cfloat>
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/BoxControllerNxSIO.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include "MantidKernel/Memory.h"
 
 
@@ -268,7 +268,7 @@ namespace Mantid
       // set file backed;
       if(!m_outputFile.empty()) 
       {
-          auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc.get()));
+          auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
           bc->setFileBacked(Saver,m_outputFile);
           pWs->getBox()->setFileBacked();
           bc->getFileIO()->setWriteBufferSize(1000000);

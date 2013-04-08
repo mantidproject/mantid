@@ -1,7 +1,8 @@
-#include "MantidMDEvents/BoxControllerNxSIO.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidMDEvents/MDEvent.h"
 
 #include <string>
 
@@ -9,18 +10,17 @@ namespace Mantid
 {
 namespace MDEvents
 {
-    // these values have to coinside with the values defimed in MDLeanEvent and MDEvent correspondingly
-    const char *EventTypes[] = {"MDLeanEvent","MDEvent"};
     // Default headers(attributes) describing the contents of the data, written by this class
-    const char *EventHeaders[] ={"signal, errorSquared, center (each dim.)","signal, errorSquared, runIndex, detectorId, center (each dim.)"};
+    const char *EventHeaders[] ={"signal, errorSquared, center (each dim.)",
+                                 "signal, errorSquared, runIndex, detectorId, center (each dim.)"};
 
-    std::string BoxControllerNxSIO::g_EventGroupName("event_data");
-    std::string BoxControllerNxSIO::g_DBDataName("free_space_blocks");
+    std::string BoxControllerNeXusIO::g_EventGroupName("event_data");
+    std::string BoxControllerNeXusIO::g_DBDataName("free_space_blocks");
 
    /**Constructor 
     @param bc shared pointer to the box controller which uses this IO operations
    */ 
-   BoxControllerNxSIO::BoxControllerNxSIO(API::BoxController *const bc) :
+   BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc) :
        m_File(NULL),
        m_ReadOnly(true),
        m_dataChunk(DATA_CHUNK),  
@@ -29,21 +29,23 @@ namespace MDEvents
        m_BlockSize(2,0),
        m_CoordSize(sizeof(coord_t)),
        m_EventType(FatEvent),
-       m_EventsVersion("1.0")
+       m_EventsVersion("1.0"),
+       m_ReadConversion(noConversion)
    {
        m_BlockSize[1] = 4+m_bc->getNDims();
 
        for(size_t  i=0;i<2;i++)
        {
-           m_EventsTypesSupported.push_back(EventTypes[i]);
            m_EventsTypeHeaders.push_back(EventHeaders[i]);
        }
 
-       //m_EventsTypesSupported.assign(EventTypes,std::end(EventTypes));
-       //m_EventsTypeHeaders.assign(EventHeaders,std::end(EventHeaders));
+       m_EventsTypesSupported.resize(2);
+       m_EventsTypesSupported[LeanEvent] = MDLeanEvent<1>::getTypeName();
+       m_EventsTypesSupported[FatEvent] = MDEvent<1>::getTypeName();
+
    }
    /**get event type form its string representation*/ 
-   BoxControllerNxSIO::EventType BoxControllerNxSIO::TypeFromString(const std::vector<std::string> &typesSupported,const std::string typeName)
+   BoxControllerNeXusIO::EventType BoxControllerNeXusIO::TypeFromString(const std::vector<std::string> &typesSupported,const std::string typeName)
    {
           auto it = std::find(typesSupported.begin(),typesSupported.end(),typeName);
           if(it==typesSupported.end())
@@ -59,7 +61,7 @@ namespace MDEvents
    * @paramtypeName  -- the name of the event used in the operations. The name itself defines the size and the format of the event
                        The events described in the class header are supported only
  */
-  void BoxControllerNxSIO::setDataType(const size_t blockSize, const std::string &typeName)
+  void BoxControllerNeXusIO::setDataType(const size_t blockSize, const std::string &typeName)
   {
       if(blockSize==4 || blockSize==8)
       {
@@ -90,7 +92,7 @@ namespace MDEvents
    *@return typeName  -- the name of the event used in the operations. The name itself defines the size and the format of the event
   */
 
-  void BoxControllerNxSIO::getDataType(size_t &CoordSize, std::string &typeName)const
+  void BoxControllerNeXusIO::getDataType(size_t &CoordSize, std::string &typeName)const
   {
       CoordSize= m_CoordSize;
       typeName = m_EventsTypesSupported[m_EventType];
@@ -103,7 +105,7 @@ namespace MDEvents
    *
    *
   */ 
-  bool BoxControllerNxSIO::openFile(const std::string &fileName,const std::string &mode)
+  bool BoxControllerNeXusIO::openFile(const std::string &fileName,const std::string &mode)
   {
       // file already opened 
       if(m_File)return false;
@@ -157,7 +159,7 @@ namespace MDEvents
       return true;
   }
   /**Create group responsible for keeping events and add necessary attributes to it*/ 
-  void BoxControllerNxSIO::CreateEventGroup()
+  void BoxControllerNeXusIO::CreateEventGroup()
   {
        if(m_ReadOnly) 
            throw Kernel::Exception::FileError("The NXdata group: "+g_EventGroupName+" does not exist in the file opened for read",m_fileName);
@@ -174,7 +176,7 @@ namespace MDEvents
   }
   
   /** Open existing Event group and check the attributes necessary for this algorithm to work */ 
-  void BoxControllerNxSIO::OpenAndCheckEventGroup()
+  void BoxControllerNeXusIO::OpenAndCheckEventGroup()
   {
 
       m_File->openGroup(g_EventGroupName, "NXdata");
@@ -187,7 +189,7 @@ namespace MDEvents
 
   }
   /** Helper function which prepares NeXus event structure to accept events   */ 
-  void BoxControllerNxSIO::prepareNxSToWrite_CurVersion()
+  void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion()
   {
 
       // Are data already there?
@@ -225,7 +227,7 @@ namespace MDEvents
   }
   /** Open the NXS data blocks for loading/saving.
     * The data should have been created before.     */
-  void BoxControllerNxSIO::prepareNxSdata_CurVersion()
+  void BoxControllerNeXusIO::prepareNxSdata_CurVersion()
   {
       // Open the data
       m_File->openData("event_data");
@@ -233,13 +235,26 @@ namespace MDEvents
 //      int type = ::NeXus::FLOAT32; 
 //      int rank = 0;
 //      NXgetinfo(file->getHandle(), &rank, dims, &type);
-       NeXus::Info info = m_File->getInfo();
-       if(info.type == ::NeXus::FLOAT64)
-       {
-           if(m_CoordSize == 4)
-               throw Kernel::Exception::NotImplementedError("converting from old style 64-bit event file data is not yet implemented ");
-       }
 
+       NeXus::Info info = m_File->getInfo();
+       int Type = info.type;
+
+       m_ReadConversion = noConversion;
+       switch(Type)
+       {
+       case(::NeXus::FLOAT64):
+               if(m_CoordSize == 4)
+                   m_ReadConversion = doubleToFolat;
+                break;
+       case(::NeXus::FLOAT32):
+               if(m_CoordSize == 8)
+                   m_ReadConversion = floatToDouble;
+               break;
+
+       default:
+           throw Kernel::Exception::FileError("Unknown events data format ",m_fileName);
+       }
+      
       // check if the number of dimensions in the file corresponds to the number of dimesnions to read.
       size_t nFileDim;
       size_t ndim2    = static_cast<size_t>(info.dims[1]);
@@ -265,7 +280,7 @@ namespace MDEvents
       this->setFileLength(nFilePoints);
     }
   /** Load free space blocks from the data file or create the NeXus place to read/write them*/
-  void BoxControllerNxSIO::getDiskBufferFileData()
+  void BoxControllerNeXusIO::getDiskBufferFileData()
   {
      std::vector<uint64_t> freeSpaceBlocks;
      this->getFreeSpaceVector(freeSpaceBlocks);
@@ -295,10 +310,11 @@ namespace MDEvents
       }
  }
 
- /** Save data block on specific position within properly opened NeXus data array
+ /** Save generc data block on specific position within properly opened NeXus data array
    *@param DataBlock     -- the vector with data to write
    *@param blockPosition -- The starting place to save data to   */ 
- void BoxControllerNxSIO::saveBlock(const std::vector<float> & DataBlock, const uint64_t blockPosition)const 
+ template<typename Type>
+ void BoxControllerNeXusIO::saveGenericBlock(const std::vector<Type> & DataBlock, const uint64_t blockPosition)const 
  {
       std::vector<int64_t> start(2,0);
       start[0] = int64_t(blockPosition);
@@ -309,11 +325,11 @@ namespace MDEvents
 
 
      // ugly cast but why would putSlab change the data?. This is NeXus bug which makes putSlab method non-constant
-     std::vector<float> &mData = const_cast<std::vector<float>& >(DataBlock);
+     std::vector<Type> &mData = const_cast<std::vector<Type>& >(DataBlock);
 
      m_fileMutex.lock();
      {
-        m_File->putSlab<float>(mData,start,dims);
+        m_File->putSlab<Type>(mData,start,dims);
 
         if(blockPosition+dims[0]>this->getFileLength())
              this->setFileLength(blockPosition+dims[0]);
@@ -321,15 +337,30 @@ namespace MDEvents
      m_fileMutex.unlock();
 
  }
+/** Save float data block on specific position within properly opened NeXus data array
+   *@param DataBlock     -- the vector with data to write
+   *@param blockPosition -- The starting place to save data to   */ 
+  void BoxControllerNeXusIO::saveBlock(const std::vector<float> & DataBlock, const uint64_t blockPosition)const
+ {
+     this->saveGenericBlock(DataBlock,blockPosition);
+ }
+/** Save double precision data block on specific position within properly opened NeXus data array
+   *@param DataBlock     -- the vector with data to write
+   *@param blockPosition -- The starting place to save data to   */ 
+ void BoxControllerNeXusIO::saveBlock(const std::vector<double> & DataBlock, const uint64_t blockPosition)const
+ {
+     this->saveGenericBlock(DataBlock,blockPosition);
+ }
 
- /** Load particular data block from the opened NeXus file. 
+ /** Load generic  data block from the opened NeXus file. 
    *@param Block         -- the storage vector to place data into
    *@param blockPosition -- The starting place to read data from
    *@param nPoints       -- number of data points (events) to read 
 
    *@returns Block -- resized block of data containing serialized events representation. 
  */
- void BoxControllerNxSIO::loadBlock(std::vector<float> & Block, const uint64_t blockPosition,const size_t nPoints)const
+ template<typename Type> 
+ void BoxControllerNeXusIO::loadGenericBlock(std::vector<Type> & Block, const uint64_t blockPosition,const size_t nPoints)const
  {
      if(blockPosition+nPoints>this->getFileLength())
          throw Kernel::Exception::FileError("Attemtp to read behind the file end",m_fileName);
@@ -345,17 +376,72 @@ namespace MDEvents
        m_File->getSlab(&Block[0],start,size);
      m_fileMutex.unlock();
 
+ }
+ /** Helper funcion which allows to convert one data fomat into another */
+ template<typename FROM,typename TO>
+ void convertFormats(const std::vector<FROM> &inData,std::vector<TO> &outData)
+ {
+     outData.reserve(inData.size());
+     for(size_t i=0;i<inData.size();i++)
+     {
+         outData.push_back(static_cast<TO>(inData[i]));
+     }
+ }
+ /** Load float  data block from the opened NeXus file. 
+   *@param Block         -- the storage vector to place data into
+   *@param blockPosition -- The starting place to read data from
+   *@param nPoints       -- number of data points (events) to read 
 
+   *@returns Block -- resized block of data containing serialized events representation. 
+ */
+ void BoxControllerNeXusIO::loadBlock(std::vector<float> & Block, const uint64_t blockPosition,const size_t nPoints)const
+ {
+     std::vector<double> tmp;
+     switch(m_ReadConversion)
+     {
+     case(noConversion):
+         loadGenericBlock(Block,blockPosition,nPoints);
+         break;
+     case(doubleToFolat):
+         loadGenericBlock(tmp,blockPosition,nPoints);
+         convertFormats(tmp,Block);
+         break;
+     default:
+         throw Kernel::Exception::FileError(" Attempt to read float data from unsupported file format",m_fileName);
+     }       
+ }
+ /** Load double  data block from the opened NeXus file. 
+   *@param Block         -- the storage vector to place data into
+   *@param blockPosition -- The starting place to read data from
+   *@param nPoints       -- number of data points (events) to read 
+
+   *@returns Block -- resized block of data containing serialized events representation. 
+ */
+void BoxControllerNeXusIO::loadBlock(std::vector<double> & Block, const uint64_t blockPosition,const size_t nPoints)const
+ {
+     std::vector<float> tmp;
+     switch(m_ReadConversion)
+     {
+     case(noConversion):
+         loadGenericBlock(Block,blockPosition,nPoints);
+         break;
+     case(floatToDouble):
+         loadGenericBlock(tmp,blockPosition,nPoints);
+         convertFormats(tmp,Block);
+         break;
+     default:
+         throw Kernel::Exception::FileError(" Attempt to read double data from unsupported file format",m_fileName);
+     }       
  }
  /// Clear NeXus internal cache
- void BoxControllerNxSIO::flushData()const
+ void BoxControllerNeXusIO::flushData()const
  {
    m_fileMutex.lock();
      m_File->flush();
    m_fileMutex.unlock();
  }
  /** flash disk buffer data from memory and close underlying NeXus file*/ 
- void BoxControllerNxSIO::closeFile()
+ void BoxControllerNeXusIO::closeFile()
  {
      if(m_File)
      {
@@ -390,89 +476,11 @@ namespace MDEvents
      }
  }
 
- BoxControllerNxSIO::~BoxControllerNxSIO()
+ BoxControllerNeXusIO::~BoxControllerNeXusIO()
  {
      this->closeFile();
  }
 
-///**TODO: this should not be here, refactor out*/ 
-//  void MDBoxFlatTree::initEventFileStorage(const std::string &fileName,API::BoxController_sptr bc,bool FileBacked,const std::string &EventType)
-//  {
-//    m_FileName = fileName;
-//    ::NeXus::File * hFile;
-//      // Erase the file if it exists
-//    Poco::File oldFile(m_FileName);
-//    if (oldFile.exists())
-//    {
-//      hFile = new ::NeXus::File(m_FileName, NXACC_RDWR);
-//      hFile->openGroup("MDEventWorkspace", "NXentry");
-//    }
-//    else
-//    {
-//      // Create a new file in HDF5 mode.
-//      hFile = new ::NeXus::File(m_FileName, NXACC_CREATE5);
-//      hFile->makeGroup("MDEventWorkspace", "NXentry", true);
-//
-//      hFile->putAttr("event_type", EventType);
-//      //TODO: what about history here?
-//    }  
-//
-//    initEventFileStorage(hFile,bc,FileBacked,EventType);
-//    if(!FileBacked)
-//    {
-//      hFile->closeGroup();
-//      hFile->close();
-//      delete hFile;
-//    }
-//  }
 
-//  void MDBoxFlatTree::initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool setFileBacked,const std::string &EventType)
-//  {
-//    bool update=true;
-//// Start the event Data group, TODO: should be better way of checking existing group
-//    try
-//    {
-//      hFile->openGroup("event_data", "NXdata");
-//    }
-//    catch(...)
-//    {
-//      update=false;
-//      hFile->makeGroup("event_data", "NXdata",true);
-//    }
-//    hFile->putAttr("version", "1.0");
-//
-//
-//    // Prepare the data chunk storage.
-//    size_t chunkSize = bc->getDataChunk();
-//    size_t nDim = bc->getNDims();
-//    uint64_t NumOldEvents(0);
-//    if (update)
-//       NumOldEvents= API::BoxController::openEventNexusData(hFile);
-//    else
-//    {
-//      std::string descr;
-//      size_t nColumns;
-//      if(EventType=="MDEvent")
-//      {
-//        nColumns = nDim+4;
-//        descr="signal, errorSquared, runIndex, detectorId, center (each dim.)";
-//      }
-//      else if(EventType=="MDLeanEvent")
-//      {
-//        nColumns = nDim+2;
-//        descr="signal, errorsquared, center (each dim.)";
-//      }
-//      else
-//        throw std::runtime_error("unknown event type encontered");
-//
-//      API::BoxController::prepareEventNexusData(hFile, chunkSize,nColumns,descr);
-//   }
-//      // Initialize the file-backing
-//    if (setFileBacked)         // Set it back to the new file handle
-//       bc->setFile(hFile, m_FileName, NumOldEvents);
-//
-//
-//  }
-//
 }
 }

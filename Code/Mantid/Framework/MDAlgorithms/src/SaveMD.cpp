@@ -22,7 +22,7 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 #include <Poco/File.h>
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDBoxFlatTree.h"
-#include "MantidMDEvents/BoxControllerNxSIO.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 
 
 #if defined (__INTEL_COMPILER)
@@ -171,7 +171,7 @@ namespace MDAlgorithms
         // the boxes file positions are unknown and we need to calculate it.
         BoxFlatStruct.initFlatStructure(ws,filename);
         // create saver class
-        auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc.get()));
+        auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
         Saver->setDataType(sizeof(coord_t),MDE::getTypeName());
         if(MakeFileBacked)
         {

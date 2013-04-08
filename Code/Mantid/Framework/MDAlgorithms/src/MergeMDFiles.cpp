@@ -23,7 +23,7 @@ See also: [[MergeMD]], for merging any MDWorkspaces in system memory (faster, bu
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/BoxControllerNxSIO.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidAPI/MemoryManager.h"
 
@@ -132,7 +132,7 @@ namespace MDAlgorithms
               auto  bc = boost::shared_ptr<API::BoxController>(new API::BoxController(nd));
               bc->fromXMLString(m_fileComponentsStructure[i].getBCXMLdescr());
 
-              m_EventLoader[i] = new BoxControllerNxSIO(bc.get());
+              m_EventLoader[i] = new BoxControllerNeXusIO(bc.get());
               m_EventLoader[i]->setDataType(sizeof(coord_t),MDE::getTypeName());
               m_EventLoader[i]->openFile(m_Filenames[i],"r");
 
@@ -218,7 +218,7 @@ namespace MDAlgorithms
     // Fix the max depth to something bigger.
     bc->setMaxDepth(20);
     bc->setSplitThreshold(5000);
-    auto saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc.get()));
+    auto saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
     saver->setDataType(sizeof(coord_t),MDE::getTypeName());    
     if(m_fileBasedTargetWS)
     {

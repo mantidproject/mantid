@@ -38,10 +38,10 @@ namespace MDEvents
       File change history is stored at: <https://github.com/mantidproject/mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-    class DLLExport BoxControllerNxSIO : public API::IBoxControllerIO
+    class DLLExport BoxControllerNeXusIO : public API::IBoxControllerIO
     {
         public:
-            BoxControllerNxSIO(API::BoxController *const theBC);
+            BoxControllerNeXusIO(API::BoxController *const theBC);
 
            ///@return true if the file to write events is opened and false otherwise
             virtual bool isOpened()const
@@ -60,21 +60,21 @@ namespace MDEvents
             }
                  
             virtual bool openFile(const std::string &fileName,const std::string &mode);
+
             virtual void saveBlock(const std::vector<float> & /* DataBlock */, const uint64_t /*blockPosition*/)const;
-            virtual void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/)const
-            {throw Kernel::Exception::NotImplementedError("Saving double presision events blocks is not supported at the moment");}
             virtual void loadBlock(std::vector<float> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)const;
-            virtual void loadBlock(std::vector<double> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)const
-            {throw Kernel::Exception::NotImplementedError("Loading double presision events blocks is not supported at the moment");}
+            virtual void saveBlock(const std::vector<double> & /* DataBlock */, const uint64_t /*blockPosition*/)const;
+            virtual void loadBlock(std::vector<double> &  /* Block */, const uint64_t /*blockPosition*/,const size_t /*BlockSize*/)const;
+       
             virtual void flushData()const;
             virtual void closeFile();
 
-            virtual ~BoxControllerNxSIO();
+            virtual ~BoxControllerNeXusIO();
             //Auxiliary functions. Used to change default state of this object which is not fully supported. Should be replaced by some IBoxControllerIO factory
             virtual void setDataType(const size_t coordSize, const std::string &typeName);
             virtual void getDataType(size_t &coordSize, std::string &typeName)const;
   //------------------------------------------------------------------------------------------------------------------------
-            //Auxiliary functions (non-virtual, used at testing)
+            //Auxiliary functions (non-virtual, used for testing)
             int64_t getNDataColums()const
             {
                 return m_BlockSize[1];
@@ -111,10 +111,10 @@ namespace MDEvents
         enum EventType
         {
             LeanEvent=0, //< the event consisting of signal error and event coordinate
-            FatEvent=1   //< the event havint the same as lean event plus RunID and detID
-        };
-        /// the type of event (currently MD event or MDLean event this class is deals with. 
-        EventType m_EventType;   
+            FatEvent=1   //< the event having the same as lean event plus RunID and detID
+        /// the type of event (currently MD event or MDLean event this class deals with. )
+        }m_EventType;  
+        
 
 
         /// The version of the MDEvents data block
@@ -124,8 +124,6 @@ namespace MDEvents
         /// data headers used for different events types
         std::vector<std::string> m_EventsTypeHeaders;
 
-        /// the name of the MD workspace group. Should be common with save/load, who uses this group to put other pieces of information about the workspace.
-        static std::string g_EventWSGroupName;
         /// the name of the Nexus data group for saving the events
         static std::string g_EventGroupName; 
         /// the group name to save disk buffer data
@@ -140,7 +138,20 @@ namespace MDEvents
         void prepareNxSdata_CurVersion();
        // get the event type from event name
         static EventType TypeFromString(const std::vector<std::string> &typesSupported,const std::string typeName);
+        /// the enum, which suggests the way (currently)two possible data types are converted to each other
+        enum CoordConversion
+        {
+            noConversion,
+            floatToDouble,
+            doubleToFolat
+        /// conversion btween fload/double requested by the client
+        }m_ReadConversion;
 
+
+        template<typename Type>
+        void saveGenericBlock(const std::vector<Type> & DataBlock, const uint64_t blockPosition)const ;
+        template<typename Type>
+        void loadGenericBlock(std::vector<Type> & DataBlock, const uint64_t blockPosition,const size_t blockSize)const ;
 
     };
 

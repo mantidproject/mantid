@@ -16,7 +16,7 @@
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/BoxControllerNxSIO.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/BoxControllerDummyIO.h"
 
@@ -73,7 +73,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
   
     // Must get ready to load in the data
-    auto loader  =boost::shared_ptr<API::IBoxControllerIO>(new BoxControllerNxSIO(bc.get()));
+    auto loader  =boost::shared_ptr<API::IBoxControllerIO>(new BoxControllerNeXusIO(bc.get()));
     loader->setDataType(box.getCoordType(),box.getEventType());
 
     // Make BoxController file based
@@ -116,7 +116,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     }
 
     // Start a class which saves to NXS file
-    auto Saver = new BoxControllerNxSIO(sc.get());
+    auto Saver = new BoxControllerNeXusIO(sc.get());
     Saver->setDataType(b.getCoordType(),b.getEventType());
 
     std::string filename = do_deleteNexusFile(barefilename);
@@ -169,7 +169,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
     std::string fileName = do_createNexus();
     // Start a class which loads NXS file
-    auto loader = new BoxControllerNxSIO(sc.get());
+    auto loader = new BoxControllerNeXusIO(sc.get());
     loader->setDataType(c.getCoordType(),c.getEventType());
     loader->openFile(fileName,"r");
 
@@ -746,7 +746,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     BoxController_sptr spBc = boost::shared_ptr<BoxController >(b->getBoxController());
 
 
-    auto fbc =boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(spBc.get()));
+    auto fbc =boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(spBc.get()));
     spBc->setSplitThreshold(100);
     spBc->setMaxDepth(4);
     spBc->setFileBacked(fbc,"MDGridBoxTest.nxs");

@@ -34,7 +34,7 @@ and used by other algorithms, they should not be needed in daily use.
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/BoxControllerNxSIO.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vector>
@@ -357,8 +357,8 @@ namespace Mantid
     // ---------------------------------------- DEAL WITH BOXES  ------------------------------------
       if (FileBackEnd)
       { // TODO:: call to the file format factory
-          auto loader = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNxSIO(bc.get()));
-          loader->setDataType(sizeof(size_t),MDE::getTypeName());
+          auto loader = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
+          loader->setDataType(sizeof(coord_t),MDE::getTypeName());
           bc->setFileBacked(loader,m_filename);
           // boxes have been already made file-backed when restoring the boxTree;
       // How much memory for the cache?
@@ -381,8 +381,8 @@ namespace Mantid
       {
         // ---------------------------------------- READ IN THE BOXES ------------------------------------
        // TODO:: call to the file format factory
-        auto loader = file_holder_type(new MDEvents::BoxControllerNxSIO(bc.get()));
-        loader->setDataType(sizeof(size_t),MDE::getTypeName());
+        auto loader = file_holder_type(new MDEvents::BoxControllerNeXusIO(bc.get()));
+        loader->setDataType(sizeof(coord_t),MDE::getTypeName());
 
         loader->openFile(m_filename,"r");
 

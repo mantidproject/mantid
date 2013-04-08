@@ -7,7 +7,7 @@
 #include <Poco/File.h>
 #include <nexus/NeXusFile.hpp>
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidMDEvents/BoxControllerNxSIO.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include "MantidAPI/FileFinder.h"
 
 using namespace Mantid;
@@ -45,8 +45,8 @@ void setUp()
  void test_contstructor_setters()
  {
 
-     MDEvents::BoxControllerNxSIO *pSaver(NULL);
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
+     MDEvents::BoxControllerNeXusIO *pSaver(NULL);
+     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNeXusIO(sc.get()));
 
      size_t CoordSize;
      std::string typeName;
@@ -73,11 +73,11 @@ void setUp()
      delete pSaver;
  }
 
- void xest_CreateOrOpenFile()
+ void test_CreateOrOpenFile()
  {
-     MDEvents::BoxControllerNxSIO *pSaver(NULL);
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
-
+     MDEvents::BoxControllerNeXusIO *pSaver(NULL);
+     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNeXusIO(sc.get()));
+     pSaver->setDataType(sizeof(coord_t),"MDLeanEvent");
      std::string FullPathFile;
 
      TSM_ASSERT_THROWS("new file does not open in read mode",pSaver->openFile(this->xxfFileName,"r"), Kernel::Exception::FileError);
@@ -109,11 +109,47 @@ void setUp()
          Poco::File(FullPathFile).remove();   
  }
 
- void xest_WriteReadReadFloat()
+ //---------------------------------------------------------------------------------------------------------
+ // tests to read/write double/vs float events
+ template<typename FROM,typename TO>
+ struct IF   // if in/out formats are different we can not read different data format from it
  {
-     MDEvents::BoxControllerNxSIO *pSaver(NULL);
-     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNxSIO(sc.get()));
-      std::string FullPathFile;
+ public:
+     static void compareReadTheSame(API::IBoxControllerIO *pSaver,const std::vector<FROM> &inputData,size_t /*nEvents*/,size_t /*nColumns*/)
+     {
+         TS_ASSERT(pSaver->isOpened());
+         TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
+         TS_ASSERT(!pSaver->isOpened());
+
+     }
+ };
+ template<typename FROM>
+ struct IF<FROM,FROM>    // if in/out formats are the same, we can read what was written earlier
+ {
+ public:
+     static void compareReadTheSame(API::IBoxControllerIO *pSaver,const std::vector<FROM> &inputData,size_t nEvents,size_t nColumns)
+     {
+        std::vector<FROM> toRead;
+        TS_ASSERT_THROWS_NOTHING(pSaver->loadBlock(toRead,100,nEvents));
+        for(size_t i=0;i<nEvents*nColumns;i++)
+        {
+         TS_ASSERT_DELTA(inputData[i],toRead[i],1.e-6);
+        }
+
+         TS_ASSERT(pSaver->isOpened());
+         TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
+         TS_ASSERT(!pSaver->isOpened());
+
+     }
+ };
+
+ template<typename FROM,typename TO>
+ void WriteReadRead()
+ {
+     MDEvents::BoxControllerNeXusIO *pSaver(NULL);
+     TS_ASSERT_THROWS_NOTHING(pSaver=new MDEvents::BoxControllerNeXusIO(sc.get()));
+     pSaver->setDataType(sizeof(FROM),"MDEvent");
+     std::string FullPathFile;
 
      TS_ASSERT_THROWS_NOTHING(pSaver->openFile(this->xxfFileName,"w"));
      TS_ASSERT_THROWS_NOTHING(FullPathFile = pSaver->getFileName());
@@ -121,31 +157,23 @@ void setUp()
      size_t nEvents=20;
      // the number of colums corresponfs to 
      size_t nColumns=pSaver->getNDataColums();
-     std::vector<float> toWrite(nColumns*nEvents);
+     std::vector<FROM> toWrite(nColumns*nEvents);
      for(size_t i = 0;i<nEvents;i++)
      {
          for(size_t j=0;j<nColumns;j++)
          {
-             toWrite[i*nColumns+j]=float(j+10*i);
+             toWrite[i*nColumns+j]=static_cast<FROM>(j+10*i);
          }
      }
      
      TS_ASSERT_THROWS_NOTHING(pSaver->saveBlock(toWrite,100));
 
-     std::vector<float> toRead;
-     TS_ASSERT_THROWS_NOTHING(pSaver->loadBlock(toRead,100,nEvents));
-     for(size_t i=0;i<nEvents*nColumns;i++)
-     {
-         TS_ASSERT_DELTA(toWrite[i],toRead[i],1.e-6);
-     }
+     IF<FROM,TO>::compareReadTheSame(pSaver,toWrite,nEvents,nColumns);
 
-     TS_ASSERT(pSaver->isOpened());
-     TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
-     TS_ASSERT(!pSaver->isOpened());
-
-
+     // open and read what was written,
+     pSaver->setDataType(sizeof(TO),"MDEvent");
      TS_ASSERT_THROWS_NOTHING(pSaver->openFile(FullPathFile,"r"));
-     std::vector<float> toRead2;
+     std::vector<TO> toRead2;
      TS_ASSERT_THROWS_NOTHING(pSaver->loadBlock(toRead2,100+(nEvents-1),1));
      for(size_t i=0;i<nColumns;i++)
      {
@@ -159,6 +187,22 @@ void setUp()
 
  }
 
+ void test_WriteFloatReadReadFloat()
+ {
+     this->WriteReadRead<float,float>();
+ }
+void test_WriteFloatReadReadDouble()
+ {
+     this->WriteReadRead<double,double>();
+ }
+ void test_WriteDoubleReadFloat()
+ {
+     this->WriteReadRead<double,float>();
+ }
 
+ void test_WriteFloatReadDouble()
+ {
+     this->WriteReadRead<float,double>();
+ }
 };
 #endif
