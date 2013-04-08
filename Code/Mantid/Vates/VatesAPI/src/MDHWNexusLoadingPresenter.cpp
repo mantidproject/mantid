@@ -93,7 +93,7 @@ vtkDataSet* MDHWNexusLoadingPresenter::execute(vtkDataSetFactory* factory, Progr
   Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
   Mantid::API::IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
 
-  factory->setRecursionDepth(this->m_view->getRecursionDepth());
+  //factory->setRecursionDepth(this->m_view->getRecursionDepth());
   // Create visualisation in one-shot.
   vtkDataSet* visualDataSet = factory->oneStepCreate(histoWs, drawingProgressUpdate);
 
