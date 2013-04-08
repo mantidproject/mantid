@@ -115,7 +115,7 @@ void setUp()
  struct IF   // if in/out formats are different we can not read different data format from it
  {
  public:
-     static void compareReadTheSame(API::IBoxControllerIO *pSaver,const std::vector<FROM> &inputData,size_t /*nEvents*/,size_t /*nColumns*/)
+     static void compareReadTheSame(API::IBoxControllerIO *pSaver,const std::vector<FROM> &/*inputData*/,size_t /*nEvents*/,size_t /*nColumns*/)
      {
          TS_ASSERT(pSaver->isOpened());
          TS_ASSERT_THROWS_NOTHING(pSaver->closeFile());
