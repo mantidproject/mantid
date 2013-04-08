@@ -85,27 +85,31 @@ namespace Mantid
         // to see if its type is a subclass the value type.
         // Each one is checked so that the most derived type
         // can be found. The Python object must have a "id()" method
-        boost::python::object id_as_py;
-        try
+
+        // There is a bug on the Mac where if a Python exception is thrown here
+        // then while it is caught correctly the Python error handler is not
+        // reset and future calls then produce garbage errors like
+        // "RuntimeError: 'NoneType' object has no attribute 'id'".
+        // Solution is to check for attribute explicitly
+        const char * attrName("id");
+        if(PyObject_HasAttrString(value.ptr(), attrName) > 0)
         {
-          id_as_py = value.attr("id")();
+          boost::python::object id_as_py = value.attr(attrName)();
+          const std::string id = boost::python::extract<std::string>(id_as_py);
+          const PyTypeObject *result(NULL);
+          try
+          {
+            result = queryDowncastRegistry(id);
+          }
+          catch(std::runtime_error&)
+          {
+            result = findDerivedType(value);
+            if( result ) registerIDForDowncasting(id, result);
+          }
+          return result;
         }
-        catch(boost::python::error_already_set&)
-        {
+        else
           return NULL;
-        }
-        const std::string id = boost::python::extract<std::string>(id_as_py);
-        const PyTypeObject *result(NULL);
-        try
-        {
-          result = queryDowncastRegistry(id);
-        }
-        catch(std::runtime_error&)
-        {
-          result = findDerivedType(value);
-          if( result ) registerIDForDowncasting(id, result);
-        }
-        return result;
       }
 
       /**
