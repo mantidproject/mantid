@@ -281,7 +281,7 @@ namespace MDEvents
   /** Load free space blocks from the data file or create the NeXus place to read/write them*/
   void BoxControllerNeXusIO::getDiskBufferFileData()
   {
-    Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+
      std::vector<uint64_t> freeSpaceBlocks;
      this->getFreeSpaceVector(freeSpaceBlocks);
      if (freeSpaceBlocks.empty())
@@ -310,6 +310,8 @@ namespace MDEvents
       }
  }
 
+
+//-------------------------------------------------------------------------------------------------------------------------------------
  /** Save generc data block on specific position within properly opened NeXus data array
    *@param DataBlock     -- the vector with data to write
    *@param blockPosition -- The starting place to save data to   */ 
@@ -321,13 +323,13 @@ namespace MDEvents
 
       // Specify the dimensions
       std::vector<int64_t> dims(m_BlockSize);
-      dims[0] =  int64_t(DataBlock.size()/this->getNDataColums());
 
+     Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+     dims[0] =  int64_t(DataBlock.size()/this->getNDataColums());
 
      // ugly cast but why would putSlab change the data?. This is NeXus bug which makes putSlab method non-constant
      std::vector<Type> &mData = const_cast<std::vector<Type>& >(DataBlock);
 
-     Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
      {
         m_File->putSlab<Type>(mData,start,dims);
 
@@ -337,6 +339,7 @@ namespace MDEvents
 
 
  }
+  
 /** Save float data block on specific position within properly opened NeXus data array
    *@param DataBlock     -- the vector with data to write
    *@param blockPosition -- The starting place to save data to   */ 
@@ -377,6 +380,7 @@ namespace MDEvents
 
 
  }
+
  /** Helper funcion which allows to convert one data fomat into another */
  template<typename FROM,typename TO>
  void convertFormats(const std::vector<FROM> &inData,std::vector<TO> &outData)
@@ -433,6 +437,9 @@ void BoxControllerNeXusIO::loadBlock(std::vector<double> & Block, const uint64_t
          throw Kernel::Exception::FileError(" Attempt to read double data from unsupported file format",m_fileName);
      }       
  }
+
+//-------------------------------------------------------------------------------------------------------------------------------------
+
  /// Clear NeXus internal cache
  void BoxControllerNeXusIO::flushData()const
  {
