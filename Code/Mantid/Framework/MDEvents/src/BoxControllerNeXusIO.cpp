@@ -110,7 +110,7 @@ namespace MDEvents
       // file already opened 
       if(m_File)return false;
 
-      m_fileMutex.lock();
+      Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
       m_ReadOnly = true;
       NXaccess access(NXACC_READ);
       if(mode.find("w")!=std::string::npos ||mode.find("W")!=std::string::npos)
@@ -154,7 +154,6 @@ namespace MDEvents
           prepareNxSdata_CurVersion();
       else
           prepareNxSToWrite_CurVersion();
-      m_fileMutex.unlock();
 
       return true;
   }
@@ -282,6 +281,7 @@ namespace MDEvents
   /** Load free space blocks from the data file or create the NeXus place to read/write them*/
   void BoxControllerNeXusIO::getDiskBufferFileData()
   {
+    Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
      std::vector<uint64_t> freeSpaceBlocks;
      this->getFreeSpaceVector(freeSpaceBlocks);
      if (freeSpaceBlocks.empty())
@@ -327,14 +327,14 @@ namespace MDEvents
      // ugly cast but why would putSlab change the data?. This is NeXus bug which makes putSlab method non-constant
      std::vector<Type> &mData = const_cast<std::vector<Type>& >(DataBlock);
 
-     m_fileMutex.lock();
+     Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
      {
         m_File->putSlab<Type>(mData,start,dims);
 
         if(blockPosition+dims[0]>this->getFileLength())
              this->setFileLength(blockPosition+dims[0]);
      }
-     m_fileMutex.unlock();
+
 
  }
 /** Save float data block on specific position within properly opened NeXus data array
@@ -372,9 +372,9 @@ namespace MDEvents
      size[0]=static_cast<int64_t>(nPoints);
      Block.resize(size[0]*size[1]);
 
-     m_fileMutex.lock();
-       m_File->getSlab(&Block[0],start,size);
-     m_fileMutex.unlock();
+     Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
+     m_File->getSlab(&Block[0],start,size);
+
 
  }
  /** Helper funcion which allows to convert one data fomat into another */
@@ -436,9 +436,9 @@ void BoxControllerNeXusIO::loadBlock(std::vector<double> & Block, const uint64_t
  /// Clear NeXus internal cache
  void BoxControllerNeXusIO::flushData()const
  {
-   m_fileMutex.lock();
+    Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
      m_File->flush();
-   m_fileMutex.unlock();
+
  }
  /** flash disk buffer data from memory and close underlying NeXus file*/ 
  void BoxControllerNeXusIO::closeFile()
@@ -447,7 +447,8 @@ void BoxControllerNeXusIO::loadBlock(std::vector<double> & Block, const uint64_t
      {
          // write all file-backed data still stack in the data buffer into the file.
          this->flushCache();
-         m_fileMutex.lock();
+         // lock file
+         Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
          {
              m_File->closeData(); // close events data
 
@@ -472,7 +473,6 @@ void BoxControllerNeXusIO::loadBlock(std::vector<double> & Block, const uint64_t
              delete m_File;
              m_File=NULL;
          }
-         m_fileMutex.unlock();
      }
  }
 
