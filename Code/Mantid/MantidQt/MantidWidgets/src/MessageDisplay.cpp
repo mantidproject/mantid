@@ -90,6 +90,15 @@ namespace MantidQt
           this, SLOT(append(const Message &)));
     }
 
+    /**
+     * @param source A string specifying the required source for messages
+     * that will be emitted
+     */
+    void MessageDisplay::setSource(const QString & source)
+    {
+      m_logChannel->setSource(source);
+    }
+
     //----------------------------------------------------------------------------------------
     // Public slots
     //----------------------------------------------------------------------------------------
@@ -154,6 +163,7 @@ namespace MantidQt
       scrollToBottom();
 
       if(msg.priority() <= Message::Priority::PRIO_ERROR ) emit errorReceived(msg.text());
+      if(msg.priority() <= Message::Priority::PRIO_WARNING ) emit warningReceived(msg.text());
     }
 
     /**
@@ -285,6 +295,7 @@ namespace MantidQt
     void MessageDisplay::setupTextArea()
     {
       m_textDisplay->setReadOnly(true);
+      m_textDisplay->ensureCursorVisible();
 
       this->setLayout(new QHBoxLayout(this));
       QLayout *layout = this->layout();

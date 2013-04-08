@@ -44,10 +44,15 @@ namespace MantidQt
     Q_OBJECT
 
     public:
-      /// Constructor
-      QtSignalChannel();
+      /// Default constructor
+      QtSignalChannel(const QString & source = "");
       /// Destructor
       ~QtSignalChannel();
+
+      /// If set, only Mantid log messages from this source are emitted
+      void setSource(const QString & source);
+      /// Get the current source are emitted
+      inline const QString & source() const { return m_source; }
 
       /// Converts the Poco::Message to a Qt signal
       void log(const Poco::Message& msg);
@@ -62,6 +67,9 @@ namespace MantidQt
 
     private:
       Q_DISABLE_COPY(QtSignalChannel);
+
+      /// Optional source (use std::string to avoid conversion in comparison)
+      QString m_source;
    };
   }
 }

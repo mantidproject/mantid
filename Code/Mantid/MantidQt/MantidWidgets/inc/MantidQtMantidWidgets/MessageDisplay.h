@@ -38,6 +38,7 @@ namespace MantidQt
     class MessageDisplay : public QWidget
     {
       Q_OBJECT
+      Q_PROPERTY(QString source READ source WRITE setSource);
 
     public:
       /// Controls whether the display is allowed to set the log levels
@@ -56,10 +57,16 @@ namespace MantidQt
 
       // Setup logging framework connections
       void attachLoggingChannel();
+      /// If set, only Mantid log messages from this source are emitted
+      void setSource(const QString & source);
+      /// Get the current source are emitted
+      inline const QString & source() const { return m_logChannel->source(); }
 
     signals:
       /// Indicate that a message of error or higher has been received.
       void errorReceived(const QString & text);
+      /// Indicate that a message of warning or higher has been received.
+      void warningReceived(const QString & text);
 
     public slots:
       /// Convenience method for appending message at fatal level
