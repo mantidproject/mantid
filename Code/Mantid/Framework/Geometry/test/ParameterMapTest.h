@@ -79,8 +79,8 @@ public:
     const std::string type("int");
     const int value(1);
     pmap.add<int>("int", m_testInstrument.get(),name,value);
-    TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, "int"), true);
-    TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, "double"), false);
+    TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pInt()), true);
+    TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pDouble()), false);
   }
 
   void testParameter_Name_Matching_Is_Case_Insensitive()
@@ -146,7 +146,7 @@ public:
     pmap.addBool(comp.get(), "A", true);
     TS_ASSERT_EQUALS(pmap.size(), 1);
     // Try to find double type parameters, of which there should be none.
-    Parameter_sptr fetchedValue = pmap.getByType(comp.get(), "double");
+    Parameter_sptr fetchedValue = pmap.getByType(comp.get(), ParameterMap::pDouble());
     TSM_ASSERT("Should not be able to find a double type parameter", fetchedValue == NULL);
   }
 
@@ -162,13 +162,13 @@ public:
     TS_ASSERT_EQUALS(pmap.size(), 2);
    
     // Test the ability to correctly fetch the double argument by type.
-    Parameter_sptr fetchedValue1 = pmap.getByType(comp.get(), "double");
+    Parameter_sptr fetchedValue1 = pmap.getByType(comp.get(), ParameterMap::pDouble());
     TS_ASSERT(fetchedValue1);
     TS_ASSERT_EQUALS("A", fetchedValue1->name());
     TS_ASSERT_DELTA(1.2, fetchedValue1->value<double>(), DBL_EPSILON);
 
     // Test the ability to correctly fetch the bool argument by type.
-    Parameter_sptr fetchedValue2 = pmap.getByType(comp.get(), "bool");
+    Parameter_sptr fetchedValue2 = pmap.getByType(comp.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue2);
     TS_ASSERT_EQUALS("B", fetchedValue2->name());
     TS_ASSERT_EQUALS(true, fetchedValue2->value<bool>());
@@ -183,7 +183,7 @@ public:
     pmap.addBool(component.get(), "A", true);
 
     //Find it via the component
-    Parameter_sptr fetchedValue = pmap.getRecursiveByType(component.get(), "bool");
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(component.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != NULL);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
     TS_ASSERT_EQUALS("bool", fetchedValue->type());
@@ -200,7 +200,7 @@ public:
     pmap.addBool(parentComponent.get(), "A", true);
 
     //Find it via the child 
-    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), "bool");
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != NULL);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
     TS_ASSERT_EQUALS("bool", fetchedValue->type());
@@ -220,10 +220,10 @@ public:
     pmap.addBool(parentComponent.get(), "B", true);
 
     //Find it via the child 
-    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), "bool");
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != NULL);
     TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority", "A", fetchedValue->name());
-    TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority","bool", fetchedValue->type());
+    TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority",ParameterMap::pBool(), fetchedValue->type());
     TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority",false, fetchedValue->value<bool>());
   }
 
