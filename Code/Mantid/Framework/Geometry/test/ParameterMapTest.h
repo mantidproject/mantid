@@ -76,9 +76,9 @@ public:
   {
     ParameterMap pmap;
     const std::string name("MyValue");
-    const std::string type("int");
+    const std::string type(ParameterMap::pInt());
     const int value(1);
-    pmap.add<int>("int", m_testInstrument.get(),name,value);
+    pmap.add<int>(type, m_testInstrument.get(),name,value);
     TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pInt()), true);
     TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pDouble()), false);
   }
@@ -186,7 +186,7 @@ public:
     Parameter_sptr fetchedValue = pmap.getRecursiveByType(component.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != NULL);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
-    TS_ASSERT_EQUALS("bool", fetchedValue->type());
+    TS_ASSERT_EQUALS(ParameterMap::pBool(), fetchedValue->type());
     TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
   }
 
@@ -203,7 +203,7 @@ public:
     Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != NULL);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
-    TS_ASSERT_EQUALS("bool", fetchedValue->type());
+    TS_ASSERT_EQUALS(ParameterMap::pBool(), fetchedValue->type());
     TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
   }
 
