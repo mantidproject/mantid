@@ -31,7 +31,8 @@ namespace MantidQt
     /** @class MessageDisplay
      * Provides a widget for display messages in a text box
      * It deals with Message objects which in turn hide whether
-     * a message is a framework Poco message or a simple string
+     * a message is a framework Poco message or a simple string.
+     * It can connect to the Mantid logging framework if required
      */
     class MessageDisplay : public QWidget
     {
@@ -44,8 +45,10 @@ namespace MantidQt
         DisableLogLevelControl
       };
 
-      /// Default constructor
-      MessageDisplay(LogLevelControl logLevelControl=DisableLogLevelControl,
+      /// Default constructor with optional parent
+      MessageDisplay(QWidget *parent=NULL);
+      /// Constructor specifying if whether control over the global log level is allowed
+      MessageDisplay(LogLevelControl logLevelControl,
                      QWidget *parent=NULL);
       ///Destructor
       ~MessageDisplay();

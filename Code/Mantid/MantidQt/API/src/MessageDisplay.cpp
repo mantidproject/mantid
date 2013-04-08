@@ -27,7 +27,22 @@ namespace MantidQt
     // Public member functions
     //-------------------------------------------
     /**
-     * @param loggerControl Controls whether the log-level applies globally or only to this channel (default=MessageDisplay::Global)
+     * Constructs a widget that does not allow control over the global log level
+     * @param parent An optional parent widget
+     */
+    MessageDisplay::MessageDisplay(QWidget *parent)
+    : QWidget(parent), m_logLevelControl(DisableLogLevelControl), m_logChannel(new QtSignalChannel),
+      m_textDisplay(new QTextEdit(this)), m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
+      m_error(new QAction(tr("&Error"), this)), m_warning(new QAction(tr("&Warning"), this)),
+      m_notice(new QAction(tr("&Notice"), this)), m_information(new QAction(tr("&Information"), this)),
+      m_debug(new QAction(tr("&Debug"), this))
+    {
+      initActions();
+      setupTextArea();
+    }
+
+    /**
+     * @param loggerControl Controls whether the log-level applies globally or only to this channel
      * @param parent An optional parent widget
      */
     MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
