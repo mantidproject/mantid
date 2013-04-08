@@ -117,6 +117,10 @@ void ViewBase::onAutoScale()
 void ViewBase::onColorMapChange(const pqColorMapModel *model)
 {
   pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    return;
+  }
   this->colorUpdater.colorMapChange(rep, model);
   rep->renderViewEventually();
 }
@@ -129,6 +133,10 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
 void ViewBase::onColorScaleChange(double min, double max)
 {
   pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    return;
+  }
   this->colorUpdater.colorScaleChange(rep, min, max);
   rep->renderViewEventually();
 }
@@ -140,6 +148,10 @@ void ViewBase::onColorScaleChange(double min, double max)
 void ViewBase::onLogScale(int state)
 {
   pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    return;
+  }
   this->colorUpdater.logScale(rep, state);
   rep->renderViewEventually();
 }
