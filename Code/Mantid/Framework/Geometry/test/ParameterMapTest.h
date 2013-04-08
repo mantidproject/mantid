@@ -29,6 +29,28 @@ public:
     TS_ASSERT_THROWS_NOTHING(ParameterMap());
   }
 
+  void testParameter_Name_Functions()
+  {
+     // This should be the only test to explicitly use the string values
+     // Other tests can use the functions tested here.
+     TS_ASSERT_EQUALS(ParameterMap::pDouble(),"double");
+     TS_ASSERT_EQUALS(ParameterMap::pInt(),"int");
+     TS_ASSERT_EQUALS(ParameterMap::pBool(),"bool");
+     TS_ASSERT_EQUALS(ParameterMap::pString(),"string");
+     TS_ASSERT_EQUALS(ParameterMap::pV3D(),"V3D");
+     TS_ASSERT_EQUALS(ParameterMap::pQuat(),"Quat");
+
+     TS_ASSERT_EQUALS(ParameterMap::pos(),"pos");
+     TS_ASSERT_EQUALS(ParameterMap::posx(),"x");
+     TS_ASSERT_EQUALS(ParameterMap::posy(),"y");
+     TS_ASSERT_EQUALS(ParameterMap::posz(),"z");
+
+     TS_ASSERT_EQUALS(ParameterMap::rot(),"rot");
+     TS_ASSERT_EQUALS(ParameterMap::rotx(),"rotx");
+     TS_ASSERT_EQUALS(ParameterMap::roty(),"roty");
+     TS_ASSERT_EQUALS(ParameterMap::rotz(),"rotz");
+  }
+
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In()
   {
     // Add a parameter for the first component of the instrument
