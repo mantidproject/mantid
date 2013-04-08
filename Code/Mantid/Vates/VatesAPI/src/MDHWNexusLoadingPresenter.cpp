@@ -130,7 +130,7 @@ void MDHWNexusLoadingPresenter::executeLoadMetadata()
   //Call base-class extraction method.
   this->extractMetadata(histoWs);
 
-  AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
+  AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
 }
 
 /**

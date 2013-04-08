@@ -25,7 +25,7 @@ private:
   // Helper method to return the full path to a real nexus file that is the correct format for this functionality.
   static std::string getSuitableFile()
   {
-    std::string temp = Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs");
+    std::string temp = Mantid::API::FileFinder::Instance().getFullPath("SEQ_MDHW.nxs");
     return temp;
   }
   
@@ -65,7 +65,7 @@ void testExecution()
 {
   //Setup view
   MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1)); 
+  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
   EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true)); 
   EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
@@ -73,12 +73,9 @@ void testExecution()
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
   EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
-  EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects
   MockProgressAction mockLoadingProgressAction;
-  EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
-
   MockProgressAction mockDrawingProgressAction;
   
   //Create the presenter and runit!
@@ -126,22 +123,19 @@ void testGetWorkspaceTypeName()
 
 void testTimeLabel()
 {
-  //Setup view
+  // Setup view
   MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
   EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true));
   EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
-  //Setup rendering factory
+  // Setup rendering factory
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
   EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
-  EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
-  //Setup progress updates objects
+  // Setup progress updates objects
   MockProgressAction mockLoadingProgressAction;
-  EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
-
   MockProgressAction mockDrawingProgressAction;
 
   //Create the presenter and runit!
@@ -149,7 +143,7 @@ void testTimeLabel()
   presenter.executeLoadMetadata();
   vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
   TSM_ASSERT_EQUALS("Time label should be exact.",
-                    presenter.getTimeStepLabel(), "D (En)");
+                    presenter.getTimeStepLabel(), "DeltaE (DeltaE)");
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
@@ -161,7 +155,7 @@ void testAxisLabels()
 {
   //Setup view
   MockMDLoadingView* view = new MockMDLoadingView;
-  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
   EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true));
   EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
 
@@ -169,12 +163,9 @@ void testAxisLabels()
   MockvtkDataSetFactory factory;
   EXPECT_CALL(factory, initialize(_)).Times(1);
   EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
-  EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
 
   //Setup progress updates objects
   MockProgressAction mockLoadingProgressAction;
-  EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
-
   MockProgressAction mockDrawingProgressAction;
 
   //Create the presenter and runit!
@@ -184,13 +175,13 @@ void testAxisLabels()
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
   TSM_ASSERT_EQUALS("X Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForX"),
-                    "A (Ang)");
+                    "[H,0,0] (in 1.992 A^-1)");
   TSM_ASSERT_EQUALS("Y Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForY"),
-                    "B (Ang)");
+                    "[0,K,0] (in 1.992 A^-1)");
   TSM_ASSERT_EQUALS("Z Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForZ"),
-                    "C (Ang)");
+                    "[0,0,L] (in 1.087 A^-1)");
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
