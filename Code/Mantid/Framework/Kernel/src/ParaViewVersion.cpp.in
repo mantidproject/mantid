@@ -10,7 +10,7 @@ namespace Kernel
 
 std::string ParaViewVersion::targetVersion()
 {
-  return "@Compatible_ParaView_Version@";
+  return "@COMPATIBLE_PARAVIEW_VERSION@";
 }
 
 } // namespace Kernel

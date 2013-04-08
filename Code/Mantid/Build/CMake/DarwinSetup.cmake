@@ -48,7 +48,7 @@ endif()
 set ( CMAKE_INSTALL_PREFIX /Applications )
 set ( INBUNDLE MantidPlot.app/ )
 # We know exactly where this has to be on Darwin
-set ( PARAVIEW_APP_DIR "/Applications/paraview.app" )
+set ( PARAVIEW_APP_DIR "/Applications/${OSX_PARAVIEW_APP}" )
 set ( PARAVIEW_APP_BIN_DIR "${PARAVIEW_APP_DIR}/Contents/MacOS" )
 set ( PARAVIEW_APP_LIB_DIR "${PARAVIEW_APP_DIR}/Contents/Libraries" )
 

@@ -73,7 +73,6 @@ set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
 set ( MtdVersion_WC_LAST_CHANGED_REV 0 )
 set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
 set ( NOT_GIT_REPO "Not" )
-set ( Compatible_ParaView_Version "3.98.1" )
 
 find_package ( Git )
 if ( GIT_FOUND )
