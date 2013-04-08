@@ -189,13 +189,13 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtAPI/MessageDisplay.h"
 #include "MantidQtAPI/Message.h"
 
 #include "MantidQtMantidWidgets/ICatSearch.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -279,10 +279,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   logWindow->setWindowTitle(tr("Results Log"));
   addDockWidget( Qt::TopDockWidgetArea, logWindow );
 
-  using MantidQt::API::MessageDisplay;
+  using MantidQt::MantidWidgets::MessageDisplay;
   using MantidQt::API::Message;
   qRegisterMetaType<Message>("Message"); // Required to use it in signals-slots
-  resultsLog = new MantidQt::API::MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
+  resultsLog = new MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
   logWindow->setWidget(resultsLog);
   connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow, SLOT(show()));
 

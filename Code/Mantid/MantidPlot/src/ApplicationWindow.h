@@ -110,11 +110,11 @@ namespace MantidQt
   namespace API
   {
     class Message;
-    class MessageDisplay;
   }
   namespace MantidWidgets
   {
     class FitPropertyBrowser;
+    class MessageDisplay;
   }
 }
 //Mantid
@@ -1391,7 +1391,7 @@ private:
   Script *m_iface_script;
   QTranslator *appTranslator, *qtTranslator;
   QDockWidget *explorerWindow, *undoStackWindow;
-  MantidQt::API::MessageDisplay *resultsLog;
+  MantidQt::MantidWidgets::MessageDisplay *resultsLog;
   QDockWidget *m_interpreterDock;
   CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;

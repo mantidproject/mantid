@@ -16,7 +16,6 @@ set ( SRC_FILES
   src/MantidQwtMatrixWorkspaceData.cpp
   src/MantidWidget.cpp
   src/Message.cpp
-  src/MessageDisplay.cpp
   src/OptionsPropertyWidget.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
@@ -41,7 +40,6 @@ set ( MOC_FILES
   inc/MantidQtAPI/ManageUserDirectories.h
   inc/MantidQtAPI/MantidDialog.h
   inc/MantidQtAPI/MantidWidget.h
-  inc/MantidQtAPI/MessageDisplay.h
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
@@ -118,4 +116,3 @@ install ( TARGETS MantidQtAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 set ( TEST_FILES
   ScriptRepositoryViewTest.h
 )
-

@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/ICatSearch.cpp
 	src/ICatUtils.cpp
 	src/InstrumentSelector.cpp
+	src/MessageDisplay.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
 	src/MultifitSetupDialog.cpp
@@ -49,6 +50,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/ICatSearch.h
     inc/MantidQtMantidWidgets/ICatUtils.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
+    inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
     inc/MantidQtMantidWidgets/MWDiag.h

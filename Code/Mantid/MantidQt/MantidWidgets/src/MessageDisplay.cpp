@@ -1,7 +1,7 @@
 //-------------------------------------------
 // Includes
 //-------------------------------------------
-#include "MantidQtAPI/MessageDisplay.h"
+#include "MantidQtMantidWidgets/MessageDisplay.h"
 
 #include "MantidKernel/Logger.h"
 
@@ -20,8 +20,9 @@
 
 namespace MantidQt
 {
-  namespace API
+  namespace MantidWidgets
   {
+    using API::Message;
 
     //-------------------------------------------
     // Public member functions
@@ -31,7 +32,7 @@ namespace MantidQt
      * @param parent An optional parent widget
      */
     MessageDisplay::MessageDisplay(QWidget *parent)
-    : QWidget(parent), m_logLevelControl(DisableLogLevelControl), m_logChannel(new QtSignalChannel),
+    : QWidget(parent), m_logLevelControl(DisableLogLevelControl), m_logChannel(new API::QtSignalChannel),
       m_textDisplay(new QTextEdit(this)), m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
       m_error(new QAction(tr("&Error"), this)), m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)), m_information(new QAction(tr("&Information"), this)),
@@ -46,7 +47,7 @@ namespace MantidQt
      * @param parent An optional parent widget
      */
     MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
-    : QWidget(parent), m_logLevelControl(logLevelControl), m_logChannel(new QtSignalChannel),
+    : QWidget(parent), m_logLevelControl(logLevelControl), m_logChannel(new API::QtSignalChannel),
       m_textDisplay(new QTextEdit(this)), m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
       m_error(new QAction(tr("&Error"), this)), m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)), m_information(new QAction(tr("&Information"), this)),

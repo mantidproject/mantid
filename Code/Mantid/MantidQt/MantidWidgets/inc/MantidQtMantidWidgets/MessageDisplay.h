@@ -22,8 +22,9 @@ class QTextEdit;
 
 namespace MantidQt
 {
-  namespace API
+  namespace MantidWidgets
   {
+    using API::Message; // So that the slots work
     //----------------------------------------------------------
     // Forward declarations
     //----------------------------------------------------------
@@ -99,16 +100,16 @@ namespace MantidQt
       /// Set the properties of the text display
       void setupTextArea();
       /// Sets the text color for the given priority
-      void setTextColor(const Message::Priority priority);
+      void setTextColor(const API::Message::Priority priority);
       /// Returns the text color for a given priority
-      QColor textColor(const Message::Priority priority) const;
+      QColor textColor(const API::Message::Priority priority) const;
       /// Appends the given text & makes sure it can be seen
       void appendText(const QString & text);
 
       /// Are we allowed to affect the log level
       LogLevelControl m_logLevelControl;
       /// A reference to the
-      QtSignalChannel *m_logChannel;
+      API::QtSignalChannel *m_logChannel;
       /// The actual widget holding the text
       QTextEdit * m_textDisplay;
       /// Mutually exclusive log actions
