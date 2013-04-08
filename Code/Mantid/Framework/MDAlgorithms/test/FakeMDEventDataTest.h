@@ -171,7 +171,7 @@ public:
     ei->setInstrument(inst);
     // Give it a run number
     ei->mutableRun().addProperty(new PropertyWithValue<std::string>("run_number", "12345"), true);
-    inWS->addExperimentInfo(ei);
+    //inWS->addExperimentInfo(ei);
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty<IMDEventWorkspace_sptr>("InputWorkspace", inWS));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakParams", ""));
