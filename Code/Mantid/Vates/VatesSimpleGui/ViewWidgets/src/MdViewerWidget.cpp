@@ -420,6 +420,11 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
   this->renderAndFinalSetup();
 }
 
+/**
+ * This function is responsible for carrying out actions when ParaView
+ * says the rendering is completed. It currently handles making sure the
+ * color selection widget state is passed between views.
+ */
 void MdViewerWidget::renderingDone()
 {
   if (this->viewSwitched)
@@ -536,9 +541,9 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->destroyView();
   delete this->hiddenView;
   this->currentView->render();
+  this->currentView->setColorsForView();
   this->currentView->checkViewOnSwitch();
   this->viewSettings->updateEnableState();
-  this->currentView->correctVisibility();
   std::cout << "End MdViewerWidget::switchViews" << std::endl;
 }
 

@@ -77,7 +77,6 @@ void MultiSliceView::render()
   this->checkSliceViewCompat();
   this->setupData();
   this->resetDisplay();
-  //this->setColorsForView();
 }
 
 void MultiSliceView::renderAll()

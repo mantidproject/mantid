@@ -100,7 +100,6 @@ void StandardView::render()
   this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
 
   this->resetDisplay();
-  //this->setColorsForView();
   emit this->triggerAccept();
 }
 

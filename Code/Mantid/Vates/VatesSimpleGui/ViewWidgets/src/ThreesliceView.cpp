@@ -59,8 +59,6 @@ void ThreeSliceView::render()
 {
   this->makeThreeSlice();
   this->resetDisplay();
-  //this->setColorsForView();
-  this->renderAll();
   emit this->triggerAccept();
 }
 

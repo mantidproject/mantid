@@ -89,6 +89,7 @@ protected slots:
   void onWikiHelp();
   /// Load and render data.
   void onDataLoaded(pqPipelineSource *source);
+  /// Perform actions when rendering is done.
   void renderingDone();
   /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);

@@ -63,6 +63,7 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
   // Place the widget for the render view in the frame provided.
   hbox->addWidget(view->getWidget());
 
+  /// Make a connection to the view's endRender signal for later checking.
   QObject::connect(view, SIGNAL(endRender()),
                    this, SIGNAL(renderingDone()));
 
@@ -105,7 +106,6 @@ void ViewBase::onAutoScale()
     return;
   }
   QPair <double, double> range = this->colorUpdater.autoScale(rep);
-  //this->renderAll();
   rep->renderViewEventually();
   emit this->dataRange(range.first, range.second);
 }
@@ -119,7 +119,6 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
   pqPipelineRepresentation *rep = this->getRep();
   this->colorUpdater.colorMapChange(rep, model);
   rep->renderViewEventually();
-  //this->renderAll();
 }
 
 /**
@@ -132,7 +131,6 @@ void ViewBase::onColorScaleChange(double min, double max)
   pqPipelineRepresentation *rep = this->getRep();
   this->colorUpdater.colorScaleChange(rep, min, max);
   rep->renderViewEventually();
-  //this->renderAll();
 }
 
 /**
@@ -144,7 +142,6 @@ void ViewBase::onLogScale(int state)
   pqPipelineRepresentation *rep = this->getRep();
   this->colorUpdater.logScale(rep, state);
   rep->renderViewEventually();
-  //this->renderAll();
 }
 
 /**
@@ -164,8 +161,6 @@ void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
 void ViewBase::setColorsForView()
 {
   std::cout << "In ViewBase::setColorsForView" << std::endl;
-  this->getView()->cancelPendingRenders();
-  this->colorUpdater.print();
   if (this->colorUpdater.isAutoScale())
   {
     this->onAutoScale();

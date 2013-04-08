@@ -153,6 +153,7 @@ signals:
    * @param state set to false to lock out all controls
    */
   void lockColorControls(bool state=false);
+  /// Signal indicating rendering is done.
   void renderingDone();
   /// Signal to trigger pipeline update.
   void triggerAccept();
