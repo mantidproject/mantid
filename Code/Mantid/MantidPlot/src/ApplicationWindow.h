@@ -1020,8 +1020,6 @@ public slots:
   //@{
   //! show scripting language selection dialog
   void showScriptingLangDialog();
-  //! print to scripting console (if available) or to stdout
-  void scriptPrint(const QString &text,bool error = false, bool timestamp = false);
   //! switches to the given scripting language; 
   bool setScriptingLanguage(const QString &lang);
 
@@ -1161,8 +1159,6 @@ private:
   void tileMdiWindows();
   void shakeViewport();
 
-  /// context menu for scripting console
-  void showScriptConsoleContextMenu(const QPoint &p);
   ///
   void showMantidConcepts();
 
@@ -1396,8 +1392,6 @@ private:
   QTranslator *appTranslator, *qtTranslator;
   QDockWidget *explorerWindow, *undoStackWindow;
   MantidQt::API::MessageDisplay *resultsLog;
-  QDockWidget *consoleWindow;
-  QTextEdit *console;
   QDockWidget *m_interpreterDock;
   CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;
@@ -1423,11 +1417,10 @@ private:
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
   QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
-  QAction *actionShowConsole;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
-  QAction *actionCloseAllWindows, *actionClearConsole, *actionShowPlotWizard, *actionShowConfigureDialog;
+  QAction *actionCloseAllWindows, *actionShowPlotWizard, *actionShowConfigureDialog;
   QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars, *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage;
   QAction *actionPlotL, *actionPlotP, *actionPlotLP, *actionPlotVerticalDropLines, *actionPlotSpline;
   QAction *actionPlotVertSteps, *actionPlotHorSteps, *actionPlotVerticalBars;

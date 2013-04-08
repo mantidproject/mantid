@@ -358,18 +358,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   explorerSplitter->setSizes( splitterSizes << 45 << 45);
   explorerWindow->hide();
 
-
-  consoleWindow = new QDockWidget(this);
-  consoleWindow->setObjectName("consoleWindow"); // this is needed for QMainWindow::restoreState()
-  consoleWindow->setWindowTitle(tr("Scripting Console"));
-  addDockWidget( Qt::TopDockWidgetArea, consoleWindow );
-  console = new QTextEdit(consoleWindow);
-  console->setReadOnly(true);
-  console->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(console, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-	  SLOT(showScriptConsoleContextMenu(const QPoint &)));
-  consoleWindow->setWidget(console);
-  consoleWindow->hide();
+  // Interpreter
   m_interpreterDock = new QDockWidget(this);
   m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
   m_interpreterDock->setWindowTitle("Script Interpreter");
@@ -569,14 +558,6 @@ bool ApplicationWindow::hasParaviewPath() const
 {
   Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
   return config.hasProperty("paraview.path");
-}
-
-void ApplicationWindow::showScriptConsoleContextMenu(const QPoint &p)
-{
-  (void)p;
-  QMenu *menu = console->createStandardContextMenu();
-  menu->addAction(actionClearConsole);
-  menu->popup(QCursor::pos());
 }
 
 void ApplicationWindow::initWindow()
@@ -1041,7 +1022,6 @@ void ApplicationWindow::insertTranslatedStrings()
   explorerWindow->setWindowTitle(tr("Project Explorer"));
   logWindow->setWindowTitle(tr("Results Log"));
   undoStackWindow->setWindowTitle(tr("Undo Stack"));
-  consoleWindow->setWindowTitle(tr("Scripting Console"));
   displayBar->setWindowTitle(tr("Data Display"));
   plotTools->setWindowTitle(tr("Plot"));
   standardTools->setWindowTitle(tr("Standard Tools"));
@@ -1081,11 +1061,8 @@ void ApplicationWindow::initMainMenu()
 
   view->setCheckable(true);
 
-  //view->addAction(actionShowPlotWizard);
   view->addAction(actionShowExplorer);
   view->addAction(actionShowLog);
-  //view->addAction(actionShowUndoStack);
-  view->addAction(actionShowConsole);
 
   view->insertSeparator();
   view->addAction(actionShowScriptWindow);//Mantid
@@ -4690,40 +4667,6 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
   app->d_opening_file = false;
   app->d_workspace->blockSignals(false);
   return app;
-}
-
-void ApplicationWindow::scriptPrint(const QString &msg, bool error, bool timestamp)
-{
-  if( error || msg.contains("error",Qt::CaseInsensitive) )
-  {
-    console->setTextColor(Qt::red);
-    consoleWindow->show();
-  }
-  else
-  {
-    console->setTextColor(Qt::black);
-  }
-  QString msg_to_print = msg;
-
-  if( error || timestamp )
-  {
-    if( timestamp )
-    {
-      QString separator(100, '-'); 
-      msg_to_print  = separator + "\n" + QDateTime::currentDateTime().toString() 
-	    + ": " + msg.trimmed() + "\n" + separator + '\n';
-    }
-
-    // Check for last character being a new line character unless we are at the start of the 
-    // scroll area
-    if( !console->text().endsWith('\n') && console->textCursor().position() != 0 )
-    {
-      console->textCursor().insertText("\n");    
-    }
-  }
-
-  console->textCursor().insertText(msg_to_print);
-  console->moveCursor(QTextCursor::End);
 }
 
 bool ApplicationWindow::setScriptingLanguage(const QString &lang)
@@ -12587,8 +12530,6 @@ void ApplicationWindow::createActions()
 
   actionShowUndoStack = undoStackWindow->toggleViewAction();
 
-  actionShowConsole = consoleWindow->toggleViewAction();
-
   actionAddLayer = new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
   actionAddLayer->setShortcut( tr("Alt+L") );
   connect(actionAddLayer, SIGNAL(activated()), this, SLOT(addLayer()));
@@ -12626,9 +12567,6 @@ void ApplicationWindow::createActions()
   actionCloseAllWindows->setShortcut( tr("Ctrl+Q") );
   connect(actionCloseAllWindows, SIGNAL(activated()), qApp, SLOT(closeAllWindows()));
   
-  actionClearConsole = new QAction(tr("Clear &Console"), this);
-  connect(actionClearConsole, SIGNAL(activated()), console, SLOT(clear()));
-
   actionDeleteFitTables = new QAction(QIcon(getQPixmap("close_xpm")), tr("Delete &Fit Tables"), this);
   connect(actionDeleteFitTables, SIGNAL(activated()), this, SLOT(deleteFitTables()));
 
@@ -13446,9 +13384,6 @@ void ApplicationWindow::translateActionsStrings()
   actionShowUndoStack->setMenuText(tr("&Undo/Redo Stack"));
   actionShowUndoStack->setToolTip(tr("Show available undo/redo commands"));
 
-  actionShowConsole->setMenuText(tr("&Console"));
-  actionShowConsole->setToolTip(tr("Show Scripting console"));
-
 #ifdef SCRIPTING_PYTHON
   actionShowScriptWindow->setMenuText(tr("&Script Window"));
   actionShowScriptWindow->setToolTip(tr("Script Window"));
@@ -13489,7 +13424,6 @@ void ApplicationWindow::translateActionsStrings()
   actionCloseAllWindows->setMenuText(tr("&Quit"));
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
 
-  actionClearConsole->setMenuText(tr("Clear &Console"));
   actionDeleteFitTables->setMenuText(tr("Delete &Fit Tables"));
 
   actionToolBars->setMenuText(tr("&Toolbars..."));
@@ -16364,7 +16298,7 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
 * @param code :: An arbitrary string of python code
 * @param async :: If true the code will be run asynchronously but only if it is called from the GUI thread
 * @param quiet :: If true then no output is produced concerning script start/finished
-* @param redirect :: If true redirect stdout/stderr to script console
+* @param redirect :: If true redirect stdout/stderr to results log
 */
 bool ApplicationWindow::runPythonScript(const QString & code, bool async,
     bool quiet, bool redirect)
