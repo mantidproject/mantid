@@ -64,6 +64,8 @@ public:
 public slots:
   /// Set state for all control widgets.
   void enableControls(bool state);
+  /// Reset the widget's state.
+  void reset();
   /// Set the color scale range into the range widgets.
   void setColorScaleRange(double min, double max);
 

@@ -283,6 +283,19 @@ double ColorSelectionWidget::getMaxRange()
   return this->ui.maxValLineEdit->text().toDouble();
 }
 
+/**
+ * This function returns the color selection widget to its original state.
+ * This means that automatic color scaling is on, log scaling is off and
+ * the color range line edits are empty.
+ */
+void ColorSelectionWidget::reset()
+{
+  this->ui.autoColorScaleCheckBox->setChecked(true);
+  this->ui.useLogScaleCheckBox->setChecked(false);
+  this->ui.minValLineEdit->setText("");
+  this->ui.maxValLineEdit->setText("");
+}
+
 } // SimpleGui
 } // Vates
 } // Mantid
