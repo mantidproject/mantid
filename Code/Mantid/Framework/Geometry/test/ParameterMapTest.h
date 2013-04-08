@@ -59,8 +59,10 @@ public:
     const double value(5.1);
     ParameterMap pmap;
     TS_ASSERT_EQUALS(pmap.size(), 0);
+    TSM_ASSERT("Newly created parameter map should be empty",pmap.empty())
     pmap.addDouble(comp.get(), name, value);
     TS_ASSERT_EQUALS(pmap.size(), 1);
+    TSM_ASSERT("Populated parameter map should not be empty",!pmap.empty())
     // Check that the correct one went in
     Parameter_sptr fetchedValue = pmap.get(comp.get(), name);
     TS_ASSERT(fetchedValue);
@@ -156,6 +158,7 @@ public:
     TS_ASSERT_EQUALS(pmap.size(), 2);
     pmap.clear();
     TS_ASSERT_EQUALS(pmap.size(), 0);
+    TSM_ASSERT("Cleared parameter map should be empty",pmap.empty())
   }
 
     void test_lookup_via_type_returns_null_if_fails()
