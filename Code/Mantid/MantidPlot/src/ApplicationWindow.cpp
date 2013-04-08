@@ -223,7 +223,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings)
 Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
-m_exitCode(0),
+m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
 #ifdef Q_OS_MAC // Mac
   settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
 #else
@@ -239,7 +239,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings, const QStringList& ar
 Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
-m_exitCode(0),
+m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
 #ifdef Q_OS_MAC // Mac
   settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
 #else
@@ -358,12 +358,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   explorerSplitter->setSizes( splitterSizes << 45 << 45);
   explorerWindow->hide();
 
-  results=new QTextEdit(logWindow);
-  results->setReadOnly (true);
-  results->hide();
-//  results->setContextMenuPolicy(Qt::CustomContextMenu);
-//  connect(results, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-//	  SLOT(showLogWindowContextMenu(const QPoint &)));
 
   consoleWindow = new QDockWidget(this);
   consoleWindow->setObjectName("consoleWindow"); // this is needed for QMainWindow::restoreState()
@@ -474,9 +468,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   if (defaultScriptingLang == "muParser")
   {
     logWindow->show();
-    results->setTextColor(Qt::blue);
-    results->insertPlainText("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
-    results->setTextColor(Qt::black);
+    g_log.warning("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
   }
 
   actionIPythonConsole->setVisible(testForIPython());
@@ -579,56 +571,10 @@ bool ApplicationWindow::hasParaviewPath() const
   return config.hasProperty("paraview.path");
 }
 
-void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)
-{
-  (void)p; //Avoid compiler warning
-  QMenu *menu = results->createStandardContextMenu();
-  if(!menu) return;
-  if(results->text().isEmpty())
-  {
-    actionClearLogInfo->setEnabled(false);
-  }
-  else
-  {
-    actionClearLogInfo->setEnabled(true);
-  }
-
-  menu->addAction(actionClearLogInfo);
-  //Mantid log level changes
-  QMenu *logLevelMenu = menu->addMenu("&Log Level");
-  logLevelMenu->addAction(actionLogLevelError);
-  logLevelMenu->addAction(actionLogLevelWarning);
-  logLevelMenu->addAction(actionLogLevelNotice);
-  logLevelMenu->addAction(actionLogLevelInformation);
-  logLevelMenu->addAction(actionLogLevelDebug);
-
-  //check the right level
-  int level = Mantid::Kernel::Logger::get("").getLevel(); //get the root logger logging level
-  if (level == Poco::Message::PRIO_ERROR)
-    actionLogLevelError->setChecked(true);
-  if (level == Poco::Message::PRIO_WARNING)
-    actionLogLevelWarning->setChecked(true);
-  if (level == Poco::Message::PRIO_NOTICE)
-    actionLogLevelNotice->setChecked(true);
-  if (level == Poco::Message::PRIO_INFORMATION)
-    actionLogLevelInformation->setChecked(true);
-  if (level == Poco::Message::PRIO_DEBUG)
-    actionLogLevelDebug->setChecked(true);
-
-  //Mantid log level changes
-  menu->popup(QCursor::pos());
-}
-
-void ApplicationWindow::setLogLevel(int level)
-{
-  //set the log level
-  Mantid::Kernel::Logger::setLevelForAll(level);
-}
-
 void ApplicationWindow::showScriptConsoleContextMenu(const QPoint &p)
 {
   (void)p;
-  QMenu *menu = results->createStandardContextMenu();
+  QMenu *menu = console->createStandardContextMenu();
   menu->addAction(actionClearConsole);
   menu->popup(QCursor::pos());
 }
@@ -4800,7 +4746,7 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
   else
   {
     newEnv = ScriptingLangManager::newEnv(lang, this);
-    connect(newEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
+    connect(newEnv, SIGNAL(print(const QString&)), resultsLog, SLOT(appendNotice(const QString&)));
 
     // The following is already part of executeScript
     // This call could be uncommented if mantidsimple is folded into Mantid such that the
@@ -7865,40 +7811,27 @@ void ApplicationWindow::showIntegrationDialog()
   id->exec();
 }
 
-/**
- * Sets the visibilty of the log window. If it is shown then
- * the results are scrolled to the bottom
- */
-void ApplicationWindow::showLogWindow(bool show)
-{
-  logWindow->setVisible(show);
-  if( show )
-  {
-    QTextCursor cur = results->textCursor();
-    cur.movePosition(QTextCursor::End);
-    results->setTextCursor(cur);
-  }
-}
-
 void ApplicationWindow::showResults(bool ok)
 {
   if (ok)
   {
-    if (!current_folder->logInfo().isEmpty())
-      results->setText(current_folder->logInfo());
-    else
-      results->setText(tr("Sorry, there are no results to display!"));
+    QString text;
+    if (!current_folder->logInfo().isEmpty()) text = current_folder->logInfo();
+    else text = "Sorry, there are no results to display!";
+    using MantidQt::API::Message;
+    resultsLog->replace(Message(text, Message::Priority::PRIO_INFORMATION));
   }
-  showLogWindow(ok);
+  logWindow->setVisible(ok);
 }
 
 void ApplicationWindow::showResults(const QString& s, bool ok)
 {
   current_folder->appendLogInfo(s);
-
   QString logInfo = current_folder->logInfo();
-  if (!logInfo.isEmpty())
-    results->setText(logInfo);
+  if (!logInfo.isEmpty()) {
+    using MantidQt::API::Message;
+    resultsLog->replace(Message(logInfo, Message::Priority::PRIO_INFORMATION));
+  }
   showResults(ok);
 }
 
@@ -8333,10 +8266,7 @@ void ApplicationWindow::clearSelection()
 
 void ApplicationWindow::copySelection()
 {
-  if(results->hasFocus()){
-    results->copy();
-    return;
-  } else if(info->hasFocus()) {
+  if(info->hasFocus()) {
     info->copy();
     return;
   }
@@ -9406,7 +9336,7 @@ void ApplicationWindow::newProject()
 {
   saveSettings();//the recent projects must be saved
   mantidUI->saveProject(saved);
-  clearLogInfo();
+  resultsLog->clear();
   setWindowTitle(tr("MantidPlot - untitled"));//Mantid
   projectname = "untitled";
 }
@@ -10310,15 +10240,6 @@ MultiLayer * ApplicationWindow::newFunctionPlot(QStringList &formulas, double st
 
   updateFunctionLists(type, formulas);
   return ml;
-}
-
-void ApplicationWindow::clearLogInfo()
-{
-  //if (!current_folder->logInfo().isEmpty()){
-  current_folder->clearLogInfo();
-  results->setText("");
-  emit modified();
-  //}
 }
 
 void ApplicationWindow::clearParamFunctionsList()
@@ -12529,7 +12450,6 @@ void ApplicationWindow::setAppColors(const QColor& wc, const QColor& pc, const Q
   palette.setColor(QPalette::WindowText, QColor(panelsTextColor));
 
   lv->setPalette(palette);
-  results->setPalette(palette);
   folders->setPalette(palette);
 }
 
@@ -12705,46 +12625,6 @@ void ApplicationWindow::createActions()
   actionCloseAllWindows = new QAction(QIcon(getQPixmap("quit_xpm")), tr("&Quit"), this);
   actionCloseAllWindows->setShortcut( tr("Ctrl+Q") );
   connect(actionCloseAllWindows, SIGNAL(activated()), qApp, SLOT(closeAllWindows()));
-
-  actionClearLogInfo = new QAction(tr("Clear &Log Information"), this);
-  connect(actionClearLogInfo, SIGNAL(activated()), this, SLOT(clearLogInfo()));
-
-  //mantid log level control
-  actionLogLevelError = new QAction(tr("&Error"), this);
-  actionLogLevelError->setCheckable(true);
-  actionLogLevelWarning = new QAction(tr("&Warning"), this);
-  actionLogLevelWarning->setCheckable(true);
-  actionLogLevelNotice = new QAction(tr("&Notice"), this);
-  actionLogLevelNotice->setCheckable(true);
-  actionLogLevelInformation = new QAction(tr("&Information"), this);
-  actionLogLevelInformation->setCheckable(true);
-  actionLogLevelDebug = new QAction(tr("&Debug"), this);
-  actionLogLevelDebug->setCheckable(true);
-
-  logLevelMapper = new QSignalMapper(this);
-  logLevelMapper->setMapping(actionLogLevelError, Poco::Message::PRIO_ERROR);
-  logLevelMapper->setMapping(actionLogLevelWarning, Poco::Message::PRIO_WARNING);
-  logLevelMapper->setMapping(actionLogLevelNotice, Poco::Message::PRIO_NOTICE);
-  logLevelMapper->setMapping(actionLogLevelInformation, Poco::Message::PRIO_INFORMATION);
-  logLevelMapper->setMapping(actionLogLevelDebug, Poco::Message::PRIO_DEBUG);
-  
-  connect(actionLogLevelError, SIGNAL(activated()), logLevelMapper, SLOT (map()));
-  connect(actionLogLevelWarning, SIGNAL(activated()), logLevelMapper, SLOT (map()));
-  connect(actionLogLevelNotice, SIGNAL(activated()), logLevelMapper, SLOT (map()));
-  connect(actionLogLevelInformation, SIGNAL(activated()), logLevelMapper, SLOT (map()));
-  connect(actionLogLevelDebug, SIGNAL(activated()), logLevelMapper, SLOT (map()));
-
-	connect(logLevelMapper, SIGNAL(mapped(int)), this, SLOT(setLogLevel(int)));
-
-  logLevelGroup = new QActionGroup(this);
-  logLevelGroup->addAction(actionLogLevelError);
-  logLevelGroup->addAction(actionLogLevelWarning);
-  logLevelGroup->addAction(actionLogLevelNotice);
-  logLevelGroup->addAction(actionLogLevelInformation);
-  logLevelGroup->addAction(actionLogLevelDebug);
-
-
-  //mantid log level control
   
   actionClearConsole = new QAction(tr("Clear &Console"), this);
   connect(actionClearConsole, SIGNAL(activated()), console, SLOT(clear()));
@@ -13609,7 +13489,6 @@ void ApplicationWindow::translateActionsStrings()
   actionCloseAllWindows->setMenuText(tr("&Quit"));
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
 
-  actionClearLogInfo->setMenuText(tr("Clear &Log Information"));
   actionClearConsole->setMenuText(tr("Clear &Console"));
   actionDeleteFitTables->setMenuText(tr("Delete &Fit Tables"));
 
@@ -15737,7 +15616,8 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force)
   hideFolderWindows(oldFolder);
   current_folder = newFolder;
 
-  results->setText(current_folder->logInfo());
+  resultsLog->clear();
+  resultsLog->appendInformation(current_folder->logInfo());
 
   lv->clear();
 
@@ -16504,15 +16384,15 @@ bool ApplicationWindow::runPythonScript(const QString & code, bool async,
   }
   if( !quiet )
   {
-    // Output a message to say we've started
-    scriptPrint("Script execution started.", false, true);
+    g_log.debug("Script execution started.\n");
   }
   if(redirect)
   {
     m_iface_script->redirectStdOut(true);
-    connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
-    connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this,
-      SLOT(scriptPrint(const QString &)));
+    connect(m_iface_script, SIGNAL(print(const QString &)), resultsLog,
+            SLOT(appendNotice(const QString&)));
+    connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)),
+            resultsLog, SLOT(appendError(const QString &)));
 
   }
   bool success(false);
@@ -16534,13 +16414,14 @@ bool ApplicationWindow::runPythonScript(const QString & code, bool async,
   if (redirect)
   {
     m_iface_script->redirectStdOut(false);
-    disconnect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
-    disconnect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this,
-      SLOT(scriptPrint(const QString &)));
+    disconnect(m_iface_script, SIGNAL(print(const QString &)), resultsLog,
+               SLOT(appendNotice(const QString&)));
+    disconnect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)),
+               resultsLog, SLOT(appendError(const QString &)));
   }
   if(success && !quiet)
   {
-    scriptPrint("Script execution completed successfully.", false, true);
+    g_log.debug("Script execution completed successfully.\n");
   }
 
   return success;

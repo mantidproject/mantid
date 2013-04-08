@@ -16,6 +16,7 @@
 class QAction;
 class QActionGroup;
 class QPoint;
+class QShowEvent;
 class QSignalMapper;
 class QTextEdit;
 
@@ -69,14 +70,18 @@ namespace MantidQt
       void appendInformation(const QString & text);
       /// Convenience method for appending message at debug level
       void appendDebug(const QString & text);
-
       /// Write a message after the current contents
       void append(const Message & msg);
-
       /// Replace the display text with the given contents
       void replace(const Message & msg);
       /// Clear all of the text
       void clear();
+      /// Scroll to the bottom of the text
+      void scrollToBottom();
+
+    protected:
+      /// Ensure the text display is at the bottom when shown
+      void showEvent(QShowEvent *);
 
     private slots:
       /// Provide a custom context menu

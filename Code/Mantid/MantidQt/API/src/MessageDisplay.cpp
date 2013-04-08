@@ -42,6 +42,16 @@ namespace MantidQt
     }
 
     /**
+     */
+    MessageDisplay::~MessageDisplay()
+    {
+      // The Channel class is ref counted and will
+      // delete itself when required
+      m_logChannel->release();
+      delete m_textDisplay;
+    }
+
+    /**
      * Attaches the Mantid logging framework
      * (Note the ConfigService must have already been started)
      */
@@ -125,6 +135,8 @@ namespace MantidQt
       appendText(msg.text());
       //set the colour back to the default (black) for historical reasons
       setTextColor(Message::Priority::PRIO_INFORMATION);
+      scrollToBottom();
+
       if(msg.priority() <= Message::Priority::PRIO_ERROR ) emit errorReceived(msg.text());
     }
 
@@ -146,13 +158,28 @@ namespace MantidQt
     }
 
     /**
+     * Moves the cursor to the bottom of the document
      */
-    MessageDisplay::~MessageDisplay()
+    void MessageDisplay::scrollToBottom()
     {
-      // The Channel class is ref counted and will
-      // delete itself when required
-      m_logChannel->release();
-      delete m_textDisplay;
+      QTextCursor cur = m_textDisplay->textCursor();
+      cur.movePosition(QTextCursor::End);
+      m_textDisplay->setTextCursor(cur);
+    }
+
+    //----------------------------------------------------------------------------------------
+    // Protected members
+    //----------------------------------------------------------------------------------------
+    /**
+     * @param event A QShowEvent object a parameterizing the event
+     */
+    void MessageDisplay::showEvent(QShowEvent * event)
+    {
+      Q_UNUSED(event);
+      scrollToBottom();
+
+      // Don't accept the event on purpose to allow parent to
+      // do something if required.
     }
 
     //-----------------------------------------------------------------------------
