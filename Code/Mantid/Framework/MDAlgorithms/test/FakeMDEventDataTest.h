@@ -166,7 +166,8 @@ public:
     auto inWS = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>,3>(10, 0.0, 10.0, 0);
     // Give it an instrument
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 16);
-    ExperimentInfo_sptr ei(new ExperimentInfo());
+    //ExperimentInfo_sptr ei(new ExperimentInfo());
+    ExperimentInfo_sptr ei = inWS->getExperimentInfo(0);
     ei->setInstrument(inst);
     // Give it a run number
     ei->mutableRun().addProperty(new PropertyWithValue<std::string>("run_number", "12345"), true);
