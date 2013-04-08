@@ -40,7 +40,7 @@ namespace MantidQt
       /// Controls whether the display is allowed to set the log levels
       enum LogLevelControl {
         EnableLogLevelControl = 0,
-        DisableLogLevelControl = 1
+        DisableLogLevelControl
       };
 
       /// Default constructor
@@ -51,6 +51,10 @@ namespace MantidQt
 
       // Setup logging framework connections
       void attachLoggingChannel();
+
+    signals:
+      /// Indicate that a message of error or higher has been received.
+      void errorReceived(const QString & text);
 
     public slots:
       /// Convenience method for appending message at fatal level

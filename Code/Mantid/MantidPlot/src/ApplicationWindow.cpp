@@ -284,6 +284,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   qRegisterMetaType<Message>("Message"); // Required to use it in signals-slots
   resultsLog = new MantidQt::API::MessageDisplay(MessageDisplay::EnableLogLevelControl, logWindow);
   logWindow->setWidget(resultsLog);
+  connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow, SLOT(show()));
 
   // Start Mantid
   // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents

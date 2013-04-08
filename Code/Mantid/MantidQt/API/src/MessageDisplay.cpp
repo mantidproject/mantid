@@ -125,6 +125,7 @@ namespace MantidQt
       appendText(msg.text());
       //set the colour back to the default (black) for historical reasons
       setTextColor(Message::Priority::PRIO_INFORMATION);
+      if(msg.priority() <= Message::Priority::PRIO_ERROR ) emit errorReceived(msg.text());
     }
 
     /**
@@ -132,7 +133,8 @@ namespace MantidQt
      */
     void MessageDisplay::replace(const Message & msg)
     {
-      m_textDisplay->setText(msg.text());
+      clear();
+      append(msg.text());
     }
 
     /**
