@@ -8,7 +8,7 @@
 class HelpWindow
 {
 public:
-    HelpWindow();
+    HelpWindow(const std::string &url);
     virtual ~HelpWindow();
     void showURL(const std::string & url);
     void showAlgorithm(const std::string &name, const int version=-1);
@@ -27,7 +27,7 @@ private:
     /// The logger for the class.
     Mantid::Kernel::Logger& m_log;
 
-    void start();
+    void start(const std::string &url);
     bool isRunning();
     void findCollectionFile(std::string & binDir);
     void determineFileLocs();
