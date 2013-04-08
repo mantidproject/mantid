@@ -90,6 +90,9 @@ namespace Algorithms
     declareProperty("TimeStepBinResolution", 0.0001,
                     "Time resolution (second) for time stamp delta T disibution. ");
 
+    declareProperty("IgnoreNegativeTimeInterval", false,
+                    "If true, then the time interval with negative number will be neglected in doing statistic.");
+
     return;
   }
 
@@ -134,6 +137,8 @@ namespace Algorithms
     m_starttime = m_dataWS->run().startTime();
     m_endtime = m_dataWS->run().endTime();
 
+    m_ignoreNegativeTime = getProperty("IgnoreNegativeTimeInterval");
+
     // 2. Process start time and end time
     processTimeRange();
 
@@ -172,6 +177,9 @@ namespace Algorithms
    */
   void GetTimeSeriesLogInformation::processTimeRange()
   {
+    // Orignal
+    m_intInfoMap.insert(make_pair("Items", m_log->size()));
+
     // Input time
     double t0r = this->getProperty("FilterStartTime");
     double tfr = this->getProperty("FilterStopTime");
@@ -385,7 +393,16 @@ namespace Algorithms
     }
 
     // 2. Create a vector of counts
-    size_t numbins = static_cast<size_t>(ceil((dtmax-dtmin)/stepsize))+2;
+    size_t numbins;
+    if (m_ignoreNegativeTime && dtmin < 0)
+    {
+      numbins = static_cast<size_t>(ceil((dtmax)/stepsize))+2;
+    }
+    else
+    {
+      numbins = static_cast<size_t>(ceil((dtmax-dtmin)/stepsize))+2;
+    }
+
     g_log.notice() << "Distribution has " << numbins << " bins.  Delta T = (" << dtmin
                    << ", " << dtmax << ")\n";
 
@@ -393,8 +410,13 @@ namespace Algorithms
           API::WorkspaceFactory::Instance().create("Workspace2D", 1, numbins, numbins));
     MantidVec& vecDeltaT = distws->dataX(0);
     MantidVec& vecCount = distws->dataY(0);
+
+    double countmin = dtmin;
+    if (m_ignoreNegativeTime && dtmin < 0)
+      countmin = 0;
+
     for (size_t i = 0; i < numbins; ++i)
-      vecDeltaT[i] = dtmin + (static_cast<double>(i)-1) * stepsize;
+      vecDeltaT[i] = countmin + (static_cast<double>(i)-1) * stepsize;
     for (size_t i = 0; i < numbins; ++i)
       vecCount[i] = 0;
 
@@ -402,21 +424,29 @@ namespace Algorithms
     for (size_t i = 0; i < vecdt.size(); ++i)
     {
       double dt = vecdt[i];
-      vector<double>::iterator viter = lower_bound(vecDeltaT.begin(), vecDeltaT.end(), dt);
-      int index = static_cast<int>(viter - vecDeltaT.begin());
-      if (index >= static_cast<int>(vecDeltaT.size()))
+      int index;
+      if (dt < 0 && m_ignoreNegativeTime)
       {
-        // Out of upper boundary
-        g_log.error() << "Find index = " << index << " > vecX.size = " << vecDeltaT.size() << ".\n";
+        index = 0;
       }
-      else if (vecdt[i] < vecDeltaT[index])
+      else
       {
-        -- index;
+        vector<double>::iterator viter = lower_bound(vecDeltaT.begin(), vecDeltaT.end(), dt);
+        index = static_cast<int>(viter - vecDeltaT.begin());
+        if (index >= static_cast<int>(vecDeltaT.size()))
+        {
+          // Out of upper boundary
+          g_log.error() << "Find index = " << index << " > vecX.size = " << vecDeltaT.size() << ".\n";
+        }
+        else if (vecdt[i] < vecDeltaT[index])
+        {
+          -- index;
+        }
+
+
+        if (index < 0)
+          throw runtime_error("How can this happen.");
       }
-
-      if (index < 0)
-        throw runtime_error("How can this happen.");
-
       vecCount[index] += 1;
     }
 

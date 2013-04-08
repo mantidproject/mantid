@@ -64,6 +64,8 @@ namespace Algorithms
     Kernel::DateAndTime m_starttime;
     Kernel::DateAndTime m_endtime;
 
+    bool m_ignoreNegativeTime;
+
     virtual void initDocs();
 
     void init();
