@@ -176,8 +176,7 @@ namespace MDAlgorithms
 
     for (uint16_t i=0; i < nExperiments; i++)
     {
-      IMDEventWorkspace_const_sptr ws = m_workspaces[i];
-      API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(ws->getExperimentInfo(i)->cloneExperimentInfo());
+      API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(m_workspaces[i]->getExperimentInfo(i)->cloneExperimentInfo());
       out->addExperimentInfo(ei);
     }
 
