@@ -1,6 +1,7 @@
 from assistant_common import WEB_BASE, HTML_DIR
 from htmlwriter import HtmlWriter
 import mantid
+from mediawiki import MediaWiki
 import os
 import wiki_tools
 
@@ -81,7 +82,9 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
         categories.extend(alg.categories())
 
         htmlfile.h3("Summary")
-        htmlfile.p(alg.getWikiSummary())
+        #htmlfile.p(alg.getWikiSummary())
+        wiki = MediaWiki(htmlfile)
+        wiki.parse(alg.getWikiSummary())
 
         htmlfile.h3("Usage")
         text = wiki_tools.create_function_signature(alg, name)
@@ -103,10 +106,11 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
             htmlfile.writeRow(propToList(property, i))
         htmlfile.closeTag(True)
 
-        from mediawiki import MediaWiki
         wiki = MediaWiki(htmlfile)
         text = wiki_tools.get_custom_wiki_section(name, version, "*WIKI*", True, False)
-        wiki.parse(text)
+        if len(text.strip()) > 0:
+            htmlfile.h3("Description")
+            wiki.parse(text)
 
         htmlfile.closeTag(True)
 

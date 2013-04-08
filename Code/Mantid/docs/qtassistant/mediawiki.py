@@ -102,17 +102,20 @@ class MediaWiki:
         if len(text) <= 0:
             return # don't bother if it is empty
         #print "01>>>", text, "<<<"
-        text = self.__clearEmpty(text)
+        if text.startswith("== Deprecation notice =="):
+            stuff = "== Deprecation notice =="
+            text = text.replace(stuff, stuff+"\n")
         #print "02>>>", text, "<<<"
-        text = self.__fixHEADERS(text)
+        text = self.__clearEmpty(text)
         #print "03>>>", text, "<<<"
+        text = self.__fixHEADERS(text)
+        #print "04>>>", text, "<<<"
         text = self.__fixUL(text)
 
         text = text.split("\n")
 
         self.__annotate(text)
 
-        self.__file.h3("Description")
         self.__file.openTag('p')
         list_stack = ""
         num_lines = len(text)
