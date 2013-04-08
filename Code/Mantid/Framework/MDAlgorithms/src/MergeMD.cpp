@@ -176,8 +176,12 @@ namespace MDAlgorithms
 
      for (uint16_t i=0; i < nExperiments; i++)
      {
-       API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(m_workspaces[i]->getExperimentInfo(i)->cloneExperimentInfo());
-       out->addExperimentInfo(ei);
+         uint16_t nWSexperiments = m_workspaces[i]->getNumExperimentInfo();
+         for(uint16_t j=0;j<nWSexperiments;j++)
+         {
+            API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(m_workspaces[i]->getExperimentInfo(j)->cloneExperimentInfo());
+            out->addExperimentInfo(ei);
+         }
      }
 
  
