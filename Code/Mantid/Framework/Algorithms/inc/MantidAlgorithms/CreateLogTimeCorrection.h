@@ -3,8 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid
 {
@@ -42,7 +43,20 @@ namespace Algorithms
   public:
     CreateLogTimeCorrection();
     virtual ~CreateLogTimeCorrection();
-    
+
+    virtual const std::string name() const {return "CreateLogTimeCorrection"; }
+    virtual int version() const {return 1; }
+    virtual const std::string category() const {return "Events\\EventFiltering"; }
+
+  private:
+    /// Sets documentation strings for this algorithm
+    virtual void initDocs();
+    /// Implement abstract Algorithm methods
+    void init();
+    /// Implement abstract Algorithm methods
+    void exec();
+
+    API::MatrixWorkspace_sptr m_dataWS;
   };
 
 
