@@ -19,6 +19,7 @@ src/MDEWLoadingPresenter.cpp
 src/MDEWInMemoryLoadingPresenter.cpp
 src/MDHWInMemoryLoadingPresenter.cpp
 src/MDHWLoadingPresenter.cpp
+src/MDHWNexusLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/NoThresholdRange.cpp
@@ -67,6 +68,7 @@ inc/MantidVatesAPI/MDEWInMemoryLoadingPresenter.h
 inc/MantidVatesAPI/MDEWRebinningPresenter.h
 inc/MantidVatesAPI/MDHWInMemoryLoadingPresenter.h
 inc/MantidVatesAPI/MDHWLoadingPresenter.h
+inc/MantidVatesAPI/MDHWNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
 inc/MantidVatesAPI/MDLoadingViewAdapter.h
@@ -136,6 +138,7 @@ test/MDEWLoadingPresenterTest.h
 test/MDEWRebinningPresenterTest.h
 test/MDHWInMemoryLoadingPresenterTest.h
 test/MDHWLoadingPresenterTest.h
+test/MDHWNexusLoadingPresenterTest.h
 test/NullRebinningPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningKnowledgeSerializerTest.h

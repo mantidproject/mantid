@@ -1,0 +1,48 @@
+<ServerManagerConfiguration>
+  <!-- Begin MDHWNexusReader -->
+  <ProxyGroup name="sources">
+    <SourceProxy name="MDHWNexusReader" class="vtkMDHWNexusReader">
+	    <StringVectorProperty
+         name="WorkspaceTypeName"
+         command="GetWorkspaceTypeName"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
+	    <IntVectorProperty
+         name="Load All Into Memory"
+         command="SetInMemory"
+         number_of_elements="1"
+         default_values="0">
+         <BooleanDomain name="bool"/>
+        </IntVectorProperty>
+	<StringVectorProperty
+         name="InputGeometryXML"
+         command="GetInputGeometryXML"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
+       <StringVectorProperty
+        name="FileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+      </StringVectorProperty>
+	  <DoubleVectorProperty 
+        name="TimestepValues"
+        information_only="1">
+        <TimeStepsInformationHelper/>
+        <Documentation>
+          Available timestep values.
+        </Documentation>
+      </DoubleVectorProperty>
+      <StringVectorProperty
+        name="TimeLabelAnnotation"
+        information_only="1"
+        si_class="vtkSITimeLabelProperty">
+      </StringVectorProperty>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End MDHWNexusReader -->
+</ServerManagerConfiguration>

@@ -111,6 +111,23 @@ namespace Mantid
       return bExecute;
     }
     
+    /**
+    Determines wheter the file can be loaded based on it's extension.
+    @param filename containing the extension
+    @param expectedExtension expected extension for the file to have
+    @return TRUE, only if the extension is approved.
+    */
+    bool MDHWLoadingPresenter::canLoadFileBasedOnExtension(const std::string& filename, const std::string& expectedExtension) const
+    {
+       // Quick check based on extension.
+      const size_t startExtension = filename.find_last_of('.');
+      const size_t endExtension = filename.length();
+      std::string extension = filename.substr(startExtension, endExtension - startExtension);
+      boost::algorithm::to_lower(extension);
+      boost::algorithm::trim(extension);
+      return extension == expectedExtension;
+    }
+
     /*
     Append the geometry and function information onto the outgoing vtkDataSet.
     @param visualDataSet : outgoing dataset on which to append metadata.
