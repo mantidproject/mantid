@@ -88,10 +88,12 @@ namespace MDEvents
   {
       throw Kernel::Exception::NotImplementedError(" Not yet implemented");
   }
-  /** If the workspace was filebacked, this would clear file-backed information from the workspace nodes and close the underlying files
-  *@param loadFileBacked -- if true, load data which were initially backed to hdd when breaking connection between the file and the workspace. 
-                             if false, data on hdd are lost if not previously loaded in memory
-  */ 
+  /** If the workspace was filebacked, this would clear file-backed information from the workspace nodes and close the files responsible for file backing
+   *
+   *@param LoadFileBackedData -- if true, load all data initially backed to hdd when breaking connection between the file and the workspace. 
+   *                             if false, data on hdd are lost if not previously loaded in memory and the workspace is generally corrupted 
+   *                              (used in destructor)
+   */ 
   TMDE(
   void MDEventWorkspace)::clearFileBacked(bool LoadFileBackedData)
   {     

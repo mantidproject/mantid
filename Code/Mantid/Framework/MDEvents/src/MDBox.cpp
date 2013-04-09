@@ -32,9 +32,9 @@ namespace MDEvents
   }
 //-----------------------------------------------------------------------------------------------
   /** Convenience Constructor/default constructor for accepting shared pointer
-   * @param splitter :: BoxController that controls how boxes split
+   * @param splitter :: shared pointer to BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
-   * @param boxSize :: size to reserve for data
+   * @param nBoxEvents :: number of events to reserve memory for.
    * @param boxID :: id for the given box
    */
   TMDE(MDBox)::MDBox(API::BoxController_sptr & splitter, const uint32_t depth,const size_t nBoxEvents,const size_t boxID)
@@ -49,7 +49,7 @@ namespace MDEvents
   /** Constructor/default constructor
    * @param splitter :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
-   * @param boxSize :: size to reserve for data
+   * @param nBoxEvents :: number of events to reserve memory for.
    * @param boxID :: id for the given box
    */
   TMDE(MDBox)::MDBox(API::BoxController*const splitter, const uint32_t depth,const size_t nBoxEvents,const size_t boxID)
@@ -64,8 +64,8 @@ namespace MDEvents
   /** Constructor
    * @param splitter :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
-   * @param extentsVector :: vector defining the extents
-   * @param boxSize :: size of reserve for data
+   * @param extentsVector :: vector defining the extents of the box in all n-dimensions
+   * @param nBoxEvents :: number of events to reserve memory for.
    * @param boxID :: id for the given box
    */
   TMDE(MDBox)::MDBox(BoxController_sptr &splitter, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
@@ -110,6 +110,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor
    * @param other: MDBox object to copy from.
+   * @param otherBC - mandatory other box controller, which controls how this box will split. 
    */
   TMDE(MDBox)::MDBox(const MDBox<MDE,nd> & other,Mantid::API::BoxController *const otherBC)
      : MDBoxBase<MDE, nd>(other,otherBC),
@@ -337,8 +338,8 @@ namespace MDEvents
   };
     /** The method to convert the table of data into vector of events 
      *   Used to load events from plain binary file
-     *   @param coordTable -- vector of events parameters
-     *   @param nColumns    -- number of parameters for each event
+     *   @param coordTable -- vector of events parameters, which will be converted into events 
+                               signal error and coordinates
      */
   TMDE(
   void MDBox)::setEventsData(const std::vector<coord_t> &coordTable)
@@ -700,11 +701,11 @@ namespace MDEvents
   }
  
   /** Create event from the input data and add it to the box.
-   * @param point :: reference to the  MDEvent coordinates
    * @param Signal  :: events signal
    * @param errorSq :: events Error squared
-   * @param index   run  index
-   * @param index   detector's ID
+   * @param point :: reference to the  vector of MDEvent coordinates
+   * @param index   run  index of the event
+   * @param index   detector's ID of the event
    * */
    TMDE(
    void MDBox)::buildAndAddEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
@@ -715,10 +716,13 @@ namespace MDEvents
    }
 
   /** Create MD MDEvent amd add it to the box.
-   // add a single event and set pointer to the box which needs splitting (if one actually need) 
+   // add a single event and set pointer to the box which needs splitting (if one actually do ) 
 
-   * @param point :: reference to a MDEvent to add.
-   * @param index :: current index for box
+   * @param Signal  :: events signal
+   * @param errorSq :: events Error squared
+   * @param point :: reference to the  vector of MDEvent coordinates
+   * @param index   run  index of the event
+   * @param index   detector's ID of the event
    */
    TMDE(
    void MDBox)::buildAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
@@ -802,8 +806,7 @@ namespace MDEvents
   /** Add Add all events . No bounds checking is made!
    *
    * @param events :: vector of events to be copied.
-   * @param start_at :: index to start at in vector
-   * @param stop_at :: index to stop at in vector (exclusive)
+   *
    * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(
@@ -820,8 +823,8 @@ namespace MDEvents
   }
 
     /**Make this box file-backed 
-    * @param fileLocation -- the starting position of this box data are/should be located in direct access file
-    * @param fileSize     -- the size this box data occupy on the file (in the units of  the data whatever it is)
+    * @param fileLocation -- the starting position of this box data are/should be located in the direct access file
+    * @param fileSize     -- the size this box data occupy in the file (in the units of the numbner of eventss)
     * @param markSaved    -- set to true if the data indeed are physically there and one can indedd read then from there
     */
     TMDE(

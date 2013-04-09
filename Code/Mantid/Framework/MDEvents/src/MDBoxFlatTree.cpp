@@ -336,7 +336,10 @@ namespace Mantid
 
   }
 
-  /// Save each NEW ExperimentInfo to a spot in the file
+  /** Save each NEW ExperimentInfo to a spot in the file 
+   *@param file -- NeXus file pointer to the file, opened within appropriate group where one going to place experiment infos
+   *@param ws   -- the shared pointer to the workspace with experiment infos to write.
+  */
   void MDBoxFlatTree::saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws)
   {
 

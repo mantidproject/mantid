@@ -263,8 +263,6 @@ namespace MDEvents
    *  nPoints, signal and error.
    *
    * @param events :: vector of events to be copied.
-   * @param start_at :: begin at this index in the array
-   * @param stop_at :: stop at this index in the array
    * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(

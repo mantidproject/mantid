@@ -162,7 +162,7 @@ static void destroySuite(MDEventTest * suite) { delete suite; }
           events[i].setDetectorId(uint32_t(i));
           events[i].setRunIndex(uint16_t(i/10));
           sumGuess+=double(i);
-          errGuess+=(i*i);
+          errGuess+=double(i*i);
           events[i].setCenter(0,0.1*static_cast<double>(i));
           events[i].setCenter(1,static_cast<double>(i));
           events[i].setCenter(2,10*static_cast<double>(i));
