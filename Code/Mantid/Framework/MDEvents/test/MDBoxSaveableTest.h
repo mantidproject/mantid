@@ -161,7 +161,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
  
   //-----------------------------------------------------------------------------------------
   /** Can we load it back? */
-  void xest_loadDirectNexus()
+  void test_loadDirectNexus()
   {
     // A box to load stuff from
     MDBox<MDLeanEvent<3>,3> c(sc.get());
