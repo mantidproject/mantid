@@ -91,6 +91,7 @@ namespace Algorithms
     setProperty("OutputWorkspace", outWS);
 
     string filename = getProperty("OutputFilename");
+    g_log.information() << "Output file name is " << filename << ".\n";
     if (filename.size() > 0)
     {
       writeCorrectionToFile(filename);

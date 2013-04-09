@@ -8,6 +8,10 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/TableRow.h"
 
+#include <fstream>
+#include <sstream>
+#include <Poco/File.h>
+
 using Mantid::Algorithms::CreateLogTimeCorrection;
 
 using namespace Mantid;
@@ -69,6 +73,28 @@ public:
 
       TS_ASSERT_DELTA(correction*(l1+l2)/l1, 1.0, 0.0001);
     }
+
+    // check output file
+    ifstream ifile;
+    ifile.open("VucanCorrection.dat");
+    TS_ASSERT(ifile.is_open());
+    size_t numrowsinfile = 0;
+    char line[256];
+    while(!ifile.eof())
+    {
+      ifile.getline(line, 256);
+      string templine(line);
+      if (templine.size() > 0)
+        ++ numrowsinfile;
+    }
+    TS_ASSERT_EQUALS(numrowsinfile, 7392);
+
+    // clean workspaces and file written
+    AnalysisDataService::Instance().remove("Vulcan_Fake");
+    AnalysisDataService::Instance().remove("CorrectionTable");
+
+    Poco::File file("VucanCorrection.dat");
+    file.remove(false);
 
     return;
   }
