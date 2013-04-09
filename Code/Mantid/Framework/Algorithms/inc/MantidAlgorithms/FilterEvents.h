@@ -5,6 +5,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -64,20 +65,21 @@ namespace Algorithms
 
     void createOutputWorkspaces(std::string outputwsnamebase);
 
-    void importDetectorTOFCalibration(std::string detcalfilename);
+    void importDetectorTOFCalibration();
 
     void filterEventsBySplitters();
 
-    DataObjects::EventWorkspace_sptr mEventWorkspace;
+    DataObjects::EventWorkspace_sptr m_eventWS;
     DataObjects::SplittersWorkspace_sptr mSplittersWorkspace;
+    DataObjects::TableWorkspace_sptr m_detCorrectWorkspace;
 
     std::set<int> m_workGroupIndexes;
     Kernel::TimeSplitterType m_splitters;
     std::map<int, DataObjects::EventWorkspace_sptr> mOutputWorkspaces;
     std::vector<std::string> m_wsNames;
 
-    std::vector<detid_t> mCalibDetectorIDs;
-    std::vector<double> mCalibOffsets;
+    std::vector<detid_t> m_detectorIDs;
+    std::vector<double> m_detTofOffsets;
 
     bool mFilterByPulseTime;
 
