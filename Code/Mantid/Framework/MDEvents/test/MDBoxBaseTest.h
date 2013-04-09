@@ -42,8 +42,8 @@ public:
   { 
   }
   //-----------------------------------------------------------------------------------------------
-  Kernel::ISaveable *const getISaveable(){return NULL;}
-  Kernel::ISaveable *const getISaveable()const{return NULL;}
+  Kernel::ISaveable * getISaveable(){return NULL;}
+  Kernel::ISaveable * getISaveable()const{return NULL;}
   void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/){};
   void clearFileBacked(bool /* loadData*/){/**does nothing*/};
   void setFileBacked(){};

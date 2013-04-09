@@ -124,10 +124,10 @@ namespace MDEvents
 
     // -------------------------------------------------------------------------------------------
     /// @return the const box controller for this box.
-    Mantid::API::BoxController  *const getBoxController() const
+    Mantid::API::BoxController  * getBoxController() const
     { return m_BoxController; }
     /// @return the box controller for this box.
-    virtual Mantid::API::BoxController  *const getBoxController()
+    virtual Mantid::API::BoxController  * getBoxController()
      { return m_BoxController; }
 
   

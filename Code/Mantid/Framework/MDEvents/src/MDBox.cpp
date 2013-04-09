@@ -151,12 +151,12 @@ namespace MDEvents
   }
 
   TMDE(
-  Kernel::ISaveable *const MDBox)::getISaveable()
+  Kernel::ISaveable * MDBox)::getISaveable()
   {
       return m_Saveable;
   }
   TMDE(
-  Kernel::ISaveable *const MDBox)::getISaveable()const
+  Kernel::ISaveable * MDBox)::getISaveable()const
   {
       return m_Saveable;
   }

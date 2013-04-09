@@ -45,8 +45,8 @@ namespace MDEvents
     if (!m_isLoaded)
     {
         API::IBoxControllerIO *fileIO = m_MDNode->getBoxController()->getFileIO(); 
-        m_MDNode->loadAndAddFrom(fileIO,this->m_fileIndexStart,this->m_fileNumEvents);
-        this->m_isLoaded = true;
+        m_MDNode->loadAndAddFrom(fileIO,this->getFilePosition(),this->getFileSize());
+        this->setLoaded(true);
     }
 
   }

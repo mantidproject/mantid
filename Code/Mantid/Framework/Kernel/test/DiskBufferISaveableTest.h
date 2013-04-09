@@ -26,26 +26,14 @@ using Mantid::Kernel::CPUTimer;
 class ISaveableTester : public ISaveable
 {
     size_t id;
-    bool _isBusy;
+
 public:
   ISaveableTester(size_t idIn) : ISaveable(),
-      id(idIn),
-      _isBusy(false)
+      id(idIn)
   {}
   virtual ~ISaveableTester(){}
   size_t getFileId()const{return id;}
-    // temporary functions
-    virtual bool isBusy()const{return _isBusy;}
-    virtual bool isDataChanged()const{return true;}
-    virtual bool wasSaved()const{return false;}
-    virtual void setLoaded(bool ){};
-    virtual bool isLoaded()const{return true;}
-    virtual void setBusy(bool On=true){_isBusy=On;}
-    virtual void setDataChanged(){}
-    virtual void clearDataChanged(){}
-    virtual void setFilePosition(uint64_t,size_t, bool)
-    {}
-    //-----------------------------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------------------------
 
     /// Save the data - to be overriden
    virtual void save()const 
@@ -56,16 +44,23 @@ public:
     streamMutex.lock();
     fakeFile += out.str();
     streamMutex.unlock();
+    this->m_wasSaved=true;
    }
 
   
     /// Load the data - to be overriden
-    virtual void load(){};
+    virtual void load()
+    {
+        this->setLoaded(true);
+    };
 
     /// Method to flush the data to disk and ensure it is written.
     virtual void flushData() const{};
     /// remove objects data from memory
-    virtual void clearDataFromMemory(){};
+    virtual void clearDataFromMemory()
+    {
+        this->setLoaded(false);
+    };
 
   /** @return the amount of memory that the object takes as a whole.
       For filebased objects it should be the amount the object occupies in memory plus the size it occupies in file if the object has not been fully loaded
@@ -271,7 +266,7 @@ public:
     DiskBuffer dbuf(4);
     for (size_t i=0; i<9; i++)
     {
-      data[i]->setBusy();
+      data[i]->setBusy(true);
       dbuf.toWrite(data[i]);
     }
     // We ended up with too much in the buffer since nothing could be written.
@@ -453,7 +448,7 @@ public:
     for (size_t i=0; i<num; i++)
     {
       data.push_back( new ISaveableTester(i) );
-      data[i]->setBusy(); // Items won't do any real saving
+      data[i]->setBusy(true); // Items won't do any real saving
     }
   }
   void setUp()
@@ -481,7 +476,7 @@ public:
     DiskBuffer dbuf(0);
     for (size_t i=0; i<data.size(); i++)
     {
-      data[i]->setBusy(); // Items won't do any real saving
+      data[i]->setBusy(true); // Items won't do any real saving
     }
 
     for (int i=0; i<int(data.size()); i++)

@@ -49,10 +49,10 @@ namespace MDEvents
     // ----------------------------- ISaveable Methods ------------------------------------------------------
     /**get object responsible for saving the box to a file. 
       *@return the const pointer to the object. The GridBox is not saveable at the moment so it is always NULL */ 
-    virtual Kernel::ISaveable *const getISaveable(){return NULL;}
+    virtual Kernel::ISaveable * getISaveable(){return NULL;}
     /**get const object responsible for saving the box to a file. 
       *@return the const pointer the const object. The GridBox is not saveable at the moment so it is always NULL */ 
-    virtual Kernel::ISaveable *const getISaveable()const{return NULL;}
+    virtual Kernel::ISaveable * getISaveable()const{return NULL;}
     /**Recursively make all underlaying boxes file-backed*/
     virtual void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/);
     virtual void setFileBacked();

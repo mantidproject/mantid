@@ -51,9 +51,9 @@ public:
     virtual ~IMDNode(){}; 
 //---------------- ISAVABLE
     /**Return the pointer to the structure responsible for saving the box on disk if the workspace occupies too much memory */
-    virtual Kernel::ISaveable *const getISaveable()=0;
+    virtual Kernel::ISaveable * getISaveable()=0;
     /**Return the pointer to the sconst tructure responsible for saving the box on disk if the workspace occupies too much memory */
-    virtual Kernel::ISaveable *const  getISaveable()const=0;        
+    virtual Kernel::ISaveable *  getISaveable()const=0;        
     /** initiate the structure responsible for swapping the box on HDD if out of memory. */
     virtual void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)=0;
     /** initiate the structure responsible for swapping the box on HDD if out of memory with default parameters (it does not know its place on HDD and was not saved). */
@@ -94,8 +94,8 @@ public:
 
 
     /// get box controller
-    virtual Mantid::API::BoxController  *const getBoxController() const=0;
-    virtual Mantid::API::BoxController  *const getBoxController() =0;
+    virtual Mantid::API::BoxController  * getBoxController() const=0;
+    virtual Mantid::API::BoxController  * getBoxController() =0;
 
       // -------------------------------- Parents/Children-Related -------------------------------------------
     /// Get the total # of unsplit MDBoxes contained.
