@@ -440,7 +440,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and xest accessing data */
-  void xest_fileBackEnd()
+  void test_fileBackEnd()
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
