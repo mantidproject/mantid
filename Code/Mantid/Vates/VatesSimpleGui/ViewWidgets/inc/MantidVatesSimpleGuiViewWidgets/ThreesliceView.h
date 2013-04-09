@@ -64,7 +64,7 @@ public:
    * Correct an oddity in the creation of the 3D view so that the cuts
    * are visibile.
    */
-  void correctVisibility();
+  //void correctVisibility();
   /**
    * ViewBase::destroyView
    */

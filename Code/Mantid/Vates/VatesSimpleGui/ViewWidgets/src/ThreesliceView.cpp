@@ -59,7 +59,6 @@ void ThreeSliceView::render()
 {
   this->makeThreeSlice();
   this->resetDisplay();
-  this->renderAll();
   emit this->triggerAccept();
 }
 
@@ -102,11 +101,12 @@ void ThreeSliceView::resetDisplay()
   this->mainView->resetDisplay();
 }
 
+/*
 void ThreeSliceView::correctVisibility()
 {
-  this->correctColorScaleRange();
+  //this->correctColorScaleRange();
 }
-
+*/
 void ThreeSliceView::correctColorScaleRange()
 {
   QPair<double, double> range = this->origRep->getColorFieldRange();

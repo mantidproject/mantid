@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
@@ -10,6 +11,8 @@
 #include <QColor>
 #include <QList>
 
+#include <limits>
+
 namespace Mantid
 {
 namespace Vates
@@ -17,7 +20,11 @@ namespace Vates
 namespace SimpleGui
 {
 
-ColorUpdater::ColorUpdater()
+ColorUpdater::ColorUpdater() :
+  autoScaleState(true),
+  logScaleState(false),
+  minScale(std::numeric_limits<double>::min()),
+  maxScale(std::numeric_limits<double>::max())
 {
 }
 
@@ -87,6 +94,63 @@ void ColorUpdater::logScale(pqPipelineRepresentation *repr, int state)
   pqSMAdaptor::setElementProperty(lut->getProxy()->GetProperty("UseLogScale"),
                                   state);
   lut->getProxy()->UpdateVTKObjects();
+}
+
+/**
+ * This function takes information from the color selection widget and
+ * sets it into the internal state variables.
+ * @param cs : Reference to the color selection widget
+ */
+void ColorUpdater::updateState(ColorSelectionWidget *cs)
+{
+  this->autoScaleState = cs->getAutoScaleState();
+  this->logScaleState = cs->getLogScaleState();
+  this->minScale = cs->getMinRange();
+  this->maxScale = cs->getMaxRange();
+}
+
+/**
+ * @return  the current auto scaling state
+ */
+bool ColorUpdater::isAutoScale()
+{
+  return this->autoScaleState;
+}
+
+/**
+ * @return the current logarithmic scaling state
+ */
+bool ColorUpdater::isLogScale()
+{
+  return this->logScaleState;
+}
+
+/**
+ * @return the current maximum range for the color scaling
+ */
+double ColorUpdater::getMaximumRange()
+{
+  return this->maxScale;
+}
+
+/**
+ * @return the current minimum range for the color scaling
+ */
+double ColorUpdater::getMinimumRange()
+{
+  return this->minScale;
+}
+
+/**
+ * This function prints out the values of the current state of the
+ * color updater.
+ */
+void ColorUpdater::print()
+{
+  std::cout << "Auto Scale: " << this->autoScaleState << std::endl;
+  std::cout << "Log Scale: " << this->logScaleState << std::endl;
+  std::cout << "Min Range: " << this->minScale << std::endl;
+  std::cout << "Max Range: " << this->maxScale << std::endl;
 }
 
 }

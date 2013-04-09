@@ -62,6 +62,11 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
 
   // Place the widget for the render view in the frame provided.
   hbox->addWidget(view->getWidget());
+
+  /// Make a connection to the view's endRender signal for later checking.
+  QObject::connect(view, SIGNAL(endRender()),
+                   this, SIGNAL(renderingDone()));
+
   return view;
 }
 
@@ -101,7 +106,7 @@ void ViewBase::onAutoScale()
     return;
   }
   QPair <double, double> range = this->colorUpdater.autoScale(rep);
-  this->renderAll();
+  rep->renderViewEventually();
   emit this->dataRange(range.first, range.second);
 }
 
@@ -111,8 +116,13 @@ void ViewBase::onAutoScale()
  */
 void ViewBase::onColorMapChange(const pqColorMapModel *model)
 {
-  this->colorUpdater.colorMapChange(this->getRep(), model);
-  this->renderAll();
+  pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    return;
+  }
+  this->colorUpdater.colorMapChange(rep, model);
+  rep->renderViewEventually();
 }
 
 /**
@@ -122,8 +132,13 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
  */
 void ViewBase::onColorScaleChange(double min, double max)
 {
-  this->colorUpdater.colorScaleChange(this->getRep(), min, max);
-  this->renderAll();
+  pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    return;
+  }
+  this->colorUpdater.colorScaleChange(rep, min, max);
+  rep->renderViewEventually();
 }
 
 /**
@@ -132,16 +147,44 @@ void ViewBase::onColorScaleChange(double min, double max)
  */
 void ViewBase::onLogScale(int state)
 {
-  this->colorUpdater.logScale(this->getRep(), state);
-  this->renderAll();
+  pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    return;
+  }
+  this->colorUpdater.logScale(rep, state);
+  rep->renderViewEventually();
 }
 
 /**
- * This function is used to correct post-accept visibility issues. Most
- * views won't need to do anything.
+ * This function passes the color selection widget to the color updater
+ * object.
+ * @param cs : Reference to the color selection widget
  */
-void ViewBase::correctVisibility()
+void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
 {
+  this->colorUpdater.updateState(cs);
+}
+
+/**
+ * This function checks the current state from the color updater and
+ * processes the necessary color changes.
+ */
+void ViewBase::setColorsForView()
+{
+  if (this->colorUpdater.isAutoScale())
+  {
+    this->onAutoScale();
+  }
+  else
+  {
+    this->onColorScaleChange(this->colorUpdater.getMinimumRange(),
+                             this->colorUpdater.getMaximumRange());
+  }
+  if (this->colorUpdater.isLogScale())
+  {
+    this->onLogScale(true);
+  }
 }
 
 /**

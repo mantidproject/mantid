@@ -129,6 +129,7 @@ void MdViewerWidget::internalSetup(bool pMode)
   this->pluginMode = pMode;
   this->rotPointDialog = NULL;
   this->lodThreshold = 5.0;
+  this->viewSwitched = false;
 }
 
 /**
@@ -364,6 +365,11 @@ void MdViewerWidget::setParaViewComponentsForView()
                    SIGNAL(applied()),
                    this, SLOT(checkForUpdates()));
 
+  QObject::connect(this->currentView,
+                   SIGNAL(renderingDone()),
+                   this,
+                   SLOT(renderingDone()));
+
   SplatterPlotView *spv = dynamic_cast<SplatterPlotView *>(this->currentView);
   if (spv)
   {
@@ -417,6 +423,20 @@ void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 }
 
 /**
+ * This function is responsible for carrying out actions when ParaView
+ * says the rendering is completed. It currently handles making sure the
+ * color selection widget state is passed between views.
+ */
+void MdViewerWidget::renderingDone()
+{
+  if (this->viewSwitched)
+  {
+    this->viewSwitched = false;
+    this->currentView->setColorsForView();
+  }
+}
+
+/**
  * This function determines the type of source plugin and sets the workspace
  * name so that the data can be retrieved and rendered.
  * @param wsname the workspace name for the data
@@ -450,6 +470,7 @@ void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
 void MdViewerWidget::renderAndFinalSetup()
 {
   this->currentView->render();
+  this->currentView->setColorsForView();
   this->currentView->checkView();
   this->currentView->setTimeSteps();
 }
@@ -500,10 +521,12 @@ void MdViewerWidget::checkForUpdates()
  */
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 {
+  this->viewSwitched = true;
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
   this->removeProxyTabWidgetConnections();
   this->hiddenView = this->setMainViewWidget(this->ui.viewWidget, v);
+  this->hiddenView->setColorScaleState(this->ui.colorSelectionWidget);
   this->hiddenView->hide();
   this->viewLayout->removeWidget(this->currentView);
   this->swapViews();
@@ -517,8 +540,8 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->destroyView();
   delete this->hiddenView;
   this->currentView->render();
+  this->currentView->setColorsForView();
   this->currentView->checkViewOnSwitch();
-  this->currentView->correctVisibility();
   this->updateAppState();
 }
 
@@ -552,6 +575,8 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
       builder->destroySources();
       this->ui.modeControlWidget->setToStandardView();
+      this->ui.colorSelectionWidget->reset();
+      this->currentView->setColorScaleState(this->ui.colorSelectionWidget);
       return true;
     }
   }
