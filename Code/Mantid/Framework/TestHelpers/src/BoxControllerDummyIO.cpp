@@ -23,8 +23,9 @@ namespace MantidTestHelpers
    * As save/load operations use void data type, these function allow set up/get  the type name provided for the IO operations
    *  and the size of the data type in bytes (e.g. the  class dependant physical  meaning of the blockSize and blockPosition used 
    *  by save/load operations     
-   *@param CoordSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations. 4 and 8 are supported only
-   *@paramtypeName  -- the name of the event used in the operations. The name itself defines the size and the format of the event
+   *@param blockSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations. 4 and 8 are supported only
+                        (float and double)
+   *@param typeName  -- the name of the event used in the operations. The name itself defines the size and the format of the event
                        The events described in the class header are supported only
   */  
   void BoxControllerDummyIO::setDataType(const size_t blockSize, const std::string &typeName)
@@ -64,9 +65,9 @@ namespace MantidTestHelpers
   /**Open the file to use in IO operations with events 
    *
    *@param fileName the name of the file to open.
-           if file name has word exist, the file is opened as existing with 100 floats equal 2.
-           othewise if assumed to be new and size 0
-   *@more  opening mode (read or read/write)
+   *                 if file name has word exist, the file is opened as existing with 100 floats equal 2.
+   *                 othewise if assumed to be new and size 0
+   *@param mode  opening mode (read ("r" ) or read/write "w") 
   */ 
   bool BoxControllerDummyIO::openFile(const std::string &fileName,const std::string &mode)
   {
@@ -107,7 +108,7 @@ namespace MantidTestHelpers
   }
  /**Save block of data into properly opened and initiated direct access data file
   @param DataBlock     -- the vector with the data to write
-  @param blockPosision -- the position of the data block within the data file itself
+  @param blockPosition -- the position of the data block within the data file itself
  */ 
  void BoxControllerDummyIO::saveBlock(const std::vector<float> & DataBlock, const uint64_t blockPosition)const 
  {
@@ -131,16 +132,16 @@ namespace MantidTestHelpers
 
  }
  /**Load a block of data from properly prepared direct access data file
-  @param DataBlock     -- the vector for data to place into. If the size of the block is smaller then the requested size, the vector will be realocated.
+  @param Block        -- the vector for data to place into. If the size of the block is smaller then the requested size, the vector will be realocated.
                           The data are placed at the beginnign of the block. 
-  @param blockPosision -- the position of the data block within the data file 
+  @param blockPosition -- the position of the data block within the data file 
   @param nPoints       -- number of data points to read from the file. The datapoint size is defined when opened file or by calling the setDataType directrly
 
-  *Thros if attempted to read data outside of the file. 
+  *Throws if attempted to read data outside of the file. 
  */ 
  void BoxControllerDummyIO::loadBlock(std::vector<float> & Block, const uint64_t blockPosition,const size_t nPoints)const
  {
-     m_fileMutex.lock();
+     Poco::ScopedLock<Mantid::Kernel::Mutex> _lock(m_fileMutex);
      if(blockPosition+nPoints>this->getFileLength())
          throw Mantid::Kernel::Exception::FileError("Attemtp to read behind the file end",m_fileName);
 
@@ -150,7 +151,7 @@ namespace MantidTestHelpers
          Block[i]=fileContents[blockPosition*m_EventSize+i];
      }
 
-     m_fileMutex.unlock();
+ 
  }
  
 
