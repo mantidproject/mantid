@@ -42,6 +42,8 @@
 #include <QDropEvent>
 #include <QStackedLayout>
 #include <QKeyEvent>
+#include <QUrl>
+#include <QTemporaryFile>
 
 #include "MantidQtAPI/FileDialogHandler.h"
 

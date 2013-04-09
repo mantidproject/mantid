@@ -27,7 +27,6 @@
 #include <iostream>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidLog.h"
 #include "../ContourLinesEditor.h"
 
 class QLabel;

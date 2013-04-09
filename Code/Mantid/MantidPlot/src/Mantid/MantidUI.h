@@ -6,7 +6,6 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
-#include "MantidLog.h"
 #include "MantidAlgorithmMetatype.h"
 
 #include "MantidAPI/FrameworkManager.h"
