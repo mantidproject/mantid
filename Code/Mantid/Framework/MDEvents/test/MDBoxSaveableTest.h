@@ -161,7 +161,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
  
   //-----------------------------------------------------------------------------------------
   /** Can we load it back? */
-  void test_loadDirectNexus()
+  void xest_loadDirectNexus()
   {
     // A box to load stuff from
     MDBox<MDLeanEvent<3>,3> c(sc.get());
@@ -193,7 +193,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
   //-----------------------------------------------------------------------------------------
   /** What if the box has no events, does it crash? */
-  void xest_SetFileBacked_fileEvents()
+  void test_SetFileBacked_fileEvents()
   {
     // A box to load stuff from
     MDBox<MDLeanEvent<3>,3> c(sc.get());
@@ -225,7 +225,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
   }
 /** Test splitting of a MDBox into a MDGridBox when the
    * original box is backed by a file. */
-  void test_fileBackEnd_construction()
+  void xest_fileBackEnd_construction()
   {
 // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
@@ -280,7 +280,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
   /** If a MDBox is file-backed, test that
    * you can add events to it without having to load the data from disk.
    */
-  void xest_fileBackEnd_addEvent()
+  void test_fileBackEnd_addEvent()
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
@@ -440,7 +440,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and xest accessing data */
-  void test_fileBackEnd()
+  void xest_fileBackEnd()
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
@@ -503,7 +503,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and test accessing data
    * in a non-const way, and writing it back out*/
-  void test_fileBackEnd_nonConst_access()
+  void xest_fileBackEnd_nonConst_access()
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
@@ -561,7 +561,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and xest accessing data
    * where the number of events in the box is reduced or increased. */
-  void test_fileBackEnd_nonConst_EventListChangesSize()
+  void xest_fileBackEnd_nonConst_EventListChangesSize()
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
@@ -718,13 +718,13 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     do_deleteNexusFile("MDBoxBinningxest.nxs");
   }
 
-  void test_fileBackEnd_binningOperations()
+  void xest_fileBackEnd_binningOperations()
   {
     do_test_fileBackEnd_binningOperations(false);
   }
 
   // TODO : does not work multithreaded and have never been workging. -- to fix 
-  void xest_fileBackEnd_binningOperations_inParallel()
+  void xxest_fileBackEnd_binningOperations_inParallel()
   {
     do_test_fileBackEnd_binningOperations(true);
   }
@@ -735,7 +735,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
    * for a workspace that is backed by a file (and thus tries to stay below
    * a certain amount of memory used).
    */
-  void test_splitAllIfNeeded_fileBacked()
+  void xest_splitAllIfNeeded_fileBacked()
   {
     typedef MDLeanEvent<2> MDE;
 
@@ -825,7 +825,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 //  //-----------------------------------------------------------------------------------------
 //  /** Set up the file back end and test accessing data.
 //   * This time, use no DiskBuffer so that reading/loading is done within the object itself */
-//  void xest_fileBackEnd_noMRU()
+//  void xxest_fileBackEnd_noMRU()
 //  {
 //    // Create a box with a controller for the back-end
 //    BoxController_sptr bc(new BoxController(3));
