@@ -561,7 +561,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and xest accessing data
    * where the number of events in the box is reduced or increased. */
-  void xest_fileBackEnd_nonConst_EventListChangesSize()
+  void test_fileBackEnd_nonConst_EventListChangesSize()
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
@@ -718,7 +718,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     do_deleteNexusFile("MDBoxBinningxest.nxs");
   }
 
-  void xest_fileBackEnd_binningOperations()
+  void test_fileBackEnd_binningOperations()
   {
     do_test_fileBackEnd_binningOperations(false);
   }
@@ -735,7 +735,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
    * for a workspace that is backed by a file (and thus tries to stay below
    * a certain amount of memory used).
    */
-  void xest_splitAllIfNeeded_fileBacked()
+  void test_splitAllIfNeeded_fileBacked()
   {
     typedef MDLeanEvent<2> MDE;
 

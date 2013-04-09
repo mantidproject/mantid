@@ -11,7 +11,7 @@ namespace MDEvents
    {
    }
 
-   /** flush data out of the write buffer */
+   /** flush data out of the file buffer to the HDD */
    void  MDBoxSaveable::flushData()const
    {
       m_MDNode->getBoxController()->getFileIO()->flushData();

@@ -447,7 +447,7 @@ void BoxControllerNeXusIO::loadBlock(std::vector<double> & Block, const uint64_t
  void BoxControllerNeXusIO::flushData()const
  {
     Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
-     m_File->flush();
+    m_File->flush();
 
  }
  /** flush disk buffer data from memory and close underlying NeXus file*/ 
@@ -455,11 +455,10 @@ void BoxControllerNeXusIO::loadBlock(std::vector<double> & Block, const uint64_t
  {
      if(m_File)
      {
-         this->flushData();
-         // lock file
-         Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
          // write all file-backed data still stack in the data buffer into the file.
          this->flushCache();
+         // lock file
+         Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
          {
              m_File->closeData(); // close events data
 
