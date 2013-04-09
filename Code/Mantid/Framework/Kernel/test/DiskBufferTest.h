@@ -4,7 +4,7 @@
 
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/FreeBlock.h"
-#include "MantidKernel/Saveable.h"
+#include "MantidKernel/ISaveable.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
@@ -26,11 +26,11 @@ using Mantid::Kernel::CPUTimer;
 
 //====================================================================================
 /** An ISaveable that fakes writing to a fixed-size file */
-class SaveableTesterWithFile : public Saveable
+class SaveableTesterWithFile : public ISaveable
 {
     size_t ID;
 public:
-  SaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch,bool wasSaved=true) : Saveable(),
+  SaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch,bool wasSaved=true) : ISaveable(),
     ID(id),m_memory(size),m_ch(ch)
   {
     // the object knows its place on file
@@ -669,12 +669,12 @@ public:
 //====================================================================================
 //====================================================================================
 /** An Saveable that will fake seeking to disk */
-class SaveableTesterWithSeek : public Saveable
+class SaveableTesterWithSeek : public ISaveable
 {  
     size_t ID;
     size_t m_memory;
 public:
-  SaveableTesterWithSeek(size_t id) : Saveable(),
+  SaveableTesterWithSeek(size_t id) : ISaveable(),
       ID(id)
   {
     m_memory=1;
