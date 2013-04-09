@@ -11,7 +11,7 @@ namespace Mantid
         /** Constructor    */
         ISaveable::ISaveable():
             m_Busy(false),m_dataChanged(false),m_wasSaved(false),m_isLoaded(false),
-            m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),m_BufMemorySize(0)
+            m_BufMemorySize(0),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0)
         {}
 
         //----------------------------------------------------------------------------------------------
@@ -19,9 +19,11 @@ namespace Mantid
             Note setting isLoaded to false to break connection with the file object which is not copyale */
         ISaveable::ISaveable(const ISaveable & other):
             m_Busy(other.m_Busy),m_dataChanged(other.m_dataChanged),m_wasSaved(other.m_wasSaved),m_isLoaded(false),
-            m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents),
             m_BufPosition(other.m_BufPosition),
-            m_BufMemorySize(other.m_BufMemorySize)
+            m_BufMemorySize(other.m_BufMemorySize),
+            m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents)
+            
+
         { }
 
 

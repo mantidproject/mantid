@@ -389,16 +389,16 @@ public:
 
   void test_addAndRemoveMultithread()
   {
-      size_t DATA_SIZE(500);
+      long DATA_SIZE(500);
       std::vector<size_t> indexToRemove(DATA_SIZE);
       std::vector<ISaveable *> objToAdd(DATA_SIZE);
-      size_t iStep=BIG_NUM/DATA_SIZE;
+      long iStep=BIG_NUM/DATA_SIZE;
       if(iStep<1||DATA_SIZE>BIG_NUM)
       {
           TSM_ASSERT("Test has wrong setting",false);
           return;
       }
-      for(size_t i=0;i<DATA_SIZE;i++)
+      for(long i=0;i<DATA_SIZE;i++)
       {
           indexToRemove[i]=i*iStep;
           objToAdd[i] = new ISaveableTester(BIG_NUM+i*iStep);

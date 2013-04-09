@@ -1443,9 +1443,8 @@ namespace MDEvents
        this->addEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0],runIndex, detectorId));
    }
 
-  /** Create MD MDEvent amd add it to the box.
-   // add a single event and set pointer to the box which needs splitting (if one actually need) 
-  /** Create event from the input data and add it to the box.
+  /** Create MD MDEvent from the input data and add it to the box.
+   *   Sets pointer to the box which needs splitting (if one actually need) 
    * @param Signal  :: events signal
    * @param errorSq :: events Error squared
    * @param point :: reference to the  MDEvent coordinates
