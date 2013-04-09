@@ -8,10 +8,8 @@ namespace Mantid
 namespace Kernel
 {
 
-  /** Constructor
-   */
+  /** Constructor    */
   ISaveable::ISaveable():
-  // m_FileId(0),
   m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),m_BufMemorySize(0)
   {}
 
@@ -23,10 +21,7 @@ namespace Kernel
      m_BufMemorySize(other.m_BufMemorySize)
  { }
 
-  //ISaveable::ISaveable(const size_t fileId):
-  // m_FileId(fileId),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),m_BufMemorySize(0)
-  //{}
-
+  
 
   /** Method stores the position of the object in Disc buffer and returns the size of this object for disk buffer to store 
    * @param bufPosition -- the allocator which specifies the position of the object in the list of objects to write
@@ -34,17 +29,20 @@ namespace Kernel
   */
   size_t ISaveable::setBufferPosition(std::list<ISaveable *>::iterator bufPosition)
   {
-      m_setter.lock();
+      Mutex::ScopedLock _lock(m_setter);
+
       m_BufPosition = boost::optional<std::list<ISaveable *>::iterator >(bufPosition);
       m_BufMemorySize  = this->getDataMemorySize();
-      m_setter.unlock();
+
       return m_BufMemorySize ;
   }
 
   /** private function which used by the disk buffer to save the contents of the  */
   void ISaveable::saveAt(uint64_t newPos, uint64_t newSize)
   {
-      m_setter.lock();
+
+      Mutex::ScopedLock _lock(m_setter);
+
       // load old contents if it was there
       if(this->wasSaved())
          this->load();
@@ -54,15 +52,15 @@ namespace Kernel
       // save in the new location
       this->save();
       this->clearDataFromMemory();      
-      m_setter.unlock();
   }
   /// clears the state of the object, and indicate that it is not stored in buffer any more 
   void ISaveable::clearBufferState()
   {
-      m_setter.lock();
+      Mutex::ScopedLock _lock(m_setter);
+
       m_BufMemorySize=0;
       m_BufPosition = boost::optional<std::list<ISaveable *>::iterator>();
-      m_setter.unlock();
+
   }
 } // namespace Mantid
 } // namespace Kernel

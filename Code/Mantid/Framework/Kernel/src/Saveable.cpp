@@ -65,11 +65,11 @@ namespace Mantid
         */
         void Saveable::setFilePosition(uint64_t newPos, size_t newSize, bool wasSaved)
         {  
-            this->m_setter.lock();
+            Mutex::ScopedLock (this->m_setter);
             this->m_fileIndexStart=newPos;  
             this->m_fileNumEvents =static_cast<uint64_t>(newSize);
             m_wasSaved = wasSaved;
-            this->m_setter.unlock();
+
         }
 
 
