@@ -43,6 +43,7 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QToolTip>
+#include <QGroupBox>
 
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -137,9 +138,13 @@ m_userEditing(true)
 
   // Algorithm buttons
 
-  m_apply = new QPushButton("Apply Mask(s) to Workspace(data)");
+  m_apply = new QPushButton("Apply to Data");
   m_apply->setToolTip("Apply current mask to the data workspace. Cannot be reverted.");
   connect(m_apply,SIGNAL(clicked()),this,SLOT(applyMask()));
+
+  m_apply_to_view = new QPushButton("Apply to View");
+  m_apply_to_view->setToolTip("Apply current mask to the view.");
+  connect(m_apply_to_view,SIGNAL(clicked()),this,SLOT(storeMask()));
 
   m_clear_all = new QPushButton("Clear All");
   m_clear_all->setToolTip("Clear all masking that have not been applied to the data.");
@@ -169,7 +174,7 @@ m_userEditing(true)
   m_save_as_cal_file_include->setToolTip("Save current mask as ROI to cal file.");
   connect(m_save_as_cal_file_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToCalFile()));
 
-  m_saveButton = new QPushButton("Save");
+  m_saveButton = new QPushButton("Apply and Save");
   m_saveButton->setToolTip("Save current masking to a file or a workspace.");
   QMenu* saveMenu = new QMenu(this);
   saveMenu->addAction(m_save_as_workspace_include);
@@ -183,12 +188,19 @@ m_userEditing(true)
   connect(saveMenu,SIGNAL(hovered(QAction*)),this,SLOT(showSaveMenuTooltip(QAction*)));
   m_saveButton->setMenu(saveMenu);
 
+  QGroupBox *box = new QGroupBox("View");
   QGridLayout* buttons = new QGridLayout();
-  buttons->addWidget(m_apply,0,0,1,2);
+  buttons->addWidget(m_apply_to_view,0,0,1,2);
   buttons->addWidget(m_saveButton,1,0);
   buttons->addWidget(m_clear_all,1,1);
-  
-  layout->addLayout(buttons);
+  box->setLayout(buttons);
+  layout->addWidget(box);
+
+  box = new QGroupBox("Workspace");
+  buttons = new QGridLayout();
+  buttons->addWidget(m_apply,0,0);
+  box->setLayout(buttons);
+  layout->addWidget(box);
 
 }
 

@@ -98,6 +98,7 @@ protected:
   QPushButton* m_ring_rectangle;
 
   QPushButton* m_apply;
+  QPushButton* m_apply_to_view;
   QPushButton* m_clear_all;
   QPushButton* m_saveButton;
 
