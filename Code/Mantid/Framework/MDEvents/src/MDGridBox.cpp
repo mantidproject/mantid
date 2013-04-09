@@ -51,7 +51,7 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor with a box controller.
-   * @param bc :: BoxController
+   * @param bc :: poineter to the BoxController, owned by workspace
    * @param depth :: recursive split depth
    * @param extentsVector :: size of the box
    */
@@ -62,7 +62,11 @@ namespace MDEvents
       initGridBox();
   }
 
- /** convenience Constructor, taking the shared pointer and extracting const pointer from it */
+ /** convenience Constructor, taking the shared pointer and extracting const pointer from it 
+   * @param bc :: shared poineter to the BoxController, owned by workspace
+   * @param depth :: recursive split depth
+   * @param extentsVector :: size of the box
+ */
   TMDE(MDGridBox)::MDGridBox(boost::shared_ptr<API::BoxController> &bc, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
    : MDBoxBase<MDE, nd>(bc.get(),depth,UNDEF_SIZET,extentsVector),
      numBoxes(0), nPoints(0)
@@ -191,7 +195,11 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor
-   * @param other :: MDGridBox to copy */
+   * @param other :: MDGridBox to copy 
+   * @param otherBC :: mandatory pointer to other box controller, which will split this box. 
+                       if it the same BC, as the one for the copied box, it needs to be taken explicitly from the 
+                       copied box. 
+   */
   TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> & other,Mantid::API::BoxController *const otherBC)
    : MDBoxBase<MDE, nd>(other,otherBC),
      numBoxes(other.numBoxes),
@@ -441,15 +449,7 @@ namespace MDEvents
   }
 
 
-  // -------------------------------------------------------------------------------------------
-  ///** Cache the centroid of this box and all sub-boxes.
-  // * @param ts :: ThreadScheduler for parallel processing.
-  // */
-  //TMDE(
-  //void MDGridBox)::refreshCentroid(Kernel::ThreadScheduler * ts)
-  //{
-  //  UNUSED_ARG(ts);
-  //}
+ 
 
 
   //-----------------------------------------------------------------------------------------------
@@ -1411,8 +1411,13 @@ namespace MDEvents
 
 
 
-  /** Create and Add several events into correspondent boxes; If the event is out/at of bounds it may be placed in very peculiar place!
+  /** Create and Add several (N) events into correspondent boxes; If the event is out/at of bounds it may be placed in very peculiar place!
    *
+   * @param sigErrSq  :: vector of N-signals and errors where errror follows signal 
+   * @param Coord :: vector of MD event coordinates, nd(number of dimensions)  coordinates for each event
+   * @param index :: vector of run  indexes for N events.
+   * @param index :: vector of detector's ID for N events.
+
    *@return number of events rejected (0 as nothing is rejected here)
    */
   TMDE(
@@ -1426,11 +1431,11 @@ namespace MDEvents
   }
 
   /** Create event from the input data and add it to the box.
-   * @param point :: reference to the  MDEvent coordinates
    * @param Signal  :: events signal
    * @param errorSq :: events Error squared
-   * @param index   run  index
-   * @param index   detector's ID
+   * @param point   :: reference to the vector of  MDEvent coordinates
+   * @param runIndex ::    run  index
+   * @param detectorId ::  detector's ID
    * */
    TMDE(
    void MDGridBox)::buildAndAddEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
@@ -1440,9 +1445,14 @@ namespace MDEvents
 
   /** Create MD MDEvent amd add it to the box.
    // add a single event and set pointer to the box which needs splitting (if one actually need) 
-
-   * @param point :: reference to a MDEvent to add.
-   * @param index :: current index for box
+  /** Create event from the input data and add it to the box.
+   * @param Signal  :: events signal
+   * @param errorSq :: events Error squared
+   * @param point :: reference to the  MDEvent coordinates
+   * @param point   :: reference to the vector of  MDEvent coordinates
+   * @param runIndex ::    run  index
+   * @param detectorId ::  detector's ID
+   * @param index  :: index of this box in the gridBox, which contains this one
    */
    TMDE(
    void MDGridBox)::buildAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
@@ -1455,7 +1465,13 @@ namespace MDEvents
    * No lock is performed. This is only safe if no 2 threads will
    * try to add to the same box at the same time.
    *
-   * @param Evnt :: reference to a MDEvent to add.
+   * @param Signal  :: events signal
+   * @param errorSq :: events Error squared
+   * @param point :: reference to the  MDEvent coordinates
+   * @param point   :: reference to the vector of  MDEvent coordinates
+   * @param runIndex ::    run  index
+   * @param detectorId ::  detector's ID
+
    * */
   TMDE(
   void MDGridBox)::buildAndAddEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
@@ -1578,12 +1594,13 @@ namespace MDEvents
       // set new box, supposetly gridded
       this->m_Children[index]=newChild;
     }
-  /**Recursively make this and all underlaying boxes file-backed */
+  /**Recursively make this and all underlaying boxes file-backed. Not(yet?) implemented for gridboxes */
   TMDE(
   void MDGridBox)::setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)
   {
       throw(Kernel::Exception::NotImplementedError("Recursive file backed is not yet implemented (unclear how to set file location etc)"));
   }
+  /** Make the box file-backed without knowing its position on the HDD. Not implemented for gridboxes*/
   TMDE(
   void MDGridBox)::setFileBacked()
   {
