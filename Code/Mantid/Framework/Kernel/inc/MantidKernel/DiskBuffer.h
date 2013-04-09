@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <vector>
 #include <list>
+#include <limits> 
 
 namespace Mantid
 {
@@ -99,8 +100,10 @@ namespace Kernel
      * @param buffer :: number of events to accumulate before writing. 0 to NOT use the write buffer  */
     void setWriteBufferSize(uint64_t buffer)
     {
-      m_writeBufferSize = buffer;
-      //m_useWriteBuffer = (buffer > 0);
+        if(buffer>std::numeric_limits<size_t>::max()/2)
+            throw std::runtime_error(" Can not aloocate memory for that many events on given architecture ");
+
+        m_writeBufferSize = static_cast<size_t>(buffer);
     }
 
     /// @return the size of the to-write buffer, in number of events
