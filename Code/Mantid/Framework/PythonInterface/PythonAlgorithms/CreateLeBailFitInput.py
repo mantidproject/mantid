@@ -25,7 +25,7 @@ This algorithm is designed to work with other algorithms to do Le Bail fit.  The
 
 *WIKI*"""
 from mantid.api import PythonAlgorithm, registerAlgorithm, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
-from mantid.kernel import Direction, StringListValidator
+from mantid.kernel import Direction, StringListValidator, FloatBoundedValidator
 
 import mantid.simpleapi as api
 
@@ -60,7 +60,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
-        self.declareProperty("LatticeConstant", 10.0, "Lattice constant for cubic crystal.")
+        self.declareProperty("LatticeConstant", -0.0, validator=FloatBoundedValidator(lower=1.0E-9), doc="Lattice constant for cubic crystal.")
 
         self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output), 
                 "Name of Table Workspace Containing Peak Parameters From .irf File.")
