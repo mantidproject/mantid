@@ -65,7 +65,6 @@ set ( SRC_FILES
 	src/ReadLock.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
-	src/Saveable.cpp        
 	src/SignalChannel.cpp
 	src/SingletonHolder.cpp
 	src/SobolSequence.cpp
@@ -192,7 +191,6 @@ set ( INC_FILES
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
 	inc/MantidKernel/RegistrationHelper.h
-	inc/MantidKernel/Saveable.h    
 	inc/MantidKernel/SignalChannel.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h

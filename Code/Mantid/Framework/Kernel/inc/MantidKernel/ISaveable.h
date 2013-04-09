@@ -57,22 +57,50 @@ namespace Kernel
     /**Return the number of units this block occipies on file */
     uint64_t getFileSize()const
     { return   m_fileNumEvents;   }
-    //-----------------------------------------------------------------------------------------------
-    // Saveable functions interface, which controls the logic of working with objects on HDD
-    virtual bool isBusy()const=0;
-    virtual bool wasSaved()const=0;
-    virtual bool isLoaded()const=0;
-    virtual void setBusy(bool /*On*/)=0;
-    //protected?
-    virtual void setLoaded(bool /*Yes*/)=0;
-    virtual bool isDataChanged()const=0;
-    virtual void setDataChanged()=0;
-    virtual void clearDataChanged()=0;
-
     /** Sets the location of the object on HDD */
-    virtual void setFilePosition(uint64_t newPos,size_t newSize,bool wasSaved)=0;
+    void setFilePosition(uint64_t newPos,size_t newSize,bool wasSaved);
     //-----------------------------------------------------------------------------------------------
+    // Saveable functions interface, which controls the logic of working with objects on HDD 
 
+
+
+    /** @return true if the object have ever been saved on HDD and knows it place there*/
+    bool wasSaved()const // for speed it returns this boolean, but for relaibility this should be m_wasSaved&&(m_fileIndexStart!=max())
+    {  return m_wasSaved;    }
+    /**@return  true if the object has been load in the memory -- the load function should call setter, or if the object was constructed in memory it should be loaded too */
+    bool isLoaded()const
+    { return m_isLoaded;}
+
+    // protected?
+   /**@sets the value of the isLoad parameter -- usually only load functiomn should set it to true */
+   void setLoaded(bool Yes)
+    { m_isLoaded = Yes;}
+
+    /// @return true if it the data of the object is busy and so cannot be cleared; false if the data was released and can be cleared/written.
+    bool isBusy() const
+    {   return m_Busy;  }
+  /// @ set the data busy to prevent from removing them from memory. The process which does that should clean the data when finished with them
+    void setBusy(bool On)
+    { m_Busy=On; }
+
+    //protected? 
+
+    /**@return the state of the parameter, which tells disk buffer to force writing data 
+     * to disk despite the size of the object have not changed (so one have probably done something with object contents. */
+    bool isDataChanged()const
+    {return m_dataChanged;}
+    /** Call this method from the method which changes the object but keeps the object size the same to tell DiskBuffer to write it back
+        the dataChanged ID is reset after save from the DataBuffer is emptied   */
+    void setDataChanged()
+    {  if(this->wasSaved())m_dataChanged=true;    }
+     /** this method has to be called if the object has been discarded from memory and is not changed any more. 
+        It expected to be called from clearDataFromMemory. */
+   void clearDataChanged()
+   {  m_dataChanged=false;   }
+
+ 
+   //-----------------------------------------------------------------------------------------------
+  // INTERFACE:
 
     /// Save the data - to be overriden
     virtual void save()const =0;
@@ -94,22 +122,29 @@ namespace Kernel
     /// the data size kept in memory
     virtual size_t getDataMemorySize()const=0;
 
-  protected:
-    /** Unique, sequential ID of the object/box within the containing workspace.
-        This ID also relates to boxes order as the boxes with adjacent 
-        ID should usually occupy adjacent places on HDD         */
-  //  size_t m_FileId;
-    /// Start point in the NXS file where the events are located
-    uint64_t m_fileIndexStart;
-    /// Number of events saved in the file, after the start index location
-    uint64_t m_fileNumEvents;  
+  protected: 
+    //-------------- 
+    /// a user needs to set this variable to true preventing from deleting data from buffer
+    bool m_Busy;
+    /** a user needs to set this variable to true to allow DiskBuffer saving the object to HDD 
+        when it decides it suitable,  if the size of iSavable object in cache is unchanged from the previous 
+        save/load operation */
+    bool m_dataChanged;
+    // this tracks the history of operations, occuring over the data. 
+    /// this boolean indicates if the data were saved on HDD and have physical representation on it (though this representation may be incorrect as data changed in memory)
+    mutable bool m_wasSaved;
+    /// this boolean indicates, if the data have its copy in memory 
+    bool m_isLoaded;
 
-    Kernel::Mutex m_setter; 
   private:
     // the iterator which describes the position of this object in the DiskBuffer. Undefined if not placed to buffer
     boost::optional< std::list<ISaveable * >::iterator> m_BufPosition;
     // the size of the object in the memory buffer, used to calculate the total amount of memory the objects occupy
     size_t m_BufMemorySize;
+   /// Start point in the NXS file where the events are located
+    uint64_t m_fileIndexStart;
+    /// Number of events saved in the file, after the start index location
+    uint64_t m_fileNumEvents;  
 
 
     /// the functions below have to be availible to DiskBuffer and nobody else. To highlight this we make them private
@@ -131,6 +166,8 @@ namespace Kernel
     /// clears the state of the object, and indicate that it is not stored in buffer any more 
     void clearBufferState();
 
+    // the mutex to protect changes in this memory 
+    Kernel::Mutex m_setter; 
   };
 
 

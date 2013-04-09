@@ -1,7 +1,7 @@
 #ifndef MANTID_MDEVENTS_MDBOX_SAVEABLE_H
 #define MANTID_MDEVENTS_MDBOX_SAVEABLE_H
 
-#include "MantidKernel/Saveable.h"
+#include "MantidKernel/ISaveable.h"
 #include "MantidAPI/IMDNode.h"
 
 namespace Mantid
@@ -36,7 +36,7 @@ namespace MDEvents
       File change history is stored at: <https://github.com/mantidproject/mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-    class DLLExport MDBoxSaveable : public Kernel::Saveable
+    class DLLExport MDBoxSaveable : public Kernel::ISaveable
     {
         public:
             MDBoxSaveable(API::IMDNode *const);
