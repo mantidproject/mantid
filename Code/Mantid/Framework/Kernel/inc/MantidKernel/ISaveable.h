@@ -72,7 +72,9 @@ namespace Kernel
     { return m_isLoaded;}
 
     // protected?
-   /**@sets the value of the isLoad parameter -- usually only load functiomn should set it to true */
+   /**sets the value of the isLoad parameter, indicating that data from HDD have its image in memory
+    *@param Yes -- boolean true or false --usually only load functiomn should set it to true 
+   */
    void setLoaded(bool Yes)
     { m_isLoaded = Yes;}
 

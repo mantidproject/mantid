@@ -57,10 +57,10 @@ namespace MDEvents
    *  As save/load operations use void data type, these function allow set up/get  the type name provided for the IO operations
    *  and the size of the data type in bytes (e.g. the  class dependant physical  meaning of the blockSize and blockPosition used 
    *  by save/load operations     
-   * @param CoordSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations. 4 and 8 are supported only
-   * @paramtypeName  -- the name of the event used in the operations. The name itself defines the size and the format of the event
-                       The events described in the class header are supported only
- */
+   * @param blockSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations. 4 and 8 are supported only
+                         e.g. float and double
+   * @param typeName  -- the name of the event used in the operations. The name itself defines the size and the format of the event
+                         The events described in the class header are supported only  */
   void BoxControllerNeXusIO::setDataType(const size_t blockSize, const std::string &typeName)
   {
       if(blockSize==4 || blockSize==8)
@@ -101,7 +101,7 @@ namespace MDEvents
   /**Open the file to use in IO operations with events 
    *
    *@param fileName the name of the file to open. Search for file perfomed within the Mantid search path. 
-   *@more  opening mode (read or read/write)
+   *@mode  opening mode (read or read/write)
    *
    *
   */ 

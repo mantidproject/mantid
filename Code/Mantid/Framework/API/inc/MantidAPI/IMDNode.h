@@ -156,7 +156,7 @@ public:
      */
     //virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const = 0;
 
-    /// General binning method for any shape.
+    // General binning method for any shape.
     //virtual void generalBin(MDBin<MDE,nd> & bin, Mantid::Geometry::MDImplicitFunction & function) const = 0;
 
    /** Sphere (peak) integration

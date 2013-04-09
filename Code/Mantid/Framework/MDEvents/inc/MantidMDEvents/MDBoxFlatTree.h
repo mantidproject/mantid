@@ -40,9 +40,7 @@ namespace MDEvents
   class DLLExport MDBoxFlatTree
   {
   public:
-    /**The constructor of the flat box tree
-     *@param -- fileName -- the name of the file to load/save the box strucure to. 
-    */
+    /**The constructor of the flat box tree    */
     MDBoxFlatTree();
 
 
