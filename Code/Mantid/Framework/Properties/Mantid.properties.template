@@ -15,7 +15,7 @@ supported.facilities = ISIS;SNS;HFIR;NCNR;LENS;ILL
 # Set a default facility
 default.facility = ISIS
 
-# Set a default insument
+# Set a default instrument
 default.instrument = 
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space
@@ -185,9 +185,9 @@ instrument.view.geometry=Default
 # files with a single call to Load.
 loading.multifile=On
 
-# Limits the maximum nuber of files Mantid will attempt to load as part of a range
-# set to a very high number to disbale
-# however this limit is in place to protect you and your computer from simple formatting mistakes
+# Limits the maximum number of files Mantid will attempt to load as part of a range.
+# Set to a very high number to disable, however this limit is in place to protect
+# you and your computer from simple formatting mistakes
 loading.multifilelimit=100
 
 # Hide algorithms that use a Property Manager by default.
