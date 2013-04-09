@@ -1,10 +1,6 @@
 //----------------------------------
 // Includes
 //----------------------------------
-// Disable Qt lowercase keywords as this includes a boost signal header
-#define QT_NO_KEYWORDS
-#include "MantidKernel/SignalChannel.h"
-#undef QT_NO_KEYWORDS
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/FileDialogHandler.h"
@@ -15,12 +11,6 @@
 #include <QFileDialog>
 #include <QTemporaryFile>
 #include <QTextStream>
-
-// Boost
-#include <boost/bind.hpp>
-
-//Poco
-#include <Poco/LoggingRegistry.h>
 
 #include <iostream>
 
@@ -43,19 +33,6 @@ UserSubWindow::UserSubWindow(QWidget* parent) :
  */
 UserSubWindow::~UserSubWindow()
 {
-  // disconnect from the mantid's logger. otherwise we have a crash
-  try
-  {
-    Poco::SignalChannel *pChannel = 
-      dynamic_cast<Poco::SignalChannel*>(Poco::LoggingRegistry::defaultRegistry().channelForName("signalChannel"));
-    if( pChannel )
-    { 
-      pChannel->sig().disconnect(boost::bind(&UserSubWindow::mantidLogReceiver, this, _1));
-    }
-  }
-  catch(...)
-  {
-  }
 }
 
 /**
@@ -73,9 +50,6 @@ void UserSubWindow::initializeLayout()
 
   //Set the icon
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
-
-  // Make the logging connection
-  connectToMantidSignal();
 
   m_bIsInitialized = true;
 }
@@ -96,16 +70,6 @@ bool UserSubWindow::isInitialized() const
 bool UserSubWindow::isPyInitialized() const
 { 
   return m_isPyInitialized; 
-}
-
-/**
- *  A boost 'slot' for the Mantid signal channel connection. This relays the message to
- * a Qt signal
- * @param msg :: The Poco message parameter
- */
-void UserSubWindow::mantidLogReceiver(const Poco::Message & msg)
-{
-  emit logMessageReceived(QString::fromStdString(msg.getText()));
 }
 
 /**
@@ -250,26 +214,3 @@ void UserSubWindow::setInterfaceName(const QString & iface_name)
 {
   m_ifacename = iface_name;
 }
-
-/**
- * Connect to Mantid's signal channel so that we can receive log messages
- */
-bool UserSubWindow::connectToMantidSignal()
-{
-  try
-  {
-    Poco::SignalChannel *pChannel = 
-      dynamic_cast<Poco::SignalChannel*>(Poco::LoggingRegistry::defaultRegistry().channelForName("signalChannel"));
-    if( !pChannel )
-    { 
-      return false;
-    }
-    pChannel->sig().connect(boost::bind(&UserSubWindow::mantidLogReceiver, this, _1));
-  }
-  catch(...)
-  {
-    return false;
-  }
-  return true;
-}
-

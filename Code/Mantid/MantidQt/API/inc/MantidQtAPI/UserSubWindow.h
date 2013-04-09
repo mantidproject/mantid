@@ -25,8 +25,6 @@
 #include <QLabel>
 #include <set>
 
-#include <Poco/Message.h>
-
 //----------------------------------
 // Qt Forward declarations
 //----------------------------------
@@ -104,18 +102,12 @@ public:
   /// Has the Python initialization function been run
   bool isPyInitialized() const;
 
-  /// A boost 'slot' for the Mantid signal channel connection
-  void mantidLogReceiver(const Poco::Message & msg);
-  
 signals:
   /// Emitted to start a (generally small) script running
   void runAsPythonScript(const QString& code, bool);
 
   /// Change the plot style/color
   void setAsPlotType(const QStringList & plotDetails);
-
-  ///Mantid log message recieved
-  void logMessageReceived(const QString & msg);
 
   ///Connects MantidPlot up with the muon analysis custom interface and in turn the fitPropertyBrowser. (Emitted when a new graph is created).
   void fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&);
@@ -155,8 +147,6 @@ private:
 
   /// Set the interface name
   void setInterfaceName(const QString & iface_name);
-  /// Connect this object to Mantid's signal channel
-  bool connectToMantidSignal();
   /// Has this already been initialized
   bool m_bIsInitialized;
   /// Has the python initialization been run
