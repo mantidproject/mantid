@@ -225,7 +225,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
   }
 /** Test splitting of a MDBox into a MDGridBox when the
    * original box is backed by a file. */
-  void xest_fileBackEnd_construction()
+  void test_fileBackEnd_construction()
   {
 // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
