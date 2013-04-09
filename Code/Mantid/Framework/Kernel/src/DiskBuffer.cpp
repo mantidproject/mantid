@@ -138,7 +138,7 @@ namespace Kernel
     if (m_writeBufferUsed > DISK_BUFFER_SIZE_TO_REPORT_WRITE)
       std::cout << "DiskBuffer:: Writing out " << m_writeBufferUsed << " events in " << m_nObjectsToWrite << " objects." << std::endl;
 
-    m_mutex.lock();
+    Poco::ScopedLock<Kernel::Mutex> _lock(m_mutex);
     // Holder for any objects that you were NOT able to write.
     std::list<ISaveable *> couldNotWrite;
     size_t objectsNotWritten(0);
@@ -218,7 +218,7 @@ namespace Kernel
     m_writeBufferUsed = memoryNotWritten;
     m_nObjectsToWrite = objectsNotWritten;
 
-    m_mutex.unlock();
+   
   }
 
 

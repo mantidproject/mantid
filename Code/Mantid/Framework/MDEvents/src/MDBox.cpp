@@ -886,15 +886,17 @@ namespace MDEvents
        if(!FileSaver->isOpened())
            throw(std::invalid_argument(" The data file has to be opened to use box loadAndAddFrom function"));
 
+       Poco::ScopedLock<Kernel::Mutex> _lock(m_dataMutex);
+
        std::vector<coord_t> TableData;
        FileSaver->loadBlock(TableData,filePosition,nEvents);
-       this->m_dataMutex.lock();
+
        // convert loaded events to data;
        size_t nCurrentEvents = data.size();
        this->data.reserve(nCurrentEvents+nEvents);
        // convert data to events appending new events to existing
        MDE::dataToEvents(TableData,data,false);
-       this->m_dataMutex.unlock();
+   
    }
    /** clear file-backed information from the box if such information exists 
     *
