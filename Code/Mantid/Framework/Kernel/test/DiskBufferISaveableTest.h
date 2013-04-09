@@ -92,7 +92,7 @@ public:
   std::vector<ISaveableTester*> data;
   size_t num;
   std::vector<ISaveableTester*> bigData;
-  size_t BIG_NUM;
+  long BIG_NUM;
 
   void setUp()
   {
@@ -105,7 +105,7 @@ public:
     BIG_NUM = 1000;
     bigData.clear();
     bigData.reserve(BIG_NUM);
-    for (size_t i=0; i<BIG_NUM; i++)
+    for (long i=0; i<BIG_NUM; i++)
       bigData.push_back( new ISaveableTester(i) );
   }
 
@@ -347,7 +347,7 @@ public:
     DiskBuffer dbuf(3);
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i=0; i<int(BIG_NUM); i++)
+    for (long i=0; i<int(BIG_NUM); i++)
     {
       dbuf.toWrite(bigData[i]);
     }
@@ -356,32 +356,32 @@ public:
 
   void test_addAndRemove()
   {
-      size_t DATA_SIZE(500);
+      long DATA_SIZE(500);
       std::vector<size_t> indexToRemove(DATA_SIZE);
       std::vector<ISaveable *> objToAdd(DATA_SIZE);
-      size_t iStep=BIG_NUM/DATA_SIZE;
+      long iStep=BIG_NUM/DATA_SIZE;
       if(iStep<1||DATA_SIZE>BIG_NUM)
       {
           TSM_ASSERT("Test has wrong setting",false);
           return;
       }
-      for(size_t i=0;i<DATA_SIZE;i++)
+      for(long i=0;i<DATA_SIZE;i++)
       {
           indexToRemove[i]=i*iStep;
-          objToAdd[i] = new ISaveableTester(BIG_NUM+i*iStep);
+          objToAdd[i] = new ISaveableTester(size_t(BIG_NUM+i*iStep));
       }
 
 
-      DiskBuffer dbuf(BIG_NUM+DATA_SIZE);
+      DiskBuffer dbuf(size_t(BIG_NUM+DATA_SIZE));
       Kernel::Timer clock;
-      for(size_t i=0;i<BIG_NUM;i++)
+      for(long i=0;i<BIG_NUM;i++)
       {
           dbuf.toWrite(bigData[i]);
       }
       std::cout<<"\nFinished DiskBuffer insertion performance test, inserted "<<BIG_NUM <<" objects on 1 thread in "<< clock.elapsed()<<" sec\n";
 
 
-      for(size_t i=0;i<DATA_SIZE;i++)
+      for(long i=0;i<DATA_SIZE;i++)
       {
           dbuf.objectDeleted(bigData[indexToRemove[i]]);
           dbuf.toWrite(objToAdd[i]);
