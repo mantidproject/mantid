@@ -193,7 +193,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
   //-----------------------------------------------------------------------------------------
   /** What if the box has no events, does it crash? */
-  void test_SetFileBacked_fileEvents()
+  void xest_SetFileBacked_fileEvents()
   {
     // A box to load stuff from
     MDBox<MDLeanEvent<3>,3> c(sc.get());
@@ -280,7 +280,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
   /** If a MDBox is file-backed, test that
    * you can add events to it without having to load the data from disk.
    */
-  void test_fileBackEnd_addEvent()
+  void xest_fileBackEnd_addEvent()
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
