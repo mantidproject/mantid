@@ -503,7 +503,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and test accessing data
    * in a non-const way, and writing it back out*/
-  void xest_fileBackEnd_nonConst_access()
+  void test_fileBackEnd_nonConst_access()
   {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
