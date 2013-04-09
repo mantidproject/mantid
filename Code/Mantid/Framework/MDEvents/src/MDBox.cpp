@@ -886,7 +886,7 @@ namespace MDEvents
        if(!FileSaver->isOpened())
            throw(std::invalid_argument(" The data file has to be opened to use box loadAndAddFrom function"));
 
-       Poco::ScopedLock<Kernel::Mutex> _lock(m_dataMutex);
+       Poco::ScopedLock<Kernel::Mutex> _lock(this->m_dataMutex);
 
        std::vector<coord_t> TableData;
        FileSaver->loadBlock(TableData,filePosition,nEvents);
