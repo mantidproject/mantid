@@ -86,7 +86,7 @@ def processCategories(categories, qhp, outputdir):
         qhp.addFile(os.path.join(HTML_DIR, filename), page_name)
         filename = os.path.join(outputdir, filename)
         handle = open(filename, 'w')
-        handle.write(doc.toprettyxml(indent="  ", encoding="utf-8"))
+        handle.write(doc.toxml(encoding="utf-8"))
 
 def process(algos, qhp, outputdir):
     import mantid
@@ -151,7 +151,9 @@ def process(algos, qhp, outputdir):
         addTxtEle(doc, 'h3', letter, div_alpha)
         addEle(doc, 'a', div_alpha, {"name":'algo'+letter})
         ul = addEle(doc, "ul", div_alpha)
-        for (name, versions) in letter_groups[letter]:
+        group = letter_groups[letter]
+        group.sort()
+        for (name, versions) in group:
             appendAlgoElement(doc, ul, name, versions)
 
     # print an index within the page
@@ -159,7 +161,7 @@ def process(algos, qhp, outputdir):
 
     filename = os.path.join(outputdir, "algorithms_index.html")
     handle = open(filename, 'w')
-    handle.write(doc.toprettyxml(indent="  ", encoding="utf-8"))
+    handle.write(doc.toxml(encoding="utf-8"))
 
     shortname = os.path.split(filename)[1]
     qhp.addFile(os.path.join(HTML_DIR, shortname), "Algorithms Index")
