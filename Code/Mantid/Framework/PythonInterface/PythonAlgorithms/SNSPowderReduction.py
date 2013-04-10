@@ -144,6 +144,9 @@ class SNSPowderReduction(PythonAlgorithm):
             self._data[info.freq][info.wl]=info
         def __getFrequency(self, request):
             for freq in self._data.keys():
+                # commit 579b5941a6618dc8c4f2ad7838484e375a24ac37
+                if abs(float(freq)-request) == 0.:                    
+                    return freq
                 if 100. * abs(float(freq)-request)/request < 5.:
                     return freq
             raise RuntimeError("Failed to find frequency: %fHz" % request)
@@ -806,8 +809,21 @@ class SNSPowderReduction(PythonAlgorithm):
         frequency = None
         if "SpeedRequest1" in logs.keys():
             frequency = logs['SpeedRequest1']
+            # f5aa61589450be6e43ee592a4aadc63926a83f82 
+            if frequency.getStatistics().mean == 0.: 
+                self.log().information("'SpeedRequest1' mean value is zero")                
+                frequency = None 
         else:
             self.log().information("'SpeedRequest1' is not specified in logs")
+        # f5aa61589450be6e43ee592a4aadc63926a83f82
+        if frequency is None and "Speed1" in logs.keys():
+            frequency = logs['Speed1']
+            if frequency.getStatistics().mean == 0.:
+                self.log().information("'Speed1' mean value is zero")
+                frequency = None
+        else:
+            self.log().information("'Speed1' is not specified in logs")
+        if frequency is None: 
             if "frequency" in logs.keys():
                 frequency = logs['frequency']
             else:
