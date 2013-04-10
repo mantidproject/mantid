@@ -15,6 +15,7 @@ set ( TEST_PY_FILES
   FunctionFactoryTest.py
   FunctionPropertyTest.py
   IEventWorkspaceTest.py
+  IFunction1DTest.py
   IPeaksWorkspaceTest.py
   ITableWorkspaceTest.py
   MatrixWorkspaceTest.py
