@@ -64,6 +64,10 @@ public:
 
   /// Enum to track the workspace type
   enum WorkspaceType { MDEW, PEAKS, MDHW };
+
+public slots:
+  /// Perform any clean up on main window shutdown
+  virtual void shutdown();
 };
 
 }

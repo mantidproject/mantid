@@ -584,6 +584,15 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
 }
 
 /**
+ * This function performs shutdown procedures when MantidPlot is shut down,
+ */
+void MdViewerWidget::shutdown()
+{
+  // This seems to cure a XInitThreads error.
+  pqPVApplicationCore::instance()->deleteLater();
+}
+
+/**
  * This function creates the main view widget specific menu items.
  */
 void MdViewerWidget::createMenus()

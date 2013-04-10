@@ -656,6 +656,8 @@ void MantidUI::showVatesSimpleInterface()
       MantidQt::API::VatesViewerInterface *vsui = interfaceManager.createVatesSimpleGui();
       if (vsui)
       {
+        connect(m_appWindow, SIGNAL(shutting_down()),
+                vsui, SLOT(shutdown()));
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
         vsui->setupPluginMode();

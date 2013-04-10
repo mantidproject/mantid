@@ -80,6 +80,10 @@ public:
   /// See MantidQt::API::VatesViewerInterface
   void setupPluginMode();
 
+public slots:
+  /// Seet MantidQt::API::VatesViewerInterface
+  void shutdown();
+
 protected slots:
   /// Check for certain updates when an accept is fired.
   void checkForUpdates();
