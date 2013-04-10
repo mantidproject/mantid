@@ -81,8 +81,7 @@ namespace MDEvents
    * @param splitter :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
    * @param extentsVector :: vector defining the extents
-   * @param boxSize :: size of reserve for data
-   * @param nBoxEvents :: if defined, we expect box to have such number of events so will allocate memory for it. 
+   * @param nBoxEvents :: Initial number of events to reserve memory for. If left undefined, the memory will be alocated on request.                        
    * @param boxID :: id for the given box
    */
   TMDE(MDBox)::MDBox(BoxController *const splitter, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
@@ -704,8 +703,8 @@ namespace MDEvents
    * @param Signal  :: events signal
    * @param errorSq :: events Error squared
    * @param point :: reference to the  vector of MDEvent coordinates
-   * @param index   run  index of the event
-   * @param index   detector's ID of the event
+   * @param runIndex  ::  run  index of the experiment the event come from
+   * @param detectorId :: the ID of the  detector recoded the event
    * */
    TMDE(
    void MDBox)::buildAndAddEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
@@ -721,8 +720,9 @@ namespace MDEvents
    * @param Signal  :: events signal
    * @param errorSq :: events Error squared
    * @param point :: reference to the  vector of MDEvent coordinates
-   * @param index   run  index of the event
-   * @param index   detector's ID of the event
+   * @param runIndex  ::  run  index of the experiment the event come from
+   * @param detectorId :: the ID of the  detector recoded the event
+   * @param index  :: the index of this cell within the hosting grid box.
    */
    TMDE(
    void MDBox)::buildAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
@@ -735,7 +735,11 @@ namespace MDEvents
    * No lock is performed. This is only safe if no 2 threads will
    * try to add to the same box at the same time.
    *
-   * @param Evnt :: reference to a MDEvent to add.
+   * @param Signal  :: events signal
+   * @param errorSq :: events Error squared
+   * @param point :: reference to the  vector of MDEvent coordinates
+   * @param runIndex  ::  run  index of the experiment the event come from
+   * @param detectorId :: the ID of the  detector recoded the event
    * */
   TMDE(
   void MDBox)::buildAndAddEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)

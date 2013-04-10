@@ -60,7 +60,7 @@ public:
     virtual void setFileBacked()=0;
    /** if node was fileBacked, the method clears file-backed information 
     *@param loadFileData -- if true, the data on HDD and not yet in memory are loaded into memory before deleting fileBacked information, 
-                            if false, all on HDD contents is discarded, which can break the data integrity (used by destructor)  */
+                            if false, all on HDD contents are discarded, which can break the data integrity (used by destructor)  */
     virtual void clearFileBacked(bool loadFileData)=0;
 
     /**Save the box at specific disk position using the class, respoinsible for the file IO. */
@@ -152,14 +152,6 @@ public:
 
 
     // -------------------------------------------------------------------------------------------
-    /** Perform centerpoint binning of events
-     * @param bin :: MDBin object giving the limits of events to accept.
-     * @param fullyContained :: optional bool array sized [nd] of which dimensions are known to be fully contained (for MDSplitBox)
-     */
-    //virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const = 0;
-
-    // General binning method for any shape.
-    //virtual void generalBin(MDBin<MDE,nd> & bin, Mantid::Geometry::MDImplicitFunction & function) const = 0;
 
    /** Sphere (peak) integration
    * The CoordTransform object could be used for more complex shapes, e.g. "lentil" integration, as long

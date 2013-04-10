@@ -383,7 +383,8 @@ namespace Mantid
   //----------------------------------------------------------------------------------------------
   /** Load the ExperimentInfo blocks, if any, in the NXS file
   *
-  * @param ws :: MDEventWorkspace/MDHisto to load
+  * @param file :: the pointer to the properly opened nexus data file where the experiment info groups can be found. 
+  * @param ws :: MDEventWorkspace/MDHisto to load experiment infos to
   */
   void MDBoxFlatTree::loadExperimentInfos(::NeXus::File * const file,boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws)
   {

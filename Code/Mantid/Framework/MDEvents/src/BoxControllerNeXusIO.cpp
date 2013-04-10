@@ -100,8 +100,8 @@ namespace MDEvents
 
   /**Open the file to use in IO operations with events 
    *
-   *@param fileName the name of the file to open. Search for file perfomed within the Mantid search path. 
-   *@mode  opening mode (read or read/write)
+   *@param fileName -- the name of the file to open. Search for file perfomed within the Mantid search path. 
+   *@param mode  -- opening mode (read or read/write)
    *
    *
   */ 

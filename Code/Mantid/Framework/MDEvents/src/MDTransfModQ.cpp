@@ -27,7 +27,7 @@ namespace Mantid
     }
     /** method returns number of matrix dimensions calculated by this class
     *   as function of the energy analysis (conversion) mode  
-       @param dEmode -- energy conversion mode requested by the user for the transfromation
+       @param mode   -- energy conversion mode requested by the user for the transfromation
        @param inWS   -- imput matrix workspace, the subject of transformation.
     */
     unsigned int MDTransfModQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,API::MatrixWorkspace_const_sptr inWS)const
@@ -43,12 +43,17 @@ namespace Mantid
     }
 
 
-    /**Convert single point of matrix workspacd into reciprocal space and (optionally) modify signal and error 
+    /**Convert single point of matrix workspace into reciprocal space and (optionally) modify signal and error 
        as function of reciprocal space (e.g. Lorents corrections)
        @param x      -- the x-coordinate of matix workspace. Often can be a time of flight though the unit conversion is availible
-       @return Coord -- converted MD coordinates of the point x calculated for particular workspace position (detector)
+       @param Coord -- converted MD coordinates of the point x calculated for particular workspace position (detector)
 
+       @param signal -- the signal in the point
+       @param error -- the signal in the point
        no signal or error transformation is performed by this particular method. 
+
+       @return Coord -- the calculated coordinate of the point in the reciprocal space. 
+
     */
     bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord, double & /*signal*/,double &/*ErrSq*/)const
     {

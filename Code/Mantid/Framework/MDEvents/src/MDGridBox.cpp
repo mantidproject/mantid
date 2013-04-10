@@ -1413,10 +1413,10 @@ namespace MDEvents
 
   /** Create and Add several (N) events into correspondent boxes; If the event is out/at of bounds it may be placed in very peculiar place!
    *
-   * @param sigErrSq  :: vector of N-signals and errors where errror follows signal 
-   * @param Coord :: vector of MD event coordinates, nd(number of dimensions)  coordinates for each event
-   * @param index :: vector of run  indexes for N events.
-   * @param index :: vector of detector's ID for N events.
+   * @param sigErrSq   :: vector of N-signals and errors where errror follows signal 
+   * @param Coord      :: vector of MD event coordinates, nd(number of dimensions)  coordinates for each event
+   * @param runIndex   :: vector of run  indexes for N events.
+   * @param detectorId :: vector of detector's ID for N events.
 
    *@return number of events rejected (0 as nothing is rejected here)
    */
