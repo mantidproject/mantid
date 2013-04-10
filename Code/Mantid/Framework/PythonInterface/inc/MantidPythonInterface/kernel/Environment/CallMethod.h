@@ -80,7 +80,7 @@ namespace Mantid { namespace PythonInterface {
        * @param errorMsg :: An error message to pass to the generated exception
        * @return The value of the function or the default value if it does not exist
        */
-      static ResultType dispatchWithException(PyObject *self, const char * funcName, const char * errorMsg)
+      static ResultType dispatchWithException(PyObject *self, const char * funcName)
       {
         GlobalInterpreterLock gil;
         if(Environment::typeHasAttribute(self, funcName))
@@ -96,7 +96,10 @@ namespace Mantid { namespace PythonInterface {
         }
         else
         {
-          throw std::runtime_error(errorMsg);
+          std::ostringstream os;
+          os << self->ob_type->tp_name << " has no function named '" << funcName << "'\n"
+             << "Check the function exists and that its first argument is self.";
+          throw std::runtime_error(os.str());
         }
         return ResultType();
       }
@@ -136,7 +139,7 @@ namespace Mantid { namespace PythonInterface {
        * @param errorMsg :: An error message if the method does not exist
        * @return The value of the function or the default value if it does not exist
        */
-      static void dispatchWithException(PyObject *self, const char * funcName, const char * errorMsg)
+      static void dispatchWithException(PyObject *self, const char * funcName)
       {
         GlobalInterpreterLock gil;
         if(Environment::typeHasAttribute(self, funcName))
@@ -152,7 +155,10 @@ namespace Mantid { namespace PythonInterface {
         }
         else
         {
-          throw std::runtime_error(errorMsg);
+          std::ostringstream os;
+          os << self->ob_type->tp_name << " has no function named '" << funcName << "'\n"
+             << "Check the function exists and that its first argument is self.";
+          throw std::runtime_error(os.str());
         }
       }
     };

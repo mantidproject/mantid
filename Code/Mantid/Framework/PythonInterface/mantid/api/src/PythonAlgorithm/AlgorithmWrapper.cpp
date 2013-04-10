@@ -69,10 +69,7 @@ namespace Mantid
      */
     void AlgorithmWrapper::init()
     {
-      std::ostringstream os;
-      os << "Python algorithm '" << this->name()
-      << "' does not define the PyInit function, cannot initialize.";
-      CallMethod_NoArg<void>::dispatchWithException(getSelf(), "PyInit", os.str().c_str());
+      CallMethod_NoArg<void>::dispatchWithException(getSelf(), "PyInit");
     }
 
     /**
@@ -81,10 +78,8 @@ namespace Mantid
      */
     void AlgorithmWrapper::exec()
     {
-      std::ostringstream os;
-      os << "Python algorithm '" << this->name()
-         << "' does not define the PyExec function, cannot execute.";
-      CallMethod_NoArg<void>::dispatchWithException(getSelf(), "PyExec", os.str().c_str());
+
+      CallMethod_NoArg<void>::dispatchWithException(getSelf(), "PyExec");
     }
 
   }
