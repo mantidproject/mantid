@@ -628,7 +628,7 @@ void MdViewerWidget::createMenus()
 
   if (this->pluginMode)
   {
-    this->ui.verticalLayout->insertWidget(0, menubar);
+    this->ui.verticalLayout_4->insertWidget(0, menubar);
   }
 }
 
