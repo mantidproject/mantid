@@ -103,10 +103,7 @@ namespace MDEvents
     void addEvent(const MDE & event);
     void addEventUnsafe(const MDE & event);
     void addAndTraceEvent(const MDE & point,size_t index);
-    // unhide MDBoxBase methods
-    virtual size_t addEvents(const std::vector<MDE> & events);
-    virtual size_t addEventsUnsafe(const std::vector<MDE> & events);
-
+   
 
     /*--------------->  EVENTS from event data              <-------------------------------------------------------------*/
     virtual void buildAndAddEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);

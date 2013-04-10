@@ -29,26 +29,10 @@ namespace Mantid
 namespace MDEvents
 {
 
-  ////===============================================================================================
-  ////===============================================================================================
-  ////-----------------------------------------------------------------------------------------------
-  ///** Empty constructor. Used when loading from NXS files.
-  // * */
-  //TMDE(MDGridBox)::MDGridBox()
-  // : MDBoxBase<MDE, nd>(), numBoxes(0), nPoints(0)
-  //{
-  //}
-   template<typename MDE,size_t nd>
-    size_t MDGridBox<MDE,nd>::addEvents(const std::vector<MDE> & events)
-    {
-        return MDBoxBase<MDE,nd>::addEvents(events);
-    }
-   template<typename MDE,size_t nd>
-   size_t MDGridBox<MDE,nd>::addEventsUnsafe(const std::vector<MDE> & events)
-   {
-        return MDBoxBase<MDE,nd>::addEventsUnsafe( events);
-   }
+ ////===============================================================================================
+ ////===============================================================================================
 
+ 
   //-----------------------------------------------------------------------------------------------
   /** Constructor with a box controller.
    * @param bc :: poineter to the BoxController, owned by workspace

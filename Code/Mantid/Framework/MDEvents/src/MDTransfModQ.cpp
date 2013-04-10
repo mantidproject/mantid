@@ -44,25 +44,27 @@ namespace Mantid
 
 
     /**Convert single point of matrix workspace into reciprocal space and (optionally) modify signal and error 
-       as function of reciprocal space (e.g. Lorents corrections)
-       @param x      -- the x-coordinate of matix workspace. Often can be a time of flight though the unit conversion is availible
-       @param Coord -- converted MD coordinates of the point x calculated for particular workspace position (detector)
+    as function of reciprocal space (e.g. Lorents corrections)
+    @param x      -- the x-coordinate of matix workspace. Often can be a time of flight though the unit conversion is availible
+    @param Coord -- converted MD coordinates of the point x calculated for particular workspace position (detector)
 
-       @param signal -- the signal in the point
-       @param error -- the signal in the point
-       no signal or error transformation is performed by this particular method. 
+    @param signal -- the signal in the point
+    @param ErrSq -- the signal in the point
+    No signal or error transformation is performed by this particular method. 
 
-       @return Coord -- the calculated coordinate of the point in the reciprocal space. 
+    @return Coord -- the calculated coordinate of the point in the reciprocal space. 
 
     */
-    bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord, double & /*signal*/,double &/*ErrSq*/)const
+    bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord, double & signal,double & ErrSq)const
     {
-      if(m_Emode == Kernel::DeltaEMode::Elastic)
-      {
-        return calcMatrixCoordElastic(x,Coord);
-      }else{
-        return calcMatrixCoordInelastic(x,Coord);
-      }
+        UNUSED_ARG(signal);
+        UNUSED_ARG(ErrSq);
+        if(m_Emode == Kernel::DeltaEMode::Elastic)
+        {
+            return calcMatrixCoordElastic(x,Coord);
+        }else{
+            return calcMatrixCoordInelastic(x,Coord);
+        }
     }
 
     /** Method fills-in all additional properties requested by user and not defined by matrix workspace itselt. 

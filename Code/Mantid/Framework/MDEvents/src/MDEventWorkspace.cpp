@@ -640,9 +640,9 @@ namespace MDEvents
 //  /** Add a large number of events to this MDEventWorkspace.
 //   * This will use a ThreadPool/OpenMP to allocate events in parallel.
 //   *
-//   * @param events :: vector of events to be copied.
-//   * @param prog :: optional Progress object to report progress back to GUI/algorithms.
-//   * @return the number of events that were rejected (because of being out of bounds)
+//   * param events :: vector of events to be copied.
+//   * param prog :: optional Progress object to report progress back to GUI/algorithms.
+//   * return the number of events that were rejected (because of being out of bounds)
 //   */
 //  TMDE(
 //  void MDEventWorkspace)::addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog)
