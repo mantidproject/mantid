@@ -63,8 +63,12 @@ namespace Kernel
 template <class Base>
 class DynamicFactory
 {
+
+public:
   /// Defines the whether notifications are dispatched
   enum NotificationStatus {Enabled, Disabled};
+  /// Defines replacement behaviour
+  enum SubscribeAction {ErrorIfExists, OverwriteCurrent};
 
 public:
   /**
@@ -162,10 +166,15 @@ public:
   /// and the instantiator is deleted.
   /// @param className :: the name of the class you wish to subscribe
   /// @param pAbstractFactory :: A pointer to an abstractFactory for this class
-  void subscribe(const std::string& className, AbstractFactory* pAbstractFactory)
+  /// @param replace :: If ReplaceExisting then the given AbstractFactory replaces any existing
+  ///                   factory with the same className, else throws std::runtime_error (default=ThrowOnExisting)
+  void subscribe(const std::string& className, AbstractFactory* pAbstractFactory,
+                 SubscribeAction replace=ErrorIfExists)
   {
+    if(className.empty()) throw std::invalid_argument("Cannot register empty class name");
+
     typename FactoryMap::iterator it = _map.find(className);
-    if (!className.empty() && it == _map.end())
+    if (it == _map.end() || replace == OverwriteCurrent)
     {
       _map[className] = pAbstractFactory;
       sendUpdateNotificationIfEnabled();

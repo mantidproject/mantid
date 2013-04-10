@@ -109,7 +109,7 @@ namespace
     }
     boost::python::object classType(handle<>(borrowed(classObject)));
     // Takes ownership of instantiator and replaces any existing algorithm
-    AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType), true);
+    AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType), AlgorithmFactoryImpl::OverwriteCurrent);
   }
 }
 
