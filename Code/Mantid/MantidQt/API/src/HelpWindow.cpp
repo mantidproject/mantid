@@ -1,4 +1,4 @@
-#include "HelpWindow.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include <boost/make_shared.hpp>
 #include <iostream>

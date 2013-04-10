@@ -42,7 +42,7 @@ Description          : QtiPlot's main window
 #include <QSet>
 #include <QSettings>
 
-#include "HelpWindow.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "Table.h"
 #include "ScriptingEnv.h"
 #include "Scripted.h"
