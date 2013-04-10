@@ -75,6 +75,7 @@ set ( SRC_FILES
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
 	src/Exponential.cpp
+	src/ExportTimeSeriesLog.cpp
 	src/ExponentialCorrection.cpp
 	src/ExtractFFTSpectrum.cpp
 	src/ExtractMask.cpp
@@ -286,6 +287,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/Exponential.h
 	inc/MantidAlgorithms/ExponentialCorrection.h
+	inc/MantidAlgorithms/ExportTimeSeriesLog.h
 	inc/MantidAlgorithms/ExtractFFTSpectrum.h
 	inc/MantidAlgorithms/ExtractMask.h
 	inc/MantidAlgorithms/ExtractMasking.h
@@ -501,6 +503,7 @@ set ( TEST_FILES
 	EditInstrumentGeometryTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
+	ExportTimeSeriesLogTest.h
 	ExtractFFTSpectrumTest.h
 	ExtractMaskTest.h
 	ExtractSingleSpectrumTest.h
