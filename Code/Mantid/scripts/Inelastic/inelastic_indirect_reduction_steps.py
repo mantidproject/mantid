@@ -1,6 +1,7 @@
 from reduction.reducer import ReductionStep
-from mantid.simpleapi import *
+import mantid
 from mantid import config
+from mantid.simpleapi import *
 import string
 import os
 
@@ -116,7 +117,7 @@ class LoadData(ReductionStep):
             if os.path.isfile(basis_mask_filename):
                     LoadMask(Instrument="BASIS", OutputWorkspace="__basis_mask", 
                              InputFile=basis_mask_filename)
-                    MaskDetectors(Workspace=filename, MaskedWorkspace="__basis_mask")
+                    MaskDetectors(Workspace=output_ws, MaskedWorkspace="__basis_mask")
             else:
                     logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
 
@@ -141,8 +142,9 @@ class LoadData(ReductionStep):
         logger.debug('self._monitor_index = ' + str(self._monitor_index))
 
         for ws in workspaces:
-            if (loader_name.endswith('Nexus')):
-                LoadNexusMonitors(Filename=self._data_files[output_ws],OutputWorkspace= ws+'_mon')
+            if isinstance(mtd[ws],mantid.api.IEventWorkspace):
+                LoadNexusMonitors(Filename=self._data_files[output_ws],
+                                  OutputWorkspace= ws+'_mon')
             else:
                 ## Extract Monitor Spectrum
                 ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace= ws+'_mon',WorkspaceIndex= self._monitor_index)
@@ -163,9 +165,10 @@ class LoadData(ReductionStep):
             loaded_ws = LoadVesuvio(Filename=filename, OutputWorkspace=output_ws, SpectrumList="1-198", **self._extra_load_opts)
             loader_name = "LoadVesuvio"
         else:
+            loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
             if self._load_logs == True:
                 loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=True, **self._extra_load_opts)
-                logger.notice("Loaded logs")
+                logger.notice("Loaded sample logs")
             else:
                 loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
             loader_handle = loaded_ws.getHistory().lastAlgorithm()
