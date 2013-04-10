@@ -62,9 +62,8 @@ class WikiReporter:
     def addFailureTestCase(self, algorithm, version, last_editor, diff):
         contents = "Algorithm %s Version %i last edited by %s is out of sync.\n\nDifferences are:\n\n%s" % (algorithm, version, last_editor, diff)
         self.__addGenericFailure__(contents, algorithm)
-
         
-    def addFailureNoPage(self, algorithm, expected_page):
-        contents = "Algorithm %s has no wiki page. Wiki page expected %s still needs creating." % (algorithm, expected_page)
+    def addFailureNoDescription(self, algorithm, version):
+        contents = "Algorithm %s Version %i has no description" % (algorithm, version)
         self.__addGenericFailure__(contents, algorithm)
 

@@ -92,7 +92,7 @@ namespace MantidQt
       /// Peak background inner radius
       const double m_backgroundInnerRadius;
       /// Peak background outer radius
-      const double m_backgroundOuterRadius;
+      double m_backgroundOuterRadius;
       /// Max opacity
       const double m_opacityMax;
       /// Min opacity
@@ -108,7 +108,7 @@ namespace MantidQt
       /// Cached background inner radius sq.
       const double m_backgroundInnerRadiusSQ;
       /// Cached background outer radius sq.
-      const double m_backgroundOuterRadiusSQ;
+      double m_backgroundOuterRadiusSQ;
       /// Flag to indicate that the background radius should be drawn.
       bool m_showBackgroundRadius;
       /// Inner radius at distance.

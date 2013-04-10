@@ -161,12 +161,12 @@ public:
 
   /// Check if a point on the scren is under any of the mask shapes
   bool isMasked(double x,double y)const{return m_maskShapes.isMasked(x,y);}
-
   /// Check if there are any masks defined
   bool hasMasks() const {return m_maskShapes.size() > 0;}
-
   /// Remove all mask shapes.
   void clearMask(){m_maskShapes.clear();}
+  /// Change all border colors.
+  void changeBorderColor(const QColor& color) {m_maskShapes.changeBorderColor(color);}
 
   //-----------------------------------
   //    Peaks overaly methods

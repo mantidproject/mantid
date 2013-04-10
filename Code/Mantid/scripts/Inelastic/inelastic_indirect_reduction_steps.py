@@ -1,6 +1,7 @@
 from reduction.reducer import ReductionStep
-from mantid.simpleapi import *
+import mantid
 from mantid import config
+from mantid.simpleapi import *
 import string
 import os
 
@@ -141,8 +142,9 @@ class LoadData(ReductionStep):
         logger.debug('self._monitor_index = ' + str(self._monitor_index))
 
         for ws in workspaces:
-            if (loader_name.endswith('Nexus')):
-                LoadNexusMonitors(Filename=self._data_files[output_ws],OutputWorkspace= ws+'_mon')
+            if isinstance(mtd[ws],mantid.api.IEventWorkspace):
+                LoadNexusMonitors(Filename=self._data_files[output_ws],
+                                  OutputWorkspace= ws+'_mon')
             else:
                 ## Extract Monitor Spectrum
                 ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace= ws+'_mon',WorkspaceIndex= self._monitor_index)

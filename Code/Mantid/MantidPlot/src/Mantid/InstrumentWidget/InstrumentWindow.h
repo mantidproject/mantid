@@ -92,6 +92,8 @@ public:
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
   InstrumentWindowTab *getTab()const;
+  /// Get a filename for saving
+  QString getSaveFileName(const QString& title, const QString& filters, QString* selectedFilter = NULL);
 
 signals:
   void enableLighting(bool);
@@ -127,15 +129,8 @@ public slots:
   void spectraInfoDialog();
   void plotSelectedSpectra();
   void showDetectorTable();
-  void groupDetectors();
-  void maskDetectors();
   void executeAlgorithm(const QString&, const QString&);
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
-
-  void extractDetsToWorkspace();
-  void sumDetsToWorkspace();
-  void createIncludeGroupingFile();
-  void createExcludeGroupingFile();
 
   void setupColorMap();
   void changeColormap(const QString & filename = "");
@@ -203,15 +198,7 @@ private:
   SimpleWidget* m_simpleDisplay;
 
   // Actions for the pick menu
-  QAction *mInfoAction, *mPlotAction, *mDetTableAction, *mGroupDetsAction, *mMaskDetsAction;
-  /// Extract selected detector ids to a new workspace
-  QAction *m_ExtractDetsToWorkspaceAction;  
-  /// Sum selected detectors to a new workspace
-  QAction *m_SumDetsToWorkspaceAction;      
-  /// Create grouping xml file which includes selected detectors
-  QAction *m_createIncludeGroupingFileAction; 
-  /// Create grouping xml file which excludes selected detectors
-  QAction *m_createExcludeGroupingFileAction; 
+  QAction *mInfoAction, *mPlotAction, *mDetTableAction;
   // Context menu actions
   QAction *m_clearPeakOverlays;
 

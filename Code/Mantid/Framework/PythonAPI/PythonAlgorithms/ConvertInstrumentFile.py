@@ -26,6 +26,7 @@ There can be several types of Fullprof files as the input file
 
 from MantidFramework import *
 from mantidsimple import *
+import mantid.simpleapi as api
 import os
 from random import *
 import numpy as np
@@ -187,7 +188,6 @@ class ConvertInstrumentFile(PythonAlgorithm):
 
         return
 
-
     def parseFullprofResolutionFile(self, irffilename):
         """ Parse Fullprof resolution .irf file
     
@@ -197,143 +197,52 @@ class ConvertInstrumentFile(PythonAlgorithm):
         Output:
          - dictionary
         """
-        # 1. Import data
-        try:
-            irffile = open(irffilename, "r")
-            rawlines = irffile.readlines()
-            irffile.close()
-        except IOError:
-            print "Fullprof resolution file %s cannot be read" % (irffilename)
-            raise NotImplementedError("Input resolution file error!")
-    
-        lines = []
-        for line in rawlines:
-            cline = line.strip()
-            if len(cline) > 0:
-                lines.append(cline)
-        # ENDFOR
-    
-        # 2. Parse
         mdict = {}
-        mdict["title"] = lines[0]
-        bank = -1
-        indexfirstline = 1
-        if lines[0][0] == "!":
-            indexfirstline = 0
 
-        for il in xrange(indexfirstline, len(lines)):
-            line = lines[il]
-            if line[0] == '!':
-                # Comment line
-                if line.count("Bank") > 0:
-                    # Line with bank
-                    terms = line.split("Bank")[1].split()
-                    bank = int(terms[0])
-                    mdict[bank] = {}
-                    if len(terms) >= 4 and terms[1] == "CWL":
-                        # center wave length
-                        cwl = float(terms[3].split("A")[0])
-                        mdict[bank]["CWL"] = cwl
-                    # ENDIF: CWL
-                # ENDIF: Containing Bank
-    
-            elif line.startswith("NPROF"):
-                # Profile Type
-                profiletype = int(line.split("NPROF")[1])
-                try: 
-                    mdict[bank]["Profile"] = profiletype
-                except KeyError:
-                    errmsg = "Irf file importing error: Bank-Line is not defined!\n" 
-                    errmsg += "Imported content: \n"
-                    for key in mdict.keys:
-                        errmsg += "%s:  %s\n" % (key, mdict[key])
-                    raise NotImplementedError(errmsg)
-    
-            elif line.startswith("TOFRG"):
-                # Tof-min(us)    step      Tof-max(us)
-                terms = line.split()
-                mdict[bank]["tof-min"] = float(terms[1])*1.0E-3
-                mdict[bank]["tof-max"] = float(terms[3])*1.0E-3
-                mdict[bank]["step"]    = float(terms[2])*1.0E-3
-    
-            elif line.startswith("D2TOF"):
-                # Dtt1      Dtt2         Zero 
-                terms = line.split()
-                mdict[bank]["dtt1"] = float(terms[1])
-                if len(terms) == 3:
-                    mdict[bank]["dtt2"] = float(terms[2])
-                    mdict[bank]["zero"] = float(terms[3])
-                else:
-                    mdict[bank]["dtt2"] = 0.0
-                    mdict[bank]["zero"] = 0.0
-    
-            elif line.startswith("ZD2TOF"):
-                #  Zero   Dtt1  
-                terms = line.split()
-                mdict[bank]["zero"] = float(terms[1])
-                mdict[bank]["dtt1"] = float(terms[2])
-                mdict[bank]["dtt2"] = 0.0
-    
-            elif line.startswith("D2TOT"):
-                # Dtt1t       Dtt2t    x-cross    Width   Zerot
-                terms = line.split()
-                mdict[bank]["dtt1t"] = float(terms[1])
-                mdict[bank]["dtt2t"] = float(terms[2])
-                mdict[bank]["x-cross"] = float(terms[3])
-                mdict[bank]["width"] = float(terms[4])
-                mdict[bank]["zerot"] = float(terms[5])
-    
-            elif line.startswith("ZD2TOT"):
-                # Zerot    Dtt1t       Dtt2t    x-cross    Width
-                terms = line.split()
-                mdict[bank]["zerot"] = float(terms[1])
-                mdict[bank]["dtt1t"] = float(terms[2])
-                mdict[bank]["dtt2t"] = float(terms[3])
-                mdict[bank]["x-cross"] = float(terms[4])
-                mdict[bank]["width"] = float(terms[5])
-    
-            elif line.startswith("TWOTH"):
-                # TOF-TWOTH of the bank
-                terms = line.split()
-                mdict[bank]["twotheta"] = float(terms[1])
-    
-            elif line.startswith("SIGMA"):
-                # Gam-2     Gam-1     Gam-0 
-                terms = line.split()
-                mdict[bank]["sig-2"] = float(terms[1])
-                mdict[bank]["sig-1"] = float(terms[2])
-                mdict[bank]["sig-0"] = float(terms[3])
-    
-            elif line.startswith("GAMMA"):
-                # Gam-2     Gam-1     Gam-0 
-                terms = line.split()
-                mdict[bank]["gam-2"] = float(terms[1])
-                mdict[bank]["gam-1"] = float(terms[2])
-                mdict[bank]["gam-0"] = float(terms[3])
-    
-            elif line.startswith("ALFBE"):
-                # alph0       beta0       alph1       beta1 
-                terms = line.split()
-                mdict[bank]["alph0"] = float(terms[1])
-                mdict[bank]["beta0"] = float(terms[2])
-                mdict[bank]["alph1"] = float(terms[3])
-                mdict[bank]["beta1"] = float(terms[4])
-    
-            elif line.startswith("ALFBT"):
-                # alph0t       beta0t       alph1t       beta1t 
-                terms = line.split()
-                mdict[bank]["alph0t"] = float(terms[1])
-                mdict[bank]["beta0t"] = float(terms[2])
-                mdict[bank]["alph1t"] = float(terms[3])
-                mdict[bank]["beta1t"] = float(terms[4])
-    
-    
-            # ENDIF: Line type
-        # ENDFOR
+        infows = api.LoadFullprofResolution(Filename=irffilename, OutputWorkspace="BankInfoTable", BankInformation=True)
+
+        numbanks = infows.rowCount()
+        for i in xrange(numbanks):
+            bankid = infows.cell(i, 0)
+            print "Found bank %d" %(bankid)
+            
+            bankwsname = irffilename.split("/")[-1].split(".")[0] + "_Bank" + str(bankid)
+            print "Export to Tableworkspace %s" % (bankwsname)
+            bankws = api.LoadFullprofResolution(Filename=irffilename, OutputWorkspace=bankwsname, Bank=bankid, BankInformation=False)
+
+            mdict = self.parseTableWorkspaceToDict(bankws, mdict, bankid)
+
+            # .irf file may not have term Dtt2
+            if mdict[bankid].has_key("Dtt2") is False:
+                mdict[bankid]["Dtt2"] = 0.0
+
+            # Convert the unit of tof-min and tof-max 
+            mdict[bankid]["tof-max"] = 1.0E-3*mdict[bankid]["tof-max"]
+
+            # Definition of sigma might be different
+            mdict[bankid]["Sig0"] = mdict[bankid]["Sig0"]**2
+            mdict[bankid]["Sig1"] = mdict[bankid]["Sig1"]**2
+            mdict[bankid]["Sig2"] = mdict[bankid]["Sig2"]**2
+        # ENDFOR i (each bank)
 
         self.mdict = mdict
     
         return mdict
+
+
+    def parseTableWorkspaceToDict(self, tablews, pardict, bankid):
+        """ Parse parameter table workspace to a dictionary
+        """
+        pardict[bankid] = {}
+
+        numrows = tablews.rowCount()
+        
+        for irow in xrange(numrows):
+            parname = tablews.cell(irow, 0)
+            parvalue = tablews.cell(irow, 1)
+            pardict[bankid][parname] = parvalue
+
+        return pardict
 
 
     def makeParameterConsistent(self):
@@ -409,13 +318,14 @@ class ConvertInstrumentFile(PythonAlgorithm):
         gpkX   = np.zeros(90)       # n ratio b/w thermal and epithermal neutron
         try:
             twosintheta = pardict["twotheta"]
-            mX = pardict["x-cross"]
-            mXb = pardict["width"]
-            instC = pardict["dtt1"] - (4*(pardict["alph0"]+pardict["alph1"])) 
+            mX = pardict["Tcross"]
+            mXb = pardict["Width"]
+            instC = pardict["Dtt1"] - (4*(pardict["Alph0"]+pardict["Alph1"])) 
         except KeyError:
             print "Cannot Find Key twotheta/x-cross/width/dtt1/alph0/alph1!"
             print "Keys are: "
             print pardict.keys()
+            raise NotImplementedError("Key works cannot be found!")
        
         if 1: 
             # latest version from Jason
@@ -426,17 +336,21 @@ class ConvertInstrumentFile(PythonAlgorithm):
 
         # 2. Calcualte alph, beta table
         for k in xrange(90):
+            #try:
             gdsp[k] = (0.9*self.mndsp[bank-1])+(k*ddstep)
             rd = 1.0/gdsp[k]
             dmX = mX-rd
             gpkX[k] = 0.5*erfc(mXb*dmX)  # this is n in the formula
-            gtof[k] = tofh(gpkX[k], pardict["zero"], pardict["dtt1"] ,pardict["dtt2"],
-                    pardict["zerot"], pardict["dtt1t"], -pardict["dtt2t"], gdsp[k])
+            gtof[k] = tofh(gpkX[k], pardict["Zero"], pardict["Dtt1"] ,pardict["Dtt2"],
+                    pardict["Zerot"], pardict["Dtt1t"], -pardict["Dtt2t"], gdsp[k])
             gdt[k] = gtof[k] - (instC*gdsp[k])
-            galpha[k] = aaba(gpkX[k], pardict["alph0"], pardict["alph1"], 
-                    pardict["alph0t"], pardict["alph1t"], gdsp[k])
-            gbeta[k] = aaba(gpkX[k], pardict["beta0"], pardict["beta1"], 
-                    pardict["beta0t"], pardict["beta1t"], gdsp[k])
+            galpha[k] = aaba(gpkX[k], pardict["Alph0"], pardict["Alph1"], 
+                    pardict["Alph0t"], pardict["Alph1t"], gdsp[k])
+            gbeta[k] = aaba(gpkX[k], pardict["Beta0"], pardict["Beta1"], 
+                    pardict["Beta0t"], pardict["Beta1t"], gdsp[k])
+            #except KeyError err:
+            #    print err
+            #    raise NotImplementedError("Unable to find some parameter name as key")
         # ENDFOR: k 
 
         # 3. Set to class variables
@@ -460,7 +374,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         # 1. Set essential values
         pardict = self.mdict[bank]
 
-        instC = pardict["dtt1"] - (4*(pardict["alph0"]+pardict["alph1"])) 
+        instC = pardict["Dtt1"] - (4*(pardict["Alph0"]+pardict["Alph1"])) 
         titleline = "%s %dHz CW=%f" % (self.sample, self.frequency, self.CWL[bank-1])
 
         # 2. Write section of prm file to string
@@ -475,12 +389,12 @@ class ConvertInstrumentFile(PythonAlgorithm):
          # ENDIF
   
         if self.iL2 < 0:
-            self.iL2 = calL2FromDtt1(difc=self.mdict[bank]["dtt1"], L1=self.iL1, twotheta=self.i2theta)
+            self.iL2 = calL2FromDtt1(difc=self.mdict[bank]["Dtt1"], L1=self.iL1, twotheta=self.i2theta)
 
         # print "Debug: L2 = %f,  2Theta (irf) = %f,  2Theta (input) = %f" % (self.iL2, pardict["twotheta"], self.i2theta)
 
         prmfile += ('INS %2i ICONS%10.3f%10.3f%10.3f          %10.3f%5i%10.3f\n' % 
-                (bank, instC*1.00009, 0.0, pardict["zero"],0.0,0,0.0))
+                (bank, instC*1.00009, 0.0, pardict["Zero"],0.0,0,0.0))
         prmfile += ('INS %2iBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5i%5i\n' % 
                 (bank, self.iL2, pardict["twotheta"], 0, 0, 0.2, 1, 1))
         prmfile += ('INS %2iBAKGD     1    4    Y    0    Y\n'   % (bank))
@@ -491,11 +405,11 @@ class ConvertInstrumentFile(PythonAlgorithm):
         prmfile += ('INS %2iINAME   powgen \n' %(bank))
         prmfile += ('INS %2iPRCF1 %5i%5i%10.5f\n' % (bank, -3, 21, 0.002))
         prmfile += ('INS %2iPRCF11%15.6f%15.6f%15.6f%15.6f\n' % 
-                (bank, 0.0, 0.0, 0.0, pardict["sig-0"]))    # sigma20
+                (bank, 0.0, 0.0, 0.0, pardict["Sig0"]))    # sigma20
         prmfile += ('INS %2iPRCF12%15.6f%15.6f%15.6f%15.6f\n' % 
-                (bank, pardict["sig-1"], pardict["sig-2"], pardict["gam-0"], pardict["gam-1"]))
+                (bank, pardict["Sig1"], pardict["Sig2"], pardict["Gam0"], pardict["Gam1"]))
         prmfile += ('INS %2iPRCF13%15.6f%15.6f%15.6f%15.6f\n' % 
-                (bank, pardict["gam-2"], 0.0, 0.0, 0.0))
+                (bank, pardict["Gam2"], 0.0, 0.0, 0.0))
         prmfile += ('INS %2iPRCF14%15.6f%15.6f%15.6f%15.6f\n' % 
                 (bank, 0.0, 0.0, 0.0, 0.0))
         prmfile += ('INS %2iPRCF15%15.6f%15.6f%15.6f%15.6f\n' % 
@@ -506,8 +420,8 @@ class ConvertInstrumentFile(PythonAlgorithm):
             prmfile += ('INS %2iPAB3%2i%10.5f%10.5f%10.5f%10.5f\n' %(bank, k+1, 
                 self.gdsp[k], self.gdt[k], self.galpha[k], self.gbeta[k]))
         prmfile += ('INS %2iPRCF2 %5i%5i%10.5f\n' % (bank, -4, 27, 0.002))
-        prmfile += ('INS %2iPRCF21%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, pardict["sig-1"]))
-        prmfile += ('INS %2iPRCF22%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["sig-2"], pardict["gam-2"], 0.0, 0.0))
+        prmfile += ('INS %2iPRCF21%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, pardict["Sig1"]))
+        prmfile += ('INS %2iPRCF22%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["Sig2"], pardict["Gam2"], 0.0, 0.0))
         prmfile += ('INS %2iPRCF23%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
         prmfile += ('INS %2iPRCF24%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
         prmfile += ('INS %2iPRCF25%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
@@ -518,10 +432,10 @@ class ConvertInstrumentFile(PythonAlgorithm):
             prmfile += ('INS %2iPAB4%2i%10.5f%10.5f%10.5f%10.5f\n' %(bank, k+1, 
                 self.gdsp[k], self.gdt[k], self.galpha[k], self.gbeta[k]))
         prmfile += ('INS %2iPRCF3 %5i%5i%10.5f\n' % (bank, -5, 21, 0.002))
-        prmfile += ('INS %2iPRCF31%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, pardict["sig-0"]))
-        prmfile += ('INS %2iPRCF32%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["sig-1"], pardict["sig-2"], 
-            pardict["gam-0"], pardict["gam-1"]))
-        prmfile += ('INS %2iPRCF33%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["gam-2"], 0.0, 0.0, 0.0))
+        prmfile += ('INS %2iPRCF31%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, pardict["Sig0"]))
+        prmfile += ('INS %2iPRCF32%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["Sig1"], pardict["Sig2"], 
+            pardict["Gam0"], pardict["Gam1"]))
+        prmfile += ('INS %2iPRCF33%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["Gam2"], 0.0, 0.0, 0.0))
         prmfile += ('INS %2iPRCF34%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
         prmfile += ('INS %2iPRCF35%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
         prmfile += ('INS %2iPRCF36%15.6f\n' % (bank, 0.0))

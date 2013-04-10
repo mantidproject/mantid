@@ -179,8 +179,11 @@ def wiki_maker_page(page):
     returns True if the wikimaker was the last editor.
     determines if there is a bot comment, which implies that the wikimaker was used to create the page last.
     """
-    #Get the last editor of the page.
+    # If there are no previous authors, we also count this as a wikimaker page.
     revisions = page.revisions()
+    if len(list(page.revisions())) == 0:
+        return True;
+    # Get the last editor of the page.
     for rev in revisions: 
         return re.search("^Bot", rev['comment'])
 
@@ -207,14 +210,16 @@ def do_algorithm(args, algo, version):
         
     print "Generating wiki page for %s at http://www.mantidproject.org/%s" % (algo, wiki_page_name)
     site = wiki_tools.site
+    
+    # Use wikitools to make the new contents.    
     new_contents = make_wiki(algo, version, latest_version) 
     
-    #Open the page with the name of the algo
+    # Open the page with the name of the algo
     page = site.Pages[wiki_page_name]
-    if args.dryrun and (not page_exists(page)):
-        print "Error: Wiki Page wiki_page_name %s does not exist on the wiki." % wiki_page_name
-        reporter.addFailureNoPage(algo, wiki_page_name)
-        return
+    
+    # Wiki page should have a description.
+    if re.search(missing_description, new_contents):
+        reporter.addFailureNoDescription(algo, version)
     
     old_contents = page.edit() + "\n"
     
@@ -242,10 +247,8 @@ def do_algorithm(args, algo, version):
             if not last_modifier == None:
                 # Report a failure test case
                 reporter.addFailureTestCase(algo, version, last_modifier, ''.join(diff_list))
-            else:
-                print "This looks like a new wiki page."
         else:
-            print "The last edit was automatic via a script. Last edit was done by WIKIMAKER script."
+            print "The last edit was automatic via a script, or this is a new page. Last edit was done by WIKIMAKER script."
         print "Last change by ", last_modifier
         
         if args.dryrun:

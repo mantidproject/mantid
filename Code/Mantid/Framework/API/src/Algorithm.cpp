@@ -168,6 +168,12 @@ namespace Mantid
       this->m_rethrow = rethrow;
     }
 
+    /// True if the algorithm is running.
+    bool Algorithm::isRunning() const
+    {
+      Poco::FastMutex::ScopedLock _lock(m_mutex);
+      return m_running;
+    }
 
 
     //---------------------------------------------------------------------------------------------
@@ -526,6 +532,7 @@ namespace Mantid
         {
           if (!isChild()) 
           { 
+            Poco::FastMutex::ScopedLock _lock(m_mutex);
             m_running = true;
           }
           if(!isChild() || m_recordHistoryForChild)
@@ -1347,8 +1354,9 @@ namespace Mantid
     /**
      * Cancel an algorithm
      */
-    void Algorithm::cancel() const
+    void Algorithm::cancel()
     {
+      Poco::FastMutex::ScopedLock _lock(m_mutex);
       //set myself to be cancelled
       m_cancel = true;
 
@@ -1372,6 +1380,7 @@ namespace Mantid
      */
     void Algorithm::interruption_point()
     {
+      Poco::FastMutex::ScopedLock _lock(m_mutex);
       // only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
       // that defines that all loops must complete, and no exception can leave an OpenMP section
       // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim

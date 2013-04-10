@@ -197,7 +197,6 @@ using namespace boost::python;
       .def("getWikiDescription", &API::IAlgorithm::getWikiDescription)
       .def("initialize", &API::IAlgorithm::initialize)
       .def("execute", &executeWhileReleasingGIL)
-      .def("isRunningAsync", &API::IAlgorithm::isRunningAsync)
       .def("isInitialized", &API::IAlgorithm::isInitialized)
       .def("isLogging", &API::IAlgorithm::isLogging)
       .def("isExecuted", &API::IAlgorithm::isExecuted)

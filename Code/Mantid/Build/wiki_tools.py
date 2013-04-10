@@ -30,6 +30,9 @@ cpp_files_bare = []
 python_files = []
 python_files_bare = []
 
+# Missing description tag.
+missing_description = "INSERT FULL DESCRIPTION HERE"
+
 #======================================================================
 def remove_wiki_from_header():
     """One-time method to remove *WIKI* tags from all header files """
@@ -104,7 +107,7 @@ def get_wiki_usage(algo, version):
             
 
 #======================================================================
-def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=False):
+def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=False, verbose=True):
     """ Extract the text between the *WIKI* tags in the .cpp file
     
     @param algo :: name of the algorithm
@@ -124,7 +127,7 @@ def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=Fa
     else:
         f = open(source,'r')
         lines = f.read().split('\n')
-        print lines
+        #print lines
         f.close()
         
         print algo
@@ -150,11 +153,12 @@ def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=Fa
             # Concatinate across the range.
             for line_index in range(start_index, end_index):
                 desc += lines[line_index] + "\n"
-            
-            if start_index == end_index:
-                print "No algorithm %s section in source." % tag
-            else:
-                print "Getting algorithm %s section from source." % tag
+
+            if verbose:
+                if start_index == end_index:
+                    print "No algorithm %s section in source." % tag
+                else:
+                    print "Getting algorithm %s section from source." % tag
         
         except IndexError:
             print "No algorithm %s section in source." % tag
@@ -597,7 +601,7 @@ def do_make_wiki(algo_name, version, latest_version):
     except IndexError:
         pass
     if (desc == ""):
-      out += "INSERT FULL DESCRIPTION HERE\n"
+      out +=  missing_description + "\n"
       print "Warning: missing wiki description for %s! Placeholder inserted instead." % algo_name
     else:
       out += desc + "\n"
