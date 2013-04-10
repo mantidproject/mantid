@@ -58,7 +58,9 @@ public:
     virtual void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)=0;
     /** initiate the structure responsible for swapping the box on HDD if out of memory with default parameters (it does not know its place on HDD and was not saved). */
     virtual void setFileBacked()=0;
-  /// if node was fileBacked, it should clear file-backed information 
+   /** if node was fileBacked, the method clears file-backed information 
+    *@param loadFileData -- if true, the data on HDD and not yet in memory are loaded into memory before deleting fileBacked information, 
+                            if false, all on HDD contents is discarded, which can break the data integrity (used by destructor)  */
     virtual void clearFileBacked(bool loadFileData)=0;
 
     /**Save the box at specific disk position using the class, respoinsible for the file IO. */
