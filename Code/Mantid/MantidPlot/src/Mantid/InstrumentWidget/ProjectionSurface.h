@@ -178,8 +178,10 @@ public:
   bool hasPeakOverlays() const {return !m_peakShapes.isEmpty();}
   void setPeakLabelPrecision(int n);
   int getPeakLabelPrecision() const {return m_peakLabelPrecision;}
-  void setShowPeakRowFlag(bool on);
-  bool getShowPeakRowFlag()const {return m_showPeakRow;}
+  void setShowPeakRowsFlag(bool on);
+  bool getShowPeakRowsFlag()const {return m_showPeakRows;}
+  void setShowPeakLabelsFlag(bool on);
+  bool getShowPeakLabelsFlag()const {return m_showPeakLabels;}
 
 signals:
 
@@ -256,7 +258,8 @@ protected:
   Shape2DCollection m_maskShapes;    ///< to draw mask shapes
   mutable QList<PeakOverlay*> m_peakShapes; ///< to draw peak labels
   mutable int m_peakLabelPrecision;
-  mutable bool m_showPeakRow;        ///< flag to show peak row index
+  mutable bool m_showPeakRows;        ///< flag to show peak row index
+  mutable bool m_showPeakLabels;     ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle;     ///< index of a default PeakMarker2D style to use with a new PeakOverlay.
 
 private:

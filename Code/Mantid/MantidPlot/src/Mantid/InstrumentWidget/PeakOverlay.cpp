@@ -110,7 +110,8 @@ Shape2DCollection(),
 m_peaksWorkspace(pws),
 m_surface(surface),
 m_precision(6),
-m_showRows(true)
+m_showRows(true),
+m_showLabels(true)
 {
   if (g_defaultStyles.isEmpty())
   {
@@ -197,6 +198,8 @@ void PeakOverlay::draw(QPainter& painter) const
 {
   // Draw symbols
   Shape2DCollection::draw(painter);
+
+  if ( !m_showLabels ) return;
 
   // Sort the labels to avoid overlapping
   QColor color(Qt::red);

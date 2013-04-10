@@ -70,6 +70,7 @@ public:
   /// set HKL precision
   void setPrecision(int prec) const {m_precision = prec;}
   void setShowRowsFlag(bool yes) {m_showRows = yes;}
+  void setShowLabelsFlag(bool yes) {m_showLabels = yes;}
   static PeakMarker2D::Style getDefaultStyle(int index);
 
 signals:
@@ -85,7 +86,8 @@ private:
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
   UnwrappedSurface* m_surface; ///< pointer to the surface this overlay is applied to
   mutable int m_precision;
-  mutable bool m_showRows; ///< flag to show peak row index
+  mutable bool m_showRows;   ///< flag to show peak row index
+  mutable bool m_showLabels; ///< flag to show peak hkl labels
 
   static QList<PeakMarker2D::Style> g_defaultStyles; ///< default marker styles
 };

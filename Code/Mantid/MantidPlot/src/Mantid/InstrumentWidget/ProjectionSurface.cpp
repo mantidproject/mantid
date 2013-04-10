@@ -643,13 +643,25 @@ void ProjectionSurface::setPeakLabelPrecision(int n)
 /**
  * Enable or disable the show peak row flag
  */
-void ProjectionSurface::setShowPeakRowFlag(bool on)
+void ProjectionSurface::setShowPeakRowsFlag(bool on)
 {
-  m_showPeakRow = on;
+  m_showPeakRows = on;
   for(int i=0;i < m_peakShapes.size(); ++i)
   {
     m_peakShapes[i]->setShowRowsFlag(on);
   }
+}
+
+/**
+ * Enable or disable the show peak label flag
+ */
+void ProjectionSurface::setShowPeakLabelsFlag(bool on)
+{
+    m_showPeakLabels = on;
+    for(int i=0;i < m_peakShapes.size(); ++i)
+    {
+      m_peakShapes[i]->setShowLabelsFlag(on);
+    }
 }
 
 /**
