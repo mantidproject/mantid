@@ -263,31 +263,3 @@ namespace Algorithms
 
 } // namespace Mantid
 } // namespace Algorithms
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
