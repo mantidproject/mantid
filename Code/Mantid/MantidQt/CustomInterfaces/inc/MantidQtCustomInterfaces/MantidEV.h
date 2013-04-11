@@ -5,11 +5,15 @@
 #include <QtGui/QWidget>
 #include <QActionGroup>
 #include <QRunnable>
+#include <Poco/NObserver.h>
+
 #include <MantidKernel/System.h>
 
 #include "ui_MantidEV.h"
 #include "MantidEVWorker.h"
 #include "MantidQtAPI/UserSubWindow.h"
+
+#include "MantidAPI/SelectionNotificationService.h"
 
 namespace MantidQt
 {
@@ -217,6 +221,7 @@ private slots:
   /// Slot for Show Info button on Point Info form
   void showInfo_slot();
 
+
   // 
   // The following slots take care of the menu items
   //
@@ -288,6 +293,9 @@ private slots:
 
   /// Slot to enable/disable the ellipse size options controls
   void setEnabledEllipseSizeOptions_slot();
+
+  /// Method to handle pointed at message from any source
+  void handleQpointNotification(const Poco::AutoPtr<Mantid::API::SelectionNotificationServiceImpl::AddNotification> & message );
 
   /// Method to get and display info about the specified Q-vector
   void showInfo( Mantid::Kernel::V3D  q_point );

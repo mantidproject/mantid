@@ -11,6 +11,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -165,6 +166,8 @@ MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent)
   worker        = new MantidEVWorker();
   m_thread_pool = new QThreadPool( this );
   m_thread_pool->setMaxThreadCount(1);
+  Poco::NObserver<MantidEV, SelectionNotificationServiceImpl::AddNotification> observer(*this, &MantidEV::handleQpointNotification);
+  SelectionNotificationService::Instance().notificationCenter.addObserver(observer);
 }
 
 
@@ -949,12 +952,32 @@ void MantidEV::showInfo_slot()
    getDouble( m_uiForm.Qx_ledt, qx );
    getDouble( m_uiForm.Qy_ledt, qy );
    getDouble( m_uiForm.Qz_ledt, qz );
-   std::cout << "Qx = " << qx << std::endl; 
-   std::cout << "Qy = " << qy << std::endl; 
-   std::cout << "Qz = " << qz << std::endl; 
+//   std::cout << "Qx = " << qx << std::endl; 
+//   std::cout << "Qy = " << qy << std::endl; 
+//   std::cout << "Qz = " << qz << std::endl; 
 
    Mantid::Kernel::V3D q_point( qx, qy, qz );
-   showInfo( q_point );
+//   showInfo( q_point );
+
+   boost::shared_ptr<std::vector<double>> q_vec(new std::vector<double>());
+   q_vec->push_back( qx );
+   q_vec->push_back( qy );
+   q_vec->push_back( qz );
+   std::string message_name("PointedAt");
+   SelectionNotificationService::Instance().addOrReplace(message_name.c_str(),q_vec);
+}
+
+
+void MantidEV::handleQpointNotification(const Poco::AutoPtr<SelectionNotificationServiceImpl::AddNotification> & message )
+{
+//  std::cout << "GOT NOTIFICATION" << std::endl;
+//  std::string name = message->name();
+//  std::cout << "Name is " << name << std::endl;
+//  std::cout << message->object()->at(0) << std::endl;
+//  std::cout << message->object()->at(1) << std::endl;
+//  std::cout << message->object()->at(2) << std::endl;
+  Mantid::Kernel::V3D  q_point( message->object()->at(0), message->object()->at(1), message->object()->at(2) );
+  showInfo( q_point );
 }
 
 
