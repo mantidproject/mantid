@@ -127,6 +127,7 @@ namespace CurveFitting
     functions.push_back("LeBailFit");
     functions.push_back("Calculation");
     functions.push_back("MonteCarlo");
+    functions.push_back("RefineBackground");
     //  TODO: Turn on this option in release 2.4
     //  functions.push_back("CalculateBackground");
     auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
@@ -195,6 +196,8 @@ namespace CurveFitting
                         new VisibleWhenProperty("Function", IS_EQUAL_TO,  "LeBailFit"));
     setPropertySettings("NumberMinimizeSteps",
                         new VisibleWhenProperty("Function", IS_EQUAL_TO,  "MonteCarlo"));
+    setPropertySettings("NumberMinimizeSteps",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "RefineBackground"));
 
     //-----------------  Parameters for Monte Carlo Simulated Annealing --------------------------
     auto mcwsprop = new WorkspaceProperty<TableWorkspace>("MCSetupWorkspace", "", Direction::Input,
@@ -298,9 +301,8 @@ namespace CurveFitting
       case BACKGROUNDPROCESS:
         // Calculating background
         // FIXME : Determine later whether this functionality is kept or removed!
-        g_log.notice() << "Function: Calculate Background (Precisely).\n";
-        throw runtime_error("This is to be removed!");
-        execCalBackground(m_wsIndex);
+        g_log.notice() << "Function: Refine Background (Precisely).\n";
+        execRefineBackground();
         break;
 
       case MONTECARLO:
@@ -457,6 +459,11 @@ namespace CurveFitting
     {
       // Le Bail Fit mode
       m_fitMode = FIT;
+    }
+    else if (function.compare("RefineBackground") == 0)
+    {
+      // Refine background mode
+      m_fitMode = BACKGROUNDPROCESS;
     }
     else
     {
@@ -1012,20 +1019,154 @@ namespace CurveFitting
     return true;
   }
 
-  //---------------------------------------------------------------------------------------------
+  //====================================  Refine background   ====================================
+  //----------------------------------------------------------------------------------------------
   /** Calculate background of the specified diffraction pattern
   * by
   * 1. fix the peak parameters but height;
   * 2. fit only heights of the peaks in a peak-group and background coefficients (assumed order 2 or 3 polynomial)
   * 3. remove peaks by the fitting result
   */
-  void LeBailFit::execCalBackground(size_t workspaceindex)
+  void LeBailFit::execRefineBackground()
   {
-    throw std::runtime_error("This method is suspended.");
-    UNUSED_ARG(workspaceindex);
+    // 0. Set up
+    m_bkgdParameterNames = m_backgroundFunction->getParameterNames();
+    m_numberBkgdParameters = m_bkgdParameterNames.size();
+    m_bkgdParameterBuffer.resize(m_numberBkgdParameters);
+    m_bkgdParameterBest.resize(m_numberBkgdParameters);
+    m_roundBkgd = 0;
+    m_bkgdParameterStepVec.resize(m_numberBkgdParameters, 1.0);
+    for (size_t i = 1; i < m_numberBkgdParameters; ++i)
+    {
+      m_bkgdParameterStepVec[i] = m_bkgdParameterStepVec[i-1] * 0.001;
+    }
+
+    // 1. Generate domain and value
+    const vector<double> vecX = m_dataWS->readX(m_wsIndex);
+    const vector<double> vecY = m_dataWS->readY(m_wsIndex);
+    vector<double> valueVec(vecX.size(), 0);
+    size_t numpts = vecX.size();
+
+    API::FunctionDomain1DVector domain(vecX);
+    API::FunctionValues values(domain);
+
+    // 2. Calculate diffraction pattern
+    calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, values, m_funcParameters, true);
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      valueVec[i] = values[i];
+    }
+    Rfactor currR = getRFactor(m_dataWS->readY(m_wsIndex), valueVec, m_dataWS->readE(m_wsIndex));
+    Rfactor bestR = currR;
+    storeBackgroundParameters(m_bkgdParameterBest);
+
+    for (size_t istep = 0; istep < m_numMinimizeSteps; ++istep)
+    {
+      // a) Store current setup
+      storeBackgroundParameters(m_bkgdParameterBuffer);
+
+      // b) Propose new values and evalulate
+      proposeNewBackgroundValues();
+      calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, values, m_funcParameters, true);
+      for (size_t i = 0; i < numpts; ++i)
+      {
+        valueVec[i] = values[i];
+      }
+      Rfactor newR = getRFactor(m_dataWS->readY(m_wsIndex), valueVec, m_dataWS->readE(m_wsIndex));
+
+      bool accept = acceptOrDeny(currR, newR);
+
+      // c) Process result
+      if (!accept)
+      {
+        // Not accept.  Restore original
+        recoverBackgroundParameters(m_bkgdParameterBuffer);
+      }
+      else
+      {
+        // Accept
+        currR = newR;
+        if (newR.Rwp < bestR.Rwp)
+        {
+          // Is it the best?
+          bestR = newR;
+          storeBackgroundParameters(m_bkgdParameterBest);
+        }
+      }
+    }
+
+    // 3. Recover the best
+    recoverBackgroundParameters(m_bkgdParameterBest);
+    calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, values, m_funcParameters, true);
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      valueVec[i] = values[i];
+    }
+    Rfactor outputR = getRFactor(m_dataWS->readY(m_wsIndex), valueVec, m_dataWS->readE(m_wsIndex));
+
+    g_log.notice() << "[DBx604] Best Rwp = " << bestR.Rwp << ",  vs. recovered best Rwp = " << outputR.Rwp << ".\n";
+
+    // 4. Add data (0: experimental, 1: calcualted, 2: difference)
+    for (size_t i = 0; i < values.size(); ++i)
+    {
+      m_outputWS->dataY(1)[i] = values[i];
+      m_outputWS->dataY(2)[i] = vecY[i]-values[i];
+    }
+
+    //   (3: peak without background, 4: input background)
+    m_backgroundFunction->function(domain, values);
+    for (size_t i = 0; i < values.size(); ++i)
+    {
+      m_outputWS->dataY(CALBKGDINDEX)[i] = values[i];
+      m_outputWS->dataY(CALPUREPEAKINDEX)[i] = m_outputWS->readY(CALDATAINDEX)[i] - values[i];
+    }
 
     return;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Store/buffer current background parameters
+    * @param bkgdparamvec :: vector to save the background parameters whose order is same in background function
+    */
+  void LeBailFit::storeBackgroundParameters(vector<double> bkgdparamvec)
+  {
+    for (size_t i = 0; i < m_numberBkgdParameters; ++i)
+    {
+      bkgdparamvec[i] = m_backgroundFunction->getParameter(i);
+    }
+
+    return;
+  }
+
+  /** Restore/recover the buffered background parameters to m_background function
+    * @param bkgdparamvec :: vector holding the background parameters whose order is same in background function
+    */
+  void LeBailFit::recoverBackgroundParameters(vector<double> bkgdparamvec)
+  {
+    for (size_t i = 0; i < m_numberBkgdParameters; ++i)
+    {
+      m_backgroundFunction->setParameter(i, bkgdparamvec[i]);
+    }
+
+    return;
+  }
+
+  /** Propose new background parameters
+    */
+  void LeBailFit::proposeNewBackgroundValues()
+  {
+    int iparam = m_roundBkgd % static_cast<int>(m_numberBkgdParameters);
+
+    double currvalue = m_backgroundFunction->getParameter(static_cast<int>(iparam));
+    double r = 2*(static_cast<double>(rand())/static_cast<double>(RAND_MAX)-0.5);
+    double newvalue = currvalue + r * m_bkgdParameterStepVec[iparam];
+
+    m_backgroundFunction->setParameter(static_cast<size_t>(iparam), newvalue);
+
+    return;
+  }
+
+
 
   //===================================  Set up the Le Bail Fit   ================================
   //----------------------------------------------------------------------------------------------
@@ -2439,36 +2580,6 @@ namespace CurveFitting
 
     return;
   }
-
-  //----------------------------------------------------------------------------------------------
-  /* Do statistics to result (fitted or calcualted)
-  void LeBailFit::calChiSquare()
-  {
-    const MantidVec& oY = m_outputWS->readY(0);
-    const MantidVec& eY = m_outputWS->readY(1);
-    const MantidVec& oE = m_outputWS->readE(0);
-
-    double chi2 = 0.0;
-    size_t numpts = oY.size();
-    for (size_t i = 0; i < numpts; ++i)
-    {
-      double temp = (oY[i]-eY[i])*(oY[i]-eY[i])/(oE[i]*oE[i]);
-      chi2 += temp;
-    }
-
-    chi2 = chi2/static_cast<double>(numpts);
-
-    Parameter localchi2;
-    localchi2.name = "LocalChi2";
-    localchi2.curvalue = chi2;
-
-    m_funcParameters.insert(std::make_pair("LocalChi2", localchi2));
-
-    g_log.information() << "[VZ] LeBailFit Result:  chi^2 = " << chi2 << "\n";
-
-    return;
-  }
-  */
 
   //-----------------------------------------------------------------------------
   /** Create output data workspace

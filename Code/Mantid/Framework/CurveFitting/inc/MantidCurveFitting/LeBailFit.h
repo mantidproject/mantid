@@ -139,7 +139,7 @@ namespace CurveFitting
                           int numiteration, string &status, double &chi2, bool outputcovarmatrix);
 
     /// Calcualte background by fitting peak heights
-    void execCalBackground(size_t workspaceindex);
+    void execRefineBackground();
 
     //--------------  Functions to set up the Le Bail Fit -----------------
     /// Create LeBailFunction
@@ -264,6 +264,15 @@ namespace CurveFitting
     void smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVector domain,
                                     FunctionValues peakdata, vector<double>& background);
 
+    /// Store/buffer current background parameters
+    void storeBackgroundParameters(vector<double> bkgdparamvec);
+
+    /// Restore/recover the buffered background parameters to m_background function
+    void recoverBackgroundParameters(vector<double> bkgdparamvec);
+
+    /// Propose new background parameters
+    void proposeNewBackgroundValues();
+
     //--------------------------------------------------------------------------
 
     /// Instance data
@@ -370,6 +379,15 @@ namespace CurveFitting
 
     /// Flag to allow peaks with duplicated (HKL)^2 in input .hkl file
     bool m_tolerateInputDupHKL2Peaks;
+
+    //------------------------ Background Refinement Variables -----------------------
+    vector<string> m_bkgdParameterNames;
+    size_t m_numberBkgdParameters;
+    vector<double> m_bkgdParameterBuffer;
+    vector<double> m_bkgdParameterBest;
+    int m_roundBkgd;
+    vector<double> m_bkgdParameterStepVec;
+
 
   };
 
