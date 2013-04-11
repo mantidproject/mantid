@@ -11,16 +11,25 @@ namespace MantidQt
 namespace API
 {
 
-class HelpWindow
+class HelpWindowImpl
 {
 public:
-    HelpWindow(const std::string &url);
-    virtual ~HelpWindow();
-    void showURL(const std::string & url);
-    void showAlgorithm(const std::string &name, const int version=-1);
-    void showFitFunction(const std::string &name);
+    void showURL(const std::string & url=std::string());
+    void showAlgorithm(const std::string &name=std::string(), const int version=-1);
+    void showFitFunction(const std::string &name=std::string());
 
 private:
+    friend struct Mantid::Kernel::CreateUsingNew<HelpWindowImpl>;
+
+    /// Default constructor
+    HelpWindowImpl();
+    /// Unimplemented copy constructor
+    HelpWindowImpl(const HelpWindowImpl&);
+    /// Unimplemented assignment operator
+    HelpWindowImpl& operator=(const HelpWindowImpl&);
+    /// Destructor
+    virtual ~HelpWindowImpl();
+
     /// Shared pointer to the process running qt assistant.
     boost::shared_ptr<QProcess> m_process;
     /// The full path of the collection file.
@@ -30,6 +39,8 @@ private:
     std::string m_cacheFile;
     /// QT assistant executable.
     std::string m_assistantExe;
+    /// Whether this is the very first startup of the helpwindow.
+    bool m_firstRun;
     /// The logger for the class.
     Mantid::Kernel::Logger& m_log;
 
@@ -38,6 +49,14 @@ private:
     void findCollectionFile(std::string & binDir);
     void determineFileLocs();
 };
+
+/** Forward declaration of a specialisation of SingletonHolder for HelpWindowImpl
+    (needed for dllexport/dllimport) and a typedef for it. */
+#ifdef _WIN32
+// this breaks new namespace declaraion rules; need to find a better fix
+template class Mantid::Kernel::SingletonHolder<HelpWindowImpl>; // MANTID_API_DLL was after class
+#endif /* _WIN32 */
+typedef Mantid::Kernel::SingletonHolder<HelpWindowImpl> HelpWindow; // MANTID_API_DLL was after template
 
 } // namespace API
 } // namespace MantidQt

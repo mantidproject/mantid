@@ -14607,10 +14607,7 @@ void ApplicationWindow::showMantidConcepts()
 void ApplicationWindow::showalgorithmDescriptions()
 {
   std::string url("qthelp://org.mantidproject/doc/html/algorithms_index.html");
-  if (m_helpWindow)
-    m_helpWindow->showURL(url);
-  else
-    m_helpWindow = boost::make_shared<HelpWindow>(url);
+  HelpWindow::Instance().showAlgorithm();
 }
 
 void ApplicationWindow::showSetupParaview()
@@ -14634,11 +14631,7 @@ void ApplicationWindow::showFirstTimeSetup()
  */
 void ApplicationWindow::showmantidplotHelp()
 {
-  std::string url("qthelp://org.mantidproject/doc/html/index.html");
-  if (m_helpWindow)
-    m_helpWindow->showURL(url);
-  else
-    m_helpWindow = boost::make_shared<HelpWindow>(url);
+  HelpWindow::Instance().showURL();
 }
 
 //
