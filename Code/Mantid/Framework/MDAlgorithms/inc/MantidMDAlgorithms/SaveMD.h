@@ -7,6 +7,11 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
+class MantidVec;
+}
+
 namespace MDAlgorithms
 {
 
@@ -64,6 +69,10 @@ namespace MDAlgorithms
 
     /// Save the MDHistoWorkspace.
     void doSaveHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
+
+    void saveMatrix(::NeXus::File * const file, std::string name,
+                    MantidVec &m);
+    void saveWtransformMatrix(::NeXus::File * const file, API::IMDWorkspace_const_sptr ws);
 
   };
 

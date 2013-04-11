@@ -11,6 +11,7 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEventFactory.h"
@@ -195,6 +196,9 @@ namespace MDAlgorithms
       ws->getHistory().saveNexus(file);
     }
 
+    // Write out W transform matrix
+    this->saveWtransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+
     file->putAttr("event_type", MDE::getTypeName());
     // Save each NEW ExperimentInfo to a spot in the file
     this->saveExperimentInfos(file,ws);
@@ -369,6 +373,9 @@ namespace MDAlgorithms
       file->putAttr( mess.str(), ws->getDimension(d)->toXMLString() );
     }
 
+    // Write out W transform matrix
+    this->saveWtransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+
     // Check that the typedef has not been changed. The NeXus types would need changing if it does!
     assert(sizeof(signal_t) == sizeof(double));
 
@@ -422,6 +429,22 @@ namespace MDAlgorithms
       throw std::runtime_error("SaveMD can only save MDEventWorkspaces and MDHistoWorkspaces.\nPlease use SaveNexus or another algorithm appropriate for this workspace type.");
   }
 
+  void SaveMD::saveWtransformMatrix(::NeXus::File *const file, IMDWorkspace_const_sptr ws)
+  {
+    DblMatrix wTrans = ws->getWTransf();
+    MantidVec vec = wTrans.getVector();
+    this->saveMatrix(file, "w_transform", vec);
+  }
+
+  void SaveMD::saveMatrix(::NeXus::File *const file, std::string name,
+                          MantidVec &m)
+  {
+    // Number of data points
+    int nPoints = static_cast<int>(m.size());
+    file->makeData(name, ::NeXus::FLOAT64, nPoints, true);
+    file->putData(m);
+    file->closeData();
+  }
 
 
 } // namespace Mantid
