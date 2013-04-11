@@ -71,6 +71,7 @@ set ( SRC_FILES
 	src/DiffractionFocussing.cpp
 	src/DiffractionFocussing2.cpp
 	src/Divide.cpp
+	src/DownloadRemoteFile.cpp
 	src/DspacemaptoCal.cpp
 	src/EQSANSResolution.cpp
 	src/EQSANSTofStructure.cpp
@@ -153,6 +154,7 @@ set ( SRC_FILES
 	src/Q1D2.cpp
 	src/Q1DWeighted.cpp
 	src/Qhelper.cpp
+	src/QueryRemoteFile.cpp
 	src/Qxy.cpp
 	src/RayTracerTester.cpp
 	src/ReadGroupsFromFile.cpp
@@ -287,6 +289,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DiffractionFocussing.h
 	inc/MantidAlgorithms/DiffractionFocussing2.h
 	inc/MantidAlgorithms/Divide.h
+	inc/MantidAlgorithms/DownloadRemoteFile.h
 	inc/MantidAlgorithms/DspacemaptoCal.h
 	inc/MantidAlgorithms/EQSANSResolution.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
@@ -370,6 +373,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Q1D2.h
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qhelper.h
+	inc/MantidAlgorithms/QueryRemoteFile.h
 	inc/MantidAlgorithms/Qxy.h
 	inc/MantidAlgorithms/RayTracerTester.h
 	inc/MantidAlgorithms/ReadGroupsFromFile.h
