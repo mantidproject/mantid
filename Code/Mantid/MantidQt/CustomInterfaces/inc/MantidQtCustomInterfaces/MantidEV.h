@@ -214,6 +214,9 @@ private slots:
   /// Slot for the integrate tab's Apply button 
   void integratePeaks_slot();
 
+  /// Slot for Show Info button on Point Info form
+  void showInfo_slot();
+
   // 
   // The following slots take care of the menu items
   //
@@ -286,6 +289,8 @@ private slots:
   /// Slot to enable/disable the ellipse size options controls
   void setEnabledEllipseSizeOptions_slot();
 
+  /// Method to get and display info about the specified Q-vector
+  void showInfo( Mantid::Kernel::V3D  q_point );
 
 private:
   /// super class pure virtual method we MUST implement
