@@ -8,6 +8,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
@@ -131,13 +132,13 @@ namespace CurveFitting
     auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
     this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
-    //------------------  Background Related Properties  -------------------------
+    /*------------------------  Background Related Properties  ---------------------------------*/
     // About background:  Background type, input (table workspace or array)
     std::vector<std::string> bkgdtype;
     bkgdtype.push_back("Polynomial");
     bkgdtype.push_back("Chebyshev");
     auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
-    this->declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
+    declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
 
     // Background function order
     // this->declareProperty("BackgroundFunctionOrder", 12, "Order of background function.");
@@ -151,41 +152,76 @@ namespace CurveFitting
                                                               API::PropertyMode::Optional);
     this->declareProperty(tablewsprop3, "Optional table workspace containing the fit result for background.");
 
-    // UseInputPeakHeights
-    this->declareProperty("UseInputPeakHeights", true,
-                          "For 'Calculation' mode only, use peak heights specified in ReflectionWorkspace. "
-                          "Otherwise, calcualte peaks' heights. ");
-
     // Peak Radius
     this->declareProperty("PeakRadius", 5, "Range (multiplier relative to FWHM) for a full peak. ");
 
-    // Pattern calcualtion
-    this->declareProperty("PlotIndividualPeaks", false, "Option to output each individual peak in mode Calculation.");
+    /*------------------------  Properties for Calculation Mode --------------------------------*/
+    // Output option to plot each individual peak
+    declareProperty("PlotIndividualPeaks", false,
+                          "Option to output each individual peak in mode Calculation.");
+    setPropertySettings("PlotIndividualPeaks",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "Calculation"));
 
+    // Make each reflection visible
+    declareProperty("IndicationPeakHeight", 0.0,
+                    "Heigh of peaks (reflections) if its calculated height is smaller than user-defined minimum.");
+    setPropertySettings("IndicationPeakHeight",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "Calculation"));
+
+    // UseInputPeakHeights
+    declareProperty("UseInputPeakHeights", true,
+                    "For 'Calculation' mode only, use peak heights specified in ReflectionWorkspace. "
+                    "Otherwise, calcualte peaks' heights. ");
+    setPropertySettings("UseInputPeakHeights",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "Calculation"));
+
+    /*---------------------------  Properties for Fitting Mode ---------------------------------*/
     // Minimizer
     std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys(); // :Instance().getKeys();
     declareProperty("Minimizer","Levenberg-MarquardtMD",
                     Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(minimizerOptions)),
                     "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Kernel::Direction::InOut);
+    setPropertySettings("Minimizer",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "LeBailFit"));
 
     declareProperty("Damping", 1.0, "Damping factor if minizer is 'Damping'");
+    setPropertySettings("Damping",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "LeBailFit"));
+    setPropertySettings("Damping",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "MonteCarlo"));
 
     declareProperty("NumberMinimizeSteps", 100, "Number of Monte Carlo random walk steps.");
+    setPropertySettings("NumberMinimizeSteps",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "LeBailFit"));
+    setPropertySettings("NumberMinimizeSteps",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "MonteCarlo"));
 
     //-----------------  Parameters for Monte Carlo Simulated Annealing --------------------------
     auto mcwsprop = new WorkspaceProperty<TableWorkspace>("MCSetupWorkspace", "", Direction::Input,
                                                           PropertyMode::Optional);
-    declareProperty(mcwsprop, "Name of table workspace containing parameters' setup for Monte Carlo simualted annearling. ");
+    declareProperty(mcwsprop,
+                    "Name of table workspace containing parameters' setup for Monte Carlo simualted annearling. ");
+    setPropertySettings("MCSetupWorkspace",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "MonteCarlo"));
+
 
     declareProperty("RandomSeed", 1, "Randum number seed.");
+    setPropertySettings("RandomSeed",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "MonteCarlo"));
 
     declareProperty("AnnealingTemperature", 1.0, "Temperature used Monte Carlo.  "
                     "Negative temperature is for simulated annealing. ");
+    setPropertySettings("AnnealingTemperature",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "MonteCarlo"));
 
     declareProperty("UseAnnealing", true, "Allow annealing temperature adjusted automatically.");
+    setPropertySettings("UseAnnealing",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "MonteCarlo"));
 
     declareProperty("DrunkenWalk", false, "Flag to use drunken walk algorithm. "
                     "Otherwise, random walk algorithm is used. ");
+    setPropertySettings("DrunkenWalk",
+                        new VisibleWhenProperty("Function", IS_EQUAL_TO,  "MonteCarlo"));
 
     declareProperty("MinimumPeakHeight", 0.01, "Minimum height of a peak to be counted "
                     "during smoothing background by exponential smooth algorithm. ");
@@ -445,7 +481,8 @@ namespace CurveFitting
       throw invalid_argument(errss.str());
     }
 
-    m_minimumHeight = getProperty("MinimumPeakHeight");
+    m_minimumPeakHeight = getProperty("MinimumPeakHeight");
+    m_indicatePeakHeight = getProperty("IndicationPeakHeight");
 
     // Tolerate duplicated input peak or not?
     m_tolerateInputDupHKL2Peaks = getProperty("AllowDegeneratedPeaks");
@@ -600,7 +637,20 @@ namespace CurveFitting
       calculatePeaksIntensities(dataws, workspaceindex, zerobackground, peaksvalues);
     }
 
-    // 3. Calcualte model pattern
+    // 3. (Optionally) set peak intensities to a large value if their height is not large enough
+    if (m_indicatePeakHeight > 1.0E-10)
+    {
+      for (size_t i = 0; i < m_dspPeaks.size(); ++i)
+      {
+        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[i].second;
+        if (thispeak->height() < m_minimumPeakHeight)
+        {
+          thispeak->setHeight(m_indicatePeakHeight);
+        }
+      }
+    }
+
+    // 4. Calcualte model pattern
     m_lebailFunction->function(domain, values);
 
     return allpeaksvalid;
@@ -3511,7 +3561,7 @@ namespace CurveFitting
     {
       ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
       double height = thispeak->height();
-      if (height > m_minimumHeight)
+      if (height > m_minimumPeakHeight)
       {
         // a) Calculate boundary
         double fwhm = thispeak->fwhm();

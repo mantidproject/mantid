@@ -340,6 +340,8 @@ namespace CurveFitting
     /// Fit mode
     FunctionMode m_fitMode;
 
+    double m_indicatePeakHeight;
+
     //-------------------------- Monte Carlo Variables--------------------------
     map<int, vector<string> > m_MCGroups;
     size_t m_numMCGroups;
@@ -364,7 +366,7 @@ namespace CurveFitting
     enum {RANDOMWALK, DRUNKENWALK} m_walkStyle;
 
     /// Minimum height of a peak to be counted in smoothing background
-    double m_minimumHeight;
+    double m_minimumPeakHeight;
 
     /// Flag to allow peaks with duplicated (HKL)^2 in input .hkl file
     bool m_tolerateInputDupHKL2Peaks;
