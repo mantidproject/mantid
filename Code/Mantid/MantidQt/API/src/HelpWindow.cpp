@@ -9,6 +9,10 @@
 #include <stdexcept>
 #include <strstream>
 
+namespace MantidQt
+{
+namespace API
+{
 using std::string;
 
 /// Base url for all of the files in the project
@@ -245,3 +249,6 @@ void HelpWindow::determineFileLocs()
         m_cacheFile = "";
     }
 }
+
+} // namespace API
+} // namespace MantidQt

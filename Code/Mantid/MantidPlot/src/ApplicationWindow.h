@@ -1369,7 +1369,7 @@ private:
   bool d_auto_update_table_values;
   int d_matrix_undo_stack_size;
   /// Smart pointer to the help window
-  boost::shared_ptr<HelpWindow> m_helpWindow;
+  boost::shared_ptr<MantidQt::API::HelpWindow> m_helpWindow;
 
   /// A method to populate the CurveLayout struct on loading a project
   CurveLayout fillCurveSettings(const QStringList & curve, unsigned int offset = 0);

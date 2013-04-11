@@ -4,6 +4,12 @@
 #include <QProcess>
 #include <string>
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/SingletonHolder.h"
+
+namespace MantidQt
+{
+namespace API
+{
 
 class HelpWindow
 {
@@ -32,4 +38,7 @@ private:
     void findCollectionFile(std::string & binDir);
     void determineFileLocs();
 };
+
+} // namespace API
+} // namespace MantidQt
 #endif // HELPWINDOW_H
