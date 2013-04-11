@@ -23,10 +23,6 @@ private:
 
     /// Default constructor
     HelpWindowImpl();
-    /// Unimplemented copy constructor
-    HelpWindowImpl(const HelpWindowImpl&);
-    /// Unimplemented assignment operator
-    HelpWindowImpl& operator=(const HelpWindowImpl&);
     /// Destructor
     virtual ~HelpWindowImpl();
 
