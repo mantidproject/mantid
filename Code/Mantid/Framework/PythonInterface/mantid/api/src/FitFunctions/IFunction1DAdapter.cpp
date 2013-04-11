@@ -1,9 +1,9 @@
 #include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
 
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
+#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 
-#include <boost/python/call_method.hpp>
 #include <boost/python/class.hpp>
 
 //-----------------------------------------------------------------------------
@@ -13,8 +13,8 @@ namespace Mantid
 {
   namespace PythonInterface
   {
+    using Environment::CallMethod2;
     using namespace boost::python;
-
 
     /**
      * Construct the "wrapper" and stores the reference to the PyObject
@@ -54,7 +54,7 @@ namespace Mantid
      */
     void IFunction1DAdapter::function1D(boost::python::object & out, const boost::python::object & xvals) const
     {
-      boost::python::call_method<void,object,object>(getSelf(), "function1D", out, xvals);
+      CallMethod2<void,object,object>::dispatchWithException(getSelf(), "function1D", out, xvals);
     }
 
 

@@ -26,7 +26,6 @@
 #include <boost/python/class.hpp>
 #include <boost/python/call_method.hpp>
 
-
 namespace Mantid { namespace PythonInterface {
   namespace Environment
   {
@@ -45,7 +44,7 @@ namespace Mantid { namespace PythonInterface {
      * Perform a call to a python function that takes no arguments and returns a value
      */
     template<typename ResultType>
-    struct DLLExport CallMethod_NoArg
+    struct DLLExport CallMethod0
     {
       /**
        * Dispatch a call to the method on the given object. If the method does not exist
@@ -107,7 +106,7 @@ namespace Mantid { namespace PythonInterface {
 
     ///Specialization for void return type
     template<>
-    struct DLLExport CallMethod_NoArg<void>
+    struct DLLExport CallMethod0<void>
     {
       /**
        * Dispatch a call to the method on the given object. If the method does not exist
@@ -147,6 +146,134 @@ namespace Mantid { namespace PythonInterface {
           try
           {
             boost::python::call_method<void>(self, funcName);
+          }
+          catch(boost::python::error_already_set&)
+          {
+            translateErrorToException();
+          }
+        }
+        else
+        {
+          std::ostringstream os;
+          os << self->ob_type->tp_name << " has no function named '" << funcName << "'\n"
+             << "Check the function exists and that its first argument is self.";
+          throw std::runtime_error(os.str());
+        }
+      }
+    };
+    //@}
+
+    /** @name Two argument Python calls */
+    //@{
+    /**
+     * Perform a call to a python function that takes no arguments and returns a value
+     */
+    template<typename ResultType,typename Arg1,typename Arg2>
+    struct DLLExport CallMethod2
+    {
+      /**
+       * Dispatch a call to the method on the given object. If the method does not exist
+       * then return the defaultValue
+       * @param self :: The object containing the method definition
+       * @param funcName :: The method name
+       * @param defaultValue :: A default value if the method does not exist
+       * @return The value of the function or the default value if it does not exist
+       */
+      static ResultType dispatchWithDefaultReturn(PyObject *self, const char * funcName, const ResultType & defaultValue,
+                                                  const Arg1 & arg1, const Arg2 & arg2)
+      {
+        GlobalInterpreterLock gil;
+        if(Environment::typeHasAttribute(self, funcName))
+        {
+          try
+          {
+            return boost::python::call_method<ResultType,Arg1,Arg2>(self, funcName,arg1,arg2);
+          }
+          catch(boost::python::error_already_set&)
+          {
+            translateErrorToException();
+          }
+        }
+        return defaultValue;
+      }
+
+      /**
+       * Dispatch a call to the method on the given object. If the method does not exist
+       * then raise a std::runtime_error exception
+       * @param self :: The object containing the method definition
+       * @param funcName :: The method name
+       * @param errorMsg :: An error message to pass to the generated exception
+       * @return The value of the function or the default value if it does not exist
+       */
+      static ResultType dispatchWithException(PyObject *self, const char * funcName)
+      {
+        GlobalInterpreterLock gil;
+        if(Environment::typeHasAttribute(self, funcName))
+        {
+          try
+          {
+            return boost::python::call_method<ResultType>(self, funcName);
+          }
+          catch(boost::python::error_already_set&)
+          {
+            translateErrorToException();
+          }
+        }
+        else
+        {
+          std::ostringstream os;
+          os << self->ob_type->tp_name << " has no function named '" << funcName << "'\n"
+             << "Check the function exists and that its first argument is self.";
+          throw std::runtime_error(os.str());
+        }
+        return ResultType();
+      }
+    };
+
+    ///Specialization for void return type
+    template<typename Arg1,typename Arg2>
+    struct DLLExport CallMethod2<void,Arg1,Arg2>
+    {
+      /**
+       * Dispatch a call to the method on the given object. If the method does not exist
+       * then do nothing
+       * @param self :: The object containing the method definition
+       * @param funcName :: The method name
+       * @return The value of the function or the default value if it does not exist
+       */
+      static void dispatchWithDefaultReturn(PyObject *self, const char * funcName,
+                                            const Arg1 & arg1, const Arg2 & arg2)
+      {
+        GlobalInterpreterLock gil;
+        if(Environment::typeHasAttribute(self, funcName))
+        {
+          try
+          {
+            boost::python::call_method<void,Arg1,Arg2>(self, funcName,arg1,arg2);
+          }
+          catch(boost::python::error_already_set&)
+          {
+            translateErrorToException();
+          }
+        }
+      }
+      /**
+       * Dispatch a call to the method on the given object. If the method does not exist
+       * then raise a runtime_error
+       * @param self :: The object containing the method definition
+       * @param funcName :: The method name
+       * @param errorMsg :: An error message if the method does not exist
+       * @return The value of the function or the default value if it does not exist
+       */
+      static void dispatchWithException(PyObject *self, const char * funcName,
+                                        const Arg1 & arg1, const Arg2 & arg2)
+      {
+        GlobalInterpreterLock gil;
+        if(Environment::typeHasAttribute(self, funcName))
+        {
+          try
+          {
+            boost::python::call_method<void,Arg1,Arg2>(self, funcName,arg1,arg2);
           }
           catch(boost::python::error_already_set&)
           {

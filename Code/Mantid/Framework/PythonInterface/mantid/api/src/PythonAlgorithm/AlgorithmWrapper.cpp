@@ -12,7 +12,7 @@ namespace Mantid
   namespace PythonInterface
   {
     using namespace boost::python;
-    using Environment::CallMethod_NoArg;
+    using Environment::CallMethod0;
 
     /**
      * Construct the "wrapper" and stores the reference to the PyObject
@@ -37,7 +37,7 @@ namespace Mantid
      */
     int AlgorithmWrapper::version() const
     {
-      return CallMethod_NoArg<int>::dispatchWithDefaultReturn(getSelf(), "version", defaultVersion());
+      return CallMethod0<int>::dispatchWithDefaultReturn(getSelf(), "version", defaultVersion());
     }
 
     int AlgorithmWrapper::defaultVersion() const
@@ -51,7 +51,7 @@ namespace Mantid
      */
     const std::string AlgorithmWrapper::category() const
     {
-      return CallMethod_NoArg<std::string>::dispatchWithDefaultReturn(getSelf(), "category", defaultCategory());
+      return CallMethod0<std::string>::dispatchWithDefaultReturn(getSelf(), "category", defaultCategory());
     }
 
     /**
@@ -69,7 +69,7 @@ namespace Mantid
      */
     void AlgorithmWrapper::init()
     {
-      CallMethod_NoArg<void>::dispatchWithException(getSelf(), "PyInit");
+      CallMethod0<void>::dispatchWithException(getSelf(), "PyInit");
     }
 
     /**
@@ -79,7 +79,7 @@ namespace Mantid
     void AlgorithmWrapper::exec()
     {
 
-      CallMethod_NoArg<void>::dispatchWithException(getSelf(), "PyExec");
+      CallMethod0<void>::dispatchWithException(getSelf(), "PyExec");
     }
 
   }
