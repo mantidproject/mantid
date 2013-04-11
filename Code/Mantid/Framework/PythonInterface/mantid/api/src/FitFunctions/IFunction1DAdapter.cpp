@@ -44,17 +44,17 @@ namespace Mantid
       Py_intptr_t dims[1] = { static_cast<Py_intptr_t>(nData) } ;
       object xvals = object(handle<>(Converters::WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims)));
       object outnp = object(handle<>(Converters::WrapReadWrite::apply<double>::createFromArray(out, 1,dims)));
-      function1D(outnp, xvals);
+      function1D(xvals, outnp);
     }
 
     /**
      * Python-type signature version of above
-     * @param out A read/write numpy array of doubles to store the results
      * @param xvals The input X values in read-only numpy array
+     * @param out A read/write numpy array of doubles to store the results
      */
-    void IFunction1DAdapter::function1D(boost::python::object & out, const boost::python::object & xvals) const
+    void IFunction1DAdapter::function1D(const boost::python::object & xvals, boost::python::object & out) const
     {
-      CallMethod2<void,object,object>::dispatchWithException(getSelf(), "function1D", out, xvals);
+      CallMethod2<void,object,object>::dispatchWithException(getSelf(), "function1D", xvals, out);
     }
 
 

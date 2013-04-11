@@ -54,7 +54,7 @@ namespace Mantid
       /// Base-class method
       void function1D(double* out, const double* xValues, const size_t nData) const;
       /// Python-type signature
-      void function1D(boost::python::object & out, const boost::python::object & xvals) const;
+      void function1D(const boost::python::object & xvals, boost::python::object & out) const;
       ///@}
 
     private:
