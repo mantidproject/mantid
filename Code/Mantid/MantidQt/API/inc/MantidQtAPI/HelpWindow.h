@@ -11,7 +11,7 @@ namespace MantidQt
 namespace API
 {
 
-class HelpWindowImpl
+class DLLExport HelpWindowImpl
 {
 public:
     void showURL(const std::string & url=std::string());
