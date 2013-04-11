@@ -50,9 +50,9 @@ private:
     (needed for dllexport/dllimport) and a typedef for it. */
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-template class Mantid::Kernel::SingletonHolder<HelpWindowImpl>; // MANTID_API_DLL was after class
+template class DLLExport Mantid::Kernel::SingletonHolder<HelpWindowImpl>; // MANTID_API_DLL was after class
 #endif /* _WIN32 */
-typedef Mantid::Kernel::SingletonHolder<HelpWindowImpl> HelpWindow; // MANTID_API_DLL was after template
+typedef DLLExport Mantid::Kernel::SingletonHolder<HelpWindowImpl> HelpWindow; // MANTID_API_DLL was after template
 
 } // namespace API
 } // namespace MantidQt
