@@ -689,8 +689,13 @@ namespace CurveFitting
     if (!pass)
     {
       // If estiamtion fails, quit b/c first/rightmost peak must be fitted.
+#if 0
       g_log.error(errmsg);
       throw runtime_error(errmsg);
+#else
+      g_log.notice("Unable to observe peak parameters.  Proceed to next peak.");
+      return false;
+#endif
     }
     else if (height < m_minPeakHeight)
     {
