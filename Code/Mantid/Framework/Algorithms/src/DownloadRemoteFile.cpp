@@ -3,6 +3,9 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidRemote/RemoteJobManager.h"
+#include "MantidKernel/ListValidator.h"
+
+#include "boost/make_shared.hpp"
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DownloadRemoteFile)
@@ -19,8 +22,12 @@ void DownloadRemoteFile::init()
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
   auto requireValue = boost::make_shared<MandatoryValidator<std::string> >();
-  // TODO: need a better validator for the compute facility property
-  declareProperty( "ComputeResource", "", requireValue, "", Direction::Input);
+
+
+
+  // Compute Resources
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
 
   // TODO: Can we figure out the user name/group name automatically?
   declareProperty( "UserName", "", requireValue, "", Direction::Input);

@@ -204,20 +204,6 @@ void FacilityInfo::fillLiveListener(const Poco::XML::Element* elem)
   }
 }
 
-<<<<<<< HEAD
-=======
-/// Called from constructor to fill HTTP proxy name
-void FacilityInfo::fillHTTPProxy(const Poco::XML::Element* elem)
-{
-  // Get the first HTTP proxy element (will be NULL if there's none)
-  Element * proxy = elem->getChildElement("httpproxy");
-  if ( proxy )
-  {
-    // Get the name of the HTTP proxy - empty string will be returned if missing
-    m_HTTPProxy = proxy->getAttribute("url");
-  }
-}
-
 /// Called from constructor to fill compute resources map
 void FacilityInfo::fillComputeResources(const Poco::XML::Element* elem)
 {
@@ -243,9 +229,6 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element* elem)
 
 }
 
-
-
->>>>>>> Changing the RemoteJobManager infrastructure
 /**
   * Returns instrument with given name
   * @param  iName Instrument name
@@ -305,6 +288,23 @@ std::vector<InstrumentInfo> FacilityInfo::instruments(const std::string& tech)co
     }
   }
   return out;
+}
+
+/**
+  * Returns a vector of the available compute resources
+  * @return vector of strings of the compute resource names
+  */
+std::vector<std::string> FacilityInfo::computeResources() const
+{
+  std::vector<std::string> names;
+  std::map< std::string, boost::shared_ptr<RemoteJobManager> >::const_iterator it = m_computeResources.begin();
+  while (it != m_computeResources.end())
+  {
+    names.push_back( (*it).first);
+    it++;
+  }
+
+  return names;
 }
 
 /**

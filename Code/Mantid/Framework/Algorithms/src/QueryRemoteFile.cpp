@@ -3,7 +3,11 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ListValidator.h"
+
 #include "MantidRemote/RemoteJobManager.h"
+
+#include "boost/make_shared.hpp"
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(QueryRemoteFile)
@@ -21,8 +25,10 @@ void QueryRemoteFile::init()
 
   auto requireValue = boost::make_shared<MandatoryValidator<std::string> >();
 
-  // TODO: need a better validator for the compute facility property
-  declareProperty( "ComputeResource", "", requireValue, "", Direction::Input);
+  // Compute Resources
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+
   // The transaction ID comes from the StartRemoteTransaction algortithm
   declareProperty( "TransactionID", "", requireValue, "", Direction::Input);
 

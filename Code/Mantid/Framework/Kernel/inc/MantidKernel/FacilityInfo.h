@@ -86,6 +86,8 @@ public:
   std::vector<InstrumentInfo> instruments(const std::string& tech) const;
   /// Returns instruments with given name
   const InstrumentInfo & instrument(std::string iName = "") const;
+  /// Returns a vector of the available compute resources
+  std::vector<std::string> computeResources() const;
   /// Returns the RemoteJobManager for the named compute resource
   boost::shared_ptr<RemoteJobManager> getRemoteJobManager( const std::string &name) const;
 

@@ -4,10 +4,12 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MaskedProperty.h"
+#include "MantidKernel/ListValidator.h"
 
 #include "MantidRemote/RemoteTask.h"
 #include "MantidRemote/RemoteJobManager.h"
 
+#include "boost/make_shared.hpp"
 #include <sstream>
 
 #include <boost/shared_ptr.hpp>
@@ -32,8 +34,10 @@ void SubmitRemoteJob::init()
 
   auto requireValue = boost::make_shared<MandatoryValidator<std::string> >();
 
-  // TODO: need a better validator for the compute facility property
-  declareProperty( "ComputeResource", "", requireValue, "", Direction::Input);
+  // Compute Resources
+  std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
+  declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
+
   declareProperty( "NumNodes", 0,  mustBePositive, "", Direction::Input);
   declareProperty( "CoresPerNode", 0,  mustBePositive, "", Direction::Input);
   // Number of actual MPI processes will be (NumNodes * CoresPerNode)
