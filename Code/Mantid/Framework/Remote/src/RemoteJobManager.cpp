@@ -18,6 +18,7 @@
 
 #include <ostream>
 #include <sstream>
+#include <fstream>
 using namespace std;
 
 
@@ -235,6 +236,168 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::stopTransaction( str
 
   return reqErr;
 }
+
+
+
+// Returns a list of all the files on the remote machine associated with the specified transaction
+RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::listFiles( const std::string &transId,
+                                                                       std::vector<std::string> &listing,
+                                                                       string &serverErr)
+{
+  JobManagerErrorCode reqErr = JM_OK;
+
+  // Create an HTTPS session
+  // TODO: Notice that we've set the context to VERIFY_NONE.  I think that means we're not checking the SSL certificate that the server
+  // sends to us.  That's BAD!!
+  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  Poco::Net::HTTPSClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
+
+  // We need to send a GET request to the server with a query string of "TransID=xxxxx&Action=query"
+  Poco::Net::HTTPRequest req;
+  string queryString = "Action=query&TransID=" + transId;
+  reqErr = initGetRequest( req, "/file_transfer", queryString);
+  if ( reqErr != JM_OK)
+  {
+    return reqErr;
+  }
+
+  session.sendRequest( req);
+
+  Poco::Net::HTTPResponse response;
+  std::istream &responseStream = session.receiveResponse( response);
+  std::vector<Poco::Net::HTTPCookie> newCookies;
+  // For as yet unknown reasons, we don't always get a session cookie back from the
+  // server.  In that case, we don't want to overwrite the cookie we're currently
+  // using...
+  response.getCookies( newCookies);
+  if (newCookies.size() > 0)
+  {
+    m_cookies = newCookies;
+  }
+
+  // We should get back an HTTP_OK code and a JSON array with all the file names
+  if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_OK)
+  {
+    // D'oh!  The server didn't like our request.
+    std::ostringstream respStatus;
+    respStatus << "Status: " << response.getStatus() << "\nReason: " << response.getReasonForStatus( response.getStatus());
+    respStatus << "\n\nReply text:\n";
+    respStatus << responseStream.rdbuf();
+    serverErr = respStatus.str();
+
+    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
+    {
+      // Probably some kind of username/password mismatch.  Clear the password so that
+      // the user can enter it again
+      m_password.clear();
+    }
+
+    reqErr = JM_HTTP_SERVER_ERR;
+  }
+  else
+  {
+    // Success!
+    // Parse the response body for the list of files.  The response should be a
+    // single JSON array that looks something like: ["file1.out", "file2.out"]
+    JSONObject results;
+
+    initFromStream( results, responseStream);
+    JSONObject::const_iterator itResults = results.find( "filenames");
+    JSONArray names;
+    (*itResults).second.getValue(names);
+    JSONArray::const_iterator itNames = names.begin();
+    while (itNames != names.end())
+    {
+      std::string oneName;
+      (*itNames).getValue( oneName);
+      listing.push_back( oneName);
+      itNames++;
+    }
+
+    reqErr = JM_OK;  // This should already be set, but just in case....
+  }
+
+  return reqErr;
+
+}
+
+// download the specified file.
+// Note: remoteFileName is just the file name (no path), but localFileName should include
+// the complete path
+RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::downloadFile( const std::string &transId,
+                                                                          const std::string &remoteFileName,
+                                                                          const std::string &localFileName,
+                                                                          string &serverErr)
+{
+  JobManagerErrorCode reqErr = JM_OK;
+
+  // Create an HTTPS session
+  // TODO: Notice that we've set the context to VERIFY_NONE.  I think that means we're not checking the SSL certificate that the server
+  // sends to us.  That's BAD!!
+  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  Poco::Net::HTTPSClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
+
+  // We need to send a GET request to the server with a query string of "TransID=xxxx&Action=download&File=zzzzz"
+  Poco::Net::HTTPRequest req;
+  string queryString = "Action=download&TransID=" + transId + "&File=" + remoteFileName;
+  reqErr = initGetRequest( req, "/file_transfer", queryString);
+  if ( reqErr != JM_OK)
+  {
+    return reqErr;
+  }
+
+  session.sendRequest( req);
+
+  Poco::Net::HTTPResponse response;
+  std::istream &responseStream = session.receiveResponse( response);
+  std::vector<Poco::Net::HTTPCookie> newCookies;
+  // For as yet unknown reasons, we don't always get a session cookie back from the
+  // server.  In that case, we don't want to overwrite the cookie we're currently
+  // using...
+  response.getCookies( newCookies);
+  if (newCookies.size() > 0)
+  {
+    m_cookies = newCookies;
+  }
+
+  // We should get back an HTTP_OK code and a JSON array with all the file names
+  if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_OK)
+  {
+    // D'oh!  The server didn't like our request.
+    std::ostringstream respStatus;
+    respStatus << "Status: " << response.getStatus() << "\nReason: " << response.getReasonForStatus( response.getStatus());
+    respStatus << "\n\nReply text:\n";
+    respStatus << responseStream.rdbuf();
+    serverErr = respStatus.str();
+
+    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
+    {
+      // Probably some kind of username/password mismatch.  Clear the password so that
+      // the user can enter it again
+      m_password.clear();
+    }
+
+    reqErr = JM_HTTP_SERVER_ERR;
+  }
+  else
+  {
+    // Successfully downloaded the file.  Now try to save it.
+    std::ofstream outfile( localFileName, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+    if (outfile.good())
+    {
+      outfile << responseStream.rdbuf();
+      outfile.close();
+    }
+    else
+    {
+      reqErr = JM_LOCAL_FILE_ERROR;
+      serverErr = "Failed to open local file (" + localFileName + ") for writing.";
+    }
+  }
+
+  return reqErr;
+}
+
 
 
 // Wrapper for a lot of the boilerplate code needed to perform an HTTPS GET
@@ -813,132 +976,6 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
   return retVal;
 }
 
-
-// Note: This function does not actually use the Moab Web Services API.  (There's nothing in
-// MWS for dealing with output files.)  Instead, it relies on some custom PHP code that must
-// be installed on the server.  See https://github.com/neutrons/MWS-Front-End
-bool MwsRemoteJobManager::jobOutputReady( const std::string &jobId)
-{
-  bool retVal = false;  // assume failure
-
-  // Open an HTTP connection to the cluster
-  Poco::URI uri(m_serviceBaseUrl);
-
-  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-  Poco::Net::HTTPSClientSession session( uri.getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
-
-  std::ostringstream path;
-  path << uri.getPathAndQuery();
-  // Path should be something like "/mws/rest", append "/filecheck" to it.
-  path << "/filecheck";
-  // Append the URL query string
-  path << "?jobid=" << jobId;
-
-  Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, path.str(), Poco::Net::HTTPRequest::HTTP_1_1);
-  req.setContentType( "text/html");
-
-  // Set the Authorization header (base64 encoded)
-  ostringstream encodedAuth;
-  Poco::Base64Encoder encoder( encodedAuth);
-
-  encoder << m_userName << ":" << m_password;
-  encoder.close();
-
-  req.setCredentials( "Basic", encodedAuth.str());
-
-  // Attach any cookies we've got from previous responses
-  req.setCookies( getCookies());
-
-  session.sendRequest( req);
-
-  // All we need to check is the return code.  And all we really care about is whether
-  // the code is 200 or not.  We're not going to differentiate between the various
-  // error codes...
-
-  Poco::Net::HTTPResponse response;
-  session.receiveResponse( response);
-  std::vector<Poco::Net::HTTPCookie> newCookies;
-  // For as yet unknown reasons, we don't always get a session cookie back from the
-  // server.  In that case, we don't want to overwrite the cookie we're currently
-  // using...
-  response.getCookies( newCookies);
-  if (newCookies.size() > 0)
-  {
-    m_cookies = newCookies;
-  }
-
-  if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
-  {
-    retVal = true;
-  }
-
-  return retVal;
-}
-
-
-
-// Note: This function does not actually use the Moab Web Services API.  (There's nothing in
-// MWS for dealing with output files.)  Instead, it relies on some custom PHP code that must
-// be installed on the server.  See https://github.com/neutrons/MWS-Front-End
-bool MwsRemoteJobManager::getJobOutput( const std::string &jobId, std::ostream &outstream)
-{
-
-  bool retVal = false;  // assume failure
-
-  // Open an HTTP connection to the cluster
-  Poco::URI uri(m_serviceBaseUrl);
-
-  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-  Poco::Net::HTTPSClientSession session( uri.getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
-
-  std::ostringstream path;
-  path << uri.getPathAndQuery();
-  // Path should be something like "/mws/rest", append "/download" to it.
-  path << "/download";
-  // Append the URL query string
-  path << "?jobid=" << jobId;
-
-  Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, path.str(), Poco::Net::HTTPRequest::HTTP_1_1);
-  req.setContentType( "text/html");
-
-  // Set the Authorization header (base64 encoded)
-  ostringstream encodedAuth;
-  Poco::Base64Encoder encoder( encodedAuth);
-
-  encoder << m_userName << ":" << m_password;
-  encoder.close();
-
-  req.setCredentials( "Basic", encodedAuth.str());
-
-  // Attach any cookies we've got from previous responses
-  req.setCookies( getCookies());
-
-  session.sendRequest( req);
-
-  Poco::Net::HTTPResponse response;
-
-  // Check the return code.  If it's good, then get the session stream and pull
-  // down the rest of the file.
-  if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
-  {
-    retVal = true;
-    istream & respStream = session.receiveResponse(response);
-    std::vector<Poco::Net::HTTPCookie> newCookies;
-    // For as yet unknown reasons, we don't always get a session cookie back from the
-    // server.  In that case, we don't want to overwrite the cookie we're currently
-    // using...
-    response.getCookies( newCookies);
-    if (newCookies.size() > 0)
-    {
-      m_cookies = newCookies;
-    }
-
-    outstream << respStream.rdbuf();
-    outstream << flush;  // make sure we've got everything before the session goes out of scope
-  }
-
-  return retVal;
-}
 
 
 

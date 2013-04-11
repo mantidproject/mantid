@@ -130,6 +130,8 @@ void JobStatusDialog::addRow( RemoteJob &job)
 
     if (status == RemoteJob::JOB_COMPLETE)
     {
+#if 0
+      ifdef'd out because jobOutputReady doesn't exist anymore
         // check to see if there's an output file and if it's readable.
         if (m_manager->jobOutputReady( job.m_jobId))
         {
@@ -138,6 +140,7 @@ void JobStatusDialog::addRow( RemoteJob &job)
             m_buttonMap->setMapping(pb, QString::fromStdString( job.m_jobId));
             connect( pb, SIGNAL(clicked()), m_buttonMap, SLOT(map()));
         }
+#endif
     }
 
 }
@@ -146,6 +149,11 @@ void JobStatusDialog::addRow( RemoteJob &job)
 // Retrieve the output file and load it into a new workspace
 void JobStatusDialog::downloadFile( QString jobId)
 {
+
+#if 0
+  ifdef out because the file download stuff if being re-worked (and also
+  because the whole dialog box needs to be re-written)
+
   // Until we get around to re-writing the whole loader subsystem to accept a
   // stream, we'll have to save the file to a temp directory and then pass
   // the filename into the loader class.
@@ -191,6 +199,8 @@ void JobStatusDialog::downloadFile( QString jobId)
 
   // Note: QTemporaryFile automatically deletes the file when the object
   // goes out of scope.  Nice!
+#endif
+
   return;
 }
 

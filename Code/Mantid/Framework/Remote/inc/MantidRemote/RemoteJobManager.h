@@ -45,9 +45,11 @@ public:
     JM_HTTP_SERVER_ERR,       // The HTTP server returned something other than code 200.
                               // In cases where this can happen, there's proably a string
                               // with the exact message the server sent back.
-    JM_CLEARTEXT_DISALLOWED   // In cases where we're using HTTP Basic Authentication, we
+    JM_CLEARTEXT_DISALLOWED,  // In cases where we're using HTTP Basic Authentication, we
                               // send the password in (obfuscated) cleartext.  As such,
                               // we have to insist on using HTTPS rather than HTTP.
+    JM_LOCAL_FILE_ERROR,      // Problem writing to the local file (see downloadFile())
+    JM_NOT_IMPLELEMTED        // The function hasn't been written (yet)
 
   };
 
@@ -75,12 +77,18 @@ public:
   virtual bool jobStatusAll( std::vector<RemoteJob> &jobList, std::string &errMsg) = 0;
 
 
-  // returns true if there's an output file associated with the specified job ID and the file is readable
-  virtual bool jobOutputReady( const std::string &jobId) = 0;
+  // Returns a list of all the files on the remote machine associated with the specified transaction
+  virtual JobManagerErrorCode listFiles( const std::string &transId,
+                                         std::vector<std::string> &listing,
+                                         std::string &serverErr) = 0;
 
-  // Fetches the job's output file from the remote cluster
-  virtual bool getJobOutput( const std::string &jobId, std::ostream &outstream) = 0;
-
+  // download the specified file.
+  // Note: remoteFileName is just the file name (no path), but localFileName should include
+  // the complete path
+  virtual JobManagerErrorCode downloadFile( const std::string &transId,
+                                            const std::string &remoteFileName,
+                                            const std::string &localFileName,
+                                            std::string &serverErr) = 0;
 
 /************
   TODO: Uncomment these when we're ready to implement
@@ -137,6 +145,18 @@ public:
   virtual JobManagerErrorCode stopTransaction( std::string &transId, std::string &serverErr);
 
 
+  // Returns a list of all the files on the remote machine associated with the specified transaction
+  virtual JobManagerErrorCode listFiles( const std::string &transId,
+                                         std::vector<std::string> &listing,
+                                         std::string &serverErr);
+
+  // download the specified file.
+  // Note: remoteFileName is just the file name (no path), but localFileName should include
+  // the complete path
+  virtual JobManagerErrorCode downloadFile( const std::string &transId,
+                                            const std::string &remoteFileName,
+                                            const std::string &localFileName,
+                                            std::string &serverErr);
 protected:
 
   // Wraps up some of the boilerplate code needed to execute an HTTP GET request
@@ -174,8 +194,6 @@ public:
                           RemoteJob::JobStatus &retStatus,
                           std::string &errMsg);
   virtual bool jobStatusAll( std::vector<RemoteJob> &jobList, std::string &errMsg);
-  virtual bool jobOutputReady( const std::string &jobId);
-  virtual bool getJobOutput( const std::string &jobId, std::ostream &outstream);
 
 /*******
   TODO: IMPLEMENT THESE FUNCTIONS FOR REAL!
