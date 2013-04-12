@@ -247,7 +247,7 @@ void HelpWindowImpl::determineFileLocs()
             }
         }
     }
-//else
+#else
     // windows it is next to MantidPlot
     m_assistantExe = Poco::Path(binDir, "assistant").absolute().toString();
     if (!Poco::File(m_assistantExe).exists())
