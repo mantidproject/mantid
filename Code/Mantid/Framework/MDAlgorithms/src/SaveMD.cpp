@@ -9,6 +9,7 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 
 *WIKI*/
 
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/Matrix.h"
@@ -429,20 +430,32 @@ namespace MDAlgorithms
       throw std::runtime_error("SaveMD can only save MDEventWorkspaces and MDHistoWorkspaces.\nPlease use SaveNexus or another algorithm appropriate for this workspace type.");
   }
 
+  void SaveMD::saveAffineTransformMatrix(::NeXus::File *const file,
+                                         IMDWorkspace_const_sptr ws)
+  {
+    CoordTransform *affTransToOrig = ws->getTransformToOriginal();
+    Matrix<coord_t> attoMatrix = affTransToOrig->makeAffineMatrix();
+    this->saveMatrix<coord_t>(file, "affine_transform_to_orig", attoMatrix);
+    CoordTransform *affTransFromOrig = ws->getTransformFromOriginal();
+    Matrix<coord_t> atfoMatrix = affTransFromOrig->makeAffineMatrix();
+    this->saveMatrix(file, "affine_transform_from_orig", atfoMatrix);
+  }
+
   void SaveMD::saveWtransformMatrix(::NeXus::File *const file, IMDWorkspace_const_sptr ws)
   {
     DblMatrix wTrans = ws->getWTransf();
-    MantidVec vec = wTrans.getVector();
-    this->saveMatrix(file, "w_transform", vec);
+    this->saveMatrix<double>(file, "w_transform", wTrans);
   }
 
+  template<typename T>
   void SaveMD::saveMatrix(::NeXus::File *const file, std::string name,
-                          MantidVec &m)
+                         Matrix<T> &m)
   {
+    std::vector<T> v = m.getVector();
     // Number of data points
-    int nPoints = static_cast<int>(m.size());
+    int nPoints = static_cast<int>(v.size());
     file->makeData(name, ::NeXus::FLOAT64, nPoints, true);
-    file->putData(m);
+    file->putData(v);
     file->closeData();
   }
 
