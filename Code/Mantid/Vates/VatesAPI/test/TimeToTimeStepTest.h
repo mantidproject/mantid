@@ -2,7 +2,6 @@
 #define TIME_TO_TIMESTEP_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <vtkRectilinearGrid.h>
 #include "MantidVatesAPI/TimeToTimeStep.h"
 
 class TimeToTimeStepTest: public CxxTest::TestSuite
