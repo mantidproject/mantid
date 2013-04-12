@@ -112,6 +112,7 @@ set ( SRC_FILES
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
+	src/SaveCanSAS1D2.cpp
 	src/SaveDASC.cpp
 	src/SaveDaveGrp.cpp
 	src/SaveDetectorMasks.cpp
@@ -248,6 +249,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
+	inc/MantidDataHandling/SaveCanSAS1D2.h
 	inc/MantidDataHandling/SaveDASC.h
 	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDetectorMasks.h
