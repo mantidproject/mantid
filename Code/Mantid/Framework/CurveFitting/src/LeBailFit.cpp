@@ -141,9 +141,6 @@ namespace CurveFitting
     auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
     declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
 
-    // Background function order
-    // this->declareProperty("BackgroundFunctionOrder", 12, "Order of background function.");
-
     // Input background parameters (array)
     this->declareProperty(new Kernel::ArrayProperty<double>("BackgroundParameters"),
                           "Optional: enter a comma-separated list of background order parameters from order 0. ");
@@ -617,8 +614,7 @@ namespace CurveFitting
   {
     // 1. Set parameters to each peak
     bool allpeaksvalid = true;
-    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr>::iterator pit;
-    //  for (pit = m_peaks.begin(); pit != m_peaks.end(); ++pit)
+
     size_t numpeaks = m_dspPeaks.size();
     for (size_t ipk = 0; ipk < numpeaks; ++ipk)
     {
@@ -1035,10 +1031,10 @@ namespace CurveFitting
     m_bkgdParameterBuffer.resize(m_numberBkgdParameters);
     m_bkgdParameterBest.resize(m_numberBkgdParameters);
     m_roundBkgd = 0;
-    m_bkgdParameterStepVec.resize(m_numberBkgdParameters, 1.0);
+    m_bkgdParameterStepVec.resize(m_numberBkgdParameters, 0.01);
     for (size_t i = 1; i < m_numberBkgdParameters; ++i)
     {
-      m_bkgdParameterStepVec[i] = m_bkgdParameterStepVec[i-1] * 0.001;
+      m_bkgdParameterStepVec[i] = m_bkgdParameterStepVec[i-1] * 0.0001;
     }
 
     // 1. Generate domain and value
@@ -1051,14 +1047,33 @@ namespace CurveFitting
     API::FunctionValues values(domain);
 
     // 2. Calculate diffraction pattern
+    Rfactor currR;
+#if 0
     calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, values, m_funcParameters, true);
     for (size_t i = 0; i < numpts; ++i)
     {
       valueVec[i] = values[i];
     }
     Rfactor currR = getRFactor(m_dataWS->readY(m_wsIndex), valueVec, m_dataWS->readE(m_wsIndex));
+#else
+    m_backgroundFunction->function(domain, values);
+    vector<double> backgroundvalues(numpts);
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      backgroundvalues[i] = values[i];
+      m_outputWS->dataY(INPUTPUREPEAKINDEX)[i] = m_dataWS->readY(m_wsIndex)[i] - values[i];
+      m_outputWS->dataE(INPUTPUREPEAKINDEX)[i] = m_dataWS->readE(m_wsIndex)[i];
+    }
+    calculateDiffractionPatternMC(m_outputWS, INPUTPUREPEAKINDEX, m_funcParameters, backgroundvalues, valueVec, currR);
+#endif
     Rfactor bestR = currR;
     storeBackgroundParameters(m_bkgdParameterBest);
+    stringstream bufss;
+    bufss << "Starting background parameter ";
+    for (size_t i = 0; i < m_bkgdParameterBest.size(); ++i)
+      bufss << "[" << i << "] = " << m_bkgdParameterBest[i] << ", ";
+    bufss << ".  Starting Rwp = " << currR.Rwp;
+    g_log.notice(bufss.str());
 
     for (size_t istep = 0; istep < m_numMinimizeSteps; ++istep)
     {
@@ -1067,12 +1082,25 @@ namespace CurveFitting
 
       // b) Propose new values and evalulate
       proposeNewBackgroundValues();
+      Rfactor newR;
+#if 0
       calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, values, m_funcParameters, true);
       for (size_t i = 0; i < numpts; ++i)
       {
         valueVec[i] = values[i];
       }
-      Rfactor newR = getRFactor(m_dataWS->readY(m_wsIndex), valueVec, m_dataWS->readE(m_wsIndex));
+       newR = getRFactor(m_dataWS->readY(m_wsIndex), valueVec, m_dataWS->readE(m_wsIndex));
+#else
+      m_backgroundFunction->function(domain, values);
+      for (size_t i = 0; i < numpts; ++i)
+      {
+        backgroundvalues[i] = values[i];
+        m_outputWS->dataY(INPUTPUREPEAKINDEX)[i] = m_dataWS->readY(m_wsIndex)[i] - values[i];
+      }
+      calculateDiffractionPatternMC(m_outputWS, INPUTPUREPEAKINDEX, m_funcParameters, backgroundvalues, valueVec, newR);
+#endif
+
+      g_log.information() << "[DBx800] New Rwp = " << newR.Rwp << ", Rp = " << newR.Rp << ".\n";
 
       bool accept = acceptOrDeny(currR, newR);
 
@@ -1091,35 +1119,80 @@ namespace CurveFitting
           // Is it the best?
           bestR = newR;
           storeBackgroundParameters(m_bkgdParameterBest);
+
+          stringstream bufss;
+          bufss << "Temp best background parameter ";
+          for (size_t i = 0; i < m_bkgdParameterBest.size(); ++i)
+            bufss << "[" << i << "] = " << m_bkgdParameterBest[i] << ", ";
+          g_log.information(bufss.str());
         }
       }
+
+      // d) Progress
+      progress(static_cast<double>(istep)/static_cast<double>(m_numMinimizeSteps));
     }
 
     // 3. Recover the best
     recoverBackgroundParameters(m_bkgdParameterBest);
+
+    stringstream bufss1;
+    bufss1 << "Best background parameter ";
+    for (size_t i = 0; i < m_bkgdParameterStepVec.size(); ++i)
+      bufss1 << "[" << i << "] = " << m_backgroundFunction->getParameter(i) << ", ";
+    g_log.notice(bufss1.str());
+
+    Rfactor outputR;
+#if 0
     calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, values, m_funcParameters, true);
+
     for (size_t i = 0; i < numpts; ++i)
     {
       valueVec[i] = values[i];
     }
     Rfactor outputR = getRFactor(m_dataWS->readY(m_wsIndex), valueVec, m_dataWS->readE(m_wsIndex));
+#else
+    m_backgroundFunction->function(domain, values);
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      backgroundvalues[i] = values[i];
+      m_outputWS->dataY(INPUTPUREPEAKINDEX)[i] = m_dataWS->readY(m_wsIndex)[i] - values[i];
+    }
+    calculateDiffractionPatternMC(m_outputWS, INPUTPUREPEAKINDEX, m_funcParameters, backgroundvalues, valueVec, outputR);
+#endif
 
     g_log.notice() << "[DBx604] Best Rwp = " << bestR.Rwp << ",  vs. recovered best Rwp = " << outputR.Rwp << ".\n";
 
     // 4. Add data (0: experimental, 1: calcualted, 2: difference)
-    for (size_t i = 0; i < values.size(); ++i)
+    for (size_t i = 0; i < numpts; ++i)
     {
-      m_outputWS->dataY(1)[i] = values[i];
-      m_outputWS->dataY(2)[i] = vecY[i]-values[i];
+      m_outputWS->dataY(1)[i] = valueVec[i]+backgroundvalues[i];
+      m_outputWS->dataY(2)[i] = vecY[i]-(valueVec[i]+backgroundvalues[i]);
     }
 
     //   (3: peak without background, 4: input background)
-    m_backgroundFunction->function(domain, values);
+    // m_backgroundFunction->function(domain, values);
     for (size_t i = 0; i < values.size(); ++i)
     {
-      m_outputWS->dataY(CALBKGDINDEX)[i] = values[i];
-      m_outputWS->dataY(CALPUREPEAKINDEX)[i] = m_outputWS->readY(CALDATAINDEX)[i] - values[i];
+      m_outputWS->dataY(CALBKGDINDEX)[i] = backgroundvalues[i];
+      m_outputWS->dataY(CALPUREPEAKINDEX)[i] = valueVec[i];
     }
+
+    // 5. Output background to table workspace
+    TableWorkspace_sptr outtablews(new TableWorkspace());
+    outtablews->addColumn("str", "Name");
+    outtablews->addColumn("double", "Value");
+    outtablews->addColumn("double", "Error");
+
+    for (size_t i = 0; i < m_bkgdParameterNames.size(); ++i)
+    {
+      string parname = m_bkgdParameterNames[i];
+      double parvalue = m_backgroundFunction->getParameter(parname);
+
+      TableRow newrow = outtablews->appendRow();
+      newrow << parname << parvalue << 1.0;
+    }
+
+    setProperty("BackgroundParametersWorkspace", outtablews);
 
     return;
   }
@@ -1128,7 +1201,7 @@ namespace CurveFitting
   /** Store/buffer current background parameters
     * @param bkgdparamvec :: vector to save the background parameters whose order is same in background function
     */
-  void LeBailFit::storeBackgroundParameters(vector<double> bkgdparamvec)
+  void LeBailFit::storeBackgroundParameters(vector<double>& bkgdparamvec)
   {
     for (size_t i = 0; i < m_numberBkgdParameters; ++i)
     {
@@ -1161,7 +1234,12 @@ namespace CurveFitting
     double r = 2*(static_cast<double>(rand())/static_cast<double>(RAND_MAX)-0.5);
     double newvalue = currvalue + r * m_bkgdParameterStepVec[iparam];
 
+    g_log.information() << "[DBx804] Background " << iparam << " propose new value = "
+                        << newvalue << "  from " << currvalue << ".\n";
+
     m_backgroundFunction->setParameter(static_cast<size_t>(iparam), newvalue);
+
+    ++ m_roundBkgd;
 
     return;
   }
@@ -1895,15 +1973,6 @@ namespace CurveFitting
 
       for (size_t i = 0; i < ndata; ++i)
         pureobspeaksintensity[i] = datay[i] - bkgdvalue[i];
-
-      /*
-      stringstream dbss;
-      dbss << "DBx254 I wonder that all background's parameters are zero!\n";
-      vector<string> bkgdparnames = m_backgroundFunction->getParameterNames();
-      for (size_t i = 0; i < bkgdparnames.size(); ++i)
-        dbss << bkgdparnames[i] << " = " << m_backgroundFunction->getParameter(i) << "\n";
-      g_log.error(dbss.str());
-      */
     }
 
     bool peakheightsphysical = true;
@@ -3522,6 +3591,12 @@ namespace CurveFitting
     {
       // Lower Rwp.  Take the change
       accept = true;
+    }
+    else if (new_goodness > 1.0-1.0E-9)
+    {
+      // Too high
+      g_log.debug() << "Goodness > " << 1.0-1.0E-9 << ".  Reject!" << ".\n";
+      accept = false;
     }
     else
     {

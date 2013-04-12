@@ -265,7 +265,7 @@ namespace CurveFitting
                                     FunctionValues peakdata, vector<double>& background);
 
     /// Store/buffer current background parameters
-    void storeBackgroundParameters(vector<double> bkgdparamvec);
+    void storeBackgroundParameters(vector<double> &bkgdparamvec);
 
     /// Restore/recover the buffered background parameters to m_background function
     void recoverBackgroundParameters(vector<double> bkgdparamvec);
