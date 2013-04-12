@@ -838,5 +838,15 @@ bool MantidEVWorker::showUB( const std::string & peaks_ws_name )
   return true;
 }
 
+
+std::vector< std::pair<std::string,std::string> >MantidEVWorker::PointInfo( const std::string & peaks_ws_name,
+                                                                            Mantid::Kernel::V3D Q)
+{
+  const auto& ADS = AnalysisDataService::Instance();
+  Mantid::DataObjects::PeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<Mantid::DataObjects::PeaksWorkspace>(peaks_ws_name);
+
+  return peaks_ws->PeakInfo( Q ); 
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

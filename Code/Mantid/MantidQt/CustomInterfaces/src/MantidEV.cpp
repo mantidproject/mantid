@@ -11,6 +11,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -165,6 +166,8 @@ MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent)
   worker        = new MantidEVWorker();
   m_thread_pool = new QThreadPool( this );
   m_thread_pool->setMaxThreadCount(1);
+  Poco::NObserver<MantidEV, SelectionNotificationServiceImpl::AddNotification> observer(*this, &MantidEV::handleQpointNotification);
+  SelectionNotificationService::Instance().notificationCenter.addObserver(observer);
 }
 
 
@@ -216,6 +219,9 @@ void MantidEV::initLayout()
 
    QObject::connect( m_uiForm.ApplyIntegrate_btn, SIGNAL(clicked()),
                     this, SLOT(integratePeaks_slot()) );
+
+   QObject::connect( m_uiForm.ShowInfo_btn, SIGNAL(clicked()),
+                    this, SLOT(showInfo_slot()) );
 
                           // connect the slots for the menu items
   QObject::connect( m_uiForm.actionSave_State, SIGNAL(triggered()),
@@ -345,7 +351,9 @@ void MantidEV::initLayout()
    m_uiForm.PeakSize_ledt->setValidator( new QDoubleValidator(m_uiForm.PeakSize_ledt));
    m_uiForm.BackgroundInnerSize_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundInnerSize_ledt));
    m_uiForm.BackgroundOuterSize_ledt->setValidator( new QDoubleValidator(m_uiForm.BackgroundOuterSize_ledt));
-
+   m_uiForm.Qx_ledt->setValidator( new QDoubleValidator(m_uiForm.Qx_ledt));
+   m_uiForm.Qy_ledt->setValidator( new QDoubleValidator(m_uiForm.Qy_ledt));
+   m_uiForm.Qz_ledt->setValidator( new QDoubleValidator(m_uiForm.Qz_ledt));
    loadSettings("");
 }
 
@@ -929,6 +937,85 @@ void MantidEV::integratePeaks_slot()
      if ( !running )
        errorMessage( "Failed to start sphere integrate thread...previous operation not complete" );
    }
+}
+
+
+/**
+ *  Slot called when Show Info button is pressed
+ */
+void MantidEV::showInfo_slot()
+{
+   std::cout << "Show Info button pressed" << std::endl;
+   double qx = 0.0;
+   double qy = 0.0;
+   double qz = 0.0;
+   getDouble( m_uiForm.Qx_ledt, qx );
+   getDouble( m_uiForm.Qy_ledt, qy );
+   getDouble( m_uiForm.Qz_ledt, qz );
+//   std::cout << "Qx = " << qx << std::endl; 
+//   std::cout << "Qy = " << qy << std::endl; 
+//   std::cout << "Qz = " << qz << std::endl; 
+
+   Mantid::Kernel::V3D q_point( qx, qy, qz );
+//   showInfo( q_point );
+
+   boost::shared_ptr<std::vector<double>> q_vec(new std::vector<double>());
+   q_vec->push_back( qx );
+   q_vec->push_back( qy );
+   q_vec->push_back( qz );
+   std::string message_name("PointedAt");
+   SelectionNotificationService::Instance().addOrReplace(message_name.c_str(),q_vec);
+}
+
+
+void MantidEV::handleQpointNotification(const Poco::AutoPtr<SelectionNotificationServiceImpl::AddNotification> & message )
+{
+//  std::cout << "GOT NOTIFICATION" << std::endl;
+//  std::string name = message->name();
+//  std::cout << "Name is " << name << std::endl;
+//  std::cout << message->object()->at(0) << std::endl;
+//  std::cout << message->object()->at(1) << std::endl;
+//  std::cout << message->object()->at(2) << std::endl;
+  Mantid::Kernel::V3D  q_point( message->object()->at(0), message->object()->at(1), message->object()->at(2) );
+  showInfo( q_point );
+}
+
+
+void MantidEV::showInfo( Mantid::Kernel::V3D  q_point )
+{
+   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+   if ( peaks_ws_name.length() == 0 )
+   {
+     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
+     return;
+   }
+
+   if ( !worker->isPeaksWorkspace( peaks_ws_name ) )
+   {
+     errorMessage("Requested Peaks Workspace Doesn't Exist");
+   }
+
+   std::vector< std::pair< std::string, std::string > > info = worker->PointInfo( peaks_ws_name, q_point );
+
+   for ( size_t i = 0; i < info.size(); i++ )
+     std::cout << info[i].first << "   " << info[i].second << std::endl;
+   
+   m_uiForm.SelectedPoint_tbl->setRowCount((int)info.size());
+   m_uiForm.SelectedPoint_tbl->setColumnCount(2);
+   m_uiForm.SelectedPoint_tbl->verticalHeader()->hide();
+   m_uiForm.SelectedPoint_tbl->horizontalHeader()->hide();
+
+   for ( size_t row = 0; row < info.size(); row++ )
+   {
+     QString first_str = QString::fromStdString( info[row].first );
+     QTableWidgetItem *item = new QTableWidgetItem( first_str );
+     m_uiForm.SelectedPoint_tbl->setItem( (int)row, 0, item );
+     QString second_str = QString::fromStdString( info[row].second );
+     item = new QTableWidgetItem( second_str );
+     m_uiForm.SelectedPoint_tbl->setItem( (int)row, 1, item );
+   }
+   m_uiForm.SelectedPoint_tbl->resizeColumnToContents(0);
+   m_uiForm.SelectedPoint_tbl->resizeColumnToContents(1);
 }
 
 
