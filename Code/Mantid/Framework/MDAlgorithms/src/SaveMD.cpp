@@ -439,17 +439,32 @@ namespace MDAlgorithms
   void SaveMD::saveAffineTransformMatrix(::NeXus::File *const file,
                                          IMDWorkspace_const_sptr ws)
   {
-    CoordTransform *affTransToOrig = ws->getTransformToOriginal();
-    Matrix<coord_t> attoMatrix = affTransToOrig->makeAffineMatrix();
-    this->saveMatrix<coord_t>(file, "affine_transform_to_orig", attoMatrix);
-    CoordTransform *affTransFromOrig = ws->getTransformFromOriginal();
-    Matrix<coord_t> atfoMatrix = affTransFromOrig->makeAffineMatrix();
-    this->saveMatrix(file, "affine_transform_from_orig", atfoMatrix);
+    try {
+      CoordTransform *affTransToOrig = ws->getTransformToOriginal();
+      Matrix<coord_t> attoMatrix = affTransToOrig->makeAffineMatrix();
+      std::cout << "ATTO: " << attoMatrix.str() << std::endl;
+      this->saveMatrix<coord_t>(file, "affine_transform_to_orig", attoMatrix);
+    }
+    catch (std::runtime_error &)
+    {
+      // Do nothing
+    }
+    try {
+      CoordTransform *affTransFromOrig = ws->getTransformFromOriginal();
+      Matrix<coord_t> atfoMatrix = affTransFromOrig->makeAffineMatrix();
+      std::cout << "ATFO: " << atfoMatrix.str() << std::endl;
+      this->saveMatrix(file, "affine_transform_from_orig", atfoMatrix);
+    }
+    catch (std::runtime_error &)
+    {
+      // Do nothing
+    }
   }
 
   void SaveMD::saveWtransformMatrix(::NeXus::File *const file, IMDWorkspace_const_sptr ws)
   {
     DblMatrix wTrans = ws->getWTransf();
+    std::cout << "W: " << wTrans.str() << std::endl;
     this->saveMatrix<double>(file, "w_transform", wTrans);
   }
 
