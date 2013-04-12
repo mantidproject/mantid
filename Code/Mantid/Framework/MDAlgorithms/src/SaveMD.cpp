@@ -200,6 +200,9 @@ namespace MDAlgorithms
     // Write out W transform matrix
     this->saveWtransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
+    // Write out the affine matrices
+    this->saveAffineTransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+
     file->putAttr("event_type", MDE::getTypeName());
     // Save each NEW ExperimentInfo to a spot in the file
     this->saveExperimentInfos(file,ws);
@@ -376,6 +379,9 @@ namespace MDAlgorithms
 
     // Write out W transform matrix
     this->saveWtransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+
+    // Write out the affine matrices
+    this->saveAffineTransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
     // Check that the typedef has not been changed. The NeXus types would need changing if it does!
     assert(sizeof(signal_t) == sizeof(double));
