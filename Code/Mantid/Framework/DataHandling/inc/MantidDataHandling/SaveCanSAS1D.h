@@ -97,7 +97,7 @@ namespace Mantid
     public:
       /// default constructor
       SaveCanSAS1D();
-      ~SaveCanSAS1D();
+      virtual ~SaveCanSAS1D();
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "SaveCanSAS1D"; }
@@ -106,15 +106,15 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\XML;SANS"; }
 
-	 private:
+	 protected:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
       /// Overwrites Algorithm method.
-      void init();
+      virtual void init();
       /// overriden method sets appending for workspace groups
       void setOtherProperties(API::IAlgorithm* alg, const std::string & propertyName,const std::string& propertyValue, int perioidNum);
       /// Overwrites Algorithm method
-      void exec();
+      virtual void exec();
       
       /// Opens the output file and, as necessary blanks it, writes the file header and moves the file pointer
       void prepareFileToWriteEntry();
@@ -129,7 +129,7 @@ namespace Mantid
       /// replaces the charcter at index in the input string with xml entity reference(eg.replace '&' with "&amp;")
       void replacewithEntityReference(std::string& input, const std::string::size_type& index);
       /// sasroot element
-      void createSASRootElement(std::string& rootElem);
+      virtual void createSASRootElement(std::string& rootElem);
 
       /// this method creates sastitle element
       void createSASTitleElement(std::string& sasTitle);
