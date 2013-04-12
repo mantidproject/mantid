@@ -377,6 +377,7 @@ set ( TEST_FILES
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h
+	SaveCanSAS1dTest2.h
 	SaveDASCTest.h
 	SaveDaveGrpTest.h
 	SaveDetectorsGroupingTest.h
