@@ -135,16 +135,21 @@ void HelpWindowImpl::start(const std::string &url)
     if (!url.empty())
         args << QLatin1String("-showUrl")
              << QLatin1String(url.c_str());
+    m_log.debug() << m_assistantExe
+                  << " " << args.join(QString(" ")).toStdString()
+                  << " (state = " << m_process->state() << ")\n";
     m_process->start(QLatin1String(m_assistantExe.c_str()), args);
+
+    // wait for it to start before returning
     if (!m_process->waitForStarted())
     {
-        m_log.debug() << "Failed to start qt assistant process\n";
+        m_log.warning() << "Failed to start qt assistant process\n";
         return;
     }
     if (m_firstRun)
     {
         m_firstRun = false;
-        m_log.debug() << "Very first run of qt assistant comes up slowly (2 sec)\n";
+        m_log.debug() << "Very first run of qt assistant comes up slowly (2 sec pause)\n";
         Poco::Thread::sleep(2000); // 2 seconds
     }
 
@@ -242,16 +247,21 @@ void HelpWindowImpl::determineFileLocs()
             }
         }
     }
-#else
+//else
     // windows it is next to MantidPlot
     m_assistantExe = Poco::Path(binDir, "assistant").absolute().toString();
     if (!Poco::File(m_assistantExe).exists())
     {
         m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+        m_assistantExe = Poco::Path(binDir, "assistant.exe").absolute().toString();
+        if (!Poco::File(m_assistantExe).exists())
+        {
+            m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+            m_assistantExe = "assistant.exe";
+        }
     }
 #endif
-    if (Poco::File(m_assistantExe).exists())
-        m_log.debug() << "Using \"" << m_assistantExe << "\" for viewing help\n";
+    m_log.debug() << "Using \"" << m_assistantExe << "\" for viewing help\n";
 
     // determine cache file location
     m_cacheFile = "mantid.qhc";
