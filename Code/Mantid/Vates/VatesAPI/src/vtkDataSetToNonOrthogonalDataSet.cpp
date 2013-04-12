@@ -1,5 +1,5 @@
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
@@ -83,9 +83,9 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
     API::Workspace_sptr ws = workspaceProvider.fetchWorkspace(m_wsName);
     std::string wsType = ws->id();
     // Have to cast since inherited class doesn't provide access to all info
-    if (boost::algorithm::find_first(wsType, "MDEventWorkspace"))
+    if (boost::algorithm::find_first(wsType, "MDHistoWorkspace"))
     {
-      API::IMDEventWorkspace_const_sptr infoWs = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(ws);
+      API::IMDHistoWorkspace_const_sptr infoWs = boost::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
       m_numDims = infoWs->getNumDims();
       Geometry::OrientedLattice oLatt = infoWs->getExperimentInfo(0)->sample().getOrientedLattice();
       Kernel::DblMatrix wTrans = infoWs->getWTransf();
