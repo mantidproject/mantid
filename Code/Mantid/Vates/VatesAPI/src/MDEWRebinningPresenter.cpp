@@ -31,7 +31,8 @@ namespace Mantid
 {
   namespace VATES
   {
-    
+    const std::string MDEWRebinningPresenter::rb_tag = "_visual_md";
+
     /**
     Constructor.
     @param input : input vtk dataset containing existing metadata.
@@ -279,7 +280,7 @@ namespace Mantid
     {
       std::string wsName = m_serializer.getWorkspaceName();
 
-      std::string outWsName = wsName + "_visual_md";
+      std::string outWsName = wsName + rb_tag;
 
       using namespace Mantid::API;
       if(RecalculateAll == m_request->action())
@@ -435,8 +436,8 @@ namespace Mantid
 
     void MDEWRebinningPresenter::makeNonOrthogonal(vtkDataSet *visualDataSet)
     {
-      vtkDataSetToNonOrthogonalDataSet converter(visualDataSet,
-                                                 m_serializer.getWorkspaceName());
+      std::string wsName = m_serializer.getWorkspaceName() + rb_tag;
+      vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName);
       converter.execute();
     }
 

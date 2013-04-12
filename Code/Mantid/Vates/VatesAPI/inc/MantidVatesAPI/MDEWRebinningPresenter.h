@@ -119,6 +119,8 @@ namespace Mantid
       bool m_ForceOrthogonal;
       /// Force output in terms of a histogram workspace. Decides which rebinning algorithm to use.
       bool m_bOutputHistogramWS;
+      /// Tag for the rebinned workspace
+      static const std::string rb_tag;
     };
   }
 }
