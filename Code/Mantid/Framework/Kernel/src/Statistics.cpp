@@ -254,14 +254,14 @@ namespace Mantid
         double diff = obs_i - cal_i;
 
         sumrpnom += fabs(diff);
-        sumrpdenom += fabs(cal_i);
+        sumrpdenom += fabs(obs_i);
 
         sumnom += weight*diff*diff;
         sumdenom += weight*obs_i*obs_i;
       }
 
       Rfactor rfactor;
-      rfactor.Rp = std::sqrt(sumrpnom/sumrpdenom);
+      rfactor.Rp = (sumrpnom/sumrpdenom);
       rfactor.Rwp = std::sqrt(sumnom/sumdenom);
 
       return rfactor;
