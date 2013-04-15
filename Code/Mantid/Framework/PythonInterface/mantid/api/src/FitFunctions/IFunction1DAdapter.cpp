@@ -21,16 +21,8 @@ namespace Mantid
      * * @param self A reference to the calling Python object
      */
     IFunction1DAdapter::IFunction1DAdapter(PyObject* self)
-      : IFunction1D(), m_self(self)
+      : API::ParamFunction(), API::IFunction1D(), IFunctionAdapter(self),  m_self(self)
     {
-    }
-
-    /**
-     * Returns the class name of the function. This cannot be overridden in Python.
-     */
-    std::string IFunction1DAdapter::name() const
-    {
-      return std::string(getSelf()->ob_type->tp_name);
     }
 
     /**
@@ -56,7 +48,5 @@ namespace Mantid
     {
       CallMethod2<void,object,object>::dispatchWithException(getSelf(), "function1D", xvals, out);
     }
-
-
   }
 }

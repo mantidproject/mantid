@@ -5,6 +5,7 @@
 using Mantid::API::IFunction1D;
 using Mantid::API::IFunction;
 using Mantid::PythonInterface::IFunction1DAdapter;
+using Mantid::PythonInterface::IFunctionAdapter;
 using namespace boost::python;
 
 void export_IFunction1D()

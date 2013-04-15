@@ -61,14 +61,16 @@ set ( EXPORT_FILES
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions
-set ( SRC_FILES 
+set ( SRC_FILES
+  src/FitFunctions/IFunctionAdapter.cpp
   src/FitFunctions/IFunction1DAdapter.cpp
   src/PythonAlgorithm/AlgorithmWrapper.cpp
   src/PythonAlgorithm/PythonAlgorithm.cpp
   src/CloneMatrixWorkspace.cpp
 )
 
-set ( INC_FILES 
+set ( INC_FILES
+  ${HEADER_DIR}/api/FitFunctions/IFunctionAdapter.h
   ${HEADER_DIR}/api/FitFunctions/IFunction1DAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmWrapper.h
   ${HEADER_DIR}/api/PythonAlgorithm/PythonAlgorithm.h

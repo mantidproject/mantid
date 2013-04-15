@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_IFunction1DAdapter_H_
-#define MANTID_PYTHONINTERFACE_IFunction1DAdapter_H_
+#ifndef MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTER_H_
+#define MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTER_H_
 /**
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -26,7 +26,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidKernel/ClassMacros.h"
+#include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 
 #include <boost/python/object.hpp>
 
@@ -41,7 +41,8 @@ namespace Mantid
      *
      * This is essentially a transparent layer that handles the function calls up into Python.
      */
-    class IFunction1DAdapter : public virtual API::ParamFunction, public virtual API::IFunction1D
+    class IFunction1DAdapter :
+      public virtual API::ParamFunction, public virtual API::IFunction1D, public virtual IFunctionAdapter
     {
     public:
       /// A constructor that looks like a Python __init__ method
@@ -49,8 +50,6 @@ namespace Mantid
 
       /** @name Virtual methods */
       ///@{
-      /// Returns the name of the algorithm
-      std::string name() const;
       /// Base-class method
       void function1D(double* out, const double* xValues, const size_t nData) const;
       /// Python-type signature
@@ -63,7 +62,7 @@ namespace Mantid
       DISABLE_COPY_AND_ASSIGN(IFunction1DAdapter);
 
       /**
-       *  Returns the PyObject that owns this wrapper, i.e. self
+       * Returns the PyObject that owns this wrapper, i.e. self
        * @returns A pointer to self
        */
       inline PyObject * getSelf() const { return m_self; }
@@ -75,4 +74,4 @@ namespace Mantid
 }
 
 
-#endif /* MANTID_PYTHONINTERFACE_IFunction1DAdapter_H_ */
+#endif /* MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTER_H_ */
