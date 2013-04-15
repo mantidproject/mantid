@@ -81,9 +81,9 @@ namespace DataHandling
     m_numberOfSpectra = getInt("NSP1");
     m_numberOfBins = getInt("NTC1");
 
-    std::cerr << "number of periods " << m_numberOfPeriods << std::endl;
-    std::cerr << "number of spectra " << m_numberOfSpectra << std::endl;
-    std::cerr << "number of bins " << m_numberOfBins << std::endl;
+//    std::cerr << "number of periods " << m_numberOfPeriods << std::endl;
+//    std::cerr << "number of spectra " << m_numberOfSpectra << std::endl;
+//    std::cerr << "number of bins " << m_numberOfBins << std::endl;
 
     return true;
   }
@@ -163,10 +163,6 @@ namespace DataHandling
     
     // create a workspace group in case the data are multiperiod
     auto workspaceGroup = API::WorkspaceGroup_sptr( new API::WorkspaceGroup );
-    if ( m_numberOfPeriods > 1 )
-    {
-      workspaceGroup->addWorkspace( localWorkspace );
-    }
     // loop over periods and spectra and fill in the output workspace
     for(int period = 0; period < m_numberOfPeriods; ++period)
     {
@@ -187,6 +183,12 @@ namespace DataHandling
       {
         // Only run the Child Algorithms once
         runLoadInstrument( localWorkspace, getString("NAME") );
+        if ( m_numberOfPeriods > 1 )
+        {
+          // adding first ws to the group after loading instrument
+          // otherwise ws can be lost.
+          workspaceGroup->addWorkspace( localWorkspace );
+        }
         // Set the total proton charge for this run
         localWorkspace->mutableRun().setProtonCharge(protonCharge);
       }
@@ -414,7 +416,13 @@ namespace DataHandling
       {
         g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
       }
-
+      if (API::AnalysisDataService::Instance().doesExist("Anonymous"))
+      {
+          // LoadInstrument adds the workspace to ADS as Anonymous
+          // we don't want it there
+          API::AnalysisDataService::Instance().remove("Anonymous");
+          localWorkspace->setName("");
+      }
     }
 
     /// Personal wrapper for sqrt to allow msvs to compile
