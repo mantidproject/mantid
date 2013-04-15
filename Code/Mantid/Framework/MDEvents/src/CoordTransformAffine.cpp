@@ -267,6 +267,14 @@ namespace MDEvents
       return formattedXMLString;
   }
 
+  /**
+   * Coordinate transform id
+   * @return the type of coordinate transform
+   */
+  std::string CoordTransformAffine::id() const
+  {
+    return "CoordTransformAffine";
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Combine two transformations into a single affine transformations
