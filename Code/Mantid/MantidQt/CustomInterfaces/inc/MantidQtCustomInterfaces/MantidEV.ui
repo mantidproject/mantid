@@ -46,7 +46,7 @@
    <item>
     <widget class="QTabWidget" name="MantidEV_tabwidg">
      <property name="currentIndex">
-      <number>6</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
@@ -116,7 +116,7 @@
         <rect>
          <x>40</x>
          <y>150</y>
-         <width>191</width>
+         <width>331</width>
          <height>23</height>
         </rect>
        </property>
@@ -142,20 +142,20 @@
         <rect>
          <x>60</x>
          <y>190</y>
-         <width>121</width>
+         <width>101</width>
          <height>31</height>
         </rect>
        </property>
        <property name="text">
-        <string>Event File Name</string>
+        <string>Filename</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="EventFileName_ledt">
        <property name="geometry">
         <rect>
-         <x>200</x>
+         <x>160</x>
          <y>190</y>
-         <width>301</width>
+         <width>341</width>
          <height>31</height>
         </rect>
        </property>
