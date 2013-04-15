@@ -3,6 +3,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/overloads.hpp>
 
 using Mantid::API::IFunction;
 using Mantid::PythonInterface::IFunctionAdapter;
@@ -31,6 +32,16 @@ namespace
 
     return registered;
   }
+  // -- Declare property overloads --
+  // The usual BOOST_MEMBER_FUNCTION_OVERLOADS doesn't work using the wrapper held type
+
+  // declareProperty(name)
+  typedef void(IFunctionAdapter::*declareParameterType1)(const std::string &);
+  // declareProperty(name,defaultValue)
+  typedef void(IFunctionAdapter::*declareParameterType2)(const std::string &,double);
+  // declareProperty(name,defaultValue, description)
+  typedef void(IFunctionAdapter::*declareParameterType3)(const std::string &,double,const std::string &);
+
   ///@endcond
 }
 
@@ -67,6 +78,14 @@ void export_IFunction()
 
     .def("getAttributeValue", &IFunctionAdapter::getAttributeValue, "Return the value of the named attribute")
 
+    .def("declareParameter", &IFunctionAdapter::declareFitParameter,
+          "Declare a fitting parameter settings its default value & description")
+
+    .def("declareParameter", &IFunctionAdapter::declareFitParameterNoDescr,
+         "Declare a fitting parameter settings its default value")
+
+    .def("declareParameter", &IFunctionAdapter::declareFitParameterZeroInit,
+         "Declare a fitting parameter settings its default value to 0.0")
 
     //-- Deprecated functions that have the wrong names --
     .def("categories", &getCategories, "Returns a list of the categories for an algorithm")

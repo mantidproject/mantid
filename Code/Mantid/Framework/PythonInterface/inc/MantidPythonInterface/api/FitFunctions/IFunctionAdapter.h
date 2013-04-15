@@ -37,7 +37,7 @@ namespace Mantid
      * Provides a layer to hook into the protected functions
      * of IFunction
      */
-    class IFunctionAdapter : public virtual API::IFunction
+    class IFunctionAdapter : virtual public API::IFunction
     {
     public:
       /// A constructor that looks like a Python __init__ method
@@ -52,6 +52,40 @@ namespace Mantid
       void declareAttribute(const std::string &name, const boost::python::object &defaultValue);
       /// Get a named attribute value
       PyObject * getAttributeValue(const std::string & name);
+
+      // Each overload of declareParamter requires a different name as we
+      // can't use a function pointer with a virtual base class
+
+      /**
+       * Declare a named parameter with initial value & description
+       * @param name :: The name of the parameter
+       * @initValue name :: The initial value
+       * @description name :: A short description of the parameter
+       */
+      inline void declareFitParameter(const std::string& name, double initValue,
+                                      const std::string& description)
+      {
+        this->declareParameter(name,initValue,description);
+      }
+
+      /**
+       * Declare a named parameter with initial value
+       * @param name :: The name of the parameter
+       * @initValue name :: The initial value
+       */
+      inline void declareFitParameterNoDescr(const std::string& name, double initValue)
+      {
+        this->declareFitParameter(name,initValue,"");
+      }
+
+      /**
+       * Declare a named parameter with initial value = 0.0
+       * @param name :: The name of the parameter
+       */
+      inline void declareFitParameterZeroInit(const std::string& name)
+      {
+        this->declareFitParameter(name,0.0,"");
+      }
 
     protected:
       /**

@@ -9,6 +9,10 @@ class PyLinear(IFunction1D):
         self.declareAttribute("StringAtt", "filename")
         self.declareAttribute("BoolAtt", True)
         
+        self.declareParameter("ParamZeroInitNoDescr")
+        self.declareParameter("ParamNoDescr", 1.5)
+        self.declareParameter("OtherParam",4,"Some fitting parameter")
+        
     def function1D(self, xvals, out):
         pass
 
@@ -35,11 +39,28 @@ class IFunction1DTest(unittest.TestCase):
         func = PyLinear()
         func.initialize() # Contains known types
         
-        # By name
         self.assertEquals(1, func.getAttributeValue("IntAtt"))
         self.assertEquals(3.4, func.getAttributeValue("DoubleAtt"))
         self.assertEquals("filename", func.getAttributeValue("StringAtt"))
         self.assertEquals(True, func.getAttributeValue("BoolAtt"))
+
+    def test_correct_parameters_are_attached_during_init(self):
+        func = PyLinear()
+        func.initialize()
+        
+        self.assertEquals(3, func.nParams())
+
+        self.assertEquals("ParamZeroInitNoDescr",func.parameterName(0))
+        self.assertEquals("",func.paramDescription(0))
+        self.assertEquals(0.0,func.getParameterValue(0))
+
+        self.assertEquals("ParamNoDescr",func.parameterName(1))
+        self.assertEquals("",func.paramDescription(1))
+        self.assertEquals(1.5,func.getParameterValue(1))
+
+        self.assertEquals("OtherParam",func.parameterName(2))
+        self.assertEquals("Some fitting parameter",func.paramDescription(2))
+        self.assertEquals(4.0,func.getParameterValue(2))
 
 if __name__ == '__main__':
     unittest.main()
