@@ -370,6 +370,9 @@ void ConvertToMD::exec()
     else // setup existing MD workspace as workspace target.
        m_OutWSWrapper->setMDWS(spws);
  
+     // get the unique number, that identifies the run, the source workspace came from
+    uint16_t numExperiment= copyMetaData(spws);
+    targWSDescr.setProperty<uint16_t>("RUN_INDEX",numExperiment);
     // preprocess detectors;
     targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D,dEModReq,getProperty("UpdateMasks"));
 
@@ -386,7 +389,7 @@ void ConvertToMD::exec()
 
      g_log.information()<<" conversion started\n";
      m_Convertor->runConversion(m_Progress.get());
-     copyMetaData(spws);
+  
 
      //JOB COMPLETED:
      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
@@ -400,8 +403,10 @@ void ConvertToMD::exec()
 /**
  * Copy over the metadata from the input matrix workspace to output MDEventWorkspace
  * @param mdEventWS :: The output MDEventWorkspace
+ *
+ * @return  :: the number of experiment info added from the current MD workspace
  */
-void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const
+uint16_t ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const
 {
   const MantidVec & binBoundaries = m_InWS2D->readX(0);
   auto mapping = m_InWS2D->spectraMap().createIDGroupsMap();
@@ -413,6 +418,12 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const
     expt->mutableRun().storeHistogramBinBoundaries(binBoundaries);
     expt->cacheDetectorGroupings(*mapping);
   }
+  // Copy ExperimentInfo (instrument, run, sample) to the output WS
+   API::ExperimentInfo_sptr ei(m_InWS2D->cloneExperimentInfo());
+   mdEventWS->addExperimentInfo(ei);
+
+
+  
 }
 
 /** Constructor */

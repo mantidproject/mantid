@@ -93,7 +93,7 @@ namespace MDAlgorithms
         bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dEModeRequested,const std::vector<std::string> &other_dim_names,
                                       const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr);
        /// Store metadata
-       void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;
+       uint16_t copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;
 
        // 
        DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,bool updateMasks);

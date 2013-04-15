@@ -156,6 +156,7 @@ protected: // until MDWSDesctiptionDepricatedExist
 //********************* internal helpers
      /// helper function to resize all vectors, responsible for MD dimensions in one go
      void resizeDimDescriptions(unsigned int Dims,size_t nBins=10);
+
 private:
   /// Coordinate system.
   Mantid::API::SpecialCoordinateSystem m_coordinateSystem;
