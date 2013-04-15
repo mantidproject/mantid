@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/ScriptRepositoryFactory.h"
-#include "MantidScriptRepository/GitScriptRepository.h"
+#include "MantidScriptRepository/ScriptRepositoryImpl.h"
 #include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
@@ -25,7 +25,7 @@ public:
 
   void testCreateScriptRepository()
   {
-    ScriptRepository_sptr script = ScriptRepositoryFactory::Instance().create("GitScriptRepository"); 
+    ScriptRepository_sptr script = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl"); 
     TS_ASSERT(script); 
 
   }

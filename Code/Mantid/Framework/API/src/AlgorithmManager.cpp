@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -30,7 +32,6 @@ namespace Mantid
     */
     AlgorithmManagerImpl::~AlgorithmManagerImpl()
     {
-      //std::cerr << "Algorithm Manager destroyed." << std::endl;
     }
 
     /** Creates an instance of an algorithm, but does not own that instance
@@ -43,25 +44,6 @@ namespace Mantid
     Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string& algName,const int& version) const
     {
         return AlgorithmFactory::Instance().create(algName,version);                // Throws on fail:
-    }
-
-    /** Gets the names and categories of all the currently available algorithms
-    *
-    *  @return A vector of pairs of algorithm names and categories
-    */
-    const std::vector<std::pair<std::string,std::string> > 
-      AlgorithmManagerImpl::getNamesAndCategories() const
-    {
-      Mutex::ScopedLock _lock(this->m_managedMutex);
-      std::vector<std::pair<std::string,std::string> > retVector;
-
-      for (unsigned int i=0; i < m_managed_algs.size(); ++i)
-      {
-        std::pair<std::string,std::string> alg(m_managed_algs[i]->name(),m_managed_algs[i]->category());
-        retVector.push_back(alg);
-      }
-
-      return retVector;
     }
 
     /** Creates and initialises an instance of an algorithm.
@@ -143,10 +125,15 @@ namespace Mantid
       return;
     }
 
+    std::size_t AlgorithmManagerImpl::size() const
+    {
+      return m_managed_algs.size();
+    }
+
     /**
      * Returns a shared pointer by algorithm id
      * @param id :: The ID of the algorithm
-     * @returns A shared pointer tot eh algorithm
+     * @returns A shared pointer to the algorithm
      */
     IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const
     {
@@ -169,6 +156,44 @@ namespace Mantid
       IAlgorithm_sptr alg = this->getAlgorithm(id);
       if (!alg) return;
       notificationCenter.postNotification(new AlgorithmStartingNotification(alg));
+    }
+
+    /// Returns the most recently created instance of the named algorithm (or null if not found)
+    IAlgorithm_sptr AlgorithmManagerImpl::newestInstanceOf(const std::string& algorithmName) const
+    {
+      for ( auto it = m_managed_algs.rbegin(); it != m_managed_algs.rend(); ++it )
+      {
+        if ( (*it)->name() == algorithmName ) return *it;
+      }
+
+      return IAlgorithm_sptr();
+    }
+
+    /// Returns all running (& managed) occurances of the named algorithm, oldest first
+    std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(const std::string& algorithmName) const
+    {
+      std::vector<IAlgorithm_const_sptr> theRunningInstances;
+      Mutex::ScopedLock _lock(this->m_managedMutex);
+      for( auto alg = m_managed_algs.begin(); alg != m_managed_algs.end(); ++alg )
+      {
+        auto currentAlgorithm = *alg;
+        if ( currentAlgorithm->name() == algorithmName && currentAlgorithm->isRunning() )
+        {
+          theRunningInstances.push_back(currentAlgorithm);
+        }
+      }
+
+      return theRunningInstances;
+    }
+
+    /// Requests cancellation of all running algorithms
+    void AlgorithmManagerImpl::cancelAll()
+    {
+      Mutex::ScopedLock _lock(this->m_managedMutex);
+      for ( auto it = m_managed_algs.begin(); it != m_managed_algs.end(); ++it )
+      {
+        if ( (*it)->isRunning() ) (*it)->cancel();
+      }
     }
 
   } // namespace API

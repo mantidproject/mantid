@@ -4999,7 +4999,7 @@ void Graph::guessUniqueCurveLayout(int& colorIndex, int& symbolIndex)
   }
   if (n_curves > 1)
     colorIndex = (colorIndex+1)%16;
-  if (colorIndex == 13) //avoid white invisible curves
+  if (colorIndex == 15) //avoid white invisible curves
     colorIndex = 0;
 
   symbolIndex = (symbolIndex+1)%15;

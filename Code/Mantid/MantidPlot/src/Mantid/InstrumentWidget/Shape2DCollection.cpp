@@ -586,6 +586,17 @@ void Shape2DCollection::setCurrentBoundingRectReal(const QRectF& rect)
 }
 
 /**
+  * Change border color.
+  */
+void Shape2DCollection::changeBorderColor(const QColor &color)
+{
+    foreach(Shape2D* shape,m_shapes)
+    {
+        shape->setColor( color );
+    }
+}
+
+/**
  * Return a list of selected shapes.
  */
 QList<Shape2D*> Shape2DCollection::getSelectedShapes() const

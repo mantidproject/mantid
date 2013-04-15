@@ -1,5 +1,5 @@
 /*WIKI*
- *This Algorithm creates a PeaksWorkspace with peaks occurring at specific fractional offsets from
+  This Algorithm creates a PeaksWorkspace with peaks occurring at specific fractional offsets from
   h,k,or l values.
 
   There are options to create Peaks offset from peaks from the input PeaksWorkspace, or to create peaks

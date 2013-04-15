@@ -232,6 +232,86 @@ namespace Mantid
       return new Peak(this->getInstrument(), QLabFrame, detectorDistance);
     }
 
+   /**
+    * Returns selected information for a "peak" at QLabFrame.
+    *
+    * @param QLabFrame  a postion in Q-space. A peak does not have to be at that position
+    * @return a vector whose elements contain different information about the "peak" at that position.
+    *         each element is a pair of description of information and the string form for the corresponding
+    *         value.
+    */
+    std::vector<std::pair<std::string,std::string> >PeaksWorkspace::PeakInfo(Kernel::V3D QLabFrame ) const
+    {
+      std::vector<std::pair< std::string,std::string > > Result;
+
+      std::pair< std::string,std::string > QMag( "|Q|", boost::lexical_cast<std::string>(QLabFrame.norm()));
+      Result.push_back( QMag );
+
+      std::pair< std::string,std::string > dspc( "d-spacing", boost::lexical_cast<std::string>(1.0/QLabFrame.norm()));
+      Result.push_back( dspc);
+
+
+      std::pair< std::string,std::string > Qlab("Qlab",QLabFrame.toString());
+      Result.push_back(Qlab);
+
+      try{
+        API::IPeak* peak = createPeak( QLabFrame);
+
+
+        std::pair< std::string,std::string > wl( "wl", boost::lexical_cast<std::string>(peak->getWavelength()));
+        Result.push_back( wl );
+
+        if( peak->findDetector())
+        {
+           V3D detPos = peak->getDetPos();
+           std::pair< std::string,std::string > detpos( "pos", boost::lexical_cast<std::string>(peak->getDetPos()));
+           Result.push_back( detpos );
+
+
+           std::pair< std::string,std::string > tof( "tof", boost::lexical_cast<std::string>(peak->getTOF()));
+           Result.push_back( tof );
+
+           std::pair< std::string,std::string > Energy( "Energy", boost::lexical_cast<std::string>(peak->getFinalEnergy()));
+           Result.push_back( Energy );
+
+           std::pair< std::string,std::string > row( "row", boost::lexical_cast<std::string>(peak->getRow()));
+           Result.push_back( row );
+
+
+           std::pair< std::string,std::string > col( "col", boost::lexical_cast<std::string>(peak->getCol()));
+           Result.push_back( col );
+
+
+           std::pair< std::string,std::string > bank( "bank",peak->getBankName() );
+           Result.push_back( bank );
+
+           std::pair< std::string,std::string > scat( "Scattering Angle",boost::lexical_cast<std::string>(peak->getScattering() ));
+           Result.push_back( scat );
+
+           int seqNum=-1;
+           double minDist= 10000000;
+           for( int i = 0; i < getNumberPeaks() ; i++ )
+             if( detPos.distance(getPeak(i).getDetPos() )< minDist)
+             {
+               minDist = detPos.distance( getPeak( i ).getDetPos() );
+               seqNum = i+1;
+             }
+
+           std::pair< std::string,std::string > SeqNum( "Sequence Num",boost::lexical_cast<std::string>(seqNum));
+           Result.push_back( SeqNum );
+
+        }
+
+
+
+
+      }catch(...)//Impossible position
+      {
+
+      }
+
+      return Result;
+    }
     //---------------------------------------------------------------------------------------------
     /** Return a reference to the Peaks vector */
     std::vector<Peak> & PeaksWorkspace::getPeaks()

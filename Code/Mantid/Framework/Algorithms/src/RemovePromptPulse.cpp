@@ -137,39 +137,42 @@ namespace { // anonymous namespace begin
     getTofRange(inputWS, tmin, tmax);
     g_log.information() << "Data tmin=" << tmin << ", tmax=" << tmax << ", period=" << period << " microseconds\n";
 
-    // get the first prompt pulse
-    double left = 0.;
-    while (left < tmin)
+    // calculate the times for the prompt pulse
+    std::vector<double> pulseTimes = this->calculatePulseTimes(tmin, tmax, period);
+    if (pulseTimes.empty())
     {
-      left += period;
+        g_log.notice() << "Not applying filter since prompt pulse is not in data range (period = "
+                       << period << ")\n";
+        setProperty("OutputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(inputWS));
+        return;
     }
-    if (left > tmax)
+    g_log.information() << "Calculated prompt pulses at ";
+    for (size_t i = 0; i < pulseTimes.size(); ++i)
+        g_log.information() << pulseTimes[i] << " ";
+    g_log.information() << " microseconds\n";
+
+    MatrixWorkspace_sptr outputWS;
+    for (auto left = pulseTimes.begin(); left != pulseTimes.end(); ++left)
     {
-      g_log.notice() << "Not applying filter since prompt pulse is not in data range (" << left << " > " << tmax
-                      << " microseconds, period = " << period << ")\n";
-      setProperty("OutputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(inputWS));
-      return;
+      double right = (*left) + width;
+
+      g_log.notice() << "Filtering tmin=" << *left << ", tmax=" << right << " microseconds\n";
+
+      // run maskbins to do the work on the first prompt pulse
+      IAlgorithm_sptr algo = this->createChildAlgorithm("MaskBins");
+      if (outputWS)
+        algo->setProperty<MatrixWorkspace_sptr>("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(outputWS));
+      else
+        algo->setProperty<MatrixWorkspace_sptr>("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(inputWS));
+      algo->setProperty<double>("XMin", *left);
+      algo->setProperty<double>("XMax", right);
+      algo->executeAsChildAlg();
+
+      // copy over the output workspace
+      outputWS = algo->getProperty("OutputWorkspace");
     }
-    double right = left + width;
-    g_log.notice() << "Filtering tmin=" << left << ", tmax=" << right << " microseconds\n";
 
-    // run maskbins to do the work on the first prompt pulse
-    IAlgorithm_sptr algo = this->createChildAlgorithm("MaskBins");
-    algo->setProperty<MatrixWorkspace_sptr>("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(inputWS));
-    algo->setProperty<double>("XMin", left);
-    algo->setProperty<double>("XMax", right);
-    algo->executeAsChildAlg();
-
-    // copy over the output workspace
-    MatrixWorkspace_sptr outputWS = algo->getProperty("OutputWorkspace");
     setProperty("OutputWorkspace", outputWS);
-
-    // verify that there isn't another window to deal with
-    if (left + period < tmax)
-    {
-      g_log.warning() << "There is more than one prompt pulse possible in the data, only the first was filtered "
-                      << "(at TOF = " << left << ", not " << (left+period) << ")\n";
-    }
   }
 
   double RemovePromptPulse::getFrequency(const API::Run& run)
@@ -190,6 +193,32 @@ namespace { // anonymous namespace begin
 
     // give up
     return Mantid::EMPTY_DBL();
+  }
+
+  /**
+   * Calculate when all prompt pulses might be between the supplied times.
+   * @param tmin The minimum time-of-flight measured.
+   * @param tmax The maximum time-of-flight measured.
+   * @param period The accelerator period.
+   * @return A vector of all prompt pulse times possible within the time-of-flight range.
+   */
+  std::vector<double> RemovePromptPulse::calculatePulseTimes(const double tmin, const double tmax, const double period)
+  {
+    std::vector<double> times;
+    double time = 0.;
+
+    // find when the first prompt pulse would be
+    while (time < tmin)
+      time += period;
+
+    // calculate all times possible
+    while (time < tmax)
+    {
+      times.push_back(time);
+      time += period;
+    }
+
+    return times;
   }
 } // namespace Mantid
 } // namespace Algorithms

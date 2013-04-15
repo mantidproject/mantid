@@ -277,8 +277,7 @@ IAlgorithm* FrameworkManagerImpl::exec(const std::string& algName, const std::st
 IAlgorithm_sptr FrameworkManagerImpl::exec(const std::string& algorithmName, int count, ...)
 {
   // Create the algorithm
-  Mantid::API::IAlgorithm_sptr alg;
-  alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(algorithmName, -1);
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName, -1);
   alg->initialize();
   if (!alg->isInitialized())
     throw std::runtime_error(algorithmName + " was not initialized.");

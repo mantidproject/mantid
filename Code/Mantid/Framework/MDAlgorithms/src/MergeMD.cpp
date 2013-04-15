@@ -167,6 +167,24 @@ namespace MDAlgorithms
     // Perform the initial box splitting
     out->splitBox();
 
+    // copy experiment infos
+     uint16_t nExperiments(0);
+     if(m_workspaces.size()>std::numeric_limits<uint16_t>::max())
+        throw std::invalid_argument("currently we can not combine more then 65535 experiments");
+     else
+        nExperiments = static_cast<uint16_t>(m_workspaces.size());
+
+     for (uint16_t i=0; i < nExperiments; i++)
+     {
+         uint16_t nWSexperiments = m_workspaces[i]->getNumExperimentInfo();
+         for(uint16_t j=0;j<nWSexperiments;j++)
+         {
+            API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(m_workspaces[i]->getExperimentInfo(j)->cloneExperimentInfo());
+            out->addExperimentInfo(ei);
+         }
+     }
+
+ 
   }
 
 

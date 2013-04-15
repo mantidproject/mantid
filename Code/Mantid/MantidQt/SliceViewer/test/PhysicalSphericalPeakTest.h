@@ -60,6 +60,33 @@ public:
     TSM_ASSERT("Should NOT be viewable if a slice point > r is set.", !physicalPeak.isViewablePeak());
   }
 
+  void test_handleBackgroundOuterRadius_zero()
+  {
+    V3D origin(0, 0, 0);
+    const double radius = 1;
+    const double innerBackgroundRadius = 2;
+    const double outerBackgroundRadius = 0; // This can happen using IntegratePeaksMD.
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
+
+    const double slicePoint = innerBackgroundRadius;
+    physicalPeak.setSlicePoint(slicePoint);
+
+    // Scale 1:1 on both x and y for simplicity.
+    const double windowHeight = 1;
+    const double windowWidth = 1;
+    const double viewHeight = 1;
+    const double viewWidth = 1;
+
+    physicalPeak.showBackgroundRadius(true);
+    auto drawObject = physicalPeak.draw(windowHeight, windowWidth, viewHeight, viewWidth);
+
+    // The Return object should be initialized to zero in every field.
+    TS_ASSERT_EQUALS(drawObject.backgroundOuterRadiusX, drawObject.backgroundInnerRadiusX);
+    TS_ASSERT_EQUALS(drawObject.backgroundOuterRadiusY, drawObject.backgroundInnerRadiusY);
+
+    TSM_ASSERT("Should be viewable since slice point == Background Inner Radius.", physicalPeak.isViewableBackground());
+  }
+
   void test_draw_defaults()
   {
     V3D origin(0, 0, 0);

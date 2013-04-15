@@ -42,6 +42,7 @@ Moves the detectors in an instrument to optimize the maximum intensity of each d
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -115,11 +116,11 @@ namespace Algorithms
  */
 
   void DiffractionEventCalibrateDetectors::movedetector(double x, double y, double z, double rotx, double roty, double rotz,
-      std::string detname, MatrixWorkspace_sptr inputW)
+      std::string detname, EventWorkspace_sptr inputW)
   {
 
     IAlgorithm_sptr alg1 = createChildAlgorithm("MoveInstrumentComponent");
-    alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
+    alg1->setProperty<EventWorkspace_sptr>("Workspace", inputW);
     alg1->setPropertyValue("ComponentName", detname);
     //Move in cm for small shifts
     alg1->setProperty("X", x*0.01);
@@ -130,7 +131,7 @@ namespace Algorithms
 
 
     IAlgorithm_sptr algx = createChildAlgorithm("RotateInstrumentComponent");
-    algx->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
+    algx->setProperty<EventWorkspace_sptr>("Workspace", inputW);
     algx->setPropertyValue("ComponentName", detname);
     algx->setProperty("X", 1.0);
     algx->setProperty("Y", 0.0);
@@ -141,7 +142,7 @@ namespace Algorithms
 
 
     IAlgorithm_sptr algy = createChildAlgorithm("RotateInstrumentComponent");
-    algy->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
+    algy->setProperty<EventWorkspace_sptr>("Workspace", inputW);
     algy->setPropertyValue("ComponentName", detname);
     algy->setProperty("X", 0.0);
     algy->setProperty("Y", 1.0);
@@ -151,7 +152,7 @@ namespace Algorithms
     algy->executeAsChildAlg();
 
     IAlgorithm_sptr algz = createChildAlgorithm("RotateInstrumentComponent");
-    algz->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
+    algz->setProperty<EventWorkspace_sptr>("Workspace", inputW);
     algz->setPropertyValue("ComponentName", detname);
     algz->setProperty("X", 0.0);
     algz->setProperty("Y", 0.0);
@@ -181,7 +182,7 @@ namespace Algorithms
       std::string groupWSName)
   {
 
-    MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
+    EventWorkspace_sptr inputW = boost::dynamic_pointer_cast<EventWorkspace>
             (AnalysisDataService::Instance().retrieve(inname));
 
     bool debug = true;
@@ -191,7 +192,7 @@ namespace Algorithms
     if (debug) std::cout << tim << " to movedetector()" << std::endl;
 
     IAlgorithm_sptr alg3 = createChildAlgorithm("ConvertUnits");
-    alg3->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+    alg3->setProperty<EventWorkspace_sptr>("InputWorkspace", inputW);
     alg3->setPropertyValue("OutputWorkspace", outname);
     alg3->setPropertyValue("Target","dSpacing");
     alg3->executeAsChildAlg();

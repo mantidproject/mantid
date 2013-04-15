@@ -29,6 +29,28 @@ public:
     TS_ASSERT_THROWS_NOTHING(ParameterMap());
   }
 
+  void testParameter_Name_Functions()
+  {
+     // This should be the only test to explicitly use the string values
+     // Other tests can use the functions tested here.
+     TS_ASSERT_EQUALS(ParameterMap::pDouble(),"double");
+     TS_ASSERT_EQUALS(ParameterMap::pInt(),"int");
+     TS_ASSERT_EQUALS(ParameterMap::pBool(),"bool");
+     TS_ASSERT_EQUALS(ParameterMap::pString(),"string");
+     TS_ASSERT_EQUALS(ParameterMap::pV3D(),"V3D");
+     TS_ASSERT_EQUALS(ParameterMap::pQuat(),"Quat");
+
+     TS_ASSERT_EQUALS(ParameterMap::pos(),"pos");
+     TS_ASSERT_EQUALS(ParameterMap::posx(),"x");
+     TS_ASSERT_EQUALS(ParameterMap::posy(),"y");
+     TS_ASSERT_EQUALS(ParameterMap::posz(),"z");
+
+     TS_ASSERT_EQUALS(ParameterMap::rot(),"rot");
+     TS_ASSERT_EQUALS(ParameterMap::rotx(),"rotx");
+     TS_ASSERT_EQUALS(ParameterMap::roty(),"roty");
+     TS_ASSERT_EQUALS(ParameterMap::rotz(),"rotz");
+  }
+
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In()
   {
     // Add a parameter for the first component of the instrument
@@ -37,8 +59,10 @@ public:
     const double value(5.1);
     ParameterMap pmap;
     TS_ASSERT_EQUALS(pmap.size(), 0);
+    TSM_ASSERT("Newly created parameter map should be empty",pmap.empty())
     pmap.addDouble(comp.get(), name, value);
     TS_ASSERT_EQUALS(pmap.size(), 1);
+    TSM_ASSERT("Populated parameter map should not be empty",!pmap.empty())
     // Check that the correct one went in
     Parameter_sptr fetchedValue = pmap.get(comp.get(), name);
     TS_ASSERT(fetchedValue);
@@ -76,11 +100,11 @@ public:
   {
     ParameterMap pmap;
     const std::string name("MyValue");
-    const std::string type("int");
+    const std::string type(ParameterMap::pInt());
     const int value(1);
-    pmap.add<int>("int", m_testInstrument.get(),name,value);
-    TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, "int"), true);
-    TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, "double"), false);
+    pmap.add<int>(type, m_testInstrument.get(),name,value);
+    TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pInt()), true);
+    TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pDouble()), false);
   }
 
   void testParameter_Name_Matching_Is_Case_Insensitive()
@@ -134,6 +158,7 @@ public:
     TS_ASSERT_EQUALS(pmap.size(), 2);
     pmap.clear();
     TS_ASSERT_EQUALS(pmap.size(), 0);
+    TSM_ASSERT("Cleared parameter map should be empty",pmap.empty())
   }
 
     void test_lookup_via_type_returns_null_if_fails()
@@ -146,7 +171,7 @@ public:
     pmap.addBool(comp.get(), "A", true);
     TS_ASSERT_EQUALS(pmap.size(), 1);
     // Try to find double type parameters, of which there should be none.
-    Parameter_sptr fetchedValue = pmap.getByType(comp.get(), "double");
+    Parameter_sptr fetchedValue = pmap.getByType(comp.get(), ParameterMap::pDouble());
     TSM_ASSERT("Should not be able to find a double type parameter", fetchedValue == NULL);
   }
 
@@ -162,13 +187,13 @@ public:
     TS_ASSERT_EQUALS(pmap.size(), 2);
    
     // Test the ability to correctly fetch the double argument by type.
-    Parameter_sptr fetchedValue1 = pmap.getByType(comp.get(), "double");
+    Parameter_sptr fetchedValue1 = pmap.getByType(comp.get(), ParameterMap::pDouble());
     TS_ASSERT(fetchedValue1);
     TS_ASSERT_EQUALS("A", fetchedValue1->name());
     TS_ASSERT_DELTA(1.2, fetchedValue1->value<double>(), DBL_EPSILON);
 
     // Test the ability to correctly fetch the bool argument by type.
-    Parameter_sptr fetchedValue2 = pmap.getByType(comp.get(), "bool");
+    Parameter_sptr fetchedValue2 = pmap.getByType(comp.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue2);
     TS_ASSERT_EQUALS("B", fetchedValue2->name());
     TS_ASSERT_EQUALS(true, fetchedValue2->value<bool>());
@@ -183,10 +208,10 @@ public:
     pmap.addBool(component.get(), "A", true);
 
     //Find it via the component
-    Parameter_sptr fetchedValue = pmap.getRecursiveByType(component.get(), "bool");
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(component.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != NULL);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
-    TS_ASSERT_EQUALS("bool", fetchedValue->type());
+    TS_ASSERT_EQUALS(ParameterMap::pBool(), fetchedValue->type());
     TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
   }
 
@@ -200,10 +225,10 @@ public:
     pmap.addBool(parentComponent.get(), "A", true);
 
     //Find it via the child 
-    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), "bool");
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != NULL);
     TS_ASSERT_EQUALS("A", fetchedValue->name());
-    TS_ASSERT_EQUALS("bool", fetchedValue->type());
+    TS_ASSERT_EQUALS(ParameterMap::pBool(), fetchedValue->type());
     TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
   }
 
@@ -220,10 +245,10 @@ public:
     pmap.addBool(parentComponent.get(), "B", true);
 
     //Find it via the child 
-    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), "bool");
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), ParameterMap::pBool());
     TS_ASSERT(fetchedValue != NULL);
     TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority", "A", fetchedValue->name());
-    TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority","bool", fetchedValue->type());
+    TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority",ParameterMap::pBool(), fetchedValue->type());
     TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority",false, fetchedValue->value<bool>());
   }
 

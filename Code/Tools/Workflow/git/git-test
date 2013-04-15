@@ -27,8 +27,10 @@ CMD_NAME="test"
 PRODUCTION_BRANCH="master"
 # Branch for buildserver support
 BUILDER_BRANCH="develop"
+# Config section to store key
+BRANCH_CFG_SECT=mantid.workflow
 # Config key to store tested branch
-BRANCH_CFG_KEY=mantid.workflow.testbranch
+BRANCH_CFG_KEY=${BRANCH_CFG_SECT}.testbranch
 
 # Set git to merge silently if everything succceeded
 # See http://git-blame.blogspot.co.uk/2012/02/anticipating-git-1710.html
@@ -207,8 +209,7 @@ end_testing() {
     fi
 
     # Clear saved config
-    git config --unset ${BRANCH_CFG_KEY}
-
+    remove_config_value ${BRANCH_CFG_KEY}
 }
 
 review_changes() {

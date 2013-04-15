@@ -25,7 +25,9 @@ This algorithm is designed to work with other algorithms to do Le Bail fit.  The
 
 *WIKI*"""
 from mantid.api import PythonAlgorithm, registerAlgorithm, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
-from mantid.kernel import Direction, StringListValidator
+from mantid.kernel import Direction, StringListValidator, FloatBoundedValidator
+
+import mantid.simpleapi as api
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
@@ -58,7 +60,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
-        self.declareProperty("LatticeConstant", 10.0, "Lattice constant for cubic crystal.")
+        self.declareProperty("LatticeConstant", -0.0, validator=FloatBoundedValidator(lower=1.0E-9), doc="Lattice constant for cubic crystal.")
 
         self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output), 
                 "Name of Table Workspace Containing Peak Parameters From .irf File.")
@@ -71,8 +73,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
     def PyExec(self):
         """ Main Execution Body
         """
-        # 1. Setup output workspaces
-        paramWS = WorkspaceFactory.createTable()
+        # 1. Peak profile parameter workspace
+        irffilename = self.getPropertyValue("FullprofParameterFile")
+        paramWS = self.createPeakParameterWorkspace(irffilename)
         self.setProperty("InstrumentParameterWorkspace", paramWS)
 
         hklWS = WorkspaceFactory.createTable()
@@ -81,7 +84,6 @@ class CreateLeBailFitInput(PythonAlgorithm):
         # 2. Get Other Properties
         instrument = self.getProperty("Instrument")
         reflectionfilename = self.getPropertyValue("ReflectionsFile")
-        irffilename = self.getPropertyValue("FullprofParameterFile")
 
         # 3. Import reflections list
         hkldict = self.importFullProfHKLFile(reflectionfilename)
@@ -91,11 +93,8 @@ class CreateLeBailFitInput(PythonAlgorithm):
             for hkl in hkllist:
                 print "Import Peak (%d, %d, %d): FWHM = %f" % (hkl[0], hkl[1], hkl[2], hkldict[hkl]["FWHM"])
 
-        # 4. Import parameter file (.irf)
-        peakparamsdict = self.parseFullprofPeakProfileFile(irffilename)
-
         # 5. Set up the table workspaces 
-        self.createPeakParameterWorkspace(peakparamsdict, paramWS)
+
         self.createReflectionWorkspace(hkldict, hklWS)
 
         return
@@ -180,10 +179,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         return hkldict
 
-    def parseFullprofPeakProfileFile(self, irffilename):
-        """ Parse Fullprof resolution .irf file
-        (It is the same function as what in ConvertInstrumentFile(),
-         except the key word in the output dictionary.)
+
+    def createPeakParameterWorkspace(self, irffilename):
+        """ Create TableWorkspace by importing Fullprof .irf file
 
         Note:
         1. Sig-0, Sig-1 and Sig-2 in .irf file are actually the square of sig0, sig1 and sig2
@@ -193,176 +191,40 @@ class CreateLeBailFitInput(PythonAlgorithm):
          - irffilename:  Resolution file (.irf)  Can be single bank or multiple bank
     
         Output:
-         - dictionary: [bank][parameter name][value]
+         - tableworkspace
         """
-        import math
+        # 1. Import
+        irfwsname = irffilename.split("/")[-1]
+        irfws = api.LoadFullprofResolution(Filename=irffilename, OutputWorkspace=irfwsname)
 
-        # 1. Import data
-        try:
-            irffile = open(irffilename, "r")
-            rawlines = irffile.readlines()
-            irffile.close()
-        except IOError:
-            print "Fullprof resolution file %s cannot be read" % (irffilename)
-            raise NotImplementedError("Input resolution file error!")
-    
-        lines = []
-        for line in rawlines:
-            cline = line.strip()
-            if len(cline) > 0:
-                lines.append(cline)
-        # ENDFOR
-    
-        # 2. Parse
-        mdict = {}
-        mdict["title"] = lines[0]
-        bank = -1
-        for il in xrange(0, len(lines)):
-            line = lines[il]
-            if line.count("Bank") > 0:
-                # Line with bank
-                terms = line.split("Bank")[1].split()
-                bank = int(terms[0])
-                mdict[bank] = {}
-                
-                if len(terms) >= 4 and terms[1] == "CWL":
-                    # center wave length
-                    cwl = float(terms[3].split("A")[0])
-                    mdict[bank]["CWL"] = cwl
-                # ENDIF: CWL
-            elif line[0] != '!':
-                # Not Comment line
-                if line.startswith("NPROF"):
-                    # Profile Type
-                    profiletype = int(line.split("NPROF")[1])
-    
-                    mdict[bank]["Profile"] = profiletype
-    
-                elif line.startswith("TOFRG"):
-                    # Tof-min(us)    step      Tof-max(us)
-                    terms = line.split()
-                    mdict[bank]["tof-min"] = float(terms[1])
-                    mdict[bank]["tof-max"] = float(terms[3])
-                    mdict[bank]["step"]    = float(terms[2])
-    
-                elif line.startswith("D2TOF"):
-                    # Dtt1      Dtt2         Zero 
-                    terms = line.split()
-                    mdict[bank]["Dtt1"] = float(terms[1])
-                    if len(terms) == 3:
-                        mdict[bank]["Dtt2"] = float(terms[2])
-                        mdict[bank]["Zero"] = float(terms[3])
-                    else:
-                        mdict[bank]["Dtt2"] = 0.0
-                        mdict[bank]["Zero"] = 0.0
-    
-                elif line.startswith("ZD2TOF"):
-                    #  Zero   Dtt1  
-                    terms = line.split()
-                    mdict[bank]["Zero"] = float(terms[1])
-                    mdict[bank]["Dtt1"] = float(terms[2])
-                    mdict[bank]["Dtt2"] = 0.0
-    
-                elif line.startswith("D2TOT"):
-                    # Dtt1t       Dtt2t    x-cross    Width   Zerot
-                    terms = line.split()
-                    mdict[bank]["Dtt1t"] = float(terms[1])
-                    mdict[bank]["Dtt2t"] = float(terms[2])
-                    mdict[bank]["Tcross"] = float(terms[3])
-                    mdict[bank]["Width"] = float(terms[4])
-                    mdict[bank]["Zerot"] = float(terms[5])
-    
-                elif line.startswith("ZD2TOT"):
-                    # Zerot    Dtt1t       Dtt2t    x-cross    Width
-                    terms = line.split()
-                    mdict[bank]["Zerot"] = float(terms[1])
-                    mdict[bank]["Dtt1t"] = float(terms[2])
-                    mdict[bank]["Dtt2t"] = float(terms[3])
-                    mdict[bank]["Tcross"] = float(terms[4])
-                    mdict[bank]["Width"] = float(terms[5])
-    
-                elif line.startswith("TWOTH"):
-                    # TOF-TWOTH of the bank
-                    terms = line.split()
-                    mdict[bank]["twotheta"] = float(terms[1])
-    
-                elif line.startswith("SIGMA"):
-                    # Gam-2     Gam-1     Gam-0 
-                    terms = line.split()
-                    mdict[bank]["Sig2"] = math.sqrt(abs(float(terms[1])))
-                    mdict[bank]["Sig1"] = math.sqrt(abs(float(terms[2])))
-                    mdict[bank]["Sig0"] = math.sqrt(abs(float(terms[3])))
-    
-                elif line.startswith("GAMMA"):
-                    # Gam-2     Gam-1     Gam-0 
-                    terms = line.split()
-                    mdict[bank]["Gam2"] = float(terms[1])
-                    mdict[bank]["Gam1"] = float(terms[2])
-                    mdict[bank]["Gam0"] = float(terms[3])
-    
-                elif line.startswith("ALFBE"):
-                    # alph0       beta0       alph1       beta1 
-                    terms = line.split()
-                    mdict[bank]["Alph0"] = float(terms[1])
-                    mdict[bank]["Beta0"] = float(terms[2])
-                    mdict[bank]["Alph1"] = float(terms[3])
-                    mdict[bank]["Beta1"] = float(terms[4])
-    
-                elif line.startswith("ALFBT"):
-                    # alph0t       beta0t       alph1t       beta1t 
-                    terms = line.split()
-                    mdict[bank]["Alph0t"] = float(terms[1])
-                    mdict[bank]["Beta0t"] = float(terms[2])
-                    mdict[bank]["Alph1t"] = float(terms[3])
-                    mdict[bank]["Beta1t"] = float(terms[4])
-
-                else:
-                    pass
-            
-            else:
-                # COMMENT Line
-                pass
-            # ENDIF: Line type
-        # ENDFOR
-
-        self.mdict = mdict
+        # 2. Create an empty workspace
+        tablews = WorkspaceFactory.createTable()
         
-        print "[CreateLeBailFit] Import Fullprof resolution file %s for bank %d successfully. " % (irffilename, bank)
-        #            print "Import .irf File.  Bank = %d" % (bank)
-
-   
-        return mdict
-
-
-    def createPeakParameterWorkspace(self, paramdict, tablews):
-        """ Create TableWorkspace containing peak parameters
-        """
-        # 1. Create an empty workspace and set the column
-        tablews.addColumn("str", "Name")
+        tablews.addColumn("str",    "Name")
         tablews.addColumn("double", "Value")
-        tablews.addColumn("str", "FitOrTie")
+        tablews.addColumn("str",    "FitOrTie")
         tablews.addColumn("double", "Min")
         tablews.addColumn("double", "Max")
         tablews.addColumn("double", "StepSize")
 
-        # 2. Add value
-        bankproperty = self.getProperty("Bank")
-        bank = bankproperty.value
-        if paramdict.has_key(bank) is False: 
-            print "Bank Type: ", type(bank)
-            raise NotImplementedError("Bank %s does not exist in input .irf file." % (bank))
+        numrows = irfws.rowCount()
+        for ir in xrange(numrows):
+            tablews.addRow(["Parameter", 0.0, "tie", -1.0E200, 1.0E200, 1.0]) 
 
-        for parname in sorted(paramdict[bank].keys()):
-            if _OUTPUTLEVEL == "INFORMATION": 
-                print "Insert parameter %s , value = %f " % (parname, paramdict[bank][parname])
-            tablews.addRow([parname, paramdict[bank][parname], "f", -1.0E100, 1.0E100, 1.0])
-        # ENDFOR
+        # 3. Copy between 2 workspace
+        for ir in xrange(numrows):
+            tablews.setCell(ir, 0, irfws.cell(ir, 0))
+            tablews.setCell(ir, 1, irfws.cell(ir, 1))
 
-        # 3. Add lattice constant
-        latticeconstant = self.getProperty("LatticeConstant").value
-        tablews.addRow(["LatticeConstant", latticeconstant, "t", 0.1, 1.0E5, 0.1])
+        # 4. Extra Lattice parameter
+        latticepar = float(self.getPropertyValue("LatticeConstant"))
+        tablews.addRow(["LatticeConstant", latticepar,  "tie", -1.0E200, 1.0E200, 1.0]) 
 
+        # 5. Clean
+        api.DeleteWorkspace(Workspace=irfwsname)
+        
         return tablews
+
 
     def createReflectionWorkspace(self, hkldict, tablews):
         """ Create TableWorkspace containing reflections and etc. 

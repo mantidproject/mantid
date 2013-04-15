@@ -85,6 +85,8 @@ signals:
     void rotate(int x, int y);
     /// Translate
     void translate(int x, int y);
+    /// Finish movement
+    void finish();
 
 private:
     bool m_isButtonPressed;

@@ -33,31 +33,35 @@
 #include <QPainter>
 #include <algorithm>
 
+/**
+ * The position in this list must match the name in the
+ * defaultColorNames() method below!!
+ */
 const QColor ColorBox::colors[] = {
-    QColor(Qt::black),
-    QColor(Qt::red),
-    QColor(Qt::green),
-    QColor(Qt::blue),
-    QColor(Qt::cyan),
-    QColor(Qt::magenta),
-    QColor(Qt::yellow),
-    QColor(Qt::darkYellow),
-    QColor(Qt::darkBlue),
-    QColor(Qt::darkMagenta),
-    QColor(Qt::darkRed),
-    QColor(Qt::darkGreen),
-    QColor(Qt::darkCyan),
-    QColor("#0000A0"),
-    QColor("#FF8000"),
-    QColor("#8000FF"),
-    QColor("#FF0080"),
-    QColor(Qt::white),
-    QColor(Qt::lightGray),
-    QColor(Qt::gray),
-    QColor("#FFFF80"),
-    QColor("#80FFFF"),
-    QColor("#FF80FF"),
-    QColor(Qt::darkGray),
+    QColor(Qt::black), //black
+    QColor(Qt::red), //red
+    QColor(Qt::green), //green
+    QColor(Qt::blue), //blue
+    QColor(Qt::cyan), //cyan
+    QColor(Qt::magenta), //magenta
+    QColor("#FF8000"), //orange
+    QColor(Qt::darkMagenta), //purple
+    QColor(Qt::darkGreen), //olive
+    QColor(Qt::darkBlue), //navy
+    QColor(Qt::darkRed), // wine
+    QColor(Qt::darkCyan), //dark cyan
+    QColor("#0000A0"), //royal
+    QColor("#8000FF"), //violet
+    QColor("#FF0080"), //pink
+    QColor(Qt::white), //white
+    QColor(Qt::lightGray), //light gray
+    QColor(Qt::gray), //gray
+    QColor("#FFFF80"), //light yellow
+    QColor("#80FFFF"), // light cyan
+    QColor("#FF80FF"), // light magenta
+    QColor(Qt::darkGray), //dark gray
+    QColor(Qt::yellow), //yellow
+    QColor(Qt::darkYellow), //dark yellow
 };
 
 ColorBox::ColorBox(QWidget *parent) : QComboBox(parent)
@@ -175,21 +179,20 @@ int ColorBox::numPredefinedColors()
 
 QStringList ColorBox::defaultColorNames()
 {
-  QStringList color_names = QStringList() << tr( "black" );
+  QStringList color_names = QStringList();
+  color_names << tr( "black" );
   color_names << tr( "red" );
   color_names << tr( "green" );
   color_names << tr( "blue" );
   color_names << tr( "cyan" );
   color_names << tr( "magenta" );
-  color_names << tr( "yellow" );
-  color_names << tr( "dark yellow" );
-  color_names << tr( "navy" );
+  color_names << tr( "orange" );
   color_names << tr( "purple" );
-  color_names << tr( "wine" );
   color_names << tr( "olive" );
+  color_names << tr( "navy" );
+  color_names << tr( "wine" );
   color_names << tr( "dark cyan" );
   color_names << tr( "royal" );
-  color_names << tr( "orange" );
   color_names << tr( "violet" );
   color_names << tr( "pink" );
   color_names << tr( "white" );
@@ -199,6 +202,9 @@ QStringList ColorBox::defaultColorNames()
   color_names << tr( "light cyan" );
   color_names << tr( "light magenta" );
   color_names << tr( "dark gray" );
+  color_names << tr( "yellow" );
+  color_names << tr( "dark yellow" );
+
   return color_names;
 }
 

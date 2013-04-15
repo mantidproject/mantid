@@ -256,7 +256,7 @@ void AbsorptionCorrection::retrieveBaseProperties()
   }
   else  //Save input in Sample with wrong atomic number and name
   {
-        NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+        NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
                         0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
     Material *mat = new Material("SetInAbsorptionCorrection", *neutron, rho);
     m_inputWS->mutableSample().setMaterial(*mat);

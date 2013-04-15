@@ -15,16 +15,16 @@ using std::string;
 const string BASEURL("qthelp://org.mantidproject/doc/");
 
 /**
- * Default constructor.
+ * \param url The url to open the window with. To use default supply an empty string.
  */
-HelpWindow::HelpWindow() :
+HelpWindow::HelpWindow(const std::string &url) :
     m_collectionFile(""),
     m_cacheFile(""),
     m_assistantExe(""),
     m_log(Mantid::Kernel::Logger::get("HelpWindow"))
 {
     this->determineFileLocs();
-    this->start();
+    this->start(url);
 }
 
 /// Destructor does nothing.
@@ -42,7 +42,7 @@ HelpWindow::~HelpWindow()
 void HelpWindow::showURL(const string &url)
 {
     // make sure the process is going
-    this->start();
+    this->start(url);
 
     m_log.debug() << "open help url \"" << url << "\"\n";
     string temp("setSource " + url + "\n");
@@ -85,8 +85,11 @@ void HelpWindow::showFitFunction(const std::string &name)
  * This will only do something if the browser is not already
  * running. Due to a bug in qt 4.8.1 this will delete the
  * cache file every time the browser is started.
+ *
+ * @param The url to show at startup. This is ignored if it is
+ * already started.
  */
-void HelpWindow::start()
+void HelpWindow::start(const std::string &url)
 {
     // check if it is already started
     if (this->isRunning())
@@ -108,6 +111,9 @@ void HelpWindow::start()
     args << QLatin1String("-collectionFile")
          << QLatin1String(m_collectionFile.c_str())
          << QLatin1String("-enableRemoteControl");
+    if (!url.empty())
+        args << QLatin1String("-showUrl")
+             << QLatin1String(url.c_str());
     m_process->start(QLatin1String(m_assistantExe.c_str()), args);
     if (!m_process->waitForStarted())
         return;

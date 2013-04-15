@@ -369,8 +369,8 @@ namespace DataHandling
       workspace->setX(wi, m_bins);
       MantidVec& y = workspace->dataY( wi );
       MantidVec& e = workspace->dataE( wi );
-      workspace->getSpectrum(wi)->setSpectrumNo(index+1);
-      size_t shift = i * (m_numberOfBins + 1);
+      workspace->getSpectrum(wi)->setSpectrumNo(index + static_cast<specid_t>(i));
+      size_t shift = i * (m_numberOfBins + 1) + 1;
       y.assign( dataBuffer.begin() + shift, dataBuffer.begin() + shift + y.size() );
       std::transform( y.begin(), y.end(), e.begin(), dblSqrt );
     }

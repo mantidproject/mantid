@@ -31,6 +31,7 @@
         <file>LoadFile.png</file>
     </qresource>
     <qresource prefix="/PickTools">
+        <file>zoom.png</file>
         <file>selection-tube.png</file>
         <file>selection-box.png</file>
         <file>selection-circle.png</file>

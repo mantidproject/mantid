@@ -322,13 +322,13 @@ namespace DataHandling
       std::string accumName = this->getPropertyValue("AccumulationWorkspace");
 
       // Check that no other MonitorLiveData thread is running with the same settings
-      auto it = AlgorithmManager::Instance().algorithms().begin();
-      for (; it != AlgorithmManager::Instance().algorithms().end(); it++)
+      auto runningLiveAlgorithms = AlgorithmManager::Instance().runningInstancesOf("MonitorLiveData");
+      auto runningAlgs_it = runningLiveAlgorithms.begin();
+      while( runningAlgs_it != runningLiveAlgorithms.end() )
       {
-        IAlgorithm_sptr alg = *it;
+        IAlgorithm_const_sptr alg = *runningAlgs_it;
         // MonitorLiveData thread that is running, except THIS one.
-        if (alg->name() == "MonitorLiveData" && (alg->getAlgorithmID() != this->getAlgorithmID())
-            && alg->isRunning())
+        if ( alg->getAlgorithmID() != this->getAlgorithmID() )
         {
           if (!accumName.empty() && alg->getPropertyValue("AccumulationWorkspace") == accumName)
             out["AccumulationWorkspace"] += "Another MonitorLiveData thread is running with the same AccumulationWorkspace.\n"
@@ -337,6 +337,7 @@ namespace DataHandling
             out["OutputWorkspace"] += "Another MonitorLiveData thread is running with the same OutputWorkspace.\n"
                 "Please specify a different OutputWorkspace name.";
         }
+        ++runningAlgs_it;
       }
     }
 

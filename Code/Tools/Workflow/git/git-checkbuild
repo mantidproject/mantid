@@ -67,8 +67,11 @@ checkargs() {
 
 # Called when we are starting from a clean slate sitting on the feature branch
 start_on_feature() {
-    mergebranch=$(current_branch)
+    # We're starting again so clear out previous saved setting
+    remove_config_value ${MERGENAME_CFG_KEY}
+
     # No need to be careful about the state of develop so kill the local branch and recreate it
+    mergebranch=$(current_branch)
     echo "Starting from branch ${mergebranch}."
 
     local_branch_exists ${BUILD_BRANCH}
@@ -90,8 +93,8 @@ start_on_feature() {
 	echo "When you have resolved the conflicts with 'git add' then 'git commit' rerun this command from ${BUILD_BRANCH}."
 	exit 1
     else
-	# Remove any stored name
-	git config --unset ${MERGE_CFG_KEY} 2> /dev/null
+	# Remove any stored name if there was one
+	remove_config_value ${MERGENAME_CFG_KEY}
     fi
     
     # Publish
@@ -153,7 +156,7 @@ start_on_develop() {
     fi
 
     # Remove any stored name
-    git config --unset ${MERGE_CFG_KEY} 2> /dev/null
+    remove_config_value ${MERGENAME_CFG_KEY}
 }
 
 main() {
