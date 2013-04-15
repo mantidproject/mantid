@@ -9,15 +9,22 @@
 
 #include "MantidAlgorithms/FilterEvents.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSplitter.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+
+using namespace std;
 
 class FilterEventsTest : public CxxTest::TestSuite
 {
@@ -68,21 +75,18 @@ public:
   {
     // 1. Create EventWorkspace and SplittersWorkspace
     DataObjects::EventWorkspace_sptr inpWS = createEventWorkspace();
-    inpWS->setName("Test02");
-    inpWS->setTitle("Test02");
+    AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
     DataObjects::SplittersWorkspace_sptr splws = createSplitter();
-    splws->setName("Splitter02");
-    splws->setTitle("Splitter02");
+    AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
     FilterEvents filter;
     filter.initialize();
 
     // 2. Set properties
-    filter.setProperty("InputWorkspace", inpWS);
+    filter.setProperty("InputWorkspace", "Test02");
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
-    filter.setProperty("SplitterWorkspace", splws);
-    filter.setProperty("DetectorCalibrationFile", "");
+    filter.setProperty("SplitterWorkspace", "Splitter02");
 
     // 3. Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -123,12 +127,80 @@ public:
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(), runstart_i64+pulsedt*4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt*6/1000), 1.0E-4);
 
+    // 5. Clean up
+    AnalysisDataService::Instance().remove("Test02");
+    AnalysisDataService::Instance().remove("Splitter02");
+
     return;
   }
 
-  void ToImplement_test_FilterWithCorrection()
+  //----------------------------------------------------------------------------------------------
+  /**  Filter test with TOF correction
+    */
+  void test_FilterWithCorrection()
   {
+    // 1. Create EventWorkspace and SplittersWorkspace
+    DataObjects::EventWorkspace_sptr inpWS = createEventWorkspace();
+    AnalysisDataService::Instance().addOrReplace("EventData", inpWS);
 
+    DataObjects::SplittersWorkspace_sptr splws = createSplitter();
+    AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
+
+    TableWorkspace_sptr timecorrws = createTimeCorrectionTable(inpWS);
+    AnalysisDataService::Instance().addOrReplace("TimeCorrectionTableX", timecorrws);
+    TS_ASSERT_EQUALS(timecorrws->rowCount(), inpWS->getNumberHistograms());
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // 2. Set properties
+    TS_ASSERT_THROWS_NOTHING(filter.setProperty("InputWorkspace", "EventData"));
+    TS_ASSERT_THROWS_NOTHING(filter.setProperty("OutputWorkspaceBaseName", "SplittedDataX"));
+    TS_ASSERT_THROWS_NOTHING(filter.setProperty("DetectorTOFCorrectionWorkspace", "TimeCorrectionTableX"));
+    TS_ASSERT_THROWS_NOTHING(filter.setProperty("SplitterWorkspace", splws));
+
+    // 3. Execute
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+#if 0
+    // 4. Get output
+    // 4.1 Workspace group 0
+    DataObjects::EventWorkspace_sptr filteredws0 = boost::dynamic_pointer_cast
+        <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_0"));
+    TS_ASSERT(filteredws0);
+    TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
+    TS_ASSERT_EQUALS(filteredws0->getEventList(0).getNumberEvents(), 4);
+
+    // 4.2 Workspace group 1
+    DataObjects::EventWorkspace_sptr filteredws1 = boost::dynamic_pointer_cast
+        <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
+    TS_ASSERT(filteredws1);
+    TS_ASSERT_EQUALS(filteredws1->getEventList(1).getNumberEvents(), 16);
+
+    // 4.3 Workspace group 2
+    DataObjects::EventWorkspace_sptr filteredws2 = boost::dynamic_pointer_cast
+        <DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
+    TS_ASSERT(filteredws2);
+    TS_ASSERT_EQUALS(filteredws2->getEventList(1).getNumberEvents(), 21);
+
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100*1000*1000;
+    int64_t tofdt = 10*1000*1000;
+
+    DataObjects::EventList elist3 = filteredws2->getEventList(3);
+    elist3.sortPulseTimeTOF();
+
+    DataObjects::TofEvent eventmin = elist3.getEvent(0);
+    TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64+pulsedt*2);
+    TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
+
+    DataObjects::TofEvent eventmax = elist3.getEvent(20);
+    TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(), runstart_i64+pulsedt*4);
+    TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt*6/1000), 1.0E-4);
+#endif
+
+    return;
   }
 
 
@@ -217,8 +289,64 @@ public:
     return splitterws;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Create the time correction table
+    */
+  TableWorkspace_sptr createTimeCorrectionTable(MatrixWorkspace_sptr inpws)
+  {
+    // 1. Generate an empty table
+    TableWorkspace_sptr corrtable(new TableWorkspace());
+    corrtable->addColumn("int", "DetectorID");
+    corrtable->addColumn("double", "Correction");
+
+    // 2. Add rows
+    Instrument_const_sptr instrument = inpws->getInstrument();
+    vector<int> detids = instrument->getDetectorIDs();
+    for (size_t i = 0; i < detids.size(); ++i)
+    {
+      int detid = detids[i];
+      double factor = 0.75;
+      TableRow newrow = corrtable->appendRow();
+      newrow << detid << factor;
+    }
+
+    return corrtable;
+  }
+
 
 };
 
 
 #endif /* MANTID_ALGORITHMS_FILTEREVENTSTEST_H_ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

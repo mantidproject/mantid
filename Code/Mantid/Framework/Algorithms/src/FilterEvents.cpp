@@ -355,7 +355,7 @@ namespace Algorithms
       vector<string> colnames = m_detCorrectWorkspace->getColumnNames();
       if (colnames.size() < 2)
         throw runtime_error("Input table workspace is not valide.");
-      else if (colnames[0].compare("Detector") || colnames[1].compare("Offset"))
+      else if (colnames[0].compare("DetectorID") || colnames[1].compare("Correction"))
         throw runtime_error("Input table workspace has wrong column definition.");
 
       // b) Parse detector to a map
