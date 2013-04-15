@@ -21,7 +21,7 @@ namespace Mantid
      * * @param self A reference to the calling Python object
      */
     IFunction1DAdapter::IFunction1DAdapter(PyObject* self)
-      : API::ParamFunction(), API::IFunction1D(), IFunctionAdapter(self),  m_self(self)
+      : API::ParamFunction(), API::IFunction1D(), IFunctionAdapter(self)
     {
     }
 

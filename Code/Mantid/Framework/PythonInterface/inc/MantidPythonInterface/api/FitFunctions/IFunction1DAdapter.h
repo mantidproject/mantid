@@ -60,15 +60,6 @@ namespace Mantid
       /// The PyObject must be supplied to construct the object
       DISABLE_DEFAULT_CONSTRUCT(IFunction1DAdapter);
       DISABLE_COPY_AND_ASSIGN(IFunction1DAdapter);
-
-      /**
-       * Returns the PyObject that owns this wrapper, i.e. self
-       * @returns A pointer to self
-       */
-      inline PyObject * getSelf() const { return m_self; }
-
-      /// The Python portion of the object
-      PyObject *m_self;
     };
   }
 }

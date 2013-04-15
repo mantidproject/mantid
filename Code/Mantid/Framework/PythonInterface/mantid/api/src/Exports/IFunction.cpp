@@ -42,7 +42,11 @@ void export_IFunction()
   class_<IFunction, IFunctionAdapter, boost::noncopyable>("IFunction", "Base class for all functions", no_init)
     .def("name", &IFunction::name, "Return the name of the function")
 
+    .def("initialize", &IFunction::initialize, "Declares any parameters and attributes on the function")
+
     .def("getCategories", &getCategories, "Returns a list of the categories for an algorithm")
+
+    .def("nAttributes", &IFunction::nAttributes, "Return the number of attributes (non-fitting arguments)")
 
     .def("nParams", &IFunction::nParams, "Return the number of parameters")
 
@@ -61,7 +65,7 @@ void export_IFunction()
 
     .def("declareAttribute", &IFunctionAdapter::declareAttribute, "Declare an attribute with an initial value")
 
-    .def("getAttributeValue", &IFunctionAdapter::getAttribute, "Return the value of the ith attribute")
+    .def("getAttributeValue", &IFunctionAdapter::getAttributeValue, "Return the value of the named attribute")
 
 
     //-- Deprecated functions that have the wrong names --

@@ -1,4 +1,5 @@
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
+#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 
 #include <boost/python/class.hpp>
 
@@ -6,6 +7,7 @@ namespace Mantid
 {
   namespace PythonInterface
   {
+    using Mantid::PythonInterface::Environment::CallMethod0;
     using namespace boost::python;
 
     /**
@@ -13,16 +15,23 @@ namespace Mantid
      * * @param self A reference to the calling Python object
      */
     IFunctionAdapter::IFunctionAdapter(PyObject* self)
-      : IFunction(), m_name(self->ob_type->tp_name)
+      : IFunction(), m_name(self->ob_type->tp_name), m_self(self)
     {
     }
 
     /**
-     * Returns the class name of the function. This cannot be overridden in Python.
+     * @returns The class name of the function. This cannot be overridden in Python.
      */
     std::string IFunctionAdapter::name() const
     {
       return m_name;
+    }
+
+    /**
+     */
+    void IFunctionAdapter::init()
+    {
+      CallMethod0<void>::dispatchWithException(getSelf(),"init");
     }
 
     /**

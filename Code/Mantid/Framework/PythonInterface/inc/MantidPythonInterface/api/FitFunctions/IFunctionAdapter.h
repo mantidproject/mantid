@@ -45,11 +45,20 @@ namespace Mantid
 
       /// Returns the name of the function
       std::string name() const;
+      /// Declare all attributes & parameters
+      void init();
 
       /// Declare an attribute with an initial value
       void declareAttribute(const std::string &name, const boost::python::object &defaultValue);
       /// Get a named attribute value
       PyObject * getAttributeValue(const std::string & name);
+
+    protected:
+      /**
+       * Returns the PyObject that owns this wrapper, i.e. self
+       * @returns A pointer to self
+       */
+      inline PyObject * getSelf() const { return m_self; }
 
     private:
       /// The PyObject must be supplied to construct the object
@@ -58,6 +67,8 @@ namespace Mantid
 
       /// The name of the function
       std::string m_name;
+      /// The Python portion of the object
+      PyObject *m_self;
     };
   }
 }
