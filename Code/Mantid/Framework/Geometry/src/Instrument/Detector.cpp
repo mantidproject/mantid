@@ -106,6 +106,26 @@ double Detector::getPhi() const
   this->getPos().getSpherical(dummy,dummy,phi);
   return phi*M_PI/180.0;
 }
+/**
+ * Calculate the phi angle between detector and beam, and then offset.
+ * @param offset in radians
+ * @return offset phi angle in radians.
+ */
+double Detector::getPhiOffset(const double& offset) const
+{
+  double avgPos = getPhi();
+  double phiOut = avgPos;
+  if(avgPos  < 0)
+  {
+    phiOut = - (offset + avgPos);
+  }
+  else
+  {
+    phiOut = offset - avgPos;
+  }
+  return phiOut;
+}
+
  /** returns the detector's topology, namely, the meaning of the detector's angular measurements.
  *     It is different in cartesian and cylindrical (surrounding the beam) coordinate system
  */
