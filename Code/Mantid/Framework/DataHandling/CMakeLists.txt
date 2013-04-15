@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/LoadAscii.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
+	src/LoadCanSAS1D2.cpp
 	src/LoadDAE.cpp
 	src/LoadDAE/idc.cpp
 	src/LoadDAE/idc.h
@@ -173,6 +174,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
+	inc/MantidDataHandling/LoadCanSAS1D2.h
 	inc/MantidDataHandling/LoadDAE.h
 	inc/MantidDataHandling/LoadDaveGrp.h
 	inc/MantidDataHandling/LoadDetectorInfo.h

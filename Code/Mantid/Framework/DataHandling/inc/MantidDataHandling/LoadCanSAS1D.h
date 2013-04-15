@@ -60,7 +60,7 @@ namespace Mantid
       ///default constructor
       LoadCanSAS1D();
       /// destructor
-      ~LoadCanSAS1D();
+      virtual ~LoadCanSAS1D();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadCanSAS1D"; }
       /// Algorithm's version for identification overriding a virtual method
@@ -73,7 +73,7 @@ namespace Mantid
       /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
       virtual int fileCheck(const std::string& filePath);
 
-    private:
+    protected:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       /// If a workspace group is created this is set from empty to the root name of the members, the name of the workspace group members up to and including the _
@@ -82,12 +82,12 @@ namespace Mantid
       int m_groupNumber;
 
       /// Overwrites Algorithm method.
-      void init();
+      virtual void init();
       /// Overwrites Algorithm method
       void exec();
 
       /// Loads an individual SASentry element into a new workspace
-      API::MatrixWorkspace_sptr loadEntry(Poco::XML::Node * const workspaceData, std::string & runName);
+      virtual API::MatrixWorkspace_sptr loadEntry(Poco::XML::Node * const workspaceData, std::string & runName);
       /// Checks if the pointer to the loaded data is not null or throws if it is
       void check(const Poco::XML::Element* const toCheck, const std::string & name) const;
       /// Appends the new data workspace creating a workspace group if there was existing data
