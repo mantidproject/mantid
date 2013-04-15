@@ -1,8 +1,6 @@
 # Define the project name
 project( Vates )
 
-
-
 ###########################################################################
 # Add OpenMP flags here . TODO: Is this the right spot?
 ###########################################################################
@@ -12,7 +10,6 @@ if ( OPENMP_FOUND )
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
 endif ()
 
-
 include( CommonVatesSetup )
 
 # Select either building Paraview plugins
@@ -21,8 +18,8 @@ set( USE_PARAVIEW ON CACHE BOOL "Create paraview plugins. " )
 # Paraview dependencies built if Paraview is found
 find_package( ParaView )
 if( ParaView_FOUND AND USE_PARAVIEW )
-
-  include ( ${PARAVIEW_USE_FILE} )
+  message( STATUS "Using ParaView ${PARAVIEW_VERSION_FULL}" )
+  include( ${PARAVIEW_USE_FILE} )
   add_subdirectory( VatesAPI )
   add_subdirectory( ParaviewPlugins )
   add_subdirectory( VatesSimpleGui )
