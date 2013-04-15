@@ -1,34 +1,42 @@
-#include "HelpWindow.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include <boost/make_shared.hpp>
 #include <iostream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <Poco/Thread.h>
 #include <QByteArray>
 #include <QDesktopServices>
 #include <stdexcept>
 #include <strstream>
 
+namespace MantidQt
+{
+namespace API
+{
 using std::string;
 
-/// Base url for all of the files in the project
-const string BASEURL("qthelp://org.mantidproject/doc/");
+/// Base url for all of the files in the project.
+const string BASE_URL("qthelp://org.mantidproject/doc/");
+/// Url to display if nothing else is suggested.
+const string DEFAULT_URL(BASE_URL + "html/index.html");
 
 /**
- * \param url The url to open the window with. To use default supply an empty string.
+ * Default constructor shows the \link DEFAULT_URL.
  */
-HelpWindow::HelpWindow(const std::string &url) :
+HelpWindowImpl::HelpWindowImpl() :
     m_collectionFile(""),
     m_cacheFile(""),
     m_assistantExe(""),
+    m_firstRun(true),
     m_log(Mantid::Kernel::Logger::get("HelpWindow"))
 {
     this->determineFileLocs();
-    this->start(url);
+    this->start(DEFAULT_URL);
 }
 
 /// Destructor does nothing.
-HelpWindow::~HelpWindow()
+HelpWindowImpl::~HelpWindowImpl()
 {
     // do nothing
 }
@@ -37,12 +45,18 @@ HelpWindow::~HelpWindow()
  * Have the help window show a specific url. If the url doesn't exist
  * this just pops up the default view for the help.
  *
- * \param url The url to open. This should start with \link BASEURL.
+ * \param url The url to open. This should start with \link BASE_URL.
+ * If it is empty show the default page.
  */
-void HelpWindow::showURL(const string &url)
+void HelpWindowImpl::showURL(const string &url)
 {
+    std::string urlToShow(url);
+    if (urlToShow.empty())
+        urlToShow = DEFAULT_URL;
+
     // make sure the process is going
     this->start(url);
+    m_process->waitForStarted(); // REMOVE
 
     m_log.debug() << "open help url \"" << url << "\"\n";
     string temp("setSource " + url + "\n");
@@ -55,28 +69,48 @@ void HelpWindow::showURL(const string &url)
  * Show the help page for a particular algorithm. The page is picked
  * using matching naming conventions.
  *
- * @param name The name of the algorithm to show.
+ * @param name The name of the algorithm to show. If this is empty show
+ * the algorithm index.
  * @param version The version of the algorithm to jump do. The default
  * value (-1) will show the top of the page.
  */
-void HelpWindow::showAlgorithm(const string &name, const int version)
+void HelpWindowImpl::showAlgorithm(const string &name, const int version)
 {
     // TODO jump to the version within the page
     (void)version;
 
-    string url(BASEURL + "html/Algo_" + name + ".html");
+    string url(BASE_URL + "html/Algo_" + name + ".html");
+    if (name.empty())
+        url = BASE_URL + "html/algorithms_index.html";
     this->showURL(url);
+}
+
+/**
+ * Convenience method for @link showAlgorithm(string, int).
+ *
+ * @param name The name of the algorithm to show. If this is empty show
+ * the algorithm index.
+ * @param version The version of the algorithm to jump do. The default
+ * value (-1) will show the top of the page.
+ */
+void HelpWindowImpl::showAlgorithm(const QString &name, const int version)
+{
+    this->showAlgorithm(name.toStdString(), version);
 }
 
 /**
  * Show the help page for a particular fit function. The page is
  * picked using matching naming conventions.
  *
- * @param name The name of the fit function to show.
+ * @param name The name of the fit function to show. If it is empty show
+ * the fit function index.
  */
-void HelpWindow::showFitFunction(const std::string &name)
+void HelpWindowImpl::showFitFunction(const std::string &name)
 {
-    string url(BASEURL + "html/FitFunc_" + name + ".html");
+    string url(BASE_URL + "html/FitFunc_" + name + ".html");
+    if (name.empty())
+        url = BASE_URL + "html/fitfunctions_index.html";
+    this->showURL(url);
 }
 
 /**
@@ -89,7 +123,7 @@ void HelpWindow::showFitFunction(const std::string &name)
  * @param The url to show at startup. This is ignored if it is
  * already started.
  */
-void HelpWindow::start(const std::string &url)
+void HelpWindowImpl::start(const std::string &url)
 {
     // check if it is already started
     if (this->isRunning())
@@ -114,9 +148,24 @@ void HelpWindow::start(const std::string &url)
     if (!url.empty())
         args << QLatin1String("-showUrl")
              << QLatin1String(url.c_str());
+    m_log.debug() << m_assistantExe
+                  << " " << args.join(QString(" ")).toStdString()
+                  << " (state = " << m_process->state() << ")\n";
     m_process->start(QLatin1String(m_assistantExe.c_str()), args);
+
+    // wait for it to start before returning
     if (!m_process->waitForStarted())
+    {
+        m_log.warning() << "Failed to start qt assistant process\n";
         return;
+    }
+    if (m_firstRun)
+    {
+        m_firstRun = false;
+        m_log.debug() << "Very first run of qt assistant comes up slowly (2 sec pause)\n";
+        Poco::Thread::sleep(2000); // 2 seconds
+    }
+
     m_log.debug() << m_assistantExe
                   << " " << args.join(QString(" ")).toStdString()
                   << " (state = " << m_process->state() << ")\n";
@@ -125,7 +174,7 @@ void HelpWindow::start(const std::string &url)
 /**
  * @return True if the browser is running.
  */
-bool HelpWindow::isRunning()
+bool HelpWindowImpl::isRunning()
 {
     // NULL pointer definitely isn't running
     if (!m_process)
@@ -144,7 +193,7 @@ bool HelpWindow::isRunning()
  *
  * @param binDir The location of the mantid executable.
  */
-void HelpWindow::findCollectionFile(std::string &binDir)
+void HelpWindowImpl::findCollectionFile(std::string &binDir)
 {
     const std::string COLLECTION("mantid.qhc");
 
@@ -184,7 +233,7 @@ void HelpWindow::findCollectionFile(std::string &binDir)
 /**
  * Determine the location of the collection and cache files.
  */
-void HelpWindow::determineFileLocs()
+void HelpWindowImpl::determineFileLocs()
 {
     // determine collection file location
     string binDir = Mantid::Kernel::ConfigService::Instance().getDirectoryOfExecutable();
@@ -217,10 +266,15 @@ void HelpWindow::determineFileLocs()
     if (!Poco::File(m_assistantExe).exists())
     {
         m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+        m_assistantExe = Poco::Path(binDir, "assistant.exe").absolute().toString();
+        if (!Poco::File(m_assistantExe).exists())
+        {
+            m_log.debug() << "File \"" << m_assistantExe << "\" does not exist\n";
+            m_assistantExe = "assistant.exe";
+        }
     }
 #endif
-    if (Poco::File(m_assistantExe).exists())
-        m_log.debug() << "Using \"" << m_assistantExe << "\" for viewing help\n";
+    m_log.debug() << "Using \"" << m_assistantExe << "\" for viewing help\n";
 
     // determine cache file location
     m_cacheFile = "mantid.qhc";
@@ -245,3 +299,6 @@ void HelpWindow::determineFileLocs()
         m_cacheFile = "";
     }
 }
+
+} // namespace API
+} // namespace MantidQt
