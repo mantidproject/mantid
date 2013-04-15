@@ -861,6 +861,7 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
         QApplication::restoreOverrideCursor();
     }
     m_startPeakShapes = false;
+    setPeakVisibility();
 }
 
 /**

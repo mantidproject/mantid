@@ -111,7 +111,7 @@ public:
   /// Get background colour
   QColor getBackgroundColor() const {return m_backgroundColor;}
   /// Send a redraw request to the surface owner
-  void requestRedraw();
+  void requestRedraw(bool resetPeakVisibility = false);
   /// Enable lighting if the implementation allows it
   void enableLighting(bool on);
 
@@ -237,6 +237,7 @@ protected:
   int getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const;
   int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
   void setInputController(int mode, InputController* controller);
+  void setPeakVisibility() const;
 
   //-----------------------------------
   //     Protected data

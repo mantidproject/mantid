@@ -331,11 +331,18 @@ void ProjectionSurface::updateDetectors()
 {
   clear();
   this->init();
+  // if integration range in the instrument actor has changed
+  // update visiblity of peak markers
+  setPeakVisibility();
 }
 
 /// Send a redraw request to the surface owner
-void ProjectionSurface::requestRedraw()
+void ProjectionSurface::requestRedraw(bool resetPeakVisibility)
 {
+  if ( resetPeakVisibility )
+  {
+    setPeakVisibility();
+  }
   emit redrawRequired();
 }
 
@@ -536,6 +543,25 @@ int ProjectionSurface::getDetectorID(unsigned char r,unsigned char g,unsigned ch
 void ProjectionSurface::setInputController(int mode, InputController *controller)
 {
     m_inputControllers[mode] = controller;
+}
+
+/**
+  * Set visibility of the peak markers according to the integration range
+  * in the instrument actor.
+  */
+void ProjectionSurface::setPeakVisibility() const
+{
+    if ( hasPeakOverlays() )
+    {
+        Mantid::Kernel::Unit_sptr unit = m_instrActor->getWorkspace()->getAxis(0)->unit();
+        QString unitID = QString::fromStdString(unit->unitID());
+        double xmin = m_instrActor->minBinValue();
+        double xmax = m_instrActor->maxBinValue();
+        foreach(PeakOverlay* po, m_peakShapes)
+        {
+            po->setPeakVisibility(xmin,xmax,unitID);
+        }
+    }
 }
 
 /**

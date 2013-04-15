@@ -21,7 +21,8 @@ Shape2D::Shape2D():
     m_color(Qt::red),
     m_fill_color(QColor()),
     m_scalable(true),
-    m_editing(false)
+    m_editing(false),
+    m_visible(true)
 {
 }
 
@@ -33,6 +34,7 @@ Shape2D::Shape2D():
   */
 void Shape2D::draw(QPainter& painter) const
 {
+  if ( !m_visible ) return;
   painter.setPen(m_color);
   this->drawShape(painter);
   if (m_editing)

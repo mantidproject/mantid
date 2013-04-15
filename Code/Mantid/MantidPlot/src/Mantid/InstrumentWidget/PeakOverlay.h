@@ -72,6 +72,7 @@ public:
   void setShowRowsFlag(bool yes) {m_showRows = yes;}
   void setShowLabelsFlag(bool yes) {m_showLabels = yes;}
   static PeakMarker2D::Style getDefaultStyle(int index);
+  void setPeakVisibility(double xmin, double xmax, QString units);
 
 signals:
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
