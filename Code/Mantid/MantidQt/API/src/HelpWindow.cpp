@@ -86,6 +86,19 @@ void HelpWindowImpl::showAlgorithm(const string &name, const int version)
 }
 
 /**
+ * Convenience method for @link showAlgorithm(string, int).
+ *
+ * @param name The name of the algorithm to show. If this is empty show
+ * the algorithm index.
+ * @param version The version of the algorithm to jump do. The default
+ * value (-1) will show the top of the page.
+ */
+void HelpWindowImpl::showAlgorithm(const QString &name, const int version)
+{
+    this->showAlgorithm(name.toStdString(), version);
+}
+
+/**
  * Show the help page for a particular fit function. The page is
  * picked using matching naming conventions.
  *

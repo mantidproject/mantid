@@ -2,6 +2,7 @@
 #define HELPWINDOW_H
 #include <boost/shared_ptr.hpp>
 #include <QProcess>
+#include <QString>
 #include <string>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -16,6 +17,7 @@ class DLLExport HelpWindowImpl
 public:
     void showURL(const std::string & url=std::string());
     void showAlgorithm(const std::string &name=std::string(), const int version=-1);
+    void showAlgorithm(const QString &name, const int version=-1);
     void showFitFunction(const std::string &name=std::string());
 
 private:
