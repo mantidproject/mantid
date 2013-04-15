@@ -11,6 +11,7 @@ set ( TEST_PY_FILES
   RetrieveRunInfoTest.py
   Stitch1DTest.py
   SuggestTibCNCSTest.py
+  SuggestTibHYSPECTest.py
   UpdatePeakParameterTableValueTest.py
 )
 
