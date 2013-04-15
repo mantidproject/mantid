@@ -10,7 +10,7 @@ import numpy
 from string import *
 
 class DakotaChiSquared(PythonAlgorithm):
-    """ Get incident energy from a monitor and some detectors
+    """ Get chi squared by comparing two mantid nexus files
     """
     def category(self):
         """ Return category
