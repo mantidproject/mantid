@@ -96,7 +96,7 @@ namespace Mantid
       // Loop over peaks
       const std::vector<Peak> & peaks = peaksW->getPeaks();
       PARALLEL_FOR3(inputW,peaksW,tablews)
-      for (size_t i=0; i < peaks.size(); i++)
+      for (int i=0; i < static_cast<int>(peaks.size()); i++)
       {
     	PARALLEL_START_INTERUPT_REGION
     	Peak peak = peaks[i];
