@@ -16,7 +16,7 @@ import os
 RUN_PROP = "Filename"
 WKSP_PROP = "OutputWorkspace"
 MODE_PROP = "Mode"
-MODES=["SingleDifference", "DoubleDifference", "ThickDifference", "FoilOut", "FoilIn"]
+MODES=["SingleDifference", "DoubleDifference", "ThickDifference", "FoilOut", "FoilIn", "FoilInOut"]
 SPECTRA_PROP = "SpectrumList"
 INST_PAR_PROP = "InstrumentParFile"
 
@@ -132,10 +132,14 @@ class LoadVesuvio(PythonAlgorithm):
 
             if self._diff_opt == "FoilOut":
                 raw_grp_indices = foil_map.get_indices(spectrum_no, foil_out_periods)
-            else:
+            elif self._diff_opt == "FoilIn":
                 indices_thin = foil_map.get_indices(spectrum_no, foil_thin_periods)
                 indices_thick = foil_map.get_indices(spectrum_no, foil_thin_periods)
                 raw_grp_indices = indices_thin + indices_thick
+            elif self._diff_opt == "FoilInOut":
+                raw_grp_indices = range(0, self._nperiods)
+            else:
+                raise RuntimeError("Unknown single foil mode: %s." % (self._diff_opt))
                 
             dataY = foil_out.dataY(ws_index)
             dataE = foil_out.dataE(ws_index)
