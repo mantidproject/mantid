@@ -22,7 +22,7 @@ const string BASE_URL("qthelp://org.mantidproject/doc/");
 const string DEFAULT_URL(BASE_URL + "html/index.html");
 
 /**
- * Default constructor shows the \link DEFAULT_URL.
+ * Default constructor shows the \link MantidQt::API::DEFAULT_URL.
  */
 HelpWindowImpl::HelpWindowImpl() :
     m_collectionFile(""),
@@ -45,7 +45,7 @@ HelpWindowImpl::~HelpWindowImpl()
  * Have the help window show a specific url. If the url doesn't exist
  * this just pops up the default view for the help.
  *
- * \param url The url to open. This should start with \link BASE_URL.
+ * \param url The url to open. This should start with \link MantidQt::API::BASE_URL.
  * If it is empty show the default page.
  */
 void HelpWindowImpl::showURL(const string &url)
@@ -86,7 +86,7 @@ void HelpWindowImpl::showAlgorithm(const string &name, const int version)
 }
 
 /**
- * Convenience method for @link showAlgorithm(string, int).
+ * Convenience method for \link HelpWindowImpl::showAlgorithm(string, int).
  *
  * @param name The name of the algorithm to show. If this is empty show
  * the algorithm index.
@@ -135,7 +135,7 @@ void HelpWindowImpl::hostShuttingDown()
  * running. Due to a bug in qt 4.8.1 this will delete the
  * cache file every time the browser is started.
  *
- * @param The url to show at startup. This is ignored if it is
+ * @param url The url to show at startup. This is ignored if it is
  * already started.
  */
 void HelpWindowImpl::start(const std::string &url)
