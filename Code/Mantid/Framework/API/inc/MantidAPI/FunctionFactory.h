@@ -149,7 +149,11 @@ namespace API
         template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
 #endif /* _WIN32 */
         typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FunctionFactoryImpl> FunctionFactory;
-        
+
+  /// Convenient typedef for an UpdateNotification
+  typedef FunctionFactoryImpl::UpdateNotification FunctionFactoryUpdateNotification;
+  /// Convenient typedef for an UpdateNotification AutoPtr
+  typedef const Poco::AutoPtr<FunctionFactoryUpdateNotification> & FunctionFactoryUpdateNotification_ptr;
 } // namespace API
 } // namespace Mantid
 
