@@ -74,7 +74,7 @@ namespace MDAlgorithms
     template<typename T>
     void saveMatrix(::NeXus::File * const file, std::string name,
                     Kernel::Matrix<T> &m, std::string tag="");
-    void saveWtransformMatrix(::NeXus::File * const file, API::IMDWorkspace_const_sptr ws);
+    void saveWmatrix(::NeXus::File * const file, API::IMDWorkspace_const_sptr ws);
 
   };
 

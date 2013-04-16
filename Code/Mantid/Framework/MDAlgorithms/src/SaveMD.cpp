@@ -198,7 +198,7 @@ namespace MDAlgorithms
     }
 
     // Write out W transform matrix
-    this->saveWtransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+    this->saveWmatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
     // Write out the affine matrices
     this->saveAffineTransformMatricies(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
@@ -378,7 +378,7 @@ namespace MDAlgorithms
     }
 
     // Write out W transform matrix
-    this->saveWtransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+    this->saveWmatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
     // Write out the affine matrices
     this->saveAffineTransformMatricies(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
@@ -442,7 +442,7 @@ namespace MDAlgorithms
     try {
       this->saveAffineTransformMatrix(file,
                                       ws->getTransformToOriginal(),
-                                      "affine_transform_to_orig");
+                                      "transform_to_orig");
     }
     catch (std::runtime_error &)
     {
@@ -451,7 +451,7 @@ namespace MDAlgorithms
     try {
       this->saveAffineTransformMatrix(file,
                                       ws->getTransformFromOriginal(),
-                                      "affine_transform_from_orig");
+                                      "transform_from_orig");
     }
     catch (std::runtime_error &)
     {
@@ -469,7 +469,7 @@ namespace MDAlgorithms
                               transform->id());
   }
 
-  void SaveMD::saveWtransformMatrix(::NeXus::File *const file, IMDWorkspace_const_sptr ws)
+  void SaveMD::saveWmatrix(::NeXus::File *const file, IMDWorkspace_const_sptr ws)
   {
     DblMatrix wTrans = ws->getWTransf();
     std::cout << "W: " << wTrans.str() << std::endl;
