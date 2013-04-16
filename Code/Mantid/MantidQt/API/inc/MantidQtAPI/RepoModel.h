@@ -6,7 +6,6 @@
 #include <QList>
 #include <QVariant>
 #include <QStringList>
-#include <QStyledItemDelegate>
 #include <QWidget>
 #include "MantidAPI/ScriptRepository.h"
 
@@ -15,67 +14,42 @@ namespace MantidQt
 namespace API
 {
 
-  class RepoItem
-  {
-public:
-    RepoItem(const QString label, const QString path, 
-             bool entry_directory = false,
-             Mantid::API::SCRIPTSTATUS curr_status = Mantid::API::BOTH_UNCHANGED, 
-             RepoItem * parent = 0);
+const QString REMOTEONLY = "REMOTE_ONLY"; 
+const QString LOCALONLY = "LOCAL_ONLY";
+const QString LOCALCHANGED = "LOCAL_CHANGED";
+const QString REMOTECHANGED = "REMOTE_CHANGED";
+const QString BOTHUNCHANGED = "UPDATED";
+const QString BOTHCHANGED = "CHANGED"; 
 
-    ~RepoItem();
-    void appendChild(RepoItem * child);
-    RepoItem * child(int row);
-    int childCount() const;
-    int columnCount() const;
-    QVariant data(int column,  int role = Qt::DisplayRole  ) const;
-    bool setData(int column, QString value, Mantid::API::ScriptRepository_sptr   ); 
-    int row() const;
-    RepoItem * parent();
-    QString systemPath();
-    Mantid::API::SCRIPTSTATUS state(){return status;};
-    bool isDir(){return directory;}; 
-    
-private:
-    QList<RepoItem * >childItems;
-    void statusUpdate(Mantid::API::ScriptRepository_sptr);
-    QString label;
-    QString path; 
-    Mantid::API::SCRIPTSTATUS status; 
-    bool directory; 
-    bool root; 
-    RepoItem* parentItem;
-};
+  /** RepoModel : Wrapper for ScriptRepository to fit the Model View Qt Framework. 
+      
+      The ScriptRepository has an hierarchical access to the folders and files, as so, 
+      it was necessary to extend the QAbstractItemModel in order to provide access to the 
+      entries on ScriptRepository.
 
+      The RepoModel will be given to a QTreeView and as so, it will allow the user to interact 
+      with the ScriptRepository through the Qt ModelView Framework. 
 
-class RepoDelegate : public QStyledItemDelegate
-{
-    Q_OBJECT
+      The requirements for a class to fit this framework is to reimplement the following methods: 
+        - ::data - giving access to the data
+        - ::flags - indication of the allowed interaction 
+        - ::headerData 
+        - ::index
+        - ::parent
+        - ::rowCount
+        - ::columnCount
+        - ::setData
 
-public:
-    RepoDelegate(QObject *parent = 0);
+     Through these methods, the RepoModel will be able to provide access to the ScriptRepository 
+     service. Allowing the users to upload and download files and folders.
 
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                          const QModelIndex &index) const;
+     Some extra services are provided, to allow the classes to show the description of the files 
+     as well as open the files to be inspected by the users: 
+      - ::entrySelected
+      - ::fileSelected
 
-    void setEditorData(QWidget *editor, const QModelIndex &index) const;
-    void setModelData(QWidget *editor, QAbstractItemModel *model,
-                      const QModelIndex &index) const;
-
-    void updateEditorGeometry(QWidget *editor,
-        const QStyleOptionViewItem &option, const QModelIndex &index) const;
-    void paint(QPainter *painter,
-                                 const QStyleOptionViewItem &option,
-                                 const QModelIndex &index) const;
-    bool editorEvent(QEvent *event,
-                                       QAbstractItemModel *model,
-                                       const QStyleOptionViewItem &option,
-                                       const QModelIndex &index);
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const ;
-};
-
-
-  /** RepoModel : TODO: DESCRIPTION
+     This class should be constructed just once, and as so, the copy constructor and the assignment 
+     will be make private to ensure this. 
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -100,35 +74,110 @@ public:
   class RepoModel : public QAbstractItemModel
 {
     Q_OBJECT
-public:
-    RepoModel(QObject *parent = 0);
-    ~RepoModel();
 
+  /** A nested class to help RepoModel to implement the QAbstractItemModel. 
+      This class in indended to keep track of the path inside the Repository
+      of the entries, in such a way the repomodel will be able to get from the 
+      index the path.
+      The ::appendChild allows the RepoModel to reconstruct the tree of the directories,
+      while the ::child and ::parent methods allow to iterate over the tree.      
+  */
+  class RepoItem
+  {
+public:
+    // construct the RepoItem passing the script repository path
+    RepoItem(const QString & label, 
+             const QString & path = "/",
+             RepoItem * parent = 0);
+
+    ~RepoItem();
+    // append child to build the directory tree
+    void appendChild(RepoItem * child);
+    // access to the row_th file/folder child of this entry
+    RepoItem * child(int row) const;
+    /// To which row this repoItem belongs?
+    int row() const;
+    // return the number of files/folders that are children of this entry
+    int childCount() const;
+    /// access to the script repository path
+    /// @return : script repository path
+    const QString & path() const{return keypath;}; 
+    /// access to the label provided at construction
+    /// @return : label for this entry
+    const QString & label()const{return m_label;}; 
+    /// access to the parent of this entry
+    /// @return : this entry parent's
+    RepoItem * parent() const{return parentItem;};
+    
+private:
+    /// track the list of children for this entry
+    QList<RepoItem * >childItems;
+    /// the label of this entry
+    QString m_label; 
+    /// the path of the script repository
+    QString keypath; 
+    /// the parent of this entry
+    RepoItem* parentItem;
+private:
+    RepoItem( const RepoItem& );
+    const RepoItem& operator=( const RepoItem& );
+
+
+};
+
+public:
+    /// constructor
+    RepoModel(QObject *parent = 0);
+    /// destructor
+    ~RepoModel();
+    /// access to the ScriptRepository data
     QVariant data(const QModelIndex & index, int role)const;
+    /// information on the available interaction
     Qt::ItemFlags flags(const QModelIndex & index) const;
+    /// header strings
     QVariant headerData(int section, Qt::Orientation orientation,
                         int role = Qt::DisplayRole) const;
+    /// access to the index
     QModelIndex index(int row, int column,
                       const QModelIndex &parent = QModelIndex()) const;
+    /// access to parent
     QModelIndex parent(const QModelIndex &index) const;
+    //// provide the number of the rows
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    /// provide the nubmer of the coluns
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    /// change data
     bool setData(const QModelIndex &index, const QVariant &value,
                   int role = Qt::EditRole);
-    public slots:
-    void entrySelected(const QModelIndex& index); 
-    void fileSelected(const QModelIndex & index); 
-    void reLoad();
- signals: 
-    void fileDescription(const QString ); 
-    void loadScript(const QString); 
+
+    static const QString & localOnlySt(); 
+    static const QString & remoteOnlySt(); 
+    static const QString & localChangedSt(); 
+    static const QString & remoteChangedSt(); 
+    static const QString & updatedSt(); 
+    static const QString & bothChangedSt(); 
+
+
+    QString fileDescription(const QModelIndex & index); 
+    QString filePath(const QModelIndex & index);
+
+
 private:
+    /// auxiliary method to populate the model
     void setupModelData(RepoItem *parent);
+    /// auxiliary method to match the ScriptStatus to string
+    const QString & fromStatus(Mantid::API::SCRIPTSTATUS status)const; 
 
     RepoItem *rootItem;
     Mantid::API::ScriptRepository_sptr repo_ptr;
     QString last_selected;
     QString repo_path;
+    /// auxiliary method to help populating the model
+    RepoItem * getParent(const QString & folder, QList<RepoItem*>&parents);
+private:
+    RepoModel( const RepoModel& );
+    const RepoModel& operator=( const RepoModel& );
+
   };
 
 
