@@ -317,9 +317,11 @@ PeakMarker2D::Style PeakOverlay::getDefaultStyle(int index)
   */
 void PeakOverlay::setPeakVisibility(double xmin, double xmax, QString units)
 {
-    enum XUnits {TOF, dSpacing, Wavelength};
-    XUnits xUnits = TOF;
-    if (units == "dSpacing")
+    enum XUnits {Unknown, TOF, dSpacing, Wavelength};
+    XUnits xUnits = Unknown;
+    if (units == "TOF")
+        xUnits = TOF;
+    else if (units == "dSpacing")
         xUnits = dSpacing;
     else if (units == "Wavelength")
         xUnits = Wavelength;
