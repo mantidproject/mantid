@@ -101,6 +101,7 @@ void StepScan::triggerLiveListener(bool checked)
   else
   {
     stopLiveListener();
+    cleanupWorkspaces();
   }
 }
 
