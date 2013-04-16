@@ -510,7 +510,6 @@ namespace Mantid
   {
     std::map<std::string, std::string> entries;
     file->getEntries(entries);
-    std::cout << "A: " << entries.size() << std::endl;
 
     if (entries.find("transform_to_orig") != entries.end())
     {
@@ -540,18 +539,18 @@ namespace Mantid
     inD--;
     outD--;
     Matrix<coord_t> mat(vec);
-    //CoordTransform *transform;
+    CoordTransform *transform = NULL;
     if ("CoordTransformAffine" == type)
     {
       CoordTransformAffine *affine = new CoordTransformAffine(inD, outD);
       affine->setMatrix(mat);
-      //transform = affine;
-      return affine;
+      transform = affine;
     }
     else
     {
-      throw std::invalid_argument("Do not know how to process coordinate transform " + type);
+      g_log.notice("Do not know how to process coordinate transform " + type);
     }
+    return transform;
   }
 
   } // namespace Mantid
