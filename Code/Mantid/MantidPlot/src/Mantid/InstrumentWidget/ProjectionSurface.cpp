@@ -331,11 +331,18 @@ void ProjectionSurface::updateDetectors()
 {
   clear();
   this->init();
+  // if integration range in the instrument actor has changed
+  // update visiblity of peak markers
+  setPeakVisibility();
 }
 
 /// Send a redraw request to the surface owner
-void ProjectionSurface::requestRedraw()
+void ProjectionSurface::requestRedraw(bool resetPeakVisibility)
 {
+  if ( resetPeakVisibility )
+  {
+    setPeakVisibility();
+  }
   emit redrawRequired();
 }
 
@@ -539,6 +546,25 @@ void ProjectionSurface::setInputController(int mode, InputController *controller
 }
 
 /**
+  * Set visibility of the peak markers according to the integration range
+  * in the instrument actor.
+  */
+void ProjectionSurface::setPeakVisibility() const
+{
+    if ( hasPeakOverlays() )
+    {
+        Mantid::Kernel::Unit_sptr unit = m_instrActor->getWorkspace()->getAxis(0)->unit();
+        QString unitID = QString::fromStdString(unit->unitID());
+        double xmin = m_instrActor->minBinValue();
+        double xmax = m_instrActor->maxBinValue();
+        foreach(PeakOverlay* po, m_peakShapes)
+        {
+            po->setPeakVisibility(xmin,xmax,unitID);
+        }
+    }
+}
+
+/**
   * Returns the current controller. If the controller doesn't exist throws a logic_error exceotion.
   */
 InputController *ProjectionSurface::getController() const
@@ -643,13 +669,25 @@ void ProjectionSurface::setPeakLabelPrecision(int n)
 /**
  * Enable or disable the show peak row flag
  */
-void ProjectionSurface::setShowPeakRowFlag(bool on)
+void ProjectionSurface::setShowPeakRowsFlag(bool on)
 {
-  m_showPeakRow = on;
+  m_showPeakRows = on;
   for(int i=0;i < m_peakShapes.size(); ++i)
   {
     m_peakShapes[i]->setShowRowsFlag(on);
   }
+}
+
+/**
+ * Enable or disable the show peak label flag
+ */
+void ProjectionSurface::setShowPeakLabelsFlag(bool on)
+{
+    m_showPeakLabels = on;
+    for(int i=0;i < m_peakShapes.size(); ++i)
+    {
+      m_peakShapes[i]->setShowLabelsFlag(on);
+    }
 }
 
 /**
