@@ -2275,7 +2275,7 @@ MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int en
 bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
   const QString & optional_msg,  const QStringList & enabled, const QStringList & disabled)
 {
-  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name);
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().newestInstanceOf(alg_name.toStdString());
   if( !alg )
   {
     return false;
@@ -2300,25 +2300,6 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
     true, presets, optional_msg, enabled, disabled);
   return (dlg->exec() == QDialog::Accepted);
 }
-
-
-Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algName)
-{
-  const deque<Mantid::API::IAlgorithm_sptr> & algorithms = Mantid::API::AlgorithmManager::Instance().algorithms();
-  Mantid::API::IAlgorithm_sptr alg;
-  deque<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aEnd = algorithms.rend();
-  for(  deque<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aIter = algorithms.rbegin() ;
-    aIter != aEnd; ++aIter )
-  {
-    if( !(*aIter)->isExecuted() && (*aIter)->name() == algName.toStdString()  )
-    {
-      alg = (*aIter);
-      break;
-    }
-  }
-  return alg;
-}
-
 
 /** Displays a string in a Qtiplot table
 *  @param logName :: the title of the table is based on this

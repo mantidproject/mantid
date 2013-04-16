@@ -18,16 +18,20 @@ class TubeSpec:
 	self.ws = ws
         self.inst = ws.getInstrument()
         self.numTubes = 0
-        self.tubeSpecString = ""
-        self.component = 0
+        self.componentNameArray = []
+        self.componentArray = [] 
         self.minNumDetsInTube = 200 
         self.tubes = []
+        self.delimiter = '/' # delimiter between parts of string in tree
         
-    def setTubeSpecByString(self, tubeSpecString, DiscontinousIndicesInTube=False):
+        
+    def setTubeSpecByString(self, tubeSpecString ):
         """     
         Sets tube specification by string. The string specifies a component of the intrument
         as in the instrument tree of its IDF file. This component may contain one or more tubes
-        and possibly all the tunes in the instrument. 
+        and possibly all the tunes in the instrument.
+        If the tube specification is not empty this component is added to those already
+        in the specification. No checking is done for repeated or overlapping components. 
         
         @param tubeSpecString: string specifying tubes of a component of the instrument
         
@@ -40,10 +44,18 @@ class TubeSpec:
         If the specification is not unique, the first found will be used and there will
         be no error message. So if in doubt don't skip a step.
         """	
-        self.specString = tubeSpecString
-        self.delimiter = '/' # delimiter between parts of string in tree
+        self.componentNameArray.append(tubeSpecString) 
         self.numTubes = -1  # Negative value forces tubes to be searched and counted
-        self.continuousIndicesInTube = not DiscontinousIndicesInTube
+        
+        
+    def setTubeSpecByStringArray( self, tubeSpecArray ):
+        """
+        Set tube specification like setTubeSpecByString, but with an array of string
+        to enable multiple components to be calibrated
+        """
+        for i in range(len(tubeSpecArray)):
+           self.setTubeSpecByString(tubeSpecArray[i])
+           
                
     def getInstrumentName (self):
         return self.inst.getName()
@@ -64,7 +76,7 @@ class TubeSpec:
            
     def searchForTubes(self, comp):
          """     
-         Searches the component for tubes and saves them in array
+         Searches the component for tubes and saves them in array, appending if array is not empty.
          
          @param comp: the component
          """
@@ -89,12 +101,14 @@ class TubeSpec:
         if(self.numTubes >= 0):
             return self.numTubes
         
-        # We have a negative number set in self.numTubes, so we search for tubes	           
-        comp = self.getComponent()
-        if( comp == 0): 
+        # We have a negative number set in self.numTubes, so we search for tubes
+        comps = self.getComponents()
+        if( comps == []): 
             return self.numTubes
         
-        self.searchForTubes(comp)
+        for i in range( len(comps)):
+           self.searchForTubes(comps[i])
+           
         self.numTubes = len(self.tubes)
         return self.numTubes
             
@@ -105,19 +119,46 @@ class TubeSpec:
          	
 	@Return value: instrument component
         """
-        if( self.component != 0):
-            return self.component
+        if( self.componentArray != []):
+            return self.componentArray[0]
         
         # We look for the component    
-        #print self.specString, 
+        print "Looking for", self.componentNameArray[0], 
         
-        comp = self.inst.getComponentByName(self.specString)
+        comp = self.inst.getComponentByName(self.componentNameArray[0])
 
 	if( comp ):
-	     self.component = comp
+	     self.componentArray.append(comp)
 	     
-	return self.component
+	return self.componentArray[0]
+	
+	
+    def getComponents ( self ):
+        """     
+        Returns instrument components corresponding to specification
+         	
+	@Return value: array of instrument components
+        """
+        if( self.componentArray != []):
+            return self.componentArray
+        
+        # We look for the components
+        for i in range( len(self.componentNameArray)):    
+           print "Looking for", self.componentNameArray[i] 
+        
+           comp = self.inst.getComponentByName(self.componentNameArray[i])
+
+	   if( comp ):
+	        self.componentArray.append(comp)
+	   else:
+	        print "Did not find", self.componentNameArray[i]
+	        print "Tube specification not valid"
+	        self.componentArray = []
+	        return []
+	     
+	return self.componentArray
  
+
 	
     def getDetectorInfoFromTube( self, tubeIx ):
         """     
@@ -126,27 +167,41 @@ class TubeSpec:
         
         @param tubeIx:  index of Tube in specified set 
 	
-	@Return value: ID of first detector and number of detectors
+	@Return value: ID of first detector, number of detectors and step between detectors +1 or -1
         """	
 	nTubes = self.getNumTubes()
 	if(nTubes < 0):
 		print "Error in listing tubes"
-		return 0, 0
+		return 0, 0, 1
 	if(tubeIx < 0 or tubeIx >= nTubes):
 		print "Tube index",tubeIx,"out of range 0 to",nTubes
-		return 0, 0
+		return 0, 0, 1
 		
 	comp = self.tubes[tubeIx]
         
 	if(comp != 0):
             firstDet = comp[0].getID()
 	    numDet = comp.nelements()
+	    # Allow for reverse numbering of Detectors
+	    lastDet = comp[numDet-1].getID()
+	    if (lastDet < firstDet):
+	       step = -1
+	       if( firstDet - lastDet + 1 != numDet):
+	       	  print "Detector number range",firstDet-lastDet+1," not equal to number of detectors",numDet
+	          print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
+	    else:
+	       step = 1
+	       if( lastDet - firstDet + 1 != numDet):
+	       	  print "Detector number range",lastDet-firstDet+1," not equal to number of detectors",numDet
+	          print "Detectors not numbered continuously in this tube. Calibration will fail for this tube."
+	          
             #print "First dectector ", firstDet," Last detector ", firstDet+numDet-1, "Number of detectors ", numDet
+            #print "First dectector ", firstDet," Last detector ", comp[numDet-1].getID()
         else:
-            print self.specString, tubeIx, "not found"
-            return 0, 0
+            print self.componentNameArray[0], tubeIx, "not found"
+            return 0, 0, 1
                         
-        return firstDet, numDet
+        return firstDet, numDet, step
         
     def getTubeLength( self, tubeIx ):
         """     
@@ -171,7 +226,7 @@ class TubeSpec:
 	    numDet = comp.nelements()
             return comp[0].getDistance( comp[numDet-1] )
         else:
-            print self.specString, tubeIx, "not found"
+            print self.componentNameArray[0], tubeIx, "not found"
             return 0.0
             
     def getTubeName ( self, tubeIx ):
@@ -197,28 +252,28 @@ class TubeSpec:
 	if(comp != 0):
 	    return comp.getFullName()
         else:
-            print self.specString, tubeIx, "not found"
+            print self.componentNameArray[0], tubeIx, "not found"
             return "Unknown"
 
                         
 	
     def getTubeByString(self, tubeIx):
      	"""     
-        Returns list of workspace indices of a tube specified by string (may be set of tubes)
-        It assumes that all the pixels along the tube have consecutive detector IDs and
-        the tube runs parallel to the Y-axis.
+        Returns list of workspace indices of a tube set that has been specified by string
+        It assumes that all the pixels along the tube have consecutive detector IDs 
         
         @param tubeIx:  index of Tube in specified set 
 	
 	Return value: list of indices
         """
-	firstDet, numDet = self.getDetectorInfoFromTube( tubeIx )			   
+	firstDet, numDet, step = self.getDetectorInfoFromTube( tubeIx )			   
         wkIds = []
-        #print " First dectector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
-        #print "Histograms", self.ws.getNumberHistograms()
+        # print " First dectector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
+        # print "Histograms", self.ws.getNumberHistograms()
         
         # First check we have one detector per histogram/workpsaceID/spectrum
-        sp = self.ws.getSpectrum(10)
+        sampleIndex = 10
+        sp = self.ws.getSpectrum(sampleIndex)
         detids = sp.getDetectorIDs()
         numDetsPerWkID = len(detids)
         if( numDetsPerWkID != 1):
@@ -227,24 +282,18 @@ class TubeSpec:
             return wkIds
         
         # Go and get workspace Indices
-        if(self.continuousIndicesInTube):
-            if( numDet > 0):
-                 for i in range (0, self.ws.getNumberHistograms(), numDet):
-	             deti = self.ws.getDetector(i)
-	             detID = deti.getID()
-	             if (detID  >= firstDet and detID < firstDet+numDet):
-	                 iPixel = detID - firstDet
-	                 wkIds = range( i - iPixel, i - iPixel + numDet)
-	                 #print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
-
-        else: #We can't assume continuous indices within tube, must loop over all indices (there are many). 
-            if( numDet > 0):
-                 for i in range(self.ws.getNumberHistograms()):
-	             sp=self.ws.getSpectrum(i)
-	             detids = sp.getDetectorIDs()
-	             for j in range(len(detids)):
-	                if (detids[j]  >= firstDet and detids[j] < firstDet+numDet):
-	                    wkIds.append(i)
+        if(step == -1):
+            startDet = firstDet - numDet + 1
+        else:
+            startDet = firstDet
+        if( numDet > 0):
+            for i in range (0, self.ws.getNumberHistograms(), numDet):
+	         deti = self.ws.getDetector(i)
+	         detID = deti.getID()
+	         if (detID  >= startDet and detID < startDet+numDet):
+	             iPixel = detID - firstDet
+	             wkIds = range( i - iPixel, i - iPixel + step*numDet, step)
+	             # print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
 
         #print  firstDet, numDet
         if (numDet > 0):

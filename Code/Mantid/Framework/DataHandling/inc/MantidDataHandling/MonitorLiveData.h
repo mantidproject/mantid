@@ -43,6 +43,7 @@ namespace DataHandling
     virtual ~MonitorLiveData();
     
     virtual const std::string name() const;
+    virtual const std::string category() const;
     virtual int version() const;
 
   private:

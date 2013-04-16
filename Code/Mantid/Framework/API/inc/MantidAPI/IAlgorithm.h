@@ -117,13 +117,10 @@ public:
 
   /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
   /// and if true terminates the algorithm.
-  virtual void cancel()const = 0;
-
-  /// True if the algorithm is running asynchronously.
-  virtual bool isRunningAsync() = 0;
+  virtual void cancel() = 0;
 
   /// True if the algorithm is running.
-  virtual bool isRunning() = 0;
+  virtual bool isRunning() const = 0;
 
   /// To query whether algorithm is a child. Default to false
   virtual bool isChild() const = 0;

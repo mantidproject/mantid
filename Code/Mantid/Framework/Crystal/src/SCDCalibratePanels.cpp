@@ -203,7 +203,7 @@ namespace Mantid
       if( N < 4)//If not well indexed
         return boost::shared_ptr<DataObjects::Workspace2D>(new DataObjects::Workspace2D);
 
-
+      std::cout<<"Number indexed peaks used="<<N<<std::endl;
       mwkspc= API::WorkspaceFactory::Instance().create("Workspace2D",(size_t)3,3*N,3*N);
 
       mwkspc->setX(0, pX);
@@ -1191,7 +1191,7 @@ namespace Mantid
 
        ifstream input(filename.c_str(), ios_base::in);
        string line;
-       string detname;
+
        boost::shared_ptr<Mantid::Geometry::ParameterMap> pmap= instrument->getParameterMap();
        while(getline(input, line))
           {
@@ -1344,7 +1344,7 @@ namespace Mantid
       os
           << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ"
           << endl;
-      for (set<string>::iterator it = AllBankName.begin(); it != AllBankName.end(); it++)
+      for (set<string>::iterator it = AllBankName.begin(); it != AllBankName.end(); ++it)
       {
         string bankName = *it;
         string::reverse_iterator rit = bankName.rbegin();

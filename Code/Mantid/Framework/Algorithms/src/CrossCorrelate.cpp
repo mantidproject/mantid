@@ -7,12 +7,11 @@ This is use in powder diffraction experiments when trying to estimate the offset
 
 More details can be found [http://en.wikipedia.org/wiki/Cross-correlation here.]
 
-==Usage==
-'''Python'''
-    CrossCorrelate("InputW","OutputW",2,3,75,1.6,2.2)
-
-
 *WIKI*/
+/*WIKI_USAGE*
+ '''Python'''
+    CrossCorrelate("InputW","OutputW",2,3,75,1.6,2.2)
+*WIKI_USAGE*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

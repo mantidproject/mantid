@@ -393,7 +393,14 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
     // If this results in infinity or NaN, then we can't tell - return false
     if ( sum == std::numeric_limits<double>::infinity() || sum != sum ) return false;
 
-    if ( std::abs(commonSum-sum)/std::max<double>(commonSum,sum) > 1.0E-7 ) return false;
+    if ( std::abs(commonSum) < 1.0E-7 && std::abs(sum) < 1.0E-7 ) 
+    {
+    	for (size_t i = 0; i < WS->blocksize(); i++)
+    	{
+    		if (std::abs(WS->readX(0)[i] - WS->readX(j)[i]) > 1.0E-7 ) return false;
+    	}
+    }
+    else if ( std::abs(commonSum-sum)/std::max<double>(commonSum,sum) > 1.0E-7 ) return false;
   }
   return true;
 }
@@ -414,7 +421,14 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
   // Now check the first spectrum
   const double firstWS = std::accumulate(ws1->readX(0).begin(),ws1->readX(0).end(),0.);
   const double secondWS = std::accumulate(ws2->readX(0).begin(),ws2->readX(0).end(),0.);
-  if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
+  if ( std::abs(firstWS) < 1.0E-7 && std::abs(secondWS) < 1.0E-7 ) 
+  {
+  	for (size_t i = 0; i < ws1->readX(0).size(); i++)
+  	{
+  		if (std::abs(ws1->readX(0)[i] - ws2->readX(0)[i]) > 1.0E-7 ) return false;
+  	}
+  }
+  else if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
 
   // If we were only asked to check the first spectrum, return now
   if (firstOnly) return true;
@@ -435,7 +449,14 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
   {
     const double firstWS = std::accumulate(ws1->readX(i).begin(),ws1->readX(i).end(),0.);
     const double secondWS = std::accumulate(ws2->readX(i).begin(),ws2->readX(i).end(),0.);
-    if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
+    if ( std::abs(firstWS) < 1.0E-7 && std::abs(secondWS) < 1.0E-7 ) 
+    {
+    	for (size_t j = 0; j < ws1->readX(i).size(); j++)
+    	{
+    		if (std::abs(ws1->readX(i)[j] - ws2->readX(i)[j]) > 1.0E-7 ) return false;
+    	}
+    }
+    else if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
   }
 
   return true;

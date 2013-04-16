@@ -65,8 +65,8 @@ private:
   mutable std::vector<GLActor*> mActorsList;    ///< Vector of GLActors for fast access.
   Mantid::Kernel::V3D m_minBound;
   Mantid::Kernel::V3D m_maxBound;
-  mutable GLuint m_displayListId;
-  mutable bool m_useDisplayList;
+  mutable GLuint m_displayListId[2];
+  mutable bool m_useDisplayList[2];
 };
 
 

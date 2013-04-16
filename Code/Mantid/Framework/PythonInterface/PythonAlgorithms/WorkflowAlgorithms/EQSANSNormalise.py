@@ -15,7 +15,7 @@ class EQSANSNormalise(PythonAlgorithm):
     """
     
     def category(self):
-        return "Workflow\\SANS;PythonAlgorithms"
+        return "Workflow\\SANS\\UsesPropertyManager"
 
     def name(self):
         return "EQSANSNormalise"

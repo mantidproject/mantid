@@ -6,9 +6,9 @@ The probability of neutron detection by each detector in the [[workspace]] is ca
 To estimate the true number of neutrons that entered the detector the counts in each bin are divided by the detector efficiency of that detector at that energy.
 
 The numbers of counts are then multiplied by the value of <math>k_i/k_f</math> for each bin. In that formula <math>k_i</math> is the wavenumber a neutron leaving the source (the same for all neutrons) and <math>k_f</math> is the wavenumber on hitting the detector (dependent on the detector and energy bin). They're calculated, in angstrom<sup>-1</sup>, as
- <math>k_i = \sqrt{\frac{2.07212466}{E_i}}</math>
+ <math>k_i = \sqrt{\frac{E_i}{2.07212466}}</math>
  
- <math>k_f = \sqrt{\frac{2.07212466}{E_i - \Delta E}}</math>
+ <math>k_f = \sqrt{\frac{E_i - \Delta E}{2.07212466}}</math>
 
 where <math>E_i</math> and <math>\Delta E</math> are energies in meV, the inital neutron kinetic energy and the energy lost to the sample respectively.
 

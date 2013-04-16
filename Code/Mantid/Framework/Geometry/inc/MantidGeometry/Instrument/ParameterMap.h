@@ -84,6 +84,22 @@ namespace Geometry
     inline bool empty() const { return m_map.empty(); }
     /// Return the size of the map
     inline int size() const { return static_cast<int>(m_map.size()); }
+    /// Return string to be used in the map
+    static const std::string & pos();
+    static const std::string & posx();
+    static const std::string & posy();
+    static const std::string & posz();
+    static const std::string & rot();
+    static const std::string & rotx();
+    static const std::string & roty();
+    static const std::string & rotz();
+    static const std::string & pDouble(); // p prefix to avoid name clash
+    static const std::string & pInt();
+    static const std::string & pBool();
+    static const std::string & pString();
+    static const std::string & pV3D();
+    static const std::string & pQuat();
+
     /// Clears the map
     inline void clear()
     {

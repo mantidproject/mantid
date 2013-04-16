@@ -46,7 +46,6 @@ public:
       std::string ProcessingAlgorithm = "",
       std::string ProcessingProperties = "")
   {
-    StartLiveData alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("FromNow", "1") );
@@ -120,13 +119,14 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
 
     // The MonitorLiveData algorithm is left running in the manager
-    TS_ASSERT_EQUALS( AlgorithmManager::Instance().algorithms().size(), 1);
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().algorithms().front();
-    TS_ASSERT_EQUALS( alg->name(), "MonitorLiveData");
+    TS_ASSERT_EQUALS( AlgorithmManager::Instance().size(), 1);
+    // Get at it via the StartLiveData output property of the same name
+    IAlgorithm_sptr monAlg = alg.getProperty("MonitorLiveData");
+    TS_ASSERT_EQUALS( monAlg->name(), "MonitorLiveData");
 
     // Wait up to 2 seconds for the algorithm to report that it is running.
     Timer tim;
-    while (!alg->isRunning())
+    while (!monAlg->isRunning())
     {
       //Wait
       Poco::Thread::sleep(1);
@@ -138,9 +138,12 @@ public:
       }
     }
     // Cancel and wait for it to be cancelled
-    alg->cancel();
+    monAlg->cancel();
     Poco::Thread::sleep(100);
   }
+
+private:
+  StartLiveData alg;
 
 };
 

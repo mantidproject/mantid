@@ -122,7 +122,6 @@ public:
         TS_ASSERT( alg->existsProperty("prop1") );
         TS_ASSERT( alg->existsProperty("prop2") );
         TS_ASSERT( !alg->isRunning() );
-        TS_ASSERT( !alg->isRunningAsync() );
         alg->setProperty("prop1","stuff");
         alg->setProperty("prop2",17);
         TS_ASSERT_THROWS_NOTHING( alg->execute() );
@@ -158,9 +157,7 @@ public:
         alg->setProperty("prop1","stuff");
         alg->setProperty("prop2",17);
         Poco::ActiveResult<bool> res = alg->executeAsync();
-        res.tryWait(10);
-        TS_ASSERT( alg->isRunningAsync() );
-        res.tryWait(50);
+        res.tryWait(60);
         TS_ASSERT( alg->isRunning() );
 
         res.wait();

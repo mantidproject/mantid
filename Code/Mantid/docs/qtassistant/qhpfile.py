@@ -1,21 +1,19 @@
 #!/usr/bin/env python
-from lxml import etree as le # python-lxml on rpm based systems
-import lxml.html
-from lxml.html import builder as lh
-import os
-
-OUTPUTDIR = "generated"
-WEB_BASE  = "http://www.mantidproject.org/"
+from xml.dom.minidom import Document
+from assistant_common import addEle, addTxtEle
 
 class QHPFile:
-    def __init__(self, namespace, folder="doc"):
-        self.__root = le.Element("QtHelpProject",
-                                 **{"version":"1.0"})
+    def __init__(self, namespace, folder="doc", prettyxml=False):
+        self.__doc = Document()
+        self.__root = addEle(self.__doc,"QtHelpProject", self.__doc,
+                             {"version":"1.0"})
+        self.__prettyxml = prettyxml
 
-        self.__addtxtele(self.__root, "namespace", namespace)
-        self.__addtxtele(self.__root, "virtualFolder", folder)
+        addTxtEle(self.__doc, "namespace", namespace, self.__root)
+        addTxtEle(self.__doc, "virtualFolder", folder, self.__root)
 
-        self.__filterSect = le.SubElement(self.__root, "filterSection")
+
+        self.__filterSect =  addEle(self.__doc, "filterSection", self.__root)
 
         self.__keywordsEle = None # should have 'keywords' section
         self.__keywords = []
@@ -35,25 +33,23 @@ class QHPFile:
     def addFile(self, filename, keyword=None):
         if not keyword is None:
             if self.__keywordsEle is None:
-                self.__keywordsEle = le.SubElement(self.__filterSect, "keywords")
+                self.__keywordsEle = addEle(self.__doc, "keywords",
+                                            self.__filterSect)
             if not keyword in self.__keywords:
-                le.SubElement(self.__keywordsEle, "keyword",
-                              **{"name":keyword, "ref":os.path.split(filename)[1]})
+                addEle(self.__doc, "keyword", self.__keywordsEle,
+                       {"name":keyword, "ref":filename})
                 self.__keywords.append(keyword)
         if self.__filesEle is None:
-            self.__filesEle = le.SubElement(self.__filterSect, "files")
+            self.__filesEle = addEle(self.__doc, "files", self.__filterSect)
         if not filename in self.__files:
-            self.__addtxtele(self.__filesEle, "file", filename)
+            addTxtEle(self.__doc, "file", filename, self.__filesEle)
             self.__files.append(filename)
 
-    def __addtxtele(self, parent, tag, text):
-        ele = le.SubElement(parent, tag)
-        ele.text = text
-        return ele
-
     def __str__(self):
-        return le.tostring(self.__root, pretty_print=True)#,
-    #xml_declaration=True)
+        if self.__prettyxml:
+            return self.__doc.toprettyxml(indent="  ")
+        else:
+            return self.__doc.toxml()
 
     def write(self, filename):
         """

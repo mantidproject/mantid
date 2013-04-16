@@ -5,16 +5,30 @@
 #include <QtGui/QWidget>
 #include <QActionGroup>
 #include <QRunnable>
+#include <Poco/NObserver.h>
+
 #include <MantidKernel/System.h>
 
 #include "ui_MantidEV.h"
 #include "MantidEVWorker.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
+#include "MantidAPI/SelectionNotificationService.h"
+
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
+
+// NOTE: The first several internal classes are just simple QRunnable
+// objects that will run worker code using one or more algorithms, in
+// a separate thread.  This avoids blocking the MantidPlot GUI by 
+// keeping the main Qt thread free.
+//
+
+//
+// START OF SIMPLE QRunnable classes -------------------------------------
+//
 
 /// Local class to load file and convert to MD in a Non-Qt thread.
 class RunLoadAndConvertToMD : public QRunnable
@@ -148,13 +162,27 @@ class RunEllipsoidIntegrate : public QRunnable
 };
 
 
+//
+// END OF SIMPLE QRunnable classes -------------------------------------
+//
+// START of the actual MantidEV Class ----------------------------------
+//
+
+/**
+ *  The MantidEV class has slots that handle user input from the Qt GUI
+ *  and then call methods in the MantidEVWorker class.  Roughly speaking,
+ *  MantidEV deals with the Qt GUI and MantideEVWorker deals with Mantid.
+ */
 class MantidEV : public API::UserSubWindow
 {
   Q_OBJECT
 
 public:
 
+  /// Constructor
   MantidEV(QWidget *parent = 0);
+
+  /// Destructor
   ~MantidEV();
 
   /// The name of the interface as registered into the factory
@@ -172,11 +200,14 @@ private slots:
   /// Slot for the find peaks tab's Apply button 
   void findPeaks_slot();
 
+  /// Slot for choosing a peaks file name
+  void getLoadPeaksFileName_slot();
+
   /// Slot for the find UB tab's Apply button 
   void findUB_slot();
 
-  /// Slot for the Browse button for choosing a matrix file 
-  void loadUB_slot();
+  /// Slot for choosing a matrix file name
+  void getLoadUB_FileName_slot();
 
   /// Slot for the choose cell tab's Apply button 
   void chooseCell_slot();
@@ -187,11 +218,48 @@ private slots:
   /// Slot for the integrate tab's Apply button 
   void integratePeaks_slot();
 
+  /// Slot for Show Info button on Point Info form
+  void showInfo_slot();
+
+
+  // 
+  // The following slots take care of the menu items
+  //
+ 
+  /// Slot to save the current MantidEV GUI state
+  void saveState_slot();
+
+  /// Slot to load a previous MantidEV GUI state
+  void loadState_slot();
+
+  /// Slot to save the UB matrix from the current MantidEV peaks workspace
+  void saveIsawUB_slot();
+
+  /// Slot to a previous UB matrix into the current MantidEV peaks workspace
+  void loadIsawUB_slot();
+
+  /// Slot to save the current MantidEV peaks workspace 
+  void saveIsawPeaks_slot();
+
+  /// Slot to load a peaks workspace to the current MantidEV named workspace
+  void loadIsawPeaks_slot();
+
+  /// Slot to show the UB matrix
+  void showUB_slot();
+  
+  //
+  // The following slots just take care of enabling and disabling
+  // some of the controls, as needed
+  //
+
   /// Slot to enable/disable the Load Event File controls
   void setEnabledLoadEventFileParams_slot( bool on );
 
   /// Slot to enable/disable the find peaks controls
   void setEnabledFindPeaksParams_slot( bool on );
+
+  /// Slot to enable/disable the Load Peaks File controls
+  void setEnabledLoadPeaksParams_slot( bool on );
 
   /// Slot to enable/disable the find UB using FFT controls
   void setEnabledFindUBFFTParams_slot( bool on );
@@ -226,25 +294,51 @@ private slots:
   /// Slot to enable/disable the ellipse size options controls
   void setEnabledEllipseSizeOptions_slot();
 
+  /// Methods to handle pointed at message from any source
+  void handleQpointNotification(const Poco::AutoPtr<Mantid::API::SelectionNotificationServiceImpl::AddNotification> & message );
+  void handleQpointNotification1(const Poco::AutoPtr<Mantid::API::SelectionNotificationServiceImpl::AfterReplaceNotification> & message );
+  /// Method to get and display info about the specified Q-vector
+  void showInfo( Mantid::Kernel::V3D  q_point );
 
 private:
   /// super class pure virtual method we MUST implement
   virtual void initLayout();
 
   /// Utility method to display an error message
-  void errorMessage( const std::string message );
+  void errorMessage( const std::string & message );
 
   /// Utility method to parse a double value in a string
   bool getDouble( std::string str, double & value );
 
   /// Utility method to get a double value from a QtLineEdit widget 
-  bool getDouble( QLineEdit *ledt, double &value );
+  bool getDouble( QLineEdit *ledt, double & value );
 
   /// Utility method to get a positive double from a QtLineEdit widget 
-  bool getPositiveDouble( QLineEdit *ledt, double &value );
+  bool getPositiveDouble( QLineEdit *ledt, double & value );
 
   /// Utility method to get a positive integer value from a QtLineEdit widget 
-  bool getPositiveInt( QLineEdit *ledt, size_t &value );
+  bool getPositiveInt( QLineEdit *ledt, size_t & value );
+
+  /// Get name of file for saving peaks
+  void getSavePeaksFileName();
+
+  /// Get name of file for saving UB matrix 
+  void getSaveUB_FileName();
+
+  /// Save QSettings to specified file, or default, if filename empty
+  void saveSettings( const std::string & filename );
+
+  /// Load QSettings from specified file, or default, if filename empty
+  void loadSettings( const std::string & filename );
+
+  /// Restore the value of the QLineEdit component from QSettings
+  void restore( QSettings *state, QString name, QLineEdit *ledt );
+
+  /// Restore the value of the QCheckbox or QRadioButton from QSettings
+  void restore( QSettings *state, QString name, QAbstractButton *btn );
+
+  /// Restore the value of a QComboBox from QSettings
+  void restore( QSettings *state, QString name, QComboBox *cmbx );
 
 
   Ui::MantidEV   m_uiForm;     ///< The form generated by Qt Designer
@@ -252,15 +346,25 @@ private:
   MantidEVWorker *worker;      /// class that uses Mantid algorithms
                                /// to do the actual work
 
-  std::string  last_UB_file;   /// filename of last UB file that was
-                               /// loaded, if any.
+  std::string  last_UB_file;   /// filename of last UB file that was loaded
+                               /// or saved from MantidEV, if any.
 
-  std::string  last_event_file;/// filename of last event file that
-                               /// was loaded, if any.
+  std::string  last_event_file;/// filename of last event file that was loaded
+                               /// or saved from MantidEV, if any.
 
-  QThreadPool  *m_thread_pool; /// thread pool with only one thread, to 
+  std::string  last_peaks_file;/// filename of last peaks file that was loaded
+                               /// or saved from MantidEV, if any.
+ 
+  std::string  last_ini_file;  /// filename of last settings file that was
+                               /// loaded or saved, if any. 
+
+  QThreadPool  *m_thread_pool; /// local thread pool with only one thread to 
                                /// allow running precisely one operation 
                                /// at a time in a separate thread.
+
+ Poco::NObserver<MantidEV, Mantid::API::SelectionNotificationServiceImpl::AddNotification> observer;
+ Poco::NObserver<MantidEV, Mantid::API::SelectionNotificationServiceImpl::AfterReplaceNotification> observer1;
+
 };
 
 } // namespace CustomInterfaces

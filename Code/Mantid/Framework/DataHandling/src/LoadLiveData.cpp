@@ -100,6 +100,9 @@ namespace DataHandling
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string LoadLiveData::name() const { return "LoadLiveData";};
   
+  /// Algorithm's category for identification. @see Algorithm::category
+  const std::string LoadLiveData::category() const { return "DataHandling\\LiveData\\Support";}
+
   /// Algorithm's version for identification. @see Algorithm::version
   int LoadLiveData::version() const { return 1;};
   

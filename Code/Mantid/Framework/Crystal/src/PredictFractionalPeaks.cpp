@@ -1,5 +1,5 @@
 /*WIKI*
- *This Algorithm creates a PeaksWorkspace with peaks occurring at specific fractional offsets from
+  This Algorithm creates a PeaksWorkspace with peaks occurring at specific fractional offsets from
   h,k,or l values.
 
   There are options to create Peaks offset from peaks from the input PeaksWorkspace, or to create peaks
@@ -191,7 +191,7 @@ namespace Mantid
        Kernel::DblMatrix UB= ol.getUB();
        vector< vector<int> > AlreadyDonePeaks;
        bool done = false;
-       int ErrPos = 1;//Used to determine position in code of a throw
+       int ErrPos =1;//Used to determine position in code of a throw
        while( !done)
        {
          for( size_t hoffset=0;hoffset<hOffsets.size();hoffset++)

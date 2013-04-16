@@ -51,6 +51,9 @@ namespace DataHandling
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string MonitorLiveData::name() const { return "MonitorLiveData";};
   
+  /// Algorithm's category for identification. @see Algorithm::category
+  const std::string MonitorLiveData::category() const { return "DataHandling\\LiveData\\Support";}
+
   /// Algorithm's version for identification. @see Algorithm::version
   int MonitorLiveData::version() const { return 1;};
   
@@ -205,7 +208,6 @@ namespace DataHandling
         }
 
         m_chunkNumber++;
-        //progress( double(chunk % 100)*0.01, "chunk " + Strings::toString(chunk));
         progress( 0.0, "Live Data " + Strings::toString(m_chunkNumber));
       }
 

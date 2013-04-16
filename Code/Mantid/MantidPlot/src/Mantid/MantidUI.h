@@ -288,12 +288,6 @@ signals:
   // a signal for getting the file locations from ICat downloaddatafiles algorithm
   void fileLocations(const std::vector<std::string>&);
 
-private:
-  Mantid::API::IAlgorithm_sptr findAlgorithmPointer(const QString & algName);
-  
-
-  //-----------------------------------
-
 public:
 
 signals:

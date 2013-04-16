@@ -54,7 +54,7 @@ namespace DataHandling
     void exec();
     ///Write the header information
 
-    std::string toIRFString(int bankid);
+    std::string toProf10IrfString(int bankid);
 
     /// Parse input workspace to map of parameters
     void parseTableWorkspace();

@@ -4,51 +4,28 @@
      <virtualFolder>doc</virtualFolder>
      <filterSection>
          <toc>
-             <section title="Mantid overview" ref="index.html"/>
-             <section title="MantidPlot" ref="./mantidplot.html">
-	       <section title="User Interfaces" ref="./userui.html"/>
-	       <section title="Algorithms" ref="algorithms_index.html"/>
-	       <section title="Fitting Functions" ref="fitfunctions_index.html"/>
+             <section title="Mantid overview" ref="html/index.html"/>
+             <section title="MantidPlot" ref="html/mantidplot.html">
+	       <section title="User Interfaces" ref="html/userui.html"/>
+	       <section title="Algorithms" ref="html/algorithms_index.html"/>
+	       <section title="Fitting Functions" ref="html/fitfunctions_index.html"/>
 	     </section>
-             <section title="Mantid Python" ref="./mantidpython.html"/>
-	     <section title="Developer information" ref="./developers.html"/>
+             <section title="Mantid Python" ref="html/mantidpython.html"/>
+	     <section title="Developer information" ref="html/developers.html"/>
          </toc>
-	 <!--
          <keywords>
-             <keyword name="Display" ref="./index.html"/>
-             <keyword name="Rich text" ref="./index.html"/>
-             <keyword name="Plain text" ref="./index.html"/>
-             <keyword name="Find" ref="./findfile.html"/>
-             <keyword name="File menu" ref="./findfile.html"/>
-             <keyword name="File name" ref="./filedialog.html"/>
-             <keyword name="File dialog" ref="./filedialog.html"/>
-             <keyword name="File globbing" ref="./wildcardmatching.html"/>
-             <keyword name="Wildcard matching" ref="./wildcardmatching.html"/>
-             <keyword name="Wildcard syntax" ref="./wildcardmatching.html"/>
-             <keyword name="Browse" ref="./browse.html"/>
-             <keyword name="Directory" ref="./browse.html"/>
-             <keyword name="Open" ref="./openfile.html"/>
-             <keyword name="Select" ref="./openfile.html"/>
+             <keyword name="Mantid overview" ref="html/index.html"/>
+             <keyword name="MantidPlot" ref="html/mantidplot.html"/>
+             <keyword name="User Interfaces" ref="html/userui.html"/>
+             <keyword name="Mantid Python" ref="html/mantidpython.html"/>
+             <keyword name="Developer information" ref="html/developers.html"/>
          </keywords>
-	 -->
          <files>
-           <!--
-	   <file>fitfunctions.html</file>
-           <file>browse.html</file>
-           <file>filedialog.html</file>
-           <file>findfile.html</file>
-           <file>index.html</file>
-           <file>intro.html</file>
-           <file>openfile.html</file>
-           <file>wildcardmatching.html</file>
-           <file>images/browse.png</file>
-           <file>images/fadedfilemenu.png</file>
-           <file>images/filedialog.png</file>
-           <file>images/handbook.png</file>
-           <file>images/mainwindow.png</file>
-           <file>images/open.png</file>
-           <file>images/wildcard.png</file>
-           -->
+           <file>html/index.html</file>
+           <file>html/mantidplot.html</file>
+           <file>html/userui.html</file>
+           <file>html/mantidpython.html</file>
+           <file>html/developers.html</file>
          </files>
      </filterSection>
 </QtHelpProject>

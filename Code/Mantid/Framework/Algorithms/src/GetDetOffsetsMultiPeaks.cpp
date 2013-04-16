@@ -144,6 +144,8 @@ namespace Mantid
           "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
       declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace","",Direction::Output),
           "An output workspace containing the offsets.");
+      declareProperty(new WorkspaceProperty<OffsetsWorkspace>("NumberPeaksWorkspace","NumberPeaksFitted",Direction::Output),
+          "An output workspace containing the offsets.");
       declareProperty(new WorkspaceProperty<>("MaskWorkspace","Mask",Direction::Output),
           "An output workspace containing the mask.");
       declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
@@ -210,6 +212,8 @@ namespace Mantid
       int nspec=static_cast<int>(inputW->getNumberHistograms());
       // Create the output OffsetsWorkspace
       OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
+      // Create the output OffsetsWorkspace
+      OffsetsWorkspace_sptr outputNP(new OffsetsWorkspace(inputW->getInstrument()));
       // determine min/max d-spacing of the workspace
       double wkspDmin, wkspDmax;
       inputW->getXMinMax(wkspDmin, wkspDmax);
@@ -254,6 +258,8 @@ namespace Mantid
         PARALLEL_START_INTERUPT_REGION
         double offset = 0.0;
         double fitSum = 0.0;
+        double chisqSum = 0.0;
+        double peakPosFittedSize = 0.0;
         // checks for dead detectors
         if ((isEvent) && (eventW->getEventList(wi).empty()))
         {
@@ -294,9 +300,11 @@ namespace Mantid
           {
             params[i+3+nparams] = peakPosFitted[i];
           }
+          peakPosFittedSize = static_cast<double>(peakPosFitted.size());
           for (size_t i = 0; i < nparams; i++)
           {
             params[i+3+2*nparams] = chisq[i];
+            chisqSum += chisq[i];
           }
     
           const gsl_multimin_fminimizer_type *T =
@@ -379,6 +387,7 @@ namespace Mantid
           for (it = dets.begin(); it != dets.end(); ++it)
           {
             outputW->setValue(*it, offset, fitSum);
+            outputNP->setValue(*it, peakPosFittedSize, chisqSum);
             if (mask == 1.)
             {
               // Being masked
@@ -399,6 +408,7 @@ namespace Mantid
 
       // Return the output
       setProperty("OutputWorkspace",outputW);
+      setProperty("NumberPeaksWorkspace",outputNP);
       setProperty("MaskWorkspace",maskWS);
 
       // Also save to .cal file, if requested

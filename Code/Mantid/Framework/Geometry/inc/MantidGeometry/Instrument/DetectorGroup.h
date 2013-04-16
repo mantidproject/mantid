@@ -120,6 +120,9 @@ namespace Mantid
       calculating such topology if it was not */
       det_topology getTopology(Kernel::V3D &center)const;
 
+      /// Return separator for list of names of detectors
+      std::string getNameSeparator() const { return ";"; }
+
     protected:
       /// The ID of this effective detector
       int m_id;
@@ -134,8 +137,7 @@ namespace Mantid
       mutable det_topology group_topology;
       /// group centre is the geometrical centre of the detectors group calculated when the calculate group topology is invoked
       mutable Kernel::V3D  groupCentre; 
-      /// Return separator for list of names of detectors
-      std::string getNameSeparator() const { return ";"; }
+
    
       // functions inherited from IComponent
       Component* clone() const{ return NULL; }

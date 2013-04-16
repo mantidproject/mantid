@@ -88,7 +88,18 @@ class BaseWidget(QtGui.QWidget):
         """
             Returns an object with the state of the interface
         """
-        return NotImplemented
+        return NotImplemented 
+    
+    def dir_browse_dialog(self):
+        """
+            Pop up a directory dialog box.
+            @param data_type: string used to filter the files
+            @param title: string to use as title
+            @param multi: multiselection is enabled if True
+        """
+        dirname = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory"))
+
+        return dirname 
     
     def data_browse_dialog(self, data_type=None, title=None, multi=False):
         """

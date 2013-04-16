@@ -116,6 +116,8 @@ namespace MDEventsTestHelper
       }
       out->refreshCache();
     }
+    auto ei = API::ExperimentInfo_sptr(new API::ExperimentInfo());
+    out->addExperimentInfo(ei);
 
     // Add to ADS on option
     if (!wsName.empty())

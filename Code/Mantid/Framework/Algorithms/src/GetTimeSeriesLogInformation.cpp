@@ -32,6 +32,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+using namespace std;
+
 namespace Mantid
 {
 namespace Algorithms
@@ -61,8 +63,15 @@ namespace Algorithms
    */
   void GetTimeSeriesLogInformation::init()
   {
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputEventWorkspace", "Anonymous", Direction::InOut),
+    declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace", "Anonymous", Direction::InOut),
         "Input EventWorkspace.  Each spectrum corresponds to 1 pixel");
+
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","Dummy",Direction::Output),
+                    "Name of the workspace containing (1) the log events in Export Log mode; "
+                    "(2) statistic on time in Overall Statistic mode. ");
+
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("PercentOutputWorkspace", "PercentStat", Direction::Output),
+        "Output Workspace as the statistic on percentage time.");
 
     std::vector<std::string> funcoptions;
     funcoptions.push_back("Overall Statistic");
@@ -86,10 +95,10 @@ namespace Algorithms
     this->declareProperty("T0", 0.0, "Earliest time of the events to be selected.  It can be absolute time (ns), relative time (second) or percentage.");
     this->declareProperty("Tf", 100.0, "Latest time of the events to be selected.  It can be absolute time (ns), relative time (second) or percentage.");
 
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("TimeOutputWorkspace", "TimeStat", Direction::Output, PropertyMode::Optional),
-        "Output Workspace as the statistic on time (second).");
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("PercentOutputWorkspace", "PercentStat", Direction::Output, PropertyMode::Optional),
-        "Output Workspace as the statistic on percentage time.");
+
+    // this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("TimeOutputWorkspace", "TimeStat", Direction::Output, PropertyMode::Optional),
+    //    "Output Workspace as the statistic on time (second).");
+
 
     this->declareProperty("Resolution", 10, "Resolution of statistic workspace");
 
@@ -100,9 +109,9 @@ namespace Algorithms
     this->declareProperty("NumberEntriesExport", 0, "Number of entries of the log to be exported.  Default is all entries.");
     this->declareProperty(new API::FileProperty("OutputPartialLogFile", "", API::FileProperty::OptionalSave),
         "Column file to record the first N entries of the designated log. (Optional for Export Log)");
-    this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output, PropertyMode::Optional),
-      "The name of the workspace to be created for exporting the log events. (Optional for Export Log)" );
 
+    this->declareProperty("IsEventWorkspace", true, "Option to select output workspace to be EventWorkspace or "
+                          "Workspce2D");
     this->declareProperty(new API::FileProperty("OutputDirectory", "", API::FileProperty::OptionalSave),
         "Directory where the information file will be written to.");
 
@@ -115,7 +124,7 @@ namespace Algorithms
   void GetTimeSeriesLogInformation::exec()
   {
     // 1. Get property
-    eventWS = this->getProperty("InputEventWorkspace");
+    eventWS = this->getProperty("InputWorkspace");
 
     std::string funcoption = this->getProperty("Function");
 
@@ -144,8 +153,7 @@ namespace Algorithms
     return;
   }
 
-  /*
-   * Export part of designated log to an file in column format
+  /** Export part of designated log to an file in column format and a output file
    */
   void GetTimeSeriesLogInformation::exportLog()
   {
@@ -159,114 +167,177 @@ namespace Algorithms
       // Log
       Kernel::TimeSeriesProperty<double>* tlog = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(
           eventWS->run().getProperty(logname));
-      if (!tlog){
-        g_log.error() << "TimeSeriesProperty Log " << logname << " does not exist in workspace " <<
-            eventWS->getName() << std::endl;
-        throw std::invalid_argument("TimeSeriesProperty log cannot be found");
+      if (!tlog)
+      {
+        std::stringstream errmsg;
+        errmsg << "TimeSeriesProperty Log " << logname << " does not exist in workspace " <<
+                  eventWS->getName();
+        g_log.error(errmsg.str());
+        throw std::invalid_argument(errmsg.str());
       }
       times = tlog->timesAsVector();
       values = tlog->valuesAsVector();
     }
     else
     {
-      throw std::invalid_argument("Log must be given!");
+      throw std::runtime_error("Log name must be given for \'Export Log\'!");
     }
-
-
 
     int numentries = this->getProperty("NumberEntriesExport");
     if (numentries < 0)
     {
-      g_log.error() << "For Export Log, NumberEntriesExport must be greater than 0.  Input = "
-          << numentries << std::endl;
-      throw std::invalid_argument("NumberEntriesExport cannot be smaller and equal to 0. ");
+      stringstream errmsg;
+      errmsg << "For Export Log, NumberEntriesExport must be greater than 0.  Input = "
+             << numentries;
+      g_log.error(errmsg.str());
+      throw std::runtime_error(errmsg.str());
     }
     else if (numentries == 0 || static_cast<size_t>(numentries) > times.size())
     {
       numentries = static_cast<int>(times.size());
     }
 
+    // 2. Optional output to file with relative time (second)
     std::string outputfilename = this->getProperty("OutputPartialLogFile");
 	if(!outputfilename.empty())
 	{
-		// 2. Output different in time
-		std::ofstream ofs;
-		ofs.open(outputfilename.c_str(), std::ios::out);
+	  std::ofstream ofs;
+	  ofs.open(outputfilename.c_str(), std::ios::out);
 
-		Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
+	  Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
 
-		for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
-		{
-		  Kernel::DateAndTime tnow = times[i];
-		  int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
-		  ofs << i << "\t" << dt << "\t" << values[i] << std::endl;
-		}
+	  for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
+	  {
+		Kernel::DateAndTime tnow = times[i];
+		int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
+		ofs << i << "\t" << dt << "\t" << values[i] << std::endl;
+	  }
 
-
-		ofs.close();
-
+	  ofs.close();
 	}
 
+	// 3. Optional output to output workspace
 	if (!getPropertyValue("OutputWorkspace").empty())
 	{
-		 // 3. Output events in workspace
+	  bool iseventws = getProperty("IsEventWorkspace");
 
-
-		 Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
-
-		 //Get some stuff from the input workspace
-		 const size_t numberOfSpectra = 1;
-		 const int YLength = static_cast<int>(eventWS->blocksize());
-
-		 EventWorkspace_sptr outWS;
-		 //Make a brand new EventWorkspace
-		 outWS = boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", numberOfSpectra, YLength+1, YLength));
-		 //Copy geometry over.
-		 API::WorkspaceFactory::Instance().initializeFromParent(eventWS, outWS, false);
-
-		 this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));
-		 // Create the output event list (empty)
-		 EventList & outEL = outWS->getOrAddEventList(0);
-		 outEL.switchTo(WEIGHTED_NOTIME);
-
-		 // Allocate all the required memory
-		 outEL.reserve(numentries);
-		 outEL.clearDetectorIDs();
-
-		 for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
-		 {
-		   Kernel::DateAndTime tnow = times[i];
-		   int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
-
-		   // convert to microseconds
-		   double dtmsec = static_cast<double>(dt)/1000.0;
-		   outEL.addEventQuickly( WeightedEventNoTime( dtmsec, values[i], values[i]) );
-		 }
-		 outWS->doneAddingEventLists();
-		 // Ensure thread-safety
-		 outWS->sortAll(TOF_SORT, NULL);
-
-		 //Now, create a default X-vector for histogramming, with just 2 bins.
-		 Kernel::cow_ptr<MantidVec> axis;
-		 MantidVec& xRef = axis.access();
-		 xRef.resize(2);
-		 std::vector<WeightedEventNoTime>& events = outEL.getWeightedEventsNoTime();
-		 xRef[0] = events.begin()->tof();
-		 xRef[1] = events.rbegin()->tof();
-
-		 //Set the binning axis using this.
-		 outWS->setX(0, axis);
+	  if (iseventws)
+	  {
+		setupEventWorkspace(numentries, times, values);
+	  }
+	  else
+	  {
+		setupWorkspace2D(numentries, times, values);
+	  }
 	}
+
+	// 4. Dummy
+	DataObjects::Workspace2D_sptr percentstatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+		API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
+	this->setProperty("PercentOutputWorkspace", percentstatws);
 
     return;
   }
 
-  /*
-   * Generate calibration file
-   */
-  void GetTimeSeriesLogInformation::generateCalibrationFile(){
+  /** Set up the output workspace in a Workspace2D
+    */
+  void GetTimeSeriesLogInformation::setupWorkspace2D(int numentries, vector<DateAndTime>& times,
+                                                     vector<double> values)
+  {
+    Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
 
-    g_log.notice() << "Generating calibration file" << std::endl;
+    size_t size = static_cast<size_t>(numentries);
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
+    if (!outWS)
+      throw runtime_error("Unable to create a Workspace2D casted to MatrixWorkspace.");
+
+    MantidVec& vecX = outWS->dataX(0);
+    MantidVec& vecY = outWS->dataY(0);
+    MantidVec& vecE = outWS->dataE(0);
+
+    for (size_t i = 0; i < size; ++i)
+    {
+      int64_t dtns = times[i].totalNanoseconds() - runstart.totalNanoseconds();
+      vecX[i] = static_cast<double>(dtns)*1.0E-9;
+      vecY[i] = values[i];
+      vecE[i] = 0.0;
+    }
+
+    Axis* xaxis = outWS->getAxis(0);
+    xaxis->setUnit("Time");
+
+    setProperty("OutputWorkspace", outWS);
+
+    return;
+  }
+
+  /** Set up an Event workspace
+    */
+  void GetTimeSeriesLogInformation::setupEventWorkspace(int numentries, vector<DateAndTime>& times,
+                                                        vector<double> values)
+  {
+    Kernel::DateAndTime runstart(eventWS->run().getProperty("run_start")->value());
+
+    //Get some stuff from the input workspace
+    const size_t numberOfSpectra = 1;
+    const int YLength = static_cast<int>(eventWS->blocksize());
+
+	EventWorkspace_sptr outWS;
+	//Make a brand new EventWorkspace
+	outWS = boost::dynamic_pointer_cast<EventWorkspace>( API::WorkspaceFactory::Instance().create("EventWorkspace", numberOfSpectra, YLength+1, YLength));
+	//Copy geometry over.
+	API::WorkspaceFactory::Instance().initializeFromParent(eventWS, outWS, false);
+
+	MatrixWorkspace_sptr outMatrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
+	if (outMatrixWS)
+	  this->setProperty("OutputWorkspace", outMatrixWS);
+	else
+	  throw runtime_error("Output workspace cannot be casted to a MatrixWorkspace.");
+
+	g_log.notice("[DBx336] An output workspace is generated.!");
+
+	// Create the output event list (empty)
+	EventList & outEL = outWS->getOrAddEventList(0);
+	outEL.switchTo(WEIGHTED_NOTIME);
+
+	// Allocate all the required memory
+	outEL.reserve(numentries);
+	outEL.clearDetectorIDs();
+
+	for (size_t i = 0; i < static_cast<size_t>(numentries); i ++)
+	{
+	  Kernel::DateAndTime tnow = times[i];
+	  int64_t dt = tnow.totalNanoseconds()-runstart.totalNanoseconds();
+
+	  // convert to microseconds
+	  double dtmsec = static_cast<double>(dt)/1000.0;
+	  outEL.addEventQuickly( WeightedEventNoTime( dtmsec, values[i], values[i]) );
+	}
+	outWS->doneAddingEventLists();
+	// Ensure thread-safety
+	outWS->sortAll(TOF_SORT, NULL);
+
+	//Now, create a default X-vector for histogramming, with just 2 bins.
+	Kernel::cow_ptr<MantidVec> axis;
+	MantidVec& xRef = axis.access();
+	xRef.resize(2);
+	std::vector<WeightedEventNoTime>& events = outEL.getWeightedEventsNoTime();
+	xRef[0] = events.begin()->tof();
+	xRef[1] = events.rbegin()->tof();
+
+	//Set the binning axis using this.
+	outWS->setX(0, axis);
+
+    return;
+  }
+
+
+  /** Generate a calibration file to correct error of fast log time
+   */
+  void GetTimeSeriesLogInformation::generateCalibrationFile()
+  {
+    g_log.notice() << "Generating calibration file.\n";
 
     double offset = this->getProperty("DetectorOffset");
 
@@ -299,6 +370,14 @@ namespace Algorithms
 
     // 3. Close file
     ofs.close();
+
+    // 4. Dummy output workspace
+    DataObjects::Workspace2D_sptr outputws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
+    DataObjects::Workspace2D_sptr percentstatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
+    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputws));
+    this->setProperty("PercentOutputWorkspace", percentstatws);
 
     return;
   }
@@ -570,7 +649,7 @@ namespace Algorithms
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, resolution, resolution));
     DataObjects::Workspace2D_sptr percentstatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, resolution, resolution));
-    this->setProperty("TimeOutputWorkspace", timestatws);
+    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(timestatws));
     this->setProperty("PercentOutputWorkspace", percentstatws);
 
     double ddt0f_ns = static_cast<double>(timespan_ns);
@@ -791,6 +870,15 @@ namespace Algorithms
     exportErrorLog(eventWS, timevec, 1/(240.1));
     calDistributions(timevec, 1/(240.1));
 
+    // Fake output
+    DataObjects::Workspace2D_sptr timestatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
+    DataObjects::Workspace2D_sptr percentstatws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
+    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(timestatws));
+    this->setProperty("PercentOutputWorkspace", percentstatws);
+
+    return;
   }
 
   /*

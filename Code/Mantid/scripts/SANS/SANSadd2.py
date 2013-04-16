@@ -109,24 +109,15 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         wsInMonitor = mtd['AddFilesSumTempory_monitors']
         wsOut = mtd['AddFilesSumTempory']    
         wsInDetector = mtd['AddFilesSumTempory_Rebin']
-        for i in range(4):
-            outY = wsOut.dataY(i)
-            outE = wsOut.dataE(i)
-            monitorY = wsInMonitor.readY(i)
-            monitorE = wsInMonitor.readE(i)            
-            for j in range(len(outY)):
-                outY[j] = monitorY[j]
-                outE[j] = monitorE[j]
+        
+        mon_n = wsInMonitor.getNumberHistograms()
+        for i in range(mon_n):
+            wsOut.setY(i,wsInMonitor.dataY(i))
+            wsOut.setE(i,wsInMonitor.dataE(i))               
                 
-                
-        for i in range(4, 73732):
-            outY = wsOut.dataY(i+4)
-            outE = wsOut.dataE(i+4)            
-            detectorY = wsInDetector.readY(i)
-            detectorE = wsInDetector.readE(i)            
-            for j in range(len(outY)):
-                outY[j] = detectorY[j]   
-                outE[j] = detectorE[j]                         
+        for i in range(wsOut.getNumberHistograms()):
+            wsOut.setY(i+mon_n, wsInDetector.dataY(i))
+            wsOut.setE(i+mon_n, wsInDetector.dataE(i))
                        
         if 'AddFilesSumTempory_Rebin' in mtd : DeleteWorkspace('AddFilesSumTempory_Rebin')
 
@@ -201,15 +192,9 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
 
   if period != _NO_INDIVIDUAL_PERIODS:
       #load just a single period
-      if ext == ".nxs" or ext == ".NXS":
-        outWs = LoadNexus( Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
-      else:   
-        outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
+      outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
   else:
-      if ext == ".nxs" or ext == ".NXS":
-        outWs = LoadNexus(Filename=filename,OutputWorkspace=wsName)
-      else:
-        outWs = Load(Filename=filename,OutputWorkspace=wsName)
+      outWs = Load(Filename=filename,OutputWorkspace=wsName)
 
   props = outWs.getHistory().lastAlgorithm()
 
@@ -292,3 +277,7 @@ def _copyLog(lastPath, logFile, pathout):
     error = 'Error copying log file ' + logFile + ' to directory ' + pathout+'\n'
     print error
     logger.notice(error)
+
+
+if __name__ == '__main__':
+    add_runs(('16183','16197'),'SANS2D','.nxs')

@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -53,7 +54,7 @@ public:
   virtual const std::string category() const { return "Diffraction;CorrectionFunctions\\InstrumentCorrections"; }
   /// Function to optimize
   double intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string peakOpt, std::string rb_param, std::string groupWSName);
-  void movedetector(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, API::MatrixWorkspace_sptr inputW);
+  void movedetector(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, Mantid::DataObjects::EventWorkspace_sptr inputW);
 
 private:
   /// Sets documentation strings for this algorithm
@@ -61,8 +62,8 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  // Matrix workspace pointer
-  //API::MatrixWorkspace_sptr inputW;
+  // Event workspace pointer
+  //API::EventWorkspace_sptr inputW;
 
 };
 

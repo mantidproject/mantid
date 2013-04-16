@@ -137,13 +137,16 @@ def getInstrumentDetails(instrument):
         LoadEmptyInstrument(Filename=idf, OutputWorkspace=instr_name)
         workspace = mtd[instr_name]
     instrument = workspace.getInstrument()
-    ana_list_split = instrument.getStringParameter('analysers')[0].split(',')
+    ana_list_param = instrument.getStringParameter('analysers')
+    if len(ana_list_param) != 1:
+        return ""
+    ana_list_split = ana_list_param[0].split(',')
     reflections = []
     result = ''
-    for i in range(0,len(ana_list_split)):
+    for analyser in ana_list_split:
         list = []
-        name = 'refl-' + ana_list_split[i]
-        list.append( ana_list_split[i] )
+        name = 'refl-' + analyser
+        list.append( analyser )
         try:
             item = instrument.getStringParameter(name)[0]
         except IndexError:

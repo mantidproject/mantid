@@ -59,6 +59,7 @@ namespace Algorithms
     void exec();
     /// Try to get the frequency from a given name.
     double getFrequency(const API::Run& run);
+    std::vector<double> calculatePulseTimes(const double tmin, const double tmax, const double period);
   };
 
 

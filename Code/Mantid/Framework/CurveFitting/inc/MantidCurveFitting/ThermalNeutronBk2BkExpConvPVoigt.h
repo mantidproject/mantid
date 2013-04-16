@@ -3,7 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/Logger.h"
 #include <complex>
@@ -41,7 +43,7 @@ namespace CurveFitting
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-  class DLLExport ThermalNeutronBk2BkExpConvPVoigt : virtual public API::IPeakFunction,
+  class DLLExport ThermalNeutronBk2BkExpConvPVoigt : virtual public API::ParamFunction,public virtual API::IFunction1D,
       virtual public API::IFunctionMW
   {
   public:
@@ -50,13 +52,15 @@ namespace CurveFitting
 
     /// Overwrite IFunction base class methods
     std::string name()const{return "ThermalNeutronBk2BkExpConvPVoigt";}
-    virtual const std::string category() const { return "Peak";}
+    virtual const std::string category() const { return "General";}
 
     /// Overwrite IPeakFunction base class methods
-    virtual double centre()const;
-    virtual double height()const;
-    virtual double fwhm()const;
-    virtual void setHeight(const double h);
+    double centre()const;
+    double height()const;
+    double fwhm()const;
+    void setHeight(const double h);
+
+    void setPeakRadius(const int& r);
 
     //--------------- ThermalNeutron peak function special ---------------------------------------
     /// Set Miller Indicies
@@ -88,6 +92,8 @@ namespace CurveFitting
     /// Override setting a new value to a parameter by name
     void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
 
+    void function1D(double* out, const double* xValues, const size_t nData)const;
+
   protected:
     //----- Overwrite IFunction ------------------------------------------------
     /// Fuction local
@@ -99,6 +105,8 @@ namespace CurveFitting
 
     /// Overwrite IFunction base class method, which declare function parameters
     virtual void init();
+
+    static int s_peakRadius;
 
   private:
     /// Static reference to the logger class
@@ -117,8 +125,10 @@ namespace CurveFitting
                     const bool explicitoutput=false) const;
 
     /// Set 2 functions to be hidden from client
+    /*
     virtual void setCentre(const double c);
     virtual void setFwhm(const double w);
+    */
 
     //------------------------------------------  Variables --------------------------------------
 

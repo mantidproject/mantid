@@ -34,9 +34,6 @@
     install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/Scripts DESTINATION bin PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
     install ( FILES ${PY_DLL_PREFIX}${PY_DLL_SUFFIX_RELEASE} ${PYTHON_EXECUTABLE} ${PYTHONW_EXECUTABLE} DESTINATION bin )
 
-    install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats DESTINATION plugins/qtplugins PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-    install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Installers/WinInstaller/qt.conf DESTINATION bin )
-    
     # include files
     install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/boost DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
     install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/Poco DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
@@ -105,6 +102,14 @@
     REGEX "(QtDesigner4.dll)|(QtDesignerComponents4.dll)|(QtScript4.dll)|(-gd-)|(d4.dll)|(_d.dll)" 
     EXCLUDE 
     PATTERN ".git" EXCLUDE )
+
+    # Qt plugins into out plugins directory and use qt.conf to point Qt at where they are
+    install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats ${CMAKE_LIBRARY_PATH}/qt_plugins/sqldrivers DESTINATION plugins/qtplugins 
+              REGEX "^.*d4.dll$" EXCLUDE  )
+    install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Installers/WinInstaller/qt.conf DESTINATION bin )
+   
+    # Copy assistant.exe
+    install ( FILES ${CMAKE_LIBRARY_PATH}/assistant.exe DESTINATION bin )
     
     # Release deployments do modify enviromental variables, other deployments do not.
     if(CPACK_PACKAGE_SUFFIX STREQUAL "") 

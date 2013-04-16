@@ -90,7 +90,7 @@ namespace DataHandling
     parseTableWorkspace();
 
     // 3. Generate the string for the file to write
-    std::string filestr = toIRFString(bankid);
+    std::string filestr = toProf10IrfString(bankid);
 
     // 4. Write to file
     std::ofstream ofile;
@@ -116,7 +116,7 @@ namespace DataHandling
     {
       dbmsgss << setw(20) << colnames[i];
     }
-    cout << dbmsgss.str() << endl;
+    g_log.debug(dbmsgss.str());
 
     // FIXME - The order of the column name can be flexible in future
     if (colnames.size() < 2 || colnames[0].compare("Name") || colnames[1].compare("Value"))
@@ -152,8 +152,9 @@ namespace DataHandling
 
   /**  Convert the parameters to Fullprof resolution file string
     */
-  std::string SaveFullprofResolution::toIRFString(int bankid)
+  std::string SaveFullprofResolution::toProf10IrfString(int bankid)
   {
+    // 1. Get all parameter values
     double tofmin = mParameters["tof-min"];
     double tofmax = mParameters["tof-max"];
     double zero = mParameters["Zero"];
@@ -177,10 +178,17 @@ namespace DataHandling
     double beta0 = mParameters["Beta0"];
     double beta1 = mParameters["Beta1"];
     double beta0t = mParameters["Beta0t"];
-    double beta1t = mParameters["Beta0"];
-    double profindex = mParameters["Profile"];
+    double beta1t = mParameters["Beta1t"];
+    int profindex = static_cast<int>(floor(mParameters["Profile"] + 0.5));
     double twotheta = mParameters["twotheta"];
 
+    // 2. Deal with profile index
+    if (profindex == 0)
+    {
+      profindex = 10;
+    }
+
+    // 3. Write out
     std::stringstream content;
 
     content << fixed;
@@ -192,21 +200,21 @@ namespace DataHandling
 
     content << "!       Tof-min(us)    step      Tof-max(us)" << std::endl;
     content << "TOFRG   "
-            << setw(16) << setprecision(1) << tofmin
-            << setw(16) << setprecision(5) << tofstep
-            << setw(16) << setprecision(1) << tofmax << std::endl;
+            << setprecision(3) << tofmin << " "
+            << setw(16) << setprecision(5) << tofstep << " "
+            << setw(16) << setprecision(3) << tofmax << std::endl;
 
     content << "!       Zero   Dtt1" << std::endl;
     content << "ZD2TOF     "
-            << setw(16) << setprecision(3) << zero
+            << setprecision(5) << zero
             << setw(16) << setprecision(5) << dtt1 << std::endl;
 
     content << "!       Zerot    Dtt1t       Dtt2t    x-cross    Width" << std::endl;
     content << "ZD2TOT    "
-            << setw(16) << setprecision(3) << zerot
+            << setprecision(5) << zerot
             << setw(16) << setprecision(5) << dtt1t
             << setw(16) << setprecision(5) << dtt2t
-            << setw(16) << setprecision(5) << xcross
+            << setw(16) << setprecision(10) << xcross
             << setw(16) << setprecision(5) << width << std::endl;
 
     content << "!     TOF-TWOTH of the bank" << std::endl;
@@ -216,29 +224,29 @@ namespace DataHandling
     // In .irf file, Sig-0, Sig-1 and Sig-2 are the squared values;
     content << "!       Sig-2     Sig-1     Sig-0" << std::endl;
     content << "SIGMA  "
-            << setw(16) << setprecision(3) << sig2*sig2
-            << setw(16) << setprecision(3) << sig1*sig1
-            << setw(16) << setprecision(3) << sig0*sig0 << std::endl;
+            << setprecision(6) << sig2*sig2
+            << setw(16) << setprecision(6) << sig1*sig1
+            << setw(16) << setprecision(6) << sig0*sig0 << std::endl;
 
     content << "!       Gam-2     Gam-1     Gam-0" << std::endl;
     content << "GAMMA  "
-            << setw(16) << setprecision(3) << gam2
-            << setw(16) << setprecision(3) << gam1
-            << setw(16) << setprecision(3) << gam0 << "\n";
+            << setw(16) << setprecision(6) << gam2 << " "
+            << setw(16) << setprecision(6) << gam1 << " "
+            << setw(16) << setprecision(6) << gam0 << "\n";
 
     content << "!          alph0       beta0       alph1       beta1" << std::endl;
     content << "ALFBE        "
-            << setw(16) << setprecision(3) << alph0 <<
-               setw(16) << setprecision(3) << beta0 <<
-               setw(16) << setprecision(3) << alph1 <<
-               setw(16) << setprecision(3) << beta1 << std::endl;
+            << setprecision(6) << alph0 << " " <<
+               setw(16) << setprecision(6) << beta0 << " " <<
+               setw(16) << setprecision(6) << alph1 << " " <<
+               setw(16) << setprecision(6) << beta1 << std::endl;
 
     content << "!         alph0t      beta0t      alph1t      beta1t" << std::endl;
     content << "ALFBT       "
-            << setw(16) << setprecision(3) << alph0t
-            << setw(16) << setprecision(3) << beta0t
-            << setw(16) << setprecision(3) << alph1t
-            << setw(16) << setprecision(3) << beta1t << std::endl;
+            << setprecision(6) << alph0t << " "
+            << setw(16) << setprecision(6) << beta0t << " "
+            << setw(16) << setprecision(6) << alph1t << " "
+            << setw(16) << setprecision(6) << beta1t << std::endl;
     content << "END" << std::endl;
 
     return content.str();

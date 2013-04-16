@@ -58,7 +58,7 @@ namespace API
    int install_repository(){
     using Mantid::API::ScriptRepositoryFactory; 
 
-    Mantid::API::ScriptRepository_sptr repo_ptr =  ScriptRepositoryFactory::Instance().create("GitScriptRepository");
+    Mantid::API::ScriptRepository_sptr repo_ptr =  ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
     try{
       repo_ptr->update();
      // QMessageBox::information(NULL, "Install Script Repository", "Script Repository Installed!\n"); 
@@ -75,7 +75,7 @@ namespace API
    int update_repository(){
     using Mantid::API::ScriptRepositoryFactory; 
 
-    Mantid::API::ScriptRepository_sptr repo_ptr =  ScriptRepositoryFactory::Instance().create("GitScriptRepository");
+    Mantid::API::ScriptRepository_sptr repo_ptr =  ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
     try{
       repo_ptr->update();      
     }catch(Mantid::API::ScriptRepoException & ex){
@@ -96,7 +96,7 @@ namespace API
     using Mantid::API::ScriptRepositoryFactory; 
     using Mantid::Kernel::ConfigServiceImpl; 
     using Mantid::Kernel::ConfigService;
-    Mantid::API::ScriptRepository_sptr repo_ptr =   ScriptRepositoryFactory::Instance().create("GitScriptRepository");
+    Mantid::API::ScriptRepository_sptr repo_ptr =   ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
  
     if (!repo_ptr->isValid()){
       // no repository cloned

@@ -184,6 +184,16 @@ if ( ENABLE_CPACK )
       else()  
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla" )
       endif()
+
+      # qt assistant is in different places in every distro
+      if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qt4-x11" )
+      elseif ( ${UNIX_DIST} MATCHES "Fedora" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qt4-assistant" )
+      elseif ( ${UNIX_DIST} MATCHES "SUSE LINUX" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} libqt4-devel-doc" )
+      endif ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+
       if( ${UNIX_DIST} STREQUAL "Ubuntu" )
         if( ${UNIX_CODENAME} STREQUAL "lucid" )
           set ( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-date-time1.40.0,libboost-regex1.40.0,libboost-signals1.40.0,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9,libnexus0 (>= 4.2),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),libqscintilla2-5,libqwt5-qt4,libqwtplot3d-qt4-0" )
@@ -196,6 +206,7 @@ if ( ENABLE_CPACK )
         else()
           message( WARNING "Mantid does not support packaging of this Ubuntu version: ${UNIX_CODENAME}")
         endif()
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},qt4-dev-tools" ) # for qt assistant
       endif()
       # soft requirement of tcmalloc - if built with it, then require it
       IF ( USE_TCMALLOC AND TCMALLOC_FOUND )

@@ -59,6 +59,8 @@ private:
   void init();
   ///Execution code
   void exec();
+  void parseChemicalFormula(const std::string chemicalSymbol, std::vector<std::string>& atoms, std::vector<uint16_t>& numberAtoms,
+		  std::vector<uint16_t>& aNumbers);
 };
 
 }

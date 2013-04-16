@@ -8,6 +8,7 @@ import sys
 import codecs
 import fnmatch
 import platform
+import re
 
 module_name=os.path.basename(os.path.splitext(__file__)[0])
 mantid_initialized = False
@@ -28,6 +29,9 @@ cpp_files = []
 cpp_files_bare = []
 python_files = []
 python_files_bare = []
+
+# Missing description tag.
+missing_description = "INSERT FULL DESCRIPTION HERE"
 
 #======================================================================
 def remove_wiki_from_header():
@@ -83,35 +87,85 @@ def add_wiki_description(algo, wikidesc):
         f = codecs.open(source, encoding='utf-8', mode='w+')
         f.write(text)
         f.close()
-        
+
 #======================================================================
 def get_wiki_description(algo, version):
+    tryUseDescriptionFromBinaries = True
+    return get_custom_wiki_section(algo, version, "*WIKI*", tryUseDescriptionFromBinaries)
+
+#======================================================================
+def get_wiki_usage(algo, version):
+    wiki_usage = get_custom_wiki_section(algo, version, "*WIKI_USAGE*")
+    wiki_no_sig_usage = get_custom_wiki_section(algo, version, "*WIKI_USAGE_NO_SIGNATURE*")
+    
+    if wiki_usage:
+        return (True, wiki_usage)
+    elif wiki_no_sig_usage:
+        return (False, wiki_no_sig_usage)
+    else:
+        return (True, "")
+            
+
+#======================================================================
+def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=False, verbose=True):
     """ Extract the text between the *WIKI* tags in the .cpp file
     
     @param algo :: name of the algorithm
     @param version :: version, -1 for latest 
     """
+    
+    desc = ""
     source = find_algo_file(algo, version)
-    if source == '':
+    if source == '' and tryUseDescriptionFromBinaries:
         from mantid.api import AlgorithmManager
         alg = AlgorithmManager.createUnmanaged(algo, version)
         print "Getting algorithm description from binaries."
         return alg.getWikiDescription()
+    elif source == '' and not tryUseDescriptionFromBinaries:
+        print "Warning: Cannot find source for algorithm"
+        return desc
     else:
         f = open(source,'r')
         lines = f.read().split('\n')
+        #print lines
         f.close()
-        n = 0
-        while not lines[n].lstrip().startswith("/*WIKI*") and not lines[n].lstrip().startswith('"""*WIKI*'):
-            n += 1
-        desc = ""
-        n += 1
-        while not lines[n].lstrip().startswith("*WIKI*"):
-            desc += lines[n] + "\n"
-            n += 1
-        print "Getting algorithm description from source."
-        return desc
+        
+        print algo
+        try:
+            # Start and end location markers.
+            start_tag_cpp = "/" + tag 
+            start_tag_python = '"""%s' % tag
+            end_tag_cpp = tag + "/"
+            end_tag_python = '%s"""' % tag
+            
+            # Find the start and end lines for the wiki section in the source.
+            start_index = 0
+            end_index = 0
+            for line_index in range(0, len(lines)):
+                line = lines[line_index]
+                if line.lstrip().startswith(start_tag_cpp) or line.lstrip().startswith(start_tag_python):
+                    start_index = line_index + 1
+                    continue
+                if line.lstrip().startswith(end_tag_cpp) or line.lstrip().startswith(end_tag_python):
+                    end_index = line_index
+                    break
+            
+            # Concatinate across the range.
+            for line_index in range(start_index, end_index):
+                desc += lines[line_index] + "\n"
 
+            if verbose:
+                if start_index == end_index:
+                    print "No algorithm %s section in source." % tag
+                else:
+                    print "Getting algorithm %s section from source." % tag
+        
+        except IndexError:
+            print "No algorithm %s section in source." % tag
+        return desc        
+
+        
+        
 #======================================================================
 def create_function_signature(alg, algo_name):
     """
@@ -144,21 +198,17 @@ def create_function_signature(alg, algo_name):
     # Add the output properties
     props = alg.getProperties()
     allreturns = []
-    workspacereturn = None
     # Loop through all the properties looking for output properties
     for prop in props:
         if (direction_string[prop.direction] == OutputDirection):
             allreturns.append(prop.name)
-            # Cache the last workspace property seen.
-            if isinstance(prop, IWorkspaceProperty): 
-                workspacereturn = prop.name
                 
     lhs = ""
     comments = ""
     if not allreturns:
         pass
-    elif (len(allreturns) == 1) and (workspacereturn is not None): 
-        lhs =   workspacereturn + " = "
+    elif (len(allreturns) == 1): 
+        lhs =   allreturns[0] + " = "
     else :
         lhs = "result = "
         comments = "\n "
@@ -227,7 +277,6 @@ def initialize_wiki(args):
     
     
 #======================================================================
-
 def flag_if_build_is_debug(mantidpath):
     """
     Check if the given build is a debug build of Mantid
@@ -487,7 +536,7 @@ def do_make_wiki(algo_name, version, latest_version):
     """ 
     
     external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
-    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000;'></anchor>\n\n" % (external_image, external_image)  
+    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000; padding-left:5px;'></anchor>\n\n" % (external_image, external_image)  
     
     # Deprecated algorithms: Simply return the deprecation message
     print "Creating... ", algo_name, version
@@ -498,7 +547,7 @@ def do_make_wiki(algo_name, version, latest_version):
     deprec_check = DeprecatedAlgorithmChecker(algo_name,version)
     deprec = deprec_check.isDeprecated()
     if len(deprec) != 0:
-        out = "== Deprecated ==\n\n"
+        out += "== Deprecated ==\n\n"
         deprecstr = deprec
         deprecstr = deprecstr.replace(". Use ", ". Use [[")
         deprecstr = deprecstr.replace(" instead.", "]] instead.")
@@ -509,25 +558,18 @@ def do_make_wiki(algo_name, version, latest_version):
     alg.initialize()
     
     if (latest_version > 1):
-        if (version < latest_version):
-            out += "Note: This page refers to version %d of %s. The latest version is %d - see [[%s v.%d]].\n\n" % (version, algo_name, latest_version, algo_name, latest_version)
-        else:
-            out += "Note: This page refers to version %d of %s. "% (version, algo_name)
-            if latest_version > 2:
-                out += "The documentation for older versions is available at: "
-            else:
-                out += "The documentation for the older version is available at: "
-            for v in xrange(1,latest_version):
-                out += "[[%s v.%d]] " % (algo_name, v)
-            out += "\n\n"
-        
+        out += "Note: This page refers to version %d of %s. \n\n"% (version, algo_name)
+            
     
     out += "== Summary ==\n\n"
     out += alg.getWikiSummary().replace("\n", " ") + "\n\n"
-    
+    # Fetch the custom usage wiki section.
+    include_signature, custom_usage = get_wiki_usage(algo_name, version)
     out += "\n\n== Usage ==\n\n"
-    out += " " + create_function_signature(alg, algo_name) + "\n\n" 
+    if include_signature:
+        out += " " + create_function_signature(alg, algo_name) + "\n\n" 
     out += "<br clear=all>\n\n" 
+    out += custom_usage
     out += "== Properties ==\n\n"
     
     out += """{| border="1" cellpadding="5" cellspacing="0" 
@@ -559,7 +601,7 @@ def do_make_wiki(algo_name, version, latest_version):
     except IndexError:
         pass
     if (desc == ""):
-      out += "INSERT FULL DESCRIPTION HERE\n"
+      out +=  missing_description + "\n"
       print "Warning: missing wiki description for %s! Placeholder inserted instead." % algo_name
     else:
       out += desc + "\n"

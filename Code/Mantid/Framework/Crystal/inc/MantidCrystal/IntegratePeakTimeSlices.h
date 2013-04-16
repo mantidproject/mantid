@@ -92,9 +92,8 @@ namespace Crystal
      bool isEdgePeak( const double* params, int nparams);
 
 
-     void setHeighHalfWidthInfo( Mantid::MantidVecPtr &xvals,
-         Mantid::MantidVecPtr &yvals,Mantid::MantidVecPtr &counts,
-         double ROW,double COL, std::vector<double> & StatBase);
+     void setHeightHalfWidthInfo( Mantid::MantidVecPtr &xvals,
+         Mantid::MantidVecPtr &yvals,Mantid::MantidVecPtr &counts);
 
      void setCurrentRadius( double radius)
      {

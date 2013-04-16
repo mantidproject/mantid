@@ -88,7 +88,7 @@ void Viewport::setProjection(const Mantid::Kernel::V3D& minBounds, const Mantid:
   double tmp = maxBounds.norm();
   if (tmp > radius) radius = tmp;
 
-  setProjection( minBounds.X(), maxBounds.X(), minBounds.Y(), maxBounds.Y(), -radius, radius );
+  setProjection( minBounds.X(), maxBounds.X(), minBounds.Y(), maxBounds.Y(), -radius, radius, type );
 }
 
 /**

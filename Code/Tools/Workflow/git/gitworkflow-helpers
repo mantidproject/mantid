@@ -54,6 +54,21 @@ check_branch_exists() {
     fi
 }
 
+# Given a hint try and find the branch on the remote
+# If the name resolves unambigously then the branchname is returned, otherwise
+# and empty string is returned
+find_branch_on_remote() {
+    if [ ! $# -eq 1 ]; then
+	echo "find_branch_on_remote requires a hint"
+	exit 1
+    fi
+    remote_branches=$(git branch -r --no-color | grep -E "${1}" | grep origin)
+    nbranches=$(echo "${remote_branches}" | wc -l) # the quotes are necessary to make it keep the separate lines!
+    if [ $nbranches -eq 1 ]; then
+	echo ${remote_branches}
+    fi
+}
+
 # Returns the name of the current branch
 current_branch() {
     git branch --no-color | grep '^\* ' | grep -v 'no branch' | sed 's/^* //g'
@@ -119,4 +134,96 @@ merge_in_progress() {
 	retval=0
     fi
     return $retval
+}
+
+# Publish given branch
+publish_branch() {
+    if [ ! $# -eq 1 ]; then
+	echo "publish_branch requires a single local branchname argument"
+	exit 1
+    fi
+    
+    git_halt_on_error push origin $1
+}
+
+# Update given local branch to remote
+# Essentially
+# git fetch -p
+# git rebase --preserve-merges origin/<branchname>
+update_branch_from_remote() {
+    if [ ! $# -eq 1 ]; then
+	echo "update_branch_from_remote requires a single local branchname argument"
+	exit 1
+    fi
+
+    git_halt_on_error fetch -p
+    git_halt_on_error rebase --preserve-merges origin/$1
+}
+
+# Delete branch on remote
+delete_remote_branch() {
+    if [ ! $# -eq 1 ]; then
+	echo "delete_remote_branch requires a single local branchname argument"
+	exit 1
+    fi
+    # Delete branch on the remote
+    git_halt_on_error push origin :$1
+}
+
+# Delete branch locally
+delete_local_branch() {
+    if [ ! $# -eq 1 ]; then
+	echo "delete_local_branch requires a single local branchname argument"
+	exit 1
+    fi
+    # Delete local branch if there
+    local_branch_exists $1
+    if [ $? -eq 1 ]; then
+	git_halt_on_error branch -D $1
+    fi
+}
+
+# Construct address for compare view on github given the branch name
+github_compare_url() {
+    if [ ! $# -eq 1 ]; then
+	echo "github_compare_address requires a single argument giving the branch name"
+    fi
+    # Any forward slashes must be replaced with semicolons
+    changes_branch_gh=$(echo $1 | sed -e "s@/@;@g")
+    # Find which repository we are in
+    repo_stem=$(git config --get remote.origin.url | sed -e 's@.*github.com[:,/]@@' | sed -e 's@\.git$@@')
+    changes_address="https://github.com/${repo_stem}/compare/${changes_branch_gh}"
+    # Echo so it can be caputured in a variable
+    echo ${changes_address}
+}
+
+# Get the author name
+get_author_name() {
+    if [ ! $# -eq 1 ]; then
+	echo "get_contact_info requires a single argument giving the branch name"
+    fi
+    git log -1 $1 --format="format:%an"
+}
+
+# Get the author name
+get_author_email() {
+    if [ ! $# -eq 1 ]; then
+	echo "get_contact_info requires a single argument giving the branch name"
+    fi
+    git log -1 $1 --format="format:%ae"
+}
+
+# Removes a key and section if it is empty
+remove_config_value() {
+    if [ ! $# -eq 1 ]; then
+	echo "remove_config_value requires the key as an arguments"
+    fi
+    # Clear saved config
+    git config --unset $1
+    # & the section if there is nothing left
+    section_name=$(echo $1 | cut -d'.' -f 1,2)
+    remaining_keys=$(git config --list | grep ${section_name})
+    if [ -z "${remaining_keys}" ]; then
+	git config --remove-section ${section_name} 2> /dev/null
+    fi
 }

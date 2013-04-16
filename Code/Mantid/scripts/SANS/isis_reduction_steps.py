@@ -2072,9 +2072,9 @@ class UserFile(ReductionStep):
         if details.startswith('RESCALE'):
             if 'FIT' in details:
                 if len(values) == 1:
-                    rAnds.fitRescale = True 
+                    rAnds.fitScale = True 
                 elif len(values) == 3: 
-                    rAnds.fitRescale = True
+                    rAnds.fitScale = True
                     rAnds.qMin = float(values[1])
                     rAnds.qMax = float(values[2])
                     rAnds.qRangeUserSelected = True

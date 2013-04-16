@@ -77,6 +77,7 @@ void InputController3DMove::mouseMoveEvent(QMouseEvent *event)
 void InputController3DMove::mouseReleaseEvent(QMouseEvent *)
 {
     m_isButtonPressed = false;
+    emit finish();
 }
 
 /**

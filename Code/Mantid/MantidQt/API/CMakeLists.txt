@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/BoolPropertyWidget.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
+        src/HelpWindow.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
 	src/ManageUserDirectories.cpp
@@ -57,6 +58,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
 	inc/MantidQtAPI/GraphOptions.h
+        inc/MantidQtAPI/HelpWindow.h
 	inc/MantidQtAPI/InterfaceFactory.h
 	inc/MantidQtAPI/InterfaceManager.h
 	inc/MantidQtAPI/MantidColorMap.h

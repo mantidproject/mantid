@@ -2,6 +2,7 @@
 #define MANTID_SLICEVIEWER_PEAKOVERLAYSPHERE_FACTORY_H_
 
 #include "MantidQtSliceViewer/PeakOverlayViewFactoryBase.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt
@@ -39,15 +40,13 @@ namespace MantidQt
       double m_peakRadius;
       double m_backgroundInnerRadius;
       double m_backgroundOuterRadius;
+      Mantid::API::IPeaksWorkspace_sptr m_peaksWS;
+      int m_FOM;
     public:
-      PeakOverlaySphereFactory(QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
+      PeakOverlaySphereFactory(Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
       virtual ~PeakOverlaySphereFactory();
-      boost::shared_ptr<PeakOverlayView> createView(const Mantid::Kernel::V3D& position) const;
-      virtual void setPeakRadius(const double& peakRadius, const double& peakInnerRadius, const double& peakOuterRadius);
-      virtual void setZRange(const double&, const double&)
-      {
-        // Do nothing.
-      }
+      virtual boost::shared_ptr<PeakOverlayView> createView(const int peakIndex, PeakTransform_const_sptr transform) const;
+      virtual int FOM() const;
     };
   }
 }

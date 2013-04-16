@@ -158,7 +158,8 @@ namespace Mantid
      */
     void SpectraDetectorMap::addSpectrumEntry(const specid_t spectrum, const detid_t & udett)
     {
-      m_s2dmap.insert(std::pair<specid_t, detid_t>(spectrum,udett));
+      std::map<specid_t, detid_t>::iterator it = m_s2dmap.end();
+      m_s2dmap.insert(it, std::pair<specid_t, detid_t>(spectrum,udett));
     }
 
 

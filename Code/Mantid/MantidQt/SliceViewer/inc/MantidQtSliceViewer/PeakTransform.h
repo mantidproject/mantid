@@ -46,6 +46,7 @@ namespace MantidQt
 
     /// Typedef for a PeakTransform wrapped in a shared_pointer.
     typedef boost::shared_ptr<PeakTransform> PeakTransform_sptr;
+    typedef boost::shared_ptr<const PeakTransform> PeakTransform_const_sptr;
     
     /**
     @class PeakTransformException
