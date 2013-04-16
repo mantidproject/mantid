@@ -685,7 +685,7 @@ class SpectraToFoilPeriodMap(object):
     & the period index into a WorkspaceGroup for a foil state.
     """
     
-    def __init__(self, nperiods):
+    def __init__(self, nperiods=6):
         """Constructor. For nperiods seet up the mappings"""
         if nperiods == 2:
             self._one_to_one = {1:1, 2:2}
@@ -722,12 +722,49 @@ class SpectraToFoilPeriodMap(object):
             self._one_to_one[index+1] = int(val)
         return arr
 
+    def get_foilout_periods(self, spectrum_no):
+        """Returns a list of the foil-out periods for the given
+        spectrum number. Note that these start from 1 not zero
+            @param spectrum_no :: A spectrum number (1->nspectra)
+            @returns A list of period numbers for foil out state
+        """
+        return self.get_foil_periods(spectrum_no, state=0)
+
+    def get_foilin_periods(self, spectrum_no):
+        """Returns a list of the foil-out periods for the given
+        spectrum number. Note that these start from 1 not zero
+            @param spectrum_no :: A spectrum number (1->nspectra)
+            @returns A list of period numbers for foil out state
+        """
+        return self.get_foil_periods(spectrum_no, state=1)
+
+    def get_foil_periods(self, spectrum_no, state):
+        """Returns a list of the periods for the given
+        spectrum number & foil state. Note that these start from 1 not zero
+            @param spectrum_no :: A spectrum number (1->nspectra)
+            @param state :: 0 = foil out, 1 = foil in. 
+            @returns A list of period numbers for foil out state
+        """
+        self._validate_spectrum_number(spectrum_no)
+        
+        foil_out = (state==0)
+
+        if spectrum_no < 135:
+            foil_periods = [1,2,3]
+        elif (spectrum_no >= 135 and spectrum_no <= 142) or \
+             (spectrum_no >= 151 and spectrum_no <= 158) or \
+             (spectrum_no >= 167 and spectrum_no <= 174) or \
+             (spectrum_no >= 183 and spectrum_no <= 190):
+            foil_periods = [2,4,6] if foil_out else [1,3,5]
+        else:
+            foil_periods = [1,3,5] if foil_out else [2,4,6]
+        return foil_periods
+
     def get_indices(self, spectrum_no, foil_state_numbers):
         """Returns a tuple of indices that can be used to access the Workspace within
         a WorkspaceGroup that corresponds to the foil state numbers given
             @param spectrum_no :: A spectrum number (1->nspectra)
-            @param foil_state_no :: A number between 1 & 9(inclusive) that defines which
-                                        foil state is required
+            @param foil_state_no :: A number between 1 & 9(inclusive) that defines which foil state is required
             @returns A tuple of indices in a WorkspaceGroup that gives the associated Workspace
         """
         indices = []
