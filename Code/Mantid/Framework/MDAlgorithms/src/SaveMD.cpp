@@ -195,13 +195,13 @@ namespace MDAlgorithms
       file->writeData("dimensions", int32_t(nd));
       // Save the algorithm history under "process"
       ws->getHistory().saveNexus(file);
+
+      // Write out W transform matrix
+      this->saveWmatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+
+      // Write out the affine matrices
+      this->saveAffineTransformMatricies(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
     }
-
-    // Write out W transform matrix
-    this->saveWmatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
-
-    // Write out the affine matrices
-    this->saveAffineTransformMatricies(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
     file->putAttr("event_type", MDE::getTypeName());
     // Save each NEW ExperimentInfo to a spot in the file
