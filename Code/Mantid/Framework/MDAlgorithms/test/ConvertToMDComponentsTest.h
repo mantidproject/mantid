@@ -213,13 +213,13 @@ void testCopyMethadata()
      subAlgo.setPropertyValue("MinValues","-10");
      subAlgo.setPropertyValue("MaxValues","10");
 
-     bool createNewTargetWs;
+     bool createNewTargetWs(false);
      std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
      std::string dE_mode = Kernel::DeltaEMode().asString(Kernel::DeltaEMode::Elastic);
      MDWSTransform QScl;
      std::vector<std::string> QScales = QScl.getQScalings();
 
-    MDEvents::MDWSDescription targWSDescr;
+     MDEvents::MDWSDescription targWSDescr;
      TS_ASSERT_THROWS_NOTHING(createNewTargetWs=subAlgo.buildTargetWSDescription(spws,Q_modes[0],dE_mode,std::vector<std::string>(),QScales[CnvrtToMD::NoScaling],targWSDescr));
 
      TSM_ASSERT("as spws is null pointer, this should request creating new workspace ",createNewTargetWs)
