@@ -102,7 +102,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Export part of designated log to an file in column format and a output file
     * @param logname :: name of log to export
-    * @param numberexports :: number of log entries to export
+    * @param numentries :: number of log entries to export
     * @param outputeventws :: boolean.  output workspace is event workspace if true.
    */
   void ExportTimeSeriesLog::exportLog(string logname, int numentries, bool outputeventws)
@@ -170,7 +170,7 @@ namespace Algorithms
     * @param values :: vector of log value in double
     */
   void ExportTimeSeriesLog::setupWorkspace2D(int numentries, vector<DateAndTime>& times,
-                                                     vector<double> values)
+                                             vector<double> values)
   {
     Kernel::DateAndTime runstart(m_dataWS->run().getProperty("run_start")->value());
 
@@ -205,7 +205,7 @@ namespace Algorithms
     * @param values :: vector of log value in double
     */
   void ExportTimeSeriesLog::setupEventWorkspace(int numentries, vector<DateAndTime>& times,
-                                                        vector<double> values)
+                                                vector<double> values)
   {
     Kernel::DateAndTime runstart(m_dataWS->run().getProperty("run_start")->value());
 
