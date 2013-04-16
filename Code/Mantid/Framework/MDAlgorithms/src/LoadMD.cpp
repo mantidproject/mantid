@@ -488,12 +488,6 @@ namespace Mantid
   {
     std::map<std::string, std::string> entries;
     file->getEntries(entries);
-    std::cout << "B: " << entries.size() << std::endl;
-    std::map<std::string, std::string>::const_iterator itr = entries.begin();
-    for (; itr != entries.end(); ++itr)
-    {
-      std::cout << "C: " << itr->first << ", " << itr->second << std::endl;
-    }
 
     if (entries.find("w_matrix") != entries.end())
     {

@@ -464,7 +464,7 @@ namespace MDAlgorithms
                                          std::string entry_name)
   {
     Matrix<coord_t> matrix = transform->makeAffineMatrix();
-    std::cout << "TRFM: " << matrix.str() << std::endl;
+    g_log.debug() << "TRFM: " << matrix.str() << std::endl;
     this->saveMatrix<coord_t>(file, entry_name, matrix,
                               ::NeXus::FLOAT32, transform->id());
   }
@@ -472,7 +472,7 @@ namespace MDAlgorithms
   void SaveMD::saveWmatrix(::NeXus::File *const file, IMDWorkspace_const_sptr ws)
   {
     DblMatrix wTrans = ws->getWTransf();
-    std::cout << "W: " << wTrans.str() << std::endl;
+    g_log.debug() << "W matrix: " << wTrans.str() << std::endl;
     this->saveMatrix<double>(file, "w_matrix", wTrans, ::NeXus::FLOAT64);
   }
 
