@@ -489,6 +489,8 @@ namespace MDAlgorithms
     if (!tag.empty())
     {
       file->putAttr("type", tag);
+      file->putAttr("rows", static_cast<int>(m.numRows()));
+      file->putAttr("columns", static_cast<int>(m.numCols()));
     }
     file->closeData();
   }

@@ -488,6 +488,13 @@ namespace Mantid
   {
     std::map<std::string, std::string> entries;
     file->getEntries(entries);
+    std::cout << "B: " << entries.size() << std::endl;
+    std::map<std::string, std::string>::const_iterator itr = entries.begin();
+    for (; itr != entries.end(); ++itr)
+    {
+      std::cout << "C: " << itr->first << ", " << itr->second << std::endl;
+    }
+
     if (entries.find("w_matrix") != entries.end())
     {
       file->openData("w_matrix");
@@ -503,6 +510,7 @@ namespace Mantid
   {
     std::map<std::string, std::string> entries;
     file->getEntries(entries);
+    std::cout << "A: " << entries.size() << std::endl;
 
     if (entries.find("transform_to_orig") != entries.end())
     {
@@ -522,13 +530,20 @@ namespace Mantid
     std::vector<coord_t> vec;
     file->getData<coord_t>(vec);
     std::string type;
+    int inD;
+    int outD;
     file->getAttr("type", type);
+    file->getAttr<int>("rows", outD);
+    file->getAttr<int>("columns", inD);
     file->closeData();
+    // Adjust dimensions
+    inD--;
+    outD--;
     Matrix<coord_t> mat(vec);
     //CoordTransform *transform;
     if ("CoordTransformAffine" == type)
     {
-      CoordTransformAffine *affine = new CoordTransformAffine(1, 1);
+      CoordTransformAffine *affine = new CoordTransformAffine(inD, outD);
       affine->setMatrix(mat);
       //transform = affine;
       return affine;
