@@ -226,7 +226,7 @@ def filter_blacklist_directories(dirnames):
     for banneddir in blacklist:
         if banneddir in dirnames:
             filtered.remove(banneddir)
-
+    return filtered
 
 #======================================================================
 def intialize_files():
