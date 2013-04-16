@@ -55,7 +55,7 @@ namespace API
     throw ScriptRepoException("This method is not implemented yet"); 
   };
   
-  static ScriptRepoException pocoException(std::string info, 
+  static ScriptRepoException pocoException(const std::string & info, 
                                            Poco::Exception & ex){
     std::stringstream ss;     
     if (dynamic_cast<Poco::FileAccessDeniedException*>(&ex))
@@ -104,8 +104,8 @@ namespace API
      "http://repository.mantidproject.com");      
      @endcode
   */
-  ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string local_rep, 
-                                         const std::string remote) :
+  ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string & local_rep, 
+                                         const std::string & remote) :
   g_log(Logger::get("ScriptRepositoryImpl"))
   {    
     // get the local path and the remote path
@@ -224,7 +224,7 @@ namespace API
      Check the connection with the server through the ::doDownloadFile method.
      @path server : The url that will be used to connect.
    */
-  void ScriptRepositoryImpl::connect(std::string server){
+  void ScriptRepositoryImpl::connect(const std::string & server){
     doDownloadFile(server);
   }
 
@@ -250,7 +250,7 @@ namespace API
       
       
    */
-  void ScriptRepositoryImpl::install(std::string path){
+  void ScriptRepositoryImpl::install(const std::string &  path){
     using Poco::DirectoryIterator;
     std::string folder = std::string(path); 
     Poco::File repository_folder(folder); 
@@ -325,22 +325,35 @@ namespace API
       @note: This method requires that ::listFiles was executed at least once.
 
   */
-  ScriptInfo ScriptRepositoryImpl::info(const std::string input_path) {
+  ScriptInfo ScriptRepositoryImpl::info(const std::string & input_path) {
     ensureValidRepository();
     std::string path = convertPath(input_path);
     ScriptInfo info; 
     try{
       RepositoryEntry & entry = repo.at(path); 
       info.author = entry.author; 
-      info.description = entry.description; 
       info.pub_date = entry.pub_date;
       info.auto_update = entry.auto_update;
+      info.directory = entry.directory; 
     }catch(const std::out_of_range & ex){
       std::stringstream ss; 
       ss << "The file \""<< input_path << "\" was not found inside the repository!";            
       throw ScriptRepoException(ss.str(), ex.what()); 
     }
     return info; 
+  }
+
+ const std::string& ScriptRepositoryImpl::description(const std::string & input_path){
+    ensureValidRepository();
+    std::string path = convertPath(input_path);
+    try{
+      RepositoryEntry & entry = repo.at(path); 
+      return entry.description; 
+    }catch(const std::out_of_range & ex){
+      std::stringstream ss; 
+      ss << "The file \""<< input_path << "\" was not found inside the repository!";            
+      throw ScriptRepoException(ss.str(), ex.what()); 
+    }
   }
 
   /** 
@@ -403,12 +416,12 @@ namespace API
       size_t pos = entry_path.rfind("/"); 
       std::string parent_dir = ""; 
       if (pos != std::string::npos)
-        parent_dir = std::string(entry_path.begin(),entry_path.begin()+pos);
+        parent_dir = std::string(entry_path.begin(),entry_path.begin()+pos).append("/");
 
       // for the directories, update the status of this directory
       if (entry.directory){
         entry.status = acc_status; 
-        last_directory = entry_path;         
+        last_directory = entry_path;        
       }else{
         // for the files, it evaluates the status of this file
         
@@ -467,7 +480,7 @@ namespace API
       }
       
       // update the status of the parent directory:
-      // the strategy hear is to compare binary the current status with the acc_state
+      // the strategy here is to compare binary the current status with the acc_state
       switch(acc_status | entry.status){
         // pure matching, meaning that the matching is done with the same state
         // or with BOTH_UNCHANGED (neutral)
@@ -510,7 +523,7 @@ namespace API
      
   */
 
-  void ScriptRepositoryImpl::download(const std::string input_path){
+  void ScriptRepositoryImpl::download(const std::string & input_path){
     ensureValidRepository();
     std::string file_path = convertPath(input_path);
     try{
@@ -532,7 +545,8 @@ namespace API
      
      @param directory_path : the path for the directory.
    */
-  void ScriptRepositoryImpl::download_directory(const std::string directory_path){
+  void ScriptRepositoryImpl::download_directory(const std::string & directory_path_){
+    std::string directory_path = std::string(directory_path_).append("/");
     bool found = false; 
     for(Repository::iterator it = repo.begin();
         it != repo.end(); it++){
@@ -581,7 +595,7 @@ namespace API
      
      @todo describe better this method.
    */
-  void ScriptRepositoryImpl::download_file(const std::string file_path, RepositoryEntry & entry) {
+  void ScriptRepositoryImpl::download_file(const std::string &file_path, RepositoryEntry & entry) {
     SCRIPTSTATUS state = entry.status;
     // if we have the state, this means that the entry is available
     if (state == LOCAL_ONLY  || state == LOCAL_CHANGED)
@@ -640,7 +654,7 @@ namespace API
   /**
     @todo Describe
   */
-  SCRIPTSTATUS ScriptRepositoryImpl::fileStatus(const std::string input_path) {
+  SCRIPTSTATUS ScriptRepositoryImpl::fileStatus(const std::string & input_path) {
     /// @todo: implement the trigger method to know it we need to revised the 
     ///        directories trees.    
     ensureValidRepository();
@@ -662,10 +676,10 @@ namespace API
      @todo Describe
 
   */
-  void ScriptRepositoryImpl::upload(const std::string file_path, 
-                                    const std::string comment,
-                                    const std::string author, 
-                                   const std::string description)
+  void ScriptRepositoryImpl::upload(const std::string & file_path, 
+                                    const std::string & comment,
+                                    const std::string & author, 
+                                   const std::string & description)
     
   {
     UNUSED_ARG(file_path); 
@@ -740,7 +754,7 @@ namespace API
   /** 
       @todo describe
   */
-  void ScriptRepositoryImpl::setIgnorePatterns(std::string patterns){
+  void ScriptRepositoryImpl::setIgnorePatterns(const std::string & patterns){
     ConfigServiceImpl & config = ConfigService::Instance();
     std::string ignore = config.getString("ScriptRepositoryIgnore"); 
     if (ignore != patterns){
@@ -766,7 +780,7 @@ namespace API
   /** 
       @todo describe
   */
-  void ScriptRepositoryImpl::setAutoUpdate(std::string input_path, bool option){
+  void ScriptRepositoryImpl::setAutoUpdate(const std::string & input_path, bool option){
     ensureValidRepository();
     std::string path = convertPath(input_path); 
     //g_log.debug() << "SetAutoUpdate... begin" << std::endl; 
@@ -810,8 +824,8 @@ namespace API
       
       @exception ScriptRepoException: For any unexpected behavior.      
   */
-  void ScriptRepositoryImpl::doDownloadFile(const std::string url_file, 
-                                            const std::string local_file_path)
+  void ScriptRepositoryImpl::doDownloadFile(const std::string & url_file, 
+                                            const std::string & local_file_path)
   {
     // get the information from url_file
     Poco::URI uri(url_file);
@@ -880,13 +894,14 @@ namespace API
       BOOST_FOREACH(ptree::value_type & file, pt){
         if (!isEntryValid(file.first))
           continue;
-        //g_log.debug() << "Inserting : file.first " << file.first << std::endl; 
+        //g_log.debug() << "Inserting : file.first " << file.first << std::endl;
         RepositoryEntry & entry = repo[file.first];
         entry.remote = true;
         entry.directory = file.second.get("directory",false);
         entry.pub_date = DateAndTime(file.second.get<std::string>("pub_date"));
         entry.description = file.second.get("description",""); 
         entry.author = file.second.get("author",""); 
+        entry.status = BOTH_UNCHANGED;
       }
       
     }catch (boost::property_tree::json_parser_error & ex){
@@ -1087,7 +1102,7 @@ namespace API
     }
   }
 
-  bool ScriptRepositoryImpl::isEntryValid(std::string path){
+  bool ScriptRepositoryImpl::isEntryValid(const std::string & path){
     //g_log.debug() << "Is valid entry? " << path << std::endl; 
     if (path == ".repository.json")
       return false;
@@ -1126,7 +1141,7 @@ namespace API
      convertPath("c:\MantidInstall\scripts_repo\README.md", flag)// returns README.md
      @endcode
   */
-  std::string ScriptRepositoryImpl::convertPath(const std::string path){
+  std::string ScriptRepositoryImpl::convertPath(const std::string & path){
     std::vector<std::string> lookAfter; 
     using Poco::Path;
     lookAfter.push_back(Path::current()); 

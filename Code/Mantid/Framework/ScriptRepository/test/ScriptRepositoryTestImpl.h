@@ -126,8 +126,8 @@ class ScriptRepositoryImplLocal : public ScriptRepositoryImpl{
 
      It also make it public, in order to be able to test this method itself.
   */
- void doDownloadFile(const std::string url_file, 
-                     const std::string local_file_path){
+ void doDownloadFile(const std::string & url_file, 
+                     const std::string & local_file_path){
 
    // answer when the download it to 'forget' the downloaded file
    // request to ping the site
@@ -343,7 +343,7 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
     ScriptInfo information = repo->info("TofConv/TofConverter.py"); 
-    TS_ASSERT(information.description == "tofconverter description");
+    TS_ASSERT(repo->description("TofConv/TofConverter.py") == "tofconverter description");
     TS_ASSERT(information.author.empty()); 
     TSM_ASSERT("check time", information.pub_date == DateAndTime("2012-02-10 10:00:50")); 
     TS_ASSERT(!information.auto_update);
