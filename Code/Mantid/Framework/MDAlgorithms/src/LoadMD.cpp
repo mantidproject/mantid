@@ -1,4 +1,4 @@
-/*WIKI* 
+/*WIKI*
 
 This algorithm loads a [[MDEventWorkspace]] that was previously
 saved using the [[SaveMD]] algorithm to a .nxs file format.
@@ -33,6 +33,7 @@ and used by other algorithms, they should not be needed in daily use.
 #include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDBoxFlatTree.h"
+#include "MantidMDEvents/CoordTransformAffine.h"
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vector>
@@ -327,6 +328,9 @@ namespace Mantid
       // Load the WorkspaceHistory "process"
       ws->history().loadNexus(file);
 
+      this->loadWmatrix(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+      this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+
       // Load each data slab
       this->loadSlab("signal", ws->getSignalArray(), ws, ::NeXus::FLOAT64);
       this->loadSlab("errors_squared", ws->getErrorSquaredArray(), ws, ::NeXus::FLOAT64);
@@ -389,6 +393,9 @@ namespace Mantid
 
       // Load the WorkspaceHistory "process"
       ws->history().loadNexus(file);
+
+      this->loadWmatrix(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+      this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
       // Add each of the dimension
       for (size_t d=0; d<nd; d++)
@@ -477,6 +484,60 @@ namespace Mantid
       delete prog;
     }
 
+  void LoadMD::loadWmatrix(IMDWorkspace_sptr ws)
+  {
+    std::map<std::string, std::string> entries;
+    file->getEntries(entries);
+    if (entries.find("w_matrix") != entries.end())
+    {
+      file->openData("w_matrix");
+      std::vector<double> vec;
+      file->getData<double>(vec);
+      file->closeData();
+      DblMatrix mat(vec);
+      ws->setWTransf(mat);
+    }
+  }
+
+  void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws)
+  {
+    std::map<std::string, std::string> entries;
+    file->getEntries(entries);
+
+    if (entries.find("transform_to_orig") != entries.end())
+    {
+      CoordTransform *transform = this->loadAffineMatrix("transform_to_orig");
+      ws->setTransformToOriginal(transform);
+    }
+    if (entries.find("transform_from_orig") != entries.end())
+    {
+      CoordTransform *transform = this->loadAffineMatrix("transform_from_orig");
+      ws->setTransformFromOriginal(transform);
+    }
+  }
+
+  CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name)
+  {
+    file->openData(entry_name);
+    std::vector<coord_t> vec;
+    file->getData<coord_t>(vec);
+    std::string type;
+    file->getAttr("type", type);
+    file->closeData();
+    Matrix<coord_t> mat(vec);
+    //CoordTransform *transform;
+    if ("CoordTransformAffine" == type)
+    {
+      CoordTransformAffine *affine = new CoordTransformAffine(1, 1);
+      affine->setMatrix(mat);
+      //transform = affine;
+      return affine;
+    }
+    else
+    {
+      throw std::invalid_argument("Do not know how to process coordinate transform " + type);
+    }
+  }
 
   } // namespace Mantid
 } // namespace MDEvents
