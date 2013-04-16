@@ -192,6 +192,7 @@ signals:
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
+  void shapesCleared();
   void redrawRequired();
   void updateInfoText();
 
@@ -207,10 +208,6 @@ protected slots:
   void erasePeaks(const QRect& rect);
 
   void colorMapChanged();
-  void catchShapeCreated();
-  void catchShapeSelected();
-  void catchShapesDeselected();
-  void catchShapeChanged();
 
 protected:
   

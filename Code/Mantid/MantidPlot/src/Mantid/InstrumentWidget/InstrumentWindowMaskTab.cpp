@@ -257,12 +257,16 @@ m_userEditing(true)
 
 }
 
+/**
+  * Initialize the tab when new projection surface is created.
+  */
 void InstrumentWindowMaskTab::initSurface()
 {
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
+  connect(m_instrWindow->getSurface().get(),SIGNAL(shapesCleared()),this,SLOT(shapesCleared()));
   enableApply();
   enableClear();
 }
@@ -311,6 +315,9 @@ void InstrumentWindowMaskTab::setActivity()
   m_instrWindow->updateInfoText();
 }
 
+/**
+  * Slot responding on creation of a new masking shape.
+  */
 void InstrumentWindowMaskTab::shapeCreated()
 {
   setSelectActivity();
@@ -318,16 +325,25 @@ void InstrumentWindowMaskTab::shapeCreated()
   enableClear();
 }
 
+/**
+  * Slot responding on selection of a new masking shape.
+  */
 void InstrumentWindowMaskTab::shapeSelected()
 {
   setProperties();
 }
 
+/**
+  * Slot responding on deselecting all masking shapes.
+  */
 void InstrumentWindowMaskTab::shapesDeselected()
 {
   clearProperties();
 }
 
+/**
+  * Slot responding on a change of a masking shape.
+  */
 void InstrumentWindowMaskTab::shapeChanged()
 {
   if (!m_left) return; // check that everything is ok
@@ -351,6 +367,15 @@ void InstrumentWindowMaskTab::shapeChanged()
     m_doubleManager->setValue(subs[1],p.y());
   }
   m_userEditing = true;
+}
+
+/**
+  * Slot responding on removing all masking shapes.
+  */
+void InstrumentWindowMaskTab::shapesCleared()
+{
+    enableApply();
+    enableClear();
 }
 
 /**
@@ -633,10 +658,12 @@ void InstrumentWindowMaskTab::toggleMaskGroup(bool maskOn)
     if ( maskOn )
     {
         m_saveButton->setMenu(m_saveMask);
+        m_saveButton->setText("Apply and Save");
     }
     else
     {
         m_saveButton->setMenu(m_saveGroup);
+        m_saveButton->setText("Save");
     }
     m_instrWindow->getSurface()->changeBorderColor(getShapeBorderColor());
     m_instrWindow->updateInstrumentView();
@@ -759,16 +786,19 @@ std::string InstrumentWindowMaskTab::generateMaskWorkspaceName(bool temp) const
   */
 void InstrumentWindowMaskTab::enableApply()
 {
+    bool hasMasks = m_instrWindow->getSurface()->hasMasks();
     if ( isMasking() )
     {
-        bool hasMasks = m_instrWindow->getSurface()->hasMasks();
         m_hasMaskToApply = hasMasks;
         m_apply->setEnabled(hasMasks);
+        m_apply_to_view->setEnabled(hasMasks);
     }
     else
     {
         m_apply->setEnabled(false);
+        m_apply_to_view->setEnabled(false);
     }
+    m_saveButton->setEnabled(hasMasks);
 }
 
 /**

@@ -80,6 +80,7 @@ signals:
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
+  void cleared();
 
 public slots:
   void addShape(const QString& type,int x,int y,const QColor& borderColor,const QColor& fillColor);

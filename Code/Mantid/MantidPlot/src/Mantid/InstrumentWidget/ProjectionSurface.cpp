@@ -44,10 +44,11 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
     m_redrawPicking(true)
 {
   connect(rootActor,SIGNAL(colorMapChanged()),this,SLOT(colorMapChanged()));
-  connect(&m_maskShapes,SIGNAL(shapeCreated()),this,SLOT(catchShapeCreated()));
-  connect(&m_maskShapes,SIGNAL(shapeSelected()),this,SLOT(catchShapeSelected()));
-  connect(&m_maskShapes,SIGNAL(shapesDeselected()),this,SLOT(catchShapesDeselected()));
-  connect(&m_maskShapes,SIGNAL(shapeChanged()),this,SLOT(catchShapeChanged()));
+  connect(&m_maskShapes,SIGNAL(shapeCreated()),this,SIGNAL(shapeCreated()));
+  connect(&m_maskShapes,SIGNAL(shapeSelected()),this,SIGNAL(shapeSelected()));
+  connect(&m_maskShapes,SIGNAL(shapesDeselected()),this,SIGNAL(shapesDeselected()));
+  connect(&m_maskShapes,SIGNAL(shapeChanged()),this,SIGNAL(shapeChanged()));
+  connect(&m_maskShapes,SIGNAL(cleared()),this,SIGNAL(shapesCleared()));
 
   // create and connect the pick input controller
   InputControllerPick* pickController = new InputControllerPick(this);
@@ -556,26 +557,6 @@ InputController *ProjectionSurface::getController() const
 void ProjectionSurface::startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor)
 {
   emit signalToStartCreatingShape2D(type,borderColor,fillColor);
-}
-
-void ProjectionSurface::catchShapeCreated()
-{
-  emit shapeCreated();
-}
-
-void ProjectionSurface::catchShapeSelected()
-{
-  emit shapeSelected();
-}
-
-void ProjectionSurface::catchShapesDeselected()
-{
-  emit shapesDeselected();
-}
-
-void ProjectionSurface::catchShapeChanged()
-{
-    emit shapeChanged();
 }
 
 /**

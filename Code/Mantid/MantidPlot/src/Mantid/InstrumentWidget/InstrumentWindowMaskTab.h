@@ -62,6 +62,7 @@ protected slots:
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
+  void shapesCleared();
   void clearShapes();
   void applyMask();
   void storeMask();
