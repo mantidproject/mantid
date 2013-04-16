@@ -466,24 +466,25 @@ namespace MDAlgorithms
     Matrix<coord_t> matrix = transform->makeAffineMatrix();
     std::cout << "TRFM: " << matrix.str() << std::endl;
     this->saveMatrix<coord_t>(file, entry_name, matrix,
-                              transform->id());
+                              ::NeXus::FLOAT32, transform->id());
   }
 
   void SaveMD::saveWmatrix(::NeXus::File *const file, IMDWorkspace_const_sptr ws)
   {
     DblMatrix wTrans = ws->getWTransf();
     std::cout << "W: " << wTrans.str() << std::endl;
-    this->saveMatrix<double>(file, "w_matrix", wTrans);
+    this->saveMatrix<double>(file, "w_matrix", wTrans, ::NeXus::FLOAT64);
   }
 
   template<typename T>
   void SaveMD::saveMatrix(::NeXus::File *const file, std::string name,
-                         Matrix<T> &m, std::string tag)
+                         Matrix<T> &m, ::NeXus::NXnumtype type, std::string tag)
   {
     std::vector<T> v = m.getVector();
     // Number of data points
     int nPoints = static_cast<int>(v.size());
-    file->makeData(name, ::NeXus::FLOAT64, nPoints, true);
+
+    file->makeData(name, type, nPoints, true);
     file->putData(v);
     if (!tag.empty())
     {

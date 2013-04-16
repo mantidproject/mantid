@@ -73,7 +73,7 @@ namespace MDAlgorithms
                                    std::string entry_name);
     template<typename T>
     void saveMatrix(::NeXus::File * const file, std::string name,
-                    Kernel::Matrix<T> &m, std::string tag="");
+                    Kernel::Matrix<T> &m, ::NeXus::NXnumtype type, std::string tag="");
     void saveWmatrix(::NeXus::File * const file, API::IMDWorkspace_const_sptr ws);
 
   };
