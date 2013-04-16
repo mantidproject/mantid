@@ -240,12 +240,13 @@ void testCopyMethadata()
 
     if(!spws->getExperimentInfo(0)->run().hasProperty("W_MATRIX"))return;
 
-    Kernel::DblMatrix UnitMatr(3,3,true),wMatr;
+    Kernel::DblMatrix UnitMatr(3,3,true);
     std::vector<double> libWMatr;
 
     TS_ASSERT_THROWS_NOTHING(libWMatr=spws->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double> >("W_MATRIX"));
 
-    //TSM_ASSERT("We have not set up anything so it should be unit matrix",wMatr.equals(UnitMatr));
+    Kernel::DblMatrix wMatr(libWMatr);
+    TSM_ASSERT("We have not set up anything so it should be unit matrix",wMatr.equals(UnitMatr));
 
 
 }
