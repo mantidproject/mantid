@@ -440,8 +440,8 @@ namespace MDAlgorithms
                                             IMDWorkspace_const_sptr ws)
   {
     try {
-      CoordTransform *affTransToOrig = ws->getTransformToOriginal();
-      this->saveAffineTransformMatrix(file, affTransToOrig,
+      this->saveAffineTransformMatrix(file,
+                                      ws->getTransformToOriginal(),
                                       "affine_transform_to_orig");
     }
     catch (std::runtime_error &)
@@ -449,8 +449,8 @@ namespace MDAlgorithms
       // Do nothing
     }
     try {
-      CoordTransform *affTransFromOrig = ws->getTransformFromOriginal();
-      this->saveAffineTransformMatrix(file, affTransFromOrig,
+      this->saveAffineTransformMatrix(file,
+                                      ws->getTransformFromOriginal(),
                                       "affine_transform_from_orig");
     }
     catch (std::runtime_error &)
@@ -463,11 +463,10 @@ namespace MDAlgorithms
                                          CoordTransform *transform,
                                          std::string entry_name)
   {
-    std::string affId = transform->id();
-    std::cout << "TRFM: " << transform->toXMLString() << std::endl;
     Matrix<coord_t> matrix = transform->makeAffineMatrix();
     std::cout << "TRFM: " << matrix.str() << std::endl;
-    this->saveMatrix<coord_t>(file, entry_name, matrix);
+    this->saveMatrix<coord_t>(file, entry_name, matrix,
+                              transform->id());
   }
 
   void SaveMD::saveWtransformMatrix(::NeXus::File *const file, IMDWorkspace_const_sptr ws)
@@ -479,13 +478,17 @@ namespace MDAlgorithms
 
   template<typename T>
   void SaveMD::saveMatrix(::NeXus::File *const file, std::string name,
-                         Matrix<T> &m)
+                         Matrix<T> &m, std::string tag)
   {
     std::vector<T> v = m.getVector();
     // Number of data points
     int nPoints = static_cast<int>(v.size());
     file->makeData(name, ::NeXus::FLOAT64, nPoints, true);
     file->putData(v);
+    if (!tag.empty())
+    {
+      file->putAttr("type", tag);
+    }
     file->closeData();
   }
 
