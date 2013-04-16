@@ -53,7 +53,7 @@ void StepScan::initLayout()
   // Try to connect to live listener for default instrument to see if live button should be enabled
   // Enable the button if the connection is successful. Will be disabled otherwise.
   m_uiForm.liveButton->setEnabled(true);
-  //m_uiForm.liveButton->setEnabled(LiveListenerFactory::Instance().checkConnection(m_instrument));
+  m_uiForm.liveButton->setEnabled(LiveListenerFactory::Instance().checkConnection(m_instrument));
   connect( m_uiForm.liveButton, SIGNAL(clicked(bool)), SLOT(triggerLiveListener(bool)), Qt::QueuedConnection );
 
   connect( m_uiForm.launchInstView, SIGNAL(clicked()), SLOT(launchInstrumentWindow()) );
