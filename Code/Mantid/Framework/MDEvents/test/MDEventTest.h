@@ -318,8 +318,10 @@ public:
       TS_ASSERT_THROWS_NOTHING(MDLeanEvent<3>::eventsToData(events,data,ncols,totalSignal,totalErrSq));
       TS_ASSERT_EQUALS(3+2,ncols);
       TS_ASSERT_EQUALS((3+2)*nPoints,data.size());
-      TS_ASSERT_DELTA(sumGuess,totalSignal,1.e-7);
-      TS_ASSERT_DELTA(errGuess,totalErrSq,1.e-7);
+      double relerr = 2*std::fabs(sumGuess-totalSignal)/(sumGuess+totalSignal);
+      TS_ASSERT_DELTA(0.,relerr,1.e-7);
+      relerr = 2*std::fabs(errGuess-totalErrSq)/(errGuess+totalErrSq);
+      TS_ASSERT_DELTA(0,relerr,1.e-7);
 
 
       std::vector<MDLeanEvent<3> > transfEvents;
@@ -353,8 +355,12 @@ public:
       TS_ASSERT_THROWS_NOTHING(MDEvent<4>::eventsToData(events,data,ncols,totalSignal,totalErrSq));
       TS_ASSERT_EQUALS(4+4,ncols);
       TS_ASSERT_EQUALS((4+4)*nPoints,data.size());
-      TS_ASSERT_DELTA(sumGuess,totalSignal,1.e-7);
-      TS_ASSERT_DELTA(errGuess,totalErrSq,1.e-7);
+
+      double relerr = 2*std::fabs(sumGuess-totalSignal)/(sumGuess+totalSignal);
+      TS_ASSERT_DELTA(0.,relerr,1.e-7);
+      relerr = 2*std::fabs(errGuess-totalErrSq)/(errGuess+totalErrSq);
+      TS_ASSERT_DELTA(0,relerr,1.e-7);
+
 
       std::vector<MDEvent<4> > transfEvents;
       TS_ASSERT_THROWS_NOTHING(MDEvent<4>::dataToEvents(data,transfEvents));
