@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/LibraryWrapper.h"
+#include "MantidMDEvents/MDWSTransform.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -39,7 +40,20 @@ public:
     {
       ConvertToMD::initialize();
     }
+    bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dEModeRequested,const std::vector<std::string> &other_dim_names,
+                                      const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr)
+    {
+        return ConvertToMD::buildTargetWSDescription(spws,Q_mod_req,dEModeRequested,other_dim_names,convert_to_,targWSDescr);
+    }
+    void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS,MDEvents::MDWSDescription &targWSDescr) const
+    {
+        ConvertToMD::copyMetaData(mdEventWS,targWSDescr);
+    }
 
+    API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDEvents::MDWSDescription &NewMDWSDescription)
+    {
+            return ConvertToMD::createNewMDWorkspace(NewMDWSDescription);
+    }
 };
 
 
@@ -184,7 +198,46 @@ void testCalcDECol()
 
 }
 
+void testCopyMethadata()
+{
+     Mantid::API::MatrixWorkspace_sptr ws2Dp = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
 
+     API::IMDEventWorkspace_sptr spws;
+     Convert2MDComponentsTestHelper subAlgo;
+     bool createNewTargetWs;
+     std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
+     std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
+     MDWSTransform QScl;
+     std::vector<std::string> QScales = QScl.getQScalings();
+
+     MDEvents::MDWSDescription targWSDescr;
+     TS_ASSERT_THROWS_NOTHING(createNewTargetWs=subAlgo.buildTargetWSDescription(spws,Q_modes[0],dE_modes[0],std::vector<std::string>(),QScales[CnvrtToMD::NoScaling],targWSDescr));
+
+     TSM_ASSERT("as spws is null pointer, this should request creating new workspace ",createNewTargetWs)
+
+     TS_ASSERT_THROWS_NOTHING(spws = subAlgo.createNewMDWorkspace(targWSDescr));
+ 
+    // copy the necessary methadata and get the unique number, that identifies the run, the source workspace came from.
+    TS_ASSERT_THROWS_NOTHING(subAlgo.copyMetaData(spws,targWSDescr));
+
+    uint16_t runIndex(1000);
+    TS_ASSERT_THROWS_NOTHING(runIndex=targWSDescr.getProperty("RUN_INDEX"));
+    TS_ASSERT_EQUALS(0,runIndex);
+
+    // target workspace has W-matrix, which should be unit matrix
+    TS_ASSERT(spws->getExperimentInfo(0)->run().hasProperty("W_MATRIX"));
+
+    if(!spws->getExperimentInfo(0)->run().hasProperty("W_MATRIX"))return;
+
+    Kernel::DblMatrix UnitMatr(3,3,true),wMatr;
+    std::vector<double> libWMatr;
+
+    TS_ASSERT_THROWS_NOTHING(wMatr=spws->getExperimentInfo(0)->run().getPropertyValueAsType<Kernel::DblMatrix >("W_MATRIX"));
+
+    TSM_ASSERT("We have not set up anything so it should be unit matrix",wMatr.equals(UnitMatr));
+
+
+}
 
 
 ConvertToMDComponentsTest()
