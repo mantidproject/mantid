@@ -66,7 +66,11 @@ def remove_wiki_from_header():
 def add_wiki_description(algo, wikidesc):
     """One-time use method that adds a wiki description  in the algo's CPP file under comments tag."""
     wikidesc = wikidesc.split('\n')
+    
     source = find_algo_file(algo)
+    print "--------------/n/n"
+    print sources
+    print "-------------/n/n"
     if source != '':
         if len("".join(wikidesc)) == 0:
             print "No wiki description found to add!!!!"
@@ -226,6 +230,9 @@ def intialize_files():
     parent_dir = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
     file_matches = []
     for root, dirnames, filenames in os.walk(parent_dir):
+      # Filter out mantidplot from the file search. There are a few file in MantidPlot we don't want to accidently search, such as FFT.
+      if 'MantidPlot' in dirnames:
+          dirnames.remove('MantidPlot')
       for filename in fnmatch.filter(filenames, '*.cpp'):
           fullfile = os.path.join(root, filename)
           cpp_files.append(fullfile)
@@ -234,6 +241,8 @@ def intialize_files():
           fullfile = os.path.join(root, filename)
           python_files.append(fullfile)
           python_files_bare.append( os.path.split(fullfile)[1] )
+    
+
 
 #======================================================================
 def find_algo_file(algo, version=-1):
