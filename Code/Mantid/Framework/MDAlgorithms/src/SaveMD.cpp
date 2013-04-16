@@ -473,7 +473,7 @@ namespace MDAlgorithms
   {
     DblMatrix wTrans = ws->getWTransf();
     std::cout << "W: " << wTrans.str() << std::endl;
-    this->saveMatrix<double>(file, "w_transform", wTrans);
+    this->saveMatrix<double>(file, "w_matrix", wTrans);
   }
 
   template<typename T>
