@@ -26,7 +26,6 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-#include <boost/signal.hpp>
 
 // Poco
 #include <Poco/File.h>
