@@ -220,6 +220,14 @@ def create_function_signature(alg, algo_name):
         
     return lhs + prototype_reformated + comments
 
+def filter_blacklist_directories(dirnames):
+    blacklist = ['MantidPlot', 'MantidQt']
+    filtered = dirnames
+    for banneddir in blacklist:
+        if banneddir in dirnames:
+            filtered.remove(banneddir)
+
+
 #======================================================================
 def intialize_files():
     """ Get path to every header file """
@@ -228,8 +236,7 @@ def intialize_files():
     file_matches = []
     for root, dirnames, filenames in os.walk(parent_dir):
       # Filter out mantidplot from the file search. There are a few file in MantidPlot we don't want to accidently search, such as FFT.
-      if 'MantidPlot' in dirnames:
-          dirnames.remove('MantidPlot')
+      dirnames = filter_blacklist_directories(dirnames)
       for filename in fnmatch.filter(filenames, '*.cpp'):
           fullfile = os.path.join(root, filename)
           cpp_files.append(fullfile)
