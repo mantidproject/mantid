@@ -4,6 +4,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "WidgetDllOption.h"
 #include "MantidQtAPI/Message.h"
 #include "MantidQtAPI/QtSignalChannel.h"
 
@@ -35,7 +36,7 @@ namespace MantidQt
      * a message is a framework Poco message or a simple string.
      * It can connect to the Mantid logging framework if required
      */
-    class MessageDisplay : public QWidget
+    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MessageDisplay : public QWidget
     {
       Q_OBJECT
       Q_PROPERTY(QString source READ source WRITE setSource);

@@ -4,6 +4,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "DllOption.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Logger.h" // So we can match the Logger priority
 
@@ -24,7 +25,7 @@ namespace MantidQt
     /** @class Message
      * Provides a simple binding of a text message with a priority
      */
-    class Message : public QObject
+    class EXPORT_OPT_MANTIDQT_API Message : public QObject
     {
       // No Q_Object macro by design
 
