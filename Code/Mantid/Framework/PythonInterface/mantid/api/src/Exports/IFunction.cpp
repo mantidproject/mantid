@@ -32,15 +32,14 @@ namespace
 
     return registered;
   }
-  // -- Declare property overloads --
-  // The usual BOOST_MEMBER_FUNCTION_OVERLOADS doesn't work using the wrapper held type
+  // -- Set property overloads --
+  // setProperty(index,value,explicit)
+  typedef void(IFunction::*setParameterType1)(size_t,const double & value,bool);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads, setParameter, 2, 3);
+  // setProperty(index,value,explicit)
+  typedef void(IFunction::*setParameterType2)(const std::string &,const double & value,bool);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads, setParameter, 2, 3);
 
-  // declareProperty(name)
-  typedef void(IFunctionAdapter::*declareParameterType1)(const std::string &);
-  // declareProperty(name,defaultValue)
-  typedef void(IFunctionAdapter::*declareParameterType2)(const std::string &,double);
-  // declareProperty(name,defaultValue, description)
-  typedef void(IFunctionAdapter::*declareParameterType3)(const std::string &,double,const std::string &);
 
   ///@endcond
 }
@@ -71,8 +70,14 @@ void export_IFunction()
     .def("getParameterValue", (double (IFunction::*)(size_t) const)&IFunction::getParameter,
          "Get the value of the ith parameter")
 
-    .def("setParameter", (void (IFunction::*)(size_t,const double &,bool))&IFunction::setParameter,
-         "Set the value of the ith parameter")
+    .def("getParameterValue", (double (IFunction::*)(const std::string&) const)&IFunction::getParameter,
+         "Get the value of the named parameter")
+
+    .def("setParameter", (setParameterType1)&IFunction::setParameter,
+         setParameterType1_Overloads("Sets the value of the ith parameter"))
+
+    .def("setParameter", (setParameterType2)&IFunction::setParameter,
+         setParameterType2_Overloads("Sets the value of the named parameter"))
 
     .def("declareAttribute", &IFunctionAdapter::declareAttribute, "Declare an attribute with an initial value")
 
