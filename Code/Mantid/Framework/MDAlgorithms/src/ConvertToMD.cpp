@@ -411,7 +411,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
  // Copy ExperimentInfo (instrument, run, sample) to the output WS
   API::ExperimentInfo_sptr ei(m_InWS2D->cloneExperimentInfo());
 
-  ei->mutableRun().addProperty("W_MATRIX",targWSDescr.m_Wtransf,true);
+  ei->mutableRun().addProperty("W_MATRIX",targWSDescr.m_Wtransf.getVector(),true);
   uint16_t runIndex = mdEventWS->addExperimentInfo(ei);
 
   const MantidVec & binBoundaries = m_InWS2D->readX(0);
@@ -427,7 +427,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
   }
 
  // and add it to the target workspace description for further usage as identifier for the workspaces, which come from this run. 
-   targWSDescr.setProperty<uint16_t>("RUN_INDEX",runIndex);
+   targWSDescr.addProperty("RUN_INDEX",runIndex,true);
   
 }
 

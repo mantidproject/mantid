@@ -68,19 +68,20 @@ namespace MDAlgorithms
     void exec();
    /// Sets documentation strings for this algorithm
     virtual void initDocs();  
-   /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
-   boost::shared_ptr<MDEvents::MDEventWSWrapper> m_OutWSWrapper;
    /// progress reporter
    boost::scoped_ptr<API::Progress > m_Progress;
-   /// pointer to the class, which does the particular conversion
-   boost::shared_ptr<MDEvents::ConvToMDBase> m_Convertor; 
  
   /// logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& g_Log;
    //------------------------------------------------------------------------------------------------------------------------------------------
    protected: //for testing, otherwise private:
+      /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
+      boost::shared_ptr<MDEvents::MDEventWSWrapper> m_OutWSWrapper;
        /// pointer to the input workspace;
       Mantid::API::MatrixWorkspace_sptr m_InWS2D;
+      /// pointer to the class, which does the particular conversion
+      boost::shared_ptr<MDEvents::ConvToMDBase> m_Convertor; 
+
 
        static Mantid::Kernel::Logger & getLogger();
 

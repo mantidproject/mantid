@@ -458,6 +458,12 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
   INSTANTIATE(uint32_t);
   INSTANTIATE(std::string);
   INSTANTIATE(bool);
+
+  template MANTID_API_DLL uint16_t LogManager::getPropertyValueAsType(const std::string &) const;
+  template MANTID_API_DLL std::vector<double> LogManager::getPropertyValueAsType(const std::string &) const;
+  template MANTID_API_DLL std::vector<size_t> LogManager::getPropertyValueAsType(const std::string &) const;
+  template MANTID_API_DLL std::vector<int> LogManager::getPropertyValueAsType(const std::string &) const;
+  template MANTID_API_DLL std::vector<long> LogManager::getPropertyValueAsType(const std::string &) const;
   /** @endcond */
 
 } //API namespace

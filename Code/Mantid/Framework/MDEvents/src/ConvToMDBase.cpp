@@ -35,7 +35,7 @@ namespace Mantid
       m_OutWSWrapper = inWSWrapper;
       // get the index which identify the run the source workspace came from.
       // This index will mark the workspace' events for diffetent worksapces to combine
-      m_RunIndex            = WSD.getProperty("RUN_INDEX");
+      m_RunIndex            = WSD.getPropertyValueAsType<uint16_t>("RUN_INDEX");
 
       m_NDims       = m_OutWSWrapper->nDimensions();
       // allocate space for single MDEvent coordinates 
