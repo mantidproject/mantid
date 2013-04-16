@@ -66,8 +66,11 @@ namespace MDAlgorithms
     /// Save the MDHistoWorkspace.
     void doSaveHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
 
+    void saveAffineTransformMatricies(::NeXus::File * const file,
+                                      API::IMDWorkspace_const_sptr ws);
     void saveAffineTransformMatrix(::NeXus::File * const file,
-                                   API::IMDWorkspace_const_sptr ws);
+                                   API::CoordTransform *transform,
+                                   std::string entry_name);
     template<typename T>
     void saveMatrix(::NeXus::File * const file, std::string name,
                     Kernel::Matrix<T> &m);

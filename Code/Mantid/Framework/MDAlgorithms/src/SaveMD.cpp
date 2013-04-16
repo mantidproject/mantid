@@ -201,7 +201,7 @@ namespace MDAlgorithms
     this->saveWtransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
     // Write out the affine matrices
-    this->saveAffineTransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+    this->saveAffineTransformMatricies(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
     file->putAttr("event_type", MDE::getTypeName());
     // Save each NEW ExperimentInfo to a spot in the file
@@ -381,7 +381,7 @@ namespace MDAlgorithms
     this->saveWtransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
     // Write out the affine matrices
-    this->saveAffineTransformMatrix(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+    this->saveAffineTransformMatricies(file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
     // Check that the typedef has not been changed. The NeXus types would need changing if it does!
     assert(sizeof(signal_t) == sizeof(double));
@@ -436,14 +436,13 @@ namespace MDAlgorithms
       throw std::runtime_error("SaveMD can only save MDEventWorkspaces and MDHistoWorkspaces.\nPlease use SaveNexus or another algorithm appropriate for this workspace type.");
   }
 
-  void SaveMD::saveAffineTransformMatrix(::NeXus::File *const file,
-                                         IMDWorkspace_const_sptr ws)
+  void SaveMD::saveAffineTransformMatricies(::NeXus::File *const file,
+                                            IMDWorkspace_const_sptr ws)
   {
     try {
       CoordTransform *affTransToOrig = ws->getTransformToOriginal();
-      Matrix<coord_t> attoMatrix = affTransToOrig->makeAffineMatrix();
-      std::cout << "ATTO: " << attoMatrix.str() << std::endl;
-      this->saveMatrix<coord_t>(file, "affine_transform_to_orig", attoMatrix);
+      this->saveAffineTransformMatrix(file, affTransToOrig,
+                                      "affine_transform_to_orig");
     }
     catch (std::runtime_error &)
     {
@@ -451,14 +450,24 @@ namespace MDAlgorithms
     }
     try {
       CoordTransform *affTransFromOrig = ws->getTransformFromOriginal();
-      Matrix<coord_t> atfoMatrix = affTransFromOrig->makeAffineMatrix();
-      std::cout << "ATFO: " << atfoMatrix.str() << std::endl;
-      this->saveMatrix(file, "affine_transform_from_orig", atfoMatrix);
+      this->saveAffineTransformMatrix(file, affTransFromOrig,
+                                      "affine_transform_from_orig");
     }
     catch (std::runtime_error &)
     {
       // Do nothing
     }
+  }
+
+  void SaveMD::saveAffineTransformMatrix(::NeXus::File *const file,
+                                         CoordTransform *transform,
+                                         std::string entry_name)
+  {
+    std::string affId = transform->id();
+    std::cout << "TRFM: " << transform->toXMLString() << std::endl;
+    Matrix<coord_t> matrix = transform->makeAffineMatrix();
+    std::cout << "TRFM: " << matrix.str() << std::endl;
+    this->saveMatrix<coord_t>(file, entry_name, matrix);
   }
 
   void SaveMD::saveWtransformMatrix(::NeXus::File *const file, IMDWorkspace_const_sptr ws)
