@@ -412,7 +412,7 @@ namespace Geometry
     recalculate();
   }
   /** Set lattice parameter error
-  @param _aerr :: lattice parameter \f$ b \f$ error (in \f$ \mbox{\AA} \f$ )*/
+  @param _berr :: lattice parameter \f$ b \f$ error (in \f$ \mbox{\AA} \f$ )*/
   void UnitCell::setErrorb(double _berr)
   {
     errorda[1]=_berr;
@@ -425,7 +425,7 @@ namespace Geometry
     recalculate();
   }
   /** Set lattice parameter error
-  @param _aerr :: lattice parameter \f$ c \f$ error (in \f$ \mbox{\AA} \f$ )*/
+  @param _cerr :: lattice parameter \f$ c \f$ error (in \f$ \mbox{\AA} \f$ )*/
   void UnitCell::setErrorc(double _cerr)
   {
     errorda[2]=_cerr;
