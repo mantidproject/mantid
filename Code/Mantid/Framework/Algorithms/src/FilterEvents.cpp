@@ -82,9 +82,6 @@ namespace Algorithms
         new API::WorkspaceProperty<DataObjects::SplittersWorkspace>("SplitterWorkspace", "", Direction::Input),
         "An input SpilltersWorskpace for filtering");
 
-    //this->declareProperty(new API::FileProperty("DetectorCalibrationFile", "", API::FileProperty::OptionalLoad, ".dat"),
-    // "Input pixel TOF calibration file in column data format");
-
     auto tablewsprop = new WorkspaceProperty<TableWorkspace>("DetectorTOFCorrectionWorkspace", "", Direction::Input, PropertyMode::Optional);
     declareProperty(tablewsprop, "Name of table workspace containing the log time correction factor for each detector. ");
 
@@ -116,7 +113,6 @@ namespace Algorithms
     mInformationWS = this->getProperty("InformationWorkspace");
 
     std::string outputwsnamebase = this->getProperty("OutputWorkspaceBaseName");
-    // std::string detcalfilename = this->getProperty("DetectorCalibrationFile");
     m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
     mFilterByPulseTime = this->getProperty("FilterByPulseTime");
 
@@ -313,6 +309,7 @@ namespace Algorithms
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Parse TOF-correction table workspace to vectors
    */
   void FilterEvents::importDetectorTOFCalibration()
