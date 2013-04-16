@@ -68,9 +68,6 @@ def add_wiki_description(algo, wikidesc):
     wikidesc = wikidesc.split('\n')
     
     source = find_algo_file(algo)
-    print "--------------/n/n"
-    print sources
-    print "-------------/n/n"
     if source != '':
         if len("".join(wikidesc)) == 0:
             print "No wiki description found to add!!!!"
