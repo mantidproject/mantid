@@ -239,7 +239,7 @@ private:
 // Performance Test
 //-------------------------------------------------------------------------------------------------
 
-class ConvertToMDTestPerformance : public CxxTest::TestSuite
+class ConvertToMDPerformanceTest : public CxxTest::TestSuite
 {
     //Kernel::CPUTimer Clock;
     time_t start,end;
@@ -261,8 +261,8 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite
     boost::shared_ptr<MDEvents::MDEventWSWrapper> pTargWS;
 
 public:
-static ConvertToMDTestPerformance *createSuite() { return new ConvertToMDTestPerformance(); }
-static void destroySuite(ConvertToMDTestPerformance * suite) { delete suite; }    
+static ConvertToMDPerformanceTest *createSuite() { return new ConvertToMDPerformanceTest(); }
+static void destroySuite(ConvertToMDPerformanceTest * suite) { delete suite; }    
 
 
 
@@ -406,7 +406,8 @@ void test_HistoNoUnitsConv()
 }
 
 
-ConvertToMDTestPerformance():
+//ConvertToMDTestPerformance():
+ConvertToMDPerformanceTest():
 Rot(3,3)
 {
    numHist=100*100;
