@@ -87,6 +87,11 @@ namespace Mantid
         this->declareFitParameter(name,0.0,"");
       }
 
+      ///  Override this method to make fitted parameters different from the declared
+      double activeParameter(size_t i)const;
+      /// Override this method to make fitted parameters different from the declared
+      void setActiveParameter(size_t i, double value);
+
     protected:
       /**
        * Returns the PyObject that owns this wrapper, i.e. self

@@ -8,6 +8,8 @@ namespace Mantid
   namespace PythonInterface
   {
     using Mantid::PythonInterface::Environment::CallMethod0;
+    using Mantid::PythonInterface::Environment::CallMethod1;
+    using Mantid::PythonInterface::Environment::CallMethod2;
     using namespace boost::python;
 
     /**
@@ -72,6 +74,38 @@ namespace Mantid
       
       return result;
     }
+
+    /**
+     * Value of i-th active parameter. If this functions is overridden
+     * in Python then it returns the value of the ith active Parameter
+     * If not it simple returns the base class result
+     * @param i The index of the parameter
+     */
+    double IFunctionAdapter::activeParameter(size_t i) const
+    {
+      return CallMethod1<double,size_t>::dispatchWithDefaultReturn(getSelf(), "activeParameter",
+          this->getParameter(i), i);
+    }
+
+    /**
+     * Sets the value of i-th active parameter. If this functions is overridden
+     * in Python then it should set the value of the ith active parameter
+     * If calls the base class function
+     * @param i The index of the parameter
+     */
+    void IFunctionAdapter::setActiveParameter(size_t i, double value)
+    {
+      try
+      {
+        CallMethod2<void,size_t,double>::dispatchWithException(getSelf(), "setActiveParameter", i,value);
+      }
+      catch(std::runtime_error&)
+      {
+        IFunction::setActiveParameter(i,value);
+      }
+
+    }
+
 
   }
 }
