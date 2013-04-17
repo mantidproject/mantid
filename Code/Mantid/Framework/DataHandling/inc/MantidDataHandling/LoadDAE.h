@@ -8,6 +8,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include <climits>
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -64,7 +65,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadDAE : public API::Algorithm
+    class DLLExport LoadDAE : public API::Algorithm, public API::DeprecatedAlgorithm
     {
     public:
       /// Default constructor
@@ -76,7 +77,7 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "DataHandling\\DataAcquisition"; }
+      virtual const std::string category() const { return "Deprecated"; }
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);
 
