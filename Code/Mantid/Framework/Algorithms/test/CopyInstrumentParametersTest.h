@@ -9,6 +9,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "WorkspaceCreationHelperTest.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -42,15 +43,19 @@ public:
 
   void testExec()
   {
-
-     int ndets = 3; 
-
      // Create workspace with paremeterised instrument and put into data store
-     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(ndets, 10, true);
-     const std::string wsName("CopyInstParamWs1");
+     MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
+     const std::string wsName1("CopyInstParamWs1");
      AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
-     dataStore.add(wsName, ws);
+     dataStore.add(wsName1, ws1);
+     /// Create another workspace with the same instrument and put into data store
+     MatrixWorkspace_sptr ws2 = WorkspaceFactory::Instance().create( ws1 );
+     const std::string wsName2("CopyInstParamWs2");
+     dataStore.add(wsName2, ws2);
 
+     // Set properties
+     TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", wsName1 ));
+     TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("OutputWorkspace", wsName2 ));
   }
 
   void testDifferent_BaseInstrument_Throws()
