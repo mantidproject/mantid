@@ -545,8 +545,8 @@ namespace API
      
      @param directory_path : the path for the directory.
    */
-  void ScriptRepositoryImpl::download_directory(const std::string & directory_path_){
-    std::string directory_path = std::string(directory_path_).append("/");
+  void ScriptRepositoryImpl::download_directory(const std::string & directory_path){
+    std::string directory_path_with_slash = std::string(directory_path).append("/");
     bool found = false; 
     for(Repository::iterator it = repo.begin();
         it != repo.end(); it++){
@@ -562,7 +562,16 @@ namespace API
           continue;
       }
       found = true;
-      
+      if (it->first != directory_path &&
+          it->first.find(directory_path_with_slash) != 0)
+        {
+          // it is not a children of this entry, just similar. Example: 
+          // TofConverter/README
+          // TofConverter.py
+          // these two pass the first test, but will not pass this one.
+          found = false;
+          continue; 
+        }
       // now, we are dealing with the children of directory path
       if (!it->second.directory)
         download_file(it->first, it->second);
