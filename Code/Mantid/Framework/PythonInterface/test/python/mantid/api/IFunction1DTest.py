@@ -1,7 +1,8 @@
 import unittest
 from mantid.api import IFunction1D, IFunction, FunctionFactory
+import numpy as np
 
-class PyLinear(IFunction1D):
+class Times2(IFunction1D):
     
     def init(self):
         self.declareAttribute("IntAtt", 1)
@@ -13,30 +14,30 @@ class PyLinear(IFunction1D):
         self.declareParameter("ParamNoDescr", 1.5)
         self.declareParameter("OtherParam",4,"Some fitting parameter")
         
-    def function1D(self, xvals, out):
-        pass
+    def function1D(self, xvals):
+        return 2*xvals
 
 class IFunction1DTest(unittest.TestCase):
 
     def test_instance_can_be_created_standalone(self):
-        func = PyLinear()
+        func = Times2()
         self.assertTrue(isinstance(func, IFunction1D))
 
     def test_instance_can_be_created_from_factory(self):
-        FunctionFactory.subscribe(PyLinear)
-        func_name = PyLinear.__name__
+        FunctionFactory.subscribe(Times2)
+        func_name = Times2.__name__
         func = FunctionFactory.createFunction(func_name)
         self.assertTrue(isinstance(func, IFunction1D))
         FunctionFactory.unsubscribe(func_name)
 
     def test_declareAttribute_only_accepts_known_types(self):
-        func = PyLinear()
+        func = Times2()
         func.initialize() # Contains known types
         self.assertEquals(4, func.nAttributes()) # Make sure initialize ran 
         self.assertRaises(ValueError, func.declareAttribute, "ListAtt", [1,2,3])
 
     def test_correct_attribute_values_are_returned_when_asked(self):
-        func = PyLinear()
+        func = Times2()
         func.initialize() # Contains known types
         
         self.assertEquals(1, func.getAttributeValue("IntAtt"))
@@ -45,7 +46,7 @@ class IFunction1DTest(unittest.TestCase):
         self.assertEquals(True, func.getAttributeValue("BoolAtt"))
 
     def test_correct_parameters_are_attached_during_init(self):
-        func = PyLinear()
+        func = Times2()
         func.initialize()
         
         self.assertEquals(3, func.nParams())
@@ -61,6 +62,16 @@ class IFunction1DTest(unittest.TestCase):
         self.assertEquals("OtherParam",func.parameterName(2))
         self.assertEquals("Some fitting parameter",func.paramDescription(2))
         self.assertEquals(4.0,func.getParameterValue(2))
+
+    def test_function1D_can_be_called_directly(self):
+        func = Times2()
+        func.initialize()
+        xvals=np.array([1,2,3])
+        out = func.function1D(xvals)
+        self.assertEquals(3, out.shape[0])
+        self.assertEquals(2, out[0])
+        self.assertEquals(4, out[1])
+        self.assertEquals(6, out[2])
 
 if __name__ == '__main__':
     unittest.main()

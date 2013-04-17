@@ -66,7 +66,7 @@ namespace Mantid
       /// Implemented Base-class method
       void functionLocal(double* out, const double* xValues, const size_t nData) const;
       /// Python-type signature for above method
-      void functionLocal(const boost::python::object & xvals, boost::python::object & out) const;
+      boost::python::object functionLocal(const boost::python::object & xvals) const;
       /// Implemented base-class method
       void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);
       /// Python signature

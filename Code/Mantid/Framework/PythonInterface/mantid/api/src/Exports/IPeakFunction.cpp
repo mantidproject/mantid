@@ -11,7 +11,7 @@ void export_IPeakFunction()
 {
   class_<IPeakFunction, bases<IFunction1D>, boost::shared_ptr<IPeakFunctionAdapter>,
          boost::noncopyable>("IPeakFunction")
-   .def("functionLocal", (void (IPeakFunctionAdapter::*)(const object &,object&)const)&IPeakFunction::functionLocal,
+   .def("functionLocal", (object (IPeakFunctionAdapter::*)(const object &)const)&IPeakFunction::functionLocal,
         "Calculate the values of the function for the given x values. The output should be stored in the out array")
     ;
 }

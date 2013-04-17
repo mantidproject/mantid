@@ -3,7 +3,11 @@
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 
-#include <boost/python/class.hpp>
+#include <boost/python/object.hpp>
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
+
 
 //-----------------------------------------------------------------------------
 // IPeakFunction definition
@@ -88,13 +92,28 @@ namespace Mantid
       // state information
       Environment::GlobalInterpreterLock gil;
 
-      Py_intptr_t dims[1] = { static_cast<Py_intptr_t>(nData) } ;
-      object xvals = object(handle<>(WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims)));
-      object outnp = object(handle<>(WrapReadWrite::apply<double>::createFromArray(out, 1,dims)));
+      Py_intptr_t dims[1] = { static_cast<Py_intptr_t>(nData) };
+      PyObject *xvals = WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims);
 
       // Deliberately avoids using the CallMethod wrappers. They lock the GIL again and
-      // will check for each function call whether the wrapped method exists.
-      boost::python::call_method<void,object,object>(getSelf(), "functionLocal", xvals,outnp);
+      // will check for each function call whether the wrapped method exists. It also avoid unnecessary construction of
+      // boost::python::objects whn using boost::python::call_method
+
+      PyObject *result = PyEval_CallMethod(getSelf(), "functionLocal", "(O)", xvals);
+      PyArrayObject *nparray = (PyArrayObject *)(result);
+
+      if(PyArray_TYPE(nparray) == NPY_DOUBLE) // dtype matches so use memcpy for speed
+      {
+        std::memcpy(static_cast<void*>(out), PyArray_DATA(nparray), nData*sizeof(npy_double));
+      }
+      else
+      {
+        PyArray_Descr *dtype=PyArray_DESCR(nparray);
+        PyObject *name = PyList_GetItem(dtype->names, 0);
+        std::ostringstream os;
+        os << "Unsupported numpy data type: '" << PyString_AsString(name) << "'. Currently only numpy.float64 is supported";
+        throw std::runtime_error(os.str());
+      }
     }
 
     /**
@@ -103,9 +122,9 @@ namespace Mantid
      * @param xvals The input X values in read-only numpy array
      * @param out A read/write numpy array of doubles to store the results
      */
-    void IPeakFunctionAdapter::functionLocal(const boost::python::object & xvals, boost::python::object & out) const
+    object IPeakFunctionAdapter::functionLocal(const boost::python::object & xvals) const
     {
-      CallMethod2<void,object,object>::dispatchWithException(getSelf(), "functionLocal", xvals, out);
+      return CallMethod1<object,object>::dispatchWithException(getSelf(), "functionLocal", xvals);
     }
 
     /**
@@ -122,16 +141,13 @@ namespace Mantid
       Environment::GlobalInterpreterLock gil;
 
       Py_intptr_t dims[1] = { static_cast<Py_intptr_t>(nData) } ;
-      object xvals = object(handle<>(Converters::WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims)));
-
-      // For some reason passing the Jacobian through as a C++ type does not work. There is a runtime error:
-      //   No to_python (by-value) converter found for C++ type: Mantid::API::Jacobian
-      // So we'll do the work of the wrapper for it
-      object jacobian = object(handle<>(boost::python::to_python_value<API::Jacobian*>()(out)));
+      PyObject *xvals = WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims);
+      PyObject *jacobian = boost::python::to_python_value<API::Jacobian*>()(out);
 
       // Deliberately avoids using the CallMethod wrappers. They lock the GIL again and
-      // will check for each function call whether the wrapped method exists.
-      boost::python::call_method<void,object,object>(getSelf(), "functionDerivLocal", xvals,jacobian);
+      // will check for each function call whether the wrapped method exists. It also avoid unnecessary construction of
+      // boost::python::objects when using boost::python::call_method
+      PyEval_CallMethod(getSelf(), "functionDerivLocal", "(OO)", xvals,jacobian);
     }
 
     /**
