@@ -27,7 +27,6 @@ set ( SRC_FILES
 	src/Fit1D.cpp
 	src/FitMW.cpp
 	src/FitPowderDiffPeaks.cpp
-	src/FitPowderDiffPeaks2.cpp
 	src/FlatBackground.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
@@ -115,7 +114,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Fit1D.h
 	inc/MantidCurveFitting/FitMW.h
 	inc/MantidCurveFitting/FitPowderDiffPeaks.h
-	inc/MantidCurveFitting/FitPowderDiffPeaks2.h
 	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
@@ -174,7 +172,6 @@ set ( INC_FILES
               
 set ( TEST_FILES
 	# ChebyshevPolynomialBackgroundTest.h
-	# FitPowderDiffPeaksTest.h
 	# RefinePowderInstrumentParametersTest.h
 	#DiffSphereTest.h
 	#SCDPanelErrorsTest.h
@@ -196,7 +193,7 @@ set ( TEST_FILES
 	ExpDecayTest.h
 	FRConjugateGradientTest.h
 	FitMWTest.h
-	FitPowderDiffPeaks2Test.h
+	FitPowderDiffPeaksTest.h
 	FlatBackgroundTest.h
 	FunctionFactoryConstraintTest.h
 	GSLMatrixTest.h

@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/FitPowderDiffPeaks2.h"
+#include "MantidCurveFitting/FitPowderDiffPeaks.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -11,7 +11,7 @@
 #include "MantidAPI/TableRow.h"
 #include <fstream>
 
-using Mantid::CurveFitting::FitPowderDiffPeaks2;
+using Mantid::CurveFitting::FitPowderDiffPeaks;
 
 using namespace std;
 using namespace Mantid;
@@ -20,19 +20,19 @@ using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 
-class FitPowderDiffPeaks2Test : public CxxTest::TestSuite
+class FitPowderDiffPeaksTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FitPowderDiffPeaks2Test *createSuite() { return new FitPowderDiffPeaks2Test(); }
-  static void destroySuite( FitPowderDiffPeaks2Test *suite ) { delete suite; }
+  static FitPowderDiffPeaksTest *createSuite() { return new FitPowderDiffPeaksTest(); }
+  static void destroySuite( FitPowderDiffPeaksTest *suite ) { delete suite; }
 
   /** Test init
     */
   void test_Init()
   {
-    CurveFitting::FitPowderDiffPeaks2 alg;
+    CurveFitting::FitPowderDiffPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -60,7 +60,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("InstrumentParameters", geomparamws);
 
     // 2. Fit
-    FitPowderDiffPeaks2 alg;
+    FitPowderDiffPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 

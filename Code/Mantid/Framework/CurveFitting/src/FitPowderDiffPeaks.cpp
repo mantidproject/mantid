@@ -64,7 +64,7 @@ are enough far from the real values.
  2. ''RefinePowderInstrumentParameters'' refines the instrumental geometry related parameters by using the d-TOF function;
  3. Repeat step 1 and 2 for  more single peaks incrementally. The predicted peak positions are more accurate in this step.
  *WIKI*/
-#include "MantidCurveFitting/FitPowderDiffPeaks2.h"
+#include "MantidCurveFitting/FitPowderDiffPeaks.h"
 
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -125,26 +125,26 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  DECLARE_ALGORITHM(FitPowderDiffPeaks2)
+  DECLARE_ALGORITHM(FitPowderDiffPeaks)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  FitPowderDiffPeaks2::FitPowderDiffPeaks2()
+  FitPowderDiffPeaks::FitPowderDiffPeaks()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  FitPowderDiffPeaks2::~FitPowderDiffPeaks2()
+  FitPowderDiffPeaks::~FitPowderDiffPeaks()
   {
   }
   
   //----------------------------------------------------------------------------------------------
   /** Set up documention
     */
-  void FitPowderDiffPeaks2::initDocs()
+  void FitPowderDiffPeaks::initDocs()
   {
     setWikiSummary("Fit peaks in powder diffraction pattern. ");
     setOptionalMessage("Fit peaks in powder diffraction pattern. ");
@@ -153,7 +153,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Parameter declaration
    */
-  void FitPowderDiffPeaks2::init()
+  void FitPowderDiffPeaks::init()
   {
     // Input data workspace
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous", Direction::Input),
@@ -251,7 +251,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Main execution
    */
-  void FitPowderDiffPeaks2::exec()
+  void FitPowderDiffPeaks::exec()
   {
     // 1. Get input
     processInputProperties();
@@ -322,7 +322,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Process input parameters
     */
-  void FitPowderDiffPeaks2::processInputProperties()
+  void FitPowderDiffPeaks::processInputProperties()
   {
     // data workspace
     m_dataWS = this->getProperty("InputWorkspace");
@@ -421,7 +421,7 @@ namespace CurveFitting
     *   1. Starting geometry parameters can be off
     *   2. Peak profile parameters cannot be trusted at all.
     */
-  void FitPowderDiffPeaks2::fitPeaksRobust()
+  void FitPowderDiffPeaks::fitPeaksRobust()
   {
     // I. Prepare
     BackToBackExponential_sptr rightpeak;
@@ -571,7 +571,7 @@ namespace CurveFitting
   /** Observe peak range with hint from right peak's properties
     * Assumption: the background is reasonably flat within peak range
     */
-  void FitPowderDiffPeaks2::observePeakRange(BackToBackExponential_sptr thispeak,
+  void FitPowderDiffPeaks::observePeakRange(BackToBackExponential_sptr thispeak,
                                              BackToBackExponential_sptr rightpeak, double refpeakshift,
                                              double& peakleftbound, double& peakrightbound)
   {
@@ -657,7 +657,7 @@ namespace CurveFitting
     * 1. leftdev, rightdev:  search range for the peak from the estimatio (theoretical)
     * Return: chi2 ... all the other parameter should be just in peak
     */
-  bool FitPowderDiffPeaks2::fitSinglePeakRobust(BackToBackExponential_sptr peak,
+  bool FitPowderDiffPeaks::fitSinglePeakRobust(BackToBackExponential_sptr peak,
                                                 BackgroundFunction_sptr backgroundfunction,
                                                 double peakleftbound, double peakrightbound,
                                                 map<string, double> rightpeakparammap,
@@ -895,7 +895,7 @@ namespace CurveFitting
   /** Fit single peak with background to raw data
     * Note 1: in a limited range (4*FWHM)
     */
-  bool  FitPowderDiffPeaks2::doFit1PeakBackground(Workspace2D_sptr dataws, size_t wsindex,
+  bool  FitPowderDiffPeaks::doFit1PeakBackground(Workspace2D_sptr dataws, size_t wsindex,
                                                  BackToBackExponential_sptr peak,
                                                  BackgroundFunction_sptr backgroundfunction,
                                                  double &chi2)
@@ -967,7 +967,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Fit signle peak by Monte Carlo/simulated annealing
     */
-  bool FitPowderDiffPeaks2::fitSinglePeakSimulatedAnnealing(BackToBackExponential_sptr peak,
+  bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(BackToBackExponential_sptr peak,
                                                             vector<string> paramtodomc)
   {
     UNUSED_ARG(peak);
@@ -1164,7 +1164,7 @@ namespace CurveFitting
     *
     * Output: (1) goodfitpeaks, (2) goodfitchi2
    */
-  void FitPowderDiffPeaks2::fitPeaksWithGoodStartingValues()
+  void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues()
   {
     // 1. Initialize (local) background function
     Polynomial_sptr backgroundfunction = boost::make_shared<Polynomial>(Polynomial());
@@ -1280,7 +1280,7 @@ namespace CurveFitting
     * @param chi2 :: The output chi squared
     * @param annhilatedpeak :: (output) annhilatedpeak
     */
-  bool FitPowderDiffPeaks2::fitSinglePeakConfident(BackToBackExponential_sptr peak,
+  bool FitPowderDiffPeaks::fitSinglePeakConfident(BackToBackExponential_sptr peak,
                                                    BackgroundFunction_sptr backgroundfunction,
                                                    double leftbound, double rightbound,
                                                    double& chi2, bool &annhilatedpeak)
@@ -1529,7 +1529,7 @@ namespace CurveFitting
     * @param peakleftboundary ::  left boundary of the peak for fitting (output)
     * @param peakrightboundary :: right boundary of the peak for fitting (output)
     */
-  void FitPowderDiffPeaks2::calculatePeakFitBoundary(size_t ileftpeak, size_t irightpeak,
+  void FitPowderDiffPeaks::calculatePeakFitBoundary(size_t ileftpeak, size_t irightpeak,
                                                      double& peakleftboundary, double& peakrightboundary)
   {
     BackToBackExponential_sptr leftpeak = m_peaks[ileftpeak].second.second;
@@ -1584,7 +1584,7 @@ namespace CurveFitting
     * @param peakfunction :: An instance of the BackToBackExponential peak function
     * @param guessedfwhm: Guessed fwhm in order to constain the peak.  If negative, then no constraint
     */
-  std::pair<bool, double> FitPowderDiffPeaks2::doFitPeak(Workspace2D_sptr dataws,BackToBackExponential_sptr peakfunction,
+  std::pair<bool, double> FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,BackToBackExponential_sptr peakfunction,
                                                          double guessedfwhm)
   {
     // 1. Set up boundary
@@ -1693,7 +1693,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------
   /** Store the function's parameter values to a map
     */
-  void FitPowderDiffPeaks2::storeFunctionParameters(IFunction_sptr function,
+  void FitPowderDiffPeaks::storeFunctionParameters(IFunction_sptr function,
                                                     std::map<string, double>& parammaps)
   {
     vector<string> paramnames = function->getParameterNames();
@@ -1707,7 +1707,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------
   /** Restore the function's parameter values from a map
     */
-  void FitPowderDiffPeaks2::restoreFunctionParameters(IFunction_sptr function,
+  void FitPowderDiffPeaks::restoreFunctionParameters(IFunction_sptr function,
                                                       map<string, double> parammap)
   {
     vector<string> paramnames = function->getParameterNames();
@@ -1735,7 +1735,7 @@ namespace CurveFitting
     * 1. fit success?
     * 2. chi2
     */
-  bool FitPowderDiffPeaks2::doFit1PeakSimple(Workspace2D_sptr dataws, size_t workspaceindex,
+  bool FitPowderDiffPeaks::doFit1PeakSimple(Workspace2D_sptr dataws, size_t workspaceindex,
                                              BackToBackExponential_sptr peakfunction,
                                              string minimzername, size_t maxiteration, double& chi2)
   {
@@ -1804,7 +1804,7 @@ namespace CurveFitting
     * @param dampfactors :: A vector of damping factors
     * @param chi2 :: The chi squared value (output)
     */
-  bool FitPowderDiffPeaks2::doFit1PeakSequential(Workspace2D_sptr dataws, size_t workspaceindex,
+  bool FitPowderDiffPeaks::doFit1PeakSequential(Workspace2D_sptr dataws, size_t workspaceindex,
                                                  BackToBackExponential_sptr peakfunction,
                                                  vector<string> minimzernames, vector<size_t> maxiterations,
                                                  vector<double> dampfactors, double& chi2)
@@ -1867,7 +1867,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------
   /** Fit background-removed peak by Gaussian
     */
-  bool FitPowderDiffPeaks2::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws, size_t workspaceindex,
+  bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws, size_t workspaceindex,
                                              double in_center, double leftfwhm, double rightfwhm,
                                              double& center, double& sigma, double& height)
   {
@@ -1963,7 +1963,7 @@ namespace CurveFitting
     * @param backgroundfunction :: An instance of BackgroundFunction
     * @param gfwhm : guessed fwhm.  If negative, then use the input value
     */
-  bool FitPowderDiffPeaks2::fitOverlappedPeaks(vector<BackToBackExponential_sptr> peaks,
+  bool FitPowderDiffPeaks::fitOverlappedPeaks(vector<BackToBackExponential_sptr> peaks,
                                                BackgroundFunction_sptr backgroundfunction,
                                                double gfwhm)
   {
@@ -2045,7 +2045,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Fit multiple (overlapped) peaks
     */
-  bool FitPowderDiffPeaks2::doFitMultiplePeaks(Workspace2D_sptr dataws, size_t wsindex,
+  bool FitPowderDiffPeaks::doFitMultiplePeaks(Workspace2D_sptr dataws, size_t wsindex,
                                                CompositeFunction_sptr peaksfunc,
                                                vector<BackToBackExponential_sptr> peakfuncs,
                                                vector<bool>& vecfitgood, vector<double>& vecchi2s)
@@ -2171,7 +2171,7 @@ namespace CurveFitting
     * @param wsindex: workspace index of the data without background
     * @param peaks :: A vector of instances of BackToBackExponential function
     */
-  void FitPowderDiffPeaks2::estimatePeakHeightsLeBail(Workspace2D_sptr dataws, size_t wsindex,
+  void FitPowderDiffPeaks::estimatePeakHeightsLeBail(Workspace2D_sptr dataws, size_t wsindex,
                                                       vector<BackToBackExponential_sptr> peaks)
   {
     // 1. Build data structures
@@ -2226,7 +2226,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Set constraints on a group of overlapped peaks for fitting
     */
-  void FitPowderDiffPeaks2::setOverlappedPeaksConstraints(vector<BackToBackExponential_sptr> peaks)
+  void FitPowderDiffPeaks::setOverlappedPeaksConstraints(vector<BackToBackExponential_sptr> peaks)
   {
     for (size_t ipk = 0; ipk < peaks.size(); ++ipk)
     {
@@ -2249,7 +2249,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Fit N overlapped peaks in a simple manner
     */
-  bool FitPowderDiffPeaks2::doFitNPeaksSimple(Workspace2D_sptr dataws, size_t wsindex,
+  bool FitPowderDiffPeaks::doFitNPeaksSimple(Workspace2D_sptr dataws, size_t wsindex,
                                               CompositeFunction_sptr peaksfunc,
                                               vector<BackToBackExponential_sptr> peakfuncs, string minimizername,
                                               size_t maxiteration, double& chi2)
@@ -2315,7 +2315,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Parse fit result
     */
-  std::string FitPowderDiffPeaks2::parseFitResult(API::IAlgorithm_sptr fitalg, double& chi2,
+  std::string FitPowderDiffPeaks::parseFitResult(API::IAlgorithm_sptr fitalg, double& chi2,
                                                   bool &fitsuccess)
   {
     stringstream rss;
@@ -2335,7 +2335,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Parse parameter workspace returned from Fit()
     */
-  std::string FitPowderDiffPeaks2::parseFitParameterWorkspace(API::ITableWorkspace_sptr paramws)
+  std::string FitPowderDiffPeaks::parseFitParameterWorkspace(API::ITableWorkspace_sptr paramws)
   {
     // 1. Check
     if (!paramws)
@@ -2366,7 +2366,7 @@ namespace CurveFitting
   /** Import TableWorkspace containing the parameters for fitting
    * the diffrotometer geometry parameters
    */
-  void FitPowderDiffPeaks2::importInstrumentParameterFromTable(DataObjects::TableWorkspace_sptr parameterWS)
+  void FitPowderDiffPeaks::importInstrumentParameterFromTable(DataObjects::TableWorkspace_sptr parameterWS)
   {
     // 1. Check column orders
     std::vector<std::string> colnames = parameterWS->getColumnNames();
@@ -2411,7 +2411,7 @@ namespace CurveFitting
 
   /** Import Bragg peak table workspace
     */
-  void FitPowderDiffPeaks2::parseBraggPeakTable(TableWorkspace_sptr peakws, vector<map<string, double> >& parammaps,
+  void FitPowderDiffPeaks::parseBraggPeakTable(TableWorkspace_sptr peakws, vector<map<string, double> >& parammaps,
                                                vector<map<string, int> >& hklmaps)
   {
     // 1. Get columns' types and names
@@ -2468,7 +2468,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------
   /** Create a Workspace2D for fitted peaks (pattern) and also the workspace for Zscores!
     */
-  Workspace2D_sptr FitPowderDiffPeaks2::genOutputFittedPatternWorkspace(std::vector<double> pattern, int workspaceindex)
+  Workspace2D_sptr FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern, int workspaceindex)
   {
     // 1. Init
     const MantidVec& X = m_dataWS->readX(workspaceindex);
@@ -2528,7 +2528,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------
   /** Create data workspace for X0, A, B and S of peak with good fit
     */
-  Workspace2D_sptr FitPowderDiffPeaks2::genPeakParameterDataWorkspace()
+  Workspace2D_sptr FitPowderDiffPeaks::genPeakParameterDataWorkspace()
   {
     // 1. Check and prepare
     if (m_peaks.size() != m_peakFitChi2.size())
@@ -2600,7 +2600,7 @@ namespace CurveFitting
     * Table has column as H, K, L, d_h, X0, A(lpha), B(eta), S(igma), Chi2
     * Each row is a peak
     */
-  pair<TableWorkspace_sptr, TableWorkspace_sptr> FitPowderDiffPeaks2::genPeakParametersWorkspace()
+  pair<TableWorkspace_sptr, TableWorkspace_sptr> FitPowderDiffPeaks::genPeakParametersWorkspace()
   {
     // 1. Debug/Test Output
     for (size_t i = 0; i < m_peaks.size(); ++i)
@@ -2740,7 +2740,7 @@ namespace CurveFitting
   /** Genearte peaks from input workspace;
     * Each peak within requirement will put into both (1) m_peaks and (2) m_peaksmap
     */
-  void FitPowderDiffPeaks2::genPeaksFromTable(TableWorkspace_sptr peakparamws)
+  void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws)
   {
     // 1. Check and clear input and output
     if (!peakparamws)
@@ -2884,7 +2884,7 @@ namespace CurveFitting
     * @param d_h :: (output) d_h
     * @return      : BackToBackExponential peak
     */
-  BackToBackExponential_sptr FitPowderDiffPeaks2::genPeak(map<string, int> hklmap, map<string, double> parammap,
+  BackToBackExponential_sptr FitPowderDiffPeaks::genPeak(map<string, int> hklmap, map<string, double> parammap,
                                                           map<string, string> bk2bk2braggmap, bool &good,
                                                           vector<int>& hkl, double& d_h)
   {
@@ -3082,7 +3082,7 @@ namespace CurveFitting
     * @param peakfunction: function to plot
     * @param background:   background of the peak
     */
-  void FitPowderDiffPeaks2::plotFunction(IFunction_sptr peakfunction, BackgroundFunction_sptr background,
+  void FitPowderDiffPeaks::plotFunction(IFunction_sptr peakfunction, BackgroundFunction_sptr background,
                                          FunctionDomain1DVector domain)
   {
     // 1. Determine range
@@ -3120,7 +3120,7 @@ namespace CurveFitting
     * @param intmap:  map as a pair of string and integer
     * @param hkl:     output integer vector for miller index
     */
-  bool FitPowderDiffPeaks2::getHKLFromMap(map<string, int> intmap, vector<int>& hkl)
+  bool FitPowderDiffPeaks::getHKLFromMap(map<string, int> intmap, vector<int>& hkl)
   {
     vector<string> strhkl(3);
     strhkl[0] = "H"; strhkl[1] = "K"; strhkl[2] = "L";
@@ -3146,7 +3146,7 @@ namespace CurveFitting
     * @param tofmin:  minimum value for cropping
     * @param tofmax:  maximum value for cropping
     */
-  void FitPowderDiffPeaks2::cropWorkspace(double tofmin, double tofmax)
+  void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax)
   {
     API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
     cropalg->initialize();
@@ -3187,7 +3187,7 @@ namespace CurveFitting
     * Exception: throw runtime error if there is no such parameter
     * @param parname:  parameter name to get from m_instrumentParameters
     */
-  double FitPowderDiffPeaks2::getParameter(string parname)
+  double FitPowderDiffPeaks::getParameter(string parname)
   {
     map<string, double>::iterator mapiter;
     mapiter = m_instrumentParmaeters.find(parname);
@@ -3211,7 +3211,7 @@ namespace CurveFitting
     * @param leftbound:  lower boundary of the source data
     * @param rightbound: upper boundary of the source data
     */
-  Workspace2D_sptr FitPowderDiffPeaks2::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews, size_t workspaceindex,
+  Workspace2D_sptr FitPowderDiffPeaks::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews, size_t workspaceindex,
                                                               double leftbound, double rightbound)
   {
     // 1. Check

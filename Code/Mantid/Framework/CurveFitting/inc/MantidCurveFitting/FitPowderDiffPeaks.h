@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS2_H_
-#define MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS2_H_
+#ifndef MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_
+#define MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -24,7 +24,7 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** FitPowderDiffPeaks2 : Fit peaks in powder diffraction pattern.
+  /** FitPowderDiffPeaks : Fit peaks in powder diffraction pattern.
 
     Mode Confident:
     * In this mode, the starting values of parameters except height will be given in input
@@ -59,17 +59,17 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport FitPowderDiffPeaks2 : public API::Algorithm
+  class DLLExport FitPowderDiffPeaks : public API::Algorithm
   {
   public:
-    FitPowderDiffPeaks2();
-    virtual ~FitPowderDiffPeaks2();
+    FitPowderDiffPeaks();
+    virtual ~FitPowderDiffPeaks();
 
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "FitPowderDiffPeaks";}
 
     /// Algorithm's version for identification overriding a virtual method
-    virtual int version() const { return 2;}
+    virtual int version() const { return 1;}
 
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Diffraction";}
@@ -389,4 +389,4 @@ namespace CurveFitting
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS2_H_ */
+#endif  /* MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_ */
