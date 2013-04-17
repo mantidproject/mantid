@@ -54,12 +54,18 @@ namespace Mantid
       void function1D(double* out, const double* xValues, const size_t nData) const;
       /// Python-type signature
       boost::python::object function1D(const boost::python::object & xvals) const;
+
+      /// Derivatives of function with respect to active parameters (C++ override)
+      void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
       ///@}
 
     private:
       /// The PyObject must be supplied to construct the object
       DISABLE_DEFAULT_CONSTRUCT(IFunction1DAdapter);
       DISABLE_COPY_AND_ASSIGN(IFunction1DAdapter);
+
+      /// Flag if the functionDeriv1D method is overridden (avoids multiple checks)
+      bool m_derivOveridden;
     };
   }
 }

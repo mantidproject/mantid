@@ -24,8 +24,9 @@ namespace Mantid
      * * @param self A reference to the calling Python object
      */
     IFunction1DAdapter::IFunction1DAdapter(PyObject* self)
-      : API::ParamFunction(), API::IFunction1D(), IFunctionAdapter(self)
+      : API::ParamFunction(), API::IFunction1D(), IFunctionAdapter(self), m_derivOveridden(false)
     {
+      m_derivOveridden = Environment::typeHasAttribute(self, "functionDeriv1D");
     }
 
     /**
@@ -74,5 +75,36 @@ namespace Mantid
     {
       return CallMethod1<object,object>::dispatchWithException(getSelf(), "function1D", xvals);
     }
+
+    /**
+     * If a Python override exists then call that, otherwise call the base class method
+     * @param out The Jacobian matrix storing the partial derivatives of the function w.r.t to the parameters
+     * @param xValues The input X values
+     * @param nData The size of the two arrays
+     */
+    void IFunction1DAdapter::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
+    {
+      if(m_derivOveridden)
+      {
+        using namespace Converters;
+        // GIL must be held while numpy wrappers are destroyed as they access Python
+        // state information
+        Environment::GlobalInterpreterLock gil;
+
+        Py_intptr_t dims[1] = { static_cast<Py_intptr_t>(nData) } ;
+        PyObject *xvals = WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims);
+        PyObject *jacobian = boost::python::to_python_value<API::Jacobian*>()(out);
+
+        // Deliberately avoids using the CallMethod wrappers. They lock the GIL again and
+        // will check for each function call whether the wrapped method exists. It also avoid unnecessary construction of
+        // boost::python::objects when using boost::python::call_method
+        PyEval_CallMethod(getSelf(), "functionDerivLocal", "(OO)", xvals,jacobian);
+      }
+      else
+      {
+        IFunction1D::functionDeriv1D(out,xValues,nData);
+      }
+    }
+
   }
 }

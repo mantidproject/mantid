@@ -62,6 +62,8 @@ namespace Mantid
 
       /// Required to solve compiler ambiguity between IPeakFunction & IFunction1DAdapter
       void function1D(double* out, const double* xValues, const size_t nData) const { IPeakFunction::function1D(out,xValues,nData); }
+      /// Required to solve compiler ambiguity between IPeakFunction & IFunction1DAdapter
+      void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData) { IPeakFunction::functionDeriv1D(out,xValues,nData); }
 
       /// Implemented Base-class method
       void functionLocal(double* out, const double* xValues, const size_t nData) const;
@@ -71,7 +73,6 @@ namespace Mantid
       void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);
       /// Python signature
       void functionDerivLocal(const boost::python::object & xvals, boost::python::object & jacobian);
-
 
     private:
       /// The PyObject must be supplied to construct the object
