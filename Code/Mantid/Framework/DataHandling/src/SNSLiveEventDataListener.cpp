@@ -370,7 +370,10 @@ namespace DataHandling
     // Append the events
     g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
     {
-      Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex)  ;
+      Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+
+      // Timestamp for the events
+      Mantid::Kernel::DateAndTime eventTime = timeFromPacket( pkt);
 
       // Iterate through each event
       const ADARA::Event *event = pkt.firstEvent();
@@ -385,11 +388,11 @@ namespace DataHandling
           // from the ADARA stream in units of 100ns.
           if (pkt.getSourceCORFlag())
           {
-            appendEvent(event->pixel, event->tof / 10.0, pkt.pulseId());
+            appendEvent(event->pixel, event->tof / 10.0, eventTime);
           }
           else
           {
-            appendEvent(event->pixel, (event->tof + pkt.getSourceTOFOffset()) / 10.0, pkt.pulseId());
+            appendEvent(event->pixel, (event->tof + pkt.getSourceTOFOffset()) / 10.0, eventTime);
           }
         }
 
