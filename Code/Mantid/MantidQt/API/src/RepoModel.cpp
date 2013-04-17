@@ -487,6 +487,18 @@ QString RepoModel::fileDescription(const QModelIndex & index){
    return desc;
 }
 
+QString RepoModel::author(const QModelIndex & index){
+ RepoItem * item = static_cast<RepoItem*>(index.internalPointer());
+ QString author = "Not defined";
+   if (!item)
+     return author; 
+   try{
+     author = QString::fromStdString(repo_ptr->info(item->path().toStdString()).author);
+   }catch(...){
+     // just ignore
+   }
+   return author;  
+}
 /** Return the operative system file path if it exists. 
     otherwise it returns an empty string
     @param index: to find the entry

@@ -182,6 +182,7 @@ public:
 
     QString fileDescription(const QModelIndex & index); 
     QString filePath(const QModelIndex & index);
+    QString author(const QModelIndex& index); 
 
 
 private:

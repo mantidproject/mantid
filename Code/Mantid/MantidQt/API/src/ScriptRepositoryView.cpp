@@ -12,7 +12,6 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QPainter>
-
 namespace MantidQt
 {
 namespace API
@@ -126,7 +125,6 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
       deleteLater(); 
       return;
     }
-    
     // from this point, it is assumed that ScriptRepository is installed.    
 
     // configure the Ui
@@ -200,8 +198,13 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
     if (_model){
       // try to get the description of the file pointed at the current index.
       // and update the description text browser. 
-      QString description = _model->fileDescription(in);      
-      ui->desc_textBrowser->setText(description); 
+      QString description = _model->fileDescription(in);
+      ui->desc_textBrowser->setText(description);
+      QString author_name = _model->author(in);
+      if (author_name.isEmpty())
+        ui->authorNameLabel->setText(""); 
+      else
+        ui->authorNameLabel->setText(QString("<b>Author:</b> ")+ author_name);
       return;
     }
   }
