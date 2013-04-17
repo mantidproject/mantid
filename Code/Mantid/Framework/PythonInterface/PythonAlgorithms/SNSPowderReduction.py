@@ -235,6 +235,7 @@ class SNSPowderReduction(PythonAlgorithm):
         outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof', 'gsas and fullprof and pdfgetn', 'NeXus',
                             'gsas and NeXus', 'fullprof and NeXus', 'gsas and fullprof and NeXus', 'gsas and fullprof and pdfgetn and NeXus']
         self.declareProperty("SaveAs", "gsas", StringListValidator(outfiletypes))
+        self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
         self.declareProperty("NormalizeByCurrent", True, "Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
@@ -285,6 +286,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams").value
         calib = self.getProperty("CalibrationFile").value
         self._outDir = self.getProperty("OutputDirectory").value
+        self._outPrefix = self.getProperty("OutputFilePrefix").value
         self._outTypes = self.getProperty("SaveAs").value
         samRuns = self.getProperty("RunNumber").value
         preserveEvents = self.getProperty("PreserveEvents").value
@@ -381,7 +383,10 @@ class SNSPowderReduction(PythonAlgorithm):
 
         for samRun in samwksplist:
             samRun = mtd[str(samRun)] 
-            print "[DBx1136] Sample Run %s:  number of events = %d" % (str(samRun), samRun.getNumberEvents())
+            try: 
+                print "[DBx1136] Sample Run %s:  number of events = %d" % (str(samRun), samRun.getNumberEvents())
+            except Exception as e:
+                print "[DBx1136] Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e))
 
             # process the container
             canRun = self.getProperty("BackgroundNumber").value
@@ -596,11 +601,18 @@ class SNSPowderReduction(PythonAlgorithm):
                     chunk["FilterByTimeStop"] = filterWall[1]
             
         wksp = api.Load(Filename=filename, OutputWorkspace=name, **chunk)
-        print "[DB1050-1] Number of events = %d" % (wksp.getNumberEvents())
+        try: 
+            print "[DB1050-1] Number of events = %d" % (wksp.getNumberEvents())
+        except Exception as e:
+            print "[DB1050-1] Unable to get events of %s.  Error message: %s" % (str(wksp), str(e))
 
         if HAVE_MPI:
-            print "MPI Task = ", mpi.world.rank, "Number Events = ", wksp.getNumberEvents()
-
+            msg = "MPI Task = %s ;" %s (str(mpi.world.rank))
+            try: 
+                msg += "Number Events = ", wksp.getNumberEvents()
+            except Exception as e: 
+                msg += "Unable to get events of %s.  Error message: %s" % (str(wksp), str(e))
+            print msg
 
         return wksp
 
@@ -777,7 +789,10 @@ class SNSPowderReduction(PythonAlgorithm):
 
         for itemp in xrange(numwksp): 
             if wksplist[itemp].__class__.__name__.count("Event") > 0: 
-                print "[DB1050-X] Number of events = %d of split-workspace %d" % (wksplist[itemp].getNumberEvents(), itemp)
+                try: 
+                    print "[DB1050-X] Number of events = %d of split-workspace %d" % (wksplist[itemp].getNumberEvents(), itemp)
+                except Exception as e:
+                    print e
             if preserveEvents and not "histo" in extension:
                 wksplist[itemp] = api.CompressEvents(InputWorkspace=wksplist[itemp], 
                     OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
@@ -791,7 +806,10 @@ class SNSPowderReduction(PythonAlgorithm):
             self.log().information("Done focussing data of %d." % (itemp))
            
             if wksplist[itemp].__class__.__name__.count("Event") > 0: 
-                print "[DB1050-Z] Number of events = %d of split-workspace %d" % (wksplist[itemp].getNumberEvents(), itemp)
+                try: 
+                    print "[DB1050-Z] Number of events = %d of split-workspace %d" % (wksplist[itemp].getNumberEvents(), itemp)
+                except Exception as e:
+                    print e
 
         print "[DB1208] Number of workspace in workspace list = ", len(wksplist)
 
@@ -844,8 +862,11 @@ class SNSPowderReduction(PythonAlgorithm):
         self.log().information("frequency: " + str(frequency) + "Hz center wavelength:" + str(wavelength) + "Angstrom")
         return self._config.getInfo(frequency, wavelength)
 
-    def _save(self, wksp, info, normalized, pdfgetn):
-        filename = os.path.join(self._outDir, str(wksp))
+    def _save(self, wksp, info, normalized, pdfgetn): 
+        prefix = str(wksp)        
+        if len(self._outPrefix) > 0: # non-empty string            
+            prefix = self._outPrefix 
+        filename = os.path.join(self._outDir, prefix) 
         if pdfgetn:
             if "pdfgetn" in self._outTypes:
                 pdfwksp = str(wksp)+"_norm"
