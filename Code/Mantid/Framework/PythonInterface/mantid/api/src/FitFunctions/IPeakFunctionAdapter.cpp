@@ -83,9 +83,15 @@ namespace Mantid
      */
     void IPeakFunctionAdapter::functionLocal(double* out, const double* xValues, const size_t nData) const
     {
+      using namespace Converters;
+      // GIL must be held while numpy wrappers are destroyed as they access Python
+      // state information
+      Environment::GlobalInterpreterLock gil;
+
       Py_intptr_t dims[1] = { static_cast<Py_intptr_t>(nData) } ;
-      object xvals = object(handle<>(Converters::WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims)));
-      object outnp = object(handle<>(Converters::WrapReadWrite::apply<double>::createFromArray(out, 1,dims)));
+      object xvals = object(handle<>(WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims)));
+      object outnp = object(handle<>(WrapReadWrite::apply<double>::createFromArray(out, 1,dims)));
+
       functionLocal(xvals, outnp);
     }
 
@@ -107,19 +113,30 @@ namespace Mantid
      */
     void IPeakFunctionAdapter::functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData)
     {
+      using namespace Converters;
+      // GIL must be held while numpy wrappers are destroyed as they access Python
+      // state information
+      Environment::GlobalInterpreterLock gil;
+
       Py_intptr_t dims[1] = { static_cast<Py_intptr_t>(nData) } ;
       object xvals = object(handle<>(Converters::WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims)));
-      functionDerivLocal(xvals, out);
+
+      // For some reason passing the Jacobian through as a C++ type does not work. There is a runtime error:
+      //   No to_python (by-value) converter found for C++ type: Mantid::API::Jacobian
+      // So we'll do the work of the wrapper for it
+      object jacobian = object(handle<>(boost::python::to_python_value<API::Jacobian*>()(out)));
+
+      functionDerivLocal(xvals, jacobian);
     }
 
     /**
      * Python-type signature version of above
      * @param xvals The input X values in read-only numpy array
-     *  @param out The Jacobian matrix storing the partial derivatives of the function w.r.t to the parameters
+     *  @param jacobian The Jacobian matrix storing the partial derivatives of the function w.r.t to the parameters
      */
-    void IPeakFunctionAdapter::functionDerivLocal(const boost::python::object & xvals, API::Jacobian* out)
+    void IPeakFunctionAdapter::functionDerivLocal(const boost::python::object & xvals, boost::python::object & jacobian)
     {
-      CallMethod2<void,object,API::Jacobian*>::dispatchWithException(getSelf(), "functionDerivLocal", xvals, out);
+      CallMethod2<void,object,object>::dispatchWithException(getSelf(), "functionDerivLocal", xvals, jacobian);
     }
 
   }

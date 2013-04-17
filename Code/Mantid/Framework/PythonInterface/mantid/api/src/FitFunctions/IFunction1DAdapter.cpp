@@ -33,6 +33,10 @@ namespace Mantid
      */
     void IFunction1DAdapter::function1D(double* out, const double* xValues, const size_t nData) const
     {
+      // GIL must be held while numpy wrappers are destroyed as they access Python
+      // state information
+      Environment::GlobalInterpreterLock gil;
+
       Py_intptr_t dims[1] = { static_cast<Py_intptr_t>(nData) } ;
       object xvals = object(handle<>(Converters::WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims)));
       object outnp = object(handle<>(Converters::WrapReadWrite::apply<double>::createFromArray(out, 1,dims)));
