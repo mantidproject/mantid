@@ -42,7 +42,7 @@ public:
   /** Fundamental test to calcualte 2 peak w/o background.
    * It is migrated from LeBailFunctionTest.test_CalculatePeakParameters
    */
-  void Ptest_cal2PeaksV2()
+  void test_cal2PeaksV2()
   {
     // 1. Create input workspace
     API::MatrixWorkspace_sptr dataws;
@@ -289,7 +289,7 @@ public:
     * Due to the strongly correlated peak parameters, only 1 parameter
     * has its value shifted from true value for unit test purpose
    */
-  void Ptest_fit1Parameter()
+  void test_fit1Parameter()
   {
     std::string testplan("zero");
 
@@ -560,8 +560,107 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test refining background.  The data to test against is from NOM 11848-4
+    */
+  void test_refineBackground()
+  {
+    // 1. Create input workspace
+    // a) Data workspace
+    API::MatrixWorkspace_sptr dataws;
+    dataws = createInputDataWorkspace(3);
+    AnalysisDataService::Instance().addOrReplace("DataB", dataws);
+
+    // b) Parameter table workspace
+    DataObjects::TableWorkspace_sptr parameterws;
+    map<string, double> modmap;
+    parameterws = createPeakParameterWorkspace(modmap, 3);
+    AnalysisDataService::Instance().addOrReplace("NOMADBank4", parameterws);
+
+    // c) Reflection (peak 211 @ TOF = 16100)
+    vector<vector<int> > peakhkls;
+    vector<double> peakheights;
+    vector<int> p211(3, 0);
+    p211[0] = 2; p211[1] = 1; p211[2] = 1;
+    peakhkls.push_back(p211);
+    peakheights.push_back(1.0);
+
+    DataObjects::TableWorkspace_sptr hklws;
+    hklws = createInputHKLWorkspace(peakhkls, peakheights);
+    AnalysisDataService::Instance().addOrReplace("LaB6Reflections", hklws);
+
+    // d) Background
+    TableWorkspace_sptr bkgdws = createBackgroundParameterWorksapce(2);
+    AnalysisDataService::Instance().addOrReplace("NomB4BackgroundParameters", bkgdws);
+
+    // 2. Initialize the algorithm
+    LeBailFit lbfit;
+
+    TS_ASSERT_THROWS_NOTHING(lbfit.initialize());
+    TS_ASSERT(lbfit.isInitialized());
+
+    // 3. Set properties
+    lbfit.setPropertyValue("InputWorkspace", "DataB");
+    lbfit.setProperty("OutputWorkspace", "RefinedBackground");
+    lbfit.setPropertyValue("InputParameterWorkspace", "NOMADBank4");
+    lbfit.setPropertyValue("OutputParameterWorkspace", "Dummy1");
+    lbfit.setPropertyValue("InputHKLWorkspace", "LaB6Reflections");
+    lbfit.setProperty("OutputPeaksWorkspace", "Dummy2");
+    lbfit.setProperty("WorkspaceIndex", 0);
+    lbfit.setProperty("Function", "RefineBackground");
+    lbfit.setProperty("UseInputPeakHeights", false);
+    lbfit.setProperty("PeakRadius", 8);
+    lbfit.setProperty("Damping", 0.4);
+    lbfit.setProperty("NumberMinimizeSteps", 100);
+    lbfit.setProperty("BackgroundParametersWorkspace", "NomB4BackgroundParameters");
+
+    // 4. Execute
+    TS_ASSERT_THROWS_NOTHING(lbfit.execute());
+    TS_ASSERT(lbfit.isExecuted());
+
+    // 5. Get output
+    DataObjects::Workspace2D_sptr outws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+          AnalysisDataService::Instance().retrieve("RefinedBackground"));
+    TS_ASSERT(outws);
+    if (!outws)
+    {
+      return;
+    }
+
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 9);
+
+#if 0
+    /*
+      for (size_t i = 0; i < outws->dataY(0).size(); ++i)
+        std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << "\t\t" << outws->dataY(1)[i] << std::endl;
+      */
+
+    // 4. Calcualte data
+    double y25 = 1360.20;
+    double y59 = 0.285529;
+    double y86 = 648.998;
+
+    TS_ASSERT_DELTA(outws->readY(1)[25], y25, 0.1);
+    TS_ASSERT_DELTA(outws->readY(1)[59], y59, 0.0001);
+    TS_ASSERT_DELTA(outws->readY(1)[86], y86, 0.001);
+#endif
+
+    // 5. Clean
+    AnalysisDataService::Instance().remove("Data");
+    AnalysisDataService::Instance().remove("RefinedBackground");
+    AnalysisDataService::Instance().remove("NOMADBank4");
+    AnalysisDataService::Instance().remove("Dummy1");
+    AnalysisDataService::Instance().remove("LaB6Reflections");
+    AnalysisDataService::Instance().remove("Dummy2");
+    AnalysisDataService::Instance().remove("NomB4BackgroundParameters");
+
+    return;
+  }
+
+
 
   /// ============================   Data Generation ============================ ///
+  //----------------------------------------------------------------------------------------------
   /** Create parameter workspace for peak calculation
    */
   DataObjects::TableWorkspace_sptr createPeakParameterWorkspace()
@@ -628,97 +727,106 @@ public:
     return parameterws;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Create parameter workspace for peak calculation.
-   *  If a parameter is to be modifed by absolute value, then this parameter will be fit.
-   */
-  DataObjects::TableWorkspace_sptr createPeakParameterWorkspace(std::map<std::string, double> parammodifymap,
-                                                                int option)
+    * If a parameter is to be modifed by absolute value, then this parameter will be fit.
+    * @param parammodifymap :: map containing parameter and its value to update from original
+    * @param option :: choice to select parameter values.
+    */
+  TableWorkspace_sptr createPeakParameterWorkspace(map<std::string, double> parammodifymap,
+                                                   int option)
   {
-      // 1. Set the parameter and fit map
-      std::map<std::string, double> paramvaluemap;
-      std::map<std::string, std::string> paramfitmap;
+    // 1. Set the parameter and fit map
+    std::map<std::string, double> paramvaluemap;
+    std::map<std::string, std::string> paramfitmap;
 
-      // 2. Get parameters (map) according to option
-      switch (option)
-      {
+    // 2. Get parameters (map) according to option
+    switch (option)
+    {
       case 1:
-          /// The backgroundless data
-          genPeakParametersBackgroundLessData(paramvaluemap);
-          break;
+        // The backgroundless data
+        genPeakParametersBackgroundLessData(paramvaluemap);
+        break;
 
       case 2:
-          /// Bank 7 w/ background
-          genPeakParameterBank7(paramvaluemap);
-          break;
+        // Bank 7 w/ background
+        genPeakParameterBank7(paramvaluemap);
+        break;
+
+      case 3:
+        // NOMAD Bank 4
+        genPeakParameterNomBank4(paramvaluemap);
+        break;
 
       default:
-          /// Denied
-          std::cout << "Peak parameters option = " << option << " is not supported." << std::endl;
-          std::cout << "Supported options are (1) Backgroundless, (2) Background Bank 7. " << std::endl;
-          throw std::invalid_argument("Unsupported peak parameters option.");
-          break;
-      }
-      std::cout << "Parameter Value Map Size = " << paramvaluemap.size() << std::endl;
+        // Unsupported
+        stringstream errmsg;
+        errmsg << "Peak parameters option = " << option << " is not supported." << ".\n"
+               << "Supported options are (1) Backgroundless, (2) Background Bank 7, (3) NOMAD Bank4.";
+        throw std::invalid_argument(errmsg.str());
+        break;
+    }
+    cout << "Parameter Value Map Size = " << paramvaluemap.size() << std::endl;
 
-      // 3. Fix all peak parameters
-      std::map<std::string, double>::iterator mit;
-      for (mit = paramvaluemap.begin(); mit != paramvaluemap.end(); ++mit)
+    // 3. Fix all peak parameters
+    std::map<std::string, double>::iterator mit;
+    for (mit = paramvaluemap.begin(); mit != paramvaluemap.end(); ++mit)
       {
           std::string parname = mit->first;
           paramfitmap.insert(std::make_pair(parname, "t"));
       }
 
-      std::cout << "Parameter Fit Map Size = " << paramfitmap.size() << std::endl;
+    std::cout << "Parameter Fit Map Size = " << paramfitmap.size() << std::endl;
 
-      // 4. Parpare the table workspace
-      DataObjects::TableWorkspace *tablews;
+    // 4. Parpare the table workspace
+    DataObjects::TableWorkspace *tablews;
 
-      tablews = new DataObjects::TableWorkspace();
-      DataObjects::TableWorkspace_sptr parameterws(tablews);
+    tablews = new DataObjects::TableWorkspace();
+    DataObjects::TableWorkspace_sptr parameterws(tablews);
 
-      tablews->addColumn("str", "Name");
-      tablews->addColumn("double", "Value");
-      tablews->addColumn("str", "FitOrTie");
+    tablews->addColumn("str", "Name");
+    tablews->addColumn("double", "Value");
+    tablews->addColumn("str", "FitOrTie");
 
-      // 5. Add value
-      std::map<std::string, double>::iterator paramiter;
-      for (paramiter = paramvaluemap.begin(); paramiter != paramvaluemap.end(); ++paramiter)
-      {
-          // a) Access value from internal parameter maps and parameter to modify map
-          std::string parname = paramiter->first;
-          double parvalue;
-          std::string fit_tie;
+    // 5. Add value
+    std::map<std::string, double>::iterator paramiter;
+    for (paramiter = paramvaluemap.begin(); paramiter != paramvaluemap.end(); ++paramiter)
+    {
+      // a) Access value from internal parameter maps and parameter to modify map
+      std::string parname = paramiter->first;
+      double parvalue;
+      std::string fit_tie;
 
-          // a) Whether is a parameter w/ value to be modified
-          std::map<std::string, double>::iterator moditer;
-          moditer = parammodifymap.find(parname);
-          if (moditer != parammodifymap.end())
+      // a) Whether is a parameter w/ value to be modified
+      std::map<std::string, double>::iterator moditer;
+      moditer = parammodifymap.find(parname);
+      if (moditer != parammodifymap.end())
           {
               // Modify
               parvalue = moditer->second;
               fit_tie = "f";
           }
-          else
+      else
           {
               // Use original
               parvalue = paramiter->second;
               fit_tie = paramfitmap[parname];
           }
 
-          // c) Append to table
-          std::cout << parname << ": " << parvalue << "  " << fit_tie << std::endl;
+      // c) Append to table
+      std::cout << parname << ": " << parvalue << "  " << fit_tie << std::endl;
 
-          API::TableRow newparam = parameterws->appendRow();
-          newparam << parname << parvalue << fit_tie;
-      }
+      API::TableRow newparam = parameterws->appendRow();
+      newparam << parname << parvalue << fit_tie;
+    }
 
-      std::cout << "ParameterWorkspace: Size = " << parameterws->rowCount() << std::endl;
+    std::cout << "ParameterWorkspace: Size = " << parameterws->rowCount() << std::endl;
 
-      return parameterws;
+    return parameterws;
   }
 
-  /*
-   * Generate peak parameters for the data without background
+  //----------------------------------------------------------------------------------------------
+  /** Generate peak parameters for the data without background
    */
   void genPeakParametersBackgroundLessData(std::map<std::string, double>& paramvaluemap)
   {
@@ -747,36 +855,10 @@ public:
     paramvaluemap.insert(std::make_pair("Gam2" ,  0.0 ));
     paramvaluemap.insert(std::make_pair("LatticeConstant", 4.156890));
 
-    /*
-    // b) Fit or not
-    paramfitmap.insert(std::make_pair("Dtt1"  , "t"));
-    paramfitmap.insert(std::make_pair("Dtt2"  , "t"));
-    paramfitmap.insert(std::make_pair("Dtt1t" , "t"));
-    paramfitmap.insert(std::make_pair("Dtt2t" , "t"));
-    paramfitmap.insert(std::make_pair("Zero"  , "t"));
-    paramfitmap.insert(std::make_pair("Zerot" , "t"));
-    paramfitmap.insert(std::make_pair("Alph0" , "t"));
-    paramfitmap.insert(std::make_pair("Alph1" , "t"));
-    paramfitmap.insert(std::make_pair("Beta0" , "t"));
-    paramfitmap.insert(std::make_pair("Beta1" , "t"));
-    paramfitmap.insert(std::make_pair("Alph0t", "t"));
-    paramfitmap.insert(std::make_pair("Alph1t", "t"));
-    paramfitmap.insert(std::make_pair("Beta0t", "t"));
-    paramfitmap.insert(std::make_pair("Beta1t", "t"));
-    paramfitmap.insert(std::make_pair("Sig2"  , "t"));
-    paramfitmap.insert(std::make_pair("Sig1"  , "t"));
-    paramfitmap.insert(std::make_pair("Sig0"  , "t"));
-    paramfitmap.insert(std::make_pair("Width" , "t"));
-    paramfitmap.insert(std::make_pair("Tcross", "t"));
-    paramfitmap.insert(std::make_pair("Gam0"  , "t"));
-    paramfitmap.insert(std::make_pair("Gam1"  , "t"));
-    paramfitmap.insert(std::make_pair("Gam2"  , "t"));
-    paramfitmap.insert(std::make_pair("LatticeConstant", "t"));
-    */
-
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Genearte peak parameters for data with background.  Bank 7
    */
   void genPeakParameterBank7(std::map<std::string, double>& paramvaluemap)
@@ -816,8 +898,42 @@ public:
     return;
   }
 
-  /*
-   * Create reflection table workspaces
+  //----------------------------------------------------------------------------------------------
+  /** Generate peak parameters for NOMAD Bank4
+    */
+  void genPeakParameterNomBank4(map<std::string, double>& paramvaluemap)
+  {
+    paramvaluemap.clear();
+
+    paramvaluemap.insert(make_pair("Alph0",	0.886733  ));
+    paramvaluemap.insert(make_pair("Alph0t",	114.12    ));
+    paramvaluemap.insert(make_pair("Alph1",	8.38073   ));
+    paramvaluemap.insert(make_pair("Alph1t",	75.8038   ));
+    paramvaluemap.insert(make_pair("Beta0",	3.34888   ));
+    paramvaluemap.insert(make_pair("Beta0t",	88.292    ));
+    paramvaluemap.insert(make_pair("Beta1",	10.5768   ));
+    paramvaluemap.insert(make_pair("Beta1t",	-0.0346847));
+    paramvaluemap.insert(make_pair("Dtt1",	9491.56));
+    paramvaluemap.insert(make_pair("Dtt1t",	9423.85));
+    paramvaluemap.insert(make_pair("Dtt2",	0));
+    paramvaluemap.insert(make_pair("Dtt2t",	0.3));
+    paramvaluemap.insert(make_pair("Gam0",	0));
+    paramvaluemap.insert(make_pair("Gam1",	0));
+    paramvaluemap.insert(make_pair("Gam2",	0));
+    paramvaluemap.insert(make_pair("LatticeConstant",	4.15689));
+    paramvaluemap.insert(make_pair("Sig0",	0));
+    paramvaluemap.insert(make_pair("Sig1",	18.3863));
+    paramvaluemap.insert(make_pair("Sig2",	0.671019));
+    paramvaluemap.insert(make_pair("Tcross",	0.4373));
+    paramvaluemap.insert(make_pair("Width",	2.9654));
+    paramvaluemap.insert(make_pair("Zero",	0));
+    paramvaluemap.insert(make_pair("Zerot",	101.618));
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Create reflection table workspaces
    */
   DataObjects::TableWorkspace_sptr createInputHKLWorkspace(std::vector<std::vector<int> > hkls, std::vector<double> heights)
   {
@@ -857,7 +973,7 @@ public:
   {    
     API::MatrixWorkspace_sptr dataws;
 
-    if (option == 1 || option == 2)
+    if (option == 1 || option == 2 || option == 3)
     {
       // Generate data
 
@@ -876,8 +992,14 @@ public:
           generateTwinPeakData(vecX, vecY, vecE);
           break;
 
+        case 3:
+          generate1PeakDataPlusBackground(vecX, vecY, vecE);
+          break;
+
         default:
-          throw runtime_error("Unsopported option to generate data workspace.");
+          stringstream errmsg;
+          errmsg << "Option " << option << " to generate a data workspace is  not supported.";
+          throw runtime_error(errmsg.str());
           break;
       }
 
@@ -916,9 +1038,10 @@ public:
     return dataws;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Generate a set of powder diffraction data with 2 peaks w/o background
    */
-  void generateSeparateTwoPeaksData2(std::vector<double>& vecX, std::vector<double>& vecY, std::vector<double>& vecE)
+  void generateSeparateTwoPeaksData2(vector<double>& vecX, vector<double>& vecY, vector<double>& vecE)
   {
     vecX.push_back(70931.750);    vecY.push_back(    0.0000000    );
     vecX.push_back(70943.609);    vecY.push_back(    0.0000000    );
@@ -1059,6 +1182,7 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Generate data (vectors) containg twin peak w/o background
    */
   void generateTwinPeakData(std::vector<double>& vecX, std::vector<double>& vecY, std::vector<double>& vecE)
@@ -1091,6 +1215,91 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Generate data with background
+    * The data comes from NOMAD 11848-4 (bank 4)
+    */
+  void generate1PeakDataPlusBackground(vector<double>& vecX, vector<double>& vecY, vector<double>& vecE)
+  {
+    vecX.push_back(15804.51508); vecY.push_back(  0.00093899);      vecE.push_back( 0.00182963);
+    vecX.push_back(15819.15517); vecY.push_back(  0.00345301);      vecE.push_back( 0.00182634);
+    vecX.push_back(15833.80882); vecY.push_back( -0.00091186);      vecE.push_back( 0.00183490);
+    vecX.push_back(15848.47604); vecY.push_back(  0.00188472);      vecE.push_back( 0.00182437);
+    vecX.push_back(15863.15685); vecY.push_back(  0.00332765);      vecE.push_back( 0.00185097);
+    vecX.push_back(15877.85126); vecY.push_back(  0.00364515);      vecE.push_back( 0.00183573);
+    vecX.push_back(15892.55929); vecY.push_back(  0.00218618);      vecE.push_back( 0.00184518);
+    vecX.push_back(15907.28093); vecY.push_back(  0.00181782);      vecE.push_back( 0.00186918);
+    vecX.push_back(15922.01622); vecY.push_back(  0.00183030);      vecE.push_back( 0.00188213);
+    vecX.push_back(15936.76515); vecY.push_back(  0.00261025);      vecE.push_back( 0.00189781);
+    vecX.push_back(15951.52774); vecY.push_back(  0.00775414);      vecE.push_back( 0.00191501);
+    vecX.push_back(15966.30401); vecY.push_back(  0.01119628);      vecE.push_back( 0.00193190);
+    vecX.push_back(15981.09397); vecY.push_back(  0.02129512);      vecE.push_back( 0.00196919);
+    vecX.push_back(15995.89763); vecY.push_back(  0.03490967);      vecE.push_back( 0.00205366);
+    vecX.push_back(16010.71500); vecY.push_back(  0.06945186);      vecE.push_back( 0.00222871);
+    vecX.push_back(16025.54610); vecY.push_back(  0.11997786);      vecE.push_back( 0.00246872);
+    vecX.push_back(16040.39093); vecY.push_back(  0.21313078);      vecE.push_back( 0.00283099);
+    vecX.push_back(16055.24952); vecY.push_back(  0.32872762);      vecE.push_back( 0.00323105);
+    vecX.push_back(16070.12187); vecY.push_back(  0.46376577);      vecE.push_back( 0.00366236);
+    vecX.push_back(16085.00799); vecY.push_back(  0.60672834);      vecE.push_back( 0.00406101);
+    vecX.push_back(16099.90791); vecY.push_back(  0.70995429);      vecE.push_back( 0.00433328);
+    vecX.push_back(16114.82163); vecY.push_back(  0.72737104);      vecE.push_back( 0.00439982);
+    vecX.push_back(16129.74916); vecY.push_back(  0.68092272);      vecE.push_back( 0.00430344);
+    vecX.push_back(16144.69052); vecY.push_back(  0.56167618);      vecE.push_back( 0.00401318);
+    vecX.push_back(16159.64572); vecY.push_back(  0.42685691);      vecE.push_back( 0.00363757);
+    vecX.push_back(16174.61478); vecY.push_back(  0.30260402);      vecE.push_back( 0.00325554);
+    vecX.push_back(16189.59770); vecY.push_back(  0.20770640);      vecE.push_back( 0.00292711);
+    vecX.push_back(16204.59450); vecY.push_back(  0.14654898);      vecE.push_back( 0.00268130);
+    vecX.push_back(16219.60519); vecY.push_back(  0.09628758);      vecE.push_back( 0.00247655);
+    vecX.push_back(16234.62979); vecY.push_back(  0.06952267);      vecE.push_back( 0.00234315);
+    vecX.push_back(16249.66830); vecY.push_back(  0.04493752);      vecE.push_back( 0.00227152);
+    vecX.push_back(16264.72074); vecY.push_back(  0.03126838);      vecE.push_back( 0.00219436);
+    vecX.push_back(16279.78713); vecY.push_back(  0.02455495);      vecE.push_back( 0.00216714);
+    vecX.push_back(16294.86748); vecY.push_back(  0.02071602);      vecE.push_back( 0.00213767);
+    vecX.push_back(16309.96179); vecY.push_back(  0.01423849);      vecE.push_back( 0.00210673);
+    vecX.push_back(16325.07009); vecY.push_back(  0.01083945);      vecE.push_back( 0.00210373);
+    vecX.push_back(16340.19238); vecY.push_back(  0.00952175);      vecE.push_back( 0.00209212);
+    vecX.push_back(16355.32868); vecY.push_back(  0.00666464);      vecE.push_back( 0.00210106);
+    vecX.push_back(16370.47900); vecY.push_back(  0.00483277);      vecE.push_back( 0.00210164);
+    vecX.push_back(16385.64335); vecY.push_back(  0.00606602);      vecE.push_back( 0.00208481);
+    vecX.push_back(16400.82175); vecY.push_back(  0.00797912);      vecE.push_back( 0.00211046);
+    vecX.push_back(16416.01421); vecY.push_back(  0.00337981);      vecE.push_back( 0.00209148);
+    vecX.push_back(16431.22075); vecY.push_back(  0.00695986);      vecE.push_back( 0.00209749);
+    vecX.push_back(16446.44137); vecY.push_back(  0.00076425);      vecE.push_back( 0.00212240);
+    vecX.push_back(16461.67609); vecY.push_back( -0.00174803);      vecE.push_back( 0.00212156);
+    vecX.push_back(16476.92492); vecY.push_back(  0.00311692);      vecE.push_back( 0.00211736);
+    vecX.push_back(16492.18788); vecY.push_back(  0.00267084);      vecE.push_back( 0.00212599);
+    vecX.push_back(16507.46497); vecY.push_back(  0.00073160);      vecE.push_back( 0.00217523);
+    vecX.push_back(16522.75622); vecY.push_back(  0.00181373);      vecE.push_back( 0.00215910);
+    vecX.push_back(16538.06163); vecY.push_back( -0.00060530);      vecE.push_back( 0.00217643);
+    vecX.push_back(16553.38122); vecY.push_back( -0.00347549);      vecE.push_back( 0.00217984);
+    vecX.push_back(16568.71501); vecY.push_back(  0.00351226);      vecE.push_back( 0.00218813);
+    vecX.push_back(16584.06299); vecY.push_back( -0.00079566);      vecE.push_back( 0.00220368);
+    vecX.push_back(16599.42519); vecY.push_back(  0.00651456);      vecE.push_back( 0.00224274);
+    vecX.push_back(16614.80163); vecY.push_back(  0.01027626);      vecE.push_back( 0.00222865);
+    vecX.push_back(16630.19230); vecY.push_back(  0.00498366);      vecE.push_back( 0.00224692);
+    vecX.push_back(16645.59723); vecY.push_back(  0.00692367);      vecE.push_back( 0.00223901);
+    vecX.push_back(16661.01644); vecY.push_back(  0.00772229);      vecE.push_back( 0.00223212);
+    vecX.push_back(16676.44992); vecY.push_back(  0.00603627);      vecE.push_back( 0.00228530);
+    vecX.push_back(16691.89770); vecY.push_back(  0.00332977);      vecE.push_back( 0.00225513);
+    vecX.push_back(16707.35980); vecY.push_back(  0.00292870);      vecE.push_back( 0.00231030);
+    vecX.push_back(16722.83621); vecY.push_back(  0.00736778);      vecE.push_back( 0.00228117);
+    vecX.push_back(16738.32696); vecY.push_back(  0.00150402);      vecE.push_back( 0.00232609);
+    vecX.push_back(16753.83206); vecY.push_back(  0.00240275);      vecE.push_back( 0.00227347);
+    vecX.push_back(16769.35153); vecY.push_back(  0.00426276);      vecE.push_back( 0.00231366);
+    vecX.push_back(16784.88537); vecY.push_back(  0.00186002);      vecE.push_back( 0.00231086);
+    vecX.push_back(16800.43359); vecY.push_back(  0.00271200);      vecE.push_back( 0.00231613);
+    vecX.push_back(16815.99622); vecY.push_back(  0.00157441);      vecE.push_back( 0.00233310);
+    vecX.push_back(16831.57327); vecY.push_back( -0.00180279);      vecE.push_back( 0.00234767);
+    vecX.push_back(16847.16475); vecY.push_back(  0.00082487);      vecE.push_back( 0.00233778);
+    vecX.push_back(16862.77067); vecY.push_back( -0.00336791);      vecE.push_back( 0.00234414);
+    vecX.push_back(16878.39104); vecY.push_back( -0.00327705);      vecE.push_back( 0.00234013);
+    vecX.push_back(16894.02589); vecY.push_back( -0.00199679);      vecE.push_back( 0.00234771);
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Import text file containing reflections (HKL)
    */
   void importReflectionTxtFile(std::string filename, std::vector<std::vector<int> >& hkls)
@@ -1222,26 +1431,42 @@ public:
   DataObjects::TableWorkspace_sptr createBackgroundParameterWorksapce(int option)
   {
     // 1. Create map
-    if (option != 1)
-    {
-      stringstream errss;
-      errss << "Option " << option << " is not supported.";
-      throw runtime_error(errss.str());
-    }
-
     map<string, double> bkgdparmap;
-    bkgdparmap.insert(make_pair("A0",  -197456));
-    bkgdparmap.insert(make_pair("A1",  15.5819));
-    bkgdparmap.insert(make_pair("A2",  -0.000467362));
-    bkgdparmap.insert(make_pair("A3",  5.59069e-09));
-    bkgdparmap.insert(make_pair("A4",  2.81875e-14));
-    bkgdparmap.insert(make_pair("A5",  -1.88986e-18));
-    bkgdparmap.insert(make_pair("A6",  2.9137e-23));
-    bkgdparmap.insert(make_pair("A7",  -2.50121e-28));
-    bkgdparmap.insert(make_pair("A8",  1.3279e-33));
-    bkgdparmap.insert(make_pair("A9",  -4.33776e-39));
-    bkgdparmap.insert(make_pair("A10", 8.01018e-45));
-    bkgdparmap.insert(make_pair("A11", -6.40846e-51));
+    switch (option)
+    {
+      case 1:
+        bkgdparmap.insert(make_pair("A0",  -197456));
+        bkgdparmap.insert(make_pair("A1",  15.5819));
+        bkgdparmap.insert(make_pair("A2",  -0.000467362));
+        bkgdparmap.insert(make_pair("A3",  5.59069e-09));
+        bkgdparmap.insert(make_pair("A4",  2.81875e-14));
+        bkgdparmap.insert(make_pair("A5",  -1.88986e-18));
+        bkgdparmap.insert(make_pair("A6",  2.9137e-23));
+        bkgdparmap.insert(make_pair("A7",  -2.50121e-28));
+        bkgdparmap.insert(make_pair("A8",  1.3279e-33));
+        bkgdparmap.insert(make_pair("A9",  -4.33776e-39));
+        bkgdparmap.insert(make_pair("A10", 8.01018e-45));
+        bkgdparmap.insert(make_pair("A11", -6.40846e-51));
+
+        break;
+
+      case 2:
+        // NOMAD Bank4
+        bkgdparmap.insert(make_pair("A0",  0.73));
+        bkgdparmap.insert(make_pair("A1",  -8.0E-5));
+        bkgdparmap.insert(make_pair("A2",  0.0));
+        bkgdparmap.insert(make_pair("A3",  0.0));
+        bkgdparmap.insert(make_pair("A4",  0.0));
+        bkgdparmap.insert(make_pair("A5",  0.0));
+
+        break;
+
+      default:
+        stringstream errss;
+        errss << "Option " << option << " is not supported.";
+        throw runtime_error(errss.str());
+        break;
+    }
 
     // 2. Build table workspace
     DataObjects::TableWorkspace* tablewsptr = new DataObjects::TableWorkspace();
@@ -1262,6 +1487,8 @@ public:
 
     return tablews;
   }
+
+
 
 };
 

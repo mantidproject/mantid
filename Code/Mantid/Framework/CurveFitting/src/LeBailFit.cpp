@@ -128,8 +128,6 @@ namespace CurveFitting
     functions.push_back("Calculation");
     functions.push_back("MonteCarlo");
     functions.push_back("RefineBackground");
-    //  TODO: Turn on this option in release 2.4
-    //  functions.push_back("CalculateBackground");
     auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
     this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
@@ -1407,7 +1405,16 @@ namespace CurveFitting
       }
     } // ENDFOR All Input (HKL)
 
-    sort(m_dspPeaks.begin(), m_dspPeaks.end());
+    if (m_dspPeaks.size() > 0)
+      sort(m_dspPeaks.begin(), m_dspPeaks.end());
+    else
+    {
+      stringstream errmsg;
+      errmsg << "There are " << numinput << " peaks are given.  But there is not peak within given range "
+             << "from " << tofmin << " to " << tofmax << " or having valid peak parameters.";
+      g_log.error(errmsg.str());
+      throw runtime_error(errmsg.str());
+    }
 
     // 3. Check to see whether there is any duplicate peaks
     bool noduppeaks = true;
@@ -1604,8 +1611,8 @@ namespace CurveFitting
       if (ifind == peakparamnames.end())
       {
         // If not a peak profile parameter, skip
-        g_log.debug() << "Parameter " << parname
-                      << " in input parameter table workspace is not for peak function.\n";
+        g_log.debug() << "Parameter '" << parname << "' in input parameter table workspace "
+                      << "is not for peak function " << peak->name() << ".\n";
       }
       else
       {
@@ -2650,7 +2657,7 @@ namespace CurveFitting
     return;
   }
 
-  //-----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Create output data workspace
    * Basic spectra list:
    * (0) original data
@@ -3801,7 +3808,7 @@ namespace CurveFitting
    * @param background: output of smoothed background
     */
   void LeBailFit::smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVector domain,
-                                              FunctionValues peakdata, vector<double>& background)
+                                             FunctionValues peakdata, vector<double>& background)
   {
     // 1. Make data ready
     MantidVec& vecData = m_dataWS->dataY(wsindex);
@@ -3877,48 +3884,6 @@ namespace CurveFitting
 
     return;
   }
-
-  //-----------------------------------------------------------------------------
-  /** Convert a Table to space to some vectors of maps
-  void convertTableWorkspaceToMaps(TableWorkspace_sptr tablews, vector<map<string, int> > intmaps,
-                                 vector<map<string, string> > strmaps, vector<map<string, double> > dblmaps)
-  {
-    // 1. Initialize
-    intmaps.clear();
-    strmaps.clear();
-    dblmaps.clear();
-
-    size_t numrows = tablews->rowCount();
-    size_t numcols = tablews->columnCount();
-
-    for (size_t i = 0; i < numrows; ++i)
-    {
-      map<string, int> intmap;
-      intmaps.push_back(intmap);
-
-      map<string, string> strmap;
-      strmaps.push_back(strmap);
-
-      map<string, double> dblmap;
-      dblmaps.push_back(dblmap);
-    }
-
-    // 2. Parse
-    for (size_t i = 0; i < numcols; ++i)
-    {
-      Column_sptr column = tablews->getColumn(i);
-      string coltype = column->type();
-      string colname = column->name();
-
-      for (size_t ir = 0; ir < numrows; ++ir)
-      {
-      }
-
-    }
-
-    return;
-  }
-  */
 
 
 } // namespace CurveFitting
