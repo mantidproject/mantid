@@ -7,7 +7,11 @@
 #include <QVariant>
 #include <QStringList>
 #include <QWidget>
+#include <QDialog>
 #include "MantidAPI/ScriptRepository.h"
+class QLineEdit; 
+class QCheckBox; 
+class QTextEdit;
 
 namespace MantidQt
 {
@@ -121,9 +125,27 @@ private:
 private:
     RepoItem( const RepoItem& );
     const RepoItem& operator=( const RepoItem& );
-
-
 };
+
+    class UploadForm: public QDialog{
+    public:
+      UploadForm(const QString & file2upload, QWidget * parent = 0);
+      virtual ~UploadForm();
+      QString email(); 
+      QString author(); 
+      QString comment();
+      bool saveInfo();
+      void setEmail(const QString& ); 
+      void setAuthor(const QString&);
+      void lastSaveOption(bool option);
+
+    protected: 
+      QLineEdit * author_le; 
+      QLineEdit * email_le; 
+      QCheckBox * save_ck;
+      QTextEdit * comment_te;
+    };
+
 
 public:
     /// constructor

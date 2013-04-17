@@ -12,6 +12,13 @@ using Mantid::Kernel::ConfigServiceImpl;
 using Mantid::Kernel::ConfigService;
 #include <QDebug>
 #include <stdexcept>
+#include <QCheckBox>
+#include <QLineEdit>
+#include <QVBoxLayout>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QDialogButtonBox>
+
 
 /*
   An auxiliary nested class to help RepoModel to rebuild the hierarchical 
@@ -296,12 +303,33 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
       repo_ptr->download(path); // FIXME: deal with exceptions 
       ret = true;
     }else if (action == "Upload"){
-    // implement upload
-      // attempt to set as parent the QView, to better display it.
-      QWidget * father = qobject_cast<QWidget*>(QObject::parent());       
-      QMessageBox::information(father,
-                               "Upload",
-                               QString::fromStdString(path));
+      QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+      UploadForm * form = new UploadForm(QString::fromStdString(path), father);
+      QSettings settings; 
+      settings.beginGroup("Mantid/ScriptRepository"); 
+      QString email = settings.value("UploadEmail",QString()).toString();
+      QString author = settings.value("UploadAuthor",QString()).toString();
+      bool lastChk = settings.value("UploadSaveInfo",false).toBool();
+      if (!email.isEmpty())
+        form->setEmail(email); 
+      if (!author.isEmpty())
+        form->setAuthor(author);
+      form->lastSaveOption(lastChk);
+      if (form->exec()){
+        settings.setValue("UploadEmail",form->saveInfo()?form->email():""); 
+        settings.setValue("UploadAuthor",form->saveInfo()?form->author():"");
+        settings.setValue("UploadSaveInfo",form->saveInfo()); 
+
+        qWarning() << "Uploading... "<< QString::fromStdString(path) << form->comment()
+                   << form->author() << form->email() << endl;         
+        repo_ptr->upload(path, form->comment().toStdString(), 
+                         form->author().toStdString(),
+                         form->email().toStdString());        
+      }else{
+        qWarning() << "Not uploading" << endl; 
+      }
+      settings.endGroup(); 
+      delete form; 
       ret = true;
     }
    
@@ -619,3 +647,63 @@ const QString & RepoModel::remoteChangedSt(){return REMOTECHANGED;};
 const QString & RepoModel::updatedSt(){return BOTHUNCHANGED;}; 
 /// @return string to define the BOTH_CHANGED state
 const QString & RepoModel::bothChangedSt(){return BOTHCHANGED;}; 
+
+
+RepoModel::UploadForm::UploadForm( const QString & file2upload,
+                                   QWidget * parent): QDialog(parent){
+      author_le = new QLineEdit(); 
+      email_le = new QLineEdit(); 
+      save_ck = new QCheckBox("Save your personal information");
+      save_ck->setToolTip("The author and email will be saved and will be written to you next time");
+      comment_te = new QTextEdit(); 
+
+      // setup the layout
+
+      QGroupBox * personalGroupBox = new QGroupBox("Personal Group Box");    
+      QFormLayout * personalLayout = new QFormLayout();       
+      personalLayout->addRow("Author",author_le); 
+      personalLayout->addRow("Email",email_le); 
+      QVBoxLayout * gpBox = new QVBoxLayout();
+      gpBox->addWidget(save_ck); 
+      gpBox->addLayout(personalLayout);
+      personalGroupBox->setLayout(gpBox);
+
+      QLabel * cmLabel = new QLabel("Comment"); 
+      QDialogButtonBox * buttonBox = new QDialogButtonBox();
+      buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+
+      QVBoxLayout * layout = new QVBoxLayout(); 
+      layout->addWidget(personalGroupBox); 
+      layout->addWidget(cmLabel); 
+      layout->addWidget(comment_te); 
+      layout->addWidget(buttonBox);
+      setLayout(layout);
+
+      setWindowTitle(QString("Upload - %2").arg(file2upload));
+      connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept())); 
+      connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+  }
+  RepoModel::UploadForm::~UploadForm(){
+    
+  } 
+QString RepoModel::UploadForm::email(){
+  return email_le->text(); 
+}
+QString RepoModel::UploadForm::author(){
+  return author_le->text(); 
+}
+QString RepoModel::UploadForm::comment(){
+  return comment_te->text(); 
+}
+bool RepoModel::UploadForm::saveInfo(){
+   return save_ck->isChecked();
+}
+void RepoModel::UploadForm::setEmail(const QString & email){
+  email_le->setText(email); 
+}
+void RepoModel::UploadForm::setAuthor(const QString & author){
+  author_le->setText(author);
+}
+void RepoModel::UploadForm::lastSaveOption(bool option){
+  save_ck->setCheckState(option?Qt::Checked:Qt::Unchecked);
+}
