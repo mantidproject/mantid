@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Script Repository</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,2,0,1">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,2,0,1,0">
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
@@ -22,7 +22,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="repo_treeView"/>
+    <widget class="MantidQt::API::RepoTreeView" name="repo_treeView"/>
    </item>
    <item>
     <widget class="QLabel" name="desc_label">
@@ -34,9 +34,23 @@
    <item>
     <widget class="QTextBrowser" name="desc_textBrowser"/>
    </item>
+   <item>
+    <widget class="QPushButton" name="reloadPushButton">
+     <property name="text">
+      <string>Reload</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::API::RepoTreeView</class>
+   <extends>QTreeView</extends>
+   <header>MantidQtAPI/RepoTreeView.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
