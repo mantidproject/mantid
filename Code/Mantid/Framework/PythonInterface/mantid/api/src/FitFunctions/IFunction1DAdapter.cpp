@@ -26,7 +26,7 @@ namespace Mantid
     }
 
     /**
-     * Translates between the C++ signature & the Python signature
+     * Translates between the C++ signature & the Python signature called by Fit
      * @param out The 1D data array of size nData that stores the output values
      * @param xValues The input X values
      * @param nData The size of the two arrays
@@ -40,11 +40,14 @@ namespace Mantid
       Py_intptr_t dims[1] = { static_cast<Py_intptr_t>(nData) } ;
       object xvals = object(handle<>(Converters::WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims)));
       object outnp = object(handle<>(Converters::WrapReadWrite::apply<double>::createFromArray(out, 1,dims)));
-      function1D(xvals, outnp);
+
+      // Deliberately avoids using the CallMethod wrappers. They lock the GIL again and
+      // will check for each function call whether the wrapped method exists.
+      boost::python::call_method<void,object,object>(getSelf(), "function1D", xvals, outnp);
     }
 
     /**
-     * Python-type signature version of above
+     * Python-type signature version of above to be called directly from Python
      * @param xvals The input X values in read-only numpy array
      * @param out A read/write numpy array of doubles to store the results
      */

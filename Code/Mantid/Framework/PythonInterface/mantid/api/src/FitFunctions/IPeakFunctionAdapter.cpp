@@ -76,7 +76,7 @@ namespace Mantid
 
 
     /**
-     * Translates between the C++ signature & the Python signature
+     * Translates between the C++ signature & the Python signature and will be called by Fit
      * @param out The 1D data array of size nData that stores the output values
      * @param xValues The input X values
      * @param nData The size of the two arrays
@@ -92,11 +92,14 @@ namespace Mantid
       object xvals = object(handle<>(WrapReadOnly::apply<double>::createFromArray(xValues, 1,dims)));
       object outnp = object(handle<>(WrapReadWrite::apply<double>::createFromArray(out, 1,dims)));
 
-      functionLocal(xvals, outnp);
+      // Deliberately avoids using the CallMethod wrappers. They lock the GIL again and
+      // will check for each function call whether the wrapped method exists.
+      boost::python::call_method<void,object,object>(getSelf(), "functionLocal", xvals,outnp);
     }
 
     /**
-     * Python-type signature version of above
+     * Python-type signature version of above so that users can call functionLocal directly from Python on a factory
+     * created object
      * @param xvals The input X values in read-only numpy array
      * @param out A read/write numpy array of doubles to store the results
      */
@@ -106,7 +109,7 @@ namespace Mantid
     }
 
     /**
-     * Translates between the C++ signature & the Python signature
+     * Translates between the C++ signature & the Python signature and will be called by Fit
      * @param out The Jacobian matrix storing the partial derivatives of the function w.r.t to the parameters
      * @param xValues The input X values
      * @param nData The size of the two arrays
@@ -126,11 +129,13 @@ namespace Mantid
       // So we'll do the work of the wrapper for it
       object jacobian = object(handle<>(boost::python::to_python_value<API::Jacobian*>()(out)));
 
-      functionDerivLocal(xvals, jacobian);
+      // Deliberately avoids using the CallMethod wrappers. They lock the GIL again and
+      // will check for each function call whether the wrapped method exists.
+      boost::python::call_method<void,object,object>(getSelf(), "functionDerivLocal", xvals,jacobian);
     }
 
     /**
-     * Python-type signature version of above
+     * Python-type signature version of above that can be called directly from Python
      * @param xvals The input X values in read-only numpy array
      *  @param jacobian The Jacobian matrix storing the partial derivatives of the function w.r.t to the parameters
      */
