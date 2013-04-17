@@ -36,14 +36,14 @@ class AdvancedSetupScript(BaseScriptElement):
     unwrapref = ""
     lowresref = ""
     cropwavelengthmin = ""
-    removepropmppulsewidth = ""
+    removepropmppulsewidth = 50.0
     maxchunksize = ""
     filterbadpulses = True
-    stripvanadiumpeaks = False
+    stripvanadiumpeaks = True
     vanadiumfwhm = ""
     vanadiumpeaktol = ""
     vanadiumsmoothparams = ""
-    preserveevents = False
+    preserveevents = True
     extension = "_event.nxs"
     outputfileprefix = ""
 
@@ -232,7 +232,7 @@ class AdvancedSetupScript(BaseScriptElement):
         """
         self.stripvanadiumpeaks = AdvancedSetupScript.stripvanadiumpeaks
         self.extension =     AdvancedSetupScript.extension 
-        self.reserveevents = AdvancedSetupScript.preserveevents
+        self.preserveevents = AdvancedSetupScript.preserveevents
 
         self.outputfileprefix = AdvancedSetupScript.outputfileprefix
 

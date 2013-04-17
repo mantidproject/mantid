@@ -64,6 +64,7 @@ class AdvancedSetupWidget(BaseWidget):
         dv4 = QtGui.QDoubleValidator(self._content.removepromptwidth_edit)
         dv4.setBottom(0.0)
         self._content.removepromptwidth_edit.setValidator(dv4)
+        self._content.removepromptwidth_edit.setText("50.0")
 
         dv5 = QtGui.QDoubleValidator(self._content.vanpeakfwhm_edit)
         dv5.setBottom(0.0)
@@ -76,7 +77,7 @@ class AdvancedSetupWidget(BaseWidget):
         # Default states
         self._content.extension_combo.setCurrentIndex(1)
 
-        self._content.stripvanpeaks_chkbox.setChecked(False)
+        self._content.stripvanpeaks_chkbox.setChecked(True)
         self._content.vanpeakfwhm_edit.setEnabled(False)
         self._content.vansmoothpar_edit.setEnabled(False)
         self._content.vanpeaktol_edit.setEnabled(False)
