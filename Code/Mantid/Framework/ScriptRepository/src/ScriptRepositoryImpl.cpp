@@ -412,12 +412,6 @@ namespace API
       out[--i] = it->first;
       //g_log.debug() << "inserting file: " << it->first << std::endl; 
 
-      // get the path of the parent directory
-      size_t pos = entry_path.rfind("/"); 
-      std::string parent_dir = ""; 
-      if (pos != std::string::npos)
-        parent_dir = std::string(entry_path.begin(),entry_path.begin()+pos).append("/");
-
       // for the directories, update the status of this directory
       if (entry.directory){
         entry.status = acc_status; 
