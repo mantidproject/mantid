@@ -153,6 +153,7 @@ public slots:
   void clearPeakOverlays();
   void setPeakLabelPrecision(int n);
   void setShowPeakRowFlag(bool on);
+  void setShowPeakLabelsFlag(bool on);
   /// Enable OpenGL. Slot called from render tab only - doesn't update the checkbox.
   void enableGL( bool on );
   void updateInfoText();

@@ -18,6 +18,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtAPI/HelpWindow.h"
 
 namespace MantidQt
 {
@@ -57,7 +58,7 @@ namespace MantidQt
     {
       const std::string & loaderName = getAlgorithm()->getPropertyValue("LoaderName");
       QString helpPage = (loaderName.empty()) ? QString("Load") : QString::fromStdString(loaderName);
-      QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
+      MantidQt::API::HelpWindow::Instance().showAlgorithm(helpPage);
     }
 
     /**

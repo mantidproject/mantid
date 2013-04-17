@@ -11,13 +11,6 @@ set ( TEST_FILES
 	ScriptRepositoryTestImpl.h)
 #        ScriptRepositoryFactoryTest.h)
 
-# uncomment these lines if you want to be able to test the
-# features that depend on internet connection
-#
-#set (TEST_FILES
-#    GitConnectionTest.h
-#    GitNewFeatureTest.h
-#)
 
 # Add the target for this directory
 add_library ( ScriptRepository ${SRC_FILES} ${INC_FILES} )

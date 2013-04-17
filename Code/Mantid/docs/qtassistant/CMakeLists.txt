@@ -67,9 +67,11 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
                        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/developers.html )
 
    if (WIN32) # copy the assistant executable for windows 32 and 64
-      add_custom_command( OUTPUT ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/assistant.exe
-                          COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${THIRD_PARTY}/assistant.exe
-                                  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/assistant.exe )
+      set (QTASSISTANT_EXE ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/assistant.exe)
+      add_custom_command( OUTPUT ${QTASSISTANT_EXE}
+                          COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_LIBRARY_PATH}/assistant.exe
+                                  ${QTASSISTANT_EXE} )
+
    endif (WIN32)
 
    set ( HELP_ALGO_OUT
@@ -99,6 +101,7 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
               
    add_custom_target ( qtassistant ALL
                        DEPENDS Framework ${HELP_OUT_DIR}/mantid.qhc
+		               ${QTASSISTANT_EXE}
                        )
 
    # Copy to correct location in bin

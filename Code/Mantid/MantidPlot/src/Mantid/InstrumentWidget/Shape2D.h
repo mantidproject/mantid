@@ -97,6 +97,10 @@ public:
   void edit(bool on){m_editing = on;}
   /// Check if the shape is being edited.
   bool isEditing()const{return m_editing;}
+  /// Show or hide the shape
+  void setVisible(bool on){m_visible = on;}
+  /// Is shape visible?
+  bool isVisible() const {return m_visible;}
 
   // --- Properties. for gui interaction --- //
 
@@ -133,8 +137,9 @@ protected:
   RectF m_boundingRect;
   QColor m_color;
   QColor m_fill_color;
-  bool m_scalable; ///< shape cann be scaled when zoomed
+  bool m_scalable; ///< shape can be scaled when zoomed
   bool m_editing;
+  bool m_visible;  ///< flag to show or hide the shape
 };
 
 class Shape2DEllipse: public Shape2D
