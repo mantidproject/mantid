@@ -59,7 +59,7 @@ namespace Algorithms
     auto outwsprop = new WorkspaceProperty<TableWorkspace>("Outputworkspace", "AnonymousOut", Direction::Output);
     declareProperty(outwsprop, "Name of the output workspace containing the corrections.");
 
-    auto fileprop = new FileProperty("OutputFilename", "", FileProperty::Save);
+    auto fileprop = new FileProperty("OutputFilename", "", FileProperty::OptionalSave);
     declareProperty(fileprop, "Name of the output time correction file.");
 
     return;
@@ -67,6 +67,8 @@ namespace Algorithms
 
 
   //----------------------------------------------------------------------------------------------
+  /** Main execution body
+    */
   void CreateLogTimeCorrection::exec()
   {
     // 1. Process input
@@ -78,6 +80,16 @@ namespace Algorithms
       errss << "Input matrix workspace " << m_dataWS->name() << " does not have instrument. ";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
+    }
+
+    //   Check whether the output workspace name is same as input
+    string outwsname = getPropertyValue("OutputWorkspace");
+    if (outwsname.compare(m_dataWS->name()) == 0)
+    {
+      stringstream errmsg;
+      errmsg << "It is not allowed to use the same name by both input matrix workspace and output table workspace.";
+      g_log.error(errmsg.str());
+      throw runtime_error(errmsg.str());
     }
 
     // 2. Explore geometry
