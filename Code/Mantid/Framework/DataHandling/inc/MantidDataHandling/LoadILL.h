@@ -91,6 +91,7 @@ private:
 	NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry);
 
+	double calculateEnergy(double);
 	double calculateTOF(double);
 	void runLoadInstrument();
 

@@ -307,7 +307,12 @@ void LoadILL::loadRunDetails(NXEntry & entry) {
 
 	//m_wavelength = entry.getFloat("wavelength");
 	std::string wavelength = boost::lexical_cast<std::string>(m_wavelength);
+	//runDetails.addProperty<double>("wavelength", m_wavelength);
 	runDetails.addProperty("wavelength", wavelength);
+	double ei = calculateEnergy(m_wavelength);
+	//runDetails.addProperty<double>("Ei", ei,true); //overwrite
+	std::string ei_str = boost::lexical_cast<std::string>(ei);
+	runDetails.addProperty("Ei", ei_str);
 
 	std::string duration = boost::lexical_cast<std::string>(
 			entry.getFloat("duration"));
@@ -606,6 +611,11 @@ void LoadILL::runLoadInstrument() {
 	}
 }
 
+/**
+ * Calculate TOF from distance
+ *  @param distance :: distance in meters
+ *  @return tof in seconds
+ */
 double LoadILL::calculateTOF(double distance) {
 	if (m_wavelength <= 0) {
 		g_log.error("Wavelenght is <= 0");
@@ -617,6 +627,19 @@ double LoadILL::calculateTOF(double distance) {
 
 	return distance / velocity;
 }
+
+/**
+ * Calculate Neutron Energy from wavelength: \f$ E = h^2 / 2m\lambda ^2 \f$
+ *  @param wavelength :: wavelength in \f$ \AA \f$
+ *  @return tof in seconds
+ */
+double LoadILL::calculateEnergy(double wavelength) {
+	double e = (PhysicalConstants::h * PhysicalConstants::h) /
+			(2 * PhysicalConstants::NeutronMass * wavelength*wavelength * 1e-20)/
+			PhysicalConstants::meV;
+	return e;
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid
