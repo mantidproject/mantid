@@ -466,13 +466,14 @@ QString RepoModel::fileDescription(const QModelIndex & index){
 */
 QString RepoModel::filePath(const QModelIndex & index){
    RepoItem * item = static_cast<RepoItem*>(index.internalPointer());
+   //   qDebug() << "Get file path from : " <<  item->path()<< endl; 
    Mantid::API::SCRIPTSTATUS state = repo_ptr->fileStatus(item->path().toStdString());
    
-   if (state == Mantid::API::REMOTE_ONLY 
-       || 
-       item->row()>1)// item is a directory
-     return ""; // do not open remote file, just local
-   
+   if (state == Mantid::API::REMOTE_ONLY)
+     return ""; 
+   Mantid::API::ScriptInfo info = repo_ptr->fileInfo(item->path().toStdString());   
+   if (info.directory)
+     return ""; 
    QString path = repo_path + "/" + item->path(); 
    return path;
 }
