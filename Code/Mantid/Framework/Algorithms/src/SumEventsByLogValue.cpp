@@ -310,7 +310,7 @@ namespace Algorithms
       }
     } catch (Exception::NotFoundError&) {
       // The monitors workspace isn't there - just return
-      g_log.information() << "No monitor workspace (" << monitorWorkspaceName << ") found.\n";
+      g_log.debug() << "No monitor workspace (" << monitorWorkspaceName << ") found.\n";
       return;
     }
 
