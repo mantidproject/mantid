@@ -19,6 +19,9 @@
 #include <algorithm>
 #include <Poco/DateTimeFormatter.h>
 #include <boost/algorithm/string.hpp>
+#include "MantidKernel/ConfigService.h"
+using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::ConfigServiceImpl; 
 using namespace std; 
 using Mantid::API::ScriptRepositoryImpl;
 using Mantid::API::ScriptRepoException;
@@ -184,12 +187,15 @@ ctest -j8 -R ScriptRepositoryTestImpl_  --verbose
 class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
   ScriptRepositoryImplLocal * repo;
   std::string local_rep;
+  std::string backup_local_repository_path;
  public: 
   static ScriptRepositoryTestImpl * createSuite(){return new ScriptRepositoryTestImpl(); }
   static void destroySuite (ScriptRepositoryTestImpl * suite){delete suite; }
 
   // ensure that all tests will be perfomed in a fresh repository
-  void setUp(){    
+  void setUp(){
+    ConfigServiceImpl & config = ConfigService::Instance();
+    backup_local_repository_path = config.getString("ScriptLocalRepository"); 
     local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
     TS_ASSERT_THROWS_NOTHING(repo = new ScriptRepositoryImplLocal(local_rep, webserverurl)); 
   }
@@ -203,6 +209,9 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     }catch(Poco::Exception & ex){
       TS_WARN(ex.displayText());
     }
+    ConfigServiceImpl & config = ConfigService::Instance();
+    config.setString("ScriptLocalRepository", backup_local_repository_path); 
+    config.saveConfig(config.getUserFilename());
   }
 
 
@@ -545,6 +554,24 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     // file has local and remote changes
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_CHANGED);
     TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::BOTH_CHANGED);
+  }
+
+/*************************************
+   *   FILE STATUS
+   *************************************/
+  void test_info_of_downloaded_folder(){
+    std::string file_name = "TofConv/TofConverter.py";
+    std::string folder_name = "TofConv";
+    // install 
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    // list files
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());     
+    // download
+    TS_ASSERT_THROWS_NOTHING(repo->download(folder_name));     
+    // it must be unchanged
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED) ;
+    // it
+    TS_ASSERT(repo->fileStatus(folder_name) == Mantid::API::BOTH_UNCHANGED) ;
   }
 
   void test_downloading_and_removing_files(){
