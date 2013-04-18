@@ -1193,7 +1193,9 @@ class MantidPyFramework(FrameworkManager):
 
         # Run through init steps 
         import mantidsimple as _mantidsimple
-        dir_list = mtd.getConfigProperty("pythonalgorithms.directories").split(';')
+        dir_list = mtd.getConfigProperty("python.plugins.directories").split(';')
+        dir_list += mtd.getConfigProperty("user.python.plugins.directories").split(';')
+        
         _mantidsimple.mockup(dir_list)
         pyalg_loader = PyAlgLoader()
         plugins = pyalg_loader.load_modules(refresh=False)

@@ -1,0 +1,1 @@
+This directory contains example functions that can be plugged into the Mantid optimisation framework.
