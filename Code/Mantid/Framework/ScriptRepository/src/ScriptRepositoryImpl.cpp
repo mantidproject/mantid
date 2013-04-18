@@ -16,6 +16,7 @@ using Mantid::Kernel::ConfigServiceImpl;
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Exception.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/NetException.h>
 
 // Visual Studion compains with the inclusion of Poco/FileStream
 // disabling this warning.
@@ -834,7 +835,7 @@ namespace API
     Poco::URI uri(url_file);
     std::string path(uri.getPathAndQuery());
     if (path.empty()) path = "/";
-  
+    std::string given_path = std::string(path.begin()+28, path.end());// remove the "/master_builds/scripts_repo/" from the path
     //Configure Poco HTTP Client Session
     try{
       Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
@@ -843,6 +844,7 @@ namespace API
       Poco::Net::HTTPResponse response;
 
       session.sendRequest(request); 
+
       std::istream & rs = session.receiveResponse(response); 
       g_log.debug() << "Answer from mantid web: " << response.getStatus() << " " 
                     << response.getReason() << std::endl; 
@@ -853,25 +855,23 @@ namespace API
           Poco::StreamCopier::copyStream(rs,null); 
           return;
         }else{
-          try{
-            {
-            // copy the file
-              Poco::FileStream _out(local_file_path); 
-              Poco::StreamCopier::copyStream(rs,_out); 
-              _out.close(); 
-            }
-          }catch(Poco::Exception & ex){            
-            g_log.warning() << "Receive exception: " << ex.what()<< std::endl; 
-            throw pocoException("Downloading failed", ex);
-          }        
-        }      
+          // copy the file
+          Poco::FileStream _out(local_file_path); 
+          Poco::StreamCopier::copyStream(rs,_out); 
+          _out.close();           
+        }
       }else{
         std::stringstream info;
         std::stringstream ss;
         Poco::StreamCopier::copyStream(rs,ss);        
         if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND)
-          info << "The file requested is not available at the central repository (" <<path
-             << "). "; 
+          info << "Failed to download " << given_path 
+               << " because it failed to find this file at the link " 
+               << "<a href=\""
+               << url_file << "\">.\n"
+               << "Hint. Check that link is correct and points to the correct server "
+               << "which you can find at <a href=\"http://www.mantidproject.org/ScriptRepository\">"
+               << "Script Repository Help Page</a>"; 
         else{          
           // show the error
           // fixme, process this error          
@@ -880,6 +880,14 @@ namespace API
         }
         throw ScriptRepoException(info.str(), ss.str()); 
       }
+    }catch(Poco::Net::HostNotFoundException & ex){
+      // this exception occurrs when the pc is not connected to the internet
+      std::stringstream info; 
+      info <<  "Failed to download " << given_path << " because there is no connection to the host "
+           << ex.message() << ".\nHint: Check your connection following this link: <a href=\""
+           << url_file << "\">" << given_path << "</a>";
+      throw ScriptRepoException(info.str(), ex.displayText(), __FILE__, __LINE__);
+    
     }catch (Poco::Exception & ex){
       throw pocoException("Connection and request failed", ex);
     }
