@@ -18,6 +18,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;
@@ -25,6 +26,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::IDetector_const_sptr;
+using Mantid::Geometry::IComponent_const_sptr;
+using namespace Geometry::ComponentHelper;
 
 class CopyInstrumentParametersTest : public CxxTest::TestSuite
 {
@@ -56,6 +59,35 @@ public:
      // Set properties
      TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", wsName1 ));
      TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("OutputWorkspace", wsName2 ));
+     // Get instrument of input workspace and move some detectors
+     Geometry::ParameterMap *pmap;
+     pmap = &(ws1->instrumentParameters()); 
+     Geometry::Instrument_const_sptr instrument = ws1->getInstrument();
+     IComponent_const_sptr det1 =instrument->getDetector(1);
+     Geometry::ComponentHelper::moveComponent(*det1, *pmap, V3D(6.0,0.0,0.7), Absolute );
+     IComponent_const_sptr det2 =instrument->getDetector(2);
+     Geometry::ComponentHelper::moveComponent(*det2, *pmap, V3D(6.0,0.1,0.7), Absolute );
+
+     // Execute Algorithm
+     TS_ASSERT_THROWS_NOTHING(copyInstParam.execute());
+     TS_ASSERT( copyInstParam.isExecuted() );
+
+     // Verify that the detectors in the output workspace have been moved as in the input workspace
+     IDetector_const_sptr deto1 = ws2->getDetector(0);
+     int id1 = deto1->getID();
+     V3D newPos1 = deto1->getPos();
+     TS_ASSERT_EQUALS( id1, 1);
+     TS_ASSERT_DELTA( newPos1.X() , 6.0, 0.0001);
+     TS_ASSERT_DELTA( newPos1.Y() , 0.0, 0.0001);
+     TS_ASSERT_DELTA( newPos1.Z() , 0.7, 0.0001);
+     IDetector_const_sptr deto2 = ws2->getDetector(1);
+     int id2 = deto2->getID();
+     V3D newPos2 = deto2->getPos();
+     TS_ASSERT_EQUALS( id2, 2);
+     TS_ASSERT_DELTA( newPos2.X() , 6.0, 0.0001);
+     TS_ASSERT_DELTA( newPos2.Y() , 0.1, 0.0001);
+     TS_ASSERT_DELTA( newPos2.Z() , 0.7, 0.0001);
+
   }
 
   void testDifferent_BaseInstrument_Throws()
