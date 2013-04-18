@@ -120,8 +120,8 @@ class SimpleAPIFitTest(unittest.TestCase):
         self.assertAlmostEqual(params.row(0)['Value'], 3.0, 10)
         self.assertAlmostEqual(params.row(3)['Value'], 3.0, 10)
         self.assertAlmostEqual(params.row(6)['Value'], 3.0, 10)
-        self.assertAlmostEqual(params.row(4)['Value'], 3.0, delta=0.05)
-        self.assertAlmostEqual(params.row(8)['Value'], 3.0, delta=0.05)
+        self.assertAlmostEqual(params.row(4)['Value'], 3.0, 1)
+        self.assertAlmostEqual(params.row(8)['Value'], 3.0, 1)
 
 
 if __name__ == '__main__':
