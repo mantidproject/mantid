@@ -83,7 +83,8 @@ void export_IFunction()
 
     .def("declareAttribute", &IFunctionAdapter::declareAttribute, "Declare an attribute with an initial value")
 
-    .def("getAttributeValue", &IFunctionAdapter::getAttributeValue, "Return the value of the named attribute")
+    .def("getAttributeValue", (PyObject * (IFunctionAdapter::*)(const std::string &))&IFunctionAdapter::getAttributeValue,
+         "Return the value of the named attribute")
 
     .def("declareParameter", &IFunctionAdapter::declareFitParameter,
           "Declare a fitting parameter settings its default value & description")

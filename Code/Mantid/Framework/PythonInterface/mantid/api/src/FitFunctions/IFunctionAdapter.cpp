@@ -64,14 +64,24 @@ namespace Mantid
     }
 
     /**
-     * Get the value of the given attribute as a Python object
+     * Get the value of the named attribute as a Python object
      * @param name :: The name of the new attribute
-     * @param defaultValue :: The default value for the attribute
      * @returns The value of the attribute
      */
     PyObject * IFunctionAdapter::getAttributeValue(const std::string & name)
     {
       auto attr = IFunction::getAttribute(name);
+      return getAttributeValue(attr);
+    }
+
+
+    /**
+     * Get the value of the given attribute as a Python object
+     * @param attr An attribute object
+     * @returns The value of the attribute
+     */
+    PyObject * IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute & attr)
+    {
       std::string type = attr.type();
       PyObject *result(NULL);
       if(type=="int") result = to_python_value<const int&>()(attr.asInt());
@@ -79,9 +89,27 @@ namespace Mantid
       else if(type=="std::string") result = to_python_value<const std::string&>()(attr.asString());
       else if(type=="bool") result = to_python_value<const bool&>()(attr.asBool());
       else throw std::runtime_error("Unknown attribute type, cannot convert C++ type to Python. Contact developement team.");
-      
       return result;
     }
+
+    /**
+     * Calls setAttributeValue on the Python object if it exists otherwise calls the base class method
+     * @param attName The name of the attribute
+     * @param attr An attribute object
+     */
+    void IFunctionAdapter::setAttribute(const std::string& attName,const Attribute& attr)
+    {
+      object value = object(handle<>(getAttributeValue(attr)));
+      try
+      {
+        CallMethod2<void,std::string,object>::dispatchWithException(getSelf(), "setAttributeValue", attName,value);
+      }
+      catch(std::runtime_error &)
+      {
+        IFunction::setAttribute(attName, attr);
+      }
+    }
+
 
     /**
      * Value of i-th active parameter. If this functions is overridden

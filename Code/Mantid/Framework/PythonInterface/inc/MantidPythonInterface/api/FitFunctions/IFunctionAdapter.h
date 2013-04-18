@@ -54,8 +54,12 @@ namespace Mantid
       void declareAttribute(const std::string &name, const boost::python::object &defaultValue);
       /// Get a named attribute value
       PyObject * getAttributeValue(const std::string & name);
+      /// Returns the attribute's value as a Python object
+      PyObject * getAttributeValue(const API::IFunction::Attribute & att);
+      /// Called by the framework when an attribute has been set
+      void setAttribute(const std::string& attName,const API::IFunction::Attribute& att);
 
-      // Each overload of declareParamter requires a different name as we
+      // Each overload of declareParameter requires a different name as we
       // can't use a function pointer with a virtual base class
 
       /**
