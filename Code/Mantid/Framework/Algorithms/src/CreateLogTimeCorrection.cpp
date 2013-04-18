@@ -56,7 +56,7 @@ namespace Algorithms
     auto inpwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous", Direction::Input);
     declareProperty(inpwsprop, "Name of the input workspace to generate log correct from.");
 
-    auto outwsprop = new WorkspaceProperty<TableWorkspace>("Outputworkspace", "AnonymousOut", Direction::Output);
+    auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "AnonymousOut", Direction::Output);
     declareProperty(outwsprop, "Name of the output workspace containing the corrections.");
 
     auto fileprop = new FileProperty("OutputFilename", "", FileProperty::OptionalSave);
