@@ -11,6 +11,7 @@ using Mantid::Kernel::ConfigServiceImpl;
 // from poco
 #include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/TemporaryFile.h>
 #include <Poco/URI.h>
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
@@ -602,31 +603,38 @@ namespace API
   void ScriptRepositoryImpl::download_file(const std::string &file_path, RepositoryEntry & entry) {
     SCRIPTSTATUS state = entry.status;
     // if we have the state, this means that the entry is available
-    if (state == LOCAL_ONLY  || state == LOCAL_CHANGED)
-      // fixme: better description
-      throw ScriptRepoException("This file can not be downloaded. It has only local changes"); 
+    if (state == LOCAL_ONLY  || state == LOCAL_CHANGED){
+      std::stringstream ss; 
+      ss << "The file " << file_path << " can not be download because it has only local changes."
+         << " If you want, please, publish this file uploading it" ; 
+      throw ScriptRepoException(ss.str()); 
+    }
     
     if (state == BOTH_UNCHANGED)
       // instead of throwing exception, silently assumes that the download was done.
       return;
            
-    if (state == BOTH_CHANGED){
-      // make a back up of the local version
-      Poco::File f(std::string(local_repository).append(file_path));
-      std::string bck = std::string(f.path()).append("_bck");
-      g_log.notice() << "The current file " << f.path() << " has some local changes"
-                     << " so, a back up copy will be created at " << bck << std::endl; 
-      f.copyTo(bck);         
-    }
-
-
     // download the file
     std::string url_path = std::string(remote_url).append(SCRIPTREPPATH).append(file_path); 
+    Poco::TemporaryFile tmpFile; 
+    doDownloadFile(url_path, tmpFile.path());
+
     std::string local_path = std::string(local_repository).append(file_path); 
     g_log.debug() << "ScriptRepository download url_path: " << url_path << " to " << local_path << std::endl;
 
-    // ensure that the path to the local_path exists
-    {
+
+    try{
+
+      if (state == BOTH_CHANGED){
+        // make a back up of the local version
+        Poco::File f(std::string(local_repository).append(file_path));
+        std::string bck = std::string(f.path()).append("_bck");
+        g_log.notice() << "The current file " << f.path() << " has some local changes"
+                       << " so, a back up copy will be created at " << bck << std::endl; 
+        f.copyTo(bck);         
+      }
+      
+      // ensure that the path to the local_path exists    
       size_t slash_pos = local_path.rfind('/');
       Poco::File file_out(local_path);
       if (slash_pos != std::string::npos){
@@ -638,11 +646,18 @@ namespace API
           }
         }// dir path is empty
       }
+      
       if (!file_out.exists())
         file_out.createFile();
+
+      tmpFile.copyTo(local_path); 
+      
+    }catch(Poco::FileAccessDeniedException & ex){
+      std::stringstream ss; 
+      ss << "You cannot create file at " << local_path << ". Not downloading ..."; 
+      throw ScriptRepoException(ss.str());      
     }
 
-    doDownloadFile(url_path,local_path);
     {
       Poco::File local(local_path);
       entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(local.getLastModified(),
