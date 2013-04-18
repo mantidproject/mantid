@@ -260,18 +260,8 @@ namespace API
     std::string local_json_file  = std::string(path).append("/.local.json");
     if (!repository_folder.exists()){
       repository_folder.createDirectories();
-    }else{
-      
-      // if the folder already exists, check if it is a ScriptRepository already: 
-      Poco::File rep(rep_json_file); 
-      Poco::File local(local_json_file); 
-      
-      if (rep.exists() && local.exists()){
-        g_log.information() << "ScriptRepository already installed at: " << path << std::endl; 
-        return;
-      }
     }
-    
+      
     // install the two files inside the given folder
     
     // download the repository json
@@ -279,9 +269,13 @@ namespace API
                    rep_json_file);
     g_log.debug() << "ScriptRepository downloaded repository information" << std::endl; 
     // creation of the instance of local_json file
-    ptree pt; 
-    write_json(local_json_file,pt); 
-    g_log.debug() << "ScriptRepository created the local repository information"<<std::endl; 
+    Poco::File local(local_json_file); 
+    if (!local.exists()){
+      ptree pt; 
+      write_json(local_json_file,pt); 
+      g_log.debug() << "ScriptRepository created the local repository information"
+                    <<std::endl; 
+    }
     
     #if defined(_WIN32) ||  defined(_WIN64)
     //set the .repository.json and .local.json hidden
@@ -308,8 +302,15 @@ namespace API
   }
 
   void ScriptRepositoryImpl::ensureValidRepository(){
-    if (!isValid())
-      throw ScriptRepoException("ScriptRepository is not installed in this machine, or it is corrupted. Ensure a proper installation is done. If necessary, execute install"); 
+    if (!isValid()){
+      std::stringstream ss; 
+      ss << "ScriptRepository is not installed correctly. The current path for ScriptRepository is " 
+         << local_repository << " but some important files that are required are corrupted or not present."
+         << "\nPlease, re-install the ScriptRepository!\n"
+         << "Hint: if you have a proper installation in other path, check the property ScriptLocalRepository "
+         << "at the Mantid.user.properties and correct it if necessary."; 
+      throw ScriptRepoException(ss.str(),"CORRUPTED"); 
+    }
   }
 
   /** Implements ScriptRepository::info
