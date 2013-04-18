@@ -101,6 +101,10 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
         g_log.information() << "Failed to update: " << ex.what() << std::endl; // 
       }
     }
+
+      // create the model
+    model = new RepoModel(this);   
+
     }catch( EXC_OPTIONS  ex){
       if (ex == NODIRECTORY)
          // probably the user change mind. He does not want to install any more.
@@ -131,8 +135,7 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
     ui->setupUi(this);
     connect(ui->reloadPushButton, SIGNAL(clicked()),this,SLOT(updateModel())); 
 
-    // setup the model and delegates
-    model = new RepoModel(this);   
+    // setup the model and delegates   
     ui->repo_treeView->setModel(model);
     ui->repo_treeView->setItemDelegateForColumn(1, new RepoDelegate(this));
     ui->repo_treeView->setItemDelegateForColumn(2, new CheckBoxDelegate(this));
