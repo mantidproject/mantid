@@ -232,9 +232,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
       }
     }// end tool tip
   }catch(Mantid::API::ScriptRepoException & ex){
-    g_log.information() << "ScriptRepository error: " << ex.what() 
-                        << "\n Detail: " << ex.systemError() << std::endl; 
-    // return QVariant
+    handleExceptions(ex,"",false);
   }
     return QVariant(); 
 }
@@ -312,11 +310,7 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
         repo_ptr->download(path); // FIXME: deal with exceptions 
         ret = true;
       }catch(Mantid::API::ScriptRepoException & ex){
-        QWidget * father = qobject_cast<QWidget*>(QObject::parent());
-        g_log.information() << "Download failed " << ex.what() << "\n Detail: " 
-                            << ex.systemError()<< std::endl;    
-        QMessageBox::warning(father, QString("Download %1 Failed!").arg(QString::fromStdString(path)),
-                             ex.what());
+        handleExceptions(ex, QString("Download %1 failed!").arg(QString::fromStdString(path)));
         ret = false;
       }
     }else if (action == "Upload"){
@@ -345,11 +339,7 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
                            form->email().toStdString());
           ret = true;
         }catch(Mantid::API::ScriptRepoException & ex){
-          QWidget * father = qobject_cast<QWidget*>(QObject::parent());
-          g_log.information() << "Upload failed " << ex.what() << "\n Detail: " 
-                            << ex.systemError()<< std::endl;    
-          QMessageBox::warning(father, QString("Upload %1 Failed!").arg(QString::fromStdString(path)),
-                             ex.what());
+          handleExceptions(ex,  QString("Upload %1 failed!").arg(QString::fromStdString(path)));
           ret = false;
         }
       }else{
@@ -673,6 +663,27 @@ void RepoModel::setupModelData(RepoItem *root)
   }
   
 }
+void RepoModel::handleExceptions(const Mantid::API::ScriptRepoException & ex,
+                                 const QString & title, 
+                                 bool showWarning) const{
+   g_log.information() << "Download failed " << ex.what() << "\n Detail: " 
+                            << ex.systemError()<< std::endl;
+   if (showWarning){
+
+     QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+     QString info = QString::fromStdString(ex.what());
+     // make the exception a nice html message
+     info.replace("\n","</p><p>");
+     QMessageBox::warning(father, title,
+                          QString("<html><body><p>%1</p></body></html>")
+                          .arg(info));   
+   }
+}
+
+
+
+
+
 /// @return string to define the LOCAL_ONLY state
 const QString & RepoModel::localOnlySt(){return LOCALONLY;}; 
 /// @return string to define the REMOTE_ONLY state

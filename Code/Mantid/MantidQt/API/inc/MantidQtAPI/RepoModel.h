@@ -206,6 +206,9 @@ private:
     RepoModel( const RepoModel& );
     const RepoModel& operator=( const RepoModel& );
     static Mantid::Kernel::Logger & g_log;
+    void handleExceptions(const Mantid::API::ScriptRepoException & ex, 
+                          const QString & title, 
+                          bool showWarning=true)const;
   };
 
 

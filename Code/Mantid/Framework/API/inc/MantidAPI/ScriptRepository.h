@@ -118,9 +118,9 @@ namespace API{
     const char* what() const throw(); 
     
     /// Returns the error description with technical details on the origin and cause.
-    std::string systemError(){return _system_error;}; 
+    const std::string & systemError()const {return _system_error;}; 
     /// Returns the file and position where the error was caused.
-    std::string filePath(){return _file_path;}; 
+    const std::string & filePath()const{return _file_path;}; 
   private:
     /// The message returned by what()
     std::string _system_error;
