@@ -52,7 +52,7 @@ namespace
      * @param obj :: A Python object that should either be a class type derived from IFunction
      *              or an instance of a class type derived from IFunction
      */
-    void subscribe(FunctionFactoryImpl & self, boost::python::object obj)
+    void subscribe(FunctionFactoryImpl & self, const boost::python::object & obj )
     {
       Poco::ScopedLock<Poco::Mutex> lock(FUNCTION_REGISTER_MUTEX);
 
