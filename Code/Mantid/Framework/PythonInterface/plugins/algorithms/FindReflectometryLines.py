@@ -103,4 +103,4 @@ class FindReflectometryLines(PythonAlgorithm):
 		
 		self.setProperty("OutputWorkspace", output_ws)
 		
-registerAlgorithm(FindReflectometryLines())
+AlgorithmFactory.subscribe(FindReflectometryLines())

@@ -171,4 +171,4 @@ class EQSANSNormalise(PythonAlgorithm):
             self.setProperty("OutputMessage", "Monitor not available. Data [%s] NOT normalized to monitor" % (input_ws_name)) 
 #############################################################################################
 
-registerAlgorithm(EQSANSNormalise)
+AlgorithmFactory.subscribe(EQSANSNormalise)

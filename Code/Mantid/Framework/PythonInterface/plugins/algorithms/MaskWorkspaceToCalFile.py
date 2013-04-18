@@ -116,4 +116,4 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 
 #############################################################################################
 
-registerAlgorithm(MaskWorkspaceToCalFile())
+AlgorithmFactory.subscribe(MaskWorkspaceToCalFile())

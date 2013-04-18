@@ -233,4 +233,4 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
 
 # ENDCLASS
-mantid.api.registerAlgorithm(UpdatePeakParameterTableValue)
+mantid.api.AlgorithmFactory.subscribe(UpdatePeakParameterTableValue)

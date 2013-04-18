@@ -102,4 +102,4 @@ class Stitch1D(PythonAlgorithm):
 
 #############################################################################################
 
-registerAlgorithm(Stitch1D())
+AlgorithmFactory.subscribe(Stitch1D())

@@ -209,7 +209,7 @@ def contains_newapi_algorithm(filename):
         if 'registerPyAlgorithm' in line:
             alg_found = False
             break
-        if 'registerAlgorithm' in line:
+        if 'AlgorithmFactory.subscribe' in line or 'registerAlgorithm': # registerAlgorithm deprecated
             alg_found = True
             break
     file.close()

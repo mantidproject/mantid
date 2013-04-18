@@ -139,4 +139,4 @@ class SANSMask(PythonAlgorithm):
 
         self._mask_pixels(id_side, workspace, facility)
        
-registerAlgorithm(SANSMask())
+AlgorithmFactory.subscribe(SANSMask())

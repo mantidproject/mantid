@@ -2,7 +2,7 @@
 Compare two nexus files containing matrix workspaces and output chi squared into a file
 *WIKI*"""
 
-from mantid.api import PythonAlgorithm, registerAlgorithm,MatrixWorkspaceProperty,PropertyMode
+from mantid.api import PythonAlgorithm, AlgorithmFactory,MatrixWorkspaceProperty,PropertyMode
 from mantid.kernel import Direction,IntBoundedValidator,FloatBoundedValidator
 import mantid.simpleapi 
 import mantid
@@ -88,4 +88,4 @@ class DakotaChiSquared(PythonAlgorithm):
 	if (len(soeName)==0): 
    		mantid.simpleapi.DeleteWorkspace(__soe.getName())
     
-registerAlgorithm(DakotaChiSquared)
+AlgorithmFactory.subscribe(DakotaChiSquared)

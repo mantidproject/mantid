@@ -7,7 +7,7 @@ import mantid.kernel.plugins as plugins
 from mantid.api import AlgorithmFactory, AlgorithmManager
 
 __TESTALG__ = \
-"""from mantid.api import PythonAlgorithm, registerAlgorithm
+"""from mantid.api import PythonAlgorithm, AlgorithmFactory
 
 class TestPyAlg(PythonAlgorithm):
 
@@ -17,7 +17,7 @@ class TestPyAlg(PythonAlgorithm):
     def PyExec(self):
         pass
         
-registerAlgorithm(TestPyAlg)
+AlgorithmFactory.subscribe(TestPyAlg)
 """
 
 class PythonPluginsTest(unittest.TestCase):

@@ -4,7 +4,7 @@ This algorithm creates an empty table workspace and puts it in the data service 
 
 *WIKI*"""
 
-from mantid.api import PythonAlgorithm, registerAlgorithm, ITableWorkspaceProperty, WorkspaceFactory
+from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory
 from mantid.kernel import Direction
 
 # Create an empty table workspace to be populated by a python script.
@@ -21,5 +21,5 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
         self.setProperty("OutputWorkspace", tableWS)
  
 # Register algorithm with Mantid
-registerAlgorithm(CreateEmptyTableWorkspace)
+AlgorithmFactory.subscribe(CreateEmptyTableWorkspace)
 

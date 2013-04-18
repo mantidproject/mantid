@@ -11,9 +11,11 @@
 // include of Python.h which it ensures is done correctly
 #include <frameobject.h>
 
-using Mantid::API::AlgorithmFactoryImpl;
-using Mantid::API::AlgorithmFactory;
+using namespace Mantid::API;
 using namespace boost::python;
+using Mantid::Kernel::AbstractInstantiator;
+using Mantid::PythonInterface::PythonAlgorithm;
+using Mantid::PythonInterface::PythonObjectInstantiator;
 
 namespace
 {
@@ -52,43 +54,20 @@ namespace
         PyDict_SetItem(registered, name, versions);
       }
     }
-
     return registered;
   }
-  ///@endcond
-}
 
-void export_AlgorithmFactory()
-{
+  //--------------------------------------------- Python algorithm subscription ------------------------------------------------
 
-  class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactoryImpl", no_init)
-      .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of currently registered algorithms")
-      .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(),
-        "Returns a reference to the AlgorithmFactory singleton")
-      .staticmethod("Instance")
-    ;
-
-}
-
-//--------------------------------------------- Python algorithm registration ------------------------------------------------
-
-namespace
-{
-    using Mantid::PythonInterface::PythonObjectInstantiator;
-    using Mantid::Kernel::AbstractInstantiator;
-    using Mantid::PythonInterface::PythonAlgorithm;
-    using Mantid::API::Algorithm;
-    using Mantid::API::IAlgorithm_sptr;
-
-  /// Python algorithm registration mutex in anonymous namespace (aka static)
+  // Python algorithm registration mutex in anonymous namespace (aka static)
   Poco::Mutex PYALG_REGISTER_MUTEX;
 
   /**
-   * A free function to register an algorithm from Python
+   * A free function to subscribe a Python algorithm into the factory
    * @param obj :: A Python object that should either be a class type derived from PythonAlgorithm
    *              or an instance of a class type derived from PythonAlgorithm
    */
-  void registerAlgorithm(boost::python::object obj)
+  void subscribe(AlgorithmFactoryImpl & self, const boost::python::object & obj)
   {
     Poco::ScopedLock<Poco::Mutex> lock(PYALG_REGISTER_MUTEX);
 
@@ -109,10 +88,39 @@ namespace
     }
     boost::python::object classType(handle<>(borrowed(classObject)));
     // Takes ownership of instantiator and replaces any existing algorithm
-    AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType), AlgorithmFactoryImpl::OverwriteCurrent);
+    self.subscribe(new PythonObjectInstantiator<Algorithm>(classType), AlgorithmFactoryImpl::OverwriteCurrent);
   }
+
+  ///@endcond
 }
 
+void export_AlgorithmFactory()
+{
+
+  class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactoryImpl", no_init)
+      .def("getRegisteredAlgorithms", &getRegisteredAlgorithms, "Returns a Python dictionary of currently registered algorithms")
+      .def("subscribe", &subscribe, "Register a Python class derived from PythonAlgorithm into the factory")
+      .def("Instance", &AlgorithmFactory::Instance, return_value_policy<reference_existing_object>(),
+        "Returns a reference to the AlgorithmFactory singleton")
+      .staticmethod("Instance")
+    ;
+
+}
+
+namespace
+{
+  // ------ Deprecated ------------
+  /**
+   * A free function to register an algorithm from Python
+   * @param obj :: A Python object that should either be a class type derived from PythonAlgorithm
+   *              or an instance of a class type derived from PythonAlgorithm
+   */
+  void registerAlgorithm(const boost::python::object & obj)
+  {
+    PyErr_WarnEx(PyExc_DeprecationWarning, "registerAlgorithm is deprecated. Replace with AlgorithmFactory.subscribe", 1);
+    subscribe(AlgorithmFactory::Instance(), obj);
+  }
+}
 
 void export_RegisterAlgorithm()
 {

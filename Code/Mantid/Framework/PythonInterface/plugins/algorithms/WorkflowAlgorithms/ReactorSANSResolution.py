@@ -78,4 +78,4 @@ class ReactorSANSResolution(PythonAlgorithm):
             raise RuntimeError, "ReactorSANSResolution could not find all the run parameters needed to compute the resolution."
 
 
-registerAlgorithm(ReactorSANSResolution)
+AlgorithmFactory.subscribe(ReactorSANSResolution)

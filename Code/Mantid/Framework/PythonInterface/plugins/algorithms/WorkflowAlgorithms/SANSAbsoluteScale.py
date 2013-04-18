@@ -219,4 +219,4 @@ class SANSAbsoluteScale(PythonAlgorithm):
         self.setProperty("OutputWorkspace", output_ws)
         self.setProperty("OutputMessage", output_msg)
     
-registerAlgorithm(SANSAbsoluteScale())
+AlgorithmFactory.subscribe(SANSAbsoluteScale())

@@ -183,4 +183,4 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             return qmin, -(math.pow(10.0,qstep)-1.0), qmax
 #############################################################################################
 
-registerAlgorithm(SANSAzimuthalAverage1D)
+AlgorithmFactory.subscribe(SANSAzimuthalAverage1D)

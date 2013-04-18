@@ -89,4 +89,4 @@ class SortByQVectors(PythonAlgorithm):
     def GetXValue(self, xs):
         return np.linalg.norm(xs)
         
-registerAlgorithm(SortByQVectors)
+AlgorithmFactory.subscribe(SortByQVectors)

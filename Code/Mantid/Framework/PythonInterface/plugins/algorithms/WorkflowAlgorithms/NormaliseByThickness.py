@@ -54,4 +54,4 @@ class NormaliseByThickness(PythonAlgorithm):
         self.setProperty("OutputWorkspace", output_ws_name)
         self.setProperty("OutputMessage", "Normalised by thickness [%g cm]" % thickness)
 
-registerAlgorithm(NormaliseByThickness())
+AlgorithmFactory.subscribe(NormaliseByThickness())

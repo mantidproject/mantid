@@ -4,7 +4,7 @@ one will select detectors in the range dmin to dmin*MaximumDistanceFraction. The
 a copy of the monitor workspace, then fed to GetEi algorithm. The output of this algorithm is identical to that of [[GetEi]].
 *WIKI*"""
 
-from mantid.api import PythonAlgorithm, registerAlgorithm,WorkspaceProperty
+from mantid.api import PythonAlgorithm, AlgorithmFactory,WorkspaceProperty
 from mantid.kernel import Direction,IntBoundedValidator,FloatBoundedValidator
 import mantid.simpleapi 
 import mantid
@@ -135,4 +135,4 @@ class GetEiMonDet(PythonAlgorithm):
         return 
     
     
-registerAlgorithm(GetEiMonDet)
+AlgorithmFactory.subscribe(GetEiMonDet)

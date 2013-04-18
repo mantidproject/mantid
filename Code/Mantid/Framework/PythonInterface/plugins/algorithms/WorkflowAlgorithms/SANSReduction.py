@@ -422,4 +422,4 @@ class SANSReduction(PythonAlgorithm):
 
         return output_msg
 #############################################################################################
-registerAlgorithm(SANSReduction)
+AlgorithmFactory.subscribe(SANSReduction)

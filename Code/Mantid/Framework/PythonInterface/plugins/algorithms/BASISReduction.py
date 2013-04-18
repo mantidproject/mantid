@@ -251,5 +251,5 @@ class BASISReduction(PythonAlgorithm):
                        OutputWorkspace=sam_ws)
     
 # Register algorithm with Mantid.
-registerAlgorithm(BASISReduction)
+AlgorithmFactory.subscribe(BASISReduction)
 

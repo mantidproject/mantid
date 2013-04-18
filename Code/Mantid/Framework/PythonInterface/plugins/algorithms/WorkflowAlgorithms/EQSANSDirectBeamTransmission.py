@@ -193,4 +193,4 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
         TransmissionUtils.apply_transmission(self, workspace, trans_ws)
   
         
-registerAlgorithm(EQSANSDirectBeamTransmission)
+AlgorithmFactory.subscribe(EQSANSDirectBeamTransmission)

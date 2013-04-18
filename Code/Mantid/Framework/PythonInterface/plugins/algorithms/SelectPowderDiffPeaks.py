@@ -4,7 +4,7 @@
 #
 ########################################################################################
 
-from mantid.api import PythonAlgorithm, registerAlgorithm, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
+from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
 from mantid.kernel import Direction, StringListValidator
 
 _OUTPUTLEVEL = "NOOUTPUT"
@@ -226,5 +226,5 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
 
 
 # Register algorithm with Mantid
-registerAlgorithm(SelectPowderDiffPeaks)
+AlgorithmFactory.subscribe(SelectPowderDiffPeaks)
 

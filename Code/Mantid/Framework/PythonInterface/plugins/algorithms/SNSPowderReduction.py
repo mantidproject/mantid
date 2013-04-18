@@ -938,4 +938,4 @@ class SNSPowderReduction(PythonAlgorithm):
         return len(wscountdict.keys())
         
 # Register algorthm with Mantid.
-registerAlgorithm(SNSPowderReduction)
+AlgorithmFactory.subscribe(SNSPowderReduction)

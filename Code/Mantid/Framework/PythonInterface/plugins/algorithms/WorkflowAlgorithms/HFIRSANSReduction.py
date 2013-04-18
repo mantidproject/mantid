@@ -440,4 +440,4 @@ class HFIRSANSReduction(PythonAlgorithm):
 
 #############################################################################################
 
-registerAlgorithm(HFIRSANSReduction)
+AlgorithmFactory.subscribe(HFIRSANSReduction)

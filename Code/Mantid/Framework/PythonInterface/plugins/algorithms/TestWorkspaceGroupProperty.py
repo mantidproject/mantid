@@ -29,4 +29,4 @@ class TestWorkspaceGroupProperty(PythonAlgorithm):
         logger.notice("Input type: %s" % str(type(ws2)))
         
         
-registerAlgorithm(TestWorkspaceGroupProperty)
+AlgorithmFactory.subscribe(TestWorkspaceGroupProperty)
