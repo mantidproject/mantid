@@ -1438,7 +1438,7 @@ class PyAlgLoader(object):
             if path == '':
                 continue
             if not os.path.isdir(path):
-                mtd.sendLogMessage(path + ' (specified in pythonalgorithms.directories property) is not a directory' )
+                mtd.sendLogMessage(path + ' is not a directory' )
                 continue
             changes, plugins = self._importAlgorithms(path, refresh)
             loaded_modules += plugins
