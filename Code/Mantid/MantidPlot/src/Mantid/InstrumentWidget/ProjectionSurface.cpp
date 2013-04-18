@@ -408,7 +408,7 @@ bool ProjectionSurface::hasSelection()const
 void ProjectionSurface::colorMapChanged()
 {
   this->changeColorMap();
-  updateView();
+  updateView(false);
 }
 
 /**
@@ -616,6 +616,18 @@ QList<PeakMarker2D*> ProjectionSurface::getMarkersWithID(int detID)const
     out += m_peakShapes[i]->getMarkersWithID(detID);
   }
   return out;
+}
+
+/**
+  * Get peaks workspace for manually editing.
+  */
+boost::shared_ptr<Mantid::API::IPeaksWorkspace> ProjectionSurface::getEditPeaksWorkspace() const
+{
+    if ( !m_peakShapes.isEmpty() )
+    {
+        return m_peakShapes.last()->getPeaksWorkspace();
+    }
+    return boost::shared_ptr<Mantid::API::IPeaksWorkspace>();
 }
 
 /**

@@ -645,60 +645,68 @@ void InstrumentWindowPickTab::setSelectionType()
   */
 void InstrumentWindowPickTab::addPeak(double x,double y)
 {
-  using namespace Mantid::PhysicalConstants;
-
   if (!m_peak->isChecked() ||  m_currentDetID < 0) return;
-  Mantid::API::IPeaksWorkspace_sptr tw;
-  std::string peakTableName = "SingleCrystalPeakTable";
 
   try
   {
-    InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-    Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-    // This does need to get the instrument from the workspace as it's doing calculations
-    // .....and this method should be an algorithm! Or at least somewhere different to here.
-    Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
-
-    if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
-    {
-      tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
-      tw->setInstrument(instr);
-      Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
-      auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( m_instrWindow->getSurface() );
-      if ( surface )
+      Mantid::API::IPeaksWorkspace_sptr tw = m_instrWindow->getSurface()->getEditPeaksWorkspace();
+      InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+      Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+      std::string peakTableName;
+      if ( tw )
       {
-          surface->setPeaksWorkspace(boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
+          peakTableName = tw->name();
       }
-    }
-    else
-    {
-      tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
-      if (!tw)
+      else
       {
-        QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
-        return;
+          peakTableName = "SingleCrystalPeakTable";
+          // This does need to get the instrument from the workspace as it's doing calculations
+          // .....and this method should be an algorithm! Or at least somewhere different to here.
+          Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
+
+          if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
+          {
+              tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
+              tw->setInstrument(instr);
+              Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
+              auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( m_instrWindow->getSurface() );
+              if ( surface )
+              {
+                  surface->setPeaksWorkspace(boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
+              }
+          }
+          else
+          {
+              tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
+              if (!tw)
+              {
+                  QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
+                  return;
+              }
+          }
       }
-    }
 
-    // Run the AddPeak algorithm
-    auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
-    alg->setPropertyValue( "RunWorkspace", ws->name() );
-    alg->setPropertyValue( "PeaksWorkspace", peakTableName );
-    alg->setProperty( "DetectorID", m_currentDetID );
-    alg->setProperty( "TOF", x );
-    alg->setProperty( "Height", instrActor->getIntegratedCounts(m_currentDetID) );
-    alg->setProperty( "BinCount", y );
-    alg->execute();
+      // Run the AddPeak algorithm
+      auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
+      alg->setPropertyValue( "RunWorkspace", ws->name() );
+      alg->setPropertyValue( "PeaksWorkspace", peakTableName );
+      alg->setProperty( "DetectorID", m_currentDetID );
+      alg->setProperty( "TOF", x );
+      alg->setProperty( "Height", instrActor->getIntegratedCounts(m_currentDetID) );
+      alg->setProperty( "BinCount", y );
+      alg->execute();
 
+      if ( tw->sample().hasOrientedLattice() )
+      {
+          auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("CalculatePeaksHKL");
+          alg->setPropertyValue( "PeaksWorkspace", peakTableName );
+          alg->execute();
+      }
   }
   catch(std::exception& e)
   {
-    if (tw)
-    {
-      Mantid::API::AnalysisDataService::Instance().remove(peakTableName);
-    }
-    QMessageBox::critical(this,"MantidPlot -Error",
-      "Cannot create a Peak object because of the error:\n"+QString(e.what()));
+      QMessageBox::critical(this,"MantidPlot -Error",
+                            "Cannot create a Peak object because of the error:\n"+QString(e.what()));
   }
 
 }

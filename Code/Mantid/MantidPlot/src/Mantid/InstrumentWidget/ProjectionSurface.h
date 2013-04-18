@@ -68,7 +68,7 @@ public:
   /// called when the gl widget gets resized
   virtual void resize(int, int);
   /// redraw surface without recalulationg of colours, etc
-  virtual void updateView(bool picking = false);
+  virtual void updateView(bool picking = true);
   /// full update and redraw of the surface
   virtual void updateDetectors();
   /// returns the bounding rectangle in the real coordinates
@@ -173,6 +173,7 @@ public:
   //-----------------------------------
 
   QList<PeakMarker2D*> getMarkersWithID(int detID)const;
+  boost::shared_ptr<Mantid::API::IPeaksWorkspace> getEditPeaksWorkspace() const;
   void peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
   void clearPeakOverlays();
   bool hasPeakOverlays() const {return !m_peakShapes.isEmpty();}

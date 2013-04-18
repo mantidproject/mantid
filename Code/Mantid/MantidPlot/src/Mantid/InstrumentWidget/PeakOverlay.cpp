@@ -66,22 +66,19 @@ void PeakHKL::draw(QPainter& painter,int prec)
   QString label;
   if (nh) 
   {
-    int max_prec = std::max(prec,int(log10(h)+1));
-    label = QString::number(h,'g',max_prec) + " ";
+      label += formatNumber( h, prec ) + " ";
   }
   else
     label = "h ";
   if (nk)
   {
-    int max_prec = std::max(prec,int(log10(k)+1));
-    label += QString::number(k,'g',max_prec) + " ";
+      label += formatNumber( k, prec ) + " ";
   }
   else
     label += "k ";
   if (nl)
   {
-    int max_prec = std::max(prec,int(log10(l)+1));
-    label += QString::number(l,'g',max_prec);
+    label += formatNumber( l, prec ) + " ";
   }
   else
     label += "l";
@@ -99,7 +96,26 @@ void PeakHKL::draw(QPainter& painter,int prec)
 
 void PeakHKL::print()const
 {
-  std::cerr << "     " << p.x() << ' ' << p.y() << '('<<h<<','<<k<<','<<l<<")("<<nh<<','<<nk<<','<<nl<<')' << std::endl;
+    std::cerr << "     " << p.x() << ' ' << p.y() << '('<<h<<','<<k<<','<<l<<")("<<nh<<','<<nk<<','<<nl<<')' << std::endl;
+}
+
+/**
+  * Creates formated string for outputting h,k, or l
+  *
+  * @param h :: Value to output.
+  * @param prec :: Precision as a number of decimal places.
+  */
+QString PeakHKL::formatNumber(double h, int prec)
+{
+    if (h == 0) return "0";
+    int max_prec = std::max(prec,int(log10(h)+1));
+    QString str = QString::number(h,'f',max_prec);
+    if ( str.contains('.') )
+    {
+        while (str.endsWith('0')) str.chop(1);
+        if (str.endsWith('.')) str.chop(1);
+    }
+    return str;
 }
 
 /**---------------------------------------------------------------------

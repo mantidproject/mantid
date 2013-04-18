@@ -907,7 +907,7 @@ void InstrumentWindow::componentSelected(ComponentID id)
     if (surface)
     {
       surface->componentSelected(id);
-      surface->updateView();
+      //surface->updateView();
       updateInstrumentView();
     }
 }

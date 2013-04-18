@@ -37,6 +37,7 @@ public:
   void print()const;
 
 private:
+  static QString formatNumber(double h, int prec);
   QPointF p; ///< untransformed marker origin
   QRectF rect; ///< label's screen area in transformed coords
   double h,k,l; ///< h,k, and l

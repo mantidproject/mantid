@@ -14,6 +14,7 @@ class QLineEdit;
 class QComboBox;
 class QCheckBox;
 class QAction;
+class QActionGroup;
 class QMenu;
 
 /**
@@ -64,9 +65,10 @@ private slots:
 
 private:
   void showEvent (QShowEvent *);
-
   QMenu* createPeaksMenu();
   QFrame * setupAxisFrame();
+  void setPrecisionMenuItemChecked(int n);
+
   QComboBox* m_renderMode;
   QPushButton *mSaveImage;
   ColorMapWidget* m_colorMapWidget;
@@ -83,6 +85,8 @@ private:
   QAction *m_wireframe;
   QAction *m_lighting;
   QAction *m_GLView; ///< toggle between OpenGL and simple view
+  QActionGroup *m_precisionActionGroup;
+  QList<QAction*> m_precisionActions;
 
   friend class InstrumentWindow;
   

@@ -165,10 +165,28 @@ QFrame * InstrumentWindowRenderTab::setupAxisFrame()
 
   return m_resetViewFrame;
 }
+
+/**
+  * Set checked n-th menu item in m_setPrecison menu.
+  */
+void InstrumentWindowRenderTab::setPrecisionMenuItemChecked(int n)
+{
+    for(int i = 0; i < m_precisionActions.size(); ++i)
+    {
+        QAction *prec = m_precisionActions[i];
+        if (i == n - 1)
+        {
+            prec->setChecked( true );
+            break;
+        }
+    }
+}
+
 void InstrumentWindowRenderTab::initSurface()
 {
   setAxis(QString::fromStdString(m_instrWindow->getInstrumentActor()->getInstrument()->getDefaultAxis()));
-  auto p3d = boost::dynamic_pointer_cast<Projection3D>(getSurface());
+  auto surface = getSurface();
+  auto p3d = boost::dynamic_pointer_cast<Projection3D>(surface);
   if ( p3d )
   {
       p3d->set3DAxesState(areAxesOn());
@@ -177,6 +195,7 @@ void InstrumentWindowRenderTab::initSurface()
   m_displayDetectorsOnly->blockSignals(true);
   m_displayDetectorsOnly->setChecked(detectorsOnly);
   m_displayDetectorsOnly->blockSignals(false);
+  setPrecisionMenuItemChecked(surface->getPeakLabelPrecision());
 }
 
 /**
@@ -384,13 +403,17 @@ QMenu* InstrumentWindowRenderTab::createPeaksMenu()
   menu->addAction(showRows);
   // setting precision set of actions
   QMenu *setPrecision = new QMenu("Label precision",this);
+  m_precisionActionGroup = new QActionGroup(this);
   QSignalMapper *signalMapper = new QSignalMapper(this);
   for(int i = 1; i < 10; ++i)
   {
     QAction *prec = new QAction(QString::number(i),setPrecision);
+    prec->setCheckable(true);
     setPrecision->addAction(prec);
     connect(prec,SIGNAL(triggered()),signalMapper,SLOT(map()));
     signalMapper->setMapping(prec,i);
+    m_precisionActions.append(prec);
+    m_precisionActionGroup->addAction(prec);
   }
   connect(signalMapper, SIGNAL(mapped(int)), m_instrWindow, SLOT(setPeakLabelPrecision(int)));
   menu->addMenu(setPrecision);
