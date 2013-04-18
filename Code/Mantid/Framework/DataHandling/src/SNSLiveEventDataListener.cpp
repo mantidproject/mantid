@@ -290,6 +290,18 @@ namespace DataHandling
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
+    } catch (std::invalid_argument e) { // TimeSeriesProperty (and possibly some other things) can
+                                        // can throw these errors
+      g_log.fatal() << "Caught an invalid argument exception." << std::endl
+                    << "Exception message: "  << e.what() << std::endl
+                    << "Thread will exit." << std::endl;
+      m_isConnected = false;
+      m_workspaceInitialized = true;  // see the comments in the default exception
+                                      // handler for why we set this value.
+      std::string newMsg( "Invalid argument exception thrown from the background thread: ");
+      newMsg += e.what();
+      m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( newMsg));
+
     } catch (...) {  // Default exception handler
       g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
                     << "  Thread is exiting." << std::endl;
