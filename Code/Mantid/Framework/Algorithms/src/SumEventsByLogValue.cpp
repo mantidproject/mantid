@@ -225,6 +225,14 @@ namespace Algorithms
       // Create a filter giving the times when this log has the current value
       TimeSplitterType filter;
       log->makeFilterByValue(filter,value,value); // min & max are the same of course
+
+      // This section ensures that the filter goes to the end of the run
+      if ( value == log->lastValue() && protonChargeLog )
+      {
+        TimeInterval timeAfterLastLogValue(log->lastTime(),m_inputWorkspace->getLastPulseTime());
+        log->expandFilterToRange(filter,value,value,timeAfterLastLogValue);
+      }
+
       // Calculate the time covered by this log value and add it to the table
       double duration = 0.0;
       for ( auto it = filter.begin(); it != filter.end(); ++it )
@@ -346,7 +354,7 @@ namespace Algorithms
       // Move on to the next one if this is not a TSP
       if ( tsp == NULL ) continue;
       // Don't keep ones with only one entry
-      //if ( tsp->realSize() < 2 ) continue;
+      if ( tsp->realSize() < 2 ) continue;
       // Now make sure it's either an int or double tsp, and if so add log to the list
       if ( dynamic_cast<TimeSeriesProperty<double>* >(*log) || dynamic_cast<TimeSeriesProperty<int>* >(*log))
       {
