@@ -2024,7 +2024,6 @@ void FitPropertyBrowser::handleFactoryUpdate(Mantid::API::FunctionFactoryUpdateN
   Q_UNUSED(notice);
   // Don't call populate directly as the updates can come from a different thread
   emit functionFactoryUpdateReceived();
-  std::cerr << "algorithm factory update recieved\n";
 }
 
 
