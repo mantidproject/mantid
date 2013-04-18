@@ -2,8 +2,16 @@ import unittest
 from mantid.api import IFunction1D, IFunction, FunctionFactory
 import numpy as np
 
+class NoCatgeoryFunction(IFunction1D):
+    
+    def init(self):
+        pass
+
 class Times2(IFunction1D):
     
+    def category(self):
+        return "SimpleFunction"
+
     def init(self):
         self.declareAttribute("IntAtt", 1)
         self.declareAttribute("DoubleAtt", 3.4)
@@ -29,6 +37,18 @@ class IFunction1DTest(unittest.TestCase):
         func = FunctionFactory.createFunction(func_name)
         self.assertTrue(isinstance(func, IFunction1D))
         FunctionFactory.unsubscribe(func_name)
+
+    def test_category_with_no_override_returns_default_category(self):
+        FunctionFactory.subscribe(NoCatgeoryFunction)
+        func = FunctionFactory.createFunction("NoCatgeoryFunction")
+        self.assertEquals("General", func.category())
+        FunctionFactory.unsubscribe("NoCatgeoryFunction")
+
+    def test_category_override_returns_overridden_result(self):
+        FunctionFactory.subscribe(Times2)
+        func = FunctionFactory.createFunction("Times2")
+        self.assertEquals("SimpleFunction", func.category())
+        FunctionFactory.unsubscribe("Times2")
 
     def test_declareAttribute_only_accepts_known_types(self):
         func = Times2()

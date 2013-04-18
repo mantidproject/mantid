@@ -52,6 +52,8 @@ void export_IFunction()
   class_<IFunction, IFunctionAdapter, boost::noncopyable>("IFunction", "Base class for all functions", no_init)
     .def("name", &IFunction::name, "Return the name of the function")
 
+    .def("category", &IFunctionAdapter::category, "Return a semi-colon(;) separated string for the categories this class should belong to. For sub-categories use a \\ separator")
+
     .def("initialize", &IFunction::initialize, "Declares any parameters and attributes on the function")
 
     .def("getCategories", &getCategories, "Returns a list of the categories for an algorithm")

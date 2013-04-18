@@ -18,6 +18,7 @@ set ( TEST_PY_FILES
   IFunction1DTest.py
   IPeaksWorkspaceTest.py
   ITableWorkspaceTest.py
+  JacobianTest.py
   MatrixWorkspaceTest.py
   MDHistoWorkspaceTest.py
   MultipleExperimentInfos.py

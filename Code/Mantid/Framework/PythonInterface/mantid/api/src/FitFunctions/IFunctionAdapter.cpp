@@ -30,6 +30,14 @@ namespace Mantid
     }
 
     /**
+     * Specify a category for the function
+     */
+    const std::string IFunctionAdapter::category() const
+    {
+      return CallMethod0<std::string>::dispatchWithDefaultReturn(getSelf(),"category", IFunction::category());
+    }
+
+    /**
      */
     void IFunctionAdapter::init()
     {

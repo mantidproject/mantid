@@ -45,6 +45,8 @@ namespace Mantid
 
       /// Returns the name of the function
       std::string name() const;
+      /// Specify a category for the function
+      const std::string category() const;
       /// Declare all attributes & parameters
       void init();
 
