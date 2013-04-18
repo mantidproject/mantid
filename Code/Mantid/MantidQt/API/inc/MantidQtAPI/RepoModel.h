@@ -13,6 +13,11 @@ class QLineEdit;
 class QCheckBox; 
 class QTextEdit;
 
+namespace Mantid{
+  namespace Kernel{
+    class Logger;
+  }
+}
 namespace MantidQt
 {
 namespace API
@@ -200,7 +205,7 @@ private:
 private:
     RepoModel( const RepoModel& );
     const RepoModel& operator=( const RepoModel& );
-
+    static Mantid::Kernel::Logger & g_log;
   };
 
 

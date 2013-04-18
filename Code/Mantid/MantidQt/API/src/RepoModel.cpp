@@ -19,6 +19,9 @@ using Mantid::Kernel::ConfigService;
 #include <QGroupBox>
 #include <QDialogButtonBox>
 
+//Initialize the logger
+Mantid::Kernel::Logger & RepoModel::g_log = Mantid::Kernel::Logger::get("RepoModel");
+
 
 /*
   An auxiliary nested class to help RepoModel to rebuild the hierarchical 
@@ -141,10 +144,10 @@ RepoModel::~RepoModel()
 QVariant RepoModel::data(const QModelIndex &index, int role) const
 {
   using namespace Mantid::API;
-    if (!index.isValid())
-        return QVariant();
-    RepoItem *item = static_cast<RepoItem*>(index.internalPointer());
-
+  if (!index.isValid())
+    return QVariant();
+  RepoItem *item = static_cast<RepoItem*>(index.internalPointer());
+  try{
     QString path = item->path();
     Mantid::API::ScriptInfo inf ; 
     Mantid::API::SCRIPTSTATUS status;
@@ -164,7 +167,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
         break;
       }
     }
-
+    
     // return the data for the DecorationRole
     if (role == Qt::DecorationRole){
       if (index.column() == 0){
@@ -199,7 +202,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
         }        
       }        
     }// end decorationRole
-      
+    
     // tool tip role
     if (role == Qt::ToolTipRole){
       if (index.column() == 1){
@@ -224,10 +227,15 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
           break;
         case LOCAL_ONLY:
           return "Click here to share this file with the Mantid community!";
-
+          
         }
       }
     }// end tool tip
+  }catch(Mantid::API::ScriptRepoException & ex){
+    g_log.information() << "ScriptRepository error: " << ex.what() 
+                        << "\n Detail: " << ex.systemError() << std::endl; 
+    // return QVariant
+  }
     return QVariant(); 
 }
 
@@ -300,8 +308,17 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
   
   if (index.column() == 1){ // trigger actions: Download and Upload
     if (action == "Download"){
-      repo_ptr->download(path); // FIXME: deal with exceptions 
-      ret = true;
+      try{
+        repo_ptr->download(path); // FIXME: deal with exceptions 
+        ret = true;
+      }catch(Mantid::API::ScriptRepoException & ex){
+        QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+        g_log.information() << "Download failed " << ex.what() << "\n Detail: " 
+                            << ex.systemError()<< std::endl;    
+        QMessageBox::warning(father, QString("Download %1 Failed!").arg(QString::fromStdString(path)),
+                             ex.what());
+        ret = false;
+      }
     }else if (action == "Upload"){
       QWidget * father = qobject_cast<QWidget*>(QObject::parent());
       UploadForm * form = new UploadForm(QString::fromStdString(path), father);
@@ -320,17 +337,26 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
         settings.setValue("UploadAuthor",form->saveInfo()?form->author():"");
         settings.setValue("UploadSaveInfo",form->saveInfo()); 
 
-        qWarning() << "Uploading... "<< QString::fromStdString(path) << form->comment()
-                   << form->author() << form->email() << endl;         
-        repo_ptr->upload(path, form->comment().toStdString(), 
+        qDebug() << "Uploading... "<< QString::fromStdString(path) << form->comment()
+                   << form->author() << form->email() << endl;
+        try{
+          repo_ptr->upload(path, form->comment().toStdString(), 
                          form->author().toStdString(),
-                         form->email().toStdString());        
+                           form->email().toStdString());
+          ret = true;
+        }catch(Mantid::API::ScriptRepoException & ex){
+          QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+          g_log.information() << "Upload failed " << ex.what() << "\n Detail: " 
+                            << ex.systemError()<< std::endl;    
+          QMessageBox::warning(father, QString("Upload %1 Failed!").arg(QString::fromStdString(path)),
+                             ex.what());
+          ret = false;
+        }
       }else{
-        qWarning() << "Not uploading" << endl; 
+        ret = false; 
       }
       settings.endGroup(); 
       delete form; 
-      ret = true;
     }
    
   }
