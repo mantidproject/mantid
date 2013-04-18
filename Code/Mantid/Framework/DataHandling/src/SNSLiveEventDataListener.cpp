@@ -38,6 +38,7 @@ using namespace Mantid::API;
 // Names for a couple of time series properties
 #define PAUSE_PROPERTY "pause"
 #define SCAN_PROPERTY "scan_index"
+#define PROTON_CHARGE_PROPERTY "proton_charge"
 
 
 // Helper function to get a DateAndTime value from an ADARA packet
@@ -365,8 +366,6 @@ namespace DataHandling
       return false;
     }
 
-    // TODO: Create a log with the pulse time and charge!!  (TimeSeriesProperties)
-
     // Append the events
     g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
     {
@@ -374,6 +373,11 @@ namespace DataHandling
 
       // Timestamp for the events
       Mantid::Kernel::DateAndTime eventTime = timeFromPacket( pkt);
+
+      // Save the pulse charge in the logs (*10 because we want the units to be
+      // picoCulombs, and ADARA sends them out in units of 10pC)
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( PROTON_CHARGE_PROPERTY)
+                    ->addValue( eventTime, pkt.pulseCharge()*10);
 
       // Iterate through each event
       const ADARA::Event *event = pkt.firstEvent();
@@ -918,14 +922,15 @@ namespace DataHandling
     // The numbers in the create() function don't matter - they'll get overwritten
     // down in initWorkspacePart2() when we load the instrument definition.
 
-    // We also know we'll need 2 time series properties on the workspace.  Create them
-    // now (because we may end up adding values to them before we can call
-    // initWorkspacePart2().
+    // We also know we'll need 3 time series properties on the workspace.  Create them
+    // now. (We may end up adding values to the pause and scan properties before we
+    // can call initWorkspacePart2().)
     Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
     m_eventBuffer->mutableRun().addLogData(prop);
     prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
     m_eventBuffer->mutableRun().addLogData(prop);
-
+    prop = new TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY);
+    m_eventBuffer->mutableRun().addLogData(prop);
   }
 
   /// Second part of the workspace initialization
