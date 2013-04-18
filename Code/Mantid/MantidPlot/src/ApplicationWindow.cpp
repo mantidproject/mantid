@@ -9163,8 +9163,7 @@ void ApplicationWindow::fileMenuAboutToShow()
   fileMenu->addAction(actionManageDirs);
   fileMenu->insertSeparator();
   fileMenu->addAction(actionLoadImage);
-  // pulled from Release 2.4.
-  //fileMenu->addAction(actionScriptRepo); 
+  fileMenu->addAction(actionScriptRepo); 
 
   MdiSubWindow *w = activeWindow();
   if (w && w->isA("Matrix"))
