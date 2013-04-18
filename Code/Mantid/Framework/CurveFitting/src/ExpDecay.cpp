@@ -1,3 +1,8 @@
+/*WIKI*
+Exponential decay function is defined by
+:<math> \mbox{Height}\times \exp(-\frac{x}{\mbox{Lifetime}})</math>
+ *WIKI*/
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -17,8 +22,8 @@ DECLARE_FUNCTION(ExpDecay)
 
 ExpDecay::ExpDecay()
 {
-  declareParameter("Height", 1.0);
-  declareParameter("Lifetime", 1.0);
+  declareParameter("Height", 1.0, "Height at time 0");
+  declareParameter("Lifetime", 1.0, "Lifetime of the process");
 }
 
 

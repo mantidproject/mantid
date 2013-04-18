@@ -1,3 +1,7 @@
+/*WIKI*
+Exponential decay for use by Muon scientists defined by
+:<math> \mbox{A}\times \exp(-{Lambda} \times {x}) </math>
+ *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -17,8 +21,8 @@ DECLARE_FUNCTION(ExpDecayMuon)
 
 void ExpDecayMuon::init()
 {
-  declareParameter("A", 0.2);
-  declareParameter("Lambda", 0.2);
+    declareParameter("A", 0.2, "Amplitude at time 0");
+    declareParameter("Lambda", 0.2, "Decay rate");
 }
 
 
