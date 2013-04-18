@@ -46,12 +46,12 @@ public:
 
   void testExec()
   {
-     // Create workspace with paremeterised instrument and put into data store
+     // Create input workspace with paremeterised instrument and put into data store
      MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
      const std::string wsName1("CopyInstParamWs1");
      AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
      dataStore.add(wsName1, ws1);
-     /// Create another workspace with the same instrument and put into data store
+     /// Create output workspace with the same base instrument and put into data store
      MatrixWorkspace_sptr ws2 = WorkspaceFactory::Instance().create( ws1 );
      const std::string wsName2("CopyInstParamWs2");
      dataStore.add(wsName2, ws2);
@@ -61,18 +61,23 @@ public:
      TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("OutputWorkspace", wsName2 ));
      // Get instrument of input workspace and move some detectors
      Geometry::ParameterMap *pmap;
-     pmap = &(ws1->instrumentParameters()); 
+     pmap = &(ws1->instrumentParameters());
      Geometry::Instrument_const_sptr instrument = ws1->getInstrument();
      IComponent_const_sptr det1 =instrument->getDetector(1);
      Geometry::ComponentHelper::moveComponent(*det1, *pmap, V3D(6.0,0.0,0.7), Absolute );
      IComponent_const_sptr det2 =instrument->getDetector(2);
      Geometry::ComponentHelper::moveComponent(*det2, *pmap, V3D(6.0,0.1,0.7), Absolute );
 
+     // Verify that a detector moved in the input workspace has not yet been moved in the output workspace
+     IDetector_const_sptr deto = ws2->getDetector(0);
+     V3D newPos = deto->getPos();
+     TS_ASSERT_DELTA( newPos.X() , 5.0, 0.0001);
+
      // Execute Algorithm
      TS_ASSERT_THROWS_NOTHING(copyInstParam.execute());
      TS_ASSERT( copyInstParam.isExecuted() );
 
-     // Verify that the detectors in the output workspace have been moved as in the input workspace
+     // Verify that the detectors in the output workspace have been moved as in the input workspace before execution
      IDetector_const_sptr deto1 = ws2->getDetector(0);
      int id1 = deto1->getID();
      V3D newPos1 = deto1->getPos();
@@ -92,6 +97,26 @@ public:
 
   void testDifferent_BaseInstrument_Throws()
   {
+    // Create input workspace with parameterised instrument and put into data store
+     MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
+     const std::string wsName1("CopyInstParamWsA");
+     AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
+     dataStore.add(wsName1, ws1);
+     // Create output workspace with another parameterised instrument and put into data store
+     MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
+     const std::string wsName2("CopyInstParamWsB");
+     dataStore.add(wsName2, ws2);
+
+     // Set properties
+     TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("InputWorkspace", wsName1 ));
+     TS_ASSERT_THROWS_NOTHING(copyInstParam.setPropertyValue("OutputWorkspace", wsName2 ));
+
+     // Execute Algorithm, should throw invalid argument exception
+     copyInstParam.setRethrows(true);
+     TS_ASSERT_THROWS(copyInstParam.execute(), std::invalid_argument);
+     TS_ASSERT( !copyInstParam.isExecuted() );
+
+
   }
 
 private:
