@@ -3,3 +3,4 @@
 ## of the plugin types
 ## 
 add_subdirectory( algorithms )
+add_subdirectory( functions )
