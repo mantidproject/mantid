@@ -1198,7 +1198,7 @@ class MantidPyFramework(FrameworkManager):
         
         _mantidsimple.mockup(dir_list)
         pyalg_loader = PyAlgLoader()
-        plugins = pyalg_loader.load_modules(refresh=False)
+        plugins = pyalg_loader.load_modules(dir_list, refresh=False)
         new_attrs = _mantidsimple.translate() # Make sure the PythonAlgorithm functions are written
         _sync_attrs(_mantidsimple, new_attrs,plugins)
         
@@ -1424,11 +1424,10 @@ class PyAlgLoader(object):
 
     __CHECKLINES__ = 100
     
-    def load_modules(self, refresh=False):
+    def load_modules(self, dir_list, refresh=False):
         """
         Import Python modules containing Python algorithms
         """
-        dir_list = mtd.getConfigProperty("pythonalgorithms.directories").split(';')
         if len(dir_list) == 0: 
             mtd.sendLogMessage('PyAlgLoader.load_modules: no python algorithm directory found')
             return

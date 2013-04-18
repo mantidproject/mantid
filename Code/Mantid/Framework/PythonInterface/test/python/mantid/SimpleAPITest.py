@@ -15,7 +15,7 @@ class TemporaryPythonAlgorithm(object):
     def __init__(self, name, code):
         from mantid import config
         
-        plugin_dirs = config['pythonalgorithms.directories'].split(";")
+        plugin_dirs = config['python.plugins.directories'].split(";")
         if len(plugin_dirs) == 0:
             raise RuntimeError("No Python algorithm directories defined")
         
