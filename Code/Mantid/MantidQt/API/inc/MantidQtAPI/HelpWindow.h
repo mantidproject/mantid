@@ -19,6 +19,7 @@ public:
     void showAlgorithm(const std::string &name=std::string(), const int version=-1);
     void showAlgorithm(const QString &name, const int version=-1);
     void showFitFunction(const std::string &name=std::string());
+    void hostShuttingDown();
 
 private:
     friend struct Mantid::Kernel::CreateUsingNew<HelpWindowImpl>;

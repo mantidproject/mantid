@@ -114,6 +114,21 @@ void HelpWindowImpl::showFitFunction(const std::string &name)
 }
 
 /**
+ * Can be called by the host process to indicate that it will
+ * close soon. This closes the help window & releases the QProcess
+ */
+void HelpWindowImpl::hostShuttingDown()
+{
+  if(m_process)
+  {
+    m_process->kill();
+    // Delete
+    m_process.reset();
+  }
+}
+
+
+/**
  * Start up the help browser in a separate process.
  *
  * This will only do something if the browser is not already
