@@ -705,9 +705,16 @@ public:
     delete p;
   }
 
-  /*
-   * Test firstTime, lastTime, firstValue and lastValue
-   */
+  void test_getSingleValue_emptyPropertyThrows()
+  {
+    const TimeSeriesProperty<int> empty("Empty");
+
+    DateAndTime time("2013-01-30T16:17:23");
+    TS_ASSERT_THROWS(empty.getSingleValue(time), std::runtime_error);
+    int i;
+    TS_ASSERT_THROWS(empty.getSingleValue(time,i), std::runtime_error);
+  }
+
   void test_firstLastTimeValue()
   {
     TimeSeriesProperty<double> * p = createDoubleTSP();
@@ -730,6 +737,16 @@ public:
     delete p;
 
     return;
+  }
+
+  void test_firstLastTimeValue_emptyPropertyThrows()
+  {
+    const TimeSeriesProperty<int> empty("Empty");
+
+    TS_ASSERT_THROWS(empty.firstTime(), std::runtime_error);
+    TS_ASSERT_THROWS(empty.lastTime(), std::runtime_error);
+    TS_ASSERT_THROWS(empty.firstValue(), std::runtime_error);
+    TS_ASSERT_THROWS(empty.lastValue(), std::runtime_error);
   }
 
   void test_min_max_value()
