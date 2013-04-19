@@ -420,6 +420,8 @@ def mockup(directories):
         directories = [directories]
     for top_dir in directories:
         for root, dirs, filenames in os.walk(top_dir):
+            if 'functions' in root: # Functions are solely for new API
+                continue
             create_fake_functions(filenames)
 
 #------------------------------------------------------------------------------
