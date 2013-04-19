@@ -48,20 +48,23 @@ def getWSprefix(wsname,runfile=None):
         runfile = wsname
     ws = mtd[wsname]
     facility = config['default.facility']
-    if facility == 'ILL':
-        instr = ws.getInstrument().getName()
-        logger.notice('Facility is '+facility)
-        prefix = instr + '_' + wsname[:-3]
-    else:		
+    ws_run = ws.getRun()
+    if 'facility' in ws_run:
+        facility = ws_run.getLogData('facility').value
+    if facility == 'ILL':		
+        inst = ws.getInstrument().getName()
+        runNo = ws.getRun()['run_number'].value
+        run_name = inst + '_'+ runNo
+    else:
         (instr, run) = getInstrRun(runfile)
         run_name = instr + run
-        try:
-            analyser = ws.getInstrument().getStringParameter('analyser')[0]
-            reflection = ws.getInstrument().getStringParameter('reflection')[0]
-        except IndexError:
-            analyser = ''
-            reflection = ''
-        prefix = run_name + '_' + analyser + reflection + '_'
+    try:
+        analyser = ws.getInstrument().getStringParameter('analyser')[0]
+        reflection = ws.getInstrument().getStringParameter('reflection')[0]
+    except IndexError:
+        analyser = ''
+        reflection = ''
+    prefix = run_name + '_' + analyser + reflection + '_'
     return prefix
 
 def getEfixed(workspace, detIndex=0):
