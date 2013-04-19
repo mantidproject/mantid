@@ -846,7 +846,7 @@ namespace Mantid
     {
       if (m_values.size()==0)
       {
-        const std::string error("lastTime(): TimeSeriesProperty is empty");
+        const std::string error("lastTime(): TimeSeriesProperty '" + name() + "' is empty");
         g_log.debug(error);
         throw std::runtime_error(error);
       }
@@ -864,7 +864,7 @@ namespace Mantid
     {
       if (m_values.size() == 0)
       {
-        const std::string error("firstValue(): TimeSeriesProperty is empty");
+        const std::string error("firstValue(): TimeSeriesProperty '" + name() + "' is empty");
         g_log.debug(error);
         throw std::runtime_error(error);
       }
@@ -882,7 +882,7 @@ namespace Mantid
     {
       if (m_values.size()==0)
       {
-        const std::string error("firstTime(): TimeSeriesProperty is empty");
+        const std::string error("firstTime(): TimeSeriesProperty '" + name() + "' is empty");
         g_log.debug(error);
         throw std::runtime_error(error);
       }
@@ -901,7 +901,7 @@ namespace Mantid
     {
       if (m_values.size() == 0)
       {
-        const std::string error("lastValue(): TimeSeriesProperty is empty");
+        const std::string error("lastValue(): TimeSeriesProperty '" + name() + "' is empty");
         g_log.debug(error);
         throw std::runtime_error(error);
       }
@@ -1117,7 +1117,7 @@ namespace Mantid
     {
       if (m_values.size() == 0)
       {
-        const std::string error("getSingleValue(): TimeSeriesProperty is empty");
+        const std::string error("getSingleValue(): TimeSeriesProperty '" + name() + "' is empty");
         g_log.debug(error);
         throw std::runtime_error(error);
       }
@@ -1176,7 +1176,7 @@ namespace Mantid
     {
       if (m_values.size() == 0)
       {
-        const std::string error("getSingleValue(): TimeSeriesProperty is empty");
+        const std::string error("getSingleValue(): TimeSeriesProperty '" + name() + "' is empty");
         g_log.debug(error);
         throw std::runtime_error(error);
       }
@@ -1243,7 +1243,7 @@ namespace Mantid
       // 0. Throw exception
       if (m_values.size() == 0)
       {
-        const std::string error("nthInterval(): TimeSeriesProperty is empty");
+        const std::string error("nthInterval(): TimeSeriesProperty '" + name() + "' is empty");
         g_log.debug(error);
         throw std::runtime_error(error);
       }
@@ -1378,7 +1378,7 @@ namespace Mantid
       // 1. Throw error if property is empty
       if (m_values.size() == 0)
       {
-        const std::string error("nthValue(): TimeSeriesProperty is empty");
+        const std::string error("nthValue(): TimeSeriesProperty '" + name() + "' is empty");
         g_log.debug(error);
         throw std::runtime_error(error);
       }
@@ -1442,7 +1442,7 @@ namespace Mantid
 
       if (m_values.size() == 0)
       {
-        const std::string error("nthTime(): TimeSeriesProperty is empty");
+        const std::string error("nthTime(): TimeSeriesProperty '" + name() + "' is empty");
         g_log.debug(error);
         throw std::runtime_error(error);
       }
