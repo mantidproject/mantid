@@ -3,7 +3,7 @@ Suggest possible time independent background range for CNCS. It works for incide
 This range is moved around if a prompt pulse is in this interval, or it goes below the TOF frame minimum. 
 *WIKI*"""
 
-from mantid.api import PythonAlgorithm, registerAlgorithm
+from mantid.api import PythonAlgorithm, AlgorithmFactory
 import mantid.simpleapi 
 from mantid.kernel import FloatBoundedValidator,Direction
 from numpy import sqrt,floor
@@ -89,4 +89,4 @@ class SuggestTibCNCS(PythonAlgorithm):
         return 
     
     
-registerAlgorithm(SuggestTibCNCS)
+AlgorithmFactory.subscribe(SuggestTibCNCS)
