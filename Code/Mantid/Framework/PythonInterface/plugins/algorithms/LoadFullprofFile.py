@@ -24,7 +24,7 @@ the peak profile parameters include Alpha, Beta, Sigma, centre and height.
 This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in the wiki page of [[LeBailFit]].
 
 *WIKI*"""
-from mantid.api import PythonAlgorithm, registerAlgorithm, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction, MatrixWorkspaceProperty, WorkspaceProperty
+from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction, MatrixWorkspaceProperty, WorkspaceProperty
 from mantid.kernel import Direction, StringListValidator
 
 import mantid.simpleapi as api
@@ -311,5 +311,5 @@ class LoadFullprofFile(PythonAlgorithm):
 
 
 # Register algorithm with Mantid
-registerAlgorithm(LoadFullprofFile)
-
+#registerAlgorithm(LoadFullprofFile)
+AlgorithmFactory.subscribe(LoadFullprofFile)
