@@ -72,7 +72,8 @@ public:
 			return;
 
 
-		TS_ASSERT_DELTA(outWS->readY(0).front(), inWS->readY(0).front(), 0.3);
+		TS_ASSERT_DELTA(outWS->readY(0).front(), inWS->readY(0).front(), 0.2);
+		TS_ASSERT_DELTA(outWS->readY(0).back(), inWS->readY(0).back(), 0.2);
 
 		// Remove workspace from the data service.
 		AnalysisDataService::Instance().remove(m_outWSName);
@@ -83,22 +84,34 @@ private:
 	const std::string m_inWSName, m_outWSName;
 
 	void createInputWorkSpace() {
-		//createWorkspace2D();
-		DataObjects::Workspace2D_sptr dataws =
-				WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(2, 10, 20);
-		dataws->getAxis(0)->setUnit("Energy");
+		int numBanks = 1;
+		int numPixels = 10;
+		int numBins = 20;
 
+		DataObjects::Workspace2D_sptr dataws =
+				WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+						numBanks, numPixels, numBins);
+
+		//WorkspaceCreationHelper::addNoise(dataws,10);
+		// np.linspace(2,5,21)
+		static const double arr[] = {2.  ,  2.15,  2.3 ,  2.45,  2.6 ,  2.75,  2.9 ,  3.05,  3.2 ,
+		        3.35,  3.5 ,  3.65,  3.8 ,  3.95,  4.1 ,  4.25,  4.4 ,  4.55,
+		        4.7 ,  4.85,  5.  };
+		std::vector<double> vec (arr, arr + sizeof(arr) / sizeof(arr[0]) );
+
+		for (size_t wi = 0; wi < dataws->getNumberHistograms(); wi++) {
+			dataws->setX(wi, vec);
+		}
+		// WorkspaceCreationHelper::DisplayDataX(dataws);
+
+		dataws->getAxis(0)->setUnit("Energy");
 		dataws->mutableRun().addProperty("Ei",
 				boost::lexical_cast<std::string>(m_Ei));
 		dataws->instrumentParameters().addString(
-				dataws->getInstrument()->getChild(0).get(), "formula_eff0",
-				"exp(-0.0565/sqrt(e0))*(1.-exp(-3.284/sqrt(e0)))");
-		dataws->instrumentParameters().addString(
 				dataws->getInstrument()->getChild(0).get(), "formula_eff",
-				"1.0/eff0*exp(-0.0565/sqrt(e))*(1.0-exp(-3.284/sqrt(e)))");
+				"exp(-0.0565/sqrt(e))*(1.0-exp(-3.284/sqrt(e)))"); //IN5
 
 		API::AnalysisDataService::Instance().addOrReplace(m_inWSName, dataws);
-
 	}
 
 };

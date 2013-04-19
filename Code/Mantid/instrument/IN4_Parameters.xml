@@ -16,11 +16,8 @@
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser 
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
 			operators -->
-		<parameter name="formula_eff0" type="string">
-			<value val="0.951*exp(-0.0887/sqrt(e0))*(1.0-exp(-5.597/sqrt(e0)))" />
-		</parameter>
 		<parameter name="formula_eff" type="string">
-			<value val="0.951/eff0*exp(-0.0887/sqrt(e))*(1.0-exp(-5.597/sqrt(e)))" />
+			<value val="0.951*exp(-0.0887/sqrt(e))*(1.0-exp(-5.597/sqrt(e)))" />
 		</parameter>
 
 	</component-link>

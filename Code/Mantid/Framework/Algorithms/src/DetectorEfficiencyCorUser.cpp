@@ -1,5 +1,14 @@
 /*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+This algorithm will correct detector efficiency according to the ILL INX program for time-of-flight data reduction.
+
+A formula named "formula_eff" must be defined in the instrument parameters file.
+
+The output data will be corrected as:
+ <math>y = \frac{y}{eff}</math>
+where <math>eff</math> will be <math>eff = \frac{f(Ei - \Delta E)}{f(E_i)}</math>
+
+The function <math>f</math> is defined as "formula_eff". To date this has been implemented for ILL IN4, IN5 and IN6.
+
  *WIKI*/
 
 #include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
@@ -7,6 +16,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidGeometry/muParser_Silent.h"
+#include <ctime>
 
 namespace Mantid {
 namespace Algorithms {
@@ -77,22 +87,20 @@ void DetectorEfficiencyCorUser::init() {
 			"The energy of neutrons leaving the source.");
 }
 
-
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void DetectorEfficiencyCorUser::exec() {
 
-	// get input properties
+	// get input properties (WSs, Ei)
 	retrieveProperties();
 
-	// parse parameter.xml file
-	double eff0 = calculateEff0();
+	// get Efficiency formula from the IDF
+	const std::string effFormula = getValFromInstrumentDef("formula_eff");
 
-	// get eff formula
-	std::string effFormula = getValFromInstrumentDef("formula_eff");
+	// Calculate Efficiency for E = Ei
+	const double eff0 = calculateFormulaValue(effFormula, m_Ei);
 
-	// correct ws input
 	const size_t numberOfChannels = this->m_inputWS->blocksize();
 	// Calculate the number of spectra in this workspace
 	const int numberOfSpectra = static_cast<int>(this->m_inputWS->size()
@@ -101,7 +109,7 @@ void DetectorEfficiencyCorUser::exec() {
 	int64_t numberOfSpectra_i = static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
 	// Loop over the histograms (detector spectra)
-	PARALLEL_FOR2(m_inputWS,m_outputWS)
+	PARALLEL_FOR2(m_outputWS,m_inputWS)
 	for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
 		PARALLEL_START_INTERUPT_REGION
 
@@ -113,16 +121,19 @@ void DetectorEfficiencyCorUser::exec() {
 		const MantidVec& eIn = m_inputWS->readE(i);
 		m_outputWS->setX(i, m_inputWS->refX(i));
 
-		MantidVec effVec = calculateEff(eff0, effFormula, xIn);
+		// TAKES TIME!!!
+		const MantidVec effVec = calculateEfficiency(eff0, effFormula, xIn);
+
 		// run this outside to benefit from parallel for
 		applyDetEfficiency(numberOfChannels, yIn, eIn, effVec, yOut, eOut);
 
 		prog.report("Detector Efficiency correction...");
+
 	PARALLEL_END_INTERUPT_REGION
-} //end for i
+	} //end for i
 PARALLEL_CHECK_INTERUPT_REGION
 
-this->setProperty("OutputWorkspace", this->m_outputWS);
+	this->setProperty("OutputWorkspace", this->m_outputWS);
 
 }
 
@@ -148,101 +159,106 @@ void DetectorEfficiencyCorUser::applyDetEfficiency(
 
 }
 /**
- * Calculate detector efficiency Eff0 : detector efficiency at the elastic peak
- * Parse the IDF formula_eff0 parameter name and  calculate the value
- * @return detector efficiency Eff0
+ * Calculate the value of a formula
+ * @param formula :: Formula
+ * @param energy :: value to use in the formula
+ * @return value calculated
  */
-double DetectorEfficiencyCorUser::calculateEff0() {
+double DetectorEfficiencyCorUser::calculateFormulaValue(
+		const std::string &formula, double energy) {
+	try {
+		mu::Parser p;
+		p.DefineVar("e", &energy);
+		p.SetExpr(formula);
+		double eff = p.Eval();
+		return eff;
 
-// get formula: <parameter name="formula_eff0" type="string">
-// <value val="exp(-0.0565/sqrt(e0))*(1.-exp(-3.284/sqrt(e0)))" />
-
-std::string formula = getValFromInstrumentDef("formula_eff0");
-
-try {
-	mu::Parser p;
-	p.DefineVar("e0", &m_Ei);
-	p.SetExpr(formula);
-	double eff0 = p.Eval();
-	//g_log.debug() <<"e0 = " << m_Ei << " : eff0 = " << eff0 << "\n";
-	return eff0;
-
-} catch (mu::Parser::exception_type &e) {
-	throw Kernel::Exception::InstrumentDefinitionError(
-			"Error calculating Eff0 from IDF. Muparser error message is: "
-					+ e.GetMsg());
+	} catch (mu::Parser::exception_type &e) {
+		throw Kernel::Exception::InstrumentDefinitionError(
+				"Error calculating formula from string. Muparser error message is: "
+						+ e.GetMsg());
+	}
 }
-}
+
+//MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
+//		const std::string& formula, const MantidVec& xIn) {
+//
+//	MantidVec effOut(xIn.size() - 1); // x are bins and have more one value than y
+//
+//	MantidVec::const_iterator xIn_it = xIn.begin();
+//	MantidVec::iterator effOut_it = effOut.begin();
+//	for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
+//		double deltaE = std::fabs((*xIn_it + *(xIn_it + 1)) / 2 - m_Ei);
+//		double e = m_Ei - deltaE;
+//
+//		double eff = calculateFormulaValue(formula, e);
+//		*effOut_it = eff / eff0;
+//	}
+//	return effOut;
+//}
+
 /**
  * Calculate detector efficiency given a formula, the efficiency at the elastic line,
  * and a vector with energies.
+ *  Efficiency = f(Ei-DeltaE) / f(Ei)
  * Hope all compilers supports the NRVO (otherwise will copy the output vector)
  * @param eff0 :: calculated eff0
  * @param formula :: formula to calculate efficiency (parsed from IDF)
  * @param xIn :: Energy bins vector (X axis)
  * @return a vector with the efficiencies
  */
-MantidVec DetectorEfficiencyCorUser::calculateEff(double eff0,
-	std::string formula, const MantidVec& xIn) {
-
-// get formula: <parameter name="formula_eff" type="string">
-// <value val="0.951/eff0*exp(-0.0887/sqrt(e))*(1.0-exp(-5.597/sqrt(e)))" />
-
-try {
-	double e = 0; //dummyValue
-	mu::Parser p;
-	p.DefineVar("eff0", &eff0);
-	p.DefineVar("e", &e);
-	p.SetExpr(formula);
+MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
+		const std::string& formula, const MantidVec& xIn) {
 
 	MantidVec effOut(xIn.size() - 1); // x are bins and have more one value than y
 
-	MantidVec::const_iterator xIn_it = xIn.begin();
-	MantidVec::iterator effOut_it = effOut.begin();
-	for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
-		e = (*xIn_it + *(xIn_it + 1)) / 2; // change the value of e in the expression (average value in a bin
+	try {
+		double e;
+		mu::Parser p;
+		p.DefineVar("e", &e);
+		p.SetExpr(formula);
 
-		//g_log.debug() << i << " eff0=" << eff0 << " e=" << e <<  " xIn_it=" << *xIn_it << " *(xIn_it + 1)=" <<  *(xIn_it + 1);
-		double eff = p.Eval(); // eval the expression
-		//g_log.debug() << "eff = " << eff << "\n";
-		*effOut_it = eff;
+		MantidVec::const_iterator xIn_it = xIn.begin();
+		MantidVec::iterator effOut_it = effOut.begin();
+		for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
+			double deltaE = std::fabs((*xIn_it + *(xIn_it + 1)) / 2 - m_Ei);
+			e =  std::fabs(m_Ei - deltaE);
+			double eff = p.Eval();
+
+			*effOut_it = eff / eff0;
+		}
+		return effOut;
+
+
+	} catch (mu::Parser::exception_type &e) {
+		throw Kernel::Exception::InstrumentDefinitionError(
+				"Error calculating formula from string. Muparser error message is: "
+						+ e.GetMsg());
 	}
 
-//		for (auto i: effOut)
-//			std::cout << i << " ";
-//		std::cout << "\n";
-
-	return effOut;
-
-} catch (mu::Parser::exception_type &e) {
-	throw Kernel::Exception::InstrumentDefinitionError(
-			"Error calculating Eff0 from IDF. Muparser error message is: "
-					+ e.GetMsg());
-}
-}
-
+	}
 /**
  * Returns the value associated to a parameter name in the IDF
  * @param parameterName :: parameter name in the IDF
  * @return the value associated to the parameter name
  */
 std::string DetectorEfficiencyCorUser::getValFromInstrumentDef(
-	std::string parameterName) {
+		const std::string& parameterName) {
 
-const ParameterMap& pmap = m_inputWS->constInstrumentParameters();
-Instrument_const_sptr instrument = m_inputWS->getInstrument();
-Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(),
-		parameterName);
-if (par) {
-	std::string ret = par->asString();
-	//g_log.debug() << "Parsed parameter " << parameterName << ": " << ret << "\n";
-	return ret;
-} else {
-	throw Kernel::Exception::InstrumentDefinitionError(
-			"There is no <" + parameterName
-					+ "> in the instrument definition!");
-}
-
+	const ParameterMap& pmap = m_inputWS->constInstrumentParameters();
+	Instrument_const_sptr instrument = m_inputWS->getInstrument();
+	Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(),
+			parameterName);
+	if (par) {
+		std::string ret = par->asString();
+		g_log.debug() << "Parsed parameter " << parameterName << ": " << ret
+				<< "\n";
+		return ret;
+	} else {
+		throw Kernel::Exception::InstrumentDefinitionError(
+				"There is no <" + parameterName
+						+ "> in the instrument definition!");
+	}
 }
 
 /** Loads and checks the values passed to the algorithm
@@ -251,31 +267,31 @@ if (par) {
  */
 void DetectorEfficiencyCorUser::retrieveProperties() {
 
-// Get the workspaces
-m_inputWS = this->getProperty("InputWorkspace");
+	// Get the workspaces
+	m_inputWS = this->getProperty("InputWorkspace");
 
-m_outputWS = this->getProperty("OutputWorkspace");
+	m_outputWS = this->getProperty("OutputWorkspace");
 
-// If input and output workspaces are not the same, create a new workspace for the output
-if (m_outputWS != this->m_inputWS) {
-	m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
-}
-
-// these first three properties are fully checked by validators
-m_Ei = this->getProperty("IncidentEnergy");
-// If we're not given an Ei, see if one has been set.
-if (m_Ei == EMPTY_DBL()) {
-	Mantid::Kernel::Property* prop = m_inputWS->run().getProperty("Ei");
-	double val;
-	if (!prop || !Strings::convert(prop->value(), val)) {
-		throw std::invalid_argument(
-				"No Ei value has been set or stored within the run information.");
+	// If input and output workspaces are not the same, create a new workspace for the output
+	if (m_outputWS != this->m_inputWS) {
+		m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
 	}
-	m_Ei = val;
-	g_log.debug() << "Using stored Ei value " << m_Ei << "\n";
-} else {
-	g_log.debug() << "Using user input Ei value: " << m_Ei << "\n";
-}
+
+	// these first three properties are fully checked by validators
+	m_Ei = this->getProperty("IncidentEnergy");
+	// If we're not given an Ei, see if one has been set.
+	if (m_Ei == EMPTY_DBL()) {
+		Mantid::Kernel::Property* prop = m_inputWS->run().getProperty("Ei");
+		double val;
+		if (!prop || !Strings::convert(prop->value(), val)) {
+			throw std::invalid_argument(
+					"No Ei value has been set or stored within the run information.");
+		}
+		m_Ei = val;
+		g_log.debug() << "Using stored Ei value " << m_Ei << "\n";
+	} else {
+		g_log.debug() << "Using user input Ei value: " << m_Ei << "\n";
+	}
 }
 
 }

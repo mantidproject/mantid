@@ -9,10 +9,10 @@ namespace Algorithms {
 
 /** DetectorEfficiencyCorUser :
 
- This algorithm will calculate the detector efficiency according to the ILL INX program for time-of-fligh
+ This algorithm will calculate the detector efficiency according to the ILL INX program for time-of-flight
  data reduction.
 
- Both formula_eff0 and formula_eff must be defined in the instrument parameters file.
+ Formula_eff must be defined in the instrument parameters file.
 
 
  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -49,9 +49,11 @@ private:
 	void init();
 	void exec();
 	void retrieveProperties();
-	double calculateEff0();
-	std::string getValFromInstrumentDef(std::string);
-	MantidVec calculateEff(double, std::string, const MantidVec&);
+	double calculateFormulaValue(const std::string&,double);
+	MantidVec calculateEfficiency(double, const std::string&, const MantidVec&);
+
+	std::string getValFromInstrumentDef(const std::string&);
+
 	void applyDetEfficiency(const size_t numberOfChannels,
 			const MantidVec& yIn, const MantidVec& eIn, const MantidVec& effVec,
 			MantidVec& yOut, MantidVec& eOut);
