@@ -82,15 +82,15 @@ set ( other_libs ${bundle}/Contents/MacOS/libMantidPythonAPI.so
 
 set ( dirs "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@" "@CMAKE_LIBRARY_PATH@" /Library/Frameworks /opt/intel/lib )
 
-#set(QT_QTCLUCENE_LIBRARY "@QT_QTCLUCENE_LIBRARY@")
-#if(QT_QTCLUCENE_LIBRARY)
-#  foreach(i ${QT_QTCLUCENE_LIBRARY})
-#    if(i MATCHES ".*\\.dylib$")
-#      get_filename_component(qtlucene_lib_path "${i}" PATH)
-#      list(APPEND other_libs ${qtlucene_lib_path})
-#    endif()
-#  endforeach(i)
-#endif()
+set(QT_QTCLUCENE_LIBRARY "@QT_QTCLUCENE_LIBRARY@")
+if(QT_QTCLUCENE_LIBRARY)
+  foreach(i ${QT_QTCLUCENE_LIBRARY})
+    if(i MATCHES ".*\\.dylib$")
+      get_filename_component(qtlucene_lib_path "${i}" PATH)
+      list(APPEND dirs ${qtlucene_lib_path})
+    endif()
+  endforeach(i)
+endif()
 
 fixup_bundle ( "${bundle}" "${other_libs}" "${dirs}" ) # This will fix up the dependencies for the hard dependencies: MantidKernel etc
 
