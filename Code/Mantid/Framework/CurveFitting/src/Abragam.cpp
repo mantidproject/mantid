@@ -1,3 +1,7 @@
+/*WIKI*
+Abragam fitting function for use by Muon scientists defined by
+:<math> \mbox{A}\times cos( 2 \pi \times {Omega} \times {x} + {Phi} ) \times \exp(-{Sigma}^2 \times Tau^2 \times {x}^2 \times ( exp ( {x} / Tau ) - 1 + {x} / Tau ) ) </math>
+ *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -18,11 +22,11 @@ DECLARE_FUNCTION(Abragam)
 
 void Abragam::init()
 {
-  declareParameter("A", 0.2); 
-  declareParameter("Omega", 0.5); 
-  declareParameter("Phi", 0); 
-  declareParameter("Sigma", 1); 
-  declareParameter("Tau",1); 
+  declareParameter("A", 0.2, "Amplitude");
+  declareParameter("Omega", 0.5, "Angular Frequency of oscillation");
+  declareParameter("Phi", 0, "Phase of oscillation at 0 (in Radians)");
+  declareParameter("Sigma", 1, "Decay rate?");
+  declareParameter("Tau",1, "?");
 }
 
 

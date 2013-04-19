@@ -1,3 +1,8 @@
+/*WIKI*
+Oscillation exponential decay function is defined by
+:<math> \mbox{A}\times \exp(-{Lambda} \times {x}) \times cos( 2 \pi \times {Frequency} \times {x} + {Phi} ) </math>
+ *WIKI*/
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -18,10 +23,10 @@ DECLARE_FUNCTION(ExpDecayOsc)
 
 void ExpDecayOsc::init()
 {
-   declareParameter("A", 0.2); 
-   declareParameter("Lambda", 0.2); 
-   declareParameter("Frequency", 0.1); 
-   declareParameter("Phi", 0.0); 
+   declareParameter("A", 0.2, "Amplitude at time 0");
+   declareParameter("Lambda", 0.2, "Decay rate");
+   declareParameter("Frequency", 0.1, "Frequency of oscillation");
+   declareParameter("Phi", 0.0, "Phase of oscillation at 0 (in Radians)");
 }
 
 
