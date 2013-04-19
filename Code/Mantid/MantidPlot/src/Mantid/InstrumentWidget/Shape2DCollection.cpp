@@ -42,6 +42,7 @@ void Shape2DCollection::draw(QPainter& painter) const
   QList<Shape2D*> nonscalable;
   foreach(Shape2D* shape,m_shapes)
   {
+    if ( !shape->isVisible() ) continue;
     if (shape->isScalable())
     {
       scalable << shape;
@@ -583,6 +584,17 @@ void Shape2DCollection::setCurrentBoundingRectReal(const QRectF& rect)
 {
   if (!m_currentShape) return;
   m_currentShape->setBoundingRect(rect);
+}
+
+/**
+  * Change border color.
+  */
+void Shape2DCollection::changeBorderColor(const QColor &color)
+{
+    foreach(Shape2D* shape,m_shapes)
+    {
+        shape->setColor( color );
+    }
 }
 
 /**

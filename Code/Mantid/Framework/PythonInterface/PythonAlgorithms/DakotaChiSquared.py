@@ -2,7 +2,7 @@
 Compare two nexus files containing matrix workspaces and output chi squared into a file
 *WIKI*"""
 
-from mantid.api import PythonAlgorithm, registerAlgorithm,WorkspaceProperty
+from mantid.api import PythonAlgorithm, registerAlgorithm,MatrixWorkspaceProperty,PropertyMode
 from mantid.kernel import Direction,IntBoundedValidator,FloatBoundedValidator
 import mantid.simpleapi 
 import mantid
@@ -32,6 +32,7 @@ class DakotaChiSquared(PythonAlgorithm):
 	fout=mantid.api.FileProperty("OutputFile","",mantid.api.FileAction.Save,".xml")
         self.declareProperty(fout,"Output filename containing chi^2.")
 	self.declareProperty("ChiSquared",0.0,Direction.Output)
+	self.declareProperty(MatrixWorkspaceProperty("ResidualsWorkspace", "",Direction.Output,PropertyMode.Optional), "The name of the workspace that will contain residuals.")
         
         return
     
@@ -57,10 +58,15 @@ class DakotaChiSquared(PythonAlgorithm):
 	if((__w1.blocksize()!=__w2.blocksize()) or (__w1.getNumberHistograms()!=__w2.getNumberHistograms())):
 		mantid.kernel.logger.error('The file sizes are different') 
 		raise ValueError( 'The file sizes are different')
-
+	
 	#calculate chi^2
-	__diff=__w1-__w2
-	__soe=mantid.simpleapi.SignalOverError(__diff)
+	soeName = self.getPropertyValue("ResidualsWorkspace")
+	if (len(soeName)>0): 
+		mantid.simpleapi.SignalOverError(__w1-__w2,OutputWorkspace=soeName)	
+		self.setProperty("ResidualsWorkspace",soeName) 
+		__soe=mantid.mtd[soeName]
+	else:
+		__soe=mantid.simpleapi.SignalOverError(__w1-__w2)
 	__soe2=__soe*__soe
 	__soe2=mantid.simpleapi.ReplaceSpecialValues(__soe2,0,0,0,0)
 	
@@ -73,14 +79,13 @@ class DakotaChiSquared(PythonAlgorithm):
 	f.close()
 
         self.setProperty("ChiSquared",chisquared)
-	
+  	
+
 	#cleanup	
 	mantid.simpleapi.DeleteWorkspace(__w1.getName())
 	mantid.simpleapi.DeleteWorkspace(__w2.getName())
-	mantid.simpleapi.DeleteWorkspace(__diff.getName())
-	mantid.simpleapi.DeleteWorkspace(__soe.getName())
 	mantid.simpleapi.DeleteWorkspace(__soe2.getName())
-        return 
-    
+	if (len(soeName)==0): 
+   		mantid.simpleapi.DeleteWorkspace(__soe.getName())
     
 registerAlgorithm(DakotaChiSquared)

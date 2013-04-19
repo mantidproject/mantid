@@ -115,10 +115,10 @@ void SassenaFFT::exec()
 
   // Transform the X-axis to appropriate dimensions
   // We assume the units of the intermediate scattering function are in picoseconds
-  // The resulting frequency unit is in micro-eV, thus use m_ps2ueV
+  // The resulting frequency unit is in mili-eV, thus use m_ps2meV
   API::IAlgorithm_sptr scaleX = this->createChildAlgorithm("ScaleX");
   scaleX->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace",sqw);
-  scaleX->setProperty<double>("Factor", m_ps2ueV);
+  scaleX->setProperty<double>("Factor", m_ps2meV);
   scaleX->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
   scaleX->executeAsChildAlg();
 
@@ -137,10 +137,19 @@ void SassenaFFT::exec()
   }
 
   // Set the Energy unit for the X-axis
-  sqw->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Energy");
+  sqw->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("DeltaE");
 
-  // Add to group workspace
-  gws->add( sqwName );
+  // Add to group workspace, except if we are replacing the workspace. In this case, the group workspace
+  // is already notified of the changes by the analysis data service.
+  if(!gws->contains(sqwName))
+  {
+    gws->add( sqwName );
+  }
+  else
+  {
+    this->g_log.information("Workspace "+sqwName+" replaced with new contents");
+  }
+
 }
 
 } // namespacce Mantid

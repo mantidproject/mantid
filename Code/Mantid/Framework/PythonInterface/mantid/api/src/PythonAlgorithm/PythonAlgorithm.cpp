@@ -10,15 +10,15 @@ namespace Mantid
   {
 
     /**
-     * Declare a preconstructed property
+     * Declare a preconstructed property.
      * @param prop :: A pointer to a property
      * @param doc :: An optional doc string
      */
-    void PythonAlgorithm::declareProperty(Kernel::Property *prop, const std::string & doc)
+    void PythonAlgorithm::declarePyAlgProperty(Kernel::Property *prop, const std::string & doc)
     {
       // We need to clone the property so that python doesn't own the object that gets inserted
       // into the manager
-      Algorithm::declareProperty(prop->clone(), doc);
+      this->declareProperty(prop->clone(), doc);
     }
 
     /**
@@ -29,9 +29,9 @@ namespace Mantid
      * @param doc :: The documentation string
      * @param direction :: The direction of the property
      */
-    void PythonAlgorithm::declareProperty(const std::string & name, const boost::python::object & defaultValue,
-                                          const boost::python::object & validator,
-                                          const std::string & doc, const int direction)
+    void PythonAlgorithm::declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+                                               const boost::python::object & validator,
+                                               const std::string & doc, const int direction)
     {
       this->declareProperty(Registry::PropertyWithValueFactory::create(name, defaultValue, validator, direction), doc);
     }
@@ -43,8 +43,8 @@ namespace Mantid
      * @param doc :: The documentation string
      * @param direction :: The direction of the property
      */
-    void PythonAlgorithm::declareProperty(const std::string & name, const boost::python::object & defaultValue,
-                                          const std::string & doc, const int direction)
+    void PythonAlgorithm::declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+                                               const std::string & doc, const int direction)
     {
       this->declareProperty(Registry::PropertyWithValueFactory::create(name, defaultValue, direction), doc);
     }
@@ -55,10 +55,10 @@ namespace Mantid
     * @param defaultValue :: A default value for the property. The type is mapped to a C++ type
     * @param direction :: The direction of the property
     */
-    void PythonAlgorithm::declareProperty(const std::string & name, const boost::python::object & defaultValue,
-                                          const int direction)
+    void PythonAlgorithm::declarePyAlgProperty(const std::string & name, const boost::python::object & defaultValue,
+                                               const int direction)
     {
-      declareProperty(name, defaultValue, "", direction);
+      declarePyAlgProperty(name, defaultValue, "", direction);
     }
 
   }

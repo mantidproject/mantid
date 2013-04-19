@@ -61,7 +61,7 @@ namespace DataHandling
   int NexusTester::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string NexusTester::category() const { return "DataHandling\\Nexus";}
+  const std::string NexusTester::category() const { return "Utility\\Development";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm

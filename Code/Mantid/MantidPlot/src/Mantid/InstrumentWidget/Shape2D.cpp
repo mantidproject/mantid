@@ -14,16 +14,27 @@
 const size_t Shape2D::NCommonCP = 4;
 const double Shape2D::sizeCP = 2;
 
+/**
+  * Set default border color to red and fill color to default Qt color (==QColor()).
+  */
 Shape2D::Shape2D():
-m_color(Qt::red),
-m_scalable(true),
-m_editing(false)
+    m_color(Qt::red),
+    m_fill_color(QColor()),
+    m_scalable(true),
+    m_editing(false),
+    m_visible(true)
 {
-
 }
 
+/**
+  * Calls virtual drawShape() method to draw the actial shape.
+  * Draws bounding rect and control points if the shape is selected.
+  *
+  * @param painter :: QPainter used for drawing.
+  */
 void Shape2D::draw(QPainter& painter) const
 {
+  if ( !m_visible ) return;
   painter.setPen(m_color);
   this->drawShape(painter);
   if (m_editing)
@@ -44,11 +55,19 @@ void Shape2D::draw(QPainter& painter) const
   }
 }
 
+/**
+  * Return total number of control points for this shape.
+  */
 size_t Shape2D::getNControlPoints() const
 {
   return NCommonCP + this->getShapeNControlPoints();
 }
 
+/**
+  * Return coordinates of i-th control point.
+  *
+  * @param i :: Index of a control point. 0 <= i < getNControlPoints().
+  */
 QPointF Shape2D::getControlPoint(size_t i) const
 {
   if ( i >= getNControlPoints())
@@ -72,7 +91,6 @@ void Shape2D::setControlPoint(size_t i,const QPointF& pos)
   {
       m_boundingRect.setVertex( i, pos );
       refit();
-      correctBoundingRect();
   }
   // else ?
   else
@@ -80,34 +98,21 @@ void Shape2D::setControlPoint(size_t i,const QPointF& pos)
   resetBoundingRect();
 }
 
-void Shape2D::correctBoundingRect()
-{
-//  double left = m_boundingRect.left();
-//  double top = m_boundingRect.top();
-//  double width = m_boundingRect.width();
-//  double height = m_boundingRect.height();
-//  if (m_boundingRect.width() < 0)
-//  {
-//    left = m_boundingRect.right();
-//    width *= -1;
-//  }
-
-//  if (m_boundingRect.height() < 0)
-//  {
-//    top = m_boundingRect.bottom();
-//    height *= -1;
-//  }
-
-//  m_boundingRect = QRectF(left,top,width,height);
-
-}
-
+/**
+  * Move the shape.
+  *
+  * @param dp :: The shift vector.
+  */
 void Shape2D::moveBy(const QPointF& dp)
 {
   m_boundingRect.translate( dp );
   refit();
 }
 
+/**
+  * Adjust the bound of the bounding rect. Calls virtual method refit()
+  * to resize the shape in order to fit into the new bounds.
+  */
 void Shape2D::adjustBoundingRect(double dx1,double dy1,double dx2,double dy2)
 {
   double dwidth = dx2 - dx1;
@@ -128,16 +133,24 @@ void Shape2D::adjustBoundingRect(double dx1,double dy1,double dx2,double dy2)
   refit();
 }
 
+/**
+  * Assign new bounding rect. Calls virtual method refit()
+  * to resize the shape in order to fit into the new bounds.
+  */
 void Shape2D::setBoundingRect(const RectF &rect)
 {
   m_boundingRect = rect;
-  correctBoundingRect();
   refit();
 }
 
+/**
+  * Check if the shape masks a point.
+  *
+  * @param p :: Point to check.
+  */
 bool Shape2D::isMasked(const QPointF& p)const
 {
-  return m_fill_color != QColor() && contains(p);
+    return m_fill_color != QColor() && contains(p);
 }
 
 // --- Shape2DEllipse --- //
@@ -450,5 +463,11 @@ void Shape2DRing::setPoint(const QString& prop, const QPointF& value)
   {
     m_boundingRect.moveCenter(value);
   }
+}
+
+void Shape2DRing::setColor(const QColor &color)
+{
+    m_inner_shape->setColor(color);
+    m_outer_shape->setColor(color);
 }
 

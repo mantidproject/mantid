@@ -22,11 +22,6 @@ void testVersion()
     TS_ASSERT_EQUALS( Q1D.version(), 1 )
   }
 
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( Q1D.category(), "SANS" )
-  }
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( Q1D.initialize() )

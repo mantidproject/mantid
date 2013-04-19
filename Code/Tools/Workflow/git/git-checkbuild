@@ -67,10 +67,20 @@ checkargs() {
 
 # Called when we are starting from a clean slate sitting on the feature branch
 start_on_feature() {
-    mergebranch=$(current_branch)
+    # We're starting again so clear out previous saved setting
+    remove_config_value ${MERGENAME_CFG_KEY}
+
     # No need to be careful about the state of develop so kill the local branch and recreate it
-    echo "Starting from branch ${mergebranch}. Deleting and recreating local copy of ${BUILD_BRANCH}"
-    git_halt_on_error branch -D ${BUILD_BRANCH}
+    mergebranch=$(current_branch)
+    echo "Starting from branch ${mergebranch}."
+
+    local_branch_exists ${BUILD_BRANCH}
+    if [ $? -eq 1 ]; then
+	echo "Deleting local copy of ${BUILD_BRANCH}"
+	git_halt_on_error branch -D ${BUILD_BRANCH}
+    fi
+
+    echo "Creating local copy of ${BUILD_BRANCH}"
     git_halt_on_error fetch -p
     git_halt_on_error checkout ${BUILD_BRANCH}
     
@@ -79,11 +89,12 @@ start_on_feature() {
     if [ $? -gt 0 ]; then
 	# Record what was attempted to be merged
 	git config ${MERGENAME_CFG_KEY} ${mergebranch}
+	echo
 	echo "When you have resolved the conflicts with 'git add' then 'git commit' rerun this command from ${BUILD_BRANCH}."
 	exit 1
     else
-	# Remove any stored name
-	git config --unset ${MERGE_CFG_KEY} 2> /dev/null
+	# Remove any stored name if there was one
+	remove_config_value ${MERGENAME_CFG_KEY}
     fi
     
     # Publish
@@ -118,7 +129,7 @@ start_on_develop() {
     # Merge as it has already been done, just push. It is likely, given the time spread that origin/develop has been updated and it
     # is possible that develop has been recreated
     prefetch_sha1=$(git rev-parse origin/${BUILD_BRANCH})
-    run_git_halt_on_error fetch -p
+    git_halt_on_error fetch -p
     postfetch_sha1=$(git rev-parse origin/${BUILD_BRANCH})
 
     # Check for forced update. Works by checking if there are commits reachable from the old that are not reachable from the new
@@ -143,6 +154,9 @@ start_on_develop() {
     if [ $? -gt 0 ]; then
 	echo "Warning: An error occurred when switching back to ${mergebranch}. Still on ${BUILD_BRANCH}!"
     fi
+
+    # Remove any stored name
+    remove_config_value ${MERGENAME_CFG_KEY}
 }
 
 main() {

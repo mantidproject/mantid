@@ -400,7 +400,7 @@ void AnvredCorrection::retrieveBaseProperties()
   }
   else  //Save input in Sample with wrong atomic number and name
   {
-	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
   			0.0, 0.0, smu, 0.0, smu, amu);
     Material *mat = new Material("SetInAnvredCorrection", *neutron, 1.0);
     m_inputWS->mutableSample().setMaterial(*mat);

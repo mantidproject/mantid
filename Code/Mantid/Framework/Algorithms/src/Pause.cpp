@@ -48,7 +48,7 @@ namespace Algorithms
   int Pause::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string Pause::category() const { return "Utility";}
+  const std::string Pause::category() const { return "Utility\\Development";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm

@@ -124,14 +124,8 @@ namespace Mantid
       return m_isExecuted;
     }
 
-    /// True if the algorithm is running asynchronously.
-    bool AlgorithmProxy::isRunningAsync()
-    {
-      return m_alg ? m_alg->isRunningAsync() : false;
-    }
-
     /// True if the algorithm is running.
-    bool AlgorithmProxy::isRunning()
+    bool AlgorithmProxy::isRunning() const
     {
       return m_alg ? m_alg->isRunning() : false;
     }
@@ -149,7 +143,7 @@ namespace Mantid
     }
 
     ///Cancel the execution of the algorithm
-    void AlgorithmProxy::cancel()const
+    void AlgorithmProxy::cancel()
     {
       if (m_alg)
         m_alg->cancel();

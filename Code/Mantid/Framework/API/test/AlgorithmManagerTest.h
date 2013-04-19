@@ -68,21 +68,22 @@ public:
 };
 
 
-/** Algorithm that runs until cancelled */
+/** Algorithm that always says it's running if asked */
 class AlgRunsForever : public Algorithm
 {
+private:
+  bool isRunningFlag;
 public:
-  AlgRunsForever() : Algorithm() {}
+  AlgRunsForever() : Algorithm(), isRunningFlag(true) {}
   virtual ~AlgRunsForever() {}
   void init() { }
-  void exec()
-  {
-    while (!this->m_cancel)
-      Poco::Thread::sleep(10);
-  }
+  void exec() { }
   virtual const std::string name() const {return "AlgRunsForever";}
   virtual int version() const {return(1);}
   virtual const std::string category() const {return("Cat1");}
+  // Override method so we can manipulate whether it appears to be running
+  virtual bool isRunning() const { return isRunningFlag; }
+  void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
 };
 
 
@@ -110,45 +111,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestFail>());
     // Size should be the same
     TS_ASSERT_EQUALS(AlgorithmFactory::Instance().getKeys().size(), nalgs);
-    
   }
 
- void testVersionPass()
+  void testVersionPass()
   {
-	TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestPass>());
+    TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestPass>());
   }
 
   void testInstance()
   {
-    // Not really much to test
-    //AlgorithmManager *tester = AlgorithmManager::Instance();
-    //TS_ASSERT_EQUALS( manager, tester);
-
     TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
-    TS_ASSERT_THROWS(
-    AlgorithmManager::Instance().create("AlgTest",3)
-    , std::runtime_error );
+    TS_ASSERT_THROWS( AlgorithmManager::Instance().create("AlgTest",3), std::runtime_error );
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), std::runtime_error );
-  }
-
-  void testGetNamesAndCategories()
-  {
-	  AlgorithmManager::Instance().clear();
-	  TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
-	  TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
-    std::vector<std::pair<std::string,std::string> > names = AlgorithmManager::Instance().getNamesAndCategories();
-	  TS_ASSERT_EQUALS(names.size(), 2);
-    if (names.size() > 0)
-	  {
-      TS_ASSERT_EQUALS(names[0].first, "AlgTest");
-      TS_ASSERT_EQUALS(names[0].second, "Cat4");
-	  }
-    if (names.size() > 1)
-    {
-      TS_ASSERT_EQUALS(names[1].first, "AlgTestSecond");
-      TS_ASSERT_EQUALS(names[1].second, "Cat3");
-    }
-
   }
 
   void testClear()
@@ -240,14 +214,13 @@ public:
       AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
 
-    // The first one is at the front
-    TS_ASSERT(AlgorithmManager::Instance().algorithms().front() == first);
+    // The first one is still in the list
+    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) == first);
 
     // Add one more, drops the oldest one
     AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
-    TSM_ASSERT("The first(oldest) algorithm is gone",
-        AlgorithmManager::Instance().algorithms().front() != first);
+    TS_ASSERT( ! AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) );
   }
 
 
@@ -257,36 +230,31 @@ public:
     AlgorithmManager::Instance().clear();
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
 
-    // Start one algorithm that never stops
+    // Create one algorithm that appears never to stop
     IAlgorithm_sptr first = AlgorithmManager::Instance().create("AlgRunsForever");
-    Poco::ActiveResult<bool> res1 = first->executeAsync();
 
     IAlgorithm_sptr second = AlgorithmManager::Instance().create("AlgTest");
 
     // Another long-running algo
     IAlgorithm_sptr third = AlgorithmManager::Instance().create("AlgRunsForever");
-    Poco::ActiveResult<bool> res3 = third->executeAsync();
-
-    // give it some time to start
-    Poco::Thread::sleep(100);
 
     for (size_t i=3; i<5; i++)
       AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
 
-    // The right ones are at the front
-    TS_ASSERT( *(AlgorithmManager::Instance().algorithms().begin()+0) == first);
-    TS_ASSERT( *(AlgorithmManager::Instance().algorithms().begin()+1) == second);
-    TS_ASSERT( *(AlgorithmManager::Instance().algorithms().begin()+2) == third);
+    // The first three created are in the list
+    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) == first);
+    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(second->getAlgorithmID()) == second);
+    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(third->getAlgorithmID()) == third);
 
     // Add one more, drops the SECOND oldest one
     AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
 
     TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-        *(AlgorithmManager::Instance().algorithms().begin()+0) == first);
-    TSM_ASSERT("The second oldest was popped, replaced with the 3rd",
-        *(AlgorithmManager::Instance().algorithms().begin()+1) == third);
+        AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) == first);
+    TSM_ASSERT("The second oldest was popped, so trying to get it should return null",
+        !AlgorithmManager::Instance().getAlgorithm(second->getAlgorithmID()) );
 
     // One more time
     AlgorithmManager::Instance().create("AlgTest");
@@ -294,46 +262,25 @@ public:
 
     // The right ones are at the front
     TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-        *(AlgorithmManager::Instance().algorithms().begin()+0) == first);
+        AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) == first);
     TSM_ASSERT("The third algorithm (is still running) so it is still there",
-        *(AlgorithmManager::Instance().algorithms().begin()+1) == third);
+        AlgorithmManager::Instance().getAlgorithm(third->getAlgorithmID()) == third);
 
-    // Cancel the long-running ones
-    first->cancel();
-    third->cancel();
-    res1.wait();
-    res3.wait();
   }
 
-  /**
-   * Disabled due to random failures that cannot be pinned down and are most likely timing issues.
-   * This test has never failed legitimately and only serves to cause confusion when it fails
-   * due to completely unrelated changes.
-   */
-  void xtestDroppingOldOnes_extremeCase()
+  void testDroppingOldOnes_extremeCase()
   {
   /** Extreme case where your queue fills up and all algos are running */
     AlgorithmManager::Instance().clear();
-    std::vector<Poco::ActiveResult<bool>> results;
-    std::vector<IAlgorithm_sptr> algs;
     for (size_t i=0; i<5; i++)
     {
-      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("AlgRunsForever");
-      algs.push_back(alg);
-      results.push_back(alg->executeAsync());
+      AlgorithmManager::Instance().create("AlgRunsForever");
     }
-    // give it some time to start
-    Poco::Thread::sleep(100);
 
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
+    // Create another that takes it past the normal max size (of 5)
     AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 6);
-
-    for (size_t i=0; i<5; i++)
-    {
-      algs[i]->cancel();
-      results[i].wait();
-    }
   }
 
   void testThreadSafety()
@@ -345,8 +292,65 @@ public:
     }
   }
 
+  void test_newestInstanceOf()
+  {
+    auto& am = AlgorithmManager::Instance();
+    am.clear();
+    auto first = am.create("AlgTest");
+    TS_ASSERT_EQUALS( am.newestInstanceOf("AlgTest"), first );
+    auto second = am.create("AlgTest");
+    TS_ASSERT_EQUALS( am.newestInstanceOf("AlgTest"), second );
+    TS_ASSERT( !am.newestInstanceOf("AlgTestSecond") );
+    // Create a different algorithm
+    am.create("AlgTestSecond");
+    // Make sure we still get back the latest instance of other algorithm
+    TS_ASSERT_EQUALS( am.newestInstanceOf("AlgTest"), second );
+  }
 
-int m_notificationValue;
+  void test_runningInstancesOf()
+  {
+    AlgorithmManager::Instance().clear();
+    // Had better return empty at this point
+    TS_ASSERT( AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty() )
+    // Create an algorithm, but don't start it
+    AlgorithmManager::Instance().create("AlgTest");
+    // Still empty
+    TS_ASSERT( AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty() )
+    // Create the 'runs forever' algorithm
+    AlgorithmManager::Instance().create("AlgRunsForever");
+    auto runningAlgorithms = AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever");
+    TS_ASSERT_EQUALS( runningAlgorithms.size(), 1 );
+    TS_ASSERT_EQUALS( runningAlgorithms.at(0)->name(), "AlgRunsForever" );
+    // Create another 'runs forever' algorithm (without proxy) and another 'normal' one
+    auto aRunningAlgorithm = AlgorithmManager::Instance().create("AlgRunsForever", 1, false);
+    TS_ASSERT( AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty() )
+    TS_ASSERT_EQUALS( AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever").size(), 2);
+    // 'Stop' one of the running algorithms and check the count drops
+    dynamic_cast<AlgRunsForever*>(aRunningAlgorithm.get())->setIsRunningTo(false);
+    TS_ASSERT_EQUALS( AlgorithmManager::Instance().runningInstancesOf("AlgRunsForever").size(), 1);
+    TS_ASSERT( AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty() )
+    TS_ASSERT_EQUALS( AlgorithmManager::Instance().size(), 3 );
+  }
+
+  void test_cancelAll()
+  {
+    AlgorithmManager::Instance().clear();
+    std::vector<Algorithm_sptr> algs(5);
+    for (size_t i=0; i<5; i++)
+    {
+      // Create without proxy so that I can cast it to an Algorithm and get at getCancel()
+      algs[i] = boost::dynamic_pointer_cast<Algorithm>(AlgorithmManager::Instance().create("AlgRunsForever",1,false));
+      TS_ASSERT( !algs[i]->getCancel() );
+    }
+
+    AlgorithmManager::Instance().cancelAll();
+    for (size_t i=0; i<5; i++)
+    {
+      TS_ASSERT( algs[i]->getCancel() );
+    }
+  }
+
+  int m_notificationValue;
 };
 
 #endif /* AlgorithmManagerTest_H_*/

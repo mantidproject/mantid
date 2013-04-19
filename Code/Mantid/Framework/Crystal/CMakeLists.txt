@@ -1,10 +1,10 @@
 
 set ( SRC_FILES
 	src/AnvredCorrection.cpp
+	src/CalculatePeaksHKL.cpp
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
 	src/CombinePeaksWorkspaces.cpp
-	src/PredictFractionalPeaks.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/FilterPeaks.cpp
 	src/FindSXPeaks.cpp
@@ -13,7 +13,6 @@ set ( SRC_FILES
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/IndexPeaks.cpp
-	src/OptimizeCrystalPlacement.cpp
 	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadHKL.cpp
@@ -21,10 +20,12 @@ set ( SRC_FILES
 	src/LoadIsawUB.cpp
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
+	src/OptimizeCrystalPlacement.cpp
 	src/OptimizeExtinctionParameters.cpp
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
+	src/PredictFractionalPeaks.cpp
 	src/PredictPeaks.cpp
 	src/SCDCalibratePanels.cpp
 	src/SCDPanelErrors.cpp
@@ -47,10 +48,10 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
+	inc/MantidCrystal/CalculatePeaksHKL.h
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
-	inc/MantidCrystal/PredictFractionalPeaks.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindSXPeaks.h
@@ -60,7 +61,6 @@ set ( INC_FILES
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/IndexPeaks.h
-	inc/MantidCrystal/OptimizeCrystalPlacement.h
 	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadHKL.h
@@ -68,10 +68,12 @@ set ( INC_FILES
 	inc/MantidCrystal/LoadIsawUB.h
 	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/NormaliseVanadium.h
+	inc/MantidCrystal/OptimizeCrystalPlacement.h
 	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
+	inc/MantidCrystal/PredictFractionalPeaks.h
 	inc/MantidCrystal/PredictPeaks.h
 	inc/MantidCrystal/SCDCalibratePanels.h
 	inc/MantidCrystal/SCDPanelErrors.h
@@ -93,10 +95,10 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	AnvredCorrectionTest.h
+	CalculatePeaksHKLTest.h
 	CalculateUMatrixTest.h
 	CentroidPeaksTest.h
 	CombinePeaksWorkspacesTest.h
-	PredictFractionalPeaksTest.h
 	DiffPeaksWorkspacesTest.h
 	FilterPeaksTest.h
 	FindSXPeaksTest.h
@@ -112,9 +114,11 @@ set ( TEST_FILES
 	LoadIsawUBTest.h
 	MaskPeaksWorkspaceTest.h
 	NormaliseVanadiumTest.h
+	OptimizeCrystalPlacementTest.h
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
+	PredictFractionalPeaksTest.h
 	PredictPeaksTest.h
 	SCDCalibratePanelsTest.h
 	SCDPanelErrorsTest.h

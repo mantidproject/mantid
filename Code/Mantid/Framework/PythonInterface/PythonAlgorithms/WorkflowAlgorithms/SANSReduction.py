@@ -6,7 +6,7 @@ from reduction_workflow.find_data import find_data
 import os
 class SANSReduction(PythonAlgorithm):
     def category(self):
-        return 'Workflow\\SANS;PythonAlgorithms'
+        return 'Workflow\\SANS\\UsesPropertyManager'
 
     def name(self):
         return 'SANSReduction'

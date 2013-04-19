@@ -8,7 +8,7 @@ import math
 class SANSAzimuthalAverage1D(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\SANS;PythonAlgorithms"
+        return "Workflow\\SANS\\UsesPropertyManager"
 
     def name(self):
         return "SANSAzimuthalAverage1D"

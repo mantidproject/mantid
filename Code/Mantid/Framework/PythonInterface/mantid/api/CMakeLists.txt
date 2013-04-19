@@ -55,6 +55,8 @@ set ( EXPORT_FILES
   src/Exports/PropertyManagerDataService.cpp
   src/Exports/FunctionFactory.cpp
   src/Exports/Progress.cpp
+  src/Exports/FunctionProperty.cpp
+  src/Exports/AlgorithmProperty.cpp
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions

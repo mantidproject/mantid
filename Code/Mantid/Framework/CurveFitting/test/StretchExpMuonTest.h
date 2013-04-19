@@ -13,7 +13,6 @@
 	#include "MantidAPI/WorkspaceFactory.h"
 	#include "MantidAPI/Algorithm.h"
 	#include "MantidDataObjects/Workspace2D.h"
-	#include "MantidDataHandling/LoadRaw.h"
 	#include "MantidKernel/Exception.h"
 	#include "MantidAPI/FunctionFactory.h"
 
@@ -21,7 +20,6 @@
 	using namespace Mantid::API;
 	using namespace Mantid::CurveFitting;
 	using namespace Mantid::DataObjects;
-	using namespace Mantid::DataHandling;
 
 
 	class StretchExpMuonTest : public CxxTest::TestSuite

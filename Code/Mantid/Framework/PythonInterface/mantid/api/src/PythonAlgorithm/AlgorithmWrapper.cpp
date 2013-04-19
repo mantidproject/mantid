@@ -15,6 +15,15 @@ namespace Mantid
     using Environment::CallMethod_NoArg;
 
     /**
+     * Construct the "wrapper" and stores the reference to the PyObject
+     * * @param self A reference to the calling Python object
+     */
+    AlgorithmWrapper::AlgorithmWrapper(PyObject* self)
+      : PythonAlgorithm(), m_self(self)
+    {
+    }
+
+    /**
      * Returns the name of the algorithm. This cannot be overridden in Python.
      */
     const std::string AlgorithmWrapper::name() const
@@ -76,15 +85,6 @@ namespace Mantid
       os << "Python algorithm '" << this->name()
          << "' does not define the PyExec function, cannot execute.";
       CallMethod_NoArg<void>::dispatchWithException(getSelf(), "PyExec", os.str().c_str());
-    }
-
-    /**
-     *  Returns the PyObject that owns this wrapper, i.e. self
-     * @returns A pointer to self
-     */
-    PyObject * AlgorithmWrapper::getSelf() const
-    {
-      return boost::python::detail::wrapper_base_::get_owner(*this);
     }
 
   }

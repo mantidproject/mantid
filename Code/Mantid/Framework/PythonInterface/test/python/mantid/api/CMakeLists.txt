@@ -13,6 +13,7 @@ set ( TEST_PY_FILES
   FileFinderTest.py
   FrameworkManagerTest.py
   FunctionFactoryTest.py
+  FunctionPropertyTest.py
   IEventWorkspaceTest.py
   IPeaksWorkspaceTest.py
   ITableWorkspaceTest.py

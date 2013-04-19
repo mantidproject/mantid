@@ -24,6 +24,7 @@ if ( SPHINX_FOUND )
   set ( SPHINX_SOURCE
     source/index.rst
     source/changes.rst
+    source/contents.rst
     source/api/mantid.rst
     source/api/mantidplot.rst
     source/_templates/indexcontent.html

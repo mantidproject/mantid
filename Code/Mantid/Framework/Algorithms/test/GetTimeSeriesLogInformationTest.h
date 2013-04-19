@@ -55,7 +55,8 @@ public:
     GetTimeSeriesLogInformation getalg;
     getalg.initialize();
 
-    getalg.setProperty("InputEventWorkspace", eventWS);
+    getalg.setProperty("InputWorkspace", eventWS);
+    getalg.setProperty("OutputWorkspace", "TimeStat");
     getalg.setProperty("Function", "Overall Statistic");
     getalg.setProperty("LogName", "FastSineLog");
 

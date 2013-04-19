@@ -368,7 +368,7 @@ namespace DataHandling
     // TODO: Create a log with the pulse time and charge!!  (TimeSeriesProperties)
 
     // Append the events
-    g_log.information() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
+    g_log.debug() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
     {
       Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex)  ;
 
@@ -405,8 +405,8 @@ namespace DataHandling
       }
     }  // mutex automatically unlocks here
 
-    g_log.information() << "Total Events: " << totalEvents << std::endl;
-    g_log.information() << "-------------------------------" << std::endl;
+    g_log.debug() << "Total Events: " << totalEvents << std::endl;
+    g_log.debug() << "-------------------------------" << std::endl;
 
     return false;
   }

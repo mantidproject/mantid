@@ -111,7 +111,7 @@ public:
   /// Get background colour
   QColor getBackgroundColor() const {return m_backgroundColor;}
   /// Send a redraw request to the surface owner
-  void requestRedraw();
+  void requestRedraw(bool resetPeakVisibility = false);
   /// Enable lighting if the implementation allows it
   void enableLighting(bool on);
 
@@ -161,12 +161,12 @@ public:
 
   /// Check if a point on the scren is under any of the mask shapes
   bool isMasked(double x,double y)const{return m_maskShapes.isMasked(x,y);}
-
   /// Check if there are any masks defined
   bool hasMasks() const {return m_maskShapes.size() > 0;}
-
   /// Remove all mask shapes.
   void clearMask(){m_maskShapes.clear();}
+  /// Change all border colors.
+  void changeBorderColor(const QColor& color) {m_maskShapes.changeBorderColor(color);}
 
   //-----------------------------------
   //    Peaks overaly methods
@@ -178,8 +178,10 @@ public:
   bool hasPeakOverlays() const {return !m_peakShapes.isEmpty();}
   void setPeakLabelPrecision(int n);
   int getPeakLabelPrecision() const {return m_peakLabelPrecision;}
-  void setShowPeakRowFlag(bool on);
-  bool getShowPeakRowFlag()const {return m_showPeakRow;}
+  void setShowPeakRowsFlag(bool on);
+  bool getShowPeakRowsFlag()const {return m_showPeakRows;}
+  void setShowPeakLabelsFlag(bool on);
+  bool getShowPeakLabelsFlag()const {return m_showPeakLabels;}
 
 signals:
 
@@ -235,6 +237,7 @@ protected:
   int getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const;
   int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
   void setInputController(int mode, InputController* controller);
+  void setPeakVisibility() const;
 
   //-----------------------------------
   //     Protected data
@@ -256,7 +259,8 @@ protected:
   Shape2DCollection m_maskShapes;    ///< to draw mask shapes
   mutable QList<PeakOverlay*> m_peakShapes; ///< to draw peak labels
   mutable int m_peakLabelPrecision;
-  mutable bool m_showPeakRow;        ///< flag to show peak row index
+  mutable bool m_showPeakRows;        ///< flag to show peak row index
+  mutable bool m_showPeakLabels;     ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle;     ///< index of a default PeakMarker2D style to use with a new PeakOverlay.
 
 private:

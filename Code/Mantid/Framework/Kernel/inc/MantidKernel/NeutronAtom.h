@@ -97,7 +97,7 @@ namespace Mantid
     MANTID_KERNEL_DLL bool operator==(const NeutronAtom& left, const NeutronAtom& right);
     MANTID_KERNEL_DLL bool operator!=(const NeutronAtom& left, const NeutronAtom& right);
     MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream& out, const NeutronAtom &atom);
-    MANTID_KERNEL_DLL NeutronAtom getNeutronAtom(const int z_number, const int a_number = 0);
+    MANTID_KERNEL_DLL NeutronAtom getNeutronAtom(const uint16_t z_number, const uint16_t a_number = 0);
 
   } //Namespace PhysicalConstants
 } //Namespace Mantid

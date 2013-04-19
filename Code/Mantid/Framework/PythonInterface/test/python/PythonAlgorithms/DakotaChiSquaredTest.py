@@ -1,5 +1,4 @@
-import unittest,sys,os
-sys.path.append('/home/3y9/Mantid/Qt-build/bin')
+import unittest,os
 import mantid
 
 
@@ -79,6 +78,25 @@ class DakotaChiSquaredTest(unittest.TestCase):
 		except:
 			assert False, "Raised an exception"
 		self.cleanup()	
+
+	def test_output(self):
+		self.makeFiles()
+		try:
+			alg=mantid.simpleapi.DakotaChiSquared(self.datafile,self.simfile,self.chifile)
+			self.assertEquals(len(alg),2)
+			self.assertEquals(alg[0],4.5)
+			self.assertEquals(alg[1].getName(),"alg")
+			self.assertEquals(alg[1].blocksize(),5)
+			self.assertEquals(alg[1].getNumberHistograms(),1)
+			self.assertEquals(alg[1].dataY(0)[3],1.5)
+			mantid.api.AnalysisDataService.remove("alg")
+			alg1=mantid.simpleapi.DakotaChiSquared(self.datafile,self.simfile,self.chifile,ResidualsWorkspace="res")
+			self.assertEquals(alg1[0],4.5)
+			self.assertEquals(alg1[1].getName(),"res")
+			mantid.api.AnalysisDataService.remove("res")
+		except:
+			assert False, "Raised an exception"
+		self.cleanup()
 
 if __name__=="__main__":
 	unittest.main()

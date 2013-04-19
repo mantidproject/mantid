@@ -73,6 +73,10 @@ namespace Algorithms
 
      void exportLog();
 
+     void setupEventWorkspace(int numentries, std::vector<Kernel::DateAndTime> &times, std::vector<double> values);
+
+     void setupWorkspace2D(int numentries, std::vector<Kernel::DateAndTime> &times, std::vector<double> values);
+
      void doStatistic();
 
      void exportErrorLog(API::MatrixWorkspace_sptr ws, std::vector<Kernel::DateAndTime> abstimevec, double dts);

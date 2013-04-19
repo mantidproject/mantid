@@ -5,7 +5,6 @@
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Fit.h"
-#include "MantidDataHandling/LoadRaw.h"
 
 #include "MantidCurveFitting/DiffSphere.h"
 

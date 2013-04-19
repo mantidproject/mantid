@@ -1,60 +1,58 @@
-from lxml import etree as le # python-lxml on rpm based systems
-import lxml.html
-from lxml.html import builder as lhbuilder
 import os
-
-WEB_BASE  = "http://www.mantidproject.org/"
+from xml.dom.minidom import Document
+from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
 
 def process_function(name, qhp, outputdir, **kwargs): # was (args, algo):
     import mantid.api
     func = mantid.api.FunctionFactory.createFunction(name)
     #print "***", func, dir(func)
 
-    root = le.Element("html")
-    head = le.SubElement(root, "head")
-    head.append(lhbuilder.META(lhbuilder.TITLE(name + " Fit Function")))
-    body = le.SubElement(root, "body")
-    body.append(lhbuilder.CENTER(lhbuilder.H1(name + " Fit Function")))
-    text = '<a href="%s">wiki help</a>' % (WEB_BASE+name)
-    body.append(lxml.html.fragment_fromstring(text))
-    body.append(lhbuilder.HR())
-
-    body.append(lhbuilder.H3("Summary"))
-    
+    doc = Document()
+    root = addEle(doc, "html", doc)
+    head = addEle(doc, "head", root)
+    addTxtEle(doc, "title", name + " Fit Function", head)
+    body = addEle(doc, "body", root)
+    temp = addEle(doc, "center", body)
+    addTxtEle(doc, "h1", name + " Fit Function", temp)
+    addTxtEle(doc, "a", "wiki help", body, {"href":WEB_BASE+name})
+    addEle(doc, "hr", body)
+    addTxtEle(doc, "h3", "Summary", body)
     if func.numParams() <= 0:
-        body.append(lhbuilder.H3("No Parameters"))
+        addTxtEle(doc, "h3", "No Parameters", body)
     else:
-        body.append(lhbuilder.H3("Parameters"))
-        table = le.SubElement(body, "table",
-                              **{"border":"1", "cellpadding":"5", "cellspacing":"0"})
-        header_row = le.SubElement(table, "tr")
-        header_row.append(lhbuilder.TH("Order"))
-        header_row.append(lhbuilder.TH("Name"))
-        header_row.append(lhbuilder.TH("Default"))
-        header_row.append(lhbuilder.TH("Explicit"))
-        header_row.append(lhbuilder.TH("Description"))
+        addTxtEle(doc, "h3", "Parameters", body)
+        table = addEle(doc, "table", body, {"border":"1", "cellpadding":"5", "cellspacing":"0"})
+        header_row = addEle(doc, "tr", table)
+        addTxtEle(doc, "th", "Order", header_row)
+        addTxtEle(doc, "th", "Name", header_row)
+        addTxtEle(doc, "th", "Default", header_row)
+        addTxtEle(doc, "th", "Explicit", header_row)
+        addTxtEle(doc, "th", "Description", header_row)
         for number in range(func.numParams()):
-            row = le.SubElement(table, "tr")
-            row.append(lhbuilder.TD(str(number+1)))
-            row.append(lhbuilder.TD(func.getParamName(number)))
-            row.append(lhbuilder.TD(str(func.getParamValue(number))))
-            row.append(lhbuilder.TD(str(func.getParamExplicit(number))))
+            row = addEle(doc, "tr", table)
+            addTxtEle(doc, "td", str(number+1), row)
+            addTxtEle(doc, "td", func.getParamName(number), row)
+            addTxtEle(doc, "td", str(func.getParamValue(number)), row)
+            addTxtEle(doc, "td", str(func.getParamExplicit(number)), row)
             descr = func.getParamDescr(number)
             if len(descr) <= 0:
-                descr = u'\u00a0' # hack to create r'&nbsp;'
-            row.append(lhbuilder.TD(descr))
+                # u"\u00A0".encode('utf-16') # hack to create r'&nbsp;'
+                descr = " " # should be &nbsp
+            addTxtEle(doc, "td", descr, row)
 
     cats = []
     for category in func.categories():
-        cats.append('<a href="fitfunctions_index.html#%s">%s</a>' % (category, category))
+        ref = "fitfunctions_index.html#%s" % (category)
+        cats.append(addTxtEle(doc, "a", category, attrs={"href":ref}))
     if len(cats) > 0:
-        text = '<p><b>Categories:</b> ' + " ".join(cats) + '</p>'
-        body.append(lxml.html.fragment_fromstring(text))
+        p = addEle(doc, "p", body)
+        addTxtEle(doc, "b", "Categories:", p)
+        for category in cats:
+            p.appendChild(category)
 
     # write out the file
     outfile = "FitFunc_%s.html" % name
-    qhp.addFile(outfile, name)
+    qhp.addFile(os.path.join(HTML_DIR, outfile), name)
     outfile = os.path.join(outputdir, outfile)
     handle = open(outfile, 'w')
-    handle.write(le.tostring(root, pretty_print=True,
-                             xml_declaration=False))
+    handle.write(doc.toprettyxml(indent="  ", encoding='utf-8'))

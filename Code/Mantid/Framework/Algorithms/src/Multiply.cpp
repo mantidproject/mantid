@@ -1,7 +1,8 @@
 /*WIKI* 
  {{BinaryOperation|verb=multiplied|prep=by|symbol=<math>\times</math>}}
 
-== Usage ==
+*WIKI*/
+/*WIKI_USAGE*
 '''Python'''
  Multiply("w1","w2","output")
  w3 = w1 * w2
@@ -15,7 +16,7 @@ The usage of basic workspace mathematical operations has been specially simplifi
 
  //w1 and w2 are workspaces
  Workspace output = w1 * w2;
-*WIKI*/
+*WIKI_USAGE*/
 // Includes
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------

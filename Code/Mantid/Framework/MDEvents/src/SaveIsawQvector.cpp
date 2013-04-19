@@ -56,7 +56,7 @@ namespace MDEvents
   int SaveIsawQvector::version() const { return 1;}
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string SaveIsawQvector::category() const { return "General";}
+  const std::string SaveIsawQvector::category() const { return "DataHandling\\Isaw";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm

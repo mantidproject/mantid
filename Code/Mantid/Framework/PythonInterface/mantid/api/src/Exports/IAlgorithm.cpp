@@ -155,7 +155,7 @@ namespace
         buffer << "      " << prop->documentation();
         if (!allowed.empty())
         {
-          buffer << " [" << Mantid::Kernel::Strings::join(allowed.begin(), allowed.end(), ", ");
+          buffer << "[" << Mantid::Kernel::Strings::join(allowed.begin(), allowed.end(), ", ");
           buffer << "]";
         }
         buffer << EOL;

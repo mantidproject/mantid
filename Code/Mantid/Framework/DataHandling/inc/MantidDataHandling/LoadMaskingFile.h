@@ -43,6 +43,8 @@ namespace DataHandling
 
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const {return 1;};
+	/// category
+	virtual const std::string category() const { return "Deprecated"; }
     
   };
 

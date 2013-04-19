@@ -122,6 +122,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     if reducer:
         ReductionSingleton().replace(reducer)
     ins_name = ReductionSingleton().instrument.name()
+    # is used for SaveCanSAS1D go give the detectors names
+    detnames = ', '.join(ReductionSingleton().instrument.listDetectors())
     scale_shift = {'scale':1.0000, 'shift':0.0000}
     #first copy the user settings in case running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
@@ -167,16 +169,6 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         delete_workspaces(raw_workspaces)
             
 
-        file = run['output_as']
-        #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
-        if file:
-            for algor in saveAlgs.keys():
-                #add the file extension, important when saving different types of file so they don't over-write each other
-                ext = saveAlgs[algor]
-                if not ext.startswith('.'):
-                    ext = '.' + ext
-                exec(algor+'(reduced,file+ext)')
-
         if verbose:
             logger.notice('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, filename))
         # Rename the final workspace
@@ -213,6 +205,22 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             RenameWorkspace(InputWorkspace=front_reduced,OutputWorkspace= final_name+'_front')            
         else:            
             RenameWorkspace(InputWorkspace=reduced,OutputWorkspace=final_name)
+
+        file = run['output_as']
+        #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
+        if file:
+            for algor in saveAlgs.keys():
+                for workspace_name in names:
+                    #add the file extension, important when saving different types of file so they don't over-write each other
+                    ext = saveAlgs[algor]
+                    if not ext.startswith('.'):
+                        ext = '.' + ext
+                    if algor == "SaveCanSAS1D":
+                        SaveCanSAS1D(workspace_name, workspace_name+ext, DetectorNames=detnames)
+                    elif algor == "SaveRKH":
+                        SaveRKH(workspace_name, workspace_name+ext, Append=False)
+                    else:
+                        exec(algor+'(workspace_name, workspace_name+ext)')
 
         if plotresults == 1:
             for final_name in names:

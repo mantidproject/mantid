@@ -99,7 +99,7 @@ void MultipleScatteringCylinderAbsorption::exec()
   }
   else  //Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(999), static_cast<uint16_t>(0),
+    NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
                         0.0, 0.0, coeff3, 0.0, coeff3, coeff1);
     Material *mat = new Material("SetInMultipleScattering", *neutron, coeff2);
     in_WS->mutableSample().setMaterial(*mat);

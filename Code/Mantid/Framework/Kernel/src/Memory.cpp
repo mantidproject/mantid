@@ -112,6 +112,7 @@ void process_mem_usage(size_t & vm_usage, size_t & resident_set)
     vm_usage = pmc.PagefileUsage / 1024;
     resident_set = pmc.WorkingSetSize / 1024;
   }
+  CloseHandle(hProcess);
 #endif
 }
 

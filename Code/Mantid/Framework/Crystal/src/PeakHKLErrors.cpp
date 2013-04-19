@@ -22,6 +22,7 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidKernel/Quat.h"
 #include "MantidAPI/IConstraint.h"
+#include <cctype>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -57,6 +58,9 @@ namespace Mantid
       declareParameter( "SampleXOffset", 0.0, "Sample x offset" );
       declareParameter( "SampleYOffset", 0.0, "Sample y offset" );
       declareParameter( "SampleZOffset", 0.0, "Sample z offset" );
+      declareParameter( "GonRotx",0.0,"3rd Rotation of Goniometer about the x axis");
+      declareParameter( "GonRoty",0.0,"2nd Rotation of Goniometer about the y axis");
+      declareParameter( "GonRotz",0.0,"1st Rotation of Goniometer about the z axis");
       initMode =1;
       if( OptRuns == "")
         return;
@@ -270,6 +274,69 @@ namespace Mantid
 
     }
 
+  /**
+   *  Returns the matrix corresponding to a rotation of theta(degrees) around axis
+   *
+   *  @param theta   the angle of rotation in degrees
+   *  @param  axis   either x,y,z, or X,Y, or Z.
+   *
+   *  @return The matrix that corresponds to this action.
+   */
+   Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis( double theta, char axis)
+    {
+     int cint = toupper(axis);
+     char c =(char)cint;
+     std::string S(std::string("")+c);
+     size_t axisPos = std::string("XYZ").find(S);
+
+     if(  axisPos >2)
+     { Matrix<double>Res( 3, 3, true);
+
+       return Res;
+     }
+     double rTheta = theta/180*M_PI;
+     Matrix<double>Res(3,3);
+     Res.zeroMatrix();
+     Res[axisPos][axisPos]=1.0;
+     Res[(axisPos+1)%3][(axisPos+1)%3]= cos(rTheta);
+     Res[(axisPos+1)%3][(axisPos+2)%3]= -sin(rTheta);
+     Res[(axisPos+2)%3][(axisPos+2)%3]= cos(rTheta);
+     Res[(axisPos+2)%3][(axisPos+1)%3]= sin(rTheta);
+     return Res;
+    }
+
+   /**
+     *  Returns the derivative of the matrix corresponding to a rotation of theta(degrees) around axis
+     *  with respect to the angle or rotation in degrees.
+     *
+     *  @param theta   the angle of rotation in degrees
+     *  @param  axis   either x,y,z, or X,Y, or Z.
+     *
+     *  @return The derivative of the matrix that corresponds to this action with respect to degree rotation.
+     */
+   Matrix<double> PeakHKLErrors::DerivRotationMatrixAboutRegAxis( double theta, char axis)
+    {
+     int cint = toupper(axis);
+     char c =(char)cint;
+     std::string S(std::string("")+c);
+     size_t axisPos = std::string("XYZ").find(S);
+
+     if( axisPos >2)
+     { Matrix<double>Res( 3, 3, true);
+
+       return Res;
+     }
+     double rTheta = theta/180*M_PI;
+     Matrix<double>Res(3,3);
+     Res.zeroMatrix();
+     Res[axisPos][axisPos]=0.0;
+     Res[(axisPos+1)%3][(axisPos+1)%3]= -sin(rTheta);
+     Res[(axisPos+1)%3][(axisPos+2)%3]= -cos(rTheta);
+     Res[(axisPos+2)%3][(axisPos+2)%3]= -sin(rTheta);
+     Res[(axisPos+2)%3][(axisPos+1)%3]= cos(rTheta);
+     return Res*(M_PI/180.);
+    }
+
      void PeakHKLErrors::function1D  ( double *out, const double *xValues, const size_t nData )const
      {
       PeaksWorkspace_sptr Peaks =
@@ -288,8 +355,16 @@ namespace Mantid
       UBinv.Invert();
       UBinv /= ( 2 * M_PI );
 
+      double GonRotx =getParameter("GonRotx");
+      double GonRoty =getParameter("GonRoty");
+      double GonRotz =getParameter("GonRotz");
+      Matrix<double> GonRot= RotationMatrixAboutRegAxis( GonRotx,'x')*
+                             RotationMatrixAboutRegAxis( GonRoty,'y')*
+                             RotationMatrixAboutRegAxis( GonRotz,'z');
+
+
       double ChiSqTot = 0.0;
-      for( size_t i = 0; i< nData; i++ )
+      for( size_t i = 0; i< nData; i+= 3 )
       {
         int peakNum = (int)( .5 + xValues[i] );
         IPeak & peak_old = Peaks->getPeak( peakNum );
@@ -298,28 +373,32 @@ namespace Mantid
         std::string runNumStr = boost::lexical_cast<std::string>( runNum );
         Peak peak = SCDPanelErrors::createNewPeak( peak_old, instNew, 0, peak_old.getL1() );
 
+
         size_t N = OptRuns.find( "/" + runNumStr + "/" );
         if( N < OptRuns.size() )
         {
+          peak.setGoniometerMatrix( GonRot*RunNum2GonMatrixMap[runNum] );
 
-          peak.setGoniometerMatrix( RunNum2GonMatrixMap[runNum] );
         }
-       // Kernel::Matrix<double> Gon  = peak.getGoniometerMatrix(  );
-       // std::cout<<"Gon = "<< Gon<<std::endl;
+        else
+        {
+          peak.setGoniometerMatrix( GonRot*peak.getGoniometerMatrix());
+        }
         V3D hkl = UBinv * peak.getQSampleFrame();
 
-        double d = 0;
+
+
         for( int k = 0; k<3; k++ )
         {
           double d1 = hkl[k] - floor( hkl[k] );
           if( d1>.5 ) d1 = d1 - 1;
           if( d1 < -.5 ) d1 = d1 + 1;
-          if( fabs( d1 )>fabs( d ) )
-            d = d1;
-        }
-        out[i] = d;
 
-        ChiSqTot += d*d;
+          out[i+k] = d1;
+          ChiSqTot += d1*d1;
+        }
+
+
       }
 
       g_log.debug() << "------------------------Function-----------------------------------------------"<<std::endl;
@@ -354,6 +433,18 @@ namespace Mantid
       UBinv.Invert();
       UBinv /= 2 * M_PI;
 
+      double GonRotx = getParameter( "GonRotx" );
+      double GonRoty = getParameter( "GonRoty" );
+      double GonRotz = getParameter( "GonRotz" );
+      Matrix<double> InvGonRotxMat = RotationMatrixAboutRegAxis( GonRotx,'x');
+      Matrix<double> InvGonRotyMat = RotationMatrixAboutRegAxis( GonRoty,'y');
+      Matrix<double> InvGonRotzMat = RotationMatrixAboutRegAxis( GonRotz,'z');
+      Matrix<double> GonRot= InvGonRotxMat * InvGonRotyMat * InvGonRotzMat;
+
+      InvGonRotxMat.Invert();
+      InvGonRotyMat.Invert();
+      InvGonRotzMat.Invert();
+
       std::map<int, Kernel::Matrix<double> > RunNums2GonMatrix;
       getRun2MatMap(  Peaks, OptRuns,RunNums2GonMatrix);
 
@@ -371,7 +462,7 @@ namespace Mantid
                               parameterIndex( std::string( "SampleYOffset" ) ),
                               parameterIndex( std::string( "SampleZOffset" ) ) };
 
-      for ( size_t i = 0; i < nData; i++ )
+      for ( size_t i = 0; i < nData; i += 3 )
       {
         int peakNum = (int)( .5 + xValues[i] );
         IPeak & peak_old = Peaks->getPeak( peakNum );
@@ -381,7 +472,11 @@ namespace Mantid
         std::string runNumStr = boost::lexical_cast<std::string>( runNum );
 
         for ( int kk = 0; kk <(int) nParams(); kk++ )
+        {
           out->set( i, kk , 0.0 );
+          out->set( i+1, kk , 0.0 );
+          out->set( i+1, kk , 0.0 );
+        }
 
         double chi, phi, omega;
         size_t chiParamNum, phiParamNum, omegaParamNum;
@@ -393,7 +488,7 @@ namespace Mantid
           phi = getParameter( "phi" + ( runNumStr ) );
           omega = getParameter( "omega" + ( runNumStr ) );
 
-          peak.setGoniometerMatrix( RunNums2GonMatrix[runNum] );
+          peak.setGoniometerMatrix(GonRot*RunNums2GonMatrix[runNum] );
 
           chiParamNum = parameterIndex( "chi" + ( runNumStr ) );
           phiParamNum = parameterIndex( "phi" + ( runNumStr ) );
@@ -407,74 +502,82 @@ namespace Mantid
           chi = phichiOmega[1];
           phi = phichiOmega[2];
           omega = phichiOmega[0];
-
+         // peak.setGoniometerMatrix( GonRot*Gon.getR());
           chiParamNum = phiParamNum =  omegaParamNum = nParams() + 10;
+          peak.setGoniometerMatrix( GonRot*peak.getGoniometerMatrix());
         }
+        //NOTE:Use getQLabFrame except for below.
+        // For parameters the getGoniometerMatrix should remove GonRot, for derivs wrt GonRot*, wrt chi*,phi*,etc.
 
 
-        double TT = M_PI / 180.0;
-        chi *= TT;
-        phi *= TT;
-        omega *= TT;
         V3D hkl = UBinv * peak.getQSampleFrame();
-        int maxoffsetPos = -1;
-        double maxOffset = 0.0;
 
-         for ( int k = 0; k<3; k++ )
-          {
-            double d = hkl[k] - floor( hkl[k] );
-
-             if( d >.5 ) d = d - 1;
-             if( d < - .5 ) d = d + 1;
-             if( fabs( d ) > fabs( maxOffset ) )
-              {
-                maxOffset = d;
-                maxoffsetPos = k;
-              }
-          }
+        //Deriv wrt chi phi and omega
         if ( phiParamNum < nParams() )
         {
-          //Rotation Matrices for chi, phi and omega
-          double chiList[] =
-          { cos( chi ), -sin( chi ), 0, sin( chi ), cos( chi ), 0, 0,  0 , 1 };
-          double phiList[] =
-          { cos( phi ), 0, sin( phi ), 0,  1, 0, -sin( phi ) , 0,  cos( phi ) };
-          double omegaList[] =
-          { cos( omega ), 0, sin( omega ), 0,   1, 0, -sin( omega ) , 0, cos( omega ) };
+          Matrix<double> chiMatrix= RotationMatrixAboutRegAxis( chi,'z');
+          Matrix<double> phiMatrix= RotationMatrixAboutRegAxis( phi,'y');
+          Matrix<double> omegaMatrix= RotationMatrixAboutRegAxis( omega,'y');
 
-          //Derivatives of Rotation matrices for chi, phi, omega in radiams
-          double DchiList[] =
-          { -sin( chi ), -cos( chi ), 0, cos( chi ), -sin( chi ), 0, 0,  0 , 0 };
-          double DphiList[] =
-          {  -sin( phi ), 0, cos( phi ), 0,  0, 0, -cos( phi ) ,0, -sin( phi )  };
-          double DomegaList[] =
-          { -sin( omega ), 0, cos( omega ), 0, 0, 0, -cos( omega ) ,0, -sin( omega ) };
+          Matrix<double> dchiMatrix= DerivRotationMatrixAboutRegAxis( chi,'z');
+          Matrix<double> dphiMatrix= DerivRotationMatrixAboutRegAxis( phi,'y');
+          Matrix<double> domegaMatrix= DerivRotationMatrixAboutRegAxis( omega,'y');
 
-          //Convert lists into Matrices to get additional functionality
-          std::vector<double> VV( chiList, chiList + 9 );
-
-          Matrix<double> chiMatrix( VV );
-          Matrix<double> phiMatrix( std::vector<double> ( phiList, phiList + 9 ) );
-          Matrix<double> omegaMatrix( std::vector<double> ( omegaList, omegaList + 9  ) );
-          Matrix<double> dchiMatrix( std::vector<double> ( DchiList, DchiList + 9  ) );
-          Matrix<double> dphiMatrix( std::vector<double> ( DphiList, DphiList + 9  ) );
-          Matrix<double> domegaMatrix( std::vector<double> ( DomegaList, DomegaList + 9  ) );
-
+          Matrix<double>InvG = omegaMatrix*chiMatrix*phiMatrix;
+          InvG.Invert();
           //Calculate Derivatives wrt chi(phi,omega) in degrees
-          Matrix<double> R = omegaMatrix * chiMatrix * dphiMatrix * ( M_PI/180. );
+          Matrix<double> R = omegaMatrix * chiMatrix * dphiMatrix ;
+          Matrix<double>InvR =InvG*R*InvG*-1;
           V3D lab = peak.getQLabFrame();
-          V3D Dhkl0 = UBinv * R.Transpose() * lab;
+          V3D Dhkl0 = UBinv * InvR * lab;
 
-          R = omegaMatrix * dchiMatrix * phiMatrix * ( M_PI/180 );
-          V3D Dhkl1 = UBinv * R.Transpose() * peak.getQLabFrame();
-          R = domegaMatrix * chiMatrix * phiMatrix * ( M_PI/180 );
-          V3D Dhkl2 = UBinv * R.Transpose() * peak.getQLabFrame();
+          R = omegaMatrix * dchiMatrix * phiMatrix ;
+          InvR =InvG*R*InvG*-1;
+          V3D Dhkl1 = UBinv * InvR * peak.getQLabFrame();
 
-          out->set( i, chiParamNum,  Dhkl1[maxoffsetPos] );
-          out->set( i, phiParamNum,  Dhkl0[maxoffsetPos] );
-          out->set( i, omegaParamNum,  Dhkl2[maxoffsetPos] );
+          R = domegaMatrix * chiMatrix * phiMatrix ;
+          InvR =InvG*R*InvG*-1;
+          V3D Dhkl2 = UBinv *  InvR* peak.getQLabFrame();//R.transpose should be R inverse
+
+          out->set(i, chiParamNum, Dhkl1[0]);
+          out->set(i + 1, chiParamNum, Dhkl1[1]);
+          out->set(i + 2, chiParamNum, Dhkl1[2]);
+          out->set(i, phiParamNum, Dhkl0[0]);
+          out->set(i + 1, phiParamNum, Dhkl0[1]);
+          out->set(i + 2, phiParamNum, Dhkl0[2]);
+          out->set(i, omegaParamNum, Dhkl2[0]);
+          out->set(i + 1, omegaParamNum, Dhkl2[1]);
+          out->set(i + 2, omegaParamNum, Dhkl2[2]);
+
+
           }//if optimize for chi phi and omega on this peak
 
+        //------------------------Goniometer Rotation Derivatives -----------------------
+              Matrix<double>InvGonRot( GonRot);
+              InvGonRot.Invert();
+              Matrix<double> InvGon = InvGonRot*peak.getGoniometerMatrix();
+              InvGon.Invert();
+              V3D  DGonx =(UBinv * InvGon * InvGonRotzMat * InvGonRotyMat
+                                          * DerivRotationMatrixAboutRegAxis(-GonRotx, 'x') * // - gives inverse of GonRot
+                                           peak.getQLabFrame())*-1;
+
+              V3D DGony  = (UBinv * InvGon * InvGonRotzMat *
+                                             DerivRotationMatrixAboutRegAxis(-GonRoty, 'y') *
+                                             InvGonRotxMat * peak.getQLabFrame())*-1;
+              V3D DGonz  =(UBinv * InvGon *
+                                           DerivRotationMatrixAboutRegAxis(-GonRotz, 'z')
+                                          * InvGonRotyMat * InvGonRotxMat * peak.getQLabFrame())*-1;
+
+              size_t paramnum = parameterIndex("GonRotx");
+              out->set(i, paramnum, DGonx[0]);
+              out->set(i + 1, paramnum, DGonx[1]);
+              out->set(i + 2, paramnum, DGonx[2]);
+              out->set(i, parameterIndex("GonRoty"), DGony[0]);
+              out->set(i + 1, parameterIndex("GonRoty"), DGony[1]);
+              out->set(i + 2, parameterIndex("GonRoty"), DGony[2]);
+              out->set(i, parameterIndex("GonRotz"), DGonz[0]);
+              out->set(i + 1, parameterIndex("GonRotz"), DGonz[1]);
+              out->set(i + 2, parameterIndex("GonRotz"), DGonz[2]);
           //-------------------- Sample Orientation derivatives ----------------------------------
            //Qlab = -KV + k|V|*beamdir
            //D = pos-sampPos
@@ -487,7 +590,7 @@ namespace Mantid
            V3D V = D/t1;
 
            //Derivs wrt sample x, y, z
-           //Ddsx =( - 1, 0, 0),  d|D|^2/dsx 2|D|d|D|/dsx =d(tranp(D)* D)/dsx =2 Ddsx* tranp(D)
+           //Ddsx =( - 1, 0, 0),  d|D|^2/dsx -> 2|D|d|D|/dsx =d(tranp(D)* D)/dsx =2 Ddsx* tranp(D)
            //|D| also called Dmag
            V3D Dmagdsxsysz( D );
            Dmagdsxsysz *= ( -1/D.norm() );
@@ -512,7 +615,9 @@ namespace Mantid
              V3D dhkl = UBinv * dQSamp;
 
 
-             out->set( i,  paramNums[x], dhkl[ maxoffsetPos]  );
+             out->set( i,  paramNums[x], dhkl[ 0]  );
+             out->set( i+1,  paramNums[x], dhkl[ 1]  );
+             out->set( i+2,  paramNums[x], dhkl[ 2]  );
 
            }
 

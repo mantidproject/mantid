@@ -129,7 +129,7 @@ endif ()
 add_subdirectory (MDAlgorithms)
 add_subdirectory (MDEvents)
 add_subdirectory (Doxygen)
-#add_subdirectory (ScriptRepository)
+add_subdirectory (ScriptRepository)
 
 ###########################################################################
 # Add a custom target to build all of the Framework
