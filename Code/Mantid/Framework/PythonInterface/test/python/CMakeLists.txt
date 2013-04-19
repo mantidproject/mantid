@@ -8,5 +8,4 @@ if (PYUNITTEST_FOUND)
 
   add_subdirectory( mantid )
   add_subdirectory( plugins )
-  add_subdirectory( PythonAlgorithms ) # Temporary
 endif ()
