@@ -356,7 +356,7 @@ namespace Algorithms
       // Move on to the next one if this is not a TSP
       if ( tsp == NULL ) continue;
       // Don't keep ones with only one entry
-      if ( tsp->realSize() < 2 ) continue;
+      //if ( tsp->realSize() < 2 ) continue;
       // Now make sure it's either an int or double tsp, and if so add log to the list
       if ( dynamic_cast<TimeSeriesProperty<double>* >(*log) || dynamic_cast<TimeSeriesProperty<int>* >(*log))
       {
