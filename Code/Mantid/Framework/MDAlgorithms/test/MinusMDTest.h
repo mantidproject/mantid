@@ -95,15 +95,15 @@ public:
     //cleanup
     if ((inPlace==1)&&rhs->isFileBacked())
     {
-        rhs->getBoxController()->closeFile(true);
+        rhs->clearFileBacked(false);
     }
     if ((inPlace==2)&&lhs->isFileBacked())
     {
-        lhs->getBoxController()->closeFile(true);
+        lhs->clearFileBacked(false);
     }
     if (ws->isFileBacked())
     {
-        ws->getBoxController()->closeFile(true);
+        ws->clearFileBacked(false);
     }
     AnalysisDataService::Instance().remove(outWSName);
   }

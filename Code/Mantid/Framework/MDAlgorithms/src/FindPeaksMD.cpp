@@ -305,7 +305,7 @@ namespace MDAlgorithms
 
     // TODO: This might be slow, progress report?
     // Make sure all centroids are fresh
-    ws->getBox()->refreshCentroid();
+    //ws->getBox()->refreshCentroid();
 
     if (ws->getNumExperimentInfo() == 0)
       throw std::runtime_error("No instrument was found in the MDEventWorkspace. Cannot find peaks.");
@@ -328,9 +328,9 @@ namespace MDAlgorithms
     }
     g_log.notice() << "Threshold signal density: " << thresholdDensity << std::endl;
 
-    typedef MDBoxBase<MDE,nd> * boxPtr;
+    typedef API::IMDNode * boxPtr;
     // We will fill this vector with pointers to all the boxes (up to a given depth)
-    typename std::vector<boxPtr> boxes;
+    typename std::vector<API::IMDNode *> boxes;
 
     // Get all the MDboxes
     progress(0.10, "Getting Boxes");
@@ -338,18 +338,18 @@ namespace MDAlgorithms
 
 
     // This pair is the <density, ptr to the box>
-    typedef std::pair<double, boxPtr> dens_box;
+    typedef std::pair<double,  API::IMDNode *> dens_box;
 
     // Map that will sort the boxes by increasing density. The key = density; value = box *.
-    typename std::multimap<double, boxPtr> sortedBoxes;
+    typename std::multimap<double, API::IMDNode *> sortedBoxes;
 
     // --------------- Sort and Filter by Density -----------------------------
     progress(0.20, "Sorting Boxes by Density");
-    typename std::vector<boxPtr>::iterator it1;
-    typename std::vector<boxPtr>::iterator it1_end = boxes.end();
-    for (it1 = boxes.begin(); it1 != it1_end; it1++)
+    auto  it1= boxes.begin();
+    auto  it1_end = boxes.end();
+    for (; it1 != it1_end; it1++)
     {
-      boxPtr box = *it1;
+      auto box = *it1;
       double density = box->getSignalNormalized() * m_densityScaleFactor;
       // Skip any boxes with too small a signal density.
       if (density > thresholdDensity)
@@ -358,7 +358,7 @@ namespace MDAlgorithms
 
     // --------------- Find Peak Boxes -----------------------------
     // List of chosen possible peak boxes.
-    std::vector<boxPtr> peakBoxes;
+    std::vector<API::IMDNode *> peakBoxes;
 
     prog = new Progress(this, 0.30, 0.95, MaxPeaks);
 
@@ -448,7 +448,7 @@ namespace MDAlgorithms
       try
       {
         auto p = this->createPeak(Q, binCount);
-        if(m_addDetectors) addDetectors(*p,*box);
+        if(m_addDetectors) addDetectors(*p,*dynamic_cast<MDBoxBase<MDE,nd> *>(box));
         peakWS->addPeak(*p);
       }
       catch (std::exception &e)

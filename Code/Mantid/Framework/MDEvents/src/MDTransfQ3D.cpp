@@ -22,7 +22,18 @@ namespace Mantid
       }
     }
 
-
+    /** Calculates 3D transformation of the variable coordinates and (if applicable) signal and error depending on 3D coordinates 
+      * (e.g. Lorents corrections) 
+      *@param x -- the transformed values
+      *@param Coord -- 3 or 4D coordinate of the resulting event
+      *@param s -- the signal
+      *@param err --the error
+      *
+      *@return Coord -- converted 3D coordinates corresponding to given detector and X-vale
+      Optionally:
+      @return s    -- Lorentz corrected signal
+      @return err  -- Lorentz corrected error
+    */
     bool MDTransfQ3D::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord,double &s, double &err)const
     {
       if(m_Emode == Kernel::DeltaEMode::Elastic)

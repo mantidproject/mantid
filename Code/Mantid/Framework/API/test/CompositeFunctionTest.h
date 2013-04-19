@@ -76,6 +76,8 @@ public:
   void init(const size_t &,const size_t &,const size_t &) { }
   void generateHistogram(const std::size_t , const MantidVec& , MantidVec& , MantidVec& , bool ) const { }
 
+  void clearFileBacked(bool ){};
+  ITableWorkspace_sptr makeBoxTable(size_t /* start*/, size_t /*num*/){return ITableWorkspace_sptr();}
 private:
   std::vector<CompositeFunctionTest_MocSpectrum> m_spectra;
   size_t m_blocksize;

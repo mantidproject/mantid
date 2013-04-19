@@ -103,27 +103,27 @@ Load(Filename=WS_Name,OutputWorkspace=WS_Name)
 # set up target ws name and remove target workspace with the same name which can occasionally exist.
 RezWS = 'WS_3D'
 try:
-	DeleteWorkspace(RezWS)
+    DeleteWorkspace(RezWS)
 except ValueError:
-	print "Target ws ",RezWS," not found in analysis data service\n"
+    print "Target ws ",RezWS," not found in analysis data service\n"
 i=0
 # let's assume this is the temperature range obtained in experiments and 
 # each data file is obtained for particular temperature. 
 T = [1,1.5,2,2.5,3,3.5,4.,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10]
 for i in range(0,len(T),1):
-	# EMULATE LOAD OF DIFFERENT results obtained for different temperatures. ------>
-	SourceWS = 'SourcePart'+str(i)
-	# Load(Filename=WS_Name,OutputWorkspace=WS_Name)	
-	CloneWorkspace(InputWorkspace=WS_Name,OutputWorkspace=SourceWS)
-	# Each workspace has the temperature from the list above associated with it through the correspondent log file
-	AddSampleLog(Workspace=SourceWS,LogName='T',LogText=str(T[i]),LogType='Number Series')
-	# END EMULATION ---------------------------------------------------------------------
+    # EMULATE LOAD OF DIFFERENT results obtained for different temperatures. ------>
+    SourceWS = 'SourcePart'+str(i)
+    # Load(Filename=WS_Name,OutputWorkspace=WS_Name)	
+    CloneWorkspace(InputWorkspace=WS_Name,OutputWorkspace=SourceWS)
+    # Each workspace has the temperature from the list above associated with it through the correspondent log file
+    AddSampleLog(Workspace=SourceWS,LogName='T',LogText=str(T[i]),LogType='Number Series')
+    # END EMULATION ---------------------------------------------------------------------
 
-	ConvertToMD(InputWorkspace=SourceWS,OutputWorkspace=RezWS,QDimensions='|Q|',OverwriteExisting=0,\
+    ConvertToMD(InputWorkspace=SourceWS,OutputWorkspace=RezWS,QDimensions='|Q|',OverwriteExisting=0,\
         dEAnalysisMode='Direct',OtherDimensions='T',PreprocDetectorsWS='DetWS',
         MinValues='0,-10,0',MaxValues='12,10,10',SplitInto="100,100,20")
-	# delete source workspace from memory;
-	DeleteWorkspace(SourceWS)
+    # delete source workspace from memory;
+    DeleteWorkspace(SourceWS)
 
 plotSlice(RezWS, xydim=["|Q|","DeltaE"], slicepoint=[0,0] )
 

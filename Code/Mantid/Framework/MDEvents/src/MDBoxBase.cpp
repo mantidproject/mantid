@@ -1,4 +1,5 @@
 #include "MantidMDEvents/MDBoxBase.h"
+#include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include <limits>
@@ -16,38 +17,42 @@ namespace MDEvents
   /** Default constructor.
    */
   TMDE(
-  MDBoxBase)::MDBoxBase()
-    : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
+  MDBoxBase)::MDBoxBase(Mantid::API::BoxController * const boxController,const uint32_t depth,const size_t boxID):
+      m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_inverseVolume(std::numeric_limits<coord_t>::quiet_NaN()),
-      m_BoxController(boost::make_shared<API::BoxController>(nd)),
-      m_depth(0),
-      m_parent(NULL)
+      m_BoxController(boxController),
+      m_depth(depth),
+      m_parent(NULL),
+      m_fileID(boxID)
   {
+      if(boxController)
+      {
+        // Give it a fresh ID from the controller.
+          if(boxID==std::numeric_limits<size_t>::max()) // Give it a fresh ID from the controller.
+            this->m_fileID =  boxController->getNextId() ;
+      }
 
-#ifdef MDBOX_TRACK_CENTROID
-    // Clear the running total of the centroid
-    for (size_t d=0; d<nd; d++)
-      m_centroid[d] = 0;
-#endif
+
   }
-
-
   //-----------------------------------------------------------------------------------------------
   /** Constructor with extents
    */
   TMDE(
-  MDBoxBase)::MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
+  MDBoxBase)::MDBoxBase(Mantid::API::BoxController *const boxController,const uint32_t depth,const size_t boxID,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
-      m_inverseVolume(1.0),
-      m_BoxController(boost::make_shared<API::BoxController>(nd)),
-      m_depth(0),
-      m_parent(NULL)
+      m_inverseVolume(UNDEF_COORDT),
+      m_BoxController(boxController),
+      m_depth(depth),
+      m_parent(NULL),
+      m_fileID(boxID)
   {
-#ifdef MDBOX_TRACK_CENTROID
-    // Clear the running total of the centroid
-    for (size_t d=0; d<nd; d++)
-      m_centroid[d] = 0;
-#endif
+      if(boxController)
+      {
+        // Give it a fresh ID from the controller.
+          if(boxID==UNDEF_SIZET) // Give it a fresh ID from the controller.
+            this->m_fileID =  boxController->getNextId() ;
+      }
+
     // Set the extents
     if (extentsVector.size() != nd) throw std::invalid_argument("MDBoxBase::ctor(): extentsVector.size() must be == nd.");
     for (size_t d=0; d<nd; d++)
@@ -61,128 +66,27 @@ namespace MDEvents
   /** Copy constructor. Copies the extents, depth, etc.
    * and recalculates the boxes' volume.
    * @param box :: incoming box to copy.
+   * @param otherBC :: if present, other (different from the current one) box controller pointer
    */
   TMDE(
-  MDBoxBase)::MDBoxBase(const MDBoxBase<MDE,nd> & box)
-  : ISaveable(box),
+  MDBoxBase)::MDBoxBase(const MDBoxBase<MDE,nd> & box,Mantid::API::BoxController * const otherBC):
     m_signal(box.m_signal), m_errorSquared(box.m_errorSquared), m_totalWeight(box.m_totalWeight),
-    m_inverseVolume(box.m_inverseVolume), m_depth(box.m_depth),
-    m_parent(box.m_parent)
+    m_inverseVolume(box.m_inverseVolume),
+    m_BoxController(otherBC),
+    m_depth(box.m_depth),
+    m_parent(box.m_parent),
+    m_fileID(box.m_fileID)
   {
-    // Save the controller in this object.
-    this->m_BoxController = box.m_BoxController;
+  
     // Copy the extents
     for (size_t d=0; d<nd; d++)
       this->extents[d] = box.extents[d];
-    // Copy the depth
-    this->m_depth = box.getDepth();
-#ifdef MDBOX_TRACK_CENTROID
-    // Clear the running total of the centroid
-    for (size_t d=0; d<nd; d++)
-      m_centroid[d] = 0;
-#endif
  
   }
 
-  //-----------------------------------------------------------------------------------------------
-  /** Add several events, starting and stopping at particular point in a vector.
-   * Bounds checking IS performed, and events outside the range are rejected.
-   *
-   * NOTE: You must call refreshCache() after you are done, to calculate the
-   *  nPoints, signal and error.
-   *
-   * @param events :: vector of events to be copied.
-   * @param start_at :: begin at this index in the array
-   * @param stop_at :: stop at this index in the array
-   * @return the number of events that were rejected (because of being out of bounds)
-   */
-  TMDE(
-  size_t MDBoxBase)::addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
-  {
-    size_t numBad = 0;
-    // --- Go event by event and add them ----
-    typename std::vector<MDE>::const_iterator it = events.begin() + start_at;
-    typename std::vector<MDE>::const_iterator it_end = events.begin() + stop_at;
-    for (; it != it_end; ++it)
-    {
-      //Check out-of-bounds-ness
-      bool badEvent = false;
-      for (size_t d=0; d<nd; d++)
-      {
-        coord_t x = it->getCenter(d);
-        if (extents[d].outside(x))
-        {
-          badEvent = true;
-          break;
-        }
-      }
+  
 
-      if (badEvent)
-        // Event was out of bounds. Count it
-        ++numBad;
-      else
-        // Event was in bounds; add it
-        addEvent(*it);
-    }
-
-    return numBad;
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add several events, starting and stopping at particular point in a vector.
-   * This is the fastest way to add many events because:
-   *  - Bounds checking is NOT performed.
-   *  - This call is NOT thread-safe (no locking is made while adding).
-   *
-   * NOTE: You must call refreshCache() after you are done, to calculate the
-   *  nPoints, signal and error.
-   *
-   * @param events :: vector of events to be copied.
-   * @param start_at :: begin at this index in the array
-   * @param stop_at :: stop at this index in the array
-   * @return 0 (since no events were rejected)
-   */
-  TMDE(
-  size_t MDBoxBase)::addEventsPartUnsafe(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
-  {
-    // --- Go event by event and add them ----
-    typename std::vector<MDE>::const_iterator it = events.begin() + start_at;
-    typename std::vector<MDE>::const_iterator it_end = events.begin() + stop_at;
-    for (; it != it_end; ++it)
-    {
-      //Check out-of-bounds-ness
-      // Event was in bounds; add it
-      addEventUnsafe(*it);
-    }
-
-    return 0;
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /** Add all of the events contained in a vector, with:
-   * - No bounds checking.
-   * - No thread-safety.
-   *
-   * @param events :: Vector of MDEvent
-   */
-  TMDE(
-  size_t MDBoxBase)::addEventsUnsafe(const std::vector<MDE> & events)
-  {
-    return this->addEventsPartUnsafe(events, 0, events.size());
-  }
-
-  //---------------------------------------------------------------------------------------------------
-  /** Add all of the events contained in a vector, with:
-   * - Bounds checking.
-   * - Thread-safety.
-   *
-   * @param events :: Vector of MDEvent
-   */
-  TMDE(
-  size_t MDBoxBase)::addEvents(const std::vector<MDE> & events)
-  {
-    return this->addEventsPart(events, 0, events.size());
-  }
+ 
 
 
   //---------------------------------------------------------------------------------------------------
@@ -351,10 +255,74 @@ namespace MDEvents
     return out;
   }
 
+//-----------------------------------------------------------------------------------------------
+  /** Add several events, starting and stopping at particular point in a vector.
+   * Bounds checking IS performed, and events outside the range are rejected.
+   *
+   * NOTE: You must call refreshCache() after you are done, to calculate the
+   *  nPoints, signal and error.
+   *
+   * @param events :: vector of events to be copied.
+   * @return the number of events that were rejected (because of being out of bounds)
+   */
+  TMDE(
+  size_t MDBoxBase)::addEvents(const std::vector<MDE> & events)
+  {
+    size_t numBad = 0;
+    // --- Go event by event and add them ----
+    typename std::vector<MDE>::const_iterator it = events.begin();
+    typename std::vector<MDE>::const_iterator it_end = events.end();
+    m_dataMutex.lock();
+    for (; it != it_end; ++it)
+    {
+      //Check out-of-bounds-ness
+      bool badEvent = false;
+      for (size_t d=0; d<nd; d++)
+      {
+        coord_t x = it->getCenter(d);
+        if (extents[d].outside(x))
+        {
+          badEvent = true;
+          break;
+        }
+      }
+
+      if (badEvent)
+        // Event was out of bounds. Count it
+        ++numBad;
+      else
+        // Event was in bounds; add it
+        addEventUnsafe(*it);
+    }
+    m_dataMutex.unlock();
+    return numBad;
+  }
 
 
+  //---------------------------------------------------------------------------------------------------
+  /** Add all of the events contained in a vector, with:
+   * - No bounds checking.
+   * - No thread-safety.
+   *
+   * @param events :: Vector of MDEvent
+   */
+  TMDE(
+  size_t MDBoxBase)::addEventsUnsafe(const std::vector<MDE> & events)
+  {
+   // --- Go event by event and add them ----
+    typename std::vector<MDE>::const_iterator it = events.begin() ;
+    typename std::vector<MDE>::const_iterator it_end = events.end() ;
+    for (; it != it_end; ++it)
+    {
+      //Check out-of-bounds-ness
+      // Event was in bounds; add it
+      addEventUnsafe(*it);
+    }
 
+    return 0;    
 
+  }  
+   
 } // namespace Mantid
 } // namespace MDEvents
 

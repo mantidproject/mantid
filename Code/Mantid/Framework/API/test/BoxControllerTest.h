@@ -3,9 +3,12 @@
 
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidAPI/BoxController.h"
+#include "MantidAPI/IBoxControllerIO.h"
+#include "MantidTestHelpers/BoxControllerDummyIO.h"
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -160,6 +163,10 @@ public:
     {
       TS_ASSERT_EQUALS( a.getSplitInto(d), b.getSplitInto(d));
     }
+    if(a.isFileBacked() && b.isFileBacked())
+    {
+        TS_ASSERT_DIFFERS(a.getFileIO(),b.getFileIO());
+    }
   }
 
   /// Generate XML and read it back
@@ -181,29 +188,55 @@ public:
     compareBoxControllers(a, b);
   }
 
-  void test_copy_constructor()
+  void test_Clone()
   {
     BoxController a(2);
     a.setMaxDepth(4);
     a.setSplitInto(10);
     a.setMaxDepth(10);
     a.setMaxId(123456);
-    BoxController b(a);
-    // Check that it is the same
-    compareBoxControllers(a, b);
+    auto b  = BoxController_sptr(a.clone());
+    // Check that settings are the same but BC are different
+    compareBoxControllers(a, *b);
+  }
+
+  void test_CloneFileBased()
+  {
+    BoxController_sptr a = boost::shared_ptr<BoxController>(new BoxController(2));
+    a->setMaxDepth(4);
+    a->setSplitInto(10);
+    a->setMaxDepth(10);
+    a->setMaxId(123456);
+    boost::shared_ptr<IBoxControllerIO> pS(new MantidTestHelpers::BoxControllerDummyIO(a));
+    TS_ASSERT_THROWS_NOTHING(a->setFileBacked(pS,"fakeFile"));
+    TS_ASSERT(a->isFileBacked());
+
+     auto b  = BoxController_sptr(a->clone());
+    // Check that settings are the same but BC are different
+    compareBoxControllers(*a, *b);
+
+    TS_ASSERT(!b->isFileBacked());
+    boost::shared_ptr<IBoxControllerIO> pS2(new MantidTestHelpers::BoxControllerDummyIO(b));
+    TS_ASSERT_THROWS_NOTHING(b->setFileBacked(pS2,"fakeFile2"));
+
+    // Check that settings are the same but BC are different
+    compareBoxControllers(*a, *b);
+    TS_ASSERT(b->isFileBacked());
+
+
+
   }
 
   void test_MRU_access()
   {
-    BoxController a(2);
-    DiskBuffer & dbuf = a.getDiskBuffer();
+    BoxController_sptr a = boost::shared_ptr<BoxController>(new BoxController(2));
+    boost::shared_ptr<IBoxControllerIO> pS(new MantidTestHelpers::BoxControllerDummyIO(a));
+    a->setFileBacked(pS,"existingFakeFile");
+    DiskBuffer * dbuf = a->getFileIO();
+
     // Set the cache parameters
-
-    // Can't have 0-sized events
-    TS_ASSERT_THROWS_ANYTHING( a.setCacheParameters(0, 4560) );
-    a.setCacheParameters(40, 123);
-
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferSize(), 123);
+    TS_ASSERT_THROWS_NOTHING(dbuf->setWriteBufferSize(123));
+    TS_ASSERT_EQUALS( dbuf->getWriteBufferSize(), 123);
   }
 
   void test_construction_defaults()
@@ -213,7 +246,24 @@ public:
     TS_ASSERT_EQUALS(2, box_controller.getNDims());
     TS_ASSERT_EQUALS(1, box_controller.getNumSplit());
     TS_ASSERT_EQUALS(0, box_controller.getMaxId());
-    //TS_ASSERT_EQUALS(true, box_controller.useWriteBuffer());
+  }
+
+  void test_openCloseFileBacked()
+  {
+    BoxController_sptr a = boost::shared_ptr<BoxController>(new BoxController(2));
+    TS_ASSERT(!a->isFileBacked());
+  
+    boost::shared_ptr<IBoxControllerIO> pS(new MantidTestHelpers::BoxControllerDummyIO(a));
+    TS_ASSERT_THROWS_NOTHING(a->setFileBacked(pS,"fakeFile"));
+
+    TSM_ASSERT("Box controller should have open faked file",pS->isOpened());
+    std::string fileName = pS->getFileName();
+    TSM_ASSERT_EQUALS("Box controller file should be named as requested ",0,fileName.compare(fileName.size()-8,8,std::string("fakeFile")));
+    TS_ASSERT(a->isFileBacked());
+
+    TS_ASSERT_THROWS_NOTHING(a->clearFileBacked());
+    TS_ASSERT(!a->isFileBacked());
+    TSM_ASSERT("Box controller should now close the faked file",!pS->isOpened());
   }
 
 

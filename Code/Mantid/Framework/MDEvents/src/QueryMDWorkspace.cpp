@@ -169,11 +169,13 @@ namespace MDEvents
     std::vector<double> TotalErrorSquared(depth, 0);
     std::vector<std::vector<double> > Dims(depth, std::vector<double>(nd,0.0) );
 
-    std::vector<MDBoxBase<MDE,nd> *> boxes;
+    std::vector<API::IMDNode *> boxes;
     ws->getBox()->getBoxes(boxes, depth, true);
     for (size_t i=0; i<boxes.size(); i++)
     {
-      MDBoxBase<MDE,nd> * box = boxes[i];
+      MDBoxBase<MDE,nd> * box =dynamic_cast<MDBoxBase<MDE,nd> * >( boxes[i]);
+      if(!box)
+          throw(std::runtime_error("Can not cast IMDNode to any type of boxes"));
       size_t d = box->getDepth();
       NumBoxes[d] += 1;
       if (box->getNPoints() > 0)

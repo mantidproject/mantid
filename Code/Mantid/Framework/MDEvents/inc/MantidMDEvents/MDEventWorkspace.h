@@ -4,8 +4,8 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/System.h"
-//#include "MantidAPI/BoxController.h"
-#include "MantidMDEvents/BoxCtrlChangesList.h"
+#include "MantidAPI/BoxController.h"
+//#include "MantidMDEvents/BoxCtrlChangesList.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDLeanEvent.h"
@@ -99,11 +99,11 @@ namespace MDEvents
 
     virtual void setMinRecursionDepth(size_t minDepth);
 
+    Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num);
     //------------------------ (END) IMDEventWorkspace Methods -----------------------------------------
 
-    Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num);
 
-    virtual void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly)
+    virtual void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly)
     {
       this->getBox()->getBoxes(boxes,maxDepth,leafOnly);
     }
@@ -114,7 +114,7 @@ namespace MDEvents
 
     size_t addEvents(const std::vector<MDE> & events);
 
-    void addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog);
+    //void addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog);
 
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > getMinimumExtents(size_t depth=2);
 
@@ -138,9 +138,9 @@ namespace MDEvents
 
     /** Set the base-level box contained within.
      * Used in file loading */
-    void setBox(MDBoxBase<MDE,nd> * box)
+    void setBox(API::IMDNode * box)
     {
-      data = box;
+      data = dynamic_cast<MDBoxBase<MDE,nd> *>(box);
     }
 
     /// Apply masking
@@ -154,15 +154,18 @@ namespace MDEvents
 
     /// Set the special coordinate system.
     void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem);
-
+    /// make the workspace file backed if it has not been already file backed;
+    virtual void setFileBacked(const std::string &fileName);
+    /// if workspace was file-backed, this should clear file-backed information and close back-up files. 
+    virtual void clearFileBacked(bool LoadFileBackedData);
   protected:
 
     /** MDBox containing all of the events in the workspace. */
     MDBoxBase<MDE, nd> * data;
 
     /// Box controller in use
-    //Mantid::API::BoxController_sptr m_BoxController;
-    boost::shared_ptr<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > > m_BoxController;
+    Mantid::API::BoxController_sptr m_BoxController;
+    //boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
   private:
 
   public:

@@ -14,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {
@@ -111,8 +112,13 @@ namespace Mantid
 
       /// Clear existing masks
       virtual void clearMDMasking() = 0;
-
+      ///
       virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const = 0;
+      /// if a workspace was filebacked, this should clear file-based status, delete file-based information and close related files.
+      virtual void clearFileBacked(bool /* loadFileContentsToMemory*/){};
+      /// this is the method to build table workspace from any workspace. It does not have much sence and may be placed here erroneously
+      virtual ITableWorkspace_sptr makeBoxTable(size_t /*start*/, size_t /* num*/)
+      {throw Kernel::Exception::NotImplementedError("This method is not generally implemented ");}
     };
     
     /// Shared pointer to the IMDWorkspace base class

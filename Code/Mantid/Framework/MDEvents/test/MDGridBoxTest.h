@@ -45,13 +45,23 @@ class MDGridBoxTest :    public CxxTest::TestSuite
 private:
   
   ///Mock type to help determine if masking is being determined correctly
-  class MockMDBox : public MDBox<MDLeanEvent<1>, 1>
+    class MockMDBox : public MDBox<MDLeanEvent<1>, 1>
   {
+      API::BoxController *const pBC;
   public:
-    MOCK_CONST_METHOD0(getIsMasked, bool());
-    MOCK_METHOD0(mask, void());
-    MOCK_METHOD0(unmask, void());
+      MockMDBox():
+          MDBox<MDLeanEvent<1>, 1>(new API::BoxController(1)),
+          pBC(MDBox<MDLeanEvent<1>, 1>::getBoxController())
+      {}
+      MOCK_CONST_METHOD0(getIsMasked, bool());
+      MOCK_METHOD0(mask, void());
+      MOCK_METHOD0(unmask, void());
+      ~MockMDBox()
+      {delete pBC;}
   };
+
+  // the sp to a box controller used as general reference to all tested classes/operations including MockMDBox
+   BoxController_sptr gbc;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -62,54 +72,62 @@ public:
   bool DODEBUG;
   MDGridBoxTest()
   {
+    gbc =  BoxController_sptr(new BoxController(1));
     DODEBUG = false;
   }
 
   //-------------------------------------------------------------------------------------
   void test_MDBoxConstructor()
   {
-    MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
+    
+    MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1(10);
     TS_ASSERT_EQUALS( b->getNumDims(), 1);
     TS_ASSERT_EQUALS( b->getNPoints(), 0);
     TS_ASSERT_DELTA( b->getExtents(0).getMin(), 0.0,  1e-5);
     TS_ASSERT_DELTA( b->getExtents(0).getMax(), 10.0, 1e-5);
     TS_ASSERT_DELTA( b->getVolume(), 10.0, 1e-5);
     // Start at ID 0.
-    TS_ASSERT_EQUALS( b->getId(), 0);
+    TS_ASSERT_EQUALS( b->getID(), 0);
+
+    BoxController *const bcc = b->getBoxController();
     delete b;
+    if(DODEBUG)
+    {
+        std::cout << sizeof( MDLeanEvent<3>) << " bytes per MDLeanEvent(3)" << std::endl;
+        std::cout << sizeof( MDLeanEvent<4>) << " bytes per MDLeanEvent(4)" << std::endl;
+        std::cout << sizeof( Mantid::Kernel::Mutex ) << " bytes per Mutex" << std::endl;
+        std::cout << sizeof( MDDimensionExtents<coord_t>) << " bytes per MDDimensionExtents" << std::endl;
+        std::cout << sizeof( MDBox<MDLeanEvent<3>,3>) << " bytes per MDBox(3)" << std::endl;
+        std::cout << sizeof( MDBox<MDLeanEvent<4>,4> ) << " bytes per MDBox(4)" << std::endl;
+        std::cout << sizeof( MDGridBox<MDLeanEvent<3>,3>) << " bytes per MDGridBox(3)" << std::endl;
+        std::cout << sizeof( MDGridBox<MDLeanEvent<4>,4> ) << " bytes per MDGridBox(4)" << std::endl;
 
-
-//    std::cout << sizeof( MDLeanEvent<3>) << " bytes per MDLeanEvent(3)" << std::endl;
-//    std::cout << sizeof( MDLeanEvent<4>) << " bytes per MDLeanEvent(4)" << std::endl;
-//    std::cout << sizeof( Mantid::Kernel::Mutex ) << " bytes per Mutex" << std::endl;
-//    std::cout << sizeof( MDDimensionExtents) << " bytes per MDDimensionExtents" << std::endl;
-//    std::cout << sizeof( MDBox<MDLeanEvent<3>,3>) << " bytes per MDBox(3)" << std::endl;
-//    std::cout << sizeof( MDBox<MDLeanEvent<4>,4> ) << " bytes per MDBox(4)" << std::endl;
-//    std::cout << sizeof( MDGridBox<MDLeanEvent<3>,3>) << " bytes per MDGridBox(3)" << std::endl;
-//    std::cout << sizeof( MDGridBox<MDLeanEvent<4>,4> ) << " bytes per MDGridBox(4)" << std::endl;
-//
-//    MemoryStats mem;
-//    size_t start = mem.availMem();
-//    std::cout << start << " KB before" << std::endl;
-//    CPUTimer tim;
-//    for (size_t i=0; i<1000000; i++)
-//    {
-//      MDBox<MDLeanEvent<3>,3> * box = new MDBox<MDLeanEvent<3>,3>();
-//      (void) box;
-//    }
-//    std::cout << tim << " to allocate a million boxes" << std::endl;
-//    mem.update();
-//    size_t stop = mem.availMem();
-//    std::cout << stop << " KB after " << std::endl;
-//    std::cout << start-stop << " KB change " << std::endl;
-//    std::cout << (start-stop)*1024 / sizeof( MDBox<MDLeanEvent<3>,3>) << " times the sizeof MDBox3" << std::endl;
+        MemoryStats mem;
+        size_t start = mem.availMem();
+        std::cout << start << " KB before" << std::endl;
+        CPUTimer tim;
+        for (size_t i=0; i<1000000; i++)
+        {
+          MDBox<MDLeanEvent<3>,3> * box = new MDBox<MDLeanEvent<3>,3>(bcc);
+          (void) box;
+        }
+        std::cout << tim << " to allocate a million boxes" << std::endl;
+        mem.update();
+        size_t stop = mem.availMem();
+        std::cout << stop << " KB after " << std::endl;
+        std::cout << start-stop << " KB change " << std::endl;
+        std::cout << (start-stop)*1024 / sizeof( MDBox<MDLeanEvent<3>,3>) << " times the sizeof MDBox3" << std::endl;
+        delete bcc;
+    }
+    else
+       delete bcc;
   }
 
 
   void check_MDGridBox(MDGridBox<MDLeanEvent<1>,1> * g)
   {
     // The grid box stole the ID of the box it replaces.
-    TS_ASSERT_EQUALS( g->getId(), 0);
+    TS_ASSERT_EQUALS( g->getID(), 0);
 
     // Look overall; it has 10 points
     TS_ASSERT_EQUALS(g->getNumDims(), 1);
@@ -127,7 +145,7 @@ public:
     TS_ASSERT( g->getBoxController() );
 
     // Check the boxes
-    std::vector<MDBoxBase<MDLeanEvent<1>,1> *> boxes = g->getBoxes();
+    std::vector<MDBoxBase<MDLeanEvent<1>,1> *> &boxes = g->getBoxes();
     TS_ASSERT_EQUALS( boxes.size(), 10);
     for (size_t i=0; i<boxes.size(); i++)
     {
@@ -136,7 +154,7 @@ public:
       MDBox<MDLeanEvent<1>,1> * box = dynamic_cast<MDBox<MDLeanEvent<1>,1> *>(boxes[i]);
 
       // Sequential ID, starting at 1 since 0 was used by the parent.
-      TS_ASSERT_EQUALS( box->getId(), i+1);
+      TS_ASSERT_EQUALS( box->getID(), i+1);
       // At the right place?
       TS_ASSERT_DELTA(box->getExtents(0).getMin(), double(i)*1.0, 1e-6);
       TS_ASSERT_DELTA(box->getExtents(0).getMax(), double(i+1)*1.0, 1e-6);
@@ -160,8 +178,9 @@ public:
   void test_MDGridBox_constructor_from_MDBox()
   {
     MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
+    TS_ASSERT(b->getBoxController());
     // Start at ID 0.
-    TS_ASSERT_EQUALS( b->getId(), 0);
+    TS_ASSERT_EQUALS( b->getID(), 0);
     // Give it 10 events
     const std::vector<MDLeanEvent<1> > events = MDEventsTestHelper::makeMDEvents1(10);
     b->addEvents( events );
@@ -175,7 +194,8 @@ public:
     check_MDGridBox(g);
 
     // Now we add 10 more events
-    g->addEvents( MDEventsTestHelper::makeMDEvents1(10) );
+    //auto events = MDEventsTestHelper::makeMDEvents1(10);
+    TSM_ASSERT_EQUALS("No bad events ",0,g->addEvents( events  ));
 
     // And now there should be 2 events per box
     std::vector<MDBoxBase<MDLeanEvent<1>,1> *> boxes = g->getBoxes();
@@ -184,14 +204,41 @@ public:
       MDBox<MDLeanEvent<1>,1> * box = dynamic_cast<MDBox<MDLeanEvent<1>,1> *>(boxes[i]);
       TS_ASSERT_EQUALS(box->getNPoints(), 2);
     }
+    
+    std::vector<signal_t> sigErr(20);
+    std::vector<coord_t> coord(10);
+    std::vector<uint16_t> runIndex;
+    std::vector<uint32_t> detID;
+
+    for(size_t i=0;i<10;i++)
+    {
+        sigErr[2*i]=events[i].getSignal();
+        sigErr[2*i+1]=events[i].getErrorSquared();
+        coord[i] = events[i].getCenter(0);
+    }
+
+    g->buildAndAddEvents(sigErr,coord,runIndex,detID);
+
+    for (size_t i=0; i<10; i++)
+    {
+      MDBox<MDLeanEvent<1>,1> * box = dynamic_cast<MDBox<MDLeanEvent<1>,1> *>(boxes[i]);
+      TS_ASSERT_EQUALS(box->getNPoints(), 3);
+    }
+
+
+
+    BoxController *const bcc = b->getBoxController();
+    delete b;
+    delete bcc;
+
   }
 
 
   //-------------------------------------------------------------------------------------
   void test_MDGridBox_copy_constructor()
   {
-    MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
-    TS_ASSERT_EQUALS( b->getId(), 0);
+    MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1(10);
+    TS_ASSERT_EQUALS( b->getID(), 0);
     const std::vector<MDLeanEvent<1> > events = MDEventsTestHelper::makeMDEvents1(10);
     b->addEvents( events );
     TS_ASSERT_EQUALS( b->getNPoints(), 10 );
@@ -199,63 +246,35 @@ public:
 
     // Build the grid box out of it
     MDGridBox<MDLeanEvent<1>,1> * g1 = new MDGridBox<MDLeanEvent<1>,1>(b);
-    MDGridBox<MDLeanEvent<1>,1> * g2 = new MDGridBox<MDLeanEvent<1>,1>(*g1);
+    MDGridBox<MDLeanEvent<1>,1> * g2 = new MDGridBox<MDLeanEvent<1>,1>(*g1,g1->getBoxController());
 
     // Perform a detailed check
     check_MDGridBox(g2);
+
+    BoxController *const bcc = b->getBoxController();
+    delete bcc;
   }
 
   void test_setBoxController()
   {
     MDGridBox<MDLeanEvent<1>,1> * box = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
-    BoxController_sptr originalBoxController = box->getBoxController();
-    BoxController_sptr newBoxController = BoxController_sptr(new BoxController(*originalBoxController));
+    BoxController * originalBoxController = box->getBoxController();
+    BoxController*const newBoxController = originalBoxController->clone();
 
-    box->setBoxController(newBoxController);
-    auto boxes = box->getBoxes();
+    TS_ASSERT_DIFFERS(originalBoxController,newBoxController);
+
+    MDGridBox<MDLeanEvent<1>,1> * box1 = new MDGridBox<MDLeanEvent<1>,1>(*box,newBoxController);
+
+    auto boxes = box1->getBoxes();
     for(size_t i = 0; i < boxes.size(); ++i)
-    {
+    {       
       TSM_ASSERT_EQUALS("All child boxes should have the same box controller as the parent.", newBoxController, boxes[i]->getBoxController()); 
     }
-  }
+    delete newBoxController;
+    delete box1;
+    delete originalBoxController;
+    delete box;
 
-
-
-  //-----------------------------------------------------------------------------------------
-  /** Test splitting of a MDBox into a MDGridBox when the
-   * original box is backed by a file. */
-  void test_fileBackEnd_construction()
-  {
-    // Create a box with a controller for the back-end
-    BoxController_sptr bc(new BoxController(3));
-    bc->setSplitInto(5);
-    // Handle the disk MRU values
-    bc->setCacheParameters(sizeof(MDLeanEvent<3>), 10000);
-    DiskBuffer & dbuf = bc->getDiskBuffer();
-    // Make a box from 0-10 in 3D
-    MDBox<MDLeanEvent<3>,3> * c = new MDBox<MDLeanEvent<3>,3>(bc, 0);
-    for (size_t d=0; d<3; d++) c->setExtents(d, 0, 10);
-
-    // Create and open the test NXS file
-    ::NeXus::File * file = MDBoxTest::do_saveAndOpenNexus(*c, "MDGridBoxTest.nxs");
-    TSM_ASSERT_EQUALS( "1000 events (on file)", c->getNPoints(), 1000);
-
-    // At this point the MDBox is set to be on disk
-    TSM_ASSERT_EQUALS( "No free blocks to start with", dbuf.getFreeSpaceMap().size(), 0);
-
-    // Construct the grid box by splitting the MDBox
-    MDGridBox<MDLeanEvent<3>,3> * gb = new MDGridBox<MDLeanEvent<3>,3>(c);
-    TSM_ASSERT_EQUALS( "Grid box also has 1000 points", gb->getNPoints(), 1000);
-    TSM_ASSERT_EQUALS( "Grid box has 125 children (5x5x5)", gb->getNumChildren(), 125);
-    TSM_ASSERT_EQUALS( "The old spot in the file is now free", dbuf.getFreeSpaceMap().size(), 1);
-
-    // Get a child
-    MDBox<MDLeanEvent<3>,3> * b = dynamic_cast<MDBox<MDLeanEvent<3>,3> *>(gb->getChild(22));
-    TSM_ASSERT_EQUALS( "Child has 8 events", b->getNPoints(), 8);
-    TSM_ASSERT_EQUALS( "Child is NOT on disk", b->wasSaved(), false);
-
-    file->close();
-    MDBoxTest::do_deleteNexusFile("MDGridBoxTest.nxs");
   }
 
 
@@ -265,9 +284,11 @@ public:
   {
     // Build the grid box
     MDGridBox<MDLeanEvent<1>,1> * g = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
-    std::vector<MDBoxBase<MDLeanEvent<1>,1>*> boxes;
+    BoxController *const bcc = g->getBoxController();
+
+    std::vector<API::IMDNode *> boxes;
     for (size_t i=0; i<15; i++)
-      boxes.push_back( MDEventsTestHelper::makeMDBox1() );
+      boxes.push_back( MDEventsTestHelper::makeMDBox1(10,bcc) );
     TS_ASSERT_THROWS_NOTHING( g->setChildren(boxes, 2, 12) );
 
     TS_ASSERT_EQUALS( g->getNumChildren(), 10);
@@ -277,16 +298,23 @@ public:
       // Parent was set correctly in child
       TS_ASSERT_EQUALS( g->getChild(i-2)->getParent(), g);
     }
+    delete g;
+    delete bcc;
+
   }
 
   void test_getChildIndexFromID()
   {
     // Build the grid box
     MDGridBox<MDLeanEvent<1>,1> * g = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
-    TS_ASSERT_EQUALS(g->getChildIndexFromID( g->getChild(0)->getId() ), 0);
-    TS_ASSERT_EQUALS(g->getChildIndexFromID( g->getChild(5)->getId() ), 5);
-    TS_ASSERT_EQUALS(g->getChildIndexFromID(0), size_t(-1) );
-    TS_ASSERT_EQUALS(g->getChildIndexFromID(11), size_t(-1) );
+    TS_ASSERT_EQUALS(g->getChildIndexFromID( g->getChild(0)->getID() ), 0);
+    TS_ASSERT_EQUALS(g->getChildIndexFromID( g->getChild(5)->getID() ), 5);
+    TS_ASSERT_EQUALS(g->getChildIndexFromID(0), UNDEF_SIZET );
+    TS_ASSERT_EQUALS(g->getChildIndexFromID(11), UNDEF_SIZET );
+    BoxController *const bcc = g->getBoxController();
+    delete g;
+    delete bcc;
+
   }
 
 
@@ -321,6 +349,11 @@ public:
     MDEventsTestHelper::extents_match(box, 0, 3.0, 4.0);
     MDEventsTestHelper::extents_match(box, 1, 0.0, 2.0);
     MDEventsTestHelper::extents_match(box, 2, 5.0, 10.0);
+
+    BoxController *const bcc =b->getBoxController();
+    delete b;
+    delete bcc;
+
   }
 
 
@@ -337,7 +370,7 @@ public:
     // Start with 100 boxes
     TS_ASSERT_EQUALS( superbox->getNumMDBoxes(), 100);
     // And ID 0
-    TS_ASSERT_EQUALS( superbox->getId(), 0 );
+    TS_ASSERT_EQUALS( superbox->getID(), 0 );
 
     // The box is a MDBox at first
     boxes = superbox->getBoxes();
@@ -346,7 +379,7 @@ public:
     TS_ASSERT_DELTA( b->getVolume(), 1.0, 1e-5 );
 
     // It is the first child, so ID is 1
-    TS_ASSERT_EQUALS( b->getId(), 1 );
+    TS_ASSERT_EQUALS( b->getID(), 1 );
     // There were 101 assigned IDs
     TS_ASSERT_EQUALS( b->getBoxController()->getMaxId(), 100+1);
 
@@ -359,11 +392,11 @@ public:
     TS_ASSERT_DELTA( gb->getVolume(), 1.0, 1e-5 );
 
     // ID of first child remains unchanged at 1
-    TS_ASSERT_EQUALS( gb->getId(), 1 );
+    TS_ASSERT_EQUALS( gb->getID(), 1 );
     // There were 101 assigned IDs
     TS_ASSERT_EQUALS( gb->getBoxController()->getMaxId(), 200+1);
     // The first child of the sub-divided box got 101 as its id
-    TS_ASSERT_EQUALS( gb->getBoxes()[0]->getId(), 101 );
+    TS_ASSERT_EQUALS( gb->getBoxes()[0]->getID(), 101 );
 
     // There are now 199 MDBoxes; the 99 at level 1, and 100 at level 2
     TS_ASSERT_EQUALS( superbox->getNumMDBoxes(), 199);
@@ -375,6 +408,11 @@ public:
     boxes = superbox->getBoxes();
     gb = dynamic_cast<MDGridBox<MDLeanEvent<2>,2> *>(boxes[0]);
     TS_ASSERT( gb );
+
+    BoxController *const bcc =superbox->getBoxController();
+    delete superbox;
+    delete bcc;
+
   }
 
   //-------------------------------------------------------------------------------------
@@ -408,43 +446,68 @@ public:
 
     // You must refresh the cache after adding individual events.
     superbox->refreshCache(NULL);
-    superbox->refreshCentroid(NULL);
+    //superbox->refreshCentroid(NULL);
 
     TS_ASSERT_EQUALS( superbox->getNPoints(), 3 );
 
-#ifdef MDBOX_TRACK_CENTROID
+    std::vector<coord_t> cenroid(2,0);
+    TS_ASSERT_THROWS(superbox->calculateCentroid(&cenroid[0]),std::runtime_error);
+
     // Check the centroid for these 3 events
-    TS_ASSERT_DELTA( superbox->getCentroid(0), 3.233, 0.001);
-    TS_ASSERT_DELTA( superbox->getCentroid(1), 3.200, 0.001);
-#endif
+    //TS_ASSERT_DELTA( cenroid[0], 3.233, 0.001);
+    //TS_ASSERT_DELTA(cenroid[1] , 3.200, 0.001);
+
+    { // One event in 0th box of the 0th box.
+      std::vector<coord_t> centers(2,0.05f) ;
+      superbox->buildAndAddEvent(2.,2.,centers,0,0);
+    }
+    { // One event in 1st box of the 0th box.
+      std::vector<coord_t> centers(2,0.05f);
+      centers[0]=0.15f;
+      superbox->buildAndAddEvent(2.,2., centers,0,0 );
+    }
+    { // One event in 99th box.
+      std::vector<coord_t> centers(2,9.5);
+      superbox->buildAndAddEvent(2.0, 2.0, centers,0,0 );
+    }
+    TS_ASSERT_EQUALS( superbox->getNPoints(), 3 );
+
+    superbox->refreshCache(NULL);
+    TS_ASSERT_EQUALS( superbox->getNPoints(), 6 );
 
     // Retrieve the 0th grid box
     boxes = superbox->getBoxes();
     gb = dynamic_cast<MDGridBox<MDLeanEvent<2>,2> *>(boxes[0]);
     TS_ASSERT( gb );
 
-    // It has two points
-    TS_ASSERT_EQUALS( gb->getNPoints(), 2 );
+    // It has three points
+    TS_ASSERT_EQUALS( gb->getNPoints(), 4 );
 
     // Retrieve the MDBox at 0th and 1st indexes in THAT gridbox
     boxes = gb->getBoxes();
     b = dynamic_cast<MDBox<MDLeanEvent<2>,2> *>(boxes[0]);
-    TS_ASSERT_EQUALS( b->getNPoints(), 1 );
+    TS_ASSERT_EQUALS( b->getNPoints(), 2 );
     b = dynamic_cast<MDBox<MDLeanEvent<2>,2> *>(boxes[1]);
-    TS_ASSERT_EQUALS( b->getNPoints(), 1 );
+    TS_ASSERT_EQUALS( b->getNPoints(), 2 );
 
     // Get the 99th box at the first level. It is not split
     boxes = superbox->getBoxes();
     b = dynamic_cast<MDBox<MDLeanEvent<2>,2> *>(boxes[99]);
     TS_ASSERT( b ); if (!b) return;
     // And it has only the one point
-    TS_ASSERT_EQUALS( b->getNPoints(), 1 );
+    TS_ASSERT_EQUALS( b->getNPoints(), 2 );
+
+    BoxController *const bcc =superbox->getBoxController();
+    delete superbox;
+    delete bcc;
+
   }
 
   //-------------------------------------------------------------------------------------
   void test_transformDimensions()
   {
     MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
+
     // Give it 10 events
     const std::vector<MDLeanEvent<1> > events = MDEventsTestHelper::makeMDEvents1(10);
     b->addEvents( events );
@@ -460,6 +523,10 @@ public:
     ev.setCenter(0, 30.9f);
     g->addEvent(ev);
     TSM_ASSERT_EQUALS("New event was added in the right spot.", g->getChild(9)->getNPoints(), 2);
+
+    BoxController *const bcc = b->getBoxController();
+    delete b;
+    delete bcc;
   }
 
 
@@ -470,7 +537,7 @@ public:
   {
     MDGridBox<MDLeanEvent<1>,1> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<1>(3,3);
     TS_ASSERT(parent);
-    std::vector<MDBoxBase<MDLeanEvent<1>,1> *> boxes;
+    std::vector<API::IMDNode *> boxes;
 
     boxes.clear();
     parent->getBoxes(boxes, 0, false);
@@ -505,6 +572,11 @@ public:
     parent->getBoxes(boxes, 2, true);
     TS_ASSERT_EQUALS( boxes.size(), 9);
     TS_ASSERT_EQUALS( boxes[0]->getDepth(), 2);
+
+    BoxController *const bcc = parent->getBoxController();
+    delete parent;
+    delete bcc;
+
   }
 
 
@@ -515,7 +587,7 @@ public:
 
     MDGridBox<MDLeanEvent<1>,1> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<1>(4,3);
     TS_ASSERT(parent);
-    std::vector<MDBoxBase<MDLeanEvent<1>,1> *> boxes;
+    std::vector<API::IMDNode *> boxes;
 
     // Function of everything x > 1.51
     MDImplicitFunction * function = new MDImplicitFunction;
@@ -576,6 +648,11 @@ public:
     parent->getBoxes(boxes, 3, true, function);
     TSM_ASSERT_EQUALS( "Only one box is found by an infinitely thin plane", boxes.size(), 1);
 
+    // clean up  behind 
+    BoxController *const bcc = parent->getBoxController();
+    delete parent;
+    delete bcc;
+
   }
 
 
@@ -587,7 +664,7 @@ public:
 
     MDGridBox<MDLeanEvent<2>,2> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<2>(4,1);
     TS_ASSERT(parent);
-    std::vector<MDBoxBase<MDLeanEvent<2>,2> *> boxes;
+    std::vector<API::IMDNode *> boxes;
 
     // Function of x,y between 2 and 3
     std::vector<coord_t> min(2, 1.99f);
@@ -621,6 +698,11 @@ public:
       TS_ASSERT( boxes[i]->getExtents(1).getMin() <= 3.00);
     }
 
+    // clean up  behind 
+    BoxController *const bcc = parent->getBoxController();
+    delete parent;
+    delete bcc;
+
   }
 
 
@@ -632,7 +714,7 @@ public:
   {
     MDGridBox<MDLeanEvent<2>,2> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<2>(4,1);
     TS_ASSERT(parent);
-    std::vector<MDBoxBase<MDLeanEvent<2>,2> *> boxes;
+    std::vector<API::IMDNode *> boxes;
 
     // Function of x,y with 0 width and height
     std::vector<coord_t> min(2, 1.99f);
@@ -650,6 +732,12 @@ public:
     TS_ASSERT_EQUALS( boxes.size(), 1);
     TS_ASSERT_DELTA( boxes[0]->getExtents(0).getMin(), 1.75, 1e-4);
     TS_ASSERT_DELTA( boxes[0]->getExtents(0).getMax(), 2.00, 1e-4);
+
+    // clean up  behind 
+    BoxController *const bcc = parent->getBoxController();
+    delete parent;
+    delete bcc;
+
   }
 
   //-------------------------------------------------------------------------------------
@@ -659,7 +747,7 @@ public:
   {
     MDGridBox<MDLeanEvent<4>,4> * parent = MDEventsTestHelper::makeRecursiveMDGridBox<4>(4,1);
     TS_ASSERT(parent);
-    std::vector<MDBoxBase<MDLeanEvent<4>,4> *> boxes;
+    std::vector<API::IMDNode *> boxes;
 
     // Function of x,y with 0 width and height
     std::vector<coord_t> min(4, 1.99f);
@@ -677,6 +765,12 @@ public:
     TS_ASSERT_EQUALS( boxes.size(), 1);
     TS_ASSERT_DELTA( boxes[0]->getExtents(0).getMin(), 1.75, 1e-4);
     TS_ASSERT_DELTA( boxes[0]->getExtents(0).getMax(), 2.00, 1e-4);
+
+    // clean up  behind 
+    BoxController *const bcc = parent->getBoxController();
+    delete parent;
+    delete bcc;
+
   }
 
 
@@ -780,34 +874,40 @@ public:
     TS_ASSERT_EQUALS( b->getNPoints(), 100);
     TS_ASSERT_EQUALS( b->getSignal(), 100*2.0);
     TS_ASSERT_EQUALS( b->getErrorSquared(), 100*2.0);
+
+    // clean up  behind 
+    BoxController *const bcc = b->getBoxController();
+    delete b;
+    delete bcc;
+
   }
 
 
-  //-------------------------------------------------------------------------------------
-  /** Tests add_events with limits into the vectorthat bad events are thrown out when using addEvents.
-   * */
-  void test_addEvents_start_stop()
-  {
-    MDGridBox<MDLeanEvent<2>,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
-    std::vector< MDLeanEvent<2> > events;
+  ////-------------------------------------------------------------------------------------
+  ///** Tests add_events with limits into the vectorthat bad events are thrown out when using addEvents.
+  // * */
+  //void xest_addEvents_start_stop()
+  //{
+  //  MDGridBox<MDLeanEvent<2>,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
+  //  std::vector< MDLeanEvent<2> > events;
 
-    // Make an event in the middle of each box
-    for (double x=0.5; x < 10; x += 1.0)
-      for (double y=0.5; y < 10; y += 1.0)
-      {
-        double centers[2] = {x,y};
-        events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
-      }
+  //  // Make an event in the middle of each box
+  //  for (double x=0.5; x < 10; x += 1.0)
+  //    for (double y=0.5; y < 10; y += 1.0)
+  //    {
+  //      double centers[2] = {x,y};
+  //      events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
+  //    }
 
-    size_t numbad = 0;
-    TS_ASSERT_THROWS_NOTHING( numbad = b->addEventsPart( events, 50, 60 ); );
-    // Get the right totals again
-    b->refreshCache(NULL);
-    TS_ASSERT_EQUALS( numbad, 0);
-    TS_ASSERT_EQUALS( b->getNPoints(), 10);
-    TS_ASSERT_EQUALS( b->getSignal(), 10*2.0);
-    TS_ASSERT_EQUALS( b->getErrorSquared(), 10*2.0);
-  }
+  //  size_t numbad = 0;
+  //  TS_ASSERT_THROWS_NOTHING( numbad = b->addEventsPart( events, 50, 60 ); );
+  //  // Get the right totals again
+  //  b->refreshCache(NULL);
+  //  TS_ASSERT_EQUALS( numbad, 0);
+  //  TS_ASSERT_EQUALS( b->getNPoints(), 10);
+  //  TS_ASSERT_EQUALS( b->getSignal(), 10*2.0);
+  //  TS_ASSERT_EQUALS( b->getErrorSquared(), 10*2.0);
+  //}
 
   //-------------------------------------------------------------------------------------
   /** Test that adding events (as vectors) in parallel does not cause
@@ -836,6 +936,12 @@ public:
     TS_ASSERT_EQUALS( b->getNPoints(), 100*num_repeat);
     TS_ASSERT_EQUALS( b->getSignal(), 100*num_repeat*2.0);
     TS_ASSERT_EQUALS( b->getErrorSquared(), 100*num_repeat*2.0);
+
+    // clean up  behind 
+    BoxController *const bcc = b->getBoxController();
+    delete b;
+    delete bcc;
+
   }
 
 
@@ -860,7 +966,7 @@ public:
   {
     MDGridBox<MDLeanEvent<2>,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
     coord_t coords[2] = {1.5,1.5};
-    const MDBoxBase<MDLeanEvent<2>,2> * c = b->getBoxAtCoord(coords);
+    const MDBoxBase<MDLeanEvent<2>,2> * c = dynamic_cast<const MDBoxBase<MDLeanEvent<2>,2> *>(b->getBoxAtCoord(coords));
     TS_ASSERT_EQUALS(c, b->getChild(11));
   }
 
@@ -876,9 +982,9 @@ public:
     typedef MDBox<MDLeanEvent<2>,2> box_t;
     typedef MDBoxBase<MDLeanEvent<2>,2> ibox_t;
 
-    gbox_t * b = MDEventsTestHelper::makeMDGridBox<2>();
-    b->getBoxController()->setSplitThreshold(100);
-    b->getBoxController()->setMaxDepth(4);
+    gbox_t * b0 = MDEventsTestHelper::makeMDGridBox<2>();
+    b0->getBoxController()->setSplitThreshold(100);
+    b0->getBoxController()->setMaxDepth(4);
 
     // Make a 1000 events at exactly the same point
     size_t num_repeat = 1000;
@@ -889,15 +995,16 @@ public:
       double centers[2] = {1e-10, 1e-10};
       events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
     }
-    TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
+    TS_ASSERT_THROWS_NOTHING( b0->addEvents( events ); );
 
 
     // Split into sub-grid boxes
-    TS_ASSERT_THROWS_NOTHING( b->splitAllIfNeeded(NULL); )
+    TS_ASSERT_THROWS_NOTHING( b0->splitAllIfNeeded(NULL); )
 
     // Dig recursively into the gridded box hierarchies
     std::vector<ibox_t*> boxes;
     size_t expected_depth = 0;
+    gbox_t *b = b0;
     while (b)
     {
       expected_depth++;
@@ -924,6 +1031,12 @@ public:
 
     // We went this many levels (and no further) because recursion depth is limited
     TS_ASSERT_EQUALS(boxes[0]->getDepth(), 4);
+
+    // clean up  behind 
+    BoxController *const bcc = b0->getBoxController();
+    delete b;
+    delete bcc;
+
   }
 
 
@@ -970,97 +1083,25 @@ public:
       size_t numChildren = box->getNumChildren();
       if (numChildren > 0)
       {
-        size_t lastId = box->getChild(0)->getId();
+        size_t lastId = box->getChild(0)->getID();
         for (size_t i = 1; i < numChildren; i++)
         {
-          TSM_ASSERT_EQUALS("Children IDs need to be sequential!", box->getChild(i)->getId(), lastId+1);
-          lastId = box->getChild(i)->getId();
+          TSM_ASSERT_EQUALS("Children IDs need to be sequential!", box->getChild(i)->getID(), lastId+1);
+          lastId = box->getChild(i)->getID();
         }
       }
 
     }
 
+    // clean up  behind 
+    BoxController *const bcc = b->getBoxController();
+    delete b;
+    delete bcc;
+
   }
 
 
 
-
-  //------------------------------------------------------------------------------------------------
-  /** This test splits a large number of events,
-   * for a workspace that is backed by a file (and thus tries to stay below
-   * a certain amount of memory used).
-   */
-  void test_splitAllIfNeeded_fileBacked()
-  {
-    typedef MDLeanEvent<2> MDE;
-    typedef MDGridBox<MDE,2> gbox_t;
-    typedef MDBox<MDE,2> box_t;
-    typedef MDBoxBase<MDE,2> ibox_t;
-
-    // Make a fake file-backing for the grid box
-    std::string filename = "MDGridBoxTest.nxs";
-    ::NeXus::File * file = new ::NeXus::File(filename, NXACC_CREATE);
-    file->makeGroup("MDEventWorkspaceTest", "NXentry", 1);
-    MDE::prepareNexusData(file, 2000);
-    file->close();
-    file = new ::NeXus::File(filename, NXACC_RDWR);
-    file->openGroup("MDEventWorkspaceTest", "NXentry");
-    API::BoxController::openEventNexusData(file);
-
-    // Create the grid box and make it file-backed.
-    gbox_t * b = MDEventsTestHelper::makeMDGridBox<2>();
-    BoxController_sptr bc = b->getBoxController();
-    bc->setSplitThreshold(100);
-    bc->setMaxDepth(4);
-    bc->setCacheParameters(1, 1000);
-    bc->setFile(file, filename, 0);
-    DiskBuffer & dbuf = bc->getDiskBuffer();
-    dbuf.setFileLength(0);
-
-    size_t num_repeat = 10;
-    if (DODEBUG) num_repeat = 20;
-    Timer tim;
-    if (DODEBUG) std::cout << "Adding " << num_repeat*10000 << " events...\n";
-    MDEventsTestHelper::feedMDBox<2>(b, num_repeat, 100, 0.05f, 0.1f);
-    if (DODEBUG) std::cout << "Adding events done in " << tim.elapsed() << "!\n";
-
-    // Split those boxes in parallel.
-    ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
-    ThreadPool tp(ts);
-    b->splitAllIfNeeded(ts);
-    tp.joinAll();
-
-    if (DODEBUG) std::cout << "Splitting events done in " << tim.elapsed() << " sec.\n";
-
-    // Get all the MDBoxes created
-    std::vector<ibox_t*> boxes;
-    b->getBoxes(boxes, 1000, true);
-    TS_ASSERT_EQUALS(boxes.size(), 10000);
-    size_t numOnDisk = 0;
-    uint64_t eventsOnDisk = 0;
-    uint64_t maxFilePos = 0;
-    for (size_t i=0; i<boxes.size(); i++)
-    {
-      ibox_t * box = boxes[i];
-      TS_ASSERT_EQUALS( box->getNPoints(), num_repeat );
-      box_t * mdbox = dynamic_cast<box_t *>(box);
-      TS_ASSERT( mdbox);
-      if ( mdbox->wasSaved() ) numOnDisk++;
-      eventsOnDisk += mdbox->getFileSize();
-      // Track the last point used in the file
-      uint64_t fileEnd = mdbox->getFilePosition() + mdbox->getFileSize();
-      if (fileEnd > maxFilePos) maxFilePos = fileEnd;
-      //std::cout << mdbox->getFilePosition() << " file pos " << i << std::endl;
-    }
-    TSM_ASSERT_EQUALS("All new boxes were set to be cached to disk.", numOnDisk, 10000);
-    uint64_t minimumSaved = 10000*(num_repeat-2);
-    TSM_ASSERT_LESS_THAN("Length of the file makes sense", minimumSaved, dbuf.getFileLength());
-    TSM_ASSERT_LESS_THAN("Most of the boxes' events were cached to disk (some remain in memory because of the MRU cache)", minimumSaved, eventsOnDisk);
-    TSM_ASSERT_LESS_THAN("And the events were properly saved sequentially in the files.", minimumSaved, maxFilePos);
-    std::cout << dbuf.getMemoryStr() << std::endl;
-    file->close();
-    if (Poco::File(filename).exists()) Poco::File(filename).remove();
-  }
 
 
 
@@ -1211,6 +1252,12 @@ public:
     MDGridBox<MDLeanEvent<2>,2> * box_ptr =  MDEventsTestHelper::makeMDGridBox<2>();
     MDEventsTestHelper::feedMDBox<2>(box_ptr, 1);
     do_test_integrateSphere(box_ptr);
+
+    // clean up  behind 
+    BoxController *const bcc = box_ptr->getBoxController();
+    delete box_ptr;
+    delete bcc;
+
   }
 
   void test_integrateSphere_unevenSplit()
@@ -1219,6 +1266,11 @@ public:
     MDGridBox<MDLeanEvent<2>,2> * box_ptr = MDEventsTestHelper::makeMDGridBox<2>(10,5);
     MDEventsTestHelper::feedMDBox<2>(box_ptr, 1);
     do_test_integrateSphere(box_ptr);
+    // clean up  behind 
+    BoxController *const bcc = box_ptr->getBoxController();
+    delete box_ptr;
+    delete bcc;
+
   }
 
   void test_integrateSphere_unevenSplit2()
@@ -1227,6 +1279,12 @@ public:
     MDGridBox<MDLeanEvent<2>,2> * box_ptr = MDEventsTestHelper::makeMDGridBox<2>(3,7);
     MDEventsTestHelper::feedMDBox<2>(box_ptr, 1);
     do_test_integrateSphere(box_ptr);
+
+    // clean up  behind 
+    BoxController *const bcc = box_ptr->getBoxController();
+    delete box_ptr;
+    delete bcc;
+
   }
 
 
@@ -1244,6 +1302,12 @@ public:
 
     do_check_integrateSphere(box, 1.0,1.0,  1.45,  1.0, "Contains one box completely");
     do_check_integrateSphere(box, 9.0,9.0,  1.45,  1.0, "Contains one box completely, at the edges");
+
+    // clean up  behind 
+    BoxController *const bcc = box_ptr->getBoxController();
+    delete box_ptr;
+    delete bcc;
+
   }
 
 
@@ -1363,7 +1427,7 @@ public:
 
   void test_getIsMasked_WhenNoMasking()
   {
-    std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
+      std::vector<API::IMDNode *> boxes;
 
     MockMDBox* a = new MockMDBox;
     MockMDBox* b = new MockMDBox;
@@ -1374,7 +1438,9 @@ public:
     boxes.push_back(a);
     boxes.push_back(b);
 
-    MDGridBox<MDLeanEvent<1>,1> g;
+    auto bc = boost::shared_ptr<BoxController>(new BoxController(1));
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(1);
+    MDGridBox<MDLeanEvent<1>,1> g(bc,0,extentsVector);
     g.setChildren(boxes, 0, 2);
 
     TSM_ASSERT("No inner boxes were masked so the MDGridBox should not report that it is masked", !g.getIsMasked());
@@ -1384,7 +1450,7 @@ public:
 
   void test_getIsMasked_WhenFirstMasked()
   {
-    std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
+    std::vector<API::IMDNode *> boxes;
 
     MockMDBox* a = new MockMDBox;
     MockMDBox* b = new MockMDBox;
@@ -1395,7 +1461,9 @@ public:
     boxes.push_back(a);
     boxes.push_back(b);
 
-    MDGridBox<MDLeanEvent<1>,1> g;
+    auto bc = boost::shared_ptr<BoxController>(new BoxController(1));
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(1);
+    MDGridBox<MDLeanEvent<1>,1> g(bc,0,extentsVector);
     g.setChildren(boxes, 0, 2);
 
     TSM_ASSERT("First inner box masked, so should return masked", g.getIsMasked());
@@ -1405,7 +1473,7 @@ public:
 
   void test_getIsMasked_WhenLastMasked()
   {
-    std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
+      std::vector<API::IMDNode *> boxes;
 
     MockMDBox* a = new MockMDBox;
     MockMDBox* b = new MockMDBox;
@@ -1416,7 +1484,10 @@ public:
     boxes.push_back(a);
     boxes.push_back(b);
 
-    MDGridBox<MDLeanEvent<1>,1> g;
+    auto bc = boost::shared_ptr<BoxController>(new BoxController(1));
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(1);
+    MDGridBox<MDLeanEvent<1>,1> g(bc,0,extentsVector);
+
     g.setChildren(boxes, 0, 2);
 
     TSM_ASSERT("Second inner box masked, so should return masked", g.getIsMasked());
@@ -1426,7 +1497,7 @@ public:
 
   void test_mask()
   {
-    std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
+    std::vector<API::IMDNode *> boxes;
 
     MockMDBox* a = new MockMDBox;
     MockMDBox* b = new MockMDBox;
@@ -1437,7 +1508,10 @@ public:
     boxes.push_back(a);
     boxes.push_back(b);
 
-    MDGridBox<MDLeanEvent<1>,1> griddedBox;
+    auto bc = boost::shared_ptr<BoxController>(new BoxController(1));
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(1);
+    MDGridBox<MDLeanEvent<1>,1> griddedBox(bc,0,extentsVector);
+
     griddedBox.setChildren(boxes, 0, 2);
 
     TS_ASSERT_THROWS_NOTHING(griddedBox.mask());//Mask the gridded box
@@ -1448,7 +1522,7 @@ public:
 
   void test_unmask()
   {
-    std::vector<MDBoxBase<MDLeanEvent<1>, 1> *> boxes;
+    std::vector<API::IMDNode *> boxes;
 
     MockMDBox* a = new MockMDBox;
     MockMDBox* b = new MockMDBox;
@@ -1459,7 +1533,10 @@ public:
     boxes.push_back(a);
     boxes.push_back(b);
 
-    MDGridBox<MDLeanEvent<1>,1> griddedBox;
+    auto bc = boost::shared_ptr<BoxController>(new BoxController(1));
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(1);
+    MDGridBox<MDLeanEvent<1>,1> griddedBox(bc,0,extentsVector);
+
     griddedBox.setChildren(boxes, 0, 2);
 
     TS_ASSERT_THROWS_NOTHING(griddedBox.unmask());//Un-Mask the gridded box
@@ -1682,7 +1759,7 @@ public:
   void test_getBoxes()
   {
     CPUTimer tim;
-    std::vector<MDBoxBase<MDLeanEvent<1>,1> *> boxes;
+    std::vector<API::IMDNode *> boxes;
     for (size_t i=0; i<10; i++)
     {
       boxes.clear();

@@ -83,14 +83,15 @@ public:
     LoadMDTest::do_compare_MDEW(ws1, ws2);
     
     // Check that the custom file name file exists
+    std::string realFile;
     if (fileBacked && !Filename.empty())
     {
-      std::string realFile = alg.getPropertyValue("Filename");
+      realFile = alg.getPropertyValue("Filename");
       TS_ASSERT( Poco::File( realFile ).exists() );
     }
     // Clean up files
-    ws1->getBoxController()->closeFile(true);
-    ws2->getBoxController()->closeFile(true);
+    ws1->clearFileBacked(false);
+    ws2->clearFileBacked(false);
 
     // Modifying the cloned dimension does not change the original
     double oldMin = ws1->getDimension(0)->getMinimum();

@@ -29,7 +29,7 @@ public:
 
     TS_ASSERT_EQUALS(0,BoxTree.getNBoxes());
 
-   TS_ASSERT_THROWS_NOTHING((BoxTree.initFlatStructure<MDLeanEvent<3>, 3>(spEw3,"aFile")));
+    TS_ASSERT_THROWS_NOTHING((BoxTree.initFlatStructure<MDLeanEvent<3>, 3>(spEw3,"aFile")));
 
     TSM_ASSERT_EQUALS("Workspace creatrion helper should generate ws split into 1001 boxes",1001,BoxTree.getNBoxes());
 

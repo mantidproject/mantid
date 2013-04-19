@@ -38,7 +38,6 @@ namespace MDEvents
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
    */
- template<class T >
  class BoxCtrlChangesList: public API::BoxController
  {
     //-----------------------------------------------------------------------------------
@@ -49,27 +48,17 @@ namespace MDEvents
      * @param theBox -- Box to split
      */
  public:
-   void addBoxToSplit(const T &theBox)
+   void addBoxToSplit(API::IMDNode *theBox)
     {
       Kernel::Mutex::ScopedLock _lock(m_boxesToSplitMutex);
       m_boxesToSplit.push_back(theBox);
     }
 
-    //-----------------------------------------------------------------------------------
-    /** Get a reference to the vector of boxes that must be split.
-     * Not thread safe!
-     */
-    std::vector<T> getBoxesToSplit()const
-    {
-      return m_boxesToSplit;
-    }
-    //-----------------------------------------------------------------------------------
+       //-----------------------------------------------------------------------------------
     /** Get a reference to the vector of BoxesToSplit that can be split.
      * thread safe!
      */
-
-    template<class MDBoxToChange >
-    std::vector< MDBoxToChange > getBoxesToSplit()const
+    std::vector< API::IMDNode *> getBoxesToSplit()const
     {
       Kernel::Mutex::ScopedLock _lock(m_boxesToSplitMutex);
       return m_boxesToSplit;
@@ -81,32 +70,27 @@ namespace MDEvents
       Kernel::Mutex::ScopedLock _lock(m_boxesToSplitMutex);
       m_boxesToSplit.clear();
     }
+    /**constructor with number of dimensions */
+    BoxCtrlChangesList(size_t nd):BoxController(nd){};
 
-    /**Copy constructor from a box controller pointer */
-    BoxCtrlChangesList(const API::BoxController & theController):
-    BoxController(theController)
+    BoxController * clone()const
     {
-      auto *bc = dynamic_cast<const BoxCtrlChangesList<T>* >(&theController);
-      if(bc)m_boxesToSplit.assign(bc->m_boxesToSplit.begin(),bc->m_boxesToSplit.end());
+        return new BoxCtrlChangesList(*this);
     }
-
-    /**Copy constructor from a BoxCtrlChangesList, not default as mutex can not be copied */
+ private: 
+    /**Copy constructor from a BoxCtrlChangesList*/
     BoxCtrlChangesList(const BoxCtrlChangesList & other):
     BoxController(other)
     {      
       m_boxesToSplit.assign(other.m_boxesToSplit.begin(),other.m_boxesToSplit.end());
     }
 
-    /**constructor with number of dimensions */
-    BoxCtrlChangesList(size_t nd):BoxController(nd){};
-
- private:
 
     /// Mutex for modifying the m_boxesToSplit member
-    Mantid::Kernel::Mutex m_boxesToSplitMutex;
+    mutable Mantid::Kernel::Mutex m_boxesToSplitMutex;
 
      /// Vector of MDBoxes to change 
-    std::vector<T> m_boxesToSplit;
+    std::vector<API::IMDNode *> m_boxesToSplit;
  };
 
 }

@@ -22,157 +22,66 @@ using namespace Mantid::Kernel;
 using Mantid::Kernel::CPUTimer;
 
 
-//====================================================================================
-class ISaveableTester : public ISaveable
-{
-public:
-  ISaveableTester(size_t id) : ISaveable(id),
-  m_memory(1)
-  {}
-  virtual ~ISaveableTester(){}
-
-  virtual bool isBox()const{return true;}
-  virtual void save()const 
-  {
-    // Fake writing to a file
-    std::ostringstream out;
-    out << getId() <<",";
-    streamMutex.lock();
-    fakeFile += out.str();
-    streamMutex.unlock();
-  }
-
-  virtual void clearDataFromMemory(){m_memory = 0; }
-  virtual void load() {}
-  virtual void flushData() const {}
-
-  uint64_t m_memory;
-  virtual uint64_t getTotalDataSize() const { return m_memory; };
-  virtual size_t getDataMemorySize() const  {  return size_t(m_memory);  }
-
-
-  // File position = same as its ID
-  //virtual uint64_t getFilePosition() const { return uint64_t(10-getId()); }
-
-  static std::string fakeFile;
-
-  static Kernel::Mutex streamMutex;
-};
-
-// Declare the static members here.
-std::string ISaveableTester::fakeFile = "";
-Kernel::Mutex ISaveableTester::streamMutex;
-
-
-
-
-//====================================================================================
-/** An ISaveable that will fake seeking to disk */
-class ISaveableTesterWithSeek : public ISaveableTester
-{
-  bool is_loaded;
-public:
-  virtual bool isBox()const{return true;}
-  ISaveableTesterWithSeek(size_t id) : ISaveableTester(id),
-    is_loaded(false)
-  {
-    this->setFilePosition(10+id,this->m_memory);
-  }
-
-  using ISaveableTester::load; // Unhide base class method to avoid Intel compiler warning
-  virtual void load(DiskBuffer & /*dbuf*/) 
-  {
-    uint64_t myFilePos = this->getFilePosition();
-    std::cout << "Block " << getId() << " loading at " << myFilePos << std::endl;
-    ISaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
-    is_loaded=true;
-  }
-
-  virtual void save()const
-  {
-    // Pretend to seek to the point and write
-    uint64_t myFilePos = this->getFilePosition();
-    std::cout << "Block " << getId() << " saving at " << myFilePos << std::endl;
-    fakeSeekAndWrite(myFilePos);
-  }
-  virtual void clearDataFromMemory()
-  { 
-    m_memory = 0; 
-    is_loaded=false;
-  }
-
-
-  void grow(DiskBuffer & dbuf, bool /*tellMRU*/)
-  {
-    // OK first you seek to where the OLD data was and load it.
-    uint64_t myFilePos = this->getFilePosition();
-    std::cout << "Block " << getId() << " loading at " << myFilePos << std::endl;
-    ISaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
-    // Simulate that the data is growing and so needs to be written out
-    size_t newfilePos = dbuf.relocate(myFilePos, m_memory, m_memory+1);
-    std::cout << "Block " << getId() << " has moved from " << myFilePos << " to " << newfilePos << std::endl;
-    myFilePos = newfilePos;
-    // Grow the size by 1
-    m_memory++;
-  
-    this->setFilePosition(myFilePos,m_memory);
-  }
-
-  /// Fake a seek followed by a write
-  static void fakeSeekAndWrite(uint64_t newPos)
-  {
-    streamMutex.lock();
-    int64_t seek = int64_t(filePos) - int64_t(newPos);
-    if (seek < 0) seek = -seek;
-    double seekTime = 5e-3 * double(seek) / 2000.0; // 5 msec for a 2000-unit seek.
-    // A short write time (500 microsec) for a small block of data
-    seekTime += 0.5e-3;
-    Timer tim;
-    while (tim.elapsed_no_reset() < seekTime)
-    { /*Wait*/ }
-    filePos = newPos;
-    streamMutex.unlock();
-  }
-
-
-  static uint64_t filePos;
-};
-uint64_t ISaveableTesterWithSeek::filePos;
-
-
 
 
 //====================================================================================
 /** An ISaveable that fakes writing to a fixed-size file */
-class ISaveableTesterWithFile : public ISaveable
+class SaveableTesterWithFile : public ISaveable
 {
-  bool is_loaded;
+    size_t ID;
 public:
-  virtual bool isBox()const{return true;}
-  ISaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch) : ISaveable(id),
-  is_loaded(false), m_memory(size),m_ch(ch)
+  SaveableTesterWithFile(size_t id, uint64_t pos, uint64_t size, char ch,bool wasSaved=true) : ISaveable(),
+    ID(id),m_memory(size),m_ch(ch)
   {
-    this->setFilePosition(pos,size,false); 
+    // the object knows its place on file
+    this->setFilePosition(pos,size,wasSaved);
+    this->setLoaded(true);
+  }
+  // this is testing/special routine
+  void setSaved(bool On=true)
+  {
+      this->m_wasSaved=On;
   }
 
-  virtual ~ISaveableTesterWithFile(){}
+  virtual ~SaveableTesterWithFile(){}
 
   virtual void clearDataFromMemory()
   {
-    is_loaded=false; 
-    /* m_memory = 0;  -- not yet implemented in this test */
+      this->setLoaded(false);
+      m_memory = 0;
   }
 
   uint64_t m_memory;
   virtual uint64_t getTotalDataSize() const 
   {
+      if(this->wasSaved())
+      {
+          if(this->isLoaded())
+              return m_memory;
+          else
+              return m_memory+this->getFileSize();
+      }
+      else
        return m_memory;
   };
   virtual size_t getDataMemorySize() const  {  return size_t(m_memory);  }
 
-  void changeMemSize(uint64_t newSize)
+  void AddNewObjects(uint64_t nNewObj)
   {
-    m_memory = newSize;
+      if(this->wasSaved())
+      {
+          if(this->isLoaded())
+          {
+              m_memory+=nNewObj;
+          }else
+          {
+              m_memory = nNewObj;
+          }
+      }
+      else
+        m_memory+= nNewObj;
+
+  
   }
 
 
@@ -188,24 +97,33 @@ public:
 
     for (size_t i=mPos; i< mPos+mMem; i++)
       fakeFile[i] = m_ch;
+      
     streamMutex.unlock();
+    // this is important function call which has to be implemented by any save function
+    this->m_wasSaved=true;
+
+  
   }
 
-  virtual void load() {is_loaded=true;}
+  virtual void load()
+  {
+      if(this->wasSaved()&&!this->isLoaded())
+      {
+          m_memory+=this->getFileSize();
+      }
+    // this is important function call which has to be implemented by any load function
+      this->setLoaded(true);
+  }
   virtual void flushData() const {}
 
    
   static std::string fakeFile;
-
   static Kernel::Mutex streamMutex;
 };
 
 // Declare the static members here.
-std::string ISaveableTesterWithFile::fakeFile;
-Kernel::Mutex ISaveableTesterWithFile::streamMutex;
-
-
-
+std::string SaveableTesterWithFile::fakeFile;
+Kernel::Mutex SaveableTesterWithFile::streamMutex;
 
 
 
@@ -214,208 +132,101 @@ class DiskBufferTest : public CxxTest::TestSuite
 {
 public:
 
-  std::vector<ISaveableTester*> data;
+  std::vector<SaveableTesterWithFile *> data;
   size_t num;
-  std::vector<ISaveableTester*> bigData;
-  size_t bigNum;
-#ifdef _GLUE_PERFORMANCE_TEST
-  std::vector<ISaveableTesterWithSeek*> dataSeek;
-#endif
 
   void setUp()
   {
     // Create the ISaveables
-    ISaveableTester::fakeFile = "";
     num = 10;
+    SaveableTesterWithFile::fakeFile = "";
     data.clear();
     for (size_t i=0; i<num; i++)
-      data.push_back( new ISaveableTester(i) );
-    bigNum = 1000;
-    bigData.clear();
-    for (size_t i=0; i<bigNum; i++)
-      bigData.push_back( new ISaveableTester(i) );
-#ifdef _GLUE_PERFORMANCE_TEST
-    dataSeek.clear();
-    for (size_t i=0; i<200; i++)
-      dataSeek.push_back( new ISaveableTesterWithSeek(i) );
-    ISaveableTester::fakeFile = "";
-    for (size_t i=0; i<data.size(); i++)
-    {
-      data[i]->setBusy(); // Items won't do any real saving
-    }
-#endif
-
-
+      data.push_back( new SaveableTesterWithFile(i,uint64_t(2*i),2,char(i+0x41)) );  
   }
 
-  void teadDown()
+  void tearDown()
   {
     for (size_t i=0; i<data.size(); i++)
     {
       delete data[i];
       data[i]= NULL;
     }
-
-    for (size_t i=0; i<bigData.size(); i++)
-    {
-      delete bigData[i];
-      bigData[i]=NULL;
-    }
-#ifdef _GLUE_PERFORMANCE_TEST
-    for (size_t i=0; i<200; i++)
-    {
-      delete dataSeek[i];
-      dataSeek[i]=NULL;
-    }
-    dataSeek.clear();
-#endif
-
   }
-  void testIsaveable()
+  void xest_nothing()
   {
-      ISaveableTester Sav(0);
-      TSM_ASSERT("ISaveable Should never been saved",!Sav.wasSaved());
-      TSM_ASSERT("ISaveable should be free",!Sav.isBusy());
-      TSM_ASSERT("ISaveable have not been changed",!Sav.isDataChanged());
-
-      TSM_ASSERT_EQUALS("Default data ID should be 0 ",0,Sav.getId());
-      TSM_ASSERT_EQUALS("Default file position is wrong ",std::numeric_limits<uint64_t>::max(),Sav.getFilePosition());
-      TSM_ASSERT_EQUALS("Default size should be 0 ",0,Sav.getFileSize());
-
-
-      ISaveableTester CopyTester(Sav);
-      TSM_ASSERT("ISaveable Should never been saved",!CopyTester.wasSaved());
-      TSM_ASSERT("ISaveable should be free",!CopyTester.isBusy());
-      TSM_ASSERT("ISaveable have not been changed",!CopyTester.isDataChanged());
-
-      TSM_ASSERT_EQUALS("Default data ID should be 0 ",0,CopyTester.getId());
-      TSM_ASSERT_EQUALS("Default file position is wrong ",std::numeric_limits<uint64_t>::max(),CopyTester.getFilePosition());
-      TSM_ASSERT_EQUALS("Default size should be 0 ",0,CopyTester.getFileSize());
-
+    TS_WARN("Tests here were disabled for the time being");
   }
 
-  //--------------------------------------------------------------------------------
-  /** Getting and setting the cache sizes */
-  void test_set_and_get_methods()
-  {
-    DiskBuffer dbuf(3);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferSize(), 3);
-    dbuf.setWriteBufferSize(11);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferSize(), 11);
-  }
-
-  //--------------------------------------------------------------------------------
-  /** Test calling toWrite() */
-  void test_basic()
-  {
-    // No MRU, 3 in the to-write cache
-    DiskBuffer dbuf(3);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferSize(), 3);
-
-    // Nothing in cache
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-
-    dbuf.toWrite(data[0]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 1);
-    dbuf.toWrite(data[1]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 2);
-    dbuf.toWrite(data[2]);
-    // Write buffer now got flushed out
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-
-    //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,1,0,");
-    // The "file" was written out this way (the right order):
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,");
-    ISaveableTester::fakeFile ="";
-
-    // If you add the same one multiple times, it only is tracked once in the to-write buffer.
-    dbuf.toWrite(data[4]);
-    dbuf.toWrite(data[4]);
-    dbuf.toWrite(data[4]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 1);
-  }
-
-
-  //--------------------------------------------------------------------------------
-  /** Set a buffer size of 0 */
-  void test_basic_WriteBuffer()
-  {
-    // No write buffer
-    DiskBuffer dbuf(0);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferSize(), 0);
-    // Nothing in cache
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-
-    dbuf.toWrite(data[0]);
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,");
-    dbuf.toWrite(data[1]);
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,");
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-    dbuf.toWrite(data[2]);
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,");
-    dbuf.toWrite(data[3]);
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,");
-    dbuf.toWrite(data[4]);
-    // Everything get written immidiately;
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,");
-  }
-
-
-
-  //--------------------------------------------------------------------------------
-  /// Empty out the cache with the flushCache() method
-  void test_flushCache()
-  {
-    DiskBuffer dbuf(10);
-    for (size_t i=0; i<6; i++)
-      dbuf.toWrite(data[i]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 6);
-    // Nothing written out yet
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "");
-    dbuf.flushCache();
-    //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "5,4,3,2,1,0,");
-    // Everything was written out at once (sorted by file index)
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,5,");
-    // Nothing left in cache
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-  }
-
-
-  //--------------------------------------------------------------------------------
-  /** Extreme case with nothing writable but exceeding the writable buffer */
+/** Extreme case with nothing writable but exceeding the writable buffer */
   void test_noWriteBuffer_nothingWritable()
   {
-    // Room for 4 in the write buffer
+     //Room for 4 in the write buffer
     DiskBuffer dbuf(4);
     for (size_t i=0; i<9; i++)
     {
-      data[i]->setBusy();
+      data[i]->setBusy(true);
       dbuf.toWrite(data[i]);
     }
     // We ended up with too much in the buffer since nothing could be written.
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 9);
-    // Let's make it all writable
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 2*9);
+     //Let's make it all writable
+    for (size_t i=0; i<9; i++)
+    {
+      data[i]->setBusy(false);
+      data[i]->setDataChanged();
+    }
+    // Trigger a write
+    data[9]->setDataChanged();
+    dbuf.toWrite(data[9]);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
+    // And all of these get written out at once
+    TS_ASSERT_EQUALS(SaveableTesterWithFile::fakeFile, "AABBCCDDEEFFGGHHIIJJ");
+
+  }
+
+/** Extreme case with nothing writable but exceeding the writable buffer */
+  void test_noWriteBuffer_nothingWritableWasSaved()
+  {
+     //Room for 4 in the write buffer
+    DiskBuffer dbuf(4);
+    for (size_t i=0; i<10; i++)
+    {
+      data[i]->setBusy(true);
+      data[i]->setSaved(false);
+      dbuf.toWrite(data[i]);
+    }
+    // We ended up with too much in the buffer since nothing could be written.
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 20);
+     //Let's make it all writable
     for (size_t i=0; i<9; i++)
       data[i]->setBusy(false);
     // Trigger a write
     dbuf.toWrite(data[9]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 2);
     // And all of these get written out at once
-    //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "9,8,7,6,5,4,3,2,1,0,");
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,5,6,7,8,9,");
+    TS_ASSERT_EQUALS(SaveableTesterWithFile::fakeFile, "IIHHGGFFEEDDCCBBAA");
+
   }
 
-
-  //--------------------------------------------------------------------------------
-  /** Sorts by file position when writing to a file */
+  ////--------------------------------------------------------------------------------
+  ///** Sorts by file position when writing to a file */
   void test_writesOutInFileOrder()
   {
-    // Room for 3 in the to-write cache
-    DiskBuffer dbuf(3);
+    for(size_t i=0;i<data.size();i++)
+    {
+        data[i]->setDataChanged();
+    }
+    // Room for 2 objects of size 2 in the to-write cache
+    DiskBuffer dbuf(2*2);
     // These 3 will get written out
     dbuf.toWrite(data[5]);
     dbuf.toWrite(data[1]);
     dbuf.toWrite(data[9]);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
+
+                                                      // 0 1 2 3 4 5 6 7 8 9
+    TS_ASSERT_EQUALS(SaveableTesterWithFile::fakeFile, "  BB      FF      JJ");
     // These 4 at the end will be in the cache
     dbuf.toWrite(data[2]);
     dbuf.toWrite(data[3]);
@@ -423,35 +234,13 @@ public:
     dbuf.toWrite(data[6]);
 
     // 1 left in the buffer
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 1);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 2);
 
     // The "file" was written out this way (sorted by file position):
-    //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "9,5,1,4,3,2,");
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "5,1,9,2,3,4,");
+                                                      // 0 1 2 3 4 5 6 7 8 9
+    TS_ASSERT_EQUALS(SaveableTesterWithFile::fakeFile, "  BBCCDDEEFF      JJ");
   }
 
-  //--------------------------------------------------------------------------------
-  /** Any ISaveable that says it can't be written remains in the cache */
-  void test_skips_dataBusy_Blocks()
-  {
-    DiskBuffer dbuf(3);
-    dbuf.toWrite(data[0]);
-    dbuf.toWrite(data[1]); data[1]->setBusy(true); // Won't get written out
-    dbuf.toWrite(data[2]);
-    dbuf.flushCache();
-
-    // Item #1 was skipped and is still in the buffer!
-    //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "2,0,");
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,2,");
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 1);
-
-    // But it'll get written out next time
-    ISaveableTester::fakeFile = "";
-    data[1]->setBusy(false);
-    dbuf.flushCache();
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "1,");
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
-  }
 
 
   //--------------------------------------------------------------------------------
@@ -459,41 +248,44 @@ public:
    * out of the caches */
   void test_objectDeleted()
   {
-    // Room for 6 in the to-write cache
-    DiskBuffer dbuf(6);
+    // Room for 6 objects of 2 in the to-write cache
+    DiskBuffer dbuf(12);
     // Fill the buffer
     for (size_t i=0; i<5; i++)
+    {
       dbuf.toWrite(data[i]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 5);
+      data[i]->setDataChanged();
+    }
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 10);
 
     // First let's get rid of something in to to-write buffer
 
     dbuf.objectDeleted(data[1]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 4);
-    TSM_ASSERT_EQUALS( "The data have never been written", dbuf.getFreeSpaceMap().size(), 0);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 8);
+    TSM_ASSERT_EQUALS( "The data marked as been saved, so delete should free this", dbuf.getFreeSpaceMap().size(), 1);
 
     dbuf.flushCache();
     // This triggers a write. 1 is no longer in the to-write buffer
-    //TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "4,3,2,0,");
-    TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,2,3,4,");
+     //                                               "0,  2,3,4,"
+    TS_ASSERT_EQUALS(SaveableTesterWithFile::fakeFile,"AA  CCDDEE");
     TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 0);
 
-    // assume now we have loaded the data back;
+    // assume now we have loaded the data back; (THIS MAY BE WRONG THOURH NOT AFFECT FURTHER TESTS)
      size_t ic(0);
      for (size_t i=0; i<5; i++)
      {
         if(i==1)continue;
-        data[i]->setFilePosition(ic,1);
-        data[i]->m_memory = 1;
+        data[i]->setFilePosition(2*ic,2,true);
+        data[i]->m_memory = 2;
         data[i]->setDataChanged();
         dbuf.toWrite(data[i]);
         ic++;
      }
 
     dbuf.objectDeleted(data[2]);
-    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 3);
-    TSM_ASSERT_EQUALS( "It is now free space mapping the data on hdd", dbuf.getFreeSpaceMap().size(), 1);
-    TSM_ASSERT_EQUALS(" and file is still the same size: ",dbuf.getFileLength(),4);
+    TS_ASSERT_EQUALS( dbuf.getWriteBufferUsed(), 6);
+    TSM_ASSERT_EQUALS( "It is still free space mapping the data on hdd", dbuf.getFreeSpaceMap().size(), 2);
+    TSM_ASSERT_EQUALS(" and file is still the same size: ",dbuf.getFileLength(),10);
 
   }
 
@@ -504,6 +296,12 @@ public:
   {
     // Room for 3 in the to-write cache
     DiskBuffer dbuf(3);
+    size_t bigNum=1000;
+    std::vector<ISaveable *> bigData;
+    bigData.reserve(bigNum);
+    for (size_t i=0; i<bigNum; i++)
+      bigData.push_back( new SaveableTesterWithFile(i,2*i,2,char(i+0x41)) );  
+
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i<int(bigNum); i++)
@@ -511,10 +309,15 @@ public:
       dbuf.toWrite(bigData[i]);
     }
     //std::cout << ISaveableTester::fakeFile << std::endl;
+    for (size_t i=0; i<size_t(bigNum); i++)
+        delete bigData[i];
+
   }
-
-
-  //--------------------------------------------------------------------------------
+  ////--------------------------------------------------------------------------------
+  ////--------------------------------------------------------------------------------
+  ////----------TESTS FOR FREE SPACE MAPS --------------------------------------------
+  ////--------------------------------------------------------------------------------
+  ////--------------------------------------------------------------------------------
   /** Freeing blocks get merged properly */
   void test_freeBlock_mergesWithPrevious()
   {
@@ -543,7 +346,6 @@ public:
     TS_ASSERT_EQUALS( free[3], 100);
   }
 
-  //--------------------------------------------------------------------------------
   /** Freeing blocks get merged properly */
   void test_freeBlock_mergesWithNext()
   {
@@ -570,7 +372,6 @@ public:
     TS_ASSERT_EQUALS( map.begin()->getSize(), 100);
   }
 
-  //--------------------------------------------------------------------------------
   /** Freeing blocks get merged properly */
   void test_freeBlock_mergesWithBothNeighbours()
   {
@@ -595,7 +396,6 @@ public:
     TS_ASSERT_EQUALS( b.getSize(), 150);
   }
 
-  //--------------------------------------------------------------------------------
   /** Add blocks to the free block list in parallel threads,
    * should not segfault or anything */
   void test_freeBlock_threadSafety()
@@ -611,26 +411,26 @@ public:
   }
 
 
-  /** Disabled because it is not necessary to defrag since that happens on the fly */
-  void xtest_defragFreeBlocks()
-  {
-    DiskBuffer dbuf(3);
-    DiskBuffer::freeSpace_t & map = dbuf.getFreeSpaceMap();
-    FreeBlock b;
+  ///** Disabled because it is not necessary to defrag since that happens on the fly */
+  //void xtest_defragFreeBlocks()
+  //{
+  //  DiskBuffer dbuf(3);
+  //  DiskBuffer::freeSpace_t & map = dbuf.getFreeSpaceMap();
+  //  FreeBlock b;
 
-    dbuf.freeBlock(0, 50);
-    dbuf.freeBlock(100, 50);
-    dbuf.freeBlock(150, 50);
-    dbuf.freeBlock(500, 50);
-    dbuf.freeBlock(550, 50);
-    dbuf.freeBlock(600, 50);
-    dbuf.freeBlock(650, 50);
-    dbuf.freeBlock(1000, 50);
-    TS_ASSERT_EQUALS( map.size(), 8);
+  //  dbuf.freeBlock(0, 50);
+  //  dbuf.freeBlock(100, 50);
+  //  dbuf.freeBlock(150, 50);
+  //  dbuf.freeBlock(500, 50);
+  //  dbuf.freeBlock(550, 50);
+  //  dbuf.freeBlock(600, 50);
+  //  dbuf.freeBlock(650, 50);
+  //  dbuf.freeBlock(1000, 50);
+  //  TS_ASSERT_EQUALS( map.size(), 8);
 
-    dbuf.defragFreeBlocks();
-    TS_ASSERT_EQUALS( map.size(), 4);
-  }
+  //  dbuf.defragFreeBlocks();
+  //  TS_ASSERT_EQUALS( map.size(), 4);
+  //}
 
   /// You can call relocate() if an block is shrinking.
   void test_relocate_when_shrinking()
@@ -725,17 +525,21 @@ public:
     TS_ASSERT_EQUALS( dbuf.allocate(55), 1000 );
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 1055 );
   }
+  ////--------------------------------------------------------------------------------
+  ////--------------------------------------------------------------------------------
+  ////--------------------------------------------------------------------------------
+  ////--------------------------------------------------------------------------------
 
   void test_allocate_with_file_manually()
   {
     // Start by faking a file
-    ISaveableTesterWithFile * blockA = new ISaveableTesterWithFile(0, 0, 2, 'A');
-    ISaveableTesterWithFile * blockB = new ISaveableTesterWithFile(1, 2, 3, 'B');
-    ISaveableTesterWithFile * blockC = new ISaveableTesterWithFile(2, 5, 5, 'C');
+    SaveableTesterWithFile * blockA = new SaveableTesterWithFile(0, 0, 2, 'A');
+    SaveableTesterWithFile * blockB = new SaveableTesterWithFile(1, 2, 3, 'B');
+    SaveableTesterWithFile * blockC = new SaveableTesterWithFile(2, 5, 5, 'C');
     blockA->save();
     blockB->save();
     blockC->save();
-    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCC");
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AABBBCCCCC");
 
     DiskBuffer dbuf(3);
     dbuf.setFileLength(10);
@@ -748,7 +552,7 @@ public:
     // Asking for a new chunk of space that needs to be at the end
     // This all now happens inside the writeBuffer
     uint64_t oldMem = blockB->getTotalDataSize();
-    blockB->changeMemSize(7);
+    blockB->AddNewObjects(4);
     uint64_t mPos   = blockB->getFilePosition();
     uint64_t newMem = blockB->getTotalDataSize();
     newPos = dbuf.relocate(mPos, oldMem, newMem);
@@ -756,26 +560,26 @@ public:
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 17);
 
     // Simulate saving
-    blockB->setFilePosition(newPos,7);
+    blockB->setFilePosition(newPos,7,true);
     blockB->save();    
-    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
 
     // Now let's allocate a new block
     newPos = dbuf.allocate(2);
     TS_ASSERT_EQUALS( newPos, 2 );
-    ISaveableTesterWithFile * blockD = new ISaveableTesterWithFile(3, newPos, 2, 'D');
+    SaveableTesterWithFile * blockD = new SaveableTesterWithFile(3, newPos, 2, 'D');
     blockD->save();
-    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AADDBCCCCCBBBBBBB");
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AADDBCCCCCBBBBBBB");
     TSM_ASSERT_EQUALS( "Still one freed block", map.size(), 1);
 
     // Grow blockD by 1
-    blockD->changeMemSize(3);
+    blockD->AddNewObjects(1);
     newPos = dbuf.relocate(2, 2, 3);
     TSM_ASSERT_EQUALS( "Block D stayed in the same place since there was room after it", newPos, 2 );
-    blockD->setFilePosition(newPos,3);
+    blockD->setFilePosition(newPos,3,true);
     blockD->save();
     dbuf.flushCache();
-    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AADDDCCCCCBBBBBBB");
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AADDDCCCCCBBBBBBB");
 
     // Allocate a little block at the end
     newPos = dbuf.allocate(1);
@@ -787,63 +591,70 @@ public:
     delete blockB;
     delete blockC;
     delete blockD;
-    //std::cout <<  ISaveableTesterWithFile::fakeFile << "!" << std::endl;
+    //std::cout <<  SaveableTesterWithFile::fakeFile << "!" << std::endl;
   }
 
   void test_allocate_with_file()
   {
-    ISaveableTesterWithFile::fakeFile ="";
+    SaveableTesterWithFile::fakeFile ="";
     // filePosition has to be identified by the fileBuffer
     uint64_t filePos = std::numeric_limits<uint64_t>::max();
     // Start by faking a file
-    ISaveableTesterWithFile * blockA = new ISaveableTesterWithFile(0, filePos, 2, 'A');
-    ISaveableTesterWithFile * blockB = new ISaveableTesterWithFile(1, filePos, 3, 'B');
-    ISaveableTesterWithFile * blockC = new ISaveableTesterWithFile(2, filePos, 5, 'C');
-
-
+    SaveableTesterWithFile * blockA = new SaveableTesterWithFile(0, filePos, 2, 'A',false);
+    SaveableTesterWithFile * blockB = new SaveableTesterWithFile(1, filePos, 3, 'B',false);
+    SaveableTesterWithFile * blockC = new SaveableTesterWithFile(2, filePos, 5, 'C',false);
+    
     DiskBuffer dbuf(3);
-    dbuf.toWrite(blockA);
     dbuf.toWrite(blockB);
+    dbuf.toWrite(blockA);
     dbuf.toWrite(blockC);
-    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCC");
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AABBBCCCCC");
 
     DiskBuffer::freeSpace_t & map = dbuf.getFreeSpaceMap();
 
 
     // Asking for a new chunk of space that needs to be at the end
-    blockB->changeMemSize(7);
+    blockB->AddNewObjects(4);
     dbuf.toWrite(blockB);
     TSM_ASSERT_EQUALS( "One freed block", map.size(), 1);
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 17);
-    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
     // Simulate saving
    
     dbuf.toWrite(blockB);
-    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
+    TS_ASSERT_EQUALS(SaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
     TS_ASSERT(!blockB->isDataChanged())
 
     //// Now let's allocate a new block
-    ISaveableTesterWithFile * blockD = new ISaveableTesterWithFile(3, filePos, 2, 'D');
+    SaveableTesterWithFile * blockD = new SaveableTesterWithFile(3, filePos, 2, 'D',false);
     dbuf.toWrite(blockD);
     // small block, nothing still sitting in the buffer
-    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AABBBCCCCCBBBBBBB");
     // this will remove block from the cash and place the file to sutable position
     dbuf.flushCache();
-    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AADDBCCCCCBBBBBBB");
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AADDBCCCCCBBBBBBB");
     TSM_ASSERT_EQUALS( "Still one freed block", map.size(), 1);
 
     //// Grow blockD by 1
-    blockD->changeMemSize(3);
+    blockD->AddNewObjects(1);
     dbuf.toWrite(blockD);
-    TS_ASSERT_EQUALS( ISaveableTesterWithFile::fakeFile, "AADDDCCCCCBBBBBBB");
-
+    // nothing happens with file 
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AADDBCCCCCBBBBBBB");
+    // trigger save as object will stay in buffer otherwise (only 1 block is im memory)
+    dbuf.flushCache();
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AADDDCCCCCBBBBBBB");
     TSM_ASSERT_EQUALS( "Nothing left one freed block", map.size(), 0);
 
 
     //// Allocate a little block at the end
-    blockD->changeMemSize(4);
+    blockD->AddNewObjects(1);
     dbuf.toWrite(blockD);
-    TSM_ASSERT_EQUALS( "The new block went to the end of the file",  ISaveableTesterWithFile::fakeFile, "AADDDCCCCCBBBBBBBDDDD" );
+    // nothing have changed as only 1 part of the object is in the memory and 3 are already on HDD
+    TS_ASSERT_EQUALS( SaveableTesterWithFile::fakeFile, "AADDDCCCCCBBBBBBB");
+    TSM_ASSERT_EQUALS( "Nothing left one freed block", map.size(), 0);
+    // trigger save as object will stay in buffer otherwise (only 1 block is im memory)
+    dbuf.flushCache();
+    TSM_ASSERT_EQUALS( "The new block went to the end of the file",  SaveableTesterWithFile::fakeFile, "AADDDCCCCCBBBBBBBDDDD" );
     TS_ASSERT_EQUALS( dbuf.getFileLength(), 21);
     TSM_ASSERT_EQUALS( "Nothing left one freed block", map.size(), 1);
 
@@ -851,8 +662,110 @@ public:
     //std::cout <<  ISaveableTesterWithFile::fakeFile << "!" << std::endl;
   }
 
-#ifndef _GLUE_PERFORMANCE_TEST
+
 };
+//====================================================================================
+// THIS TEST DOES NOT PROBABLY EXIST IN A WHILD ANY MORE; LEFT JUST IN CASE
+//====================================================================================
+//====================================================================================
+/** An Saveable that will fake seeking to disk */
+class SaveableTesterWithSeek : public ISaveable
+{  
+    size_t ID;
+    size_t m_memory;
+public:
+  SaveableTesterWithSeek(size_t id) : ISaveable(),
+      ID(id)
+  {
+    m_memory=1;
+    this->setFilePosition(10+id,this->m_memory,true);
+  }
+  
+   /// Method to flush the data to disk and ensure it is written.
+   virtual void flushData() const{};
+  /** @return the amount of memory that the object takes as a whole.
+      For filebased objects it should be the amount the object occupies in memory plus the size it occupies in file if the object has not been fully loaded
+      or modified.
+     * If the object has never been loaded, this should be equal to number of data points in the file
+     */
+    virtual uint64_t getTotalDataSize() const{return m_memory;}
+    /// the data size kept in memory
+    virtual size_t getDataMemorySize()const{return m_memory;};
+
+  virtual void load(DiskBuffer & /*dbuf*/) 
+  {
+    uint64_t myFilePos = this->getFilePosition();
+    //std::cout << "Block " << getFileId() << " loading at " << myFilePos << std::endl;
+    SaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
+    this->setLoaded(true);
+  }
+
+  virtual void save()const
+  {
+    // Pretend to seek to the point and write
+    uint64_t myFilePos = this->getFilePosition();
+    //std::cout << "Block " << getFileId() << " saving at " << myFilePos << std::endl;
+    fakeSeekAndWrite(myFilePos);
+  }
+  virtual void clearDataFromMemory()
+  { 
+    m_memory = 0; 
+    this->setLoaded(false);
+  }
+
+
+  void grow(DiskBuffer & dbuf, bool /*tellMRU*/)
+  {
+    // OK first you seek to where the OLD data was and load it.
+    uint64_t myFilePos = this->getFilePosition();
+    //std::cout << "Block " << getFileId() << " loading at " << myFilePos << std::endl;
+    SaveableTesterWithSeek::fakeSeekAndWrite( myFilePos );
+    // Simulate that the data is growing and so needs to be written out
+    size_t newfilePos = dbuf.relocate(myFilePos, m_memory, m_memory+1);
+    //std::cout << "Block " << getFileId() << " has moved from " << myFilePos << " to " << newfilePos << std::endl;
+    myFilePos = newfilePos;
+    // Grow the size by 1
+    m_memory++;
+  
+    this->setFilePosition(myFilePos,m_memory,true);
+  }
+
+  /// Fake a seek followed by a write
+  static void fakeSeekAndWrite(uint64_t newPos)
+  {
+    streamMutex.lock();
+    int64_t seek = int64_t(filePos) - int64_t(newPos);
+    if (seek < 0) seek = -seek;
+    double seekTime = 5e-3 * double(seek) / 2000.0; // 5 msec for a 2000-unit seek.
+    // A short write time (500 microsec) for a small block of data
+    seekTime += 0.5e-3;
+    Timer tim;
+    while (tim.elapsed_no_reset() < seekTime)
+    { /*Wait*/ }
+    filePos = newPos;
+    streamMutex.unlock();
+  }
+  virtual void load()
+  {
+      if(this->wasSaved()&&!this->isLoaded())
+      {
+          m_memory+=this->getFileSize();
+      }
+      this->setLoaded(true);
+  }
+
+
+  static uint64_t filePos;
+  static std::string fakeFile;
+  static Kernel::Mutex streamMutex;
+
+};
+uint64_t SaveableTesterWithSeek::filePos;
+// Declare the static members here.
+std::string SaveableTesterWithSeek::fakeFile;
+Kernel::Mutex SaveableTesterWithSeek::streamMutex;
+
+
 
 
 //====================================================================================
@@ -860,88 +773,32 @@ class DiskBufferTestPerformance : public CxxTest::TestSuite
 {
 public:
 
-  std::vector<ISaveableTester*> data;
-  std::vector<ISaveableTesterWithSeek*> dataSeek;
+  std::vector<SaveableTesterWithSeek*> dataSeek;
   size_t num;
 
   // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
+  // This means the constructor isn't called when running other xests
   static DiskBufferTestPerformance *createSuite() { return new DiskBufferTestPerformance(); }
   static void destroySuite( DiskBufferTestPerformance *suite ) { delete suite; }
 
   DiskBufferTestPerformance()
   {
-    num = 100000;
-    data.clear();
-    for (size_t i=0; i<num; i++)
-    {
-      data.push_back( new ISaveableTester(i) );
-      data[i]->setBusy(); // Items won't do any real saving
-    }
-    dataSeek.clear();
-    for (size_t i=0; i<200; i++)
-      dataSeek.push_back( new ISaveableTesterWithSeek(i) );
+
+      dataSeek.clear();
+      dataSeek.reserve(200);
+        for (size_t i=0; i<200; i++)
+            dataSeek.push_back( new SaveableTesterWithSeek(i) );
   }
   void setUp()
   {
-    ISaveableTester::fakeFile = "";
+    SaveableTesterWithSeek::fakeFile = "";
   }
 
-#endif
-
-
-  void test_smallCache_writeBuffer()
+  void xest_nothing()
   {
-    CPUTimer tim;
-    DiskBuffer dbuf(3);
-    for (size_t i=0; i<data.size(); i++)
-    {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
-    }
-    std::cout << tim << " to load " << num << " into MRU." << std::endl;
+    TS_WARN("Tests here were disabled for the time being");
   }
 
-  void test_smallCache_no_writeBuffer()
-  {
-    CPUTimer tim;
-    DiskBuffer dbuf(0);
-    for (size_t i=0; i<data.size(); i++)
-    {
-      data[i]->setBusy(); // Items won't do any real saving
-    }
-
-    for (int i=0; i<int(data.size()); i++)
-    {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
-    }
-    std::cout << tim << " to load " << num << " into MRU (no write cache)." << std::endl;
-  }
-
-  void test_largeCache_writeBuffer()
-  {
-    CPUTimer tim;
-    DiskBuffer dbuf(1000);
-    for (int i=0; i<int(data.size()); i++)
-    {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
-    }
-    std::cout << tim << " to load " << num << " into MRU." << std::endl;
-  }
-
-  void test_largeCache_noWriteBuffer()
-  {
-    CPUTimer tim;
-    DiskBuffer dbuf(0);
-    for (int i=0; i<int(data.size()); i++)
-    {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
-    }
-    std::cout << tim << " to load " << num << " into MRU (no write buffer)." << std::endl;
-  }
 
   /** Demonstrate that using a write buffer reduces time spent seeking on disk */
   void test_withFakeSeeking_withWriteBuffer()
@@ -980,6 +837,7 @@ public:
     {
       // Pretend you just loaded the data
       dataSeek[i]->grow(dbuf, true);
+      dbuf.toWrite(dataSeek[i]);
     }
     std::cout << "About to flush the cache to finish writes." << std::endl;
     dbuf.flushCache();
