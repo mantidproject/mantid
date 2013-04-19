@@ -2,11 +2,11 @@
 ## Handle selection of .pyd files for absorption corrections
 import platform, sys
 from IndirectImport import *
-#if is_supported_f2py_platform():
-    #fltabs = import_f2py("fltabs")
-    #cylabs = import_f2py("cylabs")
-#else:
-#    unsupported_message()
+if is_supported_f2py_platform():
+    fltabs = import_f2py("fltabs")
+    cylabs = import_f2py("cylabs")
+else:
+    unsupported_message()
 
 from IndirectCommon import *
 from mantid.simpleapi import *
@@ -113,7 +113,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
         logger.notice(message)
         message = 'Detector angles : '+str(ndet)+' from '+str(det[0])+' to '+str(det[ndet-1])
         logger.notice(message)
-	eZ = np.zeros(nw)                  # set errors to zero
+    eZ = np.zeros(nw)                  # set errors to zero
     name = run_name + geom
     assWS = name + '_ass'
     asscWS = name + '_assc'
