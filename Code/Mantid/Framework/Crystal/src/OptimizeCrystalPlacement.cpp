@@ -29,6 +29,7 @@ that slowly build a UB with corrected sample orientations may be needed.
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
 #include <boost/lexical_cast.hpp>
 
 #include <math.h>
@@ -136,8 +137,8 @@ namespace Mantid
     void OptimizeCrystalPlacement::exec()
     {
       PeaksWorkspace_sptr Peaks = getProperty( "PeaksWorkspace" );
-
       PeaksWorkspace_sptr OutPeaks = getProperty( "ModifiedPeaksWorkspace" );
+
       if( Peaks != OutPeaks)
       {
         boost::shared_ptr<PeaksWorkspace>X(Peaks->clone());
@@ -145,6 +146,7 @@ namespace Mantid
       }
 
       std::vector<int> NOoptimizeRuns = getProperty( "KeepGoniometerFixedfor" );
+
       const DblMatrix X = Peaks->sample().getOrientedLattice().getUB();
       Matrix<double> UBinv( X );
       UBinv.Invert();
@@ -170,25 +172,18 @@ namespace Mantid
         {
         }
 
-        if ( it == RunNumList.end() )
+        V3D hkl = UBinv * (peak.getQSampleFrame() )/ (2.0*M_PI);
+        bool use = IndexingUtils::ValidIndex( hkl, HKLintOffsetMax);  //use this peak???
+	
+	if ( use && HKLMax > 0 )
+        for( int k = 0; k < 3; k++ )
         {
-          V3D hkl = UBinv * peak.getQSampleFrame();
-          bool use = true;
-          for( int k = 0; k < 3 && use; k++ )
-          {
-            double x = hkl[k]-floor(hkl[k]);
-            if( x > .5 ) x -= 1;
+          if( fabs(hkl[k])>HKLMax)
+            use = false;
+        }
 
-            if( fabs(x) >=  HKLintOffsetMax)
-              use = false;
-
-            else if( HKLMax>0 && fabs(hkl[k])>HKLMax)
-              use = false;
-
-          }
-
-          if( !use) continue;
-
+        if ( it == RunNumList.end() && use )   // add to list of unique run numbers in workspace
+        {
           RunNumList.push_back( runNum );
 
           Geometry::Goniometer Gon( peak.getGoniometerMatrix() );
@@ -196,20 +191,31 @@ namespace Mantid
           ChiPhiOmega.push_back(  V3D( phichiOmega[1] , phichiOmega[2] , phichiOmega[0] ) );
         }
 
-        nPeaksUsed++;
-        xRef.push_back( ( double ) i );
-        yvalB.push_back( 0.0 );
-        errB.push_back( 1.0 );
-        xRef.push_back( ( double ) i );
-        yvalB.push_back( 0.0 );
-        errB.push_back( 1.0 );
-        xRef.push_back( ( double ) i );
-        yvalB.push_back( 0.0 );
-        errB.push_back( 1.0 );
+        if ( use)                             // add to lists for workspace 
+	{
+          nPeaksUsed++;
+          xRef.push_back( ( double ) i );
+          yvalB.push_back( 0.0 );
+          errB.push_back( 1.0 );
+          xRef.push_back( ( double ) i );
+          yvalB.push_back( 0.0 );
+          errB.push_back( 1.0 );
+          xRef.push_back( ( double ) i );
+          yvalB.push_back( 0.0 );
+          errB.push_back( 1.0 );
+        }
+	
+      }
+ 
+      g_log.notice()<< "Number initially indexed = " << nPeaksUsed << " at tolerance = " << HKLintOffsetMax << std::endl;
+      MatrixWorkspace_sptr mwkspc;
 
+      if ( nPeaksUsed < 1 )
+      {
+         g_log.error()<<"Error in UB too large. 0 peaks indexed at "<< HKLintOffsetMax << std::endl;
+	 throw std::invalid_argument( "Error in UB too large. 0 peaks indexed "); 
       }
 
-      MatrixWorkspace_sptr mwkspc;
       int N = 3*nPeaksUsed;//Peaks->getNumberPeaks();
       mwkspc =  WorkspaceFactory::Instance().create( "Workspace2D" , (size_t) 1 , N , N );
       mwkspc->setX( 0 , pX );

@@ -124,7 +124,7 @@ public:
       else if (nm == "omega5638")
         d = GonAngles5638[0] - table->Double(i, 1);
 
-      TS_ASSERT_DELTA(d, 0, .02);
+      TS_ASSERT_DELTA(d, 0, .3);
 
     }
   }
@@ -206,8 +206,8 @@ public:
 
     for (int i = 0; i < 3; i++)
     {
-      TS_ASSERT_DELTA(GonAngles5637[i], GonAngles5637a[i], .02);
-      TS_ASSERT_DELTA(GonAngles5638[i], GonAngles5638a[i], .02);
+      TS_ASSERT_DELTA(GonAngles5637[i], GonAngles5637a[i], .2);
+      TS_ASSERT_DELTA(GonAngles5638[i], GonAngles5638a[i], .15);
     }
 
   }
