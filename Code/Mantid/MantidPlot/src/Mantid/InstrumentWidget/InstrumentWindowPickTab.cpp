@@ -242,18 +242,21 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
   if (m_freezePlot)
   {// freeze the plot for one update
     m_freezePlot = false;
-    return;
+    detid = m_currentDetID;
   }
   if (m_instrWindow->blocked()) 
   {
     m_selectionInfoDisplay->clear();
     return;
   }
+
+  QString text;
   if (detid >= 0)
   {
+    // collect info about selected detector and add it to text
     InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
     Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
-    QString text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
+    text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
     QString wsIndex;
     try {
@@ -299,16 +302,25 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     else
     {
       xUnits = QString::fromStdString(instrActor->getWorkspace()->getAxis(0)->unit()->caption());
-      //xUnits = "Time of flight";
     }
     text += "X units: " + xUnits + '\n';
-    m_selectionInfoDisplay->setText(text);
   }
   else
   {
-    m_selectionInfoDisplay->clear();
     m_plot->clearCurve(); // Clear the plot window
     m_plot->replot();
+  }
+
+  // display info about peak overlays
+  text += getNonDetectorInfo();
+
+  if ( !text.isEmpty() )
+  {
+      m_selectionInfoDisplay->setText(text);
+  }
+  else
+  {
+      m_selectionInfoDisplay->clear();
   }
 }
 
@@ -669,11 +681,6 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
               tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
               tw->setInstrument(instr);
               Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
-              auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( m_instrWindow->getSurface() );
-              if ( surface )
-              {
-                  surface->setPeaksWorkspace(boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
-              }
           }
           else
           {
@@ -683,6 +690,11 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
                   QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
                   return;
               }
+          }
+          auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( m_instrWindow->getSurface() );
+          if ( surface )
+          {
+              surface->setPeaksWorkspace(boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
           }
       }
 
@@ -1013,6 +1025,20 @@ QString InstrumentWindowPickTab::getTubeXUnitsName(InstrumentWindowPickTab::Tube
   return "Detector_ID";
 }
 
+/**
+  * Return non-detector info to be displayed in the selection info display.
+  */
+QString InstrumentWindowPickTab::getNonDetectorInfo()
+{
+    QString text;
+    QStringList overlays = m_instrWindow->getSurface()->getPeaksWorkspaceNames();
+    if ( !overlays.isEmpty() )
+    {
+        text += "Peaks:\n" + overlays.join("\n") + "\n";
+    }
+    return text;
+}
+
 
 /**
  * Save data plotted on the miniplot into a MatrixWorkspace.
@@ -1152,9 +1178,11 @@ void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
 
 void InstrumentWindowPickTab::initSurface()
 {
-    auto surface = getSurface().get();
+    ProjectionSurface *surface = getSurface().get();
     connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
     connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
+    connect(surface,SIGNAL(peaksWorkspaceAdded()),this,SLOT(updateSelectionInfoDisplay()));
+    connect(surface,SIGNAL(peaksWorkspaceDeleted()),this,SLOT(updateSelectionInfoDisplay()));
 }
 
 /**
@@ -1206,6 +1234,15 @@ void InstrumentWindowPickTab::singleDetectorTouched(int detid)
 
 void InstrumentWindowPickTab::singleDetectorPicked(int detid)
 {
-  updatePick(detid);
+    updatePick(detid);
+}
+
+/**
+  * Update the selection display using currently selected detector.
+  * Updates non-detector information on it.
+  */
+void InstrumentWindowPickTab::updateSelectionInfoDisplay()
+{
+    updateSelectionInfo(m_currentDetID);
 }
 

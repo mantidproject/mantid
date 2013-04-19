@@ -6,6 +6,7 @@
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 
 #include <QRgb>
 #include <QSet>
@@ -634,9 +635,10 @@ boost::shared_ptr<Mantid::API::IPeaksWorkspace> ProjectionSurface::getEditPeaksW
  * Remove an overlay if its peaks workspace is deleted.
  * @param ws :: Shared pointer to the deleted peaks workspace.
  */
-void ProjectionSurface::peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws)
+void ProjectionSurface::deletePeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws)
 {
-  for(int i=0;i < m_peakShapes.size(); ++i)
+  const int npeaks = m_peakShapes.size();
+  for(int i=0;i < npeaks; ++i)
   {
     if (m_peakShapes[i]->getPeaksWorkspace() == ws)
     {
@@ -645,6 +647,10 @@ void ProjectionSurface::peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPe
       break;
     }
   }
+  if ( m_peakShapes.size() < npeaks )
+  {
+      emit peaksWorkspaceDeleted();
+  }
 }
 
 /**
@@ -652,12 +658,16 @@ void ProjectionSurface::peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPe
  */
 void ProjectionSurface::clearPeakOverlays()
 {
-  for(int i=0;i < m_peakShapes.size(); ++i)
-  {
-      delete m_peakShapes[i];
-  }
-  m_peakShapes.clear();
-  m_peakShapesStyle = 0;
+    if ( !m_peakShapes.isEmpty() )
+    {
+        for(int i=0;i < m_peakShapes.size(); ++i)
+        {
+          delete m_peakShapes[i];
+        }
+        m_peakShapes.clear();
+        m_peakShapesStyle = 0;
+        emit peaksWorkspaceDeleted();
+    }
 }
 
 /**
@@ -761,6 +771,19 @@ void ProjectionSurface::erasePeaks(const QRect &rect)
  */
 void ProjectionSurface::enableLighting(bool on)
 {
-  m_isLightingOn = on;
+    m_isLightingOn = on;
+}
+
+/**
+  * Return names of attached peaks workspaces.
+  */
+QStringList ProjectionSurface::getPeaksWorkspaceNames() const
+{
+    QStringList names;
+    foreach(PeakOverlay* po, m_peakShapes)
+    {
+        names << QString::fromStdString(po->getPeaksWorkspace()->name());
+    }
+    return names;
 }
 
