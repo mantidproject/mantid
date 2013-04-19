@@ -19,6 +19,9 @@
 #include <algorithm>
 #include <Poco/DateTimeFormatter.h>
 #include <boost/algorithm/string.hpp>
+#include "MantidKernel/ConfigService.h"
+using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::ConfigServiceImpl; 
 using namespace std; 
 using Mantid::API::ScriptRepositoryImpl;
 using Mantid::API::ScriptRepoException;
@@ -126,8 +129,8 @@ class ScriptRepositoryImplLocal : public ScriptRepositoryImpl{
 
      It also make it public, in order to be able to test this method itself.
   */
- void doDownloadFile(const std::string url_file, 
-                     const std::string local_file_path){
+ void doDownloadFile(const std::string & url_file, 
+                     const std::string & local_file_path){
 
    // answer when the download it to 'forget' the downloaded file
    // request to ping the site
@@ -184,12 +187,15 @@ ctest -j8 -R ScriptRepositoryTestImpl_  --verbose
 class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
   ScriptRepositoryImplLocal * repo;
   std::string local_rep;
+  std::string backup_local_repository_path;
  public: 
   static ScriptRepositoryTestImpl * createSuite(){return new ScriptRepositoryTestImpl(); }
   static void destroySuite (ScriptRepositoryTestImpl * suite){delete suite; }
 
   // ensure that all tests will be perfomed in a fresh repository
-  void setUp(){    
+  void setUp(){
+    ConfigServiceImpl & config = ConfigService::Instance();
+    backup_local_repository_path = config.getString("ScriptLocalRepository"); 
     local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
     TS_ASSERT_THROWS_NOTHING(repo = new ScriptRepositoryImplLocal(local_rep, webserverurl)); 
   }
@@ -203,6 +209,9 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     }catch(Poco::Exception & ex){
       TS_WARN(ex.displayText());
     }
+    ConfigServiceImpl & config = ConfigService::Instance();
+    config.setString("ScriptLocalRepository", backup_local_repository_path); 
+    config.saveConfig(config.getUserFilename());
   }
 
 
@@ -343,7 +352,7 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
     ScriptInfo information = repo->info("TofConv/TofConverter.py"); 
-    TS_ASSERT(information.description == "tofconverter description");
+    TS_ASSERT(repo->description("TofConv/TofConverter.py") == "tofconverter description");
     TS_ASSERT(information.author.empty()); 
     TSM_ASSERT("check time", information.pub_date == DateAndTime("2012-02-10 10:00:50")); 
     TS_ASSERT(!information.auto_update);
@@ -545,6 +554,24 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     // file has local and remote changes
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_CHANGED);
     TS_ASSERT(repo->fileStatus(dir_name) == Mantid::API::BOTH_CHANGED);
+  }
+
+/*************************************
+   *   FILE STATUS
+   *************************************/
+  void test_info_of_downloaded_folder(){
+    std::string file_name = "TofConv/TofConverter.py";
+    std::string folder_name = "TofConv";
+    // install 
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    // list files
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());     
+    // download
+    TS_ASSERT_THROWS_NOTHING(repo->download(folder_name));     
+    // it must be unchanged
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED) ;
+    // it
+    TS_ASSERT(repo->fileStatus(folder_name) == Mantid::API::BOTH_UNCHANGED) ;
   }
 
   void test_downloading_and_removing_files(){

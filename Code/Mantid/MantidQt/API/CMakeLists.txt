@@ -45,6 +45,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/PythonRunner.h
   inc/MantidQtAPI/QtSignalChannel.h
   inc/MantidQtAPI/ScriptRepositoryView.h
+  inc/MantidQtAPI/RepoTreeView.h
   inc/MantidQtAPI/RepoModel.h
   inc/MantidQtAPI/SyncedCheckboxes.h
   inc/MantidQtAPI/TextPropertyWidget.h

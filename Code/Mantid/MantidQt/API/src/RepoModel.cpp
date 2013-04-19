@@ -11,419 +11,346 @@ using namespace MantidQt::API;
 using Mantid::Kernel::ConfigServiceImpl; 
 using Mantid::Kernel::ConfigService;
 #include <QDebug>
+#include <stdexcept>
+#include <QCheckBox>
+#include <QLineEdit>
+#include <QVBoxLayout>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QDialogButtonBox>
+
+//Initialize the logger
+Mantid::Kernel::Logger & RepoModel::g_log = Mantid::Kernel::Logger::get("RepoModel");
+
+
 /*
-    repoitem.cpp
-
-    A container for items of data supplied by the script repository model.
+  An auxiliary nested class to help RepoModel to rebuild the hierarchical 
+  tree of ScriptRepository. 
+  
+  It will keep track of the path that is the main key to access metadata
+  on ScriptRepository and an auxiliary label to easy the display on a 
+  user nicer way.
+  
 */
-
-RepoItem::RepoItem(const QString label, const QString path, 
-             bool entry_directory,
-             Mantid::API::SCRIPTSTATUS curr_status, 
-             RepoItem * parent)
+RepoModel::RepoItem::RepoItem(const QString & label,
+                   const QString & path,
+                   RepoItem * parent):
+  m_label(label), keypath(path), parentItem(parent)
 {
-  if (!parent)
-    root = true;
-  else
-    root = false; 
-
-  parentItem = parent;
-  this->label = label; 
-  this->path = path; 
-  this->status = curr_status; 
-  this->directory = entry_directory; 
 }
-RepoItem::~RepoItem()
+/// destruct all the childItems. 
+RepoModel::RepoItem::~RepoItem()
 {
     qDeleteAll(childItems);
 }
-
-void RepoItem::appendChild(RepoItem *child)
+/** This method is the very responsible to allow the reconstruction of the
+    hierarchical tree, keeping track of the children of one item. 
+ */
+void RepoModel::RepoItem::appendChild(RepoItem *child)
 {
     childItems.append(child);
 }
 
-RepoItem *RepoItem::child(int row)
+/** Gives access to the row_th children of RepoItem. Note that 
+    the row can not be greater than ::childCount(). 
+
+    But we do not test it, because this method will be called
+    indirectly from the QView, and will never go beyond that value. 
+    
+    @param row: Number between 0 and ::childCount().
+
+    @return The pointer to the row_th children.
+    
+ */
+RepoModel::RepoItem * RepoModel::RepoItem::child(int row) const
 {  
     return childItems.value(row);
 }
 
-int RepoItem::childCount() const
+/** Return the number of children that this entry may find. 
+    @return Number of children
+ */
+int RepoModel::RepoItem::childCount() const
 {
     return childItems.count();
 }
-
-int RepoItem::columnCount() const
-{  
-   return 5;
-}
-
-QVariant RepoItem::data(int column,  int role  ) const
-{
-  if (root){
-    if (role != Qt::DisplayRole)
-      return QVariant(); 
-    switch(column){
-    case 0:
-      return "File"; 
-    case 1:
-      return "Download";
-    case 2:
-      return "Status"; 
-    case 3: 
-      return "Publish"; 
-    default: 
-      return "Path";
-    }
-  }
-
-  switch(role){
-  case  Qt::DisplayRole:
-    {
-      switch(column){
-      case 0:
-        return label;
-        break;
-      case 1: /*Donwload -> is this file already donwloaded?*/           
-        if (status == Mantid::API::REMOTE_ONLY)
-          return "false";
-        else{
-          /*if the file is only local, this question does not apply*/
-          if (status == Mantid::API::LOCAL_ONLY)
-            return "";
-          
-        }
-        return "true";
-        break;
-      case 2:/* Status -> The file is up to date?*/ 
-        if (status ==  Mantid::API::BOTH_UNCHANGED)
-          return "true";
-        else{
-          /* If the file was not downloaded, them, this question does not apply*/
-          if (status ==  Mantid::API::REMOTE_ONLY
-              || 
-              status == Mantid::API::LOCAL_ONLY)
-            return ""; 
-          else
-            return "false";
-        }
-        break;
-      case 3: /* Publish -> is this file already published?*/
-        if (status == Mantid::API::LOCAL_ONLY
-            ||
-            status == Mantid::API::LOCAL_CHANGED)
-          return "false";
-        else{
-          /* If file is only remote, tis question does not apply*/
-          if (status == Mantid::API::REMOTE_ONLY)
-            return "";
-          return "true";
-        }
-        break;
-      case 4:
-        return path;
-      default:
-        break;
-      }
-      return "";
-     
-    }
-    break;
-  case Qt::DecorationRole:
-    {
-      if (column > 0)
-        return QVariant(); 
-      
-      if (directory){
-        if (status == Mantid::API::REMOTE_ONLY)
-          return QIcon::fromTheme("folder-remote", QIcon(QPixmap(":/win/folder-remote"))); 
-        else
-          return QIcon::fromTheme("folder", QIcon(QPixmap(":/win/folder")));           
-      }
-      else{
-        int pos = QString(path).lastIndexOf('.');
-        if (pos < 0)
-          return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown"))); 
-        if (path.contains("readme",Qt::CaseInsensitive))
-          return QIcon::fromTheme("text-x-readme", QIcon(QPixmap(":/win/txt_file.png"))); 
-
-        
-        QString extension = QString(path).remove(0,pos);
-        if (extension == ".cpp" || extension == ".CPP" || extension == ".c" || extension == ".C")
-          return QIcon::fromTheme("text-x-c++", QIcon(QPixmap(":/win/unknown")));
-        else if (extension == ".py" || extension == ".PY")
-          return QIcon::fromTheme("text-x-python", QIcon(QPixmap(":/win/text-x-python"))); 
-        else if (extension == ".ui")
-          return QIcon::fromTheme("document", QIcon(QPixmap(":/win/document")));
-        else if (extension == ".docx" || extension == ".doc" || extension == ".odf")
-          return QIcon::fromTheme("x-office-document", QIcon(QPixmap(":/win/office-document"))); 
-        else if (extension == ".pdf")
-          return QIcon::fromTheme("application-pdf", QIcon(QPixmap(":/win/file_pdf"))); 
-        else
-          return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown"))); 
-        
-      }
-      
-    }
-    break;
-  case  Qt::ToolTipRole:
-    {
-      switch(column){
-      case 0:
-        return QVariant();
-        break;
-      case 1: /*Donwload -> is this file already donwloaded?*/           
-        if (status == Mantid::API::REMOTE_ONLY){
-          if (directory)
-            return "Click here to download this folder and all its files";
-          else
-            return "Click here to download this file"; 
-        }
-        break;
-      case 2:/* Status -> The file is up to date?*/ 
-        if (status ==  Mantid::API::BOTH_UNCHANGED){
-          if (directory)
-            return "This folder is up-to-date";
-          else
-            return "This file is up-to-date"; 
-        }
-        else{
-          if (status == Mantid::API::LOCAL_CHANGED)
-            return "This file has been changed locally."; // FIXME: you may consider publish
-          if (status == Mantid::API::REMOTE_CHANGED || 
-              status == Mantid::API::BOTH_CHANGED){
-            if (directory)
-              return "There is a new version of the files inside this folder. Click here to install them.";
-            else
-              return "There is a new version of this file available. Click here to install it.";
-          }
-          
-        }
-        break;
-      case 3: /* Publish -> is this file already published?*/
-        if (status == Mantid::API::LOCAL_ONLY
-            ||
-            status == Mantid::API::LOCAL_CHANGED)
-          return "You have changed this file. Click here to publish it.";
-        
-        break;
-      case 4:
-        return path;
-      default:
-        break;
-      }
-      return QVariant();     
-    }
-    break;
-  }
-  return QVariant();
-}
-
-void RepoItem::statusUpdate(Mantid::API::ScriptRepository_sptr repo){
-  status = repo->fileStatus(systemPath().toStdString());
-  foreach(RepoItem * child, childItems){
-    child->statusUpdate(repo); 
-  }
-}
-
-bool RepoItem::setData(int column , QString value,Mantid::API::ScriptRepository_sptr repo ){
-  switch(column){
-  case 0:    
-    break;
-  case 1:
-  case 2: 
-    if (value == "true"){
-      std::string file = systemPath().toStdString(); 
-      // FIXME: protect from exception
-      repo->download(file); 
-      
-      repo->listFiles(); 
-
-      statusUpdate(repo); 
-      }    
-    return true;
-    break;
-  case 3: 
-    if (value == "true")
-      status = Mantid::API::BOTH_UNCHANGED; /* simulate upload*/ 
-    return true; 
-    break;
-  default: 
-    break;
-  }
-  return false; 
-}
-    
-int RepoItem::row() const
+/** Provide the row number of this entry related to its parent. 
+    @return It's child position.
+ */
+int RepoModel::RepoItem::row() const
 {
     if (parentItem)
         return parentItem->childItems.indexOf(const_cast<RepoItem*>(this));
     return 0;
 }
 
-RepoItem *RepoItem::parent()
-{
-    return parentItem;
-}
-
-QString RepoItem::systemPath()
-{
-  return path;
-}
-//////////////////////////////////////////////////
-// DELEGATE
-///////////////////////////////////////////////////
-RepoDelegate::RepoDelegate(QObject *parent)
-    :QStyledItemDelegate(parent)
-{}
-
-QWidget * RepoDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/,
-                                     const QModelIndex &/*index*/) const
-{
-  QPushButton *pb = new QPushButton(parent);
-  return pb;
-}
-
-
-void RepoDelegate::setEditorData(QWidget *, const QModelIndex &) const
-{
-  /*    QString value = index.model()->data(index, Qt::DisplayRole).toString();  // Qt::EditRole
-    QPushButton * pb = static_cast<QPushButton*>(editor);
-    pb->setHidden(value == "true");*/
-}
-
-void RepoDelegate::setModelData(QWidget *, QAbstractItemModel *model,
-                                const QModelIndex &index) const{  
-   model->setData(index, QString("true"), Qt::EditRole);
-}
-
-void RepoDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/*index*/) const
-{
-    editor->setGeometry(option.rect);
-}
-
-void RepoDelegate::paint(
-       QPainter* painter,
-       const QStyleOptionViewItem & option,
-       const QModelIndex & index
-       ) const
-{
-  
-  if (!index.isValid())
-    return;
-  if (painter->device() ==0)
-    return;
-
-  QIcon icon ; 
-  QString checked = index.model()->data(index, Qt::DisplayRole).toString();
-  if (index.column() == 1){
-    // download    
-    if (checked == "true" || checked.isEmpty())
-      return;
-    icon = QIcon::fromTheme("system-software-install", QIcon(QPixmap(":/win/download"))); 
-  }else if (index.column() == 2){
-    // update
-    if (checked.isEmpty())
-      return; 
-    if (checked == "true")
-      icon = QIcon::fromTheme("dialog-ok", QIcon(QPixmap(":/win/dialog-ok"))); 
-    else
-      icon = QIcon::fromTheme("bottom", QIcon(QPixmap(":win/system-software-update"))); 
-  }else if (index.column() == 3){
-    if (checked.isEmpty() || checked == "true")
-      return;
-    else
-      icon = QIcon::fromTheme("add-files-to-archive", QIcon(QPixmap(":win/upload"))); 
-  }
-
-  QRect buttonRect( option.rect);
-  
-  int min_val = buttonRect.width()<buttonRect.height() ? buttonRect.width() : buttonRect.height();
-
-  buttonRect.setWidth(min_val); 
-  buttonRect.setHeight(min_val); 
-  buttonRect.moveCenter(option.rect.center());
-
-  QStyleOptionButton button;
-  button.rect = buttonRect;
-  button.icon = icon;
-  int icon_size =(int) (min_val*.8); 
-  button.iconSize = QSize(icon_size,icon_size);
-  button.state =  QStyle::State_Enabled;
-  
-  QApplication::style()->drawControl
-    (QStyle::CE_PushButton, &button, painter);
-}
-
-bool  RepoDelegate::editorEvent(QEvent *event,
-                                   QAbstractItemModel *model,
-                                   const QStyleOptionViewItem &option,
-                                   const QModelIndex &index) {
-  if ((event->type() == QEvent::MouseButtonRelease) ||
-      (event->type() == QEvent::MouseButtonDblClick)) {
-    QMouseEvent *mouse_event = static_cast<QMouseEvent*>(event);
-    if (mouse_event->button() != Qt::LeftButton ||
-        !option.rect.contains(mouse_event->pos())) {
-      return false;
-    }
-    if (event->type() == QEvent::MouseButtonDblClick) {
-      return true;
-    }
-  } else if (event->type() == QEvent::KeyPress) {
-    if (static_cast<QKeyEvent*>(event)->key() != Qt::Key_Space &&
-        static_cast<QKeyEvent*>(event)->key() != Qt::Key_Select) {
-      return false;
-    }
-  } else {
-    return false;
-  }
-
-  QString checked = index.model()->data(index, Qt::DisplayRole).toString();
-  return model->setData(index, checked != "true", Qt::EditRole);
-}
-QSize RepoDelegate::sizeHint(const QStyleOptionViewItem & /*option*/, const QModelIndex & /*index*/ ) const{
-  return QSize(35,35);
-
-} ;
 
 //////////////////////////////////////////////////
 // MODEL
 ///////////////////////////////////////////////////
-
+/** The constructor of RepoModel. It is intended to have just one model and to pass 
+    on through shared pointer. To enforce this, the copy constructor is disabled. 
+    It will construct the hierarchical tree of ScriptRepository through 
+    the setuptModelData.
+ */
 RepoModel::RepoModel(QObject *parent):
   QAbstractItemModel(parent)  
 {
   ConfigServiceImpl & config = ConfigService::Instance();
-  repo_path = QString::fromStdString(config.getString("ScriptLocalRepository")); 
-   rootItem = new RepoItem("Root","/");
-   setupModelData(rootItem);
+  repo_path = QString::fromStdString(config.getString("ScriptLocalRepository"));
+  rootItem = new RepoItem("/");
+  using Mantid::API::ScriptRepositoryFactory;
+  using Mantid::API::ScriptRepository_sptr;
+  using Mantid::API::ScriptRepository;
+  repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
+  setupModelData(rootItem);
 }
 
+/// desctructor of repomodel.
 RepoModel::~RepoModel()
 {
      delete rootItem;
 }
+/**Provide access to the data through the defined QAbstractItemModel definition. 
+   The index parameter defines how to access the corresponded data while the role
+   define the kind of information desired from RepoModel. This method will be queried
+   from QView in order to populate the view. 
 
+   From the index.internalPointer the RepoModel will have access to the path, 
+   which uniquely define its entry on ScriptRepository. 
+
+   The RepoModel defines 3 columns: 
+    - Path
+    - Status
+    - AutoUpdate
+   
+   The path, provides the name of the file. The status, give information on the ScriptRepository
+   entries. Currently, an entry may be found on the following states: 
+     - LOCAL_ONLY: The file only exists locally. 
+     - REMTOE_ONLY: The file has not been downloaded. 
+     - REMOTE_CHANGED: A new version of the file is available.
+     - LOCAL_CHANGED: The file has been changed from the original one. 
+     - BOTH_CHANGED: Locally and remotelly changed. 
+     - UPDATED: The remote and local file are identical. 
+   
+   The AutoUpdate allow to flag the entries to receive the updates automatically when new files 
+   are available at the central repository.
+
+   The repomodel will react to the following roles: 
+     - DisplayRole: to provide the main information. 
+     - DecorationRole: to provide icons to make easier and fancier to identify the files and folders. 
+     - ToolTipRole: to provide user help to interact with this class. 
+ */
 QVariant RepoModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid())
-        return QVariant();
-    RepoItem *item = static_cast<RepoItem*>(index.internalPointer());
-    return item->data(index.column(), role);
+  using namespace Mantid::API;
+  if (!index.isValid())
+    return QVariant();
+  RepoItem *item = static_cast<RepoItem*>(index.internalPointer());
+  try{
+    QString path = item->path();
+    Mantid::API::ScriptInfo inf ; 
+    Mantid::API::SCRIPTSTATUS status;
+    // return the data for the display role    
+    if (role == Qt::DisplayRole){
+      switch(index.column()){
+      case 0: // return the label (the path of the file/folder)
+        return item->label(); 
+        break; 
+      case 1: // ask for the status
+        status = repo_ptr->fileStatus(path.toStdString());
+        return fromStatus(status); 
+        break; 
+      case 2:
+        inf = repo_ptr->fileInfo(path.toStdString()); 
+        return inf.auto_update?QString("true"):QString("false");
+        break;
+      }
+    }
+    
+    // return the data for the DecorationRole
+    if (role == Qt::DecorationRole){
+      if (index.column() == 0){
+        inf = repo_ptr->fileInfo(path.toStdString());
+        status = repo_ptr->fileStatus(path.toStdString());
+        if (inf.directory){
+          if (status == Mantid::API::REMOTE_ONLY)
+            return QIcon::fromTheme("folder-remote",QIcon(QPixmap(":/win/folder-remote")));
+          else
+            return QIcon::fromTheme("folder", QIcon(QPixmap(":/win/folder")));
+        }
+        else{
+          int pos = QString(path).lastIndexOf('.');
+          if (pos < 0)
+            return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown"))); 
+          if (path.contains("readme",Qt::CaseInsensitive))
+            return QIcon::fromTheme("text-x-readme", QIcon(QPixmap(":/win/txt_file.png"))); 
+          
+          QString extension = QString(path).remove(0,pos);
+          if (extension == ".cpp" || extension == ".CPP" || extension == ".c" || extension == ".C")
+            return QIcon::fromTheme("text-x-c++", QIcon(QPixmap(":/win/unknown")));
+          else if (extension == ".py" || extension == ".PY")
+            return QIcon::fromTheme("text-x-python", QIcon(QPixmap(":/win/text-x-python"))); 
+          else if (extension == ".ui")
+            return QIcon::fromTheme("document", QIcon(QPixmap(":/win/document")));
+          else if (extension == ".docx" || extension == ".doc" || extension == ".odf")
+            return QIcon::fromTheme("x-office-document", QIcon(QPixmap(":/win/office-document"))); 
+          else if (extension == ".pdf")
+            return QIcon::fromTheme("application-pdf", QIcon(QPixmap(":/win/file_pdf"))); 
+          else
+            return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown")));           
+        }        
+      }        
+    }// end decorationRole
+    
+    // tool tip role
+    if (role == Qt::ToolTipRole){
+      if (index.column() == 1){
+        status = repo_ptr->fileStatus(path.toStdString());
+        inf = repo_ptr->fileInfo(path.toStdString());
+        switch(status){
+          
+        case REMOTE_ONLY:
+          return (inf.directory)?"Click here to download this folder and all its files"
+            :"Click here to download this file";
+          break;         
+        case BOTH_UNCHANGED:
+          return (inf.directory)? "This folder is up-to-date" : "This file is up-to-date"; 
+          break;
+        case LOCAL_CHANGED:         
+          return "Click here to publish your changes";
+        case REMOTE_CHANGED:
+        case BOTH_CHANGED:
+          return (inf.directory)?
+            "There is a new version of the files inside this folder. Click here to install them.":
+            "There is a new version of this file available. Click here to install it.";
+          break;
+        case LOCAL_ONLY:
+          return "Click here to share this file with the Mantid community!";
+          
+        }
+      }
+    }// end tool tip
+  }catch(Mantid::API::ScriptRepoException & ex){
+    handleExceptions(ex,"",false);
+  }
+    return QVariant(); 
 }
 
+/** Match the Mantid::API::SCRIPTSTATUS to a string for the user to understand. 
+ *
+ *   @param status: the SCRIPTSTATUS
+ *   @return The string that defines the status. 
+ */
+const QString & RepoModel::fromStatus(Mantid::API::SCRIPTSTATUS status) const {
+  using namespace Mantid::API;
+  switch(status){
+  case BOTH_UNCHANGED:
+    return updatedSt(); 
+  case REMOTE_ONLY:
+    return remoteOnlySt();
+  case LOCAL_ONLY:
+    return localOnlySt(); 
+  case REMOTE_CHANGED:
+    return remoteChangedSt(); 
+  case LOCAL_CHANGED:
+    return localChangedSt(); 
+  case BOTH_CHANGED:
+    return bothChangedSt(); 
+  }
+  return bothChangedSt(); 
+}
+
+/** The ScriptRepository allows to download and upload file and folders. And to 
+ * configure the AutoUpdate option for the entries. These actions will be available
+ * through the setData method.
+ * 
+ * The setData will recognize only the EditRole as a valid Role.
+ * The RepoModel will recognize the following entries. The path can not be edited
+ * (column 0) is not editable. the AutoUpdate flag (column 2) will accept the following 
+ * actions: setTrue and setFalse, to enable or disable the automatic update. 
+ * 
+ * The Status (column 1) will accept the following actions: Download and Upload. 
+ * 
+ * 
+ *
+ */
 bool RepoModel::setData(const QModelIndex & index, const QVariant & value, 
                         int role){
   if (!index.isValid())
     return false; 
   if (role != Qt::EditRole)
+    // only EditRole is acceptable for the role
     return false; 
-  
+  if (index.column() == 0)
+    // the path can not be changed
+    return false; 
 
   RepoItem * item = static_cast<RepoItem*>(index.internalPointer());
-  qDebug() << "Try to set data " << item->systemPath() << " " << value.toString() <<  endl; 
-  bool ret = false;   
-  ret = item->setData(index.column(),value.toString(), repo_ptr);
+  std::string path = item->path().toStdString(); 
+
+  bool ret = false;
+  // get the action
+  QString action = value.toString();
+  if (index.column() ==2){// set auto update   
+    bool option; 
+    if (action == "setTrue")
+      option = true; 
+    else if (action == "setFalse")
+      option = false; 
+    else
+      return false; // only setTrue and setFalse are allowed values for set auto update.
+    repo_ptr->setAutoUpdate(path, option); // FIXME deal with exceptions
+    ret = true; 
+  }
+  
+  if (index.column() == 1){ // trigger actions: Download and Upload
+    if (action == "Download"){
+      try{
+        repo_ptr->download(path); // FIXME: deal with exceptions 
+        ret = true;
+      }catch(Mantid::API::ScriptRepoException & ex){
+        handleExceptions(ex, QString("Download %1 failed!").arg(QString::fromStdString(path)));
+        ret = false;
+      }
+    }else if (action == "Upload"){
+      QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+      UploadForm * form = new UploadForm(QString::fromStdString(path), father);
+      QSettings settings; 
+      settings.beginGroup("Mantid/ScriptRepository"); 
+      QString email = settings.value("UploadEmail",QString()).toString();
+      QString author = settings.value("UploadAuthor",QString()).toString();
+      bool lastChk = settings.value("UploadSaveInfo",false).toBool();
+      if (!email.isEmpty())
+        form->setEmail(email); 
+      if (!author.isEmpty())
+        form->setAuthor(author);
+      form->lastSaveOption(lastChk);
+      if (form->exec()){
+        settings.setValue("UploadEmail",form->saveInfo()?form->email():""); 
+        settings.setValue("UploadAuthor",form->saveInfo()?form->author():"");
+        settings.setValue("UploadSaveInfo",form->saveInfo()); 
+
+        qDebug() << "Uploading... "<< QString::fromStdString(path) << form->comment()
+                   << form->author() << form->email() << endl;
+        try{
+          repo_ptr->upload(path, form->comment().toStdString(), 
+                         form->author().toStdString(),
+                           form->email().toStdString());
+          ret = true;
+        }catch(Mantid::API::ScriptRepoException & ex){
+          handleExceptions(ex,  QString("Upload %1 failed!").arg(QString::fromStdString(path)));
+          ret = false;
+        }
+      }else{
+        ret = false; 
+      }
+      settings.endGroup(); 
+      delete form; 
+    }
+   
+  }
+
   if (ret){
     emit dataChanged(index, index);  
   }
@@ -431,195 +358,401 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
   return ret;
 }
 
+/**Define the interaction with the user allowed. 
+ *
+ * Currently the user is allowed to select the path column, to collapse,
+ * expand the folders, and he is allowed to submit actions to the columns
+ * 1 and 2 (download/upload triggers) and (auto update flag). 
+ * 
+ */
 Qt::ItemFlags RepoModel::flags(const QModelIndex &index) const
 {
   if (!index.isValid())
     return 0 ;
   if (index.column() == 0)
     return  QAbstractItemModel::flags(index); 
+  // define that setData will accept the EditRole.
   return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
+/** Return the header for the columns. 
+ * The RepoModel defines 3 columns with the following information: 
+ *  - Path
+ *  - Status
+ *  - AutoUpdate
+ *  @param section: The column number
+ *  @param orientation: It will accept only the Horizontal orientation.
+ *  @param role: Only the DisplayRole will be accepted. It will not provide tool tip 
+ *  for the headers.
+ * 
+ *  @return The title for the columns.
+ */
 QVariant RepoModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-      return rootItem->data(section);
+  if (orientation == Qt::Horizontal && role == Qt::DisplayRole){
+    switch(section){
+    case 0:
+      return "Path";
+    case 1:
+      return "Status"; 
+    case 2: 
+      return "AutoUpdate";
+    default:
+      return QVariant();
+    }
+
+  }
     return QVariant();
 }
 
+/** An hierarchical structure is able to define any point giving the parent, the row and the 
+ *  column. This method is ment to be used to the View to iterate through the model. 
+ *  
+ * @param row: the index of the children  (file/folder) under the given folder(parent)
+ * @param column: The related column (repomodel defines 3 (path, status, autoupdate)
+ * @param parent: The QModelIndex parent which refers to the parent folder. 
+ * 
+ * @return The QModelIndex that allows to retrieve the information of the desired child. 
+ */
 QModelIndex RepoModel::index(int row, int column, const QModelIndex &parent) const
 {
+  // check if the row and column are allowed, 
+  // for example, it will not accept column == 3, or row = 1 
+  // for parent that refers to file and not to folder. 
     if (!hasIndex(row, column, parent))
         return QModelIndex();
-
-    RepoItem *parentItem;
-
+    // retrieve the pointer ot the RepoItem from the parent
+    RepoItem *parentItem;   
     if (!parent.isValid())
         parentItem = rootItem;
     else
         parentItem = static_cast<RepoItem*>(parent.internalPointer());
 
+    // given the row, we can find the childItem from the RepoItem::child method.
     RepoItem *childItem = parentItem->child(row);
+
     if (childItem)
         return createIndex(row, column, childItem);
     else
         return QModelIndex();
 }
 
+/** Provide the parent of a given entry, through the QModelIndex abstraction. 
+ *
+ * @param index: The QModelIndex that identifies one entry. 
+ * @return A QModelIndex that indentifies the parent of the given index.
+ */
 QModelIndex RepoModel::parent(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QModelIndex();
-
+    // the child is the RepoItem pointed by the index.
     RepoItem *childItem = static_cast<RepoItem*>(index.internalPointer());
+    // the parent is the parent of the RepoItem.
     RepoItem *parentItem = childItem->parent();
-
+    // the root item does not have a parent
     if (parentItem == rootItem)
         return QModelIndex();
-
+    // create the index and return
     return createIndex(parentItem->row(), 0, parentItem);
 }
-
+/** Count how many file/folders are direct children of the given folder,
+ * through the abstraction of QModelIndex. 
+ * 
+ * @param parent: the index to the folder. 
+ * @return the number of children of the given folder.
+ */
 int RepoModel::rowCount(const QModelIndex &parent) const
 {
     RepoItem *parentItem;
+
     if (parent.column() > 0)
-        return 0;
+      return 0; // there are rows defined only of the column 0
 
     if (!parent.isValid())
         parentItem = rootItem;
     else
         parentItem = static_cast<RepoItem*>(parent.internalPointer());
-
+    // return the number of children 
     return parentItem->childCount();
 }
 
-
-int RepoModel::columnCount(const QModelIndex &parent) const
+/** Return the number of columns defined for the given index. 
+ * But, for all the index, the number of columns will be always 3. 
+ * (path, status, autoupdate)
+ *
+ * @return 3.
+ */
+int RepoModel::columnCount(const QModelIndex &/*parent*/) const
 {
-    if (parent.isValid())
-        return static_cast<RepoItem*>(parent.internalPointer())->columnCount();
-    else
-        return rootItem->columnCount();
+  return 3;
 }
 
-void RepoModel::entrySelected(const QModelIndex& index){
-  qDebug() << "Entry selected index.row" << index.row() << endl; 
+/** Return the description of the file for a defined entry
+ **/
+QString RepoModel::fileDescription(const QModelIndex & index){
    RepoItem * item = static_cast<RepoItem*>(index.internalPointer());
-   if (!item){
-     qWarning() << "Entry selected is not a RepoItem\n"; 
-     return;}
-   QString path = item->systemPath();
-  
-   if (path != last_selected){
-     QString info; 
-     try{
-
-        info = QString::fromStdString(repo_ptr->fileInfo(path.toStdString()).description);
-     }catch(Mantid::API::ScriptRepoException & ex){
-       qDebug() << "Exception : " << ex.what() << endl; 
-       //ignore exception
-     }
-     emit fileDescription(info); /* simulate description*/ 
-     last_selected = path; 
+   if (!item)
+     return ""; 
+   QString desc;
+   try{
+     desc = QString::fromStdString(repo_ptr->description(item->path().toStdString()));
+   }catch(...){
+     // just ignore
    }
-   
+   return desc;
 }
 
-void RepoModel::fileSelected(const QModelIndex& index){
-  qDebug() << "File selected " << index.row() << endl; 
-  if (index.column() == 0){
+QString RepoModel::author(const QModelIndex & index){
+ RepoItem * item = static_cast<RepoItem*>(index.internalPointer());
+ QString author = "Not defined";
+   if (!item)
+     return author; 
+   try{
+     author = QString::fromStdString(repo_ptr->info(item->path().toStdString()).author);
+   }catch(...){
+     // just ignore
+   }
+   return author;  
+}
+/** Return the operative system file path if it exists. 
+    otherwise it returns an empty string
+    @param index: to find the entry
+    @return The operative system path or empty string
+*/
+QString RepoModel::filePath(const QModelIndex & index){
    RepoItem * item = static_cast<RepoItem*>(index.internalPointer());
-   if (item->state() == Mantid::API::REMOTE_ONLY 
-       || 
-       item->isDir())
-     return; // do not open remote file, just local
+   //   qDebug() << "Get file path from : " <<  item->path()<< endl; 
+   Mantid::API::SCRIPTSTATUS state = repo_ptr->fileStatus(item->path().toStdString());
    
-   QString path = repo_path + "/" + item->systemPath(); 
-   qDebug() << "trying to emit load Script : " <<path << "\n";
-   emit loadScript(path); 
+   if (state == Mantid::API::REMOTE_ONLY)
+     return ""; 
+   Mantid::API::ScriptInfo info = repo_ptr->fileInfo(item->path().toStdString());   
+   if (info.directory)
+     return ""; 
+   QString path = repo_path + "/" + item->path(); 
+   return path;
+}
+
+/**Auxiliary method to help setupModelData to populate all the 
+   entries of RepoModel.
+   
+   For any entry of ScriptRepository should have a parent (by definition, all the entries
+   are children of the root entry). Besides, given an entry, if the path contains a '/' this 
+   means that the entry is child of one folder. And all the folders are parents by definition. 
+
+   So, the idea of this getParent is that given a folder name, it must be related to a RepoItem 
+   that is a parent. If it does not exists, it should be created.
+   
+   @param folder: relative path inside the repository for the folder. 
+   @param Reference to the list of parents
+   @return Pointer to the RepoItem related to the given folder. 
+   
+**/
+RepoModel::RepoItem * RepoModel::getParent(const QString & folder, QList<RepoItem*>&parents){
+  // in order to speed the algorithm, check if the 
+  // folder is the same of the last folder.
+  if (parents.last()->path() == folder)
+    return parents.last(); 
+
+  // try to find this  
+  if (folder.isEmpty())
+    return parents.first(); // the parents first will always contain the root
+
+  // it will iterate through all the parents of the given folder, in order to 
+  // create any folder that has not been created. 
+  QStringList folder_parts = folder.split("/");
+  QString aux_folder;
+  RepoItem * father = parents.first();
+  // there is no reason to try to find entry A/B/C if the entry A/B was not found
+  bool try_to_find = true;
+
+  for(int i = 0; i< folder_parts.size(); i++){
+    if (i ==0)
+      aux_folder = folder_parts[i]; 
+    else
+      aux_folder += "/" + folder_parts[i]; 
+    
+    bool found = false;
+
+    if (try_to_find){
+      // this means that the previous folders were found
+      foreach(RepoItem* the_parent, parents){
+        if (the_parent->path() == aux_folder)
+          {
+            found = true;
+            father = the_parent; 
+            break;
+          }
+      }
+    }
+    // there is not RepoItem related to the current folder, 
+    // create it 
+    if (!found)
+      {
+        RepoItem * m = new RepoItem(folder_parts[i], aux_folder, father);
+        father->appendChild(m); 
+        parents.append(m); 
+        father = m; 
+        try_to_find = false;
+      }    
   }
+  return father;
 }
 
-void RepoModel::reLoad(void){
-  repo_ptr->listFiles(); 
-  
-}
-
-
-void RepoModel::setupModelData(RepoItem *parent)
+/** Populate the RepoModel with RepoItem entries that reproduce the hierarchical 
+ *  organization of ScriptRepository entries. 
+ * 
+ * It will get the information from ScriptRepository from the listFiles, which means, 
+ * that it will reconstruct the hierarchical organization of the files and folders
+ * through the list of strings with the relative path of each entry. 
+ * 
+ * @param root: The RepoItem root 
+ */
+void RepoModel::setupModelData(RepoItem *root)
 {
-  using Mantid::API::ScriptRepositoryFactory; 
-  using Mantid::API::ScriptRepository_sptr;
-  using Mantid::API::ScriptRepository;
-  repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
+
   QStringList lines;
-  repo_ptr->listFiles();
-  const std::vector<ScriptRepository::file_entry> & entries = repo_ptr->listEntries(); 
+  // get the list of entries inside the scriptrepository
+  std::vector<std::string> list = repo_ptr->listFiles();
+  
+  // auxiliary list of pointers to repoitem that are related to folders
   QList<RepoItem*> parents;
+  // the first one will always be the root
+  parents << root;
 
-  parents << parent;
-
+  
   QString last_directory = "";
   
-  unsigned int number = 0;
-  bool skip = false;
+  //FOREACH entry in LISTFILES
+  for (unsigned int number = 0; number < list.size(); number++) {
+    // folder or file inside the repository
+    QString lineData = QString::fromStdString(list[number]);
 
-  while (number < entries.size()) {
-    QString lineData = QString::fromStdString(entries[number].path);
     
-    if (!lineData.isEmpty()) {
-      // Read the column data from the rest of the line.
-      QStringList pathStrings = lineData.split("/");
-      QString current_file = "";
-      for(int i = 0; i< pathStrings.size(); i++ ){
-        if (pathStrings[i].isEmpty())
-          continue;
-        
-        if (!skip){
-          if (i ==0)
-            current_file = pathStrings[i];
-          else
-            current_file.append("/").append(pathStrings[i]);
-        }
-        // qDebug() << "loop current_file = " << current_file << " status = " << (int) entries[number].status<<endl;
-        if (current_file.startsWith(last_directory) || last_directory == "")
-          {
-            if (entries[number].directory){
-              QStringList columnData; 
-              columnData << pathStrings[i] << current_file << "nothing" << "again"; 
-              parents.last()->appendChild(new RepoItem(pathStrings[i], current_file, true,
-                                                       entries[number].status,
-                                                       parents.last()));
-              parents << parents.last()->child(parents.last()->childCount()-1);
-              last_directory = current_file;
-              last_directory.append("/");
-            }else{
-              parents.last()->appendChild(new RepoItem(pathStrings[i], 
-                                                       current_file,
-                                                       entries[number].directory,
-                                                       entries[number].status,
-                                                       parents.last()));
-            }
-            skip = false;
-          }
-        else if (last_directory.startsWith(current_file))
-          {    continue; skip = false;
-          }else{
-          parents.pop_back();
-          if (parents.last() == parent){
-            last_directory = "";
-          }else
-            last_directory = parents.last()->systemPath().append("/");
-          //qDebug() << "PopBack = "<< last_directory << endl;
-          i--;
-          skip = true;
-        }
-      }
+    // Read the column data from the rest of the line.      
+    QStringList pathStrings = lineData.split("/");
+    // separate the folder and the current entry (folder or file)
+    QString current_file = pathStrings.last(); 
+    QString folder = ""; 
+    pathStrings.removeLast(); 
+    if (pathStrings.size() > 0)
+      folder = pathStrings.join("/"); 
+    
+    // get parent for this entry
+    RepoItem * parent = getParent(folder, parents);    
+    // a new folder has started
+    if (parent == root){
+      // this test is just for the sake of performance, to reduce the numbers of parents
+      parents.clear(); 
+      parents << root;
+    }
+    
+    // check if the current entry is a directory
+    if (repo_ptr->info(lineData.toStdString()).directory){
+      // directories will be appended to parents list
+      RepoItem * aux = new RepoItem(current_file, lineData, parent); 
+      parent->appendChild(aux); 
+      parents << aux;                           
+    }else{
+      // files will just be created and appended to the parent
+      parent->appendChild(new RepoItem(current_file, lineData, parent));
       
     }
-
-    number++;
     
   }
+  
+}
+void RepoModel::handleExceptions(const Mantid::API::ScriptRepoException & ex,
+                                 const QString & title, 
+                                 bool showWarning) const{
+   g_log.information() << "Download failed " << ex.what() << "\n Detail: " 
+                            << ex.systemError()<< std::endl;
+   if (showWarning){
+
+     QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+     QString info = QString::fromStdString(ex.what());
+     // make the exception a nice html message
+     info.replace("\n","</p><p>");
+     QMessageBox::warning(father, title,
+                          QString("<html><body><p>%1</p></body></html>")
+                          .arg(info));   
+   }
+}
+
+
+
+
+
+/// @return string to define the LOCAL_ONLY state
+const QString & RepoModel::localOnlySt(){return LOCALONLY;}; 
+/// @return string to define the REMOTE_ONLY state
+const QString & RepoModel::remoteOnlySt(){return REMOTEONLY;}; 
+/// @return string to define the LOCAL_CHANGED state
+const QString & RepoModel::localChangedSt(){return LOCALCHANGED;}; 
+/// @return string to define the REMOTE_CHANGED state
+const QString & RepoModel::remoteChangedSt(){return REMOTECHANGED;}; 
+/// @return string to define the BOTH_UNCHANGED state
+const QString & RepoModel::updatedSt(){return BOTHUNCHANGED;}; 
+/// @return string to define the BOTH_CHANGED state
+const QString & RepoModel::bothChangedSt(){return BOTHCHANGED;}; 
+
+
+RepoModel::UploadForm::UploadForm( const QString & file2upload,
+                                   QWidget * parent): QDialog(parent){
+      author_le = new QLineEdit(); 
+      email_le = new QLineEdit(); 
+      save_ck = new QCheckBox("Save your personal information");
+      save_ck->setToolTip("The author and email will be saved and will be written to you next time");
+      comment_te = new QTextEdit(); 
+
+      // setup the layout
+
+      QGroupBox * personalGroupBox = new QGroupBox("Personal Group Box");    
+      QFormLayout * personalLayout = new QFormLayout();       
+      personalLayout->addRow("Author",author_le); 
+      personalLayout->addRow("Email",email_le); 
+      QVBoxLayout * gpBox = new QVBoxLayout();
+      gpBox->addWidget(save_ck); 
+      gpBox->addLayout(personalLayout);
+      personalGroupBox->setLayout(gpBox);
+
+      QLabel * cmLabel = new QLabel("Comment"); 
+      QDialogButtonBox * buttonBox = new QDialogButtonBox();
+      buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+
+      QVBoxLayout * layout = new QVBoxLayout(); 
+      layout->addWidget(personalGroupBox); 
+      layout->addWidget(cmLabel); 
+      layout->addWidget(comment_te); 
+      layout->addWidget(buttonBox);
+      setLayout(layout);
+
+      setWindowTitle(QString("Upload - %2").arg(file2upload));
+      connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept())); 
+      connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+  }
+  RepoModel::UploadForm::~UploadForm(){
+    
+  } 
+QString RepoModel::UploadForm::email(){
+  return email_le->text(); 
+}
+QString RepoModel::UploadForm::author(){
+  return author_le->text(); 
+}
+QString RepoModel::UploadForm::comment(){
+  return comment_te->text(); 
+}
+bool RepoModel::UploadForm::saveInfo(){
+   return save_ck->isChecked();
+}
+void RepoModel::UploadForm::setEmail(const QString & email){
+  email_le->setText(email); 
+}
+void RepoModel::UploadForm::setAuthor(const QString & author){
+  author_le->setText(author);
+}
+void RepoModel::UploadForm::lastSaveOption(bool option){
+  save_ck->setCheckState(option?Qt::Checked:Qt::Unchecked);
 }

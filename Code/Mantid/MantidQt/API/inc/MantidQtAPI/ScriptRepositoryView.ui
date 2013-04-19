@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Script Repository</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,2,0,1">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
@@ -22,21 +22,59 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="repo_treeView"/>
+    <widget class="MantidQt::API::RepoTreeView" name="repo_treeView"/>
    </item>
    <item>
-    <widget class="QLabel" name="desc_label">
-     <property name="text">
-      <string>Description</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="desc_label">
+       <property name="text">
+        <string>Description</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>228</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="authorNameLabel">
+       <property name="text">
+        <string>AuthorName</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QTextBrowser" name="desc_textBrowser"/>
    </item>
+   <item>
+    <widget class="QPushButton" name="reloadPushButton">
+     <property name="text">
+      <string>Reload</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::API::RepoTreeView</class>
+   <extends>QTreeView</extends>
+   <header>MantidQtAPI/RepoTreeView.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
