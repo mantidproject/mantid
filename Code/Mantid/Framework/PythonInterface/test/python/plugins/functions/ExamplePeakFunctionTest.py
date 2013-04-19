@@ -16,7 +16,7 @@ class _InternalMakeGaussian(PythonAlgorithm):
         import math
         import random
         nbins=1000
-        wspace = WorkspaceFactory.create("Workspace2D",NVectors=1,XLength=nbins+1,YLength=nbins)
+        wspace = WorkspaceFactory.create("Workspace2D",NVectors=1,XLength=nbins,YLength=nbins)
         height = self.getProperty("Height").value
         centre = self.getProperty("Centre").value
         sigma_sq = math.pow(self.getProperty("Sigma").value,2)
@@ -24,15 +24,15 @@ class _InternalMakeGaussian(PythonAlgorithm):
         amplitude = 0.1*height
         
         prog_reporter = Progress(self,start=0.0,end=1.0,nreports=nbins)
-        for i in range(1,nbins + 1):
+        for i in range(1,nbins):
             x_value = 5.0 + 5.5*i;
             nominal_y = height * math.exp(-0.5*math.pow(x_value - centre, 2.)/sigma_sq)
             # add some noise
             nominal_y += random.random()*amplitude
             
-            wspace.dataX(0)[i-1] = x_value
-            wspace.dataY(0)[i-1] = nominal_y
-            wspace.dataE(0)[i-1] = 1
+            wspace.dataX(0)[i] = x_value
+            wspace.dataY(0)[i] = nominal_y
+            wspace.dataE(0)[i] = 1
             prog_reporter.report("Setting %dth bin in workspace" % (i-1))
 
         self.setProperty("OutputWorkspace", wspace) # Stores the workspace as the given name

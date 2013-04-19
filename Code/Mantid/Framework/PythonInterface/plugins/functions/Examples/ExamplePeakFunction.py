@@ -168,9 +168,9 @@ class ExamplePeakFunction(IPeakFunction):
         """
         Called by an external entity, probably a GUI, in response to a user guessing
         the height.
+        """
         sigma = new_fwhm/(2.0*math.sqrt(2.0*math.log(2.0)))
         self.setParameter("Sigma",sigma)
-        """
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(ExamplePeakFunction)
