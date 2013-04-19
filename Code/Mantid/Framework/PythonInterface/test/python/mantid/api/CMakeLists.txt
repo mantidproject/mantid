@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   FunctionPropertyTest.py
   IEventWorkspaceTest.py
   IFunction1DTest.py
+  IPeakFunctionTest.py
   IPeaksWorkspaceTest.py
   ITableWorkspaceTest.py
   JacobianTest.py
