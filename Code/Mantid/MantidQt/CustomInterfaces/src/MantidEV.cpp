@@ -161,13 +161,18 @@ void RunEllipsoidIntegrate::run()
  *  Constructor for MantidEV.  Makes the thread pool and instance of
  *  MantidEVWorker.
  */
-MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent)
+MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent),observer(*this, &MantidEV::handleQpointNotification),
+                     observer1(*this, &MantidEV::handleQpointNotification1)                  
 {
   worker        = new MantidEVWorker();
   m_thread_pool = new QThreadPool( this );
   m_thread_pool->setMaxThreadCount(1);
-  Poco::NObserver<MantidEV, SelectionNotificationServiceImpl::AddNotification> observer(*this, &MantidEV::handleQpointNotification);
+   
   SelectionNotificationService::Instance().notificationCenter.addObserver(observer);
+
+  
+  SelectionNotificationService::Instance().notificationCenter.addObserver(observer1);
+
 }
 
 
@@ -178,6 +183,10 @@ MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent)
 MantidEV::~MantidEV()
 {
   saveSettings("");
+  SelectionNotificationService::Instance().notificationCenter.removeObserver( observer);
+
+  SelectionNotificationService::Instance().notificationCenter.removeObserver( observer1);
+
   delete worker;
   delete m_thread_pool;
 }
@@ -968,10 +977,22 @@ void MantidEV::showInfo_slot()
 }
 
 
+void MantidEV::handleQpointNotification1(const Poco::AutoPtr<SelectionNotificationServiceImpl::AfterReplaceNotification> & message )
+{
+ 
+ // std::string name = message->object_name();
+//  std::cout << "Name is " << name << std::endl;
+//  std::cout << message->object()->at(0) << std::endl;
+//  std::cout << message->object()->at(1) << std::endl;
+//  std::cout << message->object()->at(2) << std::endl;
+  Mantid::Kernel::V3D  q_point( message->object()->at(0), message->object()->at(1), message->object()->at(2) );
+  showInfo( q_point );
+}
+
 void MantidEV::handleQpointNotification(const Poco::AutoPtr<SelectionNotificationServiceImpl::AddNotification> & message )
 {
-//  std::cout << "GOT NOTIFICATION" << std::endl;
-//  std::string name = message->name();
+ 
+ // std::string name = message->object_name();
 //  std::cout << "Name is " << name << std::endl;
 //  std::cout << message->object()->at(0) << std::endl;
 //  std::cout << message->object()->at(1) << std::endl;

@@ -110,7 +110,8 @@ Shape2DCollection(),
 m_peaksWorkspace(pws),
 m_surface(surface),
 m_precision(6),
-m_showRows(true)
+m_showRows(true),
+m_showLabels(true)
 {
   if (g_defaultStyles.isEmpty())
   {
@@ -198,6 +199,8 @@ void PeakOverlay::draw(QPainter& painter) const
   // Draw symbols
   Shape2DCollection::draw(painter);
 
+  if ( !m_showLabels ) return;
+
   // Sort the labels to avoid overlapping
   QColor color(Qt::red);
   if ( !m_shapes.isEmpty() )
@@ -208,6 +211,7 @@ void PeakOverlay::draw(QPainter& painter) const
   m_labels.clear();
   foreach(Shape2D* shape,m_shapes)
   {
+    if ( !shape->isVisible() ) continue;
     if (!clipRect.contains(m_transform.map(shape->origin()))) continue;
     PeakMarker2D* marker = dynamic_cast<PeakMarker2D*>(shape);
     if (!marker) continue;
@@ -263,7 +267,7 @@ int PeakOverlay::getNumberPeaks()const
   return m_peaksWorkspace->getNumberPeaks();
 }
 
-/**---------------------------------------------------------------------
+/** ---------------------------------------------------------------------
  * Return the i-th peak.
  * @param i :: Peak index.
  * @return A reference to the peak.
@@ -273,7 +277,7 @@ Mantid::API::IPeak& PeakOverlay::getPeak(int i)
   return m_peaksWorkspace->getPeak(i);
 }
 
-/**--------------------------------------------------------------------- 
+/** ---------------------------------------------------------------------
  * Handler of the AfterReplace notifications. Updates the markers.
  * @param wsName :: The name of the modified workspace.
  * @param ws :: The shared pointer to the modified workspace.
@@ -288,11 +292,11 @@ void PeakOverlay::afterReplaceHandle(const std::string& wsName,
     auto style = isEmpty() ? getDefaultStyle(0) : m_det2marker.begin().value()->getStyle();
     clear();
     createMarkers( style );
-    m_surface->requestRedraw();
+    m_surface->requestRedraw(true);
   }
 }
 
-/**---------------------------------------------------------------------
+/** ---------------------------------------------------------------------
  * Return a default style for creating markers by index. 
  * Styles are taken form g_defaultStyles
  */
@@ -300,5 +304,43 @@ PeakMarker2D::Style PeakOverlay::getDefaultStyle(int index)
 {
   index %= g_defaultStyles.size();
   return g_defaultStyles[index];
+}
+
+/** ---------------------------------------------------------------------
+  * Set visibility of the peak markers according to the integration range
+  * in the instrument actor.
+  *
+  * @param xmin :: The lower bound of the integration range.
+  * @param xmax :: The upper bound of the integration range.
+  * @param units :: Units of the x - array in the underlying workspace:
+  *     "TOF", "dSpacing", or "Wavelength".
+  */
+void PeakOverlay::setPeakVisibility(double xmin, double xmax, QString units)
+{
+    enum XUnits {Unknown, TOF, dSpacing, Wavelength};
+    XUnits xUnits = Unknown;
+    if (units == "TOF")
+        xUnits = TOF;
+    else if (units == "dSpacing")
+        xUnits = dSpacing;
+    else if (units == "Wavelength")
+        xUnits = Wavelength;
+    foreach(Shape2D* shape,m_shapes)
+    {
+        PeakMarker2D* marker = dynamic_cast<PeakMarker2D*>(shape);
+        if (!marker) continue;
+        Mantid::API::IPeak& peak = getPeak(marker->getRow());
+        double x = 0.0;
+        switch (xUnits)
+        {
+        case TOF: x = peak.getTOF(); break;
+        case dSpacing: x = peak.getDSpacing(); break;
+        case Wavelength: x = peak.getWavelength(); break;
+        // if unknown units always vidsible
+        default: x = xmin;
+        }
+        bool on = x >= xmin && x <= xmax;
+        marker->setVisible(on);
+    }
 }
 

@@ -2,9 +2,11 @@
 ## Tests for PythonAlgorithms
 ##
 
-file(GLOB TEST_PY_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}  "*.py" )
+set ( TEST_PY_FILES
+  CheckForSampleLogsTest.py
+  SuggestTibCNCSTest.py
+  SuggestTibHYSPECTest.py
+)
 
-if ( TEST_PY_FILES )
-  # Prefix for test name=PythonAlgorithms
-  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonAlgorithms ${TEST_PY_FILES} )
-endif()
+# Prefix for test name=PythonAlgorithms
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonAlgorithms ${TEST_PY_FILES} )

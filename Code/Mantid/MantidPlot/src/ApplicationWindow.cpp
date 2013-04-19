@@ -9555,6 +9555,9 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
   m_scriptInterpreter->shutdown();
   scriptingEnv()->finalize();
 
+  // Help window
+  HelpWindow::Instance().hostShuttingDown();
+
   ce->accept();
 
 }

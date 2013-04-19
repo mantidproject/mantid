@@ -66,6 +66,7 @@ def remove_wiki_from_header():
 def add_wiki_description(algo, wikidesc):
     """One-time use method that adds a wiki description  in the algo's CPP file under comments tag."""
     wikidesc = wikidesc.split('\n')
+    
     source = find_algo_file(algo)
     if source != '':
         if len("".join(wikidesc)) == 0:
@@ -219,6 +220,14 @@ def create_function_signature(alg, algo_name):
         
     return lhs + prototype_reformated + comments
 
+def filter_blacklist_directories(dirnames):
+    blacklist = ['MantidPlot', 'MantidQt']
+    filtered = dirnames
+    for banneddir in blacklist:
+        if banneddir in dirnames:
+            filtered.remove(banneddir)
+    return filtered
+
 #======================================================================
 def intialize_files():
     """ Get path to every header file """
@@ -226,6 +235,8 @@ def intialize_files():
     parent_dir = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
     file_matches = []
     for root, dirnames, filenames in os.walk(parent_dir):
+      # Filter out mantidplot from the file search. There are a few file in MantidPlot we don't want to accidently search, such as FFT.
+      dirnames = filter_blacklist_directories(dirnames)
       for filename in fnmatch.filter(filenames, '*.cpp'):
           fullfile = os.path.join(root, filename)
           cpp_files.append(fullfile)
@@ -234,6 +245,8 @@ def intialize_files():
           fullfile = os.path.join(root, filename)
           python_files.append(fullfile)
           python_files_bare.append( os.path.split(fullfile)[1] )
+    
+
 
 #======================================================================
 def find_algo_file(algo, version=-1):

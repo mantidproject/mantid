@@ -45,7 +45,11 @@ def CalibrateWish( RunNumber, PanelNumber ):
 
    # Set fitting parameters
    eP = [57.5, 107.0, 156.5, 206.0, 255.5, 305.0, 354.5, 404.0, 453.5]
-   fitPar = TubeCalibFitParams( eP, 2000, 32 )
+   ExpectedHeight = 2000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
+   ExpectedWidth = 32.0 # Expected width of Gaussian peaks in pixels  (initial value of fit parameter)
+
+   fitPar = TubeCalibFitParams( eP, ExpectedHeight, ExpectedWidth )
+
 
    print "Created objects needed for calibration."
 
