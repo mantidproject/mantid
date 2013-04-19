@@ -61,7 +61,7 @@ namespace Algorithms
   class DLLExport GenerateEventsFilter : public API::Algorithm
   {
   public:
-    GenerateEventsFilter();
+    explicit GenerateEventsFilter();
     virtual ~GenerateEventsFilter();
     
     /// Algorithm's name for identification overriding a virtual method
@@ -83,20 +83,21 @@ namespace Algorithms
     void setFilterByTimeOnly();
     void setFilterByLogValue(std::string logname);
 
-    void processSingleValueFilter(Kernel::TimeSeriesProperty<double>* mlog, double minvalue, double maxvalue,
+    void processSingleValueFilter(double minvalue, double maxvalue,
         bool filterincrease, bool filterdecrease);
 
-    void processMultipleValueFilters(Kernel::TimeSeriesProperty<double>* mlog, double minvalue, double maxvalue,
+    void processMultipleValueFilters(double minvalue, double maxvalue,
         bool filterincrease, bool filterdecrease);
 
-    void makeFilterByValue(Kernel::TimeSeriesProperty<double>* mlog,
-        Kernel::TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre,
+    void makeFilterByValue(Kernel::TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre,
         bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime,
         int wsindex);
 
-    void makeMultipleFiltersByValues(Kernel::TimeSeriesProperty<double>* mlog,
-        Kernel::TimeSplitterType& split, std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges,
+    void makeMultipleFiltersByValues(Kernel::TimeSplitterType& split, std::map<size_t, int> indexwsindexmap, std::vector<double> logvalueranges,
         bool centre, bool filterIncrease, bool filterDecrease, Kernel::DateAndTime startTime, Kernel::DateAndTime stopTime);
+
+    void processIntegerValueFilter(Kernel::TimeSplitterType &splitters, int minvalue, int maxvalue,
+                                   bool filterIncrease, bool filterDecrease, Kernel::DateAndTime runend);
 
     size_t searchValue(std::vector<double> sorteddata, double value);
 
@@ -107,7 +108,10 @@ namespace Algorithms
     Kernel::DateAndTime mStartTime;
     Kernel::DateAndTime mStopTime;
 
-    double m_convertfactor;
+    double m_timeUnitConvertFactor;
+
+    Kernel::TimeSeriesProperty<double>* m_dblLog;
+    Kernel::TimeSeriesProperty<int>* m_intLog;
 
   };
 
