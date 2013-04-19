@@ -4,10 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/FitPowderDiffPeaks.h"
+#include "MantidDataHandling/LoadAscii.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataHandling/LoadAscii.h"
 #include "MantidAPI/TableRow.h"
 #include <fstream>
 
@@ -39,26 +39,21 @@ public:
     return;
   }
 
-  /** Fit with one shifted parmeter 'Zero'
-   */
-  void Passed_test_FitZeroShift()
+  /** Fit the parameters for PG3's bank 1 with
+    * 1. Quite-off starting values of instrumental geometry parameters.
+    * 2. Quite-close starting values of peak profile parameters.
+    */
+  void test_RobustFitPG3Bank1()
   {
     // 1. Generate testing workspace
-    std::map<std::string, double> newparamvalues;
-    newparamvalues.insert(std::make_pair("Zero", 50.0));
+    // Data
+    API::MatrixWorkspace_sptr dataws = createInputDataWorkspace(2);
 
-    API::MatrixWorkspace_sptr dataws = createInputDataWorkspace(1);
+    // Bragg peaks: ~/Mantid/Code/debug/MyTestData/Bank1PeaksParameters.txt
+    DataObjects::TableWorkspace_sptr peakparamws = createReflectionWorkspace(1);
 
-    std::string peakfilename("/home/wzz/Mantid/Code/debug/MyTestData/Bank7PeaksParameters.txt");
-    std::vector<std::vector<int> > hkls;
-    std::vector<std::vector<double> > peakparameters;
-    importPeakParametersFile(peakfilename, hkls, peakparameters);
-    DataObjects::TableWorkspace_sptr peakparamws = createReflectionWorkspace(hkls, peakparameters);
-
-    std::string insfilename("/home/wzz/Mantid/Code/debug/MyTestData/Bank7InstrumentParameters.txt");
-    std::map<std::string, double> instrparameters;
-    importInstrumentTxtFile(insfilename, instrparameters);
-    DataObjects::TableWorkspace_sptr geomparamws = createInstrumentParameterWorkspace(instrparameters, newparamvalues);
+    // Instrument profile
+    DataObjects::TableWorkspace_sptr geomparamws = createInstrumentParameterWorkspace(1);
 
     AnalysisDataService::Instance().addOrReplace("DataWorkspace", dataws);
     AnalysisDataService::Instance().addOrReplace("PeakParameters", peakparamws);
@@ -77,102 +72,76 @@ public:
     alg.setProperty("OutputZscoreWorkspace", "ZscoreTable");
     alg.setProperty("WorkspaceIndex", 0);
 
+    alg.setProperty("MinTOF", 19650.0);
+    alg.setProperty("MaxTOF", 49000.0);
+
+    vector<int32_t> minhkl(3); // HKL = (331)
+    minhkl[0] = 3; minhkl[1] = 3; minhkl[2] = 1;
+    alg.setProperty("MinimumHKL", minhkl);
+    alg.setProperty("NumberPeaksToFitBelowLowLimit", 2);
+
+    alg.setProperty("FittingMode", "Robust");
+    alg.setProperty("MinimumPeakHeight", 0.5);
+
+    // Right most peak (200)
+    vector<int> rightmostpeakhkl(3);
+    rightmostpeakhkl[0] = 2; rightmostpeakhkl[1] = 0; rightmostpeakhkl[2] = 0;
+    alg.setProperty("RightMostPeakHKL", rightmostpeakhkl);
+
+    alg.setProperty("RightMostPeakLeftBound", 46300.0);
+    alg.setProperty("RightMostPeakRightBound", 47903.0);
+
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check result
-    DataObjects::Workspace2D_sptr outws = boost::dynamic_pointer_cast<Workspace2D>
+    DataObjects::Workspace2D_sptr peakdataws =
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (AnalysisDataService::Instance().retrieve("FittedPeaks"));
-    TS_ASSERT(outws);
-
-    if (outws)
+    TS_ASSERT(peakdataws);
+    if (!peakdataws)
     {
-      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 5);
-      ofstream ofile("bank7fittedpeaks.dat");
-      for (size_t i = 0; i < outws->readX(0).size(); ++i)
-      {
-        double x = outws->readX(0)[i];
-        double y1 = outws->readY(0)[i];
-        double y2 = outws->readY(1)[i];
-        double df = outws->readY(2)[i];
-        ofile << setw(12) << setprecision(6) << x
-              << setw(12) << setprecision(6) << y1
-              << setw(12) << setprecision(6) << y2
-              << setw(12) << setprecision(6) << df << endl;
-      }
-      ofile.close();
+      return;
     }
 
-    // 4. Clean
+    TS_ASSERT_EQUALS(peakdataws->getNumberHistograms(), 5);
+
+    // Output Bragg peaks parameters
+    DataObjects::TableWorkspace_sptr outbraggws =
+        boost::dynamic_pointer_cast<TableWorkspace>
+        (AnalysisDataService::Instance().retrieve("PeaksParameterTable"));
+    TS_ASSERT(outbraggws);
+    if (!outbraggws)
+    {
+      return;
+    }
+    else
+    {
+      size_t numrows = outbraggws->rowCount();
+      TS_ASSERT_EQUALS(numrows, 11);
+    }
+
+
+    /*
+    ofstream datafile;
+    datafile.open("peakdata.dat");
+    for (size_t i = 0; i < peakdataws->readX(0).size(); ++i)
+      datafile << peakdataws->readX(0)[i] << "\t\t" << peakdataws->readY(0)[i] << "\t\t"
+               << peakdataws->readY(1)[i] << "\t\t" << peakdataws->readY(2)[i] << endl;
+    datafile.close();
+    */
+
     AnalysisDataService::Instance().remove("DataWorkspace");
-    AnalysisDataService::Instance().remove("FittedPeaks");
     AnalysisDataService::Instance().remove("PeakParameters");
     AnalysisDataService::Instance().remove("InstrumentParameters");
-    AnalysisDataService::Instance().remove("FittedData");
+    AnalysisDataService::Instance().remove("FittedPeaks");
     AnalysisDataService::Instance().remove("PeaksParameterTable");
 
     return;
   }
 
-
-  /** Fit the parameters for PG3's bank 1 with quite-off starting peak parameters.
-    */
-  void Next_test_FitPG3Bank1()
-  {
-    // 1. Generate testing workspace
-    std::map<std::string, double> newparamvalues;
-
-    API::MatrixWorkspace_sptr dataws = createInputDataWorkspace(2);
-
-    std::string peakfilename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1PeaksParameters.txt");
-    std::vector<std::vector<int> > hkls;
-    std::vector<std::vector<double> > peakparameters;
-    importPeakParametersFile(peakfilename, hkls, peakparameters);
-    DataObjects::TableWorkspace_sptr peakparamws = createReflectionWorkspace(hkls, peakparameters);
-
-    std::string insfilename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentParameters.txt");
-    std::map<std::string, double> instrparameters;
-    importInstrumentTxtFile(insfilename, instrparameters);
-    DataObjects::TableWorkspace_sptr geomparamws = createInstrumentParameterWorkspace(instrparameters, newparamvalues);
-
-    AnalysisDataService::Instance().addOrReplace("DataWorkspace", dataws);
-    AnalysisDataService::Instance().addOrReplace("PeakParameters", peakparamws);
-    AnalysisDataService::Instance().addOrReplace("InstrumentParameters", geomparamws);
-
-    // 2. Fit
-    FitPowderDiffPeaks alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
-
-    alg.setProperty("InputWorkspace", dataws);
-    alg.setProperty("OutputWorkspace", "FittedCurve");
-    alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
-    alg.setProperty("InstrumentParameterWorkspace", geomparamws);
-    alg.setProperty("OutputDataWorkspace", "FittedData");
-    alg.setProperty("OutputBraggPeakParameterWorkspace", "FittedPeakParameters");
-    alg.setProperty("ParametersToFit", "Zero");
-    alg.setProperty("WorkspaceIndex", 0);
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    // 3. Check result
-    DataObjects::TableWorkspace_sptr newgeomparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
-        (AnalysisDataService::Instance().retrieve("InstrumentParameters"));
-
-    std::map<std::string, double> fitparamvalues;
-    parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
-    double zero = fitparamvalues["Zero"];
-
-    TS_ASSERT_DELTA(zero, 0.0, 1.0);
-
-    return;
-  }
-
-
-  // ==========================   Diffraction Data [From File] ======================== //
-
+  //----------------------------   Diffraction Data [From File] ----------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Create data workspace
    *  Option 1: Old Bank 7 data
    *         2: New Bank 1 data
@@ -185,14 +154,13 @@ public:
     switch (option)
     {
       case 1:
-        // /home/wzz/Mantid/Code/debug/MyTestData/..
-        importDataFromColumnFile("4862b7.inp", datawsname);
-        std::cout << "Option 1:  4862b7.inp. " << std::endl;
+        importDataFromColumnFile("/home/wzz/Mantid/Code/debug/MyTestData/4862b7.inp", datawsname);
+        std::cout << "Option 1:  4862b7.inp. " << endl;
         break;
 
-      case 2:
+      case 2:        
         importDataFromColumnFile("PG3_10808-1.dat", datawsname);
-        std::cout << "Option 2:  PG3_10808-1.dat. " << std::endl;
+        std::cout << "Option 2:  PG3_10808-1.dat. " << endl;
         break;
 
       default:
@@ -239,13 +207,13 @@ public:
   }
 
 
-  // ====================  Reflection [From File] ==================== //
+  // =============================  Reflection [From File] =======================================
+  //----------------------------------------------------------------------------------------------
   /** Create reflection table workspaces
    */
-  DataObjects::TableWorkspace_sptr createReflectionWorkspace(std::vector<std::vector<int> > hkls,
-                                                             std::vector<std::vector<double> > peakparams)
+  DataObjects::TableWorkspace_sptr createReflectionWorkspace(int option)
   {
-    // 1. Crate table workspace
+    // 1. Create table workspace
     DataObjects::TableWorkspace* tablews = new DataObjects::TableWorkspace();
     DataObjects::TableWorkspace_sptr hklws = DataObjects::TableWorkspace_sptr(tablews);
 
@@ -260,106 +228,123 @@ public:
     tablews->addColumn("double", "Gamma");
 
     // 2. Add reflections and heights
-    for (size_t ipk = 0; ipk < hkls.size(); ++ipk)
+    switch (option)
     {
-      API::TableRow hkl = hklws->appendRow();
-      for (size_t i = 0; i < 3; ++i)
-      {
-        hkl << hkls[ipk][i];
-      }
-      for (size_t ipm = 0; ipm < peakparams[ipk].size(); ++ipm)
-      {
-        hkl << peakparams[ipk][ipm];
-      }
+      case 1:
+        createLaB6PG3Bank1BraggPeaksTable(hklws);
+        break;
+
+      default:
+        stringstream errss;
+        errss << "createReflectionWorkspace does not support option " << option << endl;
+        errss << "Supported options include 1 (LaB6 for PG3 bank 1). ";
+        throw invalid_argument(errss.str());
     }
-    std::cout << "Created Table Workspace with " << hkls.size() << " entries of peaks." << std::endl;
+
+
+    // 3. Output information
+    std::cout << "Created Table Workspace with " << hklws->rowCount() << " entries of peaks." << std::endl;
 
     return hklws;
   }
 
-  /** Import text file containing reflection (HKL) and peak parameters
-   * Input:  a text based file
-   * Output: a vector for (H, K, L) and a vector for (Height, TOF_H, ALPHA, BETA, ...
-   */
-  void importPeakParametersFile(std::string filename, std::vector<std::vector<int> >& hkls,
-                                std::vector<std::vector<double> >& peakparameters)
+  //----------------------------------------------------------------------------------------------
+  /** Create the Bragg peak parameters table for LaB6, PG3, Bank1
+    */
+  void createLaB6PG3Bank1BraggPeaksTable(TableWorkspace_sptr tablews)
   {
-    // 1. Open file
-    std::ifstream ins;
-    ins.open(filename.c_str());
-    if (!ins.is_open())
-    {
-      std::cout << "File " << filename << " cannot be opened. " << std::endl;
-      throw std::invalid_argument("Cannot open Reflection-Text-File.");
-    }
-    else
-    {
-      std::cout << "Parsing peak parameters file " << filename << std::endl;
-    }
-
-    // 2. Parse
-    hkls.clear();
-    peakparameters.clear();
-
-    char line[256];
-    while(ins.getline(line, 256))
-    {
-      if (line[0] != '#')
-      {
-        int h, k, l;
-        std::vector<int> hkl;
-        std::stringstream ss;
-        ss.str(line);
-        ss >> h >> k >> l;
-        hkl.push_back(h);
-        hkl.push_back(k);
-        hkl.push_back(l);
-        hkls.push_back(hkl);
-
-        double height, tof_h, alpha, beta, sigma2, gamma;
-        std::vector<double> params;
-        ss >> height >> tof_h >> alpha >> beta >> sigma2 >> gamma;
-        params.push_back(height);
-        params.push_back(tof_h);
-        params.push_back(alpha);
-        params.push_back(beta);
-        params.push_back(sigma2);
-        params.push_back(gamma);
-        peakparameters.push_back(params);
-      }
-    }
-
-    // 3. Close up
-    ins.close();
+    TableRow newrow0 = tablews->appendRow();
+    newrow0 << 6 << 3 <<  1 <<  .6129000 << 13962.47 << 0.20687 << 0.10063 <<    62.64174  <<  0.00000;
+    TableRow newrow1 = tablews->appendRow();
+    newrow1 << 6 << 3 <<  0 <<  .6196725 << 14116.84 << 0.20173 << 0.09910 <<    65.37142  <<  0.00000;
+    TableRow newrow2 = tablews->appendRow();
+    newrow2 << 6 << 2 <<  2 <<  .6266747 << 14276.45 << 0.19651 << 0.09754 <<    68.28736  <<  0.00000;
+    TableRow newrow3 = tablews->appendRow();
+    newrow3 << 5 << 3 <<  3 <<  .6339198 << 14441.60 << 0.19124 << 0.09594 <<    71.40701  <<  0.00000;
+    TableRow newrow4 = tablews->appendRow();
+    newrow4 << 5 << 4 <<  1 <<  .6414220 << 14612.62 << 0.18590 << 0.09432 <<    74.74986  <<  0.00000;
+    TableRow newrow5 = tablews->appendRow();
+    newrow5 << 6 << 2 <<  1 <<  .6491972 << 14789.86 << 0.18053 << 0.09266 <<    78.33788  <<  0.00000;
+    TableRow newrow6 = tablews->appendRow();
+    newrow6 << 6 << 2 <<  0 <<  .6572620 << 14973.71 << 0.17512 << 0.09098 <<    82.19574  <<  0.00000;
+    TableRow newrow7 = tablews->appendRow();
+    newrow7 << 6 << 1 <<  1 <<  .6743366 << 15362.95 << 0.16425 << 0.08752 <<    90.83628  <<  0.00000;
+    TableRow newrow8 = tablews->appendRow();
+    newrow8 << 6 << 1 <<  0 <<  .6833885 << 15569.31 << 0.15882 << 0.08575 <<    95.68645  <<  0.00000;
+    TableRow newrow9 = tablews->appendRow();
+    newrow9 << 6 << 0 <<  0 <<  .6928150 << 15784.22 << 0.15339 << 0.08395 <<   100.94289  <<  0.00000;
+    TableRow newrow10 = tablews->appendRow();
+    newrow10 << 5 << 3 <<  1 <<  .7026426 << 16008.27 << 0.14798 << 0.08213 <<   106.65237  <<  0.00000;
+    TableRow newrow11 = tablews->appendRow();
+    newrow11 << 5 << 3 <<  0 <<  .7129008 << 16242.14 << 0.14261 << 0.08028 <<   112.86885  <<  0.00000;
+    TableRow newrow12 = tablews->appendRow();
+    newrow12 << 5 << 2 <<  2 <<  .7236217 << 16486.56 << 0.13728 << 0.07842 <<   119.65435  <<  0.00000;
+    TableRow newrow13 = tablews->appendRow();
+    newrow13 << 4 << 4 <<  0 <<  .7348413 << 16742.36 << 0.13200 << 0.07653 <<   127.08086  <<  0.00000;
+    TableRow newrow14 = tablews->appendRow();
+    newrow14 << 5 << 2 <<  1 <<  .7589408 << 17291.82 << 0.12165 << 0.07271 <<   144.20578  <<  0.00000;
+    TableRow newrow15 = tablews->appendRow();
+    newrow15 << 5 << 2 <<  0 <<  .7719151 << 17587.63 << 0.11659 << 0.07078 <<   154.11699  <<  0.00000;
+    TableRow newrow16 = tablews->appendRow();
+    newrow16 << 5 << 1 <<  1 <<  .7999938 << 18227.82 << 0.10675 << 0.06688 <<   177.32069  <<  0.00000;
+    TableRow newrow17 = tablews->appendRow();
+    newrow17 << 5 << 1 <<  0 <<  .8152332 << 18575.28 << 0.10199 << 0.06492 <<   190.96744  <<  0.00000;
+    TableRow newrow18 = tablews->appendRow();
+    newrow18 << 5 << 0 <<  0 <<  .8313780 << 18943.37 << 0.09733 << 0.06296 <<   206.27393  <<  0.00000;
+    TableRow newrow19 = tablews->appendRow();
+    newrow19 << 4 << 2 <<  2 <<  .8485216 << 19334.24 << 0.09279 << 0.06099 <<   223.52153  <<  0.00000;
+    TableRow newrow20 = tablews->appendRow();
+    newrow20 << 3 << 3 <<  2 <<  .8862519 << 20194.47 << 0.08407 << 0.05707 <<   265.29507  <<  0.00000;
+    TableRow newrow21 = tablews->appendRow();
+    newrow21 << 4 << 2 <<  1 <<  .9071078 << 20669.96 << 0.07989 << 0.05511 <<   290.77103  <<  0.00000;
+    TableRow newrow22 = tablews->appendRow();
+    newrow22 << 4 << 2 <<  0 <<  .9295089 << 21180.66 << 0.07585 << 0.05317 <<   320.14307  <<  0.00000;
+    TableRow newrow23 = tablews->appendRow();
+    newrow23 << 3 << 3 <<  1 <<  .9536560 << 21731.16 << 0.07194 << 0.05123 <<   354.25049  <<  0.00000;
+    TableRow newrow24 = tablews->appendRow();
+    newrow24 << 4 << 1 <<  1 <<  .9797884 << 22326.89 << 0.06815 << 0.04931 <<   394.17169  <<  0.00000;
+    TableRow newrow25 = tablews->appendRow();
+    newrow25 << 4 << 1 <<  0 <<  1.008194 << 22974.43 << 0.06450 << 0.04740 <<   441.31073  <<  0.00000;
+    TableRow newrow26 = tablews->appendRow();
+    newrow26 << 4 << 0 <<  0 <<  1.039222 << 23681.73 << 0.06098 << 0.04551 <<   497.52353  <<  0.00000;
+    TableRow newrow27 = tablews->appendRow();
+    newrow27 << 3 << 2 <<  1 <<  1.110976 << 25317.22 << 0.05433 << 0.04178 <<   648.06329  <<  0.00000;
+    TableRow newrow28 = tablews->appendRow();
+    newrow28 << 3 << 2 <<  0 <<  1.152914 << 26273.04 << 0.05119 << 0.03995 <<   750.57770  <<  0.00000;
+    TableRow newrow29 = tablews->appendRow();
+    newrow29 << 2 << 2 <<  2 <<  1.199991 << 27345.91 << 0.04818 << 0.03814 <<   879.68634  <<  0.00000;
+    TableRow newrow30 = tablews->appendRow();
+    newrow30 << 3 << 1 <<  1 <<  1.253349 << 28561.85 << 0.04528 << 0.03635 <<  1045.47131  <<  0.00000;
+    TableRow newrow31 = tablews->appendRow();
+    newrow31 << 3 << 1 <<  0 <<  1.314524 << 29955.77 << 0.04250 << 0.03458 <<  1263.29260  <<  0.00000;
+    TableRow newrow32 = tablews->appendRow();
+    newrow32 << 3 << 0 <<  0 <<  1.385630 << 31575.84 << 0.03983 << 0.03283 <<  1557.48718  <<  0.00000;
+    TableRow newrow33 = tablews->appendRow();
+    newrow33 << 2 << 2 <<  0 <<  1.469683 << 33490.69 << 0.03726 << 0.03110 <<  1968.49475  <<  0.00000;
+    TableRow newrow34 = tablews->appendRow();
+    newrow34 << 2 << 1 <<  1 <<  1.697043 << 38669.41 << 0.03241 << 0.02766 <<  3489.94580  <<  0.00000;
+    TableRow newrow35 = tablews->appendRow();
+    newrow35 << 2 << 1 <<  0 <<  1.859018 << 42358.14 << 0.03010 << 0.02593 <<  5018.61084  <<  0.00000;
+    TableRow newrow36 = tablews->appendRow();
+    newrow36 << 2 << 0 <<  0 <<  2.078445 << 47354.61 << 0.02785 << 0.02417 <<  7830.77881  <<  0.00000;
+    TableRow newrow37 = tablews->appendRow();
+    newrow37 << 1 << 1 <<  1 <<  2.399981 << 54672.87 << 0.03776 << 0.18427 <<  9038.83203  <<  0.00000;
+    TableRow newrow38 = tablews->appendRow();
+    newrow38 << 1 << 1 <<  0 <<  2.939365 << 68507.29 << 0.01856 << 0.01574 << 10828.14648  <<  0.00000;
+    TableRow newrow39 = tablews->appendRow();
+    newrow39 << 1 << 0 <<  0 <<  4.156890 << 89444.45 << 0.01954 << 0.01041 << 52485.62500  <<  0.00000;
 
     return;
   }
 
 
-  // ====================  Instrument Parameters [From File] ==================== //
-
+  // ============================  Instrument Parameters [From File] =============================
+  //----------------------------------------------------------------------------------------------
   /** Create instrument geometry parameter/LeBail parameter workspaces
    */
-  DataObjects::TableWorkspace_sptr createInstrumentParameterWorkspace(std::map<std::string, double> parameters,
-                                                                      std::map<std::string, double> newvalueparameters)
+  DataObjects::TableWorkspace_sptr createInstrumentParameterWorkspace(int option)
   {
-    // 1. Combine 2 inputs
-    std::map<std::string, double>::iterator nvit;
-    std::stringstream infoss;
-    infoss << "Importing instrument related parameters: " << std::endl;
-    for (nvit = newvalueparameters.begin(); nvit != newvalueparameters.end(); ++nvit)
-    {
-      std::map<std::string, double>::iterator fdit;
-      fdit = parameters.find(nvit->first);
-      if (fdit != parameters.end())
-      {
-        fdit->second = nvit->second;
-        infoss << "Name: " << std::setw(15) << fdit->first << ", Value: " << fdit->second << std::endl;
-      }
-    }
-    std::cout << infoss.str();
-
-    // 2. Crate table workspace
+    // 1. Crate table workspace
     DataObjects::TableWorkspace* tablews = new DataObjects::TableWorkspace();
     DataObjects::TableWorkspace_sptr geomws = DataObjects::TableWorkspace_sptr(tablews);
 
@@ -377,77 +362,51 @@ public:
     tablews->addColumn("double", "Value");
 
     // 2. Add peak parameters' name and values
-    for (size_t ipn = 0; ipn < paramnames.size(); ++ipn)
+    switch (option)
     {
-      API::TableRow newrow = geomws->appendRow();
-      std::string parname =  paramnames[ipn];
-      double parvalue = parameters[paramnames[ipn]];
-      newrow << parname << parvalue;
+      case 1:
+        createPG3Bank1ParameterTable(geomws);
+        break;
+
+      default:
+        stringstream errss;
+        errss << "Option " << option << " is not supported by createInstrumentParameterWorkspace." << endl;
+        errss << "Supported options are 1 (PG3 bank1). ";
+        throw invalid_argument(errss.str());
+        break;
     }
 
     return geomws;
   }
 
-  /** Import text file containing reflection (HKL)
-   *  Input:  a text based file
-   *  Output: a map for (parameter name, parameter value)
-   */
-  void importInstrumentTxtFile(std::string filename, std::map<std::string, double>& parameters)
-  {
-    // 1. Open file
-    std::ifstream ins;
-    ins.open(filename.c_str());
-    if (!ins.is_open())
-    {
-      std::cout << "File " << filename << " cannot be opened. " << std::endl;
-      throw std::invalid_argument("Cannot open Reflection-Text-File.");
-    }
-    else
-    {
-      std::cout << "Importing instrument parameter file " << filename << std::endl;
-    }
-
-    // 2. Parse
-    parameters.clear();
-
-    char line[256];
-    while(ins.getline(line, 256))
-    {
-      if (line[0] != '#')
-      {
-        std::string parname;
-        double parvalue;
-
-        std::stringstream ss;
-        ss.str(line);
-        ss >> parname >> parvalue;
-
-        parameters.insert(std::make_pair(parname, parvalue));
-      }
-    }
-
-    ins.close();
-
-    return;
-  }
-
-
-  // ==============================  Check Output ========================= //
-
-  /** Parse parameter table workspace : Name, Value to a map
+  //----------------------------------------------------------------------------------------------
+  /** Add rows for input table workspace for PG3 bank1
     */
-  void parseParameterTableWorkspace(Mantid::DataObjects::TableWorkspace_sptr paramws,
-                                    std::map<std::string, double>& paramvalues)
+  void createPG3Bank1ParameterTable(TableWorkspace_sptr tablews)
   {
-    for (size_t irow = 0; irow < paramws->rowCount(); ++irow)
-    {
-      Mantid::API::TableRow row = paramws->getRow(irow);
-      std::string parname;
-      double parvalue;
-      row >> parname >> parvalue;
-
-      paramvalues.insert(std::make_pair(parname, parvalue));
-    }
+    TableRow newrow0 = tablews->appendRow(); newrow0 << "Alph0" << 2.708;
+    TableRow newrow1 = tablews->appendRow(); newrow1 << "Alph0t" << 79.58;
+    TableRow newrow2 = tablews->appendRow(); newrow2 << "Alph1" << 0.611;
+    TableRow newrow3 = tablews->appendRow(); newrow3 << "Alph1t"<< 0.0;
+    TableRow newrow4 = tablews->appendRow(); newrow4 << "Beta0"<< 2.873;
+    TableRow newrow5 = tablews->appendRow(); newrow5 << "Beta0t"<< 67.52;
+    TableRow newrow6 = tablews->appendRow(); newrow6 << "Beta1"<< 9.324;
+    TableRow newrow7 = tablews->appendRow(); newrow7 << "Beta1t"<< 0.0;
+    TableRow newrow8 = tablews->appendRow(); newrow8 << "Dtt1"<< 22583.6;
+    TableRow newrow9 = tablews->appendRow(); newrow9 << "Dtt1t"<< 22334.7;
+    TableRow newrow10 = tablews->appendRow(); newrow10 << "Dtt2"<< 0.0;
+    TableRow newrow11 = tablews->appendRow(); newrow11 << "Dtt2t"<< 53.7626;
+    TableRow newrow12 = tablews->appendRow(); newrow12 << "Gam0"<< 0.0;
+    TableRow newrow13 = tablews->appendRow(); newrow13 << "Gam1"<< 0.0;
+    TableRow newrow14 = tablews->appendRow(); newrow14 << "Gam2"<< 0.0;
+    TableRow newrow15 = tablews->appendRow(); newrow15 << "LatticeConstant" << 4.15689;
+    TableRow newrow16 = tablews->appendRow(); newrow16 << "Sig0" << 0.0;
+    TableRow newrow17 = tablews->appendRow(); newrow17 << "Sig1"  << 10.0;
+    TableRow newrow18 = tablews->appendRow(); newrow18 << "Sig2" << 417.3;
+    TableRow newrow19 = tablews->appendRow(); newrow19 << "Tcross" << 0.356;
+    TableRow newrow20 = tablews->appendRow(); newrow20 << "Width" << 5.00256;
+    TableRow newrow21 = tablews->appendRow(); newrow21 << "Zero" << 0.0;
+    TableRow newrow22 = tablews->appendRow(); newrow22 << "Zerot" << 499.99;
 
     return;
   }
