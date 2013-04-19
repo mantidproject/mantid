@@ -78,7 +78,12 @@ namespace IDA
       pyInput += "useCor = False\n";
     }
 
-    pyInput += "abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, factor=1, Save=False, PlotResult='None', PlotContrib=False)\n";
+    pyInput += uiForm().abscor_ckVerbose->isChecked() ? "True\n" : "False\n";
+
+    if ( uiForm().abscor_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
+    else pyInput += "verbose = False\n";
+
+    pyInput += "abscorFeeder(sample, container, geom, useCor, Verbose=verbose, Scale=False, factor=1, Save=False, PlotResult='None', PlotContrib=False)\n";
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
 

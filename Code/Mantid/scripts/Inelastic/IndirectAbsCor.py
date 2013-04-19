@@ -2,11 +2,11 @@
 ## Handle selection of .pyd files for absorption corrections
 import platform, sys
 from IndirectImport import *
-if is_supported_f2py_platform():
-    fltabs = import_f2py("fltabs")
-    cylabs = import_f2py("cylabs")
-else:
-    unsupported_message()
+#if is_supported_f2py_platform():
+    #fltabs = import_f2py("fltabs")
+    #cylabs = import_f2py("cylabs")
+#else:
+#    unsupported_message()
 
 from IndirectCommon import *
 from mantid.simpleapi import *
@@ -189,8 +189,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
         return [assWS]
 
 def AbsRunFeeder(inputWS, geom, beam, ncan, size, density, sigs, siga, avar,
-        plotOpt='None'):
-    Verbose = True
+        plotOpt='None', Verbose=False):
     Save = True
     StartTime('CalculateCorrections')
     '''Handles the feeding of input and plotting of output for the F2PY
