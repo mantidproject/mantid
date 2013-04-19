@@ -51,6 +51,7 @@ namespace Mantid
                      const unsigned int direction = Direction::Input):
         Kernel::PropertyWithValue<TYPE>(name,defaultvalue , validator, direction ),m_maskedValue("")
         {
+          this->setRemember(false);
         }
 
       /** Constructor  for Maskedproperty class
@@ -61,7 +62,7 @@ namespace Mantid
       MaskedProperty( const std::string& name, const TYPE& defaultvalue, const unsigned int direction):
         Kernel::PropertyWithValue <TYPE>(name,defaultvalue,direction ),m_maskedValue("")
         {
-
+          this->setRemember(false);
         }
 
       /**
@@ -83,11 +84,6 @@ namespace Mantid
         doMasking();
         return m_maskedValue;
       }
-      /**
-       * Do not remember the inputs from a masked property
-       * @return do not remember masked property values
-       */
-      virtual bool remember() const { return false; };
 
       // Unhide the PropertyWithValue assignment operator
       using Kernel::PropertyWithValue<TYPE>::operator=;

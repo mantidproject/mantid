@@ -118,7 +118,8 @@ public:
   ///Overriden function that returns if property has the same value that it was initialised with, if applicable
   virtual bool isDefault() const = 0;
   ///Whether to save input values
-  virtual bool remember() const;
+  bool remember() const;
+  void setRemember(bool);
 
   /**Sets the user level description of the property
    *  @param documentation :: The string that the user will see
@@ -204,6 +205,9 @@ private:
 
   /// Private default constructor
   Property();
+
+  /// Flag whether to save input values
+  bool m_remember;
 };
 
   /// Return the name corresponding to the mangled string given by typeid
