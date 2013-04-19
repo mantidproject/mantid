@@ -322,6 +322,14 @@ void InstrumentWindowRenderTab::showEvent (QShowEvent *)
   {
     surface->setInteractionMode(ProjectionSurface::MoveMode);
   }
+  InstrumentActor* actor = m_instrWindow->getInstrumentActor();
+  if ( actor )
+  {
+    auto visitor = SetAllVisibleVisitor();
+    actor->accept( visitor );
+    getSurface()->updateView();
+    getSurface()->requestRedraw();
+  }
 }
 
 void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
