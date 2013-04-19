@@ -32,7 +32,6 @@ HelpWindowImpl::HelpWindowImpl() :
     m_log(Mantid::Kernel::Logger::get("HelpWindow"))
 {
     this->determineFileLocs();
-    this->start(DEFAULT_URL);
 }
 
 /// Destructor does nothing.
@@ -121,7 +120,11 @@ void HelpWindowImpl::hostShuttingDown()
 {
   if(m_process)
   {
-    m_process->kill();
+    if(isRunning())
+    {
+      m_process->close();
+      m_process->waitForFinished(100); // 100ms
+    }
     // Delete
     m_process.reset();
   }
