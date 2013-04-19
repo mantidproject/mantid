@@ -267,6 +267,8 @@ namespace Algorithms
   void SumEventsByLogValue::filterEventList(const API::IEventList& eventList, const int minVal,
       const int maxVal, const Kernel::TimeSeriesProperty<int> * log, std::vector<int>& Y)
   {
+    if ( log->realSize() == 0 ) return;
+
     // TODO: Handle weighted events and avoid the vector copy below
     const auto pulseTimes = eventList.getPulseTimes();
     for ( std::size_t eventIndex = 0; eventIndex < pulseTimes.size(); ++eventIndex )
