@@ -97,13 +97,26 @@ class MantidTable;
   #define SHARED_MENUBAR
 #endif
 
+namespace Mantid
+{
+  namespace Kernel
+  {
+    class Logger;
+  }
+}
+
 namespace MantidQt
 {
-namespace MantidWidgets
-{
-class FitPropertyBrowser;
-}}
-
+  namespace API
+  {
+    class Message;
+  }
+  namespace MantidWidgets
+  {
+    class FitPropertyBrowser;
+    class MessageDisplay;
+  }
+}
 //Mantid
 class MantidUI;
 class ScriptingWindow;
@@ -357,16 +370,10 @@ public slots:
   FunctionDialog* showFunctionDialog(Graph * g, int curve);
   void addFunctionCurve();
   void clearSurfaceFunctionsList();
-  void clearLogInfo();
   void clearParamFunctionsList();
   void clearPolarFunctionsList();
   void updateFunctionLists(int type, QStringList &formulas);
   void updateSurfaceFuncList(const QString& s);
-  //@}
-
-  //! \name Mantid Log Level Functions
-  //@{
-  void setLogLevel(int level);
   //@}
 
   //! \name Matrices
@@ -702,7 +709,6 @@ public slots:
   void showAxisDialog();
   void showGridDialog();
   void showGeneralPlotDialog();
-  void showLogWindow(bool show);
   void showResults(bool ok);
   void showResults(const QString& s, bool ok=true);
   void showTextDialog();
@@ -1014,8 +1020,6 @@ public slots:
   //@{
   //! show scripting language selection dialog
   void showScriptingLangDialog();
-  //! print to scripting console (if available) or to stdout
-  void scriptPrint(const QString &text,bool error = false, bool timestamp = false);
   //! switches to the given scripting language; 
   bool setScriptingLanguage(const QString &lang);
 
@@ -1026,9 +1030,7 @@ public slots:
   void savetoNexusFile();
 
   //Slot for writing to log window
-  void writeToLogWindow(const QString& message,bool error = false);
-  /// Write an error message to the log window (convenience slot)
-  void writeErrorToLogWindow(const QString& message);
+  void writeToLogWindow(const MantidQt::API::Message& message);
   /// execute loadraw asynchronously
   void executeLoadRawAsynch(const QString& fileName,const QString& wsName ) ;
 
@@ -1070,7 +1072,6 @@ public slots:
 
 signals:
   void modified();
-  void resultsContextMenu();
   void shutting_down();
   //void changeToMDI(MdiSubWindow*);
 
@@ -1158,10 +1159,6 @@ private:
   void tileMdiWindows();
   void shakeViewport();
 
-  /// context menu for log window
-  void showLogWindowContextMenu(const QPoint &p);
-  /// context menu for scripting console
-  void showScriptConsoleContextMenu(const QPoint &p);
   ///
   void showMantidConcepts();
 
@@ -1394,9 +1391,7 @@ private:
   Script *m_iface_script;
   QTranslator *appTranslator, *qtTranslator;
   QDockWidget *explorerWindow, *undoStackWindow;
-  QTextEdit *results;
-  QDockWidget *consoleWindow;
-  QTextEdit *console;
+  MantidQt::MantidWidgets::MessageDisplay *resultsLog;
   QDockWidget *m_interpreterDock;
   CommandLineInterpreter *m_scriptInterpreter;
   QMdiArea *d_workspace;
@@ -1422,11 +1417,10 @@ private:
   QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
   QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
   QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
-  QAction *actionShowConsole;
   QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
-  QAction *actionCloseAllWindows, *actionClearLogInfo, *actionClearConsole, *actionShowPlotWizard, *actionShowConfigureDialog;
+  QAction *actionCloseAllWindows, *actionShowPlotWizard, *actionShowConfigureDialog;
   QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars, *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage;
   QAction *actionPlotL, *actionPlotP, *actionPlotLP, *actionPlotVerticalDropLines, *actionPlotSpline;
   QAction *actionPlotVertSteps, *actionPlotHorSteps, *actionPlotVerticalBars;
@@ -1487,12 +1481,6 @@ private:
   QAction *actionPanPlot;
   QAction *actionWaterfallPlot;
 
-  //mantid log level control
-  QAction  *actionLogLevelError, *actionLogLevelWarning, *actionLogLevelNotice, *actionLogLevelInformation, *actionLogLevelDebug;
-  QActionGroup *logLevelGroup;
-  QSignalMapper *logLevelMapper;
-  //mantid log level control
-
   QList<QAction *> d_user_actions;
   QList<QMenu* > d_user_menus; //Mantid
 
@@ -1522,6 +1510,9 @@ private:
 
   /// Exit code to set at application end
   int m_exitCode;
+
+  /// Log object
+  Mantid::Kernel::Logger & g_log;
 
 public:
   MantidUI *mantidUI;

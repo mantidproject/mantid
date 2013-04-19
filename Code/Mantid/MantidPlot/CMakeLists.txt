@@ -155,8 +155,7 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
                                 PROPERTIES COMPILE_FLAGS -Wno-cast-qual )
 endif ()
 
-set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
-                   src/Mantid/AlgorithmMonitor.cpp
+set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/AlgorithmHistoryWindow.cpp
                    src/Mantid/ErrorBarSettings.cpp
                    src/Mantid/FirstTimeSetup.cpp
@@ -171,7 +170,6 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/MantidApplication.cpp
                    src/Mantid/MantidCurve.cpp
                    src/Mantid/MantidDock.cpp
-                   src/Mantid/MantidLog.cpp
                    src/Mantid/MantidMatrix.cpp
                    src/Mantid/MantidMatrixCurve.cpp
                    src/Mantid/MantidMDCurve.cpp
@@ -383,8 +381,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 
-set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
-                   src/Mantid/AlgorithmMonitor.h
+set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/AlgorithmHistoryWindow.h
                    src/Mantid/ErrorBarSettings.h
                    src/Mantid/FirstTimeSetup.h
@@ -399,7 +396,6 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/MantidApplication.h
                    src/Mantid/MantidCurve.h
                    src/Mantid/MantidDock.h
-                   src/Mantid/MantidLog.h
                    src/Mantid/MantidMatrixCurve.h
                    src/Mantid/MantidMDCurve.h
                    src/Mantid/MantidMDCurveDialog.h
@@ -663,7 +659,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidApplication.h
                        src/Mantid/MantidCurve.h
                        src/Mantid/MantidDock.h
-                       src/Mantid/MantidLog.h
                        src/Mantid/MantidMatrixCurve.h
                        src/Mantid/MantidMDCurve.h
                        src/Mantid/MantidMDCurveDialog.h

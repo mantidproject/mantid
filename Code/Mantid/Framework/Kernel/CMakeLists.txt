@@ -65,7 +65,6 @@ set ( SRC_FILES
 	src/ReadLock.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
-	src/SignalChannel.cpp
 	src/SingletonHolder.cpp
 	src/SobolSequence.cpp
 	src/StartsWithValidator.cpp
@@ -191,7 +190,6 @@ set ( INC_FILES
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
 	inc/MantidKernel/RegistrationHelper.h
-	inc/MantidKernel/SignalChannel.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
 	inc/MantidKernel/StartsWithValidator.h
@@ -291,7 +289,6 @@ set ( TEST_FILES
 	RebinHistogramTest.h
 	RebinParamsValidatorTest.h
 	RegexStringsTest.h
-	SignalChannelTest.h
 	SobolSequenceTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h

@@ -1,5 +1,7 @@
 import os
 from mantid.simpleapi import *
+from mantid.kernel import Logger
+sanslog = Logger.get("SANS")
 from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1
@@ -215,8 +217,8 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
       # cal time dif in seconds
       timeDif = (timeArray[i+1].total_nanoseconds()-timeArray[i].total_nanoseconds())*1e-9
       if timeDif > 172800:
-          logger.notice('::SANS::WARNING: Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
-                                ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
+          sanslog.warning('Time increments in the proton charge log of ' + filename + ' are suspicious large.' +
+                          ' For example a time difference of ' + str(timeDif) + " seconds has been observed.")
           break 
   
   path = props.getPropertyValue('FileName')        

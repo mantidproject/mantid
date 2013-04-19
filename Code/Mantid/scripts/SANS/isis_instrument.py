@@ -2,6 +2,8 @@ from reduction import instrument
 import math
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
+from mantid.kernel import Logger
+sanslog = Logger.get("SANS")
 
 import sys
 
@@ -254,7 +256,7 @@ class DetectorBank:
         base = self._first_spec_num
 
         if not self._shape.isRectangle():
-            logger.notice('::SANS::Warning: Attempting to block rows or columns in a non-rectangular detector, this is likely to give unexpected results!')
+            sanslog.warning('Attempting to block rows or columns in a non-rectangular detector, this is likely to give unexpected results!')
             
         output = ''
         if self._orientation == 'Horizontal':
@@ -460,7 +462,7 @@ class ISISInstrument(instrument.Instrument):
         for n, detect in self.DETECTORS.iteritems():
             if detect.isAlias(requested):
                 return detect
-        logger.notice("::SANS::getDetector: Detector " + requested + "not found")
+        sanslog.notice("getDetector: Detector " + requested + "not found")
 
     def listDetectors(self) :
         return self.cur_detector().name(), self.other_detector().name()
@@ -485,8 +487,8 @@ class ISISInstrument(instrument.Instrument):
             if self.cur_detector().isAlias(detName):
                 return True
             else:
-                logger.notice("::SANS::setDetector: Detector not found")
-                logger.notice("::SANS::setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
+                sanslog.notice("setDetector: Detector not found")
+                sanslog.notice("setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True
@@ -765,7 +767,7 @@ class SANS2D(ISISInstrument):
         yshift = -ybeam
         zshift = (self.REAR_DET_Z + rearDet.z_corr)/1000.
         zshift -= self.REAR_DET_DEFAULT_SD_M
-        logger.notice("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
+        sanslog.notice("Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
         MoveInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")    
             
             
@@ -788,7 +790,7 @@ class SANS2D(ISISInstrument):
             z_move = z_new - z_orig
             MoveInstrumentComponent(Workspace=ws,ComponentName= component, Z=z_move, 
                                     RelativePosition=True)
-            logger.notice('::SANS:: Monitor 4 is at z = ' + str(z_new) )
+            sanslog.notice('Monitor 4 is at z = ' + str(z_new) )
             
         # Are these returned values used anywhere?    
         if self.cur_detector().name() == 'front-detector':
@@ -911,7 +913,7 @@ class SANS2D(ISISInstrument):
         corr_names = ['Front_Det_Z', 'Front_Det_X','Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
         for i in range(0, len(existing_values)):
             if math.fabs(existing_values[i] - new_values[i]) > 5e-04:
-                logger.notice('::SANS::Warning: values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(existing_values[i]) + \
+                sanslog.warning('values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(existing_values[i]) + \
                     ', can value is ' + str(new_values[i]))
                 errors += 1
 

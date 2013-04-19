@@ -62,7 +62,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -258,7 +258,7 @@
        </item>
        <item row="1" column="4">
         <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="inst_opt">
-         <property name="techniques" stdset="0">
+         <property name="techniques">
           <stringlist>
            <string>Small Angle Scattering</string>
           </stringlist>
@@ -306,7 +306,7 @@
                </property>
                <layout class="QGridLayout" name="gridLayout_10">
                 <item row="0" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatterSample" native="true">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatterSample">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -322,7 +322,7 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatCan" native="true">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatCan">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -363,7 +363,7 @@
                </property>
                <layout class="QGridLayout" name="gridLayout_11">
                 <item row="0" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transmis" native="true">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transmis">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -382,7 +382,7 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCan" native="true">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCan">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -423,7 +423,7 @@
                </property>
                <layout class="QGridLayout" name="gridLayout_12">
                 <item row="0" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="direct" native="true">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="direct">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -442,7 +442,7 @@
                  </widget>
                 </item>
                 <item row="1" column="0">
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dirCan" native="true">
+                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dirCan">
                   <property name="toolTip">
                    <string>The run with the sample under investigation</string>
                   </property>
@@ -1771,7 +1771,7 @@ intermediate ranges are there for comparison</string>
              </widget>
             </item>
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodRearFile" native="true">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodRearFile">
               <property name="findRunFiles" stdset="0">
                <bool>false</bool>
               </property>
@@ -1801,7 +1801,7 @@ intermediate ranges are there for comparison</string>
              </widget>
             </item>
             <item>
-             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFrontFile" native="true">
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFrontFile">
               <property name="findRunFiles" stdset="0">
                <bool>false</bool>
               </property>
@@ -3059,9 +3059,9 @@ p, li { white-space: pre-wrap; }
               </layout>
              </item>
              <item>
-              <widget class="QTextBrowser" name="centre_logging">
-               <property name="openLinks">
-                <bool>false</bool>
+              <widget class="MantidQt::MantidWidgets::MessageDisplay" name="centre_logging">
+               <property name="source">
+                <string>CentreFinder</string>
                </property>
               </widget>
              </item>
@@ -3088,7 +3088,7 @@ p, li { white-space: pre-wrap; }
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="clear_log">
+                <widget class="QPushButton" name="clear_centre_log">
                  <property name="text">
                   <string>Clear log</string>
                  </property>
@@ -3352,25 +3352,6 @@ p, li { white-space: pre-wrap; }
        <string>Logging</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_15">
-       <item row="1" column="0">
-        <widget class="QTextEdit" name="logging_field">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Sunken</enum>
-         </property>
-         <property name="lineWidth">
-          <number>10</number>
-         </property>
-         <property name="midLineWidth">
-          <number>0</number>
-         </property>
-         <property name="textInteractionFlags">
-          <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="1">
         <layout class="QVBoxLayout" name="verticalLayout_10">
          <item>
@@ -3416,6 +3397,13 @@ p, li { white-space: pre-wrap; }
         <widget class="QLabel" name="label_29">
          <property name="text">
           <string>Log messages:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="MantidQt::MantidWidgets::MessageDisplay" name="logging_field">
+         <property name="source">
+          <string>SANS</string>
          </property>
         </widget>
        </item>
@@ -3672,7 +3660,7 @@ p, li { white-space: pre-wrap; }
           <number>6</number>
          </property>
          <item row="0" column="0">
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="file_run_edit" native="true">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="file_run_edit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
              <horstretch>0</horstretch>
@@ -3938,6 +3926,11 @@ p, li { white-space: pre-wrap; }
    <extends>QComboBox</extends>
    <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
   </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MessageDisplay</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MessageDisplay.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>rad_min</tabstop>
@@ -3999,7 +3992,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>showMaskBtn</tabstop>
   <tabstop>user_spec_mask</tabstop>
   <tabstop>user_time_mask</tabstop>
-  <tabstop>logging_field</tabstop>
   <tabstop>logger_clear</tabstop>
   <tabstop>new2Add_edit</tabstop>
   <tabstop>add_Btn</tabstop>

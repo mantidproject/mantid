@@ -1,6 +1,7 @@
 import isis_reducer
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 from mantid.simpleapi import *
+from mantid.kernel import Logger
 import SANSUtility
 
 class CentreFinder(object):
@@ -16,6 +17,7 @@ class CentreFinder(object):
             position that are required for all later iterations
             @param guess_centre: the starting position that the trial x and y are relative to
         """
+        self.logger = Logger.get("CentreFinder")
         self._last_pos = guess_centre
         self.detector = None
 
@@ -84,7 +86,7 @@ class CentreFinder(object):
         y_str = str(self._last_pos[1]*1000.).ljust(10)[0:9]
         x_res = '    SX='+str(x_res).ljust(7)[0:6]
         y_res = '    SY='+str(y_res).ljust(7)[0:6]
-        return '::SANS::Itr '+str(iter)+':  ('+x_str+',  '+y_str+')'+x_res+y_res
+        return 'Itr '+str(iter)+':  ('+x_str+',  '+y_str+')'+x_res+y_res
     
     def move(self, setup, x, y):
         """
@@ -138,11 +140,11 @@ class CentreFinder(object):
         indexB = 0
         for indexA in range(0, nvals):
             if qvalsA[indexA] < qvalsB[indexB]:
-                logger.notice("::SANS::LR1 "+str(indexA)+" "+str(indexB))
+                self.logger.notice("LR1 "+str(indexA)+" "+str(indexB))
                 continue
             elif qvalsA[indexA] > qvalsB[indexB]:
                 while qvalsA[indexA] > qvalsB[indexB]:
-                    logger.notice("::SANS::LR2 "+str(indexA)+" "+str(indexB))
+                    self.logger.notice("LR2 "+str(indexA)+" "+str(indexB))
                     indexB += 1
             if indexA > nvals - 1 or indexB > nvals - 1:
                 break
@@ -159,11 +161,11 @@ class CentreFinder(object):
         indexB = 0
         for indexA in range(0, nvals):
             if qvalsA[indexA] < qvalsB[indexB]:
-                logger.notice("::SANS::UD1 "+str(indexA)+" "+str(indexB))
+                self.logger.notice("UD1 "+str(indexA)+" "+str(indexB))
                 continue
             elif qvalsA[indexA] > qvalsB[indexB]:
                 while qvalsA[indexA] > qvalsB[indexB]:
-                    logger.notice("::SANS::UD2 "+str(indexA)+" "+str(indexB))
+                    self.logger("UD2 "+str(indexA)+" "+str(indexB))
                     indexB += 1
             if indexA > nvals - 1 or indexB > nvals - 1:
                 break

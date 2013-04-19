@@ -77,7 +77,11 @@ namespace
 {
   /// The number of detectors to show within a group before eliding
   size_t DET_TABLE_NDETS_GROUP = 10;
+
 }
+
+// Initialize logger
+Mantid::Kernel::Logger & MantidUI::g_log = Mantid::Kernel::Logger::get("MantidUI");
 
 MantidUI::MantidUI(ApplicationWindow *aw):
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -89,9 +93,9 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
   m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
   m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
   m_workspaceGroupUpdateObserver(*this,&MantidUI::handleWorkspaceGroupUpdate),
-  m_appWindow(aw), m_vatesSubWindow(NULL),
-  g_log(Mantid::Kernel::Logger::get("MantidUI"))
+  m_appWindow(aw), m_vatesSubWindow(NULL)
 {
+
   // To be able to use them in queued signals they need to be registered
   static bool registered_addtional_types = false;
   if( !registered_addtional_types )
@@ -160,31 +164,27 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
 
   menuMantidMatrix = new QMenu(m_appWindow);
   connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
+
+  init();
 }
 
 // Should it be moved to the constructor?
 void MantidUI::init()
 {
-  Mantid::Kernel::ConfigService::Instance();
-  // Echo Mantid's welcome message to the logger
-  m_appWindow->writeToLogWindow(QString::fromStdString(Mantid::welcomeMessage()));
-  MantidLog::connect(this);
-  FrameworkManager::Instance();
+  AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+  dataStore.notificationCenter.addObserver(m_addObserver);
+  dataStore.notificationCenter.addObserver(m_replaceObserver);
+  dataStore.notificationCenter.addObserver(m_deleteObserver);
+  dataStore.notificationCenter.addObserver(m_clearADSObserver);
+  dataStore.notificationCenter.addObserver(m_renameObserver);
+  dataStore.notificationCenter.addObserver(m_groupworkspacesObserver);
+  dataStore.notificationCenter.addObserver(m_ungroupworkspaceObserver);
+  dataStore.notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
 
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
-
-  // Now that the framework is initialized we need to populate the algorithm tree
   m_exploreAlgorithms->update();
   try
   {
-    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, m_appWindow->mantidUI);
+    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
     m_fitFunction->init();
         // this make the progress bar work with Fit algorithm running form the fit browser
     connect(m_fitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
@@ -569,11 +569,11 @@ void MantidUI::showMDPlot()
   }
   catch (std::invalid_argument &e)
   {
-    logMessage(Poco::Message("MantidPlot",e.what(),Poco::Message::PRIO_WARNING));
+    g_log.warning() << e.what() << std::endl;
   }
   catch (std::runtime_error &e)
   { 
-    logMessage(Poco::Message("MantidPlot",e.what(),Poco::Message::PRIO_WARNING));
+    g_log.warning() << e.what() << std::endl;
   }
   catch (...)
   {
@@ -694,10 +694,10 @@ void MantidUI::showImageViewer()
     }
     else
     {
-      m_appWindow->writeToLogWindow(
-               "Only event or matrix workspaces are currently supported.");
-      m_appWindow->writeToLogWindow(
-               "Please convert to one of these before using the ImageView.");
+      const char * msg =
+          "Only event or matrix workspaces are currently supported.\n"
+          "Please convert to one of these before using the ImageView.";
+      g_log.information() << msg << std::endl;
     }
   }
     catch (std::runtime_error &e)
@@ -706,7 +706,7 @@ void MantidUI::showImageViewer()
   }
   catch (...)
   {
-    m_appWindow->writeToLogWindow("Exception getting workspace " );
+    g_log.error() << "Image View: Exception getting workspace " << std::endl;
   }
 
 }
@@ -1309,7 +1309,7 @@ void MantidUI::loadfromICatInterface(const QString& fileName,const QString& wsNa
 
 void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& fileName, const QString& wsName)
 {
-
+  using MantidQt::API::Message;
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
   if( !alg ) return;
   try
@@ -1319,14 +1319,12 @@ void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& file
   }
   catch(std::invalid_argument& e)
   {
-    //emit error(e.what());
-    m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
+    g_log.error() << e.what() << std::endl;
     return ;
   }
   catch (Mantid::Kernel::Exception::NotFoundError& e)
   {
-    //emit error(e.what());
-    m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
+    g_log.error() << e.what() << std::endl;
     return ;
   }
 
@@ -1739,7 +1737,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   }
   catch(...)
   {
-    m_appWindow->writeToLogWindow("Error when getting/downloading data file from isis server ", true);
+    g_log.error() << "Error when getting/downloading data file from server " << std::endl;
     return;
   }
   try
@@ -1750,13 +1748,13 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   }
   catch(std::invalid_argument& e)
   {
-    m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
+    g_log.error() << e.what() << std::endl;
     return;
 
   }
   catch (Mantid::Kernel::Exception::NotFoundError& e)
   {
-    m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
+    g_log.error() << e.what() << std::endl;
     return;
   }
 
@@ -1770,7 +1768,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   }
   catch(...)
   {
-    m_appWindow->writeToLogWindow("Error when getting/downloading data file from isis server", true);
+    g_log.error() << "Error when getting/downloading data file from server" << std::endl;
     return;
   }
   try
@@ -1779,7 +1777,7 @@ void MantidUI::executeDownloadDataFiles(const std::vector<std::string>& filenNam
   }
   catch (Mantid::Kernel::Exception::NotFoundError&e)
   {
-    m_appWindow->writeToLogWindow(QString::fromStdString(e.what()), true);
+    g_log.error() << e.what() << std::endl;
     return;
   }
 
@@ -1874,37 +1872,6 @@ void MantidUI::handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_
   QString name = QString::fromStdString(pNf->object_name());
   emit workspace_group_updated( name );
 }
-
-void MantidUI::logMessage(const Poco::Message& msg)
-{
-  if (!appWindow()->results) return;
-  QString str = msg.getText().c_str();
-  //if (s_logEdit->document()->blockCount() > 1000) s_logEdit->document()->clear();
-  //Ticket #671
-  //to display the logwindow if there is ann error or higher log message
-  if (msg.getPriority() <= Poco::Message::PRIO_ERROR)
-  {
-    appWindow()->logWindow->show();
-  }
-  if (msg.getPriority() < Poco::Message::PRIO_ERROR)
-    appWindow()->results->setTextColor(Qt::red);
-  else if (msg.getPriority() <= Poco::Message::PRIO_WARNING)
-    appWindow()->results->setTextColor(QColor::fromRgb(255, 100, 0)); // Orange
-  else if (msg.getPriority() > Poco::Message::PRIO_INFORMATION)
-    appWindow()->results->setTextColor(Qt::gray);
-  else if (msg.getPriority() == Poco::Message::PRIO_NOTICE)
-    appWindow()->results->setTextColor(Qt::darkBlue);
-  else
-    appWindow()->results->setTextColor(Qt::black);
-  appWindow()->results->insertPlainText(str+"\n");
-
-  QTextCursor cur = appWindow()->results->textCursor();
-  cur.movePosition(QTextCursor::End);
-  appWindow()->results->setTextCursor(cur);
-  //set the colour back to the default (black)
-  appWindow()->results->setTextColor(Qt::black);
-}
-
 
 void MantidUI::manageMantidWorkspaces()
 {
@@ -3047,12 +3014,11 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
     } 
     catch (Mantid::Kernel::Exception::NotFoundError&) 
     {
-      // Get here if workspace name is invalid
-      const std::string message("Workspace "+it.key().toStdString()+" not found");
-      logMessage(Poco::Message("MantidPlot",message,Poco::Message::PRIO_WARNING));
-    } catch (std::invalid_argument& ex) {
-      // Get here if invalid spectrum number given
-      logMessage(Poco::Message("MantidPlot",ex.what(),Poco::Message::PRIO_WARNING));
+      g_log.warning() << "Workspace " << it.key().toStdString() << " not found" << std::endl;
+    }
+    catch (std::invalid_argument& ex)
+    {
+      g_log.warning() << ex.what() << std::endl;
     }
   }
 

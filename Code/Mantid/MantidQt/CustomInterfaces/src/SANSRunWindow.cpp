@@ -57,6 +57,7 @@ using Mantid::Geometry::Instrument_const_sptr;
 
 // Initialize the logger
 Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
+Logger& SANSRunWindow::g_centreFinderLog = Logger::get("CentreFinder");
 
 //----------------------------------------------
 // Public member functions
@@ -67,7 +68,7 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_saveWorkspaces(NULL), m_ins_defdir(""), m_last_dir(""),
   m_cfg_loaded(true), m_userFname(false), m_sample_file(),
   m_warnings_issued(false), m_force_reload(false),
-  m_log_warnings(false), m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
+  m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
   m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
@@ -142,10 +143,14 @@ void SANSRunWindow::initLayout()
   m_uiForm.batch_table->addAction(m_batch_clear);
   connect(m_batch_clear, SIGNAL(activated()), this, SLOT(clearBatchTable()));
 
-  //Logging
-  connect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
+  // Main Logging
+  m_uiForm.logging_field->attachLoggingChannel();
+  connect(m_uiForm.logging_field, SIGNAL(warningReceived(const QString &)), this, SLOT(setLoggerTabTitleToWarn()));
   connect(m_uiForm.logger_clear, SIGNAL(clicked()), this, SLOT(clearLogger()));
-  m_uiForm.logging_field->ensureCursorVisible();
+
+  // Centre finder logger
+  m_uiForm.centre_logging->attachLoggingChannel();
+  connect(m_uiForm.clear_centre_log, SIGNAL(clicked()), m_uiForm.centre_logging, SLOT(clear()));
 
   //Create the widget hash maps
   initWidgetMaps();
@@ -344,7 +349,6 @@ void SANSRunWindow::connectButtonSignals()
   connect(m_reducemapper, SIGNAL(mapped(const QString &)), this, SLOT(handleReduceButtonClick(const QString &)));
     
   connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
-  connect(m_uiForm.clear_log, SIGNAL(clicked()), m_uiForm.centre_logging, SLOT(clear()));
 }
 /**  Calls connect to fix up all the slots for the run tab to their events
 */
@@ -892,9 +896,6 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.userfileBtn->setText("Reload");
   m_uiForm.tabWidget->setTabEnabled(m_uiForm.tabWidget->count() - 1, true);
   
-  //Check for warnings
-  checkLogFlags();
-
   m_cfg_loaded = true;
   emit userfileLoaded();
   m_uiForm.tabWidget->setTabEnabled(1, true);
@@ -2018,10 +2019,6 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   exec_reduce += "i.SetDetectorFloodFile('"+floodRearFile+"','REAR')\n";
   exec_reduce += "i.SetDetectorFloodFile('"+floodFrontFile+"','FRONT')\n";
 
-  //  if ( ( ! floodFile.isEmpty() ) && ( m_uiForm.detbank_sel->currentText() == "HAB" ) )
-  //{
-  //  g_log.warning() << "::SANS::Warning: Flood files will be ignored for the HAB/FRONT detector" <<std::endl; 
-  //  }
   // Set the wavelength ranges, equal to those for the sample unless this box is checked
   // Also check if the Trans Fit on/off tick is on or off. If Off then set the trans_opt to off
   if (m_uiForm.transFit_ck->isChecked())
@@ -2286,7 +2283,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     QFile tmp_file(m_tmp_batchfile);
     tmp_file.remove();
   }
-  checkLogFlags();
 }
 /** Iterates through the validators and stops if it finds one that is shown and enabled
 *  @param check the validator set to check
@@ -2438,7 +2434,7 @@ void SANSRunWindow::handleRunFindCentre()
   }
 
   // Start iteration
-  updateCentreFindingStatus("::SANS::Loading data");
+  g_centreFinderLog.notice("Loading data\n");
   handleLoadButtonClick();
 
   // Disable interaction
@@ -2494,27 +2490,18 @@ void SANSRunWindow::handleRunFindCentre()
     py_code += "xstart=float(" + beam_x->text() + ")/1000.,ystart=float(" + beam_y->text() + ")/1000.)";
   }
 
-  updateCentreFindingStatus("::SANS::Iteration 1");
+  g_centreFinderLog.notice("Iteration 1\n");
   m_uiForm.beamstart_box->setFocus();
 
   //Execute the code
-  //Connect up the logger to handle updating the centre finding status box
-  connect(this, SIGNAL(logMessageReceived(const QString&)), this, 
-	  SLOT(updateCentreFindingStatus(const QString&)));
-  disconnect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
-  
   runReduceScriptFunction(py_code);
   
-  disconnect(this, SIGNAL(logMessageReceived(const QString&)), this, 
-	     SLOT(updateCentreFindingStatus(const QString&)));
-  connect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
-
   QString coordstr = runReduceScriptFunction(coordinates_python_code); 
   
   QString result("");
   if( coordstr.isEmpty() )
   {
-    result = "::SANS::No coordinates returned!";
+    result = "No coordinates returned!";
   }
   else
   {
@@ -2527,11 +2514,11 @@ void SANSRunWindow::handleRunFindCentre()
       beam_x->setText(QString::number(coord*1000.));
       coord = xycoords[1].toDouble();
       beam_y->setText(QString::number(coord*1000.));
-      result = "::SANS::Coordinates updated";
+      result = "Coordinates updated";
     }
     else
     {
-      result = "::SANS::Incorrect number of parameters returned from function, check script.";
+      result = "Incorrect number of parameters returned from function, check script.";
 
     }
   }  
@@ -2547,7 +2534,7 @@ void SANSRunWindow::handleRunFindCentre()
   QString errors = runReduceScriptFunction(
     "print i.ReductionSingleton().user_settings.execute(i.ReductionSingleton())").trimmed();
 
-  updateCentreFindingStatus(result);
+  g_centreFinderLog.notice() << result.toStdString() << "\n";
   
   //Reenable stuff
   setProcessingState(Ready);
@@ -2754,24 +2741,7 @@ void SANSRunWindow::setUserFname()
 {
   m_userFname = true;
 }
-/**
- * Update the centre finding status label
- * @param msg :: The message string
- */
-void SANSRunWindow::updateCentreFindingStatus(const QString & msg)
-{
-  static QString prefix = "::SANS";
-  if( msg.startsWith(prefix) )
-  {
-    QStringList sections = msg.split("::");
-    QString txt = sections.at(2);
-    m_uiForm.centre_logging->append(txt);
-    if( sections.at(1) == "SANSIter" )
-    {
-      m_uiForm.centre_stat->setText(txt);
-    }
-  }  
-}
+
 /** Enables or disables the floodFile run widget
 *  @param state :: Qt::CheckState enum value, Checked means enable otherwise disabled
 */
@@ -2817,32 +2787,6 @@ void SANSRunWindow::disOrEnablePeriods(const int tickState)
   for ( ; it != m_runFiles.end(); ++it )
   {
     (*it)->doMultiEntry(enable);
-  }
-}
-/**
- * Update the logging window with status messages
- * @param msg :: The message received
- */
-void SANSRunWindow::updateLogWindow(const QString & msg)
-{
-  static QString prefix = "::SANS";
-  if( msg.startsWith(prefix) )
-  {
-    QString txt = msg.section("::",2);
-    bool logwarnings = txt.contains("warning", Qt::CaseInsensitive);
-    if( m_uiForm.verbose_check->isChecked() || logwarnings || m_uiForm.log_colette->isChecked() )
-    {
-      if( logwarnings )
-      {
-	m_log_warnings = true;
-	m_uiForm.logging_field->setTextColor(Qt::red);
-      }
-      else
-      {
-	m_uiForm.logging_field->setTextColor(Qt::black);
-      }
-      m_uiForm.logging_field->append(txt);
-    }
   }
 }
 
@@ -3016,6 +2960,13 @@ void SANSRunWindow::checkList()
     validator->show();
   }
 }
+
+void SANSRunWindow::setLoggerTabTitleToWarn()
+{
+  m_uiForm.tabWidget->setTabText(4, "Logging - WARNINGS");
+}
+
+
 /** Record the output workspace name, if there is no output
 *  workspace pass an empty string or an empty argument list
 *  @param wsName :: the name of the output workspace or empty for no output
@@ -3420,15 +3371,6 @@ QString SANSRunWindow::saveBatchGrid(const QString & filename)
   return csv_filename;
 }
 
-void SANSRunWindow::checkLogFlags()
-{
-  if( m_log_warnings )
-  {
-    m_uiForm.tabWidget->setTabText(4, "Logging - WARNINGS");
-    //    m_uiForm.tabWidget->tabBar()->setTabTextColor(4, QColor("red"));
-  }
-  m_log_warnings = false;
-}
 /** Display the first data search and the number of data directorys to users and
 *  update our input directory
 */
@@ -3466,15 +3408,6 @@ void SANSRunWindow::handleInputDirChange(Mantid::Kernel::ConfigValChangeNotifica
   {
     upDateDataDir();
   }
-}
-/** Prints the warning in a dialog box, Mantid log and the SANS GUI Logging tab
-*  @param title Brief summary the problem
-*  @param info detail to follow the summary
-*/
-void SANSRunWindow::issueWarning(const QString & title, const QString & info)
-{
-  g_log.warning() << "::SANS::warning" << title.toStdString() << ": " << info.toStdString() << std::endl;
-  QMessageBox::warning(this, title, info);
 }
 
 /** Slot when phi masking changed in GUI

@@ -41,7 +41,7 @@ endif ( stdint )
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost REQUIRED signals date_time regex ) 
+find_package ( Boost REQUIRED date_time regex ) 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK )
 # Need this defined globally for our log time values

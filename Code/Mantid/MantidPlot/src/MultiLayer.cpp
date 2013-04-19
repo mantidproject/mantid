@@ -92,6 +92,8 @@ void LayerButton::mouseDoubleClickEvent ( QMouseEvent * )
 	emit showCurvesDialog();
 }
 
+Mantid::Kernel::Logger & MultiLayer::g_log = Mantid::Kernel::Logger::get("MultiLayer");
+
 MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols, 
                        const QString& label, const char* name, Qt::WFlags f)
                          : MdiSubWindow(parent, label, name, f),
@@ -1381,8 +1383,7 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve* originalCurve, MantidT
       catch(std::invalid_argument& ex)
       {
         //Handle case when workspace does not have only one non-integrated dimension.
-        std::string message = ex.what();
-        tree->logWarningMessage(message);
+        g_log.warning() << ex.what() << std::endl;
       }
     }
   }

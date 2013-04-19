@@ -62,6 +62,7 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
   _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
+  g_log.notice() << Mantid::welcomeMessage() << std::endl;
   loadAllPlugins();
   disableNexusOutput();
   setNumOMPThreadsToConfigValue();
