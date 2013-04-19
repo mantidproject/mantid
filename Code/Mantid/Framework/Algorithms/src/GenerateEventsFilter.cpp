@@ -167,8 +167,8 @@ namespace Algorithms
   void GenerateEventsFilter::exec()
   {
     // 1. Get general input and output
-    mEventWS = this->getProperty("InputWorkspace");
-    if (!mEventWS)
+    m_dataWS = this->getProperty("InputWorkspace");
+    if (!m_dataWS)
     {
       std::stringstream errss;
       errss << "GenerateEventsFilter does not get input workspace as an EventWorkspace.";
@@ -177,11 +177,12 @@ namespace Algorithms
     }
     else
     {
-      g_log.debug() << "DB9441 GenerateEventsFilter() Input Event WS = " << mEventWS->getName()
-                    << ", Events = " << mEventWS->getNumberEvents() << std::endl;
+      g_log.debug() << "DB9441 GenerateEventsFilter() Input Event WS = " << m_dataWS->getName()
+                    << ", Events = " << m_dataWS->getNumberEvents() << std::endl;
     }
 
-    Kernel::DateAndTime runstart(mEventWS->run().getProperty("run_start")->value());
+    Kernel::DateAndTime runstart = m_dataWS->run().startTime();
+    // (m_dataWS->run().getProperty("run_start")->value());
     g_log.debug() << "DB9441 Run Start = " << runstart << " / " << runstart.totalNanoseconds()
                   << std::endl;
 
@@ -193,15 +194,15 @@ namespace Algorithms
     }
 
     // Output Splitters workspace
-    mSplitters =  boost::shared_ptr<DataObjects::SplittersWorkspace>(new DataObjects::SplittersWorkspace());
-    mSplitters->setTitle(title);
+    m_splitWS =  boost::shared_ptr<DataObjects::SplittersWorkspace>(new DataObjects::SplittersWorkspace());
+    m_splitWS->setTitle(title);
 
     // mFilterInfoWS = boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace);
-    mFilterInfoWS = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    mFilterInfoWS->setTitle(title);
+    m_filterInfoWS = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    m_filterInfoWS->setTitle(title);
 
-    mFilterInfoWS->addColumn("int", "workspacegroup");
-    mFilterInfoWS->addColumn("str", "title");
+    m_filterInfoWS->addColumn("int", "workspacegroup");
+    m_filterInfoWS->addColumn("str", "title");
 
     // 2. Get Time
     processInputTime(runstart);
@@ -222,8 +223,8 @@ namespace Algorithms
       setFilterByLogValue(logname);
     }
 
-    this->setProperty("OutputWorkspace", mSplitters);
-    this->setProperty("InformationWorkspace", mFilterInfoWS);
+    this->setProperty("OutputWorkspace", m_splitWS);
+    this->setProperty("InformationWorkspace", m_filterInfoWS);
 
     return;
   }
@@ -268,7 +269,7 @@ namespace Algorithms
       // 2. Find maximum time by proton charge
       // FIXME Use this simple method may miss the events in the last pulse
       Kernel::TimeSeriesProperty<double>* protonchargelog =
-          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(mEventWS->run().getProperty("proton_charge"));
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_dataWS->run().getProperty("proton_charge"));
       Kernel::DateAndTime runend = protonchargelog->lastTime();
 
       // 3. Set up time-convert unit
@@ -335,9 +336,9 @@ namespace Algorithms
       int wsindex = 0;
       // 1. Default and thus just one interval
       Kernel::SplittingInterval ti(mStartTime, mStopTime, 0);
-      mSplitters->addSplitter(ti);
+      m_splitWS->addSplitter(ti);
 
-      API::TableRow row = mFilterInfoWS->appendRow();
+      API::TableRow row = m_filterInfoWS->appendRow();
       std::stringstream ss;
       ss << "Time Interval From " << mStartTime << " to " << mStopTime;
       row << wsindex << ss.str();
@@ -360,10 +361,10 @@ namespace Algorithms
         Kernel::DateAndTime t0(curtime_ns);
         Kernel::DateAndTime tf(nexttime_ns);
         Kernel::SplittingInterval spiv(t0, tf, wsindex);
-        mSplitters->addSplitter(spiv);
+        m_splitWS->addSplitter(spiv);
 
         // c) Information
-        API::TableRow row = mFilterInfoWS->appendRow();
+        API::TableRow row = m_filterInfoWS->appendRow();
         std::stringstream ss;
         ss << "Time Interval From " << t0 << " to " << tf;
         row << wsindex << ss.str();
@@ -396,8 +397,8 @@ namespace Algorithms
   void GenerateEventsFilter::setFilterByLogValue(std::string logname)
   {
     // 1. Get hold on sample log to filter with
-    m_dblLog = dynamic_cast<TimeSeriesProperty<double>* >(mEventWS->run().getProperty(logname));
-    m_intLog = dynamic_cast<TimeSeriesProperty<int>* > (mEventWS->run().getProperty(logname));
+    m_dblLog = dynamic_cast<TimeSeriesProperty<double>* >(m_dataWS->run().getProperty(logname));
+    m_intLog = dynamic_cast<TimeSeriesProperty<int>* > (m_dataWS->run().getProperty(logname));
     if (!m_dblLog && !m_intLog)
     {
       stringstream errmsg;
@@ -417,25 +418,7 @@ namespace Algorithms
     double maxvalue = this->getProperty("MaximumLogValue");
     double deltaValue = this->getProperty("LogValueInterval");
 
-#if 0
-    // Later...
-    if (minvalue == EMPTY_DBL())
-    {
-      minvalue = m_dblLog->minValue();
-    }
-    if (maxvalue == EMPTY_DBL())
-    {
-      maxvalue = m_dblLog->maxValue();
-    }
-
-    if (minvalue > maxvalue)
-    {
-      g_log.error() << "Error: Input minimum log value " << minvalue <<
-          " is larger than maximum log value " << maxvalue << std::endl;
-      throw std::invalid_argument("Input minimum value is larger than maximum value");
-    }
-#endif
-
+    // 3. Log value change direction
     std::string filterdirection = getProperty("FilterLogValueByChangingDirection");
     bool filterIncrease;
     bool filterDecrease;
@@ -461,7 +444,16 @@ namespace Algorithms
       toProcessSingleValueFilter = true;
     }
 
-    // 3. Generate filters
+    // 4. Log boundary
+    string logboundary = getProperty("LogBoundary");
+    if (logboundary.compare("Centre"))
+      m_logAtCentre = true;
+    else
+      m_logAtCentre = false;
+
+    m_logTimeTolerance = getProperty("TimeTolerance");
+
+    // 5. Generate filters
     if (m_dblLog)
     {
       // Process min/max
@@ -519,9 +511,15 @@ namespace Algorithms
       }
 
       TimeSplitterType splitters;
-      DateAndTime dummytime(0);
-      throw runtime_error("Time is still dummy.  Make it right!");
-      processIntegerValueFilter(splitters, minvaluei, maxvaluei, filterIncrease, filterDecrease, dummytime);
+      DateAndTime runendtime = m_dataWS->run().endTime();
+      processIntegerValueFilter(splitters, minvaluei, maxvaluei, filterIncrease, filterDecrease, runendtime);
+
+      size_t numsplits = splitters.size();
+      for (size_t i = 0; i < numsplits; ++i)
+      {
+        SplittingInterval split = splitters[i];
+        m_splitWS->addSplitter(split);
+      }
     }
 
 
@@ -555,11 +553,11 @@ namespace Algorithms
     // 3. Add to output
     for (size_t isp = 0; isp < splitters.size(); isp ++)
     {
-      mSplitters->addSplitter(splitters[isp]);
+      m_splitWS->addSplitter(splitters[isp]);
     }
 
     // 4. Add information
-    API::TableRow row = mFilterInfoWS->appendRow();
+    API::TableRow row = m_filterInfoWS->appendRow();
     std::stringstream ss;
     ss << "Log " << m_dblLog->name() << " From " << minvalue << " To " << maxvalue << "  Value-change-direction ";
     if (filterincrease && filterdecrease)
@@ -633,7 +631,7 @@ namespace Algorithms
       {
         ss << " decrease";
       };
-      API::TableRow newrow = mFilterInfoWS->appendRow();
+      API::TableRow newrow = m_filterInfoWS->appendRow();
       newrow << wsindex << ss.str();
 
       curvalue += valueinterval;
@@ -670,7 +668,7 @@ namespace Algorithms
 
     // 4. Put to SplittersWorkspace
     for (size_t i = 0; i < splitters.size(); i ++)
-      mSplitters->addSplitter(splitters[i]);
+      m_splitWS->addSplitter(splitters[i]);
 
     return;
   }
@@ -1109,6 +1107,7 @@ namespace Algorithms
       delta = static_cast<int>(deltadbl+0.5);
       if (delta <= 0)
         throw runtime_error("LogValueInterval cannot be 0 or negative for integer log.");
+      singlemode = false;
     }
 
     // 2. Search along log to do filter
@@ -1116,26 +1115,37 @@ namespace Algorithms
     vector<DateAndTime> times = m_intLog->timesAsVector();
     vector<int> values = m_intLog->valuesAsVector();
 
+    time_duration timetol = DateAndTime::durationFromSeconds( m_logTimeTolerance*m_timeUnitConvertFactor*1.0E-9);
+
     DateAndTime splitstarttime(0);
     int pregroup = -1;
 
+    g_log.notice() << "[DB] Number of log entries = " << numlogentries << ".\n";
     for (size_t i = 0; i < numlogentries; ++i)
     {
-      double currvalue = values[i];
+      int currvalue = values[i];
       int group = -1;
 
       // a) Determine allowed and group
       if (currvalue > maxvalue || currvalue < minvalue)
       {
+        g_log.notice() << "[DB] Entry[" << i << "] = " << currvalue << ": out of range. " << ".\n";
         ;
       }
-      else if (singlemode)
+      else if (i >= 1 && ( (filterIncrease && values[i] >= values[i-1])
+                           || (filterDecrease && values[i] <= values[i])))
       {
-        group = 0;
-      }
-      else
-      {
-        group = (currvalue-minvalue)/delta;
+        if (singlemode)
+        {
+          group = 0;
+        }
+        else
+        {
+          group = (currvalue-minvalue)/delta;
+        }
+        g_log.notice() << "[DB] Entry[" << i << "] = " << currvalue << ": belong to group "
+                       << group << ".\n";
+
       }
 
       // b) Consider to make a splitter
@@ -1144,9 +1154,8 @@ namespace Algorithms
       {
         // i.  previous log is in allowed region.  but this one is not.  create a splitter
         if (splitstarttime.totalNanoseconds() == 0)
-          throw runtime_error("Programming logic error (1).");
-        // NO! YOU NEED TO CONSIDER CENTRE/LEFT ISSUE!
-        SplittingInterval newsplit(splitstarttime, times[i], group);
+          throw runtime_error("Programming logic error.");
+        SplittingInterval newsplit(splitstarttime - timetol, times[i] - timetol, pregroup);
         splitters.push_back(newsplit);
 
         splitstarttime = DateAndTime(0);
@@ -1163,7 +1172,7 @@ namespace Algorithms
         // iii. migrated to a new region
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error (1).");
-        SplittingInterval newsplit(splitstarttime, times[i], group);
+        SplittingInterval newsplit(splitstarttime - timetol, times[i] - timetol, pregroup);
         splitters.push_back(newsplit);
 
         splitstarttime = times[i];
@@ -1186,9 +1195,40 @@ namespace Algorithms
       // Last entry is in an allowed region.
       if (splitstarttime.totalNanoseconds() == 0)
         throw runtime_error("Programming logic error (1).");
-      SplittingInterval newsplit(splitstarttime, runend, pregroup);
+      SplittingInterval newsplit(splitstarttime - timetol, runend - timetol, pregroup);
       splitters.push_back(newsplit);
     }
+
+    // 4. Write to the information workspace
+    if (singlemode)
+    {
+      TableRow newrow = m_filterInfoWS->appendRow();
+      stringstream message;
+      message << m_intLog->name() << " = " << minvalue;
+      newrow << 0 << message.str();
+    }
+    else
+    {
+      int logvalue = minvalue;
+      int wsindex = 0;
+      while (logvalue <= maxvalue)
+      {
+        stringstream message;
+        if (logvalue + delta - 1 > logvalue)
+          message << m_intLog->name() << " = [" << logvalue << ", " << logvalue+delta-1 << "]";
+        else
+          message << m_intLog->name() << " = [" << logvalue ;
+
+        TableRow newrow = m_filterInfoWS->appendRow();
+        newrow << wsindex << message.str();
+
+        ++ wsindex;
+        logvalue += delta;
+      }
+    }
+
+    g_log.notice() << "[DB] Number of splitters = " << splitters.size()
+                   << ", Number of split info = " << m_filterInfoWS->rowCount() << ".\n";
 
     return;
   }

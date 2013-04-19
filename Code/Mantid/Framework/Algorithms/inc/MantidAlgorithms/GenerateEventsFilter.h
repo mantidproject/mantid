@@ -101,9 +101,9 @@ namespace Algorithms
 
     size_t searchValue(std::vector<double> sorteddata, double value);
 
-    DataObjects::EventWorkspace_const_sptr mEventWS;
-    API::ISplittersWorkspace_sptr mSplitters;
-    API::ITableWorkspace_sptr mFilterInfoWS;
+    DataObjects::EventWorkspace_const_sptr m_dataWS;
+    API::ISplittersWorkspace_sptr m_splitWS;
+    API::ITableWorkspace_sptr m_filterInfoWS;
 
     Kernel::DateAndTime mStartTime;
     Kernel::DateAndTime mStopTime;
@@ -112,6 +112,9 @@ namespace Algorithms
 
     Kernel::TimeSeriesProperty<double>* m_dblLog;
     Kernel::TimeSeriesProperty<int>* m_intLog;
+
+    bool m_logAtCentre;
+    double m_logTimeTolerance;
 
   };
 
