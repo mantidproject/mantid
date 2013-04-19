@@ -85,6 +85,7 @@ void Indirect::initLayout()
 
   connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
   connect(m_uiForm.ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(useCalib(bool)));
+
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
   connect(m_uiForm.cbIndRebType, SIGNAL(currentIndexChanged(int)), m_uiForm.swIndRebin, SLOT(setCurrentIndex(int)));
 
@@ -237,6 +238,11 @@ void Indirect::runConvertToEnergy()
     pyInput +=
       "from IndirectCommon import loadNexus\n"
       "reducer.set_calibration_workspace(loadNexus(r'"+m_uiForm.ind_calibFile->getFirstFilename()+"'))\n";
+  }
+
+  if ( m_uiForm.ckLoadLogs->isChecked() )
+  {
+    pyInput += "reducer.set_load_logs(True)\n";
   }
 
   if ( ! m_uiForm.rebin_ckDNR->isChecked() )
