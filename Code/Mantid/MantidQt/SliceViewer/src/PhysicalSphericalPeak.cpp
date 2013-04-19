@@ -28,6 +28,12 @@ namespace MantidQt
       m_backgroundOuterRadiusSQ(backgroundOuterRadius*backgroundOuterRadius),
       m_showBackgroundRadius(false)
       {
+        //This possibility can arise from IntegratePeaksMD.
+        if(m_backgroundOuterRadiusSQ <= m_backgroundInnerRadiusSQ)
+        {
+          m_backgroundOuterRadius = m_backgroundInnerRadius;
+          m_backgroundOuterRadiusSQ = m_backgroundInnerRadiusSQ;
+        }
       }
 
       /// Destructor

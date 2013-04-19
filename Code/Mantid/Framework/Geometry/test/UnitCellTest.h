@@ -39,6 +39,36 @@ public:
     TS_ASSERT_DELTA(u2.a(),3,1e-10);
   }
 
+  void test_Uncertainties()
+  {
+      UnitCell u(2,3,4,85.,95.,100);
+      TS_ASSERT_DELTA(u.errora(),0,1e-10);
+      TS_ASSERT_DELTA(u.errorb(),0,1e-10);
+      TS_ASSERT_DELTA(u.errorc(),0,1e-10);
+      TS_ASSERT_DELTA(u.erroralpha(),0,1e-10);
+      TS_ASSERT_DELTA(u.errorbeta(),0,1e-10);
+      TS_ASSERT_DELTA(u.errorgamma(),0,1e-10);
+      u.setError(0.1,0.2,0.3,5,6,7);
+      TS_ASSERT_DELTA(u.errora(),0.1,1e-10);
+      TS_ASSERT_DELTA(u.errorb(),0.2,1e-10);
+      TS_ASSERT_DELTA(u.errorc(),0.3,1e-10);
+      TS_ASSERT_DELTA(u.erroralpha(),5,1e-10);
+      TS_ASSERT_DELTA(u.errorbeta(),6,1e-10);
+      TS_ASSERT_DELTA(u.errorgamma(),7,1e-10);
+      u.setErrora(0.01);
+      u.setErrorb(0.02);
+      u.setErrorc(0.03);
+      u.setErroralpha(0.11);
+      u.setErrorbeta(0.12);
+      u.setErrorgamma(0.15,angRadians);
+      TS_ASSERT_DELTA(u.errora(),0.01,1e-10);
+      TS_ASSERT_DELTA(u.errorb(),0.02,1e-10);
+      TS_ASSERT_DELTA(u.errorc(),0.03,1e-10);
+      TS_ASSERT_DELTA(u.erroralpha(),0.11,1e-10);
+      TS_ASSERT_DELTA(u.errorbeta(),0.12,1e-10);
+      TS_ASSERT_DELTA(u.errorgamma(angRadians),0.15,1e-10);
+  }
+
   void checkCell(UnitCell & u)
   {
     TS_ASSERT_DELTA(u.a(),2.5,1e-10);

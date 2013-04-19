@@ -549,6 +549,7 @@ void FrameworkManagerProxy::registerPyAlgorithm(boost::python::object pyobj)
   using Mantid::PythonAPI::PythonObjectInstantiator;
   using Mantid::API::Algorithm;
   using Mantid::API::AlgorithmFactory;
+  using Mantid::API::AlgorithmFactoryImpl;
   using boost::python::object;
   using boost::python::handle;
   using boost::python::borrowed;
@@ -559,7 +560,7 @@ void FrameworkManagerProxy::registerPyAlgorithm(boost::python::object pyobj)
   PyObject *classObject = PyObject_GetAttrString(pyobj.ptr(), "__class__");
   object classType(handle<>(borrowed(classObject)));
   // Takes ownership of instantiator and replaces any existing algorithm
-  AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType), true);
+  AlgorithmFactory::Instance().subscribe(new PythonObjectInstantiator<Algorithm>(classType), AlgorithmFactoryImpl::OverwriteCurrent);
 }
   
 //--------------------------------------------------------------------------

@@ -5,11 +5,15 @@
 #include <QtGui/QWidget>
 #include <QActionGroup>
 #include <QRunnable>
+#include <Poco/NObserver.h>
+
 #include <MantidKernel/System.h>
 
 #include "ui_MantidEV.h"
 #include "MantidEVWorker.h"
 #include "MantidQtAPI/UserSubWindow.h"
+
+#include "MantidAPI/SelectionNotificationService.h"
 
 namespace MantidQt
 {
@@ -214,6 +218,10 @@ private slots:
   /// Slot for the integrate tab's Apply button 
   void integratePeaks_slot();
 
+  /// Slot for Show Info button on Point Info form
+  void showInfo_slot();
+
+
   // 
   // The following slots take care of the menu items
   //
@@ -286,6 +294,11 @@ private slots:
   /// Slot to enable/disable the ellipse size options controls
   void setEnabledEllipseSizeOptions_slot();
 
+  /// Methods to handle pointed at message from any source
+  void handleQpointNotification(const Poco::AutoPtr<Mantid::API::SelectionNotificationServiceImpl::AddNotification> & message );
+  void handleQpointNotification1(const Poco::AutoPtr<Mantid::API::SelectionNotificationServiceImpl::AfterReplaceNotification> & message );
+  /// Method to get and display info about the specified Q-vector
+  void showInfo( Mantid::Kernel::V3D  q_point );
 
 private:
   /// super class pure virtual method we MUST implement
@@ -348,6 +361,10 @@ private:
   QThreadPool  *m_thread_pool; /// local thread pool with only one thread to 
                                /// allow running precisely one operation 
                                /// at a time in a separate thread.
+
+ Poco::NObserver<MantidEV, Mantid::API::SelectionNotificationServiceImpl::AddNotification> observer;
+ Poco::NObserver<MantidEV, Mantid::API::SelectionNotificationServiceImpl::AfterReplaceNotification> observer1;
+
 };
 
 } // namespace CustomInterfaces

@@ -1,6 +1,7 @@
 from reduction.reducer import ReductionStep
-from mantid.simpleapi import *
+import mantid
 from mantid import config
+from mantid.simpleapi import *
 import string
 import os
 
@@ -22,6 +23,7 @@ class LoadData(ReductionStep):
 
     _multiple_frames = False
     _sum = False
+    _load_logs = False
     _monitor_index = None
     _detector_range_start = None
     _detector_range_end = None
@@ -36,6 +38,7 @@ class LoadData(ReductionStep):
         """
         super(LoadData, self).__init__()
         self._sum = False
+        self._load_logs = False
         self._multiple_frames = False
         self._monitor_index = None
         self._detector_range_start = None
@@ -67,6 +70,9 @@ class LoadData(ReductionStep):
             ## Need to adjust the reducer's list of workspaces
             self._data_files = {}
             self._data_files[wsname] = wsname
+
+    def set_load_logs(self, value):
+        self._load_logs = value
 
     def set_sum(self, value):
         self._sum = value
@@ -136,8 +142,9 @@ class LoadData(ReductionStep):
         logger.debug('self._monitor_index = ' + str(self._monitor_index))
 
         for ws in workspaces:
-            if (loader_name.endswith('Nexus')):
-                LoadNexusMonitors(Filename=self._data_files[output_ws],OutputWorkspace= ws+'_mon')
+            if isinstance(mtd[ws],mantid.api.IEventWorkspace):
+                LoadNexusMonitors(Filename=self._data_files[output_ws],
+                                  OutputWorkspace= ws+'_mon')
             else:
                 ## Extract Monitor Spectrum
                 ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace= ws+'_mon',WorkspaceIndex= self._monitor_index)
@@ -159,6 +166,11 @@ class LoadData(ReductionStep):
             loader_name = "LoadVesuvio"
         else:
             loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
+            if self._load_logs == True:
+                loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=True, **self._extra_load_opts)
+                logger.notice("Loaded sample logs")
+            else:
+                loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
             loader_handle = loaded_ws.getHistory().lastAlgorithm()
             loader_name = loader_handle.getPropertyValue("LoaderName")
         return loader_name

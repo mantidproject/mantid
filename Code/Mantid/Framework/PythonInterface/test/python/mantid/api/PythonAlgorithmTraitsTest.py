@@ -6,7 +6,7 @@ import unittest
 import testhelpers
 from mantid.kernel import Direction
 from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm, 
-                        AlgorithmManager, registerAlgorithm)
+                        AlgorithmManager, AlgorithmFactory)
 
 ########################### Test classes #####################################
 
@@ -41,8 +41,8 @@ class PythonAlgorithmTest(unittest.TestCase):
     def setUp(self):
         if self.__class__._registered is None:
             self.__class__._registered = True
-            registerAlgorithm(TestPyAlgDefaultAttrs)
-            registerAlgorithm(TestPyAlgOverriddenAttrs)
+            AlgorithmFactory.subscribe(TestPyAlgDefaultAttrs)
+            AlgorithmFactory.subscribe(TestPyAlgOverriddenAttrs)
             
     def test_managed_alg_is_descendent_of_AlgorithmProxy(self):
         alg = AlgorithmManager.create("TestPyAlgDefaultAttrs")

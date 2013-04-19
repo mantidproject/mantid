@@ -1,30 +1,33 @@
 set ( SRC_FILES
-	src/AlgorithmDialog.cpp
-	src/AlgorithmInputHistory.cpp
-	src/AlgorithmPropertiesWidget.cpp
-	src/AlgorithmRunner.cpp
-	src/BoolPropertyWidget.cpp
-	src/FilePropertyWidget.cpp
-	src/GenericDialog.cpp
-	src/InterfaceFactory.cpp
-	src/InterfaceManager.cpp
-	src/ManageUserDirectories.cpp
-	src/MantidColorMap.cpp
-	src/MantidDialog.cpp
-	src/MantidQwtIMDWorkspaceData.cpp
-	src/MantidQwtMatrixWorkspaceData.cpp
-	src/MantidWidget.cpp
-	src/OptionsPropertyWidget.cpp
-	src/PropertyWidget.cpp
-	src/PropertyWidgetFactory.cpp
-	src/PythonRunner.cpp
-	src/ScriptRepositoryView.cpp
+  src/AlgorithmDialog.cpp
+  src/AlgorithmInputHistory.cpp
+  src/AlgorithmPropertiesWidget.cpp
+  src/AlgorithmRunner.cpp
+  src/BoolPropertyWidget.cpp
+  src/FilePropertyWidget.cpp
+  src/GenericDialog.cpp
+  src/HelpWindow.cpp
+  src/InterfaceFactory.cpp
+  src/InterfaceManager.cpp
+  src/ManageUserDirectories.cpp
+  src/MantidColorMap.cpp
+  src/MantidDialog.cpp
+  src/MantidQwtIMDWorkspaceData.cpp
+  src/MantidQwtMatrixWorkspaceData.cpp
+  src/MantidWidget.cpp
+  src/Message.cpp
+  src/OptionsPropertyWidget.cpp
+  src/PropertyWidget.cpp
+  src/PropertyWidgetFactory.cpp
+  src/PythonRunner.cpp
+  src/QtSignalChannel.cpp
+  src/ScriptRepositoryView.cpp
   src/RepoModel.cpp
-	src/SyncedCheckboxes.cpp
-	src/TextPropertyWidget.cpp
-	src/UserSubWindow.cpp
-	src/VatesViewerInterface.cpp
-	src/WorkspaceObserver.cpp
+  src/SyncedCheckboxes.cpp
+  src/TextPropertyWidget.cpp
+  src/UserSubWindow.cpp
+  src/VatesViewerInterface.cpp
+  src/WorkspaceObserver.cpp
 )
 
 set ( MOC_FILES
@@ -40,6 +43,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
+  inc/MantidQtAPI/QtSignalChannel.h
   inc/MantidQtAPI/ScriptRepositoryView.h
   inc/MantidQtAPI/RepoModel.h
   inc/MantidQtAPI/SyncedCheckboxes.h
@@ -51,24 +55,25 @@ set ( MOC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-	${MOC_FILES}
-	inc/MantidQtAPI/AlgorithmInputHistory.h
-	inc/MantidQtAPI/AlgorithmRunner.h
-	inc/MantidQtAPI/DllOption.h
-	inc/MantidQtAPI/FileDialogHandler.h
-	inc/MantidQtAPI/GraphOptions.h
-	inc/MantidQtAPI/InterfaceFactory.h
-	inc/MantidQtAPI/InterfaceManager.h
-	inc/MantidQtAPI/MantidColorMap.h
-    inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
-    inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
-	inc/MantidQtAPI/MantidQwtWorkspaceData.h
-	inc/MantidQtAPI/PropertyWidgetFactory.h
-	inc/MantidQtAPI/ScriptRepositoryView.h
+  ${MOC_FILES}
+  inc/MantidQtAPI/AlgorithmInputHistory.h
+  inc/MantidQtAPI/AlgorithmRunner.h
+  inc/MantidQtAPI/DllOption.h
+  inc/MantidQtAPI/FileDialogHandler.h
+  inc/MantidQtAPI/GraphOptions.h
+  inc/MantidQtAPI/HelpWindow.h
+  inc/MantidQtAPI/InterfaceFactory.h
+  inc/MantidQtAPI/InterfaceManager.h
+  inc/MantidQtAPI/MantidColorMap.h
+  inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
+  inc/MantidQtAPI/MantidQwtMatrixWorkspaceData.h
+  inc/MantidQtAPI/MantidQwtWorkspaceData.h
+  inc/MantidQtAPI/PropertyWidgetFactory.h
+  inc/MantidQtAPI/ScriptRepositoryView.h
 )
 
 set ( UI_FILES 
-	inc/MantidQtAPI/ManageUserDirectories.ui
+  inc/MantidQtAPI/ManageUserDirectories.ui
   inc/MantidQtAPI/ScriptRepositoryView.ui 
 )
 
@@ -109,5 +114,5 @@ install ( TARGETS MantidQtAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 
 set ( TEST_FILES
-	ScriptRepositoryViewTest.h
+  ScriptRepositoryViewTest.h
 )

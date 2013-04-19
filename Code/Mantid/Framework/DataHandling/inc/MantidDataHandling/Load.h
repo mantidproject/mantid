@@ -81,7 +81,7 @@ namespace Mantid
       void loadMultipleFiles();
 
       /// Overrides the cancel() method to call m_loader->cancel()
-      void cancel()const;
+      void cancel();
       /// Create the concrete instance use for the actual loading.
       API::IDataFileChecker_sptr createLoader(const std::string & name, const double startProgress = -1.0, 
 					      const double endProgress=-1.0, const bool logging = true) const;

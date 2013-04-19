@@ -15,6 +15,26 @@ namespace Mantid
     using Kernel::V3D;
     using Kernel::Quat;
 
+    namespace // for strings to be inserted into the parameter map
+    {
+        const std::string POS_PARAM_NAME="pos";
+        const std::string POSX_PARAM_NAME="x";
+        const std::string POSY_PARAM_NAME="y";
+        const std::string POSZ_PARAM_NAME="z";
+
+        const std::string ROT_PARAM_NAME="rot";
+        const std::string ROTX_PARAM_NAME="rotx";
+        const std::string ROTY_PARAM_NAME="roty";
+        const std::string ROTZ_PARAM_NAME="rotz";
+
+        const std::string DOUBLE_PARAM_NAME="double";
+        const std::string INT_PARAM_NAME="int";
+        const std::string BOOL_PARAM_NAME="bool";
+        const std::string STRING_PARAM_NAME="string";
+        const std::string V3D_PARAM_NAME="V3D";
+        const std::string QUAT_PARAM_NAME="Quat";
+    }
+
     // Get a reference to the logger
     Kernel::Logger& ParameterMap::g_log = Kernel::Logger::get("ParameterMap");
 
@@ -27,6 +47,83 @@ namespace Mantid
     ParameterMap::ParameterMap()
       : m_map()
     {}
+
+    /**
+    * Return string to be inserted into the parameter map
+    */
+    // Position
+    const std::string & ParameterMap::pos()
+    {
+      return POS_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::posx()
+    {
+      return POSX_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::posy()
+    {
+      return POSY_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::posz()
+    {
+      return POSZ_PARAM_NAME;
+    }
+
+    // Rotation
+    const std::string & ParameterMap::rot()
+    {
+      return ROT_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::rotx()
+    {
+      return ROTX_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::roty()
+    {
+      return ROTY_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::rotz()
+    {
+      return ROTZ_PARAM_NAME;
+    }
+
+    // Other types
+    const std::string & ParameterMap::pDouble()
+    {
+      return DOUBLE_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::pInt()
+    {
+      return INT_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::pBool()
+    {
+      return BOOL_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::pString()
+    {
+      return STRING_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::pV3D()
+    {
+      return V3D_PARAM_NAME;
+    }
+
+    const std::string & ParameterMap::pQuat()
+    {
+      return QUAT_PARAM_NAME;
+    }
+
 
     /**
      * Clear any parameters with the given name
@@ -47,7 +144,7 @@ namespace Mantid
         }
       }
       // Check if the caches need invalidating
-      if( name == "pos" || name == "rot" ) clearCache();
+      if( name == pos() || name == rot() ) clearCache();
     }
 
     /**
@@ -82,7 +179,7 @@ namespace Mantid
     void ParameterMap::addPositionCoordinate(const IComponent* comp, const std::string& name, 
                                              const double value)
     {
-      Parameter_sptr param = get(comp,"pos");
+      Parameter_sptr param = get(comp,pos());
       V3D position;
       if (param)
       {
@@ -97,11 +194,11 @@ namespace Mantid
 
       // adjust position
 
-      if ( name.compare("x")==0 )
+      if ( name.compare(posx())==0 )
         position.setX(value);
-      else if ( name.compare("y")==0 )
+      else if ( name.compare(posy())==0 )
         position.setY(value);
-      else if ( name.compare("z")==0 )
+      else if ( name.compare(posz())==0 )
         position.setZ(value);
       else
       {
@@ -115,7 +212,7 @@ namespace Mantid
       if (param)
         param->set(position);
       else
-        addV3D(comp, "pos", position);
+        addV3D(comp, pos(), position);
     }
 
     /** Create or adjust "rot" parameter for a component
@@ -127,12 +224,12 @@ namespace Mantid
     */
     void ParameterMap::addRotationParam(const IComponent* comp,const std::string& name, const double deg)
     {
-      Parameter_sptr param = get(comp,"rot");
+      Parameter_sptr param = get(comp,rot());
       Quat quat;
 
-      Parameter_sptr paramRotX = get(comp,"rotx");
-      Parameter_sptr paramRotY = get(comp,"roty");
-      Parameter_sptr paramRotZ = get(comp,"rotz");
+      Parameter_sptr paramRotX = get(comp,rotx());
+      Parameter_sptr paramRotY = get(comp,roty());
+      Parameter_sptr paramRotZ = get(comp,rotz());
       double rotX, rotY, rotZ;
 
       if ( paramRotX )
@@ -153,30 +250,30 @@ namespace Mantid
 
       // adjust rotation
 
-      if ( name.compare("rotx")==0 )
+      if ( name.compare(rotx())==0 )
       {
         if (paramRotX)
           paramRotX->set(deg);
         else
-          addDouble(comp, "rotx", deg);
+          addDouble(comp, rotx(), deg);
 
         quat = Quat(deg,V3D(1,0,0))*Quat(rotY,V3D(0,1,0))*Quat(rotZ,V3D(0,0,1));
       }
-      else if ( name.compare("roty")==0 )
+      else if ( name.compare(roty())==0 )
       {
         if (paramRotY)
           paramRotY->set(deg);
         else
-          addDouble(comp, "roty", deg);
+          addDouble(comp, roty(), deg);
 
         quat = Quat(rotX,V3D(1,0,0))*Quat(deg,V3D(0,1,0))*Quat(rotZ,V3D(0,0,1));
       }
-      else if ( name.compare("rotz")==0 )
+      else if ( name.compare(rotz())==0 )
       {
         if (paramRotZ)
           paramRotZ->set(deg);
         else
-          addDouble(comp, "rotz", deg);
+          addDouble(comp, rotz(), deg);
 
         quat = Quat(rotX,V3D(1,0,0))*Quat(rotY,V3D(0,1,0))*Quat(deg,V3D(0,0,1));
       }
@@ -193,7 +290,7 @@ namespace Mantid
       if (param)
         param->set(quat);
       else
-        addQuat(comp, "rot", quat);
+        addQuat(comp, rot(), quat);
     }
 
     /**  
@@ -204,7 +301,7 @@ namespace Mantid
     */
     void ParameterMap::addDouble(const IComponent* comp,const std::string& name, const std::string& value)
     {
-      add("double",comp,name,value);
+      add(pDouble(),comp,name,value);
     }
 
     /**
@@ -215,7 +312,7 @@ namespace Mantid
     */
     void ParameterMap::addDouble(const IComponent* comp,const std::string& name, double value)
     {
-      add("double",comp,name,value);
+      add(pDouble(),comp,name,value);
     }
 
     /**  
@@ -226,7 +323,7 @@ namespace Mantid
      */
     void ParameterMap::addInt(const IComponent* comp,const std::string& name, const std::string& value)
     {
-      add("int",comp,name,value);
+      add(pInt(),comp,name,value);
     }
 
     /**
@@ -237,7 +334,7 @@ namespace Mantid
      */
     void ParameterMap::addInt(const IComponent* comp,const std::string& name, int value)
     {
-      add("int",comp,name,value);
+      add(pInt(),comp,name,value);
     }
 
     /**  
@@ -248,7 +345,7 @@ namespace Mantid
      */
     void ParameterMap::addBool(const IComponent* comp,const std::string& name, const std::string& value)
     {
-      add("bool",comp,name,value);
+      add(pBool(),comp,name,value);
     }
     /**
      * Adds a bool value to the parameter map.
@@ -258,7 +355,7 @@ namespace Mantid
      */
     void ParameterMap::addBool(const IComponent* comp,const std::string& name, bool value)
     {
-      add("bool",comp,name,value);
+      add(pBool(),comp,name,value);
     }
 
     /**  
@@ -269,7 +366,7 @@ namespace Mantid
     */
     void ParameterMap::addString(const IComponent* comp,const std::string& name, const std::string& value)
     {
-      add<std::string>("string",comp,name,value);
+      add<std::string>(pString(),comp,name,value);
     }
 
     /**  
@@ -280,7 +377,7 @@ namespace Mantid
      */
     void ParameterMap::addV3D(const IComponent* comp,const std::string& name, const std::string& value)
     {
-      add("V3D",comp,name,value);
+      add(pV3D(),comp,name,value);
       clearCache();
     }
 
@@ -292,7 +389,7 @@ namespace Mantid
     */
     void ParameterMap::addV3D(const IComponent* comp,const std::string& name, const V3D& value)
     {
-      add("V3D",comp,name,value);
+      add(pV3D(),comp,name,value);
       clearCache();
     }
 
@@ -304,7 +401,7 @@ namespace Mantid
     */
     void ParameterMap::addQuat(const IComponent* comp,const std::string& name, const Quat& value)
     {
-      add("Quat",comp,name,value);
+      add(pQuat(),comp,name,value);
       clearCache();
     }
 

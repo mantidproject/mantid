@@ -1,7 +1,8 @@
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MAPS 
 #
-# This is a simple example for running calibration for and calibration run of MAPS. 
+# This is a simple example for running calibration for and calibration run of MAPS.
+# It uses the CalibrateMaps function 
 
 #
 from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
@@ -26,9 +27,9 @@ def CalibrateMaps( RunNumber ):
 
 
    # Set initial parameters for peak finding
-   ExpectedHeight = -1000.0 # Expected Height of Peaks (initial value of fit parameter)
-   ExpectedWidth = 8.0 # Expected width of centre peak (initial value of fit parameter)
-   ExpectedPositions = [4.0, 85.0, 128.0, 165.0, 252.0] # Expected positions of the edges and peak (initial values of fit parameters)
+   ExpectedHeight = -1000.0 # Expected Height of Gaussian Peaks  (initial value of fit parameter)
+   ExpectedWidth = 8.0 # Expected width of Gaussian peaks in pixels (initial value of fit parameter)
+   ExpectedPositions = [4.0, 85.0, 128.0, 165.0, 252.0] #Expected positions of the edges and Gaussian peaks in pixels (initial values of fit parameters)
 
    # Set what we want to calibrate (e.g whole intrument or one door )
    CalibratedComponent = 'MAPS'  # Calibrate all
@@ -55,6 +56,8 @@ def CalibrateMaps( RunNumber ):
    # Get ideal tube
    iTube = IdealTube()
    # Set positions of where the shadows and ends should be. 
+   # First array gives positions in Metres and second array gives type 1=Gaussian peak 2=edge.
+   # See http://www.mantidproject.org/IdealTube for details
    # An intelligent guess is used here that is not correct for all tubes.
    iTube.setPositionsAndForm([-0.50,-0.16,-0.00, 0.16, 0.50 ],[2,1,1,1,2]) 
 

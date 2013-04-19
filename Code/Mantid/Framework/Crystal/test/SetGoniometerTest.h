@@ -91,12 +91,13 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace", "SetGoniometerTest_ws"));
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis0", "angle1, 1.0,2.0,3.0, 1") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis1", "angle2  , 4.0, 5.0,6.0, -1") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis2", "45, 1.0, 0.0,0.0, 1") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() ); //no log values
 
     // Check the results
     const Goniometer & gon = ws->mutableRun().getGoniometer();
-    TS_ASSERT_EQUALS( gon.getNumberAxes(), 2);
+    TS_ASSERT_EQUALS( gon.getNumberAxes(), 3);
 
     TS_ASSERT_EQUALS( gon.getAxis(0).name, "angle1");
     TS_ASSERT_EQUALS( gon.getAxis(0).rotationaxis, V3D(1.0,2.0,3.0));
@@ -106,6 +107,10 @@ public:
     TS_ASSERT_EQUALS( gon.getAxis(1).rotationaxis, V3D(4.0,5.0,6.0));
     TS_ASSERT_EQUALS( gon.getAxis(1).sense, -1);
 
+    TS_ASSERT_EQUALS( gon.getAxis(2).name, "GoniometerAxis2_FixedValue");
+    TS_ASSERT_EQUALS( gon.getAxis(2).rotationaxis, V3D(1.0,0.0,0.0));
+    TS_ASSERT_EQUALS( gon.getAxis(2).sense, 1);
+    TS_ASSERT_EQUALS( gon.getAxis(2).angle,45);
     AnalysisDataService::Instance().remove("SetGoniometerTest_ws");
   }
   void test_universal()

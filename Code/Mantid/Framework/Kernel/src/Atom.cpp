@@ -41,7 +41,7 @@ Atom::Atom(const std::string& symbol, const uint16_t z, const uint16_t a,
 Atom::Atom(const Atom& other):
     symbol(other.symbol), z_number(other.z_number), a_number(other.a_number),
     abundance(other.abundance), mass(other.mass), mass_density(other.mass_density),
-    number_density(other.number_density), neutron(other.neutron)
+    number_density(other.number_density), neutron(getNeutronNoExceptions(other.z_number, other.a_number))
   {}
 
 // ---------- START DO NOT EDIT AREA----------

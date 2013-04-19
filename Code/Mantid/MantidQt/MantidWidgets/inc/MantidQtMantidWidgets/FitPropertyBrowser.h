@@ -10,10 +10,10 @@
 #include <QList>
 
 #include "MantidQtAPI/WorkspaceObserver.h"
-
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 
@@ -248,6 +248,11 @@ signals:
   /// signal which can optionally be caught for customization after a fit has 
   /// been done
   void fittingDone(QString);
+  void functionFactoryUpdateReceived();
+
+protected slots:
+  /// Get the registered function names
+  virtual void populateFunctionNames();
 
 private slots:
 
@@ -404,8 +409,6 @@ private:
   void saveFunction(const QString& fnName);
   /// Create CompositeFunction
   void createCompositeFunction(const QString& str = "");
-  /// Get the registered function names
-  virtual void populateFunctionNames();
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
   /// Called when the fit is finished
@@ -434,6 +437,13 @@ private:
   void hasConstraints(QtProperty* parProp,bool& hasTie,bool& hasBounds)const;
   /// Returns the tie property for a parameter property, or NULL
   QtProperty* getTieProperty(QtProperty* parProp)const;
+
+  /// Callback for FunctionFactory update notifications
+  void handleFactoryUpdate(Mantid::API::FunctionFactoryUpdateNotification_ptr);
+  /// Observes algorithm factory update notifications
+  Poco::NObserver<FitPropertyBrowser,
+                  Mantid::API::FunctionFactoryUpdateNotification> m_updateObserver;
+
 
   /// Make sure m_groupMember belongs to the group
   //void validateGroupMember();

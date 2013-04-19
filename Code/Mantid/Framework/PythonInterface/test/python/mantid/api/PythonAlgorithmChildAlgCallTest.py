@@ -28,7 +28,7 @@ class PythonAlgorithmChildAlgCallTestAlg(PythonAlgorithm):
         outputWS = api.Scale(InputWorkspace=inputWS, Factor=2.0)
         self.setProperty("OutputWorkspace", outputWS)
 
-registerAlgorithm(PythonAlgorithmChildAlgCallTestAlg)
+AlgorithmFactory.subscribe(PythonAlgorithmChildAlgCallTestAlg)
 """
 
 

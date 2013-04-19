@@ -190,12 +190,17 @@ def Fit(*args, **kwargs):
         del kwargs['InputWorkspace']
     except KeyError:
         pass
+    # Set all workspace properties before others
+    for key in kwargs.keys():
+        if key.startswith('InputWorkspace_'):
+            algm.setProperty(key, kwargs[key])
+            del kwargs[key]
     
     lhs = _funcreturns.lhs_info()
     # Check for any properties that aren't known and warn they will not be used
     for key in kwargs.keys():
         if key not in algm:
-            logger.warning("You've passed a property (%s) to Fit() that doesn't apply to this file type." % key)
+            logger.warning("You've passed a property (%s) to Fit() that doesn't apply to any of the input workspaces." % key)
             del kwargs[key]
     _set_properties(algm, **kwargs)
     algm.execute()

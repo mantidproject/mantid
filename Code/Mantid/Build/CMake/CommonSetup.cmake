@@ -41,7 +41,7 @@ endif ( stdint )
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost REQUIRED signals date_time regex ) 
+find_package ( Boost REQUIRED date_time regex ) 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK )
 # Need this defined globally for our log time values
@@ -226,14 +226,12 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/Kernel/src/ANN/
         Framework/Kernel/src/ANN_complete.cpp
         Framework/PythonAPI/src/
-        Framework/ScriptRepository/libgit2/
         MantidPlot/src/nrutil.cpp
         MantidPlot/src/origin/OPJFile.cpp
       )
 
   # Header files to be ignored require different handling
   set ( CPPCHECK_HEADER_EXCLUDES
-        Framework/ScriptRepository/libgit2/include/git2.h
         MantidPlot/src/origin/OPJFile.h
         Framework/PythonAPI/inc/boost/python/detail/referent_storage.hpp
         Framework/PythonAPI/inc/boost/python/detail/type_list_impl_no_pts.hpp

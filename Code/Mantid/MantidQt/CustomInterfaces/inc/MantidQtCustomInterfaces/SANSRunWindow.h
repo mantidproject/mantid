@@ -190,8 +190,6 @@ private:
   int addBatchLine(QString csv_line, QString separator = "");
   ///Save the batch file
   QString saveBatchGrid(const QString & filename = "");
-  ///Reset the log flags
-  void checkLogFlags();
   //@}
  
   public slots:
@@ -232,16 +230,12 @@ private slots:
   void handleInstrumentChange();
   ///Record if that user has changed the default filename
   void setUserFname();
-  /// Update the centre finding progress
-  void updateCentreFindingStatus(const QString & msg);
   /// Enables or disables the floodFile run widget
   void prepareFlood(int state);
   /// Enable the default save button only if there an output workspace and a filename to save it to
   void enableOrDisableDefaultSave();
   /// connected to the Multi-period check box it shows or hides the multi-period boxes on the file widgets
   void disOrEnablePeriods(const int);
-  /// Append log message to log window
-  void updateLogWindow(const QString & msg);
   /// Switch mode
   void switchMode();
   ///Paste to batch table
@@ -249,12 +243,15 @@ private slots:
   ///Clear the batch table
   void clearBatchTable();
   ///Clear logger
-  void clearLogger();
+   void clearLogger();
   ///Default trans changed state
   void updateTransInfo(int state);
   /// So user can decide to use fixed q range or not
   void updateFrontDetQrange(int state);
   void checkList();
+  /// Adds a warning message to the tab title
+  void setLoggerTabTitleToWarn();
+
   
 private:
   /// used to specify the range of validation to do
@@ -312,8 +309,6 @@ private:
   /// Holds pointers to the check box for each supported save format with the name of its save algorithm
   QHash<const QCheckBox * const, QString> m_savFormats;
   typedef QHash<const QCheckBox * const, QString>::const_iterator SavFormatsConstIt;
-  /// A flag indicating there were warning messsages in the log
-  bool m_log_warnings;
   /// Get notified when the system input directories have changed
   Poco::NObserver<SANSRunWindow, Mantid::Kernel::ConfigValChangeNotification> m_newInDir;
   /// An observer for a delete notification from Mantid
@@ -341,7 +336,6 @@ private:
   void makeValidator(QLabel * const newValid, QWidget * control, QWidget * tab, const QString & errorMsg);
   void upDateDataDir();
   void handleInputDirChange(Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo);
-  void issueWarning(const QString & title, const QString & info);
   QString getInstrumentClass() const;
   bool entriesAreValid(const ValCheck check=ALL);
   bool entriesAreValid(ValMap & vals);
@@ -350,6 +344,8 @@ private:
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
+  static Mantid::Kernel::Logger & g_centreFinderLog;
+
 };
 
 }

@@ -1,7 +1,8 @@
 
 #include <MantidKernel/System.h>
 #include "MantidKernel/Logger.h"
-
+#include "MantidKernel/V3D.h"
+#include <vector>
 
 #ifndef  INTERFACES_MANTID_EV_WORKER_H
 #define  INTERFACES_MANTID_EV_WORKER_H
@@ -157,6 +158,12 @@ public:
 
   /// Display UB and lattice parameters in MantidPlot
   bool showUB( const std::string & peaks_ws_name );
+
+  /// Get Info about a Q-Vector from a PeaksWorkspace
+  std::vector< std::pair< std::string, std::string > >
+                               PointInfo( const std::string & peaks_ws_name, 
+                                                Mantid::Kernel::V3D Q);
+
 
 private:
 

@@ -30,6 +30,8 @@
 #Make the reduction module available
 from ISISCommandInterface import *
 from mantid.simpleapi import *
+from mantid.kernel import Logger
+sanslog = Logger.get("SANS")
 import copy
 import sys
 
@@ -170,7 +172,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             
 
         if verbose:
-            logger.notice('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, filename))
+            sanslog.notice(createColetteScript(run, format, reduced, centreit, plotresults, filename))
         # Rename the final workspace
         final_name = run['output_as']
         if final_name == '':

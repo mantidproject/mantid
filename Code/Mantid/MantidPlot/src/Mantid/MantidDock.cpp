@@ -18,6 +18,7 @@
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidQtAPI/InterfaceManager.h>
+#include <MantidQtAPI/Message.h>
 
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
@@ -168,16 +169,6 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups(), m_rerun
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(populateChildData(QTreeWidgetItem*)));
 
   connect(this,SIGNAL(rerunFindAbandonedWorkspaces()),this,SLOT(findAbandonedWorkspaces()),Qt::QueuedConnection);
-}
-
-/**
-Generate a warning message and use MantidUI to display it.
-@param message : message contents to display
-*/
-void MantidTreeWidget::logWarningMessage(const std::string& message)
-{
-  Poco::Message msg("MantidPlot",message,Poco::Message::PRIO_WARNING);
-  m_mantidUI->logMessage(msg);
 }
 
 /** Returns the name of the selected workspace

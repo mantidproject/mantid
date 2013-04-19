@@ -190,6 +190,8 @@ public:
   virtual std::map<std::string, std::string> validateInputs();
   virtual bool isInitialized() const;
   virtual bool isExecuted() const;
+  bool isRunning() const;
+
   using Kernel::PropertyManagerOwner::getProperty;
 
   bool isChild() const;
@@ -200,10 +202,6 @@ public:
 
   /** @name Asynchronous Execution */
   Poco::ActiveResult<bool> executeAsync();
-  /// True if the algorithm is running asynchronously.
-  bool isRunningAsync(){return m_runningAsync;}
-  /// True if the algorithm is running.
-  bool isRunning(){return m_running;}
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver& observer)const;
@@ -212,7 +210,7 @@ public:
   void removeObserver(const Poco::AbstractObserver& observer)const;
 
   /// Raises the cancel flag.
-  virtual void cancel() const;
+  virtual void cancel();
   /// Returns the cancellation state
   bool getCancel() const { return m_cancel; }
 
@@ -298,7 +296,7 @@ protected:
   bool isWorkspaceProperty(const Kernel::Property* const prop) const;
 
   /// Set to true to stop execution
-  mutable bool m_cancel;
+  bool m_cancel;
   /// Set if an exception is thrown, and not caught, within a parallel region
   bool m_parallelException;
   /// Reference to the logger class
@@ -322,9 +320,6 @@ protected:
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
 
 private:
-  /// VectorWorkspaces
-  
-
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
@@ -381,7 +376,8 @@ private:
   size_t m_groupSize;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
-
+  /// A non-recursive mutex for thread-safety
+  mutable Kernel::Mutex m_mutex;
 };
 
 ///Typedef for a shared pointer to an Algorithm

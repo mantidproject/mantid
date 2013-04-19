@@ -14,7 +14,7 @@
 using namespace Mantid::Kernel;
 
 // Helper class
-class AFactory : public DynamicFactory<int>
+class IntFactory : public DynamicFactory<int>
 {
 };
 
@@ -43,6 +43,7 @@ public:
     TS_ASSERT_THROWS( factory.create("testEntry"), std::runtime_error )
     factory.subscribe<int>("testEntry");
     TS_ASSERT_THROWS_NOTHING( int_ptr i = factory.create("testEntry") );
+    factory.unsubscribe("testEntry");
   }
 
   void testCreateUnwrapped()
@@ -50,8 +51,29 @@ public:
     TS_ASSERT_THROWS( factory.createUnwrapped("testUnrappedEntry"), std::runtime_error )
     factory.subscribe<int>("testUnwrappedEntry");
     int *i = NULL;
-    TS_ASSERT_THROWS_NOTHING( i = factory.createUnwrapped("testEntry") );
+    TS_ASSERT_THROWS_NOTHING( i = factory.createUnwrapped("testUnwrappedEntry") );
     delete i;
+    factory.unsubscribe("testUnwrappedEntry");
+  }
+
+  void testSubscribeWithEmptyNameThrowsInvalidArgument()
+  {
+    TS_ASSERT_THROWS( factory.subscribe<int>(""), std::invalid_argument);
+  }
+
+  void testSubscribeWithReplaceEqualsErrorIfExistsThrowsRegisteringMatchingClass()
+  {
+    TS_ASSERT_THROWS_NOTHING( factory.subscribe("int",new Instantiator<int, int>));
+    TS_ASSERT_THROWS( factory.subscribe("int",new Instantiator<int, int>,IntFactory::ErrorIfExists), std::runtime_error);
+    factory.unsubscribe("int");
+  }
+
+  void testSubscribeWithReplaceEqualsOverwriteCurrentReplacesMatchingClass()
+  {
+    TS_ASSERT_THROWS_NOTHING( factory.subscribe("int",new Instantiator<int, int>));
+    TS_ASSERT_THROWS_NOTHING( factory.subscribe("int",new Instantiator<int, int>,IntFactory::OverwriteCurrent));
+
+    factory.unsubscribe("int");
   }
 
   void testSubscribeByDefaultDoesNotNotify()
@@ -59,8 +81,7 @@ public:
     m_updateNoticeReceived = false;
     TS_ASSERT_THROWS_NOTHING( factory.subscribe<int>("int") );
     TS_ASSERT_EQUALS( m_updateNoticeReceived, false )
-    TS_ASSERT_THROWS_NOTHING( factory.subscribe("int2",new Instantiator<int, int>));
-    TS_ASSERT_THROWS( factory.subscribe<int>("int"), std::runtime_error);
+    factory.unsubscribe("int");
   }
 
   void testSubscribeNotifiesIfTheyAreSwitchedOn()
@@ -94,6 +115,7 @@ public:
     m_updateNoticeReceived = false;
   }
 
+
   void testExists()
   {
     TS_ASSERT( ! factory.exists("testing") );
@@ -108,13 +130,13 @@ public:
   }
 
 private:
-  void handleFactoryUpdate(const Poco::AutoPtr<AFactory::UpdateNotification> &)
+  void handleFactoryUpdate(const Poco::AutoPtr<IntFactory::UpdateNotification> &)
   {
     m_updateNoticeReceived = true;
   }
 
-  AFactory factory;
-  Poco::NObserver<DynamicFactoryTest, AFactory::UpdateNotification> m_notificationObserver;
+  IntFactory factory;
+  Poco::NObserver<DynamicFactoryTest, IntFactory::UpdateNotification> m_notificationObserver;
   bool m_updateNoticeReceived;
 };
 

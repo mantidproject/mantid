@@ -37,6 +37,22 @@ class PluginLoader(object):
 
 #======================================================================================================================
 
+def check_for_plugins(top_dir):
+    """
+        Runs a quick check to see if any plugin files exist in the given directory
+    
+        @returns True if any plugins are found, false otherwise
+    """
+    if not _os.path.isdir(top_dir):
+        return False
+
+    for root, dirs, files in _os.walk(top_dir):
+        for f in files:
+            if f.endswith(PluginLoader.extension):
+                return True
+
+    return False
+
 def find_plugins(top_dir):
     """
        Searches recursively from the given directory to find the list of plugins that should be loaded
@@ -44,13 +60,17 @@ def find_plugins(top_dir):
     """
     if not _os.path.isdir(top_dir):
         raise ValueError("Cannot search given path for plugins, path is not a directory: '%s' " % str(top_dir))
-    plugins = []
+    all_plugins = []
+    algs = []
     for root, dirs, files in _os.walk(top_dir):
         for f in files:
             if f.endswith(PluginLoader.extension):
-                plugins.append(_os.path.join(root, f))
-    
-    return plugins
+                filename = _os.path.join(root, f)
+                all_plugins.append(filename)
+                if contains_newapi_algorithm(filename):
+                    algs.append(filename)
+                    
+    return all_plugins, algs
 
 #======================================================================================================================
 
@@ -120,8 +140,8 @@ def load_from_dir(directory):
 
 def load_from_file(filepath):
     """
-        If the algorithm is a new API algorithm then load it
-        
+        Loads the plugin file. Any code present at the top-level will
+        be executed on loading
         @param filepath :: A path that must point to a file
     """
     loaded = []
@@ -188,6 +208,9 @@ def contains_newapi_algorithm(filename):
     for line in reversed(file.readlines()):
         if 'registerPyAlgorithm' in line:
             alg_found = False
+            break
+        if 'AlgorithmFactory.subscribe' in line or 'registerAlgorithm' in line: # registerAlgorithm deprecated
+            alg_found = True
             break
     file.close()
     return alg_found

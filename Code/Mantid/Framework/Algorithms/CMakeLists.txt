@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/ChangePulsetime.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
+	src/ClearMaskFlag.cpp
 	src/CloneWorkspace.cpp
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
@@ -52,6 +53,7 @@ set ( SRC_FILES
 	src/CreateFlatEventWorkspace.cpp
 	src/CreateGroupingWorkspace.cpp
 	src/CreateLogPropertyTable.cpp
+	src/CreateLogTimeCorrection.cpp
 	src/CreatePSDBleedMask.cpp
 	src/CreatePeaksWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
@@ -74,6 +76,7 @@ set ( SRC_FILES
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
 	src/Exponential.cpp
+	src/ExportTimeSeriesLog.cpp
 	src/ExponentialCorrection.cpp
 	src/ExtractFFTSpectrum.cpp
 	src/ExtractMask.cpp
@@ -238,6 +241,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ChangePulsetime.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
+	inc/MantidAlgorithms/ClearMaskFlag.h
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
@@ -261,6 +265,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateFlatEventWorkspace.h
 	inc/MantidAlgorithms/CreateGroupingWorkspace.h
 	inc/MantidAlgorithms/CreateLogPropertyTable.h
+	inc/MantidAlgorithms/CreateLogTimeCorrection.h
 	inc/MantidAlgorithms/CreatePSDBleedMask.h
 	inc/MantidAlgorithms/CreatePeaksWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
@@ -284,6 +289,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/Exponential.h
 	inc/MantidAlgorithms/ExponentialCorrection.h
+	inc/MantidAlgorithms/ExportTimeSeriesLog.h
 	inc/MantidAlgorithms/ExtractFFTSpectrum.h
 	inc/MantidAlgorithms/ExtractMask.h
 	inc/MantidAlgorithms/ExtractMasking.h
@@ -458,6 +464,7 @@ set ( TEST_FILES
 	ChangePulsetimeTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
+	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
 	CommutativeBinaryOperationTest.h
 	CompressedRebinTest.h
@@ -480,6 +487,7 @@ set ( TEST_FILES
 	CreateFlatEventWorkspaceTest.h
 	CreateGroupingWorkspaceTest.h
 	CreateLogPropertyTableTest.h
+	CreateLogTimeCorrectionTest.h
 	CreatePSDBleedMaskTest.h
 	CreatePeaksWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
@@ -498,6 +506,7 @@ set ( TEST_FILES
 	EditInstrumentGeometryTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
+	ExportTimeSeriesLogTest.h
 	ExtractFFTSpectrumTest.h
 	ExtractMaskTest.h
 	ExtractSingleSpectrumTest.h

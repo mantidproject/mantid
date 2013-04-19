@@ -30,6 +30,9 @@ cpp_files_bare = []
 python_files = []
 python_files_bare = []
 
+# Missing description tag.
+missing_description = "INSERT FULL DESCRIPTION HERE"
+
 #======================================================================
 def remove_wiki_from_header():
     """One-time method to remove *WIKI* tags from all header files """
@@ -63,6 +66,7 @@ def remove_wiki_from_header():
 def add_wiki_description(algo, wikidesc):
     """One-time use method that adds a wiki description  in the algo's CPP file under comments tag."""
     wikidesc = wikidesc.split('\n')
+    
     source = find_algo_file(algo)
     if source != '':
         if len("".join(wikidesc)) == 0:
@@ -104,7 +108,7 @@ def get_wiki_usage(algo, version):
             
 
 #======================================================================
-def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=False):
+def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=False, verbose=True):
     """ Extract the text between the *WIKI* tags in the .cpp file
     
     @param algo :: name of the algorithm
@@ -124,7 +128,7 @@ def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=Fa
     else:
         f = open(source,'r')
         lines = f.read().split('\n')
-        print lines
+        #print lines
         f.close()
         
         print algo
@@ -150,11 +154,12 @@ def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=Fa
             # Concatinate across the range.
             for line_index in range(start_index, end_index):
                 desc += lines[line_index] + "\n"
-            
-            if start_index == end_index:
-                print "No algorithm %s section in source." % tag
-            else:
-                print "Getting algorithm %s section from source." % tag
+
+            if verbose:
+                if start_index == end_index:
+                    print "No algorithm %s section in source." % tag
+                else:
+                    print "Getting algorithm %s section from source." % tag
         
         except IndexError:
             print "No algorithm %s section in source." % tag
@@ -215,6 +220,14 @@ def create_function_signature(alg, algo_name):
         
     return lhs + prototype_reformated + comments
 
+def filter_blacklist_directories(dirnames):
+    blacklist = ['MantidPlot', 'MantidQt']
+    filtered = dirnames
+    for banneddir in blacklist:
+        if banneddir in dirnames:
+            filtered.remove(banneddir)
+    return filtered
+
 #======================================================================
 def intialize_files():
     """ Get path to every header file """
@@ -222,6 +235,8 @@ def intialize_files():
     parent_dir = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
     file_matches = []
     for root, dirnames, filenames in os.walk(parent_dir):
+      # Filter out mantidplot from the file search. There are a few file in MantidPlot we don't want to accidently search, such as FFT.
+      dirnames = filter_blacklist_directories(dirnames)
       for filename in fnmatch.filter(filenames, '*.cpp'):
           fullfile = os.path.join(root, filename)
           cpp_files.append(fullfile)
@@ -230,6 +245,8 @@ def intialize_files():
           fullfile = os.path.join(root, filename)
           python_files.append(fullfile)
           python_files_bare.append( os.path.split(fullfile)[1] )
+    
+
 
 #======================================================================
 def find_algo_file(algo, version=-1):
@@ -597,7 +614,7 @@ def do_make_wiki(algo_name, version, latest_version):
     except IndexError:
         pass
     if (desc == ""):
-      out += "INSERT FULL DESCRIPTION HERE\n"
+      out +=  missing_description + "\n"
       print "Warning: missing wiki description for %s! Placeholder inserted instead." % algo_name
     else:
       out += desc + "\n"

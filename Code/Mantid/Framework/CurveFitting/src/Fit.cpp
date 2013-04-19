@@ -547,12 +547,16 @@ namespace CurveFitting
     std::string errorString;
     //double costFuncVal = 0;
     //do
+    g_log.debug("Starting minimizer iteration\n");
     while (static_cast<int>(iter) < maxIterations)
     {
       iter++;
+      g_log.debug() << "Starting iteration " << iter << "\n";
       if ( !minimizer->iterate() )
       {
         errorString = minimizer->getError();
+        g_log.debug() << "Iteration stopped. Minimizer status string=" << errorString << "\n";
+
         success = errorString.empty() || errorString == "success";
         if (success)
         {
@@ -562,7 +566,7 @@ namespace CurveFitting
       }
       prog.report();
     }
-    
+    g_log.information() << "Number of minimizer iterations=" << iter << "\n";
 
     if (static_cast<int>(iter) >= maxIterations)
     {

@@ -47,7 +47,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Graph3D.cpp
                    src/Graph.cpp
                    src/Grid.cpp
-		   src/HelpWindow.cpp
                    src/ImageDialog.cpp
                    src/ImageExportDialog.cpp
                    src/ImageMarker.cpp
@@ -156,8 +155,7 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
                                 PROPERTIES COMPILE_FLAGS -Wno-cast-qual )
 endif ()
 
-set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
-                   src/Mantid/AlgorithmMonitor.cpp
+set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/AlgorithmHistoryWindow.cpp
                    src/Mantid/ErrorBarSettings.cpp
                    src/Mantid/FirstTimeSetup.cpp
@@ -172,7 +170,6 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/MantidApplication.cpp
                    src/Mantid/MantidCurve.cpp
                    src/Mantid/MantidDock.cpp
-                   src/Mantid/MantidLog.cpp
                    src/Mantid/MantidMatrix.cpp
                    src/Mantid/MantidMatrixCurve.cpp
                    src/Mantid/MantidMDCurve.cpp
@@ -228,6 +225,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/Shape2DCollection.cpp
                    src/Mantid/InstrumentWidget/SimpleWidget.cpp
                    src/Mantid/InstrumentWidget/Viewport.cpp
+                   src/Mantid/InstrumentWidget/DetXMLFile.cpp
 )
 
 ###########################################################################
@@ -278,7 +276,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Graph3D.h
                    src/Graph.h
                    src/Grid.h
-		   src/HelpWindow.h
                    src/ImageDialog.h
                    src/ImageExportDialog.h
                    src/ImageMarker.h
@@ -384,8 +381,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 
-set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
-                   src/Mantid/AlgorithmMonitor.h
+set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/AlgorithmHistoryWindow.h
                    src/Mantid/ErrorBarSettings.h
                    src/Mantid/FirstTimeSetup.h
@@ -400,7 +396,6 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/MantidApplication.h
                    src/Mantid/MantidCurve.h
                    src/Mantid/MantidDock.h
-                   src/Mantid/MantidLog.h
                    src/Mantid/MantidMatrixCurve.h
                    src/Mantid/MantidMDCurve.h
                    src/Mantid/MantidMDCurveDialog.h
@@ -457,6 +452,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/Shape2DCollection.h
                    src/Mantid/InstrumentWidget/SimpleWidget.h
                    src/Mantid/InstrumentWidget/Viewport.h
+                   src/Mantid/InstrumentWidget/DetXMLFile.h
 )
 
 ###########################################################################
@@ -663,7 +659,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidApplication.h
                        src/Mantid/MantidCurve.h
                        src/Mantid/MantidDock.h
-                       src/Mantid/MantidLog.h
                        src/Mantid/MantidMatrixCurve.h
                        src/Mantid/MantidMDCurve.h
                        src/Mantid/MantidMDCurveDialog.h

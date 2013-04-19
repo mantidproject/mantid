@@ -102,7 +102,21 @@ namespace Geometry
       void setalpha(double _alpha,const int angleunit=angDegrees);
       void setbeta(double _beta,const int angleunit=angDegrees);
       void setgamma(double _gamma,const int angleunit=angDegrees);
-
+      // Set errors
+      void setError(double _aerr, double _berr, double _cerr, double _alphaerr, double _betaerr, double _gammaerr,const int angleunit=angDegrees);
+      void setErrora(double _aerr);
+      void setErrorb(double _berr);
+      void setErrorc(double _cerr);
+      void setErroralpha(double _alphaerr,const int angleunit=angDegrees);
+      void setErrorbeta(double _betaerr,const int angleunit=angDegrees);
+      void setErrorgamma(double _gammaerr,const int angleunit=angDegrees);
+      // Get errors in latice parameters
+      double errora() const;
+      double errorb() const;
+      double errorc() const;
+      double erroralpha(const int angleunit=angDegrees) const;
+      double errorbeta(const int angleunit=angDegrees) const;
+      double errorgamma(const int angleunit=angDegrees) const;
       // Access private variables
       const Kernel::DblMatrix& getG() const;
       const Kernel::DblMatrix& getGstar() const;
@@ -124,6 +138,8 @@ namespace Geometry
       std::vector <double> da; 
       /// Reciprocal lattice parameters (in \f$ \mbox{ \AA }^{-1} \f$ and radians)
       std::vector <double> ra; 
+      /// Error in lattice parameters (in \f$ \mbox{ \AA } \f$ and radians)
+      std::vector <double> errorda;
       /** Metric tensor
        \f[ \left( \begin{array}{ccc}
         aa & ab\cos(\gamma) & ac\cos(\beta) \\

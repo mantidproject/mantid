@@ -13,55 +13,94 @@ class QWheelEvent;
 
 /**
   * Base class for an editable 2D shape, which can be drawn on ProjectionSurface.
+  *
+  * Any shape must implement these pure virtual methods:
+  *    clone()     -- to copy itself
+  *    drawShape() -- to draw itself
+  *    refit()     -- to make sure the shape is entirely within its bounding rect
+  *                   ( returned by getBoundingRect() )
+  *    addToPath() -- to add itself to a QPainterPath, to allow this shape to be used to
+  *                   construct more complex shapes
+  *
+  * A shape has a border and the area inside this border. A point on the screen
+  * which is inside the border is considered to be masked by this shape.
+  * To be able to mask anything a shape must implement selectAt(...) and contains(...)
+  * methods.
+  *
+  * A shape can be a part of a Shape2DCollection. Collections allow to apply transformations to
+  * their items. A scale transformation is used to implement zooming. By default a shape resizes
+  * with the transformation. To override this call setScalable( false ). In this case zooming
+  * only changes the visible position but not the size of the shape.
+  *
+  * Shapes can be edited (ie change their position and sizes) in a generic way either by using coltrol
+  * points or setting properties.
+  *
   */
 class Shape2D
 {
 public:
+  /// Constructor.
   Shape2D();
+  /// Virtual destructor.
   virtual ~Shape2D(){}
 
   // --- Public pure virtual methods --- //
 
+  /// Virtual "costructor".
   virtual Shape2D* clone()const = 0;
-  // modify path so painter.drawPath(path) could be used to draw the shape. needed for filling in complex shapes
+  /// modify path so painter.drawPath(path) could be used to draw the shape. needed for filling in complex shapes
   virtual void addToPath(QPainterPath& path) const = 0;
-  // make sure the shape is within the bounding box
+  /// make sure the shape is within the bounding box
   virtual void refit() = 0;
 
   // --- Public virtual methods --- //
 
+  /// Draw this shape.
   virtual void draw(QPainter& painter) const;
+  /// Get the origin - the centre of the bounding rect.
   virtual QPointF origin() const {return m_boundingRect.center();}
+  /// Move the shape by a vector.
   virtual void moveBy(const QPointF& pos);
+  /// Get total number of control points.
   virtual size_t getNControlPoints() const;
+  /// Get a control point.
   virtual QPointF getControlPoint(size_t i) const;
+  /// Set a control point.
   virtual void setControlPoint(size_t i,const QPointF& pos);
+  /// Return the bounding rect of the shape.
   virtual RectF getBoundingRect() const {return m_boundingRect;}
-  // move the left, top, right and bottom sides of the bounding rect
-  // by dx1, dy1, dx2, and dy2 correspondingly
+  /// move the left, top, right and bottom sides of the bounding rect
+  /// by dx1, dy1, dx2, and dy2 correspondingly
   virtual void adjustBoundingRect(double dx1, double dy1, double dx2, double dy2);
+  /// Set new bounding rect.
   virtual void setBoundingRect(const RectF& rect);
-  // will the shape be selected if clicked at a point
+  /// will the shape be selected if clicked at a point? By default return false.
   virtual bool selectAt(const QPointF& )const{return false;}
-  // is a point inside the shape (closed line)
+  /// is a point inside the shape (closed line)? By default return false.
   virtual bool contains(const QPointF& )const{return false;}
-  // is a point "masked" by the shape. Only filled regions of a shape mask a point
+  /// is a point "masked" by the shape. Only filled regions of a shape mask a point
   virtual bool isMasked(const QPointF& )const;
+  /// Set border color.
+  virtual void setColor(const QColor& color){m_color = color;}
+  /// Get border color.
+  virtual QColor getColor()const{return m_color;}
+  /// Set fill color.
+  virtual void setFillColor(const QColor& color){m_fill_color = color;}
 
   // --- Public methods --- //
 
-  void setColor(const QColor& color)
-  {
-    m_color.setRed(color.red());
-    m_color.setGreen(color.green());
-    m_color.setBlue(color.blue());
-  }
-  QColor getColor()const{return m_color;}
-  void setFillColor(const QColor& color){m_fill_color = color;}
+  /// Set the shape scalable (default).
   void setScalable(bool on){m_scalable = on;}
+  /// Can the shape be scaled by Shape2DCollection's transformation?
   bool isScalable() const {return m_scalable;}
+  /// Set the shape editable. Makes visible the bounding rect and teh control points.
   void edit(bool on){m_editing = on;}
+  /// Check if the shape is being edited.
   bool isEditing()const{return m_editing;}
+  /// Show or hide the shape
+  void setVisible(bool on){m_visible = on;}
+  /// Is shape visible?
+  bool isVisible() const {return m_visible;}
 
   // --- Properties. for gui interaction --- //
 
@@ -91,11 +130,6 @@ protected:
   // make sure the bounding box is correct
   virtual void resetBoundingRect() {}
 
-  // --- Protected methods --- //
-
-  // make sure that width and heigth are positive
-  void correctBoundingRect();
-
   // --- Protected data --- //
 
   static const size_t NCommonCP;
@@ -103,8 +137,9 @@ protected:
   RectF m_boundingRect;
   QColor m_color;
   QColor m_fill_color;
-  bool m_scalable; ///< shape cann be scaled when zoomed
+  bool m_scalable; ///< shape can be scaled when zoomed
   bool m_editing;
+  bool m_visible;  ///< flag to show or hide the shape
 };
 
 class Shape2DEllipse: public Shape2D
@@ -160,6 +195,8 @@ public:
   virtual QStringList getPointNames()const{return QStringList("center");}
   virtual QPointF getPoint(const QString& prop) const;
   virtual void setPoint(const QString& prop, const QPointF& value);
+  virtual void setColor(const QColor& color);
+  virtual QColor getColor()const{return m_outer_shape->getColor();}
 protected:
   virtual void drawShape(QPainter& painter) const;
   virtual void addToPath(QPainterPath& ) const {}

@@ -67,7 +67,7 @@ std::string MantidEVWorker::workspaceType( const std::string & ws_name )
 /**
  * Utility method to check if a name is the name of an MDWorkspace. 
  *
- *  @param  ws_name   The name of the workspace
+ *  @param  md_ws_name   The name of the workspace
  *
  *  @return true if the named workspace exists and is an MDWorkspace. 
  */
@@ -88,7 +88,7 @@ bool MantidEVWorker::isMDWorkspace( const std::string & md_ws_name )
 /**
  * Utility method to check if a name is the name of a PeaksWorkspace. 
  *
- *  @param  ws_name   The name of the workspace
+ *  @param  peaks_ws_name   The name of the workspace
  *
  *  @return true if the named workspace exists and is a PeaksWorkspace. 
  */
@@ -109,7 +109,7 @@ bool MantidEVWorker::isPeaksWorkspace( const std::string & peaks_ws_name )
 /**
  * Utility method to check if a name is the name of an EventWorkspace. 
  *
- *  @param  ws_name   The name of the workspace
+ *  @param  event_ws_name   The name of the workspace
  *
  *  @return true if the named workspace exists and is an EventWorkspace. 
  */
@@ -188,7 +188,7 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
  *  @param num_to_find    The number of peaks to find.
  *  @param min_intensity  Sets the minimum value to consider an
  *                        MD box to be a possible peak.  If this
- *                        is 10, only boxes with intensity 10 times
+ *                        is 10000, only boxes with intensity 10000 times
  *                        the average intensity will be considered.
  *
  *  @return true if FindPeaksMD completed successfully.
@@ -390,14 +390,17 @@ bool MantidEVWorker::optimizePhiChiOmega( const std::string & peaks_ws_name,
 {
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("OptimizeCrystalPlacement");
   alg->setProperty("PeaksWorkspace",peaks_ws_name);
+  alg->setProperty("KeepGoniometerFixedfor","");
   alg->setProperty("ModifiedPeaksWorkspace",peaks_ws_name);
   std::string info_table = "_info";
   info_table = peaks_ws_name + info_table;
   alg->setProperty("FitInfoTable",info_table);
-  alg->setProperty("ToleranceChiPhiOmega",max_change);
-  alg->setProperty("MaxIntHKLOffsetPeaks2Use",0.12);
+  alg->setProperty("AdjustSampleOffsets",false);
+  alg->setProperty("OptimizeGoniometerTilt",false);
+  alg->setProperty("MaxAngularChange",max_change);
+  alg->setProperty("MaxIndexingError",0.20);
   alg->setProperty("MaxHKLPeaks2Use",-1.0);
-
+  alg->setProperty("MaxSamplePositionChange_meters",0.05);
   if ( alg->execute() )
     return true;
 
@@ -535,11 +538,11 @@ bool MantidEVWorker::selectCellWithForm(  const std::string & peaks_ws_name,
  *  that maps the current hkl vectors to the desired hkl values.
  *
  *  @param peaks_ws_name     The name of the peaks workspace.
- *  @param row_1_string      String with the three entries from the
+ *  @param row_1_str         String with the three entries from the
  *                           first row of the matrix.
- *  @param row_2_string      String with the three entries from the
+ *  @param row_2_str         String with the three entries from the
  *                           second row of the matrix.
- *  @param row_3_string      String with the three entries from the
+ *  @param row_3_str         String with the three entries from the
  *                           third row of the matrix.
  *
  *  @return true if the TransformHKL algorithm completes successfully.
@@ -615,7 +618,7 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
   alg->setProperty("SplitInto","2,2,2");
   alg->setProperty("SplitThreshold",200);
   alg->setProperty("MaxRecursionDepth",12);
-  alg->setProperty("MinRecursionDepth",1);
+  alg->setProperty("MinRecursionDepth",7);
   std::cout << "Making temporary MD workspace" << std::endl; 
   if ( !alg->execute() )
     return false;
@@ -836,6 +839,16 @@ bool MantidEVWorker::showUB( const std::string & peaks_ws_name )
   }
 
   return true;
+}
+
+
+std::vector< std::pair<std::string,std::string> >MantidEVWorker::PointInfo( const std::string & peaks_ws_name,
+                                                                            Mantid::Kernel::V3D Q)
+{
+  const auto& ADS = AnalysisDataService::Instance();
+  Mantid::DataObjects::PeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<Mantid::DataObjects::PeaksWorkspace>(peaks_ws_name);
+
+  return peaks_ws->PeakInfo( Q ); 
 }
 
 } // namespace CustomInterfaces

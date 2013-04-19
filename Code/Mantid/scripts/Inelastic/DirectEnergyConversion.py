@@ -35,6 +35,7 @@ import CommonFunctions as common
 import diagnostics
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
+from mantid import api
 import glob
 import os.path
 import math
@@ -714,16 +715,25 @@ class DirectEnergyConversion(object):
         else:
             # Load an empty instrument if one isn't already there
             idf_dir = config.getString('instrumentDefinition.directory')
-            instr_pattern = os.path.join(idf_dir,self.instr_name + '*_Definition.xml')
-            idf_files = glob.glob(instr_pattern)
-            if len(idf_files) > 0:
+            try:
+                idf_file=api.ExperimentInfo.getInstrumentFilename(self.instr_name)
                 tmp_ws_name = '__empty_' + self.instr_name
                 if not mtd.doesExist(tmp_ws_name):
-                    LoadEmptyInstrument(Filename=idf_files[0],OutputWorkspace=tmp_ws_name)
+                    LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
                 self.instrument = mtd[tmp_ws_name].getInstrument()
-            else:
+            except:
                 self.instrument = None
                 raise RuntimeError('Cannot load instrument for prefix "%s"' % self.instr_name)
+            #instr_pattern = os.path.join(idf_dir,self.instr_name + '*_Definition.xml')
+            #idf_files = glob.glob(instr_pattern)
+            #if len(idf_files) > 0:
+            #    tmp_ws_name = '__empty_' + self.instr_name
+            #    if not mtd.doesExist(tmp_ws_name):
+            #        LoadEmptyInstrument(Filename=idf_files[0],OutputWorkspace=tmp_ws_name)
+            #    self.instrument = mtd[tmp_ws_name].getInstrument()
+            #else:
+            #    self.instrument = None
+            #    raise RuntimeError('Cannot load instrument for prefix "%s"' % self.instr_name)
         # Initialise IDF parameters
         self.init_idf_params()
 

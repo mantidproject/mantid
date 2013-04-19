@@ -2,7 +2,7 @@ import unittest
 import testhelpers
 from mantid.api import AlgorithmManager
 from mantid.api import (IAlgorithm, Algorithm, AlgorithmProxy, PythonAlgorithm, 
-                        registerAlgorithm)
+                        AlgorithmFactory)
 import sys
 
 class IsAnAlgorithm(PythonAlgorithm):
@@ -42,11 +42,11 @@ class AlgorithmManagerTest(unittest.TestCase):
         self.assertTrue(isinstance(alg, Algorithm))
         self.assertTrue(isinstance(alg, IAlgorithm))
         
-    def test_algorithm_registration_with_valid_object_succeeds(self):
-        testhelpers.assertRaisesNothing(self, registerAlgorithm, IsAnAlgorithm)
+    def test_algorithm_subscription_with_valid_object_succeeds(self):
+        testhelpers.assertRaisesNothing(self, AlgorithmFactory.subscribe, IsAnAlgorithm)
 
     def test_algorithm_registration_with_invalid_object_throws(self):
-        self.assertRaises(ValueError, registerAlgorithm, NotAnAlgorithm)
+        self.assertRaises(ValueError, AlgorithmFactory.subscribe, NotAnAlgorithm)
 
 if __name__ == '__main__':
     unittest.main()        

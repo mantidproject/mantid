@@ -20,7 +20,6 @@ public slots:
   void selectComponentByName(const QString& name);
 private:
   void showEvent (QShowEvent *);
-  void hideEvent(QHideEvent *);
   /// Widget to display instrument tree
   InstrumentTreeWidget* m_instrumentTree;
 };

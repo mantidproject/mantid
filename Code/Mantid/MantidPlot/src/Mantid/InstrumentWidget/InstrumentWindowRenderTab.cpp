@@ -322,6 +322,14 @@ void InstrumentWindowRenderTab::showEvent (QShowEvent *)
   {
     surface->setInteractionMode(ProjectionSurface::MoveMode);
   }
+  InstrumentActor* actor = m_instrWindow->getInstrumentActor();
+  if ( actor )
+  {
+    auto visitor = SetAllVisibleVisitor();
+    actor->accept( visitor );
+    getSurface()->updateView();
+    getSurface()->requestRedraw();
+  }
 }
 
 void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
@@ -368,10 +376,19 @@ QMenu* InstrumentWindowRenderTab::createPeaksMenu()
   settings.beginGroup("Mantid/InstrumentWindow");
   QMenu* menu = new QMenu(this);
 
-  QAction* showRows = new QAction("Show rows",this);
+  // show/hide peak hkl labels
+  QAction *showLabels = new QAction("Show labels",this);
+  showLabels->setCheckable(true);
+  showLabels->setChecked(settings.value("ShowPeakLabels",true).toBool());
+  connect(showLabels,SIGNAL(toggled(bool)),m_instrWindow,SLOT(setShowPeakLabelsFlag(bool)));
+  menu->addAction(showLabels);
+  // show/hide peak table rows
+  QAction *showRows = new QAction("Show rows",this);
   showRows->setCheckable(true);
   showRows->setChecked(settings.value("ShowPeakRows",true).toBool());
   connect(showRows,SIGNAL(toggled(bool)),m_instrWindow,SLOT(setShowPeakRowFlag(bool)));
+  connect(showLabels,SIGNAL(toggled(bool)),showRows,SLOT(setEnabled(bool)));
+  showRows->setEnabled( showLabels->isChecked() );
   menu->addAction(showRows);
   // setting precision set of actions
   QMenu *setPrecision = new QMenu("Label precision",this);

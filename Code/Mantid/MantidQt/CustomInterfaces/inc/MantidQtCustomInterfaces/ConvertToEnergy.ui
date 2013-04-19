@@ -70,7 +70,7 @@
             <number>0</number>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page">
             <layout class="QHBoxLayout" name="horizontalLayout_16">
@@ -156,7 +156,7 @@
              <number>0</number>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="page_3">
              <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -284,6 +284,13 @@
                     </property>
                     <property name="text">
                      <string>Sum Files</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="ckLoadLogs">
+                    <property name="text">
+                     <string>Load Logs</string>
                     </property>
                    </widget>
                   </item>

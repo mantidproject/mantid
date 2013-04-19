@@ -12,6 +12,10 @@
 
 using Mantid::API::FunctionFactoryImpl;
 using Mantid::API::FunctionFactory;
+using Mantid::API::IFunction;
+using Mantid::PythonInterface::PythonObjectInstantiator;
+using Mantid::Kernel::AbstractInstantiator;
+
 using namespace boost::python;
 
 namespace
@@ -37,6 +41,46 @@ namespace
 
     return registered;
   }
+
+  //--------------------------------------------- Function registration ------------------------------------------------
+
+    /// Python algorithm registration mutex in anonymous namespace (aka static)
+    Poco::Mutex FUNCTION_REGISTER_MUTEX;
+
+    /**
+     * A free function to register a fit function from Python
+     * @param obj :: A Python object that should either be a class type derived from IFunction
+     *              or an instance of a class type derived from IFunction
+     */
+    void subscribe(FunctionFactoryImpl & self, const boost::python::object & obj )
+    {
+      Poco::ScopedLock<Poco::Mutex> lock(FUNCTION_REGISTER_MUTEX);
+
+      static PyObject * const baseClass = (PyObject*)converter::registered<IFunction>::converters.to_python_target_type();
+      // obj could be or instance/class, check instance first
+      PyObject *classObject(NULL);
+      if( PyObject_IsInstance(obj.ptr(), baseClass) )
+      {
+        classObject = PyObject_GetAttrString(obj.ptr(), "__class__");
+      }
+      else if(PyObject_IsSubclass(obj.ptr(), baseClass))
+      {
+        classObject = obj.ptr(); // We need to ensure the type of lifetime management so grab the raw pointer
+      }
+      else
+      {
+        throw std::invalid_argument("Cannot register a function that does not derive from IFunction.");
+      }
+      //Instantiator will store a reference to the class object, so increase reference count with borrowed template
+      auto classHandle = handle<>(borrowed(classObject));
+      auto *creator =  new PythonObjectInstantiator<IFunction>(object(classHandle));
+
+      // Find the function name
+      auto func = creator->createInstance();
+
+      // Takes ownership of instantiator
+      self.subscribe(func->name(), creator, FunctionFactoryImpl::OverwriteCurrent);
+    }
   ///@endcond
 }
 
@@ -48,6 +92,9 @@ void export_FunctionFactory()
            "Returns a list of the currently available functions")
       .def("createFunction", &FunctionFactoryImpl::createFunction,
            "Return a pointer to the requested function")
+      .def("subscribe", &subscribe, "Register a Python class derived from IFunction into the factory")
+      .def("unsubscribe", &FunctionFactoryImpl::unsubscribe, "Remove a type from the factory")
+
       .def("Instance", &FunctionFactory::Instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the FunctionFactory singleton")
       .staticmethod("Instance")
