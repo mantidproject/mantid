@@ -443,6 +443,10 @@ void InstrumentWindowRenderTab::displaySettingsAboutToshow()
  */
 void InstrumentWindowRenderTab::setSurfaceType(int index)
 {
+  m_renderMode->blockSignals(true);
+  m_renderMode->setCurrentIndex( index );
+  m_renderMode->blockSignals(false);
+  
   m_instrWindow->setSurfaceType( index );
   showResetView( index );
   showFlipControl( index );
