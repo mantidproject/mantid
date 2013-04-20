@@ -1,6 +1,6 @@
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import NumericAxis, TextAxis
+from mantid.api import NumericAxis, TextAxis, mtd
 import numpy as np
 
 class AxisTest(unittest.TestCase):
@@ -9,13 +9,14 @@ class AxisTest(unittest.TestCase):
   
     def setUp(self):
         if self.__class__._test_ws is None:
-            alg = run_algorithm("Load", Filename="LOQ48127.raw", SpectrumMax=3, child=True)
+            alg = run_algorithm('CreateWorkspace', DataX=datY,DataY=datY,DataE=datY,NSpec=3,
+                                child=True)
             self.__class__._test_ws = alg.getProperty("OutputWorkspace").value
 
     def test_constructor_methods_return_the_correct_type(self):
         self.assertTrue(isinstance(NumericAxis.create(2),NumericAxis))
         self.assertTrue(isinstance(TextAxis.create(2),TextAxis))
-  
+
     def test_axis_meta_data(self):
         yAxis = self._test_ws.getAxis(1)
         self.assertTrue(isinstance(yAxis, SpectraAxis))
@@ -30,6 +31,23 @@ class AxisTest(unittest.TestCase):
         self.assertEquals(xunit.unitID(), "TOF")
         self.assertEquals(xunit.caption(), "Time-of-flight")
         self.assertEquals(xunit.label(), "microsecond")
+
+    def test_axis_unit_can_be_replaced(self):
+        datY=np.arange(100)
+        ns=3
+        alg = run_algorithm('CreateWorkspace', DataX=datY,DataY=datY,DataE=datY,NSpec=ns,
+                            VerticalAxisUnit="Label", VerticalAxisValues=taxis, child=True)
+        ws = alg.getPropertyValue("OutputWorkspace")
+
+        ws.getAxis(0).setUnit("Label").setLabel("Time", "ns")
+        ws.getAxis(1).setUnit("Label").setLabel("Temperature", "K")
+        
+        unitx = ws.getAxis(0).getUnit()
+        unity = ws.getAxis(1).getUnit()
+        self.assertEquals("Time",unitx.caption())
+        self.assertEquals("ns",unitx.label())
+        self.assertEquals("Temperature",unity.caption())
+        self.assertEquals("K",unity.label())
         
     def test_value_axis(self):
         yAxis = self._test_ws.getAxis(1)
@@ -46,7 +64,8 @@ class AxisTest(unittest.TestCase):
     def test_extract_string_axis_values_to_list(self):
         data = [1.,2.,3.]
         axis_values = ["a","b","c"]
-        alg = run_algorithm("CreateWorkspace", DataX=data, DataY=data, NSpec=3,VerticalAxisUnit="Text",VerticalAxisValues=axis_values,child=True)
+        alg = run_algorithm("CreateWorkspace", DataX=data, DataY=data, NSpec=3,
+                            VerticalAxisUnit="Text",VerticalAxisValues=axis_values,child=True)
         workspace = alg.getProperty("OutputWorkspace").value
         txtAxis = workspace.getAxis(1)
         self.assertTrue(txtAxis.isText())
