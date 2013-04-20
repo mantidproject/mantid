@@ -91,7 +91,7 @@ public:
   bool blocked()const{return m_blocked;}
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
-  InstrumentWindowTab *getTab()const;
+  InstrumentWindowTab *getTab(const QString & title="") const;
   /// Get a filename for saving
   QString getSaveFileName(const QString& title, const QString& filters, QString* selectedFilter = NULL);
 

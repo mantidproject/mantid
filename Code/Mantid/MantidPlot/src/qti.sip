@@ -1272,12 +1272,40 @@ private:
   MantidMatrix(const MantidMatrix&);
 };
 
+class InstrumentWindowTab: QFrame
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindowTab.h"
+%End
+private:
+  InstrumentWindowTab(const InstrumentWindowTab &);
+};
+
 class InstrumentWindow: MdiSubWindow
 {
 %TypeHeaderCode
 #include "src/Mantid/InstrumentWidget/InstrumentWindow.h"
 %End
+
+%Docstring
+
+InstrumentWindow
+================
+
+    The InstrumentWindow contains functionality for exploring
+    a 3D model of an instrument. It is a tabbed widget offering
+    rendering, picking, masking and grouping functions. There is
+    also a tree view of the instrument hierarchy.
+
+    For further help see the functions defined on each of the following
+        - InstrumentWindowRenderTab
+        - InstrumentWindowPickTab
+        - InstrumentWindowMaskTab
+%End
+
 public:
+  InstrumentWindowTab * getTab(const QString & title) const;
+
   void changeColormap() /PyName = changeColorMap/;
   void changeColormap(const QString & file) /PyName = changeColorMap/;
   void setColorMapMinValue(double);
@@ -1289,6 +1317,38 @@ public:
   void setViewType(const QString &);
 private:
 InstrumentWindow(const InstrumentWindow &);
+};
+
+class InstrumentWindowRenderTab: InstrumentWindowTab
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h"
+%End
+
+public:
+  GraphOptions::ScaleType getScaleType() const;
+  void setScaleType(GraphOptions::ScaleType type);
+
+private:
+  InstrumentWindowRenderTab(const InstrumentWindowRenderTab &);
+};
+
+class InstrumentWindowPickTab: InstrumentWindowTab
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h"
+%End
+private:
+  InstrumentWindowPickTab(const InstrumentWindowPickTab &);
+};
+
+class InstrumentWindowMaskTab: InstrumentWindowTab
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h"
+%End
+private:
+  InstrumentWindowMaskTab(const InstrumentWindowMaskTab &);
 };
 
 class MantidUI: QObject

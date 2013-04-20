@@ -231,11 +231,31 @@ void InstrumentWindow::selectTab(int tab)
 }
 
 /**
- * Return the currently displayed tab.
+ * Returns the named tab or the current tab if none supplied
+ * @param title Optional title of a tab (default="")
  */
-InstrumentWindowTab *InstrumentWindow::getTab()const
+InstrumentWindowTab *InstrumentWindow::getTab(const QString & title)const
 {
-    return static_cast<InstrumentWindowTab*>(mControlsTab->currentWidget());
+  QWidget *tab(NULL);
+  if(title.isEmpty()) tab = mControlsTab->currentWidget();
+  else 
+  {
+    for(int i = 0; i < mControlsTab->count(); ++i)
+    {
+      if(mControlsTab->tabText(i) == title)
+      {
+        tab = mControlsTab->widget(i);
+        break;
+      }
+    }
+  }
+
+  if(!tab)
+  {
+    QString msg = "Invalid tab title: " + title;
+    throw std::invalid_argument(msg.toLatin1().data());
+  }
+  return qobject_cast<InstrumentWindowTab*>(tab);
 }
 
 /**
