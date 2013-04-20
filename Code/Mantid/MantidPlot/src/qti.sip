@@ -1326,11 +1326,18 @@ class InstrumentWindowRenderTab: InstrumentWindowTab
 %End
 
 public:
+
   GraphOptions::ScaleType getScaleType() const;
   void setScaleType(GraphOptions::ScaleType type);
+  void setAxis(const QString& axisName);
   void setMinValue(double value, bool apply = true);
   void setMaxValue(double value, bool apply = true);
   void setRange(double minValue, double maxValue, bool apply = true);
+  void showAxes(bool on);
+  void displayDetectorsOnly(bool yes);
+  void changeColormap(const QString & filename = "");
+  void setSurfaceType(int);
+  void flipUnwrappedView(bool);
 
 private:
   InstrumentWindowRenderTab(const InstrumentWindowRenderTab &);

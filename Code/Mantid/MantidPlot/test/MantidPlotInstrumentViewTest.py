@@ -28,9 +28,16 @@ class MantidPlotInstrumentViewTest(unittest.TestCase):
         render_tab.setMaxValue(1.75)
         render_tab.setRange(1.35,1.85)
 
+    def test_display_options(self):
+        render_tab = INST_WIN.getTab("Render")
+        render_tab.showAxes(True)
+        render_tab.displayDetectorsOnly(True);
+        render_tab.setSurfaceType(0)
+        render_tab.setAxis("Y-")
+        render_tab.flipUnwrappedView(True)
+
     def test_closing_window_invalidates_reference(self):
         inst = getInstrumentView("loq_inst")
-        render_tab = inst.getTab("Render")
         inst.close()
         self.assertTrue(inst._getHeldObject() is None)
     

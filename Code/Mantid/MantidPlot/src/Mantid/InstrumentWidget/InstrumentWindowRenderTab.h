@@ -47,16 +47,17 @@ public slots:
   void showAxes(bool on);
   void displayDetectorsOnly(bool yes);
   void setColorMapAutoscaling(bool);
+  void changeColormap(const QString & filename = "");
+  void setSurfaceType(int);
+  void flipUnwrappedView(bool);
 
 private slots:
-  void changeColormap(const QString & filename = "");
+
   void showResetView(int);
   void showFlipControl(int);
-  void flipUnwrappedView(bool);
   /// Called before the display setting menu opens. Filters out menu options.
   void displaySettingsAboutToshow();
-  /// Change the type of the surface
-  void setSurfaceType(int);
+  /// Change the type of the surfac
   void surfaceTypeChanged(int);
   void colorMapChanged();
   void scaleTypeChanged(int);
