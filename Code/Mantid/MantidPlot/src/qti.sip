@@ -1328,6 +1328,9 @@ class InstrumentWindowRenderTab: InstrumentWindowTab
 public:
   GraphOptions::ScaleType getScaleType() const;
   void setScaleType(GraphOptions::ScaleType type);
+  void setMinValue(double value, bool apply = true);
+  void setMaxValue(double value, bool apply = true);
+  void setRange(double minValue, double maxValue, bool apply = true);
 
 private:
   InstrumentWindowRenderTab(const InstrumentWindowRenderTab &);
