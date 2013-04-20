@@ -528,6 +528,30 @@ class MantidMatrix(MDIWindow):
         return new_proxy(Graph, self._getHeldObject().plotGraph2D, type)
 
 #-----------------------------------------------------------------------------
+class InstrumentWindow(MDIWindow):
+    """Proxy for the instrument window
+    """
+
+    def __init__(self, toproxy):
+        """Creates a proxy object around an instrument window
+
+        Args:
+            toproxy: The raw C object to proxy
+        """
+        QtProxyObject.__init__(self, toproxy)
+
+    def getTab(self, title):
+        """Retrieve a handle to the named tab
+
+        Args:
+            title: The title of a tab
+
+        Returns:
+            A handle to a tab widget
+        """
+        return new_proxy(QtProxyObject, self._getHeldObject().getTab, title)
+
+#-----------------------------------------------------------------------------
 class SliceViewerWindowProxy(QtProxyObject):
     """Proxy for a C++ SliceViewerWindow object.
     

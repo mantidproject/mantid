@@ -457,7 +457,7 @@ def getInstrumentView(name, tab=-1):
     Returns:
         A handle to the created instrument view widget.
     """
-    return new_proxy(proxies.MDIWindow, _qti.app.mantidUI.getInstrumentView, name,tab)
+    return new_proxy(proxies.InstrumentWindow, _qti.app.mantidUI.getInstrumentView, name, tab)
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
     """Create a MantidMatrix object from the named workspace.
