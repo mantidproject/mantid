@@ -250,12 +250,8 @@ InstrumentWindowTab *InstrumentWindow::getTab(const QString & title)const
     }
   }
 
-  if(!tab)
-  {
-    QString msg = "Invalid tab title: " + title;
-    throw std::invalid_argument(msg.toLatin1().data());
-  }
-  return qobject_cast<InstrumentWindowTab*>(tab);
+  if(!tab) return NULL;
+  else return qobject_cast<InstrumentWindowTab*>(tab);
 }
 
 /**

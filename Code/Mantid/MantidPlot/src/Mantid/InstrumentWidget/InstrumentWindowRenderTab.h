@@ -47,7 +47,7 @@ public slots:
   void showAxes(bool on);
   void displayDetectorsOnly(bool yes);
   void setColorMapAutoscaling(bool);
-  void changeColormap(const QString & filename = "");
+  void changeColorMap(const QString & filename = "");
   void setSurfaceType(int);
   void flipUnwrappedView(bool);
 

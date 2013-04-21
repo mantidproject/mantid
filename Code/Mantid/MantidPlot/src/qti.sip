@@ -1305,16 +1305,20 @@ InstrumentWindow
 
 public:
   InstrumentWindowTab * getTab(const QString & title) const;
+  void setBinRange(double, double);
 
-  void changeColormap() /PyName = changeColorMap/;
-  void changeColormap(const QString & file) /PyName = changeColorMap/;
+  // -- Deprecated in favour of specific tab functions --
+  // Deprecation is done in mantidplot.py module rather than using
+  // sip /Deprecated/annotation so that the message can be customised
+  void changeColormap();
+  void changeColormap(const QString & file);
   void setColorMapMinValue(double);
   void setColorMapMaxValue(double);
   void setColorMapRange(double, double);
-  void setBinRange(double, double);// /PyName = setBinRange/;
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
   void setViewType(const QString &);
+
 private:
 InstrumentWindow(const InstrumentWindow &);
 };
@@ -1334,8 +1338,9 @@ public:
   void setMaxValue(double value, bool apply = true);
   void setRange(double minValue, double maxValue, bool apply = true);
   void showAxes(bool on);
+  void setColorMapAutoscaling(bool);
   void displayDetectorsOnly(bool yes);
-  void changeColormap(const QString & filename = "");
+  void changeColorMap(const QString & filename = "");
   void setSurfaceType(int);
   void flipUnwrappedView(bool);
 
@@ -1359,6 +1364,19 @@ class InstrumentWindowMaskTab: InstrumentWindowTab
 %End
 private:
   InstrumentWindowMaskTab(const InstrumentWindowMaskTab &);
+};
+
+class InstrumentWindowTreeTab: InstrumentWindowTab
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindowTreeTab.h"
+%End
+
+public:
+  void selectComponentByName(const QString& name);
+
+private:
+  InstrumentWindowTreeTab(const InstrumentWindowTreeTab &);
 };
 
 class MantidUI: QObject

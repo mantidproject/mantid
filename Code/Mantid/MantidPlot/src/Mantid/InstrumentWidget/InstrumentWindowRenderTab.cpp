@@ -58,7 +58,7 @@ InstrumentWindowTab(instrWindow)
   QMenu* displaySettingsMenu = new QMenu(this);
   connect(displaySettingsMenu, SIGNAL(aboutToShow()),this,SLOT(displaySettingsAboutToshow()));
   m_colorMap = new QAction("Color Map",this);
-  connect(m_colorMap,SIGNAL(triggered()),this,SLOT(changeColormap()));
+  connect(m_colorMap,SIGNAL(triggered()),this,SLOT(changeColorMap()));
   m_backgroundColor = new QAction("Background Color",this);
   connect(m_backgroundColor,SIGNAL(triggered()),m_instrWindow,SLOT(pickBackgroundColor()));
   m_lighting = new QAction("Lighting",this);
@@ -191,7 +191,7 @@ void InstrumentWindowRenderTab::setupColorBarScaling(const MantidColorMap& cmap,
 /**
  * Change color map button slot. This provides the file dialog box to select colormap or sets it directly a string is provided
  */
-void InstrumentWindowRenderTab::changeColormap(const QString &filename)
+void InstrumentWindowRenderTab::changeColorMap(const QString &filename)
 {
   m_instrWindow->changeColormap(filename);
 }
