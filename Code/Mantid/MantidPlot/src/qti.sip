@@ -1304,12 +1304,15 @@ InstrumentWindow
 %End
 
 public:
-  enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z, RENDERMODE_SIZE };
-  enum Tab {RENDER, PICK, MASK, TREE};
+  enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, 
+                     SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
+                     RENDERMODE_SIZE };
+  enum Tab { RENDER, PICK, MASK, TREE };
 
   InstrumentWindowTab * getTab(const QString & title) const;
   InstrumentWindowTab * getTab(const Tab tab) const;
   void setBinRange(double, double);
+  bool overlay(const QString & wsName);
 
   // -- Deprecated in favour of specific tab functions --
   // Deprecation is done in mantidplot.py module rather than using

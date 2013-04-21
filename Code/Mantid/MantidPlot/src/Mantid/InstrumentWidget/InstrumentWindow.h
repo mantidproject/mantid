@@ -134,14 +134,15 @@ public slots:
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
   void setupColorMap();
-  void changeColormap(const QString & filename = "");
-  void changeScaleType(int);
-  void changeColorMapMinValue(double minValue);
-  void changeColorMapMaxValue(double maxValue);
-  void changeColorMapRange(double minValue, double maxValue);
+
+  void changeColormap(const QString & filename = ""); // Deprecated
+  void changeScaleType(int);// Deprecated
+  void changeColorMapMinValue(double minValue); // Deprecated
+  void changeColorMapMaxValue(double maxValue); // Deprecated
+  void changeColorMapRange(double minValue, double maxValue); // Deprecated
   void setIntegrationRange(double,double);
   void setBinRange(double,double);
-  void setColorMapAutoscaling(bool);
+  void setColorMapAutoscaling(bool); // Deprecated
 
   void setViewDirection(const QString&);
   void pickBackgroundColor();
@@ -151,6 +152,8 @@ public slots:
   void setSurfaceType(int);
   void setWireframe(bool);
 
+  /// Overlay a workspace with the given name
+  bool overlay(const QString & wsName);
   void clearPeakOverlays();
   void setPeakLabelPrecision(int n);
   void setShowPeakRowFlag(bool on);

@@ -1010,20 +1010,7 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
   if (text.startsWith("Workspace::"))
   {
     QStringList wsName = text.split("::");
-    Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(wsName[1].toStdString()));
-    auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( getSurface() );
-    if (pws && surface)
-    {
-      surface->setPeaksWorkspace(pws);
-      updateInstrumentView();
-      e->accept();
-      return;
-    }
-    else if (pws && !surface)
-    {
-      QMessageBox::warning(this,"MantidPlot - Warning","Please change to an unwrapped view to see peak labels.");
-    }
+    if(this->overlay(wsName[1])) e->accept();    
   }
   e->ignore();
 }
@@ -1071,6 +1058,30 @@ void InstrumentWindow::setColorMapAutoscaling(bool on)
   m_instrumentActor->setAutoscaling(on);
   setupColorMap();
   updateInstrumentView();
+}
+
+/**
+ *  Overlay a workspace with the given name
+ * @param wsName The name of a workspace in the ADS
+ * @returns True if the overlay was successful, false otherwise
+ */
+bool InstrumentWindow::overlay(const QString & wsName)
+{
+  using namespace Mantid::API;
+  auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+  auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( getSurface() );
+  bool success(false);
+  if (pws && surface)
+  {
+    surface->setPeaksWorkspace(pws);
+    updateInstrumentView();
+    success = true;
+  }
+  else if (pws && !surface)
+  {
+    QMessageBox::warning(this,"MantidPlot - Warning","Please change to an unwrapped view to see peak labels.");
+  }
+  return success;
 }
 
 /**
