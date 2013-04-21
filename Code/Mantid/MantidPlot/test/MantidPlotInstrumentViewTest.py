@@ -33,6 +33,14 @@ class MantidPlotInstrumentViewTest(unittest.TestCase):
     def test_invalid_tab_title_raises_exception(self):
         self.assertRaises(ValueError, INST_WIN.getTab, "wont see this tab")
 
+    def test_get_tab_can_use_title_index_or_enum(self):
+        render_tab = INST_WIN.getTab("Render")
+        self.assertTrue(render_tab is not None)
+        render_tab = INST_WIN.getTab(InstrumentWindow.RENDER)
+        self.assertTrue(render_tab is not None)
+        render_tab = INST_WIN.getTab(0)
+        self.assertTrue(render_tab is not None)
+
     def test_integration_range_can_be_changed(self):
         INST_WIN.setBinRange(5,10)
 

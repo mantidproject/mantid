@@ -92,6 +92,7 @@ public:
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
   InstrumentWindowTab *getTab(const QString & title="") const;
+  InstrumentWindowTab *getTab(const Tab tab) const;
   /// Get a filename for saving
   QString getSaveFileName(const QString& title, const QString& filters, QString* selectedFilter = NULL);
 

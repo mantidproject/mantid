@@ -540,18 +540,18 @@ class InstrumentWindow(MDIWindow):
         """
         QtProxyObject.__init__(self, toproxy)
 
-    def getTab(self, title):
-        """Retrieve a handle to the named tab
+    def getTab(self, name_or_tab):
+        """Retrieve a handle to the given tab
 
         Args:
-            title: The title of a tab
+            name_or_index: A string containing the title or tab type
 
         Returns:
             A handle to a tab widget
         """
-        handle = new_proxy(QtProxyObject, self._getHeldObject().getTab, title)
+        handle = new_proxy(QtProxyObject, self._getHeldObject().getTab, name_or_tab)
         if handle is None:
-            raise ValueError("Invalid tab title '%s'" % title)
+            raise ValueError("Invalid tab title '%s'" % str(name_or_tab))
         return handle
 
     # ----- Deprecated functions -----

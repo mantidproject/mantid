@@ -250,8 +250,19 @@ InstrumentWindowTab *InstrumentWindow::getTab(const QString & title)const
     }
   }
 
-  if(!tab) return NULL;
-  else return qobject_cast<InstrumentWindowTab*>(tab);
+  if(tab) return qobject_cast<InstrumentWindowTab*>(tab);
+  else return NULL;
+}
+
+/**
+ * @param tab An enumeration for the tab to select
+ * @returns A pointer to the requested tab
+ */
+InstrumentWindowTab * InstrumentWindow::getTab(const Tab tab) const
+{
+  QWidget *widget = mControlsTab->widget(static_cast<int>(tab));
+  if(widget) return qobject_cast<InstrumentWindowTab*>(widget);
+  else return NULL;
 }
 
 /**
