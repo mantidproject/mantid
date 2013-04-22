@@ -654,9 +654,6 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS)
 API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::MatrixWorkspace_const_sptr workspace)
 {
   MatrixWorkspace_sptr result;
-  // If this is a Workspace2D, get the spectra axes for copying in the spectraNo later
-  Axis *specAxis = NULL, *outAxis = NULL;
-  if (workspace->axes() > 1) specAxis = workspace->getAxis(1);
 
   const size_t numSpec = workspace->getNumberHistograms();
   const std::string emode = getProperty("Emode");
@@ -686,7 +683,6 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
     MantidVec::difference_type first = start - X0.begin();
 
     result = WorkspaceFactory::Instance().create(workspace,numSpec,bins,bins-1);
-    if (specAxis) outAxis = result->getAxis(1);
 
     for (size_t i = 0; i < numSpec; ++i)
     {
@@ -717,7 +713,6 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
     g_log.debug() << maxBins << std::endl;
     // Now create an output workspace large enough for the longest 'good' range
     result = WorkspaceFactory::Instance().create(workspace,numSpec,maxBins,maxBins-1);
-    if (specAxis) outAxis = result->getAxis(1);
     // Next, loop again copying in the correct range for each spectrum
     for (int64_t j = 0; j < int64_t(numSpec); ++j)
     {
