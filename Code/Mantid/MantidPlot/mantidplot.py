@@ -447,12 +447,12 @@ def getMantidMatrix(name):
     """Get a handle to the named Mantid matrix"""
     return new_proxy(proxies.MantidMatrix, _qti.app.mantidUI.getMantidMatrix, name)
 
-def getInstrumentView(name, tab=-1):
+def getInstrumentView(name, tab=InstrumentWindow.RENDER):
     """Create an instrument view window based on the given workspace.
     
     Args:
         name: The name of the workspace.
-        tab: The index of the tab to display initially.
+        tab: The index of the tab to display initially, (default=InstrumentWindow.RENDER)
         
     Returns:
         A handle to the created instrument view widget.
