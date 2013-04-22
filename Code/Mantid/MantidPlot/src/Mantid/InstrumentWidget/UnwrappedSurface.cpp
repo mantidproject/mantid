@@ -840,6 +840,7 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
   m_peakShapes.append(po);
   m_startPeakShapes = true;
   connect(po,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),this,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
+  emit peaksWorkspaceAdded();
 }
 
 //-----------------------------------------------------------------------------

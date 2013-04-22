@@ -68,7 +68,7 @@ public:
   /// called when the gl widget gets resized
   virtual void resize(int, int);
   /// redraw surface without recalulationg of colours, etc
-  virtual void updateView(bool picking = false);
+  virtual void updateView(bool picking = true);
   /// full update and redraw of the surface
   virtual void updateDetectors();
   /// returns the bounding rectangle in the real coordinates
@@ -169,11 +169,13 @@ public:
   void changeBorderColor(const QColor& color) {m_maskShapes.changeBorderColor(color);}
 
   //-----------------------------------
-  //    Peaks overaly methods
+  //    Peaks overlay methods
   //-----------------------------------
 
   QList<PeakMarker2D*> getMarkersWithID(int detID)const;
-  void peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
+  boost::shared_ptr<Mantid::API::IPeaksWorkspace> getEditPeaksWorkspace() const;
+  QStringList getPeaksWorkspaceNames() const;
+  void deletePeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
   void clearPeakOverlays();
   bool hasPeakOverlays() const {return !m_peakShapes.isEmpty();}
   void setPeakLabelPrecision(int n);
@@ -185,18 +187,25 @@ public:
 
 signals:
 
+  // detector selection
   void singleDetectorTouched(int);
   void singleDetectorPicked(int);
   void multipleDetectorsSelected(QList<int>&);
 
+  // shape manipulation
   void signalToStartCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor);
   void shapeCreated();
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
-  void redrawRequired();
-  void updateInfoText();
 
+  // peaks
+  void peaksWorkspaceAdded();
+  void peaksWorkspaceDeleted();
+
+  // other
+  void redrawRequired();   ///< request redrawing of self
+  void updateInfoText();   ///< request update of the info string at bottom of InstrumentWindow
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
 protected slots:

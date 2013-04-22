@@ -730,7 +730,7 @@ void InstrumentWindow::preDeleteHandle(const std::string & ws_name, const boost:
   Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
   if (pws)
   {
-    getSurface()->peaksWorkspaceDeleted(pws);
+    getSurface()->deletePeaksWorkspace(pws);
     updateInstrumentView();
     return;
   }
@@ -909,7 +909,7 @@ void InstrumentWindow::componentSelected(ComponentID id)
     if (surface)
     {
       surface->componentSelected(id);
-      surface->updateView();
+      //surface->updateView();
       updateInstrumentView();
     }
 }

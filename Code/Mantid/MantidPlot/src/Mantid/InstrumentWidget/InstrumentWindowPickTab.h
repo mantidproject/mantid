@@ -69,6 +69,7 @@ private slots:
   void savePlotToWorkspace();
   void singleDetectorTouched(int detid);
   void singleDetectorPicked(int detid);
+  void updateSelectionInfoDisplay();
 private:
   void showEvent (QShowEvent *);
   void updatePlot(int detid);
@@ -96,6 +97,7 @@ private:
     std::vector<double>* err = NULL);
     TubeXUnits getTubeXUnits(const QString& name) const;
     QString getTubeXUnitsName(TubeXUnits unit) const;
+  QString getNonDetectorInfo();
 
   /* Pick tab controls */
   OneCurvePlot* m_plot; ///< Miniplot to display data in the detectors
