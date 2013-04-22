@@ -456,8 +456,6 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   {
     PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
-    /// @todo Don't yet consider hold-off (delta)
-    const double delta = 0.0;
 
     try
     {
@@ -505,6 +503,8 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
       Unit * localFromUnit = fromUnit->clone();
       Unit * localOutputUnit = outputUnit->clone();
 
+      /// @todo Don't yet consider hold-off (delta)
+      const double delta = 0.0;
       // Convert the input unit to time-of-flight
       localFromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       // Convert from time-of-flight to the desired unit
