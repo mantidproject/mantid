@@ -283,7 +283,7 @@ void test_EventNoUnitsConv()
     WSD.m_PreprDetTable =pDetLoc_events;
     WSD.m_RotMatrix = Rot;
     // this one comes from ticket #6852 and would not exist in clear branch.
-    WSD.addProperty("RUN_INDEX",10,true);
+    WSD.addProperty("RUN_INDEX",static_cast<uint16_t>(10),true);
 
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -318,7 +318,7 @@ void test_EventFromTOFConv()
     WSD.m_PreprDetTable =pDetLoc_events;
     WSD.m_RotMatrix = Rot;
     // this one comes from ticket #6852 and would not exist in clear branch.
-    WSD.addProperty("RUN_INDEX",10,true);
+    WSD.addProperty("RUN_INDEX",static_cast<uint16_t>(10),true);
 
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -354,7 +354,7 @@ void test_HistoFromTOFConv()
     WSD.m_PreprDetTable =pDetLoc_histo;
     WSD.m_RotMatrix = Rot;
     // this one comes from ticket #6852 and would not exist in clear branch.
-    WSD.addProperty("RUN_INDEX",10,true);
+    WSD.addProperty("RUN_INDEX",static_cast<uint16_t>(10),true);
 
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -395,7 +395,7 @@ void test_HistoNoUnitsConv()
     WSD.m_PreprDetTable =pDetLoc_histo;
     WSD.m_RotMatrix = Rot;
     // this one comes from ticket #6852 and would not exist in clear branch.
-    WSD.addProperty("RUN_INDEX",10,true);
+    WSD.addProperty("RUN_INDEX",static_cast<uint16_t>(10),true);
 
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
