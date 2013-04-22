@@ -46,7 +46,7 @@
    <item>
     <widget class="QTabWidget" name="MantidEV_tabwidg">
      <property name="currentIndex">
-      <number>0</number>
+      <number>5</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
@@ -1250,7 +1250,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Region Radius</string>
+        <string>Region Radius (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="RegionRadius_ledt">
@@ -1276,7 +1276,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Peak Size</string>
+        <string>Peak Size (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="PeakSize_ledt">
@@ -1315,7 +1315,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Background Inner Size</string>
+        <string>Background Inner Size (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="BackgroundInnerSize_ledt">
@@ -1341,7 +1341,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Background Outer Size      </string>
+        <string>Background Outer Size (A^-1) </string>
        </property>
       </widget>
       <widget class="QLineEdit" name="BackgroundOuterSize_ledt">
@@ -1432,7 +1432,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Peak Radius</string>
+        <string>Peak Radius (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="PeakRadius_ledt">
@@ -1458,7 +1458,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Background Inner Radius</string>
+        <string>Background Inner Radius (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="BackgroundInnerRadius_ledt">
@@ -1484,7 +1484,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Background Outer Radius   </string>
+        <string>Background Outer Radius (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="BackgroundOuterRadius_ledt">
