@@ -1451,6 +1451,14 @@ public:
         yes True/False indicating whether only detectors are shown
 %End
 
+  void enableGL(bool on);
+%Docstring
+    Toggle the use of OpenGL. This can only be used for the unwrapped views.
+
+    Args:
+        on True/False indicating whether OpenGL should be used.
+%End
+
   void changeColorMap(const QString & filename = "");
 %Docstring
     Change the color map for the given one. If blank then a dialog is raised
@@ -1475,6 +1483,15 @@ public:
 
     Args:
         on True/False indicatingif to flip the view
+%End
+
+  void saveImage(QString filename = "");
+%Docstring
+    Save the current display buffer to an image file. The format is chosen by the filename extension and must
+    be one of .bmp,.jpeg,.jpeg,.png,.ppm,.tiff,.xbm,.xpm
+    
+    Args:
+        filename The filename for the saved image. An empty string raises a dialog box.
 %End
 
 private:

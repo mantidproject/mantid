@@ -146,7 +146,7 @@ public slots:
 
   void setViewDirection(const QString&);
   void pickBackgroundColor();
-  void saveImage();
+  void saveImage(QString filename);
   void setInfoText(const QString&);
   void set3DAxesState(bool);
   void setSurfaceType(int);

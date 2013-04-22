@@ -655,39 +655,53 @@ void InstrumentWindow::pickBackgroundColor()
 	setBackgroundColor(color);
 }
 
-void InstrumentWindow::saveImage()
+/**
+ * Saves the current image buffer as a png file.
+ * @param filename Optional filename. Empty string raises a save dialog
+ */
+void InstrumentWindow::saveImage(QString filename)
 {
+  QString defaultExt = ".png";
   QList<QByteArray> formats = QImageWriter::supportedImageFormats();
-  QListIterator<QByteArray> itr(formats);
-  QString filter("");
-  while( itr.hasNext() )
+  if(filename.isEmpty())
   {
-    filter += "*." + itr.next();
-    if( itr.hasNext() )
+    QListIterator<QByteArray> itr(formats);
+    QString filter("");
+    while( itr.hasNext() )
     {
-      filter += ";;";
+      filter += "*." + itr.next();
+      if( itr.hasNext() )
+      {
+        filter += ";;";
+      }
     }
-  }
-  QString selectedFilter = "*.png";
-  QString filename = getSaveFileName("Save image ...", filter, &selectedFilter);
+    QString selectedFilter = "*" + defaultExt;
+    filename = getSaveFileName("Save image ...", filter, &selectedFilter);
 
-  // If its empty, they cancelled the dialog
-  if( filename.isEmpty() ) return;
+    // If its empty, they cancelled the dialog
+    if( filename.isEmpty() ) return;
+  }
   
   QFileInfo finfo(filename);
-
   QString ext = finfo.completeSuffix();
+
   if( ext.isEmpty() )
   {
-    filename += selectedFilter.section("*", 1);
+    filename += defaultExt;
     ext = QFileInfo(filename).completeSuffix();
   }
   else
   {
-    QStringList extlist = filter.split(";;");
-    if( !extlist.contains("*." + ext) )
+    if( !formats.contains(ext.toAscii()) )
     {
-      QMessageBox::warning(this, "MantidPlot", "Unsupported file extension, please use one from the supported list.");
+      QString msg("Unsupported file extension. Choose one of the following: ");
+      QListIterator<QByteArray> itr(formats);
+      while( itr.hasNext() )
+      {
+        msg += itr.next() + ", ";
+      }
+      msg.chop(2);// Remove last space and comma
+      QMessageBox::warning(this, "MantidPlot", msg);
       return;
     }
   }
@@ -1262,17 +1276,10 @@ void InstrumentWindow::enableOpenGL( bool on )
 /// Private slot to toggle between the GL and simple instrument display widgets
 void InstrumentWindow::enableGL( bool on )
 {
-  m_useOpenGL = on;
-  if ( m_surfaceType == FULL3D )
-  {
-    // always OpenGL in 3D
-    selectOpenGLDisplay( true );
-  }
-  else
-  {
-    // select the display
-    selectOpenGLDisplay( on );
-  }
+  if ( m_surfaceType == FULL3D ) m_useOpenGL = true; // always OpenGL in 3D
+  else m_useOpenGL = on;
+
+  selectOpenGLDisplay(m_useOpenGL);
 }
 
 /// True if the GL instrument display is currently on

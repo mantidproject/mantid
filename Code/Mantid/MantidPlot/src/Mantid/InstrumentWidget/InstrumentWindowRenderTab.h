@@ -46,10 +46,12 @@ public slots:
   void setRange(double minValue, double maxValue, bool apply = true);
   void showAxes(bool on);
   void displayDetectorsOnly(bool yes);
+  void enableGL(bool on);
   void setColorMapAutoscaling(bool);
   void changeColorMap(const QString & filename = "");
   void setSurfaceType(int);
   void flipUnwrappedView(bool);
+  void saveImage(QString filename = "");
 
 private slots:
 

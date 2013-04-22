@@ -51,7 +51,7 @@ InstrumentWindowTab(instrWindow)
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
   mSaveImage->setToolTip("Save the instrument image to a file");
-  connect(mSaveImage, SIGNAL(clicked()), m_instrWindow, SLOT(saveImage()));
+  connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
 
   // Setup Display Setting menu
   QPushButton* displaySettings = new QPushButton("Display Settings",this);
@@ -86,7 +86,7 @@ InstrumentWindowTab(instrWindow)
   bool useOpenGL = setting == "ON";
   m_instrWindow->enableGL( useOpenGL );
   m_GLView->setChecked( useOpenGL );
-  connect(m_GLView, SIGNAL( toggled(bool) ), m_instrWindow, SLOT( enableGL(bool) ));
+  connect(m_GLView, SIGNAL( toggled(bool) ), this, SLOT( enableGL(bool) ));
 
   displaySettingsMenu->addAction(m_colorMap);
   displaySettingsMenu->addAction(m_backgroundColor);
@@ -315,6 +315,20 @@ void InstrumentWindowRenderTab::displayDetectorsOnly(bool yes)
   m_displayDetectorsOnly->blockSignals(false);
 }
 
+/**
+ * Toggle use of OpenGL
+ *
+ * @param on :: True of false for on and off.
+ */
+void InstrumentWindowRenderTab::enableGL(bool on)
+{
+  m_instrWindow->enableGL(on);
+  m_GLView->blockSignals(true);
+  m_GLView->setChecked(m_instrWindow->isGLEnabled());
+  m_GLView->blockSignals(false);
+}
+
+
 void InstrumentWindowRenderTab::showEvent (QShowEvent *)
 {
   auto surface = getSurface();
@@ -338,6 +352,16 @@ void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
   if (!surface) return;
   surface->setFlippedView(on);
   m_instrWindow->updateInstrumentView();
+}
+
+/**
+ * Saves the current image buffer to the given file. An empty string raises a dialog
+ * for finding the file
+ * @param filename Optional full path of the saved image
+ */
+void InstrumentWindowRenderTab::saveImage(QString filename)
+{
+  m_instrWindow->saveImage(filename);
 }
 
 /**
