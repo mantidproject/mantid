@@ -19,7 +19,6 @@
 #include <ostream>
 #include <sstream>
 #include <fstream>
-using namespace std;
 
 
 // Register with the job manager factory class
@@ -93,7 +92,7 @@ HttpRemoteJobManager::HttpRemoteJobManager( const Poco::XML::Element* elem)
 // of the directory that's been created for this transaction
 // If we get an error message back from the server, it will be returned in the
 // serverErr string.
-RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::startTransaction( string &transId, string &directory, string &serverErr)
+RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::startTransaction( std::string &transId, std::string &directory, std::string &serverErr)
 {
   JobManagerErrorCode reqErr = JM_OK;
 
@@ -171,7 +170,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::startTransaction( st
 // Notify the cluster that we want to stop the specified transaction
 // If we get an error message back from the server, it will be returned in the
 // serverErr string.
-RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::stopTransaction( string &transId, string &serverErr)
+RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::stopTransaction( std::string &transId, std::string &serverErr)
 {
   JobManagerErrorCode reqErr = JM_OK;
 
@@ -182,7 +181,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::stopTransaction( str
   Poco::Net::HTTPSClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
   // We need to send a GET request to the server with a query string of "action=start"
   Poco::Net::HTTPRequest req;
-  string queryString = "action=stop&transid=" + transId;
+  std::string queryString = "action=stop&transid=" + transId;
   reqErr = initGetRequest( req, "/transaction", queryString);
   if ( reqErr != JM_OK)
   {
@@ -242,7 +241,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::stopTransaction( str
 // Returns a list of all the files on the remote machine associated with the specified transaction
 RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::listFiles( const std::string &transId,
                                                                        std::vector<std::string> &listing,
-                                                                       string &serverErr)
+                                                                       std::string &serverErr)
 {
   JobManagerErrorCode reqErr = JM_OK;
 
@@ -254,7 +253,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::listFiles( const std
 
   // We need to send a GET request to the server with a query string of "TransID=xxxxx&Action=query"
   Poco::Net::HTTPRequest req;
-  string queryString = "Action=query&TransID=" + transId;
+  std::string queryString = "Action=query&TransID=" + transId;
   reqErr = initGetRequest( req, "/file_transfer", queryString);
   if ( reqErr != JM_OK)
   {
@@ -321,13 +320,141 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::listFiles( const std
 
 }
 
+// upload the specified file.
+// Note: remoteFileName is just the file name (no path), but localFileName should include
+// the complete path
+RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::uploadFile( const std::string &transId,
+                                                                        const std::string &remoteFileName,
+                                                                        const std::string &localFileName,
+                                                                        std::string &serverErr)
+{
+  JobManagerErrorCode reqErr = JM_OK;
+
+  // Verify that the file we want to upload actually exists
+  std::ifstream infile( localFileName, std::ios_base::binary);
+  if (! infile.good())
+  {
+    serverErr = "Could not open local file: " + localFileName;
+    return JM_LOCAL_FILE_ERROR;
+  }
+
+  // Create an HTTPS session
+  // TODO: Notice that we've set the context to VERIFY_NONE.  I think that means we're not checking the SSL certificate that the server
+  // sends to us.  That's BAD!!
+  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  //Poco::Net::HTTPSClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
+  Poco::Net::HTTPClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPClientSession::HTTP_PORT);
+
+  Poco::Net::HTTPRequest req;
+  reqErr = initPostRequest( req, "/file_transfer");
+  if ( reqErr != JM_OK)
+  {
+    return reqErr;
+  }
+
+  // We have to do a POST with multipart MIME encoding.  MIME is rather picky about
+  // how the parts are delimited.  See RFC 2045 & 2046 for details.
+
+  char httpLineEnd[3] = { 0x0d, 0x0a, 0x00 };  // HTTP uses CRLF for its line endings
+
+  // boundary can be almost anything (again, see RFC 2046).  The important part is that it
+  // cannot appear anywhere in the actual data
+  std::string boundary = "112233MantidHTTPBoundary44556677";
+  std::string boundaryLine = "--" + boundary + httpLineEnd;
+  std::string finalBoundaryLine = "--" + boundary + "--" + httpLineEnd;
+
+  req.setContentType( "multipart/form-data; boundary=" + boundary);
+
+
+  // Need to be able to specify the content length, so build up (most
+  // of) the post body here.
+  std::stringstream postData;
+
+  // Set the POST variable to attach to the PHP debugger
+  postData << boundaryLine;
+  postData <<"Content-Disposition: form-data; name=\"XDEBUG_SESSION_START\"" << httpLineEnd;
+  postData << httpLineEnd;
+  postData << "MWS" << httpLineEnd;
+
+  // These are the same variables that we put in the query string when performing an HTTP GET
+  postData << boundaryLine;
+  postData <<"Content-Disposition: form-data; name=\"Action\"" << httpLineEnd;
+  postData << httpLineEnd;
+  postData << "upload" << httpLineEnd;
+
+  postData << boundaryLine;
+  postData <<"Content-Disposition: form-data; name=\"TransID\"" << httpLineEnd;
+  postData << httpLineEnd;
+  postData << transId << httpLineEnd;
+
+  postData << boundaryLine;
+  postData << "Content-Disposition: form-data; name=\"File\"; filename=\"" << remoteFileName << "\"" << httpLineEnd;
+  postData << "Content-Type: application/octet-stream" << httpLineEnd;
+  postData << httpLineEnd;
+
+  infile.seekg (0, std::ios_base::end);
+  long fileLen = infile.tellg();
+  infile.seekg (0, std::ios_base::beg);
+
+  req.setContentLength( postData.str().size() + fileLen + strlen(httpLineEnd) + finalBoundaryLine.size());
+  //req.setContentLength( postData.str().size());
+
+  std::ostream &postStream = session.sendRequest( req);
+
+  // upload the actual HTTP body
+  postStream << postData.rdbuf();
+
+  postStream << infile.rdbuf();
+
+  postStream << httpLineEnd;
+  postStream << finalBoundaryLine << std::flush;
+
+  infile.close();  // done with the file
+
+  Poco::Net::HTTPResponse response;
+  std::istream &responseStream = session.receiveResponse( response);
+  std::vector<Poco::Net::HTTPCookie> newCookies;
+  // For as yet unknown reasons, we don't always get a session cookie back from the
+  // server.  In that case, we don't want to overwrite the cookie we're currently
+  // using...
+  response.getCookies( newCookies);
+  if (newCookies.size() > 0)
+  {
+    m_cookies = newCookies;
+  }
+
+  // We should get back an HTTP_OK code
+  if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_OK)
+  {
+    // D'oh!  The server didn't like our request.
+    std::ostringstream respStatus;
+    respStatus << "Status: " << response.getStatus() << "\nReason: " << response.getReasonForStatus( response.getStatus());
+    respStatus << "\n\nReply text:\n";
+    respStatus << responseStream.rdbuf();
+    serverErr = respStatus.str();
+
+    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
+    {
+      // Probably some kind of username/password mismatch.  Clear the password so that
+      // the user can enter it again
+      m_password.clear();
+    }
+
+    reqErr = JM_HTTP_SERVER_ERR;
+  }
+
+  return reqErr;
+}
+
+
+
 // download the specified file.
 // Note: remoteFileName is just the file name (no path), but localFileName should include
 // the complete path
 RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::downloadFile( const std::string &transId,
                                                                           const std::string &remoteFileName,
                                                                           const std::string &localFileName,
-                                                                          string &serverErr)
+                                                                          std::string &serverErr)
 {
   JobManagerErrorCode reqErr = JM_OK;
 
@@ -339,7 +466,8 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::downloadFile( const 
 
   // We need to send a GET request to the server with a query string of "TransID=xxxx&Action=download&File=zzzzz"
   Poco::Net::HTTPRequest req;
-  string queryString = "Action=download&TransID=" + transId + "&File=" + remoteFileName;
+  std::string queryString = "Action=download&TransID=" + transId + "&File=" + remoteFileName;
+  queryString += "&XDEBUG_SESSION_START=MWS";  // enable debugging of the remote PHP
   reqErr = initGetRequest( req, "/file_transfer", queryString);
   if ( reqErr != JM_OK)
   {
@@ -400,32 +528,39 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::downloadFile( const 
 
 
 
-// Wrapper for a lot of the boilerplate code needed to perform an HTTPS GET
-RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::initGetRequest( Poco::Net::HTTPRequest &req, string extraPath, string queryString)
+// Wrappers for a lot of the boilerplate code needed to perform an HTTPS GET or POST
+RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::initHTTPRequest( Poco::Net::HTTPRequest &req,
+                                                                             const std::string &method,
+                                                                             std::string extraPath,
+                                                                             std::string queryString)
 {
   // Open an HTTP connection to the cluster
   Poco::URI uri(m_serviceBaseUrl);
 
-  if (uri.getScheme() != "https")
-  {
-    // Disallow unencrypted channels (because we're sending the password in the
-    // HTTP auth header)
-    return JM_CLEARTEXT_DISALLOWED;
-  }
+  //if (uri.getScheme() != "https")
+  //{
+//    // Disallow unencrypted channels (because we're sending the password in the
+//    // HTTP auth header)
+//    return JM_CLEARTEXT_DISALLOWED;
+//  }
 
   std::string path = uri.getPath();
   // Path should be something like "/mws/rest", append extraPath to it.
   path += extraPath;
 
   uri.setPath( path);
-  uri.setQuery(queryString);
+  if (method == Poco::Net::HTTPRequest::HTTP_GET &&
+      queryString.size() > 0)
+  {
+    uri.setQuery(queryString);
+  }
 
   req.setVersion(Poco::Net::HTTPRequest::HTTP_1_1);
-  req.setMethod( Poco::Net::HTTPRequest::HTTP_GET);
+  req.setMethod( method);
   req.setURI(uri.toString());
 
   // Set the Authorization header (base64 encoded)
-  ostringstream encodedAuth;
+  std::ostringstream encodedAuth;
   Poco::Base64Encoder encoder( encodedAuth);
 
   encoder << m_userName << ":" << m_password;
@@ -526,7 +661,7 @@ MwsRemoteJobManager::MwsRemoteJobManager(const Poco::XML::Element *elem)
 // Returns true if the job was successfully submitted, false if there was a problem
 // retString will contain the job ID on success or an explanation of the problem on
 // failure.
-bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retString)
+bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, std::string &retString)
 {
     /**************************************************************************
      * The minimal JSON text needed to submit a job looks something like this:
@@ -548,7 +683,7 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
 
     // Build up the JSON struct for submitting a job to MWS
     std::ostringstream json;
-
+#if 0
     json << "{\n ";
     json << "\"commandFile\": \"" << m_mpirunExecutable << "\",\n";
     json << "\"commandLineArguments\": \"" << escapeQuoteChars( remoteTask.getCmdLineParams() )<< "\",\n";
@@ -561,7 +696,18 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
     //json << "\"standardErrorFilePath\": \"/home/" + user + "\",\n";
     //json << "\"standardOutputFilePath\": \"/home/" + user + "\"\n";
     json << "}";
-
+#else
+    // This JSON is known to work properly...
+    json << "{\n";
+    json << "\"commandFile\": \"/usr/lib64/openmpi/bin/mpirun\",\n";
+    json << "\"commandLineArguments\": \"-n 16 -npernode 2 --hostfile $PBS_NODEFILE /SNS/users/xmr/hello_mpi/hello\",\n";
+    json << "\"initialWorkingDirectory\": \"/SNS/users/xmr\",\n";
+    json << "\"user\": \"xmr\",\n";
+    json << "\"group\": \"users\",\n";
+    json << "\"name\": \"MPI_Hello\",\n";
+    json << "\"requirements\": [{\"requiredProcessorCountMinimum\": 16}]\n";
+    json << "}";
+#endif
     // Note: I'm currently not specifying the standardErrorFilePath or standardOutputFilePath
     // parameters.  I don't think I'll need them.
 
@@ -591,7 +737,7 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
     req.setContentType( "application/json");
 
     // Set the Authorization header (base64 encoded)
-    ostringstream encodedAuth;
+    std::ostringstream encodedAuth;
     Poco::Base64Encoder encoder( encodedAuth);
 
     encoder << m_userName << ":" << m_password;
@@ -676,7 +822,7 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
 // it writes an error message to errMsg and returns false;
 bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
                                      RemoteJob::JobStatus &retStatus,
-                                     string &errMsg)
+                                     std::string &errMsg)
 {
 
     /*****************
@@ -710,7 +856,7 @@ bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
   req.setContentType( "application/json");
 
   // Set the Authorization header (base64 encoded)
-  ostringstream encodedAuth;
+  std::ostringstream encodedAuth;
   Poco::Base64Encoder encoder( encodedAuth);
 
   encoder << m_userName << ":" << m_password;
@@ -813,7 +959,7 @@ bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
 // returns true.  If there was a problem submitting the query (network is down, for example)
 // it writes an error message to errMsg and returns false;
 bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
-                                        string &errMsg)
+                                        std::string &errMsg)
 {
 
   /*****************
@@ -846,7 +992,7 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
   req.setContentType( "application/json");
 
   // Set the Authorization header (base64 encoded)
-  ostringstream encodedAuth;
+  std::ostringstream encodedAuth;
   Poco::Base64Encoder encoder( encodedAuth);
 
   encoder << m_userName << ":" << m_password;
@@ -917,18 +1063,18 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
         {
           // This is a job submitted by MantidPlot.  Construct a RemoteJob instance and add it to jobList
           // Fields passed to the constructor for RemoteJob
-          string jobId;
+          std::string jobId;
           RemoteJob::JobStatus status;
-          string algName;
+          std::string algName;
 
           (*oneJob.find("id")).second.getValue( jobId);
           (*oneJob.find( "name")).second.getValue( algName);
-          string submitTimeString;
+          std::string submitTimeString;
           (*oneJob.find( "submitDate")).second.getValue( submitTimeString);
           // Unfortunately, the string that MWS returns is not quite in ISO 8601 format
           convertToISO8601( submitTimeString);
 
-          string statusString;
+          std::string statusString;
           (*oneJob.find( "expectedState")).second.getValue( statusString);
 
           // Convert the string into a JobStatus
@@ -984,11 +1130,11 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
 // returned by MWS into a properly formatted ISO 8601 string.
 // Note:  Only reason it's a member of MwsRemoteJobManager is so that it
 // can access the logger.
-bool MwsRemoteJobManager::convertToISO8601( string &time)
+bool MwsRemoteJobManager::convertToISO8601( std::string &time)
 {
   // First the easy bit: insert a 'T' between the date and time fields
   size_t pos = time.find( ' ');
-  if (pos == string::npos)
+  if (pos == std::string::npos)
     return false;  // Give up.  String wasn't formatted the way we expected it to be.
 
   time[pos]='T';
@@ -997,15 +1143,15 @@ bool MwsRemoteJobManager::convertToISO8601( string &time)
   // the appropriate offset value.  Amazingly, there does not seem to be an easy
   // way to convert a timezone abbreviation into an offset, so I've had to make
   // my own map.
-  string zone = time.substr(time.rfind(' ')+1);
+  std::string zone = time.substr(time.rfind(' ')+1);
   time.resize(time.rfind(' '));
-  map<string, string>::const_iterator it = m_tzOffset.find(zone);
+  std::map<std::string, std::string>::const_iterator it = m_tzOffset.find(zone);
   if (it == m_tzOffset.end())
   {
     // Didn't recognize the timezone abbreviation.  Log a warning, but otherwise
     // ignore it and continue on...
     g_log.warning() << "Unrecognized timezone abbreviation \"" << zone
-                    << "\".  Ignoring it and treating the time as UTC." << endl;
+                    << "\".  Ignoring it and treating the time as UTC." << std::endl;
   }
   else
   {

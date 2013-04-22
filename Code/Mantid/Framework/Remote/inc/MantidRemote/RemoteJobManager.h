@@ -58,37 +58,31 @@ public:
   virtual JobManagerErrorCode startTransaction( std::string &transId, std::string &directory, std::string &serverErr) = 0;
   virtual JobManagerErrorCode stopTransaction( std::string &transId, std::string &serverErr) = 0;
 
-  /*************
-    TODO: Uncomment these when I'm ready to implement them
-
-  // returns the ID's of all the user's open transactions
-  virtual bool openTransactions(std::vector<std::string> &transIds) = 0;
-
-  // NOTE: I haven't decided on the function signatures for upload/download yet.
-  // Probably ought to use std::istream and std::ostream....
-  //virtual bool uploadFile( std::string & TransId, ???? ) = 0;
-  //virtual bool downloadFile( std::string & TransId, ???? ) = 0;
-  **********/
-
-  virtual bool submitJob( const RemoteTask &remoteTask, std::string &retString) = 0;
-  virtual bool jobStatus( const std::string &jobId,
-                          RemoteJob::JobStatus &retStatus,
-                          std::string &errMsg) = 0;
-  virtual bool jobStatusAll( std::vector<RemoteJob> &jobList, std::string &errMsg) = 0;
-
-
   // Returns a list of all the files on the remote machine associated with the specified transaction
   virtual JobManagerErrorCode listFiles( const std::string &transId,
                                          std::vector<std::string> &listing,
                                          std::string &serverErr) = 0;
 
-  // download the specified file.
+  // Transfer files to/from the compute cluster.
   // Note: remoteFileName is just the file name (no path), but localFileName should include
   // the complete path
+  virtual JobManagerErrorCode uploadFile( const std::string &transId,
+                                          const std::string &remoteFileName,
+                                          const std::string &localFileName,
+                                          std::string &serverErr) = 0;
   virtual JobManagerErrorCode downloadFile( const std::string &transId,
                                             const std::string &remoteFileName,
                                             const std::string &localFileName,
                                             std::string &serverErr) = 0;
+
+  // submit a job to the compute cluster
+  virtual bool submitJob( const RemoteTask &remoteTask, std::string &retString) = 0;
+
+  virtual bool jobStatus( const std::string &jobId,
+                          RemoteJob::JobStatus &retStatus,
+                          std::string &errMsg) = 0;
+  virtual bool jobStatusAll( std::vector<RemoteJob> &jobList, std::string &errMsg) = 0;
+
 
 /************
   TODO: Uncomment these when we're ready to implement
@@ -150,17 +144,26 @@ public:
                                          std::vector<std::string> &listing,
                                          std::string &serverErr);
 
-  // download the specified file.
+  // Transfer files to/from the compute cluster.
   // Note: remoteFileName is just the file name (no path), but localFileName should include
   // the complete path
+  virtual JobManagerErrorCode uploadFile( const std::string &transId,
+                                          const std::string &remoteFileName,
+                                          const std::string &localFileName,
+                                          std::string &serverErr);
   virtual JobManagerErrorCode downloadFile( const std::string &transId,
                                             const std::string &remoteFileName,
                                             const std::string &localFileName,
                                             std::string &serverErr);
 protected:
 
-  // Wraps up some of the boilerplate code needed to execute an HTTP GET request
-  JobManagerErrorCode initGetRequest( Poco::Net::HTTPRequest &req, std::string extraPath, std::string queryString);
+  // Wraps up some of the boilerplate code needed to execute HTTP GET and POST requests
+  JobManagerErrorCode initGetRequest( Poco::Net::HTTPRequest &req, std::string extraPath, std::string queryString)
+  { return initHTTPRequest( req, Poco::Net::HTTPRequest::HTTP_GET, extraPath, queryString); }
+  JobManagerErrorCode initPostRequest( Poco::Net::HTTPRequest &req, std::string extraPath)
+  { return initHTTPRequest( req, Poco::Net::HTTPRequest::HTTP_POST, extraPath); }
+  JobManagerErrorCode initHTTPRequest( Poco::Net::HTTPRequest &req, const std::string &method,
+                                       std::string extraPath, std::string queryString="");
 
 
   std::string m_serviceBaseUrl; // What we're going to connect to.  The full URL will be
