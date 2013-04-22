@@ -369,6 +369,28 @@ public:
   }
 
 
+  // Test that not loading logs works ok.
+  void test_LoadLogs()
+  {
+      Mantid::API::FrameworkManager::Instance();
+      LoadEventNexus ld;
+      std::string outws_name = "_loadeventnexus_test_loadlogs";
+      ld.initialize();
+      ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
+      ld.setPropertyValue("OutputWorkspace", outws_name);
+      ld.setProperty<bool>("LoadLogs", false);
+
+      ld.execute();
+      TS_ASSERT( ld.isExecuted() );
+
+      MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
+
+      // Make sure that we throw if we try to read a log (that shouldn't be there)
+      TS_ASSERT_THROWS( WS->getLog("proton_charge"),  std::invalid_argument);
+
+
+  }
+
 
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount, std::string BankName = "bank36", bool willFail=false)
   {
