@@ -14,7 +14,9 @@ namespace MDEvents
     *  from the input parameters of the algorithm and parameters, retrieved from input and 
     *  (if availible) output MD workspace
     *
-    *   
+    *  The parameters are mainly related to MDTransfQ3D though are partially applicable to MDTransfModQ (scaling)
+    *  They are fully igonred for MDTransfNoQ which copies its data to MDworkspace and completely ignores 
+    *  the transformation matrix, defined by this class
       
     @date 2012-03-20
 
@@ -54,7 +56,8 @@ namespace CnvrtToMD
     {
       LabFrame, //< * '''Q (lab frame)''': this calculates the momentum transfer (ki-kf) for each event is calculated in the experimental lab frame.
       SampleFrame, //< * '''Q (sample frame)''': the goniometer rotation of the sample is taken out, to give Q in the frame of the sample. See [[SetGoniometer]] to specify the goniometer used in the experiment.     
-      HKLFrame   //<* '''HKL''': uses the UB matrix (see [[SetUB]], [[FindUBUsingFFT]] and others) to calculate the HKL Miller indices of each event.
+      HKLFrame,   //<* '''HKL''': uses the UB matrix (see [[SetUB]], [[FindUBUsingFFT]] and others) to calculate the HKL Miller indices of each event.
+      Auto   //<*  This tries to select one of above by analyzing the goniometer and UB matrix parameters on the workspace and tries to establish what coordinate system is actually defined/needed.
     };
 }
 
@@ -77,6 +80,10 @@ public:
   /// return the list of possible scalings for momentums
    std::vector<std::string> getQScalings()const{return m_QScalingID;}
    CnvrtToMD::CoordScaling getQScaling(const std::string &ScID)const;
+   /// returns the list of possible target frames to convert to
+   std::vector<std::string> getTargetFrames()const;
+   /// converts the target frame string representation into the frame ID
+   CnvrtToMD::TargetFrame getTargetFrame(const std::string &FrameID)const;
 private:
     bool m_isUVdefault;
     /** vectors, which describe the projection plain the target ws is based on (notional or cryst cartezian coordinate system). The transformation matrix below 
