@@ -52,7 +52,6 @@ void StepScan::initLayout()
 
   // Try to connect to live listener for default instrument to see if live button should be enabled
   // Enable the button if the connection is successful. Will be disabled otherwise.
-  m_uiForm.liveButton->setEnabled(true);
   m_uiForm.liveButton->setEnabled(LiveListenerFactory::Instance().checkConnection(m_instrument));
   connect( m_uiForm.liveButton, SIGNAL(clicked(bool)), SLOT(triggerLiveListener(bool)), Qt::QueuedConnection );
 
@@ -80,10 +79,10 @@ void StepScan::cleanupWorkspaces()
     if ( ADS.doesExist( m_plotWSName ) ) ADS.remove( m_plotWSName );
     m_plotWSName.clear();
   }
-  // Disable start button
+
   m_uiForm.startButton->setEnabled(false);
-  // Disable the button for launching the instrument view
   m_uiForm.launchInstView->setEnabled(false);
+  m_uiForm.plotVariable->setEnabled(false);
   // Disconnect anything listening to the comboboxes
   m_uiForm.plotVariable->disconnect(SIGNAL(currentIndexChanged(const QString &)));
   m_uiForm.normalization->disconnect(SIGNAL(currentIndexChanged(const QString &)));
@@ -203,31 +202,40 @@ void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
     return;
   }
 
-  // This is unfortunately more or less a copy of SumEventsByLogValue::getNumberSeriesLogs
-  // but I want to populate the box before running the algorithm
-  const auto & logs = ws->run().getLogData();
-  for ( auto log = logs.begin(); log != logs.end(); ++log )
-  {
-    const std::string logName = (*log)->name();
-    // Don't add scan_index - that's already there
-    if ( logName == scan_index ) continue;
-    // Try to cast to an ITimeSeriesProperty
-    auto tsp = dynamic_cast<const ITimeSeriesProperty*>(*log);
-    // Move on to the next one if this is not a TSP
-    if ( tsp == NULL ) continue;
-    // Don't keep ones with only one entry
-    //if ( tsp->realSize() < 2 ) continue;
-    // Now make sure it's either an int or double tsp, and if so add log to the list
-    if ( dynamic_cast<TimeSeriesProperty<double>* >(*log) || dynamic_cast<TimeSeriesProperty<int>* >(*log))
-    {
-      m_uiForm.plotVariable->addItem( QString::fromStdString( logName ) );
-    }
-  }
+  expandPlotVarCombobox( ws );
 
   // Now that this has been populated, allow the user to select from it
   m_uiForm.plotVariable->setEnabled(true);
   // Now's the time to enable the start button as well
   m_uiForm.startButton->setEnabled(true);
+}
+
+void StepScan::expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr& ws)
+{
+  // This is unfortunately more or less a copy of SumEventsByLogValue::getNumberSeriesLogs
+  // but I want to populate the box before running the algorithm
+  const auto & logs = ws->run().getLogData();
+  for ( auto log = logs.begin(); log != logs.end(); ++log )
+  {
+    const QString logName = QString::fromStdString( (*log)->name() );
+    // Don't add scan_index - that's already there
+    if ( logName == "scan_index" ) continue;
+    // Try to cast to an ITimeSeriesProperty
+    auto tsp = dynamic_cast<const ITimeSeriesProperty*>(*log);
+    // Move on to the next one if this is not a TSP
+    if ( tsp == NULL ) continue;
+    // Don't keep ones with only one entry
+    if ( tsp->realSize() < 2 ) continue;
+    // Now make sure it's either an int or double tsp
+    if ( dynamic_cast<TimeSeriesProperty<double>* >(*log) || dynamic_cast<TimeSeriesProperty<int>* >(*log))
+    {
+      // Add it to the list if it isn't already there
+      if ( m_uiForm.plotVariable->findText( logName ) == -1 )
+      {
+        m_uiForm.plotVariable->addItem( logName );
+      }
+    }
+  }
 }
 
 void StepScan::fillNormalizationCombobox()
@@ -343,6 +351,8 @@ void StepScan::runStepScanAlgLive(std::string stepScanProperties)
   m_monitorLiveData = startLiveData->getProperty("MonitorLiveData");
 
   AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
+  connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
+           SLOT(expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
   connect( this, SIGNAL(updatePlot(const QString&)), SLOT(generateCurve(const QString&)) );
 }
 
@@ -425,6 +435,8 @@ void StepScan::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf)
 void StepScan::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
 {
   checkForMaskWorkspace(pNf->object_name());
+  checkForResultTableUpdate(pNf->object_name());
+  checkForVaryingLogs(pNf->object_name());
 }
 
 void StepScan::checkForMaskWorkspace(const std::string & wsName)
@@ -437,11 +449,25 @@ void StepScan::checkForMaskWorkspace(const std::string & wsName)
     const int index = m_uiForm.maskWorkspace->findText("MaskWorkspace");
     if ( index != -1 ) m_uiForm.maskWorkspace->setCurrentIndex(index);
   }
-  else if ( wsName == m_tableWSName )
+}
+
+void StepScan::checkForResultTableUpdate(const std::string& wsName)
+{
+  if ( wsName == m_tableWSName )
   {
     emit updatePlot( m_uiForm.plotVariable->currentText() );
   }
 }
+
+void StepScan::checkForVaryingLogs(const std::string& wsName)
+{
+  if ( wsName == m_inputWSName )
+  {
+    MatrixWorkspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName);
+    emit logsUpdated( ws );
+  }
+}
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
