@@ -69,25 +69,22 @@ namespace MDAlgorithms
     template<typename MDE, size_t nd>
     void finalizeOutput(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr outWS);
 
-    template<typename MDE, size_t nd>
-    uint64_t loadEventsFromSubBoxes(MDEvents::MDBox<MDE, nd> *TargetBox);
+
+    uint64_t loadEventsFromSubBoxes(API::IMDNode *TargetBox);
 
     // the class which flatten the box structure and deal with it
     MDEvents::MDBoxFlatTree m_BoxStruct;
-
-    Kernel::DiskBuffer *pDiskBuffer;
+    // the vector of box structures for contributing files components
+    std::vector<MDEvents::MDBoxFlatTree> m_fileComponentsStructure;
   public:
-
+    bool m_fileBasedTargetWS;
     /// Files to load
     std::vector<std::string> m_Filenames;
 
-    /// Vector of file handles to each input file
-    std::vector< ::NeXus::File *> m_pFiles;
+    /// Vector of file handles to each input file //TODO unique?
+    std::vector<API::IBoxControllerIO *> m_EventLoader;
 
-    /// Vector of the box_index vector for each each input file
-    std::vector<boost::shared_ptr<std::vector<uint64_t> > > m_EachBoxIndexes;
 
- 
     /// Output IMDEventWorkspace
     Mantid::API::IMDEventWorkspace_sptr m_OutIWS;
 
@@ -108,7 +105,7 @@ namespace MDAlgorithms
 
     /// Set to true if the output is cloned of the first one
     //bool clonedFirst;
-
+    void clearEventLoaders();
   };
 
 

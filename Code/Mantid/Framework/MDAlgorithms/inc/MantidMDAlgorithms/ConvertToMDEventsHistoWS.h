@@ -187,7 +187,6 @@ public:
 
         pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL); 
         pWSWrapper->pWorkspace()->refreshCache();
-        pWSWrapper->refreshCentroid();
         pProg->report();          
     }
 };

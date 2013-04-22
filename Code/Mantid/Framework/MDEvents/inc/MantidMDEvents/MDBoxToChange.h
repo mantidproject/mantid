@@ -35,15 +35,15 @@ namespace Mantid
     */
 
     //-----------------------------------------------    
-    template<typename MDE, size_t nd>
-    class MDBoxToChange
-    {
-    public:
-      MDBoxToChange():m_ParentGridBox(NULL),m_Index(std::numeric_limits<size_t>::max()-1){};
 
-      size_t getIndex()const{return m_Index;}
+      class MDBoxToChange: API::IMDNode
+      {
+        public:
+        MDBoxToChange():m_ParentGridBox(NULL),m_Index(std::numeric_limits<size_t>::max()-1){};
 
-      MDGridBox<MDE,nd>* getParent()const{return m_ParentGridBox;}
+        size_t getIndex()const{return m_Index;}
+
+        API::IMDNode* getParent()const{return m_ParentGridBox;}
 
       // Below for the time being:
       //MDGridBox<MDE,nd>* splitToGridBox();
@@ -51,69 +51,72 @@ namespace Mantid
 
     private:
       /// the pointer to the greedbox, which contains box to split
-      MDGridBox<MDE,nd>* m_ParentGridBox;
+      API::IMDNode* m_ParentGridBox;
       /// index of the box to split in the gridbox array
       size_t m_Index;
     public:  
       /**function checks if the containing box has enough data 
        * the definition "enough" is also specified within this function
       */
-      bool isFull(size_t maxSize=1000)
+      bool isFull(size_t /*maxSize=1000*/)
       {
         /**stub */
         return true;
       }
       /**constructor */
-      MDBoxToChange(MDBox<MDE,nd> *box,size_t Index)
+      MDBoxToChange(API::IMDNode*box,size_t Index)
       {
         m_Index = Index;
-        MDGridBox<MDE, nd> * parent = dynamic_cast<MDGridBox<MDE, nd> * >(box->getParent());
+        API::IMDNode* parent = box->getParent();
         if(parent)
         {
           m_ParentGridBox=parent;
         }
         else  //HACK! if not parent, it is probably root a box -> such type should be created but meanwhile;
         {
-          m_ParentGridBox=reinterpret_cast<MDGridBox<MDE,nd> *>(box);
+          m_ParentGridBox=box;
           m_Index  = std::numeric_limits<size_t>::max();
         }
 
       }
 
       /**DESCRIBE */
-      MDGridBox<MDE,nd>* splitToGridBox()
+      API::IMDNode * splitToGridBox()
       {
-        MDBox<MDE, nd> *pMDBox;
+        //API::IMDNode* pMDBox;
         bool rootBox(false);
-        // get the actual box to split:
+        //// get the actual box to split: TODO: disabled until MD factory can generate a MDBox<nd> with reference to IMDNode
         if(m_Index==std::numeric_limits<size_t>::max())
         {
-          rootBox = true;
-          pMDBox = reinterpret_cast<MDBox<MDE,nd>*>(m_ParentGridBox);
-        }
-        else   pMDBox = dynamic_cast<MDBox<MDE,nd>*>(m_ParentGridBox->getChild(m_Index));
+
+        //    rootBox = true;
+        //    pMDBox = reinterpret_cast<MDBox<MDE,nd>*>(m_ParentGridBox);
+        //}
+        //else   
+        //    pMDBox = dynamic_cast<MDBox<MDE,nd>*>(m_ParentGridBox->getChild(m_Index));
 
 
-        //  Construct the grid instead of box. This should take the object out of the disk MRU
-        MDGridBox<MDE, nd> * gridbox = new MDGridBox<MDE, nd>(pMDBox);
-        // Track how many MDBoxes there are in the overall workspace
-        pMDBox->getBoxController()->trackNumBoxes(pMDBox->getDepth());
+        ////  Construct the grid instead of box. This should take the object out of the disk MRU
+        //MDGridBox<MDE, nd> * gridbox = new MDGridBox<MDE, nd>(pMDBox);
+        //// Track how many MDBoxes there are in the overall workspace
+        //pMDBox->getBoxController()->trackNumBoxes(pMDBox->getDepth());
 
 
-        if(rootBox) // carefull -- root pointer is not redefined here!
-        {
-          // this makes workspace data pointer invalid, but the actual pointer will remain dangling so care should be taken not to dereference it 
-          delete pMDBox;  
-          m_ParentGridBox = gridbox;
-        }
-        else
-        {  // this will delete the old box and set new gridBox instead
-          m_ParentGridBox->setChild(m_Index,gridbox);
+        //if(rootBox) // carefull -- root pointer is not redefined here!
+        //{
+        //  // this makes workspace data pointer invalid, but the actual pointer will remain dangling so care should be taken not to dereference it 
+        //  delete pMDBox;  
+        //  m_ParentGridBox = gridbox;
+        //}
+        //else
+        //{  // this will delete the old box and set new gridBox instead
+        //  m_ParentGridBox->setChild(m_Index,gridbox);
         }
         // make this grid box undefined again
         m_Index=std::numeric_limits<size_t>::max()-1;
 
-        return gridbox;
+        //return gridbox;
+        return NULL;
       }
     };
 

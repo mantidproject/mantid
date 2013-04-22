@@ -607,8 +607,8 @@ namespace MDEvents
     if (DODEBUG) g_log.information() << cputim << ": Performing the refreshCache().\n";
 
     //TODO: Centroid in parallel, maybe?
-    ws->getBox()->refreshCentroid(NULL);
-    if (DODEBUG) g_log.information() << cputim << ": Performing the refreshCentroid().\n";
+    //ws->getBox()->refreshCentroid(NULL);
+    //if (DODEBUG) g_log.information() << cputim << ": Performing the refreshCentroid().\n";
 
 
     if (DODEBUG)

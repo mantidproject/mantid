@@ -134,8 +134,9 @@ namespace MDAlgorithms
         // Add events, with bounds checking
         box1->addEvents(eventsCopy);
         box->releaseEvents();
+
       }
-      prog.report("Adding Events");
+      prog.report("Substracting Events");
     } while (it2.next());
 
     this->progress(0.41, "Splitting Boxes");
@@ -151,8 +152,8 @@ namespace MDAlgorithms
     ws1->refreshCache();
 
     // Set a marker that the file-back-end needs updating if the # of events changed.
-    if (ws1->getNPoints() != initial_numEvents)
-      ws1->setFileNeedsUpdating(true);
+     if (ws1->getNPoints() != initial_numEvents)
+        ws1->setFileNeedsUpdating(true);
   }
 
   //----------------------------------------------------------------------------------------------

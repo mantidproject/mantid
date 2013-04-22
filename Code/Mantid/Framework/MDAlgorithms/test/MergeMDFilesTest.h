@@ -100,12 +100,22 @@ public:
     {
       TS_ASSERT( ws->isFileBacked() );
       TS_ASSERT( Poco::File(actualOutputFilename).exists());
-      ws->getBoxController()->closeFile(true);
+      ws->clearFileBacked(false);
+      Poco::File(actualOutputFilename).remove();
+
     }
 
     // Cleanup generated input files
     for (size_t i=0; i<inWorkspaces.size(); i++)
-      inWorkspaces[i]->getBoxController()->closeFile(true);
+    { 
+        if(inWorkspaces[i]->getBoxController()->isFileBacked())
+        {
+            std::string fileName  = inWorkspaces[i]->getBoxController()->getFileIO()->getFileName();
+            inWorkspaces[i]->clearFileBacked(false);
+            Poco::File(fileName).remove();
+
+        }
+    }
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

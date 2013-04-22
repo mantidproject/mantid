@@ -158,7 +158,9 @@ Parts of the code were written with the idea of generalising functionality at a 
 #include <iostream>
 #include <cfloat>
 #include "MantidMDEvents/MDBox.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include "MantidKernel/Memory.h"
+
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -227,6 +229,7 @@ namespace Mantid
     /// Execute the algorithm
     void LoadSQW::exec()
     {
+
       m_fileName  = std::string(getProperty("Filename"));
       // Parse Extract metadata. Including data locations.
       parseMetadata(m_fileName);
@@ -259,13 +262,21 @@ namespace Mantid
 
       // Add oriented lattice.
       addLattice(pWs);
+      // Save the empty WS and turn it into a file-backed MDEventWorkspace (on option)
+      m_outputFile = getPropertyValue("OutputFilename");
 
+      // set file backed;
+      if(!m_outputFile.empty()) 
+      {
+          auto Saver = boost::shared_ptr<API::IBoxControllerIO>(new MDEvents::BoxControllerNeXusIO(bc.get()));
+          bc->setFileBacked(Saver,m_outputFile);
+          pWs->getBox()->setFileBacked();
+          bc->getFileIO()->setWriteBufferSize(1000000);
+      }
       // Start with a MDGridBox.
       pWs->splitBox();
 
       readBoxSizes();
-      // Save the empty WS and turn it into a file-backed MDEventWorkspace (on option)
-      m_outputFile = getPropertyValue("OutputFilename");
 
       if (!m_outputFile.empty())
       {
@@ -287,9 +298,15 @@ namespace Mantid
           g_log.warning() << "You may not have enough physical memory available to load the " << m_nDataPoints << " points into memory. You can cancel and specify OutputFilename to load to a file back-end." << std::endl;
       }
 
-      bc = pWs->getBoxController();
-      bc->setCacheParameters( sizeof(MDEvent<4>), 1000000);
-      std::cout << "File backed? " << bc->isFileBacked() << ". Cache " << bc->getDiskBuffer().getMemoryStr() << std::endl;
+      if(bc->isFileBacked())
+      {
+          std::cout << "File backed? " << bc->isFileBacked() << ". Cache " << bc->getFileIO()->getMemoryStr() << std::endl;
+      }
+      else
+      {
+          bool ff(false);
+          std::cout << "File backed? " << ff << ". Cache  0" <<  std::endl;
+      }
 
       //Persist the workspace.
       API::IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
@@ -352,7 +369,9 @@ namespace Mantid
       // For tracking when to split boxes
       size_t eventsAdded = 0;
       BoxController_sptr bc = ws->getBoxController();
-      DiskBuffer & dbuf = bc->getDiskBuffer();
+      DiskBuffer * dbuf(NULL);
+      if(bc->isFileBacked())
+          dbuf = bc->getFileIO();
 
       for (int blockNum=0; blockNum < numBlocks; blockNum++)
       {
@@ -423,7 +442,7 @@ namespace Mantid
           tp.joinAll();
 
           // Flush the cache - this will save things out to disk
-          dbuf.flushCache();
+          dbuf->flushCache();
           // Flush memory
           Mantid::API::MemoryManager::Instance().releaseFreeMemory();
           eventsAdded = 0;

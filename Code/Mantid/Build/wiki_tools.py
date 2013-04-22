@@ -126,12 +126,25 @@ def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=Fa
         print "Warning: Cannot find source for algorithm"
         return desc
     else:
+        return get_wiki_from_source(source, tag, verbose)
+
+def get_fitfunc_summary(name, verbose=True):
+    source = find_fitfunc_file(name)
+    if len(source) <= 0:
+        print "Warning: Cannot find source for fitfunction '%s'" % name
+        return ""
+    if name == "FlatBackground":
+        print "*****", source
+    return get_wiki_from_source(source, "*WIKI*", verbose)
+
+def get_wiki_from_source(source, tag, verbose=True):
         f = open(source,'r')
         lines = f.read().split('\n')
         #print lines
         f.close()
         
-        print algo
+        print source
+        desc = ""
         try:
             # Start and end location markers.
             start_tag_cpp = "/" + tag 
@@ -157,15 +170,13 @@ def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=Fa
 
             if verbose:
                 if start_index == end_index:
-                    print "No algorithm %s section in source." % tag
+                    print "No  '%s' section in source '%s'." % (tag, source)
                 else:
-                    print "Getting algorithm %s section from source." % tag
+                    print "Getting '%s' section from source '%s'." % (tag, source)
         
         except IndexError:
-            print "No algorithm %s section in source." % tag
+            print "No '%s' section in source '%s'." % (tag, source)
         return desc        
-
-        
         
 #======================================================================
 def create_function_signature(alg, algo_name):
@@ -265,6 +276,37 @@ def find_algo_file(algo, version=-1):
     if cpp in cpp_files_bare:
         n = cpp_files_bare.index(cpp, )
         source = cpp_files[n]
+    elif pyfile in python_files_bare:
+        n = python_files_bare.index(pyfile, )
+        source = python_files[n]
+    return source
+
+#======================================================================
+def find_fitfunc_file(name):
+    """Find the files for a given algorithm (and version)"""
+    global file_search_done
+    if not file_search_done:
+        intialize_files()
+        file_search_done=True
+
+    source = ''
+    filename = name
+    cpp = filename + ".cpp"
+    pyfile = filename + ".py"
+    if cpp in cpp_files_bare:
+        candidates = []
+        total = cpp_files_bare.count(cpp)
+        index = -1
+        while len(candidates) < total:
+            index = cpp_files_bare.index(cpp, index+1)
+            candidates.append(cpp_files[index])
+        source = candidates[0]
+        if total > 1:
+            print candidates
+            for filename in candidates:
+                if "CurveFitting" in filename:
+                    source = filename
+                    break
     elif pyfile in python_files_bare:
         n = python_files_bare.index(pyfile, )
         source = python_files[n]

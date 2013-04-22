@@ -1,3 +1,15 @@
+/*WIKI*
+A Flat background function is defined as:
+
+<math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mi>y</mi>
+    <mo>=</mo>
+    <mi>A0</mi>
+  </mrow>
+</math>
+*WIKI*/
+
 #include "MantidCurveFitting/FlatBackground.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/System.h"
@@ -30,7 +42,7 @@ namespace CurveFitting
   /// The only parameter is the constant for the flat background.
   void FlatBackground::init()
   {
-    declareParameter("A0", 0.0);
+    declareParameter("A0", 0.0, "coefficient for linear term");
   }
 
   /**

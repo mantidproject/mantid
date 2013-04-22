@@ -6,7 +6,7 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include <ostream>
 #include "MantidKernel/Strings.h"
@@ -29,30 +29,40 @@ namespace Mantid
 namespace MDEvents
 {
 
-  //===============================================================================================
-  //===============================================================================================
-  //-----------------------------------------------------------------------------------------------
-  /** Empty constructor. Used when loading from NXS files.
-   * */
-  TMDE(MDGridBox)::MDGridBox()
-   : MDBoxBase<MDE, nd>(), numBoxes(0), nPoints(0)
-  {
-  }
+ ////===============================================================================================
+ ////===============================================================================================
 
+ 
   //-----------------------------------------------------------------------------------------------
   /** Constructor with a box controller.
-   * @param bc :: BoxController
+   * @param bc :: poineter to the BoxController, owned by workspace
    * @param depth :: recursive split depth
    * @param extentsVector :: size of the box
    */
-  TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
-   : MDBoxBase<MDE, nd>(extentsVector),
+  TMDE(MDGridBox)::MDGridBox(BoxController *const bc, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
+   : MDBoxBase<MDE, nd>(bc,depth,UNDEF_SIZET,extentsVector),
      numBoxes(0), nPoints(0)
   {
-    this->m_depth = depth;
-    if (!bc)
+      initGridBox();
+  }
+
+ /** convenience Constructor, taking the shared pointer and extracting const pointer from it 
+   * @param bc :: shared poineter to the BoxController, owned by workspace
+   * @param depth :: recursive split depth
+   * @param extentsVector :: size of the box
+ */
+  TMDE(MDGridBox)::MDGridBox(boost::shared_ptr<API::BoxController> &bc, const uint32_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
+   : MDBoxBase<MDE, nd>(bc.get(),depth,UNDEF_SIZET,extentsVector),
+     numBoxes(0), nPoints(0)
+  {
+       initGridBox();
+  }
+  /// common part of MDGridBox contstructor;
+  template<typename MDE,size_t nd>
+  void MDGridBox<MDE,nd>::initGridBox()
+  {
+    if (!this->m_BoxController)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
-    this->m_BoxController = bc;
 
     // How many is it split?
     for (size_t d=0; d<nd; d++)
@@ -62,8 +72,8 @@ namespace MDEvents
     size_t tot = computeSizesFromSplit();
     if (tot == 0)
       throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
-  }
 
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor
@@ -71,26 +81,22 @@ namespace MDEvents
    * @param splitRecursively :: flag to split boxes recursively
    */
   TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box,bool splitRecursively)
-   : MDBoxBase<MDE, nd>(*box),
+   : MDBoxBase<MDE, nd>(*box,box->getBoxController()),
      nPoints(0)
   {
-    BoxController_sptr bc = box->getBoxController();
-    if (!bc)
-      throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
+    if (!this->m_BoxController)
+      throw std::runtime_error("MDGridBox::ctor(): constructing from box:: No BoxController specified in box.");
 
 //    std::cout << "Splitting MDBox ID " << box->getId() << " with " << box->getNPoints() << " events into MDGridBox" << std::endl;
 
-    // Steal the ID from the parent box that is being split.
-    this->setId( box->getId() );
-
     // How many is it split?
     for (size_t d=0; d<nd; d++)
-      split[d] = bc->getSplitInto(d);
+      split[d] = this->m_BoxController->getSplitInto(d);
 
     // Compute sizes etc.   
     size_t tot = computeSizesFromSplit();
     if (tot == 0)
-      throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
+      throw std::runtime_error("MDGridBox::ctor(): constructing from box::Invalid splitting criterion (one was zero).");
 
    double ChildVol(1);
    for(size_t d=0;d<nd;d++)
@@ -127,8 +133,8 @@ namespace MDEvents
   void MDGridBox<MDE,nd>::fillBoxShell(const size_t tot,const coord_t ChildInverseVolume)
   {
   // Create the array of MDBox contents.
-    this->boxes.clear();
-    this->boxes.reserve(tot);
+    this->m_Children.clear();
+    this->m_Children.reserve(tot);
     this->numBoxes = tot;
 
     size_t indices[nd];
@@ -144,7 +150,7 @@ namespace MDEvents
     {
       // Create the box
       // (Increase the depth of this box to one more than the parent (this))
-       MDBox<MDE,nd> * splitBox = new MDBox<MDE,nd>(this->m_BoxController, this->m_depth + 1,-1,int64_t(ID0+i));
+       MDBox<MDE,nd> * splitBox = new MDBox<MDE,nd>(this->m_BoxController, this->m_depth + 1,UNDEF_SIZET,size_t(ID0+i));
       // This MDGridBox is the parent of the new child.
        splitBox->setParent(this);
 
@@ -156,7 +162,7 @@ namespace MDEvents
           splitBox->setExtents(d, min, max);
        }
        splitBox->setInverseVolume(ChildInverseVolume); // Set the cached inverse volume
-       boxes.push_back(splitBox);
+       m_Children.push_back(splitBox);
 
        // Increment the indices, rolling back as needed
        indices[0]++;
@@ -173,9 +179,13 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor
-   * @param other :: MDGridBox to copy */
-  TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> & other)
-   : MDBoxBase<MDE, nd>(other),
+   * @param other :: MDGridBox to copy 
+   * @param otherBC :: mandatory pointer to other box controller, which will split this box. 
+                       if it the same BC, as the one for the copied box, it needs to be taken explicitly from the 
+                       copied box. 
+   */
+  TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> & other,Mantid::API::BoxController *const otherBC)
+   : MDBoxBase<MDE, nd>(other,otherBC),
      numBoxes(other.numBoxes),
      diagonalSquared(other.diagonalSquared),
      nPoints(other.nPoints)
@@ -187,23 +197,24 @@ namespace MDEvents
       m_SubBoxSize[d] = other.m_SubBoxSize[d];
     }
     // Copy all the boxes
-    boxes.clear();
-    for (size_t i=0; i<other.boxes.size(); i++)
+    m_Children.clear();
+    m_Children.reserve(numBoxes);
+    for (size_t i=0; i<other.m_Children.size(); i++)
     {
-      MDBoxBase<MDE, nd>* otherBox = other.boxes[i];
-      const MDBox<MDE, nd>* otherMDBox = dynamic_cast<const MDBox<MDE, nd>* >(otherBox);
-      const MDGridBox<MDE, nd>* otherMDGridBox = dynamic_cast<const MDGridBox<MDE, nd>* >(otherBox);
-      if (otherMDBox)
-      {
-        MDBox<MDE, nd> * newBox = new MDBox<MDE, nd>(*otherMDBox);
-        newBox->setParent(this);
-        boxes.push_back( newBox );
+        API::IMDNode* otherBox = other.m_Children[i];
+        const MDBox<MDE, nd>* otherMDBox = dynamic_cast<const MDBox<MDE, nd>* >(otherBox);
+        const MDGridBox<MDE, nd>* otherMDGridBox = dynamic_cast<const MDGridBox<MDE, nd>* >(otherBox);
+        if (otherMDBox)
+        {
+            MDBox<MDE, nd> * newBox = new MDBox<MDE, nd>(*otherMDBox,otherBC);
+            newBox->setParent(this);
+            m_Children.push_back( newBox );
       }
       else if (otherMDGridBox)
       {
-        MDGridBox<MDE, nd> * newBox = new MDGridBox<MDE, nd>(*otherMDGridBox);
-        newBox->setParent(this);
-        boxes.push_back( newBox );
+            MDGridBox<MDE, nd> * newBox = new MDGridBox<MDE, nd>(*otherMDGridBox,otherBC);
+            newBox->setParent(this);
+            m_Children.push_back( newBox );
       }
       else
       {
@@ -258,10 +269,10 @@ namespace MDEvents
   TMDE(MDGridBox)::~MDGridBox()
   {
     // Delete all contained boxes (this should fire the MDGridBox destructors recursively).
-    typename boxVector_t::iterator it;
-    for (it = boxes.begin(); it != boxes.end(); ++it)
+    auto it = m_Children.begin();
+    for ( ; it != m_Children.end(); ++it)
       delete *it;
-    boxes.clear();
+    m_Children.clear();
   }
 
 
@@ -272,8 +283,8 @@ namespace MDEvents
   {
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
-    typename boxVector_t::iterator it;
-    for (it = boxes.begin(); it != boxes.end(); ++it)
+    auto it =  m_Children.begin();
+    for (; it != m_Children.end(); ++it)
     {
       (*it)->clear();
     }
@@ -288,12 +299,15 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** Returns the total number of points (events) in this box */
-  TMDE(uint64_t MDGridBox)::getNPoints() const
-  {
-    //Use the cached value
-    return nPoints;
-  }
+  /// Recursiveluy calculates the amount of the data located in memory. Slow 
+    TMDE(size_t  MDGridBox)::getDataInMemorySize()const
+    {
+        size_t nPoints(0);
+        for(size_t i=0;i<numBoxes;i++)
+            nPoints+=m_Children[i]->getDataInMemorySize();
+        return nPoints;
+    }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the number of un-split MDBoxes in this box (recursively including all children)
@@ -302,8 +316,8 @@ namespace MDEvents
   size_t MDGridBox)::getNumMDBoxes() const
   {
     size_t total = 0;
-    typename boxVector_t::const_iterator it;
-    for (it = boxes.begin(); it != boxes.end(); ++it)
+    auto it = m_Children.begin();
+    for (; it != m_Children.end(); ++it)
     {
       total += (*it)->getNumMDBoxes();
     }
@@ -325,10 +339,10 @@ namespace MDEvents
    * @param index :: index into the array, within range 0..getNumChildren()-1
    * @return the child MDBoxBase pointer.
    */
-  template <typename MDE, size_t nd>
-  MDBoxBase<MDE,nd> * MDGridBox<MDE,nd>::getChild(size_t index)
+  TMDE(
+  API::IMDNode * MDGridBox)::getChild(size_t index)
   {
-    return boxes[index];
+    return m_Children[index];
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -340,38 +354,26 @@ namespace MDEvents
    * @param indexEnd :: end point in the vector, not-inclusive
    */
   TMDE(
-  void MDGridBox)::setChildren(const std::vector<MDBoxBase<MDE,nd> *> & otherBoxes, const size_t indexStart, const size_t indexEnd)
+  void MDGridBox)::setChildren(const std::vector<API::IMDNode *>  & otherBoxes, const size_t indexStart, const size_t indexEnd)
   {
-    boxes.clear();
-    boxes.assign( otherBoxes.begin()+indexStart, otherBoxes.begin()+indexEnd);
+     m_Children.clear();
+     m_Children.reserve(indexEnd-indexStart+1);
+     auto it = otherBoxes.begin()+indexStart;
+     auto it_end = otherBoxes.begin()+indexEnd;
     // Set the parent of each new child box.
-    for (size_t i=0; i<boxes.size(); i++)
-      boxes[i]->setParent(this);
-    numBoxes = boxes.size();
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Setter for the box controller. Sets the box controller on all children.
-   *
-   * @param controller: BoxController to set.
-   */
-  TMDE(
-  void MDGridBox)::setBoxController(Mantid::API::BoxController_sptr controller)
-  {
-    MDBoxBase<MDE,nd>::setBoxController(controller);
-    // Set on all childern.
-    for (size_t i=0; i<boxes.size(); i++)
+    for (;it!=it_end; it++)
     {
-      boxes[i]->setBoxController(controller);
+        m_Children.push_back(dynamic_cast<MDBoxBase<MDE,nd>* >(*it));
+        m_Children.back()->setParent(this);
     }
+    numBoxes = m_Children.size();
   }
 
-
-  //-----------------------------------------------------------------------------------------------
+   //-----------------------------------------------------------------------------------------------
   /** Helper function to get the index into the linear array given
    * an array of indices for each dimension (0 to nd)
    * @param indices :: array of size[nd]
-   * @return size_t index into boxes[].
+   * @return size_t index into m_Children[].
    */
   TMDE(
   inline size_t MDGridBox)::getLinearIndex(size_t * indices) const
@@ -400,18 +402,14 @@ namespace MDEvents
     this->m_errorSquared = 0;
     this->m_totalWeight = 0;
 
-#ifdef MDBOX_TRACK_CENTROID
-    for (size_t d=0; d<nd; d++)
-      this->m_centroid[d] = 0;
-#endif
 
     typename boxVector_t::iterator it;
-    typename boxVector_t::iterator it_end = boxes.end();
+    typename boxVector_t::iterator it_end = m_Children.end();
 
     if (!ts)
     {
       //--------- Serial -----------
-      for (it = boxes.begin(); it != it_end; ++it)
+      for (it = m_Children.begin(); it != it_end; ++it)
       {
         MDBoxBase<MDE,nd> * ibox = *it;
 
@@ -424,11 +422,6 @@ namespace MDEvents
         this->m_errorSquared += ibox->getErrorSquared();
         this->m_totalWeight += ibox->getTotalWeight();
 
-#ifdef MDBOX_TRACK_CENTROID
-        // And track the centroid
-        for (size_t d=0; d<nd; d++)
-          this->m_centroid[d] += ibox->getCentroid(d) * ibox->getSignal();
-#endif
       }
     }
     else
@@ -440,54 +433,7 @@ namespace MDEvents
   }
 
 
-  // -------------------------------------------------------------------------------------------
-  /** Cache the centroid of this box and all sub-boxes.
-   * @param ts :: ThreadScheduler for parallel processing.
-   */
-  TMDE(
-  void MDGridBox)::refreshCentroid(Kernel::ThreadScheduler * ts)
-  {
-    UNUSED_ARG(ts);
-#ifdef MDBOX_TRACK_CENTROID
-
-    // Start at 0.0
-    for (size_t d=0; d<nd; d++)
-      this->m_centroid[d] = 0;
-
-    // Signal was calculated before (when adding)
-    // Keep 0.0 if the signal is null. This avoids dividing by 0.0
-    if (this->m_signal == 0) return;
-
-    typename boxVector_t::iterator it;
-    typename boxVector_t::iterator it_end = boxes.end();
-
-    if (!ts)
-    {
-      //--------- Serial -----------
-      for (it = boxes.begin(); it != it_end; ++it)
-      {
-        MDBoxBase<MDE,nd> * ibox = *it;
-
-        // Refresh the centroid of all sub-boxes.
-        ibox->refreshCentroid();
-
-        signal_t iBoxSignal = ibox->getSignal();
-        // And track the centroid
-        for (size_t d=0; d<nd; d++)
-          this->m_centroid[d] += ibox->getCentroid(d) * iBoxSignal;
-      }
-    }
-    else
-    {
-      //---------- Parallel refresh --------------
-      throw std::runtime_error("Not implemented");
-    }
-
-    // Normalize centroid by the total signal
-    for (size_t d=0; d<nd; d++)
-      this->m_centroid[d] /= this->m_signal;
-#endif
-  }
+ 
 
 
   //-----------------------------------------------------------------------------------------------
@@ -510,7 +456,7 @@ namespace MDEvents
    * @param leafOnly :: if true, only add the boxes that are no more subdivided (leaves on the tree)
    */
   TMDE(
-  void MDGridBox)::getBoxes(std::vector<MDBoxBase<MDE,nd> *> & outBoxes, size_t maxDepth, bool leafOnly)
+  void MDGridBox)::getBoxes(std::vector<API::IMDNode *> & outBoxes, size_t maxDepth, bool leafOnly)
   {
     // Add this box, unless we only want the leaves
     if (!leafOnly)
@@ -521,7 +467,7 @@ namespace MDEvents
       for (size_t i=0; i<numBoxes; i++)
       {
         // Recursively go deeper, if needed
-        boxes[i]->getBoxes(outBoxes, maxDepth, leafOnly);
+        m_Children[i]->getBoxes(outBoxes, maxDepth, leafOnly);
       }
     }
     else
@@ -534,43 +480,7 @@ namespace MDEvents
 
   }
 
-  TMDE(
-  void MDGridBox)::getBoxes(std::vector<Kernel::ISaveable *> & outBoxes, size_t maxDepth, bool leafOnly)
-  {
-    // Add this box, unless we only want the leaves
-    if (!leafOnly)
-      outBoxes.push_back(this);
-
-    if (this->getDepth() + 1 <= maxDepth)
-    {
-      for (size_t i=0; i<numBoxes; i++)
-      {
-        // Recursively go deeper, if needed
-        boxes[i]->getBoxes(outBoxes, maxDepth, leafOnly);
-      }
-    }
-    else
-    {
-      // Oh, we reached the max depth and want only leaves.
-      // ... so we consider this box to be a leaf too.
-      if (leafOnly)
-        outBoxes.push_back(this);
-    }
-
-  }
-  TMDE(
-  void MDGridBox)::getBoxes(std::vector<Kernel::ISaveable *> & outBoxes, size_t maxDepth, bool leafOnly,Mantid::Geometry::MDImplicitFunction * function)
-  {
-    std::vector<MDBoxBase<MDE,nd> *> buf;
-    this->getBoxes(buf,maxDepth,leafOnly,function);
-    outBoxes.resize(buf.size());
-    for(size_t i=0;i<buf.size();i++)
-    {
-      outBoxes[i]=buf[i];
-    }
-  }
-
-
+ 
   //-----------------------------------------------------------------------------------------------
   /** Return all boxes contained within, limited by an implicit function.
    *
@@ -586,7 +496,7 @@ namespace MDEvents
    * @param function :: implicitFunction pointer
    */
   TMDE(
-  void MDGridBox)::getBoxes(std::vector<MDBoxBase<MDE,nd> *> & outBoxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function)
+  void MDGridBox)::getBoxes(std::vector<API::IMDNode *> & outBoxes, size_t maxDepth, bool leafOnly, Mantid::Geometry::MDImplicitFunction * function)
   {
     // Add this box, unless we only want the leaves
     if (!leafOnly)
@@ -673,7 +583,7 @@ namespace MDEvents
       {
         // Find the linear index into the BOXES array.
         size_t boxLinearIndex = Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, boxIndexMaker);
-        MDBoxBase<MDE,nd> * box = boxes[boxLinearIndex];
+        API::IMDNode * box = m_Children[boxLinearIndex];
 
 //        std::cout << "Box at " << Strings::join(boxIndex, boxIndex+nd, ", ")
 //              << " (" << box->getExtentsStr() << ") ";
@@ -764,7 +674,7 @@ namespace MDEvents
    * @return MDBoxBase pointer.
    */
   template <typename MDE, size_t nd>
-  const MDBoxBase<MDE,nd> * MDGridBox<MDE,nd>::getBoxAtCoord(const coord_t * coords) const
+  const API::IMDNode * MDGridBox<MDE,nd>::getBoxAtCoord(const coord_t * coords) 
   {
     size_t index = 0;
     for (size_t d=0; d<nd; d++)
@@ -778,7 +688,7 @@ namespace MDEvents
 
     // Add it to the contained box
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      return boxes[index]->getBoxAtCoord(coords);
+      return m_Children[index]->getBoxAtCoord(coords);
     else
       return NULL;
   }
@@ -800,7 +710,7 @@ namespace MDEvents
   void MDGridBox)::splitContents(size_t index, ThreadScheduler * ts)
   {
     // You can only split it if it is a MDBox (not MDGridBox).
-    MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[index]);
+    MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(m_Children[index]);
     if (!box) return;
     // Track how many MDBoxes there are in the overall workspace
     this->m_BoxController->trackNumBoxes(box->getDepth());
@@ -808,9 +718,9 @@ namespace MDEvents
     MDGridBox<MDE, nd> * gridbox = new MDGridBox<MDE, nd>(box);
 
     // Delete the old ungridded box
-    delete boxes[index];
+    delete m_Children[index];
     // And now we have a gridded box instead of a boring old regular box.
-    boxes[index] = gridbox;
+    m_Children[index] = gridbox;
 
     if (ts)
     {
@@ -834,10 +744,10 @@ namespace MDEvents
   {
     for (size_t index=0; index<numBoxes; index++)
     {
-      if (boxes[index]->getId() == childId)
+      if (m_Children[index]->getID() == childId)
         return index;
     }
-    return size_t(-1);
+    return UNDEF_SIZET;
   }
 
 
@@ -854,10 +764,10 @@ namespace MDEvents
   {
     for (size_t i=0; i < numBoxes; ++i)
     {
-      MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+      MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(m_Children[i]);
       if (box)
       {
-        // Plain MD-Box. Does it need to split?
+        // Plain MD-Box. Does it need to be split?
         if (this->m_BoxController->willSplit(box->getNPoints(), box->getDepth() ))
         {
           // The MDBox needs to split into a grid box.
@@ -868,7 +778,7 @@ namespace MDEvents
             // Track how many MDBoxes there are in the overall workspace
             this->m_BoxController->trackNumBoxes(box->getDepth());
             // Replace in the array
-            boxes[i] = gridBox;
+            m_Children[i] = gridBox;
             // Delete the old box
             delete box;
             // Now recursively check if this NEW grid box's contents should be split too
@@ -885,17 +795,19 @@ namespace MDEvents
         else
         {
           // This box does NOT have enough events to be worth splitting, if it do have at least something in memory then,
-          if (this->m_BoxController->isFileBacked()&&(box->getDataMemorySize()>0))
-          {        
-              //Mark the box as "to-write" in DiskBuffer. If the buffer is full, the box will be dropped on disk
-              this->m_BoxController->getDiskBuffer().toWrite(box);
-          }
+            Kernel::ISaveable *const pSaver(box->getISaveable());
+            if (pSaver && box->getDataInMemorySize()>0)
+            {        
+              //Mark the box as "to-write" in DiskBuffer. If the buffer is full, the boxes will be dropped on disk
+                
+              this->m_BoxController->getFileIO()->toWrite(pSaver);
+            }
         }
       }
       else
       {
         // It should be a MDGridBox
-        MDGridBox<MDE, nd> * gridBox = dynamic_cast<MDGridBox<MDE, nd>*>(boxes[i]);
+        MDGridBox<MDE, nd> * gridBox = dynamic_cast<MDGridBox<MDE, nd>*>(m_Children[i]);
         if (gridBox)
         {
           // Now recursively check if this old grid box's contents should be split too
@@ -910,111 +822,6 @@ namespace MDEvents
       }
     }
   }
-
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add a single MDLeanEvent to the grid box. If the boxes
-   * contained within are also gridded, this will recursively push the event
-   * down to the deepest level.
-   * Warning! No bounds checking is done (for performance). It must
-   * be known that the event is within the bounds of the grid box before adding.
-   *
-   * Note! nPoints, signal and error must be re-calculated using refreshCache()
-   * after all events have been added.
-   *
-   * @param event :: reference to a MDLeanEvent to add.
-   * */
-  TMDE(
-  inline void MDGridBox)::addEvent( const MDE & event)
-  {
-    size_t index = 0;
-    for (size_t d=0; d<nd; d++)
-    {
-      coord_t x = event.getCenter(d);
-      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
-      // NOTE: No bounds checking is done (for performance).
-      //if (i < 0 || i >= int(split[d])) return;
-
-      // Accumulate the index
-      index += (i * splitCumul[d]);
-    }
-
-    // Add it to the contained box
-    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      boxes[index]->addEvent(event);
-  }
-  /** Add a single MDLeanEvent to the grid box. If the boxes
-   * contained within are also gridded, this will recursively push the event
-   * down to the deepest level.
-   * Warning! No bounds checking is done (for performance). It must
-   * be known that the event is within the bounds of the grid box before adding.
-   *
-   * Note! nPoints, signal and error must be re-calculated using refreshCache()
-   * after all events have been added.
-   *
-   * @param point ::       reference to a MDEvent to add.
-   * @param ind :: index for something (unused)
-   *
-   * @returns boxToSplit:: pointer to the MDBox which has more events then it suppose to keep and should be split or NULL if 
-   *                       this does not happens
-    * */
-
-  TMDE(
-  inline void MDGridBox)::addAndTraceEvent(const MDE & point,size_t ind)
-  {
-    UNUSED_ARG(ind);
-
-    size_t index = 0;
-    for (size_t d=0; d<nd; d++)
-    {
-      coord_t x = point.getCenter(d);
-      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
-
-      // Accumulate the index
-      index += (i * splitCumul[d]);
-    }
-
-    // Add it to the contained box
-    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      boxes[index]->addAndTraceEvent(point,index);
-  
-
-  }
-  //-----------------------------------------------------------------------------------------------
-  /** Add a single MDLeanEvent to the grid box. If the boxes
-   * contained within are also gridded, this will recursively push the event
-   * down to the deepest level.
-   *
-   * Warning! No bounds checking is done (for performance). It must
-   * be known that the event is within the bounds of the grid box before adding.
-   *
-   * Warning! Call is NOT thread-safe. Only 1 thread should be writing to this
-   * box (or any child boxes) at a time
-   *
-   * Note! nPoints, signal and error must be re-calculated using refreshCache()
-   * after all events have been added.
-   *
-   * @param event :: reference to a MDEvent to add.
-   * */
-  TMDE(
-  inline void MDGridBox)::addEventUnsafe(const MDE & event)
-  {
-    size_t index = 0;
-    for (size_t d=0; d<nd; d++)
-    {
-
-      coord_t x = event.getCenter(d);
-      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
-      // Accumulate the index
-      index += (i * splitCumul[d]);
-    }
-
-    // Add it to the contained box
-    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      boxes[index]->addEventUnsafe(event);
-  }
-
-
 
   //-----------------------------------------------------------------------------------------------
   /** Perform centerpoint binning of events, with bins defined
@@ -1105,13 +912,13 @@ namespace MDEvents
         // Box is completely in the bin.
         //std::cout << "Box at index " << counters[0] << ", " << counters[1] << " is entirely contained.\n";
         // Use the aggregated signal and error
-        bin.m_signal += boxes[index]->getSignal();
-        bin.m_errorSquared += boxes[index]->getErrorSquared();
+        bin.m_signal += m_Children[index]->getSignal();
+        bin.m_errorSquared += m_Children[index]->getErrorSquared();
       }
       else
       {
         // Perform the binning
-        boxes[index]->centerpointBin(bin,fullyContained);
+        m_Children[index]->centerpointBin(bin,fullyContained);
       }
 
       // Increment the counter(s) in the nested for loops.
@@ -1411,7 +1218,7 @@ namespace MDEvents
 
     for (size_t i=0; i < numBoxes; ++i)
     {
-      MDBoxBase<MDE, nd> * box = boxes[i];
+      API::IMDNode * box = m_Children[i];
       // Box partially contained?
       bool partialBox = false;
 
@@ -1488,7 +1295,7 @@ namespace MDEvents
     for (size_t i=0; i < numBoxes; ++i)
     {
       // Go through each contained box
-      MDBoxBase<MDE, nd> * box = boxes[i];
+      API::IMDNode * box = m_Children[i];
       coord_t boxCenter[nd];
       box->getCenter(boxCenter);
 
@@ -1519,7 +1326,7 @@ namespace MDEvents
     for (size_t i=0; i < numBoxes; ++i)
     {
       // Go through each contained box
-      MDBoxBase<MDE, nd> * box = boxes[i];
+      API::IMDNode * box = m_Children[i];
       if(box->getIsMasked())
       {
         isMasked = true;
@@ -1536,8 +1343,8 @@ namespace MDEvents
     for (size_t i=0; i < numBoxes; ++i)
     {
       // Go through each contained box
-      MDBoxBase<MDE, nd> * box = boxes[i];
-      box->mask();
+        API::IMDNode * box = m_Children[i];
+        box->mask();
     }
   }
 
@@ -1548,11 +1355,258 @@ namespace MDEvents
     for (size_t i=0; i < numBoxes; ++i)
     {
       // Go through each contained box
-      MDBoxBase<MDE, nd> * box = boxes[i];
+      API::IMDNode * box = m_Children[i];
       box->unmask();
     }
   }
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------------------------
+/* Internal TMP class to simplify adding events to the box for events and lean events using single interface. One would nead to overload the box class otherwise*/
+  template<typename MDE,size_t nd>
+  struct IF_EVENT
+  {
+  public:
+      // create generic events from array of events data and add them to the grid box 
+      static inline void EXEC(MDGridBox<MDE,nd> *pBox,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
+                              const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId,size_t nEvents)
+      {
+       for(size_t i=0;i<nEvents;i++)
+           pBox->addEvent(MDEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],runIndex[i], detectorId[i],&Coord[i*nd]));
 
+      }
+
+  };
+  /* Specialize for the case of LeanEvent */
+  template<size_t nd>
+  struct IF_EVENT<MDLeanEvent<nd>,nd>
+  {
+  public:
+    // create lean events from array of events data and add them to the grid box 
+    static inline void EXEC(MDGridBox<MDLeanEvent<nd>,nd> *pBox,const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,
+                              const std::vector<uint16_t> & /*runIndex*/,const std::vector<uint32_t> &/*detectorId*/,size_t nEvents)
+    {
+       for(size_t i=0;i<nEvents;i++)
+           pBox->addEvent(MDLeanEvent<nd>(sigErrSq[2*i],sigErrSq[2*i+1],&Coord[i*nd]));
+      
+    }
+
+  };
+
+
+
+  /** Create and Add several (N) events into correspondent boxes; If the event is out/at of bounds it may be placed in very peculiar place!
+   *
+   * @param sigErrSq   :: vector of N-signals and errors where errror follows signal 
+   * @param Coord      :: vector of MD event coordinates, nd(number of dimensions)  coordinates for each event
+   * @param runIndex   :: vector of run  indexes for N events.
+   * @param detectorId :: vector of detector's ID for N events.
+
+   *@return number of events rejected (0 as nothing is rejected here)
+   */
+  TMDE(
+  size_t MDGridBox)::buildAndAddEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId)
+  {
+
+       size_t nEvents = sigErrSq.size()/2;
+       IF_EVENT<MDE,nd>::EXEC(this,sigErrSq,Coord,runIndex,detectorId,nEvents);
+
+       return 0;
+  }
+
+  /** Create event from the input data and add it to the box.
+   * @param Signal  :: events signal
+   * @param errorSq :: events Error squared
+   * @param point   :: reference to the vector of  MDEvent coordinates
+   * @param runIndex ::    run  index
+   * @param detectorId ::  detector's ID
+   * */
+   TMDE(
+   void MDGridBox)::buildAndAddEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
+   {
+       this->addEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0],runIndex, detectorId));
+   }
+
+  /** Create MD MDEvent from the input data and add it to the box.
+   *   Sets pointer to the box which needs splitting (if one actually need) 
+   * @param Signal  :: events signal
+   * @param errorSq :: events Error squared
+   * @param point :: reference to the  MDEvent coordinates
+   * @param point   :: reference to the vector of  MDEvent coordinates
+   * @param runIndex ::    run  index
+   * @param detectorId ::  detector's ID
+   * @param index  :: index of this box in the gridBox, which contains this one
+   */
+   TMDE(
+   void MDGridBox)::buildAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
+   {
+       this->addAndTraceEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId),index);
+   }
+
+  //-----------------------------------------------------------------------------------------------
+  /**Create MDEvent and add it to the box, in a NON-THREAD-SAFE manner.
+   * No lock is performed. This is only safe if no 2 threads will
+   * try to add to the same box at the same time.
+   *
+   * @param Signal  :: events signal
+   * @param errorSq :: events Error squared
+   * @param point :: reference to the  MDEvent coordinates
+   * @param point   :: reference to the vector of  MDEvent coordinates
+   * @param runIndex ::    run  index
+   * @param detectorId ::  detector's ID
+
+   * */
+  TMDE(
+  void MDGridBox)::buildAndAddEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId)
+  {
+       this->addEventUnsafe(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId));
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add a single MDLeanEvent to the grid box. If the boxes
+   * contained within are also gridded, this will recursively push the event
+   * down to the deepest level.
+   * Warning! No bounds checking is done (for performance). It must
+   * be known that the event is within the bounds of the grid box before adding.
+   *
+   * Note! nPoints, signal and error must be re-calculated using refreshCache()
+   * after all events have been added.
+   *
+   * @param event :: reference to a MDLeanEvent to add.
+   * */
+  TMDE(
+  inline void MDGridBox)::addEvent( const MDE & event)
+  {
+    size_t index = 0;
+    for (size_t d=0; d<nd; d++)
+    {
+      coord_t x = event.getCenter(d);
+      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
+      // NOTE: No bounds checking is done (for performance).
+      //if (i < 0 || i >= int(split[d])) return;
+
+      // Accumulate the index
+      index += (i * splitCumul[d]);
+    }
+
+    // Add it to the contained box
+    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
+      m_Children[index]->addEvent(event);
+  }
+  /** Add a single MDLeanEvent to the grid box. If the boxes
+   * contained within are also gridded, this will recursively push the event
+   * down to the deepest level.
+   * Warning! No bounds checking is done (for performance). It must
+   * be known that the event is within the bounds of the grid box before adding.
+   *
+   * Note! nPoints, signal and error must be re-calculated using refreshCache()
+   * after all events have been added.
+   *
+   * @param point ::       reference to a MDEvent to add.
+   * @param ind :: index for something (unused)
+   *
+   * @returns boxToSplit:: pointer to the MDBox which has more events then it suppose to keep and should be split or NULL if 
+   *                       this does not happens
+    * */
+
+  TMDE(
+  inline void MDGridBox)::addAndTraceEvent(const MDE & point,size_t ind)
+  {
+    UNUSED_ARG(ind);
+
+    size_t index = 0;
+    for (size_t d=0; d<nd; d++)
+    {
+      coord_t x = point.getCenter(d);
+      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
+
+      // Accumulate the index
+      index += (i * splitCumul[d]);
+    }
+
+    // Add it to the contained box
+    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
+      m_Children[index]->addAndTraceEvent(point,index);
+  
+
+  }
+  //-----------------------------------------------------------------------------------------------
+  /** Add a single MDLeanEvent to the grid box. If the boxes
+   * contained within are also gridded, this will recursively push the event
+   * down to the deepest level.
+   *
+   * Warning! No bounds checking is done (for performance). It must
+   * be known that the event is within the bounds of the grid box before adding.
+   *
+   * Warning! Call is NOT thread-safe. Only 1 thread should be writing to this
+   * box (or any child boxes) at a time
+   *
+   * Note! nPoints, signal and error must be re-calculated using refreshCache()
+   * after all events have been added.
+   *
+   * @param event :: reference to a MDEvent to add.
+   * */
+  TMDE(
+  inline void MDGridBox)::addEventUnsafe(const MDE & event)
+  {
+    size_t index = 0;
+    for (size_t d=0; d<nd; d++)
+    {
+
+      coord_t x = event.getCenter(d);
+      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
+      // Accumulate the index
+      index += (i * splitCumul[d]);
+    }
+
+    // Add it to the contained box
+    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
+      m_Children[index]->addEventUnsafe(event);
+  }
+
+  /**Sets particular child MDgridBox at the index, specified by the input parameters
+  *@param index     -- the position of the new child in the list of GridBox children
+  *@param newChild  -- the pointer to the new child grid box
+  */
+  TMDE(
+  inline void MDGridBox)::setChild(size_t index,MDGridBox<MDE,nd> * newChild)
+    {
+      // Delete the old box  (supposetly ungridded);
+      delete this->m_Children[index];
+      // set new box, supposetly gridded
+      this->m_Children[index]=newChild;
+    }
+  /**Recursively make this and all underlaying boxes file-backed. Not(yet?) implemented for gridboxes */
+  TMDE(
+  void MDGridBox)::setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/)
+  {
+      throw(Kernel::Exception::NotImplementedError("Recursive file backed is not yet implemented (unclear how to set file location etc)"));
+  }
+  /** Make the box file-backed without knowing its position on the HDD. Not implemented for gridboxes*/
+  TMDE(
+  void MDGridBox)::setFileBacked()
+  {
+      this->setFileBacked(UNDEF_UINT64,0,false);
+  }
+   /**Recursively clear the file-backed information stored in mdBoxes from the boxes if such information exists 
+    *
+    * @param loadDiskBackedData -- if true, load the data initially saved to HDD before breaking connection between the file and memory
+    *                              if false -- just forget about the data on the HDD
+    * not entirely fool-proof, as if the data is actually loaded is controlled by isLoaded switch in ISaveable 
+    * and this switch has to be set up correctly
+   */
+
+  TMDE(
+  void MDGridBox)::clearFileBacked(bool loadDiskBackedData)
+  {
+      auto it=m_Children.begin();
+      auto it_end = m_Children.end();
+      for(;it!=it_end;it++)
+      {
+          (*it)->clearFileBacked(loadDiskBackedData);
+      }
+  }
 }//namespace MDEvents
 
 }//namespace Mantid

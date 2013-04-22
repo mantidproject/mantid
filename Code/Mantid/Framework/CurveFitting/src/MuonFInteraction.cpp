@@ -1,3 +1,12 @@
+/*WIKI*
+Muon F interaction function defined by
+:<math>  \exp((-{Lambda} \times {x})^{Beta} ) \times  \frac {A} {6} \times
+( 3 + B + C + D ) </math>
+where
+:<math> B = \cos( \sqrt 3 \times  Omega \times x) ) </math> ,
+:<math> C = (1 - \frac 1 \sqrt 3 ) \times \cos ( ( ( 3 - \sqrt 3 ) / 2 ) \times Omega \times x ) </math>  and
+:<math> D = (1 + \frac 1 \sqrt 3 ) \times \cos ( ( ( 3 + \sqrt 3 ) / 2 ) \times Omega \times x ) </math> .
+ *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -17,10 +26,10 @@ DECLARE_FUNCTION(MuonFInteraction)
 
 void MuonFInteraction::init()
 {
-	declareParameter("Lambda", 0.2);
-	declareParameter("Omega", 0.5);
-	declareParameter("Beta", 1);
-	declareParameter("A", 1);
+    declareParameter("Lambda", 0.2, "decay rate");
+    declareParameter("Omega", 0.5, "angular frequency");
+    declareParameter("Beta", 1, "exponent");
+    declareParameter("A", 1, "Amplitude at 0");
 }
 
 

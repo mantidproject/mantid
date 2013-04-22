@@ -5,8 +5,11 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/Exception.h"
+#include "MantidAPI/IBoxControllerIO.h"
 #include <nexus/NeXusFile.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 #include <vector>
 
 
@@ -34,21 +37,21 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0),m_SplitThreshold(1024), m_numSplit(1), m_file(NULL), m_diskBuffer()//, m_useWriteBuffer(true)
+    :nd(nd), m_maxId(0),m_SplitThreshold(1024), m_numSplit(1),
+    m_fileIO(boost::shared_ptr<API::IBoxControllerIO>())
       {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
       m_addingEvents_eventsPerTask = 1000;
       m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
       m_splitInto.resize(this->nd, 1);
-      m_DataChunk = 10000;
       resetNumBoxes();
     }
 
-    BoxController(const BoxController & other );
-
     virtual ~BoxController();
 
+    // create new box controller from the existing one
+    virtual BoxController *clone()const;
     /// Serialize
     std::string toXMLString() const;
 
@@ -264,19 +267,6 @@ namespace API
       // Return true if the average # of events per box is big enough to split.
       return ((eventsAdded / numMDBoxes) > m_SplitThreshold);
     }
-    /**The method returns the data chunk (continious part of the NeXus array) used to write data on HDD */ 
-    size_t getDataChunk()const
-    {
-      return m_DataChunk;
-    }
-    /** The method used to load nexus data chunk size to the box controller. Used when loading MDEvent nexus file 
-        Disabled at the moment as it is unclear how to get acsess to physical size of NexUs data set and optimal chunk size should be physical Nexus chunk size
-    */ 
-    //void setChunkSize(size_t chunkSize)
-    //{
-    //  m_DataChunk = chunkSize;
-    // }
-
     //-----------------------------------------------------------------------------------
     /** Call to track the number of MDBoxes are contained in the MDEventWorkspace
      * This should be called when a MDBox gets split into a MDGridBox.
@@ -303,6 +293,7 @@ namespace API
     {
       return m_numMDBoxes;
     }
+   
 
     /** Return the vector giving the MAXIMUM number of MD Boxes as a function of depth */
     const std::vector<double> & getMaxNumMDBoxes() const
@@ -359,65 +350,18 @@ namespace API
       m_mutexNumMDBoxes.unlock();
     }
 
-
+    // { return m_useWriteBuffer; }
+    /// Returns if current box controller is file backed. Assumes that BC(workspace) is fileBackd if fileIO is defined;
+     bool isFileBacked()const
+     {return m_fileIO;}
+     /// returns the pointer to the class, responsible for fileIO operations;
+     IBoxControllerIO * getFileIO()
+     {return m_fileIO.get();}
+     /// makes box controller file based by providing class, responsible for fileIO. 
+     void setFileBacked(boost::shared_ptr<IBoxControllerIO> newFileIO,const std::string &fileName="");
+     void clearFileBacked();
     //-----------------------------------------------------------------------------------
-    /** @return the open NeXus file handle. NULL if not file-backed. */
-    ::NeXus::File * getFile() const
-    { return m_file; }
-
-    /** Sets the open Nexus file to use with file-based back-end
-     * @param file :: file handle
-     * @param filename :: full path to the file
-     * @param fileLength :: length of the file being open, in number of events in this case */
-    void setFile(::NeXus::File * file, const std::string & filename, const uint64_t fileLength)
-    {
-      m_file = file;
-      m_filename = filename;
-      m_diskBuffer.setFileLength(fileLength);
-    }
-
-    /** @return true if the MDEventWorkspace is backed by a file */
-    bool isFileBacked() const
-    { return m_file != NULL; }
-
-    /// @return the full path to the file open as the file-based back end.
-    const std::string & getFilename() const
-    { return m_filename; }
-
-    void closeFile(bool deleteFile = false);
-
-    //-----------------------------------------------------------------------------------
-    /** Return the DiskBuffer for disk caching */
-    const Mantid::Kernel::DiskBuffer & getDiskBuffer() const
-    { return m_diskBuffer; }
-
-    /** Return the DiskBuffer for disk caching */
-    Mantid::Kernel::DiskBuffer & getDiskBuffer()
-    { return m_diskBuffer; }
-
-    /** Return true if the DiskBuffer should be used  -- in current edition it is always used*/
-    bool useWriteBuffer() const{return true;}
-   // { return m_useWriteBuffer; }
-
-    //-----------------------------------------------------------------------------------
-    /** Set the memory-caching parameters for a file-backed
-     * MDEventWorkspace.
-     *
-     * @param bytesPerEvent :: sizeof(MDLeanEvent) that is in the workspace
-     * @param writeBufferSize :: number of EVENTS to accumulate before performing a disk write.
-     */
-    void setCacheParameters(size_t bytesPerEvent,uint64_t writeBufferSize)
-    {
-      if (bytesPerEvent == 0)
-        throw std::invalid_argument("Size of an event cannot be == 0.");
-      // Save the values
-      m_diskBuffer.setWriteBufferSize(writeBufferSize);
-      // If all caches are 0, don't use the MRU at all
-//      m_useWriteBuffer = !(writeBufferSize==0);
-      m_bytesPerEvent = bytesPerEvent;
-    }
-
-    //BoxCtrlChangesInterface *getChangesList(){return m_ChangesList;}
+      //BoxCtrlChangesInterface *getChangesList(){return m_ChangesList;}
     //void setChangesList(BoxCtrlChangesInterface *pl){m_ChangesList=pl;}
     //-----------------------------------------------------------------------------------
     // increase the counter, calculatinb events at max;
@@ -428,6 +372,11 @@ namespace API
     {return m_numEventsAtMax;}
     /// get range of id-s and increment box ID by this range;
     size_t claimIDRange(size_t range);
+
+    /// the function left for compartibility with the previous bc python interface. 
+    std::string getFilename()const;
+    /// the compartibility function -- the write buffer is always used for file based workspaces
+    bool useWriteBuffer()const;
   private:
     /// When you split a MDBox, it becomes this many sub-boxes
     void calcNumSplit()
@@ -449,7 +398,10 @@ namespace API
       for (size_t depth=1; depth<m_maxNumMDBoxes.size(); depth++)
         m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth-1] * double(m_numSplit);
     }
-
+  protected:
+   /// box controller is an ws-based singleton so it should not be possible to copy it, left protected for inheritance;
+    BoxController(const BoxController & other );
+ 
   private:
     /// Number of dimensions
     size_t nd;
@@ -498,35 +450,13 @@ namespace API
     /// Mutex for getting IDs
     Mantid::Kernel::Mutex m_idMutex;
 
-    /// Filename of the file backend
-    std::string m_filename;
-
-    /// Open file handle to the file back-end
-    ::NeXus::File * m_file;
-
-    /// Instance of the disk-caching MRU list.
-    mutable Mantid::Kernel::DiskBuffer m_diskBuffer;
-
-    /// Do we use the DiskBuffer at all? Always use WB
-    // bool m_useWriteBuffer;
-
+    // the class which does actual IO operations, including MRU support list
+    boost::shared_ptr<IBoxControllerIO> m_fileIO;
+  
+ 
     /// Number of bytes in a single MDLeanEvent<> of the workspace.
-    size_t m_bytesPerEvent;
-    /// The size of the events block which can be written in the neXus array at once (continious part of the data block)
-    size_t m_DataChunk;
+    //size_t m_bytesPerEvent;
   public:
-
-  static void prepareEventNexusData(::NeXus::File * file,const size_t DataChunk,const size_t nColumns,const std::string &descr);
-
-  //---------------------------------------------------------------------------------------------
-    /** Open the NXS event data blocks for loading.
-     *
-     * @param file :: open NXS file.
-     * @return the number of events currently in the data field.
-     */
-  static uint64_t openEventNexusData(::NeXus::File * file);
-
-  static void closeNexusData(::NeXus::File * file);
   };
 
 

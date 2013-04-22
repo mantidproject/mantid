@@ -6,7 +6,7 @@ namespace Mantid
 {
   namespace MDEvents
   {
-    /**function converts particular list of events of type T into MD workspace space and adds these events to the workspace itself  */
+    /**function converts particular list of events of type T into MD workspace and adds these events to the workspace itself  */
     template <class T>
     size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex)
     {
@@ -180,7 +180,7 @@ namespace Mantid
 
       // Recount totals at the end.
       m_OutWSWrapper->pWorkspace()->refreshCache(); 
-      m_OutWSWrapper->refreshCentroid();
+      //m_OutWSWrapper->refreshCentroid();
       pProgress->report();
 
       /// Set the special coordinate system flag on the output workspace.

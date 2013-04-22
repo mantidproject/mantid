@@ -73,7 +73,7 @@ namespace Mantid
       /// get access to the internal workspace
       API::IMDEventWorkspace_sptr pWorkspace(){return m_Workspace;}
       // should it be moved to the IMDEvents?
-      void refreshCentroid(){ (this->*(mdCalCentroid[m_NDimensions]))();   };
+      //void refreshCentroid(){ (this->*(mdCalCentroid[m_NDimensions]))();   };
       /** initiate the class with pointer to existing MD workspace */
       void setMDWS(API::IMDEventWorkspace_sptr spWS);
 

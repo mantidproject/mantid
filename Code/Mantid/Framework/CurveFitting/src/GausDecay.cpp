@@ -1,3 +1,7 @@
+/*WIKI*
+Gaussian decay for use by Muon scientists defined by
+:<math> \mbox{A}\times \exp(-{Sigma}^2 \times {x}^2 ) </math>
+ *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -18,8 +22,8 @@ DECLARE_FUNCTION(GausDecay)
 
 void GausDecay::init()
 {
-   declareParameter("A", 10.0); 
-   declareParameter("Sigma", 0.2);  
+    declareParameter("A", 10.0, "Amplitude at time 0");
+    declareParameter("Sigma", 0.2, "Decay rate");
 }
 
 

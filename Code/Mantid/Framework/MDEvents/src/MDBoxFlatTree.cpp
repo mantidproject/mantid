@@ -1,31 +1,44 @@
+#include "MantidKernel/Strings.h"
 #include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidAPI/BoxController.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include <Poco/File.h>
 
+#if defined (__INTEL_COMPILER)
+ typedef std::auto_ptr< ::NeXus::File>  file_holder_type;
+#else 
+ typedef std::unique_ptr< ::NeXus::File>  file_holder_type;
+#endif
 
 namespace Mantid
 {
   namespace MDEvents
   {
+   Kernel::Logger &MDBoxFlatTree::g_log = Kernel::Logger::get("Algorithm");
 
-    MDBoxFlatTree::MDBoxFlatTree(const std::string &fileName):
-  m_nDim(-1),m_FileName(fileName)
+    MDBoxFlatTree::MDBoxFlatTree():
+  m_nDim(-1)
   {     
   }
 
-  template<typename MDE,size_t nd>
+  /**The method initiates the MDBoxFlatTree class internal structure in the form ready for saving this structure to HDD 
+   *
+   * @param pws  -- the shared pointer to the MD workspace which is the source of the flat box structure
+   * @param fileName -- the name of the file, where this structure should be written. TODO: It is here for the case of file based workspaces
+   */
   void MDBoxFlatTree::initFlatStructure(API::IMDEventWorkspace_sptr pws,const std::string &fileName)
   {
     m_bcXMLDescr = pws->getBoxController()->toXMLString();
     m_FileName = fileName;
 
+
     m_nDim = int(pws->getNumDims());
     // flatten the box structure
     pws->getBoxes(m_Boxes, 1000, false);
 
-    Kernel::ISaveable::sortObjByFilePos(m_Boxes);
+    API::IMDNode::sortObjByID(m_Boxes);
 
     size_t maxBoxes = m_Boxes.size();
     // Box type (0=None, 1=MDBox, 2=MDGridBox
@@ -43,14 +56,15 @@ namespace Mantid
     // Start/end children IDs
     m_BoxChildren.assign(maxBoxes*2, 0);
 
-    MDBoxBase<MDE,nd> *Box;
+    API::IMDNode *Box;
+    bool filePositionDefined(true);
     for(size_t i=0;i<maxBoxes;i++)
     {
-      Box = dynamic_cast<MDBoxBase<MDE,nd> *>(m_Boxes[i]);
+      Box = m_Boxes[i];
       // currently ID is the number of the box, but it may change in a future. TODO: uint64_t
-      size_t id = Box->getId();
+      size_t id = Box->getID();
       size_t numChildren = Box->getNumChildren();
-      if (numChildren > 0)
+      if (numChildren > 0) // MDGridBox have childred
       {
         // DEBUG:
         //// Make sure that all children are ordered. TODO: This might not be needed if the IDs are rigorously done
@@ -62,9 +76,9 @@ namespace Mantid
         //  lastId = Box->getChild(i)->getId();
         //}
 
-        m_BoxType[id] = 2;
-        m_BoxChildren[id*2] = int(Box->getChild(0)->getId());
-        m_BoxChildren[id*2+1] = int(Box->getChild(numChildren-1)->getId());
+        m_BoxType[id] = 2; 
+        m_BoxChildren[id*2] = int(Box->getChild(0)->getID());
+        m_BoxChildren[id*2+1] = int(Box->getChild(numChildren-1)->getID());
 
         // no events but index defined -- TODO -- The proper file has to have consequent indexes for all boxes too. 
         m_BoxEventIndex[id*2]   = 0;
@@ -76,12 +90,17 @@ namespace Mantid
         m_BoxChildren[id*2]=0;
         m_BoxChildren[id*2+1]=0;
 
-        MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(Box);
-        if(!mdBox) throw std::runtime_error("found unfamiliar type of box");
+        //MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd> *>(Box);
+        //if(!mdBox) throw std::runtime_error("found unfamiliar type of box");
         // Store the index
 
-        uint64_t nPoints = mdBox->getNPoints();
-        m_BoxEventIndex[id*2]   = mdBox->getFilePosition();
+        uint64_t nPoints = Box->getNPoints();
+        Kernel::ISaveable *pSaver = Box->getISaveable();
+        if(pSaver)
+            m_BoxEventIndex[id*2]   = pSaver->getFilePosition();
+        else
+            filePositionDefined = false;
+
         m_BoxEventIndex[id*2+1] = nPoints;   
       }
 
@@ -90,98 +109,34 @@ namespace Mantid
       m_BoxSignalErrorsquared[id*2] = double(Box->getSignal());
       m_BoxSignalErrorsquared[id*2+1] = double(Box->getErrorSquared());
       m_InverseVolume[id] = Box->getInverseVolume();
-      for (size_t d=0; d<nd; d++)
+      for (int d=0; d<m_nDim; d++)
       {
-        size_t newIndex = id*(nd*2) + d*2;
+        size_t newIndex = id*size_t(m_nDim*2) + d*2;
         m_Extents[newIndex]   = Box->getExtents(d).getMin();
         m_Extents[newIndex+1] = Box->getExtents(d).getMax();
 
       }
     }
+    // file postion have to be calculated afresh
+    if(!filePositionDefined)
+    {
+        uint64_t boxPosition(0);
+        for(size_t i=0;i<maxBoxes;i++)
+        {
+            if(m_BoxType[i]==1)
+            {
+                m_BoxEventIndex[2*i]=boxPosition;
+                boxPosition+=m_BoxEventIndex[2*i+1];
+            }
+        }
+    }
 
   }
-  /**TODO: this should not be here, refactor out*/ 
-  void MDBoxFlatTree::initEventFileStorage(const std::string &fileName,API::BoxController_sptr bc,bool FileBacked,const std::string &EventType)
-  {
-    m_FileName = fileName;
-    ::NeXus::File * hFile;
-      // Erase the file if it exists
-    Poco::File oldFile(m_FileName);
-    if (oldFile.exists())
-    {
-      hFile = new ::NeXus::File(m_FileName, NXACC_RDWR);
-      hFile->openGroup("MDEventWorkspace", "NXentry");
-    }
-    else
-    {
-      // Create a new file in HDF5 mode.
-      hFile = new ::NeXus::File(m_FileName, NXACC_CREATE5);
-      hFile->makeGroup("MDEventWorkspace", "NXentry", true);
-
-      auto nDim = int32_t(bc->getNDims());
-   // Write out some general information like # of dimensions
-      hFile->writeData("dimensions", nDim);
-      hFile->putAttr("event_type", EventType);
-      //TODO: what about history here?
-    }  
-
-    initEventFileStorage(hFile,bc,FileBacked,EventType);
-    if(!FileBacked)
-    {
-      hFile->closeGroup();
-      hFile->close();
-      delete hFile;
-    }
-  }
-/**TODO: this should not be here, refactor out*/ 
-  void MDBoxFlatTree::initEventFileStorage(::NeXus::File *hFile,API::BoxController_sptr bc,bool MakeFileBacked,const std::string &EventType)
-  {
-    bool update=true;
-// Start the event Data group, TODO: should be better way of checking existing group
-    try
-    {
-      hFile->openGroup("event_data", "NXdata");
-    }
-    catch(...)
-    {
-      update=false;
-      hFile->makeGroup("event_data", "NXdata",true);
-    }
-    hFile->putAttr("version", "1.0");
-
-
-    // Prepare the data chunk storage.
-    size_t chunkSize = bc->getDataChunk();
-    size_t nDim = bc->getNDims();
-    uint64_t NumOldEvents(0);
-    if (update)
-       NumOldEvents= API::BoxController::openEventNexusData(hFile);
-    else
-    {
-      std::string descr;
-      size_t nColumns;
-      if(EventType=="MDEvent")
-      {
-        nColumns = nDim+4;
-        descr="signal, errorSquared, runIndex, detectorId, center (each dim.)";
-      }
-      else if(EventType=="MDLeanEvent")
-      {
-        nColumns = nDim+2;
-        descr="signal, errorsquared, center (each dim.)";
-      }
-      else
-        throw std::runtime_error("unknown event type encontered");
-
-      API::BoxController::prepareEventNexusData(hFile, chunkSize,nColumns,descr);
-   }
-      // Initialize the file-backing
-    if (MakeFileBacked)         // Set it back to the new file handle
-       bc->setFile(hFile, m_FileName, NumOldEvents);
-
-
-  }
-  void MDBoxFlatTree::setBoxesFilePositions(bool makeFileBacked)
+  /*** this function tries to set file positions of the boxes to 
+       make data physiclly located close to each otger to be as close as possible on the HDD 
+       @param setFileBacked  -- initiate the boxes to be fileBacked. The boxes assumed not to be saved before.
+  */
+  void MDBoxFlatTree::setBoxesFilePositions(bool setFileBacked)
   {
     // this will preserve file-backed workspace and information in it as we are not loading old box data and not?
     // this would be right for binary axcess but questionable for Nexus --TODO: needs testing
@@ -189,75 +144,68 @@ namespace Mantid
     //Kernel::ISaveable::sortObjByFilePos(m_Boxes);
     // calculate the box positions in the resulting file and save it on place
     uint64_t eventsStart=0;
-    bool rememberBoxIsSaved = makeFileBacked;
     for(size_t i=0;i<m_Boxes.size();i++)
     {
-      Kernel::ISaveable * mdBox = m_Boxes[i];        
-      size_t ID = mdBox->getId();
-      if(mdBox->isBox())
-      {
-          size_t nEvents = mdBox->getTotalDataSize();
-          mdBox->setFilePosition(eventsStart,nEvents,rememberBoxIsSaved);
-          m_BoxEventIndex[ID*2]   = eventsStart;
-          m_BoxEventIndex[ID*2+1] = nEvents;
+      API::IMDNode * mdBox = m_Boxes[i];        
+      size_t ID = mdBox->getID();
 
-          eventsStart+=nEvents;
-      }
-      else
-      {
-        m_BoxEventIndex[ID*2]   = 0;
-        m_BoxEventIndex[ID*2+1] = 0;
-      }
+      // avoid grid boxes;
+      if(m_BoxType[ID]==2) continue;
+
+      size_t nEvents = mdBox->getTotalDataSize();
+      m_BoxEventIndex[ID*2]   = eventsStart;
+      m_BoxEventIndex[ID*2+1] = nEvents;
+      if(setFileBacked)
+          mdBox->setFileBacked(eventsStart,nEvents,false);
+
+      eventsStart+=nEvents;
     }
-
   }
+
   void MDBoxFlatTree::saveBoxStructure(const std::string &fileName)
   {
     m_FileName = fileName;
-    ::NeXus::File * hFile;
-      // Erase the file if it exists
-    Poco::File oldFile(fileName);
-    if (oldFile.exists())
-    {
-      hFile = new ::NeXus::File(m_FileName, NXACC_RDWR);
-      hFile->openGroup("MDEventWorkspace", "NXentry");
-    }
-    else
-    {
-      // Create a new file in HDF5 mode.
-      hFile = new ::NeXus::File(m_FileName, NXACC_CREATE5);
-      hFile->makeGroup("MDEventWorkspace", "NXentry", true);
-      // Write out some general information like # of dimensions
-      hFile->writeData("dimensions", int32_t(m_nDim));
-    }  
+
+    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_Boxes[0]->getEventType(),false));
 
     //Save box structure;
-    this->saveBoxStructure(hFile);
-
-    hFile->close();
+    this->saveBoxStructure(hFile.get());
     // close workspace group
-    delete hFile;
+    hFile->closeGroup();
+    // close file
+    hFile->close();  
 
   }
 
-  void MDBoxFlatTree::saveBoxStructure(::NeXus::File *hFile)
+  void MDBoxFlatTree::saveBoxStructure( ::NeXus::File *hFile)
   {
     size_t maxBoxes = this->getNBoxes();
     if(maxBoxes==0)return;
 
-    bool update=true;
+    std::map<std::string, std::string> groupEntries;
+    hFile->getEntries(groupEntries);
+ 
+
+    bool create(false);
+    if(groupEntries.find("box_structure")==groupEntries.end()) //dimesnions dataset exist
+          create = true;
+
     // Start the box data group
-    try
+    if(create)
+    {
+      hFile->makeGroup("box_structure", "NXdata",true);
+      hFile->putAttr("version", "1.0");
+     // Add box controller info to this group
+      hFile->putAttr("box_controller_xml", m_bcXMLDescr);
+
+    }
+    else
     {
       hFile->openGroup("box_structure", "NXdata");
-    }catch(...)
-    {
-      update = false;
-      hFile->makeGroup("box_structure", "NXdata",true);
+      // update box controller information
+      hFile->putAttr("box_controller_xml", m_bcXMLDescr);
     }
-    hFile->putAttr("version", "1.0");
-    // Add box controller info to this group
-    hFile->putAttr("box_controller_xml", m_bcXMLDescr);
+
 
     std::vector<int64_t> exents_dims(2,0);
     exents_dims[0] = (int64_t(maxBoxes));
@@ -273,9 +221,20 @@ namespace Mantid
     box_2_chunk[0] = int64_t(16384);
     box_2_chunk[1] = (2);
 
-    if (update)
+    if (create)
     {
-      // Update the extendible data sets
+      // Write it for the first time
+      hFile->writeExtendibleData("box_type", m_BoxType);
+      hFile->writeExtendibleData("depth", m_Depth);
+      hFile->writeExtendibleData("inverse_volume", m_InverseVolume);
+      hFile->writeExtendibleData("extents", m_Extents, exents_dims, exents_chunk);
+      hFile->writeExtendibleData("box_children", m_BoxChildren, box_2_dims, box_2_chunk);
+      hFile->writeExtendibleData("box_signal_errorsquared", m_BoxSignalErrorsquared, box_2_dims, box_2_chunk);
+      hFile->writeExtendibleData("box_event_index", m_BoxEventIndex, box_2_dims, box_2_chunk);  
+    }
+    else
+    {
+    // Update the extendible data sets
       hFile->writeUpdatedData("box_type", m_BoxType);
       hFile->writeUpdatedData("depth", m_Depth);
       hFile->writeUpdatedData("inverse_volume", m_InverseVolume);
@@ -285,53 +244,32 @@ namespace Mantid
       hFile->writeUpdatedData("box_event_index", m_BoxEventIndex, box_2_dims);
 
     }
-    else
-    {
-      // Write it for the first time
-      hFile->writeExtendibleData("box_type", m_BoxType);
-      hFile->writeExtendibleData("depth", m_Depth);
-      hFile->writeExtendibleData("inverse_volume", m_InverseVolume);
-      hFile->writeExtendibleData("extents", m_Extents, exents_dims, exents_chunk);
-      hFile->writeExtendibleData("box_children", m_BoxChildren, box_2_dims, box_2_chunk);
-      hFile->writeExtendibleData("box_signal_errorsquared", m_BoxSignalErrorsquared, box_2_dims, box_2_chunk);
-      hFile->writeExtendibleData("box_event_index", m_BoxEventIndex, box_2_dims, box_2_chunk);
-    }
-
+    // close the box group.
     hFile->closeGroup();
-    // Finished - close the file. This ensures everything gets written out even when updating.
-    hFile->close();
+ 
 
   }
 
-  void MDBoxFlatTree::loadBoxStructure(const std::string &fileName)
+  void MDBoxFlatTree::loadBoxStructure(const std::string &fileName,size_t nDim,const std::string &EventType,bool onlyEventInfo)
   {
 
     m_FileName = fileName;
-     // open file
-    ::NeXus::File *hFile = new ::NeXus::File(m_FileName, NXACC_READ);
+    m_nDim = static_cast<unsigned int>(nDim);
+    m_eventType = EventType;
+ 
+    // open the file and the MD workspace group.
+    auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_eventType,true));
 
-    // The main entry
-    std::map<std::string, std::string> entries;
-    hFile->getEntries(entries);
 
-    std::string entryName;
-    if (entries.find("MDEventWorkspace") != entries.end())
-       entryName = "MDEventWorkspace";
-    else
-       throw std::runtime_error("Unexpected NXentry name. Expected 'MDEventWorkspace' or 'MDHistoWorkspace'.");
+    //// How many dimensions?
+    //std::vector<int32_t> vecDims;
+    //hFile->readData("dimensions", vecDims);
+    //if (vecDims.empty())
+    //    throw std::runtime_error("LoadBoxStructure:: Error loading number of dimensions.");
 
-    // Open the ws
-    hFile->openGroup(entryName, "NXentry");
-
-    // How many dimensions?
-    std::vector<int32_t> vecDims;
-    hFile->readData("dimensions", vecDims);
-    if (vecDims.empty())
-        throw std::runtime_error("LoloadBoxStructure:: Error loading number of dimensions.");
-
-    m_nDim = vecDims[0];
-    if (m_nDim<= 0)
-        throw std::runtime_error("loadBoxStructure:: number of dimensions <= 0.");
+    //m_nDim = vecDims[0];
+    //if (m_nDim<= 0)
+    //    throw std::runtime_error("loadBoxStructure:: number of dimensions <= 0.");
 
       // Now load all the dimension xml
       //this->loadDimensions();
@@ -345,16 +283,26 @@ namespace Mantid
       //  // Use the factory to make the workspace of the right type
       //  IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
       //}
-    this->loadBoxStructure(hFile);
+    this->loadBoxStructure(hFile.get(),onlyEventInfo);
 
-    delete hFile;
-    //return hFile;
+    // close workspace group
+    hFile->closeGroup();
+    // close the NeXus file
+    hFile->close();
   }
-  void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile)
+  void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile,bool onlyEventInfo)
   {
     // ----------------------------------------- Box Structure ------------------------------
     hFile->openGroup("box_structure", "NXdata");
 
+    if(onlyEventInfo)
+    {
+      // Load the box controller description
+        hFile->getAttr("box_controller_xml", m_bcXMLDescr);
+        hFile->readData("box_type", m_BoxType);
+        hFile->readData("box_event_index", m_BoxEventIndex);
+        return;
+    }
     // Load the box controller description
     hFile->getAttr("box_controller_xml", m_bcXMLDescr);
 
@@ -388,8 +336,119 @@ namespace Mantid
 
   }
 
+  /** Save each NEW ExperimentInfo to a spot in the file 
+   *@param file -- NeXus file pointer to the file, opened within appropriate group where one going to place experiment infos
+   *@param ws   -- the shared pointer to the workspace with experiment infos to write.
+  */
+  void MDBoxFlatTree::saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws)
+  {
+
+      std::map<std::string,std::string> entries;
+      file->getEntries(entries);
+      for (uint16_t i=0; i < ws->getNumExperimentInfo(); i++)
+      {
+          API::ExperimentInfo_const_sptr ei = ws->getExperimentInfo(i);
+          std::string groupName = "experiment" + Kernel::Strings::toString(i);
+          if (entries.find(groupName) == entries.end())
+          {
+              // Can't overwrite entries. Just add the new ones
+              file->makeGroup(groupName, "NXgroup", true);
+              file->putAttr("version", 1);
+              ei->saveExperimentInfoNexus(file);
+              file->closeGroup();
+
+              // Warning for high detector IDs.
+              // The routine in MDEvent::saveVectorToNexusSlab() converts detector IDs to single-precision floats
+              // Floats only have 24 bits of int precision = 16777216 as the max, precise detector ID
+              detid_t min = 0;
+              detid_t max = 0;
+              try
+              {
+                  ei->getInstrument()->getMinMaxDetectorIDs(min, max);
+              }
+              catch (std::runtime_error &)
+              { /* Ignore error. Min/max will be 0 */ }
+
+              if (max > 16777216)
+              {
+                  g_log.warning() << "This instrument (" << ei->getInstrument()->getName() <<
+                      ") has detector IDs that are higher than can be saved in the .NXS file as single-precision floats." << std::endl;
+                  g_log.warning() << "Detector IDs above 16777216 will not be precise. Please contact the developers." << std::endl;
+              }
+          }
+      }
+
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Load the ExperimentInfo blocks, if any, in the NXS file
+  *
+  * @param file :: the pointer to the properly opened nexus data file where the experiment info groups can be found. 
+  * @param ws :: MDEventWorkspace/MDHisto to load experiment infos to
+  */
+  void MDBoxFlatTree::loadExperimentInfos(::NeXus::File * const file,boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws)
+  {
+      // First, find how many experimentX blocks there are
+      std::map<std::string,std::string> entries;
+      file->getEntries(entries);
+      std::map<std::string,std::string>::iterator it = entries.begin();
+      std::vector<bool> hasExperimentBlock;
+      uint16_t numExperimentInfo = 0;
+      for (; it != entries.end(); ++it)
+      {
+          std::string name = it->first;
+          if (boost::starts_with(name, "experiment"))
+          {
+              try
+              {
+                  uint16_t num = boost::lexical_cast<uint16_t>(name.substr(10, name.size()-10));
+                  if (num+1 > numExperimentInfo)
+                  {
+                      numExperimentInfo = uint16_t(num+uint16_t(1));
+                      hasExperimentBlock.resize(numExperimentInfo, false);
+                      hasExperimentBlock[num] = true;
+                  }
+              }
+              catch (boost::bad_lexical_cast &)
+              { /* ignore */ }
+          }
+      }
+
+      // Now go through in order, loading and adding
+      for (uint16_t i=0; i < numExperimentInfo; i++)
+      {
+          std::string groupName = "experiment" + Kernel::Strings::toString(i);
+          if (!numExperimentInfo)
+          {
+              g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName << ". Workspace will be missing ExperimentInfo." << std::endl;
+              break;
+          }
+          file->openGroup(groupName, "NXgroup");
+          API::ExperimentInfo_sptr ei(new API::ExperimentInfo);
+          std::string parameterStr;
+          try
+          {
+              // Get the sample, logs, instrument
+              ei->loadExperimentInfoNexus(file, parameterStr);
+              // Now do the parameter map
+              ei->readParameterMap(parameterStr);
+              // And set it in the workspace.
+              ws->addExperimentInfo(ei);
+          }
+          catch (std::exception & e)
+          {
+              g_log.information("Error loading section '" + groupName + "' of nxs file.");
+              g_log.information(e.what());
+          }
+          file->closeGroup();
+      }
+
+  }
+
+
+
   template<typename MDE,size_t nd>
-  uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<MDBoxBase<MDE,nd> *>&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly)
+  uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *>&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly)
   {
 
     size_t numBoxes = this->getNBoxes();
@@ -417,30 +476,26 @@ namespace Mantid
       uint64_t indexStart = m_BoxEventIndex[i*2];
       uint64_t numEvents  = m_BoxEventIndex[i*2+1];
 
-      totalNumEvents+=numEvents;
+         totalNumEvents+=numEvents;
       if (box_type == 1)
       {
         // --- Make a MDBox -----
         if(BoxStructureOnly)
         {
-          box = new MDBox<MDE,nd>(bc, m_Depth[i], extentsVector,-1);
-          // Only the box structure is being loaded, so ISavable will be undefined (NeverSaved, 0 size data)
-          box->setFilePosition(std::numeric_limits<uint64_t>::max(), 0,false); // this should be default state of ISavable
+            box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector);
         }
         else // !BoxStructureOnly)
         {
 
           if(FileBackEnd)
           {
-            box = new MDBox<MDE,nd>(bc, m_Depth[i], extentsVector,-1);
-            // Set the index in the file in the box data
-            box->setFilePosition(indexStart, numEvents,true);
+              box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,UNDEF_SIZET);
+              // Mark the box as file backed and indicate that the box was saved
+              box->setFileBacked(indexStart,numEvents,true);
           }
           else
           {
-            box = new MDBox<MDE,nd>(bc, m_Depth[i], extentsVector,int64_t(numEvents));
-            // Set the index in the file in the box data, and indicate that data were not saved
-            box->setFilePosition(indexStart, numEvents,false);
+            box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,int64_t(numEvents));
           }           
         } // ifBoxStructureOnly
         ibox = box;
@@ -448,15 +503,19 @@ namespace Mantid
       else if (box_type == 2)
       {
         // --- Make a MDGridBox -----
-        ibox = new MDGridBox<MDE,nd>(bc, m_Depth[i], extentsVector);
+        ibox = new MDGridBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector);
       }
       else
         continue;
-
       // Force correct ID
-      ibox->setId(i);
+      ibox->setID(i);
       // calculate volume from extents;
       ibox->calcVolume();
+      if(std::fabs(ibox->getInverseVolume()-m_InverseVolume[i])>1.e-4)
+      {
+          g_log.debug()<<" Accuracy warning for box N "<<i<<" as stored inverse volume is : "<<m_InverseVolume[i]<<" and calculated from extents: "<<ibox->getInverseVolume()<<std::endl;
+          ibox->setInverseVolume(coord_t(m_InverseVolume[i]));
+      }
 
       // Set the cached values
       ibox->setSignal(m_BoxSignalErrorsquared[i*2]);
@@ -479,51 +538,134 @@ namespace Mantid
     }
     bc->setMaxId(numBoxes);
     return totalNumEvents;
+      return 0;
+  }
+  /** The function to create a NeXus MD workspace group with specified events type and number of dimensions or opens the existing group, 
+      which corresponds to the input parameters.
+   *@param fileName -- the name of the file to create  or open WS group 
+   *@param nDims     -- number of workspace dimensions;
+   *@param WSEventType -- the string describing event type
+   *@param readOnly    -- true if the file is opened for read-only access
+
+   *@return   NeXus pointer to properly opened NeXus data file and group.
+   *
+   *@throws if group or its component do not exist and the file is opened read-only or if the existing file parameters are not equal to the 
+              input parameters.
+  */
+  ::NeXus::File * MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName,size_t nDims, const std::string &WSEventType, bool readOnly)
+  {
+        Poco::File oldFile(fileName);
+        bool fileExists = oldFile.exists();
+        if (!fileExists && readOnly)
+            throw Kernel::Exception::FileError("Attempt to open non-existing file in read-only mode",fileName);
+
+       NXaccess access(NXACC_RDWR);
+       if(readOnly)
+           access =NXACC_READ;
+
+        file_holder_type hFile;
+        try
+        {
+           if(fileExists)
+              hFile = file_holder_type( new ::NeXus::File(fileName, access));
+          else
+              hFile = file_holder_type(new ::NeXus::File(fileName, NXACC_CREATE5));
+        }
+        catch(...)
+        {
+          throw Kernel::Exception::FileError("Can not open NeXus file",fileName);
+        }
+
+      std::map<std::string, std::string> groupEntries;
+
+        hFile->getEntries(groupEntries);
+        if(groupEntries.find("MDEventWorkspace")!=groupEntries.end()) // WS group exist
+        {
+        // Open and check ws group -------------------------------------------------------------------------------->>>
+            hFile->openGroup("MDEventWorkspace", "NXentry");
+
+            std::string eventType;
+            if(hFile->hasAttr("event_type"))
+            {
+                hFile->getAttr("event_type",eventType);
+
+                if(eventType != WSEventType)
+                      throw Kernel::Exception::FileError("Trying to open MDWorkspace nexus file with the the events: "+eventType+
+                      "\n different from workspace type: "  +WSEventType,fileName);
+            }
+            else // it is possible that woerkspace group has been created by somebody else and there are no this kind of attribute attached to it. 
+            {
+                if(readOnly) 
+                    throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace opened in read-only mode but \n"
+                                                       " does not have necessary attribute describing the event type used",fileName);
+                 hFile->putAttr("event_type", WSEventType);
+            }
+            // check dimesions dataset
+            bool dimDatasetExist(false);
+            hFile->getEntries(groupEntries);
+            if(groupEntries.find("dimensions")!=groupEntries.end()) //dimesnions dataset exist
+                dimDatasetExist = true;
+
+              if(dimDatasetExist)
+              {
+                int32_t nFileDims;
+                hFile->readData<int32_t>("dimensions",nFileDims);
+                if(nFileDims != static_cast<int32_t>(nDims))
+                        throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace initiated for different number of dimensions then requested ",
+                        fileName);
+              }
+              else
+              {
+                 auto nFileDim = static_cast<int32_t>(nDims);
+              // Write out  # of dimensions
+                 hFile->writeData("dimensions", nFileDim);
+              }
+        // END Open and check ws group --------------------------------------------------------------------------------<<<<
+        }
+        else 
+        {
+        // create new WS group      ------------------------------------------------------------------------------->>>>>
+          if(readOnly) 
+              throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace does not exist in the read-only file",fileName);
+
+           try
+           {
+                hFile->makeGroup("MDEventWorkspace", "NXentry", true);
+                hFile->putAttr("event_type",WSEventType);
+
+                auto nDim = int32_t(nDims);
+              // Write out  # of dimensions
+                 hFile->writeData("dimensions", nDim);
+           }catch(...){
+                throw Kernel::Exception::FileError("Can not create new NXdata group: MDEventWorkspace",fileName);
+           }
+          //END create new WS group      -------------------------------------------------------------------------------<<<
+        }
+        return hFile.release();
   }
 
 
+  // TODO: Get rid of this --> create  the box generator and move all below into MDBoxFactory!
+  
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<1>, 1>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<2>, 2>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<3>, 3>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<4>, 4>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<5>, 5>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<6>, 6>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<7>, 7>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<8>, 8>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<9>, 9>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
 
-  // TODO: Get rid of this!
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<1>, 1>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<2>, 2>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<3>, 3>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<4>, 4>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<5>, 5>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<6>, 6>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<7>, 7>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<8>, 8>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDEvent<9>, 9>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<1>, 1>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<2>, 2>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<3>, 3>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<4>, 4>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<5>, 5>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<6>, 6>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<7>, 7>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<8>, 8>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-  template DLLExport void MDBoxFlatTree::initFlatStructure<MDLeanEvent<9>, 9>(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-
-
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<1>, 1>(std::vector<MDBoxBase<MDLeanEvent<1>, 1>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<2>, 2>(std::vector<MDBoxBase<MDLeanEvent<2>, 2>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<3>, 3>(std::vector<MDBoxBase<MDLeanEvent<3>, 3>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<4>, 4>(std::vector<MDBoxBase<MDLeanEvent<4>, 4>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<5>, 5>(std::vector<MDBoxBase<MDLeanEvent<5>, 5>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<6>, 6>(std::vector<MDBoxBase<MDLeanEvent<6>, 6>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<7>, 7>(std::vector<MDBoxBase<MDLeanEvent<7>, 7>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<8>, 8>(std::vector<MDBoxBase<MDLeanEvent<8>, 8>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<9>, 9>(std::vector<MDBoxBase<MDLeanEvent<9>, 9>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<1>, 1>(std::vector<MDBoxBase<MDEvent<1>, 1>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<2>, 2>(std::vector<MDBoxBase<MDEvent<2>, 2>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<3>, 3>(std::vector<MDBoxBase<MDEvent<3>, 3>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<4>, 4>(std::vector<MDBoxBase<MDEvent<4>, 4>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<5>, 5>(std::vector<MDBoxBase<MDEvent<5>, 5>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<6>, 6>(std::vector<MDBoxBase<MDEvent<6>, 6>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<7>, 7>(std::vector<MDBoxBase<MDEvent<7>, 7>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<8>, 8>(std::vector<MDBoxBase<MDEvent<8>, 8>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<9>, 9>(std::vector<MDBoxBase<MDEvent<9>, 9>* >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<1>, 1>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<2>, 2>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<3>, 3>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<4>, 4>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<5>, 5>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<6>, 6>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<7>, 7>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<8>, 8>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
+  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<9>, 9>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
 
   }
 }

@@ -9,6 +9,7 @@
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/BoxControllerNeXusIO.h"
 #include "SaveMDTest.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
@@ -76,8 +77,8 @@ public:
     compareBoxControllers(*ws1->getBoxController(), *ws2->getBoxController());
     
     // Compare every box1
-    std::vector<MDBoxBase<MDE,nd>*> boxes;
-    std::vector<MDBoxBase<MDE,nd>*> boxes1;
+    std::vector<IMDNode *> boxes;
+    std::vector<IMDNode *> boxes1;
 
     ws1->getBox()->getBoxes(boxes, 1000, false);
     ws2->getBox()->getBoxes(boxes1, 1000, false);
@@ -87,23 +88,23 @@ public:
 
     for (size_t j=0; j<boxes.size(); j++)
     {
-      MDBoxBase<MDE,nd>* box1 = boxes[j];
-      MDBoxBase<MDE,nd>* box2 = boxes1[j];
+      IMDNode * box1 = boxes[j];
+      IMDNode * box2 = boxes1[j];
 
       //std::cout << "ID: " << box1->getId() << std::endl;
-      TS_ASSERT_EQUALS( box1->getId(), box2->getId() );
+      TS_ASSERT_EQUALS( box1->getID(), box2->getID() );
       TS_ASSERT_EQUALS( box1->getDepth(), box2->getDepth() );
       TS_ASSERT_EQUALS( box1->getNumChildren(), box2->getNumChildren() );
       for (size_t i=0; i<box1->getNumChildren(); i++)
       {
-        TS_ASSERT_EQUALS( box1->getChild(i)->getId(), box2->getChild(i)->getId() );
+        TS_ASSERT_EQUALS( box1->getChild(i)->getID(), box2->getChild(i)->getID() );
       }
       for (size_t d=0; d<nd; d++)
       {
         TS_ASSERT_DELTA( box1->getExtents(d).getMin(), box2->getExtents(d).getMin(), 1e-5);
         TS_ASSERT_DELTA( box1->getExtents(d).getMax(), box2->getExtents(d).getMax(), 1e-5);
       }
-      TS_ASSERT_DELTA( box1->getVolume(), box2->getVolume(), 1e-3);
+      TS_ASSERT_DELTA( box1->getInverseVolume(), box2->getInverseVolume(), 1e-3);
       if (!BoxStructureOnly)
       {
         TS_ASSERT_DELTA( box1->getSignal(), box2->getSignal(), 1e-3);
@@ -111,7 +112,7 @@ public:
         TS_ASSERT_EQUALS( box1->getNPoints(), box2->getNPoints() );
       }
       TS_ASSERT( box1->getBoxController() );
-      TS_ASSERT( box1->getBoxController()==ws1->getBoxController() );
+      TS_ASSERT( box1->getBoxController()==ws1->getBoxController().get());
 
       // Are both MDGridBoxes ?
       MDGridBox<MDE,nd>* gridbox1 = dynamic_cast<MDGridBox<MDE,nd>*>(box1);
@@ -243,20 +244,18 @@ public:
     {
       // Force a flush of the read-write cache
       BoxController_sptr bc = ws->getBoxController();
-      DiskBuffer & dbuf = bc->getDiskBuffer();
-      dbuf.flushCache();
+      DiskBuffer * dbuf = bc->getFileIO();
+      dbuf->flushCache();
 
-      typename std::vector<MDBoxBase<MDE,nd>*> boxes;
+      typename std::vector<API::IMDNode *> boxes;
       ws->getBox()->getBoxes(boxes, 1000, false);
       for (size_t i=0; i<boxes.size(); i++)
       {
         MDBox<MDE,nd>*box = dynamic_cast<MDBox<MDE,nd>*>(boxes[i]);
         if (box)
         {
-          TSM_ASSERT("Large box should not be in memory", !box->getInMemory());
-          TSM_ASSERT("Large box should be cached to disk", box->wasSaved());
-          TSM_ASSERT_EQUALS("Box should not have points in memory", box->getDataMemorySize(),0);
-
+            TSM_ASSERT("Large box should not be in memory",box->getISaveable()->getDataMemorySize()==0);
+            TSM_ASSERT("Large box should be cached to disk", box->getISaveable()->wasSaved());
         }
       }
     }
@@ -264,7 +263,7 @@ public:
     // Remove workspace from the data service.
     if (deleteWorkspace)
     {
-      ws->getBoxController()->closeFile(true);
+      ws->clearFileBacked(false);
       AnalysisDataService::Instance().remove(outWSName);
       if (Poco::File(filename).exists()) Poco::File(filename).remove();
     }
@@ -333,12 +332,16 @@ public:
     TS_ASSERT( saver.isExecuted() );
 
     // Now we look at the file that's currently open
-    ::NeXus::File * file = ws2->getBoxController()->getFile();
+    auto loader = dynamic_cast<BoxControllerNeXusIO *>( ws2->getBoxController()->getFileIO());
+    TS_ASSERT(loader);
+    if(!loader)return;
+
+    ::NeXus::File * file =loader->getFile();
     TSM_ASSERT_LESS_THAN( "The event_data field in the file must be at least 10002 long.", 10002, file->getInfo().dims[0] );
 
 
     // The file should have been modified but that's tricky to check directly.
-    std::string filename = ws2->getBoxController()->getFilename();
+    std::string filename = ws2->getBoxController()->getFileIO()->getFileName();
     // Now we re-re-load it!
     LoadMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -357,7 +360,8 @@ public:
     // Perform the full comparison of the second and 3rd loaded workspaces
     do_compare_MDEW(ws2, ws3);
 
-    ws2->getBoxController()->closeFile(true);
+    // break the connection between the workspace and the file, ws2 is file backed
+    ws2->clearFileBacked(false);
     AnalysisDataService::Instance().remove(outWSName);
 
   }

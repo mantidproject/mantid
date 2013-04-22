@@ -823,21 +823,35 @@ namespace Mantid
       PARALLEL_FOR1(out)
       for(int64_t i = 0; i < nindices; ++i)
       {
-        PARALLEL_START_INTERUPT_REGION
-
-        try
+        if (!m_parallelException && !m_cancel) 
         {
-          IDetector_const_sptr det_out = out->getDetector(m_indicesToMask[i]);
-          PARALLEL_CRITICAL(BinaryOperation_masking)
-          {
-            pmap.addBool(det_out.get(), "masked", true);
-          }
-        }
-        catch(std::runtime_error &)
-        {
-        }
+           try 
+           {
+               IDetector_const_sptr det_out = out->getDetector(m_indicesToMask[i]);
+               PARALLEL_CRITICAL(BinaryOperation_masking)
+               {
+                    pmap.addBool(det_out.get(), "masked", true);
+               }
+            } /* End of try block in PARALLEL_START_INTERUPT_REGION */ 
+            catch(Kernel::Exception::NotFoundError )
+            { // detector not found, do nothing, go further
+            }
+            catch(std::runtime_error &ex)
+            {
+               if (!m_parallelException)
+               { 
+                     m_parallelException = true; 
+                     g_log.error() << this->name() << ": " << ex.what() << "\n"; 
+               } 
+            }
+            catch(...) 
+            {
+                m_parallelException = true; 
+            } 
+        
 
-        PARALLEL_END_INTERUPT_REGION
+         } // End of if block in PARALLEL_START_INTERUPT_REGION
+
       }
       PARALLEL_CHECK_INTERUPT_REGION
     }

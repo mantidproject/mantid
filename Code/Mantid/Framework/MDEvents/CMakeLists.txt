@@ -3,6 +3,7 @@ set ( SRC_FILES
 	#
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
+	src/BoxControllerNeXusIO.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
@@ -25,7 +26,8 @@ set ( SRC_FILES
 	src/MDBoxBase.cpp
 	src/MDBoxIterator.cpp
     src/MDBoxFlatTree.cpp    
-	src/MDBoxToChange.cpp
+#	src/MDBoxToChange.cpp
+	src/MDBoxSaveable.cpp    
 	src/MDEventFactory.cpp
 	src/MDEventWSWrapper.cpp
 	src/MDEventWorkspace.cpp
@@ -46,8 +48,8 @@ set ( SRC_FILES
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
-        src/Integrate3DEvents.cpp
-        src/IntegrateEllipsoids.cpp
+    src/Integrate3DEvents.cpp
+    src/IntegrateEllipsoids.cpp
 	src/SaveIsawQvector.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
@@ -67,7 +69,9 @@ set ( INC_FILES
 	#
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
+	inc/MantidMDEvents/BoxControllerNeXusIO.h        
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
+#	inc/MantidMDEvents/BoxCtrlChangesList.h 
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h
@@ -89,7 +93,8 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDBoxBase.h
 	inc/MantidMDEvents/MDBoxIterator.h
     inc/MantidMDEvents/MDBoxFlatTree.h
-	inc/MantidMDEvents/MDBoxToChange.h
+#	inc/MantidMDEvents/MDBoxToChange.h
+	inc/MantidMDEvents/MDBoxSaveable.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
@@ -127,6 +132,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	AffineMatrixParameterParserTest.h
 	AffineMatrixParameterTest.h
+	BoxControllerNeXusIOTest.h                
 	BoxControllerSettingsAlgorithmTest.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToReflectometryQTest.h
@@ -142,7 +148,8 @@ set ( TEST_FILES
 	MDBoxBaseTest.h
 	MDBoxIteratorTest.h
 	MDBoxTest.h
-	MDBoxToChangeTest.h
+	MDBoxSaveableTest.h    
+#	MDBoxToChangeTest.h
 	MDDimensionStatsTest.h
 	MDEventFactoryTest.h
 	MDEventInserterTest.h

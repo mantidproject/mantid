@@ -1,3 +1,17 @@
+/*WIKI*
+A quadratic background function is defined as:
+
+:<math> \mbox{A0}+\mbox{A1}*x+\mbox{A2}*x^2 </math>
+
+where
+
+    <UL>
+    <LI> A0 - coefficient for constant term </LI>
+    <LI> A1 - coefficient for linear term </LI>
+    <LI> A2 - coefficient for quadratic term </LI>
+    </UL>
+ *WIKI*/
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -19,9 +33,9 @@ DECLARE_FUNCTION(Quadratic)
  */
 void Quadratic::init()
 {
-  declareParameter("A0", 0.0);
-  declareParameter("A1", 0.0);
-  declareParameter("A2", 0.0);
+  declareParameter("A0", 0.0, "coefficient for constant term");
+  declareParameter("A1", 0.0, "coefficient for linear term");
+  declareParameter("A2", 0.0, "coefficient for quadratic term");
 }
 
 /** \relates Quadratic 

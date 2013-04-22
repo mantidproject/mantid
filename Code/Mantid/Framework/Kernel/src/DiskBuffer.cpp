@@ -1,5 +1,6 @@
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/System.h"
+#include <Poco/ScopedLock.h>
 #include <iostream>
 #include <sstream>
 
@@ -15,10 +16,9 @@ namespace Kernel
   /** Constructor
    */
   DiskBuffer::DiskBuffer() :
-//    m_useWriteBuffer(false),
-    m_writeBufferSize(50),
-    m_writeBuffer_byId( m_writeBuffer.get<1>() ),
+    m_writeBufferSize(50),  
     m_writeBufferUsed(0),
+    m_nObjectsToWrite(0),
     m_free(),
     m_free_bySize( m_free.get<1>() ),
     m_fileLength(0)
@@ -33,10 +33,9 @@ namespace Kernel
    * @return
    */
   DiskBuffer::DiskBuffer(uint64_t m_writeBufferSize) :
-//    m_useWriteBuffer(m_writeBufferSize > 0),
     m_writeBufferSize(m_writeBufferSize),
-    m_writeBuffer_byId( m_writeBuffer.get<1>() ),
     m_writeBufferUsed(0),
+    m_nObjectsToWrite(0),
     m_free(),
     m_free_bySize( m_free.get<1>() ),
     m_fileLength(0)
@@ -60,29 +59,38 @@ namespace Kernel
    *
    * @param item :: item that can be written to disk.
    */
-  void DiskBuffer::toWrite(const ISaveable * item)
+  void DiskBuffer::toWrite(ISaveable * item)
   {
     if (item == NULL) return;
 //    if (!m_useWriteBuffer) return;
 
-    m_mutex.lock();
-
-    // And put it in the queue of stuff to write.
-//    std::cout << "DiskBuffer adding ID " << item->getId() << " to current size " << m_writeBuffer.size() << std::endl;
-    // TODO: check what happens when the same element is inserted with different size 
-    std::pair<writeBuffer_t::iterator,bool> result = m_writeBuffer.insert(item);
-
-    // Result.second is FALSE if the item was already there
-    if (result.second)
+    if(item->getBufPostion()) // already in the buffer and probably have changed its size in memory
     {
-      // Track the memory change
-      m_writeBufferUsed += item->getDataMemorySize();
-
-      // Should we now write out the old data?
-      if (m_writeBufferUsed >= m_writeBufferSize)
-        writeOldObjects();
+        // forget old memory size
+        m_mutex.lock();	
+          m_writeBufferUsed-=item->getBufferSize();
+          // add new size
+          size_t newMemorySize =item->getDataMemorySize(); 
+          m_writeBufferUsed+=newMemorySize;
+        m_mutex.unlock();	
+        item->setBufferSize(newMemorySize);
     }
-    m_mutex.unlock();
+    else
+    {
+        m_mutex.lock();
+            m_toWriteBuffer.push_front(item);
+            m_writeBufferUsed += item->setBufferPosition(m_toWriteBuffer.begin());
+            m_nObjectsToWrite++;
+        m_mutex.unlock();
+    }
+     
+
+   // Should we now write out the old data?
+     if (m_writeBufferUsed > m_writeBufferSize)
+          writeOldObjects();
+
+
+
   }
 
   //---------------------------------------------------------------------------------------------
@@ -93,28 +101,31 @@ namespace Kernel
    *
    * @param item :: ISaveable object that is getting deleted.
    */
-  void DiskBuffer::objectDeleted(const ISaveable * item)
+  void DiskBuffer::objectDeleted(ISaveable * item)
   {
+    if(item==NULL)return ;
+    // have it ever been in the buffer?
     m_mutex.lock();
-    // const uint64_t sizeOnFile 
-    size_t id = item->getId();
-    uint64_t size = item->getDataMemorySize();
-
-
-    // Take it out of the to-write buffer
-    writeBuffer_byId_t::iterator it2 = m_writeBuffer_byId.find(id);
-    if (it2 != m_writeBuffer_byId.end())
+    auto opt2it = item->getBufPostion();
+    if(opt2it)
     {
-      m_writeBuffer_byId.erase(it2);
-      m_writeBufferUsed -= size;
+          m_writeBufferUsed -=item->getBufferSize();
+          m_toWriteBuffer.erase(*opt2it);
     }
-    m_mutex.unlock();
+    else
+    {
+        m_mutex.unlock();
+        return;
+    }
 
+      // indicate to the object that it is not stored in memory any more
+     item->clearBufferState();
+     m_mutex.unlock();
     //std::cout << "DiskBuffer deleting ID " << item->getId() << "; new size " << m_writeBuffer.size() << std::endl;
 
     // Mark the amount of space used on disk as free
-    //this->freeBlock(item->getFilePosition(), sizeOnFile);
-    this->freeBlock(item->getFilePosition(), item->getFileSize());
+    if(item->wasSaved())
+        this->freeBlock(item->getFilePosition(), item->getFileSize());
   }
 
 
@@ -125,67 +136,72 @@ namespace Kernel
   void DiskBuffer::writeOldObjects()
   {
     if (m_writeBufferUsed > DISK_BUFFER_SIZE_TO_REPORT_WRITE)
-      std::cout << "DiskBuffer:: Writing out " << m_writeBufferUsed << " events in " << m_writeBuffer.size() << " blocks." << std::endl;
-//    std::cout << getMemoryStr() << std::endl;
-//    std::cout << getFreeSpaceMap().size() << " entries in the free size map." << std::endl;
-//    for (freeSpace_t::iterator it = m_free.begin(); it != m_free.end(); it++)
-//      std::cout << " Free : " << it->getFilePosition() << " size " << it->getSize() << std::endl;
-//    std::cout << m_fileLength << " length of file" << std::endl;
+      std::cout << "DiskBuffer:: Writing out " << m_writeBufferUsed << " events in " << m_nObjectsToWrite << " objects." << std::endl;
 
+    Poco::ScopedLock<Kernel::Mutex> _lock(m_mutex);
     // Holder for any objects that you were NOT able to write.
-    writeBuffer_t couldNotWrite;
-    size_t memoryNotWritten = 0;
+    std::list<ISaveable *> couldNotWrite;
+    size_t objectsNotWritten(0);
+    size_t memoryNotWritten(0);
 
-    // Prevent simultaneous file access (e.g. write while loading)
-    m_fileMutex.lock();
 
-    // Iterate through the map
-    writeBuffer_t::iterator it = m_writeBuffer.begin();
-    writeBuffer_t::iterator it_end = m_writeBuffer.end();
+
+    // Iterate through the list
+    auto it = m_toWriteBuffer.begin();
+    auto it_end = m_toWriteBuffer.end();
 
     ISaveable * obj = NULL;
+
     for (; it != it_end; ++it)
     {
-      // the object will be changed so no other way to go! TODO: Rethink the desighn
-      obj = const_cast<ISaveable *>(*it);
+      obj = *it;
       if (!obj->isBusy())
       {
-        uint64_t NumAllEvents = obj->getTotalDataSize();
+        uint64_t NumObjEvents = obj->getTotalDataSize();
         uint64_t fileIndexStart;
         if (!obj->wasSaved())
         {
-            fileIndexStart=this->allocate(NumAllEvents);
+            fileIndexStart=this->allocate(NumObjEvents);
            // Write to the disk; this will call the object specific save function;
-            obj->saveAt(fileIndexStart,NumAllEvents);
+          // Prevent simultaneous file access (e.g. write while loading)
+            obj->saveAt(fileIndexStart,NumObjEvents);
         }
         else
         {
           uint64_t NumFileEvents= obj->getFileSize();
-          if (NumAllEvents != NumFileEvents)
+          if (NumObjEvents != NumFileEvents)
           {
           // Event list changed size. The MRU can tell us where it best fits now.
-            fileIndexStart= this->relocate(obj->getFilePosition(), NumFileEvents, NumAllEvents);
+            fileIndexStart= this->relocate(obj->getFilePosition(), NumFileEvents, NumObjEvents);
            // Write to the disk; this will call the object specific save function;
-            obj->saveAt(fileIndexStart,NumAllEvents);
+            obj->saveAt(fileIndexStart,NumObjEvents);
           }       
           else // despite object size have not been changed, it can be modified other way. In this case, the method which changed the data should set dataChanged ID
           {
             if(obj->isDataChanged())
             {
               fileIndexStart = obj->getFilePosition();
-              obj->saveAt(fileIndexStart,NumAllEvents);
+              // Write to the disk; this will call the object specific save function;
+              obj->saveAt(fileIndexStart,NumObjEvents);
+              // this is questionable operation, which adjust file size in case when the file postions were allocated externaly
+              if(fileIndexStart+NumObjEvents>m_fileLength)m_fileLength=fileIndexStart+NumObjEvents;
             }
             else // just clean the object up -- it just occupies memory
               obj->clearDataFromMemory();
           }
         }
+       // tell the object that it has been removed from the buffer
+        obj->clearBufferState();
       } 
       else // object busy
       {
         // The object is busy, can't write. Save it for later
-        //couldNotWrite.insert( pairObj_t(obj->getFilePosition(), obj) );
-        couldNotWrite.insert( obj );
-        memoryNotWritten += obj->getDataMemorySize();
+        couldNotWrite.push_back(obj );	
+        // When a prefix or postfix operator is applied to a function argument, the value of the argument is 
+        // NOT GUARANTEED to be incremented or decremented before it is passed to the function.
+        std::list<ISaveable * >::iterator it = --couldNotWrite.end();
+        memoryNotWritten += obj->setBufferPosition(it);
+        objectsNotWritten++;
       }
     }
 
@@ -198,10 +214,11 @@ namespace Kernel
     }
 
     // Exchange with the new map you built out of the not-written blocks.
-    m_writeBuffer.swap(couldNotWrite);
+    m_toWriteBuffer.swap(couldNotWrite);
     m_writeBufferUsed = memoryNotWritten;
+    m_nObjectsToWrite = objectsNotWritten;
 
-    m_fileMutex.unlock();
+   
   }
 
 
@@ -209,11 +226,8 @@ namespace Kernel
   /** Flush out all the data in the memory; and writes out everything in the to-write cache. */
   void DiskBuffer::flushCache()
   {
-    m_mutex.lock();
-
     // Now write everything out.
     writeOldObjects();
-    m_mutex.unlock();
   }
 
   //---------------------------------------------------------------------------------------------
@@ -226,7 +240,7 @@ namespace Kernel
    */
   void DiskBuffer::freeBlock(uint64_t const pos, uint64_t const size)
   {
-    if (size == 0) return;
+    if (size == 0|| size == std::numeric_limits<uint64_t >::max()) return;
     m_freeMutex.lock();
 
     // Make the block
@@ -405,7 +419,7 @@ namespace Kernel
   std::string DiskBuffer::getMemoryStr() const
   {
     std::ostringstream mess;
-    mess << "Buffer: "  << m_writeBufferUsed << " in " << m_writeBuffer.size() << " blocks. ";
+    mess << "Buffer: "  << m_writeBufferUsed << " in " << m_nObjectsToWrite << " objects. ";
     return mess.str();
   }
 

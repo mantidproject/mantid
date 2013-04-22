@@ -240,6 +240,7 @@ set ( TEST_FILES
 	DateValidatorTest.h
 	DeltaEModeTest.h
 	DirectoryValidatorTest.h
+	DiskBufferISaveableTest.h    
 	DiskBufferTest.h
 	DynamicFactoryTest.h
 	EnabledWhenPropertyTest.h

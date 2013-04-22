@@ -37,13 +37,13 @@ namespace MDEvents
   /** Default constructor
    */
   TMDE(
-  MDEventWorkspace)::MDEventWorkspace()
-    //m_BoxController(boost::make_shared<BoxController>(nd))
-  : m_BoxController(boost::make_shared<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > >(nd))
+  MDEventWorkspace)::MDEventWorkspace():
+  m_BoxController(new BoxController(nd))
   {
     // First box is at depth 0, and has this default boxController
-    data = new MDBox<MDE, nd>(m_BoxController, 0);
+    data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
   }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor
@@ -51,23 +51,25 @@ namespace MDEvents
   TMDE(
   MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE,nd> & other)
   : IMDEventWorkspace(other),
-    m_BoxController( new BoxCtrlChangesList<MDBoxToChange<MDE,nd> >(*other.m_BoxController) )
+    m_BoxController(other.m_BoxController->clone())
   {
-    const MDBox<MDE,nd> * mdbox = dynamic_cast<const MDBox<MDE,nd> *>(other.data);
-    const MDGridBox<MDE,nd> * mdgridbox = dynamic_cast<const MDGridBox<MDE,nd> *>(other.data);
-    if (mdbox)
-    {
-      data = new MDBox<MDE, nd>(*mdbox);
-    }
-    else if (mdgridbox)
-    {
-      data = new MDGridBox<MDE, nd>(*mdgridbox);
-    }
-    else
-    {
-      throw std::runtime_error("MDEventWorkspace::copy_ctor(): unexpected data box type found.");
-    }
-    data->setBoxController(m_BoxController);
+
+
+      const MDBox<MDE,nd> * mdbox = dynamic_cast<const MDBox<MDE,nd> *>(other.data);
+      const MDGridBox<MDE,nd> * mdgridbox = dynamic_cast<const MDGridBox<MDE,nd> *>(other.data);
+      if (mdbox)
+      {
+          data = new MDBox<MDE, nd>(*mdbox,m_BoxController.get());
+      }
+      else if (mdgridbox)
+      {
+        data = new MDGridBox<MDE, nd>(*mdgridbox,m_BoxController.get());
+      }
+      else
+      {
+         throw std::runtime_error("MDEventWorkspace::copy_ctor(): unexpected data box type found.");
+      }
+
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -77,10 +79,30 @@ namespace MDEvents
   MDEventWorkspace)::~MDEventWorkspace()
   {
     delete data;
-  m_BoxController->closeFile();
   }
-
-
+  /**Make workspace file backed if it has not been already file backed 
+   * @param fileName -- short or full file name of the file, which should be used as the file back end
+  */
+  TMDE(
+  void MDEventWorkspace)::setFileBacked(const std::string &/*fileName*/)
+  {
+      throw Kernel::Exception::NotImplementedError(" Not yet implemented");
+  }
+  /** If the workspace was filebacked, this would clear file-backed information from the workspace nodes and close the files responsible for file backing
+   *
+   *@param LoadFileBackedData -- if true, load all data initially backed to hdd when breaking connection between the file and the workspace. 
+   *                             if false, data on hdd are lost if not previously loaded in memory and the workspace is generally corrupted 
+   *                              (used in destructor)
+   */ 
+  TMDE(
+  void MDEventWorkspace)::clearFileBacked(bool LoadFileBackedData)
+  {     
+      if(m_BoxController->isFileBacked())
+      {
+          data->clearFileBacked(LoadFileBackedData);
+          m_BoxController->clearFileBacked();
+      }
+  }
   //-----------------------------------------------------------------------------------------------
   /** Perform initialization after m_dimensions (and others) have been set.
    * This sets the size of the box.
@@ -172,13 +194,12 @@ namespace MDEvents
     for (size_t depth = 1; depth < minDepth; depth++)
     {
       // Get all the MDGridBoxes in the workspace
-      std::vector<MDBoxBase<MDE,nd>*> boxes;
-      boxes.clear();
-      this->getBox()->getBoxes(boxes, depth-1, false);
+       std::vector<API::IMDNode*> boxes;
+       boxes.clear();
+       this->getBox()->getBoxes(boxes, depth-1, false);
       for (size_t i=0; i<boxes.size(); i++)
       {
-        MDBoxBase<MDE,nd> * box = boxes[i];
-        MDGridBox<MDE,nd>* gbox = dynamic_cast<MDGridBox<MDE,nd>*>(box);
+        MDGridBox<MDE,nd>* gbox = dynamic_cast<MDGridBox<MDE,nd>*>(boxes[i]);
         if (gbox)
         {
           // Split ALL the contents.
@@ -225,7 +246,7 @@ namespace MDEvents
       Mantid::Geometry::MDImplicitFunction * function) const
   {
     // Get all the boxes in this workspaces
-    std::vector<MDBoxBase<MDE,nd> *> boxes;
+    std::vector<IMDNode *> boxes;
     // TODO: Should this be leaf only? Depends on most common use case
     if (function)
       this->data->getBoxes(boxes, 10000, true, function);
@@ -272,7 +293,7 @@ namespace MDEvents
         return std::numeric_limits<signal_t>::quiet_NaN();
     }
     // If you got here, then the point is in the workspace.
-    const MDBoxBase<MDE,nd> * box = data->getBoxAtCoord(coords);
+    const API::IMDNode * box = data->getBoxAtCoord(coords);
     if (box)
     {
       // What is our normalization factor?
@@ -305,14 +326,14 @@ namespace MDEvents
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > MDEventWorkspace)::getMinimumExtents(size_t depth)
   {
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > out(nd);
-    std::vector<MDBoxBase<MDE,nd>*> boxes;
+    std::vector<API::IMDNode *> boxes;
     // Get all the end (leaf) boxes
     this->data->getBoxes(boxes, depth, true);
     auto  it = boxes.begin();
     auto  it_end = boxes.end();
     for (; it != it_end; ++it)
     {
-      MDBoxBase<MDE,nd>* box = *it;
+      API::IMDNode * box = *it;
       if (box->getNPoints() > 0)
       {
         for (size_t d=0; d<nd; d++)
@@ -361,18 +382,19 @@ namespace MDEvents
 //    }
 //    out.push_back(mess.str()); mess.str("");
 
-    if (m_BoxController->getFile())
+    if (m_BoxController->isFileBacked())
     {
       mess << "File backed: ";
-      double avail = double(m_BoxController->getDiskBuffer().getWriteBufferSize() * sizeof(MDE)) / (1024*1024);
-      double used = double(m_BoxController->getDiskBuffer().getWriteBufferUsed() * sizeof(MDE)) / (1024*1024);
+      double avail = double(m_BoxController->getFileIO()->getWriteBufferSize() * sizeof(MDE)) / (1024*1024);
+      double used = double(m_BoxController->getFileIO()->getWriteBufferUsed() * sizeof(MDE)) / (1024*1024);
       mess << "Write buffer: " << used << " of " << avail << " MB. ";
       out.push_back(mess.str()); mess.str("");
 
       mess << "File";
       if (this->fileNeedsUpdating())
         mess << " (needs updating)";
-      mess << ": " << this->m_BoxController->getFilename();
+
+      mess << ": " << this->m_BoxController->getFileIO()->getFileName();
       out.push_back(mess.str()); mess.str("");
     }
     else
@@ -390,10 +412,10 @@ namespace MDEvents
   template <typename BOXTYPE>
   bool SortBoxesByID(const BOXTYPE& a, const BOXTYPE& b)
   {
-    return a->getId() < b->getId();
+    return a->getID() < b->getID();
   }
 
-
+  
   //-----------------------------------------------------------------------------------------------
   /** Create a table of data about the boxes contained */
   TMDE(
@@ -403,7 +425,7 @@ namespace MDEvents
     UNUSED_ARG(start);
     UNUSED_ARG(num);
     // Boxes to show
-    std::vector<Kernel::ISaveable *> boxes;
+    std::vector<API::IMDNode *> boxes;
     std::vector<MDBoxBase<MDE,nd>* > boxes_filtered;
     this->getBox()->getBoxes(boxes, 1000, false);
 
@@ -443,26 +465,30 @@ namespace MDEvents
     {
       MDBoxBase<MDE,nd>* box = boxes_filtered[i];
       int col = 0;
-      ws->cell<int>(i, col++) = int(box->getId());;
+
+      ws->cell<int>(i, col++) = int(box->getID());;
       ws->cell<int>(i, col++) = int(box->getDepth());
       ws->cell<int>(i, col++) = int(box->getNumChildren());
-      ws->cell<int>(i, col++) = int(box->getFilePosition());
+      
       MDBox<MDE,nd>* mdbox = dynamic_cast<MDBox<MDE,nd>*>(box);
-      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getFileSize()) : 0;
-      ws->cell<int>(i, col++) = mdbox ? int(mdbox->getDataMemorySize()) : -1;
-      if (mdbox)
+      Kernel::ISaveable const*const pSaver(box->getISaveable());
+
+      ws->cell<int>(i, col++) = pSaver ? int(pSaver->getFilePosition()):-1;
+      ws->cell<int>(i, col++) = pSaver ? int(pSaver->getFileSize()) : 0;
+      ws->cell<int>(i, col++) = mdbox ?  int(mdbox->getDataInMemorySize()) : -1;
+      if (mdbox && pSaver)
       {
-        ws->cell<std::string>(i, col++) = (mdbox->wasSaved() ? "yes":"no");
-        ws->cell<std::string>(i, col++) = (mdbox->getInMemory() ? "yes":"no");
-        // there is no exact equivalent of data added, but we assume that data added if data on file are not equal to data in memory
-        bool isDataAdded = (mdbox->getFileSize()!=mdbox->getNPoints());
-        ws->cell<std::string>(i, col++) = std::string(isDataAdded ? "Added ":"") + std::string(mdbox->isBusy() ? "Modif.":"") ;
+        ws->cell<std::string>(i, col++) = (pSaver->wasSaved() ? "yes":"no");
+        ws->cell<std::string>(i, col++) = (pSaver->isLoaded() ? "yes":"no");
+  
+        bool isDataAdded = (mdbox->isDataAdded());
+        ws->cell<std::string>(i, col++) = std::string(isDataAdded ? "Added ":"") + std::string(pSaver->isBusy() ? "Modif.":"") ;
       }
       else
       {
-        ws->cell<std::string>(i, col++) = "-";
-        ws->cell<std::string>(i, col++) = "-";
-        ws->cell<std::string>(i, col++) = "-";
+        ws->cell<std::string>(i, col++) = (pSaver ? "-":"NA");
+        ws->cell<std::string>(i, col++) = (pSaver ? "-":"NA");
+        ws->cell<std::string>(i, col++) = (pSaver ? "-":"NA");
       }
       ws->cell<std::string>(i, col++) = box->getExtentsStr();
     }
@@ -479,11 +505,11 @@ namespace MDEvents
 //    std::cout << "sizeof(MDBox<MDE,nd>) " << sizeof(MDBox<MDE,nd>) << std::endl;
 //    std::cout << "sizeof(MDGridBox<MDE,nd>) " << sizeof(MDGridBox<MDE,nd>) << std::endl;
     size_t total = 0;
-    if (this->m_BoxController->getFile())
+    if (this->m_BoxController->isFileBacked())
     {
       // File-backed workspace
       // How much is in the cache?
-      total = this->m_BoxController->getDiskBuffer().getWriteBufferUsed() * sizeof(MDE);
+      total = this->m_BoxController->getFileIO()->getWriteBufferUsed() * sizeof(MDE);
     }
     else
     {
@@ -610,86 +636,86 @@ namespace MDEvents
     //TODO ThreadPool
   }
 
-  //-----------------------------------------------------------------------------------------------
-  /** Add a large number of events to this MDEventWorkspace.
-   * This will use a ThreadPool/OpenMP to allocate events in parallel.
-   *
-   * @param events :: vector of events to be copied.
-   * @param prog :: optional Progress object to report progress back to GUI/algorithms.
-   * @return the number of events that were rejected (because of being out of bounds)
-   */
-  TMDE(
-  void MDEventWorkspace)::addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog)
-  {
-    // Always split the MDBox into a grid box
-    this->splitBox();
-    MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
-
-    // Get some parameters that should optimize task allocation.
-    size_t eventsPerTask, numTasksPerBlock;
-    this->m_BoxController->getAddingEventsParameters(eventsPerTask, numTasksPerBlock);
-
-    // Set up progress report, if any
-    if (prog)
-    {
-      size_t numTasks = events.size()/eventsPerTask;
-      prog->setNumSteps( int( numTasks + numTasks/numTasksPerBlock ));
-    }
-
-    // Where we are in the list of events
-    size_t event_index = 0;
-    while (event_index < events.size())
-    {
-      //Since the costs are not known ahead of time, use a simple FIFO buffer.
-      ThreadScheduler * ts = new ThreadSchedulerFIFO();
-      // Create the threadpool
-      ThreadPool tp(ts);
-
-      // Do 'numTasksPerBlock' tasks with 'eventsPerTask' events in each one.
-      for (size_t i = 0; i < numTasksPerBlock; i++)
-      {
-        // Calculate where to start and stop in the events vector
-        bool breakout = false;
-        size_t start_at = event_index;
-        event_index += eventsPerTask;
-        size_t stop_at = event_index;
-        if (stop_at >= events.size())
-        {
-          stop_at = events.size();
-          breakout = true;
-        }
-
-        // Create a task and push it into the scheduler
-        //std::cout << "Making a AddEventsTask " << start_at << " to " << stop_at << std::endl;
-        typename MDGridBox<MDE,nd>::AddEventsTask * task;
-        task = new typename MDGridBox<MDE,nd>::AddEventsTask(gridBox, events, start_at, stop_at, prog) ;
-        ts->push( task );
-
-        if (breakout) break;
-      }
-
-      // Finish all threads.
-//      std::cout << "Starting block ending at index " << event_index << " of " << events.size() << std::endl;
-      Timer tim;
-      tp.joinAll();
-//      std::cout << "... block took " << tim.elapsed() << " secs.\n";
-
-      //Create a threadpool for splitting.
-      ThreadScheduler * ts_splitter = new ThreadSchedulerFIFO();
-      ThreadPool tp_splitter(ts_splitter);
-
-      //Now, shake out all the sub boxes and split those if needed
-//      std::cout << "\nStarting splitAllIfNeeded().\n";
-      if (prog) prog->report("Splitting MDBox'es.");
-
-      gridBox->splitAllIfNeeded(ts_splitter);
-      tp_splitter.joinAll();
-//      std::cout << "\n... splitAllIfNeeded() took " << tim.elapsed() << " secs.\n";
-    }
-
-    // Refresh the counts, now that we are all done.
-    this->refreshCache();
-  }
+//  //-----------------------------------------------------------------------------------------------
+//  /** Add a large number of events to this MDEventWorkspace.
+//   * This will use a ThreadPool/OpenMP to allocate events in parallel.
+//   *
+//   * param events :: vector of events to be copied.
+//   * param prog :: optional Progress object to report progress back to GUI/algorithms.
+//   * return the number of events that were rejected (because of being out of bounds)
+//   */
+//  TMDE(
+//  void MDEventWorkspace)::addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog)
+//  {
+//    // Always split the MDBox into a grid box
+//    this->splitBox();
+//    MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
+//
+//    // Get some parameters that should optimize task allocation.
+//    size_t eventsPerTask, numTasksPerBlock;
+//    this->m_BoxController->getAddingEventsParameters(eventsPerTask, numTasksPerBlock);
+//
+//    // Set up progress report, if any
+//    if (prog)
+//    {
+//      size_t numTasks = events.size()/eventsPerTask;
+//      prog->setNumSteps( int( numTasks + numTasks/numTasksPerBlock ));
+//    }
+//
+//    // Where we are in the list of events
+//    size_t event_index = 0;
+//    while (event_index < events.size())
+//    {
+//      //Since the costs are not known ahead of time, use a simple FIFO buffer.
+//      ThreadScheduler * ts = new ThreadSchedulerFIFO();
+//      // Create the threadpool
+//      ThreadPool tp(ts);
+//
+//      // Do 'numTasksPerBlock' tasks with 'eventsPerTask' events in each one.
+//      for (size_t i = 0; i < numTasksPerBlock; i++)
+//      {
+//        // Calculate where to start and stop in the events vector
+//        bool breakout = false;
+//        size_t start_at = event_index;
+//        event_index += eventsPerTask;
+//        size_t stop_at = event_index;
+//        if (stop_at >= events.size())
+//        {
+//          stop_at = events.size();
+//          breakout = true;
+//        }
+//
+//        // Create a task and push it into the scheduler
+//        //std::cout << "Making a AddEventsTask " << start_at << " to " << stop_at << std::endl;
+//        typename MDGridBox<MDE,nd>::AddEventsTask * task;
+//        task = new typename MDGridBox<MDE,nd>::AddEventsTask(gridBox, events, start_at, stop_at, prog) ;
+//        ts->push( task );
+//
+//        if (breakout) break;
+//      }
+//
+//      // Finish all threads.
+////      std::cout << "Starting block ending at index " << event_index << " of " << events.size() << std::endl;
+//      Timer tim;
+//      tp.joinAll();
+////      std::cout << "... block took " << tim.elapsed() << " secs.\n";
+//
+//      //Create a threadpool for splitting.
+//      ThreadScheduler * ts_splitter = new ThreadSchedulerFIFO();
+//      ThreadPool tp_splitter(ts_splitter);
+//
+//      //Now, shake out all the sub boxes and split those if needed
+////      std::cout << "\nStarting splitAllIfNeeded().\n";
+//      if (prog) prog->report("Splitting MDBox'es.");
+//
+//      gridBox->splitAllIfNeeded(ts_splitter);
+//      tp_splitter.joinAll();
+////      std::cout << "\n... splitAllIfNeeded() took " << tim.elapsed() << " secs.\n";
+//    }
+//
+//    // Refresh the counts, now that we are all done.
+//    this->refreshCache();
+//  }
 
 
 
@@ -727,7 +753,8 @@ namespace MDEvents
       x.push_back(static_cast<coord_t>(stepLength * double(i)));
 
       // Look for the box at this coordinate
-      const MDBoxBase<MDE,nd> * box = NULL;
+      //const MDBoxBase<MDE,nd> * box = NULL;
+      const IMDNode * box = NULL;
 
       // Do an initial bounds check
       bool outOfBounds = false;
@@ -792,7 +819,7 @@ namespace MDEvents
   {
     if(maskingRegion)
     {
-      std::vector<MDBoxBase<MDE,nd> *> toMaskBoxes;
+      std::vector<API::IMDNode *> toMaskBoxes;
 
       //Apply new masks
       this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
@@ -811,7 +838,7 @@ namespace MDEvents
   TMDE(
   void MDEventWorkspace)::clearMDMasking()
   {    
-    std::vector<MDBoxBase<MDE,nd> *> allBoxes;
+      std::vector<API::IMDNode *> allBoxes;
     //Clear old masks
     this->data->getBoxes(allBoxes, 10000, true);
     for(size_t i = 0; i < allBoxes.size(); ++i)
@@ -860,6 +887,7 @@ namespace MDEvents
     }
     return result;
   }
+
 
 }//namespace MDEvents
 

@@ -26,12 +26,12 @@ namespace MDEvents
   class DLLExport MDBoxIterator : public Mantid::API::IMDIterator
   {
   public:
-    MDBoxIterator(MDBoxBase<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+      MDBoxIterator(API::IMDNode * topBox, size_t maxDepth, bool leafOnly,
         Mantid::Geometry::MDImplicitFunction * function = NULL);
-    MDBoxIterator(MDBoxBase<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+    MDBoxIterator(API::IMDNode * topBox, size_t maxDepth, bool leafOnly,
         SkippingPolicy* skippingPolicy, Mantid::Geometry::MDImplicitFunction * function = NULL);
-    MDBoxIterator(std::vector<MDBoxBase<MDE,nd>*> & boxes, size_t begin, size_t end);
-    void init(std::vector<MDBoxBase<MDE,nd>*> & boxes, size_t begin, size_t end);
+    MDBoxIterator(std::vector<API::IMDNode *> & boxes, size_t begin, size_t end);
+    void init(std::vector<API::IMDNode *> & boxes, size_t begin, size_t end);
     virtual ~MDBoxIterator();
 
     /// Return a pointer to the current box pointed to by the iterator.
@@ -88,7 +88,7 @@ namespace MDEvents
   private:
 
     /// Common code run my a few of the constructors.
-    void commonConstruct(MDBoxBase<MDE,nd> * topBox, size_t maxDepth, bool leafOnly,
+    void commonConstruct(API::IMDNode * topBox, size_t maxDepth, bool leafOnly,
       Mantid::Geometry::MDImplicitFunction * function);
 
     void getEvents() const;
@@ -102,7 +102,7 @@ namespace MDEvents
     size_t m_max;
 
     /// Vector of all the boxes that will be iterated.
-    std::vector<Kernel::ISaveable *> m_boxes;
+    std::vector<API::IMDNode *> m_boxes;
 
     /// Box currently pointed to
     MDBoxBase<MDE,nd>* m_current;

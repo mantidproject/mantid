@@ -101,6 +101,19 @@ namespace MDEvents
       for (size_t i=0; i<nd; i++)
         center[i] = centers[i];
     }
+  //---------------------------------------------------------------------------------------------
+    /** Constructor with signal and error and an array of centers
+     *
+     * @param signal :: signal (aka weight)
+     * @param errorSquared :: square of the error on the weight
+     * @param centers :: pointer to a nd-sized array of values to set for all coordinates.
+     * */
+    MDLeanEvent(const double signal, const double errorSquared, const coord_t * centers) :
+      signal(float(signal)), errorSquared(float(errorSquared))
+    {
+      for (size_t i=0; i<nd; i++)
+        center[i] = centers[i];
+    }
 
 #ifdef COORDT_IS_FLOAT
     //---------------------------------------------------------------------------------------------
@@ -266,128 +279,26 @@ namespace MDEvents
     {
       return 0;
     }
-
-
-    //---------------------------------------------------------------------------------------------
-    /** When first creating a NXS file containing the data, the proper
-     * data block(s) need to be created.
-     *
-     * @param file :: open NXS file.
-     * @param chunkSize :: chunk size to use when creating the data set (in number of events).
-     */
-    static void prepareNexusData(::NeXus::File * file, const uint64_t chunkSize)
-    {
-      API::BoxController::prepareEventNexusData(file,chunkSize,nd+2,"signal, errorsquared, center (each dim.)");
-    }
-
   
-    //---------------------------------------------------------------------------------------------
-    /** Do any final clean up of NXS event data blocks
-     *
-     * @param file :: open NXS file.
-     */  
 
-
-    //---------------------------------------------------------------------------------------------
-    /** Put a slab of MDEvent data into the nexus file.
-     * This is reused by both MDEvent and MDLeanEvent
-     *
-     * If needed, coerce it to the format of the output file (for old
-     * .nxs files in doubles)
-     *
-     * @param file :: open NXS file.
-     * @param data :: pointer to the numEvents*numColumn-sized array of data
-     *        This gets deleted by this method!
-     * @param startIndex :: index in the array to start saving to
-     * @param numEvents :: number of events to save.
-     * @param numColumns :: how many columns in the data set (depends on the data type)
-     */
-    static inline void putDataInNexus(::NeXus::File * file,
-        coord_t * data, const uint64_t startIndex,
-        const uint64_t numEvents, const size_t numColumns)
+    /* static method used to convert vector of lean events into vector of their coordinates & signal and error 
+     @param events    -- vector of events
+     @return data     -- vector of events coordinates, their signal and error casted to coord_t type
+     @return ncols    -- the number of colunts  in the data (it is nd+2 here but may be different for other data types) 
+     @return totalSignal -- total signal in the vector of events
+     @return totalErr   -- total error corresponting to the vector of events
+    */
+    static inline void eventsToData(const std::vector<MDLeanEvent<nd> > & events,std::vector<coord_t> &data,size_t &ncols,double &totalSignal,double &totalErrSq )
     {
-      //TODO: WARNING NEXUS NEEDS TO BE UPDATED TO USE 64-bit ints on Windows.
-      std::vector<int64_t> start(2,0);
-      start[0] = int64_t(startIndex);
+      ncols = nd+2;
+      size_t nEvents=events.size();
+      data.resize(nEvents*ncols);
 
-      // Specify the dimensions
-      std::vector<int64_t> dims;
-      dims.push_back(int64_t(numEvents));
-      dims.push_back(int64_t(numColumns));
-
-      // C-style call is much faster than the C++ call.
-//      int dims_ignored[NX_MAXRANK];
-//      int type = ::NeXus::FLOAT32;
-//      int rank = 0;
-//      NXgetinfo(file->getHandle(), &rank, dims_ignored, &type);
-      NeXus::Info info = file->getInfo();
-
-      if (info.type == ::NeXus::FLOAT64)
-      {
-        // Handle file-backed OLD files that are in doubles.
-
-        // Convert the floats to doubles
-        size_t dataSize = (numEvents*numColumns);
-        double * dblData = new double[dataSize];
-        for (size_t i=0; i<dataSize;i++)
-          dblData[i] = static_cast<double>(data[i]);
-        delete [] data;
-
-        // And save as doubles
-        try
-        {
-          file->putSlab(dblData, start, dims);
-        }
-        catch (std::exception &)
-        {
-          delete [] dblData;
-          throw;
-        }
-
-        delete [] dblData;
-      }
-      else
-      {
-        /* ------------- Normal files, saved in floats -------- */
-        try
-        {
-          file->putSlab(data, start, dims);
-        }
-        catch (std::exception &)
-        {
-          delete [] data;
-          throw;
-        }
-        delete [] data;
-      }
-
-    }
-
-    //---------------------------------------------------------------------------------------------
-    /** Static method to save a vector of MDEvents of this type to a nexus file
-     * open to the right group.
-     * This method plops the events as a slab at a particular point in an already created array.
-     * The data block MUST be already open.
-     *
-     * This will be re-implemented by any other MDLeanEvent-like type.
-     *
-     * @param events :: reference to the vector of events to save.
-     * @param file :: open NXS file.
-     * @param startIndex :: index in the array to start saving to
-     * @param[out] totalSignal :: returns the integrated signal of all events
-     * @param[out] totalErrorSquared :: returns the integrated squared error of all events
-     * */
-    static void saveVectorToNexusSlab(const std::vector<MDLeanEvent<nd> > & events, ::NeXus::File * file, const uint64_t startIndex,
-        signal_t & totalSignal, signal_t & totalErrorSquared)
-    {
-      size_t numEvents = events.size();
-      size_t numColumns = nd+2;
-      coord_t * data = new coord_t[numEvents*numColumns];
 
       totalSignal = 0;
-      totalErrorSquared = 0;
+      totalErrSq = 0;
 
-      size_t index = 0;
+      size_t index(0);
       typename std::vector<MDLeanEvent<nd> >::const_iterator it = events.begin();
       typename std::vector<MDLeanEvent<nd> >::const_iterator it_end = events.end();
       for (; it != it_end; ++it)
@@ -401,115 +312,47 @@ namespace MDEvents
           data[index++] = event.center[d];
         // Track the total signal
         totalSignal += signal_t(signal);
-        totalErrorSquared += signal_t(errorSquared);
+        totalErrSq  += signal_t(errorSquared);
       }
-
-      putDataInNexus(file, data, startIndex, numEvents, numColumns);
 
     }
 
-    //---------------------------------------------------------------------------------------------
-    /** Get a slab of MDEvent data out of the nexus file.
-     * This is reused by both MDEvent and MDLeanEvent
-     *
-     * If needed, coerce it to the desired output data type (coord_t)
-     *
-     * @param file :: open NXS file.
-     * @param indexStart :: index (in events) in the data field to start at
-     * @param numEvents :: number of events to load.
-     * @param numColumns :: how many columns in the data set (depends on the data type)
-     * @return a pointer to the allocated data array. Must be deleted by caller.
-     */
-    static inline coord_t * getDataFromNexus(::NeXus::File * file,
-        uint64_t indexStart, uint64_t numEvents,
-        size_t numColumns)
+    /* static method used to convert vector of data into vector of lean events 
+     @return coord    -- vector of events coordinates, their signal and error casted to coord_t type
+     @param events    -- vector of events
+     @param reserveMemory -- reserve memory for events copying. Set to false if one wants to add new events to the existing one.  
+    */
+    static inline void dataToEvents(const std::vector<coord_t> &coord, std::vector<MDLeanEvent<nd> > & events, bool reserveMemory=true)
     {
+    // Number of columns = number of dimensions + 2 (signal/error)
+      size_t numColumns = (nd+2);
+      size_t numEvents = coord.size()/numColumns;
+      if(numEvents*numColumns!=coord.size())
+          throw(std::invalid_argument("wrong input array of data to convert to lean events, suspected column data for different dimensions/(type of) events "));
 
-      // Start/size descriptors
-      std::vector<int> start(2,0);
-      start[0] = int(indexStart); //TODO: What if # events > size of int32???
 
-      std::vector<int> size(2,0);
-      size[0] = int(numEvents);
-      size[1] = int(numColumns);
-
-      // Allocate the data
-      size_t dataSize = numEvents*(numColumns);
-      coord_t * data = new coord_t[dataSize];
-
-      // C-style call is much faster than the C++ call.
-//      int dims[NX_MAXRANK];
-//      int type = ::NeXus::FLOAT32;
-//      int rank = 0;
-//      NXgetinfo(file->getHandle(), &rank, dims, &type);
-      NeXus::Info info = file->getInfo();
-
-#ifdef COORDT_IS_FLOAT
-      /* coord_t is a single-precision float */
-      if (info.type == ::NeXus::FLOAT64)
+      
+      if(reserveMemory) // Reserve the amount of space needed. Significant speed up (~30% thanks to this)
       {
-        // Handle old files that are recorded in DOUBLEs to load as FLOATS
-        double * dblData = new double[dataSize];
-        file->getSlab(dblData, start, size);
-        for (size_t i=0; i<dataSize;i++)
-          data[i] = static_cast<coord_t>(dblData[i]);
-        delete [] dblData;
+        events.clear();
+        events.reserve(numEvents);
       }
-      else
-      {
-        // Get the slab into the allocated data
-        file->getSlab(data, start, size);
-      }
-#else
-      /* coord_t is double */
-      if (type == ::NeXus::FLOAT32)
-        throw std::runtime_error("The .nxs file's data is set as FLOATs but Mantid was compiled to work with data (coord_t) as doubles. Cannot load this file");
-
-      // Get the slab into the allocated data
-      file->getSlab(data, start, size);
-#endif
-      return data;
-    }
-
-    //---------------------------------------------------------------------------------------------
-    /** Static method to load part of a HDF block into a vector of MDEvents.
-     * The data block MUST be already open, using e.g. openNexusData()
-     *
-     * This will be re-implemented by any other MDLeanEvent-like type.
-     *
-     * @param events :: reference to the vector of events to load. This is NOT cleared by the method before loading.
-     * @param file :: open NXS file.
-     * @param indexStart :: index (in events) in the data field to start at
-     * @param numEvents :: number of events to load.
-     * */
-    static void loadVectorFromNexusSlab(std::vector<MDLeanEvent<nd> > & events, ::NeXus::File * file,
-        uint64_t indexStart, uint64_t numEvents)
-    {
-      if (numEvents == 0)
-        return;
-
-      // Number of columns = number of dimensions + 2 (signal/error)
-      size_t numColumns = nd+2;
-      // Load the data
-      coord_t * data = getDataFromNexus(file, indexStart, numEvents, numColumns);
-
-      // Reserve the amount of space needed. Significant speed up (~30% thanks to this)
-      events.reserve( events.size() + numEvents);
       for (size_t i=0; i<numEvents; i++)
       {
         // Index into the data array
         size_t ii = i*numColumns;
 
         // Point directly into the data block for the centers.
-        coord_t * centers = data + ii+2;
+        const coord_t * centers = &(coord[ii+2]);
 
         // Create the event with signal, error squared, and the centers
-        events.push_back( MDLeanEvent<nd>(float(data[ii]), float(data[ii + 1]), centers) );
+        events.push_back( MDLeanEvent<nd>(signal_t(coord[ii]), signal_t(coord[ii + 1]), centers) );
       }
 
-      // Release the memory (all has been COPIED into MDLeanEvent's)
-      delete [] data;
     }
+
+
+
 
   };
  
