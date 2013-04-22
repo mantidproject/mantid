@@ -1187,6 +1187,30 @@ bool InstrumentWindowPickTab::addToDisplayContextMenu(QMenu &context) const
     return res;
 }
 
+/**
+ * Select a tool on the tab
+ * @param tool One of the enumerated tool types, @see ToolType
+ */
+void InstrumentWindowPickTab::selectTool(const ToolType tool)
+{
+  switch(tool)
+  {
+  case Zoom: m_zoom->setChecked(true);
+    break;
+  case PixelSelect: m_one->setChecked(true);
+    break;
+  case TubeSelect: m_tube->setChecked(true);
+    break;
+  case PeakSelect: m_peak->setChecked(true);
+    break;
+  case PeakErase: m_peakSelect->setChecked(true);
+    break;
+  default: throw std::invalid_argument("Invalid tool type.");
+  }
+  setSelectionType();
+}
+
+
 void InstrumentWindowPickTab::singleDetectorTouched(int detid)
 {
   if (canUpdateTouchedDetector())

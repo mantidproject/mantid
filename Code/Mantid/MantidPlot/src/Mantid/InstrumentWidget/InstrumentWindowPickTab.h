@@ -43,7 +43,9 @@ public:
   ///   SelectPeak: click on a peak marker or draw a rubber-band selector to select peak
   ///               markers. Selected peaks can be deleted by pressing the Delete key.
   enum SelectionType {Single=0,AddPeak,ErasePeak,SingleDetectorSelection,Tube};
+  enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase};
   enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,NUMBER_OF_UNITS};
+
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
@@ -53,6 +55,7 @@ public:
   void saveSettings(QSettings& settings) const;
   void loadSettings(const QSettings& settings);
   bool addToDisplayContextMenu(QMenu&) const;
+  void selectTool(const ToolType tool);
 
 public slots:
   void setTubeXUnits(int units);

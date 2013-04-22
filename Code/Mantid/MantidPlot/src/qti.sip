@@ -1495,6 +1495,7 @@ public:
 %End
 
 private:
+  InstrumentWindowRenderTab();
   InstrumentWindowRenderTab(const InstrumentWindowRenderTab &);
 };
 
@@ -1503,7 +1504,20 @@ class InstrumentWindowPickTab: InstrumentWindowTab
 %TypeHeaderCode
 #include "src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h"
 %End
+
+public:
+  enum ToolType {Zoom, PixelSelect, TubeSelect, PeakSelect, PeakErase};
+
+  void selectTool(const ToolType tool);
+%Docstring
+    Select the active tool.
+    
+    Args:
+        tool One of InstrumentWindowPickTab.{Zoom, PixelSelect, TubeSelect, PeakSelect, PeakErase}
+%End
+
 private:
+  InstrumentWindowPickTab();
   InstrumentWindowPickTab(const InstrumentWindowPickTab &);
 };
 
@@ -1513,6 +1527,7 @@ class InstrumentWindowMaskTab: InstrumentWindowTab
 #include "src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h"
 %End
 private:
+  InstrumentWindowMaskTab();
   InstrumentWindowMaskTab(const InstrumentWindowMaskTab &);
 };
 
@@ -1532,6 +1547,7 @@ public:
 %End
 
 private:
+  InstrumentWindowTreeTab();
   InstrumentWindowTreeTab(const InstrumentWindowTreeTab &);
 };
 
@@ -1560,7 +1576,7 @@ public:
   InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
 %MethodCode
   sipRes = sipCpp->getInstrumentView(*a0,a1);
-  sipRes->hide();
+  if(sipRes) sipRes->hide();
 %End
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
   Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName, 

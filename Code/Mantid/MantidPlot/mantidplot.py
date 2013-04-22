@@ -19,7 +19,7 @@ import time
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
 from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker,
-                  GraphOptions, InstrumentWindow)
+                  GraphOptions, InstrumentWindow, InstrumentWindowPickTab)
 
 # Make the ApplicationWindow instance accessible from the mantidplot namespace
 from _qti import app
@@ -457,6 +457,9 @@ def getInstrumentView(name, tab=-1):
     Returns:
         A handle to the created instrument view widget.
     """
+    ads = _get_analysis_data_service()
+    if name not in ads:
+        raise ValueError("Workspace %s does not exist" % name)
     return new_proxy(proxies.InstrumentWindow, _qti.app.mantidUI.getInstrumentView, name, tab)
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
