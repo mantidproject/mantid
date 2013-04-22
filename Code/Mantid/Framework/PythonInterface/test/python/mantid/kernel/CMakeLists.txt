@@ -25,6 +25,7 @@ set ( TEST_PY_FILES
   QuatTest.py
   UnitConversionTest.py
   UnitFactoryTest.py
+  UnitsTest.py
   V3DTest.py
 )
 
