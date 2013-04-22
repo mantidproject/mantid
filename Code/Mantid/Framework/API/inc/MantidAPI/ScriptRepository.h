@@ -471,10 +471,7 @@ They will work as was expected for folders @ref folders-sec.
               it it necessary that it identifies who was responsible for changing 
               the file. 
 
-       @param description is an optional argument, because, as 
-              explained at @ref script-description-sec it may be already inside the 
-              file. But, if the description is given, it will be inserted to the local
-              file (if it is a script) or to the README file inside the folder.
+       @param email An string that identifies the email of the author. 
      
 
       @exception ScriptRepoException may be triggered for an attempt to publish an 
@@ -486,7 +483,7 @@ They will work as was expected for folders @ref folders-sec.
      */
     virtual void upload(const std::string & file_path, const std::string & comment,
                 const std::string & author, 
-                const std::string & description = std::string())  = 0;
+                const std::string & email)  = 0;
 
     /** Define the file patterns that will not be listed in listFiles. 
         This is important to force the ScriptRepository to not list hidden files, 

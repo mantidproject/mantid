@@ -18,6 +18,9 @@ using Mantid::Kernel::ConfigServiceImpl;
 #include <Poco/Exception.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/NetException.h>
+#include <Poco/Net/HTMLForm.h>
+#include "Poco/Net/FilePartSource.h"
+
 
 // Visual Studion compains with the inclusion of Poco/FileStream
 // disabling this warning.
@@ -112,10 +115,11 @@ namespace API
   {    
     // get the local path and the remote path
     std::string loc, rem; 
+    ConfigServiceImpl & config = ConfigService::Instance();
+    remote_upload = config.getString("UploaderWebServer"); 
     if (local_rep.empty() || remote.empty()){
-      ConfigServiceImpl & config = ConfigService::Instance();
       loc = config.getString("ScriptLocalRepository"); 
-      rem = config.getString("ScriptRepository");     
+      rem = config.getString("ScriptRepository");      
     }else{
       local_repository = local_rep; 
       remote_url = remote; 
@@ -699,14 +703,77 @@ namespace API
   void ScriptRepositoryImpl::upload(const std::string & file_path, 
                                     const std::string & comment,
                                     const std::string & author, 
-                                   const std::string & description)
+                                    const std::string & email)
     
   {
-    UNUSED_ARG(file_path); 
-    UNUSED_ARG(comment);
-    UNUSED_ARG(author);
-    UNUSED_ARG(description);    
-    notImplemented();
+    using namespace Poco::Net;
+    try{
+      Poco::URI uri(remote_upload); 
+      std::string path(uri.getPathAndQuery());
+      HTTPClientSession session(uri.getHost(), uri.getPort()); 
+      HTTPRequest req(HTTPRequest::HTTP_POST, path, 
+                      HTTPMessage::HTTP_1_0); 
+      HTMLForm form(HTMLForm::ENCODING_MULTIPART); 
+      
+      // add the fields author, email and comment
+      form.add("author",author); 
+      form.add("mail", email); 
+      form.add("comment",comment); 
+      
+      // deal with the folder
+      std::string relative_path = convertPath(file_path); 
+      std::string absolute_path = local_repository + relative_path; 
+      std::string folder = "./"; 
+      size_t pos = relative_path.rfind('/'); 
+      if (pos != std::string::npos)
+        folder += std::string(relative_path.begin(), relative_path.begin() + pos);
+      if (folder[folder.size()-1] != '/')
+        folder += "/";
+      g_log.information() << "Uploading to folder: " << folder << std::endl; 
+      form.add("path",folder); 
+      
+      // inserting the file
+      FilePartSource * m_file = new FilePartSource(absolute_path);
+      form.addPart("file",m_file); 
+      form.prepareSubmit(req);
+      
+      // get the size of everything
+      std::stringstream sst; 
+      form.write(sst); 
+      // move back to the begining of the file
+      m_file->stream().clear();
+      m_file->stream().seekg(0,std::ios::beg);  
+      // set the size
+      req.setContentLength((int)sst.str().size());
+      
+      std::ostream& ostr = session.sendRequest(req);
+      // send the request.
+      ostr << sst.str(); 
+      
+      HTTPResponse response;
+      std::istream & rs = session.receiveResponse(response);
+      
+      if (response.getStatus() == HTTPResponse::HTTP_OK){
+      g_log.information() << "ScriptRepository:" << file_path <<  " uploaded!"<< std::endl; 
+      }else{
+        // FIXME: deal with exceptions.
+        g_log.information() << "ScriptRepository upload status: " 
+                            << response.getStatus() << " " << response.getReason() << std::endl;
+        std::stringstream answer; 
+        Poco::StreamCopier::copyStream(rs, answer);
+        std::string html_answer = answer.str(); 
+        g_log.information() << "FormOutput: " << answer.str() << std::endl; 
+        size_t pos1, pos2; 
+        pos1 = html_answer.find("<body>"); 
+        pos2 = html_answer.find("</body>"); 
+        if (pos1 != std::string::npos && pos2 != std::string::npos){
+          throw ScriptRepoException(std::string(html_answer.begin()+pos1, html_answer.begin()+pos2+1)); 
+        }
+     
+      }
+    }catch(Poco::Exception & ex){
+      throw ScriptRepoException(ex.displayText(), ex.className()); 
+    }
   }
 
   /** The ScriptRepositoryImpl is set to be valid when the local repository path
@@ -855,6 +922,7 @@ namespace API
     //Configure Poco HTTP Client Session
     try{
       Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
+      session.setTimeout(Poco::Timespan(2,0));// 2 secconds
       Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path,
                                      Poco::Net::HTTPMessage::HTTP_1_1);
       Poco::Net::HTTPResponse response;
