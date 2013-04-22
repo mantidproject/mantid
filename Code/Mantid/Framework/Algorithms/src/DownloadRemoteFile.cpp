@@ -23,8 +23,6 @@ void DownloadRemoteFile::init()
 
   auto requireValue = boost::make_shared<MandatoryValidator<std::string> >();
 
-
-
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
   declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
@@ -64,7 +62,7 @@ void DownloadRemoteFile::exec()
   if (jobManager->downloadFile( getPropertyValue("TransactionID"), getPropertyValue("RemoteFileName"),
                                 getPropertyValue("LocalFileName"), errMsg) != RemoteJobManager::JM_OK)
   {
-    throw( std::runtime_error( "Error listing remote files: " + errMsg));
+    throw( std::runtime_error( "Error downloading remote file: " + errMsg));
   }
 
 }
