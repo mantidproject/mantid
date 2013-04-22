@@ -761,15 +761,19 @@ namespace API
                             << response.getStatus() << " " << response.getReason() << std::endl;
         std::stringstream answer; 
         Poco::StreamCopier::copyStream(rs, answer);
-        std::string html_answer = answer.str(); 
-        g_log.information() << "FormOutput: " << answer.str() << std::endl; 
-        size_t pos1, pos2; 
-        pos1 = html_answer.find("<body>"); 
-        pos2 = html_answer.find("</body>"); 
-        if (pos1 != std::string::npos && pos2 != std::string::npos){
-          throw ScriptRepoException(std::string(html_answer.begin()+pos1, html_answer.begin()+pos2+1)); 
+        g_log.debug() << "Form Output: " << answer.str() << std::endl; 
+        
+        ptree pt; 
+        try{
+          read_json(answer, pt); 
+          std::string info = pt.get<std::string>("message",""); 
+          std::string detail = pt.get<std::string>("detail",""); 
+          throw ScriptRepoException(info, detail); 
+          
+        }catch (boost::property_tree::json_parser_error & ex){
+          throw ScriptRepoException("Bad answer from the Server",
+                                    ex.what()); 
         }
-     
       }
     }catch(Poco::Exception & ex){
       throw ScriptRepoException(ex.displayText(), ex.className()); 
