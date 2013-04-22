@@ -3,7 +3,6 @@
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MultifitSetupDialog.h"
 
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
@@ -119,6 +118,7 @@ m_logValue(NULL),
 m_compositeFunction(),
 m_changeSlotsEnabled(false),
 m_guessOutputName(true),
+m_updateObserver(*this,&FitPropertyBrowser::handleFactoryUpdate),
 m_currentHandler(0),
 m_defaultFunction("Gaussian"),
 m_defaultPeak("Gaussian"),
@@ -252,6 +252,11 @@ void FitPropertyBrowser::init()
   m_settingsGroup = m_browser->addProperty(settingsGroup);  
 
   initLayout(w);
+
+  using Mantid::API::FunctionFactory;
+  FunctionFactory::Instance().notificationCenter.addObserver(m_updateObserver);
+  connect(this, SIGNAL(functionFactoryUpdateReceived()), this, SLOT(populateFunctionNames()));
+  FunctionFactory::Instance().enableNotifications();
 }
 
 
@@ -1101,6 +1106,40 @@ std::string FitPropertyBrowser::costFunction()const
   return m_costFunctions[i].toStdString();
 }
 
+/// Get the registered function names
+void FitPropertyBrowser::populateFunctionNames()
+{
+  const std::vector<std::string> names = Mantid::API::FunctionFactory::Instance().getKeys();
+  m_registeredFunctions.clear();
+  m_registeredPeaks.clear();
+  m_registeredBackgrounds.clear();
+  m_registeredOther.clear();
+
+  for(size_t i=0;i<names.size();i++)
+  {
+    std::string fnName = names[i];
+    QString qfnName = QString::fromStdString(fnName);
+    if (qfnName == "MultiBG") continue;
+
+    auto f = Mantid::API::FunctionFactory::Instance().createFunction(fnName);
+    m_registeredFunctions << qfnName;
+    Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
+    //Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
+    if (pf)
+    {
+      m_registeredPeaks << qfnName;
+    }
+    else if (dynamic_cast<Mantid::API::IBackgroundFunction*>(f.get()))
+    {
+      m_registeredBackgrounds << qfnName;
+    }
+    else
+    {
+      m_registeredOther << qfnName;
+    }
+  }
+}
+
 /** Called when the function name property changed
  * @param prop :: A pointer to the function name property m_functionName
  */
@@ -1382,38 +1421,6 @@ void FitPropertyBrowser::setFwhm(double value)
     m_currentHandler->setFwhm(value);
     m_currentHandler->updateParameters();
     emit parameterChanged( m_currentHandler->function().get() );
-  }
-}
-
-/// Get the registered function names
-void FitPropertyBrowser::populateFunctionNames()
-{
-  const std::vector<std::string> names = Mantid::API::FunctionFactory::Instance().getKeys();
-  m_registeredFunctions.clear();
-  m_registeredPeaks.clear();
-  m_registeredBackgrounds.clear();
-  for(size_t i=0;i<names.size();i++)
-  {
-    std::string fnName = names[i];
-    QString qfnName = QString::fromStdString(fnName);
-    if (qfnName == "MultiBG") continue;
-    
-    auto f = Mantid::API::FunctionFactory::Instance().createFunction(fnName);
-    m_registeredFunctions << qfnName;
-    Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
-    //Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
-    if (pf)
-    {
-      m_registeredPeaks << qfnName;
-    }
-    else if (dynamic_cast<Mantid::API::IBackgroundFunction*>(f.get()))
-    {
-      m_registeredBackgrounds << qfnName;
-    }
-    else
-    {
-      m_registeredOther << qfnName;
-    }
   }
 }
 
@@ -2006,6 +2013,19 @@ QtProperty* FitPropertyBrowser::getTieProperty(QtProperty* parProp)const
   }
   return NULL;
 }
+
+
+/**
+ * Called when the function factory has been updated
+ * @param notice A Poco notification object
+ */
+void FitPropertyBrowser::handleFactoryUpdate(Mantid::API::FunctionFactoryUpdateNotification_ptr notice)
+{
+  Q_UNUSED(notice);
+  // Don't call populate directly as the updates can come from a different thread
+  emit functionFactoryUpdateReceived();
+}
+
 
 /** Display a tip
  * @param txt :: The text to display

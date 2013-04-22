@@ -12,7 +12,11 @@ import warnings
 
 # Mantid imports
 from mantidsimple import *
-    
+
+# Define a SANS specific logger 
+from mantid.kernel import Logger
+sanslog = Logger.get("SANS")
+
 class HFIRSetup(ReductionStep):
     def __init__(self):
         super(HFIRSetup, self).__init__()
@@ -1073,7 +1077,7 @@ class ConvertToQ(ReductionStep):
         else:
             msg = "User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity) 
             print msg
-            mantid.sendLogMessage('::SANS::Warning: ' + msg)
+            sanslog.warning(msg)
 
     def execute(self, reducer, workspace):
         """
@@ -1303,7 +1307,7 @@ class GetSampleGeom(ReductionStep):
             # means that we weren't passed an ID number, the code below treats it as a shape name
             pass
         except KeyError:
-            mantid.sendLogMessage("::SANS::Warning: Invalid geometry type for sample: " + str(new_shape) + ". Setting default to " + self._default_shape)
+            sanslog.warning("Warning: Invalid geometry type for sample: " + str(new_shape) + ". Setting default to " + self._default_shape)
             new_shape = self._default_shape
 
         self._shape = new_shape

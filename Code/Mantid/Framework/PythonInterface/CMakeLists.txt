@@ -67,6 +67,6 @@ add_subdirectory( test )
 ###########################################################################
 
 # Python algorithms
-install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
+install ( DIRECTORY plugins/ DESTINATION ${PLUGINS_DIR}/python
           PATTERN "*.pyc" EXCLUDE
           PATTERN ".svn" EXCLUDE )

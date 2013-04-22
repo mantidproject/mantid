@@ -145,7 +145,7 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public C
     pWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
     // Recount totals at the end.
     pWSWrapper->pWorkspace()->refreshCache(); 
-    pWSWrapper->refreshCentroid();
+   
     pProg->report();
     }
     private:

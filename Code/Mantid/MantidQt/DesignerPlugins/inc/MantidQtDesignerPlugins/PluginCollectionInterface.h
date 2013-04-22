@@ -17,6 +17,7 @@
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 #include "MantidQtMantidWidgets/ProcessingAlgoWidget.h"
+#include "MantidQtMantidWidgets/MessageDisplay.h"
 
 /** 
 The PluginCollectionInterface implements the interface for the plugin library and holds a 
@@ -137,5 +138,9 @@ DECLARE_WIDGET_PLUGIN(AlgorithmPropertiesWidgetPlugin,
 DECLARE_WIDGET_PLUGIN(ProcessingAlgoWidgetPlugin,
     MantidQt::MantidWidgets::ProcessingAlgoWidget,
     "Choose an algorithm or write a script as a processing step");
+
+DECLARE_WIDGET_PLUGIN(MessageDisplayPlugin,
+    MantidQt::MantidWidgets::MessageDisplay,
+    "Display messages with various priorities, optionally connecting to the logging framework");
 
 #endif

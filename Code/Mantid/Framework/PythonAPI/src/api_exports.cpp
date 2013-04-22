@@ -69,14 +69,14 @@ using namespace boost::python;
       .def("isAlgorithmName", &FrameworkManagerProxy::isAlgorithmName)
       .def("algorithmDeprecationMessage", &FrameworkManagerProxy::algorithmDeprecationMessage)
       .def("createManagedAlgorithm", &FrameworkManagerProxy::createManagedAlgorithm, 
-	   FM_createManagedAlgorithmOverloader()[return_internal_reference<>()] )
+       FM_createManagedAlgorithmOverloader()[return_internal_reference<>()] )
       .def("createUnmanagedAlgorithm", &FrameworkManagerProxy::createUnmanagedAlgorithm, 
-	   FM_createUnmanagedAlgorithmOverloader()[return_value_policy< return_by_value >()])
+       FM_createUnmanagedAlgorithmOverloader()[return_value_policy< return_by_value >()])
       .def("_getPropertyOrder", &FrameworkManagerProxy::getPropertyOrder, return_internal_reference<>())
       .def("createAlgorithmDocs", &FrameworkManagerProxy::createAlgorithmDocs)
       .def("registerPyAlgorithm", &FrameworkManagerProxy::registerPyAlgorithm)
       .def("_getRegisteredAlgorithms", &FrameworkManagerProxy::getRegisteredAlgorithms, 
-	   FM_getRegisteredAlgorithmOverloader())
+       FM_getRegisteredAlgorithmOverloader())
       .def("_observeAlgFactoryUpdates", &FrameworkManagerProxy::observeAlgFactoryUpdates)
       .def("deleteWorkspace", &FrameworkManagerProxy::deleteWorkspace)
       .def("getWorkspaceNames", &FrameworkManagerProxy::getWorkspaceNames)
@@ -331,7 +331,7 @@ void export_dataitem()
     class_< API::MatrixWorkspace, bases<API::Workspace>, MatrixWorkspaceWrapper,
       boost::noncopyable >("MatrixWorkspace", no_init)
       .def("getNumberHistograms", &API::MatrixWorkspace::getNumberHistograms)
-	    .def("detectorTwoTheta", &API::MatrixWorkspace::detectorTwoTheta)
+        .def("detectorTwoTheta", &API::MatrixWorkspace::detectorTwoTheta)
       .def("detectorSignedTwoTheta",&API::MatrixWorkspace::detectorSignedTwoTheta)
       .def("getNumberBins", &API::MatrixWorkspace::blocksize)
       .def("binIndexOf", &API::MatrixWorkspace::binIndexOf, MatrixWorkspace_binIndexOfOverloads() )
@@ -466,7 +466,7 @@ void export_dataitem()
             .def("getTotalNumMDGridBoxes", &BoxController::getTotalNumMDGridBoxes)
             .def("getAverageDepth", &BoxController::getAverageDepth)
             .def("isFileBacked", &BoxController::isFileBacked)
-            .def("getFilename", &BoxController::getFilename, return_value_policy< copy_const_reference >())
+            .def("getFilename", &BoxController::getFilename)
             .def("useWriteBuffer", &BoxController::useWriteBuffer)
         ;
   }

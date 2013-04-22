@@ -1,6 +1,8 @@
 # Algorithm to start Bayes programs
 from MantidFramework import *
-from mantidsimple import *
+from mantid.simpleapi import *
+from mantid import config
+import os.path
 
 class Moments(PythonAlgorithm):
  

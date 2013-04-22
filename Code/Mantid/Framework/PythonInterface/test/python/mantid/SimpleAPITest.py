@@ -15,7 +15,7 @@ class TemporaryPythonAlgorithm(object):
     def __init__(self, name, code):
         from mantid import config
         
-        plugin_dirs = config['pythonalgorithms.directories'].split(";")
+        plugin_dirs = config['python.plugins.directories'].split(";")
         if len(plugin_dirs) == 0:
             raise RuntimeError("No Python algorithm directories defined")
         
@@ -187,7 +187,7 @@ PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorks
         whole mantid module 
         """
         src = """
-from mantid.api import PythonAlgorithm, registerAlgorithm
+from mantid.api import PythonAlgorithm, AlgorithmFactory
 import mantid.simpleapi as api
 from mantid.simpleapi import *
 
@@ -199,7 +199,7 @@ class %(name)s(PythonAlgorithm):
         %(execline1)s
         %(execline2)s
         
-registerAlgorithm(%(name)s)
+AlgorithmFactory.subscribe(%(name)s)
 """
         name1 = "SimpleAPIPythonAlgorithm1"
         name2 = "SimpleAPIPythonAlgorithm2"

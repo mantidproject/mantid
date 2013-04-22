@@ -243,7 +243,7 @@ void MantidGLWidget::setBackgroundColor(QColor input)
   if (m_surface)
   {
     m_surface->setBackgroundColor( input );
-    m_surface->updateView();
+    m_surface->updateView(false);
   }
   update();
 }

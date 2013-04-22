@@ -1,3 +1,7 @@
+/*WIKI*
+The LogNormal fit function is defined by
+:<math> \frac{Height}{x} \cdot exp^{-\frac{ln(x)-Location}{2 \times Scale^2}}</math>
+ *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -17,9 +21,9 @@ DECLARE_FUNCTION(LogNormal)
 
 LogNormal::LogNormal()
 {
-  declareParameter("Height", 1.0);
-  declareParameter("Location", 1.0);
-  declareParameter("Scale", 1.0);
+  declareParameter("Height", 1.0, "Overall scaling factor");
+  declareParameter("Location", 1.0, "Natural logarithm of the geometric mean");
+  declareParameter("Scale", 1.0, "Natural logarithm of the geometric standard deviation");
 }
 
 /** \relates LogNormal

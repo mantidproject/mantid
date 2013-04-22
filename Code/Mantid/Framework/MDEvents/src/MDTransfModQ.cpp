@@ -8,8 +8,10 @@ namespace Mantid
     // register the class, whith conversion factory under ModQ name
     DECLARE_MD_TRANSFID(MDTransfModQ,|Q|);
 
-    /** method calculates the unigs, the transformation expects input ws to be in. If input ws is in different units, 
-    the WS data will be converted into the units requested on-fly. 
+    /**method calculates the units, the transformation expects the input ws to be in. If the input ws is in different units, 
+       the WS data will be converted into the requested units on the fly. 
+       @param dEmode -- energy conversion mode requested by the user for the transfromation
+       @param inWS   -- imput matrix workspace, the subject of transformation.
     */
     const std::string MDTransfModQ::inputUnitID(Kernel::DeltaEMode::Type dEmode, API::MatrixWorkspace_const_sptr inWS)const
     {
@@ -24,7 +26,10 @@ namespace Mantid
       }
     }
     /** method returns number of matrix dimensions calculated by this class
-    * as function of energy analysis mode   */
+    *   as function of the energy analysis (conversion) mode  
+       @param mode   -- energy conversion mode requested by the user for the transfromation
+       @param inWS   -- imput matrix workspace, the subject of transformation.
+    */
     unsigned int MDTransfModQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,API::MatrixWorkspace_const_sptr inWS)const
     {
       UNUSED_ARG(inWS);
@@ -38,15 +43,28 @@ namespace Mantid
     }
 
 
+    /**Convert single point of matrix workspace into reciprocal space and (optionally) modify signal and error 
+    as function of reciprocal space (e.g. Lorents corrections)
+    @param x      -- the x-coordinate of matix workspace. Often can be a time of flight though the unit conversion is availible
+    @param Coord -- converted MD coordinates of the point x calculated for particular workspace position (detector)
 
-    bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord, double & /*signal*/,double &/*ErrSq*/)const
+    @param signal -- the signal in the point
+    @param ErrSq -- the signal in the point
+    No signal or error transformation is performed by this particular method. 
+
+    @return Coord -- the calculated coordinate of the point in the reciprocal space. 
+
+    */
+    bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord, double & signal,double & ErrSq)const
     {
-      if(m_Emode == Kernel::DeltaEMode::Elastic)
-      {
-        return calcMatrixCoordElastic(x,Coord);
-      }else{
-        return calcMatrixCoordInelastic(x,Coord);
-      }
+        UNUSED_ARG(signal);
+        UNUSED_ARG(ErrSq);
+        if(m_Emode == Kernel::DeltaEMode::Elastic)
+        {
+            return calcMatrixCoordElastic(x,Coord);
+        }else{
+            return calcMatrixCoordInelastic(x,Coord);
+        }
     }
 
     /** Method fills-in all additional properties requested by user and not defined by matrix workspace itselt. 

@@ -6,10 +6,12 @@
 #include "../FunctionCurve.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 
+
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 
 #include "qwt_painter.h"
 #include <QPainter>
@@ -21,6 +23,8 @@
 #include <QMessageBox>
 
 #include <iostream>
+
+Mantid::Kernel::Logger & PeakPickerTool::g_log = Mantid::Kernel::Logger::get("PeakPickerTool");
 
 PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI, bool showFitPropertyBrowser, bool customInterface) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
@@ -587,8 +591,7 @@ void PeakPickerTool::algorithmFinished(const QString& out)
     }
     catch(Mantid::Kernel::Exception::NotFoundError&)
     {
-      const std::string error = "PeakPicker cannot find output workspace '" + out.toStdString() + "'";
-      m_mantidUI->logMessage(Poco::Message("", error, Poco::Message::PRIO_WARNING));
+      g_log.warning() << "PeakPicker cannot find output workspace '" + out.toStdString() + "'" << std::endl;
     }
   }
   

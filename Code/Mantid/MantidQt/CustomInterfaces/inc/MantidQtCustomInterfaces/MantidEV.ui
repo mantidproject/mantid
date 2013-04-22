@@ -46,7 +46,7 @@
    <item>
     <widget class="QTabWidget" name="MantidEV_tabwidg">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
@@ -250,7 +250,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Estimated max of a,b,c</string>
+        <string>Estimated Max of a,b,c</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="MaxABC_ledt">
@@ -258,7 +258,7 @@
         <rect>
          <x>360</x>
          <y>150</y>
-         <width>81</width>
+         <width>151</width>
          <height>24</height>
         </rect>
        </property>
@@ -276,7 +276,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Number of Peaks To Find</string>
+        <string>Number of Peaks to Find</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="NumToFind_ledt">
@@ -284,7 +284,7 @@
         <rect>
          <x>360</x>
          <y>180</y>
-         <width>81</width>
+         <width>151</width>
          <height>24</height>
         </rect>
        </property>
@@ -302,7 +302,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Min Peak Intensity</string>
+        <string>Min Intensity(above ave)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="MinIntensity_ledt">
@@ -310,12 +310,12 @@
         <rect>
          <x>360</x>
          <y>210</y>
-         <width>81</width>
+         <width>151</width>
          <height>24</height>
         </rect>
        </property>
        <property name="text">
-        <string>10</string>
+        <string>10000</string>
        </property>
       </widget>
       <widget class="Line" name="line_2">
@@ -473,7 +473,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Estimated lower bound for a,b,c</string>
+        <string>Estimated Lower Bound for a,b,c</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="MinD_ledt">
@@ -512,7 +512,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Estimated upper bound for a,b,c</string>
+        <string>Estimated Upper Bound for a,b,c</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="FFTTolerance_ledt">
@@ -564,7 +564,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Maximum change (degrees)</string>
+        <string>Maximum Change (degrees)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="MaxGoniometerChange_ledt">

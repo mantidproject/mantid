@@ -77,7 +77,7 @@ public:
   /// Toggle between the GL and simple instrument display widgets
   void enableOpenGL( bool on );
   /// Redraw the instrument view
-  void updateInstrumentView(bool picking = false);
+  void updateInstrumentView(bool picking = true);
   /// Recalculate the detector data and redraw the instrument view
   void updateInstrumentDetectors();
 
@@ -156,6 +156,7 @@ public slots:
   void clearPeakOverlays();
   void setPeakLabelPrecision(int n);
   void setShowPeakRowFlag(bool on);
+  void setShowPeakLabelsFlag(bool on);
   /// Enable OpenGL. Slot called from render tab only - doesn't update the checkbox.
   void enableGL( bool on );
   void updateInfoText();

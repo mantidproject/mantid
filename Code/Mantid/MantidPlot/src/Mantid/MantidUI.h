@@ -6,7 +6,6 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
-#include "MantidLog.h"
 #include "MantidAlgorithmMetatype.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -38,10 +37,15 @@ class AlgorithmMonitor;
 class InstrumentWindow;
 namespace MantidQt
 {
-namespace MantidWidgets
-{
-class FitPropertyBrowser;
-}}
+  namespace API
+  {
+    class Message;
+  }
+  namespace MantidWidgets
+  {
+    class FitPropertyBrowser;
+  }
+}
 
 namespace Ui
 {
@@ -319,9 +323,6 @@ public slots:
   void x_range_from_picker(double, double);
   void test();
 
-  // Display a message in QtiPlot's results window. Used by MantidLog class to display Mantid log information.
-  void logMessage(const Poco::Message& msg);
-
   void showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidWidgets::FitPropertyBrowser* fitbrowser);
 
   // Import the workspace selected in the Workspace dock window
@@ -525,9 +526,8 @@ private:
 
   QMdiSubWindow *m_vatesSubWindow; ///< Holder for the Vates interface sub-window
 
-  /// Logger object
-  Mantid::Kernel::Logger & g_log;
-
+  /// Logger
+  static Mantid::Kernel::Logger & g_log;
 };
 
 

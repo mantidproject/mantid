@@ -18,7 +18,7 @@
 #include <QAction>
 #include <QGroupBox>
 #include <QRadioButton>
-
+#include <QFileInfo>
 #include <QMessageBox>
 #include <iostream>
 #include <sstream>

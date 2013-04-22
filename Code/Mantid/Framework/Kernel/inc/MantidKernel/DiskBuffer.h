@@ -14,6 +14,8 @@
 #include <map>
 #include <stdint.h>
 #include <vector>
+#include <list>
+#include <limits> 
 
 namespace Mantid
 {
@@ -56,21 +58,6 @@ namespace Kernel
   public:
 
 
-    /** A map for the buffer of "toWrite" objects.
-     * Index 1: Order in the file to save to
-     * Index 2: ID of the object
-     */
-    typedef boost::multi_index::multi_index_container<
-      const ISaveable *,
-      boost::multi_index::indexed_by<
-        boost::multi_index::ordered_non_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, uint64_t, getFilePosition)>,
-        boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ISaveable, size_t, getId)>
-      >
-    > writeBuffer_t;
-
-    /// A way to index the toWrite buffer by ID (instead of the file position)
-    typedef writeBuffer_t::nth_index<1>::type writeBuffer_byId_t;
-
     /** A map for the list of free space blocks in the file.
      * Index 1: Position in the file.
      * Index 2: Size of the free block
@@ -91,9 +78,9 @@ namespace Kernel
     DiskBuffer(uint64_t m_writeBufferSize);
     virtual ~DiskBuffer();
 
-    void toWrite(const ISaveable * item);
+    void toWrite(ISaveable *  item);
     void flushCache();
-    void objectDeleted(const ISaveable * item);
+    void objectDeleted(ISaveable * item);
 
     // Free space map methods
     void freeBlock(uint64_t const pos, uint64_t const fileSize);
@@ -113,8 +100,10 @@ namespace Kernel
      * @param buffer :: number of events to accumulate before writing. 0 to NOT use the write buffer  */
     void setWriteBufferSize(uint64_t buffer)
     {
-      m_writeBufferSize = buffer;
-      //m_useWriteBuffer = (buffer > 0);
+        if(buffer>std::numeric_limits<size_t>::max()/2)
+            throw std::runtime_error(" Can not aloocate memory for that many events on given architecture ");
+
+        m_writeBufferSize = static_cast<size_t>(buffer);
     }
 
     /// @return the size of the to-write buffer, in number of events
@@ -137,39 +126,30 @@ namespace Kernel
 
     /** Set the length of the file that this MRU writes to.
      * @param length :: length in the same units as the cache, etc. (not necessarily bytes)  */
-    void setFileLength(const uint64_t length)
+    void setFileLength(const uint64_t length)const
     { m_fileLength = length; }
 
     //-------------------------------------------------------------------------------------------
-    /** @return the file-access mutex */
-    Kernel::RecursiveMutex & getFileMutex()
-    { return m_fileMutex; }
-
 
   protected:
     inline void writeOldObjects();
-
-    /// Mutex for accessing the file being buffered
-    Kernel::RecursiveMutex m_fileMutex;
 
     // ----------------------- To-write buffer --------------------------------------
     /// Do we use the write buffer? Always now
     //bool m_useWriteBuffer;
 
     /// Amount of memory to accumulate in the write buffer before writing.
-    uint64_t m_writeBufferSize;
-
-    /// List of the data objects that should be written out. Ordered by file position.
-    writeBuffer_t m_writeBuffer;
-
-    /// Reference to the same m_writeBuffer map, but indexed by item ID instead of by file position.
-    writeBuffer_byId_t & m_writeBuffer_byId;
+    size_t m_writeBufferSize;
 
     /// Total amount of memory in the "toWrite" buffer.
-    uint64_t m_writeBufferUsed;
+    size_t m_writeBufferUsed;
+    /// number of objects stored in to write buffer list
+    size_t m_nObjectsToWrite;
+    /** A forward list for the buffer of "toWrite" objects.   */
+    std::list<ISaveable * > m_toWriteBuffer;
 
     /// Mutex for modifying the the toWrite buffer.
-    Kernel::RecursiveMutex m_mutex;
+    Kernel::Mutex m_mutex;
 
     // ----------------------- Free space map --------------------------------------
     /// Map of the free blocks in the file
@@ -179,11 +159,11 @@ namespace Kernel
     freeSpace_bySize_t & m_free_bySize;
 
     /// Mutex for modifying the free space list
-    Kernel::RecursiveMutex m_freeMutex;
+    Kernel::Mutex m_freeMutex;
 
     // ----------------------- File object --------------------------------------
     /// Length of the file. This is where new blocks that don't fit get placed.
-    uint64_t m_fileLength;
+    mutable uint64_t m_fileLength;
 
   private:
     /// Private Copy constructor: NO COPY ALLOWED

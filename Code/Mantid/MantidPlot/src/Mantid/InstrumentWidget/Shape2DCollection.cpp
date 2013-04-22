@@ -42,6 +42,7 @@ void Shape2DCollection::draw(QPainter& painter) const
   QList<Shape2D*> nonscalable;
   foreach(Shape2D* shape,m_shapes)
   {
+    if ( !shape->isVisible() ) continue;
     if (shape->isScalable())
     {
       scalable << shape;

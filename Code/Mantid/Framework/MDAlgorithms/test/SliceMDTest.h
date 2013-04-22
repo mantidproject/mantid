@@ -174,10 +174,11 @@ public:
     // Output has this number of dimensions
     TS_ASSERT_EQUALS(out->getNumDims(), expectedNumDims);
 
+    // Clean up file
+    out->clearFileBacked(false);
+
     AnalysisDataService::Instance().remove("SliceMDTest_ws");
     AnalysisDataService::Instance().remove("SliceMDTest_outWS");
-    // Clean up file
-    out->getBoxController()->closeFile(true);
 
  
 

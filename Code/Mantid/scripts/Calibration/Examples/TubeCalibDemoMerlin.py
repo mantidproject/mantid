@@ -16,20 +16,20 @@ from tube_spec import * # For tube specification class
 # == Set parameters for calibration ==
 
 path = r"C:/Temp/" # Path name of folder containing input and output files
-filename = 'MER12024.raw' # Name of calibration run
+filename = 'MER12024.raw' # Calibration run ( found in \\isis\inst$\NDXMERLIN\Instrument\data\cycle_11_5 )
 rangeLower = 3000 # Integrate counts in each spectra from rangeLower to rangeUpper 
 rangeUpper = 20000 #
 
 # Set parameters for ideal tube. 
 Left = 2.0 # Where the left end of tube should be in pixels (target for AP)
 Centre = 512.5 # Where the centre of the tube should be in pixels (target for CP)
-Right = 1023.0 # Where the right of the tube should be in pxels (target for BP)
+Right = 1023.0 # Where the right of the tube should be in pixels (target for BP)
 ActiveLength = 2.9 # Active length of tube in Metres
 
 # Set initial parameters for peak finding
-ExpectedHeight = 1000.0 # Expected Height of Peaks (initial value of fit parameter)
+ExpectedHeight = 1000.0 # Expected Height of Gaussian Peak at centre (initial value of fit parameter)
 ExpectedWidth = 32.0 # Expected width of centre peak (initial value of fit parameter)
-ExpectedPositions = [35.0, 512.0, 989.0] # Expected positions of the edges and peak (initial values of fit parameters)
+ExpectedPositions = [35.0, 512.0, 989.0] #  Expected positions of the edges and centre peak in pixels (initial values of fit parameters)
 
 # Set what we want to calibrate (e.g whole intrument or one door )
 CalibratedComponent = 'MERLIN'  # Calibrate whole instrument
@@ -56,6 +56,7 @@ thisTubeSet.setTubeSpecByString(CalibratedComponent)
 
 # Get ideal tube
 iTube = IdealTube()
+# Call short cut method to construct ideal tube of the 3 point method format.
 iTube.constructTubeFor3PointsMethod ( Left, Right, Centre, ActiveLength )
 
 # Get fitting parameters

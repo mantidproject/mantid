@@ -25,8 +25,14 @@ namespace API
 {
 
   //-----------------------------------------------------------------------------------
-  /** Copy constructor
-   */
+  /** create new box controller from the existing one. Drops file-based state if the box-controller was file-based   */
+  BoxController * BoxController::clone()const
+  {
+        // reset the clone file IO controller to avoid dublicated file based operations for different box controllers
+        return new BoxController(*this);
+  }
+
+  /*Private Copy constructor used in cloning */
   BoxController::BoxController(const BoxController & other)
   : nd(other.nd), m_maxId(other.m_maxId),
     m_SplitThreshold(other.m_SplitThreshold),
@@ -37,16 +43,19 @@ namespace API
     m_numMDBoxes(other.m_numMDBoxes),
     m_numMDGridBoxes(other.m_numMDGridBoxes),
     m_maxNumMDBoxes(other.m_maxNumMDBoxes),
-    m_filename(other.m_filename),
-    m_file(other.m_file),
-    m_bytesPerEvent(other.m_bytesPerEvent)
+    m_fileIO(boost::shared_ptr<API::IBoxControllerIO>())
   {
+
   }
 
   /// Destructor
   BoxController::~BoxController()
   {
-    this->closeFile();
+     if(m_fileIO)
+     {
+        m_fileIO->closeFile();
+        m_fileIO.reset();
+     }
   }
    /**reserve range of id-s for use on set of adjacent boxes. 
     * Needed to be thread safe as adjacent boxes have to have subsequent ID-s
@@ -115,7 +124,24 @@ namespace API
 
     return xmlstream.str().c_str();
   }
-
+  /** the function left for compartibility with the previous bc python interface. 
+   @return  -- the file name of the file used for backup if file backup mode is enabled or emtpy sting if the workspace is not file backed   */
+   std::string BoxController::getFilename()const
+   {
+       if(m_fileIO)
+           return m_fileIO->getFileName();
+       else
+           return "";
+   }
+   /** the function left for compartibility with the previous bc python interface. 
+   @return true if the workspace is file based and false otherwise */ 
+   bool BoxController::useWriteBuffer()const
+   {
+       if(m_fileIO)
+           return true;
+       else
+           return false;
+   }
 
   //------------------------------------------------------------------------------------------------------
   /** Static method that sets the data inside this BoxController from an XML string
@@ -153,70 +179,35 @@ namespace API
 
     this->calcNumSplit();
   }
-
-
-  //------------------------------------------------------------------------------------------------------
-  /** Close the open file for the back-end, if any
-   * Note: this does not save any data that might be, e.g., in the MRU.
-   * @param deleteFile :: if true, will delete the file. Default false.
+  /** function clears the file-backed status of the box controller */ 
+   void BoxController::clearFileBacked()
+   {
+       if(m_fileIO)
+       { 
+           // flush DB cache
+          m_fileIO->flushCache();
+          // close underlying file
+          m_fileIO->closeFile();
+          // decrease the sp counter by one and nullify this instance of sp.
+          m_fileIO.reset();// = boost::shared_ptr<API::IBoxControllerIO>();
+       }
+   }
+   /** makes box controller file based by providing class, responsible for fileIO. The box controller become responsible for the FileIO pointer
+    *@param newFileIO -- instance of the box controller responsible for the IO;
+    *@param fileName  -- if newFileIO comes without opened file, this is the file name to open for the file based IO operations
    */
-  void BoxController::closeFile(bool deleteFile)
-  {
-    if (m_file)
-    {
-      m_file->close();
-      m_file = NULL;
-    }
-    if (deleteFile && !m_filename.empty())
-    {
-      Poco::File file(m_filename);
-      if (file.exists()) file.remove();
-      m_filename = "";
-    }
-  }
+   void BoxController::setFileBacked( boost::shared_ptr<IBoxControllerIO> newFileIO,const std::string &fileName)
+     {
+         if(!newFileIO->isOpened())
+             newFileIO->openFile(fileName,"w");
 
+         if(!newFileIO->isOpened())
+         {
+             throw(Kernel::Exception::FileError("Can not open target file for filebased box controller ",fileName));
+         }
 
-  void BoxController::prepareEventNexusData(::NeXus::File * file, const size_t chunkSize,const size_t nColumns,const std::string &descr)
-  {
-      std::vector<int> dims(2,0);
-      dims[0] = NX_UNLIMITED;
-      // One point per dimension, plus signal, plus error, plus runIndex, plus detectorID = nd+4
-      dims[1] = int(nColumns);
-
-      // Now the chunk size.
-      std::vector<int> chunk(dims);
-      chunk[0] = int(chunkSize);
-
-      // Make and open the data
-#ifdef COORDT_IS_FLOAT
-      file->makeCompData("event_data", ::NeXus::FLOAT32, dims, ::NeXus::NONE, chunk, true);
-#else
-      file->makeCompData("event_data", ::NeXus::FLOAT64, dims, ::NeXus::NONE, chunk, true);
-#endif
-
-      // A little bit of description for humans to read later
-      file->putAttr("description", descr);
-
-  }
-
-  //---------------------------------------------------------------------------------------------
-    /** Open the NXS data blocks for loading.
-     * The data should have been created before.
-     *
-     * @param file :: open NXS file.
-     * @return the number of events currently in the data field.
-     */
-    uint64_t BoxController::openEventNexusData(::NeXus::File * file)
-    {
-      // Open the data
-      file->openData("event_data");
-      // Return the size of dimension 0 = the number of events in the field
-      return uint64_t(file->getInfo().dims[0]);
-    }
-    void BoxController::closeNexusData(::NeXus::File * file)
-    {
-      file->closeData();
-    }
+         this->m_fileIO = newFileIO;
+     }
 
 
 } // namespace Mantid

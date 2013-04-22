@@ -1,3 +1,7 @@
+/*WIKI*
+The Stretched exponential fit function is defined by
+:<math> A \cdot e^{ (-{Lambda} \times {x}) ^{Beta} }</math>
+ *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -17,9 +21,9 @@ DECLARE_FUNCTION(StretchExpMuon)
 
 void StretchExpMuon::init()
 {
-  declareParameter("A", 0.2);
-  declareParameter("Lambda", 0.2);
-  declareParameter("Beta",0.2);
+  declareParameter("A", 0.2, "Amplitude (height at origin)");
+  declareParameter("Lambda", 0.2, "Decay rate of the standard exponential");
+  declareParameter("Beta",0.2, "Stretching exponent, usually in the (0,2] range");
 }
 
 

@@ -200,8 +200,8 @@ namespace MDAlgorithms
     if (!ws1 || !ws2)
       throw std::runtime_error("Incompatible workspace types passed to PlusMD.");
 
-    std::vector<MDBoxBase<MDE,nd>*> boxes1;
-    std::vector<MDBoxBase<MDE,nd>*> boxes2;
+    std::vector<API::IMDNode *> boxes1;
+    std::vector<API::IMDNode *> boxes2;
 
     ws1->getBox()->getBoxes(boxes1, 1000, false);
     ws2->getBox()->getBoxes(boxes2, 1000, false);
@@ -211,14 +211,14 @@ namespace MDAlgorithms
     for (size_t j=0; j<boxes1.size(); j++)
     {
 
-      MDBoxBase<MDE,nd>* box1 = boxes1[j];
-      MDBoxBase<MDE,nd>* box2 = boxes2[j];
+        API::IMDNode* box1 = boxes1[j];
+        API::IMDNode* box2 = boxes2[j];
 
-      this->compare( box1->getId(), box2->getId(), "Boxes have different ID" );
-      this->compare( box1->getDepth(), box2->getDepth(), "Boxes are at a different depth" );
+      this->compare( box1->getID(), box2->getID(), "Boxes have different ID" );
+      this->compare(size_t(box1->getDepth()), size_t(box2->getDepth()), "Boxes are at a different depth" );
       this->compare( box1->getNumChildren(), box2->getNumChildren(), "Boxes do not have the same number of children");
       for (size_t i=0; i<box1->getNumChildren(); i++)
-        this->compare( box1->getChild(i)->getId(), box2->getChild(i)->getId(), "Child of boxes do not match IDs" );
+        this->compare( box1->getChild(i)->getID(), box2->getChild(i)->getID(), "Child of boxes do not match IDs" );
 
       for (size_t d=0; d<nd; d++)
       {

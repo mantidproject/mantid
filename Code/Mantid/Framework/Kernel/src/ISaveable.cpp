@@ -1,96 +1,96 @@
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include <limits>
+//#include "MantidKernel/INode.h"
 
 namespace Mantid
 {
-namespace Kernel
-{
+    namespace Kernel
+    {
+
+        /** Constructor    */
+        ISaveable::ISaveable():
+            m_Busy(false),m_dataChanged(false),m_wasSaved(false),m_isLoaded(false),
+            m_BufMemorySize(0),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0)
+        {}
+
+        //----------------------------------------------------------------------------------------------
+        /** Copy constructor --> needed for std containers and not to copy mutexes  
+            Note setting isLoaded to false to break connection with the file object which is not copyale */
+        ISaveable::ISaveable(const ISaveable & other):
+            m_Busy(other.m_Busy),m_dataChanged(other.m_dataChanged),m_wasSaved(other.m_wasSaved),m_isLoaded(false),
+            m_BufPosition(other.m_BufPosition),
+            m_BufMemorySize(other.m_BufMemorySize),
+            m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents)
+            
+
+        { }
 
 
-//----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  ISaveable::ISaveable()
-  : m_id(0),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),
-  m_Busy(false),m_dataChanged(false),m_wasSaved(false)
-  {
-  }
+       //---------------------------------------------------------------------------
 
-  //----------------------------------------------------------------------------------------------
-  /** Copy constructor --> big qusetions about the validity of such implementation
-   */
-  ISaveable::ISaveable(const ISaveable & other)
-  : m_id(other.m_id),m_fileIndexStart(other.m_fileIndexStart),m_fileNumEvents(other.m_fileNumEvents),
-   m_Busy(other.m_Busy),m_dataChanged(other.m_dataChanged),m_wasSaved(other.m_wasSaved)
-  {
-  }
-
- ISaveable::ISaveable(const size_t id)
-  : m_id(id),m_fileIndexStart(std::numeric_limits<uint64_t>::max() ),m_fileNumEvents(0),
-    m_Busy(false),m_dataChanged(false),m_wasSaved(false)
-  {
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  ISaveable::~ISaveable()
-  {
-  }
-
-  void ISaveable::saveAt(uint64_t newPos, uint64_t newSize)
-  {
-      // load everything which is not in memory yet
-      this->load(); 
-      m_fileIndexStart= newPos;
-      m_fileNumEvents = newSize;
-      m_wasSaved   = true;
-      this->save();
-      this->clearDataFromMemory();      
-  }
-
-  /** Set the start/end point in the file where the events are located
-     * @param newPos :: start point,
-     * @param newSize :: number of events in the file   
-     * @param wasSaved :: flag to mark if info was saved
-     */
-    void ISaveable::setFilePosition(uint64_t newPos, uint64_t newSize, bool wasSaved)
-    {  
-      m_fileIndexStart=newPos;  
-      m_fileNumEvents =newSize;
-      m_wasSaved = wasSaved;
-    }
+        /** Set the start/end point in the file where the events are located
+        * @param newPos :: start point,
+        * @param newSize :: number of events in the file   
+        * @param wasSaved :: flag to mark if the info was saved, by default it does
+        */
+        void ISaveable::setFilePosition(uint64_t newPos, size_t newSize, bool wasSaved)
+        {  
+            Mutex::ScopedLock (this->m_setter);
+            this->m_fileIndexStart=newPos;  
+            this->m_fileNumEvents =static_cast<uint64_t>(newSize);
+            m_wasSaved = wasSaved;        
+        }
 
 
-  //-----------------------------------------------------------------------------------------------
-  /** Helper method for sorting MDBoxBasees by file position.
-   * MDGridBoxes return 0 for file position and so aren't sorted.
-   *
-   * @param a :: an MDBoxBase pointer
-   * @param b :: an MDBoxBase pointer
-   * @return
-   */
-  
-  inline bool CompareFilePosition (const ISaveable * a, const ISaveable * b)
-  {
-    return (a->getId() < b->getId());
-  }
+// ----------- PRIVATE, only DB availible
 
-  //-----------------------------------------------------------------------------------------------
-  /** Static method for sorting a list of MDBoxBase pointers by their file position,
-   * ascending. This should optimize the speed of loading a bit by
-   * reducing the amount of disk seeking.
-   *
-   * @param boxes :: ref to a vector of boxes. It will be sorted in-place.
-   */
-  void ISaveable::sortObjByFilePos(std::vector<ISaveable *> & boxes)
-  {
-    std::sort( boxes.begin(), boxes.end(), CompareFilePosition);
-  }
+        /** private function which used by the disk buffer to save the contents of the  object
+         @param newPos -- new position to save object to 
+         @param newSize -- new size of the saveable object
+        */
+        void ISaveable::saveAt(uint64_t newPos, uint64_t newSize)
+        {
+
+            Mutex::ScopedLock _lock(m_setter);
+
+            // load old contents if it was there
+            if(this->wasSaved())
+                this->load();
+            // set new position, derived by the disk buffer
+            m_fileIndexStart= newPos;
+            m_fileNumEvents = newSize;
+            // save in the new location
+            this->save();
+            this->clearDataFromMemory();      
+        }
+
+        /** Method stores the position of the object in Disc buffer and returns the size of this object for disk buffer to store 
+        * @param bufPosition -- the allocator which specifies the position of the object in the list of objects to write
+        * @returns the size of the object it currently occupies in memory. This size is also stored by the object itself for further references
+        */
+        size_t ISaveable::setBufferPosition(std::list<ISaveable *>::iterator bufPosition)
+        {
+            Mutex::ScopedLock _lock(m_setter);
+
+            m_BufPosition = boost::optional<std::list<ISaveable *>::iterator >(bufPosition);
+            m_BufMemorySize  = this->getDataMemorySize();
+
+            return m_BufMemorySize ;
+        }
 
 
+        /// clears the state of the object, and indicate that it is not stored in buffer any more 
+        void ISaveable::clearBufferState()
+        {
+            Mutex::ScopedLock _lock(m_setter);
 
-} // namespace Mantid
+            m_BufMemorySize=0;
+            m_BufPosition = boost::optional<std::list<ISaveable *>::iterator>();
+
+        }
+ 
+
+    } // namespace Mantid
 } // namespace Kernel
 

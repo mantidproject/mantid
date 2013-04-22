@@ -25,6 +25,7 @@ using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
 using Mantid::Geometry::MDBoxImplicitFunction;
 
+
 class MDBoxIteratorTest : public CxxTest::TestSuite
 {
 public:
@@ -62,21 +63,21 @@ public:
     B2 = dynamic_cast<gbox_t *>(A->getChild(2));
     B2->splitContents(1); // Split C21 into D210 to D212
 
-    B1 = A->getChild(1);
-    B3 = A->getChild(3);
-    TS_ASSERT_EQUALS( B1, A->getChild(1));
-    C00 = B0->getChild(0);
-    C01 = B0->getChild(1);
-    C02 = B0->getChild(2);
-    C03 = B0->getChild(3);
-    C20 = B2->getChild(0);
+    B1 = dynamic_cast<ibox_t *>(A->getChild(1));
+    B3 = dynamic_cast<ibox_t *>(A->getChild(3));
+    TS_ASSERT_EQUALS( B1, dynamic_cast<ibox_t *>(A->getChild(1)));
+    C00 = dynamic_cast<ibox_t *>(B0->getChild(0));
+    C01 = dynamic_cast<ibox_t *>(B0->getChild(1));
+    C02 = dynamic_cast<ibox_t *>(B0->getChild(2));
+    C03 = dynamic_cast<ibox_t *>(B0->getChild(3));
+    C20 = dynamic_cast<ibox_t *>(B2->getChild(0));
     C21 = dynamic_cast<gbox_t *>(B2->getChild(1));
-    C22 = B2->getChild(2);
-    C23 = B2->getChild(3);
-    D210 = C21->getChild(0);
-    D211 = C21->getChild(1);
-    D212 = C21->getChild(2);
-    D213 = C21->getChild(3);
+    C22 = dynamic_cast<ibox_t *>(B2->getChild(2));
+    C23 = dynamic_cast<ibox_t *>(B2->getChild(3));
+    D210 = dynamic_cast<ibox_t *>(C21->getChild(0));
+    D211 = dynamic_cast<ibox_t *>(C21->getChild(1));
+    D212 = dynamic_cast<ibox_t *>(C21->getChild(2));
+    D213 = dynamic_cast<ibox_t *>(C21->getChild(3));
   }
 
   //--------------------------------------------------------------------------------------
@@ -267,6 +268,9 @@ public:
     TS_ASSERT_EQUALS( it->getBox(), A);
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    BoxController *const bc = A->getBoxController();
+    delete bc;
   }
 
   //--------------------------------------------------------------------------------------
@@ -295,6 +299,10 @@ public:
 
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    BoxController *const bc = A->getBoxController();
+    delete bc;
+
   }
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_above11()
@@ -468,8 +476,17 @@ public:
     //Mock MDBox. Only one method of interest to the mocking.
     class MockMDBox : public MDBox<MDLeanEvent<2>, 2>
     {
+        API::BoxController *const pBC;
     public:
-      MOCK_CONST_METHOD0(getIsMasked, bool());
+        MockMDBox():
+            MDBox<MDLeanEvent<2>, 2>(new API::BoxController(2)),
+            pBC(MDBox<MDLeanEvent<2>, 2>::getBoxController())
+
+        {}
+        MOCK_CONST_METHOD0(getIsMasked, bool());
+       ~MockMDBox()
+        {delete pBC;}
+
     };
 
     MockMDBox mockBox;
@@ -553,16 +570,15 @@ public:
   }
 };
 
-
 class MDBoxIteratorTestPerformance : public CxxTest::TestSuite
 {
-public:
   MDGridBox<MDLeanEvent<3>,3> * top;
-
+public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static MDBoxIteratorTestPerformance *createSuite() { return new MDBoxIteratorTestPerformance(); }
   static void destroySuite( MDBoxIteratorTestPerformance *suite ) { delete suite; }
+
 
   MDBoxIteratorTestPerformance()
   {
@@ -570,6 +586,7 @@ public:
     top = MDEventsTestHelper::makeRecursiveMDGridBox<3>(5, 2);
   }
 
+public:
   // ---------------------------------------------------------------
   /** Make a simple iterator that will go through all the boxes */
   void do_test_iterator(bool leafOnly, bool ImplicitFunction, size_t expected)
@@ -658,7 +675,7 @@ public:
    */
   void do_test_getBoxes(bool leafOnly, int ImplicitFunction, size_t expected)
   {
-    std::vector< MDBoxBase<MDLeanEvent<3>,3> * > boxes;
+      std::vector< API::IMDNode * > boxes;
 
     MDImplicitFunction * function = NULL;
     if (ImplicitFunction==1)
@@ -697,8 +714,8 @@ public:
 
     // Now we still need to iterate through the vector to do anything, so this is a more fair comparison
     size_t counter = 0;
-    std::vector< MDBoxBase<MDLeanEvent<3>,3> * >::iterator it;
-    std::vector< MDBoxBase<MDLeanEvent<3>,3> * >::iterator it_end = boxes.end();
+    std::vector< API::IMDNode * >::iterator it;
+    std::vector< API::IMDNode * >::iterator it_end = boxes.end();
     for (it = boxes.begin(); it != it_end; it++)
     {
       counter++;
@@ -734,11 +751,11 @@ public:
 
   void test_getBoxes_withHugeImplicitFunction()
   {
-    do_test_getBoxes(true, 3, 125*125*125);
+    do_test_getBoxes(true, 3, 125*125*125);   
   }
 
 };
 
 
 #endif /* MANTID_MDEVENTS_MDBOXITERATORTEST_H_ */
-
+#undef RUN_CXX_PERFORMANCE_TEST_EMBEDDED

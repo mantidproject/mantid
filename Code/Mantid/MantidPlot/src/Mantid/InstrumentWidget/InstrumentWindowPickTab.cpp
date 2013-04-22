@@ -242,18 +242,21 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
   if (m_freezePlot)
   {// freeze the plot for one update
     m_freezePlot = false;
-    return;
+    detid = m_currentDetID;
   }
   if (m_instrWindow->blocked()) 
   {
     m_selectionInfoDisplay->clear();
     return;
   }
+
+  QString text;
   if (detid >= 0)
   {
+    // collect info about selected detector and add it to text
     InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
     Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
-    QString text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
+    text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
     QString wsIndex;
     try {
@@ -299,16 +302,25 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
     else
     {
       xUnits = QString::fromStdString(instrActor->getWorkspace()->getAxis(0)->unit()->caption());
-      //xUnits = "Time of flight";
     }
     text += "X units: " + xUnits + '\n';
-    m_selectionInfoDisplay->setText(text);
   }
   else
   {
-    m_selectionInfoDisplay->clear();
     m_plot->clearCurve(); // Clear the plot window
     m_plot->replot();
+  }
+
+  // display info about peak overlays
+  text += getNonDetectorInfo();
+
+  if ( !text.isEmpty() )
+  {
+      m_selectionInfoDisplay->setText(text);
+  }
+  else
+  {
+      m_selectionInfoDisplay->clear();
   }
 }
 
@@ -645,60 +657,68 @@ void InstrumentWindowPickTab::setSelectionType()
   */
 void InstrumentWindowPickTab::addPeak(double x,double y)
 {
-  using namespace Mantid::PhysicalConstants;
-
   if (!m_peak->isChecked() ||  m_currentDetID < 0) return;
-  Mantid::API::IPeaksWorkspace_sptr tw;
-  std::string peakTableName = "SingleCrystalPeakTable";
 
   try
   {
-    InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-    Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-    // This does need to get the instrument from the workspace as it's doing calculations
-    // .....and this method should be an algorithm! Or at least somewhere different to here.
-    Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
-
-    if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
-    {
-      tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
-      tw->setInstrument(instr);
-      Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
-      auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( m_instrWindow->getSurface() );
-      if ( surface )
+      Mantid::API::IPeaksWorkspace_sptr tw = m_instrWindow->getSurface()->getEditPeaksWorkspace();
+      InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
+      Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+      std::string peakTableName;
+      if ( tw )
       {
-          surface->setPeaksWorkspace(boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
+          peakTableName = tw->name();
       }
-    }
-    else
-    {
-      tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
-      if (!tw)
+      else
       {
-        QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
-        return;
+          peakTableName = "SingleCrystalPeakTable";
+          // This does need to get the instrument from the workspace as it's doing calculations
+          // .....and this method should be an algorithm! Or at least somewhere different to here.
+          Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
+
+          if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
+          {
+              tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
+              tw->setInstrument(instr);
+              Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
+          }
+          else
+          {
+              tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
+              if (!tw)
+              {
+                  QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
+                  return;
+              }
+          }
+          auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( m_instrWindow->getSurface() );
+          if ( surface )
+          {
+              surface->setPeaksWorkspace(boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
+          }
       }
-    }
 
-    // Run the AddPeak algorithm
-    auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
-    alg->setPropertyValue( "RunWorkspace", ws->name() );
-    alg->setPropertyValue( "PeaksWorkspace", peakTableName );
-    alg->setProperty( "DetectorID", m_currentDetID );
-    alg->setProperty( "TOF", x );
-    alg->setProperty( "Height", instrActor->getIntegratedCounts(m_currentDetID) );
-    alg->setProperty( "BinCount", y );
-    alg->execute();
+      // Run the AddPeak algorithm
+      auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
+      alg->setPropertyValue( "RunWorkspace", ws->name() );
+      alg->setPropertyValue( "PeaksWorkspace", peakTableName );
+      alg->setProperty( "DetectorID", m_currentDetID );
+      alg->setProperty( "TOF", x );
+      alg->setProperty( "Height", instrActor->getIntegratedCounts(m_currentDetID) );
+      alg->setProperty( "BinCount", y );
+      alg->execute();
 
+      if ( tw->sample().hasOrientedLattice() )
+      {
+          auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("CalculatePeaksHKL");
+          alg->setPropertyValue( "PeaksWorkspace", peakTableName );
+          alg->execute();
+      }
   }
   catch(std::exception& e)
   {
-    if (tw)
-    {
-      Mantid::API::AnalysisDataService::Instance().remove(peakTableName);
-    }
-    QMessageBox::critical(this,"MantidPlot -Error",
-      "Cannot create a Peak object because of the error:\n"+QString(e.what()));
+      QMessageBox::critical(this,"MantidPlot -Error",
+                            "Cannot create a Peak object because of the error:\n"+QString(e.what()));
   }
 
 }
@@ -1005,6 +1025,20 @@ QString InstrumentWindowPickTab::getTubeXUnitsName(InstrumentWindowPickTab::Tube
   return "Detector_ID";
 }
 
+/**
+  * Return non-detector info to be displayed in the selection info display.
+  */
+QString InstrumentWindowPickTab::getNonDetectorInfo()
+{
+    QString text;
+    QStringList overlays = m_instrWindow->getSurface()->getPeaksWorkspaceNames();
+    if ( !overlays.isEmpty() )
+    {
+        text += "Peaks:\n" + overlays.join("\n") + "\n";
+    }
+    return text;
+}
+
 
 /**
  * Save data plotted on the miniplot into a MatrixWorkspace.
@@ -1144,9 +1178,11 @@ void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
 
 void InstrumentWindowPickTab::initSurface()
 {
-    auto surface = getSurface().get();
+    ProjectionSurface *surface = getSurface().get();
     connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
     connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
+    connect(surface,SIGNAL(peaksWorkspaceAdded()),this,SLOT(updateSelectionInfoDisplay()));
+    connect(surface,SIGNAL(peaksWorkspaceDeleted()),this,SLOT(updateSelectionInfoDisplay()));
 }
 
 /**
@@ -1198,6 +1234,15 @@ void InstrumentWindowPickTab::singleDetectorTouched(int detid)
 
 void InstrumentWindowPickTab::singleDetectorPicked(int detid)
 {
-  updatePick(detid);
+    updatePick(detid);
+}
+
+/**
+  * Update the selection display using currently selected detector.
+  * Updates non-detector information on it.
+  */
+void InstrumentWindowPickTab::updateSelectionInfoDisplay()
+{
+    updateSelectionInfo(m_currentDetID);
 }
 

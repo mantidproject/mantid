@@ -13,28 +13,30 @@ namespace Geometry
 
   /** Default constructor. 
   \f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
-  UnitCell::UnitCell(): da(6), ra(6), G(3,3), Gstar(3,3), B(3,3)
+  UnitCell::UnitCell(): da(6), ra(6), errorda(6), G(3,3), Gstar(3,3), B(3,3)
   {
       da[0]=da[1]=da[2]=1.;
       da[3]=da[4]=da[5]=deg2rad*90.0;
+      errorda[0]=errorda[1]=errorda[2]=errorda[3]=errorda[4]=errorda[5]=0.0;
       recalculate();
   }
 
   /** Copy constructor
   @param other :: The UnitCell from which to copy lattice parameters
   */
-  UnitCell::UnitCell(const UnitCell& other):da(other.da),ra(other.ra),G(other.G),Gstar(other.Gstar),B(other.B),Binv(other.Binv)
+  UnitCell::UnitCell(const UnitCell& other):da(other.da),ra(other.ra),errorda(other.errorda),G(other.G),Gstar(other.Gstar),B(other.B),Binv(other.Binv)
   {
   }
 
   /** Constructor
   @param _a, _b, _c :: lattice parameters \f$ a, b, c \f$ \n
   with \f$\alpha = \beta = \gamma = 90^\circ \f$*/
-  UnitCell::UnitCell(double _a, double _b, double _c): da(6), ra(6), G(3,3), Gstar(3,3), B(3,3)
+  UnitCell::UnitCell(double _a, double _b, double _c): da(6), ra(6), errorda(6), G(3,3), Gstar(3,3), B(3,3)
   {
       da[0]=_a;da[1]=_b;da[2]=_c;
       // Angles are 90 degrees in radians ->Pi/2
       da[3]=da[4]=da[5]=0.5*M_PI;
+      errorda[0]=errorda[1]=errorda[2]=errorda[3]=errorda[4]=errorda[5]=0.0;
       recalculate();
   }
 
@@ -42,7 +44,7 @@ namespace Geometry
   @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
   @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
   */
-  UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int angleunit): da(6), ra(6), G(3,3), Gstar(3,3), B(3,3)
+  UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int angleunit): da(6), ra(6), errorda(6), G(3,3), Gstar(3,3), B(3,3)
   {
       da[0]=_a;da[1]=_b;da[2]=_c;
       // Angle transformed in radians
@@ -58,7 +60,8 @@ namespace Geometry
           da[4]=_beta;
           da[5]=_gamma;
       }
-      recalculate();
+    errorda[0]=errorda[1]=errorda[2]=errorda[3]=errorda[4]=errorda[5]=0.0;
+    recalculate();
   }
   
   /// Destructor
@@ -267,6 +270,81 @@ namespace Geometry
     return ra[5]*rad2deg;
   }
 
+
+
+  /** Get lattice parameter error
+  @return errora :: errorlattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )
+  */
+  double UnitCell::errora() const
+  {
+      return errorda[0];
+  }
+
+  /** Get lattice parameter error
+  @return errorb :: errorlattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )
+  */
+  double UnitCell::errorb() const
+  {
+      return errorda[1];
+  }
+
+  /** Get lattice parameter error
+  @return errorc :: errorlattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )
+  */
+  double UnitCell::errorc() const
+  {
+      return errorda[2];
+  }
+
+
+  /** Get lattice parameter error
+  @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
+  @return erroralpha :: errorlattice parameter \f$ alpha \f$ (in degrees or radians )
+  */
+  double UnitCell::erroralpha(const int angleunit) const
+  {
+      if (angleunit==angDegrees)
+      {
+          return errorda[3]*rad2deg;
+      }
+      else
+      {
+          return errorda[3];
+      }
+  }
+
+  /** Get lattice parameter error
+  @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
+  @return erroralpha :: errorlattice parameter \f$ beta \f$ (in degrees or radians )
+  */
+  double UnitCell::errorbeta(const int angleunit) const
+  {
+      if (angleunit==angDegrees)
+      {
+          return errorda[4]*rad2deg;
+      }
+      else
+      {
+          return errorda[4];
+      }
+  }
+
+  /** Get lattice parameter error
+  @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
+  @return erroralpha :: errorlattice parameter \f$ gamma \f$ (in degrees or radians )
+  */
+  double UnitCell::errorgamma(const int angleunit) const
+  {
+      if (angleunit==angDegrees)
+      {
+          return errorda[5]*rad2deg;
+      }
+      else
+      {
+          return errorda[5];
+      }
+  }
+
   /** Set lattice parameters
     @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
   @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
@@ -289,12 +367,41 @@ namespace Geometry
       recalculate();
   }
 
+  /** Set lattice parameter errors
+    @param _aerr, _berr, _cerr, _alphaerr, _betaerr, _gammaerr :: lattice parameter errors\n
+  @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
+    */
+
+  void UnitCell::setError(double _aerr, double _berr, double _cerr, double _alphaerr, double _betaerr, double _gammaerr,const int angleunit)
+  {
+    errorda[0]=_aerr; errorda[1]=_berr; errorda[2]=_cerr;
+    if (angleunit==angDegrees)
+      {
+          errorda[3]=deg2rad*_alphaerr;
+          errorda[4]=deg2rad*_betaerr;
+          errorda[5]=deg2rad*_gammaerr;
+      }
+    else
+      {
+          errorda[3]=_alphaerr;
+          errorda[4]=_betaerr;
+          errorda[5]=_gammaerr;
+      }
+  }
+
+
   /** Set lattice parameter
   @param _a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )*/
   void UnitCell::seta(double _a)
   {
     da[0]=_a;
     recalculate();
+  }
+  /** Set lattice parameter error
+  @param _aerr :: lattice parameter \f$ a \f$ error (in \f$ \mbox{\AA} \f$ )*/
+  void UnitCell::setErrora(double _aerr)
+  {
+    errorda[0]=_aerr;
   }
 
   /** Set lattice parameter
@@ -304,7 +411,12 @@ namespace Geometry
     da[1]=_b;
     recalculate();
   }
- 
+  /** Set lattice parameter error
+  @param _berr :: lattice parameter \f$ b \f$ error (in \f$ \mbox{\AA} \f$ )*/
+  void UnitCell::setErrorb(double _berr)
+  {
+    errorda[1]=_berr;
+  }
   /** Set lattice parameter
   @param _c :: lattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )*/
   void UnitCell::setc(double _c)
@@ -312,7 +424,12 @@ namespace Geometry
     da[2]=_c;
     recalculate();
   }
-
+  /** Set lattice parameter error
+  @param _cerr :: lattice parameter \f$ c \f$ error (in \f$ \mbox{\AA} \f$ )*/
+  void UnitCell::setErrorc(double _cerr)
+  {
+    errorda[2]=_cerr;
+  }
   /** Set lattice parameter
   @param _alpha :: lattice parameter \f$ \alpha \f$
   @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
@@ -325,7 +442,17 @@ namespace Geometry
       da[3]=_alpha;
     recalculate();
   }
- 
+  /** Set lattice parameter error
+  @param _alphaerr :: lattice parameter \f$ \alpha \f$ error
+  @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+  */
+  void UnitCell::setErroralpha(double _alphaerr,const int angleunit)
+  {
+    if (angleunit==angDegrees)
+      errorda[3]=deg2rad*_alphaerr;
+    else
+      errorda[3]=_alphaerr;
+  }
   /** Set lattice parameter
   @param _beta :: lattice parameter \f$ \beta \f$
   @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
@@ -339,6 +466,18 @@ namespace Geometry
     recalculate();
   }
       
+  /** Set lattice parameter error
+  @param _betaerr :: lattice parameter \f$ \beta \f$ error
+  @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+  */
+  void UnitCell::setErrorbeta(double _betaerr,const int angleunit)
+  {
+    if (angleunit==angDegrees)
+      errorda[4]=deg2rad*_betaerr;
+    else
+      errorda[4]=_betaerr;
+  }
+
   /** Set lattice parameter
   @param _gamma :: lattice parameter \f$ \gamma \f$
   @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
@@ -350,6 +489,18 @@ namespace Geometry
     else 
       da[5]=_gamma;
     recalculate();
+  }
+
+  /** Set lattice parameter error
+  @param _gammaerr :: lattice parameter \f$ \gamma \f$ error
+  @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
+  */
+  void UnitCell::setErrorgamma(double _gammaerr,const int angleunit)
+  {
+    if (angleunit==angDegrees)
+      errorda[5]=deg2rad*_gammaerr;
+    else
+      errorda[5]=_gammaerr;
   }
 
   /// Return d-spacing (\f$ \mbox{ \AA } \f$) for a given h,k,l coordinate

@@ -2,15 +2,24 @@
 #define MANTID_API_SCRIPTREPOSITORYVIEW_H_
 
 #include <QDialog>
-#include "MantidKernel/System.h"
+#include <QStyledItemDelegate>
 #include "ui_ScriptRepositoryView.h"
 #include "DllOption.h"
+namespace Mantid{
+  namespace Kernel{
+    class Logger;
+  }
+}
 namespace MantidQt
 {
 namespace API
 {
-  class RepoModel; 
-  /** ScriptRepositoryView : TODO: DESCRIPTION
+  class RepoModel;
+  /** ScriptRepositoryView : Provide the User Interface to the ScriptRepository. It does so 
+      through the Mantid Model View Framework. It is composed by a specialized QTreeView 
+      (RepoTreeView) and a TextBrowser. The TreeView is populated with the RepoModel, wich wrappers
+      the ScriptRepository. Inside this class, there are two nested classes that will implement 
+      delegates to the columns of Status and AutoUpdate in order to improve the User Experience. 
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -35,21 +44,55 @@ namespace API
   class  EXPORT_OPT_MANTIDQT_API ScriptRepositoryView : public QDialog
   {
     Q_OBJECT
-  public:
-    ScriptRepositoryView(QWidget * parent=0);
-    virtual ~ScriptRepositoryView();
-    public slots:
-    void filterValues(QString);
-  signals:
-    void loadScript(const QString);
 
-    protected slots:
+    class RepoDelegate : public QStyledItemDelegate
+    {
+    public:
+      RepoDelegate(QObject *parent = 0);
+      
+      void paint(QPainter *painter,
+                 const QStyleOptionViewItem &option,
+                 const QModelIndex &index) const;
+      bool editorEvent(QEvent *event,
+                       QAbstractItemModel *model,
+                       const QStyleOptionViewItem &option,
+                       const QModelIndex &index);
+      QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const ;
+    };
+    
+    class CheckBoxDelegate : public QStyledItemDelegate
+    {
+    public:
+      CheckBoxDelegate(QObject * parent = 0); 
+      void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+      bool editorEvent(QEvent *event,
+                       QAbstractItemModel *model,
+                       const QStyleOptionViewItem &option,
+                       const QModelIndex &index);
+    };
+
+   public:
+    // constuctor 
+    ScriptRepositoryView(QWidget * parent=0);
+    // destructor - not virtual, because this is not intended to be base
+    ~ScriptRepositoryView();
+
+  signals:
+    // allow Mantid Plot to open a python file to be seen 
+    void loadScript(const QString);
+    
+  protected slots:
+    // allow to interact with the cells, in order to update the description of the files
     void cell_activated(const QModelIndex & ); 
-    void cell_clicked(const QModelIndex & );
+    void updateModel();
+    void 	currentChanged ( const QModelIndex & current );
+
 
   private:
     Ui::ScriptRepositoryView * ui; 
     RepoModel * model;
+    // A static reference to the Logger
+    static Mantid::Kernel::Logger & g_log; 
   };
 
 

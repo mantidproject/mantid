@@ -68,7 +68,7 @@ public:
   /// called when the gl widget gets resized
   virtual void resize(int, int);
   /// redraw surface without recalulationg of colours, etc
-  virtual void updateView(bool picking = false);
+  virtual void updateView(bool picking = true);
   /// full update and redraw of the surface
   virtual void updateDetectors();
   /// returns the bounding rectangle in the real coordinates
@@ -111,7 +111,7 @@ public:
   /// Get background colour
   QColor getBackgroundColor() const {return m_backgroundColor;}
   /// Send a redraw request to the surface owner
-  void requestRedraw();
+  void requestRedraw(bool resetPeakVisibility = false);
   /// Enable lighting if the implementation allows it
   void enableLighting(bool on);
 
@@ -169,33 +169,44 @@ public:
   void changeBorderColor(const QColor& color) {m_maskShapes.changeBorderColor(color);}
 
   //-----------------------------------
-  //    Peaks overaly methods
+  //    Peaks overlay methods
   //-----------------------------------
 
   QList<PeakMarker2D*> getMarkersWithID(int detID)const;
-  void peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
+  boost::shared_ptr<Mantid::API::IPeaksWorkspace> getEditPeaksWorkspace() const;
+  QStringList getPeaksWorkspaceNames() const;
+  void deletePeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
   void clearPeakOverlays();
   bool hasPeakOverlays() const {return !m_peakShapes.isEmpty();}
   void setPeakLabelPrecision(int n);
   int getPeakLabelPrecision() const {return m_peakLabelPrecision;}
-  void setShowPeakRowFlag(bool on);
-  bool getShowPeakRowFlag()const {return m_showPeakRow;}
+  void setShowPeakRowsFlag(bool on);
+  bool getShowPeakRowsFlag()const {return m_showPeakRows;}
+  void setShowPeakLabelsFlag(bool on);
+  bool getShowPeakLabelsFlag()const {return m_showPeakLabels;}
 
 signals:
 
+  // detector selection
   void singleDetectorTouched(int);
   void singleDetectorPicked(int);
   void multipleDetectorsSelected(QList<int>&);
 
+  // shape manipulation
   void signalToStartCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor);
   void shapeCreated();
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
   void shapesCleared();
-  void redrawRequired();
-  void updateInfoText();
 
+  // peaks
+  void peaksWorkspaceAdded();
+  void peaksWorkspaceDeleted();
+
+  // other
+  void redrawRequired();   ///< request redrawing of self
+  void updateInfoText();   ///< request update of the info string at bottom of InstrumentWindow
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
 protected slots:
@@ -232,6 +243,7 @@ protected:
   int getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const;
   int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
   void setInputController(int mode, InputController* controller);
+  void setPeakVisibility() const;
 
   //-----------------------------------
   //     Protected data
@@ -253,7 +265,8 @@ protected:
   Shape2DCollection m_maskShapes;    ///< to draw mask shapes
   mutable QList<PeakOverlay*> m_peakShapes; ///< to draw peak labels
   mutable int m_peakLabelPrecision;
-  mutable bool m_showPeakRow;        ///< flag to show peak row index
+  mutable bool m_showPeakRows;        ///< flag to show peak row index
+  mutable bool m_showPeakLabels;     ///< flag to show peak hkl labels
   mutable int m_peakShapesStyle;     ///< index of a default PeakMarker2D style to use with a new PeakOverlay.
 
 private:

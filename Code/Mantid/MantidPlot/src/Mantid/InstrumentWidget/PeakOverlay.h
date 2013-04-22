@@ -37,6 +37,7 @@ public:
   void print()const;
 
 private:
+  static QString formatNumber(double h, int prec);
   QPointF p; ///< untransformed marker origin
   QRectF rect; ///< label's screen area in transformed coords
   double h,k,l; ///< h,k, and l
@@ -70,7 +71,9 @@ public:
   /// set HKL precision
   void setPrecision(int prec) const {m_precision = prec;}
   void setShowRowsFlag(bool yes) {m_showRows = yes;}
+  void setShowLabelsFlag(bool yes) {m_showLabels = yes;}
   static PeakMarker2D::Style getDefaultStyle(int index);
+  void setPeakVisibility(double xmin, double xmax, QString units);
 
 signals:
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
@@ -85,7 +88,8 @@ private:
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
   UnwrappedSurface* m_surface; ///< pointer to the surface this overlay is applied to
   mutable int m_precision;
-  mutable bool m_showRows; ///< flag to show peak row index
+  mutable bool m_showRows;   ///< flag to show peak row index
+  mutable bool m_showLabels; ///< flag to show peak hkl labels
 
   static QList<PeakMarker2D::Style> g_defaultStyles; ///< default marker styles
 };

@@ -1,3 +1,7 @@
+/*WIKI*
+Oscillating Gaussian decay for use by Muon scientists defined by
+:<math> \mbox{A}\times \exp(-{Sigma}^2 \times {x}^2) \times cos( 2 \pi \times {Frequency} \times {x} + {Phi} ) </math>
+ *WIKI*/
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -18,10 +22,10 @@ DECLARE_FUNCTION(GausOsc)
 
 void GausOsc::init()
 {
-   declareParameter("A", 10.0); 
-   declareParameter("Sigma", 0.2);
-   declareParameter("Frequency", 0.1); 
-   declareParameter("Phi", 0.0);
+   declareParameter("A", 10.0, "Amplitude at time 0");
+   declareParameter("Sigma", 0.2, "Decay rate");
+   declareParameter("Frequency", 0.1, "Frequency of oscillation");
+   declareParameter("Phi", 0.0, "Frequency of oscillation");
 }
 
 

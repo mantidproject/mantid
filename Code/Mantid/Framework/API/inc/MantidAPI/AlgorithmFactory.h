@@ -77,10 +77,10 @@ public:
    * Subscribes an algorithm using a custom instantiator. This
    * object takes ownership of the instantiator
    * @param instantiator - A pointer to a custom instantiator
-   * @param replaceExisting - If true an existing algorithm of the same name and version is replaced
+   * @param replaceExisting - Defines what happens if an algorithm of the same name/verson already exists, see SubscribeAction
    */
   template<class T>
-  void subscribe(Kernel::AbstractInstantiator<T> *instantiator, const bool replaceExisting = false)
+  void subscribe(Kernel::AbstractInstantiator<T> *instantiator, const SubscribeAction replaceExisting = ErrorIfExists)
   {
     boost::shared_ptr<IAlgorithm> tempAlg = instantiator-> createInstance();
     const int version = extractAlgVersion(tempAlg);
@@ -95,11 +95,7 @@ public:
       }
       else
       {
-        if( replaceExisting )
-        {
-          Kernel::DynamicFactory<Algorithm>::unsubscribe(key);
-        }
-        else if(version == it->second)
+        if(version == it->second && replaceExisting == ErrorIfExists)
         {
           g_log.fatal() << "Cannot register algorithm " << className << " twice with the same version\n";
           return;
@@ -109,7 +105,7 @@ public:
           m_vmap[className]=version;
         }
       }  
-      Kernel::DynamicFactory<Algorithm>::subscribe(key, instantiator);
+      Kernel::DynamicFactory<Algorithm>::subscribe(key, instantiator, replaceExisting);
     }
   }
   /// Unsubscribe the given algorithm

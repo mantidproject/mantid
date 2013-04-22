@@ -324,9 +324,9 @@ namespace MDAlgorithms
   {
     BoxController_sptr bc = ws->getBoxController();
     // store exisiting write buffer size for the future 
-    uint64_t writeBufSize =bc->getDiskBuffer().getWriteBufferSize();
+    //uint64_t writeBufSize =bc->getDiskBuffer().getWriteBufferSize();
     // and disable write buffer (if any) for input MD Events for this algorithm purposes;
-    bc->setCacheParameters(1,0);
+    //bc->setCacheParameters(1,0);
 
 
     // Cache some data to speed up accessing them a bit
@@ -393,13 +393,13 @@ namespace MDAlgorithms
       MDImplicitFunction * function = this->getImplicitFunctionForChunk(chunkMin, chunkMax);
 
       // Use getBoxes() to get an array with a pointer to each box
-      std::vector<Kernel::ISaveable *> boxes;
+      std::vector<API::IMDNode *> boxes;
       // Leaf-only; no depth limit; with the implicit function passed to it.
       ws->getBox()->getBoxes(boxes, 1000, true, function);
 
       // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
       if (bc->isFileBacked())
-        Kernel::ISaveable::sortObjByFilePos(boxes);
+          API::IMDNode::sortObjByID(boxes);
 
       // For progress reporting, the # of boxes
       if (prog)
@@ -440,7 +440,7 @@ namespace MDAlgorithms
     }
 
     // return the size of the input workspace write buffer to its initial value
-    bc->setCacheParameters(sizeof(MDE),writeBufSize);
+    //bc->setCacheParameters(sizeof(MDE),writeBufSize);
 
   }
 

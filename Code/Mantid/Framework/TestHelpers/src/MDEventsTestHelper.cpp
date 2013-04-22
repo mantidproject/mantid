@@ -147,11 +147,14 @@ namespace MDEventsTestHelper
 
 
   //-------------------------------------------------------------------------------------
-  /** Generate an empty MDBox */
-  MDBox<MDLeanEvent<1>,1> * makeMDBox1(size_t splitInto)
+  /** Generate an empty MDBox , 
+  !!! Box controller has to be deleted saparately to avoid memory leaks in tests !!!!*/
+  MDBox<MDLeanEvent<1>,1> * makeMDBox1(size_t splitInto,BoxController *splitter)
   {
-    // Split at 5 events
-    BoxController_sptr splitter(new BoxController(1));
+    if(!splitter)
+      splitter=(new BoxController(1));
+
+    // Split at 5 events   
     splitter->setSplitThreshold(5);
     // Splits into 10 boxes
     splitter->setSplitInto(splitInto);
@@ -163,11 +166,14 @@ namespace MDEventsTestHelper
   }
 
   //-------------------------------------------------------------------------------------
-  /** Generate an empty MDBox with 3 dimensions, split 10x5x2 */
+  /** Generate an empty MDBox with 3 dimensions, split 10x5x2 
+     !!! Box controller has to be deleted saparately to avoid memory leaks in tests !!!!**/
   MDBox<MDLeanEvent<3>,3> * makeMDBox3()
   {
     // Split at 5 events
-    BoxController_sptr splitter(new BoxController(3));
+
+    BoxController * splitter = new BoxController(3);
+
     splitter->setSplitThreshold(5);
     // Splits into 10x5x2 boxes
     splitter->setSplitInto(10);

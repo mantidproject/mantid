@@ -41,12 +41,12 @@ namespace
     return registered;
     }
 
-  tuple getInfo(ScriptRepository & self, const std::string path){
+  tuple getInfo(ScriptRepository & self, const std::string & path){
     ScriptInfo info = self.info(path);
-    return   boost::python::make_tuple<std::string>(info.author, info.description, info.pub_date.toSimpleString() );
+    return   boost::python::make_tuple<std::string>(info.author, info.pub_date.toSimpleString() );
   }
 
-  PyObject * getStatus(ScriptRepository & self, const std::string path){
+  PyObject * getStatus(ScriptRepository & self, const std::string & path){
     SCRIPTSTATUS st = self.fileStatus(path); 
     PyObject * value; 
     switch(st){
@@ -72,6 +72,12 @@ namespace
       value = PyString_FromString("BOTH_UNCHANGED"); 
       break;
     }
+    return value;
+  }
+
+  PyObject * getDescription(ScriptRepository & self, const std::string & path){
+    PyObject * value; 
+    value = PyString_FromString(self.description(path).c_str());
     return value;
   }
 
@@ -129,7 +135,14 @@ const char * file_info_desc =
 The author, description and publication date are available through this method. \n\
 \n\
 :param path: Path to the entry.\n\
-:return : Tuple with (author, description, last publication date)\n";
+:return : Tuple with (author, last publication date)\n";
+
+const char * file_description_desc = 
+"Return description of the entry inside ScriptRepository. \n\
+\n\
+:param path: Path to the entry.\n\
+:return : String with the description \n";
+
 
 const char * file_status_desc = 
 "Return the status of a given entry.\n\
@@ -179,6 +192,7 @@ ScriptRepository will install itself.";
     .def("install",&ScriptRepository::install, install_desc)
     .def("listFiles",&getListFiles, list_files_desc)
     .def("fileInfo",&getInfo,file_info_desc)
+    .def("description",&getDescription,file_description_desc)
     .def("fileStatus",&getStatus,file_status_desc)
     .def("download",&ScriptRepository::download,download_desc)
     //.def("upload",&ScriptRepository::upload, "")

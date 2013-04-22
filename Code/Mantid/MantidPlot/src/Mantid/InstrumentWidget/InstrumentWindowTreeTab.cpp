@@ -48,18 +48,3 @@ void InstrumentWindowTreeTab::showEvent(QShowEvent *)
     getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
 }
 
-/**
-  * Clean up on becoming invisible.
-  */
-void InstrumentWindowTreeTab::hideEvent(QHideEvent *)
-{
-  InstrumentActor* actor = m_instrWindow->getInstrumentActor();
-  if ( actor )
-  {
-    auto visitor = SetAllVisibleVisitor(); 
-    actor->accept( visitor );
-    getSurface()->updateView();
-    getSurface()->requestRedraw();
-  }
-}
-

@@ -211,10 +211,15 @@ namespace MDAlgorithms
     size_t initial_numEvents = ws1->getNPoints();
 
     // Make a leaf-only iterator through all boxes with events in the RHS workspace
-    std::vector<MDBoxBase<MDE,nd> *> boxes;
+    std::vector<API::IMDNode *> boxes;
     box2->getBoxes(boxes, 1000, true);
     int numBoxes = int(boxes.size());
 
+    bool fileBasedSource(false);
+    if(ws2->isFileBacked())
+        fileBasedSource=true;
+
+ 
     // Add the boxes in parallel. They should be spread out enough on each
     // core to avoid stepping on each other.
     // cppcheck-suppress syntaxError
@@ -229,7 +234,10 @@ namespace MDAlgorithms
         const std::vector<MDE> & events = box->getConstEvents();
         // Add events, with bounds checking
         box1->addEvents(events);
-        box->releaseEvents();
+        if(fileBasedSource)
+          box->clear();
+        else
+          box->releaseEvents();
       }
       PARALLEL_END_INTERUPT_REGION
     }
@@ -246,8 +254,8 @@ namespace MDAlgorithms
 
     // Set a marker that the file-back-end needs updating if the # of events changed.
     if (ws1->getNPoints() != initial_numEvents)
-      ws1->setFileNeedsUpdating(true);
-
+       ws1->setFileNeedsUpdating(true);
+//
     //std::cout << tim << " to add workspace " << ws2->name() << std::endl;
 
   }

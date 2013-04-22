@@ -170,160 +170,164 @@ namespace MDAlgorithms
   template<typename MDE, size_t nd, typename OMDE, size_t ond>
   void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    // Create the ouput workspace
-    typename MDEventWorkspace<OMDE, ond>::sptr outWS(new MDEventWorkspace<OMDE, ond>());
-    for (size_t od=0; od < m_binDimensions.size(); od++)
-      outWS->addDimension(m_binDimensions[od]);
-    outWS->initialize();
-    // Copy settings from the original box controller
-    BoxController_sptr bc = ws->getBoxController();
+      // Create the ouput workspace
+      typename MDEventWorkspace<OMDE, ond>::sptr outWS(new MDEventWorkspace<OMDE, ond>());
+      for (size_t od=0; od < m_binDimensions.size(); od++)
+          outWS->addDimension(m_binDimensions[od]);
+      outWS->initialize();
+      // Copy settings from the original box controller
+      BoxController_sptr bc = ws->getBoxController();
 
-    // store wrute buffer size for the future 
-    uint64_t writeBufSize = bc->getDiskBuffer().getWriteBufferSize();
-    // and disable write buffer (if any) for input MD Events for this algorithm purposes;
-    //bc->setCacheParameters(1,0);
+      // store wrute buffer size for the future 
+      //uint64_t writeBufSize = bc->getFileIO()getDiskBuffer().getWriteBufferSize();
+      // and disable write buffer (if any) for input MD Events for this algorithm purposes;
+      //bc->setCacheParameters(1,0);
 
-    BoxController_sptr obc = outWS->getBoxController();
-    // Use the "number of bins" as the "split into" parameter
-    for (size_t od=0; od < m_binDimensions.size(); od++)
-      obc->setSplitInto(od, m_binDimensions[od]->getNBins());
-    obc->setSplitThreshold(bc->getSplitThreshold());
+      BoxController_sptr obc = outWS->getBoxController();
+      // Use the "number of bins" as the "split into" parameter
+      for (size_t od=0; od < m_binDimensions.size(); od++)
+          obc->setSplitInto(od, m_binDimensions[od]->getNBins());
+      obc->setSplitThreshold(bc->getSplitThreshold());
 
-    bool bTakeDepthFromInputWorkspace = getProperty("TakeMaxRecursionDepthFromInput");
-    int tempDepth =  getProperty("MaxRecursionDepth");
-    size_t maxDepth = bTakeDepthFromInputWorkspace? bc->getMaxDepth() : size_t(tempDepth);
-    obc->setMaxDepth(maxDepth);
-    // the buffer size for resulting workspace; reasonable size is at least 10 data chunk sizes (nice to verify)
-    size_t outputSize = writeBufSize;
-    if(outputSize<10*obc->getDataChunk())outputSize=10*obc->getDataChunk();
-    obc->setCacheParameters(sizeof(OMDE),outputSize);
+      bool bTakeDepthFromInputWorkspace = getProperty("TakeMaxRecursionDepthFromInput");
+      int tempDepth =  getProperty("MaxRecursionDepth");
+      size_t maxDepth = bTakeDepthFromInputWorkspace? bc->getMaxDepth() : size_t(tempDepth);
+      obc->setMaxDepth(maxDepth);
 
-    obc->resetNumBoxes();
-    // Perform the first box splitting
-    outWS->splitBox();
+      //size_t outputSize = writeBufSize;
+      //obc->setCacheParameters(sizeof(OMDE),outputSize);
 
-    // --- File back end ? ----------------
-    std::string filename = getProperty("OutputFilename");
-    if (!filename.empty())
-    {
-      // First save to the NXS file
-      g_log.notice() << "Running SaveMD" << std::endl;
-      IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
-      alg->setPropertyValue("Filename", filename);
-      alg->setProperty("InputWorkspace", outWS);
-      alg->executeAsChildAlg();
-      // And now re-load it with this file as the backing.
-      g_log.notice() << "Running LoadMD" << std::endl;
-      alg = createChildAlgorithm("LoadMD");
-      alg->setPropertyValue("Filename", filename);
-      alg->setProperty("FileBackEnd", true);
-      alg->setPropertyValue("Memory", getPropertyValue("Memory"));
-      alg->executeAsChildAlg();
-      // Replace the workspace with the loaded, file-backed one
-      IMDWorkspace_sptr temp;
-      temp = alg->getProperty("OutputWorkspace");
-      outWS = boost::dynamic_pointer_cast<MDEventWorkspace<OMDE, ond> >(temp);
-    }
+      obc->resetNumBoxes();
+      // Perform the first box splitting
+      outWS->splitBox();
 
-
-    // Function defining which events (in the input dimensions) to place in the output
-    MDImplicitFunction * function = this->getImplicitFunctionForChunk(NULL, NULL);
-
-    std::vector<Kernel::ISaveable *> boxes;
-    // Leaf-only; no depth limit; with the implicit function passed to it.
-    ws->getBox()->getBoxes(boxes, 1000, true, function);
-    // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
-    bool fileBackedWS = bc->isFileBacked();
-    if (fileBackedWS)
-      Kernel::ISaveable::sortObjByFilePos(boxes);
-
-    Progress * prog = new Progress(this, 0.0, 1.0, boxes.size());
-
-    // The root of the output workspace
-    MDBoxBase<OMDE,ond>* outRootBox = outWS->getBox();
-
-    uint64_t totalAdded = 0;
-    uint64_t numSinceSplit = 0;
-
-    // Go through every box for this chunk.
-    //PARALLEL_FOR_IF( !bc->isFileBacked() )
-    for (int i=0; i<int(boxes.size()); i++)
-    {
-      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
-      // Perform the binning in this separate method.
-      if (box)
+      // --- File back end ? ----------------
+      std::string filename = getProperty("OutputFilename");
+      if (!filename.empty())
       {
-        // An array to hold the rotated/transformed coordinates
-        coord_t outCenter[ond];
 
-        const std::vector<MDE> & events = box->getConstEvents();
-        bool clearBox = box->wasSaved();
+          // First save to the NXS file
+          g_log.notice() << "Running SaveMD to create file back-end" << std::endl;
+          IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
+          alg->setPropertyValue("Filename", filename);
+          alg->setProperty("InputWorkspace", outWS);
+          alg->setProperty("MakeFileBacked", true);
+          alg->executeAsChildAlg();
 
-        typename std::vector<MDE>::const_iterator it = events.begin();
-        typename std::vector<MDE>::const_iterator it_end = events.end();
-        for (; it != it_end; it++)
-        {
-          // Cache the center of the event (again for speed)
-          const coord_t * inCenter = it->getCenter();
+          if(!obc->isFileBacked())
+              throw std::runtime_error("SliceMD with file-backed output: Can not set up file-backed output workspace ");
 
-          if (function->isPointContained(inCenter))
+          auto IOptr= obc->getFileIO();
+          size_t outBufSize = IOptr->getWriteBufferSize();
+          // the buffer size for resulting workspace; reasonable size is at least 10 data chunk sizes (nice to verify)
+          if(outBufSize<10*IOptr->getDataChunk())
           {
-            // Now transform to the output dimensions
-            m_transformFromOriginal->apply(inCenter, outCenter);
-
-            // Create the event
-            OMDE newEvent(it->getSignal(), it->getErrorSquared(), outCenter);
-            // Copy extra data, if any
-            copyEvent(*it, newEvent);
-            // Add it to the workspace
-            outRootBox->addEvent( newEvent );
-
-            numSinceSplit++;
+              outBufSize=10*IOptr->getDataChunk();
+              IOptr->setWriteBufferSize(outBufSize);
           }
-        }
-        if(clearBox)box->releaseEvents();
 
-        // Every 20 million events, or at the last box: do splitting
-        if (numSinceSplit > 20000000 || (i == int(boxes.size()-1)))
-        {
-          // This splits up all the boxes according to split thresholds and sizes.
-          Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
-          ThreadPool tp(ts);
-          outWS->splitAllIfNeeded(ts);
-          tp.joinAll();
-          // Accumulate stats
-          totalAdded += numSinceSplit;
-          numSinceSplit = 0;
-          // Progress reporting
-          if(!fileBackedWS)prog->report(i);
+      }
 
-        }
-        if(fileBackedWS)
-        {
-          if(!(i%10))prog->report(i);
-        }
-      } // is box
 
-    }// for each box in the vector
-    prog->report();
-    // Refresh all cache.
-    outWS->refreshCache();
+      // Function defining which events (in the input dimensions) to place in the output
+      MDImplicitFunction * function = this->getImplicitFunctionForChunk(NULL, NULL);
 
-    g_log.notice() << totalAdded << " " << OMDE::getTypeName() << "'s added to the output workspace." << std::endl;
+      std::vector<API::IMDNode *> boxes;
+      // Leaf-only; no depth limit; with the implicit function passed to it.
+      ws->getBox()->getBoxes(boxes, 1000, true, function);
+      // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
+      bool fileBackedWS = bc->isFileBacked();
+      if (fileBackedWS)
+          API::IMDNode::sortObjByID(boxes);
 
-    if (outWS->isFileBacked())
-    {
-      // Update the file-back-end
-      g_log.notice() << "Running SaveMD" << std::endl;
-      IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
-      alg->setProperty("UpdateFileBackEnd", true);
-      alg->setProperty("InputWorkspace", outWS);
-      alg->executeAsChildAlg();
-    }
-    // return the size of the input workspace write buffer to its initial value
-    bc->setCacheParameters(sizeof(MDE),writeBufSize);
-    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS));
-    delete prog;
+      Progress * prog = new Progress(this, 0.0, 1.0, boxes.size());
+
+      // The root of the output workspace
+      MDBoxBase<OMDE,ond>* outRootBox = outWS->getBox();
+
+      uint64_t totalAdded = 0;
+      uint64_t numSinceSplit = 0;
+
+      // Go through every box for this chunk.
+      //PARALLEL_FOR_IF( !bc->isFileBacked() )
+      for (int i=0; i<int(boxes.size()); i++)
+      {
+          MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
+          // Perform the binning in this separate method.
+          if (box)
+          {
+              // An array to hold the rotated/transformed coordinates
+              coord_t outCenter[ond];
+
+              const std::vector<MDE> & events = box->getConstEvents();
+
+              typename std::vector<MDE>::const_iterator it = events.begin();
+              typename std::vector<MDE>::const_iterator it_end = events.end();
+              for (; it != it_end; it++)
+              {
+                  // Cache the center of the event (again for speed)
+                  const coord_t * inCenter = it->getCenter();
+
+                  if (function->isPointContained(inCenter))
+                  {
+                      // Now transform to the output dimensions
+                      m_transformFromOriginal->apply(inCenter, outCenter);
+
+                      // Create the event
+                      OMDE newEvent(it->getSignal(), it->getErrorSquared(), outCenter);
+                      // Copy extra data, if any
+                      copyEvent(*it, newEvent);
+                      // Add it to the workspace
+                      outRootBox->addEvent( newEvent );
+
+                      numSinceSplit++;
+                  }
+              }
+              box->releaseEvents();
+
+              // Every 20 million events, or at the last box: do splitting
+              if (numSinceSplit > 20000000 || (i == int(boxes.size()-1)))
+              {
+                  // This splits up all the boxes according to split thresholds and sizes.
+                  Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+                  ThreadPool tp(ts);
+                  outWS->splitAllIfNeeded(ts);
+                  tp.joinAll();
+                  // Accumulate stats
+                  totalAdded += numSinceSplit;
+                  numSinceSplit = 0;
+                  // Progress reporting
+                  if(!fileBackedWS)prog->report(i);
+
+              }
+              if(fileBackedWS)
+              {
+                  if(!(i%10))prog->report(i);
+              }
+          } // is box
+
+      }// for each box in the vector
+      prog->report();
+
+      outWS->splitAllIfNeeded(NULL);
+      // Refresh all cache.
+      outWS->refreshCache();
+
+      g_log.notice() << totalAdded << " " << OMDE::getTypeName() << "'s added to the output workspace." << std::endl;
+
+      if (outWS->isFileBacked())
+      {
+          // Update the file-back-end
+          g_log.notice() << "Running SaveMD" << std::endl;
+          IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
+          alg->setProperty("UpdateFileBackEnd", true);
+          alg->setProperty("InputWorkspace", outWS);
+          alg->executeAsChildAlg();
+      }
+      // return the size of the input workspace write buffer to its initial value
+      //bc->setCacheParameters(sizeof(MDE),writeBufSize);
+      this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS));
+      delete prog;
   }
 
 

@@ -6,6 +6,8 @@ import testhelpers
 import platform
 from mantid.simpleapi import Load, Fit, FitDialog
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
+import numpy as np
+from testhelpers import run_algorithm
 
 class SimpleAPIFitTest(unittest.TestCase):
     
@@ -86,6 +88,40 @@ class SimpleAPIFitTest(unittest.TestCase):
             msg = str(exc)
             if msg != "Can only display properties dialog in gui mode":
                 self.fail("Dialog function raised the correct exception type but the message was wrong: " + msg)
+
+    def test_Fit_works_with_multidomain_functions(self):
+        x1 = np.arange(10)
+        y1 = np.empty(0)
+        y2 = np.empty(0)
+        y3 = np.empty(0)
+        
+        for x in x1:
+            y1 = np.append(y1, 3)
+            y2 = np.append(y2, 2.9 + 3*x)
+            y3 = np.append(y3, 3.1 + 3*x*x)
+            
+        x = np.concatenate((x1,x1,x1))
+        y = np.concatenate((y1,y2,y3))
+        
+        data_name = 'dataWS'
+        run_algorithm('CreateWorkspace',OutputWorkspace=data_name,DataX=x, DataY=y,DataE=np.ones(30),NSpec=3,UnitX='TOF')
+        
+        f1 = ';name=UserFunction,$domains=i,Formula=a+b*x+c*x^2'
+        func= 'composite=MultiDomainFunction,NumDeriv=1' + f1 + f1 + f1 + ';ties=(f2.a=f1.a=f0.a)'
+        
+        output_name = "fitWS"
+        Fit(Function=func,InputWorkspace=data_name,WorkspaceIndex=0,Output=output_name,
+            InputWorkspace_1=data_name,WorkspaceIndex_1=1,InputWorkspace_2=data_name,WorkspaceIndex_2=2)
+        
+        self.assertTrue(output_name + '_Parameters' in mtd)
+        params = mtd[output_name+'_Parameters']
+        self.assertEqual(params.rowCount(), 10)
+
+        self.assertAlmostEqual(params.row(0)['Value'], 3.0, 10)
+        self.assertAlmostEqual(params.row(3)['Value'], 3.0, 10)
+        self.assertAlmostEqual(params.row(6)['Value'], 3.0, 10)
+        self.assertAlmostEqual(params.row(4)['Value'], 3.0, 1)
+        self.assertAlmostEqual(params.row(8)['Value'], 3.0, 1)
 
 
 if __name__ == '__main__':

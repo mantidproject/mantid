@@ -66,6 +66,7 @@ def remove_wiki_from_header():
 def add_wiki_description(algo, wikidesc):
     """One-time use method that adds a wiki description  in the algo's CPP file under comments tag."""
     wikidesc = wikidesc.split('\n')
+    
     source = find_algo_file(algo)
     if source != '':
         if len("".join(wikidesc)) == 0:
@@ -125,12 +126,25 @@ def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=Fa
         print "Warning: Cannot find source for algorithm"
         return desc
     else:
+        return get_wiki_from_source(source, tag, verbose)
+
+def get_fitfunc_summary(name, verbose=True):
+    source = find_fitfunc_file(name)
+    if len(source) <= 0:
+        print "Warning: Cannot find source for fitfunction '%s'" % name
+        return ""
+    if name == "FlatBackground":
+        print "*****", source
+    return get_wiki_from_source(source, "*WIKI*", verbose)
+
+def get_wiki_from_source(source, tag, verbose=True):
         f = open(source,'r')
         lines = f.read().split('\n')
         #print lines
         f.close()
         
-        print algo
+        print source
+        desc = ""
         try:
             # Start and end location markers.
             start_tag_cpp = "/" + tag 
@@ -156,15 +170,13 @@ def get_custom_wiki_section(algo, version, tag, tryUseDescriptionFromBinaries=Fa
 
             if verbose:
                 if start_index == end_index:
-                    print "No algorithm %s section in source." % tag
+                    print "No  '%s' section in source '%s'." % (tag, source)
                 else:
-                    print "Getting algorithm %s section from source." % tag
+                    print "Getting '%s' section from source '%s'." % (tag, source)
         
         except IndexError:
-            print "No algorithm %s section in source." % tag
+            print "No '%s' section in source '%s'." % (tag, source)
         return desc        
-
-        
         
 #======================================================================
 def create_function_signature(alg, algo_name):
@@ -219,6 +231,14 @@ def create_function_signature(alg, algo_name):
         
     return lhs + prototype_reformated + comments
 
+def filter_blacklist_directories(dirnames):
+    blacklist = ['MantidPlot', 'MantidQt']
+    filtered = dirnames
+    for banneddir in blacklist:
+        if banneddir in dirnames:
+            filtered.remove(banneddir)
+    return filtered
+
 #======================================================================
 def intialize_files():
     """ Get path to every header file """
@@ -226,6 +246,8 @@ def intialize_files():
     parent_dir = os.path.abspath(os.path.join(os.path.split(__file__)[0], os.path.pardir))
     file_matches = []
     for root, dirnames, filenames in os.walk(parent_dir):
+      # Filter out mantidplot from the file search. There are a few file in MantidPlot we don't want to accidently search, such as FFT.
+      dirnames = filter_blacklist_directories(dirnames)
       for filename in fnmatch.filter(filenames, '*.cpp'):
           fullfile = os.path.join(root, filename)
           cpp_files.append(fullfile)
@@ -234,6 +256,8 @@ def intialize_files():
           fullfile = os.path.join(root, filename)
           python_files.append(fullfile)
           python_files_bare.append( os.path.split(fullfile)[1] )
+    
+
 
 #======================================================================
 def find_algo_file(algo, version=-1):
@@ -252,6 +276,37 @@ def find_algo_file(algo, version=-1):
     if cpp in cpp_files_bare:
         n = cpp_files_bare.index(cpp, )
         source = cpp_files[n]
+    elif pyfile in python_files_bare:
+        n = python_files_bare.index(pyfile, )
+        source = python_files[n]
+    return source
+
+#======================================================================
+def find_fitfunc_file(name):
+    """Find the files for a given algorithm (and version)"""
+    global file_search_done
+    if not file_search_done:
+        intialize_files()
+        file_search_done=True
+
+    source = ''
+    filename = name
+    cpp = filename + ".cpp"
+    pyfile = filename + ".py"
+    if cpp in cpp_files_bare:
+        candidates = []
+        total = cpp_files_bare.count(cpp)
+        index = -1
+        while len(candidates) < total:
+            index = cpp_files_bare.index(cpp, index+1)
+            candidates.append(cpp_files[index])
+        source = candidates[0]
+        if total > 1:
+            print candidates
+            for filename in candidates:
+                if "CurveFitting" in filename:
+                    source = filename
+                    break
     elif pyfile in python_files_bare:
         n = python_files_bare.index(pyfile, )
         source = python_files[n]

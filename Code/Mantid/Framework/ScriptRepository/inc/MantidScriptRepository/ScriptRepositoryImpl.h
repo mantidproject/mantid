@@ -79,37 +79,38 @@ namespace API{
     Repository repo;
 
   public:
-    ScriptRepositoryImpl(const std::string local_repository = std::string(), 
-                        const std::string remote_url = std::string()) ; 
+    ScriptRepositoryImpl(const std::string & local_repository = std::string(), 
+                        const std::string & remote_url = std::string()) ; 
     
     virtual ~ScriptRepositoryImpl() throw();
 
-    void connect(std::string server);
+    void connect(const std::string &  server);
 
-    void install(std::string local_path);
+    void install(const std::string & local_path);
 
-    ScriptInfo info(const std::string path);
+    ScriptInfo info(const std::string & path);
+    const std::string & description(const std::string & path);
 
     std::vector<std::string> listFiles();
 
-    void download(const std::string file_path);
+    void download(const std::string & file_path);
 
-    SCRIPTSTATUS fileStatus(const std::string file_path);
+    SCRIPTSTATUS fileStatus(const std::string & file_path);
     
-    void upload(const std::string file_path, const std::string comment,
-                const std::string author, 
-                const std::string description = std::string());
+    void upload(const std::string & file_path, const std::string & comment,
+                const std::string & author, 
+                const std::string & description = std::string());
 
     /* Return true if there is a local repository installed*/
     bool isValid(void);
 
     void check4Update(void);
 
-    void setIgnorePatterns(std::string patterns); 
+    void setIgnorePatterns(const std::string & patterns); 
     
     std::string ignorePatterns(void); 
 
-    void setAutoUpdate(std::string path, bool option = true);
+    void setAutoUpdate(const std::string & path, bool option = true);
 
     /// @deprecated Should avoid this, it is not in the design file.
     std::string localRepository() const {return local_repository;  }
@@ -117,7 +118,7 @@ namespace API{
 
  
  
-    virtual void doDownloadFile(const std::string url_file, const std::string local_file_path = "");
+    virtual void doDownloadFile(const std::string & url_file, const std::string & local_file_path = "");
  protected:
     void parseCentralRepository(Repository & repo);
 
@@ -128,7 +129,7 @@ namespace API{
     void ensureValidRepository();
 
 
-    bool isEntryValid(std::string path);
+    bool isEntryValid(const std::string & path);
 
     /// Path of the local repository.
     std::string local_repository; 
@@ -139,7 +140,7 @@ namespace API{
   private:
     void recursiveParsingDirectories(const std::string & path, Repository & repo);
 
-    std::string convertPath(const std::string path); 
+    std::string convertPath(const std::string & path); 
     
     /*    /// Used to throw when a local repository is mal-formed.
     ScriptRepoException invalidRepository();
@@ -158,8 +159,8 @@ namespace API{
   private: 
 
     static std::string printStatus(SCRIPTSTATUS st); 
-    void download_directory(const std::string); 
-    void download_file(const std::string, RepositoryEntry & ); 
+    void download_directory(const std::string&); 
+    void download_file(const std::string& , RepositoryEntry & ); 
     void updateLocalJson(const std::string & , const RepositoryEntry & ); 
 
     /// reference to the logger class

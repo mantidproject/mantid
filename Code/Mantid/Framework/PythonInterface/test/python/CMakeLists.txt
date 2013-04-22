@@ -7,5 +7,5 @@ if (PYUNITTEST_FOUND)
   set ( TESTHELPER_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} )
 
   add_subdirectory( mantid )
-  add_subdirectory( PythonAlgorithms )
+  add_subdirectory( plugins )
 endif ()

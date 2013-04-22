@@ -1,7 +1,8 @@
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MERLIN 
 #
-# This is a simple example for running calibration for and calibration run of MERLIN. Execute all.
+# This is a simple example for running calibration for and calibration run of MERLIN. 
+# It uses the CalibrateMerlin Function
 #
 # Here we run the calibration of MERLIN or selected part of MERLIN
 # (excluding short tubes of door 3) 
@@ -31,13 +32,13 @@ def CalibrateMerlin( RunNumber ):
    # Set parameters for ideal tube. 
    Left = 2.0 # Where the left end of tube should be in pixels (target for AP)
    Centre = 512.5 # Where the centre of the tube should be in pixels (target for CP)
-   Right = 1023.0 # Where the right of the tube should be in pxels (target for BP)
+   Right = 1023.0 # Where the right of the tube should be in pixels (target for BP)
    ActiveLength = 2.9 # Active length of tube in Metres
 
    # Set initial parameters for peak finding
-   ExpectedHeight = 1000.0 # Expected Height of Peaks (initial value of fit parameter)
-   ExpectedWidth = 32.0 # Expected width of centre peak (initial value of fit parameter)
-   ExpectedPositions = [35.0, 512.0, 989.0] # Expected positions of the edges and peak (initial values of fit parameters)
+   ExpectedHeight = 1000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
+   ExpectedWidth = 32.0 # Expected width of centre peak in Pixels (initial value of fit parameter)
+   ExpectedPositions = [35.0, 512.0, 989.0] # Expected positions of the edges and peak in pixels (initial values of fit parameters)
 
    # Set what we want to calibrate (e.g whole intrument or one door )
    CalibratedComponent = 'MERLIN'  # Calibrate whole instrument 

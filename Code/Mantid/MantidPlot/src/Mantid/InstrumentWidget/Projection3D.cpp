@@ -201,7 +201,7 @@ void Projection3D::setViewDirection(const QString& input)
 	{
 		m_viewport.setViewToZNegative();
 	}
-  updateView();
+  updateView(false);
 }
 
 /**
@@ -381,7 +381,7 @@ void Projection3D::translate(int x, int y)
 {
     m_viewport.generateTranslationTo( x, y );
     m_viewport.initTranslateFrom( x, y );
-    updateView();
+    updateView(false);
 }
 
 /**
@@ -403,7 +403,7 @@ void Projection3D::zoom(int x, int y)
 {
     m_viewport.generateZoomTo( x, y );
     m_viewport.initZoomFrom( x, y );
-    updateView();
+    updateView(false);
 }
 
 /**
@@ -415,7 +415,7 @@ void Projection3D::zoom(int x, int y)
 void Projection3D::wheelZoom(int x, int y, int d)
 {
     m_viewport.wheelZoom( x, y, d );
-    updateView();
+    updateView(false);
 }
 
 /**
@@ -437,7 +437,7 @@ void Projection3D::rotate(int x, int y)
 {
     m_viewport.generateRotationTo( x, y );
     m_viewport.initRotationFrom( x, y );
-    updateView();
+    updateView(false);
 }
 
 /**

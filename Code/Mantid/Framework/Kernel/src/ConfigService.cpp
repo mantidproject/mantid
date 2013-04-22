@@ -7,7 +7,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
-#include "MantidKernel/SignalChannel.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 
@@ -184,10 +183,6 @@ ConfigServiceImpl::ConfigServiceImpl() :
   Poco::LoggingFactory::defaultFactory().registerChannelClass("FilterChannel", new Poco::Instantiator<
       Poco::FilterChannel, Poco::Channel>);
 
-  //Register the SignalChannel with the Poco logging factory
-  Poco::LoggingFactory::defaultFactory().registerChannelClass("SignalChannel", new Poco::Instantiator<
-      Poco::SignalChannel, Poco::Channel>);
-
   // Define the directory to search for the Mantid.properties file.
   Poco::File f;
 
@@ -225,6 +220,8 @@ ConfigServiceImpl::ConfigServiceImpl() :
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
   m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories", true));
+  m_ConfigPaths.insert(std::make_pair("python.plugins.directories", true));
+  m_ConfigPaths.insert(std::make_pair("user.python.plugins.directories", true));
   m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
   m_ConfigPaths.insert(std::make_pair("icatDownload.directory", true));
   m_ConfigPaths.insert(std::make_pair("ManagedWorkspace.FilePath", true));
@@ -682,7 +679,6 @@ std::string ConfigServiceImpl::defaultConfig() const
     "logging.loggers.root.channel.class = SplitterChannel"
     "logging.loggers.root.channel.channel1 = consoleChannel"
     "logging.loggers.root.channel.channel2 = fileFilterChannel"
-    "logging.loggers.root.channel.channel3 = signalChannel"
     "# output to the console - primarily for console based apps"
     "logging.channels.consoleChannel.class = ConsoleChannel"
     "logging.channels.consoleChannel.formatter = f1"
@@ -697,9 +693,7 @@ std::string ConfigServiceImpl::defaultConfig() const
     "logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t"
     "logging.formatters.f1.class = PatternFormatter"
     "logging.formatters.f1.pattern = %s-[%p] %t"
-    "logging.formatters.f1.times = UTC;"
-    "# SignalChannel - Passes messages to the MantidPlot User interface"
-    "logging.channels.signalChannel.class = SignalChannel";
+    "logging.formatters.f1.times = UTC";
   return propFile;
 }
 

@@ -8,6 +8,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/IMDNode.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -48,10 +49,10 @@ namespace API
     virtual Mantid::API::BoxController_sptr getBoxController() = 0;
     virtual Mantid::API::BoxController_const_sptr getBoxController() const = 0;
 
-    virtual void getBoxes(std::vector<Kernel::ISaveable *> & boxes, size_t maxDepth, bool leafOnly)=0;
+    virtual void getBoxes(std::vector<API::IMDNode *> & boxes, size_t maxDepth, bool leafOnly)=0;
 
-    /// Helper method that makes a table workspace with some box data
-    virtual Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num) = 0;
+    ///TODO: The meaning of this method have changed! Helper method that makes a table workspace with some box data
+    //virtual Mantid::API::ITableWorkspace_sptr makeBoxTable(size_t start, size_t num) = 0;
 
     /// @return true if the workspace is file-backed
     virtual bool isFileBacked() const = 0;

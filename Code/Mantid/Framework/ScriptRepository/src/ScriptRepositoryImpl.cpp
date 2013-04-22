@@ -11,11 +11,13 @@ using Mantid::Kernel::ConfigServiceImpl;
 // from poco
 #include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/TemporaryFile.h>
 #include <Poco/URI.h>
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Exception.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/NetException.h>
 
 // Visual Studion compains with the inclusion of Poco/FileStream
 // disabling this warning.
@@ -55,7 +57,7 @@ namespace API
     throw ScriptRepoException("This method is not implemented yet"); 
   };
   
-  static ScriptRepoException pocoException(std::string info, 
+  static ScriptRepoException pocoException(const std::string & info, 
                                            Poco::Exception & ex){
     std::stringstream ss;     
     if (dynamic_cast<Poco::FileAccessDeniedException*>(&ex))
@@ -104,8 +106,8 @@ namespace API
      "http://repository.mantidproject.com");      
      @endcode
   */
-  ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string local_rep, 
-                                         const std::string remote) :
+  ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string & local_rep, 
+                                         const std::string & remote) :
   g_log(Logger::get("ScriptRepositoryImpl"))
   {    
     // get the local path and the remote path
@@ -224,7 +226,7 @@ namespace API
      Check the connection with the server through the ::doDownloadFile method.
      @path server : The url that will be used to connect.
    */
-  void ScriptRepositoryImpl::connect(std::string server){
+  void ScriptRepositoryImpl::connect(const std::string & server){
     doDownloadFile(server);
   }
 
@@ -250,7 +252,7 @@ namespace API
       
       
    */
-  void ScriptRepositoryImpl::install(std::string path){
+  void ScriptRepositoryImpl::install(const std::string &  path){
     using Poco::DirectoryIterator;
     std::string folder = std::string(path); 
     Poco::File repository_folder(folder); 
@@ -258,18 +260,8 @@ namespace API
     std::string local_json_file  = std::string(path).append("/.local.json");
     if (!repository_folder.exists()){
       repository_folder.createDirectories();
-    }else{
-      
-      // if the folder already exists, check if it is a ScriptRepository already: 
-      Poco::File rep(rep_json_file); 
-      Poco::File local(local_json_file); 
-      
-      if (rep.exists() && local.exists()){
-        g_log.information() << "ScriptRepository already installed at: " << path << std::endl; 
-        return;
-      }
     }
-    
+      
     // install the two files inside the given folder
     
     // download the repository json
@@ -277,9 +269,13 @@ namespace API
                    rep_json_file);
     g_log.debug() << "ScriptRepository downloaded repository information" << std::endl; 
     // creation of the instance of local_json file
-    ptree pt; 
-    write_json(local_json_file,pt); 
-    g_log.debug() << "ScriptRepository created the local repository information"<<std::endl; 
+    Poco::File local(local_json_file); 
+    if (!local.exists()){
+      ptree pt; 
+      write_json(local_json_file,pt); 
+      g_log.debug() << "ScriptRepository created the local repository information"
+                    <<std::endl; 
+    }
     
     #if defined(_WIN32) ||  defined(_WIN64)
     //set the .repository.json and .local.json hidden
@@ -306,8 +302,15 @@ namespace API
   }
 
   void ScriptRepositoryImpl::ensureValidRepository(){
-    if (!isValid())
-      throw ScriptRepoException("ScriptRepository is not installed in this machine, or it is corrupted. Ensure a proper installation is done. If necessary, execute install"); 
+    if (!isValid()){
+      std::stringstream ss; 
+      ss << "ScriptRepository is not installed correctly. The current path for ScriptRepository is " 
+         << local_repository << " but some important files that are required are corrupted or not present."
+         << "\nPlease, re-install the ScriptRepository!\n"
+         << "Hint: if you have a proper installation in other path, check the property ScriptLocalRepository "
+         << "at the Mantid.user.properties and correct it if necessary."; 
+      throw ScriptRepoException(ss.str(),"CORRUPTED"); 
+    }
   }
 
   /** Implements ScriptRepository::info
@@ -325,22 +328,35 @@ namespace API
       @note: This method requires that ::listFiles was executed at least once.
 
   */
-  ScriptInfo ScriptRepositoryImpl::info(const std::string input_path) {
+  ScriptInfo ScriptRepositoryImpl::info(const std::string & input_path) {
     ensureValidRepository();
     std::string path = convertPath(input_path);
     ScriptInfo info; 
     try{
       RepositoryEntry & entry = repo.at(path); 
       info.author = entry.author; 
-      info.description = entry.description; 
       info.pub_date = entry.pub_date;
       info.auto_update = entry.auto_update;
+      info.directory = entry.directory; 
     }catch(const std::out_of_range & ex){
       std::stringstream ss; 
       ss << "The file \""<< input_path << "\" was not found inside the repository!";            
       throw ScriptRepoException(ss.str(), ex.what()); 
     }
     return info; 
+  }
+
+ const std::string& ScriptRepositoryImpl::description(const std::string & input_path){
+    ensureValidRepository();
+    std::string path = convertPath(input_path);
+    try{
+      RepositoryEntry & entry = repo.at(path); 
+      return entry.description; 
+    }catch(const std::out_of_range & ex){
+      std::stringstream ss; 
+      ss << "The file \""<< input_path << "\" was not found inside the repository!";            
+      throw ScriptRepoException(ss.str(), ex.what()); 
+    }
   }
 
   /** 
@@ -399,16 +415,10 @@ namespace API
       out[--i] = it->first;
       //g_log.debug() << "inserting file: " << it->first << std::endl; 
 
-      // get the path of the parent directory
-      size_t pos = entry_path.rfind("/"); 
-      std::string parent_dir = ""; 
-      if (pos != std::string::npos)
-        parent_dir = std::string(entry_path.begin(),entry_path.begin()+pos);
-
       // for the directories, update the status of this directory
       if (entry.directory){
         entry.status = acc_status; 
-        last_directory = entry_path;         
+        last_directory = entry_path;        
       }else{
         // for the files, it evaluates the status of this file
         
@@ -467,7 +477,7 @@ namespace API
       }
       
       // update the status of the parent directory:
-      // the strategy hear is to compare binary the current status with the acc_state
+      // the strategy here is to compare binary the current status with the acc_state
       switch(acc_status | entry.status){
         // pure matching, meaning that the matching is done with the same state
         // or with BOTH_UNCHANGED (neutral)
@@ -510,7 +520,7 @@ namespace API
      
   */
 
-  void ScriptRepositoryImpl::download(const std::string input_path){
+  void ScriptRepositoryImpl::download(const std::string & input_path){
     ensureValidRepository();
     std::string file_path = convertPath(input_path);
     try{
@@ -532,7 +542,8 @@ namespace API
      
      @param directory_path : the path for the directory.
    */
-  void ScriptRepositoryImpl::download_directory(const std::string directory_path){
+  void ScriptRepositoryImpl::download_directory(const std::string & directory_path){
+    std::string directory_path_with_slash = std::string(directory_path).append("/");
     bool found = false; 
     for(Repository::iterator it = repo.begin();
         it != repo.end(); it++){
@@ -548,7 +559,16 @@ namespace API
           continue;
       }
       found = true;
-      
+      if (it->first != directory_path &&
+          it->first.find(directory_path_with_slash) != 0)
+        {
+          // it is not a children of this entry, just similar. Example: 
+          // TofConverter/README
+          // TofConverter.py
+          // these two pass the first test, but will not pass this one.
+          found = false;
+          continue; 
+        }
       // now, we are dealing with the children of directory path
       if (!it->second.directory)
         download_file(it->first, it->second);
@@ -581,34 +601,41 @@ namespace API
      
      @todo describe better this method.
    */
-  void ScriptRepositoryImpl::download_file(const std::string file_path, RepositoryEntry & entry) {
+  void ScriptRepositoryImpl::download_file(const std::string &file_path, RepositoryEntry & entry) {
     SCRIPTSTATUS state = entry.status;
     // if we have the state, this means that the entry is available
-    if (state == LOCAL_ONLY  || state == LOCAL_CHANGED)
-      // fixme: better description
-      throw ScriptRepoException("This file can not be downloaded. It has only local changes"); 
+    if (state == LOCAL_ONLY  || state == LOCAL_CHANGED){
+      std::stringstream ss; 
+      ss << "The file " << file_path << " can not be download because it has only local changes."
+         << " If you want, please, publish this file uploading it" ; 
+      throw ScriptRepoException(ss.str()); 
+    }
     
     if (state == BOTH_UNCHANGED)
       // instead of throwing exception, silently assumes that the download was done.
       return;
            
-    if (state == BOTH_CHANGED){
-      // make a back up of the local version
-      Poco::File f(std::string(local_repository).append(file_path));
-      std::string bck = std::string(f.path()).append("_bck");
-      g_log.notice() << "The current file " << f.path() << " has some local changes"
-                     << " so, a back up copy will be created at " << bck << std::endl; 
-      f.copyTo(bck);         
-    }
-
-
     // download the file
     std::string url_path = std::string(remote_url).append(SCRIPTREPPATH).append(file_path); 
+    Poco::TemporaryFile tmpFile; 
+    doDownloadFile(url_path, tmpFile.path());
+
     std::string local_path = std::string(local_repository).append(file_path); 
     g_log.debug() << "ScriptRepository download url_path: " << url_path << " to " << local_path << std::endl;
 
-    // ensure that the path to the local_path exists
-    {
+
+    try{
+
+      if (state == BOTH_CHANGED){
+        // make a back up of the local version
+        Poco::File f(std::string(local_repository).append(file_path));
+        std::string bck = std::string(f.path()).append("_bck");
+        g_log.notice() << "The current file " << f.path() << " has some local changes"
+                       << " so, a back up copy will be created at " << bck << std::endl; 
+        f.copyTo(bck);         
+      }
+      
+      // ensure that the path to the local_path exists    
       size_t slash_pos = local_path.rfind('/');
       Poco::File file_out(local_path);
       if (slash_pos != std::string::npos){
@@ -620,11 +647,18 @@ namespace API
           }
         }// dir path is empty
       }
+      
       if (!file_out.exists())
         file_out.createFile();
+
+      tmpFile.copyTo(local_path); 
+      
+    }catch(Poco::FileAccessDeniedException & ex){
+      std::stringstream ss; 
+      ss << "You cannot create file at " << local_path << ". Not downloading ..."; 
+      throw ScriptRepoException(ss.str());      
     }
 
-    doDownloadFile(url_path,local_path);
     {
       Poco::File local(local_path);
       entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(local.getLastModified(),
@@ -640,7 +674,7 @@ namespace API
   /**
     @todo Describe
   */
-  SCRIPTSTATUS ScriptRepositoryImpl::fileStatus(const std::string input_path) {
+  SCRIPTSTATUS ScriptRepositoryImpl::fileStatus(const std::string & input_path) {
     /// @todo: implement the trigger method to know it we need to revised the 
     ///        directories trees.    
     ensureValidRepository();
@@ -662,10 +696,10 @@ namespace API
      @todo Describe
 
   */
-  void ScriptRepositoryImpl::upload(const std::string file_path, 
-                                    const std::string comment,
-                                    const std::string author, 
-                                   const std::string description)
+  void ScriptRepositoryImpl::upload(const std::string & file_path, 
+                                    const std::string & comment,
+                                    const std::string & author, 
+                                   const std::string & description)
     
   {
     UNUSED_ARG(file_path); 
@@ -740,7 +774,7 @@ namespace API
   /** 
       @todo describe
   */
-  void ScriptRepositoryImpl::setIgnorePatterns(std::string patterns){
+  void ScriptRepositoryImpl::setIgnorePatterns(const std::string & patterns){
     ConfigServiceImpl & config = ConfigService::Instance();
     std::string ignore = config.getString("ScriptRepositoryIgnore"); 
     if (ignore != patterns){
@@ -766,7 +800,7 @@ namespace API
   /** 
       @todo describe
   */
-  void ScriptRepositoryImpl::setAutoUpdate(std::string input_path, bool option){
+  void ScriptRepositoryImpl::setAutoUpdate(const std::string & input_path, bool option){
     ensureValidRepository();
     std::string path = convertPath(input_path); 
     //g_log.debug() << "SetAutoUpdate... begin" << std::endl; 
@@ -810,14 +844,14 @@ namespace API
       
       @exception ScriptRepoException: For any unexpected behavior.      
   */
-  void ScriptRepositoryImpl::doDownloadFile(const std::string url_file, 
-                                            const std::string local_file_path)
+  void ScriptRepositoryImpl::doDownloadFile(const std::string & url_file, 
+                                            const std::string & local_file_path)
   {
     // get the information from url_file
     Poco::URI uri(url_file);
     std::string path(uri.getPathAndQuery());
     if (path.empty()) path = "/";
-  
+    std::string given_path = std::string(path.begin()+28, path.end());// remove the "/master_builds/scripts_repo/" from the path
     //Configure Poco HTTP Client Session
     try{
       Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
@@ -826,6 +860,7 @@ namespace API
       Poco::Net::HTTPResponse response;
 
       session.sendRequest(request); 
+
       std::istream & rs = session.receiveResponse(response); 
       g_log.debug() << "Answer from mantid web: " << response.getStatus() << " " 
                     << response.getReason() << std::endl; 
@@ -836,25 +871,23 @@ namespace API
           Poco::StreamCopier::copyStream(rs,null); 
           return;
         }else{
-          try{
-            {
-            // copy the file
-              Poco::FileStream _out(local_file_path); 
-              Poco::StreamCopier::copyStream(rs,_out); 
-              _out.close(); 
-            }
-          }catch(Poco::Exception & ex){            
-            g_log.warning() << "Receive exception: " << ex.what()<< std::endl; 
-            throw pocoException("Downloading failed", ex);
-          }        
-        }      
+          // copy the file
+          Poco::FileStream _out(local_file_path); 
+          Poco::StreamCopier::copyStream(rs,_out); 
+          _out.close();           
+        }
       }else{
         std::stringstream info;
         std::stringstream ss;
         Poco::StreamCopier::copyStream(rs,ss);        
         if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND)
-          info << "The file requested is not available at the central repository (" <<path
-             << "). "; 
+          info << "Failed to download " << given_path 
+               << " because it failed to find this file at the link " 
+               << "<a href=\""
+               << url_file << "\">.\n"
+               << "Hint. Check that link is correct and points to the correct server "
+               << "which you can find at <a href=\"http://www.mantidproject.org/ScriptRepository\">"
+               << "Script Repository Help Page</a>"; 
         else{          
           // show the error
           // fixme, process this error          
@@ -863,6 +896,14 @@ namespace API
         }
         throw ScriptRepoException(info.str(), ss.str()); 
       }
+    }catch(Poco::Net::HostNotFoundException & ex){
+      // this exception occurrs when the pc is not connected to the internet
+      std::stringstream info; 
+      info <<  "Failed to download " << given_path << " because there is no connection to the host "
+           << ex.message() << ".\nHint: Check your connection following this link: <a href=\""
+           << url_file << "\">" << given_path << "</a>";
+      throw ScriptRepoException(info.str(), ex.displayText(), __FILE__, __LINE__);
+    
     }catch (Poco::Exception & ex){
       throw pocoException("Connection and request failed", ex);
     }
@@ -880,13 +921,14 @@ namespace API
       BOOST_FOREACH(ptree::value_type & file, pt){
         if (!isEntryValid(file.first))
           continue;
-        //g_log.debug() << "Inserting : file.first " << file.first << std::endl; 
+        //g_log.debug() << "Inserting : file.first " << file.first << std::endl;
         RepositoryEntry & entry = repo[file.first];
         entry.remote = true;
         entry.directory = file.second.get("directory",false);
         entry.pub_date = DateAndTime(file.second.get<std::string>("pub_date"));
         entry.description = file.second.get("description",""); 
         entry.author = file.second.get("author",""); 
+        entry.status = BOTH_UNCHANGED;
       }
       
     }catch (boost::property_tree::json_parser_error & ex){
@@ -1087,7 +1129,7 @@ namespace API
     }
   }
 
-  bool ScriptRepositoryImpl::isEntryValid(std::string path){
+  bool ScriptRepositoryImpl::isEntryValid(const std::string & path){
     //g_log.debug() << "Is valid entry? " << path << std::endl; 
     if (path == ".repository.json")
       return false;
@@ -1126,7 +1168,7 @@ namespace API
      convertPath("c:\MantidInstall\scripts_repo\README.md", flag)// returns README.md
      @endcode
   */
-  std::string ScriptRepositoryImpl::convertPath(const std::string path){
+  std::string ScriptRepositoryImpl::convertPath(const std::string & path){
     std::vector<std::string> lookAfter; 
     using Poco::Path;
     lookAfter.push_back(Path::current()); 

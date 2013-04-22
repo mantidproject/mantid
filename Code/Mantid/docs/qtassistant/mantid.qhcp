@@ -4,7 +4,7 @@
          <title>Mantid Help</title>
          <startPage>qthelp://org.mantidproject/doc/html/index.html</startPage>
          <applicationIcon>src/images/MantidPlot_Icon_32offset.png</applicationIcon>
-         <enableFilterFunctionality>false</enableFilterFunctionality>
+         <enableFilterFunctionality>true</enableFilterFunctionality>
          <enableDocumentationManager>true</enableDocumentationManager>
          <enableAddressBar visible="false">true</enableAddressBar>
          <cacheDirectory>mantidproject</cacheDirectory>

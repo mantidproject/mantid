@@ -12,7 +12,7 @@ from tube_spec import * # For tube specification class
     
 # Get calibration raw file and integrate it 
 path = r"C:/Temp/" # Path name of folder containing input and output files
-filename = 'WISH00017701.raw' # Name of calibration run    
+filename = 'WISH00017701.raw' # Calibration run ( found in \\isis\inst$\NDXWISH\Instrument\data\cycle_11_1 ) 
 rawCalibInstWS = Load(path+filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
 CalibInstWS = Integration( rawCalibInstWS, RangeLower=1, RangeUpper=20000 )
 DeleteWorkspace(rawCalibInstWS)
@@ -29,13 +29,15 @@ thisTubeSet.setTubeSpecByString('WISH/panel03')
 
 # Set fitting parameters
 eP = [65.0, 113.0, 161.0, 209.0, 257.0, 305.0, 353.0, 401.0, 449.0]
-fitPar = TubeCalibFitParams( eP, 2000, 32 )
+ExpectedHeight = 2000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
+ExpectedWidth = 32.0 # Expected width of Gaussian peaks in pixels  (initial value of fit parameter)
+fitPar = TubeCalibFitParams( eP, ExpectedHeight, ExpectedWidth )
 
 print "Created objects needed for calibration."
 
 # Use first tube as ideal tube
 tube1 = TubeSpec(CalibInstWS)
-tube1.setTubeSpecByString('WISH/panel03/tube001')
+tube1.setTubeSpecByString('WISH/panel03/tube038')
 iTube = IdealTube()
 iTube.constructIdealTubeFromRealTube( CalibInstWS, tube1, fitPar)
 

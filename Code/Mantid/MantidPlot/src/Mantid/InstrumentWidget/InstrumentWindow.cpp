@@ -42,6 +42,8 @@
 #include <QDropEvent>
 #include <QStackedLayout>
 #include <QKeyEvent>
+#include <QUrl>
+#include <QTemporaryFile>
 
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -293,16 +295,19 @@ void InstrumentWindow::setSurfaceType(int type)
     ProjectionSurface* surface = getSurface().get();
     int peakLabelPrecision = 6;
     bool showPeakRow = true;
+    bool showPeakLabels = true;
     if ( surface )
     {
       peakLabelPrecision = surface->getPeakLabelPrecision();
-      showPeakRow = surface->getShowPeakRowFlag();
+      showPeakRow = surface->getShowPeakRowsFlag();
+      showPeakLabels = surface->getShowPeakLabelsFlag();
     }
     else
     {
       QSettings settings;
       peakLabelPrecision = settings.value("Mantid/InstrumentWindow/PeakLabelPrecision",6).toInt();
       showPeakRow = settings.value("Mantid/InstrumentWindow/ShowPeakRows",true).toBool();
+      showPeakLabels = settings.value("Mantid/InstrumentWindow/ShowPeakLabels",true).toBool();
     }
 
     // which display to use?
@@ -323,7 +328,8 @@ void InstrumentWindow::setSurfaceType(int type)
       surface = new UnwrappedSphere(m_instrumentActor,sample_pos,axis);
     }
     surface->setPeakLabelPrecision(peakLabelPrecision);
-    surface->setShowPeakRowFlag(showPeakRow);
+    surface->setShowPeakRowsFlag(showPeakRow);
+    surface->setShowPeakLabelsFlag(showPeakLabels);
     // set new surface
     setSurface(surface);
     // make sure to switch to the right instrument display
@@ -699,7 +705,8 @@ void InstrumentWindow::saveSettings()
   if ( m_InstrumentDisplay )
     settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
   settings.setValue("PeakLabelPrecision",getSurface()->getPeakLabelPrecision());
-  settings.setValue("ShowPeakRows",getSurface()->getShowPeakRowFlag());
+  settings.setValue("ShowPeakRows",getSurface()->getShowPeakRowsFlag());
+  settings.setValue("ShowPeakLabels",getSurface()->getShowPeakLabelsFlag());
   foreach(InstrumentWindowTab* tab, m_tabs)
   {
       tab->saveSettings(settings);
@@ -723,7 +730,7 @@ void InstrumentWindow::preDeleteHandle(const std::string & ws_name, const boost:
   Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
   if (pws)
   {
-    getSurface()->peaksWorkspaceDeleted(pws);
+    getSurface()->deletePeaksWorkspace(pws);
     updateInstrumentView();
     return;
   }
@@ -902,7 +909,7 @@ void InstrumentWindow::componentSelected(ComponentID id)
     if (surface)
     {
       surface->componentSelected(id);
-      surface->updateView();
+      //surface->updateView();
       updateInstrumentView();
     }
 }
@@ -1060,11 +1067,22 @@ void InstrumentWindow::setPeakLabelPrecision(int n)
 
 /**
  * Enable or disable the show peak row flag
+ * @param on :: True to show, false to hide.
  */
 void InstrumentWindow::setShowPeakRowFlag(bool on)
 {
-  getSurface()->setShowPeakRowFlag(on);
+  getSurface()->setShowPeakRowsFlag(on);
   updateInstrumentView();
+}
+
+/**
+ * Enable or disable the show peak hkl labels flag
+ * @param on :: True to show, false to hide.
+ */
+void InstrumentWindow::setShowPeakLabelsFlag(bool on)
+{
+    getSurface()->setShowPeakLabelsFlag(on);
+    updateInstrumentView();
 }
 
 /**

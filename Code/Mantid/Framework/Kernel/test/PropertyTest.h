@@ -110,6 +110,17 @@ public:
     TS_ASSERT_EQUALS(p2->units(), "furlongs/fortnight");
   }
 
+  void testRemember()
+  {
+      Property * p3;
+      p3 = new PropertyHelper;
+      TS_ASSERT(p3->remember());
+      p3->setRemember(false);
+      TS_ASSERT(!p3->remember());
+      p3->setRemember(true);
+      TS_ASSERT(p3->remember());
+  }
+
 private:
   Property *p;
 

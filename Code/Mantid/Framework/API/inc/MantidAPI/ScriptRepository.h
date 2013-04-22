@@ -20,12 +20,12 @@ namespace API{
   {
     /// Identification of the author of the script.
     std::string author; 
-    /// Description of the purpose of the script @see @ref ScriptRepositoryDescription
-    std::string description; 
     /// Time of the last update of this file (remotelly)
     Kernel::DateAndTime pub_date;
     /// Marked for auto update
     bool auto_update;
+    /// Directory Flag to indicate if the entry is a directory.
+    bool directory; 
   };
 
   /** Represent the possible states for a given file: 
@@ -95,19 +95,19 @@ namespace API{
 
   public:
     ///default constructor
-  ScriptRepoException(const std::string info = std::string("Unknown Exception")):
+  ScriptRepoException(const std::string & info = std::string("Unknown Exception")):
       _system_error(""),
       _user_info(info),
       _file_path(""){
     };
  
-    ScriptRepoException( int err_, const std::string info = std::string(),
-                         const std::string file = std::string(),
+    ScriptRepoException( int err_, const std::string & info = std::string(),
+                         const std::string & file = std::string(),
                          int line = -1);
 
-    ScriptRepoException(const std::string info ,
-                        const std::string system,                        
-                        const std::string file = std::string(),
+    ScriptRepoException(const std::string & info ,
+                        const std::string & system,                        
+                        const std::string & file = std::string(),
                         int line = -1);
 
 
@@ -118,9 +118,9 @@ namespace API{
     const char* what() const throw(); 
     
     /// Returns the error description with technical details on the origin and cause.
-    std::string systemError(){return _system_error;}; 
+    const std::string & systemError()const {return _system_error;}; 
     /// Returns the file and position where the error was caused.
-    std::string filePath(){return _file_path;}; 
+    const std::string & filePath()const{return _file_path;}; 
   private:
     /// The message returned by what()
     std::string _system_error;
@@ -292,18 +292,7 @@ They will work as was expected for folders @ref folders-sec.
   class MANTID_API_DLL ScriptRepository
   {
   public:
-  /// @deprecated Define a file inside the repository
-  struct file_entry
-  {
-    /// path related to git
-    std::string path; 
-    /// file status
-    SCRIPTSTATUS status; 
-    /// show if it is a directory or not
-    bool directory;
-  };
 
-   
     /// Virtual destructor (always needed for abstract classes)
     virtual ~ScriptRepository() {};
 
@@ -321,12 +310,20 @@ They will work as was expected for folders @ref folders-sec.
        @code
          ScriptSharing spt; 
          ScriptInfo info = spt.info("README.md"); 
-         // info.description : returns the file description.
+         // info.author : returns the file author.
        @endcode       
      */
-    virtual ScriptInfo info(const std::string path)   = 0;
+    virtual ScriptInfo info(const std::string  & path)   = 0;
+
+    /** Provide the description of the file given the path
+     *
+     *  @param path: Script path related to the reposititory, or the operative system. 
+     *  @return the description of the file or folder. 
+     */
+    virtual const std::string& description(const std::string & path) = 0;
+
     /// @deprecated Previous version, to be removed.
-    ScriptInfo fileInfo(const std::string path){return info(path);}
+    ScriptInfo fileInfo(const std::string & path){return info(path);}
     
 
     /**
@@ -367,7 +364,6 @@ They will work as was expected for folders @ref folders-sec.
        @exception May throw Invalid Repository if the local repository was not generated. In this case, it is necessary to execute the ScriptRepository::install (at least once). 
      */
     virtual std::vector<std::string> listFiles()  = 0;
-    const std::vector<struct file_entry> & listEntries() {return repository_list;}
     
     /**
        Create a copy of the remote file/folder inside the local repository.
@@ -386,7 +382,7 @@ They will work as was expected for folders @ref folders-sec.
                   remotely or to indicate that a conflict was found.
        
      */
-    virtual void download(const std::string file_path) = 0 ;
+    virtual void download(const std::string & file_path) = 0 ;
 
 
     
@@ -398,7 +394,7 @@ They will work as was expected for folders @ref folders-sec.
        @return SCRIPTSTATUS : of the given file/folder
        @exception ScriptRepoException to indicate that file is not available.
      */
-    virtual SCRIPTSTATUS fileStatus(const std::string file_path)  = 0; 
+    virtual SCRIPTSTATUS fileStatus(const std::string & file_path)  = 0; 
 
 
     /** Check if the local repository exists. If there is no local repository, 
@@ -419,7 +415,7 @@ They will work as was expected for folders @ref folders-sec.
     @exception ScriptRepoException: If the local_path may not be created (Permission issues).
 
     */
-    virtual void install(std::string local_path) = 0;
+    virtual void install(const std::string & local_path) = 0;
 
     /** Allow the ScriptRepository to double check the connection with the web server.
     An optional argument is allowed webserverurl, but, it may be taken from the settings defined for the ScriptRepository. 
@@ -429,7 +425,7 @@ They will work as was expected for folders @ref folders-sec.
     @param webserverurl : url of the mantid web server. 
     @exception ScriptRepoException: Failure to connect to the web server and the reason why.
     */
-    virtual void connect(std::string webserverurl = "") = 0;
+    virtual void connect(const std::string & webserverurl = "") = 0;
 
     /**
        Connects to the remote repository checking for updates. 
@@ -447,9 +443,6 @@ They will work as was expected for folders @ref folders-sec.
                   may eventually, notify that the local repository may not be created. 
     */
     virtual void check4Update(void)  = 0;
-    /// @deprecated Used in the previous version. Use check4Update instead.
-    void update(void) {check4Update();}; 
-
 
     
     /**
@@ -491,9 +484,9 @@ They will work as was expected for folders @ref folders-sec.
 
     
      */
-    virtual void upload(const std::string file_path, const std::string comment,
-                const std::string author, 
-                const std::string description = std::string())  = 0;
+    virtual void upload(const std::string & file_path, const std::string & comment,
+                const std::string & author, 
+                const std::string & description = std::string())  = 0;
 
     /** Define the file patterns that will not be listed in listFiles. 
         This is important to force the ScriptRepository to not list hidden files, 
@@ -512,7 +505,7 @@ They will work as was expected for folders @ref folders-sec.
 
         This settings must be preserved, and be available after trough the configure system.
     */
-    virtual void setIgnorePatterns(std::string patterns) = 0;
+    virtual void setIgnorePatterns(const std::string & patterns) = 0;
 
     /** Return the ignore patters that was defined through ScriptRepository::setIgnorePatterns*/
     virtual std::string ignorePatterns(void) = 0;
@@ -530,12 +523,9 @@ They will work as was expected for folders @ref folders-sec.
         @exception ScriptRepoException : Invalid entry.
                 
     */
-    virtual void setAutoUpdate(std::string path, bool option = true) = 0;
+    virtual void setAutoUpdate(const std::string & path, bool option = true) = 0;
 
 
-protected:
-    /// @deprecated get all the files from a repository
-    std::vector<struct file_entry> repository_list; 
   };
 
 ///shared pointer to the function base class

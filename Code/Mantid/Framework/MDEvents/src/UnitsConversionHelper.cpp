@@ -12,7 +12,8 @@ namespace MDEvents
 @param UnitsFrom -- the ID of the units, which have to be converted from
 @param UnitsTo   -- the ID of the units to converted to
 
-@returns kind of the initiated conversion, e.g. no conversion (unitsFrom == UnitsTo, fastConversion, convFromTOF or convViaTOF
+@return kind of the initiated conversion, e.g. no conversion (unitsFrom == UnitsTo, fastConversion, convFromTOF or convViaTOF. 
+             See ConvertUnits for the details of this transformations
 
 if necessary, also sets up the proper units convertor pointers which do the actual conversion. 
 */
@@ -136,7 +137,10 @@ void UnitsConversionHelper::updateConversion(size_t i)
 
   }
 }
-/** Convert units for the input data */
+/** do actual unit conversion from  input to oputput data 
+@param   val  -- the input value which has to be converted
+@return          the input value converted into the units requested.
+*/
 double UnitsConversionHelper::convertUnits(double val)
 {
   switch(m_UnitCnvrsn)

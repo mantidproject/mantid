@@ -26,21 +26,30 @@ public:
   MDBoxBaseTester()
   : MDBoxBase<MDE,nd>()
   {     
-    this->setFilePosition(0,1,false);
   }
   virtual ~MDBoxBaseTester(){}
-  MDBoxBaseTester(uint64_t filePos)
+  MDBoxBaseTester(uint64_t /*filePos*/)
   : MDBoxBase<MDE,nd>()
   { 
-    this->setId(filePos);
-    this->setFilePosition(filePos,10,false);
+  }
+  MDBoxBaseTester(const MDBoxBaseTester  &source)
+  : MDBoxBase<MDE,nd>(source,source.getBoxController())
+  {
   }
 
   MDBoxBaseTester(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
-  : MDBoxBase<MDE,nd>(extentsVector)
+  : MDBoxBase<MDE,nd>(NULL,0,0,extentsVector)
   { 
-    this->setFilePosition(0,10,false);
   }
+  //-----------------------------------------------------------------------------------------------
+  Kernel::ISaveable * getISaveable(){return NULL;}
+  Kernel::ISaveable * getISaveable()const{return NULL;}
+  void setFileBacked(const uint64_t /*fileLocation*/,const size_t /*fileSize*/, const bool /*markSaved*/){};
+  void clearFileBacked(bool /* loadData*/){/**does nothing*/};
+  void setFileBacked(){};
+  void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)const{/*Not saveable */};
+  void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */){};
+
 
   /// Clear all contained data
   virtual void clear()
@@ -48,8 +57,15 @@ public:
 
   virtual uint64_t getNPoints()const
   {
-    return this->getFileSize();
+      return 0;
+   // return this->getFileSize();
   }
+    virtual size_t getDataInMemorySize()const
+    {return 0;}
+   /// @return the amount of memory that the object takes up in the MRU.
+    virtual uint64_t getTotalDataSize() const
+    {return 0;}
+
   /// Get number of dimensions
   virtual size_t getNumDims() const
   {return nd;}
@@ -65,7 +81,7 @@ public:
   { throw std::runtime_error("MDBox does not have children."); }
 
   /// Sets the children from a vector of children
-  void setChildren(const std::vector<MDBoxBase<MDE,nd> *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
+  void setChildren(const std::vector<API::IMDNode *> & /*boxes*/, const size_t /*indexStart*/, const size_t /*indexEnd*/)
   { throw std::runtime_error("MDBox cannot have children."); }
 
   /// Return a copy of contained events
@@ -83,21 +99,34 @@ public:
   /// Add a single event
   virtual void addEventUnsafe(const MDE & /*point*/)
   {}
+  virtual size_t buildAndAddEvents(const std::vector<signal_t> & /*sigErrSq*/,const  std::vector<coord_t> & /*Coord*/,const std::vector<uint16_t> & /*runIndex*/,const std::vector<uint32_t> & /*detectorId*/)
+  {return 0;}
+  virtual void buildAndAddEvent(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t)
+  {};
+  virtual void buildAndTraceEvent(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t,size_t)
+  {};
+  virtual void buildAndAddEventUnsafe(const Mantid::signal_t,const Mantid::signal_t,const std::vector<coord_t> &,uint16_t,uint32_t)
+  {};
+
+
 
   /** Perform centerpoint binning of events
    * @param bin :: MDBin object giving the limits of events to accept.
    */
   virtual void centerpointBin(MDBin<MDE,nd> & /*bin*/, bool * ) const
   {}
+  virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL){}; 
+  virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL){};
+  //virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
+  virtual void calculateCentroid(coord_t * /*centroid*/) const{};
 
   virtual void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const {};
   virtual void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *, signal_t & ) const {};
-  virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool) {};
-  virtual void getBoxes(std::vector<MDBoxBase<MDE,nd> *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
-  virtual void getBoxes(std::vector<Kernel::ISaveable *>&  /*boxes*/, size_t /*maxDepth*/, bool) {};
-  virtual void getBoxes(std::vector<Kernel::ISaveable *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
+  virtual void getBoxes(std::vector<API::IMDNode *>&  /*boxes*/, size_t /*maxDepth*/, bool) {};
+  virtual void getBoxes(std::vector<API::IMDNode *>&  /*boxes*/, size_t /*maxDepth*/, bool, Mantid::Geometry::MDImplicitFunction *) {};
 
   virtual void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {}
+  virtual void clearDataFromMemory(){};
 
   virtual bool getIsMasked() const
   {
@@ -248,7 +277,7 @@ public:
     b.setExtents(1, -4.0, 6.0);
     b.setSignal(123.0);
     b.setErrorSquared(456.0);
-    b.setId(8765);
+    b.setID(8765);
     b.calcVolume();
 
     // Perform the copy
@@ -260,7 +289,7 @@ public:
     TS_ASSERT_DELTA( box.getSignal(), b.getSignal(), 1e-6);
     TS_ASSERT_DELTA( box.getErrorSquared(), b.getErrorSquared(), 1e-6);
     TS_ASSERT_DELTA( box.getInverseVolume(), b.getInverseVolume(), 1e-6);
-    TS_ASSERT_EQUALS( box.getId(), b.getId());
+    TS_ASSERT_EQUALS( box.getID(), b.getID());
     TS_ASSERT_EQUALS( box.getDepth(), b.getDepth());
   }
 
@@ -402,20 +431,21 @@ public:
 
   void test_sortBoxesByFilePos()
   {
-    std::vector<Kernel::ISaveable *> boxes;
+    std::vector<API::IMDNode *> boxes;
     // 10 to 1 in reverse order
 
     for (uint64_t i=0; i<10; i++)
     {
       boxes.push_back(new MDBoxBaseTester<MDLeanEvent<1>,1>(10-i));
     }
-    Kernel::ISaveable::sortObjByFilePos(boxes);
-    // After sorting, they are in the right order 1,2,3, etc.
-    for (uint64_t i=0; i<10; i++)
-    {
-        TS_ASSERT_EQUALS( boxes[i]->getFilePosition(), i+1); 
-        delete boxes[i];
-    }
+    //TODO:
+    //Kernel::ISaveable::sortObjByFilePos(boxes);
+    //// After sorting, they are in the right order 1,2,3, etc.
+    //for (uint64_t i=0; i<10; i++)
+    //{
+    //    TS_ASSERT_EQUALS( boxes[i]->getFilePosition(), i+1); 
+    //    delete boxes[i];
+    //}
   }
 
 

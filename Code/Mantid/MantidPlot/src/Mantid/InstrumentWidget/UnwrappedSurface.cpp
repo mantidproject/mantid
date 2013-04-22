@@ -835,10 +835,12 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
   }
   PeakOverlay* po = new PeakOverlay( this, pws );
   po->setPrecision(m_peakLabelPrecision);
-  po->setShowRowsFlag(m_showPeakRow);
+  po->setShowRowsFlag(m_showPeakRows);
+  po->setShowLabelsFlag(m_showPeakLabels);
   m_peakShapes.append(po);
   m_startPeakShapes = true;
   connect(po,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),this,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
+  emit peaksWorkspaceAdded();
 }
 
 //-----------------------------------------------------------------------------
@@ -860,6 +862,7 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
         QApplication::restoreOverrideCursor();
     }
     m_startPeakShapes = false;
+    setPeakVisibility();
 }
 
 /**

@@ -99,8 +99,8 @@
     REGEX "${CMAKE_LIBRARY_PATH}/CRT/*" EXCLUDE
     REGEX "${CMAKE_LIBRARY_PATH}/Python27/*" EXCLUDE 
     REGEX "${CMAKE_LIBRARY_PATH}/qt_plugins/*" EXCLUDE 
-    REGEX "(QtDesigner4.dll)|(QtDesignerComponents4.dll)|(QtScript4.dll)|(-gd-)|(d4.dll)|(_d.dll)" 
-    EXCLUDE 
+    REGEX "(QtDesigner4.dll)|(QtDesignerComponents4.dll)|(QtScript4.dll)|(-gd-)|(d4.dll)|(_d.dll)" EXCLUDE
+    REGEX "boost_signals" EXCLUDE
     PATTERN ".git" EXCLUDE )
 
     # Qt plugins into out plugins directory and use qt.conf to point Qt at where they are

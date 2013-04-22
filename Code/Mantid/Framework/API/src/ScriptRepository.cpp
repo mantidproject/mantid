@@ -8,8 +8,8 @@ namespace Mantid
   {
            
     ScriptRepoException::ScriptRepoException( int err_, 
-                                              const std::string info,
-                                              const std::string file,
+                                              const std::string & info,
+                                              const std::string & file,
                                               int line )
     {
       if (err_)        
@@ -35,9 +35,9 @@ namespace Mantid
       }
     }
 
-    ScriptRepoException::ScriptRepoException( const std::string info,  
-                                              const std::string system,
-                                              const std::string file ,
+    ScriptRepoException::ScriptRepoException( const std::string &info,  
+                                              const std::string &system,
+                                              const std::string &file ,
                                               int line)
     {
         _system_error = system; 

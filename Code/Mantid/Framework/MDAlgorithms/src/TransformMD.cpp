@@ -116,13 +116,13 @@ namespace MDAlgorithms
   template<typename MDE, size_t nd>
   void TransformMD::doTransform(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    std::vector<Kernel::ISaveable *> boxes;
+    std::vector<API::IMDNode * > boxes;
     // Get ALL the boxes, including MDGridBoxes.
     ws->getBox()->getBoxes(boxes, 1000, false);
 
     // If file backed, sort them first.
     if (ws->isFileBacked())
-      Kernel::ISaveable::sortObjByFilePos(boxes);
+        API::IMDNode::sortObjByID(boxes);
 
     PARALLEL_FOR_IF( !ws->isFileBacked() )
     for (int i=0; i<int(boxes.size()); i++)

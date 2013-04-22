@@ -46,8 +46,8 @@ void testSplitRootToGridbox()
 
 void testSplitAMemberToGridbox()
 {
-  MDBoxBase<MDEvent<2>,2>* aChildBox(NULL);
-  TS_ASSERT_THROWS_NOTHING(aChildBox = (dynamic_cast<MDGridBox<MDEvent<2>,2>*>(rootBox))->getChild(10));
+  API::IMDNode * aChildBox(NULL);
+  TS_ASSERT_THROWS_NOTHING(aChildBox = rootBox->getChild(10));
 
   MDBoxToChange<MDEvent<2>,2>  BoxToSplit(dynamic_cast<MDBox<MDEvent<2>,2>*>(aChildBox),10);
 
@@ -76,7 +76,7 @@ MDBox<MDEvent<2>,2> * makeMDBox2()
     // Splits into 10 boxes
     splitter->setSplitInto(10);
     // Set the size
-    MDBox<MDEvent<2>,2> * out = new MDBox<MDEvent<2>,2>(splitter);
+    MDBox<MDEvent<2>,2> * out = new MDBox<MDEvent<2>,2>(splitter.get());
     out->setExtents(0, 0.0, 10.0);
     out->setExtents(1, 0.0, 10.0);
     out->calcVolume();

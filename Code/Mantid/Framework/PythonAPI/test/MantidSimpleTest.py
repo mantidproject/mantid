@@ -13,7 +13,7 @@ class TemporaryPythonAlgorithm(object):
     an removes the file in the del method
     """
     def __init__(self, name, code):
-        plugin_dirs = mantidsimple.mtd.settings['pythonalgorithms.directories'].split(";")
+        plugin_dirs = mantidsimple.mtd.settings['python.plugins.directories'].split(";")
         if len(plugin_dirs) == 0:
             raise RuntimeError("No Python algorithm directories defined")
         
@@ -115,7 +115,7 @@ mtd.registerPyAlgorithm(%(name)s())
         cmd = sys.executable + ' -c "from MantidFramework import *;mtd.initialise();from mantidsimple import %(name)s;%(name)s()"' % {'name':name1}
         try:
             subprocess.check_call(cmd,shell=True)
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError,exc:
             self.fail("Error occurred running one Python algorithm from another: %s" % str(exc))
         
         # Ensure the files are removed promptly

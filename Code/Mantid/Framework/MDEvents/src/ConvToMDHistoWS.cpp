@@ -211,7 +211,7 @@ namespace Mantid
         m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
       }
       m_OutWSWrapper->pWorkspace()->refreshCache();
-      m_OutWSWrapper->refreshCentroid();
+      //m_OutWSWrapper->refreshCentroid();
       pProgress->report();   
 
       /// Set the special coordinate system flag on the output workspace.

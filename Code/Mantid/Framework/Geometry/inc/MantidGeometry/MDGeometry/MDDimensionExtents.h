@@ -10,6 +10,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
 #include <limits>
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -49,9 +50,7 @@ namespace Geometry
     //
     std::string extentsStr()const
     {
-      std::stringstream mess;
-      mess<< min << "-"<< max;
-      return mess.str();
+      return  (boost::lexical_cast<std::string>(min)+"-"+boost::lexical_cast<std::string>(max));
     }
     T getMin()const{return min;}
     T getMax()const{return max;}
