@@ -89,15 +89,15 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups(), m_rerun
   m_loadMenu = new QMenu(this);
   
   QAction* loadFileAction = new QAction("File",this);
-  QAction *loadDAEAction = new QAction("from DAE",this);
+  QAction *liveDataAction = new QAction("Live Data",this);
   m_loadMapper = new QSignalMapper(this);
-  m_loadMapper->setMapping(loadDAEAction,"LoadDAE");
+  m_loadMapper->setMapping(liveDataAction,"StartLiveData");
   m_loadMapper->setMapping(loadFileAction,"Load");
-  connect(loadDAEAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
+  connect(liveDataAction,SIGNAL(activated()), m_loadMapper, SLOT(map()));
   connect(loadFileAction,SIGNAL(activated()),m_loadMapper,SLOT(map()));
   connect(m_loadMapper, SIGNAL(mapped(const QString &)), m_mantidUI, SLOT(executeAlgorithm(const QString&)));
   m_loadMenu->addAction(loadFileAction);
-  m_loadMenu->addAction(loadDAEAction);
+  m_loadMenu->addAction(liveDataAction);
   m_loadButton->setMenu(m_loadMenu);
 
   // SET UP SORT

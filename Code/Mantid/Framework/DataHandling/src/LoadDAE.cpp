@@ -60,7 +60,10 @@ namespace Mantid
     LoadDAE::LoadDAE() :
       Algorithm(), m_daename(""), m_numberOfSpectra(0), m_numberOfPeriods(0),
       m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),m_firstRun(true)
-    {}
+    {
+        this->useAlgorithm("StartLiveData");
+        this->deprecatedDate("2013-04-22");
+    }
 
 
     /// load data from the DAE

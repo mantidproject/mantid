@@ -281,7 +281,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	#LoadDAETest.h
+  LoadDAETest.h
 	#LoadSNSNexusTest.h # TODO has no active tests in it
 	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
 	ADARAPacketTest.h
