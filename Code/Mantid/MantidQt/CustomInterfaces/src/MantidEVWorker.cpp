@@ -161,11 +161,12 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
   alg->setProperty("dEAnalysisMode","Elastic");
   alg->setProperty("QConversionScales","Q in A^-1");
   alg->setProperty("LorentzCorrection",true);
-  alg->setProperty("MinValues","-25,-25,-25");
-  alg->setProperty("MaxValues","25,25,25");
+  alg->setProperty("MinValues","-35,-35,-35");
+  alg->setProperty("MaxValues","35,35,35");
   alg->setProperty("SplitInto","2");
   alg->setProperty("SplitThreshold","50");
   alg->setProperty("MaxRecursionDepth","13");
+  alg->setProperty("MinRecursionDepth","7");
 
   if ( !alg->execute() )
     return false;
