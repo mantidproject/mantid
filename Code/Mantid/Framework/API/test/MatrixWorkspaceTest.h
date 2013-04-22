@@ -635,6 +635,16 @@ public:
     TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::API::None, ws->getSpecialCoordinateSystem());
   }
 
+  void test_getXMinMax()
+  {
+    double xmin, xmax;
+    ws->getXMinMax(xmin,xmax);
+    TS_ASSERT_EQUALS(xmin, 1.0);
+    TS_ASSERT_EQUALS(xmax, 1.0);
+    TS_ASSERT_EQUALS(ws->getXMin(), 1.0);
+    TS_ASSERT_EQUALS(ws->getXMax(), 1.0);
+  }
+
 private:
   boost::shared_ptr<MatrixWorkspace> ws;
 
