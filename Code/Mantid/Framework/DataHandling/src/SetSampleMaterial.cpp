@@ -183,7 +183,6 @@ namespace DataHandling
     size_t i = 0;
     size_t ia = 0;
     size_t numberParen = 0;
-    size_t sizeParen = 0;
     bool isotope = false;
     while (i < chemicalSymbol.length())
     {
@@ -226,12 +225,10 @@ namespace DataHandling
         if (s[i] == '(')
         {
           // next atom
-          sizeParen = 0;
           numberParen = ia + 1;
         }
         else
         {
-          sizeParen = ia - numberParen + 1;
           if (ia > numberParen)for (size_t i0 = numberParen - 1; i0 < ia; i0++)
           {
             // if more than one atom in parenthesis, it is compound
