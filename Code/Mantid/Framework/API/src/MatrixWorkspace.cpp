@@ -765,7 +765,7 @@ namespace Mantid
     {
       double xmin;
       double xmax;
-      this->getXMinMax(xmin, xmax); // delagate to the proper code
+      this->getXMinMax(xmin, xmax); // delegate to the proper code
       return xmin;
     }
 
@@ -773,7 +773,7 @@ namespace Mantid
     {
       double xmin;
       double xmax;
-      this->getXMinMax(xmin, xmax); // delagate to the proper code
+      this->getXMinMax(xmin, xmax); // delegate to the proper code
       return xmax;
     }
 
@@ -785,13 +785,11 @@ namespace Mantid
       size_t numberOfSpectra = this->getNumberHistograms();
 
       // determine the data range
-      double xfront;
-      double xback;
       for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++)
       {
-        const MantidVec& dataX = this->readX(workspaceIndex); // force using const version
-        xfront = dataX.front();
-        xback = dataX.back();
+        const MantidVec& dataX = this->readX(workspaceIndex);
+        const double xfront = dataX.front();
+        const double xback = dataX.back();
         if (boost::math::isfinite(xfront) && boost::math::isfinite(xback))
         {
           if (xfront < xmin)
