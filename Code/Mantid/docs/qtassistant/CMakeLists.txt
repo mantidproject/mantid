@@ -109,7 +109,7 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
    add_custom_command( TARGET qtassistant
                        POST_BUILD
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory ${HELP_OUT_DIR} ${HELP_BIN_OUT_DIR} 
-                       COMMENT "Copying qtassistant to bin" )
+   )
 
    ###########################################################################################
    # Installation settings
