@@ -93,18 +93,20 @@ public:
      TS_ASSERT_DELTA( newPos2.Y() , 0.1, 0.0001);
      TS_ASSERT_DELTA( newPos2.Z() , 0.7, 0.0001);
 
+     dataStore.remove(wsName1);
+     dataStore.remove(wsName2);
   }
 
   void testDifferent_BaseInstrument_Throws()
   {
     // Create input workspace with parameterised instrument and put into data store
      MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
-     const std::string wsName1("CopyInstParamWsA");
+     const std::string wsName1("CopyInstParamWs1");
      AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
      dataStore.add(wsName1, ws1);
      // Create output workspace with another parameterised instrument and put into data store
      MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
-     const std::string wsName2("CopyInstParamWsB");
+     const std::string wsName2("CopyInstParamWs2");
      dataStore.add(wsName2, ws2);
 
      // Set properties
@@ -116,7 +118,8 @@ public:
      TS_ASSERT_THROWS(copyInstParam.execute(), std::invalid_argument);
      TS_ASSERT( !copyInstParam.isExecuted() );
 
-
+     dataStore.remove(wsName1);
+     dataStore.remove(wsName2);
   }
 
 private:
