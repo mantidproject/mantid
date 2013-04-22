@@ -199,9 +199,11 @@ namespace Algorithms
     // Add a column to hold the proton charge for which the log had a certain value
     auto protonChgCol = outputWorkspace->addColumn("double","proton_charge");
     // Get hold of the proton charge log for later
-    const TimeSeriesProperty<double> * protonChargeLog = 0;
+    const TimeSeriesProperty<double> * protonChargeLog = NULL;
     try {
       protonChargeLog = m_inputWorkspace->run().getTimeSeriesProperty<double>("proton_charge");
+      // Set back to NULL if the log is empty or bad things will happen later
+      if ( protonChargeLog->realSize() == 0 ) protonChargeLog = NULL;
     } catch (std::exception&) {
       // Log and carry on if not found. Column will be left empty.
       g_log.warning("proton_charge log not found in workspace.");
