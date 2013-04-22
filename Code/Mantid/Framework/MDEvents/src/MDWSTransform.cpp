@@ -20,10 +20,11 @@ using namespace CnvrtToMD;
    c) Crystal or crystal cartezian (C)- Busing, Levi 1967 coordinate system -- depenging on Q-scale requested
 
 */
-std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
+std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &FrameRequested,std::string &QScaleRequested)const
 {
   CoordScaling ScaleID = getQScaling(QScaleRequested);
-  std::vector<double> transf = getTransfMatrix(TargWSDescription,ScaleID);
+  TargetFrame  FrameID = getTargetFrame(FrameRequested);
+  std::vector<double> transf = getTransfMatrix(TargWSDescription,FrameID,ScaleID);
 
   if(TargWSDescription.AlgID.compare("Q3D")==0)
   {
@@ -58,10 +59,31 @@ CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription 
   if(!isLatticeUnitMat)return HKLFrame;
   return SampleFrame;
 }
+/** Method verifies if the information availible on the source workspace is sufficient to build appropriate frame
+ *@param TargWSDescription -- the class which contains the information about the target workspace
+ *@param CoordFrameID     -- the ID of the target frame requested
+ * 
+ * method throws invalid argument if the infomration on the workspace is insufficient to define the frame requested
+*/ 
+void  MDWSTransform::checkTargetFrame(const MDEvents::MDWSDescription &TargWSDescription,const CnvrtToMD::TargetFrame CoordFrameID)const
+{
+    switch(CoordFrameID)
+    {
+    case(LabFrame): // nothing needed for lab frame
+        return;
+    case(SampleFrame):
+    case(HKLFrame):   // ubMatrix has to be present
+        if(!TargWSDescription.hasLattice())
+            throw std::invalid_argument(" Target frame and sample frame need defined UB matrix ");
+    default:
+        throw std::runtime_error(" Unexpected argument in MDWSTransform::checkTargetFrame");
+    }
+   
+}
 
 
 /** The matrix to convert neutron momentums into the target coordinate system   */
-std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CoordScaling &ScaleID)const
+std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame FrameID,CoordScaling &ScaleID)const
 {
 
   Kernel::Matrix<double> mat(3,3,true);
@@ -80,7 +102,13 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
       " as no oriented lattice has been defined. \n"
       " Will use unit transformation matrix\n";
   }
-  CnvrtToMD::TargetFrame CoordFrameID = findTargetFrame(TargWSDescription);
+  // set the frame ID to the values, requested by properties
+  CnvrtToMD::TargetFrame CoordFrameID(FrameID);
+  if(FrameID==AutoSelect) // if this value is autoselect, find appropriate frame from workspace properties
+    CoordFrameID = findTargetFrame(TargWSDescription);
+  else // if not, and specific target frame requested, veirfy if everything is availible on the workspace for this frame
+    checkTargetFrame(TargWSDescription,CoordFrameID); // throw, if the information is not availible
+
   switch(CoordFrameID)
   {
   case(CnvrtToMD::LabFrame):
@@ -369,10 +397,21 @@ CoordScaling MDWSTransform::getQScaling(const std::string &ScID)const
   return CoordScaling(nScaling);
 }
 
+/** function which convert input string representing Target coordinate frame to correspondent enum */
+TargetFrame MDWSTransform::getTargetFrame(const std::string &FrameID)const
+{
+  int nFrame = Kernel::Strings::isMember(m_TargFramesID,FrameID);
+
+  if (nFrame<0)throw(std::invalid_argument(" The Target Frame with ID: "+FrameID+" is unavalible"));
+
+  return TargetFrame(nFrame);
+}
+
 //
 MDWSTransform::MDWSTransform():
   m_isUVdefault(true),
-  m_QScalingID(NCoordScalings)
+  m_QScalingID(NCoordScalings),
+  m_TargFramesID(NTargetFrames)
 {
   m_UProj[0] = 1;   m_UProj[1] = 0;  m_UProj[2] = 0;
   m_VProj[0] = 0;   m_VProj[1] = 1;  m_VProj[2] = 0;
@@ -383,6 +422,11 @@ MDWSTransform::MDWSTransform():
   m_QScalingID[SingleScale]="Q in lattice units";
   m_QScalingID[OrthogonalHKLScale]="Orthogonal HKL";
   m_QScalingID[HKLScale]="HKL";
+
+  m_TargFramesID[AutoSelect]="AutoSelect";
+  m_TargFramesID[LabFrame]="Q (lab frame)";
+  m_TargFramesID[SampleFrame]="Q (sample frame)";
+  m_TargFramesID[HKLFrame]="HKL";
 
 }
 
