@@ -1118,6 +1118,10 @@ void LoadEventNexus::init()
   declareProperty(
       new PropertyWithValue<bool>("MetaDataOnly", false, Direction::Input),
       "If true, only the meta data and sample logs will be loaded.");
+
+  declareProperty(
+      new PropertyWithValue<bool>("LoadLogs", true, Direction::Input),
+      "Load the Sample/DAS logs from the file (default True).");
 }
 
 
@@ -1168,7 +1172,7 @@ void LoadEventNexus::exec()
   precount = getProperty("Precount");
   compressTolerance = getProperty("CompressTolerance");
 
-  loadlogs = true;
+  loadlogs = getProperty("LoadLogs");
 
   // Check to see if the monitors need to be loaded later
   bool load_monitors = this->getProperty("LoadMonitors");
