@@ -65,6 +65,7 @@ protected slots:
   void shapesCleared();
   void clearShapes();
   void applyMask();
+  void applyMaskToView();
   void storeMask();
   void clearMask();
   void saveInvertedMaskToWorkspace();
@@ -91,8 +92,7 @@ protected:
   void saveMaskingToFile(bool invertMask = false);
   void saveMaskingToCalFile(bool invertMask = false);
   std::string generateMaskWorkspaceName(bool temp = false) const;
-  void enableApply();
-  void enableClear();
+  void enableApplyButtons();
   void setSelectActivity();
   /// True if in masking mode, flase if in grouping.
   bool isMasking() const;
