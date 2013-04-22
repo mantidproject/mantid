@@ -1526,6 +1526,27 @@ class InstrumentWindowMaskTab: InstrumentWindowTab
 %TypeHeaderCode
 #include "src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h"
 %End
+
+public:
+  enum Mode {Mask, Group};
+  enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing};
+
+  void setMode(Mode mode);
+%Docstring
+  Set the mode to either group/mask
+  
+  Args:
+      mode One of the Mode enumerations InstrumentWindowMaskTab.{Mask, Group}
+%End
+
+  void selectTool(Activity tool);
+%Docstring
+  Set the mode to either group/mask
+  
+  Args:
+      tool One of the Activity enumerations InstrumentWindowMaskTab.{Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing}
+%End
+
 private:
   InstrumentWindowMaskTab();
   InstrumentWindowMaskTab(const InstrumentWindowMaskTab &);

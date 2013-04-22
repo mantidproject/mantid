@@ -51,9 +51,14 @@ class InstrumentWindowMaskTab: public InstrumentWindowTab
 {
   Q_OBJECT
 public:
-  enum Activity {Move = 0, Select = 1, DrawEllipse};
+  enum Mode {Mask, Group};
+  enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing};
+
   InstrumentWindowMaskTab(InstrumentWindow* instrWindow);
   void initSurface();
+  void setMode(Mode mode);
+  void selectTool(Activity tool);
+
 signals:
   void executeAlgorithm(const QString&, const QString&);
 protected slots:
