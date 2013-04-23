@@ -697,8 +697,15 @@ namespace API
   }
 
   /**
-     @todo Describe
-
+   * Uploads one file to the ScriptRepository web server, pushing, indirectly, to the 
+   * git repository. It will send in a POST method, the file and the following fields: 
+   *  - author : Will identify the author of the change
+   *  - email:  Will identify the email of the author
+   *  - comment: Description of the nature of the file or of the update
+   *  
+   * It will them upload to the URL pointed to UploaderWebServer. It will them receive a json file 
+   * with some usefull information about the success or failure of the attempt to upload. 
+   * In failure, it will be converted to an appropriated ScriptRepoException.
   */
   void ScriptRepositoryImpl::upload(const std::string & file_path, 
                                     const std::string & comment,
@@ -767,7 +774,10 @@ namespace API
         try{
           read_json(answer, pt); 
           std::string info = pt.get<std::string>("message",""); 
-          std::string detail = pt.get<std::string>("detail",""); 
+          std::string detail = pt.get<std::string>("detail","");
+          std::string cmd = pt.get<std::string>("shell",""); 
+          if (!cmd.isEmpty())
+            detail.append("\nFrom Command: ").append(cmd)
           throw ScriptRepoException(info, detail); 
           
         }catch (boost::property_tree::json_parser_error & ex){
