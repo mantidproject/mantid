@@ -11,16 +11,23 @@ namespace MDEvents
 Kernel::Logger& MDWSTransform::g_Log =Kernel::Logger::get("MD-Algorithms");
 using namespace CnvrtToMD;
 
-/** method returns the linear representation for the transformation matrix, which translate momentums from laboratory to the requested 
- *   coordinate system. 
+/** method to build the Q-coordinates transfomration.
  *
- *  depending on the presence of UB matrix and goniometer settings, it may be:
+ * @param TargWSDescription -- the class which describes target MD workspace. In Q3D case this descritpion is modifiede by the method
+                               with default Q-axis labels and Q-axis untis
+ * @param FrameRequested    -- the string which describes the target transformation frame in Q3D case. If the string value is '''Auto'''
+ *   the frame is selected depending on the presence of UB matrix and goniometer settings, namely it can be:
  * a) the laboratory -- (no UB matrix, goniometer angles set to 0)
    b) Q (sample frame)''': the goniometer rotation of the sample is taken out, to give Q in the frame of the sample. See [[SetGoniometer]] to specify the goniometer used in the experiment.
    c) Crystal or crystal cartezian (C)- Busing, Levi 1967 coordinate system -- depenging on Q-scale requested
+ *  one of the target frames above can be requested explicitly. In this case the method throws invalid argument if necessary parameters (UB matrix) is not attached to the workspace
 
+ * @param QScaleRequested   -- Q-transformation needed  
+ *
+ * @return the linear representation for the transformation matrix, which translate momentums from laboratory to the requested 
+ *   coordinate system. 
 */
-std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &FrameRequested,std::string &QScaleRequested)const
+std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &FrameRequested,const std::string &QScaleRequested)const
 {
   CoordScaling ScaleID = getQScaling(QScaleRequested);
   TargetFrame  FrameID = getTargetFrame(FrameRequested);

@@ -261,7 +261,7 @@ ConvertToMD::init()
 
 
     std::vector<std::string> TargFrames = QSclAndFrames.getQScalings();
-    declareProperty("OutputDimensions", TargFrames[CnvrtToMD::AutoSelect],boost::make_shared<StringListValidator>(TargFrames),
+    declareProperty("Q3DFrames", TargFrames[CnvrtToMD::AutoSelect],boost::make_shared<StringListValidator>(TargFrames),
       "What will be the Q-dimensions of the output workspace in Q3D case?\n"
       "   AutoSelect: Choose the target coordinate frame as the function of goniometer and UB matrix values set on the input workspace\n"
       "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
@@ -374,7 +374,7 @@ void ConvertToMD::exec()
     //c) other dim property;
     std::vector<std::string> otherDimNames = getProperty("OtherDimensions");
     //d) The output dimensions in the Q3D mode, processed together with QConversionScales
-    std::string QFrame                     = getProperty("OutputDimensions");
+    std::string QFrame                     = getProperty("Q3DFrames");
     //e) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavours of hkl
     std::string convertTo_                 = getProperty("QConversionScales");
 
@@ -487,7 +487,7 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
         // reset new ws description name
         targWSDescr =oldWSDescr;
        // set up target coordinate system
-        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convertTo_);   
+        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);   
     }
     return createNewTargetWs;
 }

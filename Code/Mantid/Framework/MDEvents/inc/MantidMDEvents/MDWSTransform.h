@@ -71,7 +71,7 @@ public:
       * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
     void setUVvectors(const std::vector<double> &ut,const std::vector<double> &vt,const std::vector<double> &wt);
 
-   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &FrameRequested, std::string &QScaleRequested)const;
+   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &FrameRequested,const std::string &QScaleRequested)const;
   
    /// construct meaningful dimension names for Q3D case and different transformation types defined by the class
    void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;

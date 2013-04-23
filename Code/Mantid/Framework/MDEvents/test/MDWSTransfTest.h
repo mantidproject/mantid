@@ -15,9 +15,10 @@ using namespace Mantid::Kernel;
 class MDWSTransformTestHelper: public MDWSTransform
 {
   public:
-   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling &scaling)const
+      std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame frames,CnvrtToMD::CoordScaling scaling)const
    {
-     return MDWSTransform::getTransfMatrix(TargWSDescription,scaling);
+       CnvrtToMD::CoordScaling inScaling(scaling);
+       return MDWSTransform::getTransfMatrix(TargWSDescription,frames,inScaling);
    }
    CnvrtToMD::TargetFrame findTargetFrame(MDEvents::MDWSDescription &TargWSDescription)const
    {
@@ -66,6 +67,28 @@ void testFindTargetFrame()
    TS_ASSERT_EQUALS(CnvrtToMD::HKLFrame,Transf.findTargetFrame(TargWSDescription));
 
 }
+void testForceTargetFrame()
+{
+   MDEvents::MDWSDescription TargWSDescription;
+   Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
+   std::vector<double> minVal(4,-3),maxVal(4,3);
+   TargWSDescription.setMinMax(minVal,maxVal);
+
+   TargWSDescription.buildFromMatrixWS(spws,"Q3D","Direct");
+
+   MDWSTransformTestHelper Transf;
+   TS_ASSERT_THROWS(Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::HKLFrame,CnvrtToMD::HKLScale),std::invalid_argument);
+   TS_ASSERT_THROWS(Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::SampleFrame,CnvrtToMD::HKLScale),std::invalid_argument);
+   spws->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(*pLattice)); 
+   spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
+
+   std::vector<double> transf;
+   TS_ASSERT_THROWS_NOTHING(transf=Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::SampleFrame,CnvrtToMD::HKLScale));
+
+
+}
+
+
 
 void test_buildDimNames(){
 
@@ -124,7 +147,7 @@ void testTransfMat1()
 
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      CnvrtToMD::CoordScaling scales = CnvrtToMD::HKLScale;
-     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::AutoSelect,scales));
      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::HKLScale));
 
       dimNames = TWS.getDimNames();
@@ -136,7 +159,7 @@ void testTransfMat1()
 
       std::vector<double> rot1;
       scales = CnvrtToMD::OrthogonalHKLScale;
-      TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,scales));
+      TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::AutoSelect,scales));
       TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,scales));
 
       dimNames = TWS.getDimNames();
@@ -157,9 +180,9 @@ void testTransfMat1()
       // Orthogonal HKL and HKL are equivalent for rectilinear lattice for any goniometer position
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,60);
      scales = CnvrtToMD::HKLScale;
-     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::AutoSelect,scales));
      scales = CnvrtToMD::OrthogonalHKLScale;
-     TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,scales));
+     TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::AutoSelect,scales));
      for(int i=0;i<9;i++)
      {
           TSM_ASSERT_DELTA(" element: "+boost::lexical_cast<std::string>(i)+" wrong",rot[i],rot1[i],1.e-6);
@@ -191,7 +214,7 @@ void testTransf2HoraceQinA()
 
      CnvrtToMD::CoordScaling scales = CnvrtToMD::NoScaling;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);
-     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::AutoSelect,scales));
 
     // and this is Horace transformation matrix obtained from   [transf,u_to_rlu]=calc_proj_matrix(alat, angldeg, u, v, 20*deg2rad, omega, dpsi, gl, gs) (private folder in sqw)
     //    0.9397    0.3420      0
@@ -213,7 +236,7 @@ void testTransf2HoraceQinA()
      Transf[2][0] = 0.;          Transf[2][1] = 0.;     Transf[2][2] = 1;
 
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,40);
-     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::AutoSelect,scales));
      sample = (PermHM*Transf*PermMH).getVector();
      for(size_t i=0;i<9;i++)
      {
@@ -287,7 +310,7 @@ void testTransf2HKL()
      U2RLU[2][0] = 0.;          U2RLU[2][1] = 0.;      U2RLU[2][2]   = 1.1244;
 
      CnvrtToMD::CoordScaling scales = CnvrtToMD::HKLScale;
-     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::AutoSelect,scales));
 
      auto sample = U2RLU.getVector();
      for(size_t i=0;i<9;i++)
