@@ -87,8 +87,13 @@ namespace Mantid
 
       void saveNexus(::NeXus::File * file, const std::string & group) const;
       void loadNexus(::NeXus::File * file, const std::string & group);
-      static void parseChemicalFormula(const std::string chemicalSymbol, std::vector<std::string>& atoms, std::vector<uint16_t>& numberAtoms,
-    		  std::vector<uint16_t>& aNumbers);
+      struct ChemicalFormula
+      {
+    	  std::vector<std::string> atoms;     // Chemical symbol of each atom
+    	  std::vector<uint16_t> numberAtoms;  // Number of each atom
+    	  std::vector<uint16_t> aNumbers;     // Atomic number of each atom
+      };
+      static ChemicalFormula parseChemicalFormula(const std::string chemicalSymbol);
 
 
     private:

@@ -132,19 +132,17 @@ namespace DataHandling
         // Use chemical formula if given by user
     	try
     	{
-			std::vector<std::string> atoms;
-			std::vector<uint16_t> numberAtoms, aNumbers;
-			Material::parseChemicalFormula(chemicalSymbol, atoms, numberAtoms, aNumbers);
+			Material::ChemicalFormula CF = Material::parseChemicalFormula(chemicalSymbol);
         	sigma_s = 0.0;
         	sigma_atten = 0.0;
-        	for (size_t i=0; i<atoms.size(); i++)
+        	for (size_t i=0; i<CF.atoms.size(); i++)
         	{
-        		Atom myAtom = getAtom(atoms[i], aNumbers[i]);
-        		Material *atom = new Material(atoms[i], myAtom.neutron, myAtom.number_density);
+        		Atom myAtom = getAtom(CF.atoms[i], CF.aNumbers[i]);
+        		Material *atom = new Material(CF.atoms[i], myAtom.neutron, myAtom.number_density);
         		g_log.notice() << myAtom << " sigma_s = "<< atom->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
         		g_log.notice() << myAtom << " sigma_atten = "<< atom->absorbXSection(NeutronAtom::ReferenceLambda) << "\n";
-        		sigma_s +=  static_cast<double>(numberAtoms[i]) * atom->totalScatterXSection(NeutronAtom::ReferenceLambda);
-        		sigma_atten +=  static_cast<double>(numberAtoms[i]) * atom->absorbXSection(NeutronAtom::ReferenceLambda);
+        		sigma_s +=  static_cast<double>(CF.numberAtoms[i]) * atom->totalScatterXSection(NeutronAtom::ReferenceLambda);
+        		sigma_atten +=  static_cast<double>(CF.numberAtoms[i]) * atom->absorbXSection(NeutronAtom::ReferenceLambda);
         	}
 			rho = zParameter / unitCellVolume;
 			NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
