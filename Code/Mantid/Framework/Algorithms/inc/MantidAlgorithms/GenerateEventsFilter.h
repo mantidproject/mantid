@@ -118,6 +118,16 @@ namespace Algorithms
 
   };
 
+  /** Generate a new time splitter and add to a list of splitters
+    */
+  void make_splitter(Kernel::DateAndTime start, Kernel::DateAndTime stop, int group, Kernel::time_duration tolerance,
+                     Kernel::TimeSplitterType& splitters)
+  {
+    Kernel::SplittingInterval newsplit(start - tolerance, stop - tolerance, group);
+    splitters.push_back(newsplit);
+
+    return;
+  }
 
 } // namespace Algorithms
 } // namespace Mantid

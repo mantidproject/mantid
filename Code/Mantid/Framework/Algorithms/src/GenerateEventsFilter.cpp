@@ -772,28 +772,6 @@ namespace Algorithms
           }
           split.push_back( SplittingInterval(start, stop, wsindex) );
 
-          /*
-          if (numgood == 1)
-          {
-            //There was only one point with the value. Use the last time, - the tolerance, as the end time
-            if (centre)
-            {
-              stop = t-tol;
-              // stop = lastTime - tol;
-            }
-            else
-            {
-              stop = t;
-            }
-            split.push_back( SplittingInterval(start, stop, wsindex) );
-          }
-          else
-          {
-            //At least 2 good values. Save the end time
-            XXX XXX
-          }
-          */
-
           //Reset the number of good ones, for next time
           numgood = 0;
         }
@@ -1110,7 +1088,7 @@ namespace Algorithms
       singlemode = false;
     }
 
-    // 2. Search along log to do filter
+    // 2. Search along log to generate splitters
     size_t numlogentries = m_intLog->size();
     vector<DateAndTime> times = m_intLog->timesAsVector();
     vector<int> values = m_intLog->valuesAsVector();
@@ -1120,60 +1098,67 @@ namespace Algorithms
     DateAndTime splitstarttime(0);
     int pregroup = -1;
 
-    g_log.notice() << "[DB] Number of log entries = " << numlogentries << ".\n";
+    g_log.debug() << "[DB] Number of log entries = " << numlogentries << ".\n";
+
     for (size_t i = 0; i < numlogentries; ++i)
     {
       int currvalue = values[i];
-      int group = -1;
+      int currgroup = -1;
 
       // a) Determine allowed and group
       if (currvalue > maxvalue || currvalue < minvalue)
       {
-        g_log.notice() << "[DB] Entry[" << i << "] = " << currvalue << ": out of range. " << ".\n";
-        ;
+        // Log value is out of range
+        g_log.debug() << "[DB] Entry[" << i << "] = " << currvalue << ": out of range. " << ".\n";
       }
-      else if (i >= 1 && ( (filterIncrease && values[i] >= values[i-1])
-                           || (filterDecrease && values[i] <= values[i])))
+      else if ((i == 0) || (i >= 1 && ((filterIncrease && values[i] >= values[i-1]) ||
+                                       (filterDecrease && values[i] <= values[i]))))
       {
+        // First entry (regardless direction) and other entries considering change of value
         if (singlemode)
         {
-          group = 0;
+          currgroup = 0;
         }
         else
         {
-          group = (currvalue-minvalue)/delta;
+          currgroup = (currvalue-minvalue)/delta;
         }
-        g_log.notice() << "[DB] Entry[" << i << "] = " << currvalue << ": belong to group "
-                       << group << ".\n";
-
+        g_log.debug() << "[DB] Entry[" << i << "] = " << currvalue << ": belong to group "
+                      << currgroup << ".\n";
       }
 
       // b) Consider to make a splitter
       bool statuschanged;
-      if (pregroup >= 0 && group < 0)
+      if (pregroup >= 0 && currgroup < 0)
       {
         // i.  previous log is in allowed region.  but this one is not.  create a splitter
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error.");
+        make_splitter(splitstarttime, times[i], pregroup, timetol, splitters);
+#if 0
         SplittingInterval newsplit(splitstarttime - timetol, times[i] - timetol, pregroup);
         splitters.push_back(newsplit);
+#endif
 
         splitstarttime = DateAndTime(0);
         statuschanged = true;
       }
-      else if (pregroup < 0 && group >= 0)
+      else if (pregroup < 0 && currgroup >= 0)
       {
         // ii.  previous log is not allowed, but this one is.  this is the start of a new splitter
         splitstarttime = times[i];
         statuschanged = true;
       }
-      else if (group >= 0 && pregroup != group)
+      else if (currgroup >= 0 && pregroup != currgroup)
       {
         // iii. migrated to a new region
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error (1).");
+        make_splitter(splitstarttime, times[i], pregroup, timetol, splitters);
+#if 0
         SplittingInterval newsplit(splitstarttime - timetol, times[i] - timetol, pregroup);
         splitters.push_back(newsplit);
+#endif
 
         splitstarttime = times[i];
         statuschanged = true;
@@ -1186,7 +1171,7 @@ namespace Algorithms
 
       // c) Update
       if (statuschanged)
-        pregroup = group;
+        pregroup = currgroup;
     }
 
     // 3. Create the last splitter if existing
@@ -1195,8 +1180,11 @@ namespace Algorithms
       // Last entry is in an allowed region.
       if (splitstarttime.totalNanoseconds() == 0)
         throw runtime_error("Programming logic error (1).");
+      make_splitter(splitstarttime, runend, pregroup, timetol, splitters);
+#if 0
       SplittingInterval newsplit(splitstarttime - timetol, runend - timetol, pregroup);
       splitters.push_back(newsplit);
+#endif
     }
 
     // 4. Write to the information workspace
@@ -1217,7 +1205,15 @@ namespace Algorithms
         if (logvalue + delta - 1 > logvalue)
           message << m_intLog->name() << " = [" << logvalue << ", " << logvalue+delta-1 << "]";
         else
-          message << m_intLog->name() << " = [" << logvalue ;
+          message << m_intLog->name() << " = " << logvalue ;
+
+        message << ". Value change direction: ";
+        if (filterIncrease && filterDecrease)
+          message << "Both.";
+        else if (filterIncrease)
+          message << "Increasing. ";
+        else if (filterDecrease)
+          message << "Decreasing. ";
 
         TableRow newrow = m_filterInfoWS->appendRow();
         newrow << wsindex << message.str();
