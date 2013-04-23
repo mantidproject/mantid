@@ -85,6 +85,8 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
         #htmlfile.p(alg.getWikiSummary())
         wiki = MediaWiki(htmlfile)
         wiki.parse(alg.getWikiSummary())
+        for img in wiki.images:
+            qhp.addFile(os.path.join(HTML_DIR, "img", img))
 
         htmlfile.h3("Usage")
         text = wiki_tools.create_function_signature(alg, name)

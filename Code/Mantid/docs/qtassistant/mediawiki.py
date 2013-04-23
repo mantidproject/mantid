@@ -1,9 +1,76 @@
 from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
+import re
+
+def formatImgHtml(raw):
+    #print "RAW:", raw
+
+    # cleanup the tag from the text
+    index = raw.index(':') # look for first ':'
+    if index < 0:
+        index = 0
+    else:
+        index += 1
+    raw = raw[index:-2]
+    
+    #print "RAW:", raw
+
+    # chop tag into something more workable
+    components = raw.split('|')
+    img = components[0] # image filename is always first
+    
+    # get the other bits of meta-data
+    alt = None
+    caption = None
+    for item in components[1:]:
+        item_low = item.lower()
+        if item_low == "thumb":
+            pass
+        elif item.endswith('px'):
+            pass
+        elif item_low == "right" or item_low == "center":
+            pass
+        elif item_low.startswith("alt"):
+            alt = '='.join(item.split('=')[1:])
+        else:
+            caption = item
+
+
+    html = "<figure>"
+    html += "<img src='img/" + img + "'"
+    if alt is not None:
+        html += " alt='%s'" % alt
+    html += "/>"
+    if caption is not None:
+        html += "\n<figcaption>%s</figcaption>\n" % caption
+    html += "</figure>\n"
+    #print "HTML:", html
+    return (img, html)
 
 class MediaWiki:
     def __init__(self, htmlfile):
         self.__file = htmlfile
         self.__types = []
+        self.images = []
+
+    def __parseImgs(self, text):
+        # Get all of the raw image links
+        raw_img = re.findall(r'\[\[Image:.*\]\]', text, flags=re.MULTILINE)
+        raw = re.findall(r'\[\[File:.*\]\]', text, flags=re.MULTILINE)
+        raw.extend(raw_img)
+
+        # generate the html
+        html = []
+        for src in raw:
+            (imagefile, newtxt) = formatImgHtml(src)
+            self.images.append(imagefile)
+            html.append(newtxt)
+
+        for (orig, repl) in zip(raw, html):
+            #print ">>>", orig
+            #print "<<<", repl
+            text = text.replace(orig, repl)
+
+        return text.strip()
 
     def __clearEmpty(self, text):
         result = []
@@ -59,7 +126,6 @@ class MediaWiki:
         return "\n".join(text)
 
     def __fixHEADERS(self, text):
-        import re
         results = re.findall(r'\s+==.*==\s+', text)
         for item in results:
             text = text.replace(item, "\n\n"+item.strip()+"\n\n")
@@ -101,6 +167,7 @@ class MediaWiki:
         text = text.strip()
         if len(text) <= 0:
             return # don't bother if it is empty
+        text = self.__parseImgs(text)
         #print "01>>>", text, "<<<"
         if text.startswith("== Deprecation notice =="):
             stuff = "== Deprecation notice =="
@@ -135,7 +202,7 @@ class MediaWiki:
                     if annotate == "blank":
                         if not text[i-1].startswith("<h"):
                             self.__file.write("</p>\n")
-                        if not text[i+1].startswith("<h"):
+                        if i+1 < num_lines and not text[i+1].startswith("<h"):
                             self.__file.write("<p>")
                     else:
                         self.__file.write(annotate)
