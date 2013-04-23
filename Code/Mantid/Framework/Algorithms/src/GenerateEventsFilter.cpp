@@ -1135,10 +1135,6 @@ namespace Algorithms
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error.");
         make_splitter(splitstarttime, times[i], pregroup, timetol, splitters);
-#if 0
-        SplittingInterval newsplit(splitstarttime - timetol, times[i] - timetol, pregroup);
-        splitters.push_back(newsplit);
-#endif
 
         splitstarttime = DateAndTime(0);
         statuschanged = true;
@@ -1155,10 +1151,6 @@ namespace Algorithms
         if (splitstarttime.totalNanoseconds() == 0)
           throw runtime_error("Programming logic error (1).");
         make_splitter(splitstarttime, times[i], pregroup, timetol, splitters);
-#if 0
-        SplittingInterval newsplit(splitstarttime - timetol, times[i] - timetol, pregroup);
-        splitters.push_back(newsplit);
-#endif
 
         splitstarttime = times[i];
         statuschanged = true;
@@ -1181,10 +1173,6 @@ namespace Algorithms
       if (splitstarttime.totalNanoseconds() == 0)
         throw runtime_error("Programming logic error (1).");
       make_splitter(splitstarttime, runend, pregroup, timetol, splitters);
-#if 0
-      SplittingInterval newsplit(splitstarttime - timetol, runend - timetol, pregroup);
-      splitters.push_back(newsplit);
-#endif
     }
 
     // 4. Write to the information workspace
