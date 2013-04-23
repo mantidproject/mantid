@@ -64,10 +64,11 @@ void SubmitRemoteJob::init()
   // we can use to track the job
   declareProperty( "JobID", "", Direction::Output);
 
-  // TODO: not sure we need these - we throw an exception when the submission fails
-  // If there was a problem submitting the job, details will be stored in these properties
-  declareProperty( "ErrorCode", "", Direction::Output);
-  declareProperty( "ErrorMessage", "", Direction::Output);
+  // Name of the python script to execute
+  declareProperty( "ScriptName", "", requireValue, "", Direction::Input);
+
+  // Command line arguments for the script
+  declareProperty( "ScriptArguments", "", Direction::Input);
 }
 
 void SubmitRemoteJob::exec()
@@ -99,9 +100,11 @@ void SubmitRemoteJob::exec()
   std::stringstream convert( getPropertyValue( "NumNodes"));
   convert >> numNodes;
   convert.str( getPropertyValue( "CoresPerNode"));
+  convert.clear();  // interestingly - setting the value with str() doesn't clear the eof bit.
   convert >> coresPerNode;
 
   convert.str("");
+  convert.clear();
   convert << (numNodes * coresPerNode);
 
   // Set the username and password from the properties
@@ -112,7 +115,10 @@ void SubmitRemoteJob::exec()
   task.appendCmdLineParam( "-n");
   task.appendCmdLineParam(  convert.str());
 
-  task.appendCmdLineParam( "-hostfile");
+  task.appendCmdLineParam( "-npernode");
+  task.appendCmdLineParam( getPropertyValue( "CoresPerNode"));
+
+  task.appendCmdLineParam( "-hostfile"); // --hostfile would work, too
   task.appendCmdLineParam( "$PBS_NODEFILE");  // This is obviously specific to PBS...
 
   task.appendCmdLineParam( "/usr/bin/python");  // TODO: the python executable is stored in facilities.xml, but actually making

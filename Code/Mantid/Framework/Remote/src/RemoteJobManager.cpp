@@ -342,8 +342,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::uploadFile( const st
   // TODO: Notice that we've set the context to VERIFY_NONE.  I think that means we're not checking the SSL certificate that the server
   // sends to us.  That's BAD!!
   Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-  //Poco::Net::HTTPSClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
-  Poco::Net::HTTPClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPClientSession::HTTP_PORT);
+  Poco::Net::HTTPSClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
 
   Poco::Net::HTTPRequest req;
   reqErr = initPostRequest( req, "/file_transfer");
@@ -683,7 +682,7 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, std::string &
 
     // Build up the JSON struct for submitting a job to MWS
     std::ostringstream json;
-#if 0
+#if 1
     json << "{\n ";
     json << "\"commandFile\": \"" << m_mpirunExecutable << "\",\n";
     json << "\"commandLineArguments\": \"" << escapeQuoteChars( remoteTask.getCmdLineParams() )<< "\",\n";
