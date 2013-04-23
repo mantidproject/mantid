@@ -10,9 +10,10 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidKernel/NexusTestHelper.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
-#include "MantidKernel/VMD.h"
 #include <cxxtest/TestSuite.h>
 
 using std::size_t;
@@ -627,6 +628,64 @@ public:
     WorkspaceTester ws;
     TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::API::None, ws.getSpecialCoordinateSystem());
   }
+
+  void test_getFirstPulseTime_getLastPulseTime()
+  {
+    WorkspaceTester ws;
+    auto proton_charge = new TimeSeriesProperty<double>("proton_charge");
+    DateAndTime startTime("2013-04-21T10:40:00");
+    proton_charge->addValue( startTime, 1.0E-7 );
+    proton_charge->addValue( startTime+1.0, 2.0E-7 );
+    proton_charge->addValue( startTime+2.0, 3.0E-7 );
+    proton_charge->addValue( startTime+3.0, 4.0E-7 );
+    ws.mutableRun().addLogData(proton_charge);
+
+    TS_ASSERT_EQUALS( ws.getFirstPulseTime(), startTime );
+    TS_ASSERT_EQUALS( ws.getLastPulseTime(), startTime+3.0 );
+  }
+
+  void test_getFirstPulseTime_getLastPulseTime_SNS1990bug()
+  {
+    WorkspaceTester ws;
+    auto proton_charge = new TimeSeriesProperty<double>("proton_charge");
+    DateAndTime startTime("1990-12-31T23:59:00");
+    proton_charge->addValue( startTime, 1.0E-7 );
+    proton_charge->addValue( startTime+1.0, 2.0E-7 );
+    ws.mutableRun().addLogData(proton_charge);
+
+    // If fewer than 100 entries (unlikely to happen in reality), you just get back the last one
+    TS_ASSERT_EQUALS( ws.getFirstPulseTime(), startTime+1.0 );
+
+    for ( int i = 2; i < 62; ++i )
+    {
+      proton_charge->addValue( startTime+static_cast<double>(i), 1.0E-7 );
+    }
+    TS_ASSERT_EQUALS( ws.getFirstPulseTime(), DateAndTime("1991-01-01T00:00:00") );
+  }
+
+  void test_getFirstPulseTime_getLastPulseTime_throws_if_protoncharge_missing_or_empty()
+  {
+    WorkspaceTester ws;
+    TS_ASSERT_THROWS( ws.getFirstPulseTime(), std::runtime_error );
+    TS_ASSERT_THROWS( ws.getLastPulseTime(), std::runtime_error );
+    ws.mutableRun().addLogData(new TimeSeriesProperty<double>("proton_charge"));
+    TS_ASSERT_THROWS( ws.getFirstPulseTime(), std::runtime_error );
+    TS_ASSERT_THROWS( ws.getLastPulseTime(), std::runtime_error );
+  }
+
+  void test_getFirstPulseTime_getLastPulseTime_throws_if_protoncharge_wrong_type()
+  {
+    WorkspaceTester ws;
+    auto proton_charge = new TimeSeriesProperty<int>("proton_charge");
+    proton_charge->addValue("2013-04-21T10:19:10",1);
+    proton_charge->addValue("2013-04-21T10:19:12",2);
+    ws.mutableRun().addLogData(proton_charge);
+    TS_ASSERT_THROWS( ws.getFirstPulseTime(), std::invalid_argument );
+    TS_ASSERT_THROWS( ws.getLastPulseTime(), std::invalid_argument );
+
+    ws.mutableRun().addProperty(new PropertyWithValue<double>("proton_charge",99.0),true);
+    TS_ASSERT_THROWS( ws.getFirstPulseTime(), std::invalid_argument );
+    TS_ASSERT_THROWS( ws.getLastPulseTime(), std::invalid_argument );
   }
 
 private:
