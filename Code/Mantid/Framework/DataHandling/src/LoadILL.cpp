@@ -310,9 +310,9 @@ void LoadILL::loadRunDetails(NXEntry & entry) {
 	//runDetails.addProperty<double>("wavelength", m_wavelength);
 	runDetails.addProperty("wavelength", wavelength);
 	double ei = calculateEnergy(m_wavelength);
-	//runDetails.addProperty<double>("Ei", ei,true); //overwrite
-	std::string ei_str = boost::lexical_cast<std::string>(ei);
-	runDetails.addProperty("Ei", ei_str);
+	runDetails.addProperty<double>("Ei", ei,true); //overwrite
+	//std::string ei_str = boost::lexical_cast<std::string>(ei);
+	//runDetails.addProperty("Ei", ei_str);
 
 	std::string duration = boost::lexical_cast<std::string>(
 			entry.getFloat("duration"));
@@ -535,9 +535,15 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 				// just copy the time binning axis to every spectra
 				m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
 			}
+			// Assign Y
 			int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
 			m_localWorkspace->dataY(spec).assign(data_p,
 					data_p + m_numberOfChannels);
+
+			// Assign Error
+			MantidVec& E = m_localWorkspace->dataE(spec);
+			std::transform(data_p, data_p + m_numberOfChannels, E.begin(), LoadILL::calculateError);
+
 			++spec;
 			progress.report();
 		}

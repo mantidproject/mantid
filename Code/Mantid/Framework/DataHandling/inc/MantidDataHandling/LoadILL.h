@@ -98,6 +98,9 @@ private:
 	std::string getDateTimeInIsoFormat(std::string dateToParse);
 	// Load all the nexus file information
 
+	/// Calculate error for y
+	static double calculateError(double in) { return sqrt(in);}
+
 	API::MatrixWorkspace_sptr m_localWorkspace;
 
 	std::string m_filename; ///< The file to load
