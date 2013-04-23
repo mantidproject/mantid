@@ -1,4 +1,5 @@
 from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
+import os
 import re
 
 def formatImgHtml(raw):
@@ -17,7 +18,8 @@ def formatImgHtml(raw):
     # chop tag into something more workable
     components = raw.split('|')
     img = components[0] # image filename is always first
-    
+    #print "IMG:", img
+
     # get the other bits of meta-data
     alt = None
     caption = None
@@ -47,8 +49,9 @@ def formatImgHtml(raw):
     return (img, html)
 
 class MediaWiki:
-    def __init__(self, htmlfile):
+    def __init__(self, htmlfile, direc):
         self.__file = htmlfile
+        self.__direc = direc
         self.__types = []
         self.images = []
 
@@ -63,6 +66,7 @@ class MediaWiki:
         for src in raw:
             (imagefile, newtxt) = formatImgHtml(src)
             self.images.append(imagefile)
+            #print "IM2:", imagefile, len(self.images)
             html.append(newtxt)
 
         for (orig, repl) in zip(raw, html):
@@ -162,12 +166,17 @@ class MediaWiki:
             else:
                 self.__types.append(None)
 
-    def parse(self, text):
+    def parse(self, text, qhp):
         #print "00>>>", text, "<<<"
         text = text.strip()
         if len(text) <= 0:
             return # don't bother if it is empty
         text = self.__parseImgs(text)
+        if len(self.images) > 0:
+            print "----->", self.images
+        for img in self.images:
+            img = os.path.join(self.__direc, "img", img)
+            qhp.addFile(img)
         #print "01>>>", text, "<<<"
         if text.startswith("== Deprecation notice =="):
             stuff = "== Deprecation notice =="
