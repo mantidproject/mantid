@@ -1292,8 +1292,7 @@ namespace Geometry
       if ( pCompElem->hasAttribute("mark-as") || pLocElem->hasAttribute("mark-as") )
       {
         g_log.warning() << "Attribute 'mark-as' is a depricated attribute in Instrument Definition File."
-                      << " For example instead of mark-as=\"monitor\" use instead is=\"monitor\"."
-                      << " See www.mantidproject.org/IDF for more details\n";
+                      << " Please see the deprecated section of www.mantidproject.org/IDF for how to remove this warning message\n";
       }
 
       try
