@@ -237,6 +237,8 @@ void testCopyMethadata()
 
     // target workspace has W-matrix, which should be unit matrix
     TS_ASSERT(spws->getExperimentInfo(0)->run().hasProperty("W_MATRIX"));
+    // it also has transformation matrix    
+    TS_ASSERT(spws->getExperimentInfo(0)->run().hasProperty("RUBW_MATRIX"));
 
     if(!spws->getExperimentInfo(0)->run().hasProperty("W_MATRIX"))return;
 
