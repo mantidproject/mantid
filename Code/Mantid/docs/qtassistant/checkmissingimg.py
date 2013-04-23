@@ -61,6 +61,12 @@ if __name__ == "__main__":
     import optparse
     parser = optparse.OptionParser(usage="usage: %prog [options] <htmldir>",
                                    description="Determine if there are images missing from the built documentation.")
+    parser.add_option('', '--shortnames', dest='shortnames',
+                      default=False, action="store_true",
+                      help="Only print the names of missing images rather than full path")
+    parser.add_option('', '--nosummary', dest='summary',
+                      default=True, action="store_false",
+                      help="Turn off the summary information")
     (options, args) = parser.parse_args()
 
     # get the html base directory
@@ -72,7 +78,8 @@ if __name__ == "__main__":
 
     # get the list of html files
     htmlfiles = getHtml(htmldir)
-    print "Verifying %d html files in '%s'" % (len(htmlfiles), htmldir)
+    if options.summary:
+        print "Verifying %d html files in '%s'" % (len(htmlfiles), htmldir)
 
     # determine what images are missing
     missing = []
@@ -80,9 +87,14 @@ if __name__ == "__main__":
         missing.extend(processHtml(htmldir, filename))
 
     # remove repeated filenames
-    missing = set(missing)
+    missing = list(set(missing))
+    missing.sort()
 
     # print the results
-    print "Missing %d image files" % len(missing)
+    if options.summary:
+        print "Missing %d image files" % len(missing)
     for filename in missing:
-        print filename
+        if options.shortnames:
+            print os.path.split(filename)[-1]
+        else:
+            print filename
