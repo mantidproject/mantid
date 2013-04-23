@@ -14,6 +14,7 @@ namespace Mantid
 {
   namespace Kernel
   {
+    using PhysicalConstants::NeutronAtom;
     /**
       A material is defined as being composed of a given element, defined as a
       PhysicalConstants::NeutronAtom, with the following properties:
@@ -75,13 +76,13 @@ namespace Mantid
       /// Get the pressure
       double pressure() const;
       /// Get the coherent scattering cross section for a given wavelength
-      double cohScatterXSection(const double lambda) const;
+      double cohScatterXSection(const double lambda = NeutronAtom::ReferenceLambda) const;
       /// Get the incoherent cross section for a given wavelength
-      double incohScatterXSection(const double lambda) const;
+      double incohScatterXSection(const double lambda = NeutronAtom::ReferenceLambda) const;
       /// Return the total scattering cross section for a given wavelength
-      double totalScatterXSection(const double lambda) const;
+      double totalScatterXSection(const double lambda = NeutronAtom::ReferenceLambda) const;
       /// Get the absorption cross section at a given wavelength
-      double absorbXSection(const double lambda) const;
+      double absorbXSection(const double lambda = NeutronAtom::ReferenceLambda) const;
       //@}
 
       void saveNexus(::NeXus::File * file, const std::string & group) const;
