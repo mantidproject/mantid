@@ -567,6 +567,57 @@ public:
     AnalysisDataService::Instance().remove("OutputWorkspace");
   }
 
+  void test_loadAffine()
+  {
+    std::string filename("SaveMDAffineTest.nxs");
+    // Make a 4D MDEventWorkspace
+    MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
+    AnalysisDataService::Instance().addOrReplace("SaveMDAffineTest_ws", ws);
+
+    // Bin data to get affine matrix
+    BinMD balg;
+    balg.initialize();
+    balg.setProperty("InputWorkspace", "SaveMDAffineTest_ws");
+    balg.setProperty("OutputWorkspace", "SaveMDAffineTestHisto_ws");
+    balg.setProperty("AlignedDim0", "Axis2,0,10,10");
+    balg.setProperty("AlignedDim1", "Axis0,0,10,5");
+    balg.setProperty("AlignedDim2", "Axis1,0,10,5");
+    balg.setProperty("AlignedDim3", "Axis3,0,10,2");
+    balg.execute();
+
+    SaveMD alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "SaveMDAffineTestHisto_ws");
+    alg.setPropertyValue("Filename", filename);
+    alg.setProperty("MakeFileBacked","0");
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    LoadMD loadAlg;
+    loadAlg.initialize();
+    loadAlg.isInitialized();
+    loadAlg.setPropertyValue("Filename", filename);
+    loadAlg.setProperty("FileBackEnd", false);
+    loadAlg.setPropertyValue("OutputWorkspace", "reloaded_affine");
+    loadAlg.execute();
+    TS_ASSERT( loadAlg.isExecuted() );
+
+    // Check the affine matrix over at a couple of locations
+    MDHistoWorkspace_sptr newWS = AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("reloaded_affine");
+    Matrix<coord_t> affMat = newWS->getTransformToOriginal()->makeAffineMatrix();
+    TS_ASSERT_EQUALS( affMat[0][1], 1.0 );
+    TS_ASSERT_EQUALS( affMat[2][0], 1.0 );
+
+    if (Poco::File(filename).exists())
+    {
+      Poco::File(filename).remove();
+    }
+
+    AnalysisDataService::Instance().remove("SaveMDAffineTest_ws");
+    AnalysisDataService::Instance().remove("SaveMDAffineTestHisto_ws");
+    AnalysisDataService::Instance().remove("OutputWorkspace");
+  }
+
 };
 
 #endif /* MANTID_MDEVENTS_LOADMDEWTEST_H_ */
