@@ -123,6 +123,8 @@ protected:
   QPushButton* m_apply_to_view;
   QPushButton* m_clear_all;
   QPushButton* m_saveButton;
+  QCheckBox* m_savegroupdet;
+
 
   QMenu* m_saveMask;
   QAction* m_save_as_workspace_include;

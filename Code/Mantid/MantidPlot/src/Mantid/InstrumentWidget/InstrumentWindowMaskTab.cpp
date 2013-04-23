@@ -47,6 +47,7 @@
 #include <QToolTip>
 #include <QTemporaryFile>
 #include <QGroupBox>
+#include <QCheckBox>
 
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -147,13 +148,13 @@ m_userEditing(true)
 
   // Create property browser
 
-    /* Create property managers: they create, own properties, get and set values  */
+  /* Create property managers: they create, own properties, get and set values  */
 
   m_groupManager = new QtGroupPropertyManager(this);
   m_doubleManager = new QtDoublePropertyManager(this);
   connect(m_doubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(doubleChanged(QtProperty*)));
 
-     /* Create editors and assign them to the managers */
+  /* Create editors and assign them to the managers */
 
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
 
@@ -175,6 +176,10 @@ m_userEditing(true)
   m_clear_all = new QPushButton("Clear All");
   m_clear_all->setToolTip("Clear all masking that have not been applied to the data.");
   connect(m_clear_all,SIGNAL(clicked()),this,SLOT(clearMask()));
+
+  m_savegroupdet = new QCheckBox("Grouped Detectors");
+  m_savegroupdet->setToolTip("If checked, then save masked with grouped detectors. ");
+  m_savegroupdet->setChecked(false);
 
   m_save_as_workspace_exclude = new QAction("As Mask to workspace",this);
   m_save_as_workspace_exclude->setToolTip("Save current mask to mask workspace.");
@@ -246,6 +251,8 @@ m_userEditing(true)
   buttons->addWidget(m_apply_to_view,0,0,1,2);
   buttons->addWidget(m_saveButton,1,0);
   buttons->addWidget(m_clear_all,1,1);
+  buttons->addWidget(m_savegroupdet, 2, 0, 1, 2);
+
   box->setLayout(buttons);
   layout->addWidget(box);
 
@@ -709,10 +716,14 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
 
     if (!fileName.isEmpty())
     {
+      // Check option "GroupedDetectors"
+      bool groupeddetectors = m_savegroupdet->isChecked();
+
+      // Call "SaveMask()"
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveMask",-1);
       alg->setProperty("InputWorkspace",boost::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
       alg->setPropertyValue("OutputFile",fileName.toStdString());
-      alg->setProperty("GroupedDetectors",true);
+      alg->setProperty("GroupedDetectors", groupeddetectors);
       alg->execute();
     }
     Mantid::API::AnalysisDataService::Instance().remove( outputWS->name() );
