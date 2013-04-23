@@ -112,8 +112,8 @@ namespace DataHandling
         Material *mat = new Material(chemicalSymbol, *neutron, rho);
         workspace->mutableSample().setMaterial(*mat);
         g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
-        g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(1.7982) << "\n";
-        g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(1.7982)<< "\n";
+        g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
+        g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< "\n";
     	return;
     }
 
@@ -124,8 +124,8 @@ namespace DataHandling
 		Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
 		workspace->mutableSample().setMaterial(*mat);
 		g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
-		g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(1.7982) << "\n";
-		g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(1.7982)<< "\n";
+		g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
+		g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< "\n";
     }
     catch (...)
     {
@@ -134,25 +134,25 @@ namespace DataHandling
     	{
 			std::vector<std::string> atoms;
 			std::vector<uint16_t> numberAtoms, aNumbers;
-			this->parseChemicalFormula(chemicalSymbol, atoms, numberAtoms, aNumbers);
+			Material::parseChemicalFormula(chemicalSymbol, atoms, numberAtoms, aNumbers);
         	sigma_s = 0.0;
         	sigma_atten = 0.0;
         	for (size_t i=0; i<atoms.size(); i++)
         	{
         		Atom myAtom = getAtom(atoms[i], aNumbers[i]);
         		Material *atom = new Material(atoms[i], myAtom.neutron, myAtom.number_density);
-        		g_log.notice() << myAtom << " sigma_s = "<< atom->totalScatterXSection(1.7982) << "\n";
-        		g_log.notice() << myAtom << " sigma_atten = "<< atom->absorbXSection(1.7982) << "\n";
-        		sigma_s +=  static_cast<double>(numberAtoms[i]) * atom->totalScatterXSection(1.7982);
-        		sigma_atten +=  static_cast<double>(numberAtoms[i]) * atom->absorbXSection(1.7982);
+        		g_log.notice() << myAtom << " sigma_s = "<< atom->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
+        		g_log.notice() << myAtom << " sigma_atten = "<< atom->absorbXSection(NeutronAtom::ReferenceLambda) << "\n";
+        		sigma_s +=  static_cast<double>(numberAtoms[i]) * atom->totalScatterXSection(NeutronAtom::ReferenceLambda);
+        		sigma_atten +=  static_cast<double>(numberAtoms[i]) * atom->absorbXSection(NeutronAtom::ReferenceLambda);
         	}
 			rho = zParameter / unitCellVolume;
 			NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
 					0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
     		Material *mat = new Material(chemicalSymbol, *neutron, rho);
 	        g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
-	        g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(1.7982) << "\n";
-	        g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(1.7982)<< "\n";
+	        g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
+	        g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< "\n";
     		workspace->mutableSample().setMaterial(*mat);
     	}
         catch (...)
@@ -164,8 +164,8 @@ namespace DataHandling
 				Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
 				workspace->mutableSample().setMaterial(*mat);
 				g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
-				g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(1.7982) << "\n";
-				g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(1.7982)<< "\n";
+				g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
+				g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< "\n";
 			}
 			catch(std::invalid_argument&)
 			{
@@ -177,87 +177,6 @@ namespace DataHandling
     // Done!
     progress(1);
   }
-  void SetSampleMaterial::parseChemicalFormula(const std::string chemicalSymbol, std::vector<std::string>& atoms,
-		  std::vector<uint16_t>& numberAtoms, std::vector<uint16_t>& aNumbers)
-  {
-	  const char *s;
-	  s = chemicalSymbol.c_str();
-	  size_t i = 0;
-	  size_t ia = 0;
-	  size_t numberParen = 0;
-	  size_t sizeParen = 0;
-	  bool isotope = false;
-	  while (i < chemicalSymbol.length())
-	  {
-		if (s[i] >= 'A' && s[i]<='Z')
-		{
-			std::string buf(s+i, s+i+1);
-			atoms.push_back(buf);
-			numberAtoms.push_back(0);
-			aNumbers.push_back(0);
-			ia ++;
-		}
-		else if (s[i] >= 'a' && s[i]<='z')
-		{
-			std::string buf(s+i, s+i+1);
-			atoms[ia-1].append(buf);
-		}
-		else if (s[i] >= '0' && s[i]<='9')
-		{
-			if (isotope)
-			{
-				size_t ilast = i;
-				// Number of digits in aNumber
-				if (aNumbers[ia-1] != 0) ilast -= (int) std::log10 ((double) aNumbers[ia-1]) + 1;
-				std::string buf(s+ilast, s+i+1);
-				aNumbers[ia-1] = static_cast<uint16_t>(std::atoi(buf.c_str()));
-			}
-			else
-			{
-				size_t ilast = i;
-				// Number of digits in aNumber
-				if (numberAtoms[ia-1] != 0) ilast -= (int) std::log10 ((double) numberAtoms[ia-1]) + 1;
-				std::string buf(s+ilast, s+i+1);
-				numberAtoms[ia-1] = static_cast<uint16_t>(std::atoi(buf.c_str()));
-			}
 
-		}
-		else if (s[i] == '(' || s[i] ==')')
-		{
-			isotope = !isotope;
-			if (s[i] == '(')
-			{
-                                // next atom
-                                sizeParen = 0;
-				numberParen = ia + 1;
-			}
-			else
-			{
-                                sizeParen = ia - numberParen + 1;
-				if (ia > numberParen)for (size_t i0 = numberParen - 1; i0 < ia; i0++)
-				{
-					  // if more than one atom in parenthesis, it is compound
-					  numberAtoms[i0] = aNumbers[i0];
-					  aNumbers[i0] = 0;
-				}
-			}
-		}
-		else
-		{
-		}
-		i++;
-	  }
-		if (ia == 1 && s[0] != '(')
-		{
-			  // isotopes in molecular expressions must have parentheses
-			  // single isotopes can omit parentheses
-			  aNumbers[0] = numberAtoms[0];
-			  numberAtoms[0] = 1;
-		}
-		for (size_t i0=0; i0<ia; i0++)
-		{
-                        if (numberAtoms[i0] == 0)numberAtoms[i0] = 1;
-		}
-  }
 }
 }

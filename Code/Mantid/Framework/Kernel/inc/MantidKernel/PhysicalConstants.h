@@ -83,6 +83,7 @@ namespace PhysicalConstants
    */
   static const double BoltzmannConstant = 8.6173324e-02;
 
+
 } // namespace PhysicalConstants
 } // namespace Mantid
 
