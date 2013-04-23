@@ -336,7 +336,6 @@ namespace Mantid
       // Load the WorkspaceHistory "process"
       ws->history().loadNexus(file);
 
-      this->loadWmatrix(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
       this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
       // Load each data slab
@@ -402,7 +401,6 @@ namespace Mantid
       // Load the WorkspaceHistory "process"
       ws->history().loadNexus(file);
 
-      this->loadWmatrix(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
       this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
       file->closeGroup();
@@ -491,22 +489,6 @@ namespace Mantid
       g_log.debug() << tim << " to finish up." << std::endl;
       delete prog;
     }
-
-  void LoadMD::loadWmatrix(IMDWorkspace_sptr ws)
-  {
-    std::map<std::string, std::string> entries;
-    file->getEntries(entries);
-
-    if (entries.find("w_matrix") != entries.end())
-    {
-      file->openData("w_matrix");
-      std::vector<double> vec;
-      file->getData<double>(vec);
-      file->closeData();
-      DblMatrix mat(vec);
-      ws->setWTransf(mat);
-    }
-  }
 
   void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws)
   {
