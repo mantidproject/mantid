@@ -1,6 +1,6 @@
 /*WIKI* 
 
-[[Image:GEM Focused.png|200px|thumb|right|Example of RAW GEM data focused across the 5 detector banks]] 
+[[Image:GEM_Focused.png|200px|thumb|right|Example of RAW GEM data focused across the 5 detector banks]]
 Given an InputWorkspace and a Grouping filename, the algorithm performs the following:
 # The calibration file is read and a map of corresponding udet-group is created.
 # The algorithm determine the X boundaries for each group as the upper and lower limits of all contributing detectors to this group and determine a logarithmic step that will ensure preserving the number of bins in the initial workspace.

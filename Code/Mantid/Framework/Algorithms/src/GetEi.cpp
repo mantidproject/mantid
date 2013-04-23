@@ -13,7 +13,7 @@ Not all neutrons arrive at the monitors at the same time because their kinetic e
 # the mean of the X-values of the two half height points is the TOF arrival time of the neutrons
 
 The above process is illustrated on a peak is shown below in the image below
-[[File:monitorspect_getei.jpg|Monitor Peak|centre|618px]]
+[[File:Monitorspect_getei.jpg|Monitor Peak|centre|618px]]
 
 The distances between the monitors are read from the instrument definition file. It is assumed that the source and the monitors all lie on one line and that the monitors have the same delay time.
 
