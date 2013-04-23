@@ -2,7 +2,7 @@
 
 The LoadEventNeXus algorithm loads data from an EventNexus file into an [[EventWorkspace]]. The default histogram bin boundaries consist of a single bin able to hold all events (in all pixels), and will have their [[units]] set to time-of-flight. Since it is an [[EventWorkspace]], it can be rebinned to finer bins with no loss of data.
 
-Sample logs, such as motor positions or e.g. temperature vs time, are also loaded using the [[LoadLogsFromSNSNexus]] child algorithm.
+Sample logs, such as motor positions or e.g. temperature vs time, are also loaded using the [[LoadNexusLogs]] child algorithm.
 
 === Optional properties ===
 
@@ -1938,90 +1938,90 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
  */
 void LoadEventNexus::deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames)
 {
-	Instrument_sptr inst = boost::const_pointer_cast<Instrument>(workspace->getInstrument()->baseInstrument());
-	//Build a list of Rectangular Detectors
-	std::vector<boost::shared_ptr<RectangularDetector> > detList;
-	for (int i=0; i < inst->nelements(); i++)
-	{
-	  boost::shared_ptr<RectangularDetector> det;
-	  boost::shared_ptr<ICompAssembly> assem;
-	  boost::shared_ptr<ICompAssembly> assem2;
+    Instrument_sptr inst = boost::const_pointer_cast<Instrument>(workspace->getInstrument()->baseInstrument());
+    //Build a list of Rectangular Detectors
+    std::vector<boost::shared_ptr<RectangularDetector> > detList;
+    for (int i=0; i < inst->nelements(); i++)
+    {
+      boost::shared_ptr<RectangularDetector> det;
+      boost::shared_ptr<ICompAssembly> assem;
+      boost::shared_ptr<ICompAssembly> assem2;
 
-	  det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
-	  if (det)
-	  {
-		detList.push_back(det);
-	  }
-	  else
-	  {
-		//Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
-		// We are not doing a full recursive search since that will be very long for lots of pixels.
-		assem = boost::dynamic_pointer_cast<ICompAssembly>( (*inst)[i] );
-		if (assem)
-		{
-		  for (int j=0; j < assem->nelements(); j++)
-		  {
-			det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
-			if (det)
-			{
-			  detList.push_back(det);
+      det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
+      if (det)
+      {
+        detList.push_back(det);
+      }
+      else
+      {
+        //Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
+        // We are not doing a full recursive search since that will be very long for lots of pixels.
+        assem = boost::dynamic_pointer_cast<ICompAssembly>( (*inst)[i] );
+        if (assem)
+        {
+          for (int j=0; j < assem->nelements(); j++)
+          {
+            det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
+            if (det)
+            {
+              detList.push_back(det);
 
-			}
-			else
-			{
-			  //Also, look in the second sub-level for RectangularDetectors (e.g. PG3).
-			  // We are not doing a full recursive search since that will be very long for lots of pixels.
-			  assem2 = boost::dynamic_pointer_cast<ICompAssembly>( (*assem)[j] );
-			  if (assem2)
-			  {
-				for (int k=0; k < assem2->nelements(); k++)
-				{
-				  det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
-				  if (det)
-				  {
-					detList.push_back(det);
-				  }
-				}
-			  }
-			}
-		  }
-		}
-	  }
-	}
+            }
+            else
+            {
+              //Also, look in the second sub-level for RectangularDetectors (e.g. PG3).
+              // We are not doing a full recursive search since that will be very long for lots of pixels.
+              assem2 = boost::dynamic_pointer_cast<ICompAssembly>( (*assem)[j] );
+              if (assem2)
+              {
+                for (int k=0; k < assem2->nelements(); k++)
+                {
+                  det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
+                  if (det)
+                  {
+                    detList.push_back(det);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
     if (detList.size() == 0) return;
-	for (int i = 0; i<static_cast<int>(detList.size()); i++)
-	{
-		bool keep = false;
-	    boost::shared_ptr<RectangularDetector> det = detList[i];
-	    std::string det_name = det->getName();
-		for (int j = 0; j<static_cast<int>(bankNames.size()); j++)
-		{
-		    size_t pos = bankNames[j].find("_events");
-			if(det_name.compare(bankNames[j].substr(0,pos)) == 0) keep = true;
-			if(keep) break;
-		}
-		if (!keep)
-		{
-			boost::shared_ptr<const IComponent> parent = inst->getComponentByName(det_name);
-			std::vector<Geometry::IComponent_const_sptr> children;
-			boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-			asmb->getChildren(children, false);
-	        for (int col = 0; col<static_cast<int>(children.size()); col++)
-	        {
-				boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col]);
-				std::vector<Geometry::IComponent_const_sptr> grandchildren;
-				asmb2->getChildren(grandchildren,false);
+    for (int i = 0; i<static_cast<int>(detList.size()); i++)
+    {
+        bool keep = false;
+        boost::shared_ptr<RectangularDetector> det = detList[i];
+        std::string det_name = det->getName();
+        for (int j = 0; j<static_cast<int>(bankNames.size()); j++)
+        {
+            size_t pos = bankNames[j].find("_events");
+            if(det_name.compare(bankNames[j].substr(0,pos)) == 0) keep = true;
+            if(keep) break;
+        }
+        if (!keep)
+        {
+            boost::shared_ptr<const IComponent> parent = inst->getComponentByName(det_name);
+            std::vector<Geometry::IComponent_const_sptr> children;
+            boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+            asmb->getChildren(children, false);
+            for (int col = 0; col<static_cast<int>(children.size()); col++)
+            {
+                boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[col]);
+                std::vector<Geometry::IComponent_const_sptr> grandchildren;
+                asmb2->getChildren(grandchildren,false);
 
-				for (int row = 0; row<static_cast<int>(grandchildren.size()); row++)
-				{
-					Detector* d = dynamic_cast<Detector*>(const_cast<IComponent*>(grandchildren[row].get()));
-					inst->removeDetector(d);
-				}
-	        }
-			IComponent* comp = dynamic_cast<IComponent*>(detList[i].get());
-			inst->remove(comp);
-		}
-	}
+                for (int row = 0; row<static_cast<int>(grandchildren.size()); row++)
+                {
+                    Detector* d = dynamic_cast<Detector*>(const_cast<IComponent*>(grandchildren[row].get()));
+                    inst->removeDetector(d);
+                }
+            }
+            IComponent* comp = dynamic_cast<IComponent*>(detList[i].get());
+            inst->remove(comp);
+        }
+    }
       return;
 }
 //-----------------------------------------------------------------------------

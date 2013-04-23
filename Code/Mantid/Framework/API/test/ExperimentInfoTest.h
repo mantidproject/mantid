@@ -10,6 +10,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusTestHelper.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/Matrix.h"
 
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -626,6 +627,43 @@ public:
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS( inst->getName(), "" );
     TS_ASSERT_EQUALS( parameterStr, "" );
+  }
+
+  void testNexus_W_matrix()
+  {
+      NexusTestHelper th(true);
+      th.createFile("ExperimentInfoWMatrixTest.nxs");
+      ExperimentInfo ei;
+
+      DblMatrix WTransf(3,3,true);
+      // let's add some tricky stuff to w-transf
+      WTransf[0][1]=0.5;
+      WTransf[0][2]=2.5;
+      WTransf[1][0]=10.5;
+      WTransf[1][2]=12.5;
+      WTransf[2][0]=20.5;
+      WTransf[2][1]=21.5;
+
+      auto wTrVector = WTransf.getVector();
+
+      // this occurs in ConvertToMD, copy methadata
+      ei.mutableRun().addProperty("W_MATRIX",wTrVector,true);
+
+      TS_ASSERT_THROWS_NOTHING(ei.saveExperimentInfoNexus(th.file));
+
+      th.reopenFile();
+
+      ExperimentInfo other;
+      std::string InstrParameters;
+      TS_ASSERT_THROWS_NOTHING(other.loadExperimentInfoNexus(th.file,InstrParameters));
+
+      std::vector<double> wMatrRestored=other.run().getPropertyValueAsType<std::vector<double> >("W_MATRIX");
+
+      for(int i=0;i<9;i++)
+      {
+          TS_ASSERT_DELTA(wTrVector[i],wMatrRestored[i],1.e-9);
+      }
+
   }
 
 private:

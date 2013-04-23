@@ -198,7 +198,7 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
   default: throw(std::invalid_argument("unrecognized conversion mode"));
 
   }
-
+  TargWSDescription.addProperty("W_MATRIX",Wmat.getVector(),true);
   return Transf*Scale*Wmat;
 }
 

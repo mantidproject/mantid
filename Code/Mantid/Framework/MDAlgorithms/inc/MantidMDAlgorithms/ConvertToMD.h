@@ -68,19 +68,20 @@ namespace MDAlgorithms
     void exec();
    /// Sets documentation strings for this algorithm
     virtual void initDocs();  
-   /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
-   boost::shared_ptr<MDEvents::MDEventWSWrapper> m_OutWSWrapper;
    /// progress reporter
    boost::scoped_ptr<API::Progress > m_Progress;
-   /// pointer to the class, which does the particular conversion
-   boost::shared_ptr<MDEvents::ConvToMDBase> m_Convertor; 
  
   /// logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& g_Log;
    //------------------------------------------------------------------------------------------------------------------------------------------
    protected: //for testing, otherwise private:
+      /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
+      boost::shared_ptr<MDEvents::MDEventWSWrapper> m_OutWSWrapper;
        /// pointer to the input workspace;
       Mantid::API::MatrixWorkspace_sptr m_InWS2D;
+      /// pointer to the class, which does the particular conversion
+      boost::shared_ptr<MDEvents::ConvToMDBase> m_Convertor; 
+
 
        static Mantid::Kernel::Logger & getLogger();
 
@@ -92,8 +93,8 @@ namespace MDAlgorithms
 
         bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dEModeRequested,const std::vector<std::string> &other_dim_names,
                                       const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr);
-       /// Store metadata
-       void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;
+       /// Store metadata and set some methadata, needed for plugin to run on the target workspace description
+       void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS,MDEvents::MDWSDescription &targWSDescr) const;
 
        // 
        DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested,bool updateMasks);
