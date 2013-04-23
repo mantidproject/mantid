@@ -215,12 +215,20 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const
 void InstrumentActor::applyMaskWorkspace()
 {
     if ( !m_maskWorkspace ) return;
-    Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("MaskDetectors",-1);
-    alg->setPropertyValue( "Workspace", getWorkspace()->name() );
-    alg->setProperty( "MaskedWorkspace", m_maskWorkspace );
-    alg->execute();
-    // After the algorithm finishes the InstrumentWindow catches the after-replace notification 
-    // and updates this instrument actor.
+    try
+    {
+        Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("MaskDetectors",-1);
+        alg->setPropertyValue( "Workspace", getWorkspace()->name() );
+        alg->setProperty( "MaskedWorkspace", m_maskWorkspace );
+        alg->execute();
+        // After the algorithm finishes the InstrumentWindow catches the after-replace notification
+        // and updates this instrument actor.
+    }
+    catch(...)
+    {
+        QMessageBox::warning(NULL,"MantidPlot - Warning","An error accured when applying the mask.","OK");
+    }
+    clearMaskWorkspace();
 }
 
 /**
@@ -621,15 +629,15 @@ void InstrumentActor::setAutoscaling(bool on)
 void InstrumentActor::initMaskHelper() const
 {
   if ( m_maskWorkspace ) return;
-  // extract the mask (if any) from the data to the mask workspace
-  const std::string maskName = "__InstrumentActor_MaskWorkspace";
-  Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",-1);
-  alg->setPropertyValue( "InputWorkspace", getWorkspace()->name() );
-  alg->setPropertyValue( "OutputWorkspace", maskName );
-  alg->execute();
-
   try
   {
+    // extract the mask (if any) from the data to the mask workspace
+    const std::string maskName = "__InstrumentActor_MaskWorkspace";
+    Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",-1);
+    alg->setPropertyValue( "InputWorkspace", getWorkspace()->name() );
+    alg->setPropertyValue( "OutputWorkspace", maskName );
+    alg->execute();
+
     m_maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
     Mantid::API::AnalysisDataService::Instance().remove( maskName );
   }

@@ -62,8 +62,10 @@ protected slots:
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
+  void shapesCleared();
   void clearShapes();
   void applyMask();
+  void applyMaskToView();
   void storeMask();
   void clearMask();
   void saveInvertedMaskToWorkspace();
@@ -90,8 +92,7 @@ protected:
   void saveMaskingToFile(bool invertMask = false);
   void saveMaskingToCalFile(bool invertMask = false);
   std::string generateMaskWorkspaceName(bool temp = false) const;
-  void enableApply();
-  void enableClear();
+  void enableApplyButtons();
   void setSelectActivity();
   /// True if in masking mode, flase if in grouping.
   bool isMasking() const;
@@ -119,8 +120,11 @@ protected:
   QPushButton* m_ring_rectangle;
 
   QPushButton* m_apply;
+  QPushButton* m_apply_to_view;
   QPushButton* m_clear_all;
   QPushButton* m_saveButton;
+  QCheckBox* m_savegroupdet;
+
 
   QMenu* m_saveMask;
   QAction* m_save_as_workspace_include;

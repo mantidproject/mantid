@@ -98,7 +98,8 @@ void export_Axis()
     .def("getValue", &Axis::getValue,
         Axis_getValue(args("index", "vertical_index"), "Returns the value at the given point on the Axis. The vertical axis index [default=0]")) 
     .def("extractValues", &extractAxisValues, "Return a numpy array of the axis values")
-    .def("setUnit", & Axis::setUnit, "Set the unit for this axis")
+    .def("setUnit", & Axis::setUnit, return_value_policy<copy_const_reference>(),
+         "Set the unit for this axis by name.")
     .def("setValue", &Axis::setValue, "Set a value at the given index")
     .def("getMin", &Axis::getMin, "Get min value specified on the axis")
     .def("getMax", &Axis::getMax, "Get max value specified on the axis")

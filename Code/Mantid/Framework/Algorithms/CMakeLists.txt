@@ -478,6 +478,7 @@ set ( TEST_FILES
 	ConvertToMatrixWorkspaceTest.h
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
+	CopyInstrumentParametersTest.h
 	CopySampleTest.h
 	CorrectFlightPathsTest.h
 	CorrectKiKfTest.h

@@ -49,8 +49,6 @@ using Mantid::Kernel::ConfigServiceImpl;
 
 using boost::property_tree::ptree;
 
-const std::string SCRIPTREPPATH = "scripts_repo/";
-
 namespace Mantid
 {
 namespace API
@@ -269,7 +267,7 @@ namespace API
     // install the two files inside the given folder
     
     // download the repository json
-    doDownloadFile(std::string(remote_url).append("/repository.json"),
+    doDownloadFile(std::string(remote_url).append("repository.json"),
                    rep_json_file);
     g_log.debug() << "ScriptRepository downloaded repository information" << std::endl; 
     // creation of the instance of local_json file
@@ -620,7 +618,7 @@ namespace API
       return;
            
     // download the file
-    std::string url_path = std::string(remote_url).append(SCRIPTREPPATH).append(file_path); 
+    std::string url_path = std::string(remote_url).append(file_path); 
     Poco::TemporaryFile tmpFile; 
     doDownloadFile(url_path, tmpFile.path());
 
@@ -814,7 +812,7 @@ namespace API
       f.moveTo(backup); 
     }
     try{
-      doDownloadFile(std::string(remote_url).append("/repository.json"),
+      doDownloadFile(std::string(remote_url).append("repository.json"),
                    rep_json_file);
     }catch(...){
       // restore file
@@ -932,7 +930,7 @@ namespace API
     Poco::URI uri(url_file);
     std::string path(uri.getPathAndQuery());
     if (path.empty()) path = "/";
-    std::string given_path = std::string(path.begin()+28, path.end());// remove the "/master_builds/scripts_repo/" from the path
+    std::string given_path = std::string(path.begin()+18, path.end());// remove the "/scriptrepository/" from the path
     //Configure Poco HTTP Client Session
     try{
       Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
