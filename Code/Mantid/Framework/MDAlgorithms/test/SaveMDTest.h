@@ -237,7 +237,10 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     ws->clearFileBacked(false);
-    //if (Poco::File(filename).exists()) Poco::File(filename).remove();
+    if (Poco::File(filename).exists())
+    {
+      Poco::File(filename).remove();
+    }
   }
 
   /** Run SaveMD with the MDHistoWorkspace */
