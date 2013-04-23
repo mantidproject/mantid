@@ -346,6 +346,12 @@ namespace MDAlgorithms
       throw std::runtime_error("SaveMD can only save MDEventWorkspaces and MDHistoWorkspaces.\nPlease use SaveNexus or another algorithm appropriate for this workspace type.");
   }
 
+  /**
+   * Save the affine matricies to both directional conversions to the
+   * data.
+   * @param file : pointer to the NeXus file
+   * @param ws : workspace to get matrix from
+   */
   void SaveMD::saveAffineTransformMatricies(::NeXus::File *const file,
                                             IMDWorkspace_const_sptr ws)
   {
@@ -369,6 +375,12 @@ namespace MDAlgorithms
     }
   }
 
+  /**
+   * Extract and save the requested affine matrix.
+   * @param file : pointer to the NeXus file
+   * @param transform : the object to extract the affine matrix from
+   * @param entry_name : the tag in the NeXus file to save under
+   */
   void SaveMD::saveAffineTransformMatrix(::NeXus::File *const file,
                                          CoordTransform *transform,
                                          std::string entry_name)
@@ -379,6 +391,15 @@ namespace MDAlgorithms
                               ::NeXus::FLOAT32, transform->id());
   }
 
+
+  /**
+   * Save routine for a generic matrix
+   * @param file : pointer to the NeXus file
+   * @param name : the tag in the NeXus file to save under
+   * @param m : matrix to save
+   * @param type : NXnumtype for the matrix data
+   * @param tag : id for an affine matrix conversion
+   */
   template<typename T>
   void SaveMD::saveMatrix(::NeXus::File *const file, std::string name,
                          Matrix<T> &m, ::NeXus::NXnumtype type, std::string tag)
