@@ -12,15 +12,13 @@
 #include "MantidKernel/NexusTestHelper.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
-#include <boost/scoped_ptr.hpp>
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/VMD.h"
+#include <cxxtest/TestSuite.h>
 
 using std::size_t;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid;
 using namespace testing;
 
 
@@ -32,9 +30,9 @@ DECLARE_WORKSPACE(WorkspaceTester)
  * @param numSpectra
  * @return
  */
-MatrixWorkspace * makeWorkspaceWithDetectors(size_t numSpectra, size_t numBins)
+boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra, size_t numBins)
 {
-  MatrixWorkspace *ws2 = new WorkspaceTester;
+  boost::shared_ptr<MatrixWorkspace> ws2 = boost::make_shared<WorkspaceTester>();
   ws2->initialize(numSpectra,numBins,numBins);
 
   Instrument_sptr inst(new Instrument("TestInstrument"));
@@ -84,16 +82,16 @@ public:
 
   void test_getIndicesFromDetectorIDs()
   {
-    WorkspaceTester * ws = new WorkspaceTester;
-    ws->initialize(10, 1,1);
+    WorkspaceTester ws;
+    ws.initialize(10, 1,1);
     for (size_t i=0; i<10; i++)
-      ws->getSpectrum(i)->setDetectorID(detid_t(i*10));
+      ws.getSpectrum(i)->setDetectorID(detid_t(i*10));
     std::vector<detid_t> dets;
     dets.push_back(60);
     dets.push_back(20);
     dets.push_back(90);
     std::vector<size_t> indices;
-    ws->getIndicesFromDetectorIDs(dets, indices);
+    ws.getIndicesFromDetectorIDs(dets, indices);
     TS_ASSERT_EQUALS( indices.size(), 3);
     TS_ASSERT_EQUALS( indices[0], 6);
     TS_ASSERT_EQUALS( indices[1], 2);
@@ -102,30 +100,30 @@ public:
 
   void test_That_A_Workspace_Gets_SpectraMap_When_Initialized_With_NVector_Elements()
   {
-    MatrixWorkspace_sptr testWS(new WorkspaceTester);
+    WorkspaceTester testWS;
     const size_t nhist(10);
-    testWS->initialize(nhist,1,1);
-    for (size_t i=0; i<testWS->getNumberHistograms(); i++)
+    testWS.initialize(nhist,1,1);
+    for (size_t i=0; i<testWS.getNumberHistograms(); i++)
     {
-      TS_ASSERT_EQUALS(testWS->getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
-      TS_ASSERT(testWS->getSpectrum(i)->hasDetectorID(detid_t(i)));
+      TS_ASSERT_EQUALS(testWS.getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
+      TS_ASSERT(testWS.getSpectrum(i)->hasDetectorID(detid_t(i)));
     }
   }
 
   void test_replaceSpectraMap()
   {
-    boost::scoped_ptr<MatrixWorkspace> testWS(new WorkspaceTester);
-    testWS->initialize(1,1,1);
+    WorkspaceTester testWS;
+    testWS.initialize(1,1,1);
     // Default one
-    TS_ASSERT_EQUALS(testWS->getSpectrum(0)->getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(testWS.getSpectrum(0)->getSpectrumNo(), 1);
 
     ISpectraDetectorMap * spectraMap = new OneToOneSpectraDetectorMap(1,10);
-    testWS->replaceSpectraMap(spectraMap);
+    testWS.replaceSpectraMap(spectraMap);
     // Has it been replaced
-    for (size_t i=0; i<testWS->getNumberHistograms(); i++)
+    for (size_t i=0; i<testWS.getNumberHistograms(); i++)
     {
-      TS_ASSERT_EQUALS(testWS->getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
-      TS_ASSERT(testWS->getSpectrum(i)->hasDetectorID(detid_t(i+1)));
+      TS_ASSERT_EQUALS(testWS.getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
+      TS_ASSERT(testWS.getSpectrum(i)->hasDetectorID(detid_t(i+1)));
     }
   }
   
@@ -195,14 +193,13 @@ public:
 
   void testGetSpectrum()
   {
-    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
-    ws->initialize(4,1,1);
+    WorkspaceTester ws;
+    ws.initialize(4,1,1);
     ISpectrum * spec = NULL;
-    TS_ASSERT_THROWS_NOTHING( spec = ws->getSpectrum(0) );
+    TS_ASSERT_THROWS_NOTHING( spec = ws.getSpectrum(0) );
     TS_ASSERT(spec);
-    TS_ASSERT_THROWS_NOTHING( spec = ws->getSpectrum(3) );
+    TS_ASSERT_THROWS_NOTHING( spec = ws.getSpectrum(3) );
     TS_ASSERT(spec);
-    //TS_ASSERT_THROWS_ANYTHING( spec = ws->getSpectrum(4) );
   }
 
   /** Get a detector sptr for each spectrum */
@@ -305,7 +302,7 @@ public:
   
   void testFlagMasked()
   {
-    MatrixWorkspace *ws = makeWorkspaceWithDetectors(2,2);
+    auto ws = makeWorkspaceWithDetectors(2,2);
     // Now do a valid masking
     TS_ASSERT_THROWS_NOTHING( ws->flagMasked(0,1,0.75) );
     TS_ASSERT( ws->hasMaskedBins(0) );
@@ -323,13 +320,11 @@ public:
     // Check the previous masking is still OK
     TS_ASSERT_EQUALS( ws->maskedBins(0).rbegin()->first, 1 )
     TS_ASSERT_EQUALS( ws->maskedBins(0).rbegin()->second, 0.75 )
-
-    delete ws;
   }
 
   void testMasking()
   {
-    MatrixWorkspace *ws2 = makeWorkspaceWithDetectors(1,2);
+    auto ws2 = makeWorkspaceWithDetectors(1,2);
 
     TS_ASSERT( !ws2->hasMaskedBins(0) );
     // Doesn't throw on invalid spectrum index, just returns false
@@ -362,58 +357,56 @@ public:
     TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->first, 1 );
     TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->second, 0.5 );
     TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.5 );
-
-    delete ws2;
   }
 
   void testSize()
   {
-    MatrixWorkspace *wkspace = new WorkspaceTester;
-    wkspace->initialize(1,4,3);
-    TS_ASSERT_EQUALS(wkspace->blocksize(), 3);
-    TS_ASSERT_EQUALS(wkspace->size(), 3);
+    WorkspaceTester wkspace;
+    wkspace.initialize(1,4,3);
+    TS_ASSERT_EQUALS(wkspace.blocksize(), 3);
+    TS_ASSERT_EQUALS(wkspace.size(), 3);
   }
 
   void testBinIndexOf()
   {
-    MatrixWorkspace *wkspace = new WorkspaceTester;
-    wkspace->initialize(1,4,2);
+    WorkspaceTester wkspace;
+    wkspace.initialize(1,4,2);
     //Data is all 1.0s
-    wkspace->dataX(0)[1] = 2.0;
-    wkspace->dataX(0)[2] = 3.0;
-    wkspace->dataX(0)[3] = 4.0;
+    wkspace.dataX(0)[1] = 2.0;
+    wkspace.dataX(0)[2] = 3.0;
+    wkspace.dataX(0)[3] = 4.0;
 
-    TS_ASSERT_EQUALS(wkspace->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(wkspace.getNumberHistograms(), 1);
 
     //First bin
-    TS_ASSERT_EQUALS(wkspace->binIndexOf(1.3), 0);
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(1.3), 0);
     // Bin boundary
-    TS_ASSERT_EQUALS(wkspace->binIndexOf(2.0), 0);
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(2.0), 0);
     // Mid range
-    TS_ASSERT_EQUALS(wkspace->binIndexOf(2.5), 1);
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(2.5), 1);
     // Still second bin
-    TS_ASSERT_EQUALS(wkspace->binIndexOf(2.001), 1);
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(2.001), 1);
     // Last bin
-    TS_ASSERT_EQUALS(wkspace->binIndexOf(3.1), 2);
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(3.1), 2);
     // Last value
-    TS_ASSERT_EQUALS(wkspace->binIndexOf(4.0), 2);
+    TS_ASSERT_EQUALS(wkspace.binIndexOf(4.0), 2);
 
     // Error handling
 
     // Bad index value
-    TS_ASSERT_THROWS(wkspace->binIndexOf(2.5, 1), std::out_of_range);
-    TS_ASSERT_THROWS(wkspace->binIndexOf(2.5, -1), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, 1), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(2.5, -1), std::out_of_range);
 
     // Bad X values
-    TS_ASSERT_THROWS(wkspace->binIndexOf(5.), std::out_of_range);
-    TS_ASSERT_THROWS(wkspace->binIndexOf(0.), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(5.), std::out_of_range);
+    TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
   }
 
   void test_nexus_spectraMap()
   {
     NexusTestHelper th(true);
     th.createFile("MatrixWorkspaceTest.nxs");
-    MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 50);
+    auto ws = makeWorkspaceWithDetectors(100, 50);
     std::vector<int> spec;
     for (int i=0; i<100; i++)
     {
@@ -528,7 +521,7 @@ public:
    */
   void test_isDetectorMasked()
   {
-    MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 10);
+    auto ws = makeWorkspaceWithDetectors(100, 10);
     Instrument_const_sptr inst = ws->getInstrument();
     // Make sure the instrument is parametrized so that the test is thorough
     TS_ASSERT( inst->isParametrized() );
@@ -543,7 +536,7 @@ public:
   /** Check if any of a list of detectors are masked */
   void test_isDetectorMasked_onASet()
   {
-    MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 10);
+    auto ws = makeWorkspaceWithDetectors(100, 10);
     Instrument_const_sptr inst = ws->getInstrument();
     // Make sure the instrument is parametrized so that the test is thorough
     TS_ASSERT( inst->isParametrized() );
@@ -572,7 +565,7 @@ public:
 
   void test_getDetectorIDToWorkspaceIndexVector()
   {
-    MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 10);
+    auto ws = makeWorkspaceWithDetectors(100, 10);
     std::vector<size_t> out;
     detid_t offset = -1234;
     TS_ASSERT_THROWS_NOTHING( ws->getDetectorIDToWorkspaceIndexVector(out, offset, false) );
@@ -585,7 +578,7 @@ public:
 
   void test_getSpectrumToWorkspaceIndexVector()
   {
-    MatrixWorkspace * ws = makeWorkspaceWithDetectors(100, 10);
+    auto ws = makeWorkspaceWithDetectors(100, 10);
     std::vector<size_t> out;
     detid_t offset = -1234;
     TS_ASSERT_THROWS_NOTHING( ws->getSpectrumToWorkspaceIndexVector(out, offset) );
@@ -598,41 +591,42 @@ public:
 
   void test_getSignalAtCoord()
   {
-    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
+    WorkspaceTester ws;
     // Matrix with 4 spectra, 5 bins each
-    ws->initialize(4,6,5);
+    ws.initialize(4,6,5);
     for (size_t wi=0; wi<4; wi++)
       for (size_t x=0; x<6; x++)
       {
-        ws->dataX(wi)[x] = double(x);
+        ws.dataX(wi)[x] = double(x);
         if (x<5)
         {
-          ws->dataY(wi)[x] = double(wi*10 + x);
-          ws->dataE(wi)[x] = double((wi*10 + x)*2);
+          ws.dataY(wi)[x] = double(wi*10 + x);
+          ws.dataE(wi)[x] = double((wi*10 + x)*2);
         }
       }
     coord_t coords[2] = {0.5, 1.0};
-    TS_ASSERT_DELTA(ws->getSignalAtCoord(coords, Mantid::API::NoNormalization), 10.0, 1e-5);
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords, Mantid::API::NoNormalization), 10.0, 1e-5);
     coords[0] = 1.5;
-    TS_ASSERT_DELTA(ws->getSignalAtCoord(coords, Mantid::API::NoNormalization), 11.0, 1e-5);
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords, Mantid::API::NoNormalization), 11.0, 1e-5);
   }
 
   void test_setMDMasking()
   {
-    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
-    TSM_ASSERT_THROWS("Characterisation test. This is not implemented.", ws->setMDMasking(NULL), std::runtime_error);
+    WorkspaceTester ws;
+    TSM_ASSERT_THROWS("Characterisation test. This is not implemented.", ws.setMDMasking(NULL), std::runtime_error);
   }
 
   void test_clearMDMasking()
   {
-    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
-    TSM_ASSERT_THROWS("Characterisation test. This is not implemented.", ws->clearMDMasking(), std::runtime_error);
+    WorkspaceTester ws;
+    TSM_ASSERT_THROWS("Characterisation test. This is not implemented.", ws.clearMDMasking(), std::runtime_error);
   }
 
   void test_getSpecialCoordinateSystem_default()
   {
-    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
-    TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::API::None, ws->getSpecialCoordinateSystem());
+    WorkspaceTester ws;
+    TSM_ASSERT_EQUALS("Should default to no special coordinate system.", Mantid::API::None, ws.getSpecialCoordinateSystem());
+  }
   }
 
 private:
