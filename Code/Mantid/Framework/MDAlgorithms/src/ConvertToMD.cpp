@@ -411,7 +411,9 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
  // Copy ExperimentInfo (instrument, run, sample) to the output WS
   API::ExperimentInfo_sptr ei(m_InWS2D->cloneExperimentInfo());
 
-  ei->mutableRun().addProperty("W_MATRIX",targWSDescr.m_Wtransf.getVector(),true);
+  ei->mutableRun().addProperty("RUBW_MATRIX",targWSDescr.m_Wtransf.getVector(),true);
+  ei->mutableRun().addProperty("W_MATRIX",targWSDescr.getPropertyValueAsType<std::vector<double> >("W_MATRIX"),true);
+
   uint16_t runIndex = mdEventWS->addExperimentInfo(ei);
 
   const MantidVec & binBoundaries = m_InWS2D->readX(0);
