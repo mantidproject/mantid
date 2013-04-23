@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidGeometry/Objects/Material.h"
+#include "MantidKernel/Material.h"
 #include <stdexcept>
 
 namespace Mantid
 {
 
-  namespace Geometry
+  namespace Kernel
   {
 
     using PhysicalConstants::NeutronAtom;

@@ -14,6 +14,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 using Mantid::Algorithms::MonteCarloAbsorption;
 using Mantid::DataObjects::Workspace2D_sptr;

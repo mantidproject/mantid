@@ -4,7 +4,6 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
@@ -13,7 +12,7 @@
 
 namespace Mantid
 {
-  namespace Geometry
+  namespace Kernel
   {
     /**
       A material is defined as being composed of a given element, defined as a
@@ -45,7 +44,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>
 
     */
-    class MANTID_GEOMETRY_DLL Material
+    class MANTID_KERNEL_DLL Material
     {
     public:
       /// Default constructor. Required for other parts of the code to 

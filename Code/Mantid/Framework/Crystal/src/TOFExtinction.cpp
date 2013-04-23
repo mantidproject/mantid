@@ -117,7 +117,7 @@ namespace Crystal
     if (peaksW != inPeaksW)
     peaksW = inPeaksW->clone();
 
-    const Geometry::Material *m_sampleMaterial = &(inPeaksW->sample().getMaterial());
+    const Kernel::Material *m_sampleMaterial = &(inPeaksW->sample().getMaterial());
     if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
     {
   	  double rho =  m_sampleMaterial->numberDensity();

@@ -118,7 +118,7 @@ namespace Crystal
     std::string filename = getPropertyValue("Filename");
     PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
 
-    const Geometry::Material *m_sampleMaterial = &(ws->sample().getMaterial());
+    const Kernel::Material *m_sampleMaterial = &(ws->sample().getMaterial());
     if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
     {
   	  double rho =  m_sampleMaterial->numberDensity();

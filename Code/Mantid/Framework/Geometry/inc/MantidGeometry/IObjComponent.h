@@ -7,6 +7,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Material.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -17,7 +18,6 @@ namespace Geometry
 // Forward Declaration
 //----------------------------------------------------------------------
 class Object;
-class Material;
 class GeometryHandler;
 
 /** Object Component class, this class brings together the physical attributes of the component
@@ -97,7 +97,7 @@ public:
   /// Returns the shape of the Object
   virtual const boost::shared_ptr<const Object> shape()const = 0;
   /// Returns the material of the Object
-  virtual const boost::shared_ptr<const Material> material()const = 0;
+  virtual const boost::shared_ptr<const Kernel::Material> material()const = 0;
 
   /// Gets the GeometryHandler
   GeometryHandler* Handle()const{return handle;}
@@ -105,7 +105,7 @@ public:
 protected:
   /// Protected copy constructor
   IObjComponent(const IObjComponent&);
-  /// Assignment operator
+  /// Assignment operato
   IObjComponent& operator=(const IObjComponent&);
 
   /// Reset the current geometry handler

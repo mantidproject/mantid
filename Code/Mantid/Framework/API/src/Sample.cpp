@@ -19,7 +19,7 @@ namespace Mantid
     using namespace Mantid::Kernel;
     using Geometry::ShapeFactory;
     using Geometry::Object;
-    using Geometry::Material;
+    using Kernel::Material;
     using Geometry::OrientedLattice;
     using Kernel::V3D;
     
@@ -137,7 +137,7 @@ namespace Mantid
      * Set the type of material that this sample is composed from
      * @param material :: A reference to the material object. It is copied into the sample.
      */
-    void Sample::setMaterial(const Geometry::Material& material)
+    void Sample::setMaterial(const Kernel::Material& material)
     {
       m_material = material;
     }

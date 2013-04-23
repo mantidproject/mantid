@@ -6,7 +6,7 @@
 //------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Objects/Material.h"
+#include "MantidKernel/Material.h"
 #include "MantidGeometry/Objects/Object.h"
 #include <vector>
 
@@ -83,9 +83,9 @@ namespace Mantid
       /** @name Material properties.*/
       //@{
       /// Return the material
-      const Geometry::Material & getMaterial() const;
+      const Kernel::Material & getMaterial() const;
       /// Set the type of material that this sample is composed from
-      void setMaterial(const Geometry::Material& material);
+      void setMaterial(const Kernel::Material& material);
       //@}
 
       /** @name Access the environment information */
@@ -138,7 +138,7 @@ namespace Mantid
       /// The sample shape object
       Geometry::Object m_shape;
       /// The sample composition
-      Geometry::Material m_material;
+      Kernel::Material m_material;
       /// An owned pointer to the SampleEnvironment object
       boost::shared_ptr<SampleEnvironment> m_environment;
       /// Pointer to the OrientedLattice of the sample, NULL if not set.

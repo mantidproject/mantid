@@ -4,11 +4,11 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
-#include "MantidGeometry/Objects/Material.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/NexusTestHelper.h"
 
-using Mantid::Geometry::Material;
+using Mantid::Kernel::Material;
 using Mantid::Kernel::NexusTestHelper;
 
 class MaterialTest: public CxxTest::TestSuite

@@ -13,7 +13,7 @@ Sets the neutrons information in the sample.
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
-#include "MantidGeometry/Objects/Material.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -36,7 +36,7 @@ namespace DataHandling
 
   using namespace Mantid::DataHandling;
   using namespace Mantid::API;
-  using namespace Geometry;
+  using namespace Kernel;
 
   /**
    * Initialize the algorithm

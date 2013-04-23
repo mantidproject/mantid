@@ -247,7 +247,7 @@ void AbsorptionCorrection::retrieveBaseProperties()
   double sigma_atten = getProperty("AttenuationXSection"); // in barns
   double sigma_s = getProperty("ScatteringXSection"); // in barns
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
-  const Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
+  const Kernel::Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
   if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
   {
         if(rho == EMPTY_DBL()) rho =  m_sampleMaterial->numberDensity();
