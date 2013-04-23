@@ -34,6 +34,7 @@ namespace API
     virtual std::string toXMLString() const = 0;
     virtual void apply(const coord_t * inputVector, coord_t * outVector) const = 0;
     virtual CoordTransform * clone() const = 0;
+    virtual std::string id() const = 0;
 
     /// Wrapper for VMD
     Mantid::Kernel::VMD applyVMD(const Mantid::Kernel::VMD & inputVector) const;

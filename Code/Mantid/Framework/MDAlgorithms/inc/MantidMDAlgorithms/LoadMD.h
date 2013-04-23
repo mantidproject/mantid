@@ -74,6 +74,10 @@ namespace MDAlgorithms
 
     void loadDimensions();
 
+    void loadAffineMatricies(API::IMDWorkspace_sptr ws);
+    API::CoordTransform *loadAffineMatrix(std::string entry_name);
+    void loadWmatrix(API::IMDWorkspace_sptr ws);
+
     /// Open file handle
     ::NeXus::File * file;
 
