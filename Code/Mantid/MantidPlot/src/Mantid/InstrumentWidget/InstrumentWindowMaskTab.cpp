@@ -164,9 +164,13 @@ m_userEditing(true)
 
   // Algorithm buttons
 
-  m_apply = new QPushButton("Apply Mask(s) to Workspace(data)");
+  m_apply = new QPushButton("Apply to Data");
   m_apply->setToolTip("Apply current mask to the data workspace. Cannot be reverted.");
   connect(m_apply,SIGNAL(clicked()),this,SLOT(applyMask()));
+
+  m_apply_to_view = new QPushButton("Apply to View");
+  m_apply_to_view->setToolTip("Apply current mask to the view.");
+  connect(m_apply_to_view,SIGNAL(clicked()),this,SLOT(applyMaskToView()));
 
   m_clear_all = new QPushButton("Clear All");
   m_clear_all->setToolTip("Clear all masking that have not been applied to the data.");
@@ -213,7 +217,7 @@ m_userEditing(true)
   connect(m_sum_to_workspace,SIGNAL(activated()),this,SLOT(sumDetsToWorkspace()));
 
   // Save button and its menus
-  m_saveButton = new QPushButton("Save");
+  m_saveButton = new QPushButton("Apply and Save");
   m_saveButton->setToolTip("Save current masking/grouping to a file or a workspace.");
 
   m_saveMask = new QMenu(this);
@@ -237,24 +241,33 @@ m_userEditing(true)
   m_saveGroup->addAction(m_save_group_file_exclude);
   connect(m_saveGroup,SIGNAL(hovered(QAction*)),this,SLOT(showSaveMenuTooltip(QAction*)));
 
-
+  QGroupBox *box = new QGroupBox("View");
   QGridLayout* buttons = new QGridLayout();
-  buttons->addWidget(m_apply,0,0,1,2);
+  buttons->addWidget(m_apply_to_view,0,0,1,2);
   buttons->addWidget(m_saveButton,1,0);
   buttons->addWidget(m_clear_all,1,1);
-  
-  layout->addLayout(buttons);
+  box->setLayout(buttons);
+  layout->addWidget(box);
+
+  box = new QGroupBox("Workspace");
+  buttons = new QGridLayout();
+  buttons->addWidget(m_apply,0,0);
+  box->setLayout(buttons);
+  layout->addWidget(box);
 
 }
 
+/**
+  * Initialize the tab when new projection surface is created.
+  */
 void InstrumentWindowMaskTab::initSurface()
 {
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
-  enableApply();
-  enableClear();
+  connect(m_instrWindow->getSurface().get(),SIGNAL(shapesCleared()),this,SLOT(shapesCleared()));
+  enableApplyButtons();
 }
 
 /**
@@ -301,23 +314,34 @@ void InstrumentWindowMaskTab::setActivity()
   m_instrWindow->updateInfoText();
 }
 
+/**
+  * Slot responding on creation of a new masking shape.
+  */
 void InstrumentWindowMaskTab::shapeCreated()
 {
   setSelectActivity();
-  enableApply();
-  enableClear();
+  enableApplyButtons();
 }
 
+/**
+  * Slot responding on selection of a new masking shape.
+  */
 void InstrumentWindowMaskTab::shapeSelected()
 {
   setProperties();
 }
 
+/**
+  * Slot responding on deselecting all masking shapes.
+  */
 void InstrumentWindowMaskTab::shapesDeselected()
 {
   clearProperties();
 }
 
+/**
+  * Slot responding on a change of a masking shape.
+  */
 void InstrumentWindowMaskTab::shapeChanged()
 {
   if (!m_left) return; // check that everything is ok
@@ -344,6 +368,14 @@ void InstrumentWindowMaskTab::shapeChanged()
 }
 
 /**
+  * Slot responding on removing all masking shapes.
+  */
+void InstrumentWindowMaskTab::shapesCleared()
+{
+    enableApplyButtons();
+}
+
+/**
   * Removes the mask shapes from the screen.
   */
 void InstrumentWindowMaskTab::clearShapes()
@@ -355,8 +387,7 @@ void InstrumentWindowMaskTab::showEvent (QShowEvent *)
 {
   setActivity();
   m_instrWindow->setMouseTracking(true);
-  enableApply();
-  enableClear();
+  enableApplyButtons();
   m_instrWindow->updateInstrumentView(true);
 }
 
@@ -456,9 +487,17 @@ void InstrumentWindowMaskTab::applyMask()
   storeMask();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_instrWindow->getInstrumentActor()->applyMaskWorkspace();
-  enableApply();
-  enableClear();
+  enableApplyButtons();
   QApplication::restoreOverrideCursor();
+}
+
+/**
+  * Apply the constructed mask to the view only.
+  */
+void InstrumentWindowMaskTab::applyMaskToView()
+{
+    storeMask();
+    enableApplyButtons();
 }
 
 /**
@@ -469,8 +508,7 @@ void InstrumentWindowMaskTab::clearMask()
   clearShapes();
   m_instrWindow->getInstrumentActor()->clearMaskWorkspace();
   m_instrWindow->updateInstrumentView();
-  enableApply();
-  enableClear();
+  enableApplyButtons();
 }
 
 /**
@@ -619,14 +657,16 @@ void InstrumentWindowMaskTab::showSaveMenuTooltip(QAction *action)
   */
 void InstrumentWindowMaskTab::toggleMaskGroup(bool maskOn)
 {
-    enableApply();
+    enableApplyButtons();
     if ( maskOn )
     {
         m_saveButton->setMenu(m_saveMask);
+        m_saveButton->setText("Apply and Save");
     }
     else
     {
         m_saveButton->setMenu(m_saveGroup);
+        m_saveButton->setText("Save");
     }
     m_instrWindow->getSurface()->changeBorderColor(getShapeBorderColor());
     m_instrWindow->updateInstrumentView();
@@ -640,13 +680,11 @@ void InstrumentWindowMaskTab::toggleMaskGroup(bool maskOn)
 void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
   // Make sure we have stored the Mask in the helper MaskWorkspace
   storeMask();
-
   setSelectActivity();
   createMaskWorkspace(invertMask, false);
-
+  enableApplyButtons();
   QApplication::restoreOverrideCursor();
 }
 
@@ -679,6 +717,7 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
     }
     Mantid::API::AnalysisDataService::Instance().remove( outputWS->name() );
   }
+  enableApplyButtons();
   QApplication::restoreOverrideCursor();
 }
 
@@ -700,9 +739,6 @@ void InstrumentWindowMaskTab::saveMaskingToCalFile(bool invertMask)
     {
       clearShapes();
       QString fileName = m_instrWindow->getSaveFileName("Select location and name for the mask file", "cal files (*.cal)");
-
-      std::cerr << "File " << fileName.toStdString() << std::endl;
-
       if (!fileName.isEmpty())
       {
         Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("MaskWorkspaceToCalFile",-1);
@@ -713,6 +749,7 @@ void InstrumentWindowMaskTab::saveMaskingToCalFile(bool invertMask)
       }
       Mantid::API::AnalysisDataService::Instance().remove( outputWS->name() );
     }
+    enableApplyButtons();
     QApplication::restoreOverrideCursor();
 }
 
@@ -745,31 +782,26 @@ std::string InstrumentWindowMaskTab::generateMaskWorkspaceName(bool temp) const
 
 /**
   * Sets the m_hasMaskToApply flag and
-  * enables/disables the Apply button.
+  * enables/disables the apply and clear buttons.
   */
-void InstrumentWindowMaskTab::enableApply()
+void InstrumentWindowMaskTab::enableApplyButtons()
 {
+    bool hasMaskShapes = m_instrWindow->getSurface()->hasMasks();
+    bool hasMaskWorkspace = m_instrWindow->getInstrumentActor()->hasMaskWorkspace();
+    bool hasMask = hasMaskShapes || hasMaskWorkspace;
     if ( isMasking() )
     {
-        bool hasMasks = m_instrWindow->getSurface()->hasMasks();
-        m_hasMaskToApply = hasMasks;
-        m_apply->setEnabled(hasMasks);
+        m_hasMaskToApply = hasMask;
+        m_apply->setEnabled(hasMask);
+        m_apply_to_view->setEnabled(hasMaskShapes);
     }
     else
     {
         m_apply->setEnabled(false);
+        m_apply_to_view->setEnabled(false);
     }
-}
-
-/**
-  * Enables/disables the ClearAll button.
-  */
-void InstrumentWindowMaskTab::enableClear()
-{
-    m_clear_all->setEnabled(
-                   m_instrWindow->getSurface()->hasMasks()
-                || m_instrWindow->getInstrumentActor()->hasMaskWorkspace()
-                );
+    m_saveButton->setEnabled(hasMask);
+    m_clear_all->setEnabled(hasMask);
 }
 
 /**
@@ -824,6 +856,7 @@ void InstrumentWindowMaskTab::storeMask()
     m_instrWindow->updateInstrumentView(); // to refresh the pick image
 
     QList<int> dets;
+    // get detectors covered by the shapes
     m_instrWindow->getSurface()->getMaskedDetectors(dets);
     if (!dets.isEmpty())
     {
@@ -834,11 +867,21 @@ void InstrumentWindowMaskTab::storeMask()
       }
       if ( !detList.empty() )
       {
-        m_instrWindow->getInstrumentActor()->getMaskWorkspace()->setMasked( detList );
-        m_instrWindow->getInstrumentActor()->update();
-        m_instrWindow->updateInstrumentDetectors();
+          // try to mask each detector separatly and ignore any failure
+          for(auto det = detList.begin(); det != detList.end(); ++det)
+          {
+              try
+              {
+                  m_instrWindow->getInstrumentActor()->getMaskWorkspace()->setMasked( *det );
+              }
+              catch(...){}
+          }
+          // update detector colours
+          m_instrWindow->getInstrumentActor()->update();
+          m_instrWindow->updateInstrumentDetectors();
       }
     }
+    // remove masking shapes
     clearShapes();
     QApplication::restoreOverrideCursor();
 }
