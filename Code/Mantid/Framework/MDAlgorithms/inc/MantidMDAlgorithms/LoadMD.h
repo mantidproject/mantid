@@ -74,7 +74,9 @@ namespace MDAlgorithms
 
     void loadDimensions();
 
+    /// Load all the affine matricies
     void loadAffineMatricies(API::IMDWorkspace_sptr ws);
+    /// Load a given affine matrix
     API::CoordTransform *loadAffineMatrix(std::string entry_name);
 
     /// Open file handle

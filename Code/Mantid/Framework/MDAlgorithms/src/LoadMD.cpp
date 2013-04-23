@@ -490,6 +490,11 @@ namespace Mantid
       delete prog;
     }
 
+  /**
+   * Load all of the affine matricies from the file, create the
+   * appropriate coordinate transform and set those on the workspace.
+   * @param ws : workspace to set the coordinate transforms on
+   */
   void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws)
   {
     std::map<std::string, std::string> entries;
@@ -507,6 +512,13 @@ namespace Mantid
     }
   }
 
+  /**
+   * Do that actual loading and manipulating of the read data to create
+   * the affine matrix and then the appropriate transformation. This is
+   * currently limited to CoordTransformAffine transforms.
+   * @param entry_name : the entry point in the NeXus file to read
+   * @return the coordinate transform object
+   */
   CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name)
   {
     file->openData(entry_name);
