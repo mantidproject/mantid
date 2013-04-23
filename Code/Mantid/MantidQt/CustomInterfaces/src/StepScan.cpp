@@ -57,7 +57,7 @@ void StepScan::initLayout()
 
   connect( m_uiForm.launchInstView, SIGNAL(clicked()), SLOT(launchInstrumentWindow()) );
 
-  connect( m_uiForm.mWRunFiles, SIGNAL(filesFound()), SLOT(loadFile()), Qt::QueuedConnection );
+  connect( m_uiForm.mWRunFiles, SIGNAL(filesFound()), SLOT(loadFile()) );
   connect( this, SIGNAL(logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr &)),
            SLOT(fillPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
 
@@ -106,6 +106,8 @@ void StepScan::triggerLiveListener(bool checked)
 
 void StepScan::startLiveListener()
 {
+  QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+
   // Remove any previously-loaded workspaces
   cleanupWorkspaces();
 
@@ -116,10 +118,13 @@ void StepScan::startLiveListener()
   m_inputWSName = "__live";
   startLiveData->setProperty("OutputWorkspace",m_inputWSName);
   startLiveData->execute();
+
   // Keep track of the algorithm that's pulling in the live data
   m_monitorLiveData = startLiveData->getProperty("MonitorLiveData");
 
   setupOptionControls();
+
+  QApplication::restoreOverrideCursor();
 }
 
 IAlgorithm_sptr StepScan::stopLiveListener()
@@ -136,10 +141,12 @@ IAlgorithm_sptr StepScan::stopLiveListener()
 
 void StepScan::loadFile()
 {
+  QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+
   // Remove any previously-loaded workspaces
   cleanupWorkspaces();
 
-  // TODO: Run entirely asynchronously (see AlgorithmRunner)
+  // TODO: Run entirely asynchronously (see AlgorithmRunner or AlgorithmObserver)
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadEventNexus");
   const QString filename = m_uiForm.mWRunFiles->getFirstFilename();
   alg->setPropertyValue("Filename", filename.toStdString());
@@ -148,11 +155,13 @@ void StepScan::loadFile()
   alg->setProperty("LoadMonitors", true);
   if ( alg->execute() )  // executeAsync???
   {
+    QApplication::restoreOverrideCursor();
     m_dataReloadNeeded = false;
     setupOptionControls();
   }
   else
   {
+    QApplication::restoreOverrideCursor();
     QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
   }
 }
@@ -301,6 +310,8 @@ void StepScan::runStepScanAlg()
   IAlgorithm_sptr stepScan = setupStepScanAlg();
   if ( !stepScan ) return;
 
+  QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+
   if ( m_uiForm.liveButton->isChecked() )  // Live data
   {
     runStepScanAlgLive(stepScan->toString());
@@ -311,6 +322,8 @@ void StepScan::runStepScanAlg()
     stepScan->setPropertyValue("InputWorkspace", m_inputWSName);
     stepScan->execute();
   }
+
+  QApplication::restoreOverrideCursor();
 
   // Now that the algorithm's been run, connect up the signal to change the plot variable
   connect( m_uiForm.plotVariable, SIGNAL(currentIndexChanged(const QString &)),
