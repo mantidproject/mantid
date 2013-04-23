@@ -35,6 +35,20 @@ namespace IDA
       geom = "cyl";
     }
 
+    QString plotResult = uiForm().abscor_cbPlotOutput->currentText();
+    if ( plotResult == "Contour" )
+    {
+      plotResult = "Contour";
+    }
+    else if ( plotResult == "Spectra" )
+    {
+      plotResult = "Spectrum";
+    }
+    else if ( plotResult == "Both" )
+    {
+      plotResult = "Both";
+    }
+    
     QString pyInput = "from IndirectDataAnalysis import abscorFeeder, loadNexus\n";
 
     if ( uiForm().abscor_cbSampleInputType->currentText() == "File" )
@@ -78,12 +92,15 @@ namespace IDA
       pyInput += "useCor = False\n";
     }
 
-    pyInput += uiForm().abscor_ckVerbose->isChecked() ? "True\n" : "False\n";
-
     if ( uiForm().abscor_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
-    pyInput += "abscorFeeder(sample, container, geom, useCor, Verbose=verbose, Scale=False, factor=1, Save=False, PlotResult='None', PlotContrib=False)\n";
+    if ( uiForm().abscor_ckSave->isChecked() ) pyInput += "save = True\n";
+    else pyInput += "save = False\n";
+
+    pyInput += "plotResult = '" + plotResult + "'\n";
+    
+    pyInput += "abscorFeeder(sample, container, geom, useCor, Verbose=verbose, Scale=False, factor=1, Save=save, PlotResult=plotResult, PlotContrib=False)\n";
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
 

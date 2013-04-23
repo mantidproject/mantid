@@ -1794,43 +1794,11 @@
           </spacer>
          </item>
          <item>
-          <spacer name="horizontalSpacer_17">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+          <widget class="QCheckBox" name="absp_ckSave">
+           <property name="text">
+            <string>Save Result</string>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_16">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_15">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+          </widget>
          </item>
         </layout>
        </item>
@@ -2065,6 +2033,21 @@
              <string>None</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>Contour</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Spectra</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Both</string>
+            </property>
+           </item>
           </widget>
          </item>
         </layout>
@@ -2112,6 +2095,13 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="abscor_ckSave">
+           <property name="text">
+            <string>Save Result</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

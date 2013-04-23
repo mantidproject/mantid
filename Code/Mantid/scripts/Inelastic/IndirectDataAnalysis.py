@@ -855,7 +855,7 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, fa
         else:
             sub_result = sam_name +'Subtract_'+ can_run
             if Verbose:
-	            logger.notice('Subtracting '+container+' from '+sample)
+                logger.notice('Subtracting '+container+' from '+sample)
             Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
             CloneWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw')
             theta,Q = GetThetaQ(sample)
@@ -865,7 +865,7 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, fa
                 sred_path = os.path.join(workdir,sub_result+'_red.nxs')
                 SaveNexusProcessed(InputWorkspace=sub_result+'_red',Filename=sred_path)
                 if Verbose:
-	                logger.notice('Output file created : '+sred_path)
+                    logger.notice('Output file created : '+sred_path)
             plot_list = [sub_result+'_red',sample]
             if (PlotResult != 'None'):
                 plotCorrResult(sub_result+'_rqw',PlotResult)
