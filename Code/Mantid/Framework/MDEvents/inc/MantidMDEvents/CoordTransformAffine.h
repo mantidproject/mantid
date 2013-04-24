@@ -37,6 +37,7 @@ namespace MDEvents
     virtual CoordTransform * clone() const;
     virtual ~CoordTransformAffine();
     virtual std::string toXMLString() const;
+    virtual std::string id() const;
     void addTranslation(const coord_t * translationVector);
     const Mantid::Kernel::Matrix<coord_t> & getMatrix() const;
     Mantid::Kernel::Matrix<coord_t> makeAffineMatrix() const;

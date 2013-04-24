@@ -37,6 +37,7 @@ namespace MDEvents
     virtual CoordTransform * clone() const;
     virtual ~CoordTransformDistance();
     virtual std::string toXMLString() const;
+    virtual std::string id() const;
 
     void apply(const coord_t * inputVector, coord_t * outVector) const;
 
