@@ -444,7 +444,7 @@ namespace API
             st |= LOC; 
           // the file is remote_changed if the date of the pub_date file is 
           // diferent from the local downloaded pubdate.
-          if (entry.pub_date != entry.downloaded_pubdate)
+          if (entry.pub_date > entry.downloaded_pubdate)
             st |= REMO; 
           
           
@@ -776,13 +776,15 @@ namespace API
       g_log.debug() << "Form Output: " << answer.str() << std::endl; 
 
       std::string info; 
-      std::string detail; 
+      std::string detail;
+      std::string published_date;
         
       ptree pt; 
       try{
         read_json(answer, pt); 
         info = pt.get<std::string>("message",""); 
         detail = pt.get<std::string>("detail","");
+        published_date = pt.get<std::string>("pub_date","");
         std::string cmd = pt.get<std::string>("shell",""); 
         if (!cmd.empty())
           detail.append("\nFrom Command: ").append(cmd);
@@ -801,6 +803,10 @@ namespace API
           Poco::File local(absolute_path);
           entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(local.getLastModified(),
                                                                               timeformat));
+          // update the pub_date and downloaded_pubdate with the pub_date given by the upload. 
+          // this ensures that the status will be correctly defined.
+          if (!published_date.empty())
+            entry.pub_date = DateAndTime(published_date);
           entry.downloaded_pubdate = entry.pub_date;
           entry.status = BOTH_UNCHANGED;      
         }
