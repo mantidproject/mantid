@@ -72,8 +72,8 @@ public:
 			return;
 
 
-		TS_ASSERT_DELTA(outWS->readY(0).front(), inWS->readY(0).front(), 0.2);
-		TS_ASSERT_DELTA(outWS->readY(0).back(), inWS->readY(0).back(), 0.2);
+		TS_ASSERT_DELTA(outWS->readY(0).front(), inWS->readY(0).front(), 1);
+		TS_ASSERT_DELTA(outWS->readY(0).back(), inWS->readY(0).back(), 0.5);
 
 		// Remove workspace from the data service.
 		AnalysisDataService::Instance().remove(m_outWSName);
@@ -94,9 +94,9 @@ private:
 
 		//WorkspaceCreationHelper::addNoise(dataws,10);
 		// np.linspace(2,5,21)
-		static const double arr[] = {2.  ,  2.15,  2.3 ,  2.45,  2.6 ,  2.75,  2.9 ,  3.05,  3.2 ,
-		        3.35,  3.5 ,  3.65,  3.8 ,  3.95,  4.1 ,  4.25,  4.4 ,  4.55,
-		        4.7 ,  4.85,  5.  };
+		static const double arr[] = {-10.  ,  -9.25,  -8.5 ,  -7.75,  -7.  ,  -6.25,  -5.5 ,  -4.75,
+		        -4.  ,  -3.25,  -2.5 ,  -1.75,  -1.  ,  -0.25,   0.5 ,   1.25,
+		         2.  ,   2.75,   3.5 ,   4.25,   5. };
 		std::vector<double> vec (arr, arr + sizeof(arr) / sizeof(arr[0]) );
 
 		for (size_t wi = 0; wi < dataws->getNumberHistograms(); wi++) {
@@ -104,7 +104,7 @@ private:
 		}
 		// WorkspaceCreationHelper::DisplayDataX(dataws);
 
-		dataws->getAxis(0)->setUnit("Energy");
+		dataws->getAxis(0)->setUnit("DeltaE");
 		dataws->mutableRun().addProperty("Ei",
 				boost::lexical_cast<std::string>(m_Ei));
 		dataws->instrumentParameters().addString(

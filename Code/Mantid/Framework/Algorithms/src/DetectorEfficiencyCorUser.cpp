@@ -2,12 +2,14 @@
 This algorithm will correct detector efficiency according to the ILL INX program for time-of-flight data reduction.
 
 A formula named "formula_eff" must be defined in the instrument parameters file.
+The input workspace must be in DeltaE units.
 
 The output data will be corrected as:
  <math>y = \frac{y}{eff}</math>
-where <math>eff</math> will be <math>eff = \frac{f(Ei - \Delta E)}{f(E_i)}</math>
+where <math>eff</math> is
+ <math>eff = \frac{f(Ei - \Delta E)}{f(E_i)}</math>
 
-The function <math>f</math> is defined as "formula_eff". To date this has been implemented for ILL IN4, IN5 and IN6.
+The function <math>f</math> is defined as "formula_eff" in the IDF. To date this has been implemented at the ILL for ILL IN4, IN5 and IN6.
 
  *WIKI*/
 
@@ -62,9 +64,9 @@ const std::string DetectorEfficiencyCorUser::category() const {
 /// Sets documentation strings for this algorithm
 void DetectorEfficiencyCorUser::initDocs() {
 	this->setWikiSummary(
-			"This algorithm calculates the detector efficiency based on the user formulas set in the IDF file or parameters.");
+			"This algorithm calculates the detector efficiency according the formula set in the instrument definition file/parameters.");
 	this->setOptionalMessage(
-			"This algorithm calculates the detector efficiency based on the user formulas set in the IDF file or parameters.");
+			"This algorithm calculates the detector efficiency according the formula set in the instrument definition file/parameters.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -72,7 +74,8 @@ void DetectorEfficiencyCorUser::initDocs() {
  */
 void DetectorEfficiencyCorUser::init() {
 	auto val = boost::make_shared<CompositeValidator>();
-	val->add<WorkspaceUnitValidator>("Energy");
+	//val->add<WorkspaceUnitValidator>("Energy");
+	val->add<WorkspaceUnitValidator>("DeltaE");
 	val->add<HistogramValidator>();
 	val->add<InstrumentValidator>();
 	declareProperty(
@@ -121,10 +124,8 @@ void DetectorEfficiencyCorUser::exec() {
 		const MantidVec& eIn = m_inputWS->readE(i);
 		m_outputWS->setX(i, m_inputWS->refX(i));
 
-		// TAKES TIME!!!
 		const MantidVec effVec = calculateEfficiency(eff0, effFormula, xIn);
-
-		// run this outside to benefit from parallel for
+		// run this outside to benefit from parallel for (?)
 		applyDetEfficiency(numberOfChannels, yIn, eIn, effVec, yOut, eOut);
 
 		prog.report("Detector Efficiency correction...");
@@ -171,6 +172,7 @@ double DetectorEfficiencyCorUser::calculateFormulaValue(
 		p.DefineVar("e", &energy);
 		p.SetExpr(formula);
 		double eff = p.Eval();
+		g_log.debug() << "Formula: " << formula <<  " with: " << energy << "evaluated to: "<< eff  << std::endl;
 		return eff;
 
 	} catch (mu::Parser::exception_type &e) {
@@ -218,25 +220,29 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
 		p.DefineVar("e", &e);
 		p.SetExpr(formula);
 
-		MantidVec::const_iterator xIn_it = xIn.begin();
+		// copied from Jaques Ollivier Code
+		bool conditionForEnergy = std::min( std::abs( *std::min_element(xIn.begin(), xIn.end()) ) , m_Ei) < m_Ei;
+
+		MantidVec::const_iterator xIn_it = xIn.begin(); // DeltaE
 		MantidVec::iterator effOut_it = effOut.begin();
 		for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
-			double deltaE = std::fabs((*xIn_it + *(xIn_it + 1)) / 2 - m_Ei);
-			e =  std::fabs(m_Ei - deltaE);
+			if (conditionForEnergy ) {
+				e =  std::fabs(m_Ei + *xIn_it);
+			}
+			else {
+				e =  std::fabs(m_Ei - *xIn_it);
+			}
 			double eff = p.Eval();
-
 			*effOut_it = eff / eff0;
 		}
 		return effOut;
-
-
 	} catch (mu::Parser::exception_type &e) {
 		throw Kernel::Exception::InstrumentDefinitionError(
 				"Error calculating formula from string. Muparser error message is: "
 						+ e.GetMsg());
 	}
 
-	}
+}
 /**
  * Returns the value associated to a parameter name in the IDF
  * @param parameterName :: parameter name in the IDF
