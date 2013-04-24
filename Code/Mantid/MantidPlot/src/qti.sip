@@ -1272,23 +1272,304 @@ private:
   MantidMatrix(const MantidMatrix&);
 };
 
+class InstrumentWindowTab: QFrame
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindowTab.h"
+%End
+private:
+  InstrumentWindowTab(const InstrumentWindowTab &);
+};
+
 class InstrumentWindow: MdiSubWindow
 {
 %TypeHeaderCode
 #include "src/Mantid/InstrumentWidget/InstrumentWindow.h"
 %End
+
+%Docstring
+
+InstrumentWindow
+================
+
+    The InstrumentWindow contains functionality for exploring
+    a 3D model of an instrument. It is a tabbed widget offering
+    rendering, picking, masking and grouping functions. There is
+    also a tree view of the instrument hierarchy.
+
+    For further help see the functions defined on each of the following
+        - InstrumentWindowRenderTab
+        - InstrumentWindowPickTab
+        - InstrumentWindowMaskTab
+%End
+
 public:
-  void changeColormap() /PyName = changeColorMap/;
-  void changeColormap(const QString & file) /PyName = changeColorMap/;
+  enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, 
+                     SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
+                     RENDERMODE_SIZE };
+  enum Tab { RENDER, PICK, MASK, TREE };
+
+
+  InstrumentWindowTab * getTab(const QString & title) const;
+%Docstring
+    Returns a handler to the requested tab
+    
+    Args:
+        title The full title of a tab in the window
+
+    Returns:
+        a pointer to the requested tab widget   
+%End
+
+  InstrumentWindowTab * getTab(const Tab tab) const;
+%Docstring
+    Returns a handler to the requested tab
+
+    Args:
+        tab One of the Tab enumeration types: 
+	    InstrumentWindow.RENDER,InstrumentWindow.PICK,
+	    InstrumentWindow.MASK,InstrumentWindow.TREE
+
+    Returns:
+        a pointer to the requested tab widget   
+%End
+
+  void setBinRange(double min_value, double max_value);
+%Docstring
+    Updates the integration range over which the colours
+    are calculated
+
+    Args:
+        min_value The minimum value over which the data is integrated
+        max_value The maximum value over which the data is integrated
+%End
+
+  bool overlay(const QString & wsName);
+%Docstring
+    Overlays a workspace onto an unwrapped surface on the instrument view.
+    Raises a dialog box if the current surface is not unwrapped.
+
+    Args:
+        wsName The name of the workspace
+
+    Returns:
+        A boolean indicating if the overlay was successful or not 
+%End
+
+  // -- Deprecated in favour of specific tab functions --
+  // Deprecation is done in mantidplot.py module rather than using
+  // sip /Deprecated/annotation so that the message can be customised
+  void changeColormap();
+  void changeColormap(const QString & file);
   void setColorMapMinValue(double);
   void setColorMapMaxValue(double);
   void setColorMapRange(double, double);
-  void setBinRange(double, double);// /PyName = setBinRange/;
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
   void setViewType(const QString &);
+
 private:
+InstrumentWindow();
 InstrumentWindow(const InstrumentWindow &);
+};
+
+class InstrumentWindowRenderTab: InstrumentWindowTab
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h"
+%End
+
+public:
+
+  GraphOptions::ScaleType getScaleType() const;
+%Docstring
+    Returns the current scale type. 0=Linear, 1=Log10
+%End
+
+  void setScaleType(GraphOptions::ScaleType type);
+%Docstring
+    Set the scale type for the colour bar. 
+
+    Args:
+        type The new type Options are: GraphOptions.Linear, GraphOptions.Log10
+%End
+
+  void setAxis(const QString& axisName);
+%Docstring
+    Set the current viewing axis by name.
+
+    Args:
+       axisName The name of a view in a string: X+,X-,Y+,Y-,Z+,Z-
+%End
+
+  void setMinValue(double value, bool apply = true);
+%Docstring
+    Set the minimum value for the colour scale
+
+    Args:
+       value The new value for the minimum
+%End
+
+  void setMaxValue(double value, bool apply = true);
+%Docstring
+    Set the maximum value for the colour scale
+
+    Args:
+       value The new value for the maximum
+%End
+
+  void setRange(double minValue, double maxValue, bool apply = true);
+%Docstring
+    Set the range of the colour bar
+
+    Args:
+        minValue The new value for the minimum
+        maxValue The new value for the maximum 
+%End
+
+  void showAxes(bool on);
+%Docstring
+    Set the axes on/off
+
+    Args:
+        on True/False indicating whether the axes are visible
+%End
+
+  void setColorMapAutoscaling(bool on);
+%Docstring
+    Set whether the colour scale should auto scale when the data is updated
+
+    Args:
+        on True/False indicating whether auto scaling is active
+%End
+
+  void displayDetectorsOnly(bool yes);
+%Docstring
+    Set whether only detectors should be shown.
+
+    Args:
+        yes True/False indicating whether only detectors are shown
+%End
+
+  void enableGL(bool on);
+%Docstring
+    Toggle the use of OpenGL. This can only be used for the unwrapped views.
+
+    Args:
+        on True/False indicating whether OpenGL should be used.
+%End
+
+  void changeColorMap(const QString & filename = "");
+%Docstring
+    Change the color map for the given one. If blank then a dialog is raised
+
+    Args:
+        filename A filename giving the full path to a color map file
+%End
+
+  void setSurfaceType(int type);
+%Docstring
+    Set the surface type of the current window.
+
+    Args:
+        type A known suface type: FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, 
+                                  CYLINDRICAL_Z,SPHERICAL_X, SPHERICAL_Y, 
+                                  SPHERICAL_Z
+%End
+
+  void flipUnwrappedView(bool on);
+%Docstring
+    Set whether an unwrapped view is flipped
+
+    Args:
+        on True/False indicatingif to flip the view
+%End
+
+  void saveImage(QString filename = "");
+%Docstring
+    Save the current display buffer to an image file. The format is chosen by the filename extension and must
+    be one of .bmp,.jpeg,.jpeg,.png,.ppm,.tiff,.xbm,.xpm
+    
+    Args:
+        filename The filename for the saved image. An empty string raises a dialog box.
+%End
+
+private:
+  InstrumentWindowRenderTab();
+  InstrumentWindowRenderTab(const InstrumentWindowRenderTab &);
+};
+
+class InstrumentWindowPickTab: InstrumentWindowTab
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h"
+%End
+
+public:
+  enum ToolType {Zoom, PixelSelect, TubeSelect, PeakSelect, PeakErase};
+
+  void selectTool(const ToolType tool);
+%Docstring
+    Select the active tool.
+    
+    Args:
+        tool One of InstrumentWindowPickTab.{Zoom, PixelSelect, TubeSelect, PeakSelect, PeakErase}
+%End
+
+private:
+  InstrumentWindowPickTab();
+  InstrumentWindowPickTab(const InstrumentWindowPickTab &);
+};
+
+class InstrumentWindowMaskTab: InstrumentWindowTab
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h"
+%End
+
+public:
+  enum Mode {Mask, Group};
+  enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing};
+
+  void setMode(Mode mode);
+%Docstring
+  Set the mode to either group/mask
+  
+  Args:
+      mode One of the Mode enumerations InstrumentWindowMaskTab.{Mask, Group}
+%End
+
+  void selectTool(Activity tool);
+%Docstring
+  Set the mode to either group/mask
+  
+  Args:
+      tool One of the Activity enumerations InstrumentWindowMaskTab.{Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing}
+%End
+
+private:
+  InstrumentWindowMaskTab();
+  InstrumentWindowMaskTab(const InstrumentWindowMaskTab &);
+};
+
+class InstrumentWindowTreeTab: InstrumentWindowTab
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindowTreeTab.h"
+%End
+
+public:
+  void selectComponentByName(const QString& name);
+%Docstring
+    Sets the tree tab to center the view on the named component
+
+    Args:
+        name The name of a component in the instrument
+%End
+
+private:
+  InstrumentWindowTreeTab();
+  InstrumentWindowTreeTab(const InstrumentWindowTreeTab &);
 };
 
 class MantidUI: QObject
@@ -1316,7 +1597,7 @@ public:
   InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
 %MethodCode
   sipRes = sipCpp->getInstrumentView(*a0,a1);
-  sipRes->hide();
+  if(sipRes) sipRes->hide();
 %End
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
   Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName, 

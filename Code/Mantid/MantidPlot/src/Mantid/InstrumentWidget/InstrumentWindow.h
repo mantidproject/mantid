@@ -94,7 +94,8 @@ public:
   bool blocked()const{return m_blocked;}
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
-  InstrumentWindowTab *getTab()const;
+  InstrumentWindowTab *getTab(const QString & title="") const;
+  InstrumentWindowTab *getTab(const Tab tab) const;
   /// Get a filename for saving
   QString getSaveFileName(const QString& title, const QString& filters, QString* selectedFilter = NULL);
 
@@ -136,23 +137,26 @@ public slots:
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
   void setupColorMap();
-  void changeColormap(const QString & filename = "");
-  void changeScaleType(int);
-  void changeColorMapMinValue(double minValue);
-  void changeColorMapMaxValue(double maxValue);
-  void changeColorMapRange(double minValue, double maxValue);
+
+  void changeColormap(const QString & filename = ""); // Deprecated
+  void changeScaleType(int);// Deprecated
+  void changeColorMapMinValue(double minValue); // Deprecated
+  void changeColorMapMaxValue(double maxValue); // Deprecated
+  void changeColorMapRange(double minValue, double maxValue); // Deprecated
   void setIntegrationRange(double,double);
   void setBinRange(double,double);
-  void setColorMapAutoscaling(bool);
+  void setColorMapAutoscaling(bool); // Deprecated
 
   void setViewDirection(const QString&);
   void pickBackgroundColor();
-  void saveImage();
+  void saveImage(QString filename);
   void setInfoText(const QString&);
   void set3DAxesState(bool);
   void setSurfaceType(int);
   void setWireframe(bool);
 
+  /// Overlay a workspace with the given name
+  bool overlay(const QString & wsName);
   void clearPeakOverlays();
   void setPeakLabelPrecision(int n);
   void setShowPeakRowFlag(bool on);

@@ -278,6 +278,46 @@ void InstrumentWindowMaskTab::initSurface()
 }
 
 /**
+ * Selects between masking/grouping
+ * @param mode The required mode, @see Mode
+ */
+void InstrumentWindowMaskTab::setMode(Mode mode)
+{
+  switch(mode)
+  {
+  case Mask: toggleMaskGroup(true);
+    break;
+  case Group: toggleMaskGroup(false);
+    break;
+  default: throw std::invalid_argument("Invalid Mask tab mode. Use Mask/Group.");
+  };
+
+
+}
+
+void InstrumentWindowMaskTab::selectTool(Activity tool)
+{
+  switch(tool)
+  {
+  case Move: m_move->setChecked(true);
+    break;
+  case Select: m_pointer->setChecked(true);
+    break;
+  case DrawEllipse: m_ellipse->setChecked(true);
+    break;
+  case DrawRectangle: m_rectangle->setChecked(true);
+    break;
+  case DrawEllipticalRing: m_ring_ellipse->setChecked(true);
+    break;
+  case DrawRectangularRing: m_ring_rectangle->setChecked(true);
+    break;
+  default: throw std::invalid_argument("Invalid tool type.");
+  }
+  setActivity();
+}
+
+
+/**
   * Set tab's activity based on the currently selected tool button.
   */
 void InstrumentWindowMaskTab::setActivity()
@@ -302,19 +342,19 @@ void InstrumentWindowMaskTab::setActivity()
   }
   else if (m_rectangle->isChecked())
   {
-    m_activity = DrawEllipse;
+    m_activity = DrawRectangle;
     m_instrWindow->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
   else if (m_ring_ellipse->isChecked())
   {
-    m_activity = DrawEllipse;
+    m_activity = DrawEllipticalRing;
     m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
   else if (m_ring_rectangle->isChecked())
   {
-    m_activity = DrawEllipse;
+    m_activity = DrawRectangularRing;
     m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
@@ -664,6 +704,11 @@ void InstrumentWindowMaskTab::showSaveMenuTooltip(QAction *action)
   */
 void InstrumentWindowMaskTab::toggleMaskGroup(bool maskOn)
 {
+    m_masking_on->blockSignals(true);
+    m_masking_on->setChecked(maskOn);
+    m_grouping_on->setChecked(!maskOn);
+    m_masking_on->blockSignals(false);
+
     enableApplyButtons();
     if ( maskOn )
     {
