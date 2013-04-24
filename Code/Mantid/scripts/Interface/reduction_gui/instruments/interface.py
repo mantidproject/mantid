@@ -201,6 +201,12 @@ class InstrumentInterface(object):
         """
         return False
         
+    def is_cluster_enabled(self):
+        """
+            Returns true if the instrument is compatible with remote submission
+        """
+        return False
+    
     def reset(self):
         """
             Reset the interface

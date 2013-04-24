@@ -85,6 +85,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Event connections
         if not IS_IN_MANTIDPLOT:
             self.reduce_button.hide()
+            self.cluster_button.hide()
         self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
         self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)  
         self.connect(self.save_button, QtCore.SIGNAL("clicked()"), self._save)  
@@ -186,6 +187,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.interface_chk.show()
             else:
                 self.interface_chk.hide()
+
+            # Show the parallel reduction button if enabled
+            if self._interface.is_cluster_enabled():
+                self.cluster_button.show()
+                self.connect(self.cluster_button, QtCore.SIGNAL("clicked()"), self.cluster_clicked)  
+            else:
+                self.cluster_button.hide()
             
             if load_last:
                 self._interface.load_last_reduction()
@@ -426,6 +434,9 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.file_menu.setEnabled(True)
         self.tools_menu.setEnabled(True)
 
+    def cluster_clicked(self):
+        print "CLUSTER CLICKED"
+        
     def open_file(self, file_path=None):
         """
             Open an XML file and populate the UI
