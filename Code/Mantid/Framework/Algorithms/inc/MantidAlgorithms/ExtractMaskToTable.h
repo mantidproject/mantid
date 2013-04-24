@@ -48,6 +48,9 @@ namespace Algorithms
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Transforms\\Masking"; }
 
+    /// Remove the items appeared in a vector from another
+    std::vector<detid_t> subtractVector(std::vector<detid_t> minuend, std::vector<detid_t> subtrahend);
+
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
@@ -61,6 +64,12 @@ namespace Algorithms
     /// Input table workspace
     DataObjects::TableWorkspace_sptr m_inputTableWS;
 
+    /// Parse input TableWorkspace to get a list of detectors IDs of which detector are already masked
+    void parseMaskTable(DataObjects::TableWorkspace_sptr masktablews, std::vector<detid_t> &maskeddetectorids);
+
+    /// Parse a string containing list in format (x, xx-yy, x, x, ...) to a vector of detid_t
+    void parseStringToVector(std::string liststr, std::vector<detid_t>& detidvec);
+
     /// Extract mask from a workspace to a list of detectors
     void extractMaskFromMatrixWorkspace(std::vector<detid_t> &maskeddetids);
 
@@ -69,7 +78,7 @@ namespace Algorithms
 
     /// Add a list of spectra (detector IDs) to the output table workspace
     void addToTableWorkspace(DataObjects::TableWorkspace_sptr outws, std::vector<detid_t> maskeddetids,
-                             double xmin, double xmax);
+                             double xmin, double xmax, std::vector<detid_t> prevmaskedids);
 
     /// Minimum X range
     double m_XMin;

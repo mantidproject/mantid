@@ -2,6 +2,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 
 
 namespace Mantid
@@ -85,9 +86,11 @@ namespace Algorithms
     setProperty("OutputWorkspace", outws);
 
     // Optionally import the input table workspace
+    vector<detid_t> prevmaskeddetids;
     if (m_inputTableWS)
     {
       g_log.notice("[To implement] Parse input table workspace.");
+      parseMaskTable(m_inputTableWS, prevmaskeddetids);
     }
     else
     {
@@ -97,7 +100,7 @@ namespace Algorithms
     // Extract mask
     vector<detid_t> maskeddetids;
     extractMaskFromMatrixWorkspace(maskeddetids);
-    g_log.notice() << "[DB] Number of masked detectors = " << maskeddetids.size() << ".\n";
+    g_log.debug() << "[DB] Number of masked detectors = " << maskeddetids.size() << ".\n";
 
     // Write out
     if (m_inputTableWS)
@@ -110,10 +113,70 @@ namespace Algorithms
       g_log.notice() << "There is no input workspace information to copy to output workspace." << ".\n";
     }
 
-    addToTableWorkspace(outws, maskeddetids, xmin, xmax);
+    addToTableWorkspace(outws, maskeddetids, xmin, xmax, prevmaskeddetids);
 
     return;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Parse input TableWorkspace to get a list of detectors IDs of which detector are already masked
+    * @param masktablews :: TableWorkspace containing masking information
+    */
+  void ExtractMaskToTable::parseMaskTable(DataObjects::TableWorkspace_sptr masktablews, std::vector<detid_t>& maskeddetectorids)
+  {
+    // Clear input
+    maskeddetectorids.clear();;
+
+    // Parse each row
+    size_t numrows = masktablews->rowCount();
+    double xmin, xmax;
+    string specliststr;
+    for (size_t i = 0; i < numrows; ++i)
+    {
+      TableRow tmprow = masktablews->getRow(i);
+      tmprow >> xmin >> xmax >> specliststr;
+
+      vector<detid_t> tmpdetidvec;
+      parseStringToVector(specliststr, tmpdetidvec);
+      maskeddetectorids.insert(maskeddetectorids.end(), tmpdetidvec.begin(), tmpdetidvec.end());
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Parse a string containing list in format (x, xx-yy, x, x, ...) to a vector of detid_t
+    * @param liststr :: string containing list to parse
+    * @param detidvec :: vector genrated from input string containing the list
+    */
+  void ExtractMaskToTable::parseStringToVector(std::string liststr, vector<detid_t>& detidvec)
+  {
+    detidvec.clear();
+
+    // Use ArrayProperty to parse the list
+    ArrayProperty<int> detlist("i", liststr);
+    if (detlist.isValid().compare(""))
+    {
+      stringstream errss;
+      errss << "String '" << liststr << "' is unable to be converted to a list of detectors IDs. "
+            << "Validation mesage: " << detlist.isValid();
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    // Convert from ArrayProperty to detectors list
+    size_t numdetids = detlist.size();
+    detidvec.reserve(numdetids);
+    for (size_t i = 0; i < numdetids; ++i)
+    {
+      int tmpid = detlist.operator ()()[i];
+      detidvec.push_back(tmpid);
+      g_log.debug() << "[DB] Add detector ID: " << tmpid << ".\n";
+    }
+
+    return;
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Extract mask information from a workspace containing instrument
@@ -142,7 +205,7 @@ namespace Algorithms
       {
         maskeddetids.push_back(tmpdetid);
       }
-      g_log.notice() << "[DB] Detector No. " << i << ":  ID = " << detids[i]
+      g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << detids[i]
                      << ", Masked = " << masked << ".\n";
     }
 
@@ -206,7 +269,7 @@ namespace Algorithms
     * @param xmax :: maximum x
     */
   void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws, vector<detid_t> maskeddetids,
-                                               double xmin, double xmax)
+                                               double xmin, double xmax, vector<detid_t> prevmaskedids)
   {
     // Sort vector of detectors ID
     size_t numdetids = maskeddetids.size();
@@ -220,6 +283,18 @@ namespace Algorithms
     else
     {
       sort(maskeddetids.begin(), maskeddetids.end());
+    }
+
+    // Exclude previously masked detectors IDs from masked detectors IDs
+    if (prevmaskedids.size() > 0)
+    {
+      sort(prevmaskedids.begin(), prevmaskedids.end());
+      maskeddetids = subtractVector(maskeddetids, prevmaskedids);
+      numdetids = maskeddetids.size();
+    }
+    else
+    {
+      g_log.debug() << "[DB] There is no previously masked detectors." << ".\n";
     }
 
     // Convert vector to string
@@ -273,44 +348,35 @@ namespace Algorithms
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Remove the detector IDs of one vector that appear in another vector
+    * @param minuend :: vector with items to be removed from
+    * @param subtrahend :: vector containing the items to be removed from minuend
+    */
+  std::vector<detid_t> ExtractMaskToTable::subtractVector(std::vector<detid_t> minuend, std::vector<detid_t> subtrahend)
+  {
+    // Define some variables
+    vector<detid_t>::iterator firstsubiter, fiter;
+    firstsubiter = subtrahend.begin();
 
+    // Returned
+    vector<detid_t> diff;
+    size_t numminend = minuend.size();
+
+    for (size_t i = 0; i < numminend; ++i)
+    {
+      detid_t tmpid = minuend[i];
+      fiter = lower_bound(firstsubiter, subtrahend.end(), tmpid);
+      bool exist = *fiter == tmpid;
+      if (!exist)
+      {
+        diff.push_back(tmpid);
+      }
+      firstsubiter = fiter;
+    }
+
+    return diff;
+  }
 
 } // namespace Algorithms
 } // namespace Mantid
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

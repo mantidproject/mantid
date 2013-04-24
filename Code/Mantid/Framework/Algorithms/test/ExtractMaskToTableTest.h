@@ -27,6 +27,74 @@ public:
   static ExtractMaskToTableTest *createSuite() { return new ExtractMaskToTableTest(); }
   static void destroySuite( ExtractMaskToTableTest *suite ) { delete suite; }
 
+  /** Test a method
+    */
+  void test_method()
+  {
+    ExtractMaskToTable alg;
+
+    vector<int> vecA;
+    vector<int> vecB;
+
+    // All B's items are in A
+    for (size_t i = 0; i < 20; ++i)
+    {
+      vecA.push_back(static_cast<int>(i)+5);
+    }
+
+    for (size_t i = 0; i < 4; ++i)
+    {
+      vecB.push_back(static_cast<int>(i)*4+1+5);
+    }
+
+    vector<int> vecC = alg.subtractVector(vecA, vecB);
+    for (size_t i = 0;i < vecC.size(); ++i)
+      cout << "Item " << i << "\t = \t" << vecC[i] << ".\n";
+    cout << "\n";
+
+    TS_ASSERT_EQUALS(vecC.size(), vecA.size()-vecB.size());
+
+    // Not all B's item are in A
+    vecA.clear();
+    vecB.clear();
+
+    for (int i = 0; i <10; ++i)
+      vecA.push_back(i*3);
+
+    for (int i = 0; i < 10; ++i)
+      vecB.push_back(i+10);
+
+    vecC = alg.subtractVector(vecA, vecB);
+
+    for (size_t i = 0;i < vecC.size(); ++i)
+      cout << "Item " << i << "\t = \t" << vecC[i] << ".\n";
+    cout << "\n";
+
+    TS_ASSERT_EQUALS(vecC.size(), 7);
+
+    // B has a large range than A
+    vecA.clear();
+    vecB.clear();
+
+    for (int i = 0; i < 10; ++i)
+      vecA.push_back(5 + i*2);
+
+    for (int i = 0; i < 3; ++i)
+      vecB.push_back(i+1);
+    for (int i = 0; i < 10; ++i)
+      vecB.push_back(i+10);
+    vecB.push_back(25);
+    vecB.push_back(30);
+
+    vecC = alg.subtractVector(vecA, vecB);
+    for (size_t i = 0;i < vecC.size(); ++i)
+      cout << "Item " << i << "\t = \t" << vecC[i] << ".\n";
+    cout << "\n";
+    TS_ASSERT_EQUALS(vecC.size(), 5);
+
+    return;
+  }
+
   /** Test initialization of the algorithm
     */
   void test_Init()
@@ -196,6 +264,100 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace2");
     AnalysisDataService::Instance().remove("MaskTable2");
 
+    return;
+  }
+
+
+  /** Test for appending a new line to an existing table workspace
+    * Some masked detectors are in the input table workspace
+    */
+  void test_appendToPreviousTable()
+  {
+    // Create a workspace with some detectors masked
+    const int nvectors(50), nbins(10);
+    Workspace2D_sptr inputws = WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+
+    //   Mask every 10th spectra
+    std::set<int64_t> maskedIndices;
+    for( int i = 0; i < 50; i += 10 )
+    {
+      maskedIndices.insert(i);
+    }
+    for (int i = 22; i < 25; ++i)
+    {
+      maskedIndices.insert(i);
+    }
+    maskedIndices.insert(42);
+
+    //   Mask some consecutive detids
+    maskedIndices.insert(5);
+    maskedIndices.insert(6);
+    maskedIndices.insert(7);
+    inputws = WorkspaceCreationHelper::maskSpectra(inputws, maskedIndices);
+
+    AnalysisDataService::Instance().addOrReplace("TestWorkspace2", inputws);
+
+    // Create a table workspace to append to
+    TableWorkspace_sptr existtablews(new TableWorkspace());
+    existtablews->addColumn("double", "XMin");
+    existtablews->addColumn("double", "XMax");
+    existtablews->addColumn("str", "SpectraList");
+    TableRow row0 = existtablews->appendRow();
+    row0 << 2345.0 << 78910.3 << "23-25, 33";
+    TableRow row1 = existtablews->appendRow();
+    row1 << 2345.1 << 78910.5 << "43";
+
+    AnalysisDataService::Instance().addOrReplace("MaskTable2", existtablews);
+
+    // Call algorithms
+    ExtractMaskToTable alg;
+    alg.initialize();
+
+    // Set up properties
+    alg.setProperty("InputWorkspace", "TestWorkspace2");
+    alg.setProperty("MaskTableWorkspace", "MaskTable2");
+    alg.setProperty("OutputWorkspace", "MaskTable2");
+    alg.setProperty("XMin", 1234.0);
+    alg.setProperty("XMax", 12345.6);
+
+    // Execute
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Validate
+    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+          AnalysisDataService::Instance().retrieve("MaskTable2"));
+    TS_ASSERT(outws);
+    if (!outws)
+      return;
+
+    cout << "Number of row in table workspace : " << outws->rowCount() << ".\n";
+    TS_ASSERT_EQUALS(outws->rowCount(), 3);
+
+    double xxmin, xxmax;
+    string specstr;
+
+    TableRow therow = outws->getRow(2);
+    therow >> xxmin >> xxmax >> specstr;
+    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
+    string expectedspec(" 1,  6-8,  11,  21,  31,  41");
+    TS_ASSERT_EQUALS(specstr, expectedspec);
+    TS_ASSERT_DELTA(xxmin, 1234.0, 0.0001);
+    TS_ASSERT_DELTA(xxmax, 12345.6, 0.0001);
+
+    TableRow therow1 = outws->getRow(1);
+    therow1 >> xxmin >> xxmax >> specstr;
+    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
+    string expectedspec2("43");
+    TS_ASSERT_DELTA(xxmin, 2345.1, 0.0001);
+    TS_ASSERT_DELTA(xxmax, 78910.5, 0.0001);
+    TS_ASSERT_EQUALS(specstr, expectedspec2);
+
+    // Clean
+    AnalysisDataService::Instance().remove("TestWorkspace2");
+    AnalysisDataService::Instance().remove("MaskTable2");
+
+    return;
   }
 
 };
