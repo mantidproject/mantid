@@ -38,6 +38,7 @@ set ( PLUGINS_DIR plugins )
 set ( PVPLUGINS_DIR pvplugins )
 set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
+include ( CPackLinuxSetup )    
 
 if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/Mantid CACHE PATH "Install path" FORCE )
@@ -73,19 +74,34 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
                                                     "endif\n"
 )
 
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_all_links.sh "#!/bin/sh\n"
+
+
+
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "#!/bin/sh\n"
                                                          "if [ ! -e $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot ]; then\n"
                                                          "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                          "fi\n"
-                                                         "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.sh /etc/profile.d/mantid.sh\n"
-                                                         "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.csh /etc/profile.d/mantid.csh\n"
 )
 
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_links.sh "#!/bin/sh\n"
-                                                         "if [ ! -e $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot ]; then\n"
-                                                         "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
-                                                         "fi"
-)
+if ( ENVVARS_ON_INSTALL ) 
+	file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
+                                                         "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.sh /etc/profile.d/mantid.sh\n"
+                                                         "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.csh /etc/profile.d/mantid.csh\n"
+	)
+endif()
+
+if ( ${UNIX_CODENAME} STREQUAL "Santiago" )
+	file ( APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
+								     "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot ]; then\n"
+                                                                     "  mv $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
+							             "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot\n"
+                                                                     "fi\n"
+	)
+	file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh "#!/bin/sh\n"
+								      "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe \"$@\" \n"
+	)
+endif()
+
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
                                                              "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
@@ -106,6 +122,9 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh "#!/bin/sh\n"
+                                                             "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe ]; then\n"
+                                                             "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
+                                                             "fi\n"
                                                              "# If the install prefix contains mantid then prune empty directories.\n"
                                                              "# Begin extra cautious here just in case some has set the something like Prefix=/usr\n"
                                                              "if echo \"$RPM_INSTALL_PREFIX0\" | grep -qi mantid; then\n"
@@ -121,6 +140,14 @@ install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_
           DESTINATION ${ETC_DIR}
 )
 
+install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh 
+          DESTINATION ${BIN_DIR}
+	  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+		      GROUP_EXECUTE GROUP_READ
+		      WORLD_EXECUTE WORLD_READ
+)
+
+
 # unset all install/uninstall scripts
 unset ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE )
 unset ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE )
@@ -132,11 +159,11 @@ if ( NOT MPI_BUILD )
   set ( ENVVARS_ON_INSTALL ON CACHE BOOL "Whether to include the scripts in /etc/profile.d to set the MANTIDPATH variable and add it to PATH. Turning this off allows installing locally without being root." )
   if ( ENVVARS_ON_INSTALL )
     set ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh )
-    set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_all_links.sh )
+    set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh )
     set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh )
     set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh )
   else ( ENVVARS_ON_INSTALL )
-    set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_links.sh )
+    set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh )
     set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh )
     set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh )
   endif ()
