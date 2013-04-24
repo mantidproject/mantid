@@ -189,7 +189,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.interface_chk.hide()
 
             # Show the parallel reduction button if enabled
-            if self._interface.is_cluster_enabled():
+            if self._interface.is_cluster_enabled() and IS_IN_MANTIDPLOT:
                 self.cluster_button.show()
                 self.connect(self.cluster_button, QtCore.SIGNAL("clicked()"), self.cluster_clicked)  
             else:

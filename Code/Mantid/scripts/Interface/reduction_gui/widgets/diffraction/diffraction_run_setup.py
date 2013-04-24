@@ -11,8 +11,13 @@ import ui.diffraction.ui_diffraction_run_setup
 import ui.diffraction.ui_diffraction_info
 
 #import mantid.simpleapi as api
-from mantid.api import *
-from mantid.kernel import *
+IS_IN_MANTIDPLOT = False
+try:
+    from mantid.api import *
+    from mantid.kernel import *
+    IS_IN_MANTIDPLOT = True
+except:
+    pass
 
 class RunSetupWidget(BaseWidget):
     """ Widget that presents run setup including sample run, optional vanadium run and etc.

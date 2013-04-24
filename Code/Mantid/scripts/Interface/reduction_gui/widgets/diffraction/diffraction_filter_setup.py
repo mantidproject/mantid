@@ -10,7 +10,12 @@ from reduction_gui.reduction.diffraction.diffraction_filter_setup_script import 
 import ui.diffraction.ui_diffraction_filter_setup
 import ui.diffraction.ui_filter_info 
 
-import mantid.simpleapi as api
+IS_IN_MANTIDPLOT = False
+try:
+    import mantid.simpleapi as api
+    IS_IN_MANTIDPLOT = True
+except:
+    pass
 
 class FilterSetupWidget(BaseWidget):
     """ Widget that presents event filters setup
