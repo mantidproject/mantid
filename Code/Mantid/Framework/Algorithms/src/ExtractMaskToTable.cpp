@@ -52,7 +52,7 @@ namespace Algorithms
     auto intblprop = new WorkspaceProperty<TableWorkspace>("MaskTableWorkspace", "", Direction::Input, PropertyMode::Optional);
     declareProperty(intblprop, "Name of the TableWorkspace to append to.");
 
-    auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "_Hidden", Direction::Output);
+    auto outwsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "", Direction::Output);
     declareProperty(outwsprop, "Name of the output TableWorkspace containing the mask information.");
 
     declareProperty("Xmin", EMPTY_DBL(), "Minimum of X-value.");
@@ -82,24 +82,35 @@ namespace Algorithms
     outws->addColumn("double", "XMin");
     outws->addColumn("double", "XMax");
     outws->addColumn("str", "SpectraList");
+    setProperty("OutputWorkspace", outws);
 
     // Optionally import the input table workspace
     if (m_inputTableWS)
     {
+      g_log.notice("[To implement] Parse input table workspace.");
+    }
+    else
+    {
+      g_log.notice("No input workspace to parse.");
     }
 
     // Extract mask
     vector<detid_t> maskeddetids;
     extractMaskFromMatrixWorkspace(maskeddetids);
+    g_log.notice() << "[DB] Number of masked detectors = " << maskeddetids.size() << ".\n";
 
     // Write out
     if (m_inputTableWS)
     {
+      g_log.notice() << "About to copying input table workspace content to output workspace." << ".\n";
       copyTableWorkspaceContent(m_inputTableWS, outws);
     }
-    addToTableWorkspace(outws, maskeddetids, xmin, xmax);
+    else
+    {
+      g_log.notice() << "There is no input workspace information to copy to output workspace." << ".\n";
+    }
 
-    setProperty("OutputWorkspace", outws);
+    addToTableWorkspace(outws, maskeddetids, xmin, xmax);
 
     return;
   }
@@ -131,6 +142,8 @@ namespace Algorithms
       {
         maskeddetids.push_back(tmpdetid);
       }
+      g_log.notice() << "[DB] Detector No. " << i << ":  ID = " << detids[i]
+                     << ", Masked = " << masked << ".\n";
     }
 
     g_log.notice() << "Extract mask:  There are " << maskeddetids.size() << " detectors that"
@@ -187,11 +200,77 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Add a list of spectra (detector IDs) to the output table workspace
+    * @param outws :: table workspace to write
+    * @param maskeddetids :: vector of detector IDs of which detectors masked
+    * @param xmin :: minumim x
+    * @param xmax :: maximum x
     */
   void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws, vector<detid_t> maskeddetids,
                                                double xmin, double xmax)
   {
+    // Sort vector of detectors ID
+    size_t numdetids = maskeddetids.size();
+    if (numdetids == 0)
+    {
+      stringstream warnss;
+      warnss << "Attempting to add an empty vector of masked detectors IDs to output workspace.  Operation failed.";
+      g_log.warning(warnss.str());
+      return;
+    }
+    else
+    {
+      sort(maskeddetids.begin(), maskeddetids.end());
+    }
 
+    // Convert vector to string
+    stringstream spectralist;
+    detid_t previd = maskeddetids[0];
+    detid_t headid = maskeddetids[0];
+    for (size_t i = 1; i < numdetids; ++i)
+    {
+      detid_t tmpid = maskeddetids[i];
+      if (tmpid == previd + 1)
+      {
+        // Continuous ID
+        previd = tmpid;
+      }
+      else if (tmpid > previd + 1)
+      {
+        // Skipped ID: make a pair
+        if (previd == headid)
+        {
+          // Single item
+          spectralist << " " << headid << ", ";
+        }
+        else
+        {
+          // Multiple items
+          spectralist << " " << headid << "-" << previd << ", ";
+        }
+
+        // New head
+        headid = tmpid;
+        previd = tmpid;
+      }
+      else
+      {
+        g_log.error() << "Current ID = " << tmpid << ", Previous ID = " << previd << ", Head ID = " << headid << ".\n";
+        throw runtime_error("Impossible!  Programming logic error!");
+      }
+    } // ENDFOR (i)
+
+    // Last one
+    if (previd == headid)
+      spectralist << " " << headid;
+    else
+      spectralist << " " << headid << "-" << previd;
+
+    // Add to table workspace
+    string specliststr = spectralist.str();
+    TableRow newrow = outws->appendRow();
+    newrow << xmin << xmax << specliststr;
+
+    return;
   }
 
 
