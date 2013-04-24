@@ -88,7 +88,8 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
       API::IMDHistoWorkspace_const_sptr infoWs = boost::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
       m_numDims = infoWs->getNumDims();
       Geometry::OrientedLattice oLatt = infoWs->getExperimentInfo(0)->sample().getOrientedLattice();
-      Kernel::DblMatrix wTrans = infoWs->getWTransf();
+      std::vector<double> wMatArr = infoWs->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double > >("W_MATRIX");
+      Kernel::DblMatrix wTrans(wMatArr);
       API::CoordTransform *transform = infoWs->getTransformToOriginal();
       Kernel::Matrix<coord_t> affMat = transform->makeAffineMatrix();
       this->createSkewInformation(oLatt, wTrans, affMat);
