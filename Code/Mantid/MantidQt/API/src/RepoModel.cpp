@@ -315,6 +315,13 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
       }
     }else if (action == "Upload"){
       QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+      if (repo_ptr->fileInfo(path).directory){
+        QMessageBox::information(father, 
+                                 "Not Supported", 
+                                 "The current version does not support uploading recursively. Please, upload one-by-one"); 
+        return false; 
+      };
+
       UploadForm * form = new UploadForm(QString::fromStdString(path), father);
       QSettings settings; 
       settings.beginGroup("Mantid/ScriptRepository"); 
