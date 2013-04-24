@@ -1,3 +1,6 @@
+"""
+    Main window for reduction UIs
+"""
 import sys, os
 import traceback
 from PyQt4 import QtGui, QtCore, uic
