@@ -435,7 +435,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.tools_menu.setEnabled(True)
 
     def cluster_clicked(self):
-        print "CLUSTER CLICKED"
+        """
+            Submit for parallel reduction
+        """
+        if self._interface is not None:
+            self._interface.cluster_submit()
         
     def open_file(self, file_path=None):
         """

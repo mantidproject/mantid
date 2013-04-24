@@ -434,6 +434,26 @@ class BaseReductionScripter(object):
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
 
+    def cluster_submit(self, output_dir):
+        """
+            Apply the reduction process to a Mantid SANSReducer
+            @param output_dir: directory where the output data will be written
+        """
+        Logger.get("scripter").notice("Preparing remote reduction job submission")
+
+        if HAS_MANTID:
+            # Generate reduction script and write it to file
+            script_path = os.path.join(output_dir, "job_submission.py")
+            script = self.to_script(script_path)
+            Logger.get("scripter").notice("Reduction script: %s" % script_path)
+            
+            # Generate job submission script
+            
+            # Submit the job
+            
+        else:
+            Logger.get("scripter").error("Mantid is unavailable to submit a reduction job")
+
     def execute_script(self, script):
         """
             Executes the given script code.
