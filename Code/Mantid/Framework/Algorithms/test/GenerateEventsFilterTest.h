@@ -45,7 +45,7 @@ public:
   static void destroySuite( GenerateEventsFilterTest *suite ) { delete suite; }
 
 
-  void Ptest_Init()
+  void test_Init()
   {
     GenerateEventsFilter alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -57,7 +57,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test generation of splitters by time
    */
-  void Ptest_genTime1Interval()
+  void test_genTime1Interval()
   {
     // 1. Create input Workspace
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
@@ -120,7 +120,7 @@ public:
    * (1) Multiple time interval
    * (2) Default start time and stop time
    */
-  void Ptest_genTimeMultipleInterval()
+  void test_genTimeMultipleInterval()
   {
     // 1. Create input Workspace
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
@@ -187,7 +187,7 @@ public:
    * (1) No time tolerance
    * (2) Just one
    */
-  void Ptest_genSimpleLogValueFilter()
+  void test_genSimpleLogValueFilter()
   {
     // 1. Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
@@ -245,7 +245,7 @@ public:
    * (1) No time tolerance
    * (2) Just one
    */
-  void Ptest_genMultipleLogValuesFilter()
+  void test_genMultipleLogValuesFilter()
   {
     std::cout << "\n==== Test Multiple Log Value Filter ====\n" << std::endl;
 
