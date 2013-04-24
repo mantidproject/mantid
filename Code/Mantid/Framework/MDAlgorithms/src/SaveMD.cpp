@@ -409,7 +409,8 @@ namespace MDAlgorithms
     int nPoints = static_cast<int>(v.size());
 
     file->makeData(name, type, nPoints, true);
-    file->putData(v);
+    // Need a pointer
+    file->putData(&v[0]);
     if (!tag.empty())
     {
       file->putAttr("type", tag);
