@@ -9,9 +9,6 @@
 #include "MantidRemote/RemoteTask.h"
 #include "MantidRemote/RemoteJobManager.h"
 
-#include "boost/make_shared.hpp"
-#include <sstream>
-
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
@@ -93,40 +90,16 @@ void SubmitRemoteJob::exec()
   // Create a RemoteTask object for this job
   RemoteTask task(getPropertyValue( "TaskName"), getPropertyValue( "TransactionID"));
   task.appendResource( "group", getPropertyValue( "GroupName"));
-  task.appendResource( "nodes", getPropertyValue( "NumNodes"));
-
-  // Need to figure out the total number of MPI processes
-  unsigned coresPerNode, numNodes;
-  std::stringstream convert( getPropertyValue( "NumNodes"));
-  convert >> numNodes;
-  convert.str( getPropertyValue( "CoresPerNode"));
-  convert.clear();  // interestingly - setting the value with str() doesn't clear the eof bit.
-  convert >> coresPerNode;
-
-  convert.str("");
-  convert.clear();
-  convert << (numNodes * coresPerNode);
+  task.appendResource( "num_nodes", getPropertyValue( "NumNodes"));
+  task.appendResource( "cores_per_node", getPropertyValue( "CoresPerNode"));
+  task.appendResource ( "executable", getPropertyValue( "ScriptName"));
 
   // Set the username and password from the properties
   jobManager->setUserName( getPropertyValue ("UserName"));
   jobManager->setPassword( getPropertyValue( "Password"));
 
-  // append command line options in the order that we want them displayed
-  task.appendCmdLineParam( "-n");
-  task.appendCmdLineParam(  convert.str());
-
-  task.appendCmdLineParam( "-npernode");
-  task.appendCmdLineParam( getPropertyValue( "CoresPerNode"));
-
-  task.appendCmdLineParam( "-hostfile"); // --hostfile would work, too
-  task.appendCmdLineParam( "$PBS_NODEFILE");  // This is obviously specific to PBS...
-
-  task.appendCmdLineParam( "/usr/bin/python");  // TODO: the python executable is stored in facilities.xml, but actually making
-                                                // use of it would be very ugly (it's copied into MWSRemoteJobManager)
-
-  // HACK! this is where we'd normally specify a file name for the python script to run...
-  task.appendCmdLineParam( "-c");
-  task.appendCmdLineParam( "print 'Hello World'");
+  // append command line options
+  task.appendCmdLineParam( getPropertyValue( "ScriptArguments"));
 
   std::string retMsg;
   bool jobOutput = jobManager->submitJob( task, retMsg);

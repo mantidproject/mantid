@@ -682,31 +682,29 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, std::string &
 
     // Build up the JSON struct for submitting a job to MWS
     std::ostringstream json;
-#if 1
+    // Note:  This is MWS API v1.0.  It looks like the version 2.0 API cleans things up a bit
+    // and should be used instead.
     json << "{\n ";
-    json << "\"commandFile\": \"" << m_mpirunExecutable << "\",\n";
+    json << "\"commandFile\": \"" << remoteTask.getResourceValue("executable") << "\",\n";
     json << "\"commandLineArguments\": \"" << escapeQuoteChars( remoteTask.getCmdLineParams() )<< "\",\n";
     json << "\"user\": \"" << m_userName << "\",\n";
     json << "\"group\": \"" << remoteTask.getResourceValue( "group") << "\",\n";
     json << "\"name\": \"" << remoteTask.getName() << "\",\n";
     json << "\"variables\": {\"SUBMITTING_APP\": \"MantidPlot\"},\n";
     json << "\"requirements\": [{\n";
-    json << "\t\"requiredProcessorCountMinimum\": \"" << remoteTask .getResourceValue("nodes") << "\"}]\n";  // don't forget the , before the \n if this is no longer the last line in the json
+    json << "\t\"requiredProcessorCountMinimum\": \"" << remoteTask.getResourceValue("num_nodes") << "\"}],\n";
+
+
+    // Note: setting the environment variables is something of a kludge, but it allows me to pass info
+    // down to the process that will actually run.  In this case, parameters for the mpirun command line.
+    json << "\"environmentVariables\" : {\n";
+    json << "\t\"MANTIDPLOT_NUM_NODES\" : \"" << remoteTask.getResourceValue("num_nodes") << "\",\n";
+    json << "\t\"MANTIDPLOT_CORES_PER_NODE\" : \"" << remoteTask.getResourceValue("cores_per_node") << "\"}\n"; // don't forget the , before the \n if this is no longer the last line in the json
+
     //json << "\"standardErrorFilePath\": \"/home/" + user + "\",\n";
     //json << "\"standardOutputFilePath\": \"/home/" + user + "\"\n";
     json << "}";
-#else
-    // This JSON is known to work properly...
-    json << "{\n";
-    json << "\"commandFile\": \"/usr/lib64/openmpi/bin/mpirun\",\n";
-    json << "\"commandLineArguments\": \"-n 16 -npernode 2 --hostfile $PBS_NODEFILE /SNS/users/xmr/hello_mpi/hello\",\n";
-    json << "\"initialWorkingDirectory\": \"/SNS/users/xmr\",\n";
-    json << "\"user\": \"xmr\",\n";
-    json << "\"group\": \"users\",\n";
-    json << "\"name\": \"MPI_Hello\",\n";
-    json << "\"requirements\": [{\"requiredProcessorCountMinimum\": 16}]\n";
-    json << "}";
-#endif
+
     // Note: I'm currently not specifying the standardErrorFilePath or standardOutputFilePath
     // parameters.  I don't think I'll need them.
 
