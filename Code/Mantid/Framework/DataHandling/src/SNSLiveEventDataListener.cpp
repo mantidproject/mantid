@@ -370,6 +370,29 @@ namespace DataHandling
       return false;
     }
 
+    // Assuming we're going to process this packet, check to see if we need
+    // to finish our initialization steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
+      }
+
+      // If we weren't ready to init, or the init failed, that's an error and
+      // we can't process this packet at all.
+      if (! m_workspaceInitialized)
+      {
+        g_log.error() << "Cannot process BankedEventPacket because workspace isn't initialized." << std::endl;
+        // Note: One error message per BankedEventPkt is likely to absolutely flood the error log.
+        // Might want to think about rate limiting this somehow...
+
+        return false; // We still return false (ie: "no error") because there's no reason to stop
+                      // parsing the data stream
+      }
+
+    }
+
     // A few counters that we use for logging purposes
     unsigned eventsPerBank = 0;
     unsigned totalEvents = 0;
@@ -458,13 +481,6 @@ namespace DataHandling
     if (m_workspaceInitialized == false)
     {
       m_instrumentXML = pkt.info();
-
-      // If we've now got all the data we need to initialize the workspace,
-      // then do so.
-      if (readyForInitPart2())
-      {
-        initWorkspacePart2();
-      }
     }
 
     return false;
@@ -488,13 +504,6 @@ namespace DataHandling
     {
       // We need the instrument name
       m_instrumentName = pkt.longName();
-
-      // If we've now got all the data we need to initialize the workspace,
-      // then do so.
-      if (readyForInitPart2())
-      {
-        initWorkspacePart2();
-      }
     }
 
     return false;
@@ -516,13 +525,6 @@ namespace DataHandling
     if (m_workspaceInitialized == false)
     {
       m_dataStartTime = timeFromPacket( pkt);
-
-      // If we've now got all the data we need to initialize the workspace,
-      // then do so.
-      if (readyForInitPart2())
-      {
-        initWorkspacePart2();
-      }
     }
     
     // Check to see if we should process the rest of this packet (depending
