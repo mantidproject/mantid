@@ -2,6 +2,8 @@
 import os
 import re
 
+from mediawiki import IMG_NOT_FOUND
+
 def getHtml(htmldir):
     """
     Recursively find all html files in the supplied directory.
@@ -28,7 +30,8 @@ def processHtml(htmldir, filename):
     text = handle.read()
     handle.close()
 
-    # determine all the requested images
+    ##### determine all the requested images
+    # that aren't set to IMG_NOT_FOUND
     candidates = re.findall(r"img(.+)/>", text, flags=re.MULTILINE)
     if len(candidates) <= 0:
         return []
@@ -44,6 +47,20 @@ def processHtml(htmldir, filename):
         if end <= start:
             continue
         options.append(candidate[:end])
+    # that are set to IMG_NOT_FOUND
+    if IMG_NOT_FOUND in text:
+        candidates = []
+        index = 0
+        while index >= 0:
+            index = text.find(IMG_NOT_FOUND, index)
+            end = text.find("</figure>")
+            if end < index or index < 0:
+                break
+            figs = re.findall(r'Missing image:\s+(.+)</figcaption>',
+                              text[index:end])
+            candidates.extend(figs)
+            index += len(IMG_NOT_FOUND)
+        options.extend(candidates)
 
     # add them to the list of missing images if not found
     results = []
