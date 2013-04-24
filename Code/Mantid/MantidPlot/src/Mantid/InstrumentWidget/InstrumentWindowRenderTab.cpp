@@ -352,6 +352,11 @@ void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
   if (!surface) return;
   surface->setFlippedView(on);
   m_instrWindow->updateInstrumentView();
+  // Sync checkbox
+  m_flipCheckBox->blockSignals(true);
+  m_flipCheckBox->setChecked(on);
+  m_flipCheckBox->blockSignals(false);
+
 }
 
 /**
