@@ -221,7 +221,6 @@ private slots:
   /// Slot for Show Info button on Point Info form
   void showInfo_slot();
 
-
   // 
   // The following slots take care of the menu items
   //
@@ -231,6 +230,9 @@ private slots:
 
   /// Slot to load a previous MantidEV GUI state
   void loadState_slot();
+
+  /// Slot to restore default GUI state
+  void setDefaultState_slot();
 
   /// Slot to save the UB matrix from the current MantidEV peaks workspace
   void saveIsawUB_slot();
@@ -296,7 +298,9 @@ private slots:
 
   /// Methods to handle pointed at message from any source
   void handleQpointNotification(const Poco::AutoPtr<Mantid::API::SelectionNotificationServiceImpl::AddNotification> & message );
+
   void handleQpointNotification1(const Poco::AutoPtr<Mantid::API::SelectionNotificationServiceImpl::AfterReplaceNotification> & message );
+
   /// Method to get and display info about the specified Q-vector
   void showInfo( Mantid::Kernel::V3D  q_point );
 

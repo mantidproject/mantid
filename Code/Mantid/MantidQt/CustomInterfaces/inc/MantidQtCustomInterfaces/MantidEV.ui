@@ -26,12 +26,13 @@
       <property name="title">
        <string>File</string>
       </property>
-      <addaction name="actionSave_State"/>
-      <addaction name="actionLoad_State"/>
       <addaction name="actionSave_Isaw_UB"/>
       <addaction name="actionLoad_Isaw_UB"/>
       <addaction name="actionSave_Isaw_Peaks"/>
       <addaction name="actionLoad_Isaw_Peaks"/>
+      <addaction name="actionSave_State"/>
+      <addaction name="actionLoad_State"/>
+      <addaction name="actionReset_Default_Settings"/>
      </widget>
      <widget class="QMenu" name="menuView">
       <property name="title">
@@ -1639,6 +1640,16 @@
   <action name="actionClose">
    <property name="text">
     <string>Close</string>
+   </property>
+  </action>
+  <action name="actionReset_Defaults_in_GUI">
+   <property name="text">
+    <string>Reset Defaults in GUI</string>
+   </property>
+  </action>
+  <action name="actionReset_Default_Settings">
+   <property name="text">
+    <string>Reset Default Settings</string>
    </property>
   </action>
  </widget>
