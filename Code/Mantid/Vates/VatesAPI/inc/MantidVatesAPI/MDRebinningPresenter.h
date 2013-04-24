@@ -49,6 +49,7 @@ namespace Mantid
       virtual bool hasTDimensionAvailable() const = 0;
       virtual std::vector<double> getTimeStepValues() const = 0;
       virtual std::string getTimeStepLabel() const = 0;
+      virtual void makeNonOrthogonal(vtkDataSet* visualDataSet) = 0;
       virtual void setAxisLabels(vtkDataSet* visualDataSet) = 0;
       virtual ~MDRebinningPresenter(){}
     };

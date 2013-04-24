@@ -46,6 +46,8 @@
 #include "MantidVatesAPI/Clipper.h"
 #include <vtkPVClipDataSet.h>
 
+#include <QtDebug>
+
 class ClipperAdapter : public Mantid::VATES::Clipper
 {
 private:
@@ -284,6 +286,16 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
     delete p_1dMDFactory;
 
     output->ShallowCopy(outData);
+    try
+    {
+      m_presenter->makeNonOrthogonal(output);
+    }
+    catch (std::invalid_argument &e)
+    {
+      qWarning() << "Workspace does not have correct information to "
+                 << "plot non-orthogonal axes. " << e.what();
+    }
+
     m_presenter->setAxisLabels(output);
   }
   return 1;

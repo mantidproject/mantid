@@ -13,6 +13,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
+#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidVatesAPI/Common.h"
@@ -30,7 +31,8 @@ namespace Mantid
 {
   namespace VATES
   {
-    
+    const std::string MDEWRebinningPresenter::rb_tag = "_visual_md";
+
     /**
     Constructor.
     @param input : input vtk dataset containing existing metadata.
@@ -278,7 +280,7 @@ namespace Mantid
     {
       std::string wsName = m_serializer.getWorkspaceName();
 
-      std::string outWsName = wsName + "_visual_md";
+      std::string outWsName = wsName + rb_tag;
 
       using namespace Mantid::API;
       if(RecalculateAll == m_request->action())
@@ -430,6 +432,13 @@ namespace Mantid
       label += sourceGeometry.getTDimension()->getUnits();
       label += ")";
       return label;
+    }
+
+    void MDEWRebinningPresenter::makeNonOrthogonal(vtkDataSet *visualDataSet)
+    {
+      std::string wsName = m_serializer.getWorkspaceName() + rb_tag;
+      vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName);
+      converter.execute();
     }
 
     void MDEWRebinningPresenter::setAxisLabels(vtkDataSet *visualDataSet)
