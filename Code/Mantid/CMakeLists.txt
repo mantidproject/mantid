@@ -185,6 +185,11 @@ if ( ENABLE_CPACK )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla" )
       endif()
 
+      # Add software collections for RHEL
+      if (  ${UNIX_CODENAME} STREQUAL "Santiago" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} scl-utils" )
+      endif()
+
       # qt assistant is in different places in every distro
       if ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qt4-x11" )
