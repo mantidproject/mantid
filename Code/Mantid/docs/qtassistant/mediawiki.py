@@ -2,6 +2,8 @@ from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
 import os
 import re
 
+IMG_NOT_FOUND = "ImageNotFound.png"
+
 def formatImgHtml(raw):
     #print "RAW:", raw
 
@@ -36,6 +38,14 @@ def formatImgHtml(raw):
         else:
             caption = item
 
+    fullname = os.path.abspath(os.path.join(os.path.curdir, 'qtassistant', 'html', 'img', img))
+    if not os.path.exists(fullname):
+        print "Did not find image '%s' setting to '%s'" % (fullname, IMG_NOT_FOUND)
+        if caption is None:
+            caption = "Missing image: %s" % img
+        else:
+            caption += "\nMissing image: %s" % img
+        img = IMG_NOT_FOUND
 
     html = "<figure>"
     html += "<img src='img/" + img + "'"
@@ -172,8 +182,8 @@ class MediaWiki:
         if len(text) <= 0:
             return # don't bother if it is empty
         text = self.__parseImgs(text)
-        if len(self.images) > 0:
-            print "----->", self.images
+        #if len(self.images) > 0:
+        #    print "----->", self.images
         for img in self.images:
             img = os.path.join(self.__direc, "img", img)
             qhp.addFile(img)

@@ -3,7 +3,7 @@ from xml.dom.minidom import Document
 from assistant_common import addEle, addTxtEle
 
 class QHPFile:
-    def __init__(self, namespace, folder="doc", prettyxml=False):
+    def __init__(self, namespace, folder="doc", prettyxml=False, withImgNotFound=True):
         self.__doc = Document()
         self.__root = addEle(self.__doc,"QtHelpProject", self.__doc,
                              {"version":"1.0"})
@@ -19,6 +19,9 @@ class QHPFile:
         self.__keywords = []
         self.__filesEle = None # should have 'files' section
         self.__files = []
+
+        if withImgNotFound: # html prefix is not strictly correct
+            self.addFile("html/img/ImageNotFound.png")
 
     def addTOC(self, contents):
         """

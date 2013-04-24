@@ -36,6 +36,7 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
           RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/images
 	   "*.PNG" )
    list ( APPEND IMAGES ${IMAGES_PNG})
+   list ( APPEND IMAGES "ImageNotFound.png")
    #message ( "QTASSISTANT_IMAGES ${IMAGES}")
    copy_python_files_to_dir("${IMAGES}" "${CMAKE_CURRENT_SOURCE_DIR}/images" ${HELP_HTML_IMG_DIR} INSTALL_IMAGES)
 
