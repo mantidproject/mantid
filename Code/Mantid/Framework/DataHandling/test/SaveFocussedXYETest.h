@@ -6,6 +6,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Axis.h"
@@ -401,6 +402,28 @@ public:
     filestrm.close();
     focusfile.remove();
     AnalysisDataService::Instance().remove(resultWS);
+  }
+
+  void test_doesnt_fail_on_missing_detectors()
+  {
+    Mantid::API::IAlgorithm_sptr load = Mantid::API::AlgorithmManager::Instance().create("Load");
+    load->setProperty("Filename","HRP38692a.nxs");
+    load->setProperty("OutputWorkspace","ws");
+    load->execute();
+
+    std::string filename("focussed.test");
+    Mantid::DataHandling::SaveFocusedXYE saveXYE;
+    saveXYE.initialize();
+    saveXYE.setPropertyValue("InputWorkspace","ws");
+    saveXYE.setPropertyValue("Filename",filename);
+    filename = saveXYE.getPropertyValue("Filename"); //absolute path
+    saveXYE.setPropertyValue("SplitFiles", "False");
+    saveXYE.execute();
+    TS_ASSERT( saveXYE.isExecuted() );
+    Poco::File focusfile(filename);
+    TS_ASSERT_EQUALS( focusfile.exists(), true );
+    if ( focusfile.exists() ) focusfile.remove();
+    Mantid::API::AnalysisDataService::Instance().clear();
   }
 
 private:
