@@ -49,7 +49,7 @@ void MWDiag::loadSettings()
   // Want the defaults from the instrument if nothing is saved in the config
   Instrument_const_sptr instrument = getInstrument(m_instru->currentText());
 
-  m_designWidg.leIFile->setText(getSetting("input mask"));
+  m_designWidg.maskFileFinder->setText(getSetting("input mask"));
   m_designWidg.leOFile->setText(getSetting("output file"));
   m_designWidg.leSignificance->setText(getSetting("significance", instrument, "diag_samp_sig"));
   m_designWidg.leHighAbs->setText(getSetting("high abs", instrument, "diag_huge"));
@@ -142,7 +142,7 @@ QString MWDiag::getSetting(const QString & settingName, boost::shared_ptr<const 
 /// the form was run or the default value for that control
 void MWDiag::saveDefaults()
 {
-  m_prevSets.setValue("input mask", m_designWidg.leIFile->text());
+  m_prevSets.setValue("input mask", m_designWidg.maskFileFinder->getText());
   m_prevSets.setValue("output file", m_designWidg.leOFile->text());
 
   m_prevSets.setValue("significance", m_designWidg.leSignificance->text());
@@ -165,11 +165,6 @@ void MWDiag::saveDefaults()
 /// runs setToolTip() on each of the controls on the form  
 void MWDiag::setupToolTips()
 {  
-  QString iFileToolTip = "A file containing a list of spectra numbers which we aleady know should be masked";
-  m_designWidg.lbIFile->setToolTip(iFileToolTip);
-  m_designWidg.leIFile->setToolTip(iFileToolTip);
-  m_designWidg.pbIFile->setToolTip(iFileToolTip);
-  
   QString oFileToolTip =
     "The name of a file to write the spectra numbers of those that fail a test";
   m_designWidg.lbOFile->setToolTip(oFileToolTip);
@@ -242,13 +237,10 @@ void MWDiag::setupToolTips()
 void MWDiag::connectSignals(const QWidget * const parentInterface)
 {// connect all the open file buttons to an open file dialog connected to it's line edit box
   QSignalMapper *signalMapper = new QSignalMapper(this);
-  signalMapper->setMapping(m_designWidg.pbIFile, QString("InputFile"));
   signalMapper->setMapping(m_designWidg.pbOFile, QString("OutputFile"));
-  connect(m_designWidg.pbIFile, SIGNAL(clicked()), signalMapper, SLOT(map()));
   connect(m_designWidg.pbOFile, SIGNAL(clicked()), signalMapper, SLOT(map()));  
   connect(signalMapper, SIGNAL(mapped(const QString &)),
          this, SLOT(browseClicked(const QString &)));
-  connect(m_designWidg.leIFile, SIGNAL(editingFinished()), this, SLOT(validateHardMaskFile()));
 
   // signals connected to the interface that this form is on
   if ( parentInterface != NULL )
@@ -277,8 +269,6 @@ void MWDiag::setUpValidators()
   m_designWidg.leAcceptance->setValidator(new QDoubleValidator(this));
   m_designWidg.leStartTime->setValidator(new QDoubleValidator(this));
   m_designWidg.leEndTime->setValidator(new QDoubleValidator(this));
-
-  validateHardMaskFile();
 }
 
 /**
@@ -286,15 +276,7 @@ void MWDiag::setUpValidators()
  */
 bool MWDiag::isInputValid() const
 {
-  bool valid(true);
-  if( m_designWidg.valInmsk->isVisible() )
-  {
-    valid &= false;
-  }
-  else
-  {
-    valid &= true;
-  }
+  bool valid(m_designWidg.maskFileFinder->isValid());
   
   valid &= m_designWidg.white_file->isValid();
   valid &= m_designWidg.white_file_2->isValid();
@@ -313,10 +295,6 @@ void MWDiag::browseClicked(const QString &buttonDis)
   QLineEdit *editBox(NULL);
   QStringList extensions;
   bool toSave = false;
-  if ( buttonDis == "InputFile")
-  {
-    editBox = m_designWidg.leIFile;
-  }
   if ( buttonDis == "OutputFile")
   {
     editBox = m_designWidg.leOFile;
@@ -383,7 +361,7 @@ QString MWDiag::createDiagnosticScript() const
   QString acceptance = m_designWidg.leAcceptance->text();
   QString bkgdRange = QString("[%1,%2]").arg(m_designWidg.leStartTime->text(),m_designWidg.leEndTime->text());
   QString variation = m_designWidg.leVariation->text();
-  QString hard_mask_file = "r'" + m_designWidg.leIFile->text() + "'";
+  QString hard_mask_file = "r'" + m_designWidg.maskFileFinder->getFirstFilename() + "'";
   if( hard_mask_file == "r''" ) hard_mask_file = "None";
   QString bleed_maxrate = m_designWidg.bleed_maxrate->text();
   QString bleed_pixels = m_designWidg.ignored_pixels->text();
@@ -569,29 +547,4 @@ void MWDiag::TOFUpd()
   if (m_TOFChanged) return;
   m_TOFChanged = (m_designWidg.leStartTime->text().toDouble() != m_sTOFAutoVal)
     || (m_designWidg.leEndTime->text().toDouble() != m_eTOFAutoVal);
-}
-
-/**
- * Validate the hard mask file input
-*/
-void MWDiag::validateHardMaskFile()
-{
-  std::string filename = m_designWidg.leIFile->text().toStdString();
-  if( filename.empty() )
-  {
-    m_designWidg.valInmsk->hide();
-    return;
-  }
-
-  FileProperty *validateHardMask = new FileProperty("UnusedName", filename,FileProperty::Load);
-  QString error = QString::fromStdString(validateHardMask->isValid()); 
-  if( error.isEmpty() )
-  {
-    m_designWidg.valInmsk->hide();
-  }
-  else
-  {
-    m_designWidg.valInmsk->show();
-  }
-  m_designWidg.valInmsk->setToolTip(error);
 }
