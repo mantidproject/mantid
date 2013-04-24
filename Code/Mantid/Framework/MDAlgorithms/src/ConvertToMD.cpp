@@ -260,7 +260,7 @@ ConvertToMD::init()
    );
 
 
-    std::vector<std::string> TargFrames = QSclAndFrames.getQScalings();
+    std::vector<std::string> TargFrames = QSclAndFrames.getTargetFrames();
     declareProperty("Q3DFrames", TargFrames[CnvrtToMD::AutoSelect],boost::make_shared<StringListValidator>(TargFrames),
       "What will be the Q-dimensions of the output workspace in Q3D case?\n"
       "   AutoSelect: Choose the target coordinate frame as the function of goniometer and UB matrix values set on the input workspace\n"
@@ -270,13 +270,6 @@ ConvertToMD::init()
       "See [[ MD_Transformation_factory#Q3D |MD Transformation factory]] for more details about this. "
        );
 
-     declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
-"This property to normalize three momentums obtained in '''Q3D''' mode. See [[MD Transformation factory]] "
-"for description and available scaling modes. The value can be modified depending on the target coordinate "
-"system. (''labFrame'',''CrystalFrame'' or ''Notional Coordinates''<NoWiki>||</NoWiki>''HKL frame'' ). "
-"The target coordinate system is defined by Goniometer and UB matrix settings attached to the workspace. "
-"See [[ MD_Transformation_factory#Q3D |MD Transformation factory]] for more details about this. "
-                     );
 
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),

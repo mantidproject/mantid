@@ -73,12 +73,13 @@ void testForceTargetFrame()
    Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
    std::vector<double> minVal(4,-3),maxVal(4,3);
    TargWSDescription.setMinMax(minVal,maxVal);
+   spws->mutableSample().setOrientedLattice(NULL); 
 
    TargWSDescription.buildFromMatrixWS(spws,"Q3D","Direct");
 
    MDWSTransformTestHelper Transf;
-   TS_ASSERT_THROWS(Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::HKLFrame,CnvrtToMD::HKLScale),std::invalid_argument);
-   TS_ASSERT_THROWS(Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::SampleFrame,CnvrtToMD::HKLScale),std::invalid_argument);
+   TSM_ASSERT_THROWS("Forced HKL frame whould not accept workspace without oriented lattice",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::HKLFrame,CnvrtToMD::HKLScale),std::invalid_argument);
+   TSM_ASSERT_THROWS("Forced SampleFrame frame whould not accept workspace without oriented lattice",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::SampleFrame,CnvrtToMD::HKLScale),std::invalid_argument);
    spws->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(*pLattice)); 
    spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
 

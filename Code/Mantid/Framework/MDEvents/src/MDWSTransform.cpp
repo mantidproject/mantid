@@ -82,6 +82,7 @@ void  MDWSTransform::checkTargetFrame(const MDEvents::MDWSDescription &TargWSDes
     case(HKLFrame):   // ubMatrix has to be present
         if(!TargWSDescription.hasLattice())
             throw std::invalid_argument(" Target frame and sample frame need defined UB matrix ");
+        return;
     default:
         throw std::runtime_error(" Unexpected argument in MDWSTransform::checkTargetFrame");
     }
