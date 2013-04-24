@@ -713,6 +713,7 @@ namespace API
   {
     using namespace Poco::Net;
     try{
+      g_log.notice() << "ScriptRepository uploading " << file_path << " ..." << std::endl; 
       Poco::URI uri(remote_upload); 
       std::string path(uri.getPathAndQuery());
       HTTPClientSession session(uri.getHost(), uri.getPort()); 
@@ -757,32 +758,60 @@ namespace API
       
       HTTPResponse response;
       std::istream & rs = session.receiveResponse(response);
-      
-      if (response.getStatus() == HTTPResponse::HTTP_OK){
-      g_log.information() << "ScriptRepository:" << file_path <<  " uploaded!"<< std::endl; 
-      }else{
-        // FIXME: deal with exceptions.
-        g_log.information() << "ScriptRepository upload status: " 
-                            << response.getStatus() << " " << response.getReason() << std::endl;
-        std::stringstream answer; 
-        Poco::StreamCopier::copyStream(rs, answer);
-        g_log.debug() << "Form Output: " << answer.str() << std::endl; 
-        
-        ptree pt; 
-        try{
-          read_json(answer, pt); 
-          std::string info = pt.get<std::string>("message",""); 
-          std::string detail = pt.get<std::string>("detail","");
-          std::string cmd = pt.get<std::string>("shell",""); 
-          if (!cmd.isEmpty())
-            detail.append("\nFrom Command: ").append(cmd)
-          throw ScriptRepoException(info, detail); 
-          
-        }catch (boost::property_tree::json_parser_error & ex){
-          throw ScriptRepoException("Bad answer from the Server",
-                                    ex.what()); 
-        }
+
+      g_log.information() << "ScriptRepository upload status: " 
+                          << response.getStatus() << " " << response.getReason() << std::endl;
+      std::stringstream answer; 
+      { // remove the status message from the end of the reply, in order not to get exception from the read_json parser
+        std::stringstream server_reply; 
+        std::string server_reply_str; 
+        Poco::StreamCopier::copyStream(rs, server_reply);
+        server_reply_str= server_reply.str(); 
+        size_t pos = server_reply_str.rfind("}");
+        if (pos != std::string::npos)
+          answer << std::string(server_reply_str.begin() , server_reply_str.begin() + pos + 1); 
+        else
+          answer << server_reply_str; 
       }
+      g_log.debug() << "Form Output: " << answer.str() << std::endl; 
+
+      std::string info; 
+      std::string detail; 
+        
+      ptree pt; 
+      try{
+        read_json(answer, pt); 
+        info = pt.get<std::string>("message",""); 
+        detail = pt.get<std::string>("detail","");
+        std::string cmd = pt.get<std::string>("shell",""); 
+        if (!cmd.empty())
+          detail.append("\nFrom Command: ").append(cmd);
+                
+      }catch (boost::property_tree::json_parser_error & ex){
+        throw ScriptRepoException("Bad answer from the Server",
+                                  ex.what()); 
+      }
+
+      if (response.getStatus() == HTTPResponse::HTTP_OK || 
+          info == "success"){
+        g_log.notice() << "ScriptRepository:" << file_path <<  " uploaded!"<< std::endl; 
+        
+        // update the file
+        RepositoryEntry & entry = repo.at(file_path);
+        {
+          Poco::File local(absolute_path);
+          entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(local.getLastModified(),
+                                                                              timeformat));
+          entry.downloaded_pubdate = entry.pub_date;
+          entry.status = BOTH_UNCHANGED;      
+        }
+        g_log.information() << "ScriptRepository update local json " << std::endl; 
+        updateLocalJson(file_path, entry); ///FIXME: performance! 
+        
+        
+      }else
+        throw ScriptRepoException(info, detail); 
+      
     }catch(Poco::Exception & ex){
       throw ScriptRepoException(ex.displayText(), ex.className()); 
     }
@@ -1136,8 +1165,12 @@ namespace API
       //      array.push_back(std::make_pair("auto_update",entry.auto_update)));
       local_json.push_back( std::pair<std::string, boost::property_tree::basic_ptree<std::string,std::string> >(path,array) );
     }else{
-      local_json.put(std::string(path).append(".downloaded_pubdate"), 
-                     entry.downloaded_pubdate.toFormattedString());
+      local_json.put(
+                boost::property_tree::ptree::path_type( std::string(path).append("!downloaded_pubdate"), '!'), 
+                entry.downloaded_pubdate.toFormattedString().c_str());
+      local_json.put(
+                boost::property_tree::ptree::path_type( std::string(path).append("!downloaded_date"), '!'), 
+                entry.downloaded_date.toFormattedString().c_str());
     }
     //g_log.debug() << "Update LOCAL JSON FILE" << std::endl; 
     #if defined(_WIN32) ||  defined(_WIN64)
