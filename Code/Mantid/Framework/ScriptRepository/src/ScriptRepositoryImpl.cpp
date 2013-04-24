@@ -792,8 +792,7 @@ namespace API
                                   ex.what()); 
       }
 
-      if (response.getStatus() == HTTPResponse::HTTP_OK || 
-          info == "success"){
+      if (info == "success"){
         g_log.notice() << "ScriptRepository:" << file_path <<  " uploaded!"<< std::endl; 
         
         // update the file
