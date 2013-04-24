@@ -11,7 +11,6 @@
 
 class pqColorMapModel;
 class pqObjectBuilder;
-class pqPipelineBrowserWidget;
 class pqPipelineSource;
 class pqPipelineRepresentation;
 class pqRenderView;
@@ -25,6 +24,9 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+class ColorSelectionWidget;
+
 /**
  *
   This class is an abstract base class for all of the Vates simple GUI's views.
@@ -66,10 +68,9 @@ public:
   virtual void checkViewOnSwitch();
   /// Close view generated sub-windows.
   virtual void closeSubWindows();
-  /// Correct post-accept visibility issues.
-  virtual void correctVisibility(pqPipelineBrowserWidget *pbw);
   /// Creates a single view instance.
-  virtual pqRenderView *createRenderView(QWidget *container);
+  virtual pqRenderView *createRenderView(QWidget *container,
+                                         QString viewName=QString(""));
   /// Remove all filters of a given name: i.e. Slice.
   virtual void destroyFilter(pqObjectBuilder *builder, const QString &name);
   /// Destroy sources and view relevant to mode switching.
@@ -103,6 +104,8 @@ public:
   virtual void resetDisplay() = 0;
   /// Setup axis scales
   virtual void setAxisScales();
+  /// Set the current color scale state
+  virtual void setColorScaleState(ColorSelectionWidget *cs);
   /// Create source for plugin mode.
   virtual void setPluginSource(QString pluginName, QString wsName);
   /// Determines if source has timesteps (4D).
@@ -121,6 +124,8 @@ public slots:
   void onColorMapChange(const pqColorMapModel *model);
   /// Set the data color scale range to the requested bounds.
   void onColorScaleChange(double min, double max);
+  /// Set the view to use a LOD threshold.
+  void onLodThresholdChange(bool state, double defVal);
   /// Set logarithmic color scaling on the data.
   void onLogScale(int state);
   /// Set the view to use a parallel projection.
@@ -129,6 +134,8 @@ public slots:
   void onResetCenterToData();
   /// Reset center of rotation to given point.
   void onResetCenterToPoint(double x, double y, double z);
+  /// Set color scaling for a view.
+  void setColorsForView();
   /// Setup the animation controls.
   void setTimeSteps(bool withUpdate = false);
   /// Provide updates to UI.
@@ -146,6 +153,8 @@ signals:
    * @param state set to false to lock out all controls
    */
   void lockColorControls(bool state=false);
+  /// Signal indicating rendering is done.
+  void renderingDone();
   /// Signal to trigger pipeline update.
   void triggerAccept();
   /**

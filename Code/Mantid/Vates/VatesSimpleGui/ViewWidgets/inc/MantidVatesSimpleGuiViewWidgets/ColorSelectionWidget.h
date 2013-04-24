@@ -52,9 +52,20 @@ public:
   /// Default destructor.
   virtual ~ColorSelectionWidget() {}
 
+  /// Get the auto color scaling state
+  bool getAutoScaleState();
+  /// Get the log scale state
+  bool getLogScaleState();
+  /// Get the minimum color range value
+  double getMinRange();
+  /// Get the maximum color range value
+  double getMaxRange();
+
 public slots:
   /// Set state for all control widgets.
   void enableControls(bool state);
+  /// Reset the widget's state.
+  void reset();
   /// Set the color scale range into the range widgets.
   void setColorScaleRange(double min, double max);
 

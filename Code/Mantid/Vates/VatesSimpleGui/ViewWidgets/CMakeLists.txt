@@ -4,6 +4,7 @@ project( MantidVatesSimpleGuiViewWidgets )
 set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorUpdater.h
+  inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
@@ -100,6 +101,9 @@ ${MANTID_SUBPROJECT_LIBS}
 MantidQtSliceViewer
 MantidQtFactory
 )
+
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h.in
+                 ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h )
 
 if( SQUISH_FOUND )
   # Need to set the AUT first

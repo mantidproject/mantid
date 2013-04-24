@@ -38,7 +38,7 @@ class VTK_EXPORT vtkPeaksSource : public vtkPolyDataAlgorithm
 {
 public:
   static vtkPeaksSource *New();
-  vtkTypeRevisionMacro(vtkPeaksSource,vtkPolyDataAlgorithm);
+  vtkTypeMacro(vtkPeaksSource,vtkPolyDataAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   
   void SetWsName(std::string wsName);

@@ -11,6 +11,7 @@
 
 class pqLoadDataReaction;
 class pqPipelineSource;
+class pqViewSettingsReaction;
 class vtkSMDoubleVectorProperty;
 
 class QAction;
@@ -79,15 +80,23 @@ public:
   /// See MantidQt::API::VatesViewerInterface
   void setupPluginMode();
 
+public slots:
+  /// Seet MantidQt::API::VatesViewerInterface
+  void shutdown();
+
 protected slots:
   /// Check for certain updates when an accept is fired.
   void checkForUpdates();
+  /// Turn on/off the LOD threshold.
+  void onLodToggled(bool state);
   /// Pop-up the rotation point dialog.
   void onRotationPoint();
   /// Show the wiki help in a browser.
   void onWikiHelp();
   /// Load and render data.
   void onDataLoaded(pqPipelineSource *source);
+  /// Perform actions when rendering is done.
+  void renderingDone();
   /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);
 
@@ -98,10 +107,14 @@ private:
   pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   ViewBase *hiddenView; ///< Holder for the view that is being switched from
   bool isPluginInitialized; ///< Flag for plugin initialization
+  double lodThreshold; ///< Default value for the LOD threshold (5 MB)
+  QAction *lodAction; ///< Holder for the LOD threshold menu item
   bool pluginMode; ///< Flag to say widget is in plugin mode
   RotationPointDialog *rotPointDialog; ///< Holder for the rotation point dialog
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
+  pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
+  bool viewSwitched;
 
   /// Check the environmental variables.
   void checkEnvSetup();
@@ -135,6 +148,8 @@ private:
   ViewBase *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
+  /// Update the state of application widgets.
+  void updateAppState();
 };
 
 } // SimpleGui

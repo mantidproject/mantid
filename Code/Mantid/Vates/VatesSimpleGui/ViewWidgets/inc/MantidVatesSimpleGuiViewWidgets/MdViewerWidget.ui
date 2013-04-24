@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>958</width>
-    <height>666</height>
+    <height>670</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,1,0">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -165,33 +165,57 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="pqPipelineBrowserWidget" name="pipelineBrowser">
+      <widget class="pqPipelineBrowserWidget" name="pipelineBrowser" native="true">
        <property name="minimumSize">
         <size>
          <width>150</width>
          <height>50</height>
         </size>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
        </property>
       </widget>
-      <widget class="pqProxyTabWidget" name="proxyTabWidget">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>30</verstretch>
-        </sizepolicy>
+      <widget class="QTabWidget" name="propInfoTabs">
+       <property name="currentIndex">
+        <number>0</number>
        </property>
-       <property name="minimumSize">
-        <size>
-         <width>150</width>
-         <height>50</height>
-        </size>
-       </property>
+       <widget class="QWidget" name="properties">
+        <attribute name="title">
+         <string>Properties</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="pqPropertiesPanel" name="propertiesPanel" native="true"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="information">
+        <attribute name="title">
+         <string>Information</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QScrollArea" name="scrollArea">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>126</width>
+              <height>237</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <widget class="pqProxyInformationWidget" name="proxyInfo" native="true"/>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
      <widget class="QWidget" name="viewWidget" native="true">
@@ -205,7 +229,7 @@
     </widget>
    </item>
    <item>
-    <widget class="pqStatusBar" name="statusBar" native="true">
+    <widget class="pqStatusBar" name="statusBar">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -218,15 +242,27 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>pqProxyTabWidget</class>
-   <extends>QTabWidget</extends>
-   <header>pqProxyTabWidget.h</header>
+   <class>pqPipelineBrowserWidget</class>
+   <extends>QWidget</extends>
+   <header>pqPipelineBrowserWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>pqPipelineBrowserWidget</class>
-   <extends>QFrame</extends>
-   <header>pqPipelineBrowserWidget.h</header>
+   <class>pqStatusBar</class>
+   <extends>QStatusBar</extends>
+   <header>pqStatusBar.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>pqProxyInformationWidget</class>
+   <extends>QWidget</extends>
+   <header>pqProxyInformationWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>pqPropertiesPanel</class>
+   <extends>QWidget</extends>
+   <header>pqPropertiesPanel.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -239,12 +275,6 @@
    <class>Mantid::Vates::SimpleGui::TimeControlWidget</class>
    <extends>QWidget</extends>
    <header>MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>pqStatusBar</class>
-   <extends>QWidget</extends>
-   <header>pqStatusBar.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

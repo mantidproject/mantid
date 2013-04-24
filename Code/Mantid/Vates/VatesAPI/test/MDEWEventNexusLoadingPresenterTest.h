@@ -124,5 +124,79 @@ void testGetWorkspaceTypeName()
   TSM_ASSERT_EQUALS("Characterisation Test Failed", "", presenter.getWorkspaceTypeName());
 }
 
+void testTimeLabel()
+{
+  //Setup view
+  MockMDLoadingView* view = new MockMDLoadingView;
+  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true));
+  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
+
+  //Setup rendering factory
+  MockvtkDataSetFactory factory;
+  EXPECT_CALL(factory, initialize(_)).Times(1);
+  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
+
+  //Setup progress updates objects
+  MockProgressAction mockLoadingProgressAction;
+  EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
+
+  MockProgressAction mockDrawingProgressAction;
+
+  //Create the presenter and runit!
+  MDEWEventNexusLoadingPresenter presenter(view, getSuitableFile());
+  presenter.executeLoadMetadata();
+  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  TSM_ASSERT_EQUALS("Time label should be exact.",
+                    presenter.getTimeStepLabel(), "D (En)");
+
+  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+
+  product->Delete();
+}
+
+void testAxisLabels()
+{
+  //Setup view
+  MockMDLoadingView* view = new MockMDLoadingView;
+  EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(1));
+  EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true));
+  EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
+
+  //Setup rendering factory
+  MockvtkDataSetFactory factory;
+  EXPECT_CALL(factory, initialize(_)).Times(1);
+  EXPECT_CALL(factory, create(_)).WillOnce(testing::Return(vtkUnstructuredGrid::New()));
+  EXPECT_CALL(factory, setRecursionDepth(_)).Times(1);
+
+  //Setup progress updates objects
+  MockProgressAction mockLoadingProgressAction;
+  EXPECT_CALL(mockLoadingProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
+
+  MockProgressAction mockDrawingProgressAction;
+
+  //Create the presenter and runit!
+  MDEWEventNexusLoadingPresenter presenter(view, getSuitableFile());
+  presenter.executeLoadMetadata();
+  vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
+  TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
+  TSM_ASSERT_EQUALS("X Label should match exactly",
+                    getStringFieldDataValue(product, "AxisTitleForX"),
+                    "A (Ang)");
+  TSM_ASSERT_EQUALS("Y Label should match exactly",
+                    getStringFieldDataValue(product, "AxisTitleForY"),
+                    "B (Ang)");
+  TSM_ASSERT_EQUALS("Z Label should match exactly",
+                    getStringFieldDataValue(product, "AxisTitleForZ"),
+                    "C (Ang)");
+
+  TS_ASSERT(Mock::VerifyAndClearExpectations(view));
+  TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+
+  product->Delete();
+}
+
 };
 #endif

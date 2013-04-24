@@ -23,3 +23,7 @@ void VatesViewerInterface::renderWorkspace(QString wsname, int wstype)
   UNUSED_ARG(wsname);
   UNUSED_ARG(wstype);
 }
+
+void VatesViewerInterface::shutdown()
+{
+}

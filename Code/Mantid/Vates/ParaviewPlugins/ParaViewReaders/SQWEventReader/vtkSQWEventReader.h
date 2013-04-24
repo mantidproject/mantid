@@ -16,7 +16,7 @@ public:
   //----------------------------------------------
 
   static vtkSQWEventReader *New();
-  vtkTypeRevisionMacro(vtkSQWEventReader,vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkSQWEventReader, vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);

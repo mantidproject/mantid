@@ -8,10 +8,6 @@
 #include <QPointer>
 #include <QWidget>
 
-class pqColorMapModel;
-class pqPipelineBrowserWidget;
-class pqPipelineRepresentation;
-class pqPipelineSource;
 class pqRenderView;
 
 namespace Mantid
@@ -67,9 +63,8 @@ public:
   /**
    * Correct an oddity in the creation of the 3D view so that the cuts
    * are visibile.
-   * @param pbw the main program's handle to the pqPipelineBrowserWidget
    */
-  void correctVisibility(pqPipelineBrowserWidget *pbw);
+  //void correctVisibility();
   /**
    * ViewBase::destroyView
    */
@@ -93,40 +88,13 @@ public:
    */
   void resetDisplay();
 
-protected:
-  /**
-   * Function that creates a 2D view by reducing the functionality of a 3D
-   * view.
-   * @param container the widget to associate with the view
-   * @return the created view
-   */
-  pqRenderView *create2dRenderView(QWidget *container);
-
 private:
   Q_DISABLE_COPY(ThreeSliceView)
 
-  /**
-   * A helper function that creates a single Cartesian slice.
-   * @param i the Cartesian direction of the slice
-   * @param view the associated Cartesian 2D view
-   * @param cut the created Cartesian slice
-   * @param repr the representation of the Cartesian slice
-   */
-  void makeSlice(ViewBase::Direction i, pqRenderView *view,
-                 pqPipelineSource *cut, pqPipelineRepresentation *repr);
   /// Helper function that creates all three Cartesian orthogonal slices.
   void makeThreeSlice();
 
   QPointer<pqRenderView> mainView; ///< The 3D view
-  QPointer<pqPipelineSource> xCut; ///< The slice for the YZ plane
-  QPointer<pqPipelineRepresentation> xCutRepr; ///< The YZ slice representation
-  QPointer<pqRenderView> xView; ///< The YZ plane view
-  QPointer<pqPipelineSource> yCut; ///< The slice for the XZ plane
-  QPointer<pqPipelineRepresentation> yCutRepr; ///< The XZ slice representation
-  QPointer<pqRenderView> yView; ///< The XZ plane view
-  QPointer<pqPipelineSource> zCut; ///< The slice for the XY plane
-  QPointer<pqPipelineRepresentation> zCutRepr; ///< The XY slice representation
-  QPointer<pqRenderView> zView; ///< The XY plane view
 
   Ui::ThreeSliceView ui; ///< The three slice view's UI form
 };
