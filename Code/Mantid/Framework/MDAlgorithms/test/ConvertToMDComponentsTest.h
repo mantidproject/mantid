@@ -43,9 +43,9 @@ public:
       ConvertToMD::initialize();
     }
     bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dEModeRequested,const std::vector<std::string> &other_dim_names,
-                                      const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr)
+                                      const std::string &QFrame,const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr)
     {
-        return ConvertToMD::buildTargetWSDescription(spws,Q_mod_req,dEModeRequested,other_dim_names,convert_to_,targWSDescr);
+        return ConvertToMD::buildTargetWSDescription(spws,Q_mod_req,dEModeRequested,other_dim_names,QFrame,convert_to_,targWSDescr);
     }
     void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS,MDEvents::MDWSDescription &targWSDescr) const
     {
@@ -218,9 +218,11 @@ void testCopyMethadata()
      std::string dE_mode = Kernel::DeltaEMode().asString(Kernel::DeltaEMode::Elastic);
      MDWSTransform QScl;
      std::vector<std::string> QScales = QScl.getQScalings();
+     std::vector<std::string> Frames = QScl.getTargetFrames();
 
      MDEvents::MDWSDescription targWSDescr;
-     TS_ASSERT_THROWS_NOTHING(createNewTargetWs=subAlgo.buildTargetWSDescription(spws,Q_modes[0],dE_mode,std::vector<std::string>(),QScales[CnvrtToMD::NoScaling],targWSDescr));
+     TS_ASSERT_THROWS_NOTHING(createNewTargetWs=subAlgo.buildTargetWSDescription(spws,Q_modes[0],dE_mode,std::vector<std::string>(),
+                                                                                 Frames[CnvrtToMD::AutoSelect],QScales[CnvrtToMD::NoScaling],targWSDescr));
 
      TSM_ASSERT("as spws is null pointer, this should request creating new workspace ",createNewTargetWs)
 

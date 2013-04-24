@@ -251,15 +251,25 @@ ConvertToMD::init()
 "the number of the target workspace dimensions by one. See [[MD Transformation factory]] for further details.",
                      Direction::InOut);
 
-     MDEvents::MDWSTransform QScl;
-     std::vector<std::string> QScales = QScl.getQScalings();
+     MDEvents::MDWSTransform QSclAndFrames;
+     std::vector<std::string> QScales = QSclAndFrames.getQScalings();
      declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
 "This property to normalize three momentums obtained in '''Q3D''' mode. See [[MD Transformation factory]] "
 "for description and available scaling modes. The value can be modified depending on the target coordinate "
-"system. (''labFrame'',''CrystalFrame'' or ''Notional Coordinates''<NoWiki>||</NoWiki>''HKL frame'' ). "
-"The target coordinate system is defined by Goniometer and UB matrix settings attached to the workspace. "
-"See [[ MD_Transformation_factory#Q3D |MD Transformation factory]] for more details about this. "
-                     );
+"system, defined by the property '''OutputDimensions'''. "
+   );
+
+
+    std::vector<std::string> TargFrames = QSclAndFrames.getTargetFrames();
+    declareProperty("Q3DFrames", TargFrames[CnvrtToMD::AutoSelect],boost::make_shared<StringListValidator>(TargFrames),
+      "What will be the Q-dimensions of the output workspace in Q3D case?\n"
+      "   AutoSelect: Choose the target coordinate frame as the function of goniometer and UB matrix values set on the input workspace\n"
+      "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
+      "  Q (sample frame): Wave-vector change of the lattice in the frame of the sample (taking out goniometer rotation).\n"
+      "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.\n"
+      "See [[ MD_Transformation_factory#Q3D |MD Transformation factory]] for more details about this. "
+       );
+
 
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
@@ -356,13 +366,15 @@ void ConvertToMD::exec()
     std::string dEModReq                   = getProperty("dEAnalysisMode");
     //c) other dim property;
     std::vector<std::string> otherDimNames = getProperty("OtherDimensions");
-    //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavours of hkl
+    //d) The output dimensions in the Q3D mode, processed together with QConversionScales
+    std::string QFrame                     = getProperty("Q3DFrames");
+    //e) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavours of hkl
     std::string convertTo_                 = getProperty("QConversionScales");
 
     // Build the target ws description as function of the input & output ws and the parameters, supplied to the algorithm 
     MDEvents::MDWSDescription targWSDescr;
     // get workspace parameters and build target workspace descritpion, report if there is need to build new target MD workspace
-    bool createNewTargetWs = buildTargetWSDescription(spws,QModReq,dEModReq,otherDimNames,convertTo_,targWSDescr);
+    bool createNewTargetWs = buildTargetWSDescription(spws,QModReq,dEModReq,otherDimNames,QFrame,convertTo_,targWSDescr);
 
      // create and initate new workspace or set up existing workspace as a target. 
     if(createNewTargetWs)  // create new
@@ -436,9 +448,17 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
 /** Constructor */
 ConvertToMD::ConvertToMD()
 {}
-/** handle the input parameters and build target workspace description as function of input parameters */ 
+/** handle the input parameters and build target workspace description as function of input parameters 
+* @param spws shared pointer to target MD workspace (just created or already existing)
+* @param QModReq -- mode to convert momentum
+* @param dEModReq -- mode to convert energy 
+* @param otherDimNames -- the vector of additional dimensions names (if any)
+* @param QFrame      -- in Q3D case this describes target coordinate system and is ignored in any othre caste
+* @param ConvertTo_  -- The parameter describing Q-scaling transformtations
+* @param targWSDescr -- the resulting class used to interpret all parameters together and used to describe selected transformation. 
+*/ 
 bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &QModReq,const std::string &dEModReq,const std::vector<std::string> &otherDimNames,
-                                           const std::string &convertTo_,MDEvents::MDWSDescription &targWSDescr)
+                                           const std::string &QFrame,const std::string &convertTo_,MDEvents::MDWSDescription &targWSDescr)
 {
   // ------- Is there need to creeate new ouptutworpaced?  
     bool createNewTargetWs =doWeNeedNewTargetWorkspace(spws);
@@ -470,7 +490,7 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
 
         // check if we are working in powder mode
         // set up target coordinate system and identify/set the (multi) dimension's names to use
-         targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convertTo_);           
+         targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);           
     }
     else // user input is mainly ignored and everything is in old MD workspace
     {  
@@ -486,7 +506,7 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
         // reset new ws description name
         targWSDescr =oldWSDescr;
        // set up target coordinate system
-        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convertTo_);   
+        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);   
     }
     return createNewTargetWs;
 }
