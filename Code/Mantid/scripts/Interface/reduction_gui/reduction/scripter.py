@@ -448,6 +448,9 @@ class BaseReductionScripter(object):
             Logger.get("scripter").notice("Reduction script: %s" % script_path)
             
             # Generate job submission script
+            script_path = os.path.join(output_dir, "job_submission.sh")
+            self._write_submission_script(script_path)
+            Logger.get("scripter").notice("Execution script: %s" % script_path)
             
             # Submit the job
             
@@ -477,3 +480,26 @@ class BaseReductionScripter(object):
         for item in self._observers:
             item.reset()
             
+    def _write_submission_script(self, file_path):
+        """
+            Write the mpirun script to be executed on a cluster
+            @param file_path: local location of the script
+            
+            #TODO: This should be a template, and it should be hidden on the cluster side
+        """
+        content =  "# Script suitable for calling remotely from MantidPlot\n"
+        content += "# Set up the environment for mantid\n"
+        content += "module load mantid-mpi\n"
+        content += "#module load mantid-mpi/nightly\n"
+
+        content += "# Compute the total processes from node count and cores_per_node\n"
+        content += "TOTAL_PROCESSES=$((MANTIDPLOT_NUM_NODES * MANTIDPLOT_CORES_PER_NODE))\n"
+
+        content += "# Kick off python on the computes...\n"
+        content += "# Note: any MANTIDPLOT_* environment variables are set by MantidPlot when it submits the job\n"
+        content += "/usr/lib64/openmpi/bin/mpirun -n $TOTAL_PROCESSES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE python job_submission.py\n"
+
+        fd = open(file_path, 'w')
+        fd.write(content)
+        fd.close()
+        

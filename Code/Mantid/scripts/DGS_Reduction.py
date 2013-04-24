@@ -6,5 +6,5 @@ from PyQt4 import QtCore, uic
 
 reducer = ReductionGUI(instrument_list=["ARCS", "CNCS", "HYSPEC", "MAPS", 
                                         "MARI", "MERLIN", "SEQUOIA"])
-reducer.setup_layout(load_last=True)
-reducer.show()
+if reducer.setup_layout(load_last=True):
+    reducer.show()

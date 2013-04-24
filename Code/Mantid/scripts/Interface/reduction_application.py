@@ -128,8 +128,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.progress_bar.hide()
 
         if self._instrument == '' or self._instrument is None:
-            self._change_instrument()
-            return
+            return self._change_instrument()
 
         # Commented out to solve a bug where setting ARCS as your default
         # instrument means you get the DGS interface when clicking ORNL_SANS..
@@ -199,6 +198,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self._interface.load_last_reduction()
         else:
             self.close()
+            
+        return True
             
     def _update_file_menu(self):
         """
@@ -351,6 +352,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self._facility = dialog.facility_combo.currentText()
             self.setup_layout()
             self._new()
+            return True
+        else:
+            self.close()
+            return False      
             
     def _clear_and_close(self):
         """

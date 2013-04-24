@@ -5,5 +5,5 @@ from reduction_application import ReductionGUI
 from PyQt4 import QtCore, uic
 
 reducer = ReductionGUI(instrument="REFL", instrument_list=["REFL"])
-reducer.setup_layout(load_last=True)
-reducer.show()
+if reducer.setup_layout(load_last=True):
+    reducer.show()
