@@ -73,12 +73,18 @@ namespace Algorithms
     /// Extract mask from a workspace to a list of detectors
     void extractMaskFromMatrixWorkspace(std::vector<detid_t> &maskeddetids);
 
+    /// Extract masked detectors from a MaskWorkspace
+    void extractMaskFromMaskWorkspace(std::vector<detid_t>& maskeddetids);
+
     /// Copy table workspace content from one workspace to another
     void copyTableWorkspaceContent(DataObjects::TableWorkspace_sptr sourceWS, DataObjects::TableWorkspace_sptr targetWS);
 
     /// Add a list of spectra (detector IDs) to the output table workspace
     void addToTableWorkspace(DataObjects::TableWorkspace_sptr outws, std::vector<detid_t> maskeddetids,
                              double xmin, double xmax, std::vector<detid_t> prevmaskedids);
+
+    /// Input workspace type
+    bool m_inputIsMask;
 
     /// Minimum X range
     double m_XMin;

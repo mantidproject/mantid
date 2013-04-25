@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ExtractMaskToTable.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -70,6 +71,16 @@ namespace Algorithms
     m_dataWS = getProperty("InputWorkspace");
     if (!m_dataWS)
       throw runtime_error("InputWorkspace cannot be cast to a MatrixWorkspace.");
+    MaskWorkspace_const_sptr maskws = boost::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
+    if (maskws)
+    {
+      g_log.notice() << "InputWorkspace " << m_dataWS->name() << " is a MaskWorkspace.\n";
+      m_inputIsMask = true;
+    }
+    else
+    {
+      m_inputIsMask = false;
+    }
 
     m_inputTableWS = getProperty("MaskTableWorkspace");
 
@@ -99,7 +110,10 @@ namespace Algorithms
 
     // Extract mask
     vector<detid_t> maskeddetids;
-    extractMaskFromMatrixWorkspace(maskeddetids);
+    if (m_inputIsMask)
+      extractMaskFromMaskWorkspace(maskeddetids);
+    else
+      extractMaskFromMatrixWorkspace(maskeddetids);
     g_log.debug() << "[DB] Number of masked detectors = " << maskeddetids.size() << ".\n";
 
     // Write out
@@ -200,7 +214,7 @@ namespace Algorithms
     {
       detid_t tmpdetid = detids[i];
       IDetector_const_sptr tmpdetector = instrument->getDetector(tmpdetid);
-      bool masked = tmpdetector->isMasked();
+      bool  masked = tmpdetector->isMasked();
       if (masked)
       {
         maskeddetids.push_back(tmpdetid);
@@ -211,6 +225,40 @@ namespace Algorithms
 
     g_log.notice() << "Extract mask:  There are " << maskeddetids.size() << " detectors that"
                       " are masked." << ".\n";
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Extract masked detectors from a MaskWorkspace
+    * @param maskeddetids :: vector of detector IDs of the detectors that are masked
+    */
+  void ExtractMaskToTable::extractMaskFromMaskWorkspace(std::vector<detid_t>& maskeddetids)
+  {
+    // Clear input
+    maskeddetids.clear();
+
+    // Go through all spectra to find masked workspace
+    MaskWorkspace_const_sptr maskws = boost::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
+    size_t numhist = maskws->getNumberHistograms();
+    for (size_t i = 0; i < numhist; ++i)
+    {
+      // Rule out the spectrum without mask
+      if (maskws->readY(i)[0] < 1.0E-9)
+        continue;
+
+      // Get spectrum
+      const API::ISpectrum *spec = maskws->getSpectrum(i);
+      if (!spec)
+        throw runtime_error("Unable to get spectrum reference from mask workspace.");
+
+      const set<detid_t> detidset = spec->getDetectorIDs();
+      for (set<detid_t>::const_iterator sit = detidset.begin(); sit != detidset.end(); ++sit)
+      {
+        detid_t tmpdetid = *sit;
+        maskeddetids.push_back(tmpdetid);
+      }
+    }
 
     return;
   }

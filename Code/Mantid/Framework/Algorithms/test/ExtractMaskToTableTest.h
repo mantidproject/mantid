@@ -4,11 +4,15 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ExtractMaskToTable.h"
+#include "MantidAlgorithms/ExtractMask.h"
+#include "MantidAlgorithms/SumNeighbours.h"
+#include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidDataHandling/MaskDetectors.h"
 
 using Mantid::Algorithms::ExtractMaskToTable;
 
@@ -356,6 +360,99 @@ public:
     // Clean
     AnalysisDataService::Instance().remove("TestWorkspace2");
     AnalysisDataService::Instance().remove("MaskTable2");
+
+    return;
+  }
+
+  /** Test for extracting masks from a MaskWorkspace
+    */
+  void test_extractFromMaskWorkspace()
+  {
+    // Create a workspace with Mask
+    const int nvectors(50), nbins(10);
+    Workspace2D_sptr inputws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors, nbins);
+    AnalysisDataService::Instance().addOrReplace("TestWorkspace3", inputws);
+
+    //   Mask detectors of spectra 1, 6, 11, ..., 31
+    DataHandling::MaskDetectors maskalg;
+    maskalg.initialize();
+    maskalg.setProperty("Workspace", "TestWorkspace3");
+    maskalg.setPropertyValue("SpectraList", "1-3, 5, 20, 34");
+    maskalg.execute();
+    if (!maskalg.isExecuted())
+      throw runtime_error("MaskDetectors fails to execute.");
+    else
+      cout << "Workspace masked." << "\n";
+
+    Instrument_const_sptr instrument = inputws->getInstrument();
+    for (size_t i = 0; i < instrument->getDetectorIDs().size(); ++i)
+    {
+      if (instrument->getDetector(instrument->getDetectorIDs()[i])->isMasked())
+        cout << "Detector : " << instrument->getDetectorIDs()[i] << " is masked." << "\n";
+    }
+
+    /*
+    //   Sum spectra
+    Algorithms::SumNeighbours sumalg;
+    sumalg.initialize();
+    sumalg.setProperty("InputWorkspace", "TestWorkspace3");
+    sumalg.setProperty("OutputWorkspace", "TestWorkspace3");
+    sumalg.setProperty("SumX", 2);
+    sumalg.setProperty("SumY", 1);
+
+    sumalg.execute();
+    if (!sumalg.isExecuted())
+      throw runtime_error("Unable to sum neighbors");
+    else
+      cout << "Workspace " << inputws->name() << " has " << inputws->getNumberHistograms() << " spectra.\n";
+    */
+
+    //   Extract to take workspace
+    Algorithms::ExtractMask extractalg;
+    extractalg.initialize();
+    extractalg.setProperty("InputWorkspace", "TestWorkspace3");
+    extractalg.setProperty("OutputWorkspace", "MaskWorkspace3");
+    extractalg.execute();
+
+    // Call algorithms
+    ExtractMaskToTable alg;
+    alg.initialize();
+
+    // Set up properties
+    alg.setProperty("InputWorkspace", "MaskWorkspace3");
+    alg.setProperty("OutputWorkspace", "MaskTable3");
+    alg.setProperty("XMin", 1234.0);
+    alg.setProperty("XMax", 12345.6);
+
+    // Execute
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // Validate
+    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+          AnalysisDataService::Instance().retrieve("MaskTable3"));
+    TS_ASSERT(outws);
+    if (!outws)
+      return;
+
+    cout << "Number of row in table workspace : " << outws->rowCount() << ".\n";
+    TS_ASSERT_EQUALS(outws->rowCount(), 1);
+
+    double xxmin, xxmax;
+    string specstr;
+
+    TableRow therow = outws->getRow(0);
+    therow >> xxmin >> xxmax >> specstr;
+    cout << "XMin = " << xxmin << ", XMax = " << xxmax << ", Spec list = " << specstr << ".\n";
+    string expectedspec(" 1-3,  5,  20,  34");
+    TS_ASSERT_EQUALS(specstr, expectedspec);
+    TS_ASSERT_DELTA(xxmin, 1234.0, 0.0001);
+    TS_ASSERT_DELTA(xxmax, 12345.6, 0.0001);
+
+    // Clean
+    AnalysisDataService::Instance().remove("TestWorkspace3");
+    AnalysisDataService::Instance().remove("MaskWorkspace3");
+    AnalysisDataService::Instance().remove("MaskTable3");
 
     return;
   }
