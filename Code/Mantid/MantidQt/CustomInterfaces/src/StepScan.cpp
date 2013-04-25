@@ -141,28 +141,35 @@ IAlgorithm_sptr StepScan::stopLiveListener()
 
 void StepScan::loadFile()
 {
-  QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-
-  // Remove any previously-loaded workspaces
-  cleanupWorkspaces();
-
-  // TODO: Run entirely asynchronously (see AlgorithmRunner or AlgorithmObserver)
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadEventNexus");
   const QString filename = m_uiForm.mWRunFiles->getFirstFilename();
-  alg->setPropertyValue("Filename", filename.toStdString());
-  m_inputWSName = "__" + QFileInfo(filename).baseName().toStdString();
-  alg->setPropertyValue("OutputWorkspace", m_inputWSName);
-  alg->setProperty("LoadMonitors", true);
-  if ( alg->execute() )  // executeAsync???
+  // This handles the fact that mwRunFiles emits the filesFound signal more than
+  // we want (on some platforms). TODO: Consider dealing with this up in mwRunFiles.
+  if ( filename != m_inputFilename || m_dataReloadNeeded )
   {
-    QApplication::restoreOverrideCursor();
-    m_dataReloadNeeded = false;
-    setupOptionControls();
-  }
-  else
-  {
-    QApplication::restoreOverrideCursor();
-    QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
+    m_inputFilename = filename;
+
+    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+
+    // Remove any previously-loaded workspaces
+    cleanupWorkspaces();
+
+    // TODO: Run entirely asynchronously (see AlgorithmRunner or AlgorithmObserver)
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadEventNexus");
+    alg->setPropertyValue("Filename", filename.toStdString());
+    m_inputWSName = "__" + QFileInfo(filename).baseName().toStdString();
+    alg->setPropertyValue("OutputWorkspace", m_inputWSName);
+    alg->setProperty("LoadMonitors", true);
+    if ( alg->execute() )  // executeAsync???
+    {
+      QApplication::restoreOverrideCursor();
+      m_dataReloadNeeded = false;
+      setupOptionControls();
+    }
+    else
+    {
+      QApplication::restoreOverrideCursor();
+      QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
+    }
   }
 }
 
