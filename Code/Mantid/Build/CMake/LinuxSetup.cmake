@@ -93,7 +93,7 @@ endif()
 if ( ${UNIX_CODENAME} STREQUAL "Santiago" )
 	file ( APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
 								     "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot ]; then\n"
-                                                                     "  mv $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot.backup\n"
+                                                                     "  mv $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
 							             "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot\n"
                                                                      "fi\n"
 	)
@@ -106,14 +106,6 @@ install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh
 	  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
 		      GROUP_EXECUTE GROUP_READ
 		      WORLD_EXECUTE WORLD_READ
-)
-
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/bin/MantidPlot
-	  DESTINATION ${BIN_DIR}
-	  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-		      GROUP_EXECUTE GROUP_READ
-		      WORLD_EXECUTE WORLD_READ
-	  RENAME MantidPlot_exe
 )
 
 endif()
@@ -129,11 +121,18 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
                                                              "if [ -h /etc/profile.d/mantid.csh ]; then\n"
                                                              "  rm /etc/profile.d/mantid.csh\n"
                                                              "fi\n"
+                                                             "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}MantidPlot_exe  ]; then\n"
+                                                             "  rm $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
+                                                             "fi\n"
+
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
                                                              "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
                                                              "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
+                                                             "fi\n"
+                                                             "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}MantidPlot_exe  ]; then\n"
+                                                             "  rm $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
                                                              "fi\n"
 )
 
