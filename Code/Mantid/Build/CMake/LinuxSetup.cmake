@@ -111,7 +111,9 @@ install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh
 endif()
 
 
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
+
+
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_pre_uninstall.sh "#!/bin/sh\n"
                                                              "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
                                                              "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                              "fi\n"
@@ -127,12 +129,21 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
 
 )
 
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh "#!/bin/sh\n"
                                                              "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
                                                              "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                              "fi\n"
-                                                             "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}MantidPlot_exe  ]; then\n"
-                                                             "  rm $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
+                                                             "if [ -h /etc/profile.d/mantid.sh ]; then\n"
+                                                             "  rm /etc/profile.d/mantid.sh\n"
+                                                             "fi\n"
+                                                             "if [ -h /etc/profile.d/mantid.csh ]; then\n"
+                                                             "  rm /etc/profile.d/mantid.csh\n"
+                                                             "fi\n"
+)
+
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
+                                                             "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
+                                                             "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                              "fi\n"
 )
 
@@ -166,7 +177,7 @@ if ( NOT MPI_BUILD )
   if ( ENVVARS_ON_INSTALL )
     set ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh )
     set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh )
-    set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_all_links.sh )
+    set ( CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_pre_uninstall.sh )
     set ( CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh )
   else ( ENVVARS_ON_INSTALL )
     set ( CPACK_RPM_POST_INSTALL_SCRIPT_FILE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh )
