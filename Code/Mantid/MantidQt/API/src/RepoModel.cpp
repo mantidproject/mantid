@@ -18,6 +18,40 @@ using Mantid::Kernel::ConfigService;
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QDialogButtonBox>
+#include <QtConcurrentRun>
+
+
+
+static QString download_thread(Mantid::API::ScriptRepository_sptr & pt, const std::string & path){
+  QString result; 
+  try{
+    pt->download(path);     
+  }catch(Mantid::API::ScriptRepoException & ex){
+    QString info = QString::fromStdString(ex.what());
+     // make the exception a nice html message
+    info.replace("\n","</p><p>");
+    return info; 
+  }
+  return result; 
+}
+
+
+static QString upload_thread(Mantid::API::ScriptRepository_sptr & pt, 
+                             const std::string & path, const QString & email, 
+                             const QString & author, const QString & comment)
+  {
+  try{
+    pt->upload(path, comment.toStdString(), 
+               author.toStdString(), email.toStdString() );
+  }catch(Mantid::API::ScriptRepoException & ex){
+    QString info = QString::fromStdString(ex.what()); 
+    info.replace("\n","</p><p>"); 
+    return info; 
+  }
+  return QString(); 
+}
+                               
+                               
 
 //Initialize the logger
 Mantid::Kernel::Logger & RepoModel::g_log = Mantid::Kernel::Logger::get("RepoModel");
@@ -103,6 +137,10 @@ RepoModel::RepoModel(QObject *parent):
   using Mantid::API::ScriptRepository_sptr;
   using Mantid::API::ScriptRepository;
   repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
+  connect(&download_watcher, SIGNAL(finished()), this, SLOT(downloadFinished()));
+  connect(&upload_watcher, SIGNAL(finished()), this, SLOT(uploadFinished()));
+  uploading_path = "nofile"; 
+  downloading_path = "nofile";
   setupModelData(rootItem);
 }
 
@@ -158,6 +196,10 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
         return item->label(); 
         break; 
       case 1: // ask for the status
+        if (isDownloading(index))
+          return "Downloading";
+        if (isUploading(index))
+        return "Uploading";
         status = repo_ptr->fileStatus(path.toStdString());
         return fromStatus(status); 
         break; 
@@ -172,8 +214,8 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DecorationRole){
       if (index.column() == 0){
         inf = repo_ptr->fileInfo(path.toStdString());
-        status = repo_ptr->fileStatus(path.toStdString());
         if (inf.directory){
+          status = repo_ptr->fileStatus(path.toStdString());
           if (status == Mantid::API::REMOTE_ONLY)
             return QIcon::fromTheme("folder-remote",QIcon(QPixmap(":/win/folder-remote")));
           else
@@ -306,15 +348,32 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
   
   if (index.column() == 1){ // trigger actions: Download and Upload
     if (action == "Download"){
-      try{
-        repo_ptr->download(path); // FIXME: deal with exceptions 
-        ret = true;
-      }catch(Mantid::API::ScriptRepoException & ex){
-        handleExceptions(ex, QString("Download %1 failed!").arg(QString::fromStdString(path)));
-        ret = false;
+      if (!download_threads.isFinished()){
+        QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+        QMessageBox::information(father, "Wait", "Downloading... "); 
+        return false;
       }
+      downloading_path = QString::fromStdString(path);
+      download_index = index;
+      download_threads = QtConcurrent::run(download_thread, repo_ptr, path);
+      download_watcher.setFuture(download_threads);       
+      ret = true;
     }else if (action == "Upload"){
+      if (!upload_threads.isFinished()){
+        QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+        QMessageBox::information(father, "Wait", "Uploading... "); 
+        return false;
+      }
+
       QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+
+      if (repo_ptr->fileInfo(path).directory){
+        QMessageBox::information(father, 
+                                 "Not Supported", 
+                                 "The current version does not support uploading recursively. Please, upload one-by-one"); 
+        return false; 
+      };
+
       UploadForm * form = new UploadForm(QString::fromStdString(path), father);
       QSettings settings; 
       settings.beginGroup("Mantid/ScriptRepository"); 
@@ -333,22 +392,18 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
 
         qDebug() << "Uploading... "<< QString::fromStdString(path) << form->comment()
                    << form->author() << form->email() << endl;
-        try{
-          repo_ptr->upload(path, form->comment().toStdString(), 
-                         form->author().toStdString(),
-                           form->email().toStdString());
-          ret = true;
-        }catch(Mantid::API::ScriptRepoException & ex){
-          handleExceptions(ex,  QString("Upload %1 failed!").arg(QString::fromStdString(path)));
-          ret = false;
-        }
+        uploading_path = QString::fromStdString(path); 
+        upload_index = index; 
+        upload_threads = QtConcurrent::run(upload_thread, repo_ptr, path, form->email(), 
+                                           form->author(), form->comment()); 
+        upload_watcher.setFuture(upload_threads); 
+        ret = true;
       }else{
         ret = false; 
       }
       settings.endGroup(); 
       delete form; 
-    }
-   
+    }   
   }
 
   if (ret){
@@ -681,7 +736,46 @@ void RepoModel::handleExceptions(const Mantid::API::ScriptRepoException & ex,
 }
 
 
+void RepoModel::downloadFinished(void){  
+  QString info = download_threads.result();
+  if (!info.isEmpty()){
+    QMessageBox::warning( qobject_cast<QWidget*>(QObject::parent()), 
+                          "Download Failed",
+                          QString("<html><body><p>%1</p></body></html>")
+                          .arg(info));  
+  }
+  downloading_path = "nofile";
+  emit dataChanged(download_index, download_index);
+}
 
+  
+bool RepoModel::isDownloading(const QModelIndex & index)const{
+  RepoItem *item = static_cast<RepoItem*>(index.internalPointer());
+  if (item)
+    return item->path() == downloading_path;
+  return false;
+}
+
+
+void RepoModel::uploadFinished(void){  
+  QString info = upload_threads.result();
+  if (!info.isEmpty()){
+    QMessageBox::warning( qobject_cast<QWidget*>(QObject::parent()), 
+                          "Upload Failed",
+                          QString("<html><body><p>%1</p></body></html>")
+                          .arg(info));  
+  }
+  uploading_path = "nofile";
+  emit dataChanged(download_index, download_index);
+}
+
+  
+bool RepoModel::isUploading(const QModelIndex & index)const{
+  RepoItem *item = static_cast<RepoItem*>(index.internalPointer());
+  if (item)
+    return item->path() == uploading_path;
+  return false; 
+}
 
 
 /// @return string to define the LOCAL_ONLY state
@@ -695,7 +789,13 @@ const QString & RepoModel::remoteChangedSt(){return REMOTECHANGED;};
 /// @return string to define the BOTH_UNCHANGED state
 const QString & RepoModel::updatedSt(){return BOTHUNCHANGED;}; 
 /// @return string to define the BOTH_CHANGED state
-const QString & RepoModel::bothChangedSt(){return BOTHCHANGED;}; 
+const QString & RepoModel::bothChangedSt(){return BOTHCHANGED;};
+/// @return string to define the downloading state
+const QString & RepoModel::downloadSt(){return DOWNLOADST;};
+/// @return string to define the uploading state
+const QString & RepoModel::uploadSt(){return UPLOADST;};
+
+
 
 
 RepoModel::UploadForm::UploadForm( const QString & file2upload,
