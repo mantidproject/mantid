@@ -100,6 +100,13 @@ if ( ${UNIX_CODENAME} STREQUAL "Santiago" )
 	file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh "#!/bin/sh\n"
 								      "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe \"$@\" \n"
 	)
+
+install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh 
+          DESTINATION ${BIN_DIR}
+	  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+		      GROUP_EXECUTE GROUP_READ
+		      WORLD_EXECUTE WORLD_READ
+)
 endif()
 
 
@@ -140,12 +147,6 @@ install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_
           DESTINATION ${ETC_DIR}
 )
 
-install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh 
-          DESTINATION ${BIN_DIR}
-	  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-		      GROUP_EXECUTE GROUP_READ
-		      WORLD_EXECUTE WORLD_READ
-)
 
 
 # unset all install/uninstall scripts
