@@ -32,13 +32,13 @@ StepScan::StepScan(QWidget *parent)
 
 StepScan::~StepScan()
 {
-  // Clean up any hidden workspaces created
-  cleanupWorkspaces();
+  // Stop live data collection, if running
+  stopLiveListener();
   // Disconnect the observers for the mask workspace combobox
   AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
   AnalysisDataService::Instance().notificationCenter.removeObserver(m_replObserver);
-  // Stop live data collection, if running
-  stopLiveListener();
+  // Clean up any hidden workspaces created
+  cleanupWorkspaces();
 }
 
 /// Set up the dialog layout
