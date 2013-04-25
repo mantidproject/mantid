@@ -10,6 +10,7 @@ IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
     IS_IN_MANTIDPLOT = True
+    from mantid.kernel import ConfigService
 except:
     pass
 
@@ -85,7 +86,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Event connections
         if not IS_IN_MANTIDPLOT:
             self.reduce_button.hide()
-            self.cluster_button.hide()
+        self.cluster_button.hide()
         self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
         self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)  
         self.connect(self.save_button, QtCore.SIGNAL("clicked()"), self._save)  
@@ -189,8 +190,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
 
             # Show the parallel reduction button if enabled
             if self._interface.is_cluster_enabled() and IS_IN_MANTIDPLOT:
-                self.cluster_button.show()
-                self.connect(self.cluster_button, QtCore.SIGNAL("clicked()"), self.cluster_clicked)  
+                config = ConfigService.Instance()
+                if config.hasProperty("cluster.submission") \
+                and config.getString("cluster.submission").lower()=='on':
+                    self.cluster_button.show()
+                    self.connect(self.cluster_button, QtCore.SIGNAL("clicked()"), self.cluster_clicked)  
             else:
                 self.cluster_button.hide()
             
