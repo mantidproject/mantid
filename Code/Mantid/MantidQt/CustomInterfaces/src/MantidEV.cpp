@@ -550,6 +550,15 @@ void MantidEV::loadEventFile_slot()
   {
     last_event_file = Qfile_name.toStdString();
     m_uiForm.EventFileName_ledt->setText( Qfile_name );
+
+    std::string base_name = extractBaseFileName( last_event_file );
+    std::string event_ws_name = base_name + "_event";
+    std::string md_ws_name    = base_name + "_md";
+    std::string peaks_ws_name = base_name + "_peaks";
+
+    m_uiForm.SelectEventWorkspace_ledt->setText( QString::fromStdString( event_ws_name ));
+    m_uiForm.MDworkspace_ledt->setText( QString::fromStdString( md_ws_name ));
+    m_uiForm.PeaksWorkspace_ledt->setText( QString::fromStdString( peaks_ws_name ));
   }
 }
 
@@ -1659,6 +1668,39 @@ bool MantidEV::getPositiveInt( QLineEdit *ledt,
   message += ledt->text().toStdString();
   errorMessage( message );
   return false;
+}
+
+
+/**
+ * Get base file name to form names for event, MD and peaks workspaces
+ *
+ * @param  full_file_name   The full name of the file that is being loaded. 
+ *
+ * @return  The base file name, with the directory and extension removed.
+ */
+std::string MantidEV::extractBaseFileName( std::string full_file_name ) const
+{
+  size_t dot_index = full_file_name.find_last_of(".");
+
+  if ( dot_index != std::string::npos )
+  {
+    full_file_name = full_file_name.substr( 0, dot_index );
+  }
+
+  size_t path_sep_index = full_file_name.find_last_of("/\\:");
+
+  if ( path_sep_index != std::string::npos )
+  {
+    full_file_name = full_file_name.substr( path_sep_index + 1 );
+  }
+
+  size_t ev_suffix_index = full_file_name.rfind( "_event", std::string::npos );
+  if ( ev_suffix_index != std::string::npos )
+  {
+    full_file_name = full_file_name.substr( 0, ev_suffix_index );
+  }
+
+  return full_file_name;
 }
 
 

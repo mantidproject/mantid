@@ -330,6 +330,9 @@ private:
   /// Utility method to get a positive integer value from a QtLineEdit widget 
   bool getPositiveInt( QLineEdit *ledt, size_t & value );
 
+  /// Get base file name to form names for event, MD and peaks workspaces
+  std::string extractBaseFileName( std::string FullFileName) const;
+
   /// Get name of file for saving peaks
   void getSavePeaksFileName();
 
