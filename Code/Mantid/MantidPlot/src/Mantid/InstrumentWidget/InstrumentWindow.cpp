@@ -1276,16 +1276,14 @@ void InstrumentWindow::enableOpenGL( bool on )
 /// Private slot to toggle between the GL and simple instrument display widgets
 void InstrumentWindow::enableGL( bool on )
 {
-  if ( m_surfaceType == FULL3D ) m_useOpenGL = true; // always OpenGL in 3D
-  else m_useOpenGL = on;
-
-  selectOpenGLDisplay(m_useOpenGL);
+    m_useOpenGL = on;
+    selectOpenGLDisplay(isGLEnabled());
 }
 
 /// True if the GL instrument display is currently on
 bool InstrumentWindow::isGLEnabled() const
 {
-    return m_useOpenGL;
+    return m_useOpenGL || ( m_surfaceType == FULL3D );
 }
 
 /**

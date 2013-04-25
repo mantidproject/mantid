@@ -16,6 +16,7 @@
 #include <QAction>
 #include <QSignalMapper>
 #include <QMessageBox>
+#include <QToolTip>
 
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
@@ -80,6 +81,7 @@ InstrumentWindowTab(instrWindow)
   
   // Create "Use OpenGL" action
   m_GLView = new QAction("Use OpenGL",this);
+  m_GLView->setToolTip("Toggle use of OpenGL for unwrapped view. Default value can be set in Preferences.");
   m_GLView->setCheckable(true);
   QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().
   getString("MantidOptions.InstrumentView.UseOpenGL")).toUpper();
@@ -97,6 +99,7 @@ InstrumentWindowTab(instrWindow)
   displaySettingsMenu->addAction(m_lighting);
   displaySettingsMenu->addAction(m_GLView);
   displaySettings->setMenu(displaySettingsMenu);
+  connect(displaySettingsMenu,SIGNAL(hovered(QAction*)),this,SLOT(showMenuToolTip(QAction*)));
 
   QFrame * axisViewFrame = setupAxisFrame();
 
@@ -547,4 +550,12 @@ void InstrumentWindowRenderTab::glOptionChanged(bool on)
     m_GLView->blockSignals(true);
     m_GLView->setChecked(on);
     m_GLView->blockSignals(false);
+}
+
+/**
+  * Show the tooltip of an action which is attached to a menu.
+  */
+void InstrumentWindowRenderTab::showMenuToolTip(QAction *action)
+{
+    QToolTip::showText(QCursor::pos(),action->toolTip(),this);
 }
