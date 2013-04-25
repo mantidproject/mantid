@@ -54,10 +54,6 @@ namespace Mantid
 namespace API
 {
 
-  static void notImplemented(){
-    throw ScriptRepoException("This method is not implemented yet"); 
-  };
-  
   static ScriptRepoException pocoException(const std::string & info, 
                                            Poco::Exception & ex){
     std::stringstream ss;     
