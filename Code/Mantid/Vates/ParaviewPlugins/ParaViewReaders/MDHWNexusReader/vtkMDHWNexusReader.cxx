@@ -20,8 +20,6 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
-#include <QtDebug>
-
 vtkStandardNewMacro(vtkMDHWNexusReader);
 
 using namespace Mantid::VATES;
@@ -147,8 +145,8 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   }
   catch (std::invalid_argument &e)
   {
-    qWarning() << "Workspace does not have correct information to "
-               << "plot non-orthogonal axes. " << e.what();
+    vtkDebugMacro(<< "Workspace does not have correct information to "
+                  << "plot non-orthogonal axes. " << e.what());
   }
   m_presenter->setAxisLabels(output);
 

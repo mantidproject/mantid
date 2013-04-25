@@ -544,7 +544,7 @@ namespace Mantid
     }
     else
     {
-      g_log.notice("Do not know how to process coordinate transform " + type);
+      g_log.information("Do not know how to process coordinate transform " + type);
     }
     return transform;
   }

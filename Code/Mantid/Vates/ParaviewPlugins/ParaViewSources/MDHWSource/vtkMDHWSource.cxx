@@ -17,8 +17,6 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
-#include <QtDebug>
-
 using namespace Mantid::VATES;
 
 vtkStandardNewMacro(vtkMDHWSource);
@@ -138,8 +136,8 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     }
     catch (std::invalid_argument &e)
     {
-      qWarning() << "Workspace does not have correct information to "
-                 << "plot non-orthogonal axes. " << e.what();
+      vtkDebugMacro(<< "Workspace does not have correct information to "
+                    << "plot non-orthogonal axes. " << e.what());
     }
     m_presenter->setAxisLabels(output);
 

@@ -39,14 +39,11 @@
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
-
 #include <boost/functional/hash.hpp>
 #include <sstream>
 
 #include "MantidVatesAPI/Clipper.h"
 #include <vtkPVClipDataSet.h>
-
-#include <QtDebug>
 
 class ClipperAdapter : public Mantid::VATES::Clipper
 {
@@ -292,8 +289,8 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
     }
     catch (std::invalid_argument &e)
     {
-      qWarning() << "Workspace does not have correct information to "
-                 << "plot non-orthogonal axes. " << e.what();
+      vtkDebugMacro(<< "Workspace does not have correct information to "
+                    << "plot non-orthogonal axes. " << e.what());
     }
 
     m_presenter->setAxisLabels(output);
