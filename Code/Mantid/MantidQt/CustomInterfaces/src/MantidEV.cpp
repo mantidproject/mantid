@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QDesktopServices>
+#include <QDesktopWidget>
 
 #include "MantidQtCustomInterfaces/MantidEV.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -691,7 +692,8 @@ void MantidEV::getSavePeaksFileName()
   QString Qfile_name = QFileDialog::getSaveFileName( this,
                           tr("Save peaks file"),
                           file_path,
-                          tr("Peaks Files (*.peaks *.integrate);; All files(*.*) "));
+                          tr("Peaks Files (*.peaks *.integrate);; All files(*.*) "),
+                          0, QFileDialog::DontConfirmOverwrite );
 
   if ( Qfile_name.length() > 0 )
   {
@@ -1270,7 +1272,38 @@ void MantidEV::saveIsawPeaks_slot()
   }
   else
   {
-    if ( !worker->saveIsawPeaks( peaks_ws_name, file_name, false ) )
+                              // if the file exists, check for overwrite or append
+    bool append = false;
+    QFile peaks_file( QString::fromStdString( file_name ) );
+    if ( peaks_file.exists() )
+    {
+      QMessageBox message_box( this->window() );
+      message_box.setText( tr("File Exists") );
+      message_box.setInformativeText("Replace file, or append peaks to file?");
+      QAbstractButton *replace_btn = message_box.addButton( tr("Replace"), QMessageBox::NoRole );
+      QAbstractButton *append_btn  = message_box.addButton( tr("Append"),  QMessageBox::YesRole );
+      message_box.setIcon( QMessageBox::Question );
+                                                   // it should not be necessary to do the next
+                                                   // four lines, but without them the message box
+                                                   // appears at random locations on RHEL 6
+      message_box.show();                               
+      QSize box_size = message_box.sizeHint(); 
+      QRect screen_rect = QDesktopWidget().screen()->rect();
+      message_box.move( QPoint( screen_rect.width()/2 - box_size.width()/2, 
+                                screen_rect.height()/2 - box_size.height()/2 ) );
+      message_box.exec();
+ 
+      if ( message_box.clickedButton() == append_btn )
+      {
+        append = true;
+      } 
+      else if ( message_box.clickedButton() == replace_btn )  // no strictly needed, but clearer
+      {
+        append = false;
+      }
+    }
+
+    if ( !worker->saveIsawPeaks( peaks_ws_name, file_name, append ) )
     {
       errorMessage( "Failed to save peaks to file" );
       return;
