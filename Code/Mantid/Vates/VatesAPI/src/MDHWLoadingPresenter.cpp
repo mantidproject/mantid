@@ -7,6 +7,8 @@
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
+#include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidVatesAPI/Common.h"
 
 #include <vtkFieldData.h>
@@ -151,6 +153,17 @@ namespace Mantid
       convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
       visualDataSet->SetFieldData(outputFD);
       outputFD->Delete();
+    }
+
+    /**
+     * Change the data based on non-orthogonal axis information
+     * @param visualDataSet : The VTK dataset to modify
+     */
+    void MDHWLoadingPresenter::makeNonOrthogonal(vtkDataSet *visualDataSet)
+    {
+      std::string wsName = vtkDataSetToWsName::exec(visualDataSet);
+      vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName);
+      converter.execute();
     }
 
     /**

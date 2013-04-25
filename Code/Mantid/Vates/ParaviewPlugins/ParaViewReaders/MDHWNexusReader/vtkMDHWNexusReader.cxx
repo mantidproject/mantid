@@ -141,7 +141,15 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
   output->ShallowCopy(clipperOutput);
-
+  try
+  {
+    m_presenter->makeNonOrthogonal(output);
+  }
+  catch (std::invalid_argument &e)
+  {
+    qWarning() << "Workspace does not have correct information to "
+               << "plot non-orthogonal axes. " << e.what();
+  }
   m_presenter->setAxisLabels(output);
 
   clipper->Delete();

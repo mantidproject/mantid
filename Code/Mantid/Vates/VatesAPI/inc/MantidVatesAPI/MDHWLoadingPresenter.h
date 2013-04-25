@@ -47,6 +47,7 @@ namespace Mantid
       virtual std::vector<double> getTimeStepValues() const;
       virtual std::string getTimeStepLabel() const;
       virtual void setAxisLabels(vtkDataSet* visualDataSet);
+      virtual void makeNonOrthogonal(vtkDataSet* visualDataSet);
       virtual ~MDHWLoadingPresenter();
     protected:
       /*---------------------------------------------------------------------------
