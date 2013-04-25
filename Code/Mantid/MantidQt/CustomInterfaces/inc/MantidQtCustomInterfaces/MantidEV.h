@@ -39,7 +39,9 @@ class RunLoadAndConvertToMD : public QRunnable
   RunLoadAndConvertToMD(       MantidEVWorker * worker, 
                          const std::string    & file_name,
                          const std::string    & ev_ws_name,
-                         const std::string    & md_ws_name );
+                         const std::string    & md_ws_name,
+                               double           maxQ,
+                               bool             do_lorentz_corr );
 
   /// Calls worker->loadAndConvertToMD from a separate thread
   void run();
@@ -49,6 +51,8 @@ class RunLoadAndConvertToMD : public QRunnable
     std::string      file_name;
     std::string      ev_ws_name;
     std::string      md_ws_name;
+    double           maxQ;
+    bool             do_lorentz_corr;
 };
 
 

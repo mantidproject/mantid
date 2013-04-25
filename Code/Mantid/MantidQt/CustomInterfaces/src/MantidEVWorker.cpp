@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 
 #include "MantidQtCustomInterfaces/MantidEVWorker.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -133,16 +134,24 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
  *  Load the specified NeXus event file into the specified EventWorkspace
  *  and convert it to the specified MD workspace.
  *
- *  @param file_name     Name of the NeXus file to load
- *  @param ev_ws_name    Name of the event workspace to create
- *  @param md_ws_name    Name of the MD workspace to create
+ *  @param file_name        Name of the NeXus file to load
+ *  @param ev_ws_name       Name of the event workspace to create
+ *  @param md_ws_name       Name of the MD workspace to create
+ *  @param maxQ             The largest absolute value of any component
+ *                          of Q to include. When ConvertToMD is called,
+ *                          MinValues = -maxQ,-maxQ,-maxQ   and 
+ *                          MaxValues =  maxQ, maxQ, maxQ 
+ *  @param do_lorentz_corr  Set true to do the Lorentz correction when
+ *                          converting to reciprocal space. 
  *
  *  @return true if the file was loaded and MD workspace was 
  *          successfully created.
  */
 bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
                                          const std::string & ev_ws_name,
-                                         const std::string & md_ws_name )
+                                         const std::string & md_ws_name,
+                                               double        maxQ,
+                                               bool          do_lorentz_corr )
 {
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
   alg->setProperty("Filename",file_name);
@@ -153,6 +162,12 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
   if ( !alg->execute() )
     return false;
 
+  std::ostringstream min_str;
+  min_str << "-" << maxQ << ",-" << maxQ << ",-" << maxQ;
+
+  std::ostringstream max_str;
+  max_str << maxQ << "," << maxQ << "," << maxQ;
+
   alg = AlgorithmManager::Instance().create("ConvertToMD");
   alg->setProperty("InputWorkspace",ev_ws_name);
   alg->setProperty("OutputWorkspace",md_ws_name);
@@ -160,9 +175,9 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
   alg->setProperty("QDimensions","Q3D");
   alg->setProperty("dEAnalysisMode","Elastic");
   alg->setProperty("QConversionScales","Q in A^-1");
-  alg->setProperty("LorentzCorrection",true);
-  alg->setProperty("MinValues","-35,-35,-35");
-  alg->setProperty("MaxValues","35,35,35");
+  alg->setProperty("LorentzCorrection",do_lorentz_corr);
+  alg->setProperty("MinValues",min_str.str());
+  alg->setProperty("MaxValues",max_str.str());
   alg->setProperty("SplitInto","2");
   alg->setProperty("SplitThreshold","50");
   alg->setProperty("MaxRecursionDepth","13");

@@ -30,17 +30,21 @@ using namespace Mantid::API;
 RunLoadAndConvertToMD::RunLoadAndConvertToMD(       MantidEVWorker * worker,
                                               const std::string    & file_name,
                                               const std::string    & ev_ws_name,
-                                              const std::string    & md_ws_name )
+                                              const std::string    & md_ws_name,
+                                                    double           maxQ,
+                                                    bool             do_lorentz_corr )
 {
-  this->worker     = worker;
-  this->file_name  = file_name;
-  this->ev_ws_name = ev_ws_name;
-  this->md_ws_name = md_ws_name;
+  this->worker          = worker;
+  this->file_name       = file_name;
+  this->ev_ws_name      = ev_ws_name;
+  this->md_ws_name      = md_ws_name;
+  this->maxQ            = maxQ;
+  this->do_lorentz_corr = do_lorentz_corr;
 }
 
 void RunLoadAndConvertToMD::run()
 {
-  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name );
+  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name, maxQ, do_lorentz_corr );
 }
 
 
@@ -62,6 +66,10 @@ RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
   this->min_intensity = min_intensity;
 }
 
+
+/**
+ *  Class to call findPeaks in a separate thread.
+ */
 void RunFindPeaks::run()
 {
   worker->findPeaks( md_ws_name, peaks_ws_name,
@@ -89,6 +97,10 @@ RunSphereIntegrate::RunSphereIntegrate(       MantidEVWorker * worker,
   this->integrate_edge = integrate_edge;
 }
 
+
+/**
+ *  Class to call sphereIntegrate in a separate thread.
+ */
 void RunSphereIntegrate::run()
 { 
   worker->sphereIntegrate( peaks_ws_name, event_ws_name,
@@ -115,6 +127,10 @@ RunFitIntegrate::RunFitIntegrate(       MantidEVWorker * worker,
   this->use_ikeda_carpenter = use_ikeda_carpenter;
 }
 
+
+/**
+ *  Class to call fitIntegrate in a separate thread.
+ */
 void RunFitIntegrate::run()
 {
   worker->fitIntegrate( peaks_ws_name, event_ws_name,
@@ -144,6 +160,10 @@ RunEllipsoidIntegrate::RunEllipsoidIntegrate(   MantidEVWorker * worker,
   this->outer_size    = outer_size;
 }
 
+
+/**
+ *  Class to call ellipsoidIntegrate in a separate thread.
+ */
 void RunEllipsoidIntegrate::run()
 {
   worker->ellipsoidIntegrate( peaks_ws_name, event_ws_name,
@@ -299,6 +319,7 @@ void MantidEV::initLayout()
                      this, SLOT( setEnabledEllipseSizeOptions_slot() ) );
 
    // Add validators to all QLineEdit objects that require numeric values
+   m_uiForm.MaxMagQ_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxMagQ_ledt));
    m_uiForm.MaxABC_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxABC_ledt));
    m_uiForm.NumToFind_ledt->setValidator( new QDoubleValidator(m_uiForm.NumToFind_ledt));
    m_uiForm.MinIntensity_ledt->setValidator( new QDoubleValidator(m_uiForm.MinIntensity_ledt));
@@ -338,6 +359,8 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.MDworkspace_ledt->setText("");
    m_uiForm.LoadEventFile_rbtn->setChecked(true);
    m_uiForm.EventFileName_ledt->setText(""); 
+   m_uiForm.MaxMagQ_ledt->setText("25");
+   m_uiForm.LorentzCorrection_ckbx->setChecked(true);
    m_uiForm.UseExistingWorkspaces_rbtn->setChecked(false);
    setEnabledLoadEventFileParams_slot(true);
    last_event_file.clear();
@@ -454,8 +477,18 @@ void MantidEV::selectWorkspace_slot()
        return;
      }
 
+     double maxQ;
+     getDouble( m_uiForm.MaxMagQ_ledt, maxQ );
+     if ( maxQ <= 0 )
+     {
+       errorMessage("Max |Q| to Map to MD MUST BE POSITIVE.");
+       return;
+     }
+
      RunLoadAndConvertToMD* runner = new RunLoadAndConvertToMD(worker,file_name,
-                                                       ev_ws_name, md_ws_name );
+                                                       ev_ws_name, md_ws_name,
+                                                       maxQ,
+                                                       m_uiForm.LorentzCorrection_ckbx->isChecked() );
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
        errorMessage( "Failed to start Load and ConvertToMD thread...previous operation not complete" );
@@ -1282,6 +1315,9 @@ void MantidEV::setEnabledLoadEventFileParams_slot( bool on )
   m_uiForm.EventFileName_lbl->setEnabled( on );
   m_uiForm.EventFileName_ledt->setEnabled( on );
   m_uiForm.SelectEventFile_btn->setEnabled( on );
+  m_uiForm.MaxMagQ_lbl->setEnabled( on );
+  m_uiForm.MaxMagQ_ledt->setEnabled( on );
+  m_uiForm.LorentzCorrection_ckbx->setEnabled( on );
 }
 
 
@@ -1635,6 +1671,8 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("MDworkspace_ledt", m_uiForm.MDworkspace_ledt->text());
   state->setValue("LoadEventFile_rbtn", m_uiForm.LoadEventFile_rbtn->isChecked());
   state->setValue("EventFileName_ledt", m_uiForm.EventFileName_ledt->text());
+  state->setValue("MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt->text());
+  state->setValue("LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx->isChecked());
   state->setValue("UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn->isChecked());
 
                                                 // Save Tab 2, Find Peaks
@@ -1728,6 +1766,8 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "MDworkspace_ledt", m_uiForm.MDworkspace_ledt );
   restore( state, "LoadEventFile_rbtn", m_uiForm.LoadEventFile_rbtn );
   restore( state, "EventFileName_ledt", m_uiForm.EventFileName_ledt );
+  restore( state, "MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt );
+  restore( state, "LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx );
   restore( state, "UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn );
 
                                                   // Load Tab 2, Find Peaks

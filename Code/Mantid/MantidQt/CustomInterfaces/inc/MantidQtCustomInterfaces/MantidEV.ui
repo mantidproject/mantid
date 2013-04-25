@@ -47,7 +47,7 @@
    <item>
     <widget class="QTabWidget" name="MantidEV_tabwidg">
      <property name="currentIndex">
-      <number>5</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
@@ -117,19 +117,19 @@
         <rect>
          <x>40</x>
          <y>150</y>
-         <width>331</width>
+         <width>451</width>
          <height>23</height>
         </rect>
        </property>
        <property name="text">
-        <string> Load From Event File</string>
+        <string> Load From Event File and Map to MD</string>
        </property>
       </widget>
       <widget class="QRadioButton" name="UseExistingWorkspaces_rbtn">
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>250</y>
+         <y>380</y>
          <width>441</width>
          <height>23</height>
         </rect>
@@ -141,7 +141,7 @@
       <widget class="QLabel" name="EventFileName_lbl">
        <property name="geometry">
         <rect>
-         <x>60</x>
+         <x>70</x>
          <y>190</y>
          <width>101</width>
          <height>31</height>
@@ -172,6 +172,42 @@
        </property>
        <property name="text">
         <string>Browse</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="MaxMagQ_lbl">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>260</y>
+         <width>221</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Max |Q| to Map to MD</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="MaxMagQ_ledt">
+       <property name="geometry">
+        <rect>
+         <x>290</x>
+         <y>250</y>
+         <width>101</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="LorentzCorrection_ckbx">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>310</y>
+         <width>271</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Apply Lorentz Correction</string>
        </property>
       </widget>
      </widget>

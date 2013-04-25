@@ -68,7 +68,9 @@ public:
   /// Load and event file and convert to MD workspace
   bool loadAndConvertToMD( const std::string & file_name,
                            const std::string & ev_ws_name,
-                           const std::string & md_ws_name );
+                           const std::string & md_ws_name,
+                                 double        maxQ,
+                                 bool          do_lorentz_corr );
 
   /// Find peaks in MD workspace and set peaks into peaks workspace
   bool findPeaks( const std::string & md_ws_name, 
