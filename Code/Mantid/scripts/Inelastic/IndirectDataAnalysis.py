@@ -809,7 +809,7 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     DeleteWorkspace('corrections')
     return CorrectedWS
                 
-def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, factor=1, Save=False,
+def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToScale=False, factor=1, Save=False,
         PlotResult='None', PlotContrib=False):
     '''Load up the necessary files and then passes them into the main
     applyCorrections routine.'''
@@ -821,7 +821,7 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, fa
     if container != '':
         CheckHistSame(sample,'Sample',container,'Container')
         (instr, can_run) = getInstrRun(container)
-        if Scale:
+        if ScaleOrNotToScale:
             Scale(InputWorkspace=container, OutputWorkspace=container, Factor=factor, Operation='Multiply')
             if Verbose:
                 logger.notice('Container scaled by '+str(factor))
