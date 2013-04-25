@@ -69,6 +69,7 @@ set ( SRC_FILES
 	src/SobolSequence.cpp
 	src/StartsWithValidator.cpp
 	src/Statistics.cpp
+        src/StdChannel.cpp
 	src/Strings.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
@@ -194,6 +195,7 @@ set ( INC_FILES
 	inc/MantidKernel/SobolSequence.h
 	inc/MantidKernel/StartsWithValidator.h
 	inc/MantidKernel/Statistics.h
+        inc/MantidKernel/StdChannel.h
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
