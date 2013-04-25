@@ -1,5 +1,5 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+
 *WIKI*/
 
 #include "MantidDataHandling/LoadMcStasNexus.h"
@@ -55,8 +55,8 @@ namespace DataHandling
   /// Sets documentation strings for this algorithm
   void LoadMcStasNexus::initDocs()
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    this->setWikiSummary("Preliminary loading of Mcstas data.");
+    this->setOptionalMessage("Preliminary loading of Mcstas data.");
   }
 
   //----------------------------------------------------------------------------------------------
