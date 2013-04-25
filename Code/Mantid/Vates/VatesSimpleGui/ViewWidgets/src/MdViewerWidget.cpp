@@ -684,7 +684,7 @@ void MdViewerWidget::onRotationPoint()
 void MdViewerWidget::onWikiHelp()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-                                 "VatesSimpleInterface"));
+                                 "VatesSimpleInterface_v2"));
 }
 
 /**
