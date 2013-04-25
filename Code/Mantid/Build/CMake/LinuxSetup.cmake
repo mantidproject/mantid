@@ -75,8 +75,6 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
 )
 
 
-
-
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "#!/bin/sh\n"
                                                          "if [ ! -e $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot ]; then\n"
                                                          "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
@@ -95,7 +93,7 @@ endif()
 if ( ${UNIX_CODENAME} STREQUAL "Santiago" )
 	file ( APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
 								     "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot ]; then\n"
-                                                                     "  mv $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
+                                                                     "  mv $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot.backup\n"
 							             "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/launch_mantidplot.sh $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot\n"
                                                                      "fi\n"
 	)
@@ -109,6 +107,15 @@ install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh
 		      GROUP_EXECUTE GROUP_READ
 		      WORLD_EXECUTE WORLD_READ
 )
+
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/bin/MantidPlot
+	  DESTINATION ${BIN_DIR}
+	  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+		      GROUP_EXECUTE GROUP_READ
+		      WORLD_EXECUTE WORLD_READ
+	  RENAME MantidPlot_exe
+)
+
 endif()
 
 
@@ -131,9 +138,6 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_links.sh "#!/bin/sh\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh "#!/bin/sh\n"
-                                                             "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe ]; then\n"
-                                                             "  rm -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
-                                                             "fi\n"
                                                              "# If the install prefix contains mantid then prune empty directories.\n"
                                                              "# Begin extra cautious here just in case some has set the something like Prefix=/usr\n"
                                                              "if echo \"$RPM_INSTALL_PREFIX0\" | grep -qi mantid; then\n"
