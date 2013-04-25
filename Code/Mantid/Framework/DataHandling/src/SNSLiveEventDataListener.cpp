@@ -322,21 +322,6 @@ namespace DataHandling
   }
 
 
-  /// Parse an RTDL packet
-
-  /// Overrides the default function defined in ADARA::Parser and processes
-  /// data from ADARA::RTDLPkt packets.
-  /// @param pkt The packet to be parsed
-  /// @return Returns false if there were no problems.  Returns true if there
-  /// was an error and packet parsing should be interrupted
-  bool SNSLiveEventDataListener::rxPacket( const ADARA::RTDLPkt &pkt)
-  {
-    // At the moment, all we need from the RTDL packets is the pulse
-    // time (and its questionable whether we even need that).
-    m_rtdlPulseId = pkt.pulseId();
-    return false;
-  }
-
   /// Parse a banked event packet
 
   /// Overrides the default function defined in ADARA::Parser and processes
@@ -347,10 +332,6 @@ namespace DataHandling
   /// @param pkt The packet to be parsed
   /// @return Returns false if there were no problems.  Returns true if there
   /// was an error and packet parsing should be interrupted
-  // Note:  Before we can process a particular BankedEventPkt, we must have
-  // received the RTDLPkt for pulse ID specified in the BankedEventPkt.
-  // Normally this won't be an issue since the SMS will send out RTDLPkts
-  // before it sends BankedEventPkts.
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BankedEventPkt &pkt)
   {
 
@@ -358,19 +339,7 @@ namespace DataHandling
     unsigned eventsPerBank = 0;
     unsigned totalEvents = 0;
 
-    // First step - make sure the RTDL packet we've saved matches the
-    // banked event packet we've just received and  make sure its RAW flag
-    // is false
-    if (pkt.pulseId() != m_rtdlPulseId)
-    {
-      // Wrong RTDL packet.  Fail!
-      g_log.error() << "Ignoring data from Pulse ID" << pkt.pulseId()
-                    << "because we have not received an RTDL packet for that pulse!"
-                    << std::endl;
-      return false;
-    }
-
-    // Next - check to see if the run has been paused.  We don't process
+    // First, check to see if the run has been paused.  We don't process
     // the events if we're paused unless the user has specifically overridden
     // this behavior with the livelistener.keeppausedevents property.
     if (m_runPaused &&  m_keepPausedEvents == false)
