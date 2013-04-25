@@ -9,6 +9,8 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <QFileInfo>
+#include <QDesktopServices>
+#include <QUrl>
 
 namespace MantidQt
 {
@@ -61,6 +63,7 @@ void StepScan::initLayout()
   connect( this, SIGNAL(logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr &)),
            SLOT(fillPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
 
+  connect( m_uiForm.helpButton, SIGNAL(clicked()), SLOT(helpClicked()) );
   connect( m_uiForm.startButton, SIGNAL(clicked()), SLOT(runStepScanAlg()) );
   connect( m_uiForm.closeButton, SIGNAL(clicked()), this->parent(), SLOT(close()) );
 }
@@ -488,6 +491,10 @@ void StepScan::checkForVaryingLogs(const std::string& wsName)
   }
 }
 
+void StepScan::helpClicked()
+{
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Step_Scan_Interface"));
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

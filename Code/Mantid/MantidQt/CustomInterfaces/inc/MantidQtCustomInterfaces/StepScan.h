@@ -43,6 +43,8 @@ private slots:
   void updateForNormalizationChange();
   void generateCurve(const QString& var);
 
+  void helpClicked();
+
 private:
   void initLayout();
   void startLiveListener();
