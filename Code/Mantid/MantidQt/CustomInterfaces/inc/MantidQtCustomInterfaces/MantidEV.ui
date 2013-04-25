@@ -40,8 +40,15 @@
       </property>
       <addaction name="actionShow_UB"/>
      </widget>
+     <widget class="QMenu" name="menuHelp">
+      <property name="title">
+       <string>Help</string>
+      </property>
+      <addaction name="actionOnline_Help_Page"/>
+     </widget>
      <addaction name="menuFile"/>
      <addaction name="menuView"/>
+     <addaction name="menuHelp"/>
     </widget>
    </item>
    <item>
@@ -1686,6 +1693,11 @@
   <action name="actionReset_Default_Settings">
    <property name="text">
     <string>Reset Default Settings</string>
+   </property>
+  </action>
+  <action name="actionOnline_Help_Page">
+   <property name="text">
+    <string>Online Help Page</string>
    </property>
   </action>
  </widget>

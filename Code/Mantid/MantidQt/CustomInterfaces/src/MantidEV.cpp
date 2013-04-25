@@ -2,6 +2,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QSettings>
+#include <QDesktopServices>
 
 #include "MantidQtCustomInterfaces/MantidEV.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -273,6 +274,10 @@ void MantidEV::initLayout()
 
    QObject::connect( m_uiForm.actionShow_UB, SIGNAL(triggered()),
                      this, SLOT(showUB_slot()) );
+   
+   QObject::connect( m_uiForm.actionOnline_Help_Page, SIGNAL(triggered()),
+                     this, SLOT(help_slot()) );
+
 
                           // connect the slots for enabling and disabling
                           // various subsets of widgets
@@ -436,6 +441,15 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.Qy_ledt->setText("");
    m_uiForm.Qz_ledt->setText("");
    m_uiForm.SelectedPoint_tbl->clear();
+}
+
+
+/**
+ * Go to MantidEV web page when help menu item is chosen
+ */
+void MantidEV::help_slot()
+{
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/SCD_Event_Data_Reduction_Interface_(MantidEV)"));
 }
 
 

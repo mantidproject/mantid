@@ -195,6 +195,9 @@ public:
 
 private slots:
 
+  /// Go to help page
+  void help_slot();
+
   /// Slot for the select workspace tab's Apply button 
   void selectWorkspace_slot();
 
