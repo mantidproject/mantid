@@ -82,7 +82,6 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "#!/bin/sh\n"
                                                          "  ln -s $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/mantidplot\n"
                                                          "fi\n"
 )
-
 if ( ENVVARS_ON_INSTALL ) 
 	file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
                                                          "ln -s $RPM_INSTALL_PREFIX0/${ETC_DIR}/mantid.sh /etc/profile.d/mantid.sh\n"
@@ -90,6 +89,9 @@ if ( ENVVARS_ON_INSTALL )
 	)
 endif()
 
+
+
+# RHEL6 specific stuff (as we need to use software collections)
 if ( ${UNIX_CODENAME} STREQUAL "Santiago" )
 	file ( APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
 								     "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot ]; then\n"
