@@ -666,6 +666,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
       Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
       std::string peakTableName;
+      bool newPeaksWorkspace = false;
       if ( tw )
       {
           peakTableName = tw->name();
@@ -682,6 +683,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
               tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
               tw->setInstrument(instr);
               Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
+              newPeaksWorkspace = true;
           }
           else
           {
@@ -709,8 +711,8 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       alg->setProperty( "BinCount", y );
       alg->execute();
 
-      // if peaks workspace doesn't have UB but the data ws has one copy it to peaks
-      if ( !tw->sample().hasOrientedLattice() && ws->sample().hasOrientedLattice() )
+      // if data WS has UB copy it to the new peaks workspace
+      if ( newPeaksWorkspace && ws->sample().hasOrientedLattice() )
       {
           auto UB = ws->sample().getOrientedLattice().getUB();
           auto lattice = new Mantid::Geometry::OrientedLattice;
