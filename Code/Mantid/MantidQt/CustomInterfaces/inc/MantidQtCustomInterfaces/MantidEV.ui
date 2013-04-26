@@ -54,7 +54,7 @@
    <item>
     <widget class="QTabWidget" name="MantidEV_tabwidg">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
@@ -614,7 +614,7 @@
       <widget class="QLineEdit" name="MaxGoniometerChange_ledt">
        <property name="geometry">
         <rect>
-         <x>400</x>
+         <x>410</x>
          <y>280</y>
          <width>81</width>
          <height>31</height>
@@ -640,7 +640,7 @@
       <widget class="QLineEdit" name="IndexingTolerance_ledt">
        <property name="geometry">
         <rect>
-         <x>400</x>
+         <x>410</x>
          <y>440</y>
          <width>81</width>
          <height>31</height>
@@ -1300,7 +1300,7 @@
       <widget class="QLineEdit" name="RegionRadius_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>310</y>
          <width>81</width>
          <height>21</height>
@@ -1326,7 +1326,7 @@
       <widget class="QLineEdit" name="PeakSize_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>370</y>
          <width>81</width>
          <height>24</height>
@@ -1354,7 +1354,7 @@
         <rect>
          <x>100</x>
          <y>400</y>
-         <width>241</width>
+         <width>281</width>
          <height>24</height>
         </rect>
        </property>
@@ -1365,7 +1365,7 @@
       <widget class="QLineEdit" name="BackgroundInnerSize_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>400</y>
          <width>81</width>
          <height>24</height>
@@ -1380,7 +1380,7 @@
         <rect>
          <x>100</x>
          <y>430</y>
-         <width>241</width>
+         <width>281</width>
          <height>31</height>
         </rect>
        </property>
@@ -1391,7 +1391,7 @@
       <widget class="QLineEdit" name="BackgroundOuterSize_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>430</y>
          <width>81</width>
          <height>24</height>
@@ -1432,7 +1432,7 @@
         <rect>
          <x>70</x>
          <y>220</y>
-         <width>271</width>
+         <width>291</width>
          <height>24</height>
         </rect>
        </property>
@@ -1443,7 +1443,7 @@
       <widget class="QLineEdit" name="NBadEdgePixels_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>220</y>
          <width>81</width>
          <height>24</height>
@@ -1471,7 +1471,7 @@
         <rect>
          <x>70</x>
          <y>40</y>
-         <width>211</width>
+         <width>261</width>
          <height>22</height>
         </rect>
        </property>
@@ -1482,7 +1482,7 @@
       <widget class="QLineEdit" name="PeakRadius_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>40</y>
          <width>81</width>
          <height>22</height>
@@ -1497,7 +1497,7 @@
         <rect>
          <x>70</x>
          <y>70</y>
-         <width>281</width>
+         <width>311</width>
          <height>24</height>
         </rect>
        </property>
@@ -1508,7 +1508,7 @@
       <widget class="QLineEdit" name="BackgroundInnerRadius_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>70</y>
          <width>81</width>
          <height>24</height>
@@ -1523,7 +1523,7 @@
         <rect>
          <x>70</x>
          <y>100</y>
-         <width>261</width>
+         <width>311</width>
          <height>24</height>
         </rect>
        </property>
@@ -1534,7 +1534,7 @@
       <widget class="QLineEdit" name="BackgroundOuterRadius_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>100</y>
          <width>81</width>
          <height>24</height>
