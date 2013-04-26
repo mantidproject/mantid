@@ -488,8 +488,10 @@ namespace API
         break;
       case LOCAL_ONLY | LOCAL_CHANGED:
         acc_status = LOCAL_CHANGED;
+        break;
       case REMOTE_ONLY | REMOTE_CHANGED:
         acc_status = REMOTE_CHANGED;
+        break;
       default:
         acc_status = BOTH_CHANGED;
         break;        
