@@ -6,7 +6,7 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MockObjects.h"
 #include <vtkDataSet.h>
-#include <vtkStructuredGrid.h>
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid::VATES;
 

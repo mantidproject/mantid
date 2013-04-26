@@ -8,7 +8,7 @@
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
-#include <vtkStructuredGrid.h>
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 

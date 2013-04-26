@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MockObjects.h"
-#include <vtkStructuredGrid.h>
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid::VATES;
 

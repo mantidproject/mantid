@@ -15,7 +15,7 @@
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
 #include <vtkPoints.h>
-#include <vtkRectilinearGrid.h>
+#include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
 #include <vtkUnstructuredGrid.h>
 
 using namespace Mantid::API;
