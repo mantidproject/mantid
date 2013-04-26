@@ -197,9 +197,9 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
         break; 
       case 1: // ask for the status
         if (isDownloading(index))
-          return "Downloading";
+          return downloadSt();
         if (isUploading(index))
-        return "Uploading";
+          return uploadSt();
         status = repo_ptr->fileStatus(path.toStdString());
         return fromStatus(status); 
         break; 
@@ -248,6 +248,10 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
     // tool tip role
     if (role == Qt::ToolTipRole){
       if (index.column() == 1){
+        if (isDownloading(index))
+          return "Downloading... Be patient.";
+        if (isUploading(index))
+          return "Uploading... Be patient.";
         status = repo_ptr->fileStatus(path.toStdString());
         inf = repo_ptr->fileInfo(path.toStdString());
         switch(status){

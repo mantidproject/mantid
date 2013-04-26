@@ -260,7 +260,8 @@ void ScriptRepositoryView::RepoDelegate::paint(
     icon = QIcon::fromTheme("dialog-ok", QIcon(QPixmap(":/win/dialog-ok")));
   else if (state == RepoModel::localOnlySt() || state == RepoModel::localChangedSt())
     icon = QIcon::fromTheme("add-files-to-archive", QIcon(QPixmap(":win/upload")));
-
+  else if (state == RepoModel::downloadSt() || state == RepoModel::uploadSt())
+    icon = QIcon(QPixmap(":win/running_process"));
   // define the region to draw the icon
   QRect buttonRect( option.rect);  
   int min_val = buttonRect.width()<buttonRect.height() ? buttonRect.width() : buttonRect.height();
