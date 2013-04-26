@@ -103,15 +103,12 @@ if ( ${UNIX_CODENAME} STREQUAL "Santiago" )
 
 install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh 
           DESTINATION ${BIN_DIR}
-	  PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-		      GROUP_EXECUTE GROUP_READ
-		      WORLD_EXECUTE WORLD_READ
+	      PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+	                  GROUP_EXECUTE GROUP_READ
+	                  WORLD_EXECUTE WORLD_READ
 )
 
 endif()
-
-
-
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_pre_uninstall.sh "#!/bin/sh\n"
                                                              "if [ ! -f $RPM_INSTALL_PREFIX0/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}/libMantidParaViewSplatterPlotSMPlugin.so ];then\n"
@@ -162,8 +159,6 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_remove_empty_install.sh "#!/bin/sh\
 install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
           DESTINATION ${ETC_DIR}
 )
-
-
 
 # unset all install/uninstall scripts
 unset ( CPACK_RPM_PRE_INSTALL_SCRIPT_FILE )
