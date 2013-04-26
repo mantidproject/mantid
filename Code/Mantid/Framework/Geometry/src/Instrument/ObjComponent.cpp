@@ -42,7 +42,7 @@ namespace Mantid
     *  @param material :: An optional pointer to the material object of this component
     */
     ObjComponent::ObjComponent(const std::string& name, Object_const_sptr shape,
-                   IComponent* parent, Material_sptr material)
+                   IComponent* parent, Kernel::Material_sptr material)
       : IObjComponent(), Component(name,parent), m_shape(shape), m_material(material)
     {
     }
@@ -76,7 +76,7 @@ namespace Mantid
      * Return the material of the component. Currently 
      * unaffacted by parametrization
      */
-    const Material_const_sptr ObjComponent::material() const
+    const Kernel::Material_const_sptr ObjComponent::material() const
     {
       return m_material;
     }

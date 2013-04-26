@@ -101,12 +101,12 @@ public:
     TS_ASSERT_EQUALS(p.getRunNumber(),1000. );
     TS_ASSERT_DELTA(p.getDSpacing(),3.5933, 1e-4 );
     double radius;
-    const Geometry::Material *m_sampleMaterial = &(wsout->sample().getMaterial());
-    if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
+    const Kernel::Material *m_sampleMaterial = &(wsout->sample().getMaterial());
+    if( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) != 0.0)
     {
   	  double rho =  m_sampleMaterial->numberDensity();
-  	  smu =  m_sampleMaterial->totalScatterXSection(1.7982) * rho;
-  	  amu = m_sampleMaterial->absorbXSection(1.7982) * rho;
+  	  smu =  m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+  	  amu = m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     }
     else
     {

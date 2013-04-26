@@ -4,7 +4,6 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
@@ -13,8 +12,9 @@
 
 namespace Mantid
 {
-  namespace Geometry
+  namespace Kernel
   {
+    using PhysicalConstants::NeutronAtom;
     /**
       A material is defined as being composed of a given element, defined as a
       PhysicalConstants::NeutronAtom, with the following properties:
@@ -45,7 +45,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>
 
     */
-    class MANTID_GEOMETRY_DLL Material
+    class MANTID_KERNEL_DLL Material
     {
     public:
       /// Default constructor. Required for other parts of the code to 
@@ -76,17 +76,24 @@ namespace Mantid
       /// Get the pressure
       double pressure() const;
       /// Get the coherent scattering cross section for a given wavelength
-      double cohScatterXSection(const double lambda) const;
+      double cohScatterXSection(const double lambda = NeutronAtom::ReferenceLambda) const;
       /// Get the incoherent cross section for a given wavelength
-      double incohScatterXSection(const double lambda) const;
+      double incohScatterXSection(const double lambda = NeutronAtom::ReferenceLambda) const;
       /// Return the total scattering cross section for a given wavelength
-      double totalScatterXSection(const double lambda) const;
+      double totalScatterXSection(const double lambda = NeutronAtom::ReferenceLambda) const;
       /// Get the absorption cross section at a given wavelength
-      double absorbXSection(const double lambda) const;
+      double absorbXSection(const double lambda = NeutronAtom::ReferenceLambda) const;
       //@}
 
       void saveNexus(::NeXus::File * file, const std::string & group) const;
       void loadNexus(::NeXus::File * file, const std::string & group);
+      struct ChemicalFormula
+      {
+    	  std::vector<std::string> atoms;     // Chemical symbol of each atom
+    	  std::vector<uint16_t> numberAtoms;  // Number of each atom
+    	  std::vector<uint16_t> aNumbers;     // Atomic number of each atom
+      };
+      static ChemicalFormula parseChemicalFormula(const std::string chemicalSymbol);
 
 
     private:

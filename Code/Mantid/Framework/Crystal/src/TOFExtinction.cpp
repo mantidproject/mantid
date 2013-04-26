@@ -41,6 +41,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::PhysicalConstants;
 
 namespace Mantid
 {
@@ -117,12 +118,12 @@ namespace Crystal
     if (peaksW != inPeaksW)
     peaksW = inPeaksW->clone();
 
-    const Geometry::Material *m_sampleMaterial = &(inPeaksW->sample().getMaterial());
-    if( m_sampleMaterial->totalScatterXSection(1.7982) != 0.0)
+    const Kernel::Material *m_sampleMaterial = &(inPeaksW->sample().getMaterial());
+    if( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) != 0.0)
     {
   	  double rho =  m_sampleMaterial->numberDensity();
-  	  smu =  m_sampleMaterial->totalScatterXSection(1.7982) * rho;
-  	  amu = m_sampleMaterial->absorbXSection(1.7982) * rho;
+  	  smu =  m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+  	  amu = m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     }
     else
     {

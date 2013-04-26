@@ -40,6 +40,7 @@ set ( SRC_FILES
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
+	src/Material.cpp
 	src/MaskedProperty.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/HermitePolynomials.cpp
@@ -160,6 +161,7 @@ set ( INC_FILES
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
+	inc/MantidKernel/Material.h
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
@@ -269,6 +271,7 @@ set ( TEST_FILES
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
 	MandatoryValidatorTest.h
+	MaterialTest.h
 	MaskedPropertyTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h

@@ -59,7 +59,6 @@ set ( SRC_FILES
 	src/Math/mathSupport.cpp
 	src/Objects/BoundingBox.cpp
 	src/Objects/InstrumentRayTracer.cpp
-	src/Objects/Material.cpp
 	src/Objects/Object.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
@@ -172,7 +171,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/mathSupport.h
 	inc/MantidGeometry/Objects/BoundingBox.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
-	inc/MantidGeometry/Objects/Material.h
 	inc/MantidGeometry/Objects/Object.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
@@ -231,7 +229,6 @@ set ( TEST_FILES
 	MDPlaneImplicitFunctionTest.h
 	MDPlaneTest.h
 	MapSupportTest.h
-	MaterialTest.h
 	MathSupportTest.h
 	NearestNeighboursFactoryTest.h
 	NearestNeighboursTest.h

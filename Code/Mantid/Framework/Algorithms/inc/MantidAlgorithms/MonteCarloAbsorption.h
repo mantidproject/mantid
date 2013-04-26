@@ -80,7 +80,7 @@ namespace Mantid
 			       const Kernel::V3D & scatterPoint,
 			       const Kernel::V3D & finalPos, const double lambda);
       /// Calculate the attenuation for a given length, material and wavelength
-      double attenuation(const double length, const Geometry::Material& material,
+      double attenuation(const double length, const Kernel::Material& material,
 			 const double lambda) const;
 
       /// Check the input and throw if invalid
@@ -95,7 +95,7 @@ namespace Mantid
       /// The sample's shape
       const Geometry::Object *m_sampleShape;
       /// The sample's material 
-      const Geometry::Material *m_sampleMaterial;
+      const Kernel::Material *m_sampleMaterial;
       /// The container(s)
       const API::SampleEnvironment *m_container;
       /// The number of wavelength points to use for each simulation
