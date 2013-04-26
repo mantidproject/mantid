@@ -845,7 +845,11 @@ namespace Mantid
     DateAndTime TimeSeriesProperty<TYPE>::lastTime() const
     {
       if (m_values.size()==0)
-        throw std::runtime_error("TimeSeriesProperty is empty");
+      {
+        const std::string error("lastTime(): TimeSeriesProperty '" + name() + "' is empty");
+        g_log.debug(error);
+        throw std::runtime_error(error);
+      }
 
       sort();
 
@@ -859,7 +863,11 @@ namespace Mantid
     TYPE TimeSeriesProperty<TYPE>::firstValue() const
     {
       if (m_values.size() == 0)
-        throw std::runtime_error("TimeSeriesProperty is empty");
+      {
+        const std::string error("firstValue(): TimeSeriesProperty '" + name() + "' is empty");
+        g_log.debug(error);
+        throw std::runtime_error(error);
+      }
 
       sort();
 
@@ -873,7 +881,11 @@ namespace Mantid
     DateAndTime TimeSeriesProperty<TYPE>::firstTime() const
     {
       if (m_values.size()==0)
-        throw std::runtime_error("TimeSeriesProperty is empty");
+      {
+        const std::string error("firstTime(): TimeSeriesProperty '" + name() + "' is empty");
+        g_log.debug(error);
+        throw std::runtime_error(error);
+      }
 
       sort();
 
@@ -888,7 +900,11 @@ namespace Mantid
     TYPE TimeSeriesProperty<TYPE>::lastValue() const
     {
       if (m_values.size() == 0)
-        throw std::runtime_error("TimeSeriesProperty is empty");
+      {
+        const std::string error("lastValue(): TimeSeriesProperty '" + name() + "' is empty");
+        g_log.debug(error);
+        throw std::runtime_error(error);
+      }
 
       sort();
 
@@ -1100,7 +1116,11 @@ namespace Mantid
     TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime& t) const
     {
       if (m_values.size() == 0)
-        throw std::runtime_error("Property is empty.  Cannot return any value");
+      {
+        const std::string error("getSingleValue(): TimeSeriesProperty '" + name() + "' is empty");
+        g_log.debug(error);
+        throw std::runtime_error(error);
+      }
 
       // 1. Get sorted
       sort();
@@ -1155,7 +1175,11 @@ namespace Mantid
     TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime& t, int& index) const
     {
       if (m_values.size() == 0)
-        throw std::runtime_error("Property is empty.  Cannot return any value");
+      {
+        const std::string error("getSingleValue(): TimeSeriesProperty '" + name() + "' is empty");
+        g_log.debug(error);
+        throw std::runtime_error(error);
+      }
 
       // 1. Get sorted
       sort();
@@ -1218,7 +1242,11 @@ namespace Mantid
     {
       // 0. Throw exception
       if (m_values.size() == 0)
-        throw std::runtime_error("TimeSeriesProperty is empty (nthInterval)");
+      {
+        const std::string error("nthInterval(): TimeSeriesProperty '" + name() + "' is empty");
+        g_log.debug(error);
+        throw std::runtime_error(error);
+      }
 
       // 1. Sort
       sort();
@@ -1349,7 +1377,11 @@ namespace Mantid
 
       // 1. Throw error if property is empty
       if (m_values.size() == 0)
-        throw std::runtime_error("TimeSeriesProperty is empty");
+      {
+        const std::string error("nthValue(): TimeSeriesProperty '" + name() + "' is empty");
+        g_log.debug(error);
+        throw std::runtime_error(error);
+      }
 
       // 2. Sort and apply filter
       sort();
@@ -1398,7 +1430,7 @@ namespace Mantid
       return value;
     }
 
-    /** Returns n-th time. NOTE: Complexity is order(n)! regardless of filter
+    /** Returns n-th time, or the last time if fewer than n entries.
      *  Special cases: There is no special cases
      *  @param n :: index
      *  @return DateAndTime
@@ -1409,7 +1441,11 @@ namespace Mantid
       sort();
 
       if (m_values.size() == 0)
-        throw std::runtime_error("TimeSeriesProperty is empty");
+      {
+        const std::string error("nthTime(): TimeSeriesProperty '" + name() + "' is empty");
+        g_log.debug(error);
+        throw std::runtime_error(error);
+      }
 
       if (n < 0 || n >= static_cast<int>(m_values.size()))
         n = static_cast<int>(m_values.size())-1;

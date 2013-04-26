@@ -149,13 +149,13 @@ namespace DataHandling
       try {
         m_socket.connect( address);  // BLOCKING connect
       } catch (...) {
-        g_log.error() << "Connection to " << address.toString() << " failed." << std::endl;
+        g_log.debug() << "Connection to " << address.toString() << " failed." << std::endl;
         return false;
       }
     }
 
     m_socket.setReceiveTimeout( Poco::Timespan( RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
-    g_log.information() << "Connected to " << m_socket.address().toString() << std::endl;
+    g_log.debug() << "Connected to " << m_socket.address().toString() << std::endl;
 
     rv = m_isConnected = true;
     return rv;

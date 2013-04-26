@@ -103,6 +103,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
     registered_addtional_types = true;
     qRegisterMetaType<Mantid::API::Workspace_sptr>();
     qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
+    qRegisterMetaType<Mantid::API::MatrixWorkspace_const_sptr>();
     //Register std::string as well as we use it alot
     qRegisterMetaType<std::string>();
   }

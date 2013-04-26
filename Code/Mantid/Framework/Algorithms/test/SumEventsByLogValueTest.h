@@ -116,12 +116,17 @@ public:
     Workspace_sptr out = alg->getProperty("OutputWorkspace");
     auto outWS = boost::dynamic_pointer_cast<ITableWorkspace>(out);
     TS_ASSERT_EQUALS( outWS->rowCount(), 2 );
-    TS_ASSERT_EQUALS( outWS->columnCount(), 4 );
+    //TS_ASSERT_EQUALS( outWS->columnCount(), 4 );
     TS_ASSERT_EQUALS( outWS->Int(0,0), 1 );
     TS_ASSERT_EQUALS( outWS->Int(0,1), 270 );
     TS_ASSERT_EQUALS( outWS->Int(1,0), 2 );
     TS_ASSERT_EQUALS( outWS->Int(1,1), 30 );
 
+    // Check the times & the proton charge
+    TS_ASSERT_EQUALS( outWS->Double(0,2), 89.0 );
+    TS_ASSERT_EQUALS( outWS->Double(1,2), 10.0 );
+    TS_ASSERT_EQUALS( outWS->Double(0,3), 90.0E7 );
+    TS_ASSERT_EQUALS( outWS->Double(1,3), 10.0E7 );
     // Save more complex tests for a system test
   }
 
@@ -142,19 +147,28 @@ private:
     EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace(3,1);
     Run & run = ws->mutableRun();
 
+    DateAndTime run_start("2010-01-01T00:00:00");
+
     auto dblTSP = new TimeSeriesProperty<double>("doubleProp");
-    dblTSP->addValue("2010-01-01T00:00:00", 3.0);
+    dblTSP->addValue(run_start, 3.0);
     run.addProperty(dblTSP);
 
     auto textTSP = new TimeSeriesProperty<std::string>("textProp");
-    textTSP->addValue("2010-01-01T00:00:00", "ON");
+    textTSP->addValue(run_start, "ON");
     run.addProperty(textTSP);
     
     auto intTSP = new TimeSeriesProperty<int>("integerProp");
-    intTSP->addValue("2010-01-01T00:00:00", 1);
-    intTSP->addValue("2010-01-01T00:00:10", 2);
-    intTSP->addValue("2010-01-01T00:00:20", 1);
+    intTSP->addValue(run_start, 1);
+    intTSP->addValue(run_start+10.0, 2);
+    intTSP->addValue(run_start+20.0, 1);
     run.addProperty(intTSP);
+
+    auto proton_charge = new TimeSeriesProperty<double>("proton_charge");
+    for ( int i = 0; i < 100; ++i )
+    {
+      proton_charge->addValue(run_start+static_cast<double>(i), 1.0E7 );
+    }
+    run.addProperty(proton_charge);
 
     return ws;
   }

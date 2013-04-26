@@ -22,8 +22,11 @@ public:
   static StepScanTest *createSuite() { return new StepScanTest(); }
   static void destroySuite( StepScanTest *suite ) { delete suite; }
 
-  // Just a simple test on a very small workspace - leave more extensive testing for system tests
-  void test_simple_case()
+  StepScanTest() : outWSName("outTable")
+  {
+  }
+
+  void setUp()
   {
     // I'm not sure why, but this trick seems to be needed to force linking to the Algorithms
     // library on Ubuntu (otherwise it says the child algorithms are not registered).
@@ -31,34 +34,60 @@ public:
     dummy.version();
     // End of dummy code
 
-    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace2(3,1);
-    ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    inputWS = WorkspaceCreationHelper::CreateEventWorkspace2(3,1);
+    inputWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     auto scan_index = new TimeSeriesProperty<int>("scan_index");
     scan_index->addValue("2010-01-01T00:00:00",0);
-    scan_index->addValue("2010-01-01T00:00:30",1);
-    // TODO: 'Close' the log, but I need to think about what happens if it isn't closed
-    scan_index->addValue("2010-01-01T00:01:40",0);
-    ws->mutableRun().addProperty(scan_index);
+    inputWS->mutableRun().addProperty(scan_index);
     auto prop = new TimeSeriesProperty<double>("sample_property");
     // This log goes from 1->5 half way through the scan_index=1 period (so average will be 3)
     prop->addValue("2010-01-01T00:00:00",1.0);
     prop->addValue("2010-01-01T00:01:05",5.0);
-    ws->mutableRun().addProperty(prop);
+    inputWS->mutableRun().addProperty(prop);
+
+    stepScan = boost::make_shared<StepScan>();
+    stepScan->initialize();
+    stepScan->setProperty("InputWorkspace", inputWS);
+    stepScan->setPropertyValue("OutputWorkspace", outWSName);
+  }
+
+  void test_the_basics()
+  {
+    TS_ASSERT_EQUALS( stepScan->name(), "StepScan" );
+    TS_ASSERT_EQUALS( stepScan->version(), 1 );
+    TS_ASSERT_EQUALS( stepScan->category(), "Workflow\\Alignment" );
+    TS_ASSERT( !stepScan->getWikiSummary().empty() );
+  }
+
+  void test_fail_on_invalid_inputs()
+  {
+    StepScan alg;
+    alg.initialize();
+    TS_ASSERT( alg.isInitialized() );
+    TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
+    TS_ASSERT( alg.execute() );
+  }
+
+  // Just a simple test on a very small workspace - leave more extensive testing for system tests
+  void test_simple_case()
+  {
+    // Add a non-zero value to the scan_index log
+    auto scan_index = inputWS->mutableRun().getTimeSeriesProperty<int>("scan_index");
+    scan_index->addValue("2010-01-01T00:00:30",1);
+    // TODO: 'Close' the log, but I need to think about what happens if it isn't closed
+    scan_index->addValue("2010-01-01T00:01:40",0);
 
     // Create a workspace to mask out one of the spectra
     MatrixWorkspace_sptr mask = WorkspaceFactory::Instance().create("MaskWorkspace",3,1,1);
     mask->dataY(1)[0] = 1;
 
-    StepScan alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", ws) );
-    const std::string outWSName("outTable");
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MaskWorkspace", mask) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("XMin", 40.0) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("XMax", 90.0) );
-    TS_ASSERT( alg.execute() );
+    TS_ASSERT_THROWS_NOTHING( stepScan->setProperty("MaskWorkspace", mask) );
+    TS_ASSERT_THROWS_NOTHING( stepScan->setProperty("XMin", 40.0) );
+    TS_ASSERT_THROWS_NOTHING( stepScan->setProperty("XMax", 90.0) );
+    TS_ASSERT( stepScan->execute() );
     
     // Retrieve the output table workspace from the ADS.
     Mantid::API::ITableWorkspace_sptr table;
@@ -87,6 +116,22 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_zero_row_not_removed_if_only_one()
+  {
+    TS_ASSERT( stepScan->execute() );
+    // Retrieve the output table workspace from the ADS.
+    Mantid::API::ITableWorkspace_sptr table;
+    TS_ASSERT_THROWS_NOTHING( table = AnalysisDataService::Instance().retrieveWS<Mantid::API::ITableWorkspace>(outWSName) );
+
+    TS_ASSERT_EQUALS( table->rowCount(), 1 )
+    TS_ASSERT_EQUALS( table->Int(0,0), 0 )
+  }
+
+private:
+  EventWorkspace_sptr inputWS;
+  IAlgorithm_sptr stepScan;
+  const std::string outWSName;
 };
 
 
