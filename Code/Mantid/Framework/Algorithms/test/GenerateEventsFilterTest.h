@@ -31,6 +31,8 @@
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 using namespace std;
 
@@ -52,8 +54,8 @@ public:
     return;
   }
 
-  /*
-   * Test generation of splitters by time
+  //----------------------------------------------------------------------------------------------
+  /** Test generation of splitters by time
    */
   void test_genTime1Interval()
   {
@@ -113,8 +115,8 @@ public:
     return;
   }
 
-  /*
-   * Test generation of splitters by time
+  //----------------------------------------------------------------------------------------------
+  /** Test generation of splitters by time
    * (1) Multiple time interval
    * (2) Default start time and stop time
    */
@@ -180,8 +182,8 @@ public:
     return;
   }
 
-  /*
-   * Generate filter by log value in simple way
+  //----------------------------------------------------------------------------------------------
+  /** Generate filter by log value in simple way
    * (1) No time tolerance
    * (2) Just one
    */
@@ -238,9 +240,8 @@ public:
      return;
   }
 
-
-  /*
-   * Generate filter by log values in increasing
+  //----------------------------------------------------------------------------------------------
+  /** Generate filter by log values in increasing
    * (1) No time tolerance
    * (2) Just one
    */
@@ -297,9 +298,70 @@ public:
 
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test to generate a set of filters against an integer log
+    */
+  void test_genFilterByIntegerLog()
+  {
+    // 1. Create input
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace2();
+    AnalysisDataService::Instance().addOrReplace("TestEventData2", eventWS);
 
-  /*
-   * Create an EventWorkspace including
+    // 2. Init and set property
+    GenerateEventsFilter alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "TestEventData2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "IntLogSplitter"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InformationWorkspace", "IntLogInformation"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "DummyIntLog"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MinimumLogValue", static_cast<double>(1)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaximumLogValue", static_cast<double>(10)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogValueInterval", static_cast<double>(1)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Seconds"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterLogValueByChangingDirection", "Both"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TimeTolerance", 0.05));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogBoundary",  "Centre"));
+
+    // 3. Running and get result
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // 4. Retrieve output workspaces
+    SplittersWorkspace_sptr splittersws = boost::dynamic_pointer_cast<SplittersWorkspace>(
+          AnalysisDataService::Instance().retrieve("IntLogSplitter"));
+    TS_ASSERT(splittersws);
+
+    TableWorkspace_const_sptr infows = boost::dynamic_pointer_cast<TableWorkspace>(
+          AnalysisDataService::Instance().retrieve("IntLogInformation"));
+    TS_ASSERT(infows);
+
+     // 5. Check output workspace
+     size_t numsplitters = 10;
+     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numsplitters);
+     size_t numoutputs = 10;
+     TS_ASSERT_EQUALS(infows->rowCount(), numoutputs);
+
+     int64_t factor = static_cast<int64_t>(1.0E9+0.5);
+
+     Kernel::SplittingInterval s0 = splittersws->getSplitter(0);
+     TS_ASSERT_EQUALS(s0.start().totalNanoseconds(), 11*factor-5*factor/100);
+     TS_ASSERT_EQUALS(s0.index(), 0);
+
+     Kernel::SplittingInterval s9 = splittersws->getSplitter(9);
+     // TS_ASSERT_EQUALS(s14.start(), 3000924990);
+     // TS_ASSERT_EQUALS(s14.stop(),  3000974990);
+     TS_ASSERT_EQUALS(s9.index(), 9);
+
+     // 6. Clean
+     AnalysisDataService::Instance().remove("TestEventData2");
+     AnalysisDataService::Instance().remove("IntLogSplitter");
+     AnalysisDataService::Instance().remove("IntLogInformation");
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Create an EventWorkspace including
    * (1) proton charge log from
    * (2) test log in sin function with time
    */
@@ -362,8 +424,92 @@ public:
     return eventws;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Create an EventWorkspace containing an integer log
+    * 1. Run start  = 10  (s)
+    * 2. Run end    = 22  (s)
+    * 3. Pulse      = 0.5 (s)
+    * 4. Log change = 1   (s)
+    */
+  EventWorkspace_sptr createEventWorkspace2()
+  {
+    using namespace WorkspaceCreationHelper;
+
+    // 1. Empty workspace
+    EventWorkspace_sptr eventws =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 2, true);
+
+    // 2. Run star time
+    int64_t factor = static_cast<int64_t>(1.0E9+0.5);
+    int64_t runstarttime_ns = 10*factor;
+    int64_t runstoptime_ns  = 22*factor;
+    int64_t pulsetime_ns    = 5*factor/10;
+    int64_t logduration_ns  = 1*factor;
+
+    Kernel::DateAndTime runstarttime(runstarttime_ns);
+    eventws->mutableRun().addProperty("run_start", runstarttime.toISO8601String());
+    Kernel::DateAndTime runendtime(runstoptime_ns);
+    eventws->mutableRun().addProperty("run_end", runendtime.toISO8601String());
+
+    // 3. Proton charge log
+    Kernel::TimeSeriesProperty<double> *protonchargelog =
+        new Kernel::TimeSeriesProperty<double>("proton_charge");
+    int64_t curtime_ns = runstarttime_ns;
+    while (curtime_ns <= runstoptime_ns)
+    {
+      Kernel::DateAndTime curtime(curtime_ns);
+      protonchargelog->addValue(curtime, 1.0);
+      curtime_ns += pulsetime_ns;
+    }
+    eventws->mutableRun().addProperty(protonchargelog, true);
+
+    // 4. Integer log
+    TimeSeriesProperty<int> *dummyintlog = new TimeSeriesProperty<int>("DummyIntLog");
+
+    int logstep = 1;
+    int logvalue = 0;
+    // double period = static_cast<double>(pulsetime_ns);
+    curtime_ns = runstarttime_ns;
+    while (curtime_ns < runstoptime_ns)
+    {
+      Kernel::DateAndTime curtime(curtime_ns);
+      dummyintlog->addValue(curtime, logvalue);
+
+      curtime_ns += logduration_ns;
+      logvalue += logstep;
+    }
+    eventws->mutableRun().addProperty(dummyintlog, true);
+
+    return eventws;
+  }
 
 };
 
 
 #endif /* MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

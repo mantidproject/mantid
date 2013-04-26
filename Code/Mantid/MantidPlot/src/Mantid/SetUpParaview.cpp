@@ -32,7 +32,7 @@ bool isParaviewHere(const QString& location)
     {
       it.next();
       QString file =it.fileName();
-      regex expression("^(vtkpqcore)", boost::regex::icase);
+      regex expression("^(paraview.exe)", boost::regex::icase);
       if(regex_search(file.toStdString(), expression) && it.fileInfo().isFile())
       {
         found = true;
@@ -50,11 +50,16 @@ SetUpParaview::SetUpParaview(StartUpFrom from, QWidget *parent) : QDialog(parent
 
   initLayout();
 
+  const QString versionRevision = QString::fromStdString(Mantid::Kernel::ParaViewVersion::targetVersion());
+  const QString versionRevisionModification = versionRevision + ".1"; // No way to get this minor version info from paraview.
+  const QString predictedLocation = QString("C:/Program Files (x86)/ParaView %1/bin").arg(versionRevisionModification);
+  const QString hintText = QString("Hint: the usual install location for ParaView is: %1").arg(predictedLocation);
+  m_uiForm.lblHint->setText(hintText);
+
   m_candidateLocation = QString(ConfigService::Instance().getString("paraview.path").c_str());
   //Do our best to figure out the location based on where paraview normally sits.
   if(m_candidateLocation.isEmpty())
   {
-    const QString predictedLocation = "C:/Program Files (x86)/ParaView 3.98.1/bin";
     if(isParaviewHere(predictedLocation))
     {
       acceptPotentialLocation(predictedLocation);
