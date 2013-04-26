@@ -212,7 +212,7 @@ public:
     TableWorkspace_sptr existtablews(new TableWorkspace());
     existtablews->addColumn("double", "XMin");
     existtablews->addColumn("double", "XMax");
-    existtablews->addColumn("str", "SpectraList");
+    existtablews->addColumn("str", "DetectorIDsList");
     TableRow row0 = existtablews->appendRow();
     row0 << 2345.0 << 78910.3 << "23-24, 33";
     TableRow row1 = existtablews->appendRow();
@@ -305,7 +305,7 @@ public:
     TableWorkspace_sptr existtablews(new TableWorkspace());
     existtablews->addColumn("double", "XMin");
     existtablews->addColumn("double", "XMax");
-    existtablews->addColumn("str", "SpectraList");
+    existtablews->addColumn("str", "DetectorIDsList");
     TableRow row0 = existtablews->appendRow();
     row0 << 2345.0 << 78910.3 << "23-25, 33";
     TableRow row1 = existtablews->appendRow();

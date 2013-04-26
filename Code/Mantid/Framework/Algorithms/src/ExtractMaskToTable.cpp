@@ -93,7 +93,7 @@ namespace Algorithms
     TableWorkspace_sptr outws(new  TableWorkspace());
     outws->addColumn("double", "XMin");
     outws->addColumn("double", "XMax");
-    outws->addColumn("str", "SpectraList");
+    outws->addColumn("str", "DetectorIDsList");
     setProperty("OutputWorkspace", outws);
 
     // Optionally import the input table workspace
