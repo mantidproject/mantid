@@ -139,8 +139,9 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
     ui->repo_treeView->setModel(model);
     ui->repo_treeView->setItemDelegateForColumn(1, new RepoDelegate(this));
     ui->repo_treeView->setItemDelegateForColumn(2, new CheckBoxDelegate(this));
-    
+    ui->repo_treeView->hideColumn(2); // hide the auto update column
     ui->repo_treeView->setColumnWidth(0,290);
+    
 
     // stablish the connections.
     connect(ui->repo_treeView, SIGNAL(activated(const QModelIndex &)),
