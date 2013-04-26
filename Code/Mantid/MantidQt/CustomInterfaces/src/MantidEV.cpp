@@ -2,6 +2,8 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QSettings>
+#include <QDesktopServices>
+#include <QDesktopWidget>
 
 #include "MantidQtCustomInterfaces/MantidEV.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -30,17 +32,21 @@ using namespace Mantid::API;
 RunLoadAndConvertToMD::RunLoadAndConvertToMD(       MantidEVWorker * worker,
                                               const std::string    & file_name,
                                               const std::string    & ev_ws_name,
-                                              const std::string    & md_ws_name )
+                                              const std::string    & md_ws_name,
+                                                    double           maxQ,
+                                                    bool             do_lorentz_corr )
 {
-  this->worker     = worker;
-  this->file_name  = file_name;
-  this->ev_ws_name = ev_ws_name;
-  this->md_ws_name = md_ws_name;
+  this->worker          = worker;
+  this->file_name       = file_name;
+  this->ev_ws_name      = ev_ws_name;
+  this->md_ws_name      = md_ws_name;
+  this->maxQ            = maxQ;
+  this->do_lorentz_corr = do_lorentz_corr;
 }
 
 void RunLoadAndConvertToMD::run()
 {
-  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name );
+  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name, maxQ, do_lorentz_corr );
 }
 
 
@@ -62,6 +68,10 @@ RunFindPeaks::RunFindPeaks(        MantidEVWorker * worker,
   this->min_intensity = min_intensity;
 }
 
+
+/**
+ *  Class to call findPeaks in a separate thread.
+ */
 void RunFindPeaks::run()
 {
   worker->findPeaks( md_ws_name, peaks_ws_name,
@@ -89,6 +99,10 @@ RunSphereIntegrate::RunSphereIntegrate(       MantidEVWorker * worker,
   this->integrate_edge = integrate_edge;
 }
 
+
+/**
+ *  Class to call sphereIntegrate in a separate thread.
+ */
 void RunSphereIntegrate::run()
 { 
   worker->sphereIntegrate( peaks_ws_name, event_ws_name,
@@ -115,6 +129,10 @@ RunFitIntegrate::RunFitIntegrate(       MantidEVWorker * worker,
   this->use_ikeda_carpenter = use_ikeda_carpenter;
 }
 
+
+/**
+ *  Class to call fitIntegrate in a separate thread.
+ */
 void RunFitIntegrate::run()
 {
   worker->fitIntegrate( peaks_ws_name, event_ws_name,
@@ -144,6 +162,10 @@ RunEllipsoidIntegrate::RunEllipsoidIntegrate(   MantidEVWorker * worker,
   this->outer_size    = outer_size;
 }
 
+
+/**
+ *  Class to call ellipsoidIntegrate in a separate thread.
+ */
 void RunEllipsoidIntegrate::run()
 {
   worker->ellipsoidIntegrate( peaks_ws_name, event_ws_name,
@@ -169,10 +191,7 @@ MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent),observer(*this, &Man
   m_thread_pool->setMaxThreadCount(1);
    
   SelectionNotificationService::Instance().notificationCenter.addObserver(observer);
-
-  
   SelectionNotificationService::Instance().notificationCenter.addObserver(observer1);
-
 }
 
 
@@ -233,26 +252,33 @@ void MantidEV::initLayout()
                     this, SLOT(showInfo_slot()) );
 
                           // connect the slots for the menu items
-  QObject::connect( m_uiForm.actionSave_State, SIGNAL(triggered()),
-                    this, SLOT(saveState_slot()) );
+   QObject::connect( m_uiForm.actionSave_State, SIGNAL(triggered()),
+                     this, SLOT(saveState_slot()) );
 
-  QObject::connect( m_uiForm.actionLoad_State, SIGNAL(triggered()),
-                    this, SLOT(loadState_slot()) );
+   QObject::connect( m_uiForm.actionLoad_State, SIGNAL(triggered()),
+                     this, SLOT(loadState_slot()) );
 
-  QObject::connect( m_uiForm.actionSave_Isaw_UB, SIGNAL(triggered()),
-                    this, SLOT(saveIsawUB_slot()) );
+   QObject::connect( m_uiForm.actionReset_Default_Settings, SIGNAL(triggered()),
+                     this, SLOT( setDefaultState_slot()) );
 
-  QObject::connect( m_uiForm.actionLoad_Isaw_UB, SIGNAL(triggered()),
-                    this, SLOT(loadIsawUB_slot()) );
+   QObject::connect( m_uiForm.actionSave_Isaw_UB, SIGNAL(triggered()),
+                     this, SLOT(saveIsawUB_slot()) );
 
-  QObject::connect( m_uiForm.actionSave_Isaw_Peaks, SIGNAL(triggered()),
-                    this, SLOT(saveIsawPeaks_slot()) );
+   QObject::connect( m_uiForm.actionLoad_Isaw_UB, SIGNAL(triggered()),
+                     this, SLOT(loadIsawUB_slot()) );
 
-  QObject::connect( m_uiForm.actionLoad_Isaw_Peaks, SIGNAL(triggered()),
-                    this, SLOT(loadIsawPeaks_slot()) );
+   QObject::connect( m_uiForm.actionSave_Isaw_Peaks, SIGNAL(triggered()),
+                     this, SLOT(saveIsawPeaks_slot()) );
 
-  QObject::connect( m_uiForm.actionShow_UB, SIGNAL(triggered()),
-                    this, SLOT(showUB_slot()) );
+   QObject::connect( m_uiForm.actionLoad_Isaw_Peaks, SIGNAL(triggered()),
+                     this, SLOT(loadIsawPeaks_slot()) );
+
+   QObject::connect( m_uiForm.actionShow_UB, SIGNAL(triggered()),
+                     this, SLOT(showUB_slot()) );
+   
+   QObject::connect( m_uiForm.actionOnline_Help_Page, SIGNAL(triggered()),
+                     this, SLOT(help_slot()) );
+
 
                           // connect the slots for enabling and disabling
                           // various subsets of widgets
@@ -298,50 +324,8 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.SpecifySize_ckbx, SIGNAL(clicked(bool)),
                      this, SLOT( setEnabledEllipseSizeOptions_slot() ) );
 
-                          // set up defaults for the UI, and set the
-                          // various groups of widgets to be enabled or
-                          // disabled as needed
-   m_uiForm.MantidEV_tabwidg->setCurrentIndex(0);
-
-   m_uiForm.LoadEventFile_rbtn->setChecked(true);
-   m_uiForm.UseExistingWorkspaces_rbtn->setChecked(false);
-   setEnabledLoadEventFileParams_slot(true);
-
-   m_uiForm.FindPeaks_rbtn->setChecked(true);
-   m_uiForm.UseExistingPeaksWorkspace_rbtn->setChecked(false);
-   m_uiForm.LoadIsawPeaks_rbtn->setChecked(false);
-   setEnabledFindPeaksParams_slot(true);
-   setEnabledLoadPeaksParams_slot(false);
-
-   m_uiForm.FindUBUsingFFT_rbtn->setChecked(true);
-   m_uiForm.FindUBUsingIndexedPeaks_rbtn->setChecked(false);
-   m_uiForm.LoadISAWUB_rbtn->setChecked(false);
-   m_uiForm.UseCurrentUB_rbtn->setChecked(false);
-   setEnabledFindUBFFTParams_slot(true);
-   setEnabledLoadUBParams_slot(false);
-   setEnabledMaxOptimizeDegrees_slot();
-   m_uiForm.IndexPeaks_ckbx->setChecked(true);
-   m_uiForm.RoundHKLs_ckbx->setChecked( true );
-   setEnabledIndexParams_slot(true);
-
-   m_uiForm.ShowPossibleCells_rbtn->setChecked(true);
-   m_uiForm.SelectCellOfType_rbtn->setChecked(false);
-   m_uiForm.SelectCellWithForm_rbtn->setChecked(false);
-   setEnabledShowCellsParams_slot(true);
-   setEnabledSetCellTypeParams_slot(false);
-   setEnabledSetCellFormParams_slot(false);
-
-   m_uiForm.SphereIntegration_rbtn->setChecked(true);
-   m_uiForm.IntegrateEdge_ckbx->setChecked(true);
-   m_uiForm.TwoDFitIntegration_rbtn->setChecked(false);
-   m_uiForm.EllipsoidIntegration_rbtn->setChecked(false);
-   setEnabledSphereIntParams_slot(true);
-   setEnabledFitIntParams_slot(false);
-   setEnabledEllipseIntParams_slot(false);
-   m_uiForm.SpecifySize_ckbx->setChecked(false);
-   setEnabledEllipseSizeOptions_slot();
-
    // Add validators to all QLineEdit objects that require numeric values
+   m_uiForm.MaxMagQ_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxMagQ_ledt));
    m_uiForm.MaxABC_ledt->setValidator( new QDoubleValidator(m_uiForm.MaxABC_ledt));
    m_uiForm.NumToFind_ledt->setValidator( new QDoubleValidator(m_uiForm.NumToFind_ledt));
    m_uiForm.MinIntensity_ledt->setValidator( new QDoubleValidator(m_uiForm.MinIntensity_ledt));
@@ -363,7 +347,110 @@ void MantidEV::initLayout()
    m_uiForm.Qx_ledt->setValidator( new QDoubleValidator(m_uiForm.Qx_ledt));
    m_uiForm.Qy_ledt->setValidator( new QDoubleValidator(m_uiForm.Qy_ledt));
    m_uiForm.Qz_ledt->setValidator( new QDoubleValidator(m_uiForm.Qz_ledt));
-   loadSettings("");
+
+   setDefaultState_slot();      // call method to set all controls to default state
+
+   loadSettings("");            // reload any previously saved user settings
+}
+
+/**
+ * Set up default values for the input controls, and set groups of 
+ * widgets to be enabled or disabled as needed.
+ */
+void MantidEV::setDefaultState_slot()
+{
+   m_uiForm.MantidEV_tabwidg->setCurrentIndex(0);
+                                                    // Select Data tab
+   m_uiForm.SelectEventWorkspace_ledt->setText("");
+   m_uiForm.MDworkspace_ledt->setText("");
+   m_uiForm.LoadEventFile_rbtn->setChecked(true);
+   m_uiForm.EventFileName_ledt->setText(""); 
+   m_uiForm.MaxMagQ_ledt->setText("25");
+   m_uiForm.LorentzCorrection_ckbx->setChecked(true);
+   m_uiForm.UseExistingWorkspaces_rbtn->setChecked(false);
+   setEnabledLoadEventFileParams_slot(true);
+   last_event_file.clear();
+                                                    // Find Peaks tab
+   m_uiForm.PeaksWorkspace_ledt->setText("");
+   m_uiForm.FindPeaks_rbtn->setChecked(true);
+   m_uiForm.MaxABC_ledt->setText("15");
+   m_uiForm.NumToFind_ledt->setText("50");
+   m_uiForm.MinIntensity_ledt->setText("100");
+   m_uiForm.UseExistingPeaksWorkspace_rbtn->setChecked(false);
+   m_uiForm.LoadIsawPeaks_rbtn->setChecked(false);
+   m_uiForm.SelectPeaksFile_ledt->setText("");
+   setEnabledFindPeaksParams_slot(true);
+   setEnabledLoadPeaksParams_slot(false);
+   last_peaks_file.clear();
+                                                    // Find UB tab
+   m_uiForm.FindUBUsingFFT_rbtn->setChecked(true);
+   m_uiForm.MinD_ledt->setText("3");
+   m_uiForm.MaxD_ledt->setText("15");
+   m_uiForm.FFTTolerance_ledt->setText("0.12");
+   m_uiForm.FindUBUsingIndexedPeaks_rbtn->setChecked(false);
+   m_uiForm.LoadISAWUB_rbtn->setChecked(false);
+   m_uiForm.SelectUBFile_ledt->setText("");
+   m_uiForm.OptimizeGoniometerAngles_ckbx->setChecked(false);
+   m_uiForm.MaxGoniometerChange_ledt->setText("5");
+   m_uiForm.UseCurrentUB_rbtn->setChecked(false);
+   m_uiForm.IndexPeaks_ckbx->setChecked(true);
+   m_uiForm.IndexingTolerance_ledt->setText("0.12");
+   m_uiForm.RoundHKLs_ckbx->setChecked( true );
+   setEnabledFindUBFFTParams_slot(true);
+   setEnabledLoadUBParams_slot(false);
+   setEnabledMaxOptimizeDegrees_slot();
+   setEnabledIndexParams_slot(true);
+   last_UB_file.clear();
+                                                     // Choose Cell tab
+   m_uiForm.ShowPossibleCells_rbtn->setChecked(true);
+   m_uiForm.MaxScalarError_ledt->setText("0.2");
+   m_uiForm.BestCellOnly_ckbx->setChecked(true);
+   m_uiForm.SelectCellOfType_rbtn->setChecked(false);
+   m_uiForm.CellType_cmbx->setCurrentIndex(0);
+   m_uiForm.CellCentering_cmbx->setCurrentIndex(0);
+   m_uiForm.SelectCellWithForm_rbtn->setChecked(false);
+   m_uiForm.CellFormNumber_cmbx->setCurrentIndex(0);
+   setEnabledShowCellsParams_slot(true);
+   setEnabledSetCellTypeParams_slot(false);
+   setEnabledSetCellFormParams_slot(false);
+                                                     // Change HKL tab
+   m_uiForm.HKL_tran_row_1_ledt->setText("1, 0, 0");
+   m_uiForm.HKL_tran_row_2_ledt->setText("0, 1, 0");
+   m_uiForm.HKL_tran_row_3_ledt->setText("0, 0, 1");
+                                                     // Integrate tab
+   m_uiForm.SphereIntegration_rbtn->setChecked(true);
+   m_uiForm.PeakRadius_ledt->setText("0.18");
+   m_uiForm.BackgroundInnerRadius_ledt->setText("0.18");
+   m_uiForm.BackgroundOuterRadius_ledt->setText("0.23");
+   m_uiForm.IntegrateEdge_ckbx->setChecked(true);
+   m_uiForm.TwoDFitIntegration_rbtn->setChecked(false);
+   m_uiForm.FitRebinParams_ledt->setText("1000,-0.004,16000");
+   m_uiForm.NBadEdgePixels_ledt->setText("5");
+   m_uiForm.IkedaCarpenter_ckbx->setChecked(false);
+   m_uiForm.EllipsoidIntegration_rbtn->setChecked(false);
+   m_uiForm.RegionRadius_ledt->setText("0.25");
+   m_uiForm.SpecifySize_ckbx->setChecked(false);
+   m_uiForm.PeakSize_ledt->setText("0.18");
+   m_uiForm.BackgroundInnerSize_ledt->setText("0.18");
+   m_uiForm.BackgroundOuterSize_ledt->setText("0.23");
+   setEnabledSphereIntParams_slot(true);
+   setEnabledFitIntParams_slot(false);
+   setEnabledEllipseIntParams_slot(false);
+   setEnabledEllipseSizeOptions_slot();
+                                                     // Point Info tab
+   m_uiForm.Qx_ledt->setText("");
+   m_uiForm.Qy_ledt->setText("");
+   m_uiForm.Qz_ledt->setText("");
+   m_uiForm.SelectedPoint_tbl->clear();
+}
+
+
+/**
+ * Go to MantidEV web page when help menu item is chosen
+ */
+void MantidEV::help_slot()
+{
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/SCD_Event_Data_Reduction_Interface_(MantidEV)"));
 }
 
 
@@ -405,8 +492,18 @@ void MantidEV::selectWorkspace_slot()
        return;
      }
 
+     double maxQ;
+     getDouble( m_uiForm.MaxMagQ_ledt, maxQ );
+     if ( maxQ <= 0 )
+     {
+       errorMessage("Max |Q| to Map to MD MUST BE POSITIVE.");
+       return;
+     }
+
      RunLoadAndConvertToMD* runner = new RunLoadAndConvertToMD(worker,file_name,
-                                                       ev_ws_name, md_ws_name );
+                                                       ev_ws_name, md_ws_name,
+                                                       maxQ,
+                                                       m_uiForm.LorentzCorrection_ckbx->isChecked() );
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
        errorMessage( "Failed to start Load and ConvertToMD thread...previous operation not complete" );
@@ -454,6 +551,15 @@ void MantidEV::loadEventFile_slot()
   {
     last_event_file = Qfile_name.toStdString();
     m_uiForm.EventFileName_ledt->setText( Qfile_name );
+
+    std::string base_name = extractBaseFileName( last_event_file );
+    std::string event_ws_name = base_name + "_event";
+    std::string md_ws_name    = base_name + "_md";
+    std::string peaks_ws_name = base_name + "_peaks";
+
+    m_uiForm.SelectEventWorkspace_ledt->setText( QString::fromStdString( event_ws_name ));
+    m_uiForm.MDworkspace_ledt->setText( QString::fromStdString( md_ws_name ));
+    m_uiForm.PeaksWorkspace_ledt->setText( QString::fromStdString( peaks_ws_name ));
   }
 }
 
@@ -586,7 +692,8 @@ void MantidEV::getSavePeaksFileName()
   QString Qfile_name = QFileDialog::getSaveFileName( this,
                           tr("Save peaks file"),
                           file_path,
-                          tr("Peaks Files (*.peaks *.integrate);; All files(*.*) "));
+                          tr("Peaks Files (*.peaks *.integrate);; All files(*.*) "),
+                          0, QFileDialog::DontConfirmOverwrite );
 
   if ( Qfile_name.length() > 0 )
   {
@@ -954,19 +1061,14 @@ void MantidEV::integratePeaks_slot()
  */
 void MantidEV::showInfo_slot()
 {
-   std::cout << "Show Info button pressed" << std::endl;
    double qx = 0.0;
    double qy = 0.0;
    double qz = 0.0;
    getDouble( m_uiForm.Qx_ledt, qx );
    getDouble( m_uiForm.Qy_ledt, qy );
    getDouble( m_uiForm.Qz_ledt, qz );
-//   std::cout << "Qx = " << qx << std::endl; 
-//   std::cout << "Qy = " << qy << std::endl; 
-//   std::cout << "Qz = " << qz << std::endl; 
 
    Mantid::Kernel::V3D q_point( qx, qy, qz );
-//   showInfo( q_point );
 
    boost::shared_ptr<std::vector<double>> q_vec(new std::vector<double>());
    q_vec->push_back( qx );
@@ -979,24 +1081,12 @@ void MantidEV::showInfo_slot()
 
 void MantidEV::handleQpointNotification1(const Poco::AutoPtr<SelectionNotificationServiceImpl::AfterReplaceNotification> & message )
 {
- 
- // std::string name = message->object_name();
-//  std::cout << "Name is " << name << std::endl;
-//  std::cout << message->object()->at(0) << std::endl;
-//  std::cout << message->object()->at(1) << std::endl;
-//  std::cout << message->object()->at(2) << std::endl;
   Mantid::Kernel::V3D  q_point( message->object()->at(0), message->object()->at(1), message->object()->at(2) );
   showInfo( q_point );
 }
 
 void MantidEV::handleQpointNotification(const Poco::AutoPtr<SelectionNotificationServiceImpl::AddNotification> & message )
 {
- 
- // std::string name = message->object_name();
-//  std::cout << "Name is " << name << std::endl;
-//  std::cout << message->object()->at(0) << std::endl;
-//  std::cout << message->object()->at(1) << std::endl;
-//  std::cout << message->object()->at(2) << std::endl;
   Mantid::Kernel::V3D  q_point( message->object()->at(0), message->object()->at(1), message->object()->at(2) );
   showInfo( q_point );
 }
@@ -1018,9 +1108,6 @@ void MantidEV::showInfo( Mantid::Kernel::V3D  q_point )
 
    std::vector< std::pair< std::string, std::string > > info = worker->PointInfo( peaks_ws_name, q_point );
 
-   for ( size_t i = 0; i < info.size(); i++ )
-     std::cout << info[i].first << "   " << info[i].second << std::endl;
-   
    m_uiForm.SelectedPoint_tbl->setRowCount((int)info.size());
    m_uiForm.SelectedPoint_tbl->setColumnCount(2);
    m_uiForm.SelectedPoint_tbl->verticalHeader()->hide();
@@ -1185,7 +1272,38 @@ void MantidEV::saveIsawPeaks_slot()
   }
   else
   {
-    if ( !worker->saveIsawPeaks( peaks_ws_name, file_name, false ) )
+                              // if the file exists, check for overwrite or append
+    bool append = false;
+    QFile peaks_file( QString::fromStdString( file_name ) );
+    if ( peaks_file.exists() )
+    {
+      QMessageBox message_box( this->window() );
+      message_box.setText( tr("File Exists") );
+      message_box.setInformativeText("Replace file, or append peaks to file?");
+      QAbstractButton *replace_btn = message_box.addButton( tr("Replace"), QMessageBox::NoRole );
+      QAbstractButton *append_btn  = message_box.addButton( tr("Append"),  QMessageBox::YesRole );
+      message_box.setIcon( QMessageBox::Question );
+                                                   // it should not be necessary to do the next
+                                                   // four lines, but without them the message box
+                                                   // appears at random locations on RHEL 6
+      message_box.show();                               
+      QSize box_size = message_box.sizeHint(); 
+      QRect screen_rect = QDesktopWidget().screen()->rect();
+      message_box.move( QPoint( screen_rect.width()/2 - box_size.width()/2, 
+                                screen_rect.height()/2 - box_size.height()/2 ) );
+      message_box.exec();
+ 
+      if ( message_box.clickedButton() == append_btn )
+      {
+        append = true;
+      } 
+      else if ( message_box.clickedButton() == replace_btn )  // no strictly needed, but clearer
+      {
+        append = false;
+      }
+    }
+
+    if ( !worker->saveIsawPeaks( peaks_ws_name, file_name, append ) )
     {
       errorMessage( "Failed to save peaks to file" );
       return;
@@ -1253,6 +1371,9 @@ void MantidEV::setEnabledLoadEventFileParams_slot( bool on )
   m_uiForm.EventFileName_lbl->setEnabled( on );
   m_uiForm.EventFileName_ledt->setEnabled( on );
   m_uiForm.SelectEventFile_btn->setEnabled( on );
+  m_uiForm.MaxMagQ_lbl->setEnabled( on );
+  m_uiForm.MaxMagQ_ledt->setEnabled( on );
+  m_uiForm.LorentzCorrection_ckbx->setEnabled( on );
 }
 
 
@@ -1584,6 +1705,39 @@ bool MantidEV::getPositiveInt( QLineEdit *ledt,
 
 
 /**
+ * Get base file name to form names for event, MD and peaks workspaces
+ *
+ * @param  full_file_name   The full name of the file that is being loaded. 
+ *
+ * @return  The base file name, with the directory and extension removed.
+ */
+std::string MantidEV::extractBaseFileName( std::string full_file_name ) const
+{
+  size_t dot_index = full_file_name.find_last_of(".");
+
+  if ( dot_index != std::string::npos )
+  {
+    full_file_name = full_file_name.substr( 0, dot_index );
+  }
+
+  size_t path_sep_index = full_file_name.find_last_of("/\\:");
+
+  if ( path_sep_index != std::string::npos )
+  {
+    full_file_name = full_file_name.substr( path_sep_index + 1 );
+  }
+
+  size_t ev_suffix_index = full_file_name.rfind( "_event", std::string::npos );
+  if ( ev_suffix_index != std::string::npos )
+  {
+    full_file_name = full_file_name.substr( 0, ev_suffix_index );
+  }
+
+  return full_file_name;
+}
+
+
+/**
  *  Utility to save the current state of all GUI components into the
  *  specified file name.  If the filename has length zero, the settings
  *  will be saved to a system dependent default location.  This is 
@@ -1606,6 +1760,8 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("MDworkspace_ledt", m_uiForm.MDworkspace_ledt->text());
   state->setValue("LoadEventFile_rbtn", m_uiForm.LoadEventFile_rbtn->isChecked());
   state->setValue("EventFileName_ledt", m_uiForm.EventFileName_ledt->text());
+  state->setValue("MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt->text());
+  state->setValue("LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx->isChecked());
   state->setValue("UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn->isChecked());
 
                                                 // Save Tab 2, Find Peaks
@@ -1699,6 +1855,8 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "MDworkspace_ledt", m_uiForm.MDworkspace_ledt );
   restore( state, "LoadEventFile_rbtn", m_uiForm.LoadEventFile_rbtn );
   restore( state, "EventFileName_ledt", m_uiForm.EventFileName_ledt );
+  restore( state, "MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt );
+  restore( state, "LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx );
   restore( state, "UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn );
 
                                                   // Load Tab 2, Find Peaks

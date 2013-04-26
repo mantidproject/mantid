@@ -26,12 +26,13 @@
       <property name="title">
        <string>File</string>
       </property>
-      <addaction name="actionSave_State"/>
-      <addaction name="actionLoad_State"/>
       <addaction name="actionSave_Isaw_UB"/>
       <addaction name="actionLoad_Isaw_UB"/>
       <addaction name="actionSave_Isaw_Peaks"/>
       <addaction name="actionLoad_Isaw_Peaks"/>
+      <addaction name="actionSave_State"/>
+      <addaction name="actionLoad_State"/>
+      <addaction name="actionReset_Default_Settings"/>
      </widget>
      <widget class="QMenu" name="menuView">
       <property name="title">
@@ -39,14 +40,21 @@
       </property>
       <addaction name="actionShow_UB"/>
      </widget>
+     <widget class="QMenu" name="menuHelp">
+      <property name="title">
+       <string>Help</string>
+      </property>
+      <addaction name="actionOnline_Help_Page"/>
+     </widget>
      <addaction name="menuFile"/>
      <addaction name="menuView"/>
+     <addaction name="menuHelp"/>
     </widget>
    </item>
    <item>
     <widget class="QTabWidget" name="MantidEV_tabwidg">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="SelectData">
       <attribute name="title">
@@ -116,19 +124,19 @@
         <rect>
          <x>40</x>
          <y>150</y>
-         <width>331</width>
+         <width>451</width>
          <height>23</height>
         </rect>
        </property>
        <property name="text">
-        <string> Load From Event File</string>
+        <string> Load From Event File and Map to MD</string>
        </property>
       </widget>
       <widget class="QRadioButton" name="UseExistingWorkspaces_rbtn">
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>250</y>
+         <y>380</y>
          <width>441</width>
          <height>23</height>
         </rect>
@@ -140,7 +148,7 @@
       <widget class="QLabel" name="EventFileName_lbl">
        <property name="geometry">
         <rect>
-         <x>60</x>
+         <x>70</x>
          <y>190</y>
          <width>101</width>
          <height>31</height>
@@ -171,6 +179,42 @@
        </property>
        <property name="text">
         <string>Browse</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="MaxMagQ_lbl">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>260</y>
+         <width>221</width>
+         <height>18</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Max |Q| to Map to MD</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="MaxMagQ_ledt">
+       <property name="geometry">
+        <rect>
+         <x>290</x>
+         <y>250</y>
+         <width>101</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="LorentzCorrection_ckbx">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>310</y>
+         <width>271</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Apply Lorentz Correction</string>
        </property>
       </widget>
      </widget>
@@ -570,7 +614,7 @@
       <widget class="QLineEdit" name="MaxGoniometerChange_ledt">
        <property name="geometry">
         <rect>
-         <x>400</x>
+         <x>410</x>
          <y>280</y>
          <width>81</width>
          <height>31</height>
@@ -596,7 +640,7 @@
       <widget class="QLineEdit" name="IndexingTolerance_ledt">
        <property name="geometry">
         <rect>
-         <x>400</x>
+         <x>410</x>
          <y>440</y>
          <width>81</width>
          <height>31</height>
@@ -1250,13 +1294,13 @@
         </rect>
        </property>
        <property name="text">
-        <string>Region Radius</string>
+        <string>Region Radius (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="RegionRadius_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>310</y>
          <width>81</width>
          <height>21</height>
@@ -1276,13 +1320,13 @@
         </rect>
        </property>
        <property name="text">
-        <string>Peak Size</string>
+        <string>Peak Size (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="PeakSize_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>370</y>
          <width>81</width>
          <height>24</height>
@@ -1310,18 +1354,18 @@
         <rect>
          <x>100</x>
          <y>400</y>
-         <width>241</width>
+         <width>281</width>
          <height>24</height>
         </rect>
        </property>
        <property name="text">
-        <string>Background Inner Size</string>
+        <string>Background Inner Size (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="BackgroundInnerSize_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>400</y>
          <width>81</width>
          <height>24</height>
@@ -1336,18 +1380,18 @@
         <rect>
          <x>100</x>
          <y>430</y>
-         <width>241</width>
+         <width>281</width>
          <height>31</height>
         </rect>
        </property>
        <property name="text">
-        <string>Background Outer Size      </string>
+        <string>Background Outer Size (A^-1) </string>
        </property>
       </widget>
       <widget class="QLineEdit" name="BackgroundOuterSize_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>430</y>
          <width>81</width>
          <height>24</height>
@@ -1388,7 +1432,7 @@
         <rect>
          <x>70</x>
          <y>220</y>
-         <width>271</width>
+         <width>291</width>
          <height>24</height>
         </rect>
        </property>
@@ -1399,7 +1443,7 @@
       <widget class="QLineEdit" name="NBadEdgePixels_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>220</y>
          <width>81</width>
          <height>24</height>
@@ -1427,18 +1471,18 @@
         <rect>
          <x>70</x>
          <y>40</y>
-         <width>211</width>
+         <width>261</width>
          <height>22</height>
         </rect>
        </property>
        <property name="text">
-        <string>Peak Radius</string>
+        <string>Peak Radius (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="PeakRadius_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>40</y>
          <width>81</width>
          <height>22</height>
@@ -1453,18 +1497,18 @@
         <rect>
          <x>70</x>
          <y>70</y>
-         <width>281</width>
+         <width>311</width>
          <height>24</height>
         </rect>
        </property>
        <property name="text">
-        <string>Background Inner Radius</string>
+        <string>Background Inner Radius (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="BackgroundInnerRadius_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>70</y>
          <width>81</width>
          <height>24</height>
@@ -1479,18 +1523,18 @@
         <rect>
          <x>70</x>
          <y>100</y>
-         <width>261</width>
+         <width>311</width>
          <height>24</height>
         </rect>
        </property>
        <property name="text">
-        <string>Background Outer Radius   </string>
+        <string>Background Outer Radius (A^-1)</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="BackgroundOuterRadius_ledt">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>390</x>
          <y>100</y>
          <width>81</width>
          <height>24</height>
@@ -1639,6 +1683,21 @@
   <action name="actionClose">
    <property name="text">
     <string>Close</string>
+   </property>
+  </action>
+  <action name="actionReset_Defaults_in_GUI">
+   <property name="text">
+    <string>Reset Defaults in GUI</string>
+   </property>
+  </action>
+  <action name="actionReset_Default_Settings">
+   <property name="text">
+    <string>Reset Default Settings</string>
+   </property>
+  </action>
+  <action name="actionOnline_Help_Page">
+   <property name="text">
+    <string>Online Help Page</string>
    </property>
   </action>
  </widget>
