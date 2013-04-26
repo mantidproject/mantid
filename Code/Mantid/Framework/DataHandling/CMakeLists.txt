@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/LoadAscii.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
+	src/LoadCanSAS1D2.cpp
 	src/LoadDAE.cpp
 	src/LoadDAE/idc.cpp
 	src/LoadDAE/idc.h
@@ -112,6 +113,7 @@ set ( SRC_FILES
 	src/SaveCSV.cpp
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
+	src/SaveCanSAS1D2.cpp
 	src/SaveDASC.cpp
 	src/SaveDaveGrp.cpp
 	src/SaveDetectorMasks.cpp
@@ -172,6 +174,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
+	inc/MantidDataHandling/LoadCanSAS1D2.h
 	inc/MantidDataHandling/LoadDAE.h
 	inc/MantidDataHandling/LoadDaveGrp.h
 	inc/MantidDataHandling/LoadDetectorInfo.h
@@ -248,6 +251,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCSV.h
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
+	inc/MantidDataHandling/SaveCanSAS1D2.h
 	inc/MantidDataHandling/SaveDASC.h
 	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDetectorMasks.h
@@ -375,6 +379,7 @@ set ( TEST_FILES
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h
+	SaveCanSAS1dTest2.h
 	SaveDASCTest.h
 	SaveDaveGrpTest.h
 	SaveDetectorsGroupingTest.h
