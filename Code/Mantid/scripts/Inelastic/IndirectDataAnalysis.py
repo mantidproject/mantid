@@ -167,10 +167,10 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         if ( len(eRange) == 4 ):
             ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1], 
                 Range2Start=eRange[2], Range2End=eRange[3],
-	            OutputInQ='__eq1', OutputInQSquared='__eq2')
+                OutputInQ='__eq1', OutputInQSquared='__eq2')
         elif ( len(eRange) == 2 ):
             ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1],
-	            OutputInQ='__eq1', OutputInQSquared='__eq2')
+                OutputInQ='__eq1', OutputInQSquared='__eq2')
         (instr, last) = getInstrRun(root)
         q1 = np.array(mtd['__eq1'].readX(0))
         i1 = np.array(mtd['__eq1'].readY(0))
