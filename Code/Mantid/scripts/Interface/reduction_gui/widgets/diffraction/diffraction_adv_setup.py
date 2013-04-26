@@ -64,6 +64,7 @@ class AdvancedSetupWidget(BaseWidget):
         dv4 = QtGui.QDoubleValidator(self._content.removepromptwidth_edit)
         dv4.setBottom(0.0)
         self._content.removepromptwidth_edit.setValidator(dv4)
+        self._content.removepromptwidth_edit.setText("50.0")
 
         dv5 = QtGui.QDoubleValidator(self._content.vanpeakfwhm_edit)
         dv5.setBottom(0.0)
@@ -76,10 +77,11 @@ class AdvancedSetupWidget(BaseWidget):
         # Default states
         self._content.extension_combo.setCurrentIndex(1)
 
-        self._content.stripvanpeaks_chkbox.setChecked(False)
-        self._content.vanpeakfwhm_edit.setEnabled(False)
-        self._content.vansmoothpar_edit.setEnabled(False)
-        self._content.vanpeaktol_edit.setEnabled(False)
+        self._content.stripvanpeaks_chkbox.setChecked(True)
+        self._syncStripVanPeakWidgets(True)
+        # self._content.vanpeakfwhm_edit.setEnabled(False)
+        # self._content.vansmoothpar_edit.setEnabled(False)
+        # self._content.vanpeaktol_edit.setEnabled(False)
 
         self._content.preserveevents_checkbox.setChecked(True)
         self._content.filterbadpulses_chkbox.setChecked(True)
@@ -109,6 +111,7 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.filterbadpulses_chkbox.setChecked(state.filterbadpulses)
         
         self._content.stripvanpeaks_chkbox.setChecked(state.stripvanadiumpeaks)
+        self._syncStripVanPeakWidgets(state.stripvanadiumpeaks)
         self._content.vanpeakfwhm_edit.setText(str(state.vanadiumfwhm))
         self._content.vanpeaktol_edit.setText(str(state.vanadiumpeaktol))
         self._content.vansmoothpar_edit.setText(str(state.vanadiumsmoothparams))
@@ -157,16 +160,17 @@ class AdvancedSetupWidget(BaseWidget):
     def _stripvanpeaks_clicked(self):
         """ Handling if strip-vanadium-peak check box is clicked
         """
-        if self._content.stripvanpeaks_chkbox.isChecked() is True:
-            # Enable all the edits
-            self._content.vanpeakfwhm_edit.setEnabled(True)
-            self._content.vansmoothpar_edit.setEnabled(True)
-            self._content.vanpeaktol_edit.setEnabled(True)
-        else:
-            # Disable all the edits
-            self._content.vanpeakfwhm_edit.setEnabled(False)
-            self._content.vansmoothpar_edit.setEnabled(False)
-            self._content.vanpeaktol_edit.setEnabled(False)
+        self._syncStripVanPeakWidgets(self._content.stripvanpeaks_chkbox.isChecked())
+        #if self._content.stripvanpeaks_chkbox.isChecked() is True:
+        #    # Enable all the edits
+        #    self._content.vanpeakfwhm_edit.setEnabled(True)
+        #    self._content.vansmoothpar_edit.setEnabled(True)
+        #    self._content.vanpeaktol_edit.setEnabled(True)
+        #else:
+        #    # Disable all the edits
+        #    self._content.vanpeakfwhm_edit.setEnabled(False)
+        #    self._content.vansmoothpar_edit.setEnabled(False)
+        #    self._content.vanpeaktol_edit.setEnabled(False)
 
         return
 
@@ -177,6 +181,15 @@ class AdvancedSetupWidget(BaseWidget):
                 self.setupUi(self)
         dialog = HelpDialog(self)
         dialog.exec_()
+
+        return
+
+    def _syncStripVanPeakWidgets(self, stripvanpeak): 
+        """ Synchronize the other widgets with vanadium peak
+        """
+        self._content.vanpeakfwhm_edit.setEnabled(stripvanpeak)
+        self._content.vansmoothpar_edit.setEnabled(stripvanpeak)
+        self._content.vanpeaktol_edit.setEnabled(stripvanpeak)
 
         return
 

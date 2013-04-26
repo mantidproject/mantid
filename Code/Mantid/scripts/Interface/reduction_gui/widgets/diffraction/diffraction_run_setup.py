@@ -65,14 +65,14 @@ class RunSetupWidget(BaseWidget):
         self._content.disablevancorr_chkbox.setChecked(False)
         self._content.disablevanbkgdcorr_chkbox.setChecked(False)
 
-        self._content.override_emptyrun_checkBox.setChecked(False)
-        self._content.override_vanrun_checkBox.setChecked(False)
-        self._content.override_vanbkgdrun_checkBox.setChecked(False) 
+        #self._content.override_emptyrun_checkBox.setChecked(False)
+        #self._content.override_vanrun_checkBox.setChecked(False)
+        #self._content.override_vanbkgdrun_checkBox.setChecked(False) 
 
         # Line edit
-        self._content.emptyrun_edit.setEnabled(False)
-        self._content.vanrun_edit.setEnabled(False)
-        self._content.vanbkgdrun_edit.setEnabled(False)
+        self._content.emptyrun_edit.setEnabled(True)
+        self._content.vanrun_edit.setEnabled(True)
+        self._content.vanbkgdrun_edit.setEnabled(True)
         self._content.resamplex_edit.setEnabled(False)
 
         # Constraints/Validator
@@ -117,12 +117,12 @@ class RunSetupWidget(BaseWidget):
         self.connect(self._content.bintype_combo, QtCore.SIGNAL("currentIndexChanged(QString)"),
                 self._bintype_process)
 
-        self.connect(self._content.override_emptyrun_checkBox, QtCore.SIGNAL("clicked()"), 
-                self._overrideemptyrun_clicked)
-        self.connect(self._content.override_vanrun_checkBox, QtCore.SIGNAL("clicked()"), 
-                self._overridevanrun_clicked)
-        self.connect(self._content.override_vanbkgdrun_checkBox, QtCore.SIGNAL("clicked()"), 
-                self._overridevanbkgdrun_clicked)
+        #self.connect(self._content.override_emptyrun_checkBox, QtCore.SIGNAL("clicked()"), 
+        #        self._overrideemptyrun_clicked)
+        #self.connect(self._content.override_vanrun_checkBox, QtCore.SIGNAL("clicked()"), 
+        #        self._overridevanrun_clicked)
+        #self.connect(self._content.override_vanbkgdrun_checkBox, QtCore.SIGNAL("clicked()"), 
+        #        self._overridevanbkgdrun_clicked)
 
         self.connect(self._content.disablebkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
                 self._disablebkgdcorr_clicked) 
@@ -374,7 +374,9 @@ class RunSetupWidget(BaseWidget):
         if self._content.disablebkgdcorr_chkbox.isChecked() is True:
             self._content.emptyrun_edit.setEnabled(False)
             self._content.emptyrun_edit.setText("")
-            self._content.override_emptyrun_checkBox.setChecked(False)
+            #self._content.override_emptyrun_checkBox.setChecked(False)
+        else:
+            self._content.emptyrun_edit.setEnabled(True)
 
         return
 
@@ -384,7 +386,9 @@ class RunSetupWidget(BaseWidget):
         if self._content.disablevancorr_chkbox.isChecked() is True:
             self._content.vanrun_edit.setEnabled(False)
             self._content.vanrun_edit.setText("")
-            self._content.override_vanrun_checkBox.setChecked(False)
+            #self._content.override_vanrun_checkBox.setChecked(False)
+        else:
+            self._content.vanrun_edit.setEnabled(True)
 
         return
 
@@ -394,7 +398,9 @@ class RunSetupWidget(BaseWidget):
         if self._content.disablevanbkgdcorr_chkbox.isChecked() is True:
             self._content.vanbkgdrun_edit.setEnabled(False)
             self._content.vanbkgdrun_edit.setText("")
-            self._content.override_vanbkgdrun_checkBox.setChecked(False)
+            #self._content.override_vanbkgdrun_checkBox.setChecked(False)
+        else:
+            self._content.vanbkgdrun_edit.setEnabled(True)
 
         return
 
