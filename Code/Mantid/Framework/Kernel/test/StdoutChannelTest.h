@@ -1,9 +1,9 @@
-#ifndef MANTID_STDCHANNELTEST_H_
-#define MANTID_STDCHANNELTEST_H_
+#ifndef MANTID_STDOUTCHANNELTEST_H_
+#define MANTID_STDOUTCHANNELTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/StdChannel.h"
+#include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/Logger.h"
 #include <iostream>
 #include <Poco/Logger.h>
@@ -18,7 +18,7 @@ public:
 
   void testContructor()
   {
-    TS_ASSERT_THROWS_NOTHING(Poco::StdChannel a;)
+    TS_ASSERT_THROWS_NOTHING(Poco::StdoutChannel a;)
   }
 
   
@@ -57,7 +57,7 @@ public:
       lbuffer.str("");
 
       //Test std channel
-      Poco::Logger::root().setChannel(new Poco::StdChannel);
+      Poco::Logger::root().setChannel(new Poco::StdoutChannel);
       log.error() << "Error Message 3" << std::endl;
       //the error should be in std::cout
       TS_ASSERT_EQUALS(obuffer.str(),"Error Message 3\n");
