@@ -69,6 +69,7 @@ set ( SRC_FILES
 	src/SobolSequence.cpp
 	src/StartsWithValidator.cpp
 	src/Statistics.cpp
+	src/StdoutChannel.cpp
 	src/Strings.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
@@ -194,6 +195,7 @@ set ( INC_FILES
 	inc/MantidKernel/SobolSequence.h
 	inc/MantidKernel/StartsWithValidator.h
 	inc/MantidKernel/Statistics.h
+	inc/MantidKernel/StdoutChannel.h
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
@@ -240,7 +242,7 @@ set ( TEST_FILES
 	DateValidatorTest.h
 	DeltaEModeTest.h
 	DirectoryValidatorTest.h
-	DiskBufferISaveableTest.h    
+	DiskBufferISaveableTest.h
 	DiskBufferTest.h
 	DynamicFactoryTest.h
 	EnabledWhenPropertyTest.h
@@ -293,6 +295,7 @@ set ( TEST_FILES
 	SobolSequenceTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h
+	StdoutChannelTest.h
 	StringsTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
