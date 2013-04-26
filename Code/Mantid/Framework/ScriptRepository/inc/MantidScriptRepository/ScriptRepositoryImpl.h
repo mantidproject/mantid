@@ -99,7 +99,7 @@ namespace API{
     
     void upload(const std::string & file_path, const std::string & comment,
                 const std::string & author, 
-                const std::string & description = std::string());
+                const std::string & email);
 
     /* Return true if there is a local repository installed*/
     bool isValid(void);
@@ -135,6 +135,8 @@ namespace API{
     std::string local_repository; 
     /// URL for the remote repository, usually: 
     std::string remote_url;
+    /// URL for the upload
+    std::string remote_upload;
 
 
   private:

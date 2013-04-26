@@ -200,8 +200,8 @@ algorithms.categories.hidden=Workflow\\Inelastic\\UsesPropertyManager;Workflow\\
 
 # ScriptRepository Properties: 
 
-# Url for the WebServer that support the upload of the files that the users want to share (not in usage)
-UploaderWebServer =
+# Url for the WebServer that support the upload of the files that the users want to share
+UploaderWebServer = @MANTIDPUBLISHER@
 # Local system path for the script repository.
 ScriptLocalRepository = 
 # Url for the remote script repository.

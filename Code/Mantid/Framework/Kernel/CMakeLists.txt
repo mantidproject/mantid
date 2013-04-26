@@ -383,6 +383,7 @@ set ( PYTHONALG_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANT
 set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/plugins" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
+SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
 
 # Construct script paths.
 set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
@@ -456,6 +457,7 @@ set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONALG_DIRS ${PLUGINS}/PythonAlgs ) # deprecated
 set ( PYTHONPLUGIN_DIRS ${PLUGINS}/python )
 set ( DATADIRS "" )
+SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
 
 # Construct script paths by replacing the old MANTID_ROOT with the new one.
 # Unfortunately string (REGEX REPLACE ... )removes the semi-colons so we have to do this in a loop.
