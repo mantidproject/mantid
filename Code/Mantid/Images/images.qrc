@@ -24,6 +24,7 @@
         <file>upload.png</file>
         <file>system-software-update.png</file>
         <file>dialog-ok.png</file>
+	<file>running_process.png</file>
         <file>file_pdf.png</file>
         <file>selection-circle-ring.png</file>
     </qresource>

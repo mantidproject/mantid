@@ -9,6 +9,9 @@
 #include <QWidget>
 #include <QDialog>
 #include "MantidAPI/ScriptRepository.h"
+#include <QtConcurrentRun>
+#include <QFutureWatcher>
+
 class QLineEdit; 
 class QCheckBox; 
 class QTextEdit;
@@ -29,6 +32,8 @@ const QString LOCALCHANGED = "LOCAL_CHANGED";
 const QString REMOTECHANGED = "REMOTE_CHANGED";
 const QString BOTHUNCHANGED = "UPDATED";
 const QString BOTHCHANGED = "CHANGED"; 
+const QString UPLOADST = "UPLOADING";
+const QString DOWNLOADST = "DOWNLOADING";
 
   /** RepoModel : Wrapper for ScriptRepository to fit the Model View Qt Framework. 
       
@@ -183,13 +188,13 @@ public:
     static const QString & remoteChangedSt(); 
     static const QString & updatedSt(); 
     static const QString & bothChangedSt(); 
-
+    static const QString & downloadSt();
+    static const QString & uploadSt();
 
     QString fileDescription(const QModelIndex & index); 
     QString filePath(const QModelIndex & index);
     QString author(const QModelIndex& index); 
-
-
+    
 private:
     /// auxiliary method to populate the model
     void setupModelData(RepoItem *parent);
@@ -209,6 +214,26 @@ private:
     void handleExceptions(const Mantid::API::ScriptRepoException & ex, 
                           const QString & title, 
                           bool showWarning=true)const;
+
+    //handle download in thread
+    QFuture<QString> download_threads;
+    QFutureWatcher<QString> download_watcher;
+    QModelIndex download_index;
+    QString downloading_path;
+    bool isDownloading(const QModelIndex & index)const ; 
+    private slots:
+    void downloadFinished();
+
+ private:
+    //handle upload in thread
+    QFuture<QString> upload_threads;
+    QFutureWatcher<QString> upload_watcher;
+    QModelIndex upload_index;
+    QString uploading_path;
+    bool isUploading(const QModelIndex & index)const ; 
+    private slots:
+    void uploadFinished();
+
   };
 
 
