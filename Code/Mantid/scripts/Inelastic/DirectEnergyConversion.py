@@ -578,8 +578,6 @@ class DirectEnergyConversion(object):
             
         where only those detectors that are unmasked are used and the weight[i] = 1/errorValue[i].
         """
-        print "Input WB workspace: ", data_ws
-        
         e_low = self.monovan_integr_range[0]
         e_upp = self.monovan_integr_range[1]
         if e_low > e_upp:
