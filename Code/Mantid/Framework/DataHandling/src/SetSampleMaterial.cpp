@@ -170,7 +170,6 @@ namespace DataHandling
 				throw std::invalid_argument("ChemicalFormula or AtomicNumber was not found in table");
 			}
         }
-      }
     }
     // Done!
     progress(1);
