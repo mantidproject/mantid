@@ -220,10 +220,10 @@ namespace Mantid
       * @param obsI :: array of observed intensity values
       * @param calI :: array of calculated intensity values;
       * @param obsE :: array of error of the observed data;
-      * @return :: Rwp
+      * @return :: RFactor including Rp and Rwp
       *
       */
-    double getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE)
+    Rfactor getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE)
     {
       // 1. Check
       if (obsI.size() != calI.size() || obsI.size() != obsE.size())
@@ -241,6 +241,8 @@ namespace Mantid
 
       double sumnom = 0;
       double sumdenom = 0;
+      double sumrpnom = 0;
+      double sumrpdenom = 0;
 
       size_t numpts = obsI.size();
       for (size_t i = 0; i < numpts; ++i)
@@ -251,13 +253,18 @@ namespace Mantid
         double weight = 1.0/(sigma*sigma);
         double diff = obs_i - cal_i;
 
+        sumrpnom += fabs(diff);
+        sumrpdenom += fabs(obs_i);
+
         sumnom += weight*diff*diff;
         sumdenom += weight*obs_i*obs_i;
       }
 
-      double rwp = std::sqrt(sumnom/sumdenom);
+      Rfactor rfactor;
+      rfactor.Rp = (sumrpnom/sumrpdenom);
+      rfactor.Rwp = std::sqrt(sumnom/sumdenom);
 
-      return rwp;
+      return rfactor;
     }
 
 

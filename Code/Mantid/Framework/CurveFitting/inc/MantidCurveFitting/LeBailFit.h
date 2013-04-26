@@ -55,13 +55,13 @@ namespace CurveFitting
   {
     // Regular
     std::string name;
-    double value;
+    double curvalue;
     double prevalue;
     double minvalue;
     double maxvalue;
     bool fit;
     double stepsize;
-    double error;
+    double fiterror;
     // Monte Carlo
     bool nonnegative;
     double mcA0;
@@ -69,6 +69,8 @@ namespace CurveFitting
     // Monte Carlo record
     double sumstepsize;
     double maxabsstepsize;
+    double maxrecordvalue;
+    double minrecordvalue;
     size_t numpositivemove;
     size_t numnegativemove;
     size_t numnomove;
@@ -137,12 +139,11 @@ namespace CurveFitting
                           int numiteration, string &status, double &chi2, bool outputcovarmatrix);
 
     /// Calcualte background by fitting peak heights
-    void calBackground(size_t workspaceindex);
+    void execRefineBackground();
 
     //--------------  Functions to set up the Le Bail Fit -----------------
     /// Create LeBailFunction
-    void createLeBailFunction(std::string backgroundtype, std::vector<double>& bkgdorderparams,
-                              DataObjects::TableWorkspace_sptr bkgdparamws);
+    void createLeBailFunction();
 
     /// Crop the workspace for better usage
     API::MatrixWorkspace_sptr cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex);
@@ -150,6 +151,9 @@ namespace CurveFitting
     //-------------- Operation with Bragg Peaks -------------------------------
     /// Create a list of peaks
     bool generatePeaksFromInput();
+
+    /// Process and calculate input background
+    void processInputBackground();
 
     /// Examine whether the insturment parameter set to a peak can cause a valid set of peak profile of that peak
     bool examinInstrumentParameterValid(ThermalNeutronBk2BkExpConvPVoigt_sptr peak,
@@ -197,7 +201,7 @@ namespace CurveFitting
     void createOutputDataWorkspace();
 
     /// Fake calculated pattern
-    void writeFakedDataToOutputWS(size_t workspaceindex, int functionmode);
+    // Disabled void writeFakedDataToOutputWS(size_t workspaceindex, int functionmode);
 
     /// Write out (domain, values) to output workspace
     void writeToOutputWorkspace(size_t wsindex, FunctionDomain1DVector domain,  FunctionValues values);
@@ -211,7 +215,9 @@ namespace CurveFitting
     void execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter> &parammap);
 
     /// Set up Monte Carlo random walk strategy
-    void setupRandomWalkStrategy();
+    void setupBuiltInRandomWalkStrategy();
+
+    void setupRandomWalkStrategyFromTable(TableWorkspace_sptr tablews);
 
     /// Add parameter (to a vector of string/name) for MC random walk
     void addParameterToMCMinimize(vector<string>& parnamesforMC, string parname);
@@ -221,22 +227,25 @@ namespace CurveFitting
                                        size_t wsindex,
                                        map<string, Parameter> funparammap,
                                        MantidVec &background, MantidVec &values,
-                                       double &rwp, double &rp);
+                                       Rfactor& rfactor);
 
     /// Calculate powder diffraction statistic Rwp
     //void calculatePowderPatternStatistic(const MantidVec &values, const vector<double> &background,
       //                                   double &rwp, double &rp);
 
     /// Determine whether the proposed value should be accepted or denied
-    bool acceptOrDeny(double currwp, double newrwp);
+    bool acceptOrDeny(Rfactor currR, Rfactor newR);
 
     /// Propose new parameters
-    bool proposeNewValues(vector<string> mcgroup, double m_totRwp,
+    bool proposeNewValues(vector<string> mcgroup, Rfactor r,
                           map<string, Parameter> &curparammap, map<string, Parameter> &newparammap, bool prevBetterRwp);
+
+    ///  Limit proposed value in the specified boundary
+    double limitProposedValueInBound(Parameter param, double newvalue, double direction, int choice);
 
     /// Book keep the (sopposed) best MC result
     void bookKeepBestMCResult(map<string, Parameter> parammap,
-                              vector<double> &bkgddata, double rwp, size_t istep);
+                              vector<double> &bkgddata, Rfactor rfactor, size_t istep);
 
     /// Apply the value of parameters in the source to target
     void applyParameterValues(map<string, Parameter> &srcparammap,
@@ -254,6 +263,15 @@ namespace CurveFitting
     /// Smooth background by fitting the background to specified background function
     void smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVector domain,
                                     FunctionValues peakdata, vector<double>& background);
+
+    /// Store/buffer current background parameters
+    void storeBackgroundParameters(vector<double> &bkgdparamvec);
+
+    /// Restore/recover the buffered background parameters to m_background function
+    void recoverBackgroundParameters(vector<double> bkgdparamvec);
+
+    /// Propose new background parameters
+    void proposeNewBackgroundValues();
 
     //--------------------------------------------------------------------------
 
@@ -287,8 +305,6 @@ namespace CurveFitting
     CurveFitting::BackgroundFunction_sptr m_backgroundFunction;
     /// Le Bail Function (Composite)
     API::CompositeFunction_sptr m_lebailFunction;
-    /// Vector to hold background
-    vector<double> m_backgroundVec;
 
     /// Function parameters updated by fit
     std::map<std::string, Parameter> m_funcParameters; // char = f: fit... = t: tie to value
@@ -301,7 +317,7 @@ namespace CurveFitting
     // std::map<std::string, double> mFuncParameterErrors;
 
     /// Calculate some statistics for fitting/calculating result
-    void doResultStatistics();
+    // void calChiSquare();
 
     /// =============================    =========================== ///
     // size_t mWSIndexToWrite;
@@ -333,11 +349,15 @@ namespace CurveFitting
     /// Fit mode
     FunctionMode m_fitMode;
 
+    double m_indicatePeakHeight;
+
     //-------------------------- Monte Carlo Variables--------------------------
-    vector<vector<string> > m_MCGroups;
+    map<int, vector<string> > m_MCGroups;
     size_t m_numMCGroups;
 
     double m_bestRwp;
+    double m_bestRp;
+
     map<string, Parameter> m_bestParameters;
     vector<double> m_bestBackgroundData;
     size_t m_bestMCStep;
@@ -355,10 +375,19 @@ namespace CurveFitting
     enum {RANDOMWALK, DRUNKENWALK} m_walkStyle;
 
     /// Minimum height of a peak to be counted in smoothing background
-    double m_minimumHeight;
+    double m_minimumPeakHeight;
 
     /// Flag to allow peaks with duplicated (HKL)^2 in input .hkl file
     bool m_tolerateInputDupHKL2Peaks;
+
+    //------------------------ Background Refinement Variables -----------------------
+    vector<string> m_bkgdParameterNames;
+    size_t m_numberBkgdParameters;
+    vector<double> m_bkgdParameterBuffer;
+    vector<double> m_bkgdParameterBest;
+    int m_roundBkgd;
+    vector<double> m_bkgdParameterStepVec;
+
 
   };
 
@@ -369,7 +398,7 @@ namespace CurveFitting
   void exportDomainValueToFile(FunctionDomain1DVector domain, FunctionValues values, string filename);
 
   /// Write a set of (XY) data to a column file
-  void exportXYDataToFile(vector<double> vecX, vector<double> vecY, string filename);
+  void writeRfactorsToFile(vector<double> vecX, vector<Rfactor> vecR, string filename);
 
   /// Convert a Table to space to some vectors of maps
   void convertTableWorkspaceToMaps(TableWorkspace_sptr tablews, vector<map<string, int> > intmaps,

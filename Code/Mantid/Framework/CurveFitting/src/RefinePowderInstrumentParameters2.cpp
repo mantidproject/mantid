@@ -314,7 +314,7 @@ namespace CurveFitting
 
       Parameter newpar;
       newpar.name = parname;
-      newpar.value = parvalue;
+      newpar.curvalue = parvalue;
       newpar.minvalue = minvalue;
       newpar.maxvalue = maxvalue;
       newpar.stepsize = stepsize;
@@ -568,16 +568,16 @@ namespace CurveFitting
       // parameter information
       string paramname = mcgroup[i];
       Parameter param = curparammap[paramname];
-      double stepsize = m_dampingFactor * currchisq * (param.value * param.mcA1 + param.mcA0) * randomnumber/m_bestChiSq;
+      double stepsize = m_dampingFactor * currchisq * (param.curvalue * param.mcA1 + param.mcA0) * randomnumber/m_bestChiSq;
 
       g_log.debug() << "Parameter " << paramname << " Step Size = " << stepsize
-                    << " From " << param.mcA0 << ", " << param.mcA1 << ", " << param.value
+                    << " From " << param.mcA0 << ", " << param.mcA1 << ", " << param.curvalue
                     << ", " << m_dampingFactor << endl;
 
       // drunk walk or random walk
       double newvalue;
       // Random walk.  No preference on direction
-      newvalue = param.value + stepsize;
+      newvalue = param.curvalue + stepsize;
 
       /*
       if (m_walkStyle == RANDOMWALK)
@@ -629,7 +629,7 @@ namespace CurveFitting
       }
 
       // apply to new parameter map
-      newparammap[paramname].value = newvalue;
+      newparammap[paramname].curvalue = newvalue;
 
       // record some trace
       Parameter& p = curparammap[paramname];
@@ -653,7 +653,7 @@ namespace CurveFitting
         p.maxabsstepsize = fabs(stepsize);
 
       g_log.debug() << "[DBx257] " << paramname << "\t" << "Proposed value = " << setw(15)
-                    << newvalue << " (orig = " << param.value << ",  step = "
+                    << newvalue << " (orig = " << param.curvalue << ",  step = "
                     << stepsize << "), totRwp = " << currchisq << endl;
     }
 
@@ -1144,8 +1144,8 @@ namespace CurveFitting
       else
         fitortie = "tie";
 
-      newrow << param.name << param.value << fitortie << param.minvalue << param.maxvalue
-             << param.stepsize << param.error;
+      newrow << param.name << param.curvalue << fitortie << param.minvalue << param.maxvalue
+             << param.stepsize << param.fiterror;
     }
 
     return tablews;
@@ -1164,13 +1164,13 @@ namespace CurveFitting
     map<string, Parameter>::iterator pariter = parameters.find(parname);
     if (pariter != parameters.end())
     {
-      parameters[parname].value = parvalue;
+      parameters[parname].curvalue = parvalue;
     }
     else
     {
       Parameter newparameter;
       newparameter.name = parname;
-      newparameter.value = parvalue;
+      newparameter.curvalue = parvalue;
       parameters.insert(make_pair(parname, newparameter));
     }
 
@@ -1257,9 +1257,9 @@ namespace CurveFitting
       {
         // Found, set up the parameter
         Parameter& param = paramiter->second;
-        function->setParameter(parname, param.value);
+        function->setParameter(parname, param.curvalue);
 
-        msgss << setw(10) << parname << " = " << param.value << endl;
+        msgss << setw(10) << parname << " = " << param.curvalue << endl;
       }
       else
       {
@@ -1407,13 +1407,13 @@ namespace CurveFitting
     {
       string parname = miter->first;
       Parameter param = miter->second;
-      double paramvalue = param.value;
+      double paramvalue = param.curvalue;
 
       titer = target.find(parname);
       if (titer == target.end())
         throw runtime_error("Source and target should have exactly the same keys.");
 
-      titer->second.value = paramvalue;
+      titer->second.curvalue = paramvalue;
     }
 
     return;
@@ -1504,8 +1504,8 @@ namespace CurveFitting
         if (pariter != parammap.end())
         {
           // Find the entry
-          pariter->second.value = parvalue;
-          pariter->second.error = parerror;
+          pariter->second.curvalue = parvalue;
+          pariter->second.fiterror = parerror;
         }
       }
     }
