@@ -24,6 +24,11 @@ set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
 
 ###########################################################################
+# Set ParaView information since later items depend on it
+###########################################################################
+include ( ParaViewSetup )
+
+###########################################################################
 # Set paths to Third_Party for Windows builds
 ###########################################################################
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")	
