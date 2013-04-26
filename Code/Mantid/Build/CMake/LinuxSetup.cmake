@@ -98,7 +98,7 @@ if ( ${UNIX_CODENAME} STREQUAL "Santiago" )
                                                                      "fi\n"
 	)
 	file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh "#!/bin/sh\n"
-								      "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe \"$@\" \n"
+								      "scl enable mantidlibs '${CMAKE_INSTALL_PREFIX}/${BIN_DIR}/MantidPlot_exe '$@ \n"
 	)
 
 install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh 
