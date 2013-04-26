@@ -184,7 +184,7 @@ namespace MDAlgorithms
     Mantid::MantidVec signals(nbins);
     Mantid::MantidVec errors(nbins);
     Mantid::MantidVec extents = boost::assign::list_of(dim->getMinimum())(dim->getMaximum());
-    std::vector<int> vecNBins = boost::assign::list_of(nbins);
+    std::vector<int> vecNBins = boost::assign::list_of(static_cast<int>(nbins));
     std::vector<std::string> names = boost::assign::list_of(dim->getName());
     std::vector<std::string> units = boost::assign::list_of(dim->getUnits());
 

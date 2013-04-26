@@ -54,7 +54,7 @@ namespace Algorithms
     Kernel::DateAndTime mFilterT0;
     Kernel::DateAndTime mFilterTf;
 
-    std::map<std::string, int> m_intInfoMap;
+    std::map<std::string, std::size_t> m_intInfoMap;
     std::map<std::string, double> m_dblInfoMap;
 
     Kernel::TimeSeriesProperty<double>* m_log;

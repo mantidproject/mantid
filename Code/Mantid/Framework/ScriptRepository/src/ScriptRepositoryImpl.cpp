@@ -651,7 +651,7 @@ namespace API
 
       tmpFile.copyTo(local_path); 
       
-    }catch(Poco::FileAccessDeniedException & ex){
+    }catch(Poco::FileAccessDeniedException &){
       std::stringstream ss; 
       ss << "You cannot create file at " << local_path << ". Not downloading ..."; 
       throw ScriptRepoException(ss.str());      

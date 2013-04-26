@@ -297,11 +297,10 @@ namespace Algorithms
     tablews->addColumn("double", "Value");
 
     // 1. Integer part
-    map<string, int>::iterator intmapiter;
-    for (intmapiter = m_intInfoMap.begin(); intmapiter != m_intInfoMap.end(); ++intmapiter)
+    for (auto intmapiter = m_intInfoMap.begin(); intmapiter != m_intInfoMap.end(); ++intmapiter)
     {
       string name = intmapiter->first;
-      int value = intmapiter->second;
+      size_t value = intmapiter->second;
 
       TableRow newrow = tablews->appendRow();
       newrow << name << static_cast<double>(value);
