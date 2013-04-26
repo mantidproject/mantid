@@ -35,6 +35,7 @@ and used by other algorithms, they should not be needed in daily use.
 #include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/BoxControllerNeXusIO.h"
+#include "MantidMDEvents/CoordTransformAffine.h"
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vector>
@@ -165,10 +166,74 @@ namespace Mantid
 
 
 
+    //----------------------------------------------------------------------------------------------
+    /** Load the ExperimentInfo blocks, if any, in the NXS file
+    *
+    * @param ws :: MDEventWorkspace/MDHisto to load
+    */
+    void LoadMD::loadExperimentInfos(boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws)
+    {
+      // First, find how many experimentX blocks there are
+      std::map<std::string,std::string> entries;
+      file->getEntries(entries);
+      std::map<std::string,std::string>::iterator it = entries.begin();
+      std::vector<bool> hasExperimentBlock;
+      uint16_t numExperimentInfo = 0;
+      for (; it != entries.end(); ++it)
+      {
+        std::string name = it->first;
+        if (boost::starts_with(name, "experiment"))
+        {
+          try
+          {
+            uint16_t num = boost::lexical_cast<uint16_t>(name.substr(10, name.size()-10));
+            if (num+1 > numExperimentInfo)
+            {
+              numExperimentInfo = uint16_t(num+uint16_t(1));
+              hasExperimentBlock.resize(numExperimentInfo, false);
+              hasExperimentBlock[num] = true;
+            }
+          }
+          catch (boost::bad_lexical_cast &)
+          { /* ignore */ }
+        }
+      }
 
-    ////----------------------------------------------------------------------------------------------
-    ///** Execute the algorithm.
-    //*/
+      // Now go through in order, loading and adding
+      for (uint16_t i=0; i < numExperimentInfo; i++)
+      {
+        std::string groupName = "experiment" + Strings::toString(i);
+        if (!numExperimentInfo)
+        {
+          g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName << ". Workspace will be missing ExperimentInfo." << std::endl;
+          break;
+        }
+        file->openGroup(groupName, "NXgroup");
+        ExperimentInfo_sptr ei(new ExperimentInfo);
+        std::string parameterStr;
+        try
+        {
+          // Get the sample, logs, instrument
+          ei->loadExperimentInfoNexus(file, parameterStr);
+          // Now do the parameter map
+          ei->readParameterMap(parameterStr);
+          // And set it in the workspace.
+          ws->addExperimentInfo(ei);
+        }
+        catch (std::exception & e)
+        {
+          g_log.information("Error loading section '" + groupName + "' of nxs file.");
+          g_log.information(e.what());
+        }
+        file->closeGroup();
+      }
+
+    }
+
+
+    //----------------------------------------------------------------------------------------------
+    /** Execute the algorithm.
+    */
     void LoadMD::exec()
     {
       m_filename = getPropertyValue("Filename");
@@ -254,10 +319,10 @@ namespace Mantid
       std::vector<int> size(1, static_cast<int>(ws->getNPoints()));
       file->getSlab(data, start, size);
       file->closeData();
-   }
+    }
 
     //----------------------------------------------------------------------------------------------
-   /** Perform loading for a MDHistoWorkspace.
+    /** Perform loading for a MDHistoWorkspace.
     * The entry should be open already.
     */
     void LoadMD::loadHisto()
@@ -270,6 +335,8 @@ namespace Mantid
 
       // Load the WorkspaceHistory "process"
       ws->history().loadNexus(file);
+
+      this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
       // Load each data slab
       this->loadSlab("signal", ws->getSignalArray(), ws, ::NeXus::FLOAT64);
@@ -316,12 +383,12 @@ namespace Mantid
     template<typename MDE, size_t nd>
     void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws)
     {
-    //  // Are we using the file back end?
+      // Are we using the file back end?
       bool FileBackEnd = getProperty("FileBackEnd");
       bool BoxStructureOnly = getProperty("BoxStructureOnly");
 
       if (FileBackEnd && BoxStructureOnly)
-         throw std::invalid_argument("Both BoxStructureOnly and FileBackEnd were set to TRUE: this is not possible.");
+        throw std::invalid_argument("Both BoxStructureOnly and FileBackEnd were set to TRUE: this is not possible.");
 
       CPUTimer tim;
       Progress * prog = new Progress(this, 0.0, 1.0, 100);
@@ -333,6 +400,8 @@ namespace Mantid
 
       // Load the WorkspaceHistory "process"
       ws->history().loadNexus(file);
+
+      this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
       file->closeGroup();
       file->close();
@@ -363,6 +432,7 @@ namespace Mantid
           // boxes have been already made file-backed when restoring the boxTree;
       // How much memory for the cache?
         {
+        // TODO: Clean up, only a write buffer now
           double mb = getProperty("Memory");
        
           // Defaults have changed, defauld disk buffer size should be 10 data chunks TODO: find optimal, 100 may be better. 
@@ -392,6 +462,8 @@ namespace Mantid
         for (size_t i=0; i<numBoxes; i++)
         {
           prog->report();
+          MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxTree[i]);
+          if(!box)continue;
 
           if(BoxEventIndex[2*i+1]>0) // Load in memory NOT using the file as the back-end,
               boxTree[i]->loadAndAddFrom(loader.get(),BoxEventIndex[2*i],static_cast<size_t>(BoxEventIndex[2*i+1]));
@@ -413,10 +485,69 @@ namespace Mantid
       //TODO:if(!FileBackEnd)ws->refreshCache();
       ws->refreshCache();
       g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints() << " points after refresh." << std::endl;
+
       g_log.debug() << tim << " to finish up." << std::endl;
       delete prog;
     }
 
+  /**
+   * Load all of the affine matricies from the file, create the
+   * appropriate coordinate transform and set those on the workspace.
+   * @param ws : workspace to set the coordinate transforms on
+   */
+  void LoadMD::loadAffineMatricies(IMDWorkspace_sptr ws)
+  {
+    std::map<std::string, std::string> entries;
+    file->getEntries(entries);
+
+    if (entries.find("transform_to_orig") != entries.end())
+    {
+      CoordTransform *transform = this->loadAffineMatrix("transform_to_orig");
+      ws->setTransformToOriginal(transform);
+    }
+    if (entries.find("transform_from_orig") != entries.end())
+    {
+      CoordTransform *transform = this->loadAffineMatrix("transform_from_orig");
+      ws->setTransformFromOriginal(transform);
+    }
+  }
+
+  /**
+   * Do that actual loading and manipulating of the read data to create
+   * the affine matrix and then the appropriate transformation. This is
+   * currently limited to CoordTransformAffine transforms.
+   * @param entry_name : the entry point in the NeXus file to read
+   * @return the coordinate transform object
+   */
+  CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name)
+  {
+    file->openData(entry_name);
+    std::vector<coord_t> vec;
+    file->getData<coord_t>(vec);
+    std::string type;
+    int inD;
+    int outD;
+    file->getAttr("type", type);
+    file->getAttr<int>("rows", outD);
+    file->getAttr<int>("columns", inD);
+    file->closeData();
+    // Adjust dimensions
+    inD--;
+    outD--;
+    Matrix<coord_t> mat(vec);
+    CoordTransform *transform = NULL;
+    if ("CoordTransformAffine" == type)
+    {
+      CoordTransformAffine *affine = new CoordTransformAffine(inD, outD);
+      affine->setMatrix(mat);
+      transform = affine;
+    }
+    else
+    {
+      g_log.notice("Do not know how to process coordinate transform " + type);
+    }
+    return transform;
+  }
 
   } // namespace Mantid
 } // namespace MDEvents

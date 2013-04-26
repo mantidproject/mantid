@@ -133,6 +133,15 @@ namespace MDEvents
       return formattedXMLString;
   }
 
+  /**
+   * Coordinate transform id
+   * @return the type of coordinate transform
+   */
+  std::string CoordTransformDistance::id() const
+  {
+    return "CoordTransformDistance";
+  }
+
 } // namespace Mantid
 } // namespace MDEvents
 

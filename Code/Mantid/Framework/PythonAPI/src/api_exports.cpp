@@ -813,7 +813,8 @@ void export_dataitem()
       .def("isText", & API::Axis::isText)
       .def("label", & API::Axis::label)
       .def("getUnit", (const Mantid::Kernel::Unit_sptr & (Mantid::API::Axis::*)() const) &API::Axis::unit, return_value_policy<copy_const_reference>() )
-      .def("setUnit", & API::Axis::setUnit)
+      .def("setUnit", & API::Axis::setUnit,
+           return_value_policy<copy_const_reference>())
       .def("getValue", & API::NumericAxis::getValue)
       ;
 

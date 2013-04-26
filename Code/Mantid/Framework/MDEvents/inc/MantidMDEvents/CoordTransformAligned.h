@@ -64,6 +64,7 @@ namespace MDEvents
     virtual ~CoordTransformAligned();
     
     std::string toXMLString() const;
+    std::string id() const;
     void apply(const coord_t * inputVector, coord_t * outVector) const;
     Mantid::Kernel::Matrix<coord_t> makeAffineMatrix() const;
 

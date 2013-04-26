@@ -28,8 +28,7 @@ Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
   */
 FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) : 
   m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(), m_extensions(),
-  m_soapEndPoint(), m_archiveSearch(), m_instruments(), m_catalogName(), m_liveListener(),
-  m_HTTPProxy()
+  m_soapEndPoint(), m_archiveSearch(), m_instruments(), m_catalogName(), m_liveListener()
 {
   if (m_name.empty())
   {
@@ -45,7 +44,6 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   fillArchiveNames(elem);
   fillCatalogName(elem);
   fillLiveListener(elem);
-  fillHTTPProxy(elem);
   fillInstruments(elem); // Make sure this is last as it picks up some defaults that are set above
 }
 
@@ -200,18 +198,6 @@ void FacilityInfo::fillLiveListener(const Poco::XML::Element* elem)
   {
     // Get the name of the listener - empty string will be returned if missing
     m_liveListener = live->getAttribute("listener");
-  }
-}
-
-/// Called from constructor to fill HTTP proxy name
-void FacilityInfo::fillHTTPProxy(const Poco::XML::Element* elem)
-{
-  // Get the first HTTP proxy element (will be NULL if there's none)
-  Element * proxy = elem->getChildElement("httpproxy");
-  if ( proxy )
-  {
-    // Get the name of the HTTP proxy - empty string will be returned if missing
-    m_HTTPProxy = proxy->getAttribute("url");
   }
 }
 

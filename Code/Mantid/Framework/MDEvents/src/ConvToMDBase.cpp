@@ -33,10 +33,9 @@ namespace Mantid
 
       // set up output MD workspace wrapper
       m_OutWSWrapper = inWSWrapper;
-
-      // Copy ExperimentInfo (instrument, run, sample) to the output WS
-      API::ExperimentInfo_sptr ei(m_InWS2D->cloneExperimentInfo());
-      m_RunIndex            = m_OutWSWrapper->pWorkspace()->addExperimentInfo(ei);
+      // get the index which identify the run the source workspace came from.
+      // This index will mark the workspace' events for diffetent worksapces to combine
+      m_RunIndex            = WSD.getPropertyValueAsType<uint16_t>("RUN_INDEX");
 
       m_NDims       = m_OutWSWrapper->nDimensions();
       // allocate space for single MDEvent coordinates 

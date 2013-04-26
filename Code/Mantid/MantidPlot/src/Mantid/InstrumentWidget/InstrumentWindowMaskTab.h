@@ -51,9 +51,14 @@ class InstrumentWindowMaskTab: public InstrumentWindowTab
 {
   Q_OBJECT
 public:
-  enum Activity {Move = 0, Select = 1, DrawEllipse};
+  enum Mode {Mask, Group};
+  enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing};
+
   InstrumentWindowMaskTab(InstrumentWindow* instrWindow);
   void initSurface();
+  void setMode(Mode mode);
+  void selectTool(Activity tool);
+
 signals:
   void executeAlgorithm(const QString&, const QString&);
 protected slots:
@@ -62,8 +67,10 @@ protected slots:
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
+  void shapesCleared();
   void clearShapes();
   void applyMask();
+  void applyMaskToView();
   void storeMask();
   void clearMask();
   void saveInvertedMaskToWorkspace();
@@ -90,8 +97,7 @@ protected:
   void saveMaskingToFile(bool invertMask = false);
   void saveMaskingToCalFile(bool invertMask = false);
   std::string generateMaskWorkspaceName(bool temp = false) const;
-  void enableApply();
-  void enableClear();
+  void enableApplyButtons();
   void setSelectActivity();
   /// True if in masking mode, flase if in grouping.
   bool isMasking() const;
@@ -119,8 +125,11 @@ protected:
   QPushButton* m_ring_rectangle;
 
   QPushButton* m_apply;
+  QPushButton* m_apply_to_view;
   QPushButton* m_clear_all;
   QPushButton* m_saveButton;
+  QCheckBox* m_savegroupdet;
+
 
   QMenu* m_saveMask;
   QAction* m_save_as_workspace_include;

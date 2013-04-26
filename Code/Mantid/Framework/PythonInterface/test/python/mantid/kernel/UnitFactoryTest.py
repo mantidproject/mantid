@@ -1,10 +1,18 @@
 import unittest
-from mantid import UnitFactory, UnitFactoryImpl
+from mantid.kernel import UnitFactory, UnitFactoryImpl, Unit
 
 class UnitFactoryTest(unittest.TestCase):
 
     def test_alias_is_of_type_UnitFactoryImpl(self):
         self.assertTrue(isinstance(UnitFactory, UnitFactoryImpl))
+
+    def test_known_unit_can_be_created(self):
+        energy = UnitFactory.create("Energy")
+        self.assertTrue(isinstance(energy, Unit))
+
+    def test_unknown_unit_raises_error(self):
+        self.assertRaises(RuntimeError, UnitFactory.create, 
+                          "NotAUnit")
         
     def test_keys_returns_a_non_empty_python_list_of_unit_keys(self):
         known_units = UnitFactory.getKeys()

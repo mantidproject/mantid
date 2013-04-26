@@ -231,11 +231,38 @@ void InstrumentWindow::selectTab(int tab)
 }
 
 /**
- * Return the currently displayed tab.
+ * Returns the named tab or the current tab if none supplied
+ * @param title Optional title of a tab (default="")
  */
-InstrumentWindowTab *InstrumentWindow::getTab()const
+InstrumentWindowTab *InstrumentWindow::getTab(const QString & title)const
 {
-    return static_cast<InstrumentWindowTab*>(mControlsTab->currentWidget());
+  QWidget *tab(NULL);
+  if(title.isEmpty()) tab = mControlsTab->currentWidget();
+  else 
+  {
+    for(int i = 0; i < mControlsTab->count(); ++i)
+    {
+      if(mControlsTab->tabText(i) == title)
+      {
+        tab = mControlsTab->widget(i);
+        break;
+      }
+    }
+  }
+
+  if(tab) return qobject_cast<InstrumentWindowTab*>(tab);
+  else return NULL;
+}
+
+/**
+ * @param tab An enumeration for the tab to select
+ * @returns A pointer to the requested tab
+ */
+InstrumentWindowTab * InstrumentWindow::getTab(const Tab tab) const
+{
+  QWidget *widget = mControlsTab->widget(static_cast<int>(tab));
+  if(widget) return qobject_cast<InstrumentWindowTab*>(widget);
+  else return NULL;
 }
 
 /**
@@ -628,39 +655,53 @@ void InstrumentWindow::pickBackgroundColor()
 	setBackgroundColor(color);
 }
 
-void InstrumentWindow::saveImage()
+/**
+ * Saves the current image buffer as a png file.
+ * @param filename Optional filename. Empty string raises a save dialog
+ */
+void InstrumentWindow::saveImage(QString filename)
 {
+  QString defaultExt = ".png";
   QList<QByteArray> formats = QImageWriter::supportedImageFormats();
-  QListIterator<QByteArray> itr(formats);
-  QString filter("");
-  while( itr.hasNext() )
+  if(filename.isEmpty())
   {
-    filter += "*." + itr.next();
-    if( itr.hasNext() )
+    QListIterator<QByteArray> itr(formats);
+    QString filter("");
+    while( itr.hasNext() )
     {
-      filter += ";;";
+      filter += "*." + itr.next();
+      if( itr.hasNext() )
+      {
+        filter += ";;";
+      }
     }
-  }
-  QString selectedFilter = "*.png";
-  QString filename = getSaveFileName("Save image ...", filter, &selectedFilter);
+    QString selectedFilter = "*" + defaultExt;
+    filename = getSaveFileName("Save image ...", filter, &selectedFilter);
 
-  // If its empty, they cancelled the dialog
-  if( filename.isEmpty() ) return;
+    // If its empty, they cancelled the dialog
+    if( filename.isEmpty() ) return;
+  }
   
   QFileInfo finfo(filename);
-
   QString ext = finfo.completeSuffix();
+
   if( ext.isEmpty() )
   {
-    filename += selectedFilter.section("*", 1);
+    filename += defaultExt;
     ext = QFileInfo(filename).completeSuffix();
   }
   else
   {
-    QStringList extlist = filter.split(";;");
-    if( !extlist.contains("*." + ext) )
+    if( !formats.contains(ext.toAscii()) )
     {
-      QMessageBox::warning(this, "MantidPlot", "Unsupported file extension, please use one from the supported list.");
+      QString msg("Unsupported file extension. Choose one of the following: ");
+      QListIterator<QByteArray> itr(formats);
+      while( itr.hasNext() )
+      {
+        msg += itr.next() + ", ";
+      }
+      msg.chop(2);// Remove last space and comma
+      QMessageBox::warning(this, "MantidPlot", msg);
       return;
     }
   }
@@ -983,20 +1024,7 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
   if (text.startsWith("Workspace::"))
   {
     QStringList wsName = text.split("::");
-    Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(wsName[1].toStdString()));
-    auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( getSurface() );
-    if (pws && surface)
-    {
-      surface->setPeaksWorkspace(pws);
-      updateInstrumentView();
-      e->accept();
-      return;
-    }
-    else if (pws && !surface)
-    {
-      QMessageBox::warning(this,"MantidPlot - Warning","Please change to an unwrapped view to see peak labels.");
-    }
+    if(this->overlay(wsName[1])) e->accept();    
   }
   e->ignore();
 }
@@ -1044,6 +1072,30 @@ void InstrumentWindow::setColorMapAutoscaling(bool on)
   m_instrumentActor->setAutoscaling(on);
   setupColorMap();
   updateInstrumentView();
+}
+
+/**
+ *  Overlay a workspace with the given name
+ * @param wsName The name of a workspace in the ADS
+ * @returns True if the overlay was successful, false otherwise
+ */
+bool InstrumentWindow::overlay(const QString & wsName)
+{
+  using namespace Mantid::API;
+  auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+  auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( getSurface() );
+  bool success(false);
+  if (pws && surface)
+  {
+    surface->setPeaksWorkspace(pws);
+    updateInstrumentView();
+    success = true;
+  }
+  else if (pws && !surface)
+  {
+    QMessageBox::warning(this,"MantidPlot - Warning","Please change to an unwrapped view to see peak labels.");
+  }
+  return success;
 }
 
 /**
@@ -1224,17 +1276,10 @@ void InstrumentWindow::enableOpenGL( bool on )
 /// Private slot to toggle between the GL and simple instrument display widgets
 void InstrumentWindow::enableGL( bool on )
 {
-  m_useOpenGL = on;
-  if ( m_surfaceType == FULL3D )
-  {
-    // always OpenGL in 3D
-    selectOpenGLDisplay( true );
-  }
-  else
-  {
-    // select the display
-    selectOpenGLDisplay( on );
-  }
+  if ( m_surfaceType == FULL3D ) m_useOpenGL = true; // always OpenGL in 3D
+  else m_useOpenGL = on;
+
+  selectOpenGLDisplay(m_useOpenGL);
 }
 
 /// True if the GL instrument display is currently on

@@ -11,8 +11,8 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
-//#include "MantidMDEvents/MDTransfDEHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/LogManager.h"
 
 
 namespace Mantid
@@ -56,7 +56,7 @@ namespace MDEvents
 
 
 /// helper class describes the properties of target MD workspace, which should be obtained as the result of conversion algorithm. 
-class DLLExport MDWSDescription : public Kernel::PropertyManager
+    class DLLExport MDWSDescription : public API::LogManager
 {
 public:  // for the time being
     /// the string which describes ChildAlgorithm, used to convert source ws to target MD ws. At the moment, it coinsides with Q-mode
@@ -156,6 +156,7 @@ protected: // until MDWSDesctiptionDepricatedExist
 //********************* internal helpers
      /// helper function to resize all vectors, responsible for MD dimensions in one go
      void resizeDimDescriptions(unsigned int Dims,size_t nBins=10);
+
 private:
   /// Coordinate system.
   Mantid::API::SpecialCoordinateSystem m_coordinateSystem;

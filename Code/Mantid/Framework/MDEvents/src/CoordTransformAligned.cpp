@@ -183,6 +183,14 @@ namespace MDEvents
      return formattedXMLString;
   }
 
+  /**
+   * Coordinate transform id
+   * @return the type of coordinate transform
+   */
+  std::string CoordTransformAligned::id() const
+  {
+    return "CoordTransformAligned";
+  }
 
 } // namespace Mantid
 } // namespace MDEvents

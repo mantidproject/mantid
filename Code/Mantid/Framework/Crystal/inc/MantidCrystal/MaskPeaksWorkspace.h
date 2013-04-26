@@ -53,14 +53,15 @@ public:
   virtual const std::string category() const { return "Crystal"; }
 
 private:
-  DataObjects::EventWorkspace_sptr inputW;  ///< A pointer to the input workspace
+  API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
   API::MatrixWorkspace_sptr outputW; ///< A pointer to the output workspace
   // Overridden Algorithm methods
   void init();
   void exec();
-  std::size_t getWkspIndex(detid2index_map * pixel_to_wi, Geometry::RectangularDetector_const_sptr det,
+  std::size_t getWkspIndex(detid2index_map * pixel_to_wi, Geometry::IComponent_const_sptr comp,
                            const int x, const int y);
   void getTofRange(double &tofMin, double &tofMax, const double tofPeak, const MantidVec& tof);
+  int findPixelID(std::string bankName, int col, int row);
 
   /// Read in all the input parameters
   void retrieveProperties();

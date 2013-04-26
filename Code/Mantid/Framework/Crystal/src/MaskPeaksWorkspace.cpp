@@ -1,7 +1,7 @@
 /*WIKI* 
 
-Mask pixels in an EventWorkspace close to peak positions from a PeaksWorkspace. 
-Peaks could come from ISAW diamond stripping routine for SNAP data. Only works on EventWorkspaces and for instruments with RectangularDetector's. 
+Mask pixels in an Workspace close to peak positions from a PeaksWorkspace. 
+Peaks could come from ISAW diamond stripping routine for SNAP data. Only works on Workspaces and for instruments with RectangularDetector's. 
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -37,6 +37,7 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
     using namespace DataObjects;
+    using namespace Geometry;
     using std::string;
 
 
@@ -54,16 +55,16 @@ namespace Mantid
     void MaskPeaksWorkspace::init()
     {
 
-      declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "", Direction::Input),
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
                       "A workspace containing one or more rectangular area detectors. Each spectrum needs to correspond to only one pixelID (e.g. no grouping or previous calls to SumNeighbours).");
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input),
                       "The name of the workspace that will be created. Can replace the input workspace.");
-      declareProperty("XMin", -2, "Minimum of X (col) Range to mask peak");
-      declareProperty("XMax", 2, "Maximum of X (col) Range to mask peak");
-      declareProperty("YMin", -2, "Minimum of Y (row) Range to mask peak");
-      declareProperty("YMax", 2, "Maximum of Y (row) Range to mask peak");
-      declareProperty("TOFMin", EMPTY_DBL(), "Minimum TOF relative to peak's center TOF.");
-      declareProperty("TOFMax", EMPTY_DBL(), "Maximum TOF relative to peak's center TOF.");
+      declareProperty("XMin", -2, "Minimum of X (col) Range to mask peak relative to peak's center");
+      declareProperty("XMax", 2, "Maximum of X (col) Range to mask peak relative to peak's center");
+      declareProperty("YMin", -2, "Minimum of Y (row) Range to mask peak relative to peak's center");
+      declareProperty("YMax", 2, "Maximum of Y (row) Range to mask peak relative to peak's center");
+      declareProperty("TOFMin", EMPTY_DBL(), "Optional(all TOF if not specified): Minimum TOF relative to peak's center TOF.");
+      declareProperty("TOFMax", EMPTY_DBL(), "Optional(all TOF if not specified): Maximum TOF relative to peak's center TOF.");
     }
 
     /** Executes the algorithm
@@ -79,7 +80,7 @@ namespace Mantid
       peaksW = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(getProperty("InPeaksWorkspace"));
 
       //To get the workspace index from the detector ID
-      detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
+      detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(false);
       //Get some stuff from the input workspace
       Geometry::Instrument_const_sptr inst = inputW->getInstrument();
       if (!inst)
@@ -94,37 +95,36 @@ namespace Mantid
  
       // Loop over peaks
       const std::vector<Peak> & peaks = peaksW->getPeaks();
-      for ( auto peak = peaks.begin(); peak != peaks.end(); ++peak )
+      PARALLEL_FOR3(inputW,peaksW,tablews)
+      for (int i=0; i < static_cast<int>(peaks.size()); i++)
       {
+    	PARALLEL_START_INTERUPT_REGION
+    	Peak peak = peaks[i];
         // get the peak location on the detector
-        double col = peak->getCol();
-        double row = peak->getRow();
+        double col = peak.getCol();
+        double row = peak.getRow();
         int xPeak = int(col+0.5)-1;
         int yPeak = int(row+0.5)-1;
         g_log.debug() << "Generating information for peak at x=" << xPeak << " y=" << yPeak << "\n";
   
         // the detector component for the peak will have all pixels that we mask
-        const string bankName = peak->getBankName();
+        const string bankName = peak.getBankName();
+        if(bankName.compare("None") == 0) continue;
         Geometry::IComponent_const_sptr comp = inst->getComponentByName(bankName);
         if (!comp)
         {
-          throw std::invalid_argument("Component "+bankName+" does not exist in instrument");
-        }
-        Geometry::RectangularDetector_const_sptr det
-            = boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
-        if (!det)
-        {
-          throw std::invalid_argument("Component "+bankName+" is not a rectangular detector");
+        	continue;
+        	g_log.debug() << "Component "+bankName+" does not exist in instrument\n";
         }
 
         // determine the range in time-of-flight
         double x0;
         double xf;
         bool tofRangeSet(false);
-        if(xPeak < det->xpixels() && xPeak >= 0 && yPeak < det->ypixels() && yPeak >= 0)
+        size_t wi = this->getWkspIndex(pixel_to_wi, comp, xPeak, yPeak);
+        if (wi != static_cast<size_t>(EMPTY_INT()))
         { // scope limit the workspace index
-          size_t wi = this->getWkspIndex(pixel_to_wi, det, xPeak, yPeak);
-          this->getTofRange(x0, xf, peak->getTOF(), inputW->readX(wi));
+          this->getTofRange(x0, xf, peak.getTOF(), inputW->readX(wi));
           tofRangeSet = true;
         }
 
@@ -134,15 +134,13 @@ namespace Mantid
         {
           for (int iy=m_yMin; iy <= m_yMax; iy++)
           {
-            std::cout << "in inner loop " << xPeak+ix << ", " << yPeak+iy << std::endl;
             //Find the pixel ID at that XY position on the rectangular detector
-            if(xPeak+ix >= det->xpixels() || xPeak+ix < 0)continue;
-            if(yPeak+iy >= det->ypixels() || yPeak+iy < 0)continue;
-            spectra.insert(this->getWkspIndex(pixel_to_wi, det, xPeak+ix, yPeak+iy));
+            size_t wj = this->getWkspIndex(pixel_to_wi, comp, xPeak+ix, yPeak+iy);
+            if (wj == static_cast<size_t>(EMPTY_INT())) continue;
+            spectra.insert(wj);
             if (!tofRangeSet)
             { // scope limit the workspace index
-              size_t wi = this->getWkspIndex(pixel_to_wi, det, xPeak+ix, yPeak+iy);
-              this->getTofRange(x0, xf, peak->getTOF(), inputW->readX(wi));
+              this->getTofRange(x0, xf, peak.getTOF(), inputW->readX(wj));
               tofRangeSet = true;
             }
           }
@@ -152,22 +150,24 @@ namespace Mantid
         if (!tofRangeSet)
         {
           g_log.warning() << "Failed to set time-of-flight range for peak (x=" << xPeak
-                          << ", y=" << yPeak << ", tof=" << peak->getTOF() << ")\n";
+                          << ", y=" << yPeak << ", tof=" << peak.getTOF() << ")\n";
         }
         else if (spectra.empty())
         {
           g_log.warning() << "Failed to find spectra for peak (x=" << xPeak
-                          << ", y=" << yPeak << ", tof=" << peak->getTOF() << ")\n";
+                          << ", y=" << yPeak << ", tof=" << peak.getTOF() << ")\n";
           continue;
         }
         else
+        PARALLEL_CRITICAL(tablews)
         {
           // append to the table workspace
           API::TableRow newrow = tablews->appendRow();
           newrow << x0 << xf << Kernel::Strings::toString(spectra);
         }
+        PARALLEL_END_INTERUPT_REGION
       } // end loop over peaks
-
+      PARALLEL_CHECK_INTERUPT_REGION
 
       // Mask bins
       API::IAlgorithm_sptr maskbinstb = this->createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
@@ -211,28 +211,52 @@ namespace Mantid
       }
     }
 
-    size_t MaskPeaksWorkspace::getWkspIndex(detid2index_map *pixel_to_wi, Geometry::RectangularDetector_const_sptr det,
+    size_t MaskPeaksWorkspace::getWkspIndex(detid2index_map *pixel_to_wi, Geometry::IComponent_const_sptr comp,
                                             const int x, const int y)
     {
-      if ( (x >= det->xpixels()) || (x < 0)     // this check is unnecessary as callers are doing it too
-           || (y >= det->ypixels()) || (y < 0)) // but just to make debugging easier
+        Geometry::RectangularDetector_const_sptr det
+            = boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+      if(det)
       {
-        std::stringstream msg;
-        msg << "Failed to find workspace index for x=" << x << " y=" << y
-            << "(max x=" << det->xpixels() << ", max y=" << det->ypixels() << ")";
-        throw std::runtime_error(msg.str());
+		  if(x >= det->xpixels() || x < 0 || y >= det->ypixels() || y < 0) return EMPTY_INT();
+		  if ( (x >= det->xpixels()) || (x < 0)     // this check is unnecessary as callers are doing it too
+			   || (y >= det->ypixels()) || (y < 0)) // but just to make debugging easier
+		  {
+			std::stringstream msg;
+			msg << "Failed to find workspace index for x=" << x << " y=" << y
+				<< "(max x=" << det->xpixels() << ", max y=" << det->ypixels() << ")";
+			throw std::runtime_error(msg.str());
+		  }
+
+		  int pixelID = det->getAtXY(x,y)->getID();
+
+		  //Find the corresponding workspace index, if any
+		  if (pixel_to_wi->find(pixelID) == pixel_to_wi->end())
+		  {
+			std::stringstream msg;
+			msg << "Failed to find workspace index for x=" << x << " y=" << y;
+			throw std::runtime_error(msg.str());
+		  }
+		  return (*pixel_to_wi)[pixelID];
       }
-
-      int pixelID = det->getAtXY(x,y)->getID();
-
-      //Find the corresponding workspace index, if any
-      if (pixel_to_wi->find(pixelID) == pixel_to_wi->end())
+      else
       {
-        std::stringstream msg;
-        msg << "Failed to find workspace index for x=" << x << " y=" << y;
-        throw std::runtime_error(msg.str());
+		  std::vector<Geometry::IComponent_const_sptr> children;
+		  boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
+		  asmb->getChildren(children, false);
+		  boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+		  std::vector<Geometry::IComponent_const_sptr> grandchildren;
+		  asmb2->getChildren(grandchildren,false);
+		  int NROWS = static_cast<int>(grandchildren.size());
+		  int NCOLS = static_cast<int>(children.size());
+		  // Wish pixels and tubes start at 1 not 0
+			  if(x-1 >= NCOLS || x-1 < 0 || y-1 >= NROWS || y-1 < 0) return EMPTY_INT();
+		  std::string bankName = comp->getName();
+		  detid2index_map::const_iterator it = pixel_to_wi->find(findPixelID(bankName, x, y));
+		  if ( it == pixel_to_wi->end() ) return EMPTY_INT();
+		  return (it->second);
       }
-      return (*pixel_to_wi)[pixelID];
+      return EMPTY_INT();
     }
 
     /**
@@ -254,6 +278,31 @@ namespace Mantid
           tofMax = tofPeak + m_tofMax;
       }
     }
+  int MaskPeaksWorkspace::findPixelID(std::string bankName, int col, int row)
+  {
+          Geometry::Instrument_const_sptr Iptr = inputW->getInstrument();
+          boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
+          if (parent->type().compare("RectangularDetector") == 0)
+          {
+                  boost::shared_ptr<const RectangularDetector> RDet = boost::shared_dynamic_cast<
+                                        const RectangularDetector>(parent);
 
-  } // namespace Crystal
+                  boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+                  return pixel->getID();
+          }
+          else
+          {
+                  std::string bankName0 = bankName;
+                  //Only works for WISH
+                  bankName0.erase(0,4);
+                  std::ostringstream pixelString;
+                  pixelString << Iptr->getName() << "/" << bankName0 << "/" <<bankName
+                  << "/tube" << std::setw(3) << std::setfill('0')<< col
+                  << "/pixel" << std::setw(4) << std::setfill('0')<< row;
+                  boost::shared_ptr<const Geometry::IComponent> component = Iptr->getComponentByName(pixelString.str());
+                  boost::shared_ptr<const Detector> pixel = boost::dynamic_pointer_cast<const Detector>(component);
+                  return pixel->getID();
+          }
+  }
+} // namespace Crystal
 } // namespace Mantid

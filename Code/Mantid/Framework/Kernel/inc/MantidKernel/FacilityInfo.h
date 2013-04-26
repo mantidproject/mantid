@@ -82,8 +82,6 @@ public:
   std::vector<InstrumentInfo> instruments(const std::string& tech) const;
   /// Returns instruments with given name
   const InstrumentInfo & instrument(std::string iName = "") const;
-  /// Returns the proxy string related to ScriptRepository settings for its installation.
-  const std::string & getHTTPProxy() const {return m_HTTPProxy;}
 
 private:
   void fillZeroPadding(const Poco::XML::Element* elem);
@@ -94,7 +92,6 @@ private:
   void fillCatalogName(const Poco::XML::Element* elem);
   void fillInstruments(const Poco::XML::Element* elem);
   void fillLiveListener(const Poco::XML::Element* elem);
-  void fillHTTPProxy(const Poco::XML::Element* elem);
 
   /// Add new extension
   void addExtension(const std::string& ext);
@@ -108,7 +105,6 @@ private:
   std::vector<InstrumentInfo> m_instruments;   ///< list of instruments of this facility
   std::string m_catalogName;                   ///< name of the catalog system of this facility
   std::string m_liveListener;                  ///< name of the default live listener
-  std::string m_HTTPProxy;                     ///< name of the default httpProxy
   static Logger& g_log;                        ///< logger
 };
 

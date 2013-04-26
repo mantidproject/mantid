@@ -61,7 +61,7 @@ public:
   Kernel::Unit_sptr& unit();
 
   /// Set the unit on the Axis
-  virtual void setUnit(const std::string & unit);
+  virtual const Kernel::Unit_sptr& setUnit(const std::string & unitName);
 
   /// Returns true is the axis is a Spectra axis
   virtual bool isSpectra() const{return false;}

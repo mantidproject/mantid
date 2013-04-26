@@ -366,7 +366,6 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
       }
 
       QWidget * father = qobject_cast<QWidget*>(QObject::parent());
-
       if (repo_ptr->fileInfo(path).directory){
         QMessageBox::information(father, 
                                  "Not Supported", 

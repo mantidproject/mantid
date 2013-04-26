@@ -20,6 +20,7 @@ namespace Mantid
       NullCoordTransform(size_t ndims=3);
       virtual ~NullCoordTransform();
       std::string toXMLString() const;
+      std::string id() const;
       void apply(const Mantid::coord_t * inputVector, Mantid::coord_t * outVector) const;
       virtual CoordTransform * clone() const;
 

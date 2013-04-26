@@ -607,7 +607,7 @@ class SNSPowderReduction(PythonAlgorithm):
             print "[DB1050-1] Unable to get events of %s.  Error message: %s" % (str(wksp), str(e))
 
         if HAVE_MPI:
-            msg = "MPI Task = %s ;" %s (str(mpi.world.rank))
+            msg = "MPI Task = %s ;" % (str(mpi.world.rank))
             try: 
                 msg += "Number Events = ", wksp.getNumberEvents()
             except Exception as e: 
