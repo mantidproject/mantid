@@ -51,9 +51,13 @@ SetUpParaview::SetUpParaview(StartUpFrom from, QWidget *parent) : QDialog(parent
 
   initLayout();
 
-  const QString versionRevision = QString::fromStdString(Mantid::Kernel::ParaViewVersion::targetVersion());
-  const QString versionRevisionModification = versionRevision + ".1"; // No way to get this minor version info from paraview.
-  const QString predictedLocation = QString("C:/Program Files (x86)/ParaView %1/bin").arg(versionRevisionModification);
+  QString versionRevision = QString::fromStdString(Mantid::Kernel::ParaViewVersion::targetVersion());
+  if (!versionRevision.contains("3.98"))
+  {
+	// For ParaView 3.10, minor version number is not available
+	versionRevision.append(".1");
+  }
+  const QString predictedLocation = QString("C:/Program Files (x86)/ParaView %1/bin").arg(versionRevision);
   const QString hintText = QString("Hint: the usual install location for ParaView is: %1").arg(predictedLocation);
   m_uiForm.lblHint->setText(hintText);
 
