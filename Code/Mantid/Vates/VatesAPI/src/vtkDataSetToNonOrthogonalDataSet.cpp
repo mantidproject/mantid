@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -82,18 +83,33 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
     ADSWorkspaceProvider<API::IMDWorkspace> workspaceProvider;
     API::Workspace_sptr ws = workspaceProvider.fetchWorkspace(m_wsName);
     std::string wsType = ws->id();
+
+    Geometry::OrientedLattice oLatt;
+    std::vector<double> wMatArr;
+    Kernel::Matrix<coord_t> affMat;
+
     // Have to cast since inherited class doesn't provide access to all info
     if (boost::algorithm::find_first(wsType, "MDHistoWorkspace"))
     {
       API::IMDHistoWorkspace_const_sptr infoWs = boost::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
       m_numDims = infoWs->getNumDims();
-      Geometry::OrientedLattice oLatt = infoWs->getExperimentInfo(0)->sample().getOrientedLattice();
-      std::vector<double> wMatArr = infoWs->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double > >("W_MATRIX");
-      Kernel::DblMatrix wTrans(wMatArr);
+      oLatt = infoWs->getExperimentInfo(0)->sample().getOrientedLattice();
+      wMatArr = infoWs->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double > >("W_MATRIX");
       API::CoordTransform *transform = infoWs->getTransformToOriginal();
-      Kernel::Matrix<coord_t> affMat = transform->makeAffineMatrix();
-      this->createSkewInformation(oLatt, wTrans, affMat);
+      affMat = transform->makeAffineMatrix();
     }
+    // This is only here to make the unit test run.
+    if (boost::algorithm::find_first(wsType, "MDEventWorkspace"))
+    {
+      API::IMDEventWorkspace_const_sptr infoWs = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(ws);
+      m_numDims = infoWs->getNumDims();
+      oLatt = infoWs->getExperimentInfo(0)->sample().getOrientedLattice();
+      wMatArr = infoWs->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double > >("W_MATRIX");
+      API::CoordTransform *transform = infoWs->getTransformToOriginal();
+      affMat = transform->makeAffineMatrix();
+    }
+    Kernel::DblMatrix wTrans(wMatArr);
+    this->createSkewInformation(oLatt, wTrans, affMat);
   }
 
   // Get the original points
