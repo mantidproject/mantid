@@ -7,6 +7,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
@@ -94,28 +95,29 @@ private:
     ws->setTransformToOriginal(affMat.clone(), 0);
 
     // Create the transform (W) matrix
-    DblMatrix wMat;
+    // Need it as a vector
+    std::vector<double> wMat;
     if (!nonUnityTransform)
     {
       DblMatrix temp(3, 3, true);
-      wMat = temp;
+      wMat = temp.getVector();
     }
     else
     {
-      std::vector<double> trans;
-      trans.push_back(1);
-      trans.push_back(1);
-      trans.push_back(0);
-      trans.push_back(1);
-      trans.push_back(-1);
-      trans.push_back(0);
-      trans.push_back(0);
-      trans.push_back(0);
-      trans.push_back(1);
-      DblMatrix temp(trans);
-      wMat = temp;
+      wMat.push_back(1);
+      wMat.push_back(1);
+      wMat.push_back(0);
+      wMat.push_back(1);
+      wMat.push_back(-1);
+      wMat.push_back(0);
+      wMat.push_back(0);
+      wMat.push_back(0);
+      wMat.push_back(1);
     }
-    ws->setWTransf(wMat);
+    // Create property for W matrix and add it as log to run object
+    PropertyWithValue<std::vector<double> > *p;
+    p = new PropertyWithValue<std::vector<double> >("W_MATRIX", wMat);
+    ws->getExperimentInfo(0)->mutableRun().addProperty(p, true);
 
     return wsName;
   }
