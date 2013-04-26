@@ -12,7 +12,7 @@
 
 using namespace Mantid::Kernel;
 
-class StdChannelTest : public CxxTest::TestSuite
+class StdoutChannelTest : public CxxTest::TestSuite
 {
 public: 
 
@@ -72,4 +72,4 @@ public:
 
 };
 
-#endif /*MANTID_STDCHANNELTEST_H_*/
+#endif /*MANTID_STDOUTCHANNELTEST_H_*/
