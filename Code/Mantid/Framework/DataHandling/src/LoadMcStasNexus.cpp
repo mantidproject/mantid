@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Unit.h"
+#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/algorithm/string.hpp>
