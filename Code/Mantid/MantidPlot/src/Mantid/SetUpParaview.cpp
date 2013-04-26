@@ -1,5 +1,6 @@
 #include "SetUpParaview.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/ParaViewVersion.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidKernel/ConfigService.h"
 #include <boost/regex.hpp>
