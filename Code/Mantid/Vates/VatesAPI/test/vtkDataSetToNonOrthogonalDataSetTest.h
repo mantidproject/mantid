@@ -49,18 +49,46 @@ private:
     alg->setProperty("alpha", 90.0);
     alg->setProperty("beta", 90.0);
     alg->setProperty("gamma", 120.0);
-    std::vector<double> uVec {1*scale, 1, 0};
-    std::vector<double> vVec {0, 0, 1};
+    std::vector<double> uVec;
+    uVec.push_back(1*scale);
+    uVec.push_back(1);
+    uVec.push_back(0);
+    std::vector<double> vVec;
+    vVec.push_back(0);
+    vVec.push_back(0);
+    vVec.push_back(1);
     alg->setProperty("u", uVec);
     alg->setProperty("v", vVec);
     alg->execute();
 
     // Create the coordinate transformation information
-    std::vector<Mantid::coord_t> affMatVals {1, 0, 0, 0, 0,
-                                             0, 0, 1, 0, 0,
-                                             0, 0, 0, 1, 0,
-                                             0, 1, 0, 0, 0,
-                                             0, 0, 0, 0, 1};
+    std::vector<Mantid::coord_t> affMatVals;
+    affMatVals.push_back(1);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(1);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(1);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(1);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(0);
+    affMatVals.push_back(1);
+                      
     CoordTransformAffine affMat(4, 4);
     affMat.setMatrix(Matrix<Mantid::coord_t>(affMatVals));
     ws->setTransformToOriginal(affMat.clone(), 0);
@@ -74,7 +102,16 @@ private:
     }
     else
     {
-      std::vector<double> trans {1, 1, 0, 1, -1, 0, 0, 0, 1};
+      std::vector<double> trans;
+      trans.push_back(1);
+      trans.push_back(1);
+      trans.push_back(0);
+      trans.push_back(1);
+      trans.push_back(-1);
+      trans.push_back(0);
+      trans.push_back(0);
+      trans.push_back(0);
+      trans.push_back(1);
       DblMatrix temp(trans);
       wMat = temp;
     }
