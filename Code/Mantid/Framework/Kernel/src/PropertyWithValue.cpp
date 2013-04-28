@@ -15,6 +15,7 @@ namespace Mantid
     INSTANTIATE(int);
     INSTANTIATE(long);
     INSTANTIATE(long long);
+    INSTANTIATE(unsigned short int);
     INSTANTIATE(unsigned int);
     INSTANTIATE(unsigned long);
     INSTANTIATE(unsigned long long);
