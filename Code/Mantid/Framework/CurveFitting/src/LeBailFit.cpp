@@ -3064,7 +3064,7 @@ namespace CurveFitting
       {
         piter->second.mcA0 = a0;
         piter->second.mcA1 = a1;
-        piter->second.nonnegative = static_cast<bool>(nonnegative);
+        piter->second.nonnegative = (nonnegative != 0);
       }
     }
 
