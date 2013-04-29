@@ -86,6 +86,10 @@ def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=True,
     workdir = config['defaultsave.directory']
     outWSlist = []
     CheckXrange(xrange,'Time')
+    calib_wsname = None
+    if calib != '':
+        calib_wsname = '__calibration'
+        Load(Filename=calib,OutputWorkspace=calib_wsname)
     for file in inputfiles:
         if Verbose:
             logger.notice('Reading file :'+file)
@@ -120,10 +124,11 @@ def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=True,
         DeleteWorkspace(root)
     if Plot:
         graph = mp.plotBin(outWSlist, 0)
+    if calib_wsname is not None:
+        DeleteWorkspace(Workspace=calib_wsname)
     EndTime('Slice')
         
 def useCalib(detectors):
-    CheckHistSame(detectors,'Detectors','__calibration','Calibration')
     Divide(LHSWorkspace=detectors, RHSWorkspace='__calibration', OutputWorkspace=detectors)
     return detectors
     
