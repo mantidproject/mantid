@@ -2,7 +2,6 @@
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
-#include "vtkMath.h"
 #include "vtkAxes.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"

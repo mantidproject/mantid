@@ -15,7 +15,7 @@
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMPropertyIterator.h>
-#include <vtkSMProxy.h>
+#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
 #include <vtkSMSourceProxy.h>
 
 #include <QDebug>

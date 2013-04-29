@@ -4,7 +4,7 @@
 #include <pqAnimationScene.h>
 #include <pqPVApplicationCore.h>
 #include <vtkSMPropertyHelper.h>
-#include <vtkSMProxy.h>
+#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
 
 namespace Mantid
 {

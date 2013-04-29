@@ -17,7 +17,7 @@
 #include <pqServerManagerModel.h>
 #include <vtkContextMouseEvent.h>
 #include <vtkSMPropertyHelper.h>
-#include <vtkSMProxy.h>
+#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
 
 #include <QString>
 

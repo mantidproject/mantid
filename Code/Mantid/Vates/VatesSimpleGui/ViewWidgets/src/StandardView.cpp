@@ -9,7 +9,7 @@
 #include <pqRenderView.h>
 #include <vtkDataObject.h>
 #include <vtkSMPropertyHelper.h>
-#include <vtkSMProxy.h>
+#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
 
 #include <QHBoxLayout>
 #include <QMessageBox>

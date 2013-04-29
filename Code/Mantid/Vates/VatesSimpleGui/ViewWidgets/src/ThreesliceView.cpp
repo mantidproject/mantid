@@ -10,7 +10,7 @@
 #include <pqPluginManager.h>
 #include <pqRenderView.h>
 #include <vtkSMPropertyHelper.h>
-#include <vtkSMProxy.h>
+#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
 
 #include <QMessageBox>
 

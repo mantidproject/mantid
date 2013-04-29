@@ -29,7 +29,7 @@
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
-#include <vtkSMProxy.h>
+#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
 #include <vtkSMSourceProxy.h>
 #include <vtkSMReaderFactory.h>
 #include <vtksys/SystemTools.hxx>

@@ -6,7 +6,7 @@
 #include <pqPipelineRepresentation.h>
 #include <pqScalarsToColors.h>
 #include <pqSMAdaptor.h>
-#include <vtkSMProxy.h>
+#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
 
 #include <QColor>
 #include <QList>
