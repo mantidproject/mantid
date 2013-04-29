@@ -226,9 +226,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/SimpleWidget.cpp
                    src/Mantid/InstrumentWidget/Viewport.cpp
                    src/Mantid/InstrumentWidget/DetXMLFile.cpp
-                   src/Mantid/Remote/JobStatusDialog.cpp
-                   src/Mantid/Remote/MantidRemoteCluster.cpp
-                   src/Mantid/Remote/NewClusterDialog.cpp
 )
 
 ###########################################################################
@@ -456,9 +453,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/SimpleWidget.h
                    src/Mantid/InstrumentWidget/Viewport.h
                    src/Mantid/InstrumentWidget/DetXMLFile.h
-                   src/Mantid/Remote/JobStatusDialog.h
-                   src/Mantid/Remote/MantidRemoteCluster.h
-                   src/Mantid/Remote/NewClusterDialog.h
 )
 
 ###########################################################################
@@ -699,9 +693,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/InstrumentWidget/Projection3D.h
                        src/Mantid/InstrumentWidget/Shape2DCollection.h
                        src/Mantid/InstrumentWidget/UnwrappedSurface.h
-                       src/Mantid/Remote/JobStatusDialog.h
-                       src/Mantid/Remote/MantidRemoteCluster.h
-                       src/Mantid/Remote/NewClusterDialog.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
@@ -712,8 +703,6 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/SetUpParaview.ui			   
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/MantidMDCurveDialog.ui
-               src/Mantid/Remote/JobStatusDialog.ui
-               src/Mantid/Remote/NewClusterDialog.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )
@@ -735,6 +724,38 @@ qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
 # The generated ui headers will go here:
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+
+
+###########################################################################
+# Files specific to the remote job submission code
+###########################################################################
+if(MAKE_REMOTE_JOBS)
+# Add the algorithms for managing remote job submission
+  LIST(APPEND MANTID_SRCS
+	src/Mantid/Remote/JobStatusDialog.cpp
+	src/Mantid/Remote/MantidRemoteCluster.cpp
+	src/Mantid/Remote/NewClusterDialog.cpp
+  )
+
+  LIST(APPEND MANTID_HDRS
+	src/Mantid/Remote/JobStatusDialog.h
+	src/Mantid/Remote/MantidRemoteCluster.h
+	src/Mantid/Remote/NewClusterDialog.h
+  )
+
+  LIST(APPEND MANTID_MOC_FILES
+	src/Mantid/Remote/JobStatusDialog.h
+	src/Mantid/Remote/MantidRemoteCluster.h
+	src/Mantid/Remote/NewClusterDialog.h
+  )
+
+  LIST(APPEND UI_FILES
+	src/Mantid/Remote/JobStatusDialog.ui
+	src/Mantid/Remote/NewClusterDialog.ui
+  )
+
+endif(MAKE_REMOTE_JOBS)
+
 
 ###########################################################################
 # Internal icon links

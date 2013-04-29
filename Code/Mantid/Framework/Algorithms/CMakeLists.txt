@@ -71,7 +71,6 @@ set ( SRC_FILES
 	src/DiffractionFocussing.cpp
 	src/DiffractionFocussing2.cpp
 	src/Divide.cpp
-	src/DownloadRemoteFile.cpp
 	src/DspacemaptoCal.cpp
 	src/EQSANSResolution.cpp
 	src/EQSANSTofStructure.cpp
@@ -154,7 +153,6 @@ set ( SRC_FILES
 	src/Q1D2.cpp
 	src/Q1DWeighted.cpp
 	src/Qhelper.cpp
-	src/QueryRemoteFile.cpp
 	src/Qxy.cpp
 	src/RayTracerTester.cpp
 	src/ReadGroupsFromFile.cpp
@@ -184,8 +182,6 @@ set ( SRC_FILES
 	src/SignalOverError.cpp
 	src/SmoothData.cpp
 	src/SmoothNeighbours.cpp
-	src/StartRemoteTransaction.cpp
-	src/StopRemoteTransaction.cpp
 	src/SofQW.cpp
 	src/SofQW2.cpp
 	src/SofQW3.cpp
@@ -197,7 +193,6 @@ set ( SRC_FILES
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
-	src/SubmitRemoteJob.cpp
 	src/SumEventsByLogValue.cpp
 	src/SumNeighbours.cpp
 	src/SumRowColumn.cpp
@@ -209,7 +204,6 @@ set ( SRC_FILES
 	src/Unwrap.cpp
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
-	src/UploadRemoteFile.cpp
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
@@ -290,7 +284,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DiffractionFocussing.h
 	inc/MantidAlgorithms/DiffractionFocussing2.h
 	inc/MantidAlgorithms/Divide.h
-	inc/MantidAlgorithms/DownloadRemoteFile.h
 	inc/MantidAlgorithms/DspacemaptoCal.h
 	inc/MantidAlgorithms/EQSANSResolution.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
@@ -374,7 +367,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Q1D2.h
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qhelper.h
-	inc/MantidAlgorithms/QueryRemoteFile.h
 	inc/MantidAlgorithms/Qxy.h
 	inc/MantidAlgorithms/RayTracerTester.h
 	inc/MantidAlgorithms/ReadGroupsFromFile.h
@@ -412,12 +404,9 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
-	inc/MantidAlgorithms/StartRemoteTransaction.h
-	inc/MantidAlgorithms/StopRemoteTransaction.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
-	inc/MantidAlgorithms/SubmitRemoteJob.h
 	inc/MantidAlgorithms/SumEventsByLogValue.h
 	inc/MantidAlgorithms/SumNeighbours.h
 	inc/MantidAlgorithms/SumRowColumn.h
@@ -429,7 +418,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Unwrap.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
-	inc/MantidAlgorithms/UploadRemoteFile.h
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
@@ -448,6 +436,27 @@ if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
+
+if(MAKE_REMOTE_JOBS)
+# Add the algorithms for managing remote job submission
+  LIST(APPEND SRC_FILES
+	src/DownloadRemoteFile.cpp
+	src/QueryRemoteFile.cpp
+	src/StartRemoteTransaction.cpp
+	src/StopRemoteTransaction.cpp
+	src/SubmitRemoteJob.cpp
+	src/UploadRemoteFile.cpp
+  )
+
+  LIST(APPEND INC_FILES
+	inc/MantidAlgorithms/DownloadRemoteFile.h
+	inc/MantidAlgorithms/QueryRemoteFile.h
+	inc/MantidAlgorithms/StartRemoteTransaction.h
+	inc/MantidAlgorithms/StopRemoteTransaction.h
+	inc/MantidAlgorithms/SubmitRemoteJob.h
+	inc/MantidAlgorithms/UploadRemoteFile.h
+  )
+endif(MAKE_REMOTE_JOBS)
 
 set ( TEST_FILES
 	#	CalMuonDeadTimeTest.h
