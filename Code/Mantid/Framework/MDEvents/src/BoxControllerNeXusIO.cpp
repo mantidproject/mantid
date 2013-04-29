@@ -112,19 +112,15 @@ namespace MDEvents
 
       Poco::ScopedLock<Poco::FastMutex> _lock(m_fileMutex);
       m_ReadOnly = true;
-      NXaccess access(NXACC_READ);
       if(mode.find("w")!=std::string::npos ||mode.find("W")!=std::string::npos)
       {
           m_ReadOnly=false; 
-          access     =NXACC_RDWR;
       }
 
       // open file if it exists or crate it if not in the mode requested
-      bool fileExists(true);
       m_fileName = API::FileFinder::Instance().getFullPath(fileName);
       if(m_fileName.empty())
       {
-          fileExists = false;
           if(!m_ReadOnly)
           {
               std::string filePath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
