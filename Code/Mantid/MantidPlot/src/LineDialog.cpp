@@ -77,7 +77,11 @@ LineDialog::LineDialog( ArrowMarker *line, QWidget* parent,  Qt::WFlags fl )
 
 	gl1->addWidget(new QLabel(tr("Line width")), 2, 0);
     widthBox = new DoubleSpinBox('f');
-  widthBox->setLocale(dynamic_cast<ApplicationWindow *>(this->parent())->locale());
+    ApplicationWindow* appWin = dynamic_cast<ApplicationWindow *>(this->parent());
+    if ( appWin )
+    {
+      widthBox->setLocale(appWin->locale());
+    }
 	widthBox->setSingleStep(0.1);
     widthBox->setRange(0, 100);
 	widthBox->setValue(lm->width());
