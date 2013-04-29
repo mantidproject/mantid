@@ -251,9 +251,11 @@ def plotBin(source, indices, error_bars = False, graph_type = 0):
         return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors,graph_type)
 
     if isinstance(source, list) or isinstance(source, tuple):
-        raise RuntimeError("Currently unable to handle multiple sources for bin plotting. Merging must be done by hand.")
-    else:
-        return _callPlotBin(source, indices, error_bars, graph_type)
+        if len(source) > 1:
+            raise RuntimeError("Currently unable to handle multiple sources for bin plotting. Merging must be done by hand.")
+        else:
+            source = source[0]
+    return _callPlotBin(source, indices, error_bars, graph_type)
 
 #-----------------------------------------------------------------------------
 def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
