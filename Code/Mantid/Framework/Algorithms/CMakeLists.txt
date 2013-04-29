@@ -65,6 +65,7 @@ set ( SRC_FILES
 	src/DeleteWorkspace.cpp
 	src/DetectorDiagnostic.cpp
 	src/DetectorEfficiencyCor.cpp
+	src/DetectorEfficiencyCorUser.cpp
 	src/DetectorEfficiencyVariation.cpp
 	src/DiffractionEventCalibrateDetectors.cpp
 	src/DiffractionFocussing.cpp
@@ -76,8 +77,8 @@ set ( SRC_FILES
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
 	src/Exponential.cpp
-	src/ExportTimeSeriesLog.cpp
 	src/ExponentialCorrection.cpp
+	src/ExportTimeSeriesLog.cpp
 	src/ExtractFFTSpectrum.cpp
 	src/ExtractMask.cpp
 	src/ExtractMasking.cpp
@@ -277,6 +278,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DeleteWorkspace.h
 	inc/MantidAlgorithms/DetectorDiagnostic.h
 	inc/MantidAlgorithms/DetectorEfficiencyCor.h
+	inc/MantidAlgorithms/DetectorEfficiencyCorUser.h
 	inc/MantidAlgorithms/DetectorEfficiencyVariation.h
 	inc/MantidAlgorithms/DiffractionEventCalibrateDetectors.h
 	inc/MantidAlgorithms/DiffractionFocussing.h
@@ -498,6 +500,7 @@ set ( TEST_FILES
 	CylinderAbsorptionTest.h
 	DeleteWorkspaceTest.h
 	DetectorEfficiencyCorTest.h
+	DetectorEfficiencyCorUserTest.h
 	DetectorEfficiencyVariationTest.h
 	DiffractionEventCalibrateDetectorsTest.h
 	DiffractionFocussing2Test.h
