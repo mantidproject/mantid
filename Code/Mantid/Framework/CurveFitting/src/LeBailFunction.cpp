@@ -13,7 +13,588 @@ namespace CurveFitting
   namespace
   {
     const int PEAKRADIUS = 8;
+    const double PEAKRANGECONSTANT = 5.0;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Calculate peak heights from the model to the observed data
+  * Algorithm will deal with
+  * (1) Peaks are close enough to overlap with each other
+  * The procedure will be
+  * (a) Assign peaks into groups; each group contains either (1) one peak or (2) peaks overlapped
+  * (b) Calculate peak intensities for every peak per group
+  *
+  * @param dataws :  data workspace holding diffraction data for peak calculation
+  * @param workspaceindex:  workpace index of the data for peak calculation in dataws
+  * @param zerobackground:  flag if the data is zero background
+  * @param allpeaksvalues:  output vector storing peaks' values calculated
+  *
+  * Return: True if all peaks' height are physical.  False otherwise
+  */
+  bool LeBailFit::calculatePeaksIntensities(MatrixWorkspace_sptr dataws, size_t workspaceindex, bool zerobackground,
+                                             vector<double>& allpeaksvalues)
+  {
+    // 1. Group the peak
+    vector<vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > > peakgroupvec;
+    groupPeaks(peakgroupvec);
+
+    // 2. Calculate each peak's intensity and set
+    bool peakheightsphysical = true;
+    for (size_t ig = 0; ig < peakgroupvec.size(); ++ig)
+    {
+      g_log.debug() << "[DBx351] Peak group " << ig << " : number of peaks = "
+                          << peakgroupvec[ig].size() << "\n";
+      bool localphysical = calculateGroupPeakIntensities(peakgroupvec[ig], dataws,
+                                                         workspaceindex, zerobackground, allpeaksvalues);
+      if (!localphysical)
+      {
+        peakheightsphysical = false;
+      }
+    }
+
+    return peakheightsphysical;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Calculate peak's intensities in a group and set the calculated peak height
+   * to the corresponding peak function.
+   * @param allpeaksvalues:  vector containing the peaks values.  Increment will be made on each
+   *                      peak group
+   * @param peakgroup:  vector of peak-centre-dpsace value and peak function pair for peaks that are overlapped
+   * @param dataws:  data workspace for the peaks
+   * @param wsindex: workspace index of the peaks data in dataws
+   * @param zerobackground: true if background is zero
+   */
+  bool LeBailFit::calculateGroupPeakIntensities(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroup,
+                                                 MatrixWorkspace_sptr dataws, size_t wsindex, bool zerobackground,
+                                                 vector<double>& allpeaksvalues)
+  {
+    // 1. Sort by d-spacing
+    if (peakgroup.empty())
+    {
+      throw runtime_error("Programming error such that input peak group cannot be empty!");
+    }
+    else
+    {
+      g_log.debug() << "[DBx155] Peaks group size = " << peakgroup.size() << "\n";
+    }
+    if (peakgroup.size() > 1)
+      sort(peakgroup.begin(), peakgroup.end());
+
+    const MantidVec& vecX = dataws->readX(wsindex);
+    const MantidVec& vecY = dataws->readY(wsindex);
+
+    // Check input vector validity
+    if (allpeaksvalues.size() != vecY.size())
+    {
+      stringstream errss;
+      errss << "Input vector 'allpeaksvalues' has wrong size = " << allpeaksvalues.size()
+            << " != data workspace Y's size = " << vecY.size();
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    // 2. Check boundary
+    ThermalNeutronBk2BkExpConvPVoigt_sptr leftpeak = peakgroup[0].second;
+    double leftbound = leftpeak->centre() - PEAKRANGECONSTANT * leftpeak->fwhm();
+    if (leftbound < vecX[0])
+    {
+      g_log.information() << "Peak group's left boundary " << leftbound << " is out side of "
+                          << "input data workspace's left bound (" << vecX[0]
+                          << ")! Accuracy of its peak intensity might be affected.\n";
+      leftbound = vecX[0] + 0.1;
+    }
+    ThermalNeutronBk2BkExpConvPVoigt_sptr rightpeak = peakgroup.back().second;
+    double rightbound = rightpeak->centre() + PEAKRANGECONSTANT * rightpeak->fwhm();
+    if (rightbound > vecX.back())
+    {
+      g_log.information() << "Peak group's right boundary " << rightbound << " is out side of "
+                          << "input data workspace's right bound (" << vecX.back()
+                          << ")! Accuracy of its peak intensity might be affected.\n";
+      rightbound = vecX.back() - 0.1;
+    }
+
+    // 3. Calculate calculation range to input workspace: [ileft, iright)
+    vector<double>::const_iterator cviter;
+
+    cviter = lower_bound(vecX.begin(), vecX.end(), leftbound);
+    size_t ileft = static_cast<size_t>(cviter-vecX.begin());
+    if (ileft > 0)
+      --ileft;
+
+    cviter = lower_bound(vecX.begin(), vecX.end(), rightbound);
+    size_t iright = static_cast<size_t>(cviter-vecX.begin());
+    if (iright <= vecX.size()-1)
+      ++ iright;
+
+    // 4. Integrate
+    // a) Data structure to hold result
+    size_t ndata = iright-ileft;
+    if (ndata == 0 || ndata > iright)
+    {
+      stringstream errss;
+      errss << "[Calcualte Peak Intensity] Group range is unphysical.  iLeft = " << ileft << ", iRight = "
+            << iright << "; Number of peaks = " << peakgroup.size()
+            << "; Left boundary = " << leftbound << ", Right boundary = " << rightbound
+            << "; Left peak FWHM = " << leftpeak->fwhm() << ", Right peak FWHM = " << rightpeak->fwhm();
+      for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
+      {
+        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = peakgroup[ipk].second;
+        errss << "Peak " << ipk << ":  d_h = " << peakgroup[ipk].first << ", TOF_h = " << thispeak->centre()
+              << ", FWHM = " << thispeak->fwhm() << "\n";
+        vector<string> peakparamnames = thispeak->getParameterNames();
+        for (size_t ipar = 0; ipar < peakparamnames.size(); ++ipar)
+        {
+          errss << "\t" << peakparamnames[ipar] << " = " << thispeak->getParameter(peakparamnames[ipar]) << "\n";
+        }
+      }
+
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    //   Partial data range
+    vector<double> datax(vecX.begin()+ileft, vecX.begin()+iright);
+    vector<double> datay(vecY.begin()+ileft, vecY.begin()+iright);
+    if (datax.size() != ndata)
+    {
+      g_log.error() << "Partial peak size = " << datax.size() << " != ndata = " << ndata << "\n";
+      throw runtime_error("ndata error!");
+    }
+
+    // FunctionDomain1DVector xvalues(datax);
+
+    g_log.debug() << "[DBx356] Number of data points = " << ndata << " index from " << ileft
+                  << " to " << iright << ";  Size(datax, datay) = " << datax.size() << "\n";
+
+    vector<double> sumYs(ndata, 0.0);
+    size_t numPeaks(peakgroup.size());
+    vector<vector<double> > peakvalues(numPeaks);
+
+    // b) Integrage peak by peak
+    for (size_t ipk = 0; ipk < numPeaks; ++ipk)
+    {
+      // calculate peak function value
+      ThermalNeutronBk2BkExpConvPVoigt_sptr peak = peakgroup[ipk].second;
+      // FunctionValues localpeakvalue(xvalues);
+      vector<double> localpeakvalue(ndata, 0.0);
+
+      // peak->function(xvalues, localpeakvalue);
+      peak->functionLocal(localpeakvalue, datax);
+
+      // check data
+      size_t numbadpts(0);
+      vector<double>::const_iterator localpeakvalue_end = localpeakvalue.end();
+      for (auto it = localpeakvalue.begin(); it != localpeakvalue_end; ++it)
+      {
+        if ( (*it != 0.) && (*it < NEG_DBL_MAX || *it > DBL_MAX))
+        {
+          numbadpts++;
+        }
+      }
+
+      // report the problem and/or integrate data
+      if (numbadpts == 0)
+      {
+        // Data is fine.  Integrate them all
+        for (size_t i = 0; i < ndata; ++i)
+        {
+          // If value is physical
+          sumYs[i] += localpeakvalue[i];
+        }
+      }
+      else
+      {
+        // Report the problem
+
+        int h, k, l;
+        peak->getMillerIndex(h, k, l);
+        stringstream warnss;
+        warnss << "Peak (" << h << ", " << k << ", " << l <<") has " << numbadpts << " data points whose "
+               << "values exceed limit (i.e., not physical).\n";
+        g_log.warning(warnss.str());
+      }
+      peakvalues[ipk].assign(localpeakvalue.begin(), localpeakvalue.end());
+    } // For All peaks
+
+    // 5. Calculate intensity of all peaks
+    vector<double> pureobspeaksintensity(ndata);
+
+    // a) Remove background
+    if (zerobackground)
+    {
+      pureobspeaksintensity.assign(datay.begin(), datay.end());
+    }
+    else
+    {
+      // Non-zero background.  Remove the background
+      FunctionDomain1DVector xvalues(datax);
+      FunctionValues bkgdvalue(xvalues);
+      m_backgroundFunction->function(xvalues, bkgdvalue);
+
+      for (size_t i = 0; i < ndata; ++i)
+        pureobspeaksintensity[i] = datay[i] - bkgdvalue[i];
+    }
+
+    bool peakheightsphysical = true;
+    for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
+    {
+      ThermalNeutronBk2BkExpConvPVoigt_sptr peak = peakgroup[ipk].second;
+      double intensity = 0.0;
+
+      for (size_t i = 0; i < ndata; ++i)
+      {
+        double temp;
+        if (sumYs[i] > 1.0E-5)
+        {
+          // Reasonable non-zero value
+          double peaktogroupratio = peakvalues[ipk][i]/sumYs[i];
+          temp = pureobspeaksintensity[i] * peaktogroupratio;
+        }
+        else
+        {
+          // SumY too smaller
+          temp = 0.0;
+        }
+        double deltax;
+        if (i == 0)
+          deltax = datax[1] - datax[0];
+        else
+          deltax = datax[i] - datax[i-1];
+        intensity += temp * deltax;
+      } // for data points
+
+      if (intensity != intensity)
+      {
+        // Unphysical intensity: NaN
+        intensity = 0.0;
+        peakheightsphysical = false;
+
+        int h, k, l;
+        peak->getMillerIndex(h, k, l);
+        g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = NaN!\n";
+
+      }
+      else if (intensity <= -DBL_MAX || intensity >= DBL_MAX)
+      {
+        // Unphysical intensity: NaN
+        intensity = 0.0;
+        peakheightsphysical = false;
+
+        int h, k, l;
+        peak->getMillerIndex(h, k, l);
+        g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = Infty!\n";
+      }
+      else if (intensity < 0.0)
+      {
+        // No negative intensity
+        intensity = 0.0;
+      }
+
+      g_log.debug() << "[DBx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";
+      peak->setHeight(intensity);
+
+      // Add peak's value to peaksvalues
+      for (size_t i = ileft; i < iright; ++i)
+      {
+        allpeaksvalues[i] += (intensity * peakvalues[ipk][i-ileft]);
+      }
+
+    } // ENDFOR each peak
+
+    return peakheightsphysical;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up the fit/tie/set-parameter for LeBail Fit (mode)
+   * All parameters              : set the value
+   * Parameters for free fit     : do nothing;
+   * Parameters fixed            : set them to be fixed;
+   * Parameters for fit with tie : tie all the related up
+  */
+  void LeBailFit::setLeBailFitParameters()
+  {
+    vector<string> peakparamnames = m_dspPeaks[0].second->getParameterNames();
+
+    // 1. Set up all the peaks' parameters... tie to a constant value..
+    //    or fit by tieing same parameters of among peaks
+    std::map<std::string, Parameter>::iterator pariter;
+    for (pariter = m_funcParameters.begin(); pariter != m_funcParameters.end(); ++pariter)
+    {
+      Parameter funcparam = pariter->second;
+
+      g_log.debug() << "Step 1:  Set peak parameter value " << funcparam.name << "\n";
+
+      std::string parname = pariter->first;
+      // double parvalue = funcparam.value;
+
+      // a) Check whether it is a parameter used in Peak
+      std::vector<std::string>::iterator sit;
+      sit = std::find(peakparamnames.begin(), peakparamnames.end(), parname);
+      if (sit == peakparamnames.end())
+      {
+        // Not a peak profile parameter
+        g_log.debug() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak.\n";
+        continue;
+      }
+
+      if (!funcparam.fit)
+      {
+        // a) Fix the value to a constant number
+        size_t numpeaks = m_dspPeaks.size();
+        for (size_t ipk = 0; ipk < numpeaks; ++ipk)
+        {
+          // TODO: Make a map between peak parameter name and index. And use fix() to replace tie
+          std::stringstream ss1, ss2;
+          ss1 << "f" << ipk << "." << parname;
+          ss2 << funcparam.curvalue;
+          std::string tiepart1 = ss1.str();
+          std::string tievalue = ss2.str();
+          m_lebailFunction->tie(tiepart1, tievalue);
+          g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue << " | \n";
+
+          /*--  Code prepared to replace the existing block
+          ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
+          size_t iparam = findIndex(thispeak, funcparam.name);
+          thispeak->fix(iparam);
+          --*/
+        } // For each peak
+      }
+      else
+      {
+        // b) Tie the values among all peaks, but will fit
+        for (size_t ipk = 1; ipk < m_dspPeaks.size(); ++ipk)
+        {
+          std::stringstream ss1, ss2;
+          ss1 << "f" << (ipk-1) << "." << parname;
+          ss2 << "f" << ipk << "." << parname;
+          std::string tiepart1 = ss1.str();
+          std::string tiepart2 = ss2.str();
+          m_lebailFunction->tie(tiepart1, tiepart2);
+          g_log.debug() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /\n";
+        }
+
+        // c) Set the constraint
+        std::stringstream parss;
+        parss << "f0." << parname;
+        string parnamef0 = parss.str();
+        CurveFitting::BoundaryConstraint* bc =
+            new BoundaryConstraint(m_lebailFunction.get(), parnamef0, funcparam.minvalue, funcparam.maxvalue);
+        m_lebailFunction->addConstraint(bc);
+      }
+    } // FOR-Function Parameters
+
+    // 2. Set 'Height' to be fixed
+    for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
+    {
+      // a. Get peak height
+      ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
+      thispeak->fix(0);
+    } // For each peak
+
+    // 3. Fix all background paramaters to constants/current values
+    size_t funcindex = m_dspPeaks.size();
+    std::vector<std::string> bkgdparnames = m_backgroundFunction->getParameterNames();
+    for (size_t ib = 0; ib < bkgdparnames.size(); ++ib)
+    {
+      std::string parname = bkgdparnames[ib];
+      double parvalue = m_backgroundFunction->getParameter(parname);
+      std::stringstream ss1, ss2;
+      ss1 << "f" << funcindex << "." << parname;
+      ss2 << parvalue;
+      std::string tiepart1 = ss1.str();
+      std::string tievalue = ss2.str();
+
+      g_log.debug() << "Step 2: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /\n";
+
+      m_lebailFunction->tie(tiepart1, tievalue);
+
+      // TODO: Prefer to use fix other than tie().  Need to figure out the parameter index from name
+      /*
+        mLeBailFunction->fix(paramindex);
+      */
+    }
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** From table/map to set parameters to an individual peak.
+   * It mostly is called by function in calculation.
+   * @param peak :  ThermalNeutronBk2BkExpConvPVoigt function to have parameters' value set
+   * @param parammap:  map of Parameters to set to peak
+   * @param peakheight: height of the peak
+   * @param setpeakheight:  boolean as the option to set peak height or not.
+   */
+  void LeBailFit::setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, map<std::string, Parameter> parammap,
+                                     double peakheight, bool setpeakheight)
+  {
+    // 1. Prepare, sort parameters by name
+    std::map<std::string, Parameter>::iterator pit;
+    vector<string> peakparamnames = peak->getParameterNames();
+
+    // 2. Apply parameters values to peak function
+    for (pit = parammap.begin(); pit != parammap.end(); ++pit)
+    {
+      // a) Check whether the parameter is a peak parameter
+      std::string parname = pit->first;
+      std::vector<std::string>::iterator ifind =
+          std::find(peakparamnames.begin(), peakparamnames.end(), parname);
+
+      // b) Set parameter value
+      if (ifind == peakparamnames.end())
+      {
+        // If not a peak profile parameter, skip
+        g_log.debug() << "Parameter '" << parname << "' in input parameter table workspace "
+                      << "is not for peak function " << peak->name() << ".\n";
+      }
+      else
+      {
+        // Set value
+        double value = pit->second.curvalue;
+        peak->setParameter(parname, value);
+        g_log.debug() << "LeBailFit Set " << parname << "= " << value << "\n";
+      }
+    } // ENDFOR: parameter iterator
+
+    // 3. Peak height
+    if (setpeakheight)
+      peak->setParameter(0, peakheight);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** From table/map to set parameters to all peaks.
+    * @param peaks:   vector of shared pointers to peaks that have parameters' values to set
+    * @param parammap: map of Parameters to set to peak
+    * @param peakheight: a universal peak height to set to all peaks
+    * @param setpeakheight: flag to set peak height to each peak or not.
+   */
+  void LeBailFit::setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
+                                     map<std::string, Parameter> parammap,
+                                     double peakheight, bool setpeakheight)
+  {
+    // 1. Prepare, sort parameters by name
+    std::map<std::string, Parameter>::iterator pit;
+    size_t numpeaks = peaks.size();
+    if (numpeaks == 0)
+      throw runtime_error("Set parameters to empty peak list. ");
+
+    // 2. Apply parameters values to peak function
+    vector<string> peakparnames = peaks[0].second->getParameterNames();
+    size_t numparnames = peakparnames.size();
+
+    for (size_t i = 0; i < numparnames; ++i)
+    {
+      if (i == 0 && setpeakheight)
+      {
+        // a) If index is height and set to height
+        for (size_t ipk = 0; ipk < numpeaks; ++ipk)
+          peaks[ipk].second->setParameter(0, peakheight);
+
+      }
+      else if (i > 0)
+      {
+        // b) A non height parameter
+        string parname = peakparnames[i];
+        pit = parammap.find(parname);
+
+        // Skip if not found
+        if (pit == parammap.end())
+        {
+          // Not found
+          g_log.debug() << "Peak parameter " << parname
+                        << "cannot be found in parameter map.\n";
+          continue;
+        }
+
+        // Set value to each peak
+        double parvalue = pit->second.curvalue;
+        for (size_t ipk = 0; ipk < numpeaks; ++ipk)
+          peaks[ipk].second->setParameter(i, parvalue);
+
+      }
+      else
+      {
+        // c) If index is height, but height is not be set
+        ;
+      }
+    }
+
+    return;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Group peaks together
+    * @param peakgroupvec:  output vector containing peaks grouped together.
+    * Disabled argument: MatrixWorkspace_sptr dataws, size_t workspaceindex,
+   */
+  void LeBailFit::groupPeaks(vector<vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > >& peakgroupvec)
+  {
+    // 1. Sort peaks
+    if (m_dspPeaks.size() > 0)
+    {
+      sort(m_dspPeaks.begin(), m_dspPeaks.end());
+    }
+    else
+    {
+      std::stringstream errmsg;
+      errmsg << "Group peaks:  No peak is found in the peak vector. ";
+      g_log.error() << errmsg.str() << "\n";
+      throw std::runtime_error(errmsg.str());
+    }
+    size_t numpeaks = m_dspPeaks.size();
+
+    // 2. Group peaks
+    peakgroupvec.clear();
+
+    // a) Starting value
+    vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroup;
+    size_t ipk = 0;
+
+    while (ipk < numpeaks)
+    {
+      peakgroup.push_back(m_dspPeaks[ipk]);
+      if (ipk < numpeaks-1)
+      {
+        // Test whether next peak will be the different group
+        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
+        ThermalNeutronBk2BkExpConvPVoigt_sptr rightpeak = m_dspPeaks[ipk+1].second;
+
+        double thisrightbound = thispeak->centre() + PEAKRANGECONSTANT * thispeak->fwhm();
+        double rightleftbound = rightpeak->centre() - PEAKRANGECONSTANT * rightpeak->fwhm();
+
+        if (thisrightbound < rightleftbound)
+        {
+          // This peak and right peak are away
+          vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroupcopy = peakgroup;
+          peakgroupvec.push_back(peakgroupcopy);
+          peakgroup.clear();
+        }
+        else
+        {
+          // Do nothing
+          ;
+        }
+      }
+      else
+      {
+        // Last peak.  Push the current
+        vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroupcopy = peakgroup;
+        peakgroupvec.push_back(peakgroupcopy);
+      }
+      ++ ipk;
+    } // ENDWHILE
+
+    g_log.debug() << "[Calculate Peak Intensity]:  Number of Peak Groups = " << peakgroupvec.size()
+                  << "\n";
+
+    return;
+  }
+
 
 //  DECLARE_FUNCTION(LeBailFunction)
 

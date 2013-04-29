@@ -2,24 +2,29 @@
 #define MANTID_CURVEFITTING_LEBAILFUNCTION_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IPowderDiffPeakFunction.h"
+
+/*
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/Bk2BkExpConvPV.h"
+*/
+
+using namespace std;
 
 namespace Mantid
 {
 namespace CurveFitting
 {
 
-  /** LeBailFunction : LeBail Fit
-   *
-    Prototype:  mainly focussed on the workflow
-    
-    First goal: Fit 2 peaks
+  /** LeBailFunction : LeBailFunction is to calculate peak intensities in a composite
+   *                   function including neutron peak and background functions.
 
-    @date 2012-06-11
+    @date 2013-04-26 : original LeBailFunction is not used by any other functions. And thus
+                       it is rewritten.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -41,15 +46,28 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LeBailFunction : public API::ParamFunction, public API::IFunction1D, public API::IFunctionMW
+  class DLLExport LeBailFunction
   {
   public:
+    /// Constructor
     LeBailFunction();
-    virtual ~LeBailFunction();
-    
-    virtual std::string name() const;
 
-    // Functions to input parameters
+    /// Destructor
+    virtual ~LeBailFunction();
+
+    /// Set peak parameters
+    void setPeakParameters(map<string, double> peakparammap);
+
+    /// Add a new peak
+    void addPeak(int h, int k, int l);
+
+    /// Get a peak
+
+
+    /// Function
+
+
+
     void addPeaks(std::vector<std::vector<int> > peakhkls, std::vector<double> peakheights);
     void setPeakHeights(std::vector<double> inheights);
     CurveFitting::Bk2BkExpConvPV_sptr getPeak(size_t peakindex);

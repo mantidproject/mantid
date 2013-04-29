@@ -55,6 +55,7 @@ set ( SRC_FILES
 	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
+	src/IPowderDiffPeakFunction.cpp
 	src/ISpectrum.cpp
 	src/ISplittersWorkspace.cpp
 	src/ITableWorkspace.cpp
@@ -117,6 +118,7 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
         src/IEventWorkspace.cpp
         src/IFunctionMD.cpp
         src/IPeakFunction.cpp
+	src/IPowderDiffPeakFunction.cpp
         )
 
 set ( INC_FILES
@@ -194,6 +196,7 @@ set ( INC_FILES
 	inc/MantidAPI/IPeak.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
+	inc/MantidAPI/IPowderDiffPeakFunction.h
 	inc/MantidAPI/ISpectrum.h
 	inc/MantidAPI/ISplittersWorkspace.h
 	inc/MantidAPI/ITableWorkspace.h
