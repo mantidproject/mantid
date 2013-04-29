@@ -267,6 +267,8 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
     Bm=spLatt->getB();
     for(int i=0;i<3;i++)LatPar[i]=spLatt->a(i);
   }
+  if(FrameID==CnvrtToMD::AutoSelect)
+      FrameID = findTargetFrame(TargWSDescription);
 
   switch(FrameID)
   {

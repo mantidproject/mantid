@@ -106,7 +106,7 @@ void test_buildDimNames(){
     TargWSDescription.buildFromMatrixWS(ws2D,"Q3D","Direct");
 
    MDWSTransform MsliceTransf;
-   TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TargWSDescription,CnvrtToMD::NoScaling));
+   TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TargWSDescription,CnvrtToMD::HKLFrame,CnvrtToMD::NoScaling));
 
    std::vector<std::string> dimNames = TargWSDescription.getDimNames();
    TS_ASSERT_EQUALS("[H,0,0]",dimNames[0]);
@@ -155,7 +155,7 @@ void testTransfMat1()
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      CnvrtToMD::CoordScaling scales = CnvrtToMD::HKLScale;
      TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::AutoSelect,scales));
-     TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::HKLScale));
+     TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::HKLFrame,CnvrtToMD::HKLScale));
 
       dimNames = TWS.getDimNames();
       TS_ASSERT_EQUALS("[H,0,0]",dimNames[0]);
@@ -167,7 +167,7 @@ void testTransfMat1()
       std::vector<double> rot1;
       scales = CnvrtToMD::OrthogonalHKLScale;
       TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::AutoSelect,scales));
-      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,scales));
+      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::AutoSelect,scales));
 
       dimNames = TWS.getDimNames();
       TS_ASSERT_EQUALS("[H,0,0]",dimNames[0]);
