@@ -97,8 +97,8 @@ namespace Geometry
 
       void saveNexus(::NeXus::File * file, const std::string & group) const;
       void loadNexus(::NeXus::File * file, const std::string & group);
-
-
+      /// the method reports if the goniometer was defined with some parameters
+      bool isDefined()const;
     private:
       /// Global rotation matrix of the goniometer
       Kernel::DblMatrix R;

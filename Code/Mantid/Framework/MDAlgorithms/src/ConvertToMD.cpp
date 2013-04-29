@@ -251,15 +251,7 @@ ConvertToMD::init()
 "the number of the target workspace dimensions by one. See [[MD Transformation factory]] for further details.",
                      Direction::InOut);
 
-     MDEvents::MDWSTransform QSclAndFrames;
-     std::vector<std::string> QScales = QSclAndFrames.getQScalings();
-     declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
-"This property to normalize three momentums obtained in '''Q3D''' mode. See [[MD Transformation factory]] "
-"for description and available scaling modes. The value can be modified depending on the target coordinate "
-"system, defined by the property '''OutputDimensions'''. "
-   );
-
-
+    MDEvents::MDWSTransform QSclAndFrames;
     std::vector<std::string> TargFrames = QSclAndFrames.getTargetFrames();
     declareProperty("Q3DFrames", TargFrames[CnvrtToMD::AutoSelect],boost::make_shared<StringListValidator>(TargFrames),
       "What will be the Q-dimensions of the output workspace in Q3D case?\n"
@@ -269,6 +261,15 @@ ConvertToMD::init()
       "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.\n"
       "See [[ MD_Transformation_factory#Q3D |MD Transformation factory]] for more details about this. "
        );
+
+
+     std::vector<std::string> QScales = QSclAndFrames.getQScalings();
+     declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
+"This property to normalize three momentums obtained in '''Q3D''' mode. See [[MD Transformation factory]] "
+"for description and available scaling modes. The value can be modified depending on the target coordinate "
+"system, defined by the property '''OutputDimensions'''. "
+   );
+
 
 
      

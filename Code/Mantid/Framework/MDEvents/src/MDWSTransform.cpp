@@ -432,8 +432,8 @@ MDWSTransform::MDWSTransform():
   m_QScalingID[HKLScale]="HKL";
 
   m_TargFramesID[AutoSelect]="AutoSelect";
-  m_TargFramesID[LabFrame]="Q (lab frame)";
-  m_TargFramesID[SampleFrame]="Q (sample frame)";
+  m_TargFramesID[LabFrame]="Q_lab";
+  m_TargFramesID[SampleFrame]="Q_sample";
   m_TargFramesID[HKLFrame]="HKL";
 
 }
