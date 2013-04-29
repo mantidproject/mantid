@@ -145,8 +145,9 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   }
   catch (std::invalid_argument &e)
   {
+	std::string error = e.what();
     vtkDebugMacro(<< "Workspace does not have correct information to "
-                  << "plot non-orthogonal axes. " << e.what());
+                  << "plot non-orthogonal axes. " << error);
   }
   m_presenter->setAxisLabels(output);
 
