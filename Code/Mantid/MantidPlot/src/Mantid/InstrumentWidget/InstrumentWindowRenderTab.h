@@ -65,6 +65,7 @@ private slots:
   void colorMapChanged();
   void scaleTypeChanged(int);
   void glOptionChanged(bool);
+  void showMenuToolTip(QAction*);
 
 private:
   void showEvent (QShowEvent *);

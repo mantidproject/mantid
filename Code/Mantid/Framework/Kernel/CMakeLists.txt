@@ -40,6 +40,7 @@ set ( SRC_FILES
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
+	src/Material.cpp
 	src/MaskedProperty.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/HermitePolynomials.cpp
@@ -69,6 +70,7 @@ set ( SRC_FILES
 	src/SobolSequence.cpp
 	src/StartsWithValidator.cpp
 	src/Statistics.cpp
+	src/StdoutChannel.cpp
 	src/Strings.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
@@ -159,6 +161,7 @@ set ( INC_FILES
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
+	inc/MantidKernel/Material.h
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
@@ -194,6 +197,7 @@ set ( INC_FILES
 	inc/MantidKernel/SobolSequence.h
 	inc/MantidKernel/StartsWithValidator.h
 	inc/MantidKernel/Statistics.h
+	inc/MantidKernel/StdoutChannel.h
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
@@ -240,7 +244,7 @@ set ( TEST_FILES
 	DateValidatorTest.h
 	DeltaEModeTest.h
 	DirectoryValidatorTest.h
-	DiskBufferISaveableTest.h    
+	DiskBufferISaveableTest.h
 	DiskBufferTest.h
 	DynamicFactoryTest.h
 	EnabledWhenPropertyTest.h
@@ -267,6 +271,7 @@ set ( TEST_FILES
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
 	MandatoryValidatorTest.h
+	MaterialTest.h
 	MaskedPropertyTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
@@ -293,6 +298,7 @@ set ( TEST_FILES
 	SobolSequenceTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h
+	StdoutChannelTest.h
 	StringsTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
@@ -383,6 +389,7 @@ set ( PYTHONALG_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANT
 set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/plugins" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
+SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
 
 # Construct script paths.
 set ( MANTID_SCRIPTS ${MANTID_ROOT}/scripts )
@@ -456,6 +463,7 @@ set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONALG_DIRS ${PLUGINS}/PythonAlgs ) # deprecated
 set ( PYTHONPLUGIN_DIRS ${PLUGINS}/python )
 set ( DATADIRS "" )
+SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
 
 # Construct script paths by replacing the old MANTID_ROOT with the new one.
 # Unfortunately string (REGEX REPLACE ... )removes the semi-colons so we have to do this in a loop.

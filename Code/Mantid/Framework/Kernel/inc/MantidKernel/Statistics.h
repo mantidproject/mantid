@@ -52,6 +52,16 @@ namespace Mantid
       /// standard_deviation of the values
       double standard_deviation;
     };
+
+    /** R factor for powder data analysis
+      */
+    struct Rfactor
+    {
+      /// Rwp
+      double Rwp;
+      /// Rp
+      double Rp;
+    };
   
     /// Return a statistics object for the given data set
     template<typename TYPE>
@@ -63,7 +73,7 @@ namespace Mantid
     template<typename TYPE>
     std::vector<double> getModifiedZscore(const std::vector<TYPE>& data, const bool sorted=false);
     /// Return the R-factors (Rwp) of a diffraction pattern data
-    double MANTID_KERNEL_DLL getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE);
+    Rfactor MANTID_KERNEL_DLL getRFactor(const std::vector<double>& obsI, const std::vector<double>& calI, const std::vector<double>& obsE);
   
   } // namespace Kernel
 } // namespace Mantid

@@ -19,18 +19,18 @@ class ConvertTableToMatrixWorkspaceTest : public CxxTest::TestSuite
 public:
   void testName()
   {
-    TS_ASSERT_EQUALS( m_converter.name(), "ConvertTableToMatrixWorkspace" )
+    TS_ASSERT_EQUALS( m_converter->name(), "ConvertTableToMatrixWorkspace" )
   }
 
   void testVersion()
   {
-    TS_ASSERT_EQUALS( m_converter.version(), 1 )
+    TS_ASSERT_EQUALS( m_converter->version(), 1 )
   }
 
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( m_converter.initialize() )
-    TS_ASSERT( m_converter.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( m_converter->initialize() )
+    TS_ASSERT( m_converter->isInitialized() )
   }
 
 
@@ -53,15 +53,13 @@ public:
     }
 
 
-    if ( !m_converter.isInitialized() ) m_converter.initialize();
+    TS_ASSERT_THROWS_NOTHING( m_converter->setProperty("InputWorkspace",tws) );
+    TS_ASSERT_THROWS_NOTHING( m_converter->setPropertyValue("OutputWorkspace","out") );
+    TS_ASSERT_THROWS_NOTHING( m_converter->setPropertyValue("ColumnX","A") );
+    TS_ASSERT_THROWS_NOTHING( m_converter->setPropertyValue("ColumnY","B") );
+    TS_ASSERT_THROWS_NOTHING( m_converter->setPropertyValue("ColumnE","C") );
 
-    TS_ASSERT_THROWS_NOTHING( m_converter.setProperty("InputWorkspace",tws) );
-    TS_ASSERT_THROWS_NOTHING( m_converter.setPropertyValue("OutputWorkspace","out") );
-    TS_ASSERT_THROWS_NOTHING( m_converter.setPropertyValue("ColumnX","A") );
-    TS_ASSERT_THROWS_NOTHING( m_converter.setPropertyValue("ColumnY","B") );
-    TS_ASSERT_THROWS_NOTHING( m_converter.setPropertyValue("ColumnE","C") );
-
-    TS_ASSERT( m_converter.execute() );
+    TS_ASSERT( m_converter->execute() );
 
     MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(
     API::AnalysisDataService::Instance().retrieve("out"));
@@ -96,11 +94,6 @@ public:
 
   void test_Default_ColumnE()
   {
-    
-    ITableWorkspace_sptr tws = WorkspaceFactory::Instance().createTable();
-    tws->addColumn("double","A");
-    tws->addColumn("double","B");
-
     size_t n = 10;
     for (size_t i = 0; i < n; ++i)
     {
@@ -110,19 +103,9 @@ public:
       row << x << y;
     }
 
+    TS_ASSERT( m_converter->execute() );
 
-    Mantid::Algorithms::ConvertTableToMatrixWorkspace converter;
-    converter.initialize();
-
-    TS_ASSERT_THROWS_NOTHING( converter.setProperty("InputWorkspace",tws) );
-    TS_ASSERT_THROWS_NOTHING( converter.setPropertyValue("OutputWorkspace","out") );
-    TS_ASSERT_THROWS_NOTHING( converter.setPropertyValue("ColumnX","A") );
-    TS_ASSERT_THROWS_NOTHING( converter.setPropertyValue("ColumnY","B") );
-
-    TS_ASSERT( converter.execute() );
-
-    MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-    API::AnalysisDataService::Instance().retrieve("out"));
+    MatrixWorkspace_sptr mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
 
     TS_ASSERT( mws );
     TS_ASSERT_EQUALS( mws->getNumberHistograms() , 1);
@@ -146,8 +129,29 @@ public:
     API::AnalysisDataService::Instance().remove("out");
   }
 
+  void test_fail_on_empty_table()
+  {
+    TS_ASSERT_THROWS( m_converter->execute(), std::runtime_error );
+  }
+
+  void setUp()
+  {
+    tws = WorkspaceFactory::Instance().createTable();
+    tws->addColumn("double","A");
+    tws->addColumn("double","B");
+
+    m_converter = boost::make_shared<Mantid::Algorithms::ConvertTableToMatrixWorkspace>();
+    m_converter->setRethrows(true);
+    m_converter->initialize();
+    TS_ASSERT_THROWS_NOTHING( m_converter->setProperty("InputWorkspace",tws) );
+    TS_ASSERT_THROWS_NOTHING( m_converter->setPropertyValue("OutputWorkspace","out") );
+    TS_ASSERT_THROWS_NOTHING( m_converter->setPropertyValue("ColumnX","A") );
+    TS_ASSERT_THROWS_NOTHING( m_converter->setPropertyValue("ColumnY","B") );
+  }
+
 private:
-    Mantid::Algorithms::ConvertTableToMatrixWorkspace m_converter;
+    IAlgorithm_sptr m_converter;
+    ITableWorkspace_sptr tws;
 };
 
 #endif /*CONVERTTABLETOMATRIXWORKSPACETEST_H_*/

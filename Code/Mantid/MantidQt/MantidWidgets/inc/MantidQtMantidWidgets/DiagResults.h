@@ -19,7 +19,6 @@ namespace MantidQt
     public:
       DiagResults(QWidget *parent);
       void updateResults(const QString & testSummary);
-      void showButtons(bool show=true);
 
     signals:
       /// is emitted just before the window dies to let the window that created this know the pointer it has is invalid
@@ -28,22 +27,11 @@ namespace MantidQt
     private:
       void updateRow(int row, QString text);
       int addRow(QString firstColumn, QString secondColumn);
-      void addButtons(int row);
-      void setupButtons(int row, QString test);
       void closeEvent(QCloseEvent *event);
-    private slots:
-      void tableList(int row);
-      void instruView(int row);
 
     private:
       /// the layout that widgets are added to
       QGridLayout *m_Grid;
-      /// points to the slot that deals with list buttons being pressed
-      QSignalMapper *m_ListMapper;
-      /// points to the slot that deals with view buttons being pressed
-      QSignalMapper *m_ViewMapper;
-      /// stores the name of the workspaces that contains the results of each test
-      QHash<int,QString> m_diagWS;
     };
   }
 }

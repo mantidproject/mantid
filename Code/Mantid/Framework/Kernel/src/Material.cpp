@@ -1,13 +1,13 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidGeometry/Objects/Material.h"
+#include "MantidKernel/Material.h"
 #include <stdexcept>
 
 namespace Mantid
 {
 
-  namespace Geometry
+  namespace Kernel
   {
 
     using PhysicalConstants::NeutronAtom;
@@ -116,7 +116,7 @@ namespace Mantid
     /**
      * Get the absorption cross section for a given wavelength.
      * CURRENTLY This assumes a linear dependence on the wavelength with the reference
-     * wavelegnth = 1.7982 angstroms.
+     * wavelength = NeutronAtom::ReferenceLambda angstroms.
      * @param lambda :: The wavelength to evaluate the cross section
      * @returns The value of the absoprtioncross section at 
      * the given wavelength
@@ -168,7 +168,87 @@ namespace Mantid
       file->readData("pressure", m_pressure);
       file->closeGroup();
     }
+    Material::ChemicalFormula Material::parseChemicalFormula(const std::string chemicalSymbol)
+    {
+      Material::ChemicalFormula CF;
+  	  const char *s;
+  	  s = chemicalSymbol.c_str();
+  	  size_t i = 0;
+  	  size_t ia = 0;
+  	  size_t numberParen = 0;
+  	  bool isotope = false;
+  	  while (i < chemicalSymbol.length())
+  	  {
+  		if (s[i] >= 'A' && s[i]<='Z')
+  		{
+  			std::string buf(s+i, s+i+1);
+  			CF.atoms.push_back(buf);
+  			CF.numberAtoms.push_back(0);
+  			CF.aNumbers.push_back(0);
+  			ia ++;
+  		}
+  		else if (s[i] >= 'a' && s[i]<='z')
+  		{
+  			std::string buf(s+i, s+i+1);
+  			CF.atoms[ia-1].append(buf);
+  		}
+  		else if (s[i] >= '0' && s[i]<='9')
+  		{
+  			if (isotope)
+  			{
+  				size_t ilast = i;
+  				// Number of digits in aNumber
+  				if (CF.aNumbers[ia-1] != 0) ilast -= (int) std::log10 ((double) CF.aNumbers[ia-1]) + 1;
+  				std::string buf(s+ilast, s+i+1);
+  				CF.aNumbers[ia-1] = static_cast<uint16_t>(std::atoi(buf.c_str()));
+  			}
+  			else
+  			{
+  				size_t ilast = i;
+  				// Number of digits in aNumber
+  				if (CF.numberAtoms[ia-1] != 0) ilast -= (int) std::log10 ((double) CF.numberAtoms[ia-1]) + 1;
+  				std::string buf(s+ilast, s+i+1);
+  				CF.numberAtoms[ia-1] = static_cast<uint16_t>(std::atoi(buf.c_str()));
+  			}
 
+  		}
+  		else if (s[i] == '(' || s[i] ==')')
+  		{
+  			isotope = !isotope;
+  			if (s[i] == '(')
+  			{
+                // next atom
+
+  				numberParen = ia + 1;
+  			}
+  			else
+  			{
+  				if (ia > numberParen)for (size_t i0 = numberParen - 1; i0 < ia; i0++)
+  				{
+  					  // if more than one atom in parenthesis, it is compound
+  					CF.numberAtoms[i0] = CF.aNumbers[i0];
+  					CF.aNumbers[i0] = 0;
+  				}
+  			}
+  		}
+  		else
+  		{
+  		}
+  		i++;
+  	  }
+  		if (ia == 1 && s[0] != '(')
+  		{
+  			  // isotopes in molecular expressions must have parentheses
+  			  // single isotopes can omit parentheses
+  			CF.aNumbers[0] = CF.numberAtoms[0];
+  			CF.numberAtoms[0] = 1;
+  		}
+  		for (size_t i0=0; i0<ia; i0++)
+  		{
+                          if (CF.numberAtoms[i0] == 0)CF.numberAtoms[i0] = 1;
+  		}
+  		return CF;
+    }
   } 
 
 }  

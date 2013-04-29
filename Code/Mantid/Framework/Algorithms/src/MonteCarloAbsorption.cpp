@@ -57,9 +57,7 @@ namespace Mantid
     using API::WorkspaceFactory;
     using API::Progress;
     using namespace Geometry;
-    using Kernel::CompositeValidator;
-    using Kernel::V3D;
-    using Kernel::Direction;
+    using namespace Kernel;
 
     //------------------------------------------------------------------------------
     // Public methods
@@ -349,7 +347,7 @@ namespace Mantid
      * @returns The attenuation factor
      */
     double 
-    MonteCarloAbsorption::attenuation(const double length, const Geometry::Material& material,
+    MonteCarloAbsorption::attenuation(const double length, const Kernel::Material& material,
                                       const double lambda) const
     {
       const double rho = material.numberDensity() * 100.0;

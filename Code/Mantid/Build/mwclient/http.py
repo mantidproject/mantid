@@ -6,6 +6,7 @@ import time
 
 import upload
 import errors
+import os
 
 from client import __ver__
 
@@ -53,12 +54,27 @@ class Cookie(object):
 class HTTPPersistentConnection(object):
 	http_class = httplib.HTTPConnection
 	scheme_name = 'http'
+	import os
+	usesProxy = False
 	
 	def __init__(self, host, pool = None):
 		self.cookies = {}
 		self.pool = pool
 		if pool: self.cookies = pool.cookies
-		self._conn = self.http_class(host)
+		
+		http_proxy_env = os.environ.get('http_proxy')
+		if http_proxy_env is not None:
+			try:
+				# proxy
+				http_proxy_url = urlparse.urlparse(http_proxy_env)
+				http_proxy_host,http_proxy_port = http_proxy_url.netloc.split(':')
+				self._conn = self.http_class(http_proxy_host,int(http_proxy_port))
+				self.usesProxy=True;
+			except:
+				self._conn = self.http_class(host)
+		else: 
+			self._conn = self.http_class(host)
+			
 		self._conn.connect()
 		self.last_request = time.time()
 		
@@ -91,7 +107,10 @@ class HTTPPersistentConnection(object):
 		if _headers: headers.update(_headers)
 		
 		try:
-			self._conn.request(method, path, headers = headers)
+			if self.usesProxy is False:
+				self._conn.request(method, path, headers = headers)
+			else:
+				self._conn.request(method, "http://"+host+path, headers = headers)
 			if issubclass(data.__class__, upload.Upload):
 				for s in data:
 					self._conn.send(s)
@@ -104,7 +123,12 @@ class HTTPPersistentConnection(object):
 			except httplib.BadStatusLine:
 				self._conn.close()
 				self._conn.connect()
-				self._conn.request(method, path, data, headers)
+				
+				if self.usesProxy is False:
+					self._conn.request(method, path, data, headers)
+				else:
+					self._conn.request(method, "http://"+host+path, data, headers)
+				
 				res = self._conn.getresponse()
 		except socket.error, e:
 			self._conn.close()

@@ -227,7 +227,12 @@ void toValue(const std::string& strvalue, std::vector<std::vector<T> >& value, c
 template<typename T>
 inline void addingOperator(T& lhs, const T& rhs)
 {
-  lhs += rhs;
+  // The cast here (and the expansion of the compound operator which that
+  // necessitates) is because if this function is created for a template
+  // type narrower than an int, the compiler will expande the operands to
+  // ints which leads to a compiler warning when it's assigned back to the
+  // narrower type.
+  lhs = static_cast<T>(lhs + rhs);
 }
 
 template<typename T>

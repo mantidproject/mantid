@@ -8,7 +8,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Objects/Material.h"
+#include "MantidKernel/Material.h"
 #include "MantidGeometry/Objects/Object.h"
 
 #include <boost/shared_ptr.hpp>
@@ -64,7 +64,7 @@ public:
   // Looking to get rid of the first of these constructors in due course (and probably add others)
   explicit ObjComponent(const std::string& name, IComponent* parent=0);
   explicit ObjComponent(const std::string& name, Object_const_sptr shape, IComponent* parent=0,
-                        Material_sptr material = Material_sptr());
+                        Kernel::Material_sptr material = Kernel::Material_sptr());
   virtual ~ObjComponent();
 
   /** Virtual Copy Constructor
@@ -98,7 +98,7 @@ public:
   /// Set a new shape on the component
   void setShape(Object_const_sptr newShape);
   /// Return the material this component is made from
-  const Material_const_sptr material() const;
+  const Kernel::Material_const_sptr material() const;
 
 protected:
   /// The physical geometry representation
@@ -106,7 +106,7 @@ protected:
   // exposing non-const methods of Object through this class.
   Object_const_sptr m_shape;
   /// The material this object is made of
-  Material_const_sptr m_material;
+  Kernel::Material_const_sptr m_material;
 
   const Kernel::V3D factorOutComponentPosition(const Kernel::V3D& point) const;
   const Kernel::V3D takeOutRotation(Kernel::V3D point) const;

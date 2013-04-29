@@ -765,7 +765,7 @@ namespace Mantid
     {
       double xmin;
       double xmax;
-      this->getXMinMax(xmin, xmax); // delagate to the proper code
+      this->getXMinMax(xmin, xmax); // delegate to the proper code
       return xmin;
     }
 
@@ -773,7 +773,7 @@ namespace Mantid
     {
       double xmin;
       double xmax;
-      this->getXMinMax(xmin, xmax); // delagate to the proper code
+      this->getXMinMax(xmin, xmax); // delegate to the proper code
       return xmax;
     }
 
@@ -785,13 +785,11 @@ namespace Mantid
       size_t numberOfSpectra = this->getNumberHistograms();
 
       // determine the data range
-      double xfront;
-      double xback;
       for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++)
       {
-        const MantidVec& dataX = this->readX(workspaceIndex); // force using const version
-        xfront = dataX.front();
-        xback = dataX.back();
+        const MantidVec& dataX = this->readX(workspaceIndex);
+        const double xfront = dataX.front();
+        const double xback = dataX.back();
         if (boost::math::isfinite(xfront) && boost::math::isfinite(xback))
         {
           if (xfront < xmin)
@@ -1256,18 +1254,16 @@ namespace Mantid
      *
      * @return the time of the first pulse
      * @throw runtime_error if the log is not found; or if it is empty.
+     * @throw invalid_argument if the log is not a double TimeSeriesProperty (should be impossible)
      */
     Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const
     {
-      TimeSeriesProperty<double>* log = dynamic_cast<TimeSeriesProperty<double>*> (this->run().getLogData("proton_charge"));
-      if (!log)
-        throw std::runtime_error("EventWorkspace::getFirstPulseTime: No TimeSeriesProperty called 'proton_charge' found in the workspace.");
-      DateAndTime startDate;
+      TimeSeriesProperty<double>* log = this->run().getTimeSeriesProperty<double>("proton_charge");
+
+      DateAndTime startDate = log->firstTime();
       DateAndTime reference("1991-01-01T00:00:00");
 
       int i=0;
-      startDate = log->nthTime(i);
-
       // Find the first pulse after 1991
       while (startDate < reference && i < 100)
       {
@@ -1286,15 +1282,12 @@ namespace Mantid
      *
      * @return the time of the first pulse
      * @throw runtime_error if the log is not found; or if it is empty.
+     * @throw invalid_argument if the log is not a double TimeSeriesProperty (should be impossible)
      */
     Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const
     {
-      TimeSeriesProperty<double>* log = dynamic_cast<TimeSeriesProperty<double>*> (this->run().getLogData("proton_charge"));
-      if (!log)
-        throw std::runtime_error("EventWorkspace::getFirstPulseTime: No TimeSeriesProperty called 'proton_charge' found in the workspace.");
-      DateAndTime stopDate = log->lastTime();
-      //Return as DateAndTime.
-      return stopDate;
+      TimeSeriesProperty<double>* log = this->run().getTimeSeriesProperty<double>("proton_charge");
+      return log->lastTime();
     }
 
 

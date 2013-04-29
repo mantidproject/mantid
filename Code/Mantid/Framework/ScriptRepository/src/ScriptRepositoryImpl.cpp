@@ -18,6 +18,9 @@ using Mantid::Kernel::ConfigServiceImpl;
 #include <Poco/Exception.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/NetException.h>
+#include <Poco/Net/HTMLForm.h>
+#include "Poco/Net/FilePartSource.h"
+
 
 // Visual Studion compains with the inclusion of Poco/FileStream
 // disabling this warning.
@@ -51,10 +54,6 @@ namespace Mantid
 namespace API
 {
 
-  static void notImplemented(){
-    throw ScriptRepoException("This method is not implemented yet"); 
-  };
-  
   static ScriptRepoException pocoException(const std::string & info, 
                                            Poco::Exception & ex){
     std::stringstream ss;     
@@ -110,10 +109,11 @@ namespace API
   {    
     // get the local path and the remote path
     std::string loc, rem; 
+    ConfigServiceImpl & config = ConfigService::Instance();
+    remote_upload = config.getString("UploaderWebServer"); 
     if (local_rep.empty() || remote.empty()){
-      ConfigServiceImpl & config = ConfigService::Instance();
       loc = config.getString("ScriptLocalRepository"); 
-      rem = config.getString("ScriptRepository");     
+      rem = config.getString("ScriptRepository");      
     }else{
       local_repository = local_rep; 
       remote_url = remote; 
@@ -440,7 +440,7 @@ namespace API
             st |= LOC; 
           // the file is remote_changed if the date of the pub_date file is 
           // diferent from the local downloaded pubdate.
-          if (entry.pub_date != entry.downloaded_pubdate)
+          if (entry.pub_date > entry.downloaded_pubdate)
             st |= REMO; 
           
           
@@ -488,8 +488,10 @@ namespace API
         break;
       case LOCAL_ONLY | LOCAL_CHANGED:
         acc_status = LOCAL_CHANGED;
+        break;
       case REMOTE_ONLY | REMOTE_CHANGED:
         acc_status = REMOTE_CHANGED;
+        break;
       default:
         acc_status = BOTH_CHANGED;
         break;        
@@ -651,7 +653,7 @@ namespace API
 
       tmpFile.copyTo(local_path); 
       
-    }catch(Poco::FileAccessDeniedException & ex){
+    }catch(Poco::FileAccessDeniedException &){
       std::stringstream ss; 
       ss << "You cannot create file at " << local_path << ". Not downloading ..."; 
       throw ScriptRepoException(ss.str());      
@@ -691,20 +693,131 @@ namespace API
   }
 
   /**
-     @todo Describe
-
+   * Uploads one file to the ScriptRepository web server, pushing, indirectly, to the 
+   * git repository. It will send in a POST method, the file and the following fields: 
+   *  - author : Will identify the author of the change
+   *  - email:  Will identify the email of the author
+   *  - comment: Description of the nature of the file or of the update
+   *  
+   * It will them upload to the URL pointed to UploaderWebServer. It will them receive a json file 
+   * with some usefull information about the success or failure of the attempt to upload. 
+   * In failure, it will be converted to an appropriated ScriptRepoException.
   */
   void ScriptRepositoryImpl::upload(const std::string & file_path, 
                                     const std::string & comment,
                                     const std::string & author, 
-                                   const std::string & description)
+                                    const std::string & email)
     
   {
-    UNUSED_ARG(file_path); 
-    UNUSED_ARG(comment);
-    UNUSED_ARG(author);
-    UNUSED_ARG(description);    
-    notImplemented();
+    using namespace Poco::Net;
+    try{
+      g_log.notice() << "ScriptRepository uploading " << file_path << " ..." << std::endl; 
+      Poco::URI uri(remote_upload); 
+      std::string path(uri.getPathAndQuery());
+      HTTPClientSession session(uri.getHost(), uri.getPort()); 
+      HTTPRequest req(HTTPRequest::HTTP_POST, path, 
+                      HTTPMessage::HTTP_1_0); 
+      HTMLForm form(HTMLForm::ENCODING_MULTIPART); 
+      
+      // add the fields author, email and comment
+      form.add("author",author); 
+      form.add("mail", email); 
+      form.add("comment",comment); 
+      
+      // deal with the folder
+      std::string relative_path = convertPath(file_path); 
+      std::string absolute_path = local_repository + relative_path; 
+      std::string folder = "./"; 
+      size_t pos = relative_path.rfind('/'); 
+      if (pos != std::string::npos)
+        folder += std::string(relative_path.begin(), relative_path.begin() + pos);
+      if (folder[folder.size()-1] != '/')
+        folder += "/";
+      g_log.information() << "Uploading to folder: " << folder << std::endl; 
+      form.add("path",folder); 
+      
+      // inserting the file
+      FilePartSource * m_file = new FilePartSource(absolute_path);
+      form.addPart("file",m_file); 
+      form.prepareSubmit(req);
+      
+      // get the size of everything
+      std::stringstream sst; 
+      form.write(sst); 
+      // move back to the begining of the file
+      m_file->stream().clear();
+      m_file->stream().seekg(0,std::ios::beg);  
+      // set the size
+      req.setContentLength((int)sst.str().size());
+      
+      std::ostream& ostr = session.sendRequest(req);
+      // send the request.
+      ostr << sst.str(); 
+      
+      HTTPResponse response;
+      std::istream & rs = session.receiveResponse(response);
+
+      g_log.information() << "ScriptRepository upload status: " 
+                          << response.getStatus() << " " << response.getReason() << std::endl;
+      std::stringstream answer; 
+      { // remove the status message from the end of the reply, in order not to get exception from the read_json parser
+        std::stringstream server_reply; 
+        std::string server_reply_str; 
+        Poco::StreamCopier::copyStream(rs, server_reply);
+        server_reply_str= server_reply.str(); 
+        size_t pos = server_reply_str.rfind("}");
+        if (pos != std::string::npos)
+          answer << std::string(server_reply_str.begin() , server_reply_str.begin() + pos + 1); 
+        else
+          answer << server_reply_str; 
+      }
+      g_log.debug() << "Form Output: " << answer.str() << std::endl; 
+
+      std::string info; 
+      std::string detail;
+      std::string published_date;
+        
+      ptree pt; 
+      try{
+        read_json(answer, pt); 
+        info = pt.get<std::string>("message",""); 
+        detail = pt.get<std::string>("detail","");
+        published_date = pt.get<std::string>("pub_date","");
+        std::string cmd = pt.get<std::string>("shell",""); 
+        if (!cmd.empty())
+          detail.append("\nFrom Command: ").append(cmd);
+                
+      }catch (boost::property_tree::json_parser_error & ex){
+        throw ScriptRepoException("Bad answer from the Server",
+                                  ex.what()); 
+      }
+
+      if (info == "success"){
+        g_log.notice() << "ScriptRepository:" << file_path <<  " uploaded!"<< std::endl; 
+        
+        // update the file
+        RepositoryEntry & entry = repo.at(file_path);
+        {
+          Poco::File local(absolute_path);
+          entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(local.getLastModified(),
+                                                                              timeformat));
+          // update the pub_date and downloaded_pubdate with the pub_date given by the upload. 
+          // this ensures that the status will be correctly defined.
+          if (!published_date.empty())
+            entry.pub_date = DateAndTime(published_date);
+          entry.downloaded_pubdate = entry.pub_date;
+          entry.status = BOTH_UNCHANGED;      
+        }
+        g_log.information() << "ScriptRepository update local json " << std::endl; 
+        updateLocalJson(file_path, entry); ///FIXME: performance! 
+        
+        
+      }else
+        throw ScriptRepoException(info, detail); 
+      
+    }catch(Poco::Exception & ex){
+      throw ScriptRepoException(ex.displayText(), ex.className()); 
+    }
   }
 
   /** The ScriptRepositoryImpl is set to be valid when the local repository path
@@ -853,6 +966,7 @@ namespace API
     //Configure Poco HTTP Client Session
     try{
       Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
+      session.setTimeout(Poco::Timespan(2,0));// 2 secconds
       Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path,
                                      Poco::Net::HTTPMessage::HTTP_1_1);
       Poco::Net::HTTPResponse response;
@@ -1054,8 +1168,12 @@ namespace API
       //      array.push_back(std::make_pair("auto_update",entry.auto_update)));
       local_json.push_back( std::pair<std::string, boost::property_tree::basic_ptree<std::string,std::string> >(path,array) );
     }else{
-      local_json.put(std::string(path).append(".downloaded_pubdate"), 
-                     entry.downloaded_pubdate.toFormattedString());
+      local_json.put(
+                boost::property_tree::ptree::path_type( std::string(path).append("!downloaded_pubdate"), '!'), 
+                entry.downloaded_pubdate.toFormattedString().c_str());
+      local_json.put(
+                boost::property_tree::ptree::path_type( std::string(path).append("!downloaded_date"), '!'), 
+                entry.downloaded_date.toFormattedString().c_str());
     }
     //g_log.debug() << "Update LOCAL JSON FILE" << std::endl; 
     #if defined(_WIN32) ||  defined(_WIN64)

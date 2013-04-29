@@ -93,8 +93,11 @@ namespace WorkflowAlgorithms
 
     Workspace_sptr outputWS = sumEvents->getProperty("OutputWorkspace");
     auto table = boost::dynamic_pointer_cast<ITableWorkspace>(outputWS);
-    // Remove the scan_index=0 entry from the resulting table (will be the first row)
-    table->removeRow(0);
+    // Remove the scan_index=0 entry from the resulting table (unless it's the only one)
+    if ( table->rowCount() > 1 && table->Int(0,0) == 0 )
+    {
+      table->removeRow(0);
+    }
 
     setProperty("OutputWorkspace",table);
   }
@@ -119,7 +122,7 @@ namespace WorkflowAlgorithms
       }
     } catch (Exception::NotFoundError&) {
       // The monitors workspace isn't there - just return
-      g_log.information() << "No monitor workspace (" << monitorWorkspaceName << ") found.\n";
+      g_log.debug() << "No monitor workspace (" << monitorWorkspaceName << ") found.\n";
     }
 
     return monitorWorkspace;
@@ -152,7 +155,7 @@ namespace WorkflowAlgorithms
       convertUnits->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
       convertUnits->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputWS);
       convertUnits->setProperty("Target", rangeUnit);
-      // Emode/efixed?
+      // TODO: Emode/efixed?
       convertUnits->executeAsChildAlg();
     }
 

@@ -199,9 +199,11 @@ namespace Algorithms
     // Add a column to hold the proton charge for which the log had a certain value
     auto protonChgCol = outputWorkspace->addColumn("double","proton_charge");
     // Get hold of the proton charge log for later
-    const TimeSeriesProperty<double> * protonChargeLog = 0;
+    const TimeSeriesProperty<double> * protonChargeLog = NULL;
     try {
       protonChargeLog = m_inputWorkspace->run().getTimeSeriesProperty<double>("proton_charge");
+      // Set back to NULL if the log is empty or bad things will happen later
+      if ( protonChargeLog->realSize() == 0 ) protonChargeLog = NULL;
     } catch (std::exception&) {
       // Log and carry on if not found. Column will be left empty.
       g_log.warning("proton_charge log not found in workspace.");
@@ -225,6 +227,14 @@ namespace Algorithms
       // Create a filter giving the times when this log has the current value
       TimeSplitterType filter;
       log->makeFilterByValue(filter,value,value); // min & max are the same of course
+
+      // This section ensures that the filter goes to the end of the run
+      if ( value == log->lastValue() && protonChargeLog )
+      {
+        TimeInterval timeAfterLastLogValue(log->lastTime(),m_inputWorkspace->getLastPulseTime());
+        log->expandFilterToRange(filter,value,value,timeAfterLastLogValue);
+      }
+
       // Calculate the time covered by this log value and add it to the table
       double duration = 0.0;
       for ( auto it = filter.begin(); it != filter.end(); ++it )
@@ -259,6 +269,8 @@ namespace Algorithms
   void SumEventsByLogValue::filterEventList(const API::IEventList& eventList, const int minVal,
       const int maxVal, const Kernel::TimeSeriesProperty<int> * log, std::vector<int>& Y)
   {
+    if ( log->realSize() == 0 ) return;
+
     // TODO: Handle weighted events and avoid the vector copy below
     const auto pulseTimes = eventList.getPulseTimes();
     for ( std::size_t eventIndex = 0; eventIndex < pulseTimes.size(); ++eventIndex )
@@ -302,7 +314,7 @@ namespace Algorithms
       }
     } catch (Exception::NotFoundError&) {
       // The monitors workspace isn't there - just return
-      g_log.information() << "No monitor workspace (" << monitorWorkspaceName << ") found.\n";
+      g_log.debug() << "No monitor workspace (" << monitorWorkspaceName << ") found.\n";
       return;
     }
 
@@ -346,7 +358,7 @@ namespace Algorithms
       // Move on to the next one if this is not a TSP
       if ( tsp == NULL ) continue;
       // Don't keep ones with only one entry
-      if ( tsp->realSize() < 2 ) continue;
+      //if ( tsp->realSize() < 2 ) continue;
       // Now make sure it's either an int or double tsp, and if so add log to the list
       if ( dynamic_cast<TimeSeriesProperty<double>* >(*log) || dynamic_cast<TimeSeriesProperty<int>* >(*log))
       {

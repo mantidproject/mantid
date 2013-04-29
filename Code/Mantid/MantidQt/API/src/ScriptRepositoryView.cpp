@@ -139,8 +139,9 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
     ui->repo_treeView->setModel(model);
     ui->repo_treeView->setItemDelegateForColumn(1, new RepoDelegate(this));
     ui->repo_treeView->setItemDelegateForColumn(2, new CheckBoxDelegate(this));
-    
+    ui->repo_treeView->hideColumn(2); // hide the auto update column
     ui->repo_treeView->setColumnWidth(0,290);
+    
 
     // stablish the connections.
     connect(ui->repo_treeView, SIGNAL(activated(const QModelIndex &)),
@@ -260,7 +261,8 @@ void ScriptRepositoryView::RepoDelegate::paint(
     icon = QIcon::fromTheme("dialog-ok", QIcon(QPixmap(":/win/dialog-ok")));
   else if (state == RepoModel::localOnlySt() || state == RepoModel::localChangedSt())
     icon = QIcon::fromTheme("add-files-to-archive", QIcon(QPixmap(":win/upload")));
-
+  else if (state == RepoModel::downloadSt() || state == RepoModel::uploadSt())
+    icon = QIcon(QPixmap(":win/running_process"));
   // define the region to draw the icon
   QRect buttonRect( option.rect);  
   int min_val = buttonRect.width()<buttonRect.height() ? buttonRect.width() : buttonRect.height();

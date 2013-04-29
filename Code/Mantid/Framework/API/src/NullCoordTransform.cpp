@@ -33,6 +33,15 @@ namespace Mantid
     }
 
     /**
+     * Coordinate transform id
+     * @return the type of coordinate transform
+     */
+    std::string NullCoordTransform::id() const
+    {
+      return "NullCoordTransform";
+    }
+
+    /**
     Apply the transformation.
     @param inputVector : pointer to the input vector
     @param outVector : pointer to the output vector.

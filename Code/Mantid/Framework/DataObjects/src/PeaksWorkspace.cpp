@@ -267,7 +267,6 @@ namespace Mantid
         {
           Peak pk = getPeak(i);
           double D = QLabFrame.distance(pk.getQLabFrame() );
-          std::cout<<"D="<<D<<std::endl;
           if( D < minDist)
           {
             minDist = D;

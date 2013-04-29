@@ -256,11 +256,12 @@ public:
         bool v2 = interestws->isMaskedIndex(ih);
         if (v1){
           number0 ++;
+          TS_ASSERT( !v2 );
         }
         if (!v2){
           number1 ++;
+          TS_ASSERT( v1 );
         }
-        TS_ASSERT_EQUALS(v1 ^ v2, true); // must be 1
       }
 
       TS_ASSERT_EQUALS(number0 > 0, true);

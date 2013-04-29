@@ -8,7 +8,6 @@
 #include <QByteArray>
 #include <QDesktopServices>
 #include <stdexcept>
-#include <strstream>
 
 namespace MantidQt
 {
@@ -243,9 +242,7 @@ void HelpWindowImpl::findCollectionFile(std::string &binDir)
     }
 
     // all tries have failed
-    std::strstream msg;
-    msg << "Failed to find help system collection file \"" << COLLECTION << "\"";
-    throw std::runtime_error(msg.str());
+    throw std::runtime_error("Failed to find help system collection file \"" + COLLECTION + "\"");
 }
 
 /**

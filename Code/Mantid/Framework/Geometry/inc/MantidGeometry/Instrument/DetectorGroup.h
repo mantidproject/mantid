@@ -184,9 +184,9 @@ namespace Mantid
         return boost::shared_ptr<const Object>();
       }
       /// Returns the material of the Object
-      const boost::shared_ptr<const Material> material() const
+      const boost::shared_ptr<const Kernel::Material> material() const
       {
-        return boost::shared_ptr<const Material>();
+        return boost::shared_ptr<const Kernel::Material>();
       }
     private:
       /// Private, unimplemented copy constructor

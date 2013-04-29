@@ -140,9 +140,9 @@ public:
     calY[3] = 1.3;
     obsE[3] = 1.0;
 
-    double rwp = getRFactor(obsY, calY, obsE);
+    Rfactor rfactor = getRFactor(obsY, calY, obsE);
 
-    TS_ASSERT_DELTA(rwp, 0.1582, 0.0001);
+    TS_ASSERT_DELTA(rfactor.Rwp, 0.1582, 0.0001);
   }
 
   /** Test throw exception

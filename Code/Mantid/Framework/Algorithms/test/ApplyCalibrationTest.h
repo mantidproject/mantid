@@ -82,6 +82,8 @@ public:
      TS_ASSERT_DELTA( newPos.X() , 1.0, 0.0001);
      TS_ASSERT_DELTA( newPos.Y() , 0.01*(ndets-1), 0.0001);
      TS_ASSERT_DELTA( newPos.Z() , 2.0, 0.0001);
+
+     dataStore.remove(wsName);
   }
 
   void testComplex()
@@ -143,6 +145,8 @@ public:
      TS_ASSERT_DELTA( newPos.X() , 1.0, 0.0001);
      TS_ASSERT_DELTA( newPos.Y() , 0.02, 0.0001);
      TS_ASSERT_DELTA( newPos.Z() , 2.0, 0.0001);
+
+     dataStore.remove(wsName);
   }
 
 

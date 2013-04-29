@@ -15,6 +15,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
@@ -665,6 +666,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
       Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
       std::string peakTableName;
+      bool newPeaksWorkspace = false;
       if ( tw )
       {
           peakTableName = tw->name();
@@ -681,6 +683,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
               tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
               tw->setInstrument(instr);
               Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
+              newPeaksWorkspace = true;
           }
           else
           {
@@ -708,6 +711,16 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       alg->setProperty( "BinCount", y );
       alg->execute();
 
+      // if data WS has UB copy it to the new peaks workspace
+      if ( newPeaksWorkspace && ws->sample().hasOrientedLattice() )
+      {
+          auto UB = ws->sample().getOrientedLattice().getUB();
+          auto lattice = new Mantid::Geometry::OrientedLattice;
+          lattice->setUB(UB);
+          tw->mutableSample().setOrientedLattice(lattice);
+      }
+
+      // if there is a UB available calculate HKL for the new peak
       if ( tw->sample().hasOrientedLattice() )
       {
           auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("CalculatePeaksHKL");

@@ -7,6 +7,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
+#include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 
@@ -182,6 +183,9 @@ ConfigServiceImpl::ConfigServiceImpl() :
   //Register the FilterChannel with the Poco logging factory
   Poco::LoggingFactory::defaultFactory().registerChannelClass("FilterChannel", new Poco::Instantiator<
       Poco::FilterChannel, Poco::Channel>);
+  //Register StdChannel with Poco
+  Poco::LoggingFactory::defaultFactory().registerChannelClass("StdoutChannel", new Poco::Instantiator<
+      Poco::StdoutChannel, Poco::Channel>);
 
   // Define the directory to search for the Mantid.properties file.
   Poco::File f;

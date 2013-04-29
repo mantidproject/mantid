@@ -87,7 +87,6 @@ namespace MantidQt
       void specifyRuns(const QStringList &runFileNames);
       void TOFUpd();
       void noDispDialog() {m_dispDialog = NULL;}
-      void validateHardMaskFile();
     };
   }
 }

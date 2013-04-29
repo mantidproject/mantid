@@ -79,7 +79,7 @@ namespace API
     try {
       // Create the live listener (which will try to connect).
       // Don't capture the returned listener - just let it die.
-      create(instrumentName);
+      create(instrumentName,true);
       // If we get to here we have connected successfully.
       return true;
     } catch (std::runtime_error&) {

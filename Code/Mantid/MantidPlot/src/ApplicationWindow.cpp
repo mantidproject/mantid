@@ -3369,7 +3369,7 @@ void ApplicationWindow::convertTableToMatrixWorkspace()
   {
     mt = convertTableToTableWorkspace(t);
   }
-  //mantidUI->executeAlgorithm("ConvertTableToMatrixWorkspace","InputWorkspace="+QString::fromStdString(mt->getWorkspaceName()));
+  if ( !mt ) return;
   QMap<QString,QString> params;
   params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
   mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
@@ -3383,6 +3383,8 @@ void ApplicationWindow::convertTableToMatrixWorkspace()
 MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
 {
   if (!t) return NULL;
+  std::vector<int> format(t->numCols(),-1);
+  std::vector<int> precision(t->numCols(),-1);
   Mantid::API::ITableWorkspace_sptr tws = Mantid::API::WorkspaceFactory::Instance().createTable();
   for(int col = 0; col < t->numCols(); ++col)
   {
@@ -3392,19 +3394,27 @@ MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
     int plotType = 6; // Label
     switch(des)
     {
-    case Table::X: {plotType = 1; type = "double"; break;}
-    case Table::Y: {plotType = 2; type = "double"; break;}
-    case Table::Z: {plotType = 3; type = "double"; break;}
-    case Table::xErr:  {plotType = 4; type = "double"; break;}
-    case Table::yErr: {plotType = 5; type = "double"; break;}
+    case Table::X:     { plotType = 1; type = "double"; break; }
+    case Table::Y:     { plotType = 2; type = "double"; break; }
+    case Table::Z:     { plotType = 3; type = "double"; break; }
+    case Table::xErr:  { plotType = 4; type = "double"; break; }
+    case Table::yErr:  { plotType = 5; type = "double"; break; }
     default:
       type = "string"; plotType = 6;
+    }
+
+    if ( plotType < 6 )
+    {
+        // temporarily convert numeric columns to format that doesn't use commas in numbers
+        t->columnNumericFormat(col,&format[col],&precision[col]);
+        t->setColNumericFormat(2,precision[col],col);
     }
     std::string columnName = name.toStdString();
     tws->addColumn(type,columnName);
     Mantid::API::Column_sptr column = tws->getColumn(columnName);
     column->setPlotType(plotType);
   }
+  // copy data from table to workspace
   tws->setRowCount(t->numRows());
   for(int col = 0; col < t->numCols(); ++col)
   {
@@ -3414,11 +3424,19 @@ MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
       column->read(row, t->text(row,col).toStdString());
     }
   }
+  // restore original format of numeric columns
+  for(int col = 0; col < t->numCols(); ++col)
+  {
+      if ( format[col] >= 0 )
+      {
+          t->setColNumericFormat(format[col],precision[col],col);
+      }
+  }
   std::string wsName = t->objectName().toStdString();
   if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
   {
-    if (QMessageBox::query("MantidPlot","Workspace with name " + t->objectName() + " already exists\n"
-      "Do you want to overwrite it?"))
+    if ( QMessageBox::question(this, "MantidPlot","Workspace with name " + t->objectName() + " already exists\n"
+      "Do you want to overwrite it?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes )
     {
       Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName,tws);
     }
