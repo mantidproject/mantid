@@ -50,7 +50,7 @@ CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription 
 {
 
   Kernel::Matrix<double> IMat(3,3,true);
-  bool isGonUnitMat   = IMat.equals(TargWSDescription.getGoniometerMatr());
+  bool hasGoniometer = TargWSDescription.hasGoniometer(); 
 
   bool isLatticeUnitMat;
   if(TargWSDescription.hasLattice())
@@ -62,7 +62,7 @@ CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription 
   }
   
 
-  if(isGonUnitMat && isLatticeUnitMat ) return LabFrame;
+  if(hasGoniometer && isLatticeUnitMat ) return LabFrame;
   if(!isLatticeUnitMat)return HKLFrame;
   return SampleFrame;
 }
@@ -76,9 +76,11 @@ void  MDWSTransform::checkTargetFrame(const MDEvents::MDWSDescription &TargWSDes
 {
     switch(CoordFrameID)
     {
-    case(LabFrame): // nothing needed for lab frame or sample frame
-    case(SampleFrame):
+    case(LabFrame): // nothing needed for lab frame 
         return;
+    case(SampleFrame):
+        if(!TargWSDescription.hasGoniometer())
+            throw std::invalid_argument(" Sample frame needs goniometer to be defined on the workspace ");
     case(HKLFrame):   // ubMatrix has to be present
         if(!TargWSDescription.hasLattice())
             throw std::invalid_argument(" HKL frame needs UB matrix defined on the workspace ");
