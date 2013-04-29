@@ -2,7 +2,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 
-FirstTimeSetup::FirstTimeSetup(QWidget *parent) : QDialog(parent)
+FirstTimeSetup::FirstTimeSetup(QWidget *parent) : QDialog(parent,Qt::WindowStaysOnTopHint)
 {
   m_uiForm.setupUi(this);
   initLayout();
