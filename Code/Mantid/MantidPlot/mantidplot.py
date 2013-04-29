@@ -250,7 +250,7 @@ def plotBin(source, indices, error_bars = False, graph_type = 0):
             indexes = [indexes]
         return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors,graph_type)
 
-    if hasattr(source, "__len__"):
+    if isinstance(source, list) or isinstance(source, tuple):
         if len(source) > 1:
             raise RuntimeError("Currently unable to handle multiple sources for bin plotting. Merging must be done by hand.")
         else:
