@@ -144,7 +144,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
                 if filterdict["FilterType"] == "ByTime":
                     # Filter by time
-                    script += "%sInterval   = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LengthOfTimeInterval"])
+                    script += "%sTimeInterval   = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LengthOfTimeInterval"])
                     script += "%sUnitOfTime = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["UnitOfTime"])
                     script += "%sLogName    = '%s',\n" % (DiffractionReductionScripter.WIDTH, "")
 
@@ -158,7 +158,14 @@ class DiffractionReductionScripter(BaseReductionScripter):
                     script += "%sFilterLogValueByChangingDirection = '%s',\n" % (DiffractionReductionScripter.WIDTH, 
                             filterdict["FilterLogValueByChangingDirection"])
                     if filterdict["LogValueInterval"] != "":
-                        script += "%sInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
+                        # Filter by log value interval
+                        script += "%sLogValueInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
+                        #if filterdict["LogName"] == "": 
+                        #    # No log value.  Then filter by time interval
+                        #    script += "%sTimeInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
+                        #else: 
+                        #    # Found log value interval
+                        #    script += "%sLogValueInterval       = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogValueInterval"])
                     script += "%sLogBoundary    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
                     if filterdict["TimeTolerance"] != "":
                         script += "%sTimeTolerance  = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])

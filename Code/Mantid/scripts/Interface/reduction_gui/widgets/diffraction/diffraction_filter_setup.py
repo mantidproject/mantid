@@ -333,15 +333,14 @@ class FilterSetupWidget(BaseWidget):
             return
 
         # Construct workspace
-        output = api.GetTimeSeriesLogInformation(InputWorkspace = str(self._metaws), 
+        output = api.ExportTimeSeriesLog(InputWorkspace = str(self._metaws), 
                 OutputWorkspace = str(logname),
-                Function = "Export Log",
                 LogName = str(logname),
                 IsEventWorkspace = False)
-        api.DeleteWorkspace(Workspace="PercentStat")
+        #api.DeleteWorkspace(Workspace="PercentStat")
 
         try: 
-            logws = output[0]
+            logws = output
         except IndexError:
             msg4 = str("Error! Workspace %s is unable to convert log %s to workspace. " % (str(self._metaws), str(logname)))
             self._content.info_text_browser.setText(str(msg1+msg4))
