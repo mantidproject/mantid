@@ -1717,16 +1717,16 @@
          <item>
           <widget class="QCheckBox" name="absp_ckVerbose">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Verbose</string>
            </property>
            <property name="checkable">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="checked">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -2087,16 +2087,16 @@
          <item>
           <widget class="QCheckBox" name="abscor_ckVerbose">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Verbose</string>
            </property>
            <property name="checkable">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="checked">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
           </widget>
          </item>

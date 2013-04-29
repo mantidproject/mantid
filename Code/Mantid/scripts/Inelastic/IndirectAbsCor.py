@@ -113,7 +113,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
         logger.notice(message)
         message = 'Detector angles : '+str(ndet)+' from '+str(det[0])+' to '+str(det[ndet-1])
         logger.notice(message)
-	eZ = np.zeros(nw)                  # set errors to zero
+    eZ = np.zeros(nw)                  # set errors to zero
     name = run_name + geom
     assWS = name + '_ass'
     asscWS = name + '_assc'
@@ -189,8 +189,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
         return [assWS]
 
 def AbsRunFeeder(inputWS, geom, beam, ncan, size, density, sigs, siga, avar,
-        plotOpt='None'):
-    Verbose = True
+        plotOpt='None', Verbose=False):
     Save = True
     StartTime('CalculateCorrections')
     '''Handles the feeding of input and plotting of output for the F2PY
