@@ -331,6 +331,7 @@ set ( TEST_FILES
 	LoadLogsFromSNSNexusTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
+	LoadMcStasNexusTest.h	
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
@@ -338,7 +339,7 @@ set ( TEST_FILES
 	LoadNexusLogsTest.h
 	LoadNexusMonitorsTest.h
 	LoadNexusProcessedTest.h
-	LoadNexusTest.h
+	LoadNexusTest.h	
 	LoadPDFgetNFileTest.h
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
