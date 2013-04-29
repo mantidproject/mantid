@@ -82,8 +82,8 @@ namespace Algorithms
         new API::WorkspaceProperty<DataObjects::SplittersWorkspace>("SplitterWorkspace", "", Direction::Input),
         "An input SpilltersWorskpace for filtering");
 
-    this->declareProperty(new API::FileProperty("DetectorCalibrationFile", "", API::FileProperty::OptionalLoad, ".dat"),
-        "Input pixel TOF calibration file in column data format");
+    auto tablewsprop = new WorkspaceProperty<TableWorkspace>("DetectorTOFCorrectionWorkspace", "", Direction::Input, PropertyMode::Optional);
+    declareProperty(tablewsprop, "Name of table workspace containing the log time correction factor for each detector. ");
 
     this->declareProperty("FilterByPulseTime", false,
         "Filter the event by its pulse time only for slow sample environment log.  This option can make execution of algorithm faster.  But it lowers precision.");
@@ -100,13 +100,22 @@ namespace Algorithms
   void FilterEvents::exec()
   {
     // 1. Get inputs
-    mEventWorkspace = this->getProperty("InputWorkspace");
+    m_eventWS = this->getProperty("InputWorkspace");
+    if (!m_eventWS)
+    {
+      stringstream errss;
+      errss << "Inputworkspace is not event workspace. ";
+      g_log.error(errss.str());
+      throw std::invalid_argument(errss.str());
+    }
+
     mSplittersWorkspace = this->getProperty("SplitterWorkspace");
+    mInformationWS = this->getProperty("InformationWorkspace");
+
     std::string outputwsnamebase = this->getProperty("OutputWorkspaceBaseName");
-    std::string detcalfilename = this->getProperty("DetectorCalibrationFile");
+    m_detCorrectWorkspace = getProperty("DetectorTOFCorrectionWorkspace");
     mFilterByPulseTime = this->getProperty("FilterByPulseTime");
 
-    mInformationWS = this->getProperty("InformationWorkspace");
     if (!mInformationWS)
     {
       mWithInfo = false;
@@ -143,7 +152,7 @@ namespace Algorithms
     */
 
     progress(0.2);
-    importDetectorTOFCalibration(detcalfilename);
+    importDetectorTOFCalibration();
 
     // 3. Filter Events
     mProgress = 0.20;
@@ -253,8 +262,8 @@ namespace Algorithms
 
       // 2. Generate one of the output workspaces & Copy geometry over. But we don't copy the data.
       DataObjects::EventWorkspace_sptr optws = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-          API::WorkspaceFactory::Instance().create("EventWorkspace", mEventWorkspace->getNumberHistograms(), 2, 1));
-      API::WorkspaceFactory::Instance().initializeFromParent(mEventWorkspace, optws, false);
+          API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventWS->getNumberHistograms(), 2, 1));
+      API::WorkspaceFactory::Instance().initializeFromParent(m_eventWS, optws, false);
 
       //    Add information
       if (mWithInfo)
@@ -300,103 +309,102 @@ namespace Algorithms
     return;
   }
 
-  /*
-   * Import the detector calibration on TOF
+  //----------------------------------------------------------------------------------------------
+  /** Parse TOF-correction table workspace to vectors
    */
-  void FilterEvents::importDetectorTOFCalibration(std::string detcalfilename)
+  void FilterEvents::importDetectorTOFCalibration()
   {
-    detid_t indet;
+    // 1. Prepare output
+    m_detectorIDs.clear();
+    m_detTofOffsets.clear();
 
-    // 1. Check workspace
-    if (!mEventWorkspace)
+    size_t numhist = m_eventWS->getNumberHistograms();
+    m_detectorIDs.resize(numhist, 0);
+    m_detTofOffsets.resize(numhist, 1.0);
+
+    // 2. Set the detector IDs
+    for (size_t i = 0; i < numhist; ++i)
     {
-      g_log.error() << "Required to import EventWorkspace before calling importCalibrationFile()" << std::endl;
-      throw std::invalid_argument("Calling function in wrong order!");
+      // FIXME - current implementation assumes one detector per spectra
+      const DataObjects::EventList events = m_eventWS->getEventList(i);
+      std::set<detid_t> detids = events.getDetectorIDs();
+      std::set<detid_t>::iterator detit;
+      if (detids.size() != 1)
+      {
+        stringstream errss;
+        errss << "The assumption is that one spectrum has one and only one detector. "
+              << "Error is found at spectrum " << i << ".  It has " << detids.size() << " detectors.";
+        g_log.error(errss.str());
+        throw runtime_error(errss.str());
+      }
+      detid_t detid = 0;
+      for (detit=detids.begin(); detit!=detids.end(); ++detit)
+        detid = *detit;
+      m_detectorIDs[i] = detid;
     }
 
-    // 2. Prepare output
-    mCalibDetectorIDs.clear();
-    mCalibOffsets.clear();
-    size_t numhist = mEventWorkspace->getNumberHistograms();
-    mCalibDetectorIDs.reserve(numhist);
-    mCalibOffsets.reserve(numhist);
-
-    // 3. Read file?
-    bool readcalfile = true;
-    if (detcalfilename.empty())
+    // 3. Apply the correction table if it applies
+    if (m_detCorrectWorkspace)
     {
-      readcalfile = false;
-    }
+      // If a detector calibration workspace is present
 
-    if (readcalfile)
-    {
-      try{
-        // a. Open file
-        std::ifstream ifs;
-        ifs.open(detcalfilename.c_str(), std::ios::in);
+      // a) Check input workspace
+      vector<string> colnames = m_detCorrectWorkspace->getColumnNames();
+      if (colnames.size() < 2)
+        throw runtime_error("Input table workspace is not valide.");
+      else if (colnames[0].compare("DetectorID") || colnames[1].compare("Correction"))
+        throw runtime_error("Input table workspace has wrong column definition.");
 
-        double doffset;
-        for (size_t i = 0; i < numhist; i ++)
+      // b) Parse detector to a map
+      map<detid_t, double> correctmap;
+      size_t numrows = m_detCorrectWorkspace->rowCount();
+      for (size_t i = 0; i < numrows; ++i)
+      {
+        TableRow row = m_detCorrectWorkspace->getRow(i);
+
+        detid_t detid;
+        double offset;
+        row >> detid >> offset;
+
+        correctmap.insert(make_pair(detid, offset));
+      }
+
+      // c) Map correction map to list
+      if (correctmap.size() > numhist)
+      {
+        g_log.warning() << "Input correction table workspace has more detectors (" << correctmap.size()
+                        << ") than input workspace " << m_eventWS->name() << "'s spectra number ("
+                        << numhist << ".\n";
+      }
+      else if (correctmap.size() < numhist)
+      {
+        stringstream errss;
+        errss << "Input correction table workspace has more detectors (" << correctmap.size()
+              << ") than input workspace " << m_eventWS->name() << "'s spectra number ("
+              << numhist << ".\n";
+        g_log.error(errss.str());
+        throw runtime_error(errss.str());
+      }
+
+      map<detid_t, double>::iterator fiter;
+      for (size_t i = 0; i < numhist; ++i)
+      {
+        detid_t detid = m_detectorIDs[i];
+        fiter = correctmap.find(detid);
+        if (fiter == correctmap.end())
         {
-          // i. each pixel:  get detector ID from EventWorkspace
-          const DataObjects::EventList events = mEventWorkspace->getEventList(i);
-          std::set<detid_t> detids = events.getDetectorIDs();
-          std::set<detid_t>::iterator detit;
-          detid_t detid = 0;
-          for (detit=detids.begin(); detit!=detids.end(); ++detit)
-            detid = *detit;
-
-          // ii. read file
-          ifs >> indet >> doffset;
-
-          // iii. store
-          if (indet != detid){
-            g_log.error() << "Calibration File Error!  Line " << i << " should read in pixel " << detid << "  but read in " << indet
-                << "\nAbort to reading calibration file!"<< std::endl;
-            readcalfile = false;
-            break;
-          }
-          else if (doffset < 0 || doffset > 1.0)
-          {
-            g_log.error() << "Calibration File Error!  Line " << i << " have ratio offset outside (0,1) " << detid << "  but read in " << indet
-                <<"\nAbort to reading calibration file!"<< std::endl;
-            readcalfile = false;
-            break;
-          }
-          else
-          {
-            mCalibDetectorIDs.push_back(detid);
-            mCalibOffsets.push_back(doffset);
-          }
+          stringstream errss;
+          errss << "Detector " << "w/ ID << " << detid  << " of spectrum " << i << " in Eventworkspace " << m_eventWS->name()
+                << " cannot be found in input TOF calibration workspace. ";
+          g_log.error(errss.str());
+          throw runtime_error(errss.str());
         }
-        ifs.close();
+        else
+        {
+          m_detTofOffsets[i] = fiter->second;
+        }
       }
-      catch (std::ifstream::failure&)
-      {
-        g_log.error() << "Calibration File Error!  Open calibration/offset file " << detcalfilename << " error " << std::endl;
-        mCalibDetectorIDs.clear();
-        mCalibOffsets.clear();
-        readcalfile = false;
-      }
-    } // If-readcalfile
-
-    // 4. Use default/dummy offset calibration = 1.0
-    if (!readcalfile)
-    {
-      g_log.notice() << "Using default detector offset/calibration" << std::endl;
-
-      for (size_t i = 0; i < mEventWorkspace->getNumberHistograms(); i ++)
-      {
-        std::set<detid_t> detids = mEventWorkspace->getEventList(i).getDetectorIDs();
-        std::set<detid_t>::iterator detit;
-        detid_t detid = 0;
-        for (detit=detids.begin(); detit!=detids.end(); ++detit)
-          detid = *detit;
-
-        mCalibDetectorIDs.push_back(detid);
-        mCalibOffsets.push_back(1.0);
-      }
-    } // If NOT Read-calibration-file
+    }
 
     return;
   }
@@ -406,7 +414,7 @@ namespace Algorithms
    */
   void FilterEvents::filterEventsBySplitters()
   {
-    size_t numberOfSpectra = mEventWorkspace->getNumberHistograms();
+    size_t numberOfSpectra = m_eventWS->getNumberHistograms();
     std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
 
     // 1. Loop over the histograms (detector spectra)
@@ -426,10 +434,10 @@ namespace Algorithms
       }
 
       // b) and this is the input event list
-      const DataObjects::EventList& input_el = mEventWorkspace->getEventList(iws);
+      const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
 
       // c) Perform the filtering (using the splitting function and just one output)
-      input_el.splitByFullTime(m_splitters, outputs, mCalibOffsets[iws]);
+      input_el.splitByFullTime(m_splitters, outputs, m_detTofOffsets[iws]);
 
       mProgress = 0.2+0.8*double(iws)/double(numberOfSpectra);
       progress(mProgress);
@@ -521,7 +529,7 @@ namespace Algorithms
   {
     lognames.clear();
 
-    const std::vector<Kernel::Property*> allprop = mEventWorkspace->mutableRun().getProperties();
+    const std::vector<Kernel::Property*> allprop = m_eventWS->mutableRun().getProperties();
     for (size_t ip = 0; ip < allprop.size(); ++ip)
     {
       Kernel::TimeSeriesProperty<double>* timeprop = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(allprop[ip]);
