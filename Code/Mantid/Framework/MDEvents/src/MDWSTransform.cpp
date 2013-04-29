@@ -35,7 +35,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
 
   if(TargWSDescription.AlgID.compare("Q3D")==0)
   {
-    this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
+    this->setQ3DDimensionsNames(TargWSDescription,FrameID,ScaleID);
   }
 
   return transf;
@@ -49,22 +49,20 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
 CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription &TargWSDescription)const
 {
 
-  Kernel::Matrix<double> IMat(3,3,true);
   bool hasGoniometer = TargWSDescription.hasGoniometer(); 
+  bool hasLattice    = TargWSDescription.hasLattice();
 
-  bool isLatticeUnitMat;
-  if(TargWSDescription.hasLattice())
+  if(!hasGoniometer)
   {
-    Kernel::Matrix<double> UB = TargWSDescription.getLattice()->getUB();
-    isLatticeUnitMat = IMat.equals(UB);
-  }else{
-    isLatticeUnitMat = true;
+      return LabFrame;
   }
-  
-
-  if(hasGoniometer && isLatticeUnitMat ) return LabFrame;
-  if(!isLatticeUnitMat)return HKLFrame;
-  return SampleFrame;
+  else
+  {
+      if(hasLattice)
+          return HKLFrame;
+      else
+          return SampleFrame;
+  }
 }
 /** Method verifies if the information availible on the source workspace is sufficient to build appropriate frame
  *@param TargWSDescription -- the class which contains the information about the target workspace
@@ -81,9 +79,12 @@ void  MDWSTransform::checkTargetFrame(const MDEvents::MDWSDescription &TargWSDes
     case(SampleFrame):
         if(!TargWSDescription.hasGoniometer())
             throw std::invalid_argument(" Sample frame needs goniometer to be defined on the workspace ");
+        return;
     case(HKLFrame):   // ubMatrix has to be present
         if(!TargWSDescription.hasLattice())
             throw std::invalid_argument(" HKL frame needs UB matrix defined on the workspace ");
+        if(!TargWSDescription.hasGoniometer())
+            throw std::invalid_argument(" HKL frame needs goniometer to be defined on the workspace ");
         return;
     default:
         throw std::runtime_error(" Unexpected argument in MDWSTransform::checkTargetFrame");
@@ -240,17 +241,17 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
   return Transf*Scale*Wmat;
 }
 
-/** Build meaningful dimension names for different conversion modes
-*/
-void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
-{
-  //axis units: convert string representation to any availible
-  CoordScaling ScaleID = getQScaling(QScaleRequested);
-  this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
+///** Build meaningful dimension names for different conversion modes
+//*/
+//void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
+//{
+//  //axis units: convert string representation to any availible
+//  CoordScaling ScaleID = getQScaling(QScaleRequested);
+//  this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
+//
+//}
 
-}
-
-void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling ScaleID)const
+void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame FrameID,CnvrtToMD::CoordScaling ScaleID)const
 {
 
   std::vector<Kernel::V3D> dimDirections;
@@ -267,9 +268,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
     for(int i=0;i<3;i++)LatPar[i]=spLatt->a(i);
   }
 
-  CnvrtToMD::TargetFrame TargFrameID = findTargetFrame(TargWSDescription);
-
-  switch(TargFrameID)
+  switch(FrameID)
   {
   case(CnvrtToMD::LabFrame):
     {
@@ -311,7 +310,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
     dimDirections = Kernel::V3D::makeVectorsOrthogonal(uv);
   }
   // axis names:
-  if((TargFrameID==CnvrtToMD::LabFrame)||(TargFrameID==CnvrtToMD::SampleFrame))
+  if((FrameID==CnvrtToMD::LabFrame)||(FrameID==CnvrtToMD::SampleFrame))
       for(int i=0;i<3;i++)TargWSDescription.setDimName(i,dimNames[i]);
   else
       for(int i=0;i<3;i++)TargWSDescription.setDimName(i,MDEvents::makeAxisName(dimDirections[i],dimNames));

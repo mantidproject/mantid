@@ -50,7 +50,8 @@ public:
 void testFindTargetFrame()
 {
    MDEvents::MDWSDescription TargWSDescription;
-   Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
+   Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::Create2DWorkspaceBinned(10,10);
+   //Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
    std::vector<double> minVal(4,-3),maxVal(4,3);
    TargWSDescription.setMinMax(minVal,maxVal);
 
@@ -59,7 +60,8 @@ void testFindTargetFrame()
    MDWSTransformTestHelper Transf;
    TS_ASSERT_EQUALS(CnvrtToMD::LabFrame,Transf.findTargetFrame(TargWSDescription));
 
-   spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
+   WorkspaceCreationHelper::SetGoniometer(spws,0,0,0);
+   //spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
 
    TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame,Transf.findTargetFrame(TargWSDescription));
 
@@ -70,7 +72,8 @@ void testFindTargetFrame()
 void testForceTargetFrame()
 {
    MDEvents::MDWSDescription TargWSDescription;
-   Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
+   
+   Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::Create2DWorkspaceBinned(10,10);
    std::vector<double> minVal(4,-3),maxVal(4,3);
    TargWSDescription.setMinMax(minVal,maxVal);
    spws->mutableSample().setOrientedLattice(NULL); 
@@ -79,9 +82,12 @@ void testForceTargetFrame()
 
    MDWSTransformTestHelper Transf;
    TSM_ASSERT_THROWS("Forced HKL frame whould not accept workspace without oriented lattice",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::HKLFrame,CnvrtToMD::HKLScale),std::invalid_argument);
-   TSM_ASSERT_THROWS("Forced SampleFrame frame whould not accept workspace without oriented lattice",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::SampleFrame,CnvrtToMD::HKLScale),std::invalid_argument);
+   TSM_ASSERT_THROWS("Forced SampleFrame frame whould not accept workspace without goniometer defined",Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::SampleFrame,CnvrtToMD::HKLScale),std::invalid_argument);
    spws->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(*pLattice)); 
-   spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
+   
+   WorkspaceCreationHelper::SetGoniometer(spws,20,0,0);
+
+   //spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
 
    std::vector<double> transf;
    TS_ASSERT_THROWS_NOTHING(transf=Transf.getTransfMatrix(TargWSDescription,CnvrtToMD::SampleFrame,CnvrtToMD::HKLScale));

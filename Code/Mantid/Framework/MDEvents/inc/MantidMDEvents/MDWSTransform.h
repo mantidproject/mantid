@@ -74,8 +74,8 @@ public:
    std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &FrameRequested,const std::string &QScaleRequested)const;
   
    /// construct meaningful dimension names for Q3D case and different transformation types defined by the class
-   void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
-   void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling scaling)const;
+   //void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
+   void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame FrameID,CnvrtToMD::CoordScaling scaling)const;
    /// construct meaningful dimension names for ModQ case and different transformation types defined by the class;
    void setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
   /// return the list of possible scalings for momentums

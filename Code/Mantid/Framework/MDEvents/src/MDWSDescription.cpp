@@ -94,7 +94,7 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
   }
 
 
-  //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
+
 
 
 }
