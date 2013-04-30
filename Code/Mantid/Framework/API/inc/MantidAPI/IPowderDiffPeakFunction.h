@@ -88,6 +88,8 @@ protected:
   static int s_peakRadius; 
 };
 
+typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;
+
 } // namespace API
 } // namespace Mantid
 

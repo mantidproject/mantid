@@ -115,7 +115,7 @@ namespace CurveFitting
 
   };
 
-  typedef boost::shared_ptr<LeBailFunction> LeBailFunction_sptr;
+  // typedef boost::shared_ptr<LeBailFunction> LeBailFunction_sptr;
 
 
 } // namespace CurveFitting

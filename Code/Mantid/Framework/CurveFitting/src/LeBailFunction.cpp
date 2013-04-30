@@ -45,14 +45,14 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-
-
   /** Generate peaks, and add them to this composite function
     * @param peakhkls :: list of Miller indexes (HKL)
    */
   void LeBailFunction::addPeaks(std::vector<std::vector<int> > peakhkls)
   {
+#if 0
     double lattice = getParameter("LatticeConstant");
+#endif
 
     for (size_t ipk = 0; ipk < peakhkls.size(); ++ ipk)
     {
@@ -69,11 +69,14 @@ namespace CurveFitting
       int k = peakhkls[ipk][1];
       int l = peakhkls[ipk][2];
 
+#if 0
       // Calculate peak position
       double peak_d = calCubicDSpace(lattice, h, k, l);
+#endif
 
-      IPowderDiffPeakFunction_sptr newpeak = generatePeak(peak_d);
+      IPowderDiffPeakFunction_sptr newpeak = generatePeak(h, k, l);
 
+      // Add peak
       addPeak(peak_d);
       m_peakHKLVec.push_back(peakhkls[ipk]);
     }
@@ -82,7 +85,27 @@ namespace CurveFitting
   } // END of addPeaks()
 
 
+  //----------------------------------------------------------------------------------------------
+  /** Generate a peak with parameter set by
+    * @param h :: H
+    * @param k :: K
+    * @param l :: L
+    */
+  IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l)
+  {
+    IPowderDiffPeakFunction_sptr peak = boost::dynamic_pointer_cast<IPowderDiffPeakFunction>(
+          FunctionFactory::Instance().create("ThermalNeutronBk2BkExpConvPVoigt"));
 
+    peak->setMillerIndex(h, k, l);
+    for (size_t i = 0; i < m_peakParameterNames.size; ++i)
+    {
+      string parname = m_peakParameterNames[i];
+      double parvalue = m_peakFunction[parname];
+      peak->setParmeter(parname, parvalue);
+    }
+
+    return peak;
+  }
 
 
   //----------------------------------------------------------------------------------------------
@@ -496,8 +519,12 @@ namespace CurveFitting
    * @param peakheight: height of the peak
    * @param setpeakheight:  boolean as the option to set peak height or not.
    */
+#if 0
   void LeBailFit::setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, map<std::string, Parameter> parammap,
                                      double peakheight, bool setpeakheight)
+#endif
+  void LeBailFunction::setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double> parammap,
+                                         double peakheight, bool setpeakheight)
   {
     // 1. Prepare, sort parameters by name
     std::map<std::string, Parameter>::iterator pit;
