@@ -1,6 +1,8 @@
 #!/usr/bin/env python
+import logging
 import os
 import re
+from fetchimg import Fetcher
 
 from mediawiki import IMG_NOT_FOUND
 
@@ -25,6 +27,9 @@ def processHtml(htmldir, filename):
     @param filename The html file to parse and look for missing images in.
     @returns All Missing image files.
     """
+    logger = logging.getLogger("processHtml")
+    logger.info("processHtml(%s, %s)" % (htmldir, filename))
+
     # read in the entire html file
     handle = file(filename, 'r')
     text = handle.read()
@@ -49,24 +54,28 @@ def processHtml(htmldir, filename):
         options.append(candidate[:end])
     # that are set to IMG_NOT_FOUND
     if IMG_NOT_FOUND in text:
+        logger.info("IMAGE_NOT_FOUND in '%s'" % filename)
         candidates = []
         index = 0
         while index >= 0:
             index = text.find(IMG_NOT_FOUND, index)
-            end = text.find("</figure>")
+            end = text.find("</figure>", index)
             if end < index or index < 0:
                 break
             figs = re.findall(r'Missing image:\s+(.+)</figcaption>',
                               text[index:end])
             candidates.extend(figs)
             index += len(IMG_NOT_FOUND)
+            logger.info("CANDIDATES: %s" % str(candidates))
         options.extend(candidates)
 
     # add them to the list of missing images if not found
     results = []
     for candidate in options:
         candidate = os.path.join(htmldir, candidate)
+        logger.info("looking for '%s'" % candidate)
         if not os.path.exists(candidate):
+            logger.info("candidate = '%s' not found" % candidate)
             results.append(candidate)
 
     # return everything that isn't found
@@ -84,6 +93,15 @@ if __name__ == "__main__":
     parser.add_option('', '--nosummary', dest='summary',
                       default=True, action="store_false",
                       help="Turn off the summary information")
+    parser.add_option('', '--download', dest="downloadarea",
+                      default=None,
+                      help="Download the missing images from the mantid wiki to the specified directory")
+    parser.add_option('', '--loglevel', dest="loglevel",
+                      default="warn",
+                      help="Set the logging level (options are 'debug', 'info', 'warn', 'error')")
+    parser.add_option('', '--logfile', dest="logfile",
+                      default=None,
+                      help="Set filename to log to")
     (options, args) = parser.parse_args()
 
     # get the html base directory
@@ -92,6 +110,19 @@ if __name__ == "__main__":
     htmldir = os.path.abspath(args[0])
     if not os.path.exists(htmldir):
         parser.error("Must specify an existing html directory")
+
+    # configure the logger
+    if options.loglevel.startswith('debug'):
+        options.loglevel=logging.DEBUG
+    elif options.loglevel.startswith('info'):
+        options.loglevel=logging.INFO
+    elif options.loglevel.startswith('warn'):
+        options.loglevel=logging.WARNING
+    elif options.loglevel.startswith('error'):
+        options.loglevel=logging.ERROR
+    else:
+        parser.error("Failed to specify valid log level: '%s'" % options.loglevel)
+    logging.basicConfig(filename=options.logfile, level=options.loglevel)
 
     # get the list of html files
     htmlfiles = getHtml(htmldir)
@@ -115,3 +146,8 @@ if __name__ == "__main__":
             print os.path.split(filename)[-1]
         else:
             print filename
+
+    if options.downloadarea is not None:
+        for filename in missing:
+            fetcher = Fetcher(filename)
+            fetcher.download(options.downloadarea)
