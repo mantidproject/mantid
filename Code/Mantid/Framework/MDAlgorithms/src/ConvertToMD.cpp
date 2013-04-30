@@ -455,7 +455,7 @@ ConvertToMD::ConvertToMD()
 * @param dEModReq -- mode to convert energy 
 * @param otherDimNames -- the vector of additional dimensions names (if any)
 * @param QFrame      -- in Q3D case this describes target coordinate system and is ignored in any othre caste
-* @param ConvertTo_  -- The parameter describing Q-scaling transformtations
+* @param convertTo_  -- The parameter describing Q-scaling transformtations
 * @param targWSDescr -- the resulting class used to interpret all parameters together and used to describe selected transformation. 
 */ 
 bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &QModReq,const std::string &dEModReq,const std::vector<std::string> &otherDimNames,
