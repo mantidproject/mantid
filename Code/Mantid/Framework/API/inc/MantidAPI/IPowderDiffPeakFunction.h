@@ -4,7 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IFunction1D.h"
 
 namespace Mantid
 {
@@ -36,28 +37,53 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IPeakFunction : public IFunctionWithLocation
+class MANTID_API_DLL IPowderDiffPeakFunction : virtual public API::ParamFunction,public virtual API::IFunction1D
 {
 public:
-  /// Constructor
-  IPeakFunction();
-  /// Returns the peak FWHM
-  virtual double fwhm()const = 0;
 
-  /// Sets the parameters such that FWHM = w
-  virtual void setFwhm(const double w) = 0;
+  /// Overwrite IFunction base class methods
+  virtual const std::string name();
+  virtual const std::string category();
 
-  /// General implementation of the method for all peaks. 
+  /// Overwrite IPeakFunction base class methods
+  double centre()const;
+  double height()const;
+  double fwhm()const;
+  void setHeight(const double h);
+
+  void setPeakRadius(const int& r);
+
+  //--------------- ThermalNeutron peak function special ---------------------------------------
+  /// Set Miller Indicies
+  void setMillerIndex(int h, int k, int l);
+
+  /// Get Miller Index from this peak
+  void getMillerIndex(int& h, int &k, int &l);
+
+  /// Get peak parameters
+  double getPeakParameter(std::string);
+
+  /// Calculate peak parameters (alpha, beta, sigma2..)
+  void calculateParameters(bool explicitoutput) const;
+  //  double& dh, double& tof_h, double& eta, double& alpha, double& beta, double &H, double& sigma2,
+  // double &gamma, double &N,
+
+  /// Core function to calcualte peak values for whole region
+  void functionLocal(vector<double>& out, const vector<double> &xValues) const;
+
+  /// Set up the flag to show whether (from client) cell parameter value changed
+  void setUnitCellParameterValueChangeFlag(bool changed)
+  {
+    m_cellParamValueChanged = changed;
+  }
+
+  /// Override setting a new value to the i-th parameter
+  void setParameter(size_t i, const double& value, bool explicitlySet=true);
+
+  /// Override setting a new value to a parameter by name
+  void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
+
   void function1D(double* out, const double* xValues, const size_t nData)const;
-  /// General implementation of the method for all peaks. 
-  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData);
-  /// Set new peak radius
-  static void setPeakRadius(const int& r = 5);
-
-  /// Function evaluation method to be implemented in the inherited classes
-  virtual void functionLocal(double* out, const double* xValues, const size_t nData)const = 0;
-  /// Derivative evaluation method to be implemented in the inherited classes
-  virtual void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData) = 0;
 
 protected:
 /// Defines the area around the centre where the peak values are to be calculated (in FWHM).

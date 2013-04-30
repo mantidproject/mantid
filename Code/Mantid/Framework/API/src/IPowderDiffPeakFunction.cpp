@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IPowderDiffPeakFunction.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
@@ -49,12 +49,12 @@ public:
 };
 
 /// Default value for the peak radius
-int IPeakFunction::s_peakRadius = 5; 
+int IPowderDiffPeakFunction::s_peakRadius = 5;
 
 /**
   * Constructor. Sets peak radius to the value of curvefitting.peakRadius property
   */
-IPeakFunction::IPeakFunction()
+IPowderDiffPeakFunction::IPowderDiffPeakFunction()
 {
   int peakRadius;
   if ( Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",peakRadius) )
@@ -74,7 +74,7 @@ IPeakFunction::IPeakFunction()
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void IPeakFunction::function1D(double* out, const double* xValues, const size_t nData)const
+void IPowderDiffPeakFunction::function1D(double* out, const double* xValues, const size_t nData)const
 {
   double c = this->centre();
   double dx = fabs(s_peakRadius*this->fwhm());
@@ -106,7 +106,7 @@ void IPeakFunction::function1D(double* out, const double* xValues, const size_t 
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void IPeakFunction::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
+void IPowderDiffPeakFunction::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
 {
   double c = this->centre();
   double dx = fabs(s_peakRadius*this->fwhm());
@@ -132,7 +132,7 @@ void IPeakFunction::functionDeriv1D(Jacobian* out, const double* xValues, const 
   this->functionDerivLocal(&J,xValues+i0,n);
 }
 
-void IPeakFunction::setPeakRadius(const int& r)
+void IPowderDiffPeakFunction::setPeakRadius(const int& r)
 {
   if (r > 0)
   {

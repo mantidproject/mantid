@@ -3,8 +3,10 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <gsl/gsl_sf_erf.h>
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+
+using namespace std;
 
 namespace Mantid
 {
@@ -15,6 +17,73 @@ namespace CurveFitting
     const int PEAKRADIUS = 8;
     const double PEAKRANGECONSTANT = 5.0;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+    */
+  LeBailFunction::LeBailFunction()
+  {
+    CompositeFunction_sptr m_function(new CompositeFunction());
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Destructor
+    */
+  LeBailFunction::~LeBailFunction()
+  {
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Initalization
+    */
+  void LeBailFunction::init()
+  {
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+
+
+  /** Generate peaks, and add them to this composite function
+    * @param peakhkls :: list of Miller indexes (HKL)
+   */
+  void LeBailFunction::addPeaks(std::vector<std::vector<int> > peakhkls)
+  {
+    double lattice = getParameter("LatticeConstant");
+
+    for (size_t ipk = 0; ipk < peakhkls.size(); ++ ipk)
+    {
+      // Check input Miller Index
+      if (peakhkls[ipk].size() != 3)
+      {
+        stringstream errss;
+        errss << "Error of " << ipk << "-th input Miller Index.  It has " << peakhkls[ipk].size()
+              << " items, but not required 3 items.";
+        g_log.error(errss.str());
+        throw runtime_error(errss.str());
+      }
+      int h = peakhkls[ipk][0];
+      int k = peakhkls[ipk][1];
+      int l = peakhkls[ipk][2];
+
+      // Calculate peak position
+      double peak_d = calCubicDSpace(lattice, h, k, l);
+
+      IPowderDiffPeakFunction_sptr newpeak = generatePeak(peak_d);
+
+      addPeak(peak_d);
+      m_peakHKLVec.push_back(peakhkls[ipk]);
+    }
+
+    return;
+  } // END of addPeaks()
+
+
+
+
 
   //----------------------------------------------------------------------------------------------
   /** Calculate peak heights from the model to the observed data
@@ -595,6 +664,72 @@ namespace CurveFitting
     return;
   }
 
+  void LeBailFit::processInputBackground()
+  {
+ #if 0
+    // 1. Get input properties
+    string backgroundtype = getProperty("BackgroundType");
+    vector<double> bkgdorderparams = getProperty("BackgroundParameters");
+    TableWorkspace_sptr bkgdparamws = getProperty("BackgroundParametersWorkspace");
+
+    // 2. Determine where the background parameters are from
+    if (!bkgdparamws)
+    {
+      g_log.information() << "[Input] Use background specified with vector with input vector sized "
+                          << bkgdorderparams.size() << ".\n";
+    }
+    else
+    {
+      g_log.information() << "[Input] Use background specified by table workspace.\n";
+      parseBackgroundTableWorkspace(bkgdparamws, bkgdorderparams);
+    }
+#endif
+
+    // 3. Create background function
+    auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
+    m_backgroundFunction = boost::dynamic_pointer_cast<BackgroundFunction>(background);
+
+    size_t order = bkgdorderparams.size();
+
+    m_backgroundFunction->setAttributeValue("n", int(order));
+    m_backgroundFunction->initialize();
+
+    for (size_t i = 0; i < order; ++i)
+    {
+      std::stringstream ss;
+      ss << "A" << i;
+      std::string parname = ss.str();
+      m_backgroundFunction->setParameter(parname, bkgdorderparams[i]);
+    }
+
+    g_log.information() << "Generated background function: " << m_backgroundFunction->asString() << "\n";
+
+    // 4. Calculate background function and set to output workspace
+    if (!m_outputWS)
+    {
+      throw runtime_error("Output workspace hasn't been created!");
+    }
+
+    FunctionDomain1DVector domainBkgd(m_dataWS->readX(m_wsIndex));
+    FunctionValues valuesBkgd(domainBkgd);
+    m_backgroundFunction->function(domainBkgd, valuesBkgd);
+
+    MantidVec& inpvec = m_outputWS->dataY(INPUTBKGDINDEX);
+    MantidVec& calvec = m_outputWS->dataY(CALBKGDINDEX);
+    MantidVec& purevec = m_outputWS->dataY(INPUTPUREPEAKINDEX);
+    const MantidVec& obsYvec = m_dataWS->readY(m_wsIndex);
+    size_t numpts = inpvec.size();
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      inpvec[i] = valuesBkgd[i];
+      calvec[i] = valuesBkgd[i];
+      purevec[i] = obsYvec[i] - valuesBkgd[i];
+    }
+
+
+    return;
+  }
+
 
 //  DECLARE_FUNCTION(LeBailFunction)
 
@@ -624,38 +759,7 @@ namespace CurveFitting
     return "LeBailFunction";
   }
 
-  void LeBailFunction::init()
-  {
-    declareParameter("Dtt1", 1.0);
-    declareParameter("Dtt2", 1.0);
-    declareParameter("Dtt1t", 1.0);
-    declareParameter("Dtt2t", 1.0);
-    declareParameter("Zero", 0.0);
-    declareParameter("Zerot", 0.0);
 
-    declareParameter("Width", 1.0);
-    declareParameter("Tcross", 1.0);
-    declareParameter("Alph0",1.6);
-    declareParameter("Alph1",1.5);
-    declareParameter("Beta0",1.6);
-    declareParameter("Beta1",1.5);
-    declareParameter("Alph0t",1.6);
-    declareParameter("Alph1t",1.5);
-    declareParameter("Beta0t",1.6);
-    declareParameter("Beta1t",1.5);
-
-    declareParameter("Sig0", 1.0);
-    declareParameter("Sig1", 1.0);
-    declareParameter("Sig2", 1.0);
-
-    declareParameter("Gam0", 0.0);
-    declareParameter("Gam1", 0.0);
-    declareParameter("Gam2", 0.0);
-
-    declareParameter("LatticeConstant", 10.0);
-
-    return;
-  }
 
   /*
    * Calculate peak parameters for a peak at d (d-spacing value)
@@ -786,11 +890,11 @@ namespace CurveFitting
       out[iy] = 0.0;
     }
 
-    for (size_t id = 0; id < mPeakHKLs.size(); ++id)
+    for (size_t id = 0; id < m_peakHKLVec.size(); ++id)
     {
-      int h = mPeakHKLs[id][0];
-      int k = mPeakHKLs[id][1];
-      int l = mPeakHKLs[id][2];
+      int h = m_peakHKLVec[id][0];
+      int k = m_peakHKLVec[id][1];
+      int l = m_peakHKLVec[id][2];
       double dh = calCubicDSpace(latticeconstant, h, k, l);
       dvalues[id] = dh;
 
@@ -848,8 +952,7 @@ namespace CurveFitting
     throw std::runtime_error("LeBailFunction does not support analytical derivative. ");
   }
 
-  /*
-   * Add a peak with its d-value
+  /** Add a peak with its d-value
    */
   void LeBailFunction::addPeak(double dh, double height)
   {
@@ -870,40 +973,10 @@ namespace CurveFitting
     return;
   }
 
-  /*
-   * Add a peak (HKL)
-   */
-  void LeBailFunction::addPeaks(std::vector<std::vector<int> > peakhkls, std::vector<double> peakheights)
-  {
-    // 1. Check
-    if (peakhkls.size() != peakheights.size())
-    {
-      g_log.error() << "SetPeaks().  Input number of (HKL) is not equal to peak heights. " << std::endl;
-      throw std::invalid_argument("Peak's HKL and height do not match. ");
-    }
-
-    // 2. Calculate peak positions
-    double lattice = getParameter("LatticeConstant");
-    for (size_t ipk = 0; ipk < peakhkls.size(); ++ ipk)
-    {
-      if (peakhkls[ipk].size() != 3)
-      {
-        throw std::invalid_argument("Vector for (HKL) must have three and only three integers.");
-      }
-      int h = peakhkls[ipk][0];
-      int k = peakhkls[ipk][1];
-      int l = peakhkls[ipk][2];
-      double peak_d = calCubicDSpace(lattice, h, k, l);
-
-      this->addPeak(peak_d, peakheights[ipk]);
-      mPeakHKLs.push_back(peakhkls[ipk]);
-    }
-
-    return;
-  } // END Function
 
   /*
    * Reset all peaks' height
+       * @param peakheights :: list of peak heights corresponding to each peak
    */
   void LeBailFunction::setPeakHeights(std::vector<double> inheights)
   {

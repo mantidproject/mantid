@@ -245,20 +245,24 @@ namespace CurveFitting
     // 2. Import parameters from table workspace
     parseInstrumentParametersTable();
     parseBraggPeaksParametersTable();
-    bool inputparamcorrect = generatePeaksFromInput();
 
-    // 3. Create output workspace/workspace
-    createOutputDataWorkspace();
-
-    // 4. Background function and calculation on it
-    processInputBackground();
-
+#if 0
     // 5. Create CompositeFunction (Le bail function)
     createLeBailFunction();
     g_log.debug() << "LeBail Composite Function: " << m_lebailFunction->asString() << "\n";
+    bool inputparamcorrect = generatePeaksFromInput();
+#else
+m_lebailFunction.addPeaks(m_funcParameters, m_hkllist);
+#endif
 
-    // 6. Adjust function mode according to input values
-    if (inputparamcorrect)
+    // 3. Background function and calculation on it
+    processInputBackground();
+
+    // 4. Create output workspace/workspace
+    createOutputDataWorkspace();
+
+    // 5. Adjust function mode according to input values
+    if (m_lebailFunction.isParameterCorrect())
     {
       // All peaks within range are physical and good to refine
       m_inputParameterPhysical = true;
@@ -357,6 +361,7 @@ namespace CurveFitting
       parseBackgroundTableWorkspace(bkgdparamws, bkgdorderparams);
     }
 
+#if 0
     // 3. Create background function
     auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
     m_backgroundFunction = boost::dynamic_pointer_cast<BackgroundFunction>(background);
@@ -397,102 +402,12 @@ namespace CurveFitting
       calvec[i] = valuesBkgd[i];
       purevec[i] = obsYvec[i] - valuesBkgd[i];
     }
+#endif
 
     return;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Process input properties to class variables and do some initial check
-    */
-  void LeBailFit::processInputProperties()
-  {
-    // 1. Get input and perform some check
-    // a) Import data workspace and related, do crop
-    API::MatrixWorkspace_sptr inpWS = this->getProperty("InputWorkspace");
 
-    int tempindex = this->getProperty("WorkspaceIndex");
-    m_wsIndex = size_t(tempindex);
-
-    if (m_wsIndex >= inpWS->getNumberHistograms())
-    {
-      // throw if workspace index is not correct
-      stringstream errss;
-      errss << "Input WorkspaceIndex " << tempindex << " is out of boundary [0, "
-            << inpWS->getNumberHistograms() << "). ";
-      g_log.error(errss.str());
-      throw runtime_error(errss.str());
-    }
-
-    m_dataWS = this->cropWorkspace(inpWS, m_wsIndex);
-
-    // b) Minimizer
-    std::string minim = getProperty("Minimizer");
-    mMinimizer = minim;
-
-    // c) Peak parameters and related.
-    parameterWS = this->getProperty("InputParameterWorkspace");
-    reflectionWS = this->getProperty("InputHKLWorkspace");
-    mPeakRadius = this->getProperty("PeakRadius");
-
-    // d) Determine Functionality (function mode)
-    std::string function = this->getProperty("Function");
-    m_fitMode = FIT; // Default: LeBailFit
-    if (function.compare("Calculation") == 0)
-    {
-      // peak calculation
-      m_fitMode = CALCULATION;
-    }
-    else if (function.compare("CalculateBackground") == 0)
-    {
-      // automatic background points selection
-      m_fitMode = BACKGROUNDPROCESS;
-    }
-    else if (function.compare("MonteCarlo") == 0)
-    {
-      // Monte Carlo random walk refinement
-      m_fitMode = MONTECARLO;
-    }
-    else if (function.compare("LeBailFit") == 0)
-    {
-      // Le Bail Fit mode
-      m_fitMode = FIT;
-    }
-    else if (function.compare("RefineBackground") == 0)
-    {
-      // Refine background mode
-      m_fitMode = BACKGROUNDPROCESS;
-    }
-    else
-    {
-      stringstream errss;
-      errss << "Function mode " << function << " is not supported by LeBailFit().";
-      g_log.error(errss.str());
-      throw invalid_argument(errss.str());
-    }
-
-    m_dampingFactor = getProperty("Damping");
-
-    tempindex = getProperty("NumberMinimizeSteps");
-    if (tempindex >= 0)
-      m_numMinimizeSteps = static_cast<size_t>(tempindex);
-    else
-    {
-      m_numMinimizeSteps = 0;
-      stringstream errss;
-      errss << "Input number of random walk steps (" << m_numMinimizeSteps <<
-               ") cannot be less and equal to zero.";
-      g_log.error(errss.str());
-      throw invalid_argument(errss.str());
-    }
-
-    m_minimumPeakHeight = getProperty("MinimumPeakHeight");
-    m_indicatePeakHeight = getProperty("IndicationPeakHeight");
-
-    // Tolerate duplicated input peak or not?
-    m_tolerateInputDupHKL2Peaks = getProperty("AllowDegeneratedPeaks");
-
-    return;
-  }
 
 
   //===================================  Pattern Calculation & Minimizing  =======================
@@ -1477,10 +1392,103 @@ namespace CurveFitting
   //============================ Implement Le Bail Formular: Calculate Peak Intensities ==========
 
   //================================= Import/Parse and Output  ===================================
+  //----------------------------------------------------------------------------------------------
+  /** Process input properties to class variables and do some initial check
+    */
+  void LeBailFit::processInputProperties()
+  {
+    // 1. Get input and perform some check
+    // a) Import data workspace and related, do crop
+    API::MatrixWorkspace_sptr inpWS = this->getProperty("InputWorkspace");
+
+    int tempindex = this->getProperty("WorkspaceIndex");
+    m_wsIndex = size_t(tempindex);
+
+    if (m_wsIndex >= inpWS->getNumberHistograms())
+    {
+      // throw if workspace index is not correct
+      stringstream errss;
+      errss << "Input WorkspaceIndex " << tempindex << " is out of boundary [0, "
+            << inpWS->getNumberHistograms() << "). ";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    m_dataWS = this->cropWorkspace(inpWS, m_wsIndex);
+
+    // b) Minimizer
+    std::string minim = getProperty("Minimizer");
+    mMinimizer = minim;
+
+    // c) Peak parameters and related.
+    parameterWS = this->getProperty("InputParameterWorkspace");
+    reflectionWS = this->getProperty("InputHKLWorkspace");
+    mPeakRadius = this->getProperty("PeakRadius");
+
+    // d) Determine Functionality (function mode)
+    std::string function = this->getProperty("Function");
+    m_fitMode = FIT; // Default: LeBailFit
+    if (function.compare("Calculation") == 0)
+    {
+      // peak calculation
+      m_fitMode = CALCULATION;
+    }
+    else if (function.compare("CalculateBackground") == 0)
+    {
+      // automatic background points selection
+      m_fitMode = BACKGROUNDPROCESS;
+    }
+    else if (function.compare("MonteCarlo") == 0)
+    {
+      // Monte Carlo random walk refinement
+      m_fitMode = MONTECARLO;
+    }
+    else if (function.compare("LeBailFit") == 0)
+    {
+      // Le Bail Fit mode
+      m_fitMode = FIT;
+    }
+    else if (function.compare("RefineBackground") == 0)
+    {
+      // Refine background mode
+      m_fitMode = BACKGROUNDPROCESS;
+    }
+    else
+    {
+      stringstream errss;
+      errss << "Function mode " << function << " is not supported by LeBailFit().";
+      g_log.error(errss.str());
+      throw invalid_argument(errss.str());
+    }
+
+    m_dampingFactor = getProperty("Damping");
+
+    tempindex = getProperty("NumberMinimizeSteps");
+    if (tempindex >= 0)
+      m_numMinimizeSteps = static_cast<size_t>(tempindex);
+    else
+    {
+      m_numMinimizeSteps = 0;
+      stringstream errss;
+      errss << "Input number of random walk steps (" << m_numMinimizeSteps <<
+               ") cannot be less and equal to zero.";
+      g_log.error(errss.str());
+      throw invalid_argument(errss.str());
+    }
+
+    m_minimumPeakHeight = getProperty("MinimumPeakHeight");
+    m_indicatePeakHeight = getProperty("IndicationPeakHeight");
+
+    // Tolerate duplicated input peak or not?
+    m_tolerateInputDupHKL2Peaks = getProperty("AllowDegeneratedPeaks");
+
+    return;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Parse the input TableWorkspace to some maps for easy access
-  */
+    * Output : m_functionParameters
+   */
   void LeBailFit::parseInstrumentParametersTable()
   {
     // 1. Check column orders

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -273,7 +274,10 @@ namespace CurveFitting
     /// Propose new background parameters
     void proposeNewBackgroundValues();
 
-    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------
+
+    /// Le Bail Function (Composite) (old: API::CompositeFunction_sptr m_lebailFunction)
+    LeBailFunction m_lebailFunction;
 
     /// Instance data
     API::MatrixWorkspace_sptr m_dataWS;
@@ -303,8 +307,7 @@ namespace CurveFitting
 
     /// Background function
     CurveFitting::BackgroundFunction_sptr m_backgroundFunction;
-    /// Le Bail Function (Composite)
-    API::CompositeFunction_sptr m_lebailFunction;
+
 
     /// Function parameters updated by fit
     std::map<std::string, Parameter> m_funcParameters; // char = f: fit... = t: tie to value

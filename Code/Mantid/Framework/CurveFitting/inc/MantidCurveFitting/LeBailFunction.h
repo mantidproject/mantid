@@ -65,10 +65,6 @@ namespace CurveFitting
 
 
     /// Function
-
-
-
-    void addPeaks(std::vector<std::vector<int> > peakhkls, std::vector<double> peakheights);
     void setPeakHeights(std::vector<double> inheights);
     CurveFitting::Bk2BkExpConvPV_sptr getPeak(size_t peakindex);
 
@@ -108,12 +104,14 @@ namespace CurveFitting
 
     mutable std::vector<double> dvalues;
     mutable std::vector<double> heights;
-    std::vector<std::vector<int> > mPeakHKLs;
+    std::vector<std::vector<int> > m_peakHKLVec;
 
     //std::vector<API::IPeakFunction* > mPeaks;
     std::vector<Bk2BkExpConvPV_sptr> mPeaks;
 
     mutable std::vector<std::map<std::string, double> > mPeakParameters; // It is in strict order with dvalues;
+
+    void addPeaks(std::vector<std::vector<int> > peakhkls);
 
   };
 
