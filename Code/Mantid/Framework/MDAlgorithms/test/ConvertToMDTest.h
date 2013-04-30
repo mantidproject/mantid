@@ -159,7 +159,7 @@ void testExecQ3D()
     checkHistogramsHaveBeenStored("WS5DQ3D");
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
-    TS_ASSERT_EQUALS(Mantid::API::QSample, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::API::HKL, outWS->getSpecialCoordinateSystem());
 
     AnalysisDataService::Instance().remove("WS5DQ3D");
 }
