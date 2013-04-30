@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   CreateWorkspaceTest.py
   DakotaChiSquaredTest.py
   FindReflectometryLinesTest.py
+  LoadFullprofFileTest.py
   MaskWorkspaceToCalFileTest.py
   RetrieveRunInfoTest.py
   Stitch1DTest.py
