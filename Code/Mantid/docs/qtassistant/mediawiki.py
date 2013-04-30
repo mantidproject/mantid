@@ -1,4 +1,5 @@
 from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
+from parseLinks import fixLinks
 
 class MediaWiki:
     def __init__(self, htmlfile):
@@ -111,7 +112,12 @@ class MediaWiki:
         text = self.__fixHEADERS(text)
         #print "04>>>", text, "<<<"
         text = self.__fixUL(text)
+        
 
+        #fix links
+        fixer=fixLinks(text)
+        text = fixer.parse()
+        
         text = text.split("\n")
 
         self.__annotate(text)
