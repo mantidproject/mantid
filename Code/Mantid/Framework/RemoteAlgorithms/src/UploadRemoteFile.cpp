@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/UploadRemoteFile.h"
+#include "MantidRemoteAlgorithms/UploadRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/MaskedProperty.h"

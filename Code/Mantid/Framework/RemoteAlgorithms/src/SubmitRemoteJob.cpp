@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/SubmitRemoteJob.h"
+#include "MantidRemoteAlgorithms/SubmitRemoteJob.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"

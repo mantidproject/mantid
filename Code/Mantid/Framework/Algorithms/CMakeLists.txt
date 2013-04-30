@@ -437,27 +437,6 @@ if(UNITY_BUILD)
   enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-if(MAKE_REMOTE_JOBS)
-# Add the algorithms for managing remote job submission
-  LIST(APPEND SRC_FILES
-	src/DownloadRemoteFile.cpp
-	src/QueryRemoteFile.cpp
-	src/StartRemoteTransaction.cpp
-	src/StopRemoteTransaction.cpp
-	src/SubmitRemoteJob.cpp
-	src/UploadRemoteFile.cpp
-  )
-
-  LIST(APPEND INC_FILES
-	inc/MantidAlgorithms/DownloadRemoteFile.h
-	inc/MantidAlgorithms/QueryRemoteFile.h
-	inc/MantidAlgorithms/StartRemoteTransaction.h
-	inc/MantidAlgorithms/StopRemoteTransaction.h
-	inc/MantidAlgorithms/SubmitRemoteJob.h
-	inc/MantidAlgorithms/UploadRemoteFile.h
-  )
-endif(MAKE_REMOTE_JOBS)
-
 set ( TEST_FILES
 	#	CalMuonDeadTimeTest.h
 	# CountEventsInPulsesTest.h
