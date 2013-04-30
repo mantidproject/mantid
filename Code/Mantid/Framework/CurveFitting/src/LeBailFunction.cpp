@@ -523,7 +523,7 @@ namespace CurveFitting
   void LeBailFit::setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, map<std::string, Parameter> parammap,
                                      double peakheight, bool setpeakheight)
 #endif
-  void LeBailFunction::setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double> parammap,
+  void LeBailFunction::setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,
                                          double peakheight, bool setpeakheight)
   {
     // 1. Prepare, sort parameters by name
