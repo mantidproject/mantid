@@ -92,7 +92,8 @@ namespace MDAlgorithms
         API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDEvents::MDWSDescription &NewMDWSDescription);
 
         bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dEModeRequested,const std::vector<std::string> &other_dim_names,
-                                      const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr);
+                                      const std::string &QFrame,const std::string &convertTo_,MDEvents::MDWSDescription &targWSDescr);
+
        /// Store metadata and set some methadata, needed for plugin to run on the target workspace description
        void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS,MDEvents::MDWSDescription &targWSDescr) const;
 

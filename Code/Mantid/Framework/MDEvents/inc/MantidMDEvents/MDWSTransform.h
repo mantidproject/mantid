@@ -14,7 +14,9 @@ namespace MDEvents
     *  from the input parameters of the algorithm and parameters, retrieved from input and 
     *  (if availible) output MD workspace
     *
-    *   
+    *  The parameters are mainly related to MDTransfQ3D though are partially applicable to MDTransfModQ (scaling)
+    *  They are fully igonred for MDTransfNoQ which copies its data to MDworkspace and completely ignores 
+    *  the transformation matrix, defined by this class
       
     @date 2012-03-20
 
@@ -54,7 +56,9 @@ namespace CnvrtToMD
     {
       LabFrame, //< * '''Q (lab frame)''': this calculates the momentum transfer (ki-kf) for each event is calculated in the experimental lab frame.
       SampleFrame, //< * '''Q (sample frame)''': the goniometer rotation of the sample is taken out, to give Q in the frame of the sample. See [[SetGoniometer]] to specify the goniometer used in the experiment.     
-      HKLFrame   //<* '''HKL''': uses the UB matrix (see [[SetUB]], [[FindUBUsingFFT]] and others) to calculate the HKL Miller indices of each event.
+      HKLFrame,   //<* '''HKL''': uses the UB matrix (see [[SetUB]], [[FindUBUsingFFT]] and others) to calculate the HKL Miller indices of each event.
+      AutoSelect,   //<*  This tries to select one of above by analyzing the goniometer and UB matrix parameters on the workspace and tries to establish what coordinate system is actually defined/needed.
+      NTargetFrames
     };
 }
 
@@ -67,16 +71,20 @@ public:
       * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
     void setUVvectors(const std::vector<double> &ut,const std::vector<double> &vt,const std::vector<double> &wt);
 
-   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
+   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &FrameRequested,const std::string &QScaleRequested)const;
   
    /// construct meaningful dimension names for Q3D case and different transformation types defined by the class
-   void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
-   void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling scaling)const;
+   //void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
+   void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame FrameID,CnvrtToMD::CoordScaling scaling)const;
    /// construct meaningful dimension names for ModQ case and different transformation types defined by the class;
    void setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
   /// return the list of possible scalings for momentums
    std::vector<std::string> getQScalings()const{return m_QScalingID;}
    CnvrtToMD::CoordScaling getQScaling(const std::string &ScID)const;
+   /// returns the list of possible target frames to convert to
+   std::vector<std::string> getTargetFrames()const{return m_TargFramesID;}
+   /// converts the target frame string representation into the frame ID
+   CnvrtToMD::TargetFrame getTargetFrame(const std::string &FrameID)const;
 private:
     bool m_isUVdefault;
     /** vectors, which describe the projection plain the target ws is based on (notional or cryst cartezian coordinate system). The transformation matrix below 
@@ -88,7 +96,8 @@ private:
 
    /// string representation of QScaling ID, which would be known to user
    std::vector<std::string> m_QScalingID;
-   //
+   /// string representation of Target frames, which would be exposed to user;
+   std::vector<std::string> m_TargFramesID;
    bool v3DIsDefault(const std::vector<double> &vect,const std::string &message)const;
 protected: // for testing
   /// function generates "Kind of" W transformation matrix for different Q-conversion modes;
@@ -96,9 +105,11 @@ protected: // for testing
    /// build orthogonal coordinate around two input vecotors u and v expressed in rlu;
    //std::vector<Kernel::V3D> buildOrtho3D(const Kernel::DblMatrix &BM,const Kernel::V3D &u, const Kernel::V3D &v)const;
 
-   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling &scaling)const;
+   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame FrameID,CnvrtToMD::CoordScaling &scaling)const;
 
    CnvrtToMD::TargetFrame findTargetFrame(MDEvents::MDWSDescription &TargWSDescription)const;
+   // helper function which verifies, if the input information availble on the workspace consistent with the frame requiested
+   void checkTargetFrame(const MDEvents::MDWSDescription &TargWSDescription,const CnvrtToMD::TargetFrame CoordFrameID)const;
 
 };
 

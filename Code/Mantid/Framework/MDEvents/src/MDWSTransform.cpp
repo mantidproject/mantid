@@ -11,23 +11,31 @@ namespace MDEvents
 Kernel::Logger& MDWSTransform::g_Log =Kernel::Logger::get("MD-Algorithms");
 using namespace CnvrtToMD;
 
-/** method returns the linear representation for the transformation matrix, which translate momentums from laboratory to the requested 
- *   coordinate system. 
+/** method to build the Q-coordinates transfomration.
  *
- *  depending on the presence of UB matrix and goniometer settings, it may be:
+ * @param TargWSDescription -- the class which describes target MD workspace. In Q3D case this descritpion is modifiede by the method
+                               with default Q-axis labels and Q-axis untis
+ * @param FrameRequested    -- the string which describes the target transformation frame in Q3D case. If the string value is '''Auto'''
+ *   the frame is selected depending on the presence of UB matrix and goniometer settings, namely it can be:
  * a) the laboratory -- (no UB matrix, goniometer angles set to 0)
    b) Q (sample frame)''': the goniometer rotation of the sample is taken out, to give Q in the frame of the sample. See [[SetGoniometer]] to specify the goniometer used in the experiment.
    c) Crystal or crystal cartezian (C)- Busing, Levi 1967 coordinate system -- depenging on Q-scale requested
+ *  one of the target frames above can be requested explicitly. In this case the method throws invalid argument if necessary parameters (UB matrix) is not attached to the workspace
 
+ * @param QScaleRequested   -- Q-transformation needed  
+ *
+ * @return the linear representation for the transformation matrix, which translate momentums from laboratory to the requested 
+ *   coordinate system. 
 */
-std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
+std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &FrameRequested,const std::string &QScaleRequested)const
 {
   CoordScaling ScaleID = getQScaling(QScaleRequested);
-  std::vector<double> transf = getTransfMatrix(TargWSDescription,ScaleID);
+  TargetFrame  FrameID = getTargetFrame(FrameRequested);
+  std::vector<double> transf = getTransfMatrix(TargWSDescription,FrameID,ScaleID);
 
   if(TargWSDescription.AlgID.compare("Q3D")==0)
   {
-    this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
+    this->setQ3DDimensionsNames(TargWSDescription,FrameID,ScaleID);
   }
 
   return transf;
@@ -41,27 +49,52 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
 CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription &TargWSDescription)const
 {
 
-  Kernel::Matrix<double> IMat(3,3,true);
-  bool isGonUnitMat   = IMat.equals(TargWSDescription.getGoniometerMatr());
+  bool hasGoniometer = TargWSDescription.hasGoniometer(); 
+  bool hasLattice    = TargWSDescription.hasLattice();
 
-  bool isLatticeUnitMat;
-  if(TargWSDescription.hasLattice())
+  if(!hasGoniometer)
   {
-    Kernel::Matrix<double> UB = TargWSDescription.getLattice()->getUB();
-    isLatticeUnitMat = IMat.equals(UB);
-  }else{
-    isLatticeUnitMat = true;
+      return LabFrame;
   }
-  
-
-  if(isGonUnitMat && isLatticeUnitMat ) return LabFrame;
-  if(!isLatticeUnitMat)return HKLFrame;
-  return SampleFrame;
+  else
+  {
+      if(hasLattice)
+          return HKLFrame;
+      else
+          return SampleFrame;
+  }
+}
+/** Method verifies if the information availible on the source workspace is sufficient to build appropriate frame
+ *@param TargWSDescription -- the class which contains the information about the target workspace
+ *@param CoordFrameID     -- the ID of the target frame requested
+ * 
+ * method throws invalid argument if the infomration on the workspace is insufficient to define the frame requested
+*/ 
+void  MDWSTransform::checkTargetFrame(const MDEvents::MDWSDescription &TargWSDescription,const CnvrtToMD::TargetFrame CoordFrameID)const
+{
+    switch(CoordFrameID)
+    {
+    case(LabFrame): // nothing needed for lab frame 
+        return;
+    case(SampleFrame):
+        if(!TargWSDescription.hasGoniometer())
+            throw std::invalid_argument(" Sample frame needs goniometer to be defined on the workspace ");
+        return;
+    case(HKLFrame):   // ubMatrix has to be present
+        if(!TargWSDescription.hasLattice())
+            throw std::invalid_argument(" HKL frame needs UB matrix defined on the workspace ");
+        if(!TargWSDescription.hasGoniometer())
+            throw std::invalid_argument(" HKL frame needs goniometer to be defined on the workspace ");
+        return;
+    default:
+        throw std::runtime_error(" Unexpected argument in MDWSTransform::checkTargetFrame");
+    }
+   
 }
 
 
 /** The matrix to convert neutron momentums into the target coordinate system   */
-std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CoordScaling &ScaleID)const
+std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame FrameID,CoordScaling &ScaleID)const
 {
 
   Kernel::Matrix<double> mat(3,3,true);
@@ -80,7 +113,13 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
       " as no oriented lattice has been defined. \n"
       " Will use unit transformation matrix\n";
   }
-  CnvrtToMD::TargetFrame CoordFrameID = findTargetFrame(TargWSDescription);
+  // set the frame ID to the values, requested by properties
+  CnvrtToMD::TargetFrame CoordFrameID(FrameID);
+  if(FrameID==AutoSelect) // if this value is autoselect, find appropriate frame from workspace properties
+    CoordFrameID = findTargetFrame(TargWSDescription);
+  else // if not, and specific target frame requested, veirfy if everything is availible on the workspace for this frame
+    checkTargetFrame(TargWSDescription,CoordFrameID); // throw, if the information is not availible
+
   switch(CoordFrameID)
   {
   case(CnvrtToMD::LabFrame):
@@ -101,7 +140,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
     }
   case(CnvrtToMD::HKLFrame):
     {
-      TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID);
+      TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID,false);
    // Obtain the transformation matrix to Cartezian related to Crystal
       mat = TargWSDescription.getGoniometerMatr()*TargWSDescription.m_Wtransf;
      break;
@@ -202,17 +241,17 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
   return Transf*Scale*Wmat;
 }
 
-/** Build meaningful dimension names for different conversion modes
-*/
-void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
-{
-  //axis units: convert string representation to any availible
-  CoordScaling ScaleID = getQScaling(QScaleRequested);
-  this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
+///** Build meaningful dimension names for different conversion modes
+//*/
+//void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
+//{
+//  //axis units: convert string representation to any availible
+//  CoordScaling ScaleID = getQScaling(QScaleRequested);
+//  this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
+//
+//}
 
-}
-
-void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling ScaleID)const
+void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame FrameID,CnvrtToMD::CoordScaling ScaleID)const
 {
 
   std::vector<Kernel::V3D> dimDirections;
@@ -228,10 +267,10 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
     Bm=spLatt->getB();
     for(int i=0;i<3;i++)LatPar[i]=spLatt->a(i);
   }
+  if(FrameID==CnvrtToMD::AutoSelect)
+      FrameID = findTargetFrame(TargWSDescription);
 
-  CnvrtToMD::TargetFrame TargFrameID = findTargetFrame(TargWSDescription);
-
-  switch(TargFrameID)
+  switch(FrameID)
   {
   case(CnvrtToMD::LabFrame):
     {
@@ -273,7 +312,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
     dimDirections = Kernel::V3D::makeVectorsOrthogonal(uv);
   }
   // axis names:
-  if((TargFrameID==CnvrtToMD::LabFrame)||(TargFrameID==CnvrtToMD::SampleFrame))
+  if((FrameID==CnvrtToMD::LabFrame)||(FrameID==CnvrtToMD::SampleFrame))
       for(int i=0;i<3;i++)TargWSDescription.setDimName(i,dimNames[i]);
   else
       for(int i=0;i<3;i++)TargWSDescription.setDimName(i,MDEvents::makeAxisName(dimDirections[i],dimNames));
@@ -369,10 +408,21 @@ CoordScaling MDWSTransform::getQScaling(const std::string &ScID)const
   return CoordScaling(nScaling);
 }
 
+/** function which convert input string representing Target coordinate frame to correspondent enum */
+TargetFrame MDWSTransform::getTargetFrame(const std::string &FrameID)const
+{
+  int nFrame = Kernel::Strings::isMember(m_TargFramesID,FrameID);
+
+  if (nFrame<0)throw(std::invalid_argument(" The Target Frame with ID: "+FrameID+" is unavalible"));
+
+  return TargetFrame(nFrame);
+}
+
 //
 MDWSTransform::MDWSTransform():
   m_isUVdefault(true),
-  m_QScalingID(NCoordScalings)
+  m_QScalingID(NCoordScalings),
+  m_TargFramesID(NTargetFrames)
 {
   m_UProj[0] = 1;   m_UProj[1] = 0;  m_UProj[2] = 0;
   m_VProj[0] = 0;   m_VProj[1] = 1;  m_VProj[2] = 0;
@@ -383,6 +433,11 @@ MDWSTransform::MDWSTransform():
   m_QScalingID[SingleScale]="Q in lattice units";
   m_QScalingID[OrthogonalHKLScale]="Orthogonal HKL";
   m_QScalingID[HKLScale]="HKL";
+
+  m_TargFramesID[AutoSelect]="AutoSelect";
+  m_TargFramesID[LabFrame]="Q_lab";
+  m_TargFramesID[SampleFrame]="Q_sample";
+  m_TargFramesID[HKLFrame]="HKL";
 
 }
 

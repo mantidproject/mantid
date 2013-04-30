@@ -97,6 +97,7 @@ public:  // for the time being
 
     boost::shared_ptr<Geometry::OrientedLattice> getLattice()const{return getOrientedLattice(m_InWS);}
     Kernel::Matrix<double> getGoniometerMatr()const;
+    bool hasGoniometer()const;
 
   /// constructor
   MDWSDescription(unsigned int nDimensions=0);

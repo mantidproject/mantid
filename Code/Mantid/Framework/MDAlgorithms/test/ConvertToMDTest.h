@@ -61,7 +61,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 19 propeties",19,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 20 propeties",20,(size_t)(pAlg->getProperties().size()));
 }
 
 
@@ -159,7 +159,7 @@ void testExecQ3D()
     checkHistogramsHaveBeenStored("WS5DQ3D");
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
-    TS_ASSERT_EQUALS(Mantid::API::QSample, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::API::HKL, outWS->getSpecialCoordinateSystem());
 
     AnalysisDataService::Instance().remove("WS5DQ3D");
 }

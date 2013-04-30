@@ -94,10 +94,19 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
   }
 
 
-  //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
 
 
-} 
+
+}
+/// Method checks if input workspace has defined goniometer
+bool MDWSDescription::hasGoniometer()const
+{
+    if(m_InWS)
+        return m_InWS->run().getGoniometer().isDefined();
+    else
+        return false;
+}
+/// nethod returns goniometer matrix if one is defined on the workspace or unit matrix if there are no such matrix
 Kernel::Matrix<double> MDWSDescription::getGoniometerMatr()const
 {
   if(m_InWS) 

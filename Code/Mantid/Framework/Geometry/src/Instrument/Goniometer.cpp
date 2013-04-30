@@ -90,6 +90,11 @@ const Kernel::DblMatrix& Goniometer::getR() const
 {
   return R;
 }
+/// Function reports if the goniometer is defined
+bool Goniometer::isDefined()const
+{
+    return initFromR||(!motors.empty());
+}
 
 /// Return information about axes. 
 /// @return str :: string that contains on each line one motor information (axis name, direction, sense, angle)  
