@@ -65,8 +65,6 @@ public:
 
   /// Calculate peak parameters (alpha, beta, sigma2..)
   void calculateParameters(bool explicitoutput) const;
-  //  double& dh, double& tof_h, double& eta, double& alpha, double& beta, double &H, double& sigma2,
-  // double &gamma, double &N,
 
   /// Core function to calcualte peak values for whole region
   void functionLocal(vector<double>& out, const vector<double> &xValues) const;

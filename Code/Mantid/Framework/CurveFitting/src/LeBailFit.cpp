@@ -252,7 +252,7 @@ namespace CurveFitting
     g_log.debug() << "LeBail Composite Function: " << m_lebailFunction->asString() << "\n";
     bool inputparamcorrect = generatePeaksFromInput();
 #else
-m_lebailFunction.addPeaks(m_funcParameters, m_hkllist);
+    m_lebailFunction.addPeaks(m_funcParameters, m_hkllist);
 #endif
 
     // 3. Background function and calculation on it
