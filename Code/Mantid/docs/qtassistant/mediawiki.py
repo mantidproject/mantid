@@ -23,16 +23,27 @@ def formatImgHtml(raw):
     #print "IMG:", img
 
     # get the other bits of meta-data
+    align = None
     alt = None
     caption = None
+    width = None
+    height = None
     for item in components[1:]:
         item_low = item.lower()
         if item_low == "thumb":
             pass
         elif item.endswith('px'):
-            pass
-        elif item_low == "right" or item_low == "center":
-            pass
+            item = item[:-2]
+            if item.startswith('x'):
+                height = int(item[1:])
+            elif 'x' in item:
+                (width, height) = item.split('x')
+                width = int(width)
+                height = int(height)
+            else:
+                width = int(item)
+        elif item_low == "right" or item_low == "center" or item_low == "left":
+            align = item_low
         elif item_low.startswith("alt"):
             alt = '='.join(item.split('=')[1:])
         else:
@@ -51,6 +62,12 @@ def formatImgHtml(raw):
     html += "<img src='img/" + img + "'"
     if alt is not None:
         html += " alt='%s'" % alt
+    if align is not None:
+        html += " align='%s'" % align
+    if width is not None:
+        html += " width='%d'" % width
+    if height is not None:
+        html += " height='%d'" % height
     html += "/>"
     if caption is not None:
         html += "\n<figcaption>%s</figcaption>\n" % caption
