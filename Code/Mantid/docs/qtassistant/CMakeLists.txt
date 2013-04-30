@@ -32,6 +32,10 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
           RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/images
 	   "*.jpg" )
    list ( APPEND IMAGES ${IMAGES_jpg})
+   file ( GLOB_RECURSE IMAGES_gif
+          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/images
+	   "*.gif" )
+   list ( APPEND IMAGES ${IMAGES_gif})
    file ( GLOB_RECURSE IMAGES_PNG 
           RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/images
 	   "*.PNG" )
