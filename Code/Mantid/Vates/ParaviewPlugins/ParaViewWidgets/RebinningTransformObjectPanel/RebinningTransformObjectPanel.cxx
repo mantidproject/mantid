@@ -1,18 +1,31 @@
 #include "RebinningTransformObjectPanel.h"
-#include "pqObjectPanelInterface.h"
-#include "pqPropertyManager.h"
-#include "pqNamedWidgets.h"
-#include "vtkSMStringVectorProperty.h"
-#include "vtkSMDoubleVectorProperty.h"
-#include <QLayout>
-#include <QMessageBox>
-#include <QCheckBox>
-#include <QGridLayout>
+
 #include "GeometryWidget.h"
 #include "ThresholdRangeWidget.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include "MantidVatesAPI/SynchronisingGeometryPresenter.h"
-#include "vtkSMProxyProperty.h"
+
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
+#include <pqObjectPanelInterface.h>
+#include <pqPropertyManager.h>
+#include <pqNamedWidgets.h>
+#include <vtkSMStringVectorProperty.h>
+#include <vtkSMDoubleVectorProperty.h>
+#include <vtkSMProxyProperty.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
+
+#include <QLayout>
+#include <QMessageBox>
+#include <QCheckBox>
+#include <QGridLayout>
+
 using namespace Mantid::VATES;
 using namespace Mantid::Geometry;
 
