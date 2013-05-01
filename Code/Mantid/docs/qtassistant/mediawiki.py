@@ -1,5 +1,4 @@
 from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
-from parseLinks import fixLinks
 import os
 import re
 from parseLinks import fixLinks
