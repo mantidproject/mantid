@@ -256,7 +256,18 @@ void InstrumentWindowPickTab::updateSelectionInfo(int detid)
   {
     // collect info about selected detector and add it to text
     InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-    Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
+    Mantid::Geometry::IDetector_const_sptr det;
+    try
+    {
+        det = instrActor->getInstrument()->getDetector(detid);
+    }
+    catch(...)
+    {
+        // if this slot is called during instrument window deletion
+        // expect exceptions thrown
+        return;
+    }
+
     text = "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
     QString wsIndex;
