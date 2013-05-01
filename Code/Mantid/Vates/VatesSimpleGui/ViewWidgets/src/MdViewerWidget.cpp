@@ -12,6 +12,11 @@
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidKernel/DynamicFactory.h"
 
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
 #include <pqActiveObjects.h>
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
@@ -29,7 +34,7 @@
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
-#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
+#include <vtkSMProxy.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMReaderFactory.h>
 #include <vtksys/SystemTools.hxx>
@@ -63,6 +68,10 @@
 #include <pqViewFrameActionsBehavior.h>
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <QAction>
 #include <QDesktopServices>

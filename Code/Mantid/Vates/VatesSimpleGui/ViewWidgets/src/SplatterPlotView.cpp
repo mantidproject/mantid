@@ -1,5 +1,10 @@
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
@@ -10,6 +15,10 @@
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
 #include <vtkSMPropertyHelper.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <QMessageBox>
 

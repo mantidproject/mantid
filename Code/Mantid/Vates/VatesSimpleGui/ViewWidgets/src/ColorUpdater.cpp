@@ -1,12 +1,21 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
 #include <pqChartValue.h>
 #include <pqColorMapModel.h>
 #include <pqPipelineRepresentation.h>
 #include <pqScalarsToColors.h>
 #include <pqSMAdaptor.h>
-#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
+#include <vtkSMProxy.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <QColor>
 #include <QList>

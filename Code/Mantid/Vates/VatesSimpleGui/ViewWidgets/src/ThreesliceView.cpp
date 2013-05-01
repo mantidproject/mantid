@@ -1,6 +1,10 @@
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/LibHelper.h"
 
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
@@ -10,7 +14,11 @@
 #include <pqPluginManager.h>
 #include <pqRenderView.h>
 #include <vtkSMPropertyHelper.h>
-#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
+#include <vtkSMProxy.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <QMessageBox>
 

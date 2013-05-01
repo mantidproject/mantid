@@ -7,6 +7,11 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
@@ -17,7 +22,11 @@
 #include <pqServerManagerModel.h>
 #include <vtkContextMouseEvent.h>
 #include <vtkSMPropertyHelper.h>
-#include "MantidVatesSimpleGuiViewWidgets/vtkSMProxy_Silent.h"
+#include <vtkSMProxy.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <QString>
 
