@@ -167,7 +167,6 @@
 #include <QUndoView>
 #include <QSignalMapper>
 #include <QDesktopWidget>
-#include <Poco/Environment.h>
 #include <zlib.h>
 
 #include <gsl/gsl_sort.h>
