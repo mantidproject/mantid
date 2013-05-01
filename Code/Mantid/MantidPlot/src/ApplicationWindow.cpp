@@ -540,6 +540,7 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, 
   
 #else
   UNUSED_ARG(commandArguments)
+  UNUSED_ARG(noDialog)
 #endif
 }
 
