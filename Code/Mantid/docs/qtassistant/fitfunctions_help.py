@@ -73,8 +73,8 @@ def process_function(name, qhp, outputdir, **kwargs): # was (args, algo):
     htmlfile.hr()
 
     htmlfile.h3("Summary")
-    wiki = MediaWiki(htmlfile)
-    wiki.parse(wiki_tools.get_fitfunc_summary(name, False))
+    wiki = MediaWiki(htmlfile, HTML_DIR)
+    wiki.parse(wiki_tools.get_fitfunc_summary(name, False), qhp)
 
     if func.numParams() <= 0:
         htmlfile.h3("No Parameters")

@@ -15,7 +15,7 @@ where <math>m</math> is the particle's mass, <math>g</math> is the acceleration 
 This [[Algorithm|algorithm]] takes a workspace of number of neutron counts against [[Units|wavelength]] and creates a workspace of cross section against Q. The output Q bins boundaries are defined by setting the property OutputBinning.
 
 Below is the formula used to calculate the cross section, <math>P_I(Q)</math>, for one bin in the output workspace whose bin number is denoted by I, when the input workspace has just one detector. Each bin is calculated from the sum of all input wavelength bins, n, that evaluate to the same Q using the formula for Q at the top of this page. In equations this relationship between the input bins and the output bins is represented by <math>n \supset I</math> and an example of a set of two bins is shown diagrammatically below.
-[[File:wav_Q_bins.png|Each Q bin contains the sum of many, one, or no wavelength bins|centre]]
+[[File:Wav_Q_bins.png|Each Q bin contains the sum of many, one, or no wavelength bins|centre]]
  
 In the equation the number of counts in the input spectrum number is denoted by <math>S(n)</math>, <math>N(n)</math> is the wavelength dependent correction and <math>\Omega</math> is the [[SolidAngle|solid angle]] of the detector
 

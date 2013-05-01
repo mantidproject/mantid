@@ -1,5 +1,6 @@
 class HtmlWriter:
     def __init__(self, filename, title=None):
+        self.name = filename
         self.__handle = open(filename, 'w')
         self.__tagstack = []
         self.openTag("html")

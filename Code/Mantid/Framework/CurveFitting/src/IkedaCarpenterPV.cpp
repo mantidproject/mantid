@@ -23,7 +23,8 @@ References:
 
 The figure below illustrate this peakshape function fitted to a TOF peak:
 
-[[Image:IkedaCarpenterPVwithBackground.png‎]]
+[[Image:IkedaCarpenterPVwithBackground.png]]
+
  *WIKI*/
 //----------------------------------------------------------------------
 // Includes

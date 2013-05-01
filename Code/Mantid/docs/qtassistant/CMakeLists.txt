@@ -7,6 +7,7 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
    set (HELP_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/qtassistant)
    set (HELP_QCH_DIR ${HELP_OUT_DIR}/qch)
    set (HELP_HTML_DIR ${HELP_OUT_DIR}/html)
+   set (HELP_HTML_IMG_DIR ${HELP_HTML_DIR}/img)
    set (HELP_IMG_DIR ${HELP_OUT_DIR}/src/images)
 
    message (STATUS "Adding information for qtassistant")
@@ -23,6 +24,47 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
          ${HELP_HTML_DIR}/developers.html
         )
 
+   # copy over images
+   set ( IMAGES
+         AbsorptionFlow.png
+         BackToBackExponentialWithConstBackground.png
+         BinMD_Coordinate_Transforms_withLine.png
+         Box.png
+         ChopDataIntegrationExplanation.png
+         ConvertToEnergyInfoTable.png
+         Convolution.png
+         FFTGaussian1FFT.png
+         FFTGaussian1.png
+         FFTGaussian2FFT.png
+         FFTGaussian2.png
+         Gaussian2Fit.jpg
+         Gaussian2Fit_Ties.jpg
+         GaussianFit.jpg
+         GaussianFit_Ties.jpg
+         GaussianWithConstBackground.png
+         GEM_Focused.png
+         IkedaCarpenterPVwithBackground.png
+         ImageNotFound.png
+         InstrumentTree.jpg
+         IntegrateEllipsoids.png
+         IntegratePeaksMD_graph1.png
+         IntegratePeaksMD_graph2.png
+         LorentzianWithConstBackground.png
+         Monitorspect_getei.jpg
+         PeakIntensityVsRadius_fig.png
+         PlotPeakByLogValue_Output.png
+         ReadFromFile-Grouping.png
+         RebinByPulseTime.png
+         SassenaFFTexample.jpg
+         SliceViewer-DetectorFace.png
+         UnwrapSNS_inst.png
+         UserFunction1D.gif
+         Wav_Q_bins.png
+       )
+   #message ( "QTASSISTANT_IMAGES ${IMAGES}")
+   copy_python_files_to_dir("${IMAGES}" "${CMAKE_CURRENT_SOURCE_DIR}/images" ${HELP_HTML_IMG_DIR} INSTALL_IMAGES)
+
+   # copy the other generic stuff
    add_custom_command( OUTPUT ${HELP_IMG_DIR}/Mantid_Logo_Transparent.png
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${CMAKE_SOURCE_DIR}/Images/Mantid_Logo_Transparent.png
                                ${HELP_IMG_DIR}/Mantid_Logo_Transparent.png
@@ -83,13 +125,13 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
          ${HELP_HTML_DIR}/fitfunctions_index.html )
 
    add_custom_command(OUTPUT ${HELP_ALGO_OUT}
-                      DEPENDS make_algorithms_help.py qhpfile.py algorithm_help.py htmlwriter.py mediawiki.py Algorithms
+                      DEPENDS make_algorithms_help.py qhpfile.py algorithm_help.py htmlwriter.py mediawiki.py ${INSTALL_IMAGES} Algorithms
                       COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_algorithms_help.py
                               -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
 		      )
 
    add_custom_command(OUTPUT ${HELP_FIT_OUT}
-                      DEPENDS make_fitfunctions_help.py qhpfile.py fitfunctions_help.py CurveFitting
+                      DEPENDS make_fitfunctions_help.py qhpfile.py fitfunctions_help.py ${INSTALL_IMAGES} CurveFitting
                       COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_fitfunctions_help.py
                               -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
 		      )

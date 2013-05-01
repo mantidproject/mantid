@@ -83,8 +83,8 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
 
         htmlfile.h3("Summary")
         #htmlfile.p(alg.getWikiSummary())
-        wiki = MediaWiki(htmlfile)
-        wiki.parse(alg.getWikiSummary())
+        wiki = MediaWiki(htmlfile, HTML_DIR)
+        wiki.parse(alg.getWikiSummary(), qhp)
 
         htmlfile.h3("Usage")
         text = wiki_tools.create_function_signature(alg, name)
@@ -106,11 +106,11 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
             htmlfile.writeRow(propToList(property, i))
         htmlfile.closeTag(True)
 
-        wiki = MediaWiki(htmlfile)
+        wiki = MediaWiki(htmlfile, HTML_DIR)
         text = wiki_tools.get_custom_wiki_section(name, version, "*WIKI*", True, False)
         if len(text.strip()) > 0:
             htmlfile.h3("Description")
-            wiki.parse(text)
+            wiki.parse(text, qhp)
 
         htmlfile.closeTag(True)
 

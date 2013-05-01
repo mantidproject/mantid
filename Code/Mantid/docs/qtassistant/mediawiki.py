@@ -1,9 +1,107 @@
 from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
+import os
+import re
+
+IMG_NOT_FOUND = "ImageNotFound.png"
+
+def formatImgHtml(raw):
+    #print "RAW:", raw
+
+    # cleanup the tag from the text
+    index = raw.index(':') # look for first ':'
+    if index < 0:
+        index = 0
+    else:
+        index += 1
+    raw = raw[index:-2]
+    
+    #print "RAW:", raw
+
+    # chop tag into something more workable
+    components = raw.split('|')
+    img = components[0] # image filename is always first
+    #print "IMG:", img
+
+    # get the other bits of meta-data
+    align = None
+    alt = None
+    caption = None
+    width = None
+    height = None
+    for item in components[1:]:
+        item_low = item.lower()
+        if item_low == "thumb":
+            pass
+        elif item.endswith('px'):
+            item = item[:-2]
+            if item.startswith('x'):
+                height = int(item[1:])
+            elif 'x' in item:
+                (width, height) = item.split('x')
+                width = int(width)
+                height = int(height)
+            else:
+                width = int(item)
+        elif item_low == "right" or item_low == "center" or item_low == "left":
+            align = item_low
+        elif item_low.startswith("alt"):
+            alt = '='.join(item.split('=')[1:])
+        else:
+            caption = item
+
+    fullname = os.path.abspath(os.path.join(os.path.curdir, 'qtassistant', 'html', 'img', img))
+    if not os.path.exists(fullname):
+        print "Did not find image '%s' setting to '%s'" % (fullname, IMG_NOT_FOUND)
+        if caption is None:
+            caption = "Missing image: %s" % img
+        else:
+            caption += "\nMissing image: %s" % img
+        img = IMG_NOT_FOUND
+
+    html = "<figure>"
+    html += "<img src='img/" + img + "'"
+    if alt is not None:
+        html += " alt='%s'" % alt
+    if align is not None:
+        html += " align='%s'" % align
+    if width is not None:
+        html += " width='%d'" % width
+    if height is not None:
+        html += " height='%d'" % height
+    html += "/>"
+    if caption is not None:
+        html += "\n<figcaption>%s</figcaption>\n" % caption
+    html += "</figure>\n"
+    #print "HTML:", html
+    return (img, html)
 
 class MediaWiki:
-    def __init__(self, htmlfile):
+    def __init__(self, htmlfile, direc):
         self.__file = htmlfile
+        self.__direc = direc
         self.__types = []
+        self.images = []
+
+    def __parseImgs(self, text):
+        # Get all of the raw image links
+        raw_img = re.findall(r'\[\[Image:.*\]\]', text, flags=re.MULTILINE)
+        raw = re.findall(r'\[\[File:.*\]\]', text, flags=re.MULTILINE)
+        raw.extend(raw_img)
+
+        # generate the html
+        html = []
+        for src in raw:
+            (imagefile, newtxt) = formatImgHtml(src)
+            self.images.append(imagefile)
+            #print "IM2:", imagefile, len(self.images)
+            html.append(newtxt)
+
+        for (orig, repl) in zip(raw, html):
+            #print ">>>", orig
+            #print "<<<", repl
+            text = text.replace(orig, repl)
+
+        return text.strip()
 
     def __clearEmpty(self, text):
         result = []
@@ -59,7 +157,6 @@ class MediaWiki:
         return "\n".join(text)
 
     def __fixHEADERS(self, text):
-        import re
         results = re.findall(r'\s+==.*==\s+', text)
         for item in results:
             text = text.replace(item, "\n\n"+item.strip()+"\n\n")
@@ -96,11 +193,17 @@ class MediaWiki:
             else:
                 self.__types.append(None)
 
-    def parse(self, text):
+    def parse(self, text, qhp):
         #print "00>>>", text, "<<<"
         text = text.strip()
         if len(text) <= 0:
             return # don't bother if it is empty
+        text = self.__parseImgs(text)
+        #if len(self.images) > 0:
+        #    print "----->", self.images
+        for img in self.images:
+            img = os.path.join(self.__direc, "img", img)
+            qhp.addFile(img)
         #print "01>>>", text, "<<<"
         if text.startswith("== Deprecation notice =="):
             stuff = "== Deprecation notice =="
@@ -135,7 +238,7 @@ class MediaWiki:
                     if annotate == "blank":
                         if not text[i-1].startswith("<h"):
                             self.__file.write("</p>\n")
-                        if not text[i+1].startswith("<h"):
+                        if i+1 < num_lines and not text[i+1].startswith("<h"):
                             self.__file.write("<p>")
                     else:
                         self.__file.write(annotate)
