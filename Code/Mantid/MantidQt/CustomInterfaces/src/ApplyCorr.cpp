@@ -161,7 +161,7 @@ namespace IDA
     if ( uiForm().abscor_ckPlotContrib->isChecked() ) pyInput += "plotContrib = True\n";
     else pyInput += "plotContrib = False\n";
 
-    pyInput += "abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
+    pyInput += "abscorFeeder(sample, container, geom, useCor, Verbose=verbose, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult, PlotContrib=plotContrib)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
