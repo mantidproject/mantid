@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPowderDiffPeakFunction.h"
+#include "MantidCurveFitting/BackgroundFunction.h"
 
 /*
 #include "MantidAPI/ParamFunction.h"
@@ -12,6 +13,9 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/Bk2BkExpConvPV.h"
 */
+
+using namespace Mantid::API;
+using namespace Mantid::CurveFitting;
 
 using namespace std;
 
@@ -89,10 +93,29 @@ namespace CurveFitting
 
     static Kernel::Logger& g_log;
 
+    ///
+
     void calPeakParametersForD(double dh, double& alpha, double& beta, double &Tof_h, double &sigma_g2, double &gamma_l, std::map<std::string, double>& parmap) const;
     void adPeakPositionD(double dh);
     double calCubicDSpace(double a, int h, int k, int l) const;
     void addPeak(double d, double height);
+
+    /// Number of peaks
+    size_t m_numPeaks;
+    /// Vector of all peaks
+    vector<API::IPowderDiffPeakFunction_sptr> m_peakvec;
+    /// Vector of pair <peak position in d-space, Peak> sortable
+    vector<double, API::IPowderDiffPeakFunction_sptr> m_dspPeakVec;
+    /// order of parameter names in m_peakParameterNameVec must be same as the order in IPowderDiffPeakFunction.
+    vector<string> m_peakParameterNameVec;
+
+    /// Background function
+    BackgroundFunction_sptr m_background;
+
+
+
+
+
 
     double mL1;
     double mL2;
@@ -111,7 +134,7 @@ namespace CurveFitting
 
     mutable std::vector<std::map<std::string, double> > mPeakParameters; // It is in strict order with dvalues;
 
-    void addPeaks(std::vector<std::vector<int> > peakhkls);
+
 
   };
 

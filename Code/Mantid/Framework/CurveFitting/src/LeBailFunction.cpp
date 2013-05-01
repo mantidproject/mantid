@@ -18,6 +18,9 @@ namespace CurveFitting
     const double PEAKRANGECONSTANT = 5.0;
   }
 
+  // Get a reference to the logger
+  Mantid::Kernel::Logger& LeBailFunction::g_log = Kernel::Logger::get("LeBailFunction");
+
   //----------------------------------------------------------------------------------------------
   /** Constructor
     */
@@ -556,68 +559,54 @@ namespace CurveFitting
 
     // 3. Peak height
     if (setpeakheight)
-      peak->setParameter(0, peakheight);
+      peak->setHeight(peakheight);
 
     return;
   }
 
   //----------------------------------------------------------------------------------------------
   /** From table/map to set parameters to all peaks.
-    * @param peaks:   vector of shared pointers to peaks that have parameters' values to set
+    * Peak height will not be set.
+    *
+    * Request: order of parameter names in m_peakParameterNameVec must be same as the order in
+    *          IPowderDiffPeakFunction.
+    *
     * @param parammap: map of Parameters to set to peak
-    * @param peakheight: a universal peak height to set to all peaks
-    * @param setpeakheight: flag to set peak height to each peak or not.
    */
-  void LeBailFit::setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
-                                     map<std::string, Parameter> parammap,
-                                     double peakheight, bool setpeakheight)
-  {
-    // 1. Prepare, sort parameters by name
-    std::map<std::string, Parameter>::iterator pit;
-    size_t numpeaks = peaks.size();
+  void LeBailFunction::setPeaksParameters(map<std::string, double> parammap)
+  {    
+    // Define some variables and constants
+    size_t numpeaks = m_peakvec.size();
     if (numpeaks == 0)
       throw runtime_error("Set parameters to empty peak list. ");
+    size_t numparnames = m_peakParameterNameVec.size();
+    map<std::string, double>::iterator pit;
 
-    // 2. Apply parameters values to peak function
-    vector<string> peakparnames = peaks[0].second->getParameterNames();
-    size_t numparnames = peakparnames.size();
-
+    // Apply parameters values to all peaks
     for (size_t i = 0; i < numparnames; ++i)
     {
-      if (i == 0 && setpeakheight)
+      string& parname = m_peakParameterNameVec[i];
+      if (parname.compare("Height"))
       {
-        // a) If index is height and set to height
-        for (size_t ipk = 0; ipk < numpeaks; ++ipk)
-          peaks[ipk].second->setParameter(0, peakheight);
+        // If parameter is not peak height.  Set to all peak
 
-      }
-      else if (i > 0)
-      {
-        // b) A non height parameter
-        string parname = peakparnames[i];
+        // Get parameter value
         pit = parammap.find(parname);
 
-        // Skip if not found
         if (pit == parammap.end())
         {
-          // Not found
-          g_log.debug() << "Peak parameter " << parname
-                        << "cannot be found in parameter map.\n";
-          continue;
+          // Not found and then skip
+          g_log.warning() << "Peak parameter " << parname
+                          << "cannot be found in parameter map.\n";
         }
-
-        // Set value to each peak
-        double parvalue = pit->second.curvalue;
-        for (size_t ipk = 0; ipk < numpeaks; ++ipk)
-          peaks[ipk].second->setParameter(i, parvalue);
-
+        else
+        {
+          double parvalue = pit->second.curvalue;
+          for (size_t ipk = 0; ipk < numpeaks; ++ipk)
+            m_peakvec[ipk]->setParameter(i, parvalue);
+        }
       }
-      else
-      {
-        // c) If index is height, but height is not be set
-        ;
-      }
-    }
+    } // END of all parameters
 
     return;
   }
@@ -628,60 +617,65 @@ namespace CurveFitting
     * @param peakgroupvec:  output vector containing peaks grouped together.
     * Disabled argument: MatrixWorkspace_sptr dataws, size_t workspaceindex,
    */
-  void LeBailFit::groupPeaks(vector<vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > >& peakgroupvec)
+  void LeBailFunction::groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > >& peakgroupvec)
   {
-    // 1. Sort peaks
-    if (m_dspPeaks.size() > 0)
+    // Sort peaks
+    if (m_numPeaks.size() > 1)
     {
       sort(m_dspPeaks.begin(), m_dspPeaks.end());
     }
-    else
+    else if (m_numPeaks.size() == 0)
     {
       std::stringstream errmsg;
       errmsg << "Group peaks:  No peak is found in the peak vector. ";
       g_log.error() << errmsg.str() << "\n";
       throw std::runtime_error(errmsg.str());
     }
-    size_t numpeaks = m_dspPeaks.size();
 
-    // 2. Group peaks
+    // Group peaks
+    //   Set up starting value
     peakgroupvec.clear();
-
-    // a) Starting value
-    vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroup;
+    vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup; // one group of peaks
     size_t ipk = 0;
 
-    while (ipk < numpeaks)
+    while (ipk < m_numPeaks)
     {
-      peakgroup.push_back(m_dspPeaks[ipk]);
+      // add peak to CURRENT peak group
+      peakgroup.push_back(m_dspPeakVec[ipk]);
+
       if (ipk < numpeaks-1)
       {
-        // Test whether next peak will be the different group
-        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
-        ThermalNeutronBk2BkExpConvPVoigt_sptr rightpeak = m_dspPeaks[ipk+1].second;
+        // Any peak but not the last (rightmost) peak
 
-        double thisrightbound = thispeak->centre() + PEAKRANGECONSTANT * thispeak->fwhm();
-        double rightleftbound = rightpeak->centre() - PEAKRANGECONSTANT * rightpeak->fwhm();
+        // test whether next peak will be in a different group
+        IPowderDiffPeakFunction_sptr thispeak = m_dspPeakVec[ipk].second;
+        IPowderDiffPeakFunction_sptr rightpeak = m_dspPeakVec[ipk+1].second;
 
-        if (thisrightbound < rightleftbound)
+        double thispeak_rightbound = thispeak->centre() + PEAKRANGECONSTANT * thispeak->fwhm();
+        double rightpeak_leftbound = rightpeak->centre() - PEAKRANGECONSTANT * rightpeak->fwhm();
+
+        if (thispeak_rightbound < rightpeak_leftbound)
         {
-          // This peak and right peak are away
-          vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroupcopy = peakgroup;
+          // this peak and its right peak are well separated.
+          // finish this group by a copy
+          vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroupcopy = peakgroup;
           peakgroupvec.push_back(peakgroupcopy);
+          //  clear for the next group
           peakgroup.clear();
         }
         else
         {
-          // Do nothing
+          // this peak and its right peak are close enough to be in same group. do nothing
           ;
         }
       }
       else
       {
-        // Last peak.  Push the current
-        vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroupcopy = peakgroup;
+        // Rightmost peak.  Finish the current peak
+        vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroupcopy = peakgroup;
         peakgroupvec.push_back(peakgroupcopy);
       }
+
       ++ ipk;
     } // ENDWHILE
 
@@ -691,77 +685,34 @@ namespace CurveFitting
     return;
   }
 
-  void LeBailFit::processInputBackground()
+  //----------------------------------------------------------------------------------------------
+  /** Add background function
+    * @param backgroundtype :: string, type of background, such as Polynomial, Chebyshev
+    * @param bkgdparmap :: map of parameter name (string) and value (double) of background function
+    */
+  void LeBailFunction::addBackgroundFunction(string backgroundtype, map<string, double> bkgdparmap)
   {
- #if 0
-    // 1. Get input properties
-    string backgroundtype = getProperty("BackgroundType");
-    vector<double> bkgdorderparams = getProperty("BackgroundParameters");
-    TableWorkspace_sptr bkgdparamws = getProperty("BackgroundParametersWorkspace");
+    size_t order = bkgdparmap.size();
 
-    // 2. Determine where the background parameters are from
-    if (!bkgdparamws)
+    // Create background function from factory
+    auto background = FunctionFactory::Instance().createFunction(backgroundtype);
+    m_background = boost::dynamic_pointer_cast<BackgroundFunction>(background);
+
+    // Set order and init
+    m_background->setAttributeValue("n", int(order));
+    m_background->initialize();
+
+    // Set parameters
+    map<string, double>::iterator miter;
+    for (miter = bkgdparmap.begin(); miter != bkgdparmap.end(); ++miter)
     {
-      g_log.information() << "[Input] Use background specified with vector with input vector sized "
-                          << bkgdorderparams.size() << ".\n";
+      string parname = miter->first;
+      double parvalue = miter->second;
+      m_background->setParameter(parname, parvalue);
     }
-    else
-    {
-      g_log.information() << "[Input] Use background specified by table workspace.\n";
-      parseBackgroundTableWorkspace(bkgdparamws, bkgdorderparams);
-    }
-#endif
-
-    // 3. Create background function
-    auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
-    m_backgroundFunction = boost::dynamic_pointer_cast<BackgroundFunction>(background);
-
-    size_t order = bkgdorderparams.size();
-
-    m_backgroundFunction->setAttributeValue("n", int(order));
-    m_backgroundFunction->initialize();
-
-    for (size_t i = 0; i < order; ++i)
-    {
-      std::stringstream ss;
-      ss << "A" << i;
-      std::string parname = ss.str();
-      m_backgroundFunction->setParameter(parname, bkgdorderparams[i]);
-    }
-
-    g_log.information() << "Generated background function: " << m_backgroundFunction->asString() << "\n";
-
-    // 4. Calculate background function and set to output workspace
-    if (!m_outputWS)
-    {
-      throw runtime_error("Output workspace hasn't been created!");
-    }
-
-    FunctionDomain1DVector domainBkgd(m_dataWS->readX(m_wsIndex));
-    FunctionValues valuesBkgd(domainBkgd);
-    m_backgroundFunction->function(domainBkgd, valuesBkgd);
-
-    MantidVec& inpvec = m_outputWS->dataY(INPUTBKGDINDEX);
-    MantidVec& calvec = m_outputWS->dataY(CALBKGDINDEX);
-    MantidVec& purevec = m_outputWS->dataY(INPUTPUREPEAKINDEX);
-    const MantidVec& obsYvec = m_dataWS->readY(m_wsIndex);
-    size_t numpts = inpvec.size();
-    for (size_t i = 0; i < numpts; ++i)
-    {
-      inpvec[i] = valuesBkgd[i];
-      calvec[i] = valuesBkgd[i];
-      purevec[i] = obsYvec[i] - valuesBkgd[i];
-    }
-
 
     return;
   }
-
-
-//  DECLARE_FUNCTION(LeBailFunction)
-
-  // Get a reference to the logger
-  Mantid::Kernel::Logger& LeBailFunction::g_log = Kernel::Logger::get("LeBailFunction");
 
   //----------------------------------------------------------------------------------------------
   /** Constructor

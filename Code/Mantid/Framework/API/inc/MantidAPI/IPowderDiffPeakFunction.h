@@ -7,6 +7,8 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
 
+using namespace std;
+
 namespace Mantid
 {
 namespace API
@@ -41,6 +43,11 @@ class MANTID_API_DLL IPowderDiffPeakFunction : virtual public API::ParamFunction
 {
 public:
 
+  /// Constructor and Destructor
+  IPowderDiffPeakFunction();
+
+  virtual ~IPowderDiffPeakFunction();
+
   /// Overwrite IFunction base class methods
   virtual const std::string name();
   virtual const std::string category();
@@ -66,9 +73,6 @@ public:
   /// Calculate peak parameters (alpha, beta, sigma2..)
   void calculateParameters(bool explicitoutput) const;
 
-  /// Core function to calcualte peak values for whole region
-  void functionLocal(vector<double>& out, const vector<double> &xValues) const;
-
   /// Set up the flag to show whether (from client) cell parameter value changed
   void setUnitCellParameterValueChangeFlag(bool changed)
   {
@@ -84,8 +88,20 @@ public:
   void function1D(double* out, const double* xValues, const size_t nData)const;
 
 protected:
-/// Defines the area around the centre where the peak values are to be calculated (in FWHM).
-  static int s_peakRadius; 
+  /// Local function for GSL minimizer
+  virtual void functionLocal(double*, const double*, int&) const;
+
+  /// Local function for calculation in Mantid
+  virtual void functionLocal(vector<double> &out, const vector<double> &xValues) const;
+
+  /// General implementation of the method for all peaks. Calculates derivatives only
+  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData) const;
+
+  /// Defines the area around the centre where the peak values are to be calculated (in FWHM).
+  static int s_peakRadius;
+
+  /// An indicator to re-calculate peak d-space position
+  bool m_cellParamValueChanged;
 };
 
 typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;
