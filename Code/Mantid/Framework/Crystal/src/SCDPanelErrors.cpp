@@ -670,7 +670,6 @@ namespace Mantid
     void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
     {
       size_t StartPos = 2;
-      size_t StartRot = 5;
 
       size_t L0param = parameterIndex("l0");
       size_t T0param = parameterIndex("t0");
@@ -968,7 +967,9 @@ namespace Mantid
 
          */
         //-------------------- Derivatives with respect to rotx,roty, and rotz ---------
-        StartRot = parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xrot");
+
+
+        size_t StartRot = parameterIndex("f" + boost::lexical_cast<string>(gr) + "_Xrot");
 
         for (size_t param = StartRot; param <= StartRot + 2; ++param)
         {
