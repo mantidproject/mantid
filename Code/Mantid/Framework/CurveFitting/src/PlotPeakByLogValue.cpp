@@ -15,7 +15,7 @@ LogValue property specifies a log value to be included into the output. If this 
 
 The output workspace is a table in which rows correspond to the spectra in the order they (spectra) appear in the Input property. The first column of the table has the log values. It is followed by pairs of columns with parameter values and fitting errors. If a parameter was fixed or tied the error will be zero. Here is an example of the output workspace:
 
-[[File:PlotPeakByLogValue_Output.PNG]]
+[[File:PlotPeakByLogValue_Output.png]]
 
 In this example a group of three Matrix workspaces were fitted with a [[Gaussian]] on a linear background.
 

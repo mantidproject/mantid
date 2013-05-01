@@ -24,23 +24,43 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
          ${HELP_HTML_DIR}/developers.html
         )
 
-   # copy over images - this just globs things in the images sub-directory
-   file ( GLOB_RECURSE IMAGES
-          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/images
-	   "*.png" )
-   file ( GLOB_RECURSE IMAGES_jpg
-          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/images
-	   "*.jpg" )
-   list ( APPEND IMAGES ${IMAGES_jpg})
-   file ( GLOB_RECURSE IMAGES_gif
-          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/images
-	   "*.gif" )
-   list ( APPEND IMAGES ${IMAGES_gif})
-   file ( GLOB_RECURSE IMAGES_PNG 
-          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/images
-	   "*.PNG" )
-   list ( APPEND IMAGES ${IMAGES_PNG})
-   list ( APPEND IMAGES "ImageNotFound.png")
+   # copy over images
+   set ( IMAGES
+         AbsorptionFlow.png
+         BackToBackExponentialWithConstBackground.png
+         BinMD_Coordinate_Transforms_withLine.png
+         Box.png
+         ChopDataIntegrationExplanation.png
+         ConvertToEnergyInfoTable.png
+         Convolution.png
+         FFTGaussian1FFT.png
+         FFTGaussian1.png
+         FFTGaussian2FFT.png
+         FFTGaussian2.png
+         Gaussian2Fit.jpg
+         Gaussian2Fit_Ties.jpg
+         GaussianFit.jpg
+         GaussianFit_Ties.jpg
+         GaussianWithConstBackground.png
+         GEM_Focused.png
+         IkedaCarpenterPVwithBackground.png
+         ImageNotFound.png
+         InstrumentTree.jpg
+         IntegrateEllipsoids.png
+         IntegratePeaksMD_graph1.png
+         IntegratePeaksMD_graph2.png
+         LorentzianWithConstBackground.png
+         Monitorspect_getei.jpg
+         PeakIntensityVsRadius_fig.png
+         PlotPeakByLogValue_Output.png
+         ReadFromFile-Grouping.png
+         RebinByPulseTime.png
+         SassenaFFTexample.jpg
+         SliceViewer-DetectorFace.png
+         UnwrapSNS_inst.png
+         UserFunction1D.gif
+         Wav_Q_bins.png
+       )
    #message ( "QTASSISTANT_IMAGES ${IMAGES}")
    copy_python_files_to_dir("${IMAGES}" "${CMAKE_CURRENT_SOURCE_DIR}/images" ${HELP_HTML_IMG_DIR} INSTALL_IMAGES)
 
