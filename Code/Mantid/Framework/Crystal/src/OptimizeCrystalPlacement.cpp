@@ -77,9 +77,9 @@ namespace Mantid
     void OptimizeCrystalPlacement::initDocs()
     {
       this->setWikiSummary(
-          "This algorithms  optimizing goniometer settings  and sample orientation to better index the peaks." );
+          "This algorithm  optimizes goniometer settings  and sample orientation to better index the peaks." );
       this->setOptionalMessage(
-          "This algorithms  optimizing goniometer settings  and sample orientation to better index the peaks." );
+          "This algorithm  optimizes goniometer settings  and sample orientation to better index the peaks." );
     }
 
     void OptimizeCrystalPlacement::init()
