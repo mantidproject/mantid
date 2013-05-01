@@ -1660,14 +1660,14 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
   if(Poco::Environment::has(platformPathName))
   {
     existingPath = Poco::Environment::get(platformPathName);
-    existingPath.append(strSeparator);
-    existingPath.append(path);
+    existingPath.append(strSeparator + path);
   }
   else
   {
     existingPath = path;
   }
-  Poco::Environment::set(platformPathName, existingPath.toString());
+  const std::string newPath = existingPath.toString();
+  Poco::Environment::set(platformPathName, newPath);
 #elif defined __linux__
   UNUSED_ARG(path)
   throw std::runtime_error("Cannot dynamically set the library path on Linux");

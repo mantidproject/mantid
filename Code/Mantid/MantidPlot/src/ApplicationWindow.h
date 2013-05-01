@@ -1094,9 +1094,8 @@ private:
   QPoint positionNewFloatingWindow(QSize sz) const;
   QPoint desktopTopLeft() const;
   bool hasParaviewPath() const;
-  bool hasVatesAvailable() const;
   bool shouldExecuteAndQuit(const QString& arg);
-  void trySetParaviewPath(const QStringList& commandArguments);
+  void trySetParaviewPath(const QStringList& commandArguments, bool noDialog=false);
 
   private slots:
   //! \name Initialization
