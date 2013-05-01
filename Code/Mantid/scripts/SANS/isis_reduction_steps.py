@@ -1504,6 +1504,7 @@ class ConvertToQISIS(sans_reduction_steps.ConvertToQ):
         Almost a copy of sans_reduction_steps.ConvertToQ, except by the calculation of
         the transmission correction wide angle.
         """
+        from mantidsimple import SANSWideAngleCorrection
         wavepixeladj = ""
         if (reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp):
             #calculate the transmission wide angle correction
