@@ -83,7 +83,7 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
          ${HELP_HTML_DIR}/fitfunctions_index.html )
 
    add_custom_command(OUTPUT ${HELP_ALGO_OUT}
-                      DEPENDS make_algorithms_help.py qhpfile.py algorithm_help.py htmlwriter.py parseLinks.py mediawiki.py Algorithms
+                      DEPENDS make_algorithms_help.py qhpfile.py algorithm_help.py htmlwriter.py parseLinks.py mediawiki.py ${INSTALL_IMAGES} Algorithms
                       COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_algorithms_help.py
                               -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
 		      )

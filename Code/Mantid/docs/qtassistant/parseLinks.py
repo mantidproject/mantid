@@ -49,9 +49,25 @@ class fixLinks:
     def linkImages(self):
         pass
 
+
+    def linkExplicit(self):
+        for item in self.explicitLinks:
+          if item.strip()[:4]=='http':
+              target=item.strip().split(' ')
+              if len(target)==2:
+                label=target[1]
+                link=target[0]
+              else:
+                label=item
+                link=item
+              formatted="<a href=\""+link+"\">"+label+"</a>"
+              self.text=self.text.replace("["+item+"]",formatted)
+              
+
     def parse(self):
         self.linkAlgorithms()
         self.linkFitFunctions()
         self.linkImages()
         self.linkMantidWiki()
+        self.linkExplicit()
         return self.text
