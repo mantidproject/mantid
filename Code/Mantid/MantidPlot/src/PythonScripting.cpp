@@ -216,7 +216,7 @@ bool PythonScripting::start()
 
     //Get the refresh protection flag
     configSvc.getValue("pythonalgorithms.refresh.allowed", refresh_allowed);
-    if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
+    if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) ) 
     {
       d_initialized = true;
     }
