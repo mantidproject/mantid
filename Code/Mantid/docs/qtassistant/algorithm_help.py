@@ -4,6 +4,7 @@ import mantid
 from mediawiki import MediaWiki
 import os
 import wiki_tools
+from parseLinks import fixLinks
 
 DIRECTION = {
     0:"input",
@@ -48,6 +49,9 @@ def propToList(property, number):
         text = "&nbsp;"
     else:
         text = text.replace("\n", "<br/>")
+    #fix links
+    fixer=fixLinks(text)
+    text = fixer.parse()
     result.append(text)
     return result
 
@@ -129,5 +133,6 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
 
     # cleanup the file
     htmlfile.nl()
+    htmlfile.closeTag(True)
     htmlfile.closeTag(True)
     htmlfile.closeTag(True)
