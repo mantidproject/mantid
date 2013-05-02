@@ -1,6 +1,33 @@
-/** *WIKI* 
+#include "MantidAlgorithms/SaveGSASInstrumentFile.h"
 
-Convert Fullprof's instrument resolution file (.irf) to  GSAS's instrument file (.iparm/.prm). 
+namespace Mantid
+{
+namespace Algorithms
+{
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   */
+  SaveGSASInstrumentFile::SaveGSASInstrumentFile()
+  {
+  }
+    
+  //----------------------------------------------------------------------------------------------
+  /** Destructor
+   */
+  SaveGSASInstrumentFile::~SaveGSASInstrumentFile()
+  {
+  }
+  
+
+
+} // namespace Algorithms
+} // namespace Mantid
+
+/** *WIKI*
+
+Convert Fullprof's instrument resolution file (.irf) to  GSAS's instrument file (.iparm/.prm).
 
 ==== Supported peak profiles ====
 * Time-of-flight back-to-back exponential convoluted with pseudo-voigt (planned)
@@ -8,16 +35,16 @@ Convert Fullprof's instrument resolution file (.irf) to  GSAS's instrument file 
 ** GSAS: Type 3 TOF profile.
 
 * Thermal neutron time-of-flight back-to-back exponential convoluted with pseudo-voigt (implemented)
-** Fullprof: Profile 10; 
-** GSAS: tabulated peak profile. 
+** Fullprof: Profile 10;
+** GSAS: tabulated peak profile.
 
 ==== Supported input Fullprof file ====
 There can be several types of Fullprof files as the input file
-* resolution file .irf (implemented) 
+* resolution file .irf (implemented)
 * configuration file .pcr (planned)
 
 ==== Calculation of L2 ====
-* If 2Theta (<math>2\theta</math>) is given, L2 will be calculated from given 2Theta and L1 by <math>DIFC = 252.816\cdot2sin(\theta)\sqrt{L1+L2}</math>. Notice that <math>2\theta</math> given in input .irf file may have subtle difference to "2Theta", which is input by user in order to calculate L2.  
+* If 2Theta (<math>2\theta</math>) is given, L2 will be calculated from given 2Theta and L1 by <math>DIFC = 252.816\cdot2sin(\theta)\sqrt{L1+L2}</math>. Notice that <math>2\theta</math> given in input .irf file may have subtle difference to "2Theta", which is input by user in order to calculate L2.
 
 * If "2Theta" (<math>2\theta</math>) is not given, L2 will be read from user input.
 
@@ -35,26 +62,27 @@ There can be several types of Fullprof files as the input file
 /** Calculate TOF difference
  * @param ep :: zero
  * @param eq :: dtt1
- * @param er :: dtt2 
+ * @param er :: dtt2
  * @param tp :: zerot
  * @param tq :: dtt1t
- * @param er :: dtt2t 
+ * @param er :: dtt2t
 */
 double tofh(double n, double ep, double eq, double er, double tp, double tq, double tr, double dsp)
 {
-    // Epithermal 
+    // Epithermal
     // double te = zero  + d*dtt1  + 0.5*dtt2*erfc( (1/d-1.05)*10 );
-    // Thermal  
-    // double tt = zerot + d*dtt1t + dtt2t/d; 
+    // Thermal
+    // double tt = zerot + d*dtt1t + dtt2t/d;
     // Total TOF
     // double t  = n*te + (1-n) tt
 
-    // FIXME Is this equation for TOF^e correct? 
+    // FIXME Is this equation for TOF^e correct?
     double te = ep + (eq*dsp) + er*0.5*erfc(((1.0/dsp)-1.05)*10.0);
     double tt = tp + (tq*dsp) + (tr/dsp);
     double t = (n*te) + tt - (n*tt);
 
-    return t
+    return t;
+}
 
 
 /** Complementary error function
@@ -81,7 +109,7 @@ double aaba(double n, double ea1, double ea2, double ta1, double ta2, double dsp
     double g  = g0  + g1*d;
     double gt = gt1 + g1t*d;
     a = 1/(n*g + (1-n)gt)
-    */ 
+    */
     double ea = ea1 + (ea2*dsp);
     double ta = ta1 - (ta2/dsp);
     double am1 = (n*ea) + ta - (n*ta);
@@ -101,29 +129,30 @@ double calL2FromDtt1(double difc, double L1, double twotheta)
 
     return l2;
 }
-    
+
 //
-//    IRF            =   Dtt1,Dtt2,ZERO ,     
-//    Python_code    =   epi_q, 0.0, epi_p,     
+//    IRF            =   Dtt1,Dtt2,ZERO ,
+//    Python_code    =   epi_q, 0.0, epi_p,
 //
-//                       Dtt1t,Dtt2t,                   
-//                       therm_q, -therm_r,     
+//                       Dtt1t,Dtt2t,
+//                       therm_q, -therm_r,
 //
-//                       x-cross,Width,Zerot,   
-//                       mX, mXb, therm_p,       
+//                       x-cross,Width,Zerot,
+//                       mX, mXb, therm_p,
 //
-//                       Sig-2,Sig-1,Sig-0,                        
-//                       sigma22, sigma21, sigma20,    
+//                       Sig-2,Sig-1,Sig-0,
+//                       sigma22, sigma21, sigma20,
 //
-//                       Gam-2,Gam-1,Gam-0,     
-//                       gam2, gam1, gam0,         
+//                       Gam-2,Gam-1,Gam-0,
+//                       gam2, gam1, gam0,
 //
-//                       alph0,beta0,alph1,beta1,                 
-//                       epi_a1, epi_b1, epi_a2, epi_b2,      
+//                       alph0,beta0,alph1,beta1,
+//                       epi_a1, epi_b1, epi_a2, epi_b2,
 //
 //                       alph0t,beta0t,alph1t,beta1t
 //                       therm_a1, therm_b1, therm_a2, therm_b2
 
+/*
 class ConvertInstrumentFile(PythonAlgorithm):
     """ Class to convert between instrument files
     """
@@ -158,7 +187,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
                 self.mxtofs = [46.76, 70.14, 81.83, 93.52, 140.3, 187.0, 233.8]
                 self.splitd = [0.53, 0.87, 0.87, 0.87, 0.87, 0.87]  #!@#$ don't need this
                 self.vrun =   [4866,4867,4868,4869,4870,4871,4872]
-            
+
             elif (hz30_f):
                 # 30 Hz
                 self.rep='30'  #none for 11-A cycle
@@ -168,7 +197,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
                 self.mxtofs = [93.5,  187.0, 280.5]
                 self.splitd = [0.85, 0.87, 0.87]
                 self.vrun = [4873,4874,4891]
-            
+
             elif (hz10_f):
                 # 10 Hz
                 self.rep='10'  #none for 11-A cycle
@@ -193,7 +222,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
                 self.mxtofs = [46.76, 70.14, 81.83, 93.52, 156.00]
                 self.vrun =   [0,     1,     2,     3,     4   ]
             else:
-                raise NotImplementedError("For instrument %s running in %d mode is not supported." 
+                raise NotImplementedError("For instrument %s running in %d mode is not supported."
                         % (self.instrument, chopperhertz))
 
         else:
@@ -207,10 +236,10 @@ class ConvertInstrumentFile(PythonAlgorithm):
 
     def parseFullprofResolutionFile(self, irffilename):
         """ Parse Fullprof resolution .irf file
-    
+
         Input:
          - irffilename:  Resolution file (.irf)  Can be single bank or multiple bank
-    
+
         Output:
          - dictionary
         """
@@ -222,7 +251,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         for i in xrange(numbanks):
             bankid = infows.cell(i, 0)
             print "Found bank %d" %(bankid)
-            
+
             bankwsname = irffilename.split("/")[-1].split(".")[0] + "_Bank" + str(bankid)
             print "Export to Tableworkspace %s" % (bankwsname)
             bankws = api.LoadFullprofResolution(Filename=irffilename, OutputWorkspace=bankwsname, Bank=bankid, BankInformation=False)
@@ -233,7 +262,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
             if mdict[bankid].has_key("Dtt2") is False:
                 mdict[bankid]["Dtt2"] = 0.0
 
-            # Convert the unit of tof-min and tof-max 
+            # Convert the unit of tof-min and tof-max
             mdict[bankid]["tof-max"] = 1.0E-3*mdict[bankid]["tof-max"]
 
             # Definition of sigma might be different
@@ -243,7 +272,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         # ENDFOR i (each bank)
 
         self.mdict = mdict
-    
+
         return mdict
 
 
@@ -253,7 +282,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         pardict[bankid] = {}
 
         numrows = tablews.rowCount()
-        
+
         for irow in xrange(numrows):
             parname = tablews.cell(irow, 0)
             parvalue = tablews.cell(irow, 1)
@@ -278,13 +307,13 @@ class ConvertInstrumentFile(PythonAlgorithm):
         return
 
     def convertToGSAS(self, banks, gsasinstrfilename):
-        """ Convert to GSAS instrument file 
+        """ Convert to GSAS instrument file
 
         Arguments
          - banks    :   list of banks (sorted) to .iparm or prm file
          - gsasinstrfilename:   string
 
-        Return  
+        Return
          - None
         """
         # 1. Check
@@ -316,7 +345,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
 
         Note:
          - gdsp[k]  :   d_k as the tabulated d-spacing value
-         - 
+         -
 
         Argument:
          - pardict
@@ -328,7 +357,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
 
         # 1. Init data structure
         gdsp   = np.zeros(90)       # d_k
-        gtof   = np.zeros(90)       # TOF_thermal(d_k) 
+        gtof   = np.zeros(90)       # TOF_thermal(d_k)
         gdt    = np.zeros(90)       # TOF_thermal(d_k) - TOF(d_k)
         galpha = np.zeros(90)       # delta(alpha)
         gbeta  = np.zeros(90)       # delta(beta)
@@ -337,17 +366,17 @@ class ConvertInstrumentFile(PythonAlgorithm):
             twosintheta = pardict["twotheta"]
             mX = pardict["Tcross"]
             mXb = pardict["Width"]
-            instC = pardict["Dtt1"] - (4*(pardict["Alph0"]+pardict["Alph1"])) 
+            instC = pardict["Dtt1"] - (4*(pardict["Alph0"]+pardict["Alph1"]))
         except KeyError:
             print "Cannot Find Key twotheta/x-cross/width/dtt1/alph0/alph1!"
             print "Keys are: "
             print pardict.keys()
             raise NotImplementedError("Key works cannot be found!")
-       
-        if 1: 
+
+        if 1:
             # latest version from Jason
-            ddstep = ((1.05*self.mxdsp[bank-1])-(0.9*self.mndsp[bank-1]))/90  
-        else: 
+            ddstep = ((1.05*self.mxdsp[bank-1])-(0.9*self.mndsp[bank-1]))/90
+        else:
             # used in the older prm file
             ddstep = ((1.00*self.mxdsp[bank-1])-(0.9*self.mndsp[bank-1]))/90
 
@@ -361,14 +390,14 @@ class ConvertInstrumentFile(PythonAlgorithm):
             gtof[k] = tofh(gpkX[k], pardict["Zero"], pardict["Dtt1"] ,pardict["Dtt2"],
                     pardict["Zerot"], pardict["Dtt1t"], -pardict["Dtt2t"], gdsp[k])
             gdt[k] = gtof[k] - (instC*gdsp[k])
-            galpha[k] = aaba(gpkX[k], pardict["Alph0"], pardict["Alph1"], 
+            galpha[k] = aaba(gpkX[k], pardict["Alph0"], pardict["Alph1"],
                     pardict["Alph0t"], pardict["Alph1t"], gdsp[k])
-            gbeta[k] = aaba(gpkX[k], pardict["Beta0"], pardict["Beta1"], 
+            gbeta[k] = aaba(gpkX[k], pardict["Beta0"], pardict["Beta1"],
                     pardict["Beta0t"], pardict["Beta1t"], gdsp[k])
             #except KeyError err:
             #    print err
             #    raise NotImplementedError("Unable to find some parameter name as key")
-        # ENDFOR: k 
+        # ENDFOR: k
 
         # 3. Set to class variables
         self.gdsp   = gdsp
@@ -391,7 +420,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         # 1. Set essential values
         pardict = self.mdict[bank]
 
-        instC = pardict["Dtt1"] - (4*(pardict["Alph0"]+pardict["Alph1"])) 
+        instC = pardict["Dtt1"] - (4*(pardict["Alph0"]+pardict["Alph1"]))
         titleline = "%s %dHz CW=%f" % (self.sample, self.frequency, self.CWL[bank-1])
 
         # 2. Write section of prm file to string
@@ -404,7 +433,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
             prmfile += ('INS   FPATH1     %f \n' % (self.iL1))
             prmfile += ('INS   HTYPE   PNTR \n')
          # ENDIF
-  
+
         if self.iL2 < 0:
             print "Calculate L2 from input DIFC (Dtt1), L2 and 2theta"
             self.iL2 = calL2FromDtt1(difc=self.mdict[bank]["Dtt1"], L1=self.iL1, twotheta=self.i2theta)
@@ -413,31 +442,31 @@ class ConvertInstrumentFile(PythonAlgorithm):
 
         # print "Debug: L2 = %f,  2Theta (irf) = %f,  2Theta (input) = %f" % (self.iL2, pardict["twotheta"], self.i2theta)
 
-        prmfile += ('INS %2i ICONS%10.3f%10.3f%10.3f          %10.3f%5i%10.3f\n' % 
+        prmfile += ('INS %2i ICONS%10.3f%10.3f%10.3f          %10.3f%5i%10.3f\n' %
                 (bank, instC*1.00009, 0.0, pardict["Zero"],0.0,0,0.0))
-        prmfile += ('INS %2iBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5i%5i\n' % 
+        prmfile += ('INS %2iBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5i%5i\n' %
                 (bank, self.iL2, pardict["twotheta"], 0, 0, 0.2, 1, 1))
         prmfile += ('INS %2iBAKGD     1    4    Y    0    Y\n'   % (bank))
-        prmfile += ('INS %2iI HEAD %s\n' % 
+        prmfile += ('INS %2iI HEAD %s\n' %
                 (bank, titleline))
         prmfile += ('INS %2iI ITYP%5i%10.4f%10.4f%10i\n' %
                 (bank, 0, self.mndsp[bank-1]*0.001*instC, self.mxtofs[bank-1], randint(10001,99999)))
         prmfile += ('INS %2iINAME   powgen \n' %(bank))
         prmfile += ('INS %2iPRCF1 %5i%5i%10.5f\n' % (bank, -3, 21, 0.002))
-        prmfile += ('INS %2iPRCF11%15.6f%15.6f%15.6f%15.6f\n' % 
+        prmfile += ('INS %2iPRCF11%15.6f%15.6f%15.6f%15.6f\n' %
                 (bank, 0.0, 0.0, 0.0, pardict["Sig0"]))    # sigma20
-        prmfile += ('INS %2iPRCF12%15.6f%15.6f%15.6f%15.6f\n' % 
+        prmfile += ('INS %2iPRCF12%15.6f%15.6f%15.6f%15.6f\n' %
                 (bank, pardict["Sig1"], pardict["Sig2"], pardict["Gam0"], pardict["Gam1"]))
-        prmfile += ('INS %2iPRCF13%15.6f%15.6f%15.6f%15.6f\n' % 
+        prmfile += ('INS %2iPRCF13%15.6f%15.6f%15.6f%15.6f\n' %
                 (bank, pardict["Gam2"], 0.0, 0.0, 0.0))
-        prmfile += ('INS %2iPRCF14%15.6f%15.6f%15.6f%15.6f\n' % 
+        prmfile += ('INS %2iPRCF14%15.6f%15.6f%15.6f%15.6f\n' %
                 (bank, 0.0, 0.0, 0.0, 0.0))
-        prmfile += ('INS %2iPRCF15%15.6f%15.6f%15.6f%15.6f\n' % 
+        prmfile += ('INS %2iPRCF15%15.6f%15.6f%15.6f%15.6f\n' %
                 (bank, 0.0, 0.0, 0.0, 0.0))
         prmfile += ('INS %2iPRCF16%15.6f\n' % (bank, 0.0))
         prmfile += ('INS %2iPAB3    %3i\n' % (bank, 90))
-        for k in xrange(90): 
-            prmfile += ('INS %2iPAB3%2i%10.5f%10.5f%10.5f%10.5f\n' %(bank, k+1, 
+        for k in xrange(90):
+            prmfile += ('INS %2iPAB3%2i%10.5f%10.5f%10.5f%10.5f\n' %(bank, k+1,
                 self.gdsp[k], self.gdt[k], self.galpha[k], self.gbeta[k]))
         prmfile += ('INS %2iPRCF2 %5i%5i%10.5f\n' % (bank, -4, 27, 0.002))
         prmfile += ('INS %2iPRCF21%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, pardict["Sig1"]))
@@ -449,11 +478,11 @@ class ConvertInstrumentFile(PythonAlgorithm):
         prmfile += ('INS %2iPRCF27%15.6f%15.6f%15.6f      \n' % (bank, 0.0, 0.0, 0.0     ))
         prmfile += ('INS %2iPAB4    %3i\n' % (bank, 90))
         for k in xrange(90):
-            prmfile += ('INS %2iPAB4%2i%10.5f%10.5f%10.5f%10.5f\n' %(bank, k+1, 
+            prmfile += ('INS %2iPAB4%2i%10.5f%10.5f%10.5f%10.5f\n' %(bank, k+1,
                 self.gdsp[k], self.gdt[k], self.galpha[k], self.gbeta[k]))
         prmfile += ('INS %2iPRCF3 %5i%5i%10.5f\n' % (bank, -5, 21, 0.002))
         prmfile += ('INS %2iPRCF31%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, pardict["Sig0"]))
-        prmfile += ('INS %2iPRCF32%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["Sig1"], pardict["Sig2"], 
+        prmfile += ('INS %2iPRCF32%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["Sig1"], pardict["Sig2"],
             pardict["Gam0"], pardict["Gam1"]))
         prmfile += ('INS %2iPRCF33%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["Gam2"], 0.0, 0.0, 0.0))
         prmfile += ('INS %2iPRCF34%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
@@ -467,7 +496,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         # 3. Write to file
         if isfirstbank:
             wprmfile = open(prmfilename, 'w')
-        else: 
+        else:
             wprmfile = open(prmfilename, 'a')
         wprmfile.write(prmfile)
         wprmfile.close()
@@ -507,7 +536,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         """
         # 1. Get input
         self.instrument = self.getProperty("Instrument")
-        self.id_line = self.getProperty("IDLine") # Standard Run LB4844 Vanadium: 4866   J.P. Hodges  2011-09-01 
+        self.id_line = self.getProperty("IDLine") # Standard Run LB4844 Vanadium: 4866   J.P. Hodges  2011-09-01
         self.sample = self.getProperty("Sample")  # titleline = "LaB6 NIST RT 4844[V=4866] 60Hz CW=.533"
         inputfilename = self.getProperty("InputFile")
         banks = self.getProperty("Banks")
@@ -530,14 +559,14 @@ class ConvertInstrumentFile(PythonAlgorithm):
             if self.instrument == "PG3":
                 self.iL1 = 60.0
             elif self.instrument == "NOM":
-                self.iL1 = 19.5 
+                self.iL1 = 19.5
             else:
                 errmsg = "L1 is not given (unphysical).  There is no default value for instrument %s." % (self.instrument)
                 raise NotImplementedError(errmsg)
         # ENDIF
 
         if self.i2theta >= 1000:
-            self.iL2 = templ2            
+            self.iL2 = templ2
             if templ2 < 0:
                 if self.instrument == "PG3":
                     self.iL2 = 3.0
@@ -552,7 +581,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
 
         # 3. Run
         self.initConstants(self.frequency)
-        if useirf is True: 
+        if useirf is True:
             self.parseFullprofResolutionFile(irffilename)
 
         self.makeParameterConsistent()
@@ -563,3 +592,4 @@ class ConvertInstrumentFile(PythonAlgorithm):
 
 
 mtd.registerPyAlgorithm(ConvertInstrumentFile())
+*/
