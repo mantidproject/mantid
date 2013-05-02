@@ -883,7 +883,7 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
 {
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-s
+
   // Does the instrument definition specify that psi should be offset.
   std::vector<std::string> parameters = ws->getInstrument()->getStringParameter("offset-phi");
   const bool bOffsetPsi = (!parameters.empty()) && std::find(parameters.begin(), parameters.end(), "Always") != parameters.end();
