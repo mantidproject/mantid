@@ -29,6 +29,8 @@ class vtkDataSetToNonOrthogonalDataSetTest : public CxxTest::TestSuite
 private:
 
   std::string createMantidWorkspace(bool nonUnityTransform,
+                                    bool forgetUB = false,
+                                    bool forgetWmat = false,
                                     double scale = 1.0)
   {
     // Creating an MDEventWorkspace as the content is not germain to the
@@ -40,27 +42,30 @@ private:
     ExperimentInfo_sptr expInfo = ExperimentInfo_sptr(new ExperimentInfo());
     ws->addExperimentInfo(expInfo);
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SetUB");
-    alg->initialize();
-    alg->setRethrows(true);
-    alg->setProperty("Workspace", wsName);
-    alg->setProperty("a", 3.643*scale);
-    alg->setProperty("b", 3.643);
-    alg->setProperty("c", 5.781);
-    alg->setProperty("alpha", 90.0);
-    alg->setProperty("beta", 90.0);
-    alg->setProperty("gamma", 120.0);
-    std::vector<double> uVec;
-    uVec.push_back(1*scale);
-    uVec.push_back(1);
-    uVec.push_back(0);
-    std::vector<double> vVec;
-    vVec.push_back(0);
-    vVec.push_back(0);
-    vVec.push_back(1);
-    alg->setProperty("u", uVec);
-    alg->setProperty("v", vVec);
-    alg->execute();
+    if (!forgetUB)
+    {
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SetUB");
+      alg->initialize();
+      alg->setRethrows(true);
+      alg->setProperty("Workspace", wsName);
+      alg->setProperty("a", 3.643*scale);
+      alg->setProperty("b", 3.643);
+      alg->setProperty("c", 5.781);
+      alg->setProperty("alpha", 90.0);
+      alg->setProperty("beta", 90.0);
+      alg->setProperty("gamma", 120.0);
+      std::vector<double> uVec;
+      uVec.push_back(1*scale);
+      uVec.push_back(1);
+      uVec.push_back(0);
+      std::vector<double> vVec;
+      vVec.push_back(0);
+      vVec.push_back(0);
+      vVec.push_back(1);
+      alg->setProperty("u", uVec);
+      alg->setProperty("v", vVec);
+      alg->execute();
+    }
 
     // Create the coordinate transformation information
     std::vector<Mantid::coord_t> affMatVals;
@@ -114,10 +119,14 @@ private:
       wMat.push_back(0);
       wMat.push_back(1);
     }
-    // Create property for W matrix and add it as log to run object
-    PropertyWithValue<std::vector<double> > *p;
-    p = new PropertyWithValue<std::vector<double> >("W_MATRIX", wMat);
-    ws->getExperimentInfo(0)->mutableRun().addProperty(p, true);
+
+    if (!forgetWmat)
+    {
+      // Create property for W matrix and add it as log to run object
+      PropertyWithValue<std::vector<double> > *p;
+      p = new PropertyWithValue<std::vector<double> >("W_MATRIX", wMat);
+      ws->getExperimentInfo(0)->mutableRun().addProperty(p, true);
+    }
 
     return wsName;
   }
@@ -217,6 +226,24 @@ public:
     ds->Delete();
   }
 
+  void testThrowsSimpleDatasetNoUB()
+  {
+    std::string wsName = createMantidWorkspace(false, true);
+    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
+    ds->Delete();
+  }
+
+  void testThrowsSimpleDatasetWMatrix()
+  {
+    std::string wsName = createMantidWorkspace(false, false, true);
+    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
+    ds->Delete();
+  }
+
   void testStaticUseForSimpleDataSet()
   {
     std::string wsName = createMantidWorkspace(false);
@@ -260,7 +287,7 @@ public:
 
   void testScaledSimpleDataset()
   {
-    std::string wsName = createMantidWorkspace(false, 2.0);
+    std::string wsName = createMantidWorkspace(false, false, false, 2.0);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
     TS_ASSERT_THROWS_NOTHING(converter.execute());
@@ -270,7 +297,7 @@ public:
 
   void testScaledNonUnitySimpleDataset()
   {
-    std::string wsName = createMantidWorkspace(true, 2.0);
+    std::string wsName = createMantidWorkspace(true, false, false, 2.0);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
     TS_ASSERT_THROWS_NOTHING(converter.execute());

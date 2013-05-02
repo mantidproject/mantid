@@ -93,8 +93,18 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
     {
       API::IMDHistoWorkspace_const_sptr infoWs = boost::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
       m_numDims = infoWs->getNumDims();
-      oLatt = infoWs->getExperimentInfo(0)->sample().getOrientedLattice();
-      wMatArr = infoWs->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double > >("W_MATRIX");
+      const API::Sample sample = infoWs->getExperimentInfo(0)->sample();
+      if (!sample.hasOrientedLattice())
+      {
+        throw std::invalid_argument("OrientedLattice is not present on workspace");
+      }
+      oLatt = sample.getOrientedLattice();
+      const API::Run run = infoWs->getExperimentInfo(0)->run();
+      if (!run.hasProperty("W_MATRIX"))
+      {
+        throw std::invalid_argument("W_MATRIX is not present on workspace");
+      }
+      wMatArr = run.getPropertyValueAsType<std::vector<double > >("W_MATRIX");
       API::CoordTransform *transform = infoWs->getTransformToOriginal();
       affMat = transform->makeAffineMatrix();
     }
@@ -103,8 +113,18 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
     {
       API::IMDEventWorkspace_const_sptr infoWs = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(ws);
       m_numDims = infoWs->getNumDims();
-      oLatt = infoWs->getExperimentInfo(0)->sample().getOrientedLattice();
-      wMatArr = infoWs->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double > >("W_MATRIX");
+      const API::Sample sample = infoWs->getExperimentInfo(0)->sample();
+      if (!sample.hasOrientedLattice())
+      {
+        throw std::invalid_argument("OrientedLattice is not present on workspace");
+      }
+      oLatt = sample.getOrientedLattice();
+      const API::Run run = infoWs->getExperimentInfo(0)->run();
+      if (!run.hasProperty("W_MATRIX"))
+      {
+        throw std::invalid_argument("W_MATRIX is not present on workspace");
+      }
+      wMatArr = run.getPropertyValueAsType<std::vector<double > >("W_MATRIX");
       API::CoordTransform *transform = infoWs->getTransformToOriginal();
       affMat = transform->makeAffineMatrix();
     }
