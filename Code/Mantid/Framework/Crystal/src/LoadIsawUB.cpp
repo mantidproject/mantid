@@ -116,7 +116,7 @@ namespace Crystal
 
     readToEndOfLine(in, true);
     double latVals[6];
-    for( size_t col=0 ; col < 3; col++)
+    for( size_t col=0 ; col < 6; col++)
     {
       s = getWord(in, true);
       if (!convert(s, val))
