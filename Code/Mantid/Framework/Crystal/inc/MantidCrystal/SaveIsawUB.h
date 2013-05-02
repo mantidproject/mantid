@@ -3,6 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid
 {
@@ -57,6 +58,9 @@ namespace Crystal
     void init();
     /// Run the algorithm
     void exec();
+
+    //Calculates the error in the volume
+    double getErrorVolume( Geometry::OrientedLattice lattice);
 
 
   };

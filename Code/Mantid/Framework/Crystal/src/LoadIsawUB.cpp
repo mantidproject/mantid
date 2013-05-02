@@ -114,6 +114,16 @@ namespace Crystal
       readToEndOfLine(in, true);
     }
 
+    readToEndOfLine(in, true);
+    double latVals[6];
+    for( size_t col=0 ; col < 3; col++)
+    {
+      s = getWord(in, true);
+      if (!convert(s, val))
+                throw std::runtime_error("The string '" + s + "' in the file was not understood as a number.");
+      latVals[col] = val;
+    }
+
     // Adjust the UB by transposing
     ub = ub.Transpose();
     
@@ -121,6 +131,7 @@ namespace Crystal
      * This is compatible (same results) with the ISAW lattice parameters */
     OrientedLattice * latt = new OrientedLattice();
     latt->setUB(ub);
+    latt->setError( latVals[0],latVals[1],latVals[2],latVals[3],latVals[4],latVals[5]);
     DblMatrix U=latt->getU();
 
     // Swap rows around to accound for IPNS convention

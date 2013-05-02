@@ -81,6 +81,56 @@ namespace Crystal
         "Path to an ISAW-style UB matrix text file.");
   }
 
+
+  double SaveIsawUB::getErrorVolume( OrientedLattice lattice)
+    {
+      double Volume;
+      double latticeParams[6] =
+             { lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()};
+      double lattice_errors[6]=
+             { lattice.errora(),lattice.errorb(),lattice.errorc(),lattice.erroralpha(),lattice.errorbeta(),lattice.errorgamma()};
+      if ( lattice.volume( )<=0)
+      {
+
+        double xA =cos(lattice.alpha() / 180. *M_PI);
+        double xB =cos(lattice.beta() / 180. * M_PI);
+        double xC =cos(lattice.gamma() / 180. * M_PI);
+        Volume = lattice.a() * lattice.b() * lattice.c() *sqrt(1 - xA * xA - xB * xB - xC * xC + 2 * xA * xB * xC);
+      }
+      else
+       Volume = lattice.volume();
+
+
+    double xA=cos(latticeParams[3]/180.*M_PI);
+    double xB=cos(latticeParams[4]/180.*M_PI);
+    double xC=cos(latticeParams[5]/180.*M_PI);
+
+    double dV =0;
+    for( int i=0;i<3;i++)
+    {
+      double U=( Volume/latticeParams[i]*lattice_errors[i]);
+      dV+= U*U;
+    }
+
+    Volume = Volume/2.0/(1-xA*xA-xB*xB-xC*xC+2*xA*xB*xC);
+    double U=(lattice_errors[3])*(sin(2*latticeParams[3]/180.*M_PI)-
+              sin(latticeParams[3]/180.*M_PI)*cos(latticeParams[4]/180*M_PI)*
+              cos(latticeParams[5]/180*M_PI));
+    dV += U*U;
+    U=(lattice_errors[4])*(sin(2*latticeParams[4]/180.*M_PI)-
+             sin(latticeParams[4]/180.*M_PI)*cos(latticeParams[3]/180*M_PI)*
+             cos(latticeParams[5]/180*M_PI));
+    dV +=U*U;
+    U=(lattice_errors[5])*(sin(2*latticeParams[5]/180.*M_PI)-
+             sin(latticeParams[5]/180.*M_PI)*cos(latticeParams[4]/180*M_PI)*
+             cos(latticeParams[3]/180*M_PI));
+    dV +=U*U;
+    dV = sqrt(dV);
+
+
+
+    return dV;
+  }
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -124,9 +174,12 @@ namespace Crystal
             << lattice.alpha() << setw(12) << setprecision(4) << lattice.beta() << setw(12)
             << setprecision(4) << lattice.gamma() << setw(12) << setprecision(4) << lattice.volume()
             << " " << endl;
-
-        out << "     0.0000" << "      0.0000" << "      0.0000" << "      0.0000" << "      0.0000"
-            << "      0.0000" << "      0.0000 " << endl;
+        double ErrorVolume =getErrorVolume(lattice);
+        out << setw(11) << setprecision(4) << lattice.errora() << setw(12) << setprecision(4) << lattice.errorb()
+                   << setw(12) << setprecision(4) << lattice.errorc() << setw(12) << setprecision(4)
+                   << lattice.erroralpha() << setw(12) << setprecision(4) << lattice.errorbeta() << setw(12)
+                   << setprecision(4) << lattice.errorgamma() << setw(12) << setprecision(4) << ErrorVolume
+                   << " " << endl;
 
         out << endl << endl;
 
