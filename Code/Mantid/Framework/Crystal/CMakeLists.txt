@@ -124,7 +124,7 @@ set ( TEST_FILES
 	SCDPanelErrorsTest.h
 	SaveHKLTest.h
 	SaveIsawPeaksTest.h
-	SaveIsawUBTest.h
+	#SaveIsawUBTest.h
 	SavePeaksFileTest.h
 	SelectCellOfTypeTest.h
 	SelectCellWithFormTest.h
