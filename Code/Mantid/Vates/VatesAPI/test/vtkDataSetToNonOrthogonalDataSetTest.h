@@ -235,7 +235,7 @@ public:
     ds->Delete();
   }
 
-  void testThrowsSimpleDatasetWMatrix()
+  void testThrowsSimpleDatasetNoWMatrix()
   {
     std::string wsName = createMantidWorkspace(false, false, true);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
