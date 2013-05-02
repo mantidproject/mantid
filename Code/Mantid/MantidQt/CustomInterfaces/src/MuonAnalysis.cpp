@@ -1854,7 +1854,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
       double shift = m_nexusTimeZero - boost::lexical_cast<double>(timeZero().toStdString());
       Mantid::API::IAlgorithm_sptr rebinAlg = Mantid::API::AlgorithmManager::Instance().create("ChangeBinOffset");
       rebinAlg->setPropertyValue("InputWorkspace", inputWS);
-      rebinAlg->setPropertyValue("OutputWorkspace", inputWS);
+      rebinAlg->setPropertyValue("OutputWorkspace", outWS);
       rebinAlg->setProperty("Offset", shift);
       rebinAlg->execute();    
     }
@@ -1864,7 +1864,10 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
   }
 
   Mantid::API::IAlgorithm_sptr cropAlg = Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
-  cropAlg->setPropertyValue("InputWorkspace", inputWS);
+  if ( m_nexusTimeZero != boost::lexical_cast<double>(timeZero().toStdString()) )
+    cropAlg->setPropertyValue("InputWorkspace", outWS);
+  else 
+    cropAlg->setPropertyValue("InputWorkspace", inputWS);
   cropAlg->setPropertyValue("OutputWorkspace", outWS);
   cropAlg->setProperty("Xmin", plotFromTime());
   if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )
