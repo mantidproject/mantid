@@ -447,7 +447,7 @@ class BaseReductionScripter(object):
             # Generate reduction script and write it to file
             script_path = os.path.join(output_dir, "job_submission.py")
             script = self.to_script()
-            script = "import os\nos.system('load module mantid-mpi')\n"+script
+            script = "import os\nos.system('module load mantid-mpi')\n"+script
             fd = open(script_path, 'w')
             fd.write(script)
             fd.close()
