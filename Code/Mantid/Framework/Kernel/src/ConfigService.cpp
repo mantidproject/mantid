@@ -1756,13 +1756,16 @@ bool ConfigServiceImpl::quickParaViewCheck() const
     }
     else
     {
-      this->g_log.notice("ParaView is not available");
+      std::stringstream messageStream;
+      messageStream << "ParaView version query failed with code: " << rc;
+      this->g_log.notice(messageStream.str());
+      this->g_log.notice("ParaView is not available, query failed.");
     }
   }
   catch(Poco::SystemException &e)
   {
     g_log.debug(e.what());
-    this->g_log.notice("ParaView is not available");
+    this->g_log.notice("ParaView is not available, Poco::SystemException");
   }
   return isAvailable; 
 }
