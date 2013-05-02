@@ -52,7 +52,7 @@ HelpWindowImpl::~HelpWindowImpl()
 void HelpWindowImpl::openWebpage(const string &url)
 {
     m_log.debug() << "open url \"" << url << "\"\n";
-    QDesktopServices::openUrl(QUrl::QUrl(QLatin1String(url.c_str())));
+    QDesktopServices::openUrl(QUrl(QLatin1String(url.c_str())));
 }
 
 /**
