@@ -446,11 +446,7 @@ class BaseReductionScripter(object):
         if HAS_MANTID:
             # Generate reduction script and write it to file
             script_path = os.path.join(output_dir, "job_submission.py")
-            script = self.to_script()
-            script = "import os\nos.system('module load mantid-mpi')\n"+script
-            fd = open(script_path, 'w')
-            fd.write(script)
-            fd.close()
+            script = self.to_script(script_path)
             Logger.get("scripter").notice("Reduction script: %s" % script_path)
             
             # Generate job submission script
@@ -499,16 +495,36 @@ class BaseReductionScripter(object):
         """
         content =  "# Script suitable for calling remotely from MantidPlot\n"
         content += "# Set up the environment for mantid\n"
-        content += "module load mantid-mpi\n"
+        content += "#module load mantid-mpi\n"
         content += "#module load mantid-mpi/nightly\n"
+
+        content += "PATH=/usr/lib64/compat-openmpi/bin:$PATH\n"
+        content += "LD_LIBRARY_PATH=/usr/lib64/compat-openmpi/lib:$LD_LIBRARY_PATH\n"
+        content += "PYTHONPATH=/usr/lib64/python2.6/site-packages/compat-openmpi:$PYTHONPATH\n"
+        content += "MPI_BIN=/usr/lib64/compat-openmpi/bin\n"
+        content += "MPI_SYSCONFIG=/etc/compat-openmpi-x86_64\n"
+        content += "MPI_FORTRAN_MOD_DIR=/usr/lib64/gfortran/modules/compat-openmpi-x86_64\n"
+        content += "MPI_INCLUDE=/usr/include/compat-openmpi-x86_64\n"
+        content += "MPI_LIB=/usr/lib64/compat-openmpi/lib\n"
+        content += "MPI_MAN=/usr/share/man/compat-openmpi-x86_64\n"
+        content += "MPI_PYTHON_SITEARCH=/usr/lib64/python2.6/site-packages/compat-openmpi\n"
+        content += "MPI_COMPILER=compat-openmpi-x86_64\n"
+        content += "MPI_SUFFIX=_compat_openmpi\n"
+        content += "MPI_HOME=/usr/lib64/compat-openmpi\n"
+        
+        content += "PREFIX=/sw/fermi/mantid-mpi/mantid-mpi-2.4.0-1.el6.x86_64\n"
+        content += "PATH=$PATH:$PREFIX/bin\n"
+        # Second one is to pick up boostmpi (not openmpi itself which comes from the compat package above)
+        content += "LD_LIBRARY_PATH=$PREFIX/lib:/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH\n"
+        content += "PYTHONPATH=$PREFIX/bin:$PYTHONPATH\n"
 
         content += "# Compute the total processes from node count and cores_per_node\n"
         content += "TOTAL_PROCESSES=$((MANTIDPLOT_NUM_NODES * MANTIDPLOT_CORES_PER_NODE))\n"
 
         content += "# Kick off python on the computes...\n"
         content += "# Note: any MANTIDPLOT_* environment variables are set by MantidPlot when it submits the job\n"
-        content += "/usr/lib64/openmpi/bin/mpirun -n $TOTAL_PROCESSES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE python job_submission.py\n"
-
+        #content += "/usr/lib64/openmpi/bin/mpirun -n $TOTAL_PROCESSES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE python job_submission.py\n"
+        content += "$MPI_BIN/mpirun -n $TOTAL_PROCESSES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE -x PATH=$PATH -x LD_LIBRARY_PATH=$LD_LIBRARY_PATH -x PYTHONPATH=$PYTHONPATH python job_submission.py\n"
         fd = open(file_path, 'w')
         fd.write(content)
         fd.close()
