@@ -446,7 +446,11 @@ class BaseReductionScripter(object):
         if HAS_MANTID:
             # Generate reduction script and write it to file
             script_path = os.path.join(output_dir, "job_submission.py")
-            script = self.to_script(script_path)
+            script = self.to_script()
+            script = "import os\nos.system('load module mantid-mpi')\n"+script
+            fd = open(script_path, 'w')
+            fd.write(script)
+            fd.close()
             Logger.get("scripter").notice("Reduction script: %s" % script_path)
             
             # Generate job submission script
