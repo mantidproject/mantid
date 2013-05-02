@@ -11,6 +11,8 @@ try:
     import mantidplot
     IS_IN_MANTIDPLOT = True
     from mantid.kernel import ConfigService
+    from mantid.api import AlgorithmFactory
+    CLUSTER_ENABLED = "SubmitRemoteJob" in AlgorithmFactory.getRegisteredAlgorithms(True)
 except:
     pass
 
@@ -37,6 +39,7 @@ from reduction_gui.instruments.instrument_factory import instrument_factory, INS
 from reduction_gui.settings.application_settings import GeneralSettings
 import ui.ui_reduction_main
 import ui.ui_instrument_dialog
+import ui.ui_cluster_details_dialog
 
 class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
     def __init__(self, instrument=None, instrument_list=None):
@@ -73,7 +76,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._last_export_directory = unicode(settings.value("last_export_directory", QtCore.QVariant('.')).toString())
         
         # Current file name
-        self._filename = None   
+        self._filename = None
+        
+        # Cluster credentials
+        self._cluster_user = None
+        self._cluster_pass = None
         
         # Internal flag for clearing all settings and restarting the application
         self._clear_and_restart = False
@@ -104,9 +111,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             
         self.general_settings.progress.connect(self._progress_updated)    
         
-        # Flag to let use know that we need to close the window as soon as possible
-        self._quit_asap = False 
-        
     def _set_window_title(self):
         """
             Sets the window title using the instrument name and the 
@@ -130,33 +134,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
 
         if self._instrument == '' or self._instrument is None:
             return self._change_instrument()
-
-        # Commented out to solve a bug where setting ARCS as your default
-        # instrument means you get the DGS interface when clicking ORNL_SANS..
-#        if self._instrument == '' or self._instrument is None:
-#            if IS_IN_MANTIDPLOT:
-#                from mantid.kernel import ConfigService
-#                c = ConfigService.Instance()
-#                facility = str(c.getFacility())
-#                if facility in INSTRUMENT_DICT.keys():
-#                    instr = str(c.getFacility().instrument(""))
-#                    instr = instr.replace("-","")
-#                    if instr in INSTRUMENT_DICT[facility].keys():
-#                        self._instrument = instr
-#                        
-#                # If we still can't find an instrument, show the
-#                # instrument selection dialog
-#                if self._instrument == '' or self._instrument is None:
-#                    self._change_instrument()
-#                    return
-#            else:
-#                self._change_instrument()
-#                return
-#                
-#        if self._instrument == '' or self._instrument is None:
-#            self.close()
-#            self._quit_asap = True
-#            return
         
         self._update_file_menu()
 
@@ -189,7 +166,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.interface_chk.hide()
 
             # Show the parallel reduction button if enabled
-            if self._interface.is_cluster_enabled() and IS_IN_MANTIDPLOT:
+            if self._interface.is_cluster_enabled() and IS_IN_MANTIDPLOT \
+            and CLUSTER_ENABLED:
                 config = ConfigService.Instance()
                 if config.hasProperty("cluster.submission") \
                 and config.getString("cluster.submission").lower()=='on':
@@ -275,6 +253,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         apiAction.setStatusTip("Select Mantid Python API")
         self.connect(apiAction, QtCore.SIGNAL("triggered()"), self._change_api)
     
+        # Cluster submission details
+        if CLUSTER_ENABLED is True:
+            jobAction = QtGui.QAction("Remote submission details", self)
+            jobAction.setShortcut("Ctrl+R")
+            jobAction.setStatusTip("Set the cluster information for remote job submission")
+            self.connect(jobAction, QtCore.SIGNAL("triggered()"), self._cluster_details_dialog)
+        
         self.tools_menu.clear()
         self.tools_menu.addAction(instrAction)
         self.tools_menu.addAction(debugAction)
@@ -360,6 +345,21 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         else:
             self.close()
             return False      
+            
+    def _cluster_details_dialog(self):
+        """
+            Show dialog to get cluster submission details
+        """ 
+        class ClusterDialog(QtGui.QDialog, ui.ui_cluster_details_dialog.Ui_Dialog): 
+            def __init__(self, instrument_list=None):
+                QtGui.QDialog.__init__(self)
+                self.setupUi(self)
+                
+        dialog = ClusterDialog()
+        dialog.exec_()
+        if dialog.result()==1:
+            self._cluster_user = dialog.username_edit.text()
+            self._cluster_pass = dialog.pass_edit.text()
             
     def _clear_and_close(self):
         """
@@ -447,8 +447,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
             Submit for parallel reduction
         """
-        if self._interface is not None:
-            self._interface.cluster_submit()
+        if self._cluster_user is None and self._cluster_pass is None:
+            self._cluster_details_dialog()
+        
+        if self._interface is not None \
+        and self._cluster_user is not None \
+        and self._cluster_pass is not None:
+            self._interface.cluster_submit(self._cluster_user, self._cluster_pass)
         
     def open_file(self, file_path=None):
         """
