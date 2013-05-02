@@ -17,6 +17,11 @@
 		<parameter name="MaxRecursionDepth">
 		  <value val="20"/>
 		</parameter>
+        
+         <!-- Offset the psi values in the mini-plot -->
+         <parameter name="offset-phi" type="string">
+          <value val="Always" />
+         </parameter>
 		
     </component-link>
 </parameter-file>    

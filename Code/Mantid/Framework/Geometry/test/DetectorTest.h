@@ -147,6 +147,73 @@ public:
     TS_ASSERT(justGoneSix < 0);
   }
 
+
+  void test_calculate_phi()
+  {
+    Detector det("det",0,0);
+
+    V3D aboveOrigin(1,0,0); // phi = 0
+    det.setPos(aboveOrigin);
+    TS_ASSERT_EQUALS(0, det.getPhi());
+
+    V3D leftOfOrigin(0,1,0); // phi = pi/2
+    det.setPos(leftOfOrigin);
+    TS_ASSERT_EQUALS(M_PI/2, det.getPhi());
+
+    V3D belowOrigin(-1, 0, 0); // phi = pi
+    det.setPos(belowOrigin);
+    TS_ASSERT_EQUALS(M_PI, det.getPhi());
+
+    V3D rightOfOrigin(0,-1,0); // phi = 3pi/2
+    det.setPos(rightOfOrigin);
+    TS_ASSERT_EQUALS(-M_PI/2, det.getPhi());
+
+  }
+
+  // Compare results with phi
+  void test_calculate_phi_with_zero_offset()
+  {
+    Detector det("det", 0, 0);
+    const double offset = 0;
+
+    V3D aboveOrigin(1,0,0); // phi = 0
+    det.setPos(aboveOrigin);
+    det.getPhiOffset(offset);
+    TS_ASSERT_EQUALS(std::abs(det.getPhi()), std::abs(det.getPhiOffset(offset)));
+
+    V3D leftOfOrigin(0,1,0); // phi = pi/2
+    det.setPos(leftOfOrigin);
+    TS_ASSERT_EQUALS(std::abs(det.getPhi()), std::abs(det.getPhiOffset(offset)));
+
+    V3D belowOrigin(-1, 0, 0); // phi = pi
+    det.setPos(belowOrigin);
+    TS_ASSERT_EQUALS(std::abs(det.getPhi()), std::abs(det.getPhiOffset(offset)));
+
+    V3D rightOfOrigin(0,-1,0); // phi = 3pi/2
+    det.setPos(rightOfOrigin);
+    TS_ASSERT_EQUALS(std::abs(det.getPhi()), std::abs(det.getPhiOffset(offset)));
+  }
+
+  void test_phi_offset_with_phi_greater_than_zero()
+  {
+    Detector det("det", 0, 0);
+    const double offset =  M_PI;
+
+    V3D leftOfOrigin(0,1,0); // phi = pi/2
+    det.setPos(leftOfOrigin);
+    TS_ASSERT_EQUALS(offset - det.getPhi(), det.getPhiOffset(offset));
+  }
+
+  void test_phi_offset_with_phi_less_than_zero()
+  {
+    Detector det("det", 0, 0);
+    const double offset = M_PI;
+
+    V3D rightOfOrigin(0, -1, 0); // phi = -pi/2
+    det.setPos(rightOfOrigin);
+    TS_ASSERT_EQUALS(-(offset + det.getPhi()), det.getPhiOffset(offset));
+  }
+
 };
 
 #endif

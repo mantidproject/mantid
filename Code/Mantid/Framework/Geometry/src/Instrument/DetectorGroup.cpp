@@ -162,13 +162,29 @@ namespace Mantid
       return result/static_cast<double>(m_detectors.size());
     }
 
-    /// Computes the averate position and returns the phi value
+    /// Computes the average position and returns the phi value
     double DetectorGroup::getPhi() const
     {
       V3D avgPos = this->getPos();
       double phi(0.0), dummy1(0.0), dummy2(0.0);
       avgPos.getSpherical(dummy1, dummy2, phi);
       return phi*M_PI/180.0;
+    }
+
+    /// Computes the average position and returns the phi value
+    double DetectorGroup::getPhiOffset(const double& offset) const
+    {
+      double avgPos = getPhi();
+      double phiOut = avgPos;
+      if(avgPos  < 0)
+      {
+        phiOut = - (offset + avgPos);
+      }
+      else
+      {
+        phiOut = offset - avgPos;
+      }
+      return phiOut;
     }
 
     /** Return IDs for the detectors grouped

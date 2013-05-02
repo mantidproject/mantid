@@ -8,6 +8,7 @@
 #include "PeakMarker2D.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -915,6 +916,11 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
 {
   InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
+
+  // Does the instrument definition specify that psi should be offset.
+  std::vector<std::string> parameters = ws->getInstrument()->getStringParameter("offset-phi");
+  const bool bOffsetPsi = (!parameters.empty()) && std::find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+
   Mantid::Geometry::IDetector_const_sptr det = instrActor->getInstrument()->getDetector(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
   Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
@@ -949,7 +955,7 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
         switch(m_tubeXUnits)
         {
         case LENGTH: xvalue = idet->getDistance(*idet0); break;
-        case PHI: xvalue = idet->getPhi(); break;
+        case PHI: xvalue = bOffsetPsi ? idet->getPhiOffset(M_PI) : idet->getPhi(); break;
         default: xvalue = static_cast<double>(id);
         }
         size_t index = instrActor->getWorkspaceIndex(id);

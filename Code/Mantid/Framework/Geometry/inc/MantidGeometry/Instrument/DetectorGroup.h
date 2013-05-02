@@ -63,6 +63,7 @@ namespace Mantid
       double getTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis) const;
       double getSignedTwoTheta(const Kernel::V3D& observer, const Kernel::V3D& axis, const Kernel::V3D& instrumentUp) const;
       double getPhi() const;
+      double getPhiOffset(const double& offset) const;
       double solidAngle(const Kernel::V3D& observer) const; 
       bool isParametrized() const;
       bool isMasked() const;
