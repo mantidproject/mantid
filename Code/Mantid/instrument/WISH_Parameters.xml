@@ -19,7 +19,7 @@
 		</parameter>
         
          <!-- Offset the psi values in the mini-plot -->
-         <parameter name="offset-psi" type="string">
+         <parameter name="offset-phi" type="string">
           <value val="Always" />
          </parameter>
 		
