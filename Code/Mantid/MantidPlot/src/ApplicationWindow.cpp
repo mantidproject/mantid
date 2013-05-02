@@ -14472,8 +14472,9 @@ void ApplicationWindow::showFirstTimeSetup()
  Show mantidplot help page
  */
 void ApplicationWindow::showmantidplotHelp()
-{
-  HelpWindow::Instance().showURL();
+{  
+  // HelpWindow::Instance().showURL(); pull from the relese 2.5-> to return in relese 2.6
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot"));
 }
 
 //
