@@ -3,7 +3,7 @@
 
 
 
-This algorithm starts by sorting the event lists by TOF; therefore you may gain speed by calling [[Sort]] beforehand. Starting from the smallest TOF, all events within Tolerance are considered to be identical. Pulse times are ignored. A weighted event without time information is created; its TOF is the average value of the summed events; its weight is the sum of the weights of the input events; its error is the sum of the square of the errors of the input events.
+This algorithm starts by sorting the event lists by TOF; therefore you may gain speed by calling [[SortEvents]] beforehand. Starting from the smallest TOF, all events within Tolerance are considered to be identical. Pulse times are ignored. A weighted event without time information is created; its TOF is the average value of the summed events; its weight is the sum of the weights of the input events; its error is the sum of the square of the errors of the input events.
 
 Note that using CompressEvents may introduce errors if you use too large of a tolerance. Rebinning an event workspace still uses an all-or-nothing view: if the TOF of the event is in the bin, then the counts of the bin is increased by the event's weight. If your tolerance is large enough that the compound event spans more than one bin, then you will get small differences in the final histogram.
 

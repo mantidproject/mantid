@@ -15,7 +15,7 @@ Peak parameters must have the following parameters, which are case sensitive in 
  7. A2
  8. chi2
 
-[[Category:Algorithms]]
+
 {{AlgorithmLinks|GeneratePeaks}}
 
 

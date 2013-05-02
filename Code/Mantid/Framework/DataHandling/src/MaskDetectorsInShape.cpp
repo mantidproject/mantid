@@ -6,7 +6,7 @@ A detector is considered to be contained it its central location point is contai
 
 ===ChildAlgorithms used===
 MaskDetectorsInShape runs the following algorithms as child algorithms:
-* [[FindDetectorsInShape ]] - To determine the detectors that are contained in the user defined shape.
+* [[FindDetectorsInShape]] - To determine the detectors that are contained in the user defined shape.
 * [[MaskDetectors]] - To mask the detectors found.
 
 

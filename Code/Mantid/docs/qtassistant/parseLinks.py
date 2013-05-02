@@ -17,8 +17,8 @@ class fixLinks:
               link,name=item.split("|")
           else:
               name=item
-              link=item     
-          if (link[0].upper()+link[1:]) in mantid.AlgorithmFactory.getRegisteredAlgorithms(True).keys():
+              link=item    
+          if (link[0].upper()+link[1:]).split("#")[0] in mantid.AlgorithmFactory.getRegisteredAlgorithms(True).keys():
             formatted="<a href=\"Algo_"+link+".html\">"+name+"</a>"
             self.text=self.text.replace("[["+item+"]]",formatted)
 
@@ -30,7 +30,8 @@ class fixLinks:
           else:
               name=item
               link=item
-          if (link[0].upper()+link[1:]) in mantid.FunctionFactory.getFunctionNames():
+          link=link.strip()  
+          if (link[0].upper()+link[1:]).split("#")[0] in mantid.FunctionFactory.getFunctionNames():
             formatted="<a href=\"FitFunc_"+link+".html\">"+name+"</a>"
             self.text=self.text.replace("[["+item+"]]",formatted)
 
@@ -46,10 +47,6 @@ class fixLinks:
               formatted="<a href=\""+WEB_BASE+link+"\">"+name+"</a>"
               self.text=self.text.replace("[["+item+"]]",formatted)
 
-    def linkImages(self):
-        pass
-
-
     def linkExplicit(self):
         for item in self.explicitLinks:
           if item.strip()[:4]=='http':
@@ -63,11 +60,29 @@ class fixLinks:
               formatted="<a href=\""+link+"\">"+label+"</a>"
               self.text=self.text.replace("["+item+"]",formatted)
               
-
+    def linkCategories(self):
+        for item in self.results:
+              #check for |
+          if item.count("|")==1:
+              link,name=item.split("|")
+          else:
+              name=item
+              link=item   
+          if link==":Category:Fit_functions":
+              formatted="<a href=\"fitfunctions_index.html\">"+name+"</a>"  
+              self.text=self.text.replace("["+item+"]",formatted) 
+          elif link==":Category:Algorithms":
+              formatted="<a href=\"algorithms_index.html\">"+name+"</a>"  
+              self.text=self.text.replace("["+item+"]",formatted)   
+          elif link.count("ategory:")==1:
+              linkpiece=link.split("ategory:")[1].strip(":")
+              formatted="<a href=\"AlgoCat_"+linkpiece+".html\">"+name+"</a>"  
+              self.text=self.text.replace("["+item+"]",formatted) 
+                     
     def parse(self):
         self.linkAlgorithms()
         self.linkFitFunctions()
-        self.linkImages()
         self.linkMantidWiki()
         self.linkExplicit()
+        self.linkCategories()
         return self.text

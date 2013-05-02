@@ -14,7 +14,6 @@ Example format:
  LoadRaw(Filename='G:/Spencer/Science/Raw/irs26173.raw',OutputWorkspace='Mon_in',SpectrumMax='1')
 </source></div>
 
-[[Category:Algorithms]]
 {{AlgorithmLinks|GeneratePythonScript}}
 
 

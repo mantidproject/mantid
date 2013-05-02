@@ -21,8 +21,7 @@ where
 <math>K_i = \frac{2\pi}{\lambda}sin\theta_i </math>
 
 <math>K_f = \frac{2\pi}{\lambda}sin\theta_f </math>
-[[Category:Algorithms]]
-[[Category:General]]
+
 {{AlgorithmLinks|ConvertToReflectometryQ}}
 
 === After Transformation ===
