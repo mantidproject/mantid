@@ -252,7 +252,7 @@ namespace CurveFitting
     g_log.debug() << "LeBail Composite Function: " << m_lebailFunction->asString() << "\n";
     bool inputparamcorrect = generatePeaksFromInput();
 #else
-    m_lebailFunction.addPeaks(m_funcParameters, m_hkllist);
+    m_lebailFunction->addPeaks(m_hkllist); // m_funcParameters,
 #endif
 
     // 3. Background function and calculation on it
@@ -645,7 +645,7 @@ namespace CurveFitting
       tof_min = fitrange[0];
       tof_max = fitrange[1];
     }
-
+#if 0
     // 2. Call Fit to fit LeBail function.
     m_lebailFunction->useNumericDerivatives( true );
     string fitstatus;
@@ -654,7 +654,8 @@ namespace CurveFitting
                      tof_min, tof_max, mMinimizer, m_dampingFactor, numiterations, fitstatus, m_lebailFitChi2, true);
 
     // 3. Get parameters
-    IFunction_sptr fitout = boost::dynamic_pointer_cast<IFunction>(m_lebailFunction);
+
+    IFunction_sptr fitout = boost::dynamic_pointer_cast<IFunction>(m_comp);
     std::vector<std::string> parnames = fitout->getParameterNames();
 
     std::stringstream rmsg;
@@ -710,7 +711,7 @@ namespace CurveFitting
     vector<string> lbparnames = m_lebailFunction->getParameterNames();
     for (size_t i = 0; i < lbparnames.size(); ++i)
     {
-      m_lebailFunction->fix(i);
+      m_lebailFunction->fix(i, lbparnames[i]);
     }
 
     // b) Fit/calculation
@@ -726,7 +727,9 @@ namespace CurveFitting
 
     // TODO: Check the covariant matrix to see whether any NaN or Infty.  If so, return false with reason
     // TODO: (continue).  Code should fit again with Simplex and extends MaxIteration if not enough... ...
-
+#else
+    throw runtime_error("Need to factor out this function to both LeBailFunction and LeBailFit.");
+#endif
     return true;
   }
 
@@ -1057,8 +1060,10 @@ namespace CurveFitting
   {
     // 1. Generate the composite function
     API::CompositeFunction compfunction;
-    m_lebailFunction = boost::make_shared<API::CompositeFunction>(compfunction);
+
+#if 0
     m_lebailFunction->useNumericDerivatives(true);
+
 
     // 2. Add peaks to LeBail Function
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
@@ -1069,6 +1074,7 @@ namespace CurveFitting
 
     // 3. Add background
     m_lebailFunction->addFunction(m_backgroundFunction);
+#endif
 
     return;
   }
@@ -3258,6 +3264,7 @@ namespace CurveFitting
     }
 
     // 2. Fit
+#if 0
     Chebyshev_sptr bkgdfunc(new Chebyshev);
     bkgdfunc->setAttributeValue("n", 6);
 
@@ -3293,6 +3300,9 @@ namespace CurveFitting
 
     for (size_t i = 0; i < numpts; ++i)
       background[i] = values[i];
+#else
+    throw runtime_error("Need to re-consider this method.");
+#endif
 
     return;
   }

@@ -1,6 +1,10 @@
 #include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/BoundaryConstraint.h"
+
+#include <sstream>
+
 #include <gsl/gsl_sf_erf.h>
 
 using namespace Mantid::API;
@@ -19,7 +23,7 @@ namespace CurveFitting
   }
 
   // Get a reference to the logger
-  Mantid::Kernel::Logger& LeBailFunction::g_log = Kernel::Logger::get("LeBailFunction");
+  Mantid::Kernel::Logger& LeBailFunction::g_log = Mantid::Kernel::Logger::get("LeBailFunction");
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -27,6 +31,7 @@ namespace CurveFitting
   LeBailFunction::LeBailFunction()
   {
     CompositeFunction_sptr m_function(new CompositeFunction());
+    m_compsiteFunction = m_function;
 
     return;
   }
@@ -78,9 +83,12 @@ namespace CurveFitting
 #endif
 
       IPowderDiffPeakFunction_sptr newpeak = generatePeak(h, k, l);
+      double dsp = newpeak->getPeakParameter("dspace");
 
       // Add peak
-      addPeak(peak_d);
+      // addPeak(peak_d);
+      m_peakvec.push_back(newpeak);
+      m_dspPeakVec.push_back(make_pair(dsp, newpeak);
       m_peakHKLVec.push_back(peakhkls[ipk]);
     }
 
@@ -126,11 +134,10 @@ namespace CurveFitting
   *
   * Return: True if all peaks' height are physical.  False otherwise
   */
-  bool LeBailFit::calculatePeaksIntensities(MatrixWorkspace_sptr dataws, size_t workspaceindex, bool zerobackground,
-                                             vector<double>& allpeaksvalues)
+  bool LeBailFunction::calculatePeaksIntensities(vector<double>& vecX, vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues)
   {
     // 1. Group the peak
-    vector<vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > > peakgroupvec;
+    vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > > peakgroupvec;
     groupPeaks(peakgroupvec);
 
     // 2. Calculate each peak's intensity and set
@@ -138,9 +145,8 @@ namespace CurveFitting
     for (size_t ig = 0; ig < peakgroupvec.size(); ++ig)
     {
       g_log.debug() << "[DBx351] Peak group " << ig << " : number of peaks = "
-                          << peakgroupvec[ig].size() << "\n";
-      bool localphysical = calculateGroupPeakIntensities(peakgroupvec[ig], dataws,
-                                                         workspaceindex, zerobackground, allpeaksvalues);
+                    << peakgroupvec[ig].size() << "\n";
+      bool localphysical = calculateGroupPeakIntensities(peakgroupvec[ig], vecX, vecY, zerobackground, allpeaksvalues);
       if (!localphysical)
       {
         peakheightsphysical = false;
@@ -160,9 +166,9 @@ namespace CurveFitting
    * @param wsindex: workspace index of the peaks data in dataws
    * @param zerobackground: true if background is zero
    */
-  bool LeBailFit::calculateGroupPeakIntensities(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peakgroup,
-                                                 MatrixWorkspace_sptr dataws, size_t wsindex, bool zerobackground,
-                                                 vector<double>& allpeaksvalues)
+  bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup,
+                                                     vector<double>& vecX, vector<double>& vecY, bool zerobackground,
+                                                     vector<double>& allpeaksvalues)
   {
     // 1. Sort by d-spacing
     if (peakgroup.empty())
@@ -176,9 +182,6 @@ namespace CurveFitting
     if (peakgroup.size() > 1)
       sort(peakgroup.begin(), peakgroup.end());
 
-    const MantidVec& vecX = dataws->readX(wsindex);
-    const MantidVec& vecY = dataws->readY(wsindex);
-
     // Check input vector validity
     if (allpeaksvalues.size() != vecY.size())
     {
@@ -190,7 +193,7 @@ namespace CurveFitting
     }
 
     // 2. Check boundary
-    ThermalNeutronBk2BkExpConvPVoigt_sptr leftpeak = peakgroup[0].second;
+    IPowderDiffPeakFunction_sptr leftpeak = peakgroup[0].second;
     double leftbound = leftpeak->centre() - PEAKRANGECONSTANT * leftpeak->fwhm();
     if (leftbound < vecX[0])
     {
@@ -199,7 +202,7 @@ namespace CurveFitting
                           << ")! Accuracy of its peak intensity might be affected.\n";
       leftbound = vecX[0] + 0.1;
     }
-    ThermalNeutronBk2BkExpConvPVoigt_sptr rightpeak = peakgroup.back().second;
+    IPowderDiffPeakFunction_sptr rightpeak = peakgroup.back().second;
     double rightbound = rightpeak->centre() + PEAKRANGECONSTANT * rightpeak->fwhm();
     if (rightbound > vecX.back())
     {
@@ -234,7 +237,7 @@ namespace CurveFitting
             << "; Left peak FWHM = " << leftpeak->fwhm() << ", Right peak FWHM = " << rightpeak->fwhm();
       for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
       {
-        ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = peakgroup[ipk].second;
+        IPowderDiffPeakFunction_sptr thispeak = peakgroup[ipk].second;
         errss << "Peak " << ipk << ":  d_h = " << peakgroup[ipk].first << ", TOF_h = " << thispeak->centre()
               << ", FWHM = " << thispeak->fwhm() << "\n";
         vector<string> peakparamnames = thispeak->getParameterNames();
@@ -270,7 +273,7 @@ namespace CurveFitting
     for (size_t ipk = 0; ipk < numPeaks; ++ipk)
     {
       // calculate peak function value
-      ThermalNeutronBk2BkExpConvPVoigt_sptr peak = peakgroup[ipk].second;
+      IPowderDiffPeakFunction_sptr peak = peakgroup[ipk].second;
       // FunctionValues localpeakvalue(xvalues);
       vector<double> localpeakvalue(ndata, 0.0);
 
@@ -325,7 +328,7 @@ namespace CurveFitting
       // Non-zero background.  Remove the background
       FunctionDomain1DVector xvalues(datax);
       FunctionValues bkgdvalue(xvalues);
-      m_backgroundFunction->function(xvalues, bkgdvalue);
+      m_background->function(xvalues, bkgdvalue);
 
       for (size_t i = 0; i < ndata; ++i)
         pureobspeaksintensity[i] = datay[i] - bkgdvalue[i];
@@ -334,7 +337,7 @@ namespace CurveFitting
     bool peakheightsphysical = true;
     for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
     {
-      ThermalNeutronBk2BkExpConvPVoigt_sptr peak = peakgroup[ipk].second;
+      IPowderDiffPeakFunction_sptr peak = peakgroup[ipk].second;
       double intensity = 0.0;
 
       for (size_t i = 0; i < ndata; ++i)
@@ -407,16 +410,14 @@ namespace CurveFitting
    * Parameters fixed            : set them to be fixed;
    * Parameters for fit with tie : tie all the related up
   */
-  void LeBailFit::setLeBailFitParameters()
+  void LeBailFunction::setLeBailFitParameters()
   {
-    vector<string> peakparamnames = m_dspPeaks[0].second->getParameterNames();
-
     // 1. Set up all the peaks' parameters... tie to a constant value..
     //    or fit by tieing same parameters of among peaks
-    std::map<std::string, Parameter>::iterator pariter;
-    for (pariter = m_funcParameters.begin(); pariter != m_funcParameters.end(); ++pariter)
+    std::map<std::string, double>::iterator pariter;
+    for (pariter = m_functionParameters.begin(); pariter != m_functionParameters.end(); ++pariter)
     {
-      Parameter funcparam = pariter->second;
+      double funcparam = pariter->second;
 
       g_log.debug() << "Step 1:  Set peak parameter value " << funcparam.name << "\n";
 
@@ -425,8 +426,8 @@ namespace CurveFitting
 
       // a) Check whether it is a parameter used in Peak
       std::vector<std::string>::iterator sit;
-      sit = std::find(peakparamnames.begin(), peakparamnames.end(), parname);
-      if (sit == peakparamnames.end())
+      sit = std::find(m_peakParameterNameVec.begin(), m_peakParameterNameVec.end(), parname);
+      if (sit == m_peakParameterNameVec.end())
       {
         // Not a peak profile parameter
         g_log.debug() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak.\n";
@@ -436,16 +437,15 @@ namespace CurveFitting
       if (!funcparam.fit)
       {
         // a) Fix the value to a constant number
-        size_t numpeaks = m_dspPeaks.size();
-        for (size_t ipk = 0; ipk < numpeaks; ++ipk)
+        for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
         {
           // TODO: Make a map between peak parameter name and index. And use fix() to replace tie
-          std::stringstream ss1, ss2;
+          stringstream ss1, ss2;
           ss1 << "f" << ipk << "." << parname;
           ss2 << funcparam.curvalue;
-          std::string tiepart1 = ss1.str();
-          std::string tievalue = ss2.str();
-          m_lebailFunction->tie(tiepart1, tievalue);
+          string tiepart1 = ss1.str();
+          string tievalue = ss2.str();
+          m_compsiteFunction->tie(tiepart1, tievalue);
           g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue << " | \n";
 
           /*--  Code prepared to replace the existing block
@@ -460,12 +460,12 @@ namespace CurveFitting
         // b) Tie the values among all peaks, but will fit
         for (size_t ipk = 1; ipk < m_dspPeaks.size(); ++ipk)
         {
-          std::stringstream ss1, ss2;
+          stringstream ss1, ss2;
           ss1 << "f" << (ipk-1) << "." << parname;
           ss2 << "f" << ipk << "." << parname;
-          std::string tiepart1 = ss1.str();
-          std::string tiepart2 = ss2.str();
-          m_lebailFunction->tie(tiepart1, tiepart2);
+          string tiepart1 = ss1.str();
+          string tiepart2 = ss2.str();
+          m_compsiteFunction->tie(tiepart1, tiepart2);
           g_log.debug() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /\n";
         }
 
@@ -474,8 +474,8 @@ namespace CurveFitting
         parss << "f0." << parname;
         string parnamef0 = parss.str();
         CurveFitting::BoundaryConstraint* bc =
-            new BoundaryConstraint(m_lebailFunction.get(), parnamef0, funcparam.minvalue, funcparam.maxvalue);
-        m_lebailFunction->addConstraint(bc);
+            new BoundaryConstraint(m_compsiteFunction.get(), parnamef0, funcparam.minvalue, funcparam.maxvalue);
+        m_compsiteFunction->addConstraint(bc);
       }
     } // FOR-Function Parameters
 
@@ -483,17 +483,17 @@ namespace CurveFitting
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
     {
       // a. Get peak height
-      ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
+      IPowderDiffPeakFunction_sptr thispeak = m_dspPeaks[ipk].second;
       thispeak->fix(0);
     } // For each peak
 
     // 3. Fix all background paramaters to constants/current values
-    size_t funcindex = m_dspPeaks.size();
-    std::vector<std::string> bkgdparnames = m_backgroundFunction->getParameterNames();
+    size_t funcindex = m_numPeaks;
+    std::vector<std::string> bkgdparnames = m_background->getParameterNames();
     for (size_t ib = 0; ib < bkgdparnames.size(); ++ib)
     {
       std::string parname = bkgdparnames[ib];
-      double parvalue = m_backgroundFunction->getParameter(parname);
+      double parvalue = m_background->getParameter(parname);
       std::stringstream ss1, ss2;
       ss1 << "f" << funcindex << "." << parname;
       ss2 << parvalue;
@@ -502,7 +502,7 @@ namespace CurveFitting
 
       g_log.debug() << "Step 2: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /\n";
 
-      m_lebailFunction->tie(tiepart1, tievalue);
+      m_compsiteFunction->tie(tiepart1, tievalue);
 
       // TODO: Prefer to use fix other than tie().  Need to figure out the parameter index from name
       /*
@@ -620,11 +620,11 @@ namespace CurveFitting
   void LeBailFunction::groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > >& peakgroupvec)
   {
     // Sort peaks
-    if (m_numPeaks.size() > 1)
+    if (m_numPeaks > 1)
     {
-      sort(m_dspPeaks.begin(), m_dspPeaks.end());
+      sort(m_dspPeakVec.begin(), m_dspPeakVec.end());
     }
-    else if (m_numPeaks.size() == 0)
+    else if (m_numPeaks == 0)
     {
       std::stringstream errmsg;
       errmsg << "Group peaks:  No peak is found in the peak vector. ";
@@ -643,7 +643,7 @@ namespace CurveFitting
       // add peak to CURRENT peak group
       peakgroup.push_back(m_dspPeakVec[ipk]);
 
-      if (ipk < numpeaks-1)
+      if (ipk < m_numPeaks-1)
       {
         // Any peak but not the last (rightmost) peak
 
@@ -714,16 +714,7 @@ namespace CurveFitting
     return;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  LeBailFunction::LeBailFunction()
-  {
-    mL1 = 1.0;
-    mL2 = 0.0;
 
-    return;
-  }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
@@ -738,11 +729,10 @@ namespace CurveFitting
   }
 
 
-
   /*
    * Calculate peak parameters for a peak at d (d-spacing value)
    * Output will be written to parameter map too.
-   */
+
   void LeBailFunction::calPeakParametersForD(double dh, double& alpha, double& beta, double &Tof_h,
       double &sigma_g2, double &gamma_l, std::map<std::string, double>& parmap) const
   {
@@ -779,10 +769,10 @@ namespace CurveFitting
 
     return;
   }
+     */
 
   /*
    * Calculate all peaks' parameters
-   */
   void LeBailFunction::calPeaksParameters()
   {
     // 1. Get parameters (class)
@@ -815,17 +805,19 @@ namespace CurveFitting
       calPeakParametersForD(dh, alpha, beta, tof_h, sigma2, gamma, mPeakParameters[id]);
 
       // b) Set peak parameters
-      mPeaks[id]->setParameter("TOF_h", tof_h);
-      mPeaks[id]->setParameter("Height", heights[id]);
-      mPeaks[id]->setParameter("Alpha", alpha);
-      mPeaks[id]->setParameter("Beta", beta);
-      mPeaks[id]->setParameter("Sigma2", sigma2);
-      mPeaks[id]->setParameter("Gamma", gamma);
+      m_peakVec[id]->setParameter("TOF_h", tof_h);
+      m_peakVec[id]->setParameter("Height", heights[id]);
+      m_peakVec[id]->setParameter("Alpha", alpha);
+      m_peakVec[id]->setParameter("Beta", beta);
+      m_peakVec[id]->setParameter("Sigma2", sigma2);
+      m_peakVec[id]->setParameter("Gamma", gamma);
     }
 
     return;
   }
+     */
 
+  /*
   void LeBailFunction::function1D(double *out, const double *xValues, size_t nData) const
   {
     // 1. Get parameters (class)
@@ -850,7 +842,7 @@ namespace CurveFitting
     Gam2 = getParameter("Gam2");
     double latticeconstant = getParameter("LatticeConstant");
 
-    /*
+
     std::cout << " \n-------------------------  being visited -----------------------\n" << std::endl;
     std::cout << "Alph0  = " << Alph0 << std::endl;
     std::cout << "Alph1  = " << Alph1 << std::endl;
@@ -859,7 +851,7 @@ namespace CurveFitting
     std::cout << "Zero   = " << Zero << std::endl;
     std::cout << "Zerot  = " << Zerot << std::endl;
     std::cout << "Lattice= " << latticeconstant << " Number of Peaks = " << mPeakHKLs.size() << std::endl;
-    */
+
 
     // 2.
     double *tempout = new double[nData];
@@ -882,18 +874,18 @@ namespace CurveFitting
 
       // b) Set peak parameters
       g_log.debug() << "DB546 Peak @ d = " << dh << " Set Height = " << dh << std::endl;
-      mPeaks[id]->setParameter("TOF_h", tof_h);
-      mPeaks[id]->setParameter("Height", heights[id]);
-      mPeaks[id]->setParameter("Alpha", alpha);
-      mPeaks[id]->setParameter("Beta", beta);
-      mPeaks[id]->setParameter("Sigma2", sigma2);
-      mPeaks[id]->setParameter("Gamma", gamma);
+      m_peakVec[id]->setParameter("TOF_h", tof_h);
+      m_peakVec[id]->setParameter("Height", heights[id]);
+      m_peakVec[id]->setParameter("Alpha", alpha);
+      m_peakVec[id]->setParameter("Beta", beta);
+      m_peakVec[id]->setParameter("Sigma2", sigma2);
+      m_peakVec[id]->setParameter("Gamma", gamma);
 
       // c) Calculate individual peak range
-      mPeaks[id]->setPeakRadius(PEAKRADIUS);
+      m_peakVec[id]->setPeakRadius(PEAKRADIUS);
 
       // d) Calculate peak
-      mPeaks[id]->function1D(tempout, xValues, nData);
+      m_peakVec[id]->function1D(tempout, xValues, nData);
       for (size_t iy = 0; iy < nData; ++iy)
       {
         out[iy] += tempout[iy];
@@ -908,19 +900,21 @@ namespace CurveFitting
 
     return;
   }
+  */
 
   /*
    * Using numerical derivative
-   */
+
   void LeBailFunction::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian)
   {
     calNumericalDeriv(domain, jacobian);
     return;
   }
+   */
 
   /*
    * Analytical
-   */
+
   void LeBailFunction::functionDeriv1D(API::Jacobian *out, const double* xValues, const size_t nData)
   {
     UNUSED_ARG(out);
@@ -929,9 +923,10 @@ namespace CurveFitting
 
     throw std::runtime_error("LeBailFunction does not support analytical derivative. ");
   }
+    */
 
   /** Add a peak with its d-value
-   */
+
   void LeBailFunction::addPeak(double dh, double height)
   {
     dvalues.push_back(dh);
@@ -943,13 +938,14 @@ namespace CurveFitting
     tpeak->setPeakRadius(8);
 
     tpeak->initialize();
-    mPeaks.push_back(tpeak);
+    m_peakVec.push_back(tpeak);
 
     std::map<std::string, double> parmap;
     mPeakParameters.push_back(parmap);
 
     return;
   }
+     */
 
 
   /*
@@ -971,15 +967,15 @@ namespace CurveFitting
   }
 
 
-  CurveFitting::Bk2BkExpConvPV_sptr LeBailFunction::getPeak(size_t peakindex)
+  IPowderDiffPeakFunction_sptr LeBailFunction::getPeak(size_t peakindex)
   {
-    if (peakindex >= mPeaks.size())
+    if (peakindex >= m_numPeaks)
     {
-      g_log.error() << "Try to access peak " << peakindex << " out of range [0, " << mPeaks.size() << ")." << std::endl;
+      g_log.error() << "Try to access peak " << peakindex << " out of range [0, " << m_peakVec.size() << ")." << std::endl;
       throw std::invalid_argument("getPeak() out of boundary");
     }
 
-    CurveFitting::Bk2BkExpConvPV_sptr rpeak = mPeaks[peakindex];
+    IPowderDiffPeakFunction_sptr rpeak = m_peakVec[peakindex];
 
     return rpeak;
   }
@@ -1018,7 +1014,7 @@ namespace CurveFitting
       throw std::runtime_error("Index out of range");
     }
 
-    CurveFitting::Bk2BkExpConvPV_sptr peak = mPeaks[index];
+    IPowderDiffPeakFunction_sptr peak = m_peakVec[index];
 
     double value = peak->getParameter(parname);
 
@@ -1045,13 +1041,13 @@ namespace CurveFitting
    */
   double LeBailFunction::getPeakFWHM(size_t peakindex) const
   {
-    if (peakindex >= mPeaks.size())
+    if (peakindex >= m_peakVec.size())
     {
-      g_log.error() << "LeBailFunction() cannot get peak indexed " << peakindex << ".  Number of peaks = " << mPeaks.size() << std::endl;
+      g_log.error() << "LeBailFunction() cannot get peak indexed " << peakindex << ".  Number of peaks = " << m_peakVec.size() << std::endl;
       throw std::invalid_argument("LeBailFunction getPeakFWHM() cannot return peak indexed out of range. ");
     }
 
-    return mPeaks[peakindex]->fwhm();
+    return m_peakVec[peakindex]->fwhm();
 
   }
 

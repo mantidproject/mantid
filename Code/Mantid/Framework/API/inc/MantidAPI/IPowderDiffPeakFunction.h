@@ -95,7 +95,10 @@ protected:
   virtual void functionLocal(vector<double> &out, const vector<double> &xValues) const;
 
   /// General implementation of the method for all peaks. Calculates derivatives only
-  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData) const;
+  /// void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData) const;
+
+  /// General implemenation of derivative
+  void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData) const;
 
   /// Defines the area around the centre where the peak values are to be calculated (in FWHM).
   static int s_peakRadius;

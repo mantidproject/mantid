@@ -82,7 +82,7 @@ namespace API
    * @param out :: Derivatives
    * @param xValues :: X values for data points
    * @param nData :: Number of data points
-   */
+
   void IPowderDiffPeakFunction::functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData) const
   {
     double c = this->centre();
@@ -105,11 +105,16 @@ namespace API
       }
     }
     if (i0 < 0 || n == 0) return;
+#if 0
     PartialJacobian1 J(out,i0);
     this->functionDerivLocal(&J,xValues+i0,n);
+#else
+    throw runtime_error("Need to think how to implement! Message 1026.");
+#endif
 
     return;
   }
+   */
 
   //----------------------------------------------------------------------------------------------
   /** Set peak radius
