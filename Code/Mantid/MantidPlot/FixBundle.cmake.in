@@ -15,6 +15,11 @@ function(gp_resolved_file_type_override resolved_file type_var)
     message(STATUS "resolving ${file} as system")
     set(${type_var} system PARENT_SCOPE)
   endif()
+  # Copy Qt dependencies to bundle
+  if(file MATCHES "libQt")
+    message("resolving ${file} as embedded")
+    set(${type_var} embedded PARENT_SCOPE)
+  endif()
   # Don't copy ParaView into the bundle
   if(resolved_file MATCHES "^@ParaView_DIR@")
     message(STATUS "resolving ParaView dependency ${file} as system")
