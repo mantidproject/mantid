@@ -16,6 +16,7 @@ class DLLExport HelpWindowImpl
 {
 public:
     void showURL(const std::string & url=std::string());
+    void showWikiPage(const std::string &page=std::string());
     void showAlgorithm(const std::string &name=std::string(), const int version=-1);
     void showAlgorithm(const QString &name, const int version=-1);
     void showFitFunction(const std::string &name=std::string());
@@ -28,6 +29,8 @@ private:
     HelpWindowImpl();
     /// Destructor
     virtual ~HelpWindowImpl();
+
+    void openWebpage(const std::string &url);
 
     /// Shared pointer to the process running qt assistant.
     boost::shared_ptr<QProcess> m_process;
