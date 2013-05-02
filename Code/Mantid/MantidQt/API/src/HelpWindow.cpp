@@ -56,8 +56,8 @@ void HelpWindowImpl::showURL(const string &url)
     this->start(url);
     m_process->waitForStarted(); // REMOVE
 
-    m_log.debug() << "open help url \"" << url << "\"\n";
-    string temp("setSource " + url + "\n");
+    m_log.debug() << "open help url \"" << urlToShow << "\"\n";
+    string temp("setSource " + urlToShow + "\n");
     QByteArray ba;
     ba.append(QLatin1String(temp.c_str()));
     m_process->write(ba);
