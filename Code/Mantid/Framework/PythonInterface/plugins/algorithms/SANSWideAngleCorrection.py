@@ -5,7 +5,7 @@ Looking at [https://kur.web.psi.ch/sans1/manuals/sas_manual.pdf Computing guide 
 
 The longer path length after scattering will also slightly increase the probability of a second scattering event, but this is not dealt with here.
  
-If our on-axis transmission is <math>T_0</math> through a sample of thickness <math>d</math>, then the transmission at some other thickness <math>x</math> is <math>\exp(-\mu x)</math> where attenuation coefficient <math>\mu = -\log( \frac{T_0}{d})</math>.
+If our on-axis transmission is <math>T_0</math> through a sample of thickness <math>d</math>, then the transmission at some other thickness <math>x</math> is <math>\exp(-\mu x)</math> where attenuation coefficient <math>\mu = -\ln( \frac{T_0}{d})</math>.
 
 
 If a neutron scatters at angle <math>2\theta</math> at distance <math>x</math> into the sample, its total transmission is then:
@@ -22,7 +22,7 @@ T^{''} = \exp(-\mu x) \exp( \frac{-\mu(d-x)}{\cos(2\theta)})
 Hammouda, gives an approximate result for the integral, see page 208 of [[http://www.ncnr.nist.gov/staff/hammouda/the_SANS_toolbox.pdf SANS toolbox]]:
 
 <math>
-T^' = \frac{T_0(T_0^A - 1)}{A \log(T_0)}
+T^' = \frac{T_0(T_0^A - 1)}{A \ln(T_0)}
 </math>
 
 For:
@@ -43,7 +43,7 @@ The output of this algorithm is:
 
 The error propagation follows this formula:
 
-  <math>OutputWorkspace_{error} = \frac{T_{0E} ^A - 1}{A\log(T_0E)}</math>
+  <math>OutputWorkspace_{error} = \frac{T_{0E} ^A - 1}{A\ln(T_0E)}</math>
 
 Which means, that we do not consider the error in the definition of the <math>2\theta</math> (the parameter A)
 
@@ -75,7 +75,7 @@ So, we decided to have a new factor that changes this equation to:
 Where Corr (Correction factor) in this case will be:
 
 <math>
-Corr = \frac{T_0^A - 1}{A \log(T_0)}
+Corr = \frac{T_0^A - 1}{A \ln(T_0)}
 </math>
 
 Which is the OutputWorkspace of SANSWideAngleCorrection.
@@ -100,12 +100,12 @@ class SANSWideAngleCorrection(PythonAlgorithm):
 
     def PyInit(self):
 	self.declareProperty(MatrixWorkspaceProperty("SampleData", "", direction = Direction.Input), 
-		"The Detector Bank data, used to verify the solid angle.")
+		"A workspace cropped to the detector to be reduced (the SAME as the input to [[Q1D]]); used to verify the solid angle. The workspace is not modified, just inspected.")
         self.declareProperty(MatrixWorkspaceProperty("TransmissionData","",direction=Direction.Input),
                                       "The transmission data calculated, referred to as <math>T_0</math> in equations in discussion section")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","",direction=Direction.Output),
-                                      "The transmission corrected, normalised (divided) by <math>T_0</math>, see discussion section")
-	self.setWikiSummary("Calculate the Wide Angle correction for SANS transmissions.")
+                                      "The transmission corrected SANS data, normalised (divided) by <math>T_0</math>, see discussion section")
+	self.setWikiSummary("Calculate the Wide Angle correction for SANS transmissions.\n\n'''NB''': This algorithm is not intended to be called and used as a standalone Mantid algorithm because actual transmission values are ''not'' passed to the reduction algorithm [[Q1D]].")
       
     def PyExec(self):
         """ Main body of execution
