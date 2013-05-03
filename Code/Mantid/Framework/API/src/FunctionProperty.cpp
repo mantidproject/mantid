@@ -62,7 +62,8 @@ namespace API
   */
   std::string FunctionProperty::value() const
   {
-    return m_value->asString();
+    if(m_value) return m_value->asString();
+    else return getDefault();
   }
 
   /** Get the value the property was initialised with -its default value
@@ -99,7 +100,7 @@ namespace API
   */
   std::string FunctionProperty::isValid() const 
   {
-    return isDefault() ? "Funcion is empty." : "";
+    return isDefault() ? "Function is empty." : "";
   }
 
   /** Indicates if the function has not been created yet.
