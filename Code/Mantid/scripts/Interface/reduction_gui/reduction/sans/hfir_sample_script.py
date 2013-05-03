@@ -165,7 +165,8 @@ class SampleData(BaseScriptElement):
         script = ""
 
         # Sample thickness
-        script += "DivideByThickness(%g)\n" % self.sample_thickness
+        if not self.sample_thickness == 1.0:
+            script += "DivideByThickness(%g)\n" % self.sample_thickness
         
         if not self.calculate_transmission:
             script += "SetTransmission(%g, %g)\n" % (self.transmission, self.transmission_spread)
