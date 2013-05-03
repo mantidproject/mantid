@@ -164,6 +164,7 @@ void FloatingWindow::removeStaysOnTopFlag()
 void FloatingWindow::setMdiSubWindow(MdiSubWindow* sw)
 {
   setWidget(sw);
+  setWindowIcon(sw->windowIcon());
 }
 
 

@@ -101,14 +101,14 @@ public:
   ~MantidMatrix();
 
   void connectTableView(QTableView*,MantidMatrixModel*);
-  MantidMatrixModel * model(){return m_modelY;};
-  MantidMatrixModel * modelY(){return m_modelY;};
-  MantidMatrixModel * modelX(){return m_modelX;};
-  MantidMatrixModel * modelE(){return m_modelE;};
-  QItemSelectionModel * selectionModel(){return m_table_viewY->selectionModel();};
-  QItemSelectionModel * selectionModelY(){return m_table_viewY->selectionModel();};
-  QItemSelectionModel * selectionModelX(){return m_table_viewX->selectionModel();};
-  QItemSelectionModel * selectionModelE(){return m_table_viewE->selectionModel();};
+  MantidMatrixModel * model(){return m_modelY;}
+  MantidMatrixModel * modelY(){return m_modelY;}
+  MantidMatrixModel * modelX(){return m_modelX;}
+  MantidMatrixModel * modelE(){return m_modelE;}
+  QItemSelectionModel * selectionModel(){return m_table_viewY->selectionModel();}
+  QItemSelectionModel * selectionModelY(){return m_table_viewY->selectionModel();}
+  QItemSelectionModel * selectionModelX(){return m_table_viewX->selectionModel();}
+  QItemSelectionModel * selectionModelE(){return m_table_viewE->selectionModel();}
 
   int numRows()const{return m_rows;}
   int numCols()const{return m_cols;}
@@ -193,18 +193,18 @@ public slots:
   double cell(int row, int col);
 
   //! Returns the X value corresponding to column 1
-  double xStart(){return x_start;};
+  double xStart(){return x_start;}
   //! Returns the X value corresponding to the last column
-  double xEnd(){return x_end;};
+  double xEnd(){return x_end;}
   //! Returns the Y value corresponding to row 1
-  double yStart(){return y_start;};
+  double yStart(){return y_start;}
   //! Returns the Y value corresponding to the last row
-  double yEnd(){return y_end;};
+  double yEnd(){return y_end;}
 
   //! Returns the step of the X axis
-  double dx(){return fabs(x_end - x_start)/(double)(numCols() - 1);};
+  double dx(){return fabs(x_end - x_start)/(double)(numCols() - 1);}
   //! Returns the step of the Y axis
-  double dy(){return fabs(y_end - y_start)/(double)(numRows() - 1);};
+  double dy(){return fabs(y_end - y_start)/(double)(numRows() - 1);}
 
   //! Returns the bounding rect of the matrix coordinates
   QwtDoubleRect boundingRect();

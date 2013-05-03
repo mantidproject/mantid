@@ -34,6 +34,7 @@
 #include "ImportASCIIDialog.h"
 #include "muParserScript.h"
 #include "ApplicationWindow.h"
+#include "pixmaps.h"
 
 #include <QMessageBox>
 #include <QDateTime>
@@ -127,6 +128,7 @@ void Table::init(int rows, int cols)
   connect(d_table, SIGNAL(valueChanged(int, int)), this, SLOT(cellEdited(int, int)));
 
   setAutoUpdateValues(applicationWindow()->autoUpdateTableValues());
+  //setWindowIcon(QIcon(getQPixmap("table_xpm")));
 }
 
 void Table::setAutoUpdateValues(bool on)

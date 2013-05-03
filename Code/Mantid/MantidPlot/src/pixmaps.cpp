@@ -12918,7 +12918,7 @@ QPixmap getQPixmap(const std::string &name)
   else if (name == "pPlot_xpm") return QPixmap(pPlot_xpm);
   else if (name == "lpPlot_xpm") return QPixmap(lpPlot_xpm);
   else if (name == "lPlot_xpm") return QPixmap(lPlot_xpm);
-  else if (name == "table_xpm") return QPixmap(table_xpm);
+  else if (name == "table_xpm") return QPixmap(magnifier_xpm); //table_xpm);
   else if (name == "multiload_xpm") return QPixmap(multiload_xpm);
   else if (name == "import_xpm") return QPixmap(import_xpm);
   else if (name == "graph_xpm") return QPixmap(graph_xpm);
