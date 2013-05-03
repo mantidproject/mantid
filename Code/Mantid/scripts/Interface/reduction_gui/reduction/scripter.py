@@ -456,7 +456,7 @@ class BaseReductionScripter(object):
             Logger.get("scripter").notice("Execution script: %s" % script_path)
             
             # Submit the job
-            submit_cmd = "SubmitRemoteJob(ComputeResource=%s, " % resource
+            submit_cmd = "SubmitRemoteJob(ComputeResource='%s', " % resource
             submit_cmd += "NumNodes=%s, CoresPerNode=%s, " % (nodes, cores_per_node)
             submit_cmd += "UserName='%s', GroupName='users', Password='%s', " % (user, pwd)
             submit_cmd += "TransactionID='mantid_remote', "
