@@ -29,7 +29,7 @@ if [ -d "${PY_SITE_DIR}/MantidFramework" ]; then
 fi
 
 if [ -f "${PY_SITE_DIR}/Mantid-1.0-py2.6.egg-info" ]; then
-  rm -f ${PY_SITE_DIR}/Mantid-1.0-py2.6.egg-info"
+  rm -f ${PY_SITE_DIR}/Mantid-1.0-py2.6.egg-info
 fi
 
 # -------------------------------------------------------------------------
@@ -41,7 +41,7 @@ PLIST=${HOME}/.MacOS/environment.plist
 if [ -f ${PLIST} ]; then
   # Backup
   mv ${PLIST} ${PLIST}.bak
-  cat ${PLIST}.bak | sed -e 's@<key>MANTIDPATH</key>@@g' | sed -e 's@<string>/Applications/MantidPlot.app/Contents/MacOS</string>@@'g > ${PLIST}
+  cat ${PLIST}.bak | sed -e 's@<key>MANTIDPATH</key>@@g' | sed -e 's@<string>/Applications/MantidPlot.app/Contents/MacOS</string>@@g' > ${PLIST}
 fi
 
 # -------------------------------------------------------------------------
