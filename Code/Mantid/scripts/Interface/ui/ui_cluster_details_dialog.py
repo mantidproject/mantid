@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/cluster_details_dialog.ui'
 #
-# Created: Thu May  2 09:45:32 2013
+# Created: Fri May  3 11:17:46 2013
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,7 +13,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.setWindowModality(QtCore.Qt.ApplicationModal)
-        Dialog.resize(439, 143)
+        Dialog.resize(439, 433)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -23,6 +23,28 @@ class Ui_Dialog(object):
         Dialog.setModal(True)
         self.verticalLayout = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.label_3 = QtGui.QLabel(Dialog)
+        self.label_3.setMinimumSize(QtCore.QSize(160, 0))
+        self.label_3.setMaximumSize(QtCore.QSize(160, 16777215))
+        self.label_3.setObjectName("label_3")
+        self.horizontalLayout_3.addWidget(self.label_3)
+        self.resource_combo = QtGui.QComboBox(Dialog)
+        self.resource_combo.setObjectName("resource_combo")
+        self.horizontalLayout_3.addWidget(self.resource_combo)
+        self.verticalLayout.addLayout(self.horizontalLayout_3)
+        self.horizontalLayout_5 = QtGui.QHBoxLayout()
+        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
+        self.label_5 = QtGui.QLabel(Dialog)
+        self.label_5.setMinimumSize(QtCore.QSize(160, 0))
+        self.label_5.setMaximumSize(QtCore.QSize(160, 16777215))
+        self.label_5.setObjectName("label_5")
+        self.horizontalLayout_5.addWidget(self.label_5)
+        self.cores_box = QtGui.QSpinBox(Dialog)
+        self.cores_box.setObjectName("cores_box")
+        self.horizontalLayout_5.addWidget(self.cores_box)
+        self.verticalLayout.addLayout(self.horizontalLayout_5)
         self.horizontalLayout_2 = QtGui.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.label_2 = QtGui.QLabel(Dialog)
@@ -64,6 +86,8 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setText(QtGui.QApplication.translate("Dialog", "Compute resource:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_5.setText(QtGui.QApplication.translate("Dialog", "Number of cores:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Dialog", "Username:", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Dialog", "Password:", None, QtGui.QApplication.UnicodeUTF8))
 

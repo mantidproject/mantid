@@ -50,6 +50,9 @@ void export_FacilityInfo()
 
     .def("liveListener", &FacilityInfo::liveListener, return_value_policy<copy_const_reference>(),
          "Returns the name of the default live listener")
+
+    .def("computeResources", &FacilityInfo::computeResources,
+         "Returns a vector of the available compute resources")
    ;
 }
 

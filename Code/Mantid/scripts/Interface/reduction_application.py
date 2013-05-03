@@ -4,6 +4,7 @@
 import sys, os
 import traceback
 from PyQt4 import QtGui, QtCore, uic
+import math
 
 # Check whether Mantid is available
 IS_IN_MANTIDPLOT = False
@@ -78,10 +79,16 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Current file name
         self._filename = None
         
-        # Cluster credentials
+        # Cluster credentials and options
         self._cluster_user = None
         self._cluster_pass = None
-        
+        self._number_of_nodes = 4
+        self._cores_per_node = 4
+        self._compute_resources = ['Fermi']
+        if IS_IN_MANTIDPLOT \
+        and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
+                self._compute_resources = ConfigService.Instance().getFacility().computeResources()
+
         # Internal flag for clearing all settings and restarting the application
         self._clear_and_restart = False
         
@@ -351,15 +358,22 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Show dialog to get cluster submission details
         """ 
         class ClusterDialog(QtGui.QDialog, ui.ui_cluster_details_dialog.Ui_Dialog): 
-            def __init__(self, instrument_list=None):
+            def __init__(self, compute_resources=None):
                 QtGui.QDialog.__init__(self)
                 self.setupUi(self)
+                self.resource_combo.clear()
+                for res in compute_resources:
+                    self.resource_combo.addItem(QtGui.QApplication.translate("Dialog", res, None, QtGui.QApplication.UnicodeUTF8))
                 
-        dialog = ClusterDialog()
+        dialog = ClusterDialog(self._compute_resources)
         dialog.exec_()
         if dialog.result()==1:
             self._cluster_user = dialog.username_edit.text()
             self._cluster_pass = dialog.pass_edit.text()
+            n_cores = dialog.cores_box.value()
+            self._number_of_nodes = int(math.ceil(n_cores/4))
+            self._cores_per_node = 4
+            self._compute_resource = dialog.resource_combo.currentText()
             
     def _clear_and_close(self):
         """
@@ -453,7 +467,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if self._interface is not None \
         and self._cluster_user is not None \
         and self._cluster_pass is not None:
-            self._interface.cluster_submit(self._cluster_user, self._cluster_pass)
+            self._interface.cluster_submit(self._cluster_user, self._cluster_pass,
+                                           resource=self._compute_resource,
+                                           nodes=self._number_of_nodes,
+                                           cores_per_node=self._cores_per_node)
         
     def open_file(self, file_path=None):
         """
