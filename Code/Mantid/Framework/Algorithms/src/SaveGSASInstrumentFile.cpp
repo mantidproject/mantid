@@ -130,6 +130,65 @@ double calL2FromDtt1(double difc, double L1, double twotheta)
     return l2;
 }
 
+/** Main execution
+ */
+void SaveGSASInstrumentFile::exec()
+{
+  // Get properties
+  string instrument = getProperty("Instrument");
+  string id_line = getProperty("IDLine"); // Standard Run LB4844 Vanadium: 4866   J.P. Hodges  2011-09-01
+  string sample = getProperty("Sample"); // titleline = "LaB6 NIST RT 4844[V=4866] 60Hz CW=.533" 
+  string inputfilename = getProperty("InputFile"); 
+  string outputfilename = getProperty("OutputFile");
+  int banks = getProperty("Banks");
+  m_L1 = getProperty("L1");
+  m_2theta = getProperty("2Theta");
+  m_L2 = getProperty("L2")
+  m_frequency = getProperty("Frequency");
+
+  // Process input
+  bool useirf = False;
+        if inputfilename.endswith(".irf"):
+            useirf = True
+            irffilename = inputfilename
+        else:
+            pcrfilename = inputfilename
+
+        # 3. Some "default" values for L1 and L2
+        if self.iL1 < 0:
+            if self.instrument == "PG3":
+                self.iL1 = 60.0
+            elif self.instrument == "NOM":
+                self.iL1 = 19.5
+            else:
+                errmsg = "L1 is not given (unphysical).  There is no default value for instrument %s." % (self.instrument)
+                raise NotImplementedError(errmsg)
+        # ENDIF
+
+        if self.i2theta >= 1000:
+            self.iL2 = templ2
+            if templ2 < 0:
+                if self.instrument == "PG3":
+                    self.iL2 = 3.0
+                elif self.instrument == "NOM":
+                    self.iL2 = 2.0
+                else:
+                    errmsg = "L2 is not given (unphysical).  There is no default value for instrument %s." % (self.instrument)
+                    raise NotImplementedError(errmsg)
+                # ENDIF
+        else:
+            self.iL2 = -1;
+
+        # 3. Run
+        self.initConstants(self.frequency)
+        if useirf is True:
+            self.parseFullprofResolutionFile(irffilename)
+
+        self.makeParameterConsistent()
+
+        self.convertToGSAS(banks, outputfilename)
+
+        return
 //
 //    IRF            =   Dtt1,Dtt2,ZERO ,
 //    Python_code    =   epi_q, 0.0, epi_p,
@@ -531,64 +590,6 @@ class ConvertInstrumentFile(PythonAlgorithm):
         return
 
 
-    def PyExec(self):
-        """ Get Property and Execute
-        """
-        # 1. Get input
-        self.instrument = self.getProperty("Instrument")
-        self.id_line = self.getProperty("IDLine") # Standard Run LB4844 Vanadium: 4866   J.P. Hodges  2011-09-01
-        self.sample = self.getProperty("Sample")  # titleline = "LaB6 NIST RT 4844[V=4866] 60Hz CW=.533"
-        inputfilename = self.getProperty("InputFile")
-        banks = self.getProperty("Banks")
-        self.iL1 = self.getProperty("L1")
-        self.i2theta = self.getProperty("2Theta")
-        templ2 = self.getProperty("L2")
-        self.frequency = int(self.getProperty("Frequency"))
-        outputfilename = self.getProperty("OutputFile")
-
-        # 2. Process input
-        useirf = False
-        if inputfilename.endswith(".irf"):
-            useirf = True
-            irffilename = inputfilename
-        else:
-            pcrfilename = inputfilename
-
-        # 3. Some "default" values for L1 and L2
-        if self.iL1 < 0:
-            if self.instrument == "PG3":
-                self.iL1 = 60.0
-            elif self.instrument == "NOM":
-                self.iL1 = 19.5
-            else:
-                errmsg = "L1 is not given (unphysical).  There is no default value for instrument %s." % (self.instrument)
-                raise NotImplementedError(errmsg)
-        # ENDIF
-
-        if self.i2theta >= 1000:
-            self.iL2 = templ2
-            if templ2 < 0:
-                if self.instrument == "PG3":
-                    self.iL2 = 3.0
-                elif self.instrument == "NOM":
-                    self.iL2 = 2.0
-                else:
-                    errmsg = "L2 is not given (unphysical).  There is no default value for instrument %s." % (self.instrument)
-                    raise NotImplementedError(errmsg)
-                # ENDIF
-        else:
-            self.iL2 = -1;
-
-        # 3. Run
-        self.initConstants(self.frequency)
-        if useirf is True:
-            self.parseFullprofResolutionFile(irffilename)
-
-        self.makeParameterConsistent()
-
-        self.convertToGSAS(banks, outputfilename)
-
-        return
 
 
 mtd.registerPyAlgorithm(ConvertInstrumentFile())
