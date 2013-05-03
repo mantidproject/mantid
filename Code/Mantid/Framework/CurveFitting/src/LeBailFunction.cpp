@@ -12,6 +12,8 @@ using namespace Mantid::Kernel;
 
 using namespace std;
 
+const double NEG_DBL_MAX(-1.*DBL_MAX);
+
 namespace Mantid
 {
 namespace CurveFitting
@@ -88,7 +90,7 @@ namespace CurveFitting
       // Add peak
       // addPeak(peak_d);
       m_peakvec.push_back(newpeak);
-      m_dspPeakVec.push_back(make_pair(dsp, newpeak);
+      m_dspPeakVec.push_back(make_pair(dsp, newpeak));
       m_peakHKLVec.push_back(peakhkls[ipk]);
     }
 
@@ -108,10 +110,10 @@ namespace CurveFitting
           FunctionFactory::Instance().create("ThermalNeutronBk2BkExpConvPVoigt"));
 
     peak->setMillerIndex(h, k, l);
-    for (size_t i = 0; i < m_peakParameterNames.size; ++i)
+    for (size_t i = 0; i < m_peakParameterNameVec.size(); ++i)
     {
-      string parname = m_peakParameterNames[i];
-      double parvalue = m_peakFunction[parname];
+      string parname = m_peakParameterNameVec[i];
+      double parvalue = m_functionParameters[parname];
       peak->setParmeter(parname, parvalue);
     }
 
@@ -458,7 +460,7 @@ namespace CurveFitting
       else
       {
         // b) Tie the values among all peaks, but will fit
-        for (size_t ipk = 1; ipk < m_dspPeaks.size(); ++ipk)
+        for (size_t ipk = 1; ipk < m_numPeaks; ++ipk)
         {
           stringstream ss1, ss2;
           ss1 << "f" << (ipk-1) << "." << parname;
@@ -480,10 +482,10 @@ namespace CurveFitting
     } // FOR-Function Parameters
 
     // 2. Set 'Height' to be fixed
-    for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
+    for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
     {
       // a. Get peak height
-      IPowderDiffPeakFunction_sptr thispeak = m_dspPeaks[ipk].second;
+      IPowderDiffPeakFunction_sptr thispeak = m_dspPeakVec[ipk].second;
       thispeak->fix(0);
     } // For each peak
 
@@ -714,19 +716,6 @@ namespace CurveFitting
     return;
   }
 
-
-    
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  LeBailFunction::~LeBailFunction()
-  {
-  }
-  
-  std::string LeBailFunction::name() const
-  {
-    return "LeBailFunction";
-  }
 
 
   /*

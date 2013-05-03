@@ -36,7 +36,6 @@ const int INPUTBKGDINDEX(6);
 const int INPUTPUREPEAKINDEX(7);
 const int SMOOTHEDBKGDINDEX(8);
 
-const double NEG_DBL_MAX(-1.*DBL_MAX);
 const double NOBOUNDARYLIMIT(1.0E10);
 
 using namespace Mantid;
@@ -252,7 +251,7 @@ namespace CurveFitting
     g_log.debug() << "LeBail Composite Function: " << m_lebailFunction->asString() << "\n";
     bool inputparamcorrect = generatePeaksFromInput();
 #else
-    m_lebailFunction->addPeaks(m_hkllist); // m_funcParameters,
+    m_lebailFunction.addPeaks(m_vecHKL); // m_funcParameters,
 #endif
 
     // 3. Background function and calculation on it
@@ -569,7 +568,7 @@ namespace CurveFitting
     }
 
     // 4. Calcualte model pattern
-    m_lebailFunction->function(domain, values);
+    m_lebailFunction.function(domain, values);
 
     return allpeaksvalid;
   }

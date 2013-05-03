@@ -62,6 +62,9 @@ namespace CurveFitting
     /// Set peak parameters
     void setPeakParameters(map<string, double> peakparammap);
 
+    /// From table/map to set parameters to all peaks.
+    void setPeaksParameters(map<std::string, double> parammap);
+
     /// Add a new peak
     void addPeak(int h, int k, int l);
 
@@ -102,6 +105,9 @@ namespace CurveFitting
     void adPeakPositionD(double dh);
     double calCubicDSpace(double a, int h, int k, int l) const;
     void addPeak(double d, double height);
+
+    /// Generate a peak with parameter set by
+    IPowderDiffPeakFunction_sptr generatePeak(int h, int k, int l);
 
     /// Set up fit/tie/parameter values to all peaks functions (calling GSL library)
     void setLeBailFitParameters();

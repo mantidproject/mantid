@@ -323,6 +323,10 @@ namespace CurveFitting
     // void calChiSquare();
 
     /// =============================    =========================== ///
+
+    /// Vector for miller indexes
+    std::vector<std::vector<int> > m_vecHKL;
+
     // size_t mWSIndexToWrite;
 
     /// Map to store peak group information: key (int) = (hkl)^2; value = group ID
