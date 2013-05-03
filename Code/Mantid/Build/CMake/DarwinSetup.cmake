@@ -117,7 +117,6 @@ message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 string (REPLACE " " "" CPACK_SYSTEM_NAME ${OSX_CODENAME})
 set ( CPACK_OSX_PACKAGE_VERSION 10.6 )
 set ( CPACK_PREFLIGHT_SCRIPT ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/installer_hooks/preflight )
-set ( CPACK_POSTFLIGHT_SCRIPT ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/installer_hooks/postflight )
 
 set ( CPACK_GENERATOR PackageMaker )
 
