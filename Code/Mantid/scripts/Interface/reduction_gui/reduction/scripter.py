@@ -447,12 +447,12 @@ class BaseReductionScripter(object):
 
         if HAS_MANTID:
             # Generate reduction script and write it to file
-            script_path = os.path.join(output_dir, "job_submission.py")
+            script_path = os.path.join(os.path.expanduser('~'), "job_submission.py")
             script = self.to_script(script_path)
             Logger.get("scripter").notice("Reduction script: %s" % script_path)
             
             # Generate job submission script
-            script_path = os.path.join(output_dir, "job_submission.sh")
+            script_path = os.path.join(os.path.expanduser('~'), "job_submission.sh")
             self._write_submission_script(script_path)
             st = os.stat(script_path)
             os.chmod(script_path, st.st_mode | stat.S_IEXEC)
