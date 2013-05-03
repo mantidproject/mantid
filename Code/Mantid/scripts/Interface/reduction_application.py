@@ -82,8 +82,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Cluster credentials and options
         self._cluster_user = None
         self._cluster_pass = None
-        self._number_of_nodes = 4
-        self._cores_per_node = 4
+        self._number_of_nodes = 1
+        self._cores_per_node = 16
         self._compute_resources = ['Fermi']
         if IS_IN_MANTIDPLOT \
         and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
@@ -370,9 +370,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if dialog.result()==1:
             self._cluster_user = dialog.username_edit.text()
             self._cluster_pass = dialog.pass_edit.text()
-            n_cores = dialog.cores_box.value()
-            self._number_of_nodes = int(math.ceil(n_cores/4))
-            self._cores_per_node = 4
+            self._number_of_nodes = int(dialog.nodes_box.value())
+            self._cores_per_node = int(dialog.cores_box.value())
             self._compute_resource = dialog.resource_combo.currentText()
             
     def _clear_and_close(self):

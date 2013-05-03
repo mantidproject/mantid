@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/cluster_details_dialog.ui'
 #
-# Created: Fri May  3 11:17:46 2013
+# Created: Fri May  3 13:03:18 2013
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,6 +34,17 @@ class Ui_Dialog(object):
         self.resource_combo.setObjectName("resource_combo")
         self.horizontalLayout_3.addWidget(self.resource_combo)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
+        self.horizontalLayout_4 = QtGui.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+        self.label_4 = QtGui.QLabel(Dialog)
+        self.label_4.setMinimumSize(QtCore.QSize(160, 0))
+        self.label_4.setMaximumSize(QtCore.QSize(160, 16777215))
+        self.label_4.setObjectName("label_4")
+        self.horizontalLayout_4.addWidget(self.label_4)
+        self.nodes_box = QtGui.QSpinBox(Dialog)
+        self.nodes_box.setObjectName("nodes_box")
+        self.horizontalLayout_4.addWidget(self.nodes_box)
+        self.verticalLayout.addLayout(self.horizontalLayout_4)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
         self.label_5 = QtGui.QLabel(Dialog)
@@ -87,6 +98,7 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Dialog", "Compute resource:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_4.setText(QtGui.QApplication.translate("Dialog", "Number of nodes:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("Dialog", "Number of cores:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Dialog", "Username:", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("Dialog", "Password:", None, QtGui.QApplication.UnicodeUTF8))
