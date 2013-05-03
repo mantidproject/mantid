@@ -367,7 +367,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                     self.resource_combo.addItem(QtGui.QApplication.translate("Dialog", res, None, QtGui.QApplication.UnicodeUTF8))
                 
         dialog = ClusterDialog(self._compute_resources)
-        dialog.username_edit.setText(QtCore.QString(self._cluster_user))
+        if self._cluster_user is not None:
+            dialog.username_edit.setText(QtCore.QString(str(self._cluster_user)))
         dialog.nodes_box.setValue(int(self._number_of_nodes))
         dialog.cores_box.setValue(int(self._cores_per_node))
         
