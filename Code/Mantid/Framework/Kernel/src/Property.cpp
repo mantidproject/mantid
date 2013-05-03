@@ -217,6 +217,7 @@ namespace API
   class IMDWorkspace;
   class IEventWorkspace;
   class IMDHistoWorkspace;
+  class IFunction;
 }
 namespace DataObjects
 {
@@ -299,6 +300,10 @@ std::string getUnmangledTypeName(const std::type_info& type)
                                        string("SpecialWorkspace2D")));
     typestrings.insert(make_pair(typeid(boost::shared_ptr<TableWorkspace>).name(),
                                         string("TableWorkspace")));
+    // FunctionProperty
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<IFunction>).name(),
+                                        string("Function")));
+
   }
   std::map<std::string, std::string>::const_iterator mitr = typestrings.find(type.name());
   if( mitr != typestrings.end() )
