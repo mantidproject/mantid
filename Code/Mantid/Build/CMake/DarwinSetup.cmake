@@ -51,6 +51,7 @@ set ( INBUNDLE MantidPlot.app/ )
 set ( PARAVIEW_APP_DIR "/Applications/${OSX_PARAVIEW_APP}" )
 set ( PARAVIEW_APP_BIN_DIR "${PARAVIEW_APP_DIR}/Contents/MacOS" )
 set ( PARAVIEW_APP_LIB_DIR "${PARAVIEW_APP_DIR}/Contents/Libraries" )
+set ( PARAVIEW_APP_PLUGIN_DIR "${PARAVIEW_APP_DIR}/Contents/Plugins" )
 
 set ( BIN_DIR MantidPlot.app/Contents/MacOS )
 set ( LIB_DIR MantidPlot.app/Contents/MacOS )
