@@ -261,7 +261,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.connect(apiAction, QtCore.SIGNAL("triggered()"), self._change_api)
     
         # Cluster submission details
-        if CLUSTER_ENABLED is True:
+        if self._interface.is_cluster_enabled() and IS_IN_MANTIDPLOT \
+            and CLUSTER_ENABLED:
             jobAction = QtGui.QAction("Remote submission details", self)
             jobAction.setShortcut("Ctrl+R")
             jobAction.setStatusTip("Set the cluster information for remote job submission")
@@ -271,6 +272,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.tools_menu.addAction(instrAction)
         self.tools_menu.addAction(debugAction)
         self.tools_menu.addAction(apiAction)
+        self.tools_menu.addAction(jobAction)
         
         recent_files = []
         for fname in self._recent_files:
