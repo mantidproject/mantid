@@ -25,6 +25,10 @@ class FunctionPropertyTest(unittest.TestCase):
 #---- Success cases ----
     def test_constructor_succeeds_with_non_empty_string_name(self):
         assertRaisesNothing(self, FunctionProperty, "Function")
+        
+    def test_type_string_returns_Function(self):
+        func = FunctionProperty("fun")
+        self.assertEqual("Function", func.type)
 
     def test_valid_string_value_gives_function_object_as_value(self):
         alg=self.TestFunctionPropAlg()
