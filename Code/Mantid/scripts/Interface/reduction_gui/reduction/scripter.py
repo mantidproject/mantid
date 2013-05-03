@@ -21,6 +21,7 @@ import time
 import platform
 import re
 import os
+import stat
 import traceback
 
 class BaseScriptElement(object):
@@ -448,6 +449,8 @@ class BaseReductionScripter(object):
             # Generate reduction script and write it to file
             script_path = os.path.join(output_dir, "job_submission.py")
             script = self.to_script(script_path)
+            st = os.stat(script_path)
+            os.chmod(script_path, st.st_mode | stat.S_IEXEC)
             Logger.get("scripter").notice("Reduction script: %s" % script_path)
             
             # Generate job submission script
