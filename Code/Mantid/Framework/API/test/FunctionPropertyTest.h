@@ -41,6 +41,8 @@ public:
   void testValue()
   {
     FunctionProperty prop("fun");
+    TS_ASSERT_EQUALS("", prop.value());
+
     std::string error;
     TS_ASSERT_THROWS_NOTHING(error = prop.setValue("name=FunctionPropertyTest_Function,A=3"));
     TS_ASSERT(error.empty());
