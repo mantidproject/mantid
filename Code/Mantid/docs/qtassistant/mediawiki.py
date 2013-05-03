@@ -1,9 +1,11 @@
 from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
+import eqnparser
 import os
 import re
 from parseLinks import fixLinks
 
 IMG_NOT_FOUND = "ImageNotFound.png"
+USE_EQN_PARSER = eqnparser.canUse()
 
 def formatImgHtml(raw):
     #print "RAW:", raw
@@ -104,6 +106,29 @@ class MediaWiki:
 
         return text.strip()
 
+    def __parseEqns(self, text):
+        if not USE_EQN_PARSER:
+            print "not converting equations to png"
+            return text
+
+        # find all of the possible equations
+        start = 0
+        htmlroot = os.path.split(self.__file.name)[0]
+        outdir = os.path.join(htmlroot, "img")
+        while start >= 0:
+            start = text.find("<math>", start)
+            if start < 0:
+                break
+            stop = text.find("</math>", start)
+            if stop < start:
+                break
+            orig = text[start+6:stop]
+            start += 1
+            eqn = eqnparser.Equation(orig, outdir=outdir)
+            text = text.replace("<math>" + orig + "</math>", eqn.contentshtml)
+            self.images.append(os.path.split(eqn.pngfile)[-1])
+        return text
+
     def __clearEmpty(self, text):
         result = []
         for line in text.split("\n"):
@@ -200,6 +225,7 @@ class MediaWiki:
         if len(text) <= 0:
             return # don't bother if it is empty
         text = self.__parseImgs(text)
+        text = self.__parseEqns(text)
         #if len(self.images) > 0:
         #    print "----->", self.images
         for img in self.images:

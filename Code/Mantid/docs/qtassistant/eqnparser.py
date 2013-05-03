@@ -26,6 +26,20 @@ bad_tags = ["include", "def", "command", "loop", "repeat", "open", "toks", "outp
 # ------       it plays a role with dvipng in generating to correct
 # ------       offset for inline equations
 PREAMBLE = r'''
+\documentclass[12pt]{standalone} 
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{gensymb}
+\usepackage{preview}
+\usepackage{standalone}
+\pagestyle{empty} 
+\batchmode
+\begin{document} 
+'''
+
+PREAMBLE = r'''
 \documentclass[12pt]{article} 
 \usepackage{amsmath}
 \usepackage{amsthm}
@@ -47,9 +61,10 @@ def canUse():
         return False
     if not os.path.exists(DVIPNG):
         return False
+    return True
 
 class Equation:
-    def __init__(self, equation, outdir="/tmp", tmpdir="/tmp", urlprefix="img", debug=False):
+    def __init__(self, equation, outdir="/tmp", tmpdir="/tmp", urlprefix="img", debug=True):
         """
         When an Equation object is initialized, it checks the filesystem
 	indiciated by IMGDIR to see if a file with the same name as its
@@ -62,12 +77,20 @@ class Equation:
         """
         # generate a logger
         self._logger = logging.getLogger(__name__+'.'+self.__class__.__name__)
+        #logging.basicConfig(level=logging.DEBUG)
 
         # trim out extraneous whitespace
-        self.contents = equation.strip()
+        splitted = equation.strip().split("\n")
+        sanitized = []
+        for item in splitted:
+            item = item.strip()
+            if len(item) > 0:
+                sanitized.append(item)
+        self.contents = "\n".join(sanitized)
 
         # cache some of the other bits of information
         self._debug = debug
+        self.tmpdir = tmpdir
         self._filestodelete = []
 
         # generate the md5 sum
@@ -82,38 +105,45 @@ class Equation:
         self.cached = os.path.isfile(self.pngfile)
         if not self.cached:
             self._logger.info("Cache file '%s' not found. Generating it." % self.pngfile)
-            self._addToTex(tmpdir)
+            self._addToTex()
             self._compileDVI()
             self._createPNG()
 
     def __del__(self):
+        if self._debug:
+            return
         # cleanup
-        if not self._debug:
-            for filename in self._filestodelete:
-                if os.path.exists(filename):
-                    self._logger.debug("deleting '%s'" % filename)
-                    os.remove(filename)
+        for filename in self._filestodelete:
+            if os.path.exists(filename):
+                self._logger.debug("deleting '%s'" % filename)
+                os.remove(filename)
         
     def __repr__(self):
         return self.contents
         
-    def _addToTex(self, tmpdir):
+    def _addToTex(self):
         """
         Creates a Tex file, writes the preamble and the equation, closed the Tex file.
         
         Calls _translateToTex
         """
-        # create the equation string
         #self._translateToTex() # could be reworked to do this
-        self.eqstring = "$ %s $ \\newpage" % self.contents
+        if "\n" in self.contents:
+            self.eqstring = "\\begin{equation*}\n%s\n\\end{equation*}" % self.contents
+        elif "\\frac" in self.contents:
+            self.eqstring = "\\begin{equation*}\n%s\n\\end{equation*}" % self.contents
+        elif "\\begin\{array" in self.contents:
+            self.eqstring = "\\begin{equation*}\n%s\n\\end{equation*}" % self.contents
+        else:
+            self.eqstring = "$\\textstyle %s$" % self.contents
         self._sanitize()
 
         # generate the temp file and write out the tex
-        (fd, self.texfile) = tempfile.mkstemp(suffix='.tex', prefix='eqn_', dir=tmpdir, text=True)
+        (fd, self.texfile) = tempfile.mkstemp(suffix='.tex', prefix='eqn_', dir=self.tmpdir, text=True)
         self._logger.info("Generating tex file '%s')" % self.texfile)
         handle = os.fdopen(fd, 'w+')
         handle.write(PREAMBLE)
-        handle.write('\n' + self.eqstring + '\n')
+        handle.write(self.eqstring)
         handle.write("\n \\end{document}\n")
         handle.close()
 
@@ -180,15 +210,25 @@ class Equation:
         # run latex
         cmd = [LATEX, self.texfile]
         self._logger.debug("cmd: '%s'" % " ".join(cmd))
-        proc = subprocess.Popen(cmd, cwd="/tmp")
+        proc = subprocess.Popen(cmd, cwd=self.tmpdir,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = proc.communicate()[0]
         retcode = proc.wait()
         if retcode != 0:
+            print ' '.join(cmd)
+            print output
             raise RuntimeError("'%s' returned %d" % (" ".join(cmd), retcode))
 
         # names of generated files
 	self.dvifile=self.texfile[:-3]+'dvi'
         auxfile = self.texfile[:-3] + 'aux'
         logfile = self.texfile[:-3] + 'log'
+
+        # verify the dvi file exists
+        if not os.path.exists(self.dvifile):
+            print ' '.join(cmd)
+            print output
+            raise RuntimeError("Failed to create dvi file '%s'" % self.dvifile)
 
 	#Open the log file and see if anything went wrong
 	handle=open(logfile)
@@ -211,15 +251,25 @@ class Equation:
         if not os.path.exists(DVIPNG):
             raise RuntimeError("dvipng executable ('%s') does not exist" % DVIPNG)
 
-        cmd = [DVIPNG, '-T tight -D 120 -z 9 -bg Transparent',
-               '-o', os.path.split(self.pngfile)[-1],
-               os.path.split(self.dvifile)[-1]]
-
+        # this command works on RHEL6
+        cmd = [DVIPNG, '-Ttight','-D120','-z9','-bg Transparent','--strict',
+                '-o%s' % self.pngfile,
+                self.dvifile]
         self._logger.debug("cmd: '%s'" % " ".join(cmd))
-        proc = subprocess.Popen(cmd, cwd="/tmp")
+        proc = subprocess.Popen(cmd, cwd=self.tmpdir, #shell=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = proc.communicate()[0]
         retcode = proc.wait()
         if retcode != 0:
-            raise RuntimeError("'%s' returned %d" % (" ".join(cmd), retcode))
+            print ' '.join(cmd)
+            print output
+            raise RuntimeError()#"'%s' returned %d" % (" ".join(cmd), retcode))
+
+        # verify the png file exists
+        if not os.path.exists(self.pngfile):
+            print ' '.join(cmd)
+            print output
+            raise RuntimeError("Failed to create png file '%s'" % self.pngfile)
 
         # register files to delete
         self._filestodelete.append(self.dvifile)
