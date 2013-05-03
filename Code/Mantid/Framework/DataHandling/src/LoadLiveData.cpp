@@ -4,7 +4,7 @@ This algorithm is called on a regular interval
 by the [[MonitorLiveData]] algorithm.
 '''It should not be necessary to call LoadLiveData directly.'''
 
-[[file:LoadLiveData_flow.png]]
+[[File:LoadLiveData_flow.png]]
 
 === Data Processing ===
 

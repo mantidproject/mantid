@@ -61,8 +61,8 @@ class fixLinks:
         for item in self.explicitLinks:
           if item.strip()[:4]=='http':
               target=item.strip().split(' ')
-              if len(target)==2:
-                label=target[1]
+              if len(target)>1:
+                label=" ".join(target[1:])
                 link=target[0]
               else:
                 label=item
@@ -88,11 +88,24 @@ class fixLinks:
               linkpiece=link.split("ategory:")[1].strip(":")
               formatted="<a href=\"AlgoCat_"+linkpiece+".html\">"+name+"</a>"  
               self.text=self.text.replace("[["+item+"]]",formatted) 
-                     
+                
+    def linkMedia(self):
+        for item in self.results:
+          #check for |
+          if item.count("|")==1:
+              link,name=item.split("|")
+          else:
+              name=item
+              link=item  
+          if link.find('Media:')!=-1:
+              formatted= "<a href=\""+WEB_BASE+link.replace("Media:","File:").strip()+"\">"+name+"</a>"   
+              self.text=self.text.replace("[["+item+"]]",formatted)                                   
+      
     def parse(self):
         self.linkAlgorithms()
         self.linkFitFunctions()
         self.linkMantidWiki()
         self.linkExplicit()
         self.linkCategories()
+        self.linkMedia()
         return self.text

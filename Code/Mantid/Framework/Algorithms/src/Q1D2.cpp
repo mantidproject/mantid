@@ -50,9 +50,9 @@ From the equation it is possible to see that for pixels in <math>R > RadiusCut</
 
 '''References'''
 
-[http://scripts.iucr.org/cgi-bin/paper?gk0158/R.P. Hjelm Jr. ''J. Appl. Cryst.'' (1988), 21, 618-628].
+[http://scripts.iucr.org/cgi-bin/paper?gk0158 R.P. Hjelm Jr. ''J. Appl. Cryst.'' (1988), 21, 618-628].
 
-[http://scripts.iucr.org/cgi-bin/paper?gk0573/P.A. Seeger & R.P. Hjelm Jr. ''J. Appl. Cryst.'' (1991), 24, 467-478].
+[http://scripts.iucr.org/cgi-bin/paper?gk0573 P.A. Seeger & R.P. Hjelm Jr. ''J. Appl. Cryst.'' (1991), 24, 467-478].
 
 ===Variations on applying the normalization===
 It is possible to divide the input workspace by the WavelenghAdj and PixelAdj workspaces prior to calling this algorithm. The results will be same as if these workspaces were passed to Q1D instead when there are high numbers of particle counts. However, in this scheme the probabilities tend to converge on the true high count probabablities more slowly with increasing number of counts and so the result is less accuate.
