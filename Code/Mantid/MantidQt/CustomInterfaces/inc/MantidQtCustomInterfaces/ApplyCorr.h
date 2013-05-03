@@ -22,6 +22,16 @@ namespace IDA
     virtual QString validate();
     virtual void loadSettings(const QSettings & settings);
     virtual QString helpURL() {return "AbsCor";}
+
+    QDoubleValidator *m_valPosDbl; ///< validator for positive double inputs.
+
+    bool validateScaleInput(); ///< validate input for Scale option.
+
+    private slots:
+
+    void scaleMultiplierCheck(bool state); ///< handle checking/unchecking of "Scale: Multiply Container by"
+
+
   };
 } // namespace IDA
 } // namespace CustomInterfaces

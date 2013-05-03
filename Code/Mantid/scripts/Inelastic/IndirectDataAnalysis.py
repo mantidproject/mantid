@@ -167,10 +167,10 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         if ( len(eRange) == 4 ):
             ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1], 
                 Range2Start=eRange[2], Range2End=eRange[3],
-	            OutputInQ='__eq1', OutputInQSquared='__eq2')
+                OutputInQ='__eq1', OutputInQSquared='__eq2')
         elif ( len(eRange) == 2 ):
             ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1],
-	            OutputInQ='__eq1', OutputInQSquared='__eq2')
+                OutputInQ='__eq1', OutputInQSquared='__eq2')
         (instr, last) = getInstrRun(root)
         q1 = np.array(mtd['__eq1'].readX(0))
         i1 = np.array(mtd['__eq1'].readY(0))
@@ -809,7 +809,7 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     DeleteWorkspace('corrections')
     return CorrectedWS
                 
-def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, factor=1, Save=False,
+def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToScale=False, factor=1, Save=False,
         PlotResult='None', PlotContrib=False):
     '''Load up the necessary files and then passes them into the main
     applyCorrections routine.'''
@@ -821,7 +821,7 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, fa
     if container != '':
         CheckHistSame(sample,'Sample',container,'Container')
         (instr, can_run) = getInstrRun(container)
-        if Scale:
+        if ScaleOrNotToScale:
             Scale(InputWorkspace=container, OutputWorkspace=container, Factor=factor, Operation='Multiply')
             if Verbose:
                 logger.notice('Container scaled by '+str(factor))
@@ -855,7 +855,7 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, fa
         else:
             sub_result = sam_name +'Subtract_'+ can_run
             if Verbose:
-	            logger.notice('Subtracting '+container+' from '+sample)
+                logger.notice('Subtracting '+container+' from '+sample)
             Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
             CloneWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw')
             theta,Q = GetThetaQ(sample)
@@ -865,7 +865,7 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, Scale=False, fa
                 sred_path = os.path.join(workdir,sub_result+'_red.nxs')
                 SaveNexusProcessed(InputWorkspace=sub_result+'_red',Filename=sred_path)
                 if Verbose:
-	                logger.notice('Output file created : '+sred_path)
+                    logger.notice('Output file created : '+sred_path)
             plot_list = [sub_result+'_red',sample]
             if (PlotResult != 'None'):
                 plotCorrResult(sub_result+'_rqw',PlotResult)

@@ -189,8 +189,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
         return [assWS]
 
 def AbsRunFeeder(inputWS, geom, beam, ncan, size, density, sigs, siga, avar,
-        plotOpt='None', Verbose=False):
-    Save = True
+        plotOpt='None', Verbose=False,Save=False):
     StartTime('CalculateCorrections')
     '''Handles the feeding of input and plotting of output for the F2PY
     absorption correction routine.'''
