@@ -58,7 +58,7 @@ public:
 
   void SetInput(vtkDataSet* input)
   {
-    m_clipper->SetInput(input);
+    m_clipper->SetInputData(input);
   }
 
   void SetClipFunction(vtkImplicitFunction* func)
@@ -186,10 +186,7 @@ bool vtkRebinningTransformOperator::getOutputHistogramWS() const
   return m_bOutputHistogramWS;
 }
 
-vtkCxxRevisionMacro(vtkRebinningTransformOperator, "$Revision: 1.0 $")
-  ;
-vtkStandardNewMacro(vtkRebinningTransformOperator)
-  ;
+vtkStandardNewMacro(vtkRebinningTransformOperator);
 
 using namespace Mantid::VATES;
 
@@ -257,10 +254,10 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(
       vtkDataObject::DATA_OBJECT()));
 
-    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
+    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {
       // usually only one actual step requested
-      m_timestep = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
+      m_timestep = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
     }
 
     std::string scalarName = XMLDefinitions::signalName();
@@ -288,7 +285,7 @@ int vtkRebinningTransformOperator::RequestData(vtkInformation* vtkNotUsed(reques
     delete p_1dMDFactory;
 
     output->ShallowCopy(outData);
-
+    m_presenter->setAxisLabels(output);
   }
   return 1;
 }
@@ -384,15 +381,6 @@ void vtkRebinningTransformOperator::SetThresholdRangeStrategyIndex(std::string s
   }
 }
 
-void vtkRebinningTransformOperator::SetInOriginalCoords(bool inOriginalCoords)
-{
-  if(inOriginalCoords != m_bTransformVis)
-  {
-    m_bTransformVis = inOriginalCoords;
-    this->Modified();
-  }
-}
-
 const char* vtkRebinningTransformOperator::GetInputGeometryXML()
 {
   try
@@ -429,6 +417,8 @@ void vtkRebinningTransformOperator::setTimeRange(vtkInformationVector* outputVec
     if(m_presenter->hasTDimensionAvailable())
     {
       vtkInformation *outInfo = outputVector->GetInformationObject(0);
+      outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(),
+                   m_presenter->getTimeStepLabel().c_str());
       std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
       outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
         static_cast<int> (timeStepValues.size()));

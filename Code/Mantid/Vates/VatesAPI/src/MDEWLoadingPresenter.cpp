@@ -6,6 +6,7 @@
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/Common.h"
 
 #include <boost/algorithm/string.hpp>
 #include <vtkFieldData.h>
@@ -55,6 +56,7 @@ namespace Mantid
           max = 1.0;
         }
         //std::cout << "dim " << d << min << " to " <<  max << std::endl;
+        axisLabels.push_back(makeAxisTitle(inDim));
         MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), min, max, inDim->getNBins()));
         dimensions.push_back(dim);
       }
@@ -160,6 +162,18 @@ namespace Mantid
     }
 
     /**
+     * Set the axis labels from the current dimensions
+     * @param visualDataSet: The VTK dataset to update
+     */
+    void MDEWLoadingPresenter::setAxisLabels(vtkDataSet *visualDataSet)
+    {
+      vtkFieldData* fieldData = visualDataSet->GetFieldData();
+      setAxisLabel("AxisTitleForX", axisLabels[0], fieldData);
+      setAxisLabel("AxisTitleForY", axisLabels[1], fieldData);
+      setAxisLabel("AxisTitleForZ", axisLabels[2], fieldData);
+    }
+
+    /**
     Gets the geometry in a string format.
     @return geometry string ref.
     @throw runtime_error if execute has not been run first.
@@ -202,6 +216,20 @@ namespace Mantid
         result.push_back(tDimension->getX(i));
       }
       return result;
+    }
+
+    /**
+     * Create a label for the "time" coordinate
+     * @return the "time" coordinate label
+     * @throw runtime_error if execute has not been run first.
+     */
+    std::string MDEWLoadingPresenter::getTimeStepLabel() const
+    {
+      if (!m_isSetup)
+      {
+        throw std::runtime_error("Have not yet run ::extractMetaData!");
+      }
+      return tDimension->getName() + " (" + tDimension->getUnits() + ")";
     }
   }
 }

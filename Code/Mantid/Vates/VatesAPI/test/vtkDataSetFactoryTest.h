@@ -12,7 +12,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <vtkStructuredGrid.h>
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;

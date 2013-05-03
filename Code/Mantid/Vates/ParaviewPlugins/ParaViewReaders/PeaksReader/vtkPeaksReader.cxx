@@ -2,7 +2,6 @@
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
-#include "vtkMath.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkPointData.h"
@@ -23,7 +22,6 @@
 
 #include <boost/algorithm/string.hpp>    
 
-vtkCxxRevisionMacro(vtkPeaksReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkPeaksReader);
 
 using namespace Mantid::VATES;
@@ -44,6 +42,7 @@ vtkPeaksReader::~vtkPeaksReader()
 {
   this->SetFileName(0);
 }
+
 
 void vtkPeaksReader::SetDimensions(int dimensions)
 {
@@ -107,8 +106,8 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
   }
 
   vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
-  glyphFilter->SetInput(structuredMesh);
-  glyphFilter->SetSource(shapeMarker->GetOutput());
+  glyphFilter->SetInputData(structuredMesh);
+  glyphFilter->SetSourceConnection(shapeMarker->GetOutputPort());
   glyphFilter->Update();
   vtkPolyData *glyphed = glyphFilter->GetOutput();
 

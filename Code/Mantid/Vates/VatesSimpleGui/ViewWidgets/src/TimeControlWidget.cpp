@@ -1,10 +1,19 @@
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
 
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
 #include <pqPVApplicationCore.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 namespace Mantid
 {

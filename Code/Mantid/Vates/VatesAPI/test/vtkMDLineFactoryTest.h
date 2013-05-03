@@ -9,7 +9,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "vtkCellType.h"
 #include "vtkUnstructuredGrid.h"
-#include <vtkStructuredGrid.h>
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;

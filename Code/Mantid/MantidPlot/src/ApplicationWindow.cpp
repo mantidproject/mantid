@@ -167,7 +167,6 @@
 #include <QUndoView>
 #include <QSignalMapper>
 #include <QDesktopWidget>
-
 #include <zlib.h>
 
 #include <gsl/gsl_sort.h>
@@ -290,6 +289,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
   // the logs being poluted with library loading errors.
   trySetParaviewPath(args);
+
   using Mantid::Kernel::ConfigService;
   ConfigService::Instance(); // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
@@ -476,6 +476,12 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   AlgorithmFactory::Instance().enableNotifications();
   AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
 
+  /*
+  The scripting enironment call setScriptingLanguage is trampling over the PATH, so we have to set it again.
+  Here we do not off the setup dialog.
+  */
+  const bool skipDialog = true;
+  trySetParaviewPath(args, skipDialog);
 }
 
 /*
@@ -488,16 +494,16 @@ This is a windows only feature. the PATH enviromental variable can be set at run
 - Otherwise, if the user is not using executeandquit command arguments launch the Setup gui.
 
 @param commandArguments : all command line arguments.
+@param noDialog : set to true to skip over the a dialog launch.
 */
-void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
+void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, bool noDialog)
 {
 #ifdef _WIN32
-  if(this->hasVatesAvailable())//TODO: This condition is redundant since Vates will be shipped by default.
-  {
+
     Mantid::Kernel::ConfigServiceImpl& confService = Mantid::Kernel::ConfigService::Instance();
     //Early check of execute and quit command arguments used by system tests.
     QString str;
-    bool b_skipDialog = false;
+    bool b_skipDialog = noDialog;
     foreach(str, commandArguments)
     {
       if(this->shouldExecuteAndQuit(str))
@@ -531,33 +537,22 @@ void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments)
         pv.exec();
       }
     }
-  }
+  
 #else
   UNUSED_ARG(commandArguments)
+  UNUSED_ARG(noDialog)
 #endif
 }
 
-
-/*
-Getter to determine if the vates paraview plugins are available.
-
-The code below may be used before MantidUI::init is called and therefore the implementation
-must not rely on the Vates Libraries to be loaded in order to determine whether Vates is available.
-
-@return TRUE if vates is available
-*/
-bool ApplicationWindow::hasVatesAvailable() const
-{
-  return Mantid::Kernel::ConfigService::Instance().quickVatesCheck();
-}
 
 /*
 Getter to determine if the paraview path has been set.
 */
 bool ApplicationWindow::hasParaviewPath() const
 {
+  const std::string propertyname = "paraview.path";
   Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
-  return config.hasProperty("paraview.path");
+  return config.hasProperty(propertyname) && !config.getString(propertyname).empty() ;
 }
 
 void ApplicationWindow::initWindow()

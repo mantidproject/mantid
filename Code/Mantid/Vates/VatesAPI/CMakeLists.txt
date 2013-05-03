@@ -19,6 +19,7 @@ src/MDEWLoadingPresenter.cpp
 src/MDEWInMemoryLoadingPresenter.cpp
 src/MDHWInMemoryLoadingPresenter.cpp
 src/MDHWLoadingPresenter.cpp
+src/MDHWNexusLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/NoThresholdRange.cpp
@@ -33,6 +34,8 @@ src/UserDefinedThresholdRange.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkDataSetToImplicitFunction.cpp
+src/vtkDataSetToNonOrthogonalDataSet.cpp
+src/vtkDataSetToScaledDataSet.cpp
 src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
 src/vtkMDLineFactory.cpp
@@ -66,6 +69,7 @@ inc/MantidVatesAPI/MDEWInMemoryLoadingPresenter.h
 inc/MantidVatesAPI/MDEWRebinningPresenter.h
 inc/MantidVatesAPI/MDHWInMemoryLoadingPresenter.h
 inc/MantidVatesAPI/MDHWLoadingPresenter.h
+inc/MantidVatesAPI/MDHWNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
 inc/MantidVatesAPI/MDLoadingViewAdapter.h
@@ -91,6 +95,8 @@ inc/MantidVatesAPI/UserDefinedThresholdRange.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
+inc/MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h
+inc/MantidVatesAPI/vtkDataSetToScaledDataSet.h
 inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
@@ -134,6 +140,7 @@ test/MDEWLoadingPresenterTest.h
 test/MDEWRebinningPresenterTest.h
 test/MDHWInMemoryLoadingPresenterTest.h
 test/MDHWLoadingPresenterTest.h
+test/MDHWNexusLoadingPresenterTest.h
 test/NullRebinningPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningKnowledgeSerializerTest.h
@@ -145,6 +152,8 @@ test/UserDefinedThresholdRangeTest.h
 test/MedianAndBelowThresholdRangeTest.h
 test/NoThresholdRangeTest.h
 test/IgnoreZerosThresholdRangeTest.h
+test/vtkDataSetToScaledDataSetTest.h
+test/vtkDataSetToNonOrthogonalDataSetTest.h
 )
 
 include_directories( inc )
@@ -169,8 +178,8 @@ set_property( TARGET VatesAPI PROPERTY FOLDER "MantidVates" )
 
 target_link_libraries( VatesAPI
 ${MANTID_SUBPROJECT_LIBS} 
-vtkCommon 
-vtkFiltering
+vtkCommonCore
+vtkCommonDataModel
 )
 
 # Create test file projects

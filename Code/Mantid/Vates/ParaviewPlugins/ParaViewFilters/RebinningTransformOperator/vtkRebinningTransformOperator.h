@@ -61,7 +61,7 @@ class VTK_EXPORT vtkRebinningTransformOperator : public vtkUnstructuredGridAlgor
 {
 public:
   static vtkRebinningTransformOperator *New();
-  vtkTypeRevisionMacro(vtkRebinningTransformOperator,vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkRebinningTransformOperator, vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
@@ -76,7 +76,6 @@ public:
   void SetOrigin(double originX, double originY, double originZ);
   void SetForceOrthogonal(bool value);
   void SetOutputHistogramWS(bool value);
-  void SetInOriginalCoords(bool inOriginalCoords);
 
   const char* GetInputGeometryXML();
   void SetThresholdRangeStrategyIndex(std::string selectedStrategyIndex);  
@@ -170,8 +169,6 @@ private:
   double m_lengthB3;
   /// Do we force the basis vectors to be orthogonal?
   bool m_ForceOrthogonal;
-  /// Flag indicating that visual results should be transformed into the original coordinate frame.
-  bool m_bTransformVis;
   /// Flag indicating that a histogram workspace should be provided.
   bool m_bOutputHistogramWS;
 

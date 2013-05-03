@@ -74,13 +74,6 @@
 		 default_values="1">
 		 <BooleanDomain name="bool"/>
        </IntVectorProperty>
-	   <IntVectorProperty
-         name="In Original Coods"
-         command="SetInOriginalCoords"
-         number_of_elements="1"
-		 default_values="0">
-		 <BooleanDomain name="bool"/>
-       </IntVectorProperty>
 	   <DoubleVectorProperty
          name="InputMinThreshold"
          command="GetInputMinThreshold"
@@ -129,6 +122,11 @@
          command="SetAppliedGeometryXML"
          number_of_elements="1"
          default_values="--">
+       </StringVectorProperty>
+       <StringVectorProperty
+         name="TimeLabelAnnotation"
+         information_only="1"
+         si_class="vtkSITimeLabelProperty">
        </StringVectorProperty>
     </SourceProxy>
   </ProxyGroup>

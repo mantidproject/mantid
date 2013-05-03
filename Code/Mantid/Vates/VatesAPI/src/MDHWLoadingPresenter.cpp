@@ -7,7 +7,9 @@
 #include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
-
+#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
+#include "MantidVatesAPI/vtkDataSetToWsName.h"
+#include "MantidVatesAPI/Common.h"
 
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
@@ -54,6 +56,7 @@ namespace Mantid
           max = 1.0;
         }
         //std::cout << "dim " << d << min << " to " <<  max << std::endl;
+        axisLabels.push_back(makeAxisTitle(inDim));
         MDHistoDimension_sptr dim(new MDHistoDimension(inDim->getName(), inDim->getName(), inDim->getUnits(), min, max, inDim->getNBins()));
         dimensions.push_back(dim);
       }
@@ -110,6 +113,23 @@ namespace Mantid
       return bExecute;
     }
     
+    /**
+    Determines wheter the file can be loaded based on it's extension.
+    @param filename containing the extension
+    @param expectedExtension expected extension for the file to have
+    @return TRUE, only if the extension is approved.
+    */
+    bool MDHWLoadingPresenter::canLoadFileBasedOnExtension(const std::string& filename, const std::string& expectedExtension) const
+    {
+       // Quick check based on extension.
+      const size_t startExtension = filename.find_last_of('.');
+      const size_t endExtension = filename.length();
+      std::string extension = filename.substr(startExtension, endExtension - startExtension);
+      boost::algorithm::to_lower(extension);
+      boost::algorithm::trim(extension);
+      return extension == expectedExtension;
+    }
+
     /*
     Append the geometry and function information onto the outgoing vtkDataSet.
     @param visualDataSet : outgoing dataset on which to append metadata.
@@ -133,6 +153,29 @@ namespace Mantid
       convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
       visualDataSet->SetFieldData(outputFD);
       outputFD->Delete();
+    }
+
+    /**
+     * Change the data based on non-orthogonal axis information
+     * @param visualDataSet : The VTK dataset to modify
+     */
+    void MDHWLoadingPresenter::makeNonOrthogonal(vtkDataSet *visualDataSet)
+    {
+      std::string wsName = vtkDataSetToWsName::exec(visualDataSet);
+      vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName);
+      converter.execute();
+    }
+
+    /**
+     * Set the axis labels from the current dimensions
+     * @param visualDataSet: The VTK dataset to update
+     */
+    void MDHWLoadingPresenter::setAxisLabels(vtkDataSet *visualDataSet)
+    {
+      vtkFieldData* fieldData = visualDataSet->GetFieldData();
+      setAxisLabel("AxisTitleForX", axisLabels[0], fieldData);
+      setAxisLabel("AxisTitleForY", axisLabels[1], fieldData);
+      setAxisLabel("AxisTitleForZ", axisLabels[2], fieldData);
     }
 
     /**
@@ -178,6 +221,20 @@ namespace Mantid
         result.push_back(tDimension->getX(i));
       }
       return result;
+    }
+
+    /**
+     * Create a label for the "time" coordinate
+     * @return the "time" coordinate label
+     * @throw runtime_error if execute has not been run first.
+     */
+    std::string MDHWLoadingPresenter::getTimeStepLabel() const
+    {
+      if (!m_isSetup)
+      {
+        throw std::runtime_error("Have not yet run ::extractMetaData!");
+      }
+      return tDimension->getName() + " (" + tDimension->getUnits() + ")";
     }
   }
 }

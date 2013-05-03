@@ -1,5 +1,9 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
+
 #include <pqActiveObjects.h>
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
@@ -18,6 +22,11 @@
 #include <vtkSMProxy.h>
 #include <vtkSMSourceProxy.h>
 
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
+
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QPointer>
 
@@ -39,22 +48,33 @@ ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
 /**
  * This function creates a single standard ParaView view instance.
  * @param widget the UI widget to associate the view with
+ * @param viewName the requested view type, if empty will default to RenderView
  * @return the created view
  */
-pqRenderView* ViewBase::createRenderView(QWidget* widget)
+pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
 {
   QHBoxLayout *hbox = new QHBoxLayout(widget);
   hbox->setMargin(0);
 
+  if (viewName == QString(""))
+  {
+    viewName = pqRenderView::renderViewType();
+  }
+
   // Create a new render view.
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
   pqRenderView *view = qobject_cast<pqRenderView*>(\
-        builder->createView(pqRenderView::renderViewType(),
+        builder->createView(viewName,
                             pqActiveObjects::instance().activeServer()));
   pqActiveObjects::instance().setActiveView(view);
 
   // Place the widget for the render view in the frame provided.
   hbox->addWidget(view->getWidget());
+
+  /// Make a connection to the view's endRender signal for later checking.
+  QObject::connect(view, SIGNAL(endRender()),
+                   this, SIGNAL(renderingDone()));
+
   return view;
 }
 
@@ -86,8 +106,15 @@ void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
  */
 void ViewBase::onAutoScale()
 {
-  QPair <double, double> range = this->colorUpdater.autoScale(this->getRep());
-  this->renderAll();
+  pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    // Can't get a good rep, just return
+    //qDebug() << "Bad rep for auto scale";
+    return;
+  }
+  QPair <double, double> range = this->colorUpdater.autoScale(rep);
+  rep->renderViewEventually();
   emit this->dataRange(range.first, range.second);
 }
 
@@ -97,8 +124,13 @@ void ViewBase::onAutoScale()
  */
 void ViewBase::onColorMapChange(const pqColorMapModel *model)
 {
-  this->colorUpdater.colorMapChange(this->getRep(), model);
-  this->renderAll();
+  pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    return;
+  }
+  this->colorUpdater.colorMapChange(rep, model);
+  rep->renderViewEventually();
 }
 
 /**
@@ -108,8 +140,13 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
  */
 void ViewBase::onColorScaleChange(double min, double max)
 {
-  this->colorUpdater.colorScaleChange(this->getRep(), min, max);
-  this->renderAll();
+  pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    return;
+  }
+  this->colorUpdater.colorScaleChange(rep, min, max);
+  rep->renderViewEventually();
 }
 
 /**
@@ -118,17 +155,44 @@ void ViewBase::onColorScaleChange(double min, double max)
  */
 void ViewBase::onLogScale(int state)
 {
-  this->colorUpdater.logScale(this->getRep(), state);
-  this->renderAll();
+  pqPipelineRepresentation *rep = this->getRep();
+  if (NULL == rep)
+  {
+    return;
+  }
+  this->colorUpdater.logScale(rep, state);
+  rep->renderViewEventually();
 }
 
 /**
- * This function is used to correct post-accept visibility issues. Most
- * views won't need to do anything.
+ * This function passes the color selection widget to the color updater
+ * object.
+ * @param cs : Reference to the color selection widget
  */
-void ViewBase::correctVisibility(pqPipelineBrowserWidget *pbw)
+void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
 {
-  UNUSED_ARG(pbw);
+  this->colorUpdater.updateState(cs);
+}
+
+/**
+ * This function checks the current state from the color updater and
+ * processes the necessary color changes.
+ */
+void ViewBase::setColorsForView()
+{
+  if (this->colorUpdater.isAutoScale())
+  {
+    this->onAutoScale();
+  }
+  else
+  {
+    this->onColorScaleChange(this->colorUpdater.getMinimumRange(),
+                             this->colorUpdater.getMaximumRange());
+  }
+  if (this->colorUpdater.isLogScale())
+  {
+    this->onLogScale(true);
+  }
 }
 
 /**
@@ -184,7 +248,8 @@ void ViewBase::setPluginSource(QString pluginName, QString wsName)
   vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
   srcProxy->UpdateVTKObjects();
   srcProxy->Modified();
-  srcProxy->UpdatePipelineInformation();;
+  srcProxy->UpdatePipelineInformation();
+  src->updatePipeline();
 }
 
 /**
@@ -301,10 +366,14 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
   if (NULL == dvp)
   {
     // This is a normal filter and therefore has no timesteps.
+    //qDebug() << "No timestep vector, returning.";
     return;
   }
+
   const int numTimesteps = static_cast<int>(dvp->GetNumberOfElements());
-  if (0 != numTimesteps)
+  //qDebug() << "# timesteps: " << numTimesteps;
+
+  if (1 < numTimesteps)
   {
     if (doUpdate)
     {
@@ -393,6 +462,27 @@ void ViewBase::onParallelProjection(bool state)
   pqRenderView *cview = this->getPvActiveView();
   vtkSMProxy *proxy = cview->getProxy();
   vtkSMPropertyHelper(proxy, "CameraParallelProjection").Set(state);
+  proxy->UpdateVTKObjects();
+  cview->render();
+}
+
+/**
+ * This function is used to set the LOD threshold for the view.
+ * @param state : whether or not to use the LOD threshold
+ * @param defVal : default value of LOD threshold
+ */
+void ViewBase::onLodThresholdChange(bool state, double defVal)
+{
+  pqRenderView *cview = this->getPvActiveView();
+  vtkSMProxy *proxy = cview->getProxy();
+  if (state)
+  {
+    vtkSMPropertyHelper(proxy, "LODThreshold").Set(defVal);
+  }
+  else
+  {
+    vtkSMPropertyHelper(proxy, "LODThreshold").Set(VTK_DOUBLE_MAX);
+  }
   proxy->UpdateVTKObjects();
   cview->render();
 }

@@ -45,6 +45,9 @@ namespace Mantid
       const std::string& getGeometryXML() const;
       virtual bool hasTDimensionAvailable() const;
       virtual std::vector<double> getTimeStepValues() const;
+      virtual std::string getTimeStepLabel() const;
+      virtual void setAxisLabels(vtkDataSet* visualDataSet);
+      virtual void makeNonOrthogonal(vtkDataSet* visualDataSet);
       virtual ~MDHWLoadingPresenter();
     protected:
       /*---------------------------------------------------------------------------
@@ -54,8 +57,12 @@ namespace Mantid
       
       Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::NoDimensionPolicy> xmlBuilder;
       Mantid::Geometry::IMDDimension_sptr tDimension;
-      virtual void appendMetadata(vtkDataSet* visualDataSet, const std::string& wsName) ;
+      std::vector<std::string> axisLabels;
+      virtual void appendMetadata(vtkDataSet* visualDataSet,
+                                  const std::string& wsName) ;
       virtual void extractMetadata(Mantid::API::IMDHistoWorkspace_sptr histoWs);
+      virtual bool canLoadFileBasedOnExtension(const std::string& filename,
+                                               const std::string& expectedExtension) const;
       virtual bool shouldLoad();
       bool m_isSetup;
       double m_time;

@@ -4,9 +4,6 @@
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <vtkImageData.h>
-#include <vtkRectilinearGrid.h>
-#include <vtkStructuredGrid.h>
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidKernel/ReadLock.h"
 

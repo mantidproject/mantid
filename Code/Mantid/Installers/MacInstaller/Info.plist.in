@@ -5,7 +5,7 @@
 	<key>LSEnvironment</key>
 	<dict>
 		<key>DYLD_LIBRARY_PATH</key>
-		<string>@PARAVIEW_APP_LIB_DIR@</string>
+		<string>@PARAVIEW_APP_LIB_DIR@:@PARAVIEW_APP_PLUGIN_DIR@</string>
 	</dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>

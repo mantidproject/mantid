@@ -38,5 +38,21 @@ namespace Mantid
       throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
     }
 
+    std::string NullRebinningPresenter::getTimeStepLabel() const
+    {
+      throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
+    }
+
+    void NullRebinningPresenter::makeNonOrthogonal(vtkDataSet *visualDataSet)
+    {
+      UNUSED_ARG(visualDataSet);
+      throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
+    }
+
+    void NullRebinningPresenter::setAxisLabels(vtkDataSet *visualDataSet)
+    {
+      UNUSED_ARG(visualDataSet);
+      throw std::runtime_error("NullRebinningPresenter does not implement this method. Misused");
+    }
   }
 }

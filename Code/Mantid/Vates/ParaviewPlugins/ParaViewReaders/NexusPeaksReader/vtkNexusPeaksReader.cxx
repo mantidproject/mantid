@@ -2,7 +2,6 @@
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
-#include "vtkMath.h"
 #include "vtkAxes.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
@@ -24,7 +23,6 @@
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>    
 
-vtkCxxRevisionMacro(vtkNexusPeaksReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkNexusPeaksReader);
 
 using namespace Mantid::VATES;
@@ -109,8 +107,8 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   }
 
   vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
-  glyphFilter->SetInput(structuredMesh);
-  glyphFilter->SetSource(shapeMarker->GetOutput());
+  glyphFilter->SetInputData(structuredMesh);
+  glyphFilter->SetSourceConnection(shapeMarker->GetOutputPort());
   glyphFilter->Update();
   vtkPolyData *glyphed = glyphFilter->GetOutput();
 

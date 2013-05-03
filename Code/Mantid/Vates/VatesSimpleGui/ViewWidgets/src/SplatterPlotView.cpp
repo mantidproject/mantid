@@ -1,16 +1,24 @@
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 
+// Have to deal with ParaView warnings and Intel compiler the hard way.
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1170
+#endif
 
-#include "pqActiveObjects.h"
-#include "pqApplicationCore.h"
-#include "pqDataRepresentation.h"
-#include "pqObjectBuilder.h"
-#include "pqPipelineRepresentation.h"
-#include "pqPipelineSource.h"
-#include "pqRenderView.h"
-#include "vtkDataObject.h"
-#include "vtkProperty.h"
-#include "vtkSMPropertyHelper.h"
+#include <pqActiveObjects.h>
+#include <pqApplicationCore.h>
+#include <pqDataRepresentation.h>
+#include <pqObjectBuilder.h>
+#include <pqPipelineRepresentation.h>
+#include <pqPipelineSource.h>
+#include <pqRenderView.h>
+#include <vtkDataObject.h>
+#include <vtkProperty.h>
+#include <vtkSMPropertyHelper.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <QMessageBox>
 
@@ -72,6 +80,7 @@ void SplatterPlotView::render()
   pqPipelineSource *src = NULL;
   src = pqActiveObjects::instance().activeSource();
 
+  QString renderType = "Surface";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
@@ -89,8 +98,6 @@ void SplatterPlotView::render()
     return;
   }
 
-  int renderType = VTK_SURFACE;
-
   if (!this->isPeaksWorkspace(src))
   {
     this->origSrc = src;
@@ -102,13 +109,14 @@ void SplatterPlotView::render()
   else
   {
     this->peaksSource.append(src);
-    renderType = VTK_WIREFRAME;
+    renderType = "Wireframe";
   }
 
   // Show the data
+  src->updatePipeline();
   pqDataRepresentation *drep = builder->createDataRepresentation(\
            src->getOutputPort(0), this->view);
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType);
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType.toStdString().c_str());
   drep->getProxy()->UpdateVTKObjects();
   pqPipelineRepresentation *prep = NULL;
   prep = qobject_cast<pqPipelineRepresentation*>(drep);

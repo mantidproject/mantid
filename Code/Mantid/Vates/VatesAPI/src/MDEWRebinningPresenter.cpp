@@ -13,8 +13,10 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
+#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidKernel/VMD.h"
@@ -23,12 +25,14 @@
 #include <vtkPlane.h>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 namespace Mantid
 {
   namespace VATES
   {
-    
+    const std::string MDEWRebinningPresenter::rb_tag = "_visual_md";
+
     /**
     Constructor.
     @param input : input vtk dataset containing existing metadata.
@@ -244,12 +248,26 @@ namespace Mantid
     @param dimension : dimension to extract property value for.
     @return true available, false otherwise.
     */
-    std::string MDEWRebinningPresenter::extractFormattedPropertyFromDimension(const Mantid::Kernel::VMD& basis, double length,  Mantid::Geometry::IMDDimension_sptr dimension) const
+    std::string MDEWRebinningPresenter::extractFormattedPropertyFromDimension(const Mantid::Kernel::V3D& basis, const size_t totalNDims, double length,  Mantid::Geometry::IMDDimension_sptr dimension) const
     {
       UNUSED_ARG(length);
+
+      MantidVec localBasis(3);
+      localBasis[0] = basis.X();
+      localBasis[1] = basis.Y();
+      localBasis[2] = basis.Z();
+      size_t nAdditionalDimensions = totalNDims - 3;
+      if(nAdditionalDimensions >= 1)
+      {
+        for(size_t i = 0; i < nAdditionalDimensions; ++i)
+        {
+          localBasis.push_back(0);
+        }
+      }
+
       std::string units = dimension->getUnits();
       std::string id = dimension->getDimensionId();
-      return boost::str(boost::format("%s, %s, %s") %id %units %basis.toString(",") );
+      return boost::str(boost::format("%s, %s, %s") %id %units %VMD(localBasis).toString(",") );
     }
 
     /**
@@ -262,7 +280,7 @@ namespace Mantid
     {
       std::string wsName = m_serializer.getWorkspaceName();
 
-      std::string outWsName = wsName + "_visual_md";
+      std::string outWsName = wsName + rb_tag;
 
       using namespace Mantid::API;
       if(RecalculateAll == m_request->action())
@@ -283,7 +301,7 @@ namespace Mantid
         if(m_view->getApplyClip())
         {
           using namespace Mantid::Kernel;
-
+          const size_t totalNDims = sourceGeometry.getAllDimensions().size();
           V3D b3 = m_b1.cross_prod(m_b2);
           binningAlg->setPropertyValue("Translation", VMD(m_origin).toString(",") );
           binningAlg->setProperty("AxisAligned", false);
@@ -292,28 +310,41 @@ namespace Mantid
           std::vector<double> OutputExtents;
           if(sourceGeometry.hasXDimension())
           {
-            binningAlg->setPropertyValue("BasisVector0", extractFormattedPropertyFromDimension(VMD(m_b1), m_lengthB1, sourceGeometry.getXDimension()));
+            binningAlg->setPropertyValue("BasisVector0", extractFormattedPropertyFromDimension(m_b1, totalNDims, m_lengthB1, sourceGeometry.getXDimension()));
             OutputExtents.push_back(0);
             OutputExtents.push_back(m_lengthB1);
             OutputBins.push_back(int(sourceGeometry.getXDimension()->getNBins()));
           }
           if(sourceGeometry.hasYDimension())
           {
-            binningAlg->setPropertyValue("BasisVector1", extractFormattedPropertyFromDimension(VMD(m_b2), m_lengthB2, sourceGeometry.getYDimension()));
+            binningAlg->setPropertyValue("BasisVector1", extractFormattedPropertyFromDimension(m_b2, totalNDims, m_lengthB2, sourceGeometry.getYDimension()));
             OutputExtents.push_back(0);
             OutputExtents.push_back(m_lengthB2);
             OutputBins.push_back(int(sourceGeometry.getYDimension()->getNBins()));
           }
           if(sourceGeometry.hasZDimension())
           {
-            binningAlg->setPropertyValue("BasisVector2", extractFormattedPropertyFromDimension(VMD(b3), m_lengthB3, sourceGeometry.getZDimension()));
+            binningAlg->setPropertyValue("BasisVector2", extractFormattedPropertyFromDimension(b3, totalNDims, m_lengthB3, sourceGeometry.getZDimension()));
             OutputExtents.push_back(0);
             OutputExtents.push_back(m_lengthB3);
             OutputBins.push_back(int(sourceGeometry.getYDimension()->getNBins()));
           }
           if(sourceGeometry.hasTDimension())
           {
-            binningAlg->setPropertyValue("BasisVector3", "");
+            // Create a basis vector parallel to the current time vector.
+            auto dimT = sourceGeometry.getTDimension();
+            std::string units = dimT->getUnits();
+            std::string id = dimT->getDimensionId();
+            std::string formattedTInput = boost::str(boost::format("%s, %s, 0,0,0,1") %id %units); 
+            binningAlg->setPropertyValue("BasisVector3", formattedTInput);
+
+            // Set up extents and bins for this dimension.
+            OutputExtents.push_back(dimT->getMinimum());
+            OutputExtents.push_back(dimT->getMaximum());
+            OutputBins.push_back(int(dimT->getNBins()));
+
+            // Overwrite the translation.
+            binningAlg->setPropertyValue("Translation", boost::str(boost::format("%s, 0") %VMD(m_origin).toString(",")) );
           }
           binningAlg->setProperty("OutputExtents", OutputExtents);
           binningAlg->setProperty("OutputBins", OutputBins);
@@ -335,7 +366,7 @@ namespace Mantid
           }
           if(sourceGeometry.hasTDimension())
           {
-            binningAlg->setPropertyValue("AlignedDim3",  extractFormattedPropertyFromDimension(sourceGeometry.getTDimension()));
+            binningAlg->setPropertyValue("AlignedDim3", extractFormattedPropertyFromDimension(sourceGeometry.getTDimension()));
           }
         }
 
@@ -386,6 +417,41 @@ namespace Mantid
         timeStepValues[i] = min + (i * increment);
       }
       return timeStepValues;
+    }
+
+    /**
+     * Create a label for the "time" coordinate
+     * @return the "time" coordinate label
+     */
+    std::string MDEWRebinningPresenter::getTimeStepLabel() const
+    {
+      Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
+      sourceGeometry.execute();
+      std::string label = sourceGeometry.getTDimension()->getName();
+      label += " (";
+      label += sourceGeometry.getTDimension()->getUnits();
+      label += ")";
+      return label;
+    }
+
+    void MDEWRebinningPresenter::makeNonOrthogonal(vtkDataSet *visualDataSet)
+    {
+      std::string wsName = m_serializer.getWorkspaceName() + rb_tag;
+      vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName);
+      converter.execute();
+    }
+
+    void MDEWRebinningPresenter::setAxisLabels(vtkDataSet *visualDataSet)
+    {
+      Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
+      sourceGeometry.execute();
+      vtkFieldData* fieldData = visualDataSet->GetFieldData();
+      setAxisLabel("AxisTitleForX",
+                   makeAxisTitle(sourceGeometry.getXDimension()), fieldData);
+      setAxisLabel("AxisTitleForY",
+                   makeAxisTitle(sourceGeometry.getYDimension()), fieldData);
+      setAxisLabel("AxisTitleForZ",
+                   makeAxisTitle(sourceGeometry.getZDimension()), fieldData);
     }
 
     void MDEWRebinningPresenter::persistReductionKnowledge(vtkDataSet* out_ds, const

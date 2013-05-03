@@ -8,8 +8,6 @@
 #include <QPointer>
 #include <QWidget>
 
-class pqColorMapModel;
-class pqPipelineRepresentation;
 class pqPipelineSource;
 class pqRenderView;
 
@@ -78,11 +76,14 @@ protected slots:
   void onDestroyingSource(pqPipelineSource *src);
   /// Invoke the RebinnerCutter on the current dataset.
   void onRebinButtonClicked();
+  /// Invoke the ScaleWorkspace on the current dataset.
+  void onScaleButtonClicked();
 
 private:
   Q_DISABLE_COPY(StandardView)
 
   QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
+  QPointer<pqPipelineSource> scaler; ///< Holder for the ScaleWorkspace
   Ui::StandardView ui; ///< The standard view's UI form
   QPointer<pqRenderView> view; ///< The main view
 };

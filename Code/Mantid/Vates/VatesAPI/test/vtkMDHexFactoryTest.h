@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 #include <vtkCellData.h>
 #include <vtkDataArray.h>
-#include <vtkStructuredGrid.h>
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid;
 using namespace Mantid::VATES;

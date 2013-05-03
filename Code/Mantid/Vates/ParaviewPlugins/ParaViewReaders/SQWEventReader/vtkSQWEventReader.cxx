@@ -2,7 +2,6 @@
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
-#include "vtkMath.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkPointData.h"
@@ -20,7 +19,6 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
-vtkCxxRevisionMacro(vtkSQWEventReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkSQWEventReader);
 
 using namespace Mantid::VATES;
@@ -113,10 +111,10 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   FilterUpdateProgressAction<vtkSQWEventReader> loadingProgressUpdate(this, "Loading...");
   FilterUpdateProgressAction<vtkSQWEventReader> drawingProgressUpdate(this, "Drawing...");
 
-  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
+  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
   {
     // usually only one actual step requested
-    m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
+    m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
   }
 
   ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
@@ -134,7 +132,7 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   vtkBox* box = vtkBox::New();
   box->SetBounds(product->GetBounds());
   vtkPVClipDataSet* clipper = vtkPVClipDataSet::New();
-  clipper->SetInput(product);
+  clipper->SetInputData(product);
   clipper->SetClipFunction(box);
   clipper->SetInsideOut(true);
   clipper->Update();
@@ -144,6 +142,8 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
   output->ShallowCopy(clipperOutput);
+
+  m_presenter->setAxisLabels(output);
 
   clipper->Delete();
   
@@ -201,6 +201,8 @@ void vtkSQWEventReader::setTimeRange(vtkInformationVector* outputVector)
   if(m_presenter->hasTDimensionAvailable())
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(),
+                 m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
       static_cast<int> (timeStepValues.size()));

@@ -8,7 +8,7 @@
 
 #include "vtkFieldData.h"
 #include "vtkCharArray.h"
-#include "vtkRectilinearGrid.h"
+#include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
 
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 
