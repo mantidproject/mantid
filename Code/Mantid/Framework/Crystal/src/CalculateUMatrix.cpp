@@ -102,10 +102,7 @@ z
 
 Then the sum in equation (11) is maximized for <math>\epsilon_0 =1, \epsilon_1 =0,  \epsilon_2 =0 \epsilon_3 =0</math> (13)
 
-== Therefore U is the rotation represented by the quaternion <math> u</math>, which is the eigenvector corresponding to the largest eigenvalue of  <math>HS</math>. ==
- 
-
-
+Therefore U is the rotation represented by the quaternion <math> u</math>, which is the eigenvector corresponding to the largest eigenvalue of  <math>HS</math>.
 
 *WIKI*/
 #include "MantidCrystal/CalculateUMatrix.h"
