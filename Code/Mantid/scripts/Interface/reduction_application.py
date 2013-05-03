@@ -261,8 +261,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.connect(apiAction, QtCore.SIGNAL("triggered()"), self._change_api)
     
         # Cluster submission details
-        if self._interface.is_cluster_enabled() and IS_IN_MANTIDPLOT \
-            and CLUSTER_ENABLED:
+        if IS_IN_MANTIDPLOT and CLUSTER_ENABLED:
             jobAction = QtGui.QAction("Remote submission details", self)
             jobAction.setShortcut("Ctrl+R")
             jobAction.setStatusTip("Set the cluster information for remote job submission")
