@@ -3,21 +3,15 @@ This was taken from https://github.com/constantAmateur/scihtmlatex
 and modified to be used for generating equations in mantid.
 """
 #from BeautifulSoup import BeautifulSoup
-import os, os.path 
-import subprocess
-import tempfile, binascii
-from cStringIO import StringIO
 import hashlib
+import logging
+import os
+import subprocess
+import tempfile
 
-DEBUG = 0
-TEMPDIR = '/tmp/'
-#IMGDIR and IMGURL must exist on the webserver
-IMGDIR = '/tmp/htmllatex'#'/home/sciteit/sciteit/r2/r2/public/static/htmlatex/'
-IMGURL = '/static/htmlatex/'
 LATEX = '/usr/bin/latex'
 DVIPNG = '/usr/bin/dvipng'
 # Trading size for time-to-generate is a only a good idea when using memcache
-DVIPNG_FLAGS = '-T tight -D 120 -z 9 -bg Transparent -o '
 TYPES = {'div':'eq', 'div':'numeq', 'div':'alignedeq', 'div':'numalignedeq', 'span':'eq', 'div':'matrix', 'div':'det'}
 
 bad_tags = ["include", "def", "command", "loop", "repeat", "open", "toks", "output",
@@ -44,51 +38,19 @@ PREAMBLE = r'''
 \begin{document} 
 '''
 
-def main(data):
+def canUse():
     """
-    Get the latex source; return a raw string for the webserver to send to the client
-
-    Take the outgoing HTML and turn it into a python object.  Search the object for the
-    <div> and <span> tags that indicate latex source -- the tags we can handle are given
-    in the global variable TYPES.  If there isn't anything to handle, return.  If there is, 
-    process it and return a pretty string of HTML for the webserver to send to the client.
- 
-    Notes:  A working directory must be set via os.chdir so latex knows where to put its output
+    This is a method to invoke in case you want to try actually using 
+    this chunk of code. True means the dependencies were found.
     """
-
-    if not os.path.isdir(TEMPDIR):
-        os.mkdir(TEMPDIR, 0755)
-    os.chdir(TEMPDIR)
-    
-    if not os.path.isdir(IMGDIR):
-        os.mkdir(IMGDIR, 0755)
-        for i in ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f']:
-            os.mkdir(IMGDIR + i, 0755)
-
-    soup = BeautifulSoup(data)
-
-    equations = soup.findAll(TYPES)
-    if not equations:
-        return data
-
-    for equation in equations:
-        key = hashlib.md5()
-        key.update(str(equation).strip())                   # Strip to minimize gratuitous differences in keys
-        eq = Equation(key.hexdigest(), equation)
-        equation.replaceWith(eq.contents[0])
-        del(eq)
-
-    return StringIO(soup.prettify()).getvalue()
-
+    if not os.path.exists(LATEX):
+        return False
+    if not os.path.exists(DVIPNG):
+        return False
 
 class Equation:
-
-    def __init__(self, equation):
+    def __init__(self, equation, outdir="/tmp", tmpdir="/tmp", urlprefix="img", debug=False):
         """
-        Parameters:  key --  an md5 sum of the parsed equation node
-                     equation -- the parsed equation node
-        Methods:     contents -- base64 encoded PNG
-
         When an Equation object is initialized, it checks the filesystem
 	indiciated by IMGDIR to see if a file with the same name as its
         key is stored; if the key-named file exists, an <img src> tag
@@ -98,55 +60,62 @@ class Equation:
         to a DVI, turned into a PNG, saved to IMGDIR, and stored in 
 	Equation.contents
         """
+        # generate a logger
+        self._logger = logging.getLogger(__name__+'.'+self.__class__.__name__)
+
+        # trim out extraneous whitespace
         self.contents = equation.strip()
 
-        key = hashlib.md5()
-        key.update(eqn)
-        self.key = key.hexdigest()
+        # cache some of the other bits of information
+        self._debug = debug
+        self._filestodelete = []
 
-        self.eqstring, self.fd = None, None
-        self.texfilename, self.texfile, self.dvifile = None, None, None
-        self.pngfile = "/tmp/" + self.key + '.png'
-        self.pngurl = IMGURL + self.key[0] + '/' + self.key + '.png'
-        #self.comment = "\n<!-- %s -->\n" % (self.contents.string.strip())
+        # generate the md5 sum
+        key = hashlib.md5()
+        key.update(self.contents)
+        self._key = key.hexdigest()
+
+        # name of the png file and html tag
+        self.pngfile = os.path.join(outdir, "eqn_" + self._key + '.png')
+        self.contentshtml = '<img src="%s"/>' % (self.pngfile)
+
         self.cached = os.path.isfile(self.pngfile)
-        if self.cached:
-            self.contents = ['<img src="%s" />' % (self.pngurl)]
-        else:
-            print "generating image file"
-            self._addToTex()
+        if not self.cached:
+            self._logger.info("Cache file '%s' not found. Generating it." % self.pngfile)
+            self._addToTex(tmpdir)
             self._compileDVI()
             self._createPNG()
-            self.contents = ['<img src="%s" />' % (self.pngurl)]
+
+    def __del__(self):
+        # cleanup
+        if not self._debug:
+            for filename in self._filestodelete:
+                if os.path.exists(filename):
+                    self._logger.debug("deleting '%s'" % filename)
+                    os.remove(filename)
         
+    def __repr__(self):
+        return self.contents
         
-    def _addToTex(self):
+    def _addToTex(self, tmpdir):
         """
         Creates a Tex file, writes the preamble and the equation, closed the Tex file.
         
         Calls _translateToTex
         """
-        print "00:"
-        (self.fd, self.texfilename) = tempfile.mkstemp(suffix='.tex', prefix='eq_', dir=TEMPDIR, text=True)
-        print "01:"
-        self.texfile = os.fdopen(self.fd, 'w+')
-        print "02:"
-        self.texfile.write(PREAMBLE)
-        print "03:"
-
-        #self._translateToTex()
+        # create the equation string
+        #self._translateToTex() # could be reworked to do this
         self.eqstring = "$ %s $ \\newpage" % self.contents
         self._sanitize()
 
-        print "04:"
-        self.texfile.write('\n' + self.eqstring + '\n')
-        print "05:"
-        self.texfile.write("\n \\end{document}\n")
-        print "06:"
-        self.texfile.close()
-        print "07:"
-        return
-
+        # generate the temp file and write out the tex
+        (fd, self.texfile) = tempfile.mkstemp(suffix='.tex', prefix='eqn_', dir=tmpdir, text=True)
+        self._logger.info("Generating tex file '%s')" % self.texfile)
+        handle = os.fdopen(fd, 'w+')
+        handle.write(PREAMBLE)
+        handle.write('\n' + self.eqstring + '\n')
+        handle.write("\n \\end{document}\n")
+        handle.close()
 
     def _translateToTex(self):
         """
@@ -159,61 +128,43 @@ class Equation:
             if self.contents.attrs[0][1] == 'eq':
                 self.eqstring = "$ %s $ \\newpage" % self.contents.string.strip()
                 self._sanitize()
-                return
             elif self.contents.attrs[0][1] == 'det':
                 self.eqstring = "\\begin{equation*} \\left| \\begin{matrix} %s \\end{matrix} \\right| \\end{equation*}" % \
-                self.contents.string.strip()
-                return
+                    self.contents.string.strip()
             elif self.contents.attrs[0][1] == 'matrix':
                 self.eqstring = "\\begin{equation*} \\left[ \\begin{matrix} %s \\end{matrix} \\right] \\end{equation*}" % \
-                self.contents.string.strip()
-                return
-            if DEBUG:
+                    self.contents.string.strip()
+            elif self._debug:
                 assert False, 'Unhandled span:  %s at %s' % (self.eqstring)
-            return
         elif self.contents.name == 'div':
             if self.contents.attrs[0][1] == 'matrix':
                 self.eqstring = "\\begin{equation*} \\left[ \\begin{matrix} %s \\end{matrix} \\right] \\end{equation*}" % \
-                self.contents.string.strip()
-                self._sanitize()
-                return
+                    self.contents.string.strip()
             elif self.contents.attrs[0][1] == 'det':
                 self.eqstring = "\\begin{equation*} \\left| \\begin{matrix} %s \\end{matrix} \\right| \\end{equation*}" % \
-                self.contents.string.strip()
-                self._sanitize()
-                return
+                    self.contents.string.strip()
             elif self.contents.attrs[0][1] == 'alignedeq':
                 self.eqstring = "\\begin{align*} %s \\end{align*}" % \
-                self.contents.string.strip()
-                self._sanitize()
-                return
+                    self.contents.string.strip()
             elif self.contents.attrs[0][1] == 'numalignedeq':
                 self.eqstring = "\\begin{align} %s \\end{align}" % \
-                self.contents.string.strip()
-                self._sanitize()
-                return
+                    self.contents.string.strip()
             elif self.contents.attrs[0][1] == 'numeq':
                 self.eqstring = "\\begin{equation} %s \\end{equation}" % \
-                self.contents.string.strip()
-                self._sanitize()
-                return
+                    self.contents.string.strip()
             else:
                 self.eqstring = "\\begin{equation*} %s \\end{equation*}" % \
-                self.contents.string.strip()
-                self._sanitize()
-                return
-            if DEBUG:
-                assert False, 'Unhandled div:  %s at %s' % (self.eqstring)
-            return
-
+                    self.contents.string.strip()
+            self._sanitize()
 
     def _sanitize(self):
         """
         Removes potentially dangerous latex code, replacing it with
         a 'LaTeX sanitized' message
         """
+        lowercase = self.eqstring.lower()
         for tag in bad_tags:
-            if tag in self.eqstring.lower():
+            if tag in lowercase:
                 self.eqstring = "$ \\mbox{\\LaTeX sanitized} $ \\newpage"
         return 
 
@@ -222,46 +173,56 @@ class Equation:
         """
         Compiles the Tex file into a DVI.  If there's an error, raise it.
         """
+        self._logger.info("Generating dvi file")
         if not os.path.exists(LATEX):
             raise RuntimeError("latex executable ('%s') does not exist" % LATEX)
 
-        #os.spawnl(os.P_WAIT, LATEX, 'latex', self.texfilename)
-        #retcode = subprocess.call([LATEX, self.texfilename])
-        proc = subprocess.Popen([LATEX, self.texfilename], cwd="/tmp")
+        # run latex
+        cmd = [LATEX, self.texfile]
+        self._logger.debug("cmd: '%s'" % " ".join(cmd))
+        proc = subprocess.Popen(cmd, cwd="/tmp")
         retcode = proc.wait()
-        print "latex returned %d" % retcode
+        if retcode != 0:
+            raise RuntimeError("'%s' returned %d" % (" ".join(cmd), retcode))
+
+        # names of generated files
+	self.dvifile=self.texfile[:-3]+'dvi'
+        auxfile = self.texfile[:-3] + 'aux'
+        logfile = self.texfile[:-3] + 'log'
+
 	#Open the log file and see if anything went wrong
-	f=open(self.texfilename[:-3]+'log')
-	for line in f:
+	handle=open(logfile)
+	for line in handle:
 		if line[0]=="!":
 			raise SyntaxError(line)
-	f.close()
-        if not DEBUG:
-                os.remove(self.texfilename)
-                os.remove(self.texfilename[:-3] + 'aux')
-                os.remove(self.texfilename[:-3] + 'log')
-        return 
+	handle.close()
+
+        # register files to delete
+        self._filestodelete.append(self.texfile)
+        self._filestodelete.append(auxfile)
+        self._filestodelete.append(logfile)
 
     def _createPNG(self):
         """
         Runs dvipng on the DVI file.
         Encodes the original latex as an HTML comment.
         """
+        self._logger.info("Generating png file")
         if not os.path.exists(DVIPNG):
             raise RuntimeError("dvipng executable ('%s') does not exist" % DVIPNG)
 
-        cmd = '%s %s "%s" %s 2>/dev/null 1>/dev/null' % (DVIPNG, DVIPNG_FLAGS, self.pngfile, self.dvifile)
-        proc = subprocess.Popen([DVIPNG, DVIPNG_FLAGS, '"%"' % self.pngfile, self.dvifile],
-                                cwd="/tmp")
-        retcode = proc.wait()
-        print "dvipng returned %d" % retcode
+        cmd = [DVIPNG, '-T tight -D 120 -z 9 -bg Transparent',
+               '-o', os.path.split(self.pngfile)[-1],
+               os.path.split(self.dvifile)[-1]]
 
-        self.dvifile = self.texfilename[:-3] + 'dvi'
-        #os.spawnl(os.P_WAIT, DVIPNG, 'dvipng', '%s %s %s' % (DVIPNG_FLAGS, self.pngfile, self.dvifile))
-        os.system('%s %s "%s" %s 2>/dev/null 1>/dev/null' % (DVIPNG, DVIPNG_FLAGS, self.pngfile, self.dvifile))
-	if not DEBUG:
-            os.remove(self.dvifile)
-        return
+        self._logger.debug("cmd: '%s'" % " ".join(cmd))
+        proc = subprocess.Popen(cmd, cwd="/tmp")
+        retcode = proc.wait()
+        if retcode != 0:
+            raise RuntimeError("'%s' returned %d" % (" ".join(cmd), retcode))
+
+        # register files to delete
+        self._filestodelete.append(self.dvifile)
 
 if __name__ == "__main__":
     import sys
@@ -269,14 +230,25 @@ if __name__ == "__main__":
     outfile = infile + ".new"
     print infile, "->", outfile
 
-    text = file(infile,'r').read()
-    start = text.find("<math>")
-    stop = text.find("</math>", start)
-    eqn = text[start+6:stop]
-    print eqn
-    key = hashlib.md5()
-    key.update(eqn)
+    #logging.basicConfig(level=logging.DEBUG)
 
-    eqn = Equation(eqn)
-    print "AAA:", eqn
-    print "BBB:", eqn.contents
+    text = file(infile,'r').read()
+
+    start = 0
+    while start >= 0:
+        start = text.find("<math>", start)
+        if start < 0:
+            break
+        stop = text.find("</math>", start)
+        if stop < start:
+            break
+        orig = text[start+6:stop]
+        start = stop
+        eqn = Equation(orig)
+        text = text.replace("<math>" + orig + "</math>", eqn.contentshtml)
+
+    print "******************************"
+    handle = open(outfile, 'w')
+    handle.write(text)
+    handle.close()
+    
