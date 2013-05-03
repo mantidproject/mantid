@@ -78,6 +78,11 @@ pythonalgorithms.refresh.allowed = 0
 # Use forward slash / for all paths
 datasearch.directories = @DATADIRS@
 
+# Path to the ParaView bin directory, i.e. the directory containing the paraview executable
+# Warning: Mantid is compiled against a specific version of ParaView. Ensure that this path
+# points to the ParaView obtained from the Mantid download page
+paraview.path = @PARAVIEW_APP_BIN_DIR@
+
 # Whether to look for ParaView (0 = try to use, 1 = don't use).
 paraview.ignore = @IGNORE_PARAVIEW@
 
