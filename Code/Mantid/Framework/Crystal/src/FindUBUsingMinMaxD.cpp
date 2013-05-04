@@ -136,22 +136,16 @@ namespace Crystal
     else                                  // tell user how many would be indexed
       {                                     // and save the UB in the sample
 
-        std::vector<V3D> hkl_vectors;
-        hkl_vectors.reserve(n_peaks);
-        Matrix<double> UBinv(UB);
-        UBinv.Invert();
-        UBinv /= (2 * M_PI);
-        for (size_t i = 0; i < n_peaks; i++)
-        {
-          V3D hkl = UBinv * peaks[i].getQSampleFrame();
-          for (size_t k = 0; k < 3; ++k)
-            hkl[k] = floor(hkl[k] + .5);
-          hkl_vectors.push_back(hkl);
-        }
-        OrientedLattice o_lattice;
         std::vector<double> sigabc(7);
-        IndexingUtils::Optimize_UB(UB, hkl_vectors, q_vectors, sigabc);
+        std::vector<V3D> miller_ind;
+        std::vector<V3D> indexed_qs;
+        double fit_error;
+        miller_ind.reserve( q_vectors.size() );
+        indexed_qs.reserve( q_vectors.size() );
+        IndexingUtils::GetIndexedPeaks( UB, q_vectors, tolerance,
+                          miller_ind, indexed_qs, fit_error );
 
+        IndexingUtils::Optimize_UB(UB, miller_ind,indexed_qs,sigabc);
         char logInfo[200];
         int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
         sprintf(logInfo,
@@ -159,6 +153,7 @@ namespace Crystal
             num_indexed, n_peaks, tolerance);
         g_log.notice(std::string(logInfo));
 
+        OrientedLattice o_lattice;
         o_lattice.setUB(UB);
         o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
 
@@ -173,9 +168,8 @@ namespace Crystal
             calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
         g_log.notice(std::string(logInfo));
 
-        g_log.notice()<<std::fixed<<std::setprecision(3)<<std::setw(9);
-        g_log.notice()<<"Parameter Errors  :"<<sigabc[0]<<sigabc[1]<<sigabc[2]<<sigabc[3]<<sigabc[4]<<sigabc[5]<<std::endl;
-        g_log.notice()<<"Parameter Errors   :"<<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[0]
+
+        g_log.notice()<<"Parameter Errors  :"<<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[0]
                                               <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[1]
                                               <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[2]
                                               <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[3]

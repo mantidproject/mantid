@@ -136,10 +136,30 @@ namespace Crystal
                           IndexingUtils::GetLatticeParameterString( newUB );
 
     g_log.notice( std::string(message) );
+    /*----------------------------------------  TODO -----------------------------*/
+        //  If lattice errors are already calculated (not via least squares) should
+       //   Use algebra to calculate derived lattice errors via hkl_tran
+    std::vector<double> sigabc(7);
+    std::vector<V3D> miller_ind;
+    std::vector<V3D> q_vectors;
+    std::vector<V3D>q_vectors0;
+    int npeaks = ws->getNumberPeaks();
+    double fit_error;
+    miller_ind.reserve( npeaks );
+    q_vectors.reserve( npeaks );
+    q_vectors0.reserve(npeaks);
+    for( int i=0;i<npeaks;i++)
+      q_vectors0.push_back(ws->getPeak(i).getQSampleFrame());
 
+    IndexingUtils::GetIndexedPeaks(newUB, q_vectors0, tolerance,
+                           miller_ind, q_vectors, fit_error );
+    IndexingUtils::Optimize_UB(newUB, miller_ind,q_vectors,sigabc);
+//-------------------------------------------------------
     if ( apply )
     {
       o_lattice.setUB( newUB );
+      o_lattice.setError( sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
+
       ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) ); 
 
       std::vector<Peak> &peaks = ws->getPeaks();
