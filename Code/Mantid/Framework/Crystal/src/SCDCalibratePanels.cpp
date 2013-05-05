@@ -82,6 +82,7 @@ Some features:
 #include "MantidKernel/Property.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
 
 using namespace Mantid::DataObjects;
 using namespace  Mantid::API;
@@ -507,11 +508,45 @@ namespace Mantid
 
     }
 
+    bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c, double alpha,
+        double beta, double gamma, double tolerance)
+    {
+      if (!peaksWs || a <= 0 || b <= 0 || c <= 0)
+        return false;
 
+      std::vector<V3D> hkl(peaksWs->getNumberPeaks());
+      std::vector<V3D> qVecs(peaksWs->getNumberPeaks());
+      for (int i = 0; i < peaksWs->getNumberPeaks(); i++)
+      {
+        Peak & peak = peaksWs->getPeak(i);
+        V3D HKL1 = peak.getHKL();
+        if (IndexingUtils::ValidIndex(HKL1, tolerance))
+        {
+          hkl.push_back(peak.getHKL());
+          qVecs.push_back(peak.getQSampleFrame());
+        }
+      }
+
+      Kernel::Matrix<double>UB(3,3);
+      IndexingUtils::Optimize_UB( UB, hkl,qVecs);
+      std::vector<double>lat(70);
+      IndexingUtils::GetLatticeParameters( UB, lat);
+
+
+      if( fabs(lat[0]-a)/a >.25) return false;
+      if( fabs(lat[1]-b)/b >.25) return false;
+      if( fabs(lat[2]-c)/c >.25) return false;
+      if( fabs(lat[3]-alpha)/alpha >.25) return false;
+      if( fabs(lat[4]-beta)/beta >.25) return false;
+      if( fabs(lat[5]-gamma)/gamma >.25) return false;
+
+      return true;
+    }
 
     void  SCDCalibratePanels::exec ()
     {
       PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
+
 
       double a = getProperty("a");
       double b = getProperty("b");
@@ -523,6 +558,11 @@ namespace Mantid
 
       double tolerance = getProperty("tolerance");
 
+      if( !GoodStart( peaksWs, a,b,c,alpha,beta,gamma,tolerance))
+        {
+           g_log.warning()<<"**** Indexing is NOT compatible with given lattice parameters******"<<std::endl;
+           g_log.warning()<<"        Index with conventional orientation matrix???"<<std::endl;
+        }
 
       bool use_L0 = getProperty("use_L0");
       bool use_timeOffset = getProperty("use_timeOffset");
@@ -870,6 +910,12 @@ namespace Mantid
       //--------------------- Get and Process Results -----------------------
       double chisq = fit_alg->getProperty( "OutputChi2overDoF");
       setProperty("ChiSqOverDOF", chisq);
+      if( chisq >1)
+      {
+        g_log.warning()<<"************* This is a large chi squared value ************"<<std::endl;
+        g_log.warning()<<"    the indexing may have been using an incorrect "<<std::endl;
+        g_log.warning()<<"    orientation matrix, instrument geometry or goniometer info"<<std::endl;
+      }
       ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
       vector< double >params;
       vector< double >errs ;
