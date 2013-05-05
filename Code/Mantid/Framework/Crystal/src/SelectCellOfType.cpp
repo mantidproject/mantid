@@ -158,27 +158,62 @@ namespace Crystal
 
     g_log.notice( std::string(message) );
 
-    std::vector<double> sigabc(7);
-    std::vector<V3D> miller_ind;
-    std::vector<V3D> q_vectors;
-    std::vector<V3D>q_vectors0;
-    int npeaks = ws->getNumberPeaks();
-    double fit_error;
-    miller_ind.reserve( npeaks );
-    q_vectors.reserve( npeaks );
-    q_vectors0.reserve(npeaks);
-    for( int i=0;i<npeaks;i++)
-      q_vectors0.push_back(ws->getPeak(i).getQSampleFrame());
 
-    IndexingUtils::GetIndexedPeaks(newUB, q_vectors0, tolerance,
-                        miller_ind, q_vectors, fit_error );
-    IndexingUtils::Optimize_UB(newUB, miller_ind,q_vectors,sigabc);
 
 
     if ( apply )
     {
+       bool latErrorsValid=true;
+      //----------------------------------- Try to optimize(LSQ) to find lattice errors ------------------------
+      //                       UB matrix may NOT have been found by unconstrained least squares optimization
+       std::vector<double> sigabc(7);
+       std::vector<V3D> miller_ind;
+       std::vector<V3D> q_vectors;
+       std::vector<V3D>q_vectors0;
+       int npeaks = ws->getNumberPeaks();
+       double fit_error;
+       miller_ind.reserve( npeaks );
+       q_vectors.reserve( npeaks );
+       q_vectors0.reserve(npeaks);
+       for( int i=0;i<npeaks;i++)
+         q_vectors0.push_back(ws->getPeak(i).getQSampleFrame());
+
+       Kernel::Matrix<double>newUB1(3,3);
+       IndexingUtils::GetIndexedPeaks(newUB, q_vectors0, tolerance,
+                           miller_ind, q_vectors, fit_error );
+       IndexingUtils::Optimize_UB(newUB1, miller_ind,q_vectors,sigabc);
+
+       int nindexed_old = (int)q_vectors.size();
+       int nindexed_new = IndexingUtils::NumberIndexed( newUB1,q_vectors0,tolerance);
+       if( nindexed_old<.8*nindexed_new || .8*nindexed_old>  nindexed_new )
+          latErrorsValid = false;
+       else
+       {
+         double maxDiff=0;
+         double maxEntry =0;
+         for( int row=0; row <3; row++)
+           for( int col=0; col< 3; col++)
+           {
+             double diff= fabs( newUB[row][col]- newUB1[row][col]);
+             double V = std::max<double>(fabs(newUB[row][col]), fabs(newUB1[row][col]));
+             if( diff > maxDiff)
+               maxDiff = diff;
+             if(V > maxEntry)
+               maxEntry = V;
+           }
+         if( maxEntry==0 || maxDiff/maxEntry >.1)
+           latErrorsValid=false;
+         else
+           newUB = newUB1;
+
+       }
+
+
+       //----------------------------------------------
       o_lattice.setUB( newUB );
-      o_lattice.setError( sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
+      if( latErrorsValid)
+         o_lattice.setError( sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
+
       ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) ); 
 
       std::vector<Peak> &peaks = ws->getPeaks();
@@ -189,7 +224,7 @@ namespace Crystal
       DblMatrix hkl_tran = info.GetHKL_Tran(); 
       int num_indexed = 0;
       std::vector<V3D> miller_indices;
-      std::vector<V3D> q_vectors;
+      q_vectors.clear();
       for ( size_t i = 0; i < n_peaks; i++ )
       {
         V3D hkl( peaks[i].getHKL() );
