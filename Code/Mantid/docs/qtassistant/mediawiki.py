@@ -1,11 +1,10 @@
 from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
-import eqnparser
+from eqnparser import Equation
 import os
 import re
 from parseLinks import fixLinks
 
 IMG_NOT_FOUND = "ImageNotFound.png"
-USE_EQN_PARSER = eqnparser.canUse()
 
 def formatImgHtml(raw):
     #print "RAW:", raw
@@ -79,11 +78,13 @@ def formatImgHtml(raw):
     return (img, html)
 
 class MediaWiki:
-    def __init__(self, htmlfile, direc):
+    def __init__(self, htmlfile, direc, **kwargs):
         self.__file = htmlfile
         self.__direc = direc
         self.__types = []
         self.images = []
+        self.__latex= kwargs["latex"]
+        self.__dvipng = kwargs["dvipng"]
 
     def __parseImgs(self, text):
         # Get all of the raw image links
@@ -107,8 +108,12 @@ class MediaWiki:
         return text.strip()
 
     def __parseEqns(self, text):
-        if not USE_EQN_PARSER:
-            print "not converting equations to png"
+        if self.__latex is None:
+            print "Failed to find latex: not converting equations to png"
+            return text
+
+        if self.__dvipng is None:
+            print "Failed to find dvipng: not converting equations to png"
             return text
 
         # find all of the possible equations
@@ -124,7 +129,8 @@ class MediaWiki:
                 break
             orig = text[start+6:stop]
             start += 1
-            eqn = eqnparser.Equation(orig, outdir=outdir)
+            eqn = Equation(orig, outdir=outdir,
+                                     latex=self.__latex, dvipng=self.__dvipng)
             text = text.replace("<math>" + orig + "</math>", eqn.contentshtml)
             self.images.append(os.path.split(eqn.pngfile)[-1])
         return text

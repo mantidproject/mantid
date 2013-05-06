@@ -24,6 +24,13 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
          ${HELP_HTML_DIR}/developers.html
         )
 
+   # find the programs that generate the equation png
+find_program ( LATEX_EXE latex )
+find_program ( DVIPNG_EXE dvipng )
+   if (LATEX_EXE AND DVIPNG_EXE)
+     set (EXTRA_QHP_GEN_ARGS --latex ${LATEX_EXE} --dvipng ${DVIPNG_EXE})
+   endif()
+
    # copy over images
    set ( IMAGES
          AbsorptionFlow.png
@@ -126,15 +133,15 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
 
    add_custom_command(OUTPUT ${HELP_ALGO_OUT}
                       DEPENDS make_algorithms_help.py qhpfile.py algorithm_help.py htmlwriter.py parseLinks.py mediawiki.py eqnparser.py ${INSTALL_IMAGES} Algorithms
-                      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_algorithms_help.py
-                              -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
-		      )
+                      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_algorithms_help.py 
+                              ${EXTRA_QHP_GEN_ARGS} -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
+                      )
 
    add_custom_command(OUTPUT ${HELP_FIT_OUT}
                       DEPENDS make_fitfunctions_help.py qhpfile.py fitfunctions_help.py htmlwriter.py parseLinks.py mediawiki.py eqnparser.py ${INSTALL_IMAGES} CurveFitting
-                      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_fitfunctions_help.py
-                              -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
-		      )
+                      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_fitfunctions_help.py 
+                              ${EXTRA_QHP_GEN_ARGS} -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR}
+                     )
 
    add_custom_command(OUTPUT  ${HELP_OUT_DIR}/mantid.qhc ${HELP_QCH_DIR}/algorithms.qch ${HELP_QCH_DIR}/fitfunctions.qch ${HELP_QCH_DIR}/mantidgeneral.qch
                       DEPENDS ${HELP_ALGO_OUT} ${HELP_FIT_OUT} ${HELP_QHCP_SOURCE}

@@ -9,8 +9,6 @@ import os
 import subprocess
 import tempfile
 
-LATEX = '/usr/bin/latex'
-DVIPNG = '/usr/bin/dvipng'
 # Trading size for time-to-generate is a only a good idea when using memcache
 TYPES = {'div':'eq', 'div':'numeq', 'div':'alignedeq', 'div':'numalignedeq', 'span':'eq', 'div':'matrix', 'div':'det'}
 
@@ -52,19 +50,9 @@ PREAMBLE = r'''
 \begin{document} 
 '''
 
-def canUse():
-    """
-    This is a method to invoke in case you want to try actually using 
-    this chunk of code. True means the dependencies were found.
-    """
-    if not os.path.exists(LATEX):
-        return False
-    if not os.path.exists(DVIPNG):
-        return False
-    return True
-
 class Equation:
-    def __init__(self, equation, outdir="/tmp", tmpdir="/tmp", urlprefix="img", debug=True):
+    def __init__(self, equation, outdir="/tmp", tmpdir="/tmp", urlprefix="img",
+                 debug=True, latex=None, dvipng=None):
         """
         When an Equation object is initialized, it checks the filesystem
 	indiciated by IMGDIR to see if a file with the same name as its
@@ -78,6 +66,10 @@ class Equation:
         # generate a logger
         self._logger = logging.getLogger(__name__+'.'+self.__class__.__name__)
         #logging.basicConfig(level=logging.DEBUG)
+
+        # cache latex and dvipng locations
+        self._latex = latex
+        self._dvipng = dvipng
 
         # trim out extraneous whitespace
         splitted = equation.strip().split("\n")
@@ -204,11 +196,11 @@ class Equation:
         Compiles the Tex file into a DVI.  If there's an error, raise it.
         """
         self._logger.info("Generating dvi file")
-        if not os.path.exists(LATEX):
+        if not os.path.exists(self._latex):
             raise RuntimeError("latex executable ('%s') does not exist" % LATEX)
 
         # run latex
-        cmd = [LATEX, self.texfile]
+        cmd = [self._latex, self.texfile]
         self._logger.debug("cmd: '%s'" % " ".join(cmd))
         proc = subprocess.Popen(cmd, cwd=self.tmpdir,
                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -248,11 +240,11 @@ class Equation:
         Encodes the original latex as an HTML comment.
         """
         self._logger.info("Generating png file")
-        if not os.path.exists(DVIPNG):
+        if not os.path.exists(self._dvipng):
             raise RuntimeError("dvipng executable ('%s') does not exist" % DVIPNG)
 
         # this command works on RHEL6
-        cmd = [DVIPNG, '-Ttight','-D120','-z9','-bg Transparent','--strict',
+        cmd = [self._dvipng, '-Ttight','-D120','-z9','-bg Transparent','--strict',
                 '-o%s' % self.pngfile,
                 self.dvifile]
         self._logger.debug("cmd: '%s'" % " ".join(cmd))
