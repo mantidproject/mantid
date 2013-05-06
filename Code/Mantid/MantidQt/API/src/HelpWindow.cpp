@@ -7,6 +7,7 @@
 #include <Poco/Thread.h>
 #include <QByteArray>
 #include <QDesktopServices>
+#include <QUrl>
 #include <stdexcept>
 
 namespace MantidQt
@@ -15,10 +16,19 @@ namespace API
 {
 using std::string;
 
+#ifndef __APPLE__
+#define ENABLE_QTASSISTANT 1
+#endif
+
 /// Base url for all of the files in the project.
 const string BASE_URL("qthelp://org.mantidproject/doc/");
 /// Url to display if nothing else is suggested.
 const string DEFAULT_URL(BASE_URL + "html/index.html");
+
+/// Base url for all of the wiki links
+const string WIKI_BASE_URL("http://mantidproject.org/");
+/// Url to display if nothing else is suggested.
+const string WIKI_DEFAULT_URL(WIKI_BASE_URL + "MantidPlot");
 
 /**
  * Default constructor shows the \link MantidQt::API::DEFAULT_URL.
@@ -39,6 +49,12 @@ HelpWindowImpl::~HelpWindowImpl()
     // do nothing
 }
 
+void HelpWindowImpl::openWebpage(const string &url)
+{
+    m_log.debug() << "open url \"" << url << "\"\n";
+    QDesktopServices::openUrl(QUrl(QLatin1String(url.c_str())));
+}
+
 /**
  * Have the help window show a specific url. If the url doesn't exist
  * this just pops up the default view for the help.
@@ -48,19 +64,37 @@ HelpWindowImpl::~HelpWindowImpl()
  */
 void HelpWindowImpl::showURL(const string &url)
 {
-    std::string urlToShow(url);
-    if (urlToShow.empty())
-        urlToShow = DEFAULT_URL;
+    if (m_collectionFile.empty()) // qt-assistant disabled
+    {
+        if (url.empty())
+            this->openWebpage(WIKI_DEFAULT_URL);
+        else
+            this->openWebpage(url);
+    }
+    else
+    {
+        std::string urlToShow(url);
+        if (urlToShow.empty())
+            urlToShow = DEFAULT_URL;
 
-    // make sure the process is going
-    this->start(url);
-    m_process->waitForStarted(); // REMOVE
+        // make sure the process is going
+        this->start(url);
+        m_process->waitForStarted(); // REMOVE
 
-    m_log.debug() << "open help url \"" << urlToShow << "\"\n";
-    string temp("setSource " + urlToShow + "\n");
-    QByteArray ba;
-    ba.append(QLatin1String(temp.c_str()));
-    m_process->write(ba);
+        m_log.debug() << "open help url \"" << urlToShow << "\"\n";
+        string temp("setSource " + urlToShow + "\n");
+        QByteArray ba;
+        ba.append(QLatin1String(temp.c_str()));
+        m_process->write(ba);
+    }
+}
+
+void HelpWindowImpl::showWikiPage(const string &page)
+{
+    if (page.empty())
+        this->openWebpage(WIKI_DEFAULT_URL);
+    else
+        this->openWebpage(WIKI_BASE_URL + page);
 }
 
 /**
@@ -77,10 +111,20 @@ void HelpWindowImpl::showAlgorithm(const string &name, const int version)
     // TODO jump to the version within the page
     (void)version;
 
-    string url(BASE_URL + "html/Algo_" + name + ".html");
-    if (name.empty())
-        url = BASE_URL + "html/algorithms_index.html";
-    this->showURL(url);
+    if (m_collectionFile.empty()) // qt-assistant disabled
+    {
+        if (name.empty())
+            this->showWikiPage("Category:Algorithms");
+        else
+            this->showWikiPage(name);
+    }
+    else
+    {
+        string url(BASE_URL + "html/Algo_" + name + ".html");
+        if (name.empty())
+            url = BASE_URL + "html/algorithms_index.html";
+        this->showURL(url);
+    }
 }
 
 /**
@@ -105,10 +149,22 @@ void HelpWindowImpl::showAlgorithm(const QString &name, const int version)
  */
 void HelpWindowImpl::showFitFunction(const std::string &name)
 {
-    string url(BASE_URL + "html/FitFunc_" + name + ".html");
-    if (name.empty())
-        url = BASE_URL + "html/fitfunctions_index.html";
-    this->showURL(url);
+    if (m_collectionFile.empty()) // qt-assistant disabled
+    {
+        if (name.empty())
+            this->showWikiPage("Category:Fit_functions");
+        else
+            this->showWikiPage(name);
+    }
+    else
+    {
+        string url(BASE_URL + "html/FitFunc_" + name + ".html");
+        if (name.empty())
+        {
+            url = BASE_URL + "html/fitfunctions_index.html";
+        }
+        this->showURL(url);
+    }
 }
 
 /**
@@ -149,11 +205,17 @@ void HelpWindowImpl::start(const std::string &url)
         return;
     }
 
-    // see if chache file exists and remove it
+    // see if chache file exists and remove it - shouldn't be necessary, but it is
     if ((!m_cacheFile.empty()) && (Poco::File(m_cacheFile).exists()))
     {
         m_log.debug() << "Removing help cache file \"" << m_cacheFile << "\"\n";
         Poco::File(m_cacheFile).remove();
+    }
+
+    // don't start the process if qt-assistant disabled
+    if (m_collectionFile.empty())
+    {
+        return;
     }
 
     // start the process
@@ -180,7 +242,7 @@ void HelpWindowImpl::start(const std::string &url)
     {
         m_firstRun = false;
         m_log.debug() << "Very first run of qt assistant comes up slowly (2 sec pause)\n";
-        Poco::Thread::sleep(2000); // 2 seconds
+        Poco::Thread::sleep(2500); // 2.5 seconds
     }
 
     m_log.debug() << m_assistantExe
@@ -212,6 +274,10 @@ bool HelpWindowImpl::isRunning()
  */
 void HelpWindowImpl::findCollectionFile(std::string &binDir)
 {
+    // this being empty notes the feature being disabled
+    m_collectionFile = "";
+
+    // name of the collection file itself
     const std::string COLLECTION("mantid.qhc");
 
     // try next to the executable
@@ -241,8 +307,16 @@ void HelpWindowImpl::findCollectionFile(std::string &binDir)
         return;
     }
 
+    // try a special place for mac/osx
+    path = Poco::Path(binDir, "../../share/doc/" + COLLECTION);
+    if (Poco::File(path).exists())
+    {
+        m_collectionFile = path.absolute().toString();
+        return;
+    }
+
     // all tries have failed
-    throw std::runtime_error("Failed to find help system collection file \"" + COLLECTION + "\"");
+    m_log.information("Failed to find help system collection file \"" + COLLECTION + "\"");
 }
 
 /**
@@ -253,7 +327,17 @@ void HelpWindowImpl::determineFileLocs()
     // determine collection file location
     string binDir = Mantid::Kernel::ConfigService::Instance().getDirectoryOfExecutable();
     this->findCollectionFile(binDir);
-    m_log.debug() << "using collection file \"" << m_collectionFile << "\"\n";
+    if (m_collectionFile.empty())
+    {
+        // clear out the other filenames
+        m_assistantExe = "";
+        m_cacheFile = "";
+        return;
+    }
+    else
+    {
+        m_log.debug() << "using collection file \"" << m_collectionFile << "\"\n";
+    }
 
     // location for qtassistant
 #ifdef __linux__
