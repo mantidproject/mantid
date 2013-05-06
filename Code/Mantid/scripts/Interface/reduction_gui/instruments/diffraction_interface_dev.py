@@ -32,3 +32,9 @@ class DiffractionInterface(InstrumentInterface):
         self.attach(FilterSetupWidget(settings = self._settings, data_type = self.data_type))
         
         return
+    
+    def is_cluster_enabled(self):
+        """
+            Returns true if the instrument is compatible with remote submission
+        """
+        return True
