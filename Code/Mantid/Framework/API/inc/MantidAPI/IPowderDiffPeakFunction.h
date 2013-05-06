@@ -49,15 +49,19 @@ public:
   virtual ~IPowderDiffPeakFunction();
 
   /// Overwrite IFunction base class methods
-  virtual const std::string name();
-  virtual const std::string category();
+  // virtual const std::string name() = 0;
+  /// Category of function
+  // virtual const std::string category(){ return "General"; }
 
-  /// Overwrite IPeakFunction base class methods
-  double centre()const;
-  double height()const;
+  /// Get peak's centre
+  double centre() const;
+  /// Get peak's intensity
+  double height() const;
+  /// Get peakl's FWHM
   double fwhm()const;
+  /// Set peak's height
   void setHeight(const double h);
-
+  /// Set peak's radius
   void setPeakRadius(const int& r);
 
   //--------------- ThermalNeutron peak function special ---------------------------------------
@@ -105,6 +109,16 @@ protected:
 
   /// An indicator to re-calculate peak d-space position
   bool m_cellParamValueChanged;
+
+  /// Centre of the peak
+  mutable bool m_centre;
+  /// Peak intensity
+  bool m_intensity;
+  /// Peak's FWHM
+  mutable bool m_fwhm;
+  /// Flag if any parameter value changed
+  bool m_hasNewParameterValue;
+
 };
 
 typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;

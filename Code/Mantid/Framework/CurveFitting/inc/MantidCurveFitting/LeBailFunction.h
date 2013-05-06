@@ -70,6 +70,9 @@ namespace CurveFitting
 
     /// Get a peak
 
+    /// Calculate
+    void function(std::vector<double>& out, std::vector<double>& xvalues);
+
 
     /// Function
     void setPeakHeights(std::vector<double> inheights);
@@ -86,7 +89,10 @@ namespace CurveFitting
     /// Fix i-th parameter with given name.
     void fix(size_t paramindex, string paramname);
 
-  protected:
+    /// Generate peaks, and add them to this composite function
+    void addPeaks(std::vector<std::vector<int> > peakhkls);
+
+  private:
 
     virtual void function1D(double* out, const double* xValues, const size_t nData)const;
     virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
@@ -95,7 +101,7 @@ namespace CurveFitting
     /// overwrite IFunction base class method, which declare function parameters
     virtual void init();
 
-  private:
+
 
     static Kernel::Logger& g_log;
 
@@ -162,8 +168,7 @@ namespace CurveFitting
     /// Add background function
     void addBackgroundFunction(string backgroundtype, map<string, double> bkgdparmap);
 
-    /// Generate peaks, and add them to this composite function
-    void addPeaks(std::vector<std::vector<int> > peakhkls);
+
 
   };
 

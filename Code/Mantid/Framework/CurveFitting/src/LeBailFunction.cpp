@@ -54,6 +54,18 @@ namespace CurveFitting
     return;
   }
 
+
+  /** Calculate powder diffraction pattern by Le Bail algorithm
+    * @param out :: output vector
+    * @param xvalues :: input vector
+    */
+  void LeBailFunction::function(std::vector<double>& out, std::vector<double>& xvalues)
+  {
+    throw runtime_error("Implement LeBailFunction::function() ASAP!");
+
+  }
+
+
   //----------------------------------------------------------------------------------------------
   /** Generate peaks, and add them to this composite function
     * @param peakhkls :: list of Miller indexes (HKL)
@@ -114,7 +126,7 @@ namespace CurveFitting
     {
       string parname = m_peakParameterNameVec[i];
       double parvalue = m_functionParameters[parname];
-      peak->setParmeter(parname, parvalue);
+      peak->setParameter(parname, parvalue);
     }
 
     return peak;

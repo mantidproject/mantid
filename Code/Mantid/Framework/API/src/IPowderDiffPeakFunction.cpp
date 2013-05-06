@@ -30,7 +30,7 @@ namespace API
         setPeakRadius(peakRadius);
       }
     }
-  }
+  }  
 
   //----------------------------------------------------------------------------------------------
   /** Desctructor
@@ -38,7 +38,49 @@ namespace API
   IPowderDiffPeakFunction::~IPowderDiffPeakFunction()
   {
 
+  }  
+
+  //----------------------------------------------------------------------------------------------
+  /** Get peak centre
+    */
+  double IPowderDiffPeakFunction::centre() const
+  {
+    // Re-calcualte peak parameters if required
+    if (m_hasNewParameterValue)
+      calculateParameters(false);
+
+    return m_centre;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get peak height
+    */
+  double IPowderDiffPeakFunction::height() const
+  {
+    return m_intensity;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**  Set peak height (intensity indeed)
+    */
+  void IPowderDiffPeakFunction::setHeight(const double h)
+  {
+    m_intensity = h;
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**  Get peak's FWHM
+    */
+  double IPowderDiffPeakFunction::fwhm() const
+  {
+    if (m_hasNewParameterValue)
+      calculateParameters(false);
+
+    return m_fwhm;
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** General implementation of the method for all peaks. Limits the peak evaluation to
