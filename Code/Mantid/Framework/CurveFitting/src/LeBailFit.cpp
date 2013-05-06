@@ -423,16 +423,14 @@ namespace CurveFitting
   {
     // 1. Generate domain and value
     const vector<double> vecX = m_dataWS->readX(m_wsIndex);
-    const vector<double> vecY = m_dataWS->readY(m_wsIndex);
-
-    API::FunctionDomain1DVector domain(vecX);
-    API::FunctionValues values(domain);
+    vector<double> vecY = m_outputWS->dataY(CALDATAINDEX);
 
     // 2. Calculate diffraction pattern
     bool useinputpeakheights = this->getProperty("UseInputPeakHeights");
-    calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, values, m_funcParameters, !useinputpeakheights);
+    calculateDiffractionPattern(m_dataWS, m_wsIndex, vecX, vecY, m_funcParameters, !useinputpeakheights);
 
     // 3. Add data (0: experimental, 1: calcualted, 2: difference)
+#if 0
     m_outputWS->dataY(0) = vecY;
     for (size_t i = 0; i < values.size(); ++i)
     {
@@ -468,12 +466,15 @@ namespace CurveFitting
         }
       } // FOR PEAKS
     } // ENDIF: plot.each.peak
+#endif
+    throw runtime_error("It is a mess of the output of calculation! ");
 
     // 5. Calculate Rwp and Rp
     Rfactor rfactor;
 
     const MantidVec& peakvalues = m_outputWS->readY(CALPUREPEAKINDEX);
     const MantidVec& background =  m_outputWS->readY(CALBKGDINDEX);
+#if 0
     vector<double> caldata(values.size(), 0.0);
     std::transform(peakvalues.begin(), peakvalues.end(), background.begin(), caldata.begin(), std::plus<double>());
     rfactor = getRFactor(m_dataWS->readY(m_wsIndex), caldata, m_dataWS->readE(m_wsIndex));
@@ -483,6 +484,7 @@ namespace CurveFitting
     par_rwp.name = "Rwp";
     par_rwp.curvalue = rfactor.Rwp;
     m_funcParameters["Rwp"] = par_rwp;
+#endif
 
     return;
   }
@@ -524,8 +526,8 @@ namespace CurveFitting
     * @param recalpeakintensity: option to calculate peak intensity or use them stored in parammap
    */
   bool LeBailFit::calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
-                                              FunctionDomain1DVector domain, FunctionValues& values,
-                                              map<string, Parameter > parammap, bool recalpeakintensity)
+                                              const MantidVec& vecX, MantidVec& vecY,
+                                              map<string, Parameter> parammap, bool recalpeakintensity)
   {
     // 1. Set parameters to each peak
     bool allpeaksvalid = true;
@@ -569,7 +571,7 @@ namespace CurveFitting
     }
 
     // 4. Calcualte model pattern
-    m_lebailFunction.function(domain, values);
+    m_lebailFunction.function(vecY, vecX);
 
     return allpeaksvalid;
   }
@@ -586,18 +588,19 @@ namespace CurveFitting
   {
     // 1. Generate domain and value
     const std::vector<double> vecX = m_dataWS->readX(m_wsIndex);
-    API::FunctionDomain1DVector domain(vecX);
-    API::FunctionValues values(domain);
+    MantidVec& vecY = m_outputWS->dataY(CALDATAINDEX);
+
+#if 0
 
     // 2. Calculate peak intensity and etc.
     vector<double> allpeaksvalues(vecX.size(), 0.0);
     calculatePeaksIntensities(m_dataWS, m_wsIndex, false, allpeaksvalues);
     // calculateDiffractionPattern(m_dataWS, workspaceindex, domain, values, parammap, calpeakintensity);
 
-    writeToOutputWorkspace(5, domain, values);
+    // writeToOutputWorkspace(5, domain, values);
 
     // b) Calculate input background
-    m_backgroundFunction->function(domain, values);
+    m_lebailFunction.backgroundfunction(vecX, vecY);
     writeToOutputWorkspace(6, domain, values);
 
     // 3. Construct the tie.  2-level loop. (1) peak parameter (2) peak
@@ -612,14 +615,16 @@ namespace CurveFitting
     // 5. Do calculation again and set the output
     // FIXME Move this part our of UnitLeBailFit
     bool calpeakintensity = true;
-    API::FunctionValues newvalues(domain);
-    this->calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, newvalues, parammap, calpeakintensity);
+    this->calculateDiffractionPattern(m_dataWS, m_wsIndex, vecX, vecY, parammap, calpeakintensity);
 
     // Add final calculated value to output workspace
-    writeToOutputWorkspace(1, domain, newvalues);
+    // writeToOutputWorkspace(1, domain, newvalues);
 
     // Add original data and
     writeInputDataNDiff(m_wsIndex, domain);
+#endif
+
+    throw runtime_error("This section should be re-written for OUTPUT!");
 
     return true;
   }

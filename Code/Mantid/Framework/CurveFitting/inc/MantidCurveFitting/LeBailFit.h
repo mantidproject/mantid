@@ -119,7 +119,7 @@ namespace CurveFitting
 
     /// Calculate diffraction pattern
     bool calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
-                                     FunctionDomain1DVector domain, FunctionValues &values,
+                                     const MantidVec &vecX, MantidVec& vecY,
                                      map<string, Parameter> parammap, bool recalpeakintesity);
 
     /// LeBailFit

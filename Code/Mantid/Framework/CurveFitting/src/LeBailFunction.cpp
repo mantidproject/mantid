@@ -62,7 +62,7 @@ namespace CurveFitting
     * @param out :: output vector
     * @param xvalues :: input vector
     */
-  void LeBailFunction::function(std::vector<double>& out, std::vector<double>& xvalues)
+  void LeBailFunction::function(std::vector<double>& out, const std::vector<double>& xvalues) const
   {
     throw runtime_error("Implement LeBailFunction::function() ASAP!");
 
@@ -318,7 +318,7 @@ namespace CurveFitting
       vector<double> localpeakvalue(ndata, 0.0);
 
       // peak->function(xvalues, localpeakvalue);
-      peak->functionLocal(localpeakvalue, datax);
+      peak->function(localpeakvalue, datax);
 
       // check data
       size_t numbadpts(0);
@@ -529,7 +529,7 @@ namespace CurveFitting
         }
         else
         {
-          double parvalue = pit->second.curvalue;
+          double parvalue = pit->second;
           for (size_t ipk = 0; ipk < numpeaks; ++ipk)
             m_peakvec[ipk]->setParameter(i, parvalue);
         }

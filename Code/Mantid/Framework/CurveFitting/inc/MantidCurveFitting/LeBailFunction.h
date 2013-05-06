@@ -72,7 +72,7 @@ namespace CurveFitting
     /// Get a peak
 
     /// Calculate
-    void function(std::vector<double>& out, std::vector<double>& xvalues);
+    void function(std::vector<double>& out, const vector<double> &xvalues) const;
 
     /// Return the composite function
     API::IFunction_sptr getFunction();

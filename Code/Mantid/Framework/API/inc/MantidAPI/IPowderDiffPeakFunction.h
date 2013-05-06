@@ -94,9 +94,12 @@ public:
 
   void function1D(double* out, const double* xValues, const size_t nData)const;
 
+  /// Calculate function in a range
+  virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const = 0;
+
 protected:
   /// Local function for GSL minimizer
-  virtual void functionLocal(double*, const double*, int&) const;
+  virtual void functionLocal(double*, const double*, int&) const = 0;
 
   /// Local function for calculation in Mantid
   virtual void functionLocal(vector<double> &out, const vector<double> &xValues) const = 0;
