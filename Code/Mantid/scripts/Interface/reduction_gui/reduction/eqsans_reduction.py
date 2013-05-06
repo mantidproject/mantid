@@ -36,10 +36,13 @@ class EQSANSReductionScripter(BaseReductionScripter):
             script += "import mantid\n"
             script += "from mantid.simpleapi import *\n"
             script += "from reduction_workflow.instruments.sans.sns_command_interface import *\n"
+            script += "config = ConfigService.Instance()\n"
+            script += "config['instrumentName']='EQSANS'\n"
         else:
             script += "from MantidFramework import *\n"
             script += "mtd.initialise(False)\n"
             script += "from reduction.instruments.sans.sns_command_interface import *\n"
+            script += "mtd.settings['default.instrument'] = 'EQSANS'\n"
         
         script += "\n"
         
@@ -98,7 +101,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
 
             script += "ReductionProperties='%s')" % table_ws
             
-            exec script
+            mantidplot.runPythonScript(script, True)
             return table_ws
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"

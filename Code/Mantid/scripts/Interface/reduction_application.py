@@ -260,18 +260,17 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         apiAction.setStatusTip("Select Mantid Python API")
         self.connect(apiAction, QtCore.SIGNAL("triggered()"), self._change_api)
     
+        self.tools_menu.clear()
+        self.tools_menu.addAction(instrAction)
+        self.tools_menu.addAction(debugAction)
+        self.tools_menu.addAction(apiAction)
         # Cluster submission details
         if IS_IN_MANTIDPLOT and CLUSTER_ENABLED:
             jobAction = QtGui.QAction("Remote submission details", self)
             jobAction.setShortcut("Ctrl+R")
             jobAction.setStatusTip("Set the cluster information for remote job submission")
             self.connect(jobAction, QtCore.SIGNAL("triggered()"), self._cluster_details_dialog)
-        
-        self.tools_menu.clear()
-        self.tools_menu.addAction(instrAction)
-        self.tools_menu.addAction(debugAction)
-        self.tools_menu.addAction(apiAction)
-        self.tools_menu.addAction(jobAction)
+            self.tools_menu.addAction(jobAction)
         
         recent_files = []
         for fname in self._recent_files:

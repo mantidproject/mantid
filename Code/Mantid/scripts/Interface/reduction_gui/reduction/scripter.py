@@ -393,12 +393,7 @@ class BaseReductionScripter(object):
         """
         script = "# %s reduction script\n" % self.instrument_name
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
-        
-        script += "from MantidFramework import *\n"
-        script += "mtd.initialise(False)\n"
-        script += "from mantidsimple import *\n\n"
-        script += "\n"
-        
+                
         for item in self._observers:
             if item.state() is not None:
                 script += str(item.state())
