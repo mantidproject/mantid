@@ -1,7 +1,9 @@
+#include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Fit.h"
 
 #include <sstream>
 
@@ -47,14 +49,15 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Initalization
+  /** Return the composite function
     */
-  void LeBailFunction::init()
+  API::IFunction_sptr LeBailFunction::getFunction()
   {
-    return;
+    return m_compsiteFunction;
+    // return boost::dynamic_pointer_cast<IFunction_sptr>(m_compsiteFunction);
   }
 
-
+  //----------------------------------------------------------------------------------------------
   /** Calculate powder diffraction pattern by Le Bail algorithm
     * @param out :: output vector
     * @param xvalues :: input vector
@@ -63,6 +66,29 @@ namespace CurveFitting
   {
     throw runtime_error("Implement LeBailFunction::function() ASAP!");
 
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Check whether a parameter is a profile parameter
+    * @param parammane :: parameter name to check with
+   */
+  bool LeBailFunction::hasProfileParameter(std::string paramname)
+  {
+    vector<string>::iterator fiter = find(m_orderedProfileParameterNames.begin(), m_orderedProfileParameterNames.end(),
+                                          paramname);
+
+    return (fiter != m_orderedProfileParameterNames.end());
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Check whether the newly set parameters are correct, i.e., all peaks are physical
+    * This function would be used with setParameters() and etc.
+    */
+  bool LeBailFunction::isParameterCorrect() const
+  {
+    throw runtime_error("Implement LeBailFunction::isParameterCorrect ASASP!");
+
+    return false;
   }
 
 
@@ -418,117 +444,6 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Set up the fit/tie/set-parameter for LeBail Fit (mode)
-   * All parameters              : set the value
-   * Parameters for free fit     : do nothing;
-   * Parameters fixed            : set them to be fixed;
-   * Parameters for fit with tie : tie all the related up
-  */
-  void LeBailFunction::setLeBailFitParameters()
-  {
-    // 1. Set up all the peaks' parameters... tie to a constant value..
-    //    or fit by tieing same parameters of among peaks
-    std::map<std::string, double>::iterator pariter;
-    for (pariter = m_functionParameters.begin(); pariter != m_functionParameters.end(); ++pariter)
-    {
-      double funcparam = pariter->second;
-
-      g_log.debug() << "Step 1:  Set peak parameter value " << funcparam.name << "\n";
-
-      std::string parname = pariter->first;
-      // double parvalue = funcparam.value;
-
-      // a) Check whether it is a parameter used in Peak
-      std::vector<std::string>::iterator sit;
-      sit = std::find(m_peakParameterNameVec.begin(), m_peakParameterNameVec.end(), parname);
-      if (sit == m_peakParameterNameVec.end())
-      {
-        // Not a peak profile parameter
-        g_log.debug() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak.\n";
-        continue;
-      }
-
-      if (!funcparam.fit)
-      {
-        // a) Fix the value to a constant number
-        for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
-        {
-          // TODO: Make a map between peak parameter name and index. And use fix() to replace tie
-          stringstream ss1, ss2;
-          ss1 << "f" << ipk << "." << parname;
-          ss2 << funcparam.curvalue;
-          string tiepart1 = ss1.str();
-          string tievalue = ss2.str();
-          m_compsiteFunction->tie(tiepart1, tievalue);
-          g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue << " | \n";
-
-          /*--  Code prepared to replace the existing block
-          ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
-          size_t iparam = findIndex(thispeak, funcparam.name);
-          thispeak->fix(iparam);
-          --*/
-        } // For each peak
-      }
-      else
-      {
-        // b) Tie the values among all peaks, but will fit
-        for (size_t ipk = 1; ipk < m_numPeaks; ++ipk)
-        {
-          stringstream ss1, ss2;
-          ss1 << "f" << (ipk-1) << "." << parname;
-          ss2 << "f" << ipk << "." << parname;
-          string tiepart1 = ss1.str();
-          string tiepart2 = ss2.str();
-          m_compsiteFunction->tie(tiepart1, tiepart2);
-          g_log.debug() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /\n";
-        }
-
-        // c) Set the constraint
-        std::stringstream parss;
-        parss << "f0." << parname;
-        string parnamef0 = parss.str();
-        CurveFitting::BoundaryConstraint* bc =
-            new BoundaryConstraint(m_compsiteFunction.get(), parnamef0, funcparam.minvalue, funcparam.maxvalue);
-        m_compsiteFunction->addConstraint(bc);
-      }
-    } // FOR-Function Parameters
-
-    // 2. Set 'Height' to be fixed
-    for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
-    {
-      // a. Get peak height
-      IPowderDiffPeakFunction_sptr thispeak = m_dspPeakVec[ipk].second;
-      thispeak->fix(0);
-    } // For each peak
-
-    // 3. Fix all background paramaters to constants/current values
-    size_t funcindex = m_numPeaks;
-    std::vector<std::string> bkgdparnames = m_background->getParameterNames();
-    for (size_t ib = 0; ib < bkgdparnames.size(); ++ib)
-    {
-      std::string parname = bkgdparnames[ib];
-      double parvalue = m_background->getParameter(parname);
-      std::stringstream ss1, ss2;
-      ss1 << "f" << funcindex << "." << parname;
-      ss2 << parvalue;
-      std::string tiepart1 = ss1.str();
-      std::string tievalue = ss2.str();
-
-      g_log.debug() << "Step 2: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /\n";
-
-      m_compsiteFunction->tie(tiepart1, tievalue);
-
-      // TODO: Prefer to use fix other than tie().  Need to figure out the parameter index from name
-      /*
-        mLeBailFunction->fix(paramindex);
-      */
-    }
-
-    return;
-  }
-
-
-  //----------------------------------------------------------------------------------------------
   /** From table/map to set parameters to an individual peak.
    * It mostly is called by function in calculation.
    * @param peak :  ThermalNeutronBk2BkExpConvPVoigt function to have parameters' value set
@@ -536,15 +451,14 @@ namespace CurveFitting
    * @param peakheight: height of the peak
    * @param setpeakheight:  boolean as the option to set peak height or not.
    */
-#if 0
-  void LeBailFit::setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, map<std::string, Parameter> parammap,
-                                     double peakheight, bool setpeakheight)
-#endif
   void LeBailFunction::setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,
                                          double peakheight, bool setpeakheight)
   {
+    // FIXME - The best solution for speeding is to have a set of peak parameter listed in the order
+    //         of peak function's parameters' indexed.  Then no need to do search anymore.
+
     // 1. Prepare, sort parameters by name
-    std::map<std::string, Parameter>::iterator pit;
+    std::map<std::string, double>::iterator pit;
     vector<string> peakparamnames = peak->getParameterNames();
 
     // 2. Apply parameters values to peak function
@@ -565,7 +479,7 @@ namespace CurveFitting
       else
       {
         // Set value
-        double value = pit->second.curvalue;
+        double value = pit->second;
         peak->setParameter(parname, value);
         g_log.debug() << "LeBailFit Set " << parname << "= " << value << "\n";
       }
@@ -724,6 +638,118 @@ namespace CurveFitting
       double parvalue = miter->second;
       m_background->setParameter(parname, parvalue);
     }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up a profile parameter to fit but tied among all peaks
+    * @param paramname :: name of parameter
+    * @param minvalue :: lower boundary
+    * @param maxvalue :: upper boundary
+    */
+  void LeBailFunction::setFitProfileParameter(string paramname, double minvalue, double maxvalue)
+  {
+    // Make ties in composition function
+    for (size_t ipk = 1; ipk < m_numPeaks; ++ipk)
+    {
+      stringstream ss1, ss2;
+      ss1 << "f" << (ipk-1) << "." << paramname;
+      ss2 << "f" << ipk << "." << paramname;
+      string tiepart1 = ss1.str();
+      string tiepart2 = ss2.str();
+      m_compsiteFunction->tie(tiepart1, tiepart2);
+      g_log.debug() << "LeBailFunction::Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /\n";
+    }
+
+    // Set contrains of the parameter on any of the tied parameter.
+    std::stringstream parss;
+    parss << "f0." << paramname;
+    string parnamef0 = parss.str();
+    CurveFitting::BoundaryConstraint* bc =
+        new BoundaryConstraint(m_compsiteFunction.get(), parnamef0, minvalue, maxvalue);
+    m_compsiteFunction->addConstraint(bc);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up a parameter to be fixed
+    * @param paramname :: name of parameter
+    * @param paramvalue :: value of parameter to be fixed to
+    */
+  void LeBailFunction::setFixProfileParameter(string paramname, double paramvalue)
+  {
+    for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
+    {
+#if 1
+      stringstream ss1, ss2;
+      ss1 << "f" << ipk << "." << paramname;
+      ss2 << paramvalue;
+      string tiepart1 = ss1.str();
+      string tievalue = ss2.str();
+      m_compsiteFunction->tie(tiepart1, tievalue);
+
+      g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue << " | \n";
+
+#else
+      // FIXME - // TODO: Make a map between peak parameter name and index. And use fix() to replace tie
+      /*--  Code prepared to replace the existing block
+      ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
+      size_t iparam = findIndex(thispeak, funcparam.name);
+      thispeak->fix(iparam);
+      --*/
+#endif
+
+    } // For each peak
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Fix all background parameters
+    */
+  void LeBailFunction::setFixBackgroundParameters()
+  {
+    size_t numbkgdparams = m_background->nParams();
+
+    for (size_t iparam = 0; iparam < numbkgdparams; ++iparam)
+      m_background->fix(iparam);
+
+#if 0
+    original code just for backup
+
+    std::vector<std::string> bkgdparnames = m_background->getParameterNames();
+    for (size_t ib = 0; ib < bkgdparnames.size(); ++ib)
+    {
+      std::string parname = bkgdparnames[ib];
+      double parvalue = m_background->getParameter(parname);
+      std::stringstream ss1, ss2;
+      ss1 << "f" << funcindex << "." << parname;
+      ss2 << parvalue;
+      std::string tiepart1 = ss1.str();
+      std::string tievalue = ss2.str();
+
+      g_log.debug() << "Step 2: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /\n";
+
+      m_compsiteFunction->tie(tiepart1, tievalue);
+    }
+#endif
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Fix all peaks' intensity/height
+    */
+  void LeBailFunction::setFixPeakHeights()
+  {
+    for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
+    {
+      // a. Get peak height
+      IPowderDiffPeakFunction_sptr thispeak = m_dspPeakVec[ipk].second;
+      thispeak->fix(0);
+    } // For each peak
 
     return;
   }

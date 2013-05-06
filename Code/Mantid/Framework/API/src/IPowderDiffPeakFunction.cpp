@@ -9,6 +9,8 @@
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 
+const double IGNOREDCHANGE = 1.0E-9;
+
 namespace Mantid
 {
 namespace API
@@ -38,7 +40,43 @@ namespace API
   IPowderDiffPeakFunction::~IPowderDiffPeakFunction()
   {
 
-  }  
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Override setting parameter by parameter index
+    * @param i :: parameter index in function;
+    * @param value :: parameter name
+    * @param explicitlySet ::
+    */
+  void IPowderDiffPeakFunction::setParameter(size_t i, const double& value, bool explicitlySet)
+  {
+    double origparamvalue = getParameter(i);
+    if (fabs(origparamvalue - value) > IGNOREDCHANGE)
+    {
+      m_hasNewParameterValue = true;
+    }
+    ParamFunction::setParameter(i, value, explicitlySet);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Overriding setting parameter by parameter name
+    * @param name :: name of the parameter to set
+    * @param value :: parameter name
+    * @param explicitlySet ::
+    */
+  void IPowderDiffPeakFunction::setParameter(const std::string& name, const double& value, bool explicitlySet)
+  {
+    double origparamvalue = getParameter(name);
+    if (fabs(origparamvalue - value) > IGNOREDCHANGE)
+    {
+      m_hasNewParameterValue = true;
+    }
+    ParamFunction::setParameter(name, value, explicitlySet);
+
+    return;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Get peak centre

@@ -128,16 +128,11 @@ namespace CurveFitting
     /// Do 1 iteration in Le Bail fit
     bool do1StepLeBailFit(std::map<std::string, Parameter>& parammap);
 
-    /// Set up Lebail
+    /// Set up fit/tie/parameter values to all peaks functions (calling GSL library)
     void setLeBailFitParameters();
 
     /// Do 1 fit on LeBailFunction
     bool fitLeBailFunction(std::map<std::string, Parameter> &parammap);
-
-    /// Minimize a give function
-    bool minimizeFunction(MatrixWorkspace_sptr dataws, size_t wsindex, IFunction_sptr function,
-                          double tofmin, double tofmax, string minimizer, double dampfactor,
-                          int numiteration, string &status, double &chi2, bool outputcovarmatrix);
 
     /// Calcualte background by fitting peak heights
     void execRefineBackground();
@@ -168,6 +163,9 @@ namespace CurveFitting
     void setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
                             map<std::string, Parameter> parammap,
                             double peakheight, bool setpeakheight);
+
+    /// Check whether a parameter is a profile parameter
+    bool hasProfileParameter(std::string paramname);
 
     //--------------  Le Bail Formular: Calculate Peak Intensities ------------
     /// Calcualte peak heights from model to data
@@ -274,7 +272,16 @@ namespace CurveFitting
     /// Propose new background parameters
     void proposeNewBackgroundValues();
 
+
+    /// Minimize a give function
+    bool minimizeFunction(API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                          double tofmin, double tofmax, string minimizer, double dampfactor,
+                          int numiteration, string &status, double &chi2, bool outputcovarmatrix);
+
     //--------------------------------------------------------------------------------------------
+
+    /// Map to contain function variables
+    map<string, Parameter> m_functionParameters;
 
     /// Le Bail Function (Composite) (old: API::CompositeFunction_sptr m_lebailFunction)
     LeBailFunction m_lebailFunction;

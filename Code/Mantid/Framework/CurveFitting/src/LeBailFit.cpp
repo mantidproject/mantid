@@ -2,6 +2,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
@@ -601,7 +602,7 @@ namespace CurveFitting
 
     // 3. Construct the tie.  2-level loop. (1) peak parameter (2) peak
     // TODO Release 2.4: setLeBailFitParameters(istep)
-    this->setLeBailFitParameters();
+    setLeBailFitParameters();
 
     // 4. Construct the Fit
     this->fitLeBailFunction(parammap);
@@ -734,90 +735,64 @@ namespace CurveFitting
 
 
   //----------------------------------------------------------------------------------------------
-  /** Minimize a give function
-   *
-   * Input arguments:
-   * @param dataws   :   data workspace
-   * @param wsindex  :   workspace index of the data in data workspace to fit
-   * @param function :   function to fit
-   * @param tofmin   :   minimum X value of data to fit
-   * @param tofmax   :   maximum X value of data to fit
-   * @param minimizer:   name of the minimizer to use for fitting
-   * @param dampfactor:  damping factor if damping is selected as minimizer
-   * @param numiteration: number of iterations for fit
-   * @param outputcovarmatrix:  option to let Fit to output covariant matrix
-   * Output
-   * @param status : fit status
-   * @param chi2   : chi square of the fit
-   */
-  bool LeBailFit::minimizeFunction(MatrixWorkspace_sptr dataws, size_t wsindex, IFunction_sptr function,
-                                    double tofmin, double tofmax, string minimizer, double dampfactor, int numiteration,
-                                    string& status, double& chi2, bool outputcovarmatrix)
+  /** Set up the fit/tie/set-parameter for LeBail Fit (mode)
+   * All parameters              : set the value
+   * Parameters for free fit     : do nothing;
+   * Parameters fixed            : set them to be fixed;
+   * Parameters for fit with tie : tie all the related up
+  */
+  void LeBailFit::setLeBailFitParameters()
   {
-    std::string fitoutputwsrootname("TempMinimizerOutput");
-
-    // 1. Initialize
-    API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
-    fitalg->initialize();
-
-    g_log.debug() << "[DBx534 | Before Fit] Function To Fit: " << function->asString()
-                  << "\n" << "Number of iteration = " << numiteration << "\n";
-
-    // 2. Set property
-    fitalg->setProperty("Function", function);
-    fitalg->setProperty("InputWorkspace", dataws);
-    fitalg->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
-    fitalg->setProperty("StartX", tofmin);
-    fitalg->setProperty("EndX", tofmax);
-    fitalg->setProperty("Minimizer", minimizer); // default is "Levenberg-MarquardtMD"
-    fitalg->setProperty("CostFunction", "Least squares");
-    fitalg->setProperty("MaxIterations", numiteration);
-    fitalg->setProperty("CreateOutput", true);
-    fitalg->setProperty("Output", fitoutputwsrootname);
-    fitalg->setProperty("CalcErrors", true);
-    if (minimizer.compare("Damping") == 0)
+    // Loop through all profile/function parameters to set up the fit
+    map<string, Parameter>::iterator pariter;
+    for (pariter = m_functionParameters.begin(); pariter != m_functionParameters.end(); ++pariter)
     {
-      fitalg->setProperty("Damping", dampfactor);
-    }
+      // Get Parameter instance
+      string parname = pariter->first;
+      Parameter funcparam = pariter->second;
 
-    // c) Execute
-    bool successfulfit = fitalg->execute();
-    if (!fitalg->isExecuted() || ! successfulfit)
-    {
-      // Early return due to bad fit
-      g_log.notice() << "[Error] Fitting to LeBail function failed.\n";
-      return false;
-    }
-    else
-    {
-      g_log.debug() << "[DBx523] Fitting successful.\n";
-    }
+      if (parname.compare(funcparam.name))
+        throw runtime_error("Programming error.");
+      else
+        g_log.debug() << "Set profile parameter " << parname << " of current value = "
+                      << funcparam.curvalue << ".\n";
 
-    // d) Process output of fit
-    //    chi^2 and status
-    chi2 = fitalg->getProperty("OutputChi2overDoF");
-    string fitstatus = fitalg->getProperty("OutputStatus");
-    status = fitstatus;
-
-    // 4. Optional output covariant matrix
-    if (outputcovarmatrix)
-    {
-      ITableWorkspace_sptr covarws = fitalg->getProperty("OutputNormalisedCovarianceMatrix");
-      if (covarws)
+      // Validate whether it is a parameter used in Peak
+#if 0
+      std::vector<std::string>::iterator sit;
+      sit = std::find(m_peakParameterNameVec.begin(), m_peakParameterNameVec.end(), parname);
+      if (sit == m_peakParameterNameVec.end())
       {
-        declareProperty(
-              new WorkspaceProperty<ITableWorkspace>("OutputNormalisedCovarianceMatrix", "", Direction::Output),
-              "The name of the TableWorkspace in which to store the final covariance matrix" );
-        setPropertyValue("OutputNormalisedCovarianceMatrix", "NormalisedCovarianceMatrix");
-        setProperty("OutputNormalisedCovarianceMatrix", covarws);
+        // Not a peak profile parameter
+        g_log.debug() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak.\n";
+        continue;
+      }
+#else
+      if (!m_lebailFunction.hasProfileParameter(parname))
+        throw runtime_error("Parameter map should have a 1-1 map to profile parameter");
+#endif
+
+      // Set up Fit/Tie
+      if (funcparam.fit)
+      {
+        // Fit the parameter, tie the values among all peaks
+        m_lebailFunction.setFitProfileParameter(parname, funcparam.minvalue, funcparam.maxvalue);
       }
       else
       {
-        g_log.warning() << "Expected covariance matrix cannot be found with algorithm Fit.\n";
+        // Fix the parameter
+        m_lebailFunction.setFixProfileParameter(parname, funcparam.curvalue);
       }
-    }
 
-    return true;
+    } // FOR-Function Parameters
+
+    // 2. Set 'Height' to be fixed
+    m_lebailFunction.setFixPeakHeights();
+
+    // 3. Fix all background paramaters to constants/current values
+    m_lebailFunction.setFixBackgroundParameters();
+
+    return;
   }
 
   //====================================  Refine background   ====================================
@@ -3304,6 +3279,99 @@ namespace CurveFitting
 #endif
 
     return;
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Minimize a give function
+   *
+   * Input arguments:
+   * @param dataws   :   data workspace
+   * @param wsindex  :   workspace index of the data in data workspace to fit
+   * @param tofmin   :   minimum X value of data to fit
+   * @param tofmax   :   maximum X value of data to fit
+   * @param minimizer:   name of the minimizer to use for fitting
+   * @param dampfactor:  damping factor if damping is selected as minimizer
+   * @param numiteration: number of iterations for fit
+   * @param outputcovarmatrix:  option to let Fit to output covariant matrix
+   * Output
+   * @param status : fit status
+   * @param chi2   : chi square of the fit
+   */
+  bool LeBailFit::minimizeFunction(MatrixWorkspace_sptr dataws, size_t wsindex,
+                                   double tofmin, double tofmax, string minimizer, double dampfactor, int numiteration,
+                                   string& status, double& chi2, bool outputcovarmatrix)
+  {
+    std::string fitoutputwsrootname("TempMinimizerOutput");
+
+    IFunction_sptr function = m_lebailFunction.getFunction();
+
+    // 1. Initialize
+    API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
+    fitalg->initialize();
+
+    g_log.debug() << "[DBx534 | Before Fit] Function To Fit: " << function->asString()
+                  << "\n" << "Number of iteration = " << numiteration << "\n";
+
+    // 2. Set property
+    fitalg->setProperty("Function", function);
+    fitalg->setProperty("InputWorkspace", dataws);
+    fitalg->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+    fitalg->setProperty("StartX", tofmin);
+    fitalg->setProperty("EndX", tofmax);
+    fitalg->setProperty("Minimizer", minimizer); // default is "Levenberg-MarquardtMD"
+    fitalg->setProperty("CostFunction", "Least squares");
+    fitalg->setProperty("MaxIterations", numiteration);
+    fitalg->setProperty("CreateOutput", true);
+    fitalg->setProperty("Output", fitoutputwsrootname);
+    fitalg->setProperty("CalcErrors", true);
+    if (minimizer.compare("Damping") == 0)
+    {
+      fitalg->setProperty("Damping", dampfactor);
+    }
+
+    // c) Execute
+    bool successfulfit = fitalg->execute();
+    if (!fitalg->isExecuted() || ! successfulfit)
+    {
+      // Early return due to bad fit
+      g_log.notice() << "[Error] Fitting to LeBail function failed.\n";
+      return false;
+    }
+    else
+    {
+      g_log.debug() << "[DBx523] Fitting successful.\n";
+    }
+
+    // d) Process output of fit
+#if 0
+    This section might be migrated to LeBailFit()
+    //    chi^2 and status
+    chi2 = fitalg->getProperty("OutputChi2overDoF");
+    string fitstatus = fitalg->getProperty("OutputStatus");
+    status = fitstatus;
+
+    // 4. Optional output covariant matrix
+    if (outputcovarmatrix)
+    {
+      ITableWorkspace_sptr covarws = fitalg->getProperty("OutputNormalisedCovarianceMatrix");
+      if (covarws)
+      {
+        declareProperty(
+              new WorkspaceProperty<ITableWorkspace>("OutputNormalisedCovarianceMatrix", "", Direction::Output),
+              "The name of the TableWorkspace in which to store the final covariance matrix" );
+        setPropertyValue("OutputNormalisedCovarianceMatrix", "NormalisedCovarianceMatrix");
+        setProperty("OutputNormalisedCovarianceMatrix", covarws);
+      }
+      else
+      {
+        g_log.warning() << "Expected covariance matrix cannot be found with algorithm Fit.\n";
+      }
+    }
+#endif
+
+    return true;
   }
 
 

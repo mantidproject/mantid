@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IPowderDiffPeakFunction.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
 
@@ -59,11 +60,11 @@ namespace CurveFitting
     /// Destructor
     virtual ~LeBailFunction();
 
-    /// Set peak parameters
-    void setPeakParameters(map<string, double> peakparammap);
-
     /// From table/map to set parameters to all peaks.
     void setPeaksParameters(map<std::string, double> parammap);
+
+    /// Check whether a parameter is a profile parameter
+    bool hasProfileParameter(std::string paramname);
 
     /// Add a new peak
     void addPeak(int h, int k, int l);
@@ -73,6 +74,8 @@ namespace CurveFitting
     /// Calculate
     void function(std::vector<double>& out, std::vector<double>& xvalues);
 
+    /// Return the composite function
+    API::IFunction_sptr getFunction();
 
     /// Function
     void setPeakHeights(std::vector<double> inheights);
@@ -86,24 +89,42 @@ namespace CurveFitting
 
     double getPeakFWHM(size_t peakindex) const;
 
+    /// Get number of peaks
+    size_t getNumberOfPeaks() const { return m_numPeaks; }
+
     /// Fix i-th parameter with given name.
-    void fix(size_t paramindex, string paramname);
+    void fit(size_t paramindex, string paramname);
+
+    /// Set up a parameter to fit but tied among all peaks
+    void setFitProfileParameter(string paramname, double minvalue, double maxvalue);
+
+    /// Set up a parameter to be fixed
+    void setFixProfileParameter(string paramname, double paramvalue);
+
+    /// Fix all background parameters
+    void setFixBackgroundParameters();
 
     /// Generate peaks, and add them to this composite function
     void addPeaks(std::vector<std::vector<int> > peakhkls);
 
+    /// Check whether the newly set parameters are correct, i.e., all peaks are physical
+    bool isParameterCorrect() const;
+
+    /// Fix all peaks' intensity/height
+    void setFixPeakHeights();
+
   private:
+
+    /// Log
+    static Kernel::Logger& g_log;
 
     virtual void function1D(double* out, const double* xValues, const size_t nData)const;
     virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
     virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
 
-    /// overwrite IFunction base class method, which declare function parameters
-    virtual void init();
-
-
-
-    static Kernel::Logger& g_log;
+    /// Set peak parameters
+    void setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,
+                           double peakheight, bool setpeakheight);
 
     ///
 
@@ -114,9 +135,6 @@ namespace CurveFitting
 
     /// Generate a peak with parameter set by
     IPowderDiffPeakFunction_sptr generatePeak(int h, int k, int l);
-
-    /// Set up fit/tie/parameter values to all peaks functions (calling GSL library)
-    void setLeBailFitParameters();
 
     /// Calculate peak intensities by Le Bail algorithm
     bool calculatePeaksIntensities(vector<double>& vecX, vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues);
@@ -137,6 +155,8 @@ namespace CurveFitting
     vector<pair<double, API::IPowderDiffPeakFunction_sptr> > m_dspPeakVec;
     /// order of parameter names in m_peakParameterNameVec must be same as the order in IPowderDiffPeakFunction.
     vector<string> m_peakParameterNameVec;
+    /// Ordered profile parameter names for search
+    vector<string> m_orderedProfileParameterNames;
 
     /// Background function
     BackgroundFunction_sptr m_background;

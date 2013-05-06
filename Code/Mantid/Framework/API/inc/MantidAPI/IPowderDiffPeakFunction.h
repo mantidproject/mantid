@@ -75,7 +75,7 @@ public:
   double getPeakParameter(std::string);
 
   /// Calculate peak parameters (alpha, beta, sigma2..)
-  void calculateParameters(bool explicitoutput) const;
+  virtual void calculateParameters(bool explicitoutput) const = 0;
 
   /// Set up the flag to show whether (from client) cell parameter value changed
   void setUnitCellParameterValueChangeFlag(bool changed)
@@ -84,10 +84,13 @@ public:
   }
 
   /// Override setting a new value to the i-th parameter
-  void setParameter(size_t i, const double& value, bool explicitlySet=true);
+  virtual void setParameter(size_t i, const double& value, bool explicitlySet=true);
 
   /// Override setting a new value to a parameter by name
-  void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
+  virtual void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
+
+  /// Check whether a parameter is a profile parameter
+  bool hasProfileParameter(std::string paramname);
 
   void function1D(double* out, const double* xValues, const size_t nData)const;
 
@@ -96,7 +99,7 @@ protected:
   virtual void functionLocal(double*, const double*, int&) const;
 
   /// Local function for calculation in Mantid
-  virtual void functionLocal(vector<double> &out, const vector<double> &xValues) const;
+  virtual void functionLocal(vector<double> &out, const vector<double> &xValues) const = 0;
 
   /// General implementation of the method for all peaks. Calculates derivatives only
   /// void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData) const;
