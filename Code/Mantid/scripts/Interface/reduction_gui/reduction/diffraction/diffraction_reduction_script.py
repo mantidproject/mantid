@@ -108,7 +108,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
         dofilter = self.doFiltering(filterdict)
 
         # 3. Header
-        script = "config['default.facility']=\"%s\"\n" % self.facility_name
+        script = "from mantid.simpleapi import *\n"
+        script += "config['default.facility']=\"%s\"\n" % self.facility_name
         script += "\n"
 
         if dofilter is True:
