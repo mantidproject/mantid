@@ -89,7 +89,7 @@ plotSlice(RezWS, xydim=["[H,0,0]","[0,K,0]"], slicepoint=[0,0] )
 
 === Convert set of inelastic results obtained in Powder mode (direct) as function of temperature to a 3D workspace: ===
 
-The test example is based on MAR1011.nxspe data file, obtained by reducing test data from the MARI experiment. The data for the experiment can be located in [https://github.com/mantidproject/systemtests Mantid system test] folder. The text will produce 3-dimensional dataset, with temperature axis. The image does not change with temperature, as we have just cloned initial workspace without any changes to the experimental data. 
+The test example is based on MAR1011.nxspe data file, obtained by reducing test data from the MARI experiment. The data for the experiment can be located in [http://github.com/mantidproject/systemtests Mantid system test] folder. The text will produce 3-dimensional dataset, with temperature axis. The image does not change with temperature, as we have just cloned initial workspace without any changes to the experimental data.
 
 <div style="border:1pt dashed blue; background:#f9f9f9;padding: 1em 0;">
 <source lang="python">

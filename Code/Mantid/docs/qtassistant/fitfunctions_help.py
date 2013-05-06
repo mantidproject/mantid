@@ -5,6 +5,7 @@ import mantid.api
 from mediawiki import MediaWiki
 import wiki_tools
 from xml.dom.minidom import Document
+from parseLinks import fixLinks
 
 def propToList(func, number):
     #htmlfile.writeRow(["Order", "Name", "Default", "Description"], True)
@@ -21,6 +22,9 @@ def propToList(func, number):
         text = "&nbsp;"
     else:
         text = text.replace("\n", "<br/>")
+    #fix links
+    fixer=fixLinks(text)
+    text = fixer.parse()
     result.append(text)
     return result
 
@@ -97,5 +101,6 @@ def process_function(name, qhp, outputdir, **kwargs): # was (args, algo):
         htmlfile.nl()
 
     # cleanup the file
+    htmlfile.closeTag(True)
     htmlfile.closeTag(True)
     htmlfile.closeTag(True)

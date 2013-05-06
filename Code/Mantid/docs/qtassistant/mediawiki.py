@@ -1,6 +1,7 @@
 from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
 import os
 import re
+from parseLinks import fixLinks
 
 IMG_NOT_FOUND = "ImageNotFound.png"
 
@@ -214,7 +215,12 @@ class MediaWiki:
         text = self.__fixHEADERS(text)
         #print "04>>>", text, "<<<"
         text = self.__fixUL(text)
+        
 
+        #fix links
+        fixer=fixLinks(text)
+        text = fixer.parse()
+        
         text = text.split("\n")
 
         self.__annotate(text)

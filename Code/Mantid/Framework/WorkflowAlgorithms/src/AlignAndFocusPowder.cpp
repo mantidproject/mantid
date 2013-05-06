@@ -6,7 +6,7 @@ This is a workflow algorithm that does the bulk of the work for time focusing di
 # [[CompressEvents]] (event workspace only)
 # [[CropWorkspace]]
 # [[MaskDetectors]]
-# [[Rebin]] or [[ResampleX] if not d-space binning
+# [[Rebin]] or [[ResampleX]] if not d-space binning
 # [[AlignDetectors]]
 # If LRef, minwl, or DIFCref are specified:
 ## [[ConvertUnits]] to time-of-flight
