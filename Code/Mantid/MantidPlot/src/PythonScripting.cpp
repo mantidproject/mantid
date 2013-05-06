@@ -68,11 +68,7 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
   // MG (Russell actually found this for OS X): We ship SIP and PyQt4 with Mantid and we need to
   // ensure that the internal import that sip does of PyQt picks up the correct version.
 #if defined(Q_OS_DARWIN) || defined(Q_OS_LINUX)
- #if defined(Q_OS_DARWIN)
-  const std::string sipLocation = "/Applications/MantidPlot.app/Contents/MacOS";
- #else
   const std::string sipLocation = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
- #endif
   // MG: The documentation claims that if the third argument to setenv is non zero then it will update the
   // environment variable. What this seems to mean is that it actually overwrites it. So here we'll have 
   // to save it and update it ourself.
