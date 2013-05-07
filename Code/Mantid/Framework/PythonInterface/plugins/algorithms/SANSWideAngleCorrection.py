@@ -86,6 +86,7 @@ This parameter enters inside [[Q1D]] as WavePixelAdj. But, this is all done for 
 from mantid.api import *
 from mantid.kernel import *
 import os
+import sys
 import numpy as np
 
 class SANSWideAngleCorrection(PythonAlgorithm):
@@ -111,36 +112,46 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         """ Main body of execution
         """
         # 1. get parameter values
-        wsSample = self.getPropertyValue("SampleData")
-        wsTrans = self.getPropertyValue("TransmissionData")
-        wsOutputName = self.getPropertyValue("OutputWorkspace")
+        wd = self.getProperty("SampleData").value
+        trans = self.getProperty("TransmissionData").value
         
-        CloneWorkspace(InputWorkspace=wsSample, OutputWorkspace=wsOutputName)
-        trans_wc = mtd[wsOutputName]
+        #initialization of progress bar: 
+        #
+        endrange = 5+wd.getNumberHistograms()
+        prog_reporter = Progress(self,start=0.0,end=1.0,nreports=endrange)
 
-        trans = mtd[wsTrans]
+        # creating the workspace for the output
+        prog_reporter.reportIncrement(5,"Preparing Wide Angle")
+        trans_wc = WorkspaceFactory.create(wd)
+
+        # get the values of transmission (data, error, binning)
         to = np.array(trans.dataY(0))
-        to_e = np.array(trans.dataE(0))
-        
-        wd = mtd[wsSample]
+        to_e = np.array(trans.dataE(0))        
+        x_bins = np.array(wd.dataX(0))
+
+        # get the position of the sample and the instrument
         sample_pos = wd.getInstrument().getSample().getPos()
         inst_pos = sample_pos - wd.getInstrument().getSource().getPos()
+
+        # for each spectrum (i,j) calculate the correction factor for the transmission.
         for i in range(wd.getNumberHistograms()):
             try:
+                prog_reporter.report("Correcting Wide Angle")
+                # calculation of A
                 twoTheta = wd.getDetector(i).getTwoTheta(sample_pos, inst_pos)
                 A = 1/np.cos(twoTheta) - 1
+                # calculation of factor for transmission
                 to_l = (np.power(to,A)-1)/(np.log(to)*A)
                 to_err_l = (np.power(to_e, A) - 1)/ (np.log(to_e) * A)
-		trans_wc.setY(i,to_l)
-		trans_ws.setE(i,to_err_l)
+                # applying the data to the workspace
+                trans_wc.setY(i,to_l)
+                trans_wc.setE(i,to_err_l)
+                trans_wc.setX(i,x_bins)
             except:
-                mantid.sendWarningMessage("WideAngleCorrection error: " + str(sys.exc_info()))
+                self.getLogger().warning("WideAngleCorrection error: " + str(sys.exc_info()[2]))
 
-        self.setProperty("OutputWorkspace",trans_wc)
-
-        return
+        self.setProperty("OutputWorkspace", trans_wc)
         
 #############################################################################################
-
 AlgorithmFactory.subscribe(SANSWideAngleCorrection)        
 
