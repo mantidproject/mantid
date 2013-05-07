@@ -528,7 +528,14 @@ namespace CurveFitting
   bool LeBailFit::calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
                                               const MantidVec& vecX, MantidVec& vecY,
                                               map<string, Parameter> parammap, bool recalpeakintensity)
-  {
+  {    
+#if 1
+    throw runtime_error("How to deal with parameter map? And how to call the other functions. ");
+    map<string, double> fakemap;
+    m_lebailFunction.setPeaksParameters(fakemap);
+    // m_lebailFunction.calculatePeaksIntensities(vecX, dataws->readY(workspaceindex), false, vecY);
+    m_lebailFunction.function(vecY, dataws->readX(workspaceindex));
+#else
     // 1. Set parameters to each peak
     bool allpeaksvalid = true;
 
@@ -537,7 +544,7 @@ namespace CurveFitting
     {
       ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
 
-      setPeakParameters(thispeak, parammap, 1.0, false);
+        setPeakParameters(thispeak, parammap, 1.0, false);
       double d_h, tof_h;
       string errmsg;
       bool localvalid = examinInstrumentParameterValid(thispeak, d_h, tof_h, errmsg);
@@ -572,6 +579,9 @@ namespace CurveFitting
 
     // 4. Calcualte model pattern
     m_lebailFunction.function(vecY, vecX);
+#endif
+
+    bool allpeaksvalid = m_lebailFunction.isParameterCorrect();
 
     return allpeaksvalid;
   }
@@ -1164,7 +1174,11 @@ namespace CurveFitting
           <CurveFitting::ThermalNeutronBk2BkExpConvPVoigt>(tmppeak);
 
       // c) Set peak function
+#if 0
       setPeakParameters(speak, this->m_funcParameters, peakheight, true);
+#else
+      throw runtime_error("Shall LeBailFit::generatePeaksFromInput() be moved to LeBailFunction?");
+#endif
       speak->setPeakRadius(mPeakRadius);
 
       // d) Calculate peak parameters
@@ -2698,7 +2712,11 @@ namespace CurveFitting
   {
     // 1. Set the parameters
     // a) Set the parameters to all peaks
-    setPeaksParameters(m_dspPeaks, funparammap, 1.0, true);
+#if 0
+    m_lebailfunction.setPeaksParameters(m_dspPeaks, funparammap, 1.0, true);
+#else
+    throw runtime_error("Figure out how to use LeBailFunction.setPeaksParameters!");
+#endif
 
     // b) Examine peaks are valid
     bool paramsvalid = true;

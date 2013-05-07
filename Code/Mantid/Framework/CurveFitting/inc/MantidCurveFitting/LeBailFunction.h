@@ -113,14 +113,19 @@ namespace CurveFitting
     /// Fix all peaks' intensity/height
     void setFixPeakHeights();
 
+    /// Calculate peak intensities by Le Bail algorithm
+    bool calculatePeaksIntensities(const vector<double>& vecX, vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues);
+
   private:
 
     /// Log
     static Kernel::Logger& g_log;
 
+    /*
     virtual void function1D(double* out, const double* xValues, const size_t nData)const;
     virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
     virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
+    */
 
     /// Set peak parameters
     void setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,
@@ -135,9 +140,6 @@ namespace CurveFitting
 
     /// Generate a peak with parameter set by
     IPowderDiffPeakFunction_sptr generatePeak(int h, int k, int l);
-
-    /// Calculate peak intensities by Le Bail algorithm
-    bool calculatePeaksIntensities(vector<double>& vecX, vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues);
 
     /// Calculate the peaks intensities in same group
     bool calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup,

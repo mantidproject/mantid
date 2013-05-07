@@ -66,13 +66,13 @@ public:
 
   //--------------- ThermalNeutron peak function special ---------------------------------------
   /// Set Miller Indicies
-  void setMillerIndex(int h, int k, int l);
+  virtual void setMillerIndex(int h, int k, int l) = 0;
 
   /// Get Miller Index from this peak
-  void getMillerIndex(int& h, int &k, int &l);
+  virtual void getMillerIndex(int& h, int &k, int &l) = 0;
 
   /// Get peak parameters
-  double getPeakParameter(std::string);
+  virtual double getPeakParameter(std::string) = 0;
 
   /// Calculate peak parameters (alpha, beta, sigma2..)
   virtual void calculateParameters(bool explicitoutput) const = 0;

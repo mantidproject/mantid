@@ -144,8 +144,13 @@ namespace CurveFitting
     */
   IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l)
   {
+    /*
     IPowderDiffPeakFunction_sptr peak = boost::dynamic_pointer_cast<IPowderDiffPeakFunction>(
           FunctionFactory::Instance().create("ThermalNeutronBk2BkExpConvPVoigt"));
+          */
+
+    IFunction_sptr f = FunctionFactory::Instance().createFunction("ThermalNeutronBk2BkExpConvPVoigt");
+    IPowderDiffPeakFunction_sptr peak = boost::dynamic_pointer_cast<IPowderDiffPeakFunction>(f);
 
     peak->setMillerIndex(h, k, l);
     for (size_t i = 0; i < m_peakParameterNameVec.size(); ++i)
@@ -174,7 +179,7 @@ namespace CurveFitting
   *
   * Return: True if all peaks' height are physical.  False otherwise
   */
-  bool LeBailFunction::calculatePeaksIntensities(vector<double>& vecX, vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues)
+  bool LeBailFunction::calculatePeaksIntensities(const vector<double>& vecX, vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues)
   {
     // 1. Group the peak
     vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > > peakgroupvec;
@@ -186,7 +191,12 @@ namespace CurveFitting
     {
       g_log.debug() << "[DBx351] Peak group " << ig << " : number of peaks = "
                     << peakgroupvec[ig].size() << "\n";
+#if 0
       bool localphysical = calculateGroupPeakIntensities(peakgroupvec[ig], vecX, vecY, zerobackground, allpeaksvalues);
+#else
+      bool localphysical = false;
+      throw runtime_error("Deal with this later....");
+#endif
       if (!localphysical)
       {
         peakheightsphysical = false;
@@ -504,9 +514,9 @@ namespace CurveFitting
   void LeBailFunction::setPeaksParameters(map<std::string, double> parammap)
   {    
     // Define some variables and constants
-    size_t numpeaks = m_peakvec.size();
-    if (numpeaks == 0)
+    if (m_numPeaks == 0)
       throw runtime_error("Set parameters to empty peak list. ");
+
     size_t numparnames = m_peakParameterNameVec.size();
     map<std::string, double>::iterator pit;
 
@@ -514,10 +524,10 @@ namespace CurveFitting
     for (size_t i = 0; i < numparnames; ++i)
     {
       string& parname = m_peakParameterNameVec[i];
+
+      // If parameter is not peak height.  Set to all peak
       if (parname.compare("Height"))
       {
-        // If parameter is not peak height.  Set to all peak
-
         // Get parameter value
         pit = parammap.find(parname);
 
@@ -530,8 +540,14 @@ namespace CurveFitting
         else
         {
           double parvalue = pit->second;
-          for (size_t ipk = 0; ipk < numpeaks; ++ipk)
+          for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
+          {
+#if 0
             m_peakvec[ipk]->setParameter(i, parvalue);
+#else
+            throw runtime_error("Is my problem?");
+#endif
+          }
         }
       }
     } // END of all parameters
@@ -1025,7 +1041,11 @@ namespace CurveFitting
    */
   void LeBailFunction::calPeaks(double* out, const double* xValues, const size_t nData)
   {
+#if 1
+    throw runtime_error("calPeaks() should be re-defined.");
+#else
     this->function1D(out, xValues, nData);
+#endif
 
     return;
   }

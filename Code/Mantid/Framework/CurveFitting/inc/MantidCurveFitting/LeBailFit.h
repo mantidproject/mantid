@@ -156,13 +156,13 @@ namespace CurveFitting
                                         double &d_h, double &tof_h, string &errmsg);
 
     /// Set parameters to each peak
-    void setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, map<string, Parameter> parammap,
-                           double peakheight, bool setpeakheight);
+    // void setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, map<string, Parameter> parammap,
+    // double peakheight, bool setpeakheight);
 
     /// From table/map to set parameters to all peaks.
-    void setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
-                            map<std::string, Parameter> parammap,
-                            double peakheight, bool setpeakheight);
+    // void setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
+    // map<std::string, Parameter> parammap,
+    // double peakheight, bool setpeakheight);
 
     /// Check whether a parameter is a profile parameter
     bool hasProfileParameter(std::string paramname);
