@@ -13,13 +13,20 @@ using namespace Mantid::PhysicalConstants;
 class MagneticIonTest : public CxxTest::TestSuite
 {
 public:
-  void testGetMagneticIon()
+  void testGetMagneticIonWithSeparateSymbolAndCharge()
   {
-    MagneticIon temp;
-    temp=getMagneticIon("Am",7);
+    MagneticIon temp=getMagneticIon("Am",7);
     TS_ASSERT_EQUALS(temp.symbol,"Am");
     TS_ASSERT_EQUALS(temp.charge,7);
     TS_ASSERT_DELTA(temp.j0[1],12.73,0.001);
+  }
+
+  void testGetMagneticIonWithCombinedSymbolAndCharge()
+  {
+    MagneticIon temp=getMagneticIon("Am7"); 
+    TS_ASSERT_EQUALS(temp.symbol,"Am");
+    TS_ASSERT_EQUALS(temp.charge,7);
+    TS_ASSERT_DELTA(temp.j0[1],12.73,0.001);   
   }
 
   void testGetJL()
