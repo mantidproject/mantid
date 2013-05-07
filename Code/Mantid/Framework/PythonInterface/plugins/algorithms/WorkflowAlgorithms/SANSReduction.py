@@ -234,7 +234,7 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value            
+                output_msg += alg.getProperty("OutputMessage").value+'\n'          
 
         # Compute I(qx,qy)
         iqxy_output = None
@@ -249,7 +249,7 @@ class SANSReduction(PythonAlgorithm):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value            
+                output_msg += alg.getProperty("OutputMessage").value+'\n'          
        
         # Verify output directory and save data
         if "OutputDirectory" in property_list:
@@ -257,8 +257,20 @@ class SANSReduction(PythonAlgorithm):
             #if len(output_dir)==0:
             #    output_dir = os.path.dirname(filename)
             if os.path.isdir(output_dir):
-                output_msg += self._save_output(iq_output, iqxy_output, 
-                                                output_dir, property_manager)
+                # Check whether we were in frame-skipping mode
+                if iq_output is not None \
+                and not AnalysisDataService.doesExist(iq_output):
+                    for i in [1, 2]:
+                        iq_frame = iq_output.replace('_Iq', '_frame%s_Iq' % i)
+                        iqxy_frame = None
+                        if iqxy_output is not None:
+                            iqxy_frame = iqxy_output.replace('_Iqxy', '_frame%s_Iqxy' % i)
+                        if AnalysisDataService.doesExist(iq_frame):
+                            output_msg += self._save_output(iq_frame, iqxy_frame, 
+                                                            output_dir, property_manager)
+                else:
+                    output_msg += self._save_output(iq_output, iqxy_output, 
+                                                    output_dir, property_manager)
                 Logger.get("SANSReduction").notice("Output saved in %s" % output_dir)
             elif len(output_dir)>0:
                 msg = "Output directory doesn't exist: %s\n" % output_dir
@@ -415,7 +427,14 @@ class SANSReduction(PythonAlgorithm):
                 alg.setProperty("Filename", filename)
                 alg.setProperty("InputWorkspace", iqxy_output)
                 alg.execute()
-                #api.SaveNISTDAT(InputWorkspace=iqxy_output, Filename=filename)  
+
+                filename = os.path.join(output_dir, iqxy_output+'.nxs')
+                alg = AlgorithmManager.create("SaveNexus")
+                alg.initialize()
+                alg.setChild(True)
+                alg.setProperty("Filename", filename)
+                alg.setProperty("InputWorkspace", iqxy_output)
+                alg.execute()
                 output_msg += "I(Qx,Qy) saved in %s\n" % (filename)
             else:
                 Logger.get("SANSReduction").error("No I(Qx,Qy) output found")
