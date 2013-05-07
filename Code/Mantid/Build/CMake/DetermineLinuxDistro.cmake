@@ -9,6 +9,7 @@ if ( LSB_CMD )
   string ( STRIP ${UNIX_DIST} UNIX_DIST )
   string ( REGEX REPLACE "RedHatEnterpriseClient" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
   string ( REGEX REPLACE "RedHatEnterpriseWorkstation" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
+  # Make Scientific Linux and CentOS look like RHEL6
   string ( REGEX REPLACE "Scientific" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
   string ( REGEX REPLACE "CentOS" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
   # get the codename
@@ -17,6 +18,9 @@ if ( LSB_CMD )
     OUTPUT_STRIP_TRAILING_WHITESPACE )
   string ( REGEX REPLACE "Codename:" "" UNIX_CODENAME ${UNIX_CODENAME} )
   string ( STRIP ${UNIX_CODENAME} UNIX_CODENAME )
+  # Make Scientific Linux and CentOS look like RHEL6
+  string ( REGEX REPLACE "Carbon" "Santiago" UNIX_DIST ${UNIX_DIST} )
+  string ( REGEX REPLACE "Final" "Santiago" UNIX_DIST ${UNIX_DIST} )
 else ( LSB_CMD )
   set ( UNIX_DIST "" )
   set ( UNIX_CODENAME "" )
