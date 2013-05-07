@@ -16,10 +16,6 @@ namespace API
 {
 using std::string;
 
-#ifndef __APPLE__
-#define ENABLE_QTASSISTANT 1
-#endif
-
 /// Base url for all of the files in the project.
 const string BASE_URL("qthelp://org.mantidproject/doc/");
 /// Url to display if nothing else is suggested.

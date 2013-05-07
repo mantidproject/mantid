@@ -12,6 +12,11 @@ def getParser(description):
                       help="Full path to the Mantid compiled binary folder. Default: '%s'. This will be saved to an .ini file" % defaultmantidpath)
     parser.add_option('-o', '--output', dest='helpoutdir',
                       help="Full path to where the output files should go.")
+    parser.add_option('--latex', dest='latex',
+                      help="Full path to latex executable")
+    parser.add_option('--dvipng', dest='dvipng',
+                      help="Full path to dvi executable")
+
     return parser
 
 def assertDirs(outputdir, verbose=False):

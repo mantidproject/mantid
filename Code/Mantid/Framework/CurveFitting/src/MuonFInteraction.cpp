@@ -4,8 +4,8 @@ Muon F interaction function defined by
 ( 3 + B + C + D ) </math>
 where
 :<math> B = \cos( \sqrt 3 \times  Omega \times x) ) </math> ,
-:<math> C = (1 - \frac 1 \sqrt 3 ) \times \cos ( ( ( 3 - \sqrt 3 ) / 2 ) \times Omega \times x ) </math>  and
-:<math> D = (1 + \frac 1 \sqrt 3 ) \times \cos ( ( ( 3 + \sqrt 3 ) / 2 ) \times Omega \times x ) </math> .
+:<math> C = (1 - \frac{1}{\sqrt{3}} ) \times \cos ( ( ( 3 - \sqrt{3} ) / 2 ) \times Omega \times x ) </math>  and
+:<math> D = (1 + \frac{1}{\sqrt{3}} ) \times \cos ( ( ( 3 + \sqrt{3} ) / 2 ) \times Omega \times x ) </math> .
  *WIKI*/
 //----------------------------------------------------------------------
 // Includes

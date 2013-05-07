@@ -18,7 +18,7 @@ def appendFuncElement(doc, div, name):
     li = addEle(doc, "li", div)
     addTxtEle(doc, "a", name, li, {"href":"FitFunc_%s.html" % name})
 
-def process(functions, qhp, outputdir):
+def process(functions, qhp, outputdir, options):
     import mantid.api
 
     # sort fit functions into categories
@@ -62,7 +62,7 @@ def process(functions, qhp, outputdir):
     # create individual html pages
     from fitfunctions_help import process_function
     for func in functions:
-        process_function(func, qhp, outputdir)
+        process_function(func, qhp, outputdir, latex=options.latex, dvipng=options.dvipng)
 
 if __name__ == "__main__":
     parser = getParser("Generate qtassistant docs for the fit functions")
@@ -87,5 +87,5 @@ if __name__ == "__main__":
     # setup the qhp file
     qhp = QHPFile("org.mantidproject.fitfunctions")
 
-    process(functions, qhp, os.path.join(helpoutdir, HTML_DIR))
+    process(functions, qhp, os.path.join(helpoutdir, HTML_DIR), options)
     qhp.write(os.path.join(helpoutdir, "fitfunctions.qhp"))

@@ -88,7 +88,7 @@ def processCategories(categories, qhp, outputdir):
         handle = open(filename, 'w')
         handle.write(doc.toxml(encoding="utf-8"))
 
-def process(algos, qhp, outputdir):
+def process(algos, qhp, outputdir, options):
     import mantid
 
     # sort algorithms into categories
@@ -173,7 +173,7 @@ def process(algos, qhp, outputdir):
     from algorithm_help import process_algorithm
     for name in algos.keys():
         versions = algos[name]
-        process_algorithm(name, versions, qhp, outputdir)
+        process_algorithm(name, versions, qhp, outputdir, latex=options.latex, dvipng=options.dvipng)
 
 if __name__ == "__main__":
     parser = getParser("Generate qtassistant docs for the algorithms")
@@ -198,5 +198,5 @@ if __name__ == "__main__":
     # setup the qhp file
     qhp = QHPFile("org.mantidproject.algorithms")
 
-    process(algos, qhp, os.path.join(helpoutdir, HTML_DIR))
+    process(algos, qhp, os.path.join(helpoutdir, HTML_DIR), options)
     qhp.write(os.path.join(helpoutdir, "algorithms.qhp"))
