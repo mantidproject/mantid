@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   LoadFullprofFileTest.py
   MaskWorkspaceToCalFileTest.py
   RetrieveRunInfoTest.py
+  SANSWideAngleCorrectionTest.py
   Stitch1DTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
