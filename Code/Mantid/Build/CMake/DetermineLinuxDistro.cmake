@@ -9,6 +9,8 @@ if ( LSB_CMD )
   string ( STRIP ${UNIX_DIST} UNIX_DIST )
   string ( REGEX REPLACE "RedHatEnterpriseClient" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
   string ( REGEX REPLACE "RedHatEnterpriseWorkstation" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
+  string ( REGEX REPLACE "Scientific" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
+  string ( REGEX REPLACE "CentOS" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
   # get the codename
   execute_process ( COMMAND ${LSB_CMD} -c
     OUTPUT_VARIABLE UNIX_CODENAME
