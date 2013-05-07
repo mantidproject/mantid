@@ -60,7 +60,7 @@ def TotalChargeNormalization(normalize_to_beam=True, beam_file=''):
         ReductionSingleton().reduction_properties["Normalisation"]="Charge"
 
 def BeamMonitorNormalization(reference_flux_file):
-    find_data(reference_flux_file, instrument=ReductionSingleton().get_instrument())
+    reference_flux_file = find_data(reference_flux_file, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["Normalisation"]="Monitor"
     ReductionSingleton().reduction_properties["MonitorReferenceFile"]=reference_flux_file
     

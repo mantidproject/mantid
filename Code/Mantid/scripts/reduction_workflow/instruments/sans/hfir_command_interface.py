@@ -29,12 +29,12 @@ def GPSANS():
     AzimuthalAverage()
 
 def DirectBeamCenter(datafile):
-    find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["BeamCenterMethod"]="DirectBeam"
     ReductionSingleton().reduction_properties["BeamCenterFile"]=datafile
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
-    find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["BeamCenterMethod"]="Scattering"
     ReductionSingleton().reduction_properties["BeamRadius"]=beam_radius
     ReductionSingleton().reduction_properties["BeamCenterFile"]=datafile
@@ -77,12 +77,12 @@ def SetSensitivityBeamCenter(x,y):
     ReductionSingleton().reduction_properties["SensitivityBeamCenterY"] = y
     
 def SensitivityDirectBeamCenter(datafile):
-    find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["SensitivityBeamCenterMethod"]="DirectBeam"
     ReductionSingleton().reduction_properties["SensitivityBeamCenterFile"]=datafile
 
 def SensitivityScatteringBeamCenter(datafile, beam_radius=3.0):
-    find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["SensitivityBeamCenterMethod"]="Scattering"
     ReductionSingleton().reduction_properties["SensitivityBeamCenterRadius"]=beam_radius
     ReductionSingleton().reduction_properties["SensitivityBeamCenterFile"]=datafile
@@ -143,8 +143,8 @@ def SetTransmission(trans, error, theta_dependent=True):
 
 def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True,
                            use_sample_dc=True):
-    find_data(sample_file, instrument=ReductionSingleton().get_instrument())
-    find_data(empty_file, instrument=ReductionSingleton().get_instrument())
+    sample_file = find_data(sample_file, instrument=ReductionSingleton().get_instrument())
+    empty_file = find_data(empty_file, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["TransmissionMethod"] = "DirectBeam"
     ReductionSingleton().reduction_properties["TransmissionBeamRadius"] = beam_radius
     ReductionSingleton().reduction_properties["TransmissionSampleDataFile"] = sample_file
@@ -154,7 +154,7 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_depen
 
 def TransmissionDarkCurrent(dark_current=None):
     if dark_current is not None:
-        find_data(dark_current, instrument=ReductionSingleton().get_instrument())
+        dark_current = find_data(dark_current, instrument=ReductionSingleton().get_instrument())
         ReductionSingleton().reduction_properties["TransmissionDarkCurrentFile"] = dark_current
     elif ReductionSingleton().reduction_properties.has_key("TransmissionDarkCurrentFile"):
         del ReductionSingleton().reduction_properties["TransmissionDarkCurrentFile"]
@@ -166,10 +166,10 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
                              sample_scattering, direct_scattering,
                              spreader_transmission=1.0, spreader_transmission_err=0.0,
                              theta_dependent=True ):
-    find_data(sample_spreader, instrument=ReductionSingleton().get_instrument())
-    find_data(direct_spreader, instrument=ReductionSingleton().get_instrument())
-    find_data(sample_scattering, instrument=ReductionSingleton().get_instrument())
-    find_data(direct_scattering, instrument=ReductionSingleton().get_instrument())
+    sample_spreader = find_data(sample_spreader, instrument=ReductionSingleton().get_instrument())
+    direct_spreader = find_data(direct_spreader, instrument=ReductionSingleton().get_instrument())
+    sample_scattering = find_data(sample_scattering, instrument=ReductionSingleton().get_instrument())
+    direct_scattering = find_data(direct_scattering, instrument=ReductionSingleton().get_instrument())
     
     ReductionSingleton().reduction_properties["TransmissionMethod"] = "BeamSpreader"
     ReductionSingleton().reduction_properties["TransSampleSpreaderFilename"] = sample_spreader
@@ -186,14 +186,14 @@ def SetTransmissionBeamCenter(x, y):
     ReductionSingleton().reduction_properties["TransmissionBeamCenterY"] = y
 
 def TransmissionDirectBeamCenter(datafile):
-    find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["TransmissionBeamCenterMethod"] = "DirectBeam"
     ReductionSingleton().reduction_properties["TransmissionBeamCenterFile"] = datafile
 
 def Background(datafile):
     if type(datafile)==list:
         datafile=','.join(datafile)
-    find_data(datafile, instrument=ReductionSingleton().get_instrument(), allow_multiple=True)
+    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument(), allow_multiple=True)
     ReductionSingleton().reduction_properties["BackgroundFiles"] = datafile
 
 def NoBackground():
@@ -222,8 +222,8 @@ def SetBckTransmission(trans, error, theta_dependent=True):
     ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependent
 
 def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
-    find_data(sample_file, instrument=ReductionSingleton().get_instrument())
-    find_data(empty_file, instrument=ReductionSingleton().get_instrument())
+    sample_file = find_data(sample_file, instrument=ReductionSingleton().get_instrument())
+    empty_file = find_data(empty_file, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["BckTransmissionMethod"] = "DirectBeam"
     ReductionSingleton().reduction_properties["BckTransmissionBeamRadius"] = beam_radius
     ReductionSingleton().reduction_properties["BckTransmissionSampleDataFile"] = sample_file
@@ -234,10 +234,10 @@ def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
                              sample_scattering, direct_scattering,
                              spreader_transmission=1.0, spreader_transmission_err=0.0,
                              theta_dependent=True ):
-    find_data(sample_spreader, instrument=ReductionSingleton().get_instrument())
-    find_data(direct_spreader, instrument=ReductionSingleton().get_instrument())
-    find_data(sample_scattering, instrument=ReductionSingleton().get_instrument())
-    find_data(direct_scattering, instrument=ReductionSingleton().get_instrument())
+    sample_spreader = find_data(sample_spreader, instrument=ReductionSingleton().get_instrument())
+    direct_spreader = find_data(direct_spreader, instrument=ReductionSingleton().get_instrument())
+    sample_scattering = find_data(sample_scattering, instrument=ReductionSingleton().get_instrument())
+    direct_scattering = find_data(direct_scattering, instrument=ReductionSingleton().get_instrument())
     
     ReductionSingleton().reduction_properties["BckTransmissionMethod"] = "BeamSpreader"
     ReductionSingleton().reduction_properties["BckTransSampleSpreaderFilename"] = sample_spreader
@@ -259,7 +259,7 @@ def BckTransmissionDirectBeamCenter(datafile):
 
 def BckTransmissionDarkCurrent(dark_current=None):
     if dark_current is not None:
-        find_data(dark_current, instrument=ReductionSingleton().get_instrument())
+        dark_current = find_data(dark_current, instrument=ReductionSingleton().get_instrument())
         ReductionSingleton().reduction_properties["BckTransmissionDarkCurrentFile"] = dark_current
     elif ReductionSingleton().reduction_properties.has_key("BckTransmissionDarkCurrentFile"):
         del ReductionSingleton().reduction_properties["BckTransmissionDarkCurrentFile"]
