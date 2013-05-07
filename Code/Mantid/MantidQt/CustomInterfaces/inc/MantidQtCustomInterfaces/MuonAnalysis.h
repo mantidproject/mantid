@@ -350,7 +350,7 @@ private:
   double plotToTime();
 
   /// time zero returned in ms
-  QString timeZero();
+  double timeZero();
 
   /// Get the new plot name
   QString getNewPlotName(const QString & cropWSfirstPart);
