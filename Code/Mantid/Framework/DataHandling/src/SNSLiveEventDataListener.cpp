@@ -18,6 +18,8 @@
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/AutoPtr.h"
+#include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NamedNodeMap.h"
 
 #include <Poco/Thread.h>
 #include <Poco/Runnable.h>
@@ -480,7 +482,55 @@ namespace DataHandling
     // packets the first time it comes in and we can ignore any others.
     if (m_workspaceInitialized == false)
     {
-      m_instrumentXML = pkt.info();
+      m_instrumentXML = pkt.info();  // save the xml so we can pass it to the
+                                     // LoadInstrument algorithm
+
+      // Now parse the XML for required logfile parameters (we can't call the
+      // LoadInstrument alg until we received a value for such parameters).
+      //
+      // What we're looking for is a node called "parameter" that has a child
+      // node called "logfile".  We need to save the id attribute on the
+      // logfile node.
+
+      Poco::XML::DOMParser parser;
+      Poco::AutoPtr<Poco::XML::Document> doc = parser.parseString( m_instrumentXML);
+
+      const Poco::XML::NodeList *nodes = doc->getElementsByTagName( "parameter");
+      // Oddly, NodeLists don't seem to have any provision for iterators.  Also,
+      // the length() function actually traverses the list to get the count,
+      // so we should probably call it once and store it in a variable instead
+      // of putting it at the top of a for loop...
+      long unsigned nodesLength = nodes->length();
+      for (long unsigned i = 0; i < nodesLength; i++)
+      {
+        Poco::XML::Node *node = nodes->item( i);
+        const Poco::XML::NodeList *childNodes = node->childNodes();
+
+        long unsigned childNodesLength = childNodes->length();
+        for (long unsigned j=0; j < childNodesLength; j++)
+        {
+          Poco::XML::Node *childNode = childNodes->item( j);
+          if (childNode->nodeName() == "logfile")
+          {
+            // Found one!
+            Poco::XML::NamedNodeMap *attr = childNode->attributes();
+            long unsigned attrLength = attr->length();
+            for (long unsigned k = 0; k < attrLength; k++)
+            {
+              Poco::XML::Node *attrNode = attr->item(k);
+              if (attrNode->nodeName() == "id")
+              {
+                m_requiredLogs.push_back( attrNode->nodeValue());
+              }
+            }
+
+            attr->release();
+          }
+        }
+        childNodes->release();
+
+      }
+      nodes->release();
     }
 
     return false;
@@ -1034,6 +1084,10 @@ namespace DataHandling
 
     loadInst->execute();
 
+    m_requiredLogs.clear();  // Clear the list.  If we have to initialize the workspace again,
+                             // (at the start of another run, for example), the list will be
+                             // repopulated when we receive the next geometry packet.
+
     m_eventBuffer->padSpectra();  // expands the workspace to the size of the just loaded instrument
 
     // Set the units
@@ -1051,6 +1105,33 @@ namespace DataHandling
     }
 
     m_workspaceInitialized = true;
+  }
+
+  // Check to see if we have data for all of the logs listed in m_requiredLogs.
+  // NOTE: This function does not lock the mutex!  The calling function must
+  // ensure that m_eventBuffer won't change while the function runs (either by
+  // locking the mutex, or by the simple fact of never calling it once the workspace
+  // has been initialized...)
+  bool SNSLiveEventDataListener::haveRequiredLogs()
+  {
+    bool allFound = true;
+    Run &run = m_eventBuffer->mutableRun();
+    auto it = m_requiredLogs.begin();
+    while (it != m_requiredLogs.end() && allFound)
+    {
+      if (! run.hasProperty(*it))
+      {
+        allFound = false;
+      }
+      else if ( run.getProperty(*it)->size() == 0)
+      {
+        allFound = false;
+      }
+
+      it++;
+    }
+
+    return allFound;
   }
 
   /// Adds an event to the workspace

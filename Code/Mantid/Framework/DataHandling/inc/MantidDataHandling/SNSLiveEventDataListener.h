@@ -104,8 +104,11 @@ namespace Mantid
         if (m_instrumentName.size() == 0) return false;
         if (m_dataStartTime == Kernel::DateAndTime())  return false;
 
-        return true;
+        return haveRequiredLogs();
       }
+
+      // Returns true if we've got a value for every log listed in m_requiredLogs
+      bool haveRequiredLogs();
 
       void appendEvent( uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime);
       // tof is "Time Of Flight" and is in units of microsecondss relative to the start of the pulse
@@ -124,6 +127,9 @@ namespace Mantid
       // We need these 2 strings to initialize m_buffer
       std::string m_instrumentName;
       std::string m_instrumentXML;
+
+      std::vector<std::string> m_requiredLogs;  // Names of log values that we need before we can initialize
+                                                // m_buffer.  We get the names by parsing m_instrumentXML;
 
       uint64_t m_rtdlPulseId;  // We get this from the RTDL packe  
 
