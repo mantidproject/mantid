@@ -1,6 +1,6 @@
 Name:           mantid-developer
 Version:        1.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
 Group:          Development/Tools
@@ -36,6 +36,10 @@ Requires: rpmdevtools
 Requires: sip-devel
 Requires: git
 Requires: openssl-devel
+Requires: texlive-latex
+Requires: dvipng
+Requires: mantidlibs-qt-devel
+Requires: scl-utils
 
 BuildArch: noarch
 
@@ -58,6 +62,10 @@ required for Mantid development.
 %files
 
 %changelog
+* Tue May 07 2013 Stuart Campbell <campbellsi@ornl.gov>
+- Added dvipng and latex for qt-assistant stuff
+- Added software collection dependencies
+
 * Thu Jun  7 2012 Russell Taylor <taylorrj@ornl.gov>
 - Remove gmock & gtest now that we include them in our repo
 - Remove subversion dependency now that we use git
