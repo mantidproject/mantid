@@ -7,6 +7,7 @@ from reduction_workflow.instruments.sans import hfir_instrument
 from mantid.api import AlgorithmManager
 from mantid.kernel import Logger
 import mantid.simpleapi as simpleapi
+import os
 
 ## List of user commands ######################################################
 def BIOSANS():
@@ -285,21 +286,17 @@ def ResetWavelength():
     
 def SaveIqAscii(reducer=None, process=''):
     """ Old command for backward compatibility """
-    output_dir = os.path.expanduser('~')
     msg = "SaveIqAscii is not longer used:\n  "
     msg += "Please use 'SaveIq' instead\n  "
-    msg += "Your output files are currently in %s" % output_dir
     Logger.get("CommandInterface").warning(msg)
-    ReductionSingleton().reduction_properties["OutputDirectory"] = output_dir
     ReductionSingleton().reduction_properties["ProcessInfo"] = str(process)
     
-def SaveIq(output_dir='', process=''):
-    ReductionSingleton().reduction_properties["OutputDirectory"] = output_dir
+def SaveIq(output_dir=None, process=''):
+    if output_dir is not None:
+        ReductionSingleton().reduction_properties["OutputDirectory"] = output_dir
     ReductionSingleton().reduction_properties["ProcessInfo"] = process
 
 def NoSaveIq():
-    if ReductionSingleton().reduction_properties.has_key("OutputDirectory"):
-        del ReductionSingleton().reduction_properties["OutputDirectory"]
     if ReductionSingleton().reduction_properties.has_key("ProcessInfo"):
         del ReductionSingleton().reduction_properties["ProcessInfo"]
             
