@@ -54,7 +54,6 @@ class HFIRSANSReduction(PythonAlgorithm):
             monitor = 0.0
             timer = 0.0 
             for i in range(len(data_file)):
-                output_str += "Loaded %s\n" % data_file[i]
                 if i==0:
                     output_str += _load_data(data_file[i], workspace)
                 else:
@@ -250,7 +249,7 @@ class HFIRSANSReduction(PythonAlgorithm):
             alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value            
+                output_msg += alg.getProperty("OutputMessage").value+'\n'        
 
         # Compute I(qx,qy)
         iqxy_output = None
@@ -265,7 +264,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value            
+                output_msg += alg.getProperty("OutputMessage").value+'\n'            
        
         # Verify output directory and save data
         if "OutputDirectory" in property_list:
