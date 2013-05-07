@@ -129,7 +129,7 @@ class MediaWiki:
                 break
             orig = text[start+6:stop]
             start += 1
-            eqn = Equation(orig, outdir=outdir,
+            eqn = Equation(orig, outdir=outdir, tmpdir=outdir,
                                      latex=self.__latex, dvipng=self.__dvipng)
             text = text.replace("<math>" + orig + "</math>", eqn.contentshtml)
             self.images.append(os.path.split(eqn.pngfile)[-1])
