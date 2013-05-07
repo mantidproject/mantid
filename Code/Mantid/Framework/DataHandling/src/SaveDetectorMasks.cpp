@@ -1,3 +1,8 @@
+/*WIKI*
+
+Does the same as [[SaveMask]], but is deprecated.
+
+*WIKI*/
 #include "MantidDataHandling/SaveDetectorMasks.h"
 #include "MantidKernel/System.h"
 
