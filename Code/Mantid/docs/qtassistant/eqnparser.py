@@ -92,7 +92,7 @@ class Equation:
 
         # name of the png file and html tag
         self.pngfile = os.path.join(outdir, "eqn_" + self._key + '.png')
-        self.contentshtml = '<img src="%s"/>' % (self.pngfile)
+        self.contentshtml = '<img src="img/%s"/>' % (os.path.split(self.pngfile)[-1])
 
         self.cached = os.path.isfile(self.pngfile)
         if not self.cached:
