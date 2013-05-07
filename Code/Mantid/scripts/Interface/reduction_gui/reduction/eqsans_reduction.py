@@ -74,31 +74,14 @@ class EQSANSReductionScripter(BaseReductionScripter):
         if HAS_MANTID:
             self.update()
             table_ws = "__patch_options"
-            script = "# Reduction script\n"
-            script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
-            
-            if self._settings.api2:
-                script += "import mantid\n"
-                script += "from mantid.simpleapi import *\n"
-                script += "\n"
-                script += "if AnalysisDataService.doesExist('%s'):\n" % table_ws
-                script += "   AnalysisDataService.remove('%s')\n\n" % table_ws
-            else:
-                script += "from MantidFramework import *\n"
-                script += "mtd.initialise(False)\n"
-                script += "\n"
-                script += "if mtd.workspaceExists('%s'):\n" % table_ws
-                script += "   mtd.deleteWorkspace('%s')\n\n" % table_ws
-            
-            script += "SetupEQSANSReduction(\n"
+            script = "SetupEQSANSReduction(\n"
             for item in self._observers:
                 if item.state() is not None:
                     if hasattr(item.state(), "options"):
                         script += item.state().options()
 
-            script += "ReductionProperties='%s')" % table_ws
-            
-            exec script
+            script += "ReductionProperties='%s')" % table_ws            
+            mantidplot.runPythonScript(script, True)
             return table_ws
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
