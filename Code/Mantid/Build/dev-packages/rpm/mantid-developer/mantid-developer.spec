@@ -36,6 +36,10 @@ Requires: rpmdevtools
 Requires: sip-devel
 Requires: git
 Requires: openssl-devel
+Requires: texlive-latex
+Requires: dvipng
+Requires: mantidlibs-qt-devel
+Requires: scl-utils
 
 BuildArch: noarch
 
