@@ -22,11 +22,6 @@ class %INSTR_NAME%Scripter(BaseReductionScripter):
         script = "# Reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
-        script += "from MantidFramework import *\n"
-        script += "mtd.initialise(False)\n"
-        script += "from mantidsimple import *"
-        script += "\n"
-        
         # The following code translates each panel/tab into python script
         for item in self._observers:
             if item.state() is not None:
