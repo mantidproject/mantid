@@ -1,3 +1,8 @@
+/*WIKI*
+
+Does the same as [[LoadMask]], but is deprecated.
+
+*WIKI*/
 #include "MantidDataHandling/LoadMaskingFile.h"
 #include "MantidKernel/System.h"
 
