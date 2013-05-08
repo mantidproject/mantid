@@ -472,7 +472,6 @@ class BaseReductionScripter(object):
                 submit_cmd += "TransactionID='mantid_remote', "
                 submit_cmd += "ScriptName='%s')" % script_path
                 mantidplot.runPythonScript(submit_cmd, True)
-                print submit_cmd
         else:
             Logger.get("scripter").error("Mantid is unavailable to submit a reduction job")
 
