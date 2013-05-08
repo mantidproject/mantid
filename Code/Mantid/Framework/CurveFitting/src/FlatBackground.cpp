@@ -1,13 +1,7 @@
 /*WIKI*
 A Flat background function is defined as:
 
-<math xmlns="http://www.w3.org/1998/Math/MathML">
-  <mrow>
-    <mi>y</mi>
-    <mo>=</mo>
-    <mi>A0</mi>
-  </mrow>
-</math>
+<math>y = A_0</math>
 *WIKI*/
 
 #include "MantidCurveFitting/FlatBackground.h"

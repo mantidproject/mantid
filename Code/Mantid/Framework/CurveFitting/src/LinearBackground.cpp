@@ -1,17 +1,7 @@
 /*WIKI*
 A linear background function is defined as:
 
-<math xmlns="http://www.w3.org/1998/Math/MathML">
-  <mrow>
-    <mi>y</mi>
-    <mo>=</mo>
-    <mi>A0</mi>
-    <mo>+</mo>
-    <mi>A1</mi>
-    <mo>&#x2062;<!-- &InvisibleTimes; --></mo>
-    <mi>x</mi>
-  </mrow>
-</math>
+<math>y = A_0 + A_1 \times x</math>
 
 Note this function is currently named LinearBackground and is likely to
 be renamed to Linear in the not too distance future.

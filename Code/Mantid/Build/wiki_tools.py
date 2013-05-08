@@ -133,8 +133,6 @@ def get_fitfunc_summary(name, verbose=True):
     if len(source) <= 0:
         print "Warning: Cannot find source for fitfunction '%s'" % name
         return ""
-    if name == "FlatBackground":
-        print "*****", source
     return get_wiki_from_source(source, "*WIKI*", verbose)
 
 def get_wiki_from_source(source, tag, verbose=True):
