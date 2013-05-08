@@ -39,7 +39,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
     m_selectRect(),
     m_interactionMode(MoveMode),
     m_isLightingOn(false),
-    m_peakLabelPrecision(6),
+    m_peakLabelPrecision(2),
     m_peakShapesStyle(0),
     m_viewChanged(true),
     m_redrawPicking(true)
