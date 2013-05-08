@@ -153,12 +153,12 @@ namespace Mantid
     /**
      * Returns the form factor for the given \f$Q^2\f$ value
      * @param qsr :: \f$Q^2\f$ in \f$\AA^{-2}\f$
-     * @returns The form factorfor the given factor
+     * @returns The form factor for the given factor or 1.0 if turned off
      */
     double ForegroundModel::formFactor(const double qsqr) const
     {
       if(m_formFactorTable) return m_formFactorTable->value(qsqr);
-      else return 0.0;
+      else return 1.0;
     }
 
     //-------------------------------------------------------------------------
