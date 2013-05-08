@@ -30,6 +30,8 @@
 #include <QHBoxLayout>
 #include <QPointer>
 
+#include <stdexcept>
+
 namespace Mantid
 {
 namespace Vates
@@ -113,7 +115,16 @@ void ViewBase::onAutoScale()
     //qDebug() << "Bad rep for auto scale";
     return;
   }
-  QPair <double, double> range = this->colorUpdater.autoScale(rep);
+  QPair <double, double> range;
+  try
+  {
+    range = this->colorUpdater.autoScale(rep);
+  }
+  catch (std::invalid_argument &)
+  {
+    // Got a bad proxy or color scale range, so do nothing
+    return;
+  }
   rep->renderViewEventually();
   emit this->dataRange(range.first, range.second);
 }
