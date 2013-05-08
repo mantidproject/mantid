@@ -90,7 +90,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
         except IOError:
             pass    
     
-    htmlfile.openTag("img", {"src":imagefile, "style":"position:relative; z-index:1000; padding-left:5px;", "width":"400"})
+    htmlfile.openTag("img", {"src":imagefile, "style":"position:relative; z-index:1000; padding-left:5px;", "width":"400", "align":"right"})
     htmlfile.closeTag(True)
     
     num_versions = len(versions)
