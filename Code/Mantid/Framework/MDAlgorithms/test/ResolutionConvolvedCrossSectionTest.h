@@ -84,7 +84,7 @@ public:
     const size_t startingNAttrs = crossSection.nAttributes();
     crossSection.setAttributeValue("ResolutionFunction", "FakeConvolution");
 
-    TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 4);
+    TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 5);
   }
 
   void test_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()

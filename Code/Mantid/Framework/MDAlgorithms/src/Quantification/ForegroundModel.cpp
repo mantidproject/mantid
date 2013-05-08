@@ -3,17 +3,29 @@
 //
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/MagneticFormFactorTable.h"
 
 namespace Mantid
 {
   namespace MDAlgorithms
   {
+    namespace
+    {
+      /// Length of the form factor interpolation table
+      const int FORM_FACTOR_TABLE_LENGTH = 500;
+      /// Name of the form factor attribute
+      const char * FORM_FACTOR_ION = "FormFactorIon";
+    }
+
     /**
      * Default constructor only callable by the factory
      */
     ForegroundModel::ForegroundModel()
-      : API::ParamFunction(), m_fittingFunction(NULL), m_parOffset(0)
+      : API::ParamFunction(), m_fittingFunction(NULL), m_parOffset(0),
+        m_formFactorTable(NULL)
     {
+      addAttributes();
+      setFormFactorIon("0"); // Off
     }
 
     /**
@@ -21,9 +33,19 @@ namespace Mantid
      * @param fittingFunction :: A reference to the fitting function
      */
     ForegroundModel::ForegroundModel(const API::IFunction & fittingFunction)
-      : API::ParamFunction(), m_fittingFunction(NULL), m_parOffset(0)
+      : API::ParamFunction(), m_fittingFunction(NULL), m_parOffset(0),
+        m_formFactorTable(NULL)
     {
+      addAttributes();
+      setFormFactorIon("0"); // Off
       setFunctionUnderMinimization(fittingFunction);
+    }
+
+    /**
+     */
+    ForegroundModel::~ForegroundModel()
+    {
+      delete m_formFactorTable;
     }
 
     /**
@@ -42,6 +64,19 @@ namespace Mantid
     void ForegroundModel::declareParameters()
     {
       throw Kernel::Exception::NotImplementedError("Error: Override ForegroundModel::declareParameters() and declare model parameters");
+    }
+
+    /**
+     * Called when an attribute value is set
+     * @param name :: The name of the attribute
+     * @param attr :: The value of the attribute
+     */
+    void ForegroundModel::setAttribute(const std::string & name, const API::IFunction::Attribute & attr)
+    {
+      if(name == FORM_FACTOR_ION)
+      {
+        setFormFactorIon(attr.asString());
+      }
     }
 
     /**
@@ -94,6 +129,49 @@ namespace Mantid
     {
       assert(m_fittingFunction);
       return *m_fittingFunction;
+    }
+
+    /**
+     * Set the default ion type for the form factor calculation
+     * @param ionType A symbol string containing the atom and charge
+     */
+    void ForegroundModel::setFormFactorIon(const std::string & ionType)
+    {
+      // "0" indicates off
+      if(ionType == "0")
+      {
+        delete m_formFactorTable;
+        m_formFactorTable = NULL;
+      }
+      else
+      {
+        using namespace PhysicalConstants;
+        m_formFactorTable = new MagneticFormFactorTable(FORM_FACTOR_TABLE_LENGTH, getMagneticIon(ionType));
+      }
+    }
+
+    /**
+     * Returns the form factor for the given \f$Q^2\f$ value
+     * @param qsr :: \f$Q^2\f$ in \f$\AA^{-2}\f$
+     * @returns The form factorfor the given factor
+     */
+    double ForegroundModel::formFactor(const double qsqr) const
+    {
+      if(m_formFactorTable) return m_formFactorTable->value(qsqr);
+      else return 0.0;
+    }
+
+    //-------------------------------------------------------------------------
+    // Private members
+    //-------------------------------------------------------------------------
+    
+    /**
+     * Add attributes common to all models
+     */
+    void ForegroundModel::addAttributes()
+    {
+      // Ion type string for form factor. "0" = off
+      declareAttribute(FORM_FACTOR_ION, API::IFunction::Attribute("0"));      
     }
 
   }
