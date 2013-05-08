@@ -76,6 +76,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
     htmlfile.hr()
     
     imagefile = ""
+    imgpath = None
     if fetchimages:
         # os.environ['http_proxy']="http://wwwcache.rl.ac.uk:8080"  #TODO should be cmake variable
         try:
@@ -83,15 +84,18 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
             import urllib
             imagefile = '%s_dlg.png' %name
             fileurl = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s" % imagefile #TODO location should be cmake variable
-            destname = os.path.join(outputdir, imagefile)
+            imgpath="img/"+imagefile
+            destname = os.path.join(outputdir, imgpath)
             urllib.urlretrieve(fileurl, filename=destname)   
             # Now link to image
             
         except IOError:
             pass    
     
-    htmlfile.openTag("img", {"src":imagefile, "style":"position:relative; z-index:1000; padding-left:5px;", "width":"400", "align":"right"})
+    htmlfile.openTag("img", {"src":imgpath, "style":"position:relative; z-index:1000; padding-left:5px;", "width":"400", "align":"right"})
     htmlfile.closeTag(True)
+    if imgpath:
+        qhp.addFile(os.path.join(HTML_DIR,imgpath))
     
     num_versions = len(versions)
     for version in versions:
