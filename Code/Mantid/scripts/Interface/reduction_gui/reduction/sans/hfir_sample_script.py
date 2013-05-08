@@ -153,11 +153,12 @@ class SampleData(BaseScriptElement):
     
     # Data file
     data_files = []
+    separate_jobs = False
 
      # Option list
     option_list = [DirectBeam, BeamSpreader]
            
-    def to_script(self):
+    def to_script(self, data_file=None):
         """
             Generate reduction script
             @param execute: if true, the script will be executed
@@ -178,15 +179,28 @@ class SampleData(BaseScriptElement):
             script += "TransmissionDarkCurrent(\"%s\")\n" % str(self.dark_current)
         
         # Data files
-        if len(self.data_files)>0:
+        if len(self.data_files)==0:
+            raise RuntimeError, "Trying to generate reduction script without a data file."
+
+        if data_file is None:
             parts = os.path.split(str(self.data_files[0]).strip())
             if len(parts[0])>0:
                 script += "DataPath(\"%s\")\n" % parts[0]
             else:
                 script += "#Note: Data path was not found at script generation, will try at run time.\n"
-            script += "AppendDataFile([\"%s\"])\n" % '\",\"'.join(self.data_files)
+
+            if self.separate_jobs is False:
+                script += "AppendDataFile([\"%s\"])\n" % '\",\"'.join(self.data_files)
+            else:
+                for f in self.data_files:
+                    script += "AppendDataFile([\"%s\"])\n" % f
         else:
-            raise RuntimeError, "Trying to generate reduction script without a data file."
+            parts = os.path.split(str(self.data_files[str(data_file)]).strip())
+            if len(parts[0])>0:
+                script += "DataPath(\"%s\")\n" % parts[0]
+            else:
+                script += "#Note: Data path was not found at script generation, will try at run time.\n"
+            script += "AppendDataFile([\"%s\"])\n" % str(data_file)
 
         return script
 
@@ -284,6 +298,7 @@ class SampleData(BaseScriptElement):
         self.dark_current = SampleData.dark_current
         self.sample_thickness = SampleData.sample_thickness
         self.data_files = []
+        self.separate_jobs = SampleData.separate_jobs
     
 
     

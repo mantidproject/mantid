@@ -405,6 +405,12 @@ class BaseReductionScripter(object):
 
         return script
     
+    def to_batch(self):
+        """
+             @param script_dir: directory where to write the job scripts
+        """
+        return [self.to_script()]
+    
     def apply(self):
         """
             Apply the reduction process to a Mantid SANSReducer
@@ -442,24 +448,28 @@ class BaseReductionScripter(object):
 
         if HAS_MANTID:
             # Generate reduction script and write it to file
-            script_path = os.path.join(os.path.expanduser('~'), "job_submission.py")
-            script = self.to_script(script_path)
-            Logger.get("scripter").notice("Reduction script: %s" % script_path)
-            
-            # Generate job submission script
-            script_path = os.path.join(os.path.expanduser('~'), "job_submission.sh")
-            self._write_submission_script(script_path)
-            st = os.stat(script_path)
-            os.chmod(script_path, st.st_mode | stat.S_IEXEC)
-            Logger.get("scripter").notice("Execution script: %s" % script_path)
-            
-            # Submit the job
-            submit_cmd = "SubmitRemoteJob(ComputeResource='%s', " % resource
-            submit_cmd += "NumNodes=%s, CoresPerNode=%s, " % (nodes, cores_per_node)
-            submit_cmd += "UserName='%s', GroupName='users', Password='%s', " % (user, pwd)
-            submit_cmd += "TransactionID='mantid_remote', "
-            submit_cmd += "ScriptName='%s')" % script_path
-            mantidplot.runPythonScript(submit_cmd, True)
+            scripts = self.to_batch()
+            for i in range(len(scripts)):
+                script = scripts[i]
+                script_name = "job_submission_%s.py" % i
+                script_path = os.path.join(os.path.expanduser('~'), script_name)
+                Logger.get("scripter").notice("Reduction script: %s" % script_path)
+                
+                # Generate job submission script
+                script_path = os.path.join(os.path.expanduser('~'), "job_submission_%s.sh" % i)
+                self._write_submission_script(script_path, script_name)
+                st = os.stat(script_path)
+                os.chmod(script_path, st.st_mode | stat.S_IEXEC)
+                Logger.get("scripter").notice("Execution script: %s" % script_path)
+                
+                # Submit the job
+                submit_cmd = "SubmitRemoteJob(ComputeResource='%s', " % resource
+                submit_cmd += "NumNodes=%s, CoresPerNode=%s, " % (nodes, cores_per_node)
+                submit_cmd += "UserName='%s', GroupName='users', Password='%s', " % (user, pwd)
+                submit_cmd += "TransactionID='mantid_remote', "
+                submit_cmd += "ScriptName='%s')" % script_path
+                mantidplot.runPythonScript(submit_cmd, True)
+                print submit_cmd
         else:
             Logger.get("scripter").error("Mantid is unavailable to submit a reduction job")
 
@@ -486,7 +496,7 @@ class BaseReductionScripter(object):
         for item in self._observers:
             item.reset()
             
-    def _write_submission_script(self, file_path):
+    def _write_submission_script(self, file_path, script_name):
         """
             Write the mpirun script to be executed on a cluster
             @param file_path: local location of the script
@@ -524,7 +534,7 @@ class BaseReductionScripter(object):
         content += "# Kick off python on the computes...\n"
         content += "# Note: any MANTIDPLOT_* environment variables are set by MantidPlot when it submits the job\n"
         #content += "/usr/lib64/openmpi/bin/mpirun -n $TOTAL_PROCESSES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE python job_submission.py\n"
-        content += "$MPI_BIN/mpirun -n $MANTIDPLOT_NUM_NODES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE -x PATH=$PATH -x LD_LIBRARY_PATH=$LD_LIBRARY_PATH -x PYTHONPATH=$PYTHONPATH python job_submission.py\n"
+        content += "$MPI_BIN/mpirun -n $MANTIDPLOT_NUM_NODES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE -x PATH=$PATH -x LD_LIBRARY_PATH=$LD_LIBRARY_PATH -x PYTHONPATH=$PYTHONPATH python %s\n" % script_name
         fd = open(file_path, 'w')
         fd.write(content)
         fd.close()
