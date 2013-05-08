@@ -198,7 +198,8 @@ void SetupEQSANSReduction::init()
   setPropertySettings("SensitivityBeamCenterRadius",
             new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputSensitivityWorkspace","", Direction::Output, PropertyMode::Optional));
+  declareProperty("OutputSensitivityWorkspace", "",
+      "Name to give the sensitivity workspace");
 
   // -- Define group --
   setPropertyGroup("SensitivityFile", eff_grp);
@@ -967,7 +968,7 @@ void SetupEQSANSReduction::setupSensitivity(boost::shared_ptr<PropertyManager> r
        }
     }
 
-    effAlg->setProperty("OutputSensitivityWorkspace", outputSensitivityWS);
+    effAlg->setPropertyValue("OutputSensitivityWorkspace", outputSensitivityWS);
     effAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
     AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityAlgorithm");

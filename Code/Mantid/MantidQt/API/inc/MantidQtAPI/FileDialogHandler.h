@@ -51,23 +51,7 @@ struct FileDialogHandler
   */
   static QString getSaveFileName(QWidget * parent = 0, const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString(), QString * selectedFilter = 0, QFileDialog::Options options = 0)
   {
-#if defined(Q_OS_DARWIN) && defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
-  // If we are compiling on Snow Leopard
-  #if __MAC_OS_X_VERSION_MAX_ALLOWED == 1060
-    static int runningMountainLion(-1);
-    if(runningMountainLion < 0)
-    {
-      // Check if we are running Mountain Lion
-      // osrelease 12.x.x is OS X 10.8: http://stackoverflow.com/questions/11072804/mac-os-x-10-8-replacement-for-gestalt-for-testing-os-version-at-runtime
-      char str[256];
-      size_t size = sizeof(str);
-      sysctlbyname("kern.osrelease", str, &size, NULL, 0);
-      if(str[0] == '1' && str[1] == '2' ) runningMountainLion = 1;
-      else runningMountainLion = 0;
-    }
-    if(runningMountainLion) options = options | QFileDialog::DontUseNativeDialog;
-  #endif
-#endif
+    options = options | QFileDialog::DontUseNativeDialog;
     return QFileDialog::getSaveFileName(parent, caption, dir, filter, selectedFilter, options);
   }
 

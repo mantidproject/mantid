@@ -36,36 +36,6 @@ def process_function(name, qhp, outputdir, **kwargs): # was (args, algo):
     #print "***", func, dir(func)
 
     htmlfile = HtmlWriter(os.path.join(outputdir, outfile), name)
-#    htmlfile.write("""<!--<script type="text/x-mathjax-config">
-#                MathJax.Hub.Config({"HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"], linebreaks: { automatic:true }, EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50) },
-#                                    tex2jax: { inlineMath: [ ["$", "$"], ["\\\\(","\\\\)"] ], displayMath: [ ["$$","$$"], ["\\[", "\\]"] ], processEscapes: true, ignoreClass: "tex2jax_ignore|dno" },
-#                                    TeX: {  noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } } },
-#                                    messageStyle: "none"
-#                });
-#         </script>--><!--
-#        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>-->\n""")
-
-    htmlfile.write("""\n<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>\n""")
-#    htmlfile.write("""
-#<script>
-#if( !window.MathJax ) {
-#    document.write(
-#        '<script type="text/javascript" src="../lib/MathJax.js"></script>'
-#    );
-#}
-#</script>
-#<!--
-#<script>
-#var url= location.protocol == 'http:'?
-#         "http://cdn.mathjax.org/mathjax/latest/MathJax.js" :
-#         "../lib/MathJax.js";
-#document.write(
-#    '<script type="text/javascript" src="' + url + '"></script>'
-#);
-#</script>
-#-->
-#""")
-
     htmlfile.openTag("center")
     htmlfile.h1(name + " Fit Function", newline=False)
     htmlfile.closeTag(True)
@@ -77,7 +47,7 @@ def process_function(name, qhp, outputdir, **kwargs): # was (args, algo):
     htmlfile.hr()
 
     htmlfile.h3("Summary")
-    wiki = MediaWiki(htmlfile, HTML_DIR)
+    wiki = MediaWiki(htmlfile, HTML_DIR, latex=kwargs["latex"], dvipng=kwargs["dvipng"])
     wiki.parse(wiki_tools.get_fitfunc_summary(name, False), qhp)
 
     if func.numParams() <= 0:

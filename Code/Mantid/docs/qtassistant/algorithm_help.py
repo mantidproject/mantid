@@ -105,7 +105,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
         
         htmlfile.h3("Summary")
         #htmlfile.p(alg.getWikiSummary())
-        wiki = MediaWiki(htmlfile, HTML_DIR)
+        wiki = MediaWiki(htmlfile, HTML_DIR, latex=kwargs["latex"], dvipng=kwargs["dvipng"])
         wiki.parse(alg.getWikiSummary(), qhp)
 
         htmlfile.h3("Usage")
@@ -128,7 +128,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
             htmlfile.writeRow(propToList(property, i))
         htmlfile.closeTag(True)
 
-        wiki = MediaWiki(htmlfile, HTML_DIR)
+        wiki = MediaWiki(htmlfile, HTML_DIR, latex=kwargs["latex"], dvipng=kwargs["dvipng"])
         text = wiki_tools.get_custom_wiki_section(name, version, "*WIKI*", True, False)
         if len(text.strip()) > 0:
             htmlfile.h3("Description")

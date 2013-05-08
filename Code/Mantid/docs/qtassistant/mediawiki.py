@@ -1,4 +1,5 @@
 from assistant_common import WEB_BASE, HTML_DIR, addEle, addTxtEle
+from eqnparser import Equation
 import os
 import re
 from parseLinks import fixLinks
@@ -77,11 +78,13 @@ def formatImgHtml(raw):
     return (img, html)
 
 class MediaWiki:
-    def __init__(self, htmlfile, direc):
+    def __init__(self, htmlfile, direc, **kwargs):
         self.__file = htmlfile
         self.__direc = direc
         self.__types = []
         self.images = []
+        self.__latex= kwargs["latex"]
+        self.__dvipng = kwargs["dvipng"]
 
     def __parseImgs(self, text):
         # Get all of the raw image links
@@ -103,6 +106,34 @@ class MediaWiki:
             text = text.replace(orig, repl)
 
         return text.strip()
+
+    def __parseEqns(self, text):
+        if self.__latex is None:
+            print "Failed to find latex: not converting equations to png"
+            return text
+
+        if self.__dvipng is None:
+            print "Failed to find dvipng: not converting equations to png"
+            return text
+
+        # find all of the possible equations
+        start = 0
+        htmlroot = os.path.split(self.__file.name)[0]
+        outdir = os.path.join(htmlroot, "img")
+        while start >= 0:
+            start = text.find("<math>", start)
+            if start < 0:
+                break
+            stop = text.find("</math>", start)
+            if stop < start:
+                break
+            orig = text[start+6:stop]
+            start += 1
+            eqn = Equation(orig, outdir=outdir, tmpdir=outdir,
+                                     latex=self.__latex, dvipng=self.__dvipng)
+            text = text.replace("<math>" + orig + "</math>", eqn.contentshtml)
+            self.images.append(os.path.split(eqn.pngfile)[-1])
+        return text
 
     def __clearEmpty(self, text):
         result = []
@@ -200,6 +231,7 @@ class MediaWiki:
         if len(text) <= 0:
             return # don't bother if it is empty
         text = self.__parseImgs(text)
+        text = self.__parseEqns(text)
         #if len(self.images) > 0:
         #    print "----->", self.images
         for img in self.images:

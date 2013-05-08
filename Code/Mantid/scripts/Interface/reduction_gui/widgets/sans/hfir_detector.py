@@ -150,13 +150,11 @@ class DetectorWidget(BaseWidget):
             try:
                 reduction_table_ws = self.options_callback()
                 patch_output = AnalysisDataService.doesExist(patch_ws)
-                
                 filename = self._content.sensitivity_file_edit.text()
-                script = "_, msg = ComputeSensitivity(Filename='%s',\n" % filename
-                script += "                     ReductionProperties='%s',\n" % reduction_table_ws
-                script += "                     OutputWorkspace='sensitivity',\n"
-                script += "                     PatchWorkspace='%s')\n" % patch_ws
-                script += "print msg\n"
+                script  = "ComputeSensitivity(Filename='%s',\n" % filename
+                script += "                   ReductionProperties='%s',\n" % reduction_table_ws
+                script += "                   OutputWorkspace='sensitivity',\n"
+                script += "                   PatchWorkspace='%s')\n" % patch_ws
                 mantidplot.runPythonScript(script, True)
             except:
                 print "Could not compute sensitivity"

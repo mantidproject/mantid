@@ -17,7 +17,7 @@ For an indirect geometry instrument, <math>\lambda_i</math> is not known but the
 selected by the analyzers is known. For this geometry:
 #<math>t_f = L_f/v_f</math>, with <math>L_f</math>: distance from sample to detector, <math>v_f</math>: final velocity derived from <math>E_f</math>
 #<math>t_i = L_i/v_i</math>, with <math>L_i</math>: distance from moderator to sample, <math>v_i</math>: initial velocity unknown
-#<math>t_0 = a'/v_i+b^'</math>, with a' and b'  constants derived from the aforementioned heuristic formula <math>a' = a \cdot 3.956 \cdot 10^{-3}</math> with [a']=meter, and <math>b' = b</math> with [b']=microsec
+#<math>t_0 = a'/v_i+b'</math>, with a' and b'  constants derived from the aforementioned heuristic formula <math>a' = a \cdot 3.956 \cdot 10^{-3}</math> with [a']=meter, and <math>b' = b</math> with [b']=microsec
 
 Putting all together:  <math>TOF' = \frac{L_i}{L_i+a'} \cdot (TOF-t_f-b') + t_f</math>, with [TOF']=microsec
 

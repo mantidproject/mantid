@@ -166,31 +166,26 @@ namespace Crystal
       std::vector<Peak> &peaks = ws->getPeaks();
       size_t n_peaks = ws->getNumberPeaks();
 
-                                       // transform the HKLs and record the new HKL
-                                       // and q-vectors for peaks ORIGINALLY indexed
-      DblMatrix hkl_tran = info.GetHKL_Tran(); 
-      int num_indexed = 0;
+      int    num_indexed   = 0;
+      double average_error = 0.0;
       std::vector<V3D> miller_indices;
       std::vector<V3D> q_vectors;
       for ( size_t i = 0; i < n_peaks; i++ )
       {
-        V3D hkl( peaks[i].getHKL() );
-        if ( IndexingUtils::ValidIndex(hkl,tolerance ) )
-        {
-          num_indexed++;
-          miller_indices.push_back( hkl_tran * hkl );
-          q_vectors.push_back( peaks[i].getQSampleFrame() );
-          peaks[i].setHKL( hkl_tran * hkl );
-        }
-        else                            // mark as NOT indexed
-          peaks[i].setHKL( V3D(0.0,0.0,0.0) );
+        q_vectors.push_back( peaks[i].getQSampleFrame() );
       }
 
-      double average_error = IndexingUtils::IndexingError( newUB, miller_indices, q_vectors );
+      num_indexed = IndexingUtils::CalculateMillerIndices( newUB, q_vectors,
+                                                           tolerance,
+                                                           miller_indices,
+                                                           average_error );
+      for ( size_t i = 0; i < n_peaks; i++ )
+      {
+        peaks[i].setHKL( miller_indices[i] );
+      }
 
       // Tell the user what happened.
-      g_log.notice() << "Transformed Miller indices on previously valid indexed Peaks. " << std::endl;   
-      g_log.notice() << "Set hkl to 0,0,0 on peaks previously indexed out of tolerance. " << std::endl;   
+      g_log.notice() << "Re-indexed the peaks with the new UB. " << std::endl;   
       g_log.notice() << "Now, " << num_indexed << " are indexed with average error " << average_error << std::endl;
 
       // Save output properties
