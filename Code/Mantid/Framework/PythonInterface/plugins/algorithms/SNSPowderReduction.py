@@ -609,7 +609,7 @@ class SNSPowderReduction(PythonAlgorithm):
         if HAVE_MPI:
             msg = "MPI Task = %s ;" % (str(mpi.world.rank))
             try: 
-                msg += "Number Events = ", wksp.getNumberEvents()
+                msg += "Number Events = " + str(wksp.getNumberEvents())
             except Exception as e: 
                 msg += "Unable to get events of %s.  Error message: %s" % (str(wksp), str(e))
             print msg
