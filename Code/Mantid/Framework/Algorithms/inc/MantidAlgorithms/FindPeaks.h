@@ -71,17 +71,20 @@ private:
   void init();
   void exec();
 
+  /// Process algorithm's properties
+  void processAlgorithmProperties();
+
   API::MatrixWorkspace_sptr calculateSecondDifference(const API::MatrixWorkspace_const_sptr &input);
   void smoothData(API::MatrixWorkspace_sptr &WS, const int &w);
   void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input, const API::MatrixWorkspace_sptr &smoothed, const int &w);
   long long computePhi(const int& w) const;
 
-  int getCentreIndex(const MantidVec &X, double centre);
+  int getVectorIndex(const MantidVec &vecX, double x);
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4);
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double centre, const double left, const double right);
   void findPeaksUsingMariscotti();
-  void findPeaksGivenStartingPoints(const std::vector<double> &peakCentres, const std::vector<double> &fitWindows);
+  void findPeaksGivenStartingPoints(const std::vector<double> &peakcentres, const std::vector<double> &fitwindows);
 
   void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
       const unsigned int& i_min, const unsigned int& i_max,
@@ -90,24 +93,24 @@ private:
   void fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
       const double& in_bg0, const double& in_bg1, const double& in_bg2);
 
-  void addRow(const int spectrum, const std::vector<double> &params, const std::vector<double> &paramsRaw, const double mincost, bool error);
+  void addInfoRow(const int spectrum, const std::vector<double> &params, const std::vector<double> &paramsRaw, const double mincost, bool error);
   void updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestEffparams, std::vector<double> &bestRawparams, double &mincost, const double expPeakPos, const double expPeakHeight);
 
   std::string createTies(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak);
   API::IFunction_sptr createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak = true);
-  int backgroundOrder();
+  int getBackgroundOrder();
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
   static const int g_z = 5;
   
   /// Storage of the peak data
-  API::ITableWorkspace_sptr m_peaks;
+  API::ITableWorkspace_sptr m_outPeakTableWS;
   /// Progress reporting
   API::Progress* m_progress;
 
   //Properties saved in the algo.
-  API::MatrixWorkspace_sptr inputWS; ///<workspace to check for peaks
-  int fwhm; ///<holder for the requested peak FWHM
+  API::MatrixWorkspace_sptr m_dataWS; ///<workspace to check for peaks
+  int m_inputPeakFWHM; ///<holder for the requested peak FWHM
   int index; ///<list of workspace indicies to check
   bool singleSpectrum; ///<flag for if only a single spectrum is present
   bool m_highBackground; ///<flag for find relatively weak peak in high background
@@ -116,6 +119,10 @@ private:
   bool m_searchPeakPos; ///<flag to search for peak in the window
   std::string m_peakFuncType; //< The name of the peak function to fit
   std::string m_backgroundType; //< The type of background to fit
+
+  // Peaks positions
+  std::vector<double> m_vecPeakCentre;
+  std::vector<double> m_vecFitWindows;
 
   // Functions for reused 
   API::IFunction_sptr m_peakFunction;
@@ -127,10 +134,10 @@ private:
   unsigned int stepGuessedPeakWidth;
 
   bool m_usePeakPositionTolerance;
-  double peakPositionTolerance;
+  double m_peakPositionTolerance;
 
   bool m_usePeakHeightTolerance;
-  double peakHeightTolerance;
+  double m_peakHeightTolerance;
 
 };
 
