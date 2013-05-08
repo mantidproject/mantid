@@ -453,6 +453,9 @@ class BaseReductionScripter(object):
                 script = scripts[i]
                 script_name = "job_submission_%s.py" % i
                 script_path = os.path.join(os.path.expanduser('~'), script_name)
+                fd = open(script_path, 'w')
+                fd.write(script)
+                fd.close()
                 Logger.get("scripter").notice("Reduction script: %s" % script_path)
                 
                 # Generate job submission script
