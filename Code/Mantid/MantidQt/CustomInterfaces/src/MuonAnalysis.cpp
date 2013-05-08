@@ -1846,12 +1846,11 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
                                 const std::string& inputWS, const std::string& outWS)
 {
   m_loaded = true;
-
   // adjust for time zero if necessary
-  if ( m_nexusTimeZero != boost::lexical_cast<double>(timeZero().toStdString()) )
+  if ( m_nexusTimeZero != timeZero())
   {
     try {
-      double shift = m_nexusTimeZero - boost::lexical_cast<double>(timeZero().toStdString());
+      double shift = m_nexusTimeZero - timeZero();
       Mantid::API::IAlgorithm_sptr rebinAlg = Mantid::API::AlgorithmManager::Instance().create("ChangeBinOffset");
       rebinAlg->setPropertyValue("InputWorkspace", inputWS);
       rebinAlg->setPropertyValue("OutputWorkspace", outWS);
@@ -1864,7 +1863,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
   }
 
   Mantid::API::IAlgorithm_sptr cropAlg = Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
-  if ( m_nexusTimeZero != boost::lexical_cast<double>(timeZero().toStdString()) )
+  if ( m_nexusTimeZero != timeZero() )
     cropAlg->setPropertyValue("InputWorkspace", outWS);
   else 
     cropAlg->setPropertyValue("InputWorkspace", inputWS);
@@ -2646,6 +2645,9 @@ void MuonAnalysis::startUpLook()
   m_uiForm.homePeriodBox2->setEditable(false);
   m_uiForm.homePeriodBox2->setEnabled(false);
 
+  // Only allow numbers in the time zero text box
+  m_uiForm.timeZeroFront->setValidator(new QDoubleValidator(m_uiForm.timeZeroFront));
+
   // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(0, 100);
   m_uiForm.groupTable->setColumnWidth(1, 200);
@@ -2895,9 +2897,20 @@ void MuonAnalysis::setGroupingFromIDF(const std::string& mainFieldDirection, Mat
  /**
  * Time zero returend in ms
  */
-QString MuonAnalysis::timeZero()
+double MuonAnalysis::timeZero()
 {
-  return m_uiForm.timeZeroFront->text();
+  QString boxText = m_uiForm.timeZeroFront->text();
+  double timeZero = 0.0;
+  try
+  {
+    timeZero = boost::lexical_cast<double>(boxText.toStdString());
+  }
+  catch(boost::bad_lexical_cast)
+  {
+    QMessageBox::warning(this, "MantidPlot - Muon Analysis", "Unable to interpret time zero as number, setting to 0.0");
+    m_uiForm.timeZeroFront->setText("0.0");
+  }
+  return timeZero;
 }
 
  /**
