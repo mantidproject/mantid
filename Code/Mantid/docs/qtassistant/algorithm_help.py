@@ -76,7 +76,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
     htmlfile.hr()
     
     imagefile = ""
-    imgpath = None
+    imgpath = ""
     if fetchimages:
         # os.environ['http_proxy']="http://wwwcache.rl.ac.uk:8080"  #TODO should be cmake variable
         try:
@@ -94,7 +94,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
     
     htmlfile.openTag("img", {"src":imgpath, "style":"position:relative; z-index:1000; padding-left:5px;", "width":"400", "align":"right"})
     htmlfile.closeTag(True)
-    if imgpath:
+    if imgpath != "":
         qhp.addFile(os.path.join(HTML_DIR,imgpath))
     
     num_versions = len(versions)
