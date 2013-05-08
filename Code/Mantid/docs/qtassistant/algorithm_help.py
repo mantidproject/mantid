@@ -75,7 +75,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
     htmlfile.nl()
     htmlfile.hr()
     
-    destname = ""
+    imagefile = ""
     if fetchimages:
         # os.environ['http_proxy']="http://wwwcache.rl.ac.uk:8080"  #TODO should be cmake variable
         try:
@@ -90,7 +90,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
         except IOError:
             pass    
     
-    htmlfile.openTag("img", {"src":destname, "style":"position:relative; z-index:1000; padding-left:5px;", "width":"400"})
+    htmlfile.openTag("img", {"src":imagefile, "style":"position:relative; z-index:1000; padding-left:5px;", "width":"400"})
     htmlfile.closeTag(True)
     
     num_versions = len(versions)
