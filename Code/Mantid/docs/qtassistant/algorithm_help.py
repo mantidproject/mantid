@@ -55,7 +55,7 @@ def propToList(property, number):
     result.append(text)
     return result
 
-def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, algo):
+def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # was (args, algo):
     categories = []
     outfile = "Algo_%s.html" % (name)
     qhp.addFile(os.path.join(HTML_DIR, outfile), name)
@@ -74,7 +74,25 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
     htmlfile.closeTag(True)
     htmlfile.nl()
     htmlfile.hr()
-
+    
+    destname = ""
+    if fetchimages:
+        # os.environ['http_proxy']="http://wwwcache.rl.ac.uk:8080"  #TODO should be cmake variable
+        try:
+            # Download image
+            import urllib
+            imagefile = '%s_dlg.png' %name
+            fileurl = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s" % imagefile #TODO location should be cmake variable
+            destname = os.path.join(outputdir, imagefile)
+            urllib.urlretrieve(fileurl, filename=destname)   
+            # Now link to image
+            
+        except IOError:
+            pass    
+    
+    htmlfile.openTag("img", {"src":destname, "style":"position:relative; z-index:1000; padding-left:5px;", "width":"400"})
+    htmlfile.closeTag(True)
+    
     num_versions = len(versions)
     for version in versions:
         htmlfile.openTag("div", {"id":"version_"+str(version)})
@@ -84,7 +102,7 @@ def process_algorithm(name, versions, qhp, outputdir, **kwargs): # was (args, al
 
         alg = mantid.FrameworkManager.createAlgorithm(name, version)
         categories.extend(alg.categories())
-
+        
         htmlfile.h3("Summary")
         #htmlfile.p(alg.getWikiSummary())
         wiki = MediaWiki(htmlfile, HTML_DIR, latex=kwargs["latex"], dvipng=kwargs["dvipng"])

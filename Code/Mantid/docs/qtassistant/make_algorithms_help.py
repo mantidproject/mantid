@@ -173,10 +173,11 @@ def process(algos, qhp, outputdir, options):
     from algorithm_help import process_algorithm
     for name in algos.keys():
         versions = algos[name]
-        process_algorithm(name, versions, qhp, outputdir, latex=options.latex, dvipng=options.dvipng)
+        process_algorithm(name, versions, qhp, outputdir, latex=options.latex, dvipng=options.dvipng, fetchimages=options.fetchimages)
 
 if __name__ == "__main__":
     parser = getParser("Generate qtassistant docs for the algorithms")
+    parser.add_option("-g", '--getimages', help="Download algorithm dialog images", default=False, action="store_true", dest="fetchimages")
     (options, args) = parser.parse_args()
 
     # where to put the generated files
