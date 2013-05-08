@@ -235,11 +235,17 @@ namespace DataHandling
     while (m_stopThread == false)  // loop until the foreground thread tells us to stop
     {
 
-      while (m_pauseNetRead)
+      while (m_pauseNetRead && m_stopThread == false)
       {
         // foreground thread doesn't want us to process any more packets until
         // it's ready.  See comments in rxPacket( const ADARA::RunStatusPkt &pkt)
         Poco::Thread::sleep( 100);  // 100 milliseconds
+      }
+
+      if (m_stopThread)
+      {
+        // it's possible that a stop request came in while we were sleeping...
+        break;
       }
 
       // Get some more data from our socket and put it in the parser's buffer
