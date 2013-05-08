@@ -1753,8 +1753,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const
       {
         std::stringstream messageStream;
         messageStream << "The compatible version of ParaView is " << targetVersionNumber << " but the installed version is " << givenVersionNumber;
-
-        this->g_log.notice(messageStream.str());
+        this->g_log.debug(messageStream.str());
         this->g_log.notice("ParaView is not available");
       }
     }
@@ -1762,14 +1761,14 @@ bool ConfigServiceImpl::quickParaViewCheck() const
     {
       std::stringstream messageStream;
       messageStream << "ParaView version query failed with code: " << rc;
-      this->g_log.notice(messageStream.str());
-      this->g_log.notice("ParaView is not available, query failed.");
+      this->g_log.debug(messageStream.str());
+      this->g_log.notice("ParaView is not available");
     }
   }
   catch(Poco::SystemException &e)
   {
-    g_log.debug(e.what());
-    this->g_log.notice("ParaView is not available, Poco::SystemException");
+    this->g_log.debug(e.what());
+    this->g_log.notice("ParaView is not available");
   }
   return isAvailable; 
 }
