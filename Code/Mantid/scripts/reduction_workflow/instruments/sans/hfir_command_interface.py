@@ -193,7 +193,7 @@ def TransmissionDirectBeamCenter(datafile):
 def Background(datafile):
     if type(datafile)==list:
         datafile=','.join(datafile)
-    datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument(), allow_multiple=True)
+    find_data(datafile, instrument=ReductionSingleton().get_instrument(), allow_multiple=True)
     ReductionSingleton().reduction_properties["BackgroundFiles"] = datafile
 
 def NoBackground():
