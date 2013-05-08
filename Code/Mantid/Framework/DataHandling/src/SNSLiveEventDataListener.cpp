@@ -1167,11 +1167,22 @@ namespace DataHandling
     // Block until the background thread has actually initialized the workspace
     // (Which won't happen until the SMS sends it the packet with the geometry
     // information in it.)
-    // Note:  Yes, I discussed this with the other developers and they all agreed
-    // that blocking was the proper behavior.  We can't return NULL, or some
-    // invalid workspace.
+    //
+    // Limit the maximum time we block to 10 seconds.  If we haven't initialized by
+    // that time, there's probably a problem upstream.  The only thing we can do,
+    // though, is throw an exception.
+
+#define MAX_BLOCK_TIME  10 // in seconds
+    Mantid::Kernel::DateAndTime endTime = Mantid::Kernel::DateAndTime::getCurrentTime();
+    endTime += (double)MAX_BLOCK_TIME;
     while (m_workspaceInitialized == false)
     {
+      if  (Mantid::Kernel::DateAndTime::getCurrentTime() > endTime)
+      {
+        // Note: If you're stepping through the initializtion code in
+        // a debugger, you probably ought to comment out this line
+        throw std::runtime_error( "SNSLiveEventDataListener timed out without initializing.");
+      }
       Poco::Thread::sleep( 100);  // 100 milliseconds
     }
 
