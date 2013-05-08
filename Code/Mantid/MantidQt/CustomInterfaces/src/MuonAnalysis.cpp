@@ -2646,7 +2646,7 @@ void MuonAnalysis::startUpLook()
   m_uiForm.homePeriodBox2->setEnabled(false);
 
   // Only allow numbers in the time zero text box
-  m_uiForm.timeZeroFront->setValidator(new QDoubleValidator());
+  m_uiForm.timeZeroFront->setValidator(new QDoubleValidator(m_uiForm.timeZeroFront));
 
   // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(0, 100);
