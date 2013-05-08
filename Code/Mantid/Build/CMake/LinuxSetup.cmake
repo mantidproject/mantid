@@ -38,7 +38,7 @@ set ( PLUGINS_DIR plugins )
 set ( PVPLUGINS_DIR pvplugins )
 set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
-include ( CPackLinuxSetup )    
+include ( DetermineLinuxDistro )    
 
 if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/Mantid CACHE PATH "Install path" FORCE )
@@ -90,7 +90,7 @@ endif()
 
 
 # RHEL6 specific stuff (as we need to use software collections)
-if ( ${UNIX_CODENAME} STREQUAL "Santiago" )
+if ( ${UNIX_DIST} STREQUAL "RedHatEnterprise" )
 	file ( APPEND ${CMAKE_CURRENT_BINARY_DIR}/rpm_post_install.sh "\n"
 								     "if [ -f $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot ]; then\n"
                                                                      "  mv $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot $RPM_INSTALL_PREFIX0/${BIN_DIR}/MantidPlot_exe\n"
