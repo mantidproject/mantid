@@ -2189,14 +2189,8 @@ void AxesDialog::customAxisFont()
 
 void AxesDialog::accept()
 {
-  /*if (updatePlot())
-		close();*/
-		if(m_updatePlot)
-		  close();
-		else
-		{updatePlot();
-		close();
-		}
+  if (updatePlot())
+    close();
 }
 
 void AxesDialog::majorGridEnabled(bool on)

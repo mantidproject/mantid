@@ -56,8 +56,11 @@ public:
   int decimals(){return d_prec;};
   void setDecimals(int prec){if (prec >= 0) d_prec = prec;};
 
-  // RJT: The interpretText() call, added in Qtiplot revision 1566 as a "Mac fix", causes a crash for us - so comment it out
-  double value(){/*interpretText();*/ return d_value;};
+  // MAG: Add back interpretText call for Mac 'fix'. The Mac spin boxes
+  // don't seem to lose focus in the same way the other platforms do
+  // so if value() is called when the box still has focus it returns
+  // the original and not the updated value.
+  double value(){ interpretText(); return d_value;};
   bool setValue(double val);
 
   void setFormat(const char format, int prec = 1){d_format = format; setDecimals(prec);};
