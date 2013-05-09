@@ -21,6 +21,7 @@
 #include <QList>
 
 #include <limits>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -44,7 +45,19 @@ ColorUpdater::~ColorUpdater()
 QPair<double, double> ColorUpdater::autoScale(pqPipelineRepresentation *repr)
 {
   QPair<double, double> range = repr->getColorFieldRange();
-  repr->getLookupTable()->setScalarRange(range.first, range.second);
+  if (0 == range.first && 1 == range.second)
+  {
+    throw std::invalid_argument("Bad color scale given");
+  }
+  pqScalarsToColors *stc = repr->getLookupTable();
+  if (NULL != stc)
+  {
+    stc->setScalarRange(range.first, range.second);
+  }
+  else
+  {
+    throw std::invalid_argument("Cannot get LUT for representation");
+  }
   repr->getProxy()->UpdateVTKObjects();
   return range;
 }
@@ -93,8 +106,12 @@ void ColorUpdater::colorScaleChange(pqPipelineRepresentation *repr,
   {
     return;
   }
-  repr->getLookupTable()->setScalarRange(min, max);
-  repr->getProxy()->UpdateVTKObjects();
+  pqScalarsToColors *stc = repr->getLookupTable();
+  if (NULL != stc)
+  {
+    stc->setScalarRange(min, max);
+    repr->getProxy()->UpdateVTKObjects();
+  }
 }
 
 void ColorUpdater::logScale(pqPipelineRepresentation *repr, int state)
