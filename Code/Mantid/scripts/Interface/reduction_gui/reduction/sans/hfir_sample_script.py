@@ -164,7 +164,7 @@ class SampleData(BaseScriptElement):
             Includes expanding run ranges. 
         """
         data_list = []
-        for f in self.data_file:
+        for f in self.data_files:
             data_list.extend(SampleData.parse_runs(f))
         return data_list
 

@@ -95,7 +95,8 @@ class BaseScriptElement(object):
             try:
                 r_min = int(toks[0])
                 r_max = int(toks[1])
-                return [str(i) for i in range(r_min, r_max+1)]
+                if r_max>r_min:
+                    return [str(i) for i in range(r_min, r_max+1)]
             except:
                 # Can't convert to run numbers, just skip
                 pass
