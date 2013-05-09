@@ -14,6 +14,9 @@ using namespace Mantid::Kernel::MultiFileNameParsing;
 class MultiFileNameParserTest : public CxxTest::TestSuite
 {
 public:
+  static MultiFileNameParserTest *createSuite() { return new MultiFileNameParserTest(); }
+  static void destroySuite(MultiFileNameParserTest *suite) { delete suite; }
+
   typedef std::vector<std::vector<unsigned int> > ParsedRuns;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -325,19 +328,6 @@ public:
     TS_ASSERT_EQUALS(filenames[2][0], "c:/TSC00004.raw");
   }
 
-  void test_instrument_with_multiple_padding()
-  {
-    Parser parser;
-    parser.parse("TESTHISTOLISTENER123,299-301");
-
-    std::vector<std::vector<std::string> > filenames = parser.fileNames();
-
-    TS_ASSERT_EQUALS(filenames[0][0], "TESTHISTOLISTENER00000123" );
-    TS_ASSERT_EQUALS(filenames[1][0], "TESTHISTOLISTENER00000299" );
-    TS_ASSERT_EQUALS(filenames[1][1], "TST00000000300" );
-    TS_ASSERT_EQUALS(filenames[1][2], "TST00000000301" );
-  }
-
   void test_complexFileNameString_SNS()
   {
     Parser parser;
@@ -369,6 +359,21 @@ public:
     TS_ASSERT_EQUALS(filenames[7][0], "CNCS_50.nxs");
     TS_ASSERT_EQUALS(filenames[7][1], "CNCS_51.nxs");
     TS_ASSERT_EQUALS(filenames[7][2], "CNCS_52.nxs");
+  }
+
+  void test_instrument_with_multiple_padding()
+  {
+    Mantid::Kernel::ConfigService::Instance().setString("supported.facilities", "TEST");
+
+    Parser parser;
+    parser.parse("TESTHISTOLISTENER123,299-301");
+
+    std::vector<std::vector<std::string> > filenames = parser.fileNames();
+
+    TS_ASSERT_EQUALS(filenames[0][0], "TESTHISTOLISTENER00000123" );
+    TS_ASSERT_EQUALS(filenames[1][0], "TESTHISTOLISTENER00000299" );
+    TS_ASSERT_EQUALS(filenames[1][1], "TST00000000300" );
+    TS_ASSERT_EQUALS(filenames[1][2], "TST00000000301" );
   }
 
 };

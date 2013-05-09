@@ -206,13 +206,6 @@
   
   <livedata listener="ISISHistoDataListener"/>
 
-  <instrument name="TESTHISTOLISTENER"> 
-    <zeropadding size="8"/>
-    <zeropadding size="11" startRunNumber="300" prefix="TST"/>
-    <technique>Test ISISHistoDataListener</technique>
-    <livedata address="127.0.0.1:6789" />
-  </instrument>
-   
 </facility>
 
 <facility name="HFIR" FileExtensions=".nxs,.dat,.xml">
@@ -488,6 +481,14 @@
       <technique>Test Neutron Diffraction</technique>
       <livedata address="127.0.0.1:0" />
    </instrument>
+
+  <instrument name="TESTHISTOLISTENER"> 
+    <zeropadding size="8"/>
+    <zeropadding size="11" startRunNumber="300" prefix="TST"/>
+    <technique>Test ISISHistoDataListener</technique>
+    <livedata listener="ISISHistoDataListener" address="127.0.0.1:6789" />
+  </instrument>
+
 </facility>
 
 </facilities>
