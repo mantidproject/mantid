@@ -13,12 +13,10 @@ if (QT_QCOLLECTIONGENERATOR_EXECUTABLE)
    # Dowload the Dialog images as part of the build for Qt Assistant
    set ( QT_ASSISTANT_FETCH_IMAGES OFF CACHE BOOL "Download algorithm dialog images for qt assistant as part of the build.")
    MARK_AS_ADVANCED(QT_ASSISTANT_FETCH_IMAGES)
-   set ( fetch_images "False")
+   set ( fetch_images "")
    if ( ${QT_ASSISTANT_FETCH_IMAGES} )
-     set ( fetch_images "True")
+     set ( fetch_images "-g")
    endif ( ${QT_ASSISTANT_FETCH_IMAGES} )
-   
-   set (QT_ASSISTANT_FETCH_IMAGES True)
 
    message (STATUS "Adding information for qtassistant")
    set (HELP_QHCP_SOURCE 
@@ -144,7 +142,7 @@ find_program ( DVIPNG_EXE dvipng )
    add_custom_command(OUTPUT ${HELP_ALGO_OUT}
                       DEPENDS make_algorithms_help.py qhpfile.py algorithm_help.py htmlwriter.py parseLinks.py mediawiki.py eqnparser.py ${INSTALL_IMAGES} Algorithms
                       COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_algorithms_help.py 
-                              ${EXTRA_QHP_GEN_ARGS} -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR} -g ${fetch_images}
+                              ${EXTRA_QHP_GEN_ARGS} -m ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} -o ${HELP_OUT_DIR} ${fetch_images}
                       )
 
    add_custom_command(OUTPUT ${HELP_FIT_OUT}
