@@ -79,6 +79,29 @@ class BaseScriptElement(object):
         return NotImplemented
     
     @classmethod
+    def parse_runs(cls, range_str):
+        """
+            Return a list of runs. Parses for run ranges indicated
+            by dashes.
+            @param range_str: string representing a range of runs
+        """
+        range_str = range_str.strip()
+        # Parse for dash
+        toks = range_str.split('-')
+        # If we have two sub-strings separated by a dash, treat
+        # it as a range if the two sub-strings can be converted
+        # to integers
+        if len(toks)==2:
+            try:
+                r_min = int(toks[0])
+                r_max = int(toks[1])
+                return [str(i) for i in range(r_min, r_max+1)]
+            except:
+                # Can't convert to run numbers, just skip
+                pass
+        return [range_str]
+        
+    @classmethod
     def getText(cls, nodelist):
         """
             Utility method to extract text out of an XML node

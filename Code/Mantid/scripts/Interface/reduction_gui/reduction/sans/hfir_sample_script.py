@@ -157,7 +157,17 @@ class SampleData(BaseScriptElement):
 
      # Option list
     option_list = [DirectBeam, BeamSpreader]
-           
+    
+    def get_data_file_list(self):
+        """
+            Get the list of data files.
+            Includes expanding run ranges. 
+        """
+        data_list = []
+        for f in self.data_file:
+            data_list.extend(SampleData.parse_runs(f))
+        return data_list
+
     def to_script(self, data_file=None):
         """
             Generate reduction script
@@ -183,16 +193,17 @@ class SampleData(BaseScriptElement):
             raise RuntimeError, "Trying to generate reduction script without a data file."
 
         if data_file is None:
-            parts = os.path.split(str(self.data_files[0]).strip())
+            data_file_list = self.get_data_file_list()
+            parts = os.path.split(str(data_file_list[0]).strip())
             if len(parts[0])>0:
                 script += "DataPath(\"%s\")\n" % parts[0]
             else:
                 script += "#Note: Data path was not found at script generation, will try at run time.\n"
 
             if self.separate_jobs is False:
-                script += "AppendDataFile([\"%s\"])\n" % '\",\"'.join(self.data_files)
+                script += "AppendDataFile([\"%s\"])\n" % '\",\"'.join(data_file_list)
             else:
-                for f in self.data_files:
+                for f in data_file_list:
                     script += "AppendDataFile([\"%s\"])\n" % f
         else:
             parts = os.path.split(str(self.data_files[str(data_file)]).strip())

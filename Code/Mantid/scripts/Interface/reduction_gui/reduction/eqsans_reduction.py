@@ -84,7 +84,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
         if data_options is None or data_options.separate_jobs is False:
             return [self.to_script()]
         
-        data_files = data_options.data_files
+        data_files = data_options.get_data_file_list()
                     
         scripts = []
         for data_file in data_files:
