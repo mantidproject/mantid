@@ -332,7 +332,7 @@ void InstrumentWindow::setSurfaceType(int type)
     else
     {
       QSettings settings;
-      peakLabelPrecision = settings.value("Mantid/InstrumentWindow/PeakLabelPrecision",6).toInt();
+      peakLabelPrecision = settings.value("Mantid/InstrumentWindow/PeakLabelPrecision",2).toInt();
       showPeakRow = settings.value("Mantid/InstrumentWindow/ShowPeakRows",true).toBool();
       showPeakLabels = settings.value("Mantid/InstrumentWindow/ShowPeakLabels",true).toBool();
     }
