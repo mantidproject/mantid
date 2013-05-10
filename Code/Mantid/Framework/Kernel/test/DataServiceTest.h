@@ -67,15 +67,14 @@ public:
     TS_ASSERT_EQUALS( svc.retrieve("anotherOne"), one );
 
     // Can't re-add the same name
-    TS_ASSERT_THROWS( svc.add("one", one), std::invalid_argument );
+    TS_ASSERT_THROWS( svc.add("one", one), std::runtime_error );
     // Can't add blank name
-    TS_ASSERT_THROWS( svc.add("", one), std::invalid_argument );
+    TS_ASSERT_THROWS( svc.add("", one), std::runtime_error );
     // Can't add empty pointer
-    TS_ASSERT_THROWS( svc.add("Null", boost::shared_ptr<int>()), std::invalid_argument );
+    TS_ASSERT_THROWS( svc.add("Null", boost::shared_ptr<int>()), std::runtime_error );
 
     svc.add("__hidden", boost::make_shared<int>(99));
-    TS_ASSERT_EQUALS( svc.size(), 2);
-    TS_ASSERT_EQUALS( notificationFlag, 2 )
+    TS_ASSERT_EQUALS( notificationFlag, 3 )
     svc.notificationCenter.removeObserver(observer);
   }
 
@@ -125,9 +124,9 @@ public:
     TS_ASSERT_EQUALS( *svc.retrieve("one"), 2);
 
     // Can't add blank names
-    TS_ASSERT_THROWS( svc.addOrReplace("", two), std::invalid_argument );
+    TS_ASSERT_THROWS( svc.addOrReplace("", two), std::runtime_error );
     // Can't add empty pointer
-    TS_ASSERT_THROWS( svc.addOrReplace("one", boost::shared_ptr<int>()), std::invalid_argument );
+    TS_ASSERT_THROWS( svc.addOrReplace("one", boost::shared_ptr<int>()), std::runtime_error );
   }
 
   void handleAfterReplaceNotification(const Poco::AutoPtr<FakeDataService::AfterReplaceNotification>& )
@@ -161,18 +160,18 @@ public:
     TSM_ASSERT_THROWS("One should have been renamed to anotherOne", svc.retrieve("one"), Exception::NotFoundError );
     TSM_ASSERT_EQUALS("One should have been renamed to anotherOne", svc.retrieve("anotherOne"), one );
 
-    TSM_ASSERT_EQUALS("The observers should have been called 1 time in total", notificationFlag, 1 );
+    TSM_ASSERT_EQUALS("The observers should have been called 2 times in total", notificationFlag, 2 );
 
     svc.rename("Two","anotherOne");
     TS_ASSERT_EQUALS( svc.size(), 1);
     TSM_ASSERT_THROWS("Two should have been renamed to anotherOne", svc.retrieve("two"), Exception::NotFoundError );
     TSM_ASSERT_EQUALS("Two should have been renamed to anotherOne", svc.retrieve("anotherOne"), two );
-    TSM_ASSERT_EQUALS("The observers should have been called 3 times in total", notificationFlag, 3 );
+    TSM_ASSERT_EQUALS("The observers should have been called 4 times in total", notificationFlag, 4 );
 
     svc.notificationCenter.removeObserver(observer);
     svc.notificationCenter.removeObserver(observer2);
 
-    svc.rename("anotherOne","");
+    TS_ASSERT_THROWS( svc.rename("anotherOne",""), std::runtime_error);
     TSM_ASSERT_THROWS_NOTHING( "'AnotherOne' should still be there", svc.retrieve("anotherOne") );
 
   }
