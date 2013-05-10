@@ -137,6 +137,9 @@ namespace Algorithms
     declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
                     "Name of the workspace to search");
 
+    declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace", "OutputWS", Direction::Output),
+                    "Name of the output workspace containing original data and fitted peaks.");
+
     auto min = boost::make_shared<BoundedValidator<int> >();
     min->setLower(1);
     // The estimated width of a peak in terms of number of channels
@@ -216,6 +219,9 @@ namespace Algorithms
   {
     // Process input
     processAlgorithmProperties();
+
+    // Create those functions to fit
+    m_backgroundFunction = FunctionFactory::Instance().createFunction(m_backgroundType);
 
     // Set up output table workspace
     m_outPeakTableWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -1057,10 +1063,11 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Fit peak with high background
-    * @param  X, Y, Z: MantidVec&
-    * @param i0: bin index of right end of peak
-    * @param i2: bin index of left end of peak
-    * @param i4: bin index of center of peak
+    * @param input :: matrix workspace to fit with
+    * @param spectrum :: workspace index of the spetrum to fit with
+    * @param ileft: bin index of right end of peak
+    * @param iright: bin index of left end of peak
+    * @param icentre: bin index of center of peak
     * @param i_min: bin index of left bound of fit range
     * @param i_max: bin index of right bound of fit range
     * @param in_bg0: guessed value of a0
@@ -1068,269 +1075,129 @@ namespace Algorithms
     * @param in_bg2: guessed value of a2
     */
   void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum,
-                                        const int& i0, const int& i2, const int& i4, const unsigned int& i_min,
-                                        const unsigned int& i_max, const double& in_bg0, const double& in_bg1, const double& in_bg2)
+                                        const int& iright, const int& ileft, const int& icentre,
+                                        const unsigned int& i_min, const unsigned int& i_max,
+                                        const double& in_bg0, const double& in_bg1, const double& in_bg2)
   {
     g_log.debug("Fitting A Peak in high-background approach");
 
+    // Prepare
     const MantidVec &X = input->readX(spectrum);
     const MantidVec &Y = input->readY(spectrum);
     const MantidVec &E = input->readE(spectrum);
 
-    const double in_centre = input->isHistogramData() ? 0.5 * (X[i4] + X[i4 + 1]) : X[i4];
-    double windowSize = 5. * fabs(X[i0] - X[i2]);
+    size_t numbkgdparams = m_backgroundFunction->nParams();
 
-    // a) Construct a Workspace to fit for background
-    std::vector<double> newX, newY, newE;
-    for (size_t i = i_min; i <= i_max; i++)
+    IFunction_sptr peakfunc = FunctionFactory::Instance().createFunction(m_peakFuncType);
+
+    // Fit background: with fit result in m_backgroundFunction
+    fitBackground(X, Y, E,  ileft, iright, i_min, i_max, in_bg0, in_bg1, in_bg2);
+
+    // Create a Workspace2D with pure peak
+    size_t numpts = i_max-i_min+1;
+    API::MatrixWorkspace_sptr peakws =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, numpts, numpts);
+
+    // Set up x-axis first
+    MantidVec& dataX = peakws->dataX(0);
+    MantidVec& dataY = peakws->dataY(0);
+    MantidVec& dataE = peakws->dataE(0);
+
+    for (size_t i = 0; i < numpts; ++i)
     {
-      if (i > size_t(i0) || i < size_t(i2))
-      {
-        newX.push_back(X[i]);
-        newY.push_back(Y[i]);
-        newE.push_back(E[i]);
-      }
+      dataX[i] = X[i_min+i];
     }
 
-    if (newX.size() < 3)
+    FunctionDomain1DVector domain(dataX);
+    FunctionValues values(domain);
+
+    // Fit with pure peak
+    //   set up data workspace as pure peak
+    m_backgroundFunction->function(domain, values);
+    for (size_t i = 0; i < numpts; ++i)
     {
-      g_log.error() << "Size of new Workspace = " << newX.size() << "  Too Small! " << std::endl;
-      throw;
-    }
-
-    API::MatrixWorkspace_sptr bkgdWS = API::WorkspaceFactory::Instance().create("Workspace2D", 1,
-                                                                                newX.size(), newY.size());
-    // AnalysisDataService::Instance().addOrReplace("BackgroundWorkspace", bkgdWS);
-    MantidVec& wsX = bkgdWS->dataX(0);
-    MantidVec& wsY = bkgdWS->dataY(0);
-    MantidVec& wsE = bkgdWS->dataE(0);
-    for (size_t i = 0; i < newY.size(); i++)
-    {
-      wsX[i] = newX[i];
-      wsY[i] = newY[i];
-      wsE[i] = newE[i];
-    }
-
-    // b) Fit background
-    IAlgorithm_sptr fit;
-    try
-    {
-      // Fitting the candidate peaks to a Gaussian
-      fit = createChildAlgorithm("Fit", -1, -1, true);
-    } catch (Exception::NotFoundError &)
-    {
-      g_log.error("The StripPeaks algorithm requires the CurveFitting library");
-      throw;
-    }
-
-    // c) Set initial fitting parameters
-    IFunction_sptr backgroundFunction = this->createFunction(0., 0., 0., in_bg0, in_bg1, in_bg2,
-                                                             false);
-    g_log.information() << "Background Type = " << m_backgroundType << "  Function: "
-                        << backgroundFunction->asString() << "  windowSize = " << windowSize << "  StartX = "
-                        << in_centre - windowSize << " EndX = " << in_centre + windowSize << std::endl;
-
-    // d) complete fit
-    fit->setProperty("Function", backgroundFunction);
-    fit->setProperty("InputWorkspace", bkgdWS);
-    fit->setProperty("WorkspaceIndex", 0);
-    fit->setProperty("MaxIterations", 50);
-    fit->setProperty("StartX", in_centre - windowSize);
-    fit->setProperty("EndX", in_centre + windowSize);
-    fit->setProperty("Minimizer", "Levenberg-Marquardt");
-    fit->setProperty("CostFunction", "Least squares");
-
-    // e) Fit and get result of fitting background
-    fit->executeAsChildAlg();
-
-    std::string fitStatus = fit->getProperty("OutputStatus");
-    //std::vector<double> params = fit->getProperty("Parameters");
-    m_backgroundFunction = fit->getProperty("Function");
-
-    double a0(0.0), a1(0.0), a2(0.0);
-
-    double bkgdchi2;
-    double mincost = 1.0E10;
-    std::vector<double> bestparams, bestRawParams;
-
-    g_log.debug() << "(HighBackground) Fit Background Function.  Fit Status = " << fitStatus
-                  << std::endl;
-
-    bool allowedfailure = fitStatus.find("cannot") > 0 && fitStatus.find("tolerance") > 0;
-    bkgdchi2 = fit->getProperty("OutputChi2overDoF");
-
-    if (fitStatus.compare("success") == 0 || allowedfailure || bkgdchi2 < 100)
-    {
-      a0 = backgroundFunction->getParameter(0); //params[0];
-      if (this->getBackgroundOrder() > 0)
-      {
-        a1 = backgroundFunction->getParameter(1); //params[1];
-        if (this->getBackgroundOrder() > 1)
-        {
-          a2 = backgroundFunction->getParameter(2); //params[2];
-        }
-      }
-      bkgdchi2 = fit->getProperty("OutputChi2overDoF");
-    }
-    else
-    {
-      bkgdchi2 = fit->getProperty("OutputChi2overDoF");
-      g_log.warning() << "Fit " << m_backgroundType << " Fails For Peak @ " << X[i4]
-                      << " ; Fit status = " << fitStatus << " . chi2 = " << bkgdchi2 << std::endl;
-      a0 = a1 = a2 = 0.;
-      bkgdchi2 = -100.;
-    }
-    g_log.information() << "(HighBackground) Fit Background:  Chi2 = " << bkgdchi2 << " a0 = " << a0
-                        << "  a1 = " << a1 << "  a2 = " << a2 << "\n";
-
-    // const double in_height = Y[i4] - in_bg0;
-
-    // g) Looping on peak width for the best fit
-    /* FIXME  This section might be removed if workspace w/ or w/o background is not the cause
-       *
-       */
-    double in_height = 0.0;
-    std::vector<double> peakxvec, peakyvec, peakevec;
-    for (size_t i = i_min; i < i_max; i++)
-    {
-      double x = X[i];
-      double y = Y[i] - (a0 + a1 * x + a2 * x * x);
-      if (y < 0)
-        y = 0.0;
-      if (y > in_height)
-        in_height = y;
-      double z;
-      if (y <= 1.0)
-        z = 1.0;
+      dataY[i] = Y[i_min+i] - values[i];
+      if (dataY[i] < 0)
+        dataY[i] = 0.;
+      if (dataY[i] >= 1.0)
+        dataE[i] = sqrt(dataY[i]);
       else
-        z = sqrt(y);
-      peakxvec.push_back(x);
-      peakyvec.push_back(y);
-      peakevec.push_back(z);
+        dataE[i] = 1.0;
     }
-    peakxvec.push_back(X[i_max]);
-    API::MatrixWorkspace_sptr peakWS =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, peakxvec.size(), peakyvec.size());
 
-    for (size_t i = 0; i < peakyvec.size(); ++i)
-    {
-      peakWS->dataX(0)[i] = peakxvec[i];
-      peakWS->dataY(0)[i] = peakyvec[i];
-      peakWS->dataE(0)[i] = peakevec[i];
-    }
-    peakWS->dataX(0).back() = peakxvec.back();
+    const MantidVec& vecX = peakws->readX(0);
+    const MantidVec& vecY = peakws->readY(0);
 
-    double peakxmin = peakxvec[0];
-    double peakxmax = peakxvec.back();
+    double g_centre, g_height, g_fwhm;
+    estimatePeakParameters(vecX, vecY, g_centre, g_height, g_fwhm);
 
-    g_log.information() << "Fit (pure) peak: Loop From (i)" << minGuessedPeakWidth << " To (i)"
-                        << maxGuessedPeakWidth << " with step " << stepGuessedPeakWidth << "  Over about "
-                        << 10 * (i0 - i2) << " pixels" << std::endl;
+    //    fix background parameters
+    for (size_t i = 0; i < numbkgdparams; ++i)
+      m_backgroundFunction->fix(i);
 
-    // std::string bkgdTies = this->createTies(0. ,0., 0., a0, a1, a2, false);
-    std::string bkgdTies = this->createTies(0., 0., 0., 0, 0, 0, false);
+    // Define some data structure
+    std::vector<double> vecRwp;
+    std::vector<std::map<std::string, double> > vecParameters;
+
+    // Create composite function
+    CompositeFunction_sptr compfunc(new CompositeFunction());
+    compfunc->addFunction(peakfunc);
+    compfunc->addFunction(m_backgroundFunction);
+
+    // Loop over guessed half-width and use icentre
     for (unsigned int iwidth = minGuessedPeakWidth; iwidth <= maxGuessedPeakWidth; iwidth +=
          stepGuessedPeakWidth)
     {
-      double in_sigma = (i4 + iwidth < X.size()) ? X[i4 + iwidth] - X[i4] : 0.; // Guess sigma
-
-      // a) Set up Child Algorithm Fit
-      IAlgorithm_sptr gfit;
-      try
-      {
-        // Fitting the candidate peaks to a Gaussian
-        gfit = createChildAlgorithm("Fit", -1, -1, true);
-      }
-      catch (Exception::NotFoundError &)
-      {
-        g_log.error("The FindPeaks algorithm requires the CurveFitting library");
-        throw std::runtime_error("FindPeaks requires CurveFitting libraryl.");
-      }
-
-      // c) Set initial fitting parameters
-      IFunction_sptr peakAndBackgroundFunction =
-          this->createFunction(in_height, in_centre, in_sigma, 0, 0, 0, true);
-
-      // d) Complete fit
-      double startx = in_centre - windowSize;
-      if (startx < peakxmin)
-        startx = peakxmin;
-      double endx = in_centre + windowSize;
-      if (endx > peakxmax)
-        endx = peakxmax;
-
-      gfit->setProperty("Function", peakAndBackgroundFunction);
-      //** gfit->setProperty("InputWorkspace", input);
-      gfit->setProperty("InputWorkspace", peakWS);
-      // gfit->setProperty("WorkspaceIndex", spectrum);
-      gfit->setProperty("WorkspaceIndex", 0);
-      gfit->setProperty("MaxIterations", 50);
-      gfit->setProperty("StartX", startx);
-      gfit->setProperty("EndX", endx);
-      gfit->setProperty("Minimizer", "Levenberg-Marquardt");
-      gfit->setProperty("CostFunction", "Least squares");
-      gfit->setProperty("Ties", bkgdTies);
-
-      g_log.debug() << "Function (to fit): " << peakAndBackgroundFunction->asString() << "  From "
-                    << (X[i4] - 5 * (X[i0] - X[i2])) << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
-
-      // e) Fit and get result
-      gfit->executeAsChildAlg();
-
-      //std::vector<double> params = gfit->getProperty("Parameters");
-      std::string fitpeakstatus = gfit->getProperty("OutputStatus");
-      m_peakFunction = gfit->getProperty("Function");
-
-      g_log.information() << "Fit (Pure) Peak Status = " << fitpeakstatus << std::endl;
-
-      this->updateFitResults(gfit, bestparams, bestRawParams, mincost, X[i4], in_height);
-    } // ENDFOR
-
-    // check to see if the last one went through
-    if (bestparams.empty())
-    {
-      this->addInfoRow(spectrum, bestparams, bestRawParams, mincost, false);
-      return;
+      double in_sigma = (icentre + iwidth - i_min < vecX.size()) ? vecX[icentre + iwidth - i_min] - vecX[icentre - i_min] : 0.;
+      setParameters(peakfunc, g_height, vecX[icentre - i_min], in_sigma, vecX[ileft - icentre], vecX[iright - i_min]);
+      double rwp1 = fitPeakBackgroundFunction(peakfunc);
+      vecRwp.push_back(rwp1);
+      std::map<std::string, double> parameters = getParameters(peakfunc);
+      vecParameters.push_back(parameters);
     }
 
-    // h) Fit again with everything altogether
-    IAlgorithm_sptr lastfit;
-    try
+    // Use observed FWHM
+    setParameters(peakfunc, g_height, vecX[icentre - i_min], g_fwhm, vecX[ileft - icentre], vecX[iright - i_min]);
+    double rwp1 = fitPeakBackgroundFunction(peakfunc);
+    vecRwp.push_back(rwp1);
+    std::map<std::string, double> parameters = getParameters(peakfunc);
+    vecParameters.push_back(parameters);
+
+    if (g_centre < vecX[ileft-i_min] || g_centre > vecX[iright-i_min])
     {
-      // Fitting the candidate peaks to a Gaussian
-      lastfit = createChildAlgorithm("Fit", -1, -1, true);
-    } catch (Exception::NotFoundError &)
-    {
-      g_log.error("The StripPeaks algorithm requires the CurveFitting library");
-      throw;
+      g_log.warning("Found a case that observed peak maximum is out of window.");
     }
 
-    // c) Set initial fitting parameters
-    IFunction_sptr peakAndBackgroundFunction = this->createFunction(bestparams[2], bestparams[0],
-                                                                    bestparams[1], bestparams[3], bestparams[4], bestparams[5], true);
-    g_log.debug() << "(High Background) Final Fit Function: " << peakAndBackgroundFunction->asString()
-                  << std::endl;
+    // Get best result
+    int index = getBestResult(peakfunc, vecRwp, vecParameters);
 
-    // d) complete fit
-    lastfit->setProperty("Function", peakAndBackgroundFunction);
-    lastfit->setProperty("InputWorkspace", input);
-    lastfit->setProperty("WorkspaceIndex", spectrum);
-    lastfit->setProperty("MaxIterations", 50);
-    lastfit->setProperty("StartX", in_centre - windowSize);
-    lastfit->setProperty("EndX", in_centre + windowSize);
-    lastfit->setProperty("Minimizer", "Levenberg-Marquardt");
-    lastfit->setProperty("CostFunction", "Least squares");
+    // Fit with all
+    //    set up data workspace as original
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      dataY[i] = Y[i_min+i];
+      dataE[i] = E[i];
+    }
 
-    // e) Fit and get result
-    lastfit->executeAsChildAlg();
+    //    unfix background
 
-    this->updateFitResults(lastfit, bestparams, bestRawParams, mincost, in_centre, in_height);
 
-    if (!bestparams.empty())
-      this->addInfoRow(spectrum, bestparams, bestRawParams, mincost,
-                       (bestparams[0] < X.front() || bestparams[0] > X.back()));
+    for (size_t i = 0; i < numbkgdparams; ++i)
+      m_backgroundFunction->unfix(i);
+
+    double chi2prev;
+    double chi2 = fitPeakBackgroundFunction(peakfunc, chi2prev);
+    std::map<std::string, double> bestparameters;
+    if (chi2 < chi2prev)
+    {
+      // Use the last result
+      bestparameters = getParameters(peakfunc);
+    }
     else
-      this->addInfoRow(spectrum, bestparams, bestRawParams, mincost, true);
+    {
+      // Use the previous best
+      bestparameters = vecParameters[index];
+    }
 
     return;
   } // END-FUNCTION: fitPeakHighBackground()
@@ -1569,7 +1436,12 @@ namespace Algorithms
     // put the two together and return
     CompositeFunction* fitFunc = new CompositeFunction();
     fitFunc->addFunction(peakFunc);
+#if 1
     fitFunc->addFunction(background);
+#else
+    fitFunc->addFunction(m_backgroundFunction);
+#endif
+
     return boost::shared_ptr<IFunction>(fitFunc);
   }
 
@@ -1619,6 +1491,240 @@ namespace Algorithms
     else
       return 0;
   }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Fit for background
+    * startX = in_centre - windowSize;
+    * endX = in_centre + windowSize;
+    * fitHightbackground(backgroundFunction, newX, newY, newE, startx, endx,
+    */
+  void FindPeaks::fitBackground(const MantidVec& X, const MantidVec& Y, const MantidVec& E,
+                                size_t ileft, size_t iright, size_t imin, size_t imax,
+                                double in_bg0, double in_bg1, double in_bg2)
+  {
+    // Construct a workspace to fit for background.  The region within fit window is removed
+    std::vector<double> newX, newY, newE;
+    for (size_t i = imin; i <= imax; i++)
+    {
+      if (i > size_t(iright) || i < size_t(ileft))
+      {
+        newX.push_back(X[i]);
+        newY.push_back(Y[i]);
+        newE.push_back(E[i]);
+      }
+    }
+    size_t numpts = newX.size();
+
+    if (numpts < 3)
+    {
+      std::stringstream errss;
+      errss << "Size of workspace to fit for background = " << newX.size()
+            << ". It is too small to proceed. ";
+      g_log.error(errss.str());
+      throw std::runtime_error(errss.str());
+    }
+
+    // Construct a background data workspace for fit
+    MatrixWorkspace_sptr bkgdWS =
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1, newX.size(), newY.size());
+
+    MantidVec& wsX = bkgdWS->dataX(0);
+    MantidVec& wsY = bkgdWS->dataY(0);
+    MantidVec& wsE = bkgdWS->dataE(0);
+    for (size_t i = 0; i < newY.size(); i++)
+    {
+      wsX[i] = newX[i];
+      wsY[i] = newY[i];
+      wsE[i] = newE[i];
+    }
+
+    // Create background function
+    m_backgroundFunction->setParameter("A0", in_bg0);
+    if (m_backgroundFunction->nParams() > 1)
+      m_backgroundFunction->setParameter("A1", in_bg1);
+    if (m_backgroundFunction->nParams() > 2)
+      m_backgroundFunction->setParameter("A2", in_bg2);
+
+    // Fit range
+    double startx = newX[0];
+    double endx = newX.back();
+
+    g_log.information() << "Background Type = " << m_backgroundType << "  Function: "
+                        << m_backgroundFunction->asString() << "  StartX = "
+                        << startx << " EndX = " << endx << ".\n";
+
+    // Set up the background fitting
+    IAlgorithm_sptr fit;
+    try
+    {
+      fit = createChildAlgorithm("Fit", -1, -1, true);
+    }
+    catch (Exception::NotFoundError &)
+    {
+      std::stringstream errss;
+      errss << "The StripPeaks algorithm requires the CurveFitting library";
+      g_log.error(errss.str());
+      throw std::runtime_error(errss.str());
+    }
+
+    fit->setProperty("Function", m_backgroundFunction);
+    fit->setProperty("InputWorkspace", bkgdWS);
+    fit->setProperty("WorkspaceIndex", 0);
+    fit->setProperty("MaxIterations", 50);
+    fit->setProperty("StartX", startx);
+    fit->setProperty("EndX", endx);
+    fit->setProperty("Minimizer", "Levenberg-Marquardt");
+    fit->setProperty("CostFunction", "Least squares");
+
+    // Execute fit and get result of fitting background
+    fit->executeAsChildAlg();
+    if (!fit->isExecuted())
+    {
+      g_log.error("Fit for background is not executed. ");
+      throw std::runtime_error("Fit for background is not executed. ");
+    }
+
+    std::string fitStatus = fit->getProperty("OutputStatus");
+    m_backgroundFunction = fit->getProperty("Function");
+
+    g_log.debug() << "(HighBackground) Fit Background Function.  Fit Status = " << fitStatus
+                  << std::endl;
+
+    // Check fiting status
+    bool allowedfailure = fitStatus.find("cannot") > 0 && fitStatus.find("tolerance") > 0;
+
+    double bkgdchi2;
+    if (fitStatus.compare("success") == 0 || allowedfailure || bkgdchi2 < 100)
+    {
+      // good fit assumed
+      bkgdchi2 = fit->getProperty("OutputChi2overDoF");
+    }
+    else
+    {
+      // set background to zero background
+      resetBackgroundParameters(m_backgroundFunction);
+      bkgdchi2 = -100.;
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Fit a single peak with background fixed
+    *
+    */
+  void FindPeaks::fitPeakBackgroundFunction(MatrixWorkspace_sptr peakws, size_t wsindex,
+                                            IFunction_sptr peakfunc,
+                                            double in_sigma, double in_height)
+  {
+
+
+
+
+
+
+      // Create function to fit (peak + background)
+      IFunction_sptr peakAndBackgroundFunction =
+          this->createFunction(in_height, in_centre, in_sigma, 0, 0, 0, true);
+
+      // Fit range and etd.
+#if 0
+      double startx = in_centre - windowSize;
+      if (startx < peakxmin)
+        startx = peakxmin;
+      double endx = in_centre + windowSize;
+      if (endx > peakxmax)
+        endx = peakxmax;
+#endif
+      double startx = peakWS->readX(0)[0];
+      double endx = peakWS->readX(0).back();
+
+      // Create Child Algorithm Fit
+      IAlgorithm_sptr gfit;
+      try
+      {
+        gfit = createChildAlgorithm("Fit", -1, -1, true);
+      }
+      catch (Exception::NotFoundError &)
+      {
+        g_log.error("The FindPeaks algorithm requires the CurveFitting library");
+        throw std::runtime_error("The FindPeaks algorithm requires the CurveFitting library");
+      }
+
+      gfit->setProperty("Function", peakAndBackgroundFunction);
+      gfit->setProperty("InputWorkspace", peakWS);
+      gfit->setProperty("WorkspaceIndex", 0);
+      gfit->setProperty("MaxIterations", 50);
+      gfit->setProperty("StartX", startx);
+      gfit->setProperty("EndX", endx);
+      gfit->setProperty("Minimizer", "Levenberg-Marquardt");
+      gfit->setProperty("CostFunction", "Least squares");
+
+      g_log.debug() << "Function (to fit): " << peakAndBackgroundFunction->asString() << "  From "
+                    << (X[i4] - 5 * (X[i0] - X[i2])) << "  to " << (X[i4] + 5 * (X[i0] - X[i2])) << std::endl;
+
+      // e) Fit and get result
+      gfit->executeAsChildAlg();
+
+      //std::vector<double> params = gfit->getProperty("Parameters");
+      std::string fitpeakstatus = gfit->getProperty("OutputStatus");
+      m_peakFunction = gfit->getProperty("Function");
+
+      g_log.information() << "Fit (Pure) Peak Status = " << fitpeakstatus << std::endl;
+
+      this->updateFitResults(gfit, bestparams, bestRawParams, mincost, X[i4], in_height);
+    } // ENDFOR
+
+    // check to see if the last one went through
+    if (bestparams.empty())
+    {
+      this->addInfoRow(spectrum, bestparams, bestRawParams, mincost, false);
+      return;
+    }
+
+    // h) Fit again with everything altogether
+    IAlgorithm_sptr lastfit;
+    try
+    {
+      // Fitting the candidate peaks to a Gaussian
+      lastfit = createChildAlgorithm("Fit", -1, -1, true);
+    } catch (Exception::NotFoundError &)
+    {
+      g_log.error("The StripPeaks algorithm requires the CurveFitting library");
+      throw;
+    }
+
+    // c) Set initial fitting parameters
+    IFunction_sptr peakAndBackgroundFunction = this->createFunction(bestparams[2], bestparams[0],
+                                                                    bestparams[1], bestparams[3], bestparams[4], bestparams[5], true);
+    g_log.debug() << "(High Background) Final Fit Function: " << peakAndBackgroundFunction->asString()
+                  << std::endl;
+
+    // d) complete fit
+    lastfit->setProperty("Function", peakAndBackgroundFunction);
+    lastfit->setProperty("InputWorkspace", input);
+    lastfit->setProperty("WorkspaceIndex", spectrum);
+    lastfit->setProperty("MaxIterations", 50);
+    lastfit->setProperty("StartX", in_centre - windowSize);
+    lastfit->setProperty("EndX", in_centre + windowSize);
+    lastfit->setProperty("Minimizer", "Levenberg-Marquardt");
+    lastfit->setProperty("CostFunction", "Least squares");
+
+    // e) Fit and get result
+    lastfit->executeAsChildAlg();
+
+    this->updateFitResults(lastfit, bestparams, bestRawParams, mincost, in_centre, in_height);
+
+    if (!bestparams.empty())
+      this->addInfoRow(spectrum, bestparams, bestRawParams, mincost,
+                       (bestparams[0] < X.front() || bestparams[0] > X.back()));
+    else
+      this->addInfoRow(spectrum, bestparams, bestRawParams, mincost, true);
+
+
+  }
+
 
 } // namespace Algorithms
 } // namespace Mantid

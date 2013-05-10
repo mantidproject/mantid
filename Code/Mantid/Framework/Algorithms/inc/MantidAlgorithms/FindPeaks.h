@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
@@ -86,7 +87,7 @@ private:
   void findPeaksUsingMariscotti();
   void findPeaksGivenStartingPoints(const std::vector<double> &peakcentres, const std::vector<double> &fitwindows);
 
-  void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
+  void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& iright, const int& ileft, const int& icentre,
       const unsigned int& i_min, const unsigned int& i_max,
       const double& in_bg0, const double& in_bg1, const double& in_bg2);
 
@@ -99,6 +100,21 @@ private:
   std::string createTies(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak);
   API::IFunction_sptr createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak = true);
   int getBackgroundOrder();
+
+  /// Fit background functions
+  void fitBackground(const MantidVec &X, const MantidVec &Y,
+                         const MantidVec &E, size_t ileft, size_t iright,
+                         size_t imin, size_t imax, double in_bg0, double in_bg1, double in_bg2);
+
+  /// Fit a single peak with background fixed
+  void fitPeakBackgroundFunction(API::MatrixWorkspace_sptr peakws, size_t wsindex, API::IFunction_sptr peakfunc, double in_sigma, double in_height);
+
+  /// Get function parameters from a function to a map
+  std::map<std::string, double> getParameters(API::IFunction_sptr func);
+
+  /// Set parameters to a peak function
+  void setParameters(API::IFunction_sptr peak, double height, double centre, double sigma, double centre_lowerbound, double centre_upperbound);
+
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
   static const int g_z = 5;
