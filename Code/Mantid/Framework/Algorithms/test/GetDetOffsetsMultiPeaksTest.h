@@ -62,6 +62,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","9.98040"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpetraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );
     TS_ASSERT( offsets.isExecuted() );
 
@@ -103,6 +104,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","9.98040"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpetraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );
     TS_ASSERT( offsets.isExecuted() );
 
