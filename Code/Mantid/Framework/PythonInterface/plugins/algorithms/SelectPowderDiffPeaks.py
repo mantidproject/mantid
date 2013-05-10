@@ -1,8 +1,8 @@
-########################################################################################
-#
-# Select the powder diffraction peaks for Le Bail Fit
-#
-########################################################################################
+"""*WIKI* 
+
+Select the powder diffraction peaks for [[Le Bail Fit]]
+
+*WIKI*"""
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
 from mantid.kernel import Direction, StringListValidator
