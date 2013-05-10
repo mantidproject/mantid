@@ -77,6 +77,7 @@ def DataPath(path):
     
 def OutputPath(path):
     ReductionSingleton().set_output_path(path)
+    ReductionSingleton().reduction_properties["OutputDirectory"] = path
 
 def Reduce1D():
     return ReductionSingleton().reduce()
