@@ -367,7 +367,12 @@ public:
   /// Return the number of objects stored by the data service
   size_t size() const
   {
-    return datamap.size();
+    size_t count = 0;
+    for( svc_constit it = datamap.begin(); it != datamap.end(); ++it)
+    {
+      if ( ! isHiddenDataServiceObject(it->first) ) ++count;
+    }
+    return count;
   }
 
   /// Get a vector of the names of the data objects stored by the service
@@ -377,10 +382,9 @@ public:
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
     std::set<std::string> names;
-    svc_constit it;
-    for( it = datamap.begin(); it != datamap.end(); ++it)
+    for( svc_constit it = datamap.begin(); it != datamap.end(); ++it)
     {
-      names.insert(it->first);
+      if ( ! isHiddenDataServiceObject(it->first) ) names.insert(it->first);
     }
     return names;
   }
@@ -392,32 +396,22 @@ public:
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
     std::vector< boost::shared_ptr<T> > objects;
-    objects.reserve( size() );
+    objects.reserve( datamap.size() );
     for(auto it = datamap.begin(); it != datamap.end(); ++it)
     {
-      objects.push_back( it->second );
+      if ( ! isHiddenDataServiceObject(it->first) ) objects.push_back( it->second );
     }
     return objects;
   }
 
-  /// Returns true if object with given name is considered visible
-  bool objectIsToBeVisible(const std::string & name)
+  inline static std::string prefixToHide()
   {
-    return !objectIsToBeHidden(name);
+    return "__";
   }
 
-  /// Returns true if object with given name is considered hidden
-  bool objectIsToBeHidden(const std::string & name)
+  inline static bool isHiddenDataServiceObject(const std::string& name)
   {
-    if(hiddenObjectsAreVisible()) return false;
-    return boost::starts_with(name, m_prefixToHide);
-  }
-
-  /// Returns true objects prefixed with "invisible" prefix should be visible
-  bool hiddenObjectsAreVisible()
-  {
-    std::string hiddenWS = Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces");
-    return (hiddenWS == "1");
+    return boost::starts_with(name, prefixToHide());
   }
 
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
@@ -427,7 +421,7 @@ public:
 
 protected:
   /// Protected constructor (singleton)
-  DataService(const std::string& name) : svc_name(name),g_log(Kernel::Logger::get(svc_name)), m_prefixToHide("__"){}
+  DataService(const std::string& name) : svc_name(name),g_log(Kernel::Logger::get(svc_name)) {}
   virtual ~DataService(){}
 
 private:
@@ -502,10 +496,6 @@ private:
   mutable Poco::Mutex m_mutex;
   /// Reference to the logger for this DataService
   Logger& g_log;
-
-  /// Prefix to indicate hidden object
-  std::string m_prefixToHide;
-
 }; // End Class Data service
 
 } // Namespace Kernel
