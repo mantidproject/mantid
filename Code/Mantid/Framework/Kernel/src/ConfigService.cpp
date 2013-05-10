@@ -270,8 +270,6 @@ ConfigServiceImpl::ConfigServiceImpl() :
 #ifndef MPI_BUILD  // There is no logging to file by default in MPI build
   g_log.information() << "Logging to: " << m_logFilePath << std::endl;
 #endif
-
-  this->setParaViewPluginPath();
 }
 
 /** Private Destructor
@@ -1748,6 +1746,8 @@ bool ConfigServiceImpl::quickParaViewCheck() const
       {
         isAvailable = true;
         this->g_log.notice("ParaView is available");
+        // Now set the plugin path.
+        this->setParaViewPluginPath();
       }
       else
       {
