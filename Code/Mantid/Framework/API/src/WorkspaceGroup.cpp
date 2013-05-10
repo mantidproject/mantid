@@ -27,7 +27,20 @@ WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
 
 WorkspaceGroup::~WorkspaceGroup()
 {
-  observeADSNotifications(false);
+    observeADSNotifications(false);
+}
+
+/**
+ * The size of the group is the sum of sizes of members.
+ */
+size_t WorkspaceGroup::getMemorySize() const
+{
+    size_t n = 0;
+    for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    {
+        n += (**it).getMemorySize();
+    }
+    return n;
 }
 
 /**
@@ -63,6 +76,7 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
 void WorkspaceGroup::add(const std::string& name)
 {
   Workspace_sptr ws = AnalysisDataService::Instance().retrieve( name );
+  AnalysisDataService::Instance().remove( name );
   addWorkspace( ws );
   g_log.debug() << "workspacename added to group vector =  " << name <<std::endl;
 }
@@ -147,6 +161,29 @@ Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const
     if ( (**it).name() == wsName ) return *it;
   }
   throw std::out_of_range("Workspace "+wsName+" not contained in the group");
+}
+
+/**
+ * Find a workspace by name. Search recursively in any nseted groups.
+ * Return an empty pointer if the workspace isn't found.
+ * @param wsName The name of the workspace.
+ */
+Workspace_sptr WorkspaceGroup::findItem(const std::string wsName) const
+{
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    {
+      Workspace *ws = it->get();
+      if ( ws->name() == wsName ) return *it;
+      WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>(ws);
+      if ( wsg )
+      {
+          // look in member groups recursively
+          auto res = wsg->findItem(wsName);
+          if ( res ) return res;
+      }
+    }
+    return Workspace_sptr();
 }
 
 /// Empty all the entries out of the workspace group. Does not remove the workspaces from the ADS.

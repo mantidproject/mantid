@@ -61,18 +61,12 @@ public:
   ~WorkspaceGroup();
   /// Return a string ID of the class
   virtual const std::string id() const { return "WorkspaceGroup"; }
-  /// The collection itself is considered to take up no space
-  virtual size_t getMemorySize() const { return 0; }
-  /// Turn ADS observations on/off
-  void observeADSNotifications(const bool observeADS);
+  /// The size of the group.
+  virtual size_t getMemorySize() const;
   /// Adds a workspace to the group.
   void add(const std::string& wsName);
   /// Adds a workspace to the group.
   void addWorkspace(Workspace_sptr workspace);
-  /// Does a workspace exist within the group
-  bool contains(const std::string & wsName) const;
-  /// Returns the names of workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
-  std::vector<std::string> getNames() const;
   /// Return the number of entries within the group
   int getNumberOfEntries() const { return static_cast<int>(this->size()); }
   /// Return the size of the group, so it is more like a container
@@ -81,6 +75,13 @@ public:
   Workspace_sptr getItem(const size_t index) const;
   /// Return the workspace by name
   Workspace_sptr getItem(const std::string wsName) const;
+  /// Find a workspace by name
+  Workspace_sptr findItem(const std::string wsName) const;
+
+  /// Does a workspace exist within the group
+  bool contains(const std::string & wsName) const;
+  /// Returns the names of workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
+  std::vector<std::string> getNames() const;
   /// Prints the group to the screen using the logger at debug
   void print() const;
   /// Remove a name from the group
@@ -96,7 +97,9 @@ public:
   void updated() const;
   /// Inidicates that the workspace group can be treated as multiperiod.
   bool isMultiperiod() const;
- 
+  /// Turn ADS observations on/off
+  void observeADSNotifications(const bool observeADS);
+
 private:
   /// Private, unimplemented copy constructor
   WorkspaceGroup(const WorkspaceGroup& ref);
@@ -110,6 +113,7 @@ private:
   void workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice);
   /// Observer for workspace before-replace notfications
   Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceBeforeReplaceNotification> m_replaceObserver;
+
   /// The list of workspace pointers in the group
   std::vector<Workspace_sptr> m_workspaces;
   /// Flag as to whether the observers have been added to the ADS

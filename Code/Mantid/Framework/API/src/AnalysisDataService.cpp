@@ -79,15 +79,7 @@ namespace Mantid
         if ( wsName.empty() )
         {
           wsName = name + "_" + boost::lexical_cast<std::string>( i + 1 );
-        }
-        else if ( doesExist( wsName ) )
-        {// if ws is already there do nothing
-          wsName.clear();
-        }
-        // add member workspace if needed
-        if ( !wsName.empty() )
-        {
-          add( wsName, ws );
+          ws->setName( wsName );
         }
       }
     }
@@ -118,15 +110,6 @@ namespace Mantid
         {
           wsName = name + "_" + boost::lexical_cast<std::string>( i + 1 );
         }
-        else if ( doesExist( wsName ) )
-        {// if ws is already there do nothing
-          wsName.clear();
-        }
-        // add member workspace if needed
-        if ( !wsName.empty() )
-        {
-          addOrReplace( wsName, ws );
-        }
       }
     }
 
@@ -141,6 +124,28 @@ namespace Mantid
       //Attach the new name to the workspace
       auto ws = retrieve( newName );
       ws->setName( newName );
+    }
+
+    /**
+      * Extend the default behaviour by searching workspace groups recursively.
+      * @param name :: Name of the workspace.
+      */
+    boost::shared_ptr<API::Workspace> AnalysisDataServiceImpl::retrieve(const std::string &name) const
+    {
+        std::vector<Workspace_sptr> workspaces = getObjects();
+        for(auto it = workspaces.begin(); it != workspaces.end(); ++it)
+        {
+          Workspace *ws = it->get();
+          if ( ws->name() == name ) return *it;
+          WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>(ws);
+          if ( wsg )
+          {
+              // look in member groups recursively
+              auto res = wsg->findItem(name);
+              if ( res ) return res;
+          }
+        }
+        throw Kernel::Exception::NotFoundError("Workspace",name);
     }
 
     //-------------------------------------------------------------------------
