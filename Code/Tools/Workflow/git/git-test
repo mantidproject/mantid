@@ -114,9 +114,29 @@ start_testing() {
 	exit 1
     fi    
 
+    # We need a clean slate
+    local_modifications
+    if [ $? -eq 1 ]; then
+        echo "You have local modifications. Please either:"
+        echo " 1) Commit the changes and rerun this command or"
+        echo " 2) Run 'git stash', perform the testing, then run 'git stash pop' when testing has finished"
+        exit 1
+    fi
     # Ensure we have everything from the remote
     git_halt_on_error fetch -p
 
+    # Reset a merge
+    merge_in_progress
+    if [ $? -eq 1 ]; then
+	git merge --abort
+    fi
+    # Reset a rebase
+    rebase_in_progress
+    if [ $? -eq 1 ]; then
+	git rebase --abort
+    fi
+ 
+    # find the test branch
     remote_testbranch=$(find_branch_on_remote ${ARG_TEST_BRANCH})
     if [ -z "$remote_testbranch" ]; then
 	echo "Cannot find branch on remote using hint '${ARG_TEST_BRANCH}'."
@@ -193,13 +213,19 @@ start_testing() {
 }
 
 end_testing() {
-    local_testbranch=$(git config ${BRANCH_CFG_KEY})
-    if [ -z ${local_testbranch} ]; then
-        echo "The name of the test branch has not been recorded in the config. Was the testing started with 'git test start'?"
-        exit 1
+    # We only deal with production here
+    startbranch=$(current_branch)
+    if [ "${startbranch}" != "${PRODUCTION_BRANCH}" ]; then
+        git_halt_on_error checkout ${PRODUCTION_BRANCH}
     fi
 
     if [ $TEST_PASSED -eq 1 ]; then
+        local_testbranch=$(git config ${BRANCH_CFG_KEY})
+        if [ -z ${local_testbranch} ]; then
+            echo "The name of the test branch has not been recorded in the config. Was the testing started with 'git test start'?"
+            exit 1
+        fi
+
 	publish=""
 	while [ "$publish" != "y" -a "$publish" != "n" ];
 	do
@@ -216,12 +242,31 @@ end_testing() {
 	    exit 0
 	fi
     else
-	echo "Testing failed on branch ${local_testbranch}. ${PRODUCTION_BRANCH} reset to origin/${PRODUCTION_BRANCH}"
-        git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
+	echo "Resetting ${PRODUCTION_BRANCH} reset to origin/${PRODUCTION_BRANCH}"
+	reset_to_remote_production  
     fi
 
-    # Clear saved config
+    # Clear any saved config
     remove_config_value ${BRANCH_CFG_KEY}
+}
+
+reset_to_remote_production() {
+    # reset will only work if we are not in the middle of a failed merge or rebase
+    git_dir="$(git rev-parse --show-toplevel)/.git"
+    
+    # Abort a merge in progress
+    merge_in_progress
+    if [ $? -eq 1 ]; then
+	git_halt_on_error merge --abort
+    fi
+
+    # Abort a rebase if in progress
+    rebase_in_progress
+    if [ $? -eq 1 ]; then
+	git_halt_on_error rebase --abort
+    fi
+    # The reset should succeed now
+    git_halt_on_error reset --hard origin/${PRODUCTION_BRANCH}
 }
 
 review_changes() {
@@ -239,23 +284,6 @@ main() {
     . "${CMDFILE_DIR}/gitworkflow-helpers"
     
     checkargs "$@"
-
-    # We need a clean slate
-    local_modifications
-    if [ $? -eq 1 ]; then
-        echo "You have local modifications. Please either:"
-        echo " 1) Commit the changes and rerun this command or"
-        echo " 2) Run 'git stash', perform the testing, then run 'git stash pop' when testing has finished"
-        exit 1
-    fi
-
-    # Has a previous merge been resolved?
-    merge_in_progress
-    if [ $? -eq 1 ]; then
-	echo "It looks like there is a merge in progress."
-	echo "Resolve any current conflicts with 'git add' & 'git commit' then rerun this command."
-	exit 1
-    fi
 
     if [ $START_MODE -eq 1 ]; then
         start_testing
