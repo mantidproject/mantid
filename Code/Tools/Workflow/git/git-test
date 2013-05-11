@@ -31,6 +31,8 @@ BUILDER_BRANCH="develop"
 BRANCH_CFG_SECT=mantid.workflow
 # Config key to store tested branch
 BRANCH_CFG_KEY=${BRANCH_CFG_SECT}.testbranch
+# Number of commits to check for develop in branch history
+NCOMMITS_LOG=500
 
 # Set git to merge silently if everything succceeded
 # See http://git-blame.blogspot.co.uk/2012/02/anticipating-git-1710.html
@@ -122,8 +124,18 @@ start_testing() {
 	exit 1
     fi
 
-    # Check if the branch has been fully merged to develop
+    # Check whether the branch has not been started from develop or had develop merged in
     local_testbranch=${remote_testbranch#"origin/"}
+    merges=$(git log -${NCOMMITS_LOG} ${remote_testbranch} | grep Merge.*into.*develop)
+    if [ -n "$merges" ]; then
+	author_name=$(get_author_name ${remote_testbranch})
+	author_email=$(get_author_email ${remote_testbranch})
+        echo "ERROR: The branch '${local_testbranch}' appears to have been based off of develop, or has had develop merged into it."
+        echo "This needs to be fixed. Reopen the ticket & contact ${author_name} on ${author_email} (or via skype)."
+        exit 1
+    fi
+
+    # Check if the branch has been fully merged to develop
     branch_is_merged ${remote_testbranch} origin/${BUILDER_BRANCH}
     if [ $? -eq 0 ]; then
 	author_name=$(get_author_name ${remote_testbranch})
