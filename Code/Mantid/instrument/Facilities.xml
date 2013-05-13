@@ -480,6 +480,13 @@
 
 </facility>
 
+
+<facility name="PSI" FileExtensions=".nxs,.hdf">
+  <instrument name="FOCUS at SINQ">
+    <technique>Neutron time-of-flight Spectroscopy</technique>
+  </instrument>
+</facility>
+
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
    <livedata listener="MockILiveListener"/>
