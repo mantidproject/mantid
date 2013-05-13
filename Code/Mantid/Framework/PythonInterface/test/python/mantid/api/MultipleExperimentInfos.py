@@ -20,3 +20,4 @@ class MultipleExperimentInfoTest(unittest.TestCase):
         self.assertTrue(isinstance(expinfo, ExperimentInfo))
 	self.assertEquals(1, self._expt_ws.getNumExperimentInfo())
 
+if __name__ == '__main__': unittest.main()

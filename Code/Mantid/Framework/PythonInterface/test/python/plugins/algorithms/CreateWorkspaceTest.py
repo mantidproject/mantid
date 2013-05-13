@@ -88,3 +88,5 @@ class CreateWorkspaceTest(unittest.TestCase):
             self.assertEquals(wksp.getAxis(1).getValue(i), axis_values[i])
 
 
+if __name__ == '__main__':
+    unittest.main()

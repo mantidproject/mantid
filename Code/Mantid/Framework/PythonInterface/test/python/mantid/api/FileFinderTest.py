@@ -15,3 +15,5 @@ class FileFinderTest(unittest.TestCase):
         self.assertTrue(len(runs) == 1)
         # We can't be sure what the full path is in general but it should certainly exist!
         self.assertTrue(os.path.exists(runs[0]))
+
+if __name__ == '__main__': unittest.main()
