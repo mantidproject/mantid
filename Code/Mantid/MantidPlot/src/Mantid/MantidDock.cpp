@@ -1700,6 +1700,7 @@ QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected()
       wsNames.append(allWsNames[i]);
   }
 
+  // cppcheck-suppress redundantAssignment
   QList<QString>::const_iterator it = wsNames.constBegin();
 
   // Check to see if all workspaces have a *single* histogram ...

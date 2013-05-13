@@ -241,11 +241,11 @@ namespace Crystal
     if( C_version.length() < 1 )
       throw  std::logic_error( std::string( "No Version for Peaks file" ) );
 
-    tag = getWord( in ,  false );
+    getWord( in ,  false ); //tag
     // cppcheck-suppress unreadVariable
     std::string C_Facility = getWord( in ,  false );
 
-    tag = getWord( in ,  false );
+    getWord( in ,  false ); //tag
     std::string C_Instrument = getWord( in ,  false );
 
     if( C_Instrument.length() < 1 )

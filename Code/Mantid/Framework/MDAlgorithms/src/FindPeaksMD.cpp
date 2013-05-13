@@ -316,8 +316,7 @@ namespace MDAlgorithms
     peakWS->copyExperimentInfoFrom(ei.get());
 
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
-    signal_t thresholdDensity = 0.0;
-    thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor * m_densityScaleFactor;
+    signal_t thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor * m_densityScaleFactor;
     // cppcheck get confused by NaN check
     // cppcheck-suppress duplicateExpression
     if ((thresholdDensity != thresholdDensity) || (thresholdDensity == std::numeric_limits<double>::infinity())
