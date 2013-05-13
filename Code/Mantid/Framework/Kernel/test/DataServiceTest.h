@@ -247,7 +247,9 @@ public:
     TS_ASSERT_EQUALS( objects.at(1), two );
     TS_ASSERT_EQUALS( objects.at(2), two );
 
+    auto allNamesSize = svc.getObjectNamesInclHidden().size();
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","1");
+    TS_ASSERT_EQUALS( allNamesSize, svc.getObjectNamesInclHidden().size() )
     names = svc.getObjectNames();
     objects = svc.getObjects();
     TS_ASSERT_EQUALS( names.size(), 4 );

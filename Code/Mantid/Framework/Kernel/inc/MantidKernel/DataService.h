@@ -384,19 +384,33 @@ public:
     }
   }
 
-  /// Get a vector of the names of the data objects stored by the service
+  /// Get the names of the data objects stored by the service
   std::set<std::string> getObjectNames() const
   {
+    if ( showingHiddenObjects() ) return getObjectNamesInclHidden();
+
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
-    const bool showingHidden = showingHiddenObjects();
     std::set<std::string> names;
     for( svc_constit it = datamap.begin(); it != datamap.end(); ++it)
     {
-      if ( showingHidden || ! isHiddenDataServiceObject(it->first) )
+      if ( ! isHiddenDataServiceObject(it->first) )
       {
         names.insert(it->first);
       }
+    }
+    return names;
+  }
+
+  /// Get the names of the data objects stored by the service
+  std::set<std::string> getObjectNamesInclHidden() const
+  {
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
+    std::set<std::string> names;
+    for( svc_constit it = datamap.begin(); it != datamap.end(); ++it)
+    {
+      names.insert(it->first);
     }
     return names;
   }
