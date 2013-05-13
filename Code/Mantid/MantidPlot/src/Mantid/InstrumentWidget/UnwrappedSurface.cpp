@@ -147,6 +147,7 @@ void UnwrappedSurface::init()
   m_u_max =  DBL_MAX;
 
   // For each detector in the order of actors
+  // cppcheck-suppress syntaxError
   PRAGMA_OMP( parallel for )
   for(int ii = 0; ii < int(ndet); ++ii)
   {
