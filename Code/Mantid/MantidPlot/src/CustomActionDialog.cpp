@@ -545,11 +545,8 @@ void CustomActionDialog::setCurrentAction(int row)
  *****************************************************************************/
 
 CustomActionHandler::CustomActionHandler(QAction *action)
-     : d_action(action)
+     : metFitTag(true),filePath(QString()),d_widget_name(QString()),d_action(action)
  {
-     metFitTag = false;
-     filePath = QString();
-	 d_widget_name = QString();
  }
 
 bool CustomActionHandler::startElement(const QString & /* namespaceURI */,

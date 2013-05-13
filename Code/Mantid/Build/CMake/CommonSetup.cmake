@@ -232,6 +232,7 @@ if ( CPPCHECK_EXECUTABLE )
   # Header files to be ignored require different handling
   set ( CPPCHECK_HEADER_EXCLUDES
         MantidPlot/src/origin/OPJFile.h
+		MantidPlot/src/origin/tree.hh
         Framework/PythonAPI/inc/boost/python/detail/referent_storage.hpp
         Framework/PythonAPI/inc/boost/python/detail/type_list_impl_no_pts.hpp
       )

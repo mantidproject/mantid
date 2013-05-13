@@ -298,18 +298,17 @@ void FunctionDialog::acceptFunction()
 		return;
 	}
 
-	double x;
 	QString formula = boxFunction->text().simplified();
 	bool error=false;
 
 	try
 	{
 		MyParser parser;
+		double x=start;
 		parser.DefineVar("x", &x);
 		parser.SetExpr(formula.ascii());
-
-		x=start;
 		parser.Eval();
+
 		x=end;
 		parser.Eval();
 	}
@@ -379,7 +378,6 @@ void FunctionDialog::acceptParametric()
 		return;
 	}
 
-	double parameter;
 	QString xformula=boxXFunction->currentText();
 	QString yformula=boxYFunction->currentText();
 	bool error=false;
@@ -387,11 +385,11 @@ void FunctionDialog::acceptParametric()
 	try
 	{
 		MyParser parser;
+		double parameter=start;
 		parser.DefineVar((boxParameter->text()).ascii(), &parameter);
 		parser.SetExpr(xformula.ascii());
-
-		parameter=start;
 		parser.Eval();
+
 		parameter=end;
 		parser.Eval();
 	}
@@ -404,11 +402,11 @@ void FunctionDialog::acceptParametric()
 	try
 	{
 		MyParser parser;
+		double parameter=start;
 		parser.DefineVar((boxParameter->text()).ascii(), &parameter);
 		parser.SetExpr(yformula.ascii());
-
-		parameter=start;
 		parser.Eval();
+
 		parameter=end;
 		parser.Eval();
 	}
@@ -478,7 +476,6 @@ void FunctionDialog::acceptPolar()
 		return;
 	}
 
-	double parameter;
 	QString rformula=boxPolarRadius->currentText();
 	QString tformula=boxPolarTheta->currentText();
 	bool error=false;
@@ -486,11 +483,11 @@ void FunctionDialog::acceptPolar()
 	try
 	{
 		MyParser parser;
+		double parameter=start;;
 		parser.DefineVar((boxPolarParameter->text()).ascii(), &parameter);
 		parser.SetExpr(rformula.ascii());
-
-		parameter=start;
 		parser.Eval();
+
 		parameter=end;
 		parser.Eval();
 	}
@@ -503,11 +500,11 @@ void FunctionDialog::acceptPolar()
 	try
 	{
 		MyParser parser;
+		double parameter=start;;
 		parser.DefineVar((boxPolarParameter->text()).ascii(), &parameter);
 		parser.SetExpr(tformula.ascii());
-
-		parameter=start;
 		parser.Eval();
+
 		parameter=end;
 		parser.Eval();
 	}

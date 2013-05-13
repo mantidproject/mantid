@@ -768,11 +768,12 @@ void ApplicationWindow::initGlobalConstants()
   d_ASCII_import_read_only = false;
   d_ASCII_import_preview = true;
   d_preview_lines = 100;
-  d_ASCII_end_line = LF;
-  d_eol = LF;
 #ifdef Q_OS_MAC
   d_ASCII_end_line = CR;
   d_eol = CR;
+#else
+  d_ASCII_end_line = LF;
+  d_eol = LF;
 #endif
 
   d_export_col_separator = "\t";

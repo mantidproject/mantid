@@ -871,7 +871,7 @@ namespace API
     // has the auto_update and check it they have changed.
     for(Repository::iterator it = repo.begin(); 
         it!= repo.end();
-        it++){
+        ++it){
       if (it->second.auto_update){
         // THE SAME AS it->status in (REMOTE_CHANGED, BOTH_CHANGED)
         if (it->second.status & REMOTE_CHANGED){
@@ -1123,7 +1123,7 @@ namespace API
       if (entries_to_delete.size() > 0){
         for (std::vector<std::string>::iterator it = entries_to_delete.begin();
              it != entries_to_delete.end();
-             it++){
+             ++it){
           // remove this entry
           pt.erase(*it);
         }
