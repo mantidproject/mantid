@@ -404,7 +404,7 @@ namespace API
     std::string last_directory = ""; 
     for (Repository::reverse_iterator it = repo.rbegin();
          it != repo.rend();
-           it++){
+           ++it){
       // for every entry, it takes the path and RepositoryEntry
       std::string entry_path = it->first; 
       RepositoryEntry & entry = it->second;
@@ -546,7 +546,7 @@ namespace API
     std::string directory_path_with_slash = std::string(directory_path).append("/");
     bool found = false; 
     for(Repository::iterator it = repo.begin();
-        it != repo.end(); it++){
+        it != repo.end(); ++it){
       // skip all entries that are not children of directory_path
       // the map will list the entries in alphabetical order, so, 
       // when it first find the directory, it will list all the 
