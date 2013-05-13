@@ -226,6 +226,12 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
 		MantidVec::const_iterator xIn_it = xIn.begin(); // DeltaE
 		MantidVec::iterator effOut_it = effOut.begin();
 		for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
+			if (conditionForEnergy ) {
+				e =  std::fabs(m_Ei + *xIn_it);
+			}
+			else {
+				e =  std::fabs(m_Ei - *xIn_it);
+			}
 			double eff = p.Eval();
 			*effOut_it = eff / eff0;
 		}
