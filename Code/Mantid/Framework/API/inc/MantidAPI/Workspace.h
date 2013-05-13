@@ -67,11 +67,12 @@ public:
 
     void virtual setTitle(const std::string&);
     void setComment(const std::string&);
-    void setName(const std::string&);
+    virtual void setName(const std::string&);
     //virtual const std::string& getTitle() const;
     virtual const std::string getTitle() const;
     const std::string& getComment() const;
     const std::string& getName() const;
+    const std::string& getUpperCaseName() const;
     bool isDirty(const int n=1) const;
     /// Get the footprint in memory in bytes.
     virtual size_t getMemorySize() const = 0;
@@ -90,6 +91,8 @@ private:
     std::string m_comment;
     /// The name associated with the object within the ADS (This is required for workspace algebra
     std::string m_name;
+    /// The upper case version of the name (for faster searching)
+    std::string m_upperCaseName;
     /// The history of the workspace, algorithm and environment
     WorkspaceHistory m_history;
 

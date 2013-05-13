@@ -370,7 +370,7 @@ public:
   //--------------------------------------------------------------------------
   /** Get a shared pointer to a stored data object
    * @param name :: name of the object */
-  boost::shared_ptr<T> retrieve( const std::string& name) const
+  virtual boost::shared_ptr<T> retrieve( const std::string& name) const
   {
     // Make DataService access thread-safe
     Poco::Mutex::ScopedLock _lock(m_mutex);
@@ -388,7 +388,7 @@ public:
   }
 
   /// Check to see if a data object exists in the store
-  bool doesExist(const std::string& name) const
+  virtual bool doesExist(const std::string& name) const
   {
     // Make DataService access thread-safe
     Poco::Mutex::ScopedLock _lock(m_mutex);

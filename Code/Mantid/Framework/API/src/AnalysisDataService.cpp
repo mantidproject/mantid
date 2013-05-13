@@ -67,21 +67,6 @@ namespace Mantid
       //Attach the name to the workspace
       if( workspace ) workspace->setName(name);
       Kernel::DataService<API::Workspace>::add(name, workspace);
-      
-      // if a group is added add its members as well
-      auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
-      if ( !group ) return;
-      for(size_t i = 0; i < group->size(); ++i)
-      {
-        auto ws = group->getItem( i );
-        std::string wsName = ws->name();
-        // if anonymous make up a name and add
-        if ( wsName.empty() )
-        {
-          wsName = name + "_" + boost::lexical_cast<std::string>( i + 1 );
-          ws->setName( wsName );
-        }
-      }
     }
 
    /**
@@ -97,20 +82,6 @@ namespace Mantid
       //Attach the name to the workspace
       if( workspace ) workspace->setName(name);
       Kernel::DataService<API::Workspace>::addOrReplace(name, workspace);
-
-      // if a group is added add its members as well
-      auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
-      if ( !group ) return;
-      for(size_t i = 0; i < group->size(); ++i)
-      {
-        auto ws = group->getItem( i );
-        std::string wsName = ws->name();
-        // make up a name for an anonymous workspace
-        if ( wsName.empty() )
-        {
-          wsName = name + "_" + boost::lexical_cast<std::string>( i + 1 );
-        }
-      }
     }
 
     /**
@@ -127,25 +98,87 @@ namespace Mantid
     }
 
     /**
-      * Extend the default behaviour by searching workspace groups recursively.
+      * Extend the default behaviour by searching workspace groups recursively. Search is case insensitive.
       * @param name :: Name of the workspace.
       */
     boost::shared_ptr<API::Workspace> AnalysisDataServiceImpl::retrieve(const std::string &name) const
     {
+        std::string foundName = name;
+        std::transform(foundName.begin(), foundName.end(), foundName.begin(),toupper);
         std::vector<Workspace_sptr> workspaces = getObjects();
         for(auto it = workspaces.begin(); it != workspaces.end(); ++it)
         {
           Workspace *ws = it->get();
-          if ( ws->name() == name ) return *it;
+          if ( ws->getUpperCaseName() == foundName ) return *it;
           WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>(ws);
           if ( wsg )
           {
               // look in member groups recursively
-              auto res = wsg->findItem(name);
+              auto res = wsg->findItem(foundName, false);
               if ( res ) return res;
           }
         }
         throw Kernel::Exception::NotFoundError("Workspace",name);
+    }
+
+    /**
+     * Search recursively in the data store and workspace groups in it for a name.
+     * @param name :: Name to search for.
+     * @return True if name is found.
+     */
+    bool AnalysisDataServiceImpl::doesExist(const std::string &name) const
+    {
+        try
+        {
+            auto it = retrieve(name);
+            if ( it ) return true;
+        }
+        catch(Kernel::Exception::NotFoundError)
+        {
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * A method to help with workspace group management.
+     * @param name :: Name of a workspace to emove.
+     */
+    void AnalysisDataServiceImpl::removeFromTopLevel(const std::string &name)
+    {
+        std::string foundName = name;
+        std::transform(foundName.begin(), foundName.end(), foundName.begin(),toupper);
+        std::vector<Workspace_sptr> workspaces = getObjects();
+        for(auto it = workspaces.begin(); it != workspaces.end(); ++it)
+        {
+            if ( (**it).getUpperCaseName() == foundName )
+            {
+                Kernel::DataService<Workspace>::remove( name );
+                return;
+            }
+        }
+    }
+
+    /**
+     * Get number of copies of a workspace in the ADS.
+     * @param workspace :: A workspace to count.
+     * @return :: Number of copies.
+     */
+    size_t AnalysisDataServiceImpl::count(Workspace_const_sptr workspace) const
+    {
+        size_t n = 0;
+        std::vector<Workspace_sptr> workspaces = getObjects();
+        for(auto it = workspaces.begin(); it != workspaces.end(); ++it)
+        {
+            if ( (*it) == workspace ) n += 1;
+            const Workspace *ws = it->get();
+            const WorkspaceGroup* wsg = dynamic_cast<const WorkspaceGroup*>(ws);
+            if ( wsg )
+            {
+                n += wsg->count( workspace );
+            }
+        }
+        return n;
     }
 
     //-------------------------------------------------------------------------

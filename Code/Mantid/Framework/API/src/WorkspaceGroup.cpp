@@ -8,6 +8,7 @@
 #include "MantidKernel/IPropertyManager.h"
 
 #include <Poco/ScopedLock.h>
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -16,11 +17,13 @@ namespace API
 
 Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
 
+size_t WorkspaceGroup::g_maxNestingLevel = 100;
+
 WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
   Workspace(), 
   m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
   m_replaceObserver(*this, &WorkspaceGroup::workspaceReplaceHandle),
-  m_workspaces(), m_observingADS(false)
+  m_workspaces(), m_observingADS(false), m_nameCounter(0)
 {
   observeADSNotifications(observeADS);
 }
@@ -28,6 +31,25 @@ WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
 WorkspaceGroup::~WorkspaceGroup()
 {
     observeADSNotifications(false);
+}
+
+/**
+ * Override the base method to set names of member workspaces if they are empty.
+ * @param name :: The new name.
+ */
+void WorkspaceGroup::setName(const std::string &name)
+{
+    Workspace::setName(name);
+    for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    {
+        std::string wsName = (**it).name();
+        if ( wsName.empty() )
+        {
+            ++m_nameCounter;
+            wsName = name + "_" + boost::lexical_cast<std::string>(m_nameCounter);
+            (**it).setName(wsName);
+        }
+    }
 }
 
 /**
@@ -93,6 +115,23 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
   if ( it == m_workspaces.end() )
   {
     m_workspaces.push_back( workspace );
+    if ( ! name().empty() )
+    {
+        // checking for non-empty name - a faster way of chacking for being in the ADS
+        if ( workspace->name().empty() )
+        {
+            ++m_nameCounter;
+            std::string wsName = name() + "_" + boost::lexical_cast<std::string>(m_nameCounter);
+            workspace->setName(wsName);
+        }
+        else
+        {
+            bool observing = m_observingADS;
+            observeADSNotifications( false );
+            AnalysisDataService::Instance().removeFromTopLevel( workspace->name() );
+            observeADSNotifications( observing );
+        }
+    }
     updated();
   }
   else
@@ -165,25 +204,67 @@ Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const
 
 /**
  * Find a workspace by name. Search recursively in any nseted groups.
- * Return an empty pointer if the workspace isn't found.
- * @param wsName The name of the workspace.
+ *
+ * @param wsName :: The name of the workspace.
+ * @param convertToUpperCase :: Set true if wsName needs to be converted to upper case before search.
+ * @param nesting :: Current nesting level. To detect cycles.
+ * @return :: Return a shared pointer to the workspace or an empty pointer if not found.
  */
-Workspace_sptr WorkspaceGroup::findItem(const std::string wsName) const
+Workspace_sptr WorkspaceGroup::findItem(const std::string wsName, bool convertToUpperCase, size_t nesting) const
 {
+    if ( nesting >= g_maxNestingLevel )
+    {
+        // check for cycles
+        throw std::runtime_error("Workspace group nesting is too deep. Could be a cycle.");
+    }
+
+    std::string foundName = wsName;
+    if ( convertToUpperCase )
+    {
+        std::transform(foundName.begin(), foundName.end(), foundName.begin(),toupper);
+    }
     Poco::Mutex::ScopedLock _lock(m_mutex);
     for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
     {
       Workspace *ws = it->get();
-      if ( ws->name() == wsName ) return *it;
+      if ( ws->getUpperCaseName() == foundName ) return *it;
       WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>(ws);
       if ( wsg )
       {
           // look in member groups recursively
-          auto res = wsg->findItem(wsName);
+          auto res = wsg->findItem(foundName, false, nesting + 1);
           if ( res ) return res;
       }
     }
     return Workspace_sptr();
+}
+
+/**
+ * Look recursively for a workspace and count its instances.
+ * @param workspace :: Workspace to look for.
+ * @param nesting :: Current nesting level. To detect cycles.
+ * @return :: Number of copies.
+ */
+size_t WorkspaceGroup::count(Workspace_const_sptr workspace, size_t nesting) const
+{
+    if ( nesting >= g_maxNestingLevel )
+    {
+        // check for cycles
+        throw std::runtime_error("Workspace group nesting is too deep. Could be a cycle.");
+    }
+
+    size_t n = 0;
+    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    {
+        if ( (*it) == workspace ) n += 1;
+        const Workspace *ws = it->get();
+        const WorkspaceGroup* wsg = dynamic_cast<const WorkspaceGroup*>(ws);
+        if ( wsg )
+        {
+            n += wsg->count( workspace, nesting + 1 );
+        }
+    }
+    return n;
 }
 
 /// Empty all the entries out of the workspace group. Does not remove the workspaces from the ADS.

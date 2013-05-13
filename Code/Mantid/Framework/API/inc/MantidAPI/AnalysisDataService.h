@@ -113,7 +113,9 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    /// Overridden rename member to attach the new name to the workspace when a workspace object is renamed
    virtual void rename( const std::string& oldName, const std::string& newName);
    /// Get a shared pointer to a stored workspace
-   boost::shared_ptr<API::Workspace> retrieve( const std::string& name) const;
+   virtual boost::shared_ptr<API::Workspace> retrieve( const std::string& name) const;
+   /// Check to see if a data object exists in the store
+   virtual bool doesExist(const std::string& name) const;
 
    /** Retrieve a workspace and cast it to the given WSTYPE
     *
@@ -130,6 +132,10 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
      return boost::dynamic_pointer_cast<WSTYPE>(workspace);
    }
 
+   /// Remove a workspace if it is on the top level of the ADS, ie not a part of a workspace group.
+   void removeFromTopLevel(const std::string &name);
+   /// Count instances of a workspace in the ADS
+   size_t count(Workspace_const_sptr workspace) const;
 
 private:
    /// Checks the name is valid, throwing if not

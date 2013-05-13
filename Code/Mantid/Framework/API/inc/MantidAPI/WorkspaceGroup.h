@@ -61,6 +61,8 @@ public:
   ~WorkspaceGroup();
   /// Return a string ID of the class
   virtual const std::string id() const { return "WorkspaceGroup"; }
+  /// Set the name
+  virtual void setName(const std::string &name);
   /// The size of the group.
   virtual size_t getMemorySize() const;
   /// Adds a workspace to the group.
@@ -76,7 +78,9 @@ public:
   /// Return the workspace by name
   Workspace_sptr getItem(const std::string wsName) const;
   /// Find a workspace by name
-  Workspace_sptr findItem(const std::string wsName) const;
+  Workspace_sptr findItem(const std::string wsName, bool convertToUpperCase = true, size_t nesting = 0) const;
+  /// Count number of instances of a workspace in the group.
+  size_t count(Workspace_const_sptr workspace, size_t nesting = 0)const;
 
   /// Does a workspace exist within the group
   bool contains(const std::string & wsName) const;
@@ -120,8 +124,12 @@ private:
   bool m_observingADS;
   /// Recursive mutex to avoid simultaneous access
   mutable Poco::Mutex m_mutex;
+  /// Counter for creating unigue names
+  mutable size_t m_nameCounter;
   /// Static reference to the logger
   static Kernel::Logger& g_log;
+  /// Maximum nesting level allowed
+  static size_t g_maxNestingLevel;
 };
 
 /// Shared pointer to a workspace group class

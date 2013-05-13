@@ -88,6 +88,23 @@ public:
       TS_ASSERT_EQUALS( group->size(), 0 );
   }
 
+  void test_setName_sets_similar_names()
+  {
+    WorkspaceGroup_sptr group(makeGroup());
+    Workspace_sptr ws(new WorkspaceTester());
+    ws->setName("workspace");
+    group->addWorkspace(ws);
+    group->addWorkspace(makeWorkspace());
+
+    group->setName("group");
+    TS_ASSERT_EQUALS(group->name(), "group");
+    TS_ASSERT_EQUALS(group->getItem(0)->name(), "group_1");
+    TS_ASSERT_EQUALS(group->getItem(1)->name(), "group_2");
+    TS_ASSERT_EQUALS(group->getItem(2)->name(), "group_3");
+    TS_ASSERT_EQUALS(group->getItem(3)->name(), "workspace");
+    TS_ASSERT_EQUALS(group->getItem(4)->name(), "group_4");
+  }
+
   void test_addWorkspace_increases_group_size_by_1()
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup());
@@ -97,6 +114,50 @@ public:
     Workspace_sptr ws2(new WorkspaceTester());
     group->addWorkspace( ws2 );
     TS_ASSERT_EQUALS( group->size(), 2 );
+  }
+
+  void test_addWorkspace_copies()
+  {
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    WorkspaceGroup_sptr group1(makeGroup());
+
+    group->addWorkspace( group1->getItem(2) );
+    TS_ASSERT_EQUALS( group->size(), 1 );
+    TS_ASSERT_EQUALS( group1->size(), 3 );
+    TS_ASSERT_EQUALS( group->getItem(0), group1->getItem(2) );
+  }
+
+  void test_addWorkspace_if_group_in_ADS()
+  {
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    AnalysisDataService::Instance().add("group",group);
+
+    // adding a workspace to a group in ADS includes it to ADS
+    Workspace_sptr ws(new WorkspaceTester());
+    group->addWorkspace( ws );
+    TS_ASSERT_EQUALS( group->size(), 1 );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("group_1") );
+    Workspace_sptr ws1 = AnalysisDataService::Instance().retrieve("group_1");
+    TS_ASSERT_EQUALS( ws, ws1 );
+    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1 );
+
+    // add one more workspace
+    TS_ASSERT( ! AnalysisDataService::Instance().doesExist("group_2") );
+    group->addWorkspace( makeWorkspace() );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("group_2") );
+    TS_ASSERT_EQUALS( group->getItem(1), AnalysisDataService::Instance().retrieve("group_2") );
+    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1 );
+
+    // add workspace which is in ADS already
+    Workspace_sptr ws3 = makeWorkspace();
+    AnalysisDataService::Instance().add("workspace", ws3);
+    group->addWorkspace( ws3 );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("workspace") );
+    TS_ASSERT_EQUALS( AnalysisDataService::Instance().retrieve("workspace"), group->getItem(2) );
+    // size of ADS doesn't change
+    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1 );
+
+    AnalysisDataService::Instance().clear();
   }
 
   void test_group_counts_as_1_in_ADS()
@@ -158,7 +219,7 @@ public:
     TS_ASSERT_THROWS( empty_group->getItem("ws0"), std::out_of_range );
   }
 
-  void test_add_group_in_ADS()
+  void test_add_if_group_in_ADS()
   {
     // if group and future member are in top level of ADS
     // member moves from top level to the group
@@ -173,23 +234,13 @@ public:
     TS_ASSERT_EQUALS( group->size(), 1 );
     TS_ASSERT_EQUALS( boost::dynamic_pointer_cast<Workspace>(group->getItem(0)), ws );
     TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1);
+    // add same workspace again -
+    group->add("ws");
+    TS_ASSERT_EQUALS( group->size(), 1 );
+    TS_ASSERT_EQUALS( boost::dynamic_pointer_cast<Workspace>(group->getItem(0)), ws );
+    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1);
     // cannot add a workspace which doesn't exist
     TS_ASSERT_THROWS( group->add("noworkspace"), Kernel::Exception::NotFoundError );
-    AnalysisDataService::Instance().clear();
-  }
-
-  void test_add_group_in_ADS_trying_to_add_same_workspace()
-  {
-    // if group and future member are in top level of ADS
-    // member moves from top level to the group
-    // ADS keeps only 1 pointer to member workspace
-    WorkspaceGroup_sptr group( new WorkspaceGroup() );
-    AnalysisDataService::Instance().add( "group", group );
-    AnalysisDataService::Instance().add( "ws", makeWorkspace() );
-    group->add("ws");
-    TS_ASSERT( group->contains("ws") );
-    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1);
-    group->add("ws");
     AnalysisDataService::Instance().clear();
   }
 

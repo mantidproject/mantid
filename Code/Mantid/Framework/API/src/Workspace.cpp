@@ -1,6 +1,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/PropertyManager.h"
 
+#include <algorithm>
+
 namespace Mantid
 {
 namespace API
@@ -53,6 +55,8 @@ void Workspace::setComment(const std::string& c)
 void Workspace::setName(const std::string& name)
 {
   m_name = name;
+  m_upperCaseName = name;
+  std::transform(m_upperCaseName.begin(), m_upperCaseName.end(), m_upperCaseName.begin(),toupper);
 }
 
 /** Get the workspace title
@@ -79,7 +83,16 @@ const std::string& Workspace::getComment() const
  */
 const std::string& Workspace::getName() const
 {
-  return m_name;
+    return m_name;
+}
+
+/**
+ * Get the workspace name converted to upper case. Uses a cached variable.
+ * @return The name in upper case.
+ */
+const std::string &Workspace::getUpperCaseName() const
+{
+    return m_upperCaseName;
 }
 
 /**
