@@ -68,17 +68,12 @@ AlgorithmDialog* InterfaceManager::createDialog(Mantid::API::IAlgorithm* alg, QW
   flags |= Qt::WindowContextHelpButtonHint;
   dlg->setWindowFlags(flags);
 
-  // Check whether we should display hidden workspaces in WS comboboxes
-  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces"));
-  bool showHidden = (!setting.compare("0")) ? false : true;
-
   // Set the content
   dlg->setAlgorithm(alg);
   dlg->setPresetValues(preset_values);
   dlg->isForScript(forScript);
   dlg->setOptionalMessage(optional_msg);
   dlg->addEnabledAndDisableLists(enabled, disabled);
-  dlg->showHiddenWorkspaces(showHidden);
 
   // Setup the layout
   dlg->initializeLayout();
