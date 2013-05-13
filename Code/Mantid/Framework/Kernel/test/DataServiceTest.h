@@ -38,6 +38,7 @@ public:
   {
     svc.clear();
     notificationFlag = 0;
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","0");
   }
 
   // Handler for an observer, called each time an object is added
@@ -218,6 +219,9 @@ public:
     TS_ASSERT_EQUALS( svc.size(), 1 );
     svc.add("__hidden", boost::make_shared<int>(1) );
     TSM_ASSERT_EQUALS( "Hidden workspaces should not be counted", svc.size(), 1 );
+
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","1");
+    TS_ASSERT_EQUALS( svc.size(), 2 );
   }
 
   void test_getObjectNames_and_getObjects()
@@ -237,10 +241,19 @@ public:
     TS_ASSERT_DIFFERS( names.find("One"), names.end() );
     TS_ASSERT_DIFFERS( names.find("Two"), names.end() );
     TS_ASSERT_DIFFERS( names.find("TwoAgain"), names.end() );
+    TS_ASSERT_EQUALS( names.find("__Three"), names.end() );
     TSM_ASSERT_EQUALS( "Hidden entries should not be returned", names.find("__Three"), names.end() );
-    TS_ASSERT_EQUALS( objects[0], one );
-    TS_ASSERT_EQUALS( objects[1], two );
-    TS_ASSERT_EQUALS( objects[2], two );
+    TS_ASSERT_EQUALS( objects.at(0), one );
+    TS_ASSERT_EQUALS( objects.at(1), two );
+    TS_ASSERT_EQUALS( objects.at(2), two );
+
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","1");
+    names = svc.getObjectNames();
+    objects = svc.getObjects();
+    TS_ASSERT_EQUALS( names.size(), 4 );
+    TS_ASSERT_EQUALS( objects.size(), 4 );
+    TS_ASSERT_DIFFERS( names.find("__Three"), names.end() );
+    TS_ASSERT_EQUALS( objects.at(3), three );
   }
 
   void test_threadSafety()
@@ -284,7 +297,36 @@ public:
     TS_ASSERT_EQUALS( *svc.retrieve("item2345"), 2345);
   }
 
+  void test_prefixToHide()
+  {
+    TS_ASSERT_EQUALS( FakeDataService::prefixToHide(), "__" );
+  }
 
+  void test_isHiddenDataServiceObject()
+  {
+    TS_ASSERT( FakeDataService::isHiddenDataServiceObject("__hidden") );
+    TS_ASSERT( FakeDataService::isHiddenDataServiceObject("__HIDDEN") );
+    TS_ASSERT( ! FakeDataService::isHiddenDataServiceObject("NotHidden") );
+    TS_ASSERT( ! FakeDataService::isHiddenDataServiceObject("_NotHidden") );
+    TS_ASSERT( ! FakeDataService::isHiddenDataServiceObject("NotHidden__") );
+    TS_ASSERT( ! FakeDataService::isHiddenDataServiceObject("Not__Hidden") );
+  }
+
+  void test_showingHiddenObjects()
+  {
+    TS_ASSERT( ! FakeDataService::showingHiddenObjects() );
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","1");
+    TS_ASSERT( FakeDataService::showingHiddenObjects() );
+    // Check behaviour if it's set to some invalid values
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","invalid");
+    TS_ASSERT( ! FakeDataService::showingHiddenObjects() );
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","-1");
+    TS_ASSERT( ! FakeDataService::showingHiddenObjects() );
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","2");
+    TS_ASSERT( ! FakeDataService::showingHiddenObjects() );
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","^~");
+    TS_ASSERT( ! FakeDataService::showingHiddenObjects() );
+  }
 };
 
 

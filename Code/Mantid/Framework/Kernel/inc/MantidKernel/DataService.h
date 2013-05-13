@@ -367,24 +367,36 @@ public:
   /// Return the number of objects stored by the data service
   size_t size() const
   {
-    size_t count = 0;
-    for( svc_constit it = datamap.begin(); it != datamap.end(); ++it)
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
+    if ( showingHiddenObjects() )
     {
-      if ( ! isHiddenDataServiceObject(it->first) ) ++count;
+      return datamap.size();
     }
-    return count;
+    else
+    {
+      size_t count = 0;
+      for( svc_constit it = datamap.begin(); it != datamap.end(); ++it)
+      {
+        if ( ! isHiddenDataServiceObject(it->first) ) ++count;
+      }
+      return count;
+    }
   }
 
   /// Get a vector of the names of the data objects stored by the service
   std::set<std::string> getObjectNames() const
   {
-    // Make DataService access thread-safe
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
+    const bool showingHidden = showingHiddenObjects();
     std::set<std::string> names;
     for( svc_constit it = datamap.begin(); it != datamap.end(); ++it)
     {
-      if ( ! isHiddenDataServiceObject(it->first) ) names.insert(it->first);
+      if ( showingHidden || ! isHiddenDataServiceObject(it->first) )
+      {
+        names.insert(it->first);
+      }
     }
     return names;
   }
@@ -392,14 +404,17 @@ public:
   /// Get a vector of the pointers to the data objects stored by the service
   std::vector< boost::shared_ptr<T> > getObjects() const
   {
-    // Make DataService access thread-safe
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
+    const bool showingHidden = showingHiddenObjects();
     std::vector< boost::shared_ptr<T> > objects;
     objects.reserve( datamap.size() );
     for(auto it = datamap.begin(); it != datamap.end(); ++it)
     {
-      if ( ! isHiddenDataServiceObject(it->first) ) objects.push_back( it->second );
+      if ( showingHidden || ! isHiddenDataServiceObject(it->first) )
+      {
+        objects.push_back( it->second );
+      }
     }
     return objects;
   }
@@ -412,6 +427,20 @@ public:
   inline static bool isHiddenDataServiceObject(const std::string& name)
   {
     return boost::starts_with(name, prefixToHide());
+  }
+
+  static bool showingHiddenObjects()
+  {
+    int showingHiddenFlag;
+    const int success = ConfigService::Instance().getValue("MantidOptions.InvisibleWorkspaces",showingHiddenFlag);
+    if ( success == 1 && showingHiddenFlag == 1 )
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   }
 
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
