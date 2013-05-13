@@ -115,6 +115,16 @@ class SANSWideAngleCorrection(PythonAlgorithm):
         wd = self.getProperty("SampleData").value
         trans = self.getProperty("TransmissionData").value
         
+        # check transmission input workspace
+        if (len(trans.dataX(0)) != len(wd.dataX(0))):
+            raise RuntimeError("Uncompatible sizes. Transmission must have the same bins of sample values")
+        if min(trans.dataY(0)) < 0:
+            raise RuntimeError("Invalid workspace for transmission, it does not accept negative values.")
+        
+        #check input sample has associated instrument
+        if not wd.getInstrument().getSample():
+            raise RuntimeError("You can not apply this correction for workspace not associated to instrument")
+
         #initialization of progress bar: 
         #
         endrange = 5+wd.getNumberHistograms()
@@ -140,7 +150,7 @@ class SANSWideAngleCorrection(PythonAlgorithm):
                 # calculation of A
                 twoTheta = wd.getDetector(i).getTwoTheta(sample_pos, inst_pos)
                 A = 1/np.cos(twoTheta) - 1
-                # calculation of factor for transmission
+                # calculation of factor for transmission            
                 to_l = (np.power(to,A)-1)/(np.log(to)*A)
                 to_err_l = (np.power(to_e, A) - 1)/ (np.log(to_e) * A)
                 # applying the data to the workspace
