@@ -355,13 +355,12 @@ namespace Mantid
          }
          else
          {
-           s = fb / fa;
-
-		   double p;
+           double p;
 		   double q;
 		   double r;
-		   double s;
+		   double s = fb / fa;
 
+		   
            if ( sa == c )
            {
              p = 2.0 * m * s;

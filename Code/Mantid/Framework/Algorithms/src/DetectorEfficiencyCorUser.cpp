@@ -215,6 +215,7 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
 	MantidVec effOut(xIn.size() - 1); // x are bins and have more one value than y
 
 	try {
+		double e;
 		mu::Parser p;
 		p.DefineVar("e", &e);
 		p.SetExpr(formula);

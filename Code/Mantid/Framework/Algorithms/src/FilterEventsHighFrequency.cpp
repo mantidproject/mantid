@@ -378,8 +378,7 @@ namespace Algorithms
   void FilterEventsHighFrequency::importCalibrationFile(std::string calfilename){
 
     detid_t indet;
-    double doffset; // Assuming the file gives offset in micro-second
-
+    
     // 1. Check workspace
     if (!eventWS){
       g_log.error() << "Required to import EventWorkspace before calling importCalibrationFile()" << std::endl;
@@ -394,6 +393,7 @@ namespace Algorithms
     try{
       // a. Successful scenario
       ifs.open(calfilename.c_str(), std::ios::in);
+	  double doffset; // Assuming the file gives offset in micro-second
 
       for (size_t i = 0; i < eventWS->getNumberHistograms(); i ++){
         // i. each pixel:  get detector ID from EventWorkspace
@@ -405,6 +405,7 @@ namespace Algorithms
           detid = *detit;
 
         // ii. read file
+
         ifs >> indet >> doffset;
 
         // iii. store
