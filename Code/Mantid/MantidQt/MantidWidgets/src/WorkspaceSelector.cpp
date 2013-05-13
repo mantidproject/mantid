@@ -20,7 +20,7 @@ using namespace MantidQt::MantidWidgets;
 WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(parent),
   m_addObserver(*this, &WorkspaceSelector::handleAddEvent), 
   m_remObserver(*this, &WorkspaceSelector::handleRemEvent),
-  m_init(init), m_workspaceTypes(), m_showHidden(true), m_optional(false),
+  m_init(init), m_workspaceTypes(), m_showHidden(false), m_optional(false),
   m_suffix(), m_algName(), m_algPropName(), m_algorithm()
 {
   setEditable(false); 
