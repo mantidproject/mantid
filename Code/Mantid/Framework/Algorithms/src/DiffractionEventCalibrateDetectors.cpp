@@ -390,8 +390,6 @@ namespace Algorithms
     algS->executeAsChildAlg();
 
     //Write DetCal File
-    double baseX,baseY,baseZ,upX,upY,upZ;
-
     std::string filename=getProperty("DetCalFilename");
     std::fstream outfile;
     outfile.open(filename.c_str(), std::ios::out);
@@ -451,7 +449,6 @@ namespace Algorithms
       int nopt = 6;
       int iter = 0;
       int status = 0;
-      double size;
  
       /* Starting point */
       x = gsl_vector_alloc (nopt);
@@ -482,7 +479,8 @@ namespace Algorithms
         if (status)
           break;
 
-        size = gsl_multimin_fminimizer_size (s);
+        
+        double size = gsl_multimin_fminimizer_size (s);
         status = gsl_multimin_test_size (size, 1e-2);
 
       }
@@ -525,16 +523,16 @@ namespace Algorithms
       int pixmid = (detList[det]->ypixels()-1)/2;
       BoundingBox box;
       detList[det]->getAtXY(pixmax, pixmid)->getBoundingBox(box);
-      baseX = box.xMax();
-      baseY = box.yMax();
-      baseZ = box.zMax();
+      double baseX = box.xMax();
+      double baseY = box.yMax();
+      double baseZ = box.zMax();
       Kernel::V3D Base=V3D(baseX,baseY,baseZ)+CalCenter;
       pixmid = (detList[det]->xpixels()-1)/2;
       pixmax = detList[det]->ypixels()-1;
       detList[det]->getAtXY(pixmid, pixmax)->getBoundingBox(box);
-      upX = box.xMax();
-      upY = box.yMax();
-      upZ = box.zMax();
+      double upX = box.xMax();
+      double upY = box.yMax();
+      double upZ = box.zMax();
       Kernel::V3D Up=V3D(upX,upY,upZ)+CalCenter;
       Base-=Center;
       Up-=Center;

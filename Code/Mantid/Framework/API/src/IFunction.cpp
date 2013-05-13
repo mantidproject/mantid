@@ -858,10 +858,9 @@ void IFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>
               IConstraint* constraint = ConstraintFactory::Instance().createInitialized(this, fitParam.getConstraint());
               if ( fitParam.getConstraintPenaltyFactor().compare("") )
               {
-                double penalty;
                 try
                 {
-                  penalty = atof(fitParam.getConstraintPenaltyFactor().c_str());
+                  double penalty = atof(fitParam.getConstraintPenaltyFactor().c_str());
                   constraint->setPenaltyFactor(penalty);
                 }
                 catch (...)

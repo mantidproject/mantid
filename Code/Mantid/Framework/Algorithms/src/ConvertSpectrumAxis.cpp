@@ -82,7 +82,6 @@ namespace Algorithms
     size_t nxBins;
     if ( isHist ) { nxBins = nBins+1; }
     else { nxBins = nBins; }
-    bool warningGiven = false;
     if ( unitTarget != "theta" && unitTarget != "signed_theta")
     {
       Kernel::Unit_sptr fromUnit = inputWS->getAxis(0)->unit();
@@ -136,7 +135,8 @@ namespace Algorithms
       {
         thetaFunction = boost::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
       }
-
+	  
+      bool warningGiven = false;
       for (size_t i = 0; i < nHist; ++i)
       {
         try 

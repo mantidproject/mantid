@@ -215,7 +215,6 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
 	MantidVec effOut(xIn.size() - 1); // x are bins and have more one value than y
 
 	try {
-		double e;
 		mu::Parser p;
 		p.DefineVar("e", &e);
 		p.SetExpr(formula);
@@ -226,12 +225,6 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
 		MantidVec::const_iterator xIn_it = xIn.begin(); // DeltaE
 		MantidVec::iterator effOut_it = effOut.begin();
 		for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
-			if (conditionForEnergy ) {
-				e =  std::fabs(m_Ei + *xIn_it);
-			}
-			else {
-				e =  std::fabs(m_Ei - *xIn_it);
-			}
 			double eff = p.Eval();
 			*effOut_it = eff / eff0;
 		}

@@ -56,7 +56,6 @@ void TextFormatButtons::init(Buttons buttons)
   }
 
   QFont font = QFont();
-  int btnSize = 32;
 #ifdef Q_OS_MAC
   int btnSize = 38;
 #else
