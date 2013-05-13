@@ -291,6 +291,45 @@ public:
     TS_ASSERT_EQUALS( names[1], "Group_2" );
   }
 
+  // Test base DataService class methods to make sure behaviour w.r.t. hidden objects
+  // persists, as this class is where it will most be used.
+  void test_size()
+  {
+    TS_ASSERT_EQUALS( ads.size(), 0 );
+    addToADS("something");
+    TS_ASSERT_EQUALS( ads.size(), 1 );
+    addToADS("__hidden");
+    TSM_ASSERT_EQUALS( "Hidden workspaces should not be counted", ads.size(), 1 );
+
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","1");
+    TS_ASSERT_EQUALS( ads.size(), 2 );
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","0");
+  }
+
+  void test_getObjectNames_and_getObjects()
+  {
+    addToADS("One");
+    addToADS("Two");
+    addToADS("__Three");
+
+    auto names = ads.getObjectNames();
+    auto objects = ads.getObjects();
+    TSM_ASSERT_EQUALS("Hidden entries should not be returned", names.size(), 2 );
+    TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(), 2 );
+    TS_ASSERT_DIFFERS( names.find("One"), names.end() );
+    TS_ASSERT_DIFFERS( names.find("Two"), names.end() );
+    TS_ASSERT_EQUALS( names.find("__Three"), names.end() );
+    TSM_ASSERT_EQUALS( "Hidden entries should not be returned", names.find("__Three"), names.end() );
+
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","1");
+    names = ads.getObjectNames();
+    objects = ads.getObjects();
+    TS_ASSERT_EQUALS( names.size(), 3 );
+    TS_ASSERT_EQUALS( objects.size(), 3 );
+    TS_ASSERT_DIFFERS( names.find("__Three"), names.end() );
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","0");
+  }
+
 private:
 
   /// If replace=true then usea addOrReplace
