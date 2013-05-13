@@ -70,8 +70,15 @@ set ( PY_FILES
 copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
                            PYTHON_PKGROOT_INSTALL_FILES )
 
+if ( MSVC )
+  # On windows copy over the python wrapper to the build directory (hang it off kernel build)
+  add_custom_command ( OUTPUT ${PYTHON_EXE_WRAPPER}
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                       ${PYTHON_EXE_WRAPPER_SRC} ${PYTHON_EXE_WRAPPER} )
+endif()
+
 # There is no library target for the top level package just the python files
-add_custom_target ( PythonModule DEPENDS ${PYTHON_PKGROOT_INSTALL_FILES} SOURCES ${PY_FILES} )
+add_custom_target ( PythonModule DEPENDS ${PYTHON_PKGROOT_INSTALL_FILES} ${PYTHON_EXE_WRAPPER} SOURCES ${PY_FILES} ${PYTHON_EXE_WRAPPER_SRC} )
 set_property ( TARGET PythonModule PROPERTY FOLDER "MantidFramework/Python" )
 
 ####################################################################################
