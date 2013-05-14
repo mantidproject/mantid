@@ -8,8 +8,7 @@ set ( SRC_FILES
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
-	src/ConvToMDPreprocDet.cpp # for deprecation
-	src/ConvToMDSelector.cpp   # for deprecation
+	src/ConvToMDSelector.cpp 
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToReflectometryQ.cpp
 	src/CoordTransformAffine.cpp
@@ -41,7 +40,6 @@ set ( SRC_FILES
 	src/MDTransfNoQ.cpp
 	src/MDTransfQ3D.cpp
 	src/MDWSDescription.cpp
-	src/MDWSDescriptionDepricated.cpp
 	src/MDWSTransform.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
@@ -75,7 +73,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h
-	inc/MantidMDEvents/ConvToMDPreprocDet.h
 	inc/MantidMDEvents/ConvToMDSelector.h
 	inc/MantidMDEvents/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDEvents/ConvertToReflectometryQ.h
@@ -112,7 +109,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDTransfNoQ.h
 	inc/MantidMDEvents/MDTransfQ3D.h
 	inc/MantidMDEvents/MDWSDescription.h
-	inc/MantidMDEvents/MDWSDescriptionDepricated.h
 	inc/MantidMDEvents/MDWSTransform.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h

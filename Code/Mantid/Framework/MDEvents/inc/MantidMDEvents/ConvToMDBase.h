@@ -12,8 +12,6 @@
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/MDEventWSWrapper.h"
 
-
-#include "MantidMDEvents/ConvToMDPreprocDet.h"
 #include "MantidMDEvents/MDTransfInterface.h"
 #include "MantidMDEvents/MDTransfFactory.h"
 

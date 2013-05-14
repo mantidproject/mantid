@@ -6,7 +6,6 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidAPI/NumericAxis.h"
-#include "MantidMDEvents/ConvToMDPreprocDet.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Progress.h"
 
