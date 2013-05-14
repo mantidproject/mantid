@@ -44,11 +44,11 @@ class ShowPeakHKLOffsetsTest: public CxxTest::TestSuite
      TS_ASSERT( show.isInitialized() )
 
      TS_ASSERT_THROWS_NOTHING(show.setProperty("PeaksWorkspace","aaa"))
-     TS_ASSERT_THROWS_NOTHING(show.setProperty("HKLInegerOffsets","offsets"))
+     TS_ASSERT_THROWS_NOTHING(show.setProperty("HKLIntegerOffsets","offsets"))
      TS_ASSERT(show.execute())
      TS_ASSERT(show.isExecuted())
-     show.setProperty("HKLInegerOffsets","offsets");
-     boost::shared_ptr<TableWorkspace> Offsets= show.getProperty("HKLInegerOffsets");
+     show.setProperty("HKLIntegerOffsets","offsets");
+     boost::shared_ptr<TableWorkspace> Offsets= show.getProperty("HKLIntegerOffsets");
 
 
      TS_ASSERT_DELTA( Offsets->Double(3,1), 0.0186555,.1)
