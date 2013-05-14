@@ -83,6 +83,12 @@ Which is the OutputWorkspace of SANSWideAngleCorrection.
 This parameter enters inside [[Q1D]] as WavePixelAdj. But, this is all done for you inside the Reduction Script.
 *WIKI*"""
 
+"""*WIKI_USAGE*
+
+'''NB''': This algorithm is not intended to be called and used as a standalone Mantid algorithm because actual transmission values are <i>not</i> passed to the reduction algorithm [[Q1D]].
+
+*WIKI_USAGE*"""
+
 from mantid.api import *
 from mantid.kernel import *
 import os
@@ -106,7 +112,7 @@ class SANSWideAngleCorrection(PythonAlgorithm):
                                       "The transmission data calculated, referred to as <math>T_0</math> in equations in discussion section")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","",direction=Direction.Output),
                                       "The transmission corrected SANS data, normalised (divided) by <math>T_0</math>, see discussion section")
-	self.setWikiSummary("Calculate the Wide Angle correction for SANS transmissions.\n\n'''NB''': This algorithm is not intended to be called and used as a standalone Mantid algorithm because actual transmission values are ''not'' passed to the reduction algorithm [[Q1D]].")
+	self.setWikiSummary("Calculate the Wide Angle correction for SANS transmissions.")
       
     def PyExec(self):
         """ Main body of execution
