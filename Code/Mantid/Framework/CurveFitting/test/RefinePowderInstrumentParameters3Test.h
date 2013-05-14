@@ -1,9 +1,9 @@
-#ifndef MANTID_CURVEFITTING_RefinePowderInstrumentParameters2TEST_H_
-#define MANTID_CURVEFITTING_RefinePowderInstrumentParameters2TEST_H_
+#ifndef MANTID_CURVEFITTING_RefinePowderInstrumentParameters3TEST_H_
+#define MANTID_CURVEFITTING_RefinePowderInstrumentParameters3TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/RefinePowderInstrumentParameters2.h"
+#include "MantidCurveFitting/RefinePowderInstrumentParameters3.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -12,7 +12,7 @@
 
 #include <fstream>
 
-using Mantid::CurveFitting::RefinePowderInstrumentParameters2;
+using Mantid::CurveFitting::RefinePowderInstrumentParameters3;
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -21,13 +21,13 @@ using namespace Mantid::API;
 
 using namespace std;
 
-class RefinePowderInstrumentParameters2Test : public CxxTest::TestSuite
+class RefinePowderInstrumentParameters3Test : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static RefinePowderInstrumentParameters2Test *createSuite() { return new RefinePowderInstrumentParameters2Test(); }
-  static void destroySuite( RefinePowderInstrumentParameters2Test *suite ) { delete suite; }
+  static RefinePowderInstrumentParameters3Test *createSuite() { return new RefinePowderInstrumentParameters3Test(); }
+  static void destroySuite( RefinePowderInstrumentParameters3Test *suite ) { delete suite; }
 
   //----------------------------------------------------------------------------------------------
   /** Fit with non Monte Carlo method.
@@ -48,7 +48,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters", profWS);
 
     // 2. Initialization
-    RefinePowderInstrumentParameters2 alg;
+    RefinePowderInstrumentParameters3 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -131,7 +131,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("Bank1ProfileParameters", profWS);
 
     // 2. Initialization
-    RefinePowderInstrumentParameters2 alg;
+    RefinePowderInstrumentParameters3 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -536,4 +536,4 @@ public:
 };
 
 
-#endif /* MANTID_CURVEFITTING_RefinePowderInstrumentParameters2TEST_H_ */
+#endif /* MANTID_CURVEFITTING_RefinePowderInstrumentParameters3TEST_H_ */

@@ -35,7 +35,7 @@ Simulated annealing will be tried as soon as it is implemented in Mantid.
 This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in the wiki page of [[LeBailFit]]. 
 
 *WIKI*/
-#include "MantidCurveFitting/RefinePowderInstrumentParameters2.h"
+#include "MantidCurveFitting/RefinePowderInstrumentParameters3.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/TextAxis.h"
@@ -47,26 +47,26 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  DECLARE_ALGORITHM(RefinePowderInstrumentParameters2)
+  DECLARE_ALGORITHM(RefinePowderInstrumentParameters3)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  RefinePowderInstrumentParameters2::RefinePowderInstrumentParameters2()
+  RefinePowderInstrumentParameters3::RefinePowderInstrumentParameters3()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  RefinePowderInstrumentParameters2::~RefinePowderInstrumentParameters2()
+  RefinePowderInstrumentParameters3::~RefinePowderInstrumentParameters3()
   {
   }
 
   //----------------------------------------------------------------------------------------------
   /** Set up documention
     */
-  void RefinePowderInstrumentParameters2::initDocs()
+  void RefinePowderInstrumentParameters3::initDocs()
   {
     setWikiSummary("Refine the instrument geometry related parameters for powder diffractomer. ");
     setOptionalMessage("Parameters include Dtt1, Dtt1t, Dtt2t, Zero, Zerot. ");
@@ -75,7 +75,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Declare properties
     */
-  void RefinePowderInstrumentParameters2::init()
+  void RefinePowderInstrumentParameters3::init()
   {
     // Peak position workspace
     declareProperty(new WorkspaceProperty<Workspace2D>("InputPeakPositionWorkspace", "Anonymous",
@@ -141,7 +141,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Main execution body
     */
-  void RefinePowderInstrumentParameters2::exec()
+  void RefinePowderInstrumentParameters3::exec()
   {
     // 1. Process input
     processInputProperties();
@@ -204,7 +204,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Process input properties
     */
-  void RefinePowderInstrumentParameters2::processInputProperties()
+  void RefinePowderInstrumentParameters3::processInputProperties()
   {
     // Data Workspace
     m_dataWS = getProperty("InputPeakPositionWorkspace");
@@ -257,7 +257,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Parse TableWorkspaces
     */
-  void RefinePowderInstrumentParameters2::parseTableWorkspaces()
+  void RefinePowderInstrumentParameters3::parseTableWorkspaces()
   {
     m_profileParameters.clear();
 
@@ -268,7 +268,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Parse table workspace to a map of Parameters
     */
-  void RefinePowderInstrumentParameters2::parseTableWorkspace(TableWorkspace_sptr tablews,
+  void RefinePowderInstrumentParameters3::parseTableWorkspace(TableWorkspace_sptr tablews,
                                                               map<string, Parameter>& parammap)
   {
     // 1. Process Table column names
@@ -338,7 +338,7 @@ namespace CurveFitting
   /** Fit instrument parameters by non Monte Carlo algorithm
     * Requirement:  m_positionFunc should have the best fit result;
    */
-  double RefinePowderInstrumentParameters2::execFitParametersNonMC()
+  double RefinePowderInstrumentParameters3::execFitParametersNonMC()
   {
     // 1. Set up constraints
     setFunctionParameterFitSetups(m_positionFunc, m_profileParameters);
@@ -359,7 +359,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Refine instrument parameters by Monte Carlo/simulated annealing method
     */
-  double RefinePowderInstrumentParameters2::execFitParametersMC()
+  double RefinePowderInstrumentParameters3::execFitParametersMC()
   {
     // 1. Monte Carlo simulation
     double chisq = doSimulatedAnnealing(m_profileParameters);
@@ -378,7 +378,7 @@ namespace CurveFitting
     *
     * Helpful:     double curchi2 = calculateD2TOFFunction(mFunction, domain, values, rawY, rawE);
     */
-  double RefinePowderInstrumentParameters2::doSimulatedAnnealing(map<string, Parameter> inparammap)
+  double RefinePowderInstrumentParameters3::doSimulatedAnnealing(map<string, Parameter> inparammap)
   {
     // 1. Prepare/initialization
     //    Data structure
@@ -555,7 +555,7 @@ namespace CurveFitting
     * @param curparammap: current parameter maps
     * @param newparammap: parameters map containing new/proposed value
     */
-  void RefinePowderInstrumentParameters2::proposeNewValues(vector<string> mcgroup,
+  void RefinePowderInstrumentParameters3::proposeNewValues(vector<string> mcgroup,
                                                            map<string, Parameter>& curparammap,
                                                            map<string, Parameter>& newparammap,
                                                            double currchisq)
@@ -667,7 +667,7 @@ namespace CurveFitting
     * @param newchisq:  new chi^2 (as a factor in step size)
     * @param temperature:  annealing temperature
     */
-  bool RefinePowderInstrumentParameters2::acceptOrDenyChange(double curchisq, double newchisq,
+  bool RefinePowderInstrumentParameters3::acceptOrDenyChange(double curchisq, double newchisq,
                                                              double temperature)
   {
     bool accept;
@@ -702,7 +702,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Book keep the best fitting result
     */
-  void RefinePowderInstrumentParameters2::bookKeepMCResult(map<string, Parameter> parammap,
+  void RefinePowderInstrumentParameters3::bookKeepMCResult(map<string, Parameter> parammap,
                                                            double chisq, int istep, int igroup,
                                                            map<string, Parameter>& bestparammap)
                                                            // vector<pair<double, map<string, Parameter> > >& bestresults,
@@ -754,7 +754,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Set up Monte Carlo random walk strategy
     */
-  void RefinePowderInstrumentParameters2::setupRandomWalkStrategy(map<string, Parameter>& parammap,
+  void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(map<string, Parameter>& parammap,
                                                                   vector<vector<string> >& mcgroups)
   {
     stringstream dboutss;
@@ -831,7 +831,7 @@ namespace CurveFitting
     * @param parname: name of parameter to check whether to put into refinement list
     * @param parammap :: parammap
     */
-  void RefinePowderInstrumentParameters2::addParameterToMCMinimize(vector<string>& parnamesforMC,
+  void RefinePowderInstrumentParameters3::addParameterToMCMinimize(vector<string>& parnamesforMC,
                                                                    string parname,
                                                                    map<string, Parameter> parammap)
   {
@@ -858,7 +858,7 @@ namespace CurveFitting
     * @param vecY :: vecY
     * Return: chi^2
     */
-  double RefinePowderInstrumentParameters2::calculateFunction(map<string, Parameter> parammap,
+  double RefinePowderInstrumentParameters3::calculateFunction(map<string, Parameter> parammap,
                                                               vector<double>& vecY)
   {
     // 1. Implement parameter values to m_positionFunc
@@ -907,7 +907,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Calculate Chi^2 of the a function with all parameters are fixed
     */
-  double RefinePowderInstrumentParameters2::calculateFunctionError(IFunction_sptr function,
+  double RefinePowderInstrumentParameters3::calculateFunctionError(IFunction_sptr function,
                                                                    Workspace2D_sptr dataws, int wsindex)
   {
     // 1. Record the fitting information
@@ -947,7 +947,7 @@ namespace CurveFitting
     *
     * Return: double chi2 of the final (best) solution.  If fitting fails, chi2 wil be maximum double
     */
-  double RefinePowderInstrumentParameters2::fitFunction(IFunction_sptr function, Workspace2D_sptr dataws,
+  double RefinePowderInstrumentParameters3::fitFunction(IFunction_sptr function, Workspace2D_sptr dataws,
                                                         int wsindex, bool powerfit)
   {
     // 1. Store original
@@ -1057,7 +1057,7 @@ namespace CurveFitting
   /** Fit function
     * Minimizer: "Levenberg-MarquardtMD"/"Simplex"
    */
-  bool RefinePowderInstrumentParameters2::doFitFunction(IFunction_sptr function, Workspace2D_sptr dataws, int wsindex,
+  bool RefinePowderInstrumentParameters3::doFitFunction(IFunction_sptr function, Workspace2D_sptr dataws, int wsindex,
                                                         string minimizer, int numiters, double& chi2, string& fitstatus)
   {
     // 0. Debug output
@@ -1113,7 +1113,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Construct an output TableWorkspace for fitting result (profile parameters)
     */
-  TableWorkspace_sptr RefinePowderInstrumentParameters2::genOutputProfileTable(map<string, Parameter> parameters,
+  TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(map<string, Parameter> parameters,
                                                                      double startchi2, double finalchi2)
   {
     // 1. Create TableWorkspace
@@ -1158,7 +1158,7 @@ namespace CurveFitting
     * @param parname:     string, parameter name
     * @param parvalue:    double, parameter value
     */
-  void RefinePowderInstrumentParameters2::addOrReplace(map<string, Parameter>& parameters,
+  void RefinePowderInstrumentParameters3::addOrReplace(map<string, Parameter>& parameters,
                                                        string parname, double parvalue)
   {
     map<string, Parameter>::iterator pariter = parameters.find(parname);
@@ -1180,7 +1180,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Construct output
    */
-  Workspace2D_sptr RefinePowderInstrumentParameters2::genOutputWorkspace(FunctionDomain1DVector domain,
+  Workspace2D_sptr RefinePowderInstrumentParameters3::genOutputWorkspace(FunctionDomain1DVector domain,
                                                                FunctionValues rawvalues)
   {
     // 1. Create and set up output workspace
@@ -1237,7 +1237,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Set parameter values to function from Parameter map
    */
-  void RefinePowderInstrumentParameters2::setFunctionParameterValues(IFunction_sptr function,
+  void RefinePowderInstrumentParameters3::setFunctionParameterValues(IFunction_sptr function,
                                                                      map<string, Parameter> params)
   {
     // 1. Prepare
@@ -1277,7 +1277,7 @@ namespace CurveFitting
   }
 
   /** Update parameter values to Parameter map from fuction map
-  void RefinePowderInstrumentParameters2::updateFunctionParameterValues(IFunction_sptr function,
+  void RefinePowderInstrumentParameters3::updateFunctionParameterValues(IFunction_sptr function,
                                                               map<string, Parameter>& params)
   {
     // 1. Prepare
@@ -1313,7 +1313,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Set parameter fitting setup (boundary, fix or unfix) to function from Parameter map
    */
-  void RefinePowderInstrumentParameters2::setFunctionParameterFitSetups(IFunction_sptr function,
+  void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(IFunction_sptr function,
                                                                         map<string, Parameter> params)
   {
     // 1. Prepare

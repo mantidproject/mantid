@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_RefinePowderInstrumentParameters2_H_
-#define MANTID_CURVEFITTING_RefinePowderInstrumentParameters2_H_
+#ifndef MANTID_CURVEFITTING_RefinePowderInstrumentParameters3_H_
+#define MANTID_CURVEFITTING_RefinePowderInstrumentParameters3_H_
 
 #include "MantidKernel/System.h"
 
@@ -24,7 +24,7 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** RefinePowderInstrumentParameters2 : TODO: DESCRIPTION
+  /** RefinePowderInstrumentParameters3 : 
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -46,11 +46,11 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport RefinePowderInstrumentParameters2 : public Algorithm
+  class DLLExport RefinePowderInstrumentParameters3 : public Algorithm
   {
   public:
-    RefinePowderInstrumentParameters2();
-    virtual ~RefinePowderInstrumentParameters2();
+    RefinePowderInstrumentParameters3();
+    virtual ~RefinePowderInstrumentParameters3();
 
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "RefinePowderInstrumentParameters";}
@@ -206,4 +206,4 @@ namespace CurveFitting
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_RefinePowderInstrumentParameters2_H_ */
+#endif  /* MANTID_CURVEFITTING_RefinePowderInstrumentParameters3_H_ */

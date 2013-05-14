@@ -59,7 +59,7 @@ set ( SRC_FILES
 	src/ProductQuadraticExp.cpp
 	src/Quadratic.cpp
 	src/RefinePowderInstrumentParameters.cpp
-	src/RefinePowderInstrumentParameters2.cpp
+	src/RefinePowderInstrumentParameters3.cpp
 	src/Resolution.cpp
 	src/SeqDomain.cpp
 	src/SimplexMinimizer.cpp
@@ -149,7 +149,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ProductQuadraticExp.h
 	inc/MantidCurveFitting/Quadratic.h
 	inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
-	inc/MantidCurveFitting/RefinePowderInstrumentParameters2.h
+	inc/MantidCurveFitting/RefinePowderInstrumentParameters3.h
 	inc/MantidCurveFitting/Resolution.h
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
@@ -225,7 +225,7 @@ set ( TEST_FILES
 	ProductLinearExpTest.h
 	ProductQuadraticExpTest.h
 	QuadraticTest.h
-	RefinePowderInstrumentParameters2Test.h
+	RefinePowderInstrumentParameters3Test.h
 	ResolutionTest.h
 	SimplexTest.h
 	SpecialFunctionSupportTest.h
