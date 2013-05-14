@@ -73,7 +73,7 @@ namespace Algorithms
     if (f_list.size() > 0){
       std::stringstream info; 
       info << "Information about ScriptRepository:\n" 
-           << " A more recent version of the following files was installed:\n"
+           << " A more recent version of the following files was installed:\n";
       for(unsigned short i = 0; i< f_list.size();i++){
         info << "  * " << f_list[i] << "\n"; 
       }
